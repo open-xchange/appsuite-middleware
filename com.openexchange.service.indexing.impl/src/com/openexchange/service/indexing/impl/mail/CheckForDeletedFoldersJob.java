@@ -57,8 +57,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.Callable;
-import org.apache.commons.logging.Log;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.attach.index.Attachment;
@@ -76,7 +74,6 @@ import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.index.MailIndexField;
 import com.openexchange.mail.index.MailUUID;
 import com.openexchange.service.indexing.JobInfo;
-import com.openexchange.service.indexing.impl.AbstractIndexingJob;
 import com.openexchange.service.indexing.impl.internal.Services;
 
 
@@ -85,10 +82,7 @@ import com.openexchange.service.indexing.impl.internal.Services;
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public class CheckForDeletedFoldersJob extends AbstractIndexingJob {
-    
-    public static final String ALL_FOLDERS = "allFolders";
-    
+public class CheckForDeletedFoldersJob extends AbstractMailJob {
 
     @Override
     public void execute(JobInfo jobInfo) throws OXException {
@@ -97,31 +91,7 @@ public class CheckForDeletedFoldersJob extends AbstractIndexingJob {
                 throw new IllegalArgumentException("Job info must be an instance of MailJobInfo.");
             }
             
-            MailJobInfo mailJobInfo = (MailJobInfo) jobInfo;
-            Callable<Object> callable = new CheckForDeletedFoldersCallable(mailJobInfo);
-            submitCallable(Types.EMAIL, mailJobInfo, callable);
-        } catch (Exception e) {
-            throw new OXException(e);
-        }
-    }
-    
-    public static final class CheckForDeletedFoldersCallable extends AbstractMailCallable {
-        
-        private static final long serialVersionUID = -8320606542261340360L;
-        
-        private static final Log LOG = com.openexchange.log.Log.loggerFor(CheckForDeletedFoldersCallable.class);
-        
-        
-        /**
-         * Initializes a new {@link CheckForDeletedFoldersCallable}.
-         * @param info
-         */
-        protected CheckForDeletedFoldersCallable(MailJobInfo info) {
-            super(info);
-        }
-
-        @Override
-        public Object call() throws Exception {
+            MailJobInfo info = (MailJobInfo) jobInfo;
             long start = System.currentTimeMillis();
             if (LOG.isDebugEnabled()) {
                 LOG.debug(this.getClass().getSimpleName() + " started performing. " + info.toString());
@@ -165,7 +135,7 @@ public class CheckForDeletedFoldersJob extends AbstractIndexingJob {
                 
                 if (allUUIDs.removeAll(uuidsInFolders)) {
                     if (allUUIDs.isEmpty()) {
-                        return null;
+                        return;
                     }
                     
                     MailUUID[] uuidArray = allUUIDs.toArray(new MailUUID[allUUIDs.size()]);
@@ -226,15 +196,13 @@ public class CheckForDeletedFoldersJob extends AbstractIndexingJob {
                     LOG.debug(this.getClass().getSimpleName() + " lasted " + diff + "ms. " + info.toString());
                 }
             }
-            
-            return null;
+        } catch (Exception e) {
+            throw new OXException(e);
         }
-
-        private void checkJobInfo() {
-            // TODO Auto-generated method stub
-            
-        }
+    }
+    
+    private void checkJobInfo() {
+        // TODO Auto-generated method stub
         
     }
-
 }

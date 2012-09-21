@@ -51,8 +51,6 @@ package com.openexchange.service.indexing.impl.mail;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.concurrent.Callable;
-import org.apache.commons.logging.Log;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.attach.index.Attachment;
@@ -64,7 +62,6 @@ import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.service.MailService;
 import com.openexchange.service.indexing.JobInfo;
-import com.openexchange.service.indexing.impl.AbstractIndexingJob;
 import com.openexchange.service.indexing.impl.internal.Services;
 
 
@@ -73,10 +70,7 @@ import com.openexchange.service.indexing.impl.internal.Services;
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public class ChangeByIdsJob extends AbstractIndexingJob {
-    
-    public static final String IDS = "ids";
-    
+public class ChangeByIdsJob extends AbstractMailJob {    
 
     @Override
     public void execute(JobInfo jobInfo) throws OXException {
@@ -85,31 +79,7 @@ public class ChangeByIdsJob extends AbstractIndexingJob {
                 throw new IllegalArgumentException("Job info must be an instance of MailJobInfo.");
             }
             
-            MailJobInfo mailJobInfo = (MailJobInfo) jobInfo;
-            Callable<Object> callable = new ChangeByIdsCallable(mailJobInfo);
-            submitCallable(Types.EMAIL, mailJobInfo, callable);
-        } catch (Exception e) {
-            throw new OXException(e);
-        }
-    }
-    
-    public static final class ChangeByIdsCallable extends AbstractMailCallable {
-        
-        private static final long serialVersionUID = -2216548293841819676L;
-        
-        private static final Log LOG = com.openexchange.log.Log.loggerFor(ChangeByIdsCallable.class);
-        
-
-        /**
-         * Initializes a new {@link ChangeByIdsCallable}.
-         * @param info
-         */
-        protected ChangeByIdsCallable(MailJobInfo info) {
-            super(info);
-        }
-
-        @Override
-        public Object call() throws Exception {
+            MailJobInfo info = (MailJobInfo) jobInfo;
             long start = System.currentTimeMillis();
             if (LOG.isDebugEnabled()) {
                 LOG.debug(this.getClass().getSimpleName() + " started performing. " + info.toString());
@@ -127,7 +97,7 @@ public class ChangeByIdsJob extends AbstractIndexingJob {
                 if (folderStorage.exists(info.folder)) {
                     String[] ids = (String[]) info.getProperty(IDS);
                     final List<String> toChange = Arrays.asList(ids);
-                    changeMails(toChange, mailAccess.getMessageStorage(), mailIndex, attachmentIndex);
+                    changeMails(info, toChange, mailAccess.getMessageStorage(), mailIndex, attachmentIndex);
                 }
             } finally {
                 closeMailAccess(mailAccess);
@@ -139,14 +109,14 @@ public class ChangeByIdsJob extends AbstractIndexingJob {
                     LOG.debug(this.getClass().getSimpleName() + " lasted " + diff + "ms. " + info.toString());
                 }
             }
-            
-            return null;
+        } catch (Exception e) {
+            throw new OXException(e);
         }
-
-        private void checkJobInfo() {
-            // TODO Auto-generated method stub
-            
-        }        
     }
-
+    
+    private void checkJobInfo() {
+        // TODO Auto-generated method stub
+        
+    }
+    
 }

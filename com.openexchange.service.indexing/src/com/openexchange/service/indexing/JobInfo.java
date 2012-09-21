@@ -91,6 +91,8 @@ public abstract class JobInfo implements Serializable {
     public Object getProperty(String key) {
         return properties.get(key);
     }
+    
+    public abstract int getModule();
 
     public abstract String toUniqueId();
     

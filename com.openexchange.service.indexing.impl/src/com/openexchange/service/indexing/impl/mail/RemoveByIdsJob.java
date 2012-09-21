@@ -51,8 +51,6 @@ package com.openexchange.service.indexing.impl.mail;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.concurrent.Callable;
-import org.apache.commons.logging.Log;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.attach.index.Attachment;
@@ -60,7 +58,6 @@ import com.openexchange.index.IndexAccess;
 import com.openexchange.index.IndexFacadeService;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.service.indexing.JobInfo;
-import com.openexchange.service.indexing.impl.AbstractIndexingJob;
 import com.openexchange.service.indexing.impl.internal.Services;
 
 
@@ -69,10 +66,7 @@ import com.openexchange.service.indexing.impl.internal.Services;
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public class RemoveByIdsJob extends AbstractIndexingJob {
-    
-    public static final String IDS = "ids";
-    
+public class RemoveByIdsJob extends AbstractMailJob {    
 
     @Override
     public void execute(JobInfo jobInfo) throws OXException {
@@ -81,32 +75,7 @@ public class RemoveByIdsJob extends AbstractIndexingJob {
                 throw new IllegalArgumentException("Job info must be an instance of MailJobInfo.");
             }
             
-            MailJobInfo mailJobInfo = (MailJobInfo) jobInfo;
-            Callable<Object> callable = new RemoveByIdsCallable(mailJobInfo);
-            submitCallable(Types.EMAIL, mailJobInfo, callable);
-        } catch (Exception e) {
-            throw new OXException(e);
-        }
-    }
-    
-    public static final class RemoveByIdsCallable extends AbstractMailCallable {
-
-        private static final long serialVersionUID = 8067617682674046053L;
-        
-        private static final Log LOG = com.openexchange.log.Log.loggerFor(RemoveByIdsCallable.class);
-        
-
-        /**
-         * Initializes a new {@link RemoveByIdsCallable}.
-         * @param mailJobInfo
-         */
-        public RemoveByIdsCallable(MailJobInfo mailJobInfo) {
-            super(mailJobInfo);            
-        }
-
-
-        @Override
-        public Object call() throws Exception {
+            MailJobInfo info = (MailJobInfo) jobInfo;
             long start = System.currentTimeMillis();
             if (LOG.isDebugEnabled()) {
                 LOG.debug(this.getClass().getSimpleName() + " started performing. " + info.toString());
@@ -119,7 +88,7 @@ public class RemoveByIdsJob extends AbstractIndexingJob {
             try {       
                 String[] ids = (String[]) info.getProperty(IDS);
                 final List<String> toAdd = Arrays.asList(ids);
-                deleteMails(toAdd, mailIndex, attachmentIndex);
+                deleteMails(info, toAdd, mailIndex, attachmentIndex);
             } finally {
                 closeIndexAccess(mailIndex);
                 closeIndexAccess(attachmentIndex);
@@ -129,13 +98,13 @@ public class RemoveByIdsJob extends AbstractIndexingJob {
                     LOG.debug(this.getClass().getSimpleName() + " lasted " + diff + "ms. " + info.toString());
                 }
             }
-            
-            return null;
+        } catch (Exception e) {
+            throw new OXException(e);
         }
+    }
+
+    private void checkJobInfo() {
+        // TODO Auto-generated method stub
         
-        private void checkJobInfo() {
-            // TODO Auto-generated method stub
-            
-        }        
     }
 }

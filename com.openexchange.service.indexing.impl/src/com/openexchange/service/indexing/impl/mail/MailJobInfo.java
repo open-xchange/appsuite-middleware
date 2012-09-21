@@ -49,6 +49,7 @@
 
 package com.openexchange.service.indexing.impl.mail;
 
+import com.openexchange.groupware.Types;
 import com.openexchange.service.indexing.IndexingJob;
 import com.openexchange.service.indexing.JobInfo;
 
@@ -105,6 +106,11 @@ public final class MailJobInfo extends JobInfo {
         password = builder.password;
         folder = builder.folder;
         force = builder.force;
+    }
+    
+    @Override
+    public int getModule() {
+        return Types.EMAIL;
     }
     
     @Override

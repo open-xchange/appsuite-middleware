@@ -49,6 +49,7 @@
 
 package com.openexchange.service.indexing.impl.infostore;
 
+import com.openexchange.groupware.Types;
 import com.openexchange.service.indexing.IndexingJob;
 import com.openexchange.service.indexing.JobInfo;
 
@@ -84,6 +85,11 @@ public class InfostoreJobInfo extends JobInfo {
         folder = builder.folder;
         force = builder.force;
         deleteFolder = builder.deleteFolder;
+    }
+    
+    @Override
+    public int getModule() {
+        return Types.INFOSTORE;
     }
 
     @Override
@@ -162,5 +168,4 @@ public class InfostoreJobInfo extends JobInfo {
         }
         
     }
-
 }

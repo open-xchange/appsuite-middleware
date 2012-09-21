@@ -49,13 +49,11 @@
 
 package com.openexchange.service.indexing.impl.mail;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.Callable;
 import org.apache.commons.logging.Log;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.Types;
@@ -80,32 +78,32 @@ import com.openexchange.mail.dataobjects.ContentAwareMailMessage;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.index.MailUUID;
 import com.openexchange.mail.parser.MailMessageParser;
+import com.openexchange.service.indexing.IndexingJob;
 import com.openexchange.service.indexing.impl.internal.Services;
 import com.openexchange.service.indexing.impl.internal.mail.IndexMailHandler;
 
 
 /**
- * {@link AbstractMailCallable}
+ * {@link AbstractMailJob}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public abstract class AbstractMailCallable implements Callable<Object>, Serializable {   
-
-    private static final long serialVersionUID = -8008543323401044194L;
+public abstract class AbstractMailJob implements IndexingJob { 
     
-    protected static final Log LOG = com.openexchange.log.Log.loggerFor(AbstractMailCallable.class);
+    public static final String IDS = "ids";
+    
+    public static final String ALL_FOLDERS = "allFolders";
+    
+    protected static final Log LOG = com.openexchange.log.Log.loggerFor(AbstractMailJob.class);
     
     protected static final int CHUNK_SIZE = 100;
-
-    protected final MailJobInfo info;
     
     
-    protected AbstractMailCallable(MailJobInfo info) {
+    protected AbstractMailJob() {
         super();
-        this.info = info;
     }    
     
-    protected void addMails(final List<String> idsToAdd, final IMailMessageStorage messageStorage, final IndexAccess<MailMessage> mailIndex, final IndexAccess<Attachment> attachmentIndex) throws OXException {
+    protected void addMails(final MailJobInfo info, final List<String> idsToAdd, final IMailMessageStorage messageStorage, final IndexAccess<MailMessage> mailIndex, final IndexAccess<Attachment> attachmentIndex) throws OXException {
         if (idsToAdd.isEmpty()) {
             return;
         }
@@ -175,7 +173,7 @@ public abstract class AbstractMailCallable implements Callable<Object>, Serializ
         });
     }
     
-    protected void deleteMails(final List<String> idsToDelete, final IndexAccess<MailMessage> mailIndex, final IndexAccess<Attachment> attachmentIndex) throws OXException {
+    protected void deleteMails(final MailJobInfo info, final List<String> idsToDelete, final IndexAccess<MailMessage> mailIndex, final IndexAccess<Attachment> attachmentIndex) throws OXException {
         if (idsToDelete.isEmpty()) {
             return;
         }
@@ -235,7 +233,7 @@ public abstract class AbstractMailCallable implements Callable<Object>, Serializ
         });
     }
     
-    protected void changeMails(final List<String> changedMails, final IMailMessageStorage messageStorage, final IndexAccess<MailMessage> mailIndex, final IndexAccess<Attachment> attachmentIndex) throws OXException {
+    protected void changeMails(final MailJobInfo info, final List<String> changedMails, final IMailMessageStorage messageStorage, final IndexAccess<MailMessage> mailIndex, final IndexAccess<Attachment> attachmentIndex) throws OXException {
         if (changedMails.isEmpty()) {
             return;
         }

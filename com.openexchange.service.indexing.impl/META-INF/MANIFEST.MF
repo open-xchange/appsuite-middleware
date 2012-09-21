@@ -127,6 +127,5 @@ Import-Package: com.hazelcast.cluster,
  org.quartz.utils.counter.sampled,
  org.quartz.xml
 Bundle-Activator: com.openexchange.service.indexing.impl.osgi.IndexingActivator
-Export-Package: com.openexchange.service.indexing.impl,
- com.openexchange.service.indexing.impl.infostore,
+Export-Package: com.openexchange.service.indexing.impl.infostore,
  com.openexchange.service.indexing.impl.mail
