@@ -217,6 +217,9 @@ fi
 /opt/open-xchange/sbin/*
 %dir /opt/open-xchange/templates/
 /opt/open-xchange/templates/*
+%doc docs/
+%doc com.openexchange.server/doc/examples
+%doc com.openexchange.server/ChangeLog
 
 %changelog
 * Tue Aug 21 2012 Marcus Klein <marcus.klein@open-xchange.com>

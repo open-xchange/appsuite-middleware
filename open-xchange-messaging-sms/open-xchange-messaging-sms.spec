@@ -48,6 +48,7 @@ ant -lib build/lib -Dbasedir=build -Dhtdoc=%{docroot} -DdestDir=%{buildroot} -Dp
 %dir /opt/open-xchange/osgi/bundle.d/
 /opt/open-xchange/osgi/bundle.d/*
 /opt/open-xchange/bundles/*
+%doc com.openexchange.messaging.sms/ChangeLog
 
 %changelog
 * Tue Aug 21 2012 Marcus Klein <marcus.klein@open-xchange.com>

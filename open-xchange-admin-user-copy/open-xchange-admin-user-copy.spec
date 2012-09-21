@@ -59,6 +59,7 @@ ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} 
 /opt/open-xchange/sbin/*
 %dir /opt/open-xchange/lib
 /opt/open-xchange/lib/*
+%doc com.openexchange.admin.user.copy/ChangeLog
 
 %changelog
 * Tue Aug 21 2012 Jan Bauerdick <jan.bauerdick@open-xchange.com>

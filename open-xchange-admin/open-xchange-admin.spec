@@ -150,6 +150,7 @@ fi
 %dir /opt/open-xchange/sbin/
 /opt/open-xchange/sbin/*
 %doc com.openexchange.admin.rmi/javadoc
+%doc com.openexchange.admin/ChangeLog
 
 %changelog
 * Tue Aug 21 2012 Marcus Klein <marcus.klein@open-xchange.com>
