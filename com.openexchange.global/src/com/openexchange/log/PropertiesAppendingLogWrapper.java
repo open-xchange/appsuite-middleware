@@ -183,7 +183,6 @@ public class PropertiesAppendingLogWrapper implements Log {
         if (logProps == null) {
             return message;
         }
-        final StringBuilder sb = new StringBuilder(message == null ? "null" : message);
         final Map<String, Object> properties = logProps.getMap();
         if (properties == null) {
             return message;
@@ -192,35 +191,45 @@ public class PropertiesAppendingLogWrapper implements Log {
          * Properties available
          */
         final Map<String, String> sorted = new TreeMap<String, String>();
-        final List<LogPropertyName> names = LogProperties.getPropertyNames();
-        final Set<String> alreadyLogged;
-        if (names.isEmpty()) {
-            alreadyLogged = Collections.emptySet();
-        } else {
-            alreadyLogged = new HashSet<String>(names.size());
-            for (final LogPropertyName name : names) {
-                if (name.implies(logLevel)) {
-                    final String propertyName = name.getPropertyName();
-                    alreadyLogged.add(propertyName);
-                    final Object value = properties.get(propertyName);
-                    if (null != value) {
+        boolean isEmpty = true;
+        {
+            final List<LogPropertyName> names = LogProperties.getPropertyNames();
+            final Set<String> alreadyLogged;
+            if (names.isEmpty()) {
+                alreadyLogged = Collections.emptySet();
+            } else {
+                alreadyLogged = new HashSet<String>(names.size());
+                for (final LogPropertyName name : names) {
+                    if (name.implies(logLevel)) {
+                        final String propertyName = name.getPropertyName();
+                        alreadyLogged.add(propertyName);
+                        final Object value = properties.get(propertyName);
+                        if (null != value) {
+                            sorted.put(propertyName, value.toString());
+                            isEmpty = false;
+                        }
+                    }
+                }
+            }
+            for (final Entry<String, Object> entry : properties.entrySet()) {
+                final String propertyName = entry.getKey();
+                if (!alreadyLogged.contains(propertyName)) {
+                    final Object value = entry.getValue();
+                    if (value instanceof ForceLog) {
                         sorted.put(propertyName, value.toString());
+                        isEmpty = false;
                     }
                 }
             }
         }
-        for (final Entry<String, Object> entry : properties.entrySet()) {
-            final String propertyName = entry.getKey();
-            if (!alreadyLogged.contains(propertyName)) {
-                final Object value = entry.getValue();
-                if (value instanceof ForceLog) {
-                    sorted.put(propertyName, value.toString());
-                }
+        final StringBuilder sb = new StringBuilder(256);
+        if (!isEmpty) {
+            for (final Entry<String, String> entry : sorted.entrySet()) {
+                sb.append('\n').append(entry.getKey()).append('=').append(entry.getValue());
             }
+            sb.deleteCharAt(0).append("\n\n");
         }
-        for (final Entry<String, String> entry : sorted.entrySet()) {
-            sb.append('\n').append(entry.getKey()).append('=').append(entry.getValue());
-        }
+        sb.append(message);
         return sb.toString();
     }
 

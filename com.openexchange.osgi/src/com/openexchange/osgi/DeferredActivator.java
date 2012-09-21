@@ -81,7 +81,7 @@ import com.openexchange.server.ServiceLookup;
  */
 public abstract class DeferredActivator implements BundleActivator, ServiceLookup {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(DeferredActivator.class);
+    static final Log LOG = com.openexchange.log.Log.loggerFor(DeferredActivator.class);
 
     private static final DeferredActivatorServiceStateLookup STATE_LOOKUP = new DeferredActivatorServiceStateLookup();
 
@@ -251,7 +251,7 @@ public abstract class DeferredActivator implements BundleActivator, ServiceLooku
             services = new ConcurrentHashMap<Class<?>, ServiceProvider<?>>(1);
             neededServiceTrackers = new ServiceTracker[0];
             availability = allAvailable = 0;
-            startBundle();
+            startUp(false);
         } else {
             final int len = classes.length;
             if (len > 0 && new HashSet<Class<?>>(Arrays.asList(classes)).size() != len) {
@@ -275,7 +275,7 @@ public abstract class DeferredActivator implements BundleActivator, ServiceLooku
                 }
             }
             if (len == 0) {
-                startBundle();
+                startUp(false);
             }
         }
     }
@@ -351,7 +351,7 @@ public abstract class DeferredActivator implements BundleActivator, ServiceLooku
                  * Start bundle
                  */
                 try {
-                    startBundle();
+                    startUp(false);
                     started.set(true);
                 } catch (final Exception e) {
                     final Bundle bundle = context.getBundle();
@@ -436,6 +436,26 @@ public abstract class DeferredActivator implements BundleActivator, ServiceLooku
         } catch (final Exception e) {
             LOG.error(e.getMessage(), e);
             throw e;
+        }
+    }
+
+    private void startUp(final boolean async) throws Exception {
+        if (async) {
+            final Runnable task = new Runnable() {
+
+                @Override
+                public void run() {
+                    try {
+                        startBundle();
+                    } catch (final Throwable t) {
+                        ExceptionUtils.handleThrowable(t);
+                        LOG.error(t.getMessage(), t);
+                    }
+                }
+            };
+            new Thread(task).run();
+        } else {
+            startBundle();
         }
     }
 
