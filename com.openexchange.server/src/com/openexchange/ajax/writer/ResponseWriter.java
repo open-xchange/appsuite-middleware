@@ -261,8 +261,13 @@ public final class ResponseWriter {
         }
         if (1 == warnings.size()) {
             final JSONObject jsonWarning = new JSONObject();
-            addException(jsonWarning, warnings.get(0).setCategory(Category.CATEGORY_WARNING), locale);
+            final OXException exception = warnings.get(0).setCategory(Category.CATEGORY_WARNING);
+            addException(jsonWarning, exception, locale);
             json.put(WARNINGS, jsonWarning);
+            // Check if error has already been set
+            if (!json.hasAndNotNull(ERROR)) {
+                addException(json, exception, locale);
+            }
         } else {
             final JSONArray jsonArray = new JSONArray();
             for (final OXException warning : warnings) {
@@ -271,6 +276,9 @@ public final class ResponseWriter {
                 jsonArray.put(jsonWarning);
             }
             json.put(WARNINGS, jsonArray);
+            if (!json.hasAndNotNull(ERROR)) {
+                addException(json, warnings.get(0).setCategory(Category.CATEGORY_WARNING), locale);
+            }
         }
     }
 
