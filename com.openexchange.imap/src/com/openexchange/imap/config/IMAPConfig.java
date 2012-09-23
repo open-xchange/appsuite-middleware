@@ -54,6 +54,7 @@ import java.net.InetSocketAddress;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.UnknownHostException;
+import java.util.Collections;
 import java.util.Map;
 import javax.mail.MessagingException;
 import javax.mail.internet.IDNA;
@@ -182,7 +183,7 @@ public final class IMAPConfig extends MailConfig {
      * @return The (unmodifiable) map containing IMAP capabilities
      */
     public Map<String, String> asMap() {
-        return capabilities;
+        return capabilities == null ? Collections.<String, String> emptyMap() : capabilities;
     }
 
     /**

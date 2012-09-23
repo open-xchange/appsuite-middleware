@@ -152,6 +152,11 @@ public final class IMAPFolderConverter {
 
     private static final String ATTRIBUTE_NO_INFERIORS = "\\noinferiors";
 
+    private static final String ATTRIBUTE_DRAFTS = "\\drafts";
+    private static final String ATTRIBUTE_JUNK = "\\junk";
+    private static final String ATTRIBUTE_SENT = "\\sent";
+    private static final String ATTRIBUTE_TRASH = "\\trash";
+
     // private static final String ATTRIBUTE_HAS_NO_CHILDREN = "\\HasNoChildren";
 
     /**
@@ -345,6 +350,21 @@ public final class IMAPFolderConverter {
                             mailFolder.setSubfolders(true);
                             mailFolder.setSubscribedSubfolders(false);
                         }
+                        if (imapConfig.asMap().containsKey("SPECIAL-USE")) {
+                            if (attrs.contains(ATTRIBUTE_DRAFTS)) {
+                                mailFolder.setDefaultFolder(true);
+                                mailFolder.setDefaultFolderType(DefaultFolderType.DRAFTS);
+                            } else if (attrs.contains(ATTRIBUTE_JUNK)) {
+                                mailFolder.setDefaultFolder(true);
+                                mailFolder.setDefaultFolderType(DefaultFolderType.SPAM);
+                            } else if (attrs.contains(ATTRIBUTE_SENT)) {
+                                mailFolder.setDefaultFolder(true);
+                                mailFolder.setDefaultFolderType(DefaultFolderType.SENT);
+                            } else if (attrs.contains(ATTRIBUTE_TRASH)) {
+                                mailFolder.setDefaultFolder(true);
+                                mailFolder.setDefaultFolderType(DefaultFolderType.TRASH);
+                            }
+                        }
                     }
                     if (!mailFolder.containsSubfolders()) {
                         /*
@@ -376,23 +396,25 @@ public final class IMAPFolderConverter {
                         mailFolder.setParentFullname(pfn.length() == 0 ? MailFolder.DEFAULT_FOLDER_ID : pfn);
                     }
                 }
-                /*
-                 * Default folder
-                 */
-                if ("INBOX".equals(imapFullName)) {
-                    mailFolder.setDefaultFolder(true);
-                    mailFolder.setDefaultFolderType(DefaultFolderType.INBOX);
-                } else if (isDefaultFoldersChecked(session, accountId)) {
-                    final String[] defaultMailFolders = getDefaultMailFolders(session, accountId);
-                    for (int i = 0; i < defaultMailFolders.length && !mailFolder.isDefaultFolder(); i++) {
-                        if (imapFullName.equals(defaultMailFolders[i])) {
-                            mailFolder.setDefaultFolder(true);
-                            mailFolder.setDefaultFolderType(TYPES[i]);
+                if (!mailFolder.containsDefaultFolder()) {
+                    /*
+                     * Default folder
+                     */
+                    if ("INBOX".equals(imapFullName)) {
+                        mailFolder.setDefaultFolder(true);
+                        mailFolder.setDefaultFolderType(DefaultFolderType.INBOX);
+                    } else if (isDefaultFoldersChecked(session, accountId)) {
+                        final String[] defaultMailFolders = getDefaultMailFolders(session, accountId);
+                        for (int i = 0; i < defaultMailFolders.length && !mailFolder.isDefaultFolder(); i++) {
+                            if (imapFullName.equals(defaultMailFolders[i])) {
+                                mailFolder.setDefaultFolder(true);
+                                mailFolder.setDefaultFolderType(TYPES[i]);
+                            }
                         }
-                    }
-                    if (!mailFolder.containsDefaultFolder()) {
-                        mailFolder.setDefaultFolder(false);
-                        mailFolder.setDefaultFolderType(DefaultFolderType.NONE);
+                        if (!mailFolder.containsDefaultFolder()) {
+                            mailFolder.setDefaultFolder(false);
+                            mailFolder.setDefaultFolderType(DefaultFolderType.NONE);
+                        }
                     }
                 }
                 /*
