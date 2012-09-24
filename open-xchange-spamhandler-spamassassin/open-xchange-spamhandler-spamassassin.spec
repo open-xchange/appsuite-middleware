@@ -46,7 +46,7 @@ ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} 
 /opt/open-xchange/osgi/bundle.d/*
 %dir /opt/open-xchange/etc/
 %config(noreplace) /opt/open-xchange/etc/*
-%doc com.openexchange.spamhandler.spamexperts/ChangeLog
+%doc com.openexchange.spamhandler.spamassassin/ChangeLog
 
 %changelog
 * Tue Aug 21 2012 Marcus Klein <marcus.klein@open-xchange.com>
