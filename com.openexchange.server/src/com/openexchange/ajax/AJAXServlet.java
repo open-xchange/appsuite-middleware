@@ -862,7 +862,7 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
     }
 
     protected static boolean mayUpload(final String action) {
-        return UPLOAD_ACTIONS.contains(action) || Arrays.asList("CSV", "VCARD","ICAL").contains(action); //Boo! Bad hack to get importer/export bundle working
+        return UPLOAD_ACTIONS.contains(action) || Arrays.asList("CSV", "VCARD","ICAL", "OUTLOOK_CSV").contains(action); //Boo! Bad hack to get importer/export bundle working
     }
 
     private static boolean isEmpty(final String string) {
