@@ -62,7 +62,9 @@ public class ReportConfiguration {
 
     public ReportConfiguration() throws IOException {
         properties = new Properties();
+
         loadProperties(System.getProperties().getProperty("openexchange.propdir"), "reportclient.properties");
+        loadProperties(System.getProperties().getProperty("openexchange.propdir2"), "licensekeys.properties");
     }
 
     public void loadProperties(String propDir, String propFile) throws IOException {
