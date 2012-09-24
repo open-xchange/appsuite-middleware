@@ -194,8 +194,7 @@ public class HazelcastActivator extends HousekeepingActivator {
             join.getMulticastConfig().setEnabled(false);
             join.getAwsConfig().setEnabled(false);
             final TcpIpConfig tcpIpConfig = join.getTcpIpConfig();
-            tcpIpConfig.setEnabled(true);
-            tcpIpConfig.setConnectionTimeoutSeconds(10);
+            tcpIpConfig.setEnabled(true).setConnectionTimeoutSeconds(10).clear();
             {
                 final List<String> members = new LinkedList<String>();
                 for (final InetAddress inetAddress : nodes) {
