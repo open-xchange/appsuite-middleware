@@ -73,6 +73,7 @@ import com.openexchange.data.conversion.ical.ICalEmitter;
 import com.openexchange.data.conversion.ical.ICalSession;
 import com.openexchange.exception.OXException;
 import com.openexchange.exception.OXException.Truncated;
+import com.openexchange.folderstorage.type.PublicType;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.CalendarObject;
@@ -165,6 +166,9 @@ public class AppointmentResource extends CalDAVResource<Appointment> {
                 Patches.Incoming.patchResources(originalAppointment, appointmentToSave);
                 Patches.Incoming.patchParticipantListRemovingAliases(factory, appointmentToSave);
                 Patches.Incoming.patchParticipantListRemovingDoubleUsers(appointmentToSave);
+                if (PublicType.getInstance().equals(parent.getFolder().getType())) {
+                    Patches.Incoming.addUserParticipantIfEmpty(factory.getSession().getUserId(), appointmentToSave);
+                }
             }
             checkForExplicitRemoves(originalAppointment, appointmentToSave);
             if (false == containsChanges(originalAppointment, appointmentToSave)) {
@@ -187,6 +191,9 @@ public class AppointmentResource extends CalDAVResource<Appointment> {
                     if (false == Patches.Incoming.tryRestoreParticipants(originalException, exceptionToSave)) {
                         Patches.Incoming.patchParticipantListRemovingAliases(factory, exceptionToSave);
                         Patches.Incoming.patchParticipantListRemovingDoubleUsers(exceptionToSave);
+                        if (PublicType.getInstance().equals(parent.getFolder().getType())) {
+                            Patches.Incoming.addUserParticipantIfEmpty(factory.getSession().getUserId(), exceptionToSave);
+                        }
                     }
                 } else {
                     /*
@@ -196,6 +203,9 @@ public class AppointmentResource extends CalDAVResource<Appointment> {
                     if (false == Patches.Incoming.tryRestoreParticipants(originalAppointment, exceptionToSave)) {
                         Patches.Incoming.patchParticipantListRemovingAliases(factory, exceptionToSave);
                         Patches.Incoming.patchParticipantListRemovingDoubleUsers(exceptionToSave);
+                        if (PublicType.getInstance().equals(parent.getFolder().getType())) {
+                            Patches.Incoming.addUserParticipantIfEmpty(factory.getSession().getUserId(), exceptionToSave);
+                        }
                     }
                 }
                 /*
@@ -238,6 +248,9 @@ public class AppointmentResource extends CalDAVResource<Appointment> {
              */
             appointmentToSave.removeObjectID(); // in case it's already assigned due to retry operations
             appointmentToSave.setParentFolderID(null != object ? object.getParentFolderID() : parentFolderID);
+            if (PublicType.getInstance().equals(parent.getFolder().getType())) {
+                Patches.Incoming.addUserParticipantIfEmpty(factory.getSession().getUserId(), appointmentToSave);
+            }
             getAppointmentInterface().insertAppointmentObject(this.appointmentToSave);
             Date clientLastModified = appointmentToSave.getLastModified();
             /*

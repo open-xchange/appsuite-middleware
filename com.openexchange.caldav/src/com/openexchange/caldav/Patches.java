@@ -95,6 +95,36 @@ public class Patches {
         private Incoming() {
         	// prevent instantiation
         }
+        
+        /**
+         * Adds the user to the list of participants if needed, i.e. the 
+         * appointment not yet has any internal user participants.
+         * 
+         * @param appointment
+         */
+        public static void addUserParticipantIfEmpty(int userID, Appointment appointment) {
+            if (null == appointment.getParticipants() || 0 == appointment.getParticipants().length) {
+                UserParticipant user = new UserParticipant(userID);
+                user.setConfirm(Appointment.ACCEPT);                
+                appointment.setParticipants(new UserParticipant[] { user });
+            } else {
+                boolean hasSomethingInternal = false;
+                for (Participant participant : appointment.getParticipants()) {
+                    if (Participant.GROUP == participant.getType() || Participant.RESOURCE == participant.getType() || 
+                        Participant.USER == participant.getType() || Participant.RESOURCEGROUP == participant.getType()) {
+                        hasSomethingInternal = true;
+                        break;
+                    }
+                }
+                if (false == hasSomethingInternal) {
+                    Participant[] participants = Arrays.copyOf(appointment.getParticipants(), 1 + appointment.getParticipants().length);
+                    UserParticipant user = new UserParticipant(userID);
+                    user.setConfirm(Appointment.ACCEPT);                
+                    participants[participants.length - 1] = user; 
+                    appointment.setParticipants(participants);
+                }
+            }
+        }
     	
         /**
          * Tries to restore the participant- and user-arrays in the updated 
