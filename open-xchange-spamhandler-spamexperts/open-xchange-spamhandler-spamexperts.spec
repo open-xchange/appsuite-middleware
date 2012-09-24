@@ -48,6 +48,7 @@ ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} 
 %config(noreplace) /opt/open-xchange/etc/*.properties
 %dir /opt/open-xchange/etc/settings/
 %config(noreplace) /opt/open-xchange/etc/settings/*.properties
+%doc com.openexchange.spamhandler.spamexperts/ChangeLog
 
 %changelog
 * Tue Aug 21 2012 Marcus Klein <marcus.klein@open-xchange.com>
