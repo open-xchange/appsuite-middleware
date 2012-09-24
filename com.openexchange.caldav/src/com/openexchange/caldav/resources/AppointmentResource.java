@@ -64,6 +64,7 @@ import java.util.Set;
 import javax.servlet.http.HttpServletResponse;
 import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.caldav.GroupwareCaldavFactory;
+import com.openexchange.caldav.ParticipantTools;
 import com.openexchange.caldav.Patches;
 import com.openexchange.caldav.Tools;
 import com.openexchange.data.conversion.ical.ConversionError;
@@ -75,6 +76,7 @@ import com.openexchange.exception.OXException.Truncated;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.CalendarObject;
+import com.openexchange.groupware.container.Participant;
 import com.openexchange.java.Streams;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 import com.openexchange.webdav.protocol.WebdavPath;
@@ -385,6 +387,8 @@ public class AppointmentResource extends CalDAVResource<Appointment> {
             return true;
         } else if (String.class.isInstance(value1) && String.class.isInstance(value2)) {
             return 0 != ((String)value1).trim().compareTo(((String)value2).trim());
+        } else if (Participant[].class.isInstance(value1)) {
+            return false == ParticipantTools.equals((Participant[])value1, (Participant[])value2, true);
         } else if (Comparable.class.isInstance(value1)) {
             return 0 != ((Comparable)value1).compareTo(value2);
         } else {

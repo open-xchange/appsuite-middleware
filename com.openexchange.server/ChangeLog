@@ -1,3 +1,7 @@
+* 2012-09-24 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 23067: More sophisticated checks for participant changes
+
 * 2012-09-21 - thorben.betten@open-xchange.com
 
  - Fix for bug 23062: Check content of JSON object for non-null
