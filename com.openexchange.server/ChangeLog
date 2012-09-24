@@ -6,6 +6,7 @@
 * 2012-09-24 - marcus.klein@open-xchange.com
 
  - Fix for bug 22524: All CLTs now use the Java options defined for CLTs and not the options for the backend server.
+ - Fix for bug 23001: Fix for bug 22909 was wrong and caused this bug. Reading now licensekeys.properties correctly.
 
 * 2012-09-24 - tobias.friedrich@open-xchange.com
 
