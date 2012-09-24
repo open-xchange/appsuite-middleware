@@ -94,7 +94,12 @@ public final class FilterJerichoHandler implements JerichoHandler {
 
     private static final Set<String> NUM_ATTRIBS = new HashSet<String>(0);
 
-    private static final Set<String> ALL = Collections.unmodifiableSet(new HashSet<String>(HTMLElements.getElementNames()));
+    private static final Set<String> ALL;
+    static {
+        final Set<String> s = new HashSet<String>(HTMLElements.getElementNames());
+        s.add("smarttagtype");
+        ALL = Collections.unmodifiableSet(s);
+    }
 
     private static volatile Map<String, Map<String, Set<String>>> staticHTMLMap;
 
@@ -381,6 +386,8 @@ public final class FilterJerichoHandler implements JerichoHandler {
             }
             if (htmlMap.containsKey(tagName)) {
                 addStartTag(startTag, true, htmlMap.get(tagName));
+            } else {
+                System.out.println("Dropped single tag: " + startTag);
             }
         } else {
             if (skipLevel > 0) {
