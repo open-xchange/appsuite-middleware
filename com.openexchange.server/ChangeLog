@@ -2,6 +2,7 @@
 
  - Fix for bug 23068: Fixed NPE on social/subscription refresh
  - Fix for bug 23080: Added "smarttagtype" to list of known HTML tags
+ - Fix for bug 23081: Support for HTML5 <wbr> tag
 
 * 2012-09-24 - marcus.klein@open-xchange.com
 
