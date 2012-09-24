@@ -122,7 +122,7 @@ public class SpecialUseDefaultFolderChecker extends IMAPDefaultFolderChecker {
                 setDefaultMailFolder(StorageUtility.INDEX_SPAM, entry.getFullName(), mailSessionCache);
                 indexes.remove(StorageUtility.INDEX_SPAM);
             }
-            entry = ListLsubCache.getJunkEntry(accountId, imapFolder, session);
+            entry = ListLsubCache.getSentEntry(accountId, imapFolder, session);
             if (null != entry) {
                 setDefaultMailFolder(StorageUtility.INDEX_SENT, entry.getFullName(), mailSessionCache);
                 indexes.remove(StorageUtility.INDEX_SENT);
