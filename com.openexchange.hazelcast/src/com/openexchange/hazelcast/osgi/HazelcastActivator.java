@@ -3,6 +3,7 @@ package com.openexchange.hazelcast.osgi;
 
 import java.net.InetAddress;
 import java.util.Collections;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 import org.apache.commons.logging.Log;
@@ -15,7 +16,6 @@ import com.hazelcast.config.Join;
 import com.hazelcast.config.TcpIpConfig;
 import com.hazelcast.core.Hazelcast;
 import com.hazelcast.core.HazelcastInstance;
-import com.hazelcast.nio.Address;
 import com.openexchange.cluster.discovery.ClusterDiscoveryService;
 import com.openexchange.cluster.discovery.ClusterListener;
 import com.openexchange.config.ConfigurationService;
@@ -195,13 +195,27 @@ public class HazelcastActivator extends HousekeepingActivator {
             join.getAwsConfig().setEnabled(false);
             final TcpIpConfig tcpIpConfig = join.getTcpIpConfig();
             tcpIpConfig.setEnabled(true);
-            for (final InetAddress address : nodes) {
-                tcpIpConfig.addAddress(new Address(address, config.getPort()));
+            tcpIpConfig.setConnectionTimeoutSeconds(10);
+            {
+                final List<String> members = new LinkedList<String>();
+                for (final InetAddress inetAddress : nodes) {
+                    final String[] addressArgs = inetAddress.getHostAddress().split("\\%");
+                    for (final String address : addressArgs) {
+                        members.add(address);
+                    }
+                }
+                if (!members.isEmpty()) {
+                    tcpIpConfig.setMembers(members);
+                }
             }
+            // for (final InetAddress address : nodes) {
+            // tcpIpConfig.addAddress(new Address(address, config.getNetworkConfig().getPort()));
+            // }
             /*
              * Create appropriate Hazelcast instance from configuration
              */
-            final HazelcastInstance hazelcastInstance = new ClassLoaderAwareHazelcastInstance(Hazelcast.newHazelcastInstance(config), false);
+            final HazelcastInstance hazelcastInstance =
+                new ClassLoaderAwareHazelcastInstance(Hazelcast.newHazelcastInstance(config), false);
             registerService(HazelcastInstance.class, hazelcastInstance);
             REF_HAZELCAST_INSTANCE.set(hazelcastInstance);
             if (logger.isInfoEnabled()) {
