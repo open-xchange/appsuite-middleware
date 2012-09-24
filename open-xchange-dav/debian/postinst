@@ -34,8 +34,41 @@ dpkg-maintscript-helper mv_conffile /opt/open-xchange/etc/groupware/contextSets/
     /opt/open-xchange/etc/contextSets/carddav.yml 6.20.99 open-xchange-carddav -- $1 \
     $(dpkg-query -W -f='${Config-Version}' open-xchange-carddav)
 
+. /opt/open-xchange/lib/oxfunctions.sh
+
+postFix622() {
+    # prevent bash from expanding, see bug 13316
+    GLOBIGNORE='*'
+
+    # SoftwareChange_Request-1028
+    pfile=/opt/open-xchange/etc/carddav.properties
+    if ! ox_exists_property com.openexchange.carddav.tree $pfile; then
+        ox_set_property com.openexchange.carddav.tree "0" $pfile
+    fi
+    if ! ox_exists_property com.openexchange.carddav.exposedCollections $pfile; then
+        ox_set_property com.openexchange.carddav.exposedCollections "0" $pfile
+    fi
+    # SoftwareChange_Request-1129
+    if ! ox_exists_property com.openexchange.carddav.reducedAggregatedCollection $pfile; then
+        ox_set_property com.openexchange.carddav.reducedAggregatedCollection "false" $pfile
+    fi
+}
+
+postFix() {
+    local version=${1%-*}
+    version=${version//[-.]/}
+
+    # prevent bash from expanding, see bug 13316
+    GLOBIGNORE='*'
+}
+
 case "$1" in
     configure)
+        postFix622
+        test -n "$2" && {
+            # we are in update mode, run postFix to apply fixes
+            postFix "$2"
+        }
     ;;
 
     abort-upgrade|abort-remove|abort-deconfigure)
