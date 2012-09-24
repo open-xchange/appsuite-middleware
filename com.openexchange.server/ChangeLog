@@ -1,3 +1,7 @@
+* 2012-09-24 - marcus.klein@open-xchange.com
+
+ - Fix for bug 22524: All CLTs now use the Java options defined for CLTs and not the options for the backend server.
+
 * 2012-09-24 - tobias.friedrich@open-xchange.com
 
  - Fix for bug 23067: More sophisticated checks for participant changes

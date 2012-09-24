@@ -25,10 +25,9 @@ ox_set_JAVA_BIN
 
 test -z "$JAVA_XTRAOPTS" && JAVA_XTRAOPTS="-Xms20M -Xmx280M"
 
-JAVA_OPTS="${JAVA_XTRAOPTS} \
+JAVA_OPTS="${JAVA_OXCMD_OPTS} \
 -Djava.awt.headless=true \
--Dopenexchange.propfile=$SYSTEMPROPERTIES \
--Dopenexchange.propdir2=$COMMONPROPERTIESDIR \
+-Dopenexchange.propdir=$PROPERTIESDIR \
 -Djava.util.logging.config.file=$LOGGINGPROPERTIES"
 
 CLASSPATH="-classpath $OXBUNDLES/com.openexchange.server.jar:\
