@@ -54,21 +54,9 @@ postFix622() {
     fi
 }
 
-postFix() {
-    local version=${1%-*}
-    version=${version//[-.]/}
-
-    # prevent bash from expanding, see bug 13316
-    GLOBIGNORE='*'
-}
-
 case "$1" in
     configure)
         postFix622
-        test -n "$2" && {
-            # we are in update mode, run postFix to apply fixes
-            postFix "$2"
-        }
     ;;
 
     abort-upgrade|abort-remove|abort-deconfigure)

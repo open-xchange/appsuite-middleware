@@ -60,9 +60,6 @@ if [ ${1:-0} -eq 2 ]; then
     # prevent bash from expanding, see bug 13316
     GLOBIGNORE='*'
 
-    ##
-    ## start update from < 6.21
-    ##
     CONFFILES="crawler.properties facebooksubscribe.properties linkedinsubscribe.properties microformatSubscription.properties msnsubscribe.properties yahoosubscribe.properties"
     for FILE in ${CONFFILES}; do
 	ox_move_config_file /opt/open-xchange/etc/groupware /opt/open-xchange/etc "$FILE"
@@ -79,9 +76,7 @@ if [ ${1:-0} -eq 2 ]; then
     if ! ox_exists_property com.openexchange.subscribe.crawler.gmx.com $pfile; then
         ox_set_property com.openexchange.subscribe.crawler.gmx.com true $pfile
     fi
-    ##
-    ## end update from < 6.21
-    ##
+
     find /opt/open-xchange/etc/crawlers -name "*.yml" -print0 | while read -d $'\0' i; do
         ox_update_permissions "$i" open-xchange:root 644
     done

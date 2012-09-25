@@ -41,13 +41,7 @@ if [ ${1:-0} -eq 2 ]; then
     # prevent bash from expanding, see bug 13316
     GLOBIGNORE='*'
 
-    ##
-    ## start update from < 6.21
-    ##
     ox_move_config_file /opt/open-xchange/etc/groupware /opt/open-xchange/etc mailfilter.properties
-    ##
-    ## end update from < 6.21
-    ##
 
     ox_update_permissions "/opt/open-xchange/etc/mailfilter.properties" root:open-xchange 640
 fi
