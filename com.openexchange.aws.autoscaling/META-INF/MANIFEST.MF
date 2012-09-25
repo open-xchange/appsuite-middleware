@@ -5,14 +5,21 @@ Bundle-SymbolicName: com.openexchange.aws.autoscaling
 Bundle-Version: 6.21.0
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
-Import-Package: com.amazonaws.services.autoscaling,
+Import-Package: com.amazonaws,
+ com.amazonaws.auth,
+ com.amazonaws.services.autoscaling,
  com.amazonaws.services.autoscaling.model,
  com.amazonaws.services.cloudwatch,
  com.amazonaws.services.cloudwatch.model,
+ com.amazonaws.services.ec2,
+ com.amazonaws.services.ec2.model,
+ com.amazonaws.services.elasticloadbalancing,
+ com.amazonaws.services.elasticloadbalancing.model,
  com.openexchange.config,
  com.openexchange.exception,
+ com.openexchange.i18n,
  com.openexchange.log,
  com.openexchange.osgi,
+ org.apache.commons.cli;version="1.2.0",
  org.apache.commons.logging,
  org.osgi.framework
-Bundle-Activator: com.openexchange.aws.autoscaling.osgi.AWSAutoScalingActivator
