@@ -87,7 +87,7 @@ public interface FolderService {
      * @param folderId The folder ID
      * @param userId The user ID
      * @param contextId The context ID
-     * @param working Whether to look-up working or ackup table
+     * @param working Whether to look-up working or backup table
      * @return The user's effective permission
      * @throws OXException If effective permission cannot be determined
      */
