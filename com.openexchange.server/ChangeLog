@@ -2,6 +2,7 @@
 
  - Fix for bug 23083: Ignore requests to set the 'image1_url' of a contact
  - Fix for bug 23076: Correctly pass last-modified when appointment has no changes 
+ - Fix for bug 22723: Use also deleted items for initial sync-token calculations  
 
 * 2012-09-24 - thorben.betten@open-xchange.com
 
