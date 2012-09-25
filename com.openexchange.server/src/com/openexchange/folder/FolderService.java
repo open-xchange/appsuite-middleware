@@ -71,6 +71,17 @@ public interface FolderService {
     public FolderObject getFolderObject(int folderId, int contextId) throws OXException;
 
     /**
+     * Gets specified folder from given context.
+     *
+     * @param folderId The folder ID
+     * @param contextId The context ID
+     * @return The folder object
+     * @param working Whether to look-up working or backup table
+     * @throws OXException If folder cannot be returned
+     */
+    public FolderObject getFolderObject(int folderId, int contextId, boolean working) throws OXException;
+
+    /**
      * Determines specified user's effective permission on the folder matching given folder ID.
      *
      * @param folderId The folder ID
