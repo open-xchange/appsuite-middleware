@@ -85,9 +85,17 @@ public final class FolderServiceImpl implements FolderService {
 
     @Override
     public EffectivePermission getFolderPermission(final int folderId, final int userId, final int contextId) throws OXException {
-        return getFolderPermission(folderId, userId, contextId, true);
+        try {
+            return getFolderPermission(folderId, userId, contextId, true);
+        } catch (final OXException e) {
+            if (OXFolderExceptionCode.NOT_EXISTS.equals(e)) {
+                return getFolderPermission(folderId, userId, contextId, false);
+            }
+            throw e;
+        }
     }
 
+    @Override
     public EffectivePermission getFolderPermission(final int folderId, final int userId, final int contextId, final boolean working) throws OXException {
         final Context ctx = ContextStorage.getStorageContext(contextId);
         final UserConfiguration userConfig = UserConfigurationStorage.getInstance().getUserConfiguration(userId, ctx);
