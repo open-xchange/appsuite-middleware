@@ -49,7 +49,10 @@ Import-Package: javax.activation,
  org.w3c.dom.stylesheets,
  org.w3c.dom.traversal,
  org.w3c.dom.views,
- org.w3c.dom.xpath
+ org.w3c.dom.xpath,
+ org.xml.sax,
+ org.xml.sax.ext,
+ org.xml.sax.helpers
 Bundle-ClassPath: .,
  lib/automaton-1.11-8.jar,
  lib/apache-mime4j-core-0.7.2.jar,
