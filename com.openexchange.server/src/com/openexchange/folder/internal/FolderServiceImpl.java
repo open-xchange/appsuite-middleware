@@ -49,18 +49,24 @@
 
 package com.openexchange.folder.internal;
 
+import java.sql.Connection;
+import java.sql.SQLException;
+import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
 import com.openexchange.folder.FolderService;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
+import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.server.impl.EffectivePermission;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
+import com.openexchange.tools.oxfolder.OXFolderExceptionCode;
+import com.openexchange.tools.oxfolder.OXFolderLoader;
 
 /**
  * {@link FolderServiceImpl} - TODO Short description of this class' purpose.
- *
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class FolderServiceImpl implements FolderService {
@@ -79,11 +85,25 @@ public final class FolderServiceImpl implements FolderService {
 
     @Override
     public EffectivePermission getFolderPermission(final int folderId, final int userId, final int contextId) throws OXException {
+        return getFolderPermission(folderId, userId, contextId, true);
+    }
+
+    public EffectivePermission getFolderPermission(final int folderId, final int userId, final int contextId, final boolean working) throws OXException {
         final Context ctx = ContextStorage.getStorageContext(contextId);
-        return new OXFolderAccess(ctx).getFolderPermission(
-            folderId,
-            userId,
-            UserConfigurationStorage.getInstance().getUserConfiguration(userId, ctx));
+        final UserConfiguration userConfig = UserConfigurationStorage.getInstance().getUserConfiguration(userId, ctx);
+        if (working) {
+            return new OXFolderAccess(ctx).getFolderPermission(folderId, userId, userConfig);
+        }
+        final Connection con = Database.get(ctx, false);
+        try {
+            final FolderObject delFolder =
+                OXFolderLoader.loadFolderObjectFromDB(folderId, ctx, con, true, false, "del_oxfolder_tree", "del_oxfolder_permissions");
+            return delFolder.getEffectiveUserPermission(userId, userConfig, con);
+        } catch (final SQLException e) {
+            throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
+        } finally {
+            Database.back(ctx, false, con);
+        }
     }
 
 }
