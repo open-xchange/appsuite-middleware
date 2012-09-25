@@ -83,8 +83,8 @@ public class CacheExceptionMessage implements LocalizableStrings {
     // 'Put' into cache failed.
     public final static String FAILED_PUT = "'Put' into cache failed.";
 
-    // 'Save put' into cache failed. An object bound to given key already exists.
-    public final static String FAILED_SAFE_PUT = "'Save put' into cache failed. An object bound to given key already exists.";
+    // 'Safe put' into cache failed. An object bound to given key already exists.
+    public final static String FAILED_SAFE_PUT = "'Safe put' into cache failed. An object bound to given key already exists.";
 
     // Remove on cache failed
     public final static String FAILED_REMOVE = "Remove on cache failed";
