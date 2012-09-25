@@ -699,7 +699,11 @@ public class Login extends AJAXServlet {
                         return;
                     }
                 } catch (final OXException e) {
-                    e.log(LOG);
+                    if (AjaxExceptionCodes.DISABLED_ACTION.equals(e)) {
+                        LOG.debug(e.getMessage(), e);
+                    } else {
+                        e.log(LOG);
+                    }
                     if (SessionServlet.isIpCheckError(e) && null != session) {
                         try {
                             // Drop Open-Xchange cookies
