@@ -1,0 +1,181 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+<title>Photo album</title>
+<meta name="description" content="">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+html {
+  height: 100%;
+}
+body {
+  background-color: #222;
+  color: white;
+  font-family: "Helvetica Neue", Helvtica, Arial, sans-serif;
+  font-size: 40px;
+  line-height: 1.2em;
+  padding: 0;
+  margin: 0;
+  height: 100%;
+}
+a, a:visited {
+  color: #fc0;
+  outline: 0;
+}
+h1 {
+  font-size: 1em;
+  font-weight: 200;
+  line-height: 1.2em;
+  color: #555;
+  padding: 1em 0 1em 0.5em;
+  margin: 0;
+}
+h1 b {
+  font-weight: 200;
+  color: #777;
+}
+section {
+  font-size: 0.9em;
+  padding: 0 0 3em 0;
+}
+nav {
+  text-align: center;
+  color: #555;
+  padding: 100px 0 100px 0;
+  height: 20px;
+}
+.caption {
+  text-align: right;
+  color: #333;
+  line-height: 1em;
+  padding: 1em 0.5em 0 0.5em;
+  border-top: 1px solid #111;
+  margin: 0em 0 1em 0;
+}
+.media {
+  margin: 0 auto 0 auto;
+  -webkit-box-shadow: 0px 2px 25px 0px #000;
+  -moz-box-shadow: 0px 2px 25px 0px #000;
+  box-shadow: 0px 2px 25px 0px #000;
+  background-color: #111;
+  display: block;
+  outline: 0;
+  max-width: 800px;
+}
+video.media {
+  height: 350px;
+}
+.download {
+  font-size: 13px;
+  line-height: 3em;
+  text-align: center;
+}
+footer {
+  background-color: #000;
+  margin-top: 3em;
+  padding: 2em 20% 2em 20%;
+  color: #555;
+  text-align: center;
+  font-size: 13px;
+  line-height: 15px;
+}
+
+@media (max-width: 480px) { body { font-size: 25px; } .media { } }
+@media (min-width: 480px) and (max-width: 600px) { body { font-size: 25px; } .media { } }
+@media (min-width: 600px) and (max-width: 800px) { .media { } }
+@media (min-width: 1400px) { body { font-size: 50px; } .media { } }
+
+</style>
+
+<script src="//ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+<script>
+var busy = "/ox7/apps/themes/login/busy.gif";
+var items = [], filename;
+<#list infostore as infoitem>
+<#if !infoitem.fileName!?starts_with("_") && !infoitem.fileName!?starts_with(".") >
+filename = "${infoitem.fileName!''?html}";
+if (/(png|jpe?g|gif)$/i.test(filename)) {
+  items.push({
+    src: "${utils.getScheme(request)!"http"}${request.serverName}${utils.getFileURL(publication, infoitem)}",
+    mime: "${infoitem.fileMIMEType?html}"
+  });
+}
+</#if>
+</#list>
+</script>
+
+</head>
+<body>
+
+<header>
+<h1>Photo album</h1>
+</header>
+<article></article>
+<nav></nav>
+<footer>${privacy}</footer>
+
+<script>
+
+var offset = 0, STEP = 2, scrollHeigth, height, limit;
+
+function drawNext() {
+    var tmp, i, $i, o, sec;
+    if (items.length > offset) {
+        tmp = items.slice(offset, offset + STEP);
+        for (i = 0, $i = tmp.length; i < $i; i++) {
+            o = tmp[i];
+            sec = $('<section>');
+            sec.append(
+                $('<div>').addClass('caption').text((i + offset + 1) + '/' + items.length)
+            );
+            if ((/^video\//i).test(o.mime)) {
+                sec.append(
+                    $('<video>', { controls: "controls", preload: "metadata", tabindex: "1" }).addClass("media")
+                    .append($('<source>', { src: o.src })),
+                    $('<div>').addClass('download').append($('<a>', { href: o.src }).text('Download video'))
+                );
+            } else {
+                sec.append(
+                    $('<img>', { alt: '', src: o.src + '&width=800&height=600&scaleType=contain', tabindex: "1" }).addClass("media")
+                );
+            }
+            $('article').append(sec);
+        }
+        fnResize();
+        offset += STEP;
+    } else {
+        // remove busy GIF
+        $('nav').remove();
+    }
+}
+
+function fnScroll() {
+    var y = $(this).scrollTop();
+    if (y >= limit) {
+        $(this).off('scroll', fnScroll);
+        drawNext();
+        $(this).on('scroll', fnScroll);
+    }
+}
+
+function fnResize() {
+    STEP = Math.ceil($('body').height() / 500 * 2);
+    height = $('body').height();
+    limit = $('nav').offset().top - (height / 2 >> 0);
+}
+
+$(document).ready(function () {
+    $('nav').append($('<img>', { src: busy, alt: '', id: 'busy' }));
+    fnResize();
+    drawNext();
+    $(window)
+        .on('scroll', fnScroll)
+        .on('resize orientationchange', fnResize);
+});
+
+</script>
+
+</body>
+</html>
