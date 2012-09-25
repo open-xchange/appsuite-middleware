@@ -114,6 +114,31 @@ public final class FolderServiceImpl implements FolderService {
     }
 
     @Override
+    public FolderObject getFolderObject(final int folderId, final int contextId, final Storage storage) throws OXException {
+        if (Storage.WORKING.equals(storage)) {
+            return new OXFolderAccess(ContextStorage.getStorageContext(contextId)).getFolderObject(folderId);
+        }
+        final Context ctx = ContextStorage.getStorageContext(contextId);
+        if (Storage.BACKUP.equals(storage)) {
+            final Connection con = Database.get(ctx, false);
+            try {
+                return OXFolderLoader.loadFolderObjectFromDB(folderId, ctx, con, true, false, DEL_OXFOLDER_TREE, DEL_OXFOLDER_PERMISSIONS);
+            } finally {
+                Database.back(ctx, false, con);
+            }
+        }
+        // Connect to master
+        final Connection con = Database.get(ctx, true);
+        try {
+            final String table = Storage.LIVE_BACKUP.equals(storage) ? DEL_OXFOLDER_TREE : "oxfolder_tree";
+            final String permTable = Storage.LIVE_BACKUP.equals(storage) ? DEL_OXFOLDER_PERMISSIONS : "oxfolder_permissions";
+            return OXFolderLoader.loadFolderObjectFromDB(folderId, ctx, con, true, false, table, permTable);
+        } finally {
+            Database.back(ctx, true, con);
+        }
+    }
+
+    @Override
     public EffectivePermission getFolderPermission(final int folderId, final int userId, final int contextId) throws OXException {
         try {
             return getFolderPermission(folderId, userId, contextId, true);

@@ -61,6 +61,28 @@ import com.openexchange.server.impl.EffectivePermission;
 public interface FolderService {
 
     /**
+     * Determines what storage to look-up.
+     */
+    public static enum Storage {
+        /**
+         * The working storage (possibly cached data).
+         */
+        WORKING,
+        /**
+         * The backup storage (possibly cached data).
+         */
+        BACKUP,
+        /**
+         * Performs live look-up on working table.
+         */
+        LIVE_WORKING,
+        /**
+         * Performs live look-up on backup table.
+         */
+        LIVE_BACKUP;
+    }
+
+    /**
      * Gets specified folder from given context.
      *
      * @param folderId The folder ID
@@ -75,11 +97,22 @@ public interface FolderService {
      *
      * @param folderId The folder ID
      * @param contextId The context ID
-     * @return The folder object
      * @param working Whether to look-up working or backup table
+     * @return The folder object
      * @throws OXException If folder cannot be returned
      */
     public FolderObject getFolderObject(int folderId, int contextId, boolean working) throws OXException;
+
+    /**
+     * Gets specified folder from given context.
+     *
+     * @param folderId The folder ID
+     * @param contextId The context ID
+     * @param storage What storage source to look-up
+     * @return The folder object
+     * @throws OXException If folder cannot be returned
+     */
+    public FolderObject getFolderObject(final int folderId, final int contextId, final Storage storage) throws OXException;
 
     /**
      * Determines specified user's effective permission on the folder matching given folder ID.
