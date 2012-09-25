@@ -61,6 +61,7 @@ import java.util.Set;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.json.JSONValue;
 import org.json.JSONWriter;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.fields.ResponseFields;
@@ -73,6 +74,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.exception.OXException.Parsing;
 import com.openexchange.exception.OXException.ProblematicAttribute;
 import com.openexchange.exception.OXException.Truncated;
+import com.openexchange.json.OXJSONWriter;
 import com.openexchange.log.Log;
 import com.openexchange.server.services.ServerServiceRegistry;
 
@@ -261,12 +263,12 @@ public final class ResponseWriter {
         }
         if (1 == warnings.size()) {
             final JSONObject jsonWarning = new JSONObject();
-            final OXException exception = warnings.get(0).setCategory(Category.CATEGORY_WARNING);
-            addException(jsonWarning, exception, locale);
+            final OXException warning = warnings.get(0).setCategory(Category.CATEGORY_WARNING);
+            addException(jsonWarning, warning, locale);
             json.put(WARNINGS, jsonWarning);
             // Check if error has already been set
             if (!json.hasAndNotNull(ERROR)) {
-                addException(json, exception, locale);
+                addException(json, warning, locale);
             }
         } else {
             final JSONArray jsonArray = new JSONArray();
@@ -276,7 +278,7 @@ public final class ResponseWriter {
                 jsonArray.put(jsonWarning);
             }
             json.put(WARNINGS, jsonArray);
-            if (!json.hasAndNotNull(ERROR)) {
+            if (!warnings.isEmpty() && !json.hasAndNotNull(ERROR)) {
                 addException(json, warnings.get(0).setCategory(Category.CATEGORY_WARNING), locale);
             }
         }
@@ -512,11 +514,21 @@ public final class ResponseWriter {
         }
         writer.key(WARNINGS);
         if (1 == warnings.size()) {
+            final OXException warning = warnings.get(0);
             writer.object();
             try {
-                writeException(warnings.get(0).setCategory(Category.CATEGORY_WARNING), writer, locale);
+                writeException(warning.setCategory(Category.CATEGORY_WARNING), writer, locale);
             } finally {
                 writer.endObject();
+            }
+            if (writer instanceof OXJSONWriter) {
+                final JSONValue jv = ((OXJSONWriter) writer).getObject();
+                if (jv.isObject()) {
+                    final JSONObject json = (JSONObject) jv;
+                    if (!json.hasAndNotNull(ERROR)) {
+                        addException(json, warning, locale);
+                    }
+                }
             }
         } else {
             writer.array();
@@ -531,6 +543,15 @@ public final class ResponseWriter {
                 }
             } finally {
                 writer.endArray();
+            }
+            if (!warnings.isEmpty() && (writer instanceof OXJSONWriter)) {
+                final JSONValue jv = ((OXJSONWriter) writer).getObject();
+                if (jv.isObject()) {
+                    final JSONObject json = (JSONObject) jv;
+                    if (!json.hasAndNotNull(ERROR)) {
+                        addException(json, warnings.get(0), locale);
+                    }
+                }
             }
         }
     }
