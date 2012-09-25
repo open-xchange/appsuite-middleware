@@ -1,3 +1,7 @@
+* 2012-09-25 - thorben.betten@open-xchange.com
+
+ - Fix for bug 21882: Added update task to remove listed unnecessary indexes
+
 * 2012-09-25 - tobias.friedrich@open-xchange.com
 
  - Fix for bug 23083: Ignore requests to set the 'image1_url' of a contact
