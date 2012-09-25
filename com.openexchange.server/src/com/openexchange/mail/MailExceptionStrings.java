@@ -82,9 +82,9 @@ public final class MailExceptionStrings implements LocalizableStrings {
     public final static String MISSING_PARAMETER_MSG = "Missing parameter %1$s";
 
     /**
-     * Invalid CATEGORY_PERMISSION_DENIED values: fp=%1$s orp=%2$s owp=%3$s odp=%4$s
+     * Invalid permission values: fp=%1$s orp=%2$s owp=%3$s odp=%4$s
      */
-    public final static String INVALID_PERMISSION_MSG = "Invalid CATEGORY_PERMISSION_DENIED values: fp=%1$s orp=%2$s owp=%3$s odp=%4$s";
+    public final static String INVALID_PERMISSION_MSG = "Invalid permission values: fp=%1$s orp=%2$s owp=%3$s odp=%4$s";
 
     /**
      * A JSON error occurred: %1$s

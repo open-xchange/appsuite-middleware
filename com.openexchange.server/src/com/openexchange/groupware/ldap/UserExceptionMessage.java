@@ -126,9 +126,9 @@ public class UserExceptionMessage implements LocalizableStrings {
     public final static String CACHE_PROBLEM_MSG = "Problem putting/removing an object into/from the cache.";
 
     /**
-     * No CATEGORY_PERMISSION_DENIED to modify resources in context %1$s
+     * No permission to modify resources in context %1$s
      */
-    public final static String PERMISSION_MSG = "No CATEGORY_PERMISSION_DENIED to modify resources in context %1$s";
+    public final static String PERMISSION_MSG = "No permission to modify resources in context %1$s";
 
     /**
      * Missing or unknown password mechanism %1$s
