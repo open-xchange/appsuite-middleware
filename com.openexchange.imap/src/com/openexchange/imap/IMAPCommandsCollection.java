@@ -1261,6 +1261,10 @@ public final class IMAPCommandsCollection {
     }
 
     public static void createFolder(final IMAPFolder newFolder, final char separator, final int type, final boolean errorOnUnsupportedType) throws MessagingException {
+        createFolder(newFolder, separator, type, errorOnUnsupportedType, null);
+    }
+
+    public static void createFolder(final IMAPFolder newFolder, final char separator, final int type, final boolean errorOnUnsupportedType, final Collection<String> specialUses) throws MessagingException {
         final Boolean ret = (Boolean) newFolder.doCommand(new IMAPFolder.ProtocolCommand() {
 
             @Override
@@ -1275,7 +1279,18 @@ public final class IMAPCommandsCollection {
                     mbox = prepareStringArgument(fullName);
                 }
                 // Create command
-                final String command = new StringBuilder(32).append("CREATE ").append(mbox).toString();
+                final String command;
+                {
+                    final StringBuilder cmdBuilder = new StringBuilder(32).append("CREATE ").append(mbox);
+                    if (null != specialUses && !specialUses.isEmpty()) {
+                        cmdBuilder.append("(USE (");
+                        for (final String specialUse : specialUses) {
+                            cmdBuilder.append(specialUse);
+                        }
+                        cmdBuilder.append("))");
+                    }
+                    command = cmdBuilder.toString();
+                }
                 // Issue command
                 final Response[] r = protocol.command(command, null);
                 final Response response = r[r.length - 1];
@@ -1321,6 +1336,72 @@ public final class IMAPCommandsCollection {
         if (newFolder.exists()) {
             new ExtendedIMAPFolder(newFolder, separator).triggerNotifyFolderListeners(FolderEvent.CREATED);
         }
+    }
+
+    public static void setSpecialUses(final IMAPFolder imapFolder, final Collection<String> specialUses) throws MessagingException {
+        if (null == specialUses || specialUses.isEmpty()) {
+            return;
+        }
+        final int type = imapFolder.getType();
+        final char sep = imapFolder.getSeparator();
+        final Boolean ret = (Boolean) imapFolder.doCommand(new IMAPFolder.ProtocolCommand() {
+
+            @Override
+            public Object doCommand(final IMAPProtocol protocol) throws ProtocolException {
+                final String fullName = imapFolder.getFullName();
+                // Encode the mbox as per RFC2060
+                final String mbox;
+                if ((type & Folder.HOLDS_MESSAGES) == 0) {
+                    // Only holds folders
+                    mbox = prepareStringArgument(fullName + sep);
+                } else {
+                    mbox = prepareStringArgument(fullName);
+                }
+                // Create command
+                final String command;
+                {
+                    final StringBuilder cmdBuilder = new StringBuilder(32).append("SETMETADATA ").append(mbox);
+                    cmdBuilder.append("(");
+                    for (final String specialUse : specialUses) {
+                        if (specialUse.charAt(0) == '\\') {
+                            cmdBuilder.append('"').append(specialUse).append('"');
+                        } else {
+                            cmdBuilder.append(specialUse);
+                        }
+                    }
+                    cmdBuilder.append(")");
+                    command = cmdBuilder.toString();
+                }
+                // Issue command
+                final Response[] r = protocol.command(command, null);
+                final Response response = r[r.length - 1];
+                if (response.isOK()) {
+                    for (int i = 0, len = r.length - 1; i < len; i++) {
+                        if (!(r[i] instanceof IMAPResponse)) {
+                            continue;
+                        }
+                        final IMAPResponse ir = (IMAPResponse) r[i];
+                        if (ir.keyEquals("METADATA")) {
+                            r[i] = null;
+                        }
+                    }
+                    return Boolean.TRUE;
+                } else if (response.isBAD()) {
+                    throw new BadCommandException(IMAPException.getFormattedMessage(
+                        IMAPException.Code.PROTOCOL_ERROR,
+                        command,
+                        response.toString() + " ("+imapFolder.getStore().toString()+")"));
+                } else if (response.isNO()) {
+                    throw new CommandFailedException(IMAPException.getFormattedMessage(
+                        IMAPException.Code.PROTOCOL_ERROR,
+                        command,
+                        response.toString() + " ("+imapFolder.getStore().toString()+")"));
+                } else {
+                    protocol.handleResult(response);
+                }
+                return Boolean.FALSE;
+            }
+        });
     }
 
     private final static String TEMPL_UID_STORE_FLAGS = "UID STORE %s %sFLAGS (%s)";

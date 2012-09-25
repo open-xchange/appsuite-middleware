@@ -433,7 +433,7 @@ public final class ListLsubCache {
      *
      * @param fullName The full name
      * @param accountId The account ID
-     * @param imapFolder The IMAP
+     * @param imapFolder The IMAP folder
      * @param session The session
      * @return The cached LIST/LSUB entry
      * @throws OXException If loading the entry fails
@@ -462,6 +462,106 @@ public final class ListLsubCache {
             final ListLsubEntry lsubEntry = collection.getLsub(fullName);
             final ListLsubEntry emptyEntryFor = ListLsubCollection.emptyEntryFor(fullName);
             return new ListLsubEntry[] { listEntry == null ? emptyEntryFor : listEntry, lsubEntry == null ? emptyEntryFor : lsubEntry };
+        }
+    }
+
+    /**
+     * Gets the LIST entry marked with "\Drafts" attribute.
+     * <p>
+     * Needs the <code>"SPECIAL-USE"</code> capability.
+     * 
+     * @param accountId The account identifier
+     * @param imapFolder The IMAP folder
+     * @param session The session
+     * @return The entry or <code>null</code>
+     * @throws OXException If loading the entry fails
+     * @throws MessagingException If a messaging error occurs
+     */
+    public static ListLsubEntry getDraftsEntry(final int accountId, final IMAPFolder imapFolder, final Session session) throws OXException, MessagingException {
+        final ListLsubCollection collection = getCollection(accountId, imapFolder, session);
+        synchronized (collection) {
+            if (checkTimeStamp(imapFolder, collection)) {
+                return collection.getDraftsEntry();
+            }
+            /*
+             * Return
+             */
+            return collection.getDraftsEntry();
+        }
+    }
+
+    /**
+     * Gets the LIST entry marked with "\Junk" attribute.
+     * <p>
+     * Needs the <code>"SPECIAL-USE"</code> capability.
+     * 
+     * @param accountId The account identifier
+     * @param imapFolder The IMAP folder
+     * @param session The session
+     * @return The entry or <code>null</code>
+     * @throws OXException If loading the entry fails
+     * @throws MessagingException If a messaging error occurs
+     */
+    public static ListLsubEntry getJunkEntry(final int accountId, final IMAPFolder imapFolder, final Session session) throws OXException, MessagingException {
+        final ListLsubCollection collection = getCollection(accountId, imapFolder, session);
+        synchronized (collection) {
+            if (checkTimeStamp(imapFolder, collection)) {
+                return collection.getJunkEntry();
+            }
+            /*
+             * Return
+             */
+            return collection.getJunkEntry();
+        }
+    }
+
+    /**
+     * Gets the LIST entry marked with "\Sent" attribute.
+     * <p>
+     * Needs the <code>"SPECIAL-USE"</code> capability.
+     * 
+     * @param accountId The account identifier
+     * @param imapFolder The IMAP folder
+     * @param session The session
+     * @return The entry or <code>null</code>
+     * @throws OXException If loading the entry fails
+     * @throws MessagingException If a messaging error occurs
+     */
+    public static ListLsubEntry getSentEntry(final int accountId, final IMAPFolder imapFolder, final Session session) throws OXException, MessagingException {
+        final ListLsubCollection collection = getCollection(accountId, imapFolder, session);
+        synchronized (collection) {
+            if (checkTimeStamp(imapFolder, collection)) {
+                return collection.getSentEntry();
+            }
+            /*
+             * Return
+             */
+            return collection.getSentEntry();
+        }
+    }
+
+    /**
+     * Gets the LIST entry marked with "\Trash" attribute.
+     * <p>
+     * Needs the <code>"SPECIAL-USE"</code> capability.
+     * 
+     * @param accountId The account identifier
+     * @param imapFolder The IMAP folder
+     * @param session The session
+     * @return The entry or <code>null</code>
+     * @throws OXException If loading the entry fails
+     * @throws MessagingException If a messaging error occurs
+     */
+    public static ListLsubEntry getTrashEntry(final int accountId, final IMAPFolder imapFolder, final Session session) throws OXException, MessagingException {
+        final ListLsubCollection collection = getCollection(accountId, imapFolder, session);
+        synchronized (collection) {
+            if (checkTimeStamp(imapFolder, collection)) {
+                return collection.getTrashEntry();
+            }
+            /*
+             * Return
+             */
+            return collection.getTrashEntry();
         }
     }
 

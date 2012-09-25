@@ -99,18 +99,16 @@ final class ListLsubCollection {
     private static final String INBOX = "INBOX";
 
     private final ConcurrentMap<String, ListLsubEntryImpl> listMap;
-
     private final ConcurrentMap<String, ListLsubEntryImpl> lsubMap;
-
     private final AtomicBoolean deprecated;
-
     private final String[] shared;
-
     private final String[] user;
-
     private Boolean mbox;
-
     private long stamp;
+    private ListLsubEntryImpl draftsEntry;
+    private ListLsubEntryImpl junkEntry;
+    private ListLsubEntryImpl sentEntry;
+    private ListLsubEntryImpl trashEntry;
 
     /**
      * Initializes a new {@link ListLsubCollection}.
@@ -129,7 +127,7 @@ final class ListLsubCollection {
         deprecated = new AtomicBoolean();
         this.shared = shared == null ? new String[0] : shared;
         this.user = user == null ? new String[0] : user;
-        init(false, imapFolder, doStatus, doGetAcl);
+        init(false, imapFolder, doStatus, doGetAcl, (IMAPStore) imapFolder.getStore());
     }
 
     /**
@@ -285,18 +283,18 @@ final class ListLsubCollection {
      */
     public void reinit(final IMAPFolder imapFolder, final boolean doStatus, final boolean doGetAcl) throws MessagingException {
         clear();
-        init(true, imapFolder, doStatus, doGetAcl);
+        init(true, imapFolder, doStatus, doGetAcl, (IMAPStore) imapFolder.getStore());
     }
 
     private void init(final boolean clearMaps, final IMAPStore imapStore, final boolean doStatus, final boolean doGetAcl) throws OXException {
         try {
-            init(clearMaps, (IMAPFolder) imapStore.getFolder("INBOX"), doStatus, doGetAcl);
+            init(clearMaps, (IMAPFolder) imapStore.getFolder("INBOX"), doStatus, doGetAcl, imapStore);
         } catch (final MessagingException e) {
             throw MimeMailException.handleMessagingException(e);
         }
     }
 
-    private void init(final boolean clearMaps, final IMAPFolder imapFolder, final boolean doStatus, final boolean doGetAcl) throws MessagingException {
+    private void init(final boolean clearMaps, final IMAPFolder imapFolder, final boolean doStatus, final boolean doGetAcl, final IMAPStore imapStore) throws MessagingException {
         if (clearMaps) {
             listMap.clear();
             lsubMap.clear();
@@ -338,6 +336,20 @@ final class ListLsubCollection {
             }
 
         });
+        if (imapStore.getCapabilities().containsKey("SPECIAL-USE")) {
+            /*
+             * Perform LIST (SPECIAL-USE) "" "*"
+             */
+            imapFolder.doCommand(new IMAPFolder.ProtocolCommand() {
+
+                @Override
+                public Object doCommand(final IMAPProtocol protocol) throws ProtocolException {
+                    doListSpecialUse(protocol);
+                    return null;
+                }
+
+            });
+        }
         /*
          * Debug logs
          */
@@ -600,13 +612,13 @@ final class ListLsubCollection {
      */
     public void update(final String fullName, final IMAPFolder imapFolder, final boolean doStatus, final boolean doGetAcl) throws MessagingException {
         if (deprecated.get() || ROOT_FULL_NAME.equals(fullName)) {
-            init(true, imapFolder, doStatus, doGetAcl);
+            init(true, imapFolder, doStatus, doGetAcl, (IMAPStore) imapFolder.getStore());
             return;
         }
         /*
          * Do a full re-build anyway...
          */
-        init(true, imapFolder, doStatus, doGetAcl);
+        init(true, imapFolder, doStatus, doGetAcl, (IMAPStore) imapFolder.getStore());
     }
 
     /**
@@ -642,6 +654,64 @@ final class ListLsubCollection {
     private static final Set<String> ATTRIBUTES_NON_EXISTING_NAMESPACE = Collections.unmodifiableSet(new HashSet<String>(Arrays.asList(
         "\\noselect",
         "\\hasnochildren")));
+
+    private static final String ATTRIBUTE_DRAFTS = "\\drafts";
+    private static final String ATTRIBUTE_JUNK = "\\junk";
+    private static final String ATTRIBUTE_SENT = "\\sent";
+    private static final String ATTRIBUTE_TRASH = "\\trash";
+
+    /**
+     * Lists special folders via <code>LIST (SPECIAL-USE) "" "*"</code>.
+     * 
+     * @param protocol The associated IMAP protocol
+     * @throws ProtocolException If a protocol error occurs
+     */
+    protected void doListSpecialUse(final IMAPProtocol protocol) throws ProtocolException {
+        /*
+         * Perform command
+         */
+        final String command = "LIST";
+        final Response[] r;
+        if (DEBUG) {
+            final String sCmd = new StringBuilder(command).append(" (SPECIAL-USE) \"\" \"*\"").toString();
+            r = protocol.command(sCmd, null);
+            LOG.debug((command) + " cache filled with >>" + sCmd + "<< which returned " + r.length + " response line(s).");
+        } else {
+            r = protocol.command(new StringBuilder(command).append(" (SPECIAL-USE) \"\" \"*\"").toString(), null);
+        }
+        final Response response = r[r.length - 1];
+        if (response.isOK()) {
+            for (int i = 0, len = r.length - 1; i < len; i++) {
+                if (!(r[i] instanceof IMAPResponse)) {
+                    continue;
+                }
+                final IMAPResponse ir = (IMAPResponse) r[i];
+                if (ir.keyEquals(command)) {
+                    final ListLsubEntryImpl entryImpl = parseListResponse(ir, lsubMap);
+                    final Set<String> attrs = entryImpl.getAttributes();
+                    if (null != attrs && !attrs.isEmpty()) {
+                        if (attrs.contains(ATTRIBUTE_DRAFTS)) {
+                            this.draftsEntry = entryImpl;
+                        } else if (attrs.contains(ATTRIBUTE_JUNK)) {
+                            this.junkEntry = entryImpl;
+                        } else if (attrs.contains(ATTRIBUTE_SENT)) {
+                            this.sentEntry = entryImpl;
+                        } else if (attrs.contains(ATTRIBUTE_TRASH)) {
+                            this.trashEntry = entryImpl;
+                        }
+                    }
+                    r[i] = null;
+                }
+            }
+            protocol.notifyResponseHandlers(r);
+        } else {
+            /*
+             * Dispatch remaining untagged responses
+             */
+            protocol.notifyResponseHandlers(r);
+            protocol.handleResult(response);
+        }
+    }
 
     /**
      * Performs a LIST/LSUB command with specified IMAP protocol.
@@ -1277,8 +1347,52 @@ final class ListLsubCollection {
     }
 
     /**
+     * Gets the LIST entry marked with "\Drafts" attribute.
+     * <p>
+     * Needs the <code>"SPECIAL-USE"</code> capability.
+     * 
+     * @return The entry or <code>null</code>
+     */
+    public ListLsubEntryImpl getDraftsEntry() {
+        return draftsEntry;
+    }
+
+    /**
+     * Gets the LIST entry marked with "\Junk" attribute.
+     * <p>
+     * Needs the <code>"SPECIAL-USE"</code> capability.
+     * 
+     * @return The entry or <code>null</code>
+     */
+    public ListLsubEntryImpl getJunkEntry() {
+        return junkEntry;
+    }
+
+    /**
+     * Gets the LIST entry marked with "\Sent" attribute.
+     * <p>
+     * Needs the <code>"SPECIAL-USE"</code> capability.
+     * 
+     * @return The entry or <code>null</code>
+     */
+    public ListLsubEntryImpl getSentEntry() {
+        return sentEntry;
+    }
+
+    /**
+     * Gets the LIST entry marked with "\Trash" attribute.
+     * <p>
+     * Needs the <code>"SPECIAL-USE"</code> capability.
+     * 
+     * @return The entry or <code>null</code>
+     */
+    public ListLsubEntryImpl getTrashEntry() {
+        return trashEntry;
+    }
+
+    /**
      * Gets the LIST entry for specified full name.
-     *
+     * 
      * @param fullName The full name
      * @return The LIST entry for specified full name or <code>null</code>
      */
@@ -1289,7 +1403,7 @@ final class ListLsubCollection {
 
     /**
      * Gets the LSUB entry for specified full name.
-     *
+     * 
      * @param fullName The full name
      * @return The LSUB entry for specified full name or <code>null</code>
      */

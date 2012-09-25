@@ -1,5 +1,9 @@
 * 2012-09-20 - martin.herfurth@open-xchange.com
 
+ - Fix for bug 23072: Bad All day appointments conflict when in different timezone.
+
+* 2012-09-20 - martin.herfurth@open-xchange.com
+
  - Fix for bug 23055: External participant detected as "Party Crasher".
 
 * 2012-09-19 - martin.herfurth@open-xchange.com

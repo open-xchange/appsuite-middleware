@@ -52,6 +52,7 @@ package com.openexchange.mail.mime.dataobjects;
 import java.io.InputStream;
 import java.io.OutputStream;
 import javax.activation.DataHandler;
+import javax.mail.Part;
 import javax.mail.internet.MimeMessage;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.dataobjects.MailMessage;
@@ -83,7 +84,7 @@ public final class MimeMailMessage extends MailMessage implements MimeRawSource,
      */
     public MimeMailMessage() {
         super();
-        mailPart = new MimeMailPart(null);
+        mailPart = new MimeMailPart((Part) null);
     }
 
     /**
@@ -140,7 +141,7 @@ public final class MimeMailMessage extends MailMessage implements MimeRawSource,
      */
     public void setContent(final MimeMessage msg) {
         // TODO: this.mailPart = msg == null ? new MIMEMailPart(null) : MIMEMessageConverter.convertPart(msg);
-        mailPart = msg == null ? new MimeMailPart(null) : new MimeMailPart(msg);
+        mailPart = msg == null ? new MimeMailPart((Part) null) : new MimeMailPart(msg);
     }
 
     /**

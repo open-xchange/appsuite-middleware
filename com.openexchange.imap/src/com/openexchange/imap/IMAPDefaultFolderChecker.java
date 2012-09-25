@@ -105,9 +105,11 @@ public class IMAPDefaultFolderChecker {
 
     static final boolean DEBUG = LOG.isDebugEnabled();
 
-    private static final String INBOX = "INBOX";
+    protected static final String INBOX = "INBOX";
 
-    private static final int FOLDER_TYPE = (IMAPFolder.HOLDS_MESSAGES | IMAPFolder.HOLDS_FOLDERS);
+    protected static final int FOLDER_TYPE = (IMAPFolder.HOLDS_MESSAGES | IMAPFolder.HOLDS_FOLDERS);
+
+    // ----------------- Members ------------------
 
     protected final Session session;
 
@@ -209,7 +211,7 @@ public class IMAPDefaultFolderChecker {
     /**
      * Performs specified {@link Callable} instance in a synchronized manner.
      */
-    protected static <V> V performSynchronized(final Callable<V> task, final Session session) throws Exception {
+    protected <V> V performSynchronized(final Callable<V> task, final Session session) throws Exception {
         Lock lock = (Lock) session.getParameter(Session.PARAM_LOCK);
         if (null == lock) {
             lock = Session.EMPTY_LOCK;
@@ -408,7 +410,7 @@ public class IMAPDefaultFolderChecker {
         }
     }
 
-    MailAccount getMailAccount(final MailAccountStorageService storageService) throws OXException {
+    protected MailAccount getMailAccount(final MailAccountStorageService storageService) throws OXException {
         final DatabaseService databaseService = IMAPServiceRegistry.getService(DatabaseService.class, true);
         final int contextId = session.getContextId();
         Connection con = null;
@@ -441,7 +443,7 @@ public class IMAPDefaultFolderChecker {
         }
     }
 
-    void sequentiallyCheckFolders(final String prefix, final char sep, final int type, final MailAccountStorageService storageService, final MailSessionCache mailSessionCache) throws OXException {
+    protected void sequentiallyCheckFolders(final String prefix, final char sep, final int type, final MailAccountStorageService storageService, final MailSessionCache mailSessionCache) throws OXException {
         /*
          * Load mail account
          */
@@ -530,11 +532,11 @@ public class IMAPDefaultFolderChecker {
         }
     }
 
-    private static boolean isOverQuotaException(final MessagingException e) {
+    protected static boolean isOverQuotaException(final MessagingException e) {
         return (null != e && e.getMessage().toLowerCase(Locale.US).indexOf("quota") >= 0);
     }
 
-    private Callable<Object> performTaskFor(final int index, final String prefix, final String fullName, final String name, final char sep, final int type, final int subscribe, final AtomicBoolean modified, final MailSessionCache cache) throws OXException {
+    protected Callable<Object> performTaskFor(final int index, final String prefix, final String fullName, final String name, final char sep, final int type, final int subscribe, final AtomicBoolean modified, final MailSessionCache cache) throws OXException {
         try {
             if (null == fullName || 0 == fullName.length()) {
                 setDefaultMailFolder(index, checkDefaultFolder(index, prefix, name, sep, type, subscribe, false, modified), cache);
@@ -553,7 +555,7 @@ public class IMAPDefaultFolderChecker {
         }
     }
 
-    private String[] getDefaultFolderPrefix(final IMAPFolder inboxFolder, final ListLsubEntry inboxListEntry, final MailSessionCache mailSessionCache) throws MessagingException, OXException {
+    protected String[] getDefaultFolderPrefix(final IMAPFolder inboxFolder, final ListLsubEntry inboxListEntry, final MailSessionCache mailSessionCache) throws MessagingException, OXException {
         /*
          * Check for NAMESPACE capability
          */
@@ -652,7 +654,7 @@ public class IMAPDefaultFolderChecker {
         return new String[] { prefix.toString(), String.valueOf(sep) };
     }
 
-    private boolean isRootInferiors() throws MessagingException {
+    protected boolean isRootInferiors() throws MessagingException {
         return RootSubfolderCache.canCreateSubfolders((DefaultFolder) imapStore.getDefaultFolder(), true, session, accountId).booleanValue();
     }
 
@@ -930,12 +932,12 @@ public class IMAPDefaultFolderChecker {
         return f.getFullName();
     }
 
-    boolean isDefaultFoldersChecked(final String key, final MailSessionCache mailSessionCache) {
+    protected boolean isDefaultFoldersChecked(final String key, final MailSessionCache mailSessionCache) {
         final Boolean b = mailSessionCache.getParameter(accountId, key);
         return (b != null) && b.booleanValue();
     }
 
-    void setDefaultFoldersChecked(final String key, final boolean checked, final MailSessionCache mailSessionCache) {
+    protected void setDefaultFoldersChecked(final String key, final boolean checked, final MailSessionCache mailSessionCache) {
         mailSessionCache.putParameter(accountId, key, Boolean.valueOf(checked));
     }
 
@@ -948,7 +950,7 @@ public class IMAPDefaultFolderChecker {
         mailSessionCache.putParameter(accountId, MailSessionParameterNames.getParamSeparator(), Character.valueOf(separator));
     }
 
-    private static final class RetryOtherPrefixException extends RuntimeException {
+    protected static final class RetryOtherPrefixException extends RuntimeException {
 
         private static final long serialVersionUID = 544473465523324664L;
 

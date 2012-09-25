@@ -81,4 +81,16 @@ public interface FolderService {
      */
     public EffectivePermission getFolderPermission(int folderId, int userId, int contextId) throws OXException;
 
+    /**
+     * Determines specified user's effective permission on the folder matching given folder ID.
+     *
+     * @param folderId The folder ID
+     * @param userId The user ID
+     * @param contextId The context ID
+     * @param working Whether to look-up working or backup table
+     * @return The user's effective permission
+     * @throws OXException If effective permission cannot be determined
+     */
+    public EffectivePermission getFolderPermission(int folderId, int userId, int contextId, boolean working) throws OXException;
+
 }
