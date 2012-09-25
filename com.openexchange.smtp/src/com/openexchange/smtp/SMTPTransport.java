@@ -493,7 +493,7 @@ public final class SMTPTransport extends MailTransport {
              * Set common headers
              */
             smtpConfig = getTransportConfig0();
-            new SMTPMessageFiller(smtpConfig.getSMTPProperties(), session, ctx, usm).setCommonHeaders(smtpMessage);
+            new SMTPMessageFiller(smtpConfig.getSMTPProperties(), session, ctx, usm).setAccountId(accountId).setCommonHeaders(smtpMessage);
             /*
              * Compose body
              */
@@ -645,6 +645,7 @@ public final class SMTPTransport extends MailTransport {
              */
             final long startPrep = System.currentTimeMillis();
             final SMTPMessageFiller smtpFiller = new SMTPMessageFiller(smtpConfig.getSMTPProperties(), session, ctx, usm);
+            smtpFiller.setAccountId(accountId);
             composedMail.setFiller(smtpFiller);
             try {
                 smtpFiller.fillMail(composedMail, smtpMessage, sendType);
