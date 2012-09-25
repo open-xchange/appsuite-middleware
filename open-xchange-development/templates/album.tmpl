@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
-<title>Photo album - Leo</title>
+<title>Photo album</title>
 <meta name="description" content="">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <style>
@@ -62,7 +62,15 @@ nav {
   background-color: #111;
   display: block;
   outline: 0;
-  height: 538px;
+  max-width: 800px;
+}
+video.media {
+  height: 350px;
+}
+.download {
+  font-size: 13px;
+  line-height: 3em;
+  text-align: center;
 }
 footer {
   background-color: #000;
@@ -74,27 +82,26 @@ footer {
   line-height: 15px;
 }
 
-@media (max-width: 480px) { body { font-size: 25px; } .media { height: 200px; } }
-@media (min-width: 480px) and (max-width: 600px) { body { font-size: 25px; } .media { height: 250px; } }
-@media (min-width: 600px) and (max-width: 800px) { .media { height: 350px; } }
-@media (min-width: 1400px) { body { font-size: 50px; } .media { height: 600px; } }
+@media (max-width: 480px) { body { font-size: 25px; } .media { } }
+@media (min-width: 480px) and (max-width: 600px) { body { font-size: 25px; } .media { } }
+@media (min-width: 600px) and (max-width: 800px) { .media { } }
+@media (min-width: 1400px) { body { font-size: 50px; } .media { } }
 
 </style>
 
 <script src="//ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
-<#list infostore as infoitem>
-<#if (infoitem.fileName!"")?starts_with("_busy.gif") >
-<script>var busy = "${utils.getScheme(request)!"http"}${request.serverName}${utils.getFileURL(publication, infoitem)}";</script>
-</#if>
-</#list>
 <script>
-var items = [];
+var busy = "/ox7/apps/themes/login/busy.gif";
+var items = [], filename;
 <#list infostore as infoitem>
-<#if !(infoitem.fileName!"")?starts_with("_") && !(infoitem.fileName!"")?starts_with(".") >
-items.push({
+<#if !infoitem.fileName!?starts_with("_") && !infoitem.fileName!?starts_with(".") >
+filename = "${infoitem.fileName!''?html}";
+if (/(png|jpe?g|gif)$/i.test(filename)) {
+  items.push({
     src: "${utils.getScheme(request)!"http"}${request.serverName}${utils.getFileURL(publication, infoitem)}",
-    mime: "${infoitem.fileMIMEType}"
-});
+    mime: "${infoitem.fileMIMEType?html}"
+  });
+}
 </#if>
 </#list>
 </script>
@@ -103,7 +110,7 @@ items.push({
 <body>
 
 <header>
-<h1><b>Leo</b>, 05.02.2012, 9:47h, Dortmund, 3660g, 53cm.</h1>
+<h1>Photo album</h1>
 </header>
 <article></article>
 <nav></nav>
@@ -123,14 +130,15 @@ function drawNext() {
             sec.append(
                 $('<div>').addClass('caption').text((i + offset + 1) + '/' + items.length)
             );
-            if (o.mime === "video/mp4") {
+            if ((/^video\//i).test(o.mime)) {
                 sec.append(
                     $('<video>', { controls: "controls", preload: "metadata", tabindex: "1" }).addClass("media")
-                    .append($('<source>', { src: o.src }))
+                    .append($('<source>', { src: o.src })),
+                    $('<div>').addClass('download').append($('<a>', { href: o.src }).text('Download video'))
                 );
             } else {
                 sec.append(
-                    $('<img>', { alt: '', src: o.src, tabindex: "1" }).addClass("media")
+                    $('<img>', { alt: '', src: o.src + '&width=800&height=600&scaleType=contain', tabindex: "1" }).addClass("media")
                 );
             }
             $('article').append(sec);
