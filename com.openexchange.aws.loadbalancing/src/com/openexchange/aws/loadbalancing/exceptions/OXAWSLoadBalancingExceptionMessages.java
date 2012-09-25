@@ -66,7 +66,7 @@ public class OXAWSLoadBalancingExceptionMessages implements LocalizableStrings {
 
     public static final String AWS_LB_REGISTER_FAILED_MSG = "Could not register instance with id %1$s with the loadbalancer.";
 
-    public static final String AWS_LB_DEREGISTER_FAILED_MSG = "Could not deregister instance with id %1$s from the loadbalancer.";
+    public static final String AWS_LB_DEREGISTER_FAILED_MSG = "Could not unregister instance with id %1$s from the loadbalancer.";
 
     /**
      * Initializes a new {@link OXAWSLoadBalancingExceptionMessages}.
