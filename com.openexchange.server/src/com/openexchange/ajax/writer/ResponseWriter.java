@@ -307,9 +307,9 @@ public final class ResponseWriter {
          * Put argument JSON array for compatibility reasons
          */
         {
-            final Object[] args = exception.getDisplayArgs();
+            final Object[] args = exception.getLogArgs();
             // Enforce first condition; review later on
-            if ((null == args || 0 == args.length)) {
+            if ((null == args) || (0 == args.length)) {
                 json.put(ERROR_PARAMS, new JSONArray());
             } else {
                 final JSONArray jArray = new JSONArray();
@@ -332,6 +332,13 @@ public final class ResponseWriter {
                     jArray.put(category.toString());
                 }
                 json.put(ERROR_CATEGORIES, jArray);
+            }
+            // For compatibility
+            if (!categories.isEmpty()) {
+                final int number = Categories.getFormerCategoryNumber(categories.get(0));
+                if (number > 0) {
+                    json.put(ERROR_CATEGORY, number);
+                }
             }
         }
         json.put(ERROR_CODE, exception.getErrorCode());
@@ -551,15 +558,26 @@ public final class ResponseWriter {
      */
     public static void writeException(final OXException exc, final JSONWriter writer, final Locale locale) throws JSONException {
         writer.key(ERROR).value(exc.getDisplayMessage(locale));
+        /*
+         * Put argument JSON array for compatibility reasons
+         */
+        {
+            final Object[] args = exc.getLogArgs();
+            // Enforce first condition; review later on
+            if ((null == args) || (0 == args.length)) {
+                writer.key(ResponseFields.ERROR_PARAMS).value(new JSONArray());
+            } else {
+                final JSONArray jArray = new JSONArray();
+                for (final Object arg : args) {
+                    jArray.put(arg);
+                }
+                writer.key(ResponseFields.ERROR_PARAMS).value(jArray);
+            }
+        }
         {
             final List<Category> categories = exc.getCategories();
             if (1 == categories.size()) {
-                final Category category = categories.get(0);
-                writer.key(ERROR_CATEGORIES).value(category.toString());
-                final int number = Categories.getFormerCategoryNumber(category);
-                if (number > 0) {
-                    writer.key(ERROR_CATEGORY).value(number);
-                }
+                writer.key(ERROR_CATEGORIES).value(categories.get(0).toString());
             } else {
                 writer.key(ERROR_CATEGORIES);
                 writer.array();
@@ -571,18 +589,18 @@ public final class ResponseWriter {
                     writer.endArray();
                 }
             }
+            // For compatibility
+            if (!categories.isEmpty()) {
+                final int number = Categories.getFormerCategoryNumber(categories.get(0));
+                if (number > 0) {
+                    writer.key(ERROR_CATEGORY).value(number);
+                }
+            }
         }
         writer.key(ERROR_CODE).value(exc.getErrorCode());
         writer.key(ERROR_ID).value(exc.getExceptionId());
         writeProblematic(exc, writer);
         writeTruncated(exc, writer);
-        if (exc.getLogArgs() != null) {
-            final JSONArray array = new JSONArray();
-            for (final Object tmp : exc.getLogArgs()) {
-                array.put(tmp);
-            }
-            writer.key(ResponseFields.ERROR_PARAMS).value(array);
-        }
         // Write stack trace
         if (includeStackTraceOnError()) {
             writer.key(ERROR_STACK);
