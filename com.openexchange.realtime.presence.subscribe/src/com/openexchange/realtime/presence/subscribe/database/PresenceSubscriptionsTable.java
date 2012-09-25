@@ -77,6 +77,8 @@ public class PresenceSubscriptionsTable extends AbstractCreateTableImpl {
             " toCid INT4 unsigned NOT NULL," +
             " toUserId INT4 unsigned NOT NULL," +
             " status varchar(64) NOT NULL," +
+            " request TEXT," +
+            " timestamp timestamp default CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP," +
             " UNIQUE (fromCid, fromUserId, toCid, toUserId)," +
             " UNIQUE (fromId, toCid, toUserId)," +
             " FOREIGN KEY (fromCid, fromUserId) REFERENCES user(cid, id) ON DELETE CASCADE," +

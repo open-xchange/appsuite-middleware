@@ -14,7 +14,9 @@ import com.openexchange.login.LoginRequest;
 import com.openexchange.login.LoginResult;
 import com.openexchange.login.internal.LoginPerformer;
 import com.openexchange.realtime.packet.ID;
+import com.openexchange.realtime.packet.Payload;
 import com.openexchange.realtime.packet.Presence;
+import com.openexchange.realtime.packet.Presence.Type;
 import com.openexchange.realtime.presence.subscribe.PresenceSubscriptionService;
 import com.openexchange.realtime.presence.subscribe.test.osgi.Activator;
 import com.openexchange.tools.session.ServerSession;
@@ -107,18 +109,25 @@ public class IntegrationTest extends TestCase {
         ID to = new ID(null, "martin.herfurth", "1337", null);
         subscription.setTo(to);
         subscription.setType(Presence.Type.UNSUBSCRIBED);
+        
+        Presence approval = new Presence();
+        approval.setTo(from);
+        approval.setFrom(to);
+        approval.setPayload(new Payload("Sicher doch.", "presenceReplyMessage"));
+        approval.setType(Type.SUBSCRIBED);
         try {
             
-            subscriptionService.subscribe(subscription, getSessionOne());
+            subscriptionService.subscribe(subscription, "bitte bitte", getSessionOne());
             List<Presence> pendingRequests = subscriptionService.getPendingRequests(getSessionOne());
             assertEquals("Wrong amount of pending requests.", 1, pendingRequests.size());
+            assertEquals("Wrong or missing message.", "bitte bitte", pendingRequests.get(0).getPayload().getData());
             List<ID> subscribers = subscriptionService.getSubscribers(getSessionOne());
             assertEquals("No subscribers expected.", 0, subscribers.size());
             
             List<ID> subscriptions = subscriptionService.getSubscriptions(getSessionTwo());
             assertEquals("No subscriptions expected.", 0, subscriptions.size());
             
-            subscriptionService.approve(from, true, getSessionOne());
+            subscriptionService.approve(approval, getSessionOne());
             subscribers = subscriptionService.getSubscribers(getSessionOne());
             assertEquals("One subscriber expected.", 1, subscribers.size());
             ID id = subscribers.get(0);
@@ -131,7 +140,9 @@ public class IntegrationTest extends TestCase {
             assertEquals("asdasd", to.getUser(), id.getUser());
             assertEquals(to.getContext(), id.getContext());
             
-            subscriptionService.approve(from, false, getSessionOne());
+            approval.setPayload(new Payload("Hau ab!", "presenceReplyMessage"));
+            approval.setType(Type.UNSUBSCRIBED);
+            subscriptionService.approve(approval, getSessionOne());
             subscribers = subscriptionService.getSubscribers(getSessionOne());
             assertEquals("No subscribers expected.", 0, subscribers.size());
             pendingRequests = subscriptionService.getPendingRequests(getSessionOne());

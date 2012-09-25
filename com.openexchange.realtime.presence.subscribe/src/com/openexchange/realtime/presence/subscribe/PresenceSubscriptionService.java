@@ -67,20 +67,21 @@ public interface PresenceSubscriptionService {
      * recipient is available or is stored for later handling.
      * 
      * @param subscription
+     * @param message optional message
      * @param session
      * @throws OXException
      */
-    public void subscribe(Presence subscription, ServerSession session) throws OXException;
+    public void subscribe(Presence subscription, String message, ServerSession session) throws OXException;
 
     /**
      * Allows a given user to see (or not to see) the current users presence status.
      * 
      * @param id The user who is allowed to receive the presence status.
-     * @param subscribed
+     * @param approval
      * @param session
      * @throws OXException
      */
-    public void approve(ID id, boolean subscribed, ServerSession session) throws OXException;
+    public void approve(Presence approval, ServerSession session) throws OXException;
 
     /**
      * Returns all active subscribers for the current user.

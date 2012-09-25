@@ -58,6 +58,7 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.realtime.MessageDispatcher;
 import com.openexchange.realtime.packet.ID;
+import com.openexchange.realtime.packet.Payload;
 import com.openexchange.realtime.packet.Presence;
 import com.openexchange.realtime.presence.subscribe.PresenceSubscriptionService;
 import com.openexchange.realtime.presence.subscribe.database.SubscriptionsSQL;
@@ -79,11 +80,12 @@ public class SubscriptionServiceImpl implements PresenceSubscriptionService {
     }
 
     @Override
-    public void subscribe(Presence subscription, ServerSession session) throws OXException {
+    public void subscribe(Presence subscription, String message, ServerSession session) throws OXException {
         SubscriptionParticipant from = createParticipant(subscription.getFrom());
         SubscriptionParticipant to = createParticipant(subscription.getTo());
 
-        Subscription sub = new Subscription(from, to, Subscription.State.pending);
+        Subscription sub = new Subscription(from, to, Presence.Type.PENDING);
+        sub.setRequest(message);
 
         SubscriptionsSQL storage = new SubscriptionsSQL(services.getService(DatabaseService.class));
         storage.store(sub, session);
@@ -93,14 +95,18 @@ public class SubscriptionServiceImpl implements PresenceSubscriptionService {
     }
 
     @Override
-    public void approve(ID id, boolean subscribed, ServerSession session) throws OXException {
-        SubscriptionParticipant from = createParticipant(id);
+    public void approve(Presence approval, ServerSession session) throws OXException {
+        SubscriptionParticipant from = createParticipant(approval.getTo()); // The subscriber (from) is the TO in this approval presence
         SubscriptionParticipant to = new SubscriptionParticipant(session.getUserId(), session.getContextId());
 
-        Subscription sub = new Subscription(from, to, subscribed ? Subscription.State.subscribed : Subscription.State.unsubscribed);
+        // TODO: Check for valid types
+        Subscription sub = new Subscription(from, to, approval.getType());
 
         SubscriptionsSQL storage = new SubscriptionsSQL(services.getService(DatabaseService.class));
         storage.store(sub, session);
+
+        MessageDispatcher messageDispatcher = services.getService(MessageDispatcher.class);
+        messageDispatcher.send(approval, session);
     }
 
     @Override
@@ -111,7 +117,7 @@ public class SubscriptionServiceImpl implements PresenceSubscriptionService {
         List<Subscription> subscriptions = storage.getFrom(to, session);
         List<ID> subscribers = new ArrayList<ID>();
         for (Subscription subscription : subscriptions) {
-            if (subscription.getState() == Subscription.State.subscribed) {
+            if (subscription.getState() == Presence.Type.SUBSCRIBED) {
                 ID id = createID(subscription.getFrom());
                 subscribers.add(id);
             }
@@ -127,7 +133,7 @@ public class SubscriptionServiceImpl implements PresenceSubscriptionService {
         List<Subscription> subscriptions = storage.getTo(from, session);
         List<ID> subscribers = new ArrayList<ID>();
         for (Subscription subscription : subscriptions) {
-            if (subscription.getState() == Subscription.State.subscribed) {
+            if (subscription.getState() == Presence.Type.SUBSCRIBED) {
                 ID id = createID(subscription.getTo());
                 subscribers.add(id);
             }
@@ -147,6 +153,7 @@ public class SubscriptionServiceImpl implements PresenceSubscriptionService {
             presence.setFrom(createID(pending.getFrom()));
             presence.setTo(createID(pending.getTo()));
             presence.setType(Presence.Type.SUBSCRIBE);
+            presence.setPayload(new Payload(pending.getRequest(), "presenceRequestMessage"));
             presences.add(presence);
         }
         return presences;
