@@ -2,7 +2,7 @@
 
  - Fix for bug 22923: Dealing with possible "Unmarshalling Error" when parsing empty date field
 
-* 2012-09-25 - tobias.friedrich@open-xchange.com
+* 2012-09-26 - tobias.friedrich@open-xchange.com
 
  - Fix for bug 23095: Validate contact image size and content type
  - Fix for bug 23078: List contacts from deleted folders as deleted resources
