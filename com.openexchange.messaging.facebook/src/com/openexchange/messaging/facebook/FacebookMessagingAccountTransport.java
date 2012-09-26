@@ -185,7 +185,7 @@ public final class FacebookMessagingAccountTransport extends FacebookMessagingRe
                         final JSONObject error = result.getJSONObject("error");
                         final String type = error.optString("type");
                         final String msg = error.optString("message");
-                        if ("OXException".equals(type)) {
+                        if ("OAuthException".equals(type)) {
                             throw FacebookMessagingExceptionCodes.OAUTH_ERROR.create(null == msg ? "" : msg);
                         }
                         throw FacebookMessagingExceptionCodes.FQL_ERROR.create(null == type ? "<unknown>" : type, null == msg ? "" : msg);
@@ -205,7 +205,7 @@ public final class FacebookMessagingAccountTransport extends FacebookMessagingRe
                         final JSONObject error = result.getJSONObject("error");
                         final String type = error.optString("type");
                         final String msg = error.optString("message");
-                        if ("OXException".equals(type)) {
+                        if ("OAuthException".equals(type)) {
                             throw FacebookMessagingExceptionCodes.OAUTH_ERROR.create(null == msg ? "" : msg);
                         }
                         throw FacebookMessagingExceptionCodes.FQL_ERROR.create(null == type ? "<unknown>" : type, null == msg ? "" : msg);
