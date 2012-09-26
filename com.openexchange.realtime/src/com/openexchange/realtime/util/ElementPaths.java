@@ -47,56 +47,26 @@
  *
  */
 
-package com.openexchange.realtime.atmosphere.impl.stanza;
+package com.openexchange.realtime.util;
 
-import org.json.JSONObject;
-import com.openexchange.exception.OXException;
-import com.openexchange.realtime.packet.ID;
-import com.openexchange.realtime.packet.Payload;
-import com.openexchange.realtime.packet.Stanza;
 
 /**
- * {@link StanzaBuilder} - Abstract Stanza parser class, gathering common fields and methods.
- * 
+ * {@link ElementPaths}
+ *
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
- * @param <T>
  */
-public abstract class StanzaBuilder<T extends Stanza> {
+//TODO: needs proper rewrite
+public class ElementPaths {
 
-    protected ID from;
-    protected JSONObject json;
-    protected T stanza;
-
-    /**
-     * Set the obligatory {@link Stanza} elements.
-     */
-    protected void basics() {
-        from();
-        to();
-        payload();
-    }
-
-    private void from() {
-        stanza.setFrom(from);
+    public static String getPath(String elementPath) {
+        return elementPath.split("#")[0];
     }
     
-    private void to() {
-        if (json.has("to")) {
-            stanza.setTo(new ID(json.optString("to")));
-        }
-    }
-
-    private void payload() {
-        if (json.has("data")) {
-            stanza.setPayload(new Payload(json.optJSONObject("data"), "json"));
-        }
+    public static String getElement(String elementPath) {
+        return elementPath.split("#")[1];
     }
     
-    /**
-     * Build a validated Stanza of type T
-     * @return a validated Stanza of type T
-     * @throws OXException if the Stanza couldn't be build due to validation or other errors 
-     */
-    public abstract T build() throws OXException; 
-
+    public static String createPath(String path, String element) {
+        return path + "#" + element;
+    }
 }

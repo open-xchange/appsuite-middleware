@@ -58,6 +58,8 @@ package com.openexchange.realtime.packet;
  */
 public class Message extends Stanza {
 
+    public final static String ELEMENTPATH = "default#message";
+    
     /**
      * An enumeration of message types describing a message's purpose.
      * <ol>
@@ -97,6 +99,11 @@ public class Message extends Stanza {
      */
     public void setType(final Type type) {
         this.type = type;
+    }
+    
+    @Override
+    public String getElementPath() {
+        return ELEMENTPATH;
     }
 
 }

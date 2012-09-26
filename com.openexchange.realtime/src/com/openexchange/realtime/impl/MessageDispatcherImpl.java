@@ -81,12 +81,26 @@ public class MessageDispatcherImpl implements MessageDispatcher {
             if (LOG.isInfoEnabled()) {
                 LOG.info("Couldn't find appropriate channel for sending stanza");
             }
-            throw RealtimeExceptionCodes.NO_APPROPRIATE_CHANNEL.create(stanza.getTo().toString(), stanza.getNamespace());
+            throw RealtimeExceptionCodes.NO_APPROPRIATE_CHANNEL.create(stanza.getTo().toString(), stanza.getElementPath());
         }
 
         channel.send(stanza, session);
     }
 
+    /**
+     * Choose a channel based on the following stanza properties:
+     * <ol>
+     * <li><b>Protocol</b>: Check the full id of the recipient for the protcol used to address him and choose a channel able to handle that
+     * protocol</li>
+     * <li><b>ElementPath</b>: Check the ElementPath of the element (in a namespace) contained in the Stanza and verify that the chosen channel can handle the
+     * element e.g. default:presence</li>
+     * </ol>
+     * 
+     * @param stanza The stanza to dispatch
+     * @param session The current session
+     * @return Null or the chosen channel than is able to handle the stanza 
+     * @throws OXException
+     */
     private Channel chooseChannel(Stanza stanza, ServerSession session) throws OXException {
         ID to = stanza.getTo();
         String protocol = to.getProtocol();
@@ -101,10 +115,10 @@ public class MessageDispatcherImpl implements MessageDispatcher {
             return channel;
         }
 
-        String namespace = stanza.getNamespace();
+        String elementPath = stanza.getElementPath();
 
         for (Channel c : channels.values()) {
-            if ((channel == null || channel.getPriority() < c.getPriority()) && c.canHandle(namespace, to, session)) {
+            if ((channel == null || channel.getPriority() < c.getPriority()) && c.canHandle(elementPath, to, session)) {
                 channel = c;
             }
         }

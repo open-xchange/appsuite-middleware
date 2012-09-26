@@ -52,6 +52,7 @@ package com.openexchange.realtime.atmosphere.impl;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 import com.openexchange.realtime.atmosphere.OXRTHandler;
+import com.openexchange.realtime.packet.Stanza;
 
 /**
  * {@link HandlerLibrary} - Tracks registered {@link OXRTHandler handlers} and
@@ -83,12 +84,12 @@ public class HandlerLibrary {
     /**
      * Gets the handler appropriate for specified namespace identifier.
      * 
-     * @param namespace The namespace identifier
+     * @param elementPath The path to an element in a namespace.
      * @return The appropriate handler or <code>null</code> if none is applicable
      */
-    public OXRTHandler getHandlerFor(String namespace) {
+    public OXRTHandler getHandlerFor(String elementPath) {
         for (OXRTHandler transformer : handlers) {
-            if (transformer.getNamespace().equals(namespace)) {
+            if (transformer.getElementPath().equals(elementPath)) {
                 return transformer;
             }
         }

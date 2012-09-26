@@ -523,7 +523,7 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
     }
 
     private boolean isInternal(Stanza stanza) {
-        return stanza.getNamespace().startsWith("ox:");
+        return stanza.getElementPath().startsWith("ox:");
     }
 
     /**
@@ -580,9 +580,9 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
     }
 
     private void dispatchStanza(Stanza stanza, RTAtmosphereState atmosphereState) throws OXException {
-        OXRTHandler transformer = library.getHandlerFor(stanza.getNamespace());
+        OXRTHandler transformer = library.getHandlerFor(stanza.getElementPath());
         if (transformer == null) {
-            throw OXException.general("No transformer for namespace " + stanza.getNamespace());
+            throw OXException.general("No transformer for " + stanza.getElementPath());
         }
         transformer.incoming(stanza, atmosphereState.session);
     }
@@ -595,9 +595,9 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
      * @throws OXException if no transformer for the given Stanza can be found
      */
     public void handleOutgoing(Stanza stanza, ServerSession serverSession) throws OXException {
-        OXRTHandler transformer = library.getHandlerFor(stanza.getNamespace());
+        OXRTHandler transformer = library.getHandlerFor(stanza.getElementPath());
         if (transformer == null) {
-            throw OXException.general("No transformer for namespace " + stanza.getNamespace());
+            throw OXException.general("No transformer for " + stanza.getElementPath());
         }
         /*
          * Let the transformer handle the processing of the stanza. hand over this as reference for sending after transforming

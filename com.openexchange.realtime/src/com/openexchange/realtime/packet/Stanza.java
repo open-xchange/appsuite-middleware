@@ -51,91 +51,84 @@ package com.openexchange.realtime.packet;
 
 /**
  * {@link Stanza} - Abstract information unit that can be send from one entity
- * to another. 
- *
- *  @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
- *  @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
+ * to another.
+ * 
+ * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
 public abstract class Stanza {
 
-	private ID to, from;
+    private ID to, from;
 
-	private String namespace = "default";
+    private Payload payload;
 
-	private Payload payload;
-	
-	/**
-	 * Initializes a new {@link Stanza}.
-	 */
-	protected Stanza() {
-	    super();
-	}
+    /**
+     * Initializes a new {@link Stanza}.
+     */
+    protected Stanza() {
+        super();
+    }
 
-	/**
-	 * Get the {@link ID} describing the stanza's recipient.
-	 * @return null or the ID of the stanza's recipient
-	 */
-	public ID getTo() {
-		return to;
-	}
+    /**
+     * Get the {@link ID} describing the stanza's recipient.
+     * 
+     * @return null or the ID of the stanza's recipient
+     */
+    public ID getTo() {
+        return to;
+    }
 
-	/**
-	 * Set the {@link ID} describing the Stanza's recipient.
-	 * @param to the ID of the stanza's recipient
-	 */
-	public void setTo(final ID to) {
-		this.to = to;
-	}
+    /**
+     * Set the {@link ID} describing the Stanza's recipient.
+     * 
+     * @param to the ID of the stanza's recipient
+     */
+    public void setTo(final ID to) {
+        this.to = to;
+    }
 
-	/**
-	 * Get the {@link ID} describing the Stanza's sender. 
-	 * @return the {@link ID} describing the Stanza's sender.
-	 */
-	public ID getFrom() {
-		return from;
-	}
+    /**
+     * Get the {@link ID} describing the Stanza's sender.
+     * 
+     * @return the {@link ID} describing the Stanza's sender.
+     */
+    public ID getFrom() {
+        return from;
+    }
 
-	/**
-     * Set the {@link ID} describing the Stanza's sender. 
+    /**
+     * Set the {@link ID} describing the Stanza's sender.
+     * 
      * @param from the {@link ID} describing the Stanza's sender.
      */
-	public void setFrom(final ID from) {
-		this.from = from;
-	}
+    public void setFrom(final ID from) {
+        this.from = from;
+    }
 
-	/**
-	 * Set the structured information of this Stanza.
-	 * @param payload the structured information to transport. 
-	 */
-	public void setPayload(final Payload payload) {
-		this.payload = payload;
-	}
+    /**
+     * Set the structured information of this Stanza.
+     * 
+     * @param payload the structured information to transport.
+     */
+    public void setPayload(final Payload payload) {
+        this.payload = payload;
+    }
 
-	/**
-	 * Get the structured information of this Stanza.
-	 * @return null or the structured information of this Stanza.
-	 */
-	public Payload getPayload() {
-		return payload;
-	}
+    /**
+     * Get the structured information of this Stanza.
+     * 
+     * @return null or the structured information of this Stanza.
+     */
+    public Payload getPayload() {
+        return payload;
+    }
 
-	/**
-	 * Get the namespace of this Stanza.
-	 * Namespaces are used to separate data ownership and vocabularies.
-	 * A namespace must not be specified for elements of the default namespace e.g. IQ, Presence, Message.
-	 * @return the namespace of this Stanza
-	 */
-	public String getNamespace() {
-		return namespace;
-	}
-
-	/**
-	 * Set the namespace of this Stanza.
-     * Namespaces are used to separate data ownership and vocabularies.
-	 * @param namespace the namespace of this Stanza
-	 */
-	public void setNamespace(final String namespace) {
-		this.namespace = namespace;
-	}
+    /**
+     * Get the path identifying the element transported by this Stanza within a namespace. Elements are the leafs in the
+     * <code>root.node1.node2#leaf</code> namespace structure. Namespaces are used to separate data ownership and vocabularies.
+     * 
+     * @return the elementPath of the element transported by this Stanza e.g. <code>default#presence</code>
+     */
+    public abstract String getElementPath();
 
 }

@@ -8,6 +8,7 @@ import com.openexchange.log.LogFactory;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.realtime.atmosphere.OXRTConversionHandler;
 import com.openexchange.realtime.atmosphere.OXRTHandler;
+import com.openexchange.realtime.packet.Message;
 import converters.ChatMessageToJSONConverter;
 import converters.JSONToChatMessageConverter;
 
@@ -45,9 +46,10 @@ public class AtmosphereTestActivator extends HousekeepingActivator {
          * After adding the new SimplePayloadConverters that are able to convert
          * from and to ChatMessage POJOS we can register a new OXRTConversionHandler
          * for ChatMessages. All this COnversionHandler does is to tell the
-         * Payload to convert itself into the desired format.
+         * Payload to convert itself into the desired format. It takes chat
+         * elements from the namespace default and transform them to ChatMessage POJOS.
          */
-        registerService(OXRTHandler.class,  new OXRTConversionHandler("chat", "chatMessage"));
+        registerService(OXRTHandler.class,  new OXRTConversionHandler(Message.ELEMENTPATH, "chatMessage"));
         
         //Add the atmosphere chat handler
         AtmosphereService service = getService(AtmosphereService.class);

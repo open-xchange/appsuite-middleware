@@ -57,6 +57,7 @@ import com.openexchange.realtime.packet.ID;
 import com.openexchange.realtime.packet.Payload;
 import com.openexchange.realtime.packet.Presence;
 import com.openexchange.realtime.packet.Presence.Type;
+import com.openexchange.realtime.packet.Stanza;
 import com.openexchange.realtime.presence.PresenceData;
 import com.openexchange.realtime.presence.PresenceService;
 import com.openexchange.realtime.presence.subscribe.PresenceSubscriptionService;
@@ -67,40 +68,11 @@ import com.openexchange.tools.session.ServerSession;
  * {@link OXRTPresenceHandler} - Handles Stanzas related to Presence and PresenceSubscription.
  * Features:
  * <ul>
- * <li>Ask others to see their Status, iow. subscribe to their Presence</li>
- * <li>Give others permission to view my Status, iow. subscribe to my Presence</li>
- * <li>Get a list of IDs you are subscribed to and their status</li>
- * <li>Change my status</li>
+ *   <li>Ask others to see their Status, iow. subscribe to their Presence</li>
+ *   <li>Give others permission to view my Status, iow. subscribe to my Presence</li>
+ *   <li>Get a list of IDs you are subscribed to and their status</li>
+ *   <li>Change my status</li>
  * </ul>
- * <h3>Initial Presence</h3> The initial presence message only has to consist of an object specifying its
- * element class and optionally the default namespace. This is enough to send a presence broadcast to
- * all subscribed users and signal that the user is now available.
- * 
- * <pre>
- * {
- *  [namespace: 'default',]
- *  element: 'presence'
- *  [type: none]
- * };
- * </pre>
- * 
- * <h3>Update Presence(Broadcast)</h3> After the initial presence message the user can decide to set his presence to a specific value. Again
- * specifying the kind of message he is sending and a data object attached specifying the presence status he wants to set. The optional
- * priority in the data object let's the user specify to which resource messages should be routed if he is connected via several clients.
- * The maximum value is 127.
- * 
- * <pre>
- * {
- *  [namespace: 'default',]
- *  element: 'presence'
- *  [type: none]
- *  data: {
- *      state: 'online',
- *      message: 'i am here',
- *      [priority: 0,]
- *  }
- * };
- * </pre>
  * 
  * <h3>Final unavailable presence</h3>
  * 
@@ -117,29 +89,30 @@ import com.openexchange.tools.session.ServerSession;
  * 
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
-public class OXRTPresenceHandler implements OXRTHandler<Presence> {
+public class OXRTPresenceHandler implements OXRTHandler {
 
     @Override
-    public String getNamespace() {
-        return "presence";
+    public String getElementPath() {
+        return Presence.ELEMENTPATH;
     }
 
     @Override
-    public void incoming(Presence stanza, ServerSession session) throws OXException {
-        if (stanza == null || session == null) {
+    public void incoming(Stanza stanza, ServerSession session) throws OXException {
+        if (stanza == null || session == null || !(stanza instanceof Presence)) {
             throw new IllegalArgumentException();
         }
-        Type type = stanza.getType();
+        Presence presence = (Presence) stanza;
+        Type type = presence.getType();
         if (Type.SUBSCRIBE == type) {
-            handleSubscribe(stanza, session);
+            handleSubscribe(presence, session);
         } else if (Type.SUBSCRIBED == type) {
-            handleSubscribed(stanza, session);
+            handleSubscribed(presence, session);
         } else if (Type.UNSUBSCRIBE == type) {
-            handleUnSubscribe(stanza, session);
+            handleUnSubscribe(presence, session);
         } else if (Type.UNSUBSCRIBED == type) {
-            handleUnSubscribed(stanza, session);
+            handleUnSubscribed(presence, session);
         } else if (Type.NONE == type || Type.UNAVAILABLE == type) {
-            handlePresence(stanza, session);
+            handlePresence(presence, session);
         } else {
             throw new UnsupportedOperationException("Not implemented yet!");
         }
@@ -147,15 +120,16 @@ public class OXRTPresenceHandler implements OXRTHandler<Presence> {
 
     /**
      * Handle the incoming request of userA to subscribe to the presence of userB.
-     * This transforms the payload of the incoming stanza and passes it to the MessageDispatcher for routing to the proper contact.
+     * This transforms the payload of the incoming stanza and passes it to the PresenceSubscriptionService.
      * 
      * <pre>
      * {
-     *  from: userA@realtime
-     *  to: userB@realtime
-     *  [namespace: 'default',]
+     *  from: ox://userA@realtime
+     *  to: ox://userB@realtime
+     *  namespace: 'presence',
      *  element: 'presence'
      *  type: subscribe
+     *  session: $session
      *  [data: {
      *      message: 'Hello B, please let me subscribe to your presence. WBR, A.',
      *  }]
@@ -167,14 +141,14 @@ public class OXRTPresenceHandler implements OXRTHandler<Presence> {
      */
     private void handleSubscribe(Presence stanza, ServerSession session) throws OXException {
         Payload payload = stanza.getPayload();
-        if(payload != null) {
-            PresenceData data = (PresenceData) stanza.getPayload().to("presenceData", session).getData();
-        }
         PresenceSubscriptionService subscriptionService = AtmospherePresenceServiceRegistry.getInstance().getService(
             PresenceSubscriptionService.class);
-        //TODO:
-//        subscriptionService.subscribe(stanza, data.getMessage(), session);
-        subscriptionService.subscribe(stanza, session);
+        if (payload != null) {
+            PresenceData data = (PresenceData) stanza.getPayload().to("presenceData", session).getData();
+            subscriptionService.subscribe(stanza, data.getMessage(), session);
+        } else {
+            subscriptionService.subscribe(stanza, "", session);
+        }
     }
 
     /**
@@ -200,9 +174,7 @@ public class OXRTPresenceHandler implements OXRTHandler<Presence> {
         PresenceData data = (PresenceData) stanza.getPayload().to("presenceData", session).getData();
         PresenceSubscriptionService subscriptionService = AtmospherePresenceServiceRegistry.getInstance().getService(
             PresenceSubscriptionService.class);
-        //TODO:
-//        subscriptionService.subscribe(stanza, data.getMessage(), session);
-        subscriptionService.approve(stanza.getTo(), true, session);
+        subscriptionService.approve(stanza, session);
     }
 
     /**
@@ -222,15 +194,13 @@ public class OXRTPresenceHandler implements OXRTHandler<Presence> {
      * </pre>
      * 
      * @param stanza
-     * @throws OXException 
+     * @throws OXException
      */
     private void handleUnSubscribe(Presence stanza, ServerSession session) throws OXException {
         PresenceData data = (PresenceData) stanza.getPayload().to("presenceData", session).getData();
         PresenceSubscriptionService subscriptionService = AtmospherePresenceServiceRegistry.getInstance().getService(
             PresenceSubscriptionService.class);
-        //TODO:
-//        subscriptionService.subscribe(stanza, data.getMessage(), session);
-        subscriptionService.approve(stanza.getTo(), false, session);
+        subscriptionService.approve(stanza, session);
     }
 
     /**
@@ -261,15 +231,16 @@ public class OXRTPresenceHandler implements OXRTHandler<Presence> {
         PresenceData data = (PresenceData) stanza.getPayload().to("presenceData", session).getData();
         PresenceSubscriptionService subscriptionService = AtmospherePresenceServiceRegistry.getInstance().getService(
             PresenceSubscriptionService.class);
-        //TODO:
-//        subscriptionService.subscribe(stanza, data.getMessage(), session);
-        subscriptionService.approve(stanza.getTo(), false, session);
+        // TODO:
+        // subscriptionService.subscribe(stanza, data.getMessage(), session);
+        subscriptionService.approve(stanza, session);
     }
 
     /**
      * Change the curren Presence status.
+     * 
      * @param stanza Stanza containing the new Presence Status
-     * @throws OXException If stanza conversion fails or the status can't be changed 
+     * @throws OXException If stanza conversion fails or the status can't be changed
      */
     private void handlePresence(Presence stanza, ServerSession session) throws OXException {
         PresenceData data = (PresenceData) stanza.getPayload().to("presenceData", session).getData();
@@ -281,8 +252,12 @@ public class OXRTPresenceHandler implements OXRTHandler<Presence> {
      * Transport status changes and subscribe requests
      */
     @Override
-    public void outgoing(Presence stanza, ServerSession session, StanzaSender sender) throws OXException {
-        // TODO Auto-generated method stub
+    public void outgoing(Stanza stanza, ServerSession session, StanzaSender sender) throws OXException {
+        Payload payload = stanza.getPayload();
+        if(payload != null) {
+            stanza.setPayload(payload.to("json", session));
+        }
+        sender.send(stanza);
 
     }
 

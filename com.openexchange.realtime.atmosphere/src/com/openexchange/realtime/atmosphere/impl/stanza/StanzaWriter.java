@@ -51,12 +51,13 @@ package com.openexchange.realtime.atmosphere.impl.stanza;
 
 import org.json.JSONException;
 import org.json.JSONObject;
-
 import com.openexchange.exception.OXException;
 import com.openexchange.realtime.packet.IQ;
 import com.openexchange.realtime.packet.Message;
+import com.openexchange.realtime.packet.Payload;
 import com.openexchange.realtime.packet.Presence;
 import com.openexchange.realtime.packet.Stanza;
+import com.openexchange.realtime.util.ElementPaths;
 
 /**
  * {@link StanzaWriter} - Transforms Stanza objects into their JSON representation.
@@ -65,50 +66,54 @@ import com.openexchange.realtime.packet.Stanza;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a> JavaDoc
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
+//TODO: needs rewrite
 public class StanzaWriter {
 
-	/**
-	 * Writes specified stanza into its JSON representation.
-	 * 
-	 * @param stanza The stanza to write
-	 * @return The appropriate JSON representation
-	 * @throws OXException If a JSON write error occurs
-	 */
-	public static JSONObject write(Stanza stanza) throws OXException {
-		try {
-			JSONObject object = new JSONObject();
-			writeBasics(stanza, object);
-			if (stanza instanceof Message) {
-				writeMessage((Message) stanza, object);
-			} else if (stanza instanceof Presence) {
-				writePresence((Presence) stanza, object);
-			} else if (stanza instanceof IQ) {
-				writeQuery((IQ) stanza, object);
-			}
-			return object;
-		} catch (JSONException x) {
-			throw OXException.general("JSONException "+x.toString());
-		}
-	}
+    /**
+     * Writes specified stanza into its JSON representation.
+     * 
+     * @param stanza The stanza to write
+     * @return The appropriate JSON representation
+     * @throws OXException If a JSON write error occurs
+     */
+    public static JSONObject write(Stanza stanza) throws OXException {
+        try {
+            JSONObject object = new JSONObject();
+            writeBasics(stanza, object);
+            if (stanza instanceof Message) {
+                writeMessage((Message) stanza, object);
+            } else if (stanza instanceof Presence) {
+                writePresence((Presence) stanza, object);
+            } else if (stanza instanceof IQ) {
+                writeQuery((IQ) stanza, object);
+            }
+            return object;
+        } catch (JSONException x) {
+            throw OXException.general("JSONException "+x.toString());
+        }
+    }
 
-	private static void writeQuery(IQ stanza, JSONObject object) throws JSONException {
-		object.put("kind", "iq");
-		object.put("type", stanza.getType().name().toLowerCase());
-	}
+    private static void writeQuery(IQ stanza, JSONObject object) throws JSONException {
+        object.put("type", stanza.getType().name().toLowerCase());
+    }
 
-	private static void writePresence(Presence stanza, JSONObject object) throws JSONException {
-		object.put("kind", "presence");
-	}
+    private static void writePresence(Presence stanza, JSONObject object) throws JSONException {
+        object.put("type", stanza.getType().name().toLowerCase());
+    }
 
-	private static void writeMessage(Message stanza, JSONObject object) throws JSONException {
-		object.put("type", stanza.getType().name().toLowerCase());
-	}
+    private static void writeMessage(Message stanza, JSONObject object) throws JSONException {
+        object.put("type", stanza.getType().name().toLowerCase());
+    }
 
-	private static void writeBasics(Stanza stanza, JSONObject object) throws JSONException {
-		object.put("ns", stanza.getNamespace());
-		object.put("from", stanza.getFrom().toString());
-		object.put("to", stanza.getTo().toString());
-		object.put("data", stanza.getPayload().getData());
-	}
+    private static void writeBasics(Stanza stanza, JSONObject object) throws JSONException {
+        object.put("namespace", ElementPaths.getPath(stanza.getElementPath()));
+        object.put("element", ElementPaths.getElement(stanza.getElementPath()));
+        object.put("from", stanza.getFrom().toString());
+        object.put("to", stanza.getTo().toString());
+        Payload payload = stanza.getPayload();
+        if(payload != null) {
+            object.put("data", payload.getData());   
+        }
+    }
 
 }

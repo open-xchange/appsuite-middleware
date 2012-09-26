@@ -149,6 +149,8 @@ package com.openexchange.realtime.packet;
 
 public class Presence extends Stanza {
 
+    public final static String ELEMENTPATH = "default#presence";
+    
     /**
      * {@link Type} - Specifies the Presence Type
      * <ol>
@@ -189,6 +191,11 @@ public class Presence extends Stanza {
      */
     public void setType(Type type) {
         this.type = type;
+    }
+    
+    @Override
+    public String getElementPath() {
+        return ELEMENTPATH;
     }
 
 }

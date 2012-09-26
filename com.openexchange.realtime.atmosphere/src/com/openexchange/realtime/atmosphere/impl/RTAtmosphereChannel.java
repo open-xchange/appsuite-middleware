@@ -80,17 +80,17 @@ public class RTAtmosphereChannel implements Channel {
 	}
 
 	@Override
-    public boolean canHandle(String namespace, ID recipient,
+    public boolean canHandle(String elementPath, ID recipient,
 			ServerSession session) throws OXException {
 		if (!isConnected(recipient, session)) {
 			return false;
 		}
 		
-		if (!hasCapability(recipient, namespace, session)) {
+		if (!hasCapability(recipient, elementPath, session)) {
 			return false;
 		}
 		
-		if (library.getHandlerFor(namespace) == null) {
+		if (library.getHandlerFor(elementPath) == null) {
 			return false;
 		}
 		

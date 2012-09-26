@@ -53,7 +53,11 @@ import org.json.JSONObject;
 import com.openexchange.exception.OXException;
 import com.openexchange.realtime.atmosphere.AtmosphereExceptionCode;
 import com.openexchange.realtime.packet.ID;
+import com.openexchange.realtime.packet.IQ;
+import com.openexchange.realtime.packet.Message;
+import com.openexchange.realtime.packet.Presence;
 import com.openexchange.realtime.packet.Stanza;
+import com.openexchange.realtime.util.ElementPaths;
 
 /**
  * {@link BuilderSelector} - Select and instantiate a new StanzaBuilder matching the client's message.
@@ -84,18 +88,23 @@ public class BuilderSelector {
         if (json == null) {
             throw new IllegalArgumentException();
         }
-        String kind = json.optString("element");
-        if (kind == null) {
+        String path = json.optString("namespace");
+        if(path == null || path.isEmpty()) {
+            path = "default";
+        }
+        String element = json.optString("element");
+        if (element == null) {
             throw AtmosphereExceptionCode.MISSING_KEY.create("element");
         }
-        if (kind.equalsIgnoreCase("iq")) {
+        String elementPath = ElementPaths.createPath(path, element);
+        if (elementPath.equalsIgnoreCase(IQ.ELEMENTPATH)) {
             return new IQBuilder(from, json);
-        } else if (kind.equalsIgnoreCase("message")) {
+        } else if (elementPath.equalsIgnoreCase(Message.ELEMENTPATH)) {
             return new MessageBuilder(from, json);
-        } else if (kind.equalsIgnoreCase("presence")) {
+        } else if (elementPath.equalsIgnoreCase(Presence.ELEMENTPATH)) {
             return new PresenceBuilder(from, json);
         } else {
-            throw AtmosphereExceptionCode.MISSING_BUILDER_FOR_KIND.create(kind);
+            throw AtmosphereExceptionCode.MISSING_BUILDER_FOR_KIND.create(elementPath);
         }
     }
 }
