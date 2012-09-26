@@ -23,14 +23,14 @@ define("ui/ui", function () {
     var socket = $.atmosphere;
     var splits = document.location.toString().split('/');
     var proto = splits[0]; var host = splits[2];
-    var location = proto+"//"+host+"/realtime/atmosphere/rt";
+    var url = proto+"//"+host+"/realtime/atmosphere/rt";
     
     var request = {
-        url: location,
+        url: url,
         contentType : "application/json",
         logLevel : 'debug',
-        transport : 'websocket' ,
-        fallbackTransport: 'long-polling',
+        transport : 'long-polling' ,
+        fallbackTransport: 'websocket',
         timeout: 60000,
         maxRequests : 3,
         headers : {session: session}

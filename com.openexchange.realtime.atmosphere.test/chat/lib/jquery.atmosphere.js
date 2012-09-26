@@ -399,7 +399,7 @@ jQuery.atmosphere = function() {
                         return {
                             init: function() {
                                 win.callbacks.push(listener);
-                                win.children.push(options.id);
+                                win.children.push(guid);
                                 return win.opened;
                             },
                             signal: function(type, data) {
@@ -418,7 +418,7 @@ jQuery.atmosphere = function() {
                                 // Removes traces only if the parent is alive
                                 if (!orphan) {
                                     remove(win.callbacks, listener);
-                                    remove(win.children, options.id);
+                                    remove(win.children, guid);
                                 }
                             }
 
@@ -439,14 +439,14 @@ jQuery.atmosphere = function() {
                                 if (!orphan) {
                                     orphan = true;
                                     if (data.reason === "aborted") {
-                                        socket.close();
+                                        _close();
                                     } else {
-                                        _prepareCallback("", "closed", 200, _request.transport);
                                         // Gives the heir some time to reconnect
-                                        if (data.heir === options.id) {
-                                            _close();
+                                        if (data.heir === guid) {
+                                            _execute();
                                         } else {
                                             setTimeout(function() {
+                                                _prepareCallback("", "closed", 200, _request.transport);
                                                 _close();
                                             }, 100);
                                         }
@@ -466,13 +466,13 @@ jQuery.atmosphere = function() {
                 function findTrace() {
                     var matcher = new RegExp("(?:^|; )(" + encodeURIComponent(name) + ")=([^;]*)").exec(document.cookie);
                     if (matcher) {
-                        return $.parseJSON(decodeURIComponent(matcher[2]));
+                        return jQuery.parseJSON(decodeURIComponent(matcher[2]));
                     }
                 }
 
                 // Finds and validates the parent socket's trace from the cookie
                 trace = findTrace();
-                if (!trace || $.now() - trace.ts > 1000) {
+                if (!trace || jQuery.now() - trace.ts > 1000) {
                     return;
                 }
 
@@ -492,7 +492,7 @@ jQuery.atmosphere = function() {
                             trace = findTrace();
                             if (!trace || oldTrace.ts === trace.ts) {
                                 // Simulates a close signal
-                                listener($.stringifyJSON({target: "c", type: "close", data: {reason: "error", heir: oldTrace.heir}}));
+                                listener(jQuery.stringifyJSON({target: "c", type: "close", data: {reason: "error", heir: oldTrace.heir}}));
                             }
                         }, 1000);
 
@@ -629,7 +629,7 @@ jQuery.atmosphere = function() {
                     document.cookie = encodeURIComponent(name) + "=" +
                         // Opera's JSON implementation ignores a number whose a last digit of 0 strangely
                         // but has no problem with a number whose a last digit of 9 + 1
-                        encodeURIComponent($.stringifyJSON({ts: $.now() + 1, heir: (storageService.get("children") || [])[0]}));
+                        encodeURIComponent(jQuery.stringifyJSON({ts: jQuery.now() + 1, heir: (storageService.get("children") || [])[0]}));
                 }
 
                 // Chooses a storageService
@@ -646,10 +646,10 @@ jQuery.atmosphere = function() {
                 if (storageService.get("opened") != null && !storageService.get("opened")) {
                     // Flag indicating the parent socket is opened
                     storageService.set("opened", false);
-                    // Leaves traces
-                    leaveTrace();
-                    _traceTimer = setInterval(leaveTrace, 1000);
                 }
+                // Leaves traces
+                leaveTrace();
+                _traceTimer = setInterval(leaveTrace, 1000);
 
                 _storageService = storageService;
             }
@@ -658,7 +658,7 @@ jQuery.atmosphere = function() {
              * @private
              */
             function _open(state, transport, request) {
-                if (_request.shared && transport != 'local' && !jQuery.browser.opera) {
+                if (_request.shared && transport != 'local') {
                     share();
                 }
 
@@ -935,7 +935,7 @@ jQuery.atmosphere = function() {
                     _response.responseBody = "";
                     _response.status = !sseOpened ? 501 : 200;
                     _invokeCallback();
-		    _sse.close();
+                    _sse.close();
 
                     if (_abordingConnection) {
                         jQuery.atmosphere.log(_request.logLevel, ["SSE closed normally"]);
@@ -1850,7 +1850,7 @@ jQuery.atmosphere = function() {
             function _push(message) {
 
                 if (_localStorageService != null) {
-                   _pushLocal(message);
+                    _pushLocal(message);
                 } else if (_activeRequest != null || _sse != null) {
                     _pushAjaxMessage(message);
                 } else if (_ieStream != null) {
@@ -1867,8 +1867,11 @@ jQuery.atmosphere = function() {
             }
 
             function _intraPush(message) {
+                // IE 9 will crash if not.
+                if (message.length == 0) return;
+
                 try {
-                     if (_localStorageService) {
+                    if (_localStorageService) {
                         _localStorageService.localSend(message);
                     } else {
                         _storageService.signal("localMessage",  jQuery.stringifyJSON({id: guid , event: message}));
@@ -2328,7 +2331,7 @@ jQuery.atmosphere = function() {
                     storage.setItem("t", "t");
                     storage.removeItem("t");
                     // The storage event of Internet Explorer and Firefox 3 works strangely
-                    return window.StorageEvent && !$.browser.msie && !($.browser.mozilla && $.browser.version.split(".")[0] === "1");
+                    return window.StorageEvent && !jQuery.browser.msie && !(jQuery.browser.mozilla && jQuery.browser.version.split(".")[0] === "1");
                 } catch (e) {
                 }
             }

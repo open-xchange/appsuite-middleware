@@ -49,6 +49,8 @@
 
 package com.openexchange.realtime.presence.subscribe.impl;
 
+import com.openexchange.realtime.packet.Presence;
+
 /**
  * {@link Subscription}
  * 
@@ -56,17 +58,15 @@ package com.openexchange.realtime.presence.subscribe.impl;
  */
 public class Subscription {
 
-    public enum State {
-        subscribed, unsubscribed, pending;
-    }
-
     private SubscriptionParticipant from;
 
     private SubscriptionParticipant to;
 
-    private State state;
+    private String request;
 
-    public Subscription(SubscriptionParticipant from, SubscriptionParticipant to, State state) {
+    private Presence.Type state;
+
+    public Subscription(SubscriptionParticipant from, SubscriptionParticipant to, Presence.Type state) {
         this.from = from;
         this.to = to;
         this.state = state;
@@ -88,12 +88,20 @@ public class Subscription {
         this.to = to;
     }
 
-    public State getState() {
+    public Presence.Type getState() {
         return state;
     }
 
-    public void setState(State state) {
+    public void setState(Presence.Type state) {
         this.state = state;
+    }
+
+    public String getRequest() {
+        return request;
+    }
+
+    public void setRequest(String request) {
+        this.request = request;
     }
 
 }

@@ -6,6 +6,7 @@ import java.util.Collection;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import com.openexchange.context.ContextService;
+import com.openexchange.database.CreateTableService;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.groupware.update.UpdateTask;
 import com.openexchange.groupware.update.UpdateTaskProviderService;
@@ -13,6 +14,7 @@ import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.realtime.MessageDispatcher;
 import com.openexchange.realtime.presence.subscribe.PresenceSubscriptionService;
 import com.openexchange.realtime.presence.subscribe.database.CreatePresenceSubscriptionDB;
+import com.openexchange.realtime.presence.subscribe.database.PresenceSubscriptionsTable;
 import com.openexchange.realtime.presence.subscribe.database.SubscriptionsSQL;
 import com.openexchange.realtime.presence.subscribe.impl.SubscriptionServiceImpl;
 import com.openexchange.user.UserService;
@@ -37,6 +39,7 @@ public class Activator extends HousekeepingActivator {
         final DatabaseService dbService = getService(DatabaseService.class);
         SubscriptionsSQL.db = dbService;
         registerService(PresenceSubscriptionService.class, new SubscriptionServiceImpl(this));
+        registerService(CreateTableService.class, new PresenceSubscriptionsTable());
         registerService(UpdateTaskProviderService.class, new UpdateTaskProviderService() {
 
             @Override

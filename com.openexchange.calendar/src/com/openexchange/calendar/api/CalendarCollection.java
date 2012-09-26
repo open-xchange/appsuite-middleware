@@ -689,12 +689,12 @@ public final class CalendarCollection implements CalendarCollectionService {
                 dsf(recStrBuilder, 'i', interval);
                 dsf(recStrBuilder, 's', cdao.getStartDate().getTime());
                 cdao.setRecurringStart(cdao.getStartDate().getTime());
-                if (cdao.containsUntil() && cdao.getUntil() != null) {
-                    dsf(recStrBuilder, 'e', cdao.getUntil().getTime());
-                } else if (occurrences > 0) {
+                if (occurrences > 0) {
                     cdao.setUntil(calculateUntilOfSequence(cdao));
                     dsf(recStrBuilder, 'e', cdao.getUntil().getTime());
                     dsf(recStrBuilder, 'o', occurrences);
+                } else if (cdao.containsUntil() && cdao.getUntil() != null) {
+                    dsf(recStrBuilder, 'e', cdao.getUntil().getTime());
                 }
             } else if (recurrenceType == CalendarObject.WEEKLY) {
                 dsf(recStrBuilder, 2);
@@ -702,12 +702,12 @@ public final class CalendarCollection implements CalendarCollectionService {
                 dsf(recStrBuilder, 'a', weekdays);
                 dsf(recStrBuilder, 's', cdao.getStartDate().getTime());
                 cdao.setRecurringStart(cdao.getStartDate().getTime());
-                if (cdao.containsUntil() && cdao.getUntil() != null) {
-                    dsf(recStrBuilder, 'e', cdao.getUntil().getTime());
-                } else if (occurrences > 0) {
+                if (occurrences > 0) {
                     cdao.setUntil(calculateUntilOfSequence(cdao));
                     dsf(recStrBuilder, 'e', cdao.getUntil().getTime());
                     dsf(recStrBuilder, 'o', occurrences);
+                } else if (cdao.containsUntil() && cdao.getUntil() != null) {
+                    dsf(recStrBuilder, 'e', cdao.getUntil().getTime());
                 }
             } else if (recurrenceType == CalendarObject.MONTHLY) {
                 if (monthday <= 0) {
@@ -722,12 +722,12 @@ public final class CalendarCollection implements CalendarCollectionService {
                     recStrBuilder.append('b').append(DELIMITER_PIPE).append(monthday).append(DELIMITER_PIPE);
                     dsf(recStrBuilder, 's', cdao.getStartDate().getTime());
                     cdao.setRecurringStart(cdao.getStartDate().getTime());
-                    if (cdao.containsUntil() && cdao.getUntil() != null) {
-                        dsf(recStrBuilder, 'e', cdao.getUntil().getTime());
-                    } else if (occurrences > 0) {
+                    if (occurrences > 0) {
                         cdao.setUntil(calculateUntilOfSequence(cdao));
                         dsf(recStrBuilder, 'e', cdao.getUntil().getTime());
                         dsf(recStrBuilder, 'o', occurrences);
+                    } else if (cdao.containsUntil() && cdao.getUntil() != null) {
+                        dsf(recStrBuilder, 'e', cdao.getUntil().getTime());
                     }
                 } else {
                     if (monthday > 5) {
@@ -739,12 +739,12 @@ public final class CalendarCollection implements CalendarCollectionService {
                     recStrBuilder.append('b').append(DELIMITER_PIPE).append(monthday).append(DELIMITER_PIPE);
                     dsf(recStrBuilder, 's', cdao.getStartDate().getTime());
                     cdao.setRecurringStart(cdao.getStartDate().getTime());
-                    if (cdao.containsUntil() && cdao.getUntil() != null) {
-                        dsf(recStrBuilder, 'e', cdao.getUntil().getTime());
-                    } else if (occurrences > 0) {
+                    if (occurrences > 0) {
                         cdao.setUntil(calculateUntilOfSequence(cdao));
                         dsf(recStrBuilder, 'e', cdao.getUntil().getTime());
                         dsf(recStrBuilder, 'o', occurrences);
+                    } else if (cdao.containsUntil() && cdao.getUntil() != null) {
+                        dsf(recStrBuilder, 'e', cdao.getUntil().getTime());
                     }
                 }
             } else if (recurrenceType == CalendarObject.YEARLY) {
@@ -758,12 +758,12 @@ public final class CalendarCollection implements CalendarCollectionService {
                     dsf(recStrBuilder, 'c', month);
                     dsf(recStrBuilder, 's', cdao.getStartDate().getTime());
                     cdao.setRecurringStart(cdao.getStartDate().getTime());
-                    if (cdao.containsUntil() && cdao.getUntil() != null) {
-                        dsf(recStrBuilder, 'e', cdao.getUntil().getTime());
-                    } else if (occurrences > 0) {
+                    if (occurrences > 0) {
                         cdao.setUntil(calculateUntilOfSequence(cdao));
                         dsf(recStrBuilder, 'e', cdao.getUntil().getTime());
                         dsf(recStrBuilder, 'o', occurrences);
+                    } else if (cdao.containsUntil() && cdao.getUntil() != null) {
+                        dsf(recStrBuilder, 'e', cdao.getUntil().getTime());
                     }
                 } else {
                     if (monthday < 1 || monthday > 5) {
@@ -776,12 +776,12 @@ public final class CalendarCollection implements CalendarCollectionService {
                     dsf(recStrBuilder, 'c', month);
                     dsf(recStrBuilder, 's', cdao.getStartDate().getTime());
                     cdao.setRecurringStart(cdao.getStartDate().getTime());
-                    if (cdao.containsUntil() && cdao.getUntil() != null) {
-                        dsf(recStrBuilder, 'e', cdao.getUntil().getTime());
-                    } else if (occurrences > 0) {
+                    if (occurrences > 0) {
                         cdao.setUntil(calculateUntilOfSequence(cdao));
                         dsf(recStrBuilder, 'e', cdao.getUntil().getTime());
                         dsf(recStrBuilder, 'o', occurrences);
+                    } else if (cdao.containsUntil() && cdao.getUntil() != null) {
+                        dsf(recStrBuilder, 'e', cdao.getUntil().getTime());
                     }
                 }
             } else {

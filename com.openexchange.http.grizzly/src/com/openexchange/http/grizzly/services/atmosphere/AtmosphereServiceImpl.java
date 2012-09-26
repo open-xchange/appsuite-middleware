@@ -52,6 +52,7 @@ package com.openexchange.http.grizzly.services.atmosphere;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 import org.apache.commons.logging.Log;
+import org.atmosphere.container.Grizzly2CometSupport;
 import org.atmosphere.container.Grizzly2WebSocketSupport;
 import org.atmosphere.cpr.AtmosphereFramework;
 import org.atmosphere.cpr.AtmosphereHandler;
@@ -90,6 +91,7 @@ public class AtmosphereServiceImpl  implements AtmosphereService {
             .and("org.atmosphere.cpr.broadcasterLifeCyclePolicy","NEVER")
             .build();
         atmosphereFramework.init(config);
+//        atmosphereFramework.setAsyncSupport(new Grizzly2CometSupport(atmosphereFramework.getAtmosphereConfig()));
         atmosphereFramework.setAsyncSupport(new Grizzly2WebSocketSupport(atmosphereFramework.getAtmosphereConfig()));
         
         ServletRegistration atmosphereRegistration = realtimeContext.addServlet("AtmosphereServlet", atmosphereServlet);

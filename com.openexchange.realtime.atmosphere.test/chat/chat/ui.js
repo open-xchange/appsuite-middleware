@@ -25,7 +25,7 @@ define("chat/ui", function () {
     
     var splits = document.location.toString().split('/');
     var proto = splits[0]; var host = splits[2];
-    var location = proto+"//"+host+"/realtime/atmosphere/rt";
+    var url = proto+"//"+host+"/realtime/atmosphere/rt";
 
     <!-- The following code is just here for demonstration purpose and not required -->
     <!-- Used to demonstrate the request.onTransportFailure callback. Not mandatory -->
@@ -42,7 +42,7 @@ define("chat/ui", function () {
     $.each(transports, function (index, transport) {
         var req = new $.atmosphere.AtmosphereRequest();
 
-	    req.url = location;
+	    req.url = url;
         req.contentType = "application/json";
         req.transport = transport;
         req.headers = { "negotiating" : "true", session: session };
@@ -60,7 +60,7 @@ define("chat/ui", function () {
     });
     
     var request = {
-        url: location,
+        url: url,
         contentType : "application/json",
         logLevel : 'debug',
         transport : 'websocket' ,

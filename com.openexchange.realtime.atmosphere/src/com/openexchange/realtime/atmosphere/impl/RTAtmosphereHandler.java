@@ -67,6 +67,7 @@ import org.atmosphere.cpr.AtmosphereResponse;
 import org.atmosphere.cpr.Broadcaster;
 import org.atmosphere.cpr.BroadcasterFactory;
 import org.atmosphere.cpr.MetaBroadcaster;
+import org.atmosphere.websocket.WebSocketEventListenerAdapter;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.exception.OXException;
@@ -141,6 +142,7 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
     @Override
     public void onRequest(AtmosphereResource resource) throws IOException {
         // Log all events on the console, including WebSocket events for debugging
+        resource.addEventListener(new WebSocketEventListenerAdapter());
 
         AtmosphereRequest request = resource.getRequest();
         AtmosphereResponse response = resource.getResponse();

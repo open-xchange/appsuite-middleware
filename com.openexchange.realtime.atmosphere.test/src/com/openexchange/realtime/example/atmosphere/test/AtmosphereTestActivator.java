@@ -40,7 +40,7 @@ public class AtmosphereTestActivator extends HousekeepingActivator {
          */
         registerService(SimplePayloadConverter.class, new ChatMessageToJSONConverter());
         registerService(SimplePayloadConverter.class, new JSONToChatMessageConverter());
-        
+
         /*
          * After adding the new SimplePayloadConverters that are able to convert
          * from and to ChatMessage POJOS we can register a new OXRTConversionHandler
@@ -55,7 +55,7 @@ public class AtmosphereTestActivator extends HousekeepingActivator {
         LOG.info("added \"/chat\" AtmosphereHandler");
         
         HttpService httpService = getService(HttpService.class);
-        httpService.registerResources("/originalAtmosphereChat", "/originalAtmosphereChat", null);
+        httpService.registerResources("/atmosphere/originalChat", "/originalAtmosphereChat", null);
         httpService.registerResources("/atmosphere/chat", "/chat", null);
         httpService.registerResources("/atmosphere/presence","/presence", null);
     }
