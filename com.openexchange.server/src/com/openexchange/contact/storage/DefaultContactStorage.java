@@ -119,6 +119,33 @@ public abstract class DefaultContactStorage implements ContactStorage {
     public SearchIterator<Contact> search(Session session, ContactSearchObject contactSearch, ContactField[] fields, SortOptions sortOptions) throws OXException {
         return search(session, getSearchTerm(contactSearch), fields, sortOptions);
     }
+    
+    /**
+     * Default implementation that first queries all contacts in the folder
+     * and then deletes them one after the other. Override if applicable for 
+     * storage.
+     */
+    @Override
+    public void delete(Session session, String folderId) throws OXException {
+        Date simulatedLastRead = new Date(Long.MAX_VALUE); // on folder deletion, the client's last modified timestamp is not used
+        SearchIterator<Contact> searchIterator = null;
+        try {
+            searchIterator = this.all(session, folderId, new ContactField[] { ContactField.OBJECT_ID });
+            if (null != searchIterator) {
+                while (searchIterator.hasNext()) {
+                    delete(session, folderId, String.valueOf(searchIterator.next().getObjectID()), simulatedLastRead);
+                }
+            }
+        } finally {
+            if (null != searchIterator) {
+                try {
+                    searchIterator.close();
+                } catch (OXException e) {
+                    // ignore
+                }
+            }
+        }
+    }
 
     /**
      * Gets all contact fields.

@@ -351,58 +351,114 @@ public class ContactServiceImpl extends DefaultContactService {
 		new EventClient(session).modify(storedContact, contact, folder);
 	}
 	
-	@Override
+    @Override
     protected void doDeleteContact(Session session, String folderID, String objectID, Date lastRead) throws OXException {
-		int userID = session.getUserId();
-		int contextID = session.getContextId();
-		final ContactStorage storage = Tools.getStorage(session, folderID);
-		/*
-		 * check folder
-		 */
-		final FolderObject folder = Tools.getFolder(contextID, folderID);
-		Check.isContactFolder(folder, session);
-		/*
-		 * check general permissions
-		 */
-		final EffectivePermission permission = Tools.getPermission(contextID, folderID, userID);
-		Check.canDeleteOwn(permission, session, folderID);
-		/*
-		 * check currently stored contact
-		 */
-		final Contact storedContact = storage.get(session, folderID, objectID, new ContactField[] { ContactField.CREATED_BY, 
-				ContactField.LAST_MODIFIED });
-		Check.contactNotNull(storedContact, contextID, Tools.parse(objectID));
-		if (storedContact.getCreatedBy() != userID) {
-			Check.canDeleteAll(permission, session, folderID);
-		}
-		Check.lastModifiedBefore(storedContact, lastRead);
-		/*
-		 * delete contact from storage
-		 */
-		storage.delete(session, folderID, objectID, lastRead);
-		/*
-		 * broadcast event
-		 */
-		storedContact.setContextId(contextID);
-		storedContact.setParentFolderID(parse(folderID));
-		storedContact.setObjectID(parse(objectID));
-		new EventClient(session).delete(storedContact, folder);
-	}
-	
+        int userID = session.getUserId();
+        int contextID = session.getContextId();
+        final ContactStorage storage = Tools.getStorage(session, folderID);
+        /*
+         * check folder
+         */
+        final FolderObject folder = Tools.getFolder(contextID, folderID);
+        Check.isContactFolder(folder, session);
+        /*
+         * check general permissions
+         */
+        final EffectivePermission permission = Tools.getPermission(contextID, folderID, userID);
+        Check.canDeleteOwn(permission, session, folderID);
+        /*
+         * check currently stored contact
+         */
+        final Contact storedContact = storage.get(session, folderID, objectID, new ContactField[] { ContactField.CREATED_BY, 
+                ContactField.LAST_MODIFIED });
+        Check.contactNotNull(storedContact, contextID, Tools.parse(objectID));
+        if (storedContact.getCreatedBy() != userID) {
+            Check.canDeleteAll(permission, session, folderID);
+        }
+        Check.lastModifiedBefore(storedContact, lastRead);
+        /*
+         * delete contact from storage
+         */
+        storage.delete(session, folderID, objectID, lastRead);
+        /*
+         * broadcast event
+         */
+        storedContact.setContextId(contextID);
+        storedContact.setParentFolderID(parse(folderID));
+        storedContact.setObjectID(parse(objectID));
+        new EventClient(session).delete(storedContact, folder);
+    }
+    
+    @Override
+    protected void doDeleteContacts(Session session, String folderID) throws OXException {
+        int userID = session.getUserId();
+        int contextID = session.getContextId();
+        final ContactStorage storage = Tools.getStorage(session, folderID);
+        /*
+         * check folder
+         */
+        final FolderObject folder = Tools.getFolder(contextID, folderID);
+        Check.isContactFolder(folder, session);
+        /*
+         * check general permissions
+         */
+        final EffectivePermission permission = Tools.getPermission(contextID, folderID, userID);
+        Check.canDeleteAll(permission, session, folderID);
+        /*
+         * check currently stored contacts
+         */
+        List<Contact> storedContacts = new ArrayList<Contact>();
+        SearchIterator<Contact> searchIterator = null;
+        try {
+            searchIterator = storage.all(session, folderID, new ContactField[] { ContactField.CREATED_BY, ContactField.OBJECT_ID });
+            if (null != searchIterator) {
+                while (searchIterator.hasNext()) {
+                    Contact storedContact = searchIterator.next();
+                    storedContacts.add(storedContact);
+                }
+            }            
+        } finally {
+            if (null != searchIterator) {
+                try {
+                    searchIterator.close();
+                } catch (OXException e) {
+                    LOG.warn("error closing iterator", e);
+                }
+            }
+        }
+        /*
+         * delete contacts from storage
+         */
+        storage.delete(session, folderID);
+        /*
+         * broadcast events
+         */
+        EventClient eventClient = new EventClient(session);
+        Date now = new Date();
+        for (Contact contact : storedContacts) {
+            contact.setContextId(contextID);
+            contact.setParentFolderID(parse(folderID));
+            contact.setLastModified(now);
+            contact.setModifiedBy(userID);
+            eventClient.delete(contact, folder);            
+        }
+    }
+    
 	@Override
     protected <O> SearchIterator<Contact> doGetContacts(boolean deleted, Session session, String folderID, String[] ids, 
         ContactField[] fields, SortOptions sortOptions, Date since) throws OXException {
-		int userID = session.getUserId();
+//		int userID = session.getUserId();
 		int contextID = session.getContextId();
 		/*
 		 * check folder
 		 */
-		final FolderObject folder = Tools.getFolder(contextID, folderID);
+		final FolderObject folder = Tools.getFolder(contextID, folderID, deleted);
 		Check.isContactFolder(folder, session);
 		/*
 		 * check general permissions
 		 */
-		final EffectivePermission permission = Tools.getPermission(contextID, folderID, userID);
+        final EffectivePermission permission = Tools.getPermission(session, folder);
+//        final EffectivePermission permission = Tools.getPermission(contextID, folderID, userID, deleted);
 		Check.canReadOwn(permission, session, folderID);
 		/*
 		 * prepare fields and sort options

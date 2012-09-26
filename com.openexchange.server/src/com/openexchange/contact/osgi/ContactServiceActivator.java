@@ -60,6 +60,7 @@ import com.openexchange.folder.FolderService;
 import com.openexchange.log.LogFactory;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.server.services.ServerServiceRegistry;
+import com.openexchange.userconf.UserConfigurationService;
 
 /**
  * {@link ContactServiceActivator}
@@ -79,7 +80,8 @@ public class ContactServiceActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ContactStorageRegistry.class, ContextService.class, FolderService.class, ConfigurationService.class };
+        return new Class<?>[] { ContactStorageRegistry.class, ContextService.class, FolderService.class, ConfigurationService.class, 
+            UserConfigurationService.class };
     }
     
     @Override

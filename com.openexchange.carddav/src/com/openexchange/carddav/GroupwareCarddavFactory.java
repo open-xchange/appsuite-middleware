@@ -67,6 +67,7 @@ import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.contact.ContactService;
 import com.openexchange.contact.SortOptions;
 import com.openexchange.exception.OXException;
+import com.openexchange.folderstorage.ContentType;
 import com.openexchange.folderstorage.FolderResponse;
 import com.openexchange.folderstorage.FolderService;
 import com.openexchange.folderstorage.FolderStorage;
@@ -415,21 +416,39 @@ public class GroupwareCarddavFactory extends AbstractWebdavFactory {
 		 * @return
 		 * @throws FolderException 
 		 */
-	    private List<UserizedFolder> getVisibleFolders(final Type type) throws OXException {
-	    	final List<UserizedFolder> folders = new ArrayList<UserizedFolder>();
-			final FolderService folderService = this.factory.getFolderService();
-			final FolderResponse<UserizedFolder[]> visibleFoldersResponse = folderService.getVisibleFolders(
-					FolderStorage.REAL_TREE_ID, ContactContentType.getInstance(), type, true, 
-					this.factory.getSession(), null);
+        private List<UserizedFolder> getVisibleFolders(final Type type) throws OXException {
+            final List<UserizedFolder> folders = new ArrayList<UserizedFolder>();
+            final FolderService folderService = this.factory.getFolderService();
+            final FolderResponse<UserizedFolder[]> visibleFoldersResponse = folderService.getVisibleFolders(
+                    FolderStorage.REAL_TREE_ID, ContactContentType.getInstance(), type, true, 
+                    this.factory.getSession(), null);
             final UserizedFolder[] response = visibleFoldersResponse.getResponse();
             for (final UserizedFolder folder : response) {
                 if (Permission.READ_OWN_OBJECTS < folder.getOwnPermission().getReadPermission() && false == this.isBlacklisted(folder)) {
-                	folders.add(folder);                	
+                    folders.add(folder);                    
                 }
             }
             return folders;
-	    }		
-		
+        }       
+        
+        private List<UserizedFolder> getDeletedFolders(Date since) throws OXException {
+            List<UserizedFolder> folders = new ArrayList<UserizedFolder>();
+            FolderService folderService = this.factory.getFolderService();
+            FolderResponse<UserizedFolder[][]> updatedFoldersResponse = folderService.getUpdates(
+                FolderStorage.REAL_TREE_ID, since, false, new ContentType[] { ContactContentType.getInstance() },
+                this.factory.getSession(), null);
+            UserizedFolder[][] response = updatedFoldersResponse.getResponse();
+            if (2 <= response.length && null != response[1] && 0 < response[1].length) {
+                for (UserizedFolder folder : response[1]) {
+                    if (Permission.READ_OWN_OBJECTS < folder.getOwnPermission().getReadPermission() && 
+                        false == this.isBlacklisted(folder) && ContactContentType.getInstance().equals(folder.getContentType())) {
+                        folders.add(folder);
+                    }
+                }
+            }
+            return folders;
+        }       
+        
 		/**
 		 * Gets an aggregated {@link Date} representing the last modification time of all resources. 
 		 * @return
@@ -537,10 +556,17 @@ public class GroupwareCarddavFactory extends AbstractWebdavFactory {
 		 */
 		public List<Contact> getDeletedContacts(Date since) throws OXException  {
 			List<Contact> contacts = new ArrayList<Contact>();
-			List<UserizedFolder> folders = this.getFolders();
-			for (UserizedFolder folder : folders) {
-				contacts.addAll(this.getDeletedContacts(since, folder.getID()));
-			}
+            List<UserizedFolder> folders = this.getFolders();
+            for (UserizedFolder folder : folders) {
+                contacts.addAll(this.getDeletedContacts(since, folder.getID()));
+            }
+            List<UserizedFolder> deletedFolders = this.getDeletedFolders(since);
+            for (UserizedFolder deletedFolder : deletedFolders) {
+                List<Contact> deletedContacts = this.getDeletedContacts(since, deletedFolder.getID());
+                LOG.debug("Detected deleted folder: " + deletedFolder + ", containing " + deletedContacts.size() + " contacts.");
+                contacts.addAll(deletedContacts);
+//                contacts.addAll(this.getDeletedContacts(since, deletedFolder.getID()));
+            }
 			return contacts;
 		}
 		
