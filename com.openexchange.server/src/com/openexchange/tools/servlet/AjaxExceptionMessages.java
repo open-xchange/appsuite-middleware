@@ -129,5 +129,8 @@ public final class AjaxExceptionMessages implements LocalizableStrings {
     
     // Bad request. The server is unable to handle the request.
     public static final String BAD_REQUEST = "Bad request. The server is unable to handle the request.";
+    
+    // The file \"%1$s\" (\"%2$s\") can't be imported as image. Only image types (JPG, GIF, BMP or PNG) are supported.
+    public static final String NO_IMAGE_FILE_MSG = "The file \"%1$s\" (\"%2$s\") can't be imported as image. Only image types (JPG, GIF, BMP or PNG) are supported.";
 
 }

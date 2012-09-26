@@ -1,3 +1,7 @@
+* 2012-09-25 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 23095: Validate contact image size and content type
+
 * 2012-09-25 - thorben.betten@open-xchange.com
 
  - Fix for bug 21882: Added update task to remove listed unnecessary indexes

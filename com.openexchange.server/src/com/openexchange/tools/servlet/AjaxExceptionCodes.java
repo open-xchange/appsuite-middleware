@@ -92,7 +92,12 @@ public enum AjaxExceptionCodes implements OXExceptionCode {
     /**
      * Unknown AJAX action %1$s in module %2$s.
      */
-    UNKNOWN_ACTION_IN_MODULE(AjaxExceptionMessages.UnknownActionInModule_MSG, Category.CATEGORY_ERROR, 21);
+    UNKNOWN_ACTION_IN_MODULE(AjaxExceptionMessages.UnknownActionInModule_MSG, Category.CATEGORY_ERROR, 21),
+    /**
+     * The file \"%1$s\" (\"%2$s\") can't be imported as image. Only image types (JPG, GIF, BMP or PNG) are supported.
+     */
+    NO_IMAGE_FILE(AjaxExceptionMessages.NO_IMAGE_FILE_MSG, Category.CATEGORY_USER_INPUT, 22),
+    ;    
 
     public static final String PREFIX = "SVL";
 
