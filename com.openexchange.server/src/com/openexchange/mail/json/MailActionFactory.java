@@ -65,6 +65,7 @@ import com.openexchange.mail.json.actions.ClearAction;
 import com.openexchange.mail.json.actions.CopyAction;
 import com.openexchange.mail.json.actions.DeleteAction;
 import com.openexchange.mail.json.actions.EditAction;
+import com.openexchange.mail.json.actions.ExpungeAction;
 import com.openexchange.mail.json.actions.GetAction;
 import com.openexchange.mail.json.actions.GetAttachmentAction;
 import com.openexchange.mail.json.actions.GetForwardAction;
@@ -126,6 +127,7 @@ public class MailActionFactory implements AJAXActionServiceFactory, AJAXStateHan
         actions.put("transport", new TransportMailAction(services));
         actions.put("receipt_ack", new ReceiptAckAction(services));
         actions.put("clear", new ClearAction(services));
+        actions.put("expunge", new ExpungeAction(services));
         actions.put("new", new NewAction(services));
         actions.put("import", new ImportAction(services));
         actions.put("edit", new EditAction(services));

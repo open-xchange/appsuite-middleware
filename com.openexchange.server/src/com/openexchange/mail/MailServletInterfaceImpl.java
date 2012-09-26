@@ -135,6 +135,7 @@ import com.openexchange.mail.mime.processing.MimeForward;
 import com.openexchange.mail.parser.MailMessageParser;
 import com.openexchange.mail.parser.handlers.NonInlineForwardPartHandler;
 import com.openexchange.mail.permission.MailPermission;
+import com.openexchange.mail.search.FlagTerm;
 import com.openexchange.mail.search.HeaderTerm;
 import com.openexchange.mail.search.SearchTerm;
 import com.openexchange.mail.search.SearchUtility;
@@ -285,11 +286,55 @@ final class MailServletInterfaceImpl extends MailServletInterface {
         return Collections.unmodifiableCollection(warnings);
     }
 
+    /**
+     * The fields containing only the mail identifier.
+     */
+    private static final MailField[] FIELDS_ID = new MailField[] { MailField.ID };
+
+    @Override
+    public boolean expungeFolder(final String folder, final boolean hardDelete) throws OXException {
+        final FullnameArgument fullnameArgument = prepareMailFolderParam(folder);
+        final int accountId = fullnameArgument.getAccountId();
+        initConnection(accountId);
+        final String fullname = fullnameArgument.getFullname();
+        final IMailFolderStorage folderStorage = mailAccess.getFolderStorage();
+        if (folderStorage instanceof IMailFolderStorageEnhanced) {
+            ((IMailFolderStorageEnhanced) folderStorage).expungeFolder(fullname, hardDelete);
+        } else {
+            final IMailMessageStorage messageStorage = mailAccess.getMessageStorage();
+            final MailMessage[] messages = messageStorage.searchMessages(
+                fullname,
+                IndexRange.NULL,
+                MailSortField.RECEIVED_DATE,
+                OrderDirection.ASC,
+                new FlagTerm(MailMessage.FLAG_DELETED, true),
+                FIELDS_ID);
+            final List<String> mailIds = new ArrayList<String>(messages.length);
+            for (int i = 0; i < messages.length; i++) {
+                final MailMessage mailMessage = messages[i];
+                if (null != mailMessage) {
+                    mailIds.add(mailMessage.getMailId());
+                }
+            }
+            if (hardDelete) {
+                messageStorage.deleteMessages(fullname, mailIds.toArray(new String[0]), true);
+            } else {
+                messageStorage.moveMessages(fullname, folderStorage.getTrashFolder(), mailIds.toArray(new String[0]), true);
+            }
+        }
+        postEvent(accountId, fullname, true);
+        final String trashFullname = prepareMailFolderParam(getTrashFolder(accountId)).getFullname();
+        if (!hardDelete) {
+            postEvent(accountId, trashFullname, true);
+        }
+        return true;
+    }
+
     @Override
     public boolean clearFolder(final String folder) throws OXException {
         final FullnameArgument fullnameArgument = prepareMailFolderParam(folder);
         final int accountId = fullnameArgument.getAccountId();
-        initConnection(fullnameArgument.getAccountId());
+        initConnection(accountId);
         final String fullname = fullnameArgument.getFullname();
         /*
          * Only backup if no hard-delete is set in user's mail configuration and fullname does not denote trash (sub)folder
@@ -306,7 +351,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
             /*
              * Update message cache
              */
-            MailMessageCache.getInstance().removeFolderMessages(fullnameArgument.getAccountId(), fullname, session.getUserId(), contextId);
+            MailMessageCache.getInstance().removeFolderMessages(accountId, fullname, session.getUserId(), contextId);
         } catch (final OXException e) {
             LOG.error(e.getMessage(), e);
         }
@@ -327,7 +372,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
     public boolean clearFolder(final String folder, final boolean hardDelete) throws OXException {
         final FullnameArgument fullnameArgument = prepareMailFolderParam(folder);
         final int accountId = fullnameArgument.getAccountId();
-        initConnection(fullnameArgument.getAccountId());
+        initConnection(accountId);
         final String fullname = fullnameArgument.getFullname();
         /*
          * Only backup if no hard-delete is set in user's mail configuration and fullname does not denote trash (sub)folder
@@ -349,7 +394,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
             /*
              * Update message cache
              */
-            MailMessageCache.getInstance().removeFolderMessages(fullnameArgument.getAccountId(), fullname, session.getUserId(), contextId);
+            MailMessageCache.getInstance().removeFolderMessages(accountId, fullname, session.getUserId(), contextId);
         } catch (final OXException e) {
             LOG.error(e.getMessage(), e);
         }

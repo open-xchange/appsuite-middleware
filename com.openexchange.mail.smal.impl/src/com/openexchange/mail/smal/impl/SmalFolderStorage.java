@@ -50,6 +50,8 @@
 package com.openexchange.mail.smal.impl;
 
 import static com.openexchange.mail.utils.MailFolderUtility.prepareMailFolderParam;
+import java.util.ArrayList;
+import java.util.List;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.IndexRange;
 import com.openexchange.mail.MailExceptionCode;
@@ -64,6 +66,7 @@ import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mail.dataobjects.MailFolderDescription;
 import com.openexchange.mail.dataobjects.MailMessage;
+import com.openexchange.mail.search.FlagTerm;
 import com.openexchange.mail.smal.impl.index.IndexAccessAdapter;
 import com.openexchange.session.Session;
 
@@ -293,6 +296,38 @@ public final class SmalFolderStorage extends AbstractSMALStorage implements IMai
             OrderDirection.DESC,
             FIELDS_ID,
             -1).length;
+    }
+
+    @Override
+    public void expungeFolder(String fullName) throws OXException {
+        expungeFolder(fullName, false);
+    }
+
+    @Override
+    public void expungeFolder(String fullName, boolean hardDelete) throws OXException {
+        if (folderStorage instanceof IMailFolderStorageEnhanced) {
+            ((IMailFolderStorageEnhanced) folderStorage).expungeFolder(ensureFullName(fullName), hardDelete);
+        }
+        final IMailMessageStorage messageStorage = delegateMailAccess.getMessageStorage();
+        final MailMessage[] messages = messageStorage.searchMessages(
+            ensureFullName(fullName),
+            IndexRange.NULL,
+            MailSortField.RECEIVED_DATE,
+            OrderDirection.ASC,
+            new FlagTerm(MailMessage.FLAG_DELETED, true),
+            FIELDS_ID);
+        final List<String> mailIds = new ArrayList<String>(messages.length);
+        for (int i = 0; i < messages.length; i++) {
+            final MailMessage mailMessage = messages[i];
+            if (null != mailMessage) {
+                mailIds.add(mailMessage.getMailId());
+            }
+        }
+        if (hardDelete) {
+            messageStorage.deleteMessages(fullName, mailIds.toArray(new String[0]), true);
+        } else {
+            messageStorage.moveMessages(fullName, folderStorage.getTrashFolder(), mailIds.toArray(new String[0]), true);
+        }
     }
 
     private static String ensureFullName(final String fullName) {
