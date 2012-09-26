@@ -309,7 +309,10 @@ public final class ResponseWriter {
          * Put argument JSON array for compatibility reasons
          */
         {
-            final Object[] args = exception.getLogArgs();
+            Object[] args = exception.getLogArgs();
+            if ((null == args) || (0 == args.length)) {
+                args = exception.getDisplayArgs();
+            }
             // Enforce first condition; review later on
             if ((null == args) || (0 == args.length)) {
                 json.put(ERROR_PARAMS, new JSONArray());
@@ -583,7 +586,10 @@ public final class ResponseWriter {
          * Put argument JSON array for compatibility reasons
          */
         {
-            final Object[] args = exc.getLogArgs();
+            Object[] args = exc.getLogArgs();
+            if ((null == args) || (0 == args.length)) {
+                args = exc.getDisplayArgs();
+            }
             // Enforce first condition; review later on
             if ((null == args) || (0 == args.length)) {
                 writer.key(ResponseFields.ERROR_PARAMS).value(new JSONArray());
