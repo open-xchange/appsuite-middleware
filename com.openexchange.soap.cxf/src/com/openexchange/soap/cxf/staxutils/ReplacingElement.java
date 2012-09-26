@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.soap.cxf;
+package com.openexchange.soap.cxf.staxutils;
 
 import javax.xml.namespace.QName;
 import org.apache.ws.commons.schema.XmlSchemaElement;

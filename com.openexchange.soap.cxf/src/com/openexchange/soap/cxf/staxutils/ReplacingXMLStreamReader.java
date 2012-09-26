@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.soap.cxf;
+package com.openexchange.soap.cxf.staxutils;
 
 import java.util.List;
 import java.util.Stack;

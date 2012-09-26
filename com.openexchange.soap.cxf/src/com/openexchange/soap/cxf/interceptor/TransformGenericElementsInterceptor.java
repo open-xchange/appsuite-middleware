@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.soap.cxf;
+package com.openexchange.soap.cxf.interceptor;
 
 import java.io.InputStream;
 import javax.xml.namespace.QName;
@@ -60,6 +60,7 @@ import org.apache.cxf.message.Message;
 import org.apache.cxf.phase.Phase;
 import org.apache.cxf.service.model.BindingOperationInfo;
 import org.apache.cxf.staxutils.transform.TransformUtils;
+import com.openexchange.soap.cxf.staxutils.ReplacingXMLStreamReader;
 
 /**
  * {@link TransformGenericElementsInterceptor}
