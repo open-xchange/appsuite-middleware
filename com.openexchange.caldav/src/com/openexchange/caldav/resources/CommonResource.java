@@ -63,7 +63,6 @@ import com.openexchange.exception.OXException;
 import com.openexchange.exception.OXException.ProblematicAttribute;
 import com.openexchange.exception.OXException.Truncated;
 import com.openexchange.groupware.container.CommonObject;
-import com.openexchange.log.LogFactory;
 import com.openexchange.webdav.protocol.Protocol.Property;
 import com.openexchange.webdav.protocol.WebdavFactory;
 import com.openexchange.webdav.protocol.WebdavLock;
@@ -133,6 +132,11 @@ public abstract class CommonResource<T extends CommonObject> extends AbstractRes
                 LOG.warn(this.getUrl() + ": " + e.getMessage() + " - trimming fields and trying again.");
                 retry = true;
             }
+        } else if ("APP-0093".equals(e.getErrorCode())) {
+            /*
+             * 'Moving a recurring appointment to another folder is not supported.'
+             */
+            throw protocolException(e, HttpServletResponse.SC_CONFLICT);
         } else if (Category.CATEGORY_PERMISSION_DENIED.equals(e.getCategory())) {
             /*
              * throw appropriate protocol exception
