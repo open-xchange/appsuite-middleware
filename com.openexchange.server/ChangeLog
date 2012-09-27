@@ -1,3 +1,7 @@
+* 2012-09-27 - martin.herfurth@open-xchange.com
+
+ - Fix for bug 23105: Mail addresses should not be case sensitive.
+
 * 2012-09-26 - thorben.betten@open-xchange.com
 
  - Fix for bug 22923: Dealing with possible "Unmarshalling Error" when parsing empty date field
