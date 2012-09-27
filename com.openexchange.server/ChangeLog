@@ -1,3 +1,7 @@
+* 2012-09-27 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 21373: Send SC_FORBIDDEN when trying to move an appointment series to another folder 
+
 * 2012-09-27 - martin.herfurth@open-xchange.com
 
  - Fix for bug 23105: Mail addresses should not be case sensitive.
@@ -10,7 +14,6 @@
 
  - Fix for bug 23095: Validate contact image size and content type
  - Fix for bug 23078: List contacts from deleted folders as deleted resources
- - Fix for bug 21373: Send SC_FORBIDDEN when trying to move an appointment series to another folder 
 
 * 2012-09-25 - thorben.betten@open-xchange.com
 
