@@ -1,3 +1,7 @@
+* 2012-09-27 - thorben.betten@open-xchange.com
+
+ - Fix for bug 23116: Added import to server bundle
+
 * 2012-09-27 - tobias.friedrich@open-xchange.com
 
  - Fix for bug 21373: Send SC_FORBIDDEN when trying to move an appointment series to another folder 
