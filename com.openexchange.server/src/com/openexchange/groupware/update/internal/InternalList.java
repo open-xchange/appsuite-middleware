@@ -474,6 +474,7 @@ public final class InternalList {
 
         // Removes unnecessary indexes from certain tables (see Bug #21882)
         new com.openexchange.groupware.update.tasks.RemoveUnnecessaryIndexes(),
+        new com.openexchange.groupware.update.tasks.RemoveUnnecessaryIndexes2(),
 
     };
 }
