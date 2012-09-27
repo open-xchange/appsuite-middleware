@@ -130,7 +130,7 @@ public class ResourceGroupParticipant implements Participant, Comparable<Partici
      * {@inheritDoc}
      */
     public void setEmailAddress(final String emailaddress) {
-        this.emailaddress = emailaddress;
+        this.emailaddress = emailaddress == null ? null : emailaddress.toLowerCase();
     }
 
     /**

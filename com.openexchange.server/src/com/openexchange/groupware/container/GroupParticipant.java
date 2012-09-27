@@ -130,7 +130,7 @@ public class GroupParticipant implements Participant, Comparable<Participant> {
      * {@inheritDoc}
      */
     public void setEmailAddress(final String emailaddress) {
-        this.emailaddress = emailaddress;
+        this.emailaddress = emailaddress == null ? null : emailaddress.toLowerCase();
     }
 
     /**

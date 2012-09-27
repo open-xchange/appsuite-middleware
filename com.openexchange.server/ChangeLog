@@ -1,3 +1,7 @@
+* 2012-09-27 - martin.herfurth@open-xchange.com
+
+ - Fix for bug 23105: Mail addresses should not be case sensitive.
+
 * 2012-09-20 - martin.herfurth@open-xchange.com
 
  - Fix for bug 23072: Bad All day appointments conflict when in different timezone.

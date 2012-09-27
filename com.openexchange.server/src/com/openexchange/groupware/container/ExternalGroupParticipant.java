@@ -73,7 +73,7 @@ public class ExternalGroupParticipant implements Participant, Comparable<Partici
      */
     public ExternalGroupParticipant(final String emailAddress) {
         super();
-        emailaddress = emailAddress;
+        setEmailAddress(emailAddress);
     }
 
     /**
@@ -130,7 +130,7 @@ public class ExternalGroupParticipant implements Participant, Comparable<Partici
      * {@inheritDoc}
      */
     public void setEmailAddress(final String emailaddress) {
-        this.emailaddress = emailaddress;
+        this.emailaddress = emailaddress == null ? null : emailaddress.toLowerCase();
     }
 
     /**
