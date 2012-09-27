@@ -1,6 +1,7 @@
 * 2012-09-27 - tobias.friedrich@open-xchange.com
 
  - Fix for bug 21373: Send SC_FORBIDDEN when trying to move an appointment series to another folder 
+ - Fix for bug 21650: Make all folders available via CardDAV 
 
 * 2012-09-27 - martin.herfurth@open-xchange.com
 
