@@ -908,12 +908,7 @@ public final class HttpServletRequestImpl implements HttpServletRequest {
     }
 
     public void setPathInfo(final String pathInfo) {
-        if (null == pathInfo) {
-            this.pathInfo = null;
-        } else {
-            // Ensure starting slash '/' character
-            this.pathInfo = pathInfo.length() > 0 && '/' != pathInfo.charAt(0) ? '/' + pathInfo : pathInfo;
-        }
+        this.pathInfo = pathInfo;
     }
 
     @Override
