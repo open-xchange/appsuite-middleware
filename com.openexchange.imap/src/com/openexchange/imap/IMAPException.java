@@ -50,7 +50,9 @@
 package com.openexchange.imap;
 
 import java.util.EnumMap;
+import java.util.EnumSet;
 import java.util.Map;
+import java.util.Set;
 import com.openexchange.exception.Category;
 import com.openexchange.exception.LogLevel;
 import com.openexchange.exception.OXException;
@@ -974,6 +976,17 @@ public final class IMAPException extends OXException {
             return create((Throwable) null, args);
         }
 
+        private static final Set<Category.EnumType> DISPLAYABLE = EnumSet.of(
+            Category.EnumType.CAPACITY,
+            Category.EnumType.CONFLICT,
+            Category.EnumType.CONNECTIVITY,
+            Category.EnumType.PERMISSION_DENIED,
+            Category.EnumType.SERVICE_DOWN,
+            Category.EnumType.TRUNCATED,
+            Category.EnumType.TRY_AGAIN,
+            Category.EnumType.USER_INPUT,
+            Category.EnumType.WARNING);
+
         /**
          * Creates a new {@link OXException} instance pre-filled with this code's attributes.
          *
@@ -986,7 +999,15 @@ public final class IMAPException extends OXException {
             if (category.getLogLevel().implies(LogLevel.DEBUG)) {
                 ret = new OXException(detailNumber, message, cause, args);
             } else {
-                ret = new OXException(detailNumber, Category.EnumType.TRY_AGAIN.equals(category.getType()) ? OXExceptionStrings.MESSAGE_RETRY : OXExceptionStrings.MESSAGE, new Object[0]).setLogMessage(message, args);
+                if (DISPLAYABLE.contains(category.getType())) {
+                    ret = new OXException(detailNumber, message, cause, args).setLogMessage(message, args);
+                } else {
+                    ret = new OXException(
+                        detailNumber,
+                        Category.EnumType.TRY_AGAIN.equals(category.getType()) ? OXExceptionStrings.MESSAGE_RETRY : OXExceptionStrings.MESSAGE,
+                        cause,
+                        new Object[0]).setLogMessage(message, args);
+                }
             }
             return ret.addCategory(category).setPrefix(PREFIX);
         }

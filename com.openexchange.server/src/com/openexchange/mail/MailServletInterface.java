@@ -336,6 +336,11 @@ public abstract class MailServletInterface {
     public abstract boolean deleteMessages(String folder, String[] msgUIDs, boolean hardDelete) throws OXException;
 
     /**
+     * Expunges denoted folder.
+     */
+    public abstract boolean expungeFolder(final String folder, final boolean hardDelete) throws OXException;
+
+    /**
      * Clears all messages out of given folder.
      */
     public abstract boolean clearFolder(final String folderArg) throws OXException;

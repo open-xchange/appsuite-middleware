@@ -259,27 +259,28 @@ public class AdminDaemon {
      * @param context
      */
     public void getCurrentBundleStatus(final BundleContext context) {
+        final boolean debugEnabled = LOG.isDebugEnabled();
         for (final Bundle bundle : context.getBundles()) {
             if (checkSimple()) {
                 if (isNoFragmentAndActive(bundle)) {
                     bundlelist.add(bundle);
-                    if (LOG.isInfoEnabled()) {
-                        LOG.info(bundle.getSymbolicName() + " already started before admin.");
+                    if (debugEnabled) {
+                        LOG.debug(bundle.getSymbolicName() + " already started before admin.");
                     }
                 }
             } else {
                 if (bundle.getState() == Bundle.ACTIVE) {
                     if (isAllowdBundle(bundle)) {
                         bundlelist.add(bundle);
-                        if (LOG.isInfoEnabled()) {
-                            LOG.info(bundle.getSymbolicName() + " already started before admin.");
+                        if (debugEnabled) {
+                            LOG.debug(bundle.getSymbolicName() + " already started before admin.");
                         }
                     }
                 } else if (bundle.getState() == Bundle.RESOLVED && null != bundle.getHeaders().get(Constants.FRAGMENT_HOST)) {
                     if (isAllowdBundle(bundle)) {
                         bundlelist.add(bundle);
-                        if (LOG.isInfoEnabled()) {
-                            LOG.info("fragment " + bundle.getSymbolicName() + " already started before admin.");
+                        if (debugEnabled) {
+                            LOG.debug("fragment " + bundle.getSymbolicName() + " already started before admin.");
                         }
                     }
                 }
