@@ -14,6 +14,7 @@ Bundle-ClassPath: lib/quartz-2.1.5.jar,
  .
 Import-Package: com.hazelcast.core,
  com.hazelcast.query,
+ com.openexchange.log,
  com.openexchange.osgi,
  com.openexchange.server,
  javax.jms,

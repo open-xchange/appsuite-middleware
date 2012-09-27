@@ -82,7 +82,7 @@ public class IndexingServiceImpl implements IndexingService {
     
 
     @Override
-    public void scheduleJob(JobInfo info, Date startDate, long repeatInterval, int priority) throws OXException {
+    public void scheduleJob(JobInfo info, Date startDate, long repeatInterval, int priority) throws OXException {        
         if (startDate == null) {
             startDate = new Date();
         }
@@ -110,6 +110,11 @@ public class IndexingServiceImpl implements IndexingService {
         Trigger trigger = triggerBuilder.build(); 
         Scheduler scheduler = getScheduler();
         try {
+            if (LOG.isDebugEnabled()) {
+                Exception exception = new Exception();
+                LOG.debug("Scheduling job: " + info.toString() + ".", exception);
+            }
+            
             scheduler.scheduleJob(jobDetail, trigger);
         } catch (SchedulerException e) {
             if (e instanceof ObjectAlreadyExistsException) {

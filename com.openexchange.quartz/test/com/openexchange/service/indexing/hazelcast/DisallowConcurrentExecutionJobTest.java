@@ -27,9 +27,24 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import org.junit.Assert;
 import org.junit.Test;
-import org.quartz.*;
+import org.quartz.DisallowConcurrentExecution;
+import org.quartz.Job;
+import org.quartz.JobBuilder;
+import org.quartz.JobDetail;
+import org.quartz.JobExecutionContext;
+import org.quartz.JobExecutionException;
+import org.quartz.Scheduler;
+import org.quartz.SchedulerException;
+import org.quartz.SimpleScheduleBuilder;
+import org.quartz.SimpleTrigger;
+import org.quartz.Trigger;
+import org.quartz.TriggerBuilder;
+import org.quartz.impl.DirectSchedulerFactory;
 import org.quartz.impl.StdSchedulerFactory;
 import org.quartz.listeners.JobListenerSupport;
+import org.quartz.service.internal.HazelcastJobStore;
+import org.quartz.simpl.RAMJobStore;
+import org.quartz.simpl.SimpleThreadPool;
 
 /**
  * Integration test for using DisallowConcurrentExecution annot.
@@ -73,9 +88,32 @@ public class DisallowConcurrentExecutionJobTest {
 
         public void execute(JobExecutionContext context) throws JobExecutionException {
             try {
+                System.out.println("Executing job.");
                 Thread.sleep(2000L);
             } catch (InterruptedException e) {
                 throw new JobExecutionException("Failed to pause job for testing.");
+            }
+        }
+    }
+    
+    @DisallowConcurrentExecution
+    public static class ReschedulingTestJob implements Job {
+
+        public void execute(JobExecutionContext context) throws JobExecutionException {
+            try {
+                System.out.println("execute. Scheduler: " + context.getScheduler().getSchedulerName() + ". Job: " + context.getJobDetail().getKey().toString() + ". Trigger: " + context.getTrigger().getKey().toString());
+                Scheduler scheduler1 = context.getScheduler();
+                scheduler1.scheduleJob(TriggerBuilder.newTrigger()
+                    .forJob(context.getJobDetail())
+                    .withIdentity("someTrigger/1/2/3/ABC", "testTriggers/1/2/oneShot/" + System.currentTimeMillis())
+                    .startAt(new Date(System.currentTimeMillis()))
+                    .withPriority(5)
+                    .build());
+                Thread.sleep(2000L);                
+            } catch (InterruptedException e) {
+                throw new JobExecutionException("Failed to pause job for testing.");
+            } catch (SchedulerException e) {
+                throw new JobExecutionException("Failed to trigger job for testing.");
             }
         }
     }
@@ -120,6 +158,12 @@ public class DisallowConcurrentExecutionJobTest {
         
         @Override
         public synchronized void jobToBeExecuted(JobExecutionContext context) {            
+            try {
+                System.out.println("ToBeExecuted. Scheduler: " + context.getScheduler().getSchedulerName() + ". Job: " + context.getJobDetail().getKey().toString() + ". Trigger: " + context.getTrigger().getKey().toString());
+            } catch (SchedulerException e) {
+                throw new AssertionError(e.getMessage());
+            }
+            
             if (!count.compareAndSet(0, 1)) {
                 throw new AssertionError("Concurrent job count was not 0 but " + count.get());
             }
@@ -128,6 +172,7 @@ public class DisallowConcurrentExecutionJobTest {
         @Override
         public synchronized void jobWasExecuted(JobExecutionContext context, JobExecutionException jobException) {
             try {
+                System.out.println("WasExecuted. Scheduler: " + context.getScheduler().getSchedulerName() + ". Job: " + context.getJobDetail().getKey().toString() + ". Trigger: " + context.getTrigger().getKey().toString());
                 CountDownLatch latch = (CountDownLatch) context.getScheduler().getContext().get(BARRIER);
                 latch.countDown();
                 if (!count.compareAndSet(1, 0)) {
@@ -136,8 +181,74 @@ public class DisallowConcurrentExecutionJobTest {
             } catch (SchedulerException e) {
                 throw new AssertionError("Error while counting down the latch.");
             }            
-        }
+        }        
+    }
+    
+    @Test
+    public void testClusterSchedulerConcurrency() throws Exception {
+        HazelcastJobStore jobStore = new TestableHazelcastJobStore();
+//        RAMJobStore jobStore = new RAMJobStore();
+        DirectSchedulerFactory.getInstance().createScheduler("sched1", "1", new SimpleThreadPool(4, 1), jobStore, null, 0, 10, -1);
+        DirectSchedulerFactory.getInstance().createScheduler("sched2", "2", new SimpleThreadPool(4, 1), jobStore, null, 0, 10, -1);    
+        Scheduler scheduler1 = DirectSchedulerFactory.getInstance().getScheduler("sched1");
+        Scheduler scheduler2 = DirectSchedulerFactory.getInstance().getScheduler("sched2");
+        CountDownLatch latch = new CountDownLatch(9);
+        SleepingJobListener listener = new SleepingJobListener();
+        scheduler1.getContext().put(BARRIER, latch);
+        scheduler1.getListenerManager().addJobListener(listener);
+        scheduler2.getContext().put(BARRIER, latch);
+        scheduler2.getListenerManager().addJobListener(listener);
+        scheduler1.start();
+        scheduler2.start();
+
+        JobDetail job1 = JobBuilder.newJob(ReschedulingTestJob.class)
+            .withIdentity("TestJob/1/2/3/ABC", "testJobs/1/2")
+            .build();        
         
+        SimpleTrigger trigger1 = TriggerBuilder.newTrigger()
+            .forJob(job1)
+            .withIdentity("someTrigger/1/2/3/ABC", "testTriggers/1/2/withInterval/5000")
+            .startAt(new Date(System.currentTimeMillis()))
+            .withPriority(5)
+            .withSchedule(SimpleScheduleBuilder.simpleSchedule()
+            .withIntervalInMilliseconds(5000)
+            .repeatForever()
+            .withMisfireHandlingInstructionFireNow())
+            .build();
+        
+        scheduler1.scheduleJob(job1, trigger1);
+        
+        Thread.sleep(10);
+        scheduler2.scheduleJob(TriggerBuilder.newTrigger()
+            .forJob(job1)
+            .withIdentity("someTrigger/1/2/3/ABC", "testTriggers/1/2/oneShot/" + System.currentTimeMillis())
+            .startAt(new Date(System.currentTimeMillis()))
+            .withPriority(5)
+            .build());
+        
+        Thread.sleep(10);
+        scheduler1.scheduleJob(TriggerBuilder.newTrigger()
+            .forJob(job1)
+            .withIdentity("someTrigger/1/2/3/ABC", "testTriggers/1/2/oneShot/" + System.currentTimeMillis())
+            .startAt(new Date(System.currentTimeMillis()))
+            .withPriority(5)
+            .build());
+        
+        Thread.sleep(10);
+        scheduler2.scheduleJob(TriggerBuilder.newTrigger()
+            .forJob(job1)
+            .withIdentity("someTrigger/1/2/3/ABC", "testTriggers/1/2/oneShot/" + System.currentTimeMillis())
+            .startAt(new Date(System.currentTimeMillis()))
+            .withPriority(5)
+            .build());
+        
+        latch.await(30, TimeUnit.SECONDS);
+        if (latch.getCount() > 0L) {
+            Assert.fail("Count was " + latch.getCount());
+        }
+
+        scheduler1.shutdown(true);
+        scheduler2.shutdown(true);
     }
     
     @Test

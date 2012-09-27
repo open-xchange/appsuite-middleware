@@ -60,7 +60,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicLong;
-
+import org.apache.commons.logging.Log;
 import org.quartz.Calendar;
 import org.quartz.JobDataMap;
 import org.quartz.JobDetail;
@@ -81,13 +81,10 @@ import org.quartz.spi.OperableTrigger;
 import org.quartz.spi.SchedulerSignaler;
 import org.quartz.spi.TriggerFiredBundle;
 import org.quartz.spi.TriggerFiredResult;
-
 import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.core.ILock;
 import com.hazelcast.core.IMap;
 import com.hazelcast.core.ISet;
-import com.hazelcast.query.EntryObject;
-import com.hazelcast.query.PredicateBuilder;
 
 
 /**
@@ -96,6 +93,8 @@ import com.hazelcast.query.PredicateBuilder;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public class HazelcastJobStore implements JobStore {
+    
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(HazelcastJobStore.class);
     
     private SchedulerSignaler signaler;
     
@@ -110,6 +109,8 @@ public class HazelcastJobStore implements JobStore {
     private IMap<JobKey, ISet<TriggerKey>> triggersByJobKey;
     
     private IMap<String, IMap<JobKey, JobDetail>> jobsByGroup;
+    
+    private ISet<JobKey> blockedJobs;
     
     private IMap<String, Calendar> calendarsByName;
     
@@ -158,6 +159,7 @@ public class HazelcastJobStore implements JobStore {
         pausedTriggerGroups = hazelcast.getSet("quartzPausedTriggerGroups");
         pausedJobGroups = hazelcast.getSet("quartzPausedJobGroups");
         lock = hazelcast.getLock("quartzJobStoreLock");
+        blockedJobs = hazelcast.getSet("quartzBlockedJobs");            
         
         triggersByKey.addIndex("trigger.nextFireTime", true);
         triggersByKey.addIndex("trigger.misfireInstruction", false);
@@ -264,9 +266,17 @@ public class HazelcastJobStore implements JobStore {
         triggersByKey.add(triggerKey);
         TriggerStateWrapper stateWrapper;
         if (pausedTriggerGroups.contains(group) || pausedJobGroups.contains(jobKey.getGroup())) {
-            stateWrapper = new TriggerStateWrapper(newTrigger, TriggerStateWrapper.STATE_PAUSED);
+            if (blockedJobs.contains(jobKey)) {
+                stateWrapper = new TriggerStateWrapper(newTrigger, TriggerStateWrapper.STATE_PAUSED_BLOCKED);
+            } else {
+                stateWrapper = new TriggerStateWrapper(newTrigger, TriggerStateWrapper.STATE_PAUSED);
+            }            
         } else {
-            stateWrapper = new TriggerStateWrapper(newTrigger);
+            if (blockedJobs.contains(jobKey)) {
+                stateWrapper = new TriggerStateWrapper(newTrigger, TriggerStateWrapper.STATE_BLOCKED);
+            } else {
+                stateWrapper = new TriggerStateWrapper(newTrigger);
+            }
         }
         
         this.triggersByKey.put(triggerKey, stateWrapper);
@@ -706,12 +716,12 @@ public class HazelcastJobStore implements JobStore {
             return TriggerState.NONE;
         }
         
-        if (trigger.getState() == TriggerStateWrapper.STATE_NORMAL) {
-            return TriggerState.NORMAL;
+        if (trigger.getState() == TriggerStateWrapper.STATE_COMPLETE) {
+            return TriggerState.COMPLETE;
         } else if (trigger.getState() == TriggerStateWrapper.STATE_PAUSED) {
             return TriggerState.PAUSED;
-        } else if (trigger.getState() == TriggerStateWrapper.STATE_COMPLETE) {
-            return TriggerState.COMPLETE;
+        } else if (trigger.getState() == TriggerStateWrapper.STATE_PAUSED_BLOCKED) {
+            return TriggerState.PAUSED;
         } else if (trigger.getState() == TriggerStateWrapper.STATE_ERROR) {
             return TriggerState.ERROR;
         } else if (trigger.getState() == TriggerStateWrapper.STATE_BLOCKED) {
@@ -731,7 +741,12 @@ public class HazelcastJobStore implements JobStore {
             }
                         
             trigger = triggersByKey.remove(triggerKey);
-            trigger.setState(TriggerStateWrapper.STATE_PAUSED);
+            if (trigger.getState() == TriggerStateWrapper.STATE_BLOCKED) {
+                trigger.setState(TriggerStateWrapper.STATE_PAUSED_BLOCKED);
+            } else {
+                trigger.setState(TriggerStateWrapper.STATE_PAUSED);
+            }
+            
             triggersByKey.put(triggerKey, trigger);
         } finally {
             lock.unlock();
@@ -806,13 +821,17 @@ public class HazelcastJobStore implements JobStore {
         lock.lock();
         try {
             TriggerStateWrapper stateWrapper = triggersByKey.get(triggerKey);
-            if (stateWrapper == null || stateWrapper.getState() != TriggerStateWrapper.STATE_PAUSED) {
+            if (stateWrapper == null || (stateWrapper.getState() != TriggerStateWrapper.STATE_PAUSED && stateWrapper.getState() != TriggerStateWrapper.STATE_PAUSED_BLOCKED)) {
                 return;
             }
             
-            applyMisfire(stateWrapper);
             stateWrapper = triggersByKey.remove(triggerKey);
-            stateWrapper.setState(TriggerStateWrapper.STATE_NORMAL);
+            if (blockedJobs.contains(stateWrapper.getTrigger().getJobKey())) {
+                stateWrapper.setState(TriggerStateWrapper.STATE_BLOCKED);
+            } else {
+                stateWrapper.setState(TriggerStateWrapper.STATE_WAITING);
+            }
+            applyMisfire(stateWrapper);
             triggersByKey.put(triggerKey, stateWrapper);
         } finally {
             lock.unlock();
@@ -924,32 +943,49 @@ public class HazelcastJobStore implements JobStore {
     public List<OperableTrigger> acquireNextTriggers(long noLaterThan, int maxCount, long timeWindow) throws JobPersistenceException {
         List<OperableTrigger> returnList = new ArrayList<OperableTrigger>();
         lock.lock();
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("Got lock. " + System.nanoTime());
+        }
+        
         long now = System.currentTimeMillis();
         long firstAcquiredTriggerFireTime = 0L;
         try {
-            EntryObject e = new PredicateBuilder().getEntryObject();
-            PredicateBuilder query = e.get("trigger.nextFireTime").isNotNull()
-                .and(e.get("trigger.nextFireTime").lessEqual(new Date(noLaterThan + timeWindow))
-                .and(e.get("trigger.misfireInstruction").equal(Trigger.MISFIRE_INSTRUCTION_IGNORE_MISFIRE_POLICY)
-                .or(e.get("trigger.misfireInstruction").notEqual(Trigger.MISFIRE_INSTRUCTION_IGNORE_MISFIRE_POLICY)
-                .and(e.get("trigger.nextFireTime").greaterEqual(new Date(now - getMisfireThreshold()))))));
-                        
-            Collection<TriggerStateWrapper> filteredTriggers = triggersByKey.values(query);
+//            EntryObject e = new PredicateBuilder().getEntryObject();
+//            PredicateBuilder query = e.get("trigger.nextFireTime").isNotNull()
+//                .and(e.get("trigger.nextFireTime").lessEqual(new Date(noLaterThan + timeWindow))
+//                .and(e.get("trigger.misfireInstruction").equal(Trigger.MISFIRE_INSTRUCTION_IGNORE_MISFIRE_POLICY)
+//                .or(e.get("trigger.misfireInstruction").notEqual(Trigger.MISFIRE_INSTRUCTION_IGNORE_MISFIRE_POLICY)
+//                .and(e.get("trigger.nextFireTime").greaterEqual(new Date(now - getMisfireThreshold()))))));
+//                        
+//            Collection<TriggerStateWrapper> filteredTriggers = triggersByKey.values(query);
+            Collection<TriggerStateWrapper> filteredTriggers = triggersByKey.values();
+            if (filteredTriggers == null) {
+                return returnList;
+            }
+            
             ArrayList<TriggerStateWrapper> triggers = new ArrayList<TriggerStateWrapper>(filteredTriggers);
             Collections.sort(triggers, new TriggerWrapperTimeComparator());
-
             Set<JobKey> excluded = new HashSet<JobKey>();
             for (TriggerStateWrapper stateWrapper : triggers) {
+                if (stateWrapper.trigger.getNextFireTime() == null) {
+                    continue;
+                }                
+                
                 if (cannotAcquire(stateWrapper)) {
                     continue;
                 }
                 
-                if(firstAcquiredTriggerFireTime > 0 && stateWrapper.getTrigger().getNextFireTime().getTime() > (firstAcquiredTriggerFireTime + timeWindow)) {                    
+                if (firstAcquiredTriggerFireTime > 0 
+                    && stateWrapper.getTrigger().getNextFireTime().getTime() > (firstAcquiredTriggerFireTime + timeWindow)) {                    
                     break;
                 }
                 
                 if (applyMisfire(stateWrapper)) {
                     continue;
+                }
+                
+                if (stateWrapper.getTrigger().getNextFireTime().getTime() > noLaterThan + timeWindow) {
+                    break;
                 }
                 
                 JobKey jobKey = stateWrapper.getTrigger().getJobKey();
@@ -989,6 +1025,15 @@ public class HazelcastJobStore implements JobStore {
             
             return returnList;
         } finally {
+            if (LOG.isDebugEnabled()) {
+                StringBuilder sb = new StringBuilder("Releasing lock. ");
+                sb.append(System.nanoTime()).append(". ");
+                for (OperableTrigger trigger : returnList) {
+                    sb.append("\n    Trigger: ").append(trigger.getKey().getName());
+                }
+                
+                LOG.debug(sb.toString());
+            }
             lock.unlock();
         }
     }
@@ -1001,6 +1046,7 @@ public class HazelcastJobStore implements JobStore {
     
     private boolean cannotAcquire(TriggerStateWrapper stateWrapper) {
         return stateWrapper.getState() == TriggerStateWrapper.STATE_BLOCKED 
+                || stateWrapper.getState() == TriggerStateWrapper.STATE_PAUSED_BLOCKED
                 || stateWrapper.getState() == TriggerStateWrapper.STATE_COMPLETE
                 || stateWrapper.getState() == TriggerStateWrapper.STATE_PAUSED
                 || stateWrapper.getState() == TriggerStateWrapper.STATE_ACQUIRED;
@@ -1009,27 +1055,27 @@ public class HazelcastJobStore implements JobStore {
     @Override
     public void releaseAcquiredTrigger(OperableTrigger trigger) throws JobPersistenceException {
         lock.lock();
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("Got lock. " + System.nanoTime());
+        }
+        
         try {
             TriggerStateWrapper stateWrapper = triggersByKey.remove(trigger.getKey());
             if (stateWrapper == null || stateWrapper.getState() != TriggerStateWrapper.STATE_ACQUIRED) {
                 return;
             }
             
-            stateWrapper.setState(stateWrapper.getOldState());
+            stateWrapper.setState(TriggerStateWrapper.STATE_WAITING);
             triggersByKey.put(trigger.getKey(), stateWrapper);
-
-            JobKey jobKey = stateWrapper.getTrigger().getJobKey();
-            String group = jobKey.getGroup();
-            Map<JobKey, JobDetail> jobDetails = jobsByGroup.get(group);
-            if (jobDetails == null) {
-                return;
-            }
-
-            JobDetail jobDetail = jobDetails.get(jobKey);
-            if (jobDetail == null) {
-                return;
-            } 
         } finally {
+            if (LOG.isDebugEnabled()) {
+                StringBuilder sb = new StringBuilder("Releasing lock. ");
+                sb.append(System.nanoTime()).append(". ");
+                sb.append("\n    Trigger: ").append(trigger.getKey().getName());
+                
+                LOG.debug(sb.toString());
+            }
+            
             lock.unlock();
         }
     }
@@ -1038,59 +1084,82 @@ public class HazelcastJobStore implements JobStore {
     public List<TriggerFiredResult> triggersFired(List<OperableTrigger> firedTriggers) throws JobPersistenceException {
         List<TriggerFiredResult> results = new ArrayList<TriggerFiredResult>();
         lock.lock();
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("Got lock. " + System.nanoTime());
+        }
+        
         try {
             for (OperableTrigger trigger : firedTriggers) {
-                if (triggersByKey.containsKey(trigger.getKey())) {
-                    Calendar calendar = null;
-                    String calendarName = trigger.getCalendarName();
-                    if (calendarName != null) {
-                        calendar = calendarsByName.get(calendarName);
-                        if (calendar == null) {
-                            continue;
-                        }
-                    }
-                    
-                    Date prevFireTime = trigger.getPreviousFireTime();
-                    trigger.triggered(calendar);
-                    triggersByKey.replace(trigger.getKey(), new TriggerStateWrapper(trigger, TriggerStateWrapper.STATE_ACQUIRED));
-                    JobKey jobKey = trigger.getJobKey();
-                    JobDetail job = retrieveJob(jobKey);
-                    
-                    TriggerFiredResult result;
-                    if (job == null) {
-                        result = new TriggerFiredResult(new JobPersistenceException("Job could not be found."));
-                    } else {
-                        TriggerFiredBundle firedBundle = new TriggerFiredBundle(
-                            job, 
-                            trigger, 
-                            calendar, 
-                            false, new Date(), 
-                            trigger.getPreviousFireTime(), 
-                            prevFireTime,
-                            trigger.getNextFireTime());
-                        
-                        result = new TriggerFiredResult(firedBundle);
-                    }
-                    
-                    results.add(result);
-                    
-                    if (job.isConcurrentExectionDisallowed()) {
-                        ISet<TriggerKey> otherTriggers = triggersByJobKey.get(jobKey);
-                        for (TriggerKey keyToBlock : otherTriggers) {
-                            if (keyToBlock.equals(trigger.getKey())) {
-                                continue;
-                            }
-                            
-                            TriggerStateWrapper triggerToBlock = triggersByKey.remove(keyToBlock);
-                            triggerToBlock.setState(TriggerStateWrapper.STATE_BLOCKED);
-                            triggersByKey.put(keyToBlock, triggerToBlock);
-                        }
+                TriggerStateWrapper stateWrapper = triggersByKey.get(trigger.getKey());
+                if (stateWrapper == null || stateWrapper.getState() != TriggerStateWrapper.STATE_ACQUIRED) {
+                    continue;
+                }
+                
+                Calendar calendar = null;
+                String calendarName = trigger.getCalendarName();
+                if (calendarName != null) {
+                    calendar = calendarsByName.get(calendarName);
+                    if (calendar == null) {
+                        continue;
                     }
                 }
+                
+                Date prevFireTime = trigger.getPreviousFireTime();
+                trigger.triggered(calendar);
+                triggersByKey.replace(trigger.getKey(), new TriggerStateWrapper(trigger, TriggerStateWrapper.STATE_WAITING));
+                JobKey jobKey = trigger.getJobKey();
+                JobDetail job = retrieveJob(jobKey);
+                TriggerFiredResult result;
+                if (job == null) {
+                    result = new TriggerFiredResult(new JobPersistenceException("Job could not be found."));
+                } else {
+                    TriggerFiredBundle firedBundle = new TriggerFiredBundle(
+                        job, 
+                        trigger, 
+                        calendar, 
+                        false, new Date(), 
+                        trigger.getPreviousFireTime(), 
+                        prevFireTime,
+                        trigger.getNextFireTime());
+                    
+                    result = new TriggerFiredResult(firedBundle);
+                }
+                
+                if (job.isConcurrentExectionDisallowed()) {
+                    ISet<TriggerKey> otherTriggers = triggersByJobKey.get(jobKey);
+                    for (TriggerKey keyToBlock : otherTriggers) {
+                        if (keyToBlock.equals(trigger.getKey())) {
+                            continue;
+                        }
+                        
+                        TriggerStateWrapper triggerToBlock = triggersByKey.remove(keyToBlock);
+                        if (triggerToBlock.getState() == TriggerStateWrapper.STATE_WAITING) {
+                            triggerToBlock.setState(TriggerStateWrapper.STATE_BLOCKED);
+                        } else if (triggerToBlock.getState() == TriggerStateWrapper.STATE_PAUSED) {
+                            triggerToBlock.setState(TriggerStateWrapper.STATE_PAUSED_BLOCKED);
+                        }
+
+                        triggersByKey.put(keyToBlock, triggerToBlock);
+                    }
+                    
+                    blockedJobs.add(jobKey);
+                }
+                
+                results.add(result);
             }
             
             return results;
         } finally {
+            if (LOG.isDebugEnabled()) {
+                StringBuilder sb = new StringBuilder("Releasing lock. ");
+                sb.append(System.nanoTime()).append(". ");
+                for (OperableTrigger trigger : firedTriggers) {
+                    sb.append("\n    Trigger: ").append(trigger.getKey().getName());
+                }                
+                
+                LOG.debug(sb.toString());
+            }
+            
             lock.unlock();
         }
     }
@@ -1098,6 +1167,10 @@ public class HazelcastJobStore implements JobStore {
     @Override
     public void triggeredJobComplete(OperableTrigger trigger, JobDetail jobDetail, CompletedExecutionInstruction triggerInstCode) throws JobPersistenceException {
         lock.lock();
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("Got lock. " + System.nanoTime());
+        }
+        
         try {
             JobKey jobKey = jobDetail.getKey();
             String group = jobKey.getGroup();
@@ -1116,11 +1189,14 @@ public class HazelcastJobStore implements JobStore {
                 }
                 
                 if (jobDetail.isConcurrentExectionDisallowed()) {
+                    blockedJobs.remove(jobKey);
                     ISet<TriggerKey> otherTriggers = triggersByJobKey.get(jobKey);
                     for (TriggerKey keyToUnblock : otherTriggers) {
                         TriggerStateWrapper triggerToUnblock = triggersByKey.remove(keyToUnblock);
                         if (triggerToUnblock.getState() == TriggerStateWrapper.STATE_BLOCKED) {
-                            triggerToUnblock.setState(triggerToUnblock.getOldState());
+                            triggerToUnblock.setState(TriggerStateWrapper.STATE_WAITING);
+                        } else if (triggerToUnblock.getState() == TriggerStateWrapper.STATE_PAUSED_BLOCKED) {
+                            triggerToUnblock.setState(TriggerStateWrapper.STATE_PAUSED);
                         }
                         
                         triggersByKey.put(keyToUnblock, triggerToUnblock);
@@ -1128,6 +1204,8 @@ public class HazelcastJobStore implements JobStore {
                     
                     signaler.signalSchedulingChange(0L);
                 }
+            } else {
+                blockedJobs.remove(jobKey);
             }
             
             TriggerStateWrapper stateWrapper = triggersByKey.get(trigger.getKey());
@@ -1169,13 +1247,17 @@ public class HazelcastJobStore implements JobStore {
                     }
                     
                     signaler.signalSchedulingChange(0L);
-                } else {
-                    TriggerStateWrapper triggerToChange = triggersByKey.remove(trigger.getKey());
-                    triggerToChange.setState(triggerToChange.getOldState());
-                    triggersByKey.put(trigger.getKey(), triggerToChange);
                 }
             }
         } finally {
+            if (LOG.isDebugEnabled()) {
+                StringBuilder sb = new StringBuilder("Releasing lock. ");
+                sb.append(System.nanoTime()).append(". ");
+                sb.append("\n    Trigger: ").append(trigger.getKey().getName());          
+                
+                LOG.debug(sb.toString());
+            }
+            
             lock.unlock();
         }
     }
@@ -1219,9 +1301,7 @@ public class HazelcastJobStore implements JobStore {
 
         if (stateWrapper.getTrigger().getNextFireTime() == null) {
             stateWrapper.setState(TriggerStateWrapper.STATE_COMPLETE);
-            triggersByKey.remove(stateWrapper.getTrigger().getKey());
-            triggersByKey.put(stateWrapper.getTrigger().getKey(), stateWrapper);
-            
+            triggersByKey.replace(stateWrapper.getTrigger().getKey(), stateWrapper);            
             signaler.notifySchedulerListenersFinalized(stateWrapper.getTrigger());
         } else if (nextFireTime.equals(stateWrapper.getTrigger().getNextFireTime())) {
             return false;
@@ -1243,56 +1323,49 @@ public class HazelcastJobStore implements JobStore {
         
         private static final long serialVersionUID = -7286840785328204285L;
         
-        public static final int STATE_NONE = 0;
-        
-        public static final int STATE_NORMAL = 1;
-        
-        public static final int STATE_PAUSED = 2;
-        
+        public static final int STATE_WAITING = 0;
+
+        public static final int STATE_ACQUIRED = 1;
+
+        public static final int STATE_EXECUTING = 2;
+
         public static final int STATE_COMPLETE = 3;
-        
-        public static final int STATE_ERROR = 4;
-        
+
+        public static final int STATE_PAUSED = 4;
+
         public static final int STATE_BLOCKED = 5;
-        
-        public static final int STATE_ACQUIRED = 6;
+
+        public static final int STATE_PAUSED_BLOCKED = 6;
+
+        public static final int STATE_ERROR = 7;
         
         private final Trigger trigger;
         
         private int state;
         
-        private int oldState;
-        
 
         public TriggerStateWrapper(Trigger trigger) {
             super();
             this.trigger = trigger;
-            this.state = STATE_NORMAL;
-            oldState = STATE_NONE;
+            this.state = STATE_WAITING;
         }
         
         public TriggerStateWrapper(Trigger trigger, int state) {
             super();
             this.trigger = trigger;
             this.state = state;
-            oldState = STATE_NONE;
         }
 
         public Trigger getTrigger() {
             return trigger;
         }
         
+        public void setState(int state) {
+            this.state = state;
+        }
+        
         public int getState() {
             return state;
-        }
-        
-        public int getOldState() {
-            return oldState;
-        }
-        
-        public void setState(int state) {
-            oldState = this.state;
-            this.state = state;
         }
     }
     

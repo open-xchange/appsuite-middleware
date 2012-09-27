@@ -62,6 +62,7 @@ import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.service.MailService;
 import com.openexchange.service.indexing.JobInfo;
+import com.openexchange.service.indexing.impl.internal.FakeSession;
 import com.openexchange.service.indexing.impl.internal.Services;
 
 
@@ -90,7 +91,8 @@ public class ChangeByIdsJob extends AbstractMailJob {
             final IndexAccess<MailMessage> mailIndex = indexFacade.acquireIndexAccess(Types.EMAIL, info.userId, info.contextId);
             final IndexAccess<Attachment> attachmentIndex = indexFacade.acquireIndexAccess(Types.ATTACHMENT, info.userId, info.contextId);
             MailService mailService = Services.getService(MailService.class);
-            MailAccess<? extends IMailFolderStorage,? extends IMailMessageStorage> mailAccess = mailService.getMailAccess(info.userId, info.contextId, info.accountId);
+            FakeSession fakeSession = new FakeSession(info.primaryPassword, info.userId, info.contextId);
+            MailAccess<? extends IMailFolderStorage,? extends IMailMessageStorage> mailAccess = mailService.getMailAccess(fakeSession, info.accountId);
             try {
                 mailAccess.connect();
                 IMailFolderStorage folderStorage = mailAccess.getFolderStorage();                

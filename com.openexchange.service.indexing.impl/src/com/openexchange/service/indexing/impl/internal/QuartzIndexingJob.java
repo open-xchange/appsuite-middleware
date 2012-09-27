@@ -90,16 +90,20 @@ public class QuartzIndexingJob implements Job {
     }    
 
     @Override
-    public void execute(JobExecutionContext context) throws JobExecutionException {
-        JobDataMap jobData = context.getMergedJobDataMap();
+    public void execute(JobExecutionContext context) throws JobExecutionException {        
+        JobDataMap jobData = context.getMergedJobDataMap();        
         Object infoObject = jobData.get(JobConstants.JOB_INFO);
         if (infoObject == null || !(infoObject instanceof JobInfo)) {
             String msg = "JobDataMap did not contain valid JobInfo instance.";
             LOG.error(msg);
             throw new JobExecutionException(msg, false);
-        }
+        } 
         
         JobInfo jobInfo = (JobInfo) infoObject;  
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("Started execution of job " + jobInfo.toString() + ". Trigger: " + context.getTrigger().getKey());
+        }
+        
         try {
             submitCallable(jobInfo);
         } catch (Exception e) {
