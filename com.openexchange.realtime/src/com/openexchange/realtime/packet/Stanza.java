@@ -60,6 +60,9 @@ public abstract class Stanza {
 
     private ID to, from;
 
+    //All 3 basic stanza types either have an optional or mandatory id field
+    private String id;
+
     private Payload payload;
 
     /**
@@ -67,6 +70,24 @@ public abstract class Stanza {
      */
     protected Stanza() {
         super();
+    }
+
+    /**
+     * Gets the id
+     * 
+     * @return The id
+     */
+    public String getId() {
+        return id;
+    }
+
+    /**
+     * Sets the id
+     * 
+     * @param id The id to set
+     */
+    public void setId(String id) {
+        this.id = id;
     }
 
     /**
@@ -122,13 +143,5 @@ public abstract class Stanza {
     public Payload getPayload() {
         return payload;
     }
-
-    /**
-     * Get the path identifying the element transported by this Stanza within a namespace. Elements are the leafs in the
-     * <code>root.node1.node2#leaf</code> namespace structure. Namespaces are used to separate data ownership and vocabularies.
-     * 
-     * @return the elementPath of the element transported by this Stanza e.g. <code>default#presence</code>
-     */
-    public abstract String getElementPath();
 
 }

@@ -49,7 +49,7 @@ public class AtmosphereTestActivator extends HousekeepingActivator {
          * Payload to convert itself into the desired format. It takes chat
          * elements from the namespace default and transform them to ChatMessage POJOS.
          */
-        registerService(OXRTHandler.class,  new OXRTConversionHandler(Message.ELEMENTPATH, "chatMessage"));
+        registerService(OXRTHandler.class,  new OXRTConversionHandler(Message.class, "chatMessage"));
         
         //Add the atmosphere chat handler
         AtmosphereService service = getService(AtmosphereService.class);

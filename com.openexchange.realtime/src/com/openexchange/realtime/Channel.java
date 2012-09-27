@@ -71,15 +71,15 @@ public interface Channel {
 	public String getProtocol();
 	
 	/**
-	 * Checks if this channel can dispatch messages to given recipient in given name space.
+	 * Checks if this channel can dispatch a specific Stanza class to a given recipient.
 	 * 
-	 * @param elmentPath The path to the element that has to be handled including the namespace e.g. "default:presence
+	 * @param stanzaClass The class of the element that has to be handled
 	 * @param recipient The recipient
 	 * @param session The session
 	 * @return <code>true</code> if this channel can dispatch messages to given recipient; otherwise <code>false</code>
 	 * @throws OXException If check fails for any reason
 	 */
-	public boolean canHandle(String elementPath, ID recipient, ServerSession session) throws OXException;
+	public boolean canHandle(Class<? extends Stanza> stanzaClass, ID recipient, ServerSession session) throws OXException;
 	
 	/**
 	 * Gets the priority used for building a ranking for concurrent channels.

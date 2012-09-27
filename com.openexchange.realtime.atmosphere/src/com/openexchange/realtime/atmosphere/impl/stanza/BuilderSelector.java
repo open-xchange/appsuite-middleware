@@ -72,7 +72,6 @@ public class BuilderSelector {
      * 
      * <pre>
      * {
-     *  [namespace: 'default',]
      *  element: 'presence'
      *  ...
      * };
@@ -88,23 +87,18 @@ public class BuilderSelector {
         if (json == null) {
             throw new IllegalArgumentException();
         }
-        String path = json.optString("namespace");
-        if(path == null || path.isEmpty()) {
-            path = "default";
-        }
         String element = json.optString("element");
         if (element == null) {
             throw AtmosphereExceptionCode.MISSING_KEY.create("element");
         }
-        String elementPath = ElementPaths.createPath(path, element);
-        if (elementPath.equalsIgnoreCase(IQ.ELEMENTPATH)) {
+        if (element.equalsIgnoreCase("iq")) {
             return new IQBuilder(from, json);
-        } else if (elementPath.equalsIgnoreCase(Message.ELEMENTPATH)) {
+        } else if (element.equalsIgnoreCase("message")) {
             return new MessageBuilder(from, json);
-        } else if (elementPath.equalsIgnoreCase(Presence.ELEMENTPATH)) {
+        } else if (element.equalsIgnoreCase("presence")) {
             return new PresenceBuilder(from, json);
         } else {
-            throw AtmosphereExceptionCode.MISSING_BUILDER_FOR_KIND.create(elementPath);
+            throw AtmosphereExceptionCode.MISSING_BUILDER_FOR_KIND.create(element);
         }
     }
 }

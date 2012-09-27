@@ -84,8 +84,6 @@ public class IQ extends Stanza {
     public static enum Type {
         GET, SET, RESULT, ERROR
     }
-    
-    public final static String ELEMENTPATH = "default#iq";
 
     /**
      * Obligatory type specifier for IQ Stanzas
@@ -115,11 +113,6 @@ public class IQ extends Stanza {
      */
     public void setType(final Type type) {
         this.type = type;
-    }
-
-    @Override
-    public String getElementPath() {
-        return ELEMENTPATH;
     }
 
 }

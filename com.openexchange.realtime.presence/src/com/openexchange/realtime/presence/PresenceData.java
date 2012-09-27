@@ -64,6 +64,15 @@ public class PresenceData {
     public static final String MESSAGE="message";
     public static final String PRIORITY="priority";
     public static final String STATE="state";
+    
+    /* TODO:
+     * handle extensions to the payload auf the default namespace
+     * ExtensionType needs an elementPath to identify it and get proper parser
+     * <xs:any     namespace='##other'
+                       minOccurs='0'
+                       maxOccurs='unbounded'/>
+     */
+//    private List<ExtensionType> extensions;
 
     /**
      * The server should deliver messages to the highest-priority available resource or decide on metrics like most recent connect,

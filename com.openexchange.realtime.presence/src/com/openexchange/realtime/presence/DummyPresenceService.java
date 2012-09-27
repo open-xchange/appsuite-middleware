@@ -51,7 +51,6 @@ package com.openexchange.realtime.presence;
 
 import java.util.Arrays;
 import java.util.List;
-
 import com.openexchange.exception.OXException;
 import com.openexchange.realtime.MessageDispatcher;
 import com.openexchange.realtime.packet.ID;
@@ -105,7 +104,6 @@ public class DummyPresenceService implements PresenceService {
 			presence.setFrom(id);
 			presence.setTo(subscriber);
 			presence.setPayload(new Payload(presenceStatus, "presenceStatus"));
-			presence.setNamespace("presence");
 			
 			dispatcher.send(presence, session);
 		}

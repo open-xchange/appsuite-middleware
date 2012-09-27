@@ -517,39 +517,23 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
         if (isInternal(stanza)) {
             handleInternally(stanza, atmosphereState);
         } else {
-            stampStanza(stanza, atmosphereState);
             dispatchStanza(stanza, atmosphereState);
         }
     }
 
     private boolean isInternal(Stanza stanza) {
-        return stanza.getElementPath().startsWith("ox:");
+        boolean isInternal = false;
+        return isInternal;
     }
 
     /**
-     * Handle the Stanza internally instead of handing it over to the message dispatcher. Handshaking and other internal stuff happens here.
+     * Handle the Stanza internally instead of handing it over to the message dispatcher.
      * 
      * @param stanza the incoming stanza
      * @param serverSession the associated serverSession
      * @throws OXException
      */
     private void handleInternally(Stanza stanza, RTAtmosphereState atmosphereState) {
-         Payload payload = stanza.getPayload();
-        
-        if (payload != null && "json".equals(payload.getFormat())) {
-            JSONObject json = (JSONObject) payload.getData();
-            // handle open
-            if ("open".equals(json.opt("step"))) {
-                LOG.info("Open by resource: " + atmosphereState.atmosphereResource.uuid());
-                printBroadcasters("After open:");
-                atmosphereState.atmosphereResource.getResponse().write("{result: 'opened'}");
-            }
-            // handle close
-            if ("close".equals(json.opt("step"))) {
-                LOG.info("Close by resource: " + atmosphereState.atmosphereResource.uuid());
-                atmosphereState.atmosphereResource.getResponse().write("{result: 'closed'}");
-            }
-        }
     }
 
     /**
@@ -569,20 +553,10 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
         return sb.toString();
     }
 
-    /**
-     * Stamp the stanza, iow. set the sender of the stanza.
-     * 
-     * @param stanza the stanza to stamp
-     * @param state the associated atmosphereState
-     */
-    private void stampStanza(Stanza stanza, RTAtmosphereState state) {
-        stanza.setFrom(state.id);
-    }
-
     private void dispatchStanza(Stanza stanza, RTAtmosphereState atmosphereState) throws OXException {
-        OXRTHandler transformer = library.getHandlerFor(stanza.getElementPath());
+        OXRTHandler transformer = library.getHandlerFor(stanza.getClass());
         if (transformer == null) {
-            throw OXException.general("No transformer for " + stanza.getElementPath());
+            throw OXException.general("No transformer for " + stanza);
         }
         transformer.incoming(stanza, atmosphereState.session);
     }
@@ -595,13 +569,11 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
      * @throws OXException if no transformer for the given Stanza can be found
      */
     public void handleOutgoing(Stanza stanza, ServerSession serverSession) throws OXException {
-        OXRTHandler transformer = library.getHandlerFor(stanza.getElementPath());
+        OXRTHandler transformer = library.getHandlerFor(stanza.getClass());
         if (transformer == null) {
-            throw OXException.general("No transformer for " + stanza.getElementPath());
+            throw OXException.general("No transformer for " + stanza);
         }
-        /*
-         * Let the transformer handle the processing of the stanza. hand over this as reference for sending after transforming
-         */
+        // Let the transformer handle the processing of the stanza. hand over this as reference for sending after transforming
         transformer.outgoing(stanza, serverSession, this);
     }
 

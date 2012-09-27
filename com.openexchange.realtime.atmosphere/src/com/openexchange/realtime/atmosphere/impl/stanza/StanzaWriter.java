@@ -94,20 +94,21 @@ public class StanzaWriter {
     }
 
     private static void writeQuery(IQ stanza, JSONObject object) throws JSONException {
+        object.put("element", "iq");
         object.put("type", stanza.getType().name().toLowerCase());
     }
 
     private static void writePresence(Presence stanza, JSONObject object) throws JSONException {
+        object.put("element", "presence");
         object.put("type", stanza.getType().name().toLowerCase());
     }
 
     private static void writeMessage(Message stanza, JSONObject object) throws JSONException {
+        object.put("element", "message");
         object.put("type", stanza.getType().name().toLowerCase());
     }
 
     private static void writeBasics(Stanza stanza, JSONObject object) throws JSONException {
-        object.put("namespace", ElementPaths.getPath(stanza.getElementPath()));
-        object.put("element", ElementPaths.getElement(stanza.getElementPath()));
         object.put("from", stanza.getFrom().toString());
         object.put("to", stanza.getTo().toString());
         Payload payload = stanza.getPayload();
