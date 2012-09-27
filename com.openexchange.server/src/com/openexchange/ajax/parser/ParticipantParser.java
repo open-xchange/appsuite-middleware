@@ -202,7 +202,7 @@ public class ParticipantParser {
         }
 
         public void setEmailAddress(String emailAddress) {
-            this.emailAddress = emailAddress;
+            this.emailAddress = emailAddress == null ? null : emailAddress.toLowerCase();
         }
 
         public void setType(int type) {
