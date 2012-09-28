@@ -516,10 +516,20 @@ public final class PropertyNames {
 	 */
 	public static final DavPropertyName REQUEST_STATUS = DavPropertyName.create("request-status", NS_CALDAV);
 
-	/**
-	 * responsedescription xmlns="DAV:"
-	 */
-	public static final DavPropertyName RESPONSEDESCRIPTION = DavPropertyName.create("responsedescription", NS_DAV);
+    /**
+     * responsedescription xmlns="DAV:"
+     */
+    public static final DavPropertyName RESPONSEDESCRIPTION = DavPropertyName.create("responsedescription", NS_DAV);
+
+    /**
+     * default-alarm-vevent-date xmlns="urn:ietf:params:xml:ns:caldav"
+     */
+    public static final DavPropertyName DEFAULT_ALARM_VEVENT_DATE = DavPropertyName.create("default-alarm-vevent-date", NS_CALDAV);
+
+    /**
+     * default-alarm-vevent-datetime xmlns="urn:ietf:params:xml:ns:caldav"
+     */
+    public static final DavPropertyName DEFAULT_ALARM_VEVENT_DATETIME = DavPropertyName.create("default-alarm-vevent-datetime", NS_CALDAV);
 
 	
 	private PropertyNames() {

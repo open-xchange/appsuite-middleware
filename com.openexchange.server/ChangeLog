@@ -1,3 +1,7 @@
+* 2012-09-28 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 22723: Use last-modified of parent folder for initial sync-token calculation 
+
 * 2012-09-28 - thorben.betten@open-xchange.com
 
  - Fix for bug 23126: Un-quote date strings if necessary

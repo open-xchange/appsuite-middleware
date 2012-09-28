@@ -276,8 +276,9 @@ public abstract class CommonFolderCollection<T extends CommonObject> extends Com
 	 */
 	private Syncstatus<WebdavResource> getSyncStatus(Date since) throws OXException {
 		Syncstatus<WebdavResource> multistatus = new Syncstatus<WebdavResource>();
-		Date nextSyncToken = new Date(since.getTime());
+//		Date nextSyncToken = new Date(since.getTime());
         boolean initialSync = 0 == since.getTime();
+		Date nextSyncToken = Tools.getLatestModified(since, this.folder);
 		/*
 		 * new and modified objects
 		 */
