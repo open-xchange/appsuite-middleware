@@ -204,6 +204,8 @@ public class SubscriptionsSQL {
                 new StatementBuilder().executeStatement(connection, insert, values);
             }
         } catch (SQLException e) {
+            throw new OXException(e);
+        } finally {
             if (sb != null) {
                 try {
                     sb.closePreparedStatement(null, rs);
@@ -212,7 +214,6 @@ public class SubscriptionsSQL {
                     throw new OXException(e1);
                 }
             }
-            throw new OXException(e);
         }
     }
 
@@ -238,6 +239,8 @@ public class SubscriptionsSQL {
 
             return handleResultSet(rs);
         } catch (SQLException e) {
+            throw new OXException(e);
+        } finally {
             if (sb != null) {
                 try {
                     sb.closePreparedStatement(null, rs);
@@ -246,7 +249,6 @@ public class SubscriptionsSQL {
                     throw new OXException(e1);
                 }
             }
-            throw new OXException(e);
         }
     }
 
@@ -265,6 +267,8 @@ public class SubscriptionsSQL {
 
             return handleResultSet(rs);
         } catch (SQLException e) {
+            throw new OXException(e);
+        } finally {
             if (sb != null) {
                 try {
                     sb.closePreparedStatement(null, rs);
@@ -273,7 +277,6 @@ public class SubscriptionsSQL {
                     throw new OXException(e1);
                 }
             }
-            throw new OXException(e);
         }
     }
 
@@ -293,6 +296,8 @@ public class SubscriptionsSQL {
 
             return handleResultSet(rs);
         } catch (SQLException e) {
+            throw new OXException(e);
+        } finally {
             if (sb != null) {
                 try {
                     sb.closePreparedStatement(null, rs);
@@ -301,7 +306,6 @@ public class SubscriptionsSQL {
                     throw new OXException(e1);
                 }
             }
-            throw new OXException(e);
         }
     }
 
