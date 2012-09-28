@@ -70,6 +70,7 @@ import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.cli.PosixParser;
 import com.openexchange.report.Constants;
+import edu.emory.mathcs.backport.java.util.Arrays;
 
 /**
  *
@@ -115,7 +116,7 @@ public final class LoginCounterTool {
             try {
                 startDate = sdf.parse(source);
             } catch (java.text.ParseException e) {
-                System.out.println("Wrong format for parameter 'start': " + source);
+                System.out.println("Wrong format for parameter 'start': " + source + " (args=" + Arrays.toString(args) + ")");
                 printHelp();
                 System.exit(0);
             }
@@ -123,7 +124,7 @@ public final class LoginCounterTool {
             try {
                 endDate = sdf.parse(source);
             } catch (java.text.ParseException e) {
-                System.out.println("Wrong format for parameter 'end': " + source);
+                System.out.println("Wrong format for parameter 'end': " + source + " (args=" + Arrays.toString(args) + ")");
                 printHelp();
                 System.exit(0);
             }
