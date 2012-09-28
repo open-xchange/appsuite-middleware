@@ -51,7 +51,6 @@ package com.openexchange.i18n.tools.replacement;
 
 import java.util.Calendar;
 import java.util.Date;
-import java.util.GregorianCalendar;
 import java.util.Locale;
 import java.util.TimeZone;
 import com.openexchange.groupware.i18n.Notifications;
@@ -102,7 +101,7 @@ public final class EndDateReplacement extends AbstractFormatDateReplacement {
      * to move (when printing) the appointment into the previous day, if only by some milliseconds, so that the appointment ends
      * shortly before midnight the next day, in our example on the 4th of August.
      */
-    private static Date correctDayOfMonth(final Date endDate, final boolean fulltime, boolean isTask) {
+    private static Date correctDayOfMonth(final Date endDate, final boolean fulltime, final boolean isTask) {
         /*-
          * Previous implementation:
          *

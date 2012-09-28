@@ -52,7 +52,6 @@ package com.openexchange.subscribe.json.osgi;
 import org.osgi.service.http.HttpService;
 import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
 import com.openexchange.groupware.settings.PreferencesItemService;
-import com.openexchange.i18n.I18nService;
 import com.openexchange.secret.SecretService;
 import com.openexchange.secret.osgi.tools.WhiteboardSecretService;
 import com.openexchange.subscribe.SubscriptionExecutionService;
