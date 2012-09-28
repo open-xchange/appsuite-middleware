@@ -96,29 +96,38 @@ public final class LoginCounterTool {
         Date endDate = null;
 
         try {
-            CommandLine cmd = parser.parse(countingOptions, args);
+            final CommandLine cmd = parser.parse(countingOptions, args);
             if (cmd.hasOption('h')) {
                 printHelp();
                 System.exit(0);
+                return;
             }
 
             if (!cmd.hasOption('s') || !cmd.hasOption('e')) {
                 System.out.println("Parameters 'start' and 'end' are required.");
                 printHelp();
                 System.exit(0);
-            } else {
-                // Parse dates
-                SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-                try {
-                    startDate = sdf.parse(cmd.getOptionValue('s'));
-                    endDate = sdf.parse(cmd.getOptionValue('e'));
-                } catch (java.text.ParseException e) {
-                    System.out.println("Wrong format for parameter 'start' or 'end'.");
-                    printHelp();
-                    System.exit(0);
-                }
+                return;
             }
-
+            // Parse dates
+            final SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+            String source = unquote(cmd.getOptionValue('s'));
+            try {
+                startDate = sdf.parse(source);
+            } catch (java.text.ParseException e) {
+                System.out.println("Wrong format for parameter 'start': " + source);
+                printHelp();
+                System.exit(0);
+            }
+            source = unquote(cmd.getOptionValue('e'));
+            try {
+                endDate = sdf.parse(source);
+            } catch (java.text.ParseException e) {
+                System.out.println("Wrong format for parameter 'end': " + source);
+                printHelp();
+                System.exit(0);
+            }
+            // Invoke MBean
             JMXServiceURL url = new JMXServiceURL("service:jmx:rmi:///jndi/rmi://localhost:9999/server");
             JMXConnector jmxConnector = JMXConnectorFactory.connect(url, null);
             try {
@@ -182,6 +191,34 @@ public final class LoginCounterTool {
     private static void printHelp() {
         HelpFormatter helpFormatter = new HelpFormatter();
         helpFormatter.printHelp("logincounter", countingOptions);
+    }
+
+    private static String unquote(final String s) {
+        if (isEmpty(s) || s.length() <= 1) {
+            return s;
+        }
+        String retval = s;
+        char c;
+        if ((c = retval.charAt(0)) == '"' || c == '\'') {
+            retval = retval.substring(1);
+        }
+        final int mlen = retval.length()-1;
+        if ((c = retval.charAt(mlen)) == '"' || c == '\'') {
+            retval = retval.substring(0, mlen);
+        }
+        return retval;
+    }
+
+    private static boolean isEmpty(final String string) {
+        if (null == string) {
+            return true;
+        }
+        final int len = string.length();
+        boolean isWhitespace = true;
+        for (int i = 0; isWhitespace && i < len; i++) {
+            isWhitespace = Character.isWhitespace(string.charAt(i));
+        }
+        return isWhitespace;
     }
 
     static {
