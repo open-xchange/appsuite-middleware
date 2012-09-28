@@ -33,8 +33,8 @@ JAVA_OPTS="${JAVA_OXCMD_OPTS} \
 CLASSPATH="-classpath $OXBUNDLES/com.openexchange.server.jar:\
 $OXBUNDLES/com.openexchange.global.jar:\
 $OXBUNDLES/com.openexchange.subscribe.crawler.jar:\
-$OXBUNDLES/org.apache.commons.cli_1.0.0.v20080604-1500.jar:\
-$OXBUNDLES/org.apache.commons.logging_1.0.4.v200706111724.jar"
+$OXBUNDLES/org.apache.commons.cli_1.2.0.v201105210650.jar:\
+$OXBUNDLES/org.apache.commons.logging_1.1.1.v201101211721.jar"
 
 pushd $OXPREFIX
 
