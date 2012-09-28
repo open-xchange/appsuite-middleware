@@ -72,8 +72,7 @@ public class StaticClusterDiscoveryActivator extends HousekeepingActivator {
 
     @Override
     protected void startBundle() throws Exception {
-        final ConfigurationService service = getService(ConfigurationService.class);
-        final String snodes = service.getProperty("com.openexchange.cluster.discovery.static.nodes", "");
+        final String snodes = getService(ConfigurationService.class).getProperty("com.openexchange.cluster.discovery.static.nodes", "");
         final List<InetAddress> nodes;
         if (isEmpty(snodes)) {
             nodes = Collections.emptyList();
