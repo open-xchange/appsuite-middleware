@@ -674,9 +674,9 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
         return reservation;
     }
 
-    private static final Pattern IS_NUMBERED_WITH_EXTENSION = Pattern.compile("\\(\\d\\)\\.");
+    private static final Pattern IS_NUMBERED_WITH_EXTENSION = Pattern.compile("\\(\\d+\\)\\.");
 
-    private static final Pattern IS_NUMBERED = Pattern.compile("\\(\\d\\)$");
+    private static final Pattern IS_NUMBERED = Pattern.compile("\\(\\d+\\)$");
 
     private String enhance(final String filename, final int c) {
         final StringBuilder stringBuilder = new StringBuilder(filename);
