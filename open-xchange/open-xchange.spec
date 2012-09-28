@@ -22,6 +22,7 @@ Requires:      open-xchange-mailstore
 Requires:      open-xchange-httpservice
 Requires:      open-xchange-theme-default
 Requires:      open-xchange-smtp >= @OXVERSION@
+Requires:      open-xchange-l10n-de-de open-xchange-l10n-fr-fr
 
 %description
 This package provides the dependencies to install a working Open-Xchange backend system. By installing this package a minimal backend is
