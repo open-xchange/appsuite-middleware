@@ -1243,7 +1243,7 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
                  */
                 final long cl = Long.parseLong(hValue);
                 if (cl < Integer.MAX_VALUE) {
-                    request.setContentLength((int) cl);
+                    request.setContentLength(cl);
                 }
             } else if (hId == Constants.SC_REQ_CONTENT_TYPE || (hId == -1 && hName.equalsIgnoreCase("Content-Type"))) {
                 /*
@@ -2293,7 +2293,6 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
     private final class KeepAliveRunnable implements Runnable {
 
         private final AjpProcessor ajpProcessor;
-
         private final int max;
 
         /**
