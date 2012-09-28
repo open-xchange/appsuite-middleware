@@ -103,7 +103,7 @@ public class SubscriptionServiceImpl implements PresenceSubscriptionService {
         Subscription sub = new Subscription(from, to, approval.getType());
 
         SubscriptionsSQL storage = new SubscriptionsSQL(services.getService(DatabaseService.class));
-//        storage.store(sub, session);
+        storage.store(sub, session);
 
         MessageDispatcher messageDispatcher = services.getService(MessageDispatcher.class);
         messageDispatcher.send(approval, session);
