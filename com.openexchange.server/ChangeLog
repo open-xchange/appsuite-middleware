@@ -5,6 +5,7 @@
 * 2012-09-28 - thorben.betten@open-xchange.com
 
  - Fix for bug 23126: Un-quote date strings if necessary
+ - Fix for bug 22835: Detect if another vacation rule has already been specified before. Throw error if present.
 
 * 2012-09-27 - thorben.betten@open-xchange.com
 
