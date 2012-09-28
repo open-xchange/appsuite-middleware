@@ -47,42 +47,37 @@
  *
  */
 
-package com.openexchange.realtime.xmpp.converter;
-
-import org.joox.JOOX;
-import com.openexchange.conversion.simple.SimpleConverter;
-import com.openexchange.conversion.simple.SimplePayloadConverter;
-import com.openexchange.exception.OXException;
-import com.openexchange.realtime.chat.ChatMessage;
-import com.openexchange.tools.session.ServerSession;
+package com.openexchange.realtime.chat;
 
 /**
- * {@link XMPPToMessageBody}
- * 
- * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
+ * {@link ChatMessage}
+ *
+ * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class XMPPToMessageBody implements SimplePayloadConverter {
+public class ChatMessage {
+	public static final int NO_PRIORITY = -1;
+	private String message;
+	private int priority = NO_PRIORITY;
+	
+	public ChatMessage(String message) {
+		super();
+		this.message = message;
+	}
 
-    @Override
-    public String getInputFormat() {
-        return "xmpp";
-    }
-
-    @Override
-    public String getOutputFormat() {
-        return "chatMessage";
-    }
-
-    @Override
-    public Quality getQuality() {
-        return Quality.GOOD;
-    }
-
-    @Override
-    public Object convert(Object data, ServerSession session, SimpleConverter converter) throws OXException {
-        String message = (String) data;
-
-        return new ChatMessage(JOOX.$(message).content());
-    }
-
+	public void setMessage(String message) {
+		this.message = message;
+	}
+	
+	public String getMessage() {
+		return message;
+	}
+	
+	public int getPriority() {
+		return priority;
+	}
+	
+	public void setPriority(int priority) {
+		this.priority = priority;
+	}
+	
 }
