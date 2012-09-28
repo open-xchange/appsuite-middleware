@@ -206,7 +206,7 @@ public class SubscriptionsSQL {
         } catch (SQLException e) {
             if (sb != null) {
                 try {
-                    sb.closePreparedStatement(connection, rs);
+                    sb.closePreparedStatement(null, rs);
                     dbService.backWritable(session.getContext(), connection);
                 } catch (SQLException e1) {
                     throw new OXException(e1);
@@ -240,7 +240,7 @@ public class SubscriptionsSQL {
         } catch (SQLException e) {
             if (sb != null) {
                 try {
-                    sb.closePreparedStatement(connection, rs);
+                    sb.closePreparedStatement(null, rs);
                     dbService.backWritable(session.getContext(), connection);
                 } catch (SQLException e1) {
                     throw new OXException(e1);
@@ -267,7 +267,7 @@ public class SubscriptionsSQL {
         } catch (SQLException e) {
             if (sb != null) {
                 try {
-                    sb.closePreparedStatement(connection, rs);
+                    sb.closePreparedStatement(null, rs);
                     dbService.backWritable(session.getContext(), connection);
                 } catch (SQLException e1) {
                     throw new OXException(e1);
@@ -295,7 +295,7 @@ public class SubscriptionsSQL {
         } catch (SQLException e) {
             if (sb != null) {
                 try {
-                    sb.closePreparedStatement(connection, rs);
+                    sb.closePreparedStatement(null, rs);
                     dbService.backWritable(session.getContext(), connection);
                 } catch (SQLException e1) {
                     throw new OXException(e1);
