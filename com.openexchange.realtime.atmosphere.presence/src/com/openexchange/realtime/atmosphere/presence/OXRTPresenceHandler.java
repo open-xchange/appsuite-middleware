@@ -91,6 +91,7 @@ public class OXRTPresenceHandler implements OXRTHandler {
             throw new IllegalArgumentException();
         }
         Presence presence = (Presence) stanza;
+        
         Type type = presence.getType();
         if (Type.SUBSCRIBE == type) {
             handleSubscribe(presence, session);

@@ -83,23 +83,6 @@ public class JSONToPresenceDataConverter implements SimplePayloadConverter {
         return Quality.GOOD;
     }
 
-    /* 
-     * Convert FROM
-     * {
-     * from: userB@realtime
-     * [namespace: 'default',]
-     * element: 'presence'
-     * [type: none]
-     * <--- interesting part to convert
-     * data: {
-     * state: 'online',
-     * message: 'i am here',
-     * [priority: 0,]
-     * [error: "error"]
-     * }
-     * --->
-     * };
-     */
     @Override
     public Object convert(Object data, ServerSession session, SimpleConverter converter) throws OXException {
         if (!(data instanceof JSONObject)) {

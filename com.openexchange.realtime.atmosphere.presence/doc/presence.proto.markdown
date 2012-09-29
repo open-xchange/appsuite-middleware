@@ -6,18 +6,21 @@ The namespace ox is used for internal Stanzas.
 
 # Atmosphere Presence Protocol Spec
 
-"session" :
-"to" :
-"element" :
-"type" :
-"data"  : {
-  "state" : 
-  "message" :
-  "priority" :
-  "error" : 
-  "extensions" : [
+~~~{.javascript}
+{
+  "session" :
+  "to" :
+  "element" :
+  "type" :
+  "payloads"  : [
+    {"element" : "state", "data" : ""}, 
+    {"element" : "message", "data" : ""},
+    {"element" : "priority", "data" : ""},
+    {"element" : "error", "data" : ""}
+    {"namespace" : "xyz", "element" : "123", "data" : ""}
   ]
 }
+~~~
 
 ## Initial Presence
 
@@ -26,7 +29,7 @@ and the element key specifying that this message is a presence message.  This is
 enough to send a broadcast to all subscribed users and signal that the user is
 now available.
 
-~~~ {.javascript}
+~~~{.javascript}
 {
      "session" : "$session",
      "element" : "presence"

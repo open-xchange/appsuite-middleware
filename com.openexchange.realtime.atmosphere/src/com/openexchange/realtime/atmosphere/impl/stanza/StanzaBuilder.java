@@ -49,6 +49,7 @@
 
 package com.openexchange.realtime.atmosphere.impl.stanza;
 
+import org.json.JSONArray;
 import org.json.JSONObject;
 import com.openexchange.exception.OXException;
 import com.openexchange.realtime.packet.ID;
@@ -74,7 +75,7 @@ public abstract class StanzaBuilder<T extends Stanza> {
         from();
         to();
         id();
-        payload();
+        payloads();
     }
 
     private void from() {
@@ -93,9 +94,18 @@ public abstract class StanzaBuilder<T extends Stanza> {
         }
     }
     
-    private void payload() {
-        if (json.has("data")) {
-            JSONObject payload = json.optJSONObject("data");
+    private void payloads() {
+        // write recursive function to get namespaces out of JSON Object 
+        if (json.has("payloads")) {
+            JSONArray payloads = json.getJSONArray("payloads");
+            for (int i = 0; i < payloads.length(); i++) {
+                JSONObject payload = payloads.getJSONObject(i);
+                if (payload.has("namespace")) {
+                    String namespace = payload.getString("namespace");
+                    stanza.addNamespace(namespace);
+                    stanza.addPayload(new Payload(payload, "json", ));
+                }
+            }
             stanza.setPayload(new Payload(json.optJSONObject("data"), "json"));
         }
     }

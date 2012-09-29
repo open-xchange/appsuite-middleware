@@ -49,6 +49,8 @@
 
 package com.openexchange.realtime.packet;
 
+import java.util.HashSet;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 import com.openexchange.conversion.simple.SimpleConverter;
 import com.openexchange.exception.OXException;
@@ -69,6 +71,8 @@ public class Payload {
     public static AtomicReference<ServiceLookup> SERVICES = new AtomicReference<ServiceLookup>();
 
     private String format;
+    
+    private Set namespaces = new HashSet<String>();
 
     private Object data;
 

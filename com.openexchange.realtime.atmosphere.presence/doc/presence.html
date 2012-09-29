@@ -106,7 +106,19 @@ code > span.er { color: #ff0000; font-weight: bold; }
 <h2 id="the-namespaces-and-addressing-elements">The namespaces and addressing elements</h2>
 <p>The namespace ox is used for internal Stanzas.</p>
 <h1 id="atmosphere-presence-protocol-spec">Atmosphere Presence Protocol Spec</h1>
-<p>“session” : “to” : “element” : “type” : “data” : { “state” : “message” : “priority” : “error” : “extensions” : [ ] }</p>
+<pre class="sourceCode javascript"><code class="sourceCode javascript">{
+  <span class="st">&quot;session&quot;</span> :
+  <span class="st">&quot;to&quot;</span> :
+  <span class="st">&quot;element&quot;</span> :
+  <span class="st">&quot;type&quot;</span> :
+  <span class="st">&quot;payloads&quot;</span>  : [
+    {<span class="st">&quot;element&quot;</span> : <span class="st">&quot;state&quot;</span>, <span class="st">&quot;data&quot;</span> : <span class="st">&quot;&quot;</span>}, 
+    {<span class="st">&quot;element&quot;</span> : <span class="st">&quot;message&quot;</span>, <span class="st">&quot;data&quot;</span> : <span class="st">&quot;&quot;</span>},
+    {<span class="st">&quot;element&quot;</span> : <span class="st">&quot;priority&quot;</span>, <span class="st">&quot;data&quot;</span> : <span class="st">&quot;&quot;</span>},
+    {<span class="st">&quot;element&quot;</span> : <span class="st">&quot;error&quot;</span>, <span class="st">&quot;data&quot;</span> : <span class="st">&quot;&quot;</span>}
+    {<span class="st">&quot;namespace&quot;</span> : <span class="st">&quot;xyz&quot;</span>, <span class="st">&quot;element&quot;</span> : <span class="st">&quot;123&quot;</span>, <span class="st">&quot;data&quot;</span> : <span class="st">&quot;&quot;</span>}
+  ]
+}</code></pre>
 <h2 id="initial-presence">Initial Presence</h2>
 <p>The initial presence message only has to consist of the obligatory session key and the element key specifying that this message is a presence message. This is enough to send a broadcast to all subscribed users and signal that the user is now available.</p>
 <pre class="sourceCode javascript"><code class="sourceCode javascript">{
