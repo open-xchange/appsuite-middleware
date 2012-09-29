@@ -2,6 +2,7 @@
 
  - Fix for bug 23141: Introduced special FileCleaningTracker which invokes File.deleteOnExit() on each incoming file upload
  - Fix for bug 23139: Configuration option whether to prefer GSSAPI authentication mechanism if supported by SIEVE backend
+ - Fix for bug 23042: Sanitize Content-Type header prior to writing a message's content
 
 * 2012-09-28 - tobias.friedrich@open-xchange.com
 
