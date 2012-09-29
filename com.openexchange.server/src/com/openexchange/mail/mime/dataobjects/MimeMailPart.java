@@ -465,6 +465,9 @@ public final class MimeMailPart extends MailPart implements MimeRawSource, MimeC
             throw new IllegalStateException(ERR_NULL_PART);
         }
         try {
+            if (part instanceof MimeMessage) {
+                saneContentType();
+            }
             part.writeTo(out);
         } catch (final UnsupportedEncodingException e) {
             LOG.error("Unsupported encoding in a message detected and monitored: \"" + e.getMessage() + '"', e);
@@ -477,6 +480,13 @@ public final class MimeMailPart extends MailPart implements MimeRawSource, MimeC
                 throw MailExceptionCode.NO_CONTENT.create(e, new Object[0]);
             }
             throw MimeMailException.handleMessagingException(e);
+        }
+    }
+
+    private void saneContentType() throws MessagingException, OXException {
+        final String[] header = part.getHeader(MessageHeaders.HDR_CONTENT_TYPE);
+        if (null != header && header.length > 0) {
+            part.setHeader(MessageHeaders.HDR_CONTENT_TYPE, new ContentType(header[0]).toString());
         }
     }
 
