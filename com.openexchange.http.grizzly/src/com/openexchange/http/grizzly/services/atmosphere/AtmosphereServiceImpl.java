@@ -91,12 +91,17 @@ public class AtmosphereServiceImpl  implements AtmosphereService {
             .and("org.atmosphere.cpr.broadcasterLifeCyclePolicy","NEVER")
             .build();
         atmosphereFramework.init(config);
-//        atmosphereFramework.setAsyncSupport(new Grizzly2CometSupport(atmosphereFramework.getAtmosphereConfig()));
-        atmosphereFramework.setAsyncSupport(new Grizzly2WebSocketSupport(atmosphereFramework.getAtmosphereConfig()));
+        atmosphereFramework.setAsyncSupport(new Grizzly2CometSupport(atmosphereFramework.getAtmosphereConfig()));
+//        atmosphereFramework.setAsyncSupport(new Grizzly2WebSocketSupport(atmosphereFramework.getAtmosphereConfig()));
         
         ServletRegistration atmosphereRegistration = realtimeContext.addServlet("AtmosphereServlet", atmosphereServlet);
         atmosphereRegistration.addMapping(atmosphereServletMapping);
         atmosphereRegistration.setLoadOnStartup(0);
+        
+        //Deliver js lib matching the serverside lib
+        ServletRegistration atmosphereJSRegistration = realtimeContext.addServlet("AtmosphereJSServlet", new AtmosphereJSServlet(bundle));
+        atmosphereJSRegistration.addMapping("/atmosphere/jquery.atmosphere.js");
+        atmosphereJSRegistration.setLoadOnStartup(0);
         
         realtimeContext.deploy(grizzly);
     }
