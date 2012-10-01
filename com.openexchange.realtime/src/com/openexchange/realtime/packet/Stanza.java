@@ -49,28 +49,31 @@
 
 package com.openexchange.realtime.packet;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 /**
- * {@link Stanza} - Abstract information unit that can be send from one entity
- * to another.
+ * {@link Stanza} - Abstract information unit that can be send from one entity to another.
  * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
 public abstract class Stanza {
 
+    // recipient and sender
     private ID to, from;
 
     // All 3 basic stanza types either have an optional or mandatory id field
     private String id;
 
     // The child elements of this Stanza
-    private Set<Payload> payloads = new HashSet<Payload>();
+    private List<Payload> payloads = new ArrayList<Payload>();
+
     // The namespaces of child elements of this Stanza
-    private Set<String> namespaces = new HashSet<String>();
+    private List<String> namespaces = new ArrayList<String>();
 
     /**
      * Initializes a new {@link Stanza}.
@@ -134,70 +137,46 @@ public abstract class Stanza {
     }
 
     /**
-     * Add a namespace to the Stanza.
+     * Get a Set of namespaces of the payloads of this Stanza.
      * 
-     * @param namespace The namespace to add.
-     * @return true if the Stanza didn't already contain the namespace
-     */
-    public boolean addNamespace(final String namespace) {
-        return namespaces.add(namespace);
-    }
-
-    /**
-     * Remove a namespace from the Stanza.
-     * 
-     * @param namespace The namespace to remove
-     * @return true if the Stanza contained this namespace
-     */
-    public boolean removeNamespace(final String namespace) {
-        return namespaces.remove(namespace);
-    }
-
-    /**
-     * Set the namespaces of the payloads of this Stanza.
-     * 
-     * @param namespaces the namespaces of the payloads of this stanza.
-     */
-    public void setNamespaces(final Set<String> namespaces) {
-        this.namespaces = new HashSet<String>(namespaces);
-    }
-
-    /**
-     * Get an unmodifiable view of the namespaces of the payloads of this Stanza.
-     * 
-     * @return null or the namespaces of the payloads of this Stanza.
+     * @return empty Set or the namespaces of the payloads of this Stanza.
      */
     public Set<String> getNamespaces() {
-        return Collections.unmodifiableSet(namespaces);
+        return new HashSet(namespaces);
     }
-    
+
     /**
-     * Add a Payload to the Stanza.
+     * Add a Payload to the Stanza and keep track of the payload's namespace.
      * 
      * @param payload The Payload to add.
      * @return true if the Stanza didn't already contain the Payload
      */
     public boolean addPayload(final Payload payload) {
-        return payloads.add(payload);
+        boolean isAdded = payloads.add(payload);
+        if(isAdded) {
+            String namespace = payload.getNamespace();
+            if (namespace != null) {
+                namespaces.add(namespace);
+            }    
+        }
+        return isAdded;
     }
 
     /**
-     * Remove a Payload from the Stanza.
+     * Remove a Payload from the Stanza and forget about its namespace.
      * 
      * @param payload The Payload to remove
      * @return true if the Stanza contained this Payload
      */
     public boolean removePayload(final Payload payload) {
-        return payloads.remove(payload);
-    }
-
-    /**
-     * Set the structured information of this Stanza.
-     * 
-     * @param payload the structured information to transport.
-     */
-    public void setPayloads(final Set<Payload> payloads) {
-        this.payloads = new HashSet<Payload>(payloads);
+        boolean isRemoved = payloads.remove(payload);
+        if(isRemoved) {
+            String namespace = payload.getNamespace();
+            if (namespace != null) {
+                namespaces.remove(namespace);
+            }
+        }
+        return isRemoved;
     }
 
     /**
@@ -205,8 +184,8 @@ public abstract class Stanza {
      * 
      * @return null or the structured information of this Stanza.
      */
-    public Set<Payload> getPayloads() {
-        return Collections.unmodifiableSet(payloads);
+    public List<Payload> getPayloads() {
+        return Collections.unmodifiableList(payloads);
     }
 
 }

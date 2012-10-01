@@ -71,7 +71,7 @@ public interface OXRTHandler {
      * Get the complete path to an element in a namespace that this OXRTHandler is able to process.
      * @return the elementPath of elements this OXRTHandler is able to process.
      */
-	public Class<? extends Stanza> getStanzaClass();
+	public String getNamespace();
 	
 	/**
 	 * Handle an incoming {@link Stanza}.

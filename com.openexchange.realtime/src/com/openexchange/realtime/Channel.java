@@ -49,6 +49,8 @@
 
 package com.openexchange.realtime;
 
+import java.util.Set;
+
 import com.openexchange.exception.OXException;
 import com.openexchange.realtime.packet.ID;
 import com.openexchange.realtime.packet.Stanza;
@@ -73,13 +75,13 @@ public interface Channel {
 	/**
 	 * Checks if this channel can dispatch a specific Stanza class to a given recipient.
 	 * 
-	 * @param stanzaClass The class of the element that has to be handled
+	 * @param namespaces The namespaces of the payloads contained in the Stanza that has to be handled by this Channel.
 	 * @param recipient The recipient
 	 * @param session The session
 	 * @return <code>true</code> if this channel can dispatch messages to given recipient; otherwise <code>false</code>
 	 * @throws OXException If check fails for any reason
 	 */
-	public boolean canHandle(Class<? extends Stanza> stanzaClass, ID recipient, ServerSession session) throws OXException;
+	public boolean canHandle(Set<String> namespaces, ID recipient, ServerSession session) throws OXException;
 	
 	/**
 	 * Gets the priority used for building a ranking for concurrent channels.

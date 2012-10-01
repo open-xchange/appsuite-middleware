@@ -50,8 +50,8 @@
 package com.openexchange.realtime.impl;
 
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-import org.cliffc.high_scale_lib.NonBlockingHashMap;
 import com.openexchange.exception.OXException;
 import com.openexchange.log.Log;
 import com.openexchange.log.LogFactory;
@@ -111,10 +111,10 @@ public class MessageDispatcherImpl implements MessageDispatcher {
                 return channel;
             }
         } else { // Choose channel based on priority and capabilities
-            Class<? extends Stanza> clazz = stanza.getClass();
+             Set<String> namespaces = stanza.getNamespaces();
             for (Channel c : channels.values()) {
                 //no channel chosen yet, or current channels priority is lower -> replace with better suited channel
-                if ((channel == null || channel.getPriority() < c.getPriority()) && c.canHandle(clazz, to, session)) {
+                if ((channel == null || channel.getPriority() < c.getPriority()) && c.canHandle(namespaces, to, session)) {
                     channel = c;
                 }
             }

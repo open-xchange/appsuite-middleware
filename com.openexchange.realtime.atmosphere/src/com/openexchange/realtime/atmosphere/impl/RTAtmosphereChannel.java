@@ -49,6 +49,8 @@
 
 package com.openexchange.realtime.atmosphere.impl;
 
+import java.util.Set;
+
 import com.openexchange.exception.OXException;
 import com.openexchange.realtime.Channel;
 import com.openexchange.realtime.packet.ID;
@@ -80,24 +82,24 @@ public class RTAtmosphereChannel implements Channel {
 	}
 
 	@Override
-    public boolean canHandle(Class<? extends Stanza> stanzaClass, ID recipient,
+    public boolean canHandle(Set<String> namespaces, ID recipient,
 			ServerSession session) {
 		if (!isConnected(recipient, session)) {
 			return false;
 		}
 		
-		if (!hasCapability(recipient, stanzaClass, session)) {
+		if (!hasCapability(recipient, namespaces, session)) {
 			return false;
 		}
 		
-		if (library.getHandlerFor(stanzaClass) == null) {
+		if (!library.getManageableNamespaces().containsAll(namespaces)) {
 			return false;
 		}
 		
 		return true;
 	}
 
-	public boolean hasCapability(ID recipient, Class<? extends Stanza> stanzaClass,
+	public boolean hasCapability(ID recipient, Set<String> namespaces,
 			ServerSession session) {
 		return true; // TODO: Implement Capability Model
 	}

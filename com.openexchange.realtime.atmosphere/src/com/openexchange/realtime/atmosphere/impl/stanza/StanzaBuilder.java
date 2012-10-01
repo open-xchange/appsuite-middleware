@@ -49,9 +49,12 @@
 
 package com.openexchange.realtime.atmosphere.impl.stanza;
 
+import org.apache.commons.logging.Log;
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.exception.OXException;
+import com.openexchange.realtime.atmosphere.AtmosphereExceptionCode;
 import com.openexchange.realtime.packet.ID;
 import com.openexchange.realtime.packet.Payload;
 import com.openexchange.realtime.packet.Stanza;
@@ -64,14 +67,16 @@ import com.openexchange.realtime.packet.Stanza;
  */
 public abstract class StanzaBuilder<T extends Stanza> {
 
+    private static Log LOG = com.openexchange.log.Log.loggerFor(StanzaBuilder.class);
     protected ID from;
     protected JSONObject json;
     protected T stanza;
 
     /**
      * Set the obligatory {@link Stanza} elements.
+     * @throws OXException for errors happening while building the Stanza
      */
-    protected void basics() {
+    protected void basics() throws OXException {
         from();
         to();
         id();
@@ -94,19 +99,26 @@ public abstract class StanzaBuilder<T extends Stanza> {
         }
     }
     
-    private void payloads() {
-        // write recursive function to get namespaces out of JSON Object 
+    private void payloads() throws OXException {
         if (json.has("payloads")) {
-            JSONArray payloads = json.getJSONArray("payloads");
+            JSONArray payloads = json.optJSONArray("payloads");
             for (int i = 0; i < payloads.length(); i++) {
-                JSONObject payload = payloads.getJSONObject(i);
+                JSONObject payload = payloads.optJSONObject(i);
+                String elementName;
+                try {
+                    elementName = payload.getString("element");
+                } catch (JSONException e) {
+                    OXException exception = AtmosphereExceptionCode.MISSING_KEY.create("element");
+                    LOG.error(exception);
+                    throw exception;
+                }
                 if (payload.has("namespace")) {
-                    String namespace = payload.getString("namespace");
-                    stanza.addNamespace(namespace);
-                    stanza.addPayload(new Payload(payload, "json", ));
+                    String namespace = payload.optString("namespace");
+                    stanza.addPayload(new Payload(payload, "json", namespace, elementName ));
+                } else {
+                    stanza.addPayload(new Payload(payload, "json", null, elementName ));
                 }
             }
-            stanza.setPayload(new Payload(json.optJSONObject("data"), "json"));
         }
     }
     

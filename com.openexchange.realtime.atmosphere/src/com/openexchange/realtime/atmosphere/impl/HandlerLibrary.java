@@ -49,10 +49,11 @@
 
 package com.openexchange.realtime.atmosphere.impl;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.CopyOnWriteArrayList;
 import com.openexchange.realtime.atmosphere.OXRTHandler;
-import com.openexchange.realtime.packet.Stanza;
 
 /**
  * {@link HandlerLibrary} - Tracks registered {@link OXRTHandler handlers} and
@@ -72,13 +73,16 @@ public class HandlerLibrary {
      * The collection for registered {@link OXRTHandler handlers}.
      */
     private final List<OXRTHandler> handlers;
+    
+    private final List<String> namespaces;
 
     /**
      * Initializes a new {@link HandlerLibrary}.
      */
     public HandlerLibrary() {
         super();
-        handlers = new CopyOnWriteArrayList<OXRTHandler>(); // Use a concurrent collection
+        handlers = new CopyOnWriteArrayList<OXRTHandler>();
+        namespaces = new CopyOnWriteArrayList<String>();
     }
 
     /**
@@ -87,9 +91,9 @@ public class HandlerLibrary {
      * @param stanzaClass The Stanza subclass we want to transform.
      * @return The appropriate handler or <code>null</code> if none is applicable.
      */
-    public OXRTHandler getHandlerFor(Class<? extends Stanza> stanzaClass) {
+    public OXRTHandler getHandlerFor(String namespace) {
         for (OXRTHandler handler : handlers) {
-            if (handler.getStanzaClass().equals(stanzaClass)) {
+            if (handler.getNamespace().equals(namespace)) {
                 return handler;
             }
         }
@@ -102,7 +106,10 @@ public class HandlerLibrary {
      * @param transformer The handler to add
      */
     public void add(OXRTHandler transformer) {
-        handlers.add(transformer);
+        boolean isAdded = handlers.add(transformer);
+        if(isAdded) {
+            namespaces.add(transformer.getNamespace());
+        }
     }
 
     /**
@@ -112,5 +119,18 @@ public class HandlerLibrary {
      */
     public void remove(OXRTHandler transformer) {
         handlers.remove(transformer);
+        boolean isRemoved = handlers.remove(transformer);
+        if(isRemoved) {
+            namespaces.remove(transformer.getNamespace());
+        }
     }
+    
+    /**
+     * Get the collected namespaces the registered OXRTHandlers are able to transform.
+     * @return the collected namespaces the registered OXRTHandlers are able to transform.
+     */
+    public Set<String> getManageableNamespaces() {
+        return new HashSet<String>(namespaces);
+    }
+    
 }

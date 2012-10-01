@@ -81,7 +81,7 @@ public class OXRTConversionHandler implements OXRTHandler {
     }
 
     @Override
-    public Class<? extends Stanza> getStanzaClass() {
+    public Class<? extends Stanza> getNamespace() {
         return stanzaClass; 
     }
 

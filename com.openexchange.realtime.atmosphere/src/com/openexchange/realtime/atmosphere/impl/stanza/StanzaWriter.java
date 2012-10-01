@@ -49,6 +49,8 @@
 
 package com.openexchange.realtime.atmosphere.impl.stanza;
 
+import java.util.List;
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.exception.OXException;
@@ -111,9 +113,14 @@ public class StanzaWriter {
     private static void writeBasics(Stanza stanza, JSONObject object) throws JSONException {
         object.put("from", stanza.getFrom().toString());
         object.put("to", stanza.getTo().toString());
-        Payload payload = stanza.getPayload();
-        if(payload != null) {
-            object.put("data", payload.getData());   
+        List<Payload> payloads = stanza.getPayloads();
+        if(!payloads.isEmpty()) {
+            JSONArray payloadArray = new JSONArray();
+            for(Payload payload : payloads) {
+                JSONObject payloadObject = new JSONObject();
+                payloadObject.put(namespace, element, data)
+                payloadArray.put(payloadObject);
+            }
         }
     }
 

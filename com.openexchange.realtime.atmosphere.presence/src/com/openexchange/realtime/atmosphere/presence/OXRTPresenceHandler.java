@@ -81,7 +81,7 @@ import com.openexchange.tools.session.ServerSession;
 public class OXRTPresenceHandler implements OXRTHandler {
 
     @Override
-    public Class<? extends Stanza> getStanzaClass() {
+    public Class<? extends Stanza> getNamespace() {
         return Presence.class;
     }
 

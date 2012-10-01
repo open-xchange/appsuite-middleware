@@ -554,6 +554,7 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
     }
 
     private void dispatchStanza(Stanza stanza, RTAtmosphereState atmosphereState) throws OXException {
+        //TODO:apply transformers to all payloads before dispatching
         OXRTHandler transformer = library.getHandlerFor(stanza.getClass());
         if (transformer == null) {
             throw OXException.general("No transformer for " + stanza);
@@ -569,6 +570,7 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
      * @throws OXException if no transformer for the given Stanza can be found
      */
     public void handleOutgoing(Stanza stanza, ServerSession serverSession) throws OXException {
+        //TODO:apply transformers to all payloads before sending
         OXRTHandler transformer = library.getHandlerFor(stanza.getClass());
         if (transformer == null) {
             throw OXException.general("No transformer for " + stanza);

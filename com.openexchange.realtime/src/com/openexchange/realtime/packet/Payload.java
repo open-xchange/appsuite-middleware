@@ -49,8 +49,6 @@
 
 package com.openexchange.realtime.packet;
 
-import java.util.HashSet;
-import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 import com.openexchange.conversion.simple.SimpleConverter;
 import com.openexchange.exception.OXException;
@@ -70,9 +68,14 @@ public class Payload {
      */
     public static AtomicReference<ServiceLookup> SERVICES = new AtomicReference<ServiceLookup>();
 
+    // Current format of the Payload e.g. json or xml or some other POJO type
     private String format;
-    
-    private Set namespaces = new HashSet<String>();
+
+    // The namespace of this payload e.g.: http://jabber.org/protocol/disco#info
+    private String namespace;
+
+    // The elementname identifying the Payload element in a namespace
+    private String elementName;
 
     private Object data;
 
@@ -81,10 +84,14 @@ public class Payload {
      * 
      * @param data The payload's data object
      * @param format The data object's format
+     * @param namespace The namespace of this Payload element
+     * @param elementName the unique element name within the namespace
      */
-    public Payload(Object data, String format) {
+    public Payload(Object data, String format, String namespace, String elementName) {
         this.data = data;
         this.format = format;
+        this.namespace = namespace;
+        this.elementName = elementName;
     }
 
     /**
@@ -108,12 +115,30 @@ public class Payload {
     }
 
     /**
+     * Gets the unique element name within the namespace
+     * 
+     * @return the unique element name within the namespace
+     */
+    public String getElementName() {
+        return elementName;
+    }
+
+    /**
      * Gets the data object's format identifier.
      * 
      * @return The format identifier.
      */
     public String getFormat() {
         return format;
+    }
+
+    /**
+     * Gets the namespace of the payload element
+     * 
+     * @return null if the element is from the the default namespace, otherwise the namespace of the payload element
+     */
+    public String getNamespace() {
+        return namespace;
     }
 
     /**
@@ -126,10 +151,53 @@ public class Payload {
      */
     public Payload to(String toFormat, ServerSession session) throws OXException {
         if (toFormat.equals(format)) {
-            return new Payload(data, toFormat);
+            return new Payload(data, toFormat, namespace, elementName);
         }
         SimpleConverter converter = SERVICES.get().getService(SimpleConverter.class);
-        return new Payload(converter.convert(format, toFormat, data, session), toFormat);
+        return new Payload(converter.convert(format, toFormat, data, session), toFormat, namespace, elementName);
     }
 
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((data == null) ? 0 : data.hashCode());
+        result = prime * result + ((elementName == null) ? 0 : elementName.hashCode());
+        result = prime * result + ((format == null) ? 0 : format.hashCode());
+        result = prime * result + ((namespace == null) ? 0 : namespace.hashCode());
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (!(obj instanceof Payload))
+            return false;
+        Payload other = (Payload) obj;
+        if (data == null) {
+            if (other.data != null)
+                return false;
+        } else if (!data.equals(other.data))
+            return false;
+        if (elementName == null) {
+            if (other.elementName != null)
+                return false;
+        } else if (!elementName.equals(other.elementName))
+            return false;
+        if (format == null) {
+            if (other.format != null)
+                return false;
+        } else if (!format.equals(other.format))
+            return false;
+        if (namespace == null) {
+            if (other.namespace != null)
+                return false;
+        } else if (!namespace.equals(other.namespace))
+            return false;
+        return true;
+    }
+    
 }
