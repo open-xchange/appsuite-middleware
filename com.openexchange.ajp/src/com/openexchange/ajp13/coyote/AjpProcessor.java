@@ -516,6 +516,11 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
     }
 
     @Override
+    public Thread getThread() {
+        return thread;
+    }
+
+    @Override
     public String getThreadName() {
         return thread.getName();
     }

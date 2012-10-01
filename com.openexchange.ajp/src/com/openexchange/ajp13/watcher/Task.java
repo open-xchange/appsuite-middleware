@@ -67,6 +67,8 @@ public interface Task {
 
     StackTraceElement[] getStackTrace();
 
+    Thread getThread();
+
     String getThreadName();
 
     void cancel();
