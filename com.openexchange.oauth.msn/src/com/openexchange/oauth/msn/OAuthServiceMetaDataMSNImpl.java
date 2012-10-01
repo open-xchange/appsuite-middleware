@@ -160,10 +160,11 @@ public class OAuthServiceMetaDataMSNImpl extends AbstractOAuthServiceMetaData {
             httpClient.getHostConfiguration().setHost("live.com", 443, protocol);
             String urlString = accessTokenGrabber;
             PostMethod postMethod = new PostMethod(urlString + params);
-            postMethod.addParameter("wrap_client_id", getAPIKey());
-            postMethod.addParameter("wrap_client_secret", getAPISecret());
-            postMethod.addParameter("wrap_callback", callback);
-            postMethod.addParameter("wrap_verification_code", verifier);
+            
+            addParameter(postMethod, "wrap_client_id", getAPIKey());
+            addParameter(postMethod,"wrap_client_secret", getAPISecret());
+            addParameter(postMethod,"wrap_callback", callback);
+            addParameter(postMethod,"wrap_verification_code", verifier);
 
             httpClient.executeMethod(postMethod);
 
@@ -203,6 +204,14 @@ public class OAuthServiceMetaDataMSNImpl extends AbstractOAuthServiceMetaData {
         return super.getOAuthToken(arguments);
         // throw OAuthExceptionCodes.IO_ERROR.create(" ***** Something went terribly wrong!");
     }
+
+	private void addParameter(PostMethod postMethod, String param,
+			String value) {
+		if (value == null)
+			return;
+		postMethod.addParameter(param, value);
+		
+	}
 
 	@Override
 	public API getAPI() {
