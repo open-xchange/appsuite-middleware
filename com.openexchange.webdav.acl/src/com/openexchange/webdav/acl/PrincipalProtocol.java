@@ -47,28 +47,29 @@
  *
  */
 
-package com.openexchange.caldav.mixins;
+package com.openexchange.webdav.acl;
 
-import com.openexchange.caldav.CaldavProtocol;
-import com.openexchange.webdav.protocol.helpers.SingleXMLPropertyMixin;
-
+import com.openexchange.webdav.acl.reports.PrincipalMatchReport;
+import com.openexchange.webdav.action.WebdavAction;
+import com.openexchange.webdav.protocol.Protocol;
 
 /**
- * The {@link CalendarHomeSet} property mixin extends resources to include a pointer to the collection containing all of a users calendars.
+ * {@link PrincipalProtocol}
  *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class CalendarHomeSet extends SingleXMLPropertyMixin {
-
-    private static final String PROPERTY_NAME = "calendar-home-set";
+public class PrincipalProtocol extends Protocol {
     
-    public CalendarHomeSet() {
-        super(CaldavProtocol.CAL_NS.getURI(), PROPERTY_NAME);
+    public PrincipalProtocol() {
+        super();
     }
-
+     
     @Override
-    protected String getValue() {
-        return "<D:href>/caldav/</D:href>";
+    public WebdavAction getReportAction(String ns, String name) {
+        if (PrincipalMatchReport.NAMESPACE.equals(ns) && PrincipalMatchReport.NAME.equals(name)) {
+            return new PrincipalMatchReport(this);                
+        }
+        return null;
     }
 
 }

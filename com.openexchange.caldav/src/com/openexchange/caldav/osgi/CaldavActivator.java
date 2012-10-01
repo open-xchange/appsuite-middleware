@@ -51,7 +51,6 @@ package com.openexchange.caldav.osgi;
 
 import org.apache.commons.logging.Log;
 import org.osgi.service.http.HttpService;
-import com.openexchange.caldav.mixins.CalendarHomeSet;
 import com.openexchange.caldav.mixins.CalendarUserAddressSet;
 import com.openexchange.caldav.mixins.DefaultAlarmVeventDate;
 import com.openexchange.caldav.mixins.DefaultAlarmVeventDatetime;
@@ -112,7 +111,6 @@ public class CaldavActivator extends HousekeepingActivator {
             performer.setGlobalMixins(mixin);
             this.mixin = mixin;
             
-            registerService(PropertyMixin.class, new CalendarHomeSet());
             registerService(PropertyMixinFactory.class, new PropertyMixinFactory() {
 
                 @Override

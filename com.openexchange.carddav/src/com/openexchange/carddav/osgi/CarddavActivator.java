@@ -1,9 +1,7 @@
 package com.openexchange.carddav.osgi;
 
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import org.osgi.service.http.HttpService;
-import com.openexchange.carddav.mixins.AddressbookHomeSet;
 import com.openexchange.carddav.servlet.CardDAV;
 import com.openexchange.carddav.servlet.CarddavPerformer;
 import com.openexchange.config.cascade.ConfigViewFactory;
@@ -12,7 +10,6 @@ import com.openexchange.folderstorage.FolderService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.user.UserService;
 import com.openexchange.webdav.directory.PathRegistration;
-import com.openexchange.webdav.protocol.helpers.PropertyMixin;
 import com.openexchange.webdav.protocol.osgi.OSGiPropertyMixin;
 
 public class CarddavActivator extends HousekeepingActivator {
@@ -39,7 +36,6 @@ public class CarddavActivator extends HousekeepingActivator {
             mixin = new OSGiPropertyMixin(context, performer);
             performer.setGlobalMixins(mixin);
             
-            registerService(PropertyMixin.class, new AddressbookHomeSet());
             registerService(PathRegistration.class, new PathRegistration("carddav"));
 
             openTrackers();

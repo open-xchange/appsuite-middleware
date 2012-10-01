@@ -47,75 +47,26 @@
  *
  */
 
-package com.openexchange.webdav.acl;
+package com.openexchange.webdav.acl.mixins;
 
-import com.openexchange.groupware.contexts.Context;
-import com.openexchange.tools.session.SessionHolder;
-import com.openexchange.user.UserService;
-import com.openexchange.webdav.protocol.Protocol;
-import com.openexchange.webdav.protocol.WebdavCollection;
-import com.openexchange.webdav.protocol.WebdavPath;
-import com.openexchange.webdav.protocol.WebdavProtocolException;
-import com.openexchange.webdav.protocol.WebdavResource;
-import com.openexchange.webdav.protocol.helpers.AbstractWebdavFactory;
-
+import com.openexchange.webdav.protocol.helpers.SingleXMLPropertyMixin;
 
 /**
- * {@link PrincipalWebdavFactory}
+ * {@link CalendarHomeSet}
+ * 
+ * Identifies the URL of any WebDAV collections that contain calendar collections owned by the associated principal resource.
  *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class PrincipalWebdavFactory extends AbstractWebdavFactory {
+public class CalendarHomeSet extends SingleXMLPropertyMixin {
 
-    private static final Protocol PROTOCOL = new PrincipalProtocol();
-
-    private final UserService userService;
-    private final SessionHolder sessionHolder;
-
-
-    public PrincipalWebdavFactory(final UserService userService, final SessionHolder sessionHolder) {
-        super();
-        this.userService = userService;
-        this.sessionHolder = sessionHolder;
+    public CalendarHomeSet() {
+        super("urn:ietf:params:xml:ns:caldav", "calendar-home-set");
     }
 
     @Override
-    public Protocol getProtocol() {
-        return PROTOCOL;
+    protected String getValue() {
+        return "<D:href>/caldav/</D:href>";
     }
-
-    @Override
-    public WebdavCollection resolveCollection(final WebdavPath url) throws WebdavProtocolException {
-        if (url.size() != 0) {
-            throw WebdavProtocolException.generalError(url, 404);
-        }
-        return mixin(new RootPrincipal(this));
-    }
-
-    @Override
-    public WebdavResource resolveResource(final WebdavPath url) throws WebdavProtocolException {
-        if (url.size() == 0) {
-            return mixin(new RootPrincipal(this));
-        }
-
-        return mixin(new RootPrincipal(this).resolveUser(url));
-    }
-
-    public UserService getUserService() {
-        return userService;
-    }
-
-    public Context getContext() {
-        return sessionHolder.getContext();
-    }
-
-    public String getLoginName() {
-        return sessionHolder.getSessionObject().getUserlogin();
-    }
-
-    public SessionHolder getSessionHolder() {
-        return sessionHolder;
-    }
-
 
 }
