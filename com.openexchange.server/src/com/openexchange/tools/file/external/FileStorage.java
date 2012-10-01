@@ -119,7 +119,7 @@ public interface FileStorage {
      * 
      * @param identifiers The file identifiers
      * @return The identifiers of those files that could not be deleted
-     * @throws OXException
+     * @throws OXException If delete attempt fails
      */
     Set<String> deleteFiles(final String[] identifiers) throws OXException;
 
