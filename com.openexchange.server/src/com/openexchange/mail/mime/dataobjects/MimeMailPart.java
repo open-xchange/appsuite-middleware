@@ -465,7 +465,7 @@ public final class MimeMailPart extends MailPart implements MimeRawSource, MimeC
             throw new IllegalStateException(ERR_NULL_PART);
         }
         try {
-            if (part instanceof MimeMessage) {
+            if (part instanceof MimeMessage && !(part instanceof com.sun.mail.imap.IMAPMessage)) {
                 saneContentType();
             }
             part.writeTo(out);
