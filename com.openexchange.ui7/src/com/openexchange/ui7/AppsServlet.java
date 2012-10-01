@@ -79,7 +79,7 @@ public class AppsServlet extends HttpServlet {
 
     private File root, zoneinfo;
 
-    private String ZONEINFO = "io.ox/core/date/tz/zoneinfo/";
+    private static String ZONEINFO = "io.ox/core/date/tz/zoneinfo/";
 
     public AppsServlet(File root, File zoneinfo) {
         this.root = root;

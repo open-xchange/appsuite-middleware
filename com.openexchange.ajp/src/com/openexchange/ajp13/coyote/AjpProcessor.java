@@ -1591,7 +1591,7 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
         /*
          * Remove leading slash character
          */
-        final String path = removeFromPath(requestURI, '/');
+        final String path = requestURI.length() > 1 ? removeFromPath(requestURI, '/') : requestURI;
         /*
          * Lookup path in available servlet paths
          */
