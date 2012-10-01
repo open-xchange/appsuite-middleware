@@ -54,7 +54,9 @@ import static com.openexchange.mail.mime.utils.MimeMessageUtility.decodeMultiEnc
 import static com.openexchange.mail.utils.MailFolderUtility.prepareFullname;
 import java.util.Collection;
 import java.util.EnumMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.TimeZone;
 import javax.mail.internet.InternetAddress;
 import org.json.JSONArray;
@@ -66,6 +68,8 @@ import com.openexchange.ajax.fields.FolderChildFields;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.ldap.UserStorage;
+import com.openexchange.log.LogProperties;
+import com.openexchange.log.Props;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailJSONField;
 import com.openexchange.mail.MailListField;
@@ -73,6 +77,7 @@ import com.openexchange.mail.MailPath;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.dataobjects.Delegatized;
 import com.openexchange.mail.dataobjects.MailMessage;
+import com.openexchange.mail.json.MailActionConstants;
 import com.openexchange.mail.mime.MimeFilter;
 import com.openexchange.mail.mime.utils.MimeMessageUtility;
 import com.openexchange.mail.parser.MailMessageParser;
@@ -180,8 +185,9 @@ public final class MessageWriter {
      */
     public static JSONObject writeMailMessage(final int accountId, final MailMessage mail, final DisplayMode displayMode, final boolean embedded, final Session session, final UserSettingMail settings, final Collection<OXException> warnings, final boolean token, final int tokenTimeout, final MimeFilter mimeFilter) throws OXException {
         final MailPath mailPath;
-        if (mail.getFolder() != null && mail.getMailId() != null) {
-            mailPath = new MailPath(accountId, mail.getFolder(), mail.getMailId());
+        final String fullName = mail.getFolder();
+        if (fullName != null && mail.getMailId() != null) {
+            mailPath = new MailPath(accountId, fullName, mail.getMailId());
         } else if (mail.getMsgref() != null) {
             mailPath = mail.getMsgref();
         } else {
@@ -194,41 +200,64 @@ public final class MessageWriter {
         } catch (final OXException e) {
             throw new OXException(e);
         }
-        final JsonMessageHandler handler = new JsonMessageHandler(accountId, mailPath, mail, displayMode, embedded, session, usm, token, tokenTimeout);
-        final MailMessageParser parser = new MailMessageParser().addMimeFilter(mimeFilter);
-        parser.parseMailMessage(mail, handler);
-        if (null != warnings) {
-            final List<OXException> list = parser.getWarnings();
-            if (!list.isEmpty()) {
-                warnings.addAll(list);
+        /*
+         * Add log properties
+         */
+        final Set<String> removees = new HashSet<String>(3);
+        final Props props = LogProperties.getLogProperties();
+        {
+            if (!props.put(MailActionConstants.LOG_PROPERTY_ACCOUNT_ID, Integer.valueOf(accountId))) {
+                removees.add(MailActionConstants.LOG_PROPERTY_ACCOUNT_ID);
+            }
+            if (!props.put(MailActionConstants.LOG_PROPERTY_FULL_NAME, fullName)) {
+                removees.add(MailActionConstants.LOG_PROPERTY_FULL_NAME);
+            }
+            if (!props.put(MailActionConstants.LOG_PROPERTY_MAIL_ID, mail.getMailId())) {
+                removees.add(MailActionConstants.LOG_PROPERTY_MAIL_ID);
             }
         }
-        final JSONObject jsonObject = handler.getJSONObject();
-        if (mail instanceof Delegatized) {
-            final int undelegatedAccountId = ((Delegatized) mail).getUndelegatedAccountId();
-            if (undelegatedAccountId >= 0) {
+        try {
+            final JsonMessageHandler handler =
+                new JsonMessageHandler(accountId, mailPath, mail, displayMode, embedded, session, usm, token, tokenTimeout);
+            final MailMessageParser parser = new MailMessageParser().addMimeFilter(mimeFilter);
+            parser.parseMailMessage(mail, handler);
+            if (null != warnings) {
+                final List<OXException> list = parser.getWarnings();
+                if (!list.isEmpty()) {
+                    warnings.addAll(list);
+                }
+            }
+            final JSONObject jsonObject = handler.getJSONObject();
+            if (mail instanceof Delegatized) {
+                final int undelegatedAccountId = ((Delegatized) mail).getUndelegatedAccountId();
+                if (undelegatedAccountId >= 0) {
+                    try {
+                        jsonObject.put(FolderChildFields.FOLDER_ID, prepareFullname(undelegatedAccountId, fullName));
+                    } catch (JSONException e) {
+                        throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
+                    }
+                }
+            }
+            if (!mail.isDraft()) {
+                return jsonObject;
+            }
+            /*
+             * Ensure "msgref" is present in draft mail
+             */
+            final String key = MailJSONField.MSGREF.getKey();
+            if (!jsonObject.has(key) && null != mailPath) {
                 try {
-                    jsonObject.put(FolderChildFields.FOLDER_ID, prepareFullname(undelegatedAccountId, mail.getFolder()));
-                } catch (JSONException e) {
+                    jsonObject.put(key, mailPath.toString());
+                } catch (final JSONException e) {
                     throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
                 }
             }
-        }
-        if (!mail.isDraft()) {
             return jsonObject;
-        }
-        /*
-         * Ensure "msgref" is present in draft mail
-         */
-        final String key = MailJSONField.MSGREF.getKey();
-        if (!jsonObject.has(key) && null != mailPath) {
-            try {
-                jsonObject.put(key, mailPath.toString());
-            } catch (final JSONException e) {
-                throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
+        } finally {
+            for (final String name : removees) {
+                props.remove(name);
             }
         }
-        return jsonObject;
     }
 
     /**
