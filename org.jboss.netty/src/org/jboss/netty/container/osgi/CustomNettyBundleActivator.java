@@ -54,7 +54,7 @@ import org.osgi.framework.BundleContext;
 
 
 /**
- * {@link CustomNettyBundleActivator}
+ * {@link CustomNettyBundleActivator} - An OSGi {@link BundleActivator} that configures logging.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
