@@ -130,9 +130,28 @@ public final class MessageWriter {
      * @throws OXException If writing structure fails
      */
     public static JSONObject writeStructure(final int accountId, final MailMessage mail, final long maxSize) throws OXException {
-        final MIMEStructureHandler handler = new MIMEStructureHandler(maxSize);
-        new StructureMailMessageParser().setParseTNEFParts(true).parseMailMessage(mail, handler);
-        return handler.getJSONMailObject();
+        final Set<String> removees = new HashSet<String>(3);
+        final Props props = LogProperties.getLogProperties();
+        {
+            if (!props.put(LOG_PROPERTY_ACCOUNT_ID, Integer.valueOf(accountId))) {
+                removees.add(LOG_PROPERTY_ACCOUNT_ID);
+            }
+            if (!props.put(LOG_PROPERTY_FULL_NAME, mail.getFolder())) {
+                removees.add(LOG_PROPERTY_FULL_NAME);
+            }
+            if (!props.put(LOG_PROPERTY_MAIL_ID, mail.getMailId())) {
+                removees.add(LOG_PROPERTY_MAIL_ID);
+            }
+        }
+        try {
+            final MIMEStructureHandler handler = new MIMEStructureHandler(maxSize);
+            new StructureMailMessageParser().setParseTNEFParts(true).parseMailMessage(mail, handler);
+            return handler.getJSONMailObject();
+        } finally {
+            for (final String name : removees) {
+                props.remove(name);
+            }
+        }
     }
 
     /**
