@@ -53,6 +53,7 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.regex.Pattern;
 import javax.management.Attribute;
 import javax.management.AttributeNotFoundException;
 import javax.management.InstanceNotFoundException;
@@ -115,18 +116,40 @@ public final class LoginCounterTool {
             String source = unquote(cmd.getOptionValue('s'));
             try {
                 startDate = sdf.parse(source);
+                throw new java.text.ParseException("ewrwer", 0);
             } catch (java.text.ParseException e) {
-                System.out.println("Wrong format for parameter 'start': " + source + " (args=" + Arrays.toString(args) + ")");
-                printHelp();
-                System.exit(0);
+                // args=[-s, 2012-09-24, 00:00:00, -e, 2012-09-25, 23:59:59]
+                if (args.length == 6) {
+                    final Pattern appendix = Pattern.compile("[0-9]{1,2}:[0-9]{1,2}:[0-9]{1,2}");
+                    String input = unquote(args[2]);
+                    if (appendix.matcher(input).matches()) {
+                        try {
+                            startDate = sdf.parse(source + " " + input);
+                            input = unquote(args[5]);
+                            if (appendix.matcher(input).matches()) {
+                                endDate = sdf.parse(unquote(args[4]) + " " + input);
+                            }
+                        } catch (final java.text.ParseException pe) {
+                            // Ignore
+                            startDate = null;
+                        }
+                    }
+                }
+                if (null == startDate) {
+                    System.out.println("Wrong format for parameter 'start': " + source + " (specified arguments: " + Arrays.toString(args) + ")");
+                    printHelp();
+                    System.exit(0);
+                }
             }
-            source = unquote(cmd.getOptionValue('e'));
-            try {
-                endDate = sdf.parse(source);
-            } catch (java.text.ParseException e) {
-                System.out.println("Wrong format for parameter 'end': " + source + " (args=" + Arrays.toString(args) + ")");
-                printHelp();
-                System.exit(0);
+            if (null == endDate) {
+                source = unquote(cmd.getOptionValue('e'));
+                try {
+                    endDate = sdf.parse(source);
+                } catch (java.text.ParseException e) {
+                    System.out.println("Wrong format for parameter 'end': " + source + " (specified arguments: " + Arrays.toString(args) + ")");
+                    printHelp();
+                    System.exit(0);
+                }
             }
             // Invoke MBean
             JMXServiceURL url = new JMXServiceURL("service:jmx:rmi:///jndi/rmi://localhost:9999/server");
