@@ -1,3 +1,8 @@
+* 2012-10-01 - francisco.laguna@open-xchange.com
+
+ - Fix for bug 23134: Ported CVS fixes
+ - Fix for bug 23135: Ported CVS fixes
+
 * 2012-10-01 - thorben.betten@open-xchange.com
 
  - Fix for bug 23146: Log if unsupported charset is detected

@@ -50,6 +50,7 @@
 package com.openexchange.subscribe.crawler;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLEncoder;
@@ -117,78 +118,90 @@ public class GMXAndWebDeAPIStep extends AbstractStep<Contact[], Object> implemen
         List<Contact> contactObjects = new ArrayList<Contact>();
         try {
             String urlString = url;
+            String parameterString = "";
 
-            // adding the parameters to the url
+            // summing up the parameters into one string
             if (!parameters.isEmpty()) {
-                urlString += "?";
+                //urlString += "?";
                 boolean isFirst = true;
-                for (final NameValuePair nvp : parameters) {
+                for (NameValuePair nvp : parameters) {
                     if (!isFirst) {
-                        urlString += "&";
+                        parameterString += "&";
                     } else {
                         isFirst = false;
                     }
-                    urlString += URLEncoder.encode(nvp.getName(), "utf-8") + "=" + URLEncoder.encode(nvp.getValue(), "utf-8");
+                    parameterString += URLEncoder.encode(nvp.getName(), "utf-8") + "=" + URLEncoder.encode(nvp.getValue(), "utf-8");
                 }
             }
-
+            
             if (debuggingEnabled) {
                 LOG.error("complete URL : " + urlString);
             }
 
-            final WebRequestSettings requestSettings = new WebRequestSettings(new URL(urlString), HttpMethod.POST);
+            WebRequestSettings requestSettings = new WebRequestSettings(new URL(urlString), HttpMethod.POST);
 
-            // adding the parameters to the request as well (just to be sure)
-            // requestSettings.setRequestParameters(new ArrayList());
-            // for (NameValuePair nvp : parameters) {
-            // requestSettings.getRequestParameters().add(nvp);
-            // }
-
-            final HtmlPage page = webClient.getPage(requestSettings);
+            HashMap<String, String> initialMap = new HashMap<String, String>();
+            initialMap.put("Content-Type", "application/x-www-form-urlencoded;charset=\"UTF-8\"");
+            requestSettings.setAdditionalHeaders(initialMap);
+          
+            // Adding the parameters to the Body as well
+            requestSettings.setRequestBody(parameterString);
+            webClient.setRedirectEnabled(false);
+            HtmlPage page = webClient.getPage(requestSettings);
 
             if (debuggingEnabled) {
                 LOG.error("Status Code : " + page.getWebResponse().getStatusCode());
                 LOG.error("URL : " + page.getWebResponse().getUrl());
                 LOG.error("webResponse : " + page.getWebResponse().getContentAsString());
             }
-        } catch (final FailingHttpStatusCodeException e) {
-            // catch the 401 that appears after logging in (for whatever reason ...)
-            if (e.getStatusCode() == 401) {
+        } catch (FailingHttpStatusCodeException e) {
+            // catch the 302 that appears after logging in
+            if (e.getStatusCode() == 302) {
                 // LOG.error(e.getResponse().getUrl());
-                final Pattern pattern = Pattern.compile("([^?]*)\\?session=(.*)");
-                final Matcher matcher = pattern.matcher(e.getResponse().getUrl().toString());
+                Pattern pattern = Pattern.compile("([^?]*)\\?session=(.*)");
+                //Matcher matcher = pattern.matcher(e.getResponse().getUrl().toString());
+                String location = "";
+                List<NameValuePair> responseHeaders = e.getResponse().getResponseHeaders();
+                for (NameValuePair nvp : responseHeaders){
+                    if (nvp.getName().equals("Location")){
+                        location = nvp.getValue();
+                    }
+                }
+                Matcher matcher = pattern.matcher(location);
                 if (matcher.find() && matcher.groupCount() == 2) {
-                    final String newUrlBase = matcher.group(1);
-                    final String functionCall = "json/PersonService/getAll";
-                    final String session = matcher.group(2);
-                    // System.out.println("Session : " + session);
-                    final String toEncode = username + ":sid=" + session;
-                    // System.out.println(toEncode);
-                    final Base64 encoder = new Base64();
-                    final byte[] bytes = encoder.encode(toEncode.getBytes());
-                    String base64Encoded = new String(bytes);
-                    // remove the whitespaces otherwise there is an error
-                    base64Encoded = base64Encoded.replaceAll("\\W", "");
-                    // System.out.println(base64Encoded);
-                    final String apiURL = newUrlBase + functionCall;
+                    String newUrlBase = matcher.group(1);
+                    String functionCall = "json/PersonService/getAll";
+                    String session = matcher.group(2);
+                    
+                    String toEncode = username + ":sid=" + session;  
+                    Base64 encoder = new Base64();
+                    String base64Encoded = "";
                     try {
-                        // System.out.println(base64Encoded);
-                        final WebRequestSettings requestSettingsForAPICall = new WebRequestSettings(new URL(apiURL), HttpMethod.POST);
-                        final HashMap<String, String> map = new HashMap<String, String>();
+                        base64Encoded = new String(encoder.encode(toEncode.getBytes("UTF-8")));
+                    } catch (UnsupportedEncodingException e2) {
+                        LOG.error(e2);
+                    }                                        
+                    
+                    // remove the whitespaces otherwise there is an error
+                    base64Encoded = base64Encoded.replaceAll("\\s", "");
+                    
+                    String apiURL = newUrlBase + functionCall;
+                    try {
+                        WebRequestSettings requestSettingsForAPICall = new WebRequestSettings(new URL(apiURL), HttpMethod.POST);
+                        HashMap<String, String> map = new HashMap<String, String>();
                         map.put("Authorization", "Basic " + base64Encoded);
-                        map.put("Content-Type", "application/json");
+                        map.put("Content-Type", "application/json;charset=\"UTF-8\"");
                         requestSettingsForAPICall.setAdditionalHeaders(map);
                         requestSettingsForAPICall.setRequestBody("{\"search\":null}");
-                        final Page page = webClient.getPage(requestSettingsForAPICall);
-                        // System.out.println(page.getWebResponse().getContentAsString());
-                        final String allContactsPage = page.getWebResponse().getContentAsString("UTF-8");
+                        Page page = webClient.getPage(requestSettingsForAPICall);
+                        String allContactsPage = page.getWebResponse().getContentAsString("UTF-8");
                         contactObjects = parseJSONIntoContacts(allContactsPage);
                         executedSuccessfully = true;
-                    } catch (final MalformedURLException e1) {
+                    } catch (MalformedURLException e1) {
                         LOG.error(e1);
-                    } catch (final FailingHttpStatusCodeException e1) {
+                    } catch (FailingHttpStatusCodeException e1) {
                         LOG.error(e1);
-                    } catch (final IOException e1) {
+                    } catch (IOException e1) {
                         LOG.error(e1);
                     }
 
@@ -209,15 +222,14 @@ public class GMXAndWebDeAPIStep extends AbstractStep<Contact[], Object> implemen
      * @param allContactsPage
      * @return
      */
-    private List<Contact> parseJSONIntoContacts(final String allContactsPage) {
-        System.out.println(allContactsPage);
-        final List<Contact> contacts = new ArrayList<Contact>();
+    private List<Contact> parseJSONIntoContacts(String allContactsPage) {
+        List<Contact> contacts = new ArrayList<Contact>();
         try {
-            final JSONObject allContentJSON = new JSONObject(allContactsPage);
-            final JSONArray allContactsJSON = (JSONArray) allContentJSON.get("response");
+            JSONObject allContentJSON = new JSONObject(allContactsPage);
+            JSONArray allContactsJSON = (JSONArray) allContentJSON.get("response");
             for (int i = 0; i < allContactsJSON.length(); i++) {
                 try {
-                    final JSONObject contactJSON = allContactsJSON.getJSONObject(i);
+                	final JSONObject contactJSON = allContactsJSON.getJSONObject(i);
                     final Contact contact = new Contact();
                     if (contactJSON.has("name")) {
                         contact.setSurName(contactJSON.getString("name"));
@@ -240,9 +252,11 @@ public class GMXAndWebDeAPIStep extends AbstractStep<Contact[], Object> implemen
                     if (contactJSON.has("company")) {
                         contact.setCompany(contactJSON.getString("company"));
                     }
+                    //setting the displayname
+                    contact.setDisplayName(contact.getGivenName() + " " + contact.getSurName());
 
-                    if (contactJSON.has("birthday")) {
-                        final JSONObject birthdayJSON = contactJSON.getJSONObject("birthday");
+                    if (JSONObject.NULL != contactJSON.get("birthday") && contactJSON.has("birthday")) {                        
+                        JSONObject birthdayJSON = contactJSON.getJSONObject("birthday");
                         String day = "";
                         String month = "";
                         String year = "";
