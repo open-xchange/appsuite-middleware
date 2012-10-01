@@ -7,6 +7,7 @@
 
  - Fix for bug 23146: Log if unsupported charset is detected
  - Fix for bug 23148: Safe sanitizing of Content-Type header
+ - Fix for bug 23149: Introduced limitation for number of accepted CSS block segments
 
 * 2012-09-29 - thorben.betten@open-xchange.com
 
