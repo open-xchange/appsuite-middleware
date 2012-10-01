@@ -60,46 +60,46 @@ import com.openexchange.dav.caldav.CalDAVTest;
 
 /**
  * {@link Bug22689Test}
- * 
- * Mountain Lion: The server responded: “403” to operation CalDAVWriteEntityQueueableOperation. 
- * 
+ *
+ * Mountain Lion: The server responded: &quot;403&quot; to operation CalDAVWriteEntityQueueableOperation.
+ *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 public class Bug22689Test extends CalDAVTest {
 
-	public Bug22689Test(String name) {
+	public Bug22689Test(final String name) {
 		super(name);
 	}
-	
+
 	public void testDefaultAlarms() throws Exception {
 	    /*
          * discover default alarms
          */
-	    String expected = "BEGIN:VALARM\r\nEND:VALARM";
-        DavPropertyNameSet props = new DavPropertyNameSet();
+	    final String expected = "BEGIN:VALARM\r\nEND:VALARM";
+        final DavPropertyNameSet props = new DavPropertyNameSet();
         props.add(PropertyNames.DEFAULT_ALARM_VEVENT_DATE);
         props.add(PropertyNames.DEFAULT_ALARM_VEVENT_DATETIME);
         props.add(PropertyNames.SUPPORTED_CALENDAR_COMPONENT_SET);
-        PropFindMethod propFind = new PropFindMethod(getWebDAVClient().getBaseURI() + "/caldav/", 
+        final PropFindMethod propFind = new PropFindMethod(getWebDAVClient().getBaseURI() + "/caldav/",
                 DavConstants.PROPFIND_BY_PROPERTY, props, DavConstants.DEPTH_1);
-        MultiStatusResponse[] responses = getWebDAVClient().doPropFind(propFind);
+        final MultiStatusResponse[] responses = getWebDAVClient().doPropFind(propFind);
         assertNotNull("got no response", responses);
         assertTrue("got no responses", 0 < responses.length);
-        for (MultiStatusResponse response : responses) {
+        for (final MultiStatusResponse response : responses) {
             if (response.getProperties(StatusCodes.SC_OK).contains(PropertyNames.SUPPORTED_CALENDAR_COMPONENT_SET)) {
-                Node node = extractNodeValue(PropertyNames.SUPPORTED_CALENDAR_COMPONENT_SET, response);
-                if (null != node && null != node.getAttributes() && null != node.getAttributes().getNamedItem("name") && 
+                final Node node = extractNodeValue(PropertyNames.SUPPORTED_CALENDAR_COMPONENT_SET, response);
+                if (null != node && null != node.getAttributes() && null != node.getAttributes().getNamedItem("name") &&
                             "VEVENT".equals(node.getAttributes().getNamedItem("name").getTextContent())) {
-                    String defaultAlarmVEventDate = extractTextContent(PropertyNames.DEFAULT_ALARM_VEVENT_DATE, response);
+                    final String defaultAlarmVEventDate = extractTextContent(PropertyNames.DEFAULT_ALARM_VEVENT_DATE, response);
                     assertNotNull("no default alarm", defaultAlarmVEventDate);
                     assertEquals("wrong default alarm", expected, defaultAlarmVEventDate.trim());
-                    String defaultAlarmVEventDatetime = extractTextContent(PropertyNames.DEFAULT_ALARM_VEVENT_DATETIME, response);
+                    final String defaultAlarmVEventDatetime = extractTextContent(PropertyNames.DEFAULT_ALARM_VEVENT_DATETIME, response);
                     assertNotNull("no default alarm", defaultAlarmVEventDatetime);
                     assertEquals("wrong default alarm", expected, defaultAlarmVEventDatetime.trim());
                 }
             }
         }
-        
+
 	}
 
 }
