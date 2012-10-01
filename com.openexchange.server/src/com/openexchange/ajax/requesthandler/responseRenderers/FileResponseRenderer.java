@@ -242,7 +242,7 @@ public class FileResponseRenderer implements ResponseRenderer {
         if (null == rotated) {
             // TODO: What to to then?
         }
-        return new FileHolder(rotated, -1, file.getContentType(), "");
+        return new FileHolder(rotated, -1, file.getContentType(), file.getName());
     }
 
     /**
@@ -282,7 +282,7 @@ public class FileResponseRenderer implements ResponseRenderer {
              * Scale to new input stream
              */
             final InputStream scaled = scaler.scale(file.getStream(), width, height, ScaleType.getType(request.getParameter("scaleType")));
-            return new FileHolder(scaled, -1, "image/png", "");
+            return new FileHolder(scaled, -1, "image/png", file.getName());
         } finally {
             Streams.close(file);
         }

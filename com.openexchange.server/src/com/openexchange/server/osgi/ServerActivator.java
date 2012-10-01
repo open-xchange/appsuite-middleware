@@ -69,6 +69,7 @@ import org.osgi.service.http.HttpService;
 import org.osgi.service.http.NamespaceException;
 import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
+import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.Attachment;
 import com.openexchange.ajax.Folder;
 import com.openexchange.ajax.Infostore;
@@ -646,6 +647,7 @@ public final class ServerActivator extends HousekeepingActivator {
             eventHandlerList.clear();
             // Stop all inside the server.
             starter.stop();
+            AJAXServlet.exitTracker();
             /*
              * Clear service registry
              */

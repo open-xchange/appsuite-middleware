@@ -1591,7 +1591,7 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
         /*
          * Remove leading slash character
          */
-        final String path = removeFromPath(requestURI, '/');
+        final String path = requestURI.length() > 1 ? removeFromPath(requestURI, '/') : requestURI;
         /*
          * Lookup path in available servlet paths
          */
@@ -2071,9 +2071,9 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
      * Receive a chunk of data. Called to implement the 'special' packet in ajp13 and to receive the data after we send a GET_BODY packet
      */
     public boolean receive() throws IOException {
-        first = false;
         bodyMessage.reset();
         readMessage(bodyMessage);
+        first = false;
         // No data received.
         if (bodyMessage.getLen() == 0) {
             // just the header

@@ -1,3 +1,15 @@
+* 2012-09-29 - thorben.betten@open-xchange.com
+
+ - Fix for bug 23141: Introduced special FileCleaningTracker which invokes File.deleteOnExit() on each incoming file upload
+
+* 2012-09-27 - martin.herfurth@open-xchange.com
+
+ - Fix for bug 23105: Mail addresses should not be case sensitive.
+
+* 2012-09-20 - martin.herfurth@open-xchange.com
+
+ - Fix for bug 23072: Bad All day appointments conflict when in different timezone.
+
 * 2012-09-20 - martin.herfurth@open-xchange.com
 
  - Fix for bug 23055: External participant detected as "Party Crasher".

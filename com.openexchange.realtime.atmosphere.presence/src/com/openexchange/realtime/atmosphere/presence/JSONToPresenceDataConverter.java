@@ -135,6 +135,7 @@ public class JSONToPresenceDataConverter implements SimplePayloadConverter {
                     presenceData.setState(presenceState);
                 }
             }
+            //TODO: when we support extension, getExtensions, get converter, convert
 
         } catch (JSONException ex) {
             throw AtmospherePresenceExceptionCode.PRESENCE_DATA_MALFORMED.create(ex, new Object[0]);

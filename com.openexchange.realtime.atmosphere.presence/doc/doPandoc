@@ -1,0 +1,2 @@
+#!/bin/bash
+pandoc -s -S -H pandoc.css -o presence.html presence.proto.markdown

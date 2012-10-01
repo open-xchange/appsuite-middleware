@@ -68,9 +68,11 @@ public class Activator extends HousekeepingActivator {
     protected void startBundle() throws Exception {
         String prefix = Dispatcher.PREFIX.get();
         ConfigurationService config = getService(ConfigurationService.class);
-        File path = new File(config.getProperty("com.openexchange.ui7.path", "/opt/open-xchange/ui7/"), "apps");
+        File path = new File(config.getProperty("com.openexchange.ui7.path", "/opt/open-xchange/ui7/"));
+        File apps = new File(path, "apps");
         File zoneinfo = new File(config.getProperty("com.openexchange.ui7.zoneinfo", "/usr/share/zoneinfo/"));
         HttpService service = getService(HttpService.class);
-        service.registerServlet(prefix + "apps", new AppsServlet(path, zoneinfo), null, null);
+        service.registerServlet(prefix + "apps", new AppsServlet(apps, zoneinfo), null, null);
+        service.registerServlet("/", new UI7Servlet(path, zoneinfo), null, null);
     }
 }

@@ -81,34 +81,44 @@ public class MessageDispatcherImpl implements MessageDispatcher {
             if (LOG.isInfoEnabled()) {
                 LOG.info("Couldn't find appropriate channel for sending stanza");
             }
-            throw RealtimeExceptionCodes.NO_APPROPRIATE_CHANNEL.create(stanza.getTo().toString(), stanza.getNamespace());
+            throw RealtimeExceptionCodes.NO_APPROPRIATE_CHANNEL.create(stanza.getTo().toString(), stanza);
         }
 
         channel.send(stanza, session);
     }
 
+    /**
+     * Choose a channel based on the following properties:
+     * <ol>
+     * <li><b>Protocol</b>: Check the full id of the recipient for the protcol used to address him and choose a channel able to handle that
+     * protocol</li>
+     * <li><b>Priority and Capabilities</b>: Get the preferred channel that can handle the Stanza if no protocol is given</li>
+     * </ol>
+     * 
+     * @param stanza The stanza to dispatch
+     * @param session The current session
+     * @return Null or the chosen channel that is able to handle the stanza.
+     * @throws OXException If the lookup of a channel fails for any reason
+     */
     private Channel chooseChannel(Stanza stanza, ServerSession session) throws OXException {
+        Channel channel = null;
         ID to = stanza.getTo();
         String protocol = to.getProtocol();
 
-        Channel channel = null;
-
-        if (protocol != null) {
+        if (protocol != null) { // Choose channel based on protocol
             channel = channels.get(protocol);
-            if (channel == null) {
-                throw RealtimeExceptionCodes.UNKNOWN_CHANNEL.create(protocol);
+            if (channel != null) {
+                return channel;
             }
-            return channel;
-        }
-
-        String namespace = stanza.getNamespace();
-
-        for (Channel c : channels.values()) {
-            if ((channel == null || channel.getPriority() < c.getPriority()) && c.canHandle(namespace, to, session)) {
-                channel = c;
+        } else { // Choose channel based on priority and capabilities
+            Class<? extends Stanza> clazz = stanza.getClass();
+            for (Channel c : channels.values()) {
+                //no channel chosen yet, or current channels priority is lower -> replace with better suited channel
+                if ((channel == null || channel.getPriority() < c.getPriority()) && c.canHandle(clazz, to, session)) {
+                    channel = c;
+                }
             }
         }
-
         return channel;
     }
 

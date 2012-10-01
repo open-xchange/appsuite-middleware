@@ -49,6 +49,7 @@
 
 package com.openexchange.groupware.dataRetrieval;
 
+import com.openexchange.exception.OXException;
 import com.openexchange.i18n.LocalizableStrings;
 
 /**
@@ -64,8 +65,8 @@ public final class DataRetrievalExceptionMessages implements LocalizableStrings 
     // Could not find data provider for id: %1$s
     public static final String UNKNOWN_DATA_PROVIDER_MSG = "Could not find data provider for id: %1$s";
 
-    // Missing parameter: %1$2
-    public static final String MISSING_PARAMETER_MSG = "Missing parameter: %1$2";
+    // Missing parameter: %1$s
+    public static final String MISSING_PARAMETER_MSG = "Missing parameter: %1$s";
 
     /**
      * Initializes a new {@link DataRetrievalExceptionMessages}.

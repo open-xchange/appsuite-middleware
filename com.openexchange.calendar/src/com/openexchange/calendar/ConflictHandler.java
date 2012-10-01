@@ -206,8 +206,8 @@ public class ConflictHandler {
         final User user = Tools.getUser(so, ctx);
         try {
             readcon = DBPool.pickup(ctx);
-            final long whole_day_start = recColl.getUserTimeUTCDate(start, user.getTimeZone());
-            long whole_day_end = recColl.getUserTimeUTCDate(end, user.getTimeZone());
+            final long whole_day_start = cdao.getFullTime() ? start.getTime() : recColl.getUserTimeUTCDate(start, user.getTimeZone());
+            long whole_day_end = cdao.getFullTime() ? end.getTime() : recColl.getUserTimeUTCDate(end, user.getTimeZone());
             if (whole_day_end <= whole_day_start) {
                 whole_day_end = whole_day_start+Constants.MILLI_DAY;
             }

@@ -73,7 +73,7 @@ public abstract class StanzaBuilder<T extends Stanza> {
     protected void basics() {
         from();
         to();
-        namespace();
+        id();
         payload();
     }
 
@@ -87,14 +87,15 @@ public abstract class StanzaBuilder<T extends Stanza> {
         }
     }
 
-    private void namespace() {
-        if (json.has("namespace")) {
-            stanza.setNamespace(json.optString("namespace"));
+    private void id() {
+        if (json.has("id")) {
+            stanza.setId(json.optString("to"));
         }
     }
     
     private void payload() {
         if (json.has("data")) {
+            JSONObject payload = json.optJSONObject("data");
             stanza.setPayload(new Payload(json.optJSONObject("data"), "json"));
         }
     }

@@ -65,13 +65,13 @@ import com.openexchange.tools.session.ServerSession;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
-public interface OXRTHandler<T extends Stanza> {
+public interface OXRTHandler {
     
     /**
-     * Get the namespace of this OXRTHandler.
-     * @return the namespace this OXRTHandler is able to process
+     * Get the complete path to an element in a namespace that this OXRTHandler is able to process.
+     * @return the elementPath of elements this OXRTHandler is able to process.
      */
-	public String getNamespace();
+	public Class<? extends Stanza> getStanzaClass();
 	
 	/**
 	 * Handle an incoming {@link Stanza}.
@@ -85,7 +85,7 @@ public interface OXRTHandler<T extends Stanza> {
 	 * @param session the currently active session
 	 * @throws OXException
 	 */
-	public void incoming(T stanza, ServerSession session) throws OXException;
+	public void incoming(Stanza stanza, ServerSession session) throws OXException;
 	
 	/**
 	 * Handle an outgoing {@link Stanza}.
@@ -98,6 +98,6 @@ public interface OXRTHandler<T extends Stanza> {
 	 * @param sender the StanzaSender to use for finally sending the processed Stanza
 	 * @throws OXException
 	 */
-	public void outgoing(T stanza, ServerSession session, StanzaSender sender) throws OXException;
+	public void outgoing(Stanza stanza, ServerSession session, StanzaSender sender) throws OXException;
 	
 }

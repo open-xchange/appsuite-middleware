@@ -97,7 +97,7 @@ public final class HazelcastRegistrationActivator extends HousekeepingActivator 
                 public void run() {
                     try {
                         serviceInfo =
-                            service.registerService("openexchange.service.hazelcast", 57462, new StringBuilder(
+                            service.registerService("openexchange.service.hazelcast", 7001, new StringBuilder(
                                 "open-xchange hazelcast service @").append(getHostName()).toString());
                     } catch (final OXException e) {
                         LOG.error(e.getMessage(), e);

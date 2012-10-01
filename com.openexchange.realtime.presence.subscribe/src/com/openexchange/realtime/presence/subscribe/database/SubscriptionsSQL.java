@@ -58,6 +58,7 @@ import java.util.ArrayList;
 import java.util.List;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
+import com.openexchange.realtime.packet.Presence;
 import com.openexchange.realtime.presence.subscribe.impl.Subscription;
 import com.openexchange.realtime.presence.subscribe.impl.SubscriptionParticipant;
 import com.openexchange.sql.builder.StatementBuilder;
@@ -94,6 +95,10 @@ public class SubscriptionsSQL {
     private static final Column toUserId = new Column("toUserId");
 
     private static final Column status = new Column("status");
+
+    private static final Column request = new Column("request");
+
+    private static final Column timestamp = new Column("timestamp");
 
     // @formatter:off
 
@@ -168,6 +173,11 @@ public class SubscriptionsSQL {
         update = update.SET(status, PLACEHOLDER);
         insert = insert.SET(status, PLACEHOLDER);
 
+        if (subscription.getRequest() != null && !subscription.getRequest().trim().equals("")) {
+            insert = insert.SET(request, PLACEHOLDER);
+            update = update.SET(request, PLACEHOLDER);
+        }
+
         Connection connection = dbService.getWritable(session.getContext());
         StatementBuilder sb = null;
         ResultSet rs = null;
@@ -177,26 +187,33 @@ public class SubscriptionsSQL {
             rs = sb.executeQuery(connection, select, values);
 
             if (rs.next()) {
-                if (subscription.getState() == Subscription.State.unsubscribed) {
+                if (subscription.getState() == Presence.Type.UNSUBSCRIBED) {
                     new StatementBuilder().executeStatement(connection, delete, values);
                 } else if (!rs.getString(status.getName()).equals(subscription.getState().name())) {
                     values.add(subscription.getState().name());
+                    if (subscription.getRequest() != null && !subscription.getRequest().trim().equals("")) {
+                        values.add(subscription.getRequest());
+                    }
                     new StatementBuilder().executeStatement(connection, update, values);
                 }
             } else {
                 values.add(subscription.getState().name());
+                if (subscription.getRequest() != null && !subscription.getRequest().trim().equals("")) {
+                    values.add(subscription.getRequest());
+                }
                 new StatementBuilder().executeStatement(connection, insert, values);
             }
         } catch (SQLException e) {
+            throw new OXException(e);
+        } finally {
             if (sb != null) {
                 try {
-                    sb.closePreparedStatement(connection, rs);
+                    sb.closePreparedStatement(null, rs);
                     dbService.backWritable(session.getContext(), connection);
                 } catch (SQLException e1) {
                     throw new OXException(e1);
                 }
             }
-            throw new OXException(e);
         }
     }
 
@@ -220,34 +237,18 @@ public class SubscriptionsSQL {
             sb = new StatementBuilder();
             rs = sb.executeQuery(connection, select, values);
 
-            List<Subscription> subscriptions = new ArrayList<Subscription>();
-
-            while (rs.next()) {
-                SubscriptionParticipant from = null;
-                if (rs.getString(fromId.getName()) != null) {
-                    from = new SubscriptionParticipant(rs.getString(fromId.getName()));
-                } else {
-                    from = new SubscriptionParticipant(rs.getInt(fromUserId.getName()), rs.getInt(fromCid.getName()));
-                }
-
-                SubscriptionParticipant to = null;
-                to = new SubscriptionParticipant(rs.getInt(toUserId.getName()), rs.getInt(toCid.getName()));
-
-                Subscription subscription = new Subscription(from, to, Subscription.State.valueOf(rs.getString(status.getName())));
-                subscriptions.add(subscription);
-            }
-
-            return subscriptions;
+            return handleResultSet(rs);
         } catch (SQLException e) {
+            throw new OXException(e);
+        } finally {
             if (sb != null) {
                 try {
-                    sb.closePreparedStatement(connection, rs);
+                    sb.closePreparedStatement(null, rs);
                     dbService.backWritable(session.getContext(), connection);
                 } catch (SQLException e1) {
                     throw new OXException(e1);
                 }
             }
-            throw new OXException(e);
         }
     }
 
@@ -264,34 +265,18 @@ public class SubscriptionsSQL {
             sb = new StatementBuilder();
             rs = sb.executeQuery(connection, selectTo, values);
 
-            List<Subscription> subscriptions = new ArrayList<Subscription>();
-
-            while (rs.next()) {
-                SubscriptionParticipant from = null;
-                if (rs.getString(fromId.getName()) != null) {
-                    from = new SubscriptionParticipant(rs.getString(fromId.getName()));
-                } else {
-                    from = new SubscriptionParticipant(rs.getInt(fromUserId.getName()), rs.getInt(fromCid.getName()));
-                }
-
-                SubscriptionParticipant to = null;
-                to = new SubscriptionParticipant(rs.getInt(toUserId.getName()), rs.getInt(toCid.getName()));
-
-                Subscription subscription = new Subscription(from, to, Subscription.State.valueOf(rs.getString(status.getName())));
-                subscriptions.add(subscription);
-            }
-
-            return subscriptions;
+            return handleResultSet(rs);
         } catch (SQLException e) {
+            throw new OXException(e);
+        } finally {
             if (sb != null) {
                 try {
-                    sb.closePreparedStatement(connection, rs);
+                    sb.closePreparedStatement(null, rs);
                     dbService.backWritable(session.getContext(), connection);
                 } catch (SQLException e1) {
                     throw new OXException(e1);
                 }
             }
-            throw new OXException(e);
         }
     }
 
@@ -299,7 +284,7 @@ public class SubscriptionsSQL {
         List<Object> values = new ArrayList<Object>();
         values.add(participant.getCid());
         values.add(participant.getUserId());
-        values.add(Subscription.State.pending.name());
+        values.add(Presence.Type.PENDING.name());
 
         Connection connection = dbService.getWritable(session.getContext());
         StatementBuilder sb = null;
@@ -309,35 +294,46 @@ public class SubscriptionsSQL {
             sb = new StatementBuilder();
             rs = sb.executeQuery(connection, selectToByCidUserIdAndStatus, values);
 
-            List<Subscription> subscriptions = new ArrayList<Subscription>();
-
-            while (rs.next()) {
-                SubscriptionParticipant from = null;
-                if (rs.getString(fromId.getName()) != null) {
-                    from = new SubscriptionParticipant(rs.getString(fromId.getName()));
-                } else {
-                    from = new SubscriptionParticipant(rs.getInt(fromUserId.getName()), rs.getInt(fromCid.getName()));
-                }
-
-                SubscriptionParticipant to = null;
-                to = new SubscriptionParticipant(rs.getInt(toUserId.getName()), rs.getInt(toCid.getName()));
-
-                Subscription subscription = new Subscription(from, to, Subscription.State.valueOf(rs.getString(status.getName())));
-                subscriptions.add(subscription);
-            }
-
-            return subscriptions;
+            return handleResultSet(rs);
         } catch (SQLException e) {
+            throw new OXException(e);
+        } finally {
             if (sb != null) {
                 try {
-                    sb.closePreparedStatement(connection, rs);
+                    sb.closePreparedStatement(null, rs);
                     dbService.backWritable(session.getContext(), connection);
                 } catch (SQLException e1) {
                     throw new OXException(e1);
                 }
             }
-            throw new OXException(e);
         }
+    }
+
+    private List<Subscription> handleResultSet(ResultSet rs) throws SQLException {
+        List<Subscription> subscriptions = new ArrayList<Subscription>();
+
+        while (rs.next()) {
+            SubscriptionParticipant from = null;
+            if (rs.getString(fromId.getName()) != null) {
+                from = new SubscriptionParticipant(rs.getString(fromId.getName()));
+            } else {
+                from = new SubscriptionParticipant(rs.getInt(fromUserId.getName()), rs.getInt(fromCid.getName()));
+            }
+
+            SubscriptionParticipant to = null;
+            to = new SubscriptionParticipant(rs.getInt(toUserId.getName()), rs.getInt(toCid.getName()));
+
+            Subscription subscription = new Subscription(from, to, Presence.Type.valueOf(rs.getString(status.getName())));
+
+            String req = rs.getString(request.getName());
+            if (req != null && !req.trim().equals("")) {
+                subscription.setRequest(req);
+            }
+
+            subscriptions.add(subscription);
+        }
+
+        return subscriptions;
     }
 
 }

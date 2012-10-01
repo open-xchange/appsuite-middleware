@@ -62,26 +62,27 @@ import com.openexchange.tools.session.ServerSession;
  * 
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
-public class OXRTConversionHandler<T extends Stanza> implements OXRTHandler<T> {
+public class OXRTConversionHandler implements OXRTHandler {
 
     public static ServiceLookup services;
 
-    private final String namespace, format;
+    private final String format;
+    private final Class<? extends Stanza> stanzaClass;
 
     /**
      * Initializes a new {@link OXRTConversionHandler}.
      * 
-     * @param namespace the namespace of Stanzas this OXRTConversionHandler can handle
+     * @param elementPath the path to an element in a namespace this OXRTConversionHandler can handle
      * @param format the format of POJOs that incoming Stanzas should be converted to
      */
-    public OXRTConversionHandler(String namespace, String format) {
-        this.namespace = namespace;
+    public OXRTConversionHandler(Class<? extends Stanza> stanzaClass, String format) {
+        this.stanzaClass = stanzaClass;
         this.format = format;
     }
 
     @Override
-    public String getNamespace() {
-        return namespace;
+    public Class<? extends Stanza> getStanzaClass() {
+        return stanzaClass; 
     }
 
     @Override

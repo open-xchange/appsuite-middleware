@@ -75,6 +75,7 @@ import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.fileupload.FileUploadException;
 import org.apache.commons.fileupload.disk.DiskFileItemFactory;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
+import org.apache.commons.io.FileCleaningTracker;
 import org.apache.commons.logging.Log;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -749,9 +750,26 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
     private static final int SIZE_THRESHOLD = 1048576;
 
     /**
-     * Creates a new {@link ServletFileUpload} instance.
+     * The file cleaning tracker.
+     */
+    private static volatile FileCleaningTracker tracker;
+    
+    /**
+     * Exits the file cleaning tracker.
+     */
+    public static void exitTracker() {
+        AJAXServlet.servletFileUpload = null;
+        final FileCleaningTracker tracker = AJAXServlet.tracker;
+        if (null != tracker) {
+            tracker.exitWhenFinished();
+            AJAXServlet.tracker = null;
+        }
+    }
+
+    /**
+     * Creates a new {@code ServletFileUpload} instance.
      *
-     * @return A new {@link ServletFileUpload} instance
+     * @return A new {@code ServletFileUpload} instance
      */
     private static ServletFileUpload newFileUploadBase() {
         /*
@@ -763,6 +781,9 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
          */
         factory.setSizeThreshold(SIZE_THRESHOLD);
         factory.setRepository(new File(ServerConfig.getProperty(Property.UploadDirectory)));
+        final FileCleaningTracker tracker = new DeleteOnExitFileCleaningTracker();
+        factory.setFileCleaningTracker(tracker);
+        AJAXServlet.tracker = tracker;
         /*
          * Create a new file upload handler
          */

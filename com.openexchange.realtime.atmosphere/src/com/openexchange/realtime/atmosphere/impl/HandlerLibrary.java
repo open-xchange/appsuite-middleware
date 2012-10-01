@@ -52,6 +52,7 @@ package com.openexchange.realtime.atmosphere.impl;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 import com.openexchange.realtime.atmosphere.OXRTHandler;
+import com.openexchange.realtime.packet.Stanza;
 
 /**
  * {@link HandlerLibrary} - Tracks registered {@link OXRTHandler handlers} and
@@ -81,15 +82,15 @@ public class HandlerLibrary {
     }
 
     /**
-     * Gets the handler appropriate for specified namespace identifier.
+     * Gets the appropriate handler for the specified Stanz class.
      * 
-     * @param namespace The namespace identifier
-     * @return The appropriate handler or <code>null</code> if none is applicable
+     * @param stanzaClass The Stanza subclass we want to transform.
+     * @return The appropriate handler or <code>null</code> if none is applicable.
      */
-    public OXRTHandler getHandlerFor(String namespace) {
-        for (OXRTHandler transformer : handlers) {
-            if (transformer.getNamespace().equals(namespace)) {
-                return transformer;
+    public OXRTHandler getHandlerFor(Class<? extends Stanza> stanzaClass) {
+        for (OXRTHandler handler : handlers) {
+            if (handler.getStanzaClass().equals(stanzaClass)) {
+                return handler;
             }
         }
         return null;

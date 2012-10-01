@@ -531,12 +531,12 @@ public final class ListLsubCache {
         final ListLsubCollection collection = getCollection(accountId, imapFolder, session);
         synchronized (collection) {
             if (checkTimeStamp(imapFolder, collection)) {
-                return collection.getJunkEntry();
+                return collection.getSentEntry();
             }
             /*
              * Return
              */
-            return collection.getJunkEntry();
+            return collection.getSentEntry();
         }
     }
 

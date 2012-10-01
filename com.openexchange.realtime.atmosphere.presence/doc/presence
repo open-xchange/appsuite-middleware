@@ -1,0 +1,66 @@
+--- Presence Service:
+* Presence information muss nur zur Laufzeit verfügbar sein - > Hazelcast?
+* JSON benötigt?
+* user@context -> user@context -> {context/user/resource1,
+context/user/resource2, ...}, Ressource muss vom client gesendet werden,
+Eindeutigkeit durch volatile sessionId param in ID
+* PresenceStatus{status(enum), title, message}, plaintext utf8 -> Müssen in db
+* gespeichert werden user -> user <-> PresenceStatus
+
+<presence>: Presence elements can be written to a stream to pass presence
+information on. The presence format is described in the documentation. Servers
+need to pass on (or parse, if the server is the final recipient) any <presence>
+stanzas that they receive.
+
+--- Kontaklisten (Roster):
+* Subscriptions müssen in Datenbank gespeichert werden
+user(requester) 1<->n user(target)
+
+Contact List management (subscriptions) is handled via presence stanzas, using
+the ‘type’ attribute, as follows:
+
+<presence to=’target_user’ type=’subscribe’> issues a request to
+target_user. The requester is asking for permission to subscribe to
+target_user’s presence information. (i.e. requester wishes to add
+target_user to their (requester’s) contact list. Target_user needs to decide
+if they will allow the requester to see this information or not).
+
+<presence to=’requester’ type=’subscribed’> returns permission to
+requester to allow requester to use the sender’s presence information in
+a contact list. (This could be sent in response to a subscribe request,
+or ‘cold’ if a sender wants requester to access their information prior
+to a request being made).
+
+<presence to=’requester’ type=’unsubscribed’> denies permission to
+requester to allow requester to use the sender’s presence
+information in a contact list. (This could be sent in response to a
+subscribe request, or ‘cold’ if a sender wants to revoke requester’s
+access to their presence information).
+<presence to ‘target_user’ type=’unsubscribe’> is a request that
+causes requester to no longer receive target_user’s presence
+information.
+
+Contact Lists (referred to as Rosters), are usually stored on servers so that
+users can retrieve them when they connect using different clients. The Roster
+consists of items that describe the relationship between the client and the
+users on the Contact List. Each item on the Contact List corresponds to another
+user, and there is a limited state model which describes the relationship. There
+are none states in total; the ‘final states’ are: “none” – neither user is
+subscribed, “to” the user has a subscription to the contact only, “from” the
+contact has a subscription to the user only and “both” – the user and contact
+have subscriptions on each other. [Other states include Pending messages to show
+that users have issued requests but no responses have been received].
+
+Servers implementing subscriptions need to ensure that the information kept with
+the Roster is updated when the various contact list requests are sent (see
+above). Contact Lists can be retrieved by the use of the <iq> stanza. XMPP
+states behaviours that apply to clients and servers as regards the use of
+Contact Lists and subscriptions. Most of this behaviour is recommended but
+optional.
+
+Status messaging is an optional part of XMPP, and is handled by the <show> and
+<status> parts of the presence stanza.
+
+--- Abruf/Connect
+Client sends <presence> elements. Clients may also send <iq> elements to
+retrieve their Contact Lists.
