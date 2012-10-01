@@ -54,26 +54,95 @@ import java.util.Set;
 import java.util.SortedSet;
 import com.openexchange.exception.OXException;
 
+/**
+ * {@link FileStorage} - A file storage.
+ * 
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ */
 public interface FileStorage {
 
+    /**
+     * Saves specified stream as a file.
+     * 
+     * @param file The stream to save as a file
+     * @return The file's path in associated file storage
+     * @throws OXException If saving file fails
+     */
     String saveNewFile(final InputStream file) throws OXException;
 
+    /**
+     * Gets denoted file's content as a stream.
+     * 
+     * @param name The file name
+     * @return The content stream
+     * @throws OXException If returning content stream fails
+     */
     InputStream getFile(String name) throws OXException;
 
+    /**
+     * Lists available files.
+     * 
+     * @return The available file as a sorted set
+     * @throws OXException If listing files fails
+     */
     SortedSet<String> getFileList() throws OXException;
 
+    /**
+     * Gets the size of denoted file.
+     * 
+     * @param name The file name
+     * @return The file's size
+     * @throws OXException If size cannot be returned
+     */
     long getFileSize(final String name) throws OXException;
 
+    /**
+     * Gets file's MIME type.
+     * 
+     * @param name The file name
+     * @return The MIME type
+     * @throws OXException If MIME type cannot be returned
+     */
     String getMimeType(final String name) throws OXException;
 
+    /**
+     * Deletes denoted file
+     * 
+     * @param identifier The file name
+     * @return <code>true</code> if deletion was successful; otherwise <code>false</code>
+     * @throws OXException If delete attempt fails
+     */
     boolean deleteFile(final String identifier) throws OXException;
 
+    /**
+     * Deletes multiple files.
+     * 
+     * @param identifiers The file identifiers
+     * @return The identifiers of those files that could not be deleted
+     * @throws OXException
+     */
     Set<String> deleteFiles(final String[] identifiers) throws OXException;
 
+    /**
+     * Completely removes/cleans all file storage's content.
+     * 
+     * @throws OXException If remove/clean operation fails
+     */
     void remove() throws OXException;
 
+    /**
+     * Re-creates file statistics.
+     * 
+     * @throws OXException If create attempt fails
+     */
     void recreateStateFile() throws OXException;
 
+    /**
+     * Checks if file statistics are correct.
+     * 
+     * @return <code>true</code> if correct; otherwise <code>false</code>
+     * @throws OXException If an error occurs
+     */
     boolean stateFileIsCorrect() throws OXException;
 
 }
