@@ -1,3 +1,7 @@
+* 2012-10-01 - thorben.betten@open-xchange.com
+
+ - Fix for bug 23146: Log if unsupported charset is detected
+
 * 2012-09-29 - thorben.betten@open-xchange.com
 
  - Fix for bug 23141: Introduced special FileCleaningTracker which invokes File.deleteOnExit() on each incoming file upload
