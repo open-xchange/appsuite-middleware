@@ -70,6 +70,7 @@ import com.openexchange.ajax.fields.FolderFields;
 import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.cache.impl.FolderCacheManager;
 import com.openexchange.cache.impl.FolderQueryCacheManager;
+import com.openexchange.contact.ContactService;
 import com.openexchange.database.provider.DBPoolProvider;
 import com.openexchange.database.provider.StaticDBPoolProvider;
 import com.openexchange.event.impl.EventClient;
@@ -1656,26 +1657,7 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
     }
 
     private void deleteContainedContacts(final int folderID) throws OXException {
-        Connection readCon = this.readCon;
-        Connection writeCon = this.writeCon;
-        final boolean createReadCon = (readCon == null);
-        final boolean createWriteCon = (writeCon == null);
-        if (createReadCon) {
-            readCon = DBPool.pickup(ctx);
-        }
-        if (createWriteCon) {
-            writeCon = DBPool.pickupWriteable(ctx);
-        }
-        try {
-            Contacts.trashContactsFromFolder(folderID, session, readCon, writeCon, false);
-        } finally {
-            if (createReadCon && readCon != null) {
-                DBPool.push(ctx, readCon);
-            }
-            if (createWriteCon && writeCon != null) {
-                DBPool.pushWrite(ctx, writeCon);
-            }
-        }
+        ServerServiceRegistry.getInstance().getService(ContactService.class).deleteContacts(session, String.valueOf(folderID));
     }
 
     private void deleteContainedDocuments(final int folderID) throws OXException {

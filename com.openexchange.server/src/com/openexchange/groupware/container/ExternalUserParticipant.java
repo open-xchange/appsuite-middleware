@@ -76,7 +76,7 @@ public class ExternalUserParticipant extends AbstractConfirmableParticipant impl
      */
     public ExternalUserParticipant(final String emailAddress) {
         super();
-        emailaddress = emailAddress;
+        setEmailAddress(emailAddress);
     }
 
     @Deprecated
@@ -102,7 +102,11 @@ public class ExternalUserParticipant extends AbstractConfirmableParticipant impl
 
     @Override
     public String getEmailAddress() {
-        return emailaddress;
+        return emailaddress == null ? null : emailaddress.toLowerCase();
+    }
+    
+    public void setEmailAddress(String emailaddress) {
+        this.emailaddress = emailaddress == null ? null : emailaddress.toLowerCase();
     }
 
     @Override

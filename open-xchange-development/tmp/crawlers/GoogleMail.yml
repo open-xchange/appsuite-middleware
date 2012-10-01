@@ -1,0 +1,8 @@
+--- !com.openexchange.subscribe.crawler.CrawlerDescription
+displayName: GoogleMail
+id: com.openexchange.subscribe.crawler.googlemail
+workflowString: |
+  --- !com.openexchange.subscribe.crawler.Workflow
+  steps: 
+    - !com.openexchange.subscribe.crawler.GoogleAPIStep {}
+  

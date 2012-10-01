@@ -147,10 +147,13 @@ public class ServerSessionAdapter implements ServerSession, PutIfAbsent {
      * Initializes a new {@link ServerSessionAdapter}.
      * 
      * @param session The delegate session
-     * @throws OXException If context look-up fails
+     * @throws OXException If initialization fails
      */
     public ServerSessionAdapter(final Session session) throws OXException {
         super();
+        if (null == session) {
+            throw new OXException(new IllegalArgumentException("Session is null."));
+        }
         if (ServerSession.class.isInstance(session)) {
             this.serverSession = (ServerSession) session;
         } else {
@@ -164,9 +167,13 @@ public class ServerSessionAdapter implements ServerSession, PutIfAbsent {
      * 
      * @param session The delegate session
      * @param ctx The session's context object
+     * @throws IllegalArgumentException If session argument is <code>null</code>
      */
     public ServerSessionAdapter(final Session session, final Context ctx) {
         super();
+        if (null == session) {
+            throw new IllegalArgumentException("Session is null.");
+        }
         if (ServerSession.class.isInstance(session)) {
             this.serverSession = (ServerSession) session;
         } else {
@@ -181,9 +188,13 @@ public class ServerSessionAdapter implements ServerSession, PutIfAbsent {
      * @param session The delegate session
      * @param ctx The session's context object
      * @param user The session's user object
+     * @throws IllegalArgumentException If session argument is <code>null</code>
      */
     public ServerSessionAdapter(final Session session, final Context ctx, final User user) {
         super();
+        if (null == session) {
+            throw new IllegalArgumentException("Session is null.");
+        }
         if (ServerSession.class.isInstance(session)) {
             this.serverSession = (ServerSession) session;
         } else {
@@ -199,9 +210,13 @@ public class ServerSessionAdapter implements ServerSession, PutIfAbsent {
      * @param session The delegate session
      * @param ctx The session's context object
      * @param user The session's user object
+     * @throws IllegalArgumentException If session argument is <code>null</code>
      */
     public ServerSessionAdapter(final Session session, final Context ctx, final User user, final UserConfiguration userConfiguration) {
         super();
+        if (null == session) {
+            throw new IllegalArgumentException("Session is null.");
+        }
         if (ServerSession.class.isInstance(session)) {
             this.serverSession = (ServerSession) session;
         } else {

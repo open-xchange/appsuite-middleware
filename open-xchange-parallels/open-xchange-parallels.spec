@@ -58,6 +58,7 @@ ox_move_config_file /opt/open-xchange/etc/groupware /opt/open-xchange/etc settin
 %config(noreplace) /opt/open-xchange/etc/*.properties
 %dir /opt/open-xchange/etc/settings/
 %config(noreplace) /opt/open-xchange/etc/settings/parallels-ui.properties
+%doc com.openexchange.custom.parallels/ChangeLog
 
 %changelog
 * Tue Aug 21 2012 Marcus Klein <marcus.klein@open-xchange.com>

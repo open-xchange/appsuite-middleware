@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <launchConfiguration type="org.eclipse.jdt.launching.localJavaApplication">
 <listAttribute key="org.eclipse.debug.core.MAPPED_RESOURCE_PATHS">
 <listEntry value="/com.openexchange.report.client/src/com/openexchange/report/client/impl/ReportClient.java"/>
@@ -9,5 +9,5 @@
 <stringAttribute key="org.eclipse.jdt.launching.MAIN_TYPE" value="com.openexchange.report.client.impl.ReportClient"/>
 <stringAttribute key="org.eclipse.jdt.launching.PROGRAM_ARGUMENTS" value="-d"/>
 <stringAttribute key="org.eclipse.jdt.launching.PROJECT_ATTR" value="com.openexchange.report.client"/>
-<stringAttribute key="org.eclipse.jdt.launching.VM_ARGUMENTS" value="-Xms20M -Xmx512M&#10;-Dopenexchange.propdir=${workspace_loc:/open-xchange-development/tmp}&#10;-Dopenexchange.propdir2=${workspace_loc:/open-xchange-development/commonTmp}"/>
+<stringAttribute key="org.eclipse.jdt.launching.VM_ARGUMENTS" value="-Xmx512M&#10;-Dopenexchange.propdir=${workspace_loc:/open-xchange-development/tmp}"/>
 </launchConfiguration>

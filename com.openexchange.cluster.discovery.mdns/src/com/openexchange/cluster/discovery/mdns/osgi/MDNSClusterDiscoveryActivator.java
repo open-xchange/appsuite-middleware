@@ -295,9 +295,22 @@ public final class MDNSClusterDiscoveryActivator extends HousekeepingActivator {
                     final MDNSService service = context.getService(reference);
                     try {
                         serviceRef.set(service);
-                        final ImmediateRegisteringListener registeringListener = new ImmediateRegisteringListener(SERVICE_ID, serviceRef);
-                        service.addListener(registeringListener);
-                        MDNSClusterDiscoveryActivator.this.registeringListener = registeringListener;
+                        final Runnable r = new Runnable() {
+
+                            @Override
+                            public void run() {
+                                try {
+                                    final ImmediateRegisteringListener registeringListener =
+                                        new ImmediateRegisteringListener(SERVICE_ID, serviceRef);
+                                    service.addListener(registeringListener);
+                                    MDNSClusterDiscoveryActivator.this.registeringListener = registeringListener;
+                                } catch (final Exception e) {
+                                    LOG.error("Failed registration of MDNSClusterDiscoveryService.", e);
+                                    serviceRef.set(null);
+                                }
+                            }
+                        };
+                        new Thread(r).start();
                         return service;
                     } catch (final Exception e) {
                         // Failure

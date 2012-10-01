@@ -55,10 +55,8 @@ import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-
 import org.json.JSONException;
 import org.json.JSONObject;
-
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
 import com.openexchange.secret.SecretService;
@@ -129,7 +127,7 @@ public class RefreshSubscriptionAction extends AbstractSubscribeAction {
 	            }
 	            int resultCode = services.getService(SubscriptionExecutionService.class).executeSubscriptions(subscriptionsToRefresh, subscribeRequest.getServerSession());
 
-	    		return new AJAXRequestResult(1, "json");
+	    		return new AJAXRequestResult(Integer.valueOf(1), "json");
 
 			} catch (JSONException e) {
 				throw new OXException(e);
@@ -137,7 +135,7 @@ public class RefreshSubscriptionAction extends AbstractSubscribeAction {
 
         }
 
-        return null;
+        return new AJAXRequestResult(Integer.valueOf(1), "json");
 	}
 
 }

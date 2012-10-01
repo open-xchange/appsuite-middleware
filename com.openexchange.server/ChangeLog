@@ -1,7 +1,100 @@
+* 2012-09-29 - thorben.betten@open-xchange.com
+
+ - Fix for bug 23141: Introduced special FileCleaningTracker which invokes File.deleteOnExit() on each incoming file upload
+ - Fix for bug 23139: Configuration option whether to prefer GSSAPI authentication mechanism if supported by SIEVE backend
+ - Fix for bug 23042: Sanitize Content-Type header prior to writing a message's content
+ - Fix for bug 23039: Convert string representation of a decimal number with arbitrary length to an integer value
+
+* 2012-09-28 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 22723: Use last-modified of parent folder for initial sync-token calculation 
+
+* 2012-09-28 - thorben.betten@open-xchange.com
+
+ - Fix for bug 23126: Un-quote date strings if necessary
+ - Fix for bug 22835: Detect if another vacation rule has already been specified before. Throw error if present.
+
+* 2012-09-27 - thorben.betten@open-xchange.com
+
+ - Fix for bug 23116: Added import to server bundle
+
+* 2012-09-27 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 21373: Send SC_FORBIDDEN when trying to move an appointment series to another folder 
+ - Fix for bug 21650: Make all folders available via CardDAV 
+
+* 2012-09-27 - martin.herfurth@open-xchange.com
+
+ - Fix for bug 23105: Mail addresses should not be case sensitive.
+
+* 2012-09-26 - thorben.betten@open-xchange.com
+
+ - Fix for bug 22923: Dealing with possible "Unmarshalling Error" when parsing empty date field
+
+* 2012-09-26 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 23095: Validate contact image size and content type
+ - Fix for bug 23078: List contacts from deleted folders as deleted resources
+
+* 2012-09-25 - thorben.betten@open-xchange.com
+
+ - Fix for bug 21882: Added update task to remove listed unnecessary indexes
+
+* 2012-09-25 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 23083: Ignore requests to set the 'image1_url' of a contact
+ - Fix for bug 23076: Correctly pass last-modified when appointment has no changes 
+ - Fix for bug 22723: Use also deleted items for initial sync-token calculations  
+
+* 2012-09-24 - thorben.betten@open-xchange.com
+
+ - Fix for bug 23068: Fixed NPE on social/subscription refresh
+ - Fix for bug 23080: Added "smarttagtype" to list of known HTML tags
+ - Fix for bug 23081: Support for HTML5 <wbr> tag
+ - Fix for bug 23082: Fixed possible npe
+
+* 2012-09-24 - marcus.klein@open-xchange.com
+
+ - Fix for bug 22524: All CLTs now use the Java options defined for CLTs and not the options for the backend server.
+ - Fix for bug 23001: Fix for bug 22909 was wrong and caused this bug. Reading now licensekeys.properties correctly.
+
+* 2012-09-24 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 23067: More sophisticated checks for participant changes
+ - Fix for bug 23048: Ensure appointments in public folders have at least one internal user as participant
+ - Fix for bug 23077: Provide empty default alarms
+
+* 2012-09-21 - thorben.betten@open-xchange.com
+
+ - Fix for bug 23062: Check content of JSON object for non-null
+
+* 2012-09-21 - marcus.klein@open-xchange.com
+
+ - Fix for bug 23061: Added buddy classloading to bundle with JYaml library to solve crawler description object loading from YML files.
+ - Fix for bug 22658: Complete path has been removed from the configuration file. Relative path are now used. Fixed a problem creating the
+   path for new crawler descriptions.
+ - Fix for bug 22198: Permissions of crawlers directory and path for crawler descriptions to write are now correct.
+ - Fix for bug 22983: Restored redirecting functionality on autologin request for SAML integration.
+
+* 2012-09-21 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 22974: Exclude distribution lists from synchronization
+ - Fix for bug 23058: Assume a status of 'COMPLETED' for tasks that are 100% completed implicitly
+
+* 2012-09-21 - martin.herfurth@open-xchange.com
+
+ - Fix for bug 23055: External Participant with different upper/lower case spelling are detected as party crasher.
+
+* 2012-09-20 - marcus.klein@open-xchange.com
+
+ - Fix for bug 22405: Extended build system to support arbitrary resources in bundles. Added fetcher.properties to bundle resources.
+
 * 2012-09-20 - thorben.betten@open-xchange.com
 
  - Fix for bug 22980: No "hidden" mailbox expunge anymore
- 
+ - Fix for bug 22897: Delete only matching session if marked for removal
+ - Fix for bug 23037: Properly mapping parsed TNEF read receipt to a multipart
+
  * 2012-09-20 - tobias.friedrich@open-xchange.com
 
  - Fix for bug 23046: Skip validation of URL property in vCards

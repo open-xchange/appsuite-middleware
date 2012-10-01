@@ -158,26 +158,26 @@ public class OXFolderExceptionMessage implements LocalizableStrings {
      */
     public final static String INVALID_MODULE_MSG = "Parent folder %1$s does not allow folder's module setting (%2$s) in context %3$s";
     /**
-     * Only one admin CATEGORY_PERMISSION_DENIED is allowed on a private folder
+     * Only one admin permission is allowed on a private folder
      * <p>
      * Only one admin is allowed on a private folder
      * </p>
      */
-    public final static String ONLY_ONE_PRIVATE_FOLDER_ADMIN_MSG = "Only one admin CATEGORY_PERMISSION_DENIED is allowed on a private folder";
+    public final static String ONLY_ONE_PRIVATE_FOLDER_ADMIN_MSG = "Only one admin permission is allowed on a private folder";
     /**
-     * A group must not hold admin CATEGORY_PERMISSION_DENIED on a private folder
+     * A group must not hold admin permission on a private folder
      * <p>
-     * No admin group CATEGORY_PERMISSION_DENIED is allowed on a private folder
+     * No admin group permission is allowed on a private folder
      * </p>
      */
-    public final static String NO_PRIVATE_FOLDER_ADMIN_GROUP_MSG = "A group must not hold admin CATEGORY_PERMISSION_DENIED on a private folder";
+    public final static String NO_PRIVATE_FOLDER_ADMIN_GROUP_MSG = "A group must not hold admin permission on a private folder";
     /**
-     * Only folder owner may hold admin CATEGORY_PERMISSION_DENIED on a private folder
+     * Only folder owner may hold admin permission on a private folder
      * <p>
-     * Only folder owner may hold admin CATEGORY_PERMISSION_DENIED on a private folder
+     * Only folder owner may hold admin permission on a private folder
      * </p>
      */
-    public final static String ONLY_PRIVATE_FOLDER_OWNER_ADMIN_MSG = "Only folder owner may hold admin CATEGORY_PERMISSION_DENIED on a private folder";
+    public final static String ONLY_PRIVATE_FOLDER_OWNER_ADMIN_MSG = "Only folder owner may hold admin permission on a private folder";
     /**
      * Administration rights required. In the Rights tab add at least one user with administration rights.
      * <p>
@@ -312,12 +312,12 @@ public class OXFolderExceptionMessage implements LocalizableStrings {
      */
     public final static String FOLDER_COULD_NOT_BE_PUT_INTO_CACHE_MSG = "Folder %1$s could not be put into cache in context %2$s";
     /**
-     * Effective CATEGORY_PERMISSION_DENIED of folder %1$s could not be determined for user %2$s in context %3$s
+     * Effective permission of folder %1$s could not be determined for user %2$s in context %3$s
      * <p>
-     * User's effective CATEGORY_PERMISSION_DENIED on folder could not be determined
+     * User's effective permission on folder could not be determined
      * </p>
      */
-    public final static String NO_EFFECTIVE_PERMISSION_MSG = "Effective CATEGORY_PERMISSION_DENIED of folder %1$s could not be determined for user %2$s in context %3$s";
+    public final static String NO_EFFECTIVE_PERMISSION_MSG = "Effective permission of folder %1$s could not be determined for user %2$s in context %3$s";
     /**
      * A SQL error occurred: %1$s
      */
@@ -410,9 +410,9 @@ public class OXFolderExceptionMessage implements LocalizableStrings {
      */
     public final static String PARAMETER_MISMATCH_MSG = "Parameter %1$s does not match JSON key %2$s";
     /**
-     * Invalid CATEGORY_PERMISSION_DENIED values: fp=%1$s orp=%2$s owp=%3$s odp=%4$s
+     * Invalid permission values: fp=%1$s orp=%2$s owp=%3$s odp=%4$s
      */
-    public final static String INVALID_PERMISSION_MSG = "Invalid CATEGORY_PERMISSION_DENIED values: fp=%1$s orp=%2$s owp=%3$s odp=%4$s";
+    public final static String INVALID_PERMISSION_MSG = "Invalid permission values: fp=%1$s orp=%2$s owp=%3$s odp=%4$s";
     /**
      * Unknown action: %1$s
      */

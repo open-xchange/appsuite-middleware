@@ -139,10 +139,10 @@ msgstr ""
 msgid "'Put' into cache failed."
 msgstr ""
 
-#. 'Save put' into cache failed. An object bound to given key already exists.
+#. 'Safe put' into cache failed. An object bound to given key already exists.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.caching/src/com/openexchange/caching/CacheExceptionMessage.java:87
 msgid ""
-"'Save put' into cache failed. An object bound to given key already exists."
+"'Safe put' into cache failed. An object bound to given key already exists."
 msgstr ""
 
 #. Remove on cache failed
@@ -930,7 +930,7 @@ msgstr ""
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:64
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.frontend.uwa/src/com/openexchange/frontend/uwa/UWAWidgetExceptionMessages.java:63
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/id/IDExceptionMessages.java:62
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.groupware.dataRetrieval/src/com/openexchange/groupware/dataRetrieval/DataRetrievalExceptionMessages.java:62
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.groupware.dataRetrieval/src/com/openexchange/groupware/dataRetrieval/DataRetrievalExceptionMessages.java:63
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.loxandra/src/com/openexchange/loxandra/LoxandraExceptionMessages.java:64
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.mail.smal.impl/src/com/openexchange/mail/smal/impl/SmalExceptionMessages.java:62
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.mdns/src/com/openexchange/mdns/MDNSExceptionMessages.java:63
@@ -1190,11 +1190,11 @@ msgid "The value given for contactTypes \"%s\" is invalid"
 msgstr ""
 
 #. *
-#. * The value given for searchScope_distributionlist "%s" is invalid
+#. * The value given for searchScope_distributionlist "%1$s" is invalid
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contact.storage.ldap/src/com/openexchange/contact/storage/ldap/LdapExceptionMessages.java:93
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contacts.ldap/src/com/openexchange/contacts/ldap/exceptions/LdapConfigurationExceptionMessage.java:127
-msgid "The given value for searchScope_distributionlist \"%s\" is invalide"
+msgid "The given value for searchScope_distributionlist \"%1$s\" is invalid"
 msgstr ""
 
 #. *
@@ -2476,33 +2476,33 @@ msgid "An unexpected error occurred: %1$s"
 msgstr ""
 
 #. Could not find data provider for id: %1$s
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.groupware.dataRetrieval/src/com/openexchange/groupware/dataRetrieval/DataRetrievalExceptionMessages.java:65
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.groupware.dataRetrieval/src/com/openexchange/groupware/dataRetrieval/DataRetrievalExceptionMessages.java:66
 msgid "Could not find data provider for id: %1$s"
 msgstr ""
 
-#. Missing parameter: %1$2
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.groupware.dataRetrieval/src/com/openexchange/groupware/dataRetrieval/DataRetrievalExceptionMessages.java:68
-msgid "Missing parameter: %1$2"
+#. Missing parameter: %1$s$2
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.groupware.dataRetrieval/src/com/openexchange/groupware/dataRetrieval/DataRetrievalExceptionMessages.java:69
+msgid "Missing parameter: %1$s"
 msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.http.client/src/com/openexchange/http/client/exceptions/OxHttpClientExceptionMessages.java:6
-msgid "The embedded Apache client threw an error: %1"
+msgid "The embedded Apache client threw an error: %1$s"
 msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.http.client/src/com/openexchange/http/client/exceptions/OxHttpClientExceptionMessages.java:7
-msgid "Parsing this JSON did not work: %1"
+msgid "Parsing this JSON did not work: %1$s"
 msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.http.client/src/com/openexchange/http/client/exceptions/OxHttpClientExceptionMessages.java:8
-msgid "Parsing this XML with SAX did not work: %1"
+msgid "Parsing this XML with SAX did not work: %1$s"
 msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.http.client/src/com/openexchange/http/client/exceptions/OxHttpClientExceptionMessages.java:9
-msgid "Some generic exception was thrown: %1"
+msgid "Some generic exception was thrown: %1$s"
 msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.http.client/src/com/openexchange/http/client/exceptions/OxHttpClientExceptionMessages.java:10
-msgid "An IO error occurred: %1"
+msgid "An IO error occurred: %1$s"
 msgstr ""
 
 #. * The grizzly server could not be started
@@ -2796,9 +2796,9 @@ msgstr ""
 msgid "Columns should be numbers, could not convert %s into number"
 msgstr ""
 
-#. No IndexAccess implementation was found for module $1%s.
+#. No IndexAccess implementation was found for module %1$s.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.index.solr/src/com/openexchange/index/solr/SolrIndexExceptionMessages.java:70
-msgid "No IndexAccess implementation was found for module $1%s."
+msgid "No IndexAccess implementation was found for module %1$s."
 msgstr ""
 
 #. An I/O Error occurred: %1$s
@@ -3548,6 +3548,7 @@ msgstr ""
 #. * No permission to modify resources in context %1$s
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.passwordchange.script/src/com/openexchange/passwordchange/script/impl/PasswordExceptionMessage.java:101
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/ldap/UserExceptionMessage.java:131
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/resource/ResourceExceptionMessage.java:111
 msgid "No permission to modify resources in context %1$s"
 msgstr ""
@@ -6935,13 +6936,6 @@ msgid "Two users with same identifier %1$s in context %2$d found."
 msgstr ""
 
 #. *
-#. * No CATEGORY_PERMISSION_DENIED to modify resources in context %1$s
-#.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/ldap/UserExceptionMessage.java:131
-msgid "No CATEGORY_PERMISSION_DENIED to modify resources in context %1$s"
-msgstr ""
-
-#. *
 #. * Missing or unknown password mechanism %1$s
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/ldap/UserExceptionMessage.java:136
@@ -7662,12 +7656,11 @@ msgid "A messaging error occurred."
 msgstr ""
 
 #. *
-#. * Invalid CATEGORY_PERMISSION_DENIED values: fp=%1$s orp=%2$s owp=%3$s odp=%4$s
+#. * Invalid permission values: fp=%1$s orp=%2$s owp=%3$s odp=%4$s
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:87
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:415
-msgid ""
-"Invalid CATEGORY_PERMISSION_DENIED values: fp=%1$s orp=%2$s owp=%3$s odp=%4$s"
+msgid "Invalid permission values: fp=%1$s orp=%2$s owp=%3$s odp=%4$s"
 msgstr ""
 
 #. *
@@ -8262,9 +8255,9 @@ msgstr ""
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:519
 msgid ""
 "The attachments to this E-Mail exceeded the size limit for attachments. "
-"Instead of sending the attachment with the E-Mail, the attachment was  and "
-"the link added to your E-Mail. Whoever receives the E-Mail can then download "
-"the attachment."
+"Instead of sending the attachment with the E-Mail, the attachment was "
+"published and the link added to your E-Mail. Whoever receives the E-Mail can "
+"then download the attachment."
 msgstr ""
 
 #. Draft message could not be saved
@@ -9115,37 +9108,33 @@ msgid ""
 msgstr ""
 
 #. *
-#. * Only one admin CATEGORY_PERMISSION_DENIED is allowed on a private folder
+#. * Only one admin permission is allowed on a private folder
 #. * <p>
 #. * Only one admin is allowed on a private folder
 #. * </p>
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:166
-msgid ""
-"Only one admin CATEGORY_PERMISSION_DENIED is allowed on a private folder"
+msgid "Only one admin permission is allowed on a private folder"
 msgstr ""
 
 #. *
-#. * A group must not hold admin CATEGORY_PERMISSION_DENIED on a private folder
+#. * A group must not hold admin permission on a private folder
 #. * <p>
-#. * No admin group CATEGORY_PERMISSION_DENIED is allowed on a private folder
+#. * No admin group permission is allowed on a private folder
 #. * </p>
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:173
-msgid ""
-"A group must not hold admin CATEGORY_PERMISSION_DENIED on a private folder"
+msgid "A group must not hold admin permission on a private folder"
 msgstr ""
 
 #. *
-#. * Only folder owner may hold admin CATEGORY_PERMISSION_DENIED on a private folder
+#. * Only folder owner may hold admin permission on a private folder
 #. * <p>
-#. * Only folder owner may hold admin CATEGORY_PERMISSION_DENIED on a private folder
+#. * Only folder owner may hold admin permission on a private folder
 #. * </p>
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:180
-msgid ""
-"Only folder owner may hold admin CATEGORY_PERMISSION_DENIED on a private "
-"folder"
+msgid "Only folder owner may hold admin permission on a private folder"
 msgstr ""
 
 #. *
@@ -9348,15 +9337,15 @@ msgid "Folder %1$s could not be put into cache in context %2$s"
 msgstr ""
 
 #. *
-#. * Effective CATEGORY_PERMISSION_DENIED of folder %1$s could not be determined for user %2$s in context %3$s
+#. * Effective permission of folder %1$s could not be determined for user %2$s in context %3$s
 #. * <p>
-#. * User's effective CATEGORY_PERMISSION_DENIED on folder could not be determined
+#. * User's effective permission on folder could not be determined
 #. * </p>
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:320
 msgid ""
-"Effective CATEGORY_PERMISSION_DENIED of folder %1$s could not be determined "
-"for user %2$s in context %3$s"
+"Effective permission of folder %1$s could not be determined for user %2$s in "
+"context %3$s"
 msgstr ""
 
 #. *
@@ -9821,6 +9810,13 @@ msgstr ""
 #. Bad request. The server is unable to handle the request.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/servlet/AjaxExceptionMessages.java:131
 msgid "Bad request. The server is unable to handle the request."
+msgstr ""
+
+#. The file \"%1$s\" (\"%2$s\") can't be imported as image. Only image types (JPG, GIF, BMP or PNG) are supported.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/servlet/AjaxExceptionMessages.java:134
+msgid ""
+"The file \"%1$s\" (\"%2$s\") can't be imported as image. Only image types "
+"(JPG, GIF, BMP or PNG) are supported."
 msgstr ""
 
 #. *
@@ -10389,6 +10385,11 @@ msgid ""
 "reach the site in your browser."
 msgstr ""
 
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe.msn/src/com/openexchange/subscribe/msn/FormStrings.java:62
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe.yahoo/src/com/openexchange/subscribe/yahoo/FormStrings.java:62
+msgid "The OAuth Account to use"
+msgstr ""
+
 #. Parsing error.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe/src/com/openexchange/subscribe/SubscriptionErrorStrings.java:75
 msgid "Parsing error."
@@ -10494,7 +10495,7 @@ msgid "Please correct the template"
 msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.templating/src/com/openexchange/templating/TemplateExceptionMessage.java:74
-msgid "The underlying templating system threw an exception: %s"
+msgid "The underlying templating system threw an exception: %1$s"
 msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.templating/src/com/openexchange/templating/TemplateExceptionMessage.java:76
@@ -10502,7 +10503,7 @@ msgid "Please use an existing template"
 msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.templating/src/com/openexchange/templating/TemplateExceptionMessage.java:78
-msgid "The template %2 does not exist."
+msgid "The template %1$s does not exist."
 msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.templating/src/com/openexchange/templating/TemplateExceptionMessage.java:80

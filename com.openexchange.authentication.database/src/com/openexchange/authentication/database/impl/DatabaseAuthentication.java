@@ -69,6 +69,25 @@ import com.openexchange.user.UserService;
  */
 public class DatabaseAuthentication implements AuthenticationService {
 
+    private static final class AuthenticatedImpl implements Authenticated {
+
+        private final String[] splitted;
+
+        protected AuthenticatedImpl(String[] splitted) {
+            this.splitted = splitted;
+        }
+
+        @Override
+        public String getContextInfo() {
+            return splitted[0];
+        }
+
+        @Override
+        public String getUserInfo() {
+            return splitted[1];
+        }
+    } // End of class AuthenticatedImpl
+
     private final ContextService contextService;
 
     private final UserService userService;
@@ -116,16 +135,7 @@ public class DatabaseAuthentication implements AuthenticationService {
         } catch (final OXException e) {
             throw new OXException(e);
         }
-        return new Authenticated() {
-            @Override
-            public String getContextInfo() {
-                return splitted[0];
-            }
-            @Override
-            public String getUserInfo() {
-                return splitted[1];
-            }
-        };
+        return new AuthenticatedImpl(splitted);
     }
 
     @Override

@@ -18,7 +18,7 @@
 <stringAttribute key="org.eclipse.jdt.launching.JRE_CONTAINER" value="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/J2SE-1.5"/>
 <stringAttribute key="org.eclipse.jdt.launching.PROGRAM_ARGUMENTS" value="-os ${target.os} -ws ${target.ws} -arch ${target.arch} -nl ${target.nl} -console"/>
 <stringAttribute key="org.eclipse.jdt.launching.SOURCE_PATH_PROVIDER" value="org.eclipse.pde.ui.workbenchClasspathProvider"/>
-<stringAttribute key="org.eclipse.jdt.launching.VM_ARGUMENTS" value="-Declipse.ignoreApp=true -Dosgi.noShutdown=true&#10;-Xmx1024M&#10;-XX:+UseConcMarkSweepGC&#10;-Dopenexchange.propdir=${workspace_loc:/open-xchange/etc/groupware}&#10;-Dopenexchange.propdir2=${workspace_loc:/open-xchange/etc/common}&#10;-Djava.util.logging.config.file=${workspace_loc:/Community/logging.properties}"/>
+<stringAttribute key="org.eclipse.jdt.launching.VM_ARGUMENTS" value="-Declipse.ignoreApp=true -Dosgi.noShutdown=true&#10;-Xmx1024M&#10;-XX:+UseConcMarkSweepGC -XX:+UseParNewGC -XX:+AggressiveOpts&#10;-Dopenexchange.propdir=${workspace_loc:/open-xchange/etc/groupware}&#10;-Dopenexchange.propdir2=${workspace_loc:/open-xchange/etc/common}&#10;-Djava.util.logging.config.file=${workspace_loc:/Community/logging.properties}"/>
 <stringAttribute key="pde.version" value="3.3"/>
 <booleanAttribute key="show_selected_only" value="false"/>
 <stringAttribute key="target_bundles" value="javax.servlet@default:default,org.apache.commons.cli@default:default,org.apache.commons.lang@default:default,org.apache.commons.logging@default:default,org.eclipse.equinox.event@default:default,org.eclipse.osgi.services@default:default,org.eclipse.osgi@-1:true"/>

@@ -73,7 +73,7 @@
 	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/org.eclipse.osgi.services_3.3.0.v20110513.jar"/>
 	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/javax.servlet_2.5.0.v201103041518.jar"/>
 	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/geronimo-annotation_1.0_spec-1.1.1.jar"/>
-	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/org.apache.commons.cli_1.0.0.v20080604-1500.jar"/>
+	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/org.apache.commons.cli_1.2.0.v201105210650.jar"/>
 	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/org.apache.servicemix.bundles.jaxb-impl-2.1.6_1.jar"/>
 	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/org.apache.servicemix.bundles.woodstox-3.2.7_1.jar"/>
 	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/org.apache.servicemix.specs.jaxb-api-2.1-1.3.0.jar"/>

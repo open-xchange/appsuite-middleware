@@ -2046,14 +2046,16 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
             }
         }
 
-        for (final UserParticipant participant : oldParticipants) {
-            final EmailableParticipant p = getUserParticipant(participant, ctx);
-            if (p != null) {
-                p.state = containsUser(participant, newParticipants) ? EmailableParticipant.STATE_NONE : EmailableParticipant.STATE_REMOVED;
-                if (forUpdate) {
-                    addSingleParticipant(p, participantSet, null, receivers, all, false);
-                } else {
-                    addReceiver(p, receivers, all);
+        if (null != oldParticipants) {
+            for (final UserParticipant participant : oldParticipants) {
+                final EmailableParticipant p = getUserParticipant(participant, ctx);
+                if (p != null) {
+                    p.state = containsUser(participant, newParticipants) ? EmailableParticipant.STATE_NONE : EmailableParticipant.STATE_REMOVED;
+                    if (forUpdate) {
+                        addSingleParticipant(p, participantSet, null, receivers, all, false);
+                    } else {
+                        addReceiver(p, receivers, all);
+                    }
                 }
             }
         }

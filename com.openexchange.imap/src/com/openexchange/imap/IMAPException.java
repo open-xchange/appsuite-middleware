@@ -50,7 +50,9 @@
 package com.openexchange.imap;
 
 import java.util.EnumMap;
+import java.util.EnumSet;
 import java.util.Map;
+import java.util.Set;
 import com.openexchange.exception.Category;
 import com.openexchange.exception.LogLevel;
 import com.openexchange.exception.OXException;
@@ -538,15 +540,15 @@ public final class IMAPException extends OXException {
          */
         DUPLICATE_FOLDER_EXT(MailExceptionCode.DUPLICATE_FOLDER_EXT, DUPLICATE_FOLDER),
         /**
-         * Mail folder "%1$s" could not be created (maybe due to insufficient CATEGORY_PERMISSION_DENIED on parent folder %2$s or due to an invalid folder
+         * Mail folder "%1$s" could not be created (maybe due to insufficient permission on parent folder %2$s or due to an invalid folder
          * name)
          */
-        FOLDER_CREATION_FAILED("Mail folder \"%1$s\" could not be created (maybe due to insufficient CATEGORY_PERMISSION_DENIED on parent folder %2$s or due to an invalid folder name)", Category.CATEGORY_USER_INPUT, 2015),
+        FOLDER_CREATION_FAILED("Mail folder \"%1$s\" could not be created (maybe due to insufficient permission on parent folder %2$s or due to an invalid folder name)", Category.CATEGORY_USER_INPUT, 2015),
         /**
-         * Mail folder "%1$s" could not be created (maybe due to insufficient CATEGORY_PERMISSION_DENIED on parent folder %2$s or due to an invalid folder
+         * Mail folder "%1$s" could not be created (maybe due to insufficient permission on parent folder %2$s or due to an invalid folder
          * name) on server %3$s with login %4$s (user=%5$s, context=%6$s)
          */
-        FOLDER_CREATION_FAILED_EXT("Mail folder \"%1$s\" could not be created (maybe due to insufficient CATEGORY_PERMISSION_DENIED on parent folder %2$s or due to an invalid folder name) on server %3$s with login %4$s (user=%5$s, context=%6$s)", FOLDER_CREATION_FAILED),
+        FOLDER_CREATION_FAILED_EXT("Mail folder \"%1$s\" could not be created (maybe due to insufficient permission on parent folder %2$s or due to an invalid folder name) on server %3$s with login %4$s (user=%5$s, context=%6$s)", FOLDER_CREATION_FAILED),
         /**
          * The composed rights could not be applied to new folder %1$s due to missing administer right in its initial rights specified by
          * IMAP server. However, the folder has been created.
@@ -558,13 +560,13 @@ public final class IMAPException extends OXException {
          */
         NO_ADMINISTER_ACCESS_ON_INITIAL_EXT("The composed rights could not be applied to new folder %1$s due to missing administer right in its initial rights specified by IMAP server. However, the folder has been created on server %2$s with login %3$s (user=%4$s, context=%5$s).", NO_ADMINISTER_ACCESS_ON_INITIAL),
         /**
-         * No admin CATEGORY_PERMISSION_DENIED specified for folder %1$s
+         * No admin permission specified for folder %1$s
          */
-        NO_ADMIN_ACL("No administer CATEGORY_PERMISSION_DENIED specified for folder %1$s", Category.CATEGORY_USER_INPUT, 2017),
+        NO_ADMIN_ACL("No administer permission specified for folder %1$s", Category.CATEGORY_USER_INPUT, 2017),
         /**
-         * No admin CATEGORY_PERMISSION_DENIED specified for folder %1$s on server %2$s with login %3$s (user=%4$s, context=%5$s)
+         * No admin permission specified for folder %1$s on server %2$s with login %3$s (user=%4$s, context=%5$s)
          */
-        NO_ADMIN_ACL_EXT("No administer CATEGORY_PERMISSION_DENIED specified for folder %1$s on server %2$s with login %3$s (user=%4$s, context=%5$s)", NO_ADMIN_ACL),
+        NO_ADMIN_ACL_EXT("No administer permission specified for folder %1$s on server %2$s with login %3$s (user=%4$s, context=%5$s)", NO_ADMIN_ACL),
         /**
          * Default folder %1$s must not be updated
          */
@@ -974,6 +976,17 @@ public final class IMAPException extends OXException {
             return create((Throwable) null, args);
         }
 
+        private static final Set<Category.EnumType> DISPLAYABLE = EnumSet.of(
+            Category.EnumType.CAPACITY,
+            Category.EnumType.CONFLICT,
+            Category.EnumType.CONNECTIVITY,
+            Category.EnumType.PERMISSION_DENIED,
+            Category.EnumType.SERVICE_DOWN,
+            Category.EnumType.TRUNCATED,
+            Category.EnumType.TRY_AGAIN,
+            Category.EnumType.USER_INPUT,
+            Category.EnumType.WARNING);
+
         /**
          * Creates a new {@link OXException} instance pre-filled with this code's attributes.
          *
@@ -986,7 +999,15 @@ public final class IMAPException extends OXException {
             if (category.getLogLevel().implies(LogLevel.DEBUG)) {
                 ret = new OXException(detailNumber, message, cause, args);
             } else {
-                ret = new OXException(detailNumber, Category.EnumType.TRY_AGAIN.equals(category.getType()) ? OXExceptionStrings.MESSAGE_RETRY : OXExceptionStrings.MESSAGE, new Object[0]).setLogMessage(message, args);
+                if (DISPLAYABLE.contains(category.getType())) {
+                    ret = new OXException(detailNumber, message, cause, args).setLogMessage(message, args);
+                } else {
+                    ret = new OXException(
+                        detailNumber,
+                        Category.EnumType.TRY_AGAIN.equals(category.getType()) ? OXExceptionStrings.MESSAGE_RETRY : OXExceptionStrings.MESSAGE,
+                        cause,
+                        new Object[0]).setLogMessage(message, args);
+                }
             }
             return ret.addCategory(category).setPrefix(PREFIX);
         }

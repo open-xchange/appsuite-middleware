@@ -491,7 +491,7 @@ setup()
     echo setting up open-xchange configuration ${CONFDIR}
 
     # this formular and parameters are from Holger
-    SERVEROPTS="-Xmx${SERVER_MEMORY}m -XX:+UseConcMarkSweepGC -XX:MaxPermSize=128M -Dsun.net.inetaddr.ttl=3600 -Dnetworkaddress.cache.ttl=3600 -Dnetworkaddress.cache.negative.ttl=10"
+    SERVEROPTS="-server -Xmx${SERVER_MEMORY}m -XX:+UseConcMarkSweepGC -XX:+UseParNewGC -XX:+AggressiveOpts -XX:+CMSClassUnloadingEnabled -XX:+CMSPermGenSweepingEnabled -XX:MaxPermSize=128M -Dsun.net.inetaddr.ttl=3600 -Dnetworkaddress.cache.ttl=3600 -Dnetworkaddress.cache.negative.ttl=10"
 
     v_setprop JAVA_XTRAOPTS "\"$SERVEROPTS\"" ${CONFDIR}/ox-scriptconf.sh
 
@@ -561,7 +561,7 @@ setup()
 
     v_setprop SERVER_NAME $SERVER_NAME ${CONFDIR}/AdminDaemon.properties
 
-    CLTOPTS="-Xmx${CLT_MEMORY}m -XX:+UseConcMarkSweepGC -Djava.net.preferIPv4Stack=true"
+    CLTOPTS="-server -Xmx${CLT_MEMORY}m -XX:+UseConcMarkSweepGC -XX:+UseParNewGC -XX:+AggressiveOpts -XX:+CMSClassUnloadingEnabled -XX:+CMSPermGenSweepingEnabled -Djava.net.preferIPv4Stack=true"
     v_setprop JAVA_OXCMD_OPTS "\"$CLTOPTS\"" ${CONFDIR}/ox-scriptconf.sh
 
     if [ -z "$DISABLE_RMI_AUTH" ] ; then

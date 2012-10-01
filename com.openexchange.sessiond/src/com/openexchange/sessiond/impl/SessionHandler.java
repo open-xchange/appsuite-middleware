@@ -394,7 +394,7 @@ public final class SessionHandler {
     protected static boolean clearSession(final String sessionid) {
         final SessionControl sessionControl = sessionDataRef.get().clearSession(sessionid);
         if (null == sessionControl) {
-            LOG.debug("Cannot find session id to remove session <" + sessionid + '>');
+            LOG.debug("Cannot find session for given identifier to remove session <" + sessionid + '>');
             return false;
         }
         try {
@@ -472,13 +472,14 @@ public final class SessionHandler {
         if (DEBUG) {
             LOG.debug(new StringBuilder("getSession <").append(sessionId).append('>').toString());
         }
-        final SessionControl sessionControl = sessionDataRef.get().getSession(sessionId);
+        final SessionData sessionData = sessionDataRef.get();
+        final SessionControl sessionControl = sessionData.getSession(sessionId);
         if (null == sessionControl) {
             SessionStorageService storageService = getServiceRegistry().getService(SessionStorageService.class);
             if (storageService != null) {
                 try {
                     Session s = storageService.lookupSession(sessionId);
-                    sessionDataRef.get().addSession(
+                    sessionData.addSession(
                         new SessionImpl(
                             s.getUserId(),
                             s.getLoginName(),
@@ -504,10 +505,11 @@ public final class SessionHandler {
                 final SessionCache cache = SessionCache.getInstance();
                 final Session session = sessionControl.getSession();
                 final CachedSession cachedSession = cache.getCachedSessionByUser(session.getUserId(), session.getContextId());
-                if (null != cachedSession) {
-                    if (cachedSession.isMarkedAsRemoved()) {
-                        cache.removeCachedSession(cachedSession.getSecret());
-                        removeUserSessions(cachedSession.getUserId(), cachedSession.getContextId(), false);
+                if (null != cachedSession && cachedSession.isMarkedAsRemoved()) {
+                    final String cSessionId = cachedSession.getSessionId();
+                    if (sessionId.equals(cSessionId)) {
+                        cache.removeCachedSession(cSessionId);
+                        sessionData.clearSession(sessionId);
                         return null;
                     }
                 }

@@ -51,6 +51,22 @@ for FILE in ${CONFFILES}; do
     ox_move_config_file /opt/open-xchange/etc/groupware /opt/open-xchange/etc $FILE
 done
 
+# prevent bash from expanding, see bug 13316
+GLOBIGNORE='*'
+
+# SoftwareChange_Request-1028
+pfile=/opt/open-xchange/etc/carddav.properties
+if ! ox_exists_property com.openexchange.carddav.tree $pfile; then
+    ox_set_property com.openexchange.carddav.tree "0" $pfile
+fi
+if ! ox_exists_property com.openexchange.carddav.exposedCollections $pfile; then
+    ox_set_property com.openexchange.carddav.exposedCollections "0" $pfile
+fi
+# SoftwareChange_Request-1129
+if ! ox_exists_property com.openexchange.carddav.reducedAggregatedCollection $pfile; then
+    ox_set_property com.openexchange.carddav.reducedAggregatedCollection "false" $pfile
+fi
+
 %files
 %defattr(-,root,root)
 %dir /opt/open-xchange/bundles/

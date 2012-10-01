@@ -77,6 +77,27 @@ import com.openexchange.tools.ssl.TrustAllSSLSocketFactory;
  */
 public class LDAPAuthentication implements AuthenticationService {
 
+    private static final class AuthenticatedImpl implements Authenticated {
+
+        private final String returnstring;
+        private final String[] splitted;
+
+        protected AuthenticatedImpl(String returnstring, String[] splitted) {
+            this.returnstring = returnstring;
+            this.splitted = splitted;
+        }
+
+        @Override
+        public String getContextInfo() {
+            return splitted[0];
+        }
+
+        @Override
+        public String getUserInfo() {
+            return null == returnstring ? splitted[1] : returnstring;
+        }
+    }
+
     private enum PropertyNames {
         BASE_DN("baseDN"),
         UID_ATTRIBUTE("uidAttribute"),
@@ -136,16 +157,7 @@ public class LDAPAuthentication implements AuthenticationService {
         }
         final String returnstring = bind(uid, password);
         LOG.info("User " + uid + " successful authenticated.");
-        return new Authenticated() {
-            @Override
-            public String getContextInfo() {
-                return splitted[0];
-            }
-            @Override
-            public String getUserInfo() {
-                return null == returnstring ? splitted[1] : returnstring;
-            }
-        };
+        return new AuthenticatedImpl(returnstring, splitted);
     }
 
     @Override

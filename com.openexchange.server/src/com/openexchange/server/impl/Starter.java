@@ -49,13 +49,12 @@
 
 package com.openexchange.server.impl;
 
-import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.Properties;
 import java.util.Stack;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.openexchange.exception.OXException;
+import com.openexchange.log.LogFactory;
 import com.openexchange.server.Initialization;
 
 /**

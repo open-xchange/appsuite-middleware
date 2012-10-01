@@ -55,6 +55,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.regex.Pattern;
 import org.apache.commons.logging.Log;
 import com.openexchange.log.LogPropertyName;
 import com.openexchange.log.Loggable;
@@ -244,6 +245,8 @@ final class LoggerTask extends AbstractTask<Object> {
         return null;
     }
 
+    private static final Pattern CRLF = Pattern.compile("\r?\n");
+
     private static String prependLocation(final String message, final Loggable loggable, final LogPropertyName.LogLevel logLevel) {
         final StringBuilder sb = new StringBuilder(64);
         final StackTraceElement[] trace = loggable.getCallerTrace();
@@ -251,7 +254,7 @@ final class LoggerTask extends AbstractTask<Object> {
         if (null != trace) {
             for (final StackTraceElement ste : trace) {
                 final String className = ste.getClassName();
-                if (null != className && !className.startsWith("com.openexchange.log") && !className.equals("com.openexchange.exception.Log") && className.indexOf("LoggingLogic", 16) < 0) {
+                if (null != className && !className.startsWith("com.openexchange.log") && !className.startsWith("com.openexchange.exception.Log") && className.indexOf("LoggingLogic", 16) < 0) {
                     sb.append(PREFIX).append(className).append('.').append(ste.getMethodName());
                     if (ste.isNativeMethod()) {
                         sb.append("(Native Method)");
@@ -268,14 +271,14 @@ final class LoggerTask extends AbstractTask<Object> {
                             sb.append(')');
                         }
                     }
-                    sb.append('\n');
+                    sb.append('\n').append(' ');
                     logClass = className;
                     break;
                 }
             }
         }
         if (null != message) {
-            sb.append(message);
+            sb.append(CRLF.matcher(message).replaceAll("$0 "));
         }
         return sb.toString();
     }

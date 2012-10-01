@@ -35,10 +35,10 @@ ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} 
 
 %post
 if [ ${1:-0} -eq 2 ]; then
-	. /opt/open-xchange/lib/oxfunctions.sh
-	pfile=/opt/open-xchange/etc/settings/themes.properties
-	ox_remove_property "modules/themes/default" $pfile
-	ox_remove_property "modules/themes/light_breeze" $pfile
+    . /opt/open-xchange/lib/oxfunctions.sh
+    pfile=/opt/open-xchange/etc/settings/themes.properties
+    ox_remove_property "modules/themes/default" $pfile
+    ox_remove_property "modules/themes/light_breeze" $pfile
 fi
 
 %clean

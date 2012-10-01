@@ -566,42 +566,80 @@ final class SessionData {
         }
     }
 
+    private static volatile Boolean volatileOnePerClient;
+    private static boolean volatileOnePerClient() {
+        Boolean b = volatileOnePerClient;
+        if (null == b) {
+            synchronized (SessionData.class) {
+                b = volatileOnePerClient;
+                if (null == b) {
+                    final ConfigurationService service = SessiondServiceRegistry.getServiceRegistry().getOptionalService(ConfigurationService.class);
+                    b = null == service ? Boolean.FALSE : Boolean.valueOf(service.getBoolProperty("com.openexchange.sessiond.volatile.onePerClient", false));
+                    volatileOnePerClient = b;
+                }
+            }
+        }
+        return b.booleanValue();
+    }
+
     SessionControl addSession(final SessionImpl session, final boolean noLimit) throws OXException {
         if (!noLimit && countSessions() > maxSessions) {
             throw SessionExceptionCodes.MAX_SESSION_EXCEPTION.create();
         }
+        final SessionControl control;
         // Check for volatile flag
         if (session.isVolatile()) {
-            final SessionControl control = new SessionControl(session);
+            control = new SessionControl(session);
             final SessionControl prev = volatileSessions.put(session.getSessionID(), control);
             if (null != prev) {
                 final SessionImpl prevSession = prev.getSession();
                 clearSession(prevSession.getSessionID());
                 SessionHandler.postSessionRemoval(prevSession);
-            } else {
-                final UserKey key = new UserKey(session.getUserId(), session.getContextId());
-                Queue<String> queue = volatileUserSessions.get(key);
+            }
+            final UserKey key = new UserKey(session.getUserId(), session.getContextId());
+            Queue<String> queue = volatileUserSessions.get(key);
+            if (null == queue) {
+                final Queue<String> nq = new ConcurrentLinkedQueue<String>();
+                queue = volatileUserSessions.putIfAbsent(key, nq);
                 if (null == queue) {
-                    final Queue<String> nq = new ConcurrentLinkedQueue<String>();
-                    queue = volatileUserSessions.putIfAbsent(key, nq);
-                    if (null == queue) {
-                        queue = nq;
+                    queue = nq;
+                }
+            }
+            // Only one volatile session per client?
+            if (volatileOnePerClient()) {
+                final String client = session.getClient();
+                if (null != client) {
+                    final List<SessionImpl> removees = new LinkedList<SessionImpl>();
+                    for (final Iterator<String> it = queue.iterator(); it.hasNext();) {
+                        final String sessionId = it.next();
+                        final SessionControl sessionControl = volatileSessions.get(sessionId);
+                        if (null == sessionControl) {
+                            it.remove(); // Does no more exist
+                        } else {
+                            final SessionImpl candidate = sessionControl.getSession();
+                            if (client.equals(candidate.getClient())) {
+                                removees.add(candidate);
+                            }
+                        }
+                    }
+                    for (final SessionImpl removee : removees) {
+                        clearSession(removee.getSessionID());
+                        SessionHandler.postSessionRemoval(removee);
                     }
                 }
-                queue.offer(session.getSessionID());
             }
-            return control;
+            queue.offer(session.getSessionID());
+        } else {
+            // Adding a session is a writing operation. Other threads requesting a session should be blocked.
+            wlock.lock();
+            try {
+                control = sessionList.getFirst().put(session);
+                randoms.put(session.getRandomToken(), session.getSessionID());
+            } finally {
+                wlock.unlock();
+            }
+            scheduleRandomTokenRemover(session.getRandomToken());
         }
-        // Adding a session is a writing operation. Other threads requesting a session should be blocked.
-        final SessionControl control;
-        wlock.lock();
-        try {
-            control = sessionList.getFirst().put(session);
-            randoms.put(session.getRandomToken(), session.getSessionID());
-        } finally {
-            wlock.unlock();
-        }
-        scheduleRandomTokenRemover(session.getRandomToken());
         return control;
     }
 
@@ -1022,30 +1060,46 @@ final class SessionData {
             public void run() {
                 try {
                     final long maxStamp = System.currentTimeMillis() - maxIdleTime;
-                    for (final Iterator<SessionControl> it = volatileSessions.values().iterator(); it.hasNext();) {
-                        final SessionControl sessionControl = it.next();
-                        if (sessionControl.getLastAccessed() < maxStamp) {
-                            it.remove();
-                            final SessionImpl session = sessionControl.getSession();
-                            SessionHandler.postSessionRemoval(session);
-                            final UserKey key = new UserKey(session.getUserId(), session.getContextId());
-                            final Queue<String> queue = volatileUserSessions.remove(key);
-                            if (null != queue) {
-                                queue.remove(session.getSessionID());
-                                if (!queue.isEmpty()) {
-                                    final Queue<String> prev = volatileUserSessions.put(key, queue);
-                                    if (null != prev) {
-                                        queue.addAll(prev);
-                                    }
-                                }
+                    if (LOG.isDebugEnabled()) {
+                        int count = 0;
+                        for (final Iterator<SessionControl> it = volatileSessions.values().iterator(); it.hasNext();) {
+                            final SessionControl sessionControl = it.next();
+                            if (sessionControl.getLastAccessed() < maxStamp) {
+                                it.remove();
+                                dropSession(sessionControl, volatileUserSessions);
+                                count++;
                             }
-                            LOG.info("Removed volatile session due to timeout: " + session.getSessionID());
+                        }
+                        LOG.debug("Volatile session cleaner run finished: " + count + " volatile session(s) removed.");
+                    } else {
+                        for (final Iterator<SessionControl> it = volatileSessions.values().iterator(); it.hasNext();) {
+                            final SessionControl sessionControl = it.next();
+                            if (sessionControl.getLastAccessed() < maxStamp) {
+                                it.remove();
+                                dropSession(sessionControl, volatileUserSessions);
+                            }
                         }
                     }
-                    LOG.info("Volatile session cleaner run finished.");
                 } catch (final Exception e) {
                     LOG.warn(e.getMessage(), e);
                 }
+            }
+
+            private void dropSession(final SessionControl sessionControl, final ConcurrentMap<UserKey, Queue<String>> volatileUserSessions) {
+                final SessionImpl session = sessionControl.getSession();
+                SessionHandler.postSessionRemoval(session);
+                final UserKey key = new UserKey(session.getUserId(), session.getContextId());
+                final Queue<String> queue = volatileUserSessions.remove(key);
+                if (null != queue) {
+                    queue.remove(session.getSessionID());
+                    if (!queue.isEmpty()) {
+                        final Queue<String> prev = volatileUserSessions.put(key, queue);
+                        if (null != prev) {
+                            queue.addAll(prev);
+                        }
+                    }
+                }
+                LOG.info("Removed volatile session due to timeout: " + session.getSessionID());
             }
         };
         final int frequencyTime = volatileFrequencyTime();

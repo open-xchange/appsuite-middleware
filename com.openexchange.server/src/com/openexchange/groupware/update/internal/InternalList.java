@@ -472,5 +472,9 @@ public final class InternalList {
         // Add 'filename' column to task tables.
         new com.openexchange.groupware.update.tasks.TasksAddFilenameColumnTask(),
 
+        // Removes unnecessary indexes from certain tables (see Bug #21882)
+        new com.openexchange.groupware.update.tasks.RemoveUnnecessaryIndexes(),
+        new com.openexchange.groupware.update.tasks.RemoveUnnecessaryIndexes2(),
+
     };
 }

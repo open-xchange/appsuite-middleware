@@ -89,5 +89,11 @@ public class PercentComplete extends AbstractVerifyingAttributeConverter<VToDo, 
         }
         final int percentage = todo.getPercentComplete().getPercentage();
         task.setPercentComplete(percentage);
+        if (100 == percentage) {
+            /*
+             * set to completed implicitly
+             */
+            task.setStatus(Task.DONE);
+        }
     }
 }

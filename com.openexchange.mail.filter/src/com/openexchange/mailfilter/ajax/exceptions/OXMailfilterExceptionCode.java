@@ -98,7 +98,13 @@ public enum OXMailfilterExceptionCode implements OXExceptionCode {
     /**
      * The passwordSource given in the config file is not a valid one
      */
-    NO_VALID_PASSWORDSOURCE("The passwordSource given in the config file is not a valid one", CATEGORY_ERROR, 20);
+    NO_VALID_PASSWORDSOURCE("The passwordSource given in the config file is not a valid one", CATEGORY_ERROR, 20),
+    /**
+     * Another vacation rule already exists. Please remove that first and try again.
+     */
+    DUPLICATE_VACATION_RULE("Another vacation rule already exists. Please remove that first and try again.", CATEGORY_TRY_AGAIN, 21),
+    
+    ;
 
 
     private final String message;

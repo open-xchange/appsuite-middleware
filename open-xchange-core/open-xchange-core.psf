@@ -5,8 +5,6 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.calendar"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.calendar.json"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.charset"/>
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.cluster.discovery"/>
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.cluster.discovery.mdns"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.common"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.config.cascade"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.config.cascade.context"/>
@@ -27,7 +25,6 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.documentation"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.documentation.json"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.file.storage"/>
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.file.storage.cifs"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.file.storage.composition"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.file.storage.config"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.file.storage.generic"/>
@@ -39,7 +36,6 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.global"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.groupware.settings.extensions"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.groupware.tools"/>
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.hazelcast"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.html"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.http.client"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.http.client.json"/>
@@ -49,18 +45,10 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.index"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.itip.json"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.jcharset"/>
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.jslob"/>
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.jslob.config"/>
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.jslob.json"/>
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.jslob.storage.db"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.logging"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.logging.tracking"/>
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.mail.autoconfig"/>
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.mail.autoconfig.json"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.management"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.management.impl"/>
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.mdns"/>
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.mdns.hazelcast"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.messaging"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.modules.json"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.modules.model"/>
@@ -84,10 +72,8 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.secret.recovery.json"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.secret.recovery.mail"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.server"/>
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.service.messaging"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.sessiond"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.sessionstorage"/>
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.sleepycat"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.sql"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.subscribe"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.tasks.json"/>
@@ -98,8 +84,8 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.user.json"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.xml"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,org.apache.tika"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,org.ho.jyaml"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,org.xmlpull"/>
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,org.quartz"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,oxscripts"/>
 </provider>
 </psf>

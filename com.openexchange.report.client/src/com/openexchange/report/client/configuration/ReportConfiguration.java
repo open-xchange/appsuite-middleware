@@ -63,6 +63,7 @@ public class ReportConfiguration {
     public ReportConfiguration() throws IOException {
         properties = new Properties();
         loadProperties(System.getProperties().getProperty("openexchange.propdir"), "reportclient.properties");
+        loadProperties(System.getProperties().getProperty("openexchange.propdir"), "licensekeys.properties");
     }
 
     public void loadProperties(String propDir, String propFile) throws IOException {
@@ -81,7 +82,6 @@ public class ReportConfiguration {
                 throw new IOException(new StringBuilder("Property file \"").append(propDir).append("/").append(propFile).append("\" couldn't be found").toString());
             }
         }
-
         try {
             properties.load(in);
         } finally {
@@ -143,5 +143,4 @@ public class ReportConfiguration {
         }
         return "";
     }
-
 }

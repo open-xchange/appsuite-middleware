@@ -315,10 +315,6 @@ public final class Init {
         if (null != propDir1) {
             System.setProperty("openexchange.propdir", propDir1);
         }
-        final String propDir2 = TestInit.getTestProperty("openexchange.propdir2");
-        if (null != propDir2) {
-            System.setProperty("openexchange.propdir2", propDir2);
-        }
     }
 
     public static void startServer() throws Exception {
@@ -868,7 +864,6 @@ public final class Init {
     public static void dropProperty() {
         final Properties sysProps = System.getProperties();
         sysProps.remove("openexchange.propdir");
-        sysProps.remove("openexchange.propdir2");
     }
 
     public static void dropConfigBundle() {

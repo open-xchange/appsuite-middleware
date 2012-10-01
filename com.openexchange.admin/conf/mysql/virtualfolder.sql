@@ -31,8 +31,7 @@ CREATE TABLE virtualPermission (
  adminFlag tinyint(3) unsigned NOT NULL,
  groupFlag tinyint(3) unsigned NOT NULL,
  system tinyint(3) unsigned NOT NULL default '0',
- PRIMARY KEY (cid, tree, user, folderId, entity),
- INDEX (cid, tree, user, folderId)
+ PRIMARY KEY (cid, tree, user, folderId, entity)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 CREATE TABLE virtualSubscription (
@@ -75,8 +74,7 @@ CREATE TABLE virtualBackupPermission (
  adminFlag tinyint(3) unsigned NOT NULL,
  groupFlag tinyint(3) unsigned NOT NULL,
  system tinyint(3) unsigned NOT NULL default '0',
- PRIMARY KEY (cid, tree, user, folderId, entity),
- INDEX (cid, tree, user, folderId)
+ PRIMARY KEY (cid, tree, user, folderId, entity)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 CREATE TABLE virtualBackupSubscription (

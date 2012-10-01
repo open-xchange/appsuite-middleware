@@ -50,9 +50,7 @@
 package com.openexchange.event.impl;
 
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.openexchange.config.ConfigurationService;
-import com.openexchange.configuration.SystemConfig;
 import com.openexchange.database.provider.DBPoolProvider;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.attach.AttachmentCleaner;
@@ -63,6 +61,7 @@ import com.openexchange.groupware.infostore.webdav.PropertyCleaner;
 import com.openexchange.groupware.infostore.webdav.PropertyStoreImpl;
 import com.openexchange.groupware.links.LinksEventHandler;
 import com.openexchange.groupware.notify.ParticipantNotify;
+import com.openexchange.log.LogFactory;
 import com.openexchange.server.Initialization;
 import com.openexchange.server.services.ServerServiceRegistry;
 

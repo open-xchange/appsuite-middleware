@@ -1,0 +1,118 @@
+--- !com.openexchange.subscribe.crawler.CrawlerDescription
+crawlerApiVersion: 616
+displayName: yahoo.com
+id: com.openexchange.subscribe.crawler.yahoocom
+priority: 8
+workflowString: |
+  --- !com.openexchange.subscribe.crawler.Workflow
+  steps: 
+    - !com.openexchange.subscribe.crawler.LoginPageByFormActionStep
+      actionOfLoginForm: "https://login.yahoo.com/config/login?"
+      baseUrl: ""
+      description: Log in
+      linkAvailableAfterLogin: "(.*contact_list.*)"
+      nameOfPasswordField: passwd
+      nameOfUserField: login
+      numberOfForm: 1
+      pageTitleAfterLogin: "(.*contact_list.*)"
+      password: ""
+      url: "http://address.yahoo.com/index.php"
+      username: ""
+    - !com.openexchange.subscribe.crawler.PageByUrlStep
+      description: We are not automatically redirected so we have to call this manually
+      url: "http://address.yahoo.com/"
+    - !com.openexchange.subscribe.crawler.PageByLinkRegexStep
+      description: Click on Classic Contacts
+      url: ".*contact_list.*"
+    - !com.openexchange.subscribe.crawler.AnchorsByLinkRegexStep
+      description: Get the links to all contact detail pages
+      linkRegex: ".*detailed_contact.*"
+      mayHaveEmptyOutput: true
+      subpageLinkRegex: ""
+    - !com.openexchange.subscribe.crawler.ContactObjectsByHTMLAnchorsAndPagePartSequenceStep
+      description: Get each contacts details
+      pageParts: !com.openexchange.subscribe.crawler.internal.PagePartSequence
+        page: ""
+        pageParts: 
+          - !com.openexchange.subscribe.crawler.internal.PagePart
+            regex: "(<h1>\\s)([a-zA-Z\\säöüß-éè]*)(</h1>)"
+            type: 1
+            typeOfInfo: display_name
+          - !com.openexchange.subscribe.crawler.internal.PagePart
+            regex: "(qa_compose1[^>]*>)([a-z@A-Z0-9\\.\\-\\{\\}\\#\\|\\^\\$\\*\\+\\?\\'\\/!%&=_`~]*)(<)"
+            type: 1
+            typeOfInfo: email1
+          - !com.openexchange.subscribe.crawler.internal.PagePart
+            regex: "(<h2>(Phone|Telefon)</h2>)"
+          - !com.openexchange.subscribe.crawler.internal.PagePart
+            regex: "(Home|Privat):[^0-9\\+\\(\\)]*([0-9\\s\\+\\-\\/\\(\\)]*)()"
+            type: 1
+            typeOfInfo: telephone_home1
+          - !com.openexchange.subscribe.crawler.internal.PagePart
+            regex: "(Work|Gesch.ftlich):[^0-9\\+\\(\\)]*([0-9\\s\\+\\-\\/\\(\\)]*)()"
+            type: 1
+            typeOfInfo: telephone_business1
+          - !com.openexchange.subscribe.crawler.internal.PagePart
+            regex: "(Mobile|Handy):[^0-9\\+\\(\\)]*([0-9\\s\\+\\-\\/\\(\\)]*)()"
+            type: 1
+            typeOfInfo: cellular_telephone1
+          - !com.openexchange.subscribe.crawler.internal.PagePart
+            regex: "(<h2>(Work|Gesch.ftlich)</h2>)"
+          - !com.openexchange.subscribe.crawler.internal.PagePart
+            regex: "<dt>[\\s]*(Company|Firma):[\\s]*<\\/dt>[\\s]*<dd>[\\s]*<div>[\\s]*([^<]*)(<\\/div>)"
+            type: 1
+            typeOfInfo: company
+          - !com.openexchange.subscribe.crawler.internal.PagePart
+            regex: "<dt>[\\s]*(Title|Titel):[\\s]*<\\/dt>[\\s]*<dd>[\\s]*<div>[\\s]*([^<]*)(<\\/div>)"
+            type: 1
+            typeOfInfo: title
+          - !com.openexchange.subscribe.crawler.internal.PagePart
+            keepStringAfterMatching: true
+            regex: "(?s)(Address|Adresse):(?:[^>]*>){3}\\s*([a-zA-Z0-9\\.\\säöüß]*)(<br \\/>)"
+            type: 1
+            typeOfInfo: street_business
+          - !com.openexchange.subscribe.crawler.internal.PagePart
+            keepStringAfterMatching: true
+            regex: "(?s)(Address|Adresse):(?:[^>]*>){5}\\s*([0-9]*)()"
+            type: 1
+            typeOfInfo: postal_code_business
+          - !com.openexchange.subscribe.crawler.internal.PagePart
+            regex: "(?s)(Address|Adresse):(?:[^>]*>){5}\\s*[0-9]*\\s*([^0-9<]*)(<)"
+            type: 1
+            typeOfInfo: city_business
+          - !com.openexchange.subscribe.crawler.internal.PagePart
+            regex: (<h2>Instant Messenger</h2>)
+          - !com.openexchange.subscribe.crawler.internal.PagePart
+            addInfo: 1
+            regex: "(AIM|Google Talk|Skype|Windows Live|Yahoo):[\\s]*<\\/dt>[\\s]*<dd>[\\s]*<div>[\\s]*([^<]*)(<\\/div>)"
+            type: 1
+            typeOfInfo: instant_messenger1
+          - !com.openexchange.subscribe.crawler.internal.PagePart
+            regex: "(<h2>(Personal|Pers.nliche Daten)</h2>)"
+          - !com.openexchange.subscribe.crawler.internal.PagePart
+            keepStringAfterMatching: true
+            regex: "(?s)(Address|Adresse):(?:[^>]*>){3}\\s*([a-zA-Z0-9\\.\\säöüß]*)(<br \\/>)"
+            type: 1
+            typeOfInfo: street_home
+          - !com.openexchange.subscribe.crawler.internal.PagePart
+            keepStringAfterMatching: true
+            regex: "(?s)(Address|Adresse):(?:[^>]*>){5}\\s*([0-9]*)()"
+            type: 1
+            typeOfInfo: postal_code_home
+          - !com.openexchange.subscribe.crawler.internal.PagePart
+            regex: "(?s)(Address|Adresse):(?:[^>]*>){5}\\s*[0-9]*\\s*([^0-9<]*)(<)"
+            type: 1
+            typeOfInfo: city_home
+          - !com.openexchange.subscribe.crawler.internal.PagePart
+            regex: "(Birthday|Geburtstag):[^0-9]*([0-9]{2})(\\/)"
+            type: 1
+            typeOfInfo: birthday_month
+          - !com.openexchange.subscribe.crawler.internal.PagePart
+            regex: "()([0-9]{2})(\\/)"
+            type: 1
+            typeOfInfo: birthday_day
+          - !com.openexchange.subscribe.crawler.internal.PagePart
+            regex: "()([0-9]{4})(<)"
+            type: 1
+            typeOfInfo: birthday_year
+  

@@ -1,0 +1,22 @@
+--- !com.openexchange.subscribe.crawler.CrawlerDescription
+crawlerApiVersion: 620
+displayName: web.de
+id: com.openexchange.subscribe.crawler.web.de
+priority: 20
+workflowString: |
+  --- !com.openexchange.subscribe.crawler.Workflow
+  steps: 
+    - !com.openexchange.subscribe.crawler.GMXAndWebDeAPIStep
+      debuggingEnabled: true
+      parameters: 
+        - !org.apache.commons.httpclient.NameValuePair
+          name: username
+          value: ""
+        - !org.apache.commons.httpclient.NameValuePair
+          name: password
+          value: ""
+        - !org.apache.commons.httpclient.NameValuePair
+          name: serviceID
+          value: coms.homenet.webde
+      url: "https://uas2.uilogin.de/login/"
+  

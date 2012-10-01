@@ -127,8 +127,7 @@ Import-Package: com.openexchange.config,
  org.xml.sax,
  org.xml.sax.ext,
  org.xml.sax.helpers
-Eclipse-RegisterBuddy: com.openexchange.xerces.sun 
- 
+Eclipse-RegisterBuddy: com.openexchange.xerces.sun, org.ho.jyaml
 Export-Package: com.openexchange.subscribe.crawler
 Bundle-ClassPath: lib/facebook-java-api-1.8-final.jar,
  lib/htmlunit-2.5.jar,

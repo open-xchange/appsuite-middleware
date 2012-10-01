@@ -94,8 +94,6 @@ public final class FilterJerichoHandler implements JerichoHandler {
 
     private static final Set<String> NUM_ATTRIBS = new HashSet<String>(0);
 
-    private static final Set<String> ALL = Collections.unmodifiableSet(new HashSet<String>(HTMLElements.getElementNames()));
-
     private static volatile Map<String, Map<String, Set<String>>> staticHTMLMap;
 
     private static volatile Map<String, Set<String>> staticStyleMap;
@@ -104,6 +102,10 @@ public final class FilterJerichoHandler implements JerichoHandler {
     private static final Pattern PAT_NUMERIC = Pattern.compile("\\p{Digit}+");
 
     private static final Map<String, Set<String>> IMAGE_STYLE_MAP;
+
+    private static final Set<String> ALL;
+
+    private static final Set<String> SINGLE_TAGS;
 
     static {
         IMAGE_STYLE_MAP = new HashMap<String, Set<String>>();
@@ -131,6 +133,18 @@ public final class FilterJerichoHandler implements JerichoHandler {
          */
         values.add("d"); // delete
         IMAGE_STYLE_MAP.put("background-image", values);
+        /*
+         * ALL tags
+         */
+        Set<String> s = new HashSet<String>(HTMLElements.getElementNames());
+        s.add("smarttagtype");
+        ALL = Collections.unmodifiableSet(s);
+        /*
+         * Single tags
+         */
+        s = new HashSet<String>();
+        s.add("wbr");
+        SINGLE_TAGS = Collections.unmodifiableSet(s);
     }
 
     /*-
@@ -207,6 +221,11 @@ public final class FilterJerichoHandler implements JerichoHandler {
         }
         if (!map.containsKey("body")) {
             map.put("body", null);
+        }
+        for (final String tagName : SINGLE_TAGS) {
+            if (!map.containsKey(tagName)) {
+                map.put(tagName, null);
+            }
         }
         htmlMap = Collections.unmodifiableMap(map);
         styleMap = Collections.unmodifiableMap(parseStyleMap(mapStr));
@@ -374,13 +393,15 @@ public final class FilterJerichoHandler implements JerichoHandler {
     @Override
     public void handleStartTag(final StartTag startTag) {
         final String tagName = startTag.getName();
-        if (startTag.isEndTagForbidden()) {
+        if (startTag.isEndTagForbidden() || SINGLE_TAGS.contains(tagName)) {
             // Simple tag
             if (skipLevel > 0) {
                 return;
             }
             if (htmlMap.containsKey(tagName)) {
                 addStartTag(startTag, true, htmlMap.get(tagName));
+            } else {
+                System.out.println("Dropped single tag: " + startTag);
             }
         } else {
             if (skipLevel > 0) {
@@ -1074,6 +1095,11 @@ public final class FilterJerichoHandler implements JerichoHandler {
                 }
                 if (!map.containsKey("body")) {
                     map.put("body", null);
+                }
+                for (final String tagName : SINGLE_TAGS) {
+                    if (!map.containsKey(tagName)) {
+                        map.put(tagName, null);
+                    }
                 }
                 staticHTMLMap = Collections.unmodifiableMap(map);
                 staticStyleMap = Collections.unmodifiableMap(parseStyleMap(mapStr));

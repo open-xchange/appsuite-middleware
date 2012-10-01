@@ -30,6 +30,12 @@ Provides:      open-xchange-admin-plugin-hosting-lib = %{version}
 Obsoletes:     open-xchange-admin-plugin-hosting-lib <= %{version}
 Provides:      open-xchange-admin-doc = %{version}
 Obsoletes:     open-xchange-admin-doc <= %{version}
+%if 0%{?suse_version}
+Requires:      mysql-client >= 5.0.0
+%endif
+%if 0%{?fedora_version} || 0%{?rhel_version}
+Requires:      mysql >= 5.0.0
+%endif
 
 %description
 This package installs the OSGi bundles to the backend that provide the RMI interface to administer the installation. This package contains
@@ -144,6 +150,7 @@ fi
 %dir /opt/open-xchange/sbin/
 /opt/open-xchange/sbin/*
 %doc com.openexchange.admin.rmi/javadoc
+%doc com.openexchange.admin/ChangeLog
 
 %changelog
 * Tue Aug 21 2012 Marcus Klein <marcus.klein@open-xchange.com>

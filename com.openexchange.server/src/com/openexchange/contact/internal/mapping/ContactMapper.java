@@ -51,9 +51,9 @@ package com.openexchange.contact.internal.mapping;
 
 import java.util.Date;
 import java.util.EnumMap;
-
 import javax.mail.internet.AddressException;
-
+import com.openexchange.config.ConfigurationService;
+import com.openexchange.contact.internal.ContactServiceLookup;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contact.ContactExceptionCodes;
 import com.openexchange.groupware.contact.helpers.ContactField;
@@ -2639,6 +2639,16 @@ public class ContactMapper extends DefaultMapper<Contact, ContactField> {
         });
 
         mappings.put(ContactField.IMAGE1, new ContactMapping<byte[]>() {
+            
+            private Integer maxImageSize = null;
+            
+            private int getMaxImageSize() throws OXException {
+                if (null == maxImageSize) {
+                    maxImageSize = Integer.valueOf(
+                        ContactServiceLookup.getService(ConfigurationService.class).getIntProperty("max_image_size", 4194304));
+                }
+                return maxImageSize.intValue();
+            }
 
             @Override
             public void set(Contact contact, byte[] value) { 
@@ -2657,6 +2667,12 @@ public class ContactMapper extends DefaultMapper<Contact, ContactField> {
 
 			@Override
 			public void validate(Contact contact) throws OXException {
+                if (null != contact && 0 < getMaxImageSize()) {
+                    byte[] image = contact.getImage1();
+                    if (null != image && image.length > getMaxImageSize()) {
+                        throw ContactExceptionCodes.IMAGE_TOO_LARGE.create(image.length, getMaxImageSize());
+                    }
+                }
 			}
 
 			@Override

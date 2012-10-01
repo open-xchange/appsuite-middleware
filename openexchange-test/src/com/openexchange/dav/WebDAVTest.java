@@ -59,7 +59,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
 import java.util.UUID;
-
 import org.apache.commons.httpclient.Header;
 import org.apache.commons.httpclient.HeaderElement;
 import org.apache.commons.httpclient.HttpMethod;
@@ -76,7 +75,6 @@ import org.json.JSONException;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
-
 import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.folder.actions.InsertResponse;
 import com.openexchange.ajax.folder.actions.VisibleFoldersResponse;
@@ -241,7 +239,11 @@ public abstract class WebDAVTest extends AbstractAJAXSession {
     }
     
     protected FolderObject getFolder(int folderID) throws OXException, IOException, JSONException {
-    	return getClient().execute(new com.openexchange.ajax.folder.actions.GetRequest(EnumAPI.OX_NEW, folderID)).getFolder();
+        return getClient().execute(new com.openexchange.ajax.folder.actions.GetRequest(EnumAPI.OX_NEW, folderID)).getFolder();
+    }
+
+    protected void deleteFolder(FolderObject folder) throws OXException, IOException, JSONException {
+        getClient().execute(new com.openexchange.ajax.folder.actions.DeleteRequest(EnumAPI.OX_NEW, true, folder));
     }
 
     protected FolderObject createFolder(FolderObject parent, String folderName) throws OXException, IOException, JSONException {

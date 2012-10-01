@@ -63,6 +63,7 @@ fi
 /opt/open-xchange/osgi/bundle.d/*
 %dir /opt/open-xchange/etc/
 %config(noreplace) %attr(640,root,open-xchange) /opt/open-xchange/etc/ldapauth.properties
+%doc com.openexchange.authentication.ldap/ChangeLog
 
 %changelog
 * Tue Aug 21 2012 Marcus Klein <marcus.klein@open-xchange.com>

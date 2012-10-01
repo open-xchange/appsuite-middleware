@@ -200,6 +200,8 @@ public class MimeMessageFiller {
 
     protected final UserSettingMail usm;
 
+    protected int accountId;
+
     private Set<String> uploadFileIDs;
 
     private Set<String> contentIds;
@@ -229,6 +231,25 @@ public class MimeMessageFiller {
         this.session = session;
         this.ctx = ctx;
         this.usm = usm;
+    }
+    
+    /**
+     * Sets the account identifier
+     *
+     * @param accountId The account identifier to set
+     */
+    public MimeMessageFiller setAccountId(final int accountId) {
+        this.accountId = accountId;
+        return this;
+    }
+    
+    /**
+     * Gets the account identifier
+     *
+     * @return The account identifier
+     */
+    public int getAccountId() {
+        return accountId;
     }
 
     /*
@@ -271,24 +292,20 @@ public class MimeMessageFiller {
         /*
          * Set organization to context-admin's company field setting
          */
-        try {
-        	final ContactService contactService = ServerServiceRegistry.getInstance().getService(ContactService.class);
-        	final String organization = contactService.getOrganization(session);
-//            final ContactInterface contactInterface =
-//                ServerServiceRegistry.getInstance().getService(ContactInterfaceDiscoveryService.class).newContactInterface(
-//                    FolderObject.SYSTEM_LDAP_FOLDER_ID,
-//                    session);
-//
-//            final Contact c = contactInterface.getUserById(ctx.getMailadmin(), false);
-//            if (null != c && c.getCompany() != null && c.getCompany().length() > 0) {
-            if (null != organization && 0 < organization.length()) {
-                final String encoded =
-                        MimeUtility.fold(14, MimeUtility.encodeText(organization, MailProperties.getInstance().getDefaultMimeCharset(), null));
-//                		MimeUtility.fold(14, MimeUtility.encodeText(c.getCompany(), MailProperties.getInstance().getDefaultMimeCharset(), null));
-                mimeMessage.setHeader(MessageHeaders.HDR_ORGANIZATION, encoded);
+        if (accountId <= 0) {
+            try {
+                final ContactService contactService = ServerServiceRegistry.getInstance().getService(ContactService.class);
+                final String organization = contactService.getOrganization(session);
+                if (null != organization && 0 < organization.length()) {
+                    final String encoded =
+                        MimeUtility.fold(
+                            14,
+                            MimeUtility.encodeText(organization, MailProperties.getInstance().getDefaultMimeCharset(), null));
+                    mimeMessage.setHeader(MessageHeaders.HDR_ORGANIZATION, encoded);
+                }
+            } catch (final Exception e) {
+                LOG.error("Header \"Organization\" could not be set", e);
             }
-        } catch (final Exception e) {
-            LOG.error("Header \"Organization\" could not be set", e);
         }
         /*
          * Add header X-Originating-IP containing the IP address of the client

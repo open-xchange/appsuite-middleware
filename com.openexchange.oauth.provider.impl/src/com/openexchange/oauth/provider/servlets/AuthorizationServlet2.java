@@ -67,14 +67,13 @@ import net.oauth.v2.server.OAuth2Servlet;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.oauth.provider.OAuthProviderConstants;
-import com.openexchange.oauth.provider.OAuthProviderService;
 import com.openexchange.oauth.provider.internal.DatabaseOAuth2ProviderService;
 import com.openexchange.oauth.provider.internal.OAuthProviderServiceLookup;
 import com.openexchange.oauth.provider.v2.OAuth2ProviderService;
 
 /**
  * {@link AuthorizationServlet2} - Autherization request handler for OAuth2.0.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class AuthorizationServlet2 extends AbstractAuthorizationServlet {

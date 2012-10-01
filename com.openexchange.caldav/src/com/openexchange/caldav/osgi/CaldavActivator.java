@@ -53,6 +53,8 @@ import org.apache.commons.logging.Log;
 import org.osgi.service.http.HttpService;
 import com.openexchange.caldav.mixins.CalendarHomeSet;
 import com.openexchange.caldav.mixins.CalendarUserAddressSet;
+import com.openexchange.caldav.mixins.DefaultAlarmVeventDate;
+import com.openexchange.caldav.mixins.DefaultAlarmVeventDatetime;
 import com.openexchange.caldav.mixins.ScheduleInboxURL;
 import com.openexchange.caldav.mixins.ScheduleOutboxURL;
 import com.openexchange.caldav.servlet.CalDAV;
@@ -63,7 +65,6 @@ import com.openexchange.data.conversion.ical.ICalParser;
 import com.openexchange.folderstorage.FolderService;
 import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
 import com.openexchange.groupware.calendar.CalendarCollectionService;
-import com.openexchange.log.LogFactory;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.tools.session.SessionHolder;
 import com.openexchange.user.UserService;
@@ -122,7 +123,9 @@ public class CaldavActivator extends HousekeepingActivator {
             });
             registerService(PropertyMixin.class, new ScheduleOutboxURL());
             registerService(PropertyMixin.class, new ScheduleInboxURL());
-            
+            registerService(PropertyMixin.class, new DefaultAlarmVeventDate());
+            registerService(PropertyMixin.class, new DefaultAlarmVeventDatetime());
+
             registerService(PathRegistration.class, new PathRegistration("caldav"));
             openTrackers();
         } catch (final Throwable t) {
