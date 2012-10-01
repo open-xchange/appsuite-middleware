@@ -53,6 +53,8 @@ import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.Map;
+import java.util.TreeMap;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.TimeUnit;
@@ -62,6 +64,8 @@ import com.openexchange.ajp13.AJPv13Server;
 import com.openexchange.ajp13.AJPv13ServiceRegistry;
 import com.openexchange.ajp13.exception.AJPv13Exception;
 import com.openexchange.log.Log;
+import com.openexchange.log.LogProperties;
+import com.openexchange.log.Props;
 import com.openexchange.threadpool.Task;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.threadpool.ThreadRenamer;
@@ -307,11 +311,38 @@ public class AJPv13TaskWatcher {
             {
                 final Throwable t = new Throwable();
                 t.setStackTrace(task.getStackTrace());
-                log.info(
-                    new StringBuilder(128).append("AJP Listener \"").append(task.getThreadName()).append("\" exceeds max. running time of ").append(
-                        AJPv13Config.getAJPWatcherMaxRunningTime()).append("msec -> Processing time: ").append(
-                        System.currentTimeMillis() - task.getProcessingStartTime()).append("msec").toString(),
-                    t);
+                final Map<String, Object> taskProperties;
+                {
+                    final Props taskProps = LogProperties.optLogProperties(task.getThread());
+                    taskProperties = null == taskProps ? null : taskProps.getMap();
+                }
+                if (null == taskProperties) {
+                    final StringBuilder logBuilder = new StringBuilder(196).append("AJP Listener \"").append(task.getThreadName());
+                    logBuilder.append("\" exceeds max. running time of ").append(AJPv13Config.getAJPWatcherMaxRunningTime());
+                    logBuilder.append("msec -> Processing time: ").append(System.currentTimeMillis() - task.getProcessingStartTime());
+                    logBuilder.append("msec");
+                    log.info(logBuilder.toString(), t);
+                } else {
+                    final StringBuilder logBuilder = new StringBuilder(512);
+                    final Map<String, String> sorted = new TreeMap<String, String>();
+                    for (final Map.Entry<String, Object> entry : taskProperties.entrySet()) {
+                        final String propertyName = entry.getKey();
+                        final Object value = entry.getValue();
+                        if (null != value) {
+                            sorted.put(propertyName, value.toString());
+                        }
+                    }
+                    for (final Map.Entry<String, String> entry : sorted.entrySet()) {
+                        logBuilder.append('\n').append(entry.getKey()).append('=').append(entry.getValue());
+                    }
+                    logBuilder.deleteCharAt(0);
+                    logBuilder.append("\n\n");
+                    logBuilder.append("AJP Listener \"").append(task.getThreadName());
+                    logBuilder.append("\" exceeds max. running time of ").append(AJPv13Config.getAJPWatcherMaxRunningTime());
+                    logBuilder.append("msec -> Processing time: ").append(System.currentTimeMillis() - task.getProcessingStartTime());
+                    logBuilder.append("msec");
+                    log.info(logBuilder.toString(), t);
+                }
             }
             if (max > 0 && task.getProcessingStartTime() < max) {
                 task.cancel();
