@@ -44,6 +44,12 @@ if [ ${1:-0} -eq 2 ]; then
     ox_move_config_file /opt/open-xchange/etc/groupware /opt/open-xchange/etc mailfilter.properties
 
     ox_update_permissions "/opt/open-xchange/etc/mailfilter.properties" root:open-xchange 640
+
+    # SoftwareChange_Request-1140
+    pfile=/opt/open-xchange/etc/mailfilter.properties
+    if ! ox_exists_property com.openexchange.mail.filter.preferGSSAPI $pfile; then
+        ox_set_property com.openexchange.mail.filter.preferGSSAPI false $pfile
+    fi
 fi
 
 %clean
