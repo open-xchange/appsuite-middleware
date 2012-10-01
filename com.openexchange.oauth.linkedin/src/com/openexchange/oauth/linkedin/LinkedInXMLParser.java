@@ -62,9 +62,11 @@ import org.apache.commons.logging.Log;
 import com.openexchange.log.LogFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.tools.versit.converter.ConverterException;
 import com.openexchange.tools.versit.converter.OXContainerConverter;
@@ -157,7 +159,7 @@ public class LinkedInXMLParser {
         return contact;
     }
 
-    public List<Contact> parseConnections(String body) {
+    public List<Contact> parseConnections(String body) throws OXException {
         final List<Contact> contacts = new ArrayList<Contact>();
         DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
 
@@ -172,6 +174,13 @@ public class LinkedInXMLParser {
                     Contact contact = parse(person);
                     contacts.add(contact);
                 }
+            }
+            
+            NodeList errors = root.getElementsByTagName("error");
+            if (errors.getLength() > 0) {
+            	Element error = (Element) errors.item(0);
+            	String message = error.getElementsByTagName("message").item(0).getTextContent();
+            	throw OXException.general(message);
             }
         } catch (ParserConfigurationException pce) {
             LOG.error(pce);
