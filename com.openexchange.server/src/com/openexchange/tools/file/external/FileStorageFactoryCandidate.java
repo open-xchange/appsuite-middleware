@@ -49,12 +49,22 @@
 
 package com.openexchange.tools.file.external;
 
+import java.net.URI;
+import com.openexchange.exception.OXException;
 
 /**
- * {@link FileStorageFactory} - A file storage factory.
+ * {@link FileStorageFactoryCandidate} - A candidate for a {@link FileStorageFactory}.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface FileStorageFactory extends FileStorageFactoryCandidate {
-    // Marker
+public interface FileStorageFactoryCandidate {
+
+    public static final int DEFAULT_RANKING = 0;
+
+    public FileStorage getFileStorage(URI uri) throws OXException;
+
+    public boolean supports(URI uri) throws OXException;
+
+    public int getRanking();
+
 }
