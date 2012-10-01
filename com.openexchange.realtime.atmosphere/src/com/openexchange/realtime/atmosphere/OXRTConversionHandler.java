@@ -67,7 +67,7 @@ public class OXRTConversionHandler implements OXRTHandler {
     public static ServiceLookup services;
 
     private final String format;
-    private final Class<? extends Stanza> stanzaClass;
+    private final String namespace;
 
     /**
      * Initializes a new {@link OXRTConversionHandler}.
@@ -75,14 +75,14 @@ public class OXRTConversionHandler implements OXRTHandler {
      * @param elementPath the path to an element in a namespace this OXRTConversionHandler can handle
      * @param format the format of POJOs that incoming Stanzas should be converted to
      */
-    public OXRTConversionHandler(Class<? extends Stanza> stanzaClass, String format) {
-        this.stanzaClass = stanzaClass;
+    public OXRTConversionHandler(String namespace, String format) {
+        this.namespace = namespace;
         this.format = format;
     }
 
     @Override
-    public Class<? extends Stanza> getNamespace() {
-        return stanzaClass; 
+    public String getNamespace() {
+        return namespace; 
     }
 
     @Override
