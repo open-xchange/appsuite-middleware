@@ -323,7 +323,12 @@ public final class CSSMatcher {
             cssBuilder.append(block);
             lastPos = m.end();
         }
-        cssElemsBuffer.append(css.substring(lastPos, css.length()));
+        /*
+         * Cut off remaining CSS content if maxCount exceeded
+         */
+        if (count < maxCount) {
+            cssElemsBuffer.append(css.substring(lastPos, css.length()));
+        }
         modified |= checkCSSElements(cssElemsBuffer, styleMap, true);
         final String tail = cssElemsBuffer.toString();
         cssElemsBuffer.setLength(0);
