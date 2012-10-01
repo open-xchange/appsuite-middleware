@@ -100,6 +100,10 @@ public final class MessageWriter {
 
     // private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(MessageWriter.class));
 
+    private static final String LOG_PROPERTY_MAIL_ID = MailActionConstants.LOG_PROPERTY_MAIL_ID;
+    private static final String LOG_PROPERTY_FULL_NAME = MailActionConstants.LOG_PROPERTY_FULL_NAME;
+    private static final String LOG_PROPERTY_ACCOUNT_ID = MailActionConstants.LOG_PROPERTY_ACCOUNT_ID;
+
     /**
      * No instantiation
      */
@@ -206,14 +210,14 @@ public final class MessageWriter {
         final Set<String> removees = new HashSet<String>(3);
         final Props props = LogProperties.getLogProperties();
         {
-            if (!props.put(MailActionConstants.LOG_PROPERTY_ACCOUNT_ID, Integer.valueOf(accountId))) {
-                removees.add(MailActionConstants.LOG_PROPERTY_ACCOUNT_ID);
+            if (!props.put(LOG_PROPERTY_ACCOUNT_ID, Integer.valueOf(accountId))) {
+                removees.add(LOG_PROPERTY_ACCOUNT_ID);
             }
-            if (!props.put(MailActionConstants.LOG_PROPERTY_FULL_NAME, fullName)) {
-                removees.add(MailActionConstants.LOG_PROPERTY_FULL_NAME);
+            if (!props.put(LOG_PROPERTY_FULL_NAME, fullName)) {
+                removees.add(LOG_PROPERTY_FULL_NAME);
             }
-            if (!props.put(MailActionConstants.LOG_PROPERTY_MAIL_ID, mail.getMailId())) {
-                removees.add(MailActionConstants.LOG_PROPERTY_MAIL_ID);
+            if (!props.put(LOG_PROPERTY_MAIL_ID, mail.getMailId())) {
+                removees.add(LOG_PROPERTY_MAIL_ID);
             }
         }
         try {
