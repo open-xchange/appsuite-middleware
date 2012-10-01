@@ -1,3 +1,13 @@
+* 2012-10-01 - francisco.laguna@open-xchange.com
+
+ - Fix for bug 23134: Ported CVS fixes
+ - Fix for bug 23135: Ported CVS fixes
+
+* 2012-10-01 - thorben.betten@open-xchange.com
+
+ - Fix for bug 23146: Log if unsupported charset is detected
+ - Fix for bug 23148: Safe sanitizing of Content-Type header
+
 * 2012-09-29 - thorben.betten@open-xchange.com
 
  - Fix for bug 23141: Introduced special FileCleaningTracker which invokes File.deleteOnExit() on each incoming file upload

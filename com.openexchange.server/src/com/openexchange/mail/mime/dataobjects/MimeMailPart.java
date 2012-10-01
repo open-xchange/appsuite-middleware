@@ -465,7 +465,7 @@ public final class MimeMailPart extends MailPart implements MimeRawSource, MimeC
             throw new IllegalStateException(ERR_NULL_PART);
         }
         try {
-            if (part instanceof MimeMessage) {
+            if (part instanceof MimeMessage && !(part instanceof com.sun.mail.imap.IMAPMessage)) {
                 saneContentType();
             }
             part.writeTo(out);
@@ -483,10 +483,14 @@ public final class MimeMailPart extends MailPart implements MimeRawSource, MimeC
         }
     }
 
-    private void saneContentType() throws MessagingException, OXException {
+    private void saneContentType() throws MessagingException {
         final String[] header = part.getHeader(MessageHeaders.HDR_CONTENT_TYPE);
         if (null != header && header.length > 0) {
-            part.setHeader(MessageHeaders.HDR_CONTENT_TYPE, new ContentType(header[0]).toString());
+            try {
+                part.setHeader(MessageHeaders.HDR_CONTENT_TYPE, new ContentType(header[0]).toString());
+            } catch (final Exception e) {
+                // Ignore
+            }
         }
     }
 
