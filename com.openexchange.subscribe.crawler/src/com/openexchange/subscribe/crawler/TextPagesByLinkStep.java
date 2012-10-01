@@ -52,7 +52,10 @@ package com.openexchange.subscribe.crawler;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+
 import com.gargoylesoftware.htmlunit.FailingHttpStatusCodeException;
 import com.gargoylesoftware.htmlunit.TextPage;
 import com.gargoylesoftware.htmlunit.WebClient;
@@ -91,14 +94,17 @@ public class TextPagesByLinkStep extends AbstractStep<List<TextPage>, HtmlPage>{
 
             int tempOffset = 0;
             boolean oneSuccess = true;
-
+            Set<String> hrefGuard = new HashSet<String>();
             while (oneSuccess) {
                 oneSuccess = false;
                 final HtmlPage tempPage = webClient.getPage(urlBeforeOffset + Integer.toString(tempOffset) + urlAfterOffset);
                 final List<HtmlAnchor> allLinks = tempPage.getAnchors();
                 for (final HtmlAnchor link : allLinks) {
                     if (link.getHrefAttribute().startsWith(linkpart)) {
-                        oneSuccess = true;
+                    	if (!hrefGuard.add(link.getHrefAttribute())) {
+                    		continue;
+                    	}
+                    	oneSuccess = true;
                         final TextPage tempTextPage = link.click();
                         output.add(tempTextPage);
                     }
