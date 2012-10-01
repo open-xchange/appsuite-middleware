@@ -75,7 +75,6 @@ import org.osgi.framework.Bundle;
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
 public class AtmosphereJSServlet extends HttpServlet {
-    private static final int DEFAULT_BUFFER_SIZE = 10240;
     private static final Log LOG = com.openexchange.log.Log.loggerFor(AtmosphereJSServlet.class);
     private Bundle bundle;
     
@@ -86,7 +85,6 @@ public class AtmosphereJSServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         response.reset();
-        response.setBufferSize(DEFAULT_BUFFER_SIZE);
         response.setContentType("application/javascript");
 
         InputStream fileStream = bundle.getEntry("lib/jquery.atmosphere.js").openStream();
