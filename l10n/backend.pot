@@ -3485,6 +3485,10 @@ msgstr ""
 msgid "The request sent was missing its body"
 msgstr ""
 
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:141
+msgid "The account is invalid, please recreate it."
+msgstr ""
+
 #. *
 #. * Cannot change password for any reason.
 #.

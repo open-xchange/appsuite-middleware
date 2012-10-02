@@ -62,7 +62,7 @@ import com.openexchange.session.Session;
  */
 public interface LinkedInService {
 
-    public List<Contact> getContacts(Session session, int user, int contextId, int accountId);
+    public List<Contact> getContacts(Session session, int user, int contextId, int accountId) throws OXException;
 
     public String getAccountDisplayName(Session session, int user, int contextId, int accountId);
 

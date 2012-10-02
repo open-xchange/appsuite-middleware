@@ -1,7 +1,12 @@
+* 2012-10-02 - francisco.laguna@open-xchange.com
+
+ - Fix for bug 23065: Ported MSN subscriber to new version 5 API.
+
 * 2012-10-02 - thorben.betten@open-xchange.com
 
  - Fix for bug 23155: Added option to disable manual umlauts-filtering
  - Fix for bug 22910: fixed checkconfigconsistency
+ - Fix for bug 23162: Respond with 404 (Not found) if an empty image stream is detected
 
 * 2012-10-01 - francisco.laguna@open-xchange.com
 
