@@ -52,6 +52,7 @@ package com.openexchange.oauth.msn;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -70,6 +71,7 @@ import org.json.JSONObject;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.oauth.OAuthAccount;
+import com.openexchange.oauth.OAuthExceptionCodes;
 import com.openexchange.oauth.msn.osgi.MSNOAuthActivator;
 import com.openexchange.session.Session;
 import com.openexchange.tools.versit.converter.ConverterException;
@@ -99,7 +101,7 @@ public class MSNServiceImpl implements MSNService {
             final com.openexchange.oauth.OAuthService oAuthService = activator.getOauthService();
             account = oAuthService.getAccount(accountId, session, user, contextId);
             // the account contains the refresh-token in this case
-            final String wrap_access_token = useRefreshTokenToGetAccessToken(account.getToken());
+            final String wrap_access_token = useRefreshTokenToGetAccessToken(account);
             final JSONObject response = useAccessTokenToAccessData(wrap_access_token);
             contacts = parseIntoContacts(wrap_access_token, response);
 
@@ -116,39 +118,17 @@ public class MSNServiceImpl implements MSNService {
      */
     private JSONObject useAccessTokenToAccessData(final String wrap_access_token) {
         JSONObject wholeResponse = new JSONObject();
-        final String responseString = "";
-        final String protectedUrl = "http://apis.live.net/V4.1/";
-        final GetMethod getMethod = new GetMethod(protectedUrl);
-        getMethod.setRequestHeader("Accept", "application/json");
-        getMethod.setRequestHeader("Content-type", "application/json");
-        getMethod.setRequestHeader("Authorization", "WRAP access_token=" + wrap_access_token);
-
-        final HttpClient client = new HttpClient();
-        client.getParams().setParameter("http.protocol.content-charset", "UTF-8");
         try {
+            final String responseString = "";
+            final String protectedUrl = "https://apis.live.net/v5.0/me/contacts?access_token=" + URLEncoder.encode(wrap_access_token, "UTF-8");
+            final GetMethod getMethod = new GetMethod(protectedUrl);
+
+            final HttpClient client = new HttpClient();
+            client.getParams().setParameter("http.protocol.content-charset", "UTF-8");
             final int responseCode = client.executeMethod(getMethod);
-
-            final GetMethod getMethod2 = new GetMethod(protectedUrl + "Contacts/");
-            getMethod2.setRequestHeader("Accept", "application/json");
-            getMethod2.setRequestHeader("Content-type", "application/json");
-            getMethod2.setRequestHeader("Authorization", "WRAP access_token=" + wrap_access_token);
-            final int responseCode2 = client.executeMethod(getMethod2);
-
-            final JSONObject response = new JSONObject(getMethod2.getResponseBodyAsString());
-            String baseURI = "";
-            if (null != response && response.has("BaseUri")) {
-                baseURI = response.getString("BaseUri");
-            }
-            if (!baseURI.equals("")) {
-                final String finalURL = baseURI + "Contacts/AllContacts";
-                final GetMethod getMethod3 = new GetMethod(finalURL);
-                getMethod3.setRequestHeader("Accept", "application/json");
-                getMethod3.setRequestHeader("Content-type", "application/json");
-                getMethod3.setRequestHeader("Authorization", "WRAP access_token=" + wrap_access_token);
-                final int responseCode3 = client.executeMethod(getMethod3);
-                wholeResponse = new JSONObject(getMethod3.getResponseBodyAsString());
-
-            }
+            String response = getMethod.getResponseBodyAsString();
+            wholeResponse = new JSONObject(response);
+            
         } catch (final HttpException e) {
             LOG.error(e);
         } catch (final IOException e) {
@@ -161,98 +141,137 @@ public class MSNServiceImpl implements MSNService {
 
     private List<Contact> parseIntoContacts(final String wrap_access_token, final JSONObject wholeResponse) {
         final List<Contact> contacts = new ArrayList<Contact>();
-        final HttpClient client = new HttpClient();
-        client.getParams().setParameter("http.protocol.content-charset", "UTF-8");
         try {
-            String baseURI = "";
-            if (wholeResponse.has("BaseUri")) {
-                baseURI = wholeResponse.getString("BaseUri");
-            }
+            JSONArray arr = wholeResponse.getJSONArray("data");
+            for(int i = 0, size = arr.length(); i < size; i++) {
+            	JSONObject cObj = arr.getJSONObject(i);
+            	Contact c = new Contact();
+            	
+            	if (cObj.hasAndNotNull("first_name")) {
+            		c.setGivenName(cObj.optString("first_name"));
+            	}
 
-            if (wholeResponse.has("Entries")) {
-                final JSONArray entries = (JSONArray) wholeResponse.get("Entries");
-                for (int i = 0; i < entries.length(); i++) {
-                    final Contact contact = new Contact();
-                    final JSONObject entry = entries.getJSONObject(i);
-                    final String contactURI = entry.getString("SelfLink");
-                    if (null != contactURI) {
-                        final GetMethod getMethod4 = new GetMethod(baseURI + contactURI);
-                        getMethod4.setRequestHeader("Accept", "application/json");
-                        getMethod4.setRequestHeader("Content-type", "application/json");
-                        getMethod4.setRequestHeader("Authorization", "WRAP access_token=" + wrap_access_token);
-                        final int responseCode4 = client.executeMethod(getMethod4);
-                        final JSONObject wlcontact = new JSONObject(getMethod4.getResponseBodyAsString());
+            	if (cObj.hasAndNotNull("last_name")) {
+            		c.setSurName(cObj.optString("last_name"));
+            	}
+            	
+            	if (cObj.hasAndNotNull("name")) {
+            		c.setDisplayName(cObj.optString("name"));
+            	} else {
+            		c.setDisplayName(c.getGivenName() + " " + c.getSurName());
+            	}
+            	
+            	if (cObj.has("emails")) {
+            		List<String> mailAddresses = new ArrayList<String>();
+            		JSONObject emails = cObj.getJSONObject("emails");
+            		for(String key: new String[]{"preferred", "account", "other", "personal","business"}) {
+            			if (emails.hasAndNotNull(key)) {
+            				String address = emails.optString(key);
+            				if (!mailAddresses.contains(address)) {
+            					mailAddresses.add(address);
+            				}
+            			}
+            		}
+            		
+            		int counter = 0;
+            		for (String mailAddress : mailAddresses) {
+						switch(counter) {
+						case 0:
+							c.setEmail1(mailAddress);
+							counter++;
+							break;
+						case 1:
+							c.setEmail2(mailAddress);
+							counter++;
+							break;
+						case 2:
+							c.setEmail3(mailAddress);
+							counter++;
+							break;
+						}
+					}
+            	}
+            	
+            	if (cObj.has("addresses")) {
+            		JSONObject obj = cObj.getJSONObject("addresses");
+            		if (obj.has("personal")) {
+            			JSONObject personalAddress = obj.getJSONObject("personal");
+            			if(personalAddress.hasAndNotNull("postal_code")) {
+            				c.setPostalCodeHome(personalAddress.getString("postal_code"));
+            			}
+            			if(personalAddress.hasAndNotNull("street")) {
+            				c.setStreetHome(personalAddress.getString("street"));
+            			}
+            			if(personalAddress.hasAndNotNull("city")) {
+            				c.setCityHome(personalAddress.getString("city"));
+            			}
+            			if(personalAddress.hasAndNotNull("state")) {
+            				c.setStateHome(personalAddress.getString("state"));
+            			}
 
-                        if (wlcontact.has("FirstName")) {
-                            final String firstname = wlcontact.getString("FirstName");
-                            contact.setGivenName(firstname);
-                        }
-                        if (wlcontact.has("LastName")) {
-                            final String lastname = wlcontact.getString("LastName");
-                            contact.setSurName(lastname);
-                        }
-                        if (wlcontact.has("Locations")) {
-                            final JSONArray locations = wlcontact.getJSONArray("Locations");
-                            final JSONObject location = locations.getJSONObject(0);
-                            if (location.has("City")) {
-                                final String city = location.getString("City");
-                                contact.setCityBusiness(city);
-                            }
-                            if (location.has("CountryRegion")) {
-                                final String country = location.getString("CountryRegion");
-                                contact.setCountryBusiness(country);
-                            }
-                        }
-                        if (wlcontact.has("ThumbnailImageLink")) {
-                            final String imageUrl = wlcontact.getString("ThumbnailImageLink");
-                            try {
-                                OXContainerConverter.loadImageFromURL(contact, imageUrl);
-                            } catch (final ConverterException e) {
-                                LOG.error(e);
-                            }
-                        }
-                        contacts.add(contact);
-                    }
-                }
+            		}
+            		
+            		if (obj.has("business")) {
+            			JSONObject businessAddress = obj.getJSONObject("business");
+            			if(businessAddress.hasAndNotNull("postal_code")) {
+            				c.setPostalCodeBusiness(businessAddress.getString("postal_code"));
+            			}
+            			if(businessAddress.hasAndNotNull("street")) {
+            				c.setStreetBusiness(businessAddress.getString("street"));
+            			}
+            			if(businessAddress.hasAndNotNull("city")) {
+            				c.setCityBusiness(businessAddress.getString("city"));
+            			}
+            			if(businessAddress.hasAndNotNull("state")) {
+            				c.setStateBusiness(businessAddress.getString("state"));
+            			}
+            		}
+            	}
+            	// TODO: Picture?
+            	
+            	contacts.add(c);
             }
-        } catch (final HttpException e) {
-            LOG.error(e);
-        } catch (final IOException e) {
-            LOG.error(e);
-        } catch (final JSONException e) {
-            LOG.error(e);
+        } catch (JSONException x) {
+        	LOG.error(x);
         }
+        
         return contacts;
     }
 
     /**
+     * @param secret 
      * @param token
+     * @throws OXException 
      */
-    private String useRefreshTokenToGetAccessToken(final String wrap_refresh_token) {
-        String accessToken = "";
-        final HttpClient client = new HttpClient();
-        final PostMethod postMethod = new PostMethod("https://consent.live.com/RefreshToken.aspx" + "?wrap_refresh_token=" + wrap_refresh_token);
+    private String useRefreshTokenToGetAccessToken(OAuthAccount account) throws OXException {
+    	String callback = null;
+    	try {
+    		JSONObject metadata = new JSONObject(account.getSecret());
+    		callback = metadata.getString("callback");
+    	} catch (JSONException x) {
+    		throw OAuthExceptionCodes.INVALID_ACCOUNT.create();
+    	}
+    	String accessToken = "";
+		
+    	try {
+    		final HttpClient client = new HttpClient();
+    		final PostMethod postMethod = new PostMethod("https://login.live.com/oauth20_token.srf?client_id=" + account.getMetaData().getAPIKey() + "&redirect_uri=" + URLEncoder.encode(callback, "UTF-8") + "&client_secret=" + URLEncoder.encode(account.getMetaData().getAPISecret(), "UTF-8")+"&refresh_token=" + account.getToken() + "&grant_type=refresh_token");
 
-        RequestEntity requestEntity;
-        try {
+    		RequestEntity requestEntity;
             requestEntity = new StringRequestEntity(postMethod.getQueryString(), "application/x-www-form-urlencoded", "UTF-8");
             postMethod.setRequestEntity(requestEntity);
             final int responseCode = client.executeMethod(postMethod);
             final String response = URLDecoder.decode(postMethod.getResponseBodyAsString(), "UTF-8");
-            final Pattern pattern = Pattern.compile("wrap_access_token=([^&]*).*");
-            final Matcher matcher = pattern.matcher(response);
-            if (matcher.find()) {
-                accessToken = matcher.group(1);
-            } else {
-                LOG.error("No AccessToken found in response : " + postMethod.getResponseBodyAsString());
-            }
+            return new JSONObject(response).getString("access_token");            
         } catch (final UnsupportedEncodingException e) {
             LOG.error(e);
         } catch (final HttpException e) {
             LOG.error(e);
         } catch (final IOException e) {
             LOG.error(e);
-        }
+        } catch (JSONException e) {
+            LOG.error(e);
+		}
         return accessToken;
     }
 
