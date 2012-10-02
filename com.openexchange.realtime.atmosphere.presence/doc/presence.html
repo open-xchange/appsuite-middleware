@@ -106,19 +106,18 @@ code > span.er { color: #ff0000; font-weight: bold; }
 <h2 id="the-namespaces-and-addressing-elements">The namespaces and addressing elements</h2>
 <p>The namespace ox is used for internal Stanzas.</p>
 <h1 id="atmosphere-presence-protocol-spec">Atmosphere Presence Protocol Spec</h1>
-<pre class="sourceCode javascript"><code class="sourceCode javascript">{
-  <span class="st">&quot;session&quot;</span> :
-  <span class="st">&quot;to&quot;</span> :
-  <span class="st">&quot;element&quot;</span> :
-  <span class="st">&quot;type&quot;</span> :
-  <span class="st">&quot;payloads&quot;</span>  : [
-    {<span class="st">&quot;element&quot;</span> : <span class="st">&quot;state&quot;</span>, <span class="st">&quot;data&quot;</span> : <span class="st">&quot;&quot;</span>}, 
-    {<span class="st">&quot;element&quot;</span> : <span class="st">&quot;message&quot;</span>, <span class="st">&quot;data&quot;</span> : <span class="st">&quot;&quot;</span>},
-    {<span class="st">&quot;element&quot;</span> : <span class="st">&quot;priority&quot;</span>, <span class="st">&quot;data&quot;</span> : <span class="st">&quot;&quot;</span>},
-    {<span class="st">&quot;element&quot;</span> : <span class="st">&quot;error&quot;</span>, <span class="st">&quot;data&quot;</span> : <span class="st">&quot;&quot;</span>}
-    {<span class="st">&quot;namespace&quot;</span> : <span class="st">&quot;xyz&quot;</span>, <span class="st">&quot;element&quot;</span> : <span class="st">&quot;123&quot;</span>, <span class="st">&quot;data&quot;</span> : <span class="st">&quot;&quot;</span>}
-  ]
+<p>A payload element is an object in the form of</p>
+<pre><code>{
+  &quot;namespace&quot; : &quot;this is the namespace of the payload element&quot;
+  &quot;element&quot; : &quot;this is the name of the payload element&quot;
+  &quot;data&quot; : &quot;&quot;
 }</code></pre>
+<p>The namespace is only needed when the payload element isn’t from the default namespace or the enclosing namespace data can be:</p>
+<ul>
+<li>a primitive json type</li>
+<li>an array of payload elements</li>
+<li>a json object containing other payload elements or Arrays of payload elements</li>
+</ul>
 <h2 id="initial-presence">Initial Presence</h2>
 <p>The initial presence message only has to consist of the obligatory session key and the element key specifying that this message is a presence message. This is enough to send a broadcast to all subscribed users and signal that the user is now available.</p>
 <pre class="sourceCode javascript"><code class="sourceCode javascript">{
@@ -133,58 +132,58 @@ code > span.er { color: #ff0000; font-weight: bold; }
      <span class="st">&quot;to&quot;</span>: <span class="st">&quot;ox://marens@1337/ox7ui</span>
 };</code></pre>
 <h2 id="update-after-initial-presence">Update after initial Presence</h2>
-<p>After the user’s availability was broadcasted via the initial presence message the user may choose to change his Presence status. The priority instructs the Server to which resource messages should be routed. Resources with negative priority never receive messages.</p>
+<p>After the user’s availability was broadcasted via the initial presence message the user may choose to change his Presence status. The priority instructs the Server to which resource messages should be routed. Resources with negative priority never receive messages. Optionals keys/elementss/elements: priority</p>
 <pre class="sourceCode javascript"><code class="sourceCode javascript">{
-    <span class="st">&quot;session&quot;</span> : <span class="st">&quot;$session&quot;</span>,
-    <span class="st">&quot;element&quot;</span> : <span class="st">&quot;presence&quot;</span>,
-    <span class="st">&quot;data&quot;</span> : {
-      <span class="st">&quot;status&quot;</span> : <span class="st">&quot;away&quot;</span>,
-      <span class="st">&quot;message&quot;</span> : <span class="st">&quot;I&#39;ll be back!&quot;</span>,
-      <span class="st">&quot;priority&quot;</span> : <span class="st">&quot;1&quot;</span>
-     }
+  <span class="st">&quot;session&quot;</span> : <span class="st">&quot;$session&quot;</span>,
+  <span class="st">&quot;element&quot;</span> : <span class="st">&quot;presence&quot;</span>,
+  <span class="st">&quot;payloads&quot;</span> : [
+    {<span class="st">&quot;element&quot;</span> : <span class="st">&quot;status&quot;</span>, <span class="st">&quot;data&quot;</span> : <span class="st">&quot;away&quot;</span>},
+    {<span class="st">&quot;element&quot;</span> : <span class="st">&quot;message&quot;</span>, <span class="st">&quot;data&quot;</span> : <span class="st">&quot;I&#39;ll be back!&quot;</span>},
+    {<span class="st">&quot;element&quot;</span> : <span class="st">&quot;priority&quot;</span>, <span class="st">&quot;data&quot;</span> : <span class="st">&quot;1&quot;</span>}
+  ]
 };</code></pre>
 <h2 id="final-unavailable-presence">Final unavailable Presence</h2>
-<p>The final unavailable presence broadcast to inform your subscribed contacts that you are gone. Type has to be set to unavailable. Optional key: message</p>
+<p>The final unavailable presence broadcast to inform your subscribed contacts that you are gone. Type has to be set to unavailable. Optionals keys/elements: message</p>
 <pre class="sourceCode javascript"><code class="sourceCode javascript">{
     <span class="st">&quot;session&quot;</span> : <span class="st">&quot;$session&quot;</span>,
     <span class="st">&quot;element&quot;</span> : <span class="st">&quot;presence&quot;</span>,
     <span class="st">&quot;type&quot;</span>: <span class="st">&quot;unavailable&quot;</span>,
-    <span class="dt">data</span>: {
-      <span class="dt">message</span>: <span class="ch">&#39;Bye!&#39;</span>
-     }
+    <span class="dt">payloads </span>: [
+      {<span class="st">&quot;element&quot;</span> : <span class="st">&quot;message&quot;</span>, <span class="st">&quot;data&quot;</span> : <span class="st">&quot;Bye!&quot;</span>}
+    ]
 };</code></pre>
 <h2 id="subscribe-request">Subscribe Request</h2>
-<p>Mr. X wants to subscribe to the presence of marens@1337. Optional key: message</p>
+<p>Mr. X wants to subscribe to the presence of marens@1337. Optionals keys/elements: message</p>
 <pre class="sourceCode javascript"><code class="sourceCode javascript">{
   <span class="st">&quot;session&quot;</span> : <span class="st">&quot;$session&quot;</span>,
   <span class="st">&quot;element&quot;</span> : <span class="st">&quot;presence&quot;</span>,
   <span class="st">&quot;to&quot;</span> : <span class="st">&quot;ox://marens@1337&quot;</span>,
   <span class="st">&quot;type&quot;</span> : <span class="st">&quot;subscribe&quot;</span>,
-  <span class="st">&quot;data&quot;</span> : {
-    <span class="st">&quot;message&quot;</span> : <span class="st">&quot;Hello marens, please let me subscribe to your presence, WBR., Mr. X&quot;</span>
-  }
+  <span class="st">&quot;payloads&quot;</span> : [
+    {<span class="st">&quot;element&quot;</span> : <span class="st">&quot;message&quot;</span>, <span class="st">&quot;data&quot;</span> : <span class="st">&quot;Hello marens, please let me subscribe to your presence, WBR., Mr. X&quot;</span>}
+  ]
 }</code></pre>
 <h2 id="subscribed-response">Subscribed Response</h2>
-<p>To accept a former subscription request from marens@1337. Optional key: message</p>
+<p>To accept a former subscription request from marens@1337. Optionals keys/elements: message</p>
 <pre class="sourceCode javascript"><code class="sourceCode javascript">{
   <span class="st">&quot;session&quot;</span> : <span class="st">&quot;$session&quot;</span>,
   <span class="st">&quot;element&quot;</span> : <span class="st">&quot;presence&quot;</span>,
   <span class="st">&quot;to&quot;</span> : <span class="st">&quot;ox://mrx@1337&quot;</span>,
   <span class="st">&quot;type&quot;</span> : <span class="st">&quot;subscribed&quot;</span>,
-  <span class="st">&quot;data&quot;</span> : {
-    <span class="st">&quot;message&quot;</span> : <span class="st">&quot;Hello Mr. X!&quot;</span>
-  }
+  <span class="st">&quot;payloads&quot;</span> : [
+    {<span class="st">&quot;element&quot;</span> : <span class="st">&quot;message&quot;</span>, <span class="st">&quot;data&quot;</span> :  <span class="st">&quot;Hello Mr. X!&quot;</span>}
+  ]
 }</code></pre>
 <h2 id="unsubscribed-presence-message">UnSubscribed Presence Message</h2>
-<p>To refuse a former presence subscription request or to cancel an already granted presence subscription. Optional key: message</p>
+<p>To refuse a former presence subscription request or to cancel an already granted presence subscription. Optionals keys/elements: message</p>
 <pre class="sourceCode javascript"><code class="sourceCode javascript">{
   <span class="st">&quot;session&quot;</span> : <span class="st">&quot;$session&quot;</span>,
   <span class="st">&quot;element&quot;</span> : <span class="st">&quot;presence&quot;</span>,
   <span class="st">&quot;to&quot;</span> : <span class="st">&quot;ox://mrx@1337&quot;</span>,
   <span class="st">&quot;type&quot;</span> : <span class="st">&quot;unsubscribed&quot;</span>,
-  <span class="st">&quot;data&quot;</span> : {
-    <span class="st">&quot;message&quot;</span> : <span class="st">&quot;Bye Mr. X!&quot;</span>
-  }
+  <span class="st">&quot;payloads&quot;</span> : [
+    {<span class="st">&quot;element&quot;</span> : <span class="st">&quot;message&quot;</span>, <span class="st">&quot;data&quot;</span> : <span class="st">&quot;Bye Mr. X!&quot;</span>}
+  ]
 }</code></pre>
 <h2 id="unsubscribe-request">UnSubscribe Request</h2>
 <p>If you no longer want to be informed about the presence status of another entity.</p>
