@@ -64,6 +64,7 @@ import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.Mail;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
+import com.openexchange.ajax.requesthandler.AJAXRequestDataTools;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.requesthandler.Converter;
 import com.openexchange.ajax.requesthandler.ResultConverter;
@@ -215,6 +216,7 @@ public final class MailConverter implements ResultConverter, MailActionConstants
         /*
          * Start response
          */
+        final boolean writeThreadAsObjects = AJAXRequestDataTools.parseBoolParameter("konfetti", requestData);
         final boolean containsMultipleFolders = containsMultipleFolders(structure, new HashSet<String>(2));
         jsonWriter.array();
         try {
@@ -223,7 +225,7 @@ public final class MailConverter implements ResultConverter, MailActionConstants
             for (final List<MailMessage> mails : structure.getMails()) {
                 if (mails != null && !mails.isEmpty()) {
                     final JSONObject jo = new JSONObject();
-                    writeThreadSortedMail(mails, jo, writers, headerWriters, containsMultipleFolders, userId, contextId);
+                    writeThreadSortedMail(mails, jo, writers, headerWriters, containsMultipleFolders, writeThreadAsObjects, userId, contextId);
                     jsonWriter.value(jo);
                 }
             }
@@ -277,7 +279,7 @@ public final class MailConverter implements ResultConverter, MailActionConstants
     private static final MailFieldWriter[] WRITER_IDS = MessageWriter.getMailFieldWriter(new MailListField[] {
         MailListField.ID, MailListField.FOLDER_ID });
 
-    private void writeThreadSortedMail(final List<MailMessage> mails, final JSONObject jMail, final MailFieldWriter[] writers, final MailFieldWriter[] headerWriters, final boolean containsMultipleFolders, final int userId, final int contextId) throws OXException, JSONException {
+    private void writeThreadSortedMail(final List<MailMessage> mails, final JSONObject jMail, final MailFieldWriter[] writers, final MailFieldWriter[] headerWriters, final boolean containsMultipleFolders, final boolean writeThreadAsObjects, final int userId, final int contextId) throws OXException, JSONException {
         final MailMessage mail = mails.get(0);
         int accountID = mail.getAccountId();
         for (int j = 0; j < writers.length; j++) {
@@ -291,13 +293,10 @@ public final class MailConverter implements ResultConverter, MailActionConstants
         int unreadCount = 0;
         // Add child nodes
         final JSONArray jChildMessages = new JSONArray();
-        if (writeThreadAsObjects()) {
+        if (writeThreadAsObjects) {
             for (final MailMessage child : mails) {
                 final JSONObject jChild = new JSONObject();
                 accountID = child.getAccountId();
-                /*-
-                 * TODO: Uncomment to write all fields
-                 *
                 for (int j = 0; j < writers.length; j++) {
                     writers[j].writeField(jChild, child, 0, true, accountID, userId, contextId);
                 }
@@ -306,10 +305,13 @@ public final class MailConverter implements ResultConverter, MailActionConstants
                         headerWriters[j].writeField(jChild, child, 0, true, accountID, userId, contextId);
                     }
                 }
-                 */
+                /*-
+                 * 
                 for (final MailFieldWriter w : WRITER_IDS) {
                     w.writeField(jChild, child, 0, true, accountID, userId, contextId);
                 }
+                 * 
+                 */
                 jChildMessages.put(jChild);
                 /*
                  * Count unread messages in this thread structure
