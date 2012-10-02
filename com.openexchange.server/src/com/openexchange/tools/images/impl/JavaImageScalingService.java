@@ -60,6 +60,7 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Locale;
 import javax.imageio.ImageIO;
 import org.apache.commons.logging.Log;
 import com.drew.imaging.ImageMetadataReader;
@@ -98,7 +99,15 @@ public class JavaImageScalingService implements ImageScalingService {
 
     @Override
     public InputStream scale(InputStream pictureData, int maxWidth, int maxHeight, ScaleType scaleType) throws IOException {
-        BufferedImage image = ImageIO.read(pictureData);
+        if (null == pictureData) {
+            throw new IOException("pictureData == null!");
+        }
+        final BufferedImage image;
+        try {
+            image = ImageIO.read(pictureData);
+        } finally {
+            Streams.close(pictureData);
+        }
 
         DimensionConstrain constrain;
         switch (scaleType) {
@@ -128,16 +137,18 @@ public class JavaImageScalingService implements ImageScalingService {
     @Override
     public InputStream rotateAccordingExif(InputStream pictureData, String contentType) throws IOException, OXException {
         String fileType;
-        if (contentType.startsWith(CT_JPEG)) {
-            fileType = "jpeg";
-        } else if (contentType.startsWith(CT_JPG)) {
-            fileType = "jpg";
-        } else if (contentType.startsWith(CT_TIFF)) {
-            fileType = "tiff";
-        } else {
-            return pictureData;
+        {
+            final String lcct = null == contentType ? "" : contentType.toLowerCase(Locale.ENGLISH);
+            if (lcct.startsWith(CT_JPEG)) {
+                fileType = "jpeg";
+            } else if (lcct.startsWith(CT_JPG)) {
+                fileType = "jpg";
+            } else if (lcct.startsWith(CT_TIFF)) {
+                fileType = "tiff";
+            } else {
+                return pictureData;
+            }
         }
-
         if (null == pictureData) {
             return pictureData;
         }

@@ -278,7 +278,8 @@ public class FileResponseRenderer implements ResponseRenderer {
             /*
              * Scale to new input stream
              */
-            final InputStream scaled = scaler.scale(file.getStream(), width, height, ScaleType.getType(request.getParameter("scaleType")));
+            final InputStream input = file.getStream();
+            final InputStream scaled = null == input ? null : scaler.scale(input, width, height, ScaleType.getType(request.getParameter("scaleType")));
             return new FileHolder(scaled, -1, "image/png", "");
         } finally {
             Streams.close(file);
