@@ -49,8 +49,8 @@
 
 package com.openexchange.log;
 
-import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import org.apache.commons.logging.Log;
 
 /**
@@ -146,7 +146,7 @@ public final class Props {
 	 * @return The shallow copy
 	 */
 	public Props copy() {
-		return new Props(new HashMap<String, Object>(map));
+		return new Props(new ConcurrentHashMap<String, Object>(map));
 	}
 
 }
