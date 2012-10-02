@@ -60,11 +60,8 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-
 import javax.imageio.ImageIO;
-
 import org.apache.commons.logging.Log;
-
 import com.drew.imaging.ImageMetadataReader;
 import com.drew.imaging.ImageProcessingException;
 import com.drew.metadata.Directory;
@@ -125,7 +122,7 @@ public class JavaImageScalingService implements ImageScalingService {
             throw new IOException("Couldn't scale image");
         }
 
-        return new ByteArrayInputStream(baos.toByteArray());
+        return Streams.newByteArrayInputStream(baos.toByteArray());
     }
 
     @Override
