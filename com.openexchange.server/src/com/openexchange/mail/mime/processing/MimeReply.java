@@ -725,7 +725,7 @@ public final class MimeReply {
             /*
              * Get any text content
              */
-            found = getTextContent(false, multipartPart, count, partContentType, pc);
+            found = getTextContent(true, multipartPart, count, partContentType, pc);
         }
         /*
          * Look for enclosed messages in any case

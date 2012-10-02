@@ -1,3 +1,7 @@
+* 2012-10-02 - thorben.betten@open-xchange.com
+
+ - Fix for bug 23155: Added option to disable manual umlauts-filtering
+
 * 2012-10-01 - francisco.laguna@open-xchange.com
 
  - Fix for bug 23134: Ported CVS fixes
@@ -7,6 +11,8 @@
 
  - Fix for bug 23146: Log if unsupported charset is detected
  - Fix for bug 23148: Safe sanitizing of Content-Type header
+ - Fix for bug 23149: Introduced limitation for number of accepted CSS block segments
+ - Fix for bug 23084: Grab HTML content if only text part available
 
 * 2012-09-29 - thorben.betten@open-xchange.com
 

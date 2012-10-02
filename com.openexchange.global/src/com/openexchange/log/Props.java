@@ -119,9 +119,16 @@ public final class Props {
      * 
      * @param name The property name
      * @param value The property value
+     * @return <code>true</code> if there was already a mapping for specified property name (that is now overwritten); otherwise <code>false</code>
      */
-    public <V> void put(final String key, final V value) {
-        map.put(key, value);
+    public <V> boolean put(final String name, final V value) {
+        if (null == name) {
+            return false;
+        }
+        if (null == value) {
+            return (null != map.remove(name));
+        }
+        return (null != map.put(name, value));
     }
 
     /**
