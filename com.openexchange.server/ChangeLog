@@ -1,5 +1,5 @@
 * 2012-10-02 - francisco.laguna@open-xchange.com
-
+ - Fix for bug 23130 & 23131: Lack of defaults led to RTE. 
  - Fix for bug 23065: Ported MSN subscriber to new version 5 API.
 
 * 2012-10-02 - thorben.betten@open-xchange.com
