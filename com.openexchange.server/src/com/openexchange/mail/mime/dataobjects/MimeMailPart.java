@@ -181,6 +181,13 @@ public final class MimeMailPart extends MailPart implements MimeRawSource, MimeC
     private boolean handleMissingStartBoundary;
 
     /**
+     * Constructor.
+     */
+    public MimeMailPart() {
+        super();
+    }
+
+    /**
      * Constructor - Only applies specified part, but does not set any attributes.
      */
     public MimeMailPart(final Part part) {
