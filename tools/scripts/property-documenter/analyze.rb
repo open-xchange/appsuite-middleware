@@ -1,4 +1,5 @@
 require 'pathname'
+require 'cgi'
 
 excludes = [/\/open-xchange-development\//, /\/tmp\//, /\/adminTmp\//, /\/build.properties$/, /\/buildservice.properties$/, /\/open[-e]xchange-test\//]
 class Prop
@@ -102,7 +103,7 @@ rev_id = now.to_i
 
 properties.each do |filename, props|
   pagecontent = "\n{|\n!Key\n!Default value\n!Comment\n"
-  props.each {|prop| pagecontent += "|-\n|#{prop.key}\n|#{prop.value}\n|#{prop.comment}\n"}
+  props.each {|prop| pagecontent += "|-\n|#{CGI::escapeHTML(prop.key)}\n|#{CGI::escapeHTML(prop.value)}\n|#{CGI::escapeHTML(prop.comment)}\n"}
   pagecontent += "|}\n"
   title = filename
   
