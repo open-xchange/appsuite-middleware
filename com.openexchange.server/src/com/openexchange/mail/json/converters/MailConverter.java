@@ -295,9 +295,6 @@ public final class MailConverter implements ResultConverter, MailActionConstants
             for (final MailMessage child : mails) {
                 final JSONObject jChild = new JSONObject();
                 accountID = child.getAccountId();
-                /*-
-                 * TODO: Uncomment to write all fields
-                 *
                 for (int j = 0; j < writers.length; j++) {
                     writers[j].writeField(jChild, child, 0, true, accountID, userId, contextId);
                 }
@@ -306,10 +303,13 @@ public final class MailConverter implements ResultConverter, MailActionConstants
                         headerWriters[j].writeField(jChild, child, 0, true, accountID, userId, contextId);
                     }
                 }
-                 */
+                /*-
+                 * 
                 for (final MailFieldWriter w : WRITER_IDS) {
                     w.writeField(jChild, child, 0, true, accountID, userId, contextId);
                 }
+                 * 
+                 */
                 jChildMessages.put(jChild);
                 /*
                  * Count unread messages in this thread structure
