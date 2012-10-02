@@ -49,6 +49,7 @@
 
 package com.openexchange.realtime.xmpp.internal;
 
+import java.util.UUID;
 import org.jboss.netty.channel.ChannelHandlerContext;
 import org.jboss.netty.channel.ChannelStateEvent;
 import org.jboss.netty.channel.ExceptionEvent;
@@ -85,6 +86,8 @@ public class XMPPChatDelivery extends SimpleChannelUpstreamHandler implements XM
     private ServerSession session;
 
     private ID id;
+    
+    private UUID streamId;
 
     public XMPPChatDelivery(XMPPChannel channel, XMPPHandler handler) {
         this.channel = channel;
@@ -108,12 +111,20 @@ public class XMPPChatDelivery extends SimpleChannelUpstreamHandler implements XM
         String message = (String) e.getMessage();
         XMPPContainer container = new XMPPContainer(message.trim());
         
-        if (session == null) {
+        if (streamId == null) {
+            negotiateStreamDetails(container);
+        } else if (session == null) {
             doLogin(container);
         } else {
             container.setSession(session);
             handler.handle(container);
         }
+    }
+
+    /**
+     * @param container
+     */
+    private void negotiateStreamDetails(XMPPContainer container) {
     }
 
     @Override
@@ -122,7 +133,9 @@ public class XMPPChatDelivery extends SimpleChannelUpstreamHandler implements XM
     }
 
     private void doLogin(XMPPContainer container) throws OXException {
-        Match match = JOOX.$(container.getXml());
+        String xml = container.getXml();
+        System.out.println(xml);
+        Match match = JOOX.$(xml);
 
         if (!match.tag().equals("auth")) {
             // TODO: Throw error
