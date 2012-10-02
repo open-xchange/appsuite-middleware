@@ -83,7 +83,7 @@ public class XMPPChatExtension implements XMPPExtension {
 
     @Override
     public boolean canHandle(Stanza stanza) {
-        return Message.class.isInstance(stanza) && canHandleNamespace(stanza.getNamespace()) && ((Message) stanza).getType() == Message.Type.chat;
+        return Message.class.isInstance(stanza) && ((Message) stanza).getType() == Message.Type.chat;
     }
 
     @Override
@@ -108,10 +108,6 @@ public class XMPPChatExtension implements XMPPExtension {
         return new HashSet<String>(Arrays.asList(""));
     }
 
-    private boolean canHandleNamespace(String namespace) {
-        return namespace != null && namespace.trim().equals("chat");
-    }
-
     private void transform(Message message, XMPPMessage xmpp, ServerSession session) throws OXException {
         ID from = message.getFrom();
         xmpp.setFrom(new JID(from.getUser(), from.getContext(), from.getResource()));
@@ -130,8 +126,6 @@ public class XMPPChatExtension implements XMPPExtension {
         message.setTo(new ID(null, to.getUser(), to.getDomain(), to.getResource()));
 
         message.setPayload(xmpp.getPayload().to("chatMessage", session));
-
-        message.setNamespace("chat");
     }
 
 }
