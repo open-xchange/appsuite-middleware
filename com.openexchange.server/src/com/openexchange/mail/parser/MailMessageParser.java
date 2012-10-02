@@ -331,9 +331,9 @@ public final class MailMessageParser {
         } finally {
             if (logPropsEnabled) {
                 final Props properties = LogProperties.getLogProperties();
-                properties.put(MailActionConstants.LOG_PROPERTY_FULL_NAME, null);
-                properties.put(MailActionConstants.LOG_PROPERTY_MAIL_ID, null);
-                properties.put(MailActionConstants.LOG_PROPERTY_FULL_NAME, null);
+                properties.remove(MailActionConstants.LOG_PROPERTY_FULL_NAME);
+                properties.remove(MailActionConstants.LOG_PROPERTY_MAIL_ID);
+                properties.remove(MailActionConstants.LOG_PROPERTY_FULL_NAME);
             }
         }
         handler.handleMessageEnd(mail);
