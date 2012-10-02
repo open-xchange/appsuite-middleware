@@ -1,3 +1,7 @@
+* 2012-10-02 - thorben.betten@open-xchange.com
+
+ - Fix for bug 23155: Added option to disable manual umlauts-filtering
+
 * 2012-10-01 - francisco.laguna@open-xchange.com
 
  - Fix for bug 23134: Ported CVS fixes
