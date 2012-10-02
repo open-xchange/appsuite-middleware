@@ -272,7 +272,7 @@ public final class CSSMatcher {
                 i = maxCssBlockCount;
                 if (null == i) {
                     final ConfigurationService service = ServiceRegistry.getInstance().getService(ConfigurationService.class);
-                    i = Integer.valueOf(null == service ? 200 : service.getIntProperty("com.openexchange.html.maxCssBlockCount", 200));
+                    i = Integer.valueOf(null == service ? 500 : service.getIntProperty("com.openexchange.html.maxCssBlockCount", 500));
                     maxCssBlockCount = i;
                 }
             }
