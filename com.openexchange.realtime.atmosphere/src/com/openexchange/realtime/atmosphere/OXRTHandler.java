@@ -50,7 +50,9 @@
 package com.openexchange.realtime.atmosphere;
 
 import com.openexchange.exception.OXException;
+import com.openexchange.realtime.atmosphere.impl.RTAtmosphereHandler;
 import com.openexchange.realtime.packet.Stanza;
+import com.openexchange.realtime.util.ElementPath;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -71,7 +73,7 @@ public interface OXRTHandler {
      * Get the complete path to an element in a namespace that this OXRTHandler is able to process.
      * @return the elementPath of elements this OXRTHandler is able to process.
      */
-	public String getNamespace();
+	public ElementPath getElementPath();
 	
 	/**
 	 * Handle an incoming {@link Stanza}.

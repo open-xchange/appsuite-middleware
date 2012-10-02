@@ -51,9 +51,12 @@ package com.openexchange.realtime.atmosphere.impl;
 
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import com.openexchange.realtime.atmosphere.OXRTHandler;
+import com.openexchange.realtime.util.ElementPath;
 
 /**
  * {@link HandlerLibrary} - Tracks registered {@link OXRTHandler handlers} and
@@ -72,17 +75,11 @@ public class HandlerLibrary {
     /**
      * The collection for registered {@link OXRTHandler handlers}.
      */
-    private final List<OXRTHandler> handlers;
-    
-    private final List<String> namespaces;
+    private final Map<ElementPath, OXRTHandler> handlers;
 
-    /**
-     * Initializes a new {@link HandlerLibrary}.
-     */
     public HandlerLibrary() {
         super();
-        handlers = new CopyOnWriteArrayList<OXRTHandler>();
-        namespaces = new CopyOnWriteArrayList<String>();
+        handlers = new ConcurrentHashMap<ElementPath, OXRTHandler>();
     }
 
     /**
@@ -91,13 +88,9 @@ public class HandlerLibrary {
      * @param stanzaClass The Stanza subclass we want to transform.
      * @return The appropriate handler or <code>null</code> if none is applicable.
      */
-    public OXRTHandler getHandlerFor(String namespace) {
-        for (OXRTHandler handler : handlers) {
-            if (handler.getNamespace().equals(namespace)) {
-                return handler;
-            }
-        }
-        return null;
+    public OXRTHandler getHandlerFor(String namespace, String element) {
+        ElementPath elementPath = new ElementPath(namespace, element);
+        return handlers.get(elementPath);
     }
 
     /**
@@ -106,10 +99,7 @@ public class HandlerLibrary {
      * @param transformer The handler to add
      */
     public void add(OXRTHandler transformer) {
-        boolean isAdded = handlers.add(transformer);
-        if(isAdded) {
-            namespaces.add(transformer.getNamespace());
-        }
+        handlers.put(transformer.getElementPath(), transformer);
     }
 
     /**
@@ -118,19 +108,16 @@ public class HandlerLibrary {
      * @param transformer The handler to remove
      */
     public void remove(OXRTHandler transformer) {
-        handlers.remove(transformer);
-        boolean isRemoved = handlers.remove(transformer);
-        if(isRemoved) {
-            namespaces.remove(transformer.getNamespace());
-        }
+        handlers.remove(transformer.getElementPath());
     }
-    
+
     /**
      * Get the collected namespaces the registered OXRTHandlers are able to transform.
+     * 
      * @return the collected namespaces the registered OXRTHandlers are able to transform.
      */
-    public Set<String> getManageableNamespaces() {
-        return new HashSet<String>(namespaces);
+    public Set<ElementPath> getManageableNamespaces() {
+        return new HashSet<ElementPath>(handlers.keySet());
     }
-    
+
 }

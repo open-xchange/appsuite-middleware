@@ -53,6 +53,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.realtime.MessageDispatcher;
 import com.openexchange.realtime.packet.Payload;
 import com.openexchange.realtime.packet.Stanza;
+import com.openexchange.realtime.util.ElementPath;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.session.ServerSession;
 
@@ -67,7 +68,7 @@ public class OXRTConversionHandler implements OXRTHandler {
     public static ServiceLookup services;
 
     private final String format;
-    private final String namespace;
+    private final ElementPath elementPath;
 
     /**
      * Initializes a new {@link OXRTConversionHandler}.
@@ -75,14 +76,14 @@ public class OXRTConversionHandler implements OXRTHandler {
      * @param elementPath the path to an element in a namespace this OXRTConversionHandler can handle
      * @param format the format of POJOs that incoming Stanzas should be converted to
      */
-    public OXRTConversionHandler(String namespace, String format) {
-        this.namespace = namespace;
+    public OXRTConversionHandler(ElementPath elementPath, String format) {
+        this.elementPath = elementPath;
         this.format = format;
     }
 
     @Override
-    public String getNamespace() {
-        return namespace; 
+    public ElementPath getElementPath() {
+        return elementPath; 
     }
 
     @Override

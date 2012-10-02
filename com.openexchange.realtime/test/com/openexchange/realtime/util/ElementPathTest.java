@@ -49,24 +49,34 @@
 
 package com.openexchange.realtime.util;
 
+import static org.junit.Assert.*;
+import org.junit.Test;
+
 
 /**
- * {@link ElementPaths}
+ * {@link ElementPathTest}
  *
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
-//TODO: needs proper rewrite
-public class ElementPaths {
+public class ElementPathTest {
 
-    public static String getPath(String elementPath) {
-        return elementPath.split("#")[0];
+    @Test(expected = IllegalArgumentException.class)
+    public void testBadElementPathString() {
+        new ElementPath(".Element");
+        new ElementPath("path.");
     }
     
-    public static String getElement(String elementPath) {
-        return elementPath.split("#")[1];
+    @Test
+    public void testGoodElementPathString() {
+        String namespace ="path.subPath.subSubPath#FunkyStuff";
+        String element = "Element";
+        ElementPath elementPath = new ElementPath(namespace+"."+element);
+        assertEquals(namespace, elementPath.getNamespace());
+        assertEquals(element, elementPath.getElement());
+        
+        ElementPath defaultNamespace = new ElementPath(element);
+        assertEquals("", defaultNamespace.getNamespace());
+        assertEquals(element, defaultNamespace.getElement());
     }
-    
-    public static String createPath(String path, String element) {
-        return path + "#" + element;
-    }
+
 }

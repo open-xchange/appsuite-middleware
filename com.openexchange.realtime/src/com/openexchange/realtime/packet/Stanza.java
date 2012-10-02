@@ -142,7 +142,7 @@ public abstract class Stanza {
      * @return empty Set or the namespaces of the payloads of this Stanza.
      */
     public Set<String> getNamespaces() {
-        return new HashSet(namespaces);
+        return new HashSet<String>(namespaces);
     }
 
     /**

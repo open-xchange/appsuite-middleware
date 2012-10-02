@@ -553,13 +553,25 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
         return sb.toString();
     }
 
+    /**
+     * 
+     * @param stanza
+     * @param atmosphereState
+     * @throws OXException
+     */
     private void dispatchStanza(Stanza stanza, RTAtmosphereState atmosphereState) throws OXException {
         //TODO:apply transformers to all payloads before dispatching
-        OXRTHandler transformer = library.getHandlerFor(stanza.getClass());
-        if (transformer == null) {
-            throw OXException.general("No transformer for " + stanza);
+        List<Payload> payloads = stanza.getPayloads();
+        for (Payload payload : payloads) {
+            //get Handler for element from namespace and transform element
+            OXRTHandler transformer = library.getHandlerFor(new ElementPath(payload.getNamespace(), payload.getElementName()));
+            if (transformer == null) {
+                throw OXException.general("No transformer for " + stanza);
+            }
+            transformer.incoming(stanza, atmosphereState.session);
         }
-        transformer.incoming(stanza, atmosphereState.session);
+        //when all elements are transformed -> get MessageDispatcher and send transformed Stanza 
+        
     }
 
     /**
