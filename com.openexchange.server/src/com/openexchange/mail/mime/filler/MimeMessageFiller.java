@@ -1601,6 +1601,8 @@ public class MimeMessageFiller {
         return sb.toString();
     }
 
+    private static final String VERSION_NAME = Version.NAME;
+
     /**
      * Processes referenced local images, inserts them as inlined HTML images and adds their binary data to parental instance of <code>
      * {@link Multipart}</code>.
@@ -1727,7 +1729,7 @@ public class MimeMessageFiller {
                      * Replace "src" attribute
                      */
                     String iTag = imageTag.replaceFirst("(?i)src=\"[^\"]*\"", "src=\"cid:" + processLocalImage(imageProvider, iid, appendBodyPart, tmp, mp) + "\"");
-                    iTag = iTag.replaceFirst("(?i)id=\"[^\"]*@" + Version.NAME + "\"", "");
+                    iTag = iTag.replaceFirst("(?i)id=\"[^\"]*@" + VERSION_NAME + "\"", "");
                     m.appendLiteralReplacement(sb, iTag);
                 } else {
                     /*
@@ -1811,7 +1813,7 @@ public class MimeMessageFiller {
             tmp.setLength(0);
             final int atPos = id.indexOf('@');
             tmp.append(PATTERN_DASHES.matcher(atPos < 0 ? id : id.substring(0, atPos)).replaceAll(""));
-            tmp.append('@').append(Version.NAME);
+            tmp.append('@').append(VERSION_NAME);
             cid = tmp.toString();
         }
         if (appendBodyPart) {
