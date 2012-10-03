@@ -1610,7 +1610,7 @@ public class MimeMessageFiller {
      * @param htmlContent The HTML content whose &lt;img&gt; tags must be replaced with real content IDs
      * @param mp The parental instance of <code>{@link Multipart}</code>
      * @param msgFiller The message filler
-     * @return the replaced html content
+     * @return The replaced HTML content
      * @throws MessagingException If appending as body part fails
      * @throws OXException If a mail error occurs
      */
