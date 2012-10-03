@@ -1585,8 +1585,21 @@ public class MimeMessageFiller {
     }
 
     private static final Pattern PATTERN_SRC = Pattern.compile("<img[^>]*?src=\"([^\"]+)\"[^>]*/?>", Pattern.CASE_INSENSITIVE);
-
     private static final Pattern PATTERN_AMP = Pattern.compile(Pattern.quote("&amp;"));
+
+    private static String blankSrc(final String imageTag) {
+        if (isEmpty(imageTag)) {
+            return imageTag;
+        }
+        final Matcher srcMatcher = PATTERN_SRC.matcher(imageTag);
+        if (!srcMatcher.find()) {
+            return imageTag;
+        }
+        final StringBuffer sb = new StringBuffer(imageTag.length());
+        srcMatcher.appendReplacement(sb, "");
+        srcMatcher.appendTail(sb);
+        return sb.toString();
+    }
 
     /**
      * Processes referenced local images, inserts them as inlined html images and adds their binary data to parental instance of <code>
@@ -1600,6 +1613,9 @@ public class MimeMessageFiller {
      * @throws OXException If a mail error occurs
      */
     protected final static String processReferencedLocalImages(final String htmlContent, final Multipart mp, final MimeMessageFiller msgFiller) throws MessagingException, OXException {
+        if (isEmpty(htmlContent)) {
+            return htmlContent;
+        }
         final ImageMatcher m = ImageMatcher.matcher(htmlContent);
         final StringBuffer sb = new StringBuffer(htmlContent.length());
         if (m.find()) {
@@ -1628,26 +1644,30 @@ public class MimeMessageFiller {
                              * Anyway, replace image tag
                              */
                             tmp.setLength(0);
-                            m.appendLiteralReplacement(sb, imageTag);
+                            m.appendLiteralReplacement(sb, blankSrc(imageTag));
                             continue;
                         }
                     } else {
                         final ImageLocation imageLocation;
+                        String blankImageTag = null;
                         {
-                            final String match = imageTag;
-                            final Matcher srcMatcher = PATTERN_SRC.matcher(match);
+                            final Matcher srcMatcher = PATTERN_SRC.matcher(imageTag);
                             if (srcMatcher.find()) {
                                 ImageLocation il;
                                 try {
                                     il = ImageUtility.parseImageLocationFrom(PATTERN_AMP.matcher(srcMatcher.group(1)).replaceAll("&"));
                                 } catch (final IllegalArgumentException e) {
+                                    final StringBuffer bblankImageTag = new StringBuffer(imageTag.length());
+                                    srcMatcher.appendReplacement(bblankImageTag, "");
+                                    srcMatcher.appendTail(bblankImageTag);
+                                    blankImageTag = bblankImageTag.toString();
                                     il = null;
                                 }
                                 imageLocation = il;
                             } else {
                                 ImageLocation il;
                                 try {
-                                    il = ImageUtility.parseImageLocationFrom(match);
+                                    il = ImageUtility.parseImageLocationFrom(imageTag);
                                 } catch (final IllegalArgumentException e) {
                                     il = null;
                                 }
@@ -1663,7 +1683,7 @@ public class MimeMessageFiller {
                              * Anyway, replace image tag
                              */
                             tmp.setLength(0);
-                            m.appendLiteralReplacement(sb, imageTag);
+                            m.appendLiteralReplacement(sb, null == blankImageTag ? blankSrc(imageTag) : blankImageTag);
                             continue;
                         }
                         final ImageDataSource dataSource =
@@ -1678,7 +1698,7 @@ public class MimeMessageFiller {
                              * Anyway, replace image tag
                              */
                             tmp.setLength(0);
-                            m.appendLiteralReplacement(sb, imageTag);
+                            m.appendLiteralReplacement(sb, blankSrc(imageTag));
                             continue;
                         }
                         try {
@@ -1946,5 +1966,17 @@ public class MimeMessageFiller {
             return fileName;
         }
     } // End of ImageDataImageProvider
+
+    private static boolean isEmpty(final String string) {
+        if (null == string) {
+            return true;
+        }
+        final int len = string.length();
+        boolean isWhitespace = true;
+        for (int i = 0; isWhitespace && i < len; i++) {
+            isWhitespace = Character.isWhitespace(string.charAt(i));
+        }
+        return isWhitespace;
+    }
 
 }
