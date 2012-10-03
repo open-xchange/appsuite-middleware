@@ -1175,7 +1175,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                                  */
                                 final String subject = mails[i].getSubject();
                                 final String ext = ".eml";
-                                final String name = (isEmpty(subject) ? "mail" + (i+1) : subject) + ext;
+                                final String name = (isEmpty(subject) ? "mail" + (i+1) : saneForFileName(subject)) + ext;
                                 ZipArchiveEntry entry;
                                 int num = 1;
                                 while (true) {
@@ -1252,6 +1252,38 @@ final class MailServletInterfaceImpl extends MailServletInterface {
             isWhitespace = Character.isWhitespace(string.charAt(i));
         }
         return isWhitespace;
+    }
+
+    private static String saneForFileName(final String fileName) {
+        if (isEmpty(fileName)) {
+            return fileName;
+        }
+        final int len = fileName.length();
+        final StringBuilder sb = new StringBuilder(len);
+        char prev = '\0';
+        for (int i = 0; i < len; i++) {
+            final char c = fileName.charAt(i);
+            if (Character.isWhitespace(c)) {
+                if (prev != '_') {
+                    prev = '_';
+                    sb.append(prev);
+                }
+            } else if ('/' == c) {
+                if (prev != '_') {
+                    prev = '_';
+                    sb.append(prev);
+                }
+            } else if ('\\' == c) {
+                if (prev != '_') {
+                    prev = '_';
+                    sb.append(prev);
+                }
+            } else {
+                prev = '\0';
+                sb.append(c);
+            }
+        }
+        return sb.toString();
     }
 
     @Override
