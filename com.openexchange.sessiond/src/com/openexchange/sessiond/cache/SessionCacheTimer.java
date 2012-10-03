@@ -63,7 +63,7 @@ public class SessionCacheTimer implements Runnable {
 
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(SessionCacheTimer.class));
 
-    private static ScheduledTimerTask sessionCacheTimer;
+    private static volatile ScheduledTimerTask sessionCacheTimer;
 
     public SessionCacheTimer() {
         super();
@@ -83,9 +83,10 @@ public class SessionCacheTimer implements Runnable {
     }
 
     public static void removeTimerService() {
+        final ScheduledTimerTask sessionCacheTimer = SessionCacheTimer.sessionCacheTimer;
         if (null != sessionCacheTimer) {
             sessionCacheTimer.cancel(false);
-            sessionCacheTimer = null;
+            SessionCacheTimer.sessionCacheTimer = null;
         }
     }
 }

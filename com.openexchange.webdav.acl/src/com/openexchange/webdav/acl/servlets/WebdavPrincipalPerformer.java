@@ -103,7 +103,7 @@ public class WebdavPrincipalPerformer implements SessionHolder{
 
     private static WebdavPrincipalPerformer INSTANCE = null;
 
-    private static ServiceLookup services;
+    private static volatile ServiceLookup services;
 
     public static void setServices(final ServiceLookup lookup){
         services = lookup;

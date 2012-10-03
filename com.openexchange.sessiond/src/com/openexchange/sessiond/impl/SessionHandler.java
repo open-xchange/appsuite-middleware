@@ -92,13 +92,13 @@ public final class SessionHandler {
         }
     };
 
-    private static SessionIdGenerator sessionIdGenerator;
+    private static volatile SessionIdGenerator sessionIdGenerator;
 
-    static SessiondConfigInterface config;
+    static volatile SessiondConfigInterface config;
 
     protected static final AtomicReference<SessionData> sessionDataRef = new AtomicReference<SessionData>();
 
-    private static boolean noLimit;
+    private static volatile boolean noLimit;
 
     private static final AtomicBoolean initialized = new AtomicBoolean();
 
@@ -124,8 +124,8 @@ public final class SessionHandler {
      * 
      * @param newConfig The appropriate configuration
      */
-    public static void init(final SessiondConfigInterface newConfig) {
-        SessionHandler.config = newConfig;
+    public static void init(final SessiondConfigInterface config) {
+        SessionHandler.config = config;
         final SessionData sessionData = new SessionData(
             config.getNumberOfSessionContainers(),
             config.getMaxSessions(),
@@ -139,7 +139,7 @@ public final class SessionHandler {
             } catch (final OXException exc) {
                 LOG.error("create instance of SessionIdGenerator", exc);
             }
-            noLimit = (newConfig.getMaxSessions() == 0);
+            noLimit = (config.getMaxSessions() == 0);
         }
     }
 
@@ -302,6 +302,7 @@ public final class SessionHandler {
         checkMaxSessPerUser(userId, contextId);
         checkMaxSessPerClient(client, userId, contextId);
         checkAuthId(login, authId);
+        final SessionIdGenerator sessionIdGenerator = SessionHandler.sessionIdGenerator;
         final String sessionId = sessionIdGenerator.createSessionId(loginName, clientHost);
         final SessionImpl session = new SessionImpl(userId, loginName, password, contextId, sessionId, sessionIdGenerator.createSecretId(
             loginName,

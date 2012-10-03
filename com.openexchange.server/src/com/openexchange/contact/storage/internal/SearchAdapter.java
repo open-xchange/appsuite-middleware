@@ -334,7 +334,7 @@ public class SearchAdapter {
         }
     }
    
-    private static CompositeSearchTerm HAS_EMAIL_TERM;
+    private static final CompositeSearchTerm HAS_EMAIL_TERM;
     static {
         ContactField[] emailFields = { ContactField.EMAIL1, ContactField.EMAIL2, ContactField.EMAIL3 };
         CompositeSearchTerm andTerm = new CompositeSearchTerm(CompositeOperation.AND);
@@ -348,10 +348,10 @@ public class SearchAdapter {
         SingleSearchTerm distributionListTerm = new SingleSearchTerm(SingleOperation.GREATER_THAN);
         distributionListTerm.addOperand(new ContactFieldOperand(ContactField.NUMBER_OF_DISTRIBUTIONLIST));
         distributionListTerm.addOperand(new ConstantOperand<Integer>(0));
-        HAS_EMAIL_TERM = new CompositeSearchTerm(CompositeOperation.OR);
-        HAS_EMAIL_TERM.addSearchTerm(notTerm);
-        HAS_EMAIL_TERM.addSearchTerm(distributionListTerm);
-        
+        final CompositeSearchTerm hasEmailTerm = new CompositeSearchTerm(CompositeOperation.OR);
+        hasEmailTerm.addSearchTerm(notTerm);
+        hasEmailTerm.addSearchTerm(distributionListTerm);
+        HAS_EMAIL_TERM = hasEmailTerm;
     }
     
     private static SingleSearchTerm getSearchTerm(ContactField field, String pattern, boolean prependWildcard, 

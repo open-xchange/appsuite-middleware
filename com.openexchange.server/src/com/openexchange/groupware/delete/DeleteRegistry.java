@@ -92,7 +92,7 @@ public final class DeleteRegistry {
     /**
      * The singleton instance.
      */
-    private static DeleteRegistry instance;
+    private static volatile DeleteRegistry instance;
 
     /**
      * Initializes singleton instance.

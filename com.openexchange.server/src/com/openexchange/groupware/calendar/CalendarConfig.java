@@ -71,15 +71,15 @@ public class CalendarConfig extends AbstractConfig implements Initialization {
 
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(CalendarConfig.class));
 
-    private static boolean solo_reminder_trigger_event = true;
-    private static boolean check_and_remove_past_reminders = true;
-    private static int max_operations_in_recurrence_calculations;
+    private static volatile boolean solo_reminder_trigger_event = true;
+    private static volatile boolean check_and_remove_past_reminders = true;
+    private static volatile int max_operations_in_recurrence_calculations;
 
-    private static boolean CACHED_ITERATOR_FAST_FETCH = true;
+    private static volatile boolean CACHED_ITERATOR_FAST_FETCH = true;
 
-    private static boolean seriesconflictlimit = true;
+    private static volatile boolean seriesconflictlimit = true;
 
-    private static boolean undefinedstatusconflict = true;
+    private static volatile boolean undefinedstatusconflict = true;
 
     public static boolean isCACHED_ITERATOR_FAST_FETCH() {
         return CACHED_ITERATOR_FAST_FETCH;

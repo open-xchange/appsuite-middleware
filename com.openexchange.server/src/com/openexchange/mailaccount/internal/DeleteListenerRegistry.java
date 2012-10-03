@@ -63,7 +63,7 @@ import com.openexchange.mailaccount.MailAccountDeleteListener;
  */
 public final class DeleteListenerRegistry {
 
-    private static DeleteListenerRegistry instance;
+    private static volatile DeleteListenerRegistry instance;
 
     /**
      * Initializes the registry instance.

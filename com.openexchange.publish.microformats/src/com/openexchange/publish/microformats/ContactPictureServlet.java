@@ -102,7 +102,7 @@ public class ContactPictureServlet extends OnlinePublicationServlet {
         contactPublisher = service;
     }
 
-    private static ContactService contacts;
+    private static volatile ContactService contacts;
 
     public static void setContactService(final ContactService service) {
         contacts = service;
