@@ -49,6 +49,7 @@
 
 package com.openexchange.realtime.xmpp.internal;
 
+import java.util.concurrent.atomic.AtomicReference;
 import com.openexchange.exception.OXException;
 import com.openexchange.realtime.MessageDispatcher;
 import com.openexchange.realtime.packet.ID;
@@ -69,7 +70,10 @@ import com.openexchange.tools.session.ServerSession;
  */
 public class XMPPChatExtension implements XMPPExtension {
 
-    public static ServiceLookup services;
+    /**
+     * The {@code ServiceLookup} reference.
+     */
+    public static final AtomicReference<ServiceLookup> SERVICES_REFERENCE = new AtomicReference<ServiceLookup>();
 
     @Override
     public String getServiceName() {
@@ -95,7 +99,7 @@ public class XMPPChatExtension implements XMPPExtension {
         Message message = new Message();
         message.setType(Message.Type.chat);
         transform((XMPPMessage) xmpp, message, session);
-        services.getService(MessageDispatcher.class).send(message, xmpp.getSession());
+        SERVICES_REFERENCE.get().getService(MessageDispatcher.class).send(message, xmpp.getSession());
     }
 
     private boolean canHandleNamespace(String namespace) {
