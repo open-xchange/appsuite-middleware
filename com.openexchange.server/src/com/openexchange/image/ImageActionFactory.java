@@ -102,7 +102,7 @@ public class ImageActionFactory implements AJAXActionServiceFactory {
         final String ALIAS = DefaultDispatcherPrefixService.getInstance().getPrefix() + ALIAS_APPENDIX;
         String s = url;
         final int pos = s.indexOf(ALIAS);
-        if (pos > 0) {
+        if (pos >= 0) {
             s = s.substring(pos + ALIAS.length());
         }
         for (final Entry<String, String> entry : alias2regName.entrySet()) {
