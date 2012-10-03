@@ -1894,17 +1894,17 @@ public final class CacheFolderStorage implements FolderStorage {
         return new StorageParametersImpl((ServerSession) session);
     }
 
-    private static volatile Integer maxRunningMillis;
-    private static int maxRunningMillis() {
-        Integer i = maxRunningMillis;
+    private static volatile Integer maxWaitMillis;
+    private static int maxWaitMillis() {
+        Integer i = maxWaitMillis;
         if (null == i) {
             synchronized (CacheFolderStorage.class) {
-                i = maxRunningMillis;
+                i = maxWaitMillis;
                 if (null == i) {
                     final ConfigurationService service = CacheServiceRegistry.getServiceRegistry().getService(ConfigurationService.class);
                     final int millis = null == service ? 60000 : service.getIntProperty("AJP_WATCHER_MAX_RUNNING_TIME", 60000);
                     i = Integer.valueOf(millis << 1);
-                    maxRunningMillis = i;
+                    maxWaitMillis = i;
                 }
             }
         }
@@ -1917,7 +1917,7 @@ public final class CacheFolderStorage implements FolderStorage {
         }
         try {
             // true if the lock was acquired and false if the waiting time elapsed before the lock was acquired
-            if (!lock.tryLock(maxRunningMillis(), TimeUnit.MILLISECONDS)) {
+            if (!lock.tryLock(maxWaitMillis(), TimeUnit.MILLISECONDS)) {
                 throw FolderExceptionErrorMessage.TRY_AGAIN.create("The maximum time to wait for the lock is exceeded.");
             }
         } catch (final InterruptedException e) {
