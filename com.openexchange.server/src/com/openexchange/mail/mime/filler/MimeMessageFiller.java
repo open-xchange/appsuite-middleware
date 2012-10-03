@@ -1602,10 +1602,10 @@ public class MimeMessageFiller {
     }
 
     /**
-     * Processes referenced local images, inserts them as inlined html images and adds their binary data to parental instance of <code>
+     * Processes referenced local images, inserts them as inlined HTML images and adds their binary data to parental instance of <code>
      * {@link Multipart}</code>.
      *
-     * @param htmlContent The html content whose &lt;img&gt; tags must be replaced with real content IDs
+     * @param htmlContent The HTML content whose &lt;img&gt; tags must be replaced with real content IDs
      * @param mp The parental instance of <code>{@link Multipart}</code>
      * @param msgFiller The message filler
      * @return the replaced html content
