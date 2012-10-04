@@ -138,6 +138,8 @@ public final class OAuthExceptionMessages implements LocalizableStrings {
 
 	public static final String MISSING_BODY_MSG = "The request sent was missing its body";
 
+	public static final String INVALID_ACCOUNT_MSG = "The account is invalid, please recreate it.";
+
     /**
      * Initializes a new {@link OAuthExceptionMessages}.
      */

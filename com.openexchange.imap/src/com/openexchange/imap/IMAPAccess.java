@@ -338,7 +338,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
     /**
      * The scheduled timer task to clean-up maps.
      */
-    private static ScheduledTimerTask cleanUpTimerTask;
+    private static volatile ScheduledTimerTask cleanUpTimerTask;
 
     /*-
      * Member section
@@ -1192,13 +1192,12 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
     }
 
     private static synchronized void dropMaps() {
+        final ScheduledTimerTask cleanUpTimerTask = IMAPAccess.cleanUpTimerTask;
         if (null != cleanUpTimerTask) {
             cleanUpTimerTask.cancel(false);
-            cleanUpTimerTask = null;
+            IMAPAccess.cleanUpTimerTask = null;
         }
-        if (null != timedOutServers) {
-            timedOutServers = null;
-        }
+        timedOutServers = null;
     }
 
     @Override

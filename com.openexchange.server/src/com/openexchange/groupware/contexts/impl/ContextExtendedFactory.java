@@ -66,31 +66,30 @@ import com.openexchange.log.LogFactory;
 /**
  * {@link ContextExtendedFactory}
  * 
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco
- *         Laguna</a>
+ * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class ContextExtendedFactory implements OXObjectFactory<ContextExtended> {
 
 	private static final long serialVersionUID = 7796462639896914733L;
 
-	private static final Log LOG = LogFactory
-			.getLog(ContextExtendedFactory.class);
+	private static final Log LOG = LogFactory.getLog(ContextExtendedFactory.class);
 
-	private int contextId;
-	public static CachingContextStorage parent;
+	public static volatile CachingContextStorage parent;
+
+	private final int contextId;
 
 	public ContextExtendedFactory(int contextId) {
 		this.contextId = contextId;
 	}
 
-	public Serializable getKey() {
+	@Override
+    public Serializable getKey() {
 		return I(contextId);
 	}
 
 	@Override
 	public ContextExtended load() throws OXException {
-		final ContextExtended retval = parent.getPersistantImpl().loadContext(
-				contextId);
+		final ContextExtended retval = parent.getPersistantImpl().loadContext(contextId);
 		// TODO We should introduce a logic layer above this context storage
 		// layer. That layer should then trigger the update tasks.
 		// Nearly all accesses to the ContextStorage need then to be replaced

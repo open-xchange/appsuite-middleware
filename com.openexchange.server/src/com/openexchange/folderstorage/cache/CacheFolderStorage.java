@@ -69,6 +69,7 @@ import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CompletionService;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
 import org.apache.commons.logging.Log;
@@ -76,6 +77,7 @@ import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheKey;
 import com.openexchange.caching.CacheService;
 import com.openexchange.concurrent.CallerRunsCompletionService;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.ContentType;
 import com.openexchange.folderstorage.Folder;
@@ -226,7 +228,7 @@ public final class CacheFolderStorage implements FolderStorage {
     @Override
     public void checkConsistency(final String treeId, final StorageParameters storageParameters) throws OXException {
         final Lock rlock = readLockFor(treeId, storageParameters);
-        rlock.lock();
+        acquire(rlock);
         try {
             for (final FolderStorage folderStorage : registry.getFolderStoragesForTreeID(treeId)) {
                 final boolean started = folderStorage.startTransaction(storageParameters, true);
@@ -367,7 +369,7 @@ public final class CacheFolderStorage implements FolderStorage {
     @Override
     public void restore(final String treeId, final String folderId, final StorageParameters storageParameters) throws OXException {
         final Lock lock = writeLockFor(treeId, storageParameters);
-        lock.lock();
+        acquire(lock);
         try {
             final FolderStorage storage = registry.getFolderStorage(treeId, folderId);
             if (null == storage) {
@@ -400,7 +402,7 @@ public final class CacheFolderStorage implements FolderStorage {
     @Override
     public Folder prepareFolder(final String treeId, final Folder folder, final StorageParameters storageParameters) throws OXException {
         final Lock lock = readLockFor(treeId, storageParameters);
-        lock.lock();
+        acquire(lock);
         try {
             final String folderId = folder.getID();
             final FolderStorage storage = registry.getFolderStorage(treeId, folderId);
@@ -459,7 +461,7 @@ public final class CacheFolderStorage implements FolderStorage {
     public void createFolder(final Folder folder, final StorageParameters storageParameters) throws OXException {
         final String treeId = folder.getTreeID();
         final Lock lock = writeLockFor(treeId, storageParameters);
-        lock.lock();
+        acquire(lock);
         try {
             final Session session = storageParameters.getSession();
             /*
@@ -577,7 +579,7 @@ public final class CacheFolderStorage implements FolderStorage {
      */
     public void removeFromCache(final String id, final String treeId, final boolean singleOnly, final Session session) throws OXException {
         final Lock lock = TreeLockManagement.getInstance().getFor(treeId, session).writeLock();
-        lock.lock();
+        acquire(lock);
         try {
             if (singleOnly) {
                 removeSingleFromCache(id, treeId, session.getUserId(), session, true);
@@ -666,7 +668,12 @@ public final class CacheFolderStorage implements FolderStorage {
      */
     public void removeSingleFromCache(final String id, final String treeId, final int userId, final int contextId, final boolean deleted, final Session optSession) {
         final Lock lock = TreeLockManagement.getInstance().getFor(treeId, userId, contextId).writeLock();
-        lock.lock();
+        try {
+            acquire(lock);
+        } catch (final OXException e) {
+            // Ignore
+            return;
+        }
         try {
             final Cache cache = globalCache;
             final String sContextId = String.valueOf(contextId);
@@ -746,7 +753,7 @@ public final class CacheFolderStorage implements FolderStorage {
     @Override
     public void clearFolder(final String treeId, final String folderId, final StorageParameters storageParameters) throws OXException {
         final Lock lock = readLockFor(treeId, storageParameters);
-        lock.lock();
+        acquire(lock);
         try {
             final Session session = storageParameters.getSession();
             /*
@@ -769,7 +776,7 @@ public final class CacheFolderStorage implements FolderStorage {
     @Override
     public void deleteFolder(final String treeId, final String folderId, final StorageParameters storageParameters) throws OXException {
         final Lock lock = writeLockFor(treeId, storageParameters);
-        lock.lock();
+        acquire(lock);
         try {
             final String parentId;
             final String realParentId;
@@ -927,7 +934,7 @@ public final class CacheFolderStorage implements FolderStorage {
     @Override
     public String getDefaultFolderID(final User user, final String treeId, final ContentType contentType, final Type type, final StorageParameters storageParameters) throws OXException {
         final Lock lock = readLockFor(treeId, storageParameters);
-        lock.lock();
+        acquire(lock);
         try {
             final FolderStorage storage = registry.getFolderStorageByContentType(treeId, contentType);
             if (null == storage) {
@@ -960,7 +967,7 @@ public final class CacheFolderStorage implements FolderStorage {
     @Override
     public Type getTypeByParent(final User user, final String treeId, final String parentId, final StorageParameters storageParameters) throws OXException {
         final Lock lock = readLockFor(treeId, storageParameters);
-        lock.lock();
+        acquire(lock);
         try {
             final FolderStorage storage = registry.getFolderStorage(treeId, parentId);
             if (null == storage) {
@@ -993,7 +1000,7 @@ public final class CacheFolderStorage implements FolderStorage {
     @Override
     public boolean containsForeignObjects(final User user, final String treeId, final String folderId, final StorageParameters storageParameters) throws OXException {
         final Lock lock = readLockFor(treeId, storageParameters);
-        lock.lock();
+        acquire(lock);
         try {
             /*
              * Get folder storage
@@ -1028,7 +1035,7 @@ public final class CacheFolderStorage implements FolderStorage {
     @Override
     public boolean isEmpty(final String treeId, final String folderId, final StorageParameters storageParameters) throws OXException {
         final Lock lock = readLockFor(treeId, storageParameters);
-        lock.lock();
+        acquire(lock);
         try {
             /*
              * Get folder storage
@@ -1063,7 +1070,7 @@ public final class CacheFolderStorage implements FolderStorage {
     @Override
     public void updateLastModified(final long lastModified, final String treeId, final String folderId, final StorageParameters storageParameters) throws OXException {
         final Lock lock = writeLockFor(treeId, storageParameters);
-        lock.lock();
+        acquire(lock);
         try {
             final FolderStorage storage = registry.getFolderStorage(treeId, folderId);
             if (null == storage) {
@@ -1108,7 +1115,7 @@ public final class CacheFolderStorage implements FolderStorage {
     @Override
     public Folder getFolder(final String treeId, final String folderId, final StorageType storageType, final StorageParameters storageParameters) throws OXException {
         final Lock lock = readLockFor(treeId, storageParameters);
-        lock.lock();
+        acquire(lock);
         try {
             /*
              * Try from cache
@@ -1198,7 +1205,7 @@ public final class CacheFolderStorage implements FolderStorage {
     @Override
     public List<Folder> getFolders(final String treeId, final List<String> folderIds, final StorageType storageType, final StorageParameters storageParameters) throws OXException {
         final Lock lock = readLockFor(treeId, storageParameters);
-        lock.lock();
+        acquire(lock);
         try {
             final int size = folderIds.size();
             final Folder[] ret = new Folder[size];
@@ -1279,7 +1286,7 @@ public final class CacheFolderStorage implements FolderStorage {
     @Override
     public SortableId[] getVisibleFolders(final String treeId, final ContentType contentType, final Type type, final StorageParameters storageParameters) throws OXException {
         final Lock lock = readLockFor(treeId, storageParameters);
-        lock.lock();
+        acquire(lock);
         try {
             final FolderStorage folderStorage = registry.getFolderStorageByContentType(treeId, contentType);
             if (null == folderStorage) {
@@ -1311,7 +1318,7 @@ public final class CacheFolderStorage implements FolderStorage {
     @Override
     public SortableId[] getSubfolders(final String treeId, final String parentId, final StorageParameters storageParameters) throws OXException {
         final Lock lock = readLockFor(treeId, storageParameters);
-        lock.lock();
+        acquire(lock);
         try {
             final Folder parent = getFolder(treeId, parentId, storageParameters);
             final String[] subfolders = parent.getSubfolderIDs();
@@ -1420,7 +1427,7 @@ public final class CacheFolderStorage implements FolderStorage {
     public void updateFolder(final Folder folder, final StorageParameters storageParameters) throws OXException {
         final String treeId = folder.getTreeID();
         final Lock lock = writeLockFor(treeId, storageParameters);
-        lock.lock();
+        acquire(lock);
         try {
             final Session session = storageParameters.getSession();
             /*
@@ -1557,7 +1564,7 @@ public final class CacheFolderStorage implements FolderStorage {
 
     private String[] getChangedFolderIDs(final int index, final String treeId, final Date timeStamp, final ContentType[] includeContentTypes, final StorageParameters storageParameters) throws OXException {
         final Lock lock = readLockFor(treeId, storageParameters);
-        lock.lock();
+        acquire(lock);
         try {
             final Session session = storageParameters.getSession();
             /*
@@ -1600,7 +1607,7 @@ public final class CacheFolderStorage implements FolderStorage {
     @Override
     public boolean containsFolder(final String treeId, final String folderId, final StorageType storageType, final StorageParameters storageParameters) throws OXException {
         final Lock lock = readLockFor(treeId, storageParameters);
-        lock.lock();
+        acquire(lock);
         try {
             final FolderStorage storage = registry.getFolderStorage(treeId, folderId);
             if (null == storage) {
@@ -1885,6 +1892,39 @@ public final class CacheFolderStorage implements FolderStorage {
             return new StorageParametersImpl(source.getUser(), source.getContext());
         }
         return new StorageParametersImpl((ServerSession) session);
+    }
+
+    private static volatile Integer maxWaitMillis;
+    private static int maxWaitMillis() {
+        Integer i = maxWaitMillis;
+        if (null == i) {
+            synchronized (CacheFolderStorage.class) {
+                i = maxWaitMillis;
+                if (null == i) {
+                    final ConfigurationService service = CacheServiceRegistry.getServiceRegistry().getService(ConfigurationService.class);
+                    final int millis = null == service ? 60000 : service.getIntProperty("AJP_WATCHER_MAX_RUNNING_TIME", 60000);
+                    i = Integer.valueOf(millis << 1);
+                    maxWaitMillis = i;
+                }
+            }
+        }
+        return i.intValue();
+    }
+
+    private static void acquire(final Lock lock) throws OXException {
+        if (null == lock) {
+            return;
+        }
+        try {
+            // true if the lock was acquired and false if the waiting time elapsed before the lock was acquired
+            if (!lock.tryLock(maxWaitMillis(), TimeUnit.MILLISECONDS)) {
+                throw FolderExceptionErrorMessage.TRY_AGAIN.create("The maximum time to wait for the lock is exceeded.");
+            }
+        } catch (final InterruptedException e) {
+            // Restore the interrupted status; see http://www.ibm.com/developerworks/java/library/j-jtp05236/index.html
+            Thread.currentThread().interrupt();
+            throw FolderExceptionErrorMessage.TRY_AGAIN.create(e, e.getMessage());
+        }
     }
 
     public static Lock readLockFor(final String treeId, final StorageParameters params) {

@@ -62,7 +62,7 @@ import com.openexchange.tools.session.ServerSession;
  */
 public class ConversionWSHandler implements WSHandler {
 	
-	public static ServiceLookup services;
+	public static volatile ServiceLookup services;
 	
 	private final String namespace;
 	private final String format;

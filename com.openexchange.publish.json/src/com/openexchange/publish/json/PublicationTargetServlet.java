@@ -62,7 +62,7 @@ public class PublicationTargetServlet extends MultipleAdapterServlet {
 
     private static final long serialVersionUID = -6971877010377069092L;
 
-    private static PublicationTargetMultipleHandlerFactory multipleFactory;
+    private static volatile PublicationTargetMultipleHandlerFactory multipleFactory;
 
     public static void setFactory(PublicationTargetMultipleHandlerFactory factory) {
         multipleFactory = factory;

@@ -171,7 +171,7 @@ public class Mappings {
 
         private final String name;
 
-        private static String prefix;
+        private static volatile String prefix;
 
         private Parameters(final String name) {
             this.name = name;

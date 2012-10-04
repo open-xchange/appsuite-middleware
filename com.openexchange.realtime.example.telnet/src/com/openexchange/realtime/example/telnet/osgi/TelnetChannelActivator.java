@@ -26,7 +26,7 @@ public class TelnetChannelActivator extends HousekeepingActivator {
 
     @Override
     protected void startBundle() throws Exception {
-        TransformingTelnetChatPlugin.services = this;
+        TransformingTelnetChatPlugin.SERVICES_REFERENCE.set(this);
 
         ServerBootstrap bootstrap = new ServerBootstrap(new NioServerSocketChannelFactory(
             Executors.newCachedThreadPool(),
@@ -59,6 +59,12 @@ public class TelnetChannelActivator extends HousekeepingActivator {
         registerService(Channel.class, channel);
 
         openTrackers();
+    }
+
+    @Override
+    protected void stopBundle() throws Exception {
+        TransformingTelnetChatPlugin.SERVICES_REFERENCE.set(null);
+        super.stopBundle();
     }
 
 }

@@ -51,7 +51,6 @@ package com.openexchange.realtime.xmpp.packet;
 
 import org.joox.Match;
 import com.openexchange.exception.OXException;
-import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -60,8 +59,6 @@ import com.openexchange.tools.session.ServerSession;
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  */
 public abstract class XMPPStanza {
-
-    public static ServiceLookup services;
 
     protected JID to;
 

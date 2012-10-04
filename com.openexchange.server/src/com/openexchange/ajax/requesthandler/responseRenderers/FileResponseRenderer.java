@@ -146,7 +146,13 @@ public class FileResponseRenderer implements ResponseRenderer {
             file = rotateIfImage(file);
             file = cropIfImage(request, file);
             file = scaleIfImage(request, file);
-            documentData = new BufferedInputStream(file.getStream());
+            InputStream stream = file.getStream();
+            if (null == stream) {
+                // React with 404
+                resp.sendError(HttpServletResponse.SC_NOT_FOUND, "Image not found.");
+                return;
+            }
+            documentData = new BufferedInputStream(stream);
             final String userAgent = req.getHeader("user-agent");
             if (SAVE_AS_TYPE.equals(contentType) || (delivery != null && delivery.equalsIgnoreCase(DOWNLOAD))) {
                 if (null == contentDisposition) {
@@ -278,7 +284,8 @@ public class FileResponseRenderer implements ResponseRenderer {
             /*
              * Scale to new input stream
              */
-            final InputStream scaled = scaler.scale(file.getStream(), width, height, ScaleType.getType(request.getParameter("scaleType")));
+            final InputStream input = file.getStream();
+            final InputStream scaled = null == input ? null : scaler.scale(input, width, height, ScaleType.getType(request.getParameter("scaleType")));
             return new FileHolder(scaled, -1, "image/png", "");
         } finally {
             Streams.close(file);

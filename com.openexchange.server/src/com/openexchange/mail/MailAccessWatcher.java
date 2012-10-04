@@ -77,7 +77,7 @@ public final class MailAccessWatcher {
 
     private static final AtomicBoolean INITIALIZED = new AtomicBoolean();
 
-    private static ScheduledTimerTask watcherTask;
+    private static volatile ScheduledTimerTask watcherTask;
 
     /**
      * Initializes and starts mail connection watcher if not done, yet

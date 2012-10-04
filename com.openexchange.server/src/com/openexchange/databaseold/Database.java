@@ -65,7 +65,7 @@ public final class Database {
 
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(Database.class));
 
-    private static DatabaseService databaseService;
+    private static volatile DatabaseService databaseService;
 
     /**
      * Prevent instantiation.
@@ -79,6 +79,7 @@ public final class Database {
     }
 
     private static DatabaseService getDatabaseService() throws OXException {
+        final DatabaseService databaseService = Database.databaseService;
         if (null == databaseService) {
             throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(DatabaseService.class.getName());
         }

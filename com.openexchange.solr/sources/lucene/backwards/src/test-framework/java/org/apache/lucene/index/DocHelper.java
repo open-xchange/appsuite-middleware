@@ -93,15 +93,15 @@ class DocHelper {
 
   public static final String LAZY_FIELD_BINARY_KEY = "lazyFieldBinary";
   public static byte [] LAZY_FIELD_BINARY_BYTES;
-  public static Field lazyFieldBinary;
+  public static volatile Field lazyFieldBinary;
   
   public static final String LAZY_FIELD_KEY = "lazyField";
   public static final String LAZY_FIELD_TEXT = "These are some field bytes";
   public static Field lazyField = new Field(LAZY_FIELD_KEY, LAZY_FIELD_TEXT, Field.Store.YES, Field.Index.ANALYZED);
   
   public static final String LARGE_LAZY_FIELD_KEY = "largeLazyField";
-  public static String LARGE_LAZY_FIELD_TEXT;
-  public static Field largeLazyField;
+  public static volatile String LARGE_LAZY_FIELD_TEXT;
+  public static volatile Field largeLazyField;
   
   //From Issue 509
   public static final String FIELD_UTF1_TEXT = "field one \u4e00text";

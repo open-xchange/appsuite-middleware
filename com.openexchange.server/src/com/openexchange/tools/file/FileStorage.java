@@ -59,7 +59,7 @@ import com.openexchange.tools.file.external.FileStorageFactory;
 
 public class FileStorage {
 
-    private static FileStorageFactory fss;
+    private static volatile FileStorageFactory fss;
 
     private com.openexchange.tools.file.external.FileStorage fs;
 

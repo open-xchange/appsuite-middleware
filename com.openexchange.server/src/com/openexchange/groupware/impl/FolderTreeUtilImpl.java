@@ -63,7 +63,7 @@ import com.openexchange.groupware.userconfiguration.UserConfiguration;
 
 public class FolderTreeUtilImpl implements FolderTreeUtil {
 
-    private static Mode MODE;
+    private static volatile Mode MODE;
 
     public FolderTreeUtilImpl(final DBProvider provider) {
         MODE = new CACHE_MODE(provider);

@@ -128,14 +128,14 @@ public class LinkedInConnectionTest extends TestCase {
         System.out.println();
     }
 
-    public void testUsageOfExistingAccount() {
+    public void testUsageOfExistingAccount() throws OXException {
         final List<Contact> contacts = linkedIn.getContacts(null,1,1,1);
         for (final Contact contact : contacts){
             System.out.println(contact.getGivenName() + " " + contact.getSurName()+", "+contact.getEmail1());
         }
     }
 
-    public void testXMLParsing() {
+    public void testXMLParsing() throws OXException {
         BufferedReader reader = null;
         try {
             reader = new BufferedReader(new InputStreamReader(new FileInputStream("/Users/karstenwill/Documents/Development/ox_projectset_workspace/com.openexchange.oauth.linkedin/local_only/linkedin.xml"), "UTF8"));
@@ -168,7 +168,7 @@ public class LinkedInConnectionTest extends TestCase {
         }
     }
 
-    public void _testGetMyContacts() {
+    public void _testGetMyContacts() throws OXException {
         final List<Contact> contacts = linkedIn.getContacts(null,1,1,1);
         boolean found = false;
         for (final Contact contact : contacts){
@@ -180,7 +180,7 @@ public class LinkedInConnectionTest extends TestCase {
     }
 
 
-    public void _testGetContacts() {
+    public void _testGetContacts() throws OXException {
     	linkedIn.getContacts(null,1,1,1);
     }
 

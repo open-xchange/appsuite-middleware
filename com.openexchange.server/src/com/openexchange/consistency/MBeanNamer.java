@@ -57,11 +57,13 @@ import javax.management.ObjectName;
  */
 public class MBeanNamer {
 
-    private static ObjectName name;
+    private static volatile ObjectName name;
 
     public static ObjectName getName() throws MalformedObjectNameException, NullPointerException {
+        ObjectName name = MBeanNamer.name;
         if (name == null) {
             name = new ObjectName("com.openexchange.consistency.Consistency", "name", "FilestoreConsistency");
+            MBeanNamer.name = name;
         }
         return name;
     }

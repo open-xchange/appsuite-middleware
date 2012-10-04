@@ -50,7 +50,6 @@
 package com.openexchange.log;
 
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.List;
 import java.util.TreeSet;
 import java.util.concurrent.ConcurrentHashMap;
@@ -136,7 +135,7 @@ public final class LogProperties {
         if (null == thread) {
             return null;
         }
-        Props props = THREAD_LOCAL.get(thread);
+        final Props props = THREAD_LOCAL.get(thread);
         if (props == null) {
             return null;
         }
@@ -160,7 +159,7 @@ public final class LogProperties {
         final Thread thread = Thread.currentThread();
         Props props = THREAD_LOCAL.get(thread);
         if (null == props) {
-            final Props newprops = new Props(new HashMap<String, Object>(16));
+            final Props newprops = new Props(new ConcurrentHashMap<String, Object>(16));
             props = THREAD_LOCAL.putIfAbsent(thread, newprops);
             if (null == props) {
                 props = newprops;
@@ -180,7 +179,7 @@ public final class LogProperties {
         if (null == props) {
             return;
         }
-        THREAD_LOCAL.put(other, new Props(new HashMap<String, Object>(props.getMap())));
+        THREAD_LOCAL.put(other, new Props(new ConcurrentHashMap<String, Object>(props.getMap())));
     }
 
     /**

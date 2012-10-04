@@ -50,6 +50,7 @@
 package com.openexchange.realtime.example.telnet;
 
 import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
 
 import com.openexchange.exception.OXException;
 import com.openexchange.realtime.MessageDispatcher;
@@ -65,7 +66,10 @@ import com.openexchange.tools.session.ServerSession;
  */
 public abstract class TransformingTelnetChatPlugin implements TelnetChatPlugin {
 	
-	public static ServiceLookup services;
+    /**
+     * The {@code ServiceLookup} reference.
+     */
+    public static final AtomicReference<ServiceLookup> SERVICES_REFERENCE = new AtomicReference<ServiceLookup>();
 	
 	@Override
 	public void handleIncoming(TelnetChatMessage message) throws OXException {
@@ -94,7 +98,7 @@ public abstract class TransformingTelnetChatPlugin implements TelnetChatPlugin {
 
 
 	protected void send(Stanza stanza, ServerSession session) throws OXException {
-		services.getService(MessageDispatcher.class).send(stanza, session);
+		SERVICES_REFERENCE.get().getService(MessageDispatcher.class).send(stanza, session);
 	}
 	
 	

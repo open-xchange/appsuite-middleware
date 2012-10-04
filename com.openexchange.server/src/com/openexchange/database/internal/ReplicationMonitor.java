@@ -57,6 +57,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.concurrent.atomic.AtomicLong;
 import org.apache.commons.logging.Log;
 import com.openexchange.log.LogFactory;
 import com.openexchange.database.Assignment;
@@ -74,11 +75,11 @@ public final class ReplicationMonitor {
 
     static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(ReplicationMonitor.class));
 
-    private static long masterConnectionsFetched;
+    private static final AtomicLong masterConnectionsFetched = new AtomicLong();
 
-    private static long slaveConnectionsFetched;
+    private static final AtomicLong slaveConnectionsFetched = new AtomicLong();
 
-    private static long masterInsteadOfSlaveFetched;
+    private static final AtomicLong masterInsteadOfSlaveFetched = new AtomicLong();
 
     private ReplicationMonitor() {
         super();
@@ -316,25 +317,25 @@ public final class ReplicationMonitor {
 
     public static void incrementFetched(final Assignment assign, final boolean write) {
         if (assign.getWritePoolId() == assign.getReadPoolId() || write) {
-            masterConnectionsFetched++;
+            masterConnectionsFetched.incrementAndGet();
         } else {
-            slaveConnectionsFetched++;
+            slaveConnectionsFetched.incrementAndGet();
         }
     }
 
     private static void incrementInstead() {
-        masterInsteadOfSlaveFetched++;
+        masterInsteadOfSlaveFetched.incrementAndGet();
     }
 
     public static long getMasterConnectionsFetched() {
-        return masterConnectionsFetched;
+        return masterConnectionsFetched.get();
     }
 
     public static long getSlaveConnectionsFetched() {
-        return slaveConnectionsFetched;
+        return slaveConnectionsFetched.get();
     }
 
     public static long getMasterInsteadOfSlave() {
-        return masterInsteadOfSlaveFetched;
+        return masterInsteadOfSlaveFetched.get();
     }
 }

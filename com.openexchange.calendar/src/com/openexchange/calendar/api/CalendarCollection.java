@@ -69,6 +69,7 @@ import java.util.Map;
 import java.util.Queue;
 import java.util.Set;
 import java.util.TimeZone;
+import java.util.concurrent.atomic.AtomicInteger;
 import org.apache.commons.logging.Log;
 import com.openexchange.api2.ReminderService;
 import com.openexchange.cache.impl.FolderCacheManager;
@@ -1579,12 +1580,12 @@ public Date getOccurenceDate(final CalendarDataObject cdao) throws OXException {
 
     // Copied from CalendarCommonCollection
 
-    private static int unique_session_int;
+    private static final AtomicInteger unique_session_int = new AtomicInteger();
     private static final String calendar_session_name = "CalendarSession";
 
     private static final Map<Integer, String> fieldMap = new HashMap<Integer, String>(24);
 
-    private static CalendarCache cache;
+    private static volatile CalendarCache cache;
 
     private static CalendarCollection recColl = new CalendarCollection();
 
@@ -2253,16 +2254,9 @@ public Date getOccurenceDate(final CalendarDataObject cdao) throws OXException {
         }
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.calendar.CalendarCommonCollectionInterface#getUniqueCalendarSessionName()
-     */
     @Override
     public String getUniqueCalendarSessionName() {
-        if (unique_session_int == Integer.MAX_VALUE) {
-            unique_session_int = 0;
-        }
-        unique_session_int++;
-        return calendar_session_name + unique_session_int;
+        return calendar_session_name + unique_session_int.incrementAndGet();
     }
 
     /* (non-Javadoc)
@@ -2596,8 +2590,10 @@ public Date getOccurenceDate(final CalendarDataObject cdao) throws OXException {
             final Context c, final UserConfiguration uc, final Connection readcon, final boolean fillShared) throws SQLException,
             SearchIteratorException, OXException {
         final CalendarFolderObject check = new CalendarFolderObject(uid, c.getContextId(), fillShared);
+        CalendarCache cache = CalendarCollection.cache;
         if (cache == null) {
             cache = CalendarCache.getInstance();
+            CalendarCollection.cache = cache;
         }
 
         final Object o = cache.get(check.getObjectKey(), check.getGroupKey());
