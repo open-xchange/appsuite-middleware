@@ -1350,7 +1350,7 @@ public final class CacheFolderStorage implements FolderStorage {
                     } else {
                         allSubfolderIds = new ArrayList<SortableId>(neededStorages.length * 8);
                         final CompletionService<java.util.List<SortableId>> completionService =
-                            new ThreadPoolCompletionService<java.util.List<SortableId>>(ThreadPools.getThreadPool());
+                            new ThreadPoolCompletionService<java.util.List<SortableId>>(ThreadPools.getThreadPool()).setTrackable(true);
                         /*
                          * Get all visible subfolders from each storage
                          */
@@ -1810,7 +1810,7 @@ public final class CacheFolderStorage implements FolderStorage {
             paramsProvider = new InstanceStorageParametersProvider(storageParameters);
         } else {
             completionService =
-                new ThreadPoolCompletionService<Object>(CacheServiceRegistry.getServiceRegistry().getService(ThreadPoolService.class, true));
+                new ThreadPoolCompletionService<Object>(CacheServiceRegistry.getServiceRegistry().getService(ThreadPoolService.class, true)).setTrackable(true);
 
             final Session session = storageParameters.getSession();
             paramsProvider =
