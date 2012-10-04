@@ -1,6 +1,7 @@
 * 2012-10-04 - tobias.friedrich@open-xchange.com
 
  - Fix for bug 23173: Skip group permissions during owner evaluation 
+ - Fix for bug 23171: Query for user- instead of contact-ID to get context administrator 
 
 * 2012-10-04 - francisco.laguna@open-xchange.com
 
