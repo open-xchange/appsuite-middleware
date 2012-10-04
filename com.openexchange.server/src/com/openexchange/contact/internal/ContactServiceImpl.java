@@ -592,11 +592,44 @@ public class ContactServiceImpl extends DefaultContactService {
 	}
 
 	@Override
-    protected String doGetOrganization(final Session session) throws OXException {
-		final String folderID = Integer.toString(FolderObject.SYSTEM_LDAP_FOLDER_ID);
-		final int userID = Tools.getContext(session).getMailadmin();
-		final ContactStorage storage = Tools.getStorage(session, folderID);
-		final Contact contact = storage.get(session, folderID, Integer.toString(userID), new ContactField[] { ContactField.COMPANY } );
+    protected String doGetOrganization(Session session) throws OXException {
+	    /*
+	     * prepare search term for context admin
+	     */
+	    int userID = Tools.getContext(session).getMailadmin();
+		String folderID = Integer.toString(FolderObject.SYSTEM_LDAP_FOLDER_ID);
+		ContactStorage storage = Tools.getStorage(session, folderID);
+        CompositeSearchTerm searchTerm = new CompositeSearchTerm(CompositeOperation.AND);
+        SingleSearchTerm folderIDTerm = new SingleSearchTerm(SingleOperation.EQUALS);
+        folderIDTerm.addOperand(new ContactFieldOperand(ContactField.FOLDER_ID));
+        folderIDTerm.addOperand(new ConstantOperand<String>(folderID));
+        searchTerm.addSearchTerm(folderIDTerm);
+		SingleSearchTerm userIDTerm = new SingleSearchTerm(SingleOperation.EQUALS);
+        userIDTerm.addOperand(new ContactFieldOperand(ContactField.INTERNAL_USERID));
+        userIDTerm.addOperand(new ConstantOperand<Integer>(userID));
+        searchTerm.addSearchTerm(userIDTerm);
+        /*
+         * search        
+         */
+        Contact contact = null;
+        SearchIterator<Contact> searchIterator = null;
+        try {
+            searchIterator = storage.search(session, searchTerm, new ContactField[] { ContactField.COMPANY });
+            if (null != searchIterator && searchIterator.hasNext()) {
+                contact = searchIterator.next();
+            }
+        } finally {
+            if (null != searchIterator) {
+                try {
+                    searchIterator.close();
+                } catch (OXException e) {
+                    LOG.debug("error closing search iterator", e);
+                }
+            }
+        }
+        /*
+         * extract organization
+         */
 		Check.contactNotNull(contact, session.getContextId(), userID);
 		return contact.getCompany();
 	}
