@@ -1,3 +1,7 @@
+* 2012-10-04 - thorben.betten@open-xchange.com
+
+ - Fix for bug 23170: Restored class' path
+
 * 2012-10-04 - tobias.friedrich@open-xchange.com
 
  - Fix for bug 23173: Skip group permissions during owner evaluation 
