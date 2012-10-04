@@ -27,5 +27,5 @@ Import-Package: com.openexchange.config,
  me.prettyprint.hector.api.mutation,
  me.prettyprint.hector.api.query,
  org.apache.cassandra.db,
- org.apache.commons.logging;version="1.0.4",
- org.osgi.framework;version="1.3.0"
+ org.apache.commons.logging,
+ org.osgi.framework

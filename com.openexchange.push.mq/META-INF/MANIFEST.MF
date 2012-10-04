@@ -23,9 +23,9 @@ Import-Package: com.openexchange.context,
  com.openexchange.timer,
  com.openexchange.tools,
  javax.jms,
- org.apache.commons.logging;version="1.0.4",
- org.osgi.framework;version="1.6.0",
- org.osgi.service.event;version="1.3.0",
- org.osgi.service.framework;version="1.0.0",
- org.osgi.util.tracker;version="1.5.0"
+ org.apache.commons.logging,
+ org.osgi.framework,
+ org.osgi.service.event,
+ org.osgi.service.framework,
+ org.osgi.util.tracker
 Bundle-Activator: com.openexchange.push.mq.osgi.PushMQActivator
