@@ -1,3 +1,7 @@
+* 2012-10-04 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 23173: Skip group permissions during owner evaluation 
+
 * 2012-10-04 - francisco.laguna@open-xchange.com
 
  - Fix for bug 23129: Adjustments to the login step configuration to match google website.
