@@ -1153,6 +1153,29 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
         }
     }
 
+    private final class ActiveTaskWatcher implements Runnable {
+        private final ConcurrentMap<Long, TaskInfo> tasks;
+
+        protected ActiveTaskWatcher() {
+            super();
+            tasks = new ConcurrentHashMap<Long, TaskInfo>(8192);
+        }
+
+        @Override
+        public void run() {
+            try {
+                // TODO:
+            } catch (Exception e) {
+                LOG.fatal("Watcher aborted execution due to an exception! Watcher is no more active!", e);
+            }
+        }
+    }
+
+    private static final class TaskInfo {
+        
+    }
+    
+
     // Public methods
 
     /**

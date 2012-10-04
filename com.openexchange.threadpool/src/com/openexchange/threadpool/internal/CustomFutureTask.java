@@ -50,6 +50,7 @@
 package com.openexchange.threadpool.internal;
 
 import java.util.concurrent.FutureTask;
+import java.util.concurrent.atomic.AtomicLong;
 import com.openexchange.threadpool.RefusedExecutionBehavior;
 import com.openexchange.threadpool.Task;
 
@@ -60,9 +61,11 @@ import com.openexchange.threadpool.Task;
  */
 public class CustomFutureTask<V> extends FutureTask<V> {
 
-    private final Task<V> task;
+    private static final AtomicLong COUNTER = new AtomicLong();
 
+    private final Task<V> task;
     private final RefusedExecutionBehavior<V> refusedExecutionBehavior;
+    private final long number;
 
     /**
      * Initializes a new {@link CustomFutureTask}.
@@ -83,6 +86,17 @@ public class CustomFutureTask<V> extends FutureTask<V> {
         super(task);
         this.task = task;
         this.refusedExecutionBehavior = refusedExecutionBehavior;
+        // Assign number
+        number = COUNTER.incrementAndGet();
+    }
+    
+    /**
+     * Gets the number
+     *
+     * @return The number
+     */
+    public long getNumber() {
+        return number;
     }
 
     /**
