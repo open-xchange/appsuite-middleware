@@ -8,7 +8,7 @@ BuildRequires: open-xchange-core
 BuildRequires: open-xchange-admin
 BuildRequires: java-devel >= 1.6.0
 Version:       @OXVERSION@
-%define        ox_release 1
+%define        ox_release 2
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -62,6 +62,8 @@ ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} 
 %doc com.openexchange.admin.user.copy/ChangeLog
 
 %changelog
+* Thu Oct 04 2012 Jan Bauerdick <jan.bauerdick@open-xchange.com>
+Second release candidate for 6.22.0
 * Tue Aug 21 2012 Jan Bauerdick <jan.bauerdick@open-xchange.com>
 First release candidate for 6.22.0
 * Mon Aug 20 2012 Jan Bauerdick <jan.bauerdick@open-xchange.com>

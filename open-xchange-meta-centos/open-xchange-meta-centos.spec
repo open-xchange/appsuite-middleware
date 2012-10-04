@@ -40,4 +40,7 @@ Authors:
 %doc README.TXT
 
 %changelog
-
+* Thu Oct 04 2012 Carsten Hoeger <choeger@open-xchange.com>
+Second release candidate for 6.22.0
+* Thu Sep 06 2012 Carsten Hoeger <choeger@open-xchange.com>
+Initial release
