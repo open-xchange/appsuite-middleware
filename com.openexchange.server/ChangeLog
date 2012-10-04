@@ -1,3 +1,7 @@
+* 2012-10-04 - francisco.laguna@open-xchange.com
+
+ - Fix for bug 23129: Adjustments to the login step configuration to match google website.
+
 * 2012-10-03 - thorben.betten@open-xchange.com
 
  - Fix for bug 23169: Sane file name for created ZIP file
