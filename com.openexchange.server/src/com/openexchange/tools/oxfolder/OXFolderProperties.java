@@ -71,6 +71,7 @@ import com.openexchange.cache.registry.CacheAvailabilityRegistry;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.PropertyEvent;
 import com.openexchange.config.PropertyListener;
+import com.openexchange.database.DatabaseService;
 import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
@@ -487,12 +488,23 @@ public final class OXFolderProperties implements Initialization, CacheAvailabili
 
     private static Map<String, Set<Integer>> getSchemasAndContexts() {
         try {
-            Connection writeCon = null;
+            DatabaseService databaseService;
+            {
+                final com.openexchange.database.internal.Initialization dbInitialization = com.openexchange.database.internal.Initialization.getInstance();
+                databaseService = dbInitialization.getDatabaseService();
+                if (null == databaseService) {
+                    databaseService = dbInitialization.startIfAbsent(ServerServiceRegistry.getInstance().getService(ConfigurationService.class));
+                }
+                if (null == databaseService) {
+                    return Collections.emptyMap();
+                }
+            }
+            Connection con = null;
             PreparedStatement stmt = null;
             ResultSet rs = null;
             try {
-                writeCon = Database.get(false);
-                stmt = writeCon.prepareStatement("SELECT db_schema, cid FROM context_server2db_pool");
+                con = databaseService.getReadOnly();
+                stmt = con.prepareStatement("SELECT db_schema, cid FROM context_server2db_pool");
                 rs = stmt.executeQuery();
 
                 final Map<String, Set<Integer>> schemasAndContexts = new HashMap<String, Set<Integer>>();
@@ -512,8 +524,8 @@ public final class OXFolderProperties implements Initialization, CacheAvailabili
                 return schemasAndContexts;
             } finally {
                 DBUtils.closeSQLStuff(rs, stmt);
-                if (writeCon != null) {
-                    Database.back(false, writeCon);
+                if (con != null) {
+                    databaseService.backReadOnly(con);
                 }
             }
         } catch (final OXException e) {
