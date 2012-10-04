@@ -63,10 +63,6 @@ import com.openexchange.spamhandler.SpamHandler;
  */
 public final class DefaultSpamHandler extends SpamHandler {
 
-    /**
-     * The configuration service supplier.
-     */
-    private static final ConfigurationServiceSupplier SUPPLIER = ConfigurationServiceSupplier.getInstance();
 
     private static final String NAME = "DefaultSpamHandler";
 
@@ -98,7 +94,7 @@ public final class DefaultSpamHandler extends SpamHandler {
         /*
          * Copy to confirmed ham
          */
-        final MailService mailService = MailServiceSupplier.getInstance().getMailService();
+        final MailService mailService = Services.getService(MailService.class);
         if (null == mailService) {
             return;
         }
@@ -117,7 +113,7 @@ public final class DefaultSpamHandler extends SpamHandler {
 
     @Override
     public boolean isCreateConfirmedSpam() {
-        final ConfigurationService configurationService = SUPPLIER.getConfigurationService();
+        final ConfigurationService configurationService = Services.getService(ConfigurationService.class);
         if (null == configurationService) {
             /*
              * Return default
@@ -129,7 +125,7 @@ public final class DefaultSpamHandler extends SpamHandler {
 
     @Override
     public boolean isCreateConfirmedHam() {
-        final ConfigurationService configurationService = SUPPLIER.getConfigurationService();
+        final ConfigurationService configurationService = Services.getService(ConfigurationService.class);
         if (null == configurationService) {
             /*
              * Return default
@@ -141,7 +137,7 @@ public final class DefaultSpamHandler extends SpamHandler {
 
     @Override
     public boolean isUnsubscribeSpamFolders() {
-        final ConfigurationService configurationService = SUPPLIER.getConfigurationService();
+        final ConfigurationService configurationService = Services.getService(ConfigurationService.class);
         if (null == configurationService) {
             /*
              * Return default
