@@ -272,7 +272,7 @@ public class HConnectionManager {
           closeClient(client);
           markHostAsDown(pool.getCassandraHost());
           excludeHosts.add(pool.getCassandraHost());
-          retryable = true;
+          retryable = op.failoverPolicy.shouldRetryFor(HectorTransportException.class);
 
           monitor.incCounter(Counter.RECOVERABLE_TRANSPORT_EXCEPTIONS);
 
@@ -281,14 +281,19 @@ public class HConnectionManager {
           // if HLT.checkTimeout(cassandraHost): suspendHost(cassandraHost);
           doTimeoutCheck(pool.getCassandraHost());
 
-          retryable = true;
+          retryable = op.failoverPolicy.shouldRetryFor(HTimedOutException.class);
 
           monitor.incCounter(Counter.RECOVERABLE_TIMED_OUT_EXCEPTIONS);
-          client.close();
+          
+          // client is initialized inside of the try/catch block, therefore in case of an exception
+          // before initialization it remains null and can throw a nullpointer exception at this point.
+          if (client != null)	
+        	  client.close();
+          
           // TODO timecheck on how long we've been waiting on timeouts here
           // suggestion per user moores on hector-users
         } else if ( he instanceof HPoolRecoverableException ) {
-          retryable = true;
+          retryable = op.failoverPolicy.shouldRetryFor(HPoolRecoverableException.class);;
           if ( hostPools.size() == 1 ) {
             throw he;
           }
