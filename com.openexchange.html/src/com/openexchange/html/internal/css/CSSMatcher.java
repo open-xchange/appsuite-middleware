@@ -296,7 +296,7 @@ public final class CSSMatcher {
         /*
          * Feed matcher with buffer's content and reset
          */
-        final String css = cssBuilder.toString();
+        final String css = dropEmptyLines(cssBuilder);
         if (css.indexOf('{') < 0) {
             return checkCSSElements(cssBuilder, styleMap, true);
         }
@@ -449,7 +449,7 @@ public final class CSSMatcher {
         /*
          * Feed matcher with buffer's content and reset
          */
-        final String css = cssBuilder.toString();
+        final String css = dropEmptyLines(cssBuilder);
         if (css.indexOf('{') < 0) {
             return checkCSSElements(cssBuilder, styleMap, removeIfAbsent);
         }
@@ -574,7 +574,7 @@ public final class CSSMatcher {
         final Matcher m;
         final MatcherReplacer mr;
         {
-            final String str = cssBuilder.toString();
+            final String str = dropEmptyLines(cssBuilder);
             m = PATTERN_STYLE_LINE.matcher(str);
             mr = new MatcherReplacer(m, str);
         }
@@ -655,5 +655,14 @@ public final class CSSMatcher {
             isWhitespace = Character.isWhitespace(string.charAt(i));
         }
         return isWhitespace;
+    }
+
+    private static final Pattern PATTERN_EMPY_LINE = Pattern.compile("(?m)^\\s+$");
+
+    private static String dropEmptyLines(final CharSequence input) {
+        if (null == input) {
+            return null;
+        }
+        return PATTERN_EMPY_LINE.matcher(input).replaceAll("");
     }
 }
