@@ -47,60 +47,38 @@
  *
  */
 
-package com.openexchange.ui7;
+package com.openexchange.ui7.osgi;
 
 import java.io.File;
-import java.io.IOException;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import com.openexchange.mail.mime.MimeType2ExtMap;
+import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
+import com.openexchange.ui7.AppsActionFactory;
+import com.openexchange.ui7.FileCache;
 
 /**
- * {@link FileServlet}
+ * {@link AppsModuleActivator}
  * 
- * @author <a href="mailto:viktor.pracht@open-xchange.com">Viktor Pracht</a>
+ * @author <a href="mailto:firstname.lastname@open-xchange.com">Firstname Lastname</a>
  */
-public class FileServlet extends HttpServlet {
-
-    private static final long serialVersionUID = 5984953578534687847L;
-
-    private static org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(FileServlet.class));
-
-    protected File root;
+public class AppsModuleActivator extends AJAXModuleActivator {
 
     private FileCache cache;
 
-    public FileServlet(FileCache cache, File root) {
+    private File root;
+
+    public AppsModuleActivator(FileCache cache, File root) {
         super();
         this.cache = cache;
         this.root = root;
     }
 
     @Override
-    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        String path = req.getPathInfo();
-        File file = getFile(req, resp, path);
-        LOG.debug("Serving " + file);
-        byte[] data = cache.get(file);
-        if (data == null) {
-            resp.reset();
-            resp.sendError(HttpServletResponse.SC_NOT_FOUND);
-        } else {
-            writeHeaders(req, resp, file, path);
-            resp.getOutputStream().write(data);
-        }
+    protected Class<?>[] getNeededServices() {
+        return new Class<?>[] {};
     }
 
-    protected File getFile(HttpServletRequest req, HttpServletResponse resp, String path) {
-        return path == null ? root : new File(root, path);
-    }
-
-    protected void writeHeaders(HttpServletRequest req, HttpServletResponse resp, File file, String path) {
-        if (!resp.containsHeader("Content-Type")) {
-            resp.setContentType(MimeType2ExtMap.getContentType(path));
-        }
+    @Override
+    protected void startBundle() throws Exception {
+        registerModule(new AppsActionFactory(this, cache, root), "apps");
     }
 
 }

@@ -67,11 +67,11 @@ import javax.servlet.http.HttpServletResponse;
 /**
  * @author Viktor Pracht <viktor.pracht@open-xchange.com>
  */
-public class AppsServlet extends HttpServlet {
+public class AppsLoadServlet extends HttpServlet {
 
     private static final long serialVersionUID = -8909104490806162791L;
 
-    private static org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(AppsServlet.class));
+    private static org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(AppsLoadServlet.class));
 
     private Map<String, byte[]> cache = new ConcurrentHashMap<String, byte[]>();
 
@@ -81,7 +81,7 @@ public class AppsServlet extends HttpServlet {
 
     private static String ZONEINFO = "io.ox/core/date/tz/zoneinfo/";
 
-    public AppsServlet(File root, File zoneinfo) {
+    public AppsLoadServlet(File root, File zoneinfo) {
         this.root = root;
         this.zoneinfo = zoneinfo;
     }

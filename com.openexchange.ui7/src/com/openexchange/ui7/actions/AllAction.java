@@ -47,60 +47,48 @@
  *
  */
 
-package com.openexchange.ui7;
+package com.openexchange.ui7.actions;
 
 import java.io.File;
-import java.io.IOException;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import com.openexchange.mail.mime.MimeType2ExtMap;
+import java.io.UnsupportedEncodingException;
+import org.json.JSONException;
+import org.json.JSONObject;
+import com.openexchange.ajax.requesthandler.AJAXRequestData;
+import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.exception.OXException;
+import com.openexchange.server.ServiceLookup;
+import com.openexchange.tools.session.ServerSession;
+import com.openexchange.ui7.FileCache;
 
 /**
- * {@link FileServlet}
+ * {@link AllAction}
  * 
  * @author <a href="mailto:viktor.pracht@open-xchange.com">Viktor Pracht</a>
  */
-public class FileServlet extends HttpServlet {
+public class AllAction extends AppsAction {
 
-    private static final long serialVersionUID = 5984953578534687847L;
-
-    private static org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(FileServlet.class));
-
-    protected File root;
-
-    private FileCache cache;
-
-    public FileServlet(FileCache cache, File root) {
-        super();
-        this.cache = cache;
-        this.root = root;
+    private static org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(AllAction.class));
+    
+    public AllAction(ServiceLookup serviceLookup, FileCache cache, File root) {
+        super(serviceLookup, cache, root);
     }
 
     @Override
-    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        String path = req.getPathInfo();
-        File file = getFile(req, resp, path);
-        LOG.debug("Serving " + file);
-        byte[] data = cache.get(file);
-        if (data == null) {
-            resp.reset();
-            resp.sendError(HttpServletResponse.SC_NOT_FOUND);
-        } else {
-            writeHeaders(req, resp, file, path);
-            resp.getOutputStream().write(data);
+    public AJAXRequestResult perform(AJAXRequestData requestData, ServerSession session) throws OXException {
+        JSONObject result = new JSONObject();
+        for (File app : new File(root, "apps.d").listFiles()) {
+            try {
+                JSONObject manifest = new JSONObject(new String(cache.get(app), "UTF-8"));
+                for (String appID : manifest.keySet()) {
+                    result.put(appID, manifest.get(appID));
+                }
+            } catch (UnsupportedEncodingException e) {
+                LOG.debug(e); // ignore: everybody has UTF-8 support
+            } catch (JSONException e) {
+                LOG.debug(e); // invalid apps simply don't get listed
+            }
         }
-    }
-
-    protected File getFile(HttpServletRequest req, HttpServletResponse resp, String path) {
-        return path == null ? root : new File(root, path);
-    }
-
-    protected void writeHeaders(HttpServletRequest req, HttpServletResponse resp, File file, String path) {
-        if (!resp.containsHeader("Content-Type")) {
-            resp.setContentType(MimeType2ExtMap.getContentType(path));
-        }
+        return new AJAXRequestResult(result);
     }
 
 }

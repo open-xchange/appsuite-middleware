@@ -4,34 +4,21 @@ Bundle-Name: Open-Xchange RequireJS servlet bundle
 Bundle-SymbolicName: com.openexchange.ui7
 Bundle-Version: 6.23.0
 Bundle-Vendor: Open-Xchange, Inc.
-Import-Package: com.openexchange.ajax,
- com.openexchange.ajax.requesthandler,
+Import-Package: com.openexchange.ajax.requesthandler,
  com.openexchange.ajax.requesthandler.osgiservice,
  com.openexchange.config,
- com.openexchange.dispatcher,
- com.openexchange.documentation,
  com.openexchange.documentation.annotations,
  com.openexchange.exception,
- com.openexchange.groupware,
- com.openexchange.http.client,
- com.openexchange.http.client.builder,
  com.openexchange.log,
  com.openexchange.mail.mime,
- com.openexchange.multiple,
  com.openexchange.osgi,
- com.openexchange.secret,
- com.openexchange.secret.osgi.tools,
  com.openexchange.server,
- com.openexchange.session,
- com.openexchange.tools.service,
- com.openexchange.tools.servlet,
  com.openexchange.tools.session,
  javax.servlet,
  javax.servlet.http,
  org.apache.commons.logging,
  org.json,
  org.osgi.framework,
- org.osgi.service.http,
- org.osgi.util.tracker
+ org.osgi.service.http
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-Activator: com.openexchange.ui7.Activator

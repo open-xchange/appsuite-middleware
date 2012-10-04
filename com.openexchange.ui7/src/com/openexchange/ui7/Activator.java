@@ -54,10 +54,13 @@ import org.osgi.service.http.HttpService;
 import com.openexchange.ajax.requesthandler.Dispatcher;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.ui7.osgi.AppsModuleActivator;
 
 public class Activator extends HousekeepingActivator {
 
     private static Class<?>[] NEEDED_SERVICES = { HttpService.class, ConfigurationService.class };
+
+    private AppsModuleActivator appsModuleActivator;
 
     @Override
     protected Class<?>[] getNeededServices() {
@@ -72,7 +75,16 @@ public class Activator extends HousekeepingActivator {
         File apps = new File(path, "apps");
         File zoneinfo = new File(config.getProperty("com.openexchange.ui7.zoneinfo", "/usr/share/zoneinfo/"));
         HttpService service = getService(HttpService.class);
-        service.registerServlet(prefix + "apps", new AppsServlet(apps, zoneinfo), null, null);
-        service.registerServlet("/", new UI7Servlet(path, zoneinfo), null, null);
+        FileCache cache = new FileCache();
+        service.registerServlet(prefix + "apps/load", new AppsLoadServlet(apps, zoneinfo), null, null);
+        service.registerServlet("/", new UI7Servlet(cache, path, zoneinfo), null, null);
+        appsModuleActivator = new AppsModuleActivator(cache, path);
+        appsModuleActivator.start(context);
+    }
+
+    @Override
+    protected void stopBundle() throws Exception {
+        appsModuleActivator.stop(context);
+        super.stopBundle();
     }
 }

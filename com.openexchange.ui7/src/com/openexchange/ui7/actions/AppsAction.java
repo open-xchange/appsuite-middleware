@@ -47,60 +47,30 @@
  *
  */
 
-package com.openexchange.ui7;
+package com.openexchange.ui7.actions;
 
 import java.io.File;
-import java.io.IOException;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import com.openexchange.mail.mime.MimeType2ExtMap;
+import com.openexchange.ajax.requesthandler.AJAXActionService;
+import com.openexchange.server.ServiceLookup;
+import com.openexchange.ui7.FileCache;
 
 /**
- * {@link FileServlet}
+ * {@link AppsAction}
  * 
  * @author <a href="mailto:viktor.pracht@open-xchange.com">Viktor Pracht</a>
  */
-public class FileServlet extends HttpServlet {
+public abstract class AppsAction implements AJAXActionService {
 
-    private static final long serialVersionUID = 5984953578534687847L;
+    protected final ServiceLookup serviceLookup;
 
-    private static org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(FileServlet.class));
+    protected final FileCache cache;
 
-    protected File root;
+    protected final File root;
 
-    private FileCache cache;
-
-    public FileServlet(FileCache cache, File root) {
+    public AppsAction(ServiceLookup serviceLookup, FileCache cache, File root) {
         super();
+        this.serviceLookup = serviceLookup;
         this.cache = cache;
         this.root = root;
     }
-
-    @Override
-    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        String path = req.getPathInfo();
-        File file = getFile(req, resp, path);
-        LOG.debug("Serving " + file);
-        byte[] data = cache.get(file);
-        if (data == null) {
-            resp.reset();
-            resp.sendError(HttpServletResponse.SC_NOT_FOUND);
-        } else {
-            writeHeaders(req, resp, file, path);
-            resp.getOutputStream().write(data);
-        }
-    }
-
-    protected File getFile(HttpServletRequest req, HttpServletResponse resp, String path) {
-        return path == null ? root : new File(root, path);
-    }
-
-    protected void writeHeaders(HttpServletRequest req, HttpServletResponse resp, File file, String path) {
-        if (!resp.containsHeader("Content-Type")) {
-            resp.setContentType(MimeType2ExtMap.getContentType(path));
-        }
-    }
-
 }

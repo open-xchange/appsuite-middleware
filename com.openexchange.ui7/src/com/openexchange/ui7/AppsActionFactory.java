@@ -50,57 +50,41 @@
 package com.openexchange.ui7;
 
 import java.io.File;
-import java.io.IOException;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import com.openexchange.mail.mime.MimeType2ExtMap;
+import java.util.Collection;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import com.openexchange.ajax.requesthandler.AJAXActionService;
+import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
+import com.openexchange.documentation.annotations.Module;
+import com.openexchange.exception.OXException;
+import com.openexchange.server.ServiceLookup;
+import com.openexchange.ui7.actions.AllAction;
+import com.openexchange.ui7.actions.AppsAction;
+
 
 /**
- * {@link FileServlet}
- * 
+ * {@link AppsActionFactory}
+ *
  * @author <a href="mailto:viktor.pracht@open-xchange.com">Viktor Pracht</a>
  */
-public class FileServlet extends HttpServlet {
+@Module(name = "apps", description = "Provides access to ui7 apps.")
+public class AppsActionFactory implements AJAXActionServiceFactory {
 
-    private static final long serialVersionUID = 5984953578534687847L;
+    private static Map<String, AppsAction> actions = new ConcurrentHashMap<String, AppsAction>(1);
 
-    private static org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(FileServlet.class));
-
-    protected File root;
-
-    private FileCache cache;
-
-    public FileServlet(FileCache cache, File root) {
+    public AppsActionFactory(ServiceLookup serviceLookup, FileCache cache, File root) {
         super();
-        this.cache = cache;
-        this.root = root;
+        actions.put("all", new AllAction(serviceLookup, cache, root));
     }
 
     @Override
-    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        String path = req.getPathInfo();
-        File file = getFile(req, resp, path);
-        LOG.debug("Serving " + file);
-        byte[] data = cache.get(file);
-        if (data == null) {
-            resp.reset();
-            resp.sendError(HttpServletResponse.SC_NOT_FOUND);
-        } else {
-            writeHeaders(req, resp, file, path);
-            resp.getOutputStream().write(data);
-        }
+    public Collection<?> getSupportedServices() {
+        return java.util.Collections.unmodifiableCollection(actions.values());
     }
 
-    protected File getFile(HttpServletRequest req, HttpServletResponse resp, String path) {
-        return path == null ? root : new File(root, path);
-    }
-
-    protected void writeHeaders(HttpServletRequest req, HttpServletResponse resp, File file, String path) {
-        if (!resp.containsHeader("Content-Type")) {
-            resp.setContentType(MimeType2ExtMap.getContentType(path));
-        }
+    @Override
+    public AJAXActionService createActionService(String action) throws OXException {
+        return actions.get(action);
     }
 
 }

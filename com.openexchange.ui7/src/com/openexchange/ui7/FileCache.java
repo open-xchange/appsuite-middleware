@@ -51,56 +51,78 @@ package com.openexchange.ui7;
 
 import java.io.File;
 import java.io.IOException;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import com.openexchange.mail.mime.MimeType2ExtMap;
+import java.io.RandomAccessFile;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * {@link FileServlet}
+ * An in-memory file cache for small files (mostly UI files).
+ * Since all data is held in RAM, this class should only be used as a singleton.
+ * This pretty much restricts it to only storing publicly accessible files
+ * (e.g. the UI).
  * 
  * @author <a href="mailto:viktor.pracht@open-xchange.com">Viktor Pracht</a>
  */
-public class FileServlet extends HttpServlet {
+public class FileCache {
 
-    private static final long serialVersionUID = 5984953578534687847L;
+    private static org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(FileCache.class));
 
-    private static org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(FileServlet.class));
+    private class CacheEntry {
 
-    protected File root;
+        private File path;
 
-    private FileCache cache;
+        private long timestamp = Long.MIN_VALUE;
 
-    public FileServlet(FileCache cache, File root) {
-        super();
-        this.cache = cache;
-        this.root = root;
-    }
+        private byte[] data = null;
 
-    @Override
-    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        String path = req.getPathInfo();
-        File file = getFile(req, resp, path);
-        LOG.debug("Serving " + file);
-        byte[] data = cache.get(file);
-        if (data == null) {
-            resp.reset();
-            resp.sendError(HttpServletResponse.SC_NOT_FOUND);
-        } else {
-            writeHeaders(req, resp, file, path);
-            resp.getOutputStream().write(data);
+        public CacheEntry(File path) {
+            this.path = path;
+        }
+
+        public byte[] getData() {
+            if (!path.isFile()) {
+                return null;
+            }
+            long current = path.lastModified();
+            if (current > timestamp) {
+                timestamp = current;
+                // Read the entire file into a byte array
+                LOG.debug("Reading " + path);
+                try {
+                    RandomAccessFile f = new RandomAccessFile(path, "r");
+                    data = new byte[(int) f.length()];
+                    f.readFully(data);
+                    f.close();
+                } catch (IOException e) {
+                    data = null;
+                }
+            }
+            return data;
         }
     }
 
-    protected File getFile(HttpServletRequest req, HttpServletResponse resp, String path) {
-        return path == null ? root : new File(root, path);
-    }
+    private Map<File, CacheEntry> cache = new ConcurrentHashMap<File, CacheEntry>();
 
-    protected void writeHeaders(HttpServletRequest req, HttpServletResponse resp, File file, String path) {
-        if (!resp.containsHeader("Content-Type")) {
-            resp.setContentType(MimeType2ExtMap.getContentType(path));
+    /**
+     * Returns the file contents as a byte array.
+     * @param path The file to return.
+     * @return The file contents as a byte array, or null if the file does
+     * not exist or is not a normal file.
+     */
+    public byte[] get(File path) {
+        CacheEntry entry = cache.get(path);
+        if (entry == null) {
+            entry = new CacheEntry(path);
+            cache.put(path, entry);
         }
+        return entry.getData();
+    }
+    
+    /**
+     * Clears the cache.
+     */
+    public void clear() {
+        cache.clear();
     }
 
 }
