@@ -456,8 +456,10 @@ public final class CSSMatcher {
         final StringBuilder cssElemsBuffer = new StringBuilder(css.length());
         final Matcher m = PATTERN_STYLE_BLOCK.matcher(css);
         cssBuilder.setLength(0);
+        final int maxCount = maxCssBlockCount();
+        int count = 0;
         int lastPos = 0;
-        while (m.find()) {
+        while ((count++ < maxCount) && m.find()) {
             // Check prefix part
             cssElemsBuffer.append(css.substring(lastPos, m.start()));
             modified |= checkCSSElements(cssElemsBuffer, styleMap, removeIfAbsent);
@@ -474,7 +476,12 @@ public final class CSSMatcher {
             cssBuilder.append(block);
             lastPos = m.end();
         }
-        cssElemsBuffer.append(css.substring(lastPos, css.length()));
+        /*
+         * Cut off remaining CSS content if maxCount exceeded
+         */
+        if (count < maxCount) {
+            cssElemsBuffer.append(css.substring(lastPos, css.length()));
+        }
         modified |= checkCSSElements(cssElemsBuffer, styleMap, removeIfAbsent);
         final String tail = cssElemsBuffer.toString();
         cssElemsBuffer.setLength(0);
