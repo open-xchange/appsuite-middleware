@@ -47,70 +47,72 @@
  *
  */
 
-package com.openexchange.realtime.atmosphere;
+package com.openexchange.realtime.atmosphere.impl.stanza;
 
+import java.util.List;
 import com.openexchange.exception.OXException;
 import com.openexchange.realtime.MessageDispatcher;
+import com.openexchange.realtime.atmosphere.StanzaSender;
+import com.openexchange.realtime.atmosphere.osgi.AtmosphereServiceRegistry;
 import com.openexchange.realtime.atmosphere.payload.PayloadTransformer;
+import com.openexchange.realtime.atmosphere.payload.PayloadTransformerLibrary;
 import com.openexchange.realtime.packet.Payload;
 import com.openexchange.realtime.packet.Stanza;
 import com.openexchange.realtime.util.ElementPath;
-import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.session.ServerSession;
 
 /**
- * {@link OXRTConversionHandler} - Handles Conversion of Stanzas for a given namespace by telling the Stanza payload the format it should
- * convert itslef into, getting the MessageDispatcher and delegating the further processing of the Stanza.
+ * {@link StanzaTransformer} - Transforms a Stanza "from" one representation "to" another by iterating over all the Payloads found
+ * in the Stanza, and recursively applying the the proper PayloadTransformers. 
  * 
+ * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
-public class OXRTConversionHandler implements PayloadTransformer {
+public abstract class StanzaTransformer<T> {
 
-    public static ServiceLookup services;
-
-    private final String format;
-    private final ElementPath elementPath;
-
+    private final AtmosphereServiceRegistry services = AtmosphereServiceRegistry.getInstance();
+    private final PayloadTransformerLibrary transformers = StranzaTransformerLibrary.getInstance();
+    
     /**
-     * Initializes a new {@link OXRTConversionHandler}.
+     * Handle an incoming {@link Stanza}.
+     * <p>
+     * Channel handlers can decide to delegate the processing of stanzas to the proper {@OXRTHandler} when they can't be
+     * handled internally. The TransformingStanzaHandler's concern is to process and validate it so that the stanza can be handled by the
+     * MessageDispatcher.
+     * </p>
      * 
-     * @param elementPath the path to an element in a namespace this OXRTConversionHandler can handle
-     * @param format the format of POJOs that incoming Stanzas should be converted to
+     * @param stanza The incoming stanza to process
+     * @param session The currently active session
+     * @throws OXException When transformation of the Stanza fails
      */
-    public OXRTConversionHandler(ElementPath elementPath, String format) {
-        this.elementPath = elementPath;
-        this.format = format;
-    }
-
-    @Override
-    public ElementPath getElementPath() {
-        return elementPath; 
-    }
-
-    @Override
-    public void incoming(Stanza stanza, ServerSession session) throws OXException {
-        Payload payload = stanza.getPayload();
-        if(payload != null) {
-            stanza.setPayload(payload.to(format, session));
+    public T incoming(Stanza stanza, ServerSession session) throws OXException {
+        List<Payload> payloads = stanza.getPayloads();
+        for (Payload payload : payloads) {
+            //get Handler for element from namespace and transform element
+            ElementPath elementPath = new ElementPath(payload.getNamespace(), payload.getElementName());
+            PayloadTransformer transformer = transformers.getHandlerFor(elementPath);
+            if (transformer == null) {
+                throw OXException.general("No transformer for " + elementPath);
+            }
+            Payload result = transformer.incoming(payload, session);
+            //TODO: create new Stanza prefilled with copied basics and add payloads?
         }
-        send(stanza, session);
-    }
-
-    @Override
-    public void outgoing(Stanza stanza, ServerSession session, StanzaSender sender) throws OXException {
-        stanza.setPayload(stanza.getPayload().to("json", session));
-        sender.send(stanza);
+        throw new UnsupportedOperationException("Not implemented yet!");
     }
 
     /**
-     * Send the Stanza by getting the MessageDispatcher service and letting it handle the further processing of the Stanza.
+     * Handle an outgoing {@link Stanza}.
+     * <p>
+     * Calling <code>Channel.send()</code> delegates the processing of the stanza to this method.
+     * </p>
      * 
-     * @param stanza the stanza to send
-     * @param session the associated ServerSession
-     * @throws OXException when sending the Stanza fails
+     * @param stanza the stanza to process
+     * @param session the currently active session
+     * @param sender the StanzaSender to use for finally sending the processed Stanza
+     * @throws OXException
      */
-    protected void send(Stanza stanza, ServerSession session) throws OXException {
-        services.getService(MessageDispatcher.class).send(stanza, session);
+    public T outgoing(Stanza stanza, ServerSession session, StanzaSender sender) throws OXException {
+        throw new UnsupportedOperationException("Not implemented yet!");
     }
 
 }

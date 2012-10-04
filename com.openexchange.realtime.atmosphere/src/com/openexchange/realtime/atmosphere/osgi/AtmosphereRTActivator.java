@@ -9,10 +9,10 @@ import com.openexchange.osgi.SimpleRegistryListener;
 import com.openexchange.realtime.Channel;
 import com.openexchange.realtime.MessageDispatcher;
 import com.openexchange.realtime.atmosphere.OXRTConversionHandler;
-import com.openexchange.realtime.atmosphere.OXRTHandler;
-import com.openexchange.realtime.atmosphere.impl.HandlerLibrary;
 import com.openexchange.realtime.atmosphere.impl.RTAtmosphereChannel;
 import com.openexchange.realtime.atmosphere.impl.RTAtmosphereHandler;
+import com.openexchange.realtime.atmosphere.payload.PayloadTransformer;
+import com.openexchange.realtime.atmosphere.payload.PayloadTransformerLibrary;
 import com.openexchange.realtime.packet.Stanza;
 import com.openexchange.sessiond.SessiondService;
 
@@ -37,19 +37,19 @@ public class AtmosphereRTActivator extends HousekeepingActivator {
 	    //Set the ServiceLookup reference directly as class variable
 	    OXRTConversionHandler.services = this;
 	    
-		final HandlerLibrary handlerLibrary = new HandlerLibrary();
+		final PayloadTransformerLibrary handlerLibrary = new PayloadTransformerLibrary();
 		
-		track(OXRTHandler.class, new SimpleRegistryListener<OXRTHandler>() {
+		track(PayloadTransformer.class, new SimpleRegistryListener<PayloadTransformer>() {
 
 		    @Override
-            public void added(ServiceReference<OXRTHandler> ref,
-                    OXRTHandler service) {
+            public void added(ServiceReference<PayloadTransformer> ref,
+                    PayloadTransformer service) {
                 handlerLibrary.add(service);
             }
 
             @Override
-            public void removed(ServiceReference<OXRTHandler> ref,
-                    OXRTHandler service) {
+            public void removed(ServiceReference<PayloadTransformer> ref,
+                    PayloadTransformer service) {
                 handlerLibrary.remove(service);
             }
 

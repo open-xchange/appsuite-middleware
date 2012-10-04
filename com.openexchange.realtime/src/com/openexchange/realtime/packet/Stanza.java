@@ -69,11 +69,14 @@ public abstract class Stanza {
     // All 3 basic stanza types either have an optional or mandatory id field
     private String id;
 
-    // The child elements of this Stanza
-    private List<Payload> payloads = new ArrayList<Payload>();
+    // All child elements of this Stanza
+    protected List<Payload> payloads = new ArrayList<Payload>();
+    
+    // Extension elements of this Stanza, subset of payloads
+    protected List<Payload> extensions = new ArrayList<Payload>();
 
     // The namespaces of child elements of this Stanza
-    private List<String> namespaces = new ArrayList<String>();
+    protected List<String> namespaces = new ArrayList<String>();
 
     /**
      * Initializes a new {@link Stanza}.
@@ -151,16 +154,7 @@ public abstract class Stanza {
      * @param payload The Payload to add.
      * @return true if the Stanza didn't already contain the Payload
      */
-    public boolean addPayload(final Payload payload) {
-        boolean isAdded = payloads.add(payload);
-        if(isAdded) {
-            String namespace = payload.getNamespace();
-            if (namespace != null) {
-                namespaces.add(namespace);
-            }    
-        }
-        return isAdded;
-    }
+    public abstract boolean addPayload(final Payload payload);
 
     /**
      * Remove a Payload from the Stanza and forget about its namespace.
@@ -168,16 +162,7 @@ public abstract class Stanza {
      * @param payload The Payload to remove
      * @return true if the Stanza contained this Payload
      */
-    public boolean removePayload(final Payload payload) {
-        boolean isRemoved = payloads.remove(payload);
-        if(isRemoved) {
-            String namespace = payload.getNamespace();
-            if (namespace != null) {
-                namespaces.remove(namespace);
-            }
-        }
-        return isRemoved;
-    }
+    public abstract boolean removePayload(final Payload payload);
 
     /**
      * Get an unmodifiable view of the structured information of this Stanza.
@@ -186,6 +171,15 @@ public abstract class Stanza {
      */
     public List<Payload> getPayloads() {
         return Collections.unmodifiableList(payloads);
+    }
+    
+    /**
+     * Get all Payloads that aren't part of the basic Presence Schema.
+     * 
+     * @return A List of extension Payloads.
+     */
+    public List<Payload> getExtensions() {
+        return extensions;
     }
 
 }

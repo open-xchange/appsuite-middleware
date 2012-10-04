@@ -49,98 +49,96 @@
 
 package com.openexchange.realtime.packet;
 
+import java.util.List;
+import com.openexchange.exception.OXException;
+
 /**
  * {@link Presence} - Exchanges presence information.
  * A Presence Stanza is a broadcast from a single entity X to a set of entities subscribed to this specific entity X.
  * Being a broadcast this stanza normally doesn't specify a recipient via the <code>to</code> field.
  * Nevertheless clients are able to send directed Presence Stanzas to single recipients by specifying a <code>to</code>.
- * 
  * Modeled after RFC3291
  * 
-     <xs:element name='presence'>
-       <xs:complexType>
-         <xs:sequence>
-           <xs:choice minOccurs='0' maxOccurs='unbounded'>
-             <xs:element ref='show'/>
-             <xs:element ref='status'/>
-             <xs:element ref='priority'/>
-           </xs:choice>
-           <xs:any     namespace='##other'
-                       minOccurs='0'
-                       maxOccurs='unbounded'/>
-           <xs:element ref='error'
-                       minOccurs='0'/>
-         </xs:sequence>
-         <xs:attribute name='from'
-                       type='xs:string'
-                       use='required'/>
-         <xs:attribute name='id'
-                       type='xs:NMTOKEN'
-                       use='optional'/>
-         <xs:attribute name='to'
-                       type='xs:string'
-                       use='required'/>
-         <xs:attribute name='type' use='optional'>
-           <xs:simpleType>
-             <xs:restriction base='xs:NCName'>
-               <xs:enumeration value='error'/>
-               <xs:enumeration value='probe'/>
-               <xs:enumeration value='subscribe'/>
-               <xs:enumeration value='subscribed'/>
-               <xs:enumeration value='unavailable'/>
-               <xs:enumeration value='unsubscribe'/>
-               <xs:enumeration value='unsubscribed'/>
-             </xs:restriction>
-           </xs:simpleType>
-         </xs:attribute>
-         <xs:attribute ref='xml:lang' use='optional'/>
-       </xs:complexType>
-     </xs:element>
-
-     <xs:element name='show'>
-       <xs:simpleType>
-         <xs:restriction base='xs:NCName'>
-           <xs:enumeration value='away'/>
-           <xs:enumeration value='chat'/>
-           <xs:enumeration value='dnd'/>
-           <xs:enumeration value='xa'/>
-         </xs:restriction>
-       </xs:simpleType>
-     </xs:element>
-
-     <xs:element name='status'>
-       <xs:complexType>
-         <xs:simpleContent>
-           <xs:extension base='xs:string'>
-             <xs:attribute ref='xml:lang' use='optional'/>
-           </xs:extension>
-         </xs:simpleContent>
-       </xs:complexType>
-     </xs:element>
-
-     <xs:element name='priority' type='xs:byte'/>
-     
-     <xs:element name='error'>
-       <xs:complexType>
-         <xs:sequence  xmlns:err='urn:ietf:params:xml:ns:xmpp-stanzas'>
-           <xs:group   ref='err:stanzaErrorGroup'/>
-           <xs:element ref='err:text'
-                       minOccurs='0'/>
-         </xs:sequence>
-         <xs:attribute name='code' type='xs:byte' use='optional'/>
-         <xs:attribute name='type' use='required'>
-           <xs:simpleType>
-             <xs:restriction base='xs:NCName'>
-               <xs:enumeration value='auth'/>
-               <xs:enumeration value='cancel'/>
-               <xs:enumeration value='continue'/>
-               <xs:enumeration value='modify'/>
-               <xs:enumeration value='wait'/>
-             </xs:restriction>
-           </xs:simpleType>
-         </xs:attribute>
-       </xs:complexType>
-     </xs:element>
+ <xs:element name='presence'>
+ * <xs:complexType>
+ * <xs:sequence>
+ * <xs:choice minOccurs='0' maxOccurs='unbounded'>
+ * <xs:element ref='show'/>
+ * <xs:element ref='status'/>
+ * <xs:element ref='priority'/>
+ * </xs:choice>
+ * <xs:any namespace='##other'
+ * minOccurs='0'
+ * maxOccurs='unbounded'/>
+ * <xs:element ref='error'
+ * minOccurs='0'/>
+ * </xs:sequence>
+ * <xs:attribute name='from'
+ * type='xs:string'
+ * use='required'/>
+ * <xs:attribute name='id'
+ * type='xs:NMTOKEN'
+ * use='optional'/>
+ * <xs:attribute name='to'
+ * type='xs:string'
+ * use='required'/>
+ * <xs:attribute name='type' use='optional'>
+ * <xs:simpleType>
+ * <xs:restriction base='xs:NCName'>
+ * <xs:enumeration value='error'/>
+ * <xs:enumeration value='probe'/>
+ * <xs:enumeration value='subscribe'/>
+ * <xs:enumeration value='subscribed'/>
+ * <xs:enumeration value='unavailable'/>
+ * <xs:enumeration value='unsubscribe'/>
+ * <xs:enumeration value='unsubscribed'/>
+ * </xs:restriction>
+ * </xs:simpleType>
+ * </xs:attribute>
+ * <xs:attribute ref='xml:lang' use='optional'/>
+ * </xs:complexType>
+ * </xs:element>
+ * <xs:element name='show'>
+ * <xs:simpleType>
+ * <xs:restriction base='xs:NCName'>
+ * <xs:enumeration value='away'/>
+ * <xs:enumeration value='chat'/>
+ * <xs:enumeration value='dnd'/>
+ * <xs:enumeration value='xa'/>
+ * </xs:restriction>
+ * </xs:simpleType>
+ * </xs:element>
+ * <xs:element name='status'>
+ * <xs:complexType>
+ * <xs:simpleContent>
+ * <xs:extension base='xs:string'>
+ * <xs:attribute ref='xml:lang' use='optional'/>
+ * </xs:extension>
+ * </xs:simpleContent>
+ * </xs:complexType>
+ * </xs:element>
+ * <xs:element name='priority' type='xs:byte'/>
+ * <xs:element name='error'>
+ * <xs:complexType>
+ * <xs:sequence xmlns:err='urn:ietf:params:xml:ns:xmpp-stanzas'>
+ * <xs:group ref='err:stanzaErrorGroup'/>
+ * <xs:element ref='err:text'
+ * minOccurs='0'/>
+ * </xs:sequence>
+ * <xs:attribute name='code' type='xs:byte' use='optional'/>
+ * <xs:attribute name='type' use='required'>
+ * <xs:simpleType>
+ * <xs:restriction base='xs:NCName'>
+ * <xs:enumeration value='auth'/>
+ * <xs:enumeration value='cancel'/>
+ * <xs:enumeration value='continue'/>
+ * <xs:enumeration value='modify'/>
+ * <xs:enumeration value='wait'/>
+ * </xs:restriction>
+ * </xs:simpleType>
+ * </xs:attribute>
+ * </xs:complexType>
+ * </xs:element>
  * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a> JavaDoc
@@ -168,10 +166,112 @@ public class Presence extends Stanza {
         UNAVAILABLE, SUBSCRIBE, SUBSCRIBED, UNSUBSCRIBE, UNSUBSCRIBED, ERROR, NONE, PENDING;
     }
 
+    // names of the payload elements from the default schema we are interested in
+    public static final String ERROR = "error";
+
+    public static final String MESSAGE = "message";
+
+    public static final String PRIORITY = "priority";
+
+    public static final String STATE = "state";
+
     /**
      * Optional attribute. The default of none means the client is available.
      */
     private Type type = Type.NONE;
+
+    /**
+     * The server should deliver messages to the highest-priority available resource or decide on metrics like most recent connect,
+     * activity, PresenceState if several resources with the same priority are connected.
+     */
+    private byte priority = 0;
+
+    /**
+     * Signal Availability by choosing ONLINE as default. Clients may set different states.
+     */
+    private PresenceState state = PresenceState.ONLINE;
+
+    /**
+     * Empty message as default. Clients may set a different message.
+     */
+    private String message = "";
+
+    /**
+     * The error object for Presence Stanza of type error
+     */
+    private OXException error = null;
+
+    /**
+     * Get the error element describing the error-type Stanza in more detail.
+     * 
+     * @return The OXException representing the error
+     */
+    public OXException getError() {
+        return error;
+    }
+
+    /**
+     * Set the error element describing the error-type Stanza in more detail.
+     * 
+     * @param error The OXException representing the error
+     */
+    public void setError(OXException error) {
+        this.error = error;
+    }
+
+    /**
+     * Gets the message.
+     * 
+     * @return The message
+     */
+    public String getMessage() {
+        return message;
+    }
+
+    /**
+     * Sets the priority.
+     * 
+     * @return The message
+     */
+    public void setMessage(String message) {
+        this.message = message;
+    }
+
+    /**
+     * Gets the priority.
+     * 
+     * @return The priority
+     */
+    public byte getPriority() {
+        return priority;
+    }
+
+    /**
+     * Sets the priority.
+     * 
+     * @param priority The priority to set
+     */
+    public void setPriority(byte priority) {
+        this.priority = priority;
+    }
+
+    /**
+     * Gets the state e.g. online or away
+     * 
+     * @return The state
+     */
+    public PresenceState getState() {
+        return state;
+    }
+
+    /**
+     * Sets the state e.g. online or away
+     * 
+     * @param state The state
+     */
+    public void setState(PresenceState state) {
+        this.state = state;
+    }
 
     /**
      * Gets the type of Presence Stanza
@@ -189,6 +289,80 @@ public class Presence extends Stanza {
      */
     public void setType(Type type) {
         this.type = type;
+    }
+
+    /**
+     * Add a Payload to the Stanza and keep track of the payload's namespace. This message is called by a PayloadTransformer after the
+     * Payload was transformed into the proper POJO representation. When payloads/child elements of the standard Presence schema are added
+     * the payload's data is assigned to the corresponding field so it can easily accessed by setters and getters.
+     * 
+     * @param payload The Payload to add.
+     * @return true if the Stanza didn't already contain the Payload
+     */
+    @Override
+    public boolean addPayload(final Payload payload) {
+        if (payload == null) {
+            throw new IllegalArgumentException("Payload must not be null");
+        }
+        boolean isAdded = true;
+        if (payload.getNamespace() == null) { // default namespace means no namespace
+            String elementName = payload.getElementName();
+            if (ERROR.equalsIgnoreCase(elementName)) {
+                setError((OXException) payload.getData());
+            } else if (MESSAGE.equalsIgnoreCase(elementName)) {
+                setMessage((String) payload.getData());
+            } else if (PRIORITY.equalsIgnoreCase(elementName)) {
+                setPriority((Byte) payload.getData());
+            } else if (STATE.equalsIgnoreCase(elementName)) {
+                setState((PresenceState) payload.getData());
+            }
+        } else { // payload has a namespace -> add as extension
+            isAdded &= extensions.add(payload);
+        }
+        // track payload anyway in the list of all payloads for further transformation
+        isAdded &= payloads.add(payload);
+        if (isAdded) {
+            namespaces.add(payload.getNamespace());
+            // TODO: Create NamespaceSlurper that - depending on format - recursively checks the payload for namespaces and resturns them as
+            // Map<namespace, count>
+        }
+        return isAdded;
+    }
+
+    /**
+     * Remove a Payload from the Stanza and forget about its namespace and set fields to dfault values.
+     * 
+     * @param payload The Payload to remove
+     * @return True if the Stanza contained this Payload
+     */
+    @Override
+    public boolean removePayload(final Payload payload) {
+        if (payload == null) {
+            throw new IllegalArgumentException("Payload must not be null");
+        }
+        boolean isRemoved = true;
+        if (payload.getNamespace() == null) { // default namespace means no namespace
+            String elementName = payload.getElementName();
+            if (ERROR.equalsIgnoreCase(elementName)) {
+                setError(null);
+            } else if (MESSAGE.equalsIgnoreCase(elementName)) {
+                setMessage("");
+            } else if (PRIORITY.equalsIgnoreCase(elementName)) {
+                setPriority((byte) 0);
+            } else if (STATE.equalsIgnoreCase(elementName)) {
+                setState(PresenceState.ONLINE);
+            }
+        } else { // payload has a namespace -> remove from extension
+            isRemoved &= extensions.remove(payload);
+        }
+
+        if (isRemoved) {
+            String namespace = payload.getNamespace();
+            if (namespace != null) {
+                namespaces.remove(namespace);
+            }
+        }
+        return isRemoved;
     }
 
 }

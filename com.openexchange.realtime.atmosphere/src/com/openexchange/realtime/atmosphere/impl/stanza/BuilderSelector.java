@@ -53,11 +53,7 @@ import org.json.JSONObject;
 import com.openexchange.exception.OXException;
 import com.openexchange.realtime.atmosphere.AtmosphereExceptionCode;
 import com.openexchange.realtime.packet.ID;
-import com.openexchange.realtime.packet.IQ;
-import com.openexchange.realtime.packet.Message;
-import com.openexchange.realtime.packet.Presence;
 import com.openexchange.realtime.packet.Stanza;
-import com.openexchange.realtime.util.ElementPaths;
 
 /**
  * {@link BuilderSelector} - Select and instantiate a new StanzaBuilder matching the client's message.

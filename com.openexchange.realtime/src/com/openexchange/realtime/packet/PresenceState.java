@@ -1,3 +1,6 @@
+
+package com.openexchange.realtime.packet;
+
 /*
  *
  *    OPEN-XCHANGE legal information
@@ -47,76 +50,38 @@
  *
  */
 
-package com.openexchange.realtime.atmosphere.impl;
-
-import java.util.Set;
-
-import com.openexchange.exception.OXException;
-import com.openexchange.realtime.Channel;
-import com.openexchange.realtime.atmosphere.payload.PayloadTransformerLibrary;
-import com.openexchange.realtime.packet.ID;
-import com.openexchange.realtime.packet.Stanza;
-import com.openexchange.tools.session.ServerSession;
-
 /**
- * {@link RTAtmosphereChannel}
- *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * {@link PresenceState} - The different Presence states that can be used to display your availability.
+ * 
+ * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
-public class RTAtmosphereChannel implements Channel {
-	
-    public static final String PROTOCOL = "ox";
-	private final RTAtmosphereHandler handler;
-	private final PayloadTransformerLibrary library;
-	
-	
+public enum PresenceState {
+    ONLINE, OFFLINE, DO_NOT_DISTURB, CHAT_ME_UP, AWAY;
 
-	public RTAtmosphereChannel(RTAtmosphereHandler handler,
-			PayloadTransformerLibrary library) {
-		this.handler = handler;
-		this.library = library;
-	}
+    /**
+     * {@inheritDoc}
+     * <p>
+     * The programmer-friendly form in this case is the name to lower case.
+     * </p>
+     */
+    @Override
+    public String toString() {
+        return this.name().toLowerCase();
+    }
 
-	@Override
-    public String getProtocol() {
-		return "ox";
-	}
-
-	@Override
-    public boolean canHandle(Set<String> namespaces, ID recipient,
-			ServerSession session) {
-		if (!isConnected(recipient, session)) {
-			return false;
-		}
-		
-		if (!hasCapability(recipient, namespaces, session)) {
-			return false;
-		}
-		
-		if (!library.getManageableNamespaces().containsAll(namespaces)) {
-			return false;
-		}
-		
-		return true;
-	}
-
-	public boolean hasCapability(ID recipient, Set<String> namespaces,
-			ServerSession session) {
-		return true; // TODO: Implement Capability Model
-	}
-
-	@Override
-    public int getPriority() {
-		return 10000;
-	}
-
-	@Override
-    public boolean isConnected(ID id, ServerSession session) {
-		return handler.isConnected(id);
-	}
-
-	@Override
-    public void send(Stanza stanza, ServerSession session) throws OXException {
-		handler.handleOutgoing(stanza, session);
-	}
+    /**
+     * Get the possible PresenceStates as comma separated String
+     * @return the values of this enum as comma separated String
+     */
+    public static String getPossibleStates() {
+        StringBuilder sb = new StringBuilder();
+        PresenceState[] states = values();
+        for(int i = 0; i < states.length; i++) {
+            sb.append(states[i]);
+            if(i < states.length - 1) {
+                sb.append(", ");
+            }
+        }
+        return sb.toString();
+    }
 }

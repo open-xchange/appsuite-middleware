@@ -47,76 +47,73 @@
  *
  */
 
-package com.openexchange.realtime.atmosphere.impl;
+package com.openexchange.realtime.atmosphere.payload;
 
+import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
-
-import com.openexchange.exception.OXException;
-import com.openexchange.realtime.Channel;
-import com.openexchange.realtime.atmosphere.payload.PayloadTransformerLibrary;
-import com.openexchange.realtime.packet.ID;
-import com.openexchange.realtime.packet.Stanza;
-import com.openexchange.tools.session.ServerSession;
+import java.util.concurrent.ConcurrentHashMap;
+import com.openexchange.realtime.util.ElementPath;
 
 /**
- * {@link RTAtmosphereChannel}
- *
+ * {@link PayloadTransformerLibrary} - Tracks registered {@link PayloadTransformer handlers} and
+ * makes them accessible through {@link #getHandlerFor(String)}.
+ * This is important to the AtmosphereChannel and associated Channel handler.
+ * The Channel can decide if it is able to process incoming Stanzas into POJOs
+ * and back again. The Channel handler can delegate the transformation to the
+ * proper OXRTHandler.
+ * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a> JavaDoc
+ * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
-public class RTAtmosphereChannel implements Channel {
-	
-    public static final String PROTOCOL = "ox";
-	private final RTAtmosphereHandler handler;
-	private final PayloadTransformerLibrary library;
-	
-	
+public class PayloadTransformerLibrary {
 
-	public RTAtmosphereChannel(RTAtmosphereHandler handler,
-			PayloadTransformerLibrary library) {
-		this.handler = handler;
-		this.library = library;
-	}
+    /**
+     * The collection for registered {@link PayloadTransformer handlers}.
+     */
+    private final Map<ElementPath, PayloadTransformer> handlers;
 
-	@Override
-    public String getProtocol() {
-		return "ox";
-	}
+    public PayloadTransformerLibrary() {
+        super();
+        handlers = new ConcurrentHashMap<ElementPath, PayloadTransformer>();
+    }
 
-	@Override
-    public boolean canHandle(Set<String> namespaces, ID recipient,
-			ServerSession session) {
-		if (!isConnected(recipient, session)) {
-			return false;
-		}
-		
-		if (!hasCapability(recipient, namespaces, session)) {
-			return false;
-		}
-		
-		if (!library.getManageableNamespaces().containsAll(namespaces)) {
-			return false;
-		}
-		
-		return true;
-	}
+    /**
+     * Gets the appropriate handler for the specified Stanz class.
+     * 
+     * @param stanzaClass The Stanza subclass we want to transform.
+     * @return The appropriate handler or <code>null</code> if none is applicable.
+     */
+    public PayloadTransformer getHandlerFor(ElementPath elementPath) {
+        return handlers.get(elementPath);
+    }
 
-	public boolean hasCapability(ID recipient, Set<String> namespaces,
-			ServerSession session) {
-		return true; // TODO: Implement Capability Model
-	}
+    /**
+     * Adds specified handler/transformer to this library.
+     * 
+     * @param transformer The handler to add
+     */
+    public void add(PayloadTransformer transformer) {
+        handlers.put(transformer.getElementPath(), transformer);
+    }
 
-	@Override
-    public int getPriority() {
-		return 10000;
-	}
+    /**
+     * Removes specified handler/transformer from this library.
+     * 
+     * @param transformer The handler to remove
+     */
+    public void remove(PayloadTransformer transformer) {
+        handlers.remove(transformer.getElementPath());
+    }
 
-	@Override
-    public boolean isConnected(ID id, ServerSession session) {
-		return handler.isConnected(id);
-	}
+    /**
+     * Get the collected namespaces the registered OXRTHandlers are able to transform.
+     * 
+     * @return the collected namespaces the registered OXRTHandlers are able to transform.
+     */
+    public Set<ElementPath> getManageableNamespaces() {
+        return new HashSet<ElementPath>(handlers.keySet());
+    }
 
-	@Override
-    public void send(Stanza stanza, ServerSession session) throws OXException {
-		handler.handleOutgoing(stanza, session);
-	}
 }

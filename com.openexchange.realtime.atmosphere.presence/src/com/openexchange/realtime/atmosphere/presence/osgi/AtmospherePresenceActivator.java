@@ -53,7 +53,7 @@ import org.apache.commons.logging.Log;
 import com.openexchange.conversion.simple.SimplePayloadConverter;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.realtime.atmosphere.OXRTConversionHandler;
-import com.openexchange.realtime.atmosphere.OXRTHandler;
+import com.openexchange.realtime.atmosphere.payload.PayloadTransformer;
 import com.openexchange.realtime.atmosphere.presence.JSONToPresenceDataConverter;
 import com.openexchange.realtime.atmosphere.presence.OXRTPresenceHandler;
 import com.openexchange.realtime.atmosphere.presence.PresenceDataToJSONConverter;
@@ -107,7 +107,7 @@ public class AtmospherePresenceActivator extends HousekeepingActivator {
          */
         registerService(SimplePayloadConverter.class, new PresenceDataToJSONConverter());
         registerService(SimplePayloadConverter.class, new JSONToPresenceDataConverter());
-        registerService(OXRTHandler.class, new OXRTPresenceHandler());
+        registerService(PayloadTransformer.class, new OXRTPresenceHandler());
     }
 
     @Override

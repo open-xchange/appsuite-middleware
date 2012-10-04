@@ -47,77 +47,49 @@
  *
  */
 
-package com.openexchange.realtime.atmosphere.impl;
+package com.openexchange.realtime.atmosphere.payload;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.CopyOnWriteArrayList;
-import com.openexchange.realtime.atmosphere.OXRTHandler;
+import com.openexchange.exception.OXException;
+import com.openexchange.realtime.atmosphere.StanzaSender;
+import com.openexchange.realtime.atmosphere.impl.RTAtmosphereHandler;
+import com.openexchange.realtime.packet.Payload;
+import com.openexchange.realtime.packet.Stanza;
 import com.openexchange.realtime.util.ElementPath;
+import com.openexchange.tools.session.ServerSession;
 
 /**
- * {@link HandlerLibrary} - Tracks registered {@link OXRTHandler handlers} and
- * makes them accessible through {@link #getHandlerFor(String)}.
- * This is important to the AtmosphereChannel and associated Channel handler.
- * The Channel can decide if it is able to process incoming Stanzas into POJOs
- * and back again. The Channel handler can delegate the transformation to the
- * proper OXRTHandler.
+ * {@link PayloadTransformer} - Used to transform Payload elemnts of incoming and outgoing Stanzas.
  * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a> JavaDoc
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
-public class HandlerLibrary {
+public interface PayloadTransformer {
 
     /**
-     * The collection for registered {@link OXRTHandler handlers}.
-     */
-    private final Map<ElementPath, OXRTHandler> handlers;
-
-    public HandlerLibrary() {
-        super();
-        handlers = new ConcurrentHashMap<ElementPath, OXRTHandler>();
-    }
-
-    /**
-     * Gets the appropriate handler for the specified Stanz class.
+     * Get the complete path to an element in a namespace that this PayloadTransformer is able to process.
      * 
-     * @param stanzaClass The Stanza subclass we want to transform.
-     * @return The appropriate handler or <code>null</code> if none is applicable.
+     * @return the elementPath of elements this PayloadTransformer is able to process.
      */
-    public OXRTHandler getHandlerFor(String namespace, String element) {
-        ElementPath elementPath = new ElementPath(namespace, element);
-        return handlers.get(elementPath);
-    }
+    public ElementPath getElementPath();
 
     /**
-     * Adds specified handler/transformer to this library.
+     * Transform an incoming Payload.
      * 
-     * @param transformer The handler to add
+     * @param paylaod The incoming Payload to process
+     * @param session The currently active session
+     * @return 
+     * @throws OXException When transformation fails
      */
-    public void add(OXRTHandler transformer) {
-        handlers.put(transformer.getElementPath(), transformer);
-    }
+    public Payload incoming(Payload payload, ServerSession session) throws OXException;
 
     /**
-     * Removes specified handler/transformer from this library.
+     * Transform an outgoing Payload.
      * 
-     * @param transformer The handler to remove
+     * @param payload The Payload to process
+     * @param session The currently active session
+     * @param sender The StanzaSender to use for finally sending the processed Stanza
+     * @throws OXException
      */
-    public void remove(OXRTHandler transformer) {
-        handlers.remove(transformer.getElementPath());
-    }
-
-    /**
-     * Get the collected namespaces the registered OXRTHandlers are able to transform.
-     * 
-     * @return the collected namespaces the registered OXRTHandlers are able to transform.
-     */
-    public Set<ElementPath> getManageableNamespaces() {
-        return new HashSet<ElementPath>(handlers.keySet());
-    }
+    public Payload outgoing(Payload payload, ServerSession session, StanzaSender sender) throws OXException;
 
 }

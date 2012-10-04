@@ -7,7 +7,7 @@ import com.openexchange.log.Log;
 import com.openexchange.log.LogFactory;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.realtime.atmosphere.OXRTConversionHandler;
-import com.openexchange.realtime.atmosphere.OXRTHandler;
+import com.openexchange.realtime.atmosphere.payload.PayloadTransformer;
 import com.openexchange.realtime.packet.Message;
 import converters.ChatMessageToJSONConverter;
 import converters.JSONToChatMessageConverter;
@@ -49,7 +49,7 @@ public class AtmosphereTestActivator extends HousekeepingActivator {
          * Payload to convert itself into the desired format. It takes chat
          * elements from the namespace default and transform them to ChatMessage POJOS.
          */
-        registerService(OXRTHandler.class,  new OXRTConversionHandler(Message.class, "chatMessage"));
+        registerService(PayloadTransformer.class,  new OXRTConversionHandler(Message.class, "chatMessage"));
         
         //Add the atmosphere chat handler
         AtmosphereService service = getService(AtmosphereService.class);

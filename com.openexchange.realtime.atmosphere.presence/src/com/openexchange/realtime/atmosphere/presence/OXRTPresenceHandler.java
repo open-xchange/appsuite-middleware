@@ -50,8 +50,8 @@
 package com.openexchange.realtime.atmosphere.presence;
 
 import com.openexchange.exception.OXException;
-import com.openexchange.realtime.atmosphere.OXRTHandler;
 import com.openexchange.realtime.atmosphere.StanzaSender;
+import com.openexchange.realtime.atmosphere.payload.PayloadTransformer;
 import com.openexchange.realtime.atmosphere.presence.osgi.AtmospherePresenceServiceRegistry;
 import com.openexchange.realtime.packet.ID;
 import com.openexchange.realtime.packet.Payload;
@@ -78,7 +78,7 @@ import com.openexchange.tools.session.ServerSession;
  * 
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
-public class OXRTPresenceHandler implements OXRTHandler {
+public class OXRTPresenceHandler implements PayloadTransformer {
 
     @Override
     public Class<? extends Stanza> getNamespace() {

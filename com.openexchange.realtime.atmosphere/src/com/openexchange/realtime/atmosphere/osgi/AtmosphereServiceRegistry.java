@@ -47,59 +47,53 @@
  *
  */
 
-package com.openexchange.realtime.atmosphere;
+package com.openexchange.realtime.atmosphere.osgi;
 
-import com.openexchange.exception.OXException;
-import com.openexchange.realtime.atmosphere.impl.RTAtmosphereHandler;
-import com.openexchange.realtime.packet.Stanza;
-import com.openexchange.realtime.util.ElementPath;
-import com.openexchange.tools.session.ServerSession;
+import com.openexchange.osgi.ServiceRegistry;
+import com.openexchange.server.ServiceLookup;
 
 /**
- * {@link OXRTHandler} OXRTHandlers are used to handle incoming and outgoing
- * Stanzas.
- * <p>
- * Channel handlers like e.g. {@link RTAtmosphereHandler} choose an OXRTHandler
- * based on the namespace of the Stanzas and the OXRTHandler and delegate the
- * further processing and handling to them.
- * <p> 
+ * {@link AtmospherePresenceServiceRegistry}
  *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
-public interface OXRTHandler {
+/**
+ * {@link AtmosphereServiceRegistry} Singleton that extends the existing {@link ServiceRegistry} to gain functionality and acts as
+ * central accesspoint for classes of the AtmospherePresence bundle.
+ * 
+ * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
+ */
+public class AtmosphereServiceRegistry extends ServiceRegistry {
+    private static final AtmosphereServiceRegistry INSTANCE = new AtmosphereServiceRegistry();
     
     /**
-     * Get the complete path to an element in a namespace that this OXRTHandler is able to process.
-     * @return the elementPath of elements this OXRTHandler is able to process.
+     * Encapsulated constructor.
      */
-	public ElementPath getElementPath();
-	
-	/**
-	 * Handle an incoming {@link Stanza}.
-	 * <p>
-	 * Channel handlers can decide to delegate the processing of stanzas to the
-	 * proper {@OXRTHandler} when they can't be handled internally. The
-	 * OXRTHandler's concern is to process and validate it so that the stanza can be handled
-	 * by the MessageDispatcher.
-	 * </p>
-	 * @param stanza the incoming stanza to process
-	 * @param session the currently active session
-	 * @throws OXException
-	 */
-	public void incoming(Stanza stanza, ServerSession session) throws OXException;
-	
-	/**
-	 * Handle an outgoing {@link Stanza}.
-	 * <p>
-	 * Calling <code>Channel.send()</code> delegates the processing of the
-	 * stanza to this method.
-	 * </p>
-	 * @param stanza the stanza to process
-	 * @param session the currently active  session
-	 * @param sender the StanzaSender to use for finally sending the processed Stanza
-	 * @throws OXException
-	 */
-	public void outgoing(Stanza stanza, ServerSession session, StanzaSender sender) throws OXException;
-	
+    private AtmosphereServiceRegistry() {}
+    
+    /**
+     * Get the GrizzlyService Registry singleton.
+     * @return the GrizzlyService Registry singleton
+     */
+    public static AtmosphereServiceRegistry getInstance() {
+        return INSTANCE;
+    }
+    
+    /**
+     * Initialize the service registry with the services that are declared as needed.
+     * @param activator the DeferredActivator to get services from
+     * @param neededServices the services declared as needed
+     */
+    public void initialize(ServiceLookup serviceLookup, Class[] neededServices) {
+        INSTANCE.clearRegistry();
+        for (Class<?> serviceClass : neededServices) {
+            Object service = serviceLookup.getService(serviceClass);
+            if (service != null) {
+                INSTANCE.addService(serviceClass, service);
+            }
+        }
+    }
 }
+
+
+

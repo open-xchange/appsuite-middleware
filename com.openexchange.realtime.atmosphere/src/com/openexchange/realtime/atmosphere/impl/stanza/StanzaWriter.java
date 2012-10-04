@@ -59,7 +59,6 @@ import com.openexchange.realtime.packet.Message;
 import com.openexchange.realtime.packet.Payload;
 import com.openexchange.realtime.packet.Presence;
 import com.openexchange.realtime.packet.Stanza;
-import com.openexchange.realtime.util.ElementPaths;
 
 /**
  * {@link StanzaWriter} - Transforms Stanza objects into their JSON representation.
@@ -118,7 +117,12 @@ public class StanzaWriter {
             JSONArray payloadArray = new JSONArray();
             for(Payload payload : payloads) {
                 JSONObject payloadObject = new JSONObject();
-                payloadObject.put(namespace, element, data)
+                String namespace = payload.getNamespace();
+                if(namespace != null) {
+                    payloadObject.put("namespace",payload.getNamespace());
+                }
+                payloadObject.put("element",payload.getElementName());
+                payloadObject.put("data",payload.getData());
                 payloadArray.put(payloadObject);
             }
         }

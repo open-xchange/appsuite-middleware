@@ -74,14 +74,17 @@ import com.openexchange.exception.OXException;
 import com.openexchange.exception.OXExceptionFactory;
 import com.openexchange.log.Log;
 import com.openexchange.log.LogFactory;
-import com.openexchange.realtime.atmosphere.OXRTHandler;
 import com.openexchange.realtime.atmosphere.StanzaSender;
 import com.openexchange.realtime.atmosphere.impl.stanza.BuilderSelector;
 import com.openexchange.realtime.atmosphere.impl.stanza.StanzaBuilder;
+import com.openexchange.realtime.atmosphere.impl.stanza.StanzaTransformer;
 import com.openexchange.realtime.atmosphere.impl.stanza.StanzaWriter;
+import com.openexchange.realtime.atmosphere.payload.PayloadTransformer;
+import com.openexchange.realtime.atmosphere.payload.PayloadTransformerLibrary;
 import com.openexchange.realtime.packet.ID;
 import com.openexchange.realtime.packet.Payload;
 import com.openexchange.realtime.packet.Stanza;
+import com.openexchange.realtime.util.ElementPath;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
@@ -107,7 +110,7 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
 
     private final ServiceLookup services;
 
-    private final HandlerLibrary library;
+    private final PayloadTransformerLibrary library;
 
     // Keep track of sessionID -> RTAtmosphereState to uniquely identify connected clients
     private final ConcurrentHashMap<String, RTAtmosphereState> sessionIdToState;
@@ -121,7 +124,7 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
      * @param library The library to use for OXRTHandler lookups needed for transformations of incoming and outgoing stanzas
      * @param services The service-lookup providing needed services
      */
-    public RTAtmosphereHandler(HandlerLibrary library, ServiceLookup services) {
+    public RTAtmosphereHandler(PayloadTransformerLibrary library, ServiceLookup services) {
         super();
         sessionIdToState = new ConcurrentHashMap<String, RTAtmosphereState>();
         userToBroadcasterIDs = new ConcurrentHashMap<String, Set<String>>();
@@ -506,7 +509,7 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
     }
 
     /**
-     * Handle incoming Stanza and decide if they have an internal namespace and need to be handles by the Channel/Handler or if they should
+     * Handle incoming Stanza and decide if they have an internal namespace and need to be handled by the Channel/Handler or if they should
      * be dispatched iow. transformed to POJOs and handed over to the MessageDispatcher.
      * 
      * @param stanza The Stanza to handle
@@ -554,22 +557,23 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
     }
 
     /**
-     * 
-     * @param stanza
-     * @param atmosphereState
-     * @throws OXException
+     * Transform the Stanza from its current JSON representation to a POJO and hand it over to the MessageDispatcher.
+     * @param stanza The incoming Stanza in JSON form
+     * @param atmosphereState The AtmosphereState associated with the incoming Stanza
+     * @throws OXException 
      */
     private void dispatchStanza(Stanza stanza, RTAtmosphereState atmosphereState) throws OXException {
-        //TODO:apply transformers to all payloads before dispatching
-        List<Payload> payloads = stanza.getPayloads();
-        for (Payload payload : payloads) {
-            //get Handler for element from namespace and transform element
-            OXRTHandler transformer = library.getHandlerFor(new ElementPath(payload.getNamespace(), payload.getElementName()));
-            if (transformer == null) {
-                throw OXException.general("No transformer for " + stanza);
-            }
-            transformer.incoming(stanza, atmosphereState.session);
+        throw new UnsupportedOperationException("Not implemented yet!");
+        if(stanza instanceof Presence) {
+            
+        } else if(stanza instanceof IQ) {
+            
+        } else if(stanza instanceof Message) {
+            
         }
+        StanzaTransformer stanzaTransformer = new StanzaTransformer();
+        //TODO:apply transformers to all payloads before dispatching
+        
         //when all elements are transformed -> get MessageDispatcher and send transformed Stanza 
         
     }
@@ -582,8 +586,9 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
      * @throws OXException if no transformer for the given Stanza can be found
      */
     public void handleOutgoing(Stanza stanza, ServerSession serverSession) throws OXException {
+        throw new UnsupportedOperationException("Not implemented yet!");
         //TODO:apply transformers to all payloads before sending
-        OXRTHandler transformer = library.getHandlerFor(stanza.getClass());
+        PayloadTransformer transformer = library.getHandlerFor(stanza.getClass());
         if (transformer == null) {
             throw OXException.general("No transformer for " + stanza);
         }
