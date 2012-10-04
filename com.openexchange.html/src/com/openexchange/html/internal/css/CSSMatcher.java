@@ -296,10 +296,10 @@ public final class CSSMatcher {
         /*
          * Feed matcher with buffer's content and reset
          */
-        final String css = dropEmptyLines(cssBuilder);
-        if (css.indexOf('{') < 0) {
+        if (cssBuilder.indexOf("{") < 0) {
             return checkCSSElements(cssBuilder, styleMap, true);
         }
+        final String css = dropEmptyLines(cssBuilder);
         final StringBuilder cssElemsBuffer = new StringBuilder(css.length());
         final Matcher m = PATTERN_STYLE_BLOCK.matcher(css);
         cssBuilder.setLength(0);
@@ -449,10 +449,10 @@ public final class CSSMatcher {
         /*
          * Feed matcher with buffer's content and reset
          */
-        final String css = dropEmptyLines(cssBuilder);
-        if (css.indexOf('{') < 0) {
+        if (cssBuilder.indexOf("{") < 0) {
             return checkCSSElements(cssBuilder, styleMap, removeIfAbsent);
         }
+        final String css = dropEmptyLines(cssBuilder);
         final StringBuilder cssElemsBuffer = new StringBuilder(css.length());
         final Matcher m = PATTERN_STYLE_BLOCK.matcher(css);
         cssBuilder.setLength(0);
@@ -507,10 +507,10 @@ public final class CSSMatcher {
             /*
              * Feed matcher with buffer's content and reset
              */
-            final String css = cssBuilder.toString();
-            if (css.indexOf('{') < 0) {
+            if (cssBuilder.indexOf("{") < 0) {
                 return checkCSSElements(cssBuilder, styleMap, removeIfAbsent);
             }
+            final String css = dropEmptyLines(cssBuilder);
             final Matcher m = PATTERN_STYLE_BLOCK.matcher(css);
             final MatcherReplacer mr = new MatcherReplacer(m, css);
             cssBuilder.setLength(0);
