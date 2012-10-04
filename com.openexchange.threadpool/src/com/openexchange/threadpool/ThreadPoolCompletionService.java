@@ -92,12 +92,10 @@ public final class ThreadPoolCompletionService<V> implements CancelableCompletio
     }
 
     private final ThreadPoolService threadPoolService;
-
     private final BlockingQueue<Future<V>> completionQueue;
-
     private final RefusedExecutionBehavior<V> behavior;
-
     private final List<Future<V>> submittedFutures;
+    private boolean trackable;
 
     /**
      * Initializes a new {@link ThreadPoolCompletionService} with caller-runs behavior and an unbound {@link BlockingQueue}.
@@ -140,6 +138,17 @@ public final class ThreadPoolCompletionService<V> implements CancelableCompletio
         this.behavior = behavior;
         submittedFutures = new LinkedList<Future<V>>();
     }
+    
+    /**
+     * Sets whether submitted tasks are trackable.
+     * 
+     * @param trackable <code>true</code> if trackable; otherwise <code>false</code>
+     * @return This completion service with new behavior applied
+     */
+    public ThreadPoolCompletionService<V> setTrackable(boolean trackable) {
+        this.trackable = trackable;
+        return this;
+    }
 
     @Override
     public Future<V> submit(final Callable<V> task) {
@@ -147,7 +156,7 @@ public final class ThreadPoolCompletionService<V> implements CancelableCompletio
             throw new NullPointerException();
         }
         final QueueingFuture<V> f = new QueueingFuture<V>(task, completionQueue);
-        submittedFutures.add(threadPoolService.submit(ThreadPools.task(f, (V) null), behavior));
+        submittedFutures.add(threadPoolService.submit(ThreadPools.task(f, (V) null, trackable), behavior));
         return f;
     }
 
@@ -157,7 +166,7 @@ public final class ThreadPoolCompletionService<V> implements CancelableCompletio
             throw new NullPointerException();
         }
         final QueueingFuture<V> f = new QueueingFuture<V>(task, result, completionQueue);
-        submittedFutures.add(threadPoolService.submit(ThreadPools.task(f, (V) null), behavior));
+        submittedFutures.add(threadPoolService.submit(ThreadPools.task(f, (V) null, trackable), behavior));
         return f;
     }
 
