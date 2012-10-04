@@ -304,7 +304,11 @@ public class MimeMessageFiller {
                     mimeMessage.setHeader(MessageHeaders.HDR_ORGANIZATION, encoded);
                 }
             } catch (final Exception e) {
-                LOG.error("Header \"Organization\" could not be set", e);
+                if (DEBUG) { // Include stack trace as well
+                    LOG.warn("Header \"Organization\" could not be set", e);
+                } else {
+                    LOG.warn("Header \"Organization\" could not be set.");
+                }
             }
         }
         /*

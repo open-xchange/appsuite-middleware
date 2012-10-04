@@ -127,7 +127,7 @@ public abstract class CalDAVFolderCollection<T extends CalendarObject> extends C
             return factory.getUser();
         } else if (null != folder.getPermissions()) {
             for (Permission permission : folder.getPermissions()) {
-                if (permission.isAdmin()) {
+                if (permission.isAdmin() && false == permission.isGroup()) {
                     return factory.resolveUser(permission.getEntity());
                 }
             }
