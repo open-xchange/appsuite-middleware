@@ -171,9 +171,7 @@ public final class CSSMatcher {
 
         PATTERN_IS_PATTERN = Pattern.compile("[unNcd*t]+");
         
-        final String token = "[\\S&&[^{}\\*/]]+";
-        
-        PATTERN_STYLE_BLOCK = Pattern.compile("("+token+"(?:(?:\\s*,\\s*|\\s+)"+token+")*\\s*\\{)([^\\}]+)\\}");
+        PATTERN_STYLE_BLOCK = Pattern.compile("((?:#|\\.|[a-zA-Z]).*?)\\s+\\{([^\\}]+)\\}", Pattern.DOTALL);
 
         PATTERN_COLOR_RGB = Pattern.compile(strCOLOR_RGB_FUNC, Pattern.CASE_INSENSITIVE);
     }
@@ -262,6 +260,8 @@ public final class CSSMatcher {
         }
     }
 
+    private static final Pattern CRLF = Pattern.compile("\r?\n| {2,}");
+
     /**
      * Iterates over CSS contained in specified string argument and checks each found element/block against given style map
      *
@@ -281,7 +281,7 @@ public final class CSSMatcher {
         if (cssBuilder.indexOf("{") < 0) {
             return checkCSSElements(cssBuilder, styleMap, true);
         }
-        final String css = cssBuilder.toString();
+        final String css = CRLF.matcher(cssBuilder).replaceAll("");
         final StringBuilder cssElemsBuffer = new StringBuilder(css.length());
         final Matcher m = PATTERN_STYLE_BLOCK.matcher(css);
         cssBuilder.setLength(0);
@@ -295,7 +295,7 @@ public final class CSSMatcher {
             // Check block part
             cssElemsBuffer.append(m.group(2));
             modified |= checkCSSElements(cssElemsBuffer, styleMap, true);
-            cssElemsBuffer.insert(0, prefixBlock(m.group(1), cssPrefix)).append('}'); // Surround with block definition
+            cssElemsBuffer.insert(0, prefixBlock(m.group(1), cssPrefix)).append('}').append('\n'); // Surround with block definition
             final String block = cssElemsBuffer.toString();
             cssElemsBuffer.setLength(0);
             // Add to main builder
@@ -427,7 +427,7 @@ public final class CSSMatcher {
         if (cssBuilder.indexOf("{") < 0) {
             return checkCSSElements(cssBuilder, styleMap, removeIfAbsent);
         }
-        final String css = cssBuilder.toString();
+        final String css = CRLF.matcher(cssBuilder).replaceAll("");
         final StringBuilder cssElemsBuffer = new StringBuilder(css.length());
         final Matcher m = PATTERN_STYLE_BLOCK.matcher(css);
         cssBuilder.setLength(0);
@@ -441,7 +441,7 @@ public final class CSSMatcher {
             // Check block part
             cssElemsBuffer.append(m.group(2));
             modified |= checkCSSElements(cssElemsBuffer, styleMap, removeIfAbsent);
-            cssElemsBuffer.insert(0, m.group(1)).append('}'); // Surround with block definition
+            cssElemsBuffer.insert(0, m.group(1)).append('}').append('\n'); // Surround with block definition
             final String block = cssElemsBuffer.toString();
             cssElemsBuffer.setLength(0);
             // Add to main builder
@@ -478,7 +478,7 @@ public final class CSSMatcher {
             if (cssBuilder.indexOf("{") < 0) {
                 return checkCSSElements(cssBuilder, styleMap, removeIfAbsent);
             }
-            final String css = cssBuilder.toString();
+            final String css = CRLF.matcher(cssBuilder.toString()).replaceAll("");
             final Matcher m = PATTERN_STYLE_BLOCK.matcher(css);
             final MatcherReplacer mr = new MatcherReplacer(m, css);
             cssBuilder.setLength(0);
@@ -487,7 +487,7 @@ public final class CSSMatcher {
                 tmpBuilder.setLength(0);
                 mr.appendLiteralReplacement(
                     cssBuilder,
-                    tmpBuilder.append(m.group(1)).append(cssElemsBuffer.toString()).append('}').toString());
+                    tmpBuilder.append(m.group(1)).append(cssElemsBuffer.toString()).append('}').append('\n').toString());
                 cssElemsBuffer.setLength(0);
             }
             mr.appendTail(cssBuilder);
