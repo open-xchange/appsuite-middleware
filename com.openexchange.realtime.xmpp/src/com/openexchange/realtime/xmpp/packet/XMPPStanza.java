@@ -68,7 +68,7 @@ public abstract class XMPPStanza {
     private String id;
 
     private ServerSession session;
-    
+
     protected XMPPStanza(ServerSession session) {
         this.session = session;
     }
@@ -103,6 +103,20 @@ public abstract class XMPPStanza {
         if (id != null) {
             document.attr("id", id);
         }
+    }
+
+    public static XMPPStanza getStanza(Match xml, ServerSession session) {
+        String id = xml.id().trim().toLowerCase();
+
+        if (id.equals("message")) {
+            return new XMPPMessage(xml, session);
+        } else if (id.equals("presence")) {
+            return new XMPPPresence(session);
+        } else if (id.equals("iq")) {
+            return new XMPPIq(xml, session);
+        }
+
+        return null;
     }
 
     public abstract String toXML(ServerSession session) throws OXException;

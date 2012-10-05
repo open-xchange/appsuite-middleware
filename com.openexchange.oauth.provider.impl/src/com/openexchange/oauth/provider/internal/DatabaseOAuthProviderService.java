@@ -347,7 +347,7 @@ public class DatabaseOAuthProviderService extends AbstractOAuthProviderService i
                     }
                 }
             };
-            ThreadPools.getThreadPool().submit(ThreadPools.task(loader));
+            ThreadPools.getThreadPool().submit(ThreadPools.trackableTask(loader));
         }
     }
 

@@ -324,7 +324,7 @@ public final class CacheFolderStorage implements FolderStorage {
                                     }
                                     if (!tasks.isEmpty()) {
                                         for (final Runnable task : tasks) {
-                                            threadPool.submit(ThreadPools.task(task), behavior);
+                                            threadPool.submit(ThreadPools.trackableTask(task), behavior);
                                         }
                                     }
                                 }
@@ -339,7 +339,7 @@ public final class CacheFolderStorage implements FolderStorage {
                             }
                         }
                     };
-                    threadPool.submit(ThreadPools.task(task), behavior);
+                    threadPool.submit(ThreadPools.trackableTask(task), behavior);
                 } catch (final Exception e) {
                     LOG.debug(e.getMessage(), e);
                 }

@@ -157,7 +157,7 @@ public final class TaskIterator2 implements TaskIterator, Runnable {
         this.type = type;
         this.con = con;
         final ThreadPoolService threadPool = ServerServiceRegistry.getInstance().getService(ThreadPoolService.class);
-        runner = threadPool.submit(ThreadPools.task(this));
+        runner = threadPool.submit(ThreadPools.trackableTask(this));
     }
 
     private void modifyAdditionalAttributes(final List<Integer> additional) {

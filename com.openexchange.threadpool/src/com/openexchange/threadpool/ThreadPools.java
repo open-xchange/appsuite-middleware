@@ -364,6 +364,17 @@ public final class ThreadPools {
     }
 
     /**
+     * Returns a trackable {@link Task} object that, when called, runs the given task and returns <tt>null</tt>.
+     *
+     * @param task The task to run
+     * @return A {@link Task} object
+     * @throws NullPointerException If task is <code>null</code>
+     */
+    public static Task<Object> trackableTask(final Runnable task) {
+        return task(task, true);
+    }
+
+    /**
      * Returns a {@link Task} object that, when called, runs the given task and returns <tt>null</tt>.
      *
      * @param task The task to run
