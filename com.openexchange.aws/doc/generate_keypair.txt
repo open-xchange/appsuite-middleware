@@ -1,0 +1,10 @@
+Generate a key pair using following commands:
+
+Generate a 2048-bit RSA private key
+openssl genrsa -out private_key.pem 2048
+
+Convert private key to PKCS#8, so Java can read it
+openssl pkcs8 -topk8 -inform PEM -outform DER -in private_key.pem -out private_key.der -nocrypt
+
+Extract public key in DER format
+openssl rsa -in private_key.pem -pubout -outform DER -out public_key.der

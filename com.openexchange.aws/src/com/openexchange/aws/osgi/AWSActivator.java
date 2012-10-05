@@ -49,6 +49,18 @@
 
 package com.openexchange.aws.osgi;
 
+import java.io.DataInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.security.KeyFactory;
+import java.security.KeyPair;
+import java.security.NoSuchAlgorithmException;
+import java.security.PrivateKey;
+import java.security.PublicKey;
+import java.security.spec.InvalidKeySpecException;
+import java.security.spec.PKCS8EncodedKeySpec;
+import java.security.spec.X509EncodedKeySpec;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.amazonaws.auth.AWSCredentials;
@@ -63,6 +75,8 @@ import com.amazonaws.services.elasticloadbalancing.AmazonElasticLoadBalancing;
 import com.amazonaws.services.elasticloadbalancing.AmazonElasticLoadBalancingClient;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3Client;
+import com.amazonaws.services.s3.AmazonS3EncryptionClient;
+import com.amazonaws.services.s3.model.EncryptionMaterials;
 import com.openexchange.aws.exceptions.OXAWSExceptionCodes;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.osgi.HousekeepingActivator;
@@ -92,6 +106,12 @@ public class AWSActivator extends HousekeepingActivator {
 
     private String amazonS3Region;
 
+    private boolean s3encryption;
+
+    private String pubKeyName;
+
+    private String privKeyName;
+
     /**
      * Initializes a new {@link AWSActivator}.
      */
@@ -115,6 +135,7 @@ public class AWSActivator extends HousekeepingActivator {
         autoscalingRegion = configService.getProperty("com.openexchange.aws.autoscalingregion");
         cloudwatchRegion = configService.getProperty("com.openexchange.aws.cloudwatchregion");
         amazonS3Region = configService.getProperty("com.openexchange.aws.s3region");
+        s3encryption = configService.getBoolProperty("com.openexchange.aws.s3encryption", false);
         if (accessKey == null) {
             throw OXAWSExceptionCodes.AWS_NO_ACCESSKEY.create();
         }
@@ -127,6 +148,9 @@ public class AWSActivator extends HousekeepingActivator {
         if (lbRegion == null) {
             throw OXAWSExceptionCodes.AWS_NO_LB_REGION.create();
         }
+        if (amazonS3Region == null) {
+            throw OXAWSExceptionCodes.AWS_NO_S3_REGION.create();
+        }
         AWSCredentials credentials = new BasicAWSCredentials(accessKey, secretKey);
         AmazonEC2 amazonEC2 = new AmazonEC2Client(credentials);
         amazonEC2.setEndpoint(ec2Region);
@@ -136,7 +160,24 @@ public class AWSActivator extends HousekeepingActivator {
         amazonAutoScaling.setEndpoint(autoscalingRegion);
         AmazonCloudWatch amazonCloudWatch = new AmazonCloudWatchClient(credentials);
         amazonCloudWatch.setEndpoint(cloudwatchRegion);
-        AmazonS3 amazonS3 = new AmazonS3Client(credentials);
+        AmazonS3 amazonS3 = null;
+        if (s3encryption) {
+            PrivateKey privateKey = null;
+            PublicKey publicKey = null;
+            try {
+                pubKeyName = configService.getProperty("com.openexchange.aws.s3pubkey");
+                privKeyName = configService.getProperty("com.openexchange.aws.s3privkey");
+                publicKey = getPublicKey(pubKeyName);
+                privateKey = getPrivateKey(privKeyName);
+            } catch (Exception e) {
+                throw OXAWSExceptionCodes.AWS_S3_ENCRYPTION_ERROR.create(e.getMessage());
+            }
+            KeyPair keyPair = new KeyPair(publicKey, privateKey);
+            EncryptionMaterials encryptionMaterials = new EncryptionMaterials(keyPair);
+            amazonS3 = new AmazonS3EncryptionClient(credentials, encryptionMaterials);
+        } else {
+            amazonS3 = new AmazonS3Client(credentials);
+        }
         amazonS3.setEndpoint(amazonS3Region);
         registerService(AmazonEC2.class, amazonEC2);
         registerService(AmazonElasticLoadBalancing.class, amazonLoadBalancing);
@@ -150,6 +191,38 @@ public class AWSActivator extends HousekeepingActivator {
         LOG.info("Stopping bundle: com.openexchange.aws");
         unregisterServices();
         cleanUp();
+    }
+
+    private PrivateKey getPrivateKey(String path) throws IOException, NoSuchAlgorithmException, InvalidKeySpecException {
+        byte[] keyBytes = null;
+        File f = configService.getFileByName(path);
+        FileInputStream fis = new FileInputStream(f);
+        DataInputStream dis = new DataInputStream(fis);
+        try {
+            keyBytes = new byte[(int) f.length()];
+            dis.readFully(keyBytes);
+        } finally {
+            dis.close();
+        }
+        PKCS8EncodedKeySpec spec = new PKCS8EncodedKeySpec(keyBytes);
+        KeyFactory kf = KeyFactory.getInstance("RSA");
+        return kf.generatePrivate(spec);
+    }
+
+    private PublicKey getPublicKey(String path) throws IOException, NoSuchAlgorithmException, InvalidKeySpecException {
+        byte[] keyBytes = null;
+        File f = configService.getFileByName(path);
+        FileInputStream fis = new FileInputStream(f);
+        DataInputStream dis = new DataInputStream(fis);
+        try {
+            keyBytes = new byte[(int) f.length()];
+            dis.readFully(keyBytes);
+        } finally {
+            dis.close();
+        }
+        X509EncodedKeySpec spec = new X509EncodedKeySpec(keyBytes);
+        KeyFactory kf = KeyFactory.getInstance("RSA");
+        return kf.generatePublic(spec);
     }
 
 }
