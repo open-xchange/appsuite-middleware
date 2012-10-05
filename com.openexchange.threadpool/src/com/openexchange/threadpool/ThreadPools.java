@@ -374,8 +374,7 @@ public final class ThreadPools {
         if (task == null) {
             throw new NullPointerException();
         }
-        final RunnableAdapter<Object> callable = new RunnableAdapter<Object>(task, null);
-        return new TrackableTaskAdapter<Object>(callable);
+        return new TrackableTaskAdapter<Object>(new RunnableAdapter<Object>(task, null));
     }
 
     /**
