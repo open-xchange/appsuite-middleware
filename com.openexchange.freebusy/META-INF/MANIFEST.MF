@@ -1,0 +1,24 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Free/Busy definitions
+Bundle-SymbolicName: com.openexchange.freebusy
+Bundle-Version: 6.23.0
+Bundle-Vendor: Open-Xchange Inc.
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Import-Package: com.openexchange.exception,
+ com.openexchange.groupware.container,
+ com.openexchange.i18n,
+ com.openexchange.log,
+ com.openexchange.osgi,
+ com.openexchange.server,
+ com.openexchange.session,
+ org.apache.commons.logging,
+ org.osgi.framework,
+ org.osgi.util.tracker
+Bundle-Activator: com.openexchange.freebusy.osgi.FreeBusyServiceActivator
+Export-Package: com.openexchange.freebusy;
+  uses:="com.openexchange.i18n,
+   com.openexchange.groupware.container,
+   com.openexchange.exception,
+   com.openexchange.session",
+ com.openexchange.freebusy.provider;uses:="com.openexchange.freebusy,com.openexchange.session"

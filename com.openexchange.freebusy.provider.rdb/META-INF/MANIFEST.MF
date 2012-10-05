@@ -1,0 +1,28 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Free/Busy provider accessing internal groupware data
+Bundle-SymbolicName: com.openexchange.freebusy.provider.rdb
+Bundle-Version: 6.23.0
+Bundle-Vendor: Open-Xchange Inc.
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Import-Package: com.openexchange.api2,
+ com.openexchange.context,
+ com.openexchange.exception,
+ com.openexchange.freebusy,
+ com.openexchange.freebusy.provider,
+ com.openexchange.groupware.calendar,
+ com.openexchange.groupware.container,
+ com.openexchange.groupware.contexts,
+ com.openexchange.groupware.ldap,
+ com.openexchange.i18n,
+ com.openexchange.log,
+ com.openexchange.osgi,
+ com.openexchange.resource,
+ com.openexchange.server,
+ com.openexchange.session,
+ com.openexchange.tools.iterator,
+ com.openexchange.user,
+ org.apache.commons.logging,
+ org.osgi.framework,
+ org.osgi.util.tracker
+Bundle-Activator: com.openexchange.freebusy.provider.rdb.osgi.RdbFreeBusyProviderActivator

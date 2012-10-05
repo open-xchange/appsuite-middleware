@@ -1,0 +1,31 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Free/Busy JSON module
+Bundle-SymbolicName: com.openexchange.freebusy.json
+Bundle-Version: 6.23.0
+Bundle-Vendor: Open-Xchange Inc.
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Import-Package: com.openexchange.admin.console.util.server,
+ com.openexchange.ajax.requesthandler,
+ com.openexchange.ajax.requesthandler.osgiservice,
+ com.openexchange.ajax.writer,
+ com.openexchange.api2,
+ com.openexchange.documentation,
+ com.openexchange.documentation.annotations,
+ com.openexchange.exception,
+ com.openexchange.freebusy,
+ com.openexchange.groupware.ldap,
+ com.openexchange.i18n,
+ com.openexchange.log,
+ com.openexchange.osgi,
+ com.openexchange.server,
+ com.openexchange.session,
+ com.openexchange.tools,
+ com.openexchange.tools.iterator,
+ com.openexchange.tools.servlet,
+ com.openexchange.tools.session,
+ org.apache.commons.logging,
+ org.json,
+ org.osgi.framework,
+ org.osgi.util.tracker
+Bundle-Activator: com.openexchange.freebusy.json.osgi.FreeBusyJSONActivator
