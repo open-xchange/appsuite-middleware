@@ -53,6 +53,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
+import jcifs.Config;
 import com.openexchange.datatypes.genericonf.DynamicFormDescription;
 import com.openexchange.datatypes.genericonf.FormElement;
 import com.openexchange.datatypes.genericonf.ReadOnlyDynamicFormDescription;
@@ -99,6 +100,10 @@ public final class CIFSFileStorageService implements FileStorageService {
         tmpDescription.add(FormElement.password(CIFSConstants.CIFS_PASSWORD, FormStrings.FORM_LABEL_PASSWORD, true, ""));
         formDescription = new ReadOnlyDynamicFormDescription(tmpDescription);
         secretProperties = Collections.unmodifiableSet(new HashSet<String>(Arrays.asList(CIFSConstants.CIFS_PASSWORD)));
+        // Configuration
+        // See jcifs.smb.SmbConstants
+        Config.setProperty("jcifs.smb.client.soTimeout", "10000");
+        Config.setProperty("jcifs.smb.client.connTimeout", "5000");
     }
 
     private void applyAccountManager(final FileStorageAccountManagerProvider accountManagerProvider) throws OXException {
