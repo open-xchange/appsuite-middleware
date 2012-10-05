@@ -98,7 +98,7 @@ import com.openexchange.threadpool.ThreadPools;
  */
 public final class SmalMessageStorage extends AbstractSMALStorage implements IMailMessageStorage, IMailMessageStorageExt, IMailMessageStorageBatch {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(SmalMessageStorage.class));
+    protected static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(SmalMessageStorage.class));
     private final IMailMessageStorage messageStorage;
 
 
@@ -268,7 +268,7 @@ public final class SmalMessageStorage extends AbstractSMALStorage implements IMa
         }
         
         mail.setAccountId(accountId);        
-        ThreadPools.getThreadPool().submit(ThreadPools.task(new Runnable() {            
+        ThreadPools.getThreadPool().submit(ThreadPools.trackableTask(new Runnable() {            
             @Override
             public void run() {
                 try {

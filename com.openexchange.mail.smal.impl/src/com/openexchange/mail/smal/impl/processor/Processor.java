@@ -150,7 +150,7 @@ public final class Processor {
     
     public void processFolderAsync(final MailFolderInfo folderInfo, final int accountId, final Session session, final Map<String, Object> params) throws OXException {
         final Performer performer = new Performer(folderInfo, accountId, session, params, strategy);
-        ThreadPools.getThreadPool().submit(ThreadPools.task(performer), DiscardBehavior.getInstance());
+        ThreadPools.getThreadPool().submit(ThreadPools.trackableTask(performer), DiscardBehavior.getInstance());
     }
     
     public void processFolderAsync(final MailFolder mailFolder, final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess, final Map<String, Object> params) throws OXException {

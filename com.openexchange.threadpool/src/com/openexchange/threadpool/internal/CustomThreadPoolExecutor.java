@@ -84,11 +84,13 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.log.LogProperties;
 import com.openexchange.threadpool.AbstractTask;
 import com.openexchange.threadpool.Task;
 import com.openexchange.threadpool.ThreadRenamer;
 import com.openexchange.threadpool.Trackable;
+import com.openexchange.threadpool.osgi.ThreadPoolServiceRegistry;
 
 /**
  * {@link CustomThreadPoolExecutor} - Copied from Java6's <tt>ThreadPoolExecutor</tt> written by Doug Lea.
@@ -1172,10 +1174,15 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
         private final Condition notEmpty = lock.newCondition();
         private final ConcurrentMap<Long, TaskInfo> tasks;
         private final TaskInfo poison = new TaskInfo(null);
+        private final long minWaitTime;
+        private final long maxRunningTime;
 
         ActiveTaskWatcher() {
             super();
             tasks = new ConcurrentHashMap<Long, TaskInfo>(8192);
+            final ConfigurationService service = ThreadPoolServiceRegistry.getService(ConfigurationService.class);
+            minWaitTime = null == service ? 20000L : service.getIntProperty("AJP_WATCHER_FREQUENCY", 20000);
+            maxRunningTime = null == service ? 60000L : service.getIntProperty("AJP_WATCHER_MAX_RUNNING_TIME", 60000);
         }
 
         void stopWhenFinished() {
@@ -1209,7 +1216,7 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
             try {
                 for (;;) {
                     try {
-                        Thread.sleep(20000L);
+                        Thread.sleep(minWaitTime);
                         if (tasks.isEmpty()) {
                             final ReentrantLock lock = this.lock;
                             lock.lockInterruptibly();
@@ -1227,7 +1234,6 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
                             }
                         }
                         // Check for exceeded tasks
-                        final long maxRunningTime = 60000L;
                         final long max = System.currentTimeMillis() - maxRunningTime;
                         final StringBuilder logBuilder = new StringBuilder(1024);
                         boolean poisoned = false;

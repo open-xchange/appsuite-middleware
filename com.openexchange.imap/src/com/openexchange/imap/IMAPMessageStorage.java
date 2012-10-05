@@ -1391,7 +1391,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                             }
                         }
                     };
-                    ThreadPools.getThreadPool().submit(ThreadPools.task(task));
+                    ThreadPools.getThreadPool().submit(ThreadPools.trackableTask(task));
                     if (INFO) {
                         final long dur = System.currentTimeMillis() - st;
                         LOG.info("\tExisting ThreadableCacheEntry queried for \"" + f.getFullName() + "\" in " + dur + "msec. Reconstruct performed ansynchronously separate thread.");

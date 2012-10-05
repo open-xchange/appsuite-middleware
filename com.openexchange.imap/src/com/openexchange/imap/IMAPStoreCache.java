@@ -246,7 +246,7 @@ public final class IMAPStoreCache {
             do {
                 final IMAPStoreContainer container = containers.next();
                 if (null != container) {
-                    threadPool.submit(ThreadPools.task(new ContainerCloseElapsedRunnable(container, stamp, debug)), behavior);
+                    threadPool.submit(ThreadPools.trackableTask(new ContainerCloseElapsedRunnable(container, stamp, debug)), behavior);
                 }
             } while (containers.hasNext());
         }

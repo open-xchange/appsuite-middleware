@@ -73,7 +73,6 @@ import java.util.UUID;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicReference;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.openexchange.chat.Chat;
 import com.openexchange.chat.ChatExceptionCodes;
 import com.openexchange.chat.ChatStrings;
@@ -89,6 +88,7 @@ import com.openexchange.crypto.CryptoService;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.log.LogFactory;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.threadpool.ThreadPools;
 import com.openexchange.timer.ScheduledTimerTask;
@@ -259,7 +259,7 @@ public final class DBChat implements Chat {
                             }
                         }
                     };
-                    ThreadPools.getThreadPool().submit(ThreadPools.task(subtask));
+                    ThreadPools.getThreadPool().submit(ThreadPools.trackableTask(subtask));
                 }
             };
 
