@@ -50,8 +50,10 @@
 package com.openexchange.osgi;
 
 import java.util.Dictionary;
+import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Filter;
 import org.osgi.framework.ServiceReference;
@@ -159,8 +161,7 @@ public abstract class HousekeepingActivator extends DeferredActivator {
     }
 
     private final List<ServiceTracker<?, ?>> serviceTrackers;
-
-    private final List<ServiceRegistration<?>> serviceRegistrations;
+    private final Map<Object, ServiceRegistration<?>> serviceRegistrations;
 
     /**
      * Initializes a new {@link HousekeepingActivator}.
@@ -168,7 +169,7 @@ public abstract class HousekeepingActivator extends DeferredActivator {
     protected HousekeepingActivator() {
         super();
         serviceTrackers = new LinkedList<ServiceTracker<?, ?>>();
-        serviceRegistrations = new LinkedList<ServiceRegistration<?>>();
+        serviceRegistrations = new LinkedHashMap<Object, ServiceRegistration<?>>(6);
     }
 
     @Override
@@ -182,7 +183,7 @@ public abstract class HousekeepingActivator extends DeferredActivator {
     }
 
     @Override
-    public void start(BundleContext context) throws Exception {
+    public void start(final BundleContext context) throws Exception {
         super.start(context);
         /*
          * Invoking ServiceTracker.open() more than once is a no-op, therefore it can be safely called from here.
@@ -214,7 +215,7 @@ public abstract class HousekeepingActivator extends DeferredActivator {
      * @param properties The service's properties
      */
     protected <S> void registerService(final Class<S> clazz, final S service, final Dictionary<String, ?> properties) {
-        serviceRegistrations.add(context.registerService(clazz.getName(), service, properties));
+        serviceRegistrations.put(service, context.registerService(clazz, service, properties));
     }
 
        /**
@@ -233,8 +234,8 @@ public abstract class HousekeepingActivator extends DeferredActivator {
      * @param service The service reference
      * @param properties The service's properties
      */
-    protected <S> void registerService (String className, Object service, Dictionary<String, ?> properties) {
-        serviceRegistrations.add(context.registerService(className, service, properties));
+    protected <S> void registerService (final String className, final Object service, final Dictionary<String, ?> properties) {
+        serviceRegistrations.put(service, context.registerService(className, service, properties));
     }
     
     /**
@@ -242,8 +243,8 @@ public abstract class HousekeepingActivator extends DeferredActivator {
      * @param className The service's class name
      * @param service The service reference
      */
-    protected <S> void registerService (String className, Object service) {
-        serviceRegistrations.add(context.registerService(className, service, null));
+    protected <S> void registerService (final String className, final Object service) {
+        registerService(className, service, null);
     }
 
     /**
@@ -401,10 +402,22 @@ public abstract class HousekeepingActivator extends DeferredActivator {
      * Unregisters all services.
      */
     protected void unregisterServices() {
-        for (final ServiceRegistration<?> reg : serviceRegistrations) {
-            reg.unregister();
+        for (final ServiceRegistration<?> registration : serviceRegistrations.values()) {
+            registration.unregister();
         }
         serviceRegistrations.clear();
+    }
+
+    /**
+     * Unregisters specified service.
+     * 
+     * @param service The service to unregister
+     */
+    protected <S> void unregisterService(final S service) {
+        final ServiceRegistration<?> registration = serviceRegistrations.remove(service);
+        if (null != registration) {
+            registration.unregister();
+        }
     }
 
     /**

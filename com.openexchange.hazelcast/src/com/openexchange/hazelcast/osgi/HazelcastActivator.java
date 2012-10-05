@@ -2,6 +2,8 @@
 package com.openexchange.hazelcast.osgi;
 
 import java.net.InetAddress;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
@@ -12,6 +14,7 @@ import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.hazelcast.config.Config;
 import com.hazelcast.config.InMemoryXmlConfig;
+import com.hazelcast.config.Interfaces;
 import com.hazelcast.config.Join;
 import com.hazelcast.config.TcpIpConfig;
 import com.hazelcast.core.Hazelcast;
@@ -105,7 +108,7 @@ public class HazelcastActivator extends HousekeepingActivator {
 
                             @Override
                             public void run() {
-                                if (init(Collections.<InetAddress> emptyList(), st, logger)) {
+                                if (init(Collections.<InetAddress> emptyList(), false, st, logger)) {
                                     if (infoEnabled) {
                                         logger.info("\nHazelcast:\n\tInitialized Hazelcast instance via delayed one-shot task after " + delay + "msec.\n");
                                     }
@@ -118,7 +121,7 @@ public class HazelcastActivator extends HousekeepingActivator {
                     /*
                      * We already have at least one node at start-up time
                      */
-                    if (init(nodes, st, logger)) {
+                    if (init(nodes, false, st, logger)) {
                         if (infoEnabled) {
                             logger.info("\nHazelcast:\n\tInitialized Hazelcast instance via initially available Open-Xchange nodes.\n");
                         }
@@ -165,48 +168,37 @@ public class HazelcastActivator extends HousekeepingActivator {
     }
 
     /**
-     * Initializes and registers a {@link HazelcastInstance} for a full TCP/IP cluster.
+     * Initializes and registers a {@code HazelcastInstance} for a full TCP/IP cluster.
      * 
      * @param nodes The pre-known nodes
+     * @param force <code>true</code> to enforce (re-)initialization of {@code HazelcastInstance}; otherwise <code>false</code>
      * @param stamp The start-up time stamp
      * @param logger The logger instance
      * @return <code>true</code> if <tt>HazelcastInstance</tt> has been initialized by this call; otherwise <code>false</code> if already
      *         done by another call
      */
-    boolean init(final List<InetAddress> nodes, final long stamp, final Log logger) {
+    boolean init(final List<InetAddress> nodes, final boolean force, final long stamp, final Log logger) {
         synchronized (this) {
-            if (null != REF_HAZELCAST_INSTANCE.get()) {
+            final HazelcastInstance prevHazelcastInstance = REF_HAZELCAST_INSTANCE.get();
+            if (null != prevHazelcastInstance) {
                 // Already initialized
-                return false;
+                if (!force) {
+                    return false;                    
+                }
+                final Config config = prevHazelcastInstance.getConfig();
+                configureNetworkJoin(nodes, true, config);
+                prevHazelcastInstance.getLifecycleService().restart();
+                if (logger.isInfoEnabled()) {
+                    logger.info("\nHazelcast:\n\tRe-Started in " + (System.currentTimeMillis() - stamp) + "msec.\n");
+                }
+                return true;
             }
             /*
              * Create configuration from XML data
              */
             final String xml = getService(ConfigurationService.class).getText("hazelcast.xml");
             final Config config = new InMemoryXmlConfig(xml);
-            /*
-             * Get reference to network join
-             */
-            final Join join = config.getNetworkConfig().getJoin();
-            /*
-             * Disable: multicast, AWS, and Enable: TCP-IP
-             */
-            join.getMulticastConfig().setEnabled(false);
-            join.getAwsConfig().setEnabled(false);
-            final TcpIpConfig tcpIpConfig = join.getTcpIpConfig();
-            tcpIpConfig.setEnabled(true).setConnectionTimeoutSeconds(10).clear();
-            {
-                final List<String> members = new LinkedList<String>();
-                for (final InetAddress inetAddress : nodes) {
-                    final String[] addressArgs = inetAddress.getHostAddress().split("\\%");
-                    for (final String address : addressArgs) {
-                        members.add(address);
-                    }
-                }
-                if (!members.isEmpty()) {
-                    tcpIpConfig.setMembers(members);
-                }
-            }
+            configureNetworkJoin(nodes, false, config);
             // for (final InetAddress address : nodes) {
             // tcpIpConfig.addAddress(new Address(address, config.getNetworkConfig().getPort()));
             // }
@@ -221,6 +213,62 @@ public class HazelcastActivator extends HousekeepingActivator {
                 logger.info("\nHazelcast:\n\tStarted in " + (System.currentTimeMillis() - stamp) + "msec.\n");
             }
             return true;
+        }
+    }
+
+    private void configureNetworkJoin(final List<InetAddress> nodes, final boolean append, final Config config) {
+        /*
+         * Get reference to network join
+         */
+        final Join join = config.getNetworkConfig().getJoin();
+        /*
+         * Disable: Multicast, AWS and ...
+         */
+        join.getMulticastConfig().setEnabled(false);
+        join.getAwsConfig().setEnabled(false);
+        /*-
+         * ... enable: TCP-IP
+         * 
+         * http://code.google.com/p/hazelcast/wiki/ConfigFullTcpIp
+         */
+        final TcpIpConfig tcpIpConfig = join.getTcpIpConfig();
+        tcpIpConfig.setEnabled(true).setConnectionTimeoutSeconds(10);
+        if (!append) {
+            tcpIpConfig.clear();
+        }
+        {
+            final List<String> members = new LinkedList<String>();
+            for (final InetAddress inetAddress : nodes) {
+                final String[] addressArgs = inetAddress.getHostAddress().split("\\%");
+                for (final String address : addressArgs) {
+                    members.add(address);
+                }
+            }
+            if (!members.isEmpty()) {
+                if (append) {
+                    List<String> cur = new ArrayList<String>(tcpIpConfig.getMembers());
+                    for (final String candidate : members) {
+                        if (!cur.contains(candidate)) {
+                            cur.add(candidate);
+                        }
+                    }
+                    tcpIpConfig.setMembers(cur);
+                    // Set interfaces, too
+                    final Interfaces interfaces = config.getNetworkConfig().getInterfaces();
+                    cur = new ArrayList<String>(interfaces.getInterfaces());
+                    for (final String candidate : members) {
+                        if (!cur.contains(candidate)) {
+                            cur.add(candidate);
+                        }
+                    }
+                    interfaces.setInterfaces(cur);
+                } else {
+                    tcpIpConfig.setMembers(members);
+                    // Set interfaces, too
+                    final Interfaces interfaces = config.getNetworkConfig().getInterfaces();
+                    interfaces.setInterfaces(members);
+                }
+            }
         }
     }
 
