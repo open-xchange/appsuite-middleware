@@ -56,10 +56,10 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.LinkedBlockingQueue;
 import javax.mail.MessagingException;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.imap.services.IMAPServiceRegistry;
+import com.openexchange.log.LogFactory;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.Protocol;
 import com.openexchange.mail.config.MailProperties;
@@ -246,7 +246,7 @@ public final class IMAPStoreCache {
             do {
                 final IMAPStoreContainer container = containers.next();
                 if (null != container) {
-                    threadPool.submit(ThreadPools.task(new ContainerCloseElapsedRunnable(container, stamp, debug)), behavior);
+                    threadPool.submit(ThreadPools.trackableTask(new ContainerCloseElapsedRunnable(container, stamp, debug)), behavior);
                 }
             } while (containers.hasNext());
         }

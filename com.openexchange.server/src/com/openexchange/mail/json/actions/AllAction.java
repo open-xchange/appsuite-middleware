@@ -198,7 +198,7 @@ public final class AllAction extends AbstractMailAction implements MailRequestSh
                         }
                     }
                 };
-                ThreadPools.getThreadPool().submit(ThreadPools.task(r));
+                ThreadPools.getThreadPool().submit(ThreadPools.trackableTask(r));
                 /*
                  * Return cached JSON result
                  */

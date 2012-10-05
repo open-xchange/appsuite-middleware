@@ -60,9 +60,9 @@ import java.util.concurrent.TimeoutException;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
+import com.openexchange.log.LogFactory;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.threadpool.ThreadPools;
 import com.openexchange.timer.ScheduledTimerTask;
@@ -198,7 +198,7 @@ public final class ConditionTreeMapManagement {
             /*
              * Submit a task for tree map initialization
              */
-            ThreadPools.getThreadPool().submit(ThreadPools.task(new LoadTreeMapRunnable(contextId, LOG)));
+            ThreadPools.getThreadPool().submit(ThreadPools.trackableTask(new LoadTreeMapRunnable(contextId, LOG)));
             return null;
         }
         return timedFrom(f, 1000);
