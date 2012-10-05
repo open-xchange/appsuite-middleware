@@ -53,10 +53,13 @@ import java.text.MessageFormat;
 import java.util.AbstractCollection;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.ConcurrentModificationException;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.TreeMap;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Callable;
@@ -85,6 +88,7 @@ import com.openexchange.log.LogProperties;
 import com.openexchange.threadpool.AbstractTask;
 import com.openexchange.threadpool.Task;
 import com.openexchange.threadpool.ThreadRenamer;
+import com.openexchange.threadpool.Trackable;
 
 /**
  * {@link CustomThreadPoolExecutor} - Copied from Java6's <tt>ThreadPoolExecutor</tt> written by Doug Lea.
@@ -1185,11 +1189,11 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
             }
         }
 
-        void addTask(final long number, final Thread thread) {
+        void addTask(final long number, final Thread thread, final Map<String, Object> logProperties) {
             final ReentrantLock lock = this.lock;
             lock.lock();
             try {
-                tasks.put(Long.valueOf(number), new TaskInfo(thread));
+                tasks.put(Long.valueOf(number), new TaskInfo(thread, logProperties));
                 notEmpty.signal();
             } finally {
                 lock.unlock();
@@ -1225,7 +1229,7 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
                         // Check for exceeded tasks
                         final long maxRunningTime = 60000L;
                         final long max = System.currentTimeMillis() - maxRunningTime;
-                        final StringBuilder logBuilder = new StringBuilder(512);
+                        final StringBuilder logBuilder = new StringBuilder(1024);
                         boolean poisoned = false;
                         for (final TaskInfo taskInfo : tasks.values()) {
                             if (poison == taskInfo) {
@@ -1234,14 +1238,28 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
                             }
                             if (taskInfo.stamp < max) {
                                 final Thread thread = taskInfo.t;
+                                final Map<String, Object> logProperties = taskInfo.logProperties;
                                 logBuilder.setLength(0);
+                                if (null != logProperties) {
+                                    final Map<String, String> sorted = new TreeMap<String, String>();
+                                    for (final Map.Entry<String, Object> entry : logProperties.entrySet()) {
+                                        final String propertyName = entry.getKey();
+                                        final Object value = entry.getValue();
+                                        if (null != value) {
+                                            sorted.put(propertyName, value.toString());
+                                        }
+                                    }
+                                    for (final Map.Entry<String, String> entry : sorted.entrySet()) {
+                                        logBuilder.append('\n').append(entry.getKey()).append('=').append(entry.getValue());
+                                    }
+                                }
                                 logBuilder.append("Worker \"").append(thread.getName());
                                 logBuilder.append("\" exceeds max. running time of ").append(maxRunningTime);
                                 logBuilder.append("msec -> Processing time: ").append(System.currentTimeMillis() - taskInfo.stamp);
                                 logBuilder.append("msec");
                                 logBuilder.append('\n');
                                 appendStackTrace(thread.getStackTrace(), logBuilder);
-                                LOG.info(logBuilder.toString());
+                                LOG.info(logBuilder);
                             }
                         }
                         if (poisoned) {
@@ -1288,11 +1306,17 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
     private static final class TaskInfo {
         final Thread t;
         final long stamp;
-        
+        final Map<String, Object> logProperties;
+
         TaskInfo(final Thread t) {
+            this(t, Collections.<String, Object> emptyMap());
+        }
+
+        TaskInfo(final Thread t, final Map<String, Object> logProperties) {
             super();
             this.t = t;
             stamp = System.currentTimeMillis();
+            this.logProperties = logProperties;
         }
     }
 
@@ -1548,7 +1572,8 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
         super.afterExecute(r, throwable);
         if (r instanceof CustomFutureTask<?>) {
             final CustomFutureTask<?> customFutureTask = (CustomFutureTask<?>) r;
-            if (customFutureTask.isTrackable()) {
+            final Trackable trackable = customFutureTask.getTrackable();
+            if (null != trackable) {
                 activeTaskWatcher.removeTask(customFutureTask.getNumber());
             }
             customFutureTask.getTask().afterExecute(throwable);
@@ -1570,8 +1595,9 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
             final Task<?> task = customFutureTask.getTask();
             task.setThreadName((ThreadRenamer) thread);
             task.beforeExecute(thread);
-            if (customFutureTask.isTrackable()) {
-                activeTaskWatcher.addTask(customFutureTask.getNumber(), thread);
+            final Trackable trackable = customFutureTask.getTrackable();
+            if (null != trackable) {
+                activeTaskWatcher.addTask(customFutureTask.getNumber(), thread, trackable.optLogProperties());
             }
         } else if (r instanceof ScheduledFutureTask<?>) {
             ((ThreadRenamer) thread).renamePrefix("OXTimer");
