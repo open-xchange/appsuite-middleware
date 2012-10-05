@@ -109,7 +109,7 @@ public enum OXAWSExceptionCodes implements OXExceptionCode {
 
     @Override
     public String getPrefix() {
-        return "SES";
+        return "AWS";
     }
 
     @Override

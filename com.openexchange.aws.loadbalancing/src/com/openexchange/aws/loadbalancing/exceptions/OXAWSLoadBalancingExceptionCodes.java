@@ -108,7 +108,7 @@ public enum OXAWSLoadBalancingExceptionCodes implements OXExceptionCode {
 
     @Override
     public String getPrefix() {
-        return "SES";
+        return "AWS";
     }
 
     @Override
