@@ -36,10 +36,10 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Language: hu\n"
 "#-#-#-#-#  server.hu_HU.po (evolution master)  #-#-#-#-#\n"
-"Plural-Forms:  nplurals=2; plural=(n != 1);\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
 "X-Generator: Lokalize 1.4\n"
 "#-#-#-#-#  errors.hu_HU.po (errors)  #-#-#-#-#\n"
-"Plural-Forms:  nplurals=2; plural=(n != 1);\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
 "X-Generator: Lokalize 1.0\n"
 
 #. The client send a ticket within the browser request and the verification of this ticket failed.
