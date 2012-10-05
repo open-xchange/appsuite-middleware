@@ -1,10 +1,24 @@
+#. *
+#. * Mail(s) could not be found in folder
+#. * <p>
+#. * The exception thrown when an invalid method is invoked on an expunged Message. The only valid methods on an expunged Message are
+#. * <code>isExpunged()</code> and <code>getMessageNumber()</code>.
+#. * </p>
+#.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:127
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe.json/src/com/openexchange/subscribe/json/SubscriptionJSONExceptionMessage.java:82
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe.json/src/com/openexchange/subscribe/json/SubscriptionJSONExceptionMessage.java:84
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe.json/src/com/openexchange/subscribe/json/SubscriptionJSONExceptionMessage.java:86
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe.json/src/com/openexchange/subscribe/json/SubscriptionJSONExceptionMessage.java:88
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe.json/src/com/openexchange/subscribe/json/SubscriptionJSONExceptionMessage.java:90
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe.json/src/com/openexchange/subscribe/json/SubscriptionJSONExceptionMessage.java:92
 # , 2012.
 msgid ""
 msgstr ""
 "Project-Id-Version: errors\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2012-09-30 12:32+0000\n"
+"PO-Revision-Date: 2012-10-03 09:58+0000\n"
 "Last-Translator: \n"
 "Language-Team: Romanian <kde-i18n-doc@kde.org>\n"
 "MIME-Version: 1.0\n"
@@ -66,46 +80,6 @@ msgstr "Nu s-au putut găsi acreditări ce necesită reînnoire în subiectul %1
 msgid "No Kerberos delegation ticket found in session %1$s."
 msgstr "Nu a fost găsit niciun tichet de delegare Kerberos în sesiunea %1$s."
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.aws.loadbalancing/src/com/openexchange/aws/loadbalancing/exceptions/OXAWSLoadBalancingExceptionMessages.java:61
-msgid "Name of loadbalancer missing."
-msgstr "Lipseşte numele sistemului de echilibrare a încărcării."
-
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.aws.loadbalancing/src/com/openexchange/aws/loadbalancing/exceptions/OXAWSLoadBalancingExceptionMessages.java:63
-msgid "No zone specified."
-msgstr "Nu s-a specificat nicio zonă."
-
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.aws.loadbalancing/src/com/openexchange/aws/loadbalancing/exceptions/OXAWSLoadBalancingExceptionMessages.java:65
-msgid "Could not create loadbalancer."
-msgstr "Nu s-a putut crea sistemul de echilibrare a încărcării."
-
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.aws.loadbalancing/src/com/openexchange/aws/loadbalancing/exceptions/OXAWSLoadBalancingExceptionMessages.java:67
-msgid "Could not register instance with id %1$s with the loadbalancer."
-msgstr ""
-"Nu s-a putut înregistra instanţa cu identificatorul %1$s pe sistemul de "
-"echilibrare a încărcării."
-
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.aws.loadbalancing/src/com/openexchange/aws/loadbalancing/exceptions/OXAWSLoadBalancingExceptionMessages.java:69
-msgid "Could not deregister instance with id %1$s from the loadbalancer."
-msgstr ""
-"Nu s-a putut radia instanţa cu identificatorul %1$s din sistemul de "
-"echilibrare a încărcării."
-
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.aws/src/com/openexchange/aws/exceptions/OXAWSExceptionMessages.java:61
-msgid "Missing access key."
-msgstr "Lipseşte cheia de acces."
-
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.aws/src/com/openexchange/aws/exceptions/OXAWSExceptionMessages.java:63
-msgid "Missing secret key."
-msgstr "Lipseşte cheia secretă."
-
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.aws/src/com/openexchange/aws/exceptions/OXAWSExceptionMessages.java:65
-msgid "EC2 region not set."
-msgstr "Regiunea EC2 nu a fost setată."
-
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.aws/src/com/openexchange/aws/exceptions/OXAWSExceptionMessages.java:67
-msgid "Loadbalancing region not set."
-msgstr "Regiunea de echilibrare a încărcării nu este setată."
-
 #. A cache error occurred: %1$s
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.caching/src/com/openexchange/caching/CacheExceptionMessage.java:69
 msgid "A cache error occurred: %1$s"
@@ -148,7 +122,6 @@ msgstr "Lipsește fișierul de configurare cache la locul: %1$s"
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/configuration/ConfigurationExceptionMessage.java:94
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:117
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.service.messaging/src/com/openexchange/service/messaging/MessagingServiceExceptionMessages.java:66
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.snippet/src/com/openexchange/snippet/SnippetExceptionMessages.java:66
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.textxtraction/src/com/openexchange/textxtraction/TextXtractExceptionMessages.java:69
 msgid "An I/O error occurred: %1$s"
 msgstr "A apărut o eroare de I/O: %1$s"
@@ -168,12 +141,12 @@ msgstr "Nu au putut fi obținute atributele implicite ale elementului."
 msgid "'Put' into cache failed."
 msgstr "Încărcarea 'Put' în cache a eșuat."
 
-#. 'Save put' into cache failed. An object bound to given key already exists.
+#. 'Safe put' into cache failed. An object bound to given key already exists.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.caching/src/com/openexchange/caching/CacheExceptionMessage.java:87
 msgid ""
-"'Save put' into cache failed. An object bound to given key already exists."
+"'Safe put' into cache failed. An object bound to given key already exists."
 msgstr ""
-"Încărcarea 'Save put' în cache a eșuat. Există deja un obiect atașat cheii "
+"Încărcarea 'Safe put' în cache a eșuat. Există deja un obiect atașat cheii "
 "date."
 
 #. Remove on cache failed
@@ -468,8 +441,8 @@ msgid ""
 "This appointment has attachments. Click on the following link to view the "
 "appointment and to retrieve the attachments: %1$s."
 msgstr ""
-"Această întâlnire are fișiere atașate. Utilizați următoarea legătură pentru a "
-"vizualiza întâlnirea și a obține fișierele atașate:  %1$s."
+"Această întâlnire are fișiere atașate. Utilizați următoarea legătură pentru "
+"a vizualiza întâlnirea și a obține fișierele atașate:  %1$s."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/Messages.java:69
 msgid ""
@@ -484,8 +457,8 @@ msgstr ""
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/Messages.java:70
 msgid ""
 "The organizer would like to change the occurrence of a recurrence on a day "
-"that already contains such a change. The server can only store one change for "
-"a series per day."
+"that already contains such a change. The server can only store one change "
+"for a series per day."
 msgstr ""
 "Organizatorul dorește să modifice o serie pentru o zi ce conține deja o "
 "astfel de modificare. Serverul poate stoca doar o singură modificare pe zi "
@@ -498,11 +471,11 @@ msgstr "Organizatorul dorește să anuleze o întâlnire ce nu a putut fi găsit
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/Messages.java:72
 msgid ""
-"An attendee wanted to change his/her participant state in an appointment that "
-"could not be found. Probably the appointment was already canceled."
+"An attendee wanted to change his/her participant state in an appointment "
+"that could not be found. Probably the appointment was already canceled."
 msgstr ""
-"Un participant dorește să modifice starea participării sale la o întâlnire ce "
-"nu poate fi găsită. Probabil această întâlnire a fost deja anulată."
+"Un participant dorește să modifice starea participării sale la o întâlnire "
+"ce nu poate fi găsită. Probabil această întâlnire a fost deja anulată."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/Messages.java:73
 msgid ""
@@ -537,10 +510,11 @@ msgstr ""
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/Messages.java:77
 msgid ""
 "An attendee wants to be brought up to date about an appointment that could "
-"not be found. It was probably deleted at some point. Best ignore this message."
+"not be found. It was probably deleted at some point. Best ignore this "
+"message."
 msgstr ""
-"Un participant dorește să fie informat la zi despre o întâlnire ce pare să nu "
-"existe. Probabil că a fost ștearsă. Se recomandă să ignorați acest mesaj."
+"Un participant dorește să fie informat la zi despre o întâlnire ce pare să "
+"nu existe. Probabil că a fost ștearsă. Se recomandă să ignorați acest mesaj."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/Messages.java:78
 msgid ""
@@ -563,8 +537,8 @@ msgid ""
 "permissions."
 msgstr ""
 "Invitația a fost trimisă către altcineva, nu dumneavoastră. Întâlnirea ar fi "
-"trebuit creată într-un dosar personal al utilizatorului la care dumneavoastră "
-"nu aveți drept de scriere."
+"trebuit creată într-un dosar personal al utilizatorului la care "
+"dumneavoastră nu aveți drept de scriere."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/Messages.java:82
 msgid "The appointment's attachments have been changed"
@@ -597,8 +571,8 @@ msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/Messages.java:96
 msgid ""
-"%1$s has declined your proposed changes on behalf of %2$s for the appointment "
-"%3$s."
+"%1$s has declined your proposed changes on behalf of %2$s for the "
+"appointment %3$s."
 msgstr ""
 "%1$s a respins modificările propuse de dvs. în numele utilizatorului %2$s "
 "pentru întâlnirea %3$s."
@@ -755,8 +729,8 @@ msgid ""
 "%1$s has deleted an appointment on behalf of %2$s, or you have been removed "
 "as a participant:"
 msgstr ""
-"%1$s a șters un eveniment în numele utilizatorului %2$s sau ați fost eliminat "
-"ca participant:"
+"%1$s a șters un eveniment în numele utilizatorului %2$s sau ați fost "
+"eliminat ca participant:"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/Messages.java:192
 msgid "%1$s has deleted an appointment on your behalf:"
@@ -966,7 +940,8 @@ msgstr "%1$s a %2$s întâlnirea, dar doreşte să facă o contrapropunere: "
 #. TODO: Mah/Cisco, please describe what is meant with the wording 'chair'
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/Messages.java:301
 msgid ""
-"You have received this E-Mail because your are the chair for this appointment."
+"You have received this E-Mail because your are the chair for this "
+"appointment."
 msgstr "Ați primit acest mesaj pentru că sunteți liderul acestei întâlniri."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/Messages.java:303
@@ -978,8 +953,8 @@ msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/Messages.java:305
 msgid ""
-"You have received this E-Mail because this appointment contains the resource %"
-"1$s which is managed by you."
+"You have received this E-Mail because this appointment contains the resource "
+"%1$s which is managed by you."
 msgstr ""
 "Ați primit acest mesaj pentru că întâlnirea utilizează resursa %1$s, pe care "
 "o administrați."
@@ -1001,7 +976,7 @@ msgstr ""
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:64
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.frontend.uwa/src/com/openexchange/frontend/uwa/UWAWidgetExceptionMessages.java:63
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/id/IDExceptionMessages.java:62
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.groupware.dataRetrieval/src/com/openexchange/groupware/dataRetrieval/DataRetrievalExceptionMessages.java:62
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.groupware.dataRetrieval/src/com/openexchange/groupware/dataRetrieval/DataRetrievalExceptionMessages.java:63
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.loxandra/src/com/openexchange/loxandra/LoxandraExceptionMessages.java:64
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.mail.smal.impl/src/com/openexchange/mail/smal/impl/SmalExceptionMessages.java:62
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.mdns/src/com/openexchange/mdns/MDNSExceptionMessages.java:63
@@ -1024,7 +999,6 @@ msgstr ""
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/update/UpdateExceptionMessages.java:86
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/upload/impl/UploadExceptionMessage.java:125
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.service.messaging/src/com/openexchange/service/messaging/MessagingServiceExceptionMessages.java:63
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.snippet/src/com/openexchange/snippet/SnippetExceptionMessages.java:63
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.solr/src/com/openexchange/solr/SolrExceptionMessages.java:116
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.spamsettings.generic/src/com/openexchange/spamsettings/generic/service/SpamSettingExceptionMessages.java:14
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.textxtraction/src/com/openexchange/textxtraction/TextXtractExceptionMessages.java:62
@@ -1072,8 +1046,8 @@ msgstr "Serviciu de conversaţie necunoscut: %1$s"
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.chat/src/com/openexchange/chat/ChatExceptionMessages.java:90
 msgid "No message found with identifier \"%1$s\" in chat \"%2$s\"."
 msgstr ""
-"Nu a fost găsit niciun mesaj cu identificatorul \"%1$s\" în conversaţia \"%"
-"2$s\"."
+"Nu a fost găsit niciun mesaj cu identificatorul \"%1$s\" în conversaţia \"%2"
+"$s\"."
 
 #. No member found with identifier "%1$s".
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.chat/src/com/openexchange/chat/ChatExceptionMessages.java:93
@@ -1264,13 +1238,14 @@ msgid "The value given for contactTypes \"%s\" is invalid"
 msgstr "Valoarea specificată pentru contactTypes \"%s\" este incorectă"
 
 #. *
-#. * The value given for searchScope_distributionlist "%s" is invalid
+#. * The value given for searchScope_distributionlist "%1$s" is invalid
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contact.storage.ldap/src/com/openexchange/contact/storage/ldap/LdapExceptionMessages.java:93
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contacts.ldap/src/com/openexchange/contacts/ldap/exceptions/LdapConfigurationExceptionMessage.java:127
-msgid "The given value for searchScope_distributionlist \"%s\" is invalide"
+msgid "The given value for searchScope_distributionlist \"%1$s\" is invalid"
 msgstr ""
-"Valoarea specificată pentru searchScope_distributionlist \"%s\" este incorectă"
+"Valoarea specificată pentru searchScope_distributionlist \"%1$s\" este "
+"incorectă"
 
 #. *
 #. * Abstract pathname "%1$s" does not denote a directory.
@@ -1364,11 +1339,11 @@ msgstr "Contactele nu pot fi inserate în LDAP."
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contact.storage.ldap/src/com/openexchange/contact/storage/ldap/LdapExceptionMessages.java:104
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contacts.ldap/src/com/openexchange/contacts/ldap/exceptions/LdapConfigurationExceptionMessage.java:182
 msgid ""
-"The folderid object is null. This is an internal error. Please notify "
-"Open-Xchange."
+"The folderid object is null. This is an internal error. Please notify Open-"
+"Xchange."
 msgstr ""
-"Obiectul folderid este null. Aceasta este o eroare internă. Notificați "
-"Open-Xchange."
+"Obiectul folderid este null. Aceasta este o eroare internă. Notificați Open-"
+"Xchange."
 
 #. *
 #. * The search object contains more than one folder id. This is not supported by this implementation
@@ -1379,8 +1354,8 @@ msgid ""
 "The search object contains more than one folder id. This is not supported by "
 "this implementation."
 msgstr ""
-"Obiectul de căutare conține mai mult de un identificator de dosar, ceea ce nu "
-"este suportat de această implementare."
+"Obiectul de căutare conține mai mult de un identificator de dosar, ceea ce "
+"nu este suportat de această implementare."
 
 #. *
 #. * The mapping table doesn't contain the string uid %s, so it has never been accessed before
@@ -1534,8 +1509,8 @@ msgstr ""
 msgid ""
 "The value given for storagePriority \"%s\" in file \"%s\" is no integer value"
 msgstr ""
-"Valoarea specificată pentru storagePriority \"%s\" în fișierul \"%s\" nu este "
-"o valoare întreagă"
+"Valoarea specificată pentru storagePriority \"%s\" în fișierul \"%s\" nu "
+"este o valoare întreagă"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contact.storage.ldap/src/com/openexchange/contact/storage/ldap/LdapExceptionMessages.java:124
 msgid "Unable to map contact property \"%s\""
@@ -1545,7 +1520,6 @@ msgstr "Nu s-a putut mapa proprietatea contactului \"%s\""
 #. *
 #. * A JSON error occurred: %1$s
 #.
-#. A JSON error occurred: %1$s
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.conversion.servlet/src/com/openexchange/conversion/servlet/ConversionServletExceptionMessage.java:70
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:73
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.indexedSearch.json/src/com/openexchange/indexedSearch/json/IndexedSearchExceptionMessages.java:65
@@ -1560,7 +1534,6 @@ msgstr "Nu s-a putut mapa proprietatea contactului \"%s\""
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.passwordchange.servlet/src/com/openexchange/passwordchange/servlet/PasswordChangeServletExceptionMessage.java:71
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:92
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:391
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.snippet/src/com/openexchange/snippet/SnippetExceptionMessages.java:72
 msgid "A JSON error occurred: %1$s"
 msgstr "A apărut o eroare JSON: %1$s"
 
@@ -1695,7 +1668,6 @@ msgstr "A apărut o eroare de I/O: %1$s."
 #. *
 #. * A SQL error occurred: %1$s
 #.
-#. A SQL error occurred: %1$s
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.datatypes.genericonf.storage/src/com/openexchange/datatypes/genericonf/storage/GenericConfigurationStorageExceptionMessage.java:68
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:67
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/id/IDExceptionMessages.java:68
@@ -1709,7 +1681,6 @@ msgstr "A apărut o eroare de I/O: %1$s."
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/downgrade/DowngradeFailedExceptionMessage.java:70
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/userconfiguration/UserConfigurationExceptionMessage.java:71
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:324
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.snippet/src/com/openexchange/snippet/SnippetExceptionMessages.java:78
 msgid "A SQL error occurred: %1$s"
 msgstr "A apărut o eroare SQL: %1$s"
 
@@ -1764,7 +1735,8 @@ msgstr "A apărut o eroare la încărcarea contextului %1$s"
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.eas.provisioning.json/src/com/openexchange/mobile/configuration/json/exception/MobileProvisioningJsonExceptionMessages.java:65
 msgid "An error occurred loading user data for user %1$s"
 msgstr ""
-"A apărut o eroare la încărcarea datelor de utilizator pentru utilizatorul %1$s"
+"A apărut o eroare la încărcarea datelor de utilizator pentru utilizatorul %1"
+"$s"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.eas.provisioning.json/src/com/openexchange/mobile/configuration/json/exception/MobileProvisioningJsonExceptionMessages.java:66
 msgid "Could not load configuration or necessary field from configuration"
@@ -1934,11 +1906,11 @@ msgstr "WebDAV nu suportă verificarea versiunilor."
 #. File storage account %1$s of service "%2$s" could not be found for user %3$s in context %4$s.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:76
 msgid ""
-"File storage account %1$s of service \"%2$s\" could not be found for user %"
-"3$s in context %4$s."
+"File storage account %1$s of service \"%2$s\" could not be found for user %3"
+"$s in context %4$s."
 msgstr ""
-"Contul de stocare de fișiere %1$s al serviciului \"%2$s\" nu a putut fi găsit "
-"pentru utilizatorul %3$s în contextul %4$s."
+"Contul de stocare de fișiere %1$s al serviciului \"%2$s\" nu a putut fi "
+"găsit pentru utilizatorul %3$s în contextul %4$s."
 
 #. The operation is not supported by service %1$s.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:79
@@ -2022,10 +1994,11 @@ msgstr "Index de etichetă de culoare necunoscut: %1$s"
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:118
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.messaging/src/com/openexchange/messaging/MessagingExceptionMessages.java:118
 msgid ""
-"A duplicate folder named \"%1$s\" already exists below parent folder \"%2$s\"."
+"A duplicate folder named \"%1$s\" already exists below parent folder \"%2$s"
+"\"."
 msgstr ""
-"Există deja un dosar duplicat cu numele \"%1$s\" subordonat dosarului părinte "
-"\"%2$s\"."
+"Există deja un dosar duplicat cu numele \"%1$s\" subordonat dosarului "
+"părinte \"%2$s\"."
 
 #. No create access on folder %1$s.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:121
@@ -2502,14 +2475,15 @@ msgstr ""
 "2$s"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/sessiond/SessionExceptionMessages.java:76
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.sessionstorage.hazelcast/src/com/openexchange/sessionstorage/hazelcast/exceptions/OXHazelcastSessionStorageExceptionMessages.java:73
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.sessionstorage.nosql/src/com/openexchange/sessionstorage/nosql/exceptions/OXNoSQLSessionStorageExceptionMessages.java:73
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.sessionstorage.hazelcast/src/com/openexchange/sessionstorage/hazelcast/exceptions/OXHazelcastSessionStorageExceptionMessages.java:68
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.sessionstorage.nosql/src/com/openexchange/sessionstorage/nosql/exceptions/OXNoSQLSessionStorageExceptionMessages.java:68
 msgid ""
 "Authentication identifier duplicate found. Existing session login: %1$s. "
 "Current denied login request: %2$s."
 msgstr ""
-"S-a găsit un identificator de autentificare duplicat. Numele de autentificare "
-"al sesiunii existente: %1$s. Cererea de autentificare respinsă: %2$s."
+"S-a găsit un identificator de autentificare duplicat. Numele de "
+"autentificare al sesiunii existente: %1$s. Cererea de autentificare "
+"respinsă: %2$s."
 
 #. This message is thrown if an inconsistancy in SessionD bundle is detected when it returns the wrong session for a given session identifier.
 #. %1$s session identifier of returned session.
@@ -2543,8 +2517,8 @@ msgid ""
 "Received wrong session %1$s having random %2$s when looking for random %3$s "
 "and session %4$s."
 msgstr ""
-"S-a obținut sesiunea eronată %1$s cu %2$s aleator la căutarea %3$s aleator și "
-"sesiunea %4$s."
+"S-a obținut sesiunea eronată %1$s cu %2$s aleator la căutarea %3$s aleator "
+"și sesiunea %4$s."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/sessiond/SessionExceptionMessages.java:95
 msgid "The session parameter is missing."
@@ -2561,8 +2535,8 @@ msgstr "Contextul este blocat."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/sessiond/SessionExceptionMessages.java:101
 msgid ""
-"Request to server was refused. Original client IP address changed. Please try "
-"again."
+"Request to server was refused. Original client IP address changed. Please "
+"try again."
 msgstr ""
 "Cererea către server a fost refuzată. S-a modificat adresa originală IP a "
 "clientului. Încercați din nou."
@@ -2614,34 +2588,34 @@ msgid "An unexpected error occurred: %1$s"
 msgstr "A apărut o eroare neașteptată: %1$s"
 
 #. Could not find data provider for id: %1$s
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.groupware.dataRetrieval/src/com/openexchange/groupware/dataRetrieval/DataRetrievalExceptionMessages.java:65
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.groupware.dataRetrieval/src/com/openexchange/groupware/dataRetrieval/DataRetrievalExceptionMessages.java:66
 msgid "Could not find data provider for id: %1$s"
 msgstr "Nu s-a putut găsi furnizorul de date pentru identificatorul: %1$s"
 
-#. Missing parameter: %1$2
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.groupware.dataRetrieval/src/com/openexchange/groupware/dataRetrieval/DataRetrievalExceptionMessages.java:68
-msgid "Missing parameter: %1$2"
-msgstr "Lipseşte parametrul: %1$2"
+#. Missing parameter: %1$s$2
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.groupware.dataRetrieval/src/com/openexchange/groupware/dataRetrieval/DataRetrievalExceptionMessages.java:69
+msgid "Missing parameter: %1$s"
+msgstr "Lipseşte parametrul: %1$s"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.http.client/src/com/openexchange/http/client/exceptions/OxHttpClientExceptionMessages.java:6
-msgid "The embedded Apache client threw an error: %1"
-msgstr "Clientul Apache integrat a returnat o eroare: %1"
+msgid "The embedded Apache client threw an error: %1$s"
+msgstr "Clientul Apache integrat a returnat o eroare: %$1s"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.http.client/src/com/openexchange/http/client/exceptions/OxHttpClientExceptionMessages.java:7
-msgid "Parsing this JSON did not work: %1"
-msgstr "Analiza acestui JSON nu a funcţionat: %1"
+msgid "Parsing this JSON did not work: %1$s"
+msgstr "Analiza acestui JSON nu a funcţionat: %1$s"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.http.client/src/com/openexchange/http/client/exceptions/OxHttpClientExceptionMessages.java:8
-msgid "Parsing this XML with SAX did not work: %1"
-msgstr "Analiza acestui XML cu SAX nu a funcţionat: %1"
+msgid "Parsing this XML with SAX did not work: %1$s"
+msgstr "Analiza acestui XML cu SAX nu a funcţionat: %1$s"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.http.client/src/com/openexchange/http/client/exceptions/OxHttpClientExceptionMessages.java:9
-msgid "Some generic exception was thrown: %1"
-msgstr "S-a returnat o excepţie generică: %1"
+msgid "Some generic exception was thrown: %1$s"
+msgstr "S-a returnat o excepţie generică: %1$s"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.http.client/src/com/openexchange/http/client/exceptions/OxHttpClientExceptionMessages.java:10
-msgid "An IO error occurred: %1"
-msgstr "A apărut o eroare de I/O: %1"
+msgid "An IO error occurred: %1$s"
+msgstr "A apărut o eroare de I/O: %1$s"
 
 #. * The grizzly server could not be started
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.http.grizzly/src/com/openexchange/http/grizzly/GrizzlyExceptionMessage.java:62
@@ -2657,11 +2631,6 @@ msgstr "Lipseşte următorul serviciu necesar: \"%1$s\""
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.http.grizzly/src/com/openexchange/http/grizzly/GrizzlyExceptionMessage.java:66
 msgid "The maximum number of HTTP sessions (%1$n) is exceeded."
 msgstr "Numărul maxim de sesiuni HTTP (%1$n) a fost depăşit."
-
-#. * The following needed feature could not be enabled: \"%1$s\"
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.http.grizzly/src/com/openexchange/http/grizzly/GrizzlyExceptionMessage.java:68
-msgid "The following needed feature could not be enabled: \"%1$s\""
-msgstr "Următoarea caracteristică necesară nu a putut fi activată: \"%1$s\""
 
 #. * Error while trying to interrupt Request processing
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.http.requestwatcher/src/com/openexchange/http/requestwatcher/RequestWatcherExceptionMessage.java:62
@@ -2712,11 +2681,11 @@ msgstr "Clasa implementatoare nu a putut fi găsită"
 #. An I/O error occurred while creating the socket connection to IMAP server (%1$s): %2$s
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/entity2acl/Entity2ACLExceptionMessage.java:73
 msgid ""
-"An I/O error occurred while creating the socket connection to IMAP server (%"
-"1$s): %2$s"
+"An I/O error occurred while creating the socket connection to IMAP server (%1"
+"$s): %2$s"
 msgstr ""
-"A apărut o eroare de I/O la crearea conexiunii pe socket cu serverul IMAP (%"
-"1$s): %2$s"
+"A apărut o eroare de I/O la crearea conexiunii pe socket cu serverul IMAP (%1"
+"$s): %2$s"
 
 #. Missing property %1$s in system.properties.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/entity2acl/Entity2ACLExceptionMessage.java:82
@@ -2743,8 +2712,8 @@ msgstr "Autentificarea IMAP %1$s nu a putut fi asociată niciunui utilizator"
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/entity2acl/Entity2ACLExceptionMessage.java:94
 msgid "User %1$s from context %2$s is not known on IMAP server \"%3$s\"."
 msgstr ""
-"Utilizatorul %1$s din contextul %2$s nu este cunoscut pe serverul IMAP \"%"
-"3$s\"."
+"Utilizatorul %1$s din contextul %2$s nu este cunoscut pe serverul IMAP \"%3$s"
+"\"."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.importexport/src/com/openexchange/importexport/exceptions/ImportExportExceptionMessages.java:61
 msgid "Could not export the folder %1$s in the format %2$s."
@@ -2797,7 +2766,8 @@ msgstr "Nu se poate importa formatul %2$s în dosarul %1$s."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.importexport/src/com/openexchange/importexport/exceptions/ImportExportExceptionMessages.java:83
 msgid ""
-"Calendar module is not enabled for the user. Appointments can not be imported."
+"Calendar module is not enabled for the user. Appointments can not be "
+"imported."
 msgstr ""
 "Modulul de calendar nu este activat pentru acest utilizator. Nu s-au putut "
 "importa întâlnirile."
@@ -2868,8 +2838,8 @@ msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.importexport/src/com/openexchange/importexport/exceptions/ImportExportExceptionMessages.java:111
 msgid ""
-"File does not contain fields for assigning contact names: no name, company or "
-"E-Mail."
+"File does not contain fields for assigning contact names: no name, company "
+"or E-Mail."
 msgstr ""
 "Fişierul nu conţine câmpuri pentru atribuirea numelor de contact: niciun "
 "nume, nicio firmă, niciun e-mail."
@@ -2879,8 +2849,8 @@ msgid ""
 "No field was set that might give the contact in line %s a display name: no "
 "name, company or E-Mail."
 msgstr ""
-"Nu s-a setat niciun câmp ce poate da contactului din linia %s un nume afișat: "
-"nici nume, nici firmă, nici e-mail."
+"Nu s-a setat niciun câmp ce poate da contactului din linia %s un nume "
+"afișat: nici nume, nici firmă, nici e-mail."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.importexport/src/com/openexchange/importexport/exceptions/ImportExportExceptionMessages.java:115
 msgid "Could not read InputStream as string"
@@ -2965,10 +2935,10 @@ msgstr "Lipsește un parametru pentru dosar"
 msgid "Columns should be numbers, could not convert %s into number"
 msgstr "Coloanele trebue să conţină numere, nu s-a putut converti %s în număr"
 
-#. No IndexAccess implementation was found for module $1%s.
+#. No IndexAccess implementation was found for module %1$s.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.index.solr/src/com/openexchange/index/solr/SolrIndexExceptionMessages.java:70
-msgid "No IndexAccess implementation was found for module $1%s."
-msgstr "Nu a fost găsită nicio implementare a IndexAccess pentru modulul $1%s."
+msgid "No IndexAccess implementation was found for module %1$s."
+msgstr "Nu a fost găsită nicio implementare a IndexAccess pentru modulul %1$s."
 
 #. An I/O Error occurred: %1$s
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.index.solr/src/com/openexchange/index/solr/SolrIndexExceptionMessages.java:73
@@ -3173,8 +3143,8 @@ msgstr "Elementul cu atributul %1$s nu a fost găsit în pagina %2$s."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.messaging.facebook/src/com/openexchange/messaging/facebook/FacebookMessagingExceptionMessages.java:89
 msgid ""
-"Missing permission \"%1$s\" in facebook login %2$s. Please copy following URL "
-"to your browser, login as %2$s (if not done yet) and grant access:\n"
+"Missing permission \"%1$s\" in facebook login %2$s. Please copy following "
+"URL to your browser, login as %2$s (if not done yet) and grant access:\n"
 "%3$s"
 msgstr ""
 "Lipsește permisiunea \"%1$s\" din contul Facebook %2$s. Copiați următoarea "
@@ -3259,8 +3229,8 @@ msgid ""
 "A Facebook API error occurred. Error code: %1$s. Error message: \"%2$s\". "
 "Please refer to http://fbdevwiki.com/wiki/Error_codes to look-up error code."
 msgstr ""
-"Aapărut o eroare de API Facebook. Cod de eroare: %1$s. Mesaj de eroare: \"%"
-"2$s\". Consultați http://fbdevwiki.com/wiki/Error_codes pentru un index al "
+"Aapărut o eroare de API Facebook. Cod de eroare: %1$s. Mesaj de eroare: \"%2"
+"$s\". Consultați http://fbdevwiki.com/wiki/Error_codes pentru un index al "
 "codurilor de eroare."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.messaging.facebook/src/com/openexchange/messaging/facebook/FormStrings.java:61
@@ -3409,8 +3379,9 @@ msgstr "Mesagerie unificată activată"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.messaging.mail/src/com/openexchange/messaging/mail/MailMessagingExceptionMessages.java:88
 msgid ""
-"Missing permission \"%1$s\" in facebook login %2$s. Please copy the following "
-"url to your browser, log in as %2$s (if not done yet) and grant access:\n"
+"Missing permission \"%1$s\" in facebook login %2$s. Please copy the "
+"following url to your browser, log in as %2$s (if not done yet) and grant "
+"access:\n"
 "%3$s"
 msgstr ""
 "Lipsește permisiunea \"%1$s\" din contul Facebook %2$s. Copiați următoarea "
@@ -3502,8 +3473,8 @@ msgstr "Nu aveți drepturi de creare în dosarul de mail %1$s."
 #. No attachment found with section identifier %1$s in message %2$s in folder %3$s.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.messaging/src/com/openexchange/messaging/MessagingExceptionMessages.java:130
 msgid ""
-"No attachment found with section identifier %1$s in message %2$s in folder %"
-"3$s."
+"No attachment found with section identifier %1$s in message %2$s in folder %3"
+"$s."
 msgstr ""
 "Nu s-a găsit niciun fişier ataşat cu identificatorul de sesiune %1$s în "
 "mesajul %2$s în dosarul %3$s."
@@ -3536,7 +3507,6 @@ msgstr "A apărut o eroare JMS: %1$s"
 
 #. Illegal state: %1$s
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.mq/src/com/openexchange/mq/MQExceptionMessages.java:82
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.snippet/src/com/openexchange/snippet/SnippetExceptionMessages.java:75
 msgid "Illegal state: %1$s"
 msgstr "Stare incorectă: %1$s"
 
@@ -3663,8 +3633,8 @@ msgid ""
 "SmartDrive user \"%1$s\" is not authenticated for stateful access to "
 "SmarTDrive server \"%2$s\"."
 msgstr ""
-"Utilizatorul SmartDrive \"%1$s\" nu este autentificat pentru accesul cu stare "
-"la serverul SmarTDrive \"%2$s\"."
+"Utilizatorul SmartDrive \"%1$s\" nu este autentificat pentru accesul cu "
+"stare la serverul SmarTDrive \"%2$s\"."
 
 #. This resource is not a file
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:111
@@ -3683,10 +3653,10 @@ msgid ""
 "account with the new password. To do so, go to Configuration -> My Social "
 "Configuration -> Accounts. Then try again."
 msgstr ""
-"Parola dumneavoastră '%1$s' a fost modificată. Trebuie să autorizați serverul "
-"să utilizeze contul dumneavoastră cu parola nouă. Selectați Configurație -> "
-"Configurație socială personală -> Conturi și modificați, apoi încercați din "
-"nou."
+"Parola dumneavoastră '%1$s' a fost modificată. Trebuie să autorizați "
+"serverul să utilizeze contul dumneavoastră cu parola nouă. Selectați "
+"Configurație -> Configurație socială personală -> Conturi și modificați, "
+"apoi încercați din nou."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:137
 msgid "The address %1$s is not white-listed as for the %2$s OAuth API"
@@ -3744,7 +3714,7 @@ msgstr "Eroare LDAP."
 #. *
 #. * A database connection cannot be obtained.
 #.
-#. * A database connection cannot be obtained.
+#. A database connection cannot be obtained.
 #. *
 #. * A database connection Cannot be obtained.
 #.
@@ -3752,7 +3722,7 @@ msgstr "Eroare LDAP."
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/group/GroupExceptionMessage.java:69
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/ldap/LdapExceptionMessage.java:91
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/ldap/UserExceptionMessage.java:91
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:75
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:72
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/update/internal/SchemaExceptionMessages.java:76
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/resource/ResourceExceptionMessage.java:71
 msgid "Cannot get database connection."
@@ -3762,6 +3732,7 @@ msgstr "Nu s-a putut obține conexiunea cu baza de date."
 #. * No permission to modify resources in context %1$s
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.passwordchange.script/src/com/openexchange/passwordchange/script/impl/PasswordExceptionMessage.java:101
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/ldap/UserExceptionMessage.java:131
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/resource/ResourceExceptionMessage.java:111
 msgid "No permission to modify resources in context %1$s"
 msgstr "Nu aveți permisiuni de modificare a resurselor în contextul %1$s"
@@ -3973,8 +3944,8 @@ msgstr ""
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:169
 msgid ""
-"POP3 sort failed due to the following reason: %1$s Switching to "
-"application-based sorting"
+"POP3 sort failed due to the following reason: %1$s Switching to application-"
+"based sorting"
 msgstr ""
 "Sortarea POP3 a eșuat din următorul motiv: %1$s Se trece pe căutarea bazată "
 "pe aplicații"
@@ -4012,8 +3983,8 @@ msgstr "Lipsește dosarul %1$s din operația de mutare a mesajelor"
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:189
 msgid ""
-"Message move aborted for user %1$s. Source and destination folder are equal: %"
-"2$s"
+"Message move aborted for user %1$s. Source and destination folder are equal: "
+"%2$s"
 msgstr ""
 "Mutarea mesajului a fost abandonată pentru utilizatorul %1$s. Dosarul sursă "
 "și cel destinație sunt egale: %2$s"
@@ -4182,8 +4153,8 @@ msgstr "POP3 nu suportă mesaje schiţă."
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:277
 msgid "Missing POP3 storage name for user %1$s in context %2$s."
 msgstr ""
-"Lipsește numele locului de stocare POP3 pentru utilizatorul %1$s în contextul "
-"%2$s."
+"Lipsește numele locului de stocare POP3 pentru utilizatorul %1$s în "
+"contextul %2$s."
 
 #. *
 #. * Missing POP3 storage for user %1$s in context %2$s.
@@ -4255,8 +4226,8 @@ msgid ""
 "Error message from server: %6$s"
 msgstr ""
 "Conexiune refuzată din cauza întârzierii autentificării la serverul %1$s cu "
-"autentificarea %2$s (utilizator=%3$s, context=%4$s). Încercați din nou peste %"
-"5$s secunde.\n"
+"autentificarea %2$s (utilizator=%3$s, context=%4$s). Încercați din nou peste "
+"%5$s secunde.\n"
 "Mesaj de eroare de la server: %6$s"
 
 #. *
@@ -4267,8 +4238,8 @@ msgid ""
 "Missing required capability %1$s on server %2$s with login %3$s (user=%4$s, "
 "context=%5$s)."
 msgstr ""
-"Lipsește capabilitatea obligatorie %1$s pe serverul %2$s cu autentificarea %"
-"3$s (utilizator=%4$s, context=%5$s)."
+"Lipsește capabilitatea obligatorie %1$s pe serverul %2$s cu autentificarea %3"
+"$s (utilizator=%4$s, context=%5$s)."
 
 #. *
 #. * POP3 storage path "%1$s" cannot be created for user %2$s in context %3$s.
@@ -4286,8 +4257,9 @@ msgstr ""
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:324
 msgid ""
-"Due to missing required capability %1$s POP3 messages are fetched and removed "
-"(expunge-on-quit) from server %2$s with login %3$s (user=%4$s, context=%5$s)."
+"Due to missing required capability %1$s POP3 messages are fetched and "
+"removed (expunge-on-quit) from server %2$s with login %3$s (user=%4$s, "
+"context=%5$s)."
 msgstr ""
 "Din cauza lipsei capabilității obligatorii %1$s, mesajele POP3 sunt obținute "
 "și eliminate (expunge-on-quit) de pe serverul %2$s cu autentificarea %3$s "
@@ -4298,8 +4270,8 @@ msgstr ""
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:328
 msgid ""
-"Validation of POP3 credentials is disabled due to possible login restrictions "
-"by provider. Otherwise subsequent login attempt might not work."
+"Validation of POP3 credentials is disabled due to possible login "
+"restrictions by provider. Otherwise subsequent login attempt might not work."
 msgstr ""
 "Verificarea datelor de autentificare POP3 este dezactivată din cauza "
 "eventualelor restricţii de autentificare care provin de la furnizor. Altfel "
@@ -4418,9 +4390,9 @@ msgid ""
 msgstr ""
 "Confidențialitate:\n"
 "Datele și referințele conținute de această pagină web vă sunt puse la "
-"dispoziție presupunând că proprietarul datelor este îndreptățit să vi le pună "
-"la dispoziție. Nici Open-Xchange, nici filialele sau entitățile sale afiliate "
-"nu vor răspunde pentru publicarea sau republicarea acestor date.\n"
+"dispoziție presupunând că proprietarul datelor este îndreptățit să vi le "
+"pună la dispoziție. Nici Open-Xchange, nici filialele sau entitățile sale "
+"afiliate nu vor răspunde pentru publicarea sau republicarea acestor date.\n"
 "Utilizarea sau difuzarea neautorizată a acestor date este interzisă. Dacă "
 "intenționați să stocați, să procesați sau să transmiteți mai departe aceste "
 "date, asigurați-vă că aveți dreptul.\n"
@@ -4586,30 +4558,10 @@ msgstr "Lipsesc date în pachetul datagram."
 msgid "No UDP channel is configured."
 msgstr "Nu este configurat niciun canal UDP."
 
-#. * The following obligatory element is missing: \"%1$s\"
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime.atmosphere.presence/src/com/openexchange/realtime/atmosphere/presence/AtmospherePresenceExceptionMessage.java:62
-msgid "The following obligatory element is missing: \"%1$s\""
-msgstr "Lipseşte următorul element obligatoriu: \"%1$s\""
-
 #. * The mandatory session information is missing.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime.atmosphere/src/com/openexchange/realtime/atmosphere/AtmosphereExceptionMessage.java:62
 msgid "The session information didn't match any ServerSession"
 msgstr "Informaţiile despre sesiune nu corespund niciunei ServerSession"
-
-#. * The received message is missing the \"kind\" key.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime.atmosphere/src/com/openexchange/realtime/atmosphere/AtmosphereExceptionMessage.java:64
-msgid "The received message is missing the \"kind\" key."
-msgstr "Mesajului primit îi lipseşte cheia \"kind\" ."
-
-#. * Could not find a parser for a message of kind: . \"%1$s\"
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime.atmosphere/src/com/openexchange/realtime/atmosphere/AtmosphereExceptionMessage.java:66
-msgid "Could not find a parser for a message of kind: . \"%1$s\""
-msgstr "Nu s-a putut găsi un analizor pentru un mesaj de tipul: . \"%1$s\""
-
-#. * Error while building Stanza: \"%1$s\"
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime.atmosphere/src/com/openexchange/realtime/atmosphere/AtmosphereExceptionMessage.java:68
-msgid "Error while building Stanza: \"%1$s\""
-msgstr "Eroare la construirea frazei: \"%1$s\""
 
 #. Unknown channel %1$s
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/RealtimeExceptionMessages.java:63
@@ -4621,8 +4573,8 @@ msgstr "Canal necunoscut %1$s"
 msgid ""
 "No appropriate channel found for recipient %1$s with payload namespace %2$s"
 msgstr ""
-"Nu există niciun canal adecvat pentru destinatarul %1$s cu spaţiul de nume al "
-"conţinutului %2$s"
+"Nu există niciun canal adecvat pentru destinatarul %1$s cu spaţiul de nume "
+"al conţinutului %2$s"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.rmi/src/com/openexchange/rmi/exceptions/OXRMIExceptionMessage.java:62
 msgid "Start of RMI service failed."
@@ -4709,8 +4661,8 @@ msgstr "Anularea înregistrării componentei de consistenţă MBean a eşuat."
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/consistency/ConsistencyExceptionMessages.java:67
 msgid "Malformed policy. Policies are formed like \"condition:action\""
 msgstr ""
-"Format strategie incorect. Strategiile trebuie să aibă formatul "
-"\"condiție:acțiune\""
+"Format strategie incorect. Strategiile trebuie să aibă formatul \"condiție:"
+"acțiune\""
 
 #. This message will be logged if a context is disabled and some user of that context tries to login.
 #. %1$d is replaced with the unique context identifier.
@@ -4787,8 +4739,8 @@ msgstr "Nu s-a putut determina resursa: %1$s"
 #. Private Appointments can not have attendees. Removing attendees and accepting appointment anyway.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/data/conversion/ical/ConversionWarningMessage.java:109
 msgid ""
-"Private appointments can not have attendees. Removing attendees and accepting "
-"appointment anyway."
+"Private appointments can not have attendees. Removing attendees and "
+"accepting appointment anyway."
 msgstr ""
 "Întâlnirile personale nu pot avea participanți. Se elimină participanții și "
 "se acceptă întâlnirea."
@@ -4860,8 +4812,8 @@ msgstr "Lipseşte sesiunea."
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/folderstorage/FolderExceptionMessages.java:82
 msgid "Folder \"%1$s\" is not visible to user \"%2$s\" in context \"%3$s\""
 msgstr ""
-"Dosarul \"%1$s\" nu este vizibil pentru utilizatorul \"%2$s\" în contextul \"%"
-"3$s\""
+"Dosarul \"%1$s\" nu este vizibil pentru utilizatorul \"%2$s\" în contextul "
+"\"%3$s\""
 
 #. JSON error: %1$s
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/folderstorage/FolderExceptionMessages.java:85
@@ -4885,8 +4837,8 @@ msgstr "Lipseşte identificatorul dosarului."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/folderstorage/FolderExceptionMessages.java:98
 msgid ""
-"Parent folder \"%1$s\" does not allow folder content type \"%2$s\" in tree \"%"
-"3$s\" for user %4$s in context %5$s."
+"Parent folder \"%1$s\" does not allow folder content type \"%2$s\" in tree "
+"\"%3$s\" for user %4$s in context %5$s."
 msgstr ""
 "Dosarul părinte \"%1$s\" nu permite conținutul de dosar \"%2$s\" în arborele "
 "\"%3$s\" pentru utilizatorul %4$s în contextul %5$s."
@@ -4902,8 +4854,8 @@ msgid ""
 "A folder named \"%1$s\" already exists below parent folder \"%2$s\" in tree "
 "\"%3$s\"."
 msgstr ""
-"Există deja un dosar cu numele \"%1$s\" subordonat dosarului părinte \"%2$s\" "
-"în arborele \"%3$s\"."
+"Există deja un dosar cu numele \"%1$s\" subordonat dosarului părinte \"%2$s"
+"\" în arborele \"%3$s\"."
 
 #. Subscribe operation not permitted on tree "%1$s".
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/folderstorage/FolderExceptionMessages.java:107
@@ -4921,8 +4873,8 @@ msgid ""
 "Unsubscribe operation not permitted on folder \"%1$s\" in tree \"%2$s\". "
 "Unsubscribe subfolders first."
 msgstr ""
-"Operația de dezabonare nu este permisă pe dosarul \"%1$s\" în arborele \"%"
-"2$s\". Dezabonați întâa dosarele subordonate."
+"Operația de dezabonare nu este permisă pe dosarul \"%1$s\" în arborele \"%2$s"
+"\". Dezabonați întâa dosarele subordonate."
 
 #. Unknown content type: %1$s.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/folderstorage/FolderExceptionMessages.java:116
@@ -4948,8 +4900,8 @@ msgstr "Nu s-a putut găsi dosarul \"%1$s\" în arborele \"%2$s\"."
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/folderstorage/FolderExceptionMessages.java:134
 msgid "No default folder available for content type \"%1$s\" in tree \"%2$s\"."
 msgstr ""
-"Nu este disponibil niciun dosar implicit pentru tipul de conţinut \"%1$s\" în "
-"arborele \"%2$s\"."
+"Nu este disponibil niciun dosar implicit pentru tipul de conţinut \"%1$s\" "
+"în arborele \"%2$s\"."
 
 #. Invalid folder identifier: %1$s.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/folderstorage/FolderExceptionMessages.java:137
@@ -4961,15 +4913,15 @@ msgstr "Identificator de dosarul incorect: %1$s."
 msgid ""
 "Folder \"%1$s\" must not be deleted by user \"%2$s\" in context \"%3$s\"."
 msgstr ""
-"Dosarul \"%1$s\" nu poate fi şters de utilizatorul \"%2$s\" în contextul \"%"
-"3$s\"."
+"Dosarul \"%1$s\" nu poate fi şters de utilizatorul \"%2$s\" în contextul \"%3"
+"$s\"."
 
 #. Folder "%1$s" must not be moved by user "%2$s" in context "%3$s".
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/folderstorage/FolderExceptionMessages.java:143
 msgid "Folder \"%1$s\" must not be moved by user \"%2$s\" in context \"%3$s\"."
 msgstr ""
-"Dosarul \"%1$s\" nu poate fi mutat de utilizatorul \"%2$s\" în contextul \"%"
-"3$s\"."
+"Dosarul \"%1$s\" nu poate fi mutat de utilizatorul \"%2$s\" în contextul \"%3"
+"$s\"."
 
 #. A temporary error occurred. Please retry.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/folderstorage/FolderExceptionMessages.java:146
@@ -5013,8 +4965,8 @@ msgid ""
 "same name."
 msgstr ""
 "Au fost găsite două dosare cu numele \"%1$s\" subordonate dosarului părinte "
-"\"%2$s\". Redenumiţi unul dintre dosare. Nu pot exista două dosare cu acelaşi "
-"nume."
+"\"%2$s\". Redenumiţi unul dintre dosare. Nu pot exista două dosare cu "
+"acelaşi nume."
 
 #. An unexpected error occurred: %1$s. Please try again.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/folderstorage/FolderExceptionMessages.java:167
@@ -5068,13 +5020,13 @@ msgstr "Nu aveţi permisiune pentru a crea grupuri."
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/group/GroupExceptionMessage.java:97
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:83
 msgid ""
-"Edit Conflict. Your change cannot be completed because somebody else has made "
-"a conflicting change to the same item. Please refresh or synchronize and try "
-"again."
+"Edit Conflict. Your change cannot be completed because somebody else has "
+"made a conflicting change to the same item. Please refresh or synchronize "
+"and try again."
 msgstr ""
-"Conflict de editare. Modificarea dumneavoastră nu poate fi efectuată deoarece "
-"altcineva a efectuat o altă modificare asupra aceluiași element, generând un "
-"conflict. Actualizați sau sincronizați și încercați din nou."
+"Conflict de editare. Modificarea dumneavoastră nu poate fi efectuată "
+"deoarece altcineva a efectuat o altă modificare asupra aceluiași element, "
+"generând un conflict. Actualizați sau sincronizați și încercați din nou."
 
 #. You are not allowed to change groups.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/group/GroupExceptionMessage.java:101
@@ -5128,8 +5080,8 @@ msgstr "Nu s-a putut şterge fişierul ataşat."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/attach/AttachmentExceptionMessages.java:77
 msgid ""
-"Could not find an attachment with the file id %s. Either the file is orphaned "
-"or belongs to another module."
+"Could not find an attachment with the file id %s. Either the file is "
+"orphaned or belongs to another module."
 msgstr ""
 "Nu s-a găsit niciun fişier ataşat cu identificatorul de fişier %s. Fişierul "
 "nu mai are niciun părinte sau aparţine unui alt modul."
@@ -5178,11 +5130,11 @@ msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/attach/AttachmentExceptionMessages.java:95
 msgid ""
-"Invalid parameter sent in request. Parameter '%1$s' was '%2$s' which does not "
-"look like a number."
+"Invalid parameter sent in request. Parameter '%1$s' was '%2$s' which does "
+"not look like a number."
 msgstr ""
-"Parametru incorect trimis în cerere. Parametrul '%1$s' a fost '%2$s', ceea ce "
-"nu pare a fi un număr."
+"Parametru incorect trimis în cerere. Parametrul '%1$s' a fost '%2$s', ceea "
+"ce nu pare a fi un număr."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/attach/AttachmentExceptionMessages.java:97
 msgid "Conflicting services registered for context %1$i and folder %2$i"
@@ -5241,11 +5193,11 @@ msgstr "Tipul de dosar \"PARTAJAT\" nu este permis în această situație."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/calendar/OXCalendarExceptionMessage.java:97
 msgid ""
-"Unexpected state for deleting a virtual appointment (exception). "
-"uid:oid:position %d:%d:%d"
+"Unexpected state for deleting a virtual appointment (exception). uid:oid:"
+"position %d:%d:%d"
 msgstr ""
-"Stare neaşteptată pentru ştergerea unei întâlniri virtuale (excepţie). "
-"uid:oid:poziţie %d:%d:%d"
+"Stare neaşteptată pentru ştergerea unei întâlniri virtuale (excepţie). uid:"
+"oid:poziţie %d:%d:%d"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/calendar/OXCalendarExceptionMessage.java:99
 msgid "SessionObject not initialized"
@@ -5296,9 +5248,9 @@ msgid ""
 "user (or owner of the calendar). Please remove additional participants or "
 "remove the \"Private\" mark."
 msgstr ""
-"Întâlnirile marcate ca 'Personale' pot fi programate doar pentru utilizatorul "
-"respectiv (sau proprietarul calendarului). Eliminați participanții "
-"suplimentari sau eliminați marcajul \"Personal\"."
+"Întâlnirile marcate ca 'Personale' pot fi programate doar pentru "
+"utilizatorul respectiv (sau proprietarul calendarului). Eliminați "
+"participanții suplimentari sau eliminați marcajul \"Personal\"."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/calendar/OXCalendarExceptionMessage.java:123
 msgid "Unsupported private flag value %d"
@@ -5327,18 +5279,18 @@ msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/calendar/OXCalendarExceptionMessage.java:135
 msgid ""
-"Got an UserParticipant object with an identifier < 1 Identifier:Folder_Type = "
-"%d:%d"
+"Got an UserParticipant object with an identifier < 1 Identifier:Folder_Type "
+"= %d:%d"
 msgstr ""
-"S-a obținut un obiect UserParticipant cu un identificator < 1 "
-"Identificator:Tip_Dosar = %d:%d"
+"S-a obținut un obiect UserParticipant cu un identificator < 1 Identificator:"
+"Tip_Dosar = %d:%d"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/calendar/OXCalendarExceptionMessage.java:137
 msgid ""
 "Got an UserParticipant object with a private folder id < 1 : Identifier = %d"
 msgstr ""
-"S-a obținut un obiect UserParticipant cu un identificator de dosar personal < "
-"1 : Identificator = %d"
+"S-a obținut un obiect UserParticipant cu un identificator de dosar personal "
+"< 1 : Identificator = %d"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/calendar/OXCalendarExceptionMessage.java:139
 msgid ""
@@ -5377,8 +5329,8 @@ msgstr "Drepturi de citire insuficiente pentru acest dosar."
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/calendar/OXCalendarExceptionMessage.java:154
 msgid ""
-"Cannot resolve recurrence position because neither the recurring position nor "
-"the recurring date position is known."
+"Cannot resolve recurrence position because neither the recurring position "
+"nor the recurring date position is known."
 msgstr ""
 "Nu s-a putut determina poziția de repetare pentru că nu s-a găsit nici "
 "poziția care se repetă, nici poziția unei date care se repetă."
@@ -5538,8 +5490,8 @@ msgid ""
 "Some data exceeds a field limit. Please shorten the input(s) for affected "
 "field(s)."
 msgstr ""
-"Anumite date depășesc limita câmpului. Reduceți valorile pentru "
-"câmpul/câmpurile afectat(e)."
+"Anumite date depășesc limita câmpului. Reduceți valorile pentru câmpul/"
+"câmpurile afectat(e)."
 
 #. *
 #. * Calendar calculation requires a proper defined time zone.
@@ -5700,14 +5652,14 @@ msgstr "Mutarea unei întâlniri periodice într-un alt dosar nu este suportată
 #. *
 #. * In order to accomplish the search, %1$d or more characters are required.
 #.
-#. * In order to accomplish the search, %1$d or more characters are required.
+#. In order to accomplish the search, %1$d or more characters are required.
 #. *
 #. * In order to accomplish the search, %1$d or more characters are required.
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/calendar/OXCalendarExceptionMessage.java:341
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:147
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/infostore/InfostoreExceptionMessages.java:111
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:218
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:211
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:428
 msgid ""
 "In order to accomplish the search, %1$d or more characters are required."
@@ -5738,8 +5690,8 @@ msgstr "Informaţie de repetare inutilă (%1$s) pentru tipul %2$s"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/calendar/OXCalendarExceptionMessage.java:358
 msgid ""
-"Unable to calculate given position. Seems to be a delete exception or outside "
-"range"
+"Unable to calculate given position. Seems to be a delete exception or "
+"outside range"
 msgstr ""
 "Nu s-a putut calcula poziţia indicată. Pare a fi o excepţie de ștergere sau "
 "poziția poate fi în afara limitelor permise."
@@ -5750,15 +5702,16 @@ msgstr "Modificarea unei excepții dintr-o serie nu este suportată."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/calendar/OXCalendarExceptionMessage.java:362
 msgid ""
-"Cannot insert appointment (%1$s). An appointment with the unique identifier (%"
-"2$s) already exists."
+"Cannot insert appointment (%1$s). An appointment with the unique identifier "
+"(%2$s) already exists."
 msgstr ""
 "Nu s-a putut insera întâlnirea (%1$s). Există deja o întâlnire cu "
 "identificatorul unic (%2$s)."
 
 #. * SQL Problem.
+#. SQL Problem.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/calendar/OXCalendarExceptionMessage.java:365
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:81
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:78
 msgid "SQL Problem."
 msgstr "Problemă de SQL."
 
@@ -5810,8 +5763,8 @@ msgstr "Întâlnirea nu este periodică."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:61
 msgid ""
-"Found a user contact outside global address book in folder %1$d in context %"
-"2$d."
+"Found a user contact outside global address book in folder %1$d in context %2"
+"$d."
 msgstr ""
 "S-a găsit un contact utilizator în afara agendei globale de contacte în "
 "dosarul %1$d în contextul %2$d."
@@ -5823,8 +5776,8 @@ msgstr "Adresă de e-mail incorectă: '%s'. Corectaţi adresa de e-mail."
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:65
 msgid ""
 "Unable to import this contact picture. Either the type is not part of the "
-"supported type (JPG, GIF, BMP or PNG) or the size exceed %3$d. Your file type "
-"is %1$s and your image size is %2$d."
+"supported type (JPG, GIF, BMP or PNG) or the size exceed %3$d. Your file "
+"type is %1$s and your image size is %2$d."
 msgstr ""
 "Nu s-a putut importa fotografia acestui contact. Fie tipul nu este unul "
 "dintre tipurile suportate (JPG, GIF, BMP or PNG), fie dimensiunea depășește %"
@@ -5832,11 +5785,12 @@ msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:67
 msgid ""
-"You are not allowed to store this contact in a non-contact folder: folder id %"
-"1$d in context %2$d with user %3$d"
+"You are not allowed to store this contact in a non-contact folder: folder id "
+"%1$d in context %2$d with user %3$d"
 msgstr ""
 "Nu vi se permite stocarea acestui contact într-un dosar ce nu este de "
-"contacte: identificatorul de dosar %1$d în contextul %2$d cu utilizatorul %3$d"
+"contacte: identificatorul de dosar %1$d în contextul %2$d cu utilizatorul %3"
+"$d"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:69
 msgid ""
@@ -5889,8 +5843,8 @@ msgstr "A apărut o eroare: identificatorul obiectului este -1"
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:87
 msgid "No changes found. No update required. context %1$d object %2$d"
 msgstr ""
-"Nu s-au găsit modificări. Actualizarea nu este necesară. context %1$d obiect %"
-"2$d"
+"Nu s-au găsit modificări. Actualizarea nu este necesară. context %1$d obiect "
+"%2$d"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:89
 msgid "Contact %1$d not found in context %2$d."
@@ -5915,8 +5869,8 @@ msgid ""
 "add a comment for the variables"
 msgstr ""
 "Importarea a eşuat. Anumite date introduse depăşesc limita câmpurilor bazei "
-"de date. Scurtaţi intrările următoare: %1$s numărul limită de caractere: %2$s "
-"trimis %3$s Adăugaţi un comentariu pentru variabile"
+"de date. Scurtaţi intrările următoare: %1$s numărul limită de caractere: %2"
+"$s trimis %3$s Adăugaţi un comentariu pentru variabile"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:99
 msgid ""
@@ -5956,8 +5910,8 @@ msgstr "Caracter nepermis în câmpul %2$s. Eroare: %1$s"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:111
 msgid ""
-"You do not have the permission to delete objects from folder %1$d in context %"
-"2$d as user %3$d"
+"You do not have the permission to delete objects from folder %1$d in context "
+"%2$d as user %3$d"
 msgstr ""
 "Nu aveţi permisiune pentru a şterge obiectele din dosarul %1$d în contextul %"
 "2$d cu utilizatorul %3$d"
@@ -5968,8 +5922,8 @@ msgstr "Tipul mime nu este definit."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:115
 msgid ""
-"A contact with private flag cannot be stored in a public folder. Folder: %1$d "
-"context %2$d user %3$d"
+"A contact with private flag cannot be stored in a public folder. Folder: %1"
+"$d context %2$d user %3$d"
 msgstr ""
 "Contactele marcate ca private nu pot fi depozitate într-un dosar public. "
 "Dosar: 1$d context %2$d utilizator %3$d"
@@ -6003,8 +5957,8 @@ msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:127
 msgid ""
-"An E-Mail address is mandatory for external distribution list members. Please "
-"add a valid E-Mail address."
+"An E-Mail address is mandatory for external distribution list members. "
+"Please add a valid E-Mail address."
 msgstr ""
 "Furnizarea unei adrese de e-mail este obligatorie pentru membrii externi din "
 "listele de distribuţie. Adăugaţi o adresă de e-mail validă."
@@ -6251,8 +6205,8 @@ msgid ""
 "#RECIPIENT# with subject \"#SUBJECT#\".\n"
 "\n"
 "Note: This delivery receipt only acknowledges that the message was displayed "
-"on the recipients computer. There is no guarantee that the recipient has read "
-"or understood the message contents."
+"on the recipients computer. There is no guarantee that the recipient has "
+"read or understood the message contents."
 msgstr ""
 "Aceasta este o confirmare de primire pentru mesajul trimis pe #DATE# către "
 "#RECIPIENT# cu subiectul \"#SUBJECT#\".\n"
@@ -6440,8 +6394,8 @@ msgid ""
 "\n"
 "========================================== "
 msgstr ""
-"A fost creată o nouă întâlnire de către [created_by] în numele utilizatorului "
-"[behalf_of]\n"
+"A fost creată o nouă întâlnire de către [created_by] în numele "
+"utilizatorului [behalf_of]\n"
 "Puteți vedea această întâlnire în calendarul dumneavoastră:\n"
 "[link]\n"
 "\n"
@@ -6490,8 +6444,8 @@ msgid ""
 "\n"
 "========================================== "
 msgstr ""
-"A fost creată o nouă întâlnire de către [created_by] în numele utilizatorului "
-"[behalf_of]\n"
+"A fost creată o nouă întâlnire de către [created_by] în numele "
+"utilizatorului [behalf_of]\n"
 "\n"
 "Întâlnire\n"
 "===========\n"
@@ -7497,11 +7451,11 @@ msgstr "Zi lucrătoare"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/importexport/csv/CsvExceptionMessages.java:57
 msgid ""
-"Broken CSV file: Lines have different number of cells, line #1 has %d, line #%"
-"d has %d. Is this really a CSV file?"
+"Broken CSV file: Lines have different number of cells, line #1 has %d, line #"
+"%d has %d. Is this really a CSV file?"
 msgstr ""
-"Fișier CSV defect: Liniile au număr diferit de celule, linia #1 are %d, linia "
-"#%d are %d. Sigur este un fișier CSV?"
+"Fișier CSV defect: Liniile au număr diferit de celule, linia #1 are %d, "
+"linia #%d are %d. Sigur este un fișier CSV?"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/importexport/csv/CsvExceptionMessages.java:59
 msgid "Illegal state: Found data after presumed last line."
@@ -7640,8 +7594,8 @@ msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/infostore/InfostoreExceptionMessages.java:117
 msgid ""
-"The document was updated in between do and undo. The database is now probably "
-"inconsistent."
+"The document was updated in between do and undo. The database is now "
+"probably inconsistent."
 msgstr ""
 "Documentul a fost actualizat între efectuarea și anularea unei acțiuni. Baza "
 "de date este probabil inconsistentă."
@@ -7780,15 +7734,6 @@ msgstr ""
 "S-au găsit doi utilizatori cu același identificator %1$s în contextul %2$d."
 
 #. *
-#. * No CATEGORY_PERMISSION_DENIED to modify resources in context %1$s
-#.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/ldap/UserExceptionMessage.java:131
-msgid "No CATEGORY_PERMISSION_DENIED to modify resources in context %1$s"
-msgstr ""
-"Nu aveți CATEGORY_PERMISSION_DENIED de modificare a resurselor în contextul %"
-"1$s"
-
-#. *
 #. * Missing or unknown password mechanism %1$s
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/ldap/UserExceptionMessage.java:136
@@ -7869,17 +7814,18 @@ msgid ""
 "Unable to access the link between these two objects. Insufficient rights. "
 "First object %1$d folder %2$d. Second object %3$d folder %4$d context %5$d."
 msgstr ""
-"Nu s-a putut accesa legătura dintre cele două obiecte. Drepturi insuficiente. "
-"Primul obiect %1$d dosar %2$d. Al doilea obiect %3$d dosar %4$d context %5$d."
+"Nu s-a putut accesa legătura dintre cele două obiecte. Drepturi "
+"insuficiente. Primul obiect %1$d dosar %2$d. Al doilea obiect %3$d dosar %4"
+"$d context %5$d."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/links/LinkExceptionMessages.java:63
 msgid ""
 "Unable to create a link between these two objects. This link already exists. "
 "First object %1$d folder %2$d. Second object %3$d folder %4$d context %5$d."
 msgstr ""
-"Nu s-a putut crea o legătură între cele oduă obiecte. Această legătură există "
-"deja. Primul obiect %1$d dosar %2$d. Al doilea obiect %3$d dosar %4$d context "
-"%5$d."
+"Nu s-a putut crea o legătură între cele oduă obiecte. Această legătură "
+"există deja. Primul obiect %1$d dosar %2$d. Al doilea obiect %3$d dosar %4$d "
+"context %5$d."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/links/LinkExceptionMessages.java:65
 msgid "Invalid SQL query: %s"
@@ -8021,149 +7967,167 @@ msgstr "Operație nepermisă."
 msgid "Reached maximum retries for writing the setting %s."
 msgstr "S-a atins numărul maxim de încercări pentru scrierea setării %s."
 
-#. * Error while inserting task: %s.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:69
+#. Task attribute name
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/AttributeNames.java:66
+msgid "Current costs"
+msgstr "Costuri curente"
+
+#. Task attribute name
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/AttributeNames.java:69
+msgid "Current duration"
+msgstr "Durată curentă"
+
+#. Task attribute name
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/AttributeNames.java:72
+msgid "Estimated costs"
+msgstr "Costuri estimate"
+
+#. Task attribute name
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/AttributeNames.java:75
+msgid "Estimated duration"
+msgstr "Durată estimată"
+
+#. Error while inserting task: %s.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:66
 msgid "Error while inserting task: %s."
 msgstr "Eroare la inserarea sarcinii: %s."
 
-#. * Setting autoCommit to true failed.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:72
+#. Setting autoCommit to true failed.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:69
 msgid "Problem setting auto commit to true."
 msgstr "Problemă la setarea auto commit pe adevărat."
 
-#. * Unimplemented feature.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:78
+#. Unimplemented feature.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:75
 msgid "This method is not implemented."
 msgstr "Această metodă nu este implementată."
 
-#. * Folder %1$s (%2$d) is not a task folder.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:84
+#. Folder %1$s (%2$d) is not a task folder.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:81
 msgid "Folder %1$s (%2$d) is not a task folder."
 msgstr "Dosarul %1$s (%2$d) nu este un dosar de sarcini."
 
-#. *
-#. * Edit conflict. Your change cannot be completed because somebody else has made a conflicting change to the same item. Please refresh or synchronize and try again.
-#.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:89
+#. Edit conflict. Your change cannot be completed because somebody else has made a conflicting change to the same item. Please refresh or synchronize and try again.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:84
 msgid ""
-"Edit conflict. Your change cannot be completed because somebody else has made "
-"a conflicting change to the same item. Please refresh or synchronize and try "
-"again."
+"Edit conflict. Your change cannot be completed because somebody else has "
+"made a conflicting change to the same item. Please refresh or synchronize "
+"and try again."
 msgstr ""
-"Conflict de editare. Modificarea dumneavoastră nu poate fi efectuată deoarece "
-"altcineva a efectuat o altă modificare asupra aceluiași element, generând un "
-"conflict. Actualizați sau sincronizați și încercați din nou."
+"Conflict de editare. Modificarea dumneavoastră nu poate fi efectuată "
+"deoarece altcineva a efectuat o altă modificare asupra aceluiași element, "
+"generând un conflict. Actualizați sau sincronizați și încercați din nou."
 
-#. * Cannot create private task in public/shared folder %1$d.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:92
+#. Cannot create private task in public/shared folder %1$d.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:87
 msgid "Cannot create private task in public/shared folder %1$d."
 msgstr "Nu se poate crea o sarcină personală în dosarul public/partajat %1$d."
 
-#. * SQL problem while updating task: %s.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:95
+#. SQL problem while updating task: %s.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:90
 msgid "SQL problem while updating task: %s."
 msgstr "Problemă de SQL la actualizarea sarcinii: %s."
 
-#. * Counting tasks did not return a result.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:98
+#. Counting tasks did not return a result.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:93
 msgid "Counting tasks did not return a result."
 msgstr "Numărătoarea sarcinilor nu a returnat niciun rezultat."
 
-#. * SQL problem while deleting task: %s.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:101
+#. SQL problem while deleting task: %s.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:96
 msgid "SQL problem while deleting task: %s."
 msgstr "Problemă de SQL la ștergerea sarcinii: %s."
 
-#. * Cannot find folder for task %2$d and participant %1$d in context %3$d.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:104
+#. Cannot find folder for task %2$d and participant %1$d in context %3$d.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:99
 msgid "Cannot find folder for task %2$d and participant %1$d in context %3$d."
 msgstr ""
 "Nu s-a putut găsi dosarul pentru sarcina %2$d și participantul %1$d în "
 "contextul %3$d."
 
-#. * SQL problem while listing tasks: %s.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:107
+#. SQL problem while listing tasks: %s.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:102
 msgid "SQL problem while listing tasks: %s."
 msgstr "Problemă de SQL la listarea sarcinilor: %s."
 
-#. * You are not allowed to delete the task %d.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:110
+#. You are not allowed to delete the task %d.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:105
 msgid "You are not allowed to delete the task."
 msgstr "Nu aveţi permisiune pentru a şterge sarcina."
 
-#. * Tried to delete %1$d folders but only %2$d were deleted.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:113
+#. Tried to delete %1$d folders but only %2$d were deleted.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:108
 msgid "Tried to delete %1$d folders but only %2$d were deleted."
 msgstr "S-a încercat ștergerea a %1$d dosare, dar au fost șterse doar %2$d."
 
-#. * Tried to delete %1$d participants but only %2$d were deleted.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:116
+#. Tried to delete %1$d participants but only %2$d were deleted.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:111
 msgid "Tried to delete %1$d participants but only %2$d were deleted."
 msgstr ""
 "S-a încercat ștergerea a %1$d participanți, dar au fost șterși doar %2$d."
 
-#. * Participant %d for task %d is not found.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:119
+#. Participant %d for task %d is not found.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:114
 msgid "Participant %d for task %d is not found."
 msgstr "Participantul %d pentru sarcina %d nu a fost găsit."
 
-#. * Cannot find task %d in context %d.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:122
+#. Cannot find task %d in context %d.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:117
 msgid "Cannot find task %d in context %d."
 msgstr "Nu s-a putut găsi sarcina %d în contextul %d."
 
-#. * Unknown task attribute %d.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:125
+#. Unknown task attribute %d.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:120
 msgid "Unknown task attribute %d."
 msgstr "Atributul sarcinii este necunoscut %d."
 
-#. * Date range in search must contain 2 and not %d values.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:128
+#. Date range in search must contain 2 and not %d values.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:123
 msgid "Date range in search must contain 2 and not %d values."
 msgstr "Intervalul de date din căutare trebuie să conțină 2 și nu %d valori."
 
-#. * Cannot decrease number of attachments below zero.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:131
+#. Cannot decrease number of attachments below zero.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:126
 msgid "Cannot decrease number of attachments below zero."
 msgstr "Numărul de fișiere atașate nu poate fi mai mic decât zero."
 
-#. * You are not allowed to read the contents of folder %1$s (%2$d).
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:134
+#. You are not allowed to read the contents of folder %1$s (%2$d).
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:129
 msgid "You are not allowed to read the contents of folder %1$s (%2$d)."
 msgstr "Nu aveţi permisiune pentru a citi conţinutul dosarului %1$s (%2$d)."
 
-#. * Tasks are disable for you (%d).
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:137
+#. Tasks are disable for you (%d).
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:132
 msgid "Tasks are disabled for you (%d)."
 msgstr "Sarcinile sunt dezactivate pentru dumneavoastră (%d)."
 
-#. * You are not allowed to create tasks in folder %1$s (%2$d).
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:140
+#. You are not allowed to create tasks in folder %1$s (%2$d).
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:135
 msgid "You are not allowed to create tasks in folder %1$s (%2$d)."
 msgstr "Nu aveţi permisiune pentru a crea sarcini în dosarul %1$s (%2$d)."
 
-#. * You are not allowed to delegate tasks.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:143
+#. You are not allowed to delegate tasks.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:138
 msgid "You are not allowed to delegate tasks."
 msgstr "Nu aveţi permisiune pentru a delega sarcini."
 
-#. * Missing folder id for creating task.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:146
+#. Missing folder id for creating task.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:141
 msgid "Missing folder id for creating task."
 msgstr "Lipsește identificatorul dosarului pentru a crea sarcina."
 
-#. * Private flagged tasks cannot be delegated.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:149
+#. Private flagged tasks cannot be delegated.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:144
 msgid "Tasks with private flag cannot be delegated."
 msgstr "Sarcinile marcate ca personale nu pot fi delegate."
 
-#. * Percent is %d but must be between 0 and 100.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:152
+#. Percent is %d but must be between 0 and 100.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:147
 msgid "Percent is %d but must be between 0 and 100."
 msgstr "Procentul este %d dar trebuie să fie între 0 și 100."
 
-#. * For tasks which are not started the percentage done must be 0 and not %d.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:155
+#. For tasks which are not started the percentage done must be 0 and not %d.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:150
 msgid ""
 "Tasks that have not been started yet need to have a 'Done' percentage of 0 "
 "and not %d."
@@ -8171,58 +8135,56 @@ msgstr ""
 "Pentru sarcinile ce nu au fost începute, procentajul trebuie să fie 0 și nu %"
 "d."
 
-#. * cannot send event to event system.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:158
+#. cannot send event to event system.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:153
 msgid "Cannot send event to event system."
 msgstr "Nu s-a putut trimite evenimentul către sistemul de evenimente."
 
-#. * You are not allowed to edit tasks in folder %1$s (%2$d).
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:161
+#. You are not allowed to edit tasks in folder %1$s (%2$d).
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:156
 msgid "You are not allowed to edit tasks in folder %1$s (%2$d)."
 msgstr ""
 "Nu aveţi permisiune pentru a edita sarcinile din acest dosar %1$s (%2$d)."
 
-#. * Moving items from or into shared folder %1$s (%2$d) is not allowed.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:164
+#. Moving items from or into shared folder %1$s (%2$d) is not allowed.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:159
 msgid "Moving items from or into shared folder %1$s (%2$d) is not allowed."
 msgstr ""
 "Nu este permisă mutarea elementelor din sau în dosarul partajat %1$s (%2$d)."
 
-#. * Missing folder mapping for task %1$d.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:167
+#. Missing folder mapping for task %1$d.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:162
 msgid "Missing folder mapping for task %1$d."
 msgstr "Lipsește maparea de dosar pentru sarcina %1$d."
 
-#. * Unknown recurrence type %d.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:170
+#. Unknown recurrence type %d.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:165
 msgid "Unknown recurrence type %d."
 msgstr "Tip de repetare necunoscut %d."
 
-#. * Value for the recurrence is missing: %d.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:173
+#. Value for the recurrence is missing: %d.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:168
 msgid "Value for the recurrence is missing: %d."
 msgstr "Lipseşte valoarea pentru repetare: %d."
 
-#. * For finished tasks the percentage must be 100 and not %d.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:176
+#. For finished tasks the percentage must be 100 and not %d.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:171
 msgid "Finished tasks need to have a percentage of 100 and not %d."
 msgstr "Pentru sarcinile finalizate, procentajul trebuie să fie 100 și nu %d."
 
-#. * Invalid task state %d.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:179
+#. Invalid task state %d.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:174
 msgid "Invalid task state %d."
 msgstr "Starea sarcinii este incorectă %d."
 
-#. * Start date %1$s must be before end date %2$s.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:182
+#. Start date %1$s must be before end date %2$s.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:177
 msgid "Start date %1$s must be before end date %2$s."
 msgstr "Data inițială %1$s trebuie să fie înaintea datei finale %2$s."
 
-#. *
-#. * The task could not be saved. Please shorten the %1$s and try again. Current length %3$d is more than allowed length of %2$d
-#. * characters.
-#.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:188
+#. The task could not be saved. Please shorten the %1$s and try again. Current length %3$d is more than allowed length of %2$d
+#. characters.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:181
 msgid ""
 "The task could not be saved. Please shorten the %1$s and try again. Current "
 "length %3$d is more than allowed length of %2$d characters."
@@ -8230,50 +8192,50 @@ msgstr ""
 "Sarcina nu a putut fi salvată. Prescurtați %1$s și încercați din nou. "
 "Lungimea actuală %3$d este mai mare decât lungimea permisă de %2$d caractere."
 
-#. * Task with private flag cannot be moved to public folder %1$s (%2$d).
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:191
+#. Task with private flag cannot be moved to public folder %1$s (%2$d).
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:184
 msgid "Tasks with private flag cannot be moved to a public folder %1$s (%2$d)."
 msgstr ""
 "Sarcinile cu marcaj personal nu pot fi mutate în dosarul public %1$s (%2$d)."
 
-#. * Only the task creator is allowed to set private flag.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:194
+#. Only the task creator is allowed to set private flag.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:187
 msgid "Only the task creator is allowed to set the private flag."
 msgstr "Doar creatorul sarcinii poate seta marcajul de personal."
 
-#. * Cannot add external participant without email address.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:197
+#. Cannot add external participant without email address.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:190
 msgid "External participants without E-Mail address can not be added."
 msgstr "Nu se pot adăuga participanţi externi fără adresă de e-mail."
 
-#. * Problem with a thread.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:200
+#. Problem with a thread.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:193
 msgid "Unexpected error."
 msgstr "Eroare neaşteptată."
 
-#. * You are not allowed to see the task %1$d in folder %2$s (%3$d).
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:203
+#. You are not allowed to see the task %1$d in folder %2$s (%3$d).
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:196
 msgid "You are not allowed to see the task %1$d in folder %2$s (%3$d)."
 msgstr ""
 "Nu aveţi permisiune pentru a vizualiza sarcina %1$d din dosarul %2$s (%3$d)."
 
-#. * Task contains invalid data: "%1$s"
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:206
+#. Task contains invalid data: "%1$s"
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:199
 msgid "Task contains invalid data: \"%1$s\""
 msgstr "Sarcina conține date incorecte: \"%1$s\""
 
-#. * The task %1$d is not stored in folder %2$s (%3$d).
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:209
+#. The task %1$d is not stored in folder %2$s (%3$d).
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:202
 msgid "The task %1$d is not stored in folder %2$s (%3$d)."
 msgstr "Sarcina %1$d nu este stocată în dosarul %2$s (%3$d)."
 
-#. * Unknown participant type %1$d.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:212
+#. Unknown participant type %1$d.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:205
 msgid "Unknown participant type %1$d."
 msgstr "Tip de participant necunoscut %1$d."
 
-#. * The entered value for costs is not within the allowed range. Please use a value from -130000.00 to 130000.00.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:215
+#. The entered value for costs is not within the allowed range. Please use a value from -130000.00 to 130000.00.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:208
 msgid ""
 "The value entered for costs is not within the allowed range. Please use a "
 "value from -130000.00 to 130000.00."
@@ -8281,20 +8243,26 @@ msgstr ""
 "Valoarea introdusă pentru costuri nu se încadrează între limitele date. "
 "Utilizați o valoare între -130000,00 și 130000,00."
 
-#. * Group %1$d is empty. You can't add an empty group to a task.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:221
+#. Group %1$d is empty. You can't add an empty group to a task.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:214
 msgid "Group %1$d is empty. You can not add an empty group to a task."
 msgstr "Grupul %1$d este gol. Nu se poate adăuga un grup gol la o sarcină."
 
-#. * UID of tasks can not be changed.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:224
+#. UID of tasks can not be changed.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:217
 msgid "Tasks uids can not be changed."
 msgstr "Nu se poate modifica UID-ul sarcinii."
 
+#. Into a numeric attribute something non numeric has been entered. %2$s will name the attribute that contains non digit characters.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:220
+msgid "Value \"%1$s\" of attribute \"%2$s\" contains non digit characters."
+msgstr ""
+"Valoarea \"%1$s\" a atributului \"%2$s\" conține caractere ce un sunt cifre."
+
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/update/UpdateExceptionMessages.java:62
 msgid ""
-"The current version number %1$s is already lower than or equal to the desired "
-"version number %2$s."
+"The current version number %1$s is already lower than or equal to the "
+"desired version number %2$s."
 msgstr ""
 "Numărul curent de versiune %1$s este deja mai mic sau egal cu numărul de "
 "versiune dorit %2$s."
@@ -8331,8 +8299,8 @@ msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/update/UpdateExceptionMessages.java:74
 msgid ""
-"Unable to determine next update task to execute. Executed: %1$s. Enqueued: %"
-"2$s. Scheduled: %3$s."
+"Unable to determine next update task to execute. Executed: %1$s. Enqueued: %2"
+"$s. Scheduled: %3$s."
 msgstr ""
 "Nu s-a putut determina următoarea sarcină de executat. Executate: %1$s. În "
 "coadă: %2$s. Programate: %3$s."
@@ -8355,8 +8323,8 @@ msgid ""
 "Blocking tasks (%1$s) must be executed before background tasks can be "
 "executed (%2$s)."
 msgstr ""
-"Sarcinile cu blocare (%1$s) trebuie executate înainte de a putea fi executate "
-"sarcinile de fundal (%2$s)."
+"Sarcinile cu blocare (%1$s) trebuie executate înainte de a putea fi "
+"executate sarcinile de fundal (%2$s)."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/update/UpdateExceptionMessages.java:82
 msgid "Unknown task: %1$s."
@@ -8524,8 +8492,8 @@ msgstr "Configuraţia utilizatorului nu a putut fi eliminată din cache: %1$s"
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/userconfiguration/UserConfigurationExceptionMessage.java:121
 msgid "Mail settings for user %1$s could not be found in context %2$d"
 msgstr ""
-"Setările de mail pentru utilizatorul %1$s nu au putut fi găsite în contextul %"
-"2$d"
+"Setările de mail pentru utilizatorul %1$s nu au putut fi găsite în contextul "
+"%2$d"
 
 #. Displayed to user if a volatile error occurred.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:69
@@ -8538,15 +8506,12 @@ msgid "A messaging error occurred."
 msgstr "A apărut o eroare de mesagerie."
 
 #. *
-#. * Invalid CATEGORY_PERMISSION_DENIED values: fp=%1$s orp=%2$s owp=%3$s odp=%4$s
+#. * Invalid permission values: fp=%1$s orp=%2$s owp=%3$s odp=%4$s
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:87
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:415
-msgid ""
-"Invalid CATEGORY_PERMISSION_DENIED values: fp=%1$s orp=%2$s owp=%3$s odp=%4$s"
-msgstr ""
-"Valori incorecte pentru CATEGORY_PERMISSION_DENIED: fp=%1$s orp=%2$s owp=%3$s "
-"odp=%4$s"
+msgid "Invalid permission values: fp=%1$s orp=%2$s owp=%3$s odp=%4$s"
+msgstr "Valori incorecte pentru permisiuni: fp=%1$s orp=%2$s owp=%3$s odp=%4$s"
 
 #. *
 #. * Missing parameter in user's mail config: %1$s
@@ -8681,11 +8646,11 @@ msgstr "Câmpul mesaj %1$s nu poate fi manipulat"
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:192
 msgid ""
-"Message field %1$s cannot be handled on server %2$s with login %3$s (user=%"
-"4$s, context=%5$s)"
+"Message field %1$s cannot be handled on server %2$s with login %3$s (user=%4"
+"$s, context=%5$s)"
 msgstr ""
-"Câmpul mesaj %1$s nu poate fi manipulat pe serverul %2$s cu autentificarea %"
-"3$s (utilizator=%4$s, context=%5$s)"
+"Câmpul mesaj %1$s nu poate fi manipulat pe serverul %2$s cu autentificarea %3"
+"$s (utilizator=%4$s, context=%5$s)"
 
 #. *
 #. * Versit error: %1$s
@@ -8814,8 +8779,8 @@ msgstr "Partea de mesaj nu conține nimic"
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:282
 msgid ""
-"Message has been successfully sent. Due to exceeded quota a copy could not be "
-"placed in your sent folder though."
+"Message has been successfully sent. Due to exceeded quota a copy could not "
+"be placed in your sent folder though."
 msgstr ""
 "Mesajul a fost trimis cu succes, dar nu s-a putut copia în dosarul de mesaje "
 "trimise deoarece limita a fost depăşită."
@@ -8880,8 +8845,8 @@ msgstr "Dosarul %1$s nu conține mesaje și de aceea nu poate fi selectat"
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:327
 msgid ""
-"Folder %1$s does not hold messages and is therefore not selectable on server %"
-"2$s with login %3$s (user=%4$s, context=%5$s)"
+"Folder %1$s does not hold messages and is therefore not selectable on server "
+"%2$s with login %3$s (user=%4$s, context=%5$s)"
 msgstr ""
 "Dosarul %1$s nu conține mesaje și de aceea nu poate fi selectat pe serverul %"
 "2$s cu autentificarea %3$s (utilizator=%4$s, context=%5$s)"
@@ -8948,11 +8913,11 @@ msgstr ""
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:363
 msgid ""
-"Checking default folders on server %1$s for user %2$s (%3$s) in context on %"
-"4$s failed: %5$s"
+"Checking default folders on server %1$s for user %2$s (%3$s) in context on %4"
+"$s failed: %5$s"
 msgstr ""
-"Verificarea dosarelor implicite pe serverul %1$s pentru utilizatorul %2$s (%"
-"3$s) în contextul pe %4$s a eșuat: %5$s"
+"Verificarea dosarelor implicite pe serverul %1$s pentru utilizatorul %2$s (%3"
+"$s) în contextul pe %4$s a eșuat: %5$s"
 
 #. *
 #. * The types of specified data source are not supported
@@ -9006,8 +8971,8 @@ msgstr "Există deja un dosar cu numele %1$s."
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:398
 msgid ""
-"A folder named %1$s already exists on server %2$s with login %3$s (user=%4$s, "
-"context=%5$s)."
+"A folder named %1$s already exists on server %2$s with login %3$s (user=%4"
+"$s, context=%5$s)."
 msgstr ""
 "Există deja un dosar cu numele %1$s pe serverul %2$s cu autentificarea %3$s "
 "(utilizator=%4$s, context=%5$s)."
@@ -9017,8 +8982,8 @@ msgstr ""
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:408
 msgid ""
-"No create access on mail folder %1$s on server %2$s with login %3$s (user=%"
-"4$s, context=%5$s)."
+"No create access on mail folder %1$s on server %2$s with login %3$s (user=%4"
+"$s, context=%5$s)."
 msgstr ""
 "Nu aveți drepturi de creare în dosarul de mail %1$s pe serverul %2$s cu "
 "autentificarea %3$s (utilizator=%4$s, context=%5$s)."
@@ -9043,8 +9008,8 @@ msgstr "Dosarul de mail nu a putut fi găsit: %1$s."
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:423
 msgid ""
-"Referenced mail %1$s could not be found in folder %2$s. Therefore "
-"reply/forward operation cannot be performed."
+"Referenced mail %1$s could not be found in folder %2$s. Therefore reply/"
+"forward operation cannot be performed."
 msgstr ""
 "Mesajul %1$s nu a putut fi găsit în dosarul %2$s. De aceea nu s-a putut "
 "efectua operația răspunde/redirecționează."
@@ -9099,16 +9064,16 @@ msgstr ""
 msgid ""
 "Sent quota exceeded. You are only allowed to send 1 E-Mail in %1$s seconds."
 msgstr ""
-"Limita de trimitere de mesaje a fost depășită. Este permis doar 1 mesaj la %"
-"1$s secunde."
+"Limita de trimitere de mesaje a fost depășită. Este permis doar 1 mesaj la %1"
+"$s secunde."
 
 #. *
 #. * Sent quota exceeded, you are only allowed to sent 1 mail in %1$s seconds.
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:473
 msgid ""
-"Please limit your recipients to %1$s  (including To/Cc/Bcc), and click 'Send' "
-"again."
+"Please limit your recipients to %1$s  (including To/Cc/Bcc), and click "
+"'Send' again."
 msgstr ""
 "Limitați numărul de destinatari la %1$s  (inclusiv Către/Cc/Bcc) și apăsați "
 "din nou 'Trimite'."
@@ -9143,11 +9108,11 @@ msgstr ""
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:493
 msgid ""
-"Cannot forward more than %1$s messages at once. Please divide the messages to "
-"forward in chunks of appropriate size."
+"Cannot forward more than %1$s messages at once. Please divide the messages "
+"to forward in chunks of appropriate size."
 msgstr ""
-"Nu se pot redirecționa mai mult de %1$s mesaje deodată. Împărțiți mesajele de "
-"redirecționat în părți de dimensiune adecvată."
+"Nu se pot redirecționa mai mult de %1$s mesaje deodată. Împărțiți mesajele "
+"de redirecționat în părți de dimensiune adecvată."
 
 #. *
 #. * Your account has been created but will not use a secure connection.
@@ -9164,8 +9129,8 @@ msgid ""
 "Your E-Mail has been successfully sent, but the original E-Mail could not be "
 "flagged as \"replied\" and/or \"forwarded\"."
 msgstr ""
-"Mesajul dumneavoastră a fost trimis cu succes, dar nu s-a putut marca mesajul "
-"original ca \"răspuns\" şi/sau \"redirecţionat\"."
+"Mesajul dumneavoastră a fost trimis cu succes, dar nu s-a putut marca "
+"mesajul original ca \"răspuns\" şi/sau \"redirecţionat\"."
 
 #. *
 #. * Invalid folder name: "%1$s"
@@ -9179,7 +9144,8 @@ msgstr "Nume de dosar incorect: \"%1$s\""
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:513
 msgid ""
-"Mail folder cannot be created/renamed. Folder name exceeds max length of %1$s."
+"Mail folder cannot be created/renamed. Folder name exceeds max length of %1"
+"$s."
 msgstr ""
 "Dosarul de mail nu poate fi creat/redenumit. Numeled dosarului depășește "
 "lungimea maximă de %1$s."
@@ -9191,14 +9157,14 @@ msgstr ""
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:519
 msgid ""
 "The attachments to this E-Mail exceeded the size limit for attachments. "
-"Instead of sending the attachment with the E-Mail, the attachment was  and "
-"the link added to your E-Mail. Whoever receives the E-Mail can then download "
-"the attachment."
+"Instead of sending the attachment with the E-Mail, the attachment was "
+"published and the link added to your E-Mail. Whoever receives the E-Mail can "
+"then download the attachment."
 msgstr ""
 "Fișierele atașate acestui mesaj depășesc limita admisă. În loc de a atașa "
 "fișierele mesajului, acestea au fost publicate, iar legătura către aceste "
-"fișiere a fost adăugată mesajului dumneavoastră. Destinatarul mesajului le va "
-"putea descărca."
+"fișiere a fost adăugată mesajului dumneavoastră. Destinatarul mesajului le "
+"va putea descărca."
 
 #. Draft message could not be saved
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:522
@@ -9211,8 +9177,8 @@ msgid ""
 "There was a problem processing the request. Please (refresh view and) try "
 "again."
 msgstr ""
-"A apărut o problemă la procesarea cererii. (Actualizaţi vederea şi) încercaţi "
-"din nou."
+"A apărut o problemă la procesarea cererii. (Actualizaţi vederea şi) "
+"încercaţi din nou."
 
 #. *
 #. * There was an issue in authenticating your E-Mail password. This may be because of a recent password change. To continue please logout
@@ -9220,14 +9186,14 @@ msgstr ""
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:73
 msgid ""
-"There was an issue in authenticating your E-Mail password. This may be due to "
-"a recent password change. To continue please log out now and then log back in "
-"with your most current password. (server=%1$s | user=%2$s)"
+"There was an issue in authenticating your E-Mail password. This may be due "
+"to a recent password change. To continue please log out now and then log "
+"back in with your most current password. (server=%1$s | user=%2$s)"
 msgstr ""
 "A apărut o problemă la autentificarea parolei dvs. de e-mail. Cauza poate fi "
 "modificarea recentă a parolei. Pentru a continua, deconectați-vă și "
-"reconectați-vă utilizând parola cea mai recentă. (server=%1$s | utilizator=%"
-"2$s)"
+"reconectați-vă utilizând parola cea mai recentă. (server=%1$s | utilizator=%2"
+"$s)"
 
 #. *
 #. * Wrong or missing login data to access mail server %1$s. Error message from mail server: %2$s
@@ -9246,8 +9212,8 @@ msgstr ""
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:84
 msgid ""
-"Wrong or missing login data to access mail server %1$s with login %2$s (user=%"
-"3$s, context=%4$s). Error message from mail server: %5$s"
+"Wrong or missing login data to access mail server %1$s with login %2$s (user="
+"%3$s, context=%4$s). Error message from mail server: %5$s"
 msgstr ""
 "Date de autentificare eronate sau lipsă pentru accesarea serverului de mail %"
 "1$s cu autentificarea %2$s (utilizator=%3$s, context=%4$s). Mesaj de eroare "
@@ -9293,12 +9259,12 @@ msgstr ""
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:110
 msgid ""
-"Folder \"%1$s\" has been closed on mail server %2$s with login %3$s (user=%"
-"4$s, context=%5$s) .\n"
+"Folder \"%1$s\" has been closed on mail server %2$s with login %3$s (user=%4"
+"$s, context=%5$s) .\n"
 "Probably your request took too long."
 msgstr ""
-"Dosarul \"%1$s\" a fost închis pe serverul de mail %2$s cu autentificarea %"
-"3$s (utilizator=%4$s, context=%5$s).\n"
+"Dosarul \"%1$s\" a fost închis pe serverul de mail %2$s cu autentificarea %3"
+"$s (utilizator=%4$s, context=%5$s).\n"
 "Probabil cererea dumneavoastră a durat prea mult."
 
 #. *
@@ -9351,8 +9317,8 @@ msgstr "Antetul mesajului este eronat: %1$s"
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:158
 msgid "An attempt was made to open a read-only folder with read-write \"%1$s\""
 msgstr ""
-"S-a încercat deschiderea unui dosar protejat la scriere cu acces "
-"scriere-citire \"%1$s\""
+"S-a încercat deschiderea unui dosar protejat la scriere cu acces scriere-"
+"citire \"%1$s\""
 
 #. *
 #. * An attempt was made to open a read-only folder with read-write "%1$s" on mail server %2$s with login %3$s (user=%4$s, context=%5$s)
@@ -9362,9 +9328,9 @@ msgid ""
 "An attempt was made to open a read-only folder with read-write \"%1$s\" on "
 "mail server %2$s with login %3$s (user=%4$s, context=%5$s)"
 msgstr ""
-"S-a încercat deschiderea unui dosar protejat la scriere cu acces "
-"scriere-citire \"%1$s\" pe serverul de mail %2$s cu autentificarea %3$s "
-"(utilizator=%4$s, context=%5$s)"
+"S-a încercat deschiderea unui dosar protejat la scriere cu acces scriere-"
+"citire \"%1$s\" pe serverul de mail %2$s cu autentificarea %3$s (utilizator=%"
+"4$s, context=%5$s)"
 
 #. *
 #. * Invalid search expression: %1$s
@@ -9410,8 +9376,8 @@ msgstr "S-a pierdut conexiunea cu serverul de mail."
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:197
 msgid ""
-"Connection closed to mail server %1$s with login %2$s (user=%3$s, context=%"
-"4$s)."
+"Connection closed to mail server %1$s with login %2$s (user=%3$s, context=%4"
+"$s)."
 msgstr ""
 "Conexiunea cu serverul de mail %1$s cu autentificarea %2$s (utilizator=%3$s, "
 "context=%4$s) s-a închis."
@@ -9520,8 +9486,8 @@ msgstr "A eșuat o comandă către serverul de mail. Răspunsul serverului: %1$s
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:274
 msgid ""
-"A command failed on mail server %1$s with login %2$s (user=%3$s, context=%"
-"4$s). Server response: %5$s"
+"A command failed on mail server %1$s with login %2$s (user=%3$s, context=%4"
+"$s). Server response: %5$s"
 msgstr ""
 "A eșuat o comandă pe serverul de mail %1$s cu autentificarea %2$s "
 "(utilizator=%3$s, context=%4$s). Răspunsul serverului: %5$s"
@@ -9556,8 +9522,8 @@ msgstr "Eroare în protocolul serverului de mail. Mesaj de eroare: %1$s"
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:294
 msgid ""
-"Error in protocol to mail server %1$s with login %2$s (user=%3$s, context=%"
-"4$s). Error message: %5$s"
+"Error in protocol to mail server %1$s with login %2$s (user=%3$s, context=%4"
+"$s). Error message: %5$s"
 msgstr ""
 "Eroare în protocolul cu serverul de mail %1$s cu autentificarea %2$s "
 "(utilizator=%3$s, context=%4$s). Mesaj de eroare: %5$s"
@@ -9604,8 +9570,8 @@ msgid ""
 "2$s (user=%3$s, context=%4$s). Error message from mail transport server: %5$s"
 msgstr ""
 "Date de autentificare eronate sau lipsă pentru accesarea serverului de "
-"transport de mail %1$s cu autentificarea %2$s (utilizator=%3$s, context=%"
-"4$s). Mesaj de eroare de la serverul de transport de mail: %5$s"
+"transport de mail %1$s cu autentificarea %2$s (utilizator=%3$s, context=%4"
+"$s). Mesaj de eroare de la serverul de transport de mail: %5$s"
 
 #. *
 #. * Error processing mail server response. The administrator has been informed.
@@ -9625,8 +9591,8 @@ msgid ""
 "Error processing %1$s mail server response for login %2$s (user=%3$s, "
 "context=%4$s). The administrator has been informed."
 msgstr ""
-"Eroare la procesarea răspunsului serverului de mail %1$s cu autentificarea %"
-"2$s (utilizator=%3$s, context=%4$s). Administratorul a fost informat."
+"Eroare la procesarea răspunsului serverului de mail %1$s cu autentificarea %2"
+"$s (utilizator=%3$s, context=%4$s). Administratorul a fost informat."
 
 #. *
 #. * I/O error "%1$s" occurred in communication with "%2$s" mail server for login %3$s (user=%4$s, context=%5$s).
@@ -9659,8 +9625,8 @@ msgid ""
 "Error processing %1$s mail server response for login %2$s (user=%3$s, "
 "context=%4$s). The administrator has been informed. Error message: %5$s"
 msgstr ""
-"Eroare la procesarea răspunsului serverului de mail %1$s cu autentificarea %"
-"2$s (utilizator=%3$s, context=%4$s). Administratorul a fost informat. Mesaj "
+"Eroare la procesarea răspunsului serverului de mail %1$s cu autentificarea %2"
+"$s (utilizator=%3$s, context=%4$s). Administratorul a fost informat. Mesaj "
 "de eroare: %5$s"
 
 #. Unexpected error: %1$s.
@@ -9679,8 +9645,8 @@ msgstr ""
 #. Found two mail accounts with same identifier %1$s for user %2$s in context %3$s.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mailaccount/MailAccountExceptionStrings.java:68
 msgid ""
-"Found two mail accounts with same identifier %1$s for user %2$s in context %"
-"3$s."
+"Found two mail accounts with same identifier %1$s for user %2$s in context %3"
+"$s."
 msgstr ""
 "Au fost găsite două conturi de e-mail cu acelaşi identificator %1$s pentru "
 "utilizatorul %2$s în contextul %3$s."
@@ -9691,8 +9657,8 @@ msgid ""
 "Found two mail accounts with same E-Mail address %1$s for user %2$s in "
 "context %3$s."
 msgstr ""
-"Au fost găsite două conturi de e-mail cu aceeaşi adresă de e-mail %1$s pentru "
-"utilizatorul %2$s în contextul %3$s."
+"Au fost găsite două conturi de e-mail cu aceeaşi adresă de e-mail %1$s "
+"pentru utilizatorul %2$s în contextul %3$s."
 
 #. A host could not be resolved: %1$s.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mailaccount/MailAccountExceptionStrings.java:77
@@ -9703,15 +9669,15 @@ msgstr "Nu s-a putut determina gazda: %1$s."
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mailaccount/MailAccountExceptionStrings.java:80
 msgid "Denied deletion of default mail account of user %1$s in context %2$s."
 msgstr ""
-"Ştergerea contului de e-mail implicit al utilizatorului %1$s în contextul %"
-"2$s a fost respinsă."
+"Ştergerea contului de e-mail implicit al utilizatorului %1$s în contextul %2"
+"$s a fost respinsă."
 
 #. Denied update of default mail account of user %1$s in context %2$s.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mailaccount/MailAccountExceptionStrings.java:83
 msgid "Denied update of default mail account of user %1$s in context %2$s."
 msgstr ""
-"Actualizarea contului de mail implicit al utilizatorului %1$s în contextul %"
-"2$ a fost respinsă."
+"Actualizarea contului de mail implicit al utilizatorului %1$s în contextul %2"
+"$ a fost respinsă."
 
 #. No duplicate default account allowed.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mailaccount/MailAccountExceptionStrings.java:86
@@ -9721,8 +9687,8 @@ msgstr "Nu este permis niciun cont implicit duplicat."
 #. Password encryption failed for login %1$s on server %2$s (user=%3$s, context=%4$s).
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mailaccount/MailAccountExceptionStrings.java:89
 msgid ""
-"Password encryption failed for login %1$s on server %2$s (user=%3$s, context=%"
-"4$s)."
+"Password encryption failed for login %1$s on server %2$s (user=%3$s, context="
+"%4$s)."
 msgstr ""
 "Criptarea parolei a eşuat pentru autentificarea %1$s pe serverul %2$s "
 "(utilizator=%3$s, context=%4$s)."
@@ -9730,8 +9696,8 @@ msgstr ""
 #. Password decryption failed for login %1$s on server %2$s (user=%3$s, context=%4$s).
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mailaccount/MailAccountExceptionStrings.java:92
 msgid ""
-"Password decryption failed for login %1$s on server %2$s (user=%3$s, context=%"
-"4$s)."
+"Password decryption failed for login %1$s on server %2$s (user=%3$s, context="
+"%4$s)."
 msgstr ""
 "Decriptarea parolei a eşuat pentru autentificarea %1$s pe serverul %2$s "
 "(utilizator=%3$s, context=%4$s)."
@@ -9934,8 +9900,8 @@ msgid ""
 "permissions or too long usage of the file store."
 msgstr ""
 "Nu s-a putut crea fișierul de blocare aici %1$s. Verificați dacă există un "
-"fișier .lock vechi, revizuiți permisiunile sau o eventuală utilizare excesivă "
-"a depozitul de fișiere."
+"fișier .lock vechi, revizuiți permisiunile sau o eventuală utilizare "
+"excesivă a depozitul de fișiere."
 
 #. Eliminating the FileStorage failed.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/file/external/FileStorageExceptionMessage.java:97
@@ -10020,8 +9986,8 @@ msgid ""
 "User %1$s has no access on shared folder %2$s in context %3$s due to user "
 "configuration"
 msgstr ""
-"Utilizatorul %1$s nu are acces la dosarul partajat %2$s în contextul %3$s din "
-"cauza configuraţiei utilizatorului"
+"Utilizatorul %1$s nu are acces la dosarul partajat %2$s în contextul %3$s "
+"din cauza configuraţiei utilizatorului"
 
 #. *
 #. * User %1$s has no write access on public folder %2$s in context %3$s due to user configuration
@@ -10034,8 +10000,8 @@ msgid ""
 "User %1$s has no write access on public folder %2$s in context %3$s due to "
 "user configuration"
 msgstr ""
-"Utilizatorul %1$s nu are acces de scriere în dosarul public %2$s în contextul "
-"%3$s din cauza configuraţiei utilizatorului"
+"Utilizatorul %1$s nu are acces de scriere în dosarul public %2$s în "
+"contextul %3$s din cauza configuraţiei utilizatorului"
 
 #. *
 #. * User %1$s has no create-subfolder permission on folder %2$s in context %3$s
@@ -10141,45 +10107,38 @@ msgstr ""
 "contextul %3$s"
 
 #. *
-#. * Only one admin CATEGORY_PERMISSION_DENIED is allowed on a private folder
+#. * Only one admin permission is allowed on a private folder
 #. * <p>
 #. * Only one admin is allowed on a private folder
 #. * </p>
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:166
-msgid ""
-"Only one admin CATEGORY_PERMISSION_DENIED is allowed on a private folder"
+msgid "Only one admin permission is allowed on a private folder"
 msgstr ""
-"Într-un dosar personal se acceptă doar o singură CATEGORY_PERMISSION_DENIED "
-"de administrator"
+"Într-un dosar personal se acceptă doar o singură permisiune de administrator"
 
 #. *
-#. * A group must not hold admin CATEGORY_PERMISSION_DENIED on a private folder
+#. * A group must not hold admin permission on a private folder
 #. * <p>
-#. * No admin group CATEGORY_PERMISSION_DENIED is allowed on a private folder
+#. * No admin group permission is allowed on a private folder
 #. * </p>
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:173
-msgid ""
-"A group must not hold admin CATEGORY_PERMISSION_DENIED on a private folder"
+msgid "A group must not hold admin permission on a private folder"
 msgstr ""
-"Un grup nu poate să dețină CATEGORY_PERMISSION_DENIED de administrare pentru "
-"un dosar personal"
+"Un grup nu poate să dețină permisiuni de administrare pentru un dosar personal"
 
 #. *
-#. * Only folder owner may hold admin CATEGORY_PERMISSION_DENIED on a private folder
+#. * Only folder owner may hold admin permission on a private folder
 #. * <p>
-#. * Only folder owner may hold admin CATEGORY_PERMISSION_DENIED on a private folder
+#. * Only folder owner may hold admin permission on a private folder
 #. * </p>
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:180
-msgid ""
-"Only folder owner may hold admin CATEGORY_PERMISSION_DENIED on a private "
-"folder"
+msgid "Only folder owner may hold admin permission on a private folder"
 msgstr ""
-"Doar proprietarul dosarului poate deține CATEGORY_PERMISSION_DENIED de "
-"administrare pentru "
-"un dosar personal"
+"Doar proprietarul dosarului poate deține permisiuni de administrare pentru un "
+"dosar personal"
 
 #. *
 #. * Administration rights required. In the Rights tab add at least one user with administration rights.
@@ -10216,8 +10175,8 @@ msgid ""
 "Not allowed to change parent id of folder %1$s through an update call. Use "
 "move method instead."
 msgstr ""
-"Identificatorul părinte al dosarului %1$s nu se poate modifica printr-un apel "
-"de actualizare. Utilizați metoda de mutare."
+"Identificatorul părinte al dosarului %1$s nu se poate modifica printr-un "
+"apel de actualizare. Utilizați metoda de mutare."
 
 #. *
 #. * Not allowed to move default folder %1$s in context %2$s
@@ -10258,8 +10217,8 @@ msgstr "Dosarul partajat %1$s nu poate fi mutat în contextul %2$s"
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:229
 msgid "Shared folder %1$s cannot be target of move operation in context %2$s"
 msgstr ""
-"Dosarul partajat %1$s nu poate fi destinația operației de mutare în contextul "
-"%2$s"
+"Dosarul partajat %1$s nu poate fi destinația operației de mutare în "
+"contextul %2$s"
 
 #. *
 #. * System folder %1$s cannot be moved in context %2$s
@@ -10281,8 +10240,8 @@ msgstr "Dosarul sistem %1$s nu poate fi mutat în contextul %2$s"
 msgid ""
 "Private folder %1$s can only be moved to a private folder in context %2$s"
 msgstr ""
-"Dosarul personal %1$s poate fi mutat doar într-un dosar personal în contextul "
-"%2$s"
+"Dosarul personal %1$s poate fi mutat doar într-un dosar personal în "
+"contextul %2$s"
 
 #. *
 #. * Public folder %1$s may only be moved to a public folder in context %2$s
@@ -10293,7 +10252,8 @@ msgstr ""
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:250
 msgid "Public folder %1$s can only be moved to a public folder in context %2$s"
 msgstr ""
-"Dosarul public %1$s poate fi mutat doar într-un dosar public în contextul %2$s"
+"Dosarul public %1$s poate fi mutat doar într-un dosar public în contextul %2"
+"$s"
 
 #. *
 #. * Target and source folder must not be equal in context %1$s
@@ -10313,7 +10273,8 @@ msgstr "Dosarul destinație și cel sursă nu pot fi egale în contextul %1$s"
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:264
 msgid ""
-"User %1$s is not allowed to move all subfolders of folder %2$s in context %3$s"
+"User %1$s is not allowed to move all subfolders of folder %2$s in context %3"
+"$s"
 msgstr ""
 "Utilizatorul %1$s nu are permisiune pentru a muta toate dosarele subordonate "
 "din dosarul %2$s în contextul %3$s"
@@ -10399,18 +10360,17 @@ msgid "Folder %1$s could not be put into cache in context %2$s"
 msgstr "Dosarul %1$s nu a putut fi pus în cache în contextul %2$s"
 
 #. *
-#. * Effective CATEGORY_PERMISSION_DENIED of folder %1$s could not be determined for user %2$s in context %3$s
+#. * Effective permission of folder %1$s could not be determined for user %2$s in context %3$s
 #. * <p>
-#. * User's effective CATEGORY_PERMISSION_DENIED on folder could not be determined
+#. * User's effective permission on folder could not be determined
 #. * </p>
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:320
 msgid ""
-"Effective CATEGORY_PERMISSION_DENIED of folder %1$s could not be determined "
-"for user %2$s in context %3$s"
+"Effective permission of folder %1$s could not be determined for user %2$s in "
+"context %3$s"
 msgstr ""
-"Nu au putut fi determinate CATEGORY_PERMISSION_DENIED efective pentru dosarul "
-"%1$s și "
+"Nu au putut fi determinate permisiunile efective pentru dosarul %1$s și "
 "utilizatorul %2$s în contextul %3$s"
 
 #. *
@@ -10488,19 +10448,19 @@ msgstr "A apărut o eroare LDAP în contextul %1$s"
 msgid ""
 "Attribute \"%1$s\" is not set in FolderObject instance %2$s in context %3$s"
 msgstr ""
-"Atributul \"%1$s\" nu a fost setat în instanța FolderObject %2$s în contextul "
-"%3$s"
+"Atributul \"%1$s\" nu a fost setat în instanța FolderObject %2$s în "
+"contextul %3$s"
 
 #. *
 #. * A source folder of module %1$s must not be moved to a target folder of module %2$s
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:367
 msgid ""
-"A source folder of module %1$s must not be moved to a target folder of module "
-"%2$s"
+"A source folder of module %1$s must not be moved to a target folder of "
+"module %2$s"
 msgstr ""
-"Nu se poate muta un dosar sursă al modulului %1$s într-un dosar destinație al "
-"modulului %2$s"
+"Nu se poate muta un dosar sursă al modulului %1$s într-un dosar destinație "
+"al modulului %2$s"
 
 #. *
 #. * Operation not executable on folder %1$s in context %2$s
@@ -10597,8 +10557,8 @@ msgstr ""
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:431
 msgid "Unable to map OCL permission value %1$s to a JSON permission value"
 msgstr ""
-"Nu s-a putut asocia valoarea permisiunii OCL %1$s cu valoarea unei permisiuni "
-"JSON"
+"Nu s-a putut asocia valoarea permisiunii OCL %1$s cu valoarea unei "
+"permisiuni JSON"
 
 #. *
 #. * Folder existence cannot be checked due to insufficient folder information
@@ -10630,7 +10590,8 @@ msgstr "Această metodă nu se poate aplica unei permisiuni IMAP."
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:447
 msgid "No subfolder creation below shared folder %1$s in context %2$s"
 msgstr ""
-"Nu se poate crea un dosar subordonat dosarului partajat %1$s în contextul %2$s"
+"Nu se poate crea un dosar subordonat dosarului partajat %1$s în contextul %2"
+"$s"
 
 #. *
 #. * User %1$s grants invalid permissions on shared folder %2$s in context %3$s. Only owner of parental shared folder %4$s may be
@@ -10641,9 +10602,9 @@ msgid ""
 "User %1$s grants invalid permissions on shared folder %2$s in context %3$s. "
 "Only the owner of parental shared folder %4$s can be the folder admin."
 msgstr ""
-"Utilizatorul %1$s acordă permisiuni incorecte pentru dosarul partajat %2$s în "
-"contextul %3$s. Doar proprietarul dosarului partajat părinte %4$s poate fi "
-"administratorul dosarului."
+"Utilizatorul %1$s acordă permisiuni incorecte pentru dosarul partajat %2$s "
+"în contextul %3$s. Doar proprietarul dosarului partajat părinte %4$s poate "
+"fi administratorul dosarului."
 
 #. *
 #. * Owner %1$s of default folder %2$s must keep the folder admin permission
@@ -10746,8 +10707,8 @@ msgstr ""
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:495
 msgid ""
-"Duplicate permission defined for group %1$s. Only one permission per group is "
-"allowed."
+"Duplicate permission defined for group %1$s. Only one permission per group "
+"is allowed."
 msgstr ""
 "A fost definită o permisiune duplicat pentru grupul %1$s. Se acceptă doar o "
 "permisiune pentru fiecare grup."
@@ -10757,11 +10718,11 @@ msgstr ""
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:499
 msgid ""
-"Only the folder visibility permission is allowed to be changed for folder %"
-"1$s in context %2$s."
+"Only the folder visibility permission is allowed to be changed for folder %1"
+"$s in context %2$s."
 msgstr ""
-"Se permite doar modificarea permisiunilor de vizibilitate pentru dosarul %1$s "
-"în contextul %2$s."
+"Se permite doar modificarea permisiunilor de vizibilitate pentru dosarul %1"
+"$s în contextul %2$s."
 
 #. *
 #. * Only individual user permissions, but no group permissions are allowed for folder %1$s in context %2$s.
@@ -10920,7 +10881,8 @@ msgstr "Obiectul a fost modificat între timp."
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/servlet/AjaxExceptionMessages.java:125
 msgid "Unexpected result. Expected \"%1$s\", but is \"%2$s\"."
 msgstr ""
-"Rezultat neaşteptat. Se aştepta rezultatul \"%1$s\", dar s-a obţinut \"%2$s\"."
+"Rezultat neaşteptat. Se aştepta rezultatul \"%1$s\", dar s-a obţinut \"%2$s"
+"\"."
 
 #. Too many concurrent requests. Please try again later.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/servlet/AjaxExceptionMessages.java:128
@@ -10932,10 +10894,14 @@ msgstr "Prea multe cereri concurente. Încercați din nou."
 msgid "Bad request. The server is unable to handle the request."
 msgstr "Cerere eronată. Serverul nu poate să proceseze cererea."
 
-#. Missing request body.
+#. The file \"%1$s\" (\"%2$s\") can't be imported as image. Only image types (JPG, GIF, BMP or PNG) are supported.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/servlet/AjaxExceptionMessages.java:134
-msgid "Missing request body."
-msgstr "Lipseşte corpul interogării."
+msgid ""
+"The file \"%1$s\" (\"%2$s\") can't be imported as image. Only image types "
+"(JPG, GIF, BMP or PNG) are supported."
+msgstr ""
+"Fișierul \"%1$s\" (\"%2$s\") nu poate fi importat ca imagine. Sunt suportate "
+"doar imagini (tip JPG, GIF, BMP sau PNG)."
 
 #. *
 #. * Exception while writing JSON.
@@ -11167,8 +11133,8 @@ msgstr ""
 "Socketul serverului de mesagerie nu poate fi atașat portului %1$d. Probabil "
 "un alt proces ascultă deja pe acest port."
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.sessionstorage.hazelcast/src/com/openexchange/sessionstorage/hazelcast/exceptions/OXHazelcastSessionStorageExceptionMessages.java:61
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.sessionstorage.nosql/src/com/openexchange/sessionstorage/nosql/exceptions/OXNoSQLSessionStorageExceptionMessages.java:61
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.sessionstorage.hazelcast/src/com/openexchange/sessionstorage/hazelcast/exceptions/OXHazelcastSessionStorageExceptionMessages.java:62
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.sessionstorage.nosql/src/com/openexchange/sessionstorage/nosql/exceptions/OXNoSQLSessionStorageExceptionMessages.java:62
 msgid "Could not find encryption key."
 msgstr "Nu s-a găsit cheia de criptare."
 
@@ -11178,50 +11144,34 @@ msgstr "Nu s-a găsit cheia de criptare."
 msgid "Start of SessionStorageService failed."
 msgstr "Pornirea SessionStorageService a eşuat."
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.sessionstorage.hazelcast/src/com/openexchange/sessionstorage/hazelcast/exceptions/OXHazelcastSessionStorageExceptionMessages.java:65
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.sessionstorage.hazelcast/src/com/openexchange/sessionstorage/hazelcast/exceptions/OXHazelcastSessionStorageExceptionMessages.java:64
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.sessionstorage.impl/src/com/openexchange/sessionstorage/impl/exceptions/OXSessionStorageExceptionMessages.java:70
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.sessionstorage.nosql/src/com/openexchange/sessionstorage/nosql/exceptions/OXNoSQLSessionStorageExceptionMessages.java:65
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.sessionstorage.nosql/src/com/openexchange/sessionstorage/nosql/exceptions/OXNoSQLSessionStorageExceptionMessages.java:64
 msgid "Saving session with sessionId %1$s failed."
 msgstr "Salvarea sesiunii cu identificatorul de sesiune %1$s a eşuat."
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.sessionstorage.hazelcast/src/com/openexchange/sessionstorage/hazelcast/exceptions/OXHazelcastSessionStorageExceptionMessages.java:67
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.sessionstorage.hazelcast/src/com/openexchange/sessionstorage/hazelcast/exceptions/OXHazelcastSessionStorageExceptionMessages.java:65
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.sessionstorage.impl/src/com/openexchange/sessionstorage/impl/exceptions/OXSessionStorageExceptionMessages.java:71
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.sessionstorage.nosql/src/com/openexchange/sessionstorage/nosql/exceptions/OXNoSQLSessionStorageExceptionMessages.java:67
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.sessionstorage.nosql/src/com/openexchange/sessionstorage/nosql/exceptions/OXNoSQLSessionStorageExceptionMessages.java:65
 msgid "Lookup for session with sessionId %1$s failed."
 msgstr "Căutarea sesiunii cu identificatorul de sesiune %1$s a eşuat."
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.sessionstorage.hazelcast/src/com/openexchange/sessionstorage/hazelcast/exceptions/OXHazelcastSessionStorageExceptionMessages.java:69
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.sessionstorage.hazelcast/src/com/openexchange/sessionstorage/hazelcast/exceptions/OXHazelcastSessionStorageExceptionMessages.java:66
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.sessionstorage.impl/src/com/openexchange/sessionstorage/impl/exceptions/OXSessionStorageExceptionMessages.java:72
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.sessionstorage.nosql/src/com/openexchange/sessionstorage/nosql/exceptions/OXNoSQLSessionStorageExceptionMessages.java:69
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.sessionstorage.nosql/src/com/openexchange/sessionstorage/nosql/exceptions/OXNoSQLSessionStorageExceptionMessages.java:66
 msgid "Removing session with sessionId %1$s failed."
 msgstr "Eliminarea sesiunii cu identificatorul de sesiune %1$s a eșuat."
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.sessionstorage.hazelcast/src/com/openexchange/sessionstorage/hazelcast/exceptions/OXHazelcastSessionStorageExceptionMessages.java:71
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.sessionstorage.hazelcast/src/com/openexchange/sessionstorage/hazelcast/exceptions/OXHazelcastSessionStorageExceptionMessages.java:67
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.sessionstorage.impl/src/com/openexchange/sessionstorage/impl/exceptions/OXSessionStorageExceptionMessages.java:73
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.sessionstorage.nosql/src/com/openexchange/sessionstorage/nosql/exceptions/OXNoSQLSessionStorageExceptionMessages.java:71
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.sessionstorage.nosql/src/com/openexchange/sessionstorage/nosql/exceptions/OXNoSQLSessionStorageExceptionMessages.java:67
 msgid "No session with sessionId %1$s found."
 msgstr "Nu a fost găsită nicio sesiune cu identificatorul de sesiune %1$s."
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.sessionstorage.hazelcast/src/com/openexchange/sessionstorage/hazelcast/exceptions/OXHazelcastSessionStorageExceptionMessages.java:75
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.sessionstorage.nosql/src/com/openexchange/sessionstorage/nosql/exceptions/OXNoSQLSessionStorageExceptionMessages.java:75
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.sessionstorage.hazelcast/src/com/openexchange/sessionstorage/hazelcast/exceptions/OXHazelcastSessionStorageExceptionMessages.java:69
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.sessionstorage.nosql/src/com/openexchange/sessionstorage/nosql/exceptions/OXNoSQLSessionStorageExceptionMessages.java:69
 msgid "Operation %1$s not supported."
 msgstr "Operaţia %1$s nu este suportată."
-
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.sessionstorage.hazelcast/src/com/openexchange/sessionstorage/hazelcast/exceptions/OXHazelcastSessionStorageExceptionMessages.java:77
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.sessionstorage.nosql/src/com/openexchange/sessionstorage/nosql/exceptions/OXNoSQLSessionStorageExceptionMessages.java:77
-msgid "Lookup for session with altId %1$s failed"
-msgstr "Căutarea sesiunii cu altId %1$s a eşuat"
-
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.sessionstorage.hazelcast/src/com/openexchange/sessionstorage/hazelcast/exceptions/OXHazelcastSessionStorageExceptionMessages.java:79
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.sessionstorage.nosql/src/com/openexchange/sessionstorage/nosql/exceptions/OXNoSQLSessionStorageExceptionMessages.java:79
-msgid "No sessions found for user %1$s in context %2$s"
-msgstr ""
-"Nu a fost găsită nicio sesiune pentru utilizatorul %1$s în contextul %2$s"
-
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.sessionstorage.hazelcast/src/com/openexchange/sessionstorage/hazelcast/exceptions/OXHazelcastSessionStorageExceptionMessages.java:81
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.sessionstorage.nosql/src/com/openexchange/sessionstorage/nosql/exceptions/OXNoSQLSessionStorageExceptionMessages.java:81
-msgid "No sessions found for context %1$s"
-msgstr "Nu a fost găsită nicio sesiune pentru contextul %1$s"
 
 #. *
 #. * The message part with sequence ID %1$s could not be found in message %2$s in folder %3$s
@@ -11295,25 +11245,12 @@ msgstr ""
 "Următorul destinatar nu este permis: %1$s. Eliminați adresa corespunzătoare "
 "și încercați din nou."
 
-#. No such snippet found for identifier: %1$s
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.snippet/src/com/openexchange/snippet/SnippetExceptionMessages.java:69
-msgid "No such snippet found for identifier: %1$s"
-msgstr ""
-"Nu a fost găsit niciun fragment de acest tip pentru identificatorul: %1$s"
-
-#. No such snippet attachment found for identifier %1$s in snippet %2$s
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.snippet/src/com/openexchange/snippet/SnippetExceptionMessages.java:81
-msgid "No such snippet attachment found for identifier %1$s in snippet %2$s"
-msgstr ""
-"Nu a fost găsit niciun fragment de fişier ataşat de acest tip pentru "
-"identificatorul %1$s în fragmentul %2$s"
-
 #. Could not find Apache Solr Core entry for user %1$s and module %2$s in context %3$s.
 #. Apache Solr Core" is a proper name, no translation applicable
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.solr/src/com/openexchange/solr/SolrExceptionMessages.java:71
 msgid ""
-"Did not find Apache Solr Core entry for user %1$s and module %2$s in context %"
-"3$s."
+"Did not find Apache Solr Core entry for user %1$s and module %2$s in context "
+"%3$s."
 msgstr ""
 "Nu a fost găsită nicio intrare Apache Solr Core pentru utilizatorul %1$s şi "
 "modulul %2$s în contextul %3$s."
@@ -11435,10 +11372,11 @@ msgstr "Paramentrul \"%s\" trebuie să fie o valoare întreagă, dar este \"%s\"
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.spamhandler.spamassassin/src/com/openexchange/spamhandler/spamassassin/exceptions/SpamhandlerSpamassassinExceptionMessage.java:91
 msgid ""
-"The parameter \"userSource\" must be set in the property file if spamd is true"
+"The parameter \"userSource\" must be set in the property file if spamd is "
+"true"
 msgstr ""
-"Parametrul \"userSource\" trebuie setat în fișierul de proprietăți dacă spamd "
-"este adevărat"
+"Parametrul \"userSource\" trebuie setat în fișierul de proprietăți dacă "
+"spamd este adevărat"
 
 #. *
 #. * The given value for userSource "%s" is not a possible one
@@ -11518,6 +11456,10 @@ msgstr "Excepţie %s"
 msgid "Please ask only for columns the server knows"
 msgstr "Cereţi doar coloane cunoscute de către server"
 
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe.json/src/com/openexchange/subscribe/json/SubscriptionJSONExceptionMessage.java:96
+msgid "Unknown Subscription"
+msgstr "Abonament necunoscut"
+
 #. Provide well-formed HTML.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe.microformats/src/com/openexchange/subscribe/microformats/OXMFErrorStrings.java:63
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe/src/com/openexchange/subscribe/SubscriptionErrorStrings.java:69
@@ -11558,6 +11500,11 @@ msgid ""
 msgstr ""
 "Nu s-a putut obține pagina %1$s. Verificați ortografia sau încercați să "
 "accesați pagina în navigatorul dumneavoastră."
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe.msn/src/com/openexchange/subscribe/msn/FormStrings.java:62
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe.yahoo/src/com/openexchange/subscribe/yahoo/FormStrings.java:62
+msgid "The OAuth Account to use"
+msgstr "Contul OAuth ce va fi utilizat"
 
 #. Parsing error.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe/src/com/openexchange/subscribe/SubscriptionErrorStrings.java:75
@@ -11672,16 +11619,16 @@ msgid "Please correct the template"
 msgstr "Corectaţi modelul"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.templating/src/com/openexchange/templating/TemplateExceptionMessage.java:74
-msgid "The underlying templating system threw an exception: %s"
-msgstr "Sistemul subordonat de modele a returnat o excepţie: %s"
+msgid "The underlying templating system threw an exception: %1$s"
+msgstr "Sistemul subordonat de modele a returnat o excepţie: %1$s"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.templating/src/com/openexchange/templating/TemplateExceptionMessage.java:76
 msgid "Please use an existing template"
 msgstr "Utilizaţi un model existent"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.templating/src/com/openexchange/templating/TemplateExceptionMessage.java:78
-msgid "The template %2 does not exist."
-msgstr "Modelul %2 nu există."
+msgid "The template %1$s does not exist."
+msgstr "Modelul %1$s nu există."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.templating/src/com/openexchange/templating/TemplateExceptionMessage.java:80
 msgid "An underlying system threw an SQL exception"
@@ -11701,8 +11648,8 @@ msgstr ""
 #. The configured consumer key/consumer secret pair is invalid. Please provide a valid consumer key/consumer secret through configuration.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.twitter/src/com/openexchange/twitter/TwitterExceptionMessages.java:77
 msgid ""
-"The configured consumer key/consumer secret pair is invalid. Please provide a "
-"valid consumer key/consumer secret through configuration."
+"The configured consumer key/consumer secret pair is invalid. Please provide "
+"a valid consumer key/consumer secret through configuration."
 msgstr ""
 "Perechea cheie consumator/secret consumator configurată este incorectă. "
 "Furnizați o pereche cheie consumator/secret consumator validă prin "
@@ -11713,8 +11660,8 @@ msgid ""
 "This transaction could not be fully undone. Some components are probably not "
 "consistent anymore. Run the recovery tool."
 msgstr ""
-"Această tranzacție nu a putut fi anulată complet. Probabil anumite componente "
-"nu mai sunt consistente. Rulați utilitarul de recuperare."
+"Această tranzacție nu a putut fi anulată complet. Probabil anumite "
+"componente nu mai sunt consistente. Rulați utilitarul de recuperare."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.tx/src/com/openexchange/tx/TransactionExceptionMessages.java:63
 msgid "Cannot commit transaction to write DB"
@@ -13960,6 +13907,85 @@ msgstr "UTC"
 #: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:522
 msgid "Zulu"
 msgstr "Zulu"
+
+#~ msgid "Name of loadbalancer missing."
+#~ msgstr "Lipseşte numele sistemului de echilibrare a încărcării."
+
+#~ msgid "No zone specified."
+#~ msgstr "Nu s-a specificat nicio zonă."
+
+#~ msgid "Could not create loadbalancer."
+#~ msgstr "Nu s-a putut crea sistemul de echilibrare a încărcării."
+
+#~ msgid "Could not register instance with id %1$s with the loadbalancer."
+#~ msgstr ""
+#~ "Nu s-a putut înregistra instanţa cu identificatorul %1$s pe sistemul de "
+#~ "echilibrare a încărcării."
+
+#~ msgid "Could not deregister instance with id %1$s from the loadbalancer."
+#~ msgstr ""
+#~ "Nu s-a putut radia instanţa cu identificatorul %1$s din sistemul de "
+#~ "echilibrare a încărcării."
+
+#~ msgid "Missing access key."
+#~ msgstr "Lipseşte cheia de acces."
+
+#~ msgid "Missing secret key."
+#~ msgstr "Lipseşte cheia secretă."
+
+#~ msgid "EC2 region not set."
+#~ msgstr "Regiunea EC2 nu a fost setată."
+
+#~ msgid "Loadbalancing region not set."
+#~ msgstr "Regiunea de echilibrare a încărcării nu este setată."
+
+#~ msgid "Missing parameter: %1$2"
+#~ msgstr "Lipseşte parametrul: %1$2"
+
+#~ msgid "An IO error occurred: %1"
+#~ msgstr "A apărut o eroare de I/O: %1"
+
+#~ msgid "The following needed feature could not be enabled: \"%1$s\""
+#~ msgstr "Următoarea caracteristică necesară nu a putut fi activată: \"%1$s\""
+
+#~ msgid "The following obligatory element is missing: \"%1$s\""
+#~ msgstr "Lipseşte următorul element obligatoriu: \"%1$s\""
+
+#~ msgid "The received message is missing the \"kind\" key."
+#~ msgstr "Mesajului primit îi lipseşte cheia \"kind\" ."
+
+#~ msgid "Could not find a parser for a message of kind: . \"%1$s\""
+#~ msgstr "Nu s-a putut găsi un analizor pentru un mesaj de tipul: . \"%1$s\""
+
+#~ msgid "Error while building Stanza: \"%1$s\""
+#~ msgstr "Eroare la construirea frazei: \"%1$s\""
+
+#~ msgid "No CATEGORY_PERMISSION_DENIED to modify resources in context %1$s"
+#~ msgstr ""
+#~ "Nu aveți CATEGORY_PERMISSION_DENIED de modificare a resurselor în "
+#~ "contextul %1$s"
+
+#~ msgid "Missing request body."
+#~ msgstr "Lipseşte corpul interogării."
+
+#~ msgid "Lookup for session with altId %1$s failed"
+#~ msgstr "Căutarea sesiunii cu altId %1$s a eşuat"
+
+#~ msgid "No sessions found for user %1$s in context %2$s"
+#~ msgstr ""
+#~ "Nu a fost găsită nicio sesiune pentru utilizatorul %1$s în contextul %2$s"
+
+#~ msgid "No sessions found for context %1$s"
+#~ msgstr "Nu a fost găsită nicio sesiune pentru contextul %1$s"
+
+#~ msgid "No such snippet found for identifier: %1$s"
+#~ msgstr ""
+#~ "Nu a fost găsit niciun fragment de acest tip pentru identificatorul: %1$s"
+
+#~ msgid "No such snippet attachment found for identifier %1$s in snippet %2$s"
+#~ msgstr ""
+#~ "Nu a fost găsit niciun fragment de fişier ataşat de acest tip pentru "
+#~ "identificatorul %1$s în fragmentul %2$s"
 
 #~ msgid "Weekend Day"
 #~ msgstr "Zi de sfârșit de săptămână"
