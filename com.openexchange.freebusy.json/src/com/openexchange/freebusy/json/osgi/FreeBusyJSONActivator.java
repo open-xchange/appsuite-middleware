@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2020 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2012 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,46 +47,27 @@
  *
  */
 
-package com.openexchange.hazelcast.osgi;
+package com.openexchange.freebusy.json.osgi;
 
-import java.net.InetAddress;
-import java.util.Collections;
-import org.apache.commons.logging.Log;
-import com.openexchange.cluster.discovery.ClusterListener;
+import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
+import com.openexchange.freebusy.FreeBusyService;
+import com.openexchange.freebusy.json.FreeBusyActionFactory;
 
 /**
- * {@link HazelcastInitializingClusterListener}
+ * {@link FreeBusyJSONActivator}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-final class HazelcastInitializingClusterListener implements ClusterListener {
+public class FreeBusyJSONActivator extends AJAXModuleActivator {
 
-    private final HazelcastActivator activator;
-    private final long stamp;
-    private final Log logger;
-
-    /**
-     * Initializes a new {@link HazelcastInitializingClusterListener}.
-     */
-    protected HazelcastInitializingClusterListener(final HazelcastActivator activator, final long stamp, Log logger) {
-        super();
-        this.activator = activator;
-        this.stamp = stamp;
-        this.logger = logger;
+    @Override
+    protected Class<?>[] getNeededServices() {
+        return new Class[] { FreeBusyService.class };
     }
 
     @Override
-    public void removed(final InetAddress address) {
-        // Nothing
-    }
-
-    @Override
-    public void added(final InetAddress address) {
-        if (activator.init(Collections.<InetAddress> singletonList(address), true, stamp, logger)) {
-            if (logger.isInfoEnabled()) {
-                logger.info("\nHazelcast:\n\tInitialized Hazelcast instance via cluster listener notification about an appeared Open-Xchange node: "+address+"\n");
-            }
-        }
+    protected void startBundle() throws Exception {
+        registerModule(new FreeBusyActionFactory(this), "freebusy");
     }
 
 }

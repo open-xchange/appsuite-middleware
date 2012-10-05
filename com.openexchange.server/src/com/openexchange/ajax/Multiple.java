@@ -53,6 +53,7 @@ import java.io.IOException;
 import java.io.Writer;
 import java.util.Collection;
 import java.util.Date;
+import java.util.regex.Pattern;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
@@ -208,7 +209,10 @@ public class Multiple extends SessionServlet {
         }
     }
 
-    protected static final AJAXState doAction(final String module, final String action, final JSONObject jsonObj, final ServerSession session, final HttpServletRequest req, final OXJSONWriter jsonWriter, AJAXState state) {
+    private static final Pattern SPLIT = Pattern.compile("/");
+
+    protected static final AJAXState doAction(final String module, final String action, final JSONObject jsonObj, final ServerSession session, final HttpServletRequest req, final OXJSONWriter jsonWriter, final AJAXState ajaxState) {
+        AJAXState state = ajaxState;
         try {
             /*
              * Look up appropriate multiple handler first, then step through if-else-statement
@@ -225,15 +229,15 @@ public class Multiple extends SessionServlet {
             jsonObj.put(MultipleHandler.ROUTE, Tools.getRoute(req.getSession(true).getId()));
             jsonObj.put(MultipleHandler.REMOTE_ADDRESS, req.getRemoteAddr());
             final Dispatcher dispatcher = getDispatcher();
-            StringBuilder moduleCandidate = new StringBuilder();
+            final StringBuilder moduleCandidate = new StringBuilder(32);
             boolean handles = false;
-            for(String component: module.split("/")) {
-            	moduleCandidate.append(component);
-            	handles = dispatcher.handles(moduleCandidate.toString());
-            	if (handles) {
-            		break;
-            	}
-            	moduleCandidate.append('/');
+            for (final String component : SPLIT.split(module, 0)) {
+                moduleCandidate.append(component);
+                handles = dispatcher.handles(moduleCandidate.toString());
+                if (handles) {
+                    break;
+                }
+                moduleCandidate.append('/');
             }
             if (handles) {
                 final AJAXRequestData request = MultipleAdapter.parse(moduleCandidate.toString(), module.substring(moduleCandidate.length()), action, jsonObj, session, Tools.considerSecure(req));

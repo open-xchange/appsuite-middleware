@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2020 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2012 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,46 +47,64 @@
  *
  */
 
-package com.openexchange.hazelcast.osgi;
+package com.openexchange.freebusy.osgi;
 
-import java.net.InetAddress;
-import java.util.Collections;
 import org.apache.commons.logging.Log;
-import com.openexchange.cluster.discovery.ClusterListener;
+import com.openexchange.freebusy.FreeBusyService;
+import com.openexchange.freebusy.internal.FreeBusyServiceImpl;
+import com.openexchange.freebusy.internal.FreeBusyServiceLookup;
+import com.openexchange.freebusy.provider.FreeBusyProvider;
+import com.openexchange.log.LogFactory;
+import com.openexchange.osgi.HousekeepingActivator;
 
 /**
- * {@link HazelcastInitializingClusterListener}
+ * {@link FreeBusyServiceActivator}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-final class HazelcastInitializingClusterListener implements ClusterListener {
-
-    private final HazelcastActivator activator;
-    private final long stamp;
-    private final Log logger;
+public class FreeBusyServiceActivator extends HousekeepingActivator {
+    
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(FreeBusyServiceActivator.class));
 
     /**
-     * Initializes a new {@link HazelcastInitializingClusterListener}.
+     * Initializes a new {@link FreeBusyServiceActivator}.
      */
-    protected HazelcastInitializingClusterListener(final HazelcastActivator activator, final long stamp, Log logger) {
+    public FreeBusyServiceActivator() {
         super();
-        this.activator = activator;
-        this.stamp = stamp;
-        this.logger = logger;
     }
 
     @Override
-    public void removed(final InetAddress address) {
-        // Nothing
+    protected Class<?>[] getNeededServices() {
+        return new Class<?>[] { };
     }
-
+    
     @Override
-    public void added(final InetAddress address) {
-        if (activator.init(Collections.<InetAddress> singletonList(address), true, stamp, logger)) {
-            if (logger.isInfoEnabled()) {
-                logger.info("\nHazelcast:\n\tInitialized Hazelcast instance via cluster listener notification about an appeared Open-Xchange node: "+address+"\n");
-            }
+    protected void startBundle() throws Exception {
+        try {
+            LOG.info("starting bundle: com.openexchange.freebusy");
+            FreeBusyServiceLookup.set(this);
+            /*
+             * track providers
+             */
+            FreeBusyProviderListener providerListener = new FreeBusyProviderListener();
+            super.track(FreeBusyProvider.class, providerListener);            
+            super.openTrackers();
+            /*
+             * register services
+             */
+            FreeBusyService freeBusyService = new FreeBusyServiceImpl(providerListener);
+            super.registerService(FreeBusyService.class, freeBusyService);
+        } catch (Exception e) {
+            LOG.error("error starting com.openexchange.freebusy", e);
+            throw e;            
         }
     }
 
+    @Override
+    protected void stopBundle() throws Exception {
+        LOG.info("stopping bundle: com.openexchange.freebusy");
+        FreeBusyServiceLookup.set(null);            
+        super.stopBundle();
+    }
+    
 }

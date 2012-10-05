@@ -310,8 +310,6 @@ public class AJPv13TaskWatcher {
              * Log exceeded task if it is not marked as a long-running task
              */
             {
-                final Throwable t = new Throwable();
-                t.setStackTrace(task.getStackTrace());
                 final Map<String, Object> taskProperties;
                 {
                     final Props taskProps = LogProperties.optLogProperties(task.getThread());
@@ -322,7 +320,9 @@ public class AJPv13TaskWatcher {
                     logBuilder.append("\" exceeds max. running time of ").append(AJPv13Config.getAJPWatcherMaxRunningTime());
                     logBuilder.append("msec -> Processing time: ").append(System.currentTimeMillis() - task.getProcessingStartTime());
                     logBuilder.append("msec");
-                    log.info(logBuilder.toString(), t);
+                    logBuilder.append('\n');
+                    appendStackTrace(task.getStackTrace(), logBuilder);
+                    log.info(logBuilder);
                 } else {
                     final StringBuilder logBuilder = new StringBuilder(512);
                     final Map<String, String> sorted = new TreeMap<String, String>();
@@ -341,11 +341,41 @@ public class AJPv13TaskWatcher {
                     logBuilder.append("\" exceeds max. running time of ").append(AJPv13Config.getAJPWatcherMaxRunningTime());
                     logBuilder.append("msec -> Processing time: ").append(System.currentTimeMillis() - task.getProcessingStartTime());
                     logBuilder.append("msec");
-                    log.info(logBuilder.toString(), t);
+                    logBuilder.append('\n');
+                    appendStackTrace(task.getStackTrace(), logBuilder);
+                    log.info(logBuilder);
                 }
             }
             if (max > 0 && task.getProcessingStartTime() < max) {
                 task.cancel();
+            }
+        }
+
+        private static void appendStackTrace(final StackTraceElement[] trace, final StringBuilder sb) {
+            if (null == trace) {
+                return;
+            }
+            for (final StackTraceElement ste : trace) {
+                final String className = ste.getClassName();
+                if (null != className) {
+                    sb.append("\tat ").append(className).append('.').append(ste.getMethodName());
+                    if (ste.isNativeMethod()) {
+                        sb.append("(Native Method)");
+                    } else {
+                        final String fileName = ste.getFileName();
+                        if (null == fileName) {
+                            sb.append("(Unknown Source)");
+                        } else {
+                            final int lineNumber = ste.getLineNumber();
+                            sb.append('(').append(fileName);
+                            if (lineNumber >= 0) {
+                                sb.append(':').append(lineNumber);
+                            }
+                            sb.append(')');
+                        }
+                    }
+                    sb.append('\n');
+                }
             }
         }
 

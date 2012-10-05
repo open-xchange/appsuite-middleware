@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2020 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2012 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,46 +47,59 @@
  *
  */
 
-package com.openexchange.hazelcast.osgi;
+package com.openexchange.freebusy.osgi;
 
-import java.net.InetAddress;
-import java.util.Collections;
+import java.util.ArrayList;
+import java.util.List;
 import org.apache.commons.logging.Log;
-import com.openexchange.cluster.discovery.ClusterListener;
+import org.osgi.framework.ServiceReference;
+import com.openexchange.freebusy.provider.FreeBusyProvider;
+import com.openexchange.log.LogFactory;
+import com.openexchange.osgi.SimpleRegistryListener;
 
 /**
- * {@link HazelcastInitializingClusterListener}
- *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * {@link FreeBusyStorageListener} 
+ * 
+ * Recognizes {@link FreeBusyProvider} services.
+ * 
+ * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-final class HazelcastInitializingClusterListener implements ClusterListener {
+public class FreeBusyProviderListener implements SimpleRegistryListener<FreeBusyProvider> {
+	
+    private final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(FreeBusyProviderListener.class));
+    
+    private final List<FreeBusyProvider> providers;
+    
+    /**
+     * Initializes a new {@link FreeBusyProviderListener}.
+     * 
+     * @param registry the registry to use
+     */
+    public FreeBusyProviderListener() {
+        super();
+        this.providers = new ArrayList<FreeBusyProvider>();
+        LOG.debug("initialized.");
+    }
 
-    private final HazelcastActivator activator;
-    private final long stamp;
-    private final Log logger;
+    @Override
+    public void added(ServiceReference<FreeBusyProvider> ref, FreeBusyProvider service) {
+        LOG.info("adding free/busy provider: " + service);
+        this.providers.add(service);
+    }
+
+    @Override
+    public void removed(ServiceReference<FreeBusyProvider> ref, FreeBusyProvider service) {
+        LOG.info("removing free/busy provider: " + service);
+        this.providers.remove(service);
+    }
 
     /**
-     * Initializes a new {@link HazelcastInitializingClusterListener}.
+     * Gets all registered free/busy provider services.
+     * 
+     * @return The free/busy providers
      */
-    protected HazelcastInitializingClusterListener(final HazelcastActivator activator, final long stamp, Log logger) {
-        super();
-        this.activator = activator;
-        this.stamp = stamp;
-        this.logger = logger;
-    }
-
-    @Override
-    public void removed(final InetAddress address) {
-        // Nothing
-    }
-
-    @Override
-    public void added(final InetAddress address) {
-        if (activator.init(Collections.<InetAddress> singletonList(address), true, stamp, logger)) {
-            if (logger.isInfoEnabled()) {
-                logger.info("\nHazelcast:\n\tInitialized Hazelcast instance via cluster listener notification about an appeared Open-Xchange node: "+address+"\n");
-            }
-        }
+    public List<FreeBusyProvider> getProviders() {
+        return this.providers;
     }
 
 }
