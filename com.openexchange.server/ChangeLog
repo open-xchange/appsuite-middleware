@@ -1,3 +1,7 @@
+* 2012-10-05 - thorben.betten@open-xchange.com
+
+ - Fix for bug 23189: Further simplified and improved regex to look-up CSS blocks
+
 * 2012-10-05 - tobias.friedrich@open-xchange.com
 
  - Fix for bug 23184: Corrected attachment condition
