@@ -74,11 +74,12 @@ import com.openexchange.oauth.msn.osgi.MSNOAuthActivator;
 public class MSNConnectionTest extends TestCase{
 
     public void testMSNServiceImpl(){
-       final String apiKey = "000000004C03D925";
-       final String apiSecret = "dFxbH5WdWnt3cdjqWeKaoyqm1lrNiD28";
+       final String apiKey = "0000000040052F00";
+       final String apiSecret = "zCH5gYyMcZz6blXGM5M44kC6N98OQ1Uc";
        final MSNOAuthActivator activator = new MSNOAuthActivator();
-       activator.setOAuthMetadata(new OAuthServiceMetaDataMSNImpl(apiKey, apiSecret, null));
-       activator.setOauthService(new MockOAuthService());
+       OAuthServiceMetaDataMSNImpl serviceMetadata = new OAuthServiceMetaDataMSNImpl(apiKey, apiSecret, null);
+       activator.setOAuthMetadata(serviceMetadata);
+       activator.setOauthService(new MockOAuthService(serviceMetadata));
        final MSNServiceImpl service = new MSNServiceImpl(activator);
        final List<Contact> contacts = service.getContacts(null, 0, 0, 0);
        System.out.println(contacts.size());
