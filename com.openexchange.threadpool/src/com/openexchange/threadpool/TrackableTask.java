@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2020 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -49,20 +49,13 @@
 
 package com.openexchange.threadpool;
 
-import java.util.Map;
-
-
 /**
- * {@link Trackable} - Signals that implementing instance is trackable.
- *
+ * {@link TrackableTask} - A trackable task being submitted to thread pool.
+ * 
+ * @see Task
+ * @see Trackable
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface Trackable {
-
-    /**
-     * Gets the optional log properties.
-     * 
-     * @return The log properties or <code>null</code>
-     */
-    Map<String, Object> optLogProperties();
+public interface TrackableTask<V> extends Task<V>, Trackable {
+    // Empty
 }

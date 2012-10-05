@@ -52,6 +52,7 @@ package com.openexchange.threadpool;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CompletionService;
 import java.util.concurrent.ExecutionException;
@@ -60,6 +61,8 @@ import java.util.concurrent.Future;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 import com.openexchange.exception.OXException;
+import com.openexchange.log.LogProperties;
+import com.openexchange.log.Props;
 import com.openexchange.threadpool.internal.CustomThreadFactory;
 import com.openexchange.threadpool.osgi.ThreadPoolActivator;
 import com.openexchange.timer.TimerService;
@@ -516,8 +519,16 @@ public final class ThreadPools {
     }
 
     private static class TrackableTaskAdapter<V> extends TaskAdapter<V> implements Trackable {
+        private final Map<String, Object> props;
         TrackableTaskAdapter(final Callable<V> callable) {
             super(callable);
+            final Props props = LogProperties.optLogProperties(Thread.currentThread());
+            this.props = null == props ? null : Collections.unmodifiableMap(props.getMap());
+        }
+
+        @Override
+        public Map<String, Object> optLogProperties() {
+            return props;
         }
     }
 
@@ -560,8 +571,16 @@ public final class ThreadPools {
 
     private static class TrackableRenamingTaskAdapter<V> extends RenamingTaskAdapter<V> implements Trackable {
 
+        private final Map<String, Object> props;
         TrackableRenamingTaskAdapter(final Callable<V> callable, final String prefix) {
             super(callable, prefix);
+            final Props props = LogProperties.optLogProperties(Thread.currentThread());
+            this.props = null == props ? null : Collections.unmodifiableMap(props.getMap());
+        }
+
+        @Override
+        public Map<String, Object> optLogProperties() {
+            return props;
         }
     }
 
