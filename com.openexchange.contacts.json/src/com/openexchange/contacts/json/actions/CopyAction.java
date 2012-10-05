@@ -51,11 +51,9 @@ package com.openexchange.contacts.json.actions;
 
 import java.sql.Connection;
 import java.util.Date;
-
 import org.apache.commons.logging.Log;
 import org.json.JSONException;
 import org.json.JSONObject;
-
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.contact.ContactService;
 import com.openexchange.contacts.json.ContactRequest;
@@ -174,7 +172,7 @@ public class CopyAction extends ContactAction {
          * create copy
          */
         String folderID = request.getFolderIDFromData();
-        if (false == hasAttachments) {
+        if (hasAttachments) {
             contact.removeNumberOfAttachments();
 	        contactService.createContact(request.getSession(), folderID, contact);
 	        copyAttachments(Integer.parseInt(folderID), request.getSession(), request.getSession().getContext(), 
