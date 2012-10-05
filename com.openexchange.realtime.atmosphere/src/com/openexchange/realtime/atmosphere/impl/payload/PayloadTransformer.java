@@ -47,62 +47,49 @@
  *
  */
 
-package com.openexchange.realtime.atmosphere.impl.stanza;
+package com.openexchange.realtime.atmosphere.impl.payload;
 
-import org.json.JSONObject;
 import com.openexchange.exception.OXException;
-import com.openexchange.realtime.atmosphere.AtmosphereExceptionCode;
-import com.openexchange.realtime.packet.ID;
-import com.openexchange.realtime.packet.IQ;
+import com.openexchange.realtime.atmosphere.StanzaSender;
+import com.openexchange.realtime.atmosphere.impl.RTAtmosphereHandler;
+import com.openexchange.realtime.packet.Payload;
 import com.openexchange.realtime.packet.Stanza;
+import com.openexchange.realtime.util.ElementPath;
+import com.openexchange.tools.session.ServerSession;
 
 /**
- * {@link IQBuilder} - Parse an atmosphere client's IQ message and build a IQ Stanza from it by adding the recipients ID.
+ * {@link PayloadTransformer} - Used to transform Payload elemnts of incoming and outgoing Stanzas.
  * 
+ * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
-public class IQBuilder extends StanzaBuilder<IQ> {
+public interface PayloadTransformer {
 
     /**
-     * Create a new IQBuilder
-     * Initializes a new {@link IQBuilder}.
+     * Get the complete path to an element in a namespace that this PayloadTransformer is able to process.
      * 
-     * @param from the sender's ID, must not be null
-     * @param json the sender's message, must not be null
-     * @throws IllegalArgumentException if from or json are null
+     * @return the elementPath of elements this PayloadTransformer is able to process.
      */
-    public IQBuilder(ID from, JSONObject json) {
-        if (from == null || json == null) {
-            throw new IllegalArgumentException();
-        }
-        this.from = from;
-        this.json = json;
-        this.stanza = new IQ();
-    }
-
-    @Override
-    public IQ build() throws OXException {
-        basics();
-        type();
-        return stanza;
-    }
+    public ElementPath getElementPath();
 
     /**
-     * Check for the obligatory type key of IQ Stanzas in the received json and set the value in the Stanza 
-     * @throws OXException if the type key is missing
+     * Transform an incoming Payload.
+     * 
+     * @param paylaod The incoming Payload to process
+     * @param session The currently active session
+     * @return 
+     * @throws OXException When transformation fails
      */
-    private void type() throws OXException {
-        throw new UnsupportedOperationException("Not implemented yet!");
-//        String type = json.optString("type");
-//        if (type == null) {
-//            throw AtmosphereExceptionCode.MISSING_KEY.create("type", json);
-//        }
-//        for (IQ.Type t : IQ.Type.values()) {
-//            if (t.name().equalsIgnoreCase(type)) {
-//                stanza.setType(t);
-//                break;
-//            }
-//        }
-    }
-    
+    public Payload incoming(Payload payload, ServerSession session) throws OXException;
+
+    /**
+     * Transform an outgoing Payload.
+     * 
+     * @param payload The Payload to process
+     * @param session The currently active session
+     * @param sender The StanzaSender to use for finally sending the processed Stanza
+     * @throws OXException
+     */
+    public Payload outgoing(Payload payload, ServerSession session, StanzaSender sender) throws OXException;
+
 }

@@ -47,15 +47,15 @@
  *
  */
 
-package com.openexchange.realtime.atmosphere.impl.stanza;
+package com.openexchange.realtime.atmosphere.impl.stanza.transformer;
 
 import java.util.List;
 import com.openexchange.exception.OXException;
 import com.openexchange.realtime.MessageDispatcher;
 import com.openexchange.realtime.atmosphere.StanzaSender;
+import com.openexchange.realtime.atmosphere.impl.payload.PayloadTransformer;
+import com.openexchange.realtime.atmosphere.impl.payload.PayloadTransformerRegistry;
 import com.openexchange.realtime.atmosphere.osgi.AtmosphereServiceRegistry;
-import com.openexchange.realtime.atmosphere.payload.PayloadTransformer;
-import com.openexchange.realtime.atmosphere.payload.PayloadTransformerLibrary;
 import com.openexchange.realtime.packet.Payload;
 import com.openexchange.realtime.packet.Stanza;
 import com.openexchange.realtime.util.ElementPath;
@@ -71,7 +71,7 @@ import com.openexchange.tools.session.ServerSession;
 public abstract class StanzaTransformer<T> {
 
     private final AtmosphereServiceRegistry services = AtmosphereServiceRegistry.getInstance();
-    private final PayloadTransformerLibrary transformers = StranzaTransformerLibrary.getInstance();
+    private final PayloadTransformerRegistry transformers = PayloadTransformerRegistry.getInstance();
     
     /**
      * Handle an incoming {@link Stanza}.

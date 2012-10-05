@@ -47,57 +47,54 @@
  *
  */
 
-package converters;
+package com.openexchange.realtime.atmosphere.impl.stanza.builder;
 
-import org.json.JSONException;
 import org.json.JSONObject;
-import com.openexchange.conversion.simple.SimpleConverter;
-import com.openexchange.conversion.simple.SimplePayloadConverter;
 import com.openexchange.exception.OXException;
-import com.openexchange.realtime.chat.ChatMessage;
-import com.openexchange.tools.session.ServerSession;
-
+import com.openexchange.realtime.atmosphere.AtmosphereExceptionCode;
+import com.openexchange.realtime.packet.ID;
+import com.openexchange.realtime.packet.Stanza;
 
 /**
- * {@link ChatMessageToJSONConverter} - Converts a Stanza Payload from a ChatMessage
- * POJO into a JSON Object.
- *
+ * {@link BuilderSelector} - Select and instantiate a new StanzaBuilder matching the client's message.
+ * 
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
-public class ChatMessageToJSONConverter implements SimplePayloadConverter {
+public class BuilderSelector {
 
-    @Override
-    public String getInputFormat() {
-        return "chatMessage";
-    }
-
-    @Override
-    public String getOutputFormat() {
-        return "json";
-    }
-
-    @Override
-    public Quality getQuality() {
-        return Quality.GOOD;
-    }
-
-    @Override
-    public Object convert(Object data, ServerSession session, SimpleConverter converter) throws OXException {
-        try {
-        ChatMessage message = (ChatMessage) data;
-        
-        JSONObject object = new JSONObject();
-        
-        object.put("message", message.getMessage());
-        if (message.getPriority() != ChatMessage.NO_PRIORITY) {
-            object.put("priority", message.getPriority());
+    /**
+     * Get a parser that is adequate for he JSONObject that has to be parsed.
+     * Incoming JSONObjects must contain an <code>element</code> key that let's us determine the needed StanzaBuilder.
+     * 
+     * <pre>
+     * {
+     *  element: 'presence'
+     *  ...
+     * };
+     * </pre>
+     * 
+     * @param json the JSONObject that has to be parsed.
+     * @return a Builder adequate for the JSONObject that has to be transformed
+     * @throws IllegalArgumentException if the JSONObject is null
+     * @throws OXException if the JSONObject doesn't contain a <code>element</code> key specifying the Stanza or no adequate
+     *             StanzaBuilder can be found
+     */
+    public static StanzaBuilder<? extends Stanza> getBuilder(ID from, JSONObject json) throws OXException {
+        if (json == null) {
+            throw new IllegalArgumentException();
         }
-        
-        return object;
-    } catch (JSONException x) {
-        throw OXException.general("Could not create json object: " + x.getMessage());
+        String element = json.optString("element");
+        if (element == null) {
+            throw AtmosphereExceptionCode.MISSING_KEY.create("element");
+        }
+        if (element.equalsIgnoreCase("iq")) {
+            return new IQBuilder(from, json);
+        } else if (element.equalsIgnoreCase("message")) {
+            return new MessageBuilder(from, json);
+        } else if (element.equalsIgnoreCase("presence")) {
+            return new PresenceBuilder(from, json);
+        } else {
+            throw AtmosphereExceptionCode.MISSING_BUILDER_FOR_ELEMENT.create(element);
+        }
     }
-    
-}
-
 }

@@ -47,70 +47,56 @@
  *
  */
 
-package com.openexchange.realtime.atmosphere;
+package com.openexchange.realtime.atmosphere.impl.stanza.builder;
 
+import org.json.JSONObject;
 import com.openexchange.exception.OXException;
-import com.openexchange.realtime.MessageDispatcher;
-import com.openexchange.realtime.atmosphere.impl.payload.PayloadTransformer;
-import com.openexchange.realtime.packet.Payload;
-import com.openexchange.realtime.packet.Stanza;
-import com.openexchange.realtime.util.ElementPath;
-import com.openexchange.server.ServiceLookup;
-import com.openexchange.tools.session.ServerSession;
+import com.openexchange.realtime.packet.ID;
+import com.openexchange.realtime.packet.Message;
+
 
 /**
- * {@link OXRTConversionHandler} - Handles Conversion of Stanzas for a given namespace by telling the Stanza payload the format it should
- * convert itslef into, getting the MessageDispatcher and delegating the further processing of the Stanza.
- * 
+ * {@link MessageBuilder}
+ *
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
-public class OXRTConversionHandler implements PayloadTransformer {
-
-    public static ServiceLookup services;
-
-    private final String format;
-    private final ElementPath elementPath;
-
+public class MessageBuilder extends StanzaBuilder<Message> {
     /**
-     * Initializes a new {@link OXRTConversionHandler}.
-     * 
-     * @param elementPath the path to an element in a namespace this OXRTConversionHandler can handle
-     * @param format the format of POJOs that incoming Stanzas should be converted to
+     * Create a new MessageBuilder
+     * Initializes a new {@link MessageBuilder}.
+     * @param from the sender's ID, must not be null
+     * @param json the sender's message, must not be null
+     * @throws IllegalArgumentException if from or json are null
      */
-    public OXRTConversionHandler(ElementPath elementPath, String format) {
-        this.elementPath = elementPath;
-        this.format = format;
-    }
-
-    @Override
-    public ElementPath getElementPath() {
-        return elementPath; 
-    }
-
-    @Override
-    public void incoming(Stanza stanza, ServerSession session) throws OXException {
-        Payload payload = stanza.getPayload();
-        if(payload != null) {
-            stanza.setPayload(payload.to(format, session));
+    public MessageBuilder(ID from, JSONObject json) {
+        if(from == null || json == null) {
+            throw new IllegalArgumentException();
         }
-        send(stanza, session);
+        this.from = from;
+        this.json = json;
+        this.stanza = new Message();
     }
-
+    
     @Override
-    public void outgoing(Stanza stanza, ServerSession session, StanzaSender sender) throws OXException {
-        stanza.setPayload(stanza.getPayload().to("json", session));
-        sender.send(stanza);
-    }
-
-    /**
-     * Send the Stanza by getting the MessageDispatcher service and letting it handle the further processing of the Stanza.
-     * 
-     * @param stanza the stanza to send
-     * @param session the associated ServerSession
-     * @throws OXException when sending the Stanza fails
-     */
-    protected void send(Stanza stanza, ServerSession session) throws OXException {
-        services.getService(MessageDispatcher.class).send(stanza, session);
+    public Message build() throws OXException {
+        throw new UnsupportedOperationException("Not implemented yet!");
+//        Message message = new Message();
+//        basics(message, object);
+//
+//        String type = object.optString("type");
+//
+//        if (type == null || type.equals("")) {
+//            message.setType(Message.Type.normal);
+//        } else {
+//            for (Message.Type t : Message.Type.values()) {
+//                if (t.name().equalsIgnoreCase(type)) {
+//                    message.setType(t);
+//                    break;
+//                }
+//            }
+//        }
+//
+//        return message;
     }
 
 }

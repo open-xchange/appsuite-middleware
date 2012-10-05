@@ -47,54 +47,21 @@
  *
  */
 
-package com.openexchange.realtime.atmosphere.impl.stanza;
+package com.openexchange.realtime.atmosphere.impl.stanza.transformer;
 
-import org.json.JSONObject;
-import com.openexchange.exception.OXException;
-import com.openexchange.realtime.atmosphere.AtmosphereExceptionCode;
-import com.openexchange.realtime.packet.ID;
-import com.openexchange.realtime.packet.Stanza;
+import com.openexchange.realtime.packet.Presence;
+
 
 /**
- * {@link BuilderSelector} - Select and instantiate a new StanzaBuilder matching the client's message.
- * 
+ * {@link PresenceTransformer} - StanzaTransformer that can transform Presence Stanzas from representation a to representation b.
+ *
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
-public class BuilderSelector {
+public class PresenceTransformer extends StanzaTransformer<Presence> {
+    private Presence presence;
 
-    /**
-     * Get a parser that is adequate for he JSONObject that has to be parsed.
-     * Incoming JSONObjects must contain an <code>element</code> key that let's us determine the needed StanzaBuilder.
-     * 
-     * <pre>
-     * {
-     *  element: 'presence'
-     *  ...
-     * };
-     * </pre>
-     * 
-     * @param json the JSONObject that has to be parsed.
-     * @return a Builder adequate for the JSONObject that has to be transformed
-     * @throws IllegalArgumentException if the JSONObject is null
-     * @throws OXException if the JSONObject doesn't contain a <code>element</code> key specifying the Stanza or no adequate
-     *             StanzaBuilder can be found
-     */
-    public static StanzaBuilder<? extends Stanza> getBuilder(ID from, JSONObject json) throws OXException {
-        if (json == null) {
-            throw new IllegalArgumentException();
-        }
-        String element = json.optString("element");
-        if (element == null) {
-            throw AtmosphereExceptionCode.MISSING_KEY.create("element");
-        }
-        if (element.equalsIgnoreCase("iq")) {
-            return new IQBuilder(from, json);
-        } else if (element.equalsIgnoreCase("message")) {
-            return new MessageBuilder(from, json);
-        } else if (element.equalsIgnoreCase("presence")) {
-            return new PresenceBuilder(from, json);
-        } else {
-            throw AtmosphereExceptionCode.MISSING_BUILDER_FOR_KIND.create(element);
-        }
+    public PresenceTransformer(Presence presence) {
+        this.presence = presence;
     }
+
 }

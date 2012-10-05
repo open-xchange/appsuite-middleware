@@ -47,70 +47,56 @@
  *
  */
 
-package com.openexchange.realtime.atmosphere;
+package com.openexchange.realtime.chat;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+import com.openexchange.conversion.simple.SimpleConverter;
+import com.openexchange.conversion.simple.SimplePayloadConverter;
 import com.openexchange.exception.OXException;
-import com.openexchange.realtime.MessageDispatcher;
-import com.openexchange.realtime.atmosphere.impl.payload.PayloadTransformer;
-import com.openexchange.realtime.packet.Payload;
-import com.openexchange.realtime.packet.Stanza;
-import com.openexchange.realtime.util.ElementPath;
-import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.session.ServerSession;
 
+
 /**
- * {@link OXRTConversionHandler} - Handles Conversion of Stanzas for a given namespace by telling the Stanza payload the format it should
- * convert itslef into, getting the MessageDispatcher and delegating the further processing of the Stanza.
- * 
+ * {@link ChatMessageToJSONConverter} - Converts a Stanza Payload from a ChatMessage
+ * POJO into a JSON Object.
+ *
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
-public class OXRTConversionHandler implements PayloadTransformer {
+public class ChatMessageToJSONConverter implements SimplePayloadConverter {
 
-    public static ServiceLookup services;
-
-    private final String format;
-    private final ElementPath elementPath;
-
-    /**
-     * Initializes a new {@link OXRTConversionHandler}.
-     * 
-     * @param elementPath the path to an element in a namespace this OXRTConversionHandler can handle
-     * @param format the format of POJOs that incoming Stanzas should be converted to
-     */
-    public OXRTConversionHandler(ElementPath elementPath, String format) {
-        this.elementPath = elementPath;
-        this.format = format;
+    @Override
+    public String getInputFormat() {
+        return "chatMessage";
     }
 
     @Override
-    public ElementPath getElementPath() {
-        return elementPath; 
+    public String getOutputFormat() {
+        return "json";
     }
 
     @Override
-    public void incoming(Stanza stanza, ServerSession session) throws OXException {
-        Payload payload = stanza.getPayload();
-        if(payload != null) {
-            stanza.setPayload(payload.to(format, session));
+    public Quality getQuality() {
+        return Quality.GOOD;
+    }
+
+    @Override
+    public Object convert(Object data, ServerSession session, SimpleConverter converter) throws OXException {
+        try {
+        ChatMessage message = (ChatMessage) data;
+        
+        JSONObject object = new JSONObject();
+        
+        object.put("message", message.getMessage());
+        if (message.getPriority() != ChatMessage.NO_PRIORITY) {
+            object.put("priority", message.getPriority());
         }
-        send(stanza, session);
+        
+        return object;
+    } catch (JSONException x) {
+        throw OXException.general("Could not create json object: " + x.getMessage());
     }
-
-    @Override
-    public void outgoing(Stanza stanza, ServerSession session, StanzaSender sender) throws OXException {
-        stanza.setPayload(stanza.getPayload().to("json", session));
-        sender.send(stanza);
-    }
-
-    /**
-     * Send the Stanza by getting the MessageDispatcher service and letting it handle the further processing of the Stanza.
-     * 
-     * @param stanza the stanza to send
-     * @param session the associated ServerSession
-     * @throws OXException when sending the Stanza fails
-     */
-    protected void send(Stanza stanza, ServerSession session) throws OXException {
-        services.getService(MessageDispatcher.class).send(stanza, session);
-    }
+    
+}
 
 }

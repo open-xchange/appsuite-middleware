@@ -53,7 +53,7 @@ import java.util.Set;
 
 import com.openexchange.exception.OXException;
 import com.openexchange.realtime.Channel;
-import com.openexchange.realtime.atmosphere.payload.PayloadTransformerLibrary;
+import com.openexchange.realtime.atmosphere.impl.payload.PayloadTransformerRegistry;
 import com.openexchange.realtime.packet.ID;
 import com.openexchange.realtime.packet.Stanza;
 import com.openexchange.tools.session.ServerSession;
@@ -67,12 +67,12 @@ public class RTAtmosphereChannel implements Channel {
 	
     public static final String PROTOCOL = "ox";
 	private final RTAtmosphereHandler handler;
-	private final PayloadTransformerLibrary library;
+	private final PayloadTransformerRegistry library;
 	
 	
 
 	public RTAtmosphereChannel(RTAtmosphereHandler handler,
-			PayloadTransformerLibrary library) {
+			PayloadTransformerRegistry library) {
 		this.handler = handler;
 		this.library = library;
 	}

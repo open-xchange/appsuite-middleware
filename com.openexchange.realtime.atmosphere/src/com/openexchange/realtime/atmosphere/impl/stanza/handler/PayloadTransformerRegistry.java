@@ -47,53 +47,86 @@
  *
  */
 
-package com.openexchange.realtime.atmosphere.osgi;
+package com.openexchange.realtime.atmosphere.impl.stanza.handler;
 
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import com.openexchange.osgi.ServiceRegistry;
-import com.openexchange.server.ServiceLookup;
+import com.openexchange.realtime.atmosphere.osgi.AtmosphereServiceRegistry;
+import com.openexchange.realtime.util.ElementPath;
 
 /**
- * {@link AtmospherePresenceServiceRegistry}
- *
- * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
- */
-/**
- * {@link AtmosphereServiceRegistry} Singleton that extends the existing {@link ServiceRegistry} to gain functionality and acts as
- * central accesspoint for classes of the AtmospherePresence bundle.
+ * {@link PayloadTransformerRegistry} - Tracks registered {@link PayloadTransformer handlers} and
+ * makes them accessible through {@link #getHandlerFor(String)}.
+ * This is important to the AtmosphereChannel and associated Channel handler.
+ * The Channel can decide if it is able to process incoming Stanzas into POJOs
+ * and back again. The Channel handler can delegate the transformation to the
+ * proper OXRTHandler.
  * 
+ * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a> JavaDoc
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
-public class AtmosphereServiceRegistry extends ServiceRegistry {
-    private static final AtmosphereServiceRegistry INSTANCE = new AtmosphereServiceRegistry();
-    
+public class PayloadTransformerRegistry extends ServiceRegistry {
+
+    private static final PayloadTransformerRegistry INSTANCE = new PayloadTransformerRegistry();
+
+    private final Map<ElementPath, PayloadTransformer> handlers;
+
     /**
      * Encapsulated constructor.
      */
-    private AtmosphereServiceRegistry() {}
-    
+    private PayloadTransformerRegistry() {
+        super();
+        handlers = new ConcurrentHashMap<ElementPath, PayloadTransformer>();
+    }
+
     /**
      * Get the Registry singleton.
+     * 
      * @return the Registry singleton
      */
-    public static AtmosphereServiceRegistry getInstance() {
+    public static PayloadTransformerRegistry getInstance() {
         return INSTANCE;
     }
-    
+
     /**
-     * Initialize the service registry with the services that are declared as needed.
-     * @param activator the DeferredActivator to get services from
-     * @param neededServices the services declared as needed
+     * Gets the appropriate handler for the specified Stanz class.
+     * 
+     * @param stanzaClass The Stanza subclass we want to transform.
+     * @return The appropriate handler or <code>null</code> if none is applicable.
      */
-    public void initialize(ServiceLookup serviceLookup, Class[] neededServices) {
-        INSTANCE.clearRegistry();
-        for (Class<?> serviceClass : neededServices) {
-            Object service = serviceLookup.getService(serviceClass);
-            if (service != null) {
-                INSTANCE.addService(serviceClass, service);
-            }
-        }
+    public PayloadTransformer getHandlerFor(ElementPath elementPath) {
+        return handlers.get(elementPath);
     }
+
+    /**
+     * Adds specified handler/transformer to this library.
+     * 
+     * @param transformer The handler to add
+     */
+    public void add(PayloadTransformer transformer) {
+        handlers.put(transformer.getElementPath(), transformer);
+    }
+
+    /**
+     * Removes specified handler/transformer from this library.
+     * 
+     * @param transformer The handler to remove
+     */
+    public void remove(PayloadTransformer transformer) {
+        handlers.remove(transformer.getElementPath());
+    }
+
+    /**
+     * Get the collected namespaces the registered OXRTHandlers are able to transform.
+     * 
+     * @return the collected namespaces the registered OXRTHandlers are able to transform.
+     */
+    public Set<ElementPath> getManageableNamespaces() {
+        return new HashSet<ElementPath>(handlers.keySet());
+    }
+
 }
-
-
-

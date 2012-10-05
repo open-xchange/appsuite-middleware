@@ -47,86 +47,57 @@
  *
  */
 
-package com.openexchange.realtime.atmosphere.impl.stanza;
+package com.openexchange.realtime.atmosphere.impl.stanza.builder;
 
-import org.apache.commons.logging.Log;
-import org.json.JSONArray;
-import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.exception.OXException;
-import com.openexchange.realtime.atmosphere.AtmosphereExceptionCode;
 import com.openexchange.realtime.packet.ID;
-import com.openexchange.realtime.packet.Payload;
-import com.openexchange.realtime.packet.Stanza;
+import com.openexchange.realtime.packet.Presence;
+import com.openexchange.realtime.packet.Presence.Type;
 
 /**
- * {@link StanzaBuilder} - Abstract Stanza parser class, gathering common fields and methods.
+ * {@link PresenceBuilder} - Parse an atmosphere client's presence message and build a Presence Stanza from it by adding the recipients ID.
  * 
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
- * @param <T>
  */
-public abstract class StanzaBuilder<T extends Stanza> {
-
-    private static Log LOG = com.openexchange.log.Log.loggerFor(StanzaBuilder.class);
-    protected ID from;
-    protected JSONObject json;
-    protected T stanza;
+public class PresenceBuilder extends StanzaBuilder<Presence> {
 
     /**
-     * Set the obligatory {@link Stanza} elements.
-     * @throws OXException for errors happening while building the Stanza
+     * Create a new PresenceBuilder
+     * Initializes a new {@link PresenceBuilder}.
+     * 
+     * @param from the sender's ID, must not be null
+     * @param json the sender's message, must not be null
+     * @throws IllegalArgumentException if from or json are null
      */
-    protected void basics() throws OXException {
-        from();
-        to();
-        id();
-        payloads();
+    public PresenceBuilder(ID from, JSONObject json) {
+        if (from == null || json == null) {
+            throw new IllegalArgumentException();
+        }
+        this.from = from;
+        this.json = json;
+        this.stanza = new Presence();
     }
 
-    private void from() {
-        stanza.setFrom(from);
-    }
-    
-    private void to() {
-        if (json.has("to")) {
-            stanza.setTo(new ID(json.optString("to")));
-        }
+    @Override
+    public Presence build() throws OXException {
+        basics();
+        type();
+        return stanza;
     }
 
-    private void id() {
-        if (json.has("id")) {
-            stanza.setId(json.optString("to"));
-        }
-    }
-    
-    private void payloads() throws OXException {
-        if (json.has("payloads")) {
-            JSONArray payloads = json.optJSONArray("payloads");
-            for (int i = 0; i < payloads.length(); i++) {
-                JSONObject payload = payloads.optJSONObject(i);
-                String elementName;
-                try {
-                    elementName = payload.getString("element");
-                } catch (JSONException e) {
-                    OXException exception = AtmosphereExceptionCode.MISSING_KEY.create("element");
-                    LOG.error(exception);
-                    throw exception;
-                }
-                if (payload.has("namespace")) {
-                    String namespace = payload.optString("namespace");
-                    stanza.addPayload(new Payload(payload, "json", namespace, elementName ));
-                } else {
-                    stanza.addPayload(new Payload(payload, "json", null, elementName ));
+    private void type() {
+        if (json.has("type")) {
+            String type = json.optString("type");
+            for (Presence.Type t : Presence.Type.values()) {
+                if (t.name().equalsIgnoreCase(type)) {
+                    stanza.setType(t);
+                    break;
                 }
             }
+        } else {
+            stanza.setType(Type.NONE);
         }
     }
-    
-    /**
-     * Build a validated Stanza of type T
-     * @return a validated Stanza of type T
-     * @throws OXException if the Stanza couldn't be build due to validation or other errors 
-     */
-    public abstract T build() throws OXException; 
 
 }

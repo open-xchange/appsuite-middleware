@@ -47,49 +47,86 @@
  *
  */
 
-package com.openexchange.realtime.atmosphere.payload;
+package com.openexchange.realtime.atmosphere.impl.payload;
 
-import com.openexchange.exception.OXException;
-import com.openexchange.realtime.atmosphere.StanzaSender;
-import com.openexchange.realtime.atmosphere.impl.RTAtmosphereHandler;
-import com.openexchange.realtime.packet.Payload;
-import com.openexchange.realtime.packet.Stanza;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import com.openexchange.osgi.ServiceRegistry;
+import com.openexchange.realtime.atmosphere.osgi.AtmosphereServiceRegistry;
 import com.openexchange.realtime.util.ElementPath;
-import com.openexchange.tools.session.ServerSession;
 
 /**
- * {@link PayloadTransformer} - Used to transform Payload elemnts of incoming and outgoing Stanzas.
+ * {@link PayloadTransformerRegistry} - Tracks registered {@link PayloadTransformer handlers} and
+ * makes them accessible through {@link #getHandlerFor(String)}.
+ * This is important to the AtmosphereChannel and associated Channel handler.
+ * The Channel can decide if it is able to process incoming Stanzas into POJOs
+ * and back again. The Channel handler can delegate the transformation to the
+ * proper OXRTHandler.
  * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a> JavaDoc
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
-public interface PayloadTransformer {
+public class PayloadTransformerRegistry extends ServiceRegistry {
+
+    private static final PayloadTransformerRegistry INSTANCE = new PayloadTransformerRegistry();
+
+    private final Map<ElementPath, PayloadTransformer> handlers;
 
     /**
-     * Get the complete path to an element in a namespace that this PayloadTransformer is able to process.
-     * 
-     * @return the elementPath of elements this PayloadTransformer is able to process.
+     * Encapsulated constructor.
      */
-    public ElementPath getElementPath();
+    private PayloadTransformerRegistry() {
+        super();
+        handlers = new ConcurrentHashMap<ElementPath, PayloadTransformer>();
+    }
 
     /**
-     * Transform an incoming Payload.
+     * Get the Registry singleton.
      * 
-     * @param paylaod The incoming Payload to process
-     * @param session The currently active session
-     * @return 
-     * @throws OXException When transformation fails
+     * @return the Registry singleton
      */
-    public Payload incoming(Payload payload, ServerSession session) throws OXException;
+    public static PayloadTransformerRegistry getInstance() {
+        return INSTANCE;
+    }
 
     /**
-     * Transform an outgoing Payload.
+     * Gets the appropriate handler for the specified Stanz class.
      * 
-     * @param payload The Payload to process
-     * @param session The currently active session
-     * @param sender The StanzaSender to use for finally sending the processed Stanza
-     * @throws OXException
+     * @param stanzaClass The Stanza subclass we want to transform.
+     * @return The appropriate handler or <code>null</code> if none is applicable.
      */
-    public Payload outgoing(Payload payload, ServerSession session, StanzaSender sender) throws OXException;
+    public PayloadTransformer getHandlerFor(ElementPath elementPath) {
+        return handlers.get(elementPath);
+    }
+
+    /**
+     * Adds specified handler/transformer to this library.
+     * 
+     * @param transformer The handler to add
+     */
+    public void add(PayloadTransformer transformer) {
+        handlers.put(transformer.getElementPath(), transformer);
+    }
+
+    /**
+     * Removes specified handler/transformer from this library.
+     * 
+     * @param transformer The handler to remove
+     */
+    public void remove(PayloadTransformer transformer) {
+        handlers.remove(transformer.getElementPath());
+    }
+
+    /**
+     * Get the collected namespaces the registered OXRTHandlers are able to transform.
+     * 
+     * @return the collected namespaces the registered OXRTHandlers are able to transform.
+     */
+    public Set<ElementPath> getManageableNamespaces() {
+        return new HashSet<ElementPath>(handlers.keySet());
+    }
 
 }

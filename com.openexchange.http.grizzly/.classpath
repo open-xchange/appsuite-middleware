@@ -7,7 +7,7 @@
 	<classpathentry exported="true" kind="lib" path="lib/atmosphere-compat-tomcat7-1.0.1-sources.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/atmosphere-compat-tomcat7-1.0.1.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/atmosphere-runtime-1.0.1-sources.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/atmosphere-runtime-1.0.1.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/atmosphere-runtime-1.0.1.jar" sourcepath="lib/atmosphere-runtime-1.0.1-sources.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/gmbal-3.0.0-b023.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/grizzly-comet-2.2.18-sources.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/grizzly-comet-2.2.18.jar"/>

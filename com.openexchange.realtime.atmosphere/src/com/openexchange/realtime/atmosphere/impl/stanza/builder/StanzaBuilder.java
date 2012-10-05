@@ -47,70 +47,86 @@
  *
  */
 
-package com.openexchange.realtime.atmosphere;
+package com.openexchange.realtime.atmosphere.impl.stanza.builder;
 
+import org.apache.commons.logging.Log;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 import com.openexchange.exception.OXException;
-import com.openexchange.realtime.MessageDispatcher;
-import com.openexchange.realtime.atmosphere.impl.payload.PayloadTransformer;
+import com.openexchange.realtime.atmosphere.AtmosphereExceptionCode;
+import com.openexchange.realtime.packet.ID;
 import com.openexchange.realtime.packet.Payload;
 import com.openexchange.realtime.packet.Stanza;
-import com.openexchange.realtime.util.ElementPath;
-import com.openexchange.server.ServiceLookup;
-import com.openexchange.tools.session.ServerSession;
 
 /**
- * {@link OXRTConversionHandler} - Handles Conversion of Stanzas for a given namespace by telling the Stanza payload the format it should
- * convert itslef into, getting the MessageDispatcher and delegating the further processing of the Stanza.
+ * {@link StanzaBuilder} - Abstract Stanza parser class, gathering common fields and methods.
  * 
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
+ * @param <T>
  */
-public class OXRTConversionHandler implements PayloadTransformer {
+public abstract class StanzaBuilder<T extends Stanza> {
 
-    public static ServiceLookup services;
-
-    private final String format;
-    private final ElementPath elementPath;
+    private static Log LOG = com.openexchange.log.Log.loggerFor(StanzaBuilder.class);
+    protected ID from;
+    protected JSONObject json;
+    protected T stanza;
 
     /**
-     * Initializes a new {@link OXRTConversionHandler}.
-     * 
-     * @param elementPath the path to an element in a namespace this OXRTConversionHandler can handle
-     * @param format the format of POJOs that incoming Stanzas should be converted to
+     * Set the obligatory {@link Stanza} elements.
+     * @throws OXException for errors happening while building the Stanza
      */
-    public OXRTConversionHandler(ElementPath elementPath, String format) {
-        this.elementPath = elementPath;
-        this.format = format;
+    protected void basics() throws OXException {
+        from();
+        to();
+        id();
+        payloads();
     }
 
-    @Override
-    public ElementPath getElementPath() {
-        return elementPath; 
+    private void from() {
+        stanza.setFrom(from);
     }
-
-    @Override
-    public void incoming(Stanza stanza, ServerSession session) throws OXException {
-        Payload payload = stanza.getPayload();
-        if(payload != null) {
-            stanza.setPayload(payload.to(format, session));
+    
+    private void to() {
+        if (json.has("to")) {
+            stanza.setTo(new ID(json.optString("to")));
         }
-        send(stanza, session);
     }
 
-    @Override
-    public void outgoing(Stanza stanza, ServerSession session, StanzaSender sender) throws OXException {
-        stanza.setPayload(stanza.getPayload().to("json", session));
-        sender.send(stanza);
+    private void id() {
+        if (json.has("id")) {
+            stanza.setId(json.optString("to"));
+        }
     }
-
+    
+    private void payloads() throws OXException {
+        if (json.has("payloads")) {
+            JSONArray payloads = json.optJSONArray("payloads");
+            for (int i = 0; i < payloads.length(); i++) {
+                JSONObject payload = payloads.optJSONObject(i);
+                String elementName;
+                try {
+                    elementName = payload.getString("element");
+                } catch (JSONException e) {
+                    OXException exception = AtmosphereExceptionCode.MISSING_KEY.create("element");
+                    LOG.error(exception);
+                    throw exception;
+                }
+                if (payload.has("namespace")) {
+                    String namespace = payload.optString("namespace");
+                    stanza.addPayload(new Payload(payload, "json", namespace, elementName ));
+                } else {
+                    stanza.addPayload(new Payload(payload, "json", null, elementName ));
+                }
+            }
+        }
+    }
+    
     /**
-     * Send the Stanza by getting the MessageDispatcher service and letting it handle the further processing of the Stanza.
-     * 
-     * @param stanza the stanza to send
-     * @param session the associated ServerSession
-     * @throws OXException when sending the Stanza fails
+     * Build a validated Stanza of type T
+     * @return a validated Stanza of type T
+     * @throws OXException if the Stanza couldn't be build due to validation or other errors 
      */
-    protected void send(Stanza stanza, ServerSession session) throws OXException {
-        services.getService(MessageDispatcher.class).send(stanza, session);
-    }
+    public abstract T build() throws OXException; 
 
 }

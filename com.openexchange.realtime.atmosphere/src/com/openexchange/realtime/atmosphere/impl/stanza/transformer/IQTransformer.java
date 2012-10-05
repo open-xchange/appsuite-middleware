@@ -47,73 +47,21 @@
  *
  */
 
-package com.openexchange.realtime.atmosphere.payload;
+package com.openexchange.realtime.atmosphere.impl.stanza.transformer;
 
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
-import com.openexchange.realtime.util.ElementPath;
+import com.openexchange.realtime.packet.IQ;
+
 
 /**
- * {@link PayloadTransformerLibrary} - Tracks registered {@link PayloadTransformer handlers} and
- * makes them accessible through {@link #getHandlerFor(String)}.
- * This is important to the AtmosphereChannel and associated Channel handler.
- * The Channel can decide if it is able to process incoming Stanzas into POJOs
- * and back again. The Channel handler can delegate the transformation to the
- * proper OXRTHandler.
- * 
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a> JavaDoc
+ * {@link IQTransformer} - StanzaTransformer that can transform IQ Stanzas from representation a to representation b.
+ *
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
-public class PayloadTransformerLibrary {
+public class IQTransformer extends StanzaTransformer<IQ> {
+    private IQ iq;
 
-    /**
-     * The collection for registered {@link PayloadTransformer handlers}.
-     */
-    private final Map<ElementPath, PayloadTransformer> handlers;
-
-    public PayloadTransformerLibrary() {
-        super();
-        handlers = new ConcurrentHashMap<ElementPath, PayloadTransformer>();
+    public IQTransformer(IQ iq) {
+        this.iq = iq;
     }
-
-    /**
-     * Gets the appropriate handler for the specified Stanz class.
-     * 
-     * @param stanzaClass The Stanza subclass we want to transform.
-     * @return The appropriate handler or <code>null</code> if none is applicable.
-     */
-    public PayloadTransformer getHandlerFor(ElementPath elementPath) {
-        return handlers.get(elementPath);
-    }
-
-    /**
-     * Adds specified handler/transformer to this library.
-     * 
-     * @param transformer The handler to add
-     */
-    public void add(PayloadTransformer transformer) {
-        handlers.put(transformer.getElementPath(), transformer);
-    }
-
-    /**
-     * Removes specified handler/transformer from this library.
-     * 
-     * @param transformer The handler to remove
-     */
-    public void remove(PayloadTransformer transformer) {
-        handlers.remove(transformer.getElementPath());
-    }
-
-    /**
-     * Get the collected namespaces the registered OXRTHandlers are able to transform.
-     * 
-     * @return the collected namespaces the registered OXRTHandlers are able to transform.
-     */
-    public Set<ElementPath> getManageableNamespaces() {
-        return new HashSet<ElementPath>(handlers.keySet());
-    }
-
+    
 }
