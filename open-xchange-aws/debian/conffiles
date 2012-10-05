@@ -1,4 +1,7 @@
 opt/open-xchange/etc/aws.properties
 opt/open-xchange/etc/awsautoscaling.properties
 opt/open-xchange/etc/awsec2.properties
+opt/open-xchange/etc/awss3.properties
 opt/open-xchange/etc/awsloadbalancing.properties
+opt/open-xchange/etc/public_key.der
+opt/open-xchange/etc/private_key.der
