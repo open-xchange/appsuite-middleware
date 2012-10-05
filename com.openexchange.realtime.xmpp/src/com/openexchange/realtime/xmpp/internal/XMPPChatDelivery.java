@@ -49,6 +49,7 @@
 
 package com.openexchange.realtime.xmpp.internal;
 
+import static org.joox.JOOX.$;
 import java.util.UUID;
 import org.jboss.netty.channel.ChannelHandlerContext;
 import org.jboss.netty.channel.ChannelStateEvent;
@@ -63,6 +64,7 @@ import com.openexchange.login.internal.LoginPerformer;
 import com.openexchange.realtime.packet.ID;
 import com.openexchange.realtime.xmpp.XMPPChannel;
 import com.openexchange.realtime.xmpp.XMPPDelivery;
+import com.openexchange.realtime.xmpp.packet.XMPPIq;
 import com.openexchange.realtime.xmpp.packet.XMPPStanza;
 import com.openexchange.tools.encoding.Base64;
 import com.openexchange.tools.session.ServerSession;
@@ -77,6 +79,8 @@ public class XMPPChatDelivery extends SimpleChannelUpstreamHandler implements XM
 
     private static final String AUTH_SASL = "urn:ietf:params:xml:ns:xmpp-sasl";
 
+    private static final String NS_BIND = "urn:ietf:params:xml:ns:xmpp-bind";
+
     private ChannelHandlerContext ctx;
 
     private final XMPPChannel channel;
@@ -86,8 +90,18 @@ public class XMPPChatDelivery extends SimpleChannelUpstreamHandler implements XM
     private ServerSession session;
 
     private ID id;
-    
+
     private UUID streamId;
+
+    private String domain;
+
+    private State state = State.init;
+    
+    private static boolean DEBUG = true;
+
+    enum State {
+        init, preLogin, postLogin, open, preBind, preSession;
+    }
 
     public XMPPChatDelivery(XMPPChannel channel, XMPPHandler handler) {
         this.channel = channel;
@@ -102,52 +116,116 @@ public class XMPPChatDelivery extends SimpleChannelUpstreamHandler implements XM
 
     @Override
     public void channelDisconnected(ChannelHandlerContext ctx, ChannelStateEvent e) throws Exception {
-        channel.removeDelivery(this.id);
+        if (id != null) {
+            channel.removeDelivery(this.id);
+        }
         super.channelDisconnected(ctx, e);
     }
 
     @Override
     public void messageReceived(ChannelHandlerContext ctx, MessageEvent e) throws Exception {
         String message = (String) e.getMessage();
+        if (DEBUG) {
+            System.out.println("<--- IN ---\n" + message);
+        }
         XMPPContainer container = new XMPPContainer(message.trim());
-        
-        if (streamId == null) {
+
+        if (state == State.init) {
             negotiateStreamDetails(container);
-        } else if (session == null) {
+            state = State.preLogin;
+        } else if (state == State.preLogin) {
             doLogin(container);
-        } else {
-            container.setSession(session);
+            state = State.postLogin;
+        } else if (state == State.postLogin) {
+            negotiateStreamDetails(container);
+            state = State.preBind;
+        } else if (state == State.preBind) {
+            bind(container);
+            state = State.preSession;
+        } else if (state == State.preSession) {
+            handleSession(container);
+            state = State.open;
+        } else if (state == State.open) {
             handler.handle(container);
         }
     }
 
-    /**
-     * @param container
-     */
+    private void handleSession(XMPPContainer container) {
+        Match xml = $(container.getXml());
+        if (xml.tag().trim().equalsIgnoreCase("iq") && xml.child().tag().trim().equalsIgnoreCase("session")) {
+            write($("iq").attr("id", xml.id()).attr("type", XMPPIq.Type.result.name()).toString());
+        }
+    }
+
+    private void bind(XMPPContainer container) throws OXException {
+        Match xml = $(container.getXml());
+        String stanza = xml.tag().trim().toLowerCase();
+
+        if (!stanza.equals("iq")) {
+            // TODO: throw error
+        }
+
+        String iqId = xml.attr("id");
+
+        String resource = xml.child("bind").child("resource").content();
+        ID prospect = new ID("xmpp", session.getLoginName(), session.getContext().getName(), resource);
+        int suffix = 0;
+        while (channel.isConnected(prospect, session)) {
+            prospect.setResource(prospect.getResource() + "_" + ++suffix);
+        }
+
+        id.setResource(prospect.getResource());
+
+        Match response = $("iq").attr("id", iqId).attr("type", XMPPIq.Type.result.name());
+        Match jid = $("jid", id.toGeneralForm().toString() + "/" + id.getResource());
+        response.append($("bind").attr("xmlns", NS_BIND).append(jid));
+        
+        write(response.toString());
+    }
+
     private void negotiateStreamDetails(XMPPContainer container) {
+        String xml = container.getXml();
+        if (xml.contains("<stream:stream ")) {
+            xml = xml + "</stream:stream>";
+        }
+
+        Match match = $(xml);
+        String xmlns = match.attr("xmlns");
+        if (xmlns != null) {
+            if (xmlns.trim().equalsIgnoreCase("jabber:client")) {
+                streamId = UUID.randomUUID();
+                StreamHandler streamHandler = new StreamHandler(streamId);
+                domain = match.attr("to");
+                write(streamHandler.createClientResponseStream(domain));
+                write(streamHandler.getStreamFeatures(state));
+            } else if (xmlns.trim().equalsIgnoreCase("jabber:server")) {
+                // TODO:
+            } else {
+                // TODO: Error
+            }
+        }
     }
 
     @Override
     public void deliver(XMPPStanza stanza, ServerSession session) throws OXException {
-        ctx.getChannel().write(stanza.toXML(session));
+        write(stanza.toXML(session));
     }
 
     private void doLogin(XMPPContainer container) throws OXException {
         String xml = container.getXml();
-        System.out.println(xml);
         Match match = JOOX.$(xml);
 
         if (!match.tag().equals("auth")) {
             // TODO: Throw error
         }
-        
+
         String namespace = match.attr("xmlns");
         if (!namespace.trim().equals(AUTH_SASL)) {
             // TODO: Support other auth methods.
         }
 
         String[] userAndPassword = new String(Base64.decode(match.content())).trim().split("\0");
-        String user = userAndPassword[0];
+        String user = userAndPassword[0] + "@" + domain;
         String password = userAndPassword[1];
 
         LoginResult loginResult = LoginPerformer.getInstance().doLogin(new XMPPLoginRequest(user, password));
@@ -159,12 +237,18 @@ public class XMPPChatDelivery extends SimpleChannelUpstreamHandler implements XM
 
         container.setSession(session);
 
-        ctx.getChannel().write("<success xmlns=\"" + AUTH_SASL + "\">" + session.getSessionID() + "</success>");
+        write("<success xmlns=\"" + AUTH_SASL + "\"/>");
+
+        container.setSession(session);
     }
-    
-    /* (non-Javadoc)
-     * @see org.jboss.netty.channel.SimpleChannelUpstreamHandler#exceptionCaught(org.jboss.netty.channel.ChannelHandlerContext, org.jboss.netty.channel.ExceptionEvent)
-     */
+
+    private void write(String message) {
+        if (DEBUG) {
+            System.out.println("--- OUT --->\n" + message);
+        }
+        ctx.getChannel().write(message);
+    }
+
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, ExceptionEvent e) throws Exception {
         e.getCause().printStackTrace();

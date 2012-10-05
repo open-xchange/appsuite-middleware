@@ -49,67 +49,60 @@
 
 package com.openexchange.realtime.xmpp.internal;
 
-import java.util.HashMap;
-import java.util.Map;
-import org.joox.JOOX;
+import static org.joox.JOOX.$;
+import java.util.UUID;
 import org.joox.Match;
-import com.openexchange.exception.OXException;
-import com.openexchange.realtime.xmpp.XMPPExtension;
-import com.openexchange.realtime.xmpp.packet.XMPPMessage;
-import com.openexchange.realtime.xmpp.packet.XMPPStanza;
-import com.openexchange.tools.session.ServerSession;
+import com.openexchange.realtime.xmpp.internal.XMPPChatDelivery.State;
 
 /**
- * {@link XMPPHandler}
+ * {@link StreamHandler}
  * 
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  */
-public class XMPPHandler {
+public class StreamHandler {
 
-    private final Map<String, XMPPComponent> components = new HashMap<String, XMPPComponent>();
+    private UUID streamId;
 
-    public void handle(XMPPContainer container) throws OXException {
-        Match match = JOOX.$(container.getXml());
-        String namespace = match.attrs("xmlns").get(0);
-        String service = null;
-        if (namespace != null) {
-            service = namespace;
-        } else if (match.tag().equals("message")) {
-            service = "chat";
-        } else if (match.tag().equals("presence")) {
-            service = "presence";
+    private static Match REQUIRED = $("required");
+
+    private static Match OPTIONAL = $("optional");
+
+    private static Match PLAIN = $("mechanism", "PLAIN");
+
+    private static Match MECHANISMS = $("mechanisms").attr("xmlns", "urn:ietf:params:xml:ns:xmpp-sasl").append(PLAIN).append(REQUIRED);
+
+    private static Match BIND = $("bind").attr("xmlns", "urn:ietf:params:xml:ns:xmpp-bind").append(REQUIRED);
+
+    private static Match SESSION = $("session").attr("xmlns", "urn:ietf:params:xml:ns:xmpp-session");
+
+    /**
+     * Initializes a new {@link StreamHandler}.
+     * 
+     * @param streamId
+     */
+    public StreamHandler(UUID streamId) {
+        super();
+        this.streamId = streamId;
+    }
+
+    public String createClientResponseStream(String domain) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("<?xml version=\"1.0\"?>\n");
+        sb.append("<stream:stream from=\"" + domain + "\" id=\"" + streamId.toString() + "\" version=\"1.0\" xmlns=\"jabber.client\" xmlns:stream=\"http://etherx.jabber.org/streams\">");
+        String retval = sb.toString();
+        return retval;
+    }
+
+    public String getStreamFeatures(State state) {
+        Match match = $("stream:features");
+
+        if (state == State.init) {
+            match.append(MECHANISMS);
+        } else if (state == State.postLogin) {
+            match.append(BIND).append(SESSION);
         }
 
-        ServerSession session = container.getSession();
-        XMPPStanza xmpp = XMPPStanza.getStanza(match, session);
-        String resource = getComponentResource(session, xmpp);
-        XMPPComponent xmppComponent = components.get(resource);
-        if (xmppComponent == null) {
-            // TODO: handle
-        }
-
-        XMPPExtension xmppExtension = xmppComponent.getExtension(service);
-        if (xmppExtension == null) {
-            // TODO: handle
-        }
-
-        xmppExtension.handleIncoming(xmpp, session);
+        return match.toString();
     }
 
-    public void addComponent(XMPPComponent component) {
-        this.components.put(component.getResource(), component);
-    }
-
-    public void removeComponent(String resource) {
-        this.components.remove(resource);
-    }
-    
-    public XMPPComponent getComponent(String resource) {
-        return this.components.get(resource);
-    }
-
-    private String getComponentResource(ServerSession session, XMPPStanza xmpp) {
-        String[] split = xmpp.getTo().getDomain().split(session.getContext().getName());
-        return split.length == 0 ? "" : split[0];
-    }
 }
