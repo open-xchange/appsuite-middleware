@@ -1250,8 +1250,9 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
                                         }
                                     }
                                     for (final Map.Entry<String, String> entry : sorted.entrySet()) {
-                                        logBuilder.append('\n').append(entry.getKey()).append('=').append(entry.getValue());
+                                        logBuilder.append(entry.getKey()).append('=').append(entry.getValue()).append('\n');
                                     }
+                                    logBuilder.append('\n');
                                 }
                                 logBuilder.append("Worker \"").append(thread.getName());
                                 logBuilder.append("\" exceeds max. running time of ").append(maxRunningTime);
