@@ -371,23 +371,11 @@ public final class ThreadPools {
      * @throws NullPointerException If task is <code>null</code>
      */
     public static Task<Object> trackableTask(final Runnable task) {
-        return task(task, true);
-    }
-
-    /**
-     * Returns a {@link Task} object that, when called, runs the given task and returns <tt>null</tt>.
-     *
-     * @param task The task to run
-     * @param trackable Whether the task is trackable
-     * @return A {@link Task} object
-     * @throws NullPointerException If task is <code>null</code>
-     */
-    public static Task<Object> task(final Runnable task, final boolean trackable) {
         if (task == null) {
             throw new NullPointerException();
         }
         final RunnableAdapter<Object> callable = new RunnableAdapter<Object>(task, null);
-        return trackable ? new TrackableTaskAdapter<Object>(callable) : new TaskAdapter<Object>(callable);
+        return new TrackableTaskAdapter<Object>(callable);
     }
 
     /**
