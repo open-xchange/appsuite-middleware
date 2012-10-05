@@ -400,8 +400,6 @@ public final class FilterJerichoHandler implements JerichoHandler {
             }
             if (htmlMap.containsKey(tagName)) {
                 addStartTag(startTag, true, htmlMap.get(tagName));
-            } else {
-                System.out.println("Dropped single tag: " + startTag);
             }
         } else {
             if (skipLevel > 0) {
