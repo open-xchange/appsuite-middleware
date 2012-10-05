@@ -114,6 +114,14 @@ msgstr ""
 msgid "Loadbalancing region not set."
 msgstr ""
 
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.aws/src/com/openexchange/aws/exceptions/OXAWSExceptionMessages.java:69
+msgid "S3 region not set."
+msgstr ""
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.aws/src/com/openexchange/aws/exceptions/OXAWSExceptionMessages.java:71
+msgid "Error in S3 encryption: %1$s"
+msgstr ""
+
 #. A cache error occurred: %1$s
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.caching/src/com/openexchange/caching/CacheExceptionMessage.java:69
 msgid "A cache error occurred: %1$s"
