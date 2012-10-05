@@ -50,8 +50,10 @@
 package com.openexchange.threadpool.internal;
 
 import java.util.concurrent.FutureTask;
+import java.util.concurrent.atomic.AtomicLong;
 import com.openexchange.threadpool.RefusedExecutionBehavior;
 import com.openexchange.threadpool.Task;
+import com.openexchange.threadpool.Trackable;
 
 /**
  * {@link CustomFutureTask} - A custom {@link FutureTask}.
@@ -60,9 +62,12 @@ import com.openexchange.threadpool.Task;
  */
 public class CustomFutureTask<V> extends FutureTask<V> {
 
-    private final Task<V> task;
+    private static final AtomicLong COUNTER = new AtomicLong();
 
+    private final Task<V> task;
     private final RefusedExecutionBehavior<V> refusedExecutionBehavior;
+    private final long number;
+    private final boolean trackable;
 
     /**
      * Initializes a new {@link CustomFutureTask}.
@@ -83,6 +88,27 @@ public class CustomFutureTask<V> extends FutureTask<V> {
         super(task);
         this.task = task;
         this.refusedExecutionBehavior = refusedExecutionBehavior;
+        // Assign number
+        number = COUNTER.incrementAndGet();
+        trackable = (task instanceof Trackable);
+    }
+    
+    /**
+     * Checks if associated task is trackable.
+     * 
+     * @return <code>true</code> if associated task is trackable; otherwise <code>false</code>
+     */
+    public boolean isTrackable() {
+        return trackable;
+    }
+    
+    /**
+     * Gets the number
+     *
+     * @return The number
+     */
+    public long getNumber() {
+        return number;
     }
 
     /**

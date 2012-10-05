@@ -56,11 +56,9 @@ import java.util.Map;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import com.openexchange.config.ConfigurationService;
 import com.openexchange.html.internal.MatcherReplacer;
 import com.openexchange.html.internal.RegexUtility;
 import com.openexchange.html.internal.RegexUtility.GroupType;
-import com.openexchange.html.services.ServiceRegistry;
 
 /**
  * {@link CSSMatcher} - Provides several utility methods to check CSS content.
@@ -264,22 +262,6 @@ public final class CSSMatcher {
         }
     }
 
-    private static volatile Integer maxCssBlockCount;
-    private static int maxCssBlockCount() {
-        Integer i = maxCssBlockCount;
-        if (null == i) {
-            synchronized (PATTERN_STYLE_BLOCK) {
-                i = maxCssBlockCount;
-                if (null == i) {
-                    final ConfigurationService service = ServiceRegistry.getInstance().getService(ConfigurationService.class);
-                    i = Integer.valueOf(null == service ? 500 : service.getIntProperty("com.openexchange.html.maxCssBlockCount", 500));
-                    maxCssBlockCount = i;
-                }
-            }
-        }
-        return i.intValue();
-    }
-
     /**
      * Iterates over CSS contained in specified string argument and checks each found element/block against given style map
      *
@@ -296,17 +278,15 @@ public final class CSSMatcher {
         /*
          * Feed matcher with buffer's content and reset
          */
-        final String css = cssBuilder.toString();
-        if (css.indexOf('{') < 0) {
+        if (cssBuilder.indexOf("{") < 0) {
             return checkCSSElements(cssBuilder, styleMap, true);
         }
+        final String css = cssBuilder.toString();
         final StringBuilder cssElemsBuffer = new StringBuilder(css.length());
         final Matcher m = PATTERN_STYLE_BLOCK.matcher(css);
         cssBuilder.setLength(0);
-        final int maxCount = maxCssBlockCount();
-        int count = 0;
         int lastPos = 0;
-        while ((count++ < maxCount) && m.find()) {
+        while (m.find()) {
             // Check prefix part
             cssElemsBuffer.append(css.substring(lastPos, m.start()));
             modified |= checkCSSElements(cssElemsBuffer, styleMap, true);
@@ -323,12 +303,7 @@ public final class CSSMatcher {
             cssBuilder.append(block);
             lastPos = m.end();
         }
-        /*
-         * Cut off remaining CSS content if maxCount exceeded
-         */
-        if (count < maxCount) {
-            cssElemsBuffer.append(css.substring(lastPos, css.length()));
-        }
+        cssElemsBuffer.append(css.substring(lastPos, css.length()));
         modified |= checkCSSElements(cssElemsBuffer, styleMap, true);
         final String tail = cssElemsBuffer.toString();
         cssElemsBuffer.setLength(0);
@@ -449,10 +424,10 @@ public final class CSSMatcher {
         /*
          * Feed matcher with buffer's content and reset
          */
-        final String css = cssBuilder.toString();
-        if (css.indexOf('{') < 0) {
+        if (cssBuilder.indexOf("{") < 0) {
             return checkCSSElements(cssBuilder, styleMap, removeIfAbsent);
         }
+        final String css = cssBuilder.toString();
         final StringBuilder cssElemsBuffer = new StringBuilder(css.length());
         final Matcher m = PATTERN_STYLE_BLOCK.matcher(css);
         cssBuilder.setLength(0);
@@ -500,10 +475,10 @@ public final class CSSMatcher {
             /*
              * Feed matcher with buffer's content and reset
              */
-            final String css = cssBuilder.toString();
-            if (css.indexOf('{') < 0) {
+            if (cssBuilder.indexOf("{") < 0) {
                 return checkCSSElements(cssBuilder, styleMap, removeIfAbsent);
             }
+            final String css = cssBuilder.toString();
             final Matcher m = PATTERN_STYLE_BLOCK.matcher(css);
             final MatcherReplacer mr = new MatcherReplacer(m, css);
             cssBuilder.setLength(0);
@@ -649,4 +624,5 @@ public final class CSSMatcher {
         }
         return isWhitespace;
     }
+
 }

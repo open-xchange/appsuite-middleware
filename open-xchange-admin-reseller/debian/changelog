@@ -1,3 +1,9 @@
+open-xchange-admin-reseller (6.22.0-2) unstable; urgency=low
+
+  * Second release candidate for 6.22.0
+
+ -- Jan Bauerdick <jan.bauerdick@open-xchange.com>  Thu, 04 Oct 2012 18:55:19 +0200
+
 open-xchange-admin-reseller (6.22.0-1) unstable; urgency=low
 
   * First release candidate for 6.22.0

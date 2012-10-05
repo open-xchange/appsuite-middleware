@@ -50,51 +50,69 @@
 package com.openexchange.spamhandler.defaultspamhandler;
 
 import java.util.concurrent.atomic.AtomicReference;
-import com.openexchange.mail.service.MailService;
+import com.openexchange.server.ServiceLookup;
 
 /**
- * {@link MailServiceSupplier} - Supplies the mail service.
- *
+ * {@link Services} - The static service lookup.
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class MailServiceSupplier {
-
-    private static final MailServiceSupplier instance = new MailServiceSupplier();
+public final class Services {    
 
     /**
-     * Gets the mail service supplier.
-     *
-     * @return The mail service supplier.
+     * Initializes a new {@link Services}.
      */
-    public static MailServiceSupplier getInstance() {
-        return instance;
-    }
-
-    private final AtomicReference<MailService> mailServiceReference;
-
-    /**
-     * Initializes a new {@link MailServiceSupplier}.
-     */
-    private MailServiceSupplier() {
+    private Services() {
         super();
-        mailServiceReference = new AtomicReference<MailService>();
+    }
+
+    private static final AtomicReference<ServiceLookup> REF = new AtomicReference<ServiceLookup>();
+
+    /**
+     * Sets the service lookup.
+     * 
+     * @param serviceLookup The service lookup or <code>null</code>
+     */
+    public static void setServiceLookup(final ServiceLookup serviceLookup) {
+        REF.set(serviceLookup);
     }
 
     /**
-     * Sets the mail service.
-     *
-     * @param mailService The mail service
+     * Gets the service lookup.
+     * 
+     * @return The service lookup or <code>null</code>
      */
-    public void setMailService(final MailService mailService) {
-        this.mailServiceReference.set(mailService);
+    public static ServiceLookup getServiceLookup() {
+        return REF.get();
     }
 
     /**
-     * Gets the mail service.
-     *
-     * @return The mail service
+     * Gets the service of specified type
+     * 
+     * @param clazz The service's class
+     * @return The service
+     * @throws IllegalStateException If an error occurs while returning the demanded service
      */
-    public MailService getMailService() {
-        return mailServiceReference.get();
+    public static <S extends Object> S getService(final Class<? extends S> clazz) {
+        final com.openexchange.server.ServiceLookup serviceLookup = REF.get();
+        if (null == serviceLookup) {
+            throw new IllegalStateException("Missing ServiceLookup instance. Bundle \"com.openexchange.caching.hazelcast\" not started?");
+        }
+        return serviceLookup.getService(clazz);
     }
+
+    /**
+     * (Optionally) Gets the service of specified type
+     * 
+     * @param clazz The service's class
+     * @return The service or <code>null</code> if absent
+     */
+    public static <S extends Object> S optService(final Class<? extends S> clazz) {
+        try {
+            return getService(clazz);
+        } catch (final IllegalStateException e) {
+            return null;
+        }
+    }
+
 }

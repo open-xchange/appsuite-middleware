@@ -329,6 +329,24 @@ public final class ThreadPools {
     }
 
     /**
+     * Returns a {@link Task} object that, when called, runs the given task and returns the given result. This can be useful when applying
+     * methods requiring a <tt>Task</tt> to an otherwise resultless action.
+     *
+     * @param task The task to run
+     * @param result The result to return
+     * @param trackable Whether the task is trackable
+     * @throws NullPointerException If task is <code>null</code>
+     * @return A {@link Task} object
+     */
+    public static <T> Task<T> task(final Runnable task, final T result, final boolean trackable) {
+        if (task == null) {
+            throw new NullPointerException();
+        }
+        final RunnableAdapter<T> callable = new RunnableAdapter<T>(task, result);
+        return trackable ? new TrackableTaskAdapter<T>(callable) : new TaskAdapter<T>(callable);
+    }
+
+    /**
      * Returns a {@link Task} object that, when called, runs the given task and returns <tt>null</tt>.
      *
      * @param task The task to run
@@ -340,6 +358,22 @@ public final class ThreadPools {
             throw new NullPointerException();
         }
         return new TaskAdapter<Object>(new RunnableAdapter<Object>(task, null));
+    }
+
+    /**
+     * Returns a {@link Task} object that, when called, runs the given task and returns <tt>null</tt>.
+     *
+     * @param task The task to run
+     * @param trackable Whether the task is trackable
+     * @return A {@link Task} object
+     * @throws NullPointerException If task is <code>null</code>
+     */
+    public static Task<Object> task(final Runnable task, final boolean trackable) {
+        if (task == null) {
+            throw new NullPointerException();
+        }
+        final RunnableAdapter<Object> callable = new RunnableAdapter<Object>(task, null);
+        return trackable ? new TrackableTaskAdapter<Object>(callable) : new TaskAdapter<Object>(callable);
     }
 
     /**
@@ -369,6 +403,21 @@ public final class ThreadPools {
             throw new NullPointerException();
         }
         return new TaskAdapter<T>(task);
+    }
+
+    /**
+     * Returns a {@link Task} object that, when called, returns the given task's result.
+     *
+     * @param task The task to run
+     * @param trackable Whether the task is trackable
+     * @return A {@link Task} object
+     * @throws NullPointerException If task is <code>null</code>
+     */
+    public static <T> Task<T> task(final Callable<T> task, final boolean trackable) {
+        if (task == null) {
+            throw new NullPointerException();
+        }
+        return trackable ? new TrackableTaskAdapter<T>(task) : new TaskAdapter<T>(task);
     }
 
     /**
@@ -413,7 +462,7 @@ public final class ThreadPools {
     /**
      * A {@link Callable} that runs given task and returns given result
      */
-    private static final class RunnableAdapter<T> implements Callable<T> {
+    private static class RunnableAdapter<T> implements Callable<T> {
 
         private final Runnable task;
 
@@ -432,7 +481,7 @@ public final class ThreadPools {
 
     }
 
-    private static final class TaskAdapter<V> implements Task<V> {
+    private static class TaskAdapter<V> implements Task<V> {
 
         private final Callable<V> callable;
 
@@ -466,7 +515,13 @@ public final class ThreadPools {
 
     }
 
-    private static final class RenamingTaskAdapter<V> implements Task<V> {
+    private static class TrackableTaskAdapter<V> extends TaskAdapter<V> implements Trackable {
+        TrackableTaskAdapter(final Callable<V> callable) {
+            super(callable);
+        }
+    }
+
+    private static class RenamingTaskAdapter<V> implements Task<V> {
 
         private final Callable<V> callable;
 
@@ -501,6 +556,13 @@ public final class ThreadPools {
             return callable.call();
         }
 
+    }
+
+    private static class TrackableRenamingTaskAdapter<V> extends RenamingTaskAdapter<V> implements Trackable {
+
+        TrackableRenamingTaskAdapter(final Callable<V> callable, final String prefix) {
+            super(callable, prefix);
+        }
     }
 
     private static class CurrentThreadExecutorService extends java.util.concurrent.AbstractExecutorService {

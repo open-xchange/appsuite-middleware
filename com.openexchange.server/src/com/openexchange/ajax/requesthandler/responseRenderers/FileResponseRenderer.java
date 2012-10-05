@@ -127,10 +127,12 @@ public class FileResponseRenderer implements ResponseRenderer {
     @Override
     public void write(final AJAXRequestData request, final AJAXRequestResult result, final HttpServletRequest req, final HttpServletResponse resp) {
         IFileHolder file = (IFileHolder) result.getResultObject();
+        final String fileContentType = file.getContentType();
+        final String fileName = file.getName();
 
         String contentType = req.getParameter(PARAMETER_CONTENT_TYPE);
         if (null == contentType) {
-            contentType = file.getContentType();
+            contentType = fileContentType;
         }
         String delivery = req.getParameter(DELIVERY);
         if (delivery == null) {
@@ -157,14 +159,14 @@ public class FileResponseRenderer implements ResponseRenderer {
             if (SAVE_AS_TYPE.equals(contentType) || (delivery != null && delivery.equalsIgnoreCase(DOWNLOAD))) {
                 if (null == contentDisposition) {
                     final StringBuilder sb = new StringBuilder(32).append("attachment");
-                    DownloadUtility.appendFilenameParameter(file.getName(), SAVE_AS_TYPE, userAgent, sb);
+                    DownloadUtility.appendFilenameParameter(fileName, SAVE_AS_TYPE, userAgent, sb);
                     resp.setHeader("Content-Disposition", sb.toString());
                 } else {
-                    Tools.setHeaderForFileDownload(userAgent, resp, file.getName(), contentDisposition);
+                    Tools.setHeaderForFileDownload(userAgent, resp, fileName, contentDisposition);
                 }
                 resp.setContentType(contentType);
             } else {
-                final CheckedDownload checkedDownload = DownloadUtility.checkInlineDownload(documentData, file.getName(), file.getContentType(), contentDisposition, userAgent);
+                final CheckedDownload checkedDownload = DownloadUtility.checkInlineDownload(documentData, fileName, fileContentType, contentDisposition, userAgent);
                 if (delivery == null || !delivery.equalsIgnoreCase(VIEW)) {
                     if (contentDisposition == null) {
                         resp.setHeader("Content-Disposition", checkedDownload.getContentDisposition());

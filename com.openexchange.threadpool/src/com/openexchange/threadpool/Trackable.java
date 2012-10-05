@@ -47,55 +47,14 @@
  *
  */
 
-package com.openexchange.spamhandler.defaultspamhandler;
+package com.openexchange.threadpool;
 
-import java.util.concurrent.atomic.AtomicReference;
-import com.openexchange.config.ConfigurationService;
 
 /**
- * {@link ConfigurationServiceSupplier} - Supplies the configuration service.
+ * {@link Trackable} - Signals that implementing instance is trackable.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class ConfigurationServiceSupplier {
-
-    private static final ConfigurationServiceSupplier instance = new ConfigurationServiceSupplier();
-
-    /**
-     * Gets the configuration service supplier.
-     *
-     * @return The configuration service supplier.
-     */
-    public static ConfigurationServiceSupplier getInstance() {
-        return instance;
-    }
-
-    private final AtomicReference<ConfigurationService> confServiceReference;
-
-    /**
-     * Initializes a new {@link ConfigurationServiceSupplier}.
-     */
-    private ConfigurationServiceSupplier() {
-        super();
-        confServiceReference = new AtomicReference<ConfigurationService>();
-    }
-
-    /**
-     * Sets the configuration service.
-     *
-     * @param confService The configuration service
-     */
-    public void setConfigurationService(final ConfigurationService confService) {
-        this.confServiceReference.set(confService);
-    }
-
-    /**
-     * Gets the configuration service.
-     *
-     * @return The configuration service
-     */
-    public ConfigurationService getConfigurationService() {
-        return confServiceReference.get();
-    }
-
+public interface Trackable {
+    // Marker interface
 }
