@@ -353,39 +353,48 @@ public final class CSSMatcher {
          * Escape every ID, escape every class name, prefix every SIMPLE SELECTOR with #prefix,
          * every time when occurring within a line
          */
-        for (final String line : SPLIT_LINES.split(s.substring(pos), 0)) {
-            final String[] words = SPLIT_WORDS.split(line, 0);
-            if (1 == words.length && "body".equalsIgnoreCase(words[0])) {
-                // Special treatment for "body" selector
-                builder.append('#').append(cssPrefix).append(' ');
-            } else {
-                for (final String word : words) {
-                    if (isEmpty(word)) {
-                        builder.append(word);
+        final String input = s.substring(pos);
+        if (input.indexOf('\n') < 0) {
+            handleLine(input, cssPrefix, builder, helper);
+        } else {
+            for (final String line : SPLIT_LINES.split(input, 0)) {
+                handleLine(line, cssPrefix, builder, helper);
+                builder.append('\n');
+            }
+            builder.deleteCharAt(builder.length()-1);
+        }
+        return builder.append('{').toString();
+    }
+
+    private static void handleLine(final String line, final String cssPrefix, final StringBuilder builder, final StringBuilder helper) {
+        final String[] words = SPLIT_WORDS.split(line, 0);
+        if (1 == words.length && "body".equalsIgnoreCase(words[0])) {
+            // Special treatment for "body" selector
+            builder.append('#').append(cssPrefix).append(' ');
+        } else {
+            for (final String word : words) {
+                if (isEmpty(word)) {
+                    builder.append(word);
+                } else {
+                    final char first = word.charAt(0);
+                    if ('.' == first) {
+                        // .class -> #prefix .prefix-class
+                        builder.append('#').append(cssPrefix).append(' ');
+                        builder.append('.').append(cssPrefix).append('-');
+                        builder.append(replaceDotsAndHashes(word.substring(1), cssPrefix, helper)).append(' ');
+                    } else if ('#' == first) {
+                        // #id -> #prefix #prefix-id
+                        builder.append('#').append(cssPrefix).append(' ');
+                        builder.append('#').append(cssPrefix).append('-');
+                        builder.append(replaceDotsAndHashes(word.substring(1), cssPrefix, helper)).append(' ');
                     } else {
-                        final char first = word.charAt(0);
-                        if ('.' == first) {
-                            // .class -> #prefix .prefix-class
-                            builder.append('#').append(cssPrefix).append(' ');
-                            builder.append('.').append(cssPrefix).append('-');
-                            builder.append(replaceDotsAndHashes(word.substring(1), cssPrefix, helper)).append(' ');
-                        } else if ('#' == first) {
-                            // #id -> #prefix #prefix-id
-                            builder.append('#').append(cssPrefix).append(' ');
-                            builder.append('#').append(cssPrefix).append('-');
-                            builder.append(replaceDotsAndHashes(word.substring(1), cssPrefix, helper)).append(' ');
-                        } else {
-                            // element -> #prefix element
-                            builder.append('#').append(cssPrefix).append(' ');
-                            builder.append(replaceDotsAndHashes(word, cssPrefix, helper)).append(' ');
-                        }
+                        // element -> #prefix element
+                        builder.append('#').append(cssPrefix).append(' ');
+                        builder.append(replaceDotsAndHashes(word, cssPrefix, helper)).append(' ');
                     }
                 }
             }
-            builder.append('\n');
         }
-        builder.deleteCharAt(builder.length()-1);
-        return builder.append('{').toString();
     }
 
     private static String replaceDotsAndHashes(final String word, final String cssPrefix, final StringBuilder helper) {
