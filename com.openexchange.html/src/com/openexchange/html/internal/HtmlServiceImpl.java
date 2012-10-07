@@ -556,13 +556,13 @@ public final class HtmlServiceImpl implements HtmlService {
 
     private static String prepareSignatureStart(final String htmlContent) {
         final Matcher m = PATTERN_SIGNATURE_START.matcher(htmlContent);
-        if (m.find()) {
-            final StringBuffer sb = new StringBuffer(htmlContent.length());
-            m.appendReplacement(sb, "$1--&#160;$2");
-            m.appendTail(sb);
-            return sb.toString();
+        if (!m.find()) {
+            return htmlContent;
         }
-        return htmlContent;
+        final StringBuffer sb = new StringBuffer(htmlContent.length());
+        m.appendReplacement(sb, "$1--&#160;$2");
+        m.appendTail(sb);
+        return sb.toString();
     }
 
     private static final String SPACE_MARKER = "--?space?--";
