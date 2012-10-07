@@ -541,7 +541,8 @@ public final class HtmlServiceImpl implements HtmlService {
 //        HTMLParser.parse(htmlContent, handler);
 //        return handler.getText();
 
-        String prepared = insertBlockquoteMarker(htmlContent);
+        String prepared = prepareSignatureStart(htmlContent);
+        prepared = insertBlockquoteMarker(prepared);
         prepared = insertSpaceMarker(prepared);
         String text = quoteText(new Renderer(new Segment(new Source(prepared), 0, prepared.length())).setMaxLineLength(9999).setIncludeHyperlinkURLs(appendHref).toString());
         // Drop heading whitespaces
@@ -549,6 +550,19 @@ public final class HtmlServiceImpl implements HtmlService {
         // ... but keep enforced ones
         text = whitespaceText(text);
         return text;
+    }
+
+    private static final Pattern PATTERN_SIGNATURE_START = Pattern.compile("([ \t]*)-- (\r?\n)");
+
+    private static String prepareSignatureStart(final String htmlContent) {
+        final Matcher m = PATTERN_SIGNATURE_START.matcher(htmlContent);
+        if (m.find()) {
+            final StringBuffer sb = new StringBuffer(htmlContent.length());
+            m.appendReplacement(sb, "$1--&#160;$2");
+            m.appendTail(sb);
+            return sb.toString();
+        }
+        return htmlContent;
     }
 
     private static final String SPACE_MARKER = "--?space?--";
