@@ -552,7 +552,7 @@ public final class HtmlServiceImpl implements HtmlService {
         return text;
     }
 
-    private static final Pattern PATTERN_SIGNATURE_START = Pattern.compile("([ \t]*)-- (\r?\n)");
+    private static final Pattern PATTERN_SIGNATURE_START = Pattern.compile("(?:\r?\n|^)([ \t]*)-- (\r?\n)");
 
     private static String prepareSignatureStart(final String htmlContent) {
         final Matcher m = PATTERN_SIGNATURE_START.matcher(htmlContent);
