@@ -137,6 +137,11 @@ public abstract class CommonResource<T extends CommonObject> extends AbstractRes
              * 'Moving a recurring appointment to another folder is not supported.'
              */
             throw protocolException(e, HttpServletResponse.SC_CONFLICT);
+        } else if ("APP-0100".equals(e.getErrorCode())) {
+            /*
+             * 'Cannot insert appointment ABC. An appointment with the unique identifier (123) already exists.'
+             */
+            throw protocolException(e, HttpServletResponse.SC_CONFLICT);
         } else if (Category.CATEGORY_PERMISSION_DENIED.equals(e.getCategory())) {
             /*
              * throw appropriate protocol exception

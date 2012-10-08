@@ -236,7 +236,7 @@ public final class FolderMap {
             if (null == session) {
                 return;
             }
-            ThreadPools.getThreadPool().submit(ThreadPools.task(new RunnableImpl(folderId, treeId, loadSubfolders, this, session)), AbortBehavior.getInstance());
+            ThreadPools.getThreadPool().submit(ThreadPools.trackableTask(new RunnableImpl(folderId, treeId, loadSubfolders, this, session)), AbortBehavior.getInstance());
         } catch (final Exception e) {
             // Ignore
         }
@@ -252,7 +252,7 @@ public final class FolderMap {
             if (null == session) {
                 return;
             }
-            ThreadPools.getThreadPool().submit(ThreadPools.task(new LoadSubfolders(folder, treeId, this, session)), AbortBehavior.getInstance());
+            ThreadPools.getThreadPool().submit(ThreadPools.trackableTask(new LoadSubfolders(folder, treeId, this, session)), AbortBehavior.getInstance());
         } catch (final Exception e) {
             // Ignore
             folder.setSubfolderIDs(null);

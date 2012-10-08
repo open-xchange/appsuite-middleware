@@ -49,6 +49,8 @@
 
 package com.openexchange.threadpool;
 
+import java.util.Map;
+
 
 /**
  * {@link Trackable} - Signals that implementing instance is trackable.
@@ -56,5 +58,11 @@ package com.openexchange.threadpool;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface Trackable {
-    // Marker interface
+
+    /**
+     * Gets the optional log properties.
+     * 
+     * @return The log properties or <code>null</code>
+     */
+    Map<String, Object> optLogProperties();
 }

@@ -333,10 +333,9 @@ public class AJPv13TaskWatcher {
                         }
                     }
                     for (final Map.Entry<String, String> entry : sorted.entrySet()) {
-                        logBuilder.append('\n').append(entry.getKey()).append('=').append(entry.getValue());
+                        logBuilder.append(entry.getKey()).append('=').append(entry.getValue()).append('\n');
                     }
-                    logBuilder.deleteCharAt(0);
-                    logBuilder.append("\n\n");
+                    logBuilder.append('\n');
                     logBuilder.append("AJP Listener \"").append(task.getThreadName());
                     logBuilder.append("\" exceeds max. running time of ").append(AJPv13Config.getAJPWatcherMaxRunningTime());
                     logBuilder.append("msec -> Processing time: ").append(System.currentTimeMillis() - task.getProcessingStartTime());

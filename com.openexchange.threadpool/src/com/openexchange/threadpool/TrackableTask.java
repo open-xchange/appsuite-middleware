@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2020 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,35 +47,15 @@
  *
  */
 
-package com.openexchange.i18n.parsing;
-
-import static org.junit.Assert.*;
-import java.io.ByteArrayInputStream;
-import java.io.UnsupportedEncodingException;
-import org.junit.Test;
-import com.openexchange.exception.OXException;
+package com.openexchange.threadpool;
 
 /**
- * {@link Bug22803Test}
- *
- * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
+ * {@link TrackableTask} - A trackable task being submitted to thread pool.
+ * 
+ * @see Task
+ * @see Trackable
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class Bug22803Test {
-
-    @SuppressWarnings("static-method")
-    @Test(timeout=200)
-    public void testWithTab() throws UnsupportedEncodingException, OXException {
-        Translations translations = new POParser().parse(new ByteArrayInputStream(PO_CONTENTS.getBytes("UTF-8")), "Bug22803Test");
-        String actual = translations.translate("Date range in search must contain 2 and not %d values.");
-        assertEquals("Translation is wrong.", "Zakres dat w wyszukiwaniu musi zawiera\u0107 dwie warto\u015bci. Aktualna liczba warto\u015bci: %d. \\t", actual);
-    }
-
-    private static final String PO_CONTENTS = "msgid \"\"\n" 
-        + "msgstr \"\"\n"
-        + "\"Content-Type: text/plain; charset=UTF-8\\n\"\n"
-        + "\n"
-        + "msgid \"Date range in search must contain 2 and not %d values.\"\n"
-        + "msgstr \"\"\n"
-        + "\"Zakres dat w wyszukiwaniu musi zawiera\u0107 dwie warto\u015bci. Aktualna liczba \"\n"
-        + "\"warto\u015bci: %d. \\t\"\n";
+public interface TrackableTask<V> extends Task<V>, Trackable {
+    // Empty
 }

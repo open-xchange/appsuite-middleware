@@ -67,7 +67,7 @@ public class CustomFutureTask<V> extends FutureTask<V> {
     private final Task<V> task;
     private final RefusedExecutionBehavior<V> refusedExecutionBehavior;
     private final long number;
-    private final boolean trackable;
+    private final Trackable trackable;
 
     /**
      * Initializes a new {@link CustomFutureTask}.
@@ -90,15 +90,15 @@ public class CustomFutureTask<V> extends FutureTask<V> {
         this.refusedExecutionBehavior = refusedExecutionBehavior;
         // Assign number
         number = COUNTER.incrementAndGet();
-        trackable = (task instanceof Trackable);
+        trackable = (task instanceof Trackable) ? (Trackable) task : null;
     }
     
     /**
-     * Checks if associated task is trackable.
+     * Gets the associated trackable instance.
      * 
-     * @return <code>true</code> if associated task is trackable; otherwise <code>false</code>
+     * @return The associated trackable instance or <code>null</code>
      */
-    public boolean isTrackable() {
+    public Trackable getTrackable() {
         return trackable;
     }
     

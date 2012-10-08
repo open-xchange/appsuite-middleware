@@ -662,7 +662,7 @@ public final class OXFolderIteratorSQL {
                 if (null == threadPool) {
                     task.run();
                 } else {
-                    threadPool.submit(ThreadPools.task(task));
+                    threadPool.submit(ThreadPools.trackableTask(task));
                 }
                 // Retry from storage...
             }
@@ -869,7 +869,7 @@ public final class OXFolderIteratorSQL {
                 if (null == threadPool) {
                     task.run();
                 } else {
-                    threadPool.submit(ThreadPools.task(task));
+                    threadPool.submit(ThreadPools.trackableTask(task));
                 }
                 // Retry from storage...
             }
@@ -967,7 +967,7 @@ public final class OXFolderIteratorSQL {
                 if (null == threadPool) {
                     task.run();
                 } else {
-                    threadPool.submit(ThreadPools.task(task));
+                    threadPool.submit(ThreadPools.trackableTask(task));
                 }
                 // Retry from storage...
             }
@@ -1058,7 +1058,7 @@ public final class OXFolderIteratorSQL {
                 if (null == threadPool) {
                     task.run();
                 } else {
-                    threadPool.submit(ThreadPools.task(task));
+                    threadPool.submit(ThreadPools.trackableTask(task));
                 }
                 // Retry from storage...
             }
@@ -1171,7 +1171,7 @@ public final class OXFolderIteratorSQL {
                 if (null == threadPool) {
                     task.run();
                 } else {
-                    threadPool.submit(ThreadPools.task(task));
+                    threadPool.submit(ThreadPools.trackableTask(task));
                 }
                 // Retry from storage...
             }
@@ -1869,7 +1869,7 @@ public final class OXFolderIteratorSQL {
                 if (null == threadPool) {
                     task.run();
                 } else {
-                    threadPool.submit(ThreadPools.task(task));
+                    threadPool.submit(ThreadPools.trackableTask(task));
                 }
                 // Retry from storage...
             }
@@ -1973,7 +1973,7 @@ public final class OXFolderIteratorSQL {
                 if (null == threadPool) {
                     task.run();
                 } else {
-                    threadPool.submit(ThreadPools.task(task));
+                    threadPool.submit(ThreadPools.trackableTask(task));
                 }
                 // Retry from storage...
             }
