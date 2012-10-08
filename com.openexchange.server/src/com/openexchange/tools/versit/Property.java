@@ -78,9 +78,10 @@ public class Property {
     public String toString() {
         final StringBuilder sb = new StringBuilder(32);
         sb.append(getName());
-        if (null != getValue()) {
+        final Object val = getValue();
+        if (null != val) {
             sb.append(": ");
-            sb.append(getValue());
+            sb.append(val);
         }
         return sb.toString();
     }

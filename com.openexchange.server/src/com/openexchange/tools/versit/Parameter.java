@@ -64,6 +64,17 @@ public class Parameter {
         this.name = name;
     }
 
+    @Override
+    public String toString() {
+        final StringBuilder sb = new StringBuilder(32);
+        sb.append(name);
+        if (!Values.isEmpty()) {
+            sb.append('=');
+            sb.append(Values.toString());
+        }
+        return sb.toString();
+    }
+
     public ParameterValue getValue(final int index) {
         return Values.get(index);
     }
