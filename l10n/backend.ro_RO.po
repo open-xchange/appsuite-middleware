@@ -2554,8 +2554,8 @@ msgstr ""
 "2$s în contextul %3$s"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/tools/iterator/SearchIteratorExceptionMessages.java:63
-msgid "A DBPool error occurred: 1$%s"
-msgstr "A apărut o eroare DBPool: 1$%s"
+msgid "A DBPool error occurred: %1$s"
+msgstr "A apărut o eroare DBPool: %1$s"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/tools/iterator/SearchIteratorExceptionMessages.java:65
 msgid "Operation not allowed on a closed SearchIterator"

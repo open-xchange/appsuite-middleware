@@ -677,7 +677,7 @@ msgstr "%1$s souhaiterait que vous modifiiez le rendez-vous :"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/Messages.java:158
 msgid "%1$s has asked %2$s to change the event:"
-msgstr "$%1$s a demandé à %2$s de modifier l'évènement :"
+msgstr "%1$s a demandé à %2$s de modifier l'évènement :"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/Messages.java:160
 msgid "You have been invited to an event by %1$s:"
@@ -2605,8 +2605,8 @@ msgstr ""
 "le contexte %3$s a été dépassé"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/tools/iterator/SearchIteratorExceptionMessages.java:63
-msgid "A DBPool error occurred: 1$%s"
-msgstr "Une erreur DBPool s'est produite : 1$%s"
+msgid "A DBPool error occurred: %1$s"
+msgstr "Une erreur DBPool s'est produite : %1$s"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/tools/iterator/SearchIteratorExceptionMessages.java:65
 msgid "Operation not allowed on a closed SearchIterator"
