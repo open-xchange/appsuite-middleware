@@ -149,6 +149,9 @@ public class POP3StorageProviderServiceTrackerCustomizer implements ServiceTrack
      * @param provider The provider to remove from registry
      */
     public void removePOP3StorageProvider(final POP3StorageProvider provider) {
+        if (null == provider) {
+            return;
+        }
         // Unregister provider's delete listeners
         if (provider.unregisterDeleteListenersOnAbsence()) {
             final List<ServiceRegistration<?>> registrations = registrationMap.remove(provider.getPOP3StorageName());
