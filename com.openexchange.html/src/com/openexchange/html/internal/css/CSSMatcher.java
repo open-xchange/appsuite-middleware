@@ -171,7 +171,7 @@ public final class CSSMatcher {
 
         PATTERN_IS_PATTERN = Pattern.compile("[unNcd*t]+");
         
-        PATTERN_STYLE_BLOCK = Pattern.compile("((?:#|\\.|[a-zA-Z]).*?)\\s+\\{([^\\}]+)\\}", Pattern.DOTALL);
+        PATTERN_STYLE_BLOCK = Pattern.compile("((?:#|\\.|[a-zA-Z]).*?\\s+\\{)([^\\}]+)\\}");
 
         PATTERN_COLOR_RGB = Pattern.compile(strCOLOR_RGB_FUNC, Pattern.CASE_INSENSITIVE);
     }
@@ -260,7 +260,7 @@ public final class CSSMatcher {
         }
     }
 
-    private static final Pattern CRLF = Pattern.compile("\r?\n| {2,}");
+    private static final Pattern CRLF = Pattern.compile("\r?\n( {2,})?");
 
     /**
      * Iterates over CSS contained in specified string argument and checks each found element/block against given style map
@@ -281,7 +281,7 @@ public final class CSSMatcher {
         if (cssBuilder.indexOf("{") < 0) {
             return checkCSSElements(cssBuilder, styleMap, true);
         }
-        final String css = CRLF.matcher(cssBuilder).replaceAll("");
+        final String css = CRLF.matcher(cssBuilder).replaceAll(" ");
         final StringBuilder cssElemsBuffer = new StringBuilder(css.length());
         final Matcher m = PATTERN_STYLE_BLOCK.matcher(css);
         cssBuilder.setLength(0);
@@ -323,7 +323,7 @@ public final class CSSMatcher {
             return match;
         }
         // Cut off trailing '{' character
-        final String s = match.substring(0, length - 1);
+        final String s = match.indexOf('{') < 0 ? match : match.substring(0, length - 1);
         if (isEmpty(s)) {
             return match;
         }
@@ -436,7 +436,7 @@ public final class CSSMatcher {
         if (cssBuilder.indexOf("{") < 0) {
             return checkCSSElements(cssBuilder, styleMap, removeIfAbsent);
         }
-        final String css = CRLF.matcher(cssBuilder).replaceAll("");
+        final String css = CRLF.matcher(cssBuilder).replaceAll(" ");
         final StringBuilder cssElemsBuffer = new StringBuilder(css.length());
         final Matcher m = PATTERN_STYLE_BLOCK.matcher(css);
         cssBuilder.setLength(0);
@@ -487,7 +487,7 @@ public final class CSSMatcher {
             if (cssBuilder.indexOf("{") < 0) {
                 return checkCSSElements(cssBuilder, styleMap, removeIfAbsent);
             }
-            final String css = CRLF.matcher(cssBuilder.toString()).replaceAll("");
+            final String css = CRLF.matcher(cssBuilder.toString()).replaceAll(" ");
             final Matcher m = PATTERN_STYLE_BLOCK.matcher(css);
             final MatcherReplacer mr = new MatcherReplacer(m, css);
             cssBuilder.setLength(0);
