@@ -149,7 +149,8 @@ public class OSGIFileStorageAccountManagerLookupService implements FileStorageAc
     public FileStorageAccountManager getAccountManager(final String accountId, final Session session) throws OXException {
         initIfAbsent(null);
 
-        FileStorageAccountManager accountManager = (FileStorageAccountManager) session.getParameter(PARAM_DEFAULT_ACCOUNT);
+        final String paramName = PARAM_DEFAULT_ACCOUNT + '@' + accountId;
+        FileStorageAccountManager accountManager = (FileStorageAccountManager) session.getParameter(paramName);
         if (null == accountManager) {
             FileStorageAccountManagerProvider candidate = null;
             for (final FileStorageAccountManagerProvider provider : providers) {
@@ -164,7 +165,7 @@ public class OSGIFileStorageAccountManagerLookupService implements FileStorageAc
             if (null == accountManager) {
                 return null;
             }
-            session.setParameter(PARAM_DEFAULT_ACCOUNT, accountManager);
+            session.setParameter(paramName, accountManager);
         }
         return accountManager;
     }
