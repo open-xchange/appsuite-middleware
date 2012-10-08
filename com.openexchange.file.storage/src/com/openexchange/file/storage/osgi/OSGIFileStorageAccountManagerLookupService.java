@@ -153,10 +153,12 @@ public class OSGIFileStorageAccountManagerLookupService implements FileStorageAc
         if (null == accountManager) {
             FileStorageAccountManagerProvider candidate = null;
             for (final FileStorageAccountManagerProvider provider : providers) {
-                final FileStorageAccountManager cAccountManager = provider.getAccountManager(accountId, session);
-                if ((null != cAccountManager) && ((null == candidate) || (provider.getRanking() > candidate.getRanking()))) {
-                    candidate = provider;
-                    accountManager = cAccountManager;
+                if ((null == candidate) || (provider.getRanking() > candidate.getRanking())) {
+                    final FileStorageAccountManager cAccountManager = provider.getAccountManager(accountId, session);
+                    if (null != cAccountManager) {
+                        candidate = provider;
+                        accountManager = cAccountManager;
+                    }
                 }
             }
             if (null == accountManager) {

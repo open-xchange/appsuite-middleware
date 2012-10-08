@@ -76,6 +76,11 @@ public interface FileStorageAccountManagerProvider {
     public static final String PROPERTY_PROVIDER = "provider";
 
     /**
+     * The default ranking: <code>0</code>.
+     */
+    public static final int DEFAULT_RANKING = 0;
+
+    /**
      * Whether this provider supports specified {@link FileStorageService file storage service}.
      *
      * @param service The file storage service
