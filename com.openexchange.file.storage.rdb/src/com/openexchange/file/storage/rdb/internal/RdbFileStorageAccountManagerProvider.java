@@ -84,7 +84,7 @@ public final class RdbFileStorageAccountManagerProvider implements FileStorageAc
 
     @Override
     public int getRanking() {
-        return 0;
+        return DEFAULT_RANKING;
     }
 
     @Override
