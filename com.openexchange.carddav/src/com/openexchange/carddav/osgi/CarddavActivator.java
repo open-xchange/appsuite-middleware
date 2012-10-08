@@ -17,7 +17,7 @@ public class CarddavActivator extends HousekeepingActivator {
     private static final Log LOG = com.openexchange.log.Log.loggerFor(CarddavActivator.class);
     private static final Class<?>[] NEEDED = new Class[] { HttpService.class, FolderService.class, ConfigViewFactory.class, UserService.class, ContactService.class };
 
-    private OSGiPropertyMixin mixin;
+    private volatile OSGiPropertyMixin mixin;
 
     @Override
     protected Class<?>[] getNeededServices() {
@@ -33,8 +33,9 @@ public class CarddavActivator extends HousekeepingActivator {
             getService(HttpService.class).registerServlet("/servlet/dav/carddav", new CardDAV(), null, null);
             
             CarddavPerformer performer = CarddavPerformer.getInstance();
-            mixin = new OSGiPropertyMixin(context, performer);
+            final OSGiPropertyMixin mixin = new OSGiPropertyMixin(context, performer);
             performer.setGlobalMixins(mixin);
+            this.mixin = mixin;
             
             registerService(PathRegistration.class, new PathRegistration("carddav"));
 
@@ -46,7 +47,11 @@ public class CarddavActivator extends HousekeepingActivator {
     
     @Override
     protected void stopBundle() throws Exception {
-        mixin.close();
+        final OSGiPropertyMixin mixin = this.mixin;
+        if (null != mixin) {
+            mixin.close();
+            this.mixin = null;
+        }
         super.stopBundle();
     }
 
