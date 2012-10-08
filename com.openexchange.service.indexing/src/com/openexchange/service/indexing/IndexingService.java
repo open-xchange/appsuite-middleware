@@ -49,26 +49,59 @@
 
 package com.openexchange.service.indexing;
 
+import java.util.Date;
 import com.openexchange.exception.OXException;
 
+
 /**
- * {@link IndexingService} - The indexing service.
- * 
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * {@link IndexingService}
+ *
+ * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public interface IndexingService {
-
+    
     /**
-     * The name of the indexing queue.
+     * Default priority for jobs.
      */
-    public static final String INDEXING_QUEUE = "indexingQueue";
-
+    public static final int DEFAULT_PRIORITY = 5;
+    
     /**
-     * Adds specified job.
+     * Use this to schedule one-shot jobs.
+     */
+    public static final long NO_INTERVAL = -1L;
+    
+    /**
+     * Use this if the job should start immediately.
+     */
+    public static final Date NOW = null;
+    
+    
+    /**
+     * Schedules an indexing job. 
      * 
-     * @param job The job to add
-     * @throws OXException If job cannot be added
+     * @param info The information needed to run this job.
+     * @param startDate The start date of the job. May be <code>null</code> to run immediately.
+     * @param repeatInterval The repeat interval in milliseconds. May be negative if the job shall only run once.
+     * @param priority The priority. If two jobs shall be started at the same time, the one with the higher priority wins. See {{@link #DEFAULT_PRIORITY}.
+     * @throws OXException 
      */
-    public void addJob(IndexingJob job) throws OXException;
+    void scheduleJob(JobInfo info, Date startDate, long repeatInterval, int priority) throws OXException;
+    
+    /**
+     * Deletes an indexing job from the scheduler.
+     * 
+     * @param info The information needed to delete this job.
+     * @throws OXException
+     */
+    void unscheduleJob(JobInfo info) throws OXException;
+    
+    /**
+     * Deletes all jobs for a given user from the scheduler.
+     * 
+     * @param contextId The context id.
+     * @param userId The user id.
+     * @throws OXException
+     */
+    void unscheduleAllForUser(int contextId, int userId) throws OXException;
 
 }

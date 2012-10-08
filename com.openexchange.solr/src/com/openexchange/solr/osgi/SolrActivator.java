@@ -30,7 +30,6 @@ import com.openexchange.login.LoginHandlerService;
 import com.openexchange.management.ManagementService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.osgi.SimpleRegistryListener;
-import com.openexchange.service.messaging.MessagingService;
 import com.openexchange.solr.SolrAccessService;
 import com.openexchange.solr.SolrCoreConfigService;
 import com.openexchange.solr.SolrMBean;
@@ -68,7 +67,7 @@ public class SolrActivator extends HousekeepingActivator {
 
 	@Override
 	protected Class<?>[] getNeededServices() {
-		return new Class<?>[] { ConfigurationService.class, DatabaseService.class, MessagingService.class, ThreadPoolService.class, HazelcastInstance.class };
+		return new Class<?>[] { ConfigurationService.class, DatabaseService.class, ThreadPoolService.class, HazelcastInstance.class };
 	}
 
 	@Override
@@ -97,8 +96,8 @@ public class SolrActivator extends HousekeepingActivator {
         boolean isSolrNode = config.getBoolProperty(SolrProperties.IS_NODE, false);
         if (isSolrNode) {
             IMap<String, Integer> solrNodes = hazelcast.getMap(SOLR_NODE_MAP);
-            String memberUuid = hazelcast.getCluster().getLocalMember().getUuid();
-            solrNodes.put(memberUuid, new Integer(0));
+            String memberAddress = hazelcast.getCluster().getLocalMember().getInetSocketAddress().getAddress().getHostAddress();
+            solrNodes.put(memberAddress, new Integer(0));
         }
 		openTrackers();
 	}

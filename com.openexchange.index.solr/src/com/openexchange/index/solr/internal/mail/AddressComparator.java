@@ -50,16 +50,14 @@
 package com.openexchange.index.solr.internal.mail;
 
 import java.util.Comparator;
-
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
-
 import com.openexchange.exception.OXException;
 import com.openexchange.index.IndexDocument;
 import com.openexchange.index.IndexField;
 import com.openexchange.index.QueryParameters.Order;
-import com.openexchange.index.mail.MailIndexField;
 import com.openexchange.mail.dataobjects.MailMessage;
+import com.openexchange.mail.index.MailIndexField;
 import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.solr.SolrExceptionCodes;
 

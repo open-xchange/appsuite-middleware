@@ -59,8 +59,8 @@ import java.util.Map;
 import java.util.TimeZone;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.infostore.database.impl.DocumentMetadataImpl;
-import com.openexchange.groupware.infostore.database.impl.SetSwitch;
 import com.openexchange.groupware.infostore.utils.Metadata;
+import com.openexchange.groupware.infostore.utils.SetSwitch;
 import com.openexchange.subscribe.helpers.DocumentMetadataHolder;
 
 

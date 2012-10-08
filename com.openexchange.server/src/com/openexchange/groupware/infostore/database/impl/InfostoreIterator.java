@@ -69,6 +69,7 @@ import com.openexchange.groupware.infostore.database.impl.InfostoreQueryCatalog.
 import com.openexchange.groupware.infostore.database.impl.InfostoreQueryCatalog.Table;
 import com.openexchange.groupware.infostore.facade.impl.InfostoreFacadeImpl;
 import com.openexchange.groupware.infostore.utils.Metadata;
+import com.openexchange.groupware.infostore.utils.SetSwitch;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.sql.DBUtils;
 
