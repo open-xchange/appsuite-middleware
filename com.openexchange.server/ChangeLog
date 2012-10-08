@@ -1,3 +1,7 @@
+* 2012-10-08 - marcus.klein@open-xchange.com
+
+ - Fix for bug 23197: Removed snappy-java from OSGi 3rd party bundles.
+
 * 2012-10-05 - thorben.betten@open-xchange.com
 
  - Fix for bug 23189: Further simplified and improved regex to look-up CSS blocks
