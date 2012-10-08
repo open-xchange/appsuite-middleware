@@ -2056,6 +2056,11 @@ msgstr ""
 msgid "No such folder."
 msgstr ""
 
+#. Authentication failed for login %1$s to server %2$s (service: %3$s).
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:145
+msgid "Authentication failed for login %1$s to server %2$s (service: %3$s)."
+msgstr ""
+
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.freebusy/src/com/openexchange/freebusy/FreeBusyExceptionMessages.java:63
 msgid "No free/busy providers available"
 msgstr ""
