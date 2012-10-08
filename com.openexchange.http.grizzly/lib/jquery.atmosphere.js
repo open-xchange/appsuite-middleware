@@ -49,7 +49,7 @@ jQuery.atmosphere = function() {
     };
 
     return {
-        version : "1.0.1",
+        version : "1.1",
         requests : [],
         callbacks : [],
 
@@ -727,8 +727,6 @@ jQuery.atmosphere = function() {
                     success: function(json) {
 
                         if (rq.requestCount++ < rq.maxRequest) {
-                            _readHeaders(_jqxhr, rq);
-
                             if (!rq.executeCallbackBeforeReconnect) {
                                 _reconnect(_jqxhr, rq);
                             }
@@ -1386,7 +1384,8 @@ jQuery.atmosphere = function() {
 
                                 //fix junk is comming in parts
                                 if (!_response.junkFull && (text.indexOf("<!-- Welcome to the Atmosphere Framework.") == -1 || text.indexOf("<!-- EOD -->") == -1)) {
-                                    return;
+                                    if (!jQuery.browser.opera)
+                                        return;
                                 }
                                 _response.junkFull = true;
 
@@ -1415,26 +1414,45 @@ jQuery.atmosphere = function() {
                                 rq.lastIndex = responseText.length;
 
                                 if (jQuery.browser.opera) {
-                                    jQuery.atmosphere.iterate(function() {
+                                    jQuery.atmosphere.iterate(function () {
                                         if (ajaxRequest.responseText.length > rq.lastIndex) {
                                             try {
                                                 _response.status = ajaxRequest.status;
                                                 _response.headers = parseHeaders(ajaxRequest.getAllResponseHeaders());
 
-                                                _readHeaders(ajaxRequest, _request);
+                                                // HOTFIX for firefox bug: https://bugzilla.mozilla.org/show_bug.cgi?id=608735
+                                                if (_request.readResponsesHeaders && _request.headers) {
+                                                    jQuery.each(_request.headers, function (name) {
+                                                        var v = ajaxRequest.getResponseHeader(name);
+                                                        if (v) {
+                                                            _response.headers[name] = v;
+                                                        }
+                                                    });
+                                                }
                                             }
-                                            catch(e) {
+                                            catch (e) {
                                                 _response.status = 404;
                                             }
-                                            _response.state = "messageReceived";
-                                            _response.responseBody = ajaxRequest.responseText.substring(rq.lastIndex);
-                                            rq.lastIndex = ajaxRequest.responseText.length;
 
-                                            _invokeCallback();
-                                            if ((rq.transport == 'streaming') && (ajaxRequest.responseText.length > rq.maxStreamingLength)) {
-                                                // Close and reopen connection on large data received
-                                                ajaxRequest.abort();
-                                                _doRequest(ajaxRequest, rq, true);
+                                            if (!_response.junkFull) {
+                                                var endOfJunk = "<!-- EOD -->";
+                                                var endOfJunkLength = endOfJunk.length;
+                                                var junkEnd = ajaxRequest.responseText.indexOf(endOfJunk) + endOfJunkLength;
+                                                rq.lastIndex = junkEnd; //skip to end of junk
+                                                _response.junkFull = true;
+                                            } else {
+                                                //any message from the server will reset the last ping time
+                                                rq.lastPingTime = (new Date()).getTime();
+                                                _response.state = "messageReceived";
+                                                _response.responseBody = ajaxRequest.responseText.substring(rq.lastIndex);
+                                                rq.lastIndex = ajaxRequest.responseText.length;
+
+                                                _invokeCallback();
+                                                if ((rq.transport == 'streaming') && (ajaxRequest.responseText.length > rq.maxStreamingLength)) {
+                                                    // Close and reopen connection on large data received
+                                                    ajaxRequest.abort();
+                                                    _doRequest(ajaxRequest, rq, true);
+                                                }
                                             }
                                         }
                                     }, 0);
@@ -1639,6 +1657,7 @@ jQuery.atmosphere = function() {
                     // XDomain loop forever on itself without this.
                     // TODO: Clearly I need to come with something better than that solution
                     if (rq.lastMessage == xdr.responseText) return;
+                    rq.lastMessage = xdr.responseText;
 
                     if (rq.executeCallbackBeforeReconnect) {
                         xdrCallback(xdr);
@@ -1656,20 +1675,38 @@ jQuery.atmosphere = function() {
                     if (!rq.executeCallbackBeforeReconnect) {
                         xdrCallback(xdr);
                     }
-                    rq.lastMessage = xdr.responseText;
+
                 };
 
                 return {
                     open: function() {
-                        if (rq.method == 'POST') {
-                            rq.attachHeadersAsQueryString = true;
-                        }
                         var url = _attachHeaders(rq);
-                        if (rq.method == 'POST') {
-                            url += "&X-Atmosphere-Post-Body=" + encodeURIComponent(rq.data);
-                        }
+                        // IE may not POST the body when the xdr.send(data) for an unknown reason
+                        // when the page reload. Only observed during an unload events, rollback
+                        // to the code below in case of issue.
+                        /*
+                            var url = _attachHeaders(rq);
+                            if (rq.method == 'POST') {
+                                url += "&X-Atmosphere-Post-Body=" + encodeURIComponent(rq.data);
+                            }
+                            xdr.open(rq.method, rewriteURL(url));
+                            xdr.send();
+                            if (rq.connectTimeout > -1) {
+                                rq.id = setTimeout(function () {
+                                    if (rq.requestCount == 0) {
+                                        xdr.abort();
+                                        _prepareCallback("Connect timeout", "closed", 200, rq.transport);
+                                    }
+                                }, rq.connectTimeout);
+                            }
+                         */
                         xdr.open(rq.method, rewriteURL(url));
-                        xdr.send();
+                        if (rq.method == 'GET') {
+                            xdr.send();
+                        } else {
+                            xdr.send(rq.data);
+                        }
+
                         if (rq.connectTimeout > -1) {
                             rq.id = setTimeout(function() {
                                 if (rq.requestCount == 0) {
@@ -2094,11 +2131,7 @@ jQuery.atmosphere = function() {
 
                     // Ugly see issue 400.
                     if (_response.responseBody.length == 0 && _response.transport == 'streaming' && _response.state == "messageReceived") {
-                        var ua = navigator.userAgent.toLowerCase();
-                        var isAndroid = ua.indexOf("android") > -1;
-                        if (isAndroid) {
-                            continue;
-                        }
+                        continue;
                     }
 
                     _invokeFunction(_response);
@@ -2146,7 +2179,7 @@ jQuery.atmosphere = function() {
                 _invokeCallback();
 
                 _clearState();
-                
+
                 // Stop sharing a connection
                 if (_storageService != null) {
                     // Clears trace timer
@@ -2293,7 +2326,7 @@ jQuery.atmosphere = function() {
         checkCORSSupport : function() {
             if (jQuery.browser.msie && !window.XDomainRequest) {
                 return true;
-            } else if (jQuery.browser.opera && jQuery.browser.version < 12.0) {
+            } else if (jQuery.browser.opera) {
                 return true;
             }
 

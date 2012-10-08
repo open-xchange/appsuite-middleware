@@ -11,7 +11,7 @@ $(function () {
     var logged = false;
     var socket = $.atmosphere;
     var subSocket;
-    var transport = 'long-polling';
+    var transport = 'websocket';
 
     <!-- The following code is just here for demonstration purpose and not required -->
     <!-- Used to demonstrate the request.onTransportFailure callback. Not mandatory -->
