@@ -49,18 +49,7 @@
 
 package com.openexchange.aws.osgi;
 
-import java.io.DataInputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.security.KeyFactory;
 import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.security.PrivateKey;
-import java.security.PublicKey;
-import java.security.spec.InvalidKeySpecException;
-import java.security.spec.PKCS8EncodedKeySpec;
-import java.security.spec.X509EncodedKeySpec;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 import org.apache.commons.logging.Log;
@@ -196,38 +185,6 @@ public class AWSActivator extends HousekeepingActivator {
         LOG.info("Stopping bundle: com.openexchange.aws");
         unregisterServices();
         cleanUp();
-    }
-
-    private PrivateKey getPrivateKey(String path) throws IOException, NoSuchAlgorithmException, InvalidKeySpecException {
-        byte[] keyBytes = null;
-        File f = configService.getFileByName(path);
-        FileInputStream fis = new FileInputStream(f);
-        DataInputStream dis = new DataInputStream(fis);
-        try {
-            keyBytes = new byte[(int) f.length()];
-            dis.readFully(keyBytes);
-        } finally {
-            dis.close();
-        }
-        PKCS8EncodedKeySpec spec = new PKCS8EncodedKeySpec(keyBytes);
-        KeyFactory kf = KeyFactory.getInstance("RSA");
-        return kf.generatePrivate(spec);
-    }
-
-    private PublicKey getPublicKey(String path) throws IOException, NoSuchAlgorithmException, InvalidKeySpecException {
-        byte[] keyBytes = null;
-        File f = configService.getFileByName(path);
-        FileInputStream fis = new FileInputStream(f);
-        DataInputStream dis = new DataInputStream(fis);
-        try {
-            keyBytes = new byte[(int) f.length()];
-            dis.readFully(keyBytes);
-        } finally {
-            dis.close();
-        }
-        X509EncodedKeySpec spec = new X509EncodedKeySpec(keyBytes);
-        KeyFactory kf = KeyFactory.getInstance("RSA");
-        return kf.generatePublic(spec);
     }
 
 }
