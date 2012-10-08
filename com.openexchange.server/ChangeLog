@@ -1,3 +1,7 @@
+* 2012-10-09 - thorben.betten@open-xchange.com
+
+ - Fix for bug 23219: Handle subsequent CRLFs in binary value
+
 * 2012-10-08 - thorben.betten@open-xchange.com
 
  - Fix for bug 23199: Fixed composing reply text
