@@ -63,11 +63,11 @@ import java.util.Set;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventAdmin;
 import com.openexchange.exception.OXException;
+import com.openexchange.file.storage.AccountAware;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.File.Field;
 import com.openexchange.file.storage.FileStorageAccount;
 import com.openexchange.file.storage.FileStorageAccountAccess;
-import com.openexchange.file.storage.FileStorageAccountManager;
 import com.openexchange.file.storage.FileStorageEventHelper;
 import com.openexchange.file.storage.FileStorageFileAccess;
 import com.openexchange.file.storage.FileStorageFileAccess.IDTuple;
@@ -637,11 +637,15 @@ public abstract class CompositingIDBasedFileAccess extends AbstractService<Trans
     protected List<FileStorageFileAccess> getAllFileStorageAccesses() throws OXException {
         final List<FileStorageService> allFileStorageServices = getAllFileStorageServices();
         final List<FileStorageFileAccess> retval = new ArrayList<FileStorageFileAccess>(allFileStorageServices.size());
-        for (final FileStorageService fileStorageService : allFileStorageServices) {
-            final FileStorageAccountManager accountManager = fileStorageService.getAccountManager();
-            final List<FileStorageAccount> accounts = accountManager.getAccounts(session);
+        for (final FileStorageService fsService : allFileStorageServices) {
+            final List<FileStorageAccount> accounts;
+            if (fsService instanceof AccountAware) {
+                accounts = ((AccountAware) fsService).getAccounts(session);
+            } else {
+                accounts = fsService.getAccountManager().getAccounts(session);
+            }
             for (final FileStorageAccount fileStorageAccount : accounts) {
-                final FileStorageAccountAccess accountAccess = fileStorageService.getAccountAccess(fileStorageAccount.getId(), session);
+                final FileStorageAccountAccess accountAccess = fsService.getAccountAccess(fileStorageAccount.getId(), session);
                 connect( accountAccess );
                 retval.add(accountAccess.getFileAccess());
             }

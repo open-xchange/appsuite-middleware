@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2020 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,70 +47,27 @@
  *
  */
 
-package com.openexchange.file.storage.cifs.osgi;
+package com.openexchange.file.storage;
 
-import org.osgi.framework.BundleContext;
-import org.osgi.util.tracker.ServiceTracker;
-import com.openexchange.file.storage.FileStorageAccountManagerLookupService;
-import com.openexchange.file.storage.FileStorageAccountManagerProvider;
-import com.openexchange.file.storage.cifs.CIFSServices;
-import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.sessiond.SessiondService;
+import java.util.List;
+import com.openexchange.exception.OXException;
+import com.openexchange.session.Session;
+
 
 /**
- * {@link CIFSActivator} - Activator for CIFS bundle.
- * 
+ * {@link AccountAware} - An account-aware {@code FileStorageService}.
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class CIFSActivator extends HousekeepingActivator {
+public interface AccountAware extends FileStorageService {
 
     /**
-     * Initializes a new {@link CIFSActivator}.
+     * Gets all service's accounts associated with session user.
+     *
+     * @param session The session providing needed user data
+     * @return All accounts associated with session user.
+     * @throws OXException If listing fails
      */
-    public CIFSActivator() {
-        super();
-    }
-
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { FileStorageAccountManagerLookupService.class, SessiondService.class };
-    }
-
-    @Override
-    protected void startBundle() throws Exception {
-        try {
-            CIFSServices.setServices(this);
-            /*
-             * Some initialization stuff
-             */
-            final BundleContext context = this.context;
-            /*
-             * Register tracker
-             */
-            rememberTracker(new ServiceTracker<FileStorageAccountManagerProvider, FileStorageAccountManagerProvider>(context, FileStorageAccountManagerProvider.class, new CIFSServiceRegisterer(context)));
-            openTrackers();
-        } catch (final Exception e) {
-            com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(CIFSActivator.class)).error(e.getMessage(), e);
-            throw e;
-        }
-    }
-
-    @Override
-    public <S> void registerService(final Class<S> clazz, final S service) {
-        super.registerService(clazz, service);
-    }
-
-    @Override
-    protected void stopBundle() throws Exception {
-        try {
-            // Clean-up
-            cleanUp();
-            // Clear service registry
-            CIFSServices.setServices(null);
-        } catch (final Exception e) {
-            com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(CIFSActivator.class)).error(e.getMessage(), e);
-            throw e;
-        }
-    }
+    public List<FileStorageAccount> getAccounts(Session session) throws OXException;
 
 }

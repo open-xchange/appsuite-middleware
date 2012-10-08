@@ -50,29 +50,32 @@
 package com.openexchange.file.storage.cifs.osgi;
 
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
-import org.osgi.service.event.Event;
-import org.osgi.service.event.EventHandler;
+import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.openexchange.exception.OXException;
+import com.openexchange.file.storage.CompositeFileStorageAccountManagerProvider;
+import com.openexchange.file.storage.FileStorageAccountManagerLookupService;
 import com.openexchange.file.storage.FileStorageAccountManagerProvider;
 import com.openexchange.file.storage.FileStorageService;
 import com.openexchange.file.storage.cifs.CIFSFileStorageService;
+import com.openexchange.file.storage.cifs.CIFSServices;
 
 /**
  * {@link CIFSServiceRegisterer}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class CIFSServiceRegisterer implements EventHandler {
+public final class CIFSServiceRegisterer implements ServiceTrackerCustomizer<FileStorageAccountManagerProvider, FileStorageAccountManagerProvider> {
 
     private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(CIFSServiceRegisterer.class));
 
     private final BundleContext context;
 
-    private volatile FileStorageService service;
-
+    private volatile FileStorageAccountManagerProvider provider;
+    private volatile CIFSFileStorageService service;
     private volatile ServiceRegistration<FileStorageService> registration;
-
+    private volatile ServiceReference<FileStorageAccountManagerProvider> reference;
     private volatile int ranking;
 
     /**
@@ -84,63 +87,77 @@ public final class CIFSServiceRegisterer implements EventHandler {
     }
 
     @Override
-    public void handleEvent(final Event event) {
-        if (FileStorageAccountManagerProvider.TOPIC.equals(event.getTopic())) {
-            final int ranking;
-            {
-                final Integer rank = (Integer) event.getProperty(FileStorageAccountManagerProvider.PROPERTY_RANKING);
-                ranking = null == rank ? 0 : rank.intValue();
-            }
-            synchronized (this) {
-                FileStorageService service = this.service;
-                if (null == service) {
-                    /*
-                     * Try to create CIFS service
-                     */
-                    try {
-                        service = CIFSFileStorageService.newInstance((FileStorageAccountManagerProvider) event.getProperty(FileStorageAccountManagerProvider.PROPERTY_PROVIDER));
-                        registration = context.registerService(FileStorageService.class, service, null);
-                        this.ranking = ranking;
-                        this.service = service;
-                    } catch (final OXException e) {
-                        LOG.warn("Registration of \"" + CIFSFileStorageService.class.getName() + "\" failed.", e);
+    public FileStorageAccountManagerProvider addingService(final ServiceReference<FileStorageAccountManagerProvider> reference) {
+        final FileStorageAccountManagerProvider provider = context.getService(reference);
+        final int ranking = provider.getRanking();
+        synchronized (this) {
+            CIFSFileStorageService service = this.service;
+            if (null == service) {
+                /*
+                 * Try to create CIFS service
+                 */
+                try {
+                    final FileStorageAccountManagerLookupService managerLookupService = CIFSServices.getService(FileStorageAccountManagerLookupService.class);
+                    service = CIFSFileStorageService.newInstance(managerLookupService);
+                    if (!provider.supports(service)) {
+                        context.ungetService(reference);
+                        return null;
                     }
-                } else {
-                    /*
-                     * Already created before, but new
-                     */
-                    if (ranking > this.ranking) {
-                        final FileStorageAccountManagerProvider provider =
-                            (FileStorageAccountManagerProvider) event.getProperty(FileStorageAccountManagerProvider.PROPERTY_PROVIDER);
-                        if (provider.supports(service)) {
-                            try {
-                                registration.unregister();
-                                registration = null;
-                                service = CIFSFileStorageService.newInstance(provider);
-                                registration = context.registerService(FileStorageService.class, service, null);
-                                this.ranking = ranking;
-                                this.service = service;
-                            } catch (final OXException e) {
-                                LOG.warn("Registration of \"" + CIFSFileStorageService.class.getName() + "\" failed.", e);
-                            }
-                        }
-                    }
+                    this.registration = context.registerService(FileStorageService.class, service, null);
+                    this.reference = reference;
+                    this.ranking = ranking;
+                    this.service = service;
+                    this.provider = provider;
+                } catch (final OXException e) {
+                    LOG.warn("Registration of \"" + CIFSFileStorageService.class.getName() + "\" failed.", e);
                 }
+            } else {
+                /*
+                 * Already created before, but new provider
+                 */
+                CompositeFileStorageAccountManagerProvider compositeProvider = service.getCompositeAccountManager();
+                if (null == compositeProvider) {
+                    compositeProvider = new CompositeFileStorageAccountManagerProvider();
+                    compositeProvider.addProvider(this.provider);
+                    unregisterService(reference);
+                    service = CIFSFileStorageService.newInstance(compositeProvider);
+                    this.registration = context.registerService(FileStorageService.class, service, null);
+                    this.reference = reference;
+                    this.ranking = ranking;
+                    this.service = service;
+                    this.provider = compositeProvider;
+                }
+                compositeProvider.addProvider(provider);
             }
+        }
+        return provider;
+    }
+
+    @Override
+    public void modifiedService(final ServiceReference<FileStorageAccountManagerProvider> reference, final FileStorageAccountManagerProvider service) {
+        // Ignore
+    }
+
+    @Override
+    public void removedService(final ServiceReference<FileStorageAccountManagerProvider> reference, final FileStorageAccountManagerProvider service) {
+        if (null != service) {
+            unregisterService(reference);
         }
     }
 
-    /**
-     * Closes this registerer.
-     */
-    public void close() {
-        final ServiceRegistration<FileStorageService> thisReg = registration;
-        if (null != thisReg) {
-            thisReg.unregister();
-            registration = null;
+    private void unregisterService(final ServiceReference<FileStorageAccountManagerProvider> ref) {
+        final ServiceRegistration<FileStorageService> registration = this.registration;
+        if (null != registration) {
+            registration.unregister();
+            this.registration = null;
         }
-        service = null;
-        ranking = 0;
+        final ServiceReference<FileStorageAccountManagerProvider> reference = null == ref ? this.reference : ref;
+        if (null != reference) {
+            context.ungetService(reference);
+        }
+        this.reference = null;
+        this.service = null;
+        this.ranking = 0;
     }
 
 }
