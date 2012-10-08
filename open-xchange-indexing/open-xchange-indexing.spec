@@ -45,7 +45,6 @@ ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} 
 %config(noreplace) /opt/open-xchange/etc/solr.properties
 %config(noreplace) /opt/open-xchange/etc/indexing-service.properties
 %config(noreplace) /opt/open-xchange/etc/smal.properties
-/opt/open-xchange/etc/solr_mailfields.properties
 %dir /opt/open-xchange/osgi/bundle.d/
 /opt/open-xchange/osgi/bundle.d/*
 %dir /opt/open-xchange/solr/
