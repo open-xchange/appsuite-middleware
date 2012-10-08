@@ -767,8 +767,8 @@ public final class MimeReply {
     }
 
     private static boolean getTextContent(final boolean preferHTML, final MailPart multipartPart, final int count, final ContentType partContentType, final ParameterContainer pc) throws OXException, MessagingException, IOException {
+        boolean found = false;
         if (preferHTML) {
-            boolean found = false;
             for (int i = 0; !found && i < count; i++) {
                 final MailPart part = multipartPart.getEnclosedMailPart(i);
                 partContentType.setContentType(part.getContentType());
@@ -791,12 +791,14 @@ public final class MimeReply {
                     found |= gatherAllTextContents(part, partContentType, pc);
                 }
             }
-            return found;
+            if (found) {
+                return true;
+            }
         }
         /*
          * Any text/* part
          */
-        boolean found = false;
+        found = false;
         for (int i = 0; i < count; i++) {
             final MailPart part = multipartPart.getEnclosedMailPart(i);
             partContentType.setContentType(part.getContentType());
