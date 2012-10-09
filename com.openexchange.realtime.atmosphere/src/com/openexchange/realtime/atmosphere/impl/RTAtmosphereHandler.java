@@ -74,17 +74,16 @@ import com.openexchange.exception.OXException;
 import com.openexchange.exception.OXExceptionFactory;
 import com.openexchange.log.Log;
 import com.openexchange.log.LogFactory;
+import com.openexchange.realtime.MessageDispatcher;
 import com.openexchange.realtime.StanzaSender;
-import com.openexchange.realtime.atmosphere.impl.stanza.BuilderSelector;
-import com.openexchange.realtime.atmosphere.impl.stanza.StanzaBuilder;
-import com.openexchange.realtime.atmosphere.impl.stanza.StanzaTransformer;
+import com.openexchange.realtime.atmosphere.impl.payload.PayloadTransformerRegistry;
 import com.openexchange.realtime.atmosphere.impl.stanza.StanzaWriter;
-import com.openexchange.realtime.atmosphere.payload.PayloadTransformerLibrary;
+import com.openexchange.realtime.atmosphere.impl.stanza.builder.BuilderSelector;
+import com.openexchange.realtime.atmosphere.impl.stanza.builder.StanzaBuilder;
+import com.openexchange.realtime.atmosphere.impl.stanza.transformer.StanzaTransformer;
+import com.openexchange.realtime.atmosphere.impl.stanza.transformer.StanzaTransformerSelector;
 import com.openexchange.realtime.packet.ID;
 import com.openexchange.realtime.packet.Stanza;
-import com.openexchange.realtime.payload.Payload;
-import com.openexchange.realtime.payload.PayloadTransformer;
-import com.openexchange.realtime.util.ElementPath;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
@@ -110,7 +109,7 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
 
     private final ServiceLookup services;
 
-     private final PayloadTransformerRegistry library;
+     private final PayloadTransformerRegistry payloadTransformerRegistry;
 
     // Keep track of sessionID -> RTAtmosphereState to uniquely identify connected clients
     private final ConcurrentHashMap<String, RTAtmosphereState> sessionIdToState;
@@ -124,11 +123,11 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
      * @param library The library to use for OXRTHandler lookups needed for transformations of incoming and outgoing stanzas
      * @param services The service-lookup providing needed services
      */
-    public RTAtmosphereHandler(PayloadTransformerLibrary library, ServiceLookup services) {
+    public RTAtmosphereHandler(PayloadTransformerRegistry library, ServiceLookup services) {
         super();
         sessionIdToState = new ConcurrentHashMap<String, RTAtmosphereState>();
         userToBroadcasterIDs = new ConcurrentHashMap<String, Set<String>>();
-        this.library = library;
+        this.payloadTransformerRegistry = library;
         this.services = services;
     }
 

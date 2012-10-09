@@ -11,8 +11,7 @@ import com.openexchange.realtime.MessageDispatcher;
 import com.openexchange.realtime.atmosphere.OXRTConversionHandler;
 import com.openexchange.realtime.atmosphere.impl.RTAtmosphereChannel;
 import com.openexchange.realtime.atmosphere.impl.RTAtmosphereHandler;
-import com.openexchange.realtime.atmosphere.payload.PayloadTransformerLibrary;
-import com.openexchange.realtime.packet.Stanza;
+import com.openexchange.realtime.atmosphere.impl.payload.PayloadTransformerRegistry;
 import com.openexchange.realtime.payload.PayloadTransformer;
 import com.openexchange.sessiond.SessiondService;
 

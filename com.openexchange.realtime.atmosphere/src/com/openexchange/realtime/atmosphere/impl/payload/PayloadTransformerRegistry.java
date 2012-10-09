@@ -54,7 +54,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import com.openexchange.osgi.ServiceRegistry;
-import com.openexchange.realtime.atmosphere.osgi.AtmosphereServiceRegistry;
+import com.openexchange.realtime.payload.PayloadTransformer;
 import com.openexchange.realtime.util.ElementPath;
 
 /**
