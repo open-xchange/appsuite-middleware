@@ -886,7 +886,7 @@ public final class Contacts {
 
             if (co.containsImage1()) {
                 if (co.getImage1() != null) {
-                    if (ContactConfig.getInstance().getProperty(PROP_SCALE_IMAGES).equalsIgnoreCase("true")) {
+                    if ("true".equalsIgnoreCase(ContactConfig.getInstance().getProperty(PROP_SCALE_IMAGES))) {
                         try {
                             co.setImage1(scaleContactImage(co.getImage1(), co.getImageContentType()));
                         } catch (final OXException e) {

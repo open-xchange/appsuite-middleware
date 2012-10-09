@@ -1,3 +1,7 @@
+* 2012-10-09 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 23207: Use contact service to modify attachment count 
+
 * 2012-10-09 - thorben.betten@open-xchange.com
 
  - Fix for bug 23219: Handle subsequent CRLFs in binary value
