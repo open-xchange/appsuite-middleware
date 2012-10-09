@@ -89,7 +89,7 @@ import com.sun.mail.imap.protocol.RFC822DATA;
 import com.sun.mail.imap.protocol.UID;
 
 /**
- * {@link Threadable} - An element within thread-sorted structure holding needed message information.
+ * {@code Threadable} - An element within thread-sorted structure holding needed message information.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @see Threader
@@ -102,41 +102,29 @@ public final class Threadable implements Cloneable {
     static final org.apache.commons.logging.Log LOG = Log.loggerFor(Threadable.class);
 
     Threadable next;
-
     Threadable kid;
-
     String fullName;
-
     String subject;
-
     private long date;
-
     String messageId;
-
     String inReplyTo;
-
     String[] refs;
-
     int messageNumber;
-
     long uid;
-
-    String id;
-
     private String subject2;
-
     private boolean hasRe;
 
     /**
-     * Initializes a new {@link Threadable}.
+     * Initializes a new {@code Threadable}.
      */
     public Threadable() {
+        super();
         subject = null; // this means "dummy".
         uid = -1L;
     }
 
     /**
-     * Initializes a new {@link Threadable}.
+     * Initializes a new {@code Threadable}.
      * 
      * @param next The next element
      * @param subject The subject
@@ -144,6 +132,7 @@ public final class Threadable implements Cloneable {
      * @param references The referenced identifiers
      */
     public Threadable(final Threadable next, final String subject, final String id, final String[] references) {
+        super();
         this.next = next;
         this.subject = subject;
         this.messageId = id;
@@ -166,6 +155,11 @@ public final class Threadable implements Cloneable {
         }
     }
 
+    /**
+     * Gets the appropriate {@code MessageId} for this {@code Threadable}.
+     * 
+     * @return The appropriate {@code MessageId}
+     */
     public MessageId toMessageId() {
         return new MessageId(messageNumber).setFullName(fullName);
     }
