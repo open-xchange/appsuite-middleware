@@ -5,6 +5,7 @@
 * 2012-10-09 - thorben.betten@open-xchange.com
 
  - Fix for bug 23219: Handle subsequent CRLFs in binary value
+ - Fix for bug 23176: Checking for indication of 302 HTTP error code in thrown exception's message
 
 * 2012-10-08 - thorben.betten@open-xchange.com
 
