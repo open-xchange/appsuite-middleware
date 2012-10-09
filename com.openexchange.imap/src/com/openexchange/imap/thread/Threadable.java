@@ -166,6 +166,11 @@ public final class Threadable implements Cloneable, Serializable {
         return new MessageId(messageNumber).setFullName(fullName);
     }
 
+    /**
+     * Gets the UID.
+     * 
+     * @return The UID
+     */
     public long getUid() {
         return uid;
     }

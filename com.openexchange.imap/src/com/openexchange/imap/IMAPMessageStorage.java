@@ -101,6 +101,7 @@ import net.htmlparser.jericho.Segment;
 import net.htmlparser.jericho.Source;
 import org.jsoup.Jsoup;
 import org.jsoup.safety.Whitelist;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.imap.cache.ListLsubCache;
 import com.openexchange.imap.cache.ListLsubEntry;
@@ -124,6 +125,7 @@ import com.openexchange.imap.thread.Threadable;
 import com.openexchange.imap.thread.ThreadableCache;
 import com.openexchange.imap.thread.ThreadableCache.ThreadableCacheEntry;
 import com.openexchange.imap.thread.Threader;
+import com.openexchange.imap.thread.nntp.ThreadableImpl;
 import com.openexchange.imap.threadsort.MessageId;
 import com.openexchange.imap.threadsort.ThreadSortNode;
 import com.openexchange.imap.threadsort.ThreadSortUtil;
@@ -1341,7 +1343,11 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
         if (!ThreadableCache.isThreadableCacheEnabled()) {
             Threadable threadable = Threadable.getAllThreadablesFrom(f, limit);
             if (sorted) {
-                threadable = new Threader().thread(threadable);
+                if (useCommonsNetThreader()) {
+                    threadable = ((ThreadableImpl) new org.apache.commons.net.nntp.Threader().thread(new ThreadableImpl(threadable))).getDelegatee();
+                } else {
+                    threadable = new Threader().thread(threadable);
+                }
             }
             return new ThreadableResult(threadable, false);
         }
@@ -1356,7 +1362,11 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
             if (null == entry.getThreadable() || sorted != entry.isSorted()) {
                 Threadable threadable = Threadable.getAllThreadablesFrom(imapFolder, limit);
                 if (sorted) {
-                    threadable = new Threader().thread(threadable);
+                    if (useCommonsNetThreader()) {
+                        threadable = ((ThreadableImpl) new org.apache.commons.net.nntp.Threader().thread(new ThreadableImpl(threadable))).getDelegatee();
+                    } else {
+                        threadable = new Threader().thread(threadable);
+                    }
                 }
                 entry.set(new TLongHashSet(IMAPCommandsCollection.getUIDCollection(imapFolder)), threadable, sorted);
                 if (logIt) {
@@ -1376,7 +1386,11 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                             try {
                                 Threadable threadable = Threadable.getAllThreadablesFrom(imapFolder, limit);
                                 if (sorted) {
-                                    threadable = new Threader().thread(threadable);
+                                    if (useCommonsNetThreader()) {
+                                        threadable = ((ThreadableImpl) new org.apache.commons.net.nntp.Threader().thread(new ThreadableImpl(threadable))).getDelegatee();
+                                    } else {
+                                        threadable = new Threader().thread(threadable);
+                                    }
                                 }
                                 entry.set(uidsSet, threadable, sorted);
                             } catch (final Exception e) {
@@ -1393,7 +1407,11 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                 }
                 Threadable threadable = Threadable.getAllThreadablesFrom(imapFolder, limit);
                 if (sorted) {
-                    threadable = new Threader().thread(threadable);
+                    if (useCommonsNetThreader()) {
+                        threadable = ((ThreadableImpl) new org.apache.commons.net.nntp.Threader().thread(new ThreadableImpl(threadable))).getDelegatee();
+                    } else {
+                        threadable = new Threader().thread(threadable);
+                    }
                 }
                 entry.set(uidsSet, threadable, sorted);
                 if (logIt) {
@@ -1406,6 +1424,22 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
             }
         }
         return new ThreadableResult((Threadable) entry.getThreadable().clone(), false);
+    }
+
+    private static Boolean useCommonsNetThreader;
+    static boolean useCommonsNetThreader() {
+        Boolean b = useCommonsNetThreader;
+        if (null == b) {
+            synchronized (IMAPMessageStorage.class) {
+                b = useCommonsNetThreader;
+                if (null == b) {
+                    final ConfigurationService service = IMAPServiceRegistry.getService(ConfigurationService.class);
+                    b = Boolean.valueOf(null != service && service.getBoolProperty("com.openexchange.imap.useCommonsNetThreader", false));
+                    useCommonsNetThreader = b;
+                }
+            }
+        }
+        return b.booleanValue();
     }
 
     @Override
@@ -1478,7 +1512,11 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                     Threadable threadable = threadableResult.threadable;
                     Threadable.append(threadable, sentThreadableResult.threadable);
                     // Sort them by thread reference
-                    threadable = new Threader().thread(threadable);
+                    if (useCommonsNetThreader()) {
+                        threadable = ((ThreadableImpl) new org.apache.commons.net.nntp.Threader().thread(new ThreadableImpl(threadable))).getDelegatee();
+                    } else {
+                        threadable = new Threader().thread(threadable);
+                    }
                     threadable = Threadable.filterFullName(sentFullName, threadable);
                     threadList = Threadable.toNodeList(threadable);
                     ThreadSortNode.filterFullName(sentFullName, threadList);
@@ -1808,7 +1846,12 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                  */
                 threadResp = ThreadSortUtil.getThreadResponse(imapFolder, sortRange);
             } else {
-                final Threadable threadable = new Threader().thread(Threadable.getAllThreadablesFrom(imapFolder, -1));
+                Threadable threadable = Threadable.getAllThreadablesFrom(imapFolder, -1);
+                if (useCommonsNetThreader()) {
+                    threadable = ((ThreadableImpl) new org.apache.commons.net.nntp.Threader().thread(new ThreadableImpl(threadable))).getDelegatee();
+                } else {
+                    threadable = new Threader().thread(threadable);
+                }
                 threadResp = Threadable.toThreadReferences(threadable, null == filter ? null : new TIntHashSet(filter));
             }
             /*

@@ -91,4 +91,5 @@ Bundle-Activator: com.openexchange.imap.osgi.IMAPActivator
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-ClassPath: .,
  lib/jericho-3.2.jar,
- lib/jsoup-1.6.1.jar
+ lib/jsoup-1.6.1.jar,
+ lib/commons-net-3.1.jar
