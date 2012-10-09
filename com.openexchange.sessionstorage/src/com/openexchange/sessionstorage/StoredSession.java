@@ -93,6 +93,9 @@ public class StoredSession implements PutIfAbsent, Serializable {
 
     private long lastAccess;
 
+    /**
+     * Initializes a new {@link StoredSession}.
+     */
     public StoredSession(String sessionId, String loginName, String password, int contextId, int userId, String secret, String login, String randomToken, String localIP, String authId, String hash, String client, Map<String, Object> parameters) {
         super();
         this.sessionId = sessionId;
@@ -133,6 +136,9 @@ public class StoredSession implements PutIfAbsent, Serializable {
         this.lastAccess = System.currentTimeMillis();
     }
 
+    /**
+     * Initializes a new {@link StoredSession}.
+     */
     public StoredSession(String sessionId, String loginName, String password, int contextId, int userId, String secret, String login, String randomToken, String localIP, String authId, String hash, String client, Map<String, Object> parameters, long lastAccess) {
         super();
         this.sessionId = sessionId;
@@ -177,6 +183,7 @@ public class StoredSession implements PutIfAbsent, Serializable {
      * Initializes a new {@link StoredSession}.
      */
     public StoredSession(final Session session) {
+        super();
         this.authId = session.getAuthId();
         this.client = session.getClient();
         this.contextId = session.getContextId();
@@ -229,6 +236,11 @@ public class StoredSession implements PutIfAbsent, Serializable {
         return password;
     }
 
+    /**
+     * Sets the password
+     * 
+     * @param password The password
+     */
     public void setPassword(final String password) {
         this.password = password;
     }
@@ -238,6 +250,11 @@ public class StoredSession implements PutIfAbsent, Serializable {
         return contextId;
     }
 
+    /**
+     * Sets the context identifier
+     * 
+     * @param contextId The context identifier
+     */
     public void setContextId(final int contextId) {
         this.contextId = contextId;
     }
@@ -247,14 +264,29 @@ public class StoredSession implements PutIfAbsent, Serializable {
         return userId;
     }
 
+    /**
+     * Sets the user identifier
+     * 
+     * @param userId The user identifier
+     */
     public void setUserId(final int userId) {
         this.userId = userId;
     }
 
+    /**
+     * Gets the session identifier.
+     * 
+     * @return The session identifier
+     */
     public String getSessionId() {
         return sessionId;
     }
 
+    /**
+     * Sets the session identifier.
+     * 
+     * @param sessionId The session identifier to set
+     */
     public void setSessionId(final String sessionId) {
         this.sessionId = sessionId;
     }
@@ -264,6 +296,11 @@ public class StoredSession implements PutIfAbsent, Serializable {
         return secret;
     }
 
+    /**
+     * Sets the secret identifier.
+     * 
+     * @param secret The secret identifier
+     */
     public void setSecret(final String secret) {
         this.secret = secret;
     }
@@ -273,6 +310,11 @@ public class StoredSession implements PutIfAbsent, Serializable {
         return login;
     }
 
+    /**
+     * Sets the login; e.g <code>test@foo</code>.
+     * 
+     * @param login The login
+     */
     public void setLogin(final String login) {
         this.login = login;
     }
@@ -282,6 +324,11 @@ public class StoredSession implements PutIfAbsent, Serializable {
         return randomToken;
     }
 
+    /**
+     * Sets the random token.
+     * 
+     * @param randomToken The random token
+     */
     public void setRandomToken(final String randomToken) {
         this.randomToken = randomToken;
     }
@@ -301,6 +348,11 @@ public class StoredSession implements PutIfAbsent, Serializable {
         return authId;
     }
 
+    /**
+     * Sets the authentication identifier.
+     * 
+     * @param authId The authentication identifier
+     */
     public void setAuthId(final String authId) {
         this.authId = authId;
     }
@@ -325,6 +377,11 @@ public class StoredSession implements PutIfAbsent, Serializable {
         this.client = client;
     }
 
+    /**
+     * Gets the user login; e.g. <code>test</code>
+     * 
+     * @return The user login
+     */
     public String getUserLogin() {
         return userLogin;
     }
