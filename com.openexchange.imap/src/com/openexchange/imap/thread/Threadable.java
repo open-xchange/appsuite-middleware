@@ -583,14 +583,18 @@ public final class Threadable implements Cloneable, Serializable {
     private static void fillInList(final Threadable t, final List<ThreadSortNode> list) {
         Threadable cur = t;
         while (null != cur) {
-            final ThreadSortNode node = new ThreadSortNode(cur.toMessageId(), cur.uid);
-            list.add(node);
-            // Check kids
-            final Threadable kid = cur.kid;
-            if (null != kid) {
-                final List<ThreadSortNode> sublist = new LinkedList<ThreadSortNode>();
-                fillInList(kid, sublist);
-                node.addChildren(sublist);
+            if (cur.isDummy()) {
+                fillInList(cur.kid, list);
+            } else {
+                final ThreadSortNode node = new ThreadSortNode(cur.toMessageId(), cur.uid);
+                list.add(node);
+                // Check kids
+                final Threadable kid = cur.kid;
+                if (null != kid) {
+                    final List<ThreadSortNode> sublist = new LinkedList<ThreadSortNode>();
+                    fillInList(kid, sublist);
+                    node.addChildren(sublist);
+                }
             }
             // Proceed to next
             cur = cur.next;
