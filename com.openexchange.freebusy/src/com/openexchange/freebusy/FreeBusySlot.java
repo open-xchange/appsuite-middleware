@@ -70,6 +70,8 @@ public class FreeBusySlot implements Comparable<FreeBusySlot> {
     private String objectID;
     private String folderID;
     private boolean fullTime;
+    private String title;
+    private String location;
     
     /**
      * Initializes a new {@link FreeBusySlot}.
@@ -216,6 +218,41 @@ public class FreeBusySlot implements Comparable<FreeBusySlot> {
         this.fullTime = isFullTime;
     }
     
+    /**
+     * Gets the title
+     *
+     * @return The title
+     */
+    public String getTitle() {
+        return title;
+    }
+
+    /**
+     * Sets the title
+     *
+     * @param title The subject to set
+     */
+    public void setTitle(String title) {
+        this.title = title;
+    }
+
+    /**
+     * Gets the location
+     *
+     * @return The location
+     */
+    public String getLocation() {
+        return location;
+    }
+
+    /**
+     * Sets the location
+     *
+     * @param location The location to set
+     */
+    public void setLocation(String location) {
+        this.location = location;
+    }
 
     @Override
     public String toString() {
@@ -229,5 +266,24 @@ public class FreeBusySlot implements Comparable<FreeBusySlot> {
         int value = null == o ? 1 : getStartTime().compareTo(o.getStartTime());
         return 0 == value ? getEndTime().compareTo(o.getEndTime()) : value;
     }
-    
+
+    @Override
+    protected Object clone() {
+        try {
+            FreeBusySlot slot = (FreeBusySlot)super.clone();
+            slot.setEndTime(endTime);
+            slot.setStartTime(startTime);
+            slot.setFolderID(folderID);
+            slot.setObjectID(objectID);
+            slot.setFullTime(fullTime);
+            slot.setLocation(location);
+            slot.setTitle(title);
+            slot.setStatus(status);
+            return slot;   
+        } catch (CloneNotSupportedException e) {
+            // clone IS supported.
+            throw new RuntimeException(e);
+        }
+    }
+
 }

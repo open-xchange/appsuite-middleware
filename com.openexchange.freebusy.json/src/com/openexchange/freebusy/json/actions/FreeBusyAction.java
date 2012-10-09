@@ -121,7 +121,7 @@ public abstract class FreeBusyAction implements AJAXActionService {
                     ResponseWriter.addException(errorObject, data.getError(), locale);
                     jsonObject.put(data.getParticipant(), errorObject);
                 } else {
-                    jsonObject.put(data.getParticipant(), serialize(data, timeZone));
+                    jsonObject.put(data.getParticipant(), serialize(data.getSlots(), timeZone));
                 }
             }
             return jsonObject;
@@ -144,6 +144,12 @@ public abstract class FreeBusyAction implements AJAXActionService {
             }
             if (freeBusySlot.isFullTime()) {
                 jsonObject.put("full_time", freeBusySlot.getFolderID());
+            }
+            if (null != freeBusySlot.getTitle()) {
+                jsonObject.put("title", freeBusySlot.getTitle());
+            }
+            if (null != freeBusySlot.getLocation()) {
+                jsonObject.put("location", freeBusySlot.getLocation());
             }
             return jsonObject;
         } catch (JSONException e) {

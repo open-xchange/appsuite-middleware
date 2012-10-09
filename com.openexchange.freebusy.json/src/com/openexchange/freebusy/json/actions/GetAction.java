@@ -90,7 +90,7 @@ public class GetAction extends FreeBusyAction {
                 request.getSession(), request.getParticipant(), request.getFrom(), request.getUntil());
         }
         return new AJAXRequestResult(null != freeBusyData ? 
-            serialize(freeBusyData, request.getTimeZone()) : JSONObject.NULL, "json");
+            serialize(freeBusyData.getSlots(), request.getTimeZone()) : JSONObject.NULL, "json");
     }
 
 }

@@ -97,7 +97,14 @@ public class FreeBusyServiceImpl implements FreeBusyService {
                         null == freeBusyData.get(providerData.getParticipant())) {
                         freeBusyData.put(providerData.getParticipant(), providerData);
                     } else {
-                        freeBusyData.get(providerData.getParticipant()).addAll(providerData);
+                        FreeBusyData data = freeBusyData.get(providerData.getParticipant());
+                        if (data.hasError()) {
+                            // replace
+                            freeBusyData.put(providerData.getParticipant(), providerData);
+                        } else {
+                            // add
+                            data.addAll(providerData.getSlots());
+                        }
                     }
                 }                
             }
@@ -118,7 +125,7 @@ public class FreeBusyServiceImpl implements FreeBusyService {
                 } else {
                     FreeBusyData data = provider.getFreeBusy(session, participant, from, until);
                     if (null != data) {
-                        freeBusyData.addAll(data);
+                        freeBusyData.addAll(data.getSlots());
                     }
                 }                
             }
