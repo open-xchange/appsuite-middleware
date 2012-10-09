@@ -113,11 +113,13 @@ public class StoredSession implements PutIfAbsent, Serializable {
         if (parameters != null) {
             Object parameter = parameters.get(Session.PARAM_LOCK);
             if (null != parameter) {
-                this.parameters.put(Session.PARAM_LOCK, parameter);
+                // Unless this is a distributed lock...
+                //this.parameters.put(Session.PARAM_LOCK, parameter);
             }
             parameter = parameters.get(Session.PARAM_COUNTER);
             if (null != parameter) {
-                this.parameters.put(Session.PARAM_COUNTER, parameter);
+                // Counter is per JVM instance
+                // this.parameters.put(Session.PARAM_COUNTER, parameter);
             }
             parameter = parameters.get(Session.PARAM_ALTERNATIVE_ID);
             if (null != parameter) {
@@ -151,11 +153,13 @@ public class StoredSession implements PutIfAbsent, Serializable {
         if (parameters != null) {
             Object parameter = parameters.get(Session.PARAM_LOCK);
             if (null != parameter) {
-                this.parameters.put(Session.PARAM_LOCK, parameter);
+                // Unless this is a distributed lock...
+                // this.parameters.put(Session.PARAM_LOCK, parameter);
             }
             parameter = parameters.get(Session.PARAM_COUNTER);
             if (null != parameter) {
-                this.parameters.put(Session.PARAM_COUNTER, parameter);
+                // Counter is per JVM instance
+                // this.parameters.put(Session.PARAM_COUNTER, parameter);
             }
             parameter = parameters.get(Session.PARAM_ALTERNATIVE_ID);
             if (null != parameter) {
@@ -185,11 +189,13 @@ public class StoredSession implements PutIfAbsent, Serializable {
         {
             Object parameter = session.getParameter(Session.PARAM_LOCK);
             if (null != parameter) {
-                this.parameters.put(Session.PARAM_LOCK, parameter);
+                // Unless this is a distributed lock...
+                // this.parameters.put(Session.PARAM_LOCK, parameter);
             }
             parameter = session.getParameter(Session.PARAM_COUNTER);
             if (null != parameter) {
-                this.parameters.put(Session.PARAM_COUNTER, parameter);
+                // Counter is per JVM instance
+                // this.parameters.put(Session.PARAM_COUNTER, parameter);
             }
             parameter = session.getParameter(Session.PARAM_ALTERNATIVE_ID);
             if (null != parameter) {
