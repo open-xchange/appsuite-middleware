@@ -52,6 +52,7 @@ package com.openexchange.imap.thread;
 import static com.openexchange.mail.MailServletInterface.mailInterfaceMonitor;
 import gnu.trove.set.TIntSet;
 import java.io.InputStream;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -94,12 +95,14 @@ import com.sun.mail.imap.protocol.UID;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @see Threader
  */
-public final class Threadable implements Cloneable {
+public final class Threadable implements Cloneable, Serializable {
+
+    private static final long serialVersionUID = -680041493836177453L;
 
     /**
      * The logger constant.
      */
-    static final org.apache.commons.logging.Log LOG = Log.loggerFor(Threadable.class);
+    static final transient org.apache.commons.logging.Log LOG = Log.loggerFor(Threadable.class);
 
     Threadable next;
     Threadable kid;
