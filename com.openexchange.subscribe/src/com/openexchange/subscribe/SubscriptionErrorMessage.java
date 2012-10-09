@@ -83,7 +83,9 @@ public enum SubscriptionErrorMessage implements OXExceptionCode {
      * Parsing error.
      */
     ParsingError(CATEGORY_ERROR, 6, SubscriptionErrorStrings.CHECK_VALUE, SubscriptionErrorStrings.PARSING_ERROR2),
-
+    /**
+     * The login or password you entered are wrong.
+     */
     INVALID_LOGIN(CATEGORY_USER_INPUT, 7, SubscriptionErrorStrings.CORRECT_PASSWORD, SubscriptionErrorStrings.WRONG_PASSWORD),
     COMMUNICATION_PROBLEM(CATEGORY_SERVICE_DOWN, 8, SubscriptionErrorStrings.CHECK_WEBSITE, SubscriptionErrorStrings.SERVICE_UNAVAILABLE),
     TEMPORARILY_UNAVAILABLE(CATEGORY_SERVICE_DOWN, 8, SubscriptionErrorStrings.TRY_AGAIN_LATER, SubscriptionErrorStrings.SERVICE_TEMPORARILY_UNAVAILABLE),

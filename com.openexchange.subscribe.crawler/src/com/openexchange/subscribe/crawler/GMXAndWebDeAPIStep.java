@@ -74,6 +74,7 @@ import com.gargoylesoftware.htmlunit.WebRequestSettings;
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
+import com.openexchange.subscribe.SubscriptionErrorMessage;
 import com.openexchange.subscribe.crawler.internal.AbstractStep;
 import com.openexchange.subscribe.crawler.internal.LoginStep;
 
@@ -166,6 +167,9 @@ public class GMXAndWebDeAPIStep extends AbstractStep<Contact[], Object> implemen
                     if (nvp.getName().equals("Location")){
                         location = nvp.getValue();
                     }
+                }
+                if (null != location && location.endsWith("error_bad_password")) {
+                    throw SubscriptionErrorMessage.INVALID_LOGIN.create();
                 }
                 Matcher matcher = pattern.matcher(location);
                 if (matcher.find() && matcher.groupCount() == 2) {
