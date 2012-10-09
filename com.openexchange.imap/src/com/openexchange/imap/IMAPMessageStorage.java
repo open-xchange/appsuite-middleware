@@ -133,6 +133,8 @@ import com.openexchange.java.Charsets;
 import com.openexchange.java.Streams;
 import com.openexchange.java.UnsynchronizedByteArrayInputStream;
 import com.openexchange.java.UnsynchronizedByteArrayOutputStream;
+import com.openexchange.log.LogProperties;
+import com.openexchange.log.Props;
 import com.openexchange.mail.IndexRange;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailField;
@@ -171,7 +173,7 @@ import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.session.Session;
 import com.openexchange.spamhandler.SpamHandlerRegistry;
 import com.openexchange.textxtraction.TextXtractService;
-import com.openexchange.threadpool.AbstractTask;
+import com.openexchange.threadpool.AbstractTrackableTask;
 import com.openexchange.threadpool.ThreadPools;
 import com.openexchange.tools.collections.PropertizedList;
 import com.openexchange.tools.session.ServerSession;
@@ -1457,11 +1459,17 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                     final Future<ThreadableResult> future;
                     {
                         final IMAPFolder sent = sentFolder;
-                        future = ThreadPools.getThreadPool().submit(new AbstractTask<ThreadableResult>() {
+                        final Props props = LogProperties.optLogProperties(Thread.currentThread());
+                        future = ThreadPools.getThreadPool().submit(new AbstractTrackableTask<ThreadableResult>() {
     
                             @Override
                             public ThreadableResult call() throws Exception {
                                 return getThreadableFor(sent, false, cache, limit);
+                            }
+
+                            @Override
+                            public Map<String, Object> optLogProperties() {
+                                return null == props ? null : Collections.unmodifiableMap(props.getMap());
                             }
                         });
                     }
