@@ -58,7 +58,6 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -609,19 +608,40 @@ public final class Threadable implements Cloneable, Serializable {
      * @param t The <tt>Threadable</tt> instance
      */
     public static Threadable filterFullName(final String fullName, final Threadable t) {
-        final List<Threadable> list = unfold(t);
-        if (list.isEmpty()) {
-            return t;
-        }
-        // Filter
-        for (final Iterator<Threadable> iterator = list.iterator(); iterator.hasNext();) {
-            final Threadable cur = iterator.next();
+        Threadable first = t;
+        Threadable prev = null;
+        Threadable cur = t;
+        while (null != cur) {
             if (checkFullName(fullName, cur)) {
-                iterator.remove();
+                final Threadable c = cur;
+                cur = cur.next;
+                if (null == prev) { // First one needs to be removed
+                    first = cur;
+                } else { // re-point
+                    prev.next = cur;
+                }
+                c.next = null;
+            } else {
+                prev = cur;
+                cur = cur.next;
             }
         }
-        // Fold
-        return fold(list);
+        return first;
+
+
+//        final List<Threadable> list = unfold(t);
+//        if (list.isEmpty()) {
+//            return t;
+//        }
+//        // Filter
+//        for (final Iterator<Threadable> iterator = list.iterator(); iterator.hasNext();) {
+//            final Threadable cur = iterator.next();
+//            if (checkFullName(fullName, cur)) {
+//                iterator.remove();
+//            }
+//        }
+//        // Fold
+//        return fold(list);
     }
 
     /**
