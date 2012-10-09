@@ -135,7 +135,7 @@ public class GMXAndWebDeAPIStep extends AbstractStep<Contact[], Object> implemen
             }
             
             if (debuggingEnabled) {
-                LOG.error("complete URL : " + urlString);
+                LOG.error("DEBUG: complete URL : " + urlString);
             }
 
             WebRequestSettings requestSettings = new WebRequestSettings(new URL(urlString), HttpMethod.POST);
@@ -150,9 +150,9 @@ public class GMXAndWebDeAPIStep extends AbstractStep<Contact[], Object> implemen
             HtmlPage page = webClient.getPage(requestSettings);
 
             if (debuggingEnabled) {
-                LOG.error("Status Code : " + page.getWebResponse().getStatusCode());
-                LOG.error("URL : " + page.getWebResponse().getUrl());
-                LOG.error("webResponse : " + page.getWebResponse().getContentAsString());
+                LOG.error("DEBUG: Status Code : " + page.getWebResponse().getStatusCode());
+                LOG.error("DEBUG: URL : " + page.getWebResponse().getUrl());
+                LOG.error("DEBUG: webResponse : " + page.getWebResponse().getContentAsString());
             }
         } catch (FailingHttpStatusCodeException e) {
             // catch the 302 that appears after logging in
