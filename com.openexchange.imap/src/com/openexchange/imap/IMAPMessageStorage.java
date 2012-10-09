@@ -1339,7 +1339,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
      */
     protected ThreadableResult getThreadableFor(final IMAPFolder f, final boolean sorted, final boolean cache, final int limit) throws MessagingException {
         if (!ThreadableCache.isThreadableCacheEnabled()) {
-            Threadable threadable = Threadable.getAllThreadablesFrom(imapFolder, limit);
+            Threadable threadable = Threadable.getAllThreadablesFrom(f, limit);
             if (sorted) {
                 threadable = new Threader().thread(threadable);
             }

@@ -657,10 +657,10 @@ public final class Threadable implements Cloneable {
     private static boolean checkFullName(final String fullName, final Threadable t) {
         Threadable cur = t;
         while (null != cur) {
-            if (t.messageNumber > 0 && !fullName.equals(cur.fullName)) {
+            if (cur.messageNumber > 0 && !fullName.equals(cur.fullName)) {
                 return false;
             }
-            final Threadable kid = t.kid;
+            final Threadable kid = cur.kid;
             if (null != kid) {
                 if (!checkFullName(fullName, kid)) {
                     return false;
@@ -721,7 +721,7 @@ public final class Threadable implements Cloneable {
                     if (1 == messageCount) {
                         sb.append("1");
                     } else {
-                        if (limit < 0) {
+                        if (limit < 0 || limit >= messageCount) {
                             sb.append("1:*");
                         } else {
                             sb.append(messageCount - limit + 1).append(':').append(messageCount); 
