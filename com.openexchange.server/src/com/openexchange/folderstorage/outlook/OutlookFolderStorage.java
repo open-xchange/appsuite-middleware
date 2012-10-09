@@ -420,7 +420,7 @@ public final class OutlookFolderStorage implements FolderStorage {
                 if (LOG.isDebugEnabled()) {
                     LOG.warn("Checking consistency failed for folder " + folderId + " in tree " + treeId, e);
                 } else {
-                    LOG.warn("Checking consistency failed for folder " + folderId + " in tree " + treeId);
+                    LOG.warn("Checking consistency failed for folder " + folderId + " in tree " + treeId + ": " + e.getMessage());
                 }
             } catch (final Exception e) {
                 if (started) {
@@ -429,7 +429,7 @@ public final class OutlookFolderStorage implements FolderStorage {
                 if (LOG.isDebugEnabled()) {
                     LOG.warn("Checking consistency failed for folder " + folderId + " in tree " + treeId, e);
                 } else {
-                    LOG.warn("Checking consistency failed for folder " + folderId + " in tree " + treeId);
+                    LOG.warn("Checking consistency failed for folder " + folderId + " in tree " + treeId + ": " + e.getMessage());
                 }
             }
         }
