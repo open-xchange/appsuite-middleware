@@ -156,7 +156,7 @@ public class GMXAndWebDeAPIStep extends AbstractStep<Contact[], Object> implemen
             }
         } catch (FailingHttpStatusCodeException e) {
             // catch the 302 that appears after logging in
-            if (e.getStatusCode() == 302) {
+            if (e.getStatusCode() == 302 || e.getMessage().trim().startsWith("302")) {
                 // LOG.error(e.getResponse().getUrl());
                 Pattern pattern = Pattern.compile("([^?]*)\\?session=(.*)");
                 //Matcher matcher = pattern.matcher(e.getResponse().getUrl().toString());
@@ -198,21 +198,21 @@ public class GMXAndWebDeAPIStep extends AbstractStep<Contact[], Object> implemen
                         contactObjects = parseJSONIntoContacts(allContactsPage);
                         executedSuccessfully = true;
                     } catch (MalformedURLException e1) {
-                        LOG.error(e1);
+                        LOG.error(e1.getMessage(), e1);
                     } catch (FailingHttpStatusCodeException e1) {
-                        LOG.error(e1);
+                        LOG.error(e1.getMessage(), e1);
                     } catch (IOException e1) {
-                        LOG.error(e1);
+                        LOG.error(e1.getMessage(), e1);
                     }
 
                 } else {
-                    LOG.error(e);
+                    LOG.error(e.getMessage(), e);
                 }
             } else {
-                LOG.error(e);
+                LOG.error(e.getMessage(), e);
             }
         } catch (final IOException e) {
-            LOG.error(e);
+            LOG.error(e.getMessage(), e);
         }
         output = contactObjects.toArray(new Contact[contactObjects.size()]);
 
