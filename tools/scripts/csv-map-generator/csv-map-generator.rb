@@ -17,7 +17,7 @@ csv = CSV.read(filename)
 ox = csv.last
 alien = csv.first
 
-print "Expected to have ox (#{ox.size}) and alien data (#{alien.size}) to have the same length" unless ox.size == alien.size
+print "Expected to have ox (#{ox.size}) and alien data (#{alien.size}) to have the same length, what kind of CSV is this?" and exit unless ox.size == alien.size
 
 weird = []
 ox.each_with_index do |ox_name, index|
@@ -29,7 +29,7 @@ ox.each_with_index do |ox_name, index|
   elsif (ox_name =~/email\d@invalid/)
     p ox_name[0,6], alien_name
   elsif (!ox_name)
-    weird << "[not mapped] ?=#{alien_name}"
+    weird << "[field not mapped] #{alien_name}"
   elsif (ox_name =~ /^[0-9]+$/)
     weird << "[not mappable] #{ox_name}=#{alien_name}"
   else 
