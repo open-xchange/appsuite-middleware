@@ -63,34 +63,22 @@ import com.openexchange.session.Session;
  */
 public class StoredSession implements PutIfAbsent, Serializable {
 
+    private static final long serialVersionUID = -3414389910481034283L;
+
     private String loginName;
-
     private String password;
-
     private int contextId;
-
     private int userId;
-
     private String sessionId;
-
     private String secret;
-
     private String login;
-
     private String randomToken;
-
     private String localIp;
-
     private String authId;
-
     private String hash;
-
     private String client;
-
     private String userLogin;
-
-    private ConcurrentMap<String, Object> parameters;
-
+    private final ConcurrentMap<String, Object> parameters;
     private long lastAccess;
 
     /**
