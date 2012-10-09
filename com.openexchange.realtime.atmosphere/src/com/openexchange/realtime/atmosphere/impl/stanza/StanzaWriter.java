@@ -56,9 +56,9 @@ import org.json.JSONObject;
 import com.openexchange.exception.OXException;
 import com.openexchange.realtime.packet.IQ;
 import com.openexchange.realtime.packet.Message;
-import com.openexchange.realtime.packet.Payload;
 import com.openexchange.realtime.packet.Presence;
 import com.openexchange.realtime.packet.Stanza;
+import com.openexchange.realtime.payload.Payload;
 
 /**
  * {@link StanzaWriter} - Transforms Stanza objects into their JSON representation.

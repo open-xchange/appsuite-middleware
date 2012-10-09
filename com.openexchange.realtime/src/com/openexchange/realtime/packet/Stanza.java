@@ -54,6 +54,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import com.openexchange.realtime.payload.Payload;
 
 /**
  * {@link Stanza} - Abstract information unit that can be send from one entity to another.

@@ -53,11 +53,11 @@ import org.apache.commons.logging.Log;
 import com.openexchange.conversion.simple.SimplePayloadConverter;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.realtime.atmosphere.OXRTConversionHandler;
-import com.openexchange.realtime.atmosphere.payload.PayloadTransformer;
 import com.openexchange.realtime.atmosphere.presence.JSONToPresenceDataConverter;
 import com.openexchange.realtime.atmosphere.presence.OXRTPresenceHandler;
 import com.openexchange.realtime.atmosphere.presence.PresenceDataToJSONConverter;
 import com.openexchange.realtime.packet.Presence;
+import com.openexchange.realtime.payload.PayloadTransformer;
 import com.openexchange.realtime.presence.PresenceService;
 import com.openexchange.realtime.presence.subscribe.PresenceSubscriptionService;
 

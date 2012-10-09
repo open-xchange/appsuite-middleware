@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.realtime.packet;
+package com.openexchange.realtime.payload;
 
 import java.util.concurrent.atomic.AtomicReference;
 import com.openexchange.conversion.simple.SimpleConverter;
@@ -56,7 +56,9 @@ import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.session.ServerSession;
 
 /**
- * {@link Payload} - Represents a stanza's payload that is any (POJO) object linked with its format identifier.
+ * {@link Payload} - Represents a stanza's payload element that is any (POJO) object linked with its format identifier. Namespace and
+ * elementName are used for unique identification (@see ElementPath) of payload elements and determine which {@link PayloadTransformer}
+ * to use. Payloads can form n-ary trees: Payload = data , {Payload}
  * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a> JavaDoc
@@ -199,5 +201,5 @@ public class Payload {
             return false;
         return true;
     }
-    
+
 }

@@ -51,9 +51,10 @@ package com.openexchange.realtime.atmosphere;
 
 import com.openexchange.exception.OXException;
 import com.openexchange.realtime.MessageDispatcher;
-import com.openexchange.realtime.atmosphere.payload.PayloadTransformer;
-import com.openexchange.realtime.packet.Payload;
+import com.openexchange.realtime.StanzaSender;
 import com.openexchange.realtime.packet.Stanza;
+import com.openexchange.realtime.payload.Payload;
+import com.openexchange.realtime.payload.PayloadTransformer;
 import com.openexchange.realtime.util.ElementPath;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.session.ServerSession;

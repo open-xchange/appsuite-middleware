@@ -49,6 +49,8 @@
 
 package com.openexchange.realtime.packet;
 
+import com.openexchange.realtime.payload.Payload;
+
 /**
  * {@link Message} - A regular message associated with a certain {@link Type type}.
  * 

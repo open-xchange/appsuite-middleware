@@ -47,22 +47,46 @@
  *
  */
 
-package com.openexchange.realtime.atmosphere;
+package com.openexchange.realtime.payload;
 
 import com.openexchange.exception.OXException;
-import com.openexchange.realtime.packet.Stanza;
+import com.openexchange.realtime.StanzaSender;
+import com.openexchange.realtime.util.ElementPath;
+import com.openexchange.tools.session.ServerSession;
 
 /**
- * {@link StanzaSender} - Handles sending of Stanzas to the ID specified in the
- * stanza. 
- *
+ * {@link PayloadTransformer} - Used to transform Payload elemnts of incoming and outgoing Stanzas.
+ * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
-public interface StanzaSender {
+public interface PayloadTransformer {
+
     /**
-     * Send Stanzas to the ID specified in the Stanza. 
-     * @param stanza the Stanza to send
-     * @throws OXException when sending of the Stanza fails
+     * Get the complete path to an element in a namespace that this PayloadTransformer is able to process.
+     * 
+     * @return the elementPath of elements this PayloadTransformer is able to process.
      */
-	public void send(Stanza stanza) throws OXException;
+    public ElementPath getElementPath();
+
+    /**
+     * Transform an incoming Payload.
+     * 
+     * @param paylaod The incoming Payload to process
+     * @param session The currently active session
+     * @return 
+     * @throws OXException When transformation fails
+     */
+    public Payload incoming(Payload payload, ServerSession session) throws OXException;
+
+    /**
+     * Transform an outgoing Payload.
+     * 
+     * @param payload The Payload to process
+     * @param session The currently active session
+     * @param sender The StanzaSender to use for finally sending the processed Stanza
+     * @throws OXException
+     */
+    public Payload outgoing(Payload payload, ServerSession session, StanzaSender sender) throws OXException;
+
 }

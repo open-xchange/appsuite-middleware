@@ -57,7 +57,7 @@ import com.openexchange.osgi.SimpleRegistryListener;
 import com.openexchange.realtime.Channel;
 import com.openexchange.realtime.MessageDispatcher;
 import com.openexchange.realtime.impl.MessageDispatcherImpl;
-import com.openexchange.realtime.packet.Payload;
+import com.openexchange.realtime.payload.Payload;
 
 /**
  * {@link RTActivator} - The activator for realtime bundle.

@@ -47,49 +47,22 @@
  *
  */
 
-package com.openexchange.realtime.atmosphere.payload;
+package com.openexchange.realtime;
 
 import com.openexchange.exception.OXException;
-import com.openexchange.realtime.atmosphere.StanzaSender;
-import com.openexchange.realtime.atmosphere.impl.RTAtmosphereHandler;
-import com.openexchange.realtime.packet.Payload;
 import com.openexchange.realtime.packet.Stanza;
-import com.openexchange.realtime.util.ElementPath;
-import com.openexchange.tools.session.ServerSession;
 
 /**
- * {@link PayloadTransformer} - Used to transform Payload elemnts of incoming and outgoing Stanzas.
- * 
+ * {@link StanzaSender} - Handles sending of Stanzas to the ID specified in the
+ * stanza. 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
- * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
-public interface PayloadTransformer {
-
+public interface StanzaSender {
     /**
-     * Get the complete path to an element in a namespace that this PayloadTransformer is able to process.
-     * 
-     * @return the elementPath of elements this PayloadTransformer is able to process.
+     * Send Stanzas to the ID specified in the Stanza. 
+     * @param stanza the Stanza to send
+     * @throws OXException when sending of the Stanza fails
      */
-    public ElementPath getElementPath();
-
-    /**
-     * Transform an incoming Payload.
-     * 
-     * @param paylaod The incoming Payload to process
-     * @param session The currently active session
-     * @return 
-     * @throws OXException When transformation fails
-     */
-    public Payload incoming(Payload payload, ServerSession session) throws OXException;
-
-    /**
-     * Transform an outgoing Payload.
-     * 
-     * @param payload The Payload to process
-     * @param session The currently active session
-     * @param sender The StanzaSender to use for finally sending the processed Stanza
-     * @throws OXException
-     */
-    public Payload outgoing(Payload payload, ServerSession session, StanzaSender sender) throws OXException;
-
+	public void send(Stanza stanza) throws OXException;
 }

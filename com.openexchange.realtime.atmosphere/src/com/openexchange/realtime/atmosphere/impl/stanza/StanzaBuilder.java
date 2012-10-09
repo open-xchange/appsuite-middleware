@@ -56,8 +56,8 @@ import org.json.JSONObject;
 import com.openexchange.exception.OXException;
 import com.openexchange.realtime.atmosphere.AtmosphereExceptionCode;
 import com.openexchange.realtime.packet.ID;
-import com.openexchange.realtime.packet.Payload;
 import com.openexchange.realtime.packet.Stanza;
+import com.openexchange.realtime.payload.Payload;
 
 /**
  * {@link StanzaBuilder} - Abstract Stanza parser class, gathering common fields and methods.

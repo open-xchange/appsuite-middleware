@@ -51,6 +51,7 @@ package com.openexchange.realtime.packet;
 
 import java.util.List;
 import com.openexchange.exception.OXException;
+import com.openexchange.realtime.payload.Payload;
 
 /**
  * {@link Presence} - Exchanges presence information.

@@ -52,7 +52,7 @@ package com.openexchange.realtime.xmpp.packet;
 import org.joox.JOOX;
 import org.joox.Match;
 import com.openexchange.exception.OXException;
-import com.openexchange.realtime.packet.Payload;
+import com.openexchange.realtime.payload.Payload;
 import com.openexchange.tools.session.ServerSession;
 
 /**

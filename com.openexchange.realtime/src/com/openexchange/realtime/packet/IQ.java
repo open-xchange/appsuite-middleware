@@ -49,6 +49,8 @@
 
 package com.openexchange.realtime.packet;
 
+import com.openexchange.realtime.payload.Payload;
+
 /**
  * {@link IQ} - Used for command exchanges.
  * <p>
