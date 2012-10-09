@@ -422,7 +422,7 @@ public final class OutlookFolderStorage implements FolderStorage {
                 } else {
                     LOG.warn("Checking consistency failed for folder " + folderId + " in tree " + treeId + ": " + e.getMessage());
                 }
-            } catch (final Exception e) {
+            } catch (final RuntimeException e) {
                 if (started) {
                     folderStorage.rollback(storageParameters);
                 }
