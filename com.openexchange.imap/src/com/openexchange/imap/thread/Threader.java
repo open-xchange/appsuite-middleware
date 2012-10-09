@@ -52,6 +52,7 @@ package com.openexchange.imap.thread;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
+import org.apache.commons.logging.Log;
 
 /**
  * {@link Threader} - This is an implementation of a message threading algorithm, as originally devised by Zamie Zawinski. See <a
@@ -63,10 +64,11 @@ import java.util.Map;
  */
 public class Threader {
 
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(Threader.class);
+    private static final boolean DEBUG = LOG.isDebugEnabled();
+
     private ThreadContainer rootNode; // has kids, and no next
-
     private Map<String, ThreadContainer> idMap; // maps message IDs to ThreadContainers
-
     private int bogusIdCount = 0; // tick of how many dup IDs we've seen
 
     /**
@@ -87,6 +89,8 @@ public class Threader {
         if (threadableRoot == null) {
             return null;
         }
+        final long st = DEBUG ? System.currentTimeMillis() : 0L;
+
         idMap = new HashMap<String, ThreadContainer>();
 
         for (final Enumeration<Threadable> e = threadableRoot.allElements(); e.hasMoreElements();) {
@@ -107,7 +111,7 @@ public class Threader {
         gatherSubjects();
 
         if (rootNode.next != null) {
-            throw new Error("root node has a next?" + rootNode);
+            throw new IllegalStateException("root node has a next?" + rootNode);
         }
 
         for (ThreadContainer r = rootNode.child; r != null; r = r.next) {
@@ -126,6 +130,12 @@ public class Threader {
         // their underlying threadables.
         rootNode.flush();
         rootNode = null;
+
+        if (DEBUG && null != result) {
+            final long dur = System.currentTimeMillis() - st;
+            LOG.debug("Threader.thread() took " + dur + "msec for " + result.fullName);
+        }
+
         return result;
     }
 
