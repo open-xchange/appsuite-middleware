@@ -6,6 +6,7 @@ Bundle-Version: 6.23.0
 Bundle-Activator: com.openexchange.solr.osgi.SolrActivator
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Eclipse-RegisterBuddy: com.openexchange.hazelcast
 Import-Package: com.hazelcast.cluster,
  com.hazelcast.config,
  com.hazelcast.core,
@@ -35,7 +36,6 @@ Import-Package: com.hazelcast.cluster,
  com.openexchange.management,
  com.openexchange.osgi,
  com.openexchange.server,
- com.openexchange.service.messaging,
  com.openexchange.threadpool,
  com.openexchange.threadpool.behavior,
  com.openexchange.tools.sql,

@@ -21,18 +21,17 @@ import com.openexchange.tools.file.external.FileStorageFactoryCandidate;
  */
 public class CompositeFileStorageFactory implements FileStorageFactory, ServiceTrackerCustomizer<FileStorageFactoryCandidate, FileStorageFactoryCandidate> {
 
-    private final List<FileStorageFactoryCandidate> facs;
+    private static final List<FileStorageFactoryCandidate> facs = new CopyOnWriteArrayList<FileStorageFactoryCandidate>();
 
     /**
      * Initializes a new {@link CompositeFileStorageFactory}.
      */
     public CompositeFileStorageFactory() {
         super();
-        facs = new CopyOnWriteArrayList<FileStorageFactoryCandidate>();
     }
 
     @Override
-    public FileStorage getFileStorage(final URI uri) throws OXException {
+    public FileStorage getFileStorage(URI uri) throws OXException {
         FileStorageFactoryCandidate candidate = null;
         for (final FileStorageFactoryCandidate fac : facs) {
             if (fac.supports(uri) && (null == candidate || fac.getRanking() > candidate.getRanking())) {

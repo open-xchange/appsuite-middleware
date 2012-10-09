@@ -54,6 +54,7 @@ import java.sql.SQLException;
 import java.util.Date;
 import com.openexchange.database.tx.AbstractDBAction;
 import com.openexchange.groupware.infostore.DocumentMetadata;
+import com.openexchange.groupware.infostore.utils.GetSwitch;
 import com.openexchange.groupware.infostore.utils.Metadata;
 
 public abstract class AbstractInfostoreAction extends AbstractDBAction {

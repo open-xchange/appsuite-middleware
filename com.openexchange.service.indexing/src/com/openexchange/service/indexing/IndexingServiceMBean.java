@@ -49,52 +49,54 @@
 
 package com.openexchange.service.indexing;
 
+import java.util.List;
 import javax.management.MBeanException;
 
+
 /**
- * {@link IndexingServiceMBean} - The MBean for indexing service.
- * 
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * {@link IndexingServiceMBean}
+ *
+ * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public interface IndexingServiceMBean {
-
-    /**
-     * The domain of the indexing service's MBean.
-     */
+    
     public static final String DOMAIN = "com.openexchange.service.indexing";
-
-    /**
-     * Sends a simple echo.
-     * <p>
-     * Message is logged as <code>ERROR</code>, don't be surprised!
-     * 
-     * @param message The echo message
-     * @throws MBeanException If a MBean error occurs
-     */
-    public void echoMessage(String message) throws MBeanException;
-
-    /**
-     * (Re-)Starts the receiver on this node.
-     * 
-     * @throws MBeanException If starting receiver fails
-     */
-    public void startReceiving() throws MBeanException;
-
-    /**
-     * Stops the receiver on this node.
-     * 
-     * @throws MBeanException If receiver cannot be stopped
-     */
-    public void stopReceiving() throws MBeanException;
+    
     
     /**
-     * Queues an indexing job. The user needs to have an active session on this machine.
+     * Returns the names of all currently running jobs on this node.
      * 
-     * @param contextId The context id.
-     * @param userId The user id.
-     * @param fullName The mail folder's full name.
-     * @throws MBeanException If enqueue operation fails
+     * @return The list of job names.
+     * @throws MBeanException 
      */
-    public void queueIndexingJob(int contextId, int userId, String fullName) throws MBeanException;
+    List<String> getAllLocalRunningJobs() throws MBeanException;
+    
+    /**
+     * Returns the names of currently running jobs for the given user on this node.
+     *
+     * @param contextId The users context id.
+     * @param userId The users id.
+     * @return The list of job names.
+     * @throws MBeanException 
+     */
+    List<String> getLocalRunningJobs(int contextId, int userId) throws MBeanException;
+    
+    /**
+     * Gets all jobs that are scheduled in the cluster.
+     * 
+     * @return The list of job names.
+     * @throws MBeanException
+     */
+    List<String> getAllScheduledJobs() throws MBeanException;
+    
+    /**
+     * Gets the jobs that are scheduled in the cluster for the given user.
+     *
+     * @param contextId The users context id.
+     * @param userId The users id.
+     * @return The list of job names.
+     * @throws MBeanException
+     */
+    List<String> getScheduledJobs(int contextId, int userId) throws MBeanException;
 
 }

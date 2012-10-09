@@ -141,6 +141,9 @@ public final class FileStorageExceptionMessages implements LocalizableStrings {
     // No such folder.
     public static final String NO_SUCH_FOLDER_MSG = "No such folder.";
 
+    // Authentication failed for login %1$s to server %2$s (service: %3$s).
+    public static final String LOGIN_FAILED_MSG = "Authentication failed for login %1$s to server %2$s (service: %3$s).";
+
     /**
      * Initializes a new {@link OXExceptionMessages}.
      */

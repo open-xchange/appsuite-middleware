@@ -49,18 +49,26 @@
 
 package com.openexchange.file.storage.cmis;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import org.apache.commons.logging.Log;
 import com.openexchange.datatypes.genericonf.DynamicFormDescription;
 import com.openexchange.datatypes.genericonf.FormElement;
 import com.openexchange.datatypes.genericonf.ReadOnlyDynamicFormDescription;
 import com.openexchange.exception.OXException;
+import com.openexchange.file.storage.AccountAware;
+import com.openexchange.file.storage.CompositeFileStorageAccountManagerProvider;
+import com.openexchange.file.storage.FileStorageAccount;
 import com.openexchange.file.storage.FileStorageAccountAccess;
 import com.openexchange.file.storage.FileStorageAccountManager;
+import com.openexchange.file.storage.FileStorageAccountManagerLookupService;
 import com.openexchange.file.storage.FileStorageAccountManagerProvider;
-import com.openexchange.file.storage.FileStorageService;
 import com.openexchange.session.Session;
 
 /**
@@ -68,26 +76,39 @@ import com.openexchange.session.Session;
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class CMISFileStorageService implements FileStorageService {
+public final class CMISFileStorageService implements AccountAware {
+
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(CMISFileStorageService.class);
 
     /**
-     * Creates a new CIFS/SMB file storage service.
+     * Creates a new CMIS file storage service.
      * 
-     * @param accountManagerProvider The detected {@link FileStorageAccountManagerProvider} reference
-     * @return A new CIFS/SMB file storage service
+     * @param accountManagerLookupService The detected {@link FileStorageAccountManagerLookupService} reference
+     * @return A new CMIS file storage service
      * @throws OXException If creation fails
      */
-    public static CMISFileStorageService newInstance(final FileStorageAccountManagerProvider accountManagerProvider) throws OXException {
+    public static CMISFileStorageService newInstance(final FileStorageAccountManagerLookupService accountManagerLookupService) throws OXException {
         final CMISFileStorageService newInst = new CMISFileStorageService();
-        newInst.applyAccountManager(accountManagerProvider);
+        newInst.applyAccountManager(accountManagerLookupService);
+        return newInst;
+    }
+
+    /**
+     * Creates a new CMIS file storage service.
+     * 
+     * @param compositeAccountManager The composite account manager
+     * @return A new CMIS file storage service
+     */
+    public static CMISFileStorageService newInstance(final CompositeFileStorageAccountManagerProvider compositeAccountManager) {
+        final CMISFileStorageService newInst = new CMISFileStorageService();
+        newInst.applyCompositeAccountManager(compositeAccountManager);
         return newInst;
     }
 
     private final DynamicFormDescription formDescription;
-
     private final Set<String> secretProperties;
-
-    private FileStorageAccountManager accountManager;
+    private volatile FileStorageAccountManager accountManager;
+    private volatile CompositeFileStorageAccountManagerProvider compositeAccountManager;
 
     /**
      * Initializes a new {@link CMISFileStorageService}.
@@ -101,8 +122,21 @@ public final class CMISFileStorageService implements FileStorageService {
         secretProperties = Collections.unmodifiableSet(new HashSet<String>(Arrays.asList(CMISConstants.CMIS_PASSWORD)));
     }
 
-    private void applyAccountManager(final FileStorageAccountManagerProvider accountManagerProvider) throws OXException {
-        accountManager = accountManagerProvider.getAccountManagerFor(this);
+    private void applyAccountManager(final FileStorageAccountManagerLookupService accountManagerLookupService) throws OXException {
+        accountManager = accountManagerLookupService.getAccountManagerFor(this);
+    }
+
+    private void applyCompositeAccountManager(final CompositeFileStorageAccountManagerProvider compositeAccountManager) {
+        this.compositeAccountManager = compositeAccountManager;
+    }
+    
+    /**
+     * Gets the composite account manager.
+     *
+     * @return The composite account manager
+     */
+    public CompositeFileStorageAccountManagerProvider getCompositeAccountManager() {
+        return compositeAccountManager;
     }
 
     @Override
@@ -127,12 +161,72 @@ public final class CMISFileStorageService implements FileStorageService {
 
     @Override
     public FileStorageAccountManager getAccountManager() {
-        return accountManager;
+        final CompositeFileStorageAccountManagerProvider compositeAccountManager = this.compositeAccountManager;
+        if (null == compositeAccountManager) {
+            return accountManager;
+        }
+        try {
+            return compositeAccountManager.getAccountManagerFor(this);
+        } catch (final OXException e) {
+            LOG.warn(e.getMessage(), e);
+            return accountManager;
+        }
+    }
+
+    private static final class FileStorageAccountInfo {
+        protected final FileStorageAccount account;
+        protected final int ranking;
+
+        protected FileStorageAccountInfo(FileStorageAccount account, int ranking) {
+            super();
+            this.account = account;
+            this.ranking = ranking;
+        }
+    }
+
+    /**
+     * Gets all service's accounts associated with session user.
+     *
+     * @param session The session providing needed user data
+     * @return All accounts associated with session user.
+     * @throws OXException If listing fails
+     */
+    @Override
+    public List<FileStorageAccount> getAccounts(final Session session) throws OXException {
+        final CompositeFileStorageAccountManagerProvider compositeAccountManager = this.compositeAccountManager;
+        if (null == compositeAccountManager) {
+            return accountManager.getAccounts(session);
+        }
+        final Map<String, FileStorageAccountInfo> accountsMap = new LinkedHashMap<String, FileStorageAccountInfo>(8);
+        for (final FileStorageAccountManagerProvider provider : compositeAccountManager.providers()) {
+            for (final FileStorageAccount account : provider.getAccountManagerFor(this).getAccounts(session)) {
+                final FileStorageAccountInfo info = new FileStorageAccountInfo(account, provider.getRanking());
+                final FileStorageAccountInfo prev = accountsMap.get(account.getId());
+                if (null == prev || prev.ranking < info.ranking) {
+                    // Replace with current
+                    accountsMap.put(account.getId(), info);
+                }
+            }
+        }
+        final List<FileStorageAccount> ret = new ArrayList<FileStorageAccount>(accountsMap.size());
+        for (final FileStorageAccountInfo info : accountsMap.values()) {
+            ret.add(info.account);
+        }
+        return ret;
     }
 
     @Override
     public FileStorageAccountAccess getAccountAccess(final String accountId, final Session session) throws OXException {
-        return new CMISAccountAccess(this, accountManager.getAccount(accountId, session), session);
+        final FileStorageAccount account;
+        {
+            final CompositeFileStorageAccountManagerProvider compositeAccountManager = this.compositeAccountManager;
+            if (null == compositeAccountManager) {
+                account = accountManager.getAccount(accountId, session);
+            } else {
+                account = compositeAccountManager.getAccountManager(accountId, session).getAccount(accountId, session);
+            }
+        }
+        return new CMISAccountAccess(this, account, session);
     }
 
 }

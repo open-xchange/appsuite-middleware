@@ -66,6 +66,7 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import com.openexchange.exception.OXException;
+import com.openexchange.file.storage.AccountAware;
 import com.openexchange.file.storage.DefaultFileStorageFolder;
 import com.openexchange.file.storage.DefaultFileStoragePermission;
 import com.openexchange.file.storage.FileStorageAccount;
@@ -577,7 +578,12 @@ public final class FileStorageFolderStorage implements FolderStorage {
                     /*
                      * Check if file storage service provides a root folder
                      */
-                    final List<FileStorageAccount> userAccounts = fsService.getAccountManager().getAccounts(session);
+                    final List<FileStorageAccount> userAccounts;
+                    if (fsService instanceof AccountAware) {
+                        userAccounts = ((AccountAware) fsService).getAccounts(session);
+                    } else {
+                        userAccounts = fsService.getAccountManager().getAccounts(session);
+                    }
                     for (final FileStorageAccount userAccount : userAccounts) {
                         if (SERVICE_INFOSTORE.equals(userAccount.getId()) || FileStorageAccount.DEFAULT_ID.equals(userAccount.getId())) {
                             continue;

@@ -5,7 +5,8 @@ Bundle-SymbolicName: com.openexchange.groupware.tools
 Bundle-Version: 6.23.0
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
-Export-Package: com.openexchange.groupware.tools.mappings,
+Export-Package: com.openexchange.groupware.tools.chunk,
+ com.openexchange.groupware.tools.mappings,
  com.openexchange.groupware.tools.mappings.database,
  com.openexchange.groupware.tools.mappings.json
 Import-Package: com.openexchange.exception,

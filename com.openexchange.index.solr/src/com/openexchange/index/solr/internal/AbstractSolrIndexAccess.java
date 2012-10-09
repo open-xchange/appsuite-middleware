@@ -63,8 +63,6 @@ import org.apache.commons.logging.Log;
 import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.SolrQuery.ORDER;
 import org.apache.solr.client.solrj.SolrResponse;
-import org.apache.solr.client.solrj.response.FacetField;
-import org.apache.solr.client.solrj.response.FacetField.Count;
 import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.client.solrj.response.UpdateResponse;
 import org.apache.solr.common.SolrDocument;
@@ -75,12 +73,9 @@ import com.openexchange.exception.OXException;
 import com.openexchange.index.IndexAccess;
 import com.openexchange.index.IndexDocument;
 import com.openexchange.index.IndexField;
-import com.openexchange.index.IndexResult;
 import com.openexchange.index.QueryParameters;
 import com.openexchange.index.QueryParameters.Order;
-import com.openexchange.index.mail.MailIndexField;
 import com.openexchange.index.solr.IndexFolderManager;
-import com.openexchange.index.solr.internal.mail.SolrMailField;
 import com.openexchange.solr.SolrAccessService;
 import com.openexchange.solr.SolrCoreIdentifier;
 
@@ -283,66 +278,66 @@ public abstract class AbstractSolrIndexAccess<V> implements IndexAccess<V> {
         return indexDocuments;
     }
     
-    protected IndexResult<V> queryChunkWise1(SolrResultConverter<V> converter, SolrQuery solrQuery, int off, int len, int chunkSize) throws OXException {
-        List<IndexDocument<V>> indexDocuments = new ArrayList<IndexDocument<V>>();
-        Map<IndexField, Map<String, Long>> facetCountsMap = null;
-        int fetched = 0;
-        int maxRows = len;
-        if (maxRows > chunkSize) {
-            maxRows = chunkSize;
-        }
-        do {
-            solrQuery.setStart(off);
-            if ((fetched + maxRows) > len) {
-                maxRows = (len - fetched);
-            }
-            solrQuery.setRows(maxRows);
-            QueryResponse queryResponse = query(solrQuery);
-            SolrDocumentList results = queryResponse.getResults();
-            for (SolrDocument document : results) {
-                indexDocuments.add(converter.convert(document));
-            }
-            
-            List<FacetField> facetFields = queryResponse.getFacetFields();
-            if (null != facetFields) {
-                if (null == facetCountsMap) {
-                    // Initialize map
-                    facetCountsMap = new HashMap<IndexField, Map<String,Long>>(facetFields.size());
-                }
-                for (final FacetField facetField : facetFields) {
-                    final List<Count> counts = facetField.getValues();
-                    if (null != counts) {
-                        final MailIndexField field = SolrMailField.fieldFor(facetField.getName());
-                        if (null != field) {
-                            Map<String, Long> map = facetCountsMap.get(field);
-                            if (null == map) {
-                                map = new HashMap<String, Long>(counts.size());
-                                facetCountsMap.put(field, map);
-                            }
-                            for (final Count count : counts) {
-                                final String countName = count.getName();
-                                final Long l = map.get(countName);
-                                if (null == l) {
-                                    map.put(countName, Long.valueOf(count.getCount()));
-                                } else {
-                                    map.put(countName, Long.valueOf(count.getCount() + l.longValue()));
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-
-            if (results.size() < maxRows) {
-                break;
-            }
-            
-            fetched += maxRows;
-            off += maxRows;
-        } while (fetched < len);
-        
-        return converter.createIndexResult(indexDocuments, facetCountsMap);
-    }
+//    protected IndexResult<V> queryChunkWise1(SolrResultConverter<V> converter, SolrQuery solrQuery, int off, int len, int chunkSize) throws OXException {
+//        List<IndexDocument<V>> indexDocuments = new ArrayList<IndexDocument<V>>();
+//        Map<IndexField, Map<String, Long>> facetCountsMap = null;
+//        int fetched = 0;
+//        int maxRows = len;
+//        if (maxRows > chunkSize) {
+//            maxRows = chunkSize;
+//        }
+//        do {
+//            solrQuery.setStart(off);
+//            if ((fetched + maxRows) > len) {
+//                maxRows = (len - fetched);
+//            }
+//            solrQuery.setRows(maxRows);
+//            QueryResponse queryResponse = query(solrQuery);
+//            SolrDocumentList results = queryResponse.getResults();
+//            for (SolrDocument document : results) {
+//                indexDocuments.add(converter.convert(document));
+//            }
+//            
+//            List<FacetField> facetFields = queryResponse.getFacetFields();
+//            if (null != facetFields) {
+//                if (null == facetCountsMap) {
+//                    // Initialize map
+//                    facetCountsMap = new HashMap<IndexField, Map<String,Long>>(facetFields.size());
+//                }
+//                for (final FacetField facetField : facetFields) {
+//                    final List<Count> counts = facetField.getValues();
+//                    if (null != counts) {
+//                        final MailIndexField field = SolrMailField.fieldFor(facetField.getName());
+//                        if (null != field) {
+//                            Map<String, Long> map = facetCountsMap.get(field);
+//                            if (null == map) {
+//                                map = new HashMap<String, Long>(counts.size());
+//                                facetCountsMap.put(field, map);
+//                            }
+//                            for (final Count count : counts) {
+//                                final String countName = count.getName();
+//                                final Long l = map.get(countName);
+//                                if (null == l) {
+//                                    map.put(countName, Long.valueOf(count.getCount()));
+//                                } else {
+//                                    map.put(countName, Long.valueOf(count.getCount() + l.longValue()));
+//                                }
+//                            }
+//                        }
+//                    }
+//                }
+//            }
+//
+//            if (results.size() < maxRows) {
+//                break;
+//            }
+//            
+//            fetched += maxRows;
+//            off += maxRows;
+//        } while (fetched < len);
+//        
+//        return converter.createIndexResult(indexDocuments, facetCountsMap);
+//    }
     
     protected String buildQueryString(String fieldName, Object value) {
         if (fieldName == null || value == null) {

@@ -70,11 +70,11 @@ import com.openexchange.index.IndexFacadeService;
 import com.openexchange.index.IndexResult;
 import com.openexchange.index.QueryParameters;
 import com.openexchange.index.QueryParameters.Order;
-import com.openexchange.index.mail.MailIndexField;
 import com.openexchange.indexedSearch.json.FieldResults;
 import com.openexchange.indexedSearch.json.SearchHandler;
 import com.openexchange.mail.MailField;
 import com.openexchange.mail.dataobjects.MailMessage;
+import com.openexchange.mail.index.MailIndexField;
 import com.openexchange.mail.search.ANDTerm;
 import com.openexchange.mail.search.BooleanTerm;
 import com.openexchange.mail.search.NOTTerm;
@@ -124,13 +124,13 @@ public class MailSearchHandler implements SearchHandler {
             int i = 0;
             for (com.openexchange.search.SearchTerm<?> searchTerm : query.getTerms()) {
                 SearchTerm<?> mailSearchTerm = map(searchTerm);
-                try {
+                {
                     more[0] = false;
                     String name = null == names ? null : names.get(i++);     
                     Map<String, Object> params = new HashMap<String, Object>(1);
                     int accountId = query.getAccountId();
                     if (accountId >= 0) {
-                        params.put("accountId", accountId);
+                        params.put("accountId", Integer.valueOf(accountId));
                     }                    
                     QueryParameters.Builder builder = new QueryParameters.Builder(params)
                                                                 .setOffset(range[0])
@@ -154,8 +154,6 @@ public class MailSearchHandler implements SearchHandler {
                         mails.add(indexDocument.getObject());
                     }
                     retval.add(new FieldResults(name, "mail", results, more[0]));
-                } finally {
-                    
                 }
             }
             // Prepare AJAX request data for mail ResultConverter

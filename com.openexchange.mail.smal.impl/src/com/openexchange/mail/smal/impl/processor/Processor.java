@@ -49,10 +49,8 @@
 
 package com.openexchange.mail.smal.impl.processor;
 
-import static com.openexchange.index.mail.MailUtility.releaseAccess;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -72,18 +70,14 @@ import com.openexchange.mail.api.IMailFolderStorage;
 import com.openexchange.mail.api.IMailFolderStorageEnhanced;
 import com.openexchange.mail.api.IMailMessageStorage;
 import com.openexchange.mail.api.MailAccess;
-import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mail.dataobjects.MailMessage;
+import com.openexchange.mail.index.MailUtility;
 import com.openexchange.mail.smal.impl.DebugInfo;
 import com.openexchange.mail.smal.impl.SmalMailAccess;
 import com.openexchange.mail.smal.impl.SmalServiceLookup;
 import com.openexchange.mail.smal.impl.index.IndexAccessAdapter;
 import com.openexchange.mail.smal.impl.index.IndexDocumentHelper;
-import com.openexchange.service.indexing.IndexingService;
-import com.openexchange.service.indexing.mail.MailJobInfo;
-import com.openexchange.service.indexing.mail.MailJobInfo.Builder;
-import com.openexchange.service.indexing.mail.job.FolderJob;
 import com.openexchange.session.Session;
 import com.openexchange.threadpool.ThreadPools;
 import com.openexchange.threadpool.behavior.DiscardBehavior;
@@ -93,7 +87,7 @@ import com.openexchange.threadpool.behavior.DiscardBehavior;
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class Processor {
+public class Processor {
 
     /**
      * The logger constant.
@@ -219,7 +213,7 @@ public final class Processor {
                 LOG.error(e.getMessage(), e);
             } finally {
                 SmalMailAccess.closeUnwrappedInstance(mailAccess);
-                releaseAccess(facade, indexAccess);
+                MailUtility.releaseAccess(facade, indexAccess);
             }
         }
         
@@ -298,25 +292,26 @@ public final class Processor {
         }
         
         private void submitJob(final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess) throws OXException {
-            final Collection<MailMessage> storageMails = getParameter("processor.storageMails", params);
-            final Collection<MailMessage> indexMails = getParameter("processor.indexMails", params);
-            final IndexingService indexingService = SmalServiceLookup.getServiceStatic(IndexingService.class);
-            if (null == indexingService) {
-                return;
-            }
-            final Session session = mailAccess.getSession();
-            final MailConfig mailConfig = mailAccess.getMailConfig();
-            final Builder jobInfoBuilder =
-                new MailJobInfo.Builder(session.getUserId(), session.getContextId()).accountId(mailAccess.getAccountId()).login(
-                    mailConfig.getLogin()).password(mailConfig.getPassword()).server(mailConfig.getServer()).port(mailConfig.getPort()).secure(
-                    mailConfig.isSecure()).primaryPassword(session.getPassword());
-            final FolderJob folderJob = new FolderJob(folderInfo.getFullName(), jobInfoBuilder.build());
-            folderJob.setIndexMails(null == indexMails ? null : new ArrayList<MailMessage>(indexMails));
-            folderJob.setStorageMails(null == storageMails ? null : new ArrayList<MailMessage>(storageMails));
-            indexingService.addJob(folderJob);
-            if (LOG.isDebugEnabled()) {
-                LOG.debug("Scheduled new job for \"" + folderInfo.getFullName() + "\" " + new DebugInfo(mailAccess));
-            }
+            // FIXME:
+//            final Collection<MailMessage> storageMails = getParameter("processor.storageMails", params);
+//            final Collection<MailMessage> indexMails = getParameter("processor.indexMails", params);
+//            final IndexingService indexingService = SmalServiceLookup.getServiceStatic(IndexingService.class);
+//            if (null == indexingService) {
+//                return;
+//            }
+//            final Session session = mailAccess.getSession();
+//            final MailConfig mailConfig = mailAccess.getMailConfig();
+//            final Builder jobInfoBuilder =
+//                new MailJobInfo.Builder(session.getUserId(), session.getContextId()).accountId(mailAccess.getAccountId()).login(
+//                    mailConfig.getLogin()).password(mailConfig.getPassword()).server(mailConfig.getServer()).port(mailConfig.getPort()).secure(
+//                    mailConfig.isSecure()).primaryPassword(session.getPassword());
+//            final FolderJob folderJob = new FolderJob(folderInfo.getFullName(), jobInfoBuilder.build());
+//            folderJob.setIndexMails(null == indexMails ? null : new ArrayList<MailMessage>(indexMails));
+//            folderJob.setStorageMails(null == storageMails ? null : new ArrayList<MailMessage>(storageMails));
+//            indexingService.addJob(folderJob);
+//            if (LOG.isDebugEnabled()) {
+//                LOG.debug("Scheduled new job for \"" + folderInfo.getFullName() + "\" " + new DebugInfo(mailAccess));
+//            }
         }
     }
 

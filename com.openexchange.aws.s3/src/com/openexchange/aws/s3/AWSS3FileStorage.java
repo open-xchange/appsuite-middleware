@@ -52,6 +52,7 @@ package com.openexchange.aws.s3;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
+import java.math.BigInteger;
 import java.net.URI;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -60,6 +61,8 @@ import java.util.List;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import org.apache.commons.logging.Log;
 import com.amazonaws.AmazonClientException;
 import com.amazonaws.services.s3.AmazonS3;
@@ -120,10 +123,10 @@ public class AWSS3FileStorage implements FileStorage {
         Bucket retval = null;
         try {
             String path = null;
-            if (uri.getPath() == null) {
+            if (uri.getPath() == null || uri.getPath().equals("")) {
                 path = config.getDefaultBucket();
             } else {
-                path = uri.getPath();
+                path = getContextId(uri);
             }
             ListBucketsRequest listBucketsRequest = new ListBucketsRequest();
             List<Bucket> buckets = amazonS3.listBuckets(listBucketsRequest);
@@ -391,7 +394,8 @@ public class AWSS3FileStorage implements FileStorage {
             md = MessageDigest.getInstance("MD5");
             byte[] message = input.getBytes("UTF-8");
             byte[] digest = md.digest(message);
-            retval = digest.toString();
+            BigInteger bigInt = new BigInteger(digest);
+            retval = bigInt.toString(16);
         } catch (NoSuchAlgorithmException e) {
             LOG.error(e.getMessage(), e);
             throw OXAWSS3ExceptionCodes.S3_CREATE_HASH_FAILED.create(input, e.getMessage());
@@ -400,6 +404,16 @@ public class AWSS3FileStorage implements FileStorage {
             throw OXAWSS3ExceptionCodes.S3_CREATE_HASH_FAILED.create(input, e.getMessage());
         }
         return retval;
+    }
+
+    private String getContextId(URI u) {
+        String path = u.getPath();
+        Pattern pattern = Pattern.compile("(.*?)(\\d+)(.*?)");
+        Matcher m = pattern.matcher(path);
+        if (m.matches()) {
+            return m.group(2);
+        }
+        return null;
     }
 
 }

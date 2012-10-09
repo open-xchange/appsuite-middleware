@@ -49,162 +49,18 @@
 
 package com.openexchange.service.indexing;
 
-import java.io.Serializable;
-import java.util.Map;
 import com.openexchange.exception.OXException;
 
+
 /**
- * {@link IndexingJob} - Represents an arbitrary, {@link java.io.Serializable serializable} job described only using POJO (plain old Java
- * objects) for the sake of reliability and consistency throughout clustered nodes.
- * <p>
- * Specify how a job is supposed to be performed by {@link #getBehavior()} method.
- * 
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * {@link IndexingJob} - Defines an indexing job.<br>
+ * An implementing class must have a <code>public</code>
+ * no-argument constructor as it will be instantiated with Class.newInstance();
+ *
+ * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public interface IndexingJob extends Serializable {
-
-    /**
-     * The job's behavior: Either {@link #CONSUMER_RUNS consumer-runs} (low-cost) or {@link #DELEGATE delegate} (high-cost) job.
-     */
-    public static enum Behavior implements Serializable {
-        /**
-         * Consumer runs associated job (default). Appropriate for small jobs which are performed in a timely manner.
-         */
-        CONSUMER_RUNS,
-        /**
-         * Consumer delegates job's execution to another thread. Appropriate for high-cost jobs.
-         */
-        DELEGATE, ;
-    }
-
-    /**
-     * A job's origin.
-     */
-    public static enum Origin implements Serializable {
-        /**
-         * Active user interaction
-         */
-        ACTIVE,
-        /**
-         * Initiated by passive operation.
-         */
-        PASSIVE
-    }
-
-    /**
-     * The default priority is <code>4</code>.
-     * 
-     * @see javax.jms.Message#DEFAULT_PRIORITY
-     */
-    public static final int DEFAULT_PRIORITY = 4;
-
-    /**
-     * The default behavior is {@link Behavior#CONSUMER_RUNS consumer-runs}.
-     */
-    public static final Behavior DEFAULT_BEHAVIOR = Behavior.CONSUMER_RUNS;
-
-    /**
-     * The default origin is {@link Origin#ACTIVE active}.
-     */
-    public static final Origin DEFAULT_ORIGIN = Origin.ACTIVE;
-
-    /**
-     * The empty class array.
-     */
-    public static final Class<?>[] EMPTY_CLASSES = new Class<?>[0];
-
-    /**
-     * Gets the classes of the services which need to be available to start this activator.
-     * 
-     * @return The array of {@link Class} instances of needed services
-     */
-    Class<?>[] getNeededServices();
-
-    /**
-     * Performs this job's task.
-     * 
-     * @throws OXException If performing job fails for any reason
-     * @throws InterruptedException If job has been interrupted
-     */
-    void performJob() throws OXException, InterruptedException;
-
-    /**
-     * Indicates whether this job is durable.
-     * <p>
-     * Durable jobs will be persisted in permanent storage and will survive server failure or restart. Non durable jobs will not survive
-     * server failure or restart.
-     * 
-     * @return <code>true</code> if durable; otherwise <code>false</code>
-     */
-    boolean isDurable();
-
-    /**
-     * Gets the priority, ranges from <code>0</code> (lowest) to <code>9</code> (highest).
-     * <p>
-     * Default is <code>4</code>.
-     * 
-     * @return This job's priority
-     */
-    int getPriority();
-
-    /**
-     * Sets the priority, ranges from <code>0</code> (lowest) to <code>9</code> (highest).
-     * <p>
-     * Default is <code>4</code>.
-     * 
-     * @param priority This job's priority
-     */
-    void setPriority(int priority);
-
-    /**
-     * Gets this job's time stamp (the number of milliseconds since January 1, 1970, 00:00:00 GMT).
-     * 
-     * @return The time stamp (the number of milliseconds since January 1, 1970, 00:00:00 GMT)
-     */
-    long getTimeStamp();
-
-    /**
-     * Gets this job's origin
-     * 
-     * @return The origin
-     */
-    Origin getOrigin();
-
-    /**
-     * Gets this job's {@link Behavior behavior}.
-     * 
-     * @return The behavior determining how to execute this job
-     */
-    Behavior getBehavior();
-
-    /**
-     * Invoked prior to executing this task in the given thread. This method is invoked by pooled thread <tt>t</tt> that will execute this
-     * task, and may be used to re-initialize {@link ThreadLocal}s, or to perform logging.
-     * <p>
-     * Implementations may leave this method empty if nothing should be performed.
-     */
-    void beforeExecute();
-
-    /**
-     * Invoked upon completion of execution of this task. This method is invoked by the thread that executed the task. If non-null, the
-     * {@link Throwable} is the uncaught exception that caused execution to terminate abruptly.
-     * <p>
-     * Implementations may leave this method empty if nothing should be performed.
-     * 
-     * @param t The exception that caused termination, or <code>null</code> if execution completed normally
-     */
-    void afterExecute(Throwable t);
-
-    /**
-     * Gets the modifiable properties associated with this job. <div
-     * style="margin-left: 0.1in; margin-right: 0.5in; background-color:#FFDDDD;">
-     * <p>
-     * Prefer to store only primitive data types (including Strings) to avoid data serialization issues short and long-term.
-     * </p>
-     * </div>
-     * 
-     * @return The properties
-     */
-    Map<String, ?> getProperties();
+public interface IndexingJob {
+    
+    void execute(JobInfo jobInfo) throws OXException;
 
 }

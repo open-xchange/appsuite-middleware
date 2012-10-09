@@ -61,19 +61,9 @@ import com.openexchange.session.Session;
 public interface FileStorageAccountManagerProvider {
 
     /**
-     * The topic for an appearing account manager provider.
+     * The default ranking: <code>0</code>.
      */
-    public static final String TOPIC = "com/openexchange/file/storage/FileStorageAccountManagerProvider";
-
-    /**
-     * The property for the provider's ranking; property is of type <code>java.lang.Integer</code>.
-     */
-    public static final String PROPERTY_RANKING = "ranking";
-
-    /**
-     * The property for the provider; property is of type <code>com.openexchange.file.storage.FileStorageAccountManagerProvider</code>.
-     */
-    public static final String PROPERTY_PROVIDER = "provider";
+    public static final int DEFAULT_RANKING = 0;
 
     /**
      * Whether this provider supports specified {@link FileStorageService file storage service}.

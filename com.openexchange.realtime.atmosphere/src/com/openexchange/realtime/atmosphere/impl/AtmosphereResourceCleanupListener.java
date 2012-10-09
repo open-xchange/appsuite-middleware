@@ -104,4 +104,8 @@ public class AtmosphereResourceCleanupListener implements AtmosphereResourceEven
     public void onThrowable(AtmosphereResourceEvent event) {
     }
 
+    @Override
+    public void onPreSuspend(AtmosphereResourceEvent arg0) {
+    }
+
 }

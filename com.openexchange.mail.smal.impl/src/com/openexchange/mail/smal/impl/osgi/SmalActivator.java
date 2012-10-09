@@ -53,6 +53,7 @@ import java.util.Dictionary;
 import java.util.Hashtable;
 import org.osgi.service.event.EventConstants;
 import org.osgi.service.event.EventHandler;
+import com.hazelcast.core.HazelcastInstance;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.context.ContextService;
@@ -64,7 +65,7 @@ import com.openexchange.mail.api.MailProvider;
 import com.openexchange.mail.smal.SmalAccessService;
 import com.openexchange.mail.smal.impl.SmalProvider;
 import com.openexchange.mail.smal.impl.SmalServiceLookup;
-import com.openexchange.mail.smal.impl.index.IndexEventHandler;
+import com.openexchange.mail.smal.impl.index.SmalSessionEventHandler;
 import com.openexchange.mail.smal.impl.internal.SmalDeleteListenerImpl;
 import com.openexchange.mail.smal.impl.internal.SmalUpdateTaskProviderServiceImpl;
 import com.openexchange.mail.smal.impl.internal.tasks.DropMailSyncTable;
@@ -85,7 +86,7 @@ import com.openexchange.user.UserService;
  */
 public class SmalActivator extends HousekeepingActivator {
 
-    private volatile com.openexchange.mail.smal.impl.index.IndexEventHandler eventHandler;
+    private volatile SmalSessionEventHandler eventHandler;
 
     /**
      * Initializes a new {@link SmalActivator}.
@@ -97,7 +98,8 @@ public class SmalActivator extends HousekeepingActivator {
     @Override
     protected Class<?>[] getNeededServices() {
         return new Class<?>[] {
-            ConfigurationService.class, ConfigViewFactory.class, ThreadPoolService.class, TimerService.class };
+            ConfigurationService.class, ConfigViewFactory.class, ThreadPoolService.class,
+            TimerService.class, IndexingService.class, HazelcastInstance.class };
     }
 
     @Override
@@ -107,10 +109,8 @@ public class SmalActivator extends HousekeepingActivator {
         trackService(MailAccountStorageService.class);
         trackService(SessiondService.class);
         trackService(DatabaseService.class);
-        // trackService(LanguageDetectionService.class);
         trackService(UserService.class);
         trackService(ContextService.class);
-        trackService(IndexingService.class);
         trackService(IndexFacadeService.class);
         openTrackers();
         /*
@@ -127,9 +127,9 @@ public class SmalActivator extends HousekeepingActivator {
          * Register event handlers
          */
         {
-            final Dictionary<String, Object> serviceProperties = new Hashtable<String, Object>(1);
+            Dictionary<String, Object> serviceProperties = new Hashtable<String, Object>(1);
             serviceProperties.put(EventConstants.EVENT_TOPIC, SessiondEventConstants.getAllTopics());
-            final IndexEventHandler eventHandler = this.eventHandler = new IndexEventHandler();
+            SmalSessionEventHandler eventHandler = this.eventHandler = new SmalSessionEventHandler();
             registerService(EventHandler.class, eventHandler, serviceProperties);
         }
         /*
@@ -145,9 +145,9 @@ public class SmalActivator extends HousekeepingActivator {
 
     @Override
     protected void stopBundle() throws Exception {
-        final com.openexchange.mail.smal.impl.index.IndexEventHandler eventHandler = this.eventHandler;
+        SmalSessionEventHandler eventHandler = this.eventHandler;
         if (null != eventHandler) {
-            eventHandler.close();
+//            eventHandler.close();
             this.eventHandler = null;
         }
         cleanUp();

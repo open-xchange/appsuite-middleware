@@ -54,7 +54,7 @@ import java.util.EnumMap;
 import java.util.EnumSet;
 import java.util.Map;
 import java.util.Set;
-import com.openexchange.index.attachments.AttachmentIndexField;
+import com.openexchange.groupware.attach.index.AttachmentIndexField;
 import com.openexchange.index.solr.internal.SolrField;
 
 
@@ -70,7 +70,7 @@ public enum SolrAttachmentField implements SolrField {
     SERVICE("service", "param3", AttachmentIndexField.SERVICE),
     ACCOUNT("account", "param4", AttachmentIndexField.ACCOUNT),
     FOLDER("folder", "param5", AttachmentIndexField.FOLDER),
-    OBJECT_ID("id", "param6", AttachmentIndexField.ID),    
+    OBJECT_ID("id", "param6", AttachmentIndexField.OBJECT_ID),    
     FILE_NAME("file_name", "param7", AttachmentIndexField.FILE_NAME),
     FILE_SIZE("file_size", "param8", AttachmentIndexField.FILE_SIZE),
     MIME_TYPE("mime_type", "param9", AttachmentIndexField.MIME_TYPE),

@@ -1,0 +1,9 @@
+You need Java Cryptography Extension (JCE) Unlimited Strength
+(http://www.oracle.com/technetwork/java/javase/downloads/jce-6-download-429243.html)
+to use AWS S3 encryption!
+
+Generate AES 256 key:
+$ openssl enc -aes-256-cbc -k secret -P -md sha1
+
+Copy salt, key & iv to config file
+Enable encryption in config file

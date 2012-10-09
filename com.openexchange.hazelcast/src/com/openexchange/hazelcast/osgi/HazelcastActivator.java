@@ -2,13 +2,15 @@
 package com.openexchange.hazelcast.osgi;
 
 import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 import org.apache.commons.logging.Log;
+import org.eclipse.osgi.framework.console.CommandInterpreter;
+import org.eclipse.osgi.framework.console.CommandProvider;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
@@ -19,10 +21,10 @@ import com.hazelcast.config.Join;
 import com.hazelcast.config.TcpIpConfig;
 import com.hazelcast.core.Hazelcast;
 import com.hazelcast.core.HazelcastInstance;
+import com.hazelcast.nio.Address;
 import com.openexchange.cluster.discovery.ClusterDiscoveryService;
 import com.openexchange.cluster.discovery.ClusterListener;
 import com.openexchange.config.ConfigurationService;
-import com.openexchange.hazelcast.ClassLoaderAwareHazelcastInstance;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.timer.TimerService;
 import com.openexchange.tools.strings.TimeSpanParser;
@@ -43,6 +45,8 @@ import com.openexchange.tools.strings.TimeSpanParser;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class HazelcastActivator extends HousekeepingActivator {
+    
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(HazelcastActivator.class);
 
     public static final AtomicReference<HazelcastInstance> REF_HAZELCAST_INSTANCE = new AtomicReference<HazelcastInstance>();
 
@@ -155,6 +159,8 @@ public class HazelcastActivator extends HousekeepingActivator {
             }
         });
         openTrackers();
+        
+        registerService(CommandProvider.class, new UtilCommandProvider(), null);
     }
 
     /**
@@ -205,14 +211,37 @@ public class HazelcastActivator extends HousekeepingActivator {
             /*
              * Create appropriate Hazelcast instance from configuration
              */
-            final HazelcastInstance hazelcastInstance =
-                new ClassLoaderAwareHazelcastInstance(Hazelcast.newHazelcastInstance(config), false);
+//            final HazelcastInstance hazelcastInstance = new ClassLoaderAwareHazelcastInstance(Hazelcast.newHazelcastInstance(config), false);
+            final HazelcastInstance hazelcastInstance = Hazelcast.newHazelcastInstance(config);
             registerService(HazelcastInstance.class, hazelcastInstance);
             REF_HAZELCAST_INSTANCE.set(hazelcastInstance);
             if (logger.isInfoEnabled()) {
                 logger.info("\nHazelcast:\n\tStarted in " + (System.currentTimeMillis() - stamp) + "msec.\n");
             }
             return true;
+        }
+    }
+    
+    public static final class UtilCommandProvider implements CommandProvider {
+
+        @Override
+        public String getHelp() {
+            StringBuilder help = new StringBuilder();
+            help.append("\taddnode - Add a solr node.\n");
+            return help.toString();
+        }
+        
+        public void _addnode(CommandInterpreter commandInterpreter) {
+            String ip = commandInterpreter.nextArgument();
+            HazelcastInstance hazelcast = REF_HAZELCAST_INSTANCE.get();
+            Join join = hazelcast.getConfig().getNetworkConfig().getJoin();
+            TcpIpConfig tcpIpConfig = join.getTcpIpConfig();
+            try {
+                tcpIpConfig.addAddress(new Address(InetAddress.getByName(ip), hazelcast.getConfig().getNetworkConfig().getPort()));
+                hazelcast.getLifecycleService().restart();
+            } catch (UnknownHostException e) {
+                LOG.error("Could not register node.", e);
+            }
         }
     }
 

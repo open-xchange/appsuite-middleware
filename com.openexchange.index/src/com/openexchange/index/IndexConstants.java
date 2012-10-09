@@ -58,13 +58,13 @@ package com.openexchange.index;
 public class IndexConstants {
     
     public static final String ACCOUNT = "account";
-
-    public static final String SERVICE = "service";
     
     public static final String IDS = "ids";
     
     public static final String MODULE = "module";
     
-    public static final int DEFAULT_ATTACHMENT = 1;
+    public static final String DEFAULT_ATTACHMENT = "1";
+    
+    public static final String DEFAULT_ACCOUNT = "0";
 
 }
