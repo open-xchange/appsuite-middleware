@@ -378,14 +378,6 @@ public class StoredSession implements PutIfAbsent, Serializable {
         this.userLogin = userLogin;
     }
 
-    public Map<String, Object> getParameters() {
-        return parameters;
-    }
-
-    public void setParameters(final Map<String, Object> parameters) {
-        this.parameters = new ConcurrentHashMap<String, Object>(parameters);
-    }
-
     @Override
     public Object setParameterIfAbsent(String name, Object value) {
         if (PARAM_LOCK.equals(name)) {
