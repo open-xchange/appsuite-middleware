@@ -547,11 +547,8 @@ public class Threader {
     private static final class ThreadContainer {
 
         Threadable threadable;
-
         ThreadContainer parent;
-
         ThreadContainer child;
-
         ThreadContainer next;
 
         /**
