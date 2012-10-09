@@ -1,3 +1,7 @@
+* 2012-10-09 - thorben.betten@open-xchange.com
+
+ - Fix for bug 23229: Added CSS3 styles to white-list filter
+
 * 2012-10-05 - jan.bauerdick@open-xchange.com
 
  - Improved c.o.aws for AWS S3 encryption
