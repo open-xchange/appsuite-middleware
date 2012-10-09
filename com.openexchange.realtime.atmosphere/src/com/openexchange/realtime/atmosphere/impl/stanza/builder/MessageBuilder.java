@@ -47,76 +47,56 @@
  *
  */
 
-package com.openexchange.realtime.atmosphere.impl;
+package com.openexchange.realtime.atmosphere.impl.stanza.builder;
 
-import java.util.Set;
-
+import org.json.JSONObject;
 import com.openexchange.exception.OXException;
-import com.openexchange.realtime.Channel;
-import com.openexchange.realtime.atmosphere.impl.payload.PayloadTransformerRegistry;
 import com.openexchange.realtime.packet.ID;
-import com.openexchange.realtime.packet.Stanza;
-import com.openexchange.tools.session.ServerSession;
+import com.openexchange.realtime.packet.Message;
+
 
 /**
- * {@link RTAtmosphereChannel}
+ * {@link MessageBuilder}
  *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
-public class RTAtmosphereChannel implements Channel {
-	
-    public static final String PROTOCOL = "ox";
-	private final RTAtmosphereHandler handler;
-	private final PayloadTransformerRegistry library;
-	
-	
+public class MessageBuilder extends StanzaBuilder<Message> {
+    /**
+     * Create a new MessageBuilder
+     * Initializes a new {@link MessageBuilder}.
+     * @param from the sender's ID, must not be null
+     * @param json the sender's message, must not be null
+     * @throws IllegalArgumentException if from or json are null
+     */
+    public MessageBuilder(ID from, JSONObject json) {
+        if(from == null || json == null) {
+            throw new IllegalArgumentException();
+        }
+        this.from = from;
+        this.json = json;
+        this.stanza = new Message();
+    }
+    
+    @Override
+    public Message build() throws OXException {
+        throw new UnsupportedOperationException("Not implemented yet!");
+//        Message message = new Message();
+//        basics(message, object);
+//
+//        String type = object.optString("type");
+//
+//        if (type == null || type.equals("")) {
+//            message.setType(Message.Type.normal);
+//        } else {
+//            for (Message.Type t : Message.Type.values()) {
+//                if (t.name().equalsIgnoreCase(type)) {
+//                    message.setType(t);
+//                    break;
+//                }
+//            }
+//        }
+//
+//        return message;
+    }
 
-	public RTAtmosphereChannel(RTAtmosphereHandler handler,
-			PayloadTransformerRegistry library) {
-		this.handler = handler;
-		this.library = library;
-	}
-
-	@Override
-    public String getProtocol() {
-		return "ox";
-	}
-
-	@Override
-    public boolean canHandle(Set<String> namespaces, ID recipient,
-			ServerSession session) {
-		if (!isConnected(recipient, session)) {
-			return false;
-		}
-		
-		if (!hasCapability(recipient, namespaces, session)) {
-			return false;
-		}
-		
-		if (!library.getManageableNamespaces().containsAll(namespaces)) {
-			return false;
-		}
-		
-		return true;
-	}
-
-	public boolean hasCapability(ID recipient, Set<String> namespaces,
-			ServerSession session) {
-		return true; // TODO: Implement Capability Model
-	}
-
-	@Override
-    public int getPriority() {
-		return 10000;
-	}
-
-	@Override
-    public boolean isConnected(ID id, ServerSession session) {
-		return handler.isConnected(id);
-	}
-
-	@Override
-    public void send(Stanza stanza, ServerSession session) throws OXException {
-		handler.handleOutgoing(stanza, session);
-	}
 }

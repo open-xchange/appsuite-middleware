@@ -50,7 +50,12 @@
 package com.openexchange.realtime.atmosphere.presence;
 
 import com.openexchange.exception.OXException;
+<<<<<<< HEAD
 import com.openexchange.realtime.StanzaSender;
+=======
+import com.openexchange.realtime.atmosphere.StanzaSender;
+import com.openexchange.realtime.atmosphere.impl.payload.PayloadTransformer;
+>>>>>>> c057920f09d7cfd1a5e35a4fade0598ca69458db
 import com.openexchange.realtime.atmosphere.presence.osgi.AtmospherePresenceServiceRegistry;
 import com.openexchange.realtime.packet.ID;
 import com.openexchange.realtime.packet.Presence;

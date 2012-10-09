@@ -49,23 +49,15 @@
 
 package com.openexchange.http.grizzly.services.atmosphere;
 
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.URL;
 import java.nio.ByteBuffer;
 import java.nio.channels.Channels;
-import java.nio.channels.FileChannel;
 import java.nio.channels.ReadableByteChannel;
 import java.nio.channels.WritableByteChannel;
-import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import org.apache.commons.logging.Log;
 import org.osgi.framework.Bundle;
 
 
@@ -75,7 +67,6 @@ import org.osgi.framework.Bundle;
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
 public class AtmosphereJSServlet extends HttpServlet {
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(AtmosphereJSServlet.class);
     private Bundle bundle;
     
     public AtmosphereJSServlet(Bundle bundle) {
@@ -83,7 +74,7 @@ public class AtmosphereJSServlet extends HttpServlet {
     }
 
     @Override
-    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
         response.reset();
         response.setContentType("application/javascript");
 

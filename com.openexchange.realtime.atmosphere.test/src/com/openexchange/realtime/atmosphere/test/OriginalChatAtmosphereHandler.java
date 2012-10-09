@@ -13,7 +13,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.openexchange.realtime.example.atmosphere.test;
+package com.openexchange.realtime.atmosphere.test;
 
 import org.atmosphere.config.service.AtmosphereHandlerService;
 import org.atmosphere.cpr.AtmosphereHandler;

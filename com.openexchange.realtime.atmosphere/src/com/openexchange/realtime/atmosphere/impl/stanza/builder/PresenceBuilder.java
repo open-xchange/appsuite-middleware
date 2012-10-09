@@ -47,62 +47,57 @@
  *
  */
 
-package com.openexchange.realtime.atmosphere.impl.stanza;
+package com.openexchange.realtime.atmosphere.impl.stanza.builder;
 
 import org.json.JSONObject;
 import com.openexchange.exception.OXException;
-import com.openexchange.realtime.atmosphere.AtmosphereExceptionCode;
 import com.openexchange.realtime.packet.ID;
-import com.openexchange.realtime.packet.IQ;
-import com.openexchange.realtime.packet.Stanza;
+import com.openexchange.realtime.packet.Presence;
+import com.openexchange.realtime.packet.Presence.Type;
 
 /**
- * {@link IQBuilder} - Parse an atmosphere client's IQ message and build a IQ Stanza from it by adding the recipients ID.
+ * {@link PresenceBuilder} - Parse an atmosphere client's presence message and build a Presence Stanza from it by adding the recipients ID.
  * 
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
-public class IQBuilder extends StanzaBuilder<IQ> {
+public class PresenceBuilder extends StanzaBuilder<Presence> {
 
     /**
-     * Create a new IQBuilder
-     * Initializes a new {@link IQBuilder}.
+     * Create a new PresenceBuilder
+     * Initializes a new {@link PresenceBuilder}.
      * 
      * @param from the sender's ID, must not be null
      * @param json the sender's message, must not be null
      * @throws IllegalArgumentException if from or json are null
      */
-    public IQBuilder(ID from, JSONObject json) {
+    public PresenceBuilder(ID from, JSONObject json) {
         if (from == null || json == null) {
             throw new IllegalArgumentException();
         }
         this.from = from;
         this.json = json;
-        this.stanza = new IQ();
+        this.stanza = new Presence();
     }
 
     @Override
-    public IQ build() throws OXException {
+    public Presence build() throws OXException {
         basics();
         type();
         return stanza;
     }
 
-    /**
-     * Check for the obligatory type key of IQ Stanzas in the received json and set the value in the Stanza 
-     * @throws OXException if the type key is missing
-     */
-    private void type() throws OXException {
-        throw new UnsupportedOperationException("Not implemented yet!");
-//        String type = json.optString("type");
-//        if (type == null) {
-//            throw AtmosphereExceptionCode.MISSING_KEY.create("type", json);
-//        }
-//        for (IQ.Type t : IQ.Type.values()) {
-//            if (t.name().equalsIgnoreCase(type)) {
-//                stanza.setType(t);
-//                break;
-//            }
-//        }
+    private void type() {
+        if (json.has("type")) {
+            String type = json.optString("type");
+            for (Presence.Type t : Presence.Type.values()) {
+                if (t.name().equalsIgnoreCase(type)) {
+                    stanza.setType(t);
+                    break;
+                }
+            }
+        } else {
+            stanza.setType(Type.NONE);
+        }
     }
-    
+
 }

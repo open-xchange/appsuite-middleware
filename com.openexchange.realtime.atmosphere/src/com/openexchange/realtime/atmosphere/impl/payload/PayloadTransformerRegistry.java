@@ -47,17 +47,18 @@
  *
  */
 
-package com.openexchange.realtime.atmosphere.payload;
+package com.openexchange.realtime.atmosphere.impl.payload;
 
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-import com.openexchange.realtime.payload.PayloadTransformer;
+import com.openexchange.osgi.ServiceRegistry;
+import com.openexchange.realtime.atmosphere.osgi.AtmosphereServiceRegistry;
 import com.openexchange.realtime.util.ElementPath;
 
 /**
- * {@link PayloadTransformerLibrary} - Tracks registered {@link PayloadTransformer handlers} and
+ * {@link PayloadTransformerRegistry} - Tracks registered {@link PayloadTransformer handlers} and
  * makes them accessible through {@link #getHandlerFor(String)}.
  * This is important to the AtmosphereChannel and associated Channel handler.
  * The Channel can decide if it is able to process incoming Stanzas into POJOs
@@ -68,16 +69,27 @@ import com.openexchange.realtime.util.ElementPath;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a> JavaDoc
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
-public class PayloadTransformerLibrary {
+public class PayloadTransformerRegistry extends ServiceRegistry {
 
-    /**
-     * The collection for registered {@link PayloadTransformer handlers}.
-     */
+    private static final PayloadTransformerRegistry INSTANCE = new PayloadTransformerRegistry();
+
     private final Map<ElementPath, PayloadTransformer> handlers;
 
-    public PayloadTransformerLibrary() {
+    /**
+     * Encapsulated constructor.
+     */
+    private PayloadTransformerRegistry() {
         super();
         handlers = new ConcurrentHashMap<ElementPath, PayloadTransformer>();
+    }
+
+    /**
+     * Get the Registry singleton.
+     * 
+     * @return the Registry singleton
+     */
+    public static PayloadTransformerRegistry getInstance() {
+        return INSTANCE;
     }
 
     /**

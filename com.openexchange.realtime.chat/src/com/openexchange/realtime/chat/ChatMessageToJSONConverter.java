@@ -47,76 +47,56 @@
  *
  */
 
-package com.openexchange.realtime.atmosphere.impl;
+package com.openexchange.realtime.chat;
 
-import java.util.Set;
-
+import org.json.JSONException;
+import org.json.JSONObject;
+import com.openexchange.conversion.simple.SimpleConverter;
+import com.openexchange.conversion.simple.SimplePayloadConverter;
 import com.openexchange.exception.OXException;
-import com.openexchange.realtime.Channel;
-import com.openexchange.realtime.atmosphere.impl.payload.PayloadTransformerRegistry;
-import com.openexchange.realtime.packet.ID;
-import com.openexchange.realtime.packet.Stanza;
 import com.openexchange.tools.session.ServerSession;
 
+
 /**
- * {@link RTAtmosphereChannel}
+ * {@link ChatMessageToJSONConverter} - Converts a Stanza Payload from a ChatMessage
+ * POJO into a JSON Object.
  *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
-public class RTAtmosphereChannel implements Channel {
-	
-    public static final String PROTOCOL = "ox";
-	private final RTAtmosphereHandler handler;
-	private final PayloadTransformerRegistry library;
-	
-	
+public class ChatMessageToJSONConverter implements SimplePayloadConverter {
 
-	public RTAtmosphereChannel(RTAtmosphereHandler handler,
-			PayloadTransformerRegistry library) {
-		this.handler = handler;
-		this.library = library;
-	}
+    @Override
+    public String getInputFormat() {
+        return "chatMessage";
+    }
 
-	@Override
-    public String getProtocol() {
-		return "ox";
-	}
+    @Override
+    public String getOutputFormat() {
+        return "json";
+    }
 
-	@Override
-    public boolean canHandle(Set<String> namespaces, ID recipient,
-			ServerSession session) {
-		if (!isConnected(recipient, session)) {
-			return false;
-		}
-		
-		if (!hasCapability(recipient, namespaces, session)) {
-			return false;
-		}
-		
-		if (!library.getManageableNamespaces().containsAll(namespaces)) {
-			return false;
-		}
-		
-		return true;
-	}
+    @Override
+    public Quality getQuality() {
+        return Quality.GOOD;
+    }
 
-	public boolean hasCapability(ID recipient, Set<String> namespaces,
-			ServerSession session) {
-		return true; // TODO: Implement Capability Model
-	}
+    @Override
+    public Object convert(Object data, ServerSession session, SimpleConverter converter) throws OXException {
+        try {
+        ChatMessage message = (ChatMessage) data;
+        
+        JSONObject object = new JSONObject();
+        
+        object.put("message", message.getMessage());
+        if (message.getPriority() != ChatMessage.NO_PRIORITY) {
+            object.put("priority", message.getPriority());
+        }
+        
+        return object;
+    } catch (JSONException x) {
+        throw OXException.general("Could not create json object: " + x.getMessage());
+    }
+    
+}
 
-	@Override
-    public int getPriority() {
-		return 10000;
-	}
-
-	@Override
-    public boolean isConnected(ID id, ServerSession session) {
-		return handler.isConnected(id);
-	}
-
-	@Override
-    public void send(Stanza stanza, ServerSession session) throws OXException {
-		handler.handleOutgoing(stanza, session);
-	}
 }

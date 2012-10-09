@@ -47,18 +47,21 @@
  *
  */
 
-package com.openexchange.realtime.atmosphere.impl.stanza;
+package com.openexchange.realtime.atmosphere.impl.stanza.transformer;
 
-import com.openexchange.realtime.packet.Stanza;
-
+import com.openexchange.realtime.packet.Message;
 
 /**
- * {@link TransformerSelector}
- *
+ * {@link MessageTransformer} - StanzaTransformer that can transform Message Stanzas from representation a to representation b.
+ * 
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
-public class TransformerSelector {
-    public static StanzaTransformer<T extends Stanza> getStanzaTransformer(final Stanza stanza) {
-        return null;
+public class MessageTransformer extends StanzaTransformer<Message> {
+
+    private Message mesage;
+
+    public MessageTransformer(Message mesage) {
+        this.mesage = mesage;
     }
+
 }

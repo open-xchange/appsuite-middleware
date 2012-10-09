@@ -47,55 +47,21 @@
  *
  */
 
-package converters;
+package com.openexchange.realtime.atmosphere.impl.stanza.transformer;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-import com.openexchange.conversion.simple.SimpleConverter;
-import com.openexchange.conversion.simple.SimplePayloadConverter;
-import com.openexchange.exception.OXException;
-import com.openexchange.realtime.chat.ChatMessage;
-import com.openexchange.tools.session.ServerSession;
+import com.openexchange.realtime.packet.Presence;
 
 
 /**
- * {@link JSONToChatMessageConverter} - Converts a Stanza Payload from a JSON Object
- * into a ChatMessage POJO.
+ * {@link PresenceTransformer} - StanzaTransformer that can transform Presence Stanzas from representation a to representation b.
  *
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
-public class JSONToChatMessageConverter implements SimplePayloadConverter {
-    
-    @Override
-    public String getInputFormat() {
-        return "json";
+public class PresenceTransformer extends StanzaTransformer<Presence> {
+    private Presence presence;
+
+    public PresenceTransformer(Presence presence) {
+        this.presence = presence;
     }
 
-    @Override
-    public String getOutputFormat() {
-        return "chatMessage";
-    }
-
-    @Override
-    public Quality getQuality() {
-        return Quality.GOOD;
-    }
-
-    @Override
-    public Object convert(Object data, ServerSession session, SimpleConverter converter) throws OXException {
-        try {
-            JSONObject object = (JSONObject) data;
-
-            ChatMessage message = new ChatMessage(object.optString("message"));
-            
-            if (object.has("priority")) {
-                message.setPriority(object.getInt("priority"));
-            }
-            
-            return message;
-        } catch (JSONException x) {
-            throw OXException.general("Could not create chat message object: " + x.getMessage());
-        }
-        
-    }
 }

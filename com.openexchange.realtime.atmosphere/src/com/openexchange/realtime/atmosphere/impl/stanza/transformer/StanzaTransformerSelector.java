@@ -47,56 +47,42 @@
  *
  */
 
-package com.openexchange.realtime.atmosphere.impl.stanza;
+package com.openexchange.realtime.atmosphere.impl.stanza.transformer;
 
-import org.json.JSONObject;
 import com.openexchange.exception.OXException;
-import com.openexchange.realtime.packet.ID;
+import com.openexchange.realtime.atmosphere.AtmosphereExceptionCode;
+import com.openexchange.realtime.packet.IQ;
+import com.openexchange.realtime.packet.Message;
 import com.openexchange.realtime.packet.Presence;
-import com.openexchange.realtime.packet.Presence.Type;
+import com.openexchange.realtime.packet.Stanza;
 
 /**
- * {@link PresenceBuilder} - Parse an atmosphere client's presence message and build a Presence Stanza from it by adding the recipients ID.
+ * {@link StanzaTransformerSelector} - Select a StanzaTransformer suitable for the given type of Stanza.
  * 
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
-public class PresenceBuilder extends StanzaBuilder<Presence> {
+public class StanzaTransformerSelector {
 
     /**
-     * Create a new PresenceBuilder
-     * Initializes a new {@link PresenceBuilder}.
+     * Select a StanzaTransformer suitable for the given type of Stanza.
      * 
-     * @param from the sender's ID, must not be null
-     * @param json the sender's message, must not be null
-     * @throws IllegalArgumentException if from or json are null
+     * @param stanza The Stanza that has to be transformed from representation a to represtation b
+     * @return a StanzaTransformer suitable for the given type of Stanza
+     * @throws OXException If no suitable StanzaTransformer can be found
      */
-    public PresenceBuilder(ID from, JSONObject json) {
-        if (from == null || json == null) {
-            throw new IllegalArgumentException();
-        }
-        this.from = from;
-        this.json = json;
-        this.stanza = new Presence();
-    }
-
-    @Override
-    public Presence build() throws OXException {
-        basics();
-        type();
-        return stanza;
-    }
-
-    private void type() {
-        if (json.has("type")) {
-            String type = json.optString("type");
-            for (Presence.Type t : Presence.Type.values()) {
-                if (t.name().equalsIgnoreCase(type)) {
-                    stanza.setType(t);
-                    break;
-                }
-            }
+    public static StanzaTransformer<? extends Stanza> getStanzaTransformer(Stanza stanza) throws OXException {
+        /*
+         * We could replace this with a Stanza.accept() and StanzaVisitor.visit() pattern if instancof becomes too ugly and we want real
+         * multiple dispatch in Java
+         */
+        if (stanza instanceof Presence) {
+            return new PresenceTransformer((Presence) stanza);
+        } else if (stanza instanceof IQ) {
+            return new IQTransformer((IQ) stanza);
+        } else if (stanza instanceof Message) {
+            return new MessageTransformer((Message) stanza);
         } else {
-            stanza.setType(Type.NONE);
+            throw AtmosphereExceptionCode.MISSING_TRANSFORMER_FOR_STANZA.create(stanza.getClass().getName());
         }
     }
 

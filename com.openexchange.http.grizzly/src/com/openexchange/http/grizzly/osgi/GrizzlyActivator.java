@@ -179,6 +179,7 @@ public class GrizzlyActivator extends HousekeepingActivator {
                         return "/echo".equals(request.getRequestURI());
                     }
 
+                    @Override
                     public void onMessage(WebSocket socket, String data) {
                         socket.send(data);
                     }

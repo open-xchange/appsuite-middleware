@@ -1,16 +1,10 @@
-package com.openexchange.realtime.example.atmosphere.test;
+package com.openexchange.realtime.atmosphere.test;
 
 import org.osgi.service.http.HttpService;
-import com.openexchange.conversion.simple.SimplePayloadConverter;
 import com.openexchange.http.grizzly.services.atmosphere.AtmosphereService;
 import com.openexchange.log.Log;
 import com.openexchange.log.LogFactory;
 import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.realtime.atmosphere.OXRTConversionHandler;
-import com.openexchange.realtime.atmosphere.payload.PayloadTransformer;
-import com.openexchange.realtime.packet.Message;
-import converters.ChatMessageToJSONConverter;
-import converters.JSONToChatMessageConverter;
 
 public class AtmosphereTestActivator extends HousekeepingActivator {
 
@@ -39,8 +33,8 @@ public class AtmosphereTestActivator extends HousekeepingActivator {
          * itself via the conversion service offered by the
          * {@link DefaultConverter} 
          */
-        registerService(SimplePayloadConverter.class, new ChatMessageToJSONConverter());
-        registerService(SimplePayloadConverter.class, new JSONToChatMessageConverter());
+//        registerService(SimplePayloadConverter.class, new ChatMessageToJSONConverter());
+//        registerService(SimplePayloadConverter.class, new JSONToChatMessageConverter());
 
         /*
          * After adding the new SimplePayloadConverters that are able to convert
@@ -49,11 +43,11 @@ public class AtmosphereTestActivator extends HousekeepingActivator {
          * Payload to convert itself into the desired format. It takes chat
          * elements from the namespace default and transform them to ChatMessage POJOS.
          */
-        registerService(PayloadTransformer.class,  new OXRTConversionHandler(Message.class, "chatMessage"));
+//        registerService(PayloadTransformer.class,  new OXRTConversionHandler(Message.class, "chatMessage"));
         
         //Add the atmosphere chat handler
         AtmosphereService service = getService(AtmosphereService.class);
-        service.addAtmosphereHandler("/chat", new OriginalChatAtmosphereHandler());
+        service.addAtmosphereHandler("/chat", new ChatHandler());
         LOG.info("added \"/chat\" AtmosphereHandler");
         
         HttpService httpService = getService(HttpService.class);

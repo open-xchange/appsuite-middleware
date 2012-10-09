@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.realtime.example.atmosphere.test;
+package com.openexchange.realtime.atmosphere.test;
 
 import java.io.IOException;
 import java.util.Date;

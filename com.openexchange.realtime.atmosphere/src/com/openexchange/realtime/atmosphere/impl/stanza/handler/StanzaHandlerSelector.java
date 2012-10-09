@@ -47,57 +47,43 @@
  *
  */
 
-package com.openexchange.realtime.atmosphere.impl.stanza;
+package com.openexchange.realtime.atmosphere.impl.stanza.handler;
 
-import org.json.JSONObject;
 import com.openexchange.exception.OXException;
-import com.openexchange.realtime.packet.ID;
+import com.openexchange.realtime.atmosphere.AtmosphereExceptionCode;
 import com.openexchange.realtime.packet.IQ;
 import com.openexchange.realtime.packet.Message;
-
+import com.openexchange.realtime.packet.Presence;
+import com.openexchange.realtime.packet.Stanza;
 
 /**
- * {@link MessageBuilder}
- *
+ * {@link StanzaHandlerSelector} - Select a StanzaTransformer suitable for the given type of Stanza.
+ * 
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
-public class MessageBuilder extends StanzaBuilder<Message> {
+public class StanzaHandlerSelector {
+
     /**
-     * Create a new MessageBuilder
-     * Initializes a new {@link MessageBuilder}.
-     * @param from the sender's ID, must not be null
-     * @param json the sender's message, must not be null
-     * @throws IllegalArgumentException if from or json are null
+     * Select a StanzaTransformer suitable for the given type of Stanza.
+     * 
+     * @param stanza The Stanza that has to be transformed from representation a to represtation b
+     * @return a StanzaTransformer suitable for the given type of Stanza
+     * @throws OXException If no suitable StanzaTransformer can be found
      */
-    public MessageBuilder(ID from, JSONObject json) {
-        if(from == null || json == null) {
-            throw new IllegalArgumentException();
+    public static StanzaHandler<? extends Stanza> getStanzaHandler(Stanza stanza) throws OXException {
+        /*
+         * We could replace this with a Stanza.accept() and StanzaVisitor.visit() pattern if instancof becomes too ugly and we want real
+         * multiple dispatch in Java
+         */
+        if (stanza instanceof Presence) {
+            StanzaHandler handler = stanzaHandlerRegistry.lookup(Presence.class);
+        } else if (stanza instanceof IQ) {
+            StanzaHandler handler = stanzaHandlerRegistry.lookup(IQ.class);
+        } else if (stanza instanceof Message) {
+            StanzaHandler handler = stanzaHandlerRegistry.lookup(Message.class);
+        } else {
+            throw AtmosphereExceptionCode.MISSING_HANDLER_FOR_STANZA.create(stanza.getClass().getName());
         }
-        this.from = from;
-        this.json = json;
-        this.stanza = new Message();
-    }
-    
-    @Override
-    public Message build() throws OXException {
-        throw new UnsupportedOperationException("Not implemented yet!");
-//        Message message = new Message();
-//        basics(message, object);
-//
-//        String type = object.optString("type");
-//
-//        if (type == null || type.equals("")) {
-//            message.setType(Message.Type.normal);
-//        } else {
-//            for (Message.Type t : Message.Type.values()) {
-//                if (t.name().equalsIgnoreCase(type)) {
-//                    message.setType(t);
-//                    break;
-//                }
-//            }
-//        }
-//
-//        return message;
     }
 
 }
