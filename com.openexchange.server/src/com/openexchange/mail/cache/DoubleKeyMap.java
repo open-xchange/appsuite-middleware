@@ -130,7 +130,11 @@ final class DoubleKeyMap<K1, K2, V extends Serializable> implements Serializable
      * @return <code>true</code> if key pair is contained in this map; otherwise <code>false</code>
      */
     public boolean containsKeyPair(final K1 k1, final K2 k2) {
-        final Map<K2, V> innerMap = getMap().get(k1);
+        final Map<K1, Map<K2, V>> m = map;
+        if (null == m) {
+            return false;
+        }
+        final Map<K2, V> innerMap = m.get(k1);
         if (null == innerMap) {
             return false;
         }
