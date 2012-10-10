@@ -57,7 +57,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.realtime.atmosphere.AtmosphereExceptionCode;
 import com.openexchange.realtime.packet.ID;
 import com.openexchange.realtime.packet.Stanza;
-import com.openexchange.realtime.payload.Payload;
+import com.openexchange.realtime.payload.PayloadElement;
 
 /**
  * {@link StanzaBuilder} - Abstract Stanza parser class, gathering common fields and methods.
@@ -114,9 +114,9 @@ public abstract class StanzaBuilder<T extends Stanza> {
                 }
                 if (payload.has("namespace")) {
                     String namespace = payload.optString("namespace");
-                    stanza.addPayload(new Payload(payload, "json", namespace, elementName ));
+                    stanza.addPayload(new PayloadElement(payload, "json", namespace, elementName ));
                 } else {
-                    stanza.addPayload(new Payload(payload, "json", null, elementName ));
+                    stanza.addPayload(new PayloadElement(payload, "json", null, elementName ));
                 }
             }
         }

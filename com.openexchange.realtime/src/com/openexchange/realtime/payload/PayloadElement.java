@@ -56,14 +56,14 @@ import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.session.ServerSession;
 
 /**
- * {@link Payload} - Represents a stanza's payload element that is any (POJO) object linked with its format identifier. Namespace and
+ * {@link PayloadElement} - Represents a stanza's payload element that is any (POJO) object linked with its format identifier. Namespace and
  * elementName are used for unique identification (@see ElementPath) of payload elements and determine which {@link PayloadTransformer}
  * to use. Payloads can form n-ary trees: Payload = data , {Payload}
  * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a> JavaDoc
  */
-public class Payload {
+public class PayloadElement {
 
     /**
      * The <tt>ServiceLookup</tt> reference.
@@ -82,14 +82,14 @@ public class Payload {
     private Object data;
 
     /**
-     * Initializes a new {@link Payload}.
+     * Initializes a new {@link PayloadElement}.
      * 
      * @param data The payload's data object
      * @param format The data object's format
      * @param namespace The namespace of this Payload element
      * @param elementName the unique element name within the namespace
      */
-    public Payload(Object data, String format, String namespace, String elementName) {
+    public PayloadElement(Object data, String format, String namespace, String elementName) {
         this.data = data;
         this.format = format;
         this.namespace = namespace;
@@ -148,15 +148,15 @@ public class Payload {
      * 
      * @param toFormat The format to convert into
      * @param session The Open-Xchange session
-     * @return A new {@link Payload payload} with desired format
+     * @return A new {@link PayloadElement payload} with desired format
      * @throws OXException If conversion fails
      */
-    public Payload to(String toFormat, ServerSession session) throws OXException {
+    public PayloadElement to(String toFormat, ServerSession session) throws OXException {
         if (toFormat.equals(format)) {
-            return new Payload(data, toFormat, namespace, elementName);
+            return new PayloadElement(data, toFormat, namespace, elementName);
         }
         SimpleConverter converter = SERVICES.get().getService(SimpleConverter.class);
-        return new Payload(converter.convert(format, toFormat, data, session), toFormat, namespace, elementName);
+        return new PayloadElement(converter.convert(format, toFormat, data, session), toFormat, namespace, elementName);
     }
 
     @Override
@@ -176,9 +176,9 @@ public class Payload {
             return true;
         if (obj == null)
             return false;
-        if (!(obj instanceof Payload))
+        if (!(obj instanceof PayloadElement))
             return false;
-        Payload other = (Payload) obj;
+        PayloadElement other = (PayloadElement) obj;
         if (data == null) {
             if (other.data != null)
                 return false;
@@ -201,5 +201,12 @@ public class Payload {
             return false;
         return true;
     }
+
+    @Override
+    public String toString() {
+        return "PayloadElement [format=" + format + ", namespace=" + namespace + ", elementName=" + elementName + ", data=" + data + "]";
+    }
+    
+    
 
 }

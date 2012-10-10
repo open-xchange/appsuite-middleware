@@ -57,7 +57,7 @@ import com.openexchange.osgi.SimpleRegistryListener;
 import com.openexchange.realtime.Channel;
 import com.openexchange.realtime.MessageDispatcher;
 import com.openexchange.realtime.impl.MessageDispatcherImpl;
-import com.openexchange.realtime.payload.Payload;
+import com.openexchange.realtime.payload.PayloadElement;
 
 /**
  * {@link RTActivator} - The activator for realtime bundle.
@@ -73,7 +73,7 @@ public class RTActivator extends HousekeepingActivator {
 
 	@Override
 	protected void startBundle() throws Exception {
-		Payload.SERVICES.set(this);
+		PayloadElement.SERVICES.set(this);
 		
 		final MessageDispatcherImpl dispatcher = new MessageDispatcherImpl();
 		
@@ -97,7 +97,7 @@ public class RTActivator extends HousekeepingActivator {
 
 	@Override
 	protected void stopBundle() throws Exception {
-	    Payload.SERVICES.set(null);
+	    PayloadElement.SERVICES.set(null);
 	    super.stopBundle();
 	}
 

@@ -47,46 +47,46 @@
  *
  */
 
-package com.openexchange.realtime.payload;
+package com.openexchange;
 
-import com.openexchange.exception.OXException;
-import com.openexchange.realtime.StanzaSender;
-import com.openexchange.realtime.util.ElementPath;
-import com.openexchange.tools.session.ServerSession;
+import static org.junit.Assert.assertEquals;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import org.junit.Test;
+import org.xml.sax.SAXException;
+import com.meterware.httpunit.GetMethodWebRequest;
+import com.meterware.httpunit.HTMLElement;
+import com.meterware.httpunit.PutMethodWebRequest;
+import com.meterware.httpunit.WebConversation;
+import com.meterware.httpunit.WebRequest;
+import com.meterware.httpunit.WebResponse;
 
 /**
- * {@link PayloadTransformer} - Used to transform Payload elemnts of incoming and outgoing Stanzas.
+ * {@link TestServletTest}
  * 
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
-public interface PayloadTransformer {
+public class TestServletTest {
+    
+    private final String URL = "http://localhost/servlet/TestServlet";
+    private final String PUT_STRING = "A PUT String with Umlaut";
+    
+    @Test
+    public void testGetMethod() throws Exception {
+        WebConversation conversation = new WebConversation();
+        WebRequest request = new GetMethodWebRequest(URL);
+        WebResponse response = conversation.getResponse(request);
+        HTMLElement[] paragraphs = response.getElementsByTagName("p");
+    }
 
-    /**
-     * Get the complete path to an element in a namespace that this PayloadTransformer is able to process.
-     * 
-     * @return the elementPath of elements this PayloadTransformer is able to process.
-     */
-    public ElementPath getElementPath();
-
-    /**
-     * Transform an incoming Payload.
-     * 
-     * @param paylaod The incoming Payload to process
-     * @param session The currently active session
-     * @return 
-     * @throws OXException When transformation fails
-     */
-    public PayloadElement incoming(PayloadElement payload, ServerSession session) throws OXException;
-
-    /**
-     * Transform an outgoing Payload.
-     * 
-     * @param payload The Payload to process
-     * @param session The currently active session
-     * @param sender The StanzaSender to use for finally sending the processed Stanza
-     * @throws OXException
-     */
-    public PayloadElement outgoing(PayloadElement payload, ServerSession session, StanzaSender sender) throws OXException;
+    @Test
+    public void testPutMethod() throws IOException, SAXException {
+        WebConversation conversation = new WebConversation();
+        ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(PUT_STRING.getBytes("UTF-8"));
+        WebRequest request = new PutMethodWebRequest("http://localhost/servlet/TestServlet", byteArrayInputStream, "text/xml");
+        WebResponse response = conversation.getResponse(request);
+        HTMLElement[] paragraphs = response.getElementsByTagName("p");
+        assertEquals("The transfered content differs", "The content: " + PUT_STRING, paragraphs[4].getText());
+    }
 
 }

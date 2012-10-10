@@ -52,7 +52,7 @@ package com.openexchange.realtime.xmpp.packet;
 import org.joox.JOOX;
 import org.joox.Match;
 import com.openexchange.exception.OXException;
-import com.openexchange.realtime.payload.Payload;
+import com.openexchange.realtime.payload.PayloadElement;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -78,13 +78,13 @@ public class XMPPIq extends XMPPStanza {
 
     private JID from;
 
-    private Payload payload;
+    private PayloadElement payload;
 
-    public Payload getPayload() {
+    public PayloadElement getPayload() {
         return payload;
     }
 
-    public void setPayload(Payload payload) {
+    public void setPayload(PayloadElement payload) {
         this.payload = payload;
     }
 

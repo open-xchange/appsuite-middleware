@@ -58,7 +58,7 @@ import com.openexchange.realtime.packet.IQ;
 import com.openexchange.realtime.packet.Message;
 import com.openexchange.realtime.packet.Presence;
 import com.openexchange.realtime.packet.Stanza;
-import com.openexchange.realtime.payload.Payload;
+import com.openexchange.realtime.payload.PayloadElement;
 
 /**
  * {@link StanzaWriter} - Transforms Stanza objects into their JSON representation.
@@ -112,10 +112,10 @@ public class StanzaWriter {
     private static void writeBasics(Stanza stanza, JSONObject object) throws JSONException {
         object.put("from", stanza.getFrom().toString());
         object.put("to", stanza.getTo().toString());
-        List<Payload> payloads = stanza.getPayloads();
+        List<PayloadElement> payloads = stanza.getPayloads();
         if(!payloads.isEmpty()) {
             JSONArray payloadArray = new JSONArray();
-            for(Payload payload : payloads) {
+            for(PayloadElement payload : payloads) {
                 JSONObject payloadObject = new JSONObject();
                 String namespace = payload.getNamespace();
                 if(namespace != null) {

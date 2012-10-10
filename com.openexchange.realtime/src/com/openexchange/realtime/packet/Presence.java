@@ -51,7 +51,7 @@ package com.openexchange.realtime.packet;
 
 import java.util.List;
 import com.openexchange.exception.OXException;
-import com.openexchange.realtime.payload.Payload;
+import com.openexchange.realtime.payload.PayloadElement;
 
 /**
  * {@link Presence} - Exchanges presence information.
@@ -301,7 +301,7 @@ public class Presence extends Stanza {
      * @return true if the Stanza didn't already contain the Payload
      */
     @Override
-    public boolean addPayload(final Payload payload) {
+    public boolean addPayload(final PayloadElement payload) {
         if (payload == null) {
             throw new IllegalArgumentException("Payload must not be null");
         }
@@ -337,7 +337,7 @@ public class Presence extends Stanza {
      * @return True if the Stanza contained this Payload
      */
     @Override
-    public boolean removePayload(final Payload payload) {
+    public boolean removePayload(final PayloadElement payload) {
         if (payload == null) {
             throw new IllegalArgumentException("Payload must not be null");
         }

@@ -54,7 +54,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import com.openexchange.realtime.payload.Payload;
+import com.openexchange.realtime.payload.PayloadElement;
 
 /**
  * {@link Stanza} - Abstract information unit that can be send from one entity to another.
@@ -71,10 +71,10 @@ public abstract class Stanza {
     private String id;
 
     // All child elements of this Stanza
-    protected List<Payload> payloads = new ArrayList<Payload>();
+    protected List<PayloadElement> payloads = new ArrayList<PayloadElement>();
     
     // Extension elements of this Stanza, subset of payloads
-    protected List<Payload> extensions = new ArrayList<Payload>();
+    protected List<PayloadElement> extensions = new ArrayList<PayloadElement>();
 
     // The namespaces of child elements of this Stanza
     protected List<String> namespaces = new ArrayList<String>();
@@ -155,7 +155,7 @@ public abstract class Stanza {
      * @param payload The Payload to add.
      * @return true if the Stanza didn't already contain the Payload
      */
-    public abstract boolean addPayload(final Payload payload);
+    public abstract boolean addPayload(final PayloadElement payload);
 
     /**
      * Remove a Payload from the Stanza and forget about its namespace.
@@ -163,14 +163,14 @@ public abstract class Stanza {
      * @param payload The Payload to remove
      * @return true if the Stanza contained this Payload
      */
-    public abstract boolean removePayload(final Payload payload);
+    public abstract boolean removePayload(final PayloadElement payload);
 
     /**
      * Get an unmodifiable view of the structured information of this Stanza.
      * 
      * @return null or the structured information of this Stanza.
      */
-    public List<Payload> getPayloads() {
+    public List<PayloadElement> getPayloads() {
         return Collections.unmodifiableList(payloads);
     }
     
@@ -179,7 +179,7 @@ public abstract class Stanza {
      * 
      * @return A List of extension Payloads.
      */
-    public List<Payload> getExtensions() {
+    public List<PayloadElement> getExtensions() {
         return extensions;
     }
 

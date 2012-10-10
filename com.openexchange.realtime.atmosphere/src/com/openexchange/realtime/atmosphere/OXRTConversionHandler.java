@@ -53,7 +53,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.realtime.MessageDispatcher;
 import com.openexchange.realtime.StanzaSender;
 import com.openexchange.realtime.packet.Stanza;
-import com.openexchange.realtime.payload.Payload;
+import com.openexchange.realtime.payload.PayloadElement;
 import com.openexchange.realtime.payload.PayloadTransformer;
 import com.openexchange.realtime.util.ElementPath;
 import com.openexchange.server.ServiceLookup;
@@ -90,7 +90,7 @@ public class OXRTConversionHandler implements PayloadTransformer {
 
     @Override
     public void incoming(Stanza stanza, ServerSession session) throws OXException {
-        Payload payload = stanza.getPayload();
+        PayloadElement payload = stanza.getPayload();
         if(payload != null) {
             stanza.setPayload(payload.to(format, session));
         }

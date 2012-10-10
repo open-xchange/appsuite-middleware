@@ -52,7 +52,7 @@ package com.openexchange.realtime.xmpp.packet;
 import org.joox.JOOX;
 import org.joox.Match;
 import com.openexchange.exception.OXException;
-import com.openexchange.realtime.payload.Payload;
+import com.openexchange.realtime.payload.PayloadElement;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -72,7 +72,7 @@ public class XMPPMessage extends XMPPStanza {
 
     private String subject;
 
-    private Payload payload;
+    private PayloadElement payload;
 
     private String thread;
 
@@ -110,11 +110,11 @@ public class XMPPMessage extends XMPPStanza {
         this.subject = subject;
     }
 
-    public Payload getPayload() {
+    public PayloadElement getPayload() {
         return payload;
     }
 
-    public void setPayload(Payload payload) {
+    public void setPayload(PayloadElement payload) {
         this.payload = payload;
     }
 
@@ -139,7 +139,7 @@ public class XMPPMessage extends XMPPStanza {
             document.append(JOOX.$("thread", thread));
         }
         if (payload != null) {
-            Payload p = payload.to("xmpp", session);
+            PayloadElement p = payload.to("xmpp", session);
             String d = (String) p.getData();
             Match j = JOOX.$(d);
             document.append(j);
@@ -160,7 +160,7 @@ public class XMPPMessage extends XMPPStanza {
 
         Match body = xml.find("body");
         if (body != null) {
-            setPayload(new Payload(body.toString(), "xmpp"));
+            setPayload(new PayloadElement(body.toString(), "xmpp"));
         }
     }
 

@@ -55,7 +55,7 @@ import com.openexchange.realtime.StanzaSender;
 import com.openexchange.realtime.atmosphere.impl.payload.PayloadTransformerRegistry;
 import com.openexchange.realtime.atmosphere.osgi.AtmosphereServiceRegistry;
 import com.openexchange.realtime.packet.Stanza;
-import com.openexchange.realtime.payload.Payload;
+import com.openexchange.realtime.payload.PayloadElement;
 import com.openexchange.realtime.payload.PayloadTransformer;
 import com.openexchange.realtime.util.ElementPath;
 import com.openexchange.tools.session.ServerSession;
@@ -85,15 +85,15 @@ public abstract class StanzaTransformer<T> {
      * @throws OXException When transformation of the Stanza fails
      */
     public T incoming(Stanza stanza, ServerSession session) throws OXException {
-        List<Payload> payloads = stanza.getPayloads();
-        for (Payload payload : payloads) {
+        List<PayloadElement> payloads = stanza.getPayloads();
+        for (PayloadElement payload : payloads) {
             //get Handler for element from namespace and transform element
             ElementPath elementPath = new ElementPath(payload.getNamespace(), payload.getElementName());
             PayloadTransformer transformer = transformers.getHandlerFor(elementPath);
             if (transformer == null) {
                 throw OXException.general("No transformer for " + elementPath);
             }
-            Payload result = transformer.incoming(payload, session);
+            PayloadElement result = transformer.incoming(payload, session);
             //TODO: create new Stanza prefilled with copied basics and add payloads?
         }
         throw new UnsupportedOperationException("Not implemented yet!");
