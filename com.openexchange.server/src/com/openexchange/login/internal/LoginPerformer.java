@@ -82,6 +82,7 @@ import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.java.Strings;
 import com.openexchange.log.LogFactory;
+import com.openexchange.login.Blocking;
 import com.openexchange.login.LoginHandlerService;
 import com.openexchange.login.LoginRequest;
 import com.openexchange.login.LoginResult;
@@ -378,26 +379,25 @@ public final class LoginPerformer {
         final ThreadPoolService executor = ThreadPools.getThreadPool();
         if (null == executor) {
             for (final Iterator<LoginHandlerService> it = LoginHandlerRegistry.getInstance().getLoginHandlers(); it.hasNext();) {
-                try {
-                    it.next().handleLogin(login);
-                } catch (final OXException e) {
-                    logError(e);
-                }
+                final LoginHandlerService handler = it.next();
+                handleSafely(login, handler, true);
             }
         } else {
             for (final Iterator<LoginHandlerService> it = LoginHandlerRegistry.getInstance().getLoginHandlers(); it.hasNext();) {
                 final LoginHandlerService handler = it.next();
-                executor.submit(new LoginPerformerTask() {
-                    @Override
-                    public Object call() {
-                        try {
-                            handler.handleLogin(login);
-                        } catch (final OXException e) {
-                            logError(e);
+                if (handler instanceof Blocking) {
+                    // Current LoginHandlerService must not be invoked concurrently
+                    handleSafely(login, handler, true);
+                } else {
+                    executor.submit(new LoginPerformerTask() {
+
+                        @Override
+                        public Object call() {
+                            handleSafely(login, handler, true);
+                            return null;
                         }
-                        return null;
-                    }
-                }, CallerRunsBehavior.getInstance());
+                    }, CallerRunsBehavior.getInstance());
+                }
             }
         }
     }
@@ -406,32 +406,46 @@ public final class LoginPerformer {
         final ThreadPoolService executor = ThreadPools.getThreadPool();
         if (null == executor) {
             for (final Iterator<LoginHandlerService> it = LoginHandlerRegistry.getInstance().getLoginHandlers(); it.hasNext();) {
-                try {
-                    it.next().handleLogout(logout);
-                } catch (final OXException e) {
-                    logError(e);
-                }
+                handleSafely(logout, it.next(), false);
             }
         } else {
             for (final Iterator<LoginHandlerService> it = LoginHandlerRegistry.getInstance().getLoginHandlers(); it.hasNext();) {
                 final LoginHandlerService handler = it.next();
-                executor.submit(new LoginPerformerTask() {
-                    @Override
-                    public Object call() {
-                        try {
-                            handler.handleLogout(logout);
-                        } catch (final OXException e) {
-                            logError(e);
+                if (handler instanceof Blocking) {
+                    // Current LoginHandlerService must not be invoked concurrently
+                    handleSafely(logout, handler, false);
+                } else {
+                    executor.submit(new LoginPerformerTask() {
+                        @Override
+                        public Object call() {
+                            handleSafely(logout, handler, false);
+                            return null;
                         }
-                        return null;
-                    }
-                }, CallerRunsBehavior.getInstance());
+                    }, CallerRunsBehavior.getInstance());
+                }
             }
         }
     }
 
-    static void logError(final OXException e) {
-        e.log(LOG);
+    /**
+     * Handles given {@code LoginResult} safely.
+     *
+     * @param login The login result to handle
+     * @param handler The handler
+     */
+    protected static void handleSafely(final LoginResult login, final LoginHandlerService handler, final boolean isLogin) {
+        if ((null == login) || (null == handler)) {
+            return;
+        }
+        try {
+            if (isLogin) {
+                handler.handleLogin(login);
+            } else {
+                handler.handleLogout(login);
+            }
+        } catch (final OXException e) {
+            e.log(LOG);
+        }
     }
 
     private static void logLoginRequest(final LoginRequest request, final LoginResult result) {

@@ -142,6 +142,7 @@ import com.openexchange.i18n.I18nService;
 import com.openexchange.id.IDGeneratorService;
 import com.openexchange.index.IndexFacadeService;
 import com.openexchange.log.LogFactory;
+import com.openexchange.login.BlockingLoginHandlerService;
 import com.openexchange.login.LoginHandlerService;
 import com.openexchange.mail.MailCounterImpl;
 import com.openexchange.mail.MailIdleCounterImpl;
@@ -443,6 +444,7 @@ public final class ServerActivator extends HousekeepingActivator {
         track(SearchService.class, new RegistryCustomizer<SearchService>(context, SearchService.class));
         // Login handler
         track(LoginHandlerService.class, new LoginHandlerCustomizer(context));
+        track(BlockingLoginHandlerService.class, new BlockingLoginHandlerCustomizer(context));
         // Multiple handler factory services
         track(MultipleHandlerFactoryService.class, new MultipleHandlerServiceTracker(context));
 
