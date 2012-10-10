@@ -54,6 +54,8 @@ package com.openexchange.login;
  * {@link BlockingLoginHandlerService}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @see LoginHandlerService
+ * @see Blocking
  */
 public interface BlockingLoginHandlerService extends LoginHandlerService, Blocking {
 
