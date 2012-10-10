@@ -8,6 +8,7 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.regex.Pattern;
 import org.apache.commons.logging.Log;
 import org.eclipse.osgi.framework.console.CommandInterpreter;
 import org.eclipse.osgi.framework.console.CommandProvider;
@@ -190,6 +191,7 @@ public class HazelcastActivator extends HousekeepingActivator {
      * @return <code>true</code> if <tt>HazelcastInstance</tt> has been initialized by this call; otherwise <code>false</code> if already
      *         done by another call
      */
+    
     InitMode init(final List<InetAddress> nodes, final boolean force, final long stamp, final Log logger) {
         synchronized (this) {
             final HazelcastInstance prevHazelcastInstance = REF_HAZELCAST_INSTANCE.get();
@@ -258,33 +260,13 @@ public class HazelcastActivator extends HousekeepingActivator {
          * Get reference to network join
          */
         final Join join = config.getNetworkConfig().getJoin();
-        /*
-         * Disable: Multicast, AWS and ...
-         */
-        join.getMulticastConfig().setEnabled(false);
-        join.getAwsConfig().setEnabled(false);
-        /*-
-         * ... enable: TCP-IP
-         * 
-         * http://code.google.com/p/hazelcast/wiki/ConfigFullTcpIp
-         */
-        final TcpIpConfig tcpIpConfig = join.getTcpIpConfig();
-        tcpIpConfig.setEnabled(true).setConnectionTimeoutSeconds(10);
-        if (!append) {
-            tcpIpConfig.clear();
-        }
-        /*
-         * Configure...
-         */
-        final List<String> members = new LinkedList<String>();
-        for (final InetAddress inetAddress : nodes) {
-            final String[] addressArgs = inetAddress.getHostAddress().split("\\%");
-            for (final String address : addressArgs) {
-                members.add(address);
-            }
-        }
-        if (!members.isEmpty()) {
-            if (append) {
+        if (append) {
+            /*
+             * Append to existing network configuration
+             */
+            final List<String> members = resolve2Members(nodes);
+            if (!members.isEmpty()) {
+                final TcpIpConfig tcpIpConfig = join.getTcpIpConfig();
                 List<String> cur = new ArrayList<String>(tcpIpConfig.getMembers());
                 for (final String candidate : members) {
                     if (!cur.contains(candidate)) {
@@ -301,13 +283,41 @@ public class HazelcastActivator extends HousekeepingActivator {
                     }
                 }
                 interfaces.setInterfaces(cur);
-            } else {
+            }
+        } else {
+            /*
+             * Disable: Multicast, AWS and ...
+             */
+            join.getMulticastConfig().setEnabled(false);
+            join.getAwsConfig().setEnabled(false);
+            /*-
+             * ... enable: TCP-IP
+             * 
+             * http://code.google.com/p/hazelcast/wiki/ConfigFullTcpIp
+             */
+            final TcpIpConfig tcpIpConfig = join.getTcpIpConfig();
+            tcpIpConfig.setEnabled(true).setConnectionTimeoutSeconds(10);
+            tcpIpConfig.clear();
+            final List<String> members = resolve2Members(nodes);
+            if (!members.isEmpty()) {
                 tcpIpConfig.setMembers(members);
                 // Set interfaces, too
                 final Interfaces interfaces = config.getNetworkConfig().getInterfaces();
                 interfaces.setInterfaces(members);
             }
         }
+    }
+
+    private static final Pattern SPLIT = Pattern.compile("\\%");
+    private static List<String> resolve2Members(final List<InetAddress> nodes) {
+        final List<String> members = new LinkedList<String>();
+        for (final InetAddress inetAddress : nodes) {
+            final String[] addressArgs = SPLIT.split(inetAddress.getHostAddress(), 0);
+            for (final String address : addressArgs) {
+                members.add(address);
+            }
+        }
+        return members;
     }
 
     @Override
