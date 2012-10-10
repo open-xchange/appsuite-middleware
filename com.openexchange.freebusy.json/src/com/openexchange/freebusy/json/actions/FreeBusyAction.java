@@ -63,7 +63,7 @@ import com.openexchange.ajax.writer.ResponseWriter;
 import com.openexchange.exception.OXException;
 import com.openexchange.freebusy.FreeBusyData;
 import com.openexchange.freebusy.FreeBusyService;
-import com.openexchange.freebusy.FreeBusySlot;
+import com.openexchange.freebusy.FreeBusyInterval;
 import com.openexchange.freebusy.json.FreeBusyRequest;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
@@ -116,13 +116,7 @@ public abstract class FreeBusyAction implements AJAXActionService {
         try {
             JSONObject jsonObject = new JSONObject();
             for (FreeBusyData data : freeBusyData) {
-                if (data.hasError()) {
-                    JSONObject errorObject = new JSONObject();
-                    ResponseWriter.addException(errorObject, data.getError(), locale);
-                    jsonObject.put(data.getParticipant(), errorObject);
-                } else {
-                    jsonObject.put(data.getParticipant(), serialize(data.getSlots(), timeZone));
-                }
+                jsonObject.put(data.getParticipant(), serialize(data, timeZone, locale));
             }
             return jsonObject;
         } catch (JSONException e) {
@@ -130,26 +124,41 @@ public abstract class FreeBusyAction implements AJAXActionService {
         }
     }
 
-    protected JSONObject serialize(FreeBusySlot freeBusySlot, TimeZone timeZone) throws OXException {
+    protected JSONObject serialize(FreeBusyData freeBusyData, TimeZone timeZone, Locale locale) throws OXException {
         try {
             JSONObject jsonObject = new JSONObject();
-            jsonObject.put("start_date", serialize(freeBusySlot.getStartTime(), timeZone));
-            jsonObject.put("end_date", serialize(freeBusySlot.getEndTime(), timeZone));
-            jsonObject.put("shown_as", freeBusySlot.getStatus().getValue());
-            if (null != freeBusySlot.getObjectID()) {
-                jsonObject.put("id", freeBusySlot.getObjectID());
+            if (freeBusyData.hasWarnings()) {
+                ResponseWriter.addWarnings(jsonObject, freeBusyData.getWarnings(), locale);
             }
-            if (null != freeBusySlot.getFolderID()) {
-                jsonObject.put("folder_id", freeBusySlot.getFolderID());
+            if (freeBusyData.hasData()) {
+                jsonObject.put("data", serialize(freeBusyData.getIntervals(), timeZone));
             }
-            if (freeBusySlot.isFullTime()) {
-                jsonObject.put("full_time", freeBusySlot.getFolderID());
+            return jsonObject;
+        } catch (JSONException e) {
+            throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
+        }
+    }
+
+    protected JSONObject serialize(FreeBusyInterval freeBusyInterval, TimeZone timeZone) throws OXException {
+        try {
+            JSONObject jsonObject = new JSONObject();
+            jsonObject.put("start_date", serialize(freeBusyInterval.getStartTime(), timeZone));
+            jsonObject.put("end_date", serialize(freeBusyInterval.getEndTime(), timeZone));
+            jsonObject.put("shown_as", freeBusyInterval.getStatus().getValue());
+            if (null != freeBusyInterval.getObjectID()) {
+                jsonObject.put("id", freeBusyInterval.getObjectID());
             }
-            if (null != freeBusySlot.getTitle()) {
-                jsonObject.put("title", freeBusySlot.getTitle());
+            if (null != freeBusyInterval.getFolderID()) {
+                jsonObject.put("folder_id", freeBusyInterval.getFolderID());
             }
-            if (null != freeBusySlot.getLocation()) {
-                jsonObject.put("location", freeBusySlot.getLocation());
+            if (freeBusyInterval.isFullTime()) {
+                jsonObject.put("full_time", freeBusyInterval.getFolderID());
+            }
+            if (null != freeBusyInterval.getTitle()) {
+                jsonObject.put("title", freeBusyInterval.getTitle());
+            }
+            if (null != freeBusyInterval.getLocation()) {
+                jsonObject.put("location", freeBusyInterval.getLocation());
             }
             return jsonObject;
         } catch (JSONException e) {
@@ -157,10 +166,10 @@ public abstract class FreeBusyAction implements AJAXActionService {
         }
     }
     
-    protected JSONArray serialize(Iterable<FreeBusySlot> freeBusySlots, TimeZone timeZone) throws OXException {
+    protected JSONArray serialize(Iterable<FreeBusyInterval> freeBusyIntervals, TimeZone timeZone) throws OXException {
         JSONArray jsonArray = new JSONArray();
-        for (FreeBusySlot freeBusySlot : freeBusySlots) {
-            jsonArray.put(serialize(freeBusySlot, timeZone));
+        for (FreeBusyInterval freeBusyInterval : freeBusyIntervals) {
+            jsonArray.put(serialize(freeBusyInterval, timeZone));
         }
         return jsonArray;
     }

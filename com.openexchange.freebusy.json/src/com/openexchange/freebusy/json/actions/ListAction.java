@@ -71,7 +71,7 @@ import com.openexchange.server.ServiceLookup;
     @Parameter(name = "session", description = "A session ID previously obtained from the login module."),
     @Parameter(name = "from", description = "The lower (inclusive) limit of the requested time-range."),
     @Parameter(name = "until", description = "The upper (exclusive) limit of the requested time-range."),
-    @Parameter(name = "merged", type = Type.BOOLEAN, optional = true, description = "Whether to pre-process the free/busy data on the server or not. This includes sorting as well as merging overlapping free/busy slots."),
+    @Parameter(name = "merged", type = Type.BOOLEAN, optional = true, description = "Whether to pre-process the free/busy data on the server or not. This includes sorting as well as merging overlapping free/busy intervals."),
 }, requestBody = "An array of participants to get the free/busy data for. Each participant may be either an internal user- or resource-ID, or an e-mail address for external participants.",
 responseDescription = "Response: An array of free/busy data, each entry containing the free/busy information for one participant.")
 public class ListAction extends FreeBusyAction {

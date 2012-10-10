@@ -71,8 +71,8 @@ import com.openexchange.server.ServiceLookup;
     @Parameter(name = "participant", description = "The participant to get the free/busy data for. May be either an internal user- or resource-ID, or an e-mail address for external participants."),
     @Parameter(name = "from", description = "The lower (inclusive) limit of the requested time-range."),
     @Parameter(name = "until", description = "The upper (exclusive) limit of the requested time-range."),
-    @Parameter(name = "merged", type = Type.BOOLEAN, optional = true, description = "Whether to pre-process the free/busy data on the server or not. This includes sorting as well as merging overlapping free/busy slots."),
-}, responseDescription = "Response: An array of free/busy slots.")
+    @Parameter(name = "merged", type = Type.BOOLEAN, optional = true, description = "Whether to pre-process the free/busy data on the server or not. This includes sorting as well as merging overlapping free/busy intervals."),
+}, responseDescription = "Response: An array of free/busy intervals.")
 public class GetAction extends FreeBusyAction {
 
     public GetAction(ServiceLookup serviceLookup) {
@@ -90,7 +90,7 @@ public class GetAction extends FreeBusyAction {
                 request.getSession(), request.getParticipant(), request.getFrom(), request.getUntil());
         }
         return new AJAXRequestResult(null != freeBusyData ? 
-            serialize(freeBusyData.getSlots(), request.getTimeZone()) : JSONObject.NULL, "json");
+            serialize(freeBusyData.getIntervals(), request.getTimeZone()) : JSONObject.NULL, "json");
     }
 
 }

@@ -58,7 +58,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.freebusy.BusyStatus;
 import com.openexchange.freebusy.FreeBusyData;
 import com.openexchange.freebusy.FreeBusyExceptionCodes;
-import com.openexchange.freebusy.FreeBusySlot;
+import com.openexchange.freebusy.FreeBusyInterval;
 import com.openexchange.freebusy.provider.FreeBusyProvider;
 import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
 import com.openexchange.groupware.container.Appointment;
@@ -152,7 +152,7 @@ public class RdbFreeBusyProvider implements FreeBusyProvider {
                 }
             }
         } catch (OXException error) {
-            freeBusyData.setError(error);
+            freeBusyData.addWarning(error);
         }
         return freeBusyData;
     }
@@ -161,7 +161,7 @@ public class RdbFreeBusyProvider implements FreeBusyProvider {
         if (null != freeBusyInformation) {
             try {
                 while (freeBusyInformation.hasNext()) {
-                    freeBusyData.add(new FreeBusySlot(freeBusyInformation.next()));                    
+                    freeBusyData.add(new FreeBusyInterval(freeBusyInformation.next()));                    
                 }
             } finally {
                 if (null != freeBusyInformation) {
@@ -173,7 +173,7 @@ public class RdbFreeBusyProvider implements FreeBusyProvider {
                 }
             }
         } else {
-            freeBusyData.add(new FreeBusySlot(freeBusyData.getFrom(), freeBusyData.getUntil(), BusyStatus.UNKNOWN));
+            freeBusyData.add(new FreeBusyInterval(freeBusyData.getFrom(), freeBusyData.getUntil(), BusyStatus.UNKNOWN));
         }
     }
     
