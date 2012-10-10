@@ -432,6 +432,7 @@ public final class LoginPerformer {
      *
      * @param login The login result to handle
      * @param handler The handler
+     * @param isLogin <code>true</code> to signal specified {@code LoginResult} refers to a login operation; otherwise it refers to a logout operation
      */
     protected static void handleSafely(final LoginResult login, final LoginHandlerService handler, final boolean isLogin) {
         if ((null == login) || (null == handler)) {
