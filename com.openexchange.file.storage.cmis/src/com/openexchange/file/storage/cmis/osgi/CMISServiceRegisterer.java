@@ -70,7 +70,6 @@ public final class CMISServiceRegisterer implements ServiceTrackerCustomizer<Fil
     private volatile FileStorageAccountManagerProvider provider;
     private volatile CMISFileStorageService service;
     private volatile ServiceRegistration<FileStorageService> registration;
-    private volatile ServiceReference<FileStorageAccountManagerProvider> reference;
 
     /**
      * Initializes a new {@link CMISServiceRegisterer}.
@@ -95,7 +94,6 @@ public final class CMISServiceRegisterer implements ServiceTrackerCustomizer<Fil
                  */
                 service = CMISFileStorageService.newInstance();
                 this.registration = context.registerService(FileStorageService.class, service, null);
-                this.reference = reference;
                 this.service = service;
                 this.provider = provider;
             } else {
@@ -109,7 +107,6 @@ public final class CMISServiceRegisterer implements ServiceTrackerCustomizer<Fil
                     unregisterService(reference);
                     service = CMISFileStorageService.newInstance(compositeProvider);
                     this.registration = context.registerService(FileStorageService.class, service, null);
-                    this.reference = reference;
                     this.service = service;
                     this.provider = compositeProvider;
                 }
@@ -147,11 +144,10 @@ public final class CMISServiceRegisterer implements ServiceTrackerCustomizer<Fil
             registration.unregister();
             this.registration = null;
         }
-        final ServiceReference<FileStorageAccountManagerProvider> reference = null == ref ? this.reference : ref;
+        final ServiceReference<FileStorageAccountManagerProvider> reference = ref;
         if (null != reference) {
             context.ungetService(reference);
         }
-        this.reference = null;
         this.service = null;
     }
 
