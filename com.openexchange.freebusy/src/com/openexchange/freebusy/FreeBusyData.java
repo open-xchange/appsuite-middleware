@@ -51,27 +51,31 @@ package com.openexchange.freebusy;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
+import java.util.Set;
 import java.util.TimeZone;
 import com.openexchange.exception.OXException;
 
 /**
  * {@link FreeBusyData}
  * 
- * Data structure hosting a user's or resource's free/busy slots.
+ * Data structure hosting a user's or resource's free/busy intervals.
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class FreeBusyData extends ArrayList<FreeBusySlot> {
+public class FreeBusyData {
     
-    private static final long serialVersionUID = 8744420045936359683L;
-
     protected String participant;
     protected Date from;
     protected Date until;
-    protected OXException error;
+    protected List<OXException> warnings;    
+    protected List<FreeBusyInterval> intervals;
     
     /**
      * Initializes a new {@link FreeBusyData}.
@@ -89,11 +93,43 @@ public class FreeBusyData extends ArrayList<FreeBusySlot> {
      */
     public FreeBusyData(String participant, Date from, Date until) {
         super();
+        this.intervals = new ArrayList<FreeBusyInterval>();
         this.participant = participant;
         this.from = from;
         this.until = until;
     }
 
+    public void clear() {
+        this.intervals.clear();
+    }
+    
+    public void add(FreeBusyInterval interval) {
+        this.intervals.add(interval);
+    }
+    
+    public void addAll(Collection<? extends FreeBusyInterval> intervals) {
+        if (null != intervals) {
+            this.intervals.addAll(intervals);
+        }
+    }
+    
+    public void add(FreeBusyData data) {
+        if (null != data) {
+            if (data.hasWarnings()) {
+                for (OXException warning : data.warnings) {
+                    this.addWarning(warning);
+                }                
+            }
+            if (data.hasData()) {
+                this.addAll(data.getIntervals());
+            }
+        }
+    }
+    
+    public List<FreeBusyInterval> getIntervals() {
+        return Collections.unmodifiableList(this.intervals);
+    }
+    
     /**
      * Gets the participant, identified either by its internal user-/resource-ID or e-mail address.
      * 
@@ -122,118 +158,134 @@ public class FreeBusyData extends ArrayList<FreeBusySlot> {
     }
 
     /**
-     * Gets an exception in case data could not be retrieved.
+     * Gets a list of warnings in case data could not be retrieved.
      * 
-     * @return The exception, if present, <code>null</code>, otherwise 
+     * @return The warnings, if present, or <code>null</code>, otherwise 
      */
-    public OXException getError() {
-        return error;
+    public List<OXException> getWarnings() {
+        return null != warnings && 0 < warnings.size() ? warnings : null;
     }
 
     /**
-     * Gets a value indicating whether there is an error or not.
+     * Gets a value indicating whether there are warnings or not.
      * 
-     * @return <code>true</code> in case of an existing error, <code>false</code>, otherwise
+     * @return <code>true</code> in case of existing warnings, <code>false</code>, otherwise
      */
-    public boolean hasError() {
-        return null != error;
+    public boolean hasWarnings() {
+        return null != this.warnings && 0 < warnings.size();
     }
 
     /**
-     * Sets the error.
+     * Gets a value indicating whether there is at least one free busy interval or not.
      * 
-     * @param error The exception
+     * @return <code>true</code> in case of existing interval, <code>false</code>, otherwise
      */
-    public void setError(OXException error) {
-        this.error = error;
+    public boolean hasData() {
+        return null != this.intervals && 0 < intervals.size();
     }
 
     /**
-     * Normalizes the contained free/busy slots. 
+     * Adds an {@link OXException} as warning.
+     * 
+     * @param warning The exception
      */
+    public void addWarning(OXException warning) {
+        if (null == warnings) {
+            warnings = new ArrayList<OXException>();
+        }
+        this.warnings.add(warning);
+    }
+    
+    private static Date[] getTimes(List<FreeBusyInterval> intervals) {
+        Set<Date> times = new HashSet<Date>();
+        for (FreeBusyInterval freeBusyInterval : intervals) {
+            times.add(freeBusyInterval.getStartTime());
+            times.add(freeBusyInterval.getEndTime());
+        }
+        Date[] array = times.toArray(new Date[times.size()]);
+        Arrays.sort(array);
+        return array; 
+    }
+    
+    /**
+    * Normalizes the contained free/busy intervals. 
+    */
     public void normalize() {
+        if (2 > this.intervals.size()) {
+            return; // nothing to do
+        }
         /*
-         * normalize to interval boundaries
+         * expand intervals to match all possible boundaries 
          */
-        Iterator<FreeBusySlot> iterator = iterator();
-        while (iterator.hasNext()) {
-            FreeBusySlot freeBusySlot = iterator.next();
-            if (null != freeBusySlot.getEndTime() && freeBusySlot.getEndTime().after(getFrom()) &&
-                null != freeBusySlot.getStartTime() && freeBusySlot.getStartTime().before(getUntil())) {
-                if (freeBusySlot.getStartTime().before(getFrom())) {
-                    freeBusySlot.setStartTime(getFrom());
+        Date[] times = getTimes(this.intervals);
+        ArrayList<FreeBusyInterval> expandedIntervals = new ArrayList<FreeBusyInterval>();
+        for (FreeBusyInterval interval : intervals) {
+            List<Date> expandedTimes = new ArrayList<Date>();
+            expandedTimes.add(interval.getStartTime());
+            for (Date time : times) {
+                if (interval.getStartTime().before(time) && interval.getEndTime().after(time)) {
+                    expandedTimes.add(time);
                 }
-                if (freeBusySlot.getEndTime().after(getUntil())) {
-                    freeBusySlot.setEndTime(getUntil());
-                }
-            } else {
-                // outside range
-                iterator.remove();
-            }            
-        }
-        if (1 < size()) {
-            /*
-             * sort
-             */
-            Collections.sort(this);
-            /*
-             * merge ranges 
-             */
-            
-            //TODO...
-            
-            ArrayList<FreeBusySlot> mergedSlots = new ArrayList<FreeBusySlot>();
-            iterator = super.iterator();
-            FreeBusySlot current = iterator.next();
-            while (iterator.hasNext()) {
-                FreeBusySlot next = iterator.next();
-                if (current.getEndTime().after(next.getStartTime())) {
-                    /*
-                     * overlapping ranges
-                     */
-                    if (current.getStatus().isMoreConflicting(next.getStatus())) {
-                        // prefer current timeslot
-                        if (current.getEndTime().after(next.getEndTime())) {
-                            // ignore next completely
-                        } else {
-                            // add both
-                            mergedSlots.add(current);
-                            next.setStartTime(current.getEndTime());
-                            current = next;
-                        }
-                    } else {
-                        // prefer next timeslot
-                        if (current.getEndTime().before(next.getEndTime())) {
-                            if (current.getStartTime().before(next.getStartTime())) {
-                                // add both
-                                current.setEndTime(next.getStartTime());
-                                mergedSlots.add(current);
-                            }
-                            current = next;
-                        } else {
-                            // add additional slot
-                            FreeBusySlot additional = new FreeBusySlot(next.getEndTime(), current.getEndTime(), current.getStatus());
-                            additional.setFolderID(current.getFolderID());
-                            additional.setObjectID(current.getObjectID());                            
-                            current.setEndTime(next.getStartTime());
-                            mergedSlots.add(current);
-                            mergedSlots.add(next);
-                            current = additional;                                                        
-                        }
-                    }
-                } else {
-                    mergedSlots.add(current);
-                    current = next;
-                }           
             }
-            mergedSlots.add(current);
-            /*
-             * take over normalized slots
-             */
-            this.clear();
-            this.addAll(mergedSlots);
+            expandedTimes.add(interval.getEndTime());
+            if (2 == expandedTimes.size()) {
+                expandedIntervals.add(interval);
+            } else {
+                for (int i = 0; i < expandedTimes.size() - 1; i++) {
+                    expandedIntervals.add(new FreeBusyInterval(expandedTimes.get(i), expandedTimes.get(i + 1), interval));
+                }
+            }
         }
-    }    
+        /*
+         * condense all overlapping intervals to most conflicting one 
+         */
+        Collections.sort(expandedIntervals);
+        ArrayList<FreeBusyInterval> mergedIntervals = new ArrayList<FreeBusyInterval>();
+        Iterator<FreeBusyInterval> iterator = expandedIntervals.iterator();
+        FreeBusyInterval current = iterator.next();
+        while (iterator.hasNext()) {
+            FreeBusyInterval next = iterator.next();
+            if (current.getStartTime().equals(next.getStartTime()) && current.getEndTime().equals(next.getEndTime())) {
+                if (false == current.getStatus().isMoreConflicting(next.getStatus())) {
+                    /*
+                     * skip current slot
+                     */
+                    current = next;
+                }
+                continue;
+            }
+            mergedIntervals.add(current);
+            current = next;
+        }
+        mergedIntervals.add(current);
+        /*
+         * expand consecutive intervals again
+         */
+        iterator = mergedIntervals.iterator();
+        while (iterator.hasNext()) {
+            FreeBusyInterval slot = iterator.next();
+            for (FreeBusyInterval freeBusyInterval : mergedIntervals) {
+                if (freeBusyInterval.equalsIgnoreTimes(slot)) {
+                    /*
+                     * merge if next to another
+                     */
+                    if (freeBusyInterval.getStartTime().equals(slot.getEndTime())) {
+                        freeBusyInterval.setStartTime(slot.getStartTime());
+                        iterator.remove();
+                        break;
+                    } else if (freeBusyInterval.getEndTime().equals(slot.getStartTime())) {
+                        freeBusyInterval.setEndTime(slot.getEndTime());
+                        iterator.remove();
+                        break;
+                    }
+                }
+            }
+        }
+        /*
+         * take over sorted intervals
+         */
+        this.intervals = mergedIntervals;
+    }
     
     @Override
     public String toString() {
@@ -242,8 +294,15 @@ public class FreeBusyData extends ArrayList<FreeBusySlot> {
         StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append(participant).append(" (").append(null != from ? sdf.format(from) : "")
             .append(" - ").append(null != until ? sdf.format(until) : "").append("):").append("\n");
-        for (FreeBusySlot fbSlot : this) {
-            stringBuilder.append(fbSlot).append("\n");
+        if (hasData()) {
+            for (FreeBusyInterval interval : this.intervals) {
+                stringBuilder.append(interval).append("\n");
+            }
+        } 
+        if (hasWarnings()) {
+            for (OXException warning : warnings) {
+                stringBuilder.append(warning.getLogMessage()).append("\n");
+            }
         }
         return stringBuilder.toString();
     }

@@ -56,13 +56,13 @@ import com.openexchange.groupware.container.Appointment;
 
 
 /**
- * {@link FreeBusySlot}
+ * {@link FreeBusyInterval}
  * 
- * Defines a free/busy time-slot.
+ * Defines a free/busy interval.
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class FreeBusySlot implements Comparable<FreeBusySlot> {
+public class FreeBusyInterval implements Comparable<FreeBusyInterval> {
     
     private Date startTime;
     private Date endTime;
@@ -70,22 +70,33 @@ public class FreeBusySlot implements Comparable<FreeBusySlot> {
     private String objectID;
     private String folderID;
     private boolean fullTime;
+    private String title;
+    private String location;
     
     /**
-     * Initializes a new {@link FreeBusySlot}.
+     * Initializes a new {@link FreeBusyInterval}, based on the supplied interval.
+     * 
+     * @param start The start time
+     * @param end The end time
+     * @param other Another free/busy slot to copy the values from
      */
-    public FreeBusySlot() {
-        super();
+    public FreeBusyInterval(Date start, Date end, FreeBusyInterval other) {
+        this(start, end, other.getStatus());
+        objectID = other.getObjectID();
+        fullTime = other.isFullTime();
+        folderID = other.getFolderID();
+        title = other.getTitle();
+        location = other.getLocation();
     }
 
     /**
-     * Initializes a new {@link FreeBusySlot}.
+     * Initializes a new {@link FreeBusyInterval}.
      * 
      * @param start the start time
      * @param end the end time
      * @param status the busy status
      */
-    public FreeBusySlot(Date start, Date end, BusyStatus status) {
+    public FreeBusyInterval(Date start, Date end, BusyStatus status) {
         super();
         this.startTime = start;
         this.endTime = end;
@@ -93,11 +104,11 @@ public class FreeBusySlot implements Comparable<FreeBusySlot> {
     }
 
     /**
-     * Initializes a new {@link FreeBusySlot}.
+     * Initializes a new {@link FreeBusyInterval}, based on the supplied appointment.
      * 
      * @param appointment The appointment to create the free/busy slot for
      */
-    public FreeBusySlot(Appointment appointment) {
+    public FreeBusyInterval(Appointment appointment) {
         this(appointment.getStartDate(), appointment.getEndDate(), BusyStatus.valueOf(appointment));
         this.fullTime = appointment.getFullTime();
         if (appointment.containsObjectID() && 0 < appointment.getObjectID()) {
@@ -105,6 +116,12 @@ public class FreeBusySlot implements Comparable<FreeBusySlot> {
         }
         if (appointment.containsParentFolderID() && 0 < appointment.getParentFolderID()) {
             this.folderID = String.valueOf(appointment.getParentFolderID());
+        }
+        if (appointment.containsTitle()){
+            this.title = appointment.getTitle();
+        }
+        if (appointment.containsLocation()){
+            this.location = appointment.getLocation();
         }
     }
 
@@ -216,6 +233,74 @@ public class FreeBusySlot implements Comparable<FreeBusySlot> {
         this.fullTime = isFullTime;
     }
     
+    /**
+     * Gets the title
+     *
+     * @return The title
+     */
+    public String getTitle() {
+        return title;
+    }
+
+    /**
+     * Sets the title
+     *
+     * @param title The subject to set
+     */
+    public void setTitle(String title) {
+        this.title = title;
+    }
+
+    /**
+     * Gets the location
+     *
+     * @return The location
+     */
+    public String getLocation() {
+        return location;
+    }
+
+    /**
+     * Sets the location
+     *
+     * @param location The location to set
+     */
+    public void setLocation(String location) {
+        this.location = location;
+    }
+    
+    /**
+     * Gets a value indicating whether this slot equals anohter one, ignoring any differences in the start- and end-time properties. 
+     * 
+     * @param other The free/busy slot to compare
+     * @return <code>true</code>, if the intervals are equal ignoring their times, <code>false</code>, otherwise.
+     */
+    public boolean equalsIgnoreTimes(FreeBusyInterval other) {
+        if (null != getStatus() && false == getStatus().equals(other.getStatus()) ||
+            null != other.getStatus() && false == other.getStatus().equals(getStatus())) {
+            return false;
+        }
+        if (null != getObjectID() && false == getObjectID().equals(other.getObjectID()) ||
+            null != other.getObjectID() && false == other.getObjectID().equals(getObjectID())) {
+            return false;
+        }
+        if (null != getFolderID() && false == getFolderID().equals(other.getFolderID()) ||
+            null != other.getFolderID() && false == other.getFolderID().equals(getFolderID())) {
+            return false;
+        }
+        if (null != getTitle() && false == getTitle().equals(other.getTitle()) ||
+            null != other.getTitle() && false == other.getTitle().equals(getTitle())) {
+            return false;
+        }
+        if (null != getLocation() && false == getLocation().equals(other.getLocation()) ||
+            null != other.getLocation() && false == other.getLocation().equals(getLocation())) {
+            return false;
+        }
+        if (isFullTime() != other.isFullTime()) {
+            return false;
+        }
+        return true;
+    }
 
     @Override
     public String toString() {
@@ -225,9 +310,15 @@ public class FreeBusySlot implements Comparable<FreeBusySlot> {
     }
 
     @Override
-    public int compareTo(FreeBusySlot o) {
-        int value = null == o ? 1 : getStartTime().compareTo(o.getStartTime());
-        return 0 == value ? getEndTime().compareTo(o.getEndTime()) : value;
+    public int compareTo(FreeBusyInterval o) {
+        int value = null == o ? 1 : this.startTime.compareTo(o.getStartTime());
+        if (0 == value) {
+            value = this.endTime.compareTo(o.getEndTime());
+            if (0 == value) {
+                value = this.status.compareTo(o.getStatus());
+            }
+        }
+        return value;
     }
     
 }

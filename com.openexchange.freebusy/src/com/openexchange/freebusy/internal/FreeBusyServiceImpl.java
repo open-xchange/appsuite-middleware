@@ -54,18 +54,22 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
 import com.openexchange.freebusy.FreeBusyData;
 import com.openexchange.freebusy.FreeBusyExceptionCodes;
 import com.openexchange.freebusy.FreeBusyService;
 import com.openexchange.freebusy.osgi.FreeBusyProviderListener;
 import com.openexchange.freebusy.provider.FreeBusyProvider;
+import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.session.Session;
+import com.openexchange.userconf.UserConfigurationService;
 
 /**
  * {@link FreeBusyServiceImpl}
  * 
- * Default  free/busy service implementation.
+ * Default free/busy service implementation.
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
@@ -84,8 +88,18 @@ public class FreeBusyServiceImpl implements FreeBusyService {
         }   
     }
 
+    private void checkFreeBusyEnabled(Session session) throws OXException {
+        Context context = FreeBusyServiceLookup.getService(ContextService.class).getContext(session.getContextId());
+        UserConfiguration userConfig = FreeBusyServiceLookup.getService(UserConfigurationService.class).getUserConfiguration(
+            session.getUserId(), context);
+        if (false == userConfig.hasFreeBusy()) {
+            throw FreeBusyExceptionCodes.FREEBUSY_NOT_ENABLED.create(session.getUserId(), session.getContextId());
+        }
+    }
+
     @Override
     public List<FreeBusyData> getFreeBusy(Session session, List<String> participants, Date from, Date until) throws OXException {
+        checkFreeBusyEnabled(session);
         checkProvidersAvailable();
         if (1 == providers.getProviders().size()) {
             return providers.getProviders().get(0).getFreeBusy(session, participants, from, until);
@@ -93,11 +107,15 @@ public class FreeBusyServiceImpl implements FreeBusyService {
             Map<String, FreeBusyData> freeBusyData = new HashMap<String, FreeBusyData>();
             for (FreeBusyProvider provider : providers.getProviders()) {
                 for (FreeBusyData providerData : provider.getFreeBusy(session, participants, from, until)) {
-                    if (false == freeBusyData.containsKey(providerData.getParticipant()) || 
-                        null == freeBusyData.get(providerData.getParticipant())) {
-                        freeBusyData.put(providerData.getParticipant(), providerData);
-                    } else {
-                        freeBusyData.get(providerData.getParticipant()).addAll(providerData);
+                    if (null != providerData) {
+                        FreeBusyData data = freeBusyData.get(providerData.getParticipant());
+                        if (null == data) {
+                            // replace
+                            freeBusyData.put(providerData.getParticipant(), providerData);                            
+                        } else {
+                            // add
+                            data.add(providerData);                           
+                        }
                     }
                 }                
             }
@@ -107,18 +125,19 @@ public class FreeBusyServiceImpl implements FreeBusyService {
 
     @Override
     public FreeBusyData getFreeBusy(Session session, String participant, Date from, Date until) throws OXException {
+        checkFreeBusyEnabled(session);
         checkProvidersAvailable();
         if (1 == providers.getProviders().size()) {
             return providers.getProviders().get(0).getFreeBusy(session, participant, from, until);
         } else {
             FreeBusyData freeBusyData = null;
             for (FreeBusyProvider provider : providers.getProviders()) {
-                if (null == freeBusyData || freeBusyData.hasError()) {
+                if (null == freeBusyData || freeBusyData.hasWarnings()) {
                     freeBusyData = provider.getFreeBusy(session, participant, from, until);
                 } else {
                     FreeBusyData data = provider.getFreeBusy(session, participant, from, until);
                     if (null != data) {
-                        freeBusyData.addAll(data);
+                        freeBusyData.addAll(data.getIntervals());
                     }
                 }                
             }
@@ -129,9 +148,15 @@ public class FreeBusyServiceImpl implements FreeBusyService {
     @Override
     public List<FreeBusyData> getMergedFreeBusy(Session session, List<String> participants, Date from, Date until) throws OXException {
         List<FreeBusyData> freeBusyData = this.getFreeBusy(session, participants, from, until);
+        FreeBusyData mergedFreeBusyData = new FreeBusyData("merged", from, until);
         for (FreeBusyData data : freeBusyData) {
             data.normalize();
+            if (data.hasData()) {
+                mergedFreeBusyData.addAll(data.getIntervals());
+            }
         }
+        mergedFreeBusyData.normalize();
+        freeBusyData.add(mergedFreeBusyData);
         return freeBusyData;
     }
 

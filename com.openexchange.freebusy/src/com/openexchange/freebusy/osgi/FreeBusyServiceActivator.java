@@ -50,12 +50,14 @@
 package com.openexchange.freebusy.osgi;
 
 import org.apache.commons.logging.Log;
+import com.openexchange.context.ContextService;
 import com.openexchange.freebusy.FreeBusyService;
 import com.openexchange.freebusy.internal.FreeBusyServiceImpl;
 import com.openexchange.freebusy.internal.FreeBusyServiceLookup;
 import com.openexchange.freebusy.provider.FreeBusyProvider;
 import com.openexchange.log.LogFactory;
 import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.userconf.UserConfigurationService;
 
 /**
  * {@link FreeBusyServiceActivator}
@@ -75,7 +77,7 @@ public class FreeBusyServiceActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { };
+        return new Class<?>[] { ContextService.class, UserConfigurationService.class };
     }
     
     @Override
