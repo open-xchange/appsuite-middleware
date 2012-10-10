@@ -55,11 +55,9 @@ import org.osgi.framework.ServiceRegistration;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.CompositeFileStorageAccountManagerProvider;
-import com.openexchange.file.storage.FileStorageAccountManagerLookupService;
 import com.openexchange.file.storage.FileStorageAccountManagerProvider;
 import com.openexchange.file.storage.FileStorageService;
 import com.openexchange.file.storage.cifs.CIFSFileStorageService;
-import com.openexchange.file.storage.cifs.CIFSServices;
 
 /**
  * {@link CIFSServiceRegisterer}
@@ -76,7 +74,6 @@ public final class CIFSServiceRegisterer implements ServiceTrackerCustomizer<Fil
     private volatile CIFSFileStorageService service;
     private volatile ServiceRegistration<FileStorageService> registration;
     private volatile ServiceReference<FileStorageAccountManagerProvider> reference;
-    private volatile int ranking;
 
     /**
      * Initializes a new {@link CIFSServiceRegisterer}.
@@ -89,7 +86,6 @@ public final class CIFSServiceRegisterer implements ServiceTrackerCustomizer<Fil
     @Override
     public FileStorageAccountManagerProvider addingService(final ServiceReference<FileStorageAccountManagerProvider> reference) {
         final FileStorageAccountManagerProvider provider = context.getService(reference);
-        final int ranking = provider.getRanking();
         synchronized (this) {
             CIFSFileStorageService service = this.service;
             if (null == service) {
@@ -97,15 +93,13 @@ public final class CIFSServiceRegisterer implements ServiceTrackerCustomizer<Fil
                  * Try to create CIFS service
                  */
                 try {
-                    final FileStorageAccountManagerLookupService managerLookupService = CIFSServices.getService(FileStorageAccountManagerLookupService.class);
-                    service = CIFSFileStorageService.newInstance(managerLookupService);
+                    service = CIFSFileStorageService.newInstance();
                     if (!provider.supports(service)) {
                         context.ungetService(reference);
                         return null;
                     }
                     this.registration = context.registerService(FileStorageService.class, service, null);
                     this.reference = reference;
-                    this.ranking = ranking;
                     this.service = service;
                     this.provider = provider;
                 } catch (final OXException e) {
@@ -123,7 +117,6 @@ public final class CIFSServiceRegisterer implements ServiceTrackerCustomizer<Fil
                     service = CIFSFileStorageService.newInstance(compositeProvider);
                     this.registration = context.registerService(FileStorageService.class, service, null);
                     this.reference = reference;
-                    this.ranking = ranking;
                     this.service = service;
                     this.provider = compositeProvider;
                 }
@@ -157,7 +150,6 @@ public final class CIFSServiceRegisterer implements ServiceTrackerCustomizer<Fil
         }
         this.reference = null;
         this.service = null;
-        this.ranking = 0;
     }
 
 }
