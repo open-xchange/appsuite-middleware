@@ -84,13 +84,12 @@ public final class CIFSFileStorageService implements AccountAware {
     /**
      * Creates a new CIFS/SMB file storage service.
      * 
-     * @param fileStorageAccountManagerLookupService The detected {@link FileStorageAccountManagerProvider} reference
      * @return A new CIFS/SMB file storage service
      * @throws OXException If creation fails
      */
-    public static CIFSFileStorageService newInstance(final FileStorageAccountManagerLookupService fileStorageAccountManagerLookupService) throws OXException {
+    public static CIFSFileStorageService newInstance() throws OXException {
         final CIFSFileStorageService newInst = new CIFSFileStorageService();
-        newInst.applyAccountManager(fileStorageAccountManagerLookupService);
+        newInst.applyAccountManager(CIFSServices.getService(FileStorageAccountManagerLookupService.class));
         return newInst;
     }
 

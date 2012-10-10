@@ -83,13 +83,12 @@ public final class CMISFileStorageService implements AccountAware {
     /**
      * Creates a new CMIS file storage service.
      * 
-     * @param accountManagerLookupService The detected {@link FileStorageAccountManagerLookupService} reference
      * @return A new CMIS file storage service
      * @throws OXException If creation fails
      */
-    public static CMISFileStorageService newInstance(final FileStorageAccountManagerLookupService accountManagerLookupService) throws OXException {
+    public static CMISFileStorageService newInstance() throws OXException {
         final CMISFileStorageService newInst = new CMISFileStorageService();
-        newInst.applyAccountManager(accountManagerLookupService);
+        newInst.applyAccountManager(CMISServices.getService(FileStorageAccountManagerLookupService.class));
         return newInst;
     }
 
