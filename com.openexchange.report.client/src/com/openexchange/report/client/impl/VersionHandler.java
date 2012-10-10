@@ -49,7 +49,6 @@
 
 package com.openexchange.report.client.impl;
 
-import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.util.jar.Attributes;
@@ -60,15 +59,17 @@ public class VersionHandler {
     public static String[] getServerVersion() throws IOException {
         String[] retval = new String[2];
 
-        String path = new File("../com.openexchange.admin/META-INF/MANIFEST.MF").getAbsolutePath();
-        URL manifestURL = new URL("file:" + path);
-        // URL manifestURL = new URL("jar:file:/opt/open-xchange/bundles/com.openexchange.admin.jar!/META-INF/MANIFEST.MF");
+        // For debugging in eclipse
+        // String path = new File("../com.openexchange.admin/META-INF/MANIFEST.MF").getAbsolutePath();
+        // URL manifestURL = new URL("file:" + path);
+        URL manifestURL = new URL("jar:file:/opt/open-xchange/bundles/com.openexchange.admin.jar!/META-INF/MANIFEST.MF");
         Attributes attrs = new Manifest(manifestURL.openStream()).getMainAttributes();
         retval[0] = attrs.getValue("OXVersion") + " Rev" + attrs.getValue("OXRevision");
 
-        path = new File("../com.openexchange.server/META-INF/MANIFEST.MF").getAbsolutePath();
-        manifestURL = new URL("file:" + path);
-        // manifestURL = new URL("file:/opt/open-xchange/bundles/com.openexchange.server/META-INF/MANIFEST.MF");
+        // For debugging in eclipse
+        // path = new File("../com.openexchange.server/META-INF/MANIFEST.MF").getAbsolutePath();
+        // manifestURL = new URL("file:" + path);
+        manifestURL = new URL("file:/opt/open-xchange/bundles/com.openexchange.server/META-INF/MANIFEST.MF");
         attrs = new Manifest(manifestURL.openStream()).getMainAttributes();
         retval[1] = attrs.getValue("OXVersion") + " Rev" + attrs.getValue("OXRevision");
 
