@@ -89,6 +89,15 @@ public final class ThreadableCache {
         INSTANCE.userMap.remove(new UserKey(session.getUserId(), session.getContextId()));
     }
 
+    /**
+     * Indicates whether <tt>Threadable</tt> cache is enabled.
+     * 
+     * @return <code>true</code> if enabled; otherwise <code>false</code>
+     */
+    public static boolean isThreadableCacheEnabled() {
+        return false;
+    }
+
     /*-
      * ------------------------------------------------------------------------
      */

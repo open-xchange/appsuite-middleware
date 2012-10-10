@@ -52,12 +52,12 @@ package com.openexchange.imap.thread;
 import static com.openexchange.mail.MailServletInterface.mailInterfaceMonitor;
 import gnu.trove.set.TIntSet;
 import java.io.InputStream;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -89,54 +89,44 @@ import com.sun.mail.imap.protocol.RFC822DATA;
 import com.sun.mail.imap.protocol.UID;
 
 /**
- * {@link Threadable} - An element within thread-sorted structure holding needed message information.
+ * {@code Threadable} - An element within thread-sorted structure holding needed message information.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @see Threader
  */
-public final class Threadable implements Cloneable {
+public final class Threadable implements Cloneable, Serializable {
+
+    private static final long serialVersionUID = -680041493836177453L;
 
     /**
      * The logger constant.
      */
-    static final org.apache.commons.logging.Log LOG = Log.loggerFor(Threadable.class);
+    static final transient org.apache.commons.logging.Log LOG = Log.loggerFor(Threadable.class);
 
     Threadable next;
-
     Threadable kid;
-
     String fullName;
-
     String subject;
-
     private long date;
-
     String messageId;
-
     String inReplyTo;
-
     String[] refs;
-
     int messageNumber;
-
     long uid;
-
-    String id;
-
     private String subject2;
-
     private boolean hasRe;
 
     /**
-     * Initializes a new {@link Threadable}.
+     * Initializes a new {@code Threadable}.
      */
     public Threadable() {
+        super();
         subject = null; // this means "dummy".
         uid = -1L;
     }
 
     /**
-     * Initializes a new {@link Threadable}.
+     * Initializes a new {@code Threadable}.
      * 
      * @param next The next element
      * @param subject The subject
@@ -144,6 +134,7 @@ public final class Threadable implements Cloneable {
      * @param references The referenced identifiers
      */
     public Threadable(final Threadable next, final String subject, final String id, final String[] references) {
+        super();
         this.next = next;
         this.subject = subject;
         this.messageId = id;
@@ -166,10 +157,20 @@ public final class Threadable implements Cloneable {
         }
     }
 
+    /**
+     * Gets the appropriate {@code MessageId} for this {@code Threadable}.
+     * 
+     * @return The appropriate {@code MessageId}
+     */
     public MessageId toMessageId() {
         return new MessageId(messageNumber).setFullName(fullName);
     }
 
+    /**
+     * Gets the UID.
+     * 
+     * @return The UID
+     */
     public long getUid() {
         return uid;
     }
@@ -192,7 +193,7 @@ public final class Threadable implements Cloneable {
         return s + " ) ]";
     }
 
-    private static final Pattern PATTERN_SUBJECT = Pattern.compile("^\\s*(Re|Sv|Vs|Aw|\u0391\u03A0|\u03A3\u03A7\u0395\u03A4|R|Rif|Res|Odp|Ynt)(?:\\[.*?\\]|\\(.*?\\))?:(?:\\s*)(.*)(?:\\s*)", Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
+    private static final Pattern PATTERN_SUBJECT = Pattern.compile("^\\s*(Re|Sv|Vs|Aw|\u0391\u03A0|\u03A3\u03A7\u0395\u03A4|R|Rif|Res|Odp|Ynt)(?:\\[.*?\\]|\\(.*?\\))?:(?:\\s*)(.*)(?:\\s*)", Pattern.CASE_INSENSITIVE);
 
     private void simplifySubject() {
         if (isEmpty(subject)) {
@@ -586,14 +587,18 @@ public final class Threadable implements Cloneable {
     private static void fillInList(final Threadable t, final List<ThreadSortNode> list) {
         Threadable cur = t;
         while (null != cur) {
-            final ThreadSortNode node = new ThreadSortNode(cur.toMessageId(), cur.uid);
-            list.add(node);
-            // Check kids
-            final Threadable kid = cur.kid;
-            if (null != kid) {
-                final List<ThreadSortNode> sublist = new LinkedList<ThreadSortNode>();
-                fillInList(kid, sublist);
-                node.addChildren(sublist);
+            if (cur.isDummy()) {
+                fillInList(cur.kid, list);
+            } else {
+                final ThreadSortNode node = new ThreadSortNode(cur.toMessageId(), cur.uid);
+                list.add(node);
+                // Check kids
+                final Threadable kid = cur.kid;
+                if (null != kid) {
+                    final List<ThreadSortNode> sublist = new LinkedList<ThreadSortNode>();
+                    fillInList(kid, sublist);
+                    node.addChildren(sublist);
+                }
             }
             // Proceed to next
             cur = cur.next;
@@ -608,19 +613,40 @@ public final class Threadable implements Cloneable {
      * @param t The <tt>Threadable</tt> instance
      */
     public static Threadable filterFullName(final String fullName, final Threadable t) {
-        final List<Threadable> list = unfold(t);
-        if (list.isEmpty()) {
-            return t;
-        }
-        // Filter
-        for (final Iterator<Threadable> iterator = list.iterator(); iterator.hasNext();) {
-            final Threadable cur = iterator.next();
+        Threadable first = t;
+        Threadable prev = null;
+        Threadable cur = t;
+        while (null != cur) {
             if (checkFullName(fullName, cur)) {
-                iterator.remove();
+                final Threadable c = cur;
+                cur = cur.next;
+                if (null == prev) { // First one needs to be removed
+                    first = cur;
+                } else { // re-point
+                    prev.next = cur;
+                }
+                c.next = null;
+            } else {
+                prev = cur;
+                cur = cur.next;
             }
         }
-        // Fold
-        return fold(list);
+        return first;
+
+
+//        final List<Threadable> list = unfold(t);
+//        if (list.isEmpty()) {
+//            return t;
+//        }
+//        // Filter
+//        for (final Iterator<Threadable> iterator = list.iterator(); iterator.hasNext();) {
+//            final Threadable cur = iterator.next();
+//            if (checkFullName(fullName, cur)) {
+//                iterator.remove();
+//            }
+//        }
+//        // Fold
+//        return fold(list);
     }
 
     /**
@@ -663,10 +689,10 @@ public final class Threadable implements Cloneable {
     private static boolean checkFullName(final String fullName, final Threadable t) {
         Threadable cur = t;
         while (null != cur) {
-            if (t.messageNumber > 0 && !fullName.equals(cur.fullName)) {
+            if (cur.messageNumber > 0 && !fullName.equals(cur.fullName)) {
                 return false;
             }
-            final Threadable kid = t.kid;
+            final Threadable kid = cur.kid;
             if (null != kid) {
                 if (!checkFullName(fullName, kid)) {
                     return false;
@@ -727,7 +753,7 @@ public final class Threadable implements Cloneable {
                     if (1 == messageCount) {
                         sb.append("1");
                     } else {
-                        if (limit < 0) {
+                        if (limit < 0 || limit >= messageCount) {
                             sb.append("1:*");
                         } else {
                             sb.append(messageCount - limit + 1).append(':').append(messageCount); 

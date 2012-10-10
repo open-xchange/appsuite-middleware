@@ -55,7 +55,6 @@ import javax.mail.MessagingException;
 import com.openexchange.exception.OXException;
 import com.openexchange.imap.IMAPAccess;
 import com.openexchange.imap.IMAPCommandsCollection;
-import com.openexchange.imap.IMAPMessageStorage;
 import com.openexchange.imap.IMAPProtocol;
 import com.openexchange.imap.thread.ThreadableCache.ThreadableCacheEntry;
 import com.openexchange.login.LoginHandlerService;
@@ -97,7 +96,7 @@ public final class ThreadableLoginHandler implements LoginHandlerService {
 
     @Override
     public void handleLogin(final LoginResult login) throws OXException {
-        if (!IMAPMessageStorage.isThreadableCacheEnabled()) {
+        if (!ThreadableCache.isThreadableCacheEnabled()) {
             return;
         }
         final ServiceLookup services = this.services;

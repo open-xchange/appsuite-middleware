@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2020 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,24 +47,28 @@
  *
  */
 
-package com.openexchange.mail.twitter.dataobjects;
+package com.openexchange.threadpool;
 
-import com.openexchange.mail.dataobjects.MailFolder;
+import java.util.Map;
 
 /**
- * {@link TwitterMailFolder}
- *
+ * {@link AbstractTrackableTask} - An abstract {@code TrackableTask} which leaves {@code #afterExecute(Throwable)},
+ * {@code #beforeExecute(Thread)}, {@code #setThreadName(ThreadRenamer)}, and {@code #optLogProperties()} empty.
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class TwitterMailFolder extends MailFolder {
-
-    private static final long serialVersionUID = -2739242975064411775L;
+public abstract class AbstractTrackableTask<V> extends AbstractTask<V> implements TrackableTask<V> {
 
     /**
-     * Initializes a new {@link TwitterMailFolder}
+     * Initializes a new {@link AbstractTrackableTask}.
      */
-    public TwitterMailFolder() {
+    protected AbstractTrackableTask() {
         super();
+    }
+
+    @Override
+    public Map<String, Object> optLogProperties() {
+        return null;
     }
 
 }

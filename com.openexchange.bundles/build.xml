@@ -11,8 +11,8 @@
 	<target name="postInstall">
 		<delete dir="${destDir}/${bundle.dDir}">
 			<include name="org.eclipse.osgi_*"/>
-			<include name="com.buglabs.osgi.tester.jar"/>
-			<include name="junit-osgi-4.9b2.jar"/>
+			<include name="com.buglabs.osgi.tester*"/>
+			<include name="junit-osgi-4.9b2*"/>
 		</delete>
     </target>
 
