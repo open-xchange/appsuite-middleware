@@ -61,13 +61,27 @@ import com.openexchange.groupware.contact.helpers.ContactField;
  */
 public class PropertyDrivenMapper extends AbstractOutlookMapper {
 
-    public PropertyDrivenMapper(Properties props){
+    private String encoding;
+
+	public PropertyDrivenMapper(Properties props){
         Set<Object> keys = props.keySet();
+        this.encoding = "UTF-8";
         for(Object key: keys){
+        	if (key.equals("encoding")) {
+        		this.encoding = (String) props.get(key);
+        		System.out.println("Using encoding from .properties file");
+        		continue;
+        	}
             ContactField field = ContactField.getByAjaxName((String) key);
             store(field, (String) props.get(key));
         }
 
     }
+
+	@Override
+	public String getEncoding() {
+		System.out.println("Encoding used: " + encoding);
+		return encoding;
+	}
 
 }

@@ -5,10 +5,14 @@
 # Author: tobias.prinz@open-xchange.com
 #
 require 'csv'
-require 'pp'
+require 'rubygems'
+require 'java_native2ascii'
+#require 'charlock_holmes'
 
 def p(key, value)
+#  print "#{key}=#{JavaNative2Ascii::native2ascii(value)}\n"
   print "#{key}=#{value}\n"
+#  print "#{key.upcase}=#{key}\n"
 end
 
 filename = ARGV[0]
@@ -17,8 +21,10 @@ csv = CSV.read(filename)
 ox = csv.last
 alien = csv.first
 
-print "Expected to have ox (#{ox.size}) and alien data (#{alien.size}) to have the same length, what kind of CSV is this?" and exit unless ox.size == alien.size
+## error handling
+#abort "Expected to have ox (#{ox.size}) and alien data (#{alien.size}) to have the same length, what kind of CSV is this?" unless ox.size == alien.size
 
+## actual properties
 weird = []
 ox.each_with_index do |ox_name, index|
   alien_name = alien[index]
@@ -36,4 +42,10 @@ ox.each_with_index do |ox_name, index|
     p ox_name, alien_name
   end
 end
+
+## encoding
+#detection = CharlockHolmes::EncodingDetector.detect(File.read(filename))
+#p 'encoding', detection[:encoding] || 'UTF-8'
+
+## comments with problematic fields
 weird.each {|problem| print "##{problem}\n"}

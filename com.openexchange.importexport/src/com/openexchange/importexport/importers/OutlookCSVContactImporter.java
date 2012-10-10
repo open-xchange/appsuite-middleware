@@ -131,17 +131,13 @@ public class OutlookCSVContactImporter extends CSVContactImporter {
     }
 
     @Override
-    protected Format getResponsibleFor() {
-        return Format.OUTLOOK_CSV;
+    protected boolean isResponsibleFor(Format f) {
+        return Format.OUTLOOK_CSV == f;
     }
 
-    /**
-     * This importers assumes the encoding CP-1252 for files uploaded, since this format is mainly used on European and American Windows
-     * systems.
-     */
     @Override
     public String getEncoding() {
-        return "cp1252";
+        return getFieldMapper().getEncoding();
     }
 
     /**

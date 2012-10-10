@@ -102,7 +102,7 @@ public class CSVContactImporter extends AbstractImporter {
 
     @Override
     public boolean canImport(final ServerSession session, final Format format, final List<String> folders, final Map<String, String[]> optionalParams) throws OXException {
-        if (!format.equals(getResponsibleFor())) {
+        if (!isResponsibleFor(format)) {
             return false;
         }
 
@@ -146,8 +146,8 @@ public class CSVContactImporter extends AbstractImporter {
         return perm.canCreateObjects();
     }
 
-    protected Format getResponsibleFor() {
-        return Format.CSV;
+    protected boolean isResponsibleFor(Format f) {
+        return f == Format.CSV;
     }
 
     protected String getEncoding() {
