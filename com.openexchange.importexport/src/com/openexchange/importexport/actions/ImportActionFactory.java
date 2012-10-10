@@ -52,7 +52,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import com.openexchange.ajax.requesthandler.AJAXActionService;
-import com.openexchange.importexport.actions.importer.AllKindsOfCsvImportAction;
+import com.openexchange.importexport.actions.importer.CSVImportAction;
 import com.openexchange.importexport.actions.importer.FacebookArchiveImportAction;
 import com.openexchange.importexport.actions.importer.FacebookFriendsImportAction;
 import com.openexchange.importexport.actions.importer.ICalImportAction;
@@ -64,8 +64,8 @@ public class ImportActionFactory extends AbstractIEActionFactory{
     @Override
     protected Map<Format, AJAXActionService> getActions(){
     	return new HashMap<Format, AJAXActionService>(){{
-    		put(Format.CSV, new AllKindsOfCsvImportAction());
-    		put(Format.OUTLOOK_CSV, new AllKindsOfCsvImportAction());
+    		put(Format.CSV, new CSVImportAction());
+    		put(Format.OUTLOOK_CSV, new CSVImportAction());
     		put(Format.VCARD, new VCardImportAction());
     		put(Format.ICAL, new ICalImportAction());
 

@@ -13,14 +13,14 @@ import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.importexport.formats.Format;
 import com.openexchange.importexport.formats.csv.PropertyDrivenMapper;
-import com.openexchange.importexport.importers.AllKindsOfCsvImporter;
+import com.openexchange.importexport.importers.CSVContactImporter;
 import com.openexchange.importexport.importers.Importer;
 import com.openexchange.importexport.osgi.ImportExportServices;
 import com.openexchange.log.LogFactory;
 
-public class AllKindsOfCsvImportAction extends AbstractImportAction implements AJAXActionService {
+public class CSVImportAction extends AbstractImportAction implements AJAXActionService {
 
-	public static Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(AllKindsOfCsvImportAction.class));
+	public static Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(CSVImportAction.class));
 
 	private Importer importer;
 
@@ -30,7 +30,7 @@ public class AllKindsOfCsvImportAction extends AbstractImportAction implements A
 	}
 
     public Importer loadImporter() {
-        final AllKindsOfCsvImporter imp = new AllKindsOfCsvImporter();
+        final CSVContactImporter imp = new CSVContactImporter();
         try {
             final ConfigurationService conf = ImportExportServices.getConfigurationService();
             final String dirName = conf.getProperty("com.openexchange.import.mapper.path");
