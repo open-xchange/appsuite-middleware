@@ -56,10 +56,9 @@ import java.util.concurrent.ConcurrentMap;
 import com.openexchange.exception.OXException;
 import com.openexchange.session.Session;
 
-
 /**
  * {@link CompositeFileStorageAccountManagerProvider} - Wrapping multiple providers.
- *
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class CompositeFileStorageAccountManagerProvider implements FileStorageAccountManagerProvider {
@@ -75,6 +74,15 @@ public final class CompositeFileStorageAccountManagerProvider implements FileSto
     public CompositeFileStorageAccountManagerProvider() {
         super();
         set = new ConcurrentHashMap<FileStorageAccountManagerProvider, Object>(4);
+    }
+
+    /**
+     * Checks if this composite {@link FileStorageAccountManagerProvider provider} has any providers assigned.
+     * 
+     * @return <code>true</code> if there are any providers; otherwise <code>false</code>
+     */
+    public boolean hasAnyProvider() {
+        return !set.isEmpty();
     }
 
     /**
@@ -115,16 +123,19 @@ public final class CompositeFileStorageAccountManagerProvider implements FileSto
         if (null != set.remove(provider)) {
             int ranking = DEFAULT_RANKING;
             for (final FileStorageAccountManagerProvider p : set.keySet()) {
-                ranking = Math.max(ranking, p.getRanking());
+                final int otherRanking = p.getRanking();
+                if (otherRanking > ranking) {
+                    ranking = otherRanking;
+                }
             }
             this.ranking = ranking;
         }
     }
 
     @Override
-    public boolean supports(final FileStorageService service) {
+    public boolean supports(final String serviceId) {
         for (final FileStorageAccountManagerProvider provider : set.keySet()) {
-            if (provider.supports(service)) {
+            if (provider.supports(serviceId)) {
                 return true;
             }
         }
@@ -135,7 +146,7 @@ public final class CompositeFileStorageAccountManagerProvider implements FileSto
 
     @Override
     public FileStorageAccountManager getAccountManager(final String accountId, final Session session) throws OXException {
-        final String paramName = PARAM_DEFAULT_ACCOUNT + '@' + accountId;
+        final String paramName = new StringBuilder(PARAM_DEFAULT_ACCOUNT).append('@').append(accountId).toString();
         FileStorageAccountManager accountManager = (FileStorageAccountManager) session.getParameter(paramName);
         if (null == accountManager) {
             FileStorageAccountManagerProvider candidate = null;
@@ -157,17 +168,17 @@ public final class CompositeFileStorageAccountManagerProvider implements FileSto
     }
 
     @Override
-    public FileStorageAccountManager getAccountManagerFor(final FileStorageService service) throws OXException {
+    public FileStorageAccountManager getAccountManagerFor(final String serviceId) throws OXException {
         FileStorageAccountManagerProvider candidate = null;
         for (final FileStorageAccountManagerProvider provider : set.keySet()) {
-            if (provider.supports(service) && (null == candidate || candidate.getRanking() < provider.getRanking())) {
+            if (provider.supports(serviceId) && (null == candidate || candidate.getRanking() < provider.getRanking())) {
                 candidate = provider;
             }
         }
         if (null == candidate) {
-            throw FileStorageExceptionCodes.NO_ACCOUNT_MANAGER_FOR_SERVICE.create(service.getId());
+            throw FileStorageExceptionCodes.NO_ACCOUNT_MANAGER_FOR_SERVICE.create(serviceId);
         }
-        return candidate.getAccountManagerFor(service);
+        return candidate.getAccountManagerFor(serviceId);
     }
 
     @Override
