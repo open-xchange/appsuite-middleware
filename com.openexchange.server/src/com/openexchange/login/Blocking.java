@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2020 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,62 +47,16 @@
  *
  */
 
-package com.openexchange.file.storage.json;
-
-import org.json.JSONException;
-import org.json.JSONObject;
-import com.openexchange.datatypes.genericonf.json.FormContentParser;
-import com.openexchange.exception.OXException;
-import com.openexchange.file.storage.FileStorageAccount;
-import com.openexchange.file.storage.FileStorageService;
-import com.openexchange.file.storage.generic.DefaultFileStorageAccount;
-import com.openexchange.file.storage.registry.FileStorageServiceRegistry;
+package com.openexchange.login;
 
 /**
- * {@link FileStorageAccountParser} - Parses the JSON representation of a messaging account according to its messaging services dynamic
- * form.
- *
+ * {@link Blocking} - Marker interface for {@link LoginHandlerService} implementations to signal that the associated
+ * {@code LoginHandlerService} shall be executed with blocking behavior; meaning calling thread does return when {@code LoginHandlerService}
+ * invocation terminates.
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class FileStorageAccountParser {
+public interface Blocking {
 
-    private final FileStorageServiceRegistry registry;
-
-    /**
-     * Initializes a new {@link FileStorageAccountParser}.
-     * 
-     * @param serviceRegistry The service registry
-     */
-    public FileStorageAccountParser(final FileStorageServiceRegistry serviceRegistry) {
-        super();
-        registry = serviceRegistry;
-    }
-
-    /**
-     * Parses specified account's JSON representation to a {@code FileStorageAccount}.
-     * 
-     * @param accountJSON
-     * @return
-     * @throws OXException
-     * @throws JSONException
-     */
-    public FileStorageAccount parse(final JSONObject accountJSON) throws OXException, JSONException {
-        final DefaultFileStorageAccount account = new DefaultFileStorageAccount();
-
-        account.setId(accountJSON.optString(FileStorageAccountConstants.ID));
-        if (accountJSON.has(FileStorageAccountConstants.DISPLAY_NAME)) {
-            account.setDisplayName(accountJSON.optString(FileStorageAccountConstants.DISPLAY_NAME));
-        }
-        final FileStorageService fsService =
-            registry.getFileStorageService(accountJSON.getString(FileStorageAccountConstants.FILE_STORAGE_SERVICE));
-        account.setFileStorageService(fsService);
-        if (accountJSON.has(FileStorageAccountConstants.CONFIGURATION)) {
-            account.setConfiguration(new FormContentParser().parse(
-                accountJSON.getJSONObject(FileStorageAccountConstants.CONFIGURATION),
-                fsService.getFormDescription()));
-        }
-
-        return account;
-    }
-
+    // Marker interface
 }

@@ -72,10 +72,9 @@ public enum ServiceExceptionCode implements OXExceptionCode {
      */
     SERVICE_INITIALIZATION_FAILED(ServiceExceptionMessage.SERVICE_INITIALIZATION_FAILED_MSG, Category.CATEGORY_ERROR, 3);
 
+    private static final String PREFIX = "SRV";
     private final String message;
-
     private final int detailNumber;
-
     private final Category category;
 
     private ServiceExceptionCode(final String message, final Category category, final int detailNumber) {
@@ -101,7 +100,7 @@ public enum ServiceExceptionCode implements OXExceptionCode {
 
     @Override
     public String getPrefix() {
-        return "SRV";
+        return PREFIX;
     }
 
     @Override

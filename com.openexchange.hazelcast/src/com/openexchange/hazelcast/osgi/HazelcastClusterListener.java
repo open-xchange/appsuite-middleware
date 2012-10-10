@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2020 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,62 +47,52 @@
  *
  */
 
-package com.openexchange.file.storage.json;
+package com.openexchange.hazelcast.osgi;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-import com.openexchange.datatypes.genericonf.json.FormContentParser;
-import com.openexchange.exception.OXException;
-import com.openexchange.file.storage.FileStorageAccount;
-import com.openexchange.file.storage.FileStorageService;
-import com.openexchange.file.storage.generic.DefaultFileStorageAccount;
-import com.openexchange.file.storage.registry.FileStorageServiceRegistry;
+import java.net.InetAddress;
+import java.util.Collections;
+import org.apache.commons.logging.Log;
+import com.openexchange.cluster.discovery.ClusterListener;
+import com.openexchange.hazelcast.osgi.HazelcastActivator.InitMode;
 
 /**
- * {@link FileStorageAccountParser} - Parses the JSON representation of a messaging account according to its messaging services dynamic
- * form.
+ * {@link HazelcastClusterListener}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class FileStorageAccountParser {
+final class HazelcastClusterListener implements ClusterListener {
 
-    private final FileStorageServiceRegistry registry;
+    private final HazelcastActivator activator;
+    private final long stamp;
+    private final Log logger;
 
     /**
-     * Initializes a new {@link FileStorageAccountParser}.
-     * 
-     * @param serviceRegistry The service registry
+     * Initializes a new {@link HazelcastClusterListener}.
      */
-    public FileStorageAccountParser(final FileStorageServiceRegistry serviceRegistry) {
+    protected HazelcastClusterListener(final HazelcastActivator activator, final long stamp, Log logger) {
         super();
-        registry = serviceRegistry;
+        this.activator = activator;
+        this.stamp = stamp;
+        this.logger = logger;
     }
 
-    /**
-     * Parses specified account's JSON representation to a {@code FileStorageAccount}.
-     * 
-     * @param accountJSON
-     * @return
-     * @throws OXException
-     * @throws JSONException
-     */
-    public FileStorageAccount parse(final JSONObject accountJSON) throws OXException, JSONException {
-        final DefaultFileStorageAccount account = new DefaultFileStorageAccount();
+    @Override
+    public void removed(final InetAddress address) {
+        // Nothing
+    }
 
-        account.setId(accountJSON.optString(FileStorageAccountConstants.ID));
-        if (accountJSON.has(FileStorageAccountConstants.DISPLAY_NAME)) {
-            account.setDisplayName(accountJSON.optString(FileStorageAccountConstants.DISPLAY_NAME));
+    @Override
+    public void added(final InetAddress address) {
+        final InitMode initMode = activator.init(Collections.<InetAddress> singletonList(address), true, stamp, logger);
+        if (InitMode.INITIALIZED.equals(initMode)) {
+            if (logger.isInfoEnabled()) {
+                logger.info("\nHazelcast:\n\tInitialized Hazelcast instance via cluster listener notification about an appeared Open-Xchange node: "+address+"\n");
+            }
+        } else if (InitMode.RE_INITIALIZED.equals(initMode)) {
+            if (logger.isInfoEnabled()) {
+                logger.info("\nHazelcast:\n\tRe-Initialized Hazelcast instance via cluster listener notification about an appeared Open-Xchange node: "+address+"\n");
+            }
         }
-        final FileStorageService fsService =
-            registry.getFileStorageService(accountJSON.getString(FileStorageAccountConstants.FILE_STORAGE_SERVICE));
-        account.setFileStorageService(fsService);
-        if (accountJSON.has(FileStorageAccountConstants.CONFIGURATION)) {
-            account.setConfiguration(new FormContentParser().parse(
-                accountJSON.getJSONObject(FileStorageAccountConstants.CONFIGURATION),
-                fsService.getFormDescription()));
-        }
-
-        return account;
     }
 
 }
