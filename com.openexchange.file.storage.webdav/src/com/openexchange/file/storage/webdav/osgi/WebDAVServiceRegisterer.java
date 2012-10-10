@@ -127,14 +127,24 @@ public final class WebDAVServiceRegisterer implements ServiceTrackerCustomizer<F
     }
 
     @Override
-    public void modifiedService(final ServiceReference<FileStorageAccountManagerProvider> reference, final FileStorageAccountManagerProvider service) {
+    public void modifiedService(final ServiceReference<FileStorageAccountManagerProvider> reference, final FileStorageAccountManagerProvider provider) {
         // Ignore
     }
 
     @Override
-    public void removedService(final ServiceReference<FileStorageAccountManagerProvider> reference, final FileStorageAccountManagerProvider service) {
-        if (null != service) {
-            unregisterService(reference);
+    public void removedService(final ServiceReference<FileStorageAccountManagerProvider> reference, final FileStorageAccountManagerProvider provider) {
+        if (null != provider) {
+            synchronized (this) {
+                final CompositeFileStorageAccountManagerProvider compositeProvider = this.service.getCompositeAccountManager();
+                if (null == compositeProvider) {
+                    unregisterService(reference);
+                } else {
+                    compositeProvider.removeProvider(provider);
+                    if (!compositeProvider.hasAnyProvider()) {
+                        unregisterService(reference);
+                    }
+                }
+            }
         }
     }
 
