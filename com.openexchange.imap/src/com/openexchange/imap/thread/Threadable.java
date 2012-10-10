@@ -722,7 +722,7 @@ public final class Threadable implements Cloneable, Serializable {
      * @return <code>true</code> to include "References" header; else <code>false</code>
      */
     static boolean includeReferences() {
-        return false;
+        return true;
     }
 
     /**
@@ -810,6 +810,29 @@ public final class Threadable implements Cloneable, Serializable {
                                     final UID uid = getItemOf(UID.class, fetchResponse);
                                     if (null != uid) {
                                         t.uid = uid.uid;
+                                    }
+                                    if (includeReferences()) {
+                                        InputStream headerStream;
+                                        BODY body = getItemOf(BODY.class, fetchResponse);
+                                        if (null == body) {
+                                            final RFC822DATA rfc822data = getItemOf(RFC822DATA.class, fetchResponse);
+                                            headerStream = null == rfc822data ? null : rfc822data.getByteArrayInputStream();
+                                        } else {
+                                            headerStream = body.getByteArrayInputStream();
+                                        }
+                                        body = null;
+                                        if (null != headerStream) {
+                                            final InternetHeaders h = new InternetHeaders();
+                                            h.load(headerStream);
+                                            headerStream = null;
+                                            for (final Enumeration<?> e = h.getAllHeaders(); e.hasMoreElements();) {
+                                                final Header hdr = (Header) e.nextElement();
+                                                final HeaderHandler headerHandler = HANDLERS.get(hdr.getName());
+                                                if (null != headerHandler) {
+                                                    headerHandler.handle(hdr, t);
+                                                }
+                                            }
+                                        }
                                     }
                                 } else {
                                     // Check for BODY resp. RFC822DATA
