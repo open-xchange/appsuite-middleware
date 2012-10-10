@@ -1,3 +1,7 @@
+* 2012-10-10 - jan.bauerdick@open-xchange.com
+
+ - Refactored report client, added yearly login counter
+
 * 2012-10-09 - thorben.betten@open-xchange.com
 
  - Fix for bug 23229: Added CSS3 styles to white-list filter

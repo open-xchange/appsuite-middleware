@@ -86,10 +86,11 @@ public class TransportHandler {
 
     private static final String URL_ENCODING = "UTF-8";
 
-    public TransportHandler() {	}
+    public TransportHandler() {
+    }
 
-    public void sendReport(final List<Total> totals, final List<MacDetail> macDetails, final List<ContextDetail> contextDetails, final String[] versions, final ClientLoginCount clc, final boolean savereport) throws IOException, JSONException {
-        final JSONObject metadata = buildJSONObject(totals, macDetails, contextDetails, versions, clc);
+    public void sendReport(final List<Total> totals, final List<MacDetail> macDetails, final List<ContextDetail> contextDetails, final String[] versions, final ClientLoginCount clc, final ClientLoginCount clcYear, final boolean savereport) throws IOException, JSONException {
+        final JSONObject metadata = buildJSONObject(totals, macDetails, contextDetails, versions, clc, clcYear);
 
         final ReportConfiguration reportConfiguration = new ReportConfiguration();
 
@@ -111,14 +112,14 @@ public class TransportHandler {
             System.setProperty("https.proxyPort", reportConfiguration.getProxyPort().trim());
         }
 
-        if( savereport ) {
+        if (savereport) {
             File tmpfile = File.createTempFile("oxreport", ".json", new File("/tmp"));
             System.out.println("Saving report to " + tmpfile.getAbsolutePath());
             DataOutputStream tfo = new DataOutputStream(new FileOutputStream(tmpfile));
             tfo.writeBytes(report.toString());
             tfo.close();
         } else {
-            final HttpsURLConnection httpsURLConnection = (HttpsURLConnection) new URL("https://"+REPORT_SERVER_URL+"/").openConnection();
+            final HttpsURLConnection httpsURLConnection = (HttpsURLConnection) new URL("https://" + REPORT_SERVER_URL + "/").openConnection();
             httpsURLConnection.setUseCaches(false);
             httpsURLConnection.setDoOutput(true);
             httpsURLConnection.setDoInput(true);
@@ -126,16 +127,11 @@ public class TransportHandler {
             httpsURLConnection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
 
             if ("true".equals(reportConfiguration.getUseProxy().trim()) && "true".equals(reportConfiguration.getProxyAuthRequired().trim())) {
-                final String proxyAutorizationProperty = "Basic "
-                    + Base64.encode((reportConfiguration.getProxyUsername()
-                        .trim()
-                        + ":" + reportConfiguration.getProxyPassword()
-                        .trim()).getBytes());
+                final String proxyAutorizationProperty = "Basic " + Base64.encode((reportConfiguration.getProxyUsername().trim() + ":" + reportConfiguration.getProxyPassword().trim()).getBytes());
 
                 Authenticator.setDefault(new ProxyAuthenticator(
                     reportConfiguration.getProxyUsername().trim(),
-                    reportConfiguration.getProxyPassword().trim()
-                    ));
+                    reportConfiguration.getProxyPassword().trim()));
 
                 httpsURLConnection.setRequestProperty("Proxy-Authorization", proxyAutorizationProperty);
             }
@@ -157,8 +153,7 @@ public class TransportHandler {
         }
     }
 
-
-    private JSONObject buildJSONObject(final List<Total> totals, final List<MacDetail> macDetails, final List<ContextDetail> contextDetails, final String[] versions, final ClientLoginCount clc) throws JSONException {
+    private JSONObject buildJSONObject(final List<Total> totals, final List<MacDetail> macDetails, final List<ContextDetail> contextDetails, final String[] versions, final ClientLoginCount clc, final ClientLoginCount clcYear) throws JSONException {
         final JSONObject retval = new JSONObject();
 
         final JSONObject total = new JSONObject();
@@ -166,21 +161,22 @@ public class TransportHandler {
         final JSONObject detail = new JSONObject();
         final JSONObject version = new JSONObject();
         final JSONObject clientlogincount = new JSONObject();
+        final JSONObject clientlogincountyear = new JSONObject();
 
-        final boolean wantsdetails = ( null != contextDetails );
-        
-        if( wantsdetails ) {
+        final boolean wantsdetails = (null != contextDetails);
+
+        if (wantsdetails) {
             total.put("report-format", "long");
         } else {
             total.put("report-format", "short");
         }
-        
+
         for (final Total tmp : totals) {
             total.put("contexts", tmp.getContexts());
             total.put("users", tmp.getUsers());
         }
 
-        for(final MacDetail tmp : macDetails) {
+        for (final MacDetail tmp : macDetails) {
             final JSONObject macDetailObjectJSON = new JSONObject();
             macDetailObjectJSON.put("id", tmp.getId());
             macDetailObjectJSON.put("count", tmp.getCount());
@@ -188,8 +184,8 @@ public class TransportHandler {
             macDetailObjectJSON.put("disabled", tmp.getNrDisabled());
             macdetail.put(tmp.getId(), macDetailObjectJSON);
         }
-        
-        if( wantsdetails ) {
+
+        if (wantsdetails) {
             for (final ContextDetail tmp : contextDetails) {
                 final JSONObject contextDetailObjectJSON = new JSONObject();
                 contextDetailObjectJSON.put("id", tmp.getId());
@@ -209,7 +205,7 @@ public class TransportHandler {
                 detail.put(tmp.getId(), contextDetailObjectJSON);
             }
         }
-        
+
         version.put("admin", versions[0]);
         version.put("groupware", versions[1]);
 
@@ -219,15 +215,20 @@ public class TransportHandler {
         clientlogincount.put("carddav", clc.getCarddav());
         clientlogincount.put("caldav", clc.getCarddav());
 
+        clientlogincountyear.put("usm-eas", clcYear.getUsmeas());
+        clientlogincountyear.put("olox2", clcYear.getOlox2());
+        clientlogincountyear.put("mobileapp", clcYear.getMobileapp());
+        clientlogincountyear.put("carddav", clcYear.getCarddav());
+        clientlogincountyear.put("caldav", clcYear.getCarddav());
+
         retval.put("total", total);
         retval.put("macdetail", macdetail);
-        if( wantsdetails ) {
+        if (wantsdetails) {
             retval.put("detail", detail);
         }
         retval.put("version", version);
         retval.put("clientlogincount", clientlogincount);
-
-
+        retval.put("clientlogincountyear", clientlogincountyear);
 
         return retval;
     }
