@@ -73,7 +73,6 @@ public class CSVImportAction extends AbstractImportAction implements AJAXActionS
     
 	@Override
 	public Importer getImporter() {
-		System.out.println("Loading AllKindsOfCsvImporter");
 		if(this.importer == null) {
             this.importer = loadImporter();
         }

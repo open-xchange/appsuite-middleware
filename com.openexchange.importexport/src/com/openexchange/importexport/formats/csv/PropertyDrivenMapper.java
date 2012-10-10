@@ -69,7 +69,6 @@ public class PropertyDrivenMapper extends AbstractOutlookMapper {
         for(Object key: keys){
         	if (key.equals("encoding")) {
         		this.encoding = (String) props.get(key);
-        		System.out.println("Using encoding from .properties file");
         		continue;
         	}
             ContactField field = ContactField.getByAjaxName((String) key);
@@ -80,7 +79,6 @@ public class PropertyDrivenMapper extends AbstractOutlookMapper {
 
 	@Override
 	public String getEncoding() {
-		System.out.println("Encoding used: " + encoding);
 		return encoding;
 	}
 
