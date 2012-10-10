@@ -148,9 +148,15 @@ public class FreeBusyServiceImpl implements FreeBusyService {
     @Override
     public List<FreeBusyData> getMergedFreeBusy(Session session, List<String> participants, Date from, Date until) throws OXException {
         List<FreeBusyData> freeBusyData = this.getFreeBusy(session, participants, from, until);
+        FreeBusyData mergedFreeBusyData = new FreeBusyData("merged", from, until);
         for (FreeBusyData data : freeBusyData) {
             data.normalize();
+            if (data.hasData()) {
+                mergedFreeBusyData.addAll(data.getIntervals());
+            }
         }
+        mergedFreeBusyData.normalize();
+        freeBusyData.add(mergedFreeBusyData);
         return freeBusyData;
     }
 

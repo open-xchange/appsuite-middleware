@@ -63,29 +63,10 @@ import org.apache.commons.logging.Log;
 import com.microsoft.schemas.exchange.services._2006.messages.FreeBusyResponseType;
 import com.microsoft.schemas.exchange.services._2006.messages.GetUserAvailabilityRequestType;
 import com.microsoft.schemas.exchange.services._2006.messages.GetUserAvailabilityResponseType;
-import com.microsoft.schemas.exchange.services._2006.messages.ResponseMessageType;
-import com.microsoft.schemas.exchange.services._2006.types.ArrayOfMailboxData;
-import com.microsoft.schemas.exchange.services._2006.types.CalendarEvent;
-import com.microsoft.schemas.exchange.services._2006.types.DayOfWeekType;
-import com.microsoft.schemas.exchange.services._2006.types.Duration;
-import com.microsoft.schemas.exchange.services._2006.types.EmailAddress;
 import com.microsoft.schemas.exchange.services._2006.types.ExchangeVersionType;
-import com.microsoft.schemas.exchange.services._2006.types.FreeBusyView;
-import com.microsoft.schemas.exchange.services._2006.types.FreeBusyViewOptionsType;
-import com.microsoft.schemas.exchange.services._2006.types.LegacyFreeBusyType;
-import com.microsoft.schemas.exchange.services._2006.types.MailboxData;
-import com.microsoft.schemas.exchange.services._2006.types.MeetingAttendeeType;
-import com.microsoft.schemas.exchange.services._2006.types.RequestServerVersion;
-import com.microsoft.schemas.exchange.services._2006.types.ResponseClassType;
-import com.microsoft.schemas.exchange.services._2006.types.SerializableTimeZone;
-import com.microsoft.schemas.exchange.services._2006.types.SerializableTimeZoneTime;
-import com.microsoft.schemas.exchange.services._2006.types.ServerVersionInfo;
 import com.openexchange.config.ConfigurationService;
-import com.openexchange.ews.DateConverter;
-import com.openexchange.ews.EWSException;
 import com.openexchange.ews.ExchangeWebService;
 import com.openexchange.exception.OXException;
-import com.openexchange.freebusy.BusyStatus;
 import com.openexchange.freebusy.FreeBusyData;
 import com.openexchange.freebusy.FreeBusyExceptionCodes;
 import com.openexchange.freebusy.FreeBusyInterval;
@@ -107,14 +88,13 @@ public class EWSFreeBusyProvider implements FreeBusyProvider {
      * return an error.
      * @see http://msdn.microsoft.com/en-us/library/exchangewebservices.freebusyviewoptionstype.timewindow.aspx
      */
-    private static final int MAX_DAYS = 62;
-    
-    private static final DateConverter DATE_CONVERTER = new DateConverter();
+    private static final int MAX_DAYS = 42;
     private static final Log LOG = com.openexchange.log.Log.loggerFor(EWSFreeBusyProvider.class);
     
     private final ExchangeWebService ews;
     private String[] emailSuffixes;
     private Boolean validEmailsOnly;
+    private Boolean detailedData;
     
     /**
      * Initializes a new {@link EWSFreeBusyProvider}.
@@ -124,27 +104,6 @@ public class EWSFreeBusyProvider implements FreeBusyProvider {
     public EWSFreeBusyProvider() throws OXException {
         super();
         this.ews = createWebService();
-    }
-    
-    private static ExchangeWebService createWebService() throws OXException {
-        ConfigurationService configService = EWSFreeBusyProviderLookup.getService(ConfigurationService.class);
-        ExchangeWebService ews = new ExchangeWebService(
-            configService.getProperty("com.openexchange.freebusy.provider.ews.url"), 
-            configService.getProperty("com.openexchange.freebusy.provider.ews.userName"), 
-            configService.getProperty("com.openexchange.freebusy.provider.ews.password"));
-        ews.getConfig().setExchangeVersion(ExchangeVersionType.valueOf(ExchangeVersionType.class, 
-            configService.getProperty("com.openexchange.freebusy.provider.ews.exchangeVersion", "EXCHANGE_2010").toUpperCase()));
-        ews.getConfig().setIgnoreHostnameValidation(configService.getBoolProperty(
-            "com.openexchange.freebusy.provider.ews.skipHostVerification", false));
-        ews.getConfig().setTrustAllCerts(configService.getBoolProperty("com.openexchange.freebusy.provider.ews.trustAllCerts", false));
-        return ews;
-    }
-    
-    private static Date addDays(Date date, int days) {
-        Calendar calendar = Calendar.getInstance();
-        calendar.setTime(date);
-        calendar.add(Calendar.DATE, days);
-        return calendar.getTime();
     }
     
     @Override
@@ -169,8 +128,11 @@ public class EWSFreeBusyProvider implements FreeBusyProvider {
         if (0 < filteredParticipants.size()) {
             for (Date currentFrom = from; currentFrom.before(until); currentFrom = addDays(currentFrom, MAX_DAYS)) {
                 Date maxUntil = addDays(currentFrom, MAX_DAYS);
-                Date currentUntil = until.before(maxUntil) ? until : maxUntil; 
-                List<FreeBusyResponseType> freeBusyResponses = getFreeBusyResponses(filteredParticipants, currentFrom, currentUntil);
+                Date currentUntil = until.before(maxUntil) ? until : maxUntil;
+                List<FreeBusyResponseType> freeBusyResponses = null;
+                
+                freeBusyResponses = getFreeBusyResponses(filteredParticipants, currentFrom, currentUntil);
+                
                 if (null == freeBusyResponses) {
                     LOG.warn("Got no free/busy response from EWS");
                     continue;
@@ -187,10 +149,16 @@ public class EWSFreeBusyProvider implements FreeBusyProvider {
                     FreeBusyData freeBusyData = freeBusyInformation.get(participant);
                     FreeBusyResponseType freeBusyResponse = freeBusyResponses.get(i);
                     if (null != freeBusyResponse) {
-                        freeBusyData.addWarning(getError(filteredParticipants.get(i), freeBusyResponse.getResponseMessage()));
-                        freeBusyData.addAll(getFreeBusyIntervals(freeBusyResponse.getFreeBusyView()));
+                        OXException warning = Tools.getError(participant, freeBusyResponse.getResponseMessage());
+                        if (null != warning) {
+                            freeBusyData.addWarning(warning);
+                        }
+                        Collection<FreeBusyInterval> intervals = Tools.getFreeBusyIntervals(freeBusyResponse.getFreeBusyView());
+                        if (null != intervals && 0 < intervals.size()) {
+                            freeBusyData.addAll(intervals);
+                        }
                     } else {
-                        freeBusyData.addWarning(OXException.general("got no response"));
+                        freeBusyData.addWarning(FreeBusyExceptionCodes.DATA_NOT_AVAILABLE.create(participant));
                     }
                 }
             }
@@ -210,125 +178,20 @@ public class EWSFreeBusyProvider implements FreeBusyProvider {
         List<FreeBusyData> freeBusyData = this.getFreeBusy(session, Arrays.asList(new String[] { participant }), from, until);
         return null != freeBusyData && 0 < freeBusyData.size() ? freeBusyData.get(0) : null; 
     }
-    
-    private static OXException getError(String participant, ResponseMessageType responseMessage) {
-        if (null != responseMessage && false == ResponseClassType.SUCCESS.equals(responseMessage.getResponseClass())) {
-            EWSException ewsException = new EWSException(responseMessage);
-            if ("ErrorMailRecipientNotFound".equals(responseMessage.getResponseCode())) {
-                return FreeBusyExceptionCodes.PARTICIPANT_NOT_FOUND.create(ewsException, participant);               
-            } else {
-                return OXException.general("Unknown error: " + responseMessage.getMessageText());             
-            }
-        }
-        return null;
-    }
-    
-    private static Collection<FreeBusyInterval> getFreeBusyIntervals(FreeBusyView freeBusyView) {
-        Collection<FreeBusyInterval> freeBusyIntervals = new ArrayList<FreeBusyInterval>();
-        if (null != freeBusyView && null != freeBusyView.getCalendarEventArray()) { 
-            List<CalendarEvent> calendarEvents = freeBusyView.getCalendarEventArray().getCalendarEvent();
-            if (null != calendarEvents) {
-                for (CalendarEvent calendarEvent : calendarEvents) {
-                    freeBusyIntervals.add(getFreeBusyInterval(calendarEvent));
-                }
-            }
-        }
-        return freeBusyIntervals;
-    }
-        
-    private static FreeBusyInterval getFreeBusyInterval(CalendarEvent calendarEvent) {
-        FreeBusyInterval interval = new FreeBusyInterval(DATE_CONVERTER.getDate(calendarEvent.getStartTime()),
-            DATE_CONVERTER.getDate(calendarEvent.getEndTime()), getStatus(calendarEvent.getBusyType())); 
-        if (null != calendarEvent.getCalendarEventDetails()) {
-            interval.setTitle(calendarEvent.getCalendarEventDetails().getSubject());
-            interval.setLocation(calendarEvent.getCalendarEventDetails().getLocation());
-        }
-        return interval;
-    }
-        
-    private static BusyStatus getStatus(LegacyFreeBusyType type) {
-        switch (type) {
-        case FREE:
-            return BusyStatus.FREE;            
-        case OOF:
-            return BusyStatus.ABSENT;          
-        case TENTATIVE:
-            return BusyStatus.TEMPORARY;           
-        case BUSY:
-            return BusyStatus.RESERVED;            
-        default:
-            return BusyStatus.UNKNOWN;
-        }
-    }
         
     private List<FreeBusyResponseType> getFreeBusyResponses(List<String> emailAddresses, Date from, Date until) {
         GetUserAvailabilityResponseType userAvailibility = getUserAvailibility(emailAddresses, from, until);
-        if (null == userAvailibility || null == userAvailibility.getFreeBusyResponseArray() || 
-                null == userAvailibility.getFreeBusyResponseArray().getFreeBusyResponse()) {
-            return null;//TODO
-//            throw new Exception("Got no user availibility response");
+        if (null == userAvailibility || null == userAvailibility.getFreeBusyResponseArray()) { 
+            return null;
         }
         return userAvailibility.getFreeBusyResponseArray().getFreeBusyResponse();
     }
     
     private GetUserAvailabilityResponseType getUserAvailibility(List<String> emailAddresses, Date from, Date until) {
         Holder<GetUserAvailabilityResponseType> responseHolder = new Holder<GetUserAvailabilityResponseType>();
-        Holder<ServerVersionInfo> versionHolder = new Holder<ServerVersionInfo>();
-        GetUserAvailabilityRequestType request = createAvailabilityRequest(emailAddresses, from, until);
-        this.ews.getServicePort().getUserAvailability(request, getRequestVersion(), responseHolder, versionHolder);
-        return responseHolder.value;        
-    }
-    
-    private static GetUserAvailabilityRequestType createAvailabilityRequest(List<String> emailAddresses, Date from, Date until) {
-        GetUserAvailabilityRequestType getUserAvailabilityRequestType = new GetUserAvailabilityRequestType();
-        getUserAvailabilityRequestType.setTimeZone(getLegacyTimeZone());
-        getUserAvailabilityRequestType.setFreeBusyViewOptions(getFreebusyViewOptions(from, until));
-        getUserAvailabilityRequestType.setMailboxDataArray(getMailboxData(emailAddresses));
-        return getUserAvailabilityRequestType;
-    }   
-    
-    private static RequestServerVersion getRequestVersion() {
-        RequestServerVersion requestServerVersion = new RequestServerVersion();
-        requestServerVersion.setVersion(ExchangeVersionType.EXCHANGE_2010);
-        return requestServerVersion;
-    }
-    
-    private static ArrayOfMailboxData getMailboxData(List<String> emailAddresses) {
-        ArrayOfMailboxData mailboxData = new ArrayOfMailboxData();
-        for (String address : emailAddresses) {
-            EmailAddress emailAddress = new EmailAddress();
-            emailAddress.setAddress(address);
-            MailboxData mailbox = new MailboxData();
-            mailbox.setEmail(emailAddress);
-            mailbox.setAttendeeType(MeetingAttendeeType.REQUIRED);
-            mailboxData.getMailboxData().add(mailbox);
-        }
-        return mailboxData;
-    }
-        
-    private static FreeBusyViewOptionsType getFreebusyViewOptions(Date from, Date until) {
-        FreeBusyViewOptionsType freeBusyViewOptionsType = new FreeBusyViewOptionsType();
-        Duration duration = new Duration();
-        duration.setStartTime(DateConverter.DEFAULT.getXMLCalendar(from));
-        duration.setEndTime(DateConverter.DEFAULT.getXMLCalendar(until));
-        freeBusyViewOptionsType.setTimeWindow(duration);
-        // http://msdn.microsoft.com/en-us/library/exchange/exchangewebservices.freebusyviewtype(v=exchg.140)
-        freeBusyViewOptionsType.getRequestedView().add("FreeBusy");
-        freeBusyViewOptionsType.getRequestedView().add("Detailed");
-        return freeBusyViewOptionsType;
-    }
-    
-    private static SerializableTimeZone getLegacyTimeZone() {
-        SerializableTimeZoneTime standardTime = new SerializableTimeZoneTime();
-        standardTime.setBias(0);
-        standardTime.setTime("00:00:00");
-        standardTime.setDayOrder((short)1);
-        standardTime.setDayOfWeek(DayOfWeekType.SUNDAY);
-        SerializableTimeZone timezone = new SerializableTimeZone();
-        timezone.setBias(0);
-        timezone.setStandardTime(standardTime);
-        timezone.setDaylightTime(standardTime);
-        return timezone;
+        GetUserAvailabilityRequestType request = Tools.createAvailabilityRequest(emailAddresses, from, until, isDetailedData());
+        this.ews.getServicePort().getUserAvailability(request, ews.getRequestVersion(), responseHolder, ews.getVersionHolder());
+        return responseHolder.value;
     }
     
     private boolean hasAllowedEmailSuffix(String participant) {
@@ -383,4 +246,39 @@ public class EWSFreeBusyProvider implements FreeBusyProvider {
         return this.validEmailsOnly.booleanValue();
     }
 
+    private boolean isDetailedData() {
+        if (null == this.detailedData) {
+            boolean value = false;
+            try {
+                value = EWSFreeBusyProviderLookup.getService(ConfigurationService.class).getBoolProperty(
+                    "com.openexchange.freebusy.provider.ews.detailed", false);
+            } catch (OXException e) {
+                LOG.warn("error reading 'com.openexchange.freebusy.provider.ews.detailed'", e);
+            }
+            this.detailedData = Boolean.valueOf(value);
+        }    
+        return this.detailedData.booleanValue();
+    }
+
+    private static ExchangeWebService createWebService() throws OXException {
+        ConfigurationService configService = EWSFreeBusyProviderLookup.getService(ConfigurationService.class);
+        ExchangeWebService ews = new ExchangeWebService(
+            configService.getProperty("com.openexchange.freebusy.provider.ews.url"), 
+            configService.getProperty("com.openexchange.freebusy.provider.ews.userName"), 
+            configService.getProperty("com.openexchange.freebusy.provider.ews.password"));
+        ews.getConfig().setExchangeVersion(ExchangeVersionType.valueOf(ExchangeVersionType.class, 
+            configService.getProperty("com.openexchange.freebusy.provider.ews.exchangeVersion", "EXCHANGE_2010").toUpperCase()));
+        ews.getConfig().setIgnoreHostnameValidation(configService.getBoolProperty(
+            "com.openexchange.freebusy.provider.ews.skipHostVerification", false));
+        ews.getConfig().setTrustAllCerts(configService.getBoolProperty("com.openexchange.freebusy.provider.ews.trustAllCerts", false));
+        return ews;
+    }
+    
+    private static Date addDays(Date date, int days) {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(date);
+        calendar.add(Calendar.DATE, days);
+        return calendar.getTime();
+    }
+    
 }

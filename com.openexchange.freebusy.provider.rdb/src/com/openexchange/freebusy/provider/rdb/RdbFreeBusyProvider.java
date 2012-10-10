@@ -50,8 +50,12 @@
 package com.openexchange.freebusy.provider.rdb;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
@@ -60,6 +64,8 @@ import com.openexchange.freebusy.FreeBusyData;
 import com.openexchange.freebusy.FreeBusyExceptionCodes;
 import com.openexchange.freebusy.FreeBusyInterval;
 import com.openexchange.freebusy.provider.FreeBusyProvider;
+import com.openexchange.group.Group;
+import com.openexchange.group.GroupService;
 import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.Participant;
@@ -91,70 +97,65 @@ public class RdbFreeBusyProvider implements FreeBusyProvider {
         return RdbFreeBusyProviderLookup.getService(AppointmentSqlFactoryService.class).createAppointmentSql(session);
     }
     
-    private static int getUserID(Context context, String participant) throws OXException {
-        UserService userService = RdbFreeBusyProviderLookup.getService(UserService.class);
-        User user = null;
-        try {
-            user = userService.getUser(Integer.parseInt(participant), context);
-        } catch (NumberFormatException e) {
-            try {
-                user = userService.searchUser(participant, context);
-            } catch (OXException x) {
-                // re-throw if not "Cannot find user with E-Mail abc"
-                if (false == "USR-0014".equals(x.getErrorCode())) { 
-                    throw x;
-                }               
-            }
-        }        
-        return null != user ? user.getId() : -1; 
-    }
-    
-    private static int getResourceID(Context context, String participant) throws OXException {
-        ResourceService resourceService = RdbFreeBusyProviderLookup.getService(ResourceService.class);
-        Resource resource = null;
-        try {
-            resource = resourceService.getResource(Integer.parseInt(participant), context);
-        } catch (NumberFormatException e) {
-            Resource[] resources = resourceService.searchResourcesByMail(participant, context);
-            if (null != resources && 0 < resources.length) {
-                if (1 < resources.length) {
-                    throw FreeBusyExceptionCodes.AMBIGUOUS_PARTICIPANT.create(participant);
-                }
-                resource = resources[0];
-            }
-        }        
-        return null != resource ? resource.getIdentifier() : -1; 
-    }
-    
     @Override
     public List<FreeBusyData> getFreeBusy(Session session, List<String> participants, Date from, Date until) {
-        List<FreeBusyData> freeBusyData = new ArrayList<FreeBusyData>();
-        for (String participant : participants) {
-            freeBusyData.add(getFreeBusy(session, participant, from, until));            
-        }
-        return freeBusyData;
+        Map<String, FreeBusyData> freeBusyInformation = this.getFreeBusyInformation(session, participants, from, until);
+        return new ArrayList<FreeBusyData>(freeBusyInformation.values());
     }
 
     @Override
     public FreeBusyData getFreeBusy(Session session, String participant, Date from, Date until) {
-        FreeBusyData freeBusyData = new FreeBusyData(participant, from, until);
-        try {
-            Context context = RdbFreeBusyProviderLookup.getService(ContextService.class).getContext(session.getContextId());
-            int id = getUserID(context, participant);
-            if (-1 != id) {
-                fillFreeBusyData(freeBusyData, getAppointmentSql(session).getFreeBusyInformation(id, Participant.USER, from, until));
-            } else {
-                id = getResourceID(context, participant);
-                if (-1 != id) {
-                    fillFreeBusyData(freeBusyData, getAppointmentSql(session).getFreeBusyInformation(id, Participant.RESOURCE, from, until));
-                } else {
-                    throw FreeBusyExceptionCodes.PARTICIPANT_NOT_FOUND.create(participant);
-                }
+        Map<String, FreeBusyData> freeBusyInformation = this.getFreeBusyInformation(
+            session, Arrays.asList(new String[] { participant }), from, until);
+        return freeBusyInformation.get(participant);
+    }
+    
+    private Map<String, FreeBusyData> getFreeBusyInformation(Session session, List<String> participants, Date from, Date until) {
+        Map<String, FreeBusyData> freeBusyInformation = new HashMap<String, FreeBusyData>();
+        for (String participant : participants) {
+            FreeBusyData freeBusyData = freeBusyInformation.get(participant);
+            if (null == freeBusyData) {
+                freeBusyData = new FreeBusyData(participant, from, until);
+                freeBusyInformation.put(participant, freeBusyData);
             }
-        } catch (OXException error) {
-            freeBusyData.addWarning(error);
+            try {
+                Context context = RdbFreeBusyProviderLookup.getService(ContextService.class).getContext(session.getContextId());
+                int userID = getUserID(context, participant);
+                if (-1 != userID) {
+                    fillFreeBusyData(freeBusyData, getAppointmentSql(session).getFreeBusyInformation(
+                        userID, Participant.USER, from, until));
+                } else {
+                    int resourceID = getResourceID(context, participant);
+                    if (-1 != resourceID) {
+                        fillFreeBusyData(freeBusyData, getAppointmentSql(session).getFreeBusyInformation(
+                            resourceID, Participant.RESOURCE, from, until));
+                    } else {
+                        int[] groupMembers = getGroupMembers(context, participant);
+                        if (null != groupMembers) {
+                            List<String> memberIDs = new ArrayList<String>();
+                            for (int member : groupMembers) {
+                                memberIDs.add(Integer.toString(member));                                
+                            }
+                            Map<String, FreeBusyData> memberInformation = this.getFreeBusyInformation(session, memberIDs, from, until);
+                            for (Entry<String, FreeBusyData> entry : memberInformation.entrySet()) {
+                                FreeBusyData memberData = freeBusyInformation.get(entry.getKey());
+                                if (null == memberData) {
+                                    freeBusyInformation.put(entry.getKey(), entry.getValue());
+                                } else {
+                                    memberData.add(entry.getValue());                                    
+                                }
+                                freeBusyData.add(entry.getValue());
+                            }
+                        } else {
+                            throw FreeBusyExceptionCodes.PARTICIPANT_NOT_FOUND.create(participant);
+                        }
+                    }
+                }
+            } catch (OXException e) {
+                freeBusyData.addWarning(e);
+            }
         }
-        return freeBusyData;
+        return freeBusyInformation;
     }
     
     private void fillFreeBusyData(FreeBusyData freeBusyData, SearchIterator<Appointment> freeBusyInformation) throws OXException {
@@ -175,6 +176,70 @@ public class RdbFreeBusyProvider implements FreeBusyProvider {
         } else {
             freeBusyData.add(new FreeBusyInterval(freeBusyData.getFrom(), freeBusyData.getUntil(), BusyStatus.UNKNOWN));
         }
+    }
+    
+    private static int[] getGroupMembers(Context context, String participant) throws OXException {
+        GroupService groupService = RdbFreeBusyProviderLookup.getService(GroupService.class);
+        Group group = null;
+        try {
+            group = groupService.getGroup(context, Integer.parseInt(participant));
+        } catch (OXException e) {
+            if ("GRP-0017".equals(e.getErrorCode())) { // 'Cannot find group with identifier ... n context ....'
+                return null;
+            } else {
+                throw e;
+            }
+        } catch (NumberFormatException e) {
+            // no group
+        }
+        return null != group ? group.getMember() : null; 
+    }
+    
+    private static int getUserID(Context context, String participant) throws OXException {
+        UserService userService = RdbFreeBusyProviderLookup.getService(UserService.class);
+        User user = null;
+        try {
+            user = userService.getUser(Integer.parseInt(participant), context);
+        } catch (OXException e) {
+            if ("USR-0010".equals(e.getErrorCode())) { // 'Cannot find user with identifier ... in context ....'
+                return -1;
+            } else {
+                throw e;
+            }
+        } catch (NumberFormatException e) {
+            try {
+                user = userService.searchUser(participant, context);
+            } catch (OXException x) {
+                // re-throw if not "Cannot find user with E-Mail abc"
+                if (false == "USR-0014".equals(x.getErrorCode())) { 
+                    throw x;
+                }
+            }
+        }        
+        return null != user ? user.getId() : -1; 
+    }
+    
+    private static int getResourceID(Context context, String participant) throws OXException {
+        ResourceService resourceService = RdbFreeBusyProviderLookup.getService(ResourceService.class);
+        Resource resource = null;
+        try {
+            resource = resourceService.getResource(Integer.parseInt(participant), context);
+        } catch (OXException e) {
+            if ("RES-0012".equals(e.getErrorCode())) { // 'Cannot find resource with identifier ....'
+                return -1;
+            } else {
+                throw e;
+            }
+        } catch (NumberFormatException e) {
+            Resource[] resources = resourceService.searchResourcesByMail(participant, context);
+            if (null != resources && 0 < resources.length) {
+                if (1 < resources.length) {
+                    throw FreeBusyExceptionCodes.AMBIGUOUS_PARTICIPANT.create(participant);
+                }
+                resource = resources[0];
+            }
+        }        
+        return null != resource ? resource.getIdentifier() : -1; 
     }
     
 }

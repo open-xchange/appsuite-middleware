@@ -294,11 +294,12 @@ public class FreeBusyData {
         StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append(participant).append(" (").append(null != from ? sdf.format(from) : "")
             .append(" - ").append(null != until ? sdf.format(until) : "").append("):").append("\n");
-        if (false == hasWarnings()) {
+        if (hasData()) {
             for (FreeBusyInterval interval : this.intervals) {
                 stringBuilder.append(interval).append("\n");
             }
-        } else {
+        } 
+        if (hasWarnings()) {
             for (OXException warning : warnings) {
                 stringBuilder.append(warning.getLogMessage()).append("\n");
             }

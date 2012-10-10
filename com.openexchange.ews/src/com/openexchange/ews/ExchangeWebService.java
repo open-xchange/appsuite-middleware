@@ -64,6 +64,7 @@ import com.microsoft.schemas.exchange.services._2006.messages.ResponseMessageTyp
 import com.microsoft.schemas.exchange.services._2006.types.MailboxCultureType;
 import com.microsoft.schemas.exchange.services._2006.types.RequestServerVersion;
 import com.microsoft.schemas.exchange.services._2006.types.ResponseClassType;
+import com.microsoft.schemas.exchange.services._2006.types.ServerVersionInfo;
 import com.microsoft.schemas.exchange.services._2006.types.TimeZoneContextType;
 import com.microsoft.schemas.exchange.services._2006.types.TimeZoneDefinitionType;
 
@@ -120,6 +121,15 @@ public class ExchangeWebService {
         RequestServerVersion requestServerVersion = new RequestServerVersion();
         requestServerVersion.setVersion(config.getExchangeVersion());
         return requestServerVersion;
+    }
+    
+    /**
+     * Gets a new {@link Holder} for the server version. 
+     * 
+     * @return The server version holder
+     */
+    public Holder<ServerVersionInfo> getVersionHolder() {
+        return new Holder<ServerVersionInfo>();
     }
     
     public static MailboxCultureType getMailboxCulture() {
