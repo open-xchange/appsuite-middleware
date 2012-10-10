@@ -47,32 +47,54 @@
  *
  */
 
-package com.openexchange.freebusy;
+package com.openexchange.freebusy.provider.google.osgi;
 
-import com.openexchange.i18n.LocalizableStrings;
+import org.apache.commons.logging.Log;
+import com.openexchange.config.ConfigurationService;
+import com.openexchange.freebusy.provider.FreeBusyProvider;
+import com.openexchange.freebusy.provider.google.GoogleFreeBusyProvider;
+import com.openexchange.freebusy.provider.google.GoogleFreeBusyProviderLookup;
+import com.openexchange.log.LogFactory;
+import com.openexchange.osgi.HousekeepingActivator;
 
 /**
- * {@link FreeBusyExceptionMessages} 
- * 
- * Translatable messages for {@link FreeBusyExceptionCodes}.
+ * {@link GoogleFreeBusyProviderActivator}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public final class FreeBusyExceptionMessages implements LocalizableStrings {
+public class GoogleFreeBusyProviderActivator extends HousekeepingActivator {
 
-    public static final String NO_PROVIDERS_AVAILABLE_MSG = "No free/busy providers available";
-    public static final String AMBIGUOUS_PARTICIPANT_MSG = "The participant \"%1$s\" is ambiguous.";
-    public static final String PARTICIPANT_NOT_FOUND_MSG = "The participant \"%1$s\" can't be found.";
-    public static final String FREEBUSY_NOT_ENABLED_MSG = "Free/busy is not enabled for user %1$d in context %2$d.";
-    public static final String DATA_NOT_AVAILABLE_MSG = "Free/busy data for \"%1$s\" is not available.";
-    public static final String COMMUNICATION_FAILURE_MSG = "A communication error occured while processing the free/busy request (\"%1$s\").";
-    public static final String EXTERNAL_ERROR_MSG = "An external error occured while processing the free/busy request (\"%1$s\").";
-    public static final String INTERNAL_ERROR_MSG = "An internal error occured while processing the free/busy request (\"%1$s\").";
-    
+    private final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(GoogleFreeBusyProviderActivator.class));
+
     /**
-     * Prevent instantiation.
+     * Initializes a new {@link GoogleFreeBusyProviderActivator}.
      */
-    private FreeBusyExceptionMessages() {
+    public GoogleFreeBusyProviderActivator() {
         super();
     }
+
+    @Override
+    protected Class<?>[] getNeededServices() {
+        return new Class<?>[] { ConfigurationService.class };
+    }
+
+    @Override
+    protected void startBundle() throws Exception {
+        try {
+            LOG.info("starting bundle: com.openexchange.freebusy.provider.google");
+            GoogleFreeBusyProviderLookup.set(this);
+            registerService(FreeBusyProvider.class, new GoogleFreeBusyProvider());
+        } catch (Exception e) {
+            LOG.error("error starting com.openexchange.freebusy.provider.google", e);
+            throw e;            
+        }
+    }
+
+    @Override
+    protected void stopBundle() throws Exception {
+        LOG.info("stopping bundle: com.openexchange.freebusy.provider.google");
+        GoogleFreeBusyProviderLookup.set(null);
+        super.stopBundle();
+    }
+
 }

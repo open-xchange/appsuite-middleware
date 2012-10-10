@@ -62,8 +62,8 @@ import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.writer.ResponseWriter;
 import com.openexchange.exception.OXException;
 import com.openexchange.freebusy.FreeBusyData;
-import com.openexchange.freebusy.FreeBusyService;
 import com.openexchange.freebusy.FreeBusyInterval;
+import com.openexchange.freebusy.FreeBusyService;
 import com.openexchange.freebusy.json.FreeBusyRequest;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
@@ -130,9 +130,7 @@ public abstract class FreeBusyAction implements AJAXActionService {
             if (freeBusyData.hasWarnings()) {
                 ResponseWriter.addWarnings(jsonObject, freeBusyData.getWarnings(), locale);
             }
-            if (freeBusyData.hasData()) {
-                jsonObject.put("data", serialize(freeBusyData.getIntervals(), timeZone));
-            }
+            jsonObject.put("data", serialize(freeBusyData.getIntervals(), timeZone));
             return jsonObject;
         } catch (JSONException e) {
             throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
@@ -168,8 +166,10 @@ public abstract class FreeBusyAction implements AJAXActionService {
     
     protected JSONArray serialize(Iterable<FreeBusyInterval> freeBusyIntervals, TimeZone timeZone) throws OXException {
         JSONArray jsonArray = new JSONArray();
-        for (FreeBusyInterval freeBusyInterval : freeBusyIntervals) {
-            jsonArray.put(serialize(freeBusyInterval, timeZone));
+        if (null != freeBusyIntervals) {
+            for (FreeBusyInterval freeBusyInterval : freeBusyIntervals) {
+                jsonArray.put(serialize(freeBusyInterval, timeZone));
+            }
         }
         return jsonArray;
     }

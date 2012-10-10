@@ -54,6 +54,9 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Future;
 import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
 import com.openexchange.freebusy.FreeBusyData;
@@ -64,6 +67,8 @@ import com.openexchange.freebusy.provider.FreeBusyProvider;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.session.Session;
+import com.openexchange.threadpool.AbstractTask;
+import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.userconf.UserConfigurationService;
 
 /**
@@ -98,48 +103,83 @@ public class FreeBusyServiceImpl implements FreeBusyService {
     }
 
     @Override
-    public List<FreeBusyData> getFreeBusy(Session session, List<String> participants, Date from, Date until) throws OXException {
+    public List<FreeBusyData> getFreeBusy(final Session session, final List<String> participants, final Date from, final Date until) throws OXException {
         checkFreeBusyEnabled(session);
         checkProvidersAvailable();
         if (1 == providers.getProviders().size()) {
             return providers.getProviders().get(0).getFreeBusy(session, participants, from, until);
         } else {
             Map<String, FreeBusyData> freeBusyData = new HashMap<String, FreeBusyData>();
-            for (FreeBusyProvider provider : providers.getProviders()) {
-                for (FreeBusyData providerData : provider.getFreeBusy(session, participants, from, until)) {
-                    if (null != providerData) {
-                        FreeBusyData data = freeBusyData.get(providerData.getParticipant());
-                        if (null == data) {
-                            // replace
-                            freeBusyData.put(providerData.getParticipant(), providerData);                            
-                        } else {
-                            // add
-                            data.add(providerData);                           
+            ExecutorService executor = FreeBusyServiceLookup.getService(ThreadPoolService.class).getExecutor();
+            List<Future<List<FreeBusyData>>> futures = new ArrayList<Future<List<FreeBusyData>>>();
+            for (final FreeBusyProvider provider : providers.getProviders()) {
+                Future<List<FreeBusyData>> future = executor.submit(new AbstractTask<List<FreeBusyData>>() {
+                    @Override
+                    public List<FreeBusyData> call() throws Exception {
+                        return provider.getFreeBusy(session, participants, from, until);
+                    }
+                });
+                futures.add(future);
+            }
+            for (Future<List<FreeBusyData>> future : futures) {
+                try {
+                    for (FreeBusyData providerData : future.get()) {
+                        if (null != providerData) {
+                            FreeBusyData data = freeBusyData.get(providerData.getParticipant());
+                            if (null == data) {
+                                // replace
+                                freeBusyData.put(providerData.getParticipant(), providerData);                            
+                            } else {
+                                // add
+                                data.add(providerData);                           
+                            }
                         }
                     }
-                }                
+                } catch (InterruptedException e) {
+                    throw FreeBusyExceptionCodes.INTERNAL_ERROR.create(e, e.getMessage());
+                } catch (ExecutionException e) {
+                    if (OXException.class.isInstance(e.getCause())) {
+                        throw (OXException)e.getCause();
+                    } else {
+                        throw FreeBusyExceptionCodes.INTERNAL_ERROR.create(e.getCause(), e.getCause().getMessage());
+                    }
+                }
             }
             return new ArrayList<FreeBusyData>(freeBusyData.values());
         }                
     }
 
     @Override
-    public FreeBusyData getFreeBusy(Session session, String participant, Date from, Date until) throws OXException {
+    public FreeBusyData getFreeBusy(final Session session, final String participant, final Date from, final Date until) throws OXException {
         checkFreeBusyEnabled(session);
         checkProvidersAvailable();
         if (1 == providers.getProviders().size()) {
             return providers.getProviders().get(0).getFreeBusy(session, participant, from, until);
         } else {
-            FreeBusyData freeBusyData = null;
-            for (FreeBusyProvider provider : providers.getProviders()) {
-                if (null == freeBusyData || freeBusyData.hasWarnings()) {
-                    freeBusyData = provider.getFreeBusy(session, participant, from, until);
-                } else {
-                    FreeBusyData data = provider.getFreeBusy(session, participant, from, until);
-                    if (null != data) {
-                        freeBusyData.addAll(data.getIntervals());
+            FreeBusyData freeBusyData = new FreeBusyData(participant, from, until);
+            ExecutorService executor = FreeBusyServiceLookup.getService(ThreadPoolService.class).getExecutor();
+            List<Future<FreeBusyData>> futures = new ArrayList<Future<FreeBusyData>>();
+            for (final FreeBusyProvider provider : providers.getProviders()) {
+                Future<FreeBusyData> future = executor.submit(new AbstractTask<FreeBusyData>() {
+                    @Override
+                    public FreeBusyData call() throws Exception {
+                        return provider.getFreeBusy(session, participant, from, until);
                     }
-                }                
+                });
+                futures.add(future);
+            }
+            for (Future<FreeBusyData> future : futures) {
+                try {
+                    freeBusyData.add(future.get());
+                } catch (InterruptedException e) {
+                    throw FreeBusyExceptionCodes.INTERNAL_ERROR.create(e, e.getMessage());
+                } catch (ExecutionException e) {
+                    if (OXException.class.isInstance(e.getCause())) {
+                        throw (OXException)e.getCause();
+                    } else {
+                        throw FreeBusyExceptionCodes.INTERNAL_ERROR.create(e.getCause(), e.getCause().getMessage());
+                    }
+                }
             }
             return freeBusyData;
         }

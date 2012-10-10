@@ -57,6 +57,7 @@ import com.openexchange.freebusy.internal.FreeBusyServiceLookup;
 import com.openexchange.freebusy.provider.FreeBusyProvider;
 import com.openexchange.log.LogFactory;
 import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.userconf.UserConfigurationService;
 
 /**
@@ -77,7 +78,7 @@ public class FreeBusyServiceActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ContextService.class, UserConfigurationService.class };
+        return new Class<?>[] { ContextService.class, UserConfigurationService.class, ThreadPoolService.class };
     }
     
     @Override
