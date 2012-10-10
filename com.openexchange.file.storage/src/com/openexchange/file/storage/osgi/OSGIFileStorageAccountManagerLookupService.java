@@ -68,7 +68,6 @@ import com.openexchange.file.storage.FileStorageAccountManager;
 import com.openexchange.file.storage.FileStorageAccountManagerLookupService;
 import com.openexchange.file.storage.FileStorageAccountManagerProvider;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
-import com.openexchange.file.storage.FileStorageService;
 import com.openexchange.log.LogFactory;
 import com.openexchange.session.Session;
 
@@ -168,19 +167,19 @@ public class OSGIFileStorageAccountManagerLookupService implements FileStorageAc
     }
 
     @Override
-    public FileStorageAccountManager getAccountManagerFor(final FileStorageService service) throws OXException {
-        initIfAbsent(service.getId());
+    public FileStorageAccountManager getAccountManagerFor(final String serviceId) throws OXException {
+        initIfAbsent(serviceId);
 
         FileStorageAccountManagerProvider candidate = null;
         for (final FileStorageAccountManagerProvider provider : providers.keySet()) {
-            if (provider.supports(service) && ((null == candidate) || (provider.getRanking() > candidate.getRanking()))) {
+            if (provider.supports(serviceId) && ((null == candidate) || (provider.getRanking() > candidate.getRanking()))) {
                 candidate = provider;
             }
         }
         if (null == candidate) {
-            throw FileStorageExceptionCodes.NO_ACCOUNT_MANAGER_FOR_SERVICE.create(service.getId());
+            throw FileStorageExceptionCodes.NO_ACCOUNT_MANAGER_FOR_SERVICE.create(serviceId);
         }
-        return candidate.getAccountManagerFor(service);
+        return candidate.getAccountManagerFor(serviceId);
     }
 
     private void initIfAbsent(final String serviceId) throws OXException {

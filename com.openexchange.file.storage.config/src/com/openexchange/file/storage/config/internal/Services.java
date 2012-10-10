@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2020 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,61 +47,73 @@
  *
  */
 
-package com.openexchange.file.storage;
+package com.openexchange.file.storage.config.internal;
 
-import com.openexchange.exception.OXException;
-import com.openexchange.session.Session;
+import java.util.concurrent.atomic.AtomicReference;
+
+import com.openexchange.server.ServiceLookup;
 
 /**
- * {@link FileStorageAccountManagerProvider} - Provides the {@link FileStorageAccountManager account manager} appropriate for a certain
- * {@link FileStorageService file storage service}.
- *
+ * {@link Services} - Provides static access to {@link ServiceLookup} reference.
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface FileStorageAccountManagerProvider {
+public final class Services {
+
+    private static final AtomicReference<ServiceLookup> SERVICES = new AtomicReference<ServiceLookup>();
 
     /**
-     * The default ranking: <code>0</code>.
+     * Initializes a new {@link Services}.
      */
-    public static final int DEFAULT_RANKING = 0;
+    private Services() {
+        super();
+    }
 
     /**
-     * Whether this provider supports specified {@link FileStorageService file storage service}.
-     *
-     * @param serviceId The file storage service identifier
-     * @return <code>true</code> if this provider supports specified file storage service; otherwise <code>false</code>
+     * Sets the {@link ServiceLookup} reference.
+     * 
+     * @param services The reference
      */
-    boolean supports(String serviceId);
+    public static void setServices(final ServiceLookup services) {
+        SERVICES.set(services);
+    }
 
     /**
-     * Gets the appropriate file storage account manager for specified account identifier and session.
-     *
-     * @param accountId The account identifier
-     * @param session The session providing needed user data
-     * @return The file storage account manager or <code>null</code>
-     * @throws OXException If retrieval fails
+     * Gets the {@link ServiceLookup} reference.
+     * 
+     * @return The reference
      */
-    FileStorageAccountManager getAccountManager(String accountId, Session session) throws OXException;
+    public static ServiceLookup getServices() {
+        return SERVICES.get();
+    }
 
     /**
-     * Gets the appropriate account manager for specified {@link FileStorageService file storage service}.
-     *
-     * @param serviceId The file storage service identifier
-     * @return The appropriate account manager for specified file storage service.
-     * @throws OXException If an appropriate account manager cannot be returned
+     * Gets the service of specified type
+     * 
+     * @param clazz The service's class
+     * @return The service or <code>null</code> is absent
+     * @throws IllegalStateException If an error occurs while returning the demanded service
      */
-    FileStorageAccountManager getAccountManagerFor(String serviceId) throws OXException;
+    public static <S extends Object> S getService(final Class<? extends S> clazz) {
+        final ServiceLookup serviceLookup = SERVICES.get();
+        if (null == serviceLookup) {
+            throw new IllegalStateException("ServiceLookup is absent. Check bundle activator.");
+        }
+        return serviceLookup.getService(clazz);
+    }
 
     /**
-     * Gets the ranking of this provider.
-     * <p>
-     * The ranking is used to determine the <i>natural order</i> of providers and the <i>default</i> provider to be returned.
-     * <p>
-     * A provider with a ranking of <code>Integer.MAX_VALUE</code> is very likely to be returned as the default service, whereas a provider
-     * with a ranking of <code>Integer.MIN_VALUE</code> is very unlikely to be returned.
-     *
-     * @return The ranking
+     * Gets the optional service of specified type
+     * 
+     * @param clazz The service's class
+     * @return The service or <code>null</code> is absent
      */
-    int getRanking();
+    public static <S extends Object> S getOptionalService(final Class<? extends S> clazz) {
+        final ServiceLookup serviceLookup = SERVICES.get();
+        if (null == serviceLookup) {
+            return null;
+        }
+        return serviceLookup.getOptionalService(clazz);
+    }
 
 }

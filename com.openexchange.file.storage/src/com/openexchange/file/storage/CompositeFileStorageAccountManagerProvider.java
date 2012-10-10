@@ -133,9 +133,9 @@ public final class CompositeFileStorageAccountManagerProvider implements FileSto
     }
 
     @Override
-    public boolean supports(final FileStorageService service) {
+    public boolean supports(final String serviceId) {
         for (final FileStorageAccountManagerProvider provider : set.keySet()) {
-            if (provider.supports(service)) {
+            if (provider.supports(serviceId)) {
                 return true;
             }
         }
@@ -168,17 +168,17 @@ public final class CompositeFileStorageAccountManagerProvider implements FileSto
     }
 
     @Override
-    public FileStorageAccountManager getAccountManagerFor(final FileStorageService service) throws OXException {
+    public FileStorageAccountManager getAccountManagerFor(final String serviceId) throws OXException {
         FileStorageAccountManagerProvider candidate = null;
         for (final FileStorageAccountManagerProvider provider : set.keySet()) {
-            if (provider.supports(service) && (null == candidate || candidate.getRanking() < provider.getRanking())) {
+            if (provider.supports(serviceId) && (null == candidate || candidate.getRanking() < provider.getRanking())) {
                 candidate = provider;
             }
         }
         if (null == candidate) {
-            throw FileStorageExceptionCodes.NO_ACCOUNT_MANAGER_FOR_SERVICE.create(service.getId());
+            throw FileStorageExceptionCodes.NO_ACCOUNT_MANAGER_FOR_SERVICE.create(serviceId);
         }
-        return candidate.getAccountManagerFor(service);
+        return candidate.getAccountManagerFor(serviceId);
     }
 
     @Override

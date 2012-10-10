@@ -53,10 +53,10 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
-import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.CompositeFileStorageAccountManagerProvider;
 import com.openexchange.file.storage.FileStorageAccountManagerProvider;
 import com.openexchange.file.storage.FileStorageService;
+import com.openexchange.file.storage.cmis.CMISConstants;
 import com.openexchange.file.storage.cmis.CMISFileStorageService;
 
 /**
@@ -66,10 +66,7 @@ import com.openexchange.file.storage.cmis.CMISFileStorageService;
  */
 public final class CMISServiceRegisterer implements ServiceTrackerCustomizer<FileStorageAccountManagerProvider, FileStorageAccountManagerProvider> {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(CMISServiceRegisterer.class));
-
     private final BundleContext context;
-
     private volatile FileStorageAccountManagerProvider provider;
     private volatile CMISFileStorageService service;
     private volatile ServiceRegistration<FileStorageService> registration;
@@ -86,25 +83,21 @@ public final class CMISServiceRegisterer implements ServiceTrackerCustomizer<Fil
     @Override
     public FileStorageAccountManagerProvider addingService(final ServiceReference<FileStorageAccountManagerProvider> reference) {
         final FileStorageAccountManagerProvider provider = context.getService(reference);
+        if (!provider.supports(CMISConstants.ID)) {
+            context.ungetService(reference);
+            return null;
+        }
         synchronized (this) {
             CMISFileStorageService service = this.service;
             if (null == service) {
                 /*
                  * Try to create CIFS service
                  */
-                try {
-                    service = CMISFileStorageService.newInstance();
-                    if (!provider.supports(service)) {
-                        context.ungetService(reference);
-                        return null;
-                    }
-                    this.registration = context.registerService(FileStorageService.class, service, null);
-                    this.reference = reference;
-                    this.service = service;
-                    this.provider = provider;
-                } catch (final OXException e) {
-                    LOG.warn("Registration of \"" + CMISFileStorageService.class.getName() + "\" failed.", e);
-                }
+                service = CMISFileStorageService.newInstance();
+                this.registration = context.registerService(FileStorageService.class, service, null);
+                this.reference = reference;
+                this.service = service;
+                this.provider = provider;
             } else {
                 /*
                  * Already created before, but new. Check its ranking
