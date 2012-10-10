@@ -47,32 +47,60 @@
  *
  */
 
-package com.openexchange.freebusy;
+package com.openexchange.freebusy.provider.google;
 
-import com.openexchange.i18n.LocalizableStrings;
+import java.util.concurrent.atomic.AtomicReference;
+import com.openexchange.exception.OXException;
+import com.openexchange.server.ServiceExceptionCode;
+import com.openexchange.server.ServiceLookup;
 
 /**
- * {@link FreeBusyExceptionMessages} 
+ * {@link GoogleFreeBusyProviderLookup} 
  * 
- * Translatable messages for {@link FreeBusyExceptionCodes}.
+ * Provides access to services.
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public final class FreeBusyExceptionMessages implements LocalizableStrings {
+public class GoogleFreeBusyProviderLookup {
 
-    public static final String NO_PROVIDERS_AVAILABLE_MSG = "No free/busy providers available";
-    public static final String AMBIGUOUS_PARTICIPANT_MSG = "The participant \"%1$s\" is ambiguous.";
-    public static final String PARTICIPANT_NOT_FOUND_MSG = "The participant \"%1$s\" can't be found.";
-    public static final String FREEBUSY_NOT_ENABLED_MSG = "Free/busy is not enabled for user %1$d in context %2$d.";
-    public static final String DATA_NOT_AVAILABLE_MSG = "Free/busy data for \"%1$s\" is not available.";
-    public static final String COMMUNICATION_FAILURE_MSG = "A communication error occured while processing the free/busy request (\"%1$s\").";
-    public static final String EXTERNAL_ERROR_MSG = "An external error occured while processing the free/busy request (\"%1$s\").";
-    public static final String INTERNAL_ERROR_MSG = "An internal error occured while processing the free/busy request (\"%1$s\").";
-    
     /**
-     * Prevent instantiation.
+     * Initializes a new {@link GoogleFreeBusyProviderLookup}.
      */
-    private FreeBusyExceptionMessages() {
+    private GoogleFreeBusyProviderLookup() {
         super();
     }
+
+    private static AtomicReference<ServiceLookup> ref = new AtomicReference<ServiceLookup>();
+
+    /**
+     * Gets the service look-up
+     *
+     * @return The service look-up or <code>null</code>
+     */
+    public static ServiceLookup get() {
+        return ref.get();
+    }
+
+    public static <S extends Object> S getService(Class<? extends S> c) throws OXException {
+        return GoogleFreeBusyProviderLookup.getService(c, false);
+    }
+    
+    public static <S extends Object> S getService(Class<? extends S> c, boolean throwOnAbsence) throws OXException {
+        ServiceLookup serviceLookup = ref.get();
+        S service = null == serviceLookup ? null : serviceLookup.getService(c);
+        if (null == service && throwOnAbsence) {
+            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(c.getName());
+        }
+        return service;
+    }
+
+    /**
+     * Sets the service look-up
+     *
+     * @param serviceLookup The service look-up or <code>null</code>
+     */
+    public static void set(ServiceLookup serviceLookup) {
+        ref.set(serviceLookup);
+    }
+
 }
