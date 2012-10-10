@@ -224,6 +224,7 @@ public class OSGIFileStorageAccountManagerLookupService implements FileStorageAc
         } catch (final InterruptedException e) {
             // Keep interrupted flag
             Thread.currentThread().interrupt();
+            throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         } catch (final ExecutionException e) {
             final Throwable cause = e.getCause();
             if (cause instanceof OXException) {
