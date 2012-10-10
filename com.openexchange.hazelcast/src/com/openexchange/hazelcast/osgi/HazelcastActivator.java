@@ -93,16 +93,16 @@ public class HazelcastActivator extends HousekeepingActivator {
                     final long et = System.currentTimeMillis();
                     logger.info("\nHazelcast\n\tAvailable cluster nodes received in "+(et - st)+"msec from "+ClusterDiscoveryService.class.getSimpleName()+":\n\t"+nodes+"\n");
                 }
+                /*-
+                 * Wait for at least one via ClusterListener
+                 * 
+                 * Add cluster listener to manage appearing/disappearing nodes
+                 */
+                final HazelcastActivator activator = HazelcastActivator.this;
+                final ClusterListener clusterListener = new HazelcastClusterListener(activator, st, logger);
+                discovery.addListener(clusterListener);
+                activator.clusterListener = clusterListener;
                 if (nodes.isEmpty()) {
-                    /*-
-                     * Wait for at least one via ClusterListener
-                     * 
-                     * Add cluster listener to manage appearing/disappearing nodes
-                     */
-                    final HazelcastActivator activator = HazelcastActivator.this;
-                    final ClusterListener clusterListener = new HazelcastInitializingClusterListener(activator, st, logger);
-                    discovery.addListener(clusterListener);
-                    activator.clusterListener = clusterListener;
                     /*
                      * Timeout before we assume we are either the first or alone in the cluster
                      */
@@ -112,7 +112,7 @@ public class HazelcastActivator extends HousekeepingActivator {
 
                             @Override
                             public void run() {
-                                if (init(Collections.<InetAddress> emptyList(), false, st, logger)) {
+                                if (InitMode.INITIALIZED.equals(init(Collections.<InetAddress> emptyList(), false, st, logger))) {
                                     if (infoEnabled) {
                                         logger.info("\nHazelcast:\n\tInitialized Hazelcast instance via delayed one-shot task after " + delay + "msec.\n");
                                     }
@@ -125,7 +125,7 @@ public class HazelcastActivator extends HousekeepingActivator {
                     /*
                      * We already have at least one node at start-up time
                      */
-                    if (init(nodes, false, st, logger)) {
+                    if (InitMode.INITIALIZED.equals(init(nodes, true, st, logger))) {
                         if (infoEnabled) {
                             logger.info("\nHazelcast:\n\tInitialized Hazelcast instance via initially available Open-Xchange nodes.\n");
                         }
@@ -174,6 +174,13 @@ public class HazelcastActivator extends HousekeepingActivator {
     }
 
     /**
+     * Hazelcast initialization result.
+     */
+    public static enum InitMode {
+        INITIALIZED, RE_INITIALIZED, NONE;
+    }
+
+    /**
      * Initializes and registers a {@code HazelcastInstance} for a full TCP/IP cluster.
      * 
      * @param nodes The pre-known nodes
@@ -183,21 +190,22 @@ public class HazelcastActivator extends HousekeepingActivator {
      * @return <code>true</code> if <tt>HazelcastInstance</tt> has been initialized by this call; otherwise <code>false</code> if already
      *         done by another call
      */
-    boolean init(final List<InetAddress> nodes, final boolean force, final long stamp, final Log logger) {
+    InitMode init(final List<InetAddress> nodes, final boolean force, final long stamp, final Log logger) {
         synchronized (this) {
             final HazelcastInstance prevHazelcastInstance = REF_HAZELCAST_INSTANCE.get();
             if (null != prevHazelcastInstance) {
                 // Already initialized
                 if (!force) {
-                    return false;                    
+                    return InitMode.NONE;                    
                 }
+                final long st = System.currentTimeMillis();
                 final Config config = prevHazelcastInstance.getConfig();
                 configureNetworkJoin(nodes, true, config);
                 prevHazelcastInstance.getLifecycleService().restart();
                 if (logger.isInfoEnabled()) {
-                    logger.info("\nHazelcast:\n\tRe-Started in " + (System.currentTimeMillis() - stamp) + "msec.\n");
+                    logger.info("\nHazelcast:\n\tRe-Started in " + (System.currentTimeMillis() - st) + "msec.\n");
                 }
-                return true;
+                return InitMode.RE_INITIALIZED;
             }
             /*
              * Create configuration from XML data
@@ -218,7 +226,7 @@ public class HazelcastActivator extends HousekeepingActivator {
             if (logger.isInfoEnabled()) {
                 logger.info("\nHazelcast:\n\tStarted in " + (System.currentTimeMillis() - stamp) + "msec.\n");
             }
-            return true;
+            return InitMode.INITIALIZED;
         }
     }
     
@@ -265,38 +273,39 @@ public class HazelcastActivator extends HousekeepingActivator {
         if (!append) {
             tcpIpConfig.clear();
         }
-        {
-            final List<String> members = new LinkedList<String>();
-            for (final InetAddress inetAddress : nodes) {
-                final String[] addressArgs = inetAddress.getHostAddress().split("\\%");
-                for (final String address : addressArgs) {
-                    members.add(address);
-                }
+        /*
+         * Configure...
+         */
+        final List<String> members = new LinkedList<String>();
+        for (final InetAddress inetAddress : nodes) {
+            final String[] addressArgs = inetAddress.getHostAddress().split("\\%");
+            for (final String address : addressArgs) {
+                members.add(address);
             }
-            if (!members.isEmpty()) {
-                if (append) {
-                    List<String> cur = new ArrayList<String>(tcpIpConfig.getMembers());
-                    for (final String candidate : members) {
-                        if (!cur.contains(candidate)) {
-                            cur.add(candidate);
-                        }
+        }
+        if (!members.isEmpty()) {
+            if (append) {
+                List<String> cur = new ArrayList<String>(tcpIpConfig.getMembers());
+                for (final String candidate : members) {
+                    if (!cur.contains(candidate)) {
+                        cur.add(candidate);
                     }
-                    tcpIpConfig.setMembers(cur);
-                    // Set interfaces, too
-                    final Interfaces interfaces = config.getNetworkConfig().getInterfaces();
-                    cur = new ArrayList<String>(interfaces.getInterfaces());
-                    for (final String candidate : members) {
-                        if (!cur.contains(candidate)) {
-                            cur.add(candidate);
-                        }
-                    }
-                    interfaces.setInterfaces(cur);
-                } else {
-                    tcpIpConfig.setMembers(members);
-                    // Set interfaces, too
-                    final Interfaces interfaces = config.getNetworkConfig().getInterfaces();
-                    interfaces.setInterfaces(members);
                 }
+                tcpIpConfig.setMembers(cur);
+                // Set interfaces, too
+                final Interfaces interfaces = config.getNetworkConfig().getInterfaces();
+                cur = new ArrayList<String>(interfaces.getInterfaces());
+                for (final String candidate : members) {
+                    if (!cur.contains(candidate)) {
+                        cur.add(candidate);
+                    }
+                }
+                interfaces.setInterfaces(cur);
+            } else {
+                tcpIpConfig.setMembers(members);
+                // Set interfaces, too
+                final Interfaces interfaces = config.getNetworkConfig().getInterfaces();
+                interfaces.setInterfaces(members);
             }
         }
     }

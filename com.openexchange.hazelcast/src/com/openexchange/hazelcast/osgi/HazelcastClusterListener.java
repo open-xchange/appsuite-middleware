@@ -53,22 +53,23 @@ import java.net.InetAddress;
 import java.util.Collections;
 import org.apache.commons.logging.Log;
 import com.openexchange.cluster.discovery.ClusterListener;
+import com.openexchange.hazelcast.osgi.HazelcastActivator.InitMode;
 
 /**
- * {@link HazelcastInitializingClusterListener}
+ * {@link HazelcastClusterListener}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-final class HazelcastInitializingClusterListener implements ClusterListener {
+final class HazelcastClusterListener implements ClusterListener {
 
     private final HazelcastActivator activator;
     private final long stamp;
     private final Log logger;
 
     /**
-     * Initializes a new {@link HazelcastInitializingClusterListener}.
+     * Initializes a new {@link HazelcastClusterListener}.
      */
-    protected HazelcastInitializingClusterListener(final HazelcastActivator activator, final long stamp, Log logger) {
+    protected HazelcastClusterListener(final HazelcastActivator activator, final long stamp, Log logger) {
         super();
         this.activator = activator;
         this.stamp = stamp;
@@ -82,9 +83,14 @@ final class HazelcastInitializingClusterListener implements ClusterListener {
 
     @Override
     public void added(final InetAddress address) {
-        if (activator.init(Collections.<InetAddress> singletonList(address), true, stamp, logger)) {
+        final InitMode initMode = activator.init(Collections.<InetAddress> singletonList(address), true, stamp, logger);
+        if (InitMode.INITIALIZED.equals(initMode)) {
             if (logger.isInfoEnabled()) {
                 logger.info("\nHazelcast:\n\tInitialized Hazelcast instance via cluster listener notification about an appeared Open-Xchange node: "+address+"\n");
+            }
+        } else if (InitMode.RE_INITIALIZED.equals(initMode)) {
+            if (logger.isInfoEnabled()) {
+                logger.info("\nHazelcast:\n\tRe-Initialized Hazelcast instance via cluster listener notification about an appeared Open-Xchange node: "+address+"\n");
             }
         }
     }
