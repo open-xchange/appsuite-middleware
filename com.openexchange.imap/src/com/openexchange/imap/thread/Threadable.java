@@ -245,7 +245,9 @@ public final class Threadable implements Cloneable, Serializable, Iterable<Threa
         return s + " ) ]";
     }
 
-    private static final Pattern PATTERN_SUBJECT = Pattern.compile("^\\s*(Re|Sv|Vs|Aw|\u0391\u03A0|\u03A3\u03A7\u0395\u03A4|R|Rif|Res|Odp|Ynt)(?:\\[.*?\\]|\\(.*?\\))?:(?:\\s*)(.*)(?:\\s*)", Pattern.CASE_INSENSITIVE);
+    private static final Pattern PATTERN_SUBJECT = Pattern.compile(
+        "^\\s*(Re|Sv|Vs|Aw|\u0391\u03A0|\u03A3\u03A7\u0395\u03A4|R|Rif|Res|Odp|Ynt)(?:\\[.*?\\]|\\(.*?\\))?:(?:\\s*)(.*)(?:\\s*)",
+        Pattern.CASE_INSENSITIVE);
 
     private void simplifySubject() {
         if (isEmpty(subject)) {
@@ -310,7 +312,6 @@ public final class Threadable implements Cloneable, Serializable, Iterable<Threa
         }
     }
 
-
     /**
      * Flushes formerly cached (simple) subject.
      */
@@ -332,7 +333,7 @@ public final class Threadable implements Cloneable, Serializable, Iterable<Threa
 
     /**
      * Gets the number of this {@code Threadable}'s top elements.
-     *
+     * 
      * @return The number of top elements
      */
     public int tops() {
@@ -347,7 +348,7 @@ public final class Threadable implements Cloneable, Serializable, Iterable<Threa
 
     /**
      * Gets the size of this {@code Threadable}.
-     *
+     * 
      * @return The size
      */
     public int size() {
@@ -451,7 +452,7 @@ public final class Threadable implements Cloneable, Serializable, Iterable<Threa
 
     /**
      * Sets the child.
-     *
+     * 
      * @param child The child
      */
     public void setChild(final Threadable child) {
@@ -529,8 +530,9 @@ public final class Threadable implements Cloneable, Serializable, Iterable<Threa
     }
 
     /**
-     * Converts passed {@link Threadable} to an IMAP-conform THREAD=REFERENCES result string.
-     *
+     * Converts passed {@link Threadable} to an IMAP-conform THREAD=REFERENCES result string;
+     * <br>e.g:&nbsp;<code>"((1)(2)(3)(4)(5)(6)(7)(8)(9)(10)(11)(12)(13))"</code>.
+     * 
      * @param threadable The instance
      * @param filter The filter
      * @return The resulting THREAD=REFERENCES string
@@ -676,20 +678,19 @@ public final class Threadable implements Cloneable, Serializable, Iterable<Threa
         }
         return first;
 
-
-//        final List<Threadable> list = unfold(t);
-//        if (list.isEmpty()) {
-//            return t;
-//        }
-//        // Filter
-//        for (final Iterator<Threadable> iterator = list.iterator(); iterator.hasNext();) {
-//            final Threadable cur = iterator.next();
-//            if (checkFullName(fullName, cur)) {
-//                iterator.remove();
-//            }
-//        }
-//        // Fold
-//        return fold(list);
+        // final List<Threadable> list = unfold(t);
+        // if (list.isEmpty()) {
+        // return t;
+        // }
+        // // Filter
+        // for (final Iterator<Threadable> iterator = list.iterator(); iterator.hasNext();) {
+        // final Threadable cur = iterator.next();
+        // if (checkFullName(fullName, cur)) {
+        // iterator.remove();
+        // }
+        // }
+        // // Fold
+        // return fold(list);
     }
 
     /**
@@ -801,7 +802,7 @@ public final class Threadable implements Cloneable, Serializable, Iterable<Threa
                         if (limit < 0 || limit >= messageCount) {
                             sb.append("1:*");
                         } else {
-                            sb.append(messageCount - limit + 1).append(':').append(messageCount); 
+                            sb.append(messageCount - limit + 1).append(':').append(messageCount);
                         }
                     }
                     sb.append(" (");
@@ -811,7 +812,7 @@ public final class Threadable implements Cloneable, Serializable, Iterable<Threa
                             sb.append("UID BODY.PEEK[HEADER.FIELDS (Subject Message-Id References In-Reply-To)]");
                         } else {
                             sb.append("UID RFC822.HEADER.LINES (Subject Message-Id References In-Reply-To)");
-                        }                        
+                        }
                     } else {
                         sb.append("UID ENVELOPE");
                         if (includeReferences()) {
