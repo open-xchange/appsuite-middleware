@@ -875,7 +875,7 @@ public final class Threadable implements Cloneable, Serializable, Iterable<Threa
                     }
                 } else if (response.isBAD()) {
                     if (ImapUtility.isInvalidMessageset(response)) {
-                        return new long[0];
+                        return null;
                     }
                     throw new BadCommandException(IMAPException.getFormattedMessage(
                         IMAPException.Code.PROTOCOL_ERROR,
