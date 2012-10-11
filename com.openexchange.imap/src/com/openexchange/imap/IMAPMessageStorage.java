@@ -1474,7 +1474,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
              */
             boolean cached = false;
             List<ThreadSortNode> threadList = null;
-            if (false && !mergeWithSent && imapConfig.getImapCapabilities().hasThreadReferences()) {
+            if (!mergeWithSent && imapConfig.getImapCapabilities().hasThreadReferences()) {
                 /*
                  * Parse THREAD response to a list structure and extract sequence numbers
                  */
