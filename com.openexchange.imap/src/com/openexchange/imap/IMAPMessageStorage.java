@@ -241,6 +241,39 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
 
     private static final boolean LOOK_UP_INBOX_ONLY = true;
 
+    private static volatile Boolean useImapThreaderIfSupported;
+    /** <b>Only</b> Applies to: getThreadSortedMessages(...) in ISimplifiedThreadStructure */
+    static boolean useImapThreaderIfSupported() {
+        Boolean b = useImapThreaderIfSupported;
+        if (null == b) {
+            synchronized (IMAPMessageStorage.class) {
+                b = useImapThreaderIfSupported;
+                if (null == b) {
+                    final ConfigurationService service = IMAPServiceRegistry.getService(ConfigurationService.class);
+                    b = Boolean.valueOf(null != service && service.getBoolProperty("com.openexchange.imap.useImapThreaderIfSupported", false));
+                    useImapThreaderIfSupported = b;
+                }
+            }
+        }
+        return b.booleanValue();
+    }
+
+    private static volatile Boolean useCommonsNetThreader;
+    static boolean useCommonsNetThreader() {
+        Boolean b = useCommonsNetThreader;
+        if (null == b) {
+            synchronized (IMAPMessageStorage.class) {
+                b = useCommonsNetThreader;
+                if (null == b) {
+                    final ConfigurationService service = IMAPServiceRegistry.getService(ConfigurationService.class);
+                    b = Boolean.valueOf(null != service && service.getBoolProperty("com.openexchange.imap.useCommonsNetThreader", false));
+                    useCommonsNetThreader = b;
+                }
+            }
+        }
+        return b.booleanValue();
+    }
+
     /*-
      * Members
      */
@@ -1426,22 +1459,6 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
         return new ThreadableResult((Threadable) entry.getThreadable().clone(), false);
     }
 
-    private static Boolean useCommonsNetThreader;
-    static boolean useCommonsNetThreader() {
-        Boolean b = useCommonsNetThreader;
-        if (null == b) {
-            synchronized (IMAPMessageStorage.class) {
-                b = useCommonsNetThreader;
-                if (null == b) {
-                    final ConfigurationService service = IMAPServiceRegistry.getService(ConfigurationService.class);
-                    b = Boolean.valueOf(null != service && service.getBoolProperty("com.openexchange.imap.useCommonsNetThreader", false));
-                    useCommonsNetThreader = b;
-                }
-            }
-        }
-        return b.booleanValue();
-    }
-
     @Override
     public List<List<MailMessage>> getThreadSortedMessages(final String fullName, final boolean includeSent, final boolean cache, final IndexRange indexRange, final long max, final MailSortField sortField, final OrderDirection order, final MailField[] mailFields) throws OXException {
         final long timeStamp = System.currentTimeMillis();
@@ -1474,7 +1491,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
              */
             boolean cached = false;
             List<ThreadSortNode> threadList = null;
-            if (!mergeWithSent && imapConfig.getImapCapabilities().hasThreadReferences()) {
+            if (!mergeWithSent && imapConfig.getImapCapabilities().hasThreadReferences() && useImapThreaderIfSupported()) {
                 /*
                  * Parse THREAD response to a list structure and extract sequence numbers
                  */
@@ -1526,7 +1543,14 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                         LOG.info("\tIMAPMessageStorage.getThreadSortedMessages(): In-application thread-sort (incl. sent messages) took " + dur + "msec for folder " + fullName);
                     }
                 } else {
-                    final ThreadableResult threadableResult = getThreadableFor(imapFolder, true, cache, limit);
+                    final ThreadableResult threadableResult = getThreadableFor(imapFolder, false, cache, limit);
+                    Threadable threadable = threadableResult.threadable;
+                    // Sort by thread reference
+                    if (useCommonsNetThreader()) {
+                        threadable = ((ThreadableImpl) new org.apache.commons.net.nntp.Threader().thread(new ThreadableImpl(threadable))).getDelegatee();
+                    } else {
+                        threadable = new Threader().thread(threadable);
+                    }
                     cached = threadableResult.cached;
                     threadList = Threadable.toNodeList(threadableResult.threadable);
                     if (logIt) {

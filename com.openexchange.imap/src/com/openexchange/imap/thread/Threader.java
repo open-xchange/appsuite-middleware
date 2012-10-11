@@ -69,13 +69,47 @@ public class Threader {
 
     private ThreadContainer rootNode; // has kids, and no next
     private Map<String, ThreadContainer> idMap; // maps message IDs to ThreadContainers
-    private int bogusIdCount = 0; // tick of how many dup IDs we've seen
+    private int bogusIdCount; // tick of how many dup IDs we've seen
+    private boolean insistOnRe;
 
     /**
      * Initializes a new {@link Threader}.
      */
     public Threader() {
         super();
+        bogusIdCount = 0;
+        insistOnRe = true;
+    }
+
+    /**
+     * Sets the <code>insistOnRe</code> flag. Default is <code>true</code>.
+     * <p>
+     * If disabled, those messages are grouped to threads which have an equal subject, regardless if one is the response (has "Re: " prefix)
+     * of the other.
+     * <p>
+     * By default exactly that case is prevented:
+     * 
+     * <pre>
+     * // - If that container is a non-dummy, and that message's subject begins
+     * // with &quot;Re:&quot;, but *this* message's subject does *not*, then make that
+     * // be a child of this one -- they were misordered. (This happens
+     * // somewhat implicitly, since if there are two messages, one with Re:
+     * // and one without, the one without will be in the hash table,
+     * // regardless of the order in which they were seen.)
+     * //
+     * // - Otherwise, make a new dummy container and make both messages be a
+     * // child of it. This catches the both-are-replies and neither-are-
+     * // replies cases, and makes them be siblings instead of asserting a
+     * // hierarchical relationship which might not be true.
+     * 
+     * </pre>
+     * 
+     * @param insistOnRe The <code>insistOnRe</code> flag to set
+     * @return This threader with new behavior applied
+     */
+    public Threader setInsistOnRe(boolean insistOnRe) {
+        this.insistOnRe = insistOnRe;
+        return this;
     }
 
     /**
@@ -144,7 +178,8 @@ public class Threader {
      * <ul>
      * <li>It walks the tree of {@code Threadable}s, and wraps each in a {@code ThreadContainer} object.</li>
      * <li>It indexes each {@code ThreadContainer} object in the id_table, under the message ID of the contained {@code Threadable}.</li>
-     * <li>For each of the {@code Threadable}'s references, it ensures that there is a {@code ThreadContainer} in the table (an empty one, if necessary.)</li>
+     * <li>For each of the {@code Threadable}'s references, it ensures that there is a {@code ThreadContainer} in the table (an empty one,
+     * if necessary.)</li>
      * </ul>
      * 
      * @param threadable The {@code Threadable} instance to build container for
@@ -494,6 +529,13 @@ public class Threader {
             } else if (old.threadable == null || // old is empty, or
             (c.threadable != null && c.threadable.subjectIsReply() && // c has Re, and
             !old.threadable.subjectIsReply())) { // old does not.
+                // Make this message be a child of the other.
+                c.parent = old;
+                c.next = old.child;
+                old.child = c;
+
+            } else if (!insistOnRe && (c.threadable != null && !c.threadable.subjectIsReply() && // c has *no* Re, and
+            !old.threadable.subjectIsReply())) { // old does not, too.
                 // Make this message be a child of the other.
                 c.parent = old;
                 c.next = old.child;
