@@ -57,17 +57,14 @@ import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.composition.IDBasedFileAccess;
 
-
 /**
  * {@link DeleteAction}
- *
+ * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 @Action(method = RequestMethod.PUT, name = "delete", description = "Delete infoitems", parameters = {
     @Parameter(name = "session", description = "A session ID previously obtained from the login module."),
-    @Parameter(name = "timestamp", description = "Timestamp of the last update of the deleted infoitems.")
-}, requestBody = "An array with [[]].",
-responseDescription = "An array with objects to delete. The fields for the object are described in Full identifier for an infostore document.")
+    @Parameter(name = "timestamp", description = "Timestamp of the last update of the deleted infoitems.") }, requestBody = "An array with objects to delete. The fields for the object are described in Full identifier for an infostore document.", responseDescription = "An array with [[]].")
 public class DeleteAction extends AbstractWriteAction {
 
     @Override
