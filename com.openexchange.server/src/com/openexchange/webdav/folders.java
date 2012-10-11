@@ -55,8 +55,8 @@ import java.util.Date;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.jdom.output.XMLOutputter;
+import com.openexchange.log.LogFactory;
+import org.jdom2.output.XMLOutputter;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 import com.openexchange.api2.FolderSQLInterface;
@@ -103,6 +103,11 @@ public final class folders extends XmlServlet<FolderSQLInterface> {
     @Override
     protected Interface getInterface() {
         return Interface.WEBDAV_XML;
+    }
+    
+    @Override
+    protected boolean isServletDisabled() {
+        return true;
     }
 
     @Override
@@ -283,6 +288,7 @@ public final class folders extends XmlServlet<FolderSQLInterface> {
 
                 writeResponse(folderObject, HttpServletResponse.SC_OK, OK, clientId, os, xo);
             } catch (final OXException exc) {
+            	exc.log(LOG);
                 if (exc.isMandatory()) {
                     LOG.debug(_parsePropChilds, exc);
                     writeResponse(folderObject, HttpServletResponse.SC_CONFLICT, getErrorMessage(exc,

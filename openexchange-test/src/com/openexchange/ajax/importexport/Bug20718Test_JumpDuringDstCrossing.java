@@ -40,7 +40,7 @@ public class Bug20718Test_JumpDuringDstCrossing extends ManagedAppointmentTest {
 		"DTEND;TZID=\""+tzid+"\":20081009T170000\n" + 
 		"DTSTART;TZID=\"Amsterdam, Berlin, Bern, Rom, Stockholm, Wien\":20081009T130000\n" + 
 		"RRULE:FREQ=WEEKLY;BYDAY=TH\n" + 
-		"SUMMARY:geblockt für Prof. Bruce-Boye - keine Termine\n" + 
+		"SUMMARY:geblockt f\u00fcr Prof. Bruce-Boye - keine Termine\n" + 
 		"UID:AAAAAGQnWJsQLItElPc+mdUPXr/kSyMA\n" + 
 		"END:VEVENT\n" + 
 		"END:VCALENDAR";

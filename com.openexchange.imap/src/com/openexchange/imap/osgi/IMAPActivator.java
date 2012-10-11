@@ -62,6 +62,7 @@ import org.osgi.service.event.EventHandler;
 import com.openexchange.caching.CacheService;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.database.DatabaseService;
+import com.openexchange.imap.IMAPAccess;
 import com.openexchange.imap.IMAPProvider;
 import com.openexchange.imap.IMAPStoreCache;
 import com.openexchange.imap.cache.ListLsubCache;
@@ -69,6 +70,9 @@ import com.openexchange.imap.config.IMAPProperties;
 import com.openexchange.imap.notify.IMAPNotifierRegistryService;
 import com.openexchange.imap.notify.internal.IMAPNotifierRegistry;
 import com.openexchange.imap.services.IMAPServiceRegistry;
+import com.openexchange.imap.thread.ThreadableCache;
+import com.openexchange.imap.thread.ThreadableLoginHandler;
+import com.openexchange.login.LoginHandlerService;
 import com.openexchange.mail.api.MailProvider;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.osgi.HousekeepingActivator;
@@ -85,13 +89,13 @@ import com.openexchange.user.UserService;
 
 /**
  * {@link IMAPActivator} - The {@link BundleActivator activator} for IMAP bundle.
- *
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class IMAPActivator extends HousekeepingActivator {
 
     protected static final org.apache.commons.logging.Log LOG =
-        com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(IMAPActivator.class));
+        com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(IMAPActivator.class));
 
     private WhiteboardSecretService secretService;
 
@@ -167,7 +171,11 @@ public final class IMAPActivator extends HousekeepingActivator {
                 }
             }
             /*
-             * Register event handle
+             * Register login handler
+             */
+            registerService(LoginHandlerService.class, new ThreadableLoginHandler(this));
+            /*
+             * Register event handler
              */
             {
                 final Dictionary<String, Object> serviceProperties = new Hashtable<String, Object>(1);
@@ -206,6 +214,8 @@ public final class IMAPActivator extends HousekeepingActivator {
                             if (null != service && service.getAnyActiveSessionForUser(session.getUserId(), session.getContextId()) == null) {
                                 ListLsubCache.dropFor(session);
                                 IMAPStoreCache.getInstance().dropFor(session.getUserId(), session.getContextId());
+                                ThreadableCache.dropFor(session);
+                                IMAPAccess.dropValidity(session.getUserId(), session.getContextId());
                             }
                         } catch (final Exception e) {
                             // Failed handling session
@@ -230,6 +240,7 @@ public final class IMAPActivator extends HousekeepingActivator {
              * Clear service registry
              */
             IMAPStoreCache.shutDownInstance();
+            ThreadableCache.getInstance().clear();
             getServiceRegistry().clearRegistry();
             if (secretService != null) {
                 secretService.close();

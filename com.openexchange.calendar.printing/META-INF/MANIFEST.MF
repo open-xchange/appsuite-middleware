@@ -2,13 +2,15 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Calendar Printing Plug-in
 Bundle-SymbolicName: com.openexchange.calendar.printing
-Bundle-Version: 6.21.0
+Bundle-Version: 6.22.0
 Bundle-Activator: com.openexchange.calendar.printing.osgi.CalendarPrintingActivator
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Import-Package: com.openexchange.ajax,
  com.openexchange.ajax.osgi,
  com.openexchange.api2,
+ com.openexchange.config.cascade,
+ com.openexchange.dispatcher,
  com.openexchange.exception,
  com.openexchange.group,
  com.openexchange.groupware,

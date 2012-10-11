@@ -55,6 +55,7 @@ import java.util.Locale;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import javax.mail.FetchProfile;
+import javax.mail.Folder;
 import javax.mail.MessagingException;
 import javax.mail.UIDFolder.FetchProfileItem;
 import com.openexchange.imap.IMAPFolderStorage;
@@ -75,7 +76,7 @@ import com.sun.mail.imap.protocol.BASE64MailboxEncoder;
  */
 public final class IMAPNotifierTask {
 
-    protected static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(IMAPNotifierTask.class));
+    protected static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(IMAPNotifierTask.class));
 
     private final int accountId;
 
@@ -244,7 +245,7 @@ public final class IMAPNotifierTask {
                         /*
                          * Open in read-write mode to clear \Recent flag(s) to not notify multiple times for the same recent messages
                          */
-                        imapFolder.open(IMAPFolder.READ_WRITE);
+                        imapFolder.open(Folder.READ_WRITE);
                         imapFolder.close(true);
                     } while (iter.hasNext());
                 } finally {

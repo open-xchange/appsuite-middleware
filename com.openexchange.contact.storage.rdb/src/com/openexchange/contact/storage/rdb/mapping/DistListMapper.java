@@ -54,6 +54,7 @@ import java.util.EnumMap;
 import com.openexchange.contact.storage.rdb.fields.DistListMemberField;
 import com.openexchange.contact.storage.rdb.internal.DistListMember;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.tools.mappings.Mapping;
 import com.openexchange.groupware.tools.mappings.database.DbMapping;
 import com.openexchange.groupware.tools.mappings.database.DefaultDbMapper;
 import com.openexchange.groupware.tools.mappings.database.IntegerMapping;
@@ -101,6 +102,11 @@ public class DistListMapper extends DefaultDbMapper<DistListMember, DistListMemb
             public Integer get(DistListMember member) { 
                 return member.getParentContactID();
             }
+
+			@Override
+			public void remove(DistListMember member) {
+				member.removeParentContactID();
+			}
         });
 		
 		mappings.put(DistListMemberField.CONTACT_ID, new IntegerMapping<DistListMember>("intfield02", "Contact ID") {
@@ -119,6 +125,11 @@ public class DistListMapper extends DefaultDbMapper<DistListMember, DistListMemb
             public Integer get(DistListMember member) { 
                 return member.getEntryID();
             }
+
+			@Override
+			public void remove(DistListMember member) {
+				member.removeEntryID();
+			}
         });
 		
 		mappings.put(DistListMemberField.MAIL_FIELD, new IntegerMapping<DistListMember>("intfield03", "Mail Field") {
@@ -137,6 +148,11 @@ public class DistListMapper extends DefaultDbMapper<DistListMember, DistListMemb
             public Integer get(DistListMember member) { 
                 return member.getEmailfield();
             }
+
+			@Override
+			public void remove(DistListMember member) {
+				member.removeEmailfield();
+			}
         });
 		
 		mappings.put(DistListMemberField.CONTACT_FOLDER_ID, new IntegerMapping<DistListMember>("intfield04", "Contact Folder ID") {
@@ -155,6 +171,11 @@ public class DistListMapper extends DefaultDbMapper<DistListMember, DistListMemb
             public Integer get(DistListMember member) { 
                 return member.getFolderID();
             }
+
+			@Override
+			public void remove(DistListMember member) {
+				member.removeFolderld();
+			}
         });
 		
 		mappings.put(DistListMemberField.DISPLAY_NAME, new VarCharMapping<DistListMember>("field01", "Display Name") {
@@ -173,6 +194,11 @@ public class DistListMapper extends DefaultDbMapper<DistListMember, DistListMemb
             public String get(DistListMember member) { 
                 return member.getDisplayname();
             }
+
+			@Override
+			public void remove(DistListMember member) {
+				member.removeDisplayname();
+			}
         });
 		
 		mappings.put(DistListMemberField.LAST_NAME, new VarCharMapping<DistListMember>("field02", "Last Name") {
@@ -191,6 +217,11 @@ public class DistListMapper extends DefaultDbMapper<DistListMember, DistListMemb
             public String get(DistListMember member) { 
                 return member.getLastname();
             }
+
+			@Override
+			public void remove(DistListMember member) {
+				member.removeLastname();
+			}
         });
 		
 		mappings.put(DistListMemberField.FIRST_NAME, new VarCharMapping<DistListMember>("field03", "First Name") {
@@ -209,6 +240,11 @@ public class DistListMapper extends DefaultDbMapper<DistListMember, DistListMemb
             public String get(DistListMember member) { 
                 return member.getFirstname();
             }
+
+			@Override
+			public void remove(DistListMember member) {
+				member.removeFirstname();
+			}
         });
 		
 		mappings.put(DistListMemberField.MAIL, new VarCharMapping<DistListMember>("field04", "Mail") {
@@ -227,6 +263,11 @@ public class DistListMapper extends DefaultDbMapper<DistListMember, DistListMemb
             public String get(DistListMember member) { 
                 return member.getEmailaddress();
             }
+
+			@Override
+			public void remove(DistListMember member) {
+				member.removeEmailfield();
+			}
         });
 		
 		mappings.put(DistListMemberField.CONTEXT_ID, new IntegerMapping<DistListMember>("cid", "Context ID") {
@@ -245,6 +286,11 @@ public class DistListMapper extends DefaultDbMapper<DistListMember, DistListMemb
             public Integer get(DistListMember member) { 
                 return member.getContextID();
             }
+
+			@Override
+			public void remove(DistListMember member) {
+				member.removeContextID();
+			}
         });
 		
 		return mappings;

@@ -51,13 +51,13 @@ package com.openexchange.groupware.tools.mappings.json;
 
 import java.util.EnumSet;
 import java.util.List;
-
+import java.util.TimeZone;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.tools.mappings.Mapper;
+import com.openexchange.session.Session;
 
 /**
  * {@link JsonMapper} - Generic JSON mapper definition for field-wise 
@@ -80,6 +80,60 @@ public interface JsonMapper<O, E extends Enum<E>> extends Mapper<O, E> {
 	 */
 	E getMappedField(int columnID);
 
+    /**
+     * Gets the field whose mapping denotes the supplied ajax name. 
+     * 
+     * @param ajaxName the ajax name
+     * @return the field, or <code>null</code> if no such field was found
+     */
+    E getMappedField(String ajaxName);
+
+	/**
+	 * Gets an int array of column IDs from the supplied fields.
+	 * 
+	 * @param fields the fields
+	 * @return the column IDs in an array
+	 * @throws OXException
+	 */
+	int[] getColumnIDs(E[] fields) throws OXException;
+
+	/**
+	 * Gets the fields whose mappings denotes the supplied column IDs. The 
+	 * field order is preserved.
+	 *  
+	 * @param columnIDs the column IDs
+	 * @return the fields
+	 * @throws OXException if there is no mapping for a columnID
+	 */
+	E[] getFields(int[] columnIDs) throws OXException;
+
+	/**
+	 * Gets the fields whose mappings denotes the supplied column IDs and 
+	 * optionally adds mandatory fields to the result if not yet present. The 
+	 * field order is preserved, while the not yet defined mandatory fields 
+	 * are appended at the end of the array.
+	 * 
+	 * @param columnIDs the column IDs
+	 * @param mandatoryFields the mandatory fields
+	 * @return the fields
+	 * @throws OXException if there is no mapping for a columnID
+	 */
+    E[] getFields(int[] columnIDs, E... mandatoryFields) throws OXException;
+
+	/**
+	 * Gets the fields whose mappings denotes the supplied column IDs, 
+	 * optionally removes illegal fields and adds mandatory fields to the 
+	 * result if not yet present. The field order is preserved, while the not 
+	 * yet defined mandatory fields are appended at the end of the array.
+	 * 
+	 * @param columnIDs the column IDs
+	 * @param illegalFields the illegal fields
+	 * @param mandatoryFields the mandatory fields
+	 * @return the fields
+	 * @throws OXException if there is no mapping for a columnID
+	 */
+    E[] getFields(int[] columnIDs, EnumSet<E> illegalFields, E... mandatoryFields) throws OXException;
+
 	/**
 	 * Deserializes an object from JSON.
 	 * 
@@ -92,17 +146,6 @@ public interface JsonMapper<O, E extends Enum<E>> extends Mapper<O, E> {
 	O deserialize(JSONObject jsonObject, E[] fields) throws OXException, JSONException;
 
 	/**
-	 * Deserializes objects from JSON.
-	 * 
-	 * @param jsonArray the JSON array to create the objects from
-	 * @param fields the fields present object
-	 * @return the objects
-	 * @throws OXException
-	 * @throws JSONException
-	 */
-	List<O> deserialize(JSONArray jsonArray, E[] fields) throws OXException, JSONException;
-	
-	/**
 	 * Serializes the supplied object to JSON.
 	 * 
 	 * @param object the object to read the values from
@@ -114,57 +157,116 @@ public interface JsonMapper<O, E extends Enum<E>> extends Mapper<O, E> {
 	JSONObject serialize(O object, E[] fields) throws JSONException, OXException;
 	
 	/**
-	 * Serializes the supplied objects to JSON.
+	 * Serializes the supplied object to JSON.
+	 * 
+	 * @param object the object to read the values from
+	 * @param fields the fields to be set
+	 * @param timeZone the client time zone to consider
+	 * @return the JSON object
+	 * @throws JSONException
+	 * @throws OXException
+	 */
+	JSONObject serialize(O object, E[] fields, TimeZone timeZone) throws JSONException, OXException;
+	
+	/**
+	 * Serializes the supplied object to JSON.
+	 * 
+	 * @param object the object to read the values from
+	 * @param fields the fields to be set
+	 * @param timeZoneID the client time zone identifier to consider
+	 * @return the JSON object
+	 * @throws JSONException
+	 * @throws OXException
+	 */
+	JSONObject serialize(O object, E[] fields, String timeZoneID) throws JSONException, OXException;
+	
+	/**
+	 * Serializes the supplied object to JSON.
+	 * 
+	 * @param object the object to read the values from
+	 * @param fields the fields to be set
+	 * @param timeZoneID the client time zone identifier to consider
+	 * @param session the underlying session
+	 * @return the JSON object
+	 * @throws JSONException
+	 * @throws OXException
+	 */
+	JSONObject serialize(O object, E[] fields, String timeZoneID, Session session) throws JSONException, OXException;
+	
+	/**
+	 * Serializes the supplied object to JSON.
+	 * 
+	 * @param object the object to read the values from
+	 * @param fields the fields to be set
+	 * @param timeZone the client time zone to consider
+	 * @param session the underlying session
+	 * @return the JSON object
+	 * @throws JSONException
+	 * @throws OXException
+	 */
+	JSONObject serialize(O object, E[] fields, TimeZone timeZone, Session session) throws JSONException, OXException;
+
+	/**
+	 * Serializes the supplied object to JSON.
+	 * 
+	 * @param object the object to read the values from
+	 * @param to the JSONObject to serialize into
+	 * @param fields the fields to be set
+	 * @param timeZone the client time zone to consider
+	 * @throws JSONException
+	 * @throws OXException
+	 */
+	void serialize(O object, JSONObject to, E[] fields, TimeZone timeZone) throws JSONException, OXException;
+
+	/**
+	 * Serializes the supplied object to JSON.
+	 * 
+	 * @param object the object to read the values from
+	 * @param to the JSONObject to serialize into
+	 * @param fields the fields to be set
+	 * @param timeZone the client time zone to consider
+	 * @param session the underlying session
+	 * @throws JSONException
+	 * @throws OXException
+	 */
+	void serialize(O object, JSONObject to, E[] fields, TimeZone timeZone, Session session) throws JSONException, OXException;
+
+	/**
+	 * Serializes the supplied object to JSON.
+	 * 
+	 * @param object the object to read the values from
+	 * @param to the JSONObject to serialize into
+	 * @param fields the fields to be set
+	 * @param timeZoneID the client time zone identifier to consider
+	 * @throws JSONException
+	 * @throws OXException
+	 */
+	void serialize(O object, JSONObject to, E[] fields, String timeZoneID) throws JSONException, OXException;
+	
+	/**
+	 * Serializes the supplied objects to JSON arrays inside a JSON array.
 	 * 
 	 * @param objects the object to read the values from
-	 * @param fields the fields to be set
+	 * @param fields the fields to set in the arrays, in the expected order
+	 * @param timeZoneID the client time zone identifier to consider
+	 * @param session the underlying session
 	 * @return the JSON array
 	 * @throws JSONException
 	 * @throws OXException
 	 */
-	JSONArray serialize(List<O> objects, E[] fields) throws JSONException, OXException;
-
+	JSONArray serialize(List<O> objects, E[] fields, String timeZoneID, Session session) throws JSONException, OXException;
+	
 	/**
-	 * Gets an int array of column IDs from the supplied fields.
+	 * Serializes the supplied objects to JSON arrays inside a JSON array.
 	 * 
-	 * @param fields the fields
-	 * @return the column IDs in an array
+	 * @param objects the object to read the values from
+	 * @param fields the fields to set in the arrays, in the expected order
+	 * @param timeZone the client time zone to consider
+	 * @param session the underlying session
+	 * @return the JSON array
+	 * @throws JSONException
 	 * @throws OXException
 	 */
-	int[] getColumnIDs(E[] fields) throws OXException;
-
-
-	/**
-	 * Gets the fields whose mappings denotes the supplied column IDs.
-	 *  
-	 * @param columnIDs the column IDs
-	 * @return the fields
-	 * @throws OXException
-	 */
-	E[] getFields(int[] columnIDs) throws OXException;
-
-	/**
-	 * Gets the fields whose mappings denotes the supplied column IDs and 
-	 * optionally adds mandatory fields to the result if not yet present.
-	 * 
-	 * @param columnIDs the column IDs
-	 * @param mandatoryFields the mandatory fields
-	 * @return the fields
-	 * @throws OXException
-	 */
-    E[] getFields(final int[] columnIDs, final E... mandatoryFields) throws OXException;
-
-	/**
-	 * Gets the fields whose mappings denotes the supplied column IDs, 
-	 * optionally removes illegal fields and adds mandatory fields to the 
-	 * result if not yet present.
-	 * 
-	 * @param columnIDs the column IDs
-	 * @param illegalFields the illegal fields
-	 * @param mandatoryFields the mandatory fields
-	 * @return the fields
-	 * @throws OXException
-	 */
-    E[] getFields(final int[] columnIDs, final EnumSet<E> illegalFields, final E... mandatoryFields) throws OXException;
-
+	JSONArray serialize(List<O> objects, E[] fields, TimeZone timeZone, Session session) throws JSONException, OXException;
+	
 }

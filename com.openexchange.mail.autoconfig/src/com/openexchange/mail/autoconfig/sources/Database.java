@@ -73,7 +73,7 @@ import com.openexchange.tools.sql.DBUtils;
  */
 public class Database extends AbstractConfigSource {
 
-    static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(Database.class);
+    static final org.apache.commons.logging.Log LOG = com.openexchange.log.LogFactory.getLog(Database.class);
 
     private final ServiceLookup services;
 

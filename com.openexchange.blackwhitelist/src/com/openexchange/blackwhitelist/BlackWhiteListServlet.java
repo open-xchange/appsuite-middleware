@@ -61,9 +61,9 @@ import org.json.JSONObject;
 import com.openexchange.ajax.DataServlet;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.blackwhitelist.osgi.ServletServiceRegistry;
-import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.tools.servlet.AjaxException;
-import com.openexchange.tools.servlet.OXJSONException;
+import com.openexchange.exception.OXException;
+import com.openexchange.tools.servlet.AjaxExceptionCodes;
+import com.openexchange.tools.servlet.OXJSONExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -73,7 +73,12 @@ import com.openexchange.tools.session.ServerSession;
  */
 public class BlackWhiteListServlet extends DataServlet {
 
-    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(BlackWhiteListServlet.class);
+    /**
+     * 
+     */
+    private static final long serialVersionUID = -929748663411398165L;
+
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.LogFactory.getLog(BlackWhiteListServlet.class);
 
     private static final String ADD = "add";
 
@@ -82,23 +87,23 @@ public class BlackWhiteListServlet extends DataServlet {
     private static final String GET = "get";
 
     @Override
-    protected boolean hasModulePermission(ServerSession session) {
+    protected boolean hasModulePermission(final ServerSession session) {
         return true;
     }
 
     @Override
-    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+    protected void doPost(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
         super.doPost(req, resp);
         doGet(req, resp);
     }
 
     @Override
-    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
-        Response response = new Response();
+    protected void doGet(final HttpServletRequest req, final HttpServletResponse resp) throws IOException {
+        final Response response = new Response();
 
         try {
-            String action = parseMandatoryStringParameter(req, PARAMETER_ACTION);
-            String module = parseMandatoryStringParameter(req, PARAMETER_MODULE);
+            final String action = parseMandatoryStringParameter(req, PARAMETER_ACTION);
+            final String module = parseMandatoryStringParameter(req, PARAMETER_MODULE);
 
             ListType type = null;
             if (module.equalsIgnoreCase("blacklist")) {
@@ -106,10 +111,10 @@ public class BlackWhiteListServlet extends DataServlet {
             } else if (module.equalsIgnoreCase("whitelist")) {
                 type = ListType.white;
             } else {
-                throw new AjaxException(AjaxException.Code.InvalidParameterValue, PARAMETER_MODULE, module);
+                throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create(PARAMETER_MODULE, module);
             }
             
-            ServerSession session = getSessionObject(req);
+            final ServerSession session = getSessionObject(req);
 
             if (action.equalsIgnoreCase(ADD)) {
                 doAdd(session, type, req, response);
@@ -118,55 +123,55 @@ public class BlackWhiteListServlet extends DataServlet {
             } else if (action.equalsIgnoreCase(GET)) {
                 doGet(session, type, response);
             } else {
-                throw new AjaxException(AjaxException.Code.InvalidParameterValue, PARAMETER_ACTION, action);
+                throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create(PARAMETER_ACTION, action);
             }
-        } catch (AbstractOXException e) {
+        } catch (final OXException e) {
             LOG.error(e.getMessage(), e);
             response.setException(e);
-        } catch (JSONException e) {
+        } catch (final JSONException e) {
             LOG.error(e.getMessage(), e);
-            response.setException(new OXJSONException(OXJSONException.Code.JSON_BUILD_ERROR, e));
+            response.setException(OXJSONExceptionCodes.JSON_BUILD_ERROR.create(e));
         }
         writeResponse(response, resp);
     }
 
-    private void doGet(ServerSession session, ListType type, Response response) throws JSONException, AbstractOXException {
-        BlackWhiteListInterface bwService = ServletServiceRegistry.getInstance().getService(BlackWhiteListInterface.class);
+    private void doGet(final ServerSession session, final ListType type, final Response response) throws JSONException, OXException {
+        final BlackWhiteListInterface bwService = ServletServiceRegistry.getInstance().getService(BlackWhiteListInterface.class);
 
-        List<String> list = bwService.getList(session, type);
+        final List<String> list = bwService.getList(session, type);
 
-        JSONArray items = new JSONArray();
-        for (String item : list) {
+        final JSONArray items = new JSONArray();
+        for (final String item : list) {
             items.put(item);
         }
-        JSONObject jsonObject = new JSONObject();
+        final JSONObject jsonObject = new JSONObject();
         jsonObject.put("items", items);
 
         response.setData(jsonObject);
     }
 
-    private void doDelete(ServerSession session, ListType type, HttpServletRequest req, Response response) throws JSONException, AbstractOXException {
-        JSONObject jsonObject = convertParameter2JSONObject(req);
+    private void doDelete(final ServerSession session, final ListType type, final HttpServletRequest req, final Response response) throws JSONException, OXException {
+        final JSONObject jsonObject = convertParameter2JSONObject(req);
 
-        String data = jsonObject.getString("data");
-        List<String> entries = new ArrayList<String>();
+        final String data = jsonObject.getString("data");
+        final List<String> entries = new ArrayList<String>();
         entries.add(data);
 
-        BlackWhiteListInterface bwService = ServletServiceRegistry.getInstance().getService(BlackWhiteListInterface.class);
+        final BlackWhiteListInterface bwService = ServletServiceRegistry.getInstance().getService(BlackWhiteListInterface.class);
 
         bwService.removeListEntries(session, type, entries);
 
         response.setData("ok");
     }
 
-    private void doAdd(ServerSession session, ListType type, HttpServletRequest req, Response response) throws JSONException, AbstractOXException {
-        JSONObject jsonObject = convertParameter2JSONObject(req);
+    private void doAdd(final ServerSession session, final ListType type, final HttpServletRequest req, final Response response) throws JSONException, OXException {
+        final JSONObject jsonObject = convertParameter2JSONObject(req);
 
-        String data = jsonObject.getString("data");
-        List<String> entries = new ArrayList<String>();
+        final String data = jsonObject.getString("data");
+        final List<String> entries = new ArrayList<String>();
         entries.add(data);
 
-        BlackWhiteListInterface bwService = ServletServiceRegistry.getInstance().getService(BlackWhiteListInterface.class);
+        final BlackWhiteListInterface bwService = ServletServiceRegistry.getInstance().getService(BlackWhiteListInterface.class);
 
         bwService.addListEntries(session, type, entries);
 

@@ -50,15 +50,18 @@
 package com.openexchange.mail.json.actions;
 
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
+import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.Mail;
 import com.openexchange.ajax.container.ByteArrayFileHolder;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
@@ -67,7 +70,6 @@ import com.openexchange.documentation.RequestMethod;
 import com.openexchange.documentation.annotations.Action;
 import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
-import com.openexchange.java.Charsets;
 import com.openexchange.java.Streams;
 import com.openexchange.log.Log;
 import com.openexchange.mail.MailExceptionCode;
@@ -77,6 +79,7 @@ import com.openexchange.mail.json.MailRequest;
 import com.openexchange.mail.mime.ContentType;
 import com.openexchange.mail.mime.MimeDefaultSession;
 import com.openexchange.mail.mime.MimeFilter;
+import com.openexchange.mail.mime.MimeMailException;
 import com.openexchange.mail.utils.CharsetDetector;
 import com.openexchange.preferences.ServerUserSetting;
 import com.openexchange.server.ServiceLookup;
@@ -103,7 +106,7 @@ import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 }, responseDescription = "(not IMAP: with timestamp): An JSON object containing all data of the requested mail. The fields of the object are listed in Detailed mail data. The fields id and attachment are not included. NOTE: Of course response is not a JSON object if either parameter hdr or parameter src are set to \"1\". Then the response contains plain text. Moreover if optional parameter save is set to \"1\" the complete message source is going to be directly written to output stream to open browser's save dialog.")
 public final class GetAction extends AbstractMailAction {
 
-    private static final org.apache.commons.logging.Log LOG = Log.valueOf(org.apache.commons.logging.LogFactory.getLog(GetAction.class));
+    private static final org.apache.commons.logging.Log LOG = Log.valueOf(com.openexchange.log.LogFactory.getLog(GetAction.class));
 
     /**
      * Initializes a new {@link GetAction}.
@@ -129,16 +132,11 @@ public final class GetAction extends AbstractMailAction {
             if (length != 1) {
                 throw new IllegalArgumentException("JSON array's length is not 1");
             }
-            final AJAXRequestData requestData = new AJAXRequestData();
-            final AJAXRequestData request = req.getRequest();
-            for (final Iterator<String> it = request.getParameterNames(); it.hasNext();) {
-                final String name = it.next();
-                requestData.putParameter(name, request.getParameter(name));
-            }
+            final AJAXRequestData requestData = req.getRequest();
             for (int i = 0; i < length; i++) {
                 final JSONObject folderAndID = paths.getJSONObject(i);
-                requestData.putParameter(Mail.PARAMETER_FOLDERID, folderAndID.getString(Mail.PARAMETER_FOLDERID));
-                requestData.putParameter(Mail.PARAMETER_ID, folderAndID.get(Mail.PARAMETER_ID).toString());
+                requestData.putParameter(AJAXServlet.PARAMETER_FOLDERID, folderAndID.getString(AJAXServlet.PARAMETER_FOLDERID));
+                requestData.putParameter(AJAXServlet.PARAMETER_ID, folderAndID.get(AJAXServlet.PARAMETER_ID).toString());
             }
             /*
              * ... and fake a GET request
@@ -157,7 +155,7 @@ public final class GetAction extends AbstractMailAction {
             /*
              * Read in parameters
              */
-            final String folderPath = req.checkParameter(Mail.PARAMETER_FOLDERID);
+            final String folderPath = req.checkParameter(AJAXServlet.PARAMETER_FOLDERID);
             // final String uid = paramContainer.checkStringParam(PARAMETER_ID);
             String tmp = req.getParameter(Mail.PARAMETER_SHOW_SRC);
             final boolean showMessageSource = ("1".equals(tmp) || Boolean.parseBoolean(tmp));
@@ -205,11 +203,11 @@ public final class GetAction extends AbstractMailAction {
              */
             final String uid;
             {
-                String tmp2 = req.getParameter(Mail.PARAMETER_ID);
+                String tmp2 = req.getParameter(AJAXServlet.PARAMETER_ID);
                 if (null == tmp2) {
                     tmp2 = req.getParameter(Mail.PARAMETER_MESSAGE_ID);
                     if (null == tmp2) {
-                        throw AjaxExceptionCodes.MISSING_PARAMETER.create(Mail.PARAMETER_ID);
+                        throw AjaxExceptionCodes.MISSING_PARAMETER.create(AJAXServlet.PARAMETER_ID);
                     }
                     uid = mailInterface.getMailIDByMessageID(folderPath, tmp2);
                 } else {
@@ -284,10 +282,21 @@ public final class GetAction extends AbstractMailAction {
                 }
                 final ContentType ct = mail.getContentType();
                 if (ct.containsCharsetParameter() && CharsetDetector.isValid(ct.getCharsetParameter())) {
-                    data = new AJAXRequestResult(new String(baos.toByteArray(), Charsets.forName(ct.getCharsetParameter())), "string");
+                    data = new AJAXRequestResult(new String(baos.toByteArray(), ct.getCharsetParameter()), "string");
                 } else {
-                    data = new AJAXRequestResult(new String(baos.toByteArray(), com.openexchange.java.Charsets.UTF_8), "string");
+                    data = new AJAXRequestResult(new String(baos.toByteArray(), "UTF-8"), "string");
                 }
+                // final ContentType rct = new ContentType("text/plain");
+                // if (ct.containsCharsetParameter() && CharsetDetector.isValid(ct.getCharsetParameter())) {
+                // rct.setCharsetParameter(ct.getCharsetParameter());
+                // } else {
+                // rct.setCharsetParameter("UTF-8");
+                // }
+                // req.getRequest().setFormat("file");
+                // final ByteArrayFileHolder fileHolder = new ByteArrayFileHolder(baos.toByteArray());
+                // fileHolder.setContentType(rct.toString());
+                // fileHolder.setName("msgsrc.txt");
+                // data = new AJAXRequestResult(fileHolder, "file");
             } else if (showMessageHeaders) {
                 /*
                  * Get message
@@ -303,6 +312,18 @@ public final class GetAction extends AbstractMailAction {
                     final int unreadMsgs = mail.getUnreadMessages();
                     mail.setUnreadMessages(unreadMsgs < 0 ? 0 : unreadMsgs + 1);
                 }
+                final ContentType rct = new ContentType("text/plain");
+                final ContentType ct = mail.getContentType();
+                if (ct.containsCharsetParameter() && CharsetDetector.isValid(ct.getCharsetParameter())) {
+                    rct.setCharsetParameter(ct.getCharsetParameter());
+                } else {
+                    rct.setCharsetParameter("UTF-8");
+                }
+                // req.getRequest().setFormat("file");
+                // final String sHeaders = formatMessageHeaders(mail.getHeadersIterator());
+                // final ByteArrayFileHolder fileHolder = new ByteArrayFileHolder(sHeaders.getBytes(rct.getCharsetParameter()));
+                // fileHolder.setContentType(rct.toString());
+                // data = new AJAXRequestResult(fileHolder, "file");
                 data = new AJAXRequestResult(formatMessageHeaders(mail.getHeadersIterator()), "string");
                 if (doUnseen) {
                     /*
@@ -345,7 +366,9 @@ public final class GetAction extends AbstractMailAction {
                 if (mail == null) {
                     throw MailExceptionCode.MAIL_NOT_FOUND.create(uid, folderPath);
                 }
-                mail.setAccountId(mailInterface.getAccountID());
+                if (!mail.containsAccountId()) {
+                    mail.setAccountId(mailInterface.getAccountID());
+                }
                 data = new AJAXRequestResult(mail, "mail");
             }
             data.addWarnings(warnings);
@@ -357,11 +380,20 @@ public final class GetAction extends AbstractMailAction {
                         "Most likely this is caused by concurrent access of multiple clients ").append(
                         "while one performed a delete on affected mail.").toString(),
                     e);
+                final Object[] args = e.getDisplayArgs();
+                final String uid = null == args || 0 == args.length ? null : args[0].toString();
+                if ("undefined".equalsIgnoreCase(uid)) {
+                    throw MailExceptionCode.PROCESSING_ERROR.create(e, new Object[0]);
+                }
             } else {
                 LOG.error(e.getMessage(), e);
             }
             throw e;
-        } catch (final Exception e) {
+        } catch (final MessagingException e) {
+            throw MimeMailException.handleMessagingException(e);
+        } catch (final IOException e) {
+            throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
+        } catch (final RuntimeException e) {
             throw MailExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
     }

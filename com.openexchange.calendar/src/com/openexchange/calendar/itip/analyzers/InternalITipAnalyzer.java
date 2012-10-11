@@ -78,11 +78,13 @@ public class InternalITipAnalyzer extends AbstractITipAnalyzer {
         super(util, services);
     }
 
+    @Override
     public List<ITipMethod> getMethods() {
 
         return null;
     }
 
+    @Override
     public ITipAnalysis analyze(ITipMessage message, Map<String, String> header, TypeWrapper wrapper, Locale locale, User user, Context ctx, Session session) throws OXException {
         ITipAnalysis analysis = new ITipAnalysis();
         

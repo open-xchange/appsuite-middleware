@@ -66,7 +66,7 @@ import com.openexchange.threadpool.ThreadPoolService;
 final class CoyoteRefusedExecutionBehavior implements RefusedExecutionBehavior<Object> {
 
     private static final org.apache.commons.logging.Log LOG =
-        com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(CoyoteRefusedExecutionBehavior.class));
+        com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(CoyoteRefusedExecutionBehavior.class));
 
     private final AJPv13TaskWatcher watcher;
 

@@ -1,0 +1,16 @@
+Source: open-xchange-admin-autocontextid
+Section: web
+Priority: optional
+Maintainer: Jan Bauerdick <jan.bauerdick@open-xchange.com>
+Build-Depends: debhelper (>= 4.0.0), ant (>= 1.7.0), ant-optional (>= 1.7.0), sun-java6-jdk|java6-sdk, open-xchange-core (>= @OXVERSION@), open-xchange-admin (>=@OXVERSION@)
+Standards-Version: 3.8.4
+Homepage: http://www.open-xchange.com
+
+Package: open-xchange-admin-autocontextid
+Architecture: all
+Depends: ${misc:Depends}, open-xchange-admin (>= @OXVERSION@)
+Replaces: open-xchange-admin-plugin-autocontextid, open-xchange-admin-plugin-autocontextid-client
+Conflicts: open-xchange-admin-plugin-autocontextid, open-xchange-admin-plugin-autocontextid-client
+Description: Administrative extension to automatically create context identifiers
+ This package adds the administrative OSGi bundle that creates for every newly created context a straight rising context identifier. Without
+ this extension an identifier must be given when creating a context.

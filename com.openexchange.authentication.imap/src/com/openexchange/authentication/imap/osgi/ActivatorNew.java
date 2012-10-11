@@ -51,12 +51,12 @@ package com.openexchange.authentication.imap.osgi;
 
 import static com.openexchange.authentication.imap.osgi.ImapAuthServiceRegistry.getServiceRegistry;
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.osgi.framework.ServiceRegistration;
 import com.openexchange.authentication.AuthenticationService;
 import com.openexchange.authentication.imap.impl.IMAPAuthentication;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.context.ContextService;
+import com.openexchange.log.LogFactory;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.osgi.DeferredActivator;
 import com.openexchange.osgi.ServiceRegistry;
@@ -66,7 +66,7 @@ public class ActivatorNew extends DeferredActivator {
 
     private static transient final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(ActivatorNew.class));
 
-    private ServiceRegistration registration;
+    private ServiceRegistration<AuthenticationService> registration;
 
     // private ServiceRegistration serviceRegistration;
 
@@ -88,7 +88,7 @@ public class ActivatorNew extends DeferredActivator {
         getServiceRegistry().addService(clazz, getService(clazz));
         // wenn alle services da und nicht authservice published, dann authservice publishen
         if (registration == null) {
-            registration = context.registerService(AuthenticationService.class.getName(), new IMAPAuthentication(), null);
+            registration = context.registerService(AuthenticationService.class, new IMAPAuthentication(), null);
         }
     }
 
@@ -122,7 +122,7 @@ public class ActivatorNew extends DeferredActivator {
             }
             if (registration == null) {
                 // authservice publishen
-                registration = context.registerService(AuthenticationService.class.getName(), new IMAPAuthentication(), null);
+                registration = context.registerService(AuthenticationService.class, new IMAPAuthentication(), null);
             }
         } catch (final Throwable t) {
             LOG.error(t.getMessage(), t);

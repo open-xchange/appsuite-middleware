@@ -49,7 +49,7 @@
 
 package com.openexchange.blackwhitelist.osgi;
 
-import com.openexchange.server.osgiservice.ServiceRegistry;
+import com.openexchange.osgi.ServiceRegistry;
 
 
 /**

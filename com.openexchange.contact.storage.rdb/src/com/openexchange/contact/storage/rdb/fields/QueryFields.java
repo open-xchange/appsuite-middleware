@@ -49,8 +49,9 @@
 
 package com.openexchange.contact.storage.rdb.fields;
 
-import java.util.EnumSet;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import com.openexchange.groupware.contact.helpers.ContactField;
@@ -62,7 +63,6 @@ import com.openexchange.groupware.contact.helpers.ContactField;
  * needed.    
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
- * @param <E>
  */
 public class QueryFields {
     
@@ -79,11 +79,16 @@ public class QueryFields {
      * 
      * @param fields
      */
-    public QueryFields(final ContactField[] fields) {
-        this.update(fields);
+    public QueryFields(final ContactField[] fields, ContactField...mandatoryFields) {
+        this.update(fields, mandatoryFields);
     }
     
-    public void update(final ContactField[] fields) {
+    /**
+     * Updates the current instance with the supplied fields. 
+     * 
+     * @param fields
+     */
+    public void update(final ContactField[] fields, ContactField...mandatoryFields) {
         if (null == fields) {
             throw new IllegalArgumentException("fields");
         }
@@ -103,6 +108,19 @@ public class QueryFields {
         		this.hasAttachmentData = true;
         	}
 		}
+        if (null != mandatoryFields) {
+	        for (final ContactField field : mandatoryFields) {
+	        	if (Fields.CONTACT_DATABASE.contains(field)) {
+	        		contactDataFieldsSet.add(field);
+	        	} else if (Fields.IMAGE_DATABASE_ADDITIONAL.contains(field)) {
+	        		imageDataFieldsSet.add(field);
+	        	} else if (ContactField.DISTRIBUTIONLIST.equals(field)) {
+	                this.hasDistListData = true;
+	        	} else if (ContactField.LAST_MODIFIED_OF_NEWEST_ATTACHMENT.equals(field)) {
+	        		this.hasAttachmentData = true;
+	        	}
+			}
+        }
         /*
          * check image data fields
          */
@@ -132,94 +150,109 @@ public class QueryFields {
         	this.contactDataFields = contactDataFieldsSet.toArray(new ContactField[contactDataFieldsSet.size()]);
         	this.hasContactData = true;
         }
-        
-        
-//        /*
-//         * determine image data fields
-//         */
-//        imageDataFields = filter(fields, Fields.IMAGE_DATABASE_ADDITIONAL, ContactField.OBJECT_ID).toArray(new ContactField[0]);
-//        hasImageData = 1 < imageDataFields.length;
-//        /*
-//         * determine distlist data fields
-//         */
-//        hasDistListData = 0 < filter(fields, EnumSet.of(ContactField.DISTRIBUTIONLIST)).size();
-//        distListDataFields = hasDistListData ? Fields.DISTLIST_DATABASE_ARRAY : new DistListMemberField[0];
-//        /*
-//         * determine attachment data fields
-//         */
-//        for (final ContactField field : fields) {
-//        	if (ContactField.LAST_MODIFIED_OF_NEWEST_ATTACHMENT.equals(field)) {
-//        		hasAttachmentData = true;
-//        		break;
-//        	}
-//        }
-//        /*
-//         * build required contact data fields
-//         */
-//        if (hasDistListData) {
-//            if (hasImageData) {
-//                contactDataFields = filter(fields, Fields.CONTACT_DATABASE, ContactField.NUMBER_OF_IMAGES, 
-//                    ContactField.NUMBER_OF_DISTRIBUTIONLIST).toArray(new ContactField[0]);
-//            } else {
-//                contactDataFields = filter(fields, Fields.CONTACT_DATABASE, ContactField.NUMBER_OF_DISTRIBUTIONLIST).toArray(new ContactField[0]);
-//            }
-//        } else {
-//            if (hasImageData) {
-//                contactDataFields = filter(fields, Fields.CONTACT_DATABASE, ContactField.NUMBER_OF_IMAGES).toArray(new ContactField[0]);
-//            } else {
-//                contactDataFields = filter(fields, Fields.CONTACT_DATABASE).toArray(new ContactField[0]);
-//            }
-//        }
-//        hasContactData = 0 < contactDataFields.length;
     }
     
+    /**
+     * Gets the contact data fields.
+     * 
+     * @return the fields
+     */
     public ContactField[] getContactDataFields() {
         return this.contactDataFields;
     }
     
+    /**
+     * Gets the image data fields.
+     * 
+     * @return the fields
+     */
     public ContactField[] getImageDataFields() {
         return this.imageDataFields;
     }
+
+    /**
+     * Gets the image data fields.
+     * 
+     * @param forUpdate whether the fields should be used for an update or not 
+     * @return the fields
+     */
+    public ContactField[] getImageDataFields(boolean forUpdate) {
+    	if (forUpdate) {
+    		List<ContactField> updateFields = new ArrayList<ContactField>();
+    		for (ContactField field : imageDataFields) {
+				if (false == ContactField.OBJECT_ID.equals(field) && false == ContactField.CONTEXTID.equals(field)) {
+					updateFields.add(field);
+				}
+			}
+    		return updateFields.toArray(new ContactField[updateFields.size()]);
+    	} else {
+    		return this.imageDataFields;
+    	}
+    }
     
+    public ContactField[] getContactDataFields(boolean forUpdate) {
+    	if (forUpdate) {
+    		List<ContactField> updateFields = new ArrayList<ContactField>();
+    		for (ContactField field : imageDataFields) {
+				if (false == ContactField.OBJECT_ID.equals(field) && false == ContactField.CONTEXTID.equals(field)) {
+					updateFields.add(field);
+				}
+			}
+    		return updateFields.toArray(new ContactField[updateFields.size()]);
+    	} else {
+    		return this.imageDataFields;
+    	}
+    }
+    
+    /**
+     * Gets the distribution list data fields.
+     * 
+     * @return the fields
+     */
     public DistListMemberField[] getDistListDataFields() {
         return this.distListDataFields;
     }    
     
+    /**
+     * Gets a value indicating whether image data fields are present or not. 
+     *  
+     * @return <code>true</code>, if there are image data fields, 
+     * <code>false</code>, otherwise
+     */
     public boolean hasImageData() {
         return this.hasImageData;
     }
 
+    /**
+     * Gets a value indicating whether contact data fields are present or not. 
+     *  
+     * @return <code>true</code>, if there are contact data fields, 
+     * <code>false</code>, otherwise
+     */
     public boolean hasContactData() {
         return this.hasContactData;
     }
 
+    /**
+     * Gets a value indicating whether distribution list data fields are 
+     * present or not. 
+     *  
+     * @return <code>true</code>, if there are distribution list data fields, 
+     * <code>false</code>, otherwise
+     */
     public boolean hasDistListData() {
         return this.hasDistListData;
     }
 
+    /**
+     * Gets a value indicating whether attachment data fields are present or 
+     * not. 
+     *  
+     * @return <code>true</code>, if there are attachment data fields, 
+     * <code>false</code>, otherwise
+     */
     public boolean hasAttachmentData() {
         return this.hasAttachmentData;
-    }
-
-    public static <E extends Enum<E>> Set<E> filter(final E[] fields, final EnumSet<E> validFields) {
-        return filter(fields, validFields, (E[])null);
-    }
-        
-    public static <E extends Enum<E>> Set<E> filter(final E[] fields, final EnumSet<E> validFields, final E... mandatoryFields) {
-        final Set<E> filteredFields = new HashSet<E>();
-        if (null != fields) {
-            for (final E field : fields) {
-                if (validFields.contains(field)) {
-                    filteredFields.add(field);
-                }
-            }
-        }
-        if (null != mandatoryFields) {
-            for (final E field : mandatoryFields) {
-                filteredFields.add(field);
-            }
-        }
-        return filteredFields;
     }
 
 }

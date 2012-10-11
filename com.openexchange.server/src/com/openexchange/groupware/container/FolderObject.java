@@ -49,7 +49,6 @@
 
 package com.openexchange.groupware.container;
 
-import java.io.Serializable;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -83,11 +82,11 @@ import com.openexchange.tools.oxfolder.OXFolderSQL;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a> - generic methods
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a> - added fields to generic methods
  */
-public class FolderObject extends FolderChildObject implements Cloneable, Serializable {
+public class FolderObject extends FolderChildObject implements Cloneable {
 
     private static final long serialVersionUID = 1019652520335292041L;
 
-    private static final transient org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(FolderObject.class));
+    private static final transient org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(FolderObject.class));
 
     /**
      * Gets the locale-specific folder name
@@ -1163,7 +1162,7 @@ public class FolderObject extends FolderChildObject implements Cloneable, Serial
      * user has on folder and applying the user configuration profile.
      */
     public final EffectivePermission getEffectiveUserPermission(final int userId, final UserConfiguration userConfig, final Connection readConArg) throws SQLException, OXException {
-        final EffectivePermission maxPerm = new EffectivePermission(userId, getObjectID(), getType(userId), getModule(), userConfig);
+        final EffectivePermission maxPerm = new EffectivePermission(userId, getObjectID(), getType(userId), getModule(), getCreatedBy(), userConfig);
         final int[] idArr;
         {
             final int[] groups = userConfig.getGroups();
@@ -1216,7 +1215,9 @@ public class FolderObject extends FolderChildObject implements Cloneable, Serial
         final StringBuilder sb = new StringBuilder();
         sb.append(super.toString()).append('\n');
         if (containsObjectID()) {
-            sb.append(" ObjectID=").append(getObjectID());
+            sb.append("ObjectID=").append(getObjectID());
+        } else {
+            sb.append("<no-object-id>");
         }
         if (containsFullName()) {
             sb.append(" Full Name=").append(getFullName());

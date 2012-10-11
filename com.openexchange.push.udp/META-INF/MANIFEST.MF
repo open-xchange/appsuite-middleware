@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Open-Xchange Push UDP
 Bundle-SymbolicName: com.openexchange.push.udp
-Bundle-Version: 6.21.0
+Bundle-Version: 6.22.0
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Import-Package: com.openexchange.config,
@@ -17,6 +17,7 @@ Import-Package: com.openexchange.config,
  com.openexchange.groupware.contexts.impl,
  com.openexchange.groupware.infostore,
  com.openexchange.groupware.tasks,
+ com.openexchange.i18n,
  com.openexchange.java,
  com.openexchange.log,
  com.openexchange.mail.utils,

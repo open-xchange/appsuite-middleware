@@ -58,6 +58,11 @@ import java.util.Date;
  */
 public class UserParticipant implements Participant, Comparable<Participant> {
 
+    private static final long serialVersionUID = -1585185796529773961L;
+
+    /**
+     * The constant to indicate no available participant identifier: <code>-1</code>.
+     */
     public static final int NO_PFID = -1;
 
     private int id = NO_ID;
@@ -193,14 +198,14 @@ public class UserParticipant implements Participant, Comparable<Participant> {
      */
     @Override
     public String getEmailAddress() {
-        return emailaddress;
+        return emailaddress == null ? null : emailaddress.toLowerCase();
     }
 
     /**
      * {@inheritDoc}
      */
     public void setEmailAddress(final String emailaddress) {
-        this.emailaddress = emailaddress;
+        this.emailaddress = emailaddress == null ? null : emailaddress.toLowerCase();
     }
 
     public boolean containsAlarm() {
@@ -273,15 +278,27 @@ public class UserParticipant implements Participant, Comparable<Participant> {
     }
 
     @Override
-    public Object clone() throws CloneNotSupportedException {
+    public UserParticipant clone() throws CloneNotSupportedException {
         final UserParticipant clone = (UserParticipant) super.clone();
         clone.alarmDate = (Date) (alarmDate == null ? null : alarmDate.clone());
+        clone.alarmMinutes = alarmMinutes;
+        clone.b_confirm = b_confirm;
+        clone.b_confirmMessage = b_confirmMessage;
+        clone.bAlarmMinutes = bAlarmMinutes;
+        clone.confirm = confirm;
+        clone.confirmMessage = confirmMessage;
+        clone.displayName = displayName;
+        clone.emailaddress = emailaddress;
+        clone.id = id;
+        clone.ignoreNotification = ignoreNotification;
+        clone.isModified = isModified;
+        clone.pfid = pfid;
         return clone;
     }
 
     @Override
-    public Participant getClone() throws CloneNotSupportedException {
-        return (Participant) clone();
+    public UserParticipant getClone() throws CloneNotSupportedException {
+        return clone();
     }
 
     @Override

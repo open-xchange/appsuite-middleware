@@ -49,10 +49,14 @@
 
 package com.openexchange.jslob.json.action;
 
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.ajax.tools.JSONUtil;
 import com.openexchange.documentation.RequestMethod;
 import com.openexchange.documentation.annotations.Action;
 import com.openexchange.documentation.annotations.Parameter;
@@ -62,6 +66,7 @@ import com.openexchange.jslob.JSlob;
 import com.openexchange.jslob.JSlobService;
 import com.openexchange.jslob.json.JSlobRequest;
 import com.openexchange.server.ServiceLookup;
+import com.openexchange.tools.servlet.AjaxExceptionCodes;
 
 /**
  * {@link UpdateAction}
@@ -71,24 +76,37 @@ import com.openexchange.server.ServiceLookup;
  */
 @Action(
     name = "update"
-    , description = "Updates or sets the JSlob associated with the current user and context." 
+    , description = "Updates or sets single elements within the JSlob associated with the current user and context." +
+    		"This can be done in a REST-like fashion. The path info specifies the path to the element that is supposed to be updated" +
+    		"; e.g. /ajax/jslob/the/path/to/element. Then the request body is considered to be the the new value for the addressed element." +
+    		" If non-REST the request body is expected to be a JSON object containing of a \"path\" and \"value\" element with the same " +
+    		"semantics. If the \"path\" element is missing in request's JSON object, that JSON object is completely <b>merged</b> with the" +
+    		" current JSON object representing the user's configuration.<br><br>Examples:<br>" +
+    		"The fastes way of storing a configuration:<br>" + 
+    		"PUT /ajax/jslob/myKey?action=update&id=myId<br>" + 
+    		"\"MyValue\"\n" + 
+    		"<br>" + 
+    		"results in a jslob {myKey: \"MyValue\"}" 
     , method = RequestMethod.PUT
     , parameters = {
-        @Parameter(name = "serviceId", description = "Identifier for the JSLobService lookup in the JSlobServiceRegistry.", optional=true)
-        , @Parameter(name = "id", description = "The path of the JSlob.", optional=true)
+        @Parameter(name = "serviceId", description = "Optional identifier for the JSlob. Default is <tt>com.openexchange.jslob.config</tt>", optional=true)
+        , @Parameter(name = "id", description = "The path of the JSlob.", optional=false)
     }
     , requestBody = "A JSON object to perform update or set. If the object contains a path key-value pair update is performed, set otherwise."
     , responseDescription = "The updated JSlob."
 )
 public final class UpdateAction extends JSlobAction {
 
+    private final List<Method> restMethods;
+
     /**
      * Initializes a new {@link UpdateAction}.
      * 
      * @param services The service look-up
      */
-    public UpdateAction(final ServiceLookup services) {
-        super(services);
+    public UpdateAction(final ServiceLookup services, final Map<String, JSlobAction> actions) {
+        super(services, actions);
+        restMethods = Collections.singletonList(Method.POST);
     }
 
     @Override
@@ -107,11 +125,12 @@ public final class UpdateAction extends JSlobAction {
         {
             final AJAXRequestData requestData = jslobRequest.getRequestData();
             final String serlvetRequestURI = requestData.getSerlvetRequestURI();
+            final Object data = requestData.getData();
             if (!isEmpty(serlvetRequestURI)) {
                 /*
                  * Update by request path
                  */
-                final JSONUpdate jsonUpdate = new JSONUpdate(serlvetRequestURI, requestData.getData());
+                final JSONUpdate jsonUpdate = new JSONUpdate(serlvetRequestURI, data instanceof String ? JSONUtil.toObject(data.toString()) : data);
                 /*
                  * Update...
                  */
@@ -124,8 +143,8 @@ public final class UpdateAction extends JSlobAction {
                 /*
                  * Update by JSON data
                  */
-                final JSONObject jsonData = (JSONObject) requestData.getData();
-                if (jsonData.hasAndNotNull("path")) {
+                final JSONObject jsonData = (JSONObject) data;
+                if (null != jsonData && jsonData.hasAndNotNull("path")) {
                     final JSONUpdate jsonUpdate = new JSONUpdate(jsonData.getString("path"), jsonData.get("value"));
                     /*
                      * Update...
@@ -137,9 +156,10 @@ public final class UpdateAction extends JSlobAction {
                     jslob = jslobService.get(id, userId, contextId);
                 } else {
                     /*
-                     * Perform Set
+                     * Perform merge
                      */
-                    jslob = new JSlob(jsonData);
+                    final JSONObject merged = JSONUtil.merge(jslobService.get(id, userId, contextId).getJsonObject(), jsonData);
+                    jslob = new JSlob(merged);
                     jslobService.set(id, jslob, userId, contextId);
                     /*
                      * ... and write back
@@ -152,20 +172,58 @@ public final class UpdateAction extends JSlobAction {
     }
 
     @Override
+    protected AJAXRequestResult performREST(final JSlobRequest jslobRequest, final Method method) throws OXException, JSONException {
+        if (!Method.POST.equals(method)) {
+            throw AjaxExceptionCodes.BAD_REQUEST.create();
+        }
+        /*
+         * REST style access
+         */
+        final AJAXRequestData requestData = jslobRequest.getRequestData();
+        final String pathInfo = requestData.getPathInfo();
+        // E.g. pathInfo="11" (preceding "jslob" removed)
+        if (isEmpty(pathInfo)) {
+            throw AjaxExceptionCodes.BAD_REQUEST.create();
+        }
+        final String[] pathElements = SPLIT_PATH.split(pathInfo);
+        final int length = pathElements.length;
+        if (0 == length) {
+            throw AjaxExceptionCodes.BAD_REQUEST.create();
+        }
+        if (1 == length) {
+            /*-
+             *  PUT /jslob/11
+             */
+            requestData.setAction("update");
+            requestData.putParameter("id", pathElements[0]);
+        } else if (2 == length) {
+            /*-
+             *  PUT /jslob/11/<path>
+             */
+            requestData.setAction("update");
+            requestData.putParameter("id", pathElements[0]);
+            try {
+                final JSONObject jObject = new JSONObject();
+                jObject.put("path", pathElements[1]);
+                jObject.put("value", requestData.getData());
+                requestData.setData(jObject, "json");
+            } catch (final JSONException e) {
+                throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage()); 
+            }
+        } else {
+            throw AjaxExceptionCodes.UNKNOWN_ACTION.create(pathInfo);
+        }
+        return perform(jslobRequest);
+    }
+
+    @Override
     public String getAction() {
         return "update";
     }
 
-    private static boolean isEmpty(final String string) {
-        if (null == string) {
-            return true;
-        }
-        final int len = string.length();
-        boolean isWhitespace = true;
-        for (int i = 0; isWhitespace && i < len; i++) {
-            isWhitespace = Character.isWhitespace(string.charAt(i));
-        }
-        return isWhitespace;
+    @Override
+    public List<Method> getRESTMethods() {
+        return restMethods;
     }
 
 }

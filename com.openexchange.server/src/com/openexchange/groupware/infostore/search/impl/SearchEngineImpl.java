@@ -61,7 +61,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Queue;
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import com.openexchange.log.LogFactory;
 import com.openexchange.configuration.ServerConfig;
 import com.openexchange.database.provider.DBProvider;
 import com.openexchange.database.tx.DBService;

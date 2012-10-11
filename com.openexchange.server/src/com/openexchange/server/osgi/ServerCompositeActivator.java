@@ -50,7 +50,9 @@
 package com.openexchange.server.osgi;
 
 import org.osgi.framework.BundleActivator;
-
+import com.openexchange.ajax.requesthandler.osgi.PrefixServiceActivator;
+import com.openexchange.image.osgi.ImageActivator;
+import com.openexchange.json.cache.impl.osgi.JsonCacheActivator;
 import com.openexchange.osgi.CompositeBundleActivator;
 
 /**
@@ -62,6 +64,8 @@ import com.openexchange.osgi.CompositeBundleActivator;
 public class ServerCompositeActivator extends CompositeBundleActivator {
 
     private final BundleActivator[] activators = {
+    	new PrefixServiceActivator(),
+    	new JsonCacheActivator(),
         new com.openexchange.tools.pipesnfilters.osgi.PipesAndFiltersActivator(),
         new com.openexchange.tools.file.osgi.DefaultFileStorageActivator(),
         new com.openexchange.ajax.requesthandler.osgi.DispatcherActivator(),
@@ -81,7 +85,7 @@ public class ServerCompositeActivator extends CompositeBundleActivator {
         new com.openexchange.groupware.importexport.osgi.ImportExportActivator(),
         new com.openexchange.consistency.osgi.ConsistencyActivator(),
         new com.openexchange.authorization.osgi.AuthorizationActivator(),
-        new com.openexchange.authentication.service.osgi.AutoLoginActivator(),
+        new com.openexchange.authentication.service.osgi.AuthenticationActivator(),
         new com.openexchange.ajax.login.osgi.LoginActivator(),
         new com.openexchange.tools.images.osgi.ImageToolsActivator(),
         new com.openexchange.mail.json.osgi.MailJSONActivator(),
@@ -95,7 +99,8 @@ public class ServerCompositeActivator extends CompositeBundleActivator {
         new com.openexchange.contact.osgi.ContactServiceActivator(),
         new com.openexchange.ajax.redirect.osgi.RedirectActivator(),
         new com.openexchange.groupware.tasks.osgi.TaskActivator(),
-        new FolderUpdaterRegistryDependencyActivator()
+        new FolderUpdaterRegistryDependencyActivator(),
+        new ImageActivator()
     };
 
     public ServerCompositeActivator() {

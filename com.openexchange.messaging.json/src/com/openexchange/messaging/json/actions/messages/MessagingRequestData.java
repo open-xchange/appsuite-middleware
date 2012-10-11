@@ -264,7 +264,7 @@ public class MessagingRequestData {
             return null;
         }
         try {
-            return OrderDirection.valueOf(OrderDirection.class, parameter.toUpperCase());
+            return Enum.valueOf(OrderDirection.class, parameter.toUpperCase());
         } catch (final IllegalArgumentException x) {
             throw MessagingExceptionCodes.INVALID_PARAMETER.create("order", parameter);
         }

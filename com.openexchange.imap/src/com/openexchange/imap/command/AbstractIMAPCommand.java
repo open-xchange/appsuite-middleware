@@ -98,7 +98,7 @@ public abstract class AbstractIMAPCommand<T> {
 
     private static final class AbstractIMAPProtocolCommand implements IMAPFolder.ProtocolCommand {
 
-        private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(AbstractIMAPProtocolCommand.class));
+        private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(AbstractIMAPProtocolCommand.class));
 
         private static final boolean DEBUG_ENABLED = LOG.isDebugEnabled();
 

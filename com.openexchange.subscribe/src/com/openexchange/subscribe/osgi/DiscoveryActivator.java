@@ -93,16 +93,16 @@ import com.openexchange.userconf.UserConfigurationService;
  */
 public class DiscoveryActivator extends HousekeepingActivator {
 
-    private OSGiSubscriptionSourceCollector collector;
-
-    private WhiteboardContextService contextService;
-
-    private WhiteboardGenericConfigurationStorageService genconfStorage;
+    private volatile OSGiSubscriptionSourceCollector collector;
+    private volatile WhiteboardContextService contextService;
+    private volatile WhiteboardGenericConfigurationStorageService genconfStorage;
 
     @Override
     public void startBundle() throws Exception {
-        collector = new OSGiSubscriptionSourceCollector(context);
-        contextService = new WhiteboardContextService(context);
+        final OSGiSubscriptionSourceCollector collector = new OSGiSubscriptionSourceCollector(context);
+        this.collector = collector;
+        final WhiteboardContextService contextService = new WhiteboardContextService(context);
+        this.contextService = contextService;
         final UserService users = getService(UserService.class);
         final UserConfigurationService userConfigs = getService(UserConfigurationService.class);
         final InfostoreFacade infostore = getService(InfostoreFacade.class);
@@ -131,14 +131,16 @@ public class DiscoveryActivator extends HousekeepingActivator {
         registerService(FolderUpdaterRegistry.class, executor);
 
         final DBProvider provider = getService(DBProvider.class);
-        genconfStorage = new WhiteboardGenericConfigurationStorageService(context);
+        final WhiteboardGenericConfigurationStorageService genconfStorage = new WhiteboardGenericConfigurationStorageService(context);
+        this.genconfStorage = genconfStorage;
         final SubscriptionSQLStorage storage = new SubscriptionSQLStorage(provider, genconfStorage, discoveryCollector);
 
-        AbstractSubscribeService.STORAGE = storage;
+        AbstractSubscribeService.STORAGE.set(storage);
 
-        AbstractSubscribeService.ENCRYPTION_FACTORY = getService(SecretEncryptionFactoryService.class);
-        AbstractSubscribeService.CRYPTO_SERVICE = getService(CryptoService.class);
-        AbstractSubscribeService.FOLDERS = folders;
+        AbstractSubscribeService.ENCRYPTION_FACTORY.set(getService(SecretEncryptionFactoryService.class));
+        AbstractSubscribeService.CRYPTO_SERVICE.set(getService(CryptoService.class));
+        AbstractSubscribeService.FOLDERS.set(folders);
+        AbstractSubscribeService.USER_CONFIGS.set(userConfigs);
 
         final SubscriptionUserDeleteListener listener = new SubscriptionUserDeleteListener();
         listener.setStorageService(genconfStorage);
@@ -153,13 +155,27 @@ public class DiscoveryActivator extends HousekeepingActivator {
 
     @Override
     public void stopBundle() throws Exception {
-        genconfStorage.close();
-        genconfStorage = null;
-        collector.close();
-        collector = null;
-        contextService.close();
-        contextService = null;
+        final WhiteboardGenericConfigurationStorageService genconfStorage = this.genconfStorage;
+        if (null != genconfStorage) {
+            genconfStorage.close();
+            this.genconfStorage = null;
+        }
+        final OSGiSubscriptionSourceCollector collector = this.collector;
+        if (null != collector) {
+            collector.close();
+            this.collector = null;
+        }
+        final WhiteboardContextService contextService = this.contextService;
+        if (null != contextService) {
+            contextService.close();
+            this.contextService = null;
+        }
         unregisterServices();
+        AbstractSubscribeService.STORAGE.set(null);
+        AbstractSubscribeService.ENCRYPTION_FACTORY.set(null);
+        AbstractSubscribeService.CRYPTO_SERVICE.set(null);
+        AbstractSubscribeService.FOLDERS.set(null);
+        AbstractSubscribeService.USER_CONFIGS.set(null);
     }
 
     @Override

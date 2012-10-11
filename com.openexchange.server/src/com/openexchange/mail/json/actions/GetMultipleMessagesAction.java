@@ -52,7 +52,10 @@ package com.openexchange.mail.json.actions;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import com.openexchange.ajax.Mail;
+import java.util.regex.Pattern;
+import org.json.JSONArray;
+import org.json.JSONException;
+import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.container.ByteArrayFileHolder;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.documentation.RequestMethod;
@@ -87,15 +90,34 @@ public final class GetMultipleMessagesAction extends AbstractMailAction {
         super(services);
     }
 
+    /**
+     * Split pattern for CSV.
+     */
+    private static final Pattern SPLIT = Pattern.compile(" *, *");
+
     @Override
-    protected AJAXRequestResult perform(final MailRequest req) throws OXException {
+    protected AJAXRequestResult perform(final MailRequest req) throws OXException, JSONException {
         try {
             // final ServerSession session = req.getSession();
             /*
              * Read in parameters
              */
-            final String folderPath = req.checkParameter(Mail.PARAMETER_FOLDERID);
-            final String[] ids = req.checkStringArray(Mail.PARAMETER_ID);
+            final String folderPath = req.checkParameter(AJAXServlet.PARAMETER_FOLDERID);
+            final String[] ids;
+            {
+                final String parameterId = AJAXServlet.PARAMETER_ID;
+                final String sIds = req.getParameter(parameterId);
+                if (null == sIds) {
+                    final JSONArray jArray = (JSONArray) req.getRequest().getData();
+                    final int length = jArray.length();
+                    ids = new String[length];
+                    for (int i = 0; i < length; i++) {
+                        ids[i] = jArray.getJSONObject(i).getString(parameterId);
+                    }
+                } else {
+                    ids = SPLIT.split(sIds, 0);
+                }
+            }
             /*
              * Get mail interface
              */

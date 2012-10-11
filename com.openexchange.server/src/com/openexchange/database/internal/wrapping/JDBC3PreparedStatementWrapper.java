@@ -67,7 +67,6 @@ import java.sql.Time;
 import java.sql.Timestamp;
 import java.util.Calendar;
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 /**
  * {@link JDBC3PreparedStatementWrapper}
@@ -78,7 +77,7 @@ public abstract class JDBC3PreparedStatementWrapper extends JDBC3StatementWrappe
 
     private final PreparedStatement delegate;
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(JDBC3PreparedStatementWrapper.class));
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(JDBC3PreparedStatementWrapper.class);
 
     /**
      * Initializes a new {@link JDBC3PreparedStatementWrapper}.

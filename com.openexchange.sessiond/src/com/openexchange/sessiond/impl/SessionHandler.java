@@ -51,31 +51,34 @@ package com.openexchange.sessiond.impl;
 
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.sessiond.services.SessiondServiceRegistry.getServiceRegistry;
+import java.util.ArrayList;
 import java.util.Dictionary;
 import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventAdmin;
 import com.openexchange.caching.objects.CachedSession;
 import com.openexchange.exception.OXException;
+import com.openexchange.log.LogFactory;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.SessionCounter;
 import com.openexchange.sessiond.SessionExceptionCodes;
 import com.openexchange.sessiond.SessionMatcher;
 import com.openexchange.sessiond.SessiondEventConstants;
 import com.openexchange.sessiond.cache.SessionCache;
+import com.openexchange.sessionstorage.SessionStorageService;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.timer.ScheduledTimerTask;
 import com.openexchange.timer.TimerService;
 
 /**
  * {@link SessionHandler} - Provides access to sessions
- *
+ * 
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
@@ -85,17 +88,17 @@ public final class SessionHandler {
 
         @Override
         public int getNumberOfSessions(final int userId, final int contextId) {
-            return sessionData.getNumOfUserSessions(userId, contextId);
+            return sessionDataRef.get().getNumOfUserSessions(userId, contextId);
         }
     };
 
-    private static SessionIdGenerator sessionIdGenerator;
+    private static volatile SessionIdGenerator sessionIdGenerator;
 
-    static SessiondConfigInterface config;
+    static volatile SessiondConfigInterface config;
 
-    protected static volatile SessionData sessionData;
+    protected static final AtomicReference<SessionData> sessionDataRef = new AtomicReference<SessionData>();
 
-    private static boolean noLimit;
+    private static volatile boolean noLimit;
 
     private static final AtomicBoolean initialized = new AtomicBoolean();
 
@@ -105,9 +108,9 @@ public final class SessionHandler {
 
     private static final boolean DEBUG = LOG.isDebugEnabled();
 
-    private static ScheduledTimerTask shortSessionContainerRotator;
+    private static volatile ScheduledTimerTask shortSessionContainerRotator;
 
-    private static ScheduledTimerTask longSessionContainerRotator;
+    private static volatile ScheduledTimerTask longSessionContainerRotator;
 
     /**
      * Initializes a new {@link SessionHandler session handler}
@@ -118,61 +121,74 @@ public final class SessionHandler {
 
     /**
      * Initializes the {@link SessionHandler session handler}
-     *
+     * 
      * @param newConfig The appropriate configuration
      */
-    public static void init(final SessiondConfigInterface newConfig) {
-        SessionHandler.config = newConfig;
-        sessionData = new SessionData(
+    public static void init(final SessiondConfigInterface config) {
+        SessionHandler.config = config;
+        final SessionData sessionData = new SessionData(
             config.getNumberOfSessionContainers(),
             config.getMaxSessions(),
             config.getRandomTokenTimeout(),
             config.getNumberOfLongTermSessionContainers(),
             config.isAutoLogin());
+        sessionDataRef.set(sessionData);
         if (initialized.compareAndSet(false, true)) {
             try {
                 sessionIdGenerator = SessionIdGenerator.getInstance();
             } catch (final OXException exc) {
                 LOG.error("create instance of SessionIdGenerator", exc);
             }
-            noLimit = (newConfig.getMaxSessions() == 0);
+            noLimit = (config.getMaxSessions() == 0);
         }
     }
 
     /**
      * Removes all sessions associated with given user in specified context
-     *
+     * 
      * @param userId The user ID
      * @param contextId The context ID
      * @param propagate <code>true</code> for remote removal; otherwise <code>false</code>
      * @return The wrapper objects for removed sessions
      */
-    public static SessionControl[] removeUserSessions(final int userId, final int contextId, final boolean propagate) {
-        final SessionControl[] retval = sessionData.removeUserSessions(userId, contextId);
+    public static Session[] removeUserSessions(final int userId, final int contextId, final boolean propagate) {
+        final SessionControl[] control = sessionDataRef.get().removeUserSessions(userId, contextId);
+        Session[] retval = new Session[control.length];
+        Session[] retval2 = null;
+        int i = 0;
         if (propagate) {
-            for (final SessionControl sessionControl : retval) {
+            for (final SessionControl sessionControl : control) {
                 try {
                     SessionCache.getInstance().putCachedSessionForRemoteRemoval(sessionControl.getSession().createCachedSession());
+                    retval[i++] = sessionControl.getSession();
                 } catch (final OXException e) {
                     LOG.error("Remote removal failed for session " + sessionControl.getSession().getSecret(), e);
                 }
+            }
+        }
+        SessionStorageService storageService = getServiceRegistry().getService(SessionStorageService.class);
+        if (storageService != null) {
+            try {
+                retval2 = storageService.removeUserSessions(userId, contextId);
+            } catch (OXException e) {
+                LOG.error(e.getMessage(), e);
             }
         }
         if (INFO) {
             LOG.info(new StringBuilder(64).append(propagate ? "Remote" : "Local").append(" removal of user sessions: User=").append(userId).append(
                 ", Context=").append(contextId).toString());
         }
-        return retval;
+        return merge(retval, retval2);
     }
 
     /**
      * Removes all sessions associated with given context.
-     *
+     * 
      * @param contextId The context ID
      * @param propagate <code>true</code> for remote removal; otherwise <code>false</code>
      */
     public static void removeContextSessions(final int contextId, final boolean propagate) {
-        final List<SessionControl> list = sessionData.removeContextSessions(contextId);
+        final List<SessionControl> list = sessionDataRef.get().removeContextSessions(contextId);
         if (propagate) {
             for (final SessionControl sessionControl : list) {
                 try {
@@ -182,33 +198,97 @@ public final class SessionHandler {
                 }
             }
         }
+        SessionStorageService storageService = getServiceRegistry().getService(SessionStorageService.class);
+        if (storageService != null) {
+            try {
+                storageService.removeContextSessions(contextId);
+            } catch (OXException e) {
+                LOG.error(e.getMessage(), e);
+            }
+        }
         if (INFO) {
             LOG.info(new StringBuilder(64).append(propagate ? "Remote" : "Local").append(" removal of sessions: Context=").append(contextId).toString());
         }
     }
 
     /**
+     * Checks for any active session for specified context.
+     * 
+     * @param contextId The context identifier
+     * @return <code>true</code> if at least one active session is found; otherwise <code>false</code>
+     */
+    public static boolean hasForContext(final int contextId) {
+        boolean hasForContext = sessionDataRef.get().hasForContext(contextId);
+        SessionStorageService storageService = getServiceRegistry().getService(SessionStorageService.class);
+        if (storageService != null && hasForContext == false) {
+            try {
+                hasForContext = storageService.hasForContext(contextId);
+            } catch (OXException e) {
+                LOG.error(e.getMessage(), e);
+            }
+        }
+        return hasForContext;
+    }
+
+    /**
      * Gets all sessions associated with given user in specified context
-     *
+     * 
      * @param userId The user ID
      * @param contextId The context ID
      * @return The wrapper objects for sessions
      */
     public static SessionControl[] getUserSessions(final int userId, final int contextId) {
-        return sessionData.getUserSessions(userId, contextId);
+        SessionControl[] retval = sessionDataRef.get().getUserSessions(userId, contextId);
+        if (retval == null) {
+            SessionStorageService storageService = getServiceRegistry().getService(SessionStorageService.class);
+            if (storageService != null) {
+                try {
+                    Session[] sessions = storageService.getUserSessions(userId, contextId);
+                    retval = new SessionControl[sessions.length];
+                    for (int i = 0; i < sessions.length; i++) {
+                        retval[i] = sessionToSessionControl(sessions[i]);
+                    }
+                } catch (OXException e) {
+                    LOG.error(e.getMessage(), e);
+                }
+            }
+        }
+        return retval;
     }
 
     public static SessionControl getAnyActiveSessionForUser(final int userId, final int contextId, final boolean includeLongTerm) {
-        return sessionData.getAnyActiveSessionForUser(userId, contextId, includeLongTerm);
+        SessionControl retval = sessionDataRef.get().getAnyActiveSessionForUser(userId, contextId, includeLongTerm);
+        if (retval == null) {
+            SessionStorageService storageService = getServiceRegistry().getService(SessionStorageService.class);
+            if (storageService != null) {
+                try {
+                    retval = sessionToSessionControl(storageService.getAnyActiveSessionForUser(userId, contextId));
+                } catch (OXException e) {
+                    LOG.error(e.getMessage(), e);
+                }
+            }
+        }
+        return retval;
     }
 
     public static Session findFirstSessionForUser(final int userId, final int contextId, final SessionMatcher matcher) {
-        return sessionData.findFirstSessionForUser(userId, contextId, matcher);
+        Session retval = sessionDataRef.get().findFirstSessionForUser(userId, contextId, matcher);
+        if (retval == null) {
+            SessionStorageService storageService = getServiceRegistry().getService(SessionStorageService.class);
+            if (storageService != null) {
+                try {
+                    retval = storageService.findFirstSessionForUser(userId, contextId);
+                } catch (OXException e) {
+                    LOG.error(e.getMessage(), e);
+                }
+            }
+        }
+        return retval;
     }
 
     /**
      * Adds a new session containing given attributes to session container(s)
-     *
+     * 
      * @param userId The user ID
      * @param loginName The user's login name
      * @param password The user's password
@@ -218,29 +298,45 @@ public final class SessionHandler {
      * @return The session ID associated with newly created session
      * @throws OXException If creating a new session fails
      */
-    protected static String addSession(final int userId, final String loginName, final String password, final int contextId, final String clientHost, final String login, final String authId, final String hash, final String client) throws OXException {
+    protected static SessionImpl addSession(final int userId, final String loginName, final String password, final int contextId, final String clientHost, final String login, final String authId, final String hash, final String client, final boolean isVolatile) throws OXException {
         checkMaxSessPerUser(userId, contextId);
         checkMaxSessPerClient(client, userId, contextId);
         checkAuthId(login, authId);
+        final SessionIdGenerator sessionIdGenerator = SessionHandler.sessionIdGenerator;
         final String sessionId = sessionIdGenerator.createSessionId(loginName, clientHost);
-        final SessionImpl session =
-            new SessionImpl(userId, loginName, password, contextId, sessionId, sessionIdGenerator.createSecretId(
-                loginName,
-                Long.toString(System.currentTimeMillis())), sessionIdGenerator.createRandomId(), clientHost, login, authId, hash, client);
+        final SessionImpl session = new SessionImpl(userId, loginName, password, contextId, sessionId, sessionIdGenerator.createSecretId(
+            loginName,
+            Long.toString(System.currentTimeMillis())), sessionIdGenerator.createRandomId(), clientHost, login, authId, hash, client);
+        session.setVolatile(isVolatile);
         // Add session
-        sessionData.addSession(session, noLimit);
+        sessionDataRef.get().addSession(session, noLimit);
+        final SessionStorageService sessionStorageService = getServiceRegistry().getService(SessionStorageService.class);
+        if (sessionStorageService != null) {
+            sessionStorageService.addSession(session);
+        }
         // Post event for created session
         postSessionCreation(session);
         // Return session ID
-        return sessionId;
+        return session;
     }
 
     private static void checkMaxSessPerUser(final int userId, final int contextId) throws OXException {
         final int maxSessPerUser = config.getMaxSessionsPerUser();
         if (maxSessPerUser > 0) {
-            final int count = sessionData.getNumOfUserSessions(userId, contextId);
+            final int count = sessionDataRef.get().getNumOfUserSessions(userId, contextId);
             if (count >= maxSessPerUser) {
                 throw SessionExceptionCodes.MAX_SESSION_PER_USER_EXCEPTION.create(I(userId), I(contextId));
+            }
+        }
+        final SessionStorageService storageService = getServiceRegistry().getService(SessionStorageService.class);
+        if (storageService != null) {
+            try {
+                int count = storageService.getUserSessions(userId, contextId).length;
+                if (maxSessPerUser > 0 && count >= maxSessPerUser) {
+                    throw SessionExceptionCodes.MAX_SESSION_PER_USER_EXCEPTION.create(I(userId), I(contextId));
+                }
+            } catch (OXException e) {
+                LOG.error(e.getMessage(), e);
             }
         }
     }
@@ -252,7 +348,7 @@ public final class SessionHandler {
         }
         final int maxSessPerClient = config.getMaxSessionsPerClient();
         if (maxSessPerClient > 0) {
-            final SessionControl[] userSessions = sessionData.getUserSessions(userId, contextId);
+            final SessionControl[] userSessions = sessionDataRef.get().getUserSessions(userId, contextId);
             int cnt = 0;
             for (final SessionControl sessionControl : userSessions) {
                 if (client.equals(sessionControl.getSession().getClient()) && ++cnt > maxSessPerClient) {
@@ -260,36 +356,55 @@ public final class SessionHandler {
                 }
             }
         }
+        SessionStorageService storageService = getServiceRegistry().getService(SessionStorageService.class);
+        if (storageService != null) {
+            if (maxSessPerClient > 0) {
+                try {
+                    Session[] userSessions = storageService.getUserSessions(userId, contextId);
+                    int cnt = 0;
+                    for (final Session session : userSessions) {
+                        if (client.equals(session.getClient()) && ++cnt > maxSessPerClient) {
+                            throw SessionExceptionCodes.MAX_SESSION_PER_CLIENT_EXCEPTION.create(client, I(userId), I(contextId));
+                        }
+                    }
+                } catch (OXException e) {
+                    LOG.error(e.getMessage(), e);
+                }
+            }
+        }
     }
 
     private static void checkAuthId(final String login, final String authId) throws OXException {
-        sessionData.checkAuthId(login, authId);
-    }
-
-    /**
-     * Refreshes the session's last-accessed time stamp
-     *
-     * @param sessionid The session ID denoting the session
-     * @return <code>true</code> if a refreshing last-accessed time stamp was successful; otherwise <code>false</code>
-     */
-    protected static boolean refreshSession(final String sessionid) {
-        if (DEBUG) {
-            LOG.debug(new StringBuilder("refreshSession <").append(sessionid).append('>').toString());
+        sessionDataRef.get().checkAuthId(login, authId);
+        SessionStorageService storageService = getServiceRegistry().getService(SessionStorageService.class);
+        if (storageService != null) {
+            try {
+                storageService.checkAuthId(login, authId);
+            } catch (OXException e) {
+                LOG.error(e.getMessage(), e);
+            }
         }
-        return sessionData.getSession(sessionid) != null;
     }
 
     /**
      * Clears the session denoted by given session ID from session container(s)
-     *
+     * 
      * @param sessionid The session ID
      * @return <code>true</code> if a session could be removed; otherwise <code>false</code>
      */
     protected static boolean clearSession(final String sessionid) {
-        final SessionControl sessionControl = sessionData.clearSession(sessionid);
+        final SessionControl sessionControl = sessionDataRef.get().clearSession(sessionid);
         if (null == sessionControl) {
-            LOG.debug("Cannot find session id to remove session <" + sessionid + '>');
+            LOG.debug("Cannot find session for given identifier to remove session <" + sessionid + '>');
             return false;
+        }
+        try {
+            final SessionStorageService sessionStorageService = getServiceRegistry().getService(SessionStorageService.class);
+            if (sessionStorageService != null) {
+                sessionStorageService.removeSession(sessionControl.getSession().getSessionID());
+            }
+        } catch (OXException e) {
+            LOG.error(e.getMessage(), e);
         }
         postSessionRemoval(sessionControl.getSession());
         return true;
@@ -297,7 +412,7 @@ public final class SessionHandler {
 
     /**
      * Changes the password stored in session denoted by given session ID
-     *
+     * 
      * @param sessionid The session ID
      * @param newPassword The new password
      * @throws OXException If changing the password fails
@@ -306,16 +421,28 @@ public final class SessionHandler {
         if (DEBUG) {
             LOG.debug(new StringBuilder("changeSessionPassword <").append(sessionid).append('>').toString());
         }
-        final SessionControl sessionControl = sessionData.getSession(sessionid);
+        final SessionControl sessionControl = sessionDataRef.get().getSession(sessionid);
         if (null == sessionControl) {
             throw SessionExceptionCodes.PASSWORD_UPDATE_FAILED.create();
         }
         // TODO: Check permission via security service
         sessionControl.getSession().setPassword(newPassword);
+        final SessionStorageService sessionStorageService = getServiceRegistry().getService(SessionStorageService.class);
+        if (sessionStorageService != null) {
+            sessionStorageService.changePassword(sessionid, newPassword);
+        }
     }
 
     protected static Session getSessionByRandomToken(final String randomToken, final String newIP) {
-        final SessionControl sessionControl = sessionData.getSessionByRandomToken(randomToken);
+        SessionStorageService storageService = getServiceRegistry().getService(SessionStorageService.class);
+        if (storageService != null) {
+            try {
+                return storageService.getSessionByRandomToken(randomToken, newIP);
+            } catch (OXException e) {
+                LOG.error(e.getMessage(), e);
+            }
+        }
+        final SessionControl sessionControl = sessionDataRef.get().getSessionByRandomToken(randomToken);
         if (null == sessionControl) {
             return null;
         }
@@ -338,7 +465,7 @@ public final class SessionHandler {
 
     /**
      * Gets the session associated with given session ID
-     *
+     * 
      * @param sessionId The session ID
      * @return The session associated with given session ID; otherwise <code>null</code> if expired or none found
      */
@@ -346,31 +473,57 @@ public final class SessionHandler {
         if (DEBUG) {
             LOG.debug(new StringBuilder("getSession <").append(sessionId).append('>').toString());
         }
+        final SessionData sessionData = sessionDataRef.get();
         final SessionControl sessionControl = sessionData.getSession(sessionId);
         if (null == sessionControl) {
-            return null;
-        }
-        // Look-up cache if current session wrapped by session-control is marked for removal
-        try {
-            final SessionCache cache = SessionCache.getInstance();
-            final Session session = sessionControl.getSession();
-            final CachedSession cachedSession = cache.getCachedSessionByUser(session.getUserId(), session.getContextId());
-            if (null != cachedSession) {
-                if (cachedSession.isMarkedAsRemoved()) {
-                    cache.removeCachedSession(cachedSession.getSecret());
-                    removeUserSessions(cachedSession.getUserId(), cachedSession.getContextId(), false);
-                    return null;
+            SessionStorageService storageService = getServiceRegistry().getService(SessionStorageService.class);
+            if (storageService != null) {
+                try {
+                    Session s = storageService.lookupSession(sessionId);
+                    sessionData.addSession(
+                        new SessionImpl(
+                            s.getUserId(),
+                            s.getLoginName(),
+                            s.getPassword(),
+                            s.getContextId(),
+                            s.getSessionID(),
+                            s.getSecret(),
+                            s.getRandomToken(),
+                            s.getLocalIp(),
+                            s.getLogin(),
+                            s.getAuthId(),
+                            s.getHash(),
+                            s.getClient()),
+                        noLimit);
+                    return sessionToSessionControl(s);
+                } catch (OXException e) {
+                    LOG.error(e.getMessage(), e);
                 }
             }
-        } catch (final OXException e) {
-            LOG.error("Unable to look-up session cache", e);
+        } else {
+            // Look-up cache if current session wrapped by session-control is marked for removal
+            try {
+                final SessionCache cache = SessionCache.getInstance();
+                final Session session = sessionControl.getSession();
+                final CachedSession cachedSession = cache.getCachedSessionByUser(session.getUserId(), session.getContextId());
+                if (null != cachedSession && cachedSession.isMarkedAsRemoved()) {
+                    final String cSessionId = cachedSession.getSessionId();
+                    if (sessionId.equals(cSessionId)) {
+                        cache.removeCachedSession(cSessionId);
+                        sessionData.clearSession(sessionId);
+                        return null;
+                    }
+                }
+            } catch (final OXException e) {
+                LOG.error("Unable to look-up session cache", e);
+            }
         }
         return sessionControl;
     }
 
     /**
      * Gets the session associated with given alternative identifier
-     *
+     * 
      * @param alternative identifier The alternative identifier
      * @return The session associated with given alternative identifier; otherwise <code>null</code> if expired or none found
      */
@@ -378,24 +531,32 @@ public final class SessionHandler {
         if (DEBUG) {
             LOG.debug(new StringBuilder("getSessionByAlternativeId <").append(altId).append('>').toString());
         }
-        final SessionControl sessionControl = sessionData.getSessionByAlternativeId(altId);
+        final SessionControl sessionControl = sessionDataRef.get().getSessionByAlternativeId(altId);
         if (null == sessionControl) {
-            return null;
-        }
-        // Look-up cache if current session wrapped by session-control is marked for removal
-        try {
-            final SessionCache cache = SessionCache.getInstance();
-            final Session session = sessionControl.getSession();
-            final CachedSession cachedSession = cache.getCachedSessionByUser(session.getUserId(), session.getContextId());
-            if (null != cachedSession) {
-                if (cachedSession.isMarkedAsRemoved()) {
-                    cache.removeCachedSession(cachedSession.getSecret());
-                    removeUserSessions(cachedSession.getUserId(), cachedSession.getContextId(), false);
-                    return null;
+            SessionStorageService storageService = getServiceRegistry().getService(SessionStorageService.class);
+            if (storageService != null) {
+                try {
+                    return sessionToSessionControl(storageService.getSessionByAlternativeId(altId));
+                } catch (OXException e) {
+                    LOG.error(e.getMessage(), e);
                 }
             }
-        } catch (final OXException e) {
-            LOG.error("Unable to look-up session cache", e);
+        } else {
+            // Look-up cache if current session wrapped by session-control is marked for removal
+            try {
+                final SessionCache cache = SessionCache.getInstance();
+                final Session session = sessionControl.getSession();
+                final CachedSession cachedSession = cache.getCachedSessionByUser(session.getUserId(), session.getContextId());
+                if (null != cachedSession) {
+                    if (cachedSession.isMarkedAsRemoved()) {
+                        cache.removeCachedSession(cachedSession.getSecret());
+                        removeUserSessions(cachedSession.getUserId(), cachedSession.getContextId(), false);
+                        return null;
+                    }
+                }
+            } catch (final OXException e) {
+                LOG.error("Unable to look-up session cache", e);
+            }
         }
         return sessionControl;
     }
@@ -404,7 +565,7 @@ public final class SessionHandler {
      * Gets (and removes) the session bound to given session identifier in cache.
      * <p>
      * Session is going to be added to local session containers on a cache hit.
-     *
+     * 
      * @param sessionId The session identifier
      * @return A wrapping instance of {@link SessionControl} or <code>null</code>
      */
@@ -420,45 +581,81 @@ public final class SessionHandler {
                 } else {
                     // A cache hit! Add to local session containers
                     LOG.info("Migrate session: " + cachedSession.getSessionId());
-                    return sessionData.addSession(new SessionImpl(cachedSession), noLimit);
+                    return sessionDataRef.get().addSession(new SessionImpl(cachedSession), noLimit);
                 }
             }
         } catch (final OXException e) {
             LOG.error(e.getMessage(), e);
+        }
+        SessionStorageService storageService = getServiceRegistry().getService(SessionStorageService.class);
+        if (storageService != null) {
+            try {
+                return sessionToSessionControl(storageService.getCachedSession(sessionId));
+            } catch (OXException e) {
+                LOG.error(e.getMessage(), e);
+            }
         }
         return null;
     }
 
     /**
      * Gets all available instances of {@link SessionControl}
-     *
+     * 
      * @return All available instances of {@link SessionControl}
      */
     public static List<SessionControl> getSessions() {
         if (DEBUG) {
             LOG.debug("getSessions");
         }
-        return sessionData.getShortTermSessions();
+        List<SessionControl> retval = sessionDataRef.get().getShortTermSessions();
+        if (retval == null) {
+            SessionStorageService storageService = getServiceRegistry().getService(SessionStorageService.class);
+            if (storageService != null) {
+                List<Session> list = storageService.getSessions();
+                List<SessionControl> result = new ArrayList<SessionControl>();
+                for (Session s : list) {
+                    result.add(sessionToSessionControl(s));
+                }
+                return result;
+            }
+        }
+        return retval;
     }
 
     protected static void cleanUp() {
         if (DEBUG) {
             LOG.debug("session cleanup");
         }
-        final List<SessionControl> controls = sessionData.rotateShort();
-        if (INFO) {
-            for (final SessionControl sessionControl : controls) {
+        final List<SessionControl> controls = sessionDataRef.get().rotateShort();
+        for (final SessionControl sessionControl : controls) {
+            if (INFO) {
                 LOG.info("Session timed out. ID: " + sessionControl.getSession().getSessionID());
+            }
+            try {
+                final SessionStorageService sessionStorageService = getServiceRegistry().getService(SessionStorageService.class);
+                if (sessionStorageService != null) {
+                    sessionStorageService.removeSession(sessionControl.getSession().getSessionID());
+                }
+            } catch (OXException e) {
+                LOG.error(e.getMessage(), e);
             }
         }
         postSessionDataRemoval(controls);
     }
 
     protected static void cleanUpLongTerm() {
-        final List<SessionControl> controls = sessionData.rotateLongTerm();
-        if (INFO) {
-            for (final SessionControl control : controls) {
+        final List<SessionControl> controls = sessionDataRef.get().rotateLongTerm();
+        for (final SessionControl control : controls) {
+            if (INFO) {
                 LOG.info("Session timed out. ID: " + control.getSession().getSessionID());
+            }
+            try {
+                final SessionStorageService sessionStorageService = getServiceRegistry().getService(SessionStorageService.class);
+                if (sessionStorageService != null) {
+                    sessionStorageService.removeSession(control.getSession().getSessionID());
+                }
+            } catch (OXException e) {
+                LOG.error(e.getMessage(), e);
             }
         }
         postContainerRemoval(controls);
@@ -466,9 +663,12 @@ public final class SessionHandler {
 
     public static void close() {
         if (initialized.compareAndSet(true, false)) {
-            final SessionData sd = sessionData;
-            postContainerRemoval(sd.getShortTermSessions());
-            sd.clear();
+            final SessionData sd = sessionDataRef.get();
+            if (null != sd) {
+                postContainerRemoval(sd.getShortTermSessions());
+                sd.clear();
+                sessionDataRef.set(null);
+            }
             sessionIdGenerator = null;
             config = null;
             noLimit = false;
@@ -476,15 +676,15 @@ public final class SessionHandler {
     }
 
     public static int getNumberOfActiveSessions() {
-        return sessionData.countSessions();
+        return sessionDataRef.get().countSessions();
     }
 
     public static int[] getNumberOfLongTermSessions() {
-        return sessionData.getLongTermSessionsPerContainer();
+        return sessionDataRef.get().getLongTermSessionsPerContainer();
     }
 
     public static int[] getNumberOfShortTermSessions() {
-        return sessionData.getShortTermSessionsPerContainer();
+        return sessionDataRef.get().getShortTermSessionsPerContainer();
     }
 
     private static void postSessionCreation(final Session session) {
@@ -501,7 +701,7 @@ public final class SessionHandler {
         }
     }
 
-    private static void postSessionRemoval(final Session session) {
+    static void postSessionRemoval(final Session session) {
         final EventAdmin eventAdmin = getServiceRegistry().getService(EventAdmin.class);
         if (eventAdmin != null) {
             final Dictionary<String, Object> dic = new Hashtable<String, Object>(2);
@@ -568,34 +768,84 @@ public final class SessionHandler {
     }
 
     public static void addThreadPoolService(final ThreadPoolService service) {
-        sessionData.addThreadPoolService(service);
+        sessionDataRef.get().addThreadPoolService(service);
     }
 
     public static void removeThreadPoolService() {
-        sessionData.removeThreadPoolService();
+        sessionDataRef.get().removeThreadPoolService();
     }
 
     public static void addTimerService(final TimerService service) {
-        sessionData.addTimerService(service);
+        sessionDataRef.get().addTimerService(service);
         final long containerTimeout = config.getSessionContainerTimeout();
-        shortSessionContainerRotator =
-            service.scheduleWithFixedDelay(new ShortSessionContainerRotator(), containerTimeout, containerTimeout);
+        shortSessionContainerRotator = service.scheduleWithFixedDelay(
+            new ShortSessionContainerRotator(),
+            containerTimeout,
+            containerTimeout);
         if (config.isAutoLogin()) {
             final long longContainerTimeout = config.getLongTermSessionContainerTimeout();
-            longSessionContainerRotator =
-                service.scheduleWithFixedDelay(new LongSessionContainerRotator(), longContainerTimeout, longContainerTimeout);
+            longSessionContainerRotator = service.scheduleWithFixedDelay(
+                new LongSessionContainerRotator(),
+                longContainerTimeout,
+                longContainerTimeout);
         }
     }
 
     public static void removeTimerService() {
+        final ScheduledTimerTask longSessionContainerRotator = SessionHandler.longSessionContainerRotator;
         if (longSessionContainerRotator != null) {
             longSessionContainerRotator.cancel(false);
-            longSessionContainerRotator = null;
+            SessionHandler.longSessionContainerRotator = null;
         }
+        final ScheduledTimerTask shortSessionContainerRotator = SessionHandler.shortSessionContainerRotator;
         if (shortSessionContainerRotator != null) {
             shortSessionContainerRotator.cancel(false);
-            shortSessionContainerRotator = null;
+            SessionHandler.shortSessionContainerRotator = null;
         }
-        sessionData.removeTimerService();
+        sessionDataRef.get().removeTimerService();
+    }
+
+    private static SessionControl sessionToSessionControl(Session session) {
+        if (session != null) {
+            SessionImpl impl = new SessionImpl(
+                session.getUserId(),
+                session.getLoginName(),
+                session.getPassword(),
+                session.getContextId(),
+                session.getSessionID(),
+                session.getSecret(),
+                session.getRandomToken(),
+                session.getLocalIp(),
+                session.getLogin(),
+                session.getAuthId(),
+                session.getHash(),
+                session.getClient());
+            SessionControl control = new SessionControl(impl);
+            return control;
+        }
+        return null;
+    }
+
+    private static Session[] merge(Session[] array1, Session[] array2) {
+        int lenghtArray1 = 0, lengthArray2 = 0;
+        if (array1 != null) {
+            lenghtArray1 = array1.length;
+        }
+        if (array2 != null) {
+            lengthArray2 = array2.length;
+        }
+        Session[] retval = new Session[lenghtArray1 + lengthArray2];
+        int i = 0;
+        if (array1 != null) {
+            for (Session s : array1) {
+                retval[i++] = s;
+            }
+        }
+        if (array2 != null) {
+            for (Session s : array2) {
+                retval[i++] = s;
+            }
+        }
+        return retval;
     }
 }

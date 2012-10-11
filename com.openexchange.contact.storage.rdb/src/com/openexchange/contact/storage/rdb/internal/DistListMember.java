@@ -94,7 +94,7 @@ public class DistListMember extends DistributionListEntryObject {
 			member.setDisplayname(dleo.getDisplayname());
 		}
 		if (dleo.containsEmailaddress()) {
-			member.setEmailaddress(dleo.getEmailaddress());
+			member.setEmailaddress(dleo.getEmailaddress(), false);
 		}
 		if (dleo.containsEmailfield()) {
 			member.setEmailfield(dleo.getEmailfield());
@@ -130,6 +130,11 @@ public class DistListMember extends DistributionListEntryObject {
 		this.parentContactID = parentContactID;
 	}
 
+    public void removeParentContactID() {
+        parentContactID = 0;
+        b_parentContactID = false;
+    }
+
 	/**
 	 * @return the contextID
 	 */
@@ -144,6 +149,12 @@ public class DistListMember extends DistributionListEntryObject {
 		this.b_contextID = true;
 		this.contextID = contextID;
 	}
+
+	
+    public void removeContextID() {
+        contextID = 0;
+        b_contextID = false;
+    }
 
 	/**
 	 * @return the b_contextID

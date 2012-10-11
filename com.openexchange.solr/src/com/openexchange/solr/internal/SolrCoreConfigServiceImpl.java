@@ -53,20 +53,16 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.util.List;
-
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
-import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
+import com.openexchange.log.LogFactory;
 import com.openexchange.solr.SolrCore;
 import com.openexchange.solr.SolrCoreConfigService;
 import com.openexchange.solr.SolrCoreConfiguration;
 import com.openexchange.solr.SolrCoreIdentifier;
 import com.openexchange.solr.SolrCoreStore;
 import com.openexchange.solr.SolrExceptionCodes;
-import com.openexchange.solr.SolrProperties;
 
 
 /**
@@ -107,26 +103,23 @@ public class SolrCoreConfigServiceImpl implements SolrCoreConfigService {
     }
     
     @Override
-    public synchronized boolean createCoreEnvironment(final int cid, final int uid, final int module) throws OXException {
-        if (indexMysql.createCoreEntry(cid, uid, module)) {
-            final SolrCore solrCore = indexMysql.getSolrCore(cid, uid, module);
+    public synchronized boolean createCoreEnvironment(SolrCoreIdentifier identifier) throws OXException {
+        if (indexMysql.createCoreEntry(identifier.getContextId(), identifier.getUserId(), identifier.getModule())) {
+            final SolrCore solrCore = indexMysql.getSolrCore(identifier.getContextId(), identifier.getUserId(), identifier.getModule());
             final SolrCoreStore store = indexMysql.getCoreStore(solrCore.getStore());
             
-            final ConfigurationService config = Services.getService(ConfigurationService.class);
             final URI storeUri = store.getUri();
             final File storeDir = new File(storeUri);
             if (!storeDir.exists()) {
                 throw SolrExceptionCodes.CORE_STORE_NOT_EXISTS_ERROR.create(storeDir.getPath());
             }
-            
-            final String solrHome = config.getProperty(SolrProperties.PROP_SOLR_HOME);      
-            final SolrCoreIdentifier identifier = new SolrCoreIdentifier(cid, uid, module);
+
             final SolrCoreConfiguration coreConfig = new SolrCoreConfiguration(storeUri, identifier);
             final String coreDirPath = coreConfig.getCoreDirPath();
             final File coreDir = new File(coreDirPath);     
             if (coreDir.exists()) {
                 LOG.warn("Core directory " + coreDir.getPath() + " already exists. Checking consistency...");
-                if (structureIsConsistent(solrHome, coreConfig, module)) {
+                if (structureIsConsistent(coreConfig, identifier.getModule())) {
                     LOG.warn("Core directory " + coreDir.getPath() + " seems to be consistent.");
                     return true;
                 }
@@ -147,14 +140,14 @@ public class SolrCoreConfigServiceImpl implements SolrCoreConfigService {
                 LOG.error("Deleting core directory during rollback failed.");
             }
             
-            indexMysql.removeCoreEntry(cid, uid, module);
+            indexMysql.removeCoreEntry(identifier.getContextId(), identifier.getUserId(), identifier.getModule());
             return false;
         }
         
         return false;
     }
     
-    private boolean structureIsConsistent(final String solrHome, final SolrCoreConfiguration coreConfig, final int module) throws OXException {
+    private boolean structureIsConsistent(final SolrCoreConfiguration coreConfig, final int module) throws OXException {
         final File coreDir = new File(coreConfig.getCoreDirPath());
         final File dataDir = new File(coreConfig.getDataDirPath());
         return isReadableAndWritableDirectory(coreDir) && isReadableAndWritableDirectory(dataDir);
@@ -165,11 +158,10 @@ public class SolrCoreConfigServiceImpl implements SolrCoreConfigService {
     }
     
     @Override
-    public synchronized void removeCoreEnvironment(final int cid, final int uid, final int module) throws OXException {
-        final SolrCore solrCore = indexMysql.getSolrCore(cid, uid, module);
+    public synchronized void removeCoreEnvironment(SolrCoreIdentifier identifier) throws OXException {
+        final SolrCore solrCore = indexMysql.getSolrCore(identifier.getContextId(), identifier.getUserId(), identifier.getModule());
         final SolrCoreStore store = indexMysql.getCoreStore(solrCore.getStore());
         final URI storeUri = store.getUri();
-        final SolrCoreIdentifier identifier = new SolrCoreIdentifier(cid, uid, module);
         final SolrCoreConfiguration config = new SolrCoreConfiguration(storeUri, identifier);
          
         final String coreDirPath = config.getCoreDirPath();
@@ -180,13 +172,13 @@ public class SolrCoreConfigServiceImpl implements SolrCoreConfigService {
             } catch (IOException e) {
                 throw new OXException(e);
             } finally {
-                indexMysql.removeCoreEntry(cid, uid, module);
+                indexMysql.removeCoreEntry(identifier.getContextId(), identifier.getUserId(), identifier.getModule());
             }
         }
     }
     
     @Override
-    public boolean coreEnvironmentExists(int contextId, int userId, int module) throws OXException {
-        return indexMysql.coreEntryExists(contextId, userId, module);
+    public boolean coreEnvironmentExists(SolrCoreIdentifier identifier) throws OXException {
+        return indexMysql.coreEntryExists(identifier.getContextId(), identifier.getUserId(), identifier.getModule());
     }
 }

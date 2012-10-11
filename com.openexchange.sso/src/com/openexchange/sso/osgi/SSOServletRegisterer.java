@@ -50,13 +50,15 @@
 package com.openexchange.sso.osgi;
 
 import javax.servlet.ServletException;
-import org.apache.commons.logging.LogFactory;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.http.HttpService;
 import org.osgi.service.http.NamespaceException;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
+import com.openexchange.dispatcher.DispatcherPrefixService;
+import com.openexchange.log.LogFactory;
 import com.openexchange.sso.SSOConstants;
+import com.openexchange.sso.services.SSOServiceRegistry;
 import com.openexchange.sso.servlet.SSOServlet;
 
 /**
@@ -82,7 +84,7 @@ public final class SSOServletRegisterer implements ServiceTrackerCustomizer {
     public Object addingService(final ServiceReference reference) {
         final HttpService service = (HttpService) context.getService(reference);
         try {
-            service.registerServlet(SSOConstants.SERVLET_PATH, new SSOServlet(), null, null);
+            service.registerServlet(SSOServiceRegistry.getInstance().getService(DispatcherPrefixService.class).getPrefix() + SSOConstants.SERVLET_PATH_APPENDIX, new SSOServlet(), null, null);
         } catch (final ServletException e) {
             com.openexchange.log.Log.valueOf(LogFactory.getLog(SSOServletRegisterer.class)).error(e.getMessage(), e);
         } catch (final NamespaceException e) {
@@ -99,7 +101,7 @@ public final class SSOServletRegisterer implements ServiceTrackerCustomizer {
     @Override
     public void removedService(final ServiceReference reference, final Object service) {
         final HttpService httpService = (HttpService) service;
-        httpService.unregister(SSOConstants.SERVLET_PATH);
+        httpService.unregister(SSOServiceRegistry.getInstance().getService(DispatcherPrefixService.class).getPrefix() + SSOConstants.SERVLET_PATH_APPENDIX);
         context.ungetService(reference);
     }
 

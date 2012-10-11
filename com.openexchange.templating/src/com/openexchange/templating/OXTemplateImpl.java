@@ -51,6 +51,7 @@ package com.openexchange.templating;
 
 import java.io.IOException;
 import java.io.Writer;
+import org.apache.commons.logging.Log;
 import com.openexchange.exception.OXException;
 import freemarker.template.Template;
 
@@ -58,6 +59,8 @@ import freemarker.template.Template;
  * @author <a href="mailto:martin.herfurth@open-xchange.org">Martin Herfurth</a>
  */
 public class OXTemplateImpl implements OXTemplate{
+
+	private static final Log LOG = com.openexchange.log.Log.loggerFor(OXTemplateImpl.class);
 
     private Template template;
     private TemplateLevel level = TemplateLevel.USER;
@@ -77,7 +80,9 @@ public class OXTemplateImpl implements OXTemplate{
         } catch (final freemarker.template.TemplateException e) {
             throw TemplateErrorMessage.UnderlyingException.create(e.getMessage());
         } catch (final IOException e) {
-            throw TemplateErrorMessage.IOException.create(e);
+            final OXException x = TemplateErrorMessage.IOException.create(e);
+            LOG.error(x.getMessage(), x);
+            throw x;
         }
     }
 

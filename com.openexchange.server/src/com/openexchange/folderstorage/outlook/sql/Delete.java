@@ -177,7 +177,7 @@ public final class Delete {
                  * Backup failed
                  */
                 debugSQL(stmt);
-                final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(Delete.class));
+                final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(Delete.class));
                 if (LOG.isDebugEnabled()) {
                     LOG.debug("Backup failed.", e);
                 }
@@ -199,7 +199,7 @@ public final class Delete {
                 stmt.executeUpdate();
             } catch (final SQLException e) {
                 debugSQL(stmt);
-                final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(Delete.class));
+                final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(Delete.class));
                 if (LOG.isDebugEnabled()) {
                     LOG.debug("Backup failed.", e);
                 }
@@ -221,7 +221,7 @@ public final class Delete {
                 stmt.executeUpdate();
             } catch (final SQLException e) {
                 debugSQL(stmt);
-                final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(Delete.class));
+                final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(Delete.class));
                 if (LOG.isDebugEnabled()) {
                     LOG.debug("Backup failed.", e);
                 }

@@ -59,7 +59,9 @@ import java.util.Set;
 import org.apache.tika.config.TikaConfig;
 import org.apache.tika.exception.TikaException;
 import org.apache.tika.io.IOUtils;
+import org.apache.tika.metadata.HttpHeaders;
 import org.apache.tika.metadata.Metadata;
+import org.apache.tika.metadata.TikaMetadataKeys;
 import org.apache.tika.mime.MediaType;
 import org.apache.tika.parser.ParseContext;
 import org.apache.tika.parser.Parser;
@@ -75,8 +77,10 @@ import com.openexchange.filemanagement.ManagedFileManagement;
  */
 public final class TikaImageExtractingParser implements Parser {
 
+    private static final long serialVersionUID = -8054020195071839180L;
+
     private static final org.apache.commons.logging.Log LOG =
-        com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(TikaImageExtractingParser.class));
+        com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(TikaImageExtractingParser.class));
 
     private static final Set<MediaType> TYPES_IMAGE;
 
@@ -133,8 +137,8 @@ public final class TikaImageExtractingParser implements Parser {
     }
 
     private boolean handledExcel(final InputStream stream, final Metadata metadata) throws IOException {
-        final String fileName = metadata.get(Metadata.RESOURCE_NAME_KEY);
-        final String type = metadata.get(Metadata.CONTENT_TYPE);
+        final String fileName = metadata.get(TikaMetadataKeys.RESOURCE_NAME_KEY);
+        final String type = metadata.get(HttpHeaders.CONTENT_TYPE);
         if (type != null) {
             for (final MediaType mt : TYPES_EXCEL) {
                 if (mt.toString().equals(type)) {
@@ -150,8 +154,8 @@ public final class TikaImageExtractingParser implements Parser {
         /*
          * Is it a supported image?
          */
-        final String fileName = metadata.get(Metadata.RESOURCE_NAME_KEY);
-        final String type = metadata.get(Metadata.CONTENT_TYPE);
+        final String fileName = metadata.get(TikaMetadataKeys.RESOURCE_NAME_KEY);
+        final String type = metadata.get(HttpHeaders.CONTENT_TYPE);
         if (type != null) {
             for (final MediaType mt : TYPES_IMAGE) {
                 if (mt.toString().equals(type)) {
@@ -172,7 +176,6 @@ public final class TikaImageExtractingParser implements Parser {
         return false;
     }
 
-    @Override
     public void parse(final InputStream stream, final ContentHandler handler, final Metadata metadata) throws IOException, SAXException, TikaException {
         parse(stream, handler, metadata, new ParseContext());
     }

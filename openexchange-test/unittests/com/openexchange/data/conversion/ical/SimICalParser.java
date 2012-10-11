@@ -50,8 +50,10 @@
 package com.openexchange.data.conversion.ical;
 
 import java.io.InputStream;
+import java.util.Collections;
 import java.util.List;
 import java.util.TimeZone;
+
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.tasks.Task;
@@ -101,5 +103,15 @@ public class SimICalParser implements ICalParser{
     public String parseProperty(final String propertyName, final InputStream ical) {
         return null;
     }
+
+	@Override
+	public List<FreeBusyInformation> parseFreeBusy(String icalText, TimeZone defaultTZ, Context ctx, List<ConversionError> errors, List<ConversionWarning> warnings) throws ConversionError {
+		return Collections.emptyList();
+	}
+
+	@Override
+	public List<FreeBusyInformation> parseFreeBusy(InputStream ical, TimeZone defaultTZ, Context ctx, List<ConversionError> errors, List<ConversionWarning> warnings) throws ConversionError {
+		return Collections.emptyList();
+	}
 
 }

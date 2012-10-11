@@ -9,11 +9,11 @@ import java.util.Map;
 import java.util.Scanner;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import com.openexchange.contact.ContactService;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.contact.ContactInterface;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.FolderObject;
-import com.openexchange.importexport.ImportResult;
+import com.openexchange.groupware.importexport.ImportResult;
 import com.openexchange.importexport.exceptions.ImportExportExceptionCodes;
 import com.openexchange.importexport.formats.Format;
 import com.openexchange.importexport.osgi.ImportExportServices;
@@ -21,14 +21,7 @@ import com.openexchange.java.Strings;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.session.ServerSession;
 
-public class FacebookFriendsImporter extends AbstractImporter {
-
-	@Override
-	protected String getNameForFieldInTruncationError(int id,
-			OXException dataTruncation) {
-		// TODO Auto-generated method stub
-		return null;
-	}
+public class FacebookFriendsImporter extends ContactImporter {
 
 	@Override
     public boolean canImport(ServerSession sessObj, Format format,
@@ -63,18 +56,15 @@ public class FacebookFriendsImporter extends AbstractImporter {
 			contacts.add(c);
 		}
 
-        ContactInterface contactInterface;
-		try {
-			contactInterface = ImportExportServices.getContactInterfaceDiscoveryService().newContactInterface(fid, sessObj);
-		} catch (OXException e1) {
+		ContactService contactService = ImportExportServices.getContactService();
+		if (null == contactService) {
 			throw ImportExportExceptionCodes.CONTACT_INTERFACE_MISSING.create();
 		}
-
 
 		for(Contact c: contacts) {
 			ImportResult res = null;
 			try {
-				contactInterface.insertContactObject(c);
+			    super.createContact(sessObj, c, Integer.toString(fid));
 				res = new ImportResult(
 						String.valueOf(fid),
 						String.valueOf(c.getObjectID()),
@@ -84,7 +74,7 @@ public class FacebookFriendsImporter extends AbstractImporter {
 				res.setException(ImportExportExceptionCodes.COULD_NOT_WRITE.create());
 				res.setDate(new Date());
 			}
-			list.add(res);
+			list.add(res); 
 		}
 
 		return list;

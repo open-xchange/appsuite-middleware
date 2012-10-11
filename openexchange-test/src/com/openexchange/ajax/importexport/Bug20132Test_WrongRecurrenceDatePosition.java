@@ -86,13 +86,13 @@ public class Bug20132Test_WrongRecurrenceDatePosition extends ManagedAppointment
 
 		"END:VCALENDAR\n";
 
-		ICalImportRequest request = new ICalImportRequest(folder.getObjectID(), ical);
+		ICalImportRequest request = new ICalImportRequest(folder.getObjectID(), ical, false);
 		ICalImportResponse response = getClient().execute(request);
 		assertTrue(response.hasError());
 		ImportResult[] imports = response.getImports();
 		assertEquals(1, imports.length);
 		OXException exception = imports[0].getException();
-		assertEquals(Category.EnumType.TRUNCATED, exception.getCategory());
+		assertEquals("TRUNCATED", exception.getCategory().toString());
 		String message = exception.getMessage();
 		assertTrue(message.contains("Here comes a long (actually too long) story"));
 		System.out.println(message);

@@ -73,7 +73,7 @@ public final class UnifiedInboxAccess extends MailAccess<UnifiedInboxFolderStora
 
     private static final long serialVersionUID = 6666321725945931657L;
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(UnifiedInboxAccess.class));
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(UnifiedInboxAccess.class));
 
     /**
      * Fullname of INBOX.
@@ -120,7 +120,7 @@ public final class UnifiedInboxAccess extends MailAccess<UnifiedInboxFolderStora
 
     private transient UnifiedInboxMessageStorage messageStorage;
 
-    private transient MailLogicTools logicTools;
+    private transient UnifiedInboxLogicTools logicTools;
 
     /**
      * Initializes a new {@link UnifiedInboxAccess}.
@@ -192,7 +192,7 @@ public final class UnifiedInboxAccess extends MailAccess<UnifiedInboxFolderStora
             throw UnifiedInboxException.Code.NOT_CONNECTED.create();
         }
         if (null == logicTools) {
-            logicTools = new MailLogicTools(session, accountId);
+            logicTools = new UnifiedInboxLogicTools(session, accountId);
         }
         return logicTools;
     }

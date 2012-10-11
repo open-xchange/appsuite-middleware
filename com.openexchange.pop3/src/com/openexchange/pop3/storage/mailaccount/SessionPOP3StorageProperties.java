@@ -80,34 +80,23 @@ public final class SessionPOP3StorageProperties implements POP3StorageProperties
         final Session session = pop3Access.getSession();
         final String key = SessionParameterNames.getStorageProperties(pop3Access.getAccountId());
         SessionPOP3StorageProperties cached;
-        final Lock lock = (Lock) session.getParameter(Session.PARAM_LOCK);
+        Lock lock = (Lock) session.getParameter(Session.PARAM_LOCK);
         if (null == lock) {
-            synchronized (session) {
-                try {
-                    cached = (SessionPOP3StorageProperties) session.getParameter(key);
-                } catch (final ClassCastException e) {
-                    cached = null;
-                }
-                if (null == cached) {
-                    cached = new SessionPOP3StorageProperties(new RdbPOP3StorageProperties(pop3Access), session, key);
-                    session.setParameter(key, cached);
-                }
-            }
-        } else {
-            lock.lock();
+            lock = Session.EMPTY_LOCK;
+        }
+        lock.lock();
+        try {
             try {
-                try {
-                    cached = (SessionPOP3StorageProperties) session.getParameter(key);
-                } catch (final ClassCastException e) {
-                    cached = null;
-                }
-                if (null == cached) {
-                    cached = new SessionPOP3StorageProperties(new RdbPOP3StorageProperties(pop3Access), session, key);
-                    session.setParameter(key, cached);
-                }
-            } finally {
-                lock.unlock();
+                cached = (SessionPOP3StorageProperties) session.getParameter(key);
+            } catch (final ClassCastException e) {
+                cached = null;
             }
+            if (null == cached) {
+                cached = new SessionPOP3StorageProperties(new RdbPOP3StorageProperties(pop3Access), session, key);
+                session.setParameter(key, cached);
+            }
+        } finally {
+            lock.unlock();
         }
         return cached;
     }

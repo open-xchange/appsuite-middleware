@@ -53,6 +53,7 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.regex.Pattern;
 import javax.management.Attribute;
 import javax.management.AttributeNotFoundException;
 import javax.management.InstanceNotFoundException;
@@ -70,6 +71,7 @@ import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.cli.PosixParser;
 import com.openexchange.report.Constants;
+import edu.emory.mathcs.backport.java.util.Arrays;
 
 /**
  *
@@ -96,29 +98,60 @@ public final class LoginCounterTool {
         Date endDate = null;
 
         try {
-            CommandLine cmd = parser.parse(countingOptions, args);
+            final CommandLine cmd = parser.parse(countingOptions, args);
             if (cmd.hasOption('h')) {
                 printHelp();
                 System.exit(0);
+                return;
             }
 
             if (!cmd.hasOption('s') || !cmd.hasOption('e')) {
                 System.out.println("Parameters 'start' and 'end' are required.");
                 printHelp();
                 System.exit(0);
-            } else {
-                // Parse dates
-                SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-                try {
-                    startDate = sdf.parse(cmd.getOptionValue('s'));
-                    endDate = sdf.parse(cmd.getOptionValue('e'));
-                } catch (java.text.ParseException e) {
-                    System.out.println("Wrong format for parameter 'start' or 'end'.");
+                return;
+            }
+            // Parse dates
+            final SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+            String source = unquote(cmd.getOptionValue('s'));
+            try {
+                startDate = sdf.parse(source);
+                throw new java.text.ParseException("ewrwer", 0);
+            } catch (java.text.ParseException e) {
+                // args=[-s, 2012-09-24, 00:00:00, -e, 2012-09-25, 23:59:59]
+                if (args.length == 6) {
+                    final Pattern appendix = Pattern.compile("[0-9]{1,2}:[0-9]{1,2}:[0-9]{1,2}");
+                    String input = unquote(args[2]);
+                    if (appendix.matcher(input).matches()) {
+                        try {
+                            startDate = sdf.parse(source + " " + input);
+                            input = unquote(args[5]);
+                            if (appendix.matcher(input).matches()) {
+                                endDate = sdf.parse(unquote(args[4]) + " " + input);
+                            }
+                        } catch (final java.text.ParseException pe) {
+                            // Ignore
+                            startDate = null;
+                        }
+                    }
+                }
+                if (null == startDate) {
+                    System.out.println("Wrong format for parameter 'start': " + source + " (specified arguments: " + Arrays.toString(args) + ")");
                     printHelp();
                     System.exit(0);
                 }
             }
-
+            if (null == endDate) {
+                source = unquote(cmd.getOptionValue('e'));
+                try {
+                    endDate = sdf.parse(source);
+                } catch (java.text.ParseException e) {
+                    System.out.println("Wrong format for parameter 'end': " + source + " (specified arguments: " + Arrays.toString(args) + ")");
+                    printHelp();
+                    System.exit(0);
+                }
+            }
+            // Invoke MBean
             JMXServiceURL url = new JMXServiceURL("service:jmx:rmi:///jndi/rmi://localhost:9999/server");
             JMXConnector jmxConnector = JMXConnectorFactory.connect(url, null);
             try {
@@ -182,6 +215,34 @@ public final class LoginCounterTool {
     private static void printHelp() {
         HelpFormatter helpFormatter = new HelpFormatter();
         helpFormatter.printHelp("logincounter", countingOptions);
+    }
+
+    private static String unquote(final String s) {
+        if (isEmpty(s) || s.length() <= 1) {
+            return s;
+        }
+        String retval = s;
+        char c;
+        if ((c = retval.charAt(0)) == '"' || c == '\'') {
+            retval = retval.substring(1);
+        }
+        final int mlen = retval.length()-1;
+        if ((c = retval.charAt(mlen)) == '"' || c == '\'') {
+            retval = retval.substring(0, mlen);
+        }
+        return retval;
+    }
+
+    private static boolean isEmpty(final String string) {
+        if (null == string) {
+            return true;
+        }
+        final int len = string.length();
+        boolean isWhitespace = true;
+        for (int i = 0; isWhitespace && i < len; i++) {
+            isWhitespace = Character.isWhitespace(string.charAt(i));
+        }
+        return isWhitespace;
     }
 
     static {

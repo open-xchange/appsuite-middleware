@@ -51,7 +51,7 @@ package com.openexchange.databaseold;
 
 import java.sql.Connection;
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import com.openexchange.log.LogFactory;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
@@ -65,7 +65,7 @@ public final class Database {
 
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(Database.class));
 
-    private static DatabaseService databaseService;
+    private static volatile DatabaseService databaseService;
 
     /**
      * Prevent instantiation.
@@ -79,6 +79,7 @@ public final class Database {
     }
 
     private static DatabaseService getDatabaseService() throws OXException {
+        final DatabaseService databaseService = Database.databaseService;
         if (null == databaseService) {
             throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(DatabaseService.class.getName());
         }

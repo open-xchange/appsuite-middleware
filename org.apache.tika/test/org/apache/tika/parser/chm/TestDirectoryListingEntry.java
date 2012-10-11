@@ -23,9 +23,9 @@ import org.apache.tika.parser.chm.accessor.DirectoryListingEntry;
 
 /**
  * Tests public methods of the DirectoryListingEntry class
- *
+ * 
  * @author olegt
- *
+ * 
  */
 public class TestDirectoryListingEntry extends TestCase {
     private DirectoryListingEntry dle = null;

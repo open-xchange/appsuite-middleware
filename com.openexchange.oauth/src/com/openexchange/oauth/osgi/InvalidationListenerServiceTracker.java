@@ -62,7 +62,7 @@ import com.openexchange.oauth.internal.InvalidationListenerRegistry;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class InvalidationListenerServiceTracker implements ServiceTrackerCustomizer<OAuthAccountInvalidationListener, OAuthAccountInvalidationListener> {
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(InvalidationListenerServiceTracker.class));
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(InvalidationListenerServiceTracker.class));
 
     private final BundleContext context;
 

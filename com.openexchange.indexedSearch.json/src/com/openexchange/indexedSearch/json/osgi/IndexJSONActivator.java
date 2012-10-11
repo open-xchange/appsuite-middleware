@@ -50,6 +50,7 @@
 package com.openexchange.indexedSearch.json.osgi;
 
 import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
+import com.openexchange.database.DatabaseService;
 import com.openexchange.index.IndexFacadeService;
 import com.openexchange.indexedSearch.json.IndexActionFactory;
 import com.openexchange.indexedSearch.json.ResultConverters;
@@ -72,7 +73,7 @@ public class IndexJSONActivator extends AJAXModuleActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { IndexFacadeService.class };
+        return new Class<?>[] { IndexFacadeService.class, DatabaseService.class };
     }
 
     @Override

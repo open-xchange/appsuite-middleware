@@ -145,6 +145,7 @@ public final class ResponseParser {
                 exception = new OXException(number, Category.EnumType.TRY_AGAIN.equals(category.getType()) ? OXExceptionStrings.MESSAGE_RETRY : OXExceptionStrings.MESSAGE, args);
                 exception.setLogMessage(message);
             }
+            exception.setPrefix(prefix);
             for (final Category cat : categories) {
                 exception.addCategory(cat);
             }

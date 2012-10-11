@@ -53,13 +53,13 @@ import static com.openexchange.java.Autoboxing.I;
 import java.io.InputStream;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.Locale;
 import java.util.Set;
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import com.openexchange.log.LogFactory;
 import com.openexchange.data.conversion.ical.ConversionError;
 import com.openexchange.data.conversion.ical.ConversionWarning;
 import com.openexchange.data.conversion.ical.ICalEmitter;
@@ -221,8 +221,8 @@ public class AppointmentState extends LinkableState {
             {
                 final UnsynchronizedByteArrayOutputStream byteArrayOutputStream = new UnsynchronizedByteArrayOutputStream();
                 final ICalSession session = emitter.createSession(new SimpleMode(ZoneInfo.OUTLOOK));
-                emitter.writeAppointment(session, obj, sessObj.getContext(), new ArrayList<ConversionError>(),
-                        new ArrayList<ConversionWarning>());
+                emitter.writeAppointment(session, obj, sessObj.getContext(), new LinkedList<ConversionError>(),
+                        new LinkedList<ConversionWarning>());
                 emitter.writeSession(session, byteArrayOutputStream);
                 icalFile = new UnsynchronizedByteArrayInputStream(byteArrayOutputStream.toByteArray());
             }

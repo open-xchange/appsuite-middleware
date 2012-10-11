@@ -90,7 +90,7 @@ import com.openexchange.threadpool.ThreadPoolService;
 public final class CacheFolderStorageActivator extends DeferredActivator {
 
     static final org.apache.commons.logging.Log LOG =
-        com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(CacheFolderStorageActivator.class));
+        com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(CacheFolderStorageActivator.class));
 
     private List<ServiceRegistration<?>> registrations;
 

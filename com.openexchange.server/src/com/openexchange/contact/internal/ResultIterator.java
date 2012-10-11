@@ -49,29 +49,44 @@
 
 package com.openexchange.contact.internal;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
-
+import java.util.Map.Entry;
+import org.apache.commons.logging.Log;
+import com.openexchange.contact.storage.ContactStorage;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.Types;
+import com.openexchange.groupware.attach.Attachments;
+import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
+import com.openexchange.groupware.container.DistributionListEntryObject;
+import com.openexchange.log.LogFactory;
 import com.openexchange.server.impl.EffectivePermission;
+import com.openexchange.session.Session;
 import com.openexchange.tools.iterator.SearchIterator;
 
 /**
- * {@link ResultIterator} - Filters a search iterator based on a user's 
- * permission.
+ * {@link ResultIterator} - Search iterator for contacts fetched through the 
+ * contact service, performing additional operations on the contacts. 
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 public class ResultIterator implements SearchIterator<Contact> {
 	
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(ResultIterator.class));
+
+    private static final ContactField[] DLISTMEMBER_FIELDS = { 
+    	ContactField.FOLDER_ID, ContactField.OBJECT_ID, ContactField.CREATED_BY, ContactField.PRIVATE_FLAG, ContactField.LAST_MODIFIED, 
+    	ContactField.DISPLAY_NAME, ContactField.EMAIL1, ContactField.EMAIL2, ContactField.EMAIL3, };
+
     private final SearchIterator<Contact> delegate;
     private final boolean needsAttachmentInfo;
-    private final int userID;
-    private final int contextID;
     private Contact next;
 	private final Map<String, Boolean> canReadAllMap;
-	private Boolean canReadAll;
+	private final Boolean canReadAll;
+	private final Session session;
 
 	/**
 	 * Initializes a new {@link ResultIterator} where the 'can read all' 
@@ -84,16 +99,8 @@ public class ResultIterator implements SearchIterator<Contact> {
 	 * @param userID
 	 * @throws OXException
 	 */
-	public ResultIterator(final SearchIterator<Contact> delegate, final boolean needsAttachmentInfo, final int contextID, final int userID) throws OXException {
-		super();
-		this.delegate = delegate;
-		this.needsAttachmentInfo = needsAttachmentInfo;
-		this.contextID = contextID;
-		this.userID = userID;
-		// query folder permissions dynamically
-		this.canReadAll = null;
-		this.canReadAllMap = new HashMap<String, Boolean>(); 
-		initNext();
+	public ResultIterator(SearchIterator<Contact> delegate, boolean needsAttachmentInfo, Session session) throws OXException {
+		this(delegate, needsAttachmentInfo, session, null);
 	}
 	
 	/**
@@ -107,15 +114,17 @@ public class ResultIterator implements SearchIterator<Contact> {
 	 * @param canReadAll
 	 * @throws OXException
 	 */
-	public ResultIterator(final SearchIterator<Contact> delegate, final boolean needsAttachmentInfo, final int contextID, final int userID, final boolean canReadAll) throws OXException {
+	public ResultIterator(SearchIterator<Contact> delegate, boolean needsAttachmentInfo, Session session, boolean canReadAll) throws OXException {
+		this(delegate, needsAttachmentInfo, session, Boolean.valueOf(canReadAll));
+	}
+	
+	private ResultIterator(SearchIterator<Contact> delegate, boolean needsAttachmentInfo, Session session, Boolean canReadAll) throws OXException {
 		super();
 		this.delegate = delegate;
 		this.needsAttachmentInfo = needsAttachmentInfo;
-		this.contextID = contextID;
-		this.userID = userID;
-		// use fixed folder permissions
-		this.canReadAll = Boolean.valueOf(canReadAll);
-		this.canReadAllMap = null; 
+		this.session = session;
+		this.canReadAll = canReadAll;
+		this.canReadAllMap = new HashMap<String, Boolean>(); 
 		initNext();
 	}
 	
@@ -123,13 +132,138 @@ public class ResultIterator implements SearchIterator<Contact> {
         while (delegate.hasNext()) {
             next = delegate.next();
             if (this.accept(next)) {
-            	if (this.needsAttachmentInfo) {
-            		Tools.addAttachmentInformation(next, contextID);
-            	}
+            	addAttachmentInfo(next);
+            	addDistributionListInfo(next);
                 return;
             }
         }
         next = null;	
+	}
+	
+	/**
+	 * Adds the date of the last modification to attachments of the given 
+	 * contact when needed, i.e. the information is not already present.
+	 * 
+	 * @param contact the contact to add the attachment information for
+	 * @throws OXException
+	 */
+	private void addAttachmentInfo(Contact contact) throws OXException {
+		if (this.needsAttachmentInfo && false == contact.containsLastModifiedOfNewestAttachment() && 0 < contact.getNumberOfAttachments()) {
+			contact.setLastModifiedOfNewestAttachment(Attachments.getInstance().getNewestCreationDate(
+					Tools.getContext(session.getContextId()), Types.CONTACT, contact.getObjectID()));
+		}
+	}
+	
+	/**
+	 * Adds distribution list member information dynamically by querying the 
+	 * referenced contacts. 
+	 * 
+	 * @param contact
+	 */
+	private void addDistributionListInfo(Contact contact) {
+		if (null != contact && 0 < contact.getNumberOfDistributionLists()) {
+			DistributionListEntryObject[] members = contact.getDistributionList();
+			if (null != members && 0 < members.length) {
+				Contact[] referencedContacts = getReferencedContacts(members);
+				for (int i = 0; i < referencedContacts.length; i++) {
+					if (null != referencedContacts[i]) {
+						/*
+						 * update member info dynamically
+						 */
+						updateMemberInfo(members[i], referencedContacts[i]);
+					} else {
+						/*
+						 * 'dead' reference, convert into one-off address entry
+						 */
+						convertToOneOff(members[i]);
+					}
+				}
+			}
+		}
+	}
+
+	private void convertToOneOff(DistributionListEntryObject member) {
+		member.removeFolderld();
+		member.removeEntryID();
+		member.setEmailfield(DistributionListEntryObject.INDEPENDENT);
+	}
+	
+	private void updateMemberInfo(DistributionListEntryObject member, Contact referencedContact) {
+		member.setDisplayname(referencedContact.getDisplayName());
+		member.setFolderID(referencedContact.getParentFolderID());
+		member.setEntryID(referencedContact.getObjectID());
+		member.setFirstname(referencedContact.getGivenName());
+		member.setLastname(referencedContact.getSurName());
+		String email = null;
+		if (DistributionListEntryObject.EMAILFIELD1 == member.getEmailfield()) {
+			email = referencedContact.getEmail1();
+		} else if (DistributionListEntryObject.EMAILFIELD2 == member.getEmailfield()) {
+			email = referencedContact.getEmail2();
+		} else if (DistributionListEntryObject.EMAILFIELD3 == member.getEmailfield()) {
+			email = referencedContact.getEmail3();
+		}
+		try {
+			member.setEmailaddress(email);
+		} catch (OXException e) {
+			LOG.warn("Error setting e-mail address for updated distribution list member", e);
+		}
+	}
+	
+	private Contact[] getReferencedContacts(DistributionListEntryObject[] members) {
+		Contact[] contacts = new Contact[members.length];
+		/*
+		 * determine queried folders
+		 */
+		Map<String, List<String>> folderAndObjectIDs = new HashMap<String, List<String>>();  
+		for (DistributionListEntryObject member : members) {
+			if (DistributionListEntryObject.INDEPENDENT != member.getEmailfield()) {
+				String folderID = Integer.toString(member.getFolderID()); 
+				if (null == folderAndObjectIDs.get(folderID)) {
+					folderAndObjectIDs.put(folderID, new ArrayList<String>());
+				}
+				folderAndObjectIDs.get(folderID).add(Integer.toString(member.getEntryID()));
+			}
+		}
+		/*
+		 * query needed contacts from each folder
+		 */
+		for (Entry<String, List<String>> entry : folderAndObjectIDs.entrySet()) {
+			SearchIterator<Contact> searchIterator = null;
+			try {
+				ContactStorage storage = Tools.getStorage(session, entry.getKey());
+				searchIterator = storage.list(session, "0".equals(entry.getKey()) ? null : entry.getKey(), 
+						entry.getValue().toArray(new String[entry.getValue().size()]), DLISTMEMBER_FIELDS);
+				while (searchIterator.hasNext()) {
+					Contact contact = searchIterator.next();
+					try {
+						if (null != contact && this.accept(contact, null)) {
+							/*
+							 * add contact info for matching member in result
+							 */
+							for (int i = 0; i < members.length; i++) {
+								if (members[i].getEntryID() == contact.getObjectID() && (0 == members[i].getFolderID() || 										
+										members[i].getFolderID() == contact.getParentFolderID())) {
+									contacts[i] = contact;
+								}
+							}
+						}
+					} catch (OXException e) {
+						LOG.warn("Error resolving referenced member for distribution list", e);
+					}
+				}
+			} catch (OXException e) {
+				LOG.warn("Error resolving referenced members for distribution list", e);
+			} finally {
+				if (null != searchIterator) {
+					try {
+						searchIterator.close();
+					} catch (OXException e) {
+						LOG.warn(e);
+					}
+				}
+			}
+		}
+		return contacts;
 	}
 	
 	/**
@@ -141,18 +275,30 @@ public class ResultIterator implements SearchIterator<Contact> {
 	 * @throws OXException
 	 */
 	private boolean accept(final Contact contact) throws OXException {
-		if (contact.getCreatedBy() == userID) {
+		return this.accept(contact, this.canReadAll);
+	}
+
+	private boolean accept(Contact contact, Boolean canReadAll) throws OXException {
+		if (contact.getCreatedBy() == session.getUserId()) {
 			return true;
 		} else if (contact.containsPrivateFlag()) {
 			return false;
-		} else if (null != this.canReadAll) {
-			return this.canReadAll;
+		} else if (null != canReadAll) {
+			// use supplied 'can read all' information
+			return canReadAll.booleanValue();
 		} else {
-			final String folderID = Integer.toString(contact.getParentFolderID());
+			// query 'can read all' permissions dynamically
+			String folderID = Integer.toString(contact.getParentFolderID());
 			if (false == canReadAllMap.containsKey(folderID)) {
-				final EffectivePermission permission = Tools.getPermission(this.contextID, folderID, this.userID);
-				canReadAllMap.put(folderID, Boolean.valueOf(permission.canReadAllObjects()));
-			}
+				boolean canReadAllObjects = false;
+				try {
+					EffectivePermission permission = Tools.getPermission(session.getContextId(), folderID, session.getUserId());
+					canReadAllObjects = permission.canReadAllObjects();
+				} catch (final OXException e) {
+					LOG.debug("Unable to determine effective permissions for folder '" + folderID + "'", e);
+				}
+				canReadAllMap.put(folderID, Boolean.valueOf(canReadAllObjects));
+			}				
 			return canReadAllMap.get(folderID).booleanValue();
 		}
 	}

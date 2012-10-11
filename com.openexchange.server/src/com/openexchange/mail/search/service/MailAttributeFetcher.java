@@ -83,7 +83,7 @@ import com.openexchange.search.SingleSearchTerm.SingleOperation;
  */
 public final class MailAttributeFetcher implements SearchAttributeFetcher<MailMessage> {
 
-    static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(MailAttributeFetcher.class));
+    static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(MailAttributeFetcher.class));
 
     private static interface AttributeGetter {
 

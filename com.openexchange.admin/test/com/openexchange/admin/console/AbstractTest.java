@@ -54,7 +54,6 @@ import java.io.PrintStream;
 import junit.framework.TestCase;
 
 import org.junit.After;
-import org.junit.Before;
 
 public abstract class AbstractTest extends TestCase {
 
@@ -100,6 +99,7 @@ public abstract class AbstractTest extends TestCase {
     
     
     
+    @Override
     @After
     public void tearDown() {
         if(errConsole == null) {

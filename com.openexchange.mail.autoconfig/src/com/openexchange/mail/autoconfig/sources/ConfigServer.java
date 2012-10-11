@@ -72,7 +72,7 @@ import com.openexchange.mail.autoconfig.xmlparser.ClientConfig;
  */
 public class ConfigServer extends AbstractConfigSource {
 
-    static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(ConfigServer.class);
+    static final org.apache.commons.logging.Log LOG = com.openexchange.log.LogFactory.getLog(ConfigServer.class);
 
     @Override
     public Autoconfig getAutoconfig(String emailLocalPart, String emailDomain, String password, User user, Context context) throws OXException {

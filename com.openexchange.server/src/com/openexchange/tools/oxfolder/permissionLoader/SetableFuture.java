@@ -65,6 +65,7 @@ public final class SetableFuture extends FutureTask<OCLPermission[]> implements 
 
     private static final Callable<OCLPermission[]> DUMMY = new Callable<OCLPermission[]>() {
 
+        @Override
         public OCLPermission[] call() throws Exception {
             return null;
         }

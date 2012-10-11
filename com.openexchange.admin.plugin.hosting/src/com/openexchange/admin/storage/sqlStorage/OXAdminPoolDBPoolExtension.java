@@ -50,62 +50,79 @@
 package com.openexchange.admin.storage.sqlStorage;
 
 import java.sql.Connection;
+import org.apache.commons.logging.Log;
 import com.openexchange.admin.rmi.exceptions.PoolException;
-import com.openexchange.admin.tools.PropertyHandler;
-import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
+import com.openexchange.log.LogFactory;
 
 public class OXAdminPoolDBPoolExtension extends OXAdminPoolDBPool implements OXAdminPoolInterfaceExtension {
 
-    public OXAdminPoolDBPoolExtension(final PropertyHandler prop) {
-        super(prop);
+    private static final Log LOG = LogFactory.getLog(OXAdminPoolDBPoolExtension.class);
+
+    public OXAdminPoolDBPoolExtension() {
+        super();
     }
 
-    public int getDBPoolIdForContextId(final int context_id) throws PoolException {
+    @Override
+    public int getDBPoolIdForContextId(int contextId) throws PoolException {
         try {
-            return Database.resolvePool(context_id, true);
-        } catch (final OXException e) {
+            return getService().getWritablePool(contextId);
+        } catch (OXException e) {
             throw new PoolException("" + e.getMessage(), e);
         }
     }
 
-    public Connection getWRITEConnectionForPoolId(final int db_pool_id, final String schema_name) throws PoolException {
+    @Override
+    public Connection getWRITEConnectionForPoolId(int poolId, String schema) throws PoolException {
         try {
-            return Database.get(db_pool_id,schema_name);
-        } catch (final OXException e) {
+            return getService().get(poolId, schema);
+        } catch (OXException e) {
             throw new PoolException("" + e.getMessage(), e);
         }
     }
 
-    public void pushWRITEConnectionForPoolId(final int db_pool_id, final Connection con) {
-        Database.back(db_pool_id, con);
-    }
-
-    public Connection getWRITENoTimeoutConnectionForPoolId(final int db_pool_id, final String schema_name) throws PoolException {
+    @Override
+    public void pushWRITEConnectionForPoolId(int poolId, Connection con) {
         try {
-            return Database.getNoTimeout(db_pool_id, schema_name);
-        } catch (final OXException e) {
-            throw new PoolException("" + e.getMessage(), e);
+            getService().back(poolId, con);
+        } catch (PoolException e) {
+            LOG.error(e.getMessage(), e);
         }
     }
 
-    public void pushWRITENoTimeoutConnectionForPoolId(final int db_pool_id, final Connection con) {
-        Database.backNoTimeoout(db_pool_id, con);
-    }
-
-    public void resetPoolMappingForContext(final int context_id) throws PoolException {
+    @Override
+    public Connection getWRITENoTimeoutConnectionForPoolId(final int poolId, final String schema) throws PoolException {
         try {
-            Database.reset(context_id);
-        } catch (final OXException e) {
+            return getService().getNoTimeout(poolId, schema);
+        } catch (OXException e) {
             throw new PoolException("" + e.getMessage(), e);
         }
     }
 
-   public String getSchemeForContextId(final int context_id) throws PoolException {
-       try {
-            return Database.getSchema(context_id);
-        } catch (final OXException e) {
+    @Override
+    public void pushWRITENoTimeoutConnectionForPoolId(int poolId, Connection con) {
+        try {
+            getService().backNoTimeoout(poolId, con);
+        } catch (PoolException e) {
+            LOG.error(e.getMessage(), e);
+        }
+    }
+
+    @Override
+    public void resetPoolMappingForContext(int contextId) throws PoolException {
+        try {
+            getService().invalidate(contextId);
+        } catch (OXException e) {
             throw new PoolException("" + e.getMessage(), e);
         }
-   }
+    }
+
+    @Override
+    public String getSchemeForContextId(final int contextId) throws PoolException {
+        try {
+            return getService().getSchemaName(contextId);
+        } catch (OXException e) {
+            throw new PoolException("" + e.getMessage(), e);
+        }
+    }
 }

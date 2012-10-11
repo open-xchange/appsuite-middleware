@@ -86,7 +86,7 @@ import com.openexchange.server.ServiceLookup;
 public class JODConverterDocumentConverterService implements DocumentConverterService {
 
     private static final org.apache.commons.logging.Log LOG =
-        com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(JODConverterDocumentConverterService.class));
+        com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(JODConverterDocumentConverterService.class));
 
     private final ServiceLookup serviceLookup;
 

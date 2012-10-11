@@ -94,12 +94,12 @@ public final class FacebookConstants {
     /**
      * The HTTP client field which accesses "httpClient_" in class {@link HttpWebConnection}.
      */
-    public static Field HTTP_CLIENT_FIELD;
+    public static volatile Field HTTP_CLIENT_FIELD;
 
     /**
      * The connection manager field which accesses "httpConnectionManager" in class {@link HttpClient}.
      */
-    public static Field CONNECTION_MANAGER_FIELD;
+    public static volatile Field CONNECTION_MANAGER_FIELD;
 
     /**
      * The folder identifier for a user's wall posts.
@@ -126,10 +126,10 @@ public final class FacebookConstants {
             cmf.setAccessible(true);
         } catch (final SecurityException e) {
             // Cannot occur
-            com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(FacebookConstants.class)).error(e.getMessage(), e);
+            com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(FacebookConstants.class)).error(e.getMessage(), e);
         } catch (final NoSuchFieldException e) {
             // Cannot occur
-            com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(FacebookConstants.class)).error(e.getMessage(), e);
+            com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(FacebookConstants.class)).error(e.getMessage(), e);
         }
         HTTP_CLIENT_FIELD = hcf;
         CONNECTION_MANAGER_FIELD = cmf;

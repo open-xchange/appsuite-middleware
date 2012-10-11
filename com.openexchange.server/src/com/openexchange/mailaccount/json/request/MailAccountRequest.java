@@ -97,7 +97,7 @@ import com.openexchange.tools.session.ServerSession;
  */
 public final class MailAccountRequest {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(MailAccountRequest.class));
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(MailAccountRequest.class));
 
     private static final boolean DEBUG = LOG.isDebugEnabled();
 
@@ -478,7 +478,7 @@ public final class MailAccountRequest {
         // Set server and port
         final String server;
         {
-            final String[] tmp = TransportConfig.parseProtocol(transportServerURL);
+            final String[] tmp = MailConfig.parseProtocol(transportServerURL);
             server = tmp == null ? transportServerURL : tmp[1];
         }
         final int pos = server.indexOf(':');

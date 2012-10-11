@@ -52,6 +52,7 @@ package com.openexchange.authentication.database.impl;
 import static com.openexchange.authentication.LoginExceptionCodes.INVALID_CREDENTIALS;
 import com.openexchange.authentication.Authenticated;
 import com.openexchange.authentication.AuthenticationService;
+import com.openexchange.authentication.LoginExceptionCodes;
 import com.openexchange.authentication.LoginInfo;
 import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
@@ -67,6 +68,25 @@ import com.openexchange.user.UserService;
  * @author <a href="mailto:sebastian.kauss@open-xchange.org">Sebastian Kauss</a>
  */
 public class DatabaseAuthentication implements AuthenticationService {
+
+    private static final class AuthenticatedImpl implements Authenticated {
+
+        private final String[] splitted;
+
+        protected AuthenticatedImpl(String[] splitted) {
+            this.splitted = splitted;
+        }
+
+        @Override
+        public String getContextInfo() {
+            return splitted[0];
+        }
+
+        @Override
+        public String getUserInfo() {
+            return splitted[1];
+        }
+    } // End of class AuthenticatedImpl
 
     private final ContextService contextService;
 
@@ -115,16 +135,12 @@ public class DatabaseAuthentication implements AuthenticationService {
         } catch (final OXException e) {
             throw new OXException(e);
         }
-        return new Authenticated() {
-            @Override
-            public String getContextInfo() {
-                return splitted[0];
-            }
-            @Override
-            public String getUserInfo() {
-                return splitted[1];
-            }
-        };
+        return new AuthenticatedImpl(splitted);
+    }
+
+    @Override
+    public Authenticated handleAutoLoginInfo(LoginInfo loginInfo) throws OXException {
+        throw LoginExceptionCodes.NOT_SUPPORTED.create(DatabaseAuthentication.class.getName());
     }
 
     /**

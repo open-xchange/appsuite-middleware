@@ -75,7 +75,7 @@ import com.openexchange.config.ConfigurationService;
  */
 public final class AJPv13ServerImpl extends AJPv13Server implements Runnable {
 
-    private static final transient org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(AJPv13ServerImpl.class));
+    private static final transient org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(AJPv13ServerImpl.class));
 
     private static final DecimalFormat DF = new DecimalFormat("0000");
 
@@ -96,12 +96,13 @@ public final class AJPv13ServerImpl extends AJPv13Server implements Runnable {
         running = new AtomicBoolean();
 
         final ConfigurationService service = AJPv13ServiceRegistry.getServiceRegistry().getService(ConfigurationService.class);
-        final boolean coyote = null == service ? false : service.getBoolProperty("AJP_COYOTE_SOCKET_HANDLER", true);
+        final boolean coyote = null == service || service.getBoolProperty("AJP_COYOTE_SOCKET_HANDLER", true);
         if (coyote) {
             socketHandler = new CoyoteSocketHandler();
             LOG.info("------------ Started Coyote socket handler ------------");
         } else {
             socketHandler = new AJPv13SocketHandler();
+            LOG.warn("\n\tOutdated AJP socket handler configured. Please consider to set \"AJP_COYOTE_SOCKET_HANDLER\" property to \"TRUE\".\n");
             LOG.info("------------ Started AJP socket handler ------------");
         }
     }

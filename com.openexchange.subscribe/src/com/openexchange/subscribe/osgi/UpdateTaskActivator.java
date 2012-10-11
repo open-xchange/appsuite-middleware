@@ -76,7 +76,6 @@ public final class UpdateTaskActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        // TODO Auto-generated method stub
-        return null;
+        return EMPTY_CLASSES;
     }
 }

@@ -66,7 +66,7 @@ import com.openexchange.threadpool.ThreadPools;
  */
 public final class AJPv13SocketHandler implements IAJPv13SocketHandler {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(AJPv13SocketHandler.class));
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(AJPv13SocketHandler.class));
 
     /**
      * The atomic boolean to track started status.

@@ -51,8 +51,8 @@ package com.openexchange.mail.json.parser;
 
 import static com.openexchange.groupware.upload.impl.UploadUtility.getSize;
 import static com.openexchange.mail.mime.converters.MimeMessageConverter.convertPart;
-import static com.openexchange.mail.text.HTMLProcessing.getConformHTML;
-import static com.openexchange.mail.text.HTMLProcessing.htmlFormat;
+import static com.openexchange.mail.text.HtmlProcessing.getConformHTML;
+import static com.openexchange.mail.text.HtmlProcessing.htmlFormat;
 import java.io.IOException;
 import java.io.InputStream;
 import java.text.DateFormat;
@@ -111,7 +111,7 @@ import com.openexchange.user.UserService;
  */
 public final class PublishAttachmentHandler extends AbstractAttachmentHandler {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(PublishAttachmentHandler.class));
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(PublishAttachmentHandler.class));
 
     private final Session session;
 
@@ -198,7 +198,7 @@ public final class PublishAttachmentHandler extends AbstractAttachmentHandler {
     }
 
     @Override
-    public ComposedMailMessage[] generateComposedMails(final ComposedMailMessage source) throws OXException {
+    public ComposedMailMessage[] generateComposedMails(final ComposedMailMessage source, List<OXException> warnings) throws OXException {
         if (!exceeded) {
             /*
              * No quota exceeded, return prepared source
@@ -243,6 +243,7 @@ public final class PublishAttachmentHandler extends AbstractAttachmentHandler {
          */
         publisher = target.getPublicationService();
         try {
+        	warnings.add(MailExceptionCode.USED_PUBLISHING_FEATURE.create());
             return generateComposedMails0(source, publications, folderId, target, publisher, ctx);
         } catch (final OXException e) {
             /*

@@ -132,21 +132,27 @@ public class NewAction extends ContactAction {
     }
 
     @Override
-    protected AJAXRequestResult perform2(final ContactRequest request) throws OXException, JSONException {
-        final boolean containsImage = request.containsImage();
-        final JSONObject json = request.getContactJSON(containsImage);
-        if (false == json.has("folder_id")) {
-            throw OXException.mandatoryField("missing folder");
+    protected AJAXRequestResult perform2(final ContactRequest request) throws OXException {
+        boolean containsImage = request.containsImage();
+        JSONObject json = request.getContactJSON(containsImage);
+        String folderID = json.optString("folder_id", null);
+        if (null == folderID) {
+			throw OXJSONExceptionCodes.MISSING_FIELD.create("folder_id");
         }
-        final Contact contact = ContactMapper.getInstance().deserialize(json, ContactMapper.getInstance().getAllFields());
+        Contact contact = null;
+		try {
+			contact = ContactMapper.getInstance().deserialize(json, ContactMapper.getInstance().getAllFields());
+		} catch (JSONException e) {
+			throw OXJSONExceptionCodes.JSON_READ_ERROR.create(e, json);
+		}
         if (containsImage) {
         	RequestTools.setImageData(request, contact);
         }
-        getContactService().createContact(request.getSession(), json.getString("folder_id"), contact);
+        getContactService().createContact(request.getSession(), folderID, contact);
         try {
-            final JSONObject object = new JSONObject("{\"id\":" + contact.getObjectID() + "}");
+            JSONObject object = new JSONObject("{\"id\":" + contact.getObjectID() + "}");
             return new AJAXRequestResult(object, contact.getLastModified(), "json");
-        } catch (final JSONException e) {
+        } catch (JSONException e) {
             throw OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e);
         }
     }

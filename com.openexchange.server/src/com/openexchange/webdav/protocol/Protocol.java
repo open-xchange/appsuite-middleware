@@ -52,9 +52,7 @@ package com.openexchange.webdav.protocol;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-
-import org.jdom.Namespace;
-
+import org.jdom2.Namespace;
 import com.openexchange.webdav.action.WebdavAction;
 import com.openexchange.webdav.protocol.util.PropertySwitch;
 
@@ -229,7 +227,7 @@ public class Protocol {
         return Collections.emptyList();
     }
 
-    public WebdavAction getReportAction(String ns, String name) {
+    public WebdavAction getReportAction(final String ns, final String name) {
         return null;
     }
 }

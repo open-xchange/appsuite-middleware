@@ -48,9 +48,8 @@
  */
 package com.openexchange.admin.rmi.impl;
 
+import static com.openexchange.java.Autoboxing.I;
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Database;
 import com.openexchange.admin.rmi.dataobjects.Group;
@@ -58,31 +57,33 @@ import com.openexchange.admin.rmi.dataobjects.NameAndIdObject;
 import com.openexchange.admin.rmi.dataobjects.Resource;
 import com.openexchange.admin.rmi.dataobjects.Server;
 import com.openexchange.admin.rmi.dataobjects.User;
-import com.openexchange.admin.rmi.dataobjects.UserModuleAccess;
-import com.openexchange.admin.rmi.exceptions.*;
+import com.openexchange.admin.rmi.exceptions.DatabaseUpdateException;
+import com.openexchange.admin.rmi.exceptions.InvalidCredentialsException;
+import com.openexchange.admin.rmi.exceptions.InvalidDataException;
+import com.openexchange.admin.rmi.exceptions.NoSuchContextException;
+import com.openexchange.admin.rmi.exceptions.NoSuchGroupException;
+import com.openexchange.admin.rmi.exceptions.NoSuchObjectException;
+import com.openexchange.admin.rmi.exceptions.NoSuchResourceException;
+import com.openexchange.admin.rmi.exceptions.NoSuchUserException;
+import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.storage.interfaces.OXToolStorageInterface;
-import com.openexchange.groupware.userconfiguration.UserConfiguration;
+import com.openexchange.log.LogFactory;
 
 /**
  * General abstraction class used by all impl classes
  * 
  * @author d7
- *
  */
 public abstract class OXCommonImpl {
+
     private final static Log log = LogFactory.getLog(OXCommonImpl.class);
-    
+
     protected final OXToolStorageInterface tool;
-    
-    public OXCommonImpl() throws StorageException {
-        try {
-            tool = OXToolStorageInterface.getInstance();
-        } catch (final StorageException e) {
-            log.error(e.getMessage(), e);
-            throw e;
-        }
+
+    public OXCommonImpl() {
+        tool = OXToolStorageInterface.getInstance();
     }
-    
+
     protected final void contextcheck(final Context ctx) throws InvalidCredentialsException {
         if (null == ctx || null == ctx.getId()) {
             final InvalidCredentialsException e = new InvalidCredentialsException("Client sent invalid context data object");
@@ -90,30 +91,42 @@ public abstract class OXCommonImpl {
             throw e;
         }
     }
-    
-    protected void setUserIdInArrayOfUsers(final Context ctx, final User[] users) throws InvalidDataException, StorageException {
+
+    protected void setUserIdInArrayOfUsers(final Context ctx, final User[] users) throws InvalidDataException, StorageException, NoSuchObjectException {
         for (final User user : users) {
             setIdOrGetIDFromNameAndIdObject(ctx, user);
         }
     }
 
-    protected void setIdOrGetIDFromNameAndIdObject(final Context ctx, final NameAndIdObject nameandid) throws StorageException, InvalidDataException {
+    protected void setIdOrGetIDFromNameAndIdObject(final Context ctx, final NameAndIdObject nameandid) throws StorageException, InvalidDataException, NoSuchObjectException {
         final Integer id = nameandid.getId();
         if (null == id) {
             final String name = nameandid.getName();
             if (null != name) {
                 if (nameandid instanceof User) {
-                    nameandid.setId(tool.getUserIDByUsername(ctx, name));
+                    try {
+                        nameandid.setId(I(tool.getUserIDByUsername(ctx, name)));
+                    } catch (NoSuchUserException e) {
+                        throw new NoSuchObjectException(e);
+                    }
                 } else if (nameandid instanceof Group) {
-                    nameandid.setId(tool.getGroupIDByGroupname(ctx, name));
+                    try {
+                        nameandid.setId(I(tool.getGroupIDByGroupname(ctx, name)));
+                    } catch (NoSuchGroupException e) {
+                        throw new NoSuchObjectException(e);
+                    }
                 } else if (nameandid instanceof Resource) {
-                    nameandid.setId(tool.getResourceIDByResourcename(ctx, name));
+                    try {
+                        nameandid.setId(I(tool.getResourceIDByResourcename(ctx, name)));
+                    } catch (NoSuchResourceException e) {
+                        throw new NoSuchObjectException(e);
+                    }
                 } else if (nameandid instanceof Context) {
-                    nameandid.setId(tool.getContextIDByContextname(name));
+                    nameandid.setId(I(tool.getContextIDByContextname(name)));
                 } else if (nameandid instanceof Database) {
-                    nameandid.setId(tool.getDatabaseIDByDatabasename(name));
+                    nameandid.setId(I(tool.getDatabaseIDByDatabasename(name)));
                 } else if (nameandid instanceof Server) {
-                    nameandid.setId(tool.getServerIDByServername(name));
+                    nameandid.setId(I(tool.getServerIDByServername(name)));
                 }
             } else {
                 final String simpleName = nameandid.getClass().getSimpleName().toLowerCase();

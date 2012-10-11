@@ -77,7 +77,7 @@ import com.openexchange.tools.session.ServerSession;
 public final class GetAction extends AbstractResourceAction {
 
     private static final org.apache.commons.logging.Log LOG =
-        com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(GetAction.class));
+        com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(GetAction.class));
 
     /**
      * Initializes a new {@link GetAction}.

@@ -65,9 +65,14 @@ import java.util.Iterator;
 import java.util.Set;
 import com.openexchange.cache.impl.FolderCacheManager;
 import com.openexchange.cache.impl.FolderQueryCacheManager;
+import com.openexchange.caching.Cache;
+import com.openexchange.caching.CacheKey;
+import com.openexchange.caching.CacheService;
 import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
+import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.folderstorage.cache.CacheFolderStorage;
+import com.openexchange.folderstorage.outlook.OutlookFolderStorage;
 import com.openexchange.group.GroupStorage;
 import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.calendar.CalendarCache;
@@ -82,6 +87,7 @@ import com.openexchange.groupware.ldap.LdapExceptionCode;
 import com.openexchange.i18n.LocaleTools;
 import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.server.impl.OCLPermission;
+import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.StringCollection;
 import com.openexchange.tools.oxfolder.memory.ConditionTreeMapManagement;
 import com.openexchange.tools.sql.DBUtils;
@@ -93,7 +99,7 @@ import com.openexchange.tools.sql.DBUtils;
  */
 public final class OXFolderAdminHelper {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(OXFolderAdminHelper.class));
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(OXFolderAdminHelper.class));
 
     private static final boolean ADMIN_EDITABLE = false;
 
@@ -549,6 +555,16 @@ public final class OXFolderAdminHelper {
                     }
                     if (CalendarCache.isInitialized()) {
                         CalendarCache.getInstance().invalidateGroup(cid);
+                    }
+                    final CacheService service = ServerServiceRegistry.getInstance().getService(CacheService.class);
+                    if (null != service) {
+                        final Cache cache = service.getCache("GlobalFolderCache");
+                        final String sContextId = Integer.toString(cid);
+                        final String[] trees = new String[] { FolderStorage.REAL_TREE_ID, OutlookFolderStorage.OUTLOOK_TREE_ID, "20" };
+                        for (final String tid : trees) {
+                            final CacheKey cacheKey = service.newCacheKey(1, tid, Integer.toString(globalAddressBookId));
+                            cache.removeFromGroup(cacheKey, sContextId);
+                        }
                     }
                 } catch (final OXException e) {
                     LOG.error(e.getMessage(), e);

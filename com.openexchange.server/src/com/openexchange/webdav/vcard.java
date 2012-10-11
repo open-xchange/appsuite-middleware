@@ -64,18 +64,18 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import com.openexchange.log.LogFactory;
+
+import com.openexchange.contact.ContactService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.Types;
-import com.openexchange.groupware.contact.ContactInterface;
-import com.openexchange.groupware.contact.ContactInterfaceDiscoveryService;
-import com.openexchange.groupware.container.CommonObject;
+import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
-import com.openexchange.groupware.container.DataObject;
-import com.openexchange.groupware.container.FolderChildObject;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
@@ -104,27 +104,27 @@ public final class vcard extends PermissionServlet {
 
     private static final long serialVersionUID = 1043665340444383184L;
 
-    private final static int[] _contactFields = {
-        DataObject.OBJECT_ID, DataObject.CREATED_BY, DataObject.CREATION_DATE, DataObject.LAST_MODIFIED, DataObject.MODIFIED_BY,
-        FolderChildObject.FOLDER_ID, CommonObject.PRIVATE_FLAG, CommonObject.CATEGORIES, Contact.GIVEN_NAME, Contact.SUR_NAME,
-        Contact.ANNIVERSARY, Contact.ASSISTANT_NAME, Contact.BIRTHDAY, Contact.BRANCHES,
-        Contact.BUSINESS_CATEGORY, Contact.CATEGORIES, Contact.CELLULAR_TELEPHONE1, Contact.CELLULAR_TELEPHONE2,
-        Contact.CITY_BUSINESS, Contact.CITY_HOME, Contact.CITY_OTHER, Contact.COMMERCIAL_REGISTER,
-        Contact.COMPANY, Contact.COUNTRY_BUSINESS, Contact.COUNTRY_HOME, Contact.COUNTRY_OTHER,
-        Contact.DEPARTMENT, Contact.DISPLAY_NAME, Contact.EMAIL1, Contact.EMAIL2, Contact.EMAIL3,
-        Contact.EMPLOYEE_TYPE, Contact.FAX_BUSINESS, Contact.FAX_HOME, Contact.FAX_OTHER, Contact.FILE_AS,
-        Contact.FOLDER_ID, Contact.GIVEN_NAME, Contact.INFO, Contact.INSTANT_MESSENGER1,
-        Contact.INSTANT_MESSENGER2, Contact.MANAGER_NAME, Contact.MARITAL_STATUS, Contact.MIDDLE_NAME,
-        Contact.NICKNAME, Contact.NOTE, Contact.NUMBER_OF_CHILDREN, Contact.NUMBER_OF_EMPLOYEE,
-        Contact.POSITION, Contact.POSTAL_CODE_BUSINESS, Contact.POSTAL_CODE_HOME, Contact.POSTAL_CODE_OTHER,
-        Contact.PRIVATE_FLAG, Contact.PROFESSION, Contact.ROOM_NUMBER, Contact.SALES_VOLUME,
-        Contact.SPOUSE_NAME, Contact.STATE_BUSINESS, Contact.STATE_HOME, Contact.STATE_OTHER,
-        Contact.STREET_BUSINESS, Contact.STREET_HOME, Contact.STREET_OTHER, Contact.SUFFIX, Contact.TAX_ID,
-        Contact.TELEPHONE_ASSISTANT, Contact.TELEPHONE_BUSINESS1, Contact.TELEPHONE_BUSINESS2,
-        Contact.TELEPHONE_CALLBACK, Contact.TELEPHONE_CAR, Contact.TELEPHONE_COMPANY, Contact.TELEPHONE_HOME1,
-        Contact.TELEPHONE_HOME2, Contact.TELEPHONE_IP, Contact.TELEPHONE_ISDN, Contact.TELEPHONE_OTHER,
-        Contact.TELEPHONE_PAGER, Contact.TELEPHONE_PRIMARY, Contact.TELEPHONE_RADIO, Contact.TELEPHONE_TELEX,
-        Contact.TELEPHONE_TTYTDD, Contact.TITLE, Contact.URL, Contact.DEFAULT_ADDRESS };
+    private final static ContactField[] _contactFields = {
+        ContactField.OBJECT_ID, ContactField.CREATED_BY, ContactField.CREATION_DATE, ContactField.LAST_MODIFIED, ContactField.MODIFIED_BY,
+        ContactField.FOLDER_ID, ContactField.PRIVATE_FLAG, ContactField.CATEGORIES, ContactField.GIVEN_NAME, ContactField.SUR_NAME,
+        ContactField.ANNIVERSARY, ContactField.ASSISTANT_NAME, ContactField.BIRTHDAY, ContactField.BRANCHES,
+        ContactField.BUSINESS_CATEGORY, ContactField.CATEGORIES, ContactField.CELLULAR_TELEPHONE1, ContactField.CELLULAR_TELEPHONE2,
+        ContactField.CITY_BUSINESS, ContactField.CITY_HOME, ContactField.CITY_OTHER, ContactField.COMMERCIAL_REGISTER,
+        ContactField.COMPANY, ContactField.COUNTRY_BUSINESS, ContactField.COUNTRY_HOME, ContactField.COUNTRY_OTHER,
+        ContactField.DEPARTMENT, ContactField.DISPLAY_NAME, ContactField.EMAIL1, ContactField.EMAIL2, ContactField.EMAIL3,
+        ContactField.EMPLOYEE_TYPE, ContactField.FAX_BUSINESS, ContactField.FAX_HOME, ContactField.FAX_OTHER, ContactField.FILE_AS,
+        ContactField.FOLDER_ID, ContactField.GIVEN_NAME, ContactField.INFO, ContactField.INSTANT_MESSENGER1,
+        ContactField.INSTANT_MESSENGER2, ContactField.MANAGER_NAME, ContactField.MARITAL_STATUS, ContactField.MIDDLE_NAME,
+        ContactField.NICKNAME, ContactField.NOTE, ContactField.NUMBER_OF_CHILDREN, ContactField.NUMBER_OF_EMPLOYEE,
+        ContactField.POSITION, ContactField.POSTAL_CODE_BUSINESS, ContactField.POSTAL_CODE_HOME, ContactField.POSTAL_CODE_OTHER,
+        ContactField.PRIVATE_FLAG, ContactField.PROFESSION, ContactField.ROOM_NUMBER, ContactField.SALES_VOLUME,
+        ContactField.SPOUSE_NAME, ContactField.STATE_BUSINESS, ContactField.STATE_HOME, ContactField.STATE_OTHER,
+        ContactField.STREET_BUSINESS, ContactField.STREET_HOME, ContactField.STREET_OTHER, ContactField.SUFFIX, ContactField.TAX_ID,
+        ContactField.TELEPHONE_ASSISTANT, ContactField.TELEPHONE_BUSINESS1, ContactField.TELEPHONE_BUSINESS2,
+        ContactField.TELEPHONE_CALLBACK, ContactField.TELEPHONE_CAR, ContactField.TELEPHONE_COMPANY, ContactField.TELEPHONE_HOME1,
+        ContactField.TELEPHONE_HOME2, ContactField.TELEPHONE_IP, ContactField.TELEPHONE_ISDN, ContactField.TELEPHONE_OTHER,
+        ContactField.TELEPHONE_PAGER, ContactField.TELEPHONE_PRIMARY, ContactField.TELEPHONE_RADIO, ContactField.TELEPHONE_TELEX,
+        ContactField.TELEPHONE_TTYTDD, ContactField.TITLE, ContactField.URL, ContactField.DEFAULT_ADDRESS };
 
     private static final String STR_USER_AGENT = "user-agent";
 
@@ -228,12 +228,8 @@ public final class vcard extends PermissionServlet {
                 resp.setStatus(HttpServletResponse.SC_OK);
                 resp.setContentType("text/vcard");
 
-                final ContactInterface contactInterface = ServerServiceRegistry.getInstance().getService(
-                    ContactInterfaceDiscoveryService.class).newContactInterface(contactfolder_id, sessionObj);
-
-                //final ContactSQLInterface contactInterface = new RdbContactSQLInterface(sessionObj);
-                it = contactInterface.getModifiedContactsInFolder(contactfolder_id, _contactFields, new Date(0));
-
+                final ContactService contactService = ServerServiceRegistry.getInstance().getService(ContactService.class);
+                it = contactService.getAllContacts(sessionObj, Integer.toString(contactfolder_id), _contactFields);
                 while (it.hasNext()) {
                     final Contact contactObject = it.next();
 
@@ -460,24 +456,24 @@ public final class vcard extends PermissionServlet {
 
                             contactObj.setParentFolderID(contactfolder_id);
 
-                            final ContactInterface contactInterface = ServerServiceRegistry.getInstance().getService(
-                                ContactInterfaceDiscoveryService.class).newContactInterface(contactfolder_id, session);
+                            final ContactService contactService = ServerServiceRegistry.getInstance().getService(ContactService.class);
                             if (contactObj.containsObjectID()) {
-                                contactInterface.updateContactObject(contactObj, contactfolder_id, timestamp);
+                            	contactService.updateContact(session, Integer.toString(contactfolder_id), Integer.toString(object_id), 
+                            			contactObj, timestamp);
                             } else {
-                                contactInterface.insertContactObject(contactObj);
+                            	contactService.createContact(session, Integer.toString(contactfolder_id), contactObj);
                             }
 
                             entries.add(client_id);
                         } else {
                             contactObj.setParentFolderID(contactfolder_id);
 
-                            final ContactInterface contactInterface = ServerServiceRegistry.getInstance().getService(
-                                ContactInterfaceDiscoveryService.class).newContactInterface(contactfolder_id, session);
+                            final ContactService contactService = ServerServiceRegistry.getInstance().getService(ContactService.class);
                             if (contactObj.containsObjectID()) {
-                                contactInterface.updateContactObject(contactObj, contactfolder_id, timestamp);
+                            	contactService.updateContact(session, Integer.toString(contactfolder_id), 
+                            			Integer.toString(contactObj.getObjectID()), contactObj, timestamp);
                             } else {
-                                contactInterface.insertContactObject(contactObj);
+                            	contactService.createContact(session, Integer.toString(contactfolder_id), contactObj);
                             }
 
                             if (client_id != null) {
@@ -508,10 +504,10 @@ public final class vcard extends PermissionServlet {
                     deleteEntry(context, principal_id, object_id);
 
                     if (enabledelete) {
-                        final ContactInterface contactInterface = ServerServiceRegistry.getInstance().getService(
-                            ContactInterfaceDiscoveryService.class).newContactInterface(contactfolder_id, session);
+                    	final ContactService contactService = ServerServiceRegistry.getInstance().getService(ContactService.class);
                         try {
-                            contactInterface.deleteContactObject(object_id, contactfolder_id, timestamp);
+                        	contactService.deleteContact(session, Integer.toString(contactfolder_id), Integer.toString(object_id), 
+                        			timestamp);
                         } catch (final OXException exc) {
                             if (exc.isNotFound()) {
                                 LOG.debug("object was already deleted on server: " + object_id, exc);

@@ -59,7 +59,7 @@ import java.util.Set;
 import java.util.concurrent.DelayQueue;
 import java.util.concurrent.TimeUnit;
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import com.openexchange.log.LogFactory;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventAdmin;
 import com.openexchange.event.EventFactoryService;
@@ -80,13 +80,13 @@ public class PushOutputQueue implements Runnable {
 
     private static HashMap<PushObject, PushDelayedObject> existingPushObjects = new HashMap<PushObject, PushDelayedObject>();
 
-    private static boolean isEnabled;
+    private static volatile boolean isEnabled;
 
-    private static boolean isInit;
+    private static volatile boolean isInit;
 
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(PushOutputQueue.class));
 
-    private static PushConfiguration pushConfigInterface;
+    private static volatile PushConfiguration pushConfigInterface;
 
     private static DelayQueue<PushDelayedObject> queue = new DelayQueue<PushDelayedObject>();
 
@@ -94,7 +94,7 @@ public class PushOutputQueue implements Runnable {
 
     private static int remoteHostTimeOut = 3600000;
 
-    private static PushChannels channels;
+    private static volatile PushChannels channels;
 
     /**
      * Adds specified push object to queue for delivery.

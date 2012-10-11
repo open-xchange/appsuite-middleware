@@ -61,7 +61,7 @@ import com.openexchange.groupware.container.Appointment;
  */
 public class ResolveUidTest extends AppointmentTest {
 
-    public ResolveUidTest(String name) {
+    public ResolveUidTest(final String name) {
         super(name);
     }
 
@@ -74,14 +74,14 @@ public class ResolveUidTest extends AppointmentTest {
         appointmentObj.setParentFolderID(appointmentFolderId);
         appointmentObj.setIgnoreConflicts(true);
         appointmentObj.setUid("1234567890abcdefgh");
-        int objectId = insertAppointment(getWebConversation(), appointmentObj, timeZone, PROTOCOL + getHostName(), getSessionId());
+        final int objectId = insertAppointment(getWebConversation(), appointmentObj, timeZone, PROTOCOL + getHostName(), getSessionId());
         appointmentObj.setObjectID(objectId);
 
-        int loadId = resolveUid(getWebConversation(), PROTOCOL + getHostName(), getSessionId(), "1234567890abcdefgh");
+        final int loadId = resolveUid(getWebConversation(), PROTOCOL + getHostName(), getSessionId(), "1234567890abcdefgh");
 
         assertEquals("Wrong id", objectId, loadId);
 
-        deleteAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getSessionId());
+        deleteAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getSessionId(), false);
     }
 
     public void testWithoutUid() throws Exception {
@@ -92,16 +92,16 @@ public class ResolveUidTest extends AppointmentTest {
         appointmentObj.setShownAs(Appointment.ABSENT);
         appointmentObj.setParentFolderID(appointmentFolderId);
         appointmentObj.setIgnoreConflicts(true);
-        int objectId = insertAppointment(getWebConversation(), appointmentObj, timeZone, PROTOCOL + getHostName(), getSessionId());
+        final int objectId = insertAppointment(getWebConversation(), appointmentObj, timeZone, PROTOCOL + getHostName(), getSessionId());
         appointmentObj.setObjectID(objectId);
 
-        Appointment loadAppointment = loadAppointment(getWebConversation(), objectId, appointmentFolderId, timeZone, PROTOCOL + getHostName(), getSessionId());
+        final Appointment loadAppointment = loadAppointment(getWebConversation(), objectId, appointmentFolderId, timeZone, PROTOCOL + getHostName(), getSessionId());
 
-        int loadId = resolveUid(getWebConversation(), PROTOCOL + getHostName(), getSessionId(), loadAppointment.getUid());
+        final int loadId = resolveUid(getWebConversation(), PROTOCOL + getHostName(), getSessionId(), loadAppointment.getUid());
 
         assertEquals("Wrong id", objectId, loadId);
 
-        deleteAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getSessionId());
+        deleteAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getSessionId(), false);
     }
 
     public void testInsertSameUidTwice() throws Exception {
@@ -113,16 +113,16 @@ public class ResolveUidTest extends AppointmentTest {
         appointmentObj.setParentFolderID(appointmentFolderId);
         appointmentObj.setIgnoreConflicts(true);
         appointmentObj.setUid("1234567890abcdefgh");
-        int objectId = insertAppointment(getWebConversation(), appointmentObj, timeZone, PROTOCOL + getHostName(), getSessionId());
+        final int objectId = insertAppointment(getWebConversation(), appointmentObj, timeZone, PROTOCOL + getHostName(), getSessionId());
 
         try {
             insertAppointment(getWebConversation(), appointmentObj, timeZone, PROTOCOL + getHostName(), getSessionId());
             fail("Exception expected.");
-        } catch (Exception e) {
+        } catch (final Exception e) {
             // Expected.
         }
 
-        deleteAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getSessionId());
+        deleteAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getSessionId(), false);
     }
 
 }

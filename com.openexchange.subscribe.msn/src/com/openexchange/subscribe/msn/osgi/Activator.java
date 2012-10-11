@@ -49,7 +49,7 @@
 package com.openexchange.subscribe.msn.osgi;
 
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import com.openexchange.log.LogFactory;
 import org.osgi.util.tracker.ServiceTracker;
 import com.openexchange.context.ContextService;
 import com.openexchange.oauth.OAuthService;

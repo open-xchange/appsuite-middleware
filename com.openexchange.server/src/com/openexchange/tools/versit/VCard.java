@@ -134,7 +134,7 @@ public class VCard {
     private static final String[] PropertyNames3 = {
         "NAME", "PROFILE", "SOURCE", "FN", "N", "NICKNAME", "PHOTO", "BDAY", "ADR", "LABEL", "TEL", "EMAIL", "MAILER", "TZ", "GEO",
         "TITLE", "ROLE", "LOGO", "AGENT", "ORG", "CATEGORIES", "NOTE", "PRODID", "REV", "SORT-STRING", "SOUND", "UID", "URL", "VERSION",
-        "CLASS", "KEY", "X-OPEN-XCHANGE-CTYPE" };
+        "CLASS", "KEY", "X-OPEN-XCHANGE-CTYPE", "IMPP" };
 
     private static final PropertyDefinition[] Properties3 = {
         DefaultProperty, DefaultProperty, DefaultProperty, DefaultProperty, DoubleListProperty, CommaListProperty, BinaryProperty,
@@ -145,8 +145,8 @@ public class VCard {
         BinaryProperty, new PropertyDefinition(VCardValueDefinition.Default, AgentValueNames, AgentValues, NoNames, NoParameters),
         new PropertyDefinition(SemicolonList), CommaListProperty, DefaultProperty, DefaultProperty,
         new PropertyDefinition(DateTimeValueDefinition.Default, DateValueNames, DateValues, NoNames, NoParameters), DefaultProperty,
-        BinaryProperty, DefaultProperty, new PropertyDefinition(URIValueDefinition.Default), DefaultProperty, DefaultProperty,
-        new PropertyDefinition(BinaryValue, KeyValueNames, KeyValues, NoNames, NoParameters), DefaultProperty };
+        BinaryProperty, DefaultProperty, DefaultProperty, DefaultProperty, DefaultProperty,
+        new PropertyDefinition(BinaryValue, KeyValueNames, KeyValues, NoNames, NoParameters), DefaultProperty, DefaultProperty };
 
     // Arrays of object definitions
 

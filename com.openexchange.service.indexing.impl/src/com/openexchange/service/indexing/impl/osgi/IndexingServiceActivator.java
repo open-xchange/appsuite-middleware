@@ -49,15 +49,17 @@
 
 package com.openexchange.service.indexing.impl.osgi;
 
+import java.util.concurrent.atomic.AtomicReference;
 import javax.management.NotCompliantMBeanException;
 import javax.management.ObjectName;
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.osgi.framework.ServiceReference;
+import org.quartz.service.QuartzService;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
 import com.openexchange.index.IndexFacadeService;
+import com.openexchange.log.LogFactory;
 import com.openexchange.mail.service.MailService;
 import com.openexchange.mail.smal.SmalAccessService;
 import com.openexchange.management.ManagementService;
@@ -72,6 +74,7 @@ import com.openexchange.service.indexing.impl.IndexingServiceImpl;
 import com.openexchange.service.indexing.impl.IndexingServiceInit;
 import com.openexchange.service.indexing.impl.IndexingServiceMBeanImpl;
 import com.openexchange.service.indexing.impl.Services;
+import com.openexchange.sessiond.SessiondService;
 import com.openexchange.threadpool.ThreadPoolService;
 
 /**
@@ -94,7 +97,7 @@ public final class IndexingServiceActivator extends HousekeepingActivator {
     protected Class<?>[] getNeededServices() {
         return new Class<?>[] {
             ConfigurationService.class, MQService.class, ThreadPoolService.class, DatabaseService.class, MailService.class,
-            SmalAccessService.class, IndexFacadeService.class };
+            SmalAccessService.class, IndexFacadeService.class, SessiondService.class };
     }
 
     @Override
@@ -172,6 +175,36 @@ public final class IndexingServiceActivator extends HousekeepingActivator {
                     }
                 }
 
+            });
+            track(QuartzService.class, new SimpleRegistryListener<QuartzService>() {
+
+                private final AtomicReference<QuartzService> aRef = new AtomicReference<QuartzService>();
+
+                @Override
+                public void added(final ServiceReference<QuartzService> ref, final QuartzService service) {
+                    aRef.set(service);
+                    Services.getServiceLookup().addIfAbsent(QuartzService.class, new ServiceLookup() {
+                        
+                        @Override
+                        public <S> S getService(final Class<? extends S> clazz) {
+                            return getOptionalService(clazz);
+                        }
+                        
+                        @Override
+                        public <S> S getOptionalService(final Class<? extends S> clazz) {
+                            if (QuartzService.class.equals(clazz)) {
+                                return (S) aRef.get();
+                            }
+                            return null;
+                        }
+                    });
+                }
+
+                @Override
+                public void removed(final ServiceReference<QuartzService> ref, final QuartzService service) {
+                    aRef.set(null);
+                }
+                
             });
             openTrackers();
 

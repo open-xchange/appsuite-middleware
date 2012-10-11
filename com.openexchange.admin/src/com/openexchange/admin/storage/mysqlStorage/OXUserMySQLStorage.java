@@ -77,7 +77,6 @@ import java.util.Set;
 import java.util.TimeZone;
 import java.util.UUID;
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.osgi.framework.ServiceException;
 import com.openexchange.admin.properties.AdminProperties;
 import com.openexchange.admin.rmi.dataobjects.Context;
@@ -104,6 +103,7 @@ import com.openexchange.groupware.settings.impl.SettingStorage;
 import com.openexchange.groupware.userconfiguration.RdbUserConfigurationStorage;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
+import com.openexchange.log.LogFactory;
 import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mailaccount.Attribute;
@@ -115,6 +115,7 @@ import com.openexchange.spamhandler.SpamHandler;
 import com.openexchange.tools.net.URIDefaults;
 import com.openexchange.tools.net.URIParser;
 import com.openexchange.tools.oxfolder.OXFolderAdminHelper;
+import com.openexchange.tools.sql.DBUtils;
 
 /**
  * @author cutmasta
@@ -552,7 +553,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                     } else if (returntype.equalsIgnoreCase("java.util.Date")) {
                         final Date result = (java.util.Date) method.invoke(usrdata, (Object[]) null);
                         if (null != result) {
-                            stmt.setDate(db, new java.sql.Date(result.getTime()));
+                            stmt.setTimestamp(db, new java.sql.Timestamp(result.getTime()));
                         } else {
                             final Method methodbool = getMethodforbooleanparameter(method);
                             final boolean test = (Boolean) methodbool.invoke(usrdata, (Object[]) null);
@@ -792,6 +793,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
 
             // fire up
             con.commit();
+            log.info("User " + userId + " changed!");
         } catch (final DataTruncation dt) {
             log.error(AdminCache.DATA_TRUNCATION_ERROR_MSG, dt);
             rollback(con);
@@ -1019,7 +1021,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
 
                 stmt.setInt(12, contactId);
 
-                String homedir = prop.getUserProp(AdminProperties.User.HOME_DIR_ROOT, "/home");
+                String homedir = "/home"; //prop.getUserProp(AdminProperties.User.HOME_DIR_ROOT, "/home");
                 homedir += "/" + usrdata.getName();
                 stmt.setString(13, homedir);
 
@@ -1323,9 +1325,6 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             storeUISettings(ctx, con, usrdata, userId);
             // Set wanted folder tree.
             storeFolderTree(ctx, con, usrdata, userId);
-            if (log.isInfoEnabled()) {
-                log.info("User " + userId + " created!");
-            }
             return userId;
         } catch (final ServiceException e) {
             log.error("Required service not found.", e);
@@ -1498,7 +1497,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             final int retval = create(ctx, usrdata, moduleAccess, write_ox_con, internal_user_id, contact_id, uid_number);
 
             write_ox_con.commit();
-
+            log.info("User " + retval + " created!");
             return retval;
         } catch (final DataTruncation dt) {
             log.error(AdminCache.DATA_TRUNCATION_ERROR_MSG, dt);
@@ -1785,7 +1784,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
         final ArrayList<User> userlist = new ArrayList<User>();
         try {
             read_ox_con = cache.getConnectionForContext(context_id);
-            final OXToolStorageInterface oxtool = OXToolMySQLStorage.getInstance();
+            final OXToolStorageInterface oxtool = OXToolStorageInterface.getInstance();
             final int adminForContext = oxtool.getAdminForContext(ctx, read_ox_con);
 
             stmt = read_ox_con.prepareStatement("SELECT uid FROM login2user WHERE cid = ? AND id = ?");
@@ -2080,10 +2079,14 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             }
         } catch (final SQLException sqle) {
             log.error("SQL Error", sqle);
-            throw new StorageException(sqle.toString());
+            throw new StorageException(sqle.toString(), sqle);
         } catch (final OXException e) {
             log.error("Delete contact via groupware API error", e);
-            throw new StorageException(e.toString());
+            final SQLException sqle = DBUtils.extractSqlException(e);
+            if (null != sqle) {
+                throw new StorageException(sqle.toString(), sqle);
+            }
+            throw new StorageException(e.toString(), e);
         } finally {
             try {
                 if (stmt != null) {
@@ -2119,47 +2122,52 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
 
     @Override
     public void delete(final Context ctx, final User[] users) throws StorageException {
-        final Connection con;
         try {
-            con = cache.getConnectionForContextNoTimeout(ctx.getId().intValue());
-        } catch (final PoolException e) {
-            log.error("Pool Error", e);
-            throw new StorageException(e);
-        }
-        try {
-            con.setAutoCommit(false);
-            delete(ctx, users, con);
-            con.commit();
-        } catch (final StorageException st) {
-            log.error("Storage Error", st);
-            try {
-                con.rollback();
-            } catch (final SQLException ex) {
-                log.error("Error rollback ox db write connection", ex);
-            }
-            throw st;
+            final DBUtils.TransactionRollbackCondition condition = new DBUtils.TransactionRollbackCondition(3);
+            do {
+                final Connection con;
+                try {
+                    con = cache.getConnectionForContextNoTimeout(ctx.getId().intValue());
+                } catch (final PoolException e) {
+                    log.error("Pool Error", e);
+                    throw new StorageException(e);
+                }
+                condition.resetTransactionRollbackException();
+                try {
+                    DBUtils.startTransaction(con);
+                    delete(ctx, users, con);
+                    for (final User user : users) {
+                        log.info("User " + user.getId() + " deleted!");
+                    }
+                    con.commit();
+                } catch (final StorageException st) {
+                    DBUtils.rollback(con);
+                    final SQLException sqle = DBUtils.extractSqlException(st);
+                    if (!condition.isFailedTransactionRollback(sqle)) {
+                        log.error("Storage Error", st);
+                        throw st;
+                    }
+                } catch (final SQLException sql) {
+                    DBUtils.rollback(con);
+                    if (!condition.isFailedTransactionRollback(sql)) {
+                        log.error("SQL Error", sql);
+                        throw new StorageException(sql.toString(), sql);
+                    }
+                } catch (final RuntimeException e) {
+                    log.error(e.getMessage(), e);
+                    DBUtils.rollback(con);
+                    throw e;
+                } finally {
+                    DBUtils.autocommit(con);
+                    try {
+                        cache.pushConnectionForContextNoTimeout(ctx.getId().intValue(), con);
+                    } catch (final PoolException e) {
+                        log.error("Pool Error pushing ox write connection to pool!", e);
+                    }
+                }
+            } while (condition.checkRetry());
         } catch (final SQLException sql) {
-            log.error("SQL Error", sql);
-            try {
-                con.rollback();
-            } catch (final SQLException ex) {
-                log.error("Error rollback ox db write connection", ex);
-            }
-            throw new StorageException(sql.toString());
-        } catch (final RuntimeException e) {
-            log.error(e.getMessage(), e);
-            try {
-                con.rollback();
-            } catch (final SQLException ex) {
-                log.error("Error rollback ox db write connection", ex);
-            }
-            throw e;
-        } finally {
-            try {
-                cache.pushConnectionForContextNoTimeout(ctx.getId().intValue(), con);
-            } catch (final PoolException e) {
-                log.error("Pool Error pushing ox write connection to pool!", e);
-            }
+            throw new StorageException(sql.toString(), sql);
         }
     }
 

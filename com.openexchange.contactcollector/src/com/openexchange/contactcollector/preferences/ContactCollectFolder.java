@@ -101,11 +101,12 @@ public class ContactCollectFolder implements PreferencesItemService {
             @Override
             public void writeValue(final Session session, final Context ctx, final User user, final Setting setting) throws OXException {
                 Integer value;
+                final Object singleValue = setting.getSingleValue();
                 try {
-                    if (setting.getSingleValue() == null) {
+                    if (singleValue == null || "null".equalsIgnoreCase(singleValue.toString())) {
                         value = null;
                     } else {
-                        value = new Integer(String.valueOf(setting.getSingleValue()));
+                        value = Integer.valueOf(singleValue.toString());
                     }
                 } catch (final NumberFormatException e) {
                     throw SettingExceptionCodes.INVALID_VALUE.create(e, setting.getSingleValue(), "contactCollectFolder");

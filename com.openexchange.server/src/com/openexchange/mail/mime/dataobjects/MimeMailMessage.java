@@ -52,17 +52,20 @@ package com.openexchange.mail.mime.dataobjects;
 import java.io.InputStream;
 import java.io.OutputStream;
 import javax.activation.DataHandler;
+import javax.mail.Part;
 import javax.mail.internet.MimeMessage;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.MailPart;
+import com.openexchange.mail.mime.ManagedMimeMessage;
+import com.openexchange.mail.mime.MimeCleanUp;
 
 /**
  * {@link MimeMailMessage} - A subclass of {@link MailMessage} to support MIME messages (as per RFC822).
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class MimeMailMessage extends MailMessage implements MimeRawSource {
+public final class MimeMailMessage extends MailMessage implements MimeRawSource, MimeCleanUp {
 
     private static final long serialVersionUID = 4593386724062676753L;
 
@@ -81,7 +84,7 @@ public final class MimeMailMessage extends MailMessage implements MimeRawSource 
      */
     public MimeMailMessage() {
         super();
-        mailPart = new MimeMailPart(null);
+        mailPart = new MimeMailPart();
     }
 
     /**
@@ -138,7 +141,7 @@ public final class MimeMailMessage extends MailMessage implements MimeRawSource 
      */
     public void setContent(final MimeMessage msg) {
         // TODO: this.mailPart = msg == null ? new MIMEMailPart(null) : MIMEMessageConverter.convertPart(msg);
-        mailPart = msg == null ? new MimeMailPart(null) : new MimeMailPart(msg);
+        mailPart = msg == null ? new MimeMailPart((Part) null) : new MimeMailPart(msg);
     }
 
     /**
@@ -148,6 +151,18 @@ public final class MimeMailMessage extends MailMessage implements MimeRawSource 
      */
     public MimeMessage getMimeMessage() {
         return (MimeMessage) mailPart.getPart();
+    }
+ 
+    @Override
+    public void cleanUp() {
+        final MimeMessage mimeMessage = getMimeMessage();
+        if (mimeMessage instanceof ManagedMimeMessage) {
+            try {
+                ((ManagedMimeMessage) mimeMessage).cleanUp();
+            } catch (final Exception e) {
+                com.openexchange.log.Log.loggerFor(MimeMailMessage.class).warn("Couldn't clean-up MIME resource.", e);
+            }
+        }
     }
 
     @Override

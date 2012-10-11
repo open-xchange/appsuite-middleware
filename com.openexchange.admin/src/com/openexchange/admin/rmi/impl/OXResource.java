@@ -54,7 +54,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import com.openexchange.log.LogFactory;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
@@ -73,6 +73,7 @@ import com.openexchange.admin.rmi.exceptions.EnforceableDataObjectException;
 import com.openexchange.admin.rmi.exceptions.InvalidCredentialsException;
 import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 import com.openexchange.admin.rmi.exceptions.NoSuchContextException;
+import com.openexchange.admin.rmi.exceptions.NoSuchObjectException;
 import com.openexchange.admin.rmi.exceptions.NoSuchResourceException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.storage.interfaces.OXResourceStorageInterface;
@@ -113,6 +114,7 @@ public class OXResource extends OXCommonImpl implements OXResourceInterface{
         basicauth = new BasicAuthenticator();
     }
 
+    @Override
     public void change(final Context ctx, final Resource res, Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException,InvalidDataException, DatabaseUpdateException, NoSuchResourceException {
         auth = auth == null ? new Credentials("","") : auth;
         try {
@@ -135,8 +137,12 @@ public class OXResource extends OXCommonImpl implements OXResourceInterface{
         }
         
         try {
-            setIdOrGetIDFromNameAndIdObject(ctx, res);
-            
+            try {
+                setIdOrGetIDFromNameAndIdObject(ctx, res);
+            } catch (NoSuchObjectException e) {
+                throw new NoSuchResourceException(e);
+            }
+
             res.testMandatoryCreateFieldsNull();
             
             final int resource_ID = res.getId();        
@@ -187,7 +193,7 @@ public class OXResource extends OXCommonImpl implements OXResourceInterface{
 
         oxRes.change(ctx, res);
         
-        final ArrayList<Bundle> bundles = AdminDaemon.getBundlelist();
+        final java.util.List<Bundle> bundles = AdminDaemon.getBundlelist();
         for (final Bundle bundle : bundles) {
             final String bundlename = bundle.getSymbolicName();
             if (Bundle.ACTIVE==bundle.getState()) {
@@ -213,6 +219,7 @@ public class OXResource extends OXCommonImpl implements OXResourceInterface{
         }
     }
     
+    @Override
     public Resource create(final Context ctx, final Resource res, Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException,InvalidDataException, DatabaseUpdateException {        
        auth = auth == null ? new Credentials("","") : auth;
        try {
@@ -275,7 +282,7 @@ public class OXResource extends OXCommonImpl implements OXResourceInterface{
        res.setId(retval);
        final ArrayList<OXResourcePluginInterface> interfacelist = new ArrayList<OXResourcePluginInterface>();
 
-       final ArrayList<Bundle> bundles = AdminDaemon.getBundlelist();
+       final java.util.List<Bundle> bundles = AdminDaemon.getBundlelist();
        for (final Bundle bundle : bundles) {
            final String bundlename = bundle.getSymbolicName();
            if (Bundle.ACTIVE==bundle.getState()) {
@@ -317,6 +324,7 @@ public class OXResource extends OXCommonImpl implements OXResourceInterface{
        return res;
     }
     
+    @Override
     public void delete(final Context ctx, final Resource res, Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException,InvalidDataException, DatabaseUpdateException, NoSuchResourceException {
         auth = auth == null ? new Credentials("","") : auth;
         try {
@@ -329,7 +337,11 @@ public class OXResource extends OXCommonImpl implements OXResourceInterface{
         try {
             basicauth.doAuthentication(auth,ctx);
             
-            setIdOrGetIDFromNameAndIdObject(ctx, res);
+            try {
+                setIdOrGetIDFromNameAndIdObject(ctx, res);
+            } catch (NoSuchObjectException e) {
+                throw new NoSuchResourceException(e);
+            }
             if (log.isDebugEnabled()) {
                 log.debug(ctx + " - " + res + " - " + auth);
             }
@@ -358,8 +370,8 @@ public class OXResource extends OXCommonImpl implements OXResourceInterface{
         }
         final ArrayList<OXResourcePluginInterface> interfacelist = new ArrayList<OXResourcePluginInterface>();
 
-        final ArrayList<Bundle> bundles = AdminDaemon.getBundlelist();
-        final ArrayList<Bundle> revbundles = new ArrayList<Bundle>();
+        final java.util.List<Bundle> bundles = AdminDaemon.getBundlelist();
+        final java.util.List<Bundle> revbundles = new ArrayList<Bundle>();
         for (int i = bundles.size() - 1; i >= 0; i--) {
             revbundles.add(bundles.get(i));
         }
@@ -391,6 +403,7 @@ public class OXResource extends OXCommonImpl implements OXResourceInterface{
         oxRes.delete(ctx, res);
     }
     
+    @Override
     public Resource getData(final Context ctx, final Resource res, Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException,InvalidDataException, DatabaseUpdateException, NoSuchResourceException {
         auth = auth == null ? new Credentials("","") : auth;
         try {
@@ -406,9 +419,13 @@ public class OXResource extends OXCommonImpl implements OXResourceInterface{
             log.error(e.getMessage(), e);
             throw e;
         }        
-        
-        setIdOrGetIDFromNameAndIdObject(ctx, res);
-        
+
+        try {
+            setIdOrGetIDFromNameAndIdObject(ctx, res);
+        } catch (NoSuchObjectException e) {
+            throw new NoSuchResourceException(e);
+        }
+
         final int resource_id = res.getId().intValue();
         
         if (log.isDebugEnabled()) {
@@ -423,7 +440,7 @@ public class OXResource extends OXCommonImpl implements OXResourceInterface{
         
         Resource retres = oxRes.getData(ctx, res);
 
-        final ArrayList<Bundle> bundles = AdminDaemon.getBundlelist();
+        final java.util.List<Bundle> bundles = AdminDaemon.getBundlelist();
         for (final Bundle bundle : bundles) {
             final String bundlename = bundle.getSymbolicName();
             if (Bundle.ACTIVE==bundle.getState()) {
@@ -446,6 +463,7 @@ public class OXResource extends OXCommonImpl implements OXResourceInterface{
         return retres;
     }
     
+    @Override
     public Resource[] getData(final Context ctx, final Resource[] resources, Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, NoSuchResourceException, DatabaseUpdateException {
         auth = auth == null ? new Credentials("","") : auth;
         try {
@@ -497,7 +515,7 @@ public class OXResource extends OXCommonImpl implements OXResourceInterface{
             retval.add(tmp);
         }        
             
-        final ArrayList<Bundle> bundles = AdminDaemon.getBundlelist();
+        final java.util.List<Bundle> bundles = AdminDaemon.getBundlelist();
         for (final Bundle bundle : bundles) {
             final String bundlename = bundle.getSymbolicName();
             if (Bundle.ACTIVE==bundle.getState()) {
@@ -521,6 +539,7 @@ public class OXResource extends OXCommonImpl implements OXResourceInterface{
         return retval.toArray(new Resource[retval.size()]);
     }
     
+    @Override
     public Resource[] list(final Context ctx, final String pattern, Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException,InvalidDataException, DatabaseUpdateException {
         auth = auth == null ? new Credentials("","") : auth;
         try {
@@ -550,6 +569,7 @@ public class OXResource extends OXCommonImpl implements OXResourceInterface{
         return oxRes.list(ctx,pattern);
     }
     
+    @Override
     public Resource[] listAll(final Context ctx, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException,InvalidDataException, DatabaseUpdateException {
         return list(ctx, "*", auth);
     }

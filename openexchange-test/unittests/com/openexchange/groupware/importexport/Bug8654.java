@@ -63,6 +63,7 @@ import com.openexchange.api2.TasksSQLInterface;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.tasks.Task;
 import com.openexchange.groupware.tasks.TasksSQLImpl;
+import com.openexchange.importexport.formats.Format;
 
 public class Bug8654 extends AbstractICalImportTest {
 

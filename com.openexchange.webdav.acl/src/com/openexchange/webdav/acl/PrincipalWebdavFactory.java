@@ -67,7 +67,7 @@ import com.openexchange.webdav.protocol.helpers.AbstractWebdavFactory;
  */
 public class PrincipalWebdavFactory extends AbstractWebdavFactory {
 
-    private static final Protocol PROTOCOL = new Protocol();
+    private static final Protocol PROTOCOL = new PrincipalProtocol();
 
     private final UserService userService;
     private final SessionHolder sessionHolder;

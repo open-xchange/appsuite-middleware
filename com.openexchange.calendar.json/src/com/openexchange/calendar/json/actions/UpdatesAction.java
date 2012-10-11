@@ -92,7 +92,7 @@ import com.openexchange.tools.session.ServerSession;
 }, responseDescription = "Response with timestamp: An array with new, modified and deleted appointments. New and modified appointments are represented by arrays. The elements of each array contain the information specified by the corresponding identifiers in the columns parameter. Deleted appointments (should the ignore parameter be ever implemented) would be identified by objects described in Full identifier for an appointment instead of arrays. Appointment sequencies are broken up into individual appointments and each modified occurrence of a sequence in the requested range is returned separately. The appointments are sorted in ascending order by the field start_date.")
 public final class UpdatesAction extends AppointmentAction {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(UpdatesAction.class));
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(UpdatesAction.class));
 
     /**
      * Initializes a new {@link UpdatesAction}.

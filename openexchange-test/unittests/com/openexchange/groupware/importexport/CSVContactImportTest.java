@@ -49,7 +49,6 @@
 
 package com.openexchange.groupware.importexport;
 
-import com.openexchange.exception.OXException;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -64,9 +63,11 @@ import junit.framework.JUnit4TestAdapter;
 import org.junit.Test;
 import com.openexchange.api2.ContactSQLInterface;
 import com.openexchange.api2.RdbContactSQLImpl;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
-import com.openexchange.groupware.importexport.importers.CSVContactImporter;
+import com.openexchange.importexport.formats.Format;
+import com.openexchange.importexport.importers.CSVContactImporter;
 
 /**
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias 'Tierlieb' Prinz</a>
@@ -80,7 +81,7 @@ public class CSVContactImportTest extends AbstractContactTest {
     public boolean doDebugging = false;
 
     public String notASingleImport = "I_E-0804";
-    public String malformedCSV = "I_E-1000";
+    public String malformedCSV = "CSV-1000";
     public String malformedDate = "CON-0600";
 
     //workaround for JUnit 3 runner

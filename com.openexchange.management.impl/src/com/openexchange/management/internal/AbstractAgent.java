@@ -87,7 +87,7 @@ import javax.management.remote.JMXServiceURL;
 import javax.security.auth.Subject;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import com.openexchange.log.LogFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.management.ManagementExceptionCode;
 
@@ -140,7 +140,7 @@ public abstract class AbstractAgent {
 
     }
 
-    private static final class AbstractAgentJMXAuthenticator implements JMXAuthenticator {
+    protected static final class AbstractAgentJMXAuthenticator implements JMXAuthenticator {
 
         private static volatile Charset US_ASCII;
 
@@ -437,14 +437,25 @@ public abstract class AbstractAgent {
      * @throws OXException If connector cannot be added
      */
     protected final JMXServiceURL addConnectorServer(final String urlstr, final String jmxLogin, final String jmxPassword) throws OXException {
-        final JMXServiceURL url;
         try {
-            url = new JMXServiceURL(urlstr);
+            return addConnectorServer(new JMXServiceURL(urlstr), jmxLogin, jmxPassword);
         } catch (final MalformedURLException e) {
             throw ManagementExceptionCode.MALFORMED_URL.create(e, urlstr);
         }
+    }
+
+    /**
+     * Creates a JMX connector server bound to specified JMX URL.
+     *
+     * @param url The JMX URL
+     * @param jmxLogin The JMX login or <code>null</code> to use no authentication for connecting to specified JMX URL
+     * @param jmxPassword The JMX password (only needed if previous parameter is not <code>null</code>)
+     * @return The {@link JMXServiceURL} to which the connector is bound
+     * @throws OXException If connector cannot be added
+     */
+    protected final JMXServiceURL addConnectorServer(final JMXServiceURL url, final String jmxLogin, final String jmxPassword) throws OXException {
         if (connectors.containsKey(url)) {
-            throw ManagementExceptionCode.JMX_URL_ALREADY_BOUND.create(urlstr);
+            throw ManagementExceptionCode.JMX_URL_ALREADY_BOUND.create(url);
         }
         try {
             final Map<String, Object> environment;
@@ -462,7 +473,7 @@ public abstract class AbstractAgent {
             cs.start();
             connectors.put(url, cs);
             if (LOG.isInfoEnabled()) {
-                LOG.info(new StringBuilder("JMX connector server on ").append(urlstr).append(" started"));
+                LOG.info(new StringBuilder("JMX connector server on ").append(url).append(" started"));
             }
             return url;
         } catch (final IOException e) {

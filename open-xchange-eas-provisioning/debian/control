@@ -1,0 +1,35 @@
+Source: open-xchange-eas-provisioning
+Section: web
+Priority: optional
+Maintainer: Marcus Klein <marcus.klein@open-xchange.com>
+Build-Depends: debhelper (>= 4.0.0), ant (>= 1.7.0), ant-optional (>= 1.7.0), sun-java6-jdk|java6-sdk, open-xchange-core (>= @OXVERSION@)
+Standards-Version: 3.8.4
+Homepage: http://www.open-xchange.com
+
+Package: open-xchange-eas-provisioning
+Architecture: all
+Depends: ${misc:Depends}, open-xchange-eas-provisioning-core (>= @OXVERSION@), open-xchange-eas (>= @OXVERSION@), open-xchange-eas-provisioning-action
+Description: Meta package to install all necessary components to provision synchronization with mobile phones
+
+Package: open-xchange-eas-provisioning-core
+Architecture: all
+Pre-Depends: open-xchange-core (>= @OXVERSION@)
+Depends: ${misc:Depends}
+Replaces: open-xchange-mobile-configuration-generator (<< 6.21.0-0), open-xchange-mobile-configuration-json (<< 6.21.0-0)
+Conflicts: open-xchange-mobile-configuration-generator (<< 6.21.0-0), open-xchange-mobile-configuration-json (<< 6.21.0-0)
+Description: Backend extension to provision synchronization with mobile phones
+
+###### http://wiki.debian.org/Renaming_a_Package #####
+Package: open-xchange-mobile-configuration-generator
+Architecture: all
+Depends: ${shlibs:Depends}, ${misc:Depends}, open-xchange-eas-provisioning-core
+Section: oldlibs
+Description: transitional dummy package
+
+Package: open-xchange-mobile-configuration-json
+Architecture: all
+Depends: ${shlibs:Depends}, ${misc:Depends}, open-xchange-eas-provisioning-core
+Section: oldlibs
+Description: transitional dummy package
+
+

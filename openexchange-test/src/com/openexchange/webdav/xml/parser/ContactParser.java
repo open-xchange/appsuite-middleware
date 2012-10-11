@@ -46,7 +46,7 @@ package com.openexchange.webdav.xml.parser;
 
 import java.util.ArrayList;
 import java.util.List;
-import org.jdom.Element;
+import org.jdom2.Element;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.DistributionListEntryObject;
 import com.openexchange.groupware.container.LinkEntryObject;

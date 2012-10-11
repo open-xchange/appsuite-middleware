@@ -49,15 +49,16 @@
 
 package com.openexchange.groupware.calendar;
 
+import java.io.File;
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import com.openexchange.log.LogFactory;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.configuration.ConfigurationException;
 import com.openexchange.configuration.ConfigurationExceptionCodes;
-import com.openexchange.configuration.SystemConfig;
-import com.openexchange.configuration.SystemConfig.Property;
 import com.openexchange.exception.OXException;
 import com.openexchange.server.Initialization;
 import com.openexchange.server.impl.Starter;
+import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.conf.AbstractConfig;
 
 /**
@@ -68,19 +69,17 @@ public class CalendarConfig extends AbstractConfig implements Initialization {
 
     private static final CalendarConfig singleton = new CalendarConfig();
 
-    private static final Property KEY = Property.CALENDAR;
-
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(CalendarConfig.class));
 
-    private static boolean solo_reminder_trigger_event = true;
-    private static boolean check_and_remove_past_reminders = true;
-    private static int max_operations_in_recurrence_calculations;
+    private static volatile boolean solo_reminder_trigger_event = true;
+    private static volatile boolean check_and_remove_past_reminders = true;
+    private static volatile int max_operations_in_recurrence_calculations;
 
-    private static boolean CACHED_ITERATOR_FAST_FETCH = true;
+    private static volatile boolean CACHED_ITERATOR_FAST_FETCH = true;
 
-    private static boolean seriesconflictlimit = true;
+    private static volatile boolean seriesconflictlimit = true;
 
-    private static boolean undefinedstatusconflict = true;
+    private static volatile boolean undefinedstatusconflict = true;
 
     public static boolean isCACHED_ITERATOR_FAST_FETCH() {
         return CACHED_ITERATOR_FAST_FETCH;
@@ -105,9 +104,10 @@ public class CalendarConfig extends AbstractConfig implements Initialization {
      */
     @Override
     protected String getPropertyFileName() throws OXException {
-        final String filename = SystemConfig.getProperty(KEY);
+        final File file = ServerServiceRegistry.getInstance().getService(ConfigurationService.class).getFileByName("calendar.properties");
+        final String filename = null == file ? null : file.getPath();
         if (null == filename) {
-            throw ConfigurationExceptionCodes.PROPERTY_MISSING.create(KEY.getPropertyName());
+            throw ConfigurationExceptionCodes.PROPERTY_MISSING.create("calendar.properties");
         }
         return filename;
     }

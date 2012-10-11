@@ -58,7 +58,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import com.openexchange.log.LogFactory;
 import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.api2.TasksSQLInterface;
 import com.openexchange.data.conversion.ical.ConversionError;
@@ -147,6 +147,7 @@ public class ICalExporter implements Exporter {
         CalendarObject.NOTE,
         CalendarObject.RECURRENCE_TYPE,
         CalendarObject.PARTICIPANTS,
+        Task.UID,
         Task.ACTUAL_COSTS,
         Task.ACTUAL_DURATION,
         Task.ALARM,
@@ -234,7 +235,7 @@ public class ICalExporter implements Exporter {
                 try {
                     while (searchIterator.hasNext()) {
                         final Appointment appointment = searchIterator.next();
-                        if (Appointment.NO_RECURRENCE != appointment.getRecurrenceType()) {
+                        if (CalendarObject.NO_RECURRENCE != appointment.getRecurrenceType()) {
                             if (!appointment.containsTimezone()) {
                                 appointment.setTimezone(user.getTimeZone());
                             }

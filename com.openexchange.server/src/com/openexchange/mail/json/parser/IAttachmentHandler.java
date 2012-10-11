@@ -50,6 +50,8 @@
 
 package com.openexchange.mail.json.parser;
 
+import java.util.List;
+
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.dataobjects.compose.ComposedMailMessage;
@@ -84,5 +86,5 @@ public interface IAttachmentHandler {
      * @return The resulting composed mails
      * @throws OXException If an error occurs while filling mail
      */
-    public ComposedMailMessage[] generateComposedMails(ComposedMailMessage source) throws OXException;
+    public ComposedMailMessage[] generateComposedMails(ComposedMailMessage source, List<OXException> warnings) throws OXException;
 }

@@ -54,6 +54,7 @@ import java.io.UnsupportedEncodingException;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Collections;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -61,6 +62,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import javax.mail.internet.AddressException;
+import javax.mail.internet.IDNA;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -68,14 +71,16 @@ import com.openexchange.ajax.Login;
 import com.openexchange.ajax.helper.BrowserDetector;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.configuration.ServerConfig;
+import com.openexchange.exception.OXException;
 import com.openexchange.java.Charsets;
+import com.openexchange.mail.mime.MimeMailException;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.systemname.SystemNameService;
 import com.openexchange.tools.encoding.Helper;
 
 /**
  * Convenience methods for servlets.
- *
+ * 
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public final class Tools {
@@ -147,9 +152,46 @@ public final class Tools {
     }
 
     /**
+     * Converts a unicode representation of an internet address to ASCII using the procedure in RFC3490 section 4.1. Unassigned characters
+     * are not allowed and STD3 ASCII rules are enforced.
+     * <p>
+     * This implementation already supports EsZett character. Thanks to <a
+     * href="http://blog.http.net/code/gnu-libidn-eszett-hotfix/">http.net</a>!
+     * <p>
+     * <code>"someone@m&uuml;ller.de"</code> is converted to <code>"someone@xn--mller-kva.de"</code>
+     * 
+     * @param idnAddress The unicode representation of an internet address
+     * @return The ASCII-encoded (punycode) of given internet address or <code>null</code> if argument is <code>null</code>
+     * @throws OXException If ASCII representation of given internet address cannot be created
+     */
+    public static String toACE(final String idnAddress) throws OXException {
+        try {
+            return IDNA.toACE(idnAddress);
+        } catch (final AddressException e) {
+            throw MimeMailException.handleMessagingException(e);
+        }
+    }
+
+    /**
+     * Converts an ASCII-encoded address to its unicode representation. Unassigned characters are not allowed and STD3 hostnames are
+     * enforced.
+     * <p>
+     * This implementation already supports EsZett character. Thanks to <a
+     * href="http://blog.http.net/code/gnu-libidn-eszett-hotfix/">http.net</a>!
+     * <p>
+     * <code>"someone@xn--mller-kva.de"</code> is converted to <code>"someone@m&uuml;ller.de"</code>
+     * 
+     * @param aceAddress The ASCII-encoded (punycode) address
+     * @return The unicode representation of given internet address or <code>null</code> if argument is <code>null</code>
+     */
+    public static String toIDN(final String aceAddress) {
+        return IDNA.toIDN(aceAddress);
+    }
+
+    /**
      * Sets specified ETag header (and implicitly removes/replaces any existing cache-controlling header: <i>Expires</i>,
      * <i>Cache-Control</i>, and <i>Pragma</i>)
-     *
+     * 
      * @param eTag The ETag value
      * @param resp The HTTP servlet response to apply to
      */
@@ -164,7 +206,7 @@ public final class Tools {
     /**
      * Sets specified ETag header (and implicitly removes/replaces any existing cache-controlling header: <i>Expires</i>,
      * <i>Cache-Control</i>, and <i>Pragma</i>)
-     *
+     * 
      * @param eTag The ETag value
      * @param expires The optional expires date, pass <code>null</code> to set default expiry (+ 1 year)
      * @param resp The HTTP servlet response to apply to
@@ -184,29 +226,27 @@ public final class Tools {
             resp.setHeader(NAME_CACHE_CONTROL, "private, max-age=31521018"); // 1 year
         }
     }
-    
 
-	public static void setExpires(Date expires, HttpServletResponse resp) {
-       if (null != expires) {
+    public static void setExpires(final Date expires, final HttpServletResponse resp) {
+        if (null != expires) {
             synchronized (HEADER_DATEFORMAT) {
                 resp.setHeader(NAME_EXPIRES, HEADER_DATEFORMAT.format(expires));
             }
             resp.setHeader(NAME_CACHE_CONTROL, "private, max-age=31521018"); // 1 year
         }
-	}
-	
-	public static void setExpiresInOneYear(HttpServletResponse resp) {
-		synchronized (HEADER_DATEFORMAT) {
+    }
+
+    public static void setExpiresInOneYear(final HttpServletResponse resp) {
+        synchronized (HEADER_DATEFORMAT) {
             resp.setHeader(NAME_EXPIRES, HEADER_DATEFORMAT.format(new Date(System.currentTimeMillis() + MILLIS_YEAR)));
         }
-		resp.setHeader(NAME_CACHE_CONTROL, "private, max-age=31521018"); // 1 year
-	}
-
+        resp.setHeader(NAME_CACHE_CONTROL, "private, max-age=31521018"); // 1 year
+    }
 
     /**
      * The magic spell to disable caching. Do not use these headers if response is directly written into servlet's output stream to initiate
      * a download.
-     *
+     * 
      * @param resp the servlet response.
      * @see #removeCachingHeader(HttpServletResponse)
      */
@@ -219,7 +259,7 @@ public final class Tools {
     /**
      * Remove <tt>Pragma</tt> response header value if we are going to write directly into servlet's output stream cause then some browsers
      * do not allow this header.
-     *
+     * 
      * @param resp the servlet response.
      */
     public static void removeCachingHeader(final HttpServletResponse resp) {
@@ -230,7 +270,7 @@ public final class Tools {
 
     /**
      * Formats a date for HTTP headers.
-     *
+     * 
      * @param date date to format.
      * @return the string with the formated date.
      */
@@ -242,7 +282,7 @@ public final class Tools {
 
     /**
      * Parses a date from a HTTP date header.
-     *
+     * 
      * @param str The HTTP date header value
      * @return The parsed <code>java.util.Date</code> object
      * @throws ParseException If the date header value cannot be parsed
@@ -276,7 +316,7 @@ public final class Tools {
     /**
      * This method integrates interesting HTTP header values into a string for logging purposes. This is usefull if a client sent an illegal
      * request for discovering the cause of the illegal request.
-     *
+     * 
      * @param req the servlet request.
      * @return a string containing interesting HTTP headers.
      */
@@ -316,7 +356,7 @@ public final class Tools {
 
     /**
      * Deletes all OX specific cookies.
-     *
+     * 
      * @param req The HTTP servlet request.
      * @param resp The HTTP servlet response.
      */
@@ -326,7 +366,7 @@ public final class Tools {
 
     /**
      * Deletes all cookies which satisfy specified matcher.
-     *
+     * 
      * @param req The HTTP servlet request.
      * @param resp The HTTP servlet response.
      * @param matcher The cookie name matcher determining which cookie shall be deleted
@@ -339,6 +379,7 @@ public final class Tools {
                 if (matcher.matches(cookieName)) {
                     final Cookie respCookie = new Cookie(cookieName, cookie.getValue());
                     respCookie.setPath("/");
+                    // A zero value causes the cookie to be deleted.
                     respCookie.setMaxAge(0);
                     resp.addCookie(respCookie);
                 }
@@ -381,11 +422,30 @@ public final class Tools {
         resp.setHeader("Content-Disposition", cd);
     }
 
+    private static final class AuthCookie implements com.openexchange.authentication.Cookie {
+
+        private final Cookie cookie;
+
+        protected AuthCookie(final Cookie cookie) {
+            this.cookie = cookie;
+        }
+
+        @Override
+        public String getValue() {
+            return cookie.getValue();
+        }
+
+        @Override
+        public String getName() {
+            return cookie.getName();
+        }
+    }
+
     public static interface CookieNameMatcher {
 
         /**
          * Indicates if specified cookie name matches.
-         *
+         * 
          * @param cookieName The cookie name to check
          * @return <code>true</code> if specified cookie name matches; otherwise <code>false</code>
          */
@@ -396,7 +456,7 @@ public final class Tools {
      * Tries to determine the best protocol used for accessing this server instance. If the configuration property
      * com.openexchange.forceHTTPS is set to true, this will always be https://, otherwise the request will be used to determine the
      * protocol. https:// if it was a secure request, http:// otherwise
-     *
+     * 
      * @param req The HttpServletRequest used to contact this server
      * @return "http://" or "https://" depending on what was deemed more appropriate
      */
@@ -406,15 +466,16 @@ public final class Tools {
 
     public static boolean considerSecure(final HttpServletRequest req) {
         final ConfigurationService configurationService = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
-        if (configurationService != null) {
-            return configurationService.getBoolProperty(ServerConfig.Property.FORCE_HTTPS.getPropertyName(), false);
+        if (configurationService != null && configurationService.getBoolProperty(ServerConfig.Property.FORCE_HTTPS.getPropertyName(), false) && !Cookies.isLocalLan(req)) {
+            // HTTPS is enforced by configuration
+            return true;
         }
         return req.isSecure();
     }
 
     /**
      * Gets the route for specified HTTP session identifier to be used along with <i>";jsessionid"</i> URL part.
-     *
+     * 
      * @param httpSessionId The HTTP session identifier
      * @return The route
      */
@@ -426,7 +487,41 @@ public final class Tools {
         return pos > 0 ? httpSessionId : httpSessionId + '.' + ServerServiceRegistry.getInstance().getService(SystemNameService.class).getSystemName();
     }
 
+    /**
+     * Part of HTTP content type header.
+     */
+    private static final String MULTIPART = "multipart/";
+
+    /**
+     * Utility method that determines whether the request contains multipart content
+     * 
+     * @param request The request to be evaluated.
+     * @return <code>true</code> if the request is multipart; <code>false</code> otherwise.
+     */
+    public static final boolean isMultipartContent(final HttpServletRequest request) {
+        if (null == request) {
+            return false;
+        }
+        final String contentType = request.getContentType();
+        if (contentType == null) {
+            return false;
+        }
+        if (contentType.toLowerCase().startsWith(MULTIPART)) {
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * Copy headers from specified request to a newly generated map.
+     * 
+     * @param req The request to copy headers from
+     * @return The map containing the headers
+     */
     public static final Map<String, List<String>> copyHeaders(final HttpServletRequest req) {
+        if (null == req) {
+            return Collections.emptyMap();
+        }
         final Map<String, List<String>> headers = new HashMap<String, List<String>>();
         for (final Enumeration<?> e = req.getHeaderNames(); e.hasMoreElements();) {
             final String name = (String) e.nextElement();
@@ -438,17 +533,25 @@ public final class Tools {
             for (final Enumeration<?> valueEnum = req.getHeaders(name); valueEnum.hasMoreElements();) {
                 values.add((String) valueEnum.nextElement());
             }
-
         }
         return headers;
     }
 
+    /**
+     * Gets the authentication Cookies from passed request.
+     * 
+     * @param req The request
+     * @return The authentication Cookies
+     */
     public static com.openexchange.authentication.Cookie[] getCookieFromHeader(final HttpServletRequest req) {
+        if (null == req) {
+            return new com.openexchange.authentication.Cookie[0];
+        }
         final Cookie[] cookies = req.getCookies();
         if (null == cookies) {
             return new com.openexchange.authentication.Cookie[0];
         }
-        com.openexchange.authentication.Cookie[] retval = new com.openexchange.authentication.Cookie[cookies.length];
+        final com.openexchange.authentication.Cookie[] retval = new com.openexchange.authentication.Cookie[cookies.length];
         for (int i = 0; i < cookies.length; i++) {
             retval[i] = getCookie(cookies[i]);
         }
@@ -456,15 +559,6 @@ public final class Tools {
     }
 
     private static com.openexchange.authentication.Cookie getCookie(final Cookie cookie) {
-        return new com.openexchange.authentication.Cookie() {
-            @Override
-            public String getValue() {
-                return cookie.getValue();
-            }
-            @Override
-            public String getName() {
-                return cookie.getName();
-            }
-        };
+        return new AuthCookie(cookie);
     }
 }

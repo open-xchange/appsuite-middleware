@@ -56,6 +56,8 @@ package com.openexchange.groupware.container.participants;
  */
 public abstract class AbstractConfirmableParticipant implements ConfirmableParticipant {
 
+    private static final long serialVersionUID = 2232819928880304722L;
+
     private ConfirmStatus status = ConfirmStatus.NONE;
 
     private boolean bStatus = false;
@@ -117,5 +119,17 @@ public abstract class AbstractConfirmableParticipant implements ConfirmableParti
     @Override
     public boolean containsMessage() {
         return bMessage;
+    }
+    
+    @Override
+    public AbstractConfirmableParticipant clone() throws CloneNotSupportedException {
+        AbstractConfirmableParticipant retval = (AbstractConfirmableParticipant) super.clone();
+        
+        retval.bMessage = bMessage;
+        retval.bStatus = bStatus;
+        retval.message = message;
+        retval.status = status;
+        
+        return retval;
     }
 }

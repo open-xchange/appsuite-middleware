@@ -58,7 +58,6 @@ import java.util.List;
 import java.util.Set;
 import javax.servlet.http.HttpServlet;
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.osgi.service.http.HttpService;
 import com.openexchange.ajax.SessionServlet;
 import com.openexchange.config.ConfigurationService;
@@ -71,45 +70,64 @@ import com.openexchange.configuration.ServerConfig.Property;
  */
 public abstract class AbstractSessionServletActivator extends AbstractServletActivator {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(AbstractSessionServletActivator.class));
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(AbstractSessionServletActivator.class);
 
-    protected void registerSessionServlet(String alias, HttpServlet servlet, String... configKeys) {
-        List<String> allKeys = new ArrayList<String>(Arrays.asList(configKeys));
+    /**
+     * Initializes a new {@link AbstractSessionServletActivator}.
+     */
+    protected AbstractSessionServletActivator() {
+        super();
+    }
+
+    /**
+     * Registers given Servlet.
+     * 
+     * @param alias The Servlet's alias
+     * @param servlet The Servlet instance
+     * @param configKeys The Servlet's initial parameters
+     */
+    protected void registerSessionServlet(final String alias, final HttpServlet servlet, final String... configKeys) {
+        final List<String> allKeys = new ArrayList<String>(Arrays.asList(configKeys));
         allKeys.add(Property.IP_CHECK.getPropertyName());
         allKeys.add(Property.COOKIE_HASH.getPropertyName());
+        allKeys.add(Property.IP_CHECK_WHITELIST.getPropertyName());
+        allKeys.add(Property.IP_MASK_V4.getPropertyName());
+        allKeys.add(Property.IP_MASK_V6.getPropertyName());
 
         try {
-            Dictionary<String, String> initParams = new Hashtable<String, String>();
-            ConfigurationService configurationService = getService(ConfigurationService.class);
+            final Dictionary<String, String> initParams = new Hashtable<String, String>();
+            final ConfigurationService configurationService = getService(ConfigurationService.class);
             if (configurationService != null) {
-                for (String configKey : allKeys) {
+                for (final String configKey : allKeys) {
                     String property = configurationService.getProperty(configKey);
                     if (property == null) {
-                        StringBuilder sb = new StringBuilder("Missing initialization parameter \"");
+                        final StringBuilder sb = new StringBuilder("Missing initialization parameter \"");
                         sb.append(configKey);
-                        sb.append("\". Aborting registration of servlet \"");
+                        sb.append("\". Problem during registration of servlet \"");
                         sb.append(servlet.getClass().getName());
                         sb.append("\" into the URI namespace \"");
                         sb.append(alias);
                         sb.append("\".");
-                        throw new IllegalStateException(sb.toString());
+                        final IllegalStateException e = new IllegalStateException(sb.toString());
+                        LOG.warn(e.getMessage(), e);
+                        property = "";
                     }
                     initParams.put(configKey, property);
                 }
-            }
 
-            String whitelistFile = configurationService.getText(SessionServlet.SESSION_WHITELIST_FILE);
-            if (whitelistFile != null) {
-                initParams.put(SessionServlet.SESSION_WHITELIST_FILE, whitelistFile);
+                final String whitelistFile = configurationService.getText(SessionServlet.SESSION_WHITELIST_FILE);
+                if (whitelistFile != null) {
+                    initParams.put(SessionServlet.SESSION_WHITELIST_FILE, whitelistFile);
+                }
             }
 
             registerServlet(alias, servlet, initParams, getService(HttpService.class));
-        } catch (IllegalStateException e) {
+        } catch (final IllegalStateException e) {
             LOG.error(e.getMessage(), e);
         }
     }
 
-    protected void registerServlet(String alias, HttpServlet servlet) {
+    protected void registerServlet(final String alias, final HttpServlet servlet) {
         registerServlet(alias, servlet, getService(HttpService.class));
     }
 
@@ -117,20 +135,31 @@ public abstract class AbstractSessionServletActivator extends AbstractServletAct
      * final, because these services are always needed to register Session Servlets. Additional needed Services are provided by
      * <code>getAdditionalNeededServices()</code>
      */
+    @Override
     protected final Class<?>[] getNeededServices() {
-        Set<Class<?>> neededServices = new HashSet<Class<?>>();
+        final Set<Class<?>> neededServices = new HashSet<Class<?>>();
         neededServices.add(HttpService.class);
         neededServices.add(ConfigurationService.class);
-
-        if (getAdditionalNeededServices() != null) {
-            for (Class<?> clazz : getAdditionalNeededServices()) {
+        /*
+         * Additional needed services
+         */
+        final Class<?>[] additionalNeededServices = getAdditionalNeededServices();
+        if (additionalNeededServices != null) {
+            for (final Class<?> clazz : additionalNeededServices) {
                 neededServices.add(clazz);
             }
         }
-
+        /*
+         * Return
+         */
         return neededServices.toArray(new Class<?>[neededServices.size()]);
     }
 
+    /**
+     * Gets additionally needed services beside <tt>HttpService</tt> & <tt>ConfigurationService</tt>.
+     * 
+     * @return The additionally needed services
+     */
     protected abstract Class<?>[] getAdditionalNeededServices();
 
 }

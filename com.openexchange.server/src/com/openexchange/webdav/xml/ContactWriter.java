@@ -58,31 +58,32 @@ import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.jdom.Element;
-import org.jdom.Namespace;
-import org.jdom.Text;
-import org.jdom.output.XMLOutputter;
+import org.jdom2.Element;
+import org.jdom2.Namespace;
+import org.jdom2.Text;
+import org.jdom2.output.XMLOutputter;
+import com.openexchange.contact.ContactService;
+import com.openexchange.contact.SortOptions;
 import com.openexchange.exception.OXException;
 import com.openexchange.exception.OXException.Generic;
 import com.openexchange.groupware.Types;
-import com.openexchange.groupware.contact.ContactInterface;
-import com.openexchange.groupware.contact.ContactInterfaceDiscoveryService;
-import com.openexchange.groupware.container.CommonObject;
+import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
-import com.openexchange.groupware.container.DataObject;
 import com.openexchange.groupware.container.DistributionListEntryObject;
-import com.openexchange.groupware.container.FolderChildObject;
 import com.openexchange.groupware.container.LinkEntryObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
+import com.openexchange.log.LogFactory;
 import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.tools.encoding.Base64;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorException;
+import com.openexchange.webdav.xml.fields.CommonFields;
 import com.openexchange.webdav.xml.fields.ContactFields;
+import com.openexchange.webdav.xml.fields.DataFields;
+import com.openexchange.webdav.xml.fields.FolderChildFields;
 
 /**
  * ContactWriter
@@ -92,32 +93,32 @@ import com.openexchange.webdav.xml.fields.ContactFields;
 
 public class ContactWriter extends CommonWriter {
 
-    protected final static int[] changeFields = {
-        DataObject.OBJECT_ID, DataObject.CREATED_BY, DataObject.CREATION_DATE, DataObject.LAST_MODIFIED, DataObject.MODIFIED_BY,
-        FolderChildObject.FOLDER_ID, CommonObject.PRIVATE_FLAG, CommonObject.CATEGORIES, Contact.GIVEN_NAME, Contact.SUR_NAME,
-        Contact.ANNIVERSARY, Contact.ASSISTANT_NAME, Contact.BIRTHDAY, Contact.BRANCHES, Contact.BUSINESS_CATEGORY, Contact.CATEGORIES,
-        Contact.CELLULAR_TELEPHONE1, Contact.CELLULAR_TELEPHONE2, Contact.CITY_BUSINESS, Contact.CITY_HOME, Contact.CITY_OTHER,
-        Contact.COMMERCIAL_REGISTER, Contact.COMPANY, Contact.COUNTRY_BUSINESS, Contact.COUNTRY_HOME, Contact.COUNTRY_OTHER,
-        Contact.DEPARTMENT, Contact.DISPLAY_NAME, Contact.DISTRIBUTIONLIST, Contact.EMAIL1, Contact.EMAIL2, Contact.EMAIL3,
-        Contact.EMPLOYEE_TYPE, Contact.FAX_BUSINESS, Contact.FAX_HOME, Contact.FAX_OTHER, Contact.FILE_AS, Contact.FOLDER_ID,
-        Contact.GIVEN_NAME, Contact.IMAGE1, Contact.IMAGE1_CONTENT_TYPE, Contact.INFO, Contact.INSTANT_MESSENGER1,
-        Contact.INSTANT_MESSENGER2, Contact.LINKS, Contact.MANAGER_NAME, Contact.MARITAL_STATUS, Contact.MIDDLE_NAME, Contact.NICKNAME,
-        Contact.NOTE, Contact.NUMBER_OF_CHILDREN, Contact.NUMBER_OF_EMPLOYEE, Contact.POSITION, Contact.POSTAL_CODE_BUSINESS,
-        Contact.POSTAL_CODE_HOME, Contact.POSTAL_CODE_OTHER, Contact.PRIVATE_FLAG, Contact.PROFESSION, Contact.ROOM_NUMBER,
-        Contact.SALES_VOLUME, Contact.SPOUSE_NAME, Contact.STATE_BUSINESS, Contact.STATE_HOME, Contact.STATE_OTHER,
-        Contact.STREET_BUSINESS, Contact.STREET_HOME, Contact.STREET_OTHER, Contact.SUFFIX, Contact.TAX_ID, Contact.TELEPHONE_ASSISTANT,
-        Contact.TELEPHONE_BUSINESS1, Contact.TELEPHONE_BUSINESS2, Contact.TELEPHONE_CALLBACK, Contact.TELEPHONE_CAR,
-        Contact.TELEPHONE_COMPANY, Contact.TELEPHONE_HOME1, Contact.TELEPHONE_HOME2, Contact.TELEPHONE_IP, Contact.TELEPHONE_ISDN,
-        Contact.TELEPHONE_OTHER, Contact.TELEPHONE_PAGER, Contact.TELEPHONE_PRIMARY, Contact.TELEPHONE_RADIO, Contact.TELEPHONE_TELEX,
-        Contact.TELEPHONE_TTYTDD, Contact.TITLE, Contact.URL, Contact.USERFIELD01, Contact.USERFIELD02, Contact.USERFIELD03,
-        Contact.USERFIELD04, Contact.USERFIELD05, Contact.USERFIELD06, Contact.USERFIELD07, Contact.USERFIELD08, Contact.USERFIELD09,
-        Contact.USERFIELD10, Contact.USERFIELD11, Contact.USERFIELD12, Contact.USERFIELD13, Contact.USERFIELD14, Contact.USERFIELD15,
-        Contact.USERFIELD16, Contact.USERFIELD17, Contact.USERFIELD18, Contact.USERFIELD19, Contact.USERFIELD20, Contact.DEFAULT_ADDRESS,
-        Contact.NUMBER_OF_ATTACHMENTS };
+    protected final static ContactField[] changeFields = {
+    	ContactField.OBJECT_ID, ContactField.CREATED_BY, ContactField.CREATION_DATE, ContactField.LAST_MODIFIED, ContactField.MODIFIED_BY,
+    	ContactField.FOLDER_ID, ContactField.PRIVATE_FLAG, ContactField.CATEGORIES, ContactField.GIVEN_NAME, ContactField.SUR_NAME,
+        ContactField.ANNIVERSARY, ContactField.ASSISTANT_NAME, ContactField.BIRTHDAY, ContactField.BRANCHES, ContactField.BUSINESS_CATEGORY, ContactField.CATEGORIES,
+        ContactField.CELLULAR_TELEPHONE1, ContactField.CELLULAR_TELEPHONE2, ContactField.CITY_BUSINESS, ContactField.CITY_HOME, ContactField.CITY_OTHER,
+        ContactField.COMMERCIAL_REGISTER, ContactField.COMPANY, ContactField.COUNTRY_BUSINESS, ContactField.COUNTRY_HOME, ContactField.COUNTRY_OTHER,
+        ContactField.DEPARTMENT, ContactField.DISPLAY_NAME, ContactField.DISTRIBUTIONLIST, ContactField.EMAIL1, ContactField.EMAIL2, ContactField.EMAIL3,
+        ContactField.EMPLOYEE_TYPE, ContactField.FAX_BUSINESS, ContactField.FAX_HOME, ContactField.FAX_OTHER, ContactField.FILE_AS, ContactField.FOLDER_ID,
+        ContactField.GIVEN_NAME, ContactField.IMAGE1, ContactField.IMAGE1_CONTENT_TYPE, ContactField.INFO, ContactField.INSTANT_MESSENGER1,
+        ContactField.INSTANT_MESSENGER2, ContactField.LINKS, ContactField.MANAGER_NAME, ContactField.MARITAL_STATUS, ContactField.MIDDLE_NAME, ContactField.NICKNAME,
+        ContactField.NOTE, ContactField.NUMBER_OF_CHILDREN, ContactField.NUMBER_OF_EMPLOYEE, ContactField.POSITION, ContactField.POSTAL_CODE_BUSINESS,
+        ContactField.POSTAL_CODE_HOME, ContactField.POSTAL_CODE_OTHER, ContactField.PRIVATE_FLAG, ContactField.PROFESSION, ContactField.ROOM_NUMBER,
+        ContactField.SALES_VOLUME, ContactField.SPOUSE_NAME, ContactField.STATE_BUSINESS, ContactField.STATE_HOME, ContactField.STATE_OTHER,
+        ContactField.STREET_BUSINESS, ContactField.STREET_HOME, ContactField.STREET_OTHER, ContactField.SUFFIX, ContactField.TAX_ID, ContactField.TELEPHONE_ASSISTANT,
+        ContactField.TELEPHONE_BUSINESS1, ContactField.TELEPHONE_BUSINESS2, ContactField.TELEPHONE_CALLBACK, ContactField.TELEPHONE_CAR,
+        ContactField.TELEPHONE_COMPANY, ContactField.TELEPHONE_HOME1, ContactField.TELEPHONE_HOME2, ContactField.TELEPHONE_IP, ContactField.TELEPHONE_ISDN,
+        ContactField.TELEPHONE_OTHER, ContactField.TELEPHONE_PAGER, ContactField.TELEPHONE_PRIMARY, ContactField.TELEPHONE_RADIO, ContactField.TELEPHONE_TELEX,
+        ContactField.TELEPHONE_TTYTDD, ContactField.TITLE, ContactField.URL, ContactField.USERFIELD01, ContactField.USERFIELD02, ContactField.USERFIELD03,
+        ContactField.USERFIELD04, ContactField.USERFIELD05, ContactField.USERFIELD06, ContactField.USERFIELD07, ContactField.USERFIELD08, ContactField.USERFIELD09,
+        ContactField.USERFIELD10, ContactField.USERFIELD11, ContactField.USERFIELD12, ContactField.USERFIELD13, ContactField.USERFIELD14, ContactField.USERFIELD15,
+        ContactField.USERFIELD16, ContactField.USERFIELD17, ContactField.USERFIELD18, ContactField.USERFIELD19, ContactField.USERFIELD20, ContactField.DEFAULT_ADDRESS,
+        ContactField.NUMBER_OF_ATTACHMENTS };
 
     // private ContactSQLInterface contactsql;
 
-    protected final static int[] deleteFields = { DataObject.OBJECT_ID, DataObject.LAST_MODIFIED };
+    protected final static ContactField[] deleteFields = { ContactField.OBJECT_ID, ContactField.LAST_MODIFIED };
 
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(ContactWriter.class));
 
@@ -136,34 +137,31 @@ public class ContactWriter extends CommonWriter {
         final Element eProp = new Element("prop", "D", "DAV:");
         final XMLOutputter xo = new XMLOutputter();
         try {
-            final ContactInterface contactInterface = ServerServiceRegistry.getInstance().getService(ContactInterfaceDiscoveryService.class).newContactInterface(
-                folderId,
-                sessionObj);
-            final Contact contactobject = contactInterface.getObjectById(objectId, folderId);
+        	final ContactService contactService = ServerServiceRegistry.getInstance().getService(ContactService.class);
+            final Contact contactobject = contactService.getContact(sessionObj, Integer.toString(folderId), Integer.toString(objectId)); 
             writeObject(contactobject, eProp, false, xo, os);
         } catch (final OXException exc) {
             if (exc.isGeneric(Generic.NOT_FOUND)) {
                 writeResponseElement(eProp, 0, HttpServletResponse.SC_NOT_FOUND, XmlServlet.OBJECT_NOT_FOUND_EXCEPTION, xo, os);
             } else {
-                writeResponseElement(eProp, 0, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, XmlServlet.SERVER_ERROR_EXCEPTION, xo, os);
+                writeResponseElement(eProp, 0, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, getErrorMessage(XmlServlet.SERVER_ERROR_EXCEPTION, XmlServlet.SERVER_ERROR_STATUS), xo, os);
             }
         } catch (final Exception ex) {
             LOG.error(ex.getMessage(), ex);
-            writeResponseElement(eProp, 0, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, XmlServlet.SERVER_ERROR_EXCEPTION, xo, os);
+            writeResponseElement(eProp, 0, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, getErrorMessage(XmlServlet.SERVER_ERROR_EXCEPTION, XmlServlet.SERVER_ERROR_STATUS), xo, os);
         }
     }
 
     public void startWriter(final boolean bModified, final boolean bDeleted, final boolean bList, final int folder_id, final Date lastsync, final OutputStream os) throws Exception {
         final XMLOutputter xo = new XMLOutputter();
+    	final ContactService contactService = ServerServiceRegistry.getInstance().getService(ContactService.class);
         /*
          * Fist send all 'deletes', than all 'modified'
          */
         if (bDeleted) {
             SearchIterator<Contact> it = null;
             try {
-                final ContactInterface contactInterface = ServerServiceRegistry.getInstance().getService(
-                    ContactInterfaceDiscoveryService.class).newContactInterface(folder_id, sessionObj);
-                it = contactInterface.getDeletedContactsInFolder(folder_id, deleteFields, lastsync);
+            	it = contactService.getDeletedContacts(sessionObj, Integer.toString(folder_id), lastsync, deleteFields);
                 writeIterator(it, true, xo, os);
             } finally {
                 if (it != null) {
@@ -175,9 +173,7 @@ public class ContactWriter extends CommonWriter {
         if (bModified) {
             SearchIterator<Contact> it = null;
             try {
-                final ContactInterface contactInterface = ServerServiceRegistry.getInstance().getService(
-                    ContactInterfaceDiscoveryService.class).newContactInterface(folder_id, sessionObj);
-                it = contactInterface.getModifiedContactsInFolder(folder_id, changeFields, lastsync);
+            	it = contactService.getModifiedContacts(sessionObj, Integer.toString(folder_id), lastsync, changeFields);
                 writeIterator(it, false, xo, os);
             } finally {
                 if (it != null) {
@@ -189,9 +185,7 @@ public class ContactWriter extends CommonWriter {
         if (bList) {
             SearchIterator<Contact> it = null;
             try {
-                final ContactInterface contactInterface = ServerServiceRegistry.getInstance().getService(
-                    ContactInterfaceDiscoveryService.class).newContactInterface(folder_id, sessionObj);
-                it = contactInterface.getContactsInFolder(folder_id, 0, 50000, 0, null, null,  deleteFields);
+            	it = contactService.getAllContacts(sessionObj, Integer.toString(folder_id), deleteFields, new SortOptions(0, 50000));
                 writeList(it, xo, os);
             } finally {
                 if (it != null) {
@@ -219,9 +213,9 @@ public class ContactWriter extends CommonWriter {
         try {
             object_id = contactObj.getObjectID();
             if (contactObj.containsImage1() && !delete) {
-                final ContactInterface contactInterface = ServerServiceRegistry.getInstance().getService(
-                    ContactInterfaceDiscoveryService.class).newContactInterface(contactObj.getParentFolderID(), sessionObj);
-                final Contact contactObjectWithImage = contactInterface.getObjectById(object_id, contactObj.getParentFolderID());
+            	final ContactService contactService = ServerServiceRegistry.getInstance().getService(ContactService.class);
+            	final Contact contactObjectWithImage = contactService.getContact(sessionObj, 
+            			Integer.toString(contactObj.getParentFolderID()), Integer.toString(contactObj.getObjectID()));
                 addContent2PropElement(eProp, contactObjectWithImage, delete);
             } else {
                 addContent2PropElement(eProp, contactObj, delete);
@@ -242,8 +236,8 @@ public class ContactWriter extends CommonWriter {
 
     public void addContent2PropElement(final Element e, final Contact contactobject, final boolean delete, final boolean externalUser) throws OXException, SearchIteratorException, UnsupportedEncodingException, AddressException {
         if (delete) {
-            addElement(ContactFields.OBJECT_ID, contactobject.getObjectID(), e);
-            addElement(ContactFields.LAST_MODIFIED, contactobject.getLastModified(), e);
+            addElement(DataFields.OBJECT_ID, contactobject.getObjectID(), e);
+            addElement(DataFields.LAST_MODIFIED, contactobject.getLastModified(), e);
             addElement("object_status", "DELETE", e);
         } else {
             writeCommonElements(contactobject, e);
@@ -280,7 +274,7 @@ public class ContactWriter extends CommonWriter {
         addElement(ContactFields.BIRTHDAY, contactobject.getBirthday(), e);
         addElement(ContactFields.BRANCHES, contactobject.getBranches(), e);
         addElement(ContactFields.BUSINESS_CATEGORY, contactobject.getBusinessCategory(), e);
-        addElement(ContactFields.CATEGORIES, contactobject.getCategories(), e);
+        addElement(CommonFields.CATEGORIES, contactobject.getCategories(), e);
         addElement(ContactFields.MOBILE1, contactobject.getCellularTelephone1(), e);
         addElement(ContactFields.MOBILE2, contactobject.getCellularTelephone2(), e);
         addElement(ContactFields.CITY, contactobject.getCityHome(), e);
@@ -401,7 +395,7 @@ public class ContactWriter extends CommonWriter {
                 /*
                  * An element with the same name and same value already exists. check for "isInternal" attribute.
                  */
-                final org.jdom.Attribute attr = elem.getAttribute("isInternal");
+                final org.jdom2.Attribute attr = elem.getAttribute("isInternal");
                 if (null == attr) {
                     if (internalAddresses.contains(ia)) {
                         elem.setAttribute("isInternal", "true");
@@ -423,21 +417,23 @@ public class ContactWriter extends CommonWriter {
         final Element e_links = new Element(ContactFields.LINKS, XmlServlet.NS);
 
         final LinkEntryObject[] links = contactobject.getLinks();
-        for (int a = 0; a < links.length; a++) {
-            final int id = links[a].getLinkID();
-            String displayname = links[a].getLinkDisplayname();
-            if (displayname == null) {
-                displayname = Integer.toString(id);
+        if (links != null) {
+            for (int a = 0; a < links.length; a++) {
+                final int id = links[a].getLinkID();
+                String displayname = links[a].getLinkDisplayname();
+                if (displayname == null) {
+                    displayname = Integer.toString(id);
+                }
+
+                final Element e = new Element("link", XmlServlet.NS);
+                e.addContent(Integer.toString(id));
+                e.setAttribute("displayname", displayname, XmlServlet.NS);
+
+                e_links.addContent(e);
             }
-
-            final Element e = new Element("link", XmlServlet.NS);
-            e.addContent(Integer.toString(id));
-            e.setAttribute("displayname", displayname, XmlServlet.NS);
-
-            e_links.addContent(e);
+            e_prop.addContent(e_links);
         }
 
-        e_prop.addContent(e_links);
     }
 
     protected void writeDistributionList(final Contact contactobject, final Element e_prop) {
@@ -455,7 +451,7 @@ public class ContactWriter extends CommonWriter {
             final Element e = new Element("email", XmlServlet.NS);
             e.addContent(correctCharacterData(email));
             e.setAttribute("id", Integer.toString(distributionlist[a].getEntryID()), XmlServlet.NS);
-            e.setAttribute(ContactFields.FOLDER_ID, Integer.toString(distributionlist[a].getFolderID()), XmlServlet.NS);
+            e.setAttribute(FolderChildFields.FOLDER_ID, Integer.toString(distributionlist[a].getFolderID()), XmlServlet.NS);
             e.setAttribute("displayname", displayname.trim(), XmlServlet.NS);
             e.setAttribute("emailfield", Integer.toString(distributionlist[a].getEmailfield()), XmlServlet.NS);
 

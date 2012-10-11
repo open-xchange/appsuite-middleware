@@ -53,19 +53,22 @@ import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.EnumSet;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Set;
-
+import java.util.TimeZone;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
+import java.util.concurrent.FutureTask;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.tools.mappings.DefaultMapper;
-
+import com.openexchange.session.Session;
 
 /**
  * {@link DefaultJsonMapper} - Abstract {@link JsonMapper} implementation.
@@ -100,22 +103,89 @@ public abstract class DefaultJsonMapper<O, E extends Enum<E>> extends DefaultMap
 	
 	@Override
 	public JSONObject serialize(final O object, final E[] fields) throws JSONException, OXException {
-        final JSONObject json = new JSONObject();
-        for (final E field : fields) {
-        	this.get(field).serialize(object, json);
-		}
-        return json;
+		return this.serialize(object, fields, (TimeZone)null);
 	}
 
 	@Override
-	public JSONArray serialize(final List<O> objects, final E[] fields) throws JSONException, OXException {
-		final JSONArray jsonArray = new JSONArray();
-		for (final O object : objects) {
-			jsonArray.put(this.serialize(object, fields));
+	public JSONObject serialize(final O object, final E[] fields, final String timeZoneID) throws JSONException, OXException {
+		return this.serialize(object, fields, null != timeZoneID ? getTimeZone(timeZoneID) : null);
+	}
+
+	@Override
+	public void serialize(O object, JSONObject to, E[] fields, TimeZone timeZone, Session session) throws JSONException, OXException {
+        for (final E field : fields) {
+        	final JsonMapping<? extends Object, O> mapping = this.get(field);
+        	if (null != mapping) {
+        		mapping.serialize(object, to, timeZone, session);
+        	}
+		}
+	}
+	
+	@Override
+	public JSONObject serialize(O object, E[] fields, TimeZone timeZone, Session session) throws JSONException, OXException {
+		JSONObject jsonObject = new JSONObject();
+		this.serialize(object, jsonObject, fields, timeZone, session);
+		return jsonObject;
+	}
+	
+	@Override
+	public JSONObject serialize(O object, E[] fields, String timeZoneID, Session session) throws JSONException, OXException {
+		return this.serialize(object, fields, null != timeZoneID ? getTimeZone(timeZoneID) : null, session);
+	}
+	
+	@Override
+	public JSONObject serialize(O object, E[] fields, TimeZone timeZone) throws JSONException, OXException {
+		return this.serialize(object, fields, timeZone, null);
+	}
+	
+	@Override
+	public void serialize(final O object, final JSONObject to, final E[] fields, final String timeZoneID) throws JSONException, OXException {
+		this.serialize(object, to, fields, null != timeZoneID ? getTimeZone(timeZoneID) : null);
+	}
+	
+	@Override
+	public void serialize(O object, JSONObject to, E[] fields, final TimeZone timeZone) throws JSONException, OXException {
+		this.serialize(object, to, fields, timeZone, null);
+	}
+	
+//	@Override
+//	public JSONArray serialize(final List<O> objects, final E[] fields) throws JSONException, OXException {
+//		return this.serialize(objects, fields, null);
+//	}
+//	
+//	@Override
+//	public JSONArray serialize(final List<O> objects, final E[] fields, String timeZoneID) throws JSONException, OXException {
+//		return this.serialize(objects, fields, timeZoneID, null);
+//	}
+//	
+//	@Override
+//	public JSONArray serialize(List<O> objects, E[] fields, String timeZoneID, Session session) throws JSONException, OXException {
+//		final JSONArray jsonArray = new JSONArray();
+//		TimeZone timeZone = null != timeZoneID ? getTimeZone(timeZoneID) : null;
+//		for (final O object : objects) {
+//			jsonArray.put(this.serialize(object, fields, timeZone, session));
+//		}
+//		return jsonArray;
+//	}
+
+	@Override
+	public JSONArray serialize(List<O> objects, E[] fields, String timeZoneID, Session session) throws JSONException, OXException {
+		return this.serialize(objects, fields, null != timeZoneID ? getTimeZone(timeZoneID) : null, session);		
+	}
+
+	@Override
+	public JSONArray serialize(List<O> objects, E[] fields, TimeZone timeZone, Session session) throws JSONException, OXException {
+		JSONArray jsonArray = new JSONArray();
+		for (O object : objects) {
+			JSONArray itemArray = new JSONArray();
+			for (E field : fields) {
+				itemArray.put(get(field).serialize(object, timeZone, session));				
+			}
+			jsonArray.put(itemArray);
 		}
 		return jsonArray;
 	}
-	
+
 	@Override
 	public O deserialize(final JSONObject jsonObject, final E[] fields) throws OXException, JSONException {
 		final O object = newInstance();
@@ -129,32 +199,40 @@ public abstract class DefaultJsonMapper<O, E extends Enum<E>> extends DefaultMap
 		return object;
 	}
 
-	@Override
-	public List<O> deserialize(final JSONArray jsonArray, final E[] fields) throws OXException, JSONException {
-		final List<O> objects = new ArrayList<O>();
-		for (int i = 0; i < jsonArray.length(); i++) {
-			objects.add(this.deserialize(jsonArray.getJSONObject(i), fields));			
-		}
-		return objects;
-	}
-
-	@Override
-	public JsonMapping<? extends Object, O> get(final E field) throws OXException {
-		if (null == field) {
-			throw new IllegalArgumentException("field");
-		}
-		final JsonMapping<? extends Object, O> mapping = this.mappings.get(field);
-		if (null == mapping) {
-			throw OXException.notFound(field.toString());
-		}
-		return mapping;
-	}
-	
-	@Override
-	public E getMappedField(final int columnID) {
-		return this.columnMap.get(Integer.valueOf(columnID));
-	}
-	
+    @Override
+    public JsonMapping<? extends Object, O> get(final E field) throws OXException {
+        final JsonMapping<? extends Object, O> mapping = this.opt(field);
+        if (null == mapping) {
+            throw OXException.notFound(field.toString());
+        }
+        return mapping;
+    }
+    
+    @Override
+    public JsonMapping<? extends Object, O> opt(final E field) {
+        if (null == field) {
+            throw new IllegalArgumentException("field");
+        }
+        return this.mappings.get(field);
+    }
+    
+    @Override
+    public E getMappedField(final int columnID) {
+        return this.columnMap.get(Integer.valueOf(columnID));
+    }
+    
+    @Override
+    public E getMappedField(String ajaxName) {
+        if (null != ajaxName) {
+            for (Entry<E, ? extends JsonMapping<? extends Object, O>> entry: mappings.entrySet()) {
+                if (ajaxName.equals(entry.getValue().getAjaxName())) {
+                    return entry.getKey();
+                }
+            }
+        }        
+        return null;
+    }
+    
 	@Override
 	public int[] getColumnIDs(final E[] fields) throws OXException {
 		if (null == fields) {
@@ -182,7 +260,7 @@ public abstract class DefaultJsonMapper<O, E extends Enum<E>> extends DefaultMap
 		if (null == columnIDs) {
 			throw new IllegalArgumentException("columnIDs");
 		}
-		final Set<E> fields = new HashSet<E>();
+		final List<E> fields = new ArrayList<E>();
 		for (final int columnID : columnIDs) {
 			final E field = this.getMappedField(columnID);
 			if (null != field && (null == illegalFields || false == illegalFields.contains(field))) {
@@ -208,5 +286,42 @@ public abstract class DefaultJsonMapper<O, E extends Enum<E>> extends DefaultMap
 	 * @return the mappings
 	 */
 	protected abstract EnumMap<E, ? extends JsonMapping<? extends Object, O>> createMappings();
+
+    private static final ConcurrentMap<String, Future<TimeZone>> ZONE_CACHE = new ConcurrentHashMap<String, Future<TimeZone>>();
+
+    /**
+     * Gets the <code>TimeZone</code> for the given ID.
+     *
+     * @param ID The ID for a <code>TimeZone</code>, either an abbreviation such as "PST", a full name such as "America/Los_Angeles", or a
+     *            custom ID such as "GMT-8:00".
+     * @return The specified <code>TimeZone</code>, or the GMT zone if the given ID cannot be understood.
+     */
+    protected static TimeZone getTimeZone(final String ID) {
+        Future<TimeZone> f = ZONE_CACHE.get(ID);
+        if (f == null) {
+            final FutureTask<TimeZone> ft = new FutureTask<TimeZone>(new Callable<TimeZone>() {
+
+                @Override
+                public TimeZone call() throws Exception {
+                    return TimeZone.getTimeZone(ID);
+                }
+            });
+            f = ZONE_CACHE.putIfAbsent(ID, ft);
+            if (null == f) {
+                ft.run();
+                f = ft;
+            }
+        }
+        try {
+            return f.get();
+        } catch (final InterruptedException e) {
+            // Keep interrupted status
+            Thread.currentThread().interrupt();
+        } catch (final ExecutionException e) {
+            final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(DefaultJsonMapper.class));
+            LOG.error(e.getMessage(), e);
+        }
+        return TimeZone.getTimeZone(ID);
+    }
 
 }

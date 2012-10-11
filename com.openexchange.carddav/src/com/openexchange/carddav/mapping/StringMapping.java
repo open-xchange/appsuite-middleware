@@ -51,17 +51,19 @@ package com.openexchange.carddav.mapping;
 
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
+import com.openexchange.groupware.tools.mappings.DefaultMapping;
 
 
 /**
- * {@link StringMapping} - CardDAVMapping implementing with a default 
+ * {@link StringMapping} - Mapping implementation with a default 
  * <code>truncate</code> implementation. 
  * 
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public abstract class StringMapping extends CardDAVMapping<String> {
+public abstract class StringMapping extends DefaultMapping<String, Contact> {
 
-	public boolean truncate(Contact contact, int length) throws OXException {
+	@Override
+    public boolean truncate(Contact contact, int length) throws OXException {
 		final String value = this.get(contact);
 		if (null != value && length < value.length()) {
 			this.set(contact, value.substring(0, length));

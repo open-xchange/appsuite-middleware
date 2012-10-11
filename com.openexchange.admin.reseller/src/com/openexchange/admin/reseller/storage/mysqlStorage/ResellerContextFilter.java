@@ -83,6 +83,7 @@ public class ResellerContextFilter implements Filter<Integer, Integer> {
         this.admin = admin;
     }
 
+    @Override
     public Integer[] filter(Collection<Integer> input) throws PipesAndFiltersException {
         List<Integer> cids;
         if( null == admin ) {
@@ -96,7 +97,7 @@ public class ResellerContextFilter implements Filter<Integer, Integer> {
         return cids.toArray(new Integer[cids.size()]);
     }
 
-    private static final String SQL = "SELECT cid FROM context2subadmin WHERE sid = ? AND cid IN (";
+    private static final String GET_SIDS_SQL = "SELECT sid FROM subadmin WHERE pid = ?";
 
     private List<Integer> filterContexts(Collection<Integer> cids) throws StorageException {
         final Connection con;
@@ -109,9 +110,22 @@ public class ResellerContextFilter implements Filter<Integer, Integer> {
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
-            stmt = con.prepareStatement(getIN(SQL, cids.size()));
+            // determine all subadmin sids having me as a parent
+            stmt = con.prepareStatement(GET_SIDS_SQL);
+            stmt.setInt(1, admin.getId());
+            rs = stmt.executeQuery();
+            String GET_CIDS_SQL = "SELECT cid FROM context2subadmin WHERE sid IN (";
+            GET_CIDS_SQL += admin.getId() + ","; 
+            while( rs.next() ) {
+                GET_CIDS_SQL += rs.getInt(1) + ","; 
+            }
+            GET_CIDS_SQL = GET_CIDS_SQL.substring(0, GET_CIDS_SQL.length()-1);
+            GET_CIDS_SQL += ") AND cid IN (";
+            stmt.close();
+            rs.close();
+            
+            stmt = con.prepareStatement(getIN(GET_CIDS_SQL, cids.size()));
             int pos = 1;
-            stmt.setInt(pos++, admin.getId());
             for (Integer cid : cids) {
                 stmt.setInt(pos++, cid.intValue());
             }

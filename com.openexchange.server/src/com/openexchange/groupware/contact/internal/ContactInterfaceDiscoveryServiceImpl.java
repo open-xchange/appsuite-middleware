@@ -70,7 +70,7 @@ import com.openexchange.tools.session.ServerSession;
  */
 public final class ContactInterfaceDiscoveryServiceImpl implements ContactInterfaceDiscoveryService {
 
-    private static ContactInterfaceDiscoveryServiceImpl instance;
+    private static volatile ContactInterfaceDiscoveryServiceImpl instance;
 
     /**
      * Gets the {@link ContactInterfaceDiscoveryService} implementation.

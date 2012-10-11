@@ -49,6 +49,7 @@
 
 package com.openexchange.mail.mime;
 
+import static com.openexchange.mail.mime.utils.MimeMessageUtility.decodeEnvelopeHeader;
 import static com.openexchange.mail.mime.utils.MimeMessageUtility.unfold;
 import java.io.Serializable;
 import java.util.Iterator;
@@ -198,6 +199,10 @@ public abstract class ParameterizedHeader implements Serializable, Comparable<Pa
         }
         // String paramHdr = PATTERN_CORRECT.matcher(unfold(paramHdrArg.trim())).replaceAll("=");
         String paramHdr = unfold(paramHdrArg.trim());
+        if (paramHdr.indexOf("=?") >= 0) {
+            // Possibly mail-safe encoded
+            paramHdr = decodeEnvelopeHeader(paramHdr).trim();
+        }
         final int length = paramHdr.length();
         if (length > 0) {
             final int lastPos = length - 1;

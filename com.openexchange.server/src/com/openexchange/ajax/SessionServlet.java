@@ -50,6 +50,8 @@
 package com.openexchange.ajax;
 
 import static com.openexchange.java.Autoboxing.I;
+import static com.openexchange.tools.servlet.http.Cookies.extractDomainValue;
+import static com.openexchange.tools.servlet.http.Cookies.getDomainValue;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.lang.reflect.UndeclaredThrowableException;
@@ -68,7 +70,6 @@ import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.json.JSONException;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.login.HashCalculator;
@@ -87,6 +88,7 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserExceptionCode;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.java.Java7ConcurrentLinkedQueue;
+import com.openexchange.log.LogFactory;
 import com.openexchange.log.LogProperties;
 import com.openexchange.log.Props;
 import com.openexchange.server.ServiceExceptionCode;
@@ -96,6 +98,7 @@ import com.openexchange.session.SessionThreadCounter;
 import com.openexchange.sessiond.SessionExceptionCodes;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.sessiond.impl.IPRange;
+import com.openexchange.sessiond.impl.SubnetMask;
 import com.openexchange.sessiond.impl.ThreadLocalSessionHolder;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.servlet.CountingHttpServletRequest;
@@ -107,7 +110,6 @@ import edu.emory.mathcs.backport.java.util.concurrent.atomic.AtomicBoolean;
 /**
  * Overridden service method that checks if a valid session can be found for the request.
  *
- * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
 public abstract class SessionServlet extends AJAXServlet {
@@ -123,7 +125,6 @@ public abstract class SessionServlet extends AJAXServlet {
     public static final String SESSION_KEY = "sessionObject";
     
     public static final String PUBLIC_SESSION_KEY = "publicSessionObject";
-    
 
     public static final String SESSION_WHITELIST_FILE = "noipcheck.cnf";
 
@@ -133,7 +134,7 @@ public abstract class SessionServlet extends AJAXServlet {
 
     private static volatile boolean checkIP = true;
 
-    private static volatile ClientWhitelist ipCheckWhitelist;
+    private static volatile ClientWhitelist clientWhitelist;
 
     private static volatile CookieHashSource hashSource;
 
@@ -141,9 +142,8 @@ public abstract class SessionServlet extends AJAXServlet {
 
     private static final Lock RANGE_LOCK = new ReentrantLock();
 
-    /**
-     * Initializes a new {@link SessionServlet}.
-     */
+    private static volatile SubnetMask allowedSubnet;
+
     protected SessionServlet() {
         super();
     }
@@ -154,7 +154,10 @@ public abstract class SessionServlet extends AJAXServlet {
         if (INITIALIZED.compareAndSet(false, true)) {
             checkIP = Boolean.parseBoolean(config.getInitParameter(ServerConfig.Property.IP_CHECK.getPropertyName()));
             hashSource = CookieHashSource.parse(config.getInitParameter(Property.COOKIE_HASH.getPropertyName()));
-            ipCheckWhitelist = new ClientWhitelist().add(config.getInitParameter(Property.IP_CHECK_WHITELIST.getPropertyName()));
+            clientWhitelist = new ClientWhitelist().add(config.getInitParameter(Property.IP_CHECK_WHITELIST.getPropertyName()));
+            String ipMaskV4 = config.getInitParameter(ServerConfig.Property.IP_MASK_V4.getPropertyName());
+            String ipMaskV6 = config.getInitParameter(ServerConfig.Property.IP_MASK_V6.getPropertyName());
+            allowedSubnet = new SubnetMask(ipMaskV4, ipMaskV6);
         }
         initRanges(config);
     }
@@ -205,9 +208,7 @@ public abstract class SessionServlet extends AJAXServlet {
         if (null != getSessionObject(req, true)) {
             return;
         }
-        /*
-         * Remember session
-         */
+        // Remember session
         final SessiondService sessiondService = ServerServiceRegistry.getInstance().getService(SessiondService.class);
         if (sessiondService == null) {
             throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(SessiondService.class.getName());
@@ -287,7 +288,7 @@ public abstract class SessionServlet extends AJAXServlet {
                 }
             }
             ThreadLocalSessionHolder.getInstance().setSession(session);
-            if (null != threadCounter) {
+            if (null != threadCounter && null != session) {
                 sessionId = session.getSessionID();
                 threadCounter.increment(sessionId);
             }
@@ -361,6 +362,9 @@ public abstract class SessionServlet extends AJAXServlet {
     }
 
     private static int getMaxConcurrentRequests0(final ServerSession session) {
+    	if (session == null) {
+    		return 0;
+    	}
         final Set<String> set = session.getUser().getAttributes().get("ajax.maxCount");
         if (null == set || set.isEmpty()) {
             try {
@@ -385,7 +389,7 @@ public abstract class SessionServlet extends AJAXServlet {
     }
 
     private void checkIP(final Session session, final String actual) throws OXException {
-        checkIP(checkIP, getRanges(), session, actual, ipCheckWhitelist);
+        checkIP(checkIP, getRanges(), session, actual, clientWhitelist);
     }
 
     private Queue<IPRange> getRanges() {
@@ -438,16 +442,18 @@ public abstract class SessionServlet extends AJAXServlet {
     /**
      * Checks if the client IP address of the current request matches the one through that the session has been created.
      *
-     * @param checkIP <code>true</code> to deny request with an exception.
+     * @param doCheck <code>true</code> to deny request with an exception.
      * @param ranges The white-list ranges
      * @param session session object
      * @param actual IP address of the current request.
-     * @param ipCheckWhitelist The optional IP check whitelist (by client identifier)
+     * @param whitelist The optional IP check whitelist (by client identifier)
      * @throws OXException if the IP addresses don't match.
      */
-    public static void checkIP(final boolean checkIP, final Queue<IPRange> ranges, final Session session, final String actual, final ClientWhitelist ipCheckWhitelist) throws OXException {
-        if (null == actual || (!actual.equals(session.getLocalIp()) && !isWhitelistedFromIPCheck(actual, ranges) && !isWhitelistedClient(session, ipCheckWhitelist))) {
-            if (checkIP) {
+    public static void checkIP(final boolean doCheck, final Queue<IPRange> ranges, final Session session, final String actual, final ClientWhitelist whitelist) throws OXException {
+        if (null == actual || !actual.equals(session.getLocalIp())) {
+            // IP is missing or changed
+            if (doCheck && !isWhitelistedFromIPCheck(actual, ranges) && !isWhitelistedClient(session, whitelist) && !allowedSubnet.areInSameSubnet(actual, session.getLocalIp())) {
+                // kick client with changed IP address
                 if (INFO) {
                     final StringBuilder sb = new StringBuilder(96);
                     sb.append("Request to server denied (IP check activated) for session: ");
@@ -456,12 +462,16 @@ public abstract class SessionServlet extends AJAXServlet {
                     sb.append(session.getLocalIp());
                     sb.append(" to ");
                     sb.append((null == actual ? "<missing>" : actual));
-                    sb.append(" and is not covered by IP white-list.");
+                    sb.append(" and is not covered by IP white-list or netmask.");
                     LOG.info(sb.toString());
                 }
                 throw SessionExceptionCodes.WRONG_CLIENT_IP.create();
             }
-            if (DEBUG) {
+            if (null != actual && (!doCheck || isWhitelistedClient(session, whitelist))) {
+                // change IP in session so the IMAP NOOP command contains the correct client IP address (Bug #21842)
+                session.setLocalIp(actual);
+            }
+            if (DEBUG && !isWhitelistedFromIPCheck(actual, ranges) && !isWhitelistedClient(session, whitelist)) {
                 final StringBuilder sb = new StringBuilder(64);
                 sb.append("Session ");
                 sb.append(session.getSessionID());
@@ -474,8 +484,11 @@ public abstract class SessionServlet extends AJAXServlet {
         }
     }
 
-    private static boolean isWhitelistedClient(final Session session, final ClientWhitelist ipCheckWhitelist) {
-        return null != ipCheckWhitelist && !ipCheckWhitelist.isEmpty() && ipCheckWhitelist.isAllowed(session.getClient());
+    /**
+     * White listed clients are necessary for the Mobile Web Interface. This clients often change their IP address in mobile data networks.
+     */
+    private static boolean isWhitelistedClient(final Session session, final ClientWhitelist whitelist) {
+        return null != whitelist && !whitelist.isEmpty() && whitelist.isAllowed(session.getClient());
     }
 
     public static boolean isWhitelistedFromIPCheck(final String actual, final Queue<IPRange> ranges) {
@@ -536,13 +549,13 @@ public abstract class SessionServlet extends AJAXServlet {
     /**
      * Finds appropriate local session.
      *
-     * @param hashSource defines how the cookie should be found
+     * @param source defines how the cookie should be found
      * @param sessionId identifier of the session.
      * @param sessiondService The SessionD service
      * @return the session.
      * @throws SessionException if the session can not be found.
      */
-    public static ServerSession getSession(final CookieHashSource hashSource, final HttpServletRequest req, final String sessionId, final SessiondService sessiondService) throws OXException {
+    public static ServerSession getSession(final CookieHashSource source, final HttpServletRequest req, final String sessionId, final SessiondService sessiondService) throws OXException {
         final Session session = sessiondService.getSession(sessionId);
         if (null == session) {
             if (INFO) {
@@ -562,7 +575,7 @@ public abstract class SessionServlet extends AJAXServlet {
         /*
          * Get session secret
          */
-        final String secret = extractSecret(hashSource, req, session.getHash(), session.getClient());
+        final String secret = extractSecret(source, req, session.getHash(), session.getClient());
         if (secret == null || !session.getSecret().equals(secret)) {
             if (INFO && null != secret) {
                 LOG.info("Session secret is different. Given secret \"" + secret + "\" differs from secret in session \"" + session.getSecret() + "\".");
@@ -581,9 +594,7 @@ public abstract class SessionServlet extends AJAXServlet {
             return ServerSessionAdapter.valueOf(session, context, user);
         } catch (final OXException e) {
             if (ContextExceptionCodes.NOT_FOUND.equals(e)) {
-                /*
-                 * An outdated session; context absent
-                 */
+                // An outdated session; context absent
                 sessiondService.removeSession(sessionId);
                 if (INFO) {
                     LOG.info("The context associated with session \"" + sessionId + "\" cannot be found. Obviously an outdated session which is invalidated now.");
@@ -593,9 +604,7 @@ public abstract class SessionServlet extends AJAXServlet {
             if (UserExceptionCode.USER_NOT_FOUND.getPrefix().equals(e.getPrefix())) {
                 final int code = e.getCode();
                 if (UserExceptionCode.USER_NOT_FOUND.getNumber() == code || LdapExceptionCode.USER_NOT_FOUND.getNumber() == code) {
-                    /*
-                     * An outdated session; user absent
-                     */
+                    // An outdated session; user absent
                     sessiondService.removeSession(sessionId);
                     if (INFO) {
                         LOG.info("The user associated with session \"" + sessionId + "\" cannot be found. Obviously an outdated session which is invalidated now.");
@@ -692,8 +701,18 @@ public abstract class SessionServlet extends AJAXServlet {
 
             for (final String string : cookieNames) {
                 if (name.startsWith(string)) {
-                    final Cookie respCookie = new Cookie(name, cookie.getValue());
+                    final String value = cookie.getValue();
+                    final Cookie respCookie = new Cookie(name, value);
                     respCookie.setPath("/");
+                    final String domain = getDomainValue(req.getServerName());
+                    if (null != domain) {
+                        respCookie.setDomain(domain);
+                        // Once again without domain parameter
+                        final Cookie respCookie2 = new Cookie(name, value);
+                        respCookie2.setPath("/");
+                        respCookie2.setMaxAge(0); // delete
+                        resp.addCookie(respCookie2);
+                    }
                     respCookie.setMaxAge(0); // delete
                     resp.addCookie(respCookie);
                 }
@@ -701,6 +720,12 @@ public abstract class SessionServlet extends AJAXServlet {
         }
     }
 
+    /**
+     * Removes all JSESSIONID cookies found in given HTTP Servlet request.
+     * 
+     * @param req The HTTP Servlet request
+     * @param resp The HTTP Servlet response
+     */
     public static void removeJSESSIONID(final HttpServletRequest req, final HttpServletResponse resp) {
         final Cookie[] cookies = req.getCookies();
         if (cookies == null) {
@@ -709,8 +734,18 @@ public abstract class SessionServlet extends AJAXServlet {
         for (final Cookie cookie : cookies) {
             final String name = cookie.getName();
             if (Tools.JSESSIONID_COOKIE.equals(name)) {
-                final Cookie respCookie = new Cookie(name, cookie.getValue());
+                final String value = cookie.getValue();
+                final Cookie respCookie = new Cookie(name, value);
                 respCookie.setPath("/");
+                final String domain = extractDomainValue(value);
+                if (null != domain) {
+                    respCookie.setDomain(domain);
+                    // Once again without domain parameter
+                    final Cookie respCookie2 = new Cookie(name, value);
+                    respCookie2.setPath("/");
+                    respCookie2.setMaxAge(0); // delete
+                    resp.addCookie(respCookie2);
+                }
                 respCookie.setMaxAge(0); // delete
                 resp.addCookie(respCookie);
             }
@@ -719,9 +754,9 @@ public abstract class SessionServlet extends AJAXServlet {
 
     /**
      * Returns the remembered session.
-     * 
-     * @param req The Servlet request
-     * @return The remembered session
+     *
+     * @param req The Servlet request.
+     * @return The remembered session.
      */
     protected static ServerSession getSessionObject(final ServletRequest req) {
         return getSessionObject(req, false);

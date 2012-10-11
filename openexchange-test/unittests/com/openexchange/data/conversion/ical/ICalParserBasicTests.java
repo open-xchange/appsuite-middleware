@@ -57,7 +57,6 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.TimeZone;
-
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.CalendarObject;
@@ -720,7 +719,7 @@ public class ICalParserBasicTests extends AbstractICalParserTest {
 
         // Local Time
 
-        String icalText = fixtures.vtodoWithLocalDTStartAndDTEnd(start, end);
+        String icalText = fixtures.vtodoWithLocalDTStartAndDue(start, end);
         Task task = parseTask(icalText, utc);
 
         assertEquals(start, task.getStartDate());
@@ -728,7 +727,7 @@ public class ICalParserBasicTests extends AbstractICalParserTest {
 
         // UTC
 
-        icalText = fixtures.vtodoWithUTCDTStartAndDTEnd(start, end);
+        icalText = fixtures.vtodoWithUTCDTStartAndDue(start, end);
         task = parseTask(icalText);
 
         assertEquals(start, task.getStartDate());
@@ -739,7 +738,7 @@ public class ICalParserBasicTests extends AbstractICalParserTest {
         final TimeZone timeZone = TimeZone.getTimeZone("America/Los_Angeles");
         assertFalse("Bad test TimeZone",timeZone.equals(TimeZone.getDefault()));
 
-        icalText = fixtures.vtodoWithDTStartAndEndInTimeZone(start, end, timeZone);
+        icalText = fixtures.vtodoWithDTStartAndDueInTimeZone(start, end, timeZone);
         task = parseTask(icalText);
 
         assertEquals(recalculate(start, utc , timeZone), task.getStartDate());
@@ -747,7 +746,7 @@ public class ICalParserBasicTests extends AbstractICalParserTest {
 
         // VTIMEZONE
 
-        icalText = fixtures.vtodoWithDTStartAndDTEndInCustomTimezone(start, end);
+        icalText = fixtures.vtodoWithDTStartAndDueInCustomTimezone(start, end);
         task = parseTask(icalText);
 
         assertEquals(D("24/02/1981 01:00"), task.getStartDate());

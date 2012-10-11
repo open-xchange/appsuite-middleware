@@ -49,7 +49,9 @@
 
 package com.openexchange.imap;
 
-import static com.openexchange.mail.mime.utils.MIMEStorageUtility.getFetchProfile;
+import static com.openexchange.mail.MailServletInterface.mailInterfaceMonitor;
+import static com.openexchange.mail.mime.utils.MimeStorageUtility.getFetchProfile;
+import gnu.trove.TLongCollection;
 import gnu.trove.list.TIntList;
 import gnu.trove.list.TLongList;
 import gnu.trove.list.array.TIntArrayList;
@@ -69,6 +71,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
@@ -141,7 +144,7 @@ public final class IMAPCommandsCollection {
 
     private static final String STR_FETCH = "FETCH";
 
-    static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(IMAPCommandsCollection.class));
+    static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(IMAPCommandsCollection.class));
 
     static final boolean DEBUG = LOG.isDebugEnabled();
 
@@ -266,7 +269,7 @@ public final class IMAPCommandsCollection {
                     Boolean retval = Boolean.TRUE;
                     boolean delete = false;
                     try {
-                        if ((type & IMAPFolder.HOLDS_MESSAGES) == 0) {
+                        if ((type & Folder.HOLDS_MESSAGES) == 0) {
                             // Only holds folders
                             final char separator = getSeparator(p);
                             p.create(fullName + separator);
@@ -278,7 +281,7 @@ public final class IMAPCommandsCollection {
                              * Some IMAP servers do not allow creation of folders that can contain messages AND subfolders. Verify that
                              * created folder may also contain subfolders.
                              */
-                            if ((type & IMAPFolder.HOLDS_FOLDERS) != 0) {
+                            if ((type & Folder.HOLDS_FOLDERS) != 0) {
                                 final ListInfo[] li = p.list("", fullName);
                                 if (li != null && !li[0].hasInferiors) {
                                     /*
@@ -301,7 +304,7 @@ public final class IMAPCommandsCollection {
                     if (DEBUG) {
                         LOG.debug("Either creation or deletion of temporary folder failed. Assume maildir folder format.", e);
                     }
-                    return Boolean.valueOf((((type & IMAPFolder.HOLDS_MESSAGES) > 0)) && ((type & IMAPFolder.HOLDS_FOLDERS) > 0));
+                    return Boolean.valueOf((((type & Folder.HOLDS_MESSAGES) > 0)) && ((type & Folder.HOLDS_FOLDERS) > 0));
                 }
             }
         }))).booleanValue();
@@ -859,14 +862,34 @@ public final class IMAPCommandsCollection {
      * @throws ParsingException If parsing STATUS response fails
      */
     protected static int[] parseStatusResponse(final Response statusResponse) throws ParsingException {
+        if (null == statusResponse) {
+            throw new ParsingException("Parse error in STATUS response: No opening parenthesized list found.");
+        }
+        int cnt = 0;
+        {
+            final String resp = statusResponse.toString();
+            if (isEmpty(resp)) {
+                throw new ParsingException("Parse error in STATUS response: No opening parenthesized list found.");
+            }
+            int pos = -1;
+            while ((pos = resp.indexOf('(', pos+1)) > 0) {
+                cnt++;
+            }
+        }
+        if (cnt <= 0) {
+            throw new ParsingException("Parse error in STATUS response: No opening parenthesized list found.");
+        }
         /*
          * Read until opening parenthesis or EOF
          */
         byte b = 0;
         do {
             b = statusResponse.readByte();
+            if (b == '(' && --cnt > 0) {
+                b = statusResponse.readByte();
+            }
         } while (b != 0 && b != '(');
-        if (0 == b) {
+        if (0 == b || cnt > 0) {
             // EOF
             throw new ParsingException("Parse error in STATUS response: No opening parenthesized list found.");
         }
@@ -902,14 +925,34 @@ public final class IMAPCommandsCollection {
         if (null == counterTypes || counterTypes.length == 0) {
             return new int[0];
         }
+        if (null == statusResponse) {
+            throw new ParsingException("Parse error in STATUS response: No opening parenthesized list found.");
+        }
+        int cnt = 0;
+        {
+            final String resp = statusResponse.toString();
+            if (isEmpty(resp)) {
+                throw new ParsingException("Parse error in STATUS response: No opening parenthesized list found.");
+            }
+            int pos = -1;
+            while ((pos = resp.indexOf('(', pos+1)) > 0) {
+                cnt++;
+            }
+        }
+        if (cnt <= 0) {
+            throw new ParsingException("Parse error in STATUS response: No opening parenthesized list found.");
+        }
         /*
          * Read until opening parenthesis or EOF
          */
         byte b = 0;
         do {
             b = statusResponse.readByte();
+            if (b == '(' && --cnt > 0) {
+                b = statusResponse.readByte();
+            }
         } while (b != 0 && b != '(');
-        if (0 == b) {
+        if (0 == b || cnt > 0) {
             // EOF
             throw new ParsingException("Parse error in STATUS response: No opening parenthesized list found.");
         }
@@ -935,6 +978,18 @@ public final class IMAPCommandsCollection {
             }
         }
         return -1;
+    }
+
+    private static boolean isEmpty(final String string) {
+        if (null == string) {
+            return true;
+        }
+        final int len = string.length();
+        boolean isWhitespace = true;
+        for (int i = 0; isWhitespace && i < len; i++) {
+            isWhitespace = Character.isWhitespace(string.charAt(i));
+        }
+        return isWhitespace;
     }
 
     /**
@@ -1094,20 +1149,20 @@ public final class IMAPCommandsCollection {
     private static final String COMMAND_LSUB = "LSUB";
 
     /**
-     * Checks folder subscription for the folder denoted by specified fullname.
+     * Checks folder subscription for the folder denoted by specified full name.
      * <p>
      * This method imitates the behavior from {@link IMAPFolder#isSubscribed() isSubscribde()} that is a namespace folder's subscription
-     * status is checked with specified separator character appended to fullname.
+     * status is checked with specified separator character appended to full name.
      *
-     * @param fullname The folder's fullname
+     * @param fullName The folder's full name
      * @param separator The separator character
      * @param isNamespace <code>true</code> if denoted folder is a namespace folder; otherwise <code>false</code>
      * @param defaultFolder The IMAP store's default folder
      * @return <code>true</code> if folder is subscribed; otherwise <code>false</code>
      * @throws MessagingException If checking folder subscription fails
      */
-    public static boolean isSubscribed(final String fullname, final char separator, final boolean isNamespace, final IMAPFolder defaultFolder) throws MessagingException {
-        final String lfolder = ((isNamespace || (fullname.length() == 0)) && (separator != '\0')) ? fullname + separator : fullname;
+    public static boolean isSubscribed(final String fullName, final char separator, final boolean isNamespace, final IMAPFolder defaultFolder) throws MessagingException {
+        final String lfolder = ((isNamespace || (fullName.length() == 0)) && (separator != '\0')) ? fullName + separator : fullName;
         return ((Boolean) (defaultFolder.doCommand(new IMAPFolder.ProtocolCommand() {
 
             @Override
@@ -1138,7 +1193,7 @@ public final class IMAPCommandsCollection {
             private int parseIMAPResponse(final IMAPResponse ir) throws ParsingException {
                 if (ir.keyEquals(COMMAND_LSUB)) {
                     final ListInfo li = new ListInfo(ir);
-                    if (li.name.equals(fullname)) {
+                    if (li.name.equals(fullName)) {
                         return li.canOpen ? 1 : 0;
                     }
                 }
@@ -1213,7 +1268,7 @@ public final class IMAPCommandsCollection {
                 final String fullName = newFolder.getFullName();
                 // Encode the mbox as per RFC2060
                 final String mbox;
-                if ((type & IMAPFolder.HOLDS_MESSAGES) == 0) {
+                if ((type & Folder.HOLDS_MESSAGES) == 0) {
                     // Only holds folders
                     mbox = prepareStringArgument(fullName + separator);
                 } else {
@@ -1228,7 +1283,7 @@ public final class IMAPCommandsCollection {
                     /*
                      * Certain IMAP servers do not allow creation of folders that can contain messages AND subfolders.
                      */
-                    if ((type & IMAPFolder.HOLDS_FOLDERS) != 0) {
+                    if ((type & Folder.HOLDS_FOLDERS) != 0) {
                         final ListInfo[] li = protocol.list("", fullName);
                         if (errorOnUnsupportedType && li != null && !li[0].hasInferiors) {
                             protocol.delete(fullName);
@@ -1243,6 +1298,9 @@ public final class IMAPCommandsCollection {
                         command,
                         response.toString() + " ("+newFolder.getStore().toString()+")"));
                 } else if (response.isNO()) {
+                    if (response.toString().toLowerCase(Locale.US).indexOf("already exists") > 0) {
+                        return Boolean.TRUE;
+                    }
                     throw new CommandFailedException(IMAPException.getFormattedMessage(
                         IMAPException.Code.PROTOCOL_ERROR,
                         command,
@@ -1309,7 +1367,11 @@ public final class IMAPCommandsCollection {
                 Response response = null;
                 Next: for (int i = 0; i < args.length; i++) {
                     final String command = String.format(format, args[i], "-", ALL_COLOR_LABELS);
-                    r = p.command(command, null);
+                    {
+                        final long start = System.currentTimeMillis();
+                        r = p.command(command, null);
+                        mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
+                    }
                     response = r[r.length - 1];
                     if (response.isOK()) {
                         p.notifyResponseHandlers(r);
@@ -1368,7 +1430,11 @@ public final class IMAPCommandsCollection {
                 Response response = null;
                 Next: for (int i = 0; i < args.length; i++) {
                     final String command = String.format(format, args[i], "+", colorLabelFlag);
-                    r = p.command(command, null);
+                    {
+                        final long start = System.currentTimeMillis();
+                        r = p.command(command, null);
+                        mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
+                    }
                     response = r[r.length - 1];
                     if (response.isOK()) {
                         p.notifyResponseHandlers(r);
@@ -1603,7 +1669,12 @@ public final class IMAPCommandsCollection {
 
             @Override
             public Object doCommand(final IMAPProtocol p) throws ProtocolException {
-                final Response[] r = p.command(COMMAND_SEARCH_UNSEEN, null);
+                final Response[] r;
+                {
+                    final long start = System.currentTimeMillis();
+                    r = p.command(COMMAND_SEARCH_UNSEEN, null);
+                    mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
+                }
                 /*
                  * Result is something like: SEARCH 12 20 24
                  */
@@ -1910,16 +1981,16 @@ public final class IMAPCommandsCollection {
     }
 
     /**
-     * Checks if IMAP folder denoted by specified fullname is allowed to be opened in desired mode.
+     * Checks if IMAP folder denoted by specified full name is allowed to be opened in desired mode.
      *
      * @param f The IMAP folder providing protocol access
-     * @param fullname The fullname to check
+     * @param fullName The full name to check
      * @param mode The desired open mode
-     * @return <code>true</code> if IMAP folder denoted by specified fullname is allowed to be opened in desired mode; otherwise
+     * @return <code>true</code> if IMAP folder denoted by specified full name is allowed to be opened in desired mode; otherwise
      *         <code>false</code>
      * @throws OXException If an IMAP error occurs
      */
-    public static boolean canBeOpened(final IMAPFolder f, final String fullname, final int mode) throws OXException {
+    public static boolean canBeOpened(final IMAPFolder f, final String fullName, final int mode) throws OXException {
         if ((Folder.READ_ONLY != mode) && (Folder.READ_WRITE != mode)) {
             IMAPException.create(IMAPException.Code.UNKNOWN_FOLDER_MODE, Integer.valueOf(mode));
         }
@@ -1934,7 +2005,7 @@ public final class IMAPCommandsCollection {
                          * Encode the mbox as per RFC2060
                          */
                         final Argument args = new Argument();
-                        args.writeString(BASE64MailboxEncoder.encode(fullname));
+                        args.writeString(BASE64MailboxEncoder.encode(fullName));
                         /*
                          * Perform command
                          */
@@ -2178,14 +2249,25 @@ public final class IMAPCommandsCollection {
      * @throws MessagingException If an error occurs in underlying protocol
      */
     public static long[] getUIDs(final IMAPFolder imapFolder) throws MessagingException {
+        return getUIDCollection(imapFolder).toArray();
+    }
+
+    /**
+     * Detects the corresponding UIDs from given folder
+     *
+     * @param imapFolder The IMAP folder
+     * @return The corresponding UIDs
+     * @throws MessagingException If an error occurs in underlying protocol
+     */
+    public static TLongCollection getUIDCollection(final IMAPFolder imapFolder) throws MessagingException {
         final int messageCount = imapFolder.getMessageCount();
         if (messageCount <= 0) {
             /*
              * Empty folder...
              */
-            return new long[0];
+            return new TLongArrayList(0);
         }
-        return (long[]) (imapFolder.doCommand(new IMAPFolder.ProtocolCommand() {
+        return (TLongList) (imapFolder.doCommand(new IMAPFolder.ProtocolCommand() {
 
             @Override
             public Object doCommand(final IMAPProtocol p) throws ProtocolException {
@@ -2209,8 +2291,7 @@ public final class IMAPCommandsCollection {
                 if (response.isOK()) {
                     for (int j = 0; j < len; j++) {
                         if (STR_FETCH.equals(((IMAPResponse) r[j]).getKey())) {
-                            final UID uidItem = getItemOf(UID.class, (FetchResponse) r[j], STR_UID);
-                            uids.add(uidItem.uid);
+                            uids.add(getItemOf(UID.class, (FetchResponse) r[j], STR_UID).uid);
                             r[j] = null;
                         }
                     }
@@ -2231,7 +2312,7 @@ public final class IMAPCommandsCollection {
                 } else {
                     p.handleResult(response);
                 }
-                return uids.toArray();
+                return uids;
             }
 
         }));
@@ -2954,17 +3035,17 @@ public final class IMAPCommandsCollection {
     private final static String REPLACEMENT_BACKSLASH = "\\\\\\\\";
 
     /**
-     * First encodes given fullname by using <code>com.sun.mail.imap.protocol.BASE64MailboxEncoder.encode()</code> method. Afterwards
+     * First encodes given full name by using <code>com.sun.mail.imap.protocol.BASE64MailboxEncoder.encode()</code> method. Afterwards
      * encoded string is checked if it needs quoting and escaping of the special characters '"' and '\'.
      *
-     * @param fullname The folder fullname
-     * @return Prepared fullname ready for being used in raw IMAP commands
+     * @param fullName The folder full name
+     * @return Prepared full name ready for being used in raw IMAP commands
      */
-    public static String prepareStringArgument(final String fullname) {
+    public static String prepareStringArgument(final String fullName) {
         /*
          * Ensure to have only ASCII characters
          */
-        final String lfolder = BASE64MailboxEncoder.encode(fullname);
+        final String lfolder = BASE64MailboxEncoder.encode(fullName);
         /*
          * Determine if quoting (and escaping) has to be done
          */

@@ -56,14 +56,13 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.FolderObject;
-import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.tasks.Task;
+import com.openexchange.log.LogFactory;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.timer.ScheduledTimerTask;
@@ -141,9 +140,9 @@ public final class EventQueue {
 
     private static final AtomicBoolean isFirst = new AtomicBoolean(true);
 
-    private static boolean isInit;
+    private static volatile boolean isInit;
 
-    private static boolean noDelay;
+    private static volatile boolean noDelay;
 
     private static List<EventObject> queue1;
 
@@ -151,7 +150,7 @@ public final class EventQueue {
 
     private static int delay = 180000;
 
-    private static boolean isEnabled;
+    private static volatile boolean isEnabled;
 
     static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(EventQueue.class));
 
@@ -190,10 +189,10 @@ public final class EventQueue {
     /*
      * +++++++++++++++ Infostore Event Lists +++++++++++++++
      */
-
-    private static final List<InfostoreEventInterface> infostoreEventList = new ArrayList<InfostoreEventInterface>(4);
-
-    private static final List<InfostoreEventInterface> noDelayInfostoreEventList = new ArrayList<InfostoreEventInterface>(4);
+//
+//    private static final List<InfostoreEventInterface> infostoreEventList = new ArrayList<InfostoreEventInterface>(4);
+//
+//    private static final List<InfostoreEventInterface> noDelayInfostoreEventList = new ArrayList<InfostoreEventInterface>(4);
 
     private static final AtomicBoolean shuttingDown = new AtomicBoolean();
 
@@ -203,9 +202,9 @@ public final class EventQueue {
 
     private static final AtomicBoolean shutdownComplete = new AtomicBoolean();
 
-    private static ScheduledTimerTask timerTask;
+    private static volatile ScheduledTimerTask timerTask;
 
-    private static EventDispatcher newEventDispatcher = null;
+    private static volatile EventDispatcher newEventDispatcher;
 
     private EventQueue() {
         super();
@@ -245,18 +244,17 @@ public final class EventQueue {
                             queue2,
                             shutdownComplete,
                             shuttingDown);
-                    timerTask = timer.scheduleWithFixedDelay(task2schedule, delay, delay);
+                    final ScheduledTimerTask timerTask = timer.scheduleWithFixedDelay(task2schedule, delay, delay);
                     task2schedule.setScheduledTimerTask(timerTask);
+                    EventQueue.timerTask = timerTask;
                 }
             }
-
             isEnabled = true;
         } else {
             if (LOG.isInfoEnabled()) {
                 LOG.info("EventQueue is disabled");
             }
         }
-
         isInit = true;
         shuttingDown.set(false);
     }
@@ -328,9 +326,9 @@ public final class EventQueue {
         case Types.FOLDER:
             folder(eventObj, noDelay ? noDelayFolderEventList : folderEventList);
             break;
-        case Types.INFOSTORE:
-            infostore(eventObj, noDelay ? noDelayInfostoreEventList : infostoreEventList);
-            break;
+//        case Types.INFOSTORE:
+//            infostore(eventObj, noDelay ? noDelayInfostoreEventList : infostoreEventList);
+//            break;
         default:
             LOG.error("invalid module: " + module);
         }
@@ -550,45 +548,45 @@ public final class EventQueue {
         }
     }
 
-    protected static void infostore(final EventObject eventObj, final List<InfostoreEventInterface> infostoreEventList) {
-        if (infostoreEventList.isEmpty()) {
-            return;
-        }
-        final int action = eventObj.getAction();
-        final DocumentMetadata documentMetadata = (DocumentMetadata) eventObj.getObject();
-        final Session session = eventObj.getSessionObject();
-        switch (action) {
-        case EventClient.CREATED:
-            for (final InfostoreEventInterface next : infostoreEventList) {
-                try {
-                    next.infoitemCreated(documentMetadata, session);
-                } catch (final Throwable t) {
-                    LOG.error(t.getMessage(), t);
-                }
-            }
-            break;
-        case EventClient.CHANGED:
-            for (final InfostoreEventInterface next : infostoreEventList) {
-                try {
-                    next.infoitemModified(documentMetadata, session);
-                } catch (final Throwable t) {
-                    LOG.error(t.getMessage(), t);
-                }
-            }
-            break;
-        case EventClient.DELETED:
-            for (final InfostoreEventInterface next : infostoreEventList) {
-                try {
-                    next.infoitemDeleted(documentMetadata, session);
-                } catch (final Throwable t) {
-                    LOG.error(t.getMessage(), t);
-                }
-            }
-            break;
-        default:
-            LOG.error("invalid action for infostore: " + action);
-        }
-    }
+//    protected static void infostore(final EventObject eventObj, final List<InfostoreEventInterface> infostoreEventList) {
+//        if (infostoreEventList.isEmpty()) {
+//            return;
+//        }
+//        final int action = eventObj.getAction();
+//        final DocumentMetadata documentMetadata = (DocumentMetadata) eventObj.getObject();
+//        final Session session = eventObj.getSessionObject();
+//        switch (action) {
+//        case EventClient.CREATED:
+//            for (final InfostoreEventInterface next : infostoreEventList) {
+//                try {
+//                    next.infoitemCreated(documentMetadata, session);
+//                } catch (final Throwable t) {
+//                    LOG.error(t.getMessage(), t);
+//                }
+//            }
+//            break;
+//        case EventClient.CHANGED:
+//            for (final InfostoreEventInterface next : infostoreEventList) {
+//                try {
+//                    next.infoitemModified(documentMetadata, session);
+//                } catch (final Throwable t) {
+//                    LOG.error(t.getMessage(), t);
+//                }
+//            }
+//            break;
+//        case EventClient.DELETED:
+//            for (final InfostoreEventInterface next : infostoreEventList) {
+//                try {
+//                    next.infoitemDeleted(documentMetadata, session);
+//                } catch (final Throwable t) {
+//                    LOG.error(t.getMessage(), t);
+//                }
+//            }
+//            break;
+//        default:
+//            LOG.error("invalid action for infostore: " + action);
+//        }
+//    }
 
     public static void addAppointmentEvent(final AppointmentEventInterface event) {
         if (NoDelayEventInterface.class.isInstance(event)) {
@@ -622,13 +620,14 @@ public final class EventQueue {
         }
     }
 
-    public static void addInfostoreEvent(final InfostoreEventInterface event) {
-        if (NoDelayEventInterface.class.isInstance(event)) {
-            noDelayInfostoreEventList.add(event);
-        } else {
-            infostoreEventList.add(event);
-        }
-    }
+// FIXME: remove
+//    public static void addInfostoreEvent(final InfostoreEventInterface event) {
+//        if (NoDelayEventInterface.class.isInstance(event)) {
+//            noDelayInfostoreEventList.add(event);
+//        } else {
+//            infostoreEventList.add(event);
+//        }
+//    }
 
     public static void removeAppointmentEvent(final AppointmentEventInterface event) {
         if (NoDelayEventInterface.class.isInstance(event)) {
@@ -662,13 +661,14 @@ public final class EventQueue {
         }
     }
 
-    public static void removeInfostoreEvent(final InfostoreEventInterface event) {
-        if (NoDelayEventInterface.class.isInstance(event)) {
-            noDelayInfostoreEventList.remove(event);
-        } else {
-            infostoreEventList.remove(event);
-        }
-    }
+// FIXME: remove
+//    public static void removeInfostoreEvent(final InfostoreEventInterface event) {
+//        if (NoDelayEventInterface.class.isInstance(event)) {
+//            noDelayInfostoreEventList.remove(event);
+//        } else {
+//            infostoreEventList.remove(event);
+//        }
+//    }
 
     public static void addModernListener(final AppointmentEventInterface listener) {
         checkEventDispatcher();
@@ -726,6 +726,6 @@ public final class EventQueue {
         taskEventList.clear();
         contactEventList.clear();
         folderEventList.clear();
-        infostoreEventList.clear();
+//        infostoreEventList.clear();
     }
 }

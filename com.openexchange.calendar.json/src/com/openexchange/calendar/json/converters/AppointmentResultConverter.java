@@ -82,7 +82,7 @@ import com.openexchange.tools.session.ServerSession;
  */
 public class AppointmentResultConverter extends AbstractCalendarJSONResultConverter {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(AppointmentResultConverter.class));
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(AppointmentResultConverter.class));
 
     private static final String INPUT_FORMAT = "appointment";
 

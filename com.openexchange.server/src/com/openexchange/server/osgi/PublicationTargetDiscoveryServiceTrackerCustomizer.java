@@ -63,7 +63,7 @@ import com.openexchange.server.services.ServerServiceRegistry;
  */
 public final class PublicationTargetDiscoveryServiceTrackerCustomizer implements ServiceTrackerCustomizer<PublicationTargetDiscoveryService,PublicationTargetDiscoveryService> {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(PublicationTargetDiscoveryServiceTrackerCustomizer.class));
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(PublicationTargetDiscoveryServiceTrackerCustomizer.class));
 
     private final BundleContext context;
 

@@ -17,8 +17,12 @@
 package org.apache.tika.parser.microsoft;
 
 import java.io.InputStream;
+import java.util.Locale;
 
 import org.apache.tika.TikaTest;
+import org.apache.tika.metadata.DublinCore;
+import org.apache.tika.metadata.HttpHeaders;
+import org.apache.tika.metadata.MSOffice;
 import org.apache.tika.metadata.Metadata;
 import org.apache.tika.parser.ParseContext;
 import org.apache.tika.sax.BodyContentHandler;
@@ -36,9 +40,9 @@ public class PowerPointParserTest extends TikaTest {
 
             assertEquals(
                     "application/vnd.ms-powerpoint",
-                    metadata.get(Metadata.CONTENT_TYPE));
-            assertEquals("Sample Powerpoint Slide", metadata.get(Metadata.TITLE));
-            assertEquals("Keith Bennett", metadata.get(Metadata.AUTHOR));
+                    metadata.get(HttpHeaders.CONTENT_TYPE));
+            assertEquals("Sample Powerpoint Slide", metadata.get(DublinCore.TITLE));
+            assertEquals("Keith Bennett", metadata.get(MSOffice.AUTHOR));
             String content = handler.toString();
             assertTrue(content.contains("Sample Powerpoint Slide"));
             assertTrue(content.contains("Powerpoint X for Mac"));
@@ -99,11 +103,11 @@ public class PowerPointParserTest extends TikaTest {
 
         assertContains("Keyword1 Keyword2", content);
         assertEquals("Keyword1 Keyword2",
-                     metadata.get(Metadata.KEYWORDS));
+                     metadata.get(MSOffice.KEYWORDS));
 
         assertContains("Subject is here", content);
         assertEquals("Subject is here",
-                     metadata.get(Metadata.SUBJECT));
+                     metadata.get(DublinCore.SUBJECT));
 
         assertContains("Suddenly some Japanese text:", content);
         // Special version of (GHQ)
@@ -129,6 +133,9 @@ public class PowerPointParserTest extends TikaTest {
 
         String content = handler.toString();
         assertContains("Master footer is here", content);
+
+        // Make sure boilerplate text didn't come through:
+        assertEquals(-1, content.indexOf("Click to edit Master"));
     }
 
     // TODO: once we fix TIKA-712, re-enable this
@@ -147,6 +154,9 @@ public class PowerPointParserTest extends TikaTest {
 
         String content = handler.toString();
         assertContains("Text that I added to the master slide", content);
+
+        // Make sure boilerplate text didn't come through:
+        assertEquals(-1, content.indexOf("Click to edit Master"));
     }
     */
 
@@ -166,7 +176,41 @@ public class PowerPointParserTest extends TikaTest {
 
         String content = handler.toString();
         assertContains("Text that I added to the master slide", content);
+
+        // Make sure boilerplate text didn't come through:
+        assertEquals(-1, content.indexOf("Click to edit Master"));
     }
     */
 
+    /**
+     * Ensures that custom OLE2 (HPSF) properties are extracted
+     */
+    public void testCustomProperties() throws Exception {
+       InputStream input = PowerPointParserTest.class.getResourceAsStream(
+             "/test-documents/testPPT_custom_props.ppt");
+       Metadata metadata = new Metadata();
+       
+       try {
+          ContentHandler handler = new BodyContentHandler(-1);
+          ParseContext context = new ParseContext();
+          context.set(Locale.class, Locale.US);
+          new OfficeParser().parse(input, handler, metadata, context);
+       } finally {
+          input.close();
+       }
+       
+       assertEquals("application/vnd.ms-powerpoint", metadata.get(HttpHeaders.CONTENT_TYPE));
+       assertEquals("JOUVIN ETIENNE",       metadata.get(MSOffice.AUTHOR));
+       assertEquals("EJ04325S",             metadata.get(MSOffice.LAST_AUTHOR));
+       assertEquals("2011-08-22T13:32:58Z", metadata.get(MSOffice.LAST_SAVED));
+       assertEquals("2011-08-22T13:30:53Z", metadata.get(MSOffice.CREATION_DATE));
+       assertEquals("1",                    metadata.get(MSOffice.SLIDE_COUNT));
+       assertEquals("3",                    metadata.get(MSOffice.WORD_COUNT));
+       assertEquals("Test extraction properties pptx", metadata.get(DublinCore.TITLE));
+       assertEquals("true",                 metadata.get("custom:myCustomBoolean"));
+       assertEquals("3",                    metadata.get("custom:myCustomNumber"));
+       assertEquals("MyStringValue",        metadata.get("custom:MyCustomString"));
+       assertEquals("2010-12-30T22:00:00Z", metadata.get("custom:MyCustomDate"));
+       assertEquals("2010-12-29T22:00:00Z", metadata.get("custom:myCustomSecondDate"));
+    }
 }

@@ -86,7 +86,7 @@ public class UsmFailureDuringRecurrenceTest extends ManagedAppointmentTest {
         changes.put(Appointment.DAY_IN_MONTH, 23);
         changes.put(Appointment.MONTH, 3);
         changes.put(Appointment.UNTIL,D("31/12/2025 00:00"));
-        failTest(changes, "Incomplete recurring information: Missing interval");
+        failTest(changes, "Incomplete recurring information: missing interval");
     }
 
   //I think it should be an exception like "Bullshit, you cannot make a change exception a series"
@@ -121,7 +121,7 @@ public class UsmFailureDuringRecurrenceTest extends ManagedAppointmentTest {
         expectationsForException.put(Appointment.UNTIL,null);
         expectationsForException.put(Appointment.INTERVAL, null);
 
-        failTest(changes, "Incomplete recurring information: Missing interval.");
+        failTest(changes, "Incomplete recurring information: missing interval.");
     }
 
     public void testShouldAllowToCreateAChangeException() throws Exception {
@@ -171,8 +171,9 @@ public class UsmFailureDuringRecurrenceTest extends ManagedAppointmentTest {
         changes.update(update);
         calendarManager.update(update);
 
-        if(update.containsRecurrencePosition())
+        if(update.containsRecurrencePosition()) {
             assertFalse("Appointment and change exception should have different IDs", app.getObjectID() == update.getObjectID() );
+        }
 
         assertFalse("Update was expected to work", calendarManager.hasLastException());
 

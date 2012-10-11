@@ -84,7 +84,7 @@ responseDescription = "The JSON representation of the updated reminder.")
 public final class RemindAgainAction extends AbstractReminderAction {
 
     private static final org.apache.commons.logging.Log LOG =
-        com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(RemindAgainAction.class));
+        com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(RemindAgainAction.class));
 
     /**
      * Initializes a new {@link RemindAgainAction}.

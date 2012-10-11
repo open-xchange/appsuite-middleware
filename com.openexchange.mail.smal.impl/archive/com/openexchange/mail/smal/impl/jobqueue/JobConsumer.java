@@ -59,7 +59,7 @@ import java.util.concurrent.Semaphore;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import com.openexchange.log.LogFactory;
 import com.openexchange.mail.smal.impl.SmalServiceLookup;
 import com.openexchange.threadpool.AbstractTask;
 import com.openexchange.threadpool.Task;

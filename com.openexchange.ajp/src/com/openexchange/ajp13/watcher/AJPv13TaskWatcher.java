@@ -53,15 +53,19 @@ import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.Map;
+import java.util.TreeMap;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import com.openexchange.ajp13.AJPv13Config;
+import com.openexchange.ajp13.AJPv13Server;
 import com.openexchange.ajp13.AJPv13ServiceRegistry;
 import com.openexchange.ajp13.exception.AJPv13Exception;
-import com.openexchange.ajp13.najp.AJPv13ServerImpl;
 import com.openexchange.log.Log;
+import com.openexchange.log.LogProperties;
+import com.openexchange.log.Props;
 import com.openexchange.threadpool.Task;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.threadpool.ThreadRenamer;
@@ -75,7 +79,7 @@ import com.openexchange.timer.TimerService;
  */
 public class AJPv13TaskWatcher {
 
-    private static final org.apache.commons.logging.Log LOG = Log.valueOf(org.apache.commons.logging.LogFactory.getLog(AJPv13TaskWatcher.class));
+    private static final org.apache.commons.logging.Log LOG = Log.loggerFor(AJPv13TaskWatcher.class);
 
     private ScheduledTimerTask scheduledTimerTask;
 
@@ -177,7 +181,7 @@ public class AJPv13TaskWatcher {
                     return;
                 }
                 final boolean logExceededTasks = AJPv13Config.getAJPWatcherEnabled();
-                if (logExceededTasks && log.isInfoEnabled() && AJPv13Config.getAJPWatcherPermission()) {
+                if (logExceededTasks && log.isInfoEnabled()) {
                     final AtomicInteger countWaiting = new AtomicInteger();
                     final AtomicInteger countProcessing = new AtomicInteger();
                     final AtomicInteger countExceeded = new AtomicInteger();
@@ -197,34 +201,25 @@ public class AJPv13TaskWatcher {
                      */
                     threadPoolService.invokeAll(tasks);
                     /*
-                     * All threads are listening longer than specified max listener running time
+                     * Check if all threads are listening longer than specified max listener running time
                      */
-                    final int numProcessing = countProcessing.get();
-                    if (numProcessing > 0 && countExceeded.get() == numProcessing) {
-                        final String delimStr = "\n++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n";
-                        log.error(new StringBuilder(128 + delimStr.length()).append(delimStr).append(
-                            "AJP-Watcher's run done: SYSTEM DEADLOCK DETECTED!").append(" Going to stop and re-initialize system").append(
-                            delimStr).toString());
-                        /*
-                         * Restart AJP Server
-                         */
-                        try {
-                            AJPv13ServerImpl.restartAJPServer();
-                        } catch (final AJPv13Exception e) {
-                            log.error(e.getMessage(), e);
+                    if (AJPv13Config.getAJPWatcherPermission()) {
+                        final int numProcessing = countProcessing.get();
+                        if (numProcessing > 0 && countExceeded.get() == numProcessing) {
+                            final String delimStr = "\n++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n";
+                            log.error(new StringBuilder(128 + delimStr.length()).append(delimStr).append(
+                                "AJP-Watcher's run done: SYSTEM DEADLOCK DETECTED!").append(" Going to stop and re-initialize system").append(
+                                delimStr).toString());
+                            /*
+                             * Restart AJP Server
+                             */
+                            try {
+                                AJPv13Server.restartAJPServer();
+                            } catch (final AJPv13Exception e) {
+                                log.error(e.getMessage(), e);
+                            }
                         }
                     }
-                    /*-
-                     *
-                    else {
-                        if (log.isTraceEnabled()) {
-                            final String delimStr = "\n+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n";
-                            log.trace(new StringBuilder(128 + delimStr.length()).append(delimStr).append("AJP-Watcher's run done: ").append(
-                                "    Waiting=").append(countWaiting).append("    Running=").append(countProcessing).append("    Exceeded=").append(
-                                countExceeded).append("    Total=").append(listeners.size()).append(delimStr).toString());
-                        }
-                    }
-                     */
                 } else {
                     /*
                      * Create a list of tasks
@@ -316,11 +311,37 @@ public class AJPv13TaskWatcher {
             {
                 final Throwable t = new Throwable();
                 t.setStackTrace(task.getStackTrace());
-                log.info(
-                    new StringBuilder(128).append("AJP Listener \"").append(task.getThreadName()).append("\" exceeds max. running time of ").append(
-                        AJPv13Config.getAJPWatcherMaxRunningTime()).append("msec -> Processing time: ").append(
-                        System.currentTimeMillis() - task.getProcessingStartTime()).append("msec").toString(),
-                    t);
+                final Map<String, Object> taskProperties;
+                {
+                    final Props taskProps = LogProperties.optLogProperties(task.getThread());
+                    taskProperties = null == taskProps ? null : taskProps.getMap();
+                }
+                if (null == taskProperties) {
+                    final StringBuilder logBuilder = new StringBuilder(196).append("AJP Listener \"").append(task.getThreadName());
+                    logBuilder.append("\" exceeds max. running time of ").append(AJPv13Config.getAJPWatcherMaxRunningTime());
+                    logBuilder.append("msec -> Processing time: ").append(System.currentTimeMillis() - task.getProcessingStartTime());
+                    logBuilder.append("msec");
+                    log.info(logBuilder.toString(), t);
+                } else {
+                    final StringBuilder logBuilder = new StringBuilder(512);
+                    final Map<String, String> sorted = new TreeMap<String, String>();
+                    for (final Map.Entry<String, Object> entry : taskProperties.entrySet()) {
+                        final String propertyName = entry.getKey();
+                        final Object value = entry.getValue();
+                        if (null != value) {
+                            sorted.put(propertyName, value.toString());
+                        }
+                    }
+                    for (final Map.Entry<String, String> entry : sorted.entrySet()) {
+                        logBuilder.append(entry.getKey()).append('=').append(entry.getValue()).append('\n');
+                    }
+                    logBuilder.append('\n');
+                    logBuilder.append("AJP Listener \"").append(task.getThreadName());
+                    logBuilder.append("\" exceeds max. running time of ").append(AJPv13Config.getAJPWatcherMaxRunningTime());
+                    logBuilder.append("msec -> Processing time: ").append(System.currentTimeMillis() - task.getProcessingStartTime());
+                    logBuilder.append("msec");
+                    log.info(logBuilder.toString(), t);
+                }
             }
             if (max > 0 && task.getProcessingStartTime() < max) {
                 task.cancel();

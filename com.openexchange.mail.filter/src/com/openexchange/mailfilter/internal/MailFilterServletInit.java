@@ -53,6 +53,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import javax.servlet.ServletException;
 import org.osgi.service.http.HttpService;
 import org.osgi.service.http.NamespaceException;
+import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.exception.OXException;
 import com.openexchange.mailfilter.ajax.MailfilterServlet;
 import com.openexchange.mailfilter.ajax.exceptions.OXMailfilterExceptionCode;
@@ -67,9 +68,12 @@ import com.openexchange.server.Initialization;
  */
 public class MailFilterServletInit implements Initialization {
 
-	private static final String SC_SRVLT_ALIAS = "ajax/mailfilter";
+    /**
+     * The {@link DefaultDeferringURLService} reference.
+     */
+    public static final java.util.concurrent.atomic.AtomicReference<DispatcherPrefixService> PREFIX = new java.util.concurrent.atomic.AtomicReference<DispatcherPrefixService>();
 
-	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
+	private static final org.apache.commons.logging.Log LOG = com.openexchange.log.LogFactory
 			.getLog(MailFilterServletInit.class);
 
 	private static final MailFilterServletInit instance = new MailFilterServletInit();
@@ -116,11 +120,12 @@ public class MailFilterServletInit implements Initialization {
 			LOG.error("HTTP service is null. Mail Filter servlet cannot be registered");
 			return;
 		}
+		PREFIX.set(MailFilterServletServiceRegistry.getServiceRegistry().getService(DispatcherPrefixService.class));
 		try {
 			/*
 			 * Register mail filter servlet
 			 */
-			httpService.registerServlet(SC_SRVLT_ALIAS, new MailfilterServlet(), null, null);
+			httpService.registerServlet(PREFIX.get().getPrefix()+"mailfilter", new MailfilterServlet(), null, null);
 		} catch (final ServletException e) {
 			throw OXMailfilterExceptionCode.SERVLET_REGISTRATION_FAILED.create(e, e
 					.getMessage());
@@ -148,7 +153,7 @@ public class MailFilterServletInit implements Initialization {
 			/*
 			 * Unregister mail filter servlet
 			 */
-			httpService.unregister(SC_SRVLT_ALIAS);
+			httpService.unregister(PREFIX.get().getPrefix()+"mailfilter");
 		}
 	}
 

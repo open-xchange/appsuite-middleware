@@ -49,118 +49,135 @@
 
 package com.openexchange.soap.cxf.osgi;
 
-import java.text.MessageFormat;
+import java.util.List;
 import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import javax.jws.WebService;
 import javax.xml.ws.Endpoint;
+import org.apache.commons.logging.Log;
+import org.apache.cxf.interceptor.DocLiteralInInterceptor;
+import org.apache.cxf.interceptor.Interceptor;
+import org.apache.cxf.message.Message;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceEvent;
 import org.osgi.framework.ServiceListener;
 import org.osgi.framework.ServiceReference;
+import com.openexchange.soap.cxf.ExceptionUtils;
 import com.openexchange.soap.cxf.WebserviceName;
-
 
 /**
  * {@link WebserviceCollector}
- *
+ * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class WebserviceCollector implements ServiceListener {
 
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(WebserviceCollector.class);
+
     private static final String WEBSERVICE_NAME = "WebserviceName";
 
-    private final ConcurrentMap<String, Endpoint> endpoints = new ConcurrentHashMap<String, Endpoint>();
+    private final ConcurrentMap<String, Endpoint> endpoints;
 
     private final BundleContext context;
 
-    private boolean open;
+    private volatile boolean open;
 
-    public WebserviceCollector(BundleContext context) {
+    /**
+     * Initializes a new {@link WebserviceCollector}.
+     * 
+     * @param context The bundle context
+     */
+    public WebserviceCollector(final BundleContext context) {
+        super();
+        endpoints = new ConcurrentHashMap<String, Endpoint>();
         this.context = context;
     }
 
-
     @Override
-    public void serviceChanged(ServiceEvent event) {
-        if(!open) {
+    public void serviceChanged(final ServiceEvent event) {
+        if (!open) {
             return;
         }
-        if(event.getType() == ServiceEvent.REGISTERED) {
-            ServiceReference ref = event.getServiceReference();
-            add(ref);
-        } else if (event.getType() == ServiceEvent.UNREGISTERING) {
-            ServiceReference ref = event.getServiceReference();
-            remove(ref);
+        final int type = event.getType();
+        if (ServiceEvent.REGISTERED == type) {
+            add(event.getServiceReference());
+        } else if (ServiceEvent.UNREGISTERING == type) {
+            remove(event.getServiceReference());
         }
     }
 
+    /**
+     * Opens this collector.
+     */
     public void open() {
         try {
-            ServiceReference[] allServiceReferences = context.getAllServiceReferences(null, null);
-            for (ServiceReference serviceReference : allServiceReferences) {
-                add( serviceReference );
+            final ServiceReference<?>[] allServiceReferences = context.getAllServiceReferences(null, null);
+            for (final ServiceReference<?> serviceReference : allServiceReferences) {
+                add(serviceReference);
             }
 
-        } catch (InvalidSyntaxException e) {
+        } catch (final InvalidSyntaxException e) {
             // Impossible, no filter specified.
         }
 
         open = true;
     }
 
+    /**
+     * Closes this collector.
+     */
     public void close() {
         open = false;
-        for (Entry<String, Endpoint> entry : endpoints.entrySet()) {
+        for (final Entry<String, Endpoint> entry : endpoints.entrySet()) {
             remove(entry.getKey(), entry.getValue());
         }
     }
 
+    private void remove(final ServiceReference<?> ref) {
+        final Object service = context.getService(ref);
 
-    private void remove(ServiceReference ref) {
-        Object service = context.getService(ref);
-
-        if( isWebservice(service) ) {
-            String name = getName(ref, service);
-            remove( name, service );
+        if (isWebservice(service)) {
+            final String name = getName(ref, service);
+            remove(name, service);
         }
     }
 
-    private void add(ServiceReference ref) {
-        Object service = context.getService(ref);
-        if( isWebservice(service) ) {
-            String name = getName(ref, service);
-            replace( name, service );
+    private void add(final ServiceReference<?> ref) {
+        final Object service = context.getService(ref);
+        if (isWebservice(service)) {
+            final String name = getName(ref, service);
+            replace(name, service);
         }
     }
 
-    private String getName(ServiceReference ref, Object service) {
+    private String getName(final ServiceReference<?> ref, final Object service) {
         // If an annotation is present with the name, use that
         {
-            WebserviceName webserviceName = service.getClass().getAnnotation(WebserviceName.class);
-            if(webserviceName != null) {
+            final WebserviceName webserviceName = service.getClass().getAnnotation(WebserviceName.class);
+            if (webserviceName != null) {
                 return webserviceName.value();
             }
         }
         // If a service property for WebserviceName is present, use that
         {
-            Object name = ref.getProperty(WEBSERVICE_NAME);
-            if(name != null && !"".equals(name)) {
-                return name.toString();
+            final Object name = ref.getProperty(WEBSERVICE_NAME);
+            final String sName = null == name ? null : name.toString();
+            if (!isEmpty(sName)) {
+                return sName;
             }
         }
         // Next try the WebService annotation
-
         {
-            WebService webService = service.getClass().getAnnotation(WebService.class);
+            final WebService webService = service.getClass().getAnnotation(WebService.class);
             String serviceName = webService.serviceName();
-            if(serviceName != null && ! ("".equals(serviceName))) {
+            if (!isEmpty(serviceName)) {
                 return serviceName;
             }
             serviceName = webService.name();
-            if(serviceName != null && ! ("".equals(serviceName))) {
+            if (!isEmpty(serviceName)) {
                 return serviceName;
             }
         }
@@ -168,24 +185,62 @@ public class WebserviceCollector implements ServiceListener {
         return service.getClass().getSimpleName();
     }
 
-    private void remove(String name, Object service) {
-        Endpoint endpoint = endpoints.remove(name);
-        if(endpoint != null) {
+    private static boolean isEmpty(final String string) {
+        if (null == string) {
+            return true;
+        }
+        final int len = string.length();
+        boolean isWhitespace = true;
+        for (int i = 0; isWhitespace && i < len; i++) {
+            isWhitespace = Character.isWhitespace(string.charAt(i));
+        }
+        return isWhitespace;
+    }
+
+    private void remove(final String name, final Object service) {
+        final Endpoint endpoint = endpoints.remove(name);
+        if (endpoint != null) {
             endpoint.stop();
         }
     }
 
-    private void replace(String name, Object service) {
-        Endpoint oldEndpoint = endpoints.replace(name, Endpoint.publish(MessageFormat.format("/{0}", name), service));
-        if(oldEndpoint != null) {
+    private void replace(final String name, final Object service) {
+        final String address = '/' + name; // MessageFormat.format("/{0}", name);
+        Endpoint oldEndpoint;
+        try {
+            // Publish new server endpoint
+            final Endpoint endpoint = Endpoint.publish(address, service);
+            {
+                // Alter server's in-stream interceptors
+                final org.apache.cxf.endpoint.Endpoint serverEndpoint = (org.apache.cxf.endpoint.Endpoint) endpoint.getProperties();
+                final List<Interceptor<? extends Message>> inInterceptors = serverEndpoint.getBinding().getInInterceptors();
+                boolean found = false;
+                int index = 0;
+                for (final Interceptor<? extends Message> interceptor : inInterceptors) {
+                    if (interceptor instanceof DocLiteralInInterceptor) {
+                        found = true;
+                        break;
+                    }
+                    index++;
+                }
+                if (found) {
+                    inInterceptors.remove(index);
+                    inInterceptors.add(index, new com.openexchange.soap.cxf.interceptor.DocLiteralInInterceptor());
+                }
+            }
+            oldEndpoint = endpoints.replace(name, endpoint);
+            LOG.info("Publishing endpoint succeeded. Published \"" + name + "\" under address \"" + address + "\".");
+        } catch (final Throwable t) {
+            ExceptionUtils.handleThrowable(t);
+            LOG.error("Publishing endpoint failed. Couldn't publish \"" + name + "\" under address \"" + address + "\".", t);
+            oldEndpoint = null;
+        }
+        if (oldEndpoint != null) {
             oldEndpoint.stop();
         }
     }
 
-    private boolean isWebservice(Object service) {
-        WebService annotation = service.getClass().getAnnotation(WebService.class);
-        return annotation != null;
+    private boolean isWebservice(final Object service) {
+        return (null != service.getClass().getAnnotation(WebService.class));
     }
-
-
 }

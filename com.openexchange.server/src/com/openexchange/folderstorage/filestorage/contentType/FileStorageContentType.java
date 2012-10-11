@@ -58,6 +58,8 @@ import com.openexchange.folderstorage.ContentType;
  */
 public class FileStorageContentType implements ContentType {
 
+    private static final long serialVersionUID = 1548536482010132571L;
+
     private static final FileStorageContentType instance = new FileStorageContentType();
 
     /**

@@ -65,6 +65,7 @@ import com.openexchange.groupware.contact.ContactInterface;
 import com.openexchange.groupware.contact.ContactInterfaceDiscoveryService;
 import com.openexchange.groupware.contact.OverridingContactInterface;
 import com.openexchange.groupware.container.Contact;
+import com.openexchange.groupware.container.DataObject;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.generic.TargetFolderDefinition;
 import com.openexchange.groupware.search.Order;
@@ -96,6 +97,9 @@ public class ContactFolderUpdaterStrategy implements FolderUpdaterStrategy<Conta
         int score = 0;
         final int threshold = getThreshold(session);
 
+        if(isReasonablyEmpty(original) && isReasonablyEmpty(candidate)) {
+        	return threshold + 1;
+        }
         // For the sake of simplicity we assume that equal names mean equal contacts
         // TODO: This needs to be diversified in the form of "unique-in-context" later (if there is only one "Max Mustermann" in a folder it
         // is unique and qualifies as identifier. If there are two "Max Mustermann" it does not.)
@@ -128,7 +132,21 @@ public class ContactFolderUpdaterStrategy implements FolderUpdaterStrategy<Conta
         return score;
     }
 
-    private boolean isset(final String s) {
+    private boolean isReasonablyEmpty(Contact c) {
+		return !(c.containsEmail1() 
+		|| c.containsEmail2() 
+		|| c.containsEmail3() 
+		|| c.containsSurName() 
+		|| c.containsGivenName() 
+		|| c.containsYomiFirstName()
+		|| c.containsYomiLastName()
+		|| c.containsCompany()
+		|| c.containsYomiCompany()
+		|| c.containsDisplayName()
+		|| c.containsNickname());
+	}
+
+	private boolean isset(final String s) {
         return s == null || s.length() > 0;
     }
 
@@ -156,7 +174,7 @@ public class ContactFolderUpdaterStrategy implements FolderUpdaterStrategy<Conta
                 folderId,
                 0,
                 numberOfContacts,
-                Contact.OBJECT_ID,
+                DataObject.OBJECT_ID,
                 Order.ASCENDING,
                 null,
                 COMPARISON_COLUMNS);

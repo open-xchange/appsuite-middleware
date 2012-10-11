@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<schema name="OX Schema Mail" version="1.1">
+    <types>
+        <fieldType name="boolean" class="solr.BoolField" omitNorms="true" />
+        <fieldType name="string" class="solr.StrField" sortMissingLast="true" omitNorms="true" />
+        <fieldType name="long" class="solr.LongField" omitNorms="true" />
+        <fieldType name="int" class="solr.IntField" omitNorms="true" />
+
+        <fieldType name="text" class="solr.TextField" positionIncrementGap="100" omitNorms="false">
+            <analyzer type="index">
+                <tokenizer class="solr.WhitespaceTokenizerFactory" />
+                <filter class="solr.WordDelimiterFilterFactory" generateWordParts="1" generateNumberParts="1" catenateWords="0" catenateNumbers="1"
+                    catenateAll="0" splitOnCaseChange="1" />
+                <filter class="solr.LowerCaseFilterFactory" />
+                <filter class="solr.RemoveDuplicatesTokenFilterFactory" />
+            </analyzer>
+            <analyzer type="query">
+                <tokenizer class="solr.WhitespaceTokenizerFactory" />
+                <filter class="solr.WordDelimiterFilterFactory" generateWordParts="1" generateNumberParts="1" catenateWords="0" catenateNumbers="1"
+                    catenateAll="0" splitOnCaseChange="1" />
+                <filter class="solr.LowerCaseFilterFactory" />
+                <filter class="solr.SynonymFilterFactory" synonyms="${confDir:/opt/open-xchange/solr/conf}/synonyms.txt" ignoreCase="true" expand="true" />
+                <filter class="solr.RemoveDuplicatesTokenFilterFactory" />
+            </analyzer>
+        </fieldType>
+
+        <fieldType name="addr" class="solr.TextField">
+            <analyzer>
+                <tokenizer class="solr.KeywordTokenizerFactory" />
+                <filter class="de.kippdata.solrext.analyzer.InternetAddressCleanupFilterFactory" />
+                <filter class="solr.WordDelimiterFilterFactory" catenateWords="0" catenateNumbers="0" catenateAll="0" splitOnCaseChange="0"
+                    splitOnNumerics="0" types="${confDir:/opt/open-xchange/solr/conf}/wdf.txt" />
+                <filter class="de.kippdata.solrext.analyzer.DomainSkipFilterFactory" domains="de com co.uk net" />
+                <filter class="solr.WordDelimiterFilterFactory" catenateWords="0" catenateNumbers="0" catenateAll="0" splitOnCaseChange="0"
+                    splitOnNumerics="0" />
+                <filter class="solr.LengthFilterFactory" min="2" max="30" />
+                <filter class="solr.LowerCaseFilterFactory" />
+            </analyzer>
+            <!-- <analyzer> -->
+            <!-- <tokenizer class="solr.KeywordTokenizerFactory" /> -->
+            <!-- <filter class="de.kippdata.solrext.analyzer.InternetAddressCleanupFilterFactory"/> -->
+            <!-- <filter class="solr.WordDelimiterFilterFactory" -->
+            <!-- catenateWords="0" catenateNumbers="0" catenateAll="0" splitOnCaseChange="0" -->
+            <!-- splitOnNumerics="0" -->
+            <!-- types="${confDir:/opt/open-xchange/solr/conf}/wdf.txt" /> -->
+            <!-- <filter class="de.kippdata.solrext.analyzer.DomainSkipFilterFactory"/> -->
+            <!-- <filter class="solr.WordDelimiterFilterFactory" -->
+            <!-- catenateWords="0" catenateNumbers="0" catenateAll="0" splitOnCaseChange="0" -->
+            <!-- splitOnNumerics="0" /> -->
+            <!-- <filter class="solr.LengthFilterFactory" min="2" max="30" /> -->
+            <!-- </analyzer> -->
+        </fieldType>
+    </types>
+
+    <fields>
+        <!-- Common Fields -->
+        <field name="uuid" type="string" stored="true" indexed="true" />
+        <field name="timestamp" type="long" stored="true" indexed="true" />
+        <field name="account" type="int" stored="true" indexed="true" />
+        <field name="full_name" type="string" stored="true" indexed="true" />
+        <field name="id" type="string" stored="true" indexed="true" />
+        <field name="color_label" type="int" stored="true" indexed="true" />
+        <field name="attachment" type="boolean" stored="true" indexed="true" />
+
+        <!-- Long fields -->
+        <field name="received_date" type="long" stored="true" indexed="true" />
+        <field name="sent_date" type="long" stored="true" indexed="true" />
+        <field name="size" type="long" stored="true" indexed="true" />
+
+        <!-- Flag fields -->
+        <field name="flag_answered" type="boolean" stored="true" indexed="true" />
+        <field name="flag_deleted" type="boolean" stored="true" indexed="true" />
+        <field name="flag_draft" type="boolean" stored="true" indexed="true" />
+        <field name="flag_flagged" type="boolean" stored="true" indexed="true" />
+        <field name="flag_recent" type="boolean" stored="true" indexed="true" />
+        <field name="flag_seen" type="boolean" stored="true" indexed="true" />
+        <field name="flag_user" type="boolean" stored="true" indexed="true" />
+        <field name="flag_spam" type="boolean" stored="true" indexed="true" />
+        <field name="flag_forwarded" type="boolean" stored="true" indexed="true" />
+        <field name="flag_read_ack" type="boolean" stored="true" indexed="true" />
+        <field name="user_flags" type="string" stored="true" indexed="true" multiValued="true" />
+
+        <field name="from" type="addr" stored="true" indexed="true" multiValued="true" />
+        <!-- <field name="from_analyzed" type="addr" stored="false" indexed="true" multiValued="true" /> -->
+        <!-- <copyField source="from" dest="from_analyzed" /> -->
+
+        <field name="to" type="addr" stored="true" indexed="true" multiValued="true" />
+        <!-- <field name="to_analyzed" type="addr" stored="false" indexed="true" multiValued="true" /> -->
+        <!-- <copyField source="to" dest="to_analyzed" /> -->
+
+        <field name="cc" type="addr" stored="true" indexed="true" multiValued="true" />
+        <!-- <field name="cc_analyzed" type="addr" stored="false" indexed="true" multiValued="true" /> -->
+        <!-- <copyField source="cc" dest="cc_analyzed" /> -->
+
+        <field name="bcc" type="addr" stored="true" indexed="true" multiValued="true" />
+        <!-- <field name="bcc_analyzed" type="addr" stored="false" indexed="true" multiValued="true" /> -->
+        <!-- <copyField source="bcc" dest="bcc_analyzed" /> -->
+
+        <!-- Subject Field -->
+        <field name="subject" type="text" stored="true" indexed="true" />
+        <field name="content_flag" type="boolean" stored="false" indexed="true" />
+        <field name="content" type="text" stored="false" indexed="true" />
+    </fields>
+
+    <uniqueKey>uuid</uniqueKey>
+    <solrQueryParser defaultOperator="AND" />
+    <!-- <defaultSearchField>from_analyzed</defaultSearchField> -->
+</schema>

@@ -1,0 +1,75 @@
+Source: open-xchange-meta
+Section: web
+Priority: optional
+Maintainer: Carsten Hoeger <choeger@open-xchange.com>
+Build-Depends: debhelper (>= 4.0.0)
+Standards-Version: 3.8.4
+Homepage: http://www.open-xchange.com
+
+Package: open-xchange-meta-oxucs
+Architecture: all
+Depends: ${oxcommon}, ${all-lang}, univention-config-registry, open-xchange-authentication-ucs, open-xchange-spamhandler-spamassassin, open-xchange-mailfilter, open-xchange-meta-admin, open-xchange-meta-pubsub, open-xchange-meta-messaging, open-xchange-meta-gui, open-xchange-push-imapidle, open-xchange-configjump-generic, open-xchange-configjump-generic-gui, open-xchange-dav
+Conflicts: open-xchange-push-mailnotify
+Description: The Open-Xchange Meta package for OX into UCS integration
+
+Package: open-xchange-meta-parallels
+Architecture: all
+Depends: ${oxcommon}, ${all-lang}, open-xchange-parallels, open-xchange-parallels-gui, open-xchange-spamhandler-spamassassin, open-xchange-admin-soap, open-xchange-meta-admin, open-xchange-meta-pubsub, open-xchange-meta-messaging, open-xchange-meta-gui
+Conflicts: open-xchange-admin-autocontextid, open-xchange-admin-reseller
+Description: The Open-Xchange Meta package for OX into Parallels integration
+
+Package: open-xchange-meta-plesk
+Architecture: all
+Depends: ${oxcommon}, ${all-lang}, open-xchange-spamhandler-default, open-xchange-admin-soap, open-xchange-meta-admin, open-xchange-meta-pubsub, open-xchange-meta-messaging, open-xchange-meta-gui
+Description: The Open-Xchange Meta package for OX into Plesk integration
+
+Package: open-xchange-meta-server
+Architecture: all
+Depends: ${oxcommon}, open-xchange, open-xchange-spamhandler
+Description: The Open-Xchange Meta package for OX Backend
+
+Package: open-xchange-meta-admin
+Architecture: all
+Depends: open-xchange-admin
+Description: The Open-Xchange Meta package for User/Group Provisioning
+
+Package: open-xchange-meta-pubsub
+Architecture: all
+Depends: open-xchange-publish, open-xchange-subscribe
+Description: The Open-Xchange Meta package for Publish and Subscribe
+
+Package: open-xchange-meta-messaging
+Architecture: all
+Depends: open-xchange-unifiedmail, open-xchange-messaging
+Description: The Open-Xchange Meta package for Messaging
+
+Package: open-xchange-meta-gui
+Architecture: all
+Depends: open-xchange-gui, open-xchange-gui-wizard-plugin-gui, open-xchange-online-help-de-de, open-xchange-online-help-en-us, open-xchange-online-help-fr-fr
+Description: The Open-Xchange Meta package for OX GUI
+
+Package: open-xchange-meta-singleserver
+Architecture: all
+Depends: open-xchange-meta-server, open-xchange-meta-gui, open-xchange-meta-admin, open-xchange-meta-pubsub, open-xchange-meta-messaging
+Description: The Open-Xchange Meta package for OX on a single server
+
+Package: open-xchange-meta-databaseonly
+Architecture: all
+Depends: open-xchange-passwordchange-database, open-xchange-manage-group-resource
+Description: The Open-Xchange Meta package for OX managed via database only
+
+Package: open-xchange-meta-mobility
+Architecture: all
+Depends: open-xchange-eas, open-xchange-usm, open-xchange-help-usm-eas, open-xchange-eas-provisioning-mail, open-xchange-eas-provisioning-gui
+Description: The Open-Xchange Meta package for Business Mobility
+
+Package: open-xchange-meta-outlook
+Architecture: all
+Depends: open-xchange-outlook-updater, open-xchange-outlook-updater-oxtender2, open-xchange-usm, open-xchange-folder-json
+Description: The Open-Xchange Meta package for Outlook OXtender
+
+Package: open-xchange-meta-cpanel
+Architecture: all
+Depends: ${oxcommon}, ${all-lang}, open-xchange-spamhandler-spamassassin, open-xchange-admin-soap-reseller, open-xchange-authentication-imap, open-xchange-meta-admin, open-xchange-meta-pubsub, open-xchange-meta-messaging, open-xchange-meta-gui, open-xchange-manage-group-resource, open-xchange-gui-wizard-plugin
+Description: The Open-Xchange Meta package for OX into cPanel integration
+

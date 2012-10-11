@@ -1,0 +1,19 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: NOMS Appstore Mock
+Bundle-SymbolicName: com.openexchange.appstore.noms
+Bundle-Version: 6.21.0.0
+Bundle-Activator: com.openexchange.appstore.noms.osgi.Activator
+Bundle-Vendor: Open-Xchange Inc.
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Import-Package: com.openexchange.ajax.requesthandler,
+ com.openexchange.ajax.requesthandler.osgiservice,
+ com.openexchange.documentation,
+ com.openexchange.exception,
+ com.openexchange.log,
+ com.openexchange.osgi,
+ com.openexchange.server,
+ com.openexchange.tools.session,
+ org.apache.commons.logging;version="1.0.4",
+ org.json,
+ org.osgi.framework;version="1.3.0"

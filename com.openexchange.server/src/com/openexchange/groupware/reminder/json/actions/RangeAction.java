@@ -84,7 +84,7 @@ import com.openexchange.tools.session.ServerSession;
 public final class RangeAction extends AbstractReminderAction {
 
     private static final org.apache.commons.logging.Log LOG =
-        com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(RangeAction.class));
+        com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(RangeAction.class));
 
     /**
      * Initializes a new {@link RangeAction}.

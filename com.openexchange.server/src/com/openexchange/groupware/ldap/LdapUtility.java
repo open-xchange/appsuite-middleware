@@ -60,7 +60,7 @@ import javax.naming.Name;
 import javax.naming.NamingException;
 import javax.naming.ldap.LdapContext;
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import com.openexchange.log.LogFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.configuration.DirectoryService;
@@ -295,7 +295,7 @@ public final class LdapUtility {
     /**
      * Proxy attribute to store the customization properties.
      */
-    private static Properties customization;
+    private static volatile Properties customization;
 
     /**
      * Returns the properties for the customization of the ldap interface.

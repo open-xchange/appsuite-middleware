@@ -54,7 +54,6 @@ import net.fortuna.ical4j.model.Calendar;
 import net.fortuna.ical4j.model.component.VEvent;
 import net.fortuna.ical4j.model.property.Comment;
 import net.fortuna.ical4j.model.property.Method;
-import net.fortuna.ical4j.model.property.XProperty;
 import com.openexchange.data.conversion.ical.ConversionError;
 import com.openexchange.data.conversion.ical.ConversionWarning;
 import com.openexchange.data.conversion.ical.Mode;
@@ -74,6 +73,7 @@ import com.openexchange.groupware.contexts.Context;
  */
 public class ICal4JITipEmitter extends ICal4JEmitter implements ITipEmitter {
 
+    @Override
     public String writeMessage(ITipMessage message, Context ctx, List<ConversionError> errors, List<ConversionWarning> warnings) {
         Calendar calendar = new Calendar();
         initCalendar(calendar);

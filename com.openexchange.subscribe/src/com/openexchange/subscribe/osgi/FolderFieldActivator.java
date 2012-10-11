@@ -51,7 +51,6 @@ package com.openexchange.subscribe.osgi;
 
 import com.openexchange.ajax.customizer.folder.AdditionalFolderField;
 import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.subscribe.AbstractSubscribeService;
 import com.openexchange.subscribe.folders.HasSubscriptions;
 
 
@@ -75,8 +74,7 @@ public class FolderFieldActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        // TODO Auto-generated method stub
-        return null;
+        return EMPTY_CLASSES;
     }
 
 }

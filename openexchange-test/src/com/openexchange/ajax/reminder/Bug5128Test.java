@@ -69,7 +69,7 @@ public class Bug5128Test extends ReminderTest {
         final TimeZone timeZone = ConfigTools.getTimeZone(getWebConversation(), getHostName(), getSessionId());
 
         final Calendar c = TimeTools.createCalendar(timeZone);
-        Calendar rCal = TimeTools.createCalendar(timeZone);
+        final Calendar rCal = TimeTools.createCalendar(timeZone);
         rCal.setTime(c.getTime());
 
         final FolderObject folderObj = FolderTest.getStandardCalendarFolder(getWebConversation(), getHostName(), getSessionId());
@@ -125,6 +125,6 @@ public class Bug5128Test extends ReminderTest {
         }
 
         deleteReminder(getWebConversation(), reminderArray[pos].getObjectId(), getHostName(), getSessionId());
-        AppointmentTest.deleteAppointment(getWebConversation(), targetId, folderId, getHostName(), getSessionId());
+        AppointmentTest.deleteAppointment(getWebConversation(), targetId, folderId, getHostName(), getSessionId(), false);
     }
 }

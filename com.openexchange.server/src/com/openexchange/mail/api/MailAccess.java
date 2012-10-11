@@ -54,6 +54,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Properties;
+import java.util.Queue;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
@@ -68,6 +70,7 @@ import com.openexchange.mail.cache.SingletonMailAccessCache;
 import com.openexchange.mail.config.MailConfigException;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.dataobjects.MailFolder;
+import com.openexchange.mail.mime.MimeCleanUp;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
@@ -89,7 +92,7 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
      */
     private static final long serialVersionUID = -2580495494392812083L;
 
-    private static final transient org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(MailAccess.class));
+    private static final transient org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(MailAccess.class));
 
     /*-
      * ############### MEMBERS ###############
@@ -104,12 +107,12 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
     protected boolean cacheable;
 
     /**
-     * Indicates if {@link MailAccess} is currently held in {@link SingletonMailAccessCache}.
+     * Indicates if <tt>MailAccess</tt> is currently held in {@link SingletonMailAccessCache}.
      */
     protected boolean cached;
 
     /**
-     * A flag to check if this {@link MailAccess} is connected, but in IDLE mode, waiting for any server notifications.
+     * A flag to check if this <tt>MailAccess</tt> is connected, but in IDLE mode, waiting for any server notifications.
      */
     protected boolean waiting;
 
@@ -124,7 +127,7 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
     private StackTraceElement[] trace;
 
     /**
-     * Initializes a new {@link MailAccess} for session user's default mail account.
+     * Initializes a new <tt>MailAccess</tt> for session user's default mail account.
      *
      * @param session The session
      */
@@ -133,7 +136,7 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
     }
 
     /**
-     * Initializes a new {@link MailAccess}.
+     * Initializes a new <tt>MailAccess</tt>.
      *
      * @param session The session
      * @param accountId The account ID
@@ -147,7 +150,7 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
     }
 
     /**
-     * Gets the session associated with this {@link MailAccess} instance.
+     * Gets the session associated with this <tt>MailAccess</tt> instance.
      *
      * @return The session
      */
@@ -205,7 +208,7 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
     /**
      * Triggers all implementation-specific startup actions.
      *
-     * @param mailAccess An instance of {@link MailAccess}
+     * @param mailAccess An instance of <tt>MailAccess</tt>
      * @throws OXException If implementation-specific startup fails
      */
     protected static void startupImpl(final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess) throws OXException {
@@ -215,7 +218,7 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
     /**
      * Triggers all implementation-specific shutdown actions.
      *
-     * @param mailAccess An instance of {@link MailAccess}
+     * @param mailAccess An instance of <tt>MailAccess</tt>
      * @throws OXException If implementation-specific shutdown fails
      */
     protected static void shutdownImpl(final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess) throws OXException {
@@ -223,7 +226,7 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
     }
 
     /**
-     * - The max. number of {@link MailAccess} instanced allowed being cached concurrently for a user's account. TODO: Add to configuration?
+     * - The max. number of <tt>MailAccess</tt> instanced allowed being cached concurrently for a user's account. TODO: Add to configuration?
      */
     public static final int MAX_PER_USER = 3;
 
@@ -238,7 +241,7 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
     }
 
     /**
-     * Gets the proper instance of {@link MailAccess} for session user's default mail account.
+     * Gets the proper instance of <tt>MailAccess</tt> for session user's default mail account.
      * <p>
      * When starting to work with obtained {@link MailAccess mail access} at first its {@link #connect()} method is supposed to be invoked.
      * On finished work the final {@link #close(boolean)} must be called:
@@ -257,7 +260,7 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
      * </pre>
      *
      * @param session The session
-     * @return A proper instance of {@link MailAccess}
+     * @return A proper instance of <tt>MailAccess</tt>
      * @throws OXException If instantiation fails or a caching error occurs
      */
     public static final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> getInstance(final Session session) throws OXException {
@@ -265,7 +268,7 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
     }
 
     /**
-     * Gets the proper instance of {@link MailAccess} parameterized with given session and account ID.
+     * Gets the proper instance of <tt>MailAccess</tt> parameterized with given session and account ID.
      * <p>
      * When starting to work with obtained {@link MailAccess mail access} at first its {@link #connect()} method is supposed to be invoked.
      * On finished work the final {@link #close(boolean)} must be called:
@@ -285,7 +288,7 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
      *
      * @param session The session
      * @param accountId The account ID
-     * @return A proper instance of {@link MailAccess}
+     * @return A proper instance of <tt>MailAccess</tt>
      * @throws OXException If instantiation fails or a caching error occurs
      */
     public static final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> getInstance(final Session session, final int accountId) throws OXException {
@@ -304,8 +307,8 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
         /*
          * Occupy free slot
          */
-        final Object sLookup = session.getParameter("com.openexchange.mail.lookupMailAccessCache");
-        if (null == sLookup || Boolean.parseBoolean(sLookup.toString())) {
+        final Object tmp = session.getParameter("com.openexchange.mail.lookupMailAccessCache");
+        if (null == tmp || toBool(tmp)) {
             final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = getMailAccessCache().removeMailAccess(session, accountId);
             if (mailAccess != null) {
                 return mailAccess;
@@ -315,8 +318,63 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
         return mailProvider.createNewMailAccess(session, accountId).setProvider(mailProvider);
     }
 
+    private static boolean toBool(final Object obj) {
+        if (obj instanceof Boolean) {
+            return ((Boolean) obj).booleanValue();
+        }
+        return Boolean.parseBoolean(obj.toString().trim());
+    }
+
     /**
-     * Gets the proper instance of {@link MailAccess} for specified user's default account.
+     * Gets a new, un-cached <tt>MailAccess</tt> instance that is initially not connected. 
+     * 
+     * @param session The associated session
+     * @param accountId The account identifier
+     * @return The new, un-cached <tt>MailAccess</tt> instance
+     * @throws OXException If a new, un-cached <tt>MailAccess</tt> instance cannot be returned
+     */
+    public static final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> getNewInstance(final Session session, final int accountId) throws OXException {
+        final String name = "com.openexchange.mail.lookupMailAccessCache";
+        final boolean setParam;
+        {
+            final Object tmp = session.getParameter("com.openexchange.mail.lookupMailAccessCache");
+            setParam = (null == tmp || toBool(tmp));
+        }
+        if (setParam) {
+            session.setParameter(name, Boolean.FALSE);
+        }
+        try {
+            return getInstance(session, accountId);
+        } finally {
+            if (setParam) {
+                session.setParameter(name, null);
+            }
+        }
+    }
+
+    /**
+     * Re-connects specified <tt>MailAccess</tt> instance.
+     * 
+     * @param mailAccess The <tt>MailAccess</tt> instance to re-connect
+     * @return The re-connected <tt>MailAccess</tt> instance.
+     * @throws OXException If re-connect attempt fails
+     * @see #getNewInstance(Session, int)
+     */
+    public static final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> reconnect(final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess) throws OXException {
+        if (null == mailAccess) {
+            return null;
+        }
+        final Session session = mailAccess.getSession();
+        final int accountId = mailAccess.getAccountId();
+        mailAccess.close(true);
+        // A new instance, freshly initialized
+        final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> newAccess = MailAccess.getNewInstance(session, accountId);
+        newAccess.connect();
+        return newAccess;
+    }
+
+    /**
+     * Gets the proper instance of <tt>MailAccess</tt> for specified user's default account.
      * <p>
      * When starting to work with obtained {@link MailAccess mail access} at first its {@link #connect()} method is supposed to be invoked.
      * On finished work the final {@link #close(boolean)} must be called:
@@ -344,7 +402,7 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
     }
 
     /**
-     * Gets the proper instance of {@link MailAccess} for specified user and account ID.
+     * Gets the proper instance of <tt>MailAccess</tt> for specified user and account ID.
      * <p>
      * When starting to work with obtained {@link MailAccess mail access} at first its {@link #connect()} method is supposed to be invoked.
      * On finished work the final {@link #close(boolean)} must be called:
@@ -499,7 +557,7 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
      * Convenience method to obtain root folder in a fast way; meaning no default folder check is performed which is not necessary to return
      * the root folder.
      * <p>
-     * The same result is yielded through calling <code>getFolderStorage().getRootFolder()</code> on a connected {@link MailAccess}.
+     * The same result is yielded through calling <code>getFolderStorage().getRootFolder()</code> on a connected <tt>MailAccess</tt>.
      * <p>
      * Since this mail access instance is connected if not already done before, the {@link #close(boolean)} operation should be invoked
      * afterwards:
@@ -527,7 +585,7 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
      * Convenience method to obtain folder's number of unread messages in a fast way; meaning no default folder check is performed.
      * <p>
      * The same result is yielded through calling <code>getFolderStorage().getFolder().getUnreadMessageCount()</code> on a connected
-     * {@link MailAccess}.
+     * <tt>MailAccess</tt>.
      * <p>
      * Since this mail access instance is connected if not already done before, the {@link #close(boolean)} operation should be invoked
      * afterwards:
@@ -644,6 +702,34 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
              * Remove from watcher no matter if cached or closed
              */
             MailAccessWatcher.removeMailAccess(this);
+            cleanUp();
+        }
+    }
+
+    private static ThreadLocal<Queue<MimeCleanUp>> CLEAN_UPS = new ThreadLocal<Queue<MimeCleanUp>>() {
+        @Override
+        protected Queue<MimeCleanUp> initialValue() {
+            return new ConcurrentLinkedQueue<MimeCleanUp>();
+        }
+    };
+
+    /**
+     * Remembers specified {@link MimeCleanUp} instance.
+     * 
+     * @param mimeCleanUp The {@link MimeCleanUp} instance
+     */
+    public static void rememberMimeCleanUp(final MimeCleanUp mimeCleanUp) {
+        if (null == mimeCleanUp) {
+            return;
+        }
+        CLEAN_UPS.get().offer(mimeCleanUp);
+    }
+
+    private static void cleanUp() {
+        final Queue<MimeCleanUp> queue = CLEAN_UPS.get();
+        MimeCleanUp mimeCleanUp;
+        while ((mimeCleanUp = queue.poll()) != null) {
+            mimeCleanUp.cleanUp();
         }
     }
 

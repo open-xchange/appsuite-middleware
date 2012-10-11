@@ -54,12 +54,16 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
+import org.apache.commons.logging.Log;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Charsets;
 
 /**
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
  */
 final class POTokenStream {
+
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(POTokenStream.class);
 
     private final InputStream stream;
 
@@ -83,7 +87,15 @@ final class POTokenStream {
     }
 
     public void setCharset(final String charset) {
-        this.charset = Charset.forName(charset);
+        try {
+            this.charset = Charset.forName(charset);
+        } catch (final java.nio.charset.UnsupportedCharsetException e) {
+            // Invalid charset
+            if (LOG.isWarnEnabled()) {
+                LOG.warn("Unsupported charset: \"" + charset + "\". Therefore using fall-back \"UTF-8\". Forgot to replace header appropriately?");
+            }
+            this.charset = Charsets.UTF_8;
+        }
     }
 
     public boolean lookahead(final POToken token) {
@@ -162,7 +174,7 @@ final class POTokenStream {
         return charset.decode(ByteBuffer.wrap(b)).toString();
     }
 
-    private String decode(final String orig) {
+    private static String decode(final String orig) {
         final StringBuilder sb = new StringBuilder(orig);
         int pos = sb.indexOf("\\");
         while (pos != -1) {
@@ -174,8 +186,9 @@ final class POTokenStream {
             case '"':
                 sb.replace(pos, pos + 2, "\"");
                 break;
+            default:
             }
-            pos = sb.indexOf("\\", pos);
+            pos = sb.indexOf("\\", pos + 1);
         }
         return sb.toString();
     }

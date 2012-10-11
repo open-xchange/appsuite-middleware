@@ -5,6 +5,8 @@
 	<projects>
 	</projects>
 	<buildSpec>
+		<!-- Temporary disabled -->
+		<!--
 		<buildCommand>
 			<name>org.eclipse.ui.externaltools.ExternalToolBuilder</name>
 			<arguments>
@@ -14,6 +16,7 @@
 				</dictionary>
 			</arguments>
 		</buildCommand>
+		-->
 		<buildCommand>
 			<name>org.eclipse.jdt.core.javabuilder</name>
 			<arguments>

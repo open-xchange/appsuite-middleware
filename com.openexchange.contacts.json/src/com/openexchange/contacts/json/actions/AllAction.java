@@ -54,15 +54,15 @@ import java.util.Date;
 import java.util.List;
 import java.util.TimeZone;
 
-import org.json.JSONException;
-
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.contacts.json.ContactRequest;
 import com.openexchange.documentation.RequestMethod;
+import com.openexchange.documentation.Type;
 import com.openexchange.documentation.annotations.Action;
 import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contact.ContactInterface;
+import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.search.Order;
 import com.openexchange.server.ServiceLookup;
@@ -82,7 +82,8 @@ import com.openexchange.tools.session.ServerSession;
     @Parameter(name = "columns", description = "A comma-separated list of columns to return. Each column is specified by a numeric column identifier. Column identifiers for contacts are defined in Common object data and Detailed contact data. The alias \"all\" uses the predefined columnset [20, 1, 5, 2, 602]."),
     @Parameter(name = "sort", optional=true, description = "The identifier of a column which determines the sort order of the response. If this parameter is specified, then the parameter order must be also specified."),
     @Parameter(name = "order", optional=true, description= "\"asc\" if the response entires should be sorted in the ascending order, \"desc\" if the response entries should be sorted in the descending order. If this parameter is specified, then the parameter sort must be also specified."),
-    @Parameter(name = "collation", description = "(preliminary, since 6.20) - allows you to specify a collation to sort the contacts by. As of 6.20, only supports \"gbk\" and \"gb2312\", not needed for other languages. Parameter sort should be set for this to work.")
+    @Parameter(name = "collation", description = "(preliminary, since 6.20) - allows you to specify a collation to sort the contacts by. As of 6.20, only supports \"gbk\" and \"gb2312\", not needed for other languages. Parameter sort should be set for this to work."),
+    @Parameter(name = "admin", optional=true, type=Type.BOOLEAN, description = "(preliminary, since 6.22) - whether to include the contact representing the admin in the result or not. Defaults to \"true\".")
 }, responseDescription = "Response with timestamp: An array with contact data. Each array element describes one contact and is itself an array. The elements of each array contain the information specified by the corresponding identifiers in the columns parameter.")
 public class AllAction extends ContactAction {
 
@@ -139,23 +140,25 @@ public class AllAction extends ContactAction {
     }
     
     @Override
-    protected AJAXRequestResult perform2(final ContactRequest request) throws OXException, JSONException {
-        final List<Contact> contacts = new ArrayList<Contact>();
+    protected AJAXRequestResult perform2(final ContactRequest request) throws OXException {
+        List<Contact> contacts = new ArrayList<Contact>();
         Date lastModified = new Date(0);
         SearchIterator<Contact> searchIterator = null;
+        boolean excludeAdmin = request.isExcludeAdmin();
+        int adminID = excludeAdmin ? request.getSession().getContext().getMailadmin() : -1;
         try {
             searchIterator = getContactService().getAllContacts(request.getSession(), request.getFolderID(), 
-            		request.getFields(), request.getSortOptions());
+            		excludeAdmin ? request.getFields(ContactField.INTERNAL_USERID) : request.getFields(), request.getSortOptions());
             while (searchIterator.hasNext()) {
-                final Contact contact = searchIterator.next();
+                Contact contact = searchIterator.next();
+                if (excludeAdmin && contact.getInternalUserId() == adminID) {
+                	continue;
+                }
                 lastModified = getLatestModified(lastModified, contact);
-                applyTimezoneOffset(contact, request.getTimeZone());
                 contacts.add(contact);
             }
         } finally {
-        	if (null != searchIterator) {
-        		searchIterator.close();
-        	}
+        	close(searchIterator);
         }
         request.sortInternalIfNeeded(contacts);
         return new AJAXRequestResult(contacts, lastModified, "contact");

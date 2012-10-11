@@ -1,0 +1,20 @@
+mox/config/animations:
+    protected: false
+
+mox/config/appointmentDays:
+    protected: false
+
+mox/config/mailCount:
+    protected: false
+
+mox/config/maxAppointmentBreak:
+    protected: false
+
+mox/subscribedFolders/calendar:
+    protected: false
+
+mox/subscribedFolders/contacts:
+    protected: false
+
+mox/subscribedFolders/mail:
+    protected: false

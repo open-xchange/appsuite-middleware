@@ -59,6 +59,7 @@ import javax.mail.internet.IDNA;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeUtility;
 import com.openexchange.mail.config.MailProperties;
+import com.openexchange.mail.mime.utils.MimeMessageUtility;
 
 /**
  * {@link QuotedInternetAddress} - A quoted version of {@link InternetAddress} originally written by <b>Bill Shannon</b> and <b>John
@@ -83,7 +84,7 @@ public final class QuotedInternetAddress extends InternetAddress {
 
     private static final long serialVersionUID = -2523736473507495692L;
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(QuotedInternetAddress.class));
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(QuotedInternetAddress.class));
 
     private static final boolean IGNORE_BOGUS_GROUP_NAME = getBooleanSystemProperty("mail.mime.address.ignorebogusgroupname", true);
 
@@ -777,7 +778,7 @@ public final class QuotedInternetAddress extends InternetAddress {
         return IDNA.toIDN(aceAddress);
     }
 
-    private final String jcharset;
+    private String jcharset;
 
     /**
      * Initializes a new {@link QuotedInternetAddress}.
@@ -860,7 +861,7 @@ public final class QuotedInternetAddress extends InternetAddress {
         }
     }
 
-    private static final Pattern WHITESPACE_OR_CONTROL = Pattern.compile("[\\p{Space}&&[^ ]]|\\p{Cntrl}|[^\\p{Print}]");
+    private static final Pattern WHITESPACE_OR_CONTROL = Pattern.compile("[\\p{Space}&&[^ ]]|\\p{Cntrl}|[^\\p{Print}\\p{L}]");
 
     private static String init(final String address, final boolean suppressControlOrWhitespace) {
         if (!suppressControlOrWhitespace) {
@@ -953,6 +954,27 @@ public final class QuotedInternetAddress extends InternetAddress {
         return toIDN(address);
     }
 
+    @Override
+    public void setPersonal(String name, String charset) throws UnsupportedEncodingException {
+        personal = name;
+        if (name != null) {
+            if (charset == null) {
+                // use default charset
+                jcharset = MailProperties.getInstance().getDefaultMimeCharset();
+            } else {
+                // MIME charset -> java charset
+                String javaCharset = MimeUtility.javaCharset(charset);
+                if ("utf8".equalsIgnoreCase(javaCharset)) {
+                    javaCharset = "UTF-8";
+                }
+                jcharset = javaCharset;
+            }
+            encodedPersonal = MimeUtility.encodeWord(name, charset, null);
+        } else {
+            encodedPersonal = null;
+        }
+    }
+
     /**
      * Sets the email address.
      *
@@ -978,9 +1000,36 @@ public final class QuotedInternetAddress extends InternetAddress {
     }
 
     /**
+     * Get the personal name. If the name is encoded as per RFC 2047, it is decoded and converted into Unicode. If the decoding or
+     * conversion fails, the raw data is returned as is.
+     * 
+     * @return personal name
+     */
+    @Override
+    public String getPersonal() {
+        if (personal != null) {
+            return personal;
+        }
+
+        if (encodedPersonal != null) {
+            try {
+                personal = MimeMessageUtility.decodeMultiEncodedHeader(encodedPersonal);
+                return personal;
+            } catch (final Exception ex) {
+                // 1. ParseException: either its an unencoded string or
+                // it can't be parsed
+                // 2. UnsupportedEncodingException: can't decode it.
+                return encodedPersonal;
+            }
+        }
+        // No personal or encodedPersonal, return null
+        return null;
+    }
+
+    /**
      * Convert this address into a RFC 822 / RFC 2047 encoded address. The resulting string contains only US-ASCII characters, and hence is
      * mail-safe.
-     *
+     * 
      * @return possibly encoded address string
      */
     @Override
@@ -1185,7 +1234,8 @@ public final class QuotedInternetAddress extends InternetAddress {
                 valid = i > 1 && '\\' == phrase.charAt(i - 1);
                 i++;
             } else if (c == '\\') {
-                final char c2 = phrase.charAt(i + 1);
+                final int ni = i + 1;
+                final char c2 = ni < len ? phrase.charAt(ni) : '\0';
                 valid = (c2 == '"' || c2 == '\\');
                 i += 2;
             } else {

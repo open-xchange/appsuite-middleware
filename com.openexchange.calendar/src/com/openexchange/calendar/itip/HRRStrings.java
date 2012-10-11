@@ -60,11 +60,11 @@ public class HRRStrings implements LocalizableStrings {
 
     public static final String NO = "No recurrence";
 
-    public static final String DAILY = "Every %1$s Day";
+    public static final String DAILY = "Every %1$s day";
 
-    public static final String WEEKLY_EACH = "Every Week on %1$s";
+    public static final String WEEKLY_EACH = "Every week on %1$s";
 
-    public static final String WEEKLY = "Every %1$s Weeks on %2$s";
+    public static final String WEEKLY = "Every %1$s weeks on %2$s";
 
     public static final String MONTHLY_1 = "On %1$s. day every %2$s. month";
 
@@ -72,11 +72,12 @@ public class HRRStrings implements LocalizableStrings {
 
     public static final String YEARLY_1 = "On %1$s %2$s in %3$s";
 
+    // E.g. "Every 2. February"
     public static final String YEARLY_2 = "Every %1$s. %2$s";
 
-    public static final String WORK_DAY = "Work Day";
+    public static final String WORK_DAY = "Work day";
 
-    public static final String WEEKEND_DAY = "Weekend Day";
+    public static final String WEEKEND_DAY = "Weekend day";
 
     public static final String DAY = "Day";
 
@@ -130,7 +131,8 @@ public class HRRStrings implements LocalizableStrings {
 
     public static final String OCCURRENCES = "Occurs %1$s times";
 
+    // E.g. "Until Wednesday, July 11, 2012"
     public static final String UNTIL = "Until %1$s";
 
-    public static final String FOREVER = "No End";
+    public static final String FOREVER = "No end";
 }

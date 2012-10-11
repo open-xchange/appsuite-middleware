@@ -74,7 +74,7 @@ import com.openexchange.server.ServiceLookup;
 public final class MailAction extends AbstractQuotaAction {
 
     private static final org.apache.commons.logging.Log LOG =
-        com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(MailAction.class));
+        com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(MailAction.class));
 
     /**
      * Initializes a new {@link MailAction}.

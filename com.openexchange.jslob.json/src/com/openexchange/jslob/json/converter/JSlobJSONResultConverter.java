@@ -117,8 +117,9 @@ public class JSlobJSONResultConverter implements ResultConverter {
     private JSONObject convertJSlob(final JSlob jslob) throws JSONException {
         final JSONObject json = new JSONObject();
         json.put("id", jslob.getId().getId());
-        json.put("jslob", jslob.getJsonObject());
-        return jslob.getJsonObject();
+        json.put("tree", jslob.getJsonObject());
+        json.put("meta", jslob.getMetaObject());
+        return json;
     }
 
 }

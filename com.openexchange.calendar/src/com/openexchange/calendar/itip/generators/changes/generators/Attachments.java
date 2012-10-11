@@ -16,18 +16,20 @@ import com.openexchange.groupware.contexts.Context;
 
 public class Attachments implements ChangeDescriptionGenerator {
 
-	private AttachmentMemory memory;
+	private final AttachmentMemory memory;
 	
 	
 	public Attachments(AttachmentMemory memory) {
 		this.memory = memory;
 	}
 	
-	public String[] getFields() {
-		return null;
+	@Override
+    public String[] getFields() {
+		return new String[] {};
 	}
 
-	public List<Sentence> getDescriptions(Context ctx, Appointment original,
+	@Override
+    public List<Sentence> getDescriptions(Context ctx, Appointment original,
 			Appointment updated, AppointmentDiff diff, Locale locale,
 			TimeZone timezone) throws OXException {
 		List<Sentence> sentences = new ArrayList<Sentence>(1);

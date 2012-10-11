@@ -49,16 +49,17 @@
 
 package com.openexchange.groupware.attach;
 
+import java.io.File;
 import java.util.concurrent.locks.ReentrantLock;
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import com.openexchange.log.LogFactory;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.configuration.ConfigurationException;
 import com.openexchange.configuration.ConfigurationExceptionCodes;
 import com.openexchange.configuration.ServerConfig;
-import com.openexchange.configuration.SystemConfig;
-import com.openexchange.configuration.SystemConfig.Property;
 import com.openexchange.exception.OXException;
 import com.openexchange.server.Initialization;
+import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.conf.AbstractConfig;
 
 /**
@@ -72,21 +73,26 @@ public class AttachmentConfig extends AbstractConfig implements Initialization {
 
     private static final ReentrantLock INIT_LOCK = new ReentrantLock();
 
-    private static final Property KEY = Property.ATTACHMENT;
-
 	private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(AttachmentConfig.class));
 
-    private static AttachmentConfig singleton;
+    private static volatile AttachmentConfig _singleton;
 
     private static boolean loaded = false;
 
     private AttachmentConfig(){}
 
     public static AttachmentConfig getInstance(){
-        if(singleton != null) {
-			return singleton;
-		}
-        return singleton = new AttachmentConfig();
+        AttachmentConfig ret = _singleton;
+        if (ret == null) {
+            synchronized (AttachmentConfig.class) {
+                ret = _singleton;
+                if (ret == null) {
+                    ret = new AttachmentConfig();
+                    _singleton = ret;
+                }
+            }
+        }
+        return ret;
     }
 
     /**
@@ -94,23 +100,24 @@ public class AttachmentConfig extends AbstractConfig implements Initialization {
      */
     @Override
     protected String getPropertyFileName() throws OXException {
-        final String filename = SystemConfig.getProperty(KEY);
+        final File file = ServerServiceRegistry.getInstance().getService(ConfigurationService.class).getFileByName("attachment.properties");
+        final String filename = null == file ? null : file.getPath();
         if (null == filename) {
-            throw ConfigurationExceptionCodes.PROPERTY_MISSING.create(
-                KEY.getPropertyName());
+            throw ConfigurationExceptionCodes.PROPERTY_MISSING.create("attachment.properties");
         }
         return filename;
     }
 
     public static String getProperty(final String key) {
-    	if(!loaded || singleton == null) {
+    	AttachmentConfig singleton = _singleton;
+        if(!loaded || singleton == null) {
 			try {
-				getInstance().start();
+			    singleton = getInstance();
+			    singleton.start();
 			} catch (final OXException e) {
 				LOG.error("Can't init config",e);
 			}
 		}
-
         return singleton.getPropertyInternal(key);
     }
 
@@ -137,7 +144,7 @@ public class AttachmentConfig extends AbstractConfig implements Initialization {
 
     @Override
     public void start() throws OXException {
-        if(!loaded || singleton == null) {
+        if(!loaded || _singleton == null) {
             INIT_LOCK.lock();
             try {
                 getInstance().loadPropertiesInternal();
@@ -150,7 +157,7 @@ public class AttachmentConfig extends AbstractConfig implements Initialization {
 
     @Override
     public void stop() throws ConfigurationException {
-        singleton = null;
+        _singleton = null;
         loaded = false;
     }
 }

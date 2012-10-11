@@ -112,9 +112,11 @@ public class ITipActivator extends HousekeepingActivator {
         final UserConfigurationStorage userConfigs = UserConfigurationStorage.getInstance();
         final TimerService timers = getService(TimerService.class);
 		
-        final int interval = config.getIntProperty("com.openexchange.calendar.notify.interval", 120000);
-        final AttachmentMemory attachmentMemory = new AttachmentMemory(interval * 3, timers);
-
+        int detailInterval = config.getIntProperty("com.openexchange.calendar.notify.interval.detail", 120000);
+        int stateChangeInterval = config.getIntProperty("com.openexchange.calendar.notify.interval.states", 600000);
+        int priorityInterval = config.getIntProperty("com.openexchange.calendar.notify.interval.priority", 900000);
+        
+        final AttachmentMemory attachmentMemory = new AttachmentMemory(detailInterval * 3, timers);
         MailSenderService sender = new DefaultMailSenderService(emitter, htmlService, attachments, contexts, users, userConfigs, attachmentMemory);
 
         final AppointmentSqlFactory sqlFactory = new AppointmentSqlFactory();
@@ -123,7 +125,7 @@ public class ITipActivator extends HousekeepingActivator {
         final NotificationMailGeneratorFactory mails = new NotificationMailGeneratorFactory(resolver, util, this, attachmentMemory);
 
         
-		final AppointmentNotificationPool pool = new AppointmentNotificationPool(timers, mails, sender, interval);
+        AppointmentNotificationPool pool = new AppointmentNotificationPool(timers, mails, sender, detailInterval, stateChangeInterval, priorityInterval);
         sender = new PoolingMailSenderService(pool, sender);
         
         

@@ -52,23 +52,6 @@ jcs.region.OXMessageCache.elementattributes.IsSpool=false
 jcs.region.OXMessageCache.elementattributes.IsRemote=false
 jcs.region.OXMessageCache.elementattributes.IsLateral=false
 
-# Pre-defined cache region for ox imap connections.
-jcs.region.OXIMAPConCache=
-jcs.region.OXIMAPConCache.cacheattributes=org.apache.jcs.engine.CompositeCacheAttributes
-jcs.region.OXIMAPConCache.cacheattributes.MaxObjects=1000000
-jcs.region.OXIMAPConCache.cacheattributes.MemoryCacheName=org.apache.jcs.engine.memory.lru.LRUMemoryCache
-jcs.region.OXIMAPConCache.cacheattributes.UseMemoryShrinker=true
-jcs.region.OXIMAPConCache.cacheattributes.MaxMemoryIdleTimeSeconds=7
-jcs.region.OXIMAPConCache.cacheattributes.ShrinkerIntervalSeconds=3
-jcs.region.OXIMAPConCache.elementattributes=org.apache.jcs.engine.ElementAttributes
-jcs.region.OXIMAPConCache.elementattributes.IsEternal=false
-jcs.region.OXIMAPConCache.elementattributes.MaxLifeSeconds=3600
-jcs.region.OXIMAPConCache.elementattributes.IdleTime=7
-# NOT APPLICABLE TO ANY AUXILIARY (NEITHER DISK, REMOTE NOR TCP)
-jcs.region.OXIMAPConCache.elementattributes.IsSpool=false
-jcs.region.OXIMAPConCache.elementattributes.IsRemote=false
-jcs.region.OXIMAPConCache.elementattributes.IsLateral=false
-
 # Pre-defined cache region for cached results on folder searches
 jcs.region.OXFolderQueryCache=
 jcs.region.OXFolderQueryCache.cacheattributes=org.apache.jcs.engine.CompositeCacheAttributes
@@ -242,36 +225,16 @@ jcs.region.GlobalFolderCache.elementattributes.IsSpool=false
 jcs.region.GlobalFolderCache.elementattributes.IsRemote=false
 jcs.region.GlobalFolderCache.elementattributes.IsLateral=false
 
-# Pre-defined cache regions for user-sensitive folder objects.   
-jcs.region.UserFolderCache=LTCP
-jcs.region.UserFolderCache.cacheattributes=org.apache.jcs.engine.CompositeCacheAttributes
-jcs.region.UserFolderCache.cacheattributes.MaxObjects=10000000
-jcs.region.UserFolderCache.cacheattributes.MemoryCacheName=org.apache.jcs.engine.memory.lru.LRUMemoryCache
-jcs.region.UserFolderCache.cacheattributes.UseMemoryShrinker=true
-# Disable MaxMemoryIdleTimeSeconds cause some entries can be eternal
-# Shrinker removal works as follows:
-# 1. Check 'Eternal', 'MaxLifeSeconds' AND 'IdleTime' for element-attribute-caused removal
-# 2. Check 'MaxMemoryIdleTime' for cache-attribute-caused removal
-jcs.region.UserFolderCache.cacheattributes.MaxMemoryIdleTimeSeconds=180
-jcs.region.UserFolderCache.cacheattributes.ShrinkerIntervalSeconds=60
-jcs.region.UserFolderCache.elementattributes=org.apache.jcs.engine.ElementAttributes
-jcs.region.UserFolderCache.elementattributes.IsEternal=false
-jcs.region.UserFolderCache.elementattributes.MaxLifeSeconds=300
-jcs.region.UserFolderCache.elementattributes.IdleTime=180
-jcs.region.UserFolderCache.elementattributes.IsSpool=false
-jcs.region.UserFolderCache.elementattributes.IsRemote=false
-jcs.region.UserFolderCache.elementattributes.IsLateral=false
-
 # auxiliary cache configuration for synchronizing caches in a cluster Open-Xchange uses cache invalidation on remote caches.
 # TCP Lateral Cache to broadcast PUTS and REMOVALS (and possibly GETS) to other local caches
 jcs.auxiliary.LTCP=org.apache.jcs.auxiliary.lateral.socket.tcp.LateralTCPCacheFactory
 jcs.auxiliary.LTCP.attributes=org.apache.jcs.auxiliary.lateral.socket.tcp.TCPLateralCacheAttributes
-# jcs.auxiliary.LTCP.attributes.TcpServers=127.0.0.1:57461
+# jcs.auxiliary.LTCP.attributes.TcpServers=oxhost2:57461
 jcs.auxiliary.LTCP.attributes.TcpListenerPort=57462
 # Define UDP discovery here, but ensure you do not specify static TCP server via jcs.auxiliary.LTCP.attributes.TcpServers
 jcs.auxiliary.LTCP.attributes.UdpDiscoveryAddr=224.168.32.1
 jcs.auxiliary.LTCP.attributes.UdpDiscoveryPort=6780
-jcs.auxiliary.LTCP.attributes.UdpDiscoveryEnabled=true
+jcs.auxiliary.LTCP.attributes.UdpDiscoveryEnabled=false
 # Setting Receive equal to false means the cache operates in send-only mode
 jcs.auxiliary.LTCP.attributes.Receive=true
 # Setting AllowGet equal to false would cause the auxiliary cache to return null from any get request

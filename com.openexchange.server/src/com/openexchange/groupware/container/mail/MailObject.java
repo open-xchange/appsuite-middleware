@@ -60,28 +60,24 @@ import javax.mail.Message.RecipientType;
 import javax.mail.MessagingException;
 import javax.mail.Multipart;
 import javax.mail.Part;
+import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MailDateFormat;
 import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
+import com.openexchange.contact.ContactService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.Types;
-import com.openexchange.groupware.contact.ContactInterface;
-import com.openexchange.groupware.contact.ContactInterfaceDiscoveryService;
-import com.openexchange.groupware.container.Contact;
-import com.openexchange.groupware.container.FolderObject;
-import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.mime.ContentDisposition;
 import com.openexchange.mail.mime.ContentType;
+import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.mail.mime.MimeDefaultSession;
 import com.openexchange.mail.mime.MimeMailException;
 import com.openexchange.mail.mime.MimeType2ExtMap;
 import com.openexchange.mail.mime.MimeTypes;
-import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.mail.mime.datasource.FileDataSource;
 import com.openexchange.mail.mime.datasource.MessageDataSource;
 import com.openexchange.mail.mime.utils.MimeMessageUtility;
@@ -98,7 +94,7 @@ import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
  */
 public class MailObject {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(MailObject.class));
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(MailObject.class));
 
     private static final boolean DEBUG = LOG.isDebugEnabled();
 
@@ -158,17 +154,29 @@ public class MailObject {
     }
 
     private final void validateMailObject() throws OXException {
-        if (fromAddr == null || fromAddr.length() == 0) {
+        if (isEmpty(fromAddr)) {
             throw MailExceptionCode.MISSING_FIELD.create("From");
         } else if (toAddrs == null || toAddrs.length == 0) {
             throw MailExceptionCode.MISSING_FIELD.create("To");
-        } else if (contentType == null || contentType.length() == 0) {
+        } else if (isEmpty(contentType)) {
             throw MailExceptionCode.MISSING_FIELD.create("Content-Type");
         } else if (subject == null) {
             throw MailExceptionCode.MISSING_FIELD.create("Subject");
         } else if (text == null) {
             throw MailExceptionCode.MISSING_FIELD.create("Text");
         }
+    }
+
+    private static boolean isEmpty(final String string) {
+        if (null == string) {
+            return true;
+        }
+        final int len = string.length();
+        boolean isWhitespace = true;
+        for (int i = 0; isWhitespace && i < len; i++) {
+            isWhitespace = Character.isWhitespace(string.charAt(i));
+        }
+        return isWhitespace;
     }
 
     /**
@@ -360,6 +368,9 @@ public class MailObject {
              * Set from
              */
             InternetAddress[] internetAddrs = parseAddressList(fromAddr, false);
+            if (null == internetAddrs || 0 == internetAddrs.length) {
+                throw MimeMailException.handleMessagingException(new AddressException("\"From\" cannot be parsed: " + fromAddr));
+            }
             msg.setFrom(internetAddrs[0]);
             msg.setReplyTo(internetAddrs);
             /*
@@ -460,12 +471,9 @@ public class MailObject {
              * Set organization
              */
             try {
-                final Context ctx = ContextStorage.getStorageContext(session);
-                final ContactInterface contactInterface = ServerServiceRegistry.getInstance().getService(
-                    ContactInterfaceDiscoveryService.class).newContactInterface(FolderObject.SYSTEM_LDAP_FOLDER_ID, session);
-                final Contact c = contactInterface.getUserById(ctx.getMailadmin(), false);
-                if (null != c && c.getCompany() != null && c.getCompany().length() > 0) {
-                    msg.setHeader(HEADER_ORGANIZATION, c.getCompany());
+                final String organization = ServerServiceRegistry.getInstance().getService(ContactService.class).getOrganization(session);
+                if (null != organization && 0 < organization.length()) {
+                    msg.setHeader(HEADER_ORGANIZATION, organization);
                 }
             } catch (final Exception e) {
                 LOG.warn("Header \"Organization\" could not be set", e);
@@ -611,7 +619,7 @@ public class MailObject {
         this.subject = subject;
     }
     
-    public void setUid(String uid) {
+    public void setUid(final String uid) {
 		this.uid = uid;
 	}
     
@@ -619,7 +627,7 @@ public class MailObject {
 		return uid;
 	}
 
-    public void setRecurrenceDatePosition(long time) {
+    public void setRecurrenceDatePosition(final long time) {
     	this.recurrenceDatePosition = time;
 	}
     

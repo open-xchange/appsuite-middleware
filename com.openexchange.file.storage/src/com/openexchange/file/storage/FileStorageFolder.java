@@ -63,7 +63,7 @@ import java.util.Set;
 public interface FileStorageFolder extends FileStorageConstants {
 
     /**
-     * The constant for fullname of an account's root folder.
+     * The constant for full name of an account's root folder.
      */
     public static final String ROOT_FULLNAME = "";
 

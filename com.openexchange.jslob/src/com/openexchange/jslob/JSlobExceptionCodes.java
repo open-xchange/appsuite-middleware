@@ -65,31 +65,37 @@ public enum JSlobExceptionCodes implements OXExceptionCode {
     /**
      * An unexpected error occurred: %1$s
      */
-    UNEXPECTED_ERROR(JSlobExceptionMessages.UNEXPECTED_ERROR, Category.CATEGORY_ERROR, 1),
+    UNEXPECTED_ERROR(JSlobExceptionMessages.UNEXPECTED_ERROR, CATEGORY_ERROR, 1),
     /**
      * A JSON error occurred: %1$s
      */
-    JSON_ERROR(JSlobExceptionMessages.JSON_ERROR, EnumCategory.ERROR, 2),
+    JSON_ERROR(JSlobExceptionMessages.JSON_ERROR, CATEGORY_ERROR, 2),
     /**
      * No JSlob storage found for identifier: %1$s
      */
-    NOT_FOUND(JSlobExceptionMessages.NOT_FOUND, EnumCategory.ERROR, 3),
+    NOT_FOUND(JSlobExceptionMessages.NOT_FOUND, CATEGORY_ERROR, 3),
     /**
      * No JSlob found for service %1$s.
      */
-    NOT_FOUND_EXT(JSlobExceptionMessages.NOT_FOUND_EXT, EnumCategory.USER_INPUT, 4),
+    NOT_FOUND_EXT(JSlobExceptionMessages.NOT_FOUND_EXT, CATEGORY_USER_INPUT, 4),
     /**
      * Conflicting deletion of JSlob for service %1$s.
      */
-    CONFLICT(JSlobExceptionMessages.CONFLICT, EnumCategory.USER_INPUT, 5),
+    CONFLICT(JSlobExceptionMessages.CONFLICT, CATEGORY_USER_INPUT, 5),
     /**
-     * Path doesn't exist: %1$s
+     * Path does not exist: %1$s
      */
-    PATH_NOT_FOUND(JSlobExceptionMessages.PATH_NOT_FOUND, EnumCategory.USER_INPUT, 6),
+    PATH_NOT_FOUND(JSlobExceptionMessages.PATH_NOT_FOUND, CATEGORY_USER_INPUT, 6),
     /**
      * Invalid path: %1$s.
      */
-    INVALID_PATH(JSlobExceptionMessages.INVALID_PATH, EnumCategory.USER_INPUT, 7), ;
+    INVALID_PATH(JSlobExceptionMessages.INVALID_PATH, EnumCategory.CATEGORY_USER_INPUT, 7),
+    /**
+     * Referenced JSlob %1$s must not be set for service %2$s. Nothing will be done.
+     */
+    SET_NOT_SUPPORTED(JSlobExceptionMessages.SET_NOT_SUPPORTED, CATEGORY_WARNING, 8),
+    
+    ;
     
     /**
      * The error code prefix for JSlob exceptions.

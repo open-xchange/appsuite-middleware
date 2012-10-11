@@ -64,38 +64,6 @@ import com.openexchange.exception.OXException;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public interface SolrAccessService {
-
-    /**
-     * Creates and starts up a new solr core.
-     * 
-     * @param identifier The cores name.
-     * @param instanceDir The cores instance directory.
-     * @param dataDir The cores data directory where the index files are placed in.
-     * @param schemaPath The path to the cores schema xml file.
-     * @param configPath The path to the cores configuration xml file.
-     * @return If starting the core was successfull or not.
-     * @throws OXException If the core could not be created or started.
-     */
-    boolean startCore(SolrCoreConfiguration configuration) throws OXException;
-
-    /**
-     * Shuts down a running core.
-     * If the core was not running, this call will be ignored.
-     * 
-     * @param identifier The cores name.
-     * @return If stopping the core was successfull or not.
-     * @throws OXException If the core could not be stopped.
-     */
-    boolean stopCore(SolrCoreIdentifier identifier) throws OXException;
-
-    /**
-     * Reloads a running core.
-     * 
-     * @param identifier The cores name.
-     * @throws OXException If an error occurrs during reloading the core.
-     */
-    void reloadCore(SolrCoreIdentifier identifier) throws OXException;
-        
     /**
      * See {@link SolrServer#add(SolrInputDocument)} for details.
      * 
@@ -187,5 +155,12 @@ public interface SolrAccessService {
      * @throws OXException in case of solr errors.
      */
     public QueryResponse query(SolrCoreIdentifier identifier, SolrParams params) throws OXException;
+    
+    /**
+     * Releases all resources hold for a core.
+     * 
+     * @param identifier The cores identifier.
+     */
+    public void freeResources(SolrCoreIdentifier identifier);
     
 }

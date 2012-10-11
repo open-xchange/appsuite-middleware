@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<projectDescription>
+	<name>open-xchange-loxandra</name>
+	<comment></comment>
+	<projects>
+		<project>com.openexchange.loxandra</project>
+		<project>com.openexchange.loxandra.common</project>
+		<project>com.openexchange.loxandra.dto</project>
+		<project>com.openexchange.loxandra.hector</project>
+		<project>com.openexchange.loxandra.impl</project>
+		<project>com.openexchange.loxandra.json</project>
+		<project>com.openexchange.loxandra.util</project>
+	</projects>
+	<buildSpec>
+		<buildCommand>
+			<name>com.csc.dip.projectset.ProjectSetBuilder</name>
+			<arguments>
+			</arguments>
+		</buildCommand>
+	</buildSpec>
+	<natures>
+		<nature>com.csc.dip.projectset.ProjectSetNature</nature>
+	</natures>
+</projectDescription>

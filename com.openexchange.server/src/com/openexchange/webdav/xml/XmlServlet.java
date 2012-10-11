@@ -57,17 +57,17 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.jdom.Document;
-import org.jdom.Element;
-import org.jdom.Namespace;
-import org.jdom.output.XMLOutputter;
+import org.jdom2.Document;
+import org.jdom2.Element;
+import org.jdom2.Namespace;
+import org.jdom2.output.XMLOutputter;
 import org.kxml2.io.KXmlParser;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
 import com.openexchange.exception.OXException.Generic;
+import com.openexchange.exception.OXExceptionConstants;
 import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.attach.AttachmentBase;
 import com.openexchange.groupware.attach.Attachments;
@@ -77,6 +77,7 @@ import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.container.DataObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
+import com.openexchange.log.LogFactory;
 import com.openexchange.server.impl.Version;
 import com.openexchange.session.Session;
 import com.openexchange.webdav.LastModifiedCache;
@@ -85,8 +86,8 @@ import com.openexchange.webdav.PermissionServlet;
 import com.openexchange.webdav.QueuedAction;
 import com.openexchange.webdav.WebdavExceptionCode;
 import com.openexchange.webdav.xml.fields.CalendarFields;
-import com.openexchange.webdav.xml.fields.CommonFields;
 import com.openexchange.webdav.xml.fields.DataFields;
+import com.openexchange.webdav.xml.fields.FolderChildFields;
 
 /**
  * {@link XmlServlet} - The XML servlet.
@@ -276,13 +277,13 @@ public abstract class XmlServlet<I> extends PermissionServlet {
                         System.out.println("invalid value in element lastsync");
                     }
 
-                    final Element eFolderId = eProp.getChild(CommonFields.FOLDER_ID, Namespace.getNamespace(PREFIX,
+                    final Element eFolderId = eProp.getChild(FolderChildFields.FOLDER_ID, Namespace.getNamespace(PREFIX,
                             NAMESPACE));
                     if (eFolderId != null) {
                         try {
                             folder_id = Integer.parseInt(eFolderId.getText());
                         } catch (final NumberFormatException exc) {
-                            throw WebdavExceptionCode.INVALID_VALUE.create(exc, CommonFields.FOLDER_ID, eFolderId.getText());
+                            throw WebdavExceptionCode.INVALID_VALUE.create(exc, FolderChildFields.FOLDER_ID, eFolderId.getText());
                         }
                     }
 
@@ -294,15 +295,15 @@ public abstract class XmlServlet<I> extends PermissionServlet {
                         bList = false;
                         final String[] value = eObjectMode.getText().trim().toUpperCase().split(",");
 
-                        for (int a = 0; a < value.length; a++) {
-                            if (value[a].trim().equals("MODIFIED") || value[a].trim().equals("NEW_AND_MODIFIED")) {
+                        for (final String element : value) {
+                            if (element.trim().equals("MODIFIED") || element.trim().equals("NEW_AND_MODIFIED")) {
                                 bModified = true;
-                            } else if (value[a].trim().equals("DELETED")) {
+                            } else if (element.trim().equals("DELETED")) {
                                 bDeleted = true;
-                            } else if (value[a].trim().equals("LIST")) {
+                            } else if (element.trim().equals("LIST")) {
                                 bList = true;
                             } else {
-                                throw WebdavExceptionCode.INVALID_VALUE.create("objectmode", value[a]);
+                                throw WebdavExceptionCode.INVALID_VALUE.create("objectmode", element);
                             }
                         }
                     }
@@ -313,13 +314,13 @@ public abstract class XmlServlet<I> extends PermissionServlet {
                         throw WebdavExceptionCode.INVALID_VALUE.create(exc, DataFields.OBJECT_ID, eObjectId.getText());
                     }
 
-                    final Element eFolderId = eProp.getChild(CommonFields.FOLDER_ID, Namespace.getNamespace(PREFIX,
+                    final Element eFolderId = eProp.getChild(FolderChildFields.FOLDER_ID, Namespace.getNamespace(PREFIX,
                             NAMESPACE));
                     if (eFolderId != null) {
                         try {
                             folder_id = Integer.parseInt(eFolderId.getText());
                         } catch (final NumberFormatException exc) {
-                            throw WebdavExceptionCode.INVALID_VALUE.create(exc, CommonFields.FOLDER_ID, eFolderId.getText());
+                            throw WebdavExceptionCode.INVALID_VALUE.create(exc, FolderChildFields.FOLDER_ID, eFolderId.getText());
                         }
                     }
                 } else {
@@ -344,7 +345,7 @@ public abstract class XmlServlet<I> extends PermissionServlet {
 
             os.write(("</D:multistatus>").getBytes());
             os.flush();
-        } catch (final org.jdom.JDOMException exc) {
+        } catch (final org.jdom2.JDOMException exc) {
             LOG.error("doPropFind", exc);
             doError(req, resp, HttpServletResponse.SC_BAD_REQUEST, "XML ERROR");
         } catch (final OXException exc) {
@@ -355,7 +356,7 @@ public abstract class XmlServlet<I> extends PermissionServlet {
                     LOG.error(exc.getMessage(), exc);
                 }
                 doError(req, resp, HttpServletResponse.SC_CONFLICT, "Conflict: " + exc.getMessage());
-            } else if (OXException.CATEGORY_PERMISSION_DENIED.equals(exc.getCategory())) {
+            } else if (OXExceptionConstants.CATEGORY_PERMISSION_DENIED.equals(exc.getCategory())) {
                 doError(req, resp, HttpServletResponse.SC_FORBIDDEN, exc.getMessage());
             } else if (Category.CATEGORY_CONFLICT.equals(exc.getCategory())) {
                 LOG.error("doPropFind", exc);
@@ -571,16 +572,16 @@ public abstract class XmlServlet<I> extends PermissionServlet {
         if (conflicts != null) {
             final Element eConflictItems = new Element("conflictitems", Namespace.getNamespace("D", davUri));
             final StringBuilder textBuilder = new StringBuilder(50);
-            for (int a = 0; a < conflicts.length; a++) {
+            for (final Appointment conflict : conflicts) {
                 final Element eConflictItem = new Element("conflictitem", Namespace.getNamespace("D", davUri));
-                if (conflicts[a].getTitle() == null) {
+                if (conflict.getTitle() == null) {
                     eConflictItem.setAttribute("subject", "", NS);
                 } else {
-                    eConflictItem.setAttribute("subject", conflicts[a].getTitle(), NS);
+                    eConflictItem.setAttribute("subject", conflict.getTitle(), NS);
                 }
 
-                eConflictItem.setText(textBuilder.append(conflicts[a].getStartDate().getTime()).append(',').append(
-                        conflicts[a].getEndDate().getTime()).append(',').append(conflicts[a].getFullTime()).toString());
+                eConflictItem.setText(textBuilder.append(conflict.getStartDate().getTime()).append(',').append(
+                        conflict.getEndDate().getTime()).append(',').append(conflict.getFullTime()).toString());
                 textBuilder.setLength(0);
 
                 eConflictItems.addContent(eConflictItem);

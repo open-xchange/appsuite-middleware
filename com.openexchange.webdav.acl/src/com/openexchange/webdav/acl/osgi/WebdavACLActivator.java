@@ -50,7 +50,6 @@
 package com.openexchange.webdav.acl.osgi;
 
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.osgi.service.http.HttpService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.user.UserService;
@@ -65,9 +64,9 @@ import com.openexchange.webdav.protocol.osgi.OSGiPropertyMixin;
  */
 public class WebdavACLActivator extends HousekeepingActivator {
 
-    private static final Log LOG = LogFactory.getLog(WebdavACLActivator.class);
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(WebdavACLActivator.class);
 
-    private OSGiPropertyMixin mixin;
+    private volatile OSGiPropertyMixin mixin;
 
     @Override
     protected Class<?>[] getNeededServices() {
@@ -82,8 +81,9 @@ public class WebdavACLActivator extends HousekeepingActivator {
             getService(HttpService.class).registerServlet("/servlet/dav/principals/users", new WebdavPrincipalServlet(), null, null);
 
             final WebdavPrincipalPerformer performer = WebdavPrincipalPerformer.getInstance();
-            mixin = new OSGiPropertyMixin(context, performer);
+            final OSGiPropertyMixin mixin = new OSGiPropertyMixin(context, performer);
             performer.setGlobalMixins(mixin);
+            this.mixin = mixin;
             openTrackers();
         } catch (final Throwable t) {
             LOG.error(t.getMessage(), t);
@@ -92,7 +92,11 @@ public class WebdavACLActivator extends HousekeepingActivator {
 
     @Override
     protected void stopBundle() throws Exception {
-        mixin.close();
+        final OSGiPropertyMixin mixin = this.mixin;
+        if (null != mixin) {
+            mixin.close();
+            this.mixin = null;
+        }
         super.stopBundle();
     }
 

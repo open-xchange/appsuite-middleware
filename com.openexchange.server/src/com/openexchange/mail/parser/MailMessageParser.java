@@ -52,6 +52,7 @@ package com.openexchange.mail.parser;
 import static com.openexchange.mail.MailServletInterface.mailInterfaceMonitor;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.charset.UnsupportedCharsetException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -81,11 +82,11 @@ import net.freeutils.tnef.mime.RawDataSource;
 import net.freeutils.tnef.mime.ReadReceiptHandler;
 import net.freeutils.tnef.mime.TNEFMime;
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.i18n.LocaleTools;
 import com.openexchange.java.Charsets;
 import com.openexchange.log.ForceLog;
+import com.openexchange.log.LogFactory;
 import com.openexchange.log.LogProperties;
 import com.openexchange.log.Props;
 import com.openexchange.mail.MailExceptionCode;
@@ -93,6 +94,7 @@ import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.MailPart;
+import com.openexchange.mail.json.MailActionConstants;
 import com.openexchange.mail.mime.ContentDisposition;
 import com.openexchange.mail.mime.ContentType;
 import com.openexchange.mail.mime.MessageHeaders;
@@ -102,6 +104,7 @@ import com.openexchange.mail.mime.MimeType2ExtMap;
 import com.openexchange.mail.mime.MimeTypes;
 import com.openexchange.mail.mime.TNEFBodyPart;
 import com.openexchange.mail.mime.converters.MimeMessageConverter;
+import com.openexchange.mail.mime.dataobjects.MimeMailPart;
 import com.openexchange.mail.mime.dataobjects.MimeRawSource;
 import com.openexchange.mail.mime.datasource.MessageDataSource;
 import com.openexchange.mail.mime.utils.MimeMessageUtility;
@@ -121,6 +124,10 @@ import com.openexchange.tools.tnef.TNEF2ICal;
 public final class MailMessageParser {
 
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(MailMessageParser.class));
+
+    private static final String LOG_PROPERTY_FULL_NAME = MailActionConstants.LOG_PROPERTY_FULL_NAME;
+    private static final String LOG_PROPERTY_MAIL_ID = MailActionConstants.LOG_PROPERTY_MAIL_ID;
+    private static final String LOG_PROPERTY_ACCOUNT_ID = MailActionConstants.LOG_PROPERTY_ACCOUNT_ID;
 
     private static final String APPL_OCTET = MimeTypes.MIME_APPL_OCTET;
 
@@ -298,15 +305,15 @@ public final class MailMessageParser {
                 final Props properties = LogProperties.getLogProperties();
                 final int accountId = mail.getAccountId();
                 if (accountId >= 0) {
-                    properties.put("com.openexchange.mail.accountId", ForceLog.valueOf(Integer.valueOf(accountId)));
+                    properties.put(LOG_PROPERTY_ACCOUNT_ID, ForceLog.valueOf(Integer.valueOf(accountId)));
                 }
                 final String mailId = mail.getMailId();
                 if (null != mailId) {
-                    properties.put("com.openexchange.mail.mailId", ForceLog.valueOf(mailId));
+                    properties.put(LOG_PROPERTY_MAIL_ID, ForceLog.valueOf(mailId));
                 }
                 final String folder = mail.getFolder();
                 if (null != folder) {
-                    properties.put("com.openexchange.mail.folder", ForceLog.valueOf(folder));
+                    properties.put(LOG_PROPERTY_FULL_NAME, ForceLog.valueOf(folder));
                 }
             }
             /*
@@ -328,9 +335,9 @@ public final class MailMessageParser {
         } finally {
             if (logPropsEnabled) {
                 final Props properties = LogProperties.getLogProperties();
-                properties.put("com.openexchange.mail.accountId", null);
-                properties.put("com.openexchange.mail.mailId", null);
-                properties.put("com.openexchange.mail.folder", null);
+                properties.remove(LOG_PROPERTY_ACCOUNT_ID);
+                properties.remove(LOG_PROPERTY_MAIL_ID);
+                properties.remove(LOG_PROPERTY_FULL_NAME);
             }
         }
         handler.handleMessageEnd(mail);
@@ -389,6 +396,10 @@ public final class MailMessageParser {
                 for (int i = 0; i < count; i++) {
                     final MailPart enclosedContent = mailPart.getEnclosedMailPart(i);
                     parseMailContent(enclosedContent, handler, mpPrefix, i + 1);
+                }
+                if (!handler.handleMultipartEnd(mailPart, mpId)) {
+                    stop = true;
+                    return;
                 }
             } catch (final RuntimeException rte) {
                 /*
@@ -539,14 +550,7 @@ public final class MailMessageParser {
                         LOG.error("Invalid TNEF contact", e);
                         return;
                     }
-                    final int mpsize = mp.getCount();
-                    for (int i = 0; i < mpsize; i++) {
-                        /*
-                         * Since TNEF library is based on JavaMail API we use an instance of IMAPMailContent regardless of the mail
-                         * implementation
-                         */
-                        parseMailContent(MimeMessageConverter.convertPart(mp.getBodyPart(i), false), handler, prefix, partCount++);
-                    }
+                    parseMailContent(new MimeMailPart(mp), handler, prefix, partCount);
                     /*
                      * Stop to further process TNEF attachment
                      */
@@ -565,14 +569,7 @@ public final class MailMessageParser {
                         }
                         return;
                     }
-                    final int mpsize = mp.getCount();
-                    for (int i = 0; i < mpsize; i++) {
-                        /*
-                         * Since TNEF library is based on JavaMail API we use an instance of IMAPMailContent regardless of the mail
-                         * implementation
-                         */
-                        parseMailContent(MimeMessageConverter.convertPart(mp.getBodyPart(i)), handler, prefix, partCount++);
-                    }
+                    parseMailContent(new MimeMailPart(mp), handler, prefix, partCount);
                     /*
                      * Stop to further process TNEF attachment
                      */
@@ -682,7 +679,7 @@ public final class MailMessageParser {
                 if (s > 0) {
                     final Iterator<?> iter = attachments.iterator();
                     final ByteArrayOutputStream os = new UnsynchronizedByteArrayOutputStream(BUF_SIZE);
-                    for (int i = 0; i < s; i++) {
+                    Next: for (int i = 0; i < s; i++) {
                         final Attachment attachment = (Attachment) iter.next();
                         final TNEFBodyPart bodyPart = new TNEFBodyPart();
                         if (attachment.getNestedMessage() == null) {
@@ -697,6 +694,15 @@ public final class MailMessageParser {
                             String contentTypeStr = null;
                             if (attachment.getMAPIProps() != null) {
                                 contentTypeStr = (String) attachment.getMAPIProps().getPropValue(MAPIProp.PR_ATTACH_MIME_TAG);
+                            }
+                            if (null != contentTypeStr) {
+                                final String tmp = contentTypeStr.toLowerCase(Locale.US);
+                                if (tmp.startsWith("multipart/") && tmp.indexOf("boundary=") < 0) {
+                                    final MimeMessage nested = new MimeMessage(MimeDefaultSession.getDefaultSession(), attachment.getRawData());
+                                    parseMailContent(MimeMessageConverter.convertMessage(nested, false), handler, prefix, partCount++);
+                                    // Proceed with next attachment in list
+                                    continue Next;
+                                }
                             }
                             if ((contentTypeStr == null) && (attachFilename != null)) {
                                 contentTypeStr = MimeType2ExtMap.getContentType(attachFilename);
@@ -1009,6 +1015,10 @@ public final class MailMessageParser {
          */
         final String charset = getCharset(mailPart, contentType);
         try {
+            if (contentType.startsWith("text/htm")) {
+                final String html = MessageUtility.readMailPart(mailPart, charset);
+                return MessageUtility.simpleHtmlDuplicateRemoval(html);
+            }
             return MessageUtility.readMailPart(mailPart, charset);
         } catch (final java.io.CharConversionException e) {
             // Obviously charset was wrong or bogus implementation of character conversion
@@ -1066,7 +1076,12 @@ public final class MailMessageParser {
             charset = cs;
         } else {
             if (contentType.startsWith(PRIMARY_TEXT)) {
-                charset = CharsetDetector.detectCharset(mailPart.getInputStream());
+                final InputStream inputStream = mailPart.getInputStream();
+                if (null == inputStream) {
+                    charset = MailProperties.getInstance().getDefaultMimeCharset();
+                } else {
+                    charset = CharsetDetector.detectCharset(inputStream);
+                }
             } else {
                 charset = MailProperties.getInstance().getDefaultMimeCharset();
             }

@@ -57,6 +57,7 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -68,7 +69,8 @@ import com.openexchange.index.IndexDocument;
 import com.openexchange.index.IndexFacadeService;
 import com.openexchange.index.IndexResult;
 import com.openexchange.index.QueryParameters;
-import com.openexchange.index.solr.mail.SolrMailConstants;
+import com.openexchange.index.QueryParameters.Order;
+import com.openexchange.index.mail.MailIndexField;
 import com.openexchange.indexedSearch.json.FieldResults;
 import com.openexchange.indexedSearch.json.SearchHandler;
 import com.openexchange.mail.MailField;
@@ -93,21 +95,21 @@ import com.openexchange.tools.session.ServerSession;
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class MailSearchHandler implements SearchHandler, SolrMailConstants {
+public class MailSearchHandler implements SearchHandler {
 
     private final ServiceLookup services;
 
     /**
      * Initializes a new {@link MailSearchHandler}.
      */
-    public MailSearchHandler(final ServiceLookup services) {
+    public MailSearchHandler(ServiceLookup services) {
         super();
         this.services = services;
     }
 
     @Override
-    public List<FieldResults> search(final JSONObject jsonQuery, final int[] range, final int[] fields, final AJAXRequestData requestData, final ServerSession session) throws OXException {
-        final IndexFacadeService indexFacade = services.getService(IndexFacadeService.class);
+    public List<FieldResults> search(JSONObject jsonQuery, int[] range, int[] fields, AJAXRequestData requestData, ServerSession session) throws OXException {
+        IndexFacadeService indexFacade = services.getService(IndexFacadeService.class);
         if (null == indexFacade) {
             return Collections.emptyList();
         }
@@ -115,55 +117,46 @@ public final class MailSearchHandler implements SearchHandler, SolrMailConstants
         try {
             indexAccess = indexFacade.acquireIndexAccess(com.openexchange.groupware.Types.EMAIL, session);
             // Parse query
-            final MailQuery query = MailQuery.queryFor(jsonQuery);
-            final MailField[] mailFields = MailField.getFields(fields);
-            final boolean[] more = new boolean[1];
-            final List<String> names = query.getNames();
-            final List<FieldResults> retval = new LinkedList<FieldResults>();
+            MailQuery query = MailQuery.queryFor(jsonQuery);
+            boolean[] more = new boolean[1];
+            List<String> names = query.getNames();
+            List<FieldResults> retval = new LinkedList<FieldResults>();
             int i = 0;
-            for (final com.openexchange.search.SearchTerm<?> searchTerm : query.getTerms()) {
+            for (com.openexchange.search.SearchTerm<?> searchTerm : query.getTerms()) {
+                SearchTerm<?> mailSearchTerm = map(searchTerm);
                 try {
                     more[0] = false;
-                    final String name = null == names ? null : names.get(i++);
-                    final String queryString;
-                    {
-                        final StringBuilder queryBuilder = new StringBuilder(128);
-                        queryBuilder.append('(').append(FIELD_USER).append(':').append(session.getUserId()).append(')');
-                        queryBuilder.append(" AND (").append(FIELD_CONTEXT).append(':').append(session.getContextId()).append(')');
-                        final int accountId = query.getAccountId();
-                        if (accountId >= 0) {
-                            queryBuilder.append(" AND (").append(FIELD_ACCOUNT).append(':').append(accountId).append(')');
-                        }
-                        final String fullName = query.getFullName();
-                        if (null != fullName) {
-                            queryBuilder.append(" AND (").append(FIELD_FULL_NAME).append(":\"").append(fullName).append("\")");
-                        }
-                        if (null != searchTerm) {
-                            queryBuilder.append(" AND (").append(SearchTerm2Query.searchTerm2Query(map(searchTerm))).append(')');
-                        }
-                        queryString = queryBuilder.toString();
+                    String name = null == names ? null : names.get(i++);     
+                    Map<String, Object> params = new HashMap<String, Object>(1);
+                    int accountId = query.getAccountId();
+                    if (accountId >= 0) {
+                        params.put("accountId", accountId);
+                    }                    
+                    QueryParameters.Builder builder = new QueryParameters.Builder(params)
+                                                                .setOffset(range[0])
+                                                                .setLength(range[1] - range[0])
+                                                                .setType(IndexDocument.Type.MAIL)
+                                                                .setSortField(MailIndexField.RECEIVED_DATE)
+                                                                .setOrder(Order.DESC);                    
+                    String fullName = query.getFullName();
+                    if (fullName != null) {
+                        builder.setFolders(Collections.singleton(fullName));
                     }
-                    final Map<String, Object> params = new HashMap<String, Object>(4);
-                    // TODO: params.put("fields", mailFields);
-                    params.put("sort", FIELD_RECEIVED_DATE);
-                    params.put("order", "desc");
-                    final QueryParameters queryParameter =
-                        new QueryParameters.Builder(queryString).setOffset(range[0]).setLength(range[1] - range[0]).setType(
-                            IndexDocument.Type.MAIL).setParameters(params).build();
-                    final IndexResult<MailMessage> indexResult = indexAccess.query(queryParameter);
+                    QueryParameters parameters = builder.setHandler(com.openexchange.index.SearchHandler.CUSTOM).setSearchTerm(mailSearchTerm).build();
+                    MailField[] mailFields = MailField.getFields(fields);
+                    Set<MailIndexField> indexFields = MailIndexField.getFor(mailFields);
+                    IndexResult<MailMessage> indexResult = indexAccess.query(parameters, indexFields);
                     if (range[1] > 0 && range[1] < indexResult.getNumFound()) {
                         more[0] = true;
                     }
-                    final List<IndexDocument<MailMessage>> results = indexResult.getResults();
-                    final List<MailMessage> mails = new ArrayList<MailMessage>(results.size());
-                    for (final IndexDocument<MailMessage> indexDocument : results) {
+                    List<IndexDocument<MailMessage>> results = indexResult.getResults();
+                    List<MailMessage> mails = new ArrayList<MailMessage>(results.size());
+                    for (IndexDocument<MailMessage> indexDocument : results) {
                         mails.add(indexDocument.getObject());
                     }
                     retval.add(new FieldResults(name, "mail", results, more[0]));
-                } catch (final InterruptedException e) {
-                    // Thread interrupted
-                    Thread.currentThread().interrupt();
-                    return Collections.emptyList();
+                } finally {
+                    
                 }
             }
             // Prepare AJAX request data for mail ResultConverter
@@ -171,7 +164,7 @@ public final class MailSearchHandler implements SearchHandler, SolrMailConstants
             requestData.putParameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_ALL);
             requestData.putParameter(AJAXServlet.PARAMETER_COLUMNS, toCSV(jsonQuery.getJSONArray(AJAXServlet.PARAMETER_COLUMNS)));
             return retval;
-        } catch (final JSONException e) {
+        } catch (JSONException e) {
             throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
         } finally {
             if (null != indexAccess) {
@@ -187,11 +180,11 @@ public final class MailSearchHandler implements SearchHandler, SolrMailConstants
      * @return An appropriate mail search term
      * @throws IllegalArgumentException If an appropriate mail search term cannot be generated
      */
-    private static SearchTerm<?> map(final com.openexchange.search.SearchTerm<?> searchTerm) {
-        final Operation operation = searchTerm.getOperation();
+    private static SearchTerm<?> map(com.openexchange.search.SearchTerm<?> searchTerm) {
+        Operation operation = searchTerm.getOperation();
         if (CompositeOperation.AND.equals(operation)) {
-            final com.openexchange.search.SearchTerm<?>[] searchTerms = ((CompositeSearchTerm) searchTerm).getOperands();
-            final int length = searchTerms.length;
+            com.openexchange.search.SearchTerm<?>[] searchTerms = ((CompositeSearchTerm) searchTerm).getOperands();
+            int length = searchTerms.length;
             if (length == 0) {
                 return BooleanTerm.TRUE;
             }
@@ -207,8 +200,8 @@ public final class MailSearchHandler implements SearchHandler, SolrMailConstants
             return andTerm;
         }
         if (CompositeOperation.OR.equals(operation)) {
-            final com.openexchange.search.SearchTerm<?>[] searchTerms = ((CompositeSearchTerm) searchTerm).getOperands();
-            final int length = searchTerms.length;
+            com.openexchange.search.SearchTerm<?>[] searchTerms = ((CompositeSearchTerm) searchTerm).getOperands();
+            int length = searchTerms.length;
             if (length == 0) {
                 return BooleanTerm.TRUE;
             }
@@ -224,25 +217,25 @@ public final class MailSearchHandler implements SearchHandler, SolrMailConstants
             return orTerm;
         }
         if (CompositeOperation.NOT.equals(operation)) {
-            final com.openexchange.search.SearchTerm<?>[] searchTerms = ((CompositeSearchTerm) searchTerm).getOperands();
-            final int length = searchTerms.length;
+            com.openexchange.search.SearchTerm<?>[] searchTerms = ((CompositeSearchTerm) searchTerm).getOperands();
+            int length = searchTerms.length;
             if (length == 0) {
                 return BooleanTerm.TRUE;
             }
             return new NOTTerm(map(searchTerms[0]));
         }
-        final Object[] values = getNameAndConstant((Operand[]) searchTerm.getOperands());
+        Object[] values = getNameAndConstant((Operand[]) searchTerm.getOperands());
         if (null == values) {
             throw new IllegalArgumentException(MessageFormat.format(
                 "Invalid values for single search term: {0}",
                 Arrays.toString(searchTerm.getOperands())));
         }
-        final SearchTerm<?> term =
+        SearchTerm<?> term =
             MailAttributeFetcher.getInstance().getSearchTerm(values[0].toString(), getSingleOperation(operation), values[1]);
         return null == term ? BooleanTerm.TRUE : term;
     }
 
-    private static SingleOperation getSingleOperation(final Operation operation) {
+    private static SingleOperation getSingleOperation(Operation operation) {
         if (SingleOperation.EQUALS.equals(operation)) {
             return SingleOperation.EQUALS;
         }
@@ -255,7 +248,7 @@ public final class MailSearchHandler implements SearchHandler, SolrMailConstants
         throw new IllegalArgumentException(MessageFormat.format("Unknown single search term operation: {0}", operation));
     }
 
-    private static Object[] getNameAndConstant(@SuppressWarnings("unchecked") final Operand[] operands) {
+    private static Object[] getNameAndConstant(@SuppressWarnings("unchecked") Operand[] operands) {
         if (Operand.Type.CONSTANT.equals((operands[0]).getType())) {
             return new Object[] { operands[1].getValue().toString(), operands[0].getValue() };
         } else if (operands.length > 1 && Operand.Type.CONSTANT.equals((operands[1]).getType())) {
@@ -264,15 +257,15 @@ public final class MailSearchHandler implements SearchHandler, SolrMailConstants
         return null;
     }
 
-    private static String toCSV(final JSONArray jArray) throws JSONException {
+    private static String toCSV(JSONArray jArray) throws JSONException {
         if (null == jArray) {
             return "";
         }
-        final int len = jArray.length();
+        int len = jArray.length();
         if (0 == len) {
             return "";
         }
-        final StringBuilder sb = new StringBuilder(len << 2);
+        StringBuilder sb = new StringBuilder(len << 2);
         sb.append(jArray.get(0));
         for (int i = 1; i < len; i++) {
             sb.append(',').append(jArray.get(i));

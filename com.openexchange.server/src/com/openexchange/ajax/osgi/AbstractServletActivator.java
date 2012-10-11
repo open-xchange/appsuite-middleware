@@ -55,9 +55,9 @@ import java.util.List;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.osgi.service.http.HttpService;
 import org.osgi.service.http.NamespaceException;
+import com.openexchange.log.LogFactory;
 import com.openexchange.osgi.HousekeepingActivator;
 
 /**
@@ -69,19 +69,19 @@ public abstract class AbstractServletActivator extends HousekeepingActivator {
 
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(AbstractServletActivator.class));
 
-    private List<String> servlets = new ArrayList<String>();
+    private final List<String> servlets = new ArrayList<String>();
 
-    protected void registerServlet(String alias, HttpServlet servlet, HttpService httpService) {
+    protected void registerServlet(final String alias, final HttpServlet servlet, final HttpService httpService) {
         registerServlet(alias, servlet, null, httpService);
     }
 
-    protected void registerServlet(String alias, HttpServlet servlet, Dictionary<String, String> params, HttpService httpService) {
+    protected void registerServlet(final String alias, final HttpServlet servlet, final Dictionary<String, String> params, final HttpService httpService) {
         try {
             httpService.registerServlet(alias, servlet, params, null);
             servlets.add(alias);
-        } catch (ServletException e) {
+        } catch (final ServletException e) {
             LOG.error(e.getMessage(), e);
-        } catch (NamespaceException e) {
+        } catch (final NamespaceException e) {
             LOG.error(e.getMessage(), e);
         }
     }
@@ -93,15 +93,19 @@ public abstract class AbstractServletActivator extends HousekeepingActivator {
     }
 
     private void unregisterServlets() {
-        HttpService httpService = getService(HttpService.class);
-        for (String servlet : servlets) {
-            httpService.unregister(servlet);
+        final HttpService httpService = getService(HttpService.class);
+        if (null != httpService) {
+            for (final String servlet : servlets) {
+                httpService.unregister(servlet);
+            }
         }
     }
     
-    protected void unregisterServlet(String alias) {
-        HttpService httpService = getService(HttpService.class);
-        httpService.unregister(alias);
+    protected void unregisterServlet(final String alias) {
+        final HttpService httpService = getService(HttpService.class);
+        if (null != httpService) {
+            httpService.unregister(alias);
+        }
         servlets.remove(alias);
     }
 

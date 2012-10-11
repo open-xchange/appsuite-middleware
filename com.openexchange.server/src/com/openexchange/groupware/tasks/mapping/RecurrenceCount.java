@@ -53,6 +53,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
+import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.tasks.Mapper;
 import com.openexchange.groupware.tasks.Task;
 
@@ -79,7 +80,7 @@ public class RecurrenceCount implements Mapper<Integer> {
      */
     @Override
     public int getId() {
-        return Task.RECURRENCE_COUNT;
+        return CalendarObject.RECURRENCE_COUNT;
     }
 
     /**
@@ -96,6 +97,11 @@ public class RecurrenceCount implements Mapper<Integer> {
     @Override
     public String getDBColumnName() {
         return "recurrence_count"; // TODO rename this
+    }
+
+    @Override
+    public String getDisplayName() {
+        throw new UnsupportedOperationException();
     }
 
     /**

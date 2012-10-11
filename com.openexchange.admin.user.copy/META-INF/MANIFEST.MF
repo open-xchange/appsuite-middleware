@@ -2,37 +2,22 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Admin Usercopy
 Bundle-SymbolicName: com.openexchange.admin.user.copy
-Bundle-Version: 6.20.1.0
+Bundle-Version: 6.22.0
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-Activator: com.openexchange.admin.user.copy.osgi.Activator
-Bundle-RequiredExecutionEnvironment: J2SE-1.5
-Import-Package: com.openexchange.admin.console,
- com.openexchange.admin.daemons,
- com.openexchange.admin.rmi,
- com.openexchange.admin.rmi.dataobjects,
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Import-Package: com.openexchange.admin.rmi.dataobjects,
  com.openexchange.admin.rmi.exceptions,
  com.openexchange.admin.rmi.impl,
  com.openexchange.admin.storage.interfaces,
- com.openexchange.ajax.writer,
- com.openexchange.datatypes.genericonf,
+ com.openexchange.admin.tools,
+ com.openexchange.admin.user.copy.rmi,
+ com.openexchange.config,
  com.openexchange.exception,
- com.openexchange.groupware,
- com.openexchange.groupware.attach,
- com.openexchange.groupware.container,
- com.openexchange.groupware.generic,
- com.openexchange.groupware.infostore,
- com.openexchange.groupware.infostore.database.impl,
- com.openexchange.groupware.reminder,
- com.openexchange.groupware.search,
- com.openexchange.groupware.tasks,
  com.openexchange.java,
- com.openexchange.mailaccount,
- com.openexchange.server.impl,
- com.openexchange.subscribe,
- com.openexchange.tools.conf,
- com.openexchange.tools.servlet,
+ com.openexchange.log,
+ com.openexchange.osgi,
  com.openexchange.user.copy,
- org.apache.commons.logging;version="1.0.4",
- org.json,
- org.osgi.framework;version="1.3.0",
+ org.apache.commons.logging,
+ org.osgi.framework,
  org.osgi.util.tracker

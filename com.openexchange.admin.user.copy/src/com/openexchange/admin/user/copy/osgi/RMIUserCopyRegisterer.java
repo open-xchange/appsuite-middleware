@@ -49,21 +49,15 @@
 
 package com.openexchange.admin.user.copy.osgi;
 
-import java.rmi.AccessException;
-import java.rmi.AlreadyBoundException;
-import java.rmi.NotBoundException;
-import java.rmi.RemoteException;
-import java.rmi.registry.Registry;
-import java.rmi.server.UnicastRemoteObject;
+import java.rmi.Remote;
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
+import org.osgi.framework.ServiceRegistration;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
-import com.openexchange.admin.daemons.AdminDaemon;
 import com.openexchange.admin.rmi.exceptions.StorageException;
-import com.openexchange.admin.user.copy.rmi.OXUserCopyInterface;
 import com.openexchange.admin.user.copy.rmi.impl.OXUserCopy;
+import com.openexchange.log.LogFactory;
 import com.openexchange.user.copy.UserCopyService;
 
 /**
@@ -71,59 +65,47 @@ import com.openexchange.user.copy.UserCopyService;
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public class RMIUserCopyRegisterer implements ServiceTrackerCustomizer {
+public class RMIUserCopyRegisterer implements ServiceTrackerCustomizer<UserCopyService,UserCopyService> {
 
     private static final Log LOG = LogFactory.getLog(RMIUserCopyRegisterer.class);
 
     private final BundleContext context;
 
-    private static Registry registry;
-    
-    private static OXUserCopy userCopy;
-    
+    private ServiceRegistration<Remote> registration;
 
-    public RMIUserCopyRegisterer(BundleContext context) {
+    public RMIUserCopyRegisterer(final BundleContext context) {
         super();
         this.context = context;
     }
 
-    public Object addingService(final ServiceReference reference) {
-        UserCopyService service = (UserCopyService) context.getService(reference);
+    @Override
+    public UserCopyService addingService(final ServiceReference<UserCopyService> reference) {
+        final UserCopyService service = context.getService(reference);
         try {
-            registry = AdminDaemon.getRegistry();
-
-            userCopy = new OXUserCopy(context, service);
-            final OXUserCopyInterface oxresell_stub = (OXUserCopyInterface) UnicastRemoteObject.exportObject(userCopy, 0);
-
-            // bind all NEW Objects to registry
-            registry.bind(OXUserCopyInterface.RMI_NAME, oxresell_stub);
+            final OXUserCopy userCopy = new OXUserCopy(context, service);
+            registration = context.registerService(Remote.class, userCopy, null);
             LOG.info("RMI Interface for usercopy bundle bound to RMI registry");
-        } catch (final RemoteException e) {
-            LOG.error(e.getMessage(), e);
-        } catch (final AlreadyBoundException e) {
-            LOG.error(e.getMessage(), e);
         } catch (final StorageException e) {
             LOG.error(e.getMessage(), e);
         }
         return service;
     }
 
-    public void modifiedService(final ServiceReference reference, final Object service) {
+    @Override
+    public void modifiedService(final ServiceReference<UserCopyService> reference, final UserCopyService service) {
         // Nothing to do.
     }
 
-    public void removedService(final ServiceReference reference, final Object service) {
+    @Override
+    public void removedService(final ServiceReference<UserCopyService> reference, final UserCopyService service) {
         try {
-            if (null != registry) {
+            if (null != registration) {
                 LOG.info("RMI Interface for usercopy bundle removed from RMI registry");
-                registry.unbind(OXUserCopyInterface.RMI_NAME);
-                context.ungetService(reference);
+                registration.unregister();
+                registration = null;
             }
-        } catch (final AccessException e) {
-            LOG.error(e.getMessage(), e);
-        } catch (final RemoteException e) {
-            LOG.error(e.getMessage(), e);
-        } catch (final NotBoundException e) {
+            context.ungetService(reference);
+        } catch (final Exception e) {
             LOG.error(e.getMessage(), e);
         }
     }

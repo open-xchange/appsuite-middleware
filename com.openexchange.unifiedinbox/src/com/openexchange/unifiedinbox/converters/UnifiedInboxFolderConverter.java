@@ -87,7 +87,7 @@ public final class UnifiedInboxFolderConverter {
     static final int[] EMPTY_COUNTS = new int[] { 0, 0, 0, 0 };
 
     private static final org.apache.commons.logging.Log LOG =
-        com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(UnifiedInboxFolderConverter.class));
+        com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(UnifiedInboxFolderConverter.class));
 
     private static final MailFolder ROOT_UNIFIED_INBOX_FOLDER;
 
@@ -277,6 +277,7 @@ public final class UnifiedInboxFolderConverter {
                 sb.setLength(0);
                 completionService.submit(new LoggingCallable<int[]>(session) {
 
+                    @Override
                     public int[] call() throws Exception {
                         MailAccess<?, ?> mailAccess = null;
                         try {

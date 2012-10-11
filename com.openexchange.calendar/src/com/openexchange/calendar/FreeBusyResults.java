@@ -59,7 +59,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import com.openexchange.calendar.api.CalendarCollection;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.calendar.CalendarDataObject;
@@ -72,9 +71,11 @@ import com.openexchange.groupware.container.Participants;
 import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
+import com.openexchange.log.LogFactory;
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorException;
+import com.openexchange.tools.iterator.SearchIteratorExceptionCodes;
 
 /**
  * FreeBusyResults
@@ -257,7 +258,7 @@ public class FreeBusyResults implements SearchIterator<CalendarDataObject> {
             throw OXCalendarExceptionCodes.CALENDAR_SQL_ERROR.create(sqle);
         } catch(final Exception e) {
             LOG.error("FreeBusyResults calculation problem with oid "+oid+" / "+cdao == null ? "" : cdao.toString() , e);
-            throw SearchIteratorException.Code.CALCULATION_ERROR.create("APP", oid, e);
+            throw SearchIteratorExceptionCodes.CALCULATION_ERROR.create(e, oid).setPrefix("APP");
         }
         if (ft != 0 && cdao != null) {
             cdao.setFullTime(true);

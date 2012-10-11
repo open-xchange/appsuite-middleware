@@ -131,7 +131,7 @@ public class DeleteMultipleAppointmentTest extends AppointmentTest {
     @Test
     public void testDeleteMultiple() throws Exception {
         int[] ids = new int[] {appointment1.getObjectID(), appointment2.getObjectID()};
-        DeleteRequest delReq = new DeleteRequest(ids, client.getValues().getPrivateAppointmentFolder(), new Date(), true);
+        DeleteRequest delReq = new DeleteRequest(ids, client.getValues().getPrivateAppointmentFolder(), new Date(System.currentTimeMillis() + 300000L), true);
         CommonDeleteResponse delRes = client.execute(delReq);
         assertFalse("Multiple delete failed: " + delRes.getErrorMessage(), delRes.hasError());
     }

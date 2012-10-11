@@ -56,6 +56,8 @@ package com.openexchange.groupware.container;
  */
 public class GroupParticipant implements Participant, Comparable<Participant> {
 
+    private static final long serialVersionUID = 246682125014920210L;
+
     private int id;
 
     private String displayName;
@@ -84,7 +86,9 @@ public class GroupParticipant implements Participant, Comparable<Participant> {
 
     /**
      * {@inheritDoc}
+     * @deprecated
      */
+    @Deprecated
     @Override
     public void setIdentifier(final int id) {
         this.id = id;
@@ -119,14 +123,14 @@ public class GroupParticipant implements Participant, Comparable<Participant> {
      */
     @Override
     public String getEmailAddress() {
-        return emailaddress;
+        return emailaddress == null ? null : emailaddress.toLowerCase();
     }
 
     /**
      * {@inheritDoc}
      */
     public void setEmailAddress(final String emailaddress) {
-        this.emailaddress = emailaddress;
+        this.emailaddress = emailaddress == null ? null : emailaddress.toLowerCase();
     }
 
     /**
@@ -176,13 +180,20 @@ public class GroupParticipant implements Participant, Comparable<Participant> {
     }
 
     @Override
-    public Object clone() throws CloneNotSupportedException {
-        return super.clone();
+    public GroupParticipant clone() throws CloneNotSupportedException {
+        GroupParticipant retval = (GroupParticipant) super.clone();
+
+        retval.setDisplayName(this.getDisplayName());
+        retval.setEmailAddress(this.getEmailAddress());
+        retval.setIdentifier(this.getIdentifier());
+        retval.setIgnoreNotification(this.isIgnoreNotification());
+
+        return retval;
     }
 
     @Override
     public Participant getClone() throws CloneNotSupportedException {
-        return (Participant) clone();
+        return clone();
     }
 
     @Override

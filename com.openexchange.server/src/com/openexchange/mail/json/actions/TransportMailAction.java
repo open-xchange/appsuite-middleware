@@ -79,7 +79,7 @@ import com.openexchange.tools.session.ServerSession;
 public final class TransportMailAction extends AbstractMailAction {
 
     private static final org.apache.commons.logging.Log LOG =
-        com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(TransportMailAction.class));
+        com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(TransportMailAction.class));
 
     private static final boolean DEBUG = LOG.isDebugEnabled();
 

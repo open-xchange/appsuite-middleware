@@ -50,7 +50,7 @@
 package com.openexchange.filemanagement.json.actions;
 
 import org.json.JSONObject;
-import com.openexchange.ajax.AJAXFile;
+import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
@@ -71,7 +71,7 @@ import com.openexchange.tools.session.ServerSession;
  */
 @Action(method = RequestMethod.GET, name = "keepalive", description = "Updating a file's last access timestamp (keep alive)", parameters = {
     @Parameter(name = "session", description = "A session ID previously obtained from the login module."),
-    @Parameter(name = "id", description = "The ID of the uploaded file whose timestamp should be updated.") 
+    @Parameter(name = "id", description = "The ID of the uploaded file whose timestamp should be updated.")
 }, responseDescription = "The string \"null\" in response's data element")
 public final class KeepaliveAction implements AJAXActionService {
 
@@ -84,7 +84,7 @@ public final class KeepaliveAction implements AJAXActionService {
 
     @Override
     public AJAXRequestResult perform(final AJAXRequestData requestData, final ServerSession session) throws OXException {
-        final String id = requestData.checkParameter(AJAXFile.PARAMETER_ID);
+        final String id = requestData.checkParameter(AJAXServlet.PARAMETER_ID);
         final ManagedFileManagement management = ServerServiceRegistry.getInstance().getService(ManagedFileManagement.class);
         management.getByID(id);
         return new AJAXRequestResult(JSONObject.NULL, "json");

@@ -51,7 +51,6 @@ package com.openexchange.secret.recovery.osgi;
 
 import java.util.Collection;
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.osgi.framework.BundleContext;
 import org.osgi.util.tracker.ServiceTracker;
 import com.openexchange.exception.OXException;
@@ -61,13 +60,13 @@ import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link WhiteboardSecretMigrator}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class WhiteboardSecretMigrator extends ServiceTracker<SecretMigrator, SecretMigrator> implements SecretMigrator {
 
-    private static final Log LOG = LogFactory.getLog(WhiteboardSecretMigrator.class);
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(WhiteboardSecretMigrator.class);
 
     public WhiteboardSecretMigrator(final BundleContext context) {
         super(context, SecretMigrator.class, null);

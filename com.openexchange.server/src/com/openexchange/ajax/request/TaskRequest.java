@@ -54,13 +54,15 @@ import gnu.trove.list.TIntList;
 import gnu.trove.list.array.TIntArrayList;
 import java.util.Date;
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import com.openexchange.log.LogFactory;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONValue;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.fields.CalendarFields;
+import com.openexchange.ajax.fields.CommonFields;
+import com.openexchange.ajax.fields.DataFields;
 import com.openexchange.ajax.fields.FolderChildFields;
 import com.openexchange.ajax.fields.OrderFields;
 import com.openexchange.ajax.fields.ResponseFields;
@@ -106,12 +108,12 @@ public class TaskRequest extends CalendarRequest {
         CalendarObject.NOTE,
         CalendarObject.RECURRENCE_TYPE,
         CalendarObject.PARTICIPANTS,
-        CalendarObject.UID,
+        CommonObject.UID,
         Task.ACTUAL_COSTS,
         Task.ACTUAL_DURATION,
-        Task.ALARM,
+        CalendarObject.ALARM,
         Task.BILLING_INFORMATION,
-        Task.CATEGORIES,
+        CommonObject.CATEGORIES,
         Task.COMPANIES,
         Task.CURRENCY,
         Task.DATE_COMPLETED,
@@ -121,7 +123,7 @@ public class TaskRequest extends CalendarRequest {
         Task.TARGET_COSTS,
         Task.TARGET_DURATION,
         Task.TRIP_METER,
-        Task.COLOR_LABEL
+        CommonObject.COLOR_LABEL
     };
 
     public TaskRequest(final ServerSession session) {
@@ -173,7 +175,7 @@ public class TaskRequest extends CalendarRequest {
         final JSONObject jsonobject = DataParser.checkJSONObject(jsonObj, ResponseFields.DATA);
 
         final TaskParser taskParser = new TaskParser(timeZone);
-        taskParser.parse(task, jsonobject);
+        taskParser.parse(task, jsonobject, session.getUser().getLocale());
 
         final TasksSQLInterface sqlinterface = new TasksSQLImpl(session);
 
@@ -182,7 +184,7 @@ public class TaskRequest extends CalendarRequest {
         timestamp = task.getLastModified();
 
         final JSONObject jsonResponseObject = new JSONObject();
-        jsonResponseObject.put(TaskFields.ID, task.getObjectID());
+        jsonResponseObject.put(DataFields.ID, task.getObjectID());
 
         return jsonResponseObject;
     }
@@ -197,7 +199,7 @@ public class TaskRequest extends CalendarRequest {
         final JSONObject jsonobject = DataParser.checkJSONObject(jsonObj, ResponseFields.DATA);
 
         final TaskParser taskParser = new TaskParser(timeZone);
-        taskParser.parse(task, jsonobject);
+        taskParser.parse(task, jsonobject, session.getUser().getLocale());
 
         task.setObjectID(id);
 
@@ -407,7 +409,7 @@ public class TaskRequest extends CalendarRequest {
     public JSONObject actionConfirm(final JSONObject json) throws OXException, JSONException {
         final JSONObject data = DataParser.checkJSONObject(json, ResponseFields.DATA);
         final Task task = new Task();
-        new TaskParser(timeZone).parse(task, data);
+        new TaskParser(timeZone).parse(task, data, session.getUser().getLocale());
         final TasksSQLInterface taskSql = new TasksSQLImpl(session);
         final int taskIdFromParameter = DataParser.parseInt(json, AJAXServlet.PARAMETER_ID);
         final int taskId;
@@ -462,11 +464,11 @@ public class TaskRequest extends CalendarRequest {
             searchObj.setPattern(DataParser.parseString(jData, SearchFields.PATTERN));
         }
 
-        searchObj.setTitle(DataParser.parseString(jData, TaskFields.TITLE));
+        searchObj.setTitle(DataParser.parseString(jData, CalendarFields.TITLE));
         searchObj.setPriority(DataParser.parseInt(jData, TaskFields.PRIORITY));
         searchObj.setSearchInNote(DataParser.parseBoolean(jData, "searchinnote"));
         searchObj.setStatus(DataParser.parseInt(jData, TaskFields.STATUS));
-        searchObj.setCatgories(DataParser.parseString(jData, TaskFields.CATEGORIES));
+        searchObj.setCatgories(DataParser.parseString(jData, CommonFields.CATEGORIES));
         searchObj.setSubfolderSearch(DataParser.parseBoolean(jData, "subfoldersearch"));
 
         if (jData.has(CalendarFields.PARTICIPANTS)) {
@@ -522,15 +524,15 @@ public class TaskRequest extends CalendarRequest {
         timestamp = new Date(0);
 
         final JSONObject jsonResponseObject = new JSONObject();
-        jsonResponseObject.put(TaskFields.ID, taskObj.getObjectID());
+        jsonResponseObject.put(DataFields.ID, taskObj.getObjectID());
 
         return jsonResponseObject;
     }
 
-    private int[] removeVirtualColumns(final int[] columns) {
+    private static int[] removeVirtualColumns(final int[] columns) {
         final TIntList tmp = new TIntArrayList(columns.length);
         for (final int col : columns) {
-            if (col != Task.LAST_MODIFIED_UTC) {
+            if (col != DataObject.LAST_MODIFIED_UTC) {
                 tmp.add(col);
             }
         }

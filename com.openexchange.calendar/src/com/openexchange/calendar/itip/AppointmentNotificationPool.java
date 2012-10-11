@@ -50,362 +50,578 @@
 package com.openexchange.calendar.itip;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
+import java.util.concurrent.locks.ReentrantLock;
 
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import com.openexchange.log.LogFactory;
 
+import com.openexchange.ajax.fields.AppointmentFields;
+import com.openexchange.ajax.fields.CalendarFields;
+import com.openexchange.calendar.AppointmentDiff;
 import com.openexchange.calendar.itip.generators.ITipMailGenerator;
 import com.openexchange.calendar.itip.generators.NotificationMail;
+import com.openexchange.calendar.itip.generators.NotificationMailGenerator;
 import com.openexchange.calendar.itip.generators.NotificationMailGeneratorFactory;
 import com.openexchange.calendar.itip.generators.NotificationParticipant;
 import com.openexchange.calendar.itip.sender.MailSenderService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Appointment;
+import com.openexchange.groupware.container.ExternalUserParticipant;
+import com.openexchange.groupware.container.Participant;
+import com.openexchange.groupware.container.UserParticipant;
+import com.openexchange.groupware.container.participants.ConfirmableParticipant;
 import com.openexchange.session.Session;
 import com.openexchange.timer.TimerService;
 
 /**
  * {@link AppointmentNotificationPool}
  * 
- * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
+ * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class AppointmentNotificationPool implements
 		AppointmentNotificationPoolService, Runnable {
-
-	private static final Log LOG = LogFactory
-			.getLog(AppointmentNotificationPool.class);
-
-	// Ctx ID, Appt ID, User ID
-	private Map<Integer, Map<Integer, Map<Integer, OldNew>>> pool;
-
-	private ReentrantReadWriteLock lock;
-
-	private NotificationMailGeneratorFactory generatorFactory;
-
-	private MailSenderService notificationMailer;
-
-	private int interval;
-
+	private static final Log LOG = com.openexchange.log.Log.loggerFor(AppointmentNotificationPool.class);
+	
+	// TODO: Keep shared folder owner, if possible
+	
+	private static final int MINUTES = 60000;
+	
+	private int detailChangeInterval = 2 *MINUTES;
+	private int stateChangeInterval = 10 *MINUTES;
+	private int priorityInterval = 15 *MINUTES;
+	
+	private final NotificationMailGeneratorFactory generatorFactory;
+	private final MailSenderService notificationMailer;
+	
+	private final ReentrantLock lock = new ReentrantLock();
+	
+	private final Map<Integer, Map<Integer, QueueItem>> items = new HashMap<Integer, Map<Integer, QueueItem>>();
+	
 	public AppointmentNotificationPool(TimerService timer,
 			NotificationMailGeneratorFactory generatorFactory,
-			MailSenderService notificationMailer, int interval) {
-		pool = new ConcurrentHashMap<Integer, Map<Integer, Map<Integer, OldNew>>>();
-		lock = new ReentrantReadWriteLock();
+			MailSenderService notificationMailer, int detailChangeInterval, int stateChangeInterval, int priorityInterval) {
 		this.generatorFactory = generatorFactory;
 		this.notificationMailer = notificationMailer;
 
-		timer.scheduleAtFixedRate(this, 1000, interval/2);
-		this.interval = interval;
+		this.detailChangeInterval = detailChangeInterval;
+		this.stateChangeInterval = stateChangeInterval;
+		this.priorityInterval = priorityInterval;
+		
+		timer.scheduleAtFixedRate(this, 1000, Math.min(stateChangeInterval, Math.min(detailChangeInterval, priorityInterval))/2);
 	}
 	
-	private OldNew get(int contextId, int apptId, int userId) {
-		Map<Integer, Map<Integer, OldNew>> apptMap = pool.get(contextId);
-		if (apptMap == null) {
-			return null;
+	@Override
+    public void run() {
+		try {
+			lock.lock();
+			
+			for(QueueItem item: allItems()) {
+				tick(item.getContextId(), item.getAppointmentId(), false);
+			}
+		} catch (Throwable t) {
+			LOG.error(t.getMessage(), t);
+		} finally {
+			lock.unlock();
+		}
+	}
+
+	@Override
+    public void enqueue(Appointment original, Appointment newAppointment,
+			Session session, int sharedFolderOwner) throws OXException {
+		if (original == null) {
+			throw new NullPointerException("Please specify an original appointment, a new appointment and a session");
 		}
 		
-		Map<Integer, OldNew> userMap = apptMap.get(apptId);
-		if (userMap == null) {
-			return null;
+		if (newAppointment == null) {
+			throw new NullPointerException("Please specify an original appointment, a new appointment and a session");
 		}
 		
-		return userMap.get(userId);
+		if (session == null) {
+			throw new NullPointerException("Please specify an original appointment, a new appointment and a session");
+		}
+		
+		try {
+			lock.lock();
+			item(session.getContextId(), original.getObjectID()).remember(original, newAppointment, session, sharedFolderOwner);
+		} finally {
+			lock.unlock();
+		}
+	}
+
+
+	@Override
+    public void fasttrack(Appointment appointment, Session session)
+			throws OXException {
+		try {
+			lock.lock();
+			tick(session.getContextId(), appointment.getObjectID(), true);
+		} finally {
+			lock.unlock();
+		}
+	}
+
+	private void tick(int contextId, int objectID, boolean force) {
+		try {
+			HandlingSuggestion handlingSuggestion = item(contextId, objectID).tick(force);
+			if (handlingSuggestion == HandlingSuggestion.DONE) {
+				drop(contextId, objectID);
+			}
+		} catch (Throwable t) {
+			LOG.error(t.getMessage(), t);
+			drop(contextId, objectID);
+		}
+	}
+
+	@Override
+    public void drop(Appointment appointment, Session session)
+			throws OXException {
+		drop(session.getContextId(), appointment.getObjectID());
 	}
 	
-	private void set(int contextId, int apptId, int userId, OldNew oldNew) {
-		Map<Integer, Map<Integer, OldNew>> apptMap = pool.get(contextId);
-		if (apptMap == null) {
-			apptMap = new ConcurrentHashMap<Integer, Map<Integer,OldNew>>();
-			pool.put(contextId, apptMap);
+	private Collection<QueueItem> allItems() {
+		List<QueueItem> allItems = new LinkedList<QueueItem>();
+		for(Map<Integer, QueueItem> contextMaps: items.values()) {
+			allItems.addAll(contextMaps.values());
 		}
-		
-		Map<Integer, OldNew> userMap = apptMap.get(apptId);
-		if (userMap == null) {
-			userMap = new ConcurrentHashMap<Integer, AppointmentNotificationPool.OldNew>();
-			apptMap.put(apptId, userMap);
-		}
-		
-		userMap.put(userId, oldNew);
+		return allItems;
 	}
 	
-	private void remove(int contextId, int apptId, int userId) {
-		Map<Integer, Map<Integer, OldNew>> apptMap = pool.get(contextId);
-		if (apptMap == null) {
+	private QueueItem item(int contextId, int objectID) {
+		Map<Integer, QueueItem> contextMap = items.get(contextId);
+		if (contextMap == null) {
+			contextMap = new HashMap<Integer, QueueItem>();
+			QueueItem queueItem = new QueueItem();
+			contextMap.put(objectID, queueItem);
+			items.put(contextId, contextMap);
+			return queueItem;
+		}
+		QueueItem queueItem = contextMap.get(objectID);
+		if (queueItem == null) {
+			queueItem = new QueueItem();
+			contextMap.put(objectID, queueItem);
+		}
+		return queueItem;
+	}
+
+	private void drop(int contextId, int objectID) {
+		Map<Integer, QueueItem> contextMap = items.get(contextId);
+		if (contextMap == null) {
 			return;
 		}
+		contextMap.remove(objectID);
+		if (contextMap.isEmpty()) {
+			items.remove(contextId);
+		}
+	}
+
+	private static final class Update {
+		private final Appointment oldAppointment;
+		private final Appointment newAppointment;
+		private final Session session;
+		private final long timestamp;
+		private AppointmentDiff diff;
+		private int sharedFolderOwner = -1;
 		
-		Map<Integer, OldNew> userMap = apptMap.get(apptId);
-		if (userMap == null) {
-			return;
-		}
-		
-		userMap.remove(userId);
-	}
-	
-	private List<OldNew> removeAll(int contextId, int apptId) {
-		Map<Integer, Map<Integer, OldNew>> apptMap = pool.get(contextId);
-		if (apptMap == null) {
-			return Collections.emptyList();
-		}
-		
-		Map<Integer, OldNew> userMap = apptMap.remove(apptId);
-		if (userMap == null) {
-			return Collections.emptyList();
-		}
-		
-		List<OldNew> retval = new ArrayList<OldNew>(userMap.size());
-		List<OldNew> tail = new ArrayList<OldNew>();
-		for (OldNew oldNew : userMap.values()) {
-			if (oldNew.isOrganizerEntry()) {
-				retval.add(oldNew);
-			} else {
-				tail.add(oldNew);
-			}
-		}
-		retval.addAll(tail);
-		return retval;
-		
-	}
-	
-	private void enqueue(OldNew value) {
-		int contextId = value.session.getContextId();
-		int apptId = (value.neww != null) ? value.neww.getObjectID() : value.old.getObjectID();
-		int userId = value.session.getUserId();
-		set(contextId, apptId, userId, value);
-	}
-
-	public void enqueue(Appointment original, Appointment newAppointment,
-			Session session) throws OXException {
-		lock.writeLock().lock();
-		try {
-			boolean isCreate = original == null;
-			int objectId = 0;
-			int onBehalfOf = 0;
-			if (isCreate) {
-				objectId = newAppointment.getObjectID();
-				onBehalfOf = newAppointment.getPrincipalId();
-			} else {
-				objectId = original.getObjectID();
-				onBehalfOf = original.getPrincipalId();
-			}
-			
-			OldNew oldNew = get(session.getContextId(), objectId, session.getUserId());
-
-			if (oldNew == null) {
-				set(session.getContextId(), objectId, session.getUserId(), new OldNew(original, newAppointment,
-						onBehalfOf, session));
-			} else {
-				oldNew.setNeww(newAppointment);
-			}
-		} finally {
-			lock.writeLock().unlock();
-		}
-	}
-
-	public void fasttrack(Appointment appointment, Session session) {
-		lock.writeLock().lock();
-		try {
-			if (pool.isEmpty()) {
-				return;
-			}
-			List<OldNew> values = removeAll(session.getContextId(), appointment.getObjectID());
-			
-			notify(values, null, false);
-
-		} finally {
-			lock.writeLock().unlock();
-		}
-	}
-
-	public void drop(Appointment appointment, Session session) {
-		lock.writeLock().lock();
-		try {
-			if (pool.isEmpty()) {
-				return;
-			}
-
-			removeAll(session.getContextId(), appointment.getObjectID());
-		} finally {
-			lock.writeLock().unlock();
-		}
-	}
-
-	public void run() {
-		lock.writeLock().lock();
-		try {
-			List<OldNew> enqueueAgainList = new ArrayList<OldNew>();
-			try {
-				if (pool.isEmpty()) {
-					return;
-				}
-				Set<Integer> poolKeySet = pool.keySet();
-				for (Integer contextId : poolKeySet) {
-					Map<Integer, Map<Integer, OldNew>> contextPool = pool.get(contextId);
-					Set<Integer> contextKeySet = contextPool.keySet();
-					for (Integer objectId : contextKeySet) {
-						List<OldNew> values = removeAll(contextId, objectId);
-						notify(values, enqueueAgainList, true);
-					}
-				}
-			} catch (Throwable t) {
-				LOG.error(t.getMessage(), t);
-			} finally {
-				pool.clear();
-			}
-			for (OldNew oldNew : enqueueAgainList) {
-				enqueue(oldNew);
-			}
-		} finally {
-			lock.writeLock().unlock();
-		}
-
-	}
-
-	private void notify(List<OldNew> values, List<OldNew> enqueueAgainList, boolean enqueueAgain) {
-		try {
-			if (values.isEmpty()) {
-				return;
-			}
-			if (values.size() == 1) {
-				OldNew oldNew = values.get(0);
-				if (enqueueAgain && keepAnotherRound(oldNew.updated)) {
-					enqueueAgainList.add(oldNew);
-				} else {
-					int onBehalfOf = (oldNew.old != null) ? oldNew.old.getPrincipalId() : oldNew.neww.getPrincipalId();
-					ITipMailGenerator generator = generatorFactory.create(oldNew.old, oldNew.neww,
-							oldNew.session, onBehalfOf);
-					List<NotificationParticipant> recipients = generator
-							.getRecipients();
-					for (NotificationParticipant participant : recipients) {
-
-						NotificationMail mail = (oldNew.old == null) ? generator
-								.generateCreateMailFor(participant) : generator
-								.generateUpdateMailFor(participant);
-						if (mail != null) {
-							notificationMailer.sendMail(mail, oldNew.session);
-						}
-					}
-				}
-				
-			} else {
-				// Construct a new mail and send it to everyone.
-				Appointment earliestOriginal = null;
-				long earliestTstamp = System.currentTimeMillis();
-				for(OldNew value : values) {
-					if (earliestTstamp > value.tstamp) {
-						earliestTstamp = value.tstamp;
-						earliestOriginal = value.old;
-					}
-				}
-				
-				Appointment newestNeww = null;
-				long newestTstamp = 0;
-				for(OldNew value : values) {
-					if (newestTstamp < value.updated) {
-						newestTstamp = value.updated;
-						newestNeww = value.neww;
-					}
-				}
-				
-				OldNew oldNew = values.get(0);
-				
-				ITipMailGenerator generator = generatorFactory.create(earliestOriginal, newestNeww,
-						oldNew.session, oldNew.getSession().getUserId());
-				generator.noActor();
-				List<NotificationParticipant> recipients = generator
-						.getRecipients();
-				for (NotificationParticipant participant : recipients) {
-
-					NotificationMail mail = (oldNew.old == null) ? generator
-							.generateCreateMailFor(participant) : generator
-							.generateUpdateMailFor(participant);
-					if (mail != null) {
-						notificationMailer.sendMail(mail, oldNew.session);
-					}
-				}
-				
-			}
-		} catch (OXException e) {
-			LOG.error(e.getMessage(), e);
-		}
-	}
-	
-	private boolean keepAnotherRound(long updated) {
-		return System.currentTimeMillis() - updated < interval;
-	}
-
-
-	private class OldNew {
-
-		private Appointment old;
-
-		private Appointment neww;
-
-		private Session session;
-
-		private int onBehalfOf;
-
-		private boolean organizerEntry;
-		
-		public long tstamp = System.currentTimeMillis();
-		public long updated = System.currentTimeMillis();
-
-		public OldNew(Appointment old, Appointment neww, int onBehalfOf,
-				Session session) {
-			this.setOld(old);
-			this.setNeww(neww);
-			this.setOnBehalfOf(onBehalfOf);
-			setSession(session);
-			
-			Appointment determinant = (old != null) ? old : neww;
-			
-			organizerEntry = determinant.getOrganizerId() == session.getUserId();
-		}
-
-		public boolean isOrganizerEntry() {
-			
-			return organizerEntry;
-		}
-
-		public int getOnBehalfOf() {
-			return onBehalfOf;
-		}
-
-		public void setOnBehalfOf(int onBehalfOf) {
-			this.onBehalfOf = onBehalfOf;
-		}
-
-		public Appointment getOld() {
-			return old;
-		}
-
-		public void setOld(Appointment old) {
-			this.old = old;
-		}
-
-		public Appointment getNeww() {
-			return neww;
-		}
-
-		public void setNeww(Appointment neww) {
-			this.neww = neww;
-			updated = System.currentTimeMillis();
+		public Update(Appointment oldAppointment, Appointment newAppointment, Session session, int sharedFolderOwner) {
+			this.oldAppointment = oldAppointment;
+			this.newAppointment = newAppointment;
+			this.session = session;
+			this.sharedFolderOwner = sharedFolderOwner;
+			this.timestamp = System.currentTimeMillis();
 		}
 
 		public Session getSession() {
 			return session;
 		}
-
-		public void setSession(Session session) {
-			this.session = session;
+		
+		public long getTimestamp() {
+			return timestamp;
+		}
+		
+		public Appointment getOldAppointment() {
+			return oldAppointment;
+		}
+		
+		public Appointment getNewAppointment() {
+			return newAppointment;
+		}
+		
+		public int getSharedFolderOwner() {
+			return sharedFolderOwner;
+		}
+		
+		public AppointmentDiff getDiff() {
+			if (diff == null) {
+				diff = AppointmentDiff.compare(oldAppointment, newAppointment, NotificationMailGenerator.DEFAULT_SKIP);
+			}
+			return diff;
 		}
 
+		public PartitionIndex getPartitionIndex() {
+			return new PartitionIndex(session.getUserId(), sharedFolderOwner);
+		}
+	}
+	
+	private static enum HandlingSuggestion {
+		KEEP, DONE
+	}
+	
+	private final class QueueItem {
+		private Appointment original;
+		private Appointment mostRecent;
+		private long newestTime;
+		private long lastKnownStartDateForNextOccurrence;
+		private Session session;
+		
+		private final LinkedList<Update> updates = new LinkedList<Update>();
+	
+		public void remember(Appointment original, Appointment newAppointment, Session session, int sharedFolderOwner) {
+			if (this.original == null) {
+				this.original = original;
+				this.mostRecent = newAppointment;
+				this.session = session;
+			}
+			if (this.session.getUserId() != original.getOrganizerId() && session.getUserId() == original.getOrganizerId()) {
+				this.session = session;
+			}
+			this.mostRecent = newAppointment;
+			this.newestTime = System.currentTimeMillis();
+			this.lastKnownStartDateForNextOccurrence = newAppointment.getStartDate().getTime();
+			Update update = new Update(original, newAppointment, session, sharedFolderOwner);
+			updates.add(update);
+			if (update.getDiff().anyFieldChangedOf(CalendarFields.START_DATE, CalendarFields.END_DATE, AppointmentFields.LOCATION, CalendarFields.RECURRENCE_TYPE, CalendarFields.DAY_IN_MONTH, CalendarFields.DAYS, AppointmentFields.FULL_TIME, CalendarFields.INTERVAL, CalendarFields.MONTH, CalendarFields.RECURRENCE_POSITION, CalendarFields.RECURRENCE_DATE_POSITION)) {
+				// Participant State has been reset
+				// Purge state only changes
+				Iterator<Update> iterator = updates.iterator();
+				while(iterator.hasNext()) {
+					Update u = iterator.next();
+					if (u.getDiff().isAboutStateChangesOnly()) {
+						iterator.remove();
+					}
+				}
+				this.original = updates.get(0).getOldAppointment();
+				// Apply new reset states to original appointment
+				copyParticipantStates(newAppointment, this.original);
+			}
+		}
+		
+		
+		public HandlingSuggestion tick(boolean force) throws OXException {
+			if (original == null) {
+				return HandlingSuggestion.DONE;
+			}
+			// Diff most recent and original version
+			AppointmentDiff overallDiff = AppointmentDiff.compare(original, mostRecent, NotificationMailGenerator.DEFAULT_SKIP);
+			
+			if (overallDiff.isAboutStateChangesOnly()) {
+				if (!force && getInterval() < stateChangeInterval && getIntervalToStartDate() > priorityInterval) {
+					return HandlingSuggestion.KEEP;
+				}
+				notifyAllParticipantsAboutOverallChanges();
+				return HandlingSuggestion.DONE;
+			} else if (overallDiff.isAboutDetailChangesOnly()) {
+				if (!force && getInterval() < detailChangeInterval && getIntervalToStartDate() > priorityInterval) {
+					return HandlingSuggestion.KEEP;
+				}
+				notifyInternalParticipantsAboutDetailChangesAsIndividualUsers();
+				notifyExternalParticipantsAboutOverallChangesAsOrganizer();
+				return HandlingSuggestion.DONE;
+			} else {
+				if (!force && getInterval() < Math.min(detailChangeInterval, stateChangeInterval) && getIntervalToStartDate() > priorityInterval) {
+					return HandlingSuggestion.KEEP;
+				}
+				notifyInternalParticipantsAboutDetailChangesAsIndividualUsers();
+				notifyInternalParticipantsAboutStateChanges();
+				notifyExternalParticipantsAboutOverallChangesAsOrganizer();
+				return HandlingSuggestion.DONE;
+			}
+		}
+
+
+		private void notifyAllParticipantsAboutOverallChanges() throws OXException {
+			ITipMailGenerator generator = generatorFactory.create(original, mostRecent,
+					session, -1);
+			if (moreThanOneUserActed()) {
+				generator.noActor();
+			}
+			List<NotificationParticipant> recipients = generator
+					.getRecipients();
+			for (NotificationParticipant participant : recipients) {
+				NotificationMail mail = generator.generateUpdateMailFor(participant);
+				if (mail != null) {
+					notificationMailer.sendMail(mail, session);
+				}
+			}
+		}
+
+
+        private void notifyInternalParticipantsAboutOverallChanges() throws OXException {
+            ITipMailGenerator generator = generatorFactory.create(original, mostRecent, session, -1);
+            if (moreThanOneUserActed()) {
+                generator.noActor();
+            }
+            List<NotificationParticipant> recipients = generator.getRecipients();
+            for (NotificationParticipant participant : recipients) {
+                if (!(participant.isExternal() || participant.isResource())) {
+                    NotificationMail mail = generator.generateUpdateMailFor(participant);
+                    if (mail != null) {
+                        notificationMailer.sendMail(mail, session);
+                    }
+                }
+            }
+        }
+
+
+		private boolean moreThanOneUserActed() {
+			int userId = session.getUserId();
+			for (Update update : updates) {
+				if (update.getSession().getUserId() != userId) {
+					return true;
+				}
+			}
+			return false;
+		}
+
+		// TODO: What about combined state changes and detail changes? The user should send a mail about both and the state change should be omitted in the state change summary.
+		private void notifyInternalParticipantsAboutDetailChangesAsIndividualUsers() throws OXException {
+			if (!moreThanOneUserActed()) {
+				notifyInternalParticipantsAboutOverallChanges();
+				return;
+			}
+			Map<PartitionIndex, Update[]> partitions = new HashMap<PartitionIndex, Update[]>();
+			for(Update update: updates) {
+				if (update.getDiff().isAboutCertainParticipantsStateChangeOnly(update.getSession().getUserId()+"")) {
+					continue;
+				}
+				Update[] partition = partitions.get(update.getSession().getUserId());
+				if (partition == null) {
+					partition = new Update[2];
+					partitions.put(update.getPartitionIndex(), partition);
+					partition[0] = update;
+				}
+				partition[1] = update;
+			}
+			List<Update[]> userScopedUpdates = new ArrayList<Update[]>(partitions.values());
+			Collections.sort(userScopedUpdates, new Comparator<Update[]>() {
+
+				@Override
+                public int compare(Update[] o1, Update[] o2) {
+					return (int) (o1[1].getTimestamp() - o2[1].getTimestamp());
+				}
+			});
+			
+			for (Update[] userScopedUpdate : userScopedUpdates) {
+				Session session = userScopedUpdate[1].getSession();
+				Appointment oldAppointment = userScopedUpdate[0].getOldAppointment();
+				Appointment newAppointment = userScopedUpdate[1].getNewAppointment();
+				ITipMailGenerator generator = generatorFactory.create(oldAppointment, newAppointment,
+						session, userScopedUpdate[0].getSharedFolderOwner());
+				List<NotificationParticipant> recipients = generator
+						.getRecipients();
+				for (NotificationParticipant participant : recipients) {
+					if (participant.isExternal() && !participant.hasRole(ITipRole.ORGANIZER)) {
+						continue;
+					}
+					NotificationMail mail = generator.generateUpdateMailFor(participant);
+					if (mail != null) {
+						notificationMailer.sendMail(mail, session);
+					}
+				}
+			}
+		}
+		
+		private void copyParticipantStates(Appointment src, Appointment dest) {
+			Map<String, Participant> oldStates = new HashMap<String, Participant>();
+			if (src.getUsers() != null) {
+				for (UserParticipant up : src.getUsers()) {
+					oldStates.put(String.valueOf(up.getIdentifier()), up);
+				}
+			}
+			
+			if (src.getConfirmations() != null) {
+				for (ConfirmableParticipant cp: src.getConfirmations()) {
+					oldStates.put(cp.getEmailAddress(), cp);
+				}
+			}
+			
+			
+			if (dest.getParticipants() != null) {
+				List<Participant> newParticipants = new ArrayList<Participant>(dest.getParticipants().length);
+				for(Participant p: dest.getParticipants()) {
+					if (p instanceof UserParticipant) {
+						UserParticipant up = (UserParticipant) p;
+						UserParticipant oup = (UserParticipant) oldStates.get(String.valueOf(up.getIdentifier()));
+						up = new UserParticipant(up.getIdentifier());
+						if (oup != null) {
+							up.setConfirm(oup.getConfirm());
+							up.setConfirmMessage(oup.getConfirmMessage());
+						}
+						newParticipants.add(up);
+					} else if (p instanceof ConfirmableParticipant) {
+						ConfirmableParticipant cp = (ConfirmableParticipant) p;
+						ConfirmableParticipant ocp = (ConfirmableParticipant) oldStates.get(String.valueOf(cp.getEmailAddress()));
+						cp = new ExternalUserParticipant(cp.getEmailAddress());
+						if (ocp != null) {
+							cp.setStatus(ocp.getStatus());
+							cp.setMessage(ocp.getMessage());
+						}
+						newParticipants.add(cp);
+					} else {
+						newParticipants.add(p);
+					}
+					
+				}
+				dest.setParticipants(newParticipants);
+			}
+			
+			if (dest.getUsers() != null) {
+				List<UserParticipant> newUsers = new ArrayList<UserParticipant>(dest.getUsers().length);
+				
+				for (UserParticipant up: dest.getUsers()) {
+					up = new UserParticipant(up.getIdentifier());
+					UserParticipant oup = (UserParticipant) oldStates.get(String.valueOf(up.getIdentifier()));
+					if (oup != null) {
+						up.setConfirm(oup.getConfirm());
+						up.setConfirmMessage(oup.getConfirmMessage());
+					}
+					newUsers.add(up);
+				}
+				
+				dest.setUsers(newUsers);
+			}
+			
+			if (dest.getConfirmations() != null) {
+				List<ConfirmableParticipant> newConfirmations = new ArrayList<ConfirmableParticipant>(dest.getConfirmations().length);
+				
+				for (ConfirmableParticipant cp: dest.getConfirmations()) {
+					cp = new ExternalUserParticipant(cp.getEmailAddress());
+					ConfirmableParticipant ocp = (ConfirmableParticipant) oldStates.get(String.valueOf(cp.getEmailAddress()));
+					if (ocp != null) {
+						cp.setStatus(ocp.getStatus());
+						cp.setMessage(ocp.getMessage());
+					}
+					
+					newConfirmations.add(cp);
+				}
+				
+				dest.setConfirmations(newConfirmations);
+			}
+		}
+
+		private void notifyInternalParticipantsAboutStateChanges() throws OXException {
+			// We have to construct a pair of appointments in which only the participant status is changed
+			// For that we clone the new appointment
+			// And set the participant states to the values in the old appointment
+			// Then finally construct a mail to all internal participants
+			Appointment facsimile = mostRecent.clone();
+			
+			copyParticipantStates(original, facsimile);
+			
+			
+			ITipMailGenerator generator = generatorFactory.create(facsimile, mostRecent,
+					session, -1);
+			generator.noActor();
+			List<NotificationParticipant> recipients = generator
+					.getRecipients();
+			for (NotificationParticipant participant : recipients) {
+				if (participant.isExternal()) {
+					continue;
+				}
+				NotificationMail mail = generator.generateUpdateMailFor(participant);
+				if (mail != null) {
+					notificationMailer.sendMail(mail, session);
+				}
+			}
+		}
+
+
+		private void notifyExternalParticipantsAboutOverallChangesAsOrganizer() throws OXException {
+			ITipMailGenerator generator = generatorFactory.create(original, mostRecent,
+					session, -1);
+			if (moreThanOneUserActed()) {
+				generator.noActor();
+			}
+			List<NotificationParticipant> recipients = generator
+					.getRecipients();
+			for (NotificationParticipant participant : recipients) {
+				if (!participant.isExternal() || participant.hasRole(ITipRole.ORGANIZER)) {
+					continue;
+				}
+				NotificationMail mail = generator.generateUpdateMailFor(participant);
+				if (mail != null) {
+					notificationMailer.sendMail(mail, session);
+				}
+			}
+		}
+
+
+		private int getIntervalToStartDate() {
+			return (int) (lastKnownStartDateForNextOccurrence - System.currentTimeMillis());
+		}
+
+
+		private int getInterval() {
+			return (int) (System.currentTimeMillis() - newestTime);
+		}
+		
+		public int getContextId() {
+			return session.getContextId();
+		}
+		
+		public int getAppointmentId() {
+			return original.getObjectID();
+		}
+	}
+	
+	private static final class PartitionIndex {
+		public int uid,sharedFolderOwner;
+
+		public PartitionIndex(int uid, int sharedFolderOwner) {
+			super();
+			this.uid = uid;
+			this.sharedFolderOwner = sharedFolderOwner;
+		}
+
+		@Override
+		public int hashCode() {
+			final int prime = 31;
+			int result = 1;
+			result = prime * result + sharedFolderOwner;
+			result = prime * result + uid;
+			return result;
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			if (this == obj) {
+                return true;
+            }
+			if (obj == null) {
+                return false;
+            }
+			if (getClass() != obj.getClass()) {
+                return false;
+            }
+			PartitionIndex other = (PartitionIndex) obj;
+			if (sharedFolderOwner != other.sharedFolderOwner) {
+                return false;
+            }
+			if (uid != other.uid) {
+                return false;
+            }
+			return true;
+		}
+
+		
+		
 	}
 
 }

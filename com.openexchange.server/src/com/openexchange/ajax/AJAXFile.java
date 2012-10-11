@@ -63,6 +63,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.fileupload.FileItem;
+import org.apache.commons.fileupload.FileUploadBase;
 import org.apache.commons.fileupload.FileUploadException;
 import org.apache.commons.fileupload.disk.DiskFileItemFactory;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
@@ -101,7 +102,7 @@ public final class AJAXFile extends PermissionServlet {
      */
     private static final long serialVersionUID = 1L;
 
-    private static final transient org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(AJAXFile.class));
+    private static final transient org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(AJAXFile.class));
 
     private static final String MIME_TEXT_HTML_CHARSET_UTF_8 = "text/html; charset=UTF-8";
 
@@ -289,7 +290,7 @@ public final class AJAXFile extends PermissionServlet {
         resp.setContentType(MIME_TEXT_HTML_CHARSET_UTF_8);
         String action = null;
         try {
-            if (ServletFileUpload.isMultipartContent(new ServletRequestContext(req))) {
+            if (FileUploadBase.isMultipartContent(new ServletRequestContext(req))) {
                 final DiskFileItemFactory factory = new DiskFileItemFactory();
                 /*
                  * Set factory constraints

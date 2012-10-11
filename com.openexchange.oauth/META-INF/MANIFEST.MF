@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Open-Xchange Oauth Bundle
 Bundle-SymbolicName: com.openexchange.oauth
-Bundle-Version: 6.21.0
+Bundle-Version: 6.22.0
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Import-Package: com.openexchange.config,
@@ -17,6 +17,10 @@ Import-Package: com.openexchange.config,
  com.openexchange.groupware.contexts.impl,
  com.openexchange.groupware.delete,
  com.openexchange.groupware.update,
+ com.openexchange.http.client,
+ com.openexchange.http.client.builder,
+ com.openexchange.http.client.exceptions,
+ com.openexchange.http.deferrer,
  com.openexchange.i18n,
  com.openexchange.id,
  com.openexchange.log,
@@ -30,20 +34,32 @@ Import-Package: com.openexchange.config,
  com.openexchange.sql.grammar,
  com.openexchange.sql.schema,
  com.openexchange.sql.tools,
+ com.openexchange.timer,
  com.openexchange.tools.session,
  com.openexchange.tools.sql,
  com.openexchange.tools.update,
  javax.crypto,
  javax.crypto.spec,
  javax.security.auth,
+ javax.servlet,
+ javax.servlet.http,
  org.apache.commons.codec,
  org.apache.commons.codec.binary,
+ org.apache.commons.httpclient,
+ org.apache.commons.httpclient.util,
  org.apache.commons.logging,
  org.apache.commons.logging.impl,
  org.osgi.framework,
  org.osgi.service.event,
- org.osgi.util.tracker
+ org.osgi.util.tracker,
+ org.scribe.builder,
+ org.scribe.builder.api,
+ org.scribe.exceptions,
+ org.scribe.extractors,
+ org.scribe.model,
+ org.scribe.oauth,
+ org.scribe.services,
+ org.scribe.utils
 Export-Package: com.openexchange.oauth
-Bundle-ClassPath: .,
- lib/scribe-1.1.0.jar
+Bundle-ClassPath: .
 Bundle-Activator: com.openexchange.oauth.osgi.Activator

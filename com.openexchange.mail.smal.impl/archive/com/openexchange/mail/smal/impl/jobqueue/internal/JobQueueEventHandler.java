@@ -86,7 +86,7 @@ import com.openexchange.timer.TimerService;
 public final class JobQueueEventHandler implements EventHandler {
 
     private static final org.apache.commons.logging.Log LOG =
-        com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(JobQueueEventHandler.class));
+        com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(JobQueueEventHandler.class));
 
     private final ConcurrentMap<Key, ConcurrentMap<String, ElapsedFolderJob>> periodicJobs;
 

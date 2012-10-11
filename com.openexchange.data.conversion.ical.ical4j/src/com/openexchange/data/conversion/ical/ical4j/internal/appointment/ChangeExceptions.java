@@ -49,8 +49,7 @@
 
 package com.openexchange.data.conversion.ical.ical4j.internal.appointment;
 
-import static com.openexchange.data.conversion.ical.ical4j.internal.ParserTools.parseDate;
-import static com.openexchange.data.conversion.ical.ical4j.internal.ParserTools.recalculateMidnight;
+import java.util.Calendar;
 import java.util.List;
 import java.util.TimeZone;
 import java.util.regex.Matcher;
@@ -58,17 +57,18 @@ import java.util.regex.Pattern;
 import net.fortuna.ical4j.model.component.VEvent;
 import net.fortuna.ical4j.model.property.RecurrenceId;
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import com.openexchange.data.conversion.ical.ConversionWarning;
 import com.openexchange.data.conversion.ical.Mode;
 import com.openexchange.data.conversion.ical.ical4j.internal.AbstractVerifyingAttributeConverter;
 import com.openexchange.data.conversion.ical.ical4j.internal.EmitterTools;
+import com.openexchange.data.conversion.ical.ical4j.internal.ParserTools;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.calendar.CalendarCollectionService;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.calendar.OXCalendarExceptionCodes;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.log.LogFactory;
 
 /**
  * Writes the recurrence identifier into change exception appointments to get the series not displayed at the change exceptions original
@@ -80,7 +80,7 @@ public class ChangeExceptions extends AbstractVerifyingAttributeConverter<VEvent
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(ChangeExceptions.class));
     private static final TimeZone UTC = TimeZone.getTimeZone("UTC");
 
-    private static CalendarCollectionService calendarCollection;
+    private static volatile CalendarCollectionService calendarCollection;
 
     public ChangeExceptions() {
         super();
@@ -147,7 +147,20 @@ public class ChangeExceptions extends AbstractVerifyingAttributeConverter<VEvent
 
     @Override
     public void parse(final int index, final VEvent vEvent, final Appointment appointment, final TimeZone timeZone, final Context ctx, final List<ConversionWarning> warnings) {
-        appointment.setRecurrenceDatePosition(recalculateMidnight(parseDate(vEvent,new RecurrenceId(), timeZone), UTC));
+        RecurrenceId property = vEvent.getRecurrenceId();
+        java.util.Date date = ParserTools.recalculateAsNeeded(property.getDate(), property, timeZone);
+        java.util.Date recurrencePosition = normalize(date);
+        appointment.setRecurrenceDatePosition(recurrencePosition);
+    }
+
+    private java.util.Date normalize(java.util.Date date) {
+        Calendar cal = Calendar.getInstance(UTC);
+        cal.setTime(date);
+        cal.set(Calendar.HOUR_OF_DAY, 0);
+        cal.set(Calendar.MINUTE, 0);
+        cal.set(Calendar.SECOND, 0);
+        cal.set(Calendar.MILLISECOND, 0);
+        return cal.getTime();
     }
 
     /**

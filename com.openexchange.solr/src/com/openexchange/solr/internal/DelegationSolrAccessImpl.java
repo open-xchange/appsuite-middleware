@@ -49,34 +49,31 @@
 
 package com.openexchange.solr.internal;
 
-import java.net.InetAddress;
-import java.net.UnknownHostException;
+import java.io.Serializable;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.util.Collection;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.client.solrj.response.UpdateResponse;
 import org.apache.solr.common.SolrInputDocument;
 import org.apache.solr.common.params.SolrParams;
-
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
+import com.openexchange.log.LogFactory;
+import com.openexchange.service.messaging.Message;
+import com.openexchange.service.messaging.MessagingService;
 import com.openexchange.solr.SolrAccessService;
 import com.openexchange.solr.SolrCore;
-import com.openexchange.solr.SolrCoreConfigService;
-import com.openexchange.solr.SolrCoreConfiguration;
 import com.openexchange.solr.SolrCoreIdentifier;
-import com.openexchange.solr.SolrCoreStore;
 import com.openexchange.solr.SolrExceptionCodes;
+import com.openexchange.solr.SolrProperties;
 import com.openexchange.solr.rmi.RMISolrAccessService;
 
 /**
@@ -90,140 +87,13 @@ public class DelegationSolrAccessImpl implements SolrAccessService {
 
     private final EmbeddedSolrAccessImpl embeddedAccess;
 
-    private String serverAddress = null;
-
     private final SolrIndexMysql indexMysql;
         
 
-    public DelegationSolrAccessImpl(final EmbeddedSolrAccessImpl localDelegate) {
+    public DelegationSolrAccessImpl(EmbeddedSolrAccessImpl localDelegate) {
         super();
-        this.embeddedAccess = localDelegate;
+        embeddedAccess = localDelegate;
         indexMysql = SolrIndexMysql.getInstance();
-    }
-    
-    public void startUp() throws OXException {
-        embeddedAccess.startUp();
-    }
-    
-    public void shutDown() throws OXException {
-        final String server = getLocalServerAddress();
-        final Set<Integer> contextIds = new HashSet<Integer>();        
-        final Collection<String> activeCores = embeddedAccess.getActiveCores();        
-        for (final String core : activeCores) {
-            try {
-                final SolrCoreIdentifier identifier = new SolrCoreIdentifier(core);
-                contextIds.add(identifier.getContextId());
-            } catch (final OXException e) {
-                // Parsing error. Ignore this core.
-            }
-        }
-        
-        for (final Integer contextId : contextIds) {
-            indexMysql.deactivateCoresForServer(server, contextId);
-        }
-        
-        embeddedAccess.shutDown();
-    }
-
-    /**
-     * @param identifier
-     * @param instanceDir
-     * @param dataDir
-     * @param schemaPath
-     * @param configPath
-     * @throws OXException
-     * @see com.openexchange.solr.SolrAccessService#startCore(com.openexchange.solr.SolrCoreIdentifier, java.lang.String, java.lang.String,
-     *      java.lang.String, java.lang.String)
-     */
-    @Override
-    public boolean startCore(final SolrCoreConfiguration configuration) throws OXException {
-        final SolrCoreIdentifier identifier = configuration.getIdentifier();
-        final int contextId = identifier.getContextId();
-        final int userId = identifier.getUserId();
-        final int module = identifier.getModule();
-        if (!embeddedAccess.hasActiveCore(identifier)) {                           
-            final SolrCore solrCore = getCoreOrCreateEnvironment(contextId, userId, module);
-            if (solrCore.isActive()) {
-                if (solrCore.getServer().equals(getLocalServerAddress())) {
-                    /*
-                     * This core should be active on this server.
-                     * Maybe the server was killed hard?
-                     */
-                    return tryToStart(configuration);
-                }
-            } else {
-            	return tryToStart(configuration);
-            }
-        }
-        
-        LOG.warn("Could not start solr core. There already seems to be an active one for user " + userId + " and module " + module + " in context " + contextId + ".");
-        return false;
-    }
-    
-    private SolrCore getCoreOrCreateEnvironment(final int contextId, final int userId, final int module) throws OXException {
-        try {
-            return indexMysql.getSolrCore(contextId, userId, module);
-        } catch (final OXException e) {
-            if (e.similarTo(SolrExceptionCodes.CORE_ENTRY_NOT_FOUND)) {
-                final SolrCoreConfigService coreService = Services.getService(SolrCoreConfigService.class);
-                coreService.createCoreEnvironment(contextId, userId, module);
-                return indexMysql.getSolrCore(contextId, userId, module);
-            } else {
-                throw e;
-            }
-        }
-    }
-    
-    private boolean tryToStart(final SolrCoreConfiguration configuration) throws OXException {
-        final SolrCoreIdentifier identifier = configuration.getIdentifier();
-        final int contextId = identifier.getContextId();
-        final int userId = identifier.getUserId();
-        final int module = identifier.getModule();
-        
-        final boolean started = embeddedAccess.startCore(configuration);
-        if (started) {
-            if (!indexMysql.activateCoreEntry(contextId, userId, module, getLocalServerAddress())) {
-                /*
-                 * Somebody else tried to start up a core for this index and was faster.
-                 */
-                embeddedAccess.stopCore(identifier);
-                return false;
-            }
-        
-            return true;
-        }
-        
-        return false;
-    }
-
-    /**
-     * @param identifier
-     * @throws OXException 
-     * @see com.openexchange.solr.SolrAccessService#stopCore(com.openexchange.solr.SolrCoreIdentifier)
-     */
-    @Override
-    public boolean stopCore(final SolrCoreIdentifier identifier) throws OXException {
-        final int contextId = identifier.getContextId();
-        final int userId = identifier.getUserId();
-        final int module = identifier.getModule();
-        if (embeddedAccess.hasActiveCore(identifier) && indexMysql.deactivateCoreEntry(contextId, userId, module)) {
-            embeddedAccess.stopCore(identifier);            
-            return true;       
-        }
-        
-        LOG.info("User " + userId + " in context " + contextId + " tried to stop a solr core for module " + module + " that was not started by this instance or is already closed.");
-        return false;
-    }
-
-    /**
-     * @param identifier
-     * @throws OXException
-     * @see com.openexchange.solr.SolrAccessService#reloadCore(com.openexchange.solr.SolrCoreIdentifier)
-     */
-    @Override
-    public void reloadCore(final SolrCoreIdentifier identifier) throws OXException {
-        final SolrAccessService delegate = getDelegate(identifier);
-        delegate.reloadCore(identifier);
     }
 
     /**
@@ -236,9 +106,14 @@ public class DelegationSolrAccessImpl implements SolrAccessService {
      *      boolean)
      */
     @Override
-    public UpdateResponse add(final SolrCoreIdentifier identifier, final SolrInputDocument document, final boolean commit) throws OXException {
-        final SolrAccessService delegate = getDelegate(identifier);
-        return delegate.add(identifier, document, commit);
+    public UpdateResponse add(SolrCoreIdentifier identifier, SolrInputDocument document, boolean commit) throws OXException {
+        SolrAccessService delegate = getDelegate(identifier);
+        UpdateResponse response = delegate.add(identifier, document, commit);
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("Add took " + response.getElapsedTime() + "ms for 1 document.");
+        }
+        
+        return response;
     }
 
     /**
@@ -250,9 +125,14 @@ public class DelegationSolrAccessImpl implements SolrAccessService {
      * @see com.openexchange.solr.SolrAccessService#add(com.openexchange.solr.SolrCoreIdentifier, java.util.Collection, boolean)
      */
     @Override
-    public UpdateResponse add(final SolrCoreIdentifier identifier, final Collection<SolrInputDocument> documents, final boolean commit) throws OXException {
-        final SolrAccessService delegate = getDelegate(identifier);
-        return delegate.add(identifier, documents, commit);
+    public UpdateResponse add(SolrCoreIdentifier identifier, Collection<SolrInputDocument> documents, boolean commit) throws OXException {
+        SolrAccessService delegate = getDelegate(identifier);
+        UpdateResponse response = delegate.add(identifier, documents, commit);
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("Add took " + response.getElapsedTime() + "ms for " + documents.size() + " documents.");
+        }
+        
+        return response;
     }
 
     /**
@@ -264,9 +144,14 @@ public class DelegationSolrAccessImpl implements SolrAccessService {
      * @see com.openexchange.solr.SolrAccessService#deleteById(com.openexchange.solr.SolrCoreIdentifier, java.lang.String, boolean)
      */
     @Override
-    public UpdateResponse deleteById(final SolrCoreIdentifier identifier, final String id, final boolean commit) throws OXException {
-        final SolrAccessService delegate = getDelegate(identifier);
-        return delegate.deleteById(identifier, id, commit);
+    public UpdateResponse deleteById(SolrCoreIdentifier identifier, String id, boolean commit) throws OXException {
+        SolrAccessService delegate = getDelegate(identifier);
+        UpdateResponse response = delegate.deleteById(identifier, id, commit);
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("Delete took " + response.getElapsedTime() + "ms for 1 document.");
+        }
+        
+        return response;
     }
 
     /**
@@ -278,9 +163,14 @@ public class DelegationSolrAccessImpl implements SolrAccessService {
      * @see com.openexchange.solr.SolrAccessService#deleteByQuery(com.openexchange.solr.SolrCoreIdentifier, java.lang.String, boolean)
      */
     @Override
-    public UpdateResponse deleteByQuery(final SolrCoreIdentifier identifier, final String query, final boolean commit) throws OXException {
-        final SolrAccessService delegate = getDelegate(identifier);
-        return delegate.deleteByQuery(identifier, query, commit);
+    public UpdateResponse deleteByQuery(SolrCoreIdentifier identifier, String query, boolean commit) throws OXException {
+        SolrAccessService delegate = getDelegate(identifier);
+        UpdateResponse response = delegate.deleteByQuery(identifier, query, commit);
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("Delete took " + response.getElapsedTime() + "ms for query " + query + ".");
+        }
+        
+        return response;
     }
 
     /**
@@ -290,9 +180,14 @@ public class DelegationSolrAccessImpl implements SolrAccessService {
      * @see com.openexchange.solr.SolrAccessService#commit(com.openexchange.solr.SolrCoreIdentifier)
      */
     @Override
-    public UpdateResponse commit(final SolrCoreIdentifier identifier) throws OXException {
-        final SolrAccessService delegate = getDelegate(identifier);
-        return delegate.commit(identifier);
+    public UpdateResponse commit(SolrCoreIdentifier identifier) throws OXException {
+        SolrAccessService delegate = getDelegate(identifier);
+        UpdateResponse response = delegate.commit(identifier);
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("Commit took " + response.getElapsedTime() + "ms.");
+        }
+        
+        return response;
     }
 
     /**
@@ -304,9 +199,14 @@ public class DelegationSolrAccessImpl implements SolrAccessService {
      * @see com.openexchange.solr.SolrAccessService#commit(com.openexchange.solr.SolrCoreIdentifier, boolean, boolean)
      */
     @Override
-    public UpdateResponse commit(final SolrCoreIdentifier identifier, final boolean waitFlush, final boolean waitSearcher) throws OXException {
-        final SolrAccessService delegate = getDelegate(identifier);
-        return delegate.commit(identifier, waitFlush, waitSearcher);
+    public UpdateResponse commit(SolrCoreIdentifier identifier, boolean waitFlush, boolean waitSearcher) throws OXException {
+        SolrAccessService delegate = getDelegate(identifier);
+        UpdateResponse response = delegate.commit(identifier, waitFlush, waitSearcher);
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("Commit took " + response.getElapsedTime() + "ms.");
+        }
+        
+        return response;
     }
 
     /**
@@ -316,9 +216,14 @@ public class DelegationSolrAccessImpl implements SolrAccessService {
      * @see com.openexchange.solr.SolrAccessService#rollback(com.openexchange.solr.SolrCoreIdentifier)
      */
     @Override
-    public UpdateResponse rollback(final SolrCoreIdentifier identifier) throws OXException {
-        final SolrAccessService delegate = getDelegate(identifier);
-        return delegate.rollback(identifier);
+    public UpdateResponse rollback(SolrCoreIdentifier identifier) throws OXException {
+        SolrAccessService delegate = getDelegate(identifier);
+        UpdateResponse response = delegate.rollback(identifier);
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("Rollback took " + response.getElapsedTime() + "ms.");
+        }
+        
+        return response;
     }
 
     /**
@@ -328,9 +233,14 @@ public class DelegationSolrAccessImpl implements SolrAccessService {
      * @see com.openexchange.solr.SolrAccessService#optimize(com.openexchange.solr.SolrCoreIdentifier)
      */
     @Override
-    public UpdateResponse optimize(final SolrCoreIdentifier identifier) throws OXException {
-        final SolrAccessService delegate = getDelegate(identifier);
-        return delegate.optimize(identifier);
+    public UpdateResponse optimize(SolrCoreIdentifier identifier) throws OXException {
+        SolrAccessService delegate = getDelegate(identifier);
+        UpdateResponse response = delegate.optimize(identifier);
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("Optimize took " + response.getElapsedTime() + "ms.");
+        }
+        
+        return response;
     }
 
     /**
@@ -342,9 +252,14 @@ public class DelegationSolrAccessImpl implements SolrAccessService {
      * @see com.openexchange.solr.SolrAccessService#optimize(com.openexchange.solr.SolrCoreIdentifier, boolean, boolean)
      */
     @Override
-    public UpdateResponse optimize(final SolrCoreIdentifier identifier, final boolean waitFlush, final boolean waitSearcher) throws OXException {
-        final SolrAccessService delegate = getDelegate(identifier);
-        return delegate.optimize(identifier, waitFlush, waitSearcher);
+    public UpdateResponse optimize(SolrCoreIdentifier identifier, boolean waitFlush, boolean waitSearcher) throws OXException {
+        SolrAccessService delegate = getDelegate(identifier);
+        UpdateResponse response = delegate.optimize(identifier, waitFlush, waitSearcher);
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("Optimize took " + response.getElapsedTime() + "ms.");
+        }
+        
+        return response;
     }
 
     /**
@@ -357,9 +272,14 @@ public class DelegationSolrAccessImpl implements SolrAccessService {
      * @see com.openexchange.solr.SolrAccessService#optimize(com.openexchange.solr.SolrCoreIdentifier, boolean, boolean, int)
      */
     @Override
-    public UpdateResponse optimize(final SolrCoreIdentifier identifier, final boolean waitFlush, final boolean waitSearcher, final int maxSegments) throws OXException {
-        final SolrAccessService delegate = getDelegate(identifier);
-        return delegate.optimize(identifier, waitFlush, waitSearcher, maxSegments);
+    public UpdateResponse optimize(SolrCoreIdentifier identifier, boolean waitFlush, boolean waitSearcher, int maxSegments) throws OXException {
+        SolrAccessService delegate = getDelegate(identifier);
+        UpdateResponse response = delegate.optimize(identifier, waitFlush, waitSearcher, maxSegments);
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("Optimize took " + response.getElapsedTime() + "ms.");
+        }
+        
+        return response;
     }
 
     /**
@@ -371,104 +291,134 @@ public class DelegationSolrAccessImpl implements SolrAccessService {
      *      org.apache.solr.common.params.SolrParams)
      */
     @Override
-    public QueryResponse query(final SolrCoreIdentifier identifier, final SolrParams params) throws OXException {
-        final SolrAccessService delegate = getDelegate(identifier);
-        return delegate.query(identifier, params);
-    }
-    
-    private SolrAccessService getDelegate(final SolrCoreIdentifier identifier) throws OXException {
-        if (embeddedAccess.hasActiveCore(identifier)) {
-            return embeddedAccess;
+    public QueryResponse query(SolrCoreIdentifier identifier, SolrParams params) throws OXException {
+        SolrAccessService delegate = getDelegate(identifier);
+        QueryResponse response = delegate.query(identifier, params);
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("Query took " + response.getElapsedTime() + "ms and returned " + response.getResults().size() + " elements.");
         }
         
-        final int contextId = identifier.getContextId();
-        final int userId = identifier.getUserId();
-        final int module = identifier.getModule();
-        SolrCore solrCore = getCoreOrCreateEnvironment(contextId, userId, module);
-        if (solrCore.isActive()) {
-            if (solrCore.getServer().equals(getLocalServerAddress())) {
-                /*
-                 * This core should be active on this server. As its not, we have to start it up again.
-                 * This may happen if the server was not shut down correctly.
-                 */
-                final SolrCoreStore coreStore = indexMysql.getCoreStore(solrCore.getStore());
-                final SolrCoreConfiguration configuration = new SolrCoreConfiguration(coreStore.getUri(), identifier);                
-                if (!embeddedAccess.startCore(configuration) && !embeddedAccess.hasActiveCore(identifier)) {
-                    throw SolrExceptionCodes.DELEGATION_ERROR.create();
-                }
-                
-                return embeddedAccess;
+        return response;
+    }
+    
+	@Override
+	public void freeResources(SolrCoreIdentifier identifier) {
+		embeddedAccess.freeResources(identifier);		
+	}
+	
+	public EmbeddedSolrAccessImpl getEmbeddedServerAccess() {
+	    return embeddedAccess;
+	}
+    
+    private SolrAccessService getDelegate(SolrCoreIdentifier identifier) throws OXException {
+    	if (identifier == null) {
+    		throw new IllegalArgumentException("Parameter `identifier` must not be null!");
+    	}
+    	
+    	ConfigurationService config = Services.getService(ConfigurationService.class);
+		boolean isSolrNode = config.getBoolProperty(SolrProperties.IS_NODE, false);
+		if (isSolrNode) {
+			/*
+			 * Three possibilities here:
+			 * 1. The core is already started within our node
+			 * 	  => use embedded solr instance
+			 * 
+			 * 2. The core is not started yet
+			 *    => start it up locally and return embedded solr instance
+			 *    
+			 * 3. The core is started on another node
+			 *    => connect via RMI and return remote solr instance
+			 */
+			if (embeddedAccess.hasActiveCore(identifier) || embeddedAccess.startCore(identifier)) {
+			    if (LOG.isDebugEnabled()) {
+			        LOG.debug("Returning local solr access.");
+			    }
+			    
+	            return embeddedAccess;
+	        }
+			
+			int contextId = identifier.getContextId();
+	        int userId = identifier.getUserId();
+	        int module = identifier.getModule();			
+			SolrCore solrCore = indexMysql.getSolrCore(contextId, userId, module);			
+			if (solrCore.isActive()) {
+				return getRMIAccess(solrCore.getServer());
+			}
+			
+	        throw SolrExceptionCodes.DELEGATION_ERROR.create();	
+		} else {
+			/*
+			 * Two possibilities here:
+			 * 1. The core is already started on another node.
+			 *    => connect via RMI and return remote solr instance
+			 * 
+			 * 2. The core is not started yet.
+			 *    => Delegate core start up to solr nodes. And then?
+			 */
+			int contextId = identifier.getContextId();
+	        int userId = identifier.getUserId();
+	        int module = identifier.getModule();
+			SolrCore solrCore = indexMysql.getSolrCore(contextId, userId, module);
+			if (solrCore.isActive()) {
+				return getRMIAccess(solrCore.getServer());
+			}			
+			
+			MessagingService msgService = Services.getService(MessagingService.class);
+        	Map<String, Serializable> properties = new HashMap<String, Serializable>();
+        	properties.put(MessagingConstants.PROP_IDENTIFIER, identifier);
+        	Message msg = new Message(MessagingConstants.START_CORE_TOPIC, properties);
+        	msgService.postMessage(msg);
+        	if (LOG.isDebugEnabled()) {
+                LOG.debug("Requested a remote solr core startup for core " + identifier.toString() + ".");
             }
-            
-            return getRMIAccess(solrCore.getServer());
-        }
-        
-        final SolrCoreStore coreStore = indexMysql.getCoreStore(solrCore.getStore());
-        final SolrCoreConfiguration configuration = new SolrCoreConfiguration(coreStore.getUri(), identifier);    
-        if (tryToStart(configuration)) {
-            return embeddedAccess;
-        }
-        
-        if (embeddedAccess.hasActiveCore(identifier)) {
-            return embeddedAccess;
-        }
-        solrCore = indexMysql.getSolrCore(contextId, userId, module);
-        final String coreServer = solrCore.getServer();
-        if (!solrCore.isActive() || coreServer.equals(getLocalServerAddress())) {
-            throw SolrExceptionCodes.DELEGATION_ERROR.create();
-        }
-        return getRMIAccess(coreServer);
+
+        	// FIXME: Try to sleep and reconnect here?
+        	throw SolrExceptionCodes.CORE_NOT_STARTED.create(identifier.toString());
+		}   
     }
     
     
-    private static final ConcurrentMap<String, RMISolrAccessService> rmiCache = new ConcurrentHashMap<String, RMISolrAccessService>();
+    private static ConcurrentMap<String, RMISolrAccessService> rmiCache = new ConcurrentHashMap<String, RMISolrAccessService>();
     
-    private SolrAccessService getRMIAccess(final String server) throws OXException {
+    private SolrAccessService getRMIAccess(String server) throws OXException {
     	RMISolrAccessService rmiAccess = rmiCache.get(server);
     	if (rmiAccess == null) {
     		rmiAccess = updateRmiCache(server);
     	} else {
     		try {
 				rmiAccess.pingRmi();
-			} catch (final RemoteException e) {
+			} catch (RemoteException e) {
 				rmiAccess = updateRmiCache(server);
+				if (LOG.isDebugEnabled()) {
+					LOG.debug("Ping failed for remote access on " + server + ". Reconnect.");
+				}
 			}    		
     	}
         
+    	if (LOG.isDebugEnabled()) {
+			LOG.debug("Returning remote solr access to server " + server + ".");
+		}
         return new SolrAccessServiceRmiWrapper(rmiAccess);
     }
     
-    private RMISolrAccessService updateRmiCache(final String server) throws OXException {
+    private RMISolrAccessService updateRmiCache(String server) throws OXException {
     	try {
     		rmiCache.remove(server);
-	    	final ConfigurationService config = Services.getService(ConfigurationService.class);
-	        final int rmiPort = config.getIntProperty("RMI_PORT", 1099);
-	        final Registry registry = LocateRegistry.getRegistry(server, rmiPort);
-	        final RMISolrAccessService rmiAccess = (RMISolrAccessService) registry.lookup(RMISolrAccessService.RMI_NAME);
+	    	ConfigurationService config = Services.getService(ConfigurationService.class);
+	        int rmiPort = config.getIntProperty("RMI_PORT", 1099);
+	        Registry registry = LocateRegistry.getRegistry(server, rmiPort);
+	        RMISolrAccessService rmiAccess = (RMISolrAccessService) registry.lookup(RMISolrAccessService.RMI_NAME);
 
-	        final RMISolrAccessService cachedRmiAccess = rmiCache.putIfAbsent(server, rmiAccess);
+	        RMISolrAccessService cachedRmiAccess = rmiCache.putIfAbsent(server, rmiAccess);
 	        if (cachedRmiAccess == null) {
 	        	return rmiAccess;
 	        }
 	        
 	        return cachedRmiAccess;
-    	} catch (final RemoteException e) {
+    	} catch (RemoteException e) {
             throw new OXException(e);
-        } catch (final NotBoundException e) {
+        } catch (NotBoundException e) {
             throw new OXException(e);
         }        
-    }
-
-    private String getLocalServerAddress() throws OXException {
-        if (serverAddress != null) {
-            return serverAddress;
-        }
-
-        try {
-            final InetAddress addr = InetAddress.getLocalHost();
-            return serverAddress = addr.getHostAddress();
-        } catch (final UnknownHostException e) {
-            throw new OXException(e);
-        }
     }
 }

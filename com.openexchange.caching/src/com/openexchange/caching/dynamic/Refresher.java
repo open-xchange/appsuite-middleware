@@ -54,12 +54,14 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheExceptionCode;
 import com.openexchange.caching.CacheService;
+import com.openexchange.caching.LockAware;
+import com.openexchange.caching.PutIfAbsent;
 import com.openexchange.caching.osgi.CacheActivator;
 import com.openexchange.exception.OXException;
+import com.openexchange.log.LogFactory;
 
 /**
  *
@@ -75,20 +77,27 @@ public abstract class Refresher<T extends Serializable> {
     /**
      * Factory for reloading cached objects.
      */
-    private final OXObjectFactory<T> factory;
+    private OXObjectFactory<T> factory;
 
     /**
      * The cache region name.
      */
-    private final String regionName;
+    private String regionName;
 
     /**
      * Whether to issue a cache remove operation before replacing a cache element.
      */
-    private final boolean removeBeforePut;
-
+    private boolean removeBeforePut;
+    
     /**
      * Default constructor.
+     */
+    public Refresher() {
+        super();
+	}
+
+    /**
+     * Initializes a new {@link Refresher}.
      *
      * @throws IllegalArgumentException If provided region name is <code>null</code>
      */
@@ -120,9 +129,35 @@ public abstract class Refresher<T extends Serializable> {
     }
 
     public static <T extends Serializable> T cache(final T obj, final Cache cache, final OXObjectFactory<T> factory) throws OXException {
-        T retval = null;
-        final Lock lock = factory.getCacheLock();
         final Serializable key = factory.getKey();
+        T retval = null;
+        /*
+         * Check for distributed cache nature
+         */
+        if (cache.isDistributed()) {
+            try {
+                if (cache instanceof PutIfAbsent) {
+                    return (T) ((PutIfAbsent) cache).putIfAbsent(key, obj);
+                }
+                try {
+                    cache.putSafe(key, obj);
+                    return obj;
+                } catch (final OXException e) {
+                    if (!CacheExceptionCode.FAILED_SAFE_PUT.equals(e)) {
+                        throw e;
+                    }
+                    // Obviously another thread put in the meantime
+                    retval = (T) cache.get(key);
+                }
+                return retval;
+            } catch (final RuntimeException e) {
+                throw CacheExceptionCode.CACHE_ERROR.create(e, e.getMessage());
+            }
+        }
+        /*
+         * Common way...
+         */
+        final Lock lock = getLock(cache, factory);
         lock.lock();
         try {
             final Object tmp = cache.get(key);
@@ -144,20 +179,60 @@ public abstract class Refresher<T extends Serializable> {
         return retval;
     }
 
+    private static <T extends Serializable> Lock getLock(final Cache cache, final OXObjectFactory<T> factory) {
+        if (cache instanceof LockAware) {
+            return ((LockAware) cache).getLock();
+        }
+        return factory.getCacheLock();
+    }
+
     public static <T extends Serializable> T refresh(final String regionName, final OXObjectFactory<T> factory, final boolean removeBeforePut) throws OXException {
         return refresh(regionName, getCache(regionName), factory, removeBeforePut);
     }
 
+    @SuppressWarnings("unchecked")
     public static <T extends Serializable> T refresh(final String regionName, final Cache cache, final OXObjectFactory<T> factory, final boolean removeBeforePut) throws OXException {
         if (null == cache) {
             return factory.load();
         }
-        T retval = null;
-        final Lock lock = factory.getCacheLock();
         final Serializable key = factory.getKey();
-        Condition cond = null;
+        T retval = null;
+        /*
+         * Check for distributed cache nature
+         */
+        if (cache.isDistributed()) {
+        	// No need for locks
+        	retval = (T) cache.get(key);
+            if (null == retval) {
+                try {
+                    if (cache instanceof PutIfAbsent) {
+                        final T newVal = factory.load();
+                        retval = (T) ((PutIfAbsent) cache).putIfAbsent(key, newVal);
+                        if (null == retval) {
+                            retval = newVal;
+                        }
+                    } else {
+                        try {
+                            final T newVal = factory.load();
+                            cache.putSafe(key, newVal);
+                            retval = newVal;
+                        } catch (final OXException e) {
+                            if (!CacheExceptionCode.FAILED_SAFE_PUT.equals(e)) {
+                                throw e;
+                            }
+                            // Obviously another thread put in the meantime
+                            retval = (T) cache.get(key);
+                        }
+                    }
+                } catch (final RuntimeException e) {
+                    throw CacheExceptionCode.CACHE_ERROR.create(e, e.getMessage());
+                }
+            }
+            return retval;
+        }
+        final Lock lock = getLock(cache, factory);
         try {
-            if (!lock.tryLock(3, TimeUnit.SECONDS)) {
+            if (!lock.tryLock(500, TimeUnit.MILLISECONDS)) {
                 return factory.load();
             }
             // Lock obtained
@@ -167,6 +242,10 @@ public abstract class Refresher<T extends Serializable> {
             LOG.error(e.getMessage(), e);
             return factory.load();
         }
+        /*
+         * Lock acquired & replicated cache
+         */
+        Condition cond = null;
         try {
             final Object tmp = cache.get(key);
             if (null == tmp) {
@@ -233,7 +312,7 @@ public abstract class Refresher<T extends Serializable> {
 
     public static Cache getCache(final String regionName) throws OXException {
         if (null == regionName) {
-            throw CacheExceptionCode.INVALID_CACHE_REGION_NAME.create(regionName);
+            throw CacheExceptionCode.INVALID_CACHE_REGION_NAME.create("null");
         }
         final CacheService service = CacheActivator.getCacheService();
         return null == service ? null : service.getCache(regionName);

@@ -1,6 +1,8 @@
 package com.openexchange.webdav.xml.contact;
 
 import java.util.Date;
+import java.util.Locale;
+
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.webdav.xml.ContactTest;
@@ -69,7 +71,7 @@ public class ListTest extends ContactTest {
 			loadContact(webCon, (objectId+1000), contactFolderId, PROTOCOL + hostName, login, password, context);
 			fail("object not found exception expected!");
 		} catch (final OXException exc) {
-			assertExceptionMessage(exc.getMessage(), XmlServlet.OBJECT_NOT_FOUND_STATUS);
+			assertExceptionMessage(exc.getDisplayMessage(Locale.ENGLISH), XmlServlet.OBJECT_NOT_FOUND_STATUS);
 		}
 
 		final int[][] objectIdAndFolderId = { { objectId ,contactFolderId } };
@@ -102,7 +104,7 @@ public class ListTest extends ContactTest {
 		final Contact contactObj = createContactObject("testObjectNotFound");
 		final int objectId = insertContact(webCon, contactObj, PROTOCOL + hostName, login, password, context);
 
-		final int[] idArray = listContact(getWebConversation(), contactFolderId, getHostName(), getLogin(), getPassword());
+		final int[] idArray = listContact(getWebConversation(), contactFolderId, getHostName(), getLogin(), getPassword(), context);
 
 		boolean found = false;
 		for (int a = 0; a < idArray.length; a++) {

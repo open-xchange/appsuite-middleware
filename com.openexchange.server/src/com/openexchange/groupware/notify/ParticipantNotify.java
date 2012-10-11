@@ -56,9 +56,9 @@ import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
-import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -75,7 +75,7 @@ import javax.mail.Part;
 import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMultipart;
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import com.openexchange.log.LogFactory;
 import com.openexchange.ajax.Attachment;
 import com.openexchange.data.conversion.ical.ConversionError;
 import com.openexchange.data.conversion.ical.ConversionWarning;
@@ -398,6 +398,7 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
         taskAccepted(null, taskObj, session);
     }
 
+    @Override
     public void taskAccepted(final Task oldTask, final Task taskObj, final Session session) {
         sendNotification(oldTask, taskObj, session, new TaskState(
             new TaskActionReplacement(TaskActionReplacement.ACTION_ACCEPTED),
@@ -411,6 +412,7 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
         taskDeclined(null, taskObj, session);
     }
 
+    @Override
     public void taskDeclined(final Task oldTask, final Task taskObj, final Session session) {
         sendNotification(oldTask, taskObj, session, new TaskState(
             new TaskActionReplacement(TaskActionReplacement.ACTION_DECLINED),
@@ -424,6 +426,7 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
         taskTentativelyAccepted(null, taskObj, session);
     }
 
+    @Override
     public void taskTentativelyAccepted(final Task oldTask, final Task taskObj, final Session session) {
         sendNotification(oldTask, taskObj, session, new TaskState(
             new TaskActionReplacement(TaskActionReplacement.ACTION_TENTATIVE),
@@ -551,7 +554,7 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
             }
 
             // Set correct recurrence information if CalendarObject is an Appointment
-            if (newApp.getRecurrenceType() != Appointment.NO_RECURRENCE) {
+            if (newApp.getRecurrenceType() != CalendarObject.NO_RECURRENCE) {
                 try {
                     ServerServiceRegistry.getInstance().getService(CalendarCollectionService.class, true).fillDAO(
                         (CalendarDataObject) newApp);
@@ -955,7 +958,7 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
                     return null;
                 }
 
-                if (cal.getRecurrenceType() == Appointment.NO_RECURRENCE && p.type == Participant.EXTERNAL_USER) {
+                if (cal.getRecurrenceType() == CalendarObject.NO_RECURRENCE && p.type == Participant.EXTERNAL_USER) {
                     msg.message = generateMessageMultipart(session, cal, textMessage, state.getModule(), state.getType(), ITipMethod.REQUEST, p, strings, b);
                 } else {
                     msg.message = textMessage;
@@ -1182,7 +1185,7 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
             final ICalEmitter emitter = ServerServiceRegistry.getInstance().getService(ICalEmitter.class);
             final ICalSession icalSession = emitter.createSession(new SimpleMode(ZoneInfo.OUTLOOK));
             Date until = null;
-            if (Appointment.NO_RECURRENCE != app.getRecurrenceType()) {
+            if (CalendarObject.NO_RECURRENCE != app.getRecurrenceType()) {
                 until = app.getEndDate();
                 app.setEndDate(computeFirstOccurrenceEnd(app));
             }
@@ -1195,8 +1198,8 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
                 app,
                 session.getContext(),
                 iTip,
-                new ArrayList<ConversionError>(),
-                new ArrayList<ConversionWarning>());
+                new LinkedList<ConversionError>(),
+                new LinkedList<ConversionWarning>());
             if (null != until) {
                 app.setEndDate(until);
             }
@@ -2043,14 +2046,16 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
             }
         }
 
-        for (final UserParticipant participant : oldParticipants) {
-            final EmailableParticipant p = getUserParticipant(participant, ctx);
-            if (p != null) {
-                p.state = containsUser(participant, newParticipants) ? EmailableParticipant.STATE_NONE : EmailableParticipant.STATE_REMOVED;
-                if (forUpdate) {
-                    addSingleParticipant(p, participantSet, null, receivers, all, false);
-                } else {
-                    addReceiver(p, receivers, all);
+        if (null != oldParticipants) {
+            for (final UserParticipant participant : oldParticipants) {
+                final EmailableParticipant p = getUserParticipant(participant, ctx);
+                if (p != null) {
+                    p.state = containsUser(participant, newParticipants) ? EmailableParticipant.STATE_NONE : EmailableParticipant.STATE_REMOVED;
+                    if (forUpdate) {
+                        addSingleParticipant(p, participantSet, null, receivers, all, false);
+                    } else {
+                        addReceiver(p, receivers, all);
+                    }
                 }
             }
         }
@@ -2341,7 +2346,7 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
      * @return The first occurence's end time.
      */
     private static Date computeFirstOccurrenceEnd(final long startMillis, final long endMillis) {
-        final Calendar cal = GregorianCalendar.getInstance(getCalendarTools().getTimeZone("UTC"), Locale.ENGLISH);
+        final Calendar cal = Calendar.getInstance(getCalendarTools().getTimeZone("UTC"), Locale.ENGLISH);
         cal.setTimeInMillis(endMillis);
         final int hourOfDay = cal.get(Calendar.HOUR_OF_DAY);
         final int minutes = cal.get(Calendar.MINUTE);

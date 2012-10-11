@@ -60,7 +60,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.html.HtmlService;
 import com.openexchange.mail.MailPath;
 import com.openexchange.mail.dataobjects.MailMessage;
-import com.openexchange.mail.text.HTMLProcessing;
+import com.openexchange.mail.text.HtmlProcessing;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.utils.DisplayMode;
 import com.openexchange.preview.PreviewDocument;
@@ -130,18 +130,19 @@ public class FilteredHTMLPreviewResultConverter extends AbstractPreviewResultCon
                     content = htmlService.dropScriptTagsInHeader(content);
                     if (DisplayMode.MODIFYABLE.isIncluded(mode) && usm.isDisplayHtmlInlineContent()) {
                         final boolean[] modified = new boolean[1];
+                        final String cssPrefix = "ox-" + HtmlProcessing.getHash(Long.toString(System.currentTimeMillis()));
                         final boolean externalImagesAllowed = usm.isAllowHTMLImages();
                         content = htmlService.checkBaseTag(content, externalImagesAllowed);
-                        if (HTMLProcessing.useSanitize()) {
+                        if (HtmlProcessing.useSanitize()) {
                             // No need to generate well-formed HTML
                             if (externalImagesAllowed) {
                                 /*
                                  * TODO: Does not work reliably by now
                                  */
                                 // retval = htmlService.checkExternalImages(retval);
-                                content = htmlService.sanitize(content, null, false, null);
+                                content = htmlService.sanitize(content, null, false, null, cssPrefix);
                             } else {
-                                content = htmlService.sanitize(content, null, true, modified);
+                                content = htmlService.sanitize(content, null, true, modified, cssPrefix);
                             }
                         } else {
                             final String charset = metaData.get("charset");
@@ -166,13 +167,13 @@ public class FilteredHTMLPreviewResultConverter extends AbstractPreviewResultCon
                             final MailMessage mail = (MailMessage) result.getParameter("__mail");
                             if (mail != null) {
                                 final MailPath mailPath = new MailPath(mail.getAccountId(), mail.getFolder(), mail.getMailId());
-                                content = HTMLProcessing.filterInlineImages(content, session, mailPath);
+                                content = HtmlProcessing.filterInlineImages(content, session, mailPath);
                             }
                         }
                         /*
                          * Replace CSS classes
                          */
-                        content = HTMLProcessing.saneCss(content, htmlService);
+                        content = HtmlProcessing.saneCss(content, htmlService, cssPrefix);
                         if (asDiv) {
                             content = toDiv(content);
                         }
@@ -186,14 +187,14 @@ public class FilteredHTMLPreviewResultConverter extends AbstractPreviewResultCon
     }
 
     private String toDiv(final String content) {
-    	// Let's try and turn this into an appendable DIV
+        // Let's try and turn this into an appendable DIV
         String ret = content;
         ret = ret.replaceAll("<body[^>]*>", "<div>");
-    	ret = ret.substring(ret.indexOf("<div>"));
-    	ret = ret.replaceAll("</body[^>]*>", "</div>"); 
-    	ret = ret.substring(0, ret.lastIndexOf("</div>") + 6);
-    	return ret;
-	}
+        ret = ret.substring(ret.indexOf("<div>"));
+        ret = ret.replaceAll("</body[^>]*>", "</div>"); 
+        ret = ret.substring(0, ret.lastIndexOf("</div>") + 6);
+        return ret;
+    }
 
 	/**
      * {@link SanitizedPreviewDocument}

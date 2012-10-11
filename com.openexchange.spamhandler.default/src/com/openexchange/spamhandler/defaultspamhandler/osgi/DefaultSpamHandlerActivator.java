@@ -56,9 +56,8 @@ import com.openexchange.config.ConfigurationService;
 import com.openexchange.mail.service.MailService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.spamhandler.SpamHandler;
-import com.openexchange.spamhandler.defaultspamhandler.ConfigurationServiceSupplier;
 import com.openexchange.spamhandler.defaultspamhandler.DefaultSpamHandler;
-import com.openexchange.spamhandler.defaultspamhandler.MailServiceSupplier;
+import com.openexchange.spamhandler.defaultspamhandler.Services;
 
 /**
  * {@link DefaultSpamHandlerActivator} - {@link BundleActivator Activator} for default spam handler bundle.
@@ -68,7 +67,7 @@ import com.openexchange.spamhandler.defaultspamhandler.MailServiceSupplier;
 public final class DefaultSpamHandlerActivator extends HousekeepingActivator {
 
     private static final org.apache.commons.logging.Log LOG =
-        com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(DefaultSpamHandlerActivator.class));
+        com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(DefaultSpamHandlerActivator.class));
 
     private final Dictionary<String, String> dictionary;
 
@@ -87,24 +86,9 @@ public final class DefaultSpamHandlerActivator extends HousekeepingActivator {
     }
 
     @Override
-    protected void handleUnavailability(final Class<?> clazz) {
-        if (MailService.class.equals(clazz)) {
-            MailServiceSupplier.getInstance().setMailService(null);
-        }
-    }
-
-    @Override
-    protected void handleAvailability(final Class<?> clazz) {
-        if (MailService.class.equals(clazz)) {
-            MailServiceSupplier.getInstance().setMailService(getService(MailService.class));
-        }
-    }
-
-    @Override
     protected void startBundle() throws Exception {
         try {
-            MailServiceSupplier.getInstance().setMailService(getService(MailService.class));
-            ConfigurationServiceSupplier.getInstance().setConfigurationService(getService(ConfigurationService.class));
+            Services.setServiceLookup(this);
             registerService(SpamHandler.class, DefaultSpamHandler.getInstance(), dictionary);
         } catch (final Throwable t) {
             LOG.error(t.getMessage(), t);
@@ -117,8 +101,7 @@ public final class DefaultSpamHandlerActivator extends HousekeepingActivator {
     protected void stopBundle() throws Exception {
         try {
             cleanUp();
-            MailServiceSupplier.getInstance().setMailService(null);
-            ConfigurationServiceSupplier.getInstance().setConfigurationService(null);
+            Services.setServiceLookup(null);
         } catch (final Throwable t) {
             LOG.error(t.getMessage(), t);
             throw t instanceof Exception ? (Exception) t : new Exception(t);

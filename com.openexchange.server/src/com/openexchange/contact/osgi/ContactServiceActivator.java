@@ -50,15 +50,17 @@
 package com.openexchange.contact.osgi;
 
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.contact.ContactService;
 import com.openexchange.contact.internal.ContactServiceImpl;
 import com.openexchange.contact.internal.ContactServiceLookup;
 import com.openexchange.contact.storage.registry.ContactStorageRegistry;
 import com.openexchange.context.ContextService;
 import com.openexchange.folder.FolderService;
+import com.openexchange.log.LogFactory;
 import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.server.services.ServerServiceRegistry;
+import com.openexchange.userconf.UserConfigurationService;
 
 /**
  * {@link ContactServiceActivator}
@@ -78,15 +80,18 @@ public class ContactServiceActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ContactStorageRegistry.class, ContextService.class, FolderService.class };
+        return new Class<?>[] { ContactStorageRegistry.class, ContextService.class, FolderService.class, ConfigurationService.class, 
+            UserConfigurationService.class };
     }
     
     @Override
     protected void startBundle() throws Exception {
         try {
             LOG.info("starting bundle: com.openexchange.contact.service");
-            ContactServiceLookup.set(this);            
-            super.registerService(ContactService.class, new ContactServiceImpl());
+            ContactServiceLookup.set(this);
+            final ContactService contactService = new ContactServiceImpl();
+            super.registerService(ContactService.class, contactService);
+            ServerServiceRegistry.getInstance().addService(ContactService.class, contactService);
         } catch (final Exception e) {
             LOG.error("error starting \"com.openexchange.contact.service\"", e);
             throw e;            

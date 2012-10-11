@@ -63,7 +63,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import com.openexchange.log.LogFactory;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.exceptions.PoolException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
@@ -89,6 +89,7 @@ public class FilestoreUsageLoader implements Filter<Context, Context> {
         this.averageSize = averageSize;
     }
 
+    @Override
     public Context[] filter(Collection<Context> contexts) throws PipesAndFiltersException {
         Map<Integer, Map<String, Map<Integer, Context>>> readIdMap = new HashMap<Integer, Map<String, Map<Integer, Context>>>();
         for (Context context : contexts) {

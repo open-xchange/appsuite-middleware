@@ -51,6 +51,7 @@ package com.openexchange.jslob.json.action;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import org.json.JSONArray;
 import org.json.JSONException;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
@@ -74,7 +75,7 @@ import com.openexchange.server.ServiceLookup;
     , description = "Get a list of JSlobs associated with the current user and context." 
     , method = RequestMethod.PUT
     , parameters = {
-        @Parameter(name = "serviceId", description = "Identifier for the JSLobService lookup in the JSlobServiceRegistry.", optional=true)
+        @Parameter(name = "serviceId", description = "Optional identifier for the JSlob. Default is <tt>com.openexchange.jslob.config</tt>", optional=true)
     }
     , requestBody = "An array containing JSlob identifiers."
     , responseDescription = "An array containing JSlobs."
@@ -86,8 +87,8 @@ public final class ListAction extends JSlobAction {
      * 
      * @param services The service look-up
      */
-    public ListAction(final ServiceLookup services) {
-        super(services);
+    public ListAction(final ServiceLookup services, final Map<String, JSlobAction> actions) {
+        super(services, actions);
     }
 
     @Override

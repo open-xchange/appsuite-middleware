@@ -87,7 +87,7 @@ public final class MessagingServiceExceptionMessages implements LocalizableStrin
     public static final String INVALID_MSG_PACKAGE_MSG = "Invalid message package";
 
     // Unparseable string.
-    public static final String UNPARSEABLE_STRING_MSG = "Unparseable string.";
+    public static final String UNPARSEABLE_STRING_MSG = "Unparsable string.";
 
     // Invalid quoted-printable encoding.
     public static final String INVALID_QUOTED_PRINTABLE_MSG = "Invalid quoted-printable encoding.";

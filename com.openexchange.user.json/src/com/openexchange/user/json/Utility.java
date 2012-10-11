@@ -49,6 +49,14 @@
 
 package com.openexchange.user.json;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
 import java.util.TimeZone;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
@@ -56,6 +64,11 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
+import java.util.regex.Pattern;
+
+import com.openexchange.ajax.requesthandler.AJAXRequestData;
+import com.openexchange.exception.OXException;
+import com.openexchange.tools.servlet.AjaxExceptionCodes;
 
 /**
  * {@link Utility} - Utility class for user JSON interface bundle.
@@ -72,6 +85,8 @@ public final class Utility {
     }
 
     private static final ConcurrentMap<String, Future<TimeZone>> ZONE_CACHE = new ConcurrentHashMap<String, Future<TimeZone>>();
+
+    private static final Pattern PAT = Pattern.compile(" *, *");
 
     /**
      * Gets the <code>TimeZone</code> for the given ID.
@@ -102,7 +117,7 @@ public final class Utility {
             // Keep interrupted status
             Thread.currentThread().interrupt();
         } catch (final ExecutionException e) {
-            final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(Utility.class));
+            final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(Utility.class));
             LOG.error(e.getMessage(), e);
         }
         return TimeZone.getTimeZone(ID);
@@ -153,6 +168,70 @@ public final class Utility {
         System.arraycopy(fields, 0, checkedCols, 0, fields.length);
         checkedCols[fields.length] = requiredField;
         return checkedCols;
+    }
+
+    /**
+     * Parses specified optional parameter into an array of <code>int</code>.
+     *
+     * @param parameterName The parameter name
+     * @param request The request
+     * @return The parsed array of <code>int</code>; a zero length array is returned if parameter is missing
+     */
+    public static int[] parseOptionalIntArrayParameter(final String parameterName, final AJAXRequestData request) {
+        final String tmp = request.getParameter(parameterName);
+        if (null == tmp) {
+            return new int[0];
+        }
+        final String[] sa = PAT.split(tmp, 0);
+        final int[] columns = new int[sa.length];
+        for (int i = 0; i < sa.length; i++) {
+            columns[i] = Integer.parseInt(sa[i]);
+        }
+        return columns;
+    }
+
+    /**
+     * Split a comma-separated string.
+     */
+    private static final Pattern SPLIT = Pattern.compile(" *, *");
+
+    /**
+     * Gets the attribute parameters.
+     *
+     * @param expectedParameterNames The expected parameter names
+     * @param request The request
+     * @return The attribute parameters
+     * @throws OXException If parsing attribute parameters fails
+     */
+    public static Map<String, List<String>> getAttributeParameters(final Set<String> expectedParameterNames, final AJAXRequestData request) throws OXException {
+        final Iterator<Entry<String, String>> nonMatchingParameters = request.getNonMatchingParameters(expectedParameterNames);
+        if (!nonMatchingParameters.hasNext()) {
+            return Collections.emptyMap();
+        }
+        final Map<String, List<String>> attributeParameters = new LinkedHashMap<String, List<String>>();
+        do {
+            final Entry<String, String> entry = nonMatchingParameters.next();
+            final String key = entry.getKey();
+            List<String> list = attributeParameters.get(key);
+            if (null == list) {
+                list = new ArrayList<String>(4);
+                attributeParameters.put(key, list);
+            }
+            final String value = entry.getValue();
+            final int pos = value.indexOf('*');
+            if (pos < 0) {
+                final String[] strings = SPLIT.split(value, 0);
+                for (final String string : strings) {
+                    list.add(string);
+                }
+            } else {
+                if (value.length() > 1) {
+                    throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create( key, value);
+                }
+                list.add(UserContact.ALL_ATTRIBUTES);
+            }
+        } while (nonMatchingParameters.hasNext());
+        return attributeParameters;
     }
 
 }

@@ -69,7 +69,7 @@ public final class ICal4jItem implements ICalItem {
 
     @Override
     public String getUID() {
-        final Property property = component.getProperty(Uid.UID);
+        final Property property = component.getProperty(Property.UID);
         return null == property ? null : property.getValue();
     }
 

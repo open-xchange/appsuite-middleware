@@ -40,14 +40,15 @@ public abstract class AbstractPOIContainerExtractionTest extends TestCase {
     public static final MediaType TYPE_PPTX = MediaType.application("vnd.openxmlformats-officedocument.presentationml.presentation");
     public static final MediaType TYPE_XLSX = MediaType.application("vnd.openxmlformats-officedocument.spreadsheetml.sheet");
     public static final MediaType TYPE_MSG = MediaType.application("vnd.ms-outlook");
-
+    
     public static final MediaType TYPE_TXT = MediaType.text("plain");
     public static final MediaType TYPE_PDF = MediaType.application("pdf");
-
+    
     public static final MediaType TYPE_JPG = MediaType.image("jpeg");
     public static final MediaType TYPE_GIF = MediaType.image("gif");
     public static final MediaType TYPE_PNG = MediaType.image("png");
-    public static final MediaType TYPE_EMF = MediaType.application("x-msmetafile");
+    public static final MediaType TYPE_EMF = MediaType.application("x-emf");
+    public static final MediaType TYPE_WMF = MediaType.application("x-msmetafile");
 
     protected TrackingHandler process(String filename, ContainerExtractor extractor, boolean recurse) throws Exception {
         TikaInputStream stream = getTestFile(filename);
@@ -68,7 +69,7 @@ public abstract class AbstractPOIContainerExtractionTest extends TestCase {
             stream.close();
         }
     }
-
+    
     protected TikaInputStream getTestFile(String filename) throws Exception {
         URL input = AbstractPOIContainerExtractionTest.class.getResource(
                "/test-documents/" + filename);
@@ -76,11 +77,11 @@ public abstract class AbstractPOIContainerExtractionTest extends TestCase {
 
         return TikaInputStream.get(input);
     }
-
+    
     public static class TrackingHandler implements EmbeddedResourceHandler {
        public List<String> filenames = new ArrayList<String>();
        public List<MediaType> mediaTypes = new ArrayList<MediaType>();
-
+       
        @Override
     public void handle(String filename, MediaType mediaType,
             InputStream stream) {

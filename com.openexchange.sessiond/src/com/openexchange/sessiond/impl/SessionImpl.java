@@ -53,14 +53,16 @@ import java.io.Serializable;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.ReentrantLock;
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import com.openexchange.caching.objects.CachedSession;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.crypto.CryptoService;
 import com.openexchange.exception.OXException;
+import com.openexchange.log.LogFactory;
+import com.openexchange.session.PutIfAbsent;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.services.SessiondServiceRegistry;
 
@@ -70,36 +72,25 @@ import com.openexchange.sessiond.services.SessiondServiceRegistry;
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class SessionImpl implements Session {
+public final class SessionImpl implements PutIfAbsent {
 
     // A random-enough key for encrypting and decrypting passwords on their way through the caching system.
     private static final String OBFUSCATION_KEY_PROPERTY = "com.openexchange.sessiond.encryptionKey";
 
     private final String loginName;
-
     private String password;
-
     private final int contextId;
-
     private final int userId;
-
     private final String sessionId;
-
     private final String secret;
-
     private final String login;
-
     private String randomToken;
-
     private String localIp;
-
     private final String authId;
-
     private String hash;
-
     private String client;
-
-    private final Map<String, Object> parameters;
+    private final ConcurrentMap<String, Object> parameters;
+    private boolean isVolatile;
 
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(SessionImpl.class));
 
@@ -174,6 +165,9 @@ public final class SessionImpl implements Session {
     }
 
     private String obfuscate(final String string) {
+        if (isEmpty(string)) {
+            return string;
+        }
         try {
             final String key = getObfuscationKey();
             return isEmpty(key) ? string : SessiondServiceRegistry.getServiceRegistry().getService(CryptoService.class).encrypt(string, key);
@@ -256,6 +250,14 @@ public final class SessionImpl implements Session {
     }
 
     @Override
+    public Object setParameterIfAbsent(String name, Object value) {
+        if (PARAM_LOCK.equals(name)) {
+            return parameters.get(PARAM_LOCK);
+        }
+        return parameters.putIfAbsent(name, value);
+    }
+
+    @Override
     public void removeRandomToken() {
         randomToken = null;
     }
@@ -328,5 +330,23 @@ public final class SessionImpl implements Session {
     @Override
     public void setClient(final String client) {
         this.client = client;
+    }
+    
+    /**
+     * Gets the volatile flag
+     *
+     * @return The volatile flag
+     */
+    public boolean isVolatile() {
+        return isVolatile;
+    }
+
+    /**
+     * Sets the volatile flag.
+     * 
+     * @param isVolatile The volatile flag
+     */
+    public void setVolatile(final boolean isVolatile) {
+        this.isVolatile = isVolatile;
     }
 }

@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Open-Xchange OAuth Facebook Bundle
 Bundle-SymbolicName: com.openexchange.oauth.facebook
-Bundle-Version: 6.21.0
+Bundle-Version: 6.22.0
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Import-Package: com.openexchange.config,
@@ -26,8 +26,15 @@ Import-Package: com.openexchange.config,
  org.apache.commons.logging,
  org.json,
  org.osgi.framework,
- org.osgi.util.tracker
+ org.osgi.util.tracker,
+ org.scribe.builder,
+ org.scribe.builder.api,
+ org.scribe.exceptions,
+ org.scribe.extractors,
+ org.scribe.model,
+ org.scribe.oauth,
+ org.scribe.services,
+ org.scribe.utils
 Bundle-Activator: com.openexchange.oauth.facebook.osgi.Activator
-Bundle-ClassPath: .,
- lib/scribe-1.1.0.jar
+Bundle-ClassPath: .
 Export-Package: com.openexchange.oauth.facebook

@@ -76,7 +76,7 @@ public final class TwitterConfiguration {
      * @param configurationService The configuration service needed to read properties
      */
     public static void configure(final ConfigurationService configurationService) {
-        final org.apache.commons.logging.Log log = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(TwitterConfiguration.class));
+        final org.apache.commons.logging.Log log = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(TwitterConfiguration.class));
         {
             final String property = configurationService.getProperty("com.openexchange.twitter.consumerKey");
             if (null == property) {

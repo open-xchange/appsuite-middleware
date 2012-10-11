@@ -90,7 +90,7 @@ import com.openexchange.user.UserService;
  */
 public final class UnifiedInboxFolderStorage extends MailFolderStorage {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(UnifiedInboxFolderStorage.class));
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(UnifiedInboxFolderStorage.class));
 
     // private final UnifiedINBOXAccess access;
 
@@ -251,6 +251,7 @@ public final class UnifiedInboxFolderStorage extends MailFolderStorage {
             final int accountId = accounts[i].getId();
             completionService.submit(new LoggingCallable<int[][]>(session, unifiedINBOXAccountId) {
 
+                @Override
                 public int[][] call() throws Exception {
                     return UnifiedInboxFolderConverter.getAccountDefaultFolders(accountId, session, FULLNAMES);
                 }
@@ -301,6 +302,7 @@ public final class UnifiedInboxFolderStorage extends MailFolderStorage {
             final String[] tmp = names[index];
             completionService.submit(new LoggingCallable<Retval>(session, unifiedInboxId) {
 
+                @Override
                 public Retval call() throws Exception {
                     return new Retval(UnifiedInboxFolderConverter.getUnifiedINBOXFolder(
                         getAccountId(),
@@ -360,6 +362,7 @@ public final class UnifiedInboxFolderStorage extends MailFolderStorage {
         for (final MailAccount mailAccount : accounts) {
             completionService.submit(new LoggingCallable<MailFolder>(session) {
 
+                @Override
                 public MailFolder call() throws Exception {
                     MailAccess<?, ?> mailAccess = null;
                     try {
@@ -589,6 +592,7 @@ public final class UnifiedInboxFolderStorage extends MailFolderStorage {
             collator.setStrength(Collator.SECONDARY);
         }
 
+        @Override
         public int compare(final MailFolder o1, final MailFolder o2) {
             final String name1 = o1.getName();
             final String name2 = o2.getName();

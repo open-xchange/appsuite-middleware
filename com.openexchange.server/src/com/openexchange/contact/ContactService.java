@@ -50,10 +50,10 @@
 package com.openexchange.contact;
 
 import java.util.Date;
-
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
+import com.openexchange.groupware.search.ContactSearchObject;
 import com.openexchange.search.SearchTerm;
 import com.openexchange.session.Session;
 import com.openexchange.tools.iterator.SearchIterator;
@@ -65,6 +65,14 @@ import com.openexchange.tools.iterator.SearchIterator;
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 public interface ContactService {
+	
+    /**
+     * Contact fields that may be queried from contacts of the global address 
+     * list, even if the current session's user has no sufficient access 
+     * permissions for that folder. 
+     */
+	public static final ContactField[] LIMITED_USER_FIELDS = new ContactField[] { ContactField.DISPLAY_NAME, ContactField.GIVEN_NAME, 
+			ContactField.SUR_NAME, ContactField.MIDDLE_NAME, ContactField.SUFFIX, ContactField.LAST_MODIFIED };
 	
     /**
      * Gets a contact with all fields.
@@ -298,6 +306,50 @@ public interface ContactService {
     <O> SearchIterator<Contact> searchContacts(Session session, SearchTerm<O> term, ContactField[] fields, SortOptions sortOptions) throws OXException;
     
     /**
+     * Searches for contacts.
+     * 
+     * @param session the session
+     * @param contactSearch the contact search object
+     * @return the contacts found with the search
+     * @throws OXException
+     */
+    SearchIterator<Contact> searchContacts(Session session, ContactSearchObject contactSearch) throws OXException;
+
+    /**
+     * Searches for contacts.
+     * 
+     * @param session the session
+     * @param contactSearch the contact search object
+     * @param sortOptions the options to sort the results 
+     * @return the contacts found with the search
+     * @throws OXException
+     */
+    SearchIterator<Contact> searchContacts(Session session, ContactSearchObject contactSearch, SortOptions sortOptions) throws OXException;
+
+    /**
+     * Searches for contacts.
+     * 
+     * @param session the session
+     * @param contactSearch the contact search object
+     * @param fields the contact fields that should be retrieved
+     * @return the contacts found with the search
+     * @throws OXException
+     */
+    SearchIterator<Contact> searchContacts(Session session, ContactSearchObject contactSearch, ContactField[] fields) throws OXException;
+
+    /**
+     * Searches for contacts.
+     * 
+     * @param session the session
+     * @param contactSearch the contact search object
+     * @param fields the contact fields that should be retrieved
+     * @param sortOptions the options to sort the results 
+     * @return the contacts found with the search
+     * @throws OXException
+     */
+    SearchIterator<Contact> searchContacts(Session session, ContactSearchObject contactSearch, ContactField[] fields, SortOptions sortOptions) throws OXException;
+    
+    /**
      * Creates a new contact in a folder.
      * 
      * @param session the session
@@ -329,5 +381,121 @@ public interface ContactService {
      * @throws OXException
      */
     void deleteContact(Session session, String folderId, String id, Date lastRead) throws OXException;
+
+    /**
+     * Deletes all contacts in a folder.
+     * 
+     * @param session the session
+     * @param folderId the ID of the parent folder
+     * @throws OXException
+     */
+    void deleteContacts(Session session, String folderId) throws OXException;
+
+    /**
+     * Gets a user's contact with all fields.<p>
+     * If the current user has no adequate permissions, no exception is thrown, 
+     * but the queried contact fields are limited to fields defined by 
+     * <code>ContactService.LIMITED_USER_FIELDS</code>.
+     *  
+     * @param session the session
+     * @param userID the user's ID
+     * @return the contact
+     * @throws OXException
+     */
+    Contact getUser(Session session, int userID) throws OXException;
+
+	/**
+     * Gets a user's contact with specified fields.<p>
+     * 
+     * If the current user has no adequate permissions, no exception is thrown, 
+     * but the queried contact fields are limited to the fields defined by 
+     * <code>ContactService.LIMITED_USER_FIELDS</code>.
+     * 
+     * @param session the session
+     * @param userID the user's ID
+     * @param fields the contact fields that should be retrieved
+     * @return the contact
+     * @throws OXException
+     */
+    Contact getUser(Session session, int userID, ContactField[] fields) throws OXException;
+    
+    /**
+     * Gets a user contacts with all fields.<p>
+     * 
+     * If the current user has no adequate permissions, no exception is thrown, 
+     * but the queried contact fields are limited to the fields defined by 
+     * <code>ContactService.LIMITED_USER_FIELDS</code>.
+     * 
+     * @param session the session
+     * @param userIDs the user IDs
+     * @return the contacts
+     * @throws OXException
+     */
+    SearchIterator<Contact> getUsers(Session session, int[] userIDs) throws OXException;
+
+	/**
+     * Gets user contacts with specified fields.<p>
+     * 
+     * If the current user has no adequate permissions, no exception is thrown, 
+     * but the queried contact fields are limited to the fields defined by 
+     * <code>ContactService.LIMITED_USER_FIELDS</code>.
+     * 
+     * @param session the session
+     * @param userIDs the user IDs
+     * @param fields the contact fields that should be retrieved
+     * @return the contacts
+     * @throws OXException
+     */
+    SearchIterator<Contact> getUsers(Session session, int[] userIDs, ContactField[] fields) throws OXException;
+    
+	/**
+     * Gets all user contacts with specified fields.<p>
+     * 
+     * If the current user has no adequate permissions, no exception is thrown, 
+     * but the queried contact fields are limited to the fields defined by 
+     * <code>ContactService.LIMITED_USER_FIELDS</code>.
+     * 
+     * @param session the session
+     * @param fields the contact fields that should be retrieved
+     * @param sortOptions the options to sort the results 
+     * @return the contacts
+     * @throws OXException
+     */
+    SearchIterator<Contact> getAllUsers(Session session, ContactField[] fields, SortOptions sortOptions) throws OXException;
+    
+    /**
+     * Gets the value of the <code>ContactField.COMPANY</code> field from the
+     * contact representing the current context's mail admin.
+     * 
+     * @param session the session
+     * @return the organization
+     * @throws OXException
+     */
+    String getOrganization(Session session) throws OXException;
+
+    /**
+     * Searches for users.
+     * 
+     * @param session the session
+     * @param term the search term
+     * @param fields the contact fields that should be retrieved
+     * @param sortOptions the options to sort the results 
+     * @return the user contacts found with the search
+     * @throws OXException
+     */
+	<O> SearchIterator<Contact> searchUsers(Session session, SearchTerm<O> term, ContactField[] fields, SortOptions sortOptions) throws OXException;
+	
+	
+    /**
+     * Searches for users.
+     * 
+     * @param session the session
+     * @param contactSearch the contact search object
+     * @param fields the contact fields that should be retrieved
+     * @param sortOptions the options to sort the results 
+     * @return the user contacts found with the search
+     * @throws OXException
+     */
+    SearchIterator<Contact> searchUsers(Session session, ContactSearchObject contactSearch, ContactField[] fields, SortOptions sortOptions) throws OXException;
 
 }

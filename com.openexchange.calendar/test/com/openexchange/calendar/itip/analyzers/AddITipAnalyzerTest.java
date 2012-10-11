@@ -70,6 +70,7 @@ import com.openexchange.data.conversion.ical.itip.ITipMessage;
 import com.openexchange.data.conversion.ical.itip.ITipMethod;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.calendar.CalendarDataObject;
+import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.sim.SimBuilder;
 
 /**
@@ -95,7 +96,7 @@ public class AddITipAnalyzerTest extends AbstractITipAnalyzerTest {
         message.addException(newException);
         
         final CalendarDataObject existingSeries = appointment("123-123-123-123");
-        existingSeries.setRecurrenceType(CalendarDataObject.WEEKLY);
+        existingSeries.setRecurrenceType(CalendarObject.WEEKLY);
         existingSeries.setInterval(1);
         existingSeries.setObjectID(12);
         
@@ -133,7 +134,7 @@ public class AddITipAnalyzerTest extends AbstractITipAnalyzerTest {
         message.addException(newException);
         
         final CalendarDataObject existingSeries = appointment("123-123-123-123");
-        existingSeries.setRecurrenceType(CalendarDataObject.WEEKLY);
+        existingSeries.setRecurrenceType(CalendarObject.WEEKLY);
         existingSeries.setInterval(1);
         existingSeries.setObjectID(12);
         
@@ -173,7 +174,7 @@ public class AddITipAnalyzerTest extends AbstractITipAnalyzerTest {
         message.addException(newException);
         
         final CalendarDataObject existingSeries = appointment("123-123-123-123");
-        existingSeries.setRecurrenceType(CalendarDataObject.WEEKLY);
+        existingSeries.setRecurrenceType(CalendarObject.WEEKLY);
         existingSeries.setInterval(1);
         existingSeries.setObjectID(12);
         
@@ -237,7 +238,7 @@ public class AddITipAnalyzerTest extends AbstractITipAnalyzerTest {
         message.addException(newException);
         
         final CalendarDataObject existingSeries = appointment("123-123-123-123");
-        existingSeries.setRecurrenceType(CalendarDataObject.WEEKLY);
+        existingSeries.setRecurrenceType(CalendarObject.WEEKLY);
         existingSeries.setInterval(1);
         existingSeries.setObjectID(12);
         

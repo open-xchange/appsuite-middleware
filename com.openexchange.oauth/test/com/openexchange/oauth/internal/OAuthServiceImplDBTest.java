@@ -57,6 +57,7 @@ import java.util.Map;
 import com.openexchange.context.SimContextService;
 import com.openexchange.exception.OXException;
 import com.openexchange.id.SimIDGenerator;
+import com.openexchange.oauth.API;
 import com.openexchange.oauth.AbstractOAuthServiceMetaData;
 import com.openexchange.oauth.DefaultOAuthAccount;
 import com.openexchange.oauth.OAuthAccount;
@@ -119,9 +120,14 @@ public class OAuthServiceImplDBTest extends SQLTestCase {
                 return authUrl;
             }
 
+			@Override
+			public API getAPI() {
+				return API.OTHER;
+			}
+
         });
 
-        oauth = new OAuthServiceImpl(getDBProvider(), new SimIDGenerator(), registry, new SimContextService()) {
+        oauth = new OAuthServiceImpl(getDBProvider(), new SimIDGenerator(), registry, new SimContextService(), null) {
             @Override
             protected void obtainToken(final OAuthInteractionType type, final Map<String, Object> arguments, final DefaultOAuthAccount account) {
                 account.setToken("myAccessToken");

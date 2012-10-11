@@ -189,6 +189,22 @@ public final class Autoboxing {
         return intArray;
     }
 
+    public static byte[] B2b(final Collection<Byte> byteCollection) {
+        byte[] byteArray = new byte[byteCollection.size()];
+        int pos = 0;
+        for (final Byte b : byteCollection) {
+            if (null != b) {
+                byteArray[pos++] = b.byteValue();
+            }
+        }
+        if (pos != byteArray.length) {
+            final byte[] tmpArray = new byte[pos];
+            System.arraycopy(byteArray, 0, tmpArray, 0, pos);
+            byteArray = tmpArray;
+        }
+        return byteArray;
+    }
+
     /**
      * Converts a long-array into a Long-array.
      * @param longArray long[] to be converted to Long[]

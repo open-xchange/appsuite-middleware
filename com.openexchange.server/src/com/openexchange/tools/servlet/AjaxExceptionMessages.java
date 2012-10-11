@@ -49,13 +49,15 @@
 
 package com.openexchange.tools.servlet;
 
+import com.openexchange.i18n.LocalizableStrings;
+
 
 /**
  * {@link AjaxExceptionMessages}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class AjaxExceptionMessages {
+public final class AjaxExceptionMessages implements LocalizableStrings {
 
     /**
      * Initializes a new {@link AjaxExceptionMessages}
@@ -66,6 +68,9 @@ public final class AjaxExceptionMessages {
 
     // Unknown AJAX action: %s.
     public static final String UnknownAction_MSG = "Unknown AJAX action: %s.";
+
+    // Unknown AJAX action %1$s in module %2$s.
+    public static final String UnknownActionInModule_MSG = "Unknown AJAX action %1$s in module %2$s.";
 
     // Missing the following request parameter: %s
     public static final String MISSING_PARAMETER_MSG = "Missing the following request parameter: %s";
@@ -109,5 +114,23 @@ public final class AjaxExceptionMessages {
 
     // The action "%1$s" is disabled due to server configuration
     public static final String DisabledAction_MSG = "The action \"%1$s\" is disabled due to server configuration";
+    
+    // No permission for module: %1$s.
+    public static final String NO_PERMISSION_FOR_MODULE = "No permission for module: %1$s.";
+    
+    // Object has been changed in the meantime.
+    public static final String CONFLICT = "Object has been changed in the meantime.";
+
+    // Unexpected result. Expected "%1$s", but is "%2$s".
+    public static final String UNEXPECTED_RESULT = "Unexpected result. Expected \"%1$s\", but is \"%2$s\".";
+
+    // Too many concurrent requests. Please try again later.
+    public static final String TOO_MANY_REQUESTS = "Too many concurrent requests. Please try again later.";
+    
+    // Bad request. The server is unable to handle the request.
+    public static final String BAD_REQUEST = "Bad request. The server is unable to handle the request.";
+    
+    // The file \"%1$s\" (\"%2$s\") can't be imported as image. Only image types (JPG, GIF, BMP or PNG) are supported.
+    public static final String NO_IMAGE_FILE_MSG = "The file \"%1$s\" (\"%2$s\") can't be imported as image. Only image types (JPG, GIF, BMP or PNG) are supported.";
 
 }

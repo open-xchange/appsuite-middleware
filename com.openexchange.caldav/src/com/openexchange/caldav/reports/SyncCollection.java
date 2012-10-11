@@ -52,11 +52,11 @@ package com.openexchange.caldav.reports;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import org.jdom.Document;
-import org.jdom.Element;
-import org.jdom.JDOMException;
-import org.jdom.Namespace;
-import com.openexchange.caldav.GroupwareCaldavFactory;
+import org.jdom2.Document;
+import org.jdom2.Element;
+import org.jdom2.JDOMException;
+import org.jdom2.Namespace;
+import com.openexchange.caldav.resources.CommonFolderCollection;
 import com.openexchange.webdav.action.WebdavPropfindAction;
 import com.openexchange.webdav.action.WebdavRequest;
 import com.openexchange.webdav.action.WebdavResponse;
@@ -77,16 +77,16 @@ public class SyncCollection extends WebdavPropfindAction {
 
     public static final String NAME = "sync-collection";
 
-    public SyncCollection(Protocol protocol) {
+    public SyncCollection(final Protocol protocol) {
         super(protocol);
     }
     
     @Override
-    public void perform(WebdavRequest req, WebdavResponse res) throws WebdavProtocolException {
+    public void perform(final WebdavRequest req, final WebdavResponse res) throws WebdavProtocolException {
         final Element response = new Element("multistatus", DAV_NS);
 
-        List<Namespace> namespaces = protocol.getAdditionalNamespaces();
-        for (Namespace namespace : namespaces) {
+        final List<Namespace> namespaces = protocol.getAdditionalNamespaces();
+        for (final Namespace namespace : namespaces) {
             response.addNamespaceDeclaration(namespace);
         }
 
@@ -96,41 +96,36 @@ public class SyncCollection extends WebdavPropfindAction {
         Document requestBody = null;
         try {
             requestBody = req.getBodyAsDocument();
-        } catch (JDOMException e) {
+        } catch (final JDOMException e) {
             forceAllProp = true;
-        } catch (IOException e) {
+        } catch (final IOException e) {
             forceAllProp = true;
         }
-        ResourceMarshaller marshaller = getMarshaller(req, forceAllProp, requestBody, null);
 
-        String token = getSyncToken(req, requestBody);
+        final ResourceMarshaller marshaller = getMarshaller(req, forceAllProp, requestBody, null);
+        final String token = getSyncToken(req, requestBody);
+        Syncstatus<WebdavResource> syncStatus = ((CommonFolderCollection<?>)req.getCollection()).getSyncStatus(token); 
+        final List<Element> all = new ArrayList<Element>();
+        final int[] statusCodes = syncStatus.getStatusCodes();
+        final PropertiesMarshaller helper = new PropertiesMarshaller(req.getURLPrefix(), req.getCharset());
         
-        Syncstatus<WebdavResource> syncStatus = ((GroupwareCaldavFactory) req.getFactory()).getSyncStatusSince(req.getCollection(), token);
-        
-        List<Element> all = new ArrayList<Element>();
-
-        
-        int[] statusCodes = syncStatus.getStatusCodes();
-        
-        PropertiesMarshaller helper = new PropertiesMarshaller(req.getURLPrefix(), req.getCharset());
-        
-        for (int sc : statusCodes) {
+        for (final int sc : statusCodes) {
             if (sc == 404) {
-                for(WebdavStatus<WebdavResource> status : syncStatus.toIterable(sc)) {
-                    WebdavResource resource = status.getAdditional();
+                for(final WebdavStatus<WebdavResource> status : syncStatus.toIterable(sc)) {
+                    final WebdavResource resource = status.getAdditional();
                     final Element r =  new Element("response",DAV_NS);
                     r.addContent(helper.marshalHREF(resource.getUrl(), resource.getResourceType() != null));
                     r.addContent(helper.marshalStatus(404));
                     all.add(r);
                 }
             } else {
-                for(WebdavStatus<WebdavResource> status : syncStatus.toIterable(sc)) {
-                    List<Element> marshalled = marshaller.marshal(status.getAdditional());
+                for(final WebdavStatus<WebdavResource> status : syncStatus.toIterable(sc)) {
+                    final List<Element> marshalled = marshaller.marshal(status.getAdditional());
                     all.addAll(marshalled);
                 }
             }
         }
-        Element syncToken = new Element("sync-token", DAV_NS);
+        final Element syncToken = new Element("sync-token", DAV_NS);
         syncToken.setText(syncStatus.getToken());
         response.addContent(syncToken);
         response.addContent(all);
@@ -145,14 +140,14 @@ public class SyncCollection extends WebdavPropfindAction {
 
     }
 
-    private String getSyncToken(WebdavRequest req, Document requestBody) throws WebdavProtocolException {
+    private String getSyncToken(final WebdavRequest req, final Document requestBody) throws WebdavProtocolException {
 
-        List children = requestBody.getRootElement().getChildren("sync-token", DAV_NS);
+        final List<Element> children = requestBody.getRootElement().getChildren("sync-token", DAV_NS);
         if (children == null || children.isEmpty()) {
             return null;
         }
 
-        Element tokenElement = (Element) children.get(0);
+        final Element tokenElement = children.get(0);
         return tokenElement.getText();
     }
 }

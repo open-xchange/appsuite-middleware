@@ -69,6 +69,7 @@ import com.openexchange.mail.mime.PlainTextAddress;
 import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.mail.mime.converters.MimeMessageConverter;
 import com.openexchange.mail.mime.utils.MimeMessageUtility;
+import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.tools.TimeZoneUtils;
 
 /**
@@ -80,7 +81,7 @@ public abstract class MailMessage extends MailPart {
 
     private static final long serialVersionUID = 8585899349289256569L;
 
-    private static final transient org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(MailMessage.class));
+    private static final transient org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(MailMessage.class));
 
     /*-
      * ------------------- Flags ------------------------------
@@ -441,7 +442,7 @@ public abstract class MailMessage extends MailPart {
         super();
         priority = PRIORITY_NORMAL;
         colorLabel = COLOR_LABEL_NONE;
-        accountId = -1;
+        accountId = MailAccount.DEFAULT_ID;
     }
 
     /**

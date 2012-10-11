@@ -88,8 +88,9 @@ public class PositiveAssertionOnChangeException extends AbstractPositiveAssertio
         approachUsedForTest = "Create change exception";
         Appointment copy = startAppointment.clone();
 
-        if(! startAppointment.containsObjectID())
+        if(! startAppointment.containsObjectID()) {
             manager.insert(copy);
+        }
 
         Appointment update = new Appointment();
         update.setLastModified(copy.getLastModified());

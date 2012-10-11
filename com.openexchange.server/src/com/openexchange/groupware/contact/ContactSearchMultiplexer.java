@@ -88,7 +88,7 @@ public class ContactSearchMultiplexer {
         final int[] folders = searchObj.getFolders();
         final int contextId = session.getContextId();
         final List<SearchIterator<Contact>> searchIterators = new LinkedList<SearchIterator<Contact>>();
-        if(null != folders && folders.length > 0) {
+        if ((null != folders) && (folders.length > 0)) {
             final List<Integer> foldersForDefaultSearch = new ArrayList<Integer>(folders.length);
             for (final int folderId : folders) {
                 if(discoveryService.hasSpecificContactInterface(folderId, contextId)) {

@@ -1,0 +1,15 @@
+Source: open-xchange-soap-cxf
+Section: web
+Priority: optional
+Maintainer: Marcus Klein <marcus.klein@open-xchange.com>
+Build-Depends: debhelper (>= 4.0.0), ant (>= 1.7.0), ant-optional (>= 1.7.0), sun-java6-jdk|java6-sdk, open-xchange-core (>= @OXVERSION@)
+Standards-Version: 3.8.4
+Homepage: http://www.open-xchange.com
+
+Package: open-xchange-soap-cxf
+Architecture: all
+Pre-Depends: open-xchange-core (>= @OXVERSION@)
+Depends: ${misc:Depends}
+Replaces: open-xchange-axis2
+Conflicts: open-xchange-axis2
+Description: Bundle to offer SOAP webservices as discovered in the OSGi system

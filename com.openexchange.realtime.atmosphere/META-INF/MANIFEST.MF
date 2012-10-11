@@ -1,0 +1,35 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Atmosphere Realtime Channel
+Bundle-SymbolicName: com.openexchange.realtime.atmosphere
+Bundle-Version: 6.22.0.0
+Bundle-Activator: com.openexchange.realtime.atmosphere.osgi.AtmosphereRTActivator
+Bundle-Vendor: Open-Xchange Inc.
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Import-Package: com.openexchange.authentication,
+ com.openexchange.exception,
+ com.openexchange.http.grizzly.services.atmosphere,
+ com.openexchange.i18n,
+ com.openexchange.java,
+ com.openexchange.java.util,
+ com.openexchange.json,
+ com.openexchange.log,
+ com.openexchange.osgi,
+ com.openexchange.realtime,
+ com.openexchange.realtime.packet,
+ com.openexchange.realtime.util,
+ com.openexchange.server,
+ com.openexchange.session,
+ com.openexchange.sessiond,
+ com.openexchange.sessionstorage,
+ com.openexchange.tools.session,
+ javax.servlet,
+ javax.servlet.http,
+ org.apache.commons.logging,
+ org.atmosphere.cpr,
+ org.atmosphere.handler,
+ org.atmosphere.websocket,
+ org.json,
+ org.osgi.framework,
+ org.osgi.util.tracker
+Export-Package: com.openexchange.realtime.atmosphere

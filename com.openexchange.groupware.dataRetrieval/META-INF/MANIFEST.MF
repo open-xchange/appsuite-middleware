@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: DataRetrieval Plug-in
 Bundle-SymbolicName: com.openexchange.groupware.dataRetrieval
-Bundle-Version: 6.21.0
+Bundle-Version: 6.22.0
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Import-Package: com.openexchange.ajax,
@@ -10,6 +10,7 @@ Import-Package: com.openexchange.ajax,
  com.openexchange.ajax.osgi,
  com.openexchange.ajax.requesthandler,
  com.openexchange.config,
+ com.openexchange.dispatcher,
  com.openexchange.documentation,
  com.openexchange.exception,
  com.openexchange.groupware,

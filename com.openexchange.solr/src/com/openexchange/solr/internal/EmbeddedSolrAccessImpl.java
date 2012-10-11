@@ -49,16 +49,17 @@
 
 package com.openexchange.solr.internal;
 
-import java.io.FileReader;
 import java.io.IOException;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.Collection;
+import java.util.HashSet;
+import java.util.Properties;
+import java.util.Set;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
-
 import javax.xml.parsers.ParserConfigurationException;
-
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.solr.client.solrj.SolrServer;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.embedded.EmbeddedSolrServer;
@@ -68,17 +69,18 @@ import org.apache.solr.common.SolrInputDocument;
 import org.apache.solr.common.params.SolrParams;
 import org.apache.solr.core.CoreContainer;
 import org.apache.solr.core.CoreDescriptor;
-import org.apache.solr.core.SolrConfig;
 import org.apache.solr.core.SolrCore;
-import org.apache.solr.schema.IndexSchema;
-import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
-
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.Types;
+import com.openexchange.log.LogFactory;
 import com.openexchange.solr.SolrAccessService;
+import com.openexchange.solr.SolrCoreConfigService;
 import com.openexchange.solr.SolrCoreConfiguration;
 import com.openexchange.solr.SolrCoreIdentifier;
+import com.openexchange.solr.SolrCoreStore;
+import com.openexchange.solr.SolrExceptionCodes;
 import com.openexchange.solr.SolrProperties;
 
 /**
@@ -87,57 +89,85 @@ import com.openexchange.solr.SolrProperties;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public class EmbeddedSolrAccessImpl implements SolrAccessService {
-    
+
+    private static final String ISE_MSG = "The core container was null. The embedded solr server was not started up properly.";
+
+    private static final String IAE_MSG = "Parameter `%s` must not be null.";
+
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(EmbeddedSolrAccessImpl.class));
-    
+
     private final Lock mutex = new ReentrantLock();
 
     private CoreContainer coreContainer;
-    
+
+    private String serverAddress = null;
+
+    private final SolrIndexMysql indexMysql;
 
     public EmbeddedSolrAccessImpl() {
         super();
+        indexMysql = SolrIndexMysql.getInstance();
     }
 
     public void startUp() throws OXException {
         final ConfigurationService config = Services.getService(ConfigurationService.class);
-        final String solrHome = config.getProperty(SolrProperties.PROP_SOLR_HOME);
-
-        /*
-         * Set some properties without the server would not start.
-         */
-        System.setProperty("solr.core.name", "");
-        System.setProperty("solr.core.dataDir", "");
-        System.setProperty("solr.core.instanceDir", "");
-        System.setProperty("logDir", "");
+        final String solrHome = config.getProperty(SolrProperties.SOLR_HOME);
         coreContainer = new CoreContainer(solrHome);
     }
 
-    @Override
-    public boolean startCore(final SolrCoreConfiguration configuration) throws OXException {
+    public boolean startCore(final SolrCoreIdentifier identifier) throws OXException {
+        if (identifier == null) {
+            throw new IllegalArgumentException(String.format(IAE_MSG, "identifier"));
+        }
         if (coreContainer == null) {
-            // TODO: throw exception
+            throw new IllegalStateException(ISE_MSG);
         }
 
-        final String coreName = configuration.getIdentifier().toString();
-        final String dataDir = configuration.getDataDirPath();
-        final CoreDescriptor coreDescriptor = new CoreDescriptor(coreContainer, coreName, configuration.getCoreDirPath());
-        coreDescriptor.setDataDir(dataDir);
+        final int contextId = identifier.getContextId();
+        final int userId = identifier.getUserId();
+        final int module = identifier.getModule();
+        mutex.lock();
         try {
-        	mutex.lock();
-	        if (!hasActiveCore(configuration.getIdentifier())) {
-	        	final ConfigurationService config = Services.getService(ConfigurationService.class);
-	        	final String schemaPath = config.getProperty(SolrProperties.PROP_SCHEMA_MAIL);
-	        	final String configPath = config.getProperty(SolrProperties.PROP_CONFIG_MAIL);
-	    		final SolrConfig solrConfig = new SolrConfig(null, new InputSource(new FileReader(configPath)));		
-	    		final IndexSchema schema = new IndexSchema(solrConfig, null, new InputSource(new FileReader(schemaPath)));
-	    		
-	    		final SolrCore solrCore = new SolrCore(coreName, dataDir, solrConfig, schema, coreDescriptor);
-	    		coreContainer.register(configuration.getIdentifier().toString(), solrCore, false);
-	        	return true;
-	        }
-            
-        	return false;
+            if (hasActiveCore(identifier)) {
+                return false;
+            }
+
+            final com.openexchange.solr.SolrCore solrCore = getCoreOrCreateEnvironment(identifier);
+            if (solrCore.isActive()) {
+                if (solrCore.getServer().equals(getLocalServerAddress())) {
+                    indexMysql.deactivateCoreEntry(contextId, userId, module);
+                } else {
+                    return false;
+                }
+            }
+
+            final ConfigurationService config = Services.getService(ConfigurationService.class);
+            final String libDir = config.getProperty(SolrProperties.LIB_DIR);
+            final String schemaFile = getSchemaFileByModule(module);
+            final String configFile = getConfigFileByModule(module);
+            final String configDir = config.getProperty(SolrProperties.CONFIG_DIR);
+            final SolrCoreStore coreStore = indexMysql.getCoreStore(solrCore.getStore());
+            final SolrCoreConfiguration configuration = new SolrCoreConfiguration(coreStore.getUri(), identifier);
+            final String coreName = configuration.getIdentifier().toString();
+            final String dataDir = configuration.getDataDirPath();
+            final Properties properties = new Properties();
+            properties.put("data.dir", dataDir);
+            properties.put("logDir", "/var/log/open-xchange");
+            properties.put("confDir", configDir);
+            properties.put("libDir", libDir);
+            final CoreDescriptor coreDescriptor = new CoreDescriptor(coreContainer, coreName, configuration.getCoreDirPath());
+            coreDescriptor.setDataDir(dataDir);
+            coreDescriptor.setSchemaName(schemaFile);
+            coreDescriptor.setConfigName(configFile);
+            coreDescriptor.setCoreProperties(properties);
+            final SolrCore embeddedSolrCore = coreContainer.create(coreDescriptor);
+            if (indexMysql.activateCoreEntry(contextId, userId, module, getLocalServerAddress())) {
+                coreContainer.register(configuration.getIdentifier().toString(), embeddedSolrCore, false);
+                return true;
+            } else {
+                embeddedSolrCore.close();
+                return false;
+            }
         } catch (final ParserConfigurationException e) {
             throw new OXException(e);
         } catch (final IOException e) {
@@ -145,246 +175,381 @@ public class EmbeddedSolrAccessImpl implements SolrAccessService {
         } catch (final SAXException e) {
             throw new OXException(e);
         } finally {
-        	mutex.unlock();
+            mutex.unlock();
         }
     }
 
-    @Override
     public boolean stopCore(final SolrCoreIdentifier identifier) throws OXException {
-        if (coreContainer != null) {
-            // TODO: throw exception
+        if (identifier == null) {
+            throw new IllegalArgumentException(String.format(IAE_MSG, "identifier"));
         }
-            
+        if (coreContainer == null) {
+            throw new IllegalStateException(ISE_MSG);
+        }
+
+        final int contextId = identifier.getContextId();
+        final int userId = identifier.getUserId();
+        final int module = identifier.getModule();
+        // TODO : remove optimize and implement a suitable
+        // optimize-strategy
+        optimize(identifier);
+        indexMysql.deactivateCoreEntry(contextId, userId, module);
+        mutex.lock();
         try {
-        	mutex.lock();
-			final SolrCore solrCore = coreContainer.remove(identifier.toString());
-			if (solrCore != null) {
-				// FIXME : remove optimize and implement a suitable optimize-strategy
-				optimize(identifier);   
-				solrCore.close();
-				return true;
-			}
-		} finally {
-			mutex.unlock();
-		}
-        
-		return false;
+            final SolrCore solrCore = coreContainer.remove(identifier.toString());
+            if (solrCore != null) {
+                solrCore.close();
+                return true;
+            }
+        } finally {
+            mutex.unlock();
+        }
+
+        return false;
     }
 
-    public void shutDown() {
+    public void shutDown() throws OXException {
+        final String server = getLocalServerAddress();
+        final Set<Integer> contextIds = new HashSet<Integer>();
+        final Collection<String> activeCores = getActiveCores();
+        for (final String core : activeCores) {
+            try {
+                final SolrCoreIdentifier identifier = new SolrCoreIdentifier(core);
+                contextIds.add(identifier.getContextId());
+            } catch (final OXException e) {
+                // Parsing error. Ignore this core.
+            }
+        }
+
+        for (final Integer contextId : contextIds) {
+            indexMysql.deactivateCoresForServer(server, contextId);
+        }
+
         if (coreContainer != null) {
             coreContainer.shutdown();
         }
     }
 
-    @Override
-    public void reloadCore(final SolrCoreIdentifier identifier) throws OXException {
-        if (coreContainer != null) {
-            // TODO: throw exception
-        }
-        
-        try {
-        	mutex.lock();
-            coreContainer.reload(identifier.toString());
-        } catch (final ParserConfigurationException e) {
-            throw new OXException(e);
-        } catch (final IOException e) {
-            throw new OXException(e);
-        } catch (final SAXException e) {
-            throw new OXException(e);
-        } finally {
-        	mutex.unlock();
-        }
-    }
-    
     public boolean hasActiveCore(final SolrCoreIdentifier identifier) throws OXException {
-        if (coreContainer != null) {
-            // TODO: throw exception
+        if (identifier == null) {
+            throw new IllegalArgumentException(String.format(IAE_MSG, "identifier"));
         }
-        
+        if (coreContainer == null) {
+            throw new IllegalStateException(ISE_MSG);
+        }
+
         return coreContainer.getCoreNames().contains(identifier.toString());
     }
-        
-    @Override
-    public UpdateResponse add(SolrCoreIdentifier identifier, SolrInputDocument document, boolean commit) throws OXException {
-        final SolrServer solrServer = getSolrServer(identifier);
-        try {
-            return solrServer.add(document);
-        } catch (SolrServerException e) {
-            rollback(solrServer);
-            throw new OXException(e);
-        } catch (IOException e) {
-            rollback(solrServer);
-            throw new OXException(e);
-        } finally {
-            commit(solrServer, commit);
-        }
-    }
 
-    @Override
-    public UpdateResponse add(SolrCoreIdentifier identifier, Collection<SolrInputDocument> documents, boolean commit) throws OXException {
-        final SolrServer solrServer = getSolrServer(identifier);
-        try {
-            return solrServer.add(documents);
-        } catch (SolrServerException e) {
-            rollback(solrServer);
-            throw new OXException(e);
-        } catch (IOException e) {
-            rollback(solrServer);
-            throw new OXException(e);
-        } finally {
-            commit(solrServer, commit);
-        }
-    }
-
-    @Override
-    public UpdateResponse deleteById(SolrCoreIdentifier identifier, String id, boolean commit) throws OXException {
-        final SolrServer solrServer = getSolrServer(identifier);
-        try {
-            return solrServer.deleteById(id);
-        } catch (SolrServerException e) {
-            rollback(solrServer);
-            throw new OXException(e);
-        } catch (IOException e) {
-            rollback(solrServer);
-            throw new OXException(e);
-        } finally {
-            commit(solrServer, commit);
-        }
-    }
-
-    @Override
-    public UpdateResponse deleteByQuery(SolrCoreIdentifier identifier, String query, boolean commit) throws OXException {
-        final SolrServer solrServer = getSolrServer(identifier);
-        try {
-            return solrServer.deleteByQuery(query);
-        } catch (SolrServerException e) {
-            rollback(solrServer);
-            throw new OXException(e);
-        } catch (IOException e) {
-            rollback(solrServer);
-            throw new OXException(e);
-        } finally {
-            commit(solrServer, commit);
-        }
-    }
-
-    @Override
-    public UpdateResponse commit(SolrCoreIdentifier identifier) throws OXException {
-        final SolrServer solrServer = getSolrServer(identifier);
-        try {
-            return solrServer.commit();
-        } catch (SolrServerException e) {
-            rollback(solrServer);
-            throw new OXException(e);
-        } catch (IOException e) {
-            rollback(solrServer);
-            throw new OXException(e);
-        }
-    }
-
-    @Override
-    public UpdateResponse commit(SolrCoreIdentifier identifier, boolean waitFlush, boolean waitSearcher) throws OXException {
-        final SolrServer solrServer = getSolrServer(identifier);
-        try {
-            return solrServer.commit(waitFlush, waitSearcher);
-        } catch (SolrServerException e) {
-            rollback(solrServer);
-            throw new OXException(e);
-        } catch (IOException e) {
-            rollback(solrServer);
-            throw new OXException(e);
-        }
-    }
-
-    @Override
-    public UpdateResponse rollback(SolrCoreIdentifier identifier) throws OXException {
-        final SolrServer solrServer = getSolrServer(identifier);
-        try {
-            return solrServer.rollback();
-        } catch (SolrServerException e) {
-            rollback(solrServer);
-            throw new OXException(e);
-        } catch (IOException e) {
-            rollback(solrServer);
-            throw new OXException(e);
-        }
-    }
-
-    @Override
-    public UpdateResponse optimize(SolrCoreIdentifier identifier) throws OXException {
-        final SolrServer solrServer = getSolrServer(identifier);
-        try {
-            return solrServer.optimize();
-        } catch (SolrServerException e) {
-            rollback(solrServer);
-            throw new OXException(e);
-        } catch (IOException e) {
-            rollback(solrServer);
-            throw new OXException(e);
-        }
-    }
-
-    @Override
-    public UpdateResponse optimize(SolrCoreIdentifier identifier, boolean waitFlush, boolean waitSearcher) throws OXException {
-        final SolrServer solrServer = getSolrServer(identifier);
-        try {
-            return solrServer.optimize(waitFlush, waitSearcher);
-        } catch (SolrServerException e) {
-            rollback(solrServer);
-            throw new OXException(e);
-        } catch (IOException e) {
-            rollback(solrServer);
-            throw new OXException(e);
-        }
-    }
-
-    @Override
-    public UpdateResponse optimize(SolrCoreIdentifier identifier, boolean waitFlush, boolean waitSearcher, int maxSegments) throws OXException {
-        final SolrServer solrServer = getSolrServer(identifier);
-        try {
-            return solrServer.optimize(waitFlush, waitSearcher, maxSegments);
-        } catch (SolrServerException e) {
-            rollback(solrServer);
-            throw new OXException(e);
-        } catch (IOException e) {
-            rollback(solrServer);
-            throw new OXException(e);
-        }
-    }
-
-    @Override
-    public QueryResponse query(SolrCoreIdentifier identifier, SolrParams params) throws OXException {
-        final SolrServer solrServer = getSolrServer(identifier);
-        try {
-            return solrServer.query(params);
-        } catch (SolrServerException e) {
-            rollback(solrServer);
-            throw new OXException(e);
-        }
-    }
-    
     public Collection<String> getActiveCores() {
         return coreContainer.getCoreNames();
     }
-    
+
+    @Override
+    public UpdateResponse add(final SolrCoreIdentifier identifier, final SolrInputDocument document, final boolean commit) throws OXException {
+        if (identifier == null) {
+            throw new IllegalArgumentException(String.format(IAE_MSG, "identifier"));
+        }
+        if (document == null) {
+            throw new IllegalArgumentException(String.format(IAE_MSG, "document"));
+        }
+
+        final SolrServer solrServer = getSolrServer(identifier);
+        try {
+            return solrServer.add(document);
+        } catch (final SolrServerException e) {
+            rollback(solrServer);
+            throw new OXException(e);
+        } catch (final IOException e) {
+            rollback(solrServer);
+            throw new OXException(e);
+        } finally {
+            commit(solrServer, commit);
+        }
+    }
+
+    @Override
+    public UpdateResponse add(final SolrCoreIdentifier identifier, final Collection<SolrInputDocument> documents, final boolean commit) throws OXException {
+        if (identifier == null) {
+            throw new IllegalArgumentException(String.format(IAE_MSG, "identifier"));
+        }
+        if (documents == null) {
+            throw new IllegalArgumentException(String.format(IAE_MSG, "documents"));
+        }
+
+        final SolrServer solrServer = getSolrServer(identifier);
+        try {
+            return solrServer.add(documents);
+        } catch (final SolrServerException e) {
+            rollback(solrServer);
+            throw new OXException(e);
+        } catch (final IOException e) {
+            rollback(solrServer);
+            throw new OXException(e);
+        } finally {
+            commit(solrServer, commit);
+        }
+    }
+
+    @Override
+    public UpdateResponse deleteById(final SolrCoreIdentifier identifier, final String id, final boolean commit) throws OXException {
+        if (identifier == null) {
+            throw new IllegalArgumentException(String.format(IAE_MSG, "identifier"));
+        }
+        if (id == null) {
+            throw new IllegalArgumentException(String.format(IAE_MSG, "id"));
+        }
+
+        final SolrServer solrServer = getSolrServer(identifier);
+        try {
+            return solrServer.deleteById(id);
+        } catch (final SolrServerException e) {
+            rollback(solrServer);
+            throw new OXException(e);
+        } catch (final IOException e) {
+            rollback(solrServer);
+            throw new OXException(e);
+        } finally {
+            commit(solrServer, commit);
+        }
+    }
+
+    @Override
+    public UpdateResponse deleteByQuery(final SolrCoreIdentifier identifier, final String query, final boolean commit) throws OXException {
+        if (identifier == null) {
+            throw new IllegalArgumentException(String.format(IAE_MSG, "identifier"));
+        }
+        if (query == null) {
+            throw new IllegalArgumentException(String.format(IAE_MSG, "query"));
+        }
+
+        final SolrServer solrServer = getSolrServer(identifier);
+        try {
+            return solrServer.deleteByQuery(query);
+        } catch (final SolrServerException e) {
+            rollback(solrServer);
+            throw new OXException(e);
+        } catch (final IOException e) {
+            rollback(solrServer);
+            throw new OXException(e);
+        } finally {
+            commit(solrServer, commit);
+        }
+    }
+
+    @Override
+    public UpdateResponse commit(final SolrCoreIdentifier identifier) throws OXException {
+        if (identifier == null) {
+            throw new IllegalArgumentException(String.format(IAE_MSG, "identifier"));
+        }
+
+        final SolrServer solrServer = getSolrServer(identifier);
+        try {
+            return solrServer.commit();
+        } catch (final SolrServerException e) {
+            rollback(solrServer);
+            throw new OXException(e);
+        } catch (final IOException e) {
+            rollback(solrServer);
+            throw new OXException(e);
+        }
+    }
+
+    @Override
+    public UpdateResponse commit(final SolrCoreIdentifier identifier, final boolean waitFlush, final boolean waitSearcher) throws OXException {
+        if (identifier == null) {
+            throw new IllegalArgumentException(String.format(IAE_MSG, "identifier"));
+        }
+
+        final SolrServer solrServer = getSolrServer(identifier);
+        try {
+            return solrServer.commit(waitFlush, waitSearcher);
+        } catch (final SolrServerException e) {
+            rollback(solrServer);
+            throw new OXException(e);
+        } catch (final IOException e) {
+            rollback(solrServer);
+            throw new OXException(e);
+        }
+    }
+
+    @Override
+    public UpdateResponse rollback(final SolrCoreIdentifier identifier) throws OXException {
+        if (identifier == null) {
+            throw new IllegalArgumentException(String.format(IAE_MSG, "identifier"));
+        }
+
+        final SolrServer solrServer = getSolrServer(identifier);
+        try {
+            return solrServer.rollback();
+        } catch (final SolrServerException e) {
+            rollback(solrServer);
+            throw new OXException(e);
+        } catch (final IOException e) {
+            rollback(solrServer);
+            throw new OXException(e);
+        }
+    }
+
+    @Override
+    public UpdateResponse optimize(final SolrCoreIdentifier identifier) throws OXException {
+        if (identifier == null) {
+            throw new IllegalArgumentException(String.format(IAE_MSG, "identifier"));
+        }
+
+        final SolrServer solrServer = getSolrServer(identifier);
+        try {
+            return solrServer.optimize();
+        } catch (final SolrServerException e) {
+            rollback(solrServer);
+            throw new OXException(e);
+        } catch (final IOException e) {
+            rollback(solrServer);
+            throw new OXException(e);
+        }
+    }
+
+    @Override
+    public UpdateResponse optimize(final SolrCoreIdentifier identifier, final boolean waitFlush, final boolean waitSearcher) throws OXException {
+        if (identifier == null) {
+            throw new IllegalArgumentException(String.format(IAE_MSG, "identifier"));
+        }
+
+        final SolrServer solrServer = getSolrServer(identifier);
+        try {
+            return solrServer.optimize(waitFlush, waitSearcher);
+        } catch (final SolrServerException e) {
+            rollback(solrServer);
+            throw new OXException(e);
+        } catch (final IOException e) {
+            rollback(solrServer);
+            throw new OXException(e);
+        }
+    }
+
+    @Override
+    public UpdateResponse optimize(final SolrCoreIdentifier identifier, final boolean waitFlush, final boolean waitSearcher, final int maxSegments) throws OXException {
+        if (identifier == null) {
+            throw new IllegalArgumentException(String.format(IAE_MSG, "identifier"));
+        }
+
+        final SolrServer solrServer = getSolrServer(identifier);
+        try {
+            return solrServer.optimize(waitFlush, waitSearcher, maxSegments);
+        } catch (final SolrServerException e) {
+            rollback(solrServer);
+            throw new OXException(e);
+        } catch (final IOException e) {
+            rollback(solrServer);
+            throw new OXException(e);
+        }
+    }
+
+    @Override
+    public QueryResponse query(final SolrCoreIdentifier identifier, final SolrParams params) throws OXException {
+        if (identifier == null) {
+            throw new IllegalArgumentException(String.format(IAE_MSG, "identifier"));
+        }
+        if (params == null) {
+            throw new IllegalArgumentException(String.format(IAE_MSG, "params"));
+        }
+
+        final SolrServer solrServer = getSolrServer(identifier);
+        try {
+            return solrServer.query(params);
+        } catch (final SolrServerException e) {
+            rollback(solrServer);
+            throw new OXException(e);
+        }
+    }
+
+    @Override
+    public void freeResources(final SolrCoreIdentifier identifier) {
+        if (identifier == null) {
+            throw new IllegalArgumentException(String.format(IAE_MSG, "identifier"));
+        }
+
+        try {
+            if (hasActiveCore(identifier)) {
+                stopCore(identifier);
+            }
+        } catch (OXException e) {
+            LOG.error("Could not stop core " + identifier.toString(), e);
+        }        
+    }
+
+    private String getConfigFileByModule(final int module) throws OXException {
+        final ConfigurationService config = Services.getService(ConfigurationService.class);
+        final String configFile;
+        switch (module) {
+        case Types.EMAIL:
+            configFile = config.getProperty(SolrProperties.CONFIG_FILE_MAIL);
+            break;
+            
+        case Types.INFOSTORE:
+            configFile = config.getProperty(SolrProperties.CONFIG_FILE_INFOSTORE);
+            break;
+
+        default:
+            throw SolrExceptionCodes.UNKNOWN_MODULE.create(module);
+        }
+
+        return configFile;
+    }
+
+    private String getSchemaFileByModule(final int module) throws OXException {
+        final ConfigurationService config = Services.getService(ConfigurationService.class);
+        final String schemaFile;
+        switch (module) {
+        case Types.EMAIL:
+            schemaFile = config.getProperty(SolrProperties.SCHEMA_FILE_MAIL);
+            break;
+            
+        case Types.INFOSTORE:
+            schemaFile = config.getProperty(SolrProperties.SCHEMA_FILE_INFOSTORE);
+            break;
+
+        default:
+            throw SolrExceptionCodes.UNKNOWN_MODULE.create(module);
+        }
+
+        return schemaFile;
+    }
+
     private SolrServer getSolrServer(final SolrCoreIdentifier identifier) throws OXException {
+        if (coreContainer == null) {
+            throw new IllegalStateException(ISE_MSG);
+        }
+
         final EmbeddedSolrServer solrServer = new EmbeddedSolrServer(coreContainer, identifier.toString());
         return solrServer;
     }
-    
-    private void commit(SolrServer solrServer, boolean commit) throws OXException {
+
+    private String getLocalServerAddress() throws OXException {
+        if (serverAddress != null) {
+            return serverAddress;
+        }
+
+        try {
+            final InetAddress addr = InetAddress.getLocalHost();
+            return serverAddress = addr.getHostAddress();
+        } catch (final UnknownHostException e) {
+            throw new OXException(e);
+        }
+    }
+
+    private void commit(final SolrServer solrServer, final boolean commit) throws OXException {
         if (commit) {
             try {
                 solrServer.commit();
-            } catch (SolrServerException e) {
+            } catch (final SolrServerException e) {
                 throw new OXException(e);
-            } catch (IOException e) {
+            } catch (final IOException e) {
                 throw new OXException(e);
             }
         }
     }
-    
+
     private void rollback(final SolrServer solrServer) {
         try {
             solrServer.rollback();
@@ -393,12 +558,26 @@ public class EmbeddedSolrAccessImpl implements SolrAccessService {
             handleThrowable(t);
         }
     }
-    
+
+    private com.openexchange.solr.SolrCore getCoreOrCreateEnvironment(final SolrCoreIdentifier identifier) throws OXException {
+        try {
+            return indexMysql.getSolrCore(identifier.getContextId(), identifier.getUserId(), identifier.getModule());
+        } catch (final OXException e) {
+            if (e.similarTo(SolrExceptionCodes.CORE_ENTRY_NOT_FOUND)) {
+                final SolrCoreConfigService coreService = Services.getService(SolrCoreConfigService.class);
+                coreService.createCoreEnvironment(identifier);
+                return indexMysql.getSolrCore(identifier.getContextId(), identifier.getUserId(), identifier.getModule());
+            } else {
+                throw e;
+            }
+        }
+    }
+
     private static final String MARKER = " ---=== /!\\ ===--- ";
 
     /**
      * Checks whether the supplied <tt>Throwable</tt> is one that needs to be rethrown and swallows all others.
-     *
+     * 
      * @param t The <tt>Throwable</tt> to check
      */
     private void handleThrowable(final Throwable t) {
@@ -414,4 +593,5 @@ public class EmbeddedSolrAccessImpl implements SolrAccessService {
         }
         // All other instances of Throwable will be silently swallowed
     }
+
 }

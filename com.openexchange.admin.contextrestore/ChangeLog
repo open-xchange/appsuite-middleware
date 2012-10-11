@@ -1,3 +1,12 @@
+* 2012-06-15 - jan.bauerdick@open-xchange.com
+
+ - Moved packages c.o.admin.contextrestore.rmi & c.o.admin.contextrestore.console to dedicated bundles
+
+* 2012-06-11 - jan.bauerdick@open-xchange.com
+
+ - Refactored to run in groupware VM
+ - Register RMI as OSGi-service
+
 * 2011-03-01 - marcus.klein@open-xchange.com
 
  - Bugfix #18465: Compiling sources everywhere to Java5 compatible class files.

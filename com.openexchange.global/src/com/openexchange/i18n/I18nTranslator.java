@@ -50,7 +50,7 @@
 package com.openexchange.i18n;
 
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import com.openexchange.log.LogFactory;
 
 /**
  * Implementation of a {@link Translator} backed with an {@link I18nService}.

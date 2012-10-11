@@ -50,7 +50,6 @@
 package com.openexchange.groupware.update.internal;
 
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import com.openexchange.groupware.update.UpdateTask;
 import com.openexchange.groupware.update.UpdateTaskAdapter;
 import com.openexchange.groupware.update.UpdateTaskV2;
@@ -63,6 +62,7 @@ import com.openexchange.groupware.update.tasks.CreateIndexOnContextAttributesTas
 import com.openexchange.groupware.update.tasks.CreateIndexOnUserAttributesForAliasLookupTask;
 import com.openexchange.groupware.update.tasks.MailAccountAddReplyToTask;
 import com.openexchange.groupware.update.tasks.VirtualFolderAddSortNumTask;
+import com.openexchange.log.LogFactory;
 
 /**
  * Lists all update tasks of the com.openexchange.server bundle.
@@ -320,8 +320,8 @@ public final class InternalList {
      * All this tasks should extend {@link UpdateTaskAdapter} to fulfill the prerequisites to be sorted among their dependencies.
      */
     private static final UpdateTaskV2[] TASKS = new UpdateTaskV2[] {
-        // Renames "Unified Mail" to "Unified Mail"
-        new com.openexchange.groupware.update.tasks.UnifiedInboxRenamerTask(),
+        // Renames "Unified INBOX" to "Unified Mail"
+        new com.openexchange.groupware.update.tasks.UnifiedINBOXRenamerTask(),
 
         // Creates necessary tables for mail header cache
         new com.openexchange.groupware.update.tasks.HeaderCacheCreateTableTask(),
@@ -402,13 +402,10 @@ public final class InternalList {
         // Add "sortNum" column to virtual folder table.
         new VirtualFolderAddSortNumTask(),
 
+        // +++++++++++++++++++++++++++++++++ Version 6.20.1 starts here. +++++++++++++++++++++++++++++++++
+
         // Restores the initial permissions on the public root folder.
         new com.openexchange.groupware.update.tasks.DropIndividualUserPermissionsOnPublicFolderTask(),
-
-        // +++++++++++++++++++++++++++++++++ Version 6.21.0 starts here. +++++++++++++++++++++++++++++++++
-
-        // Add "replyTo" column to mail/transport account table
-        new MailAccountAddReplyToTask(),
 
         // Adds Outlook address fields to contact tables
         new com.openexchange.groupware.update.tasks.ContactAddOutlookAddressFieldsTask(),
@@ -440,11 +437,44 @@ public final class InternalList {
         // Checks for missing folder 'public_infostore' (15) in any available context
         new com.openexchange.groupware.update.tasks.CheckForPublicInfostoreFolderTask(),
 
+        // Drops useless foreign keys from 'malPollHash' table
+        new com.openexchange.groupware.update.tasks.MALPollDropConstraintsTask(),
+
+        // +++++++++++++++++++++++++++++++++ Version 6.20.3 starts here. +++++++++++++++++++++++++++++++++
+
+        // Extends dn fields in calendar tables to 320 chars.
+        new com.openexchange.groupware.update.tasks.CalendarExtendDNColumnTaskV2(),
+
+        // +++++++++++++++++++++++++++++++++ Version 6.20.5 starts here. +++++++++++++++++++++++++++++++++
+
+        // Creates indexes on tables "prg_dlist" and "del_dlist" to improve look-up.
+        new com.openexchange.groupware.update.tasks.DListAddIndexForLookup(),
+
+        // +++++++++++++++++++++++++++++++++ Version 6.20.7 starts here. +++++++++++++++++++++++++++++++++
+
+        // Another attempt: Adds 'organizerId', 'principal' and 'principalId' to prg_dates and del_dates
+        new com.openexchange.groupware.update.tasks.AppointmentAddOrganizerIdPrincipalPrincipalIdColumnsTask2(),
+
+        // Add UIDs to appointments if missing.
+        new com.openexchange.groupware.update.tasks.CalendarAddUIDValueTask(),
+
+        // +++++++++++++++++++++++++++++++++ Version 6.22.0 starts here. +++++++++++++++++++++++++++++++++
+
+        // Add "replyTo" column to mail/transport account table
+        new MailAccountAddReplyToTask(),
+
         // Migrate "replyTo" information from properties table to account tables
         new com.openexchange.groupware.update.tasks.MailAccountMigrateReplyToTask(),
 
-        // Drops useless foreign keys from 'malPollHash' table
-        new com.openexchange.groupware.update.tasks.MALPollDropConstraintsTask(),
+        // Add 'filename' column to appointment tables.
+        new com.openexchange.groupware.update.tasks.AppointmentAddFilenameColumnTask(),
+
+        // Add 'filename' column to task tables.
+        new com.openexchange.groupware.update.tasks.TasksAddFilenameColumnTask(),
+
+        // Removes unnecessary indexes from certain tables (see Bug #21882)
+        new com.openexchange.groupware.update.tasks.RemoveUnnecessaryIndexes(),
+        new com.openexchange.groupware.update.tasks.RemoveUnnecessaryIndexes2(),
 
     };
 }

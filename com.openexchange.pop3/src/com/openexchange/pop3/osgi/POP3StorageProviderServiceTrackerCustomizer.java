@@ -68,7 +68,7 @@ import com.openexchange.pop3.storage.POP3StorageProviderRegistry;
  */
 public class POP3StorageProviderServiceTrackerCustomizer implements ServiceTrackerCustomizer<POP3StorageProvider,POP3StorageProvider> {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(POP3StorageProviderServiceTrackerCustomizer.class));
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(POP3StorageProviderServiceTrackerCustomizer.class));
 
     private final BundleContext context;
 
@@ -149,6 +149,9 @@ public class POP3StorageProviderServiceTrackerCustomizer implements ServiceTrack
      * @param provider The provider to remove from registry
      */
     public void removePOP3StorageProvider(final POP3StorageProvider provider) {
+        if (null == provider) {
+            return;
+        }
         // Unregister provider's delete listeners
         if (provider.unregisterDeleteListenersOnAbsence()) {
             final List<ServiceRegistration<?>> registrations = registrationMap.remove(provider.getPOP3StorageName());

@@ -73,79 +73,104 @@ public class OXAutoCIDContextImpl implements OXContextPluginInterface {
         oxautocid = OXAutoCIDStorageInterface.getInstance();
     }
 
+    @Override
     public void change(final Context ctx, final Credentials auth) {
         // Nothing to do.
     }
 
+    @Override
     public void changeModuleAccess(final Context ctx, final UserModuleAccess access, final Credentials auth) {
         // Nothing to do.
     }
 
+    @Override
     public void changeModuleAccess(final Context ctx, final String access_combination_name, final Credentials auth) {
         // Nothing to do.
     }
 
+    @Override
     public Context postCreate(final Context ctx, final User admin_user, final UserModuleAccess access, final Credentials auth) {
         return ctx;
     }
 
+    @Override
     public Context preCreate(final Context ctx, final User admin_user, final Credentials auth) throws PluginException {
         try {
-            if (!ctx.isIdset()) {
-                int id = oxautocid.generateContextId();
-                ctx.setId(Integer.valueOf(id));
-            }
+            final int id = oxautocid.generateContextId();
+            ctx.setId(Integer.valueOf(id));
             return ctx;
-        } catch (StorageException e) {
+        } catch (final StorageException e) {
             throw new PluginException(e);
         }
     }
 
+    @Override
     public void delete(final Context ctx, final Credentials auth) {
         // Nothing to do.
     }
 
+    @Override
     public void disable(final Context ctx, final Credentials auth) {
         // Nothing to do.
     }
 
+    @Override
     public void disableAll(final Credentials auth) {
         // Nothing to do.
     }
 
+    @Override
     public void downgrade(final Context ctx, final Credentials auth) {
         // Nothing to do.
     }
 
+    @Override
     public void enable(final Context ctx, final Credentials auth) {
         // Nothing to do.
     }
 
+    @Override
     public void enableAll(final Credentials auth) {
         // Nothing to do.
     }
 
+    @Override
     public String getAccessCombinationName(final Context ctx, final Credentials auth) {
         return null;
     }
 
+    @Override
     public List<OXCommonExtension> getData(final List<Context> ctxs, final Credentials auth) {
         return null;
     }
 
+    @Override
     public UserModuleAccess getModuleAccess(final Context ctx, final Credentials auth) {
         return null;
     }
 
+    @Override
     public Filter<Context, Context> list(final String search_pattern, final Credentials auth) {
         return null;
     }
 
+    @Override
     public Filter<Integer, Integer> filter(final Credentials auth) {
         return null;
     }
 
-    public Boolean checkMandatoryMembersContextCreate(Context ctx) {
+    @Override
+    public Boolean checkMandatoryMembersContextCreate(final Context ctx) {
         return new Boolean(true);
+    }
+
+    @Override
+    public void exists(final Context ctx, final Credentials auth) {
+        // Nothing to do.
+    }
+
+    @Override
+    public void getAdminId(final Context ctx, final Credentials auth) {
+        // Nothing to do.
     }
 }

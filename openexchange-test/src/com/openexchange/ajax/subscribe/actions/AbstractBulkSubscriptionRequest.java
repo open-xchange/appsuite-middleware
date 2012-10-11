@@ -74,8 +74,9 @@ public abstract class AbstractBulkSubscriptionRequest<T extends AbstractSubscrip
     }
 
     public Parameter getColumnsAsParameter(){
-        if(getColumns() == null)
+        if(getColumns() == null) {
             return null;
+        }
         return new Parameter("columns", Strings.join(getColumns(), ","));
     }
 
@@ -88,8 +89,9 @@ public abstract class AbstractBulkSubscriptionRequest<T extends AbstractSubscrip
     }
 
     public Params getDynamicColumnsAsParameter(){
-        if(getDynamicColumns() == null)
+        if(getDynamicColumns() == null) {
             return null;
+        }
 
         Params params = new Params();
         for (String plugin : getDynamicColumns().keySet()) {

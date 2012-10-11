@@ -70,11 +70,9 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import com.openexchange.database.provider.DBProvider;
 import com.openexchange.database.provider.ReuseReadConProvider;
 import com.openexchange.database.tx.DBService;
-import com.openexchange.event.impl.EventClient;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.contexts.Context;
@@ -122,7 +120,9 @@ import com.openexchange.groupware.results.DeltaImpl;
 import com.openexchange.groupware.results.TimedResult;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
+import com.openexchange.log.LogFactory;
 import com.openexchange.server.impl.EffectivePermission;
+import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.tools.collections.Injector;
 import com.openexchange.tools.file.FileStorage;
 import com.openexchange.tools.file.QuotaFileStorage;
@@ -130,7 +130,6 @@ import com.openexchange.tools.file.SaveFileWithQuotaAction;
 import com.openexchange.tools.iterator.CombinedSearchIterator;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorAdapter;
-import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.SessionHolder;
 
@@ -329,9 +328,6 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
             updateVersion.setTimestamp(oldDocument.getSequenceNumber());
 
             perform(updateVersion, true);
-
-            final EventClient ec = new EventClient(sessionObj);
-            ec.modify(document);
         } catch (final OXException x) {
             throw x;
         } catch (final Exception e) {
@@ -592,14 +588,6 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
                     reservation.destroySilently();
                 }
             }
-
-            final EventClient ec = new EventClient(sessionObj);
-            try {
-                ec.create(document);
-            } catch (final Exception e) {
-                LOG.error("", e);
-            }
-
         } else {
             saveDocument(document, data, sequenceNumber, nonNull(document), sessionObj);
         }
@@ -893,26 +881,8 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
                     infostoreFilenameReservation.destroySilently();
                 }
             }
-
-            final EventClient ec = new EventClient(sessionObj);
-            final DocumentMetadataImpl docForEvent = new DocumentMetadataImpl(oldDocument);
-            final SetSwitch set = new SetSwitch(docForEvent);
-            final GetSwitch get = new GetSwitch(document);
-            for (final Metadata metadata : modifiedColumns) {
-                set.setValue(metadata.doSwitch(get));
-                metadata.doSwitch(set);
-            }
-            final OXFolderAccess ofa = new OXFolderAccess(sessionObj.getContext());
-            int folderId = (int) oldDocument.getFolderId();
-            if (updatedCols.contains(Metadata.FOLDER_ID_LITERAL)) {
-                folderId = (int) docForEvent.getFolderId();
-            }
-            ec.modify(oldDocument, docForEvent, ofa.getFolderObject(folderId));
         } catch (final OXException x) {
             throw x;
-        } catch (final Exception e) {
-            // FIXME Client
-            LOG.error("", e);
         }
     }
 
@@ -995,16 +965,6 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
 
         {
             perform(deleteDocument, true);
-        }
-
-        final EventClient ec = new EventClient(sessionObj);
-
-        for (final DocumentMetadata m : allDocuments) {
-            try {
-                ec.delete(m);
-            } catch (final Exception e) {
-                LOG.error("", e);
-            }
         }
     }
 
@@ -1252,13 +1212,6 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
             throw x;
         }
 
-        final EventClient ec = new EventClient(sessionObj);
-        try {
-            ec.modify(metadata);
-        } catch (final Exception e) {
-            LOG.error("", e); // FIXME
-        }
-
         final int[] retval = new int[versionSet.size()];
         int i = 0;
         for (final Integer integer : versionSet) {
@@ -1283,9 +1236,9 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
         columns = addLastModifiedIfNeeded(columns);
         boolean onlyOwn = false;
         final EffectivePermission isperm = security.getFolderPermission(folderId, ctx, user, userConfig);
-        if (isperm.getReadPermission() == EffectivePermission.NO_PERMISSIONS) {
+        if (isperm.getReadPermission() == OCLPermission.NO_PERMISSIONS) {
             throw InfostoreExceptionCodes.NO_READ_PERMISSION.create();
-        } else if (isperm.getReadPermission() == EffectivePermission.READ_OWN_OBJECTS) {
+        } else if (isperm.getReadPermission() == OCLPermission.READ_OWN_OBJECTS) {
             onlyOwn = true;
         }
         boolean addLocked = false;
@@ -1394,9 +1347,9 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
     public Delta<DocumentMetadata> getDelta(final long folderId, final long updateSince, Metadata[] columns, final Metadata sort, final int order, final boolean ignoreDeleted, final Context ctx, final User user, final UserConfiguration userConfig) throws OXException {
         boolean onlyOwn = false;
         final EffectivePermission isperm = security.getFolderPermission(folderId, ctx, user, userConfig);
-        if (isperm.getReadPermission() == EffectivePermission.NO_PERMISSIONS) {
+        if (isperm.getReadPermission() == OCLPermission.NO_PERMISSIONS) {
             throw InfostoreExceptionCodes.NO_READ_PERMISSION.create();
-        } else if (isperm.getReadPermission() == EffectivePermission.READ_OWN_OBJECTS) {
+        } else if (isperm.getReadPermission() == OCLPermission.READ_OWN_OBJECTS) {
             onlyOwn = true;
         }
         boolean addLocked = false;

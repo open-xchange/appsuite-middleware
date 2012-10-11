@@ -66,6 +66,8 @@ import java.util.List;
 import java.util.Set;
 import com.openexchange.event.impl.EventClient;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.container.CalendarObject;
+import com.openexchange.groupware.container.DataObject;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
@@ -731,6 +733,10 @@ class UpdateData {
             // Delegator not participant and participant changed task. Change parent folder of original task to delegators folder identifier
             // so we are able to use that for participant notification.
             Folder delegatorFolder = FolderStorage.extractFolderOfUser(getOrigFolder(), orig.getCreatedBy());
+            if (null == delegatorFolder) {
+                // Delegator has been removed from participant list.
+                delegatorFolder = FolderStorage.extractFolderOfUser(getOrigFolder(), getUserId());
+            }
             orig.setParentFolderID(delegatorFolder.getIdentifier());
         }
         sentEvent(session, getUpdated(), getOrigTask(), getDestFolder());
@@ -758,7 +764,7 @@ class UpdateData {
     }
 
     void makeNextRecurrence(final Session session) throws OXException {
-        if (Task.NO_RECURRENCE != updated.getRecurrenceType() && Task.DONE == updated.getStatus() && Arrays.contains(
+        if (CalendarObject.NO_RECURRENCE != updated.getRecurrenceType() && Task.DONE == updated.getStatus() && Arrays.contains(
             getModifiedFields(),
             Status.SINGLETON.getId())) {
 
@@ -781,10 +787,10 @@ class UpdateData {
             TaskIterator ti;
             if (own) {
                 ti = storage.search(ctx, getUserId(), search, 0, Order.ASCENDING, new int[] {
-                    Task.PERCENT_COMPLETED, Task.CREATED_BY, Task.START_DATE }, emptyList, listWithFolder, emptyList);
+                    Task.PERCENT_COMPLETED, DataObject.CREATED_BY, CalendarObject.START_DATE }, emptyList, listWithFolder, emptyList);
             } else {
                 ti = storage.search(ctx, getUserId(), search, 0, Order.ASCENDING, new int[] {
-                    Task.PERCENT_COMPLETED, Task.CREATED_BY, Task.START_DATE }, listWithFolder, emptyList, emptyList);
+                    Task.PERCENT_COMPLETED, DataObject.CREATED_BY, CalendarObject.START_DATE }, listWithFolder, emptyList, emptyList);
             }
 
             final boolean next = TaskLogic.makeRecurrence(updated);

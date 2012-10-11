@@ -66,6 +66,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
 import javax.management.remote.JMXConnectorServer;
+import javax.management.remote.JMXConnectorServerFactory;
 import javax.management.remote.JMXServiceURL;
 import javax.management.remote.rmi.RMIConnectorServer;
 import javax.management.remote.rmi.RMIJRMPServerImpl;
@@ -76,7 +77,7 @@ import com.openexchange.management.ManagementService;
 
 /**
  * {@link ManagementAgentImpl} - A JMX agent implementation
- *
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class ManagementAgentImpl extends AbstractAgent implements ManagementService {
@@ -85,7 +86,7 @@ public final class ManagementAgentImpl extends AbstractAgent implements Manageme
 
     /**
      * Gets the singleton instance
-     *
+     * 
      * @return The singleton instance
      */
     public static ManagementAgentImpl getInstance() {
@@ -116,13 +117,17 @@ public final class ManagementAgentImpl extends AbstractAgent implements Manageme
     private ManagementAgentImpl() {
         super();
         jmxPort = 9999;
-        jmxServerPort = 3000;
+        jmxServerPort = -1;
         jmxSinglePort = false;
     }
 
     @Override
     public void run() {
         initializeMBeanServer();
+    }
+
+    private static boolean doManualConnect() {
+        return true;
     }
 
     private void initializeMBeanServer() {
@@ -142,7 +147,7 @@ public final class ManagementAgentImpl extends AbstractAgent implements Manageme
                 // use at least two ports, because two different RMI Socket Factories
                 // cannot share the same port.
                 //
-                //// final CustomRMISocketFactory sf = new CustomRMISocketFactory(jmxBindAddr == null ? "*" : jmxBindAddr.trim());
+                // // final CustomRMISocketFactory sf = new CustomRMISocketFactory(jmxBindAddr == null ? "*" : jmxBindAddr.trim());
                 final RMIClientSocketFactory csf = new CustomSslRMIClientSocketFactory();
                 final RMIServerSocketFactory ssf = new CustomSslRmiServerSocketFactory(jmxBindAddr == null ? "*" : jmxBindAddr.trim());
                 // Create the RMI Registry using the SSL socket factories above.
@@ -180,38 +185,10 @@ public final class ManagementAgentImpl extends AbstractAgent implements Manageme
                 }
                 // Environment map.
                 //
-                final Map<String, Object> env = new HashMap<String, Object>();
-                // Manually creates and binds a JMX RMI Connector Server stub with the
-                // registry created above: the port we pass here is the port that can
-                // be specified in "service:jmx:rmi://"+hostname+":"+port - where the
-                // RMI server stub and connection objects will be exported.
-                // Here we choose to use the same port as was specified for the
-                // RMI Registry. We can do so because we're using \*the same\* client
-                // and server socket factories, for the registry itself \*and\* for this
-                // object.
-                //
-                final RMIServerImpl stub = new RMIJRMPServerImpl(jmxPort, csf, ssf, env);
-
-                // Now specify the SSL Socket Factories:
-                //
-                // For the client side (remote)
-                //
-                //// env.put(RMIConnectorServer.RMI_CLIENT_SOCKET_FACTORY_ATTRIBUTE,csf);
-                // For the server side (local)
-                //
-                ////env.put(RMIConnectorServer.RMI_SERVER_SOCKET_FACTORY_ATTRIBUTE,ssf);
-                // For binding the JMX RMI Connector Server with the registry
-                // created above:
-                //
-                // //env.put("com.sun.jndi.rmi.factory.socket", csf);
-                // Create an RMI connector server.
-                //
-                // As specified in the JMXServiceURL the RMIServer stub will be
-                // registered in the RMI registry running in the local host on
-                // port 3000 with the name "jmxrmi". This is the same name the
-                // out-of-the-box management agent uses to register the RMIServer
-                // stub too.
-                //
+                final Map<String, Object> env = new HashMap<String, Object>(4);
+                if (jmxLogin != null && jmxPassword != null) {
+                    env.put(JMXConnectorServer.AUTHENTICATOR, new AbstractAgentJMXAuthenticator(new String[] { jmxLogin, jmxPassword }));
+                }
                 // The port specified in "service:jmx:rmi://"+hostname+":"+port
                 // is the second port, where RMI connection objects will be exported.
                 // Here we use the same port as that we choose for the RMI registry.
@@ -219,36 +196,81 @@ public final class ManagementAgentImpl extends AbstractAgent implements Manageme
                 // of the URL, in "rmi://"+hostname+":"+port
                 //
                 final String hostname = InetAddress.getLocalHost().getHostName();
-                final JMXServiceURL url =
-                    new JMXServiceURL(
-                        "service:jmx:rmi://" + hostname + ":" + jmxPort + "/jndi/rmi://" + hostname + ":" + jmxPort + "/jmxrmi");
-                // Now create the server from the JMXServiceURL
-                //
-                //// final JMXConnectorServer cs = JMXConnectorServerFactory.newJMXConnectorServer(url, env, mbs)
-                // Now create the server manually....
-                // We can't use the JMXConnectorServerFactory because of
+                final JMXServiceURL url = jmxServiceUrlFor(hostname, jmxPort, jmxPort);
+                // Check if manual connect shall be performed to address bug:
                 // http://bugs.sun.com/view_bug.do?bug_id=5107423
                 //
-                final JMXConnectorServer cs = new RMIConnectorServer(new JMXServiceURL("rmi", hostname, jmxPort), env, stub, mbs) {
+                final JMXConnectorServer cs;
+                if (doManualConnect()) {
+                    // Now specify the SSL Socket Factories:
+                    //
+                    // For the client side (remote)
+                    //
+                    env.put(RMIConnectorServer.RMI_CLIENT_SOCKET_FACTORY_ATTRIBUTE, csf);
+                    // For the server side (local)
+                    //
+                    env.put(RMIConnectorServer.RMI_SERVER_SOCKET_FACTORY_ATTRIBUTE, ssf);
+                    // For binding the JMX RMI Connector Server with the registry
+                    // created above:
+                    //
+                    env.put("com.sun.jndi.rmi.factory.socket", csf);
+                    // Manually creates and binds a JMX RMI Connector Server stub with the
+                    // registry created above: the port we pass here is the port that can
+                    // be specified in "service:jmx:rmi://"+hostname+":"+port - where the
+                    // RMI server stub and connection objects will be exported.
+                    // Here we choose to use the same port as was specified for the
+                    // RMI Registry. We can do so because we're using \*the same\* client
+                    // and server socket factories, for the registry itself \*and\* for this
+                    // object.
+                    //
+                    final RMIServerImpl stub = new RMIJRMPServerImpl(jmxPort, csf, ssf, env);
+                    // Now create the server manually....
+                    // We can't use the JMXConnectorServerFactory because of
+                    // http://bugs.sun.com/view_bug.do?bug_id=5107423
+                    //
+                    final JMXServiceURL rmiUrl = new JMXServiceURL("rmi", hostname, jmxPort);
+                    cs = new RMIConnectorServer(rmiUrl, env, stub, mbs) {
 
-                    @Override
-                    public JMXServiceURL getAddress() {
-                        return url;
-                    }
-
-                    @Override
-                    public synchronized void start() throws IOException {
-                        try {
-                            registry.bind("jmxrmi", stub);
-                        } catch (final AlreadyBoundException x) {
-                            final IOException io = new IOException(x.getMessage());
-                            io.initCause(x);
-                            throw io;
+                        @Override
+                        public JMXServiceURL getAddress() {
+                            return url;
                         }
-                        super.start();
-                    }
-                };
 
+                        @Override
+                        public synchronized void start() throws IOException {
+                            try {
+                                registry.bind("server", stub);
+                            } catch (final AlreadyBoundException x) {
+                                final IOException io = new IOException(x.getMessage());
+                                io.initCause(x);
+                                throw io;
+                            }
+                            super.start();
+                        }
+                    };
+                } else {
+                    // Now specify the SSL Socket Factories:
+                    //
+                    // For the client side (remote)
+                    //
+                    env.put(RMIConnectorServer.RMI_CLIENT_SOCKET_FACTORY_ATTRIBUTE, csf);
+                    // For the server side (local)
+                    //
+                    env.put(RMIConnectorServer.RMI_SERVER_SOCKET_FACTORY_ATTRIBUTE, ssf);
+                    // For binding the JMX RMI Connector Server with the registry
+                    // created above:
+                    //
+                    env.put("com.sun.jndi.rmi.factory.socket", csf);
+                    // Create an RMI connector server.
+                    //
+                    // As specified in the JMXServiceURL the RMIServer stub will be
+                    // registered in the RMI registry running in the local host on
+                    // port 3000 with the name "jmxrmi". This is the same name the
+                    // out-of-the-box management agent uses to register the RMIServer
+                    // stub too.
+                    //
+                    cs = JMXConnectorServerFactory.newJMXConnectorServer(url, env, mbs);
+                }
                 // Start the RMI connector server.
                 //
                 cs.start();
@@ -258,6 +280,9 @@ public final class ManagementAgentImpl extends AbstractAgent implements Manageme
                 }
                 jmxURL = url;
             } else {
+                /*
+                 * The common setup using two ports
+                 */
                 addRMIRegistry(jmxPort, jmxBindAddr);
                 /*
                  * Create a JMX connector and start it
@@ -265,29 +290,18 @@ public final class ManagementAgentImpl extends AbstractAgent implements Manageme
                 final String ip = getHostName(jmxBindAddr.charAt(0) == '*' ? "localhost" : jmxBindAddr);
                 /*-
                  * Start JMX URL
-                 * service:jmx:rmi://<TARGET_MACHINE>:<JMX_RMI_SERVER_PORT>/jndi/rmi://<TARGET_MACHINE>:<RMI_REGISTRY_PORT>/jmxrmi
-                 * The RMI registry tells the JMX clients where to find the JMX RMI port, specified via the jmxrmi key
+                 * service:jmx:rmi://<TARGET_MACHINE>:<JMX_RMI_SERVER_PORT>/jndi/rmi://<TARGET_MACHINE>:<RMI_REGISTRY_PORT>/server
+                 * The RMI registry tells the JMX clients where to find the JMX RMI port, specified via the server key
                  * The RMI port is generally known and can be set via properties.
                  * The JMX RMI server port is normally chosen by the jvm at random
                  * 
-                 * To obtain the target machine connect to service:jmx:rmi:///jndi/rmi://<TARGET_MACHINE>:<RMI_REGISTRY_PORT>/jmxrmi
-                 * To obtain the JMX RMI server port connect to service:jmx:rmi/<TARGET_MACHINE>/jndi/rmi://<TARGET_MACHINE>:<RMI_REGISTRY_PORT>/jmxrmi
+                 * To obtain the target machine connect to service:jmx:rmi:///jndi/rmi://<TARGET_MACHINE>:<RMI_REGISTRY_PORT>/server
+                 * To obtain the JMX RMI server port connect to service:jmx:rmi/<TARGET_MACHINE>/jndi/rmi://<TARGET_MACHINE>:<RMI_REGISTRY_PORT>/server
                  *  
                  *  Our URL service:jmx:rmi:///jndi/rmi://localhost:9999/server
                  */
-                final StringBuilder jmxURLBuilder = new StringBuilder(128).append("service:jmx:rmi://");
-                /*
-                 * Set RMIServer and RMIConnection host & port
-                 */
-                jmxURLBuilder.append(ip == null ? "localhost" : ip).append(':').append(jmxServerPort);
-                /*-
-                 * Set RMI Registry host & port
-                 * 
-                 * In the URL, jmxServerPort is the port number on which the RMIServer and RMIConnection remote objects are exported and
-                 * jmxPort is the port number of the RMI Registry.
-                 */
-                jmxURLBuilder.append("/jndi/rmi://").append(ip == null ? "localhost" : ip).append(':').append(jmxPort).append("/server");
-                jmxURL = addConnectorServer(jmxURLBuilder.toString(), jmxLogin, jmxPassword);
+                final JMXServiceURL jmxServiceURL = jmxServiceUrlFor(ip, jmxServerPort, jmxPort);
+                jmxURL = addConnectorServer(jmxServiceURL, jmxLogin, jmxPassword);
             }
             if (LOG.isInfoEnabled()) {
                 LOG.info(new StringBuilder(128).append("\n\n\tUse JConsole or MC4J to connect to MBeanServer with this url: ").append(
@@ -305,6 +319,26 @@ public final class ManagementAgentImpl extends AbstractAgent implements Manageme
         } catch (final OXException e) {
             LOG.error(e.getMessage(), e);
         }
+    }
+
+    /**
+     * Creates the appropriate {@link JMXServiceURL} instance for specified arguments.
+     * 
+     * @param hostName The host name; <code>null</code> to determine by <code>InetAddress.getLocalHost().getHostName()</code>
+     * @param jmxServerPort The JMX server port
+     * @param jmxRmiPort The JMX RMI port
+     * @return The appropriate JMX service URL
+     * @throws IOException If generating service URL fails
+     */
+    private static JMXServiceURL jmxServiceUrlFor(final String hostName, final int jmxServerPort, final int jmxRmiPort) throws IOException {
+        String host = hostName;
+        if (null == host) {
+            host = InetAddress.getLocalHost().getHostName();
+        }
+        if (jmxServerPort < 0) {
+            return new JMXServiceURL("service:jmx:rmi:///jndi/rmi://" + host + ":" + jmxRmiPort + "/server");
+        }
+        return new JMXServiceURL("service:jmx:rmi://" + host + ":" + jmxServerPort + "/jndi/rmi://" + host + ":" + jmxRmiPort + "/server");
     }
 
     @Override
@@ -399,7 +433,7 @@ public final class ManagementAgentImpl extends AbstractAgent implements Manageme
 
     /**
      * Sets the JMX server port.
-     *
+     * 
      * @param jmxServerPort The JMX server port to set
      */
     public void setJmxServerPort(final int jmxServerPort) {
@@ -408,7 +442,7 @@ public final class ManagementAgentImpl extends AbstractAgent implements Manageme
 
     /**
      * Sets the JMX port
-     *
+     * 
      * @param jmxPort The JMX port
      */
     public void setJmxPort(final int jmxPort) {
@@ -417,7 +451,7 @@ public final class ManagementAgentImpl extends AbstractAgent implements Manageme
 
     /**
      * Sets the JMX bind address
-     *
+     * 
      * @param jmxBindAddr The JMX bind address or <code>"*"</code>
      */
     public void setJmxBindAddr(final String jmxBindAddr) {
@@ -426,7 +460,7 @@ public final class ManagementAgentImpl extends AbstractAgent implements Manageme
 
     /**
      * Sets the JMX login
-     *
+     * 
      * @param jmxLogin The JMX login to set
      */
     public void setJmxLogin(final String jmxLogin) {
@@ -435,7 +469,7 @@ public final class ManagementAgentImpl extends AbstractAgent implements Manageme
 
     /**
      * Sets the JMX password
-     *
+     * 
      * @param jmxPassword the JMX password
      */
     public void setJmxPassword(final String jmxPassword) {

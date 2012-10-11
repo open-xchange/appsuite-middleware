@@ -52,6 +52,9 @@ package com.openexchange.messaging.generic;
 import java.util.Map;
 import com.openexchange.messaging.MessagingAccount;
 import com.openexchange.messaging.MessagingService;
+import com.openexchange.messaging.ServiceAware;
+import com.openexchange.messaging.generic.services.MessagingGenericServiceRegistry;
+import com.openexchange.messaging.registry.MessagingServiceRegistry;
 
 /**
  * {@link DefaultMessagingAccount} - The default {@link MessagingAccount} implementation.
@@ -59,7 +62,7 @@ import com.openexchange.messaging.MessagingService;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since Open-Xchange v6.16
  */
-public class DefaultMessagingAccount implements MessagingAccount {
+public class DefaultMessagingAccount implements MessagingAccount, ServiceAware {
 
     private static final long serialVersionUID = -8295765793020470243L;
 
@@ -68,6 +71,8 @@ public class DefaultMessagingAccount implements MessagingAccount {
     private String displayName;
 
     private int id;
+
+    private String serviceId;
 
     private int[] staticRootPermissions;
 
@@ -97,7 +102,39 @@ public class DefaultMessagingAccount implements MessagingAccount {
 
     @Override
     public MessagingService getMessagingService() {
+        MessagingService messagingService = this.messagingService;
+        if (null == messagingService && null != serviceId) {
+            // Try to obtain from registry
+            final MessagingServiceRegistry registry = MessagingGenericServiceRegistry.getService(MessagingServiceRegistry.class);
+            if (null == registry) {
+                return null;
+            }
+            try {
+                messagingService = registry.getMessagingService(serviceId, -1, -1);
+            } catch (final Exception e) {
+                messagingService = null;
+            }
+            if (null != messagingService) {
+                this.messagingService = messagingService;
+            }
+        }
         return messagingService;
+    }
+
+    @Override
+    public String getServiceId() {
+        return serviceId;
+    }
+
+    /**
+     * Sets the service identifier
+     *
+     * @param serviceId The service identifier to set
+     * @return This account with service identifier applied
+     */
+    public DefaultMessagingAccount setServiceId(final String serviceId) {
+        this.serviceId = serviceId;
+        return this;
     }
 
     /**
@@ -134,6 +171,7 @@ public class DefaultMessagingAccount implements MessagingAccount {
      */
     public void setMessagingService(final MessagingService messagingService) {
         this.messagingService = messagingService;
+        serviceId = null == messagingService ? null : messagingService.getId();
     }
 
 }

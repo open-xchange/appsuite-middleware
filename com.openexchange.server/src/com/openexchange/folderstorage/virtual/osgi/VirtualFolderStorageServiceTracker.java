@@ -64,7 +64,7 @@ import com.openexchange.folderstorage.virtual.VirtualFolderStorageRegistry;
 public final class VirtualFolderStorageServiceTracker implements ServiceTrackerCustomizer<FolderStorage, FolderStorage> {
 
     private static final org.apache.commons.logging.Log LOG =
-        com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(VirtualFolderStorageServiceTracker.class));
+        com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(VirtualFolderStorageServiceTracker.class));
 
     private final BundleContext context;
 

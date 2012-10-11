@@ -59,6 +59,7 @@ import org.osgi.service.event.EventConstants;
 import org.osgi.service.event.EventHandler;
 import org.osgi.service.http.HttpService;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.groupware.settings.PreferencesItemService;
 import com.openexchange.mailfilter.ajax.actions.MailfilterAction;
 import com.openexchange.mailfilter.ajax.exceptions.OXMailfilterExceptionCode;
@@ -74,7 +75,7 @@ import com.openexchange.sessiond.SessiondService;
 
 public class Activator extends DeferredActivator {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(Activator.class));
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(Activator.class));
 
     private final AtomicBoolean mstarted;
 
@@ -92,7 +93,7 @@ public class Activator extends DeferredActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ConfigurationService.class, HttpService.class, SessiondService.class };
+        return new Class<?>[] { ConfigurationService.class, HttpService.class, SessiondService.class, DispatcherPrefixService.class };
     }
 
 

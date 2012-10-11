@@ -59,10 +59,10 @@ import java.io.Writer;
 import java.nio.charset.UnsupportedCharsetException;
 import javax.xml.transform.OutputKeys;
 import javax.xml.transform.TransformerConfigurationException;
+import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.sax.SAXTransformerFactory;
 import javax.xml.transform.sax.TransformerHandler;
 import javax.xml.transform.stream.StreamResult;
-import org.apache.tika.config.TikaConfig;
 import org.apache.tika.detect.DefaultDetector;
 import org.apache.tika.detect.Detector;
 import org.apache.tika.exception.TikaException;
@@ -75,13 +75,13 @@ import org.apache.tika.parser.AutoDetectParser;
 import org.apache.tika.parser.ParseContext;
 import org.apache.tika.parser.Parser;
 import org.apache.tika.sax.BodyContentHandler;
-import org.apache.tika.utils.ParseUtils;
 import org.xml.sax.ContentHandler;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Charsets;
 import com.openexchange.java.Streams;
+import com.openexchange.textxtraction.TextXtractExceptionCodes;
 
 /**
  * {@link TikaDocumentHandler}
@@ -91,7 +91,7 @@ import com.openexchange.java.Streams;
 public final class TikaDocumentHandler {
 
     protected static final org.apache.commons.logging.Log LOG =
-        com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(TikaDocumentHandler.class));
+        com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(TikaDocumentHandler.class));
 
     protected final Detector detector;
 
@@ -133,10 +133,9 @@ public final class TikaDocumentHandler {
             metadata = new Metadata();
             context = new ParseContext();
             detector = new DefaultDetector();
-            final Parser tmp = null == mimeType ? new AutoDetectParser(detector) : ParseUtils.getParser(mimeType, TikaConfig.getDefaultConfig());
-            parser = null == tmp ? new AutoDetectParser(detector) : tmp;
+            parser = new AutoDetectParser(detector);
             context.set(Parser.class, parser);
-        } catch (final TikaException e) {
+        } catch (final Exception e) {
             throw TextXtractExceptionCodes.ERROR.create(e, e.getMessage());
         }
     }
@@ -158,7 +157,7 @@ public final class TikaDocumentHandler {
     }
 
     /**
-     * Gets the document's type.
+     * Gets the document's type & ensures specified {@link InputStream stream} is closed.
      *
      * @param in The document's input stream
      * @return The type
@@ -175,7 +174,7 @@ public final class TikaDocumentHandler {
     }
 
     /**
-     * Gets the document's language.
+     * Gets the document's language & ensures specified {@link InputStream stream} is closed.
      *
      * @param in The document's input stream
      * @return The language
@@ -192,10 +191,9 @@ public final class TikaDocumentHandler {
     }
 
     /**
-     * Gets the document's content.
+     * Gets the document's content & ensures specified {@link InputStream stream} is closed.
      *
      * @param in The document's input stream
-     * @param output The output format
      * @return The content according to output format
      * @throws OXException If an error occurs
      */
@@ -300,7 +298,7 @@ public final class TikaDocumentHandler {
      * @throws TransformerConfigurationException if the transformer can not be created
      */
     protected static TransformerHandler getTransformerHandler(final OutputStream output, final String method, final String encoding) throws TransformerConfigurationException {
-        final SAXTransformerFactory factory = (SAXTransformerFactory) SAXTransformerFactory.newInstance();
+        final SAXTransformerFactory factory = (SAXTransformerFactory) TransformerFactory.newInstance();
         final TransformerHandler handler = factory.newTransformerHandler();
         handler.getTransformer().setOutputProperty(OutputKeys.METHOD, method);
         handler.getTransformer().setOutputProperty(OutputKeys.INDENT, "yes");

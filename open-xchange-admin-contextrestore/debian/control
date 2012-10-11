@@ -1,0 +1,17 @@
+Source: open-xchange-admin-contextrestore
+Section: web
+Priority: optional
+Maintainer: Jan Bauerdick <jan.bauerdick@open-xchange.com>
+Build-Depends: debhelper (>= 4.0.0), ant (>= 1.7.0), ant-optional (>= 1.7.0), sun-java6-jdk|java6-sdk, open-xchange-core (>= @OXVERSION@), open-xchange-admin (>=@OXVERSION@)
+Standards-Version: 3.8.4
+Homepage: http://www.open-xchange.com
+
+Package: open-xchange-admin-contextrestore
+Architecture: all
+Depends: ${misc:Depends}, open-xchange-admin (>= @OXVERSION@)
+Replaces: open-xchange-admin-plugin-contextrestore
+Conflicts: open-xchange-admin-plugin-contextrestore
+Description: Extension to restore context data from a database dump
+ This package adds the OSGi bundle that allows to restore a complete context from a MySQL database dump file. Only the table rows for the
+ given context are extracted from the database dump file and inserted into the currently registered database servers. This can be used to
+ restore accidentially deleted contexts.

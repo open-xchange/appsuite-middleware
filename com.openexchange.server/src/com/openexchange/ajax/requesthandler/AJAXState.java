@@ -49,12 +49,12 @@
 
 package com.openexchange.ajax.requesthandler;
 
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Map;
+import java.util.Queue;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import com.openexchange.exception.OXException;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 
@@ -65,22 +65,22 @@ import com.openexchange.tools.servlet.AjaxExceptionCodes;
  */
 public final class AJAXState {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(AJAXState.class));
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(AJAXState.class));
 
     private final Map<String, Object> properties;
 
     private final Set<String> initializers;
 
-    private final List<AJAXStateHandler> handlers;
+    private final Queue<AJAXStateHandler> handlers;
 
     /**
      * Initializes a new {@link AJAXState}.
      */
     public AJAXState() {
         super();
-        properties = new HashMap<String, Object>();
+        properties = new ConcurrentHashMap<String, Object>();
         initializers = new HashSet<String>();
-        handlers = new LinkedList<AJAXStateHandler>();
+        handlers = new ConcurrentLinkedQueue<AJAXStateHandler>();
     }
 
     /**
@@ -99,6 +99,7 @@ public final class AJAXState {
      * @param name The property name
      * @return The property or <code>null</code> if absent
      */
+    @SuppressWarnings("unchecked")
     public <V> V optProperty(final String name) {
         return (V) properties.get(name);
     }
@@ -111,6 +112,7 @@ public final class AJAXState {
      * @throws OXException If property is absent
      */
     public <V> V getProperty(final String name) throws OXException {
+        @SuppressWarnings("unchecked")
         final V value = (V) properties.get(name);
         if (null == value) {
             throw AjaxExceptionCodes.MISSING_PARAMETER.create(name);
@@ -135,6 +137,7 @@ public final class AJAXState {
      * @param name The property name
      * @return The removed property value or <code>null</code> if absent
      */
+    @SuppressWarnings("unchecked")
     public <V> V removeProperty(final String name) {
         return (V) properties.remove(name);
     }
@@ -172,7 +175,7 @@ public final class AJAXState {
      */
     public void close() {
         while (!handlers.isEmpty()) {
-            final AJAXStateHandler handler = handlers.remove(0);
+            final AJAXStateHandler handler = handlers.poll();
             try {
                 handler.cleanUp(this);
             } catch (final OXException e) {

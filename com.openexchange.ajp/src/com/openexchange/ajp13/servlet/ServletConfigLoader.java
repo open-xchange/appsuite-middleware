@@ -89,7 +89,7 @@ public final class ServletConfigLoader {
      */
     private static final String FILEEXT_PROPERTIES = ".properties";
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(ServletConfigLoader.class));
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(ServletConfigLoader.class));
 
     /**
      * Puts properties into map
@@ -163,7 +163,7 @@ public final class ServletConfigLoader {
             final ServletConfigWrapper servletConfig = new ServletConfigWrapper();
             final ServletContextWrapper servletContext = new ServletContextWrapper(servletConfig);
             servletConfig.setServletContextWrapper(servletContext);
-            defaultInstance = new ServletConfigLoader(servletConfig, servletContext, new File(servletConfigDir));
+            defaultInstance = new ServletConfigLoader(servletConfig, servletContext, null == servletConfigDir ? null : new File(servletConfigDir));
         }
     }
 
@@ -175,7 +175,7 @@ public final class ServletConfigLoader {
      */
     private static Map<String, String> loadDirProps(final File dir) {
         final Map<String, String> m = new HashMap<String, String>();
-        if (dir.exists() && dir.isDirectory()) {
+        if (null != dir && dir.exists() && dir.isDirectory()) {
             for (final File f : dir.listFiles()) {
                 if (f.isFile() && f.getName().toLowerCase().endsWith(FILEEXT_PROPERTIES)) {
                     m.putAll(loadProperties(f));
@@ -269,6 +269,8 @@ public final class ServletConfigLoader {
         this.directory = directory;
         globalProps = loadDirProps(this.directory);
         globalProps.put(Property.IP_CHECK.getPropertyName(), ServerConfig.getProperty(Property.IP_CHECK));
+        globalProps.put(Property.IP_MASK_V4.getPropertyName(), ServerConfig.getProperty(Property.IP_MASK_V4));
+        globalProps.put(Property.IP_MASK_V6.getPropertyName(), ServerConfig.getProperty(Property.IP_MASK_V6));
     }
 
     /**
@@ -289,6 +291,8 @@ public final class ServletConfigLoader {
         this.directory = directory;
         globalProps = loadDirProps(this.directory);
         globalProps.put(Property.IP_CHECK.getPropertyName(),  AJPv13Config.getServerProperty(Property.IP_CHECK));
+        globalProps.put(Property.IP_MASK_V4.getPropertyName(),  AJPv13Config.getServerProperty(Property.IP_MASK_V4));
+        globalProps.put(Property.IP_MASK_V6.getPropertyName(),  AJPv13Config.getServerProperty(Property.IP_MASK_V6));
         globalProps.put(Property.UI_WEB_PATH.getPropertyName(), AJPv13Config.getServerProperty(Property.UI_WEB_PATH));
         globalProps.put(Property.COOKIE_HASH.getPropertyName(), AJPv13Config.getServerProperty(Property.COOKIE_HASH));
     }
@@ -358,7 +362,7 @@ public final class ServletConfigLoader {
     /**
      * Gets the directory in which all servlet configurations are kept
      *
-     * @return The configurations' directory
+     * @return The configurations' directory or <code>null</code> if not initialized
      */
     public File getDirectory() {
         return directory;
@@ -376,7 +380,7 @@ public final class ServletConfigLoader {
          * Lookup class-specific properties
          */
         if (props == null) {
-            if (!clazzGuardian.contains(clazz)) {
+            if (!clazzGuardian.contains(clazz) && null != directory) {
                 props = loadProperties(new File(
                     directory,
                     new StringBuilder(32).append(clazz).append('.').append(FILEEXT_PROPERTIES).toString()));
@@ -420,7 +424,7 @@ public final class ServletConfigLoader {
          * Lookup class-specific properties
          */
         if (props == null) {
-            if (!clazzGuardian.contains(clazz)) {
+            if (!clazzGuardian.contains(clazz) && null != directory) {
                 props = loadProperties(new File(
                     directory,
                     new StringBuilder(32).append(clazz).append('.').append(FILEEXT_PROPERTIES).toString()));

@@ -52,6 +52,7 @@ package com.openexchange.groupware.tasks.mapping;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import com.openexchange.groupware.container.CommonObject;
 import com.openexchange.groupware.tasks.Mapper;
 import com.openexchange.groupware.tasks.Mapping;
 import com.openexchange.groupware.tasks.Task;
@@ -68,22 +69,32 @@ public final class UID implements Mapper<String> {
         super();
     }
 
+    @Override
     public int getId() {
-        return Task.UID;
+        return CommonObject.UID;
     }
 
+    @Override
     public boolean isSet(final Task task) {
         return task.containsUid();
     }
 
+    @Override
     public String getDBColumnName() {
         return "uid";
     }
 
+    @Override
+    public String getDisplayName() {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
     public void toDB(final PreparedStatement stmt, final int pos, final Task task) throws SQLException {
         stmt.setString(pos, task.getUid());
     }
 
+    @Override
     public void fromDB(final ResultSet result, final int pos, final Task task) throws SQLException {
         final String uid = result.getString(pos);
         if (!result.wasNull()) {
@@ -91,14 +102,17 @@ public final class UID implements Mapper<String> {
         }
     }
 
+    @Override
     public boolean equals(final Task task1, final Task task2) {
         return Mapping.equals(task1.getUid(), task2.getUid());
     }
 
+    @Override
     public String get(final Task task) {
         return task.getUid();
     }
 
+    @Override
     public void set(final Task task, final String value) {
         task.setUid(value);
     }

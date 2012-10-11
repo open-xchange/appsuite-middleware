@@ -56,7 +56,6 @@ import com.openexchange.data.conversion.ical.ical4j.internal.calendar.Alarm;
 import com.openexchange.data.conversion.ical.ical4j.internal.calendar.Categories;
 import com.openexchange.data.conversion.ical.ical4j.internal.calendar.CreatedAndDTStamp;
 import com.openexchange.data.conversion.ical.ical4j.internal.calendar.Duration;
-import com.openexchange.data.conversion.ical.ical4j.internal.calendar.End;
 import com.openexchange.data.conversion.ical.ical4j.internal.calendar.Klass;
 import com.openexchange.data.conversion.ical.ical4j.internal.calendar.LastModified;
 import com.openexchange.data.conversion.ical.ical4j.internal.calendar.Note;
@@ -92,7 +91,6 @@ public final class TaskConverters {
         tmp.add(new Title<VToDo, Task>());
         tmp.add(new Note<VToDo, Task>());
         tmp.add(new Start<VToDo, Task>());
-        tmp.add(new End<VToDo, Task>());
         tmp.add(new Duration<VToDo, Task>());
         tmp.add(new DueDate());
         tmp.add(new Klass<VToDo, Task>());

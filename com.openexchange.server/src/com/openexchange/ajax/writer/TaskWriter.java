@@ -53,11 +53,13 @@ import gnu.trove.map.TIntObjectMap;
 import gnu.trove.map.hash.TIntObjectHashMap;
 import java.util.TimeZone;
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import com.openexchange.log.LogFactory;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import com.openexchange.ajax.fields.CalendarFields;
 import com.openexchange.ajax.fields.TaskFields;
+import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.tasks.Task;
 
 /**
@@ -83,12 +85,12 @@ public class TaskWriter extends CalendarWriter {
 
     public void writeTask(final Task task, final JSONObject json) throws JSONException {
         super.writeFields(task, timeZone, json);
-        writeParameter(TaskFields.TITLE, task.getTitle(), json);
-        writeParameter(TaskFields.START_DATE, task.getStartDate(), json);
-        writeParameter(TaskFields.END_DATE, task.getEndDate(), json);
+        writeParameter(CalendarFields.TITLE, task.getTitle(), json);
+        writeParameter(CalendarFields.START_DATE, task.getStartDate(), json);
+        writeParameter(CalendarFields.END_DATE, task.getEndDate(), json);
         writeParameter(TaskFields.ACTUAL_COSTS, task.getActualCosts(), json, task.containsActualCosts());
         writeParameter(TaskFields.ACTUAL_DURATION, task.getActualDuration(), json, task.containsActualDuration());
-        writeParameter(TaskFields.NOTE, task.getNote(), json);
+        writeParameter(CalendarFields.NOTE, task.getNote(), json);
         writeParameter(TaskFields.AFTER_COMPLETE, task.getAfterComplete(), json);
         writeParameter(TaskFields.BILLING_INFORMATION, task.getBillingInformation(), json);
         writeParameter(TaskFields.COMPANIES, task.getCompanies(), json);
@@ -106,17 +108,17 @@ public class TaskWriter extends CalendarWriter {
         writeParameter(TaskFields.TARGET_COSTS, task.getTargetCosts(), json, task.containsTargetCosts());
         writeParameter(TaskFields.TARGET_DURATION, task.getTargetDuration(), json, task.containsTargetDuration());
         writeParameter(TaskFields.TRIP_METER, task.getTripMeter(), json);
-        writeParameter(TaskFields.ALARM, task.getAlarm(), timeZone, json);
+        writeParameter(CalendarFields.ALARM, task.getAlarm(), timeZone, json);
         writeRecurrenceParameter(task, json);
         if (task.containsParticipants()) {
-            json.put(TaskFields.PARTICIPANTS, getParticipantsAsJSONArray(task));
+            json.put(CalendarFields.PARTICIPANTS, getParticipantsAsJSONArray(task));
         }
         if (task.containsUserParticipants()) {
-            json.put(TaskFields.USERS, getUsersAsJSONArray(task));
+            json.put(CalendarFields.USERS, getUsersAsJSONArray(task));
         }
         // Recurrence data
-        writeParameter(TaskFields.DAY_IN_MONTH, task.getDayInMonth(), json, task.containsDayInMonth());
-        writeParameter(TaskFields.DAYS, task.getDays(), json, task.containsDays());
+        writeParameter(CalendarFields.DAY_IN_MONTH, task.getDayInMonth(), json, task.containsDayInMonth());
+        writeParameter(CalendarFields.DAYS, task.getDays(), json, task.containsDays());
     }
 
     protected void writeField(final Task task, final int column, final TimeZone tz, final JSONArray json) throws JSONException {
@@ -129,7 +131,7 @@ public class TaskWriter extends CalendarWriter {
         }
         // No appropriate static writer found, write manually
         switch (column) {
-        case Task.ALARM:
+        case CalendarObject.ALARM:
             writeValue(task.getAlarm(), tz, json);
             break;
         default:
@@ -162,25 +164,25 @@ public class TaskWriter extends CalendarWriter {
 
     static {
         final TIntObjectMap<TaskFieldWriter> m = new TIntObjectHashMap<TaskFieldWriter>(25, 1);
-        m.put(Task.TITLE, new TaskFieldWriter() {
+        m.put(CalendarObject.TITLE, new TaskFieldWriter() {
             @Override
             public void write(final Task taskObject, final JSONArray jsonArray) {
                 writeValue(taskObject.getTitle(), jsonArray);
             }
         });
-        m.put(Task.START_DATE, new TaskFieldWriter() {
+        m.put(CalendarObject.START_DATE, new TaskFieldWriter() {
             @Override
             public void write(final Task taskObject, final JSONArray jsonArray) {
                 writeValue(taskObject.getStartDate(), jsonArray);
             }
         });
-        m.put(Task.END_DATE, new TaskFieldWriter() {
+        m.put(CalendarObject.END_DATE, new TaskFieldWriter() {
             @Override
             public void write(final Task taskObject, final JSONArray jsonArray) {
                 writeValue(taskObject.getEndDate(), jsonArray);
             }
         });
-        m.put(Task.NOTE, new TaskFieldWriter() {
+        m.put(CalendarObject.NOTE, new TaskFieldWriter() {
             @Override
             public void write(final Task taskObject, final JSONArray jsonArray) {
                 writeValue(taskObject.getNote(), jsonArray);
@@ -258,55 +260,55 @@ public class TaskWriter extends CalendarWriter {
                 writeValue(taskObject.getTripMeter(), jsonArray);
             }
         });
-        m.put(Task.RECURRENCE_TYPE, new TaskFieldWriter() {
+        m.put(CalendarObject.RECURRENCE_TYPE, new TaskFieldWriter() {
             @Override
             public void write(final Task taskObject, final JSONArray jsonArray) {
                 writeValue(taskObject.getRecurrenceType(), jsonArray, taskObject.containsRecurrenceType());
             }
         });
-        m.put(Task.PARTICIPANTS, new TaskFieldWriter() {
+        m.put(CalendarObject.PARTICIPANTS, new TaskFieldWriter() {
             @Override
             public void write(final Task taskObject, final JSONArray jsonArray) throws JSONException {
                 jsonArray.put(getParticipantsAsJSONArray(taskObject));
             }
         });
-        m.put(Task.USERS, new TaskFieldWriter() {
+        m.put(CalendarObject.USERS, new TaskFieldWriter() {
             @Override
             public void write(final Task taskObject, final JSONArray jsonArray) throws JSONException {
                 jsonArray.put(getUsersAsJSONArray(taskObject));
             }
         });
-        m.put(Task.DAYS, new TaskFieldWriter() {
+        m.put(CalendarObject.DAYS, new TaskFieldWriter() {
             @Override
             public void write(final Task taskObject, final JSONArray jsonArray) {
                 writeValue(taskObject.getDays(), jsonArray, taskObject.containsDays());
             }
         });
-        m.put(Task.DAY_IN_MONTH, new TaskFieldWriter() {
+        m.put(CalendarObject.DAY_IN_MONTH, new TaskFieldWriter() {
             @Override
             public void write(final Task taskObject, final JSONArray jsonArray) {
                 writeValue(taskObject.getDayInMonth(), jsonArray, taskObject.containsDayInMonth());
             }
         });
-        m.put(Task.MONTH, new TaskFieldWriter() {
+        m.put(CalendarObject.MONTH, new TaskFieldWriter() {
             @Override
             public void write(final Task taskObject, final JSONArray jsonArray) {
                 writeValue(taskObject.getMonth(), jsonArray, taskObject.containsMonth());
             }
         });
-        m.put(Task.INTERVAL, new TaskFieldWriter() {
+        m.put(CalendarObject.INTERVAL, new TaskFieldWriter() {
             @Override
             public void write(final Task taskObject, final JSONArray jsonArray) {
                 writeValue(taskObject.getInterval(), jsonArray, taskObject.containsInterval());
             }
         });
-        m.put(Task.UNTIL, new TaskFieldWriter() {
+        m.put(CalendarObject.UNTIL, new TaskFieldWriter() {
             @Override
             public void write(final Task taskObject, final JSONArray jsonArray) {
                 writeValue(taskObject.getUntil(), jsonArray, taskObject.containsUntil());
             }
         });
-        m.put(Task.RECURRENCE_COUNT, new TaskFieldWriter() {
+        m.put(CalendarObject.RECURRENCE_COUNT, new TaskFieldWriter() {
             @Override
             public void write(final Task task, final JSONArray json) {
                 writeValue(task.getOccurrence(), json, task.containsOccurrence());

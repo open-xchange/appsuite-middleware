@@ -64,4 +64,9 @@ public class ParameterValue {
         Text = text;
     }
 
+    @Override
+    public String toString() {
+        return null == Text ? "null" : Text;
+    }
+
 }

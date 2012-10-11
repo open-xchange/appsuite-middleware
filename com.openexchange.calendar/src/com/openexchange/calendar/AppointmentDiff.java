@@ -50,12 +50,17 @@
 package com.openexchange.calendar;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
+import com.openexchange.ajax.fields.AppointmentFields;
+import com.openexchange.ajax.fields.CalendarFields;
 import com.openexchange.groupware.container.Appointment;
+import com.openexchange.groupware.container.Change;
 import com.openexchange.groupware.container.Differ;
 import com.openexchange.groupware.container.Difference;
 
@@ -142,6 +147,16 @@ public class AppointmentDiff {
         return false;
     }
     
+	public boolean anyFieldChangedOf(Collection<String> fields) {
+        for (String field : fields) {
+            if (differingFieldNames.contains(field)) {
+                return true;
+            }
+        }
+        return false;
+	}
+
+    
 
 	public boolean anyFieldChangedOf(final int...fields) {
 		for (final int field : fields) {
@@ -164,6 +179,19 @@ public class AppointmentDiff {
             copy.remove(field);
         }
         return copy.isEmpty();
+    }
+    
+    public boolean exactlyTheseChanged(String... fields) {
+        if (!onlyTheseChanged(fields)) {
+            return false;
+        }
+
+        for (String field : fields) {
+            if (!differingFieldNames.contains(field)) {
+                return false;
+            }
+        }
+        return true;
     }
 
     
@@ -234,6 +262,92 @@ public class AppointmentDiff {
         
 
     }
+    
+    
+    // Diagnostic Methods
+    
+    public boolean isAboutStateChangesOnly() {
+        
+        // First, let's see if any fields besides the state tracking fields have changed
+        HashSet<String> differing = new HashSet<String>(differingFieldNames);
+        
+        for(String field: new String[]{CalendarFields.PARTICIPANTS, CalendarFields.USERS, CalendarFields.CONFIRMATIONS}) {
+            differing.remove(field);
+        }
+        if (!differing.isEmpty()) {
+            return false;
+        }
+        
+        // Hm, okay, so now let's see if any participants were added or removed. That also means this mail is not only about state changes.
+        for(String field: new String[]{CalendarFields.PARTICIPANTS, CalendarFields.USERS, CalendarFields.CONFIRMATIONS}) {
+            FieldUpdate update = getUpdateFor(field);
+            if (update == null) {
+                continue;
+            }
+            Difference extraInfo = (Difference) update.getExtraInfo();
+            if (!extraInfo.getAdded().isEmpty()) {
+                return false;
+            }
+            if (!extraInfo.getRemoved().isEmpty()) {
+                return false;
+            }
+
+        }
+        
+        return true;
+    }
+
+    public boolean isAboutCertainParticipantsStateChangeOnly(String identifier) {
+		if (!isAboutStateChangesOnly()) {
+			return false;
+		}
+		
+        for(String field: new String[]{CalendarFields.PARTICIPANTS, CalendarFields.USERS, CalendarFields.CONFIRMATIONS}) {
+            FieldUpdate update = getUpdateFor(field);
+            if (update == null) {
+                continue;
+            }
+            Difference extraInfo = (Difference) update.getExtraInfo();
+            List<Change> changed = extraInfo.getChanged();
+            if (changed.size() > 1) {
+            	return false;
+            }
+            Change change = changed.get(0);
+			if (!change.getIdentifier().equals(identifier)) {
+				return false;
+			}
+        }
+        return true;		
+	}
+
+	public boolean isAboutDetailChangesOnly() {
+		HashSet<String> differing = new HashSet<String>(differingFieldNames);
+        
+		
+        for(String field: new String[]{CalendarFields.PARTICIPANTS, CalendarFields.USERS, CalendarFields.CONFIRMATIONS}) {
+            differing.remove(field);
+        }
+        // If any other field than the participants fields as changed and the participant fields were not changed, we're done, as no state changes could have occurred
+        if (!differing.isEmpty() && !anyFieldChangedOf(CalendarFields.PARTICIPANTS, CalendarFields.USERS, CalendarFields.CONFIRMATIONS)) {
+            return true;
+        }
+        
+        // Hm, okay, so now let's see if any participants state has changed. That means, that something other than a detail field has changed
+        for(String field: new String[]{CalendarFields.PARTICIPANTS, CalendarFields.USERS, CalendarFields.CONFIRMATIONS}) {
+            FieldUpdate update = getUpdateFor(field);
+            if (update == null) {
+                continue;
+            }
+            Difference extraInfo = (Difference) update.getExtraInfo();
+            List<Change> changed = extraInfo.getChanged();
+            if (!changed.isEmpty()) {
+            	return false; // A state has been changed, this is not about details only
+            }
+
+        }
+        
+        return true;
+	}
 
 
 

@@ -70,7 +70,7 @@ import com.openexchange.server.services.ServerServiceRegistry;
 public final class DefaultFolderNamesProvider {
 
     private static final org.apache.commons.logging.Log LOG =
-        com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(DefaultFolderNamesProvider.class));
+        com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(DefaultFolderNamesProvider.class));
 
     private static final String SWITCH_DEFAULT_FOLDER = "Switching to default value %s";
 

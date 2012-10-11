@@ -52,13 +52,15 @@ package com.openexchange.upsell.multiple.osgi;
 import static com.openexchange.upsell.multiple.osgi.MyServiceRegistry.getServiceRegistry;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.osgi.util.tracker.ServiceTracker;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.context.ContextService;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.osgi.ServiceRegistry;
-import com.openexchange.tools.service.SessionServletRegistration;
+import com.openexchange.tools.servlet.http.HTTPServletRegistration;
 import com.openexchange.upsell.multiple.api.UpsellURLService;
 import com.openexchange.upsell.multiple.impl.MyServlet;
 import com.openexchange.user.UserService;
@@ -67,8 +69,6 @@ public class MyActivator extends HousekeepingActivator {
 
     private static transient final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(MyActivator.class));
 
-    private SessionServletRegistration servletRegistration;
-
     public MyActivator() {
         super();
     }
@@ -76,7 +76,7 @@ public class MyActivator extends HousekeepingActivator {
     @Override
     protected Class<?>[] getNeededServices() {
         return new Class<?>[] {
-            UserService.class, DatabaseService.class, ContextService.class, ConfigurationService.class };
+            UserService.class, DatabaseService.class, ContextService.class, ConfigurationService.class, ConfigViewFactory.class };
     }
 
     @Override
@@ -98,63 +98,46 @@ public class MyActivator extends HousekeepingActivator {
     }
 
     @Override
-	protected void startBundle() throws Exception {
+    protected void startBundle() throws Exception {
 
-		// try to load all the needed services like config service and hostnameservice
-		try {
-			{
-				final ServiceRegistry registry = getServiceRegistry();
-				registry.clearRegistry();
-				final Class<?>[] classes = getNeededServices();
-				for (int i = 0; i < classes.length; i++) {
-					final Object service = getService(classes[i]);
-					if (null != service) {
-						registry.addService(classes[i], service);
-					}
-				}
-			}
-
-
-			// register the http info/sso servlet
-			servletRegistration = new SessionServletRegistration(context, new MyServlet(), getFromConfig("com.openexchange.upsell.multiple.servlet"));
-			servletRegistration.open();
-
-            // Open service trackers
-			track(UpsellURLService.class, new UrlServiceInstallationServiceListener(context));
-			openTrackers();
-
-
-		} catch (final Throwable t) {
-			LOG.error(t.getMessage(), t);
-			throw t instanceof Exception ? (Exception) t : new Exception(t);
-		}
-
-	}
-
-    private String getFromConfig(final String key) throws OXException {
-        final ConfigurationService configservice = MyServiceRegistry.getServiceRegistry().getService(ConfigurationService.class, true);
-        return configservice.getProperty(key);
-    }
-
-    @Override
-    protected void stopBundle() throws Exception {
+        // try to load all the needed services like config service and hostnameservice
         try {
-
-            /*
-             * Close service trackers
-             */
-            cleanUp();
-
-            // stop info/sso servlet
-            if(servletRegistration != null) {
-                servletRegistration.close();
+            {
+                final ServiceRegistry registry = getServiceRegistry();
+                registry.clearRegistry();
+                final Class<?>[] classes = getNeededServices();
+                for (final Class<?> classe : classes) {
+                    final Object service = getService(classe);
+                    if (null != service) {
+                        registry.addService(classe, service);
+                    }
+                }
             }
 
-            getServiceRegistry().clearRegistry();
+
+            // register the http info/sso servlet
+            rememberTracker(new HTTPServletRegistration(context, getFromConfig("com.openexchange.upsell.multiple.servlet"), new MyServlet()));
+            rememberTracker(new ServiceTracker<UpsellURLService,UpsellURLService>(context, UpsellURLService.class, new UrlServiceInstallationServiceListener(context)));
+
+            // Open service trackers
+            openTrackers();
+
+
         } catch (final Throwable t) {
             LOG.error(t.getMessage(), t);
             throw t instanceof Exception ? (Exception) t : new Exception(t);
         }
+
+    }
+
+    private String getFromConfig(final String key) throws OXException {
+        return MyServiceRegistry.getServiceRegistry().getService(ConfigurationService.class, true).getProperty(key);
+    }
+
+    @Override
+    protected void stopBundle() throws Exception {
+        super.stopBundle();
+        getServiceRegistry().clearRegistry();
     }
 
 }

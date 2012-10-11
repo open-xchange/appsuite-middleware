@@ -50,6 +50,7 @@
 package com.openexchange.admin.storage.mysqlStorage;
 
 import static com.openexchange.java.Autoboxing.L;
+import static com.openexchange.java.Autoboxing.i;
 import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
 import static com.openexchange.tools.sql.DBUtils.rollback;
 import java.sql.Connection;
@@ -63,7 +64,6 @@ import java.util.List;
 import java.util.SortedMap;
 import java.util.TreeMap;
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import com.openexchange.admin.daemons.ClientAdminThread;
 import com.openexchange.admin.properties.AdminProperties;
 import com.openexchange.admin.rmi.dataobjects.Context;
@@ -74,7 +74,10 @@ import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.services.AdminServiceRegistry;
 import com.openexchange.admin.tools.AdminCache;
 import com.openexchange.admin.tools.PropertyHandler;
+import com.openexchange.config.ConfigurationService;
+import com.openexchange.database.Assignment;
 import com.openexchange.exception.OXException;
+import com.openexchange.log.LogFactory;
 import com.openexchange.tools.pipesnfilters.DataSource;
 import com.openexchange.tools.pipesnfilters.Filter;
 import com.openexchange.tools.pipesnfilters.PipesAndFiltersException;
@@ -113,7 +116,8 @@ public class OXContextMySQLStorageCommon {
 
             prep = configdb_con.prepareStatement("SELECT context.name, context.enabled, context.reason_id, context.filestore_id, context.filestore_name, context.quota_max, context_server2db_pool.write_db_pool_id, context_server2db_pool.read_db_pool_id, context_server2db_pool.db_schema, login2context.login_info FROM context LEFT JOIN ( login2context, context_server2db_pool, server ) ON ( context.cid = context_server2db_pool.cid AND context_server2db_pool.server_id = server.server_id AND context.cid = login2context.cid ) WHERE context.cid = ? AND server.name = ?");
             prep.setInt(1, context_id);
-            prep.setString(2, prop.getProp(AdminProperties.Prop.SERVER_NAME, "local"));
+            final String serverName = AdminServiceRegistry.getInstance().getService(ConfigurationService.class).getProperty(AdminProperties.Prop.SERVER_NAME, "local");
+            prep.setString(2, serverName);
             ResultSet rs = prep.executeQuery();
 
             final Context cs = new Context();
@@ -419,18 +423,35 @@ public class OXContextMySQLStorageCommon {
         if (null == db.getRead_id() || 0 == db.getRead_id().intValue()) {
             db.setRead_id(db.getId());
         }
-    
-        // create context entry in configdb
-        // quota is in MB, but we store in Byte
-        long quota_max_temp = ctx.getMaxQuota().longValue();
-        if (quota_max_temp != -1) {
-            quota_max_temp *= Math.pow(2, 20);
-            ctx.setMaxQuota(L(quota_max_temp));
-        }
         fillContextTable(ctx, con);
-    
-        // insert in the context_server2dbpool table
-        fillContextServer2DBPool(ctx, db, con);
+
+        try {
+            final int serverId = ClientAdminThread.cache.getServerId();
+            ClientAdminThread.cache.getPool().writeAssignment(con, new Assignment() {
+                @Override
+                public int getContextId() {
+                    return i(ctx.getId());
+                }
+                @Override
+                public int getServerId() {
+                    return serverId;
+                }
+                @Override
+                public int getReadPoolId() {
+                    return i(db.getRead_id());
+                }
+                @Override
+                public int getWritePoolId() {
+                    return i(db.getId());
+                }
+                @Override
+                public String getSchema() {
+                    return db.getScheme();
+                }
+            });
+        } catch (PoolException e) {
+            throw new StorageException(e.getMessage(), e);
+        }
     }
 
     public final void handleCreateContextRollback(final Connection configCon, final Connection oxCon, final int contextId) {
@@ -532,46 +553,6 @@ public class OXContextMySQLStorageCommon {
         return retval;
     }
 
-    private final int getMyServerID(final Connection configdb_write_con) throws SQLException, StorageException {
-        PreparedStatement sstmt = null;
-        int sid = 0;
-        try {
-
-            final String servername = prop.getProp(AdminProperties.Prop.SERVER_NAME, "local");
-            sstmt = configdb_write_con.prepareStatement("SELECT server_id FROM server WHERE name = ?");
-            sstmt.setString(1, servername);
-            final ResultSet rs2 = sstmt.executeQuery();
-            if (!rs2.next()) {
-                throw new StorageException("No server registered with name=" + servername);
-            }
-            sid = Integer.parseInt(rs2.getString("server_id"));
-            rs2.close();
-        } catch (final SQLException sql) {
-            log.error("SQL Error", sql);
-            throw sql;
-        } finally {
-            closePreparedStatement(sstmt);
-        }
-        return sid;
-    }
-
-    private final void fillContextServer2DBPool(final Context ctx, final Database db, final Connection configdbCon) throws StorageException {
-        PreparedStatement stmt = null;
-        try {
-            stmt = configdbCon.prepareStatement("INSERT INTO context_server2db_pool (server_id,cid,read_db_pool_id,write_db_pool_id,db_schema) VALUES  (?,?,?,?,?)");
-            stmt.setInt(1, getMyServerID(configdbCon));
-            stmt.setInt(2, ctx.getId().intValue());
-            stmt.setInt(3, db.getRead_id().intValue());
-            stmt.setInt(4, db.getId().intValue());
-            stmt.setString(5, db.getScheme());
-            stmt.executeUpdate();
-        } catch (final SQLException e) {
-            throw new StorageException(e.getMessage(), e);
-        } finally {
-            closeSQLStuff(stmt);
-        }
-    }
-
     private final void fillContextTable(final Context ctx, final Connection configdbCon) throws StorageException {
         PreparedStatement stmt = null;
         try {
@@ -585,7 +566,12 @@ public class OXContextMySQLStorageCommon {
             stmt.setBoolean(3, true);
             stmt.setInt(4, ctx.getFilestoreId().intValue());
             stmt.setString(5, ctx.getFilestore_name());
-            stmt.setLong(6, ctx.getMaxQuota().longValue());
+            // quota is in MB, but we store in Byte
+            long quota_max_temp = ctx.getMaxQuota().longValue();
+            if (quota_max_temp != -1) {
+                quota_max_temp *= Math.pow(2, 20);
+            }
+            stmt.setLong(6, quota_max_temp);
             stmt.executeUpdate();
         } catch (final SQLException e) {
             throw new StorageException(e.getMessage(), e);

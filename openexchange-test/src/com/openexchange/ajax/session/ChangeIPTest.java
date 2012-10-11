@@ -85,7 +85,8 @@ public final class ChangeIPTest extends AbstractAJAXSession {
     }
 
     public void testIPChange() throws Throwable {
-        final ChangeIPRequest request1 = new ChangeIPRequest("192.168.32.27", false);
+        String ipAdress = "192.168.123.321";
+        final ChangeIPRequest request1 = new ChangeIPRequest(ipAdress, false);
         final ChangeIPResponse response1 = client.execute(request1);
         assertFalse("Change IP response contains an exception.", response1.hasError());
         assertTrue("Change IP response contains wrong data.", response1.hasCorrectResponse());

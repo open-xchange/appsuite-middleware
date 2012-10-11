@@ -67,6 +67,7 @@ import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.messaging.MessagingAccount;
 import com.openexchange.messaging.MessagingAccountManager;
 import com.openexchange.messaging.MessagingService;
+import com.openexchange.messaging.ServiceAware;
 import com.openexchange.messaging.mail.services.MailMessagingServiceRegistry;
 import com.openexchange.session.Session;
 
@@ -579,7 +580,7 @@ public final class MailMessagingAccountManager implements MessagingAccountManage
         return service.getContext(contextId);
     }
 
-    private static class MessagingAccountImpl implements MessagingAccount {
+    private static class MessagingAccountImpl implements MessagingAccount, ServiceAware {
 
         private static final long serialVersionUID = 5355396480305094516L;
 
@@ -594,6 +595,11 @@ public final class MailMessagingAccountManager implements MessagingAccountManage
         public MessagingAccountImpl() {
             super();
             map = new HashMap<String, Object>();
+        }
+
+        @Override
+        public String getServiceId() {
+            return "com.openexchange.messaging.mail";
         }
 
         public void addParameter2Config(final String name, final Object value) {

@@ -50,8 +50,9 @@
 package com.openexchange.oauth.yahoo.internal;
 
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import com.openexchange.log.LogFactory;
 import com.openexchange.http.deferrer.DeferringURLService;
+import com.openexchange.oauth.API;
 import com.openexchange.oauth.AbstractOAuthServiceMetaData;
 
 
@@ -82,4 +83,9 @@ public class OAuthServiceMetaDataYahooImpl extends AbstractOAuthServiceMetaData{
         }
         return deferrer.getDeferredURL(callbackUrl);
     }
+
+	@Override
+	public API getAPI() {
+		return API.YAHOO;
+	}
 }

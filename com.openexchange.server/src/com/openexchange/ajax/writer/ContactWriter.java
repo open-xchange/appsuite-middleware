@@ -58,13 +58,17 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import com.openexchange.ajax.fields.CommonFields;
 import com.openexchange.ajax.fields.ContactFields;
+import com.openexchange.ajax.fields.DataFields;
 import com.openexchange.ajax.fields.DistributionListFields;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contact.datasource.ContactImageDataSource;
 import com.openexchange.groupware.container.CommonObject;
 import com.openexchange.groupware.container.Contact;
+import com.openexchange.groupware.container.DataObject;
 import com.openexchange.groupware.container.DistributionListEntryObject;
+import com.openexchange.groupware.container.FolderChildObject;
 import com.openexchange.groupware.container.LinkEntryObject;
 import com.openexchange.image.ImageLocation;
 import com.openexchange.session.Session;
@@ -151,9 +155,13 @@ public class ContactWriter extends CommonWriter {
                     final String imageURL = imgSource.generateUrl(imageLocation, session);
                     writeParameter(ContactFields.IMAGE1_URL, imageURL, json);
                 } catch (final OXException e) {
-                    org.apache.commons.logging.LogFactory.getLog(ContactWriter.class).warn("Contact image URL could not be generated.", e);
+                    com.openexchange.log.LogFactory.getLog(ContactWriter.class).warn("Contact image URL could not be generated.", e);
                 }
             }
+        }
+        // write image1 at least when setting it to null
+        if (contact.containsImage1() && null == contact.getImage1()) {
+        	json.put(ContactFields.IMAGE1, JSONObject.NULL);
         }
         // writeParameter(ContactFields.IMAGE1, contactobject.getImage1());
         writeParameter(ContactFields.INFO, contact.getInfo(), json);
@@ -234,7 +242,7 @@ public class ContactWriter extends CommonWriter {
         writeParameter(ContactFields.ADDRESS_BUSINESS, contact.getAddressBusiness(), json);
         writeParameter(ContactFields.ADDRESS_HOME, contact.getAddressHome(), json);
         writeParameter(ContactFields.ADDRESS_OTHER, contact.getAddressOther(), json);
-        writeParameter(ContactFields.UID, contact.getUid(), json);
+        writeParameter(CommonFields.UID, contact.getUid(), json);
 
         final JSONArray jsonLinkArray = getLinksAsJSONArray(contact);
         if (jsonLinkArray != null) {
@@ -255,7 +263,7 @@ public class ContactWriter extends CommonWriter {
 
             for (int a = 0; a < linkentries.length; a++) {
                 final JSONObject jsonLinkObject = new JSONObject();
-                writeParameter(ContactFields.ID, linkentries[a].getLinkID(), jsonLinkObject, linkentries[a].containsLinkID());
+                writeParameter(DataFields.ID, linkentries[a].getLinkID(), jsonLinkObject, linkentries[a].containsLinkID());
                 writeParameter(ContactFields.DISPLAY_NAME, linkentries[a].getLinkDisplayname(), jsonLinkObject);
                 jsonArray.put(jsonLinkObject);
             }
@@ -277,11 +285,11 @@ public class ContactWriter extends CommonWriter {
             final int emailField = distributionlist[a].getEmailfield();
 
             if (!(emailField == DistributionListEntryObject.INDEPENDENT)) {
-                writeParameter(DistributionListFields.ID, distributionlist[a].getEntryID(), jsonDListObj);
+                writeParameter(DataFields.ID, distributionlist[a].getEntryID(), jsonDListObj);
             }
 
             writeParameter(DistributionListFields.MAIL, distributionlist[a].getEmailaddress(), jsonDListObj);
-            writeParameter(DistributionListFields.DISPLAY_NAME, distributionlist[a].getDisplayname(), jsonDListObj);
+            writeParameter(ContactFields.DISPLAY_NAME, distributionlist[a].getDisplayname(), jsonDListObj);
             writeParameter(DistributionListFields.MAIL_FIELD, emailField, jsonDListObj);
 
             jsonArray.put(jsonDListObj);
@@ -299,13 +307,13 @@ public class ContactWriter extends CommonWriter {
          * No appropriate static writer found, write manually
          */
         switch (field) {
-        case Contact.CREATION_DATE:
+        case DataObject.CREATION_DATE:
             writeValue(contactobject.getCreationDate(), timeZone, jsonArray);
             break;
-        case Contact.LAST_MODIFIED:
+        case DataObject.LAST_MODIFIED:
             writeValue(contactobject.getLastModified(), timeZone, jsonArray);
             break;
-        case Contact.LAST_MODIFIED_UTC:
+        case DataObject.LAST_MODIFIED_UTC:
             writeValue(contactobject.getLastModified(), utc, jsonArray);
             break;
         default:
@@ -337,7 +345,7 @@ public class ContactWriter extends CommonWriter {
     static {
         final TIntObjectMap<ContactFieldWriter> m = new TIntObjectHashMap<ContactFieldWriter>(128);
 
-        m.put(Contact.OBJECT_ID, new ContactFieldWriter() {
+        m.put(DataObject.OBJECT_ID, new ContactFieldWriter() {
 
             @Override
             public void write(final Contact contactObject, final JSONArray jsonArray, final Session session) {
@@ -345,7 +353,7 @@ public class ContactWriter extends CommonWriter {
             }
         });
 
-        m.put(Contact.CREATED_BY, new ContactFieldWriter() {
+        m.put(DataObject.CREATED_BY, new ContactFieldWriter() {
 
             @Override
             public void write(final Contact contactObject, final JSONArray jsonArray, final Session session) {
@@ -353,7 +361,7 @@ public class ContactWriter extends CommonWriter {
             }
         });
 
-        m.put(Contact.MODIFIED_BY, new ContactFieldWriter() {
+        m.put(DataObject.MODIFIED_BY, new ContactFieldWriter() {
 
             @Override
             public void write(final Contact contactObject, final JSONArray jsonArray, final Session session) {
@@ -361,7 +369,7 @@ public class ContactWriter extends CommonWriter {
             }
         });
 
-        m.put(Contact.FOLDER_ID, new ContactFieldWriter() {
+        m.put(FolderChildObject.FOLDER_ID, new ContactFieldWriter() {
 
             @Override
             public void write(final Contact contactObject, final JSONArray jsonArray, final Session session) {
@@ -369,7 +377,7 @@ public class ContactWriter extends CommonWriter {
             }
         });
 
-        m.put(Contact.PRIVATE_FLAG, new ContactFieldWriter() {
+        m.put(CommonObject.PRIVATE_FLAG, new ContactFieldWriter() {
 
             @Override
             public void write(final Contact contactObject, final JSONArray jsonArray, final Session session) {
@@ -417,7 +425,7 @@ public class ContactWriter extends CommonWriter {
             }
         });
 
-        m.put(Contact.UID, new ContactFieldWriter() {
+        m.put(CommonObject.UID, new ContactFieldWriter() {
 
             @Override
             public void write(final Contact contactObject, final JSONArray jsonArray, final Session session) {
@@ -481,7 +489,7 @@ public class ContactWriter extends CommonWriter {
             }
         });
 
-        m.put(Contact.CATEGORIES, new ContactFieldWriter() {
+        m.put(CommonObject.CATEGORIES, new ContactFieldWriter() {
 
             @Override
             public void write(final Contact contactObject, final JSONArray jsonArray, final Session session) {
@@ -529,7 +537,7 @@ public class ContactWriter extends CommonWriter {
             }
         });
 
-        m.put(Contact.COLOR_LABEL, new ContactFieldWriter() {
+        m.put(CommonObject.COLOR_LABEL, new ContactFieldWriter() {
 
             @Override
             public void write(final Contact contactObject, final JSONArray jsonArray, final Session session) {
@@ -703,7 +711,7 @@ public class ContactWriter extends CommonWriter {
                             final String imageURL = imgSource.generateUrl(imageLocation, session);
                             writeValue(imageURL, jsonArray);
                         } catch (final OXException e) {
-                            org.apache.commons.logging.LogFactory.getLog(ContactWriter.class).warn("Contact image URL could not be generated.", e);
+                            com.openexchange.log.LogFactory.getLog(ContactWriter.class).warn("Contact image URL could not be generated.", e);
                             writeValueNull(jsonArray);
                         }
                     }
@@ -1238,14 +1246,14 @@ public class ContactWriter extends CommonWriter {
             }
         });
 
-        m.put(Contact.NUMBER_OF_ATTACHMENTS, new ContactFieldWriter() {
+        m.put(CommonObject.NUMBER_OF_ATTACHMENTS, new ContactFieldWriter() {
 
             @Override
             public void write(final Contact contactObject, final JSONArray jsonArray, final Session session) {
                 writeValue(contactObject.getNumberOfAttachments(), jsonArray, contactObject.containsNumberOfAttachments());
             }
         });
-        m.put(Contact.LAST_MODIFIED_OF_NEWEST_ATTACHMENT, new ContactFieldWriter() {
+        m.put(CommonObject.LAST_MODIFIED_OF_NEWEST_ATTACHMENT, new ContactFieldWriter() {
             @Override
             public void write(final Contact contact, final JSONArray json, final Session session) {
                 writeValue(contact.getLastModifiedOfNewestAttachment(), json, contact.containsLastModifiedOfNewestAttachment());

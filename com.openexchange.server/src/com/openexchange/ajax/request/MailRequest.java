@@ -56,7 +56,7 @@ import org.json.JSONObject;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.Mail;
 import com.openexchange.ajax.fields.CommonFields;
-import com.openexchange.ajax.fields.FolderFields;
+import com.openexchange.ajax.fields.FolderChildFields;
 import com.openexchange.ajax.fields.ResponseFields;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
@@ -70,7 +70,7 @@ import com.openexchange.tools.session.ServerSession;
 
 public final class MailRequest {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(MailRequest.class));
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(MailRequest.class));
 
     private static enum CollectableOperation {
         MOVE, COPY, STORE_FLAG, COLOR_LABEL;
@@ -152,6 +152,8 @@ public final class MailRequest {
             MAIL_SERVLET.actionGetStructure(session, writer, jsonObject, mailInterface);
         } else if (action.equalsIgnoreCase(AJAXServlet.ACTION_MATTACH)) {
             MAIL_SERVLET.actionGetAttachment();
+        } else if (action.equalsIgnoreCase("attachmentToken")) {
+            MAIL_SERVLET.actionGetAttachmentToken(session, writer, jsonObject, mailInterface);
         } else if (action.equalsIgnoreCase(AJAXServlet.ACTION_NEW_MSGS)) {
             MAIL_SERVLET.actionGetNew(session, writer, jsonObject, mailInterface);
         } else if (action.equalsIgnoreCase(AJAXServlet.ACTION_LIST)) {
@@ -244,7 +246,7 @@ public final class MailRequest {
     }
 
     private static boolean isMove(final JSONObject jsonObject) throws JSONException {
-        return jsonObject.has(ResponseFields.DATA) && jsonObject.getJSONObject(ResponseFields.DATA).has(FolderFields.FOLDER_ID);
+        return jsonObject.has(ResponseFields.DATA) && jsonObject.getJSONObject(ResponseFields.DATA).has(FolderChildFields.FOLDER_ID);
     }
 
     private static boolean isStoreFlags(final JSONObject jsonObject) throws JSONException {
@@ -347,13 +349,13 @@ public final class MailRequest {
         public MoveCollectObject(final JSONObject dataObject, final Mail mailServlet) throws JSONException {
             super(mailServlet);
             this.srcFld = dataObject.getString(AJAXServlet.PARAMETER_FOLDERID);
-            this.destFld = dataObject.getJSONObject(ResponseFields.DATA).getString(FolderFields.FOLDER_ID);
+            this.destFld = dataObject.getJSONObject(ResponseFields.DATA).getString(FolderChildFields.FOLDER_ID);
         }
 
         @Override
         public boolean collectable(final JSONObject dataObject, final CollectableOperation op) throws JSONException {
             return (CollectableOperation.MOVE.equals(op) && this.srcFld.equals(dataObject.getString(AJAXServlet.PARAMETER_FOLDERID)) && this.destFld.equals(dataObject.getJSONObject(
-                ResponseFields.DATA).getString(FolderFields.FOLDER_ID)));
+                ResponseFields.DATA).getString(FolderChildFields.FOLDER_ID)));
         }
 
         @Override
@@ -377,13 +379,13 @@ public final class MailRequest {
         public CopyCollectObject(final JSONObject dataObject, final Mail mailServlet) throws JSONException {
             super(mailServlet);
             this.srcFld = dataObject.getString(AJAXServlet.PARAMETER_FOLDERID);
-            this.destFld = dataObject.getJSONObject(ResponseFields.DATA).getString(FolderFields.FOLDER_ID);
+            this.destFld = dataObject.getJSONObject(ResponseFields.DATA).getString(FolderChildFields.FOLDER_ID);
         }
 
         @Override
         public boolean collectable(final JSONObject dataObject, final CollectableOperation op) throws JSONException {
             return (CollectableOperation.COPY.equals(op) && this.srcFld.equals(dataObject.getString(AJAXServlet.PARAMETER_FOLDERID)) && this.destFld.equals(dataObject.getJSONObject(
-                ResponseFields.DATA).getString(FolderFields.FOLDER_ID)));
+                ResponseFields.DATA).getString(FolderChildFields.FOLDER_ID)));
         }
 
         @Override

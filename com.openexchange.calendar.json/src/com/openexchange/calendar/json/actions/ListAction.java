@@ -96,7 +96,7 @@ responseDescription = "Response with timestamp: An array with appointment data. 
 public final class ListAction extends AppointmentAction {
 
     private static final org.apache.commons.logging.Log LOG =
-        com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(ListAction.class));
+        com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(ListAction.class));
 
     /**
      * Initializes a new {@link ListAction}.

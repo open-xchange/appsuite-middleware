@@ -49,21 +49,28 @@
 
 package com.openexchange.index.solr.osgi;
 
+import java.util.Dictionary;
+import java.util.Hashtable;
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.eclipse.osgi.framework.console.CommandInterpreter;
-import org.eclipse.osgi.framework.console.CommandProvider;
-import org.junit.runner.JUnitCore;
-
+import org.osgi.service.event.EventConstants;
+import org.osgi.service.event.EventHandler;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.database.CreateTableService;
 import com.openexchange.database.DatabaseService;
+import com.openexchange.groupware.update.DefaultUpdateTaskProviderService;
+import com.openexchange.groupware.update.UpdateTaskProviderService;
+import com.openexchange.file.storage.FileStorageEventConstants;
+import com.openexchange.file.storage.composition.IDBasedFileAccessFactory;
 import com.openexchange.index.IndexFacadeService;
-import com.openexchange.index.solr.SolrIndexFacadeTest;
+import com.openexchange.index.solr.groupware.IndexedFoldersCreateTableService;
+import com.openexchange.index.solr.groupware.IndexedFoldersCreateTableTask;
 import com.openexchange.index.solr.internal.Services;
 import com.openexchange.index.solr.internal.SolrIndexFacadeService;
-import com.openexchange.langdetect.LanguageDetectionService;
+import com.openexchange.index.solr.internal.filestore.SolrFilestoreEventHandler;
+import com.openexchange.log.LogFactory;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.solr.SolrAccessService;
+import com.openexchange.textxtraction.TextXtractService;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.timer.TimerService;
 import com.openexchange.user.UserService;
@@ -78,12 +85,14 @@ public class SolrIndexActivator extends HousekeepingActivator {
 
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(SolrIndexActivator.class));
     
+    private SolrIndexFacadeService solrFacadeService;
+        
 
     @Override
     protected Class<?>[] getNeededServices() {
         return new Class[] {
             DatabaseService.class, UserService.class, ConfigurationService.class, TimerService.class, ThreadPoolService.class,
-            LanguageDetectionService.class, SolrAccessService.class };
+            SolrAccessService.class, IDBasedFileAccessFactory.class, TextXtractService.class };
     }
 
     @Override
@@ -91,38 +100,47 @@ public class SolrIndexActivator extends HousekeepingActivator {
         LOG.info("Starting Bundle com.openexchange.index.solr");
         Services.setServiceLookup(this);
 
-        final SolrIndexFacadeService solrFacadeService = new SolrIndexFacadeService();
+        solrFacadeService = new SolrIndexFacadeService();
+        solrFacadeService.init();
         registerService(IndexFacadeService.class, solrFacadeService);
         addService(IndexFacadeService.class, solrFacadeService);
-        registerService(CommandProvider.class, new UtilCommandProvider());
+        IndexedFoldersCreateTableService createTableService = new IndexedFoldersCreateTableService();
+        registerService(CreateTableService.class, createTableService);
+        registerService(UpdateTaskProviderService.class, new DefaultUpdateTaskProviderService(new IndexedFoldersCreateTableTask(createTableService)));
+        Dictionary<String, Object> ht = new Hashtable<String, Object>();
+        ht.put(EventConstants.EVENT_TOPIC, FileStorageEventConstants.ALL_TOPICS);
+        registerService(EventHandler.class, new SolrFilestoreEventHandler(), ht);
+//        	registerService(CommandProvider.class, new UtilCommandProvider());        
         
 //        final SolrCoreConfigService indexService = new SolrCoreConfigServiceImpl();
 //        registerService(SolrCoreConfigService.class, indexService);
-
-        /*
-         * Register UpdateTasks and DeleteListener. Uncomment for production. final DatabaseService dbService =
-         * getService(DatabaseService.class); final CreateTableService createTableService = new IndexCreateTableService();
-         * registerService(CreateTableService.class, createTableService); registerService(UpdateTaskProviderService.class, new
-         * IndexUpdateTaskProviderService( new CreateTableUpdateTask(createTableService, new String[0], Schema.NO_VERSION, dbService), new
-         * IndexCreateServerTableTask(dbService) )); registerService(DeleteListener.class, new IndexDeleteListener(indexService));
-         */
     }
     
-    public class UtilCommandProvider implements CommandProvider {
-
-        public UtilCommandProvider() {
-            super();
+    @Override
+    protected void stopBundle() throws Exception {
+        if (solrFacadeService != null) {
+            solrFacadeService.shutDown();
         }
-
-        public String getHelp() {
-            final StringBuilder help = new StringBuilder();
-            help.append("\tstartTest - Start SolrIndexFacadeTest.\n");
-            return help.toString();
-        }
-
-        public void _startTest(final CommandInterpreter commandInterpreter) {
-            final JUnitCore jUnit = new JUnitCore();
-            jUnit.run(SolrIndexFacadeTest.class);
-        }
+        
+        super.stopBundle();
     }
+    
+//    public class UtilCommandProvider implements CommandProvider {
+//
+//        public UtilCommandProvider() {
+//            super();
+//        }
+//
+//        @Override
+//		public String getHelp() {
+//            final StringBuilder help = new StringBuilder();
+//            help.append("\tstartTest - Start SolrIndexFacadeTest.\n");
+//            return help.toString();
+//        }
+//
+//        public void _startTest(final CommandInterpreter commandInterpreter) {
+//            final JUnitCore jUnit = new JUnitCore();
+//            jUnit.run(SolrIndexFacadeTest.class);
+//        }
+//    }
 }

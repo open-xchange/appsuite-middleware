@@ -76,6 +76,10 @@ public enum ComposeType {
      * Draft
      */
     DRAFT(4),
+    /**
+     * New SMS (special handling for contained text; e.g. no html-to-text conversion)
+     */
+    NEW_SMS(5),
 
     ;
 

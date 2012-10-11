@@ -66,4 +66,7 @@ public final class Mappers {
 	 */
 	public static final DistListMapper DISTLIST = new DistListMapper();
 
+	private Mappers() {
+		// prevent instantiation
+	}
 }

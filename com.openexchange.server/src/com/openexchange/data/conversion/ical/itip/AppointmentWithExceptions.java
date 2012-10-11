@@ -65,7 +65,7 @@ public class AppointmentWithExceptions {
     private CalendarDataObject cdao;
     private Appointment appointment;
 
-    private List<CalendarDataObject> exceptions;
+    private final List<CalendarDataObject> exceptions;
     
     /**
      * Initializes a new {@link AppointmentWithExceptions}.

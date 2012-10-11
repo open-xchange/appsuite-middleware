@@ -117,7 +117,7 @@ public final class UserSettingMail implements Cloneable, Serializable {
      */
     private static final long serialVersionUID = -5787223065275414178L;
 
-    private static final transient org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(UserSettingMail.class));
+    private static final transient org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(UserSettingMail.class));
 
     /*-
      * Integer constants for on/off options
@@ -320,6 +320,8 @@ public final class UserSettingMail implements Cloneable, Serializable {
 
     private boolean noSave;
 
+    private boolean dropReplyForwardPrefix;
+
     /**
      * Initializes a new {@link UserSettingMail}.
      *
@@ -362,6 +364,24 @@ public final class UserSettingMail implements Cloneable, Serializable {
      */
     public int getAutoLinebreak() {
         return autoLinebreak;
+    }
+
+    /**
+     * Gets the dropReplyForwardPrefix.
+     *
+     * @return The dropReplyForwardPrefix
+     */
+    public boolean isDropReplyForwardPrefix() {
+        return dropReplyForwardPrefix;
+    }
+    
+    /**
+     * Sets the dropReplyForwardPrefix.
+     *
+     * @param dropReplyForwardPrefix The dropReplyForwardPrefix to set
+     */
+    public void setDropReplyForwardPrefix(final boolean dropReplyForwardPrefix) {
+        this.dropReplyForwardPrefix = dropReplyForwardPrefix;
     }
 
     /**

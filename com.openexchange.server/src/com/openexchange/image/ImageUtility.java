@@ -59,9 +59,10 @@ import jonelo.jacksum.JacksumAPI;
 import jonelo.jacksum.algorithm.AbstractChecksum;
 import jonelo.jacksum.algorithm.MD;
 import com.openexchange.ajax.AJAXServlet;
+import com.openexchange.ajax.requesthandler.AJAXRequestData;
+import com.openexchange.ajax.requesthandler.DefaultDispatcherPrefixService;
 import com.openexchange.groupware.notify.hostname.HostData;
 import com.openexchange.groupware.notify.hostname.HostnameService;
-import com.openexchange.image.servlet.ImageServlet;
 import com.openexchange.java.Charsets;
 import com.openexchange.log.LogProperties;
 import com.openexchange.log.Props;
@@ -129,9 +130,31 @@ public final class ImageUtility {
         }
         final ImageLocation il = new ImageLocation.Builder(imageId).accountId(accountId).folder(folder).id(id).build();
         if (null == registrationName) {
-            registrationName = ImageServlet.getRegistrationNameFor(imageUri);
+            registrationName = ImageActionFactory.getRegistrationNameFor(imageUri);
             if (null == registrationName) {
                 throw new IllegalArgumentException("No known registration name for: " + imageUri);
+            }
+        }
+        il.setRegistrationName(registrationName);
+        return il;
+    }
+    
+    public static ImageLocation parseImageLocationFrom(final AJAXRequestData requestData) {
+        if (requestData == null) {
+            return null;
+        }
+
+        final String accountId = requestData.getParameter("accountId");
+        final String folder = requestData.getParameter(AJAXServlet.PARAMETER_FOLDERID);
+        final String id = requestData.getParameter(AJAXServlet.PARAMETER_ID);
+        final String imageId = requestData.getParameter(AJAXServlet.PARAMETER_UID);
+        String registrationName = requestData.getParameter("source");
+
+        final ImageLocation il = new ImageLocation.Builder(imageId).accountId(accountId).folder(folder).id(id).build();
+        if (null == registrationName) {
+            registrationName = ImageActionFactory.getRegistrationNameFor(requestData.getSerlvetRequestURI());
+            if (null == registrationName) {
+                throw new IllegalArgumentException("No known registration name for: " + requestData.getSerlvetRequestURI());
             }
         }
         il.setRegistrationName(registrationName);
@@ -203,7 +226,9 @@ public final class ImageUtility {
         /*
          * Compose URL parameters
          */
-        sb.append(prefix).append('/').append(ImageDataSource.ALIAS);
+        sb.append(prefix);
+        sb.append(DefaultDispatcherPrefixService.getInstance().getPrefix());
+        sb.append(ImageDataSource.ALIAS_APPENDIX);
         final String alias = imageDataSource.getAlias();
         if (null != alias) {
             sb.append(alias);
@@ -256,7 +281,7 @@ public final class ImageUtility {
             return URLEncoder.encode(text, UTF_8);
         } catch (final UnsupportedEncodingException e) {
             // Cannot occur
-            com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(ImageUtility.class)).error(e.getMessage(), e);
+            com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(ImageUtility.class)).error(e.getMessage(), e);
             return text;
         }
     }
@@ -275,7 +300,7 @@ public final class ImageUtility {
             checksum.update(string.getBytes(Charsets.UTF_8));
             return checksum.getFormattedValue();
         } catch (final NoSuchAlgorithmException e) {
-            com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(ImageUtility.class)).error(e.getMessage(), e);
+            com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(ImageUtility.class)).error(e.getMessage(), e);
         }
         return null;
     }
@@ -305,9 +330,9 @@ public final class ImageUtility {
             checksum.update(string.getBytes(UTF_8));
             return checksum.getFormattedValue();
         } catch (final NoSuchAlgorithmException e) {
-            com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(ImageUtility.class)).error(e.getMessage(), e);
+            com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(ImageUtility.class)).error(e.getMessage(), e);
         } catch (final UnsupportedEncodingException e) {
-            com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(ImageUtility.class)).error(e.getMessage(), e);
+            com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(ImageUtility.class)).error(e.getMessage(), e);
         }
         return null;
     }

@@ -80,7 +80,7 @@ responseDescription = "An JSON array with the ids that was not deleted.")
 public final class DeleteAction extends AbstractReminderAction {
 
     private static final org.apache.commons.logging.Log LOG =
-        com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(DeleteAction.class));
+        com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(DeleteAction.class));
 
     /**
      * Initializes a new {@link DeleteAction}.

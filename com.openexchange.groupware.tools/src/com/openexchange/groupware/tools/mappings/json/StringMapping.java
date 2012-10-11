@@ -67,16 +67,18 @@ public abstract class StringMapping<O> extends DefaultJsonMapping<String, O> {
 	}
 
 	@Override
-	public void deserialize(final JSONObject from, final O to) throws JSONException, OXException {
-		this.set(to, from.getString(getAjaxName()));
+	public void deserialize(JSONObject from, O to) throws JSONException, OXException {
+		this.set(to, from.isNull(getAjaxName()) ? null : from.getString(getAjaxName()));
 	}
 
 	@Override
-	public void serialize(final O from, final JSONObject to) throws JSONException {
-		final String value = this.get(from);
-		if (null != value && 0 < value.length()) {
-			to.put(getAjaxName(), value);
-        }
+	public boolean truncate(final O object, final int length) throws OXException {
+		final String value = this.get(object);
+		if (null != value && length < value.length()) {
+			this.set(object, value.substring(0, length));
+			return true;
+		}
+		return false;
 	}
-
+	
 }

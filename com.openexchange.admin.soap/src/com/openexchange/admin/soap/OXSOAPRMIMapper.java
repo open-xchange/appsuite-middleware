@@ -61,9 +61,7 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.jar.Attributes;
 import java.util.jar.Manifest;
-
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 /**
  * @author choeger
@@ -107,7 +105,7 @@ public abstract class OXSOAPRMIMapper {
 
     private Class<?> clazz = null;
     
-    protected static final Log log = LogFactory.getLog(OXSOAPRMIMapper.class);    
+    protected static final Log log = org.apache.commons.logging.LogFactory.getLog(OXSOAPRMIMapper.class);    
 
     /**
      * @throws RemoteException 
@@ -124,7 +122,7 @@ public abstract class OXSOAPRMIMapper {
             final Attributes attrs = manifest.getMainAttributes();
             final String configFile = attrs.getValue("Config-File");
 
-            Properties props = new Properties();
+            final Properties props = new Properties();
             props.load(new FileInputStream(configFile));
             if( props.containsKey(MAX_RMI_CONNECT_ATTEMPTS_PROP) ) {
                 MAX_RMI_CONNECT_ATTEMPTS = Integer.parseInt((String)props.get(MAX_RMI_CONNECT_ATTEMPTS_PROP));
@@ -157,10 +155,10 @@ public abstract class OXSOAPRMIMapper {
                 sb.append(RMI_HOSTNAME);
                 log.debug(sb.toString());
             }
-        } catch (MalformedURLException e) {
+        } catch (final MalformedURLException e) {
             log.error(e.getMessage(), e);
             throw new RemoteException(e.getMessage());
-        } catch (IOException e) {
+        } catch (final IOException e) {
             log.error(e.getMessage(), e);
             throw new RemoteException(e.getMessage());
         }
@@ -176,7 +174,7 @@ public abstract class OXSOAPRMIMapper {
             if( ! LOCK.tryLock(LOCK_WAIT_TIME, TimeUnit.SECONDS) ) {
                 throw new RemoteException("Could get lock within " + LOCK_WAIT_TIME + " seconds");
             }
-        } catch (InterruptedException e2) {
+        } catch (final InterruptedException e2) {
             throw new RemoteException(THREAD_INTERRUPTED_ERROR);
         }
 
@@ -186,19 +184,19 @@ public abstract class OXSOAPRMIMapper {
                 log.info("reconnecting to " + rmihost);
                 boolean doloop = true;
                 int count = MAX_RMI_CONNECT_ATTEMPTS;
-                int delay = CONNECT_ATTEMPTS_DELAY_TIME*1000;
+                final int delay = CONNECT_ATTEMPTS_DELAY_TIME*1000;
                 boolean failed = false;
                 while(doloop) {
                     try {
                         rmistub = Naming.lookup(rmihost);
                         doloop = false;
-                    } catch (java.rmi.ConnectException e) {
+                    } catch (final java.rmi.ConnectException e) {
                         rmistub = null;
                         log.info("OXSOAPRMIMapper.reconnect: Connection problem");
                         log.info("waiting " + CONNECT_ATTEMPTS_DELAY_TIME + " seconds and try again");
                         try {
                             Thread.sleep(delay);
-                        } catch (InterruptedException e1) {
+                        } catch (final InterruptedException e1) {
                             log.error(e1.getMessage(),e1);
                         }
                         count--;
@@ -213,22 +211,22 @@ public abstract class OXSOAPRMIMapper {
                 }
                 //clazz.cast(rmistub);
             }
-        } catch (SecurityException e) {
+        } catch (final SecurityException e) {
             log.error(e.getMessage(), e);
             throw new RemoteException(e.getMessage());
-        } catch (NoSuchFieldException e) {
+        } catch (final NoSuchFieldException e) {
             log.error(e.getMessage(), e);
             throw new RemoteException(e.getMessage());
-        } catch (IllegalArgumentException e) {
+        } catch (final IllegalArgumentException e) {
             log.error(e.getMessage(), e);
             throw new RemoteException(e.getMessage());
-        } catch (IllegalAccessException e) {
+        } catch (final IllegalAccessException e) {
             log.error(e.getMessage(), e);
             throw new RemoteException(e.getMessage());
-        } catch (MalformedURLException e) {
+        } catch (final MalformedURLException e) {
             log.error(e.getMessage(), e);
             throw new RemoteException(e.getMessage());
-        } catch (NotBoundException e) {
+        } catch (final NotBoundException e) {
             log.error(e.getMessage(), e);
             throw new RemoteException(e.getMessage());
         } finally {

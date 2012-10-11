@@ -52,6 +52,7 @@ package com.openexchange.mail.json.actions;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.Mail;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.documentation.RequestMethod;
@@ -81,7 +82,7 @@ import com.openexchange.tools.session.ServerSession;
 public final class GetForwardAction extends AbstractMailAction {
 
     private static final org.apache.commons.logging.Log LOG =
-        Log.valueOf(org.apache.commons.logging.LogFactory.getLog(GetForwardAction.class));
+        Log.valueOf(com.openexchange.log.LogFactory.getLog(GetForwardAction.class));
 
     /**
      * Initializes a new {@link GetForwardAction}.
@@ -107,8 +108,8 @@ public final class GetForwardAction extends AbstractMailAction {
             /*
              * Read in parameters
              */
-            final String folderPath = req.checkParameter(Mail.PARAMETER_FOLDERID);
-            final String uid = req.checkParameter(Mail.PARAMETER_ID);
+            final String folderPath = req.checkParameter(AJAXServlet.PARAMETER_FOLDERID);
+            final String uid = req.checkParameter(AJAXServlet.PARAMETER_ID);
             final String view = req.getParameter(Mail.PARAMETER_VIEW);
             final UserSettingMail usmNoSave = (UserSettingMail) session.getUserSettingMail().clone();
             /*
@@ -119,12 +120,17 @@ public final class GetForwardAction extends AbstractMailAction {
              * Overwrite settings with request's parameters
              */
             detectDisplayMode(true, view, usmNoSave);
+            if (Boolean.parseBoolean(req.getParameter("dropPrefix"))) {
+                usmNoSave.setDropReplyForwardPrefix(true);
+            }
             /*
              * Get mail interface
              */
             final MailServletInterface mailInterface = getMailInterface(req);
             final MailMessage mailMessage = mailInterface.getForwardMessageForDisplay(new String[] { folderPath }, new String[] { uid }, usmNoSave);
-            mailMessage.setAccountId(mailInterface.getAccountID());
+            if (!mailMessage.containsAccountId()) {
+                mailMessage.setAccountId(mailInterface.getAccountID());
+            }
             return new AJAXRequestResult(mailMessage, "mail");
         } catch (final RuntimeException e) {
             throw MailExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
@@ -141,8 +147,8 @@ public final class GetForwardAction extends AbstractMailAction {
             final String[] ids = new String[paths.length()];
             for (int i = 0; i < folders.length; i++) {
                 final JSONObject folderAndID = paths.getJSONObject(i);
-                folders[i] = folderAndID.getString(Mail.PARAMETER_FOLDERID);
-                ids[i] = folderAndID.getString(Mail.PARAMETER_ID);
+                folders[i] = folderAndID.getString(AJAXServlet.PARAMETER_FOLDERID);
+                ids[i] = folderAndID.getString(AJAXServlet.PARAMETER_ID);
             }
             final String view = req.getParameter(Mail.PARAMETER_VIEW);
             final UserSettingMail usmNoSave = (UserSettingMail) session.getUserSettingMail().clone();
@@ -169,8 +175,17 @@ public final class GetForwardAction extends AbstractMailAction {
             }
             final MailServletInterface mailInterface = getMailInterface(req);
             final MailMessage mail = mailInterface.getForwardMessageForDisplay(folders, ids, usmNoSave);
-            mail.setAccountId(mailInterface.getAccountID());
+            if (!mail.containsAccountId()) {
+                mail.setAccountId(mailInterface.getAccountID());
+            }
             return new AJAXRequestResult(mail, "mail");
+        } catch (final OXException e) {
+            final Object[] args = e.getDisplayArgs();
+            final String uid = null == args || 0 == args.length ? null : args[0].toString();
+            if (MailExceptionCode.MAIL_NOT_FOUND.equals(e) && "undefined".equalsIgnoreCase(uid)) {
+                throw MailExceptionCode.PROCESSING_ERROR.create(e, new Object[0]);
+            }
+            throw e;
         } catch (final JSONException e) {
             throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
         } catch (final RuntimeException e) {

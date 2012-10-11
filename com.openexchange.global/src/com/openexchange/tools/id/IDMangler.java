@@ -49,27 +49,46 @@
 
 package com.openexchange.tools.id;
 
+import java.nio.charset.UnsupportedCharsetException;
 import java.util.ArrayList;
+import java.util.BitSet;
 import java.util.List;
+import org.apache.commons.codec.DecoderException;
+import org.apache.commons.codec.net.QuotedPrintableCodec;
 
 /**
- * {@link IDMangler}
+ * {@link IDMangler} - Utility class for generating & parsing a mangled/composite identifier.
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class IDMangler {
 
+    /**
+     * The primary delimiter: <code>"://"</code>
+     */
     public static final String PRIMARY_DELIM = "://";
 
-    public static final String SECONDARY_DELIM = "/";
+    private static final char CHAR_SECONDARY_DELIM = '/';
 
-    public static String mangle(String... components) {
-        StringBuilder id = new StringBuilder(50);
+    /**
+     * The secondary delimiter: <code>"/"</code>
+     */
+    public static final String SECONDARY_DELIM = Character.toString(CHAR_SECONDARY_DELIM);
+
+    /**
+     * Generates a mangled/composite identifier from specified String components.
+     * 
+     * @param components The String components
+     * @return The mangled/composite identifier
+     */
+    public static String mangle(final String... components) {
+        final StringBuilder id = new StringBuilder(50);
         boolean first = true;
-        for (String string : components) {
-            string = escape(string);
-            id.append(string);
-            String delim = first ? PRIMARY_DELIM : SECONDARY_DELIM;
+        for (String component : components) {
+            component = escape(component);
+            id.append(component);
+            final String delim = first ? PRIMARY_DELIM : SECONDARY_DELIM;
             id.append(delim);
             first = false;
         }
@@ -77,104 +96,178 @@ public class IDMangler {
         return id.toString();
     }
 
-    private static String escape(String string) {
-        if(string == null) {
+    private static String escape(final String string) {
+        if (string == null) {
             return null;
         }
-        StringBuilder buffer = new StringBuilder(string.length() * 3);
-        for (char c : string.toCharArray()) {
-            switch (c) {
-            case '/':
-                buffer.append("[/]");
-                break;
-            case '[':
-                buffer.append("[[]");
-                break;
-            case ':':
-                buffer.append("[:]");
-                break;
-            default:
-                buffer.append(c);
-            }
-        }
-        return buffer.toString();
+        return encodeQP(string);
+        // StringBuilder buffer = new StringBuilder(string.length() * 3);
+        // for (char c : string.toCharArray()) {
+        // switch (c) {
+        // case '/':
+        // buffer.append("[/]");
+        // break;
+        // case '[':
+        // buffer.append("[[]");
+        // break;
+        // case ':':
+        // buffer.append("[:]");
+        // break;
+        // default:
+        // buffer.append(c);
+        // }
+        // }
+        // return buffer.toString();
     }
 
     private static enum ParserState {
         APPEND, APPEND_PREFIX, PRIMARY_DELIM1, PRIMARY_DELIM2, ESCAPED;
     }
 
-    public static List<String> unmangle(String mangled) {
-        ArrayList<String> list = new ArrayList<String>(5);
-        StringBuilder buffer = new StringBuilder(50);
-        ParserState state = ParserState.APPEND_PREFIX;
-        ParserState unescapedState = null;
+    /**
+     * Parses specified mangled identifier into its String components.
+     * 
+     * @param mangled The mangled identifier
+     * @return The identifier's components
+     */
+    public static List<String> unmangle(final String mangled) {
+        return unmangle(mangled, false);
+    }
 
-        for (char c : mangled.toCharArray()) {
-            switch (c) {
-            case '[': {
-                if (state == ParserState.ESCAPED) {
+    /**
+     * Parses specified mangled identifier into its String components.
+     * 
+     * @param mangled The mangled identifier
+     * @param stateMachine <code>true</code> for state machine based parsing; otherwise <code>false</code>
+     * @return The identifier's components
+     */
+    public static List<String> unmangle(String mangled, final boolean stateMachine) {
+        final List<String> list = new ArrayList<String>(5);
+        if (stateMachine) {
+            final StringBuilder buffer = new StringBuilder(50);
+            ParserState state = ParserState.APPEND_PREFIX;
+            ParserState unescapedState = null;
+    
+            for (final char c : mangled.toCharArray()) {
+                switch (c) {
+                case '[': {
+                    if (state == ParserState.ESCAPED) {
+                        buffer.append(c);
+                    } else {
+                        unescapedState = state;
+                        state = ParserState.ESCAPED;
+                    }
+                    break;
+                }
+                case ']': {
+                    if (state == ParserState.ESCAPED) {
+                        state = unescapedState;
+                    } else {
+                        buffer.append(c);
+                    }
+                    break;
+                }
+                case ':': {
+                    switch (state) {
+                    case APPEND:
+                    case ESCAPED:
+                        buffer.append(c);
+                        break;
+                    case APPEND_PREFIX:
+                        state = ParserState.PRIMARY_DELIM1;
+                        break;
+                    }
+                    break;
+                }
+                case '/': {
+                    switch (state) {
+                    case APPEND:
+                        list.add(buffer.toString());
+                        buffer.setLength(0);
+                        break;
+                    case APPEND_PREFIX:
+                    case ESCAPED:
+                        buffer.append(c);
+                        break;
+                    case PRIMARY_DELIM1:
+                        state = ParserState.PRIMARY_DELIM2;
+                        break;
+                    case PRIMARY_DELIM2:
+                        list.add(buffer.toString());
+                        buffer.setLength(0);
+                        state = ParserState.APPEND;
+                        break;
+                    }
+                    break;
+                }
+                default: {
+                    switch(state) {
+                    case PRIMARY_DELIM1: buffer.append(':'); state = ParserState.APPEND_PREFIX; break;
+                    case PRIMARY_DELIM2: buffer.append(":/"); state = ParserState.APPEND_PREFIX; break;
+                    }
                     buffer.append(c);
+                    break;
+                }
+                }
+            }
+            if (buffer.length() != 0) {
+                list.add(buffer.toString());
+            }
+        } else {
+            // Find first delimiter
+            int prev = 0;
+            int pos = mangled.indexOf(PRIMARY_DELIM, prev);
+            if (pos == -1) {
+            	list.add(mangled);
+            	return list;
+            }
+            list.add(decodeQP(mangled.substring(prev, pos)));
+            prev = pos + PRIMARY_DELIM.length();
+            while (prev > 0) {
+                pos = mangled.indexOf(CHAR_SECONDARY_DELIM, prev);
+                if (pos > 0) {
+                    list.add(decodeQP(mangled.substring(prev, pos)));
+                    prev = pos + 1;
                 } else {
-                    unescapedState = state;
-                    state = ParserState.ESCAPED;
+                    list.add(decodeQP(mangled.substring(prev)));
+                    prev = -1;
                 }
-                break;
             }
-            case ']': {
-                if (state == ParserState.ESCAPED) {
-                    state = unescapedState;
-                } else {
-                    buffer.append(c);
-                }
-                break;
-            }
-            case ':': {
-                switch (state) {
-                case APPEND:
-                case ESCAPED:
-                    buffer.append(c);
-                    break;
-                case APPEND_PREFIX:
-                    state = ParserState.PRIMARY_DELIM1;
-                    break;
-                }
-                break;
-            }
-            case '/': {
-                switch (state) {
-                case APPEND:
-                    list.add(buffer.toString());
-                    buffer.setLength(0);
-                    break;
-                case APPEND_PREFIX:
-                case ESCAPED:
-                    buffer.append(c);
-                    break;
-                case PRIMARY_DELIM1:
-                    state = ParserState.PRIMARY_DELIM2;
-                    break;
-                case PRIMARY_DELIM2:
-                    list.add(buffer.toString());
-                    buffer.setLength(0);
-                    state = ParserState.APPEND;
-                    break;
-                }
-                break;
-            }
-            default: {
-                switch(state) {
-                case PRIMARY_DELIM1: buffer.append(':'); state = ParserState.APPEND_PREFIX; break;
-                case PRIMARY_DELIM2: buffer.append(":/"); state = ParserState.APPEND_PREFIX; break;
-                }
-                buffer.append(c);
-                break;
-            }
-            }
-        }
-        if (buffer.length() != 0) {
-            list.add(buffer.toString());
         }
         return list;
+    }
+
+    private static final BitSet PRINTABLE_CHARS = new BitSet(256);
+    // Static initializer for printable chars collection
+    static {
+        for (int i = '0'; i <= '9'; i++) {
+            PRINTABLE_CHARS.set(i);
+        }
+        for (int i = 'A'; i <= 'Z'; i++) {
+            PRINTABLE_CHARS.set(i);
+        }
+        for (int i = 'a'; i <= 'z'; i++) {
+            PRINTABLE_CHARS.set(i);
+        }
+        PRINTABLE_CHARS.set('.');
+        PRINTABLE_CHARS.set('-');
+        PRINTABLE_CHARS.set('_');
+    }
+
+    private static String encodeQP(final String string) {
+        try {
+            return new String(QuotedPrintableCodec.encodeQuotedPrintable(PRINTABLE_CHARS, string.getBytes(com.openexchange.java.Charsets.UTF_8)),com.openexchange.java.Charsets.US_ASCII);
+        } catch (final UnsupportedCharsetException e) {
+            // Cannot occur
+            return string;
+        }
+    }
+
+    private static String decodeQP(final String string) {
+        try {
+            return new String(QuotedPrintableCodec.decodeQuotedPrintable(string.getBytes(com.openexchange.java.Charsets.US_ASCII)), com.openexchange.java.Charsets.UTF_8);
+        } catch (final DecoderException e) {
+            return string;
+        }
     }
 }

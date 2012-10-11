@@ -67,11 +67,11 @@ public final class ImageLocation {
     /**
      * The builder for a {@link ImageLocation}.
      */
-    public static class Builder {
-        private final String imageId;
-        private String accountId;
-        private String folder;
-        private String id;
+    public static final class Builder {
+        protected final String imageId;
+        protected String accountId;
+        protected String folder;
+        protected String id;
 
         public Builder() {
             super();

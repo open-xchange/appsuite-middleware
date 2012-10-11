@@ -50,6 +50,7 @@
 package com.openexchange.mdns.internal;
 
 import java.util.UUID;
+import com.openexchange.mdns.MDNSServiceEntry;
 
 /**
  * {@link MDNSReregisterer}
@@ -61,5 +62,9 @@ public interface MDNSReregisterer {
     void reregisterServices();
 
     boolean contains(UUID id, String serviceId);
+
+    void serviceAdded(String serviceId, MDNSServiceEntry entry);
+
+    void serviceRemoved(String serviceId, MDNSServiceEntry entry);
 
 }

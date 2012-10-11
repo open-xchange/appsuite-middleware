@@ -27,7 +27,6 @@ CREATE TABLE reminder (
     description VARCHAR(1028),
     folder VARCHAR(1028),
     PRIMARY KEY (cid,object_id),
-    INDEX (cid,target_id),
     INDEX (cid,userid,alarm),
     INDEX (cid,userid,last_modified),
     CONSTRAINT reminder_unique UNIQUE (cid,target_id,module,userid)

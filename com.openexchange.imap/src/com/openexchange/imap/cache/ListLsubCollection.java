@@ -90,7 +90,7 @@ import com.sun.mail.imap.protocol.IMAPResponse;
  */
 final class ListLsubCollection {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(ListLsubCollection.class));
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(ListLsubCollection.class));
 
     private static final boolean DEBUG = LOG.isDebugEnabled();
 
@@ -315,7 +315,7 @@ final class ListLsubCollection {
 
         });
         /*
-         * Perform LIST "" "*"
+         * Perform LSUB "" "*"
          */
         imapFolder.doCommand(new IMAPFolder.ProtocolCommand() {
 
@@ -327,7 +327,7 @@ final class ListLsubCollection {
 
         });
         /*
-         * Perform LSUB "" "*"
+         * Perform LIST "" "*"
          */
         imapFolder.doCommand(new IMAPFolder.ProtocolCommand() {
 
@@ -396,7 +396,7 @@ final class ListLsubCollection {
                         }
                     } catch (final Exception e) {
                         // Swallow failed STATUS command
-                        com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(ListLsubCollection.class)).debug(
+                        com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(ListLsubCollection.class)).debug(
                             "STATUS command failed for " + imapFolder.getStore().toString(),
                             e);
                     }
@@ -406,38 +406,8 @@ final class ListLsubCollection {
         /*
          * ACLs if enabled
          */
-        if (doGetAcl && ((IMAPStore) imapFolder.getStore()).hasCapability("ACL")) {
-            final ConcurrentMap<String, ListLsubEntryImpl> primary;
-            final ConcurrentMap<String, ListLsubEntryImpl> lookup;
-            if (listMap.size() > lsubMap.size()) {
-                primary = lsubMap;
-                lookup = listMap;
-            } else {
-                primary = listMap;
-                lookup = lsubMap;
-            }
-            /*
-             * Perform GETACL command for each entry
-             */
-            for (final Iterator<ListLsubEntryImpl> iter = primary.values().iterator(); iter.hasNext();) {
-                final ListLsubEntryImpl listEntry = iter.next();
-                if (listEntry.canOpen()) {
-                    try {
-                        final String fullName = listEntry.getFullName();
-                        final List<ACL> aclList = IMAPCommandsCollection.getAcl(fullName, imapFolder, false);
-                        listEntry.setAcls(aclList);
-                        final ListLsubEntryImpl lsubEntry = lookup.get(fullName);
-                        if (null != lsubEntry) {
-                            lsubEntry.setAcls(aclList);
-                        }
-                    } catch (final Exception e) {
-                        // Swallow failed ACL command
-                        com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(ListLsubCollection.class)).debug(
-                            "ACL/MYRIGHTS command failed for " + imapFolder.getStore().toString(),
-                            e);
-                    }
-                }
-            }
+        if (doGetAcl) {
+            initACLs(imapFolder);
         }
         if (DEBUG) {
             final long dur = System.currentTimeMillis() - st;
@@ -461,6 +431,56 @@ final class ListLsubCollection {
          */
         stamp = System.currentTimeMillis();
         deprecated.set(false);
+    }
+
+    /**
+     * Initializes ACL lists.
+     * 
+     * @param imapFolder The IMAP folder to obtain <tt>IMAPProtocol</tt> instance from
+     * @throws MessagingException If ACL capability cannot be checked
+     */
+    public void initACLs(final IMAPFolder imapFolder) throws MessagingException {
+        if (!((IMAPStore) imapFolder.getStore()).hasCapability("ACL")) {
+            return;
+        }
+        final long st = DEBUG ? System.currentTimeMillis() : 0L;
+        final ConcurrentMap<String, ListLsubEntryImpl> primary;
+        final ConcurrentMap<String, ListLsubEntryImpl> lookup;
+        if (listMap.size() > lsubMap.size()) {
+            primary = lsubMap;
+            lookup = listMap;
+        } else {
+            primary = listMap;
+            lookup = lsubMap;
+        }
+        /*
+         * Perform GETACL command for each entry
+         */
+        for (final Iterator<ListLsubEntryImpl> iter = primary.values().iterator(); iter.hasNext();) {
+            final ListLsubEntryImpl listEntry = iter.next();
+            if (listEntry.canOpen()) {
+                try {
+                    final String fullName = listEntry.getFullName();
+                    final List<ACL> aclList = IMAPCommandsCollection.getAcl(fullName, imapFolder, false);
+                    listEntry.setAcls(aclList);
+                    final ListLsubEntryImpl lsubEntry = lookup.get(fullName);
+                    if (null != lsubEntry) {
+                        lsubEntry.setAcls(aclList);
+                    }
+                } catch (final Exception e) {
+                    // Swallow failed ACL command
+                    com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(ListLsubCollection.class)).debug(
+                        "ACL/MYRIGHTS command failed for " + imapFolder.getStore().toString(),
+                        e);
+                }
+            }
+        }
+        if (DEBUG) {
+            final long dur = System.currentTimeMillis() - st;
+            final StringBuilder sb = new StringBuilder(64);
+            sb.append("LIST/LSUB cache built GETACL entries in ").append(dur).append("msec.");
+            LOG.debug(sb.toString());
+        }
     }
 
     private void checkConsistency() {
@@ -789,7 +809,8 @@ final class ListLsubCollection {
             }
             final IMAPResponse ir = (IMAPResponse) r[i];
             if (ir.keyEquals(command)) {
-                list.add(parseListResponse(ir, lsub ? null : lsubMap));
+                final ListLsubEntryImpl entryImpl = parseListResponse(ir, lsub ? null : lsubMap);
+                list.add(entryImpl);
                 r[i] = null;
             }
         }
@@ -942,12 +963,12 @@ final class ListLsubCollection {
         final Response response = r[r.length - 1];
         if (response.isOK()) {
             ListLsubEntryImpl listLsubEntry = null;
-            for (int i = 0, len = r.length; i < len; i++) {
+            for (int i = 0, len = r.length; null == listLsubEntry && i < len; i++) {
                 if (!(r[i] instanceof IMAPResponse)) {
                     continue;
                 }
                 final IMAPResponse ir = (IMAPResponse) r[i];
-                if (null == listLsubEntry && ir.keyEquals("LIST")) {
+                if (ir.keyEquals("LIST")) {
                     listLsubEntry = parseListResponse(ir, null);
                     r[i] = null;
                 }
@@ -1099,7 +1120,7 @@ final class ListLsubCollection {
                 }
                 final IMAPResponse ir = (IMAPResponse) r[i];
                 if (ir.keyEquals(command)) {
-                    final ListLsubEntryImpl listLsubEntry = parseListResponse(ir, null);
+                    final ListLsubEntryImpl listLsubEntry = parseListResponse(ir, lsub ? null : lsubMap);
                     retval = listLsubEntry;
                     {
                         final ListLsubEntryImpl oldEntry = map.get(fullName);
@@ -1182,7 +1203,7 @@ final class ListLsubCollection {
                         }
                     } catch (final Exception e) {
                         // Swallow failed STATUS command
-                        com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(ListLsubCollection.class)).debug(
+                        com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(ListLsubCollection.class)).debug(
                             "STATUS command failed for " + imapFolder.getStore().toString(),
                             e);
                     }
@@ -1202,7 +1223,7 @@ final class ListLsubCollection {
                         }
                     } catch (final Exception e) {
                         // Swallow failed ACL command
-                        com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(ListLsubCollection.class)).debug(
+                        com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(ListLsubCollection.class)).debug(
                             "ACL/MYRIGHTS command failed for " + imapFolder.getStore().toString(),
                             e);
                     }

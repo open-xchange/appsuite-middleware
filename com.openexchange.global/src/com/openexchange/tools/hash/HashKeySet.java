@@ -77,18 +77,22 @@ public final class HashKeySet extends AbstractHashKeyCollection<HashKeySet> impl
         return this;
     }
 
+    @Override
     public int size() {
         return set.size();
     }
 
+    @Override
     public boolean isEmpty() {
         return set.isEmpty();
     }
 
+    @Override
     public boolean contains(final Object o) {
         return set.contains(newKey(o.toString()));
     }
 
+    @Override
     public Iterator<String> iterator() {
         final List<String> list = new ArrayList<String>(set.size());
         for (final HashKey key : set) {
@@ -97,6 +101,7 @@ public final class HashKeySet extends AbstractHashKeyCollection<HashKeySet> impl
         return list.iterator();
     }
 
+    @Override
     public Object[] toArray() {
         final List<String> list = new ArrayList<String>(set.size());
         for (final HashKey key : set) {
@@ -105,6 +110,7 @@ public final class HashKeySet extends AbstractHashKeyCollection<HashKeySet> impl
         return list.toArray();
     }
 
+    @Override
     public <T> T[] toArray(final T[] a) {
         final List<String> list = new ArrayList<String>(set.size());
         for (final HashKey key : set) {
@@ -113,14 +119,17 @@ public final class HashKeySet extends AbstractHashKeyCollection<HashKeySet> impl
         return list.toArray(a);
     }
 
+    @Override
     public boolean add(final String e) {
         return set.add(newKey(e));
     }
 
+    @Override
     public boolean remove(final Object o) {
         return set.remove(newKey(o.toString()));
     }
 
+    @Override
     public boolean containsAll(final Collection<?> c) {
         final Collection<HashKey> col = new ArrayList<HashKey>(c.size());
         for (final Object o : c) {
@@ -129,6 +138,7 @@ public final class HashKeySet extends AbstractHashKeyCollection<HashKeySet> impl
         return set.containsAll(col);
     }
 
+    @Override
     public boolean addAll(final Collection<? extends String> c) {
         final Collection<HashKey> col = new ArrayList<HashKey>(c.size());
         for (final Object o : c) {
@@ -137,6 +147,7 @@ public final class HashKeySet extends AbstractHashKeyCollection<HashKeySet> impl
         return set.addAll(col);
     }
 
+    @Override
     public boolean retainAll(final Collection<?> c) {
         final Collection<HashKey> col = new ArrayList<HashKey>(c.size());
         for (final Object o : c) {
@@ -145,6 +156,7 @@ public final class HashKeySet extends AbstractHashKeyCollection<HashKeySet> impl
         return set.retainAll(col);
     }
 
+    @Override
     public boolean removeAll(final Collection<?> c) {
         final Collection<HashKey> col = new ArrayList<HashKey>(c.size());
         for (final Object o : c) {
@@ -153,6 +165,7 @@ public final class HashKeySet extends AbstractHashKeyCollection<HashKeySet> impl
         return set.removeAll(col);
     }
 
+    @Override
     public void clear() {
         set.clear();
     }

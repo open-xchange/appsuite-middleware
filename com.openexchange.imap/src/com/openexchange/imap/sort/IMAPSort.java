@@ -50,7 +50,7 @@
 package com.openexchange.imap.sort;
 
 import static com.openexchange.mail.MailServletInterface.mailInterfaceMonitor;
-import static com.openexchange.mail.mime.utils.MIMEStorageUtility.getFetchProfile;
+import static com.openexchange.mail.mime.utils.MimeStorageUtility.getFetchProfile;
 import static com.openexchange.mail.utils.StorageUtility.EMPTY_MSGS;
 import gnu.trove.list.TLongList;
 import gnu.trove.list.array.TLongArrayList;
@@ -86,7 +86,7 @@ import com.sun.mail.imap.protocol.IMAPResponse;
  */
 public final class IMAPSort {
 
-    static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(IMAPSort.class));
+    static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(IMAPSort.class));
 
     /**
      * No instantiation

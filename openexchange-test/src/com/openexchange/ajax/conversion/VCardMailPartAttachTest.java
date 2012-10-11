@@ -56,12 +56,12 @@ import com.openexchange.ajax.contact.action.AllRequest;
 import com.openexchange.ajax.framework.CommonAllResponse;
 import com.openexchange.ajax.framework.Executor;
 import com.openexchange.ajax.framework.ListIDs;
+import com.openexchange.ajax.mail.actions.GetRequest;
+import com.openexchange.ajax.mail.actions.GetResponse;
+import com.openexchange.ajax.mail.actions.SendRequest;
+import com.openexchange.ajax.mail.actions.SendResponse;
 import com.openexchange.ajax.mail.netsol.FolderAndID;
 import com.openexchange.ajax.mail.netsol.actions.NetsolDeleteRequest;
-import com.openexchange.ajax.mail.netsol.actions.NetsolGetRequest;
-import com.openexchange.ajax.mail.netsol.actions.NetsolGetResponse;
-import com.openexchange.ajax.mail.netsol.actions.NetsolSendRequest;
-import com.openexchange.ajax.mail.netsol.actions.NetsolSendResponse;
 import com.openexchange.groupware.container.DataObject;
 import com.openexchange.mail.MailJSONField;
 
@@ -147,8 +147,8 @@ public final class VCardMailPartAttachTest extends AbstractConversionTest {
                 /*
                  * Perform transport
                  */
-                final NetsolSendResponse response = Executor.execute(getSession(),
-                        new NetsolSendRequest(mailObject_25kb.toString()));
+                final SendResponse response = Executor.execute(getSession(),
+                    new SendRequest(mailObject_25kb.toString()));
                 assertTrue("Send failed", response.getFolderAndID() != null);
                 assertTrue("Duration corrupt", response.getRequestDuration() > 0);
                 mailFolderAndMailID = response.getFolderAndID();
@@ -174,21 +174,28 @@ public final class VCardMailPartAttachTest extends AbstractConversionTest {
                 /*
                  * Get previously sent mail
                  */
-                final FolderAndID mailPath = new FolderAndID(mailFolderAndMailID[0], mailFolderAndMailID[1]);
-                final NetsolGetResponse resp = Executor.execute(getSession(),
-                        new NetsolGetRequest(mailPath, true));
+                final GetResponse resp = Executor.execute(getSession(),
+                    new GetRequest(mailFolderAndMailID[0], mailFolderAndMailID[1], true));
                 final JSONObject fetchedMailObject = (JSONObject) resp.getData();
 
-
-                assertFalse("Missing JSON mail object", fetchedMailObject == null);
+                assertNotNull("Missing JSON mail object", fetchedMailObject);
                 assertTrue("JSON mail object misses field: " + MailJSONField.ATTACHMENTS.getKey(), fetchedMailObject
                         .has(MailJSONField.ATTACHMENTS.getKey())
                         && !fetchedMailObject.isNull(MailJSONField.ATTACHMENTS.getKey()));
                 final JSONArray attachmentArray = fetchedMailObject.getJSONArray(MailJSONField.ATTACHMENTS.getKey());
-                assertEquals("Unexpected number of attachments in JSON mail object", 2, attachmentArray.length());
-                final JSONObject vcardAttachmentObject = attachmentArray.getJSONObject(1);
-                assertTrue("JSON attachment object does not refer to a VCard file", vcardAttachmentObject.getString(
-                        MailJSONField.CONTENT_TYPE.getKey()).startsWith("text/vcard"));
+                assertTrue("Unexpected number of attachments in JSON mail object: " + attachmentArray.length(), attachmentArray.length() >= 2);
+                StringBuilder sb = new StringBuilder();
+                boolean foundAttachment = false;
+                for (int i = 0; i < attachmentArray.length() && !foundAttachment; i++) {
+                    final JSONObject vcardAttachmentObject = attachmentArray.getJSONObject(i);
+                    String contentType = vcardAttachmentObject.getString(MailJSONField.CONTENT_TYPE.getKey());
+                    foundAttachment = contentType.startsWith("text/vcard");
+                    if (!foundAttachment) {
+                        sb.append(contentType);
+                        sb.append(' ');
+                    }
+                }
+                assertTrue("Can't find vCard attachment. Found content-types: " + sb, foundAttachment);
             } finally {
                 if (mailFolderAndMailID != null) {
                     final FolderAndID mailPath = new FolderAndID(mailFolderAndMailID[0], mailFolderAndMailID[1]);

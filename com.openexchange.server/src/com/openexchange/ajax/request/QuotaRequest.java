@@ -51,7 +51,7 @@ package com.openexchange.ajax.request;
 
 import static com.openexchange.mail.utils.StorageUtility.UNLIMITED_QUOTA;
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import com.openexchange.log.LogFactory;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONValue;

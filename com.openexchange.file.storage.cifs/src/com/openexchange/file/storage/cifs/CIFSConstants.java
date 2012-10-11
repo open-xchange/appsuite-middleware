@@ -94,6 +94,11 @@ public final class CIFSConstants implements FileStorageConstants {
     public static final String CIFS_TIMEOUT = "timeout";
 
     /**
+     * The configuration property name for a user's CIFS/SMB home directory.
+     */
+    public static final String CIFS_HOME_DIR = "homedir";
+
+    /**
      * Initializes a new {@link CIFSConstants}.
      */
     private CIFSConstants() {

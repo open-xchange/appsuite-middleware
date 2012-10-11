@@ -8,8 +8,12 @@ Homepage: http://www.open-xchange.com
 
 Package: open-xchange-authentication-imap
 Architecture: all
-Depends: ${misc:Depends}, sun-java6-jre|java6-runtime, open-xchange-core (>= @OXVERSION@)
+Pre-Depends: open-xchange-core (>= @OXVERSION@)
+Depends: ${misc:Depends}
 Conflicts: open-xchange-authentication-database, open-xchange-authentication-ldap
 Provides: open-xchange-authentication
-Description: The Open-Xchange IMAP authentication
- This package implements an authentication mechanism using an IMAP server.
+Description: Module for authenticating users using the IMAP server
+ This package installs the OSGi bundle implementing the OSGi AuthenticationService for the backend. The implementation uses some IMAP server
+ to authenticate login requests.
+ This authentication module is mutually exclusive with any other authentication module. Only one authentication module can be installed on
+ the backend.

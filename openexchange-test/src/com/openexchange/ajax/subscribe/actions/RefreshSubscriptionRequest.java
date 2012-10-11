@@ -109,10 +109,12 @@ public class RefreshSubscriptionRequest extends AbstractSubscriptionRequest<Refr
     @Override
     public Parameter[] getParameters() {
         Params params = new Params(AJAXServlet.PARAMETER_ACTION, "refresh");
-        if(folderID != null)
+        if(folderID != null) {
             params.add(AJAXServlet.PARAMETER_FOLDERID, folderID);
-        if(subscriptionID != -1)
+        }
+        if(subscriptionID != -1) {
             params.add(AJAXServlet.PARAMETER_ID, String.valueOf(subscriptionID));
+        }
         return params.toArray();
     }
 

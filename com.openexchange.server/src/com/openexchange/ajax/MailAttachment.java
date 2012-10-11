@@ -75,6 +75,7 @@ import com.openexchange.mail.attachment.AttachmentToken;
 import com.openexchange.mail.attachment.AttachmentTokenRegistry;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.dataobjects.MailPart;
+import com.openexchange.mail.mime.ContentDisposition;
 import com.openexchange.mail.mime.ContentType;
 import com.openexchange.mail.mime.MimeTypes;
 import com.openexchange.mail.utils.MessageUtility;
@@ -94,7 +95,7 @@ public class MailAttachment extends AJAXServlet {
      */
     private static final long serialVersionUID = -3109402774466180271L;
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(MailAttachment.class));
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(MailAttachment.class));
 
     @Override
     protected void doGet(final HttpServletRequest req, final HttpServletResponse res) throws ServletException, IOException {
@@ -128,14 +129,14 @@ public class MailAttachment extends AJAXServlet {
              *
              * IP-Check appropriate for roaming mobile devices?
              */
-            if (false && null != token.getClientIp() && !req.getRemoteAddr().equals(token.getClientIp())) {
+            if (token.isCheckIp() && null != token.getClientIp() && !req.getRemoteAddr().equals(token.getClientIp())) {
                 AttachmentTokenRegistry.getInstance().removeToken(id);
                 throw MailExceptionCode.ATTACHMENT_EXPIRED.create();
             }
             /*
              * At least expect the same user agent as the one which created the attachment token
              */
-            if (null != token.getUserAgent()) {
+            if (token.isOneTime() && null != token.getUserAgent()) {
                 final String requestUserAgent = req.getHeader("user-agent");
                 if (null == requestUserAgent) {
                     AttachmentTokenRegistry.getInstance().removeToken(id);
@@ -160,7 +161,8 @@ public class MailAttachment extends AJAXServlet {
                     final ContentType contentType = mailPart.getContentType();
                     final String cs =
                         contentType.containsCharsetParameter() ? contentType.getCharsetParameter() : MailProperties.getInstance().getDefaultMimeCharset();
-                    final String htmlContent = MessageUtility.readMailPart(mailPart, cs);
+                    String htmlContent = MessageUtility.readMailPart(mailPart, cs);
+                    htmlContent = MessageUtility.simpleHtmlDuplicateRemoval(htmlContent);
                     final HtmlService htmlService = ServerServiceRegistry.getInstance().getService(HtmlService.class);
                     attachmentInputStream =
                         new UnsynchronizedByteArrayInputStream(htmlService.filterWhitelist(
@@ -178,7 +180,10 @@ public class MailAttachment extends AJAXServlet {
                      * disposition.
                      */
                     res.setContentType("application/octet-stream");
-                    res.setHeader("Content-Disposition", Mail.getAttachmentDispositionValue(fileName, mailPart.getContentType().getBaseType(), req.getHeader("user-agent")));
+                    final ContentDisposition cd = new ContentDisposition();
+                    cd.setAttachment();
+                    cd.addParameter("filename", fileName);
+                    res.setHeader("Content-Disposition", cd.toString());
                 } else {
                     final String userAgent = req.getHeader("user-agent");
                     final CheckedDownload checkedDownload =

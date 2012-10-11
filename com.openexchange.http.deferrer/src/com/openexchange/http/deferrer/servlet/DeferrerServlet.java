@@ -52,10 +52,15 @@ package com.openexchange.http.deferrer.servlet;
 import java.io.IOException;
 import java.net.URLEncoder;
 import java.util.Enumeration;
+import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
+
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
+import com.openexchange.http.deferrer.CustomRedirectURLDetermination;
 
 
 /**
@@ -64,14 +69,19 @@ import javax.servlet.http.HttpServletResponse;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class DeferrerServlet extends HttpServlet {
-
+	
+	public static final List<CustomRedirectURLDetermination> CUSTOM_HANDLERS = new CopyOnWriteArrayList<CustomRedirectURLDetermination>();
 
     @Override
     protected void service(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         // get url to defer to
         // redirect
+    	
 
-        String redirectURL = req.getParameter("redirect");
+        String redirectURL = determineRedirectURL(req);
+        if (redirectURL == null) {
+        	return;
+        }
         char concat = '?';
         if (redirectURL.contains("?")) {
             concat = '&';
@@ -92,4 +102,14 @@ public class DeferrerServlet extends HttpServlet {
         resp.sendRedirect(builder.toString());
 
     }
+
+	private String determineRedirectURL(HttpServletRequest req) {
+		for(CustomRedirectURLDetermination determination: CUSTOM_HANDLERS) {
+			String url = determination.getURL(req);
+			if (url != null) {
+				return url;
+			}
+		}
+		return req.getParameter("redirect");
+	}
 }

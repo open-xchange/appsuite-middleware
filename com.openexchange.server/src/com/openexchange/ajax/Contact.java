@@ -58,13 +58,12 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONValue;
 import com.openexchange.ajax.container.Response;
-import com.openexchange.ajax.fields.ContactFields;
+import com.openexchange.ajax.fields.DataFields;
 import com.openexchange.ajax.parser.ContactParser;
 import com.openexchange.ajax.parser.DataParser;
 import com.openexchange.ajax.request.ContactRequest;
@@ -74,6 +73,7 @@ import com.openexchange.groupware.contact.ContactInterfaceDiscoveryService;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.upload.UploadFile;
 import com.openexchange.groupware.upload.impl.UploadEvent;
+import com.openexchange.log.LogFactory;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.servlet.OXJSONExceptionCodes;
@@ -277,7 +277,7 @@ public class Contact extends DataServlet {
                     contactInterface.insertContactObject(contactobject);
 
                     final JSONObject jData = new JSONObject();
-                    jData.put(ContactFields.ID, contactobject.getObjectID());
+                    jData.put(DataFields.ID, contactobject.getObjectID());
 
                     response.setData(jData);
                 } finally {

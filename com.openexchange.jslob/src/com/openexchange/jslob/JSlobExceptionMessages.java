@@ -73,11 +73,14 @@ public final class JSlobExceptionMessages implements LocalizableStrings {
     // Conflicting deletion of JSlob for service %1$s.
     public static final String CONFLICT = "Conflicting deletion of JSlob for service %1$s.";
 
-    // Path doesn't exist: %1$s
+    // Path does not exist: %1$s
     public static final String PATH_NOT_FOUND = "Path doesn't exist: %1$s";
 
     // Invalid path: %1$s.
     public static final String INVALID_PATH = "Invalid path: %1$s.";
+
+    // Referenced JSlob %1$s must not be set for service %2$s. Nothing will be done.
+    public static final String SET_NOT_SUPPORTED = "Referenced JSlob %1$s must not be set for service %2$s. Nothing will be done.";
 
     /**
      * Initializes a new {@link JSlobExceptionMessages}.

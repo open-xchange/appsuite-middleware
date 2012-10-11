@@ -140,7 +140,7 @@ public class SubscriptionJSONWriter {
             } else if (ENABLED.equals(basicCol)) {
                 array.put(subscription.isEnabled());
             } else {
-                SubscriptionJSONErrorMessages.UNKNOWN_COLUMN.create(basicCol);
+                throw SubscriptionJSONErrorMessages.UNKNOWN_COLUMN.create(basicCol);
             }
         }
     }

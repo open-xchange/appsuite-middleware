@@ -55,8 +55,8 @@ import java.util.Date;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.jdom.output.XMLOutputter;
+import com.openexchange.log.LogFactory;
+import org.jdom2.output.XMLOutputter;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 import com.openexchange.ajax.fields.DataFields;
@@ -96,6 +96,11 @@ public final class tasks extends XmlServlet<TasksSQLInterface> {
     @Override
     protected Interface getInterface() {
         return Interface.WEBDAV_ICAL;
+    }
+    
+    @Override
+    protected boolean isServletDisabled() {
+        return true;
     }
 
     @Override
@@ -261,6 +266,7 @@ public final class tasks extends XmlServlet<TasksSQLInterface> {
                 }
                 writeResponse(task, HttpServletResponse.SC_OK, OK, clientId, os, xo);
             } catch (final OXException exc) {
+            	exc.log(LOG);
                 if (exc.isMandatory()) {
                     LOG.debug(_parsePropChilds, exc);
                     writeResponse(task, HttpServletResponse.SC_CONFLICT, getErrorMessage(exc,
@@ -269,10 +275,9 @@ public final class tasks extends XmlServlet<TasksSQLInterface> {
                     LOG.debug(_parsePropChilds, exc);
                     writeResponse(task, HttpServletResponse.SC_FORBIDDEN, getErrorMessage(exc,
                             PERMISSION_EXCEPTION), clientId, os, xo);
-                } else if (exc.isConflict()) {
+                } else if (exc.isConflict() || exc.getCategories().contains(Category.CATEGORY_CONFLICT)) {
                     LOG.debug(_parsePropChilds, exc);
-                    writeResponse(task, HttpServletResponse.SC_CONFLICT, getErrorMessage(exc,
-                            CONFLICT_EXCEPTION), clientId, os, xo);
+                    writeResponse(task, HttpServletResponse.SC_CONFLICT, MODIFICATION_EXCEPTION, clientId, os, xo);
                 } else if (exc.isNotFound()) {
                     LOG.debug(_parsePropChilds, exc);
                     writeResponse(task, HttpServletResponse.SC_NOT_FOUND, OBJECT_NOT_FOUND_EXCEPTION,

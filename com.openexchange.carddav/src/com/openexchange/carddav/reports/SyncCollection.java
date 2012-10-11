@@ -52,11 +52,13 @@ package com.openexchange.carddav.reports;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import org.jdom.Document;
-import org.jdom.Element;
-import org.jdom.JDOMException;
-import org.jdom.Namespace;
-import com.openexchange.carddav.GroupwareCarddavFactory;
+
+import org.jdom2.Document;
+import org.jdom2.Element;
+import org.jdom2.JDOMException;
+import org.jdom2.Namespace;
+
+import com.openexchange.carddav.resources.CardDAVCollection;
 import com.openexchange.webdav.action.WebdavPropfindAction;
 import com.openexchange.webdav.action.WebdavRequest;
 import com.openexchange.webdav.action.WebdavResponse;
@@ -104,14 +106,10 @@ public class SyncCollection extends WebdavPropfindAction {
         ResourceMarshaller marshaller = getMarshaller(req, forceAllProp, requestBody, null);
 
         String token = getSyncToken(req, requestBody);
-        
-        Syncstatus<WebdavResource> syncStatus = ((GroupwareCarddavFactory) req.getFactory()).getSyncStatusSince(token);
+        Syncstatus<WebdavResource> syncStatus = ((CardDAVCollection)req.getResource()).getSyncStatus(token);
         
         List<Element> all = new ArrayList<Element>();
-
-        
         int[] statusCodes = syncStatus.getStatusCodes();
-        
         PropertiesMarshaller helper = new PropertiesMarshaller(req.getURLPrefix(), req.getCharset());
         
         for (int sc : statusCodes) {
@@ -144,15 +142,8 @@ public class SyncCollection extends WebdavPropfindAction {
         }
 
     }
-
+    
     private String getSyncToken(WebdavRequest req, Document requestBody) throws WebdavProtocolException {
-
-        List children = requestBody.getRootElement().getChildren("sync-token", DAV_NS);
-        if (children == null || children.isEmpty()) {
-            return null;
-        }
-
-        Element tokenElement = (Element) children.get(0);
-        return tokenElement.getText();
+    	return requestBody.getRootElement().getChildText("sync-token", DAV_NS);
     }
 }

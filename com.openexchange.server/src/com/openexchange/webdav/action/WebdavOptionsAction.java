@@ -54,11 +54,12 @@ import com.openexchange.webdav.protocol.WebdavProtocolException;
 
 public class WebdavOptionsAction extends AbstractAction {
 
-	public void perform(final WebdavRequest req, final WebdavResponse res)
+	@Override
+    public void perform(final WebdavRequest req, final WebdavResponse res)
 			throws WebdavProtocolException {
 		res.setHeader("Content-Length","0");
 		res.setHeader("Allow", join(req.getResource().getOptions()));
-		res.setHeader("DAV", "1, 2, 3, access-control, calendar-access, addressbook, extended-mkcol");
+		res.setHeader("DAV", "1, 2, 3, access-control, calendar-access, addressbook, extended-mkcol, calendar-auto-schedule, calendar-schedule");
 		res.setHeader("Accept-Ranges", "bytes");
 		res.setHeader("MS-Author-Via", "DAV"); // Hack for Windows Webfolder
 	}

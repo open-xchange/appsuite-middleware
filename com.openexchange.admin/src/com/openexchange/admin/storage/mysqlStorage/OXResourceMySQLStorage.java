@@ -56,7 +56,7 @@ import java.sql.SQLException;
 import java.sql.Types;
 import java.util.ArrayList;
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import com.openexchange.log.LogFactory;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Resource;
 import com.openexchange.admin.rmi.exceptions.PoolException;
@@ -164,6 +164,7 @@ public class OXResourceMySQLStorage extends OXResourceSQLStorage implements OXMy
                 changeLastModified(resource_id, ctx, con);
             }
             con.commit();
+            log.info("Resource " + rid + " changed!");
         } catch (final DataTruncation dt) {
             log.error(AdminCache.DATA_TRUNCATION_ERROR_MSG, dt);
             dorollback(con);
@@ -254,6 +255,7 @@ public class OXResourceMySQLStorage extends OXResourceSQLStorage implements OXMy
             prep_insert.executeUpdate();
 
             con.commit();
+            log.info("Resource " + resID + " created!");
             return resID;
         }catch (final DataTruncation dt){
             log.error(AdminCache.DATA_TRUNCATION_ERROR_MSG, dt);
@@ -304,6 +306,7 @@ public class OXResourceMySQLStorage extends OXResourceSQLStorage implements OXMy
             prep_del.executeUpdate();
 
             con.commit();
+            log.info("Resource " + resource_id + " deleted!");
         } catch (final SQLException e) {
             log.error("SQL Error", e);
             dorollback(con);
@@ -355,6 +358,7 @@ public class OXResourceMySQLStorage extends OXResourceSQLStorage implements OXMy
             prep_del.executeUpdate();
             
             con.commit();
+            log.info("Resource " + resource_id + " deleted!");
         } catch (final SQLException e) {
             log.error("SQL Error", e);
             dorollback(con);

@@ -56,6 +56,7 @@ import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
+import com.openexchange.ajax.requesthandler.DefaultDispatcherPrefixService;
 import com.openexchange.exception.OXException;
 import com.openexchange.filemanagement.ManagedFile;
 import com.openexchange.filemanagement.ManagedFileExceptionErrorMessage;
@@ -71,7 +72,7 @@ import com.openexchange.session.Session;
  */
 final class ManagedFileImpl implements ManagedFile, FileRemovedRegistry {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(ManagedFileImpl.class));
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(ManagedFileImpl.class));
 
     private static final ManagedFileImageDataSource IMAGE_DATA_SOURCE = new ManagedFileImageDataSource();
 
@@ -139,7 +140,7 @@ final class ManagedFileImpl implements ManagedFile, FileRemovedRegistry {
         /*
          * Compose URL parameters
          */
-        sb.append(prefix).append("/ajax/file");
+        sb.append(prefix).append(DefaultDispatcherPrefixService.getInstance().getPrefix()).append("file");
         if (null != route) {
             sb.append(";jsessionid=").append(route);
         }
@@ -250,7 +251,7 @@ final class ManagedFileImpl implements ManagedFile, FileRemovedRegistry {
     }
 
     @Override
-    public void setContentDisposition(String contentDisposition) {
+    public void setContentDisposition(final String contentDisposition) {
         this.contentDisposition = contentDisposition;
     }
 }

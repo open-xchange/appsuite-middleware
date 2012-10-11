@@ -123,7 +123,7 @@ public final class VirtualFolderStorageRegistry implements FolderStorageDiscover
                 } else {
                     // No, already present
                     final org.apache.commons.logging.Log log =
-                        com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(VirtualFolderStorageRegistry.class));
+                        com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(VirtualFolderStorageRegistry.class));
                     if (log.isErrorEnabled()) {
                         log.error("Duplicate folder storage for content type \"" + contentTypes[j].toString() + "\"", new Throwable());
                     }

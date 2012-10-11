@@ -8,5 +8,6 @@ Homepage: http://www.open-xchange.com
 
 Package: open-xchange-smtp
 Architecture: all
-Depends: ${misc:Depends}, sun-java6-jre|java6-runtime, open-xchange-core (>= @OXVERSION@)
+Pre-Depends: open-xchange-core (>= @OXVERSION@)
+Depends: ${misc:Depends}
 Description: The Open-Xchange Server SMTP Bundle

@@ -51,6 +51,7 @@ package com.openexchange.ajax.importexport.actions;
 
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.AbstractAJAXResponse;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.importexport.ImportResult;
 
 /**
@@ -87,12 +88,29 @@ public final class ICalImportResponse extends AbstractAJAXResponse {
      */
     @Override
     public boolean hasError() {
-        boolean retval = super.hasError();
+        if (super.hasError()) {
+            return true;
+        }
+        boolean retval = false;
         if (null != imports) {
-            for (final ImportResult result : imports) {
-                retval = retval || result.hasError();
+            for (int i = 0; !retval && i < imports.length; i++) {
+                retval = imports[i].hasError();
             }
         }
         return retval;
+    }
+
+    @Override
+    public OXException getException() {
+        OXException e = super.getException();
+        if (null != e) {
+            return e;
+        }
+        if (null != imports) {
+            for (int i = 0; null == e && i < imports.length; i++) {
+                e = imports[i].getException();
+            }
+        }
+        return e;
     }
 }

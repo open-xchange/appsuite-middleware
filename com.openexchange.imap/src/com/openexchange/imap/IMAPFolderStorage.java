@@ -53,6 +53,9 @@ import static com.openexchange.mail.MailServletInterface.mailInterfaceMonitor;
 import static com.openexchange.mail.dataobjects.MailFolder.DEFAULT_FOLDER_ID;
 import static com.openexchange.mail.utils.MailFolderUtility.isEmpty;
 import static java.util.regex.Matcher.quoteReplacement;
+import gnu.trove.procedure.TIntProcedure;
+import gnu.trove.set.TIntSet;
+import gnu.trove.set.hash.TIntHashSet;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -97,7 +100,7 @@ import com.openexchange.imap.notify.internal.IMAPNotifierMessageRecentListener;
 import com.openexchange.imap.services.IMAPServiceRegistry;
 import com.openexchange.imap.util.IMAPSessionStorageAccess;
 import com.openexchange.mail.MailExceptionCode;
-import com.openexchange.mail.api.IMailFolderStorageEnhanced;
+import com.openexchange.mail.api.IMailFolderStorageEnhanced2;
 import com.openexchange.mail.api.MailFolderStorage;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.dataobjects.MailFolder;
@@ -125,9 +128,9 @@ import com.sun.mail.imap.Rights;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class IMAPFolderStorage extends MailFolderStorage implements IMailFolderStorageEnhanced {
+public final class IMAPFolderStorage extends MailFolderStorage implements IMailFolderStorageEnhanced2 {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(IMAPFolderStorage.class));
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(IMAPFolderStorage.class));
 
     private static final boolean DEBUG = LOG.isDebugEnabled();
 
@@ -337,6 +340,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
         return separator.charValue();
     }
 
+    @Override
     public int[] getTotalAndUnreadCounter(final String fullName) throws OXException {
         if (DEFAULT_FOLDER_ID.equals(fullName)) {
             return new int[] { 0, 0 };
@@ -1119,7 +1123,17 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
         } finally {
             if (createMe != null && created) {
                 try {
-                    ListLsubCache.addSingle(createMe.getFullName(), accountId, createMe, session);
+                    final Folder parent = createMe.getParent();
+                    if (null != parent) {
+                        final String parentFullName = parent.getFullName();
+                        ListLsubCache.addSingle(parentFullName, accountId, createMe, session);
+                        if ("".equals(parentFullName)) {
+                            ListLsubCache.addSingle(MailFolder.DEFAULT_FOLDER_ID, accountId, createMe, session);
+                        }
+                        ListLsubCache.addSingle(createMe.getFullName(), accountId, createMe, session);
+                    } else {
+                        ListLsubCache.clearCache(accountId, session);
+                    }
                 } catch (final MessagingException e) {
                     // Updating LIST/LSUB cache failed
                     ListLsubCache.clearCache(accountId, session);
@@ -2578,9 +2592,21 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
                     /*
                      * Copy ACLs
                      */
-                    final ACL[] acls = toMove.getACL();
-                    for (int i = 0; i < acls.length; i++) {
-                        newFolder.addACL(acls[i]);
+                    for (final ACL acl : toMove.getACL()) {
+                        try {
+                            newFolder.addACL(acl);
+                        } catch (final MessagingException e) {
+                            final Exception next = e.getNextException();
+                            if (!(next instanceof CommandFailedException)) {
+                                throw e;
+                            }
+                            final StringBuilder tmp = new StringBuilder(128);
+                            tmp.append("\"SETACL ").append(acl.getName()).append(' ').append(acl.getRights()).append("\" failed.");
+                            tmp.append(" ACL could not be applied to from source folder '");
+                            tmp.append(moveFullname).append("' to target folder '");
+                            tmp.append(newFullname).append("': ").append(next.getMessage());
+                            LOG.warn(tmp.toString());
+                        }
                     }
                 } finally {
                     newFolder.close(false);
@@ -2814,6 +2840,8 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
         return altnamespace;
     }*/
 
+    private static final TIntSet WILDCARDS = new TIntHashSet(Arrays.asList(Integer.valueOf('%'), Integer.valueOf('*')));
+
     /**
      * Checks id specified folder name is allowed to be used on folder creation. The folder name is valid if the separator character does
      * not appear or provided that MBox format is enabled may only appear at name's end.
@@ -2824,14 +2852,21 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
      * @return <code>true</code> if folder name is valid; otherwise <code>false</code>
      */
     private static boolean checkFolderNameValidity(final String name, final char separator, final boolean mboxEnabled) {
+        WILDCARDS.forEach(new TIntProcedure() {
+            
+            @Override
+            public boolean execute(final int value) {
+                return name.indexOf(value) < 0;
+            }
+        });
         final int pos = name.indexOf(separator);
         if (mboxEnabled) {
             /*
              * Allow trailing separator
              */
-            return (pos == -1) || (pos == name.length() - 1);
+            return (pos < 0) || (pos == name.length() - 1);
         }
-        return (pos == -1);
+        return (pos < 0);
     }
 
     private static final String REGEX_TEMPL = "[\\S\\p{Blank}&&[^\\p{Cntrl}#SEP#]]+(?:\\Q#SEP#\\E[\\S\\p{Blank}&&[^\\p{Cntrl}#SEP#]]+)*";

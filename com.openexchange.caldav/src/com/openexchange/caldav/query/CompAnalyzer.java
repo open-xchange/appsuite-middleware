@@ -58,7 +58,7 @@ import java.util.List;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class CompAnalyzer extends AnalyzerElement {
-    private String name;
+    private final String name;
     
     public CompAnalyzer(String name) {
         super();

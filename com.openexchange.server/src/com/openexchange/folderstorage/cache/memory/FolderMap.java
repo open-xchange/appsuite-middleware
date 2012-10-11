@@ -80,7 +80,7 @@ import com.openexchange.tools.session.ServerSessionAdapter;
  */
 public final class FolderMap {
 
-    protected static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(FolderMap.class);
+    protected static final org.apache.commons.logging.Log LOG = com.openexchange.log.LogFactory.getLog(FolderMap.class);
 
     private final ConcurrentMap<Key, Wrapper> map;
 
@@ -236,7 +236,7 @@ public final class FolderMap {
             if (null == session) {
                 return;
             }
-            ThreadPools.getThreadPool().submit(ThreadPools.task(new RunnableImpl(folderId, treeId, loadSubfolders, this, session)), AbortBehavior.getInstance());
+            ThreadPools.getThreadPool().submit(ThreadPools.trackableTask(new RunnableImpl(folderId, treeId, loadSubfolders, this, session)), AbortBehavior.getInstance());
         } catch (final Exception e) {
             // Ignore
         }
@@ -252,7 +252,7 @@ public final class FolderMap {
             if (null == session) {
                 return;
             }
-            ThreadPools.getThreadPool().submit(ThreadPools.task(new LoadSubfolders(folder, treeId, this, session)), AbortBehavior.getInstance());
+            ThreadPools.getThreadPool().submit(ThreadPools.trackableTask(new LoadSubfolders(folder, treeId, this, session)), AbortBehavior.getInstance());
         } catch (final Exception e) {
             // Ignore
             folder.setSubfolderIDs(null);
@@ -297,6 +297,17 @@ public final class FolderMap {
      * 
      * @param folderId the folder id
      * @param treeId the tree id
+     */
+    public void remove(final String folderId, final String treeId) {
+        map.remove(keyOf(folderId, treeId));
+    }
+
+    /**
+     * Removes the folder.
+     * 
+     * @param folderId the folder id
+     * @param treeId the tree id
+     * @param session The session
      * @return The folder
      */
     public Folder remove(final String folderId, final String treeId, final Session session) {

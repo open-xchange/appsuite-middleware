@@ -49,7 +49,7 @@
 
 package com.openexchange.groupware.data;
 
-import org.jdom.Verifier;
+import org.jdom2.Verifier;
 
 /**
  * This class contains methods for checking data.

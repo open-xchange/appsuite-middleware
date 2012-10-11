@@ -1,0 +1,10 @@
+<config>
+    <parser class="org.apache.tika.parser.html.HtmlParser" />
+    <parser class="org.apache.tika.parser.microsoft.OfficeParser" />
+    <parser class="org.apache.tika.parser.microsoft.ooxml.OOXMLParser" />
+    <parser class="org.apache.tika.parser.odf.OpenDocumentParser" />
+    <parser class="org.apache.tika.parser.pdf.PDFParser" />
+    <parser class="org.apache.tika.parser.rtf.RTFParser" />
+    <parser class="org.apache.tika.parser.txt.TXTParser" />
+    <parser class="org.apache.tika.parser.xml.DcXMLParser" />
+</config>

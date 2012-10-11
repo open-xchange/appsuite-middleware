@@ -57,7 +57,7 @@ import java.util.List;
 import java.util.Set;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import com.openexchange.log.LogFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.exception.OXExceptionConstants;
 import com.openexchange.groupware.EnumComponent;
@@ -720,6 +720,8 @@ public class DocumentMetadataResource extends AbstractResource implements OXWebd
                 // CREATE WITH FILE
                 try {
                     dumpMetadataToDB(body, guessSize);
+                } catch (WebdavProtocolException x) {
+                	throw x;
                 } catch (final OXException x) {
                     if (CATEGORY_PERMISSION_DENIED == x.getCategory()) {
                         throw WebdavProtocolException.Code.GENERAL_ERROR.create(url, HttpServletResponse.SC_FORBIDDEN);
@@ -756,7 +758,7 @@ public class DocumentMetadataResource extends AbstractResource implements OXWebd
                             }
                         }
                     }
-                    throw WebdavProtocolException.Code.GENERAL_ERROR.create(url, HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+                    throw WebdavProtocolException.Code.GENERAL_ERROR.create(url, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, x);
                 } finally {
                     try {
                         database.finish();

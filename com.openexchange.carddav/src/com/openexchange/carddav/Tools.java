@@ -50,12 +50,20 @@
 package com.openexchange.carddav;
 
 import java.util.Date;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import java.util.List;
+
+import com.openexchange.contact.ContactFieldOperand;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.groupware.contact.ContactExceptionCodes;
+import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
+import com.openexchange.search.CompositeSearchTerm;
+import com.openexchange.search.CompositeSearchTerm.CompositeOperation;
+import com.openexchange.search.SearchTerm;
+import com.openexchange.search.SingleSearchTerm;
+import com.openexchange.search.SingleSearchTerm.SingleOperation;
+import com.openexchange.search.internal.operands.ConstantOperand;
 import com.openexchange.webdav.protocol.WebdavPath;
 
 
@@ -68,15 +76,14 @@ import com.openexchange.webdav.protocol.WebdavPath;
  */
 public class Tools {
 	
-    private static final Pattern FOLDER_NAME = Pattern.compile("f\\d+_(\\d+).vcf");
-
     /**
      * Extracts the UID part from the supplied {@link WebdavPath}, i.e. the 
-     * path's name without the <code>.vcf</code> extension.  
-     * @param path 
-     * @return
+     * path's name without the <code>.vcf</code> extension.
+     *   
+     * @param path the path 
+     * @return the name
      */
-    public static String extractUID(final WebdavPath path) {
+    public static String extractUID(WebdavPath path) {
     	if (null == path) {
     		throw new IllegalArgumentException("path");
     	} 
@@ -85,33 +92,18 @@ public class Tools {
 	
     /**
      * Extracts the UID part from the supplied resource name, i.e. the 
-     * resource name without the <code>.vcf</code> extension.  
-     * @param name
-     * @return
+     * resource name without the <code>.vcf</code> extension.
+     *   
+     * @param name the name
+     * @return the UID
      */
-    public static String extractUID(final String name) {
-    	if (null != name && 4 < name.length() && name.endsWith(".vcf")) {
-    		return name.substring(0, name.length() - 4);    		
+    public static String extractUID(String name) {
+    	if (null != name && 4 < name.length() && name.toLowerCase().endsWith(".vcf")) {
+    		return name.substring(0, name.length() - 4);
     	}
     	return name;
     }
 	
-    /**
-     * Extracts the folder id from the supplied resource name, i.e. the 
-     * part of a ox folder resource name representing the folder's id.  
-     * @param name
-     * @return
-     */
-    public static String extractFolderId(final String name) {
-    	if (null != name && 0 < name.length() && name.charAt(0) == 'f') {
-            final Matcher matcher = FOLDER_NAME.matcher(name);
-            if (matcher.find()) {
-                return matcher.group(1);
-            }
-    	}
-    	return null;
-    }
-    
     public static Date getLatestModified(final Date lastModified1, final Date lastModified2) {
     	return lastModified1.after(lastModified2) ? lastModified1 : lastModified2;
     }
@@ -120,8 +112,8 @@ public class Tools {
     	return getLatestModified(lastModified, contact.getLastModified());
     }
     
-    public static Date getLatestModified(final Date lastModified, final UserizedFolder folder) {
-    	return getLatestModified(lastModified, folder.getLastModified());
+    public static Date getLatestModified(Date lastModified, UserizedFolder folder) {
+    	return getLatestModified(lastModified, folder.getLastModifiedUTC());
     }
     
     public static boolean isImageProblem(final OXException e) {
@@ -137,5 +129,50 @@ public class Tools {
     	return ContactExceptionCodes.DATA_TRUNCATION.equals(e);
     }
 	
+	/**
+	 * Parses a numerical identifier from a string, wrapping a possible 
+	 * NumberFormatException into an OXException.
+	 * 
+	 * @param id the id string
+	 * @return the parsed identifier
+	 * @throws OXException
+	 */
+	public static int parse(final String id) throws OXException {
+		try {
+			return Integer.parseInt(id);
+		} catch (final NumberFormatException e) {
+			throw ContactExceptionCodes.ID_PARSING_FAILED.create(e, id); 
+		}
+	}
+
+	public static SearchTerm<?> getSearchTerm(String uid, List<String> folderIDs) {
+		CompositeSearchTerm uidsTerm = new CompositeSearchTerm(CompositeOperation.OR);
+		uidsTerm.addSearchTerm(getSingleSearchTerm(ContactField.UID, uid));
+		uidsTerm.addSearchTerm(getSingleSearchTerm(ContactField.USERFIELD19, uid));
+		if (null == folderIDs || 0 == folderIDs.size()) {
+			return uidsTerm;
+		} else {
+			CompositeSearchTerm andTerm = new CompositeSearchTerm(CompositeOperation.AND);
+			andTerm.addSearchTerm(uidsTerm);
+			if (1 == folderIDs.size()) {
+				andTerm.addSearchTerm(getSingleSearchTerm(ContactField.FOLDER_ID, folderIDs.get(0)));
+			} else {
+				CompositeSearchTerm foldersTerm = new CompositeSearchTerm(CompositeOperation.OR);
+				for (String folderID : folderIDs) {
+					foldersTerm.addSearchTerm(getSingleSearchTerm(ContactField.FOLDER_ID, folderID));
+				}
+				andTerm.addSearchTerm(foldersTerm);
+			}
+			return andTerm;
+		}	
+	}
+	
+	private static SingleSearchTerm getSingleSearchTerm(ContactField field, String value) {
+		SingleSearchTerm term = new SingleSearchTerm(SingleOperation.EQUALS);
+		term.addOperand(new ContactFieldOperand(field));
+		term.addOperand(new ConstantOperand<String>(value));
+		return term;
+	}
+	 
 }
  

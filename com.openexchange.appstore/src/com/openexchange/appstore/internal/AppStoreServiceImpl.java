@@ -91,7 +91,7 @@ import com.openexchange.sql.grammar.UPDATE;
  */
 public class AppStoreServiceImpl implements AppStoreService {
 
-    static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(AppStoreServiceImpl.class);
+    static final org.apache.commons.logging.Log LOG = com.openexchange.log.LogFactory.getLog(AppStoreServiceImpl.class);
     private final ServiceLookup serviceLookup;
 
     /**
@@ -550,12 +550,13 @@ public class AppStoreServiceImpl implements AppStoreService {
                 Integer contextId = resultSet.getInt("cid");
                 Integer userId = resultSet.getInt("userId");
 
-                if (contextId == 0 && userId == 0)
+                if (contextId == 0 && userId == 0) {
                     target = "all";
-                else if (userId == 0)
+                } else if (userId == 0) {
                     target = "context";
-                else
+                } else {
                     target = "user";
+                }
 
                 ReleaseStatus status = new ReleaseStatus();
                 status.setTarget(target);

@@ -19,6 +19,7 @@ import com.openexchange.groupware.container.FolderObject;
 public class CopyTest extends AbstractContactTest {
 
 	private int objectId1;
+	private long ts1, ts2;
     private int objectId2;
     private int targetFolder;
     private FolderObject folder;
@@ -42,13 +43,13 @@ public class CopyTest extends AbstractContactTest {
 
 		folder = Create.createPrivateFolder("testCopy", FolderObject.CONTACT, userId);
 		folder.setParentFolderID(client.getValues().getPrivateContactFolder());
-		InsertResponse folderCreateResponse = client.execute(new InsertRequest(EnumAPI.OUTLOOK, folder));
+		final InsertResponse folderCreateResponse = client.execute(new InsertRequest(EnumAPI.OUTLOOK, folder));
 		folderCreateResponse.fillObject(folder);
 
 		targetFolder = folder.getObjectID();
 
-		CopyRequest request = new CopyRequest(objectId1, contactFolderId, targetFolder, true);
-		CopyResponse response = client.execute(request);
+		final CopyRequest request = new CopyRequest(objectId1, contactFolderId, targetFolder, true);
+		final CopyResponse response = client.execute(request);
 
 
 		if (response.hasError()) {
@@ -64,15 +65,16 @@ public class CopyTest extends AbstractContactTest {
 		    fail("Could not find copied contact.");
 		}
 
-		GetRequest getFirstContactRequest = new GetRequest(contactFolderId, objectId1, tz);
-		GetResponse firstContactResponse = client.execute(getFirstContactRequest);
-		Contact firstContact = firstContactResponse.getContact();
-
-		GetRequest getSecondContactRequest = new GetRequest(targetFolder, objectId2, tz);
-		GetResponse seconContactResponse = client.execute(getSecondContactRequest);
-		Contact secondContact = seconContactResponse.getContact();
+		final GetRequest getFirstContactRequest = new GetRequest(contactFolderId, objectId1, tz);
+		final GetResponse firstContactResponse = client.execute(getFirstContactRequest);
+		final Contact firstContact = firstContactResponse.getContact();
+		ts1 = firstContactResponse.getResponse().getTimestamp().getTime();
+		final GetRequest getSecondContactRequest = new GetRequest(targetFolder, objectId2, tz);
+		final GetResponse seconContactResponse = client.execute(getSecondContactRequest);
+		final Contact secondContact = seconContactResponse.getContact();
 		secondContact.setObjectID(objectId1);
 		secondContact.setParentFolderID(contactFolderId);
+		ts2 = seconContactResponse.getResponse().getTimestamp().getTime();
 
 		compareObject(firstContact, secondContact);
 	}
@@ -80,9 +82,9 @@ public class CopyTest extends AbstractContactTest {
 
     @Override
     protected void tearDown() throws Exception {
-        client.execute(new DeleteRequest(contactFolderId, objectId1, new Date()));
+        client.execute(new DeleteRequest(contactFolderId, objectId1, new Date(ts1), false));
         if (objectId2 > 0) {
-            client.execute(new DeleteRequest(targetFolder, objectId2, new Date()));
+            client.execute(new DeleteRequest(targetFolder, objectId2, new Date(ts2), false));
         }
         client.execute(new com.openexchange.ajax.folder.actions.DeleteRequest(EnumAPI.OUTLOOK, folder));
 

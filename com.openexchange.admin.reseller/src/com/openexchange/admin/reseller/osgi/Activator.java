@@ -49,123 +49,90 @@
 
 package com.openexchange.admin.reseller.osgi;
 
-import java.rmi.AccessException;
-import java.rmi.AlreadyBoundException;
-import java.rmi.NotBoundException;
-import java.rmi.RemoteException;
-import java.rmi.registry.Registry;
-import java.rmi.server.UnicastRemoteObject;
-import java.sql.SQLException;
+import java.rmi.Remote;
 import java.util.Hashtable;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.osgi.framework.BundleActivator;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceRegistration;
-
-import com.openexchange.admin.daemons.AdminDaemon;
 import com.openexchange.admin.exceptions.OXGenericException;
 import com.openexchange.admin.plugins.BasicAuthenticatorPluginInterface;
 import com.openexchange.admin.plugins.OXContextPluginInterface;
 import com.openexchange.admin.plugins.OXUserPluginInterface;
 import com.openexchange.admin.reseller.daemons.ClientAdminThreadExtended;
-import com.openexchange.admin.reseller.rmi.OXResellerInterface;
 import com.openexchange.admin.reseller.rmi.impl.OXReseller;
 import com.openexchange.admin.reseller.rmi.impl.OXResellerContextImpl;
 import com.openexchange.admin.reseller.rmi.impl.OXResellerUserImpl;
 import com.openexchange.admin.reseller.rmi.impl.ResellerAuth;
 import com.openexchange.admin.reseller.tools.AdminCacheExtended;
 import com.openexchange.admin.rmi.exceptions.StorageException;
+import com.openexchange.admin.tools.AdminCache;
+import com.openexchange.config.ConfigurationService;
+import com.openexchange.database.DatabaseService;
+import com.openexchange.osgi.HousekeepingActivator;
 
-public class Activator implements BundleActivator {
+public class Activator extends HousekeepingActivator {
 
     private static final Log LOG = LogFactory.getLog(Activator.class);
 
-    private static Registry registry = null;
+    public Activator() {
+        super();
+    }
 
-    private static OXReseller reseller = null;
-
-    public void start(BundleContext context) throws Exception {
+    @Override
+    public void startBundle() throws Exception {
         try {
-            initCache();
+            ConfigurationService configurationService = getService(ConfigurationService.class);
+            AdminCache.compareAndSetConfigurationService(null, configurationService);
+            initCache(configurationService);
 
-            registry = AdminDaemon.getRegistry();
-
-            reseller = new OXReseller();
-            final OXResellerInterface oxresell_stub = (OXResellerInterface) UnicastRemoteObject.exportObject(reseller, 0);
-
-            // bind all NEW Objects to registry
-            registry.bind(OXResellerInterface.RMI_NAME, oxresell_stub);
+            final OXReseller reseller = new OXReseller();
+            registerService(Remote.class, reseller, null);
             LOG.info("RMI Interface for reseller bundle bound to RMI registry");
 
-            Hashtable<String, String> props = new Hashtable<String, String>();
+            final Hashtable<String, String> props = new Hashtable<String, String>();
             props.put("name", "BasicAuthenticator");
             LOG.info(BasicAuthenticatorPluginInterface.class.getName());
-            ServiceRegistration reg = context.registerService(BasicAuthenticatorPluginInterface.class.getName(), new ResellerAuth(), props);
-            if (LOG.isDebugEnabled()) {
-                LOG.debug(reg.toString());
-                LOG.debug("Service registered");
-            }
+            registerService(BasicAuthenticatorPluginInterface.class, new ResellerAuth(), props);
 
             props.clear();
             props.put("name", "OXContext");
             LOG.info(OXContextPluginInterface.class.getName());
-            reg = context.registerService(OXContextPluginInterface.class.getName(), new OXResellerContextImpl(), props);
-            if (LOG.isDebugEnabled()) {
-                LOG.debug(reg.toString());
-                LOG.debug("Service registered");
-            }
+            registerService(OXContextPluginInterface.class, new OXResellerContextImpl(), props);
 
             props.clear();
             props.put("name", "OXUser");
             LOG.info(OXUserPluginInterface.class.getName());
-            reg = context.registerService(OXUserPluginInterface.class.getName(), new OXResellerUserImpl(), props);
-            if (LOG.isDebugEnabled()) {
-                LOG.debug(reg.toString());
-                LOG.debug("Service registered");
-            }
+            registerService(OXUserPluginInterface.class, new OXResellerUserImpl(), props);
 
-        } catch (final RemoteException e) {
-            LOG.error(e.getMessage(), e);
-            throw e;
-        } catch (final AlreadyBoundException e) {
-            LOG.error(e.getMessage(), e);
-            throw e;
+            track(DatabaseService.class, new DatabaseServiceCustomizer(context, ClientAdminThreadExtended.cache.getPool()));
+            openTrackers();
         } catch (final StorageException e) {
             LOG.fatal("Error while creating one instance for RMI interface", e);
             throw e;
-        } catch (SQLException e) {
-            LOG.error(e.getMessage(), e);
-            throw e;
-        } catch (OXGenericException e) {
+        } catch (final OXGenericException e) {
             LOG.fatal(e.getMessage(), e);
             throw e;
-        }
-    }
-
-    public void stop(BundleContext context) throws Exception {
-        try {
-            if (null != registry) {
-                registry.unbind(OXResellerInterface.RMI_NAME);
-            }
-        } catch (final AccessException e) {
-            LOG.error(e.getMessage(), e);
-            throw e;
-        } catch (final RemoteException e) {
-            LOG.error(e.getMessage(), e);
-            throw e;
-        } catch (final NotBoundException e) {
+        } catch (final Exception e) {
             LOG.error(e.getMessage(), e);
             throw e;
         }
     }
 
-    private void initCache() throws SQLException, OXGenericException {
-        AdminCacheExtended cache = new AdminCacheExtended();
-        cache.initCache();
+    @Override
+    public void stopBundle() {
+        closeTrackers();
+        unregisterServices();
+    }
+
+    private void initCache(final ConfigurationService service) throws OXGenericException {
+        final AdminCacheExtended cache = new AdminCacheExtended();
+        cache.initCache(service);
         cache.initCacheExtended();
         ClientAdminThreadExtended.cache = cache;
         LOG.info("ResellerBundle: Cache and Pools initialized!");
+    }
+
+    @Override
+    protected Class<?>[] getNeededServices() {
+        return new Class<?>[] { ConfigurationService.class };
     }
 }

@@ -56,13 +56,11 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.TimeZone;
-
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-
 import com.openexchange.ajax.contact.action.AllRequest;
 import com.openexchange.ajax.contact.action.ContactUpdatesResponse;
 import com.openexchange.ajax.contact.action.DeleteRequest;
@@ -557,9 +555,15 @@ public class AbstractContactTest extends AbstractAJAXSession {
         client.execute(request);
     }
 
-    public void deleteContact(final int id, final int inFolder) throws Exception {
-        final DeleteRequest request = new DeleteRequest(inFolder, id, new Date());
-        client.execute(request);
+    public void deleteContact(final int id, final int inFolder, final boolean ignoreFailure) throws Exception {
+        try {
+            final DeleteRequest request = new DeleteRequest(inFolder, id, ignoreFailure ? new Date(Long.MAX_VALUE) : new Date(), !ignoreFailure);
+            client.execute(request);
+        } catch (final Exception e) {
+            if (!ignoreFailure) {
+                throw e;
+            }
+        }
     }
 
     public Contact[] allContact(final int inFolder, final int[] cols) throws Exception {

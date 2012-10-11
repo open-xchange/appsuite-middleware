@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Microformats Subscription Plug-in
 Bundle-SymbolicName: com.openexchange.subscribe.microformats
-Bundle-Version: 6.21.0
+Bundle-Version: 6.22.0
 Bundle-Activator: com.openexchange.subscribe.microformats.osgi.Activator
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
@@ -39,10 +39,17 @@ Import-Package: com.openexchange.config,
  org.apache.commons.httpclient.util,
  org.apache.commons.logging,
  org.apache.xerces.impl,
+ org.apache.xerces.jaxp,
+ org.apache.xerces.jaxp.datatype,
+ org.apache.xerces.jaxp.validation,
  org.apache.xerces.parsers,
  org.apache.xerces.util,
  org.apache.xerces.xni,
  org.apache.xerces.xni.parser,
+ org.cyberneko.html,
+ org.cyberneko.html.filters,
+ org.cyberneko.html.parsers,
+ org.cyberneko.html.xercesbridge,
  org.osgi.framework,
  org.osgi.util.tracker,
  org.w3c.dom,
@@ -53,8 +60,7 @@ Import-Package: com.openexchange.config,
  org.xml.sax,
  org.xml.sax.ext,
  org.xml.sax.helpers
-Bundle-ClassPath: lib/nekohtml-1.9.13.jar,
- .,
+Bundle-ClassPath: .,
  lib/htmllexer.jar,
  lib/htmlparser.jar,
  lib/jodatime.jar,

@@ -54,6 +54,7 @@ import java.util.Dictionary;
 import java.util.Hashtable;
 import com.openexchange.caching.CacheService;
 import com.openexchange.calendar.CalendarAdministration;
+import com.openexchange.calendar.CalendarMySQL;
 import com.openexchange.calendar.CalendarReminderDelete;
 import com.openexchange.calendar.api.AppointmentSqlFactory;
 import com.openexchange.calendar.api.CalendarCollection;
@@ -85,16 +86,20 @@ public class CoreCalendarActivator extends HousekeepingActivator {
     protected java.lang.Class<?>[] getNeededServices() {
         return new Class<?>[] { CacheService.class };
     }
+    
 
     @Override
     protected void startBundle() throws Exception {
-        registerService(AppointmentSqlFactoryService.class, new AppointmentSqlFactory());
-        registerService(CalendarCollectionService.class, new CalendarCollection());
-        registerService(CalendarAdministrationService.class, new CalendarAdministration());
+        final AppointmentSqlFactory factory = new AppointmentSqlFactory();
+        ITipActivator.initFeatures(factory);
+        CalendarMySQL.setApppointmentSqlFactory(factory);
+        
+        registerService(AppointmentSqlFactoryService.class, factory, null);
+        registerService(CalendarCollectionService.class, new CalendarCollection(), null);
+        registerService(CalendarAdministrationService.class, new CalendarAdministration(), null);
         final Dictionary<String, Integer> props = new Hashtable<String, Integer>(1, 1);
         props.put(TargetService.MODULE_PROPERTY, I(Types.APPOINTMENT));
         registerService(TargetService.class, new CalendarReminderDelete(), props);
-
         registerCacheRegion();
     }
 

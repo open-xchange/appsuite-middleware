@@ -20,6 +20,10 @@ import java.io.InputStream;
 
 import junit.framework.TestCase;
 
+import org.apache.tika.metadata.ClimateForcast;
+import org.apache.tika.metadata.DublinCore;
+import org.apache.tika.metadata.HttpHeaders;
+import org.apache.tika.metadata.MSOffice;
 import org.apache.tika.metadata.Metadata;
 import org.apache.tika.parser.AutoDetectParser;
 import org.apache.tika.parser.ParseContext;
@@ -49,12 +53,12 @@ public class IWorkParserTest extends TestCase {
         iWorkParser.parse(input, handler, metadata, parseContext);
 
         assertEquals(6, metadata.size());
-        assertEquals("application/vnd.apple.keynote", metadata.get(Metadata.CONTENT_TYPE));
-        assertEquals("3", metadata.get(Metadata.SLIDE_COUNT));
+        assertEquals("application/vnd.apple.keynote", metadata.get(HttpHeaders.CONTENT_TYPE));
+        assertEquals("3", metadata.get(MSOffice.SLIDE_COUNT));
         assertEquals("1024", metadata.get(KeynoteContentHandler.PRESENTATION_WIDTH));
         assertEquals("768", metadata.get(KeynoteContentHandler.PRESENTATION_HEIGHT));
-        assertEquals("Tika user", metadata.get(Metadata.AUTHOR));
-        assertEquals("Apache tika", metadata.get(Metadata.TITLE));
+        assertEquals("Tika user", metadata.get(MSOffice.AUTHOR));
+        assertEquals("Apache tika", metadata.get(DublinCore.TITLE));
 
         String content = handler.toString();
         assertTrue(content.contains("A sample presentation"));
@@ -83,13 +87,13 @@ public class IWorkParserTest extends TestCase {
         iWorkParser.parse(input, handler, metadata, parseContext);
 
         assertEquals(51, metadata.size());
-        assertEquals("application/vnd.apple.pages", metadata.get(Metadata.CONTENT_TYPE));
-        assertEquals("Tika user", metadata.get(Metadata.AUTHOR));
-        assertEquals("Apache tika", metadata.get(Metadata.TITLE));
-        assertEquals("2010-05-09T21:34:38+0200", metadata.get(Metadata.CREATION_DATE));
-        assertEquals("2010-05-09T23:50:36+0200", metadata.get(Metadata.LAST_MODIFIED));
-        assertEquals("en", metadata.get(Metadata.LANGUAGE));
-        assertEquals("2", metadata.get(Metadata.PAGE_COUNT));
+        assertEquals("application/vnd.apple.pages", metadata.get(HttpHeaders.CONTENT_TYPE));
+        assertEquals("Tika user", metadata.get(MSOffice.AUTHOR));
+        assertEquals("Apache tika", metadata.get(DublinCore.TITLE));
+        assertEquals("2010-05-09T21:34:38+0200", metadata.get(MSOffice.CREATION_DATE));
+        assertEquals("2010-05-09T23:50:36+0200", metadata.get(HttpHeaders.LAST_MODIFIED));
+        assertEquals("en", metadata.get(DublinCore.LANGUAGE));
+        assertEquals("2", metadata.get(MSOffice.PAGE_COUNT));
 
         String content = handler.toString();
 
@@ -121,10 +125,10 @@ public class IWorkParserTest extends TestCase {
 
         String content = handler.toString();
         assertEquals(9, metadata.size());
-        assertEquals("2", metadata.get(Metadata.PAGE_COUNT));
-        assertEquals("Tika User", metadata.get(Metadata.AUTHOR));
-        assertEquals("Account checking", metadata.get(Metadata.TITLE));
-        assertEquals("a comment", metadata.get(Metadata.COMMENT));
+        assertEquals("2", metadata.get(MSOffice.PAGE_COUNT));
+        assertEquals("Tika User", metadata.get(MSOffice.AUTHOR));
+        assertEquals("Account checking", metadata.get(DublinCore.TITLE));
+        assertEquals("a comment", metadata.get(ClimateForcast.COMMENT));
 
         assertTrue(content.contains("Category"));
         assertTrue(content.contains("Home"));

@@ -54,7 +54,7 @@ import java.util.Arrays;
 import com.openexchange.caching.CacheKey;
 
 /**
- * {@link CacheKeyImpl} - A cache key that consists of a context ID and an unique (serializable) identifier of any object.
+ * {@link CacheKeyImpl} - A cache key that consists of a context ID and an unique (serializable) identifier of any type.
  */
 public class CacheKeyImpl implements CacheKey {
 
@@ -96,13 +96,7 @@ public class CacheKeyImpl implements CacheKey {
      * @throws IllegalArgumentException If specified key is <code>null</code>
      */
     public CacheKeyImpl(final int contextId, final Serializable key) {
-        super();
-        if (null == key) {
-            throw new IllegalArgumentException("key is null");
-        }
-        this.contextId = contextId;
-        keyObjs = new Serializable[] { key };
-        hash = key.hashCode() ^ contextId;
+        this(contextId, new Serializable[] { key });
     }
 
     /**

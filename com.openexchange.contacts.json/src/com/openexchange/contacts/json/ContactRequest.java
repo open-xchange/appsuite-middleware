@@ -62,8 +62,10 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.fields.OrderFields;
+import com.openexchange.ajax.fields.SearchTermFields;
 import com.openexchange.ajax.parser.SearchTermParser;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
+import com.openexchange.contact.ContactFieldOperand;
 import com.openexchange.contact.SortOptions;
 import com.openexchange.contact.SortOrder;
 import com.openexchange.contacts.json.mapping.ContactMapper;
@@ -72,8 +74,11 @@ import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.contact.helpers.SpecialAlphanumSortContactComparator;
 import com.openexchange.groupware.contact.helpers.UseCountComparator;
 import com.openexchange.groupware.container.Contact;
+import com.openexchange.groupware.container.DataObject;
 import com.openexchange.groupware.search.Order;
 import com.openexchange.groupware.upload.impl.UploadEvent;
+import com.openexchange.search.Operand;
+import com.openexchange.search.SearchExceptionMessages;
 import com.openexchange.search.SearchTerm;
 import com.openexchange.tools.TimeZoneUtils;
 import com.openexchange.tools.arrays.Arrays;
@@ -122,19 +127,25 @@ public class ContactRequest {
      * @throws OXException
      */
     public SortOptions getSortOptions() throws OXException {
-    	final int leftHandLimit = this.getLeftHandLimit();
+        SortOptions sortOptions = new SortOptions();
+    	int leftHandLimit = this.getLeftHandLimit();
+    	if (0 < leftHandLimit) {
+    	    sortOptions.setRangeStart(leftHandLimit);
+    	}
     	int rightHandLimit = this.getRightHandLimit();
-        if (rightHandLimit == 0) {
-            rightHandLimit = 50000;
-        }            
-        final SortOptions sortOptions = new SortOptions(leftHandLimit,  rightHandLimit - leftHandLimit);
+    	if (0 < rightHandLimit) {
+    	    if (rightHandLimit < leftHandLimit) {
+    	        throw OXJSONExceptionCodes.INVALID_VALUE.create(rightHandLimit, "right_hand_limit");
+    	    }
+            sortOptions.setLimit(leftHandLimit);
+    	}    	
         if (false == isInternalSort()) {
        		sortOptions.setCollation(this.getCollation());
-        	final int sort = this.getSort();
+        	int sort = this.getSort();
         	if (0 < sort) {
-        		final ContactField sortField = ContactMapper.getInstance().getMappedField(sort);
+        		ContactField sortField = ContactMapper.getInstance().getMappedField(sort);
         		if (null == sortField) {
-        			throw new IllegalArgumentException("no mapped field for sort order '" + sort + "'.");
+                    throw OXJSONExceptionCodes.INVALID_VALUE.create(sort, "sort");
         		}
         		sortOptions.setOrderBy(new SortOrder[] { SortOptions.Order(sortField, getOrder()) });
         	}
@@ -166,29 +177,70 @@ public class ContactRequest {
      * @throws OXException
      */
     public ContactField[] getFields() throws OXException {
-    	final int[] columnIDs = RequestTools.getColumnsAsIntArray(request, "columns");
+    	return getFields((ContactField[])null);
+//    	final int[] columnIDs = RequestTools.getColumnsAsIntArray(request, "columns");
+//    	if (this.isInternalSort()) {
+//        	return ContactMapper.getInstance().getFields(columnIDs, VIRTUAL_FIELDS, ContactField.LAST_MODIFIED,
+//        			ContactField.YOMI_LAST_NAME, ContactField.SUR_NAME, ContactField.YOMI_FIRST_NAME, ContactField.GIVEN_NAME, 
+//        			ContactField.DISPLAY_NAME, ContactField.YOMI_COMPANY, ContactField.COMPANY, ContactField.EMAIL1, ContactField.EMAIL2, 
+//        			ContactField.USE_COUNT);
+//    	} else {
+//        	return ContactMapper.getInstance().getFields(columnIDs, VIRTUAL_FIELDS, ContactField.LAST_MODIFIED);
+//    	}
+    }    
+
+    public ContactField[] getFields(final ContactField...mandatoryFields) throws OXException {
+    	ContactField[] fields = null;
     	if (this.isInternalSort()) {
-        	return ContactMapper.getInstance().getFields(columnIDs, VIRTUAL_FIELDS, ContactField.LAST_MODIFIED,
-        			ContactField.YOMI_LAST_NAME, ContactField.SUR_NAME, ContactField.YOMI_FIRST_NAME, ContactField.GIVEN_NAME, 
-        			ContactField.DISPLAY_NAME, ContactField.YOMI_COMPANY, ContactField.COMPANY, ContactField.EMAIL1, ContactField.EMAIL2, 
-        			ContactField.USE_COUNT);
+    		fields = new ContactField[] { 
+    			ContactField.LAST_MODIFIED, ContactField.YOMI_LAST_NAME, ContactField.SUR_NAME, 
+				ContactField.YOMI_FIRST_NAME, ContactField.GIVEN_NAME, ContactField.DISPLAY_NAME, ContactField.YOMI_COMPANY, 
+				ContactField.COMPANY, ContactField.EMAIL1, ContactField.EMAIL2, ContactField.USE_COUNT };
     	} else {
-        	return ContactMapper.getInstance().getFields(columnIDs, VIRTUAL_FIELDS, ContactField.LAST_MODIFIED);
+    		fields = new ContactField[] { ContactField.LAST_MODIFIED };
     	}
+    	if (null != mandatoryFields) {
+    		fields = Arrays.add(fields, mandatoryFields);
+    	}
+    	final int[] columnIDs = RequestTools.getColumnsAsIntArray(request, "columns");
+    	return ContactMapper.getInstance().getFields(columnIDs, VIRTUAL_FIELDS, fields);
     }    
 
     /**
      * Gets a search term from the json array named 'filter in the request. 
      * @return the search term
      * @throws OXException
-     * @throws JSONException
      */
-    public SearchTerm<?> getSearchFilter() throws OXException, JSONException {
-		final JSONArray filterContent = getJSONData().getJSONArray("filter");
-		if (null == filterContent) {
+    public SearchTerm<?> getSearchFilter() throws OXException {
+    	JSONArray jsonArray = this.getJSONData().optJSONArray("filter");
+		if (null == jsonArray) {
 			throw OXJSONExceptionCodes.MISSING_FIELD.create("filter");
-		}		
-	    return SearchTermParser.parse(filterContent);
+		}
+	    return ContactSearchTermParser.INSTANCE.parseSearchTerm(jsonArray);
+    }
+
+    /**
+     * {@link ContactSearchTermParser}
+     *
+     * Custom {@link SearchTermParser} producing {@link ContactFieldOperand}s 
+     * from ajax names.
+     */
+    private static final class ContactSearchTermParser extends SearchTermParser {
+        
+        public static final ContactSearchTermParser INSTANCE = new ContactSearchTermParser();
+        
+        private ContactSearchTermParser() {
+            super();
+        }
+        
+        @Override
+        protected Operand<?> parseOperand(final JSONObject operand) throws OXException {
+            if (false == operand.hasAndNotNull(SearchTermFields.FIELD)) {
+                throw SearchExceptionMessages.PARSING_FAILED_MISSING_FIELD.create(SearchTermFields.FIELD);
+            }
+            ContactField field = ContactMapper.getInstance().getMappedField(operand.optString(SearchTermFields.FIELD));
+            return new ContactFieldOperand(field);
+        }
     }
 
     /**
@@ -222,16 +274,17 @@ public class ContactRequest {
     /**
      * Gets the request's data as JSON object.
      * 
-     * @return the json object
+     * @return the JSON object
      * @throws OXException
-     * @throws JSONException
      */
-    public JSONObject getJSONData() throws OXException, JSONException {
-    	final JSONObject jsonData = (JSONObject)request.getData();
-    	if (null == jsonData) {
+    public JSONObject getJSONData() throws OXException {
+    	Object data = request.getData();
+    	if (null == data) {
             throw OXJSONExceptionCodes.MISSING_FIELD.create("data");
-    	}
-    	return jsonData;
+    	} else if (false == JSONObject.class.isInstance(data)) {
+    		throw OXJSONExceptionCodes.INVALID_VALUE.create("data", data.toString());
+    	} 
+    	return (JSONObject)data;
     }
 
     /**
@@ -239,10 +292,9 @@ public class ContactRequest {
      * 
      * @return the folder ID
      * @throws OXException
-     * @throws JSONException
      */
-    public String getFolderIDFromData() throws OXException, JSONException {
-    	final String folderID = getJSONData().getString("folder_id");
+    public String getFolderIDFromData() throws OXException {
+    	String folderID = this.getJSONData().optString("folder_id");
     	if (null == folderID || 0 == folderID.length()) {
     		throw OXJSONExceptionCodes.MISSING_FIELD.create("folder_id");
     	}
@@ -322,6 +374,10 @@ public class ContactRequest {
     public int getRightHandLimit() throws OXException {
         return RequestTools.getNullableIntParameter(request, "right_hand_limit");
     }
+    
+    public boolean isExcludeAdmin() throws OXException {
+    	return request.containsParameter("admin") && false == request.getParameter("admin", boolean.class);
+    }
 
     public int[][] getListRequestData() throws OXException {
         final JSONArray data = (JSONArray) request.getData();
@@ -332,7 +388,7 @@ public class ContactRequest {
         return RequestTools.buildObjectIdAndFolderId(data);
     }
 
-    public boolean containsImage() {
+    public boolean containsImage() throws OXException {
         return request.hasUploads();
     }
 
@@ -349,7 +405,7 @@ public class ContactRequest {
         }
     }
 
-    public UploadEvent getUploadEvent() {
+    public UploadEvent getUploadEvent() throws OXException {
         return request.getUploadEvent();
     }
 
@@ -399,7 +455,7 @@ public class ContactRequest {
     private int[] removeVirtual(final int[] columns) {
         final TIntList helper = new TIntArrayList(columns.length);
         for (final int col : columns) {
-            if (col == Contact.LAST_MODIFIED_UTC) {
+            if (col == DataObject.LAST_MODIFIED_UTC) {
                 // SKIP
             } else if (col == Contact.IMAGE1_URL) {
                 helper.add(Contact.IMAGE1);
@@ -412,10 +468,10 @@ public class ContactRequest {
     }
 
     private int[] checkOrInsertLastModified(final int[] columns) {
-        if (!Arrays.contains(columns, Contact.LAST_MODIFIED)) {
+        if (!Arrays.contains(columns, DataObject.LAST_MODIFIED)) {
             final int[] newColumns = new int[columns.length + 1];
             System.arraycopy(columns, 0, newColumns, 0, columns.length);
-            newColumns[columns.length] = Contact.LAST_MODIFIED;
+            newColumns[columns.length] = DataObject.LAST_MODIFIED;
 
             return newColumns;
         } else {

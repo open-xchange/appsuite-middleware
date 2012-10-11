@@ -54,7 +54,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import com.openexchange.log.LogFactory;
 import com.openexchange.database.provider.DBProvider;
 import com.openexchange.database.provider.StaticDBPoolProvider;
 import com.openexchange.exception.OXException;
@@ -264,7 +264,8 @@ public class SelectForUpdateReservation implements InfostoreFilenameReservation 
 		return wasAdjusted;
 	}
 	
-	public void setWasAdjusted(boolean wasAdjusted) {
+	@Override
+    public void setWasAdjusted(boolean wasAdjusted) {
 		this.wasAdjusted = wasAdjusted;
 	}
 	

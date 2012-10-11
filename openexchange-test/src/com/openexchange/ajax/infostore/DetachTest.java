@@ -122,17 +122,13 @@ public class DetachTest extends InfostoreAJAXTest {
 		final int id = clean.get(0);
 
 
-		final Response res = update(getWebConversation(),getHostName(),sessionId,id,Long.MAX_VALUE,m("filename" , "blupp.properties"));
+		Response res = update(getWebConversation(),getHostName(),sessionId,id,Long.MAX_VALUE,m("filename" , "blupp.properties"));
 		assertNoError(res);
 
 		final int id2 = createNew(getWebConversation(), getHostName(), sessionId, m("title" , "otherFile", "description","other_desc", "folder_id" ,	((Integer)folderId).toString()), upload, "text/plain");
 		clean.add(id2);
 
-		try {
-			detach(getWebConversation(), getHostName(), sessionId, Long.MAX_VALUE, clean.get(0), new int[]{5});
-			fail("Expected Exception.");
-		} catch (final IOException x) {
-			assertTrue(true);
-		}
+		detach(getWebConversation(), getHostName(), sessionId, Long.MAX_VALUE, clean.get(0), new int[]{5});
+		
 	}
 }

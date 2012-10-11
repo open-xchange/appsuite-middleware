@@ -134,6 +134,8 @@ public class ParticipantParser {
 
     private static final class JSONParticipant extends AbstractConfirmableParticipant implements Comparable<Participant> {
 
+        private static final long serialVersionUID = -3063859164091177034L;
+
         private int type;
         private int identifier;
         private String emailAddress;
@@ -154,7 +156,7 @@ public class ParticipantParser {
         }
 
         @Override
-        public Participant getClone() {
+        public ConfirmableParticipant getClone() {
             return new JSONParticipant(this);
         }
 
@@ -165,7 +167,7 @@ public class ParticipantParser {
 
         @Override
         public String getEmailAddress() {
-            return emailAddress;
+            return emailAddress == null ? null : emailAddress.toLowerCase();
         }
 
         @Override
@@ -188,6 +190,7 @@ public class ParticipantParser {
             this.displayName = displayName;
         }
 
+        @Deprecated
         @Override
         public void setIdentifier(int id) {
             this.identifier = id;
@@ -199,11 +202,24 @@ public class ParticipantParser {
         }
 
         public void setEmailAddress(String emailAddress) {
-            this.emailAddress = emailAddress;
+            this.emailAddress = emailAddress == null ? null : emailAddress.toLowerCase();
         }
 
         public void setType(int type) {
             this.type = type;
+        }
+        
+        @Override
+        public JSONParticipant clone() throws CloneNotSupportedException {
+            JSONParticipant retval = (JSONParticipant) super.clone();
+            
+            retval.displayName = this.displayName;
+            retval.emailAddress = this.emailAddress;
+            retval.identifier = this.identifier;
+            retval.ignoreNotification = this.ignoreNotification;
+            retval.type = this.type;
+            
+            return retval;
         }
 
         @Override

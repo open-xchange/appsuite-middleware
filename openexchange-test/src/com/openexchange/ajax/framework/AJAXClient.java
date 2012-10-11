@@ -140,8 +140,9 @@ public class AJAXClient {
     @Override
     protected void finalize() throws Throwable {
         try {
-            if (mustLogout)
+            if (mustLogout) {
                 logout();
+            }
         } finally {
             super.finalize();
         }

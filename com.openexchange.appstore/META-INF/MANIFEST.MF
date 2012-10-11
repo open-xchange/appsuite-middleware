@@ -17,6 +17,7 @@ Import-Package: com.openexchange.config.cascade,
  com.openexchange.sql.builder,
  com.openexchange.sql.grammar,
  com.openexchange.sql.tools,
+ com.openexchange.log,
  org.apache.commons.logging,
  org.osgi.framework
 Bundle-ActivationPolicy: lazy

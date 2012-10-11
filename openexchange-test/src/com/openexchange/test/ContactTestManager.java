@@ -51,7 +51,9 @@ package com.openexchange.test;
 
 import static com.openexchange.java.Autoboxing.I;
 import static org.junit.Assert.fail;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -59,6 +61,9 @@ import java.util.List;
 import java.util.TimeZone;
 import java.util.Vector;
 import junit.framework.TestCase;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.ClientProtocolException;
+import org.apache.http.client.methods.HttpGet;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -78,6 +83,7 @@ import com.openexchange.ajax.contact.action.UpdateRequest;
 import com.openexchange.ajax.contact.action.UpdatesRequest;
 import com.openexchange.ajax.fields.ContactFields;
 import com.openexchange.ajax.framework.AJAXClient;
+import com.openexchange.ajax.framework.AJAXSession;
 import com.openexchange.ajax.framework.AbstractAJAXResponse;
 import com.openexchange.ajax.framework.CommonAllResponse;
 import com.openexchange.ajax.framework.CommonListResponse;
@@ -88,6 +94,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.search.ContactSearchObject;
 import com.openexchange.groupware.search.Order;
+import com.openexchange.java.UnsynchronizedByteArrayOutputStream;
 
 /**
  * This class and ContactObject should be all that is needed to write contact-related tests. If multiple users are needed use multiple
@@ -254,7 +261,14 @@ public class ContactTestManager implements TestManager {
      * Updates a contact via HTTP-API and returns the same contact for convenience
      */
     public Contact updateAction(final Contact contact) {
-        final UpdateRequest request = new UpdateRequest(contact);
+    	return this.updateAction(contact.getParentFolderID(), contact);
+    }
+
+    /**
+     * Updates a contact via HTTP-API and returns the same contact for convenience
+     */
+    public Contact updateAction(final int inFolder, final Contact contact) {
+        final UpdateRequest request = new UpdateRequest(inFolder, contact, true);
         try {
             lastResponse = getClient().execute(request, getSleep());
             contact.setLastModified(lastResponse.getTimestamp());
@@ -547,11 +561,11 @@ public class ContactTestManager implements TestManager {
         }
     }
 
-    private List<Contact> transform(final JSONArray data) throws JSONException, OXException, OXException {
+    public List<Contact> transform(final JSONArray data) throws JSONException, OXException, IOException {
     	return transform(data, Contact.ALL_COLUMNS);
     }
 
-    private List<Contact> transform(final JSONArray data, final int[] columns) throws JSONException, OXException, OXException {
+    public List<Contact> transform(final JSONArray data, final int[] columns) throws JSONException, OXException, IOException {
         final List<Contact> contacts = new LinkedList<Contact>();
         for (int i = 0; i < data.length(); i++) {
             final JSONArray jsonArray = data.getJSONArray(i);
@@ -566,9 +580,51 @@ public class ContactTestManager implements TestManager {
             }
             final Contact contactObject = new Contact();
             getContactParser().parse(contactObject, jsonObject);
+            
+            if (null != contactObject.getImage1()) {
+            	final String image1 = new String(contactObject.getImage1());
+            	if (0 < image1.length() && image1.contains("image")) {
+            		// interpret as image url, download real image            		
+            		try {
+                        contactObject.setImage1(loadImage(image1));
+                        contactObject.setNumberOfImages(1);
+                    } catch (final Exception e) {
+                        // Ignore possible error during download attempt
+                    }
+            	}            	
+            }            
             contacts.add(contactObject);
         }
         return contacts;
+    }
+
+    private byte[] loadImage(final String imageURL) throws OXException {
+        InputStream inputStream = null;
+        try {
+            final AJAXSession ajaxSession = getClient().getSession();
+            final HttpGet httpRequest = new HttpGet(getClient().getProtocol() + "://" + getClient().getHostname() + imageURL);
+            final HttpResponse httpResponse = ajaxSession.getHttpClient().execute(httpRequest);
+            inputStream = httpResponse.getEntity().getContent();
+            final int len = 8192;
+            final byte[] buf = new byte[len];
+            final ByteArrayOutputStream out = new UnsynchronizedByteArrayOutputStream(len << 2);
+            for (int read; (read = inputStream.read(buf, 0, len)) > 0;) {
+                out.write(buf, 0, read);
+            }
+            return out.toByteArray();
+        } catch (final ClientProtocolException e) {
+        	throw new OXException(e);
+		} catch (final IOException e) {
+        	throw new OXException(e);
+		} finally {
+            if (null != inputStream) {
+                try {
+                    inputStream.close();
+                } catch (final Exception e) {
+                    // Ignore
+                }
+            }
+        }
     }
 
     @Override
@@ -723,6 +779,7 @@ final class ContactMapping extends TestCase {
             put(ContactFields.MODIFIED_BY, Contact.MODIFIED_BY);
             put(ContactFields.NUMBER_OF_ATTACHMENTS, Contact.NUMBER_OF_ATTACHMENTS);
             put(ContactFields.PRIVATE_FLAG, Contact.PRIVATE_FLAG);
+            put(ContactFields.EXTENDED_PROPERTIES, Contact.EXTENDED_PROPERTIES);
 
             put(ContactFields.YOMI_COMPANY, Contact.YOMI_COMPANY);
             put(ContactFields.YOMI_FIRST_NAME, Contact.YOMI_FIRST_NAME);
@@ -733,6 +790,7 @@ final class ContactMapping extends TestCase {
             put(ContactFields.ADDRESS_OTHER, Contact.ADDRESS_OTHER);
 
             put(ContactFields.UID, Contact.UID);
+            put(ContactFields.IMAGE1_URL, Contact.IMAGE1_URL);
 
         } catch (final Exception e) {
             fail(e.getMessage());

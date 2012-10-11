@@ -6,8 +6,8 @@ import java.util.Set;
 
 import junit.framework.TestCase;
 
-import org.jdom.Element;
-import org.jdom.Namespace;
+import org.jdom2.Element;
+import org.jdom2.Namespace;
 
 import com.openexchange.webdav.protocol.Protocol;
 import com.openexchange.webdav.protocol.WebdavProperty;
@@ -51,7 +51,7 @@ public class PropertiesWriterTest extends TestCase {
 		assertHref(response, "/"+testCollection+"test.txt");
 
 		int count = 0;
-		for(final Element element : (List<Element>)response.getChildren()) {
+		for(final Element element : response.getChildren()) {
 			if(!element.getName().equals("propstat")) {
 				continue;
 			}
@@ -77,7 +77,7 @@ public class PropertiesWriterTest extends TestCase {
 		assertHref(response, "/"+testCollection+"test.txt");
 
 		int count = 0;
-		for(final Element element : (List<Element>)response.getChildren()) {
+		for(final Element element : response.getChildren()) {
 			if(!element.getName().equals("propstat")) {
 				continue;
 			}
@@ -105,13 +105,13 @@ public class PropertiesWriterTest extends TestCase {
 
 		for(final Property p : new Protocol().getKnownProperties()) { allProps.add(p.getName()); }
 
-		for(final Element element : (List<Element>)response.getChildren()) {
+		for(final Element element : response.getChildren()) {
 			if(!element.getName().equals("propstat")) {
 				continue;
 			}
 			assertStatus(element, "HTTP/1.1 200 OK");
 			final Element prop = element.getChild("prop", DAV_NS);
-			for(final Element child : (List<Element>) prop.getChildren()) {
+			for(final Element child : prop.getChildren()) {
 				assertTrue("Didn't expect "+child.getName(), allProps.remove(child.getName()));
 			}
 		}
@@ -132,13 +132,13 @@ public class PropertiesWriterTest extends TestCase {
 
 		for(final Property p : new Protocol().getKnownProperties()) { allProps.add(p.getName()); }
 
-		for(final Element element : (List<Element>)response.getChildren()) {
+		for(final Element element : response.getChildren()) {
 			if(!element.getName().equals("propstat")) {
 				continue;
 			}
 			assertStatus(element, "HTTP/1.1 200 OK");
 			final Element prop = element.getChild("prop", DAV_NS);
-			for(final Element child : (List<Element>) prop.getChildren()) {
+			for(final Element child : prop.getChildren()) {
 				assertTrue(allProps.remove(child.getName()));
 			}
 		}
@@ -157,7 +157,7 @@ public class PropertiesWriterTest extends TestCase {
 
 		assertHref(response, "/"+testCollection+"test.txt");
 
-		for(final Element element : (List<Element>)response.getChildren()) {
+		for(final Element element : response.getChildren()) {
 			if(!element.getName().equals("propstat")) {
 				continue;
 			}
@@ -179,7 +179,7 @@ public class PropertiesWriterTest extends TestCase {
 
 		assertHref(response, "/"+testCollection+"test.txt");
 
-		for(final Element element : (List<Element>)response.getChildren()) {
+		for(final Element element : response.getChildren()) {
 			if(!element.getName().equals("propstat")) {
 				continue;
 			}
@@ -206,7 +206,7 @@ public class PropertiesWriterTest extends TestCase {
 
 		assertHref(response, "/"+testCollection+"test.txt");
 
-		for(final Element element : (List<Element>)response.getChildren()) {
+		for(final Element element : response.getChildren()) {
 			if(!element.getName().equals("propstat")) {
 				continue;
 			}
@@ -225,7 +225,7 @@ public class PropertiesWriterTest extends TestCase {
 
 		assertHref(response, "/"+testCollection+"test.txt");
 
-		for(final Element element : (List<Element>)response.getChildren()) {
+		for(final Element element : response.getChildren()) {
 			if(!element.getName().equals("propstat")) {
 				continue;
 			}
@@ -255,7 +255,7 @@ public class PropertiesWriterTest extends TestCase {
 
 		int count = 0;
 		int status = 0;
-		for(final Element element : (List<Element>)response.getChildren()) {
+		for(final Element element : response.getChildren()) {
 			if(!element.getName().equals("propstat")) {
 				continue;
 			}

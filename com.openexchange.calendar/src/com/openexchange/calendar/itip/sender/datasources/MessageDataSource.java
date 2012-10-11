@@ -69,7 +69,7 @@ import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
  */
 public final class MessageDataSource implements DataSource {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(MessageDataSource.class));
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(MessageDataSource.class));
 
     private static final int DEFAULT_BUF_SIZE = 0x1000;
 
@@ -147,6 +147,7 @@ public final class MessageDataSource implements DataSource {
         this.contentType = ct.toString();
     }
 
+    @Override
     public InputStream getInputStream() throws IOException {
         if (data == null) {
             throw new IOException("no data");
@@ -157,14 +158,17 @@ public final class MessageDataSource implements DataSource {
     /**
      * Not implemented
      */
+    @Override
     public OutputStream getOutputStream() throws IOException {
         throw new IOException(this.getClass().getName() + ".getOutputStream() isn't implemented");
     }
 
+    @Override
     public String getContentType() {
         return contentType;
     }
 
+    @Override
     public String getName() {
         return name;
     }

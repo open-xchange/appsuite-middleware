@@ -56,7 +56,7 @@ import net.fortuna.ical4j.model.TimeZoneRegistryFactory;
 import net.fortuna.ical4j.util.TimeZones;
 import net.fortuna.ical4j.zoneinfo.outlook.OutlookTimeZoneRegistryFactory;
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import com.openexchange.log.LogFactory;
 import com.openexchange.data.conversion.ical.ZoneInfo;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.calendar.CalendarCollectionService;
@@ -73,7 +73,7 @@ import com.openexchange.groupware.container.CalendarObject;
 public final class EmitterTools {
 
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(EmitterTools.class));
-    private static CalendarCollectionService calendarCollection;
+    private static volatile CalendarCollectionService calendarCollection;
 
     private final TimeZoneRegistry registry;
 
@@ -176,10 +176,11 @@ public final class EmitterTools {
     public static java.util.Date calculateExactTime(final CalendarDataObject appointment, final java.util.Date exception) {
         java.util.Date retval = exception;
         try {
-            final RecurringResultsInterface rrs = calendarCollection.calculateRecurring(
+            final CalendarCollectionService service = calendarCollection;
+            final RecurringResultsInterface rrs = service.calculateRecurring(
                 appointment,
-                calendarCollection.normalizeLong(exception.getTime() - Constants.MILLI_WEEK),
-                calendarCollection.normalizeLong(exception.getTime() + Constants.MILLI_WEEK),
+                service.normalizeLong(exception.getTime() - Constants.MILLI_WEEK),
+                service.normalizeLong(exception.getTime() + Constants.MILLI_WEEK),
                 0,
                 CalendarCollectionService.MAX_OCCURRENCESE,
                 true);

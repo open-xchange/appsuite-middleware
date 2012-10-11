@@ -53,7 +53,8 @@ import com.openexchange.webdav.protocol.WebdavProtocolException;
 
 public class WebdavTraceAction extends AbstractAction{
 
-	public void perform(final WebdavRequest req, final WebdavResponse res) throws WebdavProtocolException {
+	@Override
+    public void perform(final WebdavRequest req, final WebdavResponse res) throws WebdavProtocolException {
 		for(final String header : req.getHeaderNames()) {
 			res.setHeader(header, req.getHeader(header));
 		}

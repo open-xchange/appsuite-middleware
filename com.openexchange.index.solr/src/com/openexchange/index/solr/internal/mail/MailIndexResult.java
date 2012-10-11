@@ -50,7 +50,9 @@
 package com.openexchange.index.solr.internal.mail;
 
 import java.util.List;
+import java.util.Map;
 import com.openexchange.index.IndexDocument;
+import com.openexchange.index.IndexField;
 import com.openexchange.index.IndexResult;
 import com.openexchange.mail.dataobjects.MailMessage;
 
@@ -61,15 +63,17 @@ import com.openexchange.mail.dataobjects.MailMessage;
  */
 public final class MailIndexResult implements IndexResult<MailMessage> {
 
-    private long numFound;
+    private int numFound;
 
     private List<IndexDocument<MailMessage>> mails;
+
+    private Map<IndexField, Map<String, Long>> facetCounts;
 
     /**
      * Initializes a new {@link MailIndexResult}.
      */
     public MailIndexResult() {
-        this(0L);
+        this(0);
     }
 
     /**
@@ -77,13 +81,13 @@ public final class MailIndexResult implements IndexResult<MailMessage> {
      * 
      * @param numFound The <code>numFound</code> to set
      */
-    public MailIndexResult(final long numFound) {
+    public MailIndexResult(final int numFound) {
         super();
         this.numFound = numFound;
     }
 
     @Override
-    public long getNumFound() {
+    public int getNumFound() {
         return numFound;
     }
 
@@ -92,7 +96,7 @@ public final class MailIndexResult implements IndexResult<MailMessage> {
      * 
      * @param numFound The <code>numFound</code> to set
      */
-    public void setNumFound(final long numFound) {
+    public void setNumFound(final int numFound) {
         this.numFound = numFound;
     }
 
@@ -108,6 +112,20 @@ public final class MailIndexResult implements IndexResult<MailMessage> {
      */
     public void setResults(final List<IndexDocument<MailMessage>> mails) {
         this.mails = mails;
+    }
+
+    @Override
+    public Map<IndexField, Map<String, Long>> getFacetCounts() {
+        return facetCounts;
+    }
+    
+    /**
+     * Sets the facet counts
+     *
+     * @param facetCounts The facet counts to set
+     */
+    public void setFacetCounts(final Map<IndexField, Map<String, Long>> facetCounts) {
+        this.facetCounts = facetCounts;
     }
 
 }

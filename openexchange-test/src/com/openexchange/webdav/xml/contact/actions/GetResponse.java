@@ -49,7 +49,7 @@
 
 package com.openexchange.webdav.xml.contact.actions;
 
-import org.jdom.Document;
+import org.jdom2.Document;
 import com.openexchange.webdav.xml.framework.AbstractWebDAVResponse;
 import com.openexchange.webdav.xml.types.Response;
 

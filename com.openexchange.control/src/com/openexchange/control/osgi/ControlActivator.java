@@ -68,7 +68,7 @@ import com.openexchange.osgi.HousekeepingActivator;
 public final class ControlActivator extends HousekeepingActivator {
 
     private static final org.apache.commons.logging.Log LOG =
-        com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(ControlActivator.class));
+        com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(ControlActivator.class));
 
     private Thread shutdownHookThread;
 

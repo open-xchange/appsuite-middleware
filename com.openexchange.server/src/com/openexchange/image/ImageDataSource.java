@@ -49,6 +49,7 @@
 
 package com.openexchange.image;
 
+import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.conversion.DataArguments;
 import com.openexchange.conversion.DataSource;
 import com.openexchange.exception.OXException;
@@ -64,7 +65,7 @@ public interface ImageDataSource extends DataSource {
     /**
      * The image servlet's alias
      */
-    public static final String ALIAS = "ajax/image";
+    public static final String ALIAS_APPENDIX = "image";
 
     public static final long SECOND_IN_MILLIS = 1000;
 
@@ -135,5 +136,13 @@ public interface ImageDataSource extends DataSource {
      * @throws OXException If ETag cannot be returned
      */
     String getETag(ImageLocation imageLocation, Session session) throws OXException;
+
+    /**
+     * Parses specified AJAXRequestData to its image location.
+     * 
+     * @param requestData The AJAXRequestData to parse
+     * @return The resulting image location
+     */
+    ImageLocation parseRequest(AJAXRequestData requestData);
 
 }

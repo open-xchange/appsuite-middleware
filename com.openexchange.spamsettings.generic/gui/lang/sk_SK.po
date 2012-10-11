@@ -1,0 +1,20 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: NAME\n"
+"POT-Creation-Date: 2011-05-04 12:37+0200\n"
+"PO-Revision-Date: 2011-06-06 16:41+0100\n"
+"Language-Team: NAME <EMAIL>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=3; plural=(n==1) ? 0 : (n>=2 && n<=4) ? 1 : 2;\n"
+
+msgid "Spam settings"
+msgstr "Nastavenia Spamu"
+
+msgid "Change spam settings"
+msgstr "Zmeniť nastavenia Spamu"
+
+msgid "Modify your spam configuration."
+msgstr "Zmeňte svoje nastavenia Spamu."
+

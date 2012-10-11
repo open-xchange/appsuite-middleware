@@ -55,7 +55,7 @@ import java.util.HashSet;
 import java.util.Locale;
 import java.util.Set;
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import com.openexchange.log.LogFactory;
 import com.openexchange.ajax.container.IFileHolder;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
@@ -74,9 +74,10 @@ import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
+
 /**
  * {@link AbstractPreviewResultConverter}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 abstract class AbstractPreviewResultConverter implements ResultConverter {
@@ -111,9 +112,7 @@ abstract class AbstractPreviewResultConverter implements ResultConverter {
         {
             final Object resultObject = result.getResultObject();
             if (!(resultObject instanceof IFileHolder)) {
-                throw AjaxExceptionCodes.UNEXPECTED_RESULT.create(
-                    IFileHolder.class.getSimpleName(),
-                    null == resultObject ? "null" : resultObject.getClass().getSimpleName());
+                throw AjaxExceptionCodes.UNEXPECTED_RESULT.create(IFileHolder.class.getSimpleName(), null == resultObject ? "null" : resultObject.getClass().getSimpleName());
             }
             fileHolder = (IFileHolder) resultObject;
         }
@@ -130,33 +129,28 @@ abstract class AbstractPreviewResultConverter implements ResultConverter {
                 dataProperties.put(DataProperties.PROPERTY_DISPOSITION, fileHolder.getDisposition());
                 dataProperties.put(DataProperties.PROPERTY_NAME, fileHolder.getName());
                 dataProperties.put(DataProperties.PROPERTY_SIZE, Long.toString(fileHolder.getLength()));
-
+                
                 int pages = -1;
                 if (requestData.containsParameter("pages")) {
                     pages = requestData.getIntParameter("pages");
                 }
-                previewDocument =
-                    previewService.getPreviewFor(
-                        new SimpleData<InputStream>(fileHolder.getStream(), dataProperties),
-                        getOutput(),
-                        session,
-                        pages);
+                previewDocument = previewService.getPreviewFor(new SimpleData<InputStream>(fileHolder.getStream(), dataProperties), getOutput(), session, pages);
 
             }
             if (requestData.getIntParameter("save") == 1) {
                 // TODO:
-                // /*-
-                // * Preview document should be saved.
-                // * We set the request format to file and return a FileHolder
-                // * containing the preview document.
-                // */
-                // requestData.setFormat("file");
-                // final byte[] documentBytes = previewDocument.getContent().getBytes();
-                // final InputStream is = new ByteArrayInputStream(documentBytes);
-                // final String contentType = previewDocument.getMetaData().get("content-type");
-                // final String fileName = previewDocument.getMetaData().get("resourcename");
-                // final FileHolder responseFileHolder = new FileHolder(is, documentBytes.length, contentType, fileName);
-                // result.setResultObject(responseFileHolder, "file");
+//                /*-
+//                 * Preview document should be saved.
+//                 * We set the request format to file and return a FileHolder
+//                 * containing the preview document.
+//                 */
+//                requestData.setFormat("file");
+//                final byte[] documentBytes = previewDocument.getContent().getBytes();
+//                final InputStream is = new ByteArrayInputStream(documentBytes);
+//                final String contentType = previewDocument.getMetaData().get("content-type");
+//                final String fileName = previewDocument.getMetaData().get("resourcename");
+//                final FileHolder responseFileHolder = new FileHolder(is, documentBytes.length, contentType, fileName);
+//                result.setResultObject(responseFileHolder, "file");
             } else {
                 result.setResultObject(previewDocument, getOutputFormat());
             }
@@ -231,7 +225,7 @@ abstract class AbstractPreviewResultConverter implements ResultConverter {
 
     /**
      * Gets the desired output format.
-     * 
+     *
      * @return The output format
      */
     public abstract PreviewOutput getOutput();

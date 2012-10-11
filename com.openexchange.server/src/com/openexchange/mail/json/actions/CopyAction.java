@@ -51,10 +51,9 @@ package com.openexchange.mail.json.actions;
 
 import org.json.JSONException;
 import org.json.JSONObject;
-import com.openexchange.ajax.Mail;
+import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.fields.DataFields;
 import com.openexchange.ajax.fields.FolderChildFields;
-import com.openexchange.ajax.fields.FolderFields;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.documentation.RequestMethod;
 import com.openexchange.documentation.annotations.Action;
@@ -94,9 +93,9 @@ public final class CopyAction extends AbstractMailAction {
             /*
              * Read in parameters
              */
-            final String uid = req.checkParameter(Mail.PARAMETER_ID);
-            final String sourceFolder = req.checkParameter(Mail.PARAMETER_FOLDERID);
-            final String destFolder = ((JSONObject) req.getRequest().getData()).getString(FolderFields.FOLDER_ID);
+            final String uid = req.checkParameter(AJAXServlet.PARAMETER_ID);
+            final String sourceFolder = req.checkParameter(AJAXServlet.PARAMETER_FOLDERID);
+            final String destFolder = ((JSONObject) req.getRequest().getData()).getString(FolderChildFields.FOLDER_ID);
             /*
              * Get mail interface
              */

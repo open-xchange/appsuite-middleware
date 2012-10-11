@@ -78,7 +78,7 @@ import com.openexchange.user.UserService;
  */
 public final class CyrusEntity2ACL extends Entity2ACL {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(CyrusEntity2ACL.class));
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(CyrusEntity2ACL.class));
 
     private static final CyrusEntity2ACL INSTANCE = new CyrusEntity2ACL();
 

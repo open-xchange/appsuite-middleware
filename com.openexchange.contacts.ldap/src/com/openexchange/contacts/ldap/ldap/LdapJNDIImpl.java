@@ -70,7 +70,8 @@ import javax.naming.ldap.PagedResultsControl;
 import javax.naming.ldap.PagedResultsResponseControl;
 import javax.naming.ldap.SortControl;
 import javax.naming.ldap.SortKey;
-import com.openexchange.contacts.ldap.contacts.LdapContactInterface.SortInfo;
+
+import com.openexchange.contacts.ldap.contacts.SortInfo;
 import com.openexchange.contacts.ldap.exceptions.LdapExceptionCode;
 import com.openexchange.contacts.ldap.property.FolderProperties;
 import com.openexchange.contacts.ldap.property.FolderProperties.DerefAliases;
@@ -120,7 +121,7 @@ public class LdapJNDIImpl implements LdapInterface {
         }
     }
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(LdapJNDIImpl.class));
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(LdapJNDIImpl.class));
 
     private final FolderProperties folderprop;
 

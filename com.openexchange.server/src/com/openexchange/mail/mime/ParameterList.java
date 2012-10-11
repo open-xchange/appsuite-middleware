@@ -78,7 +78,7 @@ public final class ParameterList implements Cloneable, Serializable, Comparable<
      */
     private static final long serialVersionUID = 1085330725813918879L;
 
-    private static final transient org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(ParameterList.class));
+    private static final transient org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(ParameterList.class));
 
     /**
      * The regular expression to parse parameters
@@ -92,7 +92,7 @@ public final class ParameterList implements Cloneable, Serializable, Comparable<
     private static final Pattern PATTERN_PARAM_CORRECT;
 
     static {
-        final String paramNameRegex = "([\\p{ASCII}&&[^=\"\\s;]]+)";
+        final String paramNameRegex = "([\\p{L}\\p{ASCII}&&[^=\"\\s;]]+)";
         final String tokenRegex = "(?:[^\"][\\S&&[^\\s,;:\\\\\"/\\[\\]?()<>@]]*)";
         final String quotedStringRegex = "(?:\"(?:(?:\\\\\\\")|[^\"])+?\")"; // Grab '\"' char sequence or any non-quote character
         PATTERN_PARAM_LIST =
@@ -224,10 +224,17 @@ public final class ParameterList implements Cloneable, Serializable, Comparable<
             int pos = parameterList.indexOf(';');
             while (pos >= 0) {
                 final int delim = parameterList.indexOf('=', pos);
-                final String name = parameterList.substring(pos + 1, delim).trim();
-                pos = parameterList.indexOf(';', pos + 1);
-                final String value = pos < 0 ? parameterList.substring(delim + 1) : parameterList.substring(delim + 1, pos);
-                parseParameter(name.toLowerCase(Locale.ENGLISH), value);
+                if (delim < 0) {
+                    final int pos2 = parameterList.indexOf(';', pos + 1);
+                    final String name = pos2 < 0 ? parameterList.substring(pos + 1).trim() : parameterList.substring(pos + 1, pos2).trim();
+                    parseParameter(name.toLowerCase(Locale.ENGLISH), "");
+                    pos = pos2;
+                } else {
+                    final String name = parameterList.substring(pos + 1, delim).trim();
+                    pos = parameterList.indexOf(';', pos + 1);
+                    final String value = pos < 0 ? parameterList.substring(delim + 1) : parameterList.substring(delim + 1, pos);
+                    parseParameter(name.toLowerCase(Locale.ENGLISH), value);
+                }
             }
         }
     }
@@ -517,7 +524,7 @@ public final class ParameterList implements Cloneable, Serializable, Comparable<
      */
     private static final class Parameter implements Cloneable, Serializable, Comparable<Parameter> {
 
-        private static final transient org.apache.commons.logging.Log LOG1 = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(Parameter.class));
+        private static final transient org.apache.commons.logging.Log LOG1 = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(Parameter.class));
 
         private static final long serialVersionUID = 7978948703870567515L;
 

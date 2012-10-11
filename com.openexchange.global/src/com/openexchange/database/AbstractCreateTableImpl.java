@@ -51,8 +51,12 @@ package com.openexchange.database;
 
 import static com.openexchange.database.Databases.closeSQLStuff;
 import java.sql.Connection;
+import java.sql.DatabaseMetaData;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import com.openexchange.exception.OXException;
 
 /**
@@ -61,6 +65,9 @@ import com.openexchange.exception.OXException;
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
 public abstract class AbstractCreateTableImpl implements CreateTableService {
+
+    private static final org.apache.commons.logging.Log LOG =
+        com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(AbstractCreateTableImpl.class));
 
     /**
      * Initializes a new {@link AbstractCreateTableImpl}.
@@ -75,13 +82,43 @@ public abstract class AbstractCreateTableImpl implements CreateTableService {
         try {
             stmt = con.createStatement();
             for (final String create : getCreateStatements()) {
-                stmt.execute(create);
+                final String tableName = extractTableName(create);
+                if (null != tableName && tableExists(con, tableName)) {
+                    LOG.info("A table with name \"" + tableName + "\" already exists. Aborting table creation.");
+                } else {
+                    stmt.execute(create);
+                }
             }
         } catch (final SQLException e) {
             throw DBPoolingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
             closeSQLStuff(stmt);
         }
+    }
+
+    private static final Pattern PATTERN_CREATE_TABLE = Pattern.compile("CREATE +TABLE +`?(\\w+)`? +\\(");
+
+    private static String extractTableName(final String create) {
+        final Matcher m = PATTERN_CREATE_TABLE.matcher(create);
+        if (m.find()) {
+            return m.group(1);
+        }
+        return null;
+    }
+
+    private static final String TABLE = "TABLE";
+
+    private static final boolean tableExists(final Connection con, final String table) throws SQLException {
+        final DatabaseMetaData metaData = con.getMetaData();
+        ResultSet rs = null;
+        boolean retval = false;
+        try {
+            rs = metaData.getTables(null, null, table, new String[] { TABLE });
+            retval = (rs.next() && rs.getString("TABLE_NAME").equalsIgnoreCase(table));
+        } finally {
+            closeSQLStuff(rs);
+        }
+        return retval;
     }
 
     /**

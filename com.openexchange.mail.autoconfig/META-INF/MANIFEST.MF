@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Autoconfig Bundle
 Bundle-SymbolicName: com.openexchange.mail.autoconfig
-Bundle-Version: 6.21.0
+Bundle-Version: 6.22.0
 Bundle-Activator: com.openexchange.mail.autoconfig.osgi.Activator
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
@@ -12,6 +12,7 @@ Import-Package: com.openexchange.config.cascade,
  com.openexchange.groupware.contexts,
  com.openexchange.groupware.ldap,
  com.openexchange.i18n,
+ com.openexchange.log,
  com.openexchange.mail.mime,
  com.openexchange.osgi,
  com.openexchange.server,
@@ -20,13 +21,21 @@ Import-Package: com.openexchange.config.cascade,
  com.openexchange.tools.ssl,
  javax.mail,
  javax.mail.internet,
+ javax.net,
+ javax.net.ssl,
  org.apache.commons.httpclient,
  org.apache.commons.httpclient.methods,
  org.apache.commons.httpclient.params,
  org.apache.commons.httpclient.protocol,
  org.apache.commons.logging,
- org.osgi.framework
+ org.kxml2.io,
+ org.kxml2.kdom,
+ org.kxml2.wap,
+ org.kxml2.wap.syncml,
+ org.kxml2.wap.wml,
+ org.kxml2.wap.wv,
+ org.osgi.framework,
+ org.xmlpull.v1
 Bundle-ActivationPolicy: lazy
-Bundle-ClassPath: .,
- lib/kxml.jar
+Bundle-ClassPath: .
 Export-Package: com.openexchange.mail.autoconfig

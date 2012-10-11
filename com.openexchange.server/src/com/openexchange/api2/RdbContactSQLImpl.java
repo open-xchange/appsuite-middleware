@@ -74,7 +74,7 @@ import java.util.Locale;
 import java.util.Set;
 import java.util.UUID;
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import com.openexchange.log.LogFactory;
 import com.openexchange.ajax.parser.ContactSearchtermSqlConverter;
 import com.openexchange.contact.LdapServer;
 import com.openexchange.database.provider.SimpleDBProvider;
@@ -100,7 +100,9 @@ import com.openexchange.groupware.contact.helpers.ContactSwitcherForTimestamp;
 import com.openexchange.groupware.contact.helpers.SpecialAlphanumSortContactComparator;
 import com.openexchange.groupware.contact.helpers.UseCountComparator;
 import com.openexchange.groupware.contact.sqlinjectors.SQLInjector;
+import com.openexchange.groupware.container.CommonObject;
 import com.openexchange.groupware.container.Contact;
+import com.openexchange.groupware.container.DataObject;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
@@ -1081,12 +1083,12 @@ public class RdbContactSQLImpl implements ContactSQLInterface, OverridingContact
                 if (!Arrays.contains(cols, Contact.IMAGE1) || !tmp.contains(imageId)) {
                     tmp.add(imageId);
                 }
-            } else if (Contact.LAST_MODIFIED_OF_NEWEST_ATTACHMENT == col) {
+            } else if (CommonObject.LAST_MODIFIED_OF_NEWEST_ATTACHMENT == col) {
                 tmp.add(col);
             } else if (Contact.CONTACT_NUMBER_OF_LINKS == col) {
-                tmp.add(Contact.NUMBER_OF_LINKS);
-            } else if (Contact.LAST_MODIFIED_UTC == col) {
-                tmp.add(Contact.LAST_MODIFIED);
+                tmp.add(CommonObject.NUMBER_OF_LINKS);
+            } else if (DataObject.LAST_MODIFIED_UTC == col) {
+                tmp.add(DataObject.LAST_MODIFIED);
             } else {
                 LOG.warn("UNKNOWN FIELD -> " + col);
             }
@@ -1192,7 +1194,7 @@ public class RdbContactSQLImpl implements ContactSQLInterface, OverridingContact
             if (check && !performSecurityReadCheck(co.getParentFolderID(), co.getCreatedBy(), userId, session, con, ctx)) {
                 throw ContactExceptionCodes.NO_ACCESS_PERMISSION.create(I(co.getParentFolderID()), I(ctx.getContextId()), I(userId));
             }
-            if (Arrays.contains(cols, Contact.LAST_MODIFIED_OF_NEWEST_ATTACHMENT)) {
+            if (Arrays.contains(cols, CommonObject.LAST_MODIFIED_OF_NEWEST_ATTACHMENT)) {
                 final Date creationDate = Attachments.getInstance(new SimpleDBProvider(con, null)).getNewestCreationDate(
                     ctx,
                     Types.CONTACT,

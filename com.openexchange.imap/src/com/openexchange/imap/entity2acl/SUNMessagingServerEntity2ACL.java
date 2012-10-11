@@ -88,7 +88,7 @@ import com.openexchange.user.UserService;
  */
 public class SUNMessagingServerEntity2ACL extends Entity2ACL {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(SUNMessagingServerEntity2ACL.class));
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(SUNMessagingServerEntity2ACL.class));
 
     private static final SUNMessagingServerEntity2ACL INSTANCE = new SUNMessagingServerEntity2ACL();
 

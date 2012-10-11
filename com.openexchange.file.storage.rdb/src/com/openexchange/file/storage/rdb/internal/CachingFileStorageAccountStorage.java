@@ -64,8 +64,8 @@ import com.openexchange.caching.dynamic.OXObjectFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageAccount;
 import com.openexchange.file.storage.FileStorageService;
-import com.openexchange.file.storage.rdb.services.FileStorageRdbServiceRegistry;
-import com.openexchange.osgi.ServiceRegistry;
+import com.openexchange.file.storage.rdb.Services;
+import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 
 /**
@@ -162,7 +162,7 @@ public final class CachingFileStorageAccountStorage implements FileStorageAccoun
     /**
      * The service registry.
      */
-    private final ServiceRegistry serviceRegistry;
+    private final ServiceLookup serviceRegistry;
 
     /**
      * Initializes a new {@link CachingFileStorageAccountStorage}.
@@ -171,7 +171,20 @@ public final class CachingFileStorageAccountStorage implements FileStorageAccoun
         super();
         delegatee = RdbFileStorageAccountStorage.getInstance();
         cacheLock = new ReentrantLock(true);
-        serviceRegistry = FileStorageRdbServiceRegistry.getServiceRegistry();
+        serviceRegistry = Services.getServices();
+    }
+ 
+    /**
+     * Invalidates specified account.
+     *
+     * @param serviceId The service identifier
+     * @param id The account identifier
+     * @param user The user identifier
+     * @param contextId The context identifier
+     * @throws OXException If invalidation fails
+     */
+    public void invalidate(final String serviceId, final int id, final int user, final int contextId) throws OXException {
+        invalidateFileStorageAccount(serviceId, id, user, contextId);
     }
 
     private void invalidateFileStorageAccount(final String serviceId, final int id, final int user, final int cid) throws OXException {
@@ -180,6 +193,18 @@ public final class CachingFileStorageAccountStorage implements FileStorageAccoun
             final Cache cache = cacheService.getCache(REGION_NAME);
             cache.remove(newCacheKey(cacheService, serviceId, id, user, cid));
         }
+    }
+
+    /**
+     * Gets the first account matching specified account identifier.
+     * 
+     * @param accountId The account identifier
+     * @param session The session
+     * @return The matching account or <code>null</code>
+     * @throws OXException If look-up fails
+     */
+    public FileStorageAccount getAccount(final int accountId, final Session session) throws OXException {
+        return delegatee.getAccount(accountId, session);
     }
 
     @Override
@@ -199,12 +224,8 @@ public final class CachingFileStorageAccountStorage implements FileStorageAccoun
         if (cacheService == null) {
             return delegatee.getAccount(serviceId, id, session);
         }
-        try {
-            final OXObjectFactory<FileStorageAccount> factory = new FileStorageAccountFactory(serviceId, id, delegatee, cacheService, session, cacheLock);
-            return new FileStorageAccountReloader(factory, REGION_NAME);
-        } catch (final OXException e) {
-            throw e;
-        }
+        final OXObjectFactory<FileStorageAccount> factory = new FileStorageAccountFactory(serviceId, id, delegatee, cacheService, session, cacheLock);
+        return new FileStorageAccountReloader(factory, REGION_NAME);
     }
 
     @Override

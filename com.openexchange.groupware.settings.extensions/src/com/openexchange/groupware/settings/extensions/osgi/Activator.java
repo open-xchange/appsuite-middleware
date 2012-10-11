@@ -52,7 +52,6 @@ package com.openexchange.groupware.settings.extensions.osgi;
 import java.util.List;
 import java.util.Map;
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -71,6 +70,7 @@ import com.openexchange.groupware.settings.PreferencesItemService;
 import com.openexchange.groupware.settings.Setting;
 import com.openexchange.groupware.settings.extensions.ServicePublisher;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
+import com.openexchange.log.LogFactory;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.session.Session;
 import com.openexchange.tools.strings.StringParser;
@@ -80,15 +80,15 @@ import com.openexchange.tools.strings.StringParser;
  */
 public class Activator extends HousekeepingActivator {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(Activator.class));
+    static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(Activator.class));
 
     private static final String PREFERENCE_PATH = "preferencePath";
 
     private static final String METADATA_PREFIX = "meta";
 
-    private ServicePublisher services;
+    private ServicePublisher servicePublisher;
 
-    private ServiceTracker serviceTracker;
+    private ServiceTracker<ConfigViewFactory,ConfigViewFactory> serviceTracker;
 
     /**
      * Initializes a new {@link Activator}.
@@ -104,7 +104,7 @@ public class Activator extends HousekeepingActivator {
 
     @Override
     protected void startBundle() throws Exception {
-        services = new OSGiServicePublisher(context);
+        servicePublisher = new OSGiServicePublisher(context);
         registerListenerForConfigurationService();
     }
 
@@ -112,7 +112,7 @@ public class Activator extends HousekeepingActivator {
     protected void stopBundle() throws Exception {
         super.stopBundle();
         unregisterListenerForConfigurationService();
-        services.removeAllServices();
+        servicePublisher.removeAllServices();
     }
 
     public void handleConfigurationUpdate(final ConfigViewFactory viewFactory) {
@@ -191,7 +191,7 @@ public class Activator extends HousekeepingActivator {
                         try {
                             final String finalScope = property.get("final");
                             final String isProtected = property.get("protected");
-                            return (finalScope == null || finalScope.equals("user")) && (isProtected == null || ! property.get("protected", boolean.class));
+                            return (finalScope == null || finalScope.equals("user")) && (isProtected == null || ! property.get("protected", boolean.class).booleanValue());
                         } catch (final OXException x) {
                             LOG.error(x.getMessage(), x);
                             return false;
@@ -201,9 +201,9 @@ public class Activator extends HousekeepingActivator {
                     @Override
                     public void writeValue(final Session session, final Context ctx, final User user, final Setting setting) throws OXException {
                         Object value = setting.getSingleValue();
-                        if(value == null) {
+                        if (value == null) {
                             final Object[] multiValue = setting.getMultiValue();
-                            if(multiValue != null) {
+                            if (multiValue != null) {
 
                                 final JSONArray arr = new JSONArray();
                                 for (final Object o : multiValue) {
@@ -216,15 +216,14 @@ public class Activator extends HousekeepingActivator {
                         }
                         try {
                             final String oldValue = viewFactory.getView(user.getId(), ctx.getContextId()).get(propertyName, String.class);
-                        if(value != null) {
+                            if (value != null) {
                                 // Clients have a habit of dumping the config back at us, so we only save differing values.
-                                if(!value.equals(oldValue)) {
+                                if (!value.equals(oldValue)) {
                                     viewFactory.getView(user.getId(), ctx.getContextId()).set("user", propertyName, value);
                                 }
 
-                        } else {
-
-                        }} catch (final OXException e) {
+                            }
+                        } catch (final OXException e) {
                             throw new OXException(e);
                         }
 
@@ -235,7 +234,7 @@ public class Activator extends HousekeepingActivator {
 
         };
 
-        services.publishService(PreferencesItemService.class, prefItem);
+        servicePublisher.publishService(PreferencesItemService.class, prefItem);
 
         // And let's publish the metadata as well
         final List<String> metadataNames = property.getMetadataNames();
@@ -300,7 +299,7 @@ public class Activator extends HousekeepingActivator {
 
             };
 
-            services.publishService(PreferencesItemService.class, metadataItem);
+            servicePublisher.publishService(PreferencesItemService.class, metadataItem);
         }
 
         // Lastly, let's publish configurability.
@@ -330,8 +329,8 @@ public class Activator extends HousekeepingActivator {
                     public void getValue(final Session session, final Context ctx, final User user, final UserConfiguration userConfig, final Setting setting) throws OXException {
                         final String finalScope = property.get("final");
                         final String isProtected = property.get("protected");
-                        final boolean writable = (finalScope == null || finalScope.equals("user")) && (isProtected == null || ! property.get("protected", boolean.class));
-                        setting.setSingleValue(writable);
+                        final boolean writable = (finalScope == null || finalScope.equals("user")) && (isProtected == null || ! property.get("protected", boolean.class).booleanValue());
+                        setting.setSingleValue(Boolean.valueOf(writable));
                     }
 
                     @Override
@@ -354,7 +353,7 @@ public class Activator extends HousekeepingActivator {
 
         };
 
-        services.publishService(PreferencesItemService.class, configurableItem);
+        servicePublisher.publishService(PreferencesItemService.class, configurableItem);
     }
 
     private boolean isPreferenceItem(final ComposedConfigProperty<String> property) throws OXException {
@@ -362,7 +361,7 @@ public class Activator extends HousekeepingActivator {
     }
 
     private void registerListenerForConfigurationService() {
-        serviceTracker = new ServiceTracker(context, ConfigViewFactory.class.getName(), new ConfigurationTracker(context, this));
+        serviceTracker = new ServiceTracker<ConfigViewFactory,ConfigViewFactory>(context, ConfigViewFactory.class, new ConfigurationTracker(context, this));
         serviceTracker.open();
     }
 
@@ -371,7 +370,7 @@ public class Activator extends HousekeepingActivator {
     }
 
 
-    private static final class ConfigurationTracker implements ServiceTrackerCustomizer {
+    private static final class ConfigurationTracker implements ServiceTrackerCustomizer<ConfigViewFactory,ConfigViewFactory> {
         private final BundleContext context;
         private final Activator activator;
 
@@ -382,21 +381,19 @@ public class Activator extends HousekeepingActivator {
         }
 
         @Override
-        public Object addingService(final ServiceReference serviceReference) {
-            final Object addedService = context.getService(serviceReference);
-            if(ConfigViewFactory.class.isAssignableFrom(addedService.getClass())) {
-                activator.handleConfigurationUpdate((ConfigViewFactory) addedService);
-            }
+        public ConfigViewFactory addingService(final ServiceReference<ConfigViewFactory> serviceReference) {
+            final ConfigViewFactory addedService = context.getService(serviceReference);
+            activator.handleConfigurationUpdate(addedService);
             return addedService;
         }
 
         @Override
-        public void modifiedService(final ServiceReference serviceReference, final Object o) {
+        public void modifiedService(final ServiceReference<ConfigViewFactory> serviceReference, final ConfigViewFactory o) {
             // IGNORE
         }
 
         @Override
-        public void removedService(final ServiceReference serviceReference, final Object o) {
+        public void removedService(final ServiceReference<ConfigViewFactory> serviceReference, final ConfigViewFactory o) {
             context.ungetService(serviceReference);
         }
     }

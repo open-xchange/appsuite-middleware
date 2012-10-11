@@ -77,21 +77,16 @@ import com.openexchange.user.UserService;
  */
 public final class POP3Activator extends HousekeepingActivator {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(POP3Activator.class));
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(POP3Activator.class));
 
-    private final Dictionary<String, String> dictionary;
-
-    private POP3StorageProviderServiceTrackerCustomizer customizer;
-
-    private MailAccountPOP3StorageProvider builtInProvider;
+    private volatile POP3StorageProviderServiceTrackerCustomizer customizer;
+    private volatile MailAccountPOP3StorageProvider builtInProvider;
 
     /**
      * Initializes a new {@link POP3Activator}
      */
     public POP3Activator() {
         super();
-        dictionary = new Hashtable<String, String>();
-        dictionary.put("protocol", POP3Provider.PROTOCOL_POP3.toString());
     }
 
     @Override
@@ -136,12 +131,16 @@ public final class POP3Activator extends HousekeepingActivator {
                     }
                 }
             }
+            final Dictionary<String, String> dictionary = new Hashtable<String, String>();
+            dictionary.put("protocol", POP3Provider.PROTOCOL_POP3.toString());
             registerService(MailProvider.class, POP3Provider.getInstance(), dictionary);
             /*
              * Add built-in mail account POP3 storage provider
              */
-            customizer = new POP3StorageProviderServiceTrackerCustomizer(context);
-            builtInProvider = new MailAccountPOP3StorageProvider();
+            final POP3StorageProviderServiceTrackerCustomizer customizer = new POP3StorageProviderServiceTrackerCustomizer(context);
+            this.customizer = customizer;
+            final MailAccountPOP3StorageProvider builtInProvider = new MailAccountPOP3StorageProvider();
+            this.builtInProvider = builtInProvider;
             customizer.addPOP3StorageProvider(builtInProvider);
             /*
              * Service tracker for possible POP3 storage provider
@@ -163,10 +162,14 @@ public final class POP3Activator extends HousekeepingActivator {
     public void stopBundle() throws Exception {
         try {
             // Remove built-in provider
-            customizer.removePOP3StorageProvider(builtInProvider);
-            builtInProvider = null;
-            // Customizer shut-down
-            customizer.dropAllRegistrations();
+            final POP3StorageProviderServiceTrackerCustomizer customizer = this.customizer;
+            if (null != customizer) {
+                customizer.removePOP3StorageProvider(builtInProvider);
+                builtInProvider = null;
+                // Customizer shut-down
+                customizer.dropAllRegistrations();
+                this.customizer = null;
+            }
             cleanUp();
             /*
              * Clear service registry

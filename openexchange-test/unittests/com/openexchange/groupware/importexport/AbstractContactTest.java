@@ -49,35 +49,33 @@
 
 package com.openexchange.groupware.importexport;
 
-import com.openexchange.exception.OXException;
 import static com.openexchange.java.Autoboxing.B;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
-
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
-
 import com.openexchange.api2.ContactSQLInterface;
 import com.openexchange.api2.RdbContactSQLImpl;
 import com.openexchange.calendar.CalendarSql;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.Init;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.DataObject;
 import com.openexchange.groupware.container.FolderChildObject;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.contexts.impl.ContextImpl;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
+import com.openexchange.importexport.formats.Format;
+import com.openexchange.importexport.importers.Importer;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.sessiond.impl.SessionObject;
 import com.openexchange.test.AjaxInit;
@@ -485,7 +483,8 @@ public class AbstractContactTest {
     public static User getUserParticipant() throws Exception{
         Init.startServer();
         final UserStorage uStorage = UserStorage.getInstance();
-        final Context ctx = new ContextImpl(1);
+        final Context ctx = ContextStorage.getInstance().getContext(
+            ContextStorage.getInstance().getContextId(AjaxInit.getAJAXProperty("contextName")));
         final int uid = uStorage.getUserId(AjaxInit.getAJAXProperty("user_participant1"), ctx);
         return uStorage.getUser(uid, ctx);
     }

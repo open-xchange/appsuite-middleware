@@ -85,7 +85,7 @@ public final class Utility {
      */
     public static void debugSQL(final PreparedStatement stmt) {
         if (null != stmt) {
-            final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(Utility.class));
+            final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(Utility.class));
             if (LOG.isDebugEnabled()) {
                 final String sql = getSQLString(stmt);
                 LOG.debug(new StringBuilder(sql.length() + 16).append("Failed SQL:\n\t").append(sql).toString());

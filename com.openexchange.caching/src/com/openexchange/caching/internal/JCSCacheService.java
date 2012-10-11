@@ -50,12 +50,12 @@
 package com.openexchange.caching.internal;
 
 import java.io.InputStream;
-import java.io.Serializable;
+import java.util.Properties;
 import org.apache.jcs.JCS;
 import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheExceptionCode;
-import com.openexchange.caching.CacheKey;
 import com.openexchange.caching.CacheService;
+import com.openexchange.caching.DefaultCacheKeyService;
 import com.openexchange.exception.OXException;
 
 /**
@@ -63,7 +63,7 @@ import com.openexchange.exception.OXException;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class JCSCacheService implements CacheService {
+public final class JCSCacheService extends DefaultCacheKeyService implements CacheService {
 
     private static final JCSCacheService SINGLETON = new JCSCacheService();
 
@@ -81,6 +81,16 @@ public final class JCSCacheService implements CacheService {
      */
     private JCSCacheService() {
         super();
+    }
+
+    @Override
+    public boolean isReplicated() {
+        return true;
+    }
+
+    @Override
+    public boolean isDistributed() {
+        return false;
     }
 
     @Override
@@ -131,23 +141,13 @@ public final class JCSCacheService implements CacheService {
     }
 
     @Override
+    public void loadConfiguration(final Properties properties) throws OXException {
+        JCSCacheServiceInit.getInstance().loadConfiguration(properties);
+    }
+
+    @Override
     public void loadDefaultConfiguration() throws OXException {
         JCSCacheServiceInit.getInstance().loadDefaultConfiguration();
-    }
-
-    @Override
-    public CacheKey newCacheKey(final int contextId, final int objectId) {
-        return new CacheKeyImpl(contextId, objectId);
-    }
-
-    @Override
-    public CacheKey newCacheKey(final int contextId, final Serializable obj) {
-        return new CacheKeyImpl(contextId, obj);
-    }
-
-    @Override
-    public CacheKey newCacheKey(final int contextId, final Serializable... objs) {
-        return new CacheKeyImpl(contextId, objs);
     }
 
 }

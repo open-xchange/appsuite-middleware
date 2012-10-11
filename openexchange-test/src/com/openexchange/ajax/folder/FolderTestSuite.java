@@ -95,7 +95,7 @@ public final class FolderTestSuite {
         // Now several single function tests.
         tests.addTestSuite(GetMailInboxTest.class);
         tests.addTestSuite(GetVirtualTest.class);
-        tests.addTestSuite(GetSortedMailFolderTest.class);
+        // tests.addTestSuite(GetSortedMailFolderTest.class);
         tests.addTestSuite(ExemplaryFolderTestManagerTest.class);
 
         // New folder API

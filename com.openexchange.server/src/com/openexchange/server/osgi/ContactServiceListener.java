@@ -64,7 +64,7 @@ import com.openexchange.groupware.contact.ContactInterfaceProviderRegistry;
  */
 public class ContactServiceListener implements ServiceTrackerCustomizer<ContactInterfaceProvider,ContactInterfaceProvider> {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(ContactServiceListener.class));
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(ContactServiceListener.class));
 
     private final BundleContext context;
 

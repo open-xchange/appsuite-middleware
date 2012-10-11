@@ -67,8 +67,8 @@ public final class RFC2616Regex {
         super();
     }
 
-    private static final String tokenCharRegex = "[\\p{ASCII}&&[^\\p{Cntrl}()<>@,;:\\\"/\\[\\]?={}\\p{Blank}]]";
-
+    private static final String tokenCharRegex = "[[\\p{L}\\p{ASCII}]&&[^\\p{Cntrl}()<>@,;:\\\"/\\[\\]?={}\\p{Blank}]]";
+    
     /**
      * Regular expression that satisfies a <i>token</i> as per <a href="http://www.faqs.org/rfcs/rfc2616.html">RFC 2616</a>:
      *
@@ -82,7 +82,7 @@ public final class RFC2616Regex {
      */
     public static final Pattern TOKEN = Pattern.compile(tokenCharRegex + "+"); // At least one token character fits a token
 
-    private static final String qdtextRegex = "[\\p{ASCII}\\p{Blank}&&[^\\p{Cntrl}\"]]*";
+    private static final String qdtextRegex = "[\\p{L}\\p{ASCII}\\p{Blank}&&[^\\p{Cntrl}\"]]*";
 
     /**
      * Regular expression that satisfies a <i>qdtext</i> as per <a href="http://www.faqs.org/rfcs/rfc2616.html">RFC 2616</a>:
@@ -94,7 +94,7 @@ public final class RFC2616Regex {
      */
     public static final Pattern QDTEXT = Pattern.compile(qdtextRegex);
 
-    private static final String quotedPairRegex = "(?:\\\\\\p{ASCII})*";
+    private static final String quotedPairRegex = "(?:\\\\[\\p{L}\\p{ASCII}])*";
 
     /**
      * Regular expression that satisfies a <i>quoted-pair</i> as per <a href="http://www.faqs.org/rfcs/rfc2616.html">RFC 2616</a>:
@@ -106,7 +106,7 @@ public final class RFC2616Regex {
      */
     public static final Pattern QUOTED_PAIR = Pattern.compile(quotedPairRegex);
 
-    private static final String quotedStringRegex = "(?:\"(?:[\\p{ASCII}\\p{Blank}&&[^\\p{Cntrl}\"]]|(?:\\\\\\p{ASCII}))*\")";
+    private static final String quotedStringRegex = "(?:\"(?:[\\p{L}\\p{ASCII}\\p{Blank}&&[^\\p{Cntrl}\"]]|(?:\\\\[\\p{L}\\p{ASCII}]))*\")";
 
     /**
      * Regular expression that satisfies a <code>quoted-string</code> as per <a href="http://www.faqs.org/rfcs/rfc2616.html">RFC 2616</a>:

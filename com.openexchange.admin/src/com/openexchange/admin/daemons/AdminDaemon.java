@@ -49,103 +49,233 @@
 
 package com.openexchange.admin.daemons;
 
-import com.openexchange.admin.daemons.osgi.RMITracker;
-import com.openexchange.admin.exceptions.OXGenericException;
-import com.openexchange.admin.properties.AdminProperties;
-import com.openexchange.admin.rmi.OXAdminCoreInterface;
-import com.openexchange.admin.rmi.OXGroupInterface;
-import com.openexchange.admin.rmi.OXLoginInterface;
-import com.openexchange.admin.rmi.OXResourceInterface;
-import com.openexchange.admin.rmi.OXTaskMgmtInterface;
-import com.openexchange.admin.rmi.OXUserInterface;
-import com.openexchange.admin.rmi.exceptions.StorageException;
-import com.openexchange.admin.rmi.impl.OXAdminCoreImpl;
-import com.openexchange.admin.rmi.impl.OXTaskMgmtImpl;
-
-import java.io.IOException;
-import java.net.InetAddress;
-import java.net.ServerSocket;
-import java.rmi.AccessException;
-import java.rmi.AlreadyBoundException;
-import java.rmi.NotBoundException;
+import java.rmi.Remote;
 import java.rmi.RemoteException;
-import java.rmi.registry.LocateRegistry;
-import java.rmi.registry.Registry;
-import java.rmi.server.RMIServerSocketFactory;
-import java.rmi.server.RMISocketFactory;
-import java.rmi.server.UnicastRemoteObject;
 import java.util.ArrayList;
-
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.regex.Pattern;
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleEvent;
 import org.osgi.framework.BundleListener;
 import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceReference;
-import org.osgi.util.tracker.ServiceTracker;
-
+import org.osgi.framework.ServiceRegistration;
+import com.openexchange.admin.exceptions.OXGenericException;
+import com.openexchange.admin.rmi.exceptions.StorageException;
+import com.openexchange.admin.rmi.impl.OXAdminCoreImpl;
+import com.openexchange.admin.rmi.impl.OXTaskMgmtImpl;
+import com.openexchange.admin.services.AdminServiceRegistry;
 import com.openexchange.admin.tools.AdminCache;
 import com.openexchange.admin.tools.PropertyHandler;
+import com.openexchange.config.ConfigurationService;
+import com.openexchange.log.LogFactory;
 
 public class AdminDaemon {
 
     static final Log LOG = LogFactory.getLog(AdminDaemon.class);
 
     private static PropertyHandler prop = null;
-    private AdminCache cache = null;
-    private static Registry registry = null;
-    /*
-     * Write changes to this list cannot happen at the same time as the BundleListener
-     * delivers events in order and not concurrently. So there's no need to deal with
-     * concurrency here
-     */
-    static ArrayList<Bundle> bundlelist = new ArrayList<Bundle>();
 
-    private static com.openexchange.admin.rmi.impl.OXUser oxuser_v2 = null;
-    private static com.openexchange.admin.rmi.impl.OXGroup oxgrp_v2 = null;
-    private static com.openexchange.admin.rmi.impl.OXResource oxres_v2 = null;
-    private static com.openexchange.admin.rmi.impl.OXLogin oxlogin_v2 = null;
-    private static OXAdminCoreImpl oxadmincore = null;
-    private static OXTaskMgmtImpl oxtaskmgmt = null;
+    private static AdminCache cache = null;
 
-    public class LocalServerFactory implements RMIServerSocketFactory {
+    private static final Set<Pattern> ALLOWED_BUNDLE_NAMES;
 
-        public ServerSocket createServerSocket(final int port) throws IOException {
-            final String hostname_property = ClientAdminThread.cache.getProperties().getProp("BIND_ADDRESS", "localhost");
-            if (hostname_property.equalsIgnoreCase("0")) {
-                if (LOG.isInfoEnabled()){
-                    LOG.info("Admindaemon will listen on all network devices!");
+    static {
+        class RegexHelper {
+            Pattern wildcardPattern(final String wildcard) {
+                final StringBuilder s = new StringBuilder(wildcard.length());
+                s.append('^');
+                final int len = wildcard.length();
+                for (int i = 0; i < len; i++) {
+                    final char c = wildcard.charAt(i);
+                    if (c == '*') {
+                        s.append(".*");
+                    } else if (c == '?') {
+                        s.append(".");
+                    } else if (c == '(' || c == ')' || c == '[' || c == ']' || c == '$' || c == '^' || c == '.' || c == '{' || c == '}' || c == '|' || c == '\\') {
+                        s.append('\\');
+                        s.append(c);
+                    } else {
+                        s.append(c);
+                    }
                 }
-                return new ServerSocket(port, 0, null);
+                s.append('$');
+                return Pattern.compile(s.toString());
             }
-            if (LOG.isInfoEnabled()){
-                LOG.info("Admindaemon will listen on "+hostname_property+"!");
+
+            Pattern literalPattern(final String literal) {
+                return Pattern.compile(Pattern.quote(literal));
             }
-            return new ServerSocket(port, 0, InetAddress.getByName(hostname_property));
         }
+        final RegexHelper regexHelper = new RegexHelper();
+        // Initialize set
+        final Set<Pattern> set = new HashSet<Pattern>(64);
+        set.add(regexHelper.literalPattern("com.openexchange.admin"));
+        set.add(regexHelper.wildcardPattern("com.openexchange.admin.*"));
+        set.add(regexHelper.wildcardPattern("org.osgi.*"));
+        set.add(regexHelper.wildcardPattern("org.eclipse.equinox.*"));
+        set.add(regexHelper.wildcardPattern("org.eclipse.osgi.*"));
+        set.add(regexHelper.wildcardPattern("java.*"));
+        set.add(regexHelper.wildcardPattern("javax.*"));
+        // Others
+        set.add(regexHelper.literalPattern("com.openexchange.caching"));
+        set.add(regexHelper.literalPattern("com.openexchange.calendar"));
+        set.add(regexHelper.literalPattern("com.openexchange.common"));
+        set.add(regexHelper.literalPattern("com.openexchange.config.cascade"));
+        set.add(regexHelper.literalPattern("com.openexchange.configread"));
+        set.add(regexHelper.literalPattern("com.openexchange.control"));
+        set.add(regexHelper.literalPattern("com.openexchange.conversion"));
+        set.add(regexHelper.literalPattern("com.openexchange.crypto"));
+        set.add(regexHelper.literalPattern("com.openexchange.dataretention"));
+        set.add(regexHelper.literalPattern("com.openexchange.datatypes.genericonf.storage"));
+        set.add(regexHelper.literalPattern("com.openexchange.datatypes.genericonf"));
+        set.add(regexHelper.literalPattern("com.openexchange.file.storage.composition"));
+        set.add(regexHelper.literalPattern("com.openexchange.file.storage"));
+        set.add(regexHelper.literalPattern("com.openexchange.global"));
+        set.add(regexHelper.literalPattern("com.openexchange.html"));
+        set.add(regexHelper.literalPattern("com.openexchange.i18n"));
+        set.add(regexHelper.literalPattern("com.openexchange.management"));
+        set.add(regexHelper.literalPattern("com.openexchange.messaging.facebook"));
+        set.add(regexHelper.literalPattern("com.openexchange.messaging.generic"));
+        set.add(regexHelper.literalPattern("com.openexchange.messaging"));
+        set.add(regexHelper.literalPattern("com.openexchange.monitoring"));
+        set.add(regexHelper.literalPattern("com.openexchange.oauth"));
+        set.add(regexHelper.literalPattern("com.openexchange.proxy"));
+        set.add(regexHelper.literalPattern("com.openexchange.publish.basic"));
+        set.add(regexHelper.literalPattern("com.openexchange.publish"));
+        set.add(regexHelper.literalPattern("com.openexchange.push"));
+        set.add(regexHelper.literalPattern("com.openexchange.secret.recovery"));
+        set.add(regexHelper.literalPattern("com.openexchange.secret"));
+        set.add(regexHelper.literalPattern("com.openexchange.server"));
+        set.add(regexHelper.literalPattern("com.openexchange.sql"));
+        set.add(regexHelper.literalPattern("com.openexchange.subscribe"));
+        set.add(regexHelper.literalPattern("com.openexchange.threadpool"));
+        set.add(regexHelper.literalPattern("com.openexchange.tx"));
+        set.add(regexHelper.literalPattern("com.openexchange.user.copy"));
+        set.add(regexHelper.literalPattern("com.openexchange.usm.api"));
+        set.add(regexHelper.literalPattern("com.openexchange.usm.database.ox"));
+        set.add(regexHelper.literalPattern("com.openexchange.usm.journal.impl"));
+        set.add(regexHelper.literalPattern("com.openexchange.usm.journal"));
+        set.add(regexHelper.literalPattern("com.openexchange.usm.util"));
+        set.add(regexHelper.literalPattern("com.openexchange.xerces.sun"));
+        set.add(regexHelper.literalPattern("com.openexchange.xml"));
+        ALLOWED_BUNDLE_NAMES = Collections.unmodifiableSet(set);
     }
 
     /**
-     * This method is used for initialization of the list of current running bundles.
-     * The problem is that the listener itself will not get any events before this
-     * bundle is started, so if any bundles are started beforehand you won't notice
-     * this here. The consequence is that we have to build an initial list on startup
-     *
+     * Checks if specified bundle is contained in list of allowed bundles.
+     * 
+     * @param bundle The bundle to check
+     * @return <code>true</code> if allowed; otherwise <code>false</code>
+     */
+    public static boolean isAllowdBundle(final Bundle bundle) {
+        return isAllowdBundle(bundle.getSymbolicName());
+    }
+
+    /**
+     * Checks if specified symbolic name is contained in list of allowed bundles.
+     * 
+     * @param symbolicName The symbolic name to check
+     * @return <code>true</code> if allowed; otherwise <code>false</code>
+     */
+    public static boolean isAllowdBundle(final String symbolicName) {
+        for (final Pattern p : ALLOWED_BUNDLE_NAMES) {
+            if (p.matcher(symbolicName).matches()) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private final List<ServiceRegistration<Remote>> services = new ArrayList<ServiceRegistration<Remote>>();
+
+    /*
+     * Write changes to this list cannot happen at the same time as the BundleListener delivers events in order and not concurrently. So
+     * there's no need to deal with concurrency here
+     */
+    static List<Bundle> bundlelist = new CopyOnWriteArrayList<Bundle>();
+
+    private static com.openexchange.admin.rmi.impl.OXUser oxuser_v2 = null;
+
+    private static com.openexchange.admin.rmi.impl.OXGroup oxgrp_v2 = null;
+
+    private static com.openexchange.admin.rmi.impl.OXResource oxres_v2 = null;
+
+    private static com.openexchange.admin.rmi.impl.OXLogin oxlogin_v2 = null;
+
+    private static OXAdminCoreImpl oxadmincore = null;
+
+    private static OXTaskMgmtImpl oxtaskmgmt = null;
+
+    /**
+     * Checks if a simple check shall be performed in order to determine if a bundle is needed for admin to work:
+     * <p>
+     * Bundle is <b>not</b> a fragment bundle <small><b>AND</b></small> its state is <code>ACTIVE</code>.
+     * 
+     * @return <code>true</code> if a simple check is sufficient; otherwise <code>false</code>
+     */
+    static boolean checkSimple() {
+        return true;
+    }
+
+    /**
+     * Checks if specified bundle is <b>not</b> a fragment bundle.
+     * 
+     * @param bundle The bundle to check
+     * @return <code>true</code> if specified bundle is <b>not</b> a fragment bundle; else <code>false</code>
+     */
+    public static boolean isNoFragment(final Bundle bundle) {
+        return (null == bundle.getHeaders().get(Constants.FRAGMENT_HOST));
+    }
+
+    /**
+     * Checks if specified bundle is <b>not</b> a fragment bundle <small><b>AND</b></small> its state is <code>ACTIVE</code>.
+     * 
+     * @param bundle The bundle to check
+     * @return <code>true</code> if specified bundle is <b>not</b> a fragment bundle <small><b>AND</b></small> its state is <code>ACTIVE</code>; else <code>false</code>
+     */
+    public static boolean isNoFragmentAndActive(final Bundle bundle) {
+        return (isNoFragment(bundle) && (Bundle.ACTIVE == bundle.getState()));
+    }
+
+    /**
+     * This method is used for initialization of the list of current running bundles. The problem is that the listener itself will not get
+     * any events before this bundle is started, so if any bundles are started beforehand you won't notice this here. The consequence is
+     * that we have to build an initial list on startup
+     * 
      * @param context
      */
-    public void getCurrentBundleStatus(BundleContext context) {
+    public void getCurrentBundleStatus(final BundleContext context) {
+        final boolean debugEnabled = LOG.isDebugEnabled();
         for (final Bundle bundle : context.getBundles()) {
-            if (bundle.getState() == Bundle.ACTIVE) {
-                bundlelist.add(bundle);
-                if (LOG.isInfoEnabled()) {
-                    LOG.info(bundle.getSymbolicName() + " already started before admin.");
+            if (checkSimple()) {
+                if (isNoFragmentAndActive(bundle)) {
+                    bundlelist.add(bundle);
+                    if (debugEnabled) {
+                        LOG.debug(bundle.getSymbolicName() + " already started before admin.");
+                    }
                 }
-            } else if (bundle.getState() == Bundle.RESOLVED && null != bundle.getHeaders().get(Constants.FRAGMENT_HOST)) {
-                bundlelist.add(bundle);
-                if (LOG.isInfoEnabled()) {
-                    LOG.info("fragment " + bundle.getSymbolicName() + " already started before admin.");
+            } else {
+                if (bundle.getState() == Bundle.ACTIVE) {
+                    if (isAllowdBundle(bundle)) {
+                        bundlelist.add(bundle);
+                        if (debugEnabled) {
+                            LOG.debug(bundle.getSymbolicName() + " already started before admin.");
+                        }
+                    }
+                } else if (bundle.getState() == Bundle.RESOLVED && null != bundle.getHeaders().get(Constants.FRAGMENT_HOST)) {
+                    if (isAllowdBundle(bundle)) {
+                        bundlelist.add(bundle);
+                        if (debugEnabled) {
+                            LOG.debug("fragment " + bundle.getSymbolicName() + " already started before admin.");
+                        }
+                    }
                 }
             }
         }
@@ -153,8 +283,10 @@ public class AdminDaemon {
 
     public void registerBundleListener(final BundleContext context) {
         final BundleListener bl = new BundleListener() {
+
+            @Override
             public void bundleChanged(final BundleEvent event) {
-                if (event.getType() == BundleEvent.STARTED) {
+                if (event.getType() == BundleEvent.STARTED && (checkSimple() ? isNoFragment(event.getBundle()) : isAllowdBundle(event.getBundle()))) {
                     bundlelist.add(event.getBundle());
                 } else if (event.getType() == BundleEvent.STOPPED) {
                     bundlelist.remove(event.getBundle());
@@ -165,119 +297,83 @@ public class AdminDaemon {
         context.addBundleListener(bl);
     }
 
-    public void initCache() throws OXGenericException {
-        this.cache = new AdminCache();
-
-        this.cache.initCache();
-        ClientAdminThread.cache = this.cache;
-        prop = this.cache.getProperties();
-        LOG.info("Cache and Pools initialized!");
+    public static void initCache(final ConfigurationService service) throws OXGenericException {
+        if (cache == null) {
+            if (null == service) {
+                throw new OXGenericException("Absent service: " + ConfigurationService.class.getName());
+            }
+            cache = new AdminCache();
+            cache.initCache(service);
+            ClientAdminThread.cache = cache;
+            prop = cache.getProperties();
+            LOG.info("Cache and Pools initialized!");
+        } else if (ClientAdminThread.cache == null) {
+            ClientAdminThread.cache = cache;
+        }
+    }
+    
+    public static AdminCache getCache() throws OXGenericException {
+        if (cache == null) {
+            ConfigurationService service = AdminServiceRegistry.getInstance().getService(ConfigurationService.class);
+            if (null == service) {
+                service = AdminCache.getConfigurationService();
+            }
+            initCache(service);
+        }
+        return cache;
     }
 
-    public void initAccessCombinationsInCache() throws ClassNotFoundException, OXGenericException{
-        this.cache.initAccessCombinations();
+    public void initAccessCombinationsInCache() throws ClassNotFoundException, OXGenericException {
+        AdminDaemon.cache.initAccessCombinations();
     }
 
     public void initRMI(final BundleContext context) {
         try {
-            final int rmi_port = prop.getRmiProp(AdminProperties.RMI.RMI_PORT, 1099);
-            try {
-                // Use SslRMIServerSocketFactory for SSL here
-                registry = LocateRegistry.createRegistry(rmi_port, RMISocketFactory.getDefaultSocketFactory(), new LocalServerFactory());
-            } catch (final RemoteException e) {
-                // if a registry has be already created in this osgi framework
-                // we just need to get it from the port (normally this happens
-                // on restarting
-                registry = LocateRegistry.getRegistry(ClientAdminThread.cache.getProperties().getProp("BIND_ADDRESS", "localhost"), rmi_port);
-            }
-
-            // Now export all NEW Objects
             oxuser_v2 = new com.openexchange.admin.rmi.impl.OXUser(context);
-            final OXUserInterface oxuser_stub_v2 = (OXUserInterface) UnicastRemoteObject.exportObject(oxuser_v2, 0);
-
             oxgrp_v2 = new com.openexchange.admin.rmi.impl.OXGroup(context);
-            final OXGroupInterface oxgrp_stub_v2 = (OXGroupInterface) UnicastRemoteObject.exportObject(oxgrp_v2, 0);
-
             oxres_v2 = new com.openexchange.admin.rmi.impl.OXResource(context);
-            final OXResourceInterface oxres_stub_v2 = (OXResourceInterface) UnicastRemoteObject.exportObject(oxres_v2, 0);
-
             oxlogin_v2 = new com.openexchange.admin.rmi.impl.OXLogin(context);
-            final OXLoginInterface oxlogin_stub_v2 = (OXLoginInterface)UnicastRemoteObject.exportObject(oxlogin_v2, 0);
-
             oxadmincore = new OXAdminCoreImpl(context);
-            final OXAdminCoreInterface oxadmincore_stub = (OXAdminCoreInterface)UnicastRemoteObject.exportObject(oxadmincore, 0);
-
             oxtaskmgmt = new OXTaskMgmtImpl();
-            final OXTaskMgmtInterface oxtaskmgmt_stub = (OXTaskMgmtInterface) UnicastRemoteObject.exportObject(oxtaskmgmt, 0);
-            // END of NEW export
 
-            // bind all NEW Objects to registry
-            registry.bind(OXUserInterface.RMI_NAME, oxuser_stub_v2);
-            registry.bind(OXGroupInterface.RMI_NAME, oxgrp_stub_v2);
-            registry.bind(OXResourceInterface.RMI_NAME, oxres_stub_v2);
-            registry.bind(OXLoginInterface.RMI_NAME, oxlogin_stub_v2);
-            registry.bind(OXAdminCoreInterface.RMI_NAME, oxadmincore_stub);
-            registry.bind(OXTaskMgmtInterface.RMI_NAME, oxtaskmgmt_stub);
-            
+            services.add(context.registerService(Remote.class, oxuser_v2, null));
+            services.add(context.registerService(Remote.class, oxgrp_v2, null));
+            services.add(context.registerService(Remote.class, oxres_v2, null));
+            services.add(context.registerService(Remote.class, oxlogin_v2, null));
+            services.add(context.registerService(Remote.class, oxadmincore, null));
+            services.add(context.registerService(Remote.class, oxtaskmgmt, null));
         } catch (final RemoteException e) {
-            LOG.fatal("Error creating RMI registry!",e);
-            System.exit(1);
-        } catch (final AlreadyBoundException e) {
-            LOG.fatal("One RMI name is already bound!", e);
-            System.exit(1);
+            LOG.fatal("Error creating RMI registry!", e);
         } catch (final StorageException e) {
             LOG.fatal("Error while creating one instance for RMI interface", e);
         }
     }
-    
-    public void unregisterRMI() {
-        try {
-            registry.unbind(OXUserInterface.RMI_NAME);
-            registry.unbind(OXGroupInterface.RMI_NAME);
-            registry.unbind(OXResourceInterface.RMI_NAME);
-            registry.unbind(OXLoginInterface.RMI_NAME);
-            registry.unbind(OXAdminCoreInterface.RMI_NAME);
-            registry.unbind(OXTaskMgmtInterface.RMI_NAME);
-        } catch (final AccessException e) {
-            LOG.error("Error unregistering RMI", e);
-        } catch (final RemoteException e) {
-            LOG.error("Error unregistering RMI", e);
-        } catch (final NotBoundException e) {
-            LOG.error("Error unregistering RMI", e);
-        }
-    }
 
-    public static final Registry getRegistry() {
-        return registry;
+    public void unregisterRMI(BundleContext context) {
+        for (ServiceRegistration<Remote> registration : services) {
+            context.ungetService(registration.getReference());
+        }
     }
 
     public static PropertyHandler getProp() {
         return prop;
     }
 
-    public static final ArrayList<Bundle> getBundlelist() {
+    public static final List<Bundle> getBundlelist() {
         return bundlelist;
     }
 
     /**
-     * Looks for a matching service reference inside all bundles provided
-     * through {@link #getBundlelist()}.
-     *
-     * @param <S>
-     *            Type of the service
-     * @param bundleSymbolicName
-     *            The bundle's symbolic name which offers the service
-     * @param serviceName
-     *            The service's name provided through "<i>name</i>" property
-     * @param context
-     *            The bundle context (on which
-     *            {@link BundleContext#getService(ServiceReference)} is invoked)
-     * @param clazz
-     *            The service's class
+     * Looks for a matching service reference inside all bundles provided through {@link #getBundlelist()}.
+     * 
+     * @param <S> Type of the service
+     * @param bundleSymbolicName The bundle's symbolic name which offers the service
+     * @param serviceName The service's name provided through "<i>name</i>" property
+     * @param context The bundle context (on which {@link BundleContext#getService(ServiceReference)} is invoked)
+     * @param clazz The service's class
      * @return The service if found; otherwise <code>null</code>
      */
-    public static final <S extends Object> S getService(final String bundleSymbolicName, final String serviceName,
-            final BundleContext context, final Class<? extends S> clazz) {
+    public static final <S extends Object> S getService(final String bundleSymbolicName, final String serviceName, final BundleContext context, final Class<? extends S> clazz) {
         for (final Bundle bundle : bundlelist) {
             if (bundle.getState() == Bundle.ACTIVE && bundleSymbolicName.equals(bundle.getSymbolicName())) {
                 final ServiceReference[] servicereferences = bundle.getRegisteredServices();
@@ -292,8 +388,7 @@ public class AdminDaemon {
                             try {
                                 return clazz.cast(obj);
                             } catch (final ClassCastException e) {
-                                LOG.error("Service " + serviceName + "(" + obj.getClass().getName() + ") in bundle "
-                                        + bundleSymbolicName + " cannot be cast to an instance of " + clazz.getName());
+                                LOG.error("Service " + serviceName + "(" + obj.getClass().getName() + ") in bundle " + bundleSymbolicName + " cannot be cast to an instance of " + clazz.getName());
                                 return null;
                             }
                         }
@@ -305,20 +400,13 @@ public class AdminDaemon {
     }
 
     /**
-     * Ungets the service identified through given bundle's symbolic name and "<i>name</i>"
-     * property.
-     *
-     * @param bundleSymbolicName
-     *            The bundle's symbolic name which offers the service
-     * @param serviceName
-     *            The service's name provided through "<i>name</i>" property
-     * @param context
-     *            The bundle context (on which
-     *            {@link BundleContext#ungetService(ServiceReference)} is
-     *            invoked)
+     * Ungets the service identified through given bundle's symbolic name and "<i>name</i>" property.
+     * 
+     * @param bundleSymbolicName The bundle's symbolic name which offers the service
+     * @param serviceName The service's name provided through "<i>name</i>" property
+     * @param context The bundle context (on which {@link BundleContext#ungetService(ServiceReference)} is invoked)
      */
-    public static final void ungetService(final String bundleSymbolicName, final String serviceName,
-            final BundleContext context) {
+    public static final void ungetService(final String bundleSymbolicName, final String serviceName, final BundleContext context) {
         for (final Bundle bundle : bundlelist) {
             if (bundle.getState() == Bundle.ACTIVE && bundleSymbolicName.equals(bundle.getSymbolicName())) {
                 final ServiceReference[] servicereferences = bundle.getRegisteredServices();

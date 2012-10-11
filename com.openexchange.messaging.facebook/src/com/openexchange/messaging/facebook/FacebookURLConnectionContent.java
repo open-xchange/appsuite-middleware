@@ -127,8 +127,8 @@ public final class FacebookURLConnectionContent implements BinaryContent {
                     URLConnection urlCon = null;
                     try {
                         urlCon = url.openConnection();
-                        urlCon.setConnectTimeout(2500);
-                        urlCon.setReadTimeout(2500);
+                        urlCon.setConnectTimeout(10000);
+                        urlCon.setReadTimeout(10000);
                         urlCon.connect();
                         mimeType = urlCon.getContentType();
                     } catch (final IOException e) {
@@ -164,8 +164,8 @@ public final class FacebookURLConnectionContent implements BinaryContent {
     private void init() throws OXException {
         try {
             final URLConnection urlCon = url.openConnection();
-            urlCon.setConnectTimeout(2500);
-            urlCon.setReadTimeout(2500);
+            urlCon.setConnectTimeout(10000);
+            urlCon.setReadTimeout(10000);
             urlCon.connect();
             mimeType = urlCon.getContentType();
             final InputStream in = urlCon.getInputStream();
@@ -190,8 +190,8 @@ public final class FacebookURLConnectionContent implements BinaryContent {
         if (null == tmp) {
             try {
                 final URLConnection urlCon = url.openConnection();
-                urlCon.setConnectTimeout(2500);
-                urlCon.setReadTimeout(2500);
+                urlCon.setConnectTimeout(10000);
+                urlCon.setReadTimeout(10000);
                 urlCon.connect();
                 return urlCon.getInputStream();
             } catch (final SocketTimeoutException e) {
@@ -220,7 +220,7 @@ public final class FacebookURLConnectionContent implements BinaryContent {
             try {
                 urlCon.getInputStream().close();
             } catch (final IOException e) {
-                com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(FacebookURLConnectionContent.class)).error(e.getMessage(), e);
+                com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(FacebookURLConnectionContent.class)).error(e.getMessage(), e);
             }
         }
     }
@@ -230,7 +230,7 @@ public final class FacebookURLConnectionContent implements BinaryContent {
             try {
                 in.close();
             } catch (final IOException e) {
-                com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(FacebookURLConnectionContent.class)).error(e.getMessage(), e);
+                com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(FacebookURLConnectionContent.class)).error(e.getMessage(), e);
             }
         }
     }

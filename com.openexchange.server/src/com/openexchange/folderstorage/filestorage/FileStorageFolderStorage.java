@@ -75,6 +75,7 @@ import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.file.storage.FileStorageFolderAccess;
 import com.openexchange.file.storage.FileStoragePermission;
 import com.openexchange.file.storage.FileStorageService;
+import com.openexchange.file.storage.ServiceAware;
 import com.openexchange.file.storage.registry.FileStorageServiceRegistry;
 import com.openexchange.folderstorage.ContentType;
 import com.openexchange.folderstorage.Folder;
@@ -162,7 +163,17 @@ public final class FileStorageFolderStorage implements FolderStorage {
 
     } // End of class Key
 
+    /**
+     * <code>"1"</code>
+     */
     private static final String PRIVATE_FOLDER_ID = String.valueOf(FolderObject.SYSTEM_PRIVATE_FOLDER_ID);
+
+    /**
+     * <code>"9"</code>
+     */
+    private static final String INFOSTORE = Integer.toString(FolderObject.SYSTEM_INFOSTORE_FOLDER_ID);
+
+    private static final String SERVICE_INFOSTORE = "infostore";
 
     /**
      * Initializes a new {@link FileStorageFolderStorage}.
@@ -497,9 +508,9 @@ public final class FileStorageFolderStorage implements FolderStorage {
             /*
              * Set proper name
              */
-            final FileStorageServiceRegistry msr =
+            final FileStorageServiceRegistry fssr =
                 FileStorageFolderStorageServiceRegistry.getServiceRegistry().getService(FileStorageServiceRegistry.class, true);
-            final FileStorageService fsService = msr.getFileStorageService(serviceId);
+            final FileStorageService fsService = fssr.getFileStorageService(serviceId);
             final FileStorageAccount fsAccount = fsService.getAccountManager().getAccount(accountId, storageParameters.getSession());
             retval.setName(fsAccount.getDisplayName());
             hasSubfolders = rootFolder.hasSubfolders();
@@ -554,7 +565,7 @@ public final class FileStorageFolderStorage implements FolderStorage {
             }
         }
 
-        if (PRIVATE_FOLDER_ID.equals(parentId)) {
+        if (REAL_TREE_ID.equals(treeId) ? PRIVATE_FOLDER_ID.equals(parentId) : INFOSTORE.equals(parentId)) {
             /*
              * Get all user file storage accounts
              */
@@ -568,6 +579,9 @@ public final class FileStorageFolderStorage implements FolderStorage {
                      */
                     final List<FileStorageAccount> userAccounts = fsService.getAccountManager().getAccounts(session);
                     for (final FileStorageAccount userAccount : userAccounts) {
+                        if (SERVICE_INFOSTORE.equals(userAccount.getId()) || FileStorageAccount.DEFAULT_ID.equals(userAccount.getId())) {
+                            continue;
+                        }
                         final FileStorageAccountAccess accountAccess =
                             userAccount.getFileStorageService().getAccountAccess(userAccount.getId(), session);
                         accountAccess.connect();
@@ -601,10 +615,14 @@ public final class FileStorageFolderStorage implements FolderStorage {
             final List<SortableId> list = new ArrayList<SortableId>(size);
             for (int j = 0; j < size; j++) {
                 final FileStorageAccount acc = accounts.get(j);
-                list.add(new FileStorageId(
-                    FileStorageFolderIdentifier.getFQN(acc.getFileStorageService().getId(), acc.getId(), ""),
-                    j,
-                    null));
+                final String serviceId;
+                if (acc instanceof ServiceAware) {
+                    serviceId = ((ServiceAware) acc).getServiceId();
+                } else {
+                    final FileStorageService tmp = acc.getFileStorageService();
+                    serviceId = null == tmp ? null : tmp.getId();
+                }
+                list.add(new FileStorageId(FileStorageFolderIdentifier.getFQN(serviceId, acc.getId(), ""), j, null));
             }
             return list.toArray(new SortableId[list.size()]);
         }

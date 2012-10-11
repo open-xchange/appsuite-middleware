@@ -52,7 +52,6 @@ package com.openexchange.file.storage.json.actions.files;
 import java.util.Date;
 import java.util.List;
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -64,6 +63,7 @@ import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.json.FileMetadataWriter;
 import com.openexchange.groupware.results.Delta;
 import com.openexchange.groupware.results.TimedResult;
+import com.openexchange.log.LogFactory;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
@@ -117,12 +117,7 @@ public abstract class AbstractFileAction implements AJAXActionService {
     }
 
     protected AJAXRequestResult results(final SearchIterator<File> results, final long timestamp, final InfostoreRequest request) throws OXException {
-        try {
-            return new AJAXRequestResult(results, new Date(timestamp), "infostore");
-        } finally {
-            results.close();
-        }
-
+        return new AJAXRequestResult(results, new Date(timestamp), "infostore");
     }
 
     public AJAXRequestResult result(final Delta<File> delta, final InfostoreRequest request) throws OXException {
@@ -191,10 +186,14 @@ public abstract class AbstractFileAction implements AJAXActionService {
         } catch (final OXException x) {
             failure(req,x);
             throw x;
-        } catch (final Throwable t) {
-            failure(req,t);
-            LOG.error(t.getMessage(), t);
-            throw AjaxExceptionCodes.UNEXPECTED_ERROR.create( t.getMessage());
+        } catch (final NullPointerException e) {
+            failure(req,e);
+            LOG.error(e.getMessage(), e);
+            throw AjaxExceptionCodes.UNEXPECTED_ERROR.create(e, "Null dereference.");
+        } catch (final RuntimeException e) {
+            failure(req,e);
+            LOG.error(e.getMessage(), e);
+            throw AjaxExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         } finally {
             after(req);
 

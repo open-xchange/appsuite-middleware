@@ -61,7 +61,7 @@ import com.openexchange.threadpool.ThreadRenamer;
  */
 public abstract class LoggingCallable<V> implements Task<V> {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(LoggingCallable.class));
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(LoggingCallable.class));
 
     private final Session session;
 
@@ -122,14 +122,17 @@ public abstract class LoggingCallable<V> implements Task<V> {
         return accountId;
     }
 
+    @Override
     public void afterExecute(final Throwable t) {
         // NOP
     }
 
+    @Override
     public void beforeExecute(final Thread t) {
         // NOP
     }
 
+    @Override
     public void setThreadName(final ThreadRenamer threadRenamer) {
         // NOP
     }

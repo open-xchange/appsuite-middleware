@@ -63,10 +63,10 @@ import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.regex.Pattern;
-import com.openexchange.ajp13.AJPv13Config;
 import com.openexchange.ajp13.AJPv13Server;
+import com.openexchange.ajp13.AJPv13ServiceRegistry;
 import com.openexchange.ajp13.servlet.OXServletException;
-import com.openexchange.configuration.SystemConfig;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.server.Initialization;
 
@@ -77,7 +77,7 @@ import com.openexchange.server.Initialization;
  */
 public final class HttpManagersInit implements Initialization {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(HttpManagersInit.class));
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(HttpManagersInit.class));
 
     private static final HttpManagersInit instance = new HttpManagersInit();
 
@@ -133,15 +133,11 @@ public final class HttpManagersInit implements Initialization {
         try {
             final Map<String, Constructor<?>> servletConstructorMap;
             if (readFromFile) {
-                final String servletMappingDir = AJPv13Config.getSystemProperty(SystemConfig.Property.ServletMappingDir);
-                if (servletMappingDir == null) {
-                    throw OXServletException.Code.MISSING_SERVLET_DIR.create(SystemConfig.Property.ServletMappingDir.getPropertyName());
-                }
-                final File dir = new File(servletMappingDir);
-                if (!dir.exists()) {
-                    throw OXServletException.Code.DIR_NOT_EXISTS.create(servletMappingDir);
+                final File dir = AJPv13ServiceRegistry.getInstance().getService(ConfigurationService.class).getDirectory("servletmappings");
+                if (null == dir || !dir.exists()) {
+                    throw OXServletException.Code.DIR_NOT_EXISTS.create("servletmappings");
                 } else if (!dir.isDirectory()) {
-                    throw OXServletException.Code.NO_DIRECTORY.create(servletMappingDir);
+                    throw OXServletException.Code.NO_DIRECTORY.create("servletmappings");
                 }
                 final File[] propFiles = dir.listFiles(new FilenameFilter() {
 

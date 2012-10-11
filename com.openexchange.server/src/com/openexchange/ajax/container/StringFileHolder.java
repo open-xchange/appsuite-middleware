@@ -69,6 +69,8 @@ public final class StringFileHolder implements IFileHolder {
 
     private String disposition;
 
+    private String delivery;
+
     /**
      * Initializes a new {@link StringFileHolder} with default encoding (UTF-8).
      *
@@ -150,6 +152,20 @@ public final class StringFileHolder implements IFileHolder {
      */
     public void setDisposition(final String disposition) {
         this.disposition = disposition;
+    }
+    
+    /**
+     * Sets the delivery
+     *
+     * @param delivery The delivery to set
+     */
+    public void setDelivery(String delivery) {
+        this.delivery = delivery;
+    }
+
+    @Override
+    public String getDelivery() {
+        return delivery;
     }
 
 }

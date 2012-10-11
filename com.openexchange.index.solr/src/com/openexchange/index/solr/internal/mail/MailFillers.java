@@ -52,14 +52,11 @@ package com.openexchange.index.solr.internal.mail;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.Locale;
-import java.util.Set;
 import javax.mail.internet.AddressException;
 import org.apache.solr.common.SolrDocument;
 import com.openexchange.exception.OXException;
-import com.openexchange.index.IndexConstants;
 import com.openexchange.index.IndexExceptionCodes;
-import com.openexchange.index.solr.mail.SolrMailConstants;
+import com.openexchange.index.solr.mail.SolrMailField;
 import com.openexchange.mail.MailField;
 import com.openexchange.mail.MailFields;
 import com.openexchange.mail.dataobjects.MailMessage;
@@ -72,7 +69,7 @@ import com.openexchange.mail.mime.QuotedInternetAddress;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class MailFillers implements SolrMailConstants {
+public final class MailFillers {
 
     /**
      * Initializes a new {@link MailFillers}.
@@ -147,8 +144,6 @@ public final class MailFillers implements SolrMailConstants {
         return list;
     }
 
-    protected static final Set<Locale> KNOWN_LOCALES = IndexConstants.KNOWN_LOCALES;
-
     /**
      * A mail filler.
      */
@@ -187,7 +182,7 @@ public final class MailFillers implements SolrMailConstants {
 
         @Override
         public void fill(final MailMessage mail, final SolrDocument doc) throws OXException {
-            mail.setFolder(null == fullName ? MailFillers.<String> getFieldValue(FIELD_FULL_NAME, doc) : fullName);
+            mail.setFolder(null == fullName ? MailFillers.<String> getFieldValue(SolrMailField.FULL_NAME.solrName(), doc) : fullName);
         }
     }
 
@@ -214,7 +209,7 @@ public final class MailFillers implements SolrMailConstants {
 
         @Override
         public void fill(final MailMessage mail, final SolrDocument doc) throws OXException {
-            mail.setAccountId(accountId < 0 ? MailFillers.<Integer> getFieldValue(FIELD_ACCOUNT, doc).intValue() : accountId);
+            mail.setAccountId(accountId < 0 ? MailFillers.<Integer> getFieldValue(SolrMailField.ACCOUNT.solrName(), doc).intValue() : accountId);
         }
     }
 
@@ -222,7 +217,10 @@ public final class MailFillers implements SolrMailConstants {
 
         @Override
         public void fill(final MailMessage mail, final SolrDocument doc) throws OXException {
-            mail.setColorLabel(MailFillers.<Integer> getFieldValue(FIELD_COLOR_LABEL, doc).intValue());
+            final Integer colorLabel = MailFillers.<Integer> getFieldValue(SolrMailField.COLOR_LABEL.solrName(), doc);
+            if (colorLabel != null) {
+                mail.setColorLabel(colorLabel.intValue());
+            }            
         }
     };
 
@@ -230,7 +228,10 @@ public final class MailFillers implements SolrMailConstants {
 
         @Override
         public void fill(final MailMessage mail, final SolrDocument doc) throws OXException {
-            mail.setHasAttachment(MailFillers.<Boolean> getFieldValue(FIELD_ATTACHMENT, doc).booleanValue());
+            final Boolean hasAttachment = MailFillers.<Boolean> getFieldValue(SolrMailField.ATTACHMENT.solrName(), doc);
+            if (hasAttachment != null) {
+                mail.setHasAttachment(hasAttachment.booleanValue());
+            }            
         }
     };
 
@@ -238,7 +239,7 @@ public final class MailFillers implements SolrMailConstants {
 
         @Override
         public void fill(final MailMessage mail, final SolrDocument doc) throws OXException {
-            final Long size = MailFillers.<Long> getFieldValue(FIELD_SIZE, doc);
+            final Long size = MailFillers.<Long> getFieldValue(SolrMailField.SIZE.solrName(), doc);
             if (null != size) {
                 mail.setSize(size.longValue());
             }
@@ -249,7 +250,7 @@ public final class MailFillers implements SolrMailConstants {
 
         @Override
         public void fill(final MailMessage mail, final SolrDocument doc) throws OXException {
-            final Long time = MailFillers.<Long> getFieldValue(FIELD_RECEIVED_DATE, doc);
+            final Long time = MailFillers.<Long> getFieldValue(SolrMailField.RECEIVED_DATE.solrName(), doc);
             if (null != time) {
                 mail.setReceivedDate(new Date(time.longValue()));
             }
@@ -260,7 +261,7 @@ public final class MailFillers implements SolrMailConstants {
 
         @Override
         public void fill(final MailMessage mail, final SolrDocument doc) throws OXException {
-            final Long time = MailFillers.<Long> getFieldValue(FIELD_SENT_DATE, doc);
+            final Long time = MailFillers.<Long> getFieldValue(SolrMailField.SENT_DATE.solrName(), doc);
             if (null != time) {
                 mail.setSentDate(new Date(time.longValue()));
             }
@@ -271,12 +272,14 @@ public final class MailFillers implements SolrMailConstants {
 
         @Override
         public void fill(final MailMessage mail, final SolrDocument doc) throws OXException {
-            final String addressList = getFieldValue(FIELD_FROM_PLAIN, doc);
-            if (!isEmpty(addressList)) {
-                try {
-                    mail.addFrom(QuotedInternetAddress.parse(addressList, false));
-                } catch (final AddressException e) {
-                    mail.addFrom(new PlainTextAddress(addressList));
+            final List<String> addressList = getFieldValue(SolrMailField.FROM.solrName(), doc);
+            if (addressList != null && !addressList.isEmpty()) {
+                for (String addr : addressList) {
+                    try {
+                        mail.addFrom(QuotedInternetAddress.parse(addr, false));
+                    } catch (AddressException e) {
+                        mail.addFrom(new PlainTextAddress(addr));
+                    }
                 }
             }
         }
@@ -286,12 +289,14 @@ public final class MailFillers implements SolrMailConstants {
 
         @Override
         public void fill(final MailMessage mail, final SolrDocument doc) throws OXException {
-            final String addressList = getFieldValue(FIELD_TO_PLAIN, doc);
-            if (!isEmpty(addressList)) {
-                try {
-                    mail.addTo(QuotedInternetAddress.parse(addressList, false));
-                } catch (final AddressException e) {
-                    mail.addTo(new PlainTextAddress(addressList));
+            final List<String> addressList = getFieldValue(SolrMailField.TO.solrName(), doc);
+            if (addressList != null && !addressList.isEmpty()) {
+                for (String addr : addressList) {
+                    try {
+                        mail.addFrom(QuotedInternetAddress.parse(addr, false));
+                    } catch (AddressException e) {
+                        mail.addFrom(new PlainTextAddress(addr));
+                    }
                 }
             }
         }
@@ -301,12 +306,14 @@ public final class MailFillers implements SolrMailConstants {
 
         @Override
         public void fill(final MailMessage mail, final SolrDocument doc) throws OXException {
-            final String addressList = getFieldValue(FIELD_CC_PLAIN, doc);
-            if (!isEmpty(addressList)) {
-                try {
-                    mail.addCc(QuotedInternetAddress.parse(addressList, false));
-                } catch (final AddressException e) {
-                    mail.addCc(new PlainTextAddress(addressList));
+            final List<String> addressList = getFieldValue(SolrMailField.CC.solrName(), doc);
+            if (addressList != null && !addressList.isEmpty()) {
+                for (String addr : addressList) {
+                    try {
+                        mail.addFrom(QuotedInternetAddress.parse(addr, false));
+                    } catch (AddressException e) {
+                        mail.addFrom(new PlainTextAddress(addr));
+                    }
                 }
             }
         }
@@ -316,12 +323,14 @@ public final class MailFillers implements SolrMailConstants {
 
         @Override
         public void fill(final MailMessage mail, final SolrDocument doc) throws OXException {
-            final String addressList = getFieldValue(FIELD_BCC_PLAIN, doc);
-            if (!isEmpty(addressList)) {
-                try {
-                    mail.addBcc(QuotedInternetAddress.parse(addressList, false));
-                } catch (final AddressException e) {
-                    mail.addBcc(new PlainTextAddress(addressList));
+            final List<String> addressList = getFieldValue(SolrMailField.BCC.solrName(), doc);
+            if (addressList != null && !addressList.isEmpty()) {
+                for (String addr : addressList) {
+                    try {
+                        mail.addFrom(QuotedInternetAddress.parse(addr, false));
+                    } catch (AddressException e) {
+                        mail.addFrom(new PlainTextAddress(addr));
+                    }
                 }
             }
         }
@@ -332,56 +341,58 @@ public final class MailFillers implements SolrMailConstants {
         @Override
         public void fill(final MailMessage mail, final SolrDocument doc) throws OXException {
             int flags = 0;
-            Boolean b = MailFillers.<Boolean> getFieldValue(FIELD_FLAG_ANSWERED, doc);
+            Boolean b = MailFillers.<Boolean> getFieldValue(SolrMailField.FLAG_ANSWERED.solrName(), doc);
             if (null != b && b.booleanValue()) {
                 flags |= MailMessage.FLAG_ANSWERED;
             }
-            b = MailFillers.<Boolean> getFieldValue(FIELD_FLAG_DELETED, doc);
+            b = MailFillers.<Boolean> getFieldValue(SolrMailField.FLAG_DELETED.solrName(), doc);
             if (null != b && b.booleanValue()) {
                 flags |= MailMessage.FLAG_DELETED;
             }
-            b = MailFillers.<Boolean> getFieldValue(FIELD_FLAG_DRAFT, doc);
+            b = MailFillers.<Boolean> getFieldValue(SolrMailField.FLAG_DRAFT.solrName(), doc);
             if (null != b && b.booleanValue()) {
                 flags |= MailMessage.FLAG_DRAFT;
             }
-            b = MailFillers.<Boolean> getFieldValue(FIELD_FLAG_FLAGGED, doc);
+            b = MailFillers.<Boolean> getFieldValue(SolrMailField.FLAG_FLAGGED.solrName(), doc);
             if (null != b && b.booleanValue()) {
                 flags |= MailMessage.FLAG_FLAGGED;
             }
-            b = MailFillers.<Boolean> getFieldValue(FIELD_FLAG_FORWARDED, doc);
+            b = MailFillers.<Boolean> getFieldValue(SolrMailField.FLAG_FORWARDED.solrName(), doc);
             if (null != b && b.booleanValue()) {
                 flags |= MailMessage.FLAG_FORWARDED;
             }
-            b = MailFillers.<Boolean> getFieldValue(FIELD_FLAG_READ_ACK, doc);
+            b = MailFillers.<Boolean> getFieldValue(SolrMailField.FLAG_READ_ACK.solrName(), doc);
             if (null != b && b.booleanValue()) {
                 flags |= MailMessage.FLAG_READ_ACK;
             }
-            b = MailFillers.<Boolean> getFieldValue(FIELD_FLAG_RECENT, doc);
+            b = MailFillers.<Boolean> getFieldValue(SolrMailField.FLAG_RECENT.solrName(), doc);
             if (null != b && b.booleanValue()) {
                 flags |= MailMessage.FLAG_RECENT;
             }
-            b = MailFillers.<Boolean> getFieldValue(FIELD_FLAG_SEEN, doc);
+            b = MailFillers.<Boolean> getFieldValue(SolrMailField.FLAG_SEEN.solrName(), doc);
             if (null != b && b.booleanValue()) {
                 flags |= MailMessage.FLAG_SEEN;
             }
-            b = MailFillers.<Boolean> getFieldValue(FIELD_FLAG_SPAM, doc);
+            b = MailFillers.<Boolean> getFieldValue(SolrMailField.FLAG_SPAM.solrName(), doc);
             if (null != b && b.booleanValue()) {
                 flags |= MailMessage.FLAG_SPAM;
             }
-            b = MailFillers.<Boolean> getFieldValue(FIELD_FLAG_USER, doc);
+            b = MailFillers.<Boolean> getFieldValue(SolrMailField.FLAG_USER.solrName(), doc);
             if (null != b && b.booleanValue()) {
                 flags |= MailMessage.FLAG_USER;
             }
             mail.setFlags(flags);
 
-            final Object ufs = doc.getFieldValue(FIELD_USER_FLAGS);
-            if (null != ufs) {
-                if (ufs instanceof String) {
-                    mail.addUserFlag(ufs.toString());
-                } else {
-                    @SuppressWarnings("unchecked")
-                    final List<String> ufl = (List<String>) ufs;
-                    mail.addUserFlags(ufl.toArray(new String[ufl.size()]));
+            final String userFlagsField = SolrMailField.USER_FLAGS.solrName();
+            if (userFlagsField != null) {
+                final Object ufs = doc.getFieldValue(userFlagsField);
+                if (null != ufs) {
+                    if (ufs instanceof String) {
+                        mail.addUserFlag(ufs.toString());
+                    } else {
+                        @SuppressWarnings("unchecked") final List<String> ufl = (List<String>) ufs;
+                        mail.addUserFlags(ufl.toArray(new String[ufl.size()]));
+                    }
                 }
             }
         }
@@ -391,7 +402,7 @@ public final class MailFillers implements SolrMailConstants {
 
         @Override
         public void fill(final MailMessage mail, final SolrDocument doc) throws OXException {
-            final String subject = getFieldValue(FIELD_SUBJECT_PLAIN, doc);
+            final String subject = getFieldValue(SolrMailField.SUBJECT.solrName(), doc);
             if (null != subject) {
                 mail.setSubject(subject);
             }
@@ -400,6 +411,10 @@ public final class MailFillers implements SolrMailConstants {
 
     @SuppressWarnings("unchecked")
     protected static <V> V getFieldValue(final String name, final SolrDocument document) throws OXException {
+        if (name == null) {
+            return null;
+        }
+        
         final Object value = document.getFieldValue(name);
         if (null == value) {
             return null;

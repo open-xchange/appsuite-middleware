@@ -145,23 +145,20 @@ public class AdvancedSearchAction extends ContactAction {
     }
 
     @Override
-    protected AJAXRequestResult perform2(final ContactRequest request) throws OXException, JSONException {
-        final List<Contact> contacts = new ArrayList<Contact>();
+    protected AJAXRequestResult perform2(ContactRequest request) throws OXException {
+        List<Contact> contacts = new ArrayList<Contact>();
         Date lastModified = new Date(0);
         SearchIterator<Contact> searchIterator = null;
         try {
             searchIterator = getContactService().searchContacts(request.getSession(), request.getSearchFilter(), 
             		request.getFields(), request.getSortOptions());
             while (searchIterator.hasNext()) {
-                final Contact contact = searchIterator.next();
+                Contact contact = searchIterator.next();
                 lastModified = getLatestModified(lastModified, contact);
-                applyTimezoneOffset(contact, request.getTimeZone());
                 contacts.add(contact);
             }
         } finally {
-        	if (null != searchIterator) {
-        		searchIterator.close();
-        	}
+        	close(searchIterator);
         }
         request.sortInternalIfNeeded(contacts);
         return new AJAXRequestResult(contacts, lastModified, "contact");

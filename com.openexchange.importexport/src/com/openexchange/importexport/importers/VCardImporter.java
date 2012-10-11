@@ -60,23 +60,19 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import com.openexchange.api2.ContactSQLInterface;
 import com.openexchange.exception.OXException;
 import com.openexchange.exception.OXException.Generic;
 import com.openexchange.exception.OXExceptionConstants;
-import com.openexchange.groupware.contact.ContactInterface;
-import com.openexchange.groupware.contact.OverridingContactInterface;
-import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.groupware.importexport.ImportResult;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
-import com.openexchange.importexport.ImportResult;
 import com.openexchange.importexport.exceptions.ImportExportExceptionCodes;
 import com.openexchange.importexport.formats.Format;
 import com.openexchange.importexport.formats.vcard.VCardFileToken;
 import com.openexchange.importexport.formats.vcard.VCardTokenizer;
-import com.openexchange.importexport.osgi.ImportExportServices;
+import com.openexchange.log.LogFactory;
 import com.openexchange.server.impl.EffectivePermission;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.session.ServerSession;
@@ -96,7 +92,7 @@ import com.openexchange.tools.versit.converter.OXContainerConverter;
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias 'Tierlieb' Prinz</a> (minor: changes to new interface)
  */
-public class VCardImporter extends AbstractImporter implements OXExceptionConstants {
+public class VCardImporter extends ContactImporter implements OXExceptionConstants {
 
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(VCardImporter.class));
 
@@ -184,7 +180,6 @@ public class VCardImporter extends AbstractImporter implements OXExceptionConsta
         final List<ImportResult> list = new ArrayList<ImportResult>();
 
         try {
-            boolean canOverrideInCaseOfTruncation = false;
             oxContainerConverter = new OXContainerConverter(session);
             final VCardTokenizer tokenizer = new VCardTokenizer(is);
             final List<VCardFileToken> chunks = tokenizer.split();
@@ -212,24 +207,15 @@ public class VCardImporter extends AbstractImporter implements OXExceptionConsta
                         contactObj.setParentFolderID(contactFolderId);
                         importResult.setDate(new Date());
                         try {
-                            final ContactInterface contactInterface = ImportExportServices.getContactInterfaceDiscoveryService().newContactInterface(contactObj.getParentFolderID(), session);
-                            if(contactInterface instanceof OverridingContactInterface){
-                                ((OverridingContactInterface) contactInterface).forceInsertContactObject(contactObj);
-                                canOverrideInCaseOfTruncation = true;
-                            } else {
-                                contactInterface.insertContactObject(contactObj);
-                            }
+                            super.createContact(session, contactObj, Integer.toString(contactFolderId));
                         } catch (final OXException oxEx) {
                             if (CATEGORY_USER_INPUT.equals(oxEx.getCategory())) {
                                 LOG.debug(oxEx.getMessage(), oxEx);
                             } else {
                                 LOG.error(oxEx.getMessage(), oxEx);
                             }
-                            if(oxEx.getCategory() != CATEGORY_TRUNCATED
-                                || (oxEx.getCategory() == CATEGORY_TRUNCATED && !canOverrideInCaseOfTruncation)){
-                                importResult.setException(oxEx);
-                                LOG.debug("cannot import contact object", oxEx);
-                            }
+                            importResult.setException(oxEx);
+                            LOG.debug("cannot import contact object", oxEx);
                         }
                         importResult.setObjectId(String.valueOf(contactObj.getObjectID()));
                         importResult.setDate(contactObj.getLastModified());
@@ -260,14 +246,5 @@ public class VCardImporter extends AbstractImporter implements OXExceptionConsta
 
         return list;
     }
-
-    @Override
-    protected String getNameForFieldInTruncationError(final int id, final OXException unused) {
-        final ContactField field = ContactField.getByValue(id);
-        if (field == null) {
-            return String.valueOf(id);
-        }
-        return field.getReadableName();
-    }
-
+    
 }

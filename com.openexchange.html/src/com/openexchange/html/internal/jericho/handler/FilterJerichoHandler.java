@@ -54,6 +54,7 @@ import static com.openexchange.html.internal.HtmlServiceImpl.PATTERN_URL_SOLE;
 import static com.openexchange.html.internal.css.CSSMatcher.checkCSS;
 import static com.openexchange.html.internal.css.CSSMatcher.containsCSSElement;
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStreamReader;
 import java.net.MalformedURLException;
@@ -71,17 +72,18 @@ import net.htmlparser.jericho.Attributes;
 import net.htmlparser.jericho.CharacterReference;
 import net.htmlparser.jericho.EndTag;
 import net.htmlparser.jericho.HTMLElementName;
+import net.htmlparser.jericho.HTMLElements;
 import net.htmlparser.jericho.Segment;
 import net.htmlparser.jericho.StartTag;
 import net.htmlparser.jericho.Tag;
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.html.internal.HtmlServiceImpl;
 import com.openexchange.html.internal.jericho.JerichoHandler;
 import com.openexchange.html.internal.parser.handler.HTMLFilterHandler;
 import com.openexchange.html.internal.parser.handler.HTMLURLReplacerHandler;
 import com.openexchange.html.services.ServiceRegistry;
+import com.openexchange.log.LogFactory;
 
 /**
  * {@link FilterJerichoHandler}
@@ -100,6 +102,10 @@ public final class FilterJerichoHandler implements JerichoHandler {
     private static final Pattern PAT_NUMERIC = Pattern.compile("\\p{Digit}+");
 
     private static final Map<String, Set<String>> IMAGE_STYLE_MAP;
+
+    private static final Set<String> ALL;
+
+    private static final Set<String> SINGLE_TAGS;
 
     static {
         IMAGE_STYLE_MAP = new HashMap<String, Set<String>>();
@@ -127,6 +133,18 @@ public final class FilterJerichoHandler implements JerichoHandler {
          */
         values.add("d"); // delete
         IMAGE_STYLE_MAP.put("background-image", values);
+        /*
+         * ALL tags
+         */
+        Set<String> s = new HashSet<String>(HTMLElements.getElementNames());
+        s.add("smarttagtype");
+        ALL = Collections.unmodifiableSet(s);
+        /*
+         * Single tags
+         */
+        s = new HashSet<String>();
+        s.add("wbr");
+        SINGLE_TAGS = Collections.unmodifiableSet(s);
     }
 
     /*-
@@ -167,6 +185,8 @@ public final class FilterJerichoHandler implements JerichoHandler {
 
     private boolean replaceUrls = true;
 
+    private String cssPrefix;
+
     /**
      * Initializes a new {@link FilterJerichoHandler}.
      */
@@ -202,8 +222,24 @@ public final class FilterJerichoHandler implements JerichoHandler {
         if (!map.containsKey("body")) {
             map.put("body", null);
         }
+        for (final String tagName : SINGLE_TAGS) {
+            if (!map.containsKey(tagName)) {
+                map.put(tagName, null);
+            }
+        }
         htmlMap = Collections.unmodifiableMap(map);
         styleMap = Collections.unmodifiableMap(parseStyleMap(mapStr));
+    }
+
+    /**
+     * Sets the CSS prefix
+     *
+     * @param cssPrefix The CSS prefix to set
+     * @return This handler with new behavior applied
+     */
+    public FilterJerichoHandler setCssPrefix(final String cssPrefix) {
+        this.cssPrefix = cssPrefix;
+        return this;
     }
 
     /**
@@ -310,7 +346,7 @@ public final class FilterJerichoHandler implements JerichoHandler {
                 /*
                  * Handle style attribute
                  */
-                checkCSS(cssBuffer.append(content), styleMap, true);
+                checkCSS(cssBuffer.append(content), styleMap, cssPrefix);
                 String checkedCSS = cssBuffer.toString();
                 cssBuffer.setLength(0);
                 if (dropExternalImages) {
@@ -323,7 +359,13 @@ public final class FilterJerichoHandler implements JerichoHandler {
                 if (content.isWhiteSpace()) {
                     htmlBuilder.append(content);
                 } else {
-                    htmlBuilder.append(CharacterReference.reencode(content));
+                    /*-
+                     * Should we re-encode prior to appending?
+                     * E.g. "<" ==> "&lt;"
+                     * 
+                     * htmlBuilder.append(CharacterReference.reencode(content));
+                     */
+                    htmlBuilder.append(content);
                 }
             }
         }
@@ -351,7 +393,7 @@ public final class FilterJerichoHandler implements JerichoHandler {
     @Override
     public void handleStartTag(final StartTag startTag) {
         final String tagName = startTag.getName();
-        if (startTag.isEndTagForbidden()) {
+        if (startTag.isEndTagForbidden() || SINGLE_TAGS.contains(tagName)) {
             // Simple tag
             if (skipLevel > 0) {
                 return;
@@ -378,7 +420,17 @@ public final class FilterJerichoHandler implements JerichoHandler {
                 }
                 addStartTag(startTag, false, htmlMap.get(tagName));
             } else {
-                if (!body || isRemoveWholeTag(startTag)) {
+                if (!body) {
+                    /*
+                     * Remove whole tag incl. subsequent content and tags
+                     */
+                    skipLevel++;
+                } else if (isMSTag(startTag)) {
+                    /*
+                     * Just remove tag definition: "<tag>text<subtag>text</subtag></tag>" would be "text<subtag>text</subtag>"
+                     */
+                    mark();
+                } else if (isRemoveWholeTag(startTag)) {
                     /*
                      * Remove whole tag incl. subsequent content and tags
                      */
@@ -393,7 +445,16 @@ public final class FilterJerichoHandler implements JerichoHandler {
         }
     }
 
-    private boolean isRemoveWholeTag(final Tag tag) {
+    private static boolean isMSTag(final Tag tag) {
+        final String check = tag.getName();
+        final char c;
+        if (check.length() < 2 || ':' != check.charAt(1) || (('w' != (c = check.charAt(0))) && ('W' != c) && ('o' != c) && ('O' != c))) {
+            return false;
+        }
+        return ALL.contains(check.substring(2));
+    }
+
+    private static boolean isRemoveWholeTag(final Tag tag) {
         final String check = tag.getName();
         return (HTMLElementName.SCRIPT == check || check.startsWith("w:") || check.startsWith("o:"));
     }
@@ -449,7 +510,8 @@ public final class FilterJerichoHandler implements JerichoHandler {
                     }
                 }
             } else if ("class".equals(attr) || "id".equals(attr)) {
-                attrBuilder.append(' ').append(attr).append("=\"").append(CharacterReference.encode(attribute.getValue())).append('"');
+                final String value = prefixBlock(CharacterReference.encode(attribute.getValue()), cssPrefix);
+                attrBuilder.append(' ').append(attr).append("=\"").append(value).append('"');
             } else {
                 final String val = attribute.getValue();
                 if (null == allowedAttributes) { // No restrictions
@@ -520,6 +582,57 @@ public final class FilterJerichoHandler implements JerichoHandler {
         htmlBuilder.append('>');
     }
 
+    private static final Pattern SPLIT_WORDS = Pattern.compile(" +");
+
+    private static String prefixBlock(final String value, final String cssPrefix) {
+        if (isEmpty(value) || isEmpty(cssPrefix)) {
+            return value;
+        }
+        final int length = value.length();
+        int pos = 0;
+        while (pos < length && Character.isWhitespace(value.charAt(pos))) {
+            pos++;
+        }
+        final StringBuilder builder = new StringBuilder(length << 1);
+        if (pos > 0) {
+            builder.append(value.substring(0, pos));
+        }
+        for (final String word : SPLIT_WORDS.split(value.substring(pos), 0)) {
+            final char first = word.charAt(0);
+            if ('.' == first) {
+                builder.append('.').append(cssPrefix).append('-').append(replaceDots(word.substring(1), cssPrefix)).append(' ');
+            } else if ('#' == first) {
+                if (word.indexOf('.') < 0) { // contains no dots
+                    builder.append('#').append(cssPrefix).append('-').append(replaceDots(word.substring(1), cssPrefix)).append(' ');
+                } else {
+                    builder.append('#').append(cssPrefix).append('-').append(replaceDots(word.substring(1), cssPrefix)).append(' ');
+                }
+            } else {
+                builder.append(cssPrefix).append('-').append(replaceDots(word, cssPrefix)).append(' ');
+            }
+        }
+        builder.deleteCharAt(builder.length() - 1);
+        return builder.toString();
+    }
+
+    private static final Pattern DOT = Pattern.compile("\\.");
+
+    private static String replaceDots(final String word, final String cssPrefix) {
+        return DOT.matcher(word).replaceAll('.' + cssPrefix + '-');
+    }
+
+    private static boolean isEmpty(final String string) {
+        if (null == string) {
+            return true;
+        }
+        final int len = string.length();
+        boolean isWhitespace = true;
+        for (int i = 0; isWhitespace && i < len; i++) {
+            isWhitespace = Character.isWhitespace(string.charAt(i));
+        }
+        return isWhitespace;
+    }
+
     private String checkPossibleURL(final String val) {
         final Matcher m = PATTERN_URL_SOLE.matcher(val);
         if (!m.matches()) {
@@ -547,7 +660,7 @@ public final class FilterJerichoHandler implements JerichoHandler {
             builder.setLength(restoreLen);
             builder.append(url);
         } catch (final Exception e) {
-            final org.apache.commons.logging.Log log = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(HTMLURLReplacerHandler.class));
+            final org.apache.commons.logging.Log log = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(HTMLURLReplacerHandler.class));
             log.warn("URL replacement failed.", e);
             builder.setLength(restoreLen);
             builder.append(url);
@@ -570,7 +683,7 @@ public final class FilterJerichoHandler implements JerichoHandler {
                 /*
                  * Handle style attribute
                  */
-                checkCSS(cssBuffer.append(cdata), styleMap, true);
+                checkCSS(cssBuffer.append(cdata), styleMap, cssPrefix);
                 String checkedCSS = cssBuffer.toString();
                 cssBuffer.setLength(0);
                 if (dropExternalImages) {
@@ -588,7 +701,7 @@ public final class FilterJerichoHandler implements JerichoHandler {
     @Override
     public void handleComment(final String comment) {
         if (isCss) {
-            checkCSS(cssBuffer.append(comment), styleMap, true);
+            checkCSS(cssBuffer.append(comment), styleMap, cssPrefix);
             String checkedCSS = cssBuffer.toString();
             cssBuffer.setLength(0);
             if (dropExternalImages) {
@@ -934,7 +1047,7 @@ public final class FilterJerichoHandler implements JerichoHandler {
                 String mapStr = null;
                 {
                     final ConfigurationService service = ServiceRegistry.getInstance().getService(ConfigurationService.class);
-                    final String whitelist = null == service ? null : service.getProperty("Whitelist");
+                    final File whitelist = null == service ? null : service.getFileByName("whitelist.properties");
                     if (null == whitelist) {
                         if (LOG.isWarnEnabled()) {
                             LOG.warn("Using default white list");
@@ -980,6 +1093,11 @@ public final class FilterJerichoHandler implements JerichoHandler {
                 }
                 if (!map.containsKey("body")) {
                     map.put("body", null);
+                }
+                for (final String tagName : SINGLE_TAGS) {
+                    if (!map.containsKey(tagName)) {
+                        map.put(tagName, null);
+                    }
                 }
                 staticHTMLMap = Collections.unmodifiableMap(map);
                 staticStyleMap = Collections.unmodifiableMap(parseStyleMap(mapStr));

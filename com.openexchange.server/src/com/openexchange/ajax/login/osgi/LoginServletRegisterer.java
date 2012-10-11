@@ -55,15 +55,17 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import javax.servlet.ServletException;
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.http.HttpService;
 import org.osgi.service.http.NamespaceException;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.openexchange.ajax.Login;
+import com.openexchange.ajax.requesthandler.DefaultDispatcherPrefixService;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.configuration.ServerConfig.Property;
+import com.openexchange.dispatcher.DispatcherPrefixService;
+import com.openexchange.log.LogFactory;
 import com.openexchange.login.ConfigurationProperty;
 
 /**
@@ -74,13 +76,15 @@ import com.openexchange.login.ConfigurationProperty;
 public class LoginServletRegisterer implements ServiceTrackerCustomizer<Object, Object> {
 
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(LoginServletRegisterer.class));
-    private static final String SERVLET_PATH = "/ajax/login";
+    private static final String SERVLET_PATH_APPENDIX = "login";
 
     private final BundleContext context;
     private final Lock lock = new ReentrantLock();
 
     private ConfigurationService configService;
     private HttpService httpService;
+    private DispatcherPrefixService prefixService;
+    
     private Login login;
 
     public LoginServletRegisterer(final BundleContext context) {
@@ -100,7 +104,11 @@ public class LoginServletRegisterer implements ServiceTrackerCustomizer<Object, 
             if (obj instanceof HttpService) {
                 httpService = (HttpService) obj;
             }
-            needsRegistration = null != configService && null != httpService && login == null;
+            if (obj instanceof DispatcherPrefixService) {
+            	prefixService = (DispatcherPrefixService) obj;
+            }
+
+            needsRegistration = null != configService && null != httpService && login == null && prefixService != null;
             if (needsRegistration) {
                 login = new Login();
             }
@@ -115,6 +123,8 @@ public class LoginServletRegisterer implements ServiceTrackerCustomizer<Object, 
             addProperty(params, Property.COOKIE_FORCE_HTTPS);
             addProperty(params, Property.FORCE_HTTPS);
             addProperty(params, Property.IP_CHECK);
+            addProperty(params, Property.IP_MASK_V4);
+            addProperty(params, Property.IP_MASK_V6);
             final String tmp = configService.getText("noipcheck.cnf");
             if (null != tmp) {
                 params.put(ConfigurationProperty.NO_IP_CHECK_RANGE.getPropertyName(), tmp);
@@ -128,7 +138,7 @@ public class LoginServletRegisterer implements ServiceTrackerCustomizer<Object, 
             addProperty(params, ConfigurationProperty.REDIRECT_IP_CHANGE_ALLOWED);
             try {
                 LOG.info("Registering login servlet.");
-                httpService.registerServlet(SERVLET_PATH, new Login(), params, null);
+                httpService.registerServlet(prefixService.getPrefix() + SERVLET_PATH_APPENDIX, new Login(), params, null);
             } catch (final ServletException e) {
                 LOG.error("Registering login servlet failed.", e);
             } catch (final NamespaceException e) {
@@ -176,7 +186,7 @@ public class LoginServletRegisterer implements ServiceTrackerCustomizer<Object, 
         }
         if (null != unregister) {
             LOG.info("Unregistering login servlet.");
-            unregister.unregister(SERVLET_PATH);
+            unregister.unregister(DefaultDispatcherPrefixService.getInstance().getPrefix() + SERVLET_PATH_APPENDIX);
         }
         context.ungetService(reference);
     }

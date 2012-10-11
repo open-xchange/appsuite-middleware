@@ -52,6 +52,8 @@ package com.openexchange.messaging.json.actions.accounts;
 import junit.framework.TestCase;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.contexts.SimContext;
+import com.openexchange.groupware.ldap.SimUser;
 import com.openexchange.messaging.MessagingAccount;
 import com.openexchange.messaging.SimAccountManager;
 import com.openexchange.messaging.SimMessagingService;
@@ -81,7 +83,7 @@ public class DeleteTest extends TestCase {
         requestData.putParameter("id", "12");
         requestData.putParameter("messagingService", "com.openexchange.twitter");
 
-        final SimServerSession session = new SimServerSession(null, null, null);
+        final SimServerSession session = new SimServerSession(new SimContext(1), new SimUser(), null);
 
         final DeleteAction action = new DeleteAction(registry);
         action.perform(requestData, session);
@@ -98,7 +100,7 @@ public class DeleteTest extends TestCase {
         final AJAXRequestData requestData = new AJAXRequestData();
         requestData.putParameter("messagingService", "com.openexchange.twitter");
 
-        final SimServerSession session = new SimServerSession(null, null, null);
+        final SimServerSession session = new SimServerSession(new SimContext(1), new SimUser(), null);
 
         final DeleteAction action = new DeleteAction(null);
 
@@ -114,7 +116,7 @@ public class DeleteTest extends TestCase {
         final AJAXRequestData requestData = new AJAXRequestData();
         requestData.putParameter("id", "12");
 
-        final SimServerSession session = new SimServerSession(null, null, null);
+        final SimServerSession session = new SimServerSession(new SimContext(1), new SimUser(), null);
 
         final DeleteAction action = new DeleteAction(null);
 
@@ -131,7 +133,7 @@ public class DeleteTest extends TestCase {
         requestData.putParameter("id", "I'm not a number");
         requestData.putParameter("messagingService", "com.openexchange.twitter");
 
-        final SimServerSession session = new SimServerSession(null, null, null);
+        final SimServerSession session = new SimServerSession(new SimContext(1), new SimUser(), null);
 
         final DeleteAction action = new DeleteAction(null);
 
@@ -144,9 +146,9 @@ public class DeleteTest extends TestCase {
 
     }
 
-    public void testOXExceptionInRegistry() throws OXException {
+    public void testMessagingExceptionInRegistry() throws OXException {
         final SimMessagingServiceRegistry registry = new SimMessagingServiceRegistry();
-        registry.setException(new OXException());
+        registry.setException(new OXException(-1));
 
         final SimAccountManager accManager = new SimAccountManager();
         final SimMessagingService service = new SimMessagingService();
@@ -159,7 +161,7 @@ public class DeleteTest extends TestCase {
         requestData.putParameter("id", "12");
         requestData.putParameter("messagingService", "com.openexchange.twitter");
 
-        final SimServerSession session = new SimServerSession(null, null, null);
+        final SimServerSession session = new SimServerSession(new SimContext(1), new SimUser(), null);
 
         final DeleteAction action = new DeleteAction(registry);
         try {
@@ -171,11 +173,11 @@ public class DeleteTest extends TestCase {
 
     }
 
-    public void testOXExceptionInAccountManager() throws OXException {
+    public void testMessagingExceptionInAccountManager() throws OXException {
         final SimMessagingServiceRegistry registry = new SimMessagingServiceRegistry();
 
         final SimAccountManager accManager = new SimAccountManager();
-        accManager.setException(new OXException());
+        accManager.setException(new OXException(-1));
         final SimMessagingService service = new SimMessagingService();
         service.setAccountManager(accManager);
 
@@ -186,7 +188,7 @@ public class DeleteTest extends TestCase {
         requestData.putParameter("id", "12");
         requestData.putParameter("messagingService", "com.openexchange.twitter");
 
-        final SimServerSession session = new SimServerSession(null, null, null);
+        final SimServerSession session = new SimServerSession(new SimContext(1), new SimUser(), null);
 
         final DeleteAction action = new DeleteAction(registry);
         try {

@@ -108,7 +108,7 @@ import com.openexchange.tools.stream.UnsynchronizedByteArrayInputStream;
  */
 public final class TNEF2ICal {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(TNEF2ICal.class));
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(TNEF2ICal.class));
 
     /**
      * Initializes a new {@link TNEF2ICal}.

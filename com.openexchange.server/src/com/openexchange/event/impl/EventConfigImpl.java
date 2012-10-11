@@ -49,12 +49,13 @@
 
 package com.openexchange.event.impl;
 
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Properties;
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import com.openexchange.log.LogFactory;
 import com.openexchange.groupware.configuration.AbstractConfigWrapper;
 
 /**
@@ -76,7 +77,7 @@ public class EventConfigImpl extends AbstractConfigWrapper implements EventConfi
 
     }
 
-    public EventConfigImpl(final String propfile) {
+    public EventConfigImpl(final File propfile) {
         /*-
          * This if statement always yields false
          *

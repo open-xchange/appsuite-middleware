@@ -52,13 +52,13 @@ package com.openexchange.tools.versit.utility;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
+
 import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.api2.TasksSQLInterface;
+import com.openexchange.contact.ContactService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
 import com.openexchange.groupware.calendar.CalendarDataObject;
-import com.openexchange.groupware.contact.ContactInterface;
-import com.openexchange.groupware.contact.ContactInterfaceDiscoveryService;
 import com.openexchange.groupware.container.CommonObject;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.FolderObject;
@@ -81,7 +81,7 @@ import com.openexchange.tools.versit.converter.OXContainerConverter;
  */
 public final class VersitUtility {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(VersitUtility.class));
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(VersitUtility.class));
 
     /**
      * No instantiation
@@ -122,9 +122,8 @@ public final class VersitUtility {
                 final Contact contactObj = oxc.convertContact(vo);
                 contactObj.setParentFolderID(new OXFolderAccess(ctx).getDefaultFolder(session.getUserId(), FolderObject.CONTACT).getObjectID());
                 contactObj.setContextId(ctx.getContextId());
-                final ContactInterface contactInterface = ServerServiceRegistry.getInstance().getService(
-                    ContactInterfaceDiscoveryService.class).newContactInterface(contactObj.getParentFolderID(), session);
-                contactInterface.insertContactObject(contactObj);
+                final ContactService contactService = ServerServiceRegistry.getInstance().getService(ContactService.class);
+                contactService.createContact(session, Integer.toString(contactObj.getParentFolderID()), contactObj);
                 /*
                  * Add to list
                  */

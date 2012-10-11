@@ -2,11 +2,12 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Open-Xchange Text-Extraction Bundle
 Bundle-SymbolicName: com.openexchange.textxtraction
-Bundle-Version: 6.21.0
+Bundle-Version: 6.22.0
 Bundle-Activator: com.openexchange.textxtraction.osgi.TextXtractionActivator
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
-Import-Package: com.openexchange.exception,
+Import-Package: com.openexchange.config,
+ com.openexchange.exception,
  com.openexchange.i18n,
  com.openexchange.java,
  com.openexchange.log,
@@ -15,6 +16,21 @@ Import-Package: com.openexchange.exception,
  javax.swing.text.html,
  javax.swing.text.html.parser,
  javax.swing.text.rtf,
+ javax.xml,
+ javax.xml.datatype,
+ javax.xml.namespace,
+ javax.xml.parsers,
+ javax.xml.stream,
+ javax.xml.stream.events,
+ javax.xml.stream.util,
+ javax.xml.transform,
+ javax.xml.transform.dom,
+ javax.xml.transform.sax,
+ javax.xml.transform.stream,
+ javax.xml.xpath,
+ net.htmlparser.jericho,
+ net.htmlparser.jericho.nodoc,
+ org.apache.commons.io,
  org.apache.commons.logging,
  org.apache.tika,
  org.apache.tika.config,
@@ -56,9 +72,30 @@ Import-Package: com.openexchange.exception,
  org.apache.tika.sax,
  org.apache.tika.sax.xpath,
  org.apache.tika.utils,
+ org.apache.xerces.impl,
+ org.apache.xerces.parsers,
+ org.apache.xerces.util,
+ org.apache.xerces.xni,
+ org.apache.xerces.xni.parser,
+ org.apache.xmlbeans,
+ org.jdom2,
+ org.jdom2.input,
+ org.jdom2.output,
  org.osgi.framework,
- org.osgi.util.tracker
-Bundle-ActivationPolicy: lazy
+ org.osgi.util.tracker,
+ org.w3c.dom,
+ org.w3c.dom.css,
+ org.w3c.dom.ranges,
+ org.w3c.dom.stylesheets,
+ org.w3c.dom.traversal,
+ org.xml.sax,
+ org.xml.sax.ext,
+ org.xml.sax.helpers
 Export-Package: com.openexchange.textxtraction
-Bundle-ClassPath: lib/jericho-3.2.jar,
+Bundle-ClassPath: lib/pdfbox-1.7.0.jar,
+ lib/poi-3.8.jar,
+ lib/poi-contrib-3.6.jar,
+ lib/poi-scratchpad-3.8.jar,
+ lib/poi-ooxml-3.8.jar,
+ lib/dom4j-1.6.1.jar,
  .

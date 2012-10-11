@@ -70,7 +70,7 @@ public class LocalizedDatabaseFolder extends DatabaseFolder {
 
     private static final long serialVersionUID = 3830248343115931304L;
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(LocalizedDatabaseFolder.class));
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(LocalizedDatabaseFolder.class));
 
     private ConcurrentMap<Locale, Future<String>> localizedNames;
 

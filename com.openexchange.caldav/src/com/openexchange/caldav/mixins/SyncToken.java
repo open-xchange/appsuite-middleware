@@ -50,8 +50,11 @@
 package com.openexchange.caldav.mixins;
 
 import java.util.Date;
-import com.openexchange.caldav.GroupwareCaldavFactory;
+import org.apache.commons.logging.Log;
+import com.openexchange.caldav.resources.CommonCollection;
+import com.openexchange.log.LogFactory;
 import com.openexchange.webdav.protocol.Protocol;
+import com.openexchange.webdav.protocol.WebdavProtocolException;
 import com.openexchange.webdav.protocol.helpers.SingleXMLPropertyMixin;
 
 
@@ -59,25 +62,30 @@ import com.openexchange.webdav.protocol.helpers.SingleXMLPropertyMixin;
  * {@link SyncToken}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 public class SyncToken extends SingleXMLPropertyMixin {
 
-    private final int folderId;
-    private final GroupwareCaldavFactory factory;
-    private String value;
-    
-    public SyncToken(int folderId, GroupwareCaldavFactory factory) {
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(SyncToken.class);
+
+    private String value = null;
+    private final CommonCollection collection;
+
+    public SyncToken(CommonCollection collection) {
         super(Protocol.DAV_NS.getURI(), "sync-token");
-        this.folderId = folderId;
-        this.factory = factory;
+        this.collection = collection;
     }
     
     @Override
     protected String getValue() {
-    	if (null == this.value) {
-    		final Date lastModification = this.factory.getState().getLastModification(this.folderId);
-    		this.value = null != lastModification ? Long.toString(lastModification.getTime()) : "0";
-    	}
-    	return this.value;
+        if (null == value && null != collection) {
+            try {
+                Date lastModified = this.collection.getLastModified();
+                this.value = Long.toString(null != lastModified ? lastModified.getTime() : 0);
+            } catch (WebdavProtocolException e) {
+                LOG.error("error determining sync-token from collection", e);
+            }
+        }
+        return value;
     }
 }

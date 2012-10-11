@@ -1,0 +1,19 @@
+Source: open-xchange-admin-user-copy
+Section: web
+Priority: optional
+Maintainer: Jan Bauerdick <jan.bauerdick@open-xchange.com>
+Build-Depends: debhelper (>= 4.0.0), ant (>= 1.7.0), ant-optional (>= 1.7.0), sun-java6-jdk|java6-sdk, open-xchange-core (>= @OXVERSION@), open-xchange-admin (>=@OXVERSION@)
+Standards-Version: 3.8.4
+Homepage: http://www.open-xchange.com
+
+Package: open-xchange-admin-user-copy
+Architecture: all
+Depends: ${misc:Depends}, open-xchange-admin (>= @OXVERSION@)
+Replaces: open-xchange-admin-plugin-user-copy, open-xchange-admin-plugin-user-copy-client, open-xchange-user-copy
+Conflicts: open-xchange-admin-plugin-user-copy, open-xchange-admin-plugin-user-copy-client, open-xchange-user-copy
+Description: Extension to copy users into other contexts
+ This package installs administrative OSGi bundles that provide the extension to copy a user into another context. This is mainly used to
+ combine several users into the same context. To complete the move of a user, the user can be deleted in the source context after copying
+ it to the destination context.
+ This extension only copies all the private data of a user. All public information in a context does not belong to any user and therefore it is
+ not copied at all. The sharing information of the private data of a user needs to be removed.

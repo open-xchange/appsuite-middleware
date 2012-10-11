@@ -67,6 +67,9 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.attach.AttachmentBase;
 import com.openexchange.groupware.attach.Attachments;
+import com.openexchange.groupware.container.CalendarObject;
+import com.openexchange.groupware.container.CommonObject;
+import com.openexchange.groupware.container.FolderChildObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.server.services.ServerServiceRegistry;
@@ -142,7 +145,7 @@ public final class TaskIterator2 implements TaskIterator, Runnable {
         final List<Integer> tmp1 = new ArrayList<Integer>(attributes.length);
         final List<Integer> tmp2 = new ArrayList<Integer>(attributes.length);
         for (final int column : attributes) {
-            if (null == Mapping.getMapping(column) && Task.FOLDER_ID != column) {
+            if (null == Mapping.getMapping(column) && FolderChildObject.FOLDER_ID != column) {
                 tmp2.add(I(column));
             } else {
                 tmp1.add(I(column));
@@ -154,19 +157,19 @@ public final class TaskIterator2 implements TaskIterator, Runnable {
         this.type = type;
         this.con = con;
         final ThreadPoolService threadPool = ServerServiceRegistry.getInstance().getService(ThreadPoolService.class);
-        runner = threadPool.submit(ThreadPools.task(this));
+        runner = threadPool.submit(ThreadPools.trackableTask(this));
     }
 
     private void modifyAdditionalAttributes(final List<Integer> additional) {
         // If participants are requested we also add users automatically. Users
         // are calculated from participants.
-        if (additional.contains(I(Task.USERS))) {
-            if (!additional.contains(I(Task.PARTICIPANTS))) {
-                additional.add(I(Task.PARTICIPANTS));
+        if (additional.contains(I(CalendarObject.USERS))) {
+            if (!additional.contains(I(CalendarObject.PARTICIPANTS))) {
+                additional.add(I(CalendarObject.PARTICIPANTS));
             }
             // Not removed users will give SearchIteratorException in code
             // below.
-            additional.remove(I(Task.USERS));
+            additional.remove(I(CalendarObject.USERS));
         }
     }
 
@@ -203,17 +206,17 @@ public final class TaskIterator2 implements TaskIterator, Runnable {
                 tasks.addAll(preread.take(additionalAttributes.length > 0));
                 for (final int attribute : additionalAttributes) {
                     switch (attribute) {
-                    case Task.LAST_MODIFIED_OF_NEWEST_ATTACHMENT:
+                    case CommonObject.LAST_MODIFIED_OF_NEWEST_ATTACHMENT:
                         addLastModifiedOfNewestAttachment(tasks);
                         break;
-                    case Task.PARTICIPANTS:
+                    case CalendarObject.PARTICIPANTS:
                         try {
                             readParticipants(tasks);
                         } catch (final OXException e) {
                             throw e;
                         }
                         break;
-                    case Task.ALARM:
+                    case CalendarObject.ALARM:
                         try {
                             if (con == null) {
                                 Reminder.loadReminder(ctx, userId, tasks);
@@ -325,7 +328,7 @@ public final class TaskIterator2 implements TaskIterator, Runnable {
                 int pos = 1;
                 for (final int taskField : taskAttributes) {
                     final Mapper<?> mapper = Mapping.getMapping(taskField);
-                    if (Task.FOLDER_ID == taskField) {
+                    if (FolderChildObject.FOLDER_ID == taskField) {
                         if (-1 == folderId) {
                             task.setParentFolderID(result.getInt(pos++));
                         } else {

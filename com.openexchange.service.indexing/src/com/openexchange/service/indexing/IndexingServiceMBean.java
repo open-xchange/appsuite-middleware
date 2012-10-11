@@ -86,5 +86,15 @@ public interface IndexingServiceMBean {
      * @throws MBeanException If receiver cannot be stopped
      */
     public void stopReceiving() throws MBeanException;
+    
+    /**
+     * Queues an indexing job. The user needs to have an active session on this machine.
+     * 
+     * @param contextId The context id.
+     * @param userId The user id.
+     * @param fullName The mail folder's full name.
+     * @throws MBeanException If enqueue operation fails
+     */
+    public void queueIndexingJob(int contextId, int userId, String fullName) throws MBeanException;
 
 }

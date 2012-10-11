@@ -50,13 +50,16 @@
 package com.openexchange.oauth.json.osgi;
 
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.dispatcher.DispatcherPrefixService;
+import com.openexchange.log.LogFactory;
+import com.openexchange.oauth.OAuthHTTPClientFactory;
 import com.openexchange.oauth.OAuthService;
 import com.openexchange.oauth.json.AbstractOAuthAJAXActionService;
 import com.openexchange.oauth.json.oauthaccount.actions.AccountActionFactory;
 import com.openexchange.oauth.json.oauthmeta.actions.MetaDataActionFactory;
+import com.openexchange.oauth.json.proxy.OAuthProxyActionFactory;
 import com.openexchange.oauth.json.service.ServiceRegistry;
 import com.openexchange.osgi.RegistryServiceTrackerCustomizer;
 import com.openexchange.secret.osgi.tools.WhiteboardSecretService;
@@ -76,7 +79,7 @@ public class OAuthJSONActivator extends AJAXModuleActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ConfigurationService.class };
+        return new Class<?>[] { ConfigurationService.class, DispatcherPrefixService.class, OAuthService.class, OAuthHTTPClientFactory.class };
     }
 
     @Override
@@ -110,16 +113,11 @@ public class OAuthJSONActivator extends AJAXModuleActivator {
                     registry.addService(classe, service);
                 }
             }
+            AbstractOAuthAJAXActionService.PREFIX.set(getService(DispatcherPrefixService.class));
             /*
              * Service trackers
              */
             track(OAuthService.class, new RegistryServiceTrackerCustomizer<OAuthService>(context, registry, OAuthService.class));
-            /*
-             * Tracker for HTTPService to register servlets
-             */
-            // trackers.add(new SessionServletRegistration(context, new AccountServlet(), "/ajax/" + AccountMultipleHandlerFactory.MODULE));
-            // trackers.add(new SessionServletRegistration(context,new MetaDataServlet(), "/ajax/" +
-            // MetaDataMultipleHandlerFactory.MODULE));
             /*
              * Open trackers
              */
@@ -129,6 +127,7 @@ public class OAuthJSONActivator extends AJAXModuleActivator {
              */
             registerModule(AccountActionFactory.getInstance(), "oauth/accounts");
             registerModule(MetaDataActionFactory.getInstance(), "oauth/services");
+            registerModule(new OAuthProxyActionFactory(getService(OAuthService.class), getService(OAuthHTTPClientFactory.class)), "oauth/proxy");
             /*
              * Apply OAuth service to actions
              */
@@ -156,9 +155,10 @@ public class OAuthJSONActivator extends AJAXModuleActivator {
                 oAuthService = null;
             }
             AbstractOAuthAJAXActionService.setOAuthService(null);
+            AbstractOAuthAJAXActionService.PREFIX.set(null);
             ServiceRegistry.getInstance().clearRegistry();
         } catch (final Exception e) {
-            com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(OAuthJSONActivator.class)).error(e.getMessage(), e);
+            com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(OAuthJSONActivator.class)).error(e.getMessage(), e);
             throw e;
         }
     }

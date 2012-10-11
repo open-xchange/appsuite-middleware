@@ -79,7 +79,7 @@ public abstract class MimeFileMailPart extends MailPart {
     private static final long serialVersionUID = 257902073011243269L;
 
     private static final transient org.apache.commons.logging.Log LOG =
-        com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(MimeFileMailPart.class));
+        com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(MimeFileMailPart.class));
 
     private final File file;
 

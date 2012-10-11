@@ -50,21 +50,18 @@ package com.openexchange.spamhandler.spamexperts.impl;
  */
 
 import java.io.IOException;
-
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
 import org.json.JSONException;
 import org.json.JSONObject;
-
 import com.openexchange.ajax.DataServlet;
 import com.openexchange.ajax.container.Response;
-import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.session.Session;
-import com.openexchange.tools.servlet.OXJSONException;
+import com.openexchange.tools.servlet.OXJSONExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -84,18 +81,19 @@ public final class MyServlet extends DataServlet {
 	 * 
 	 */
 	private static final long serialVersionUID = -8914926421736440078L;
-	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(MyServlet.class);
+	private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.loggerFor(MyServlet.class);
 
 	public MyServlet() {
 		super();
 	}
 
 	@Override
-	protected boolean hasModulePermission(ServerSession session) {
+	protected boolean hasModulePermission(final ServerSession session) {
 		return true;
 	}
 
-	protected void doGet(final HttpServletRequest req,
+	@Override
+    protected void doGet(final HttpServletRequest req,
 			final HttpServletResponse resp) throws ServletException,
 			IOException {
 
@@ -111,7 +109,7 @@ public final class MyServlet extends DataServlet {
 				jsonObj = convertParameter2JSONObject(req);
 			} catch (final JSONException e) {
 				LOG.error(e.getMessage(), e);
-				response.setException(new OXJSONException(OXJSONException.Code.JSON_BUILD_ERROR, e));
+				response.setException(OXJSONExceptionCodes.JSON_BUILD_ERROR.create(e));
 				writeResponse(response, resp);
 				return;
 			}
@@ -120,11 +118,11 @@ public final class MyServlet extends DataServlet {
 			final Object responseObj = proRequest.action(action, jsonObj);
 			response.setData(responseObj);
 
-		} catch (final AbstractOXException e) {
+		} catch (final OXException e) {
 			LOG.error(e.getMessage(), e);
 			response.setException(e);
 		} catch (final JSONException e) {
-			final OXJSONException oje = new OXJSONException(OXJSONException.Code.JSON_WRITE_ERROR, e);
+			final OXException oje = OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e);
 			LOG.error(oje.getMessage(), oje);
 			response.setException(oje);
 		}

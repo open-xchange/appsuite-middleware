@@ -91,7 +91,7 @@ import com.openexchange.mail.uuencode.UUEncodedPart;
  */
 public final class MultipleMailPartHandler implements MailMessageHandler {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(MultipleMailPartHandler.class));
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(MultipleMailPartHandler.class));
 
     private static final class TextMailPart extends MailPart {
 
@@ -257,6 +257,11 @@ public final class MultipleMailPartHandler implements MailMessageHandler {
             }
             return (ids.size() > mailParts.size());
         }
+        return true;
+    }
+
+    @Override
+    public boolean handleMultipartEnd(final MailPart mp, final String id) throws OXException {
         return true;
     }
 

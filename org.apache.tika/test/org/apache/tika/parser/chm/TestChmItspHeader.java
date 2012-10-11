@@ -26,7 +26,7 @@ import org.apache.tika.parser.chm.core.ChmConstants;
 
 /**
  * Tests all public methods of the ChmItspHeader
- *
+ * 
  */
 public class TestChmItspHeader extends TestCase {
     private ChmItspHeader chmItspHeader = null;

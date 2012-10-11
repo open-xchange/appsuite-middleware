@@ -54,7 +54,7 @@ import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.framework.AJAXRequest;
 import com.openexchange.ajax.framework.AbstractAJAXResponse;
 import com.openexchange.ajax.framework.Header;
-import com.openexchange.groupware.importexport.Format;
+import com.openexchange.importexport.formats.Format;
 
 /**
  *

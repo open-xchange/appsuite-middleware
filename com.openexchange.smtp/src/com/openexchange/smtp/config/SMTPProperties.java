@@ -64,7 +64,7 @@ import com.openexchange.mail.transport.config.TransportProperties;
  */
 public final class SMTPProperties extends AbstractProtocolProperties implements ISMTPProperties {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(SMTPProperties.class));
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(SMTPProperties.class));
 
     private static final SMTPProperties instance = new SMTPProperties();
 

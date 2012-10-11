@@ -49,6 +49,7 @@
 
 package com.openexchange.exception;
 
+import java.io.Serializable;
 import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -73,7 +74,7 @@ import com.openexchange.session.Session;
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class OXException extends Exception implements OXExceptionConstants {
+public class OXException extends Exception implements OXExceptionConstants, Serializable {
 
     // ([A-Z_]+)\((".*").*,
     // public static final String $1_MSG = $2;
@@ -85,7 +86,7 @@ public class OXException extends Exception implements OXExceptionConstants {
     // $1($1_MSG,
 
     private static final org.apache.commons.logging.Log LOG =
-        com.openexchange.exception.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(OXException.class));
+        com.openexchange.exception.Log.valueOf(com.openexchange.log.LogFactory.getLog(OXException.class));
 
     private static final long serialVersionUID = 2058371531364916608L;
 
@@ -111,7 +112,11 @@ public class OXException extends Exception implements OXExceptionConstants {
         /**
          * No generic type set.
          */
-        NONE, NOT_FOUND,
+        NONE,
+        /**
+         * Not found.
+         */
+        NOT_FOUND,
         /**
          * The exception was caused due to missing permissions needed to access a certain module and/or module.
          */
@@ -841,9 +846,9 @@ public class OXException extends Exception implements OXExceptionConstants {
             } catch (final NullPointerException e) {
                 msg = null;
             } catch (final MissingFormatArgumentException e) {
-                LOG.debug("Missing format argument.", e);
+                LOG.debug("Missing format argument: >>" + msg + "<<", e);
             } catch (final IllegalFormatException e) {
-                LOG.error("Illegal message format.", e);
+                LOG.error("Illegal message format: >>" + msg + "<<", e);
             }
         }
         return msg;

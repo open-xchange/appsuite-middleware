@@ -65,7 +65,7 @@ import com.openexchange.mail.smal.impl.SmalMailProviderRegistry;
 public final class SmalProviderServiceTracker implements ServiceTrackerCustomizer<MailProvider, MailProvider> {
 
     private static final org.apache.commons.logging.Log LOG =
-        com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(SmalProviderServiceTracker.class));
+        com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(SmalProviderServiceTracker.class));
 
     private final BundleContext context;
 

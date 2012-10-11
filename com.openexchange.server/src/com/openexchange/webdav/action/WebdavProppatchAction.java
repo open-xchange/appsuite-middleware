@@ -52,17 +52,14 @@ package com.openexchange.webdav.action;
 import java.io.IOException;
 import java.io.Writer;
 import java.util.List;
-
 import javax.servlet.http.HttpServletResponse;
-
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.jdom.Document;
-import org.jdom.Element;
-import org.jdom.JDOMException;
-import org.jdom.Namespace;
-import org.jdom.output.XMLOutputter;
-
+import org.jdom2.Document;
+import org.jdom2.Element;
+import org.jdom2.JDOMException;
+import org.jdom2.Namespace;
+import org.jdom2.output.XMLOutputter;
+import com.openexchange.log.LogFactory;
 import com.openexchange.tools.UnsynchronizedStringWriter;
 import com.openexchange.webdav.protocol.Protocol;
 import com.openexchange.webdav.protocol.WebdavProperty;
@@ -109,7 +106,7 @@ public class WebdavProppatchAction extends AbstractAction {
 			multistatus.addContent(response);
 
 			final WebdavResource resource = req.getResource();
-			for(final Element element : (List<Element>) requestDoc.getRootElement().getChildren()) {
+			for(final Element element : requestDoc.getRootElement().getChildren()) {
 				PropertyAction action = null;
 				if(element.getNamespace().equals(DAV_NS)) {
 					if("set".equals(element.getName())) {
@@ -123,12 +120,13 @@ public class WebdavProppatchAction extends AbstractAction {
 					continue;
 				}
 
-				for(final Element prop : (List<Element>) element.getChildren("prop", DAV_NS)) {
+				for(final Element prop : element.getChildren("prop", DAV_NS)) {
 					response.addContent(action.perform(prop, resource));
 				}
 			}
 			resource.save();
 			res.setStatus(Protocol.SC_MULTISTATUS);
+            res.setContentType("text/xml");
 			outputter.output(responseDoc, res.getOutputStream());
 
 
@@ -166,7 +164,7 @@ public class WebdavProppatchAction extends AbstractAction {
 				return propstat;
 			}
 
-			final Element propertyElement = (Element) propElement.getChildren().get(0);
+			final Element propertyElement = propElement.getChildren().get(0);
 			final WebdavProperty property = new WebdavProperty();
 			property.setNamespace(propertyElement.getNamespaceURI());
 			property.setName(propertyElement.getName());
@@ -228,7 +226,7 @@ public class WebdavProppatchAction extends AbstractAction {
 				propstat.addContent(statusElement);
 				return propstat;
 			}
-			final Element propertyElement = (Element) propElement.getChildren().get(0);
+			final Element propertyElement = propElement.getChildren().get(0);
 
 			try {
 				resource.removeProperty(propertyElement.getNamespaceURI(), propertyElement.getName());

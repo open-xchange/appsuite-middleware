@@ -1,0 +1,27 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: HTTP Client Helpers
+Bundle-SymbolicName: com.openexchange.http.client
+Bundle-Version: 6.22.0
+Bundle-Activator: com.openexchange.http.client.osgi.HTTPClientActivator
+Bundle-Vendor: Open-Xchange Inc.
+Bundle-RequiredExecutionEnvironment: J2SE-1.5
+Import-Package: com.openexchange.exception,
+ com.openexchange.filemanagement,
+ com.openexchange.groupware,
+ com.openexchange.i18n,
+ com.openexchange.osgi,
+ com.openexchange.tools.ssl,
+ org.apache.commons.httpclient,
+ org.apache.commons.httpclient.auth,
+ org.apache.commons.httpclient.cookie,
+ org.apache.commons.httpclient.methods,
+ org.apache.commons.httpclient.methods.multipart,
+ org.apache.commons.httpclient.params,
+ org.apache.commons.httpclient.protocol,
+ org.apache.commons.httpclient.util,
+ org.osgi.framework;version="1.3.0"
+Export-Package: com.openexchange.http.client,
+ com.openexchange.http.client.apache,
+ com.openexchange.http.client.builder,
+ com.openexchange.http.client.exceptions

@@ -1,0 +1,16 @@
+Source: open-xchange-admin-soap
+Section: web
+Priority: optional
+Maintainer: Marcus Klein <marcus.klein@open-xchange.com>
+Build-Depends: debhelper (>= 4.0.0), ant (>= 1.7.0), ant-optional (>= 1.7.0), sun-java6-jdk|java6-sdk, open-xchange-admin (>= @OXVERSION@)
+Standards-Version: 3.8.4
+Homepage: http://www.open-xchange.com
+
+Package: open-xchange-admin-soap
+Architecture: all
+Depends: ${misc:Depends}, open-xchange-admin (>= @OXVERSION@), open-xchange-soap-cxf (>= @OXVERSION@)
+Description: The Open-Xchange administrative SOAP interface
+ This package installs the OSGi bundles that provide a SOAP interface to administer the backend installation. This is an extension to the
+ administrative RMI interfaces. RMI can only be used with Java while SOAP enables a lot of programming languages for administrative clients.
+ This package contains the SOAP interfaces for registering, changing and deleting servers, databases and filestores. It also add the
+ interfaces for creating, changing and deleting contexts, users, groups and resources.

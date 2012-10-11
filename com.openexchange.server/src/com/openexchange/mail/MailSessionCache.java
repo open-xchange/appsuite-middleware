@@ -70,6 +70,9 @@ public final class MailSessionCache {
      * @return The session-bound mail cache.
      */
     public static MailSessionCache getInstance(final Session session) {
+        if (null == session) {
+            return null;
+        }
         final String key = MailSessionParameterNames.getParamMainCache();
         MailSessionCache mailCache = null;
         try {
@@ -82,26 +85,19 @@ public final class MailSessionCache {
             session.setParameter(key, null);
         }
         if (null == mailCache) {
-            final Lock lock = (Lock) session.getParameter(Session.PARAM_LOCK);
+            Lock lock = (Lock) session.getParameter(Session.PARAM_LOCK);
             if (null == lock) {
-                synchronized (session) {
-                    mailCache = (MailSessionCache) session.getParameter(key);
-                    if (null == mailCache) {
-                        mailCache = new MailSessionCache();
-                        session.setParameter(key, mailCache);
-                    }
+                lock = Session.EMPTY_LOCK;
             }
-            } else {
-                lock.lock();
-                try {
-                    mailCache = (MailSessionCache) session.getParameter(key);
-                    if (null == mailCache) {
-                        mailCache = new MailSessionCache();
-                        session.setParameter(key, mailCache);
-                    }
-                } finally {
-                    lock.unlock();
+            lock.lock();
+            try {
+                mailCache = (MailSessionCache) session.getParameter(key);
+                if (null == mailCache) {
+                    mailCache = new MailSessionCache();
+                    session.setParameter(key, mailCache);
                 }
+            } finally {
+                lock.unlock();
             }
         }
         return mailCache;
@@ -126,26 +122,19 @@ public final class MailSessionCache {
             return;
         }
         if (null != mailCache) {
-            final Lock lock = (Lock) session.getParameter(Session.PARAM_LOCK);
+            Lock lock = (Lock) session.getParameter(Session.PARAM_LOCK);
             if (null == lock) {
-                synchronized (session) {
-                    mailCache = (MailSessionCache) session.getParameter(key);
-                    if (null != mailCache) {
-                        mailCache.clear();
-                        session.setParameter(key, null);
-                    }
+                lock = Session.EMPTY_LOCK;
+            }
+            lock.lock();
+            try {
+                mailCache = (MailSessionCache) session.getParameter(key);
+                if (null != mailCache) {
+                    mailCache.clear();
+                    session.setParameter(key, null);
                 }
-            } else {
-                lock.lock();
-                try {
-                    mailCache = (MailSessionCache) session.getParameter(key);
-                    if (null != mailCache) {
-                        mailCache.clear();
-                        session.setParameter(key, null);
-                    }
-                } finally {
-                    lock.unlock();
-                }
+            } finally {
+                lock.unlock();
             }
         }
     }

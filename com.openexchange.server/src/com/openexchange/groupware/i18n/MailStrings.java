@@ -82,7 +82,7 @@ public class MailStrings implements LocalizableStrings {
         .intern();
 
     // The alternative internationalized name for the sent mail folder
-    public static final String SENT_ALT = "Sent Items"
+    public static final String SENT_ALT = "Sent items"
         .intern();
 
     // The internationalized name for the spam mail folder
@@ -107,7 +107,7 @@ public class MailStrings implements LocalizableStrings {
 
 
     // The internationalized subject for a read acknowledgement
-    public static final String ACK_SUBJECT = "Read Acknowledgement";
+    public static final String ACK_SUBJECT = "Read acknowledgement";
 
     // The text body of a received read acknowledgement
     // #DATE# is replaced with the sent date of referenced email

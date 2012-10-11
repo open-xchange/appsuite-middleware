@@ -83,10 +83,12 @@ public class AddITipAnalyzer extends AbstractITipAnalyzer {
         super(util, services);
     }
 
+    @Override
     public List<ITipMethod> getMethods() {
         return Arrays.asList(ITipMethod.ADD);
     }
 
+    @Override
     public ITipAnalysis analyze(ITipMessage message, Map<String, String> header, TypeWrapper wrapper, Locale locale, User user, Context ctx, Session session) throws OXException {
        
 
@@ -97,9 +99,14 @@ public class AddITipAnalyzer extends AbstractITipAnalyzer {
         List<Appointment> exceptions = null;
         boolean findActions = true;
         for (CalendarDataObject exception : message.exceptions()) {
-        	exception = exception.clone();
-        	ensureParticipant(exception, session);
-        	ITipChange change = new ITipChange();
+            exception = exception.clone();
+            int owner = session.getUserId();
+            if (message.getOwner() > 0 && message.getOwner() != session.getUserId()) {
+                owner = message.getOwner();
+            }
+
+            ensureParticipant(exception, session, owner);
+            ITipChange change = new ITipChange();
             change.setType(Type.CREATE);
             change.setException(true);
             if (master == null) {

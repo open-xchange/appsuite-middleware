@@ -56,15 +56,17 @@ import java.util.List;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.log.LogFactory;
 import com.openexchange.log.LogProperties;
 import com.openexchange.log.Props;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.AddSessionParameter;
+import com.openexchange.sessiond.Parameterized;
 import com.openexchange.sessiond.SessionMatcher;
 import com.openexchange.sessiond.SessiondService;
+import com.openexchange.sessiond.SessiondServiceExtended;
 
 /**
  * {@link SessiondServiceImpl} - Implementation of {@link SessiondService}
@@ -72,7 +74,11 @@ import com.openexchange.sessiond.SessiondService;
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class SessiondServiceImpl implements SessiondService {
+public class SessiondServiceImpl implements SessiondServiceExtended {
+
+    private static final String PARAM_SESSION = Parameterized.PARAM_SESSION;
+
+    private static final String PARAM_VOLATILE = Parameterized.PARAM_VOLATILE;
 
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(SessiondServiceImpl.class));
 
@@ -84,18 +90,33 @@ public class SessiondServiceImpl implements SessiondService {
     }
 
     @Override
+    public boolean hasForContext(final int contextId) {
+        return SessionHandler.hasForContext(contextId);
+    }
+
+    @Override
     public String addSession(final AddSessionParameter param) throws OXException {
-        return SessionHandler.addSession(param.getUserId(), param.getUserLoginInfo(), param.getPassword(), param.getContext().getContextId(), param.getClientIP(), param.getFullLogin(), param.getAuthId(), param.getHash(), param.getClient());
+        final Parameterized parameterized = (param instanceof Parameterized) ? (Parameterized) param : null;
+        final boolean isVolatile;
+        if (null == parameterized) {
+            isVolatile = false;
+        } else {
+            final Boolean parameter = parameterized.<Boolean> getParameter(PARAM_VOLATILE);
+            isVolatile = null == parameter ? false : parameter.booleanValue();
+        }
+        final SessionImpl session = SessionHandler.addSession(param.getUserId(), param.getUserLoginInfo(), param.getPassword(), param.getContext().getContextId(), param.getClientIP(), param.getFullLogin(), param.getAuthId(), param.getHash(), param.getClient(), isVolatile);
+        if (null == session) {
+            return null;
+        }
+        if (null != parameterized) {
+            parameterized.setParameter(PARAM_SESSION, session);
+        }
+        return session.getSessionID();
     }
 
     @Override
     public void changeSessionPassword(final String sessionId, final String newPassword) throws OXException {
         SessionHandler.changeSessionPassword(sessionId, newPassword);
-    }
-
-    @Override
-    public boolean refreshSession(final String sessionId) {
-        return SessionHandler.refreshSession(sessionId);
     }
 
     @Override

@@ -1029,5 +1029,11 @@ public class MockCalendarCollectionService implements CalendarCollectionService{
         // TODO Auto-generated method stub
         return null;
     }
+	@Override
+	public void setRecurrencePositionOrDateInDAO(CalendarDataObject cdao,
+			boolean ignore_exceptions) throws OXException {
+		// TODO Auto-generated method stub
+		
+	}
 
 }

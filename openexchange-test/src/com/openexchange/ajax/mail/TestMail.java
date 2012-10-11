@@ -76,8 +76,10 @@ import com.openexchange.mail.MailListField;
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
 public class TestMail implements IdentitySource<TestMail> {
+    
+    private String from;
 
-    private List<String> from, to, cc, bcc;
+    private List<String> to, cc, bcc;
 
     private List<JSONObject> attachment;
 
@@ -134,11 +136,11 @@ public class TestMail implements IdentitySource<TestMail> {
         this.priority = priority;
     }
 
-    public List<String> getFrom() {
+    public String getFrom() {
         return from;
     }
 
-    public void setFrom(final List<String> from) {
+    public void setFrom(final String from) {
         this.from = from;
     }
 
@@ -242,7 +244,7 @@ public class TestMail implements IdentitySource<TestMail> {
     }
 
     public TestMail(final String sender, final String recipient, final String subject, final String contentType, final String text) throws JSONException {
-        setFrom(Arrays.asList(new String[] { sender }));
+        setFrom(sender);
         setTo(Arrays.asList(new String[] { recipient }));
         setSubject(subject);
         setContentType(contentType);
@@ -330,7 +332,7 @@ public class TestMail implements IdentitySource<TestMail> {
             final MailListField field = MailListField.getField(columns[index]);
             // lists
             if (field == MailListField.FROM) {
-                setFrom(j2l(values.getJSONArray(index)));
+                setFrom(values.getString(index));
             }
             if (field == MailListField.TO) {
                 setTo(j2l(values.getJSONArray(index)));
@@ -440,7 +442,7 @@ public class TestMail implements IdentitySource<TestMail> {
 
     public void setBy(final MailListField field, final Object value) {
         if (field == MailListField.FROM) {
-            setFrom(addresses2list((String) value));
+            setFrom((String) value);
         }
         if (field == MailListField.TO) {
             setTo(addresses2list((String) value));
@@ -528,7 +530,7 @@ public class TestMail implements IdentitySource<TestMail> {
      */
     public JSONObject toJSON() throws JSONException {
         final JSONObject result = new JSONObject();
-        result.put(MailJSONField.FROM.getKey(), correctMailAddresses(getFrom()));
+        result.put(MailJSONField.FROM.getKey(), getFrom());
         result.put(MailJSONField.RECIPIENT_TO.getKey(), getTo() != null ? correctMailAddresses(getTo()) : "");
         result.put(MailJSONField.RECIPIENT_BCC.getKey(), getBcc() != null ? correctMailAddresses(getBcc()) : "");
         result.put(MailJSONField.RECIPIENT_CC.getKey(), getCc() != null ? correctMailAddresses(getCc()) : "");
@@ -571,7 +573,7 @@ public class TestMail implements IdentitySource<TestMail> {
         bob.append("Folder = " + getFolder() + ", ID = " + getId() + "\n");
         if (from != null) {
             bob.append("From: ");
-            bob.append(Strings.join(from, ", "));
+            bob.append(from);
         }
         if (from != null) {
             bob.append("\nTo: ");

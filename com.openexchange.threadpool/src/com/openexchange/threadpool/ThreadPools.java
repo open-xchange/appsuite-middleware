@@ -52,6 +52,7 @@ package com.openexchange.threadpool;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CompletionService;
 import java.util.concurrent.ExecutionException;
@@ -60,8 +61,11 @@ import java.util.concurrent.Future;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 import com.openexchange.exception.OXException;
+import com.openexchange.log.LogProperties;
+import com.openexchange.log.Props;
 import com.openexchange.threadpool.internal.CustomThreadFactory;
 import com.openexchange.threadpool.osgi.ThreadPoolActivator;
+import com.openexchange.timer.TimerService;
 
 /**
  * {@link ThreadPools} - Utility methods for {@link ThreadPoolService} and {@link Task}.
@@ -70,7 +74,7 @@ import com.openexchange.threadpool.osgi.ThreadPoolActivator;
  */
 public final class ThreadPools {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(ThreadPools.class));
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(ThreadPools.class));
 
     /**
      * Initializes a new {@link ThreadPools}.
@@ -85,7 +89,16 @@ public final class ThreadPools {
      * @return The thread pool or <code>null</code>
      */
     public static ThreadPoolService getThreadPool() {
-        return ThreadPoolActivator.REF.get();
+        return ThreadPoolActivator.REF_THREAD_POOL.get();
+    }
+
+    /**
+     * Gets registered timer service.
+     * 
+     * @return The timer service or <code>null</code>
+     */
+    public static TimerService getTimerService() {
+        return ThreadPoolActivator.REF_TIMER.get();
     }
 
     /**
@@ -319,6 +332,24 @@ public final class ThreadPools {
     }
 
     /**
+     * Returns a {@link Task} object that, when called, runs the given task and returns the given result. This can be useful when applying
+     * methods requiring a <tt>Task</tt> to an otherwise resultless action.
+     *
+     * @param task The task to run
+     * @param result The result to return
+     * @param trackable Whether the task is trackable
+     * @throws NullPointerException If task is <code>null</code>
+     * @return A {@link Task} object
+     */
+    public static <T> Task<T> task(final Runnable task, final T result, final boolean trackable) {
+        if (task == null) {
+            throw new NullPointerException();
+        }
+        final RunnableAdapter<T> callable = new RunnableAdapter<T>(task, result);
+        return trackable ? new TrackableTaskAdapter<T>(callable) : new TaskAdapter<T>(callable);
+    }
+
+    /**
      * Returns a {@link Task} object that, when called, runs the given task and returns <tt>null</tt>.
      *
      * @param task The task to run
@@ -330,6 +361,20 @@ public final class ThreadPools {
             throw new NullPointerException();
         }
         return new TaskAdapter<Object>(new RunnableAdapter<Object>(task, null));
+    }
+
+    /**
+     * Returns a trackable {@link Task} object that, when called, runs the given task and returns <tt>null</tt>.
+     *
+     * @param task The task to run
+     * @return A {@link Task} object
+     * @throws NullPointerException If task is <code>null</code>
+     */
+    public static Task<Object> trackableTask(final Runnable task) {
+        if (task == null) {
+            throw new NullPointerException();
+        }
+        return new TrackableTaskAdapter<Object>(new RunnableAdapter<Object>(task, null));
     }
 
     /**
@@ -359,6 +404,21 @@ public final class ThreadPools {
             throw new NullPointerException();
         }
         return new TaskAdapter<T>(task);
+    }
+
+    /**
+     * Returns a {@link Task} object that, when called, returns the given task's result.
+     *
+     * @param task The task to run
+     * @param trackable Whether the task is trackable
+     * @return A {@link Task} object
+     * @throws NullPointerException If task is <code>null</code>
+     */
+    public static <T> Task<T> task(final Callable<T> task, final boolean trackable) {
+        if (task == null) {
+            throw new NullPointerException();
+        }
+        return trackable ? new TrackableTaskAdapter<T>(task) : new TaskAdapter<T>(task);
     }
 
     /**
@@ -403,7 +463,7 @@ public final class ThreadPools {
     /**
      * A {@link Callable} that runs given task and returns given result
      */
-    private static final class RunnableAdapter<T> implements Callable<T> {
+    private static class RunnableAdapter<T> implements Callable<T> {
 
         private final Runnable task;
 
@@ -422,7 +482,7 @@ public final class ThreadPools {
 
     }
 
-    private static final class TaskAdapter<V> implements Task<V> {
+    private static class TaskAdapter<V> implements Task<V> {
 
         private final Callable<V> callable;
 
@@ -456,7 +516,21 @@ public final class ThreadPools {
 
     }
 
-    private static final class RenamingTaskAdapter<V> implements Task<V> {
+    private static class TrackableTaskAdapter<V> extends TaskAdapter<V> implements Trackable {
+        private final Map<String, Object> props;
+        TrackableTaskAdapter(final Callable<V> callable) {
+            super(callable);
+            final Props props = LogProperties.optLogProperties(Thread.currentThread());
+            this.props = null == props ? null : Collections.unmodifiableMap(props.getMap());
+        }
+
+        @Override
+        public Map<String, Object> optLogProperties() {
+            return props;
+        }
+    }
+
+    private static class RenamingTaskAdapter<V> implements Task<V> {
 
         private final Callable<V> callable;
 
@@ -491,6 +565,21 @@ public final class ThreadPools {
             return callable.call();
         }
 
+    }
+
+    private static class TrackableRenamingTaskAdapter<V> extends RenamingTaskAdapter<V> implements Trackable {
+
+        private final Map<String, Object> props;
+        TrackableRenamingTaskAdapter(final Callable<V> callable, final String prefix) {
+            super(callable, prefix);
+            final Props props = LogProperties.optLogProperties(Thread.currentThread());
+            this.props = null == props ? null : Collections.unmodifiableMap(props.getMap());
+        }
+
+        @Override
+        public Map<String, Object> optLogProperties() {
+            return props;
+        }
     }
 
     private static class CurrentThreadExecutorService extends java.util.concurrent.AbstractExecutorService {

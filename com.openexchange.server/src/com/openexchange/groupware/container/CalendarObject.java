@@ -50,10 +50,12 @@
 package com.openexchange.groupware.container;
 
 import static com.openexchange.java.Autoboxing.I;
+
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+
 import com.openexchange.groupware.container.participants.ConfirmableParticipant;
 
 /**
@@ -63,7 +65,9 @@ import com.openexchange.groupware.container.participants.ConfirmableParticipant;
  */
 public abstract class CalendarObject extends CommonObject {
 
-	public static final int TITLE = 200;
+    private static final long serialVersionUID = 8108851156436746900L;
+
+    public static final int TITLE = 200;
 
 	public static final int START_DATE = 201;
 
@@ -108,8 +112,6 @@ public abstract class CalendarObject extends CommonObject {
 	 * occur.
 	 */
 	public static final int RECURRENCE_COUNT = 222;
-
-	public static final int UID = 223;
 
 	public static final int ORGANIZER = 224;
 
@@ -216,8 +218,6 @@ public abstract class CalendarObject extends CommonObject {
 
 	protected String confirmMessage;
 
-	protected String uid;
-
 	protected String organizer;
 
 	protected int sequence;
@@ -277,8 +277,6 @@ public abstract class CalendarObject extends CommonObject {
 	protected boolean b_confirmMessage;
 
 	protected boolean b_occurrence;
-
-	protected boolean b_uid;
 
 	protected boolean b_organizer;
 
@@ -377,10 +375,6 @@ public abstract class CalendarObject extends CommonObject {
 
 	public int getOccurrence() {
 		return occurrence;
-	}
-
-	public String getUid() {
-		return uid;
 	}
 
 	public String getOrganizer() {
@@ -537,11 +531,6 @@ public abstract class CalendarObject extends CommonObject {
 		b_occurrence = true;
 	}
 
-	public void setUid(String uid) {
-		this.uid = uid;
-		b_uid = true;
-	}
-
 	public void setOrganizer(String organizer) {
 		this.organizer = organizer;
 		b_organizer = true;
@@ -663,11 +652,6 @@ public abstract class CalendarObject extends CommonObject {
 		b_occurrence = false;
 	}
 
-	public void removeUid() {
-		uid = null;
-		b_uid = false;
-	}
-
 	public void removeOrganizer() {
 		organizer = null;
 		b_organizer = false;
@@ -773,10 +757,6 @@ public abstract class CalendarObject extends CommonObject {
 	public void setParticipants(final Participant[] participants) {
 		this.participants = participants;
 		b_participants = true;
-	}
-
-	public boolean containsUid() {
-		return b_uid;
 	}
 
 	public boolean containsOrganizer() {
@@ -903,7 +883,6 @@ public abstract class CalendarObject extends CommonObject {
 		users = null;
 		confirmations = null;
 		occurrence = 0;
-		uid = null;
 		organizer = null;
 		sequence = 0;
 		organizerId = 0;
@@ -927,7 +906,6 @@ public abstract class CalendarObject extends CommonObject {
 		b_participants = false;
 		b_users = false;
 		b_occurrence = false;
-		b_uid = false;
 		b_organizer = false;
 		b_sequence = false;
 		b_organizerId = false;
@@ -1186,13 +1164,6 @@ public abstract class CalendarObject extends CommonObject {
 			differingFields.add(USERS);
 		}
 
-		if ((!containsUid() && other.containsUid())
-				|| (containsUid() && other.containsUid()
-						&& getUid() != other.getUid() && (getUid() == null || !getUid()
-						.equals(other.getUid())))) {
-			differingFields.add(UID);
-		}
-
 		if ((!containsOrganizer() && other.containsOrganizer())
 				|| (containsOrganizer() && other.containsOrganizer()
 						&& getOrganizer() != other.getOrganizer() && (getOrganizer() == null || !getOrganizer()
@@ -1391,9 +1362,6 @@ public abstract class CalendarObject extends CommonObject {
 				setDeleteExceptions((Date[]) value);
 			}
 			break;
-		case UID:
-			setUid((String) value);
-			break;
 		case ORGANIZER:
 			setOrganizer((String) value);
 			break;
@@ -1443,10 +1411,11 @@ public abstract class CalendarObject extends CommonObject {
 		case MONTH:
 			return getMonth();
 		case RECURRENCE_COUNT:
-			if (containsRecurrenceCount())
-				return getRecurrenceCount();
-			else
-				return getOccurrence();
+			if (containsRecurrenceCount()) {
+                return getRecurrenceCount();
+            } else {
+                return getOccurrence();
+            }
 		case DAY_IN_MONTH:
 			return getDayInMonth();
 		case RECURRENCE_TYPE:
@@ -1465,8 +1434,6 @@ public abstract class CalendarObject extends CommonObject {
 			return getChangeException();
 		case DELETE_EXCEPTIONS:
 			return getDeleteException();
-		case UID:
-			return getUid();
 		case ORGANIZER:
 			return getOrganizer();
 		case SEQUENCE:
@@ -1534,8 +1501,6 @@ public abstract class CalendarObject extends CommonObject {
 			return containsDeleteExceptions();
 		case RECURRENCE_CALCULATOR:
 			return true;
-		case UID:
-			return containsUid();
 		case ORGANIZER:
 			return containsOrganizer();
 		case SEQUENCE:
@@ -1620,9 +1585,6 @@ public abstract class CalendarObject extends CommonObject {
             removeDeleteExceptions();
         case RECURRENCE_CALCULATOR:
             return;
-        case UID:
-            removeUid();
-            break;
         case ORGANIZER:
             removeOrganizer();
             break;
@@ -1657,5 +1619,41 @@ public abstract class CalendarObject extends CommonObject {
 	@Override
 	public String toString() {
 		return "[" + this.getObjectID() + "] " + this.getTitle();
+	}
+	
+	@Override
+    public CalendarObject clone() {
+	    CalendarObject retval;
+        try {
+            retval = (CalendarObject) super.clone();
+            
+            if (getParticipants() != null) {
+                Participant[] clonedParticipants = new Participant[getParticipants().length];
+                for (int i = 0; i < getParticipants().length; i++) {
+                    clonedParticipants[i] = getParticipants()[i].getClone();
+                }
+                retval.setParticipants(clonedParticipants);
+            }
+            
+            if (getConfirmations() != null) {
+                ConfirmableParticipant[] clonedConfirmations = new ConfirmableParticipant[getConfirmations().length];
+                for (int i = 0; i < getConfirmations().length; i++) {
+                    clonedConfirmations[i] = getConfirmations()[i].getClone();
+                }
+                retval.setConfirmations(clonedConfirmations);
+            }
+            
+            if (getUsers() != null) {
+                UserParticipant[] clonedUsers = new UserParticipant[getUsers().length];
+                for (int i = 0; i <  getUsers().length; i++) {
+                    clonedUsers[i] = getUsers()[i].getClone();
+                }
+                retval.setUsers(clonedUsers);
+            }
+            
+        } catch (CloneNotSupportedException e) {
+            throw new InternalError(e.getMessage());
+        }
+	    return retval;
 	}
 }

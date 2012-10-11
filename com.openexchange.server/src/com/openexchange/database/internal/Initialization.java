@@ -50,12 +50,12 @@
 package com.openexchange.database.internal;
 
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import com.openexchange.caching.CacheService;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.database.DBPoolingExceptionCodes;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
+import com.openexchange.log.LogFactory;
 
 /**
  * {@link Initialization}
@@ -82,7 +82,7 @@ public final class Initialization {
 
     private ConfigDatabaseServiceImpl configDatabaseService;
 
-    private DatabaseServiceImpl databaseService;
+    private volatile DatabaseServiceImpl databaseService;
 
     /**
      * Prevent instantiation.
@@ -98,43 +98,63 @@ public final class Initialization {
     public boolean isStarted() {
         return null != pools;
     }
+    
+    /**
+     * Gets the database service
+     *
+     * @return The database service or <code>null</code> if not initialized, yet
+     */
+    public DatabaseService getDatabaseService() {
+        return databaseService;
+    }
 
     public DatabaseService start(final ConfigurationService configurationService) throws OXException {
-        if (null != pools) {
-            throw DBPoolingExceptionCodes.ALREADY_INITIALIZED.create(Initialization.class.getName());
-        }
-        // Parse configuration
-        configuration.readConfiguration(configurationService);
-        // Set timer interval
-        timer.configure(configuration);
-        // Setting up database connection pools.
-        pools = new Pools(timer);
-        management.addOverview(new Overview(pools));
-        // Add life cycle for configuration database
-        final ConfigDatabaseLifeCycle configDBLifeCycle = new ConfigDatabaseLifeCycle(configuration, management, timer);
-        pools.addLifeCycle(configDBLifeCycle);
-        // Configuration database connection pool service.
-        configDatabaseService = new ConfigDatabaseServiceImpl(configuration.getPoolConfig().forceWriteOnly, new ConfigDatabaseAssignmentImpl(), pools);
+        return start0(configurationService, false);
+    }
 
-        // Context database assignments.
-        contextAssignment = new ContextDatabaseAssignmentImpl(configDatabaseService);
-        if (null != cacheService) {
-            contextAssignment.setCacheService(cacheService);
-        }
-        // Context pool life cycle.
-        final ContextDatabaseLifeCycle contextDBLifeCycle = new ContextDatabaseLifeCycle(configuration, management, timer, configDatabaseService);
-        pools.addLifeCycle(contextDBLifeCycle);
+    public DatabaseService startIfAbsent(final ConfigurationService configurationService) throws OXException {
+        return start0(configurationService, true);
+    }
 
-        Server.setConfigDatabaseService(configDatabaseService);
-        Server.start(configurationService);
-        try {
-            LOG.info("Resolved server name \"" + Server.getServerName() + "\" to identifier " + Server.getServerId());
-        } catch (final OXException e) {
-            LOG.warn("Resolving server name to an identifier failed. This is normal until a server has been registered.", e);
+    private DatabaseService start0(final ConfigurationService configurationService, final boolean returnIfPresent) throws OXException {
+        synchronized (management) {
+            if (null != pools) {
+                if (returnIfPresent) {
+                    return databaseService;
+                }
+                throw DBPoolingExceptionCodes.ALREADY_INITIALIZED.create(Initialization.class.getName());
+            }
+            // Parse configuration
+            configuration.readConfiguration(configurationService);
+            // Set timer interval
+            timer.configure(configuration);
+            // Setting up database connection pools.
+            pools = new Pools(timer);
+            management.addOverview(new Overview(pools));
+            // Add life cycle for configuration database
+            final ConfigDatabaseLifeCycle configDBLifeCycle = new ConfigDatabaseLifeCycle(configuration, management, timer);
+            pools.addLifeCycle(configDBLifeCycle);
+            // Configuration database connection pool service.
+            configDatabaseService = new ConfigDatabaseServiceImpl(new ConfigDatabaseAssignmentImpl(), pools);
+            // Context database assignments.
+            contextAssignment = new ContextDatabaseAssignmentImpl(configDatabaseService);
+            if (null != cacheService) {
+                contextAssignment.setCacheService(cacheService);
+            }
+            // Context pool life cycle.
+            final ContextDatabaseLifeCycle contextDBLifeCycle =
+                new ContextDatabaseLifeCycle(configuration, management, timer, configDatabaseService);
+            pools.addLifeCycle(contextDBLifeCycle);
+            Server.setConfigDatabaseService(configDatabaseService);
+            Server.start(configurationService);
+            try {
+                LOG.info("Resolved server name \"" + Server.getServerName() + "\" to identifier " + Server.getServerId());
+            } catch (final OXException e) {
+                LOG.warn("Resolving server name to an identifier failed. This is normal until a server has been registered.", e);
+            }
+            databaseService = new DatabaseServiceImpl(pools, configDatabaseService, contextAssignment);
+            return databaseService;
         }
-
-        databaseService = new DatabaseServiceImpl(configuration.getPoolConfig().forceWriteOnly, pools, configDatabaseService, contextAssignment);
-        return databaseService;
     }
 
     public void stop() {

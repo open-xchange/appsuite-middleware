@@ -25,7 +25,9 @@ import java.util.Set;
 import junit.framework.TestCase;
 
 import org.apache.tika.exception.TikaException;
+import org.apache.tika.metadata.HttpHeaders;
 import org.apache.tika.metadata.Metadata;
+import org.apache.tika.metadata.TikaMetadataKeys;
 import org.apache.tika.mime.MediaType;
 import org.apache.tika.parser.AbstractParser;
 import org.apache.tika.parser.AutoDetectParser;
@@ -40,18 +42,18 @@ import org.xml.sax.SAXException;
 public abstract class AbstractPkgTest extends TestCase {
    protected ParseContext trackingContext;
    protected ParseContext recursingContext;
-
+   
    protected Parser autoDetectParser;
    protected EmbeddedTrackingParser tracker;
 
    @Override
 protected void setUp() throws Exception {
       super.setUp();
-
+      
       tracker = new EmbeddedTrackingParser();
       trackingContext = new ParseContext();
       trackingContext.set(Parser.class, tracker);
-
+      
       autoDetectParser = new AutoDetectParser();
       recursingContext = new ParseContext();
       recursingContext.set(Parser.class, autoDetectParser);
@@ -63,12 +65,12 @@ protected void setUp() throws Exception {
       protected List<String> filenames = new ArrayList<String>();
       protected List<String> mediatypes = new ArrayList<String>();
       protected byte[] lastSeenStart;
-
+      
       public void reset() {
          filenames.clear();
          mediatypes.clear();
       }
-
+      
       @Override
     public Set<MediaType> getSupportedTypes(ParseContext context) {
          // Cheat!
@@ -79,9 +81,9 @@ protected void setUp() throws Exception {
     public void parse(InputStream stream, ContentHandler handler,
             Metadata metadata, ParseContext context) throws IOException,
             SAXException, TikaException {
-         filenames.add(metadata.get(Metadata.RESOURCE_NAME_KEY));
-         mediatypes.add(metadata.get(Metadata.CONTENT_TYPE));
-
+         filenames.add(metadata.get(TikaMetadataKeys.RESOURCE_NAME_KEY));
+         mediatypes.add(metadata.get(HttpHeaders.CONTENT_TYPE));
+         
          lastSeenStart = new byte[32];
          stream.read(lastSeenStart);
       }

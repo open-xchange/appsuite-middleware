@@ -50,7 +50,7 @@
 package com.openexchange.sessiond.impl;
 
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import com.openexchange.log.LogFactory;
 
 /**
  * This timer rotates the containers in the SessionHandler.

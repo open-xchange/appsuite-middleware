@@ -66,22 +66,10 @@ public final class SolrIndexExceptionMessages implements LocalizableStrings {
         super();
     }
 
-    // Could not find solr core entry for user %1$s and module %2$s in context %3$s.
-    public static final String CORE_ENTRY_NOT_FOUND_MSG = "Did not find solr core entry for user %1$s and module %2$s in context %3$s.";
-
-    // Could not find solr core store for given attributes. %1$s.
-    public static final String CORE_STORE_ENTRY_NOT_FOUND_MSG = "Could not find solr core store for given attributes. %1$s.";
-
-    // All core stores seem to be full.
-    public static final String NO_FREE_CORE_STORE_MSG = "All core stores seem to be full.";   
+    // No IndexAccess implementation was found for module %1$s.
+    public static final String MISSING_ACCESS_FOR_MODULE_MSG = "No IndexAccess implementation was found for module %1$s.";
     
-    // This cores instance directory (%1$s) already exists. It cannot be created.
-    public static final String INSTANCE_DIR_EXISTS_MSG = "This cores instance directory (%1$s) already exists. It cannot be created.";
-
-    // An index fault occurred: %1$s
-    public static final String INDEX_FAULT_MSG = "An index fault occurred: %1$s";
-
-    // No IndexAccess implementation was found for module $1%s.
-    public static final String MISSING_ACCESS_FOR_MODULE_MSG = "No IndexAccess implementation was found for module $1%s.";
+    // An I/O Error occurred: %1$s
+    public static final String IO_ERROR_MSG = "An I/O Error occurred: %1$s";
     
 }

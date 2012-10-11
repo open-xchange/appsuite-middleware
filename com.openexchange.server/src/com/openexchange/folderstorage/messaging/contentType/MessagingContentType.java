@@ -53,16 +53,18 @@ import com.openexchange.folderstorage.ContentType;
 
 /**
  * {@link MessagingContentType} - The folder storage content type for messaging.
- *
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class MessagingContentType implements ContentType {
+
+    private static final long serialVersionUID = 509747715670881803L;
 
     private static final MessagingContentType instance = new MessagingContentType();
 
     /**
      * Gets the {@link MessagingContentType} instance.
-     *
+     * 
      * @return The {@link MessagingContentType} instance
      */
     public static MessagingContentType getInstance() {

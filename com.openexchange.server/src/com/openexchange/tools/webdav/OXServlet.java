@@ -61,13 +61,14 @@ import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.jdom.Document;
-import org.jdom.JDOMException;
+import org.jdom2.Document;
+import org.jdom2.JDOMException;
 import com.openexchange.ajax.fields.Header;
+import com.openexchange.ajax.fields.LoginFields;
 import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.util.UUIDs;
+import com.openexchange.log.LogFactory;
 import com.openexchange.login.Interface;
 import com.openexchange.login.LoginRequest;
 import com.openexchange.login.internal.LoginPerformer;
@@ -99,14 +100,21 @@ public abstract class OXServlet extends WebDavServlet {
     private static final class LoginRequestImpl implements LoginRequest {
 
         private final String login;
-
         private final HttpServletRequest req;
-
         private final String pass;
-
+        private final String client;
         private final Interface interfaze;
+        private final String version;
+        private final boolean isVolatile;
+        private final String userAgent;
 
         public LoginRequestImpl(final String login, final String pass, final Interface interfaze, final HttpServletRequest req) {
+            super();
+            this.client = req.getParameter(LoginFields.CLIENT_PARAM);
+            version = req.getParameter(LoginFields.VERSION_PARAM);
+            userAgent = req.getParameter("agent");
+            String parameter = req.getParameter(LoginFields.VOLATILE);
+            this.isVolatile = null != parameter && Boolean.parseBoolean(parameter.trim());
             this.login = login;
             this.req = req;
             this.pass = pass;
@@ -114,8 +122,13 @@ public abstract class OXServlet extends WebDavServlet {
         }
 
         @Override
+        public boolean isVolatile() {
+            return isVolatile;
+        }
+
+        @Override
         public String getUserAgent() {
-            return req.getHeader("user-agent");
+            return null == userAgent ? req.getHeader("user-agent") : userAgent;
         }
 
         @Override
@@ -145,12 +158,12 @@ public abstract class OXServlet extends WebDavServlet {
 
         @Override
         public String getClient() {
-            return null;
+            return client;
         }
 
         @Override
         public String getVersion() {
-            return null;
+            return version;
         }
 
         @Override
@@ -486,7 +499,7 @@ public abstract class OXServlet extends WebDavServlet {
      * @throws IOException if an exception occurs while reading the body.
      */
     protected Document getJDOMDocument(final HttpServletRequest req) throws JDOMException, IOException {
-        org.jdom.Document doc = null;
+        org.jdom2.Document doc = null;
         if (req.getContentLength() > 0) {
             doc = ServerServiceRegistry.getInstance().getService(JDOMParser.class).parse(req.getInputStream());
         }

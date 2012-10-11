@@ -53,7 +53,6 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import com.openexchange.documentation.DocumentationRegistry;
 import com.openexchange.documentation.descriptions.ContainerDescription;
 import com.openexchange.documentation.descriptions.ModuleDescription;
@@ -61,7 +60,7 @@ import com.openexchange.exception.OXException;
 
 /**
  * {@link DefaultDocumentationRegistry} - The default documentation registry.
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
@@ -69,8 +68,8 @@ import com.openexchange.exception.OXException;
  */
 public class DefaultDocumentationRegistry implements DocumentationRegistry {
 
-	private static final Log LOG = LogFactory.getLog(DefaultDocumentationRegistry.class);
-	
+	private static final Log LOG = com.openexchange.log.Log.loggerFor(DefaultDocumentationRegistry.class);
+
     private final Map<String, ModuleDescription> modules;
     private final Map<String, ContainerDescription> containers;
 
@@ -110,8 +109,8 @@ public class DefaultDocumentationRegistry implements DocumentationRegistry {
     }
 
     /**
-     * Registers a new module description using the module's name. 
-     * 
+     * Registers a new module description using the module's name.
+     *
      * @param module the module description to add
      */
     public void addModule(final ModuleDescription module) throws OXException {
@@ -120,7 +119,7 @@ public class DefaultDocumentationRegistry implements DocumentationRegistry {
         }
         if (this.modules.containsKey(module.getName())) {
             throw DocumentationExceptionCode.MODULE_ALREADY_REGISTERED.create(module.getName());
-        }        
+        }
         LOG.debug("Adding module: " + module.getName());
         this.modules.put(module.getName(), module);
         final ContainerDescription[] containers = module.getContainers();
@@ -138,7 +137,7 @@ public class DefaultDocumentationRegistry implements DocumentationRegistry {
 
     /**
      * Removes a module description from the registry.
-     * 
+     *
      * @param name the name of the module description to remove
      */
     public void removeModule(final String name) throws OXException {
@@ -153,5 +152,5 @@ public class DefaultDocumentationRegistry implements DocumentationRegistry {
         	}
         }
     }
-    
+
 }

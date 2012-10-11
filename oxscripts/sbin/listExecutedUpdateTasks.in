@@ -53,10 +53,9 @@ OXCONFIG=@oxscriptconf@
 OXPREFIX=@prefix@
 OXBUNDLES=$OXPREFIX/bundles
 
-
 test -f $OXFUNCTIONS || {
-	echo "missing common shell functions file"
-	exit 1
+    echo "missing common shell functions file"
+    exit 1
 }
 
 . $OXFUNCTIONS
@@ -67,13 +66,12 @@ ox_set_JAVA_BIN
 
 test -z "$JAVA_XTRAOPTS" && JAVA_XTRAOPTS="-Xms20M -Xmx280M"
 
-JAVA_OPTS="${JAVA_XTRAOPTS} \
+JAVA_OPTS="${JAVA_OXCMD_OPTS} \
 -Djava.awt.headless=true \
--Dopenexchange.propfile=$SYSTEMPROPERTIES \
--Dopenexchange.propdir2=$COMMONPROPERTIESDIR \
+-Dopenexchange.propdir=$PROPERTIESDIR \
 -Djava.util.logging.config.file=$LOGGINGPROPERTIES"
 
-CLASSPATH="-classpath $OXBUNDLES/com.openexchange.global.jar:$OXBUNDLES/com.openexchange.server.jar:$OXBUNDLES/org.apache.commons.cli_1.0.0.v20080604-1500.jar:$OXBUNDLES/org.apache.commons.logging_1.0.4.v200706111724.jar"
+CLASSPATH="-classpath $OXBUNDLES/com.openexchange.global/com.openexchange.global.jar:$OXBUNDLES/com.openexchange.server/com.openexchange.server.jar:$OXBUNDLES/org.apache.commons.cli_1.2.0.v201105210650.jar:$OXBUNDLES/org.apache.commons.logging_1.0.4.v200706111724.jar"
 
 umask 066
 exec $JAVA_BIN $JAVA_OPTS $CLASSPATH com.openexchange.groupware.update.tools.console.ListExecutedTasksCLT $@

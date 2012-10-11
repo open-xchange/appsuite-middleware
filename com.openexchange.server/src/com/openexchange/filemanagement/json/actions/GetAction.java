@@ -54,10 +54,11 @@ import java.io.Closeable;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import com.openexchange.ajax.AJAXFile;
+import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.container.ByteArrayFileHolder;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.ajax.requesthandler.DispatcherNotes;
 import com.openexchange.ajax.requesthandler.ETagAwareAJAXActionService;
 import com.openexchange.documentation.RequestMethod;
 import com.openexchange.documentation.annotations.Action;
@@ -83,6 +84,7 @@ import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
     @Parameter(name = "session", description = "A session ID previously obtained from the login module."),
     @Parameter(name = "id", description = "The ID of the uploaded file.")
 }, responseDescription = "The content of the requested file is directly written into output stream.")
+@DispatcherNotes(defaultFormat = "file", allowPublicSession = true)
 public final class GetAction implements ETagAwareAJAXActionService {
 
     private final ServiceLookup services;
@@ -119,9 +121,9 @@ public final class GetAction implements ETagAwareAJAXActionService {
     @Override
     public AJAXRequestResult perform(final AJAXRequestData requestData, final ServerSession session) throws OXException {
         try {
-            final String id = requestData.getParameter(AJAXFile.PARAMETER_ID);
+            final String id = requestData.getParameter(AJAXServlet.PARAMETER_ID);
             if (id == null || id.length() == 0) {
-                throw UploadException.UploadCode.MISSING_PARAM.create(AJAXFile.PARAMETER_ID).setAction(AJAXFile.ACTION_GET);
+                throw UploadException.UploadCode.MISSING_PARAM.create(AJAXServlet.PARAMETER_ID).setAction(AJAXServlet.ACTION_GET);
             }
             final ManagedFileManagement management = ServerServiceRegistry.getInstance().getService(ManagedFileManagement.class);
             final ManagedFile file = management.getByID(id);
@@ -129,7 +131,7 @@ public final class GetAction implements ETagAwareAJAXActionService {
              * Content type
              */
             final String fileName = file.getFileName();
-            String disposition = file.getContentDisposition();
+            final String disposition = file.getContentDisposition();
             final ContentType contentType = new ContentType(file.getContentType());
             if (contentType.getBaseType().equalsIgnoreCase("application/octet-stream")) {
                 /*

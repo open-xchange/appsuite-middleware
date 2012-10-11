@@ -53,10 +53,10 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.Locale;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.regex.Pattern;
 import javax.servlet.http.HttpServletRequest;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -64,8 +64,6 @@ import org.json.JSONObject;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.notify.hostname.HostnameService;
-import com.openexchange.groupware.upload.UploadFile;
-import com.openexchange.groupware.upload.impl.UploadEvent;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.servlet.http.Tools;
 import com.openexchange.tools.session.ServerSession;
@@ -91,13 +89,18 @@ public class AJAXRequestDataTools {
     /*-
      * ----------------------- Member stuff -----------------------
      */
-    
+
     /**
      * Initializes a new {@link AJAXRequestDataTools}.
      */
     protected AJAXRequestDataTools() {
         super();
     }
+
+    /**
+     * The pattern to split by commas.
+     */
+    protected static final Pattern SPLIT_CSV = Pattern.compile("\\s*,\\s*");
 
     /**
      * Parses an appropriate {@link AJAXRequestData} instance from specified arguments.
@@ -114,15 +117,21 @@ public class AJAXRequestDataTools {
     public AJAXRequestData parseRequest(final HttpServletRequest req, final boolean preferStream, final boolean isFileUpload, final ServerSession session, final String prefix) throws IOException, OXException {
         final AJAXRequestData retval = new AJAXRequestData();
         parseHostName(retval, req, session);
+        retval.setMultipart(isFileUpload);
+        /*
+         * Set HTTP Servlet request instance
+         */
+        retval.setHttpServletRequest(req);
         /*
          * Set the module
          */
         retval.setModule(getModule(prefix, req));
-        
+
         /*
          * Set request URI
          */
         retval.setServletRequestURI(AJAXServlet.getServletSpecificURI(req));
+        retval.setPathInfo(req.getPathInfo());
         retval.setAction(getAction(req));
         /*
          * Set the format
@@ -147,21 +156,20 @@ public class AJAXRequestDataTools {
             }
         }
         /*
+         * Check for decorators
+         */
+        {
+            final String parameter = req.getParameter("decorators");
+            if (null != parameter) {
+                for (final String id : SPLIT_CSV.split(parameter, 0)) {
+                    retval.addDecoratorId(id.trim());
+                }
+            }
+        }
+        /*
          * Set request body
          */
-        if (isFileUpload) {
-            final UploadEvent upload = AJAXServlet.processUploadStatic(req);
-            final Iterator<UploadFile> iterator = upload.getUploadFilesIterator();
-            while (iterator.hasNext()) {
-                retval.addFile(iterator.next());
-            }
-            final Iterator<String> names = upload.getFormFieldNames();
-            while (names.hasNext()) {
-                final String name = names.next();
-                retval.putParameter(name, upload.getFormField(name));
-            }
-            retval.setUploadEvent(upload);
-        } else if (preferStream || parseBoolParameter("binary", req)) {
+        if (preferStream || parseBoolParameter("binary", req)) {
             /*
              * Pass request's stream
              */
@@ -196,14 +204,45 @@ public class AJAXRequestDataTools {
         return retval;
     }
 
-    private static final Set<String> BOOL_VALS = Collections.unmodifiableSet(new HashSet<String>(Arrays.asList("true", "1", "yes", "on")));
-
     private static boolean parseBoolParameter(final String name, final HttpServletRequest req) {
-        final String parameter = req.getParameter(name);
+        return parseBoolParameter(req.getParameter(name));
+    }
+
+    /**
+     * Parses denoted <tt>boolean</tt> value from specified request data.
+     * <p>
+     * <code>true</code> if given value is not <code>null</code> and equals ignore-case to one of the values "true", "yes", "y", "on", or
+     * "1".
+     * 
+     * @param name The parameter's name
+     * @param requestData The request data to parse from
+     * @return The parsed <tt>boolean</tt> value (<code>false</code> on absence)
+     */
+    public static boolean parseBoolParameter(final String name, final AJAXRequestData requestData) {
+        return parseBoolParameter(requestData.getParameter(name));
+    }
+
+    private static final Set<String> BOOL_VALS = Collections.unmodifiableSet(new HashSet<String>(Arrays.asList(
+        "true",
+        "1",
+        "yes",
+        "y",
+        "on")));
+
+    /**
+     * Parses denoted <tt>boolean</tt> value from specified <tt>String</tt> parameter.
+     * <p>
+     * <code>true</code> if given value is not <code>null</code> and equals ignore-case to one of the values "true", "yes", "y", "on", or
+     * "1".
+     * 
+     * @param parameter The parameter
+     * @return The parsed <tt>boolean</tt> value (<code>false</code> on absence)
+     */
+    public static boolean parseBoolParameter(final String parameter) {
         if (null == parameter) {
             return false;
         }
-        return BOOL_VALS.contains(parameter.toLowerCase(Locale.ENGLISH));
+        return BOOL_VALS.contains(parameter.trim().toLowerCase(Locale.ENGLISH));
     }
 
     /**
@@ -248,34 +287,38 @@ public class AJAXRequestDataTools {
         return startingChar == toCheck.charAt(i);
     }
 
-	/**
-	 * Gets the module from specified HTTP request.
-	 * 
-	 * @param prefix The dispatcher's default prefix to strip from request's {@link HttpServletRequest#getPathInfo() path info}.
-	 * @param req The HTTP request
-	 * @return The determined module
-	 */
-	public String getModule(final String prefix, final HttpServletRequest req) {
-		 String pathInfo = req.getRequestURI();
-         final int lastIndex = pathInfo.lastIndexOf(';');
-         if (lastIndex > 0) {
-        	 pathInfo = pathInfo.substring(0, lastIndex);
-         }
-         return pathInfo.substring(prefix.length());
-	}
+    /**
+     * Gets the module from specified HTTP request.
+     * 
+     * @param prefix The dispatcher's default prefix to strip from request's {@link HttpServletRequest#getPathInfo() path info}.
+     * @param req The HTTP request
+     * @return The determined module
+     */
+    public String getModule(final String prefix, final HttpServletRequest req) {
+        String pathInfo = req.getRequestURI();
+        final int lastIndex = pathInfo.lastIndexOf(';');
+        if (lastIndex > 0) {
+            pathInfo = pathInfo.substring(0, lastIndex);
+        }
+        String module = pathInfo.substring(prefix.length());
+        if (module.endsWith("/")) {
+        	module = module.substring(0, module.length()-1);
+        }
+        return module;
+    }
 
-	/**
-	 * Gets the action from specified HTTP request.
-	 * 
-	 * @param req The HTTP request
-	 * @return The determined action
-	 */
-	public String getAction(final HttpServletRequest req) {
-		final String action = req.getParameter("action");
-		if (null == action) {
-			return req.getMethod().toUpperCase(Locale.US);
-		}
+    /**
+     * Gets the action from specified HTTP request.
+     * 
+     * @param req The HTTP request
+     * @return The determined action
+     */
+    public String getAction(final HttpServletRequest req) {
+        final String action = req.getParameter("action");
+        if (null == action) {
+            return req.getMethod().toUpperCase(Locale.US);
+        }
         return action;
-        
-	}
+
+    }
 }

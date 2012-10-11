@@ -64,11 +64,11 @@ import java.sql.Types;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import org.apache.commons.collections.keyvalue.MultiKey;
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import com.openexchange.log.LogFactory;
 import com.openexchange.admin.rmi.dataobjects.Database;
 import com.openexchange.admin.rmi.dataobjects.Filestore;
 import com.openexchange.admin.rmi.dataobjects.MaintenanceReason;
@@ -618,10 +618,10 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
             while (result.next()) {
                 int i = 1;
                 final Filestore fs = new Filestore();
-                fs.setId(result.getInt(i++));
+                fs.setId(I(result.getInt(i++)));
                 fs.setUrl(result.getString(i++));
-                fs.setSize(result.getLong(i++));
-                fs.setMaxContexts(result.getInt(i++));
+                fs.setSize(L(result.getLong(i++)));
+                fs.setMaxContexts(I(result.getInt(i++)));
                 stores.add(fs);
             }
         } catch (final SQLException e) {
@@ -1322,118 +1322,43 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
         return fs;
     }
 
-    /* ----------------------- */
-    private class FilestoreInfo {
-
-        public int contextID, filestoreID, writeDBPoolID;
-
-        public long usage;
-
-        public String dbSchema;
-
-        public FilestoreInfo(final int contextID, final int writeDBPoolID, final String dbSchema, final int filestoreID) {
-            this.contextID = contextID;
-            this.writeDBPoolID = writeDBPoolID;
-            this.dbSchema = dbSchema;
-            this.filestoreID = filestoreID;
-        }
-        
-        @Override
-        public String toString(){
-            return "cid: " +contextID + ", fid: " +filestoreID+", db: " + dbSchema + ", writepoolID: "+writeDBPoolID + ", usage: " + usage;
-        }
-    }
-
-    public class FilestoreContextBlock {
-
-        public int representativeContextID, writeDBPoolID, filestoreID;
-
-        public Map<Integer, FilestoreInfo> filestores;
-
-        public FilestoreContextBlock(final int representativeContextID, final int writeDBPoolID, final int filestoreID) {
-            this.representativeContextID = representativeContextID;
-            this.filestores = new HashMap<Integer, FilestoreInfo>();
-            this.writeDBPoolID = writeDBPoolID;
-            this.filestoreID = filestoreID;
-        }
-
-        public int size() {
-            return filestores.size();
-        }
-
-        public void add(final FilestoreInfo newInfo) {
-            filestores.put(newInfo.contextID, newInfo);
-        }
-
-        public void update(final int contextID, final long usage) {
-            final FilestoreInfo info = filestores.get(contextID);
-            if(info != null) {
-                info.usage = usage;
-        }
-        }
-
-        public long getUsage(final int contextID) {
-            if (filestores.containsKey(contextID)) {
-                return filestores.get(contextID).usage;
-            }
-            return 0;
-        }
-        
-        @Override
-        public String toString(){
-            return "["+filestoreID+"] Elements: " + size() + ", writepoolID: " +writeDBPoolID;
-        }
-        
-    }
-
     private void updateFilestoresWithRealUsage(final List<Filestore> stores) throws StorageException {
-        final List<FilestoreContextBlock> blocks = makeBlocksFromFilestoreContexts();
-        
+        final Collection<FilestoreContextBlock> blocks = makeBlocksFromFilestoreContexts();
         for (final FilestoreContextBlock block : blocks) {
-            if (block.size() == 0) {
-                continue;
-            }
             updateBlockWithFilestoreUsage(block);
         }
         updateFilestoresWithUsageFromBlocks(stores, blocks);
         for (final Filestore store: stores){
-            store.setSize(toMB(store.getSize()));
-            store.setUsed(toMB(store.getUsed()));
+            store.setSize(L(toMB(l(store.getSize()))));
+            store.setUsed(L(toMB(l(store.getUsed()))));
         }
     }
 
-    private List<FilestoreContextBlock> makeBlocksFromFilestoreContexts() throws StorageException {
-        PreparedStatement stmt = null;
-        ResultSet result = null;
-        Connection con = null;
+    private Collection<FilestoreContextBlock> makeBlocksFromFilestoreContexts() throws StorageException {
+        final Connection con;
         try {
             con = cache.getConnectionForConfigDB();
-            stmt = con.prepareStatement("SELECT d.cid,d.write_db_pool_id, d.db_schema, c.filestore_id FROM context c JOIN context_server2db_pool d ON c.cid=d.cid WHERE d.server_id=? ORDER BY d.write_db_pool_id,d.db_schema,c.filestore_id ASC;");
+        } catch (final PoolException e) {
+            throw new StorageException(e);
+        }
+        PreparedStatement stmt = null;
+        ResultSet result = null;
+        try {
+            stmt = con.prepareStatement("SELECT d.cid,d.write_db_pool_id,d.db_schema,c.filestore_id FROM context_server2db_pool d JOIN context c ON d.cid=c.cid WHERE d.server_id=?");
             stmt.setInt(1, cache.getServerId());
             result = stmt.executeQuery();
-
-            final LinkedList<FilestoreContextBlock> blocks = new LinkedList<FilestoreContextBlock>();
-
-            String schema = "";
-            int writePool = -1, filestoreID = -1;
-            FilestoreContextBlock block = null;
+            final Map<MultiKey, FilestoreContextBlock> blocks = new HashMap<MultiKey, FilestoreContextBlock>();
             while (result.next()) {
                 final FilestoreInfo temp = new FilestoreInfo(result.getInt(1), result.getInt(2), result.getString(3), result.getInt(4));
-                if (writePool != temp.writeDBPoolID || !schema.equals(temp.dbSchema) || filestoreID != temp.filestoreID) {
-                    if (block != null) {
-                        blocks.add(block);
-                    }
+                final MultiKey key = new MultiKey(I(temp.writeDBPoolID), temp.dbSchema, I(temp.filestoreID));
+                FilestoreContextBlock block = blocks.get(key);
+                if (null == block) {
                     block = new FilestoreContextBlock(temp.contextID, temp.writeDBPoolID, temp.filestoreID);
-                    writePool = temp.writeDBPoolID;
-                    schema = temp.dbSchema;
-                    filestoreID = temp.filestoreID;
+                    blocks.put(key, block);
                 }
                 block.add(temp);
             }
-            if (block != null) {
-                blocks.add(block);
-            }
-            return blocks;
+            return blocks.values();
         } catch (final PoolException e) {
             throw new StorageException(e);
         } catch (final SQLException e) {
@@ -1441,9 +1366,7 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
         } finally {
             closeSQLStuff(result, stmt);
             try {
-                if (con != null) {
-                    cache.pushConnectionForConfigDB(con);
-                }
+                cache.pushConnectionForConfigDB(con);
             } catch (final PoolException e) {
                 throw new StorageException(e);
             }
@@ -1451,11 +1374,18 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
     }
     
     private void updateBlockWithFilestoreUsage(final FilestoreContextBlock block) throws StorageException {
-        Connection con = null;
+        if (block.size() == 0) {
+            return;
+        }
+        final Connection con;
+        try {
+            con = cache.getConnectionForContext(block.representativeContextID);
+        } catch (final PoolException e) {
+            throw new StorageException(e);
+        }
         PreparedStatement stmt = null;
         ResultSet result = null;
         try {
-            con = cache.getConnectionForContext(block.representativeContextID);
             stmt = con.prepareStatement("SELECT cid, used FROM filestore_usage");
             result = stmt.executeQuery();
             while (result.next()) {
@@ -1463,23 +1393,19 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
                 final long usage = result.getLong(2);
                 block.update(cid, usage);
             }
-        } catch (final PoolException e) {
-            throw new StorageException(e);
         } catch (final SQLException e) {
             throw new StorageException(e);
         } finally {
             closeSQLStuff(result, stmt);
             try {
-                if (con != null) {
-                    cache.pushConnectionForContext(block.representativeContextID, con);
-                }
+                cache.pushConnectionForContext(block.representativeContextID, con);
             } catch (final PoolException e) {
                 throw new StorageException(e);
             }
         }
     }
 
-    private void updateFilestoresWithUsageFromBlocks(final List<Filestore> stores, final List<FilestoreContextBlock> blocks) throws StorageException {
+    private void updateFilestoresWithUsageFromBlocks(final List<Filestore> stores, final Collection<FilestoreContextBlock> blocks) throws StorageException {
         final Map<Integer, Long> filestore2usage = new HashMap<Integer, Long>();
         final Map<Integer, Integer> filestore2ctxUsage = new HashMap<Integer, Integer>();
         for (final FilestoreContextBlock block : blocks) {
@@ -1540,30 +1466,6 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
             }
         }
         return quotaUsed;
-    }
-
-    private static final class FilestoreUsage {
-
-        private int ctxCount;
-
-        private long usage;
-
-        FilestoreUsage() {
-            super();
-        }
-
-        final void addContextUsage(final long ctxUsage) {
-            ctxCount++;
-            usage += ctxUsage;
-        }
-
-        final int getCtxCount() {
-            return ctxCount;
-        }
-
-        final long getUsage() {
-            return usage;
-        }
     }
 
     /**

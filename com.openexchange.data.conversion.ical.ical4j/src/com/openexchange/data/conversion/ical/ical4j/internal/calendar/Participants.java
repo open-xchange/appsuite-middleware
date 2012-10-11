@@ -53,10 +53,12 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.TimeZone;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.IDNA;
@@ -66,6 +68,7 @@ import net.fortuna.ical4j.model.Property;
 import net.fortuna.ical4j.model.PropertyList;
 import net.fortuna.ical4j.model.TextList;
 import net.fortuna.ical4j.model.component.CalendarComponent;
+import net.fortuna.ical4j.model.parameter.Cn;
 import net.fortuna.ical4j.model.parameter.CuType;
 import net.fortuna.ical4j.model.parameter.PartStat;
 import net.fortuna.ical4j.model.parameter.Role;
@@ -73,7 +76,6 @@ import net.fortuna.ical4j.model.parameter.Rsvp;
 import net.fortuna.ical4j.model.property.Attendee;
 import net.fortuna.ical4j.model.property.Resources;
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import com.openexchange.data.conversion.ical.ConversionError;
 import com.openexchange.data.conversion.ical.ConversionWarning;
 import com.openexchange.data.conversion.ical.ConversionWarning.Code;
@@ -93,6 +95,7 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.notify.NotificationConfig;
 import com.openexchange.groupware.notify.NotificationConfig.NotificationProperty;
+import com.openexchange.log.LogFactory;
 import com.openexchange.mail.usersetting.UserSettingMailStorage;
 import com.openexchange.resource.Resource;
 
@@ -194,6 +197,8 @@ public class Participants<T extends CalendarComponent, U extends CalendarObject>
             final ParameterList parameters = attendee.getParameters();
             parameters.add(Role.REQ_PARTICIPANT);
             parameters.add(CuType.INDIVIDUAL);
+            final String displayName = this.resolveUserDisplayName(index, userParticipant, ctx);
+            parameters.add(new Cn(null != displayName && 0 < displayName.length() ? displayName : address));
             switch (userParticipant.getConfirm()) {
             case CalendarObject.ACCEPT:
                 parameters.add(PartStat.ACCEPTED);
@@ -202,7 +207,7 @@ public class Participants<T extends CalendarComponent, U extends CalendarObject>
                 parameters.add(PartStat.DECLINED);
                 break;
             case CalendarObject.TENTATIVE:
-                parameters.add(PartStat.NEEDS_ACTION);
+                parameters.add(PartStat.TENTATIVE);
                 break;
             case CalendarObject.NONE:
             default:
@@ -213,6 +218,18 @@ public class Participants<T extends CalendarComponent, U extends CalendarObject>
         } catch (AddressException e) {
             LOG.error(e);
         }
+    }
+
+    protected String resolveUserDisplayName(int index, UserParticipant userParticipant, Context ctx) throws ConversionError {
+        String displayName = userParticipant.getDisplayName();
+        if (null == displayName || 0 == displayName.length()) {
+            try {
+                displayName = userResolver.loadUser(userParticipant.getIdentifier(), ctx).getDisplayName();
+            } catch (OXException e) {
+                LOG.warn("Error resolving displayname for user participant", e);
+            }
+        }
+        return displayName;
     }
 
     protected String resolveUserMail(final int index, final UserParticipant userParticipant, final Context ctx) throws ConversionError {
@@ -271,7 +288,7 @@ public class Participants<T extends CalendarComponent, U extends CalendarObject>
         for(final User user : users) {
             final UserParticipant up = new UserParticipant(user.getId());
             ICalParticipant icalP = null;
-            for (final String alias: user.getAliases()) {
+            for (final String alias: getPossibleAddresses(user)) {
             	String toRemove = null;
             	for(final String mail: mails.keySet()){
             		if(mail.equalsIgnoreCase(alias)){
@@ -287,17 +304,18 @@ public class Participants<T extends CalendarComponent, U extends CalendarObject>
             }
             if (icalP == null) {
                 LOG.warn("Should not be possible to find a user ("+user.getMail()+") by their alias and then be unable to remove that alias  from list");
-            }
-            if (icalP.message != null) {
-                up.setConfirmMessage(icalP.message);
-            }
-            if (icalP.status != -1) {
-                up.setConfirm(icalP.status);
+            } else {
+                if (icalP.message != null) {
+                    up.setConfirmMessage(icalP.message);
+                }
+                if (icalP.status != -1) {
+                    up.setConfirm(icalP.status);
+                }
             }
 
             cObj.addParticipant(up);
         }
-
+        
         final List<ConfirmableParticipant> confirmableParticipants = new ArrayList<ConfirmableParticipant>();
         for(final String mail : mails.keySet()) {
             final ExternalUserParticipant external = new ExternalUserParticipant(mail);
@@ -348,6 +366,20 @@ public class Participants<T extends CalendarComponent, U extends CalendarObject>
                 Code.CANT_RESOLVE_RESOURCE, resourceName);
             warnings.add(warning);
         }
+    }
+
+    
+    private static Set<String> getPossibleAddresses(User user) {
+        Set<String> possibleAddresses = new HashSet<String>();
+        if (null != user.getMail()) {
+            possibleAddresses.add((user.getMail()));
+        }
+        if (null != user.getAliases()) {
+            for (String alias : user.getAliases()) {
+                possibleAddresses.add(alias);
+            }
+        }
+        return possibleAddresses;
     }
 
     /**

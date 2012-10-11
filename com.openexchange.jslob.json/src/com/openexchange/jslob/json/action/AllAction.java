@@ -50,9 +50,9 @@
 package com.openexchange.jslob.json.action;
 
 import java.util.Collection;
+import java.util.Map;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.documentation.RequestMethod;
-import com.openexchange.documentation.Type;
 import com.openexchange.documentation.annotations.Action;
 import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
@@ -72,7 +72,7 @@ import com.openexchange.server.ServiceLookup;
     , description = "Gets all JSlobs associated with the current user and context." 
     , method = RequestMethod.GET
     , parameters = {
-        @Parameter(name = "serviceId", description = "Identifier for the JSLobService lookup in the JSlobServiceRegistry.", optional=true)
+        @Parameter(name = "serviceId", description = "Optional identifier for the JSlob. Default is <tt>com.openexchange.jslob.config</tt>", optional=true)
     }
 )
 public final class AllAction extends JSlobAction {
@@ -82,8 +82,8 @@ public final class AllAction extends JSlobAction {
      * 
      * @param services The service look-up
      */
-    public AllAction(final ServiceLookup services) {
-        super(services);
+    public AllAction(final ServiceLookup services, final Map<String, JSlobAction> actions) {
+        super(services, actions);
     }
 
     @Override

@@ -50,12 +50,12 @@
 package com.openexchange.voipnow.json.osgi;
 
 import javax.servlet.ServletException;
-import org.apache.commons.logging.LogFactory;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.http.HttpService;
 import org.osgi.service.http.NamespaceException;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
+import com.openexchange.log.LogFactory;
 import com.openexchange.voipnow.json.servlet.VoipNowServlet;
 
 /**
@@ -84,7 +84,7 @@ public final class ServletRegisterer implements ServiceTrackerCustomizer {
     public Object addingService(final ServiceReference reference) {
         final HttpService service = (HttpService) context.getService(reference);
         try {
-            service.registerServlet(com.openexchange.voipnow.json.Constants.SERVLET_PATH, new VoipNowServlet(), null, null);
+            service.registerServlet(VoipNowActivator.PREFIX.get().getPrefix() + com.openexchange.voipnow.json.Constants.SERVLET_PATH_APPENDIX, new VoipNowServlet(), null, null);
             return service;
         } catch (final ServletException e) {
             com.openexchange.log.Log.valueOf(LogFactory.getLog(ServletRegisterer.class)).error(e.getMessage(), e);
@@ -107,7 +107,7 @@ public final class ServletRegisterer implements ServiceTrackerCustomizer {
         }
         try {
             final HttpService httpService = (HttpService) service;
-            httpService.unregister(com.openexchange.voipnow.json.Constants.SERVLET_PATH);
+            httpService.unregister(VoipNowActivator.PREFIX.get().getPrefix() + com.openexchange.voipnow.json.Constants.SERVLET_PATH_APPENDIX);
         } finally {
             context.ungetService(reference);
         }

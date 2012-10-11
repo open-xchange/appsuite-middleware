@@ -179,7 +179,6 @@ public class UpdatesAction extends ContactAction {
             while (searchIterator.hasNext()) {
                 final Contact contact = searchIterator.next();
                 lastModified = getLatestModified(lastModified, contact);
-                applyTimezoneOffset(contact, request.getTimeZone());
                 modifiedContacts.add(contact);
             }
         } finally {
@@ -197,7 +196,6 @@ public class UpdatesAction extends ContactAction {
 	            while (searchIterator.hasNext()) {
 	                final Contact contact = searchIterator.next();
 	                lastModified = getLatestModified(lastModified, contact);
-	                applyTimezoneOffset(contact, request.getTimeZone());
 	                deletedContacts.add(contact);
 	            }
 	        } finally {

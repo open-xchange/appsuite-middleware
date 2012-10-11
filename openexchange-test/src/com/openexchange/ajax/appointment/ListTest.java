@@ -103,9 +103,9 @@ public class ListTest extends AppointmentTest {
 
         assertEquals("check response array", 3, appointmentArray.length);
 
-        deleteAppointment(getWebConversation(), id1, appointmentFolderId, PROTOCOL + getHostName(), getSessionId());
-        deleteAppointment(getWebConversation(), id2, appointmentFolderId, PROTOCOL + getHostName(), getSessionId());
-        deleteAppointment(getWebConversation(), id3, appointmentFolderId, PROTOCOL + getHostName(), getSessionId());
+        deleteAppointment(getWebConversation(), id1, appointmentFolderId, PROTOCOL + getHostName(), getSessionId(), false);
+        deleteAppointment(getWebConversation(), id2, appointmentFolderId, PROTOCOL + getHostName(), getSessionId(), false);
+        deleteAppointment(getWebConversation(), id3, appointmentFolderId, PROTOCOL + getHostName(), getSessionId(), false);
     }
 
     public void testListWithNoEntries() throws Exception {
@@ -123,9 +123,9 @@ public class ListTest extends AppointmentTest {
 
         assertEquals("check response array", 0, appointmentArray.length);
 
-        deleteAppointment(getWebConversation(), id1, appointmentFolderId, PROTOCOL + getHostName(), getSessionId());
-        deleteAppointment(getWebConversation(), id2, appointmentFolderId, PROTOCOL + getHostName(), getSessionId());
-        deleteAppointment(getWebConversation(), id3, appointmentFolderId, PROTOCOL + getHostName(), getSessionId());
+        deleteAppointment(getWebConversation(), id1, appointmentFolderId, PROTOCOL + getHostName(), getSessionId(), false);
+        deleteAppointment(getWebConversation(), id2, appointmentFolderId, PROTOCOL + getHostName(), getSessionId(), false);
+        deleteAppointment(getWebConversation(), id3, appointmentFolderId, PROTOCOL + getHostName(), getSessionId(), false);
     }
 
     public void testListWithAllFields() throws Exception {
@@ -187,8 +187,9 @@ public class ListTest extends AppointmentTest {
         } catch (final OXException exc) {
             LOG.warn("Conflict Exception found. Maybe test result is wrong: " + exc);
         } finally {
-            if (objectId != 0)
-                deleteAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getSessionId());
+            if (objectId != 0) {
+                deleteAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getSessionId(), false);
+            }
         }
     }
 
@@ -272,8 +273,8 @@ public class ListTest extends AppointmentTest {
 
         assertTrue("not all objects in response : "+found1+":"+found2+":"+found3, (found1 && found2 && found3));
 
-        deleteAppointment(getWebConversation(), objectId1, publicFolderId, PROTOCOL + getHostName(), getSessionId());
-        deleteAppointment(getWebConversation(), objectId2, appointmentFolderId, PROTOCOL + getHostName(), getSessionId());
+        deleteAppointment(getWebConversation(), objectId1, publicFolderId, PROTOCOL + getHostName(), getSessionId(), false);
+        deleteAppointment(getWebConversation(), objectId2, appointmentFolderId, PROTOCOL + getHostName(), getSessionId(), false);
     }
 
     // Node 2652
@@ -301,7 +302,7 @@ public class ListTest extends AppointmentTest {
                 assertNotNull(objectData.opt(2));
             }
         } finally {
-            deleteAppointment(getWebConversation(), objectId, appointmentFolderId, getHostName(), getSessionId());
+            deleteAppointment(getWebConversation(), objectId, appointmentFolderId, getHostName(), getSessionId(), false);
         }
     }
 }

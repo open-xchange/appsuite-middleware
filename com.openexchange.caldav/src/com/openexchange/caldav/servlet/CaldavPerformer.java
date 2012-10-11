@@ -51,12 +51,15 @@ package com.openexchange.caldav.servlet;
 
 import java.util.EnumMap;
 import java.util.Map;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+
 import com.openexchange.caldav.CaldavProtocol;
 import com.openexchange.caldav.GroupwareCaldavFactory;
+import com.openexchange.caldav.WebdavPostAction;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.data.conversion.ical.ICalEmitter;
 import com.openexchange.data.conversion.ical.ICalParser;
@@ -105,11 +108,11 @@ import com.openexchange.webdav.protocol.helpers.PropertyMixin;
  */
 public class CaldavPerformer implements SessionHolder {
 
-    private static final Log LOG = LogFactory.getLog(CaldavPerformer.class);
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(CaldavPerformer.class);
 
     private static CaldavPerformer INSTANCE = null;
 
-    private static ServiceLookup services;
+    private static volatile ServiceLookup services;
 
     public static void setServices(ServiceLookup lookup) {
         services = lookup;
@@ -128,7 +131,7 @@ public class CaldavPerformer implements SessionHolder {
     }
 
     public static enum Action {
-        UNLOCK, PROPPATCH, PROPFIND, OPTIONS, MOVE, MKCOL, LOCK, COPY, DELETE, GET, HEAD, PUT, TRACE, REPORT
+        UNLOCK, PROPPATCH, PROPFIND, OPTIONS, MOVE, MKCOL, LOCK, COPY, DELETE, GET, HEAD, PUT, TRACE, REPORT, POST
     }
 
     private final GroupwareCaldavFactory factory;
@@ -155,6 +158,7 @@ public class CaldavPerformer implements SessionHolder {
         WebdavAction head;
         WebdavAction put;
         WebdavAction trace;
+        WebdavAction post;
 
         this.factory = new GroupwareCaldavFactory(
             this,
@@ -178,6 +182,7 @@ public class CaldavPerformer implements SessionHolder {
         delete = prepare(new WebdavDeleteAction(), true, true, new WebdavExistsAction(), new WebdavIfAction(0, true, false));
         get = prepare(new WebdavGetAction(), true, false, new WebdavExistsAction(), new WebdavIfAction(0, false, false));
         head = prepare(new WebdavHeadAction(), true, true, new WebdavExistsAction(), new WebdavIfAction(0, false, false));
+        post = prepare(new WebdavPostAction(factory), true, true, new WebdavIfAction(0, false, false));
 
         final OXWebdavPutAction oxWebdavPut = new OXWebdavPutAction();
         oxWebdavPut.setSessionHolder(this);
@@ -202,6 +207,7 @@ public class CaldavPerformer implements SessionHolder {
         actions.put(Action.HEAD, head);
         actions.put(Action.PUT, put);
         actions.put(Action.TRACE, trace);
+        actions.put(Action.POST, post);
 
         makeLockNullTolerant();
 
@@ -260,6 +266,7 @@ public class CaldavPerformer implements SessionHolder {
         return lifeCycle;
     }
 
+    @Override
     public ServerSession getSessionObject() {
         sessionNotNull();
         return session.get();
@@ -272,10 +279,12 @@ public class CaldavPerformer implements SessionHolder {
         }
     }
 
+    @Override
     public Context getContext() {
         return session.get().getContext();
     }
 
+    @Override
     public User getUser() {
         return session.get().getUser();
     }
@@ -290,6 +299,7 @@ public class CaldavPerformer implements SessionHolder {
             if (LOG.isDebugEnabled()) {
                 LOG.debug("Executing " + action);
             }
+            
             actions.get(action).perform(webdavRequest, webdavResponse);
         } catch (final WebdavProtocolException x) {
             resp.setStatus(x.getStatus());

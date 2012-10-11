@@ -49,22 +49,7 @@
 
 package com.openexchange.sessiond;
 
-import static com.openexchange.sessiond.SessionExceptionMessages.CONTEXT_LOCKED_MSG;
-import static com.openexchange.sessiond.SessionExceptionMessages.DUPLICATE_AUTHID_MSG;
-import static com.openexchange.sessiond.SessionExceptionMessages.MAX_SESSION_EXCEPTION_MSG;
-import static com.openexchange.sessiond.SessionExceptionMessages.MAX_SESSION_PER_USER_EXCEPTION_MSG;
-import static com.openexchange.sessiond.SessionExceptionMessages.MISSING_PROPERTY_MSG;
-import static com.openexchange.sessiond.SessionExceptionMessages.PASSWORD_UPDATE_FAILED_MSG;
-import static com.openexchange.sessiond.SessionExceptionMessages.SESSIOND_CONFIG_EXCEPTION_MSG;
-import static com.openexchange.sessiond.SessionExceptionMessages.SESSIOND_EXCEPTION_MSG;
-import static com.openexchange.sessiond.SessionExceptionMessages.SESSIONID_COLLISION_MSG;
-import static com.openexchange.sessiond.SessionExceptionMessages.SESSION_EXPIRED_MSG;
-import static com.openexchange.sessiond.SessionExceptionMessages.SESSION_PARAMETER_MISSING_MSG;
-import static com.openexchange.sessiond.SessionExceptionMessages.UNKNOWN_EVENT_TOPIC_MSG;
-import static com.openexchange.sessiond.SessionExceptionMessages.WRONG_BY_RANDOM_MSG;
-import static com.openexchange.sessiond.SessionExceptionMessages.WRONG_CLIENT_IP_MSG;
-import static com.openexchange.sessiond.SessionExceptionMessages.WRONG_SESSION_MSG;
-import static com.openexchange.sessiond.SessionExceptionMessages.WRONG_SESSION_SECRET_MSG;
+import static com.openexchange.sessiond.SessionExceptionMessages.*;
 import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
 import com.openexchange.exception.OXExceptionCode;
@@ -82,7 +67,7 @@ public enum SessionExceptionCodes implements OXExceptionCode {
      */
     SESSIOND_EXCEPTION(SESSIOND_EXCEPTION_MSG, Category.CATEGORY_ERROR, 1),
     /**
-     * Max Session size reached
+     * Maximum number of sessions elapsed
      */
     MAX_SESSION_EXCEPTION(MAX_SESSION_EXCEPTION_MSG, Category.CATEGORY_ERROR, 2),
     /**
@@ -97,9 +82,9 @@ public enum SessionExceptionCodes implements OXExceptionCode {
     UNKNOWN_EVENT_TOPIC(UNKNOWN_EVENT_TOPIC_MSG, Category.CATEGORY_ERROR, 5),
     /** Password could not be changed */
     PASSWORD_UPDATE_FAILED(PASSWORD_UPDATE_FAILED_MSG, Category.CATEGORY_ERROR, 6),
-    /** Max. session size for user %1$s in context %2$s exceeded */
+    /** Max. number of sessions exceeded for user %1$s in context %2$s */
     MAX_SESSION_PER_USER_EXCEPTION(MAX_SESSION_PER_USER_EXCEPTION_MSG, Category.CATEGORY_ERROR, 7),
-    /** Found duplicate used authentication identifier. Login of existing session: %1$s. Current denied login request: %2$s. */
+    /** Authentication identifier duplicate found. Existing session login: %1$s. Current denied login request: %2$s. */
     DUPLICATE_AUTHID(DUPLICATE_AUTHID_MSG, Category.CATEGORY_ERROR, 8),
     /** SessionD returned wrong session with identifier %1$s for given session identifier %2$s. */
     WRONG_SESSION(WRONG_SESSION_MSG, Category.CATEGORY_ERROR, 9),
@@ -130,7 +115,7 @@ public enum SessionExceptionCodes implements OXExceptionCode {
      */
     WRONG_SESSION_SECRET(WRONG_SESSION_SECRET_MSG, Category.CATEGORY_TRY_AGAIN, 206),
     /**
-     * Max. number of sessions exceeded for client %1$s of user %2$s in context %3$s exceeded
+     * Max. number of sessions exceeded for client %1$s of user %2$s in context %3$s
      */
     MAX_SESSION_PER_CLIENT_EXCEPTION(SessionExceptionMessages.MAX_SESSION_PER_CLIENT_EXCEPTION_MSG, Category.CATEGORY_ERROR, 207),
     

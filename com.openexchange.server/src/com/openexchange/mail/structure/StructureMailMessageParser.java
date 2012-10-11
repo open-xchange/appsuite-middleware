@@ -83,13 +83,14 @@ import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.mime.ContentDisposition;
 import com.openexchange.mail.mime.ContentType;
+import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.mail.mime.MimeDefaultSession;
 import com.openexchange.mail.mime.MimeType2ExtMap;
 import com.openexchange.mail.mime.MimeTypes;
-import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.mail.mime.TNEFBodyPart;
 import com.openexchange.mail.mime.converters.MimeMessageConverter;
 import com.openexchange.mail.mime.dataobjects.MIMEMultipartMailPart;
+import com.openexchange.mail.mime.dataobjects.MimeMailPart;
 import com.openexchange.mail.mime.datasource.MessageDataSource;
 import com.openexchange.mail.mime.utils.MimeMessageUtility;
 import com.openexchange.mail.parser.MailMessageHandler;
@@ -108,7 +109,7 @@ import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 public final class StructureMailMessageParser {
 
     private static final org.apache.commons.logging.Log LOG =
-        com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(StructureMailMessageParser.class));
+        com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(StructureMailMessageParser.class));
 
     private static final boolean WARN_ENABLED = LOG.isWarnEnabled();
 
@@ -191,6 +192,7 @@ public final class StructureMailMessageParser {
      */
     public StructureMailMessageParser() {
         super();
+        parseTNEFParts = true;
         neverTreatMessageAsAttachment = true;
         inlineDetector = LENIENT_DETECTOR;
     }
@@ -325,8 +327,8 @@ public final class StructureMailMessageParser {
         if (isText(lcct)) {
             if (isInline) {
                 final String content = readContent(mailPart, contentType);
-                final UUEncodedMultiPart uuencodedMP = parseUUEncodedParts ? new UUEncodedMultiPart(content) : null;
-                if (parseUUEncodedParts && uuencodedMP.isUUEncoded()) {
+                final UUEncodedMultiPart uuencodedMP;
+                if (parseUUEncodedParts && (uuencodedMP = new UUEncodedMultiPart(content)).isUUEncoded()) {
                     /*
                      * UUEncoded content detected. Handle normal text.
                      */
@@ -517,14 +519,7 @@ public final class StructureMailMessageParser {
                         LOG.error("Invalid TNEF contact", e);
                         return;
                     }
-                    final int mpsize = mp.getCount();
-                    for (int i = 0; i < mpsize; i++) {
-                        /*
-                         * Since TNEF library is based on JavaMail API we use an instance of IMAPMailContent regardless of the mail
-                         * implementation
-                         */
-                        parseMailContent(MimeMessageConverter.convertPart(mp.getBodyPart(i), false), handler, prefix, partCount++);
-                    }
+                    parseMailContent(new MimeMailPart(mp), handler, prefix, partCount);
                     /*
                      * Stop to further process TNEF attachment
                      */
@@ -543,14 +538,7 @@ public final class StructureMailMessageParser {
                         }
                         return;
                     }
-                    final int mpsize = mp.getCount();
-                    for (int i = 0; i < mpsize; i++) {
-                        /*
-                         * Since TNEF library is based on JavaMail API we use an instance of IMAPMailContent regardless of the mail
-                         * implementation
-                         */
-                        parseMailContent(MimeMessageConverter.convertPart(mp.getBodyPart(i)), handler, prefix, partCount++);
-                    }
+                    parseMailContent(new MimeMailPart(mp), handler, prefix, partCount);
                     /*
                      * Stop to further process TNEF attachment
                      */
@@ -859,6 +847,10 @@ public final class StructureMailMessageParser {
     private static String readContent(final MailPart mailPart, final ContentType contentType) throws OXException, IOException {
         final String charset = getCharset(mailPart, contentType);
         try {
+            if (contentType.startsWith("text/htm")) {
+                final String html = MessageUtility.readMailPart(mailPart, charset);
+                return MessageUtility.simpleHtmlDuplicateRemoval(html);
+            }
             return MessageUtility.readMailPart(mailPart, charset);
         } catch (final java.io.CharConversionException e) {
             // Obviously charset was wrong or bogus implementation of character conversion

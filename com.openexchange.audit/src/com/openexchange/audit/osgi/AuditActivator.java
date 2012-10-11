@@ -53,7 +53,7 @@ import static com.openexchange.audit.services.AuditServiceRegistry.getServiceReg
 import java.util.Dictionary;
 import java.util.Hashtable;
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import com.openexchange.log.LogFactory;
 import org.osgi.service.event.EventConstants;
 import org.osgi.service.event.EventHandler;
 import com.openexchange.audit.impl.AuditEventHandler;

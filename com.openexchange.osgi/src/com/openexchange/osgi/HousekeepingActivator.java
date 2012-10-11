@@ -182,6 +182,17 @@ public abstract class HousekeepingActivator extends DeferredActivator {
     }
 
     @Override
+    public void start(BundleContext context) throws Exception {
+        super.start(context);
+        /*
+         * Invoking ServiceTracker.open() more than once is a no-op, therefore it can be safely called from here.
+         */
+        if (!serviceTrackers.isEmpty()) {
+            openTrackers();
+        }
+    }
+
+    @Override
     protected void stopBundle() throws Exception {
         cleanUp();
     }
@@ -206,7 +217,7 @@ public abstract class HousekeepingActivator extends DeferredActivator {
         serviceRegistrations.add(context.registerService(clazz.getName(), service, properties));
     }
 
-    /**
+       /**
      * Registers specified service under the specified class.
      *
      * @param clazz The service's class
@@ -215,9 +226,34 @@ public abstract class HousekeepingActivator extends DeferredActivator {
     protected <S> void registerService(final Class<S> clazz, final S service) {
         registerService(clazz, service, null);
     }
+    
+    /**
+     * Registers specified Service or {@link org.osgi.framework.ServiceFactory} with the specified properties under the specified classname
+     * @param className The service's class name
+     * @param service The service reference
+     * @param properties The service's properties
+     */
+    protected <S> void registerService (String className, Object service, Dictionary<String, ?> properties) {
+        serviceRegistrations.add(context.registerService(className, service, properties));
+    }
+    
+    /**
+     * Registers specified Service or {@link org.osgi.framework.ServiceFactory} under the specified class name
+     * @param className The service's class name
+     * @param service The service reference
+     */
+    protected <S> void registerService (String className, Object service) {
+        serviceRegistrations.add(context.registerService(className, service, null));
+    }
 
     /**
      * Adds specified service tracker to this activator. Thus it is automatically closed and removed by {@link #cleanUp()}.
+     * <br>
+     * <div style="margin-left: 0.1in; margin-right: 0.5in; background-color:#FFDDDD;">
+     * <p>
+     * <b>NOTE</b>: Please {@link #openTrackers() open} trackers.
+     * </p>
+     * </div>
      *
      * @param tracker The service tracker
      */
@@ -227,6 +263,12 @@ public abstract class HousekeepingActivator extends DeferredActivator {
 
     /**
      * Removes specified service tracker from this activator.
+     * <br>
+     * <div style="margin-left: 0.1in; margin-right: 0.5in; background-color:#FFDDDD;">
+     * <p>
+     * <b>NOTE</b>: Please {@link ServiceTracker#close() close} tracker if it has already been started.
+     * </p>
+     * </div>
      *
      * @param tracker The service tracker
      */

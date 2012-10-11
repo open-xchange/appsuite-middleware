@@ -67,9 +67,9 @@ public class ConfigTools {
     private static final int NON_PERSISTENT_VALUE = -1;
 
     /**
-     * A timespan specification consists of a number and a unit of measurement. Units are:
+     * A time span specification consists of a number and a unit of measurement. Units are:
      * <ul>
-     * <li>ms for miliseconds</li>
+     * <li>ms for milliseconds</li>
      * <li>s for seconds</li>
      * <li>m for minutes</li>
      * <li>h for hours</li>
@@ -83,16 +83,20 @@ public class ConfigTools {
      * @return The parsed time span in seconds or <code>-1</code> to let the Cookie be deleted when the Web browser exits
      */
     public static int parseTimespanSecs(final String span) {
-        if (null == span || NON_PERSISTENT_IDENTIFIER.equals(span.toLowerCase())) {
+        if (null == span) {
             return NON_PERSISTENT_VALUE;
         }
-        return (int) (TimeSpanParser.parseTimespan(span).longValue() / 1000);
+        final String tmp = span.trim();
+        if (NON_PERSISTENT_IDENTIFIER.equals(tmp.toLowerCase())) {
+            return NON_PERSISTENT_VALUE;
+        }
+        return (int) (TimeSpanParser.parseTimespan(tmp).longValue() / 1000);
     }
 
     /**
-     * A timespan specification consists of a number and a unit of measurement. Units are:
+     * A time span specification consists of a number and a unit of measurement. Units are:
      * <ul>
-     * <li>ms for miliseconds</li>
+     * <li>ms for milliseconds</li>
      * <li>s for seconds</li>
      * <li>m for minutes</li>
      * <li>h for hours</li>
@@ -106,10 +110,14 @@ public class ConfigTools {
      * @return The parsed time span in milliseconds or <code>-1</code> to let the Cookie be deleted when the Web browser exits
      */
     public static long parseTimespan(final String span) {
-        if (null == span || NON_PERSISTENT_IDENTIFIER.equals(span.toLowerCase())) {
+        if (null == span) {
             return NON_PERSISTENT_VALUE;
         }
-        return TimeSpanParser.parseTimespan(span).longValue();
+        final String tmp = span.trim();
+        if (NON_PERSISTENT_IDENTIFIER.equals(tmp.toLowerCase())) {
+            return NON_PERSISTENT_VALUE;
+        }
+        return TimeSpanParser.parseTimespan(tmp).longValue();
     }
 
     /**

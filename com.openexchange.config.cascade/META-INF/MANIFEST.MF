@@ -2,12 +2,13 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: A Cascading Configuration System
 Bundle-SymbolicName: com.openexchange.config.cascade
-Bundle-Version: 6.21.0
+Bundle-Version: 6.22.0
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Import-Package: com.openexchange.exception,
  com.openexchange.groupware,
  com.openexchange.i18n,
+ com.openexchange.java,
  com.openexchange.log,
  com.openexchange.osgi,
  com.openexchange.tools.strings,

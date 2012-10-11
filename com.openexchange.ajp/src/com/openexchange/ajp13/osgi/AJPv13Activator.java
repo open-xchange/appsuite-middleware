@@ -49,13 +49,13 @@
 
 package com.openexchange.ajp13.osgi;
 
-import static com.openexchange.ajp13.AJPv13ServiceRegistry.getServiceRegistry;
 import java.util.ArrayList;
 import java.util.List;
 import org.osgi.service.http.HttpService;
 import com.openexchange.ajp13.AJPv13Config;
-import com.openexchange.ajp13.AbstractAJPv13Request;
 import com.openexchange.ajp13.AJPv13Server;
+import com.openexchange.ajp13.AJPv13ServiceRegistry;
+import com.openexchange.ajp13.AbstractAJPv13Request;
 import com.openexchange.ajp13.servlet.http.HttpSessionWrapper;
 import com.openexchange.ajp13.servlet.http.osgi.HttpServiceImpl;
 import com.openexchange.config.ConfigurationService;
@@ -69,7 +69,7 @@ import com.openexchange.timer.TimerService;
 
 /**
  * {@link AJPv13Activator}
- *
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class AJPv13Activator extends HousekeepingActivator {
@@ -77,8 +77,7 @@ public final class AJPv13Activator extends HousekeepingActivator {
     /**
      * The logger.
      */
-    private static final org.apache.commons.logging.Log LOG =
-        com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(AJPv13Activator.class));
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(AJPv13Activator.class));
 
     private List<Initialization> inits;
 
@@ -95,24 +94,13 @@ public final class AJPv13Activator extends HousekeepingActivator {
     }
 
     @Override
-    protected void handleAvailability(final Class<?> clazz) {
-        final org.apache.commons.logging.Log logger =
-            com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(AJPv13Activator.class));
-        if (logger.isInfoEnabled()) {
-            logger.info("Re-available service: " + clazz.getName());
-        }
-        final Object service = getService(clazz);
-        getServiceRegistry().addService(clazz, service);
+    public <S> boolean addServiceAlt(Class<? extends S> clazz, S service) {
+        return super.addServiceAlt(clazz, service);
     }
 
     @Override
-    protected void handleUnavailability(final Class<?> clazz) {
-        final org.apache.commons.logging.Log logger =
-            com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(AJPv13Activator.class));
-        if (logger.isWarnEnabled()) {
-            logger.warn("Absent service: " + clazz.getName());
-        }
-        getServiceRegistry().removeService(clazz);
+    public <S> boolean removeService(Class<? extends S> clazz) {
+        return super.removeService(clazz);
     }
 
     @Override
@@ -121,17 +109,30 @@ public final class AJPv13Activator extends HousekeepingActivator {
             /*
              * (Re-)Initialize service registry with available services
              */
-            {
-                final ServiceRegistry registry = getServiceRegistry();
-                registry.clearRegistry();
-                final Class<?>[] classes = getNeededServices();
-                for (final Class<?> classe : classes) {
-                    final Object service = getService(classe);
-                    if (null != service) {
-                        registry.addService(classe, service);
-                    }
+            final AJPv13Activator activator = this;
+            final ServiceRegistry serviceRegistry = new ServiceRegistry() {
+
+                @Override
+                public <S> S getOptionalService(final Class<? extends S> clazz) {
+                    return activator.getOptionalService(clazz);
                 }
-            }
+
+                @Override
+                public <S> S getService(final Class<? extends S> clazz) {
+                    return activator.getService(clazz);
+                }
+
+                @Override
+                public <S> void addService(final Class<? extends S> clazz, final S service) {
+                    activator.addServiceAlt(clazz, service);
+                }
+
+                @Override
+                public void removeService(final Class<?> clazz) {
+                    activator.removeService(clazz);
+                }
+            };
+            AJPv13ServiceRegistry.SERVICE_REGISTRY.set(serviceRegistry);
             inits = new ArrayList<Initialization>(3);
             /*
              * Set starter dependent on mode
@@ -175,7 +176,7 @@ public final class AJPv13Activator extends HousekeepingActivator {
             /*
              * Start trackers
              */
-            track(ManagementService.class, new ManagementServiceTracker(context));
+            track(ManagementService.class, new ManagementServiceTracker(context, this));
             openTrackers();
             /*
              * Register services
@@ -194,7 +195,7 @@ public final class AJPv13Activator extends HousekeepingActivator {
              */
 
         } catch (final Exception e) {
-            com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(AJPv13Activator.class)).error(e.getMessage(), e);
+            com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(AJPv13Activator.class)).error(e.getMessage(), e);
             throw e;
         }
     }
@@ -215,9 +216,9 @@ public final class AJPv13Activator extends HousekeepingActivator {
             /*
              * Clear service registry
              */
-            getServiceRegistry().clearRegistry();
+            AJPv13ServiceRegistry.SERVICE_REGISTRY.set(null);
         } catch (final Exception e) {
-            com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(AJPv13Activator.class)).error(e.getMessage(), e);
+            com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(AJPv13Activator.class)).error(e.getMessage(), e);
             throw e;
         }
     }
@@ -237,7 +238,7 @@ public final class AJPv13Activator extends HousekeepingActivator {
 
         @Override
         public void stop() throws OXException {
-            com.openexchange.ajp13.najp.AJPv13ServerImpl.stopAJPServer();
+            AJPv13Server.stopAJPServer();
             AJPv13Config.getInstance().stop();
             AJPv13Server.releaseInstrance();
         }

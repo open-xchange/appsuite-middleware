@@ -172,7 +172,7 @@ public class ICalSeriesTests extends ManagedAppointmentTest {
 		ICalImportRequest request = new ICalImportRequest(fid, ical);
 		client.execute(request);
 
-		AllRequest allRequest = new AllRequest(fid, Appointment.ALL_COLUMNS, start, end, tz, false);
+		AllRequest allRequest = new AllRequest(fid, new int[]{Appointment.OBJECT_ID}, start, end, tz, false);
 		CommonAllResponse response2 = client.execute(allRequest);
 
 		Object[][] data = response2.getArray();

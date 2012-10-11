@@ -50,11 +50,16 @@
 package com.openexchange.ajax.parser;
 
 import java.util.TimeZone;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import com.openexchange.ajax.fields.CommonFields;
 import com.openexchange.ajax.fields.ContactFields;
+import com.openexchange.ajax.fields.DataFields;
 import com.openexchange.ajax.fields.DistributionListFields;
+import com.openexchange.ajax.fields.FolderChildFields;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.DistributionListEntryObject;
@@ -105,19 +110,23 @@ public class ContactParser extends CommonParser {
         for (int a = 0; a < jdistributionlist.length(); a++) {
             final JSONObject entry = jdistributionlist.getJSONObject(a);
             distributionlist[a] = new DistributionListEntryObject();
-            if (entry.has(DistributionListFields.ID)) {
-                distributionlist[a].setEntryID(parseInt(entry, DistributionListFields.ID));
+            if (entry.has(DataFields.ID)) {
+                distributionlist[a].setEntryID(parseInt(entry, DataFields.ID));
             }
 
-            if (entry.has(DistributionListFields.FIRST_NAME)) {
-                distributionlist[a].setFirstname(parseString(entry, DistributionListFields.FIRST_NAME));
+            if (entry.has(FolderChildFields.FOLDER_ID)) {
+                distributionlist[a].setFolderID(parseInt(entry, FolderChildFields.FOLDER_ID));
             }
 
-            if (entry.has(DistributionListFields.LAST_NAME)) {
-                distributionlist[a].setLastname(parseString(entry, DistributionListFields.LAST_NAME));
+            if (entry.has(ContactFields.FIRST_NAME)) {
+                distributionlist[a].setFirstname(parseString(entry, ContactFields.FIRST_NAME));
             }
 
-            distributionlist[a].setDisplayname(parseString(entry, DistributionListFields.DISPLAY_NAME));
+            if (entry.has(ContactFields.LAST_NAME)) {
+                distributionlist[a].setLastname(parseString(entry, ContactFields.LAST_NAME));
+            }
+
+            distributionlist[a].setDisplayname(parseString(entry, ContactFields.DISPLAY_NAME));
             distributionlist[a].setEmailaddress(parseString(entry, DistributionListFields.MAIL));
             distributionlist[a].setEmailfield(parseInt(entry, DistributionListFields.MAIL_FIELD));
         }
@@ -130,11 +139,11 @@ public class ContactParser extends CommonParser {
         for (int a = 0; a < links.length; a++) {
             links[a] = new LinkEntryObject();
             final JSONObject entry = jlinks.getJSONObject(a);
-            if (entry.has(ContactFields.ID)) {
-                links[a].setLinkID(parseInt(entry, ContactFields.ID));
+            if (entry.has(DataFields.ID)) {
+                links[a].setLinkID(parseInt(entry, DataFields.ID));
             }
 
-            links[a].setLinkDisplayname(parseString(entry, DistributionListFields.DISPLAY_NAME));
+            links[a].setLinkDisplayname(parseString(entry, ContactFields.DISPLAY_NAME));
         }
         oxobject.setLinks(links);
     }
@@ -1163,11 +1172,11 @@ public class ContactParser extends CommonParser {
         new JSONAttributeMapper() {
             @Override
             public boolean jsonObjectContains(final JSONObject jsonobject) {
-                return jsonobject.has(ContactFields.UID);
+                return jsonobject.has(CommonFields.UID);
             }
             @Override
             public void setObject(final Contact contactobject, final JSONObject jsonobject) {
-                contactobject.setUid(parseString(jsonobject, ContactFields.UID));
+                contactobject.setUid(parseString(jsonobject, CommonFields.UID));
             }
         }
     };

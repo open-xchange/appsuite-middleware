@@ -71,7 +71,7 @@ import com.openexchange.user.UserService;
  */
 public final class ScriptPasswordChange extends PasswordChangeService {
 
-	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
+	private static final org.apache.commons.logging.Log LOG = com.openexchange.log.LogFactory
 			.getLog(ScriptPasswordChange.class);
 
 	/**

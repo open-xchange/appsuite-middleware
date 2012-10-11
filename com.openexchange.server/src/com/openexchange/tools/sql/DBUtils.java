@@ -63,10 +63,10 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import com.openexchange.databaseold.Database;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.search.Order;
+import com.openexchange.log.LogFactory;
 
 /**
  * Utilities for database resource handling.
@@ -232,9 +232,9 @@ public final class DBUtils {
     }
 
     /**
-     * Rolls a transaction of a connection back.
+     * Performs a roll-back for a started transaction.
      *
-     * @param con connection to roll back.
+     * @param con The connection to roll back.
      */
     public static void rollback(final Connection con) {
         if (null == con) {
@@ -325,7 +325,7 @@ public final class DBUtils {
     }
 
     /**
-     * Filters a given list of tablenames. Returns only those that also exist
+     * Filters a given list of table names. Returns only those that also exist
      * @param con The connection to the database in which to check for the tables
      * @param tablesToCheck The list of table names to check for.
      * @return A set with all the tables that exist of those to be checked for
@@ -418,6 +418,166 @@ public final class DBUtils {
         final Statement statement = connection.createStatement();
         statement.execute("SET @@foreign_key_checks = " + value);
         statement.close();
+    }
+
+    /**
+     * Checks if passed <tt>SQLException</tt> (or any of chained <tt>SQLException</tt>s) indicates a failed transaction roll-back.
+     * 
+     * <pre>
+     * Deadlock found when trying to get lock; try restarting transaction
+     * </pre>
+     * 
+     * @param sqlException The SQL exception to check
+     * @return <code>true</code> if a failed transaction roll-back is indicated; otherwise <code>false</code>
+     */
+    public static boolean isTransactionRollbackException(final SQLException sqlException) {
+        if (null == sqlException) {
+            return false;
+        }
+        if (sqlException.getClass().getName().endsWith("TransactionRollbackException")) {
+            return true;
+        }
+        if (isTransactionRollbackException(sqlException.getNextException())) {
+            return true;
+        }
+        final Throwable cause = sqlException.getCause();
+        if (null == cause || !(cause instanceof Exception)) {
+            return false;
+        }
+        return isTransactionRollbackException((Exception) cause);
+    }
+
+    /**
+     * Checks if passed <tt>SQLException</tt> (or any of chained <tt>SQLException</tt>s) indicates a failed transaction roll-back.
+     * 
+     * <pre>
+     * Deadlock found when trying to get lock; try restarting transaction
+     * </pre>
+     * 
+     * @param exception The exception to check
+     * @return <code>true</code> if a failed transaction roll-back is indicated; otherwise <code>false</code>
+     */
+    public static boolean isTransactionRollbackException(final Exception exception) {
+        if (null == exception) {
+            return false;
+        }
+        if (exception instanceof SQLException) {
+            return isTransactionRollbackException((SQLException) exception);
+        }
+        final Throwable cause = exception.getCause();
+        if (null == cause || !(cause instanceof Exception)) {
+            return false;
+        }
+        return isTransactionRollbackException((Exception) cause);
+    }
+
+    /**
+     * Extracts possibly nested <tt>SQLException</tt> reference.
+     * 
+     * @param exception The parental exception to extract from
+     * @return The <tt>SQLException</tt> reference or <code>null</code>
+     */
+    public static SQLException extractSqlException(final Exception exception) {
+        if (null == exception) {
+            return null;
+        }
+        if (exception instanceof SQLException) {
+            return (SQLException) exception;
+        }
+        final Throwable cause = exception.getCause();
+        if (null == cause || !(cause instanceof Exception)) {
+            return null;
+        }
+        return extractSqlException((Exception) cause);
+    }
+
+    /**
+     * Checks for retry condition for a failed transaction roll-back.
+     */
+    public static final class TransactionRollbackCondition {
+
+        private final int max;
+
+        private int count;
+
+        private SQLException transactionRollbackException;
+
+        /**
+         * Initializes a new {@link TransactionRollbackCondition}.
+         * 
+         * @param max The max. retry count
+         */
+        public TransactionRollbackCondition(final int max) {
+            super();
+            count = 0;
+            this.max = max;
+        }
+
+        /**
+         * Check for a failed transaction roll-back.
+         * 
+         * @param e The SQL exception to check for a failed transaction roll-back
+         * @return <code>true</code> a failed transaction roll-back; otherwise <code>false</code>
+         */
+        public boolean isFailedTransactionRollback(final SQLException e) {
+            if (isTransactionRollbackException(e)) {
+                transactionRollbackException = e;
+                return true;
+            }
+            return false;
+        }
+
+        /**
+         * Check for a failed transaction roll-back.
+         * 
+         * @param e The exception to check for a failed transaction roll-back
+         * @return <code>true</code> a failed transaction roll-back; otherwise <code>false</code>
+         */
+        public boolean isFailedTransactionRollback(final Exception e) {
+            final SQLException sqle = extractSqlException(e);
+            if (null != sqle && isTransactionRollbackException(sqle)) {
+                transactionRollbackException = sqle;
+                return true;
+            }
+            return false;
+        }
+        
+        /**
+         * Gets the recently checked <tt>SQLException</tt> reference that indicates a failed transaction roll-back.
+         * 
+         * @return The recently checked <tt>SQLException</tt> reference
+         */
+        public SQLException getTransactionRollbackException() {
+            return transactionRollbackException;
+        }
+
+        /**
+         * Resets the reference that indicates a failed transaction roll-back.
+         */
+        public void resetTransactionRollbackException() {
+            transactionRollbackException = null;
+        }
+
+        /**
+         * Check for retry condition.
+         * <p>
+         * <b>Note</b>: {@link #isFailedTransactionRollback(SQLException)} is expected to be called prior to invoking this method.
+         * <p>
+         * If check returns <code>true</code>, <tt>SQLException</tt> reference is set to <code>null</code>.
+         * 
+         * @return <code>true</code> if retry condition is met; otherwise <code>false</code>
+         * @throws SQLException If retry-count is exceeded and previously checked <tt>SQLException</tt> indicated a failed transaction roll-back
+         */
+        public boolean checkRetry() throws SQLException {
+            if (null == transactionRollbackException) {
+                return false;
+            }
+            if (++count <= max) {
+                transactionRollbackException = null;
+                return true;
+            }
+            throw transactionRollbackException;
+        }
     }
 
 }

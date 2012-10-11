@@ -72,6 +72,7 @@ import java.util.concurrent.locks.ReentrantLock;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventAdmin;
 import com.openexchange.cache.impl.FolderCacheManager;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.FolderEventConstants;
 import com.openexchange.groupware.Types;
@@ -93,7 +94,7 @@ import com.openexchange.tools.sql.DBUtils;
  */
 public final class OXFolderSQL {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(OXFolderSQL.class));
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(OXFolderSQL.class));
 
     /**
      * Initializes a new OXFolderSQL
@@ -437,11 +438,21 @@ public final class OXFolderSQL {
                 readCon = DBPool.pickup(ctx);
                 closeReadCon = true;
             }
-            stmt = readCon.prepareStatement(folderId > 0 ? new StringBuilder(SQL_LOOKUPFOLDER).append(" AND fuid!=").append(folderId).toString() : SQL_LOOKUPFOLDER);
+            StringBuilder stmtBuilder = new StringBuilder("SELECT fuid,fname FROM oxfolder_tree WHERE cid=? AND parent=? AND fname=?");
+            if (module > 0) {
+                final ConfigurationService service = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
+                if (null != service && service.getBoolProperty("com.openexchange.oxfolder.considerModuleOnDuplicateCheck", false)) {
+                    stmtBuilder.append(" AND module=").append(module);
+                }
+            }
+            if (folderId > 0) {
+                stmtBuilder.append(" AND fuid!=").append(folderId);
+            }
+            stmt = readCon.prepareStatement(stmtBuilder.toString());
+            stmtBuilder = null;
             stmt.setInt(1, ctx.getContextId()); // cid
             stmt.setInt(2, parent); // parent
             stmt.setString(3, folderName); // fname
-            stmt.setInt(4, module); // module
             rs = executeQuery(stmt);
             while (rs.next()) {
                 final int fuid = rs.getInt(1);

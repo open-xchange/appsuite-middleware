@@ -70,6 +70,10 @@ import com.openexchange.ajax.fields.OrderFields;
 import com.openexchange.ajax.fields.SearchFields;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.contact.ContactService;
+import com.openexchange.contact.SortOptions;
+import com.openexchange.contact.SortOrder;
+import com.openexchange.contacts.json.mapping.ContactMapper;
 import com.openexchange.documentation.RequestMethod;
 import com.openexchange.documentation.Type;
 import com.openexchange.documentation.annotations.Action;
@@ -77,6 +81,7 @@ import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contact.ContactInterfaceDiscoveryService;
 import com.openexchange.groupware.contact.ContactSearchMultiplexer;
+import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.search.ContactSearchObject;
@@ -87,7 +92,9 @@ import com.openexchange.tools.servlet.OXJSONExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.user.UserService;
 import com.openexchange.user.json.Constants;
+import com.openexchange.user.json.UserContact;
 import com.openexchange.user.json.field.UserField;
+import com.openexchange.user.json.mapping.UserMapper;
 import com.openexchange.user.json.services.ServiceRegistry;
 import com.openexchange.user.json.writer.UserWriter;
 
@@ -95,6 +102,7 @@ import com.openexchange.user.json.writer.UserWriter;
  * {@link SearchAction} - Maps the action to a <tt>search</tt> action.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 @Action(method = RequestMethod.PUT, name = "search", description = "Search users.", parameters = { 
 		@Parameter(name = "session", description = "A session ID previously obtained from the login module."),
@@ -130,6 +138,119 @@ public final class SearchAction extends AbstractUserAction {
 
     @Override
     public AJAXRequestResult perform(final AJAXRequestData request, final ServerSession session) throws OXException {
+        /*
+         * Parse parameters
+         */
+        final int[] columns = parseIntArrayParameter(AJAXServlet.PARAMETER_COLUMNS, request);
+        final int orderBy = parseIntParameter(AJAXServlet.PARAMETER_SORT, request);
+        final Order order = OrderFields.parse(request.getParameter(AJAXServlet.PARAMETER_ORDER));
+        final String collation = request.getParameter(AJAXServlet.PARAMETER_COLLATION);
+        final JSONObject jData = (JSONObject) request.getData();
+        /*
+         * Contact search object
+         */
+        ContactSearchObject contactSearch = new ContactSearchObject();
+        contactSearch.addFolder(Constants.USER_ADDRESS_BOOK_FOLDER_ID);
+        try {
+	        if (jData.has(SearchFields.PATTERN)) {
+	            contactSearch.setPattern(parseString(jData, SearchFields.PATTERN));
+	        }
+	        if (jData.has("startletter")) {
+	            contactSearch.setStartLetter(parseBoolean(jData, "startletter"));
+	        }
+	        if (jData.has("emailAutoComplete") && jData.getBoolean("emailAutoComplete")) {
+	            contactSearch.setEmailAutoComplete(true);
+	        }
+	        if (jData.has("orSearch") && jData.getBoolean("orSearch")) {
+	            contactSearch.setOrSearch(true);
+	        }
+	        contactSearch.setSurname(parseString(jData, ContactFields.LAST_NAME));
+	        contactSearch.setDisplayName(parseString(jData, ContactFields.DISPLAY_NAME));
+	        contactSearch.setGivenName(parseString(jData, ContactFields.FIRST_NAME));
+	        contactSearch.setCompany(parseString(jData, ContactFields.COMPANY));
+	        contactSearch.setEmail1(parseString(jData, ContactFields.EMAIL1));
+	        contactSearch.setEmail2(parseString(jData, ContactFields.EMAIL2));
+	        contactSearch.setEmail3(parseString(jData, ContactFields.EMAIL3));
+	        contactSearch.setDynamicSearchField(parseJSONIntArray(jData, "dynamicsearchfield"));
+	        contactSearch.setDynamicSearchFieldValue(parseJSONStringArray(jData, "dynamicsearchfieldvalue"));
+	        contactSearch.setPrivatePostalCodeRange(parseJSONStringArray(jData, "privatepostalcoderange"));
+	        contactSearch.setBusinessPostalCodeRange(parseJSONStringArray(jData, "businesspostalcoderange"));
+	        contactSearch.setPrivatePostalCodeRange(parseJSONStringArray(jData, "privatepostalcoderange"));
+	        contactSearch.setOtherPostalCodeRange(parseJSONStringArray(jData, "otherpostalcoderange"));
+	        contactSearch.setBirthdayRange(parseJSONDateArray(jData, "birthdayrange"));
+	        contactSearch.setAnniversaryRange(parseJSONDateArray(jData, "anniversaryrange"));
+	        contactSearch.setNumberOfEmployeesRange(parseJSONStringArray(jData, "numberofemployee"));
+	        contactSearch.setSalesVolumeRange(parseJSONStringArray(jData, "salesvolumerange"));
+	        contactSearch.setCreationDateRange(parseJSONDateArray(jData, "creationdaterange"));
+	        contactSearch.setLastModifiedRange(parseJSONDateArray(jData, "lastmodifiedrange"));
+	        contactSearch.setCatgories(parseString(jData, "categories"));
+	        contactSearch.setSubfolderSearch(parseBoolean(jData, "subfoldersearch"));
+        } catch (JSONException e) {
+            throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
+        }
+        /*
+         * Sort options 
+         */
+    	UserField orderField = UserMapper.getInstance().getMappedField(orderBy);
+    	SortOptions sortOptions = new SortOptions(collation); 
+    	if (null == orderField) {
+    		// Sort field is a contact field: pass as it is
+    		final ContactField sortField = ContactMapper.getInstance().getMappedField(orderBy);
+    		if (null != sortField) {        			
+    			sortOptions.setOrderBy(new SortOrder[] { SortOptions.Order(sortField, order) });
+    		}
+    	}
+    	/*
+    	 * Perform search
+    	 */        	
+    	Date lastModified = new Date(0);
+    	final List<UserContact> userContacts = new ArrayList<UserContact>();
+        final ContactService contactService = ServiceRegistry.getInstance().getService(ContactService.class);
+        final ContactField[] contactFields = ContactMapper.getInstance().getFields(columns, 
+        		ContactField.INTERNAL_USERID, ContactField.LAST_MODIFIED);            
+        final UserService userService = ServiceRegistry.getInstance().getService(UserService.class, true);
+        SearchIterator<Contact> searchIterator = null;
+        try {
+        	searchIterator = contactService.searchUsers(session, contactSearch, contactFields, sortOptions);
+        	/*
+        	 * Process results
+        	 */
+            while (searchIterator.hasNext()) {
+            	final Contact contact = searchIterator.next();
+            	/*
+            	 * Check last modified
+            	 */
+            	if (contact.getLastModified().after(lastModified)) {
+            		lastModified = contact.getLastModified();
+            	}                	
+            	/*
+            	 * Get corresponding user
+            	 */
+            	final User user = userService.getUser(contact.getInternalUserId(), session.getContext());
+            	userContacts.add(new UserContact(contact, user));
+            }
+        } finally {
+        	if (null != searchIterator) {
+        		searchIterator.close();
+        	}
+        }
+        /*
+         * Sort by users if a user field was denoted by sort field
+         */
+        if (1 < userContacts.size()) {
+        	final UserField orderByUserField = UserMapper.getInstance().getMappedField(orderBy);
+        	if (null != orderByUserField) {
+        		Collections.sort(userContacts, UserContact.getComparator(
+        				orderByUserField, session.getUser().getLocale(), Order.DESCENDING.equals(order)));
+        	}
+        }
+        /*
+         * Return appropriate result
+         */
+        return new AJAXRequestResult(userContacts, lastModified, "usercontact");
+    }
+
+    public AJAXRequestResult performOLD(final AJAXRequestData request, final ServerSession session) throws OXException {
         try {
             /*
              * Parse parameters
@@ -214,7 +335,7 @@ public final class SearchAction extends AbstractUserAction {
                 try {
                     it.close();
                 } catch (final Exception e) {
-                    final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(SearchAction.class));
+                    final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(SearchAction.class));
                     LOG.error(e.getMessage(), e);
                 }
             }

@@ -49,8 +49,10 @@
 
 package com.openexchange.contact.storage.registry;
 
+import java.util.List;
 import com.openexchange.contact.storage.ContactStorage;
 import com.openexchange.exception.OXException;
+import com.openexchange.session.Session;
 
 
 /**
@@ -63,11 +65,20 @@ public interface ContactStorageRegistry {
     /**
      * Gets the {@link ContactStorage} for the supplied folder ID.
      * 
-     * @param context ID the context ID
+     * @param session the session
      * @param folderId the ID of the folder to get the storage for
      * @return the storage
      * @throws OXException
      */
-    ContactStorage getStorage(int contextID, String folderId) throws OXException;
+    ContactStorage getStorage(Session session, String folderId) throws OXException;
+
+    /**
+     * Gets a list of all registered {@link ContactStorage}s.
+     * 
+     * @param session the session
+     * @return the storages
+     * @throws OXException
+     */
+    List<ContactStorage> getStorages(Session session) throws OXException;
 
 }

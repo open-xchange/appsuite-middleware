@@ -530,8 +530,8 @@ public class RdbMessagingAccountStorage implements MessagingAccountStorage, Secr
 
     private static <S> S getService(final Class<? extends S> clazz) throws OXException {
         try {
-            return MessagingGenericServiceRegistry.getServiceRegistry().getService(clazz, true);
-        } catch (final OXException e) {
+            return MessagingGenericServiceRegistry.getService(clazz);
+        } catch (final RuntimeException e) {
             throw new OXException(e);
         }
     }
@@ -540,11 +540,7 @@ public class RdbMessagingAccountStorage implements MessagingAccountStorage, Secr
         if (session instanceof ServerSession) {
             return ((ServerSession) session).getContext();
         }
-        try {
-            return getService(ContextService.class).getContext(session.getContextId());
-        } catch (final OXException e) {
-            throw new OXException(e);
-        }
+        return getService(ContextService.class).getContext(session.getContextId());
     }
 
     private static int getGenericConfId(final int contextId, final int userId, final String serviceId, final int accountId, final Connection con) throws OXException, SQLException {

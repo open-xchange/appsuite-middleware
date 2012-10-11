@@ -60,13 +60,6 @@ import java.util.ArrayList;
 public interface ElementAttributes extends Serializable {
 
     /**
-     * Sets the version attribute of the attributes object
-     *
-     * @param version The new version value
-     */
-    public void setVersion(long version);
-
-    /**
      * Sets the maxLife attribute of the attributes object.
      *
      * @param mls The new MaxLifeSeconds value
@@ -130,13 +123,6 @@ public interface ElementAttributes extends Serializable {
      * Sets the LastAccessTime as now of the element attributes object
      */
     public void setLastAccessTimeNow();
-
-    /**
-     * Gets the version attribute of the attributes object
-     *
-     * @return The version value
-     */
-    public long getVersion();
 
     /**
      * Gets the idleTime attribute of the attributes object

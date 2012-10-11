@@ -49,20 +49,30 @@
 
 package com.openexchange.mailaccount.json.actions;
 
+import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.HashSet;
+import java.util.List;
+import java.util.Locale;
 import java.util.Set;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.databaseold.Database;
 import com.openexchange.documentation.RequestMethod;
 import com.openexchange.documentation.annotations.Action;
 import com.openexchange.documentation.annotations.Parameter;
+import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.MailSessionCache;
 import com.openexchange.mail.api.MailAccess;
+import com.openexchange.mail.mime.MimeMailExceptionCode;
 import com.openexchange.mailaccount.Attribute;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountDescription;
@@ -87,7 +97,7 @@ import com.openexchange.tools.session.ServerSession;
 responseDescription = "A JSON object representing the updated mail account. See mail account data.")
 public final class UpdateAction extends AbstractMailAccountAction {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(UpdateAction.class));
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(UpdateAction.class));
 
     public static final String ACTION = AJAXServlet.ACTION_UPDATE;
 
@@ -129,11 +139,12 @@ public final class UpdateAction extends AbstractMailAccountAction {
 
             final Set<Attribute> notAllowed = new HashSet<Attribute>(fieldsToUpdate);
             notAllowed.removeAll(WEBMAIL_ALLOWED);
+            final int contextId = session.getContextId();
             if (!session.getUserConfiguration().isMultipleMailAccounts() && (!isDefaultMailAccount(accountDescription) || (!notAllowed.isEmpty()))) {
                 throw
                     MailAccountExceptionCodes.NOT_ENABLED.create(
                     Integer.valueOf(session.getUserId()),
-                    Integer.valueOf(session.getContextId()));
+                    Integer.valueOf(contextId));
             }
 
             final MailAccountStorageService storageService =
@@ -144,21 +155,66 @@ public final class UpdateAction extends AbstractMailAccountAction {
                 throw AjaxExceptionCodes.MISSING_PARAMETER.create( MailAccountFields.ID);
             }
 
-            final MailAccount toUpdate = storageService.getMailAccount(id, session.getUserId(), session.getContextId());
+            final MailAccount toUpdate = storageService.getMailAccount(id, session.getUserId(), contextId);
             if (isUnifiedINBOXAccount(toUpdate)) {
                 // Treat as no hit
                 throw MailAccountExceptionCodes.NOT_FOUND.create(
                     Integer.valueOf(id),
                     Integer.valueOf(session.getUserId()),
-                    Integer.valueOf(session.getContextId()));
+                    Integer.valueOf(contextId));
+            }
+
+            // List for possible warnings
+            final List<OXException> warnings = new ArrayList<OXException>(2);
+            boolean clearStamp = false;
+            {
+                // Don't check for POP3 account due to access restrictions (login only allowed every n minutes)
+                final boolean pop3 = accountDescription.getMailProtocol().toLowerCase(Locale.ENGLISH).startsWith("pop3");
+                if (fieldsToUpdate.contains(Attribute.MAIL_URL_LITERAL)) {
+                    if(!pop3 && !ValidateAction.checkMailServerURL(accountDescription, session, warnings)) {
+                        final OXException warning = MimeMailExceptionCode.CONNECT_ERROR.create(accountDescription.getMailServer(), accountDescription.getLogin());
+                        warning.setCategory(Category.CATEGORY_WARNING);
+                        warnings.add(0, warning);
+                    }
+                    clearStamp |= (pop3 && !toUpdate.getMailServer().equals(accountDescription.getMailServer()));
+                }
+                if (fieldsToUpdate.contains(Attribute.TRANSPORT_URL_LITERAL)) {
+                    if(!pop3 && !ValidateAction.checkTransportServerURL(accountDescription, session, warnings)) {
+                        final String transportLogin = accountDescription.getTransportLogin();
+                        final OXException warning = MimeMailExceptionCode.CONNECT_ERROR.create(accountDescription.getTransportServer(), transportLogin == null ? accountDescription.getLogin() : transportLogin);
+                        warning.setCategory(Category.CATEGORY_WARNING);
+                        warnings.add(0, warning);
+                    }
+                    clearStamp |= (pop3 && !toUpdate.getTransportServer().equals(accountDescription.getTransportServer()));
+                }
             }
 
             storageService.updateMailAccount(
                 accountDescription,
                 fieldsToUpdate,
                 session.getUserId(),
-                session.getContextId(),
+                contextId,
                 session);
+
+            if (clearStamp) {
+                final Connection con = Database.get(contextId, true);
+                PreparedStatement stmt = null;
+                try {
+                    // Delete possibly existing mapping
+                    stmt = con.prepareStatement("DELETE FROM user_mail_account_properties WHERE cid = ? AND user = ? AND id = ? AND name = ?");
+                    int pos = 1;
+                    stmt.setInt(pos++, contextId);
+                    stmt.setInt(pos++, session.getUserId());
+                    stmt.setInt(pos++, id);
+                    stmt.setString(pos++, "pop3.lastaccess");
+                    stmt.executeUpdate();
+                } catch (final SQLException e) {
+                    throw MailAccountExceptionCodes.SQL_ERROR.create(e, e.getMessage());
+                } finally {
+                    closeSQLStuff(null, stmt);
+                    Database.back(contextId, true, con);
+                }
+            }
 
             if (fieldsToUpdate.removeAll(DEFAULT)) {
                 /*
@@ -187,9 +243,9 @@ public final class UpdateAction extends AbstractMailAccountAction {
             }
 
             final JSONObject jsonAccount =
-                MailAccountWriter.write(storageService.getMailAccount(id, session.getUserId(), session.getContextId()));
+                MailAccountWriter.write(storageService.getMailAccount(id, session.getUserId(), contextId));
 
-            return new AJAXRequestResult(jsonAccount);
+            return new AJAXRequestResult(jsonAccount).addWarnings(warnings);
         } catch (final JSONException e) {
             throw AjaxExceptionCodes.JSON_ERROR.create( e, e.getMessage());
         }

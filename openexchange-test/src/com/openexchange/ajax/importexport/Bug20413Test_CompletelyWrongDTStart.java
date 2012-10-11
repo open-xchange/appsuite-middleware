@@ -1,8 +1,6 @@
 package com.openexchange.ajax.importexport;
 
 import java.util.Calendar;
-import java.util.Date;
-
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -17,7 +15,7 @@ public class Bug20413Test_CompletelyWrongDTStart extends ManagedAppointmentTest 
 		super(name);
 	}
 	
-	private String ical = 
+	private final String ical = 
 		"BEGIN:VCALENDAR\n" + 
 		"PRODID:Strato Communicator 3.5\n" + 
 		"VERSION:2.0\n" + 
@@ -57,14 +55,15 @@ public class Bug20413Test_CompletelyWrongDTStart extends ManagedAppointmentTest 
 		JSONArray arr = (JSONArray)response.getData();
 		
 		
-		assertEquals(2, arr.length()); // interesting: you get an appointment and a series for the same date. ICal4J weirdness. But hey, it works!
+		assertEquals(1, arr.length());
 		
 		JSONObject jsonObject = arr.getJSONObject(0);
 		Appointment actual = calendarManager.get(jsonObject.getInt("folder_id"), jsonObject.getInt("id"));
 		Calendar startDate = Calendar.getInstance();
 		startDate.setTime(actual.getStartDate());
+		//NOTE: Completely irrelevant. Date format not allowed. 
 		assertEquals(Calendar.NOVEMBER, startDate.get(Calendar.MONTH));
-		assertEquals(10, startDate.get(Calendar.DAY_OF_MONTH));
+		assertEquals(9, startDate.get(Calendar.DAY_OF_MONTH));
 		
 	}
 

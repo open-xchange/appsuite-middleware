@@ -65,7 +65,7 @@ import javax.crypto.spec.SecretKeySpec;
  */
 public final class OldStyleDecrypt {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(OldStyleDecrypt.class));
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(OldStyleDecrypt.class));
 
     /**
      * The key length.

@@ -108,5 +108,12 @@ public interface IFileHolder extends Closeable {
      * @return The disposition or <code>null</code>
      */
     String getDisposition();
+    
+    /**
+     * Gets the delivery
+     * 
+     * @return the delivery.
+     */
+    String getDelivery();
 
 }

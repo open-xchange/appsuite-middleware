@@ -63,9 +63,13 @@ import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.Folder;
 import com.openexchange.ajax.customizer.folder.AdditionalFolderField;
 import com.openexchange.ajax.customizer.folder.AdditionalFolderFieldList;
+import com.openexchange.ajax.fields.DataFields;
+import com.openexchange.ajax.fields.FolderChildFields;
 import com.openexchange.ajax.fields.FolderFields;
 import com.openexchange.cache.impl.FolderCacheManager;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.container.DataObject;
+import com.openexchange.groupware.container.FolderChildObject;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
@@ -86,7 +90,7 @@ import com.openexchange.tools.session.ServerSessionAdapter;
  */
 public final class FolderWriter extends DataWriter {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(FolderWriter.class));
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(FolderWriter.class));
 
     private static final int[] mapping = { 0, -1, 1, -1, 2, -1, -1, -1, 4 };
 
@@ -146,14 +150,14 @@ public final class FolderWriter extends DataWriter {
     private static final TIntObjectMap<FolderFieldWriter> STATIC_WRITERS_MAP = new TIntObjectHashMap<FolderFieldWriter>(15);
 
     static {
-        STATIC_WRITERS_MAP.put(FolderObject.OBJECT_ID, new FolderFieldWriter() {
+        STATIC_WRITERS_MAP.put(DataObject.OBJECT_ID, new FolderFieldWriter() {
 
             @Override
             public void writeField(final JSONWriter jsonwriter, final FolderObject fo, final boolean withKey, final String name, final int hasSubfolders) throws JSONException {
                 if (!fo.containsObjectID()) {
                     if (withKey) {
                         if (fo.containsFullName()) {
-                            jsonwriter.key(FolderFields.ID);
+                            jsonwriter.key(DataFields.ID);
                             jsonwriter.value(fo.getFullName());
                         }
                     } else {
@@ -162,18 +166,18 @@ public final class FolderWriter extends DataWriter {
                     return;
                 }
                 if (withKey) {
-                    jsonwriter.key(FolderFields.ID);
+                    jsonwriter.key(DataFields.ID);
                 }
                 jsonwriter.value(fo.getObjectID());
             }
         });
-        STATIC_WRITERS_MAP.put(FolderObject.CREATED_BY, new FolderFieldWriter() {
+        STATIC_WRITERS_MAP.put(DataObject.CREATED_BY, new FolderFieldWriter() {
 
             @Override
             public void writeField(final JSONWriter jsonwriter, final FolderObject fo, final boolean withKey, final String name, final int hasSubfolders) throws JSONException {
                 if (withKey) {
                     if (fo.containsCreatedBy()) {
-                        jsonwriter.key(FolderFields.CREATED_BY);
+                        jsonwriter.key(DataFields.CREATED_BY);
                         jsonwriter.value(fo.getCreatedBy());
                     }
                 } else {
@@ -181,13 +185,13 @@ public final class FolderWriter extends DataWriter {
                 }
             }
         });
-        STATIC_WRITERS_MAP.put(FolderObject.MODIFIED_BY, new FolderFieldWriter() {
+        STATIC_WRITERS_MAP.put(DataObject.MODIFIED_BY, new FolderFieldWriter() {
 
             @Override
             public void writeField(final JSONWriter jsonwriter, final FolderObject fo, final boolean withKey, final String name, final int hasSubfolders) throws JSONException {
                 if (withKey) {
                     if (fo.containsModifiedBy()) {
-                        jsonwriter.key(FolderFields.MODIFIED_BY);
+                        jsonwriter.key(DataFields.MODIFIED_BY);
                         jsonwriter.value(fo.getModifiedBy());
                     }
                 } else {
@@ -195,13 +199,13 @@ public final class FolderWriter extends DataWriter {
                 }
             }
         });
-        STATIC_WRITERS_MAP.put(FolderObject.FOLDER_ID, new FolderFieldWriter() {
+        STATIC_WRITERS_MAP.put(FolderChildObject.FOLDER_ID, new FolderFieldWriter() {
 
             @Override
             public void writeField(final JSONWriter jsonwriter, final FolderObject fo, final boolean withKey, final String name, final int hasSubfolders) throws JSONException {
                 if (withKey) {
                     if (fo.containsParentFolderID()) {
-                        jsonwriter.key(FolderFields.FOLDER_ID);
+                        jsonwriter.key(FolderChildFields.FOLDER_ID);
                         jsonwriter.value(fo.getParentFolderID());
                     }
                 } else {
@@ -482,14 +486,14 @@ public final class FolderWriter extends DataWriter {
                  * No static writer available, generate a new one
                  */
                 Fields: switch (field) {
-                case FolderObject.CREATION_DATE:
+                case DataObject.CREATION_DATE:
                     retval[i] = new FolderFieldWriter() {
 
                         @Override
                         public void writeField(final JSONWriter jsonwriter, final FolderObject fo, final boolean withKey, final String name, final int hasSubfolders) throws JSONException {
                             if (withKey) {
                                 if (fo.containsCreationDate()) {
-                                    jsonwriter.key(FolderFields.CREATION_DATE);
+                                    jsonwriter.key(DataFields.CREATION_DATE);
                                     jsonwriter.value(addTimeZoneOffset(fo.getCreationDate().getTime()));
                                 }
                             } else {
@@ -498,14 +502,14 @@ public final class FolderWriter extends DataWriter {
                         }
                     };
                     break Fields;
-                case FolderObject.LAST_MODIFIED:
+                case DataObject.LAST_MODIFIED:
                     retval[i] = new FolderFieldWriter() {
 
                         @Override
                         public void writeField(final JSONWriter jsonwriter, final FolderObject fo, final boolean withKey, final String name, final int hasSubfolders) throws JSONException {
                             if (withKey) {
                                 if (fo.containsLastModified()) {
-                                    jsonwriter.key(FolderFields.LAST_MODIFIED);
+                                    jsonwriter.key(DataFields.LAST_MODIFIED);
                                     jsonwriter.value(addTimeZoneOffset(fo.getLastModified().getTime()));
                                 }
                             } else {
@@ -514,14 +518,14 @@ public final class FolderWriter extends DataWriter {
                         }
                     };
                     break Fields;
-                case FolderObject.LAST_MODIFIED_UTC:
+                case DataObject.LAST_MODIFIED_UTC:
                     retval[i] = new FolderFieldWriter() {
 
                         @Override
                         public void writeField(final JSONWriter jsonwriter, final FolderObject fo, final boolean withKey, final String name, final int hasSubfolders) throws JSONException {
                             if (withKey) {
                                 if (fo.containsLastModified()) {
-                                    jsonwriter.key(FolderFields.LAST_MODIFIED_UTC);
+                                    jsonwriter.key(DataFields.LAST_MODIFIED_UTC);
                                     jsonwriter.value(fo.getLastModified().getTime());
                                 }
                             } else {

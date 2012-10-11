@@ -49,6 +49,8 @@
 
 package com.openexchange.log;
 
+import java.util.Comparator;
+
 /**
  * {@link LogPropertyName} - A log property name.
  *
@@ -65,6 +67,10 @@ public final class LogPropertyName implements Comparable<LogPropertyName> {
          */
         ALL,
         /**
+         * The TRACE log level
+         */
+        TRACE, 
+        /**
          * The DEBUG log level.
          */
         DEBUG,
@@ -79,7 +85,17 @@ public final class LogPropertyName implements Comparable<LogPropertyName> {
         /**
          * The ERROR log level.
          */
-        ERROR, ;
+        ERROR, 
+        /**
+         * The FATAL log level.
+         */
+        FATAL, 
+
+        /*
+         * Don't log this
+         */
+        OFF, ;
+        
 
         /**
          * Gets the appropriate log level for specified naming.
@@ -99,6 +115,25 @@ public final class LogPropertyName implements Comparable<LogPropertyName> {
             }
             return ALL;
         }
+
+		public boolean includes(LogLevel other) {
+			if (this == OFF) {
+				return false;
+			}
+			return other.ordinal() <= ordinal();
+		}
+		
+		public static Comparator<LogLevel> getComparator() {
+			return new Comparator<LogLevel>() {
+
+				@Override
+				public int compare(LogLevel o1, LogLevel o2) {
+					return o1.ordinal() - o2.ordinal();
+				}
+				
+			};
+		}
+		
     }
 
     private final String propertyName;

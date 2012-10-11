@@ -52,11 +52,11 @@ package com.openexchange.subscribe.crawler.osgi;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.log.LogFactory;
 import com.openexchange.subscribe.crawler.internal.CrawlerUpdateTask;
 import com.openexchange.timer.ScheduledTimerTask;
 import com.openexchange.timer.TimerService;
@@ -107,13 +107,13 @@ public class CrawlerAutoUpdater implements ServiceTrackerCustomizer<Object, Obje
             lock.unlock();
         }
         // only activate the auto-update if both services are available and it is enabled via config-file
-        if (taskSchedulingPossible && Boolean.parseBoolean(configurationService.getProperty(activator.ENABLE_AUTO_UPDATE))) {
+        if (taskSchedulingPossible && Boolean.parseBoolean(configurationService.getProperty(Activator.ENABLE_AUTO_UPDATE))) {
             final CrawlerUpdateTask crawlerUpdateTask = new CrawlerUpdateTask(configurationService, activator);
             // Start the job 30 seconds after this and repeat it as often as configured (default:daily)
             final long updateInterval = Integer.parseInt(configurationService.getProperty(Activator.UPDATE_INTERVAL));
             // Insert daily TimerTask to look for updates
             scheduledTimerTask = timerService.scheduleWithFixedDelay(crawlerUpdateTask, 30 * 1000, updateInterval);
-            LOG.info("Task for crawler auto-update initialised");
+            LOG.info("Task for crawler auto-update initialized");
         }
         return obj;
     }

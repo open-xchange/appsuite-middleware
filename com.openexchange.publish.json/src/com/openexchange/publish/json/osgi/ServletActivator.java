@@ -51,6 +51,7 @@ package com.openexchange.publish.json.osgi;
 
 import com.openexchange.ajax.osgi.AbstractSessionServletActivator;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.multiple.MultipleHandlerFactoryService;
 import com.openexchange.publish.PublicationTargetDiscoveryService;
 import com.openexchange.publish.json.PublicationMultipleHandlerFactory;
@@ -61,8 +62,8 @@ import com.openexchange.publish.json.types.EntityMap;
 
 public class ServletActivator extends AbstractSessionServletActivator {
 
-    private static final String TARGET_ALIAS = "ajax/publicationTargets";
-    private static final String PUB_ALIAS = "ajax/publications";
+    private static final String TARGET_ALIAS_APPENDIX = "publicationTargets";
+    private static final String PUB_ALIAS_APPENDIX = "publications";
 
     @Override
     protected void handleAvailability(final Class<?> clazz) {
@@ -90,8 +91,8 @@ public class ServletActivator extends AbstractSessionServletActivator {
         PublicationServlet.setFactory(publicationHandlerFactory);
         PublicationTargetServlet.setFactory(publicationTargetHandlerFactory);
 
-        registerSessionServlet(TARGET_ALIAS, new PublicationTargetServlet());
-        registerSessionServlet(PUB_ALIAS, new PublicationServlet());
+        registerSessionServlet(getService(DispatcherPrefixService.class).getPrefix() + TARGET_ALIAS_APPENDIX, new PublicationTargetServlet());
+        registerSessionServlet(getService(DispatcherPrefixService.class).getPrefix() + PUB_ALIAS_APPENDIX, new PublicationServlet());
     }
 
     @Override
@@ -118,6 +119,6 @@ public class ServletActivator extends AbstractSessionServletActivator {
 
     @Override
     protected Class<?>[] getAdditionalNeededServices() {
-        return new Class<?>[] { PublicationTargetDiscoveryService.class, ConfigurationService.class };
+        return new Class<?>[] { PublicationTargetDiscoveryService.class, ConfigurationService.class, DispatcherPrefixService.class };
     }
 }

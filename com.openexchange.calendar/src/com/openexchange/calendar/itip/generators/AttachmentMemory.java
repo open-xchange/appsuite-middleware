@@ -58,14 +58,15 @@ import com.openexchange.timer.TimerService;
  */
 public class AttachmentMemory {
 	
-	private ConcurrentHashMap<TimestampedAttachmentChange, TimestampedAttachmentChange> memory = new ConcurrentHashMap<AttachmentMemory.TimestampedAttachmentChange, AttachmentMemory.TimestampedAttachmentChange>();
+	private final ConcurrentHashMap<TimestampedAttachmentChange, TimestampedAttachmentChange> memory = new ConcurrentHashMap<AttachmentMemory.TimestampedAttachmentChange, AttachmentMemory.TimestampedAttachmentChange>();
 	
 	private int purgeInterval;
 	
 	public AttachmentMemory(int purgeInterval, TimerService timer) {
 		timer.scheduleAtFixedRate(new Runnable() {
 
-			public void run() {
+			@Override
+            public void run() {
 				purge();
 			}
 			
@@ -118,17 +119,22 @@ public class AttachmentMemory {
 		}
 		@Override
 		public boolean equals(Object obj) {
-			if (this == obj)
-				return true;
-			if (obj == null)
-				return false;
-			if (getClass() != obj.getClass())
-				return false;
+			if (this == obj) {
+                return true;
+            }
+			if (obj == null) {
+                return false;
+            }
+			if (getClass() != obj.getClass()) {
+                return false;
+            }
 			TimestampedAttachmentChange other = (TimestampedAttachmentChange) obj;
-			if (ctxId != other.ctxId)
-				return false;
-			if (objectId != other.objectId)
-				return false;
+			if (ctxId != other.ctxId) {
+                return false;
+            }
+			if (objectId != other.objectId) {
+                return false;
+            }
 			return true;
 		}
 		@Override

@@ -92,7 +92,7 @@ public final class Utility {
             checksum.update(string.getBytes(com.openexchange.java.Charsets.UTF_8));
             return checksum.getFormattedValue();
         } catch (final NoSuchAlgorithmException e) {
-            com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(Utility.class)).error(e.getMessage(), e);
+            com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(Utility.class)).error(e.getMessage(), e);
         }
         return null;
     }
@@ -122,7 +122,7 @@ public final class Utility {
             checksum.update(string.getBytes(com.openexchange.java.Charsets.UTF_8));
             return checksum.getFormattedValue();
         } catch (final NoSuchAlgorithmException e) {
-            com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(Utility.class)).error(e.getMessage(), e);
+            com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(Utility.class)).error(e.getMessage(), e);
         }
         return null;
     }
@@ -158,7 +158,7 @@ public final class Utility {
             // Keep interrupted status
             Thread.currentThread().interrupt();
         } catch (final ExecutionException e) {
-            final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(Utility.class));
+            final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(Utility.class));
             LOG.error(e.getMessage(), e);
         }
         return TimeZone.getTimeZone(ID);

@@ -114,7 +114,7 @@ public final class MessagingGenericCreateTableTask extends AbstractCreateTableIm
     public void perform(final PerformParameters params) throws com.openexchange.exception.OXException {
         final int contextId = params.getContextId();
         createTable("messagingAccount", getMessagingAccountTable(), contextId);
-        final org.apache.commons.logging.Log logger = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(MessagingGenericCreateTableTask.class));
+        final org.apache.commons.logging.Log logger = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(MessagingGenericCreateTableTask.class));
         if (logger.isInfoEnabled()) {
             logger.info("UpdateTask '" + MessagingGenericCreateTableTask.class.getSimpleName() + "' successfully performed!");
         }
@@ -183,8 +183,8 @@ public final class MessagingGenericCreateTableTask extends AbstractCreateTableIm
 
     private <S> S getService(final Class<? extends S> clazz) throws OXException {
         try {
-            return MessagingGenericServiceRegistry.getServiceRegistry().getService(clazz, true);
-        } catch (final OXException e) {
+            return MessagingGenericServiceRegistry.getService(clazz);
+        } catch (final RuntimeException e) {
             throw new OXException(e);
         }
     }

@@ -68,7 +68,7 @@ public class I18NErrorStrings implements LocalizableStrings {
 
     // The first argument will contain the letter found in the file, the second argument will contain the letter that was expected. The
     // third argument will contain the file name and the fourth the line number.
-    public static final String MALFORMED_TOKEN = "Malformed token or a unsupported token. Got %s but expected %s in .po file %s:%s.";
+    public static final String MALFORMED_TOKEN = "Malformed or unsupported token. Got %s but expected %s in .po file %s:%s.";
 
     // The argument contains the filename of the .po file that could not be read.
     public static final String IO_EXCEPTION = "An IOException ocurred reading .po file %s.";

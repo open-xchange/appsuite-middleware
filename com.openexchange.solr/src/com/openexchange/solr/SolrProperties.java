@@ -57,22 +57,26 @@ package com.openexchange.solr;
  */
 public class SolrProperties {
     
-    public static final String PROP_SOLR_HOME = "com.openexchange.solr.solrHome";
+    public static final String SOLR_HOME = "com.openexchange.solr.solrHome";
     
-    public static final String PROP_SOLR_XML = "com.openexchange.solr.solrXml";
+    public static final String LIB_DIR = "com.openexchange.solr.libDir";
+        
+    public static final String SCHEMA_FILE_MAIL = "com.openexchange.solr.schemaMail";
     
-    public static final String PROP_DEFAULT_CORE_NAME = "com.openexchange.solr.defaultCoreName";
-
-    public static final String PROP_SCHEMA_MAIL = "com.openexchange.solr.schemaMail";
+    public static final String CONFIG_FILE_MAIL = "com.openexchange.solr.configMail";
     
-    public static final String PROP_CONFIG_MAIL = "com.openexchange.solr.configMail";
+    public static final String SCHEMA_FILE_INFOSTORE = "com.openexchange.solr.schemaInfostore";
     
-//    public static final String PROP_SCHEMA_APPOINTMENTS = "com.openexchange.solr.schemaAppointments";
+    public static final String CONFIG_FILE_INFOSTORE = "com.openexchange.solr.configInfostore";
+        
+    public static final String IS_NODE = "com.openexchange.solr.isSolrNode";
     
-//    public static final String PROP_DATA_DIR_NAME = "com.openexchange.solr.dataDirName";
+    public static final String CONFIG_DIR = "com.openexchange.solr.configDir";
     
-    public static final String PROP_CONFIG_MAIL_NAME = "com.openexchange.solr.configMailName";
+    public static final String SIMPLE_HANLDER = "com.openexchange.solr.simpleHandler";
     
-//    public static final String PROP_CONFIG_DIR_NAME = "com.openexchange.solr.configDirName";
-
+    public static final String CUSTOM_HANLDER = "com.openexchange.solr.customHandler";
+    
+    public static final String ALL_HANLDER = "com.openexchange.solr.allHandler";
+   
 }

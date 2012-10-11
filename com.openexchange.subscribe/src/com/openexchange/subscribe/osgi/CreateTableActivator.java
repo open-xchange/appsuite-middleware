@@ -72,7 +72,6 @@ public class CreateTableActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        // TODO Auto-generated method stub
-        return null;
+        return EMPTY_CLASSES;
     }
 }

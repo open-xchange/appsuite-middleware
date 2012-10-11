@@ -59,6 +59,7 @@ import java.util.Map;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.Mail;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.documentation.RequestMethod;
@@ -86,7 +87,7 @@ responseDescription = "Response (not IMAP: with timestamp): An array with mail d
 public final class ListAction extends AbstractMailAction {
 
     private static final org.apache.commons.logging.Log LOG =
-        com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(ListAction.class));
+        com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(ListAction.class));
 
     private static final boolean DEBUG = LOG.isDebugEnabled();
 
@@ -106,7 +107,7 @@ public final class ListAction extends AbstractMailAction {
             /*
              * Read in parameters
              */
-            final int[] columns = req.checkIntArray(Mail.PARAMETER_COLUMNS);
+            final int[] columns = req.checkIntArray(AJAXServlet.PARAMETER_COLUMNS);
             final String[] headers = req.optStringArray(Mail.PARAMETER_HEADERS);
             /*
              * Get map
@@ -132,7 +133,9 @@ public final class ListAction extends AbstractMailAction {
                 for (int i = 0; i < mails.length; i++) {
                     final MailMessage mail = mails[i];
                     if (mail != null) {
-                        mail.setAccountId(accountID);
+                        if (!mail.containsAccountId()) {
+                            mail.setAccountId(accountID);
+                        }
                         list.add(mail);
                     }
                 }
@@ -151,8 +154,8 @@ public final class ListAction extends AbstractMailAction {
             return Collections.emptyMap();
         }
         final Map<String, List<String>> idMap = newHashMap(4);
-        final String parameterFolderId = Mail.PARAMETER_FOLDERID;
-        final String parameterId = Mail.PARAMETER_ID;
+        final String parameterFolderId = AJAXServlet.PARAMETER_FOLDERID;
+        final String parameterId = AJAXServlet.PARAMETER_ID;
         String folder;
         List<String> list;
         {

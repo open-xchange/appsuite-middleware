@@ -60,10 +60,10 @@ import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import com.openexchange.log.LogFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.service.messaging.Message;
-import com.openexchange.service.messaging.MessagingServiceExceptionCodes;
+import com.openexchange.service.messaging.MessagingServiceExceptionCode;
 import com.openexchange.service.messaging.internal.Constants;
 import com.openexchange.service.messaging.internal.MessageHandlerTracker;
 import com.openexchange.service.messaging.internal.MessageHandlerWrapper;
@@ -224,7 +224,7 @@ public class MessagingDatagramHandler {
                     final MessagingContiguousMessage prev = tTruncated.remove(key);
                     tLocks.remove(key);
                     if (null == prev) {
-                        throw MessagingServiceExceptionCodes.MISSING_PREV_PACKAGE.create();
+                        throw MessagingServiceExceptionCode.MISSING_PREV_PACKAGE.create();
                     }
                     prev.add(pm.getChunkNumber(), pm.getChunk());
                     return prev.toMessage();
@@ -240,7 +240,7 @@ public class MessagingDatagramHandler {
                      */
                     final MessagingContiguousMessage first = new MessagingContiguousMessage(pm.getTopic(), pm.getChunk());
                     if (null != tTruncated.putIfAbsent(key, first)) {
-                        throw MessagingServiceExceptionCodes.CONFLICTING_TRUNCATED_PACKAGES.create();
+                        throw MessagingServiceExceptionCode.CONFLICTING_TRUNCATED_PACKAGES.create();
                     }
                     final LockAndCondition lac = getLock(key);
                     final Lock lock = lac.lock;
@@ -271,7 +271,7 @@ public class MessagingDatagramHandler {
                                 lac.condition.signalAll();
                                 // Restore the interrupted status; see http://www.ibm.com/developerworks/java/library/j-jtp05236/index.html
                                 Thread.currentThread().interrupt();
-                                throw MessagingServiceExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+                                throw MessagingServiceExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
                             }
                         } while (null == (prev = tTruncated.get(key)));
                     } finally {
@@ -281,7 +281,7 @@ public class MessagingDatagramHandler {
                 prev.add(pm.getChunkNumber(), pm.getChunk());
                 return null;
             } catch (final RuntimeException e) {
-                throw MessagingServiceExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+                throw MessagingServiceExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
             }
         }
 

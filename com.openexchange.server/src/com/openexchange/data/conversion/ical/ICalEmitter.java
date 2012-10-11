@@ -72,6 +72,19 @@ public interface ICalEmitter {
     public String writeTasks(List<Task> tasks, List<ConversionError> errors, List<ConversionWarning> warnings, Context ctx) throws ConversionError;
 
     /**
+     * Writes a free/busy-reply, using the supplied free/busy information to
+     * reflect the free/busy-times and the corresponding attendee.
+     * 
+     * @param freeBusyRequest the free/busy-information 
+     * @param ctx the context
+     * @param errors the list of conversion errors
+     * @param warnings the list of conversion warnings
+     * @return the free/busy-reply
+     * @throws ConversionError
+     */
+    String writeFreeBusyReply(FreeBusyInformation freeBusyInfo, Context ctx, List<ConversionError> errors, List<ConversionWarning> warnings) throws ConversionError;
+
+    /**
      * Creates a new {@link ICalSession} to collect the iCal information.
      * @param mode Operation mode to use.
      * @return a newly generated {@link ICalSession}.

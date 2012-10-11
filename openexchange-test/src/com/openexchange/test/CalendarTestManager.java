@@ -53,6 +53,7 @@ import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Autoboxing.I2i;
 import static com.openexchange.java.Autoboxing.i2I;
 import static junit.framework.Assert.fail;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -60,8 +61,10 @@ import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.TimeZone;
+
 import org.json.JSONException;
 import org.xml.sax.SAXException;
+
 import com.openexchange.ajax.appointment.action.AllRequest;
 import com.openexchange.ajax.appointment.action.AppointmentInsertResponse;
 import com.openexchange.ajax.appointment.action.ConfirmRequest;
@@ -213,16 +216,19 @@ public class CalendarTestManager implements TestManager {
             return getClient().execute(request);
         } catch (OXException e) {
             setLastException(e);
-            if (failOnError)
+            if (failOnError) {
                 fail("AjaxException during task creation: " + e.getLocalizedMessage());
+            }
         } catch (IOException e) {
             setLastException(e);
-            if (failOnError)
+            if (failOnError) {
                 fail("IOException during task creation: " + e.getLocalizedMessage());
+            }
         } catch (JSONException e) {
             setLastException(e);
-            if (failOnError)
+            if (failOnError) {
                 fail("JsonException during task creation: " + e.getLocalizedMessage());
+            }
         }
         return null;
     }
@@ -235,8 +241,9 @@ public class CalendarTestManager implements TestManager {
         AppointmentInsertResponse insertResponse = execute(insertRequest);
         extractInfo(insertResponse);
         insertResponse.fillAppointment(appointment);
-        if (doesFailOnError() || appointment.getObjectID() != 0)
+        if (doesFailOnError() || appointment.getObjectID() != 0) {
             createdEntities.add(appointment);
+        }
         return appointment;
     }
 
@@ -261,8 +268,9 @@ public class CalendarTestManager implements TestManager {
             extractInfo(response);
             return response.getAppointment(timezone);
         } catch (OXException e) {
-            if (failOnError)
+            if (failOnError) {
                 throw e;
+            }
             return null;
         }
     }
@@ -274,8 +282,9 @@ public class CalendarTestManager implements TestManager {
             extractInfo(response);
             return response.getAppointment(timezone);
         } catch (OXException e) {
-            if (failOnError)
+            if (failOnError) {
                 throw e;
+            }
             return null;
         }
     }
@@ -308,8 +317,9 @@ public class CalendarTestManager implements TestManager {
         UpdateResponse updateResponse = execute(updateRequest);
         extractInfo(updateResponse);
         updatedAppointment.setLastModified(updateResponse.getTimestamp());
-        if (updateResponse.getId() != 0)
+        if (updateResponse.getId() != 0) {
             updatedAppointment.setObjectID(updateResponse.getId());
+        }
         for (Appointment createdAppoinment : createdEntities) {
             if (createdAppoinment.getObjectID() == updatedAppointment.getObjectID()) {
                 createdAppoinment.setLastModified(updatedAppointment.getLastModified());
@@ -332,11 +342,13 @@ public class CalendarTestManager implements TestManager {
         for (Object[] values : arr) {
             Appointment temp = new Appointment();
             list.add(temp);
-            for (int i = 0; i < cols.length; i++)
-                if (values[i] != null)
+            for (int i = 0; i < cols.length; i++) {
+                if (values[i] != null) {
                     temp.set(cols[i], conv(cols[i], values[i]));
-                else
+                } else {
                     temp.remove(cols[i]);
+                }
+            }
             fixDates(temp);
         }
         return list;
@@ -355,12 +367,15 @@ public class CalendarTestManager implements TestManager {
     }
 
     private void fixDates(Appointment temp) {
-        if (temp.getFullTime())
+        if (temp.getFullTime()) {
             return;
-        if (temp.containsStartDate())
+        }
+        if (temp.containsStartDate()) {
             temp.setStartDate(moveOffset(temp.getStartDate()));
-        if (temp.containsEndDate())
+        }
+        if (temp.containsEndDate()) {
             temp.setEndDate(moveOffset(temp.getEndDate()));
+        }
     }
 
     private Date moveOffset(Date value) {
@@ -374,18 +389,21 @@ public class CalendarTestManager implements TestManager {
         case Appointment.START_DATE:
         case Appointment.END_DATE:
         case Appointment.UNTIL:
-            if (!(object instanceof Date))
+            if (!(object instanceof Date)) {
                 value = new Date((Long) object);
+            }
         }
         return value;
     }
 
     private int[] addNecessaryColumns(int[] columns) {
         List<Integer> cols = new LinkedList<Integer>(Arrays.asList(i2I(columns)));
-        if (!cols.contains(I(CommonObject.FOLDER_ID)))
+        if (!cols.contains(I(CommonObject.FOLDER_ID))) {
             cols.add(I(CommonObject.FOLDER_ID));
-        if (!cols.contains(I(CommonObject.OBJECT_ID)))
+        }
+        if (!cols.contains(I(CommonObject.OBJECT_ID))) {
             cols.add(I(CommonObject.OBJECT_ID));
+        }
         return I2i(cols);
     }
 
@@ -472,8 +490,9 @@ public class CalendarTestManager implements TestManager {
                 failOnErrorOverride);
         }
         CommonDeleteResponse response = execute(deleteRequest);
-        if(response != null)
+        if(response != null) {
             extractInfo(response);
+        }
     }
 
     public void delete(Appointment appointment) {
@@ -501,6 +520,10 @@ public class CalendarTestManager implements TestManager {
         }
     }
 
+    public List<Appointment> getCreatedEntities() {
+    	return this.createdEntities;
+    }
+    
     /*
      * Helper methods
      */
@@ -539,8 +562,9 @@ public class CalendarTestManager implements TestManager {
     protected void extractInfo(AbstractAJAXResponse response) {
         setLastResponse(response);
         setLastModification(response.getTimestamp());
-        if (response.hasError())
+        if (response.hasError()) {
             setLastException(response.getException());
+        }
     }
 
 }

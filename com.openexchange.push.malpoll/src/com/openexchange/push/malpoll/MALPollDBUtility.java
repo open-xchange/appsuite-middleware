@@ -72,7 +72,7 @@ import com.openexchange.push.malpoll.services.MALPollServiceRegistry;
  */
 public final class MALPollDBUtility {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(MALPollDBUtility.class));
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(MALPollDBUtility.class));
 
     private static final int CHUNK_SIZE = 100;
 

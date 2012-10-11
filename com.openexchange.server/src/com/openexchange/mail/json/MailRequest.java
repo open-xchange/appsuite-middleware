@@ -49,9 +49,15 @@
 
 package com.openexchange.mail.json;
 
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Set;
 import java.util.regex.Pattern;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
+import com.openexchange.ajax.requesthandler.AJAXRequestDataTools;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.json.actions.AbstractMailAction;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
@@ -71,7 +77,7 @@ public final class MailRequest {
 
     private final ServerSession session;
 
-    private final AJAXRequestData request;
+    private final AJAXRequestData requestData;
 
     /**
      * Initializes a new {@link MailRequest}.
@@ -81,16 +87,64 @@ public final class MailRequest {
      */
     public MailRequest(final AJAXRequestData request, final ServerSession session) {
         super();
-        this.request = request;
+        this.requestData = request;
         this.session = session;
     }
 
+    private static final Set<String> ALIASES_MAX = Collections.unmodifiableSet(new HashSet<String>(Arrays.asList("max", "maximum")));
+
+    /**
+     * Gets the <code>max</code> parameter.
+     * 
+     * @return The <code>max</code> parameter
+     * @throws OXException If <code>max</code> is not a number
+     */
+    public long getMax() throws OXException {
+        String s = null;
+        for (final Iterator<String> it = ALIASES_MAX.iterator(); (null == s) && it.hasNext();) {
+            s = requestData.getParameter(it.next());
+        }
+        if (null == s) {
+            return -1L;
+        }
+        try {
+            return Long.parseLong(s.trim());
+        } catch (final NumberFormatException e) {
+            throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create("max", s);
+        }
+    }
+
     public String checkParameter(final String name) throws OXException {
-        return request.checkParameter(name);
+        return requestData.checkParameter(name);
     }
 
     public String getParameter(final String name) {
-        return request.getParameter(name);
+        return requestData.getParameter(name);
+    }
+
+    /**
+     * Gets optional <code>boolean</code> parameter.
+     *
+     * @param name The parameter name
+     * @return The <code>boolean</code>
+     */
+    public boolean optBool(final String name) {
+        return AJAXRequestDataTools.parseBoolParameter(requestData.getParameter(name));
+    }
+
+    /**
+     * Gets optional <code>boolean</code> parameter.
+     *
+     * @param name The parameter name
+     * @param def The default value to return if such a parameter is absent
+     * @return The <code>boolean</code>
+     */
+    public boolean optBool(final String name, final boolean def) {
+        final String parameter = requestData.getParameter(name);
+        if (null == parameter) {
+            return def;
+        }
+        return AJAXRequestDataTools.parseBoolParameter(parameter);
     }
 
     /**
@@ -101,7 +155,7 @@ public final class MailRequest {
      * @throws OXException If parameter is an invalid number value
      */
     public int optInt(final String name) throws OXException {
-        final String parameter = request.getParameter(name);
+        final String parameter = requestData.getParameter(name);
         if (null == parameter) {
             return NOT_FOUND;
         }
@@ -125,7 +179,7 @@ public final class MailRequest {
      * @throws OXException If an error occurs
      */
     public int[] checkIntArray(final String name) throws OXException {
-        final String parameter = request.getParameter(name);
+        final String parameter = requestData.getParameter(name);
         if (null == parameter) {
             throw AjaxExceptionCodes.MISSING_PARAMETER.create(name);
         }
@@ -157,7 +211,7 @@ public final class MailRequest {
      * @throws OXException If parameter is absdent
      */
     public String[] checkStringArray(final String name) throws OXException {
-        final String parameter = request.getParameter(name);
+        final String parameter = requestData.getParameter(name);
         if (null == parameter) {
             throw AjaxExceptionCodes.MISSING_PARAMETER.create(name);
         }
@@ -171,7 +225,7 @@ public final class MailRequest {
      * @return The <code>String</code> array
      */
     public String[] optStringArray(final String name) {
-        final String parameter = request.getParameter(name);
+        final String parameter = requestData.getParameter(name);
         if (null == parameter) {
             return null;
         }
@@ -184,7 +238,7 @@ public final class MailRequest {
      * @return The request
      */
     public AJAXRequestData getRequest() {
-        return request;
+        return requestData;
     }
 
     /**

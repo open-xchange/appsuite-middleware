@@ -129,9 +129,10 @@ public interface HtmlService {
      * @param optConfigName The optional configuration name to read whitelist from
      * @param dropExternalImages Whether to drop image URLs
      * @param modified A <code>boolean</code> array with length <code>1</code> to store modified status
+     * @param cssPrefix The optional CSS prefix
      * @return The sanitized HTML content
      */
-    String sanitize(String htmlContent, String optConfigName, boolean dropExternalImages, boolean[] modified);
+    String sanitize(String htmlContent, String optConfigName, boolean dropExternalImages, boolean[] modified, String cssPrefix);
 
     /**
      * Converts specified HTML content to plain text.

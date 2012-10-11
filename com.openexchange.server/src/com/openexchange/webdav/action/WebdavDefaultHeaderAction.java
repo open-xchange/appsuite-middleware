@@ -55,7 +55,8 @@ import com.openexchange.webdav.protocol.util.Utils;
 
 public class WebdavDefaultHeaderAction extends AbstractAction {
 
-	public void perform(final WebdavRequest req, final WebdavResponse res)
+	@Override
+    public void perform(final WebdavRequest req, final WebdavResponse res)
 			throws WebdavProtocolException {
 		res.setHeader("Server","Openexchange WebDAV");
 		res.setHeader("Date", Utils.convert(new Date()));

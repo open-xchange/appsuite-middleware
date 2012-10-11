@@ -2,23 +2,41 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Reseller Plug-in
 Bundle-SymbolicName: com.openexchange.admin.reseller
-Bundle-Version: 6.20.0.0
+Bundle-Version: 6.22.0
 Bundle-Vendor: Open-Xchange Inc.
-Bundle-RequiredExecutionEnvironment: J2SE-1.5
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-Activator: com.openexchange.admin.reseller.osgi.Activator
-Import-Package: com.openexchange.admin.plugins,
+Import-Package: com.openexchange.admin.console,
+ com.openexchange.admin.console.context.extensioninterfaces,
+ com.openexchange.admin.console.exception,
+ com.openexchange.admin.console.user,
+ com.openexchange.admin.daemons,
+ com.openexchange.admin.exceptions,
+ com.openexchange.admin.plugins,
+ com.openexchange.admin.reseller.rmi,
+ com.openexchange.admin.reseller.rmi.dataobjects,
+ com.openexchange.admin.reseller.rmi.exceptions,
+ com.openexchange.admin.reseller.rmi.extensions,
+ com.openexchange.admin.rmi,
  com.openexchange.admin.rmi.dataobjects,
+ com.openexchange.admin.rmi.exceptions,
+ com.openexchange.admin.rmi.extensions,
+ com.openexchange.admin.rmi.impl,
+ com.openexchange.admin.tools,
+ com.openexchange.config,
+ com.openexchange.database,
  com.openexchange.exception,
  com.openexchange.groupware,
  com.openexchange.groupware.contexts,
+ com.openexchange.groupware.contexts.impl,
  com.openexchange.groupware.impl,
  com.openexchange.groupware.userconfiguration,
  com.openexchange.java,
- org.apache.commons.logging;version="1.0.4",
- org.osgi.framework;version="1.3.0"
-Require-Bundle: com.openexchange.server,
- com.openexchange.admin,
- com.openexchange.admin.plugin.hosting,
- com.openexchange.admin.autocontextid
-Eclipse-RegisterBuddy: com.openexchange.admin,
+ com.openexchange.osgi,
+ com.openexchange.tools.pipesnfilters,
+ com.openexchange.tools.sql,
+ org.apache.commons.logging,
+ org.osgi.framework,
+ org.osgi.util.tracker;version="1.5.0"
+Require-Bundle: com.openexchange.admin,
  com.openexchange.admin.plugin.hosting

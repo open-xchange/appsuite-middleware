@@ -66,20 +66,27 @@ import com.openexchange.admin.storage.interfaces.OXResourceStorageInterface;
  */
 public abstract class OXResourceSQLStorage extends OXResourceStorageInterface {
 
+    @Override
     abstract public void changeLastModified(final int resource_id, final Context ctx, final Connection write_ox_con) throws StorageException;
 
+    @Override
     abstract public void change(final Context ctx, final Resource res) throws StorageException;
 
+    @Override
     abstract public int create(final Context ctx, final Resource res) throws StorageException;
 
+    @Override
     abstract public void createRecoveryData(final int resource_id, final Context ctx, final Connection con) throws StorageException;
 
+    @Override
     abstract public void deleteAllRecoveryData(final Context ctx, final Connection con) throws StorageException;
 
     abstract public void delete(final Context ctx, final int resource_id) throws StorageException;
 
+    @Override
     abstract public void deleteRecoveryData(final int resource_id, final Context ctx, final Connection con) throws StorageException;
 
+    @Override
     abstract public Resource[] list(final Context ctx, final String pattern) throws StorageException;
 
 }

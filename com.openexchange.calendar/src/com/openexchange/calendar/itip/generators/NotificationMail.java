@@ -51,6 +51,8 @@ package com.openexchange.calendar.itip.generators;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
@@ -64,8 +66,7 @@ import com.openexchange.data.conversion.ical.itip.ITipMessage;
 import com.openexchange.data.conversion.ical.itip.ITipMethod;
 import com.openexchange.groupware.attach.AttachmentMetadata;
 import com.openexchange.groupware.container.Appointment;
-import com.openexchange.groupware.container.Change;
-import com.openexchange.groupware.container.Difference;
+import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.notify.State.Type;
 
@@ -99,11 +100,13 @@ public class NotificationMail {
 
     private NotificationParticipant actor;
     
-    private List<AttachmentMetadata> attachments = new ArrayList<AttachmentMetadata>();
+    private final List<AttachmentMetadata> attachments = new ArrayList<AttachmentMetadata>();
 
 	private Type stateType;
 	
 	private boolean attachmentUpdate;
+
+	private boolean sortedParticipants;
 
     public ITipMessage getMessage() {
         return itipMessage;
@@ -201,9 +204,6 @@ public class NotificationMail {
 		if (isAboutActorsStateChangeOnly()) {
 			return actor;
 		}
-		if (principal != null) {
-			return principal;
-		}
 		
 		if (sharedCalendarOwner != null) {
 			return sharedCalendarOwner;
@@ -239,13 +239,25 @@ public class NotificationMail {
 	}
 
 	public void setParticipants(List<NotificationParticipant> recipients) {
+		sortedParticipants = false;
         this.participants = recipients;
     }
     
     public List<NotificationParticipant> getParticipants() {
-        return participants;
+    	if (!sortedParticipants) {
+    		Collections.sort(participants, new Comparator<NotificationParticipant>() {
+
+				@Override
+                public int compare(NotificationParticipant p1,
+						NotificationParticipant p2) {
+					return p1.getDisplayName().compareTo(p2.getDisplayName());
+				}
+    			
+    		});
+    	}
+    	return participants;
     }
-    
+        
     public void setResources(List<NotificationParticipant> resources) {
         this.resources = resources;
     }
@@ -314,9 +326,9 @@ public class NotificationMail {
     
     private boolean onlyPseudoChangesOnParticipants() {
         AppointmentDiff appDiff = getDiff();
-        boolean onlyParticipantsChanged = appDiff.onlyTheseChanged(CalendarField.getByColumn(Appointment.PARTICIPANTS).getJsonName());
+        boolean onlyParticipantsChanged = appDiff.exactlyTheseChanged(CalendarField.getByColumn(CalendarObject.PARTICIPANTS).getJsonName());
         if (onlyParticipantsChanged) {
-            FieldUpdate participantUpdate = appDiff.getUpdateFor(CalendarField.getByColumn(Appointment.PARTICIPANTS).getJsonName());
+            FieldUpdate participantUpdate = appDiff.getUpdateFor(CalendarField.getByColumn(CalendarObject.PARTICIPANTS).getJsonName());
             Participant[] oldParticipants = (Participant[]) participantUpdate.getOriginalValue();
             Participant[] newParticipants = (Participant[]) participantUpdate.getNewValue();
 
@@ -355,7 +367,7 @@ public class NotificationMail {
     }
     
     private boolean isNotWorthUpdateNotification(final Appointment original, final Appointment modified) {
-        if (original.containsRecurrenceType() && original.getRecurrenceType() != Appointment.NO_RECURRENCE) {
+        if (original.containsRecurrenceType() && original.getRecurrenceType() != CalendarObject.NO_RECURRENCE) {
             if (endsInPast(original)) {
                 return endsInPast(modified);
             } else {
@@ -378,7 +390,7 @@ public class NotificationMail {
         final Date now = new Date();
         final Date endDate = appointment.getEndDate();
         final Date until = appointment.getUntil();
-        if (appointment.isException() || appointment.getRecurrenceType() == Appointment.NO_RECURRENCE) {
+        if (appointment.isException() || appointment.getRecurrenceType() == CalendarObject.NO_RECURRENCE) {
             return endDate.before(now);
         } else {
             if (until == null) {
@@ -394,20 +406,29 @@ public class NotificationMail {
 	}
 
 
-	private static final Set<String> FIELDS_TO_IGNORE = new HashSet<String>(Arrays.asList(
-            AppointmentFields.ID,
-            AppointmentFields.CREATED_BY,
-            AppointmentFields.MODIFIED_BY,
-            AppointmentFields.CREATION_DATE,
-            AppointmentFields.LAST_MODIFIED,
-            AppointmentFields.LAST_MODIFIED_UTC,
-            AppointmentFields.ALARM,
-            AppointmentFields.NOTIFICATION,
-            AppointmentFields.RECURRENCE_TYPE,
-            AppointmentFields.CATEGORIES,
-            AppointmentFields.SEQUENCE,
-            AppointmentFields.SHOW_AS)
-        );
+	private static final Set<String> FIELDS_TO_REPORT = new HashSet<String>(Arrays.asList(
+			AppointmentFields.LOCATION,
+			AppointmentFields.FULL_TIME,
+			AppointmentFields.SHOW_AS,
+			AppointmentFields.TIMEZONE,
+			AppointmentFields.RECURRENCE_START,
+			AppointmentFields.TITLE,
+			AppointmentFields.START_DATE,
+			AppointmentFields.END_DATE,
+			AppointmentFields.NOTE,
+			AppointmentFields.RECURRENCE_DATE_POSITION,
+			AppointmentFields.RECURRENCE_POSITION,
+			AppointmentFields.RECURRENCE_TYPE,
+			AppointmentFields.DAYS,
+			AppointmentFields.DAY_IN_MONTH,
+			AppointmentFields.MONTH,
+			AppointmentFields.INTERVAL,
+			AppointmentFields.UNTIL,
+			AppointmentFields.RECURRENCE_CALCULATOR,
+			AppointmentFields.PARTICIPANTS,
+			AppointmentFields.USERS,
+			AppointmentFields.CONFIRMATIONS
+		));
     
     private boolean anInterestingFieldChanged() {
     	if (getDiff() == null) {
@@ -416,71 +437,43 @@ public class NotificationMail {
     	if (isAttachmentUpdate()) {
     		return true;
     	}
-    	Set<String> changedFields = new HashSet<String>(getDiff().getDifferingFieldNames());
     	
-    	changedFields.removeAll(FIELDS_TO_IGNORE);
-    
-    	return !changedFields.isEmpty();
+    	return getDiff().anyFieldChangedOf(FIELDS_TO_REPORT);
     }
 
 	public boolean isAboutStateChangesOnly() {
         if (getDiff() == null) {
             return false;
         }
+
         if (isAttachmentUpdate()) {
         	return false;
         }
-        
-        // First, let's see if any fields besides the state tracking fields have changed
-        HashSet<String> differing = new HashSet<String>(getDiff().getDifferingFieldNames());
-        
-        for(String field: new String[]{AppointmentFields.PARTICIPANTS, AppointmentFields.USERS, AppointmentFields.CONFIRMATIONS}) {
-            differing.remove(field);
-        }
-        if (!differing.isEmpty()) {
-            return false;
-        }
-        
-        // Hm, okay, so now let's see if any participants were added or removed. That also means this mail is not only about state changes.
-        for(String field: new String[]{AppointmentFields.PARTICIPANTS, AppointmentFields.USERS, AppointmentFields.CONFIRMATIONS}) {
-            FieldUpdate update = getDiff().getUpdateFor(field);
-            if (update == null) {
-                continue;
-            }
-            Difference extraInfo = (Difference) update.getExtraInfo();
-            if (!extraInfo.getAdded().isEmpty()) {
-                return false;
-            }
-            if (!extraInfo.getRemoved().isEmpty()) {
-                return false;
-            }
 
-        }
-        
-        return true;
+        return diff.isAboutStateChangesOnly();
     }
-	
+
 	public boolean isAboutActorsStateChangeOnly() {
-		if (!isAboutStateChangesOnly()) {
-			return false;
-		}
-		
-        for(String field: new String[]{AppointmentFields.PARTICIPANTS, AppointmentFields.USERS, AppointmentFields.CONFIRMATIONS}) {
-            FieldUpdate update = getDiff().getUpdateFor(field);
-            if (update == null) {
-                continue;
-            }
-            Difference extraInfo = (Difference) update.getExtraInfo();
-            List<Change> changed = extraInfo.getChanged();
-            for (Change change : changed) {
-				if (!change.getIdentifier().equals(actor.getIdentifier()+"")) {
-					return false;
-				}
-			}
-        }
-        return true;		
+    	if (!isAboutStateChangesOnly()) {
+    		return false;
+    	}
+		return diff.isAboutCertainParticipantsStateChangeOnly(actor.getIdentifier()+"");
 	}
 
+	public boolean someoneElseChangedPrincipalsState() {
+		if (actor.getIdentifier() == getPrincipal().getIdentifier()) {
+			return false;
+		}
+		return diff.isAboutCertainParticipantsStateChangeOnly(getPrincipal().getIdentifier()+"");
+	}
+
+    private boolean isAboutRecipientsStateChangeOnly() {
+    	if (!isAboutStateChangesOnly()) {
+    		return false;
+    	}
+		return diff.isAboutCertainParticipantsStateChangeOnly(recipient.getEmail());
+	}
+    	
     public void setActor(NotificationParticipant actor) {
         this.actor = actor;
     }

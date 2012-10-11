@@ -60,7 +60,7 @@ import com.openexchange.mailaccount.MailAccount;
  */
 public class MailAccountTransportProperties implements ITransportProperties {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(MailAccountTransportProperties.class));
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(MailAccountTransportProperties.class));
 
     protected final Map<String, String> properties;
 

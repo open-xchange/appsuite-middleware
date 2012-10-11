@@ -73,7 +73,7 @@ import com.openexchange.threadpool.ThreadPools;
 public final class CoyoteSocketHandler implements IAJPv13SocketHandler {
 
     protected static final org.apache.commons.logging.Log LOG =
-        com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(CoyoteSocketHandler.class));
+        com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(CoyoteSocketHandler.class));
 
     /**
      * The atomic boolean to track started status.

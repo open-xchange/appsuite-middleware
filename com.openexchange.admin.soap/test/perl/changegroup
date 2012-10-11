@@ -32,9 +32,7 @@ sub doRequest {
     	      SOAP::Data->value("Group")->value(\SOAP::Data->value(
                    # First the mandatory fields
     	           SOAP::Data->name("name" => $name),
-    	           SOAP::Data->name("displayname" => $displayname),
-    	           # And here the optional fields
-    	           SOAP::Data->name("description" => "description")
+    	           SOAP::Data->name("displayname" => $displayname)
     	           )),
     	      $inSelf->{'creds'}
     	     );

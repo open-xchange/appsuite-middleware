@@ -103,8 +103,9 @@ public final class FunctionTest extends AbstractAJAXSession {
 
     @Override
     protected void tearDown() throws Exception {
-        for(int id: groupsToDelete)
+        for(int id: groupsToDelete) {
             getClient().execute(new DeleteRequest(id, new Date(Long.MAX_VALUE), false));
+        }
         super.tearDown();
     }
 
@@ -215,8 +216,9 @@ public final class FunctionTest extends AbstractAJAXSession {
         assertEquals("Amount of new elements should equal modfied elements, since we cannot distinguish between the two", numberNewAfterCreation, numberModifiedAfterCreation);
 
         DeleteResponse deleteResponse = getClient().execute(new DeleteRequest(group, true));
-        if(deleteResponse.hasError())
+        if(deleteResponse.hasError()) {
             groupsToDelete.remove(id);
+        }
 
         UpdatesResponse updatesResponseAfterDeletion = getClient().execute(new UpdatesRequest(lm, true));
         int numberNewAfterDeletion = updatesResponseAfterDeletion.getNew().size();

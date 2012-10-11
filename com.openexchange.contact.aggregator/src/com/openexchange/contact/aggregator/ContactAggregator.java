@@ -52,7 +52,7 @@ package com.openexchange.contact.aggregator;
 import java.util.ArrayList;
 import java.util.List;
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import com.openexchange.log.LogFactory;
 import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.contact.aggregator.ContactSource.Type;
@@ -67,11 +67,11 @@ import com.openexchange.tools.session.ServerSession;
  */
 public class ContactAggregator {
 
-    private static final Log LOG = LogFactory.getLog(ContactAggregator.class);
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(ContactAggregator.class);
 
-    private List<ContactSourceFactory> factories = new ArrayList<ContactSourceFactory>();
+    private final List<ContactSourceFactory> factories = new ArrayList<ContactSourceFactory>();
 
-    private List<ContactSource> sources = new ArrayList<ContactSource>();
+    private final List<ContactSource> sources = new ArrayList<ContactSource>();
     
     private ConfigViewFactory configViews = null;
 

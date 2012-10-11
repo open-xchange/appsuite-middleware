@@ -49,25 +49,55 @@
 
 package com.openexchange.publish.impl;
 
+import org.apache.commons.logging.Log;
+import org.osgi.service.event.Event;
+import org.osgi.service.event.EventHandler;
 import com.openexchange.context.ContextService;
-import com.openexchange.groupware.infostore.DocumentMetadata;
+import com.openexchange.exception.OXException;
+import com.openexchange.file.storage.FileStorageEventHelper;
+import com.openexchange.file.storage.composition.FileID;
+import com.openexchange.groupware.contexts.Context;
 
 
 /**
  * {@link InfostoreCleanUpEventHandler}
  *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  *
  */
-public class InfostoreCleanUpEventHandler extends EntityCleanUpEventHandler<DocumentMetadata> {
+public class InfostoreCleanUpEventHandler implements EventHandler {
+    
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(InfostoreCleanUpEventHandler.class);
+    
+    private final EntityCleanUp entityCleanUp;
+    
+    private final ContextService contextService;
+    
 
-    public InfostoreCleanUpEventHandler(EntityCleanUp entityCleanUp, ContextService contexts) {
-        super(entityCleanUp, "infostore/object", contexts);
+    public InfostoreCleanUpEventHandler(EntityCleanUp entityCleanUp, ContextService contextService) {
+        super();
+        this.entityCleanUp = entityCleanUp;
+        this.contextService = contextService;
     }
 
     @Override
-    public String getEntityId(DocumentMetadata actionObj) {
-        return String.valueOf(actionObj.getId());
+    public void handleEvent(Event event) {
+        if (FileStorageEventHelper.isInfostoreEvent(event) && FileStorageEventHelper.isDeleteEvent(event)) {
+            Context context;
+            try {
+                context = contextService.getContext(FileStorageEventHelper.extractSession(event).getContextId());
+            } catch (OXException e) {
+                LOG.error("Could not delete all dependent publications: " + e.getMessage(), e);
+                return;
+            }
+
+            try {
+                FileID fileID = new FileID(FileStorageEventHelper.extractObjectId(event));
+                entityCleanUp.cleanUp(context, "infostore/object", fileID.getFileId());
+            } catch (OXException e) {
+                LOG.error("Could not delete all dependent publications: " + e.getMessage(), e);
+            }
+        }        
     }
 
 }

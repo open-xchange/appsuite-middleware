@@ -61,9 +61,8 @@ import java.util.List;
 import java.util.Queue;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.jdom.Element;
-import org.jdom.output.XMLOutputter;
+import org.jdom2.Element;
+import org.jdom2.output.XMLOutputter;
 import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.exception.OXException;
 import com.openexchange.exception.OXException.Generic;
@@ -79,12 +78,15 @@ import com.openexchange.groupware.container.FolderChildObject;
 import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
+import com.openexchange.log.LogFactory;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorException;
 import com.openexchange.webdav.xml.fields.AppointmentFields;
 import com.openexchange.webdav.xml.fields.CalendarFields;
+import com.openexchange.webdav.xml.fields.CommonFields;
+import com.openexchange.webdav.xml.fields.DataFields;
 
 /**
  * The WebDAV/XML writer for calendar module.
@@ -143,13 +145,11 @@ public class AppointmentWriter extends CalendarWriter {
                 writeResponseElement(eProp, 0, HttpServletResponse.SC_NOT_FOUND, XmlServlet.OBJECT_NOT_FOUND_EXCEPTION, xo,
                     os);
             } else {
-                writeResponseElement(eProp, 0, HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
-                    XmlServlet.SERVER_ERROR_EXCEPTION, xo, os);
+                writeResponseElement(eProp, 0, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, getErrorMessage(XmlServlet.SERVER_ERROR_EXCEPTION, XmlServlet.SERVER_ERROR_STATUS), xo, os);
             }
         } catch (final Exception ex) {
             LOG.error("AppointmentWriter.startWriter()", ex);
-            writeResponseElement(eProp, 0, HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
-                    XmlServlet.SERVER_ERROR_EXCEPTION, xo, os);
+            writeResponseElement(eProp, 0, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, getErrorMessage(XmlServlet.SERVER_ERROR_EXCEPTION, XmlServlet.SERVER_ERROR_STATUS), xo, os);
         }
     }
 
@@ -288,11 +288,11 @@ public class AppointmentWriter extends CalendarWriter {
     public void addContent2PropElement(final Element e_prop, final Appointment ao, final boolean delete,
             final boolean externalUse) throws OXException, SearchIteratorException, UnsupportedEncodingException {
         if (delete) {
-            addElement(AppointmentFields.OBJECT_ID, ao.getObjectID(), e_prop);
-            addElement(AppointmentFields.LAST_MODIFIED, ao.getLastModified(), e_prop);
+            addElement(DataFields.OBJECT_ID, ao.getObjectID(), e_prop);
+            addElement(DataFields.LAST_MODIFIED, ao.getLastModified(), e_prop);
 
             if (ao.containsRecurrenceID()) {
-                addElement(AppointmentFields.RECURRENCE_ID, ao.getRecurrenceID(), e_prop);
+                addElement(CalendarFields.RECURRENCE_ID, ao.getRecurrenceID(), e_prop);
             }
 
             addElement("object_status", "DELETE", e_prop);
@@ -362,12 +362,12 @@ public class AppointmentWriter extends CalendarWriter {
             addElement(AppointmentFields.SHOW_AS, ao.getShownAs(), e_prop);
 
             if (ao.containsRecurrenceDatePosition()) {
-                addElement(AppointmentFields.RECURRENCE_DATE_POSITION, ao.getRecurrenceDatePosition(), e_prop);
+                addElement(CalendarFields.RECURRENCE_DATE_POSITION, ao.getRecurrenceDatePosition(), e_prop);
             }
 
             if (ao.containsAlarm()) {
                 addElement(CalendarFields.ALARM_FLAG, true, e_prop);
-                addElement(AppointmentFields.ALARM, ao.getAlarm(), e_prop);
+                addElement(CalendarFields.ALARM, ao.getAlarm(), e_prop);
             } else {
                 addElement(CalendarFields.ALARM_FLAG, false, e_prop);
             }
@@ -380,7 +380,7 @@ public class AppointmentWriter extends CalendarWriter {
                 addElement(AppointmentFields.UID, ao.getUid(), e_prop);
             }
 
-            addElement(AppointmentFields.COLORLABEL, ao.getLabel(), e_prop);
+            addElement(CommonFields.COLORLABEL, ao.getLabel(), e_prop);
 
             writeCalendarElements(ao, e_prop);
         }

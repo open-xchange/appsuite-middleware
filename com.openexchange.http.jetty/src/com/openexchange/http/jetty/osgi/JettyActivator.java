@@ -50,7 +50,7 @@
 package com.openexchange.http.jetty.osgi;
 
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import com.openexchange.log.LogFactory;
 import org.osgi.service.http.HttpService;
 import com.openexchange.http.jetty.JettyHttpService;
 import com.openexchange.osgi.HousekeepingActivator;

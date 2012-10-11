@@ -64,30 +64,14 @@ import com.openexchange.exception.OXExceptionFactory;
 public enum SolrIndexExceptionCodes implements OXExceptionCode {
 
     /**
-     * Could not find solr core entry for user %1$s and module %2$s in context %3$s. 
+     * No IndexAccess implementation was found for module %1$s.
      */
-    CORE_ENTRY_NOT_FOUND(SolrIndexExceptionMessages.CORE_ENTRY_NOT_FOUND_MSG, Category.CATEGORY_ERROR, 1001),
-    /**
-     * Could not find solr core store for given attributes. %1$s.
-     */
-    CORE_STORE_ENTRY_NOT_FOUND(SolrIndexExceptionMessages.CORE_STORE_ENTRY_NOT_FOUND_MSG, Category.CATEGORY_ERROR, 1002),
-    /**
-     * All core stores seem to be full.
-     */
-    NO_FREE_CORE_STORE(SolrIndexExceptionMessages.NO_FREE_CORE_STORE_MSG, Category.CATEGORY_ERROR, 1003),
-    /**
-     * This cores instance directory (%1$s) already exists. It cannot be created. 
-     */
-    INSTANCE_DIR_EXISTS(SolrIndexExceptionMessages.INSTANCE_DIR_EXISTS_MSG, Category.CATEGORY_ERROR, 1004),
-    /**
-     * An index fault occurred: %1$s
-     */
-    INDEX_FAULT(SolrIndexExceptionMessages.INDEX_FAULT_MSG, CATEGORY_ERROR, 1005),
-    /**
-     * No IndexAccess implementation was found for module $1%s.
-     */
-    MISSING_ACCESS_FOR_MODULE(SolrIndexExceptionMessages.MISSING_ACCESS_FOR_MODULE_MSG, CATEGORY_ERROR, 1006)
+    MISSING_ACCESS_FOR_MODULE(SolrIndexExceptionMessages.MISSING_ACCESS_FOR_MODULE_MSG, CATEGORY_ERROR, 1001),
     
+    /**
+     * An I/O Error occurred: %1$s
+     */
+    IO_ERROR(SolrIndexExceptionMessages.IO_ERROR_MSG, CATEGORY_ERROR, 1002),
     ;
 
     private final String message;

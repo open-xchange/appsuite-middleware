@@ -51,10 +51,10 @@ package com.openexchange.folder.json.osgi;
 
 import static com.openexchange.folder.json.services.ServiceRegistry.getInstance;
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import com.openexchange.ajax.customizer.folder.AdditionalFolderField;
 import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.folder.json.Constants;
 import com.openexchange.folder.json.FolderFieldRegistry;
 import com.openexchange.folder.json.actions.FolderActionFactory;
@@ -63,6 +63,7 @@ import com.openexchange.folder.json.services.ServiceRegistry;
 import com.openexchange.folderstorage.ContentTypeDiscoveryService;
 import com.openexchange.folderstorage.FolderService;
 import com.openexchange.groupware.settings.PreferencesItemService;
+import com.openexchange.log.LogFactory;
 import com.openexchange.login.LoginHandlerService;
 import com.openexchange.osgi.RegistryServiceTrackerCustomizer;
 
@@ -83,7 +84,7 @@ public class FolderJSONActivator extends AJAXModuleActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ConfigurationService.class };
+        return new Class<?>[] { ConfigurationService.class, DispatcherPrefixService.class };
     }
 
     @Override
@@ -102,6 +103,7 @@ public class FolderJSONActivator extends AJAXModuleActivator {
             /*
              * Configure
              */
+            getInstance().addService(DispatcherPrefixService.class, getService(DispatcherPrefixService.class));
             apply(getService(ConfigurationService.class));
             /*
              * Service trackers
@@ -146,7 +148,7 @@ public class FolderJSONActivator extends AJAXModuleActivator {
              */
             restore();
         } catch (final Exception e) {
-            com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(FolderJSONActivator.class)).error(e.getMessage(), e);
+            com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(FolderJSONActivator.class)).error(e.getMessage(), e);
             throw e;
         }
     }
@@ -162,7 +164,11 @@ public class FolderJSONActivator extends AJAXModuleActivator {
                  */
                 module = cmod;
                 Constants.setModule(tmpModule);
+            } else {
+                Constants.setModule(null);
             }
+        } else {
+            Constants.setModule(null);
         }
         final String tmpServletPath = configurationService.getProperty("com.openexchange.folder.json.servletPath");
         if (null != tmpServletPath) {

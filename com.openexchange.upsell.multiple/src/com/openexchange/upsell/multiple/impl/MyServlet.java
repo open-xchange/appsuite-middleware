@@ -1,5 +1,3 @@
-package com.openexchange.upsell.multiple.impl;
-
 /*
  *
  *    OPEN-XCHANGE legal information
@@ -49,6 +47,8 @@ package com.openexchange.upsell.multiple.impl;
  *
  */
 
+package com.openexchange.upsell.multiple.impl;
+
 import java.io.IOException;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -65,70 +65,70 @@ import com.openexchange.tools.servlet.OXJSONExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
 /**
- *
+ * 
  * Servlet which returns needed Data for the Spamexperts Iframe Plugin to redirect
  * and authenticate to an external GUI.
- *
+ * 
  * Also does jobs for the other GUI Plugin
- *
- *
+ * 
+ * 
  * @author <a href="mailto:manuel.kraft@open-xchange.com">Manuel Kraft</a>
- *
+ * 
  */
 public final class MyServlet extends DataServlet {
 
-	/**
-	 *
-	 */
-	private static final long serialVersionUID = -8914926421736440078L;
-	private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(MyServlet.class));
+    /**
+     * 
+     */
+    private static final long serialVersionUID = -8914926421736440078L;
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.loggerFor(MyServlet.class);
 
-	public MyServlet() {
-		super();
-	}
+    public MyServlet() {
+        super();
+    }
 
-	@Override
-	protected boolean hasModulePermission(final ServerSession session) {
-		return true;
-	}
+    @Override
+    protected boolean hasModulePermission(final ServerSession session) {
+        return true;
+    }
 
-	@Override
+    @Override
     protected void doGet(final HttpServletRequest req,
-			final HttpServletResponse resp) throws ServletException,
-			IOException {
+        final HttpServletResponse resp) throws ServletException,
+        IOException {
 
-		final Response response = new Response();
+        final Response response = new Response();
 
-		try {
+        try {
 
-			final String action = parseMandatoryStringParameter(req,PARAMETER_ACTION);
-			final Session session = getSessionObject(req);
-			JSONObject jsonObj;
+            final String action = parseMandatoryStringParameter(req,PARAMETER_ACTION);
+            final Session session = getSessionObject(req);
+            JSONObject jsonObj;
 
-			try {
-				jsonObj = convertParameter2JSONObject(req);
-			} catch (final JSONException e) {
-				LOG.error(e.getMessage(), e);
-				response.setException(OXJSONExceptionCodes.JSON_BUILD_ERROR.create(e));
-				writeResponse(response, resp);
-				return;
-			}
-			final Context ctx = ContextStorage.getInstance().getContext(session);
-			final MyServletRequest proRequest = new MyServletRequest(session, ctx);
-			final Object responseObj = proRequest.action(action, jsonObj,req);
-			response.setData(responseObj);
+            try {
+                jsonObj = convertParameter2JSONObject(req);
+            } catch (final JSONException e) {
+                LOG.error(e.getMessage(), e);
+                response.setException(OXJSONExceptionCodes.JSON_BUILD_ERROR.create(e));
+                writeResponse(response, resp);
+                return;
+            }
+            final Context ctx = ContextStorage.getInstance().getContext(session);
+            final MyServletRequest proRequest = new MyServletRequest(session, ctx);
+            final Object responseObj = proRequest.action(action, jsonObj,req);
+            response.setData(responseObj);
 
-		} catch (final OXException e) {
-			LOG.error(e.getMessage(), e);
-			response.setException(e);
-		} catch (final JSONException e) {
-			final OXException oje = OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e);
-			LOG.error(oje.getMessage(), oje);
-			response.setException(oje);
-		}
+        } catch (final OXException e) {
+            LOG.error(e.getMessage(), e);
+            response.setException(e);
+        } catch (final JSONException e) {
+            final OXException oje = OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e);
+            LOG.error(oje.getMessage(), oje);
+            response.setException(oje);
+        }
 
-		writeResponse(response, resp);
+        writeResponse(response, resp);
 
-	}
+    }
 
 }

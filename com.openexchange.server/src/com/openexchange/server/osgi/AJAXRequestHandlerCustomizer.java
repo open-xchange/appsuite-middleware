@@ -63,7 +63,7 @@ import com.openexchange.server.services.ServerRequestHandlerRegistry;
  */
 public final class AJAXRequestHandlerCustomizer implements ServiceTrackerCustomizer<AJAXRequestHandler, AJAXRequestHandler> {
 
-	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
+	private static final org.apache.commons.logging.Log LOG = com.openexchange.log.LogFactory
 			.getLog(AJAXRequestHandlerCustomizer.class);
 
 	private final BundleContext context;

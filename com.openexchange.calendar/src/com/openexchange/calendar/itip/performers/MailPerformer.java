@@ -77,23 +77,27 @@ public class MailPerformer extends AbstrakterDingeMacher {
         super(util, sender, generators);
     }
 
+    @Override
     public Collection<ITipAction> getSupportedActions() {
         return EnumSet.of(ITipAction.DECLINECOUNTER, ITipAction.REFRESH, ITipAction.SEND_APPOINTMENT);
     }
 
+    @Override
     public List<Appointment> perform(ITipAction action, ITipAnalysis analysis, Session session) throws OXException {
         List<ITipChange> changes = analysis.getChanges();
         for (ITipChange change : changes) {
             CalendarDataObject appointment = change.getNewAppointment();
             appointment.setNotification(true);
-            writeMail(action, null, appointment, session);
+            int owner = getOwner(session, analysis, appointment);
+            writeMail(action, null, appointment, session, owner);
         }
         
         List<ITipAnnotation> annotations = analysis.getAnnotations();
         for (ITipAnnotation annotation : annotations) {
             Appointment appointment = annotation.getAppointment();
             appointment.setNotification(true);
-            writeMail(action, null, appointment, session);
+            int owner = getOwner(session, analysis, appointment);
+            writeMail(action, null, appointment, session, owner);
         }
         return Collections.emptyList();
     }

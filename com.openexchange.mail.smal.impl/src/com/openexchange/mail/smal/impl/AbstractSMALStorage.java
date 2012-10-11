@@ -50,11 +50,14 @@
 package com.openexchange.mail.smal.impl;
 
 import java.util.Collections;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import java.util.regex.Pattern;
+import com.openexchange.config.cascade.ConfigView;
+import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.exception.OXException;
+import com.openexchange.index.IndexFacadeService;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailField;
+import com.openexchange.mail.MailSessionCache;
 import com.openexchange.mail.api.IMailFolderStorage;
 import com.openexchange.mail.api.IMailFolderStorageEnhanced;
 import com.openexchange.mail.api.IMailMessageStorage;
@@ -63,10 +66,9 @@ import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mail.smal.impl.processor.DefaultProcessorStrategy;
 import com.openexchange.mail.smal.impl.processor.MailFolderInfo;
-import com.openexchange.mail.smal.impl.processor.ProcessingProgress;
 import com.openexchange.mail.smal.impl.processor.Processor;
 import com.openexchange.mail.smal.impl.processor.ProcessorStrategy;
-import com.openexchange.server.ServiceExceptionCodes;
+import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.service.indexing.IndexingJob;
 import com.openexchange.service.indexing.IndexingService;
 import com.openexchange.service.indexing.mail.MailJobInfo;
@@ -82,12 +84,6 @@ import com.openexchange.threadpool.ThreadPools;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public abstract class AbstractSMALStorage {
-
-    /**
-     * The logger.
-     */
-    protected static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(AbstractSMALStorage.class));
-
     /**
      * The fields containing only the mail identifier.
      */
@@ -139,6 +135,13 @@ public abstract class AbstractSMALStorage {
     private volatile MailJobInfo jobInfo;
 
     /**
+     * Whether denoted account is blacklisted.
+     * <p>
+     * See {@link #isBlacklisted()}
+     */
+    protected Boolean blacklisted;
+
+    /**
      * Initializes a new {@link AbstractSMALStorage}.
      */
     protected AbstractSMALStorage(final Session session, final int accountId, final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> delegateMailAccess) {
@@ -153,6 +156,81 @@ public abstract class AbstractSMALStorage {
     }
 
     /**
+     * Checks if denoted account is blacklisted
+     * 
+     * @return <code>true</code> if blacklisted; otherwise <code>false</code>
+     * @throws OXException If an error occurs
+     */
+    protected boolean isBlacklisted() throws OXException {
+        if (null == blacklisted) {
+            final MailSessionCache sessionCache = MailSessionCache.getInstance(session);
+            final Object param = sessionCache.getParameter(accountId, "com.openexchange.mail.smal.isBlacklisted");
+            if (null == param) {
+                final ConfigView view = getConfigViewFactory().getView(userId, contextId);
+                final String blacklist = view.get("com.openexchange.mail.smal.blacklist", String.class);
+                blacklisted = Boolean.valueOf(contains(delegateMailAccess.getMailConfig().getServer(), blacklist));
+                sessionCache.putParameterIfAbsent(accountId, "com.openexchange.mail.smal.isBlacklisted", blacklisted);
+            } else {
+                try {
+                    blacklisted = (Boolean) param;
+                } catch (final ClassCastException e) {
+                    final ConfigView view = getConfigViewFactory().getView(userId, contextId);
+                    final String blacklist = view.get("com.openexchange.mail.smal.blacklist", String.class);
+                    blacklisted = Boolean.valueOf(contains(delegateMailAccess.getMailConfig().getServer(), blacklist));
+                    sessionCache.putParameterIfAbsent(accountId, "com.openexchange.mail.smal.isBlacklisted", blacklisted);
+                }
+            }
+        }
+        return blacklisted.booleanValue();
+    }
+
+    private static final Pattern SPLIT_CSV = Pattern.compile("\\s*,\\s*");
+
+    private static boolean contains(final String host, final String blacklist) {
+        if (isEmpty(host) || isEmpty(blacklist)) {
+            return false;
+        }
+        for (final String blacklistedHost : SPLIT_CSV.split(blacklist, 0)) {
+            if (host.equals(blacklistedHost)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private static boolean isEmpty(final String string) {
+        if (null == string) {
+            return true;
+        }
+        final int len = string.length();
+        boolean isWhitespace = true;
+        for (int i = 0; isWhitespace && i < len; i++) {
+            isWhitespace = Character.isWhitespace(string.charAt(i));
+        }
+        return isWhitespace;
+    }
+
+    /**
+     * Gets the <tt>IndexFacadeService</tt> service.
+     * 
+     * @return The <tt>IndexFacadeService</tt> service or <code>null</code> if absent or disabled via configuration
+     * @throws OXException If user configuration cannot be read
+     */
+    protected IndexFacadeService getIndexFacadeService() throws OXException {
+        final IndexFacadeService facadeService = SmalServiceLookup.getServiceStatic(IndexFacadeService.class);
+        return null == facadeService ? null : (isBlacklisted() ? null : facadeService);
+    }
+
+    /**
+     * Gets the {@link ConfigViewFactory} service.
+     * 
+     * @return The service
+     */
+    protected ConfigViewFactory getConfigViewFactory() {
+        return SmalServiceLookup.getServiceStatic(ConfigViewFactory.class);
+    }
+
+    /**
      * Initiates processing of given folder.
      * 
      * @param fullName The folder full name
@@ -160,13 +238,19 @@ public abstract class AbstractSMALStorage {
      * @throws OXException If folder retrieval fails
      * @throws InterruptedException If interrupted
      */
-    protected ProcessingProgress processFolder(final String fullName) throws OXException, InterruptedException {
+    protected void processFolder(final String fullName) throws OXException, InterruptedException {
         final IMailFolderStorage folderStorage = delegateMailAccess.getFolderStorage();
         if (folderStorage instanceof IMailFolderStorageEnhanced) {
             final IMailFolderStorageEnhanced storageEnhanced = (IMailFolderStorageEnhanced) folderStorage;
-            return processor.processFolder(new MailFolderInfo(fullName, storageEnhanced.getTotalCounter(fullName)), accountId, session, Collections.<String, Object> emptyMap());
+            processor.processFolderAsync(
+              new MailFolderInfo(fullName, storageEnhanced.getTotalCounter(fullName)),
+              accountId,
+              session,
+              Collections.<String, Object> emptyMap());
+            
         }
-        return processFolder(folderStorage.getFolder(fullName));
+
+        processFolder(folderStorage.getFolder(fullName));
     }
 
     /**
@@ -177,8 +261,8 @@ public abstract class AbstractSMALStorage {
      * @throws OXException If processing fails
      * @throws InterruptedException If interrupted
      */
-    protected ProcessingProgress processFolder(final MailFolder mailFolder) throws OXException, InterruptedException {
-        return processor.processFolder(mailFolder, delegateMailAccess, Collections.<String, Object> emptyMap());
+    protected void processFolder(final MailFolder mailFolder) throws OXException, InterruptedException {
+        processor.processFolderAsync(mailFolder, delegateMailAccess, Collections.<String, Object> emptyMap());
     }
 
     /**
@@ -189,8 +273,8 @@ public abstract class AbstractSMALStorage {
      * @throws OXException If processing fails
      * @throws InterruptedException If interrupted
      */
-    protected ProcessingProgress processFolder(final MailFolderInfo mailFolderInfo) throws OXException, InterruptedException {
-        return processor.processFolder(mailFolderInfo, accountId, session, Collections.<String, Object> emptyMap());
+    protected void processFolder(final MailFolderInfo mailFolderInfo) throws OXException, InterruptedException {
+        processor.processFolderAsync(mailFolderInfo, accountId, session, Collections.<String, Object> emptyMap());
     }
 
     /**
@@ -255,7 +339,7 @@ public abstract class AbstractSMALStorage {
     protected static <V> CancelableCompletionService<V> newCompletionService() throws OXException {
         final ThreadPoolService threadPool = ThreadPools.getThreadPool();
         if (null == threadPool) {
-            throw ServiceExceptionCodes.SERVICE_UNAVAILABLE.create(ThreadPoolService.class.getName());
+            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(ThreadPoolService.class.getName());
         }
         return new ThreadPoolCompletionService<V>(threadPool);
     }

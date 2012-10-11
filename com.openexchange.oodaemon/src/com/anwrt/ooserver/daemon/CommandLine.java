@@ -68,8 +68,9 @@ public final class CommandLine {
     private static String getDaemonStartupMessage(final boolean isAdmin) {
         final String line = "kkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkk\n\n";
         String admin = "";
-        if (isAdmin)
+        if (isAdmin) {
             admin = " # ADMIN MODE #";
+        }
         final String msg = "\n" + line + "\t\t\tOPEN OFFICE DAEMON v1.0 beta" + admin + "\n" + "\n" + line;
 
         return msg;
@@ -101,10 +102,12 @@ public final class CommandLine {
      * @return true if the command is valid
      */
     private static boolean isAdminCommandValid(final String command) {
-        if (command.equals(cmdStatus))
+        if (command.equals(cmdStatus)) {
             return true;
-        if (command.equals(cmdStop))
+        }
+        if (command.equals(cmdStop)) {
             return true;
+        }
         return false;
     }
 
@@ -147,8 +150,9 @@ public final class CommandLine {
 
     private static HashMap namedValueArrayToHashMap(final NamedValue[] array) {
         final HashMap ret = new HashMap();
-        for (int i = 0; i < array.length; i++)
+        for (int i = 0; i < array.length; i++) {
             ret.put(array[i].Name, array[i].Value);
+        }
         return ret;
     }
 
@@ -159,8 +163,9 @@ public final class CommandLine {
      * @throws Exception any error that could occur
      */
     private static void executeCommand(final String command) throws Exception {
-        if (!isAdminCommandValid(command))
+        if (!isAdminCommandValid(command)) {
             throw new Exception("invalid command " + command);
+        }
         final XComponentContext initialContext = Bootstrap.createInitialComponentContext(null);
         final XMultiComponentFactory manager = initialContext.getServiceManager();
         final Object unoResolverObj = manager.createInstanceWithContext("com.sun.star.bridge.UnoUrlResolver", initialContext);
@@ -170,8 +175,9 @@ public final class CommandLine {
         try {
             if (command.equals(cmdStatus)) {
                 final Object statusObj = unoUrlResolver.resolve(url);
-                if (statusObj == null)
+                if (statusObj == null) {
                     throw new Exception("cannot resolve Status");
+                }
                 final XNameAccess status = (XNameAccess) UnoRuntime.queryInterface(XNameAccess.class, statusObj);
                 printStatus(status);
             } else if (command.equals(cmdStop)) {
@@ -195,8 +201,9 @@ public final class CommandLine {
             Logger.fatalError("Cannot read configuration", ex);
             System.exit(1);
         }
-        if (logLevel != null)
+        if (logLevel != null) {
             setLogLevel(logLevel);
+        }
         try {
             executeCommand(adminCommand);
         } catch (final Exception ex) {
@@ -262,39 +269,45 @@ public final class CommandLine {
             if (args.length < _minArgs) {
                 try {
                     // Treat GNU recommended special options
-                    if (args.length != 1)
+                    if (args.length != 1) {
                         throw new Exception();
+                    }
                     if (args[0].equals(SPECIAL_OPTION_PREFIX + _optVersion)) {
                         printVersion();
                         System.exit(0);
                     } else if (args[0].equals(SPECIAL_OPTION_PREFIX + _optHelp)) {
                         printHelpInformations();
                         System.exit(0);
-                    } else
+                    } else {
                         throw new Exception();
+                    }
                 } catch (final Exception ex) {
                     throw new Exception("wrong argument number");
                 }
             }
-            if (!args[argPos].equals(OPTION_PREFIX + _optConfig))
+            if (!args[argPos].equals(OPTION_PREFIX + _optConfig)) {
                 throw new Exception(OPTION_PREFIX + _optConfig + " argument required");
+            }
             configPath = args[argPos + _optConfigArgPos];
             argPos += _optConfigShift;
             if (args.length >= argPos + 1) {
                 if (args[argPos].equals(OPTION_PREFIX + _optAdmin)) {
                     isAdmin = true;
-                    if (args.length < argPos + _optAdminShift)
+                    if (args.length < argPos + _optAdminShift) {
                         throw new Exception("ADMIN_COMMAND not specified after optin " + OPTION_PREFIX + "admin");
+                    }
                     adminCommand = args[argPos + _optAdminArgPos];
                     argPos += _optAdminShift;
                     if ((args.length >= argPos + 1) && args[argPos].equals(OPTION_PREFIX + _optLogger)) {
-                        if (args.length < argPos + _optLoggerShift)
+                        if (args.length < argPos + _optLoggerShift) {
                             throw new Exception("LOG_LEVEL not specified after option " + OPTION_PREFIX + "logger");
+                        }
                         logLevel = args[argPos + _optLoggerArgPos];
                     }
                 } else if (args[argPos].equals(OPTION_PREFIX + _optLogger)) {
-                    if (args.length < argPos + _optLoggerShift)
+                    if (args.length < argPos + _optLoggerShift) {
                         throw new Exception("LOG_LEVEL not specified after option " + OPTION_PREFIX + "logger");
+                    }
                     logLevel = args[argPos + _optLoggerArgPos];
                 }
             }
@@ -307,10 +320,11 @@ public final class CommandLine {
         System.out.println(getDaemonStartupMessage(isAdmin));
 
         // Choose which mode to start
-        if (isAdmin)
+        if (isAdmin) {
             startAdminMode(configPath, adminCommand, logLevel);
-        else
+        } else {
             startNormalMode(configPath, logLevel);
+        }
 
         System.exit(0);
     }

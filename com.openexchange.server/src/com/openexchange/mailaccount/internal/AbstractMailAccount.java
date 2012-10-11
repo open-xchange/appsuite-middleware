@@ -71,7 +71,7 @@ import com.openexchange.tools.net.URITools;
  */
 public abstract class AbstractMailAccount implements MailAccount {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(AbstractMailAccount.class));
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(AbstractMailAccount.class));
 
     private static final long serialVersionUID = -641194838598605274L;
 
@@ -281,7 +281,7 @@ public abstract class AbstractMailAccount implements MailAccount {
      * @param primaryAddress The primary email address
      */
     public void setPrimaryAddress(final String primaryAddress) {
-        this.primaryAddress = primaryAddress;
+        this.primaryAddress = primaryAddress == null ? primaryAddress : IDNA.toIDN(primaryAddress);;
     }
 
     /**

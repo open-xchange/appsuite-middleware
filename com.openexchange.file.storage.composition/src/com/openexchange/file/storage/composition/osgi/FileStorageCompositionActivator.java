@@ -50,6 +50,7 @@
 package com.openexchange.file.storage.composition.osgi;
 
 import java.util.List;
+import org.osgi.service.event.EventAdmin;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageService;
 import com.openexchange.file.storage.composition.IDBasedFileAccess;
@@ -69,7 +70,7 @@ public class FileStorageCompositionActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[]{FileStorageServiceRegistry.class};
+        return new Class<?>[]{ FileStorageServiceRegistry.class, EventAdmin.class };
     }
 
     @Override
@@ -99,7 +100,11 @@ public class FileStorageCompositionActivator extends HousekeepingActivator {
                     protected FileStorageService getFileStorageService(final String serviceId) throws OXException {
                         return getService(FileStorageServiceRegistry.class).getFileStorageService(serviceId);
                     }
-
+                    
+                    @Override
+                    protected EventAdmin getEventAdmin() {
+                        return getService(EventAdmin.class);
+                    }
                 };
             }
 

@@ -86,6 +86,7 @@ public final class UnifiedInboxThreadFactory implements java.util.concurrent.Thr
         len = namePrefix.length() + 4;
     }
 
+    @Override
     public Thread newThread(final Runnable r) {
         // final Thread t = new Thread(group, r, getThreadName(
         // threadNumber.getAndIncrement(),

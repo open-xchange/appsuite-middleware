@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Hostname Service for LDAP
 Bundle-SymbolicName: com.openexchange.hostname.ldap
-Bundle-Version: 6.21.0
+Bundle-Version: 6.22.0
 Bundle-Activator: com.openexchange.hostname.ldap.osgi.Activator
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
@@ -23,3 +23,4 @@ Import-Package: com.openexchange.cache,
  javax.naming.ldap,
  org.apache.commons.logging,
  org.osgi.framework
+Bundle-ClassPath: .

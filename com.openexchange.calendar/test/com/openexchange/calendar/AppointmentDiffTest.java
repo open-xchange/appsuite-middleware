@@ -56,6 +56,7 @@ import java.util.TimeZone;
 import org.junit.Test;
 import com.openexchange.calendar.AppointmentDiff.FieldUpdate;
 import com.openexchange.groupware.container.Appointment;
+import com.openexchange.groupware.container.CalendarObject;
 import static com.openexchange.time.TimeTools.*;
 import static org.junit.Assert.*;
 
@@ -67,7 +68,7 @@ import static org.junit.Assert.*;
 public class AppointmentDiffTest {
     @Test
     public void testDifferentDates() {
-        int[] fieldsToTest = new int[]{Appointment.START_DATE, Appointment.END_DATE};
+        int[] fieldsToTest = new int[]{CalendarObject.START_DATE, CalendarObject.END_DATE};
         Date oldValue = D("8:00 PM");
         Date newValue = D("10:00 PM");
         
@@ -76,7 +77,7 @@ public class AppointmentDiffTest {
     
     @Test
     public void testSameDates() {
-        int[] fieldsToTest = new int[]{Appointment.START_DATE, Appointment.END_DATE};
+        int[] fieldsToTest = new int[]{CalendarObject.START_DATE, CalendarObject.END_DATE};
         Date value = D("8:00 PM");
         
         expectSame(fieldsToTest, value);

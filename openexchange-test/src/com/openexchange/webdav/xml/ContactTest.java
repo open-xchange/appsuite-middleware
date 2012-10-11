@@ -8,14 +8,16 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.TimeZone;
+
+import org.apache.commons.httpclient.Credentials;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.UsernamePasswordCredentials;
 import org.apache.commons.httpclient.auth.AuthScope;
 import org.apache.commons.httpclient.methods.ByteArrayRequestEntity;
-import org.jdom.Document;
-import org.jdom.Element;
-import org.jdom.input.SAXBuilder;
-import org.jdom.output.XMLOutputter;
+import org.jdom2.Document;
+import org.jdom2.Element;
+import org.jdom2.input.SAXBuilder;
+import org.jdom2.output.XMLOutputter;
 import com.meterware.httpunit.PutMethodWebRequest;
 import com.meterware.httpunit.WebConversation;
 import com.meterware.httpunit.WebRequest;
@@ -165,7 +167,6 @@ public class ContactTest extends AbstractWebdavXMLTest {
 		assertEqualsAndNotNull("number of attachments is not equals", contactObj1.getNumberOfAttachments(), contactObj2.getNumberOfAttachments());
 		assertEqualsAndNotNull("default address is not equals", contactObj1.getDefaultAddress(), contactObj2.getDefaultAddress());
 
-		assertEqualsAndNotNull("links are not equals", links2String(contactObj1.getLinks()), links2String(contactObj2.getLinks()));
 		assertEqualsAndNotNull("distribution list is not equals", distributionlist2String(contactObj1.getDistributionList()), distributionlist2String(contactObj2.getDistributionList()));
 	}
 
@@ -443,7 +444,7 @@ public class ContactTest extends AbstractWebdavXMLTest {
 		assertEquals("check response status", 200, response[0].getStatus());
 	}
 
-	public static int[] listContact(final WebConversation webCon, final int inFolder, String host, final String login, final String password) throws Exception {
+	public static int[] listContact(final WebConversation webCon, final int inFolder, String host, final String login, final String password, String context) throws Exception {
 		host = AbstractWebdavXMLTest.appendPrefix(host);
 
 		final Element ePropfind = new Element("propfind", webdav);
@@ -471,7 +472,7 @@ public class ContactTest extends AbstractWebdavXMLTest {
 
 		final HttpClient httpclient = new HttpClient();
 
-		httpclient.getState().setCredentials(AuthScope.ANY, new UsernamePasswordCredentials(login, password));
+		httpclient.getState().setCredentials(AuthScope.ANY, getCredentials(login, password, context));
 		final PropFindMethod propFindMethod = new PropFindMethod(host + CONTACT_URL);
 		propFindMethod.setDoAuthentication( true );
 
@@ -488,6 +489,11 @@ public class ContactTest extends AbstractWebdavXMLTest {
 		assertEquals("response length not is 1", 1, response.length);
 
 		return (int[])response[0].getDataObject();
+	}
+
+	private static Credentials getCredentials(String login, String password,
+			String context) {
+		return new UsernamePasswordCredentials((context == null || context.equals("")) ? login : login+"@"+context, password);
 	}
 
 	public static Contact[] listContact(final WebConversation webCon, final int inFolder, final Date modified, final boolean changed, final boolean deleted, String host, final String login, final String password, String context) throws Exception {
@@ -523,7 +529,7 @@ public class ContactTest extends AbstractWebdavXMLTest {
 		xo.output(doc, baos);
 		baos.flush();
 		final HttpClient httpclient = new HttpClient();
-		httpclient.getState().setCredentials(AuthScope.ANY, new UsernamePasswordCredentials(login+"@"+context, password));
+		httpclient.getState().setCredentials(AuthScope.ANY, getCredentials(login, password, context));
 		final PropFindMethod propFindMethod = new PropFindMethod(host + CONTACT_URL);
 		propFindMethod.setDoAuthentication(true);
 		propFindMethod.setRequestEntity(new ByteArrayRequestEntity(baos.toByteArray(), "text/xml"));
@@ -559,7 +565,7 @@ public class ContactTest extends AbstractWebdavXMLTest {
 		xo.output(doc, baos);
 		baos.flush();
 		final HttpClient httpclient = new HttpClient();
-		httpclient.getState().setCredentials(AuthScope.ANY, new UsernamePasswordCredentials(login+"@"+context, password));
+		httpclient.getState().setCredentials(AuthScope.ANY, getCredentials(login, password, context));
 		final PropFindMethod propFindMethod = new PropFindMethod(host + CONTACT_URL);
 		propFindMethod.setDoAuthentication(true);
 		propFindMethod.setRequestEntity(new ByteArrayRequestEntity(baos.toByteArray(), "text/xml"));

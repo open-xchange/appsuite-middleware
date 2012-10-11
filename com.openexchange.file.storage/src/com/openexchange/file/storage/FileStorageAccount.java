@@ -62,6 +62,11 @@ import java.util.Map;
 public interface FileStorageAccount extends Serializable, FileStorageConstants {
 
     /**
+     * The identifier for default/primary file storage account.
+     */
+    public static final String DEFAULT_ID = "0";
+
+    /**
      * Gets this account's configuration.
      *
      * @return The configuration as a {@link Map}

@@ -54,12 +54,11 @@ import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Date;
-import javax.activation.MimetypesFileTypeMap;
+import javax.activation.FileTypeMap;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import com.openexchange.ajax.container.FileHolder;
 import com.openexchange.ajax.container.IFileHolder;
 import com.openexchange.ajax.helper.DownloadUtility;
@@ -69,6 +68,7 @@ import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.requesthandler.ResponseRenderer;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Streams;
+import com.openexchange.log.LogFactory;
 import com.openexchange.tools.images.ImageScalingService;
 import com.openexchange.tools.images.ScaleType;
 import com.openexchange.tools.servlet.http.Tools;
@@ -127,9 +127,17 @@ public class FileResponseRenderer implements ResponseRenderer {
     @Override
     public void write(final AJAXRequestData request, final AJAXRequestResult result, final HttpServletRequest req, final HttpServletResponse resp) {
         IFileHolder file = (IFileHolder) result.getResultObject();
+        final String fileContentType = file.getContentType();
+        final String fileName = file.getName();
 
-        final String contentType = req.getParameter(PARAMETER_CONTENT_TYPE);
+        String contentType = req.getParameter(PARAMETER_CONTENT_TYPE);
+        if (null == contentType) {
+            contentType = fileContentType;
+        }
         String delivery = req.getParameter(DELIVERY);
+        if (delivery == null) {
+            delivery = file.getDelivery();
+        }
         String contentDisposition = req.getParameter(PARAMETER_CONTENT_DISPOSITION);
         if (null == contentDisposition) {
             contentDisposition = file.getDisposition();
@@ -137,14 +145,28 @@ public class FileResponseRenderer implements ResponseRenderer {
 
         InputStream documentData = null;
         try {
+            file = rotateIfImage(file);
+            file = cropIfImage(request, file);
             file = scaleIfImage(request, file);
-            documentData = new BufferedInputStream(file.getStream());
+            InputStream stream = file.getStream();
+            if (null == stream) {
+                // React with 404
+                resp.sendError(HttpServletResponse.SC_NOT_FOUND, "Image not found.");
+                return;
+            }
+            documentData = new BufferedInputStream(stream);
             final String userAgent = req.getHeader("user-agent");
             if (SAVE_AS_TYPE.equals(contentType) || (delivery != null && delivery.equalsIgnoreCase(DOWNLOAD))) {
-                Tools.setHeaderForFileDownload(userAgent, resp, file.getName(), contentDisposition);
+                if (null == contentDisposition) {
+                    final StringBuilder sb = new StringBuilder(32).append("attachment");
+                    DownloadUtility.appendFilenameParameter(fileName, SAVE_AS_TYPE, userAgent, sb);
+                    resp.setHeader("Content-Disposition", sb.toString());
+                } else {
+                    Tools.setHeaderForFileDownload(userAgent, resp, fileName, contentDisposition);
+                }
                 resp.setContentType(contentType);
             } else {
-                final CheckedDownload checkedDownload = DownloadUtility.checkInlineDownload(documentData, file.getName(), file.getContentType(), contentDisposition, userAgent);
+                final CheckedDownload checkedDownload = DownloadUtility.checkInlineDownload(documentData, fileName, fileContentType, contentDisposition, userAgent);
                 if (delivery == null || !delivery.equalsIgnoreCase(VIEW)) {
                     if (contentDisposition == null) {
                         resp.setHeader("Content-Disposition", checkedDownload.getContentDisposition());
@@ -211,6 +233,23 @@ public class FileResponseRenderer implements ResponseRenderer {
         }
     }
 
+    private IFileHolder rotateIfImage(final IFileHolder file) throws IOException, OXException {
+        final ImageScalingService scaler = this.scaler;
+        if (scaler == null) {
+            return file;
+        }
+
+        if (!isImage(file)) {
+            return file;
+        }
+
+        final InputStream rotated = scaler.rotateAccordingExif(file.getStream(), file.getContentType());
+        if (null == rotated) {
+            // TODO: What to to then?
+        }
+        return new FileHolder(rotated, -1, file.getContentType(), "");
+    }
+
     /**
      * Scale possible image data.
      *
@@ -225,16 +264,11 @@ public class FileResponseRenderer implements ResponseRenderer {
         if (scaler == null) {
             return file;
         }
-        /*
-         * Check content type
-         */
-        String contentType = file.getContentType();
-        if (!contentType.startsWith("image/")) {
-            final String fileName = file.getName();
-            if (fileName == null || !(contentType = MimetypesFileTypeMap.getDefaultFileTypeMap().getContentType(fileName)).startsWith("image/")) {
-                return file;
-            }
+
+        if (!isImage(file)) {
+            return file;
         }
+
         /*
          * Start scaling if appropriate parameters are present
          */
@@ -252,11 +286,45 @@ public class FileResponseRenderer implements ResponseRenderer {
             /*
              * Scale to new input stream
              */
-            final InputStream scaled = scaler.scale(file.getStream(), width, height, ScaleType.getType(request.getParameter("scaleType")));
+            final InputStream input = file.getStream();
+            final InputStream scaled = null == input ? null : scaler.scale(input, width, height, ScaleType.getType(request.getParameter("scaleType")));
             return new FileHolder(scaled, -1, "image/png", "");
         } finally {
             Streams.close(file);
         }
+    }
+    
+    private IFileHolder cropIfImage(final AJAXRequestData request, final IFileHolder file) throws IOException, OXException {
+    	if (null == this.scaler || false == isImage(file) || false == request.isSet("cropWidth") || false == request.isSet("cropHeight")) {
+    		return file;
+    	}
+    	/*
+    	 * get crop parameters
+    	 */
+    	final int cropX = request.isSet("cropX") ? request.getParameter("cropX", int.class).intValue() : 0;
+    	final int cropY = request.isSet("cropY") ? request.getParameter("cropY", int.class).intValue() : 0;
+    	final int cropWidth = request.getParameter("cropWidth", int.class).intValue();
+    	final int cropHeight = request.getParameter("cropHeight", int.class).intValue();
+    	/*
+    	 * crop to new input stream
+    	 */
+        try {
+            final InputStream croppedImage = scaler.crop(file.getStream(), cropX, cropY, cropWidth, cropHeight, file.getContentType());
+            return new FileHolder(croppedImage, -1, file.getContentType(), file.getName());
+        } finally {
+            Streams.close(file);
+        }    
+    }
+
+    private boolean isImage(final IFileHolder file) {
+        String contentType = file.getContentType();
+        if (null == contentType || !contentType.startsWith("image/")) {
+            final String fileName = file.getName();
+            if (fileName == null || !(contentType = FileTypeMap.getDefaultFileTypeMap().getContentType(fileName)).startsWith("image/")) {
+                return false;
+            }
+        }
+        return true;
     }
 
 }

@@ -49,17 +49,36 @@
 
 package com.openexchange.index.solr.internal;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
+
+import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.SolrResponse;
+import org.apache.solr.client.solrj.response.FacetField;
+import org.apache.solr.client.solrj.response.FacetField.Count;
 import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.client.solrj.response.UpdateResponse;
+import org.apache.solr.common.SolrDocument;
+import org.apache.solr.common.SolrDocumentList;
 import org.apache.solr.common.SolrInputDocument;
 import org.apache.solr.common.params.SolrParams;
+
 import com.openexchange.exception.OXException;
 import com.openexchange.index.IndexAccess;
+import com.openexchange.index.IndexDocument;
+import com.openexchange.index.IndexField;
+import com.openexchange.index.IndexResult;
+import com.openexchange.index.mail.MailIndexField;
+import com.openexchange.index.solr.IndexFolderManager;
+import com.openexchange.index.solr.mail.SolrMailField;
 import com.openexchange.solr.SolrAccessService;
 import com.openexchange.solr.SolrCoreIdentifier;
 
@@ -69,8 +88,8 @@ import com.openexchange.solr.SolrCoreIdentifier;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public abstract class AbstractSolrIndexAccess<V> implements IndexAccess<V> {
-
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(AbstractSolrIndexAccess.class));
+    
+    private final Lock folderCacheLock = new ReentrantLock();
 
     protected final int contextId;
 
@@ -83,6 +102,8 @@ public abstract class AbstractSolrIndexAccess<V> implements IndexAccess<V> {
     private final AtomicInteger retainCount;
 
     private long lastAccess;
+    
+    private Map<Integer, Map<String, Set<String>>> indexedFolders;
         
 
     /**
@@ -98,19 +119,54 @@ public abstract class AbstractSolrIndexAccess<V> implements IndexAccess<V> {
         this.module = identifier.getModule();
         lastAccess = System.currentTimeMillis();
         retainCount = new AtomicInteger(0);
+        indexedFolders = new HashMap<Integer, Map<String, Set<String>>>();
+    }
+    
+    /*
+     * Implemented methods
+     */
+    protected boolean isIndexed(int module, String accountId, String folderId) throws OXException {
+        Map<String, Set<String>> accounts = indexedFolders.get(module);
+        folderCacheLock.lock();        
+        try {
+            Set<String> folders;
+            if (accounts == null) {
+                accounts = new HashMap<String, Set<String>>();
+                folders = new HashSet<String>();
+                accounts.put(accountId, folders);
+                indexedFolders.put(module, accounts);
+            } else {
+                folders = accounts.get(accountId);
+                if (folders == null) {
+                    folders = new HashSet<String>();
+                    accounts.put(accountId, folders);                    
+                }              
+            }
+            
+            if (folders.contains(folderId)) {
+                return true;
+            }
+            
+            if (IndexFolderManager.isIndexed(contextId, userId, module, accountId, folderId)) {
+                folders.add(folderId);
+                return true;
+            }
+
+            return false;
+        } finally {
+            folderCacheLock.unlock();
+        }
     }
     
     /*
      * Public methods
      */
-    @Override
-    public void release() {        
-        try {
-            final SolrAccessService accessService = Services.getService(SolrAccessService.class);
-            accessService.stopCore(identifier);
-        } catch (final OXException e) {
-            LOG.warn(e.getLogMessage(), e);
-        }
+    public void releaseCore() {
+        indexedFolders.clear();
+        indexedFolders = null;
+        indexedFolders = new HashMap<Integer, Map<String, Set<String>>>();
+        final SolrAccessService accessService = Services.getService(SolrAccessService.class);
+        accessService.freeResources(identifier);
     }
 
     public SolrCoreIdentifier getIdentifier() {
@@ -147,11 +203,7 @@ public abstract class AbstractSolrIndexAccess<V> implements IndexAccess<V> {
     protected UpdateResponse addDocument(final SolrInputDocument document, final boolean commit) throws OXException {
         lastAccess = System.currentTimeMillis();
         final SolrAccessService accessService = Services.getService(SolrAccessService.class);        
-        final UpdateResponse response = accessService.add(identifier, document, commit);
-        if (LOG.isDebugEnabled()) {
-            LOG.debug("Add took " + response.getElapsedTime() + "ms for 1 document.");
-        }
-        
+        final UpdateResponse response = accessService.add(identifier, document, commit);        
         return response;
     }
     
@@ -159,32 +211,20 @@ public abstract class AbstractSolrIndexAccess<V> implements IndexAccess<V> {
         lastAccess = System.currentTimeMillis();
         final SolrAccessService accessService = Services.getService(SolrAccessService.class);
         final UpdateResponse response = accessService.add(identifier, documents, commit);
-        if (LOG.isDebugEnabled()) {
-            LOG.debug("Add took " + response.getElapsedTime() + "ms for " + documents.size() + " documents.");
-        }
-        
         return response;
     }
     
     protected UpdateResponse commit() throws OXException {
         lastAccess = System.currentTimeMillis();
         final SolrAccessService accessService = Services.getService(SolrAccessService.class);        
-        final UpdateResponse response = accessService.commit(identifier);
-        if (LOG.isDebugEnabled()) {
-            LOG.debug("Commit took " + response.getElapsedTime() + "ms.");
-        }
-        
+        final UpdateResponse response = accessService.commit(identifier);        
         return response;
     }
     
     protected UpdateResponse optimize() throws OXException {
         lastAccess = System.currentTimeMillis();
         final SolrAccessService accessService = Services.getService(SolrAccessService.class);        
-        final UpdateResponse response = accessService.optimize(identifier);
-        if (LOG.isDebugEnabled()) {
-            LOG.debug("Optimize took " + response.getElapsedTime() + "ms.");
-        }
-        
+        final UpdateResponse response = accessService.optimize(identifier);        
         return response;
     }
     
@@ -192,21 +232,13 @@ public abstract class AbstractSolrIndexAccess<V> implements IndexAccess<V> {
         lastAccess = System.currentTimeMillis();
         final SolrAccessService accessService = Services.getService(SolrAccessService.class);        
         final UpdateResponse response = accessService.deleteById(identifier, id, true);
-        if (LOG.isDebugEnabled()) {
-            LOG.debug("Delete by id took " + response.getElapsedTime() + "ms.");
-        }
-        
         return response;
     }
     
     protected SolrResponse deleteDocumentsByQuery(final String query) throws OXException {
         lastAccess = System.currentTimeMillis();
         final SolrAccessService accessService = Services.getService(SolrAccessService.class);        
-        final UpdateResponse response = accessService.deleteByQuery(identifier, query, true);
-        if (LOG.isDebugEnabled()) {
-            LOG.debug("Delete by query took " + response.getElapsedTime() + "ms.");
-        }
-        
+        final UpdateResponse response = accessService.deleteByQuery(identifier, query, true);        
         return response;
     }
     
@@ -214,11 +246,155 @@ public abstract class AbstractSolrIndexAccess<V> implements IndexAccess<V> {
         lastAccess = System.currentTimeMillis();
         final SolrAccessService accessService = Services.getService(SolrAccessService.class);        
         final QueryResponse response = accessService.query(identifier, query);
-        if (LOG.isDebugEnabled()) {
-            LOG.debug("Query took " + response.getElapsedTime() + "ms.");
-        }
-        
         return response;
     }
+    
+    protected List<IndexDocument<V>> queryChunkWise(SolrResultConverter<V> converter, SolrQuery solrQuery, int off, int len, int chunkSize) throws OXException {
+        List<IndexDocument<V>> indexDocuments = new ArrayList<IndexDocument<V>>();
+        int fetched = 0;
+        int maxRows = len;
+        if (maxRows > chunkSize) {
+            maxRows = chunkSize;
+        }
+        do {
+            solrQuery.setStart(off);
+            if ((fetched + maxRows) > len) {
+                maxRows = (len - fetched);
+            }
+            solrQuery.setRows(maxRows);
+            QueryResponse queryResponse = query(solrQuery);
+            SolrDocumentList results = queryResponse.getResults();
+            for (SolrDocument document : results) {
+                indexDocuments.add(converter.convert(document));
+            }
 
+            if (results.size() < maxRows) {
+                break;
+            }
+            
+            fetched += maxRows;
+            off += maxRows;
+        } while (fetched < len);
+        
+        return indexDocuments;
+    }
+    
+    protected IndexResult<V> queryChunkWise1(SolrResultConverter<V> converter, SolrQuery solrQuery, int off, int len, int chunkSize) throws OXException {
+        List<IndexDocument<V>> indexDocuments = new ArrayList<IndexDocument<V>>();
+        Map<IndexField, Map<String, Long>> facetCountsMap = null;
+        int fetched = 0;
+        int maxRows = len;
+        if (maxRows > chunkSize) {
+            maxRows = chunkSize;
+        }
+        do {
+            solrQuery.setStart(off);
+            if ((fetched + maxRows) > len) {
+                maxRows = (len - fetched);
+            }
+            solrQuery.setRows(maxRows);
+            QueryResponse queryResponse = query(solrQuery);
+            SolrDocumentList results = queryResponse.getResults();
+            for (SolrDocument document : results) {
+                indexDocuments.add(converter.convert(document));
+            }
+            
+            List<FacetField> facetFields = queryResponse.getFacetFields();
+            if (null != facetFields) {
+                if (null == facetCountsMap) {
+                    // Initialize map
+                    facetCountsMap = new HashMap<IndexField, Map<String,Long>>(facetFields.size());
+                }
+                for (final FacetField facetField : facetFields) {
+                    final List<Count> counts = facetField.getValues();
+                    if (null != counts) {
+                        final MailIndexField field = SolrMailField.fieldFor(facetField.getName());
+                        if (null != field) {
+                            Map<String, Long> map = facetCountsMap.get(field);
+                            if (null == map) {
+                                map = new HashMap<String, Long>(counts.size());
+                                facetCountsMap.put(field, map);
+                            }
+                            for (final Count count : counts) {
+                                final String countName = count.getName();
+                                final Long l = map.get(countName);
+                                if (null == l) {
+                                    map.put(countName, Long.valueOf(count.getCount()));
+                                } else {
+                                    map.put(countName, Long.valueOf(count.getCount() + l.longValue()));
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            if (results.size() < maxRows) {
+                break;
+            }
+            
+            fetched += maxRows;
+            off += maxRows;
+        } while (fetched < len);
+        
+        return converter.createIndexResult(indexDocuments, facetCountsMap);
+    }
+    
+    protected String buildQueryString(String fieldName, String value) {
+        if (fieldName == null || value == null) {
+            return null;
+        }
+        
+        StringBuilder sb = new StringBuilder(); 
+        sb.append('(').append(fieldName).append(":\"").append(value).append("\")");
+        return sb.toString();
+    }
+    
+    protected String buildQueryStringWithOr(String fieldName, Set<String> values) {
+        if (fieldName == null || values == null || values.isEmpty()) {
+            return null;
+        }
+        
+        StringBuilder sb = new StringBuilder();
+        sb.append('(');
+        boolean first = true;
+        for (String value : values) {
+            if (first) {
+                sb.append('(').append(fieldName).append(":\"").append(value).append("\")");
+                first = false;
+            } else {
+                sb.append(" OR (").append(fieldName).append(":\"").append(value).append("\")");
+            }
+        }
+        
+        sb.append(')');
+        return sb.toString();
+    }
+    
+    protected String catenateQueriesWithAnd(String... queries) {
+        if (queries == null || queries.length == 0) {
+            return null;
+        }
+        
+        StringBuilder sb = new StringBuilder();
+        sb.append('(');
+        boolean first = true;
+        for (String query : queries) {
+            if (query != null) {
+                if (first) {
+                    sb.append(query);
+                    first = false; 
+                } else {
+                    sb.append(" AND ").append(query);
+                }
+            }
+        }
+        
+        if (sb.length() == 1) {
+            return null;
+        }
+        
+        sb.append(')');
+        return sb.toString();
+    }
 }

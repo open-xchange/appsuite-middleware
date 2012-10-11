@@ -1,27 +1,29 @@
 package com.openexchange.calendar.itip.sender;
 
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import com.openexchange.log.LogFactory;
 
 import com.openexchange.calendar.itip.AppointmentNotificationPoolService;
 import com.openexchange.calendar.itip.generators.NotificationMail;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.notify.State.Type;
 import com.openexchange.session.Session;
 
 public class PoolingMailSenderService implements MailSenderService {
 	
-	private static final Log LOG = LogFactory.getLog(PoolingMailSenderService.class);
+	private static final Log LOG = com.openexchange.log.Log.loggerFor(PoolingMailSenderService.class);
 	
-	private AppointmentNotificationPoolService pool; 
-	private MailSenderService delegate;
+	private final AppointmentNotificationPoolService pool; 
+	private final MailSenderService delegate;
 	
 	public PoolingMailSenderService(AppointmentNotificationPoolService pool, MailSenderService delegate) {
 		this.pool = pool;
 		this.delegate = delegate;
 	}
 	
-	public void sendMail(NotificationMail mail, Session session) {
+	@Override
+    public void sendMail(NotificationMail mail, Session session) {
 		if (!mail.shouldBeSent()) {
 			return;
 		}
@@ -36,13 +38,21 @@ public class PoolingMailSenderService implements MailSenderService {
 			}
 			
 			if (shouldEnqueue(mail)) {
-				pool.enqueue(mail.getOriginal(), mail.getAppointment(), session);
+				int sharedFolderOwner = -1;
+				if (mail.getSharedCalendarOwner() != null) {
+					sharedFolderOwner = mail.getSharedCalendarOwner().getIdentifier();
+				}
+				pool.enqueue(mail.getOriginal(), mail.getAppointment(), session, sharedFolderOwner);
 				return;
 			}
 			
 			// Fasttrack messages prior to creating a change or delete exception
 			if (needsFastTrack(mail)) {
-				pool.fasttrack(mail.getOriginal(), session);
+                Appointment app = mail.getOriginal();
+                if (app == null) {
+                    app = mail.getAppointment();
+                }
+                pool.fasttrack(app, session);
 				delegate.sendMail(mail, session);
 				return;
 			}
@@ -64,6 +74,9 @@ public class PoolingMailSenderService implements MailSenderService {
 	}
 	
 	private boolean shouldEnqueue(NotificationMail mail) {
+		if (mail.getOriginal() == null || mail.getAppointment() == null) {
+			return false;
+		}
 		Type stateType = mail.getStateType();
 		if (stateType == Type.MODIFIED || isStateChange(mail)) {
 			return !needsFastTrack(mail);
@@ -73,7 +86,9 @@ public class PoolingMailSenderService implements MailSenderService {
 	}
 	
 	private boolean needsFastTrack(NotificationMail mail) {
-		
+		if (mail.getOriginal() == null || mail.getAppointment() == null) {
+			return true;
+		}
 		return isChangeExceptionsMail(mail);
 	}
 

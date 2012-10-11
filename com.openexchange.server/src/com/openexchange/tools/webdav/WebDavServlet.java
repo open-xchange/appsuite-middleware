@@ -55,6 +55,8 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import com.openexchange.config.ConfigurationService;
+import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.servlet.CountingHttpServletRequest;
 
 /**
@@ -154,12 +156,38 @@ public abstract class WebDavServlet extends HttpServlet {
         resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Method \"REPORT\" is not supported by this servlet");
     }
 
+    protected boolean isDisabledByProperty() {
+        ConfigurationService config = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
+        return config.getBoolProperty("com.openexchange.webdav.disabled", true);
+    }
+    
+    protected String getDisabledMessage() {
+        ConfigurationService config = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
+        String text = config.getText("webdav-disabled-message.txt");
+        return text;
+    }
+    
+    /**
+     * Override this and return true to disable the servlet. In this case an error message will be sent to the client.
+     * Whether WebDav servlets can be disabled at all has to be specified with "com.openexchange.webdav.disabled=true"
+     * in server.properties. The error message may be customized within the property "com.openexchange.webdav.errorMessage".
+     * 
+     * @return
+     */
+    protected boolean isServletDisabled() {
+        return false;
+    }
 
     /**
      * {@inheritDoc}
      */
     @Override
     protected void service(final HttpServletRequest request, final HttpServletResponse resp) throws ServletException, IOException {
+        if (isServletDisabled() && isDisabledByProperty()) {
+            resp.setContentType("text/html; charset=UTF-8");
+            resp.sendError(HttpServletResponse.SC_SERVICE_UNAVAILABLE, getDisabledMessage());
+            return;
+        }
         incrementRequests();
         try {
             final HttpServletRequest req = new CountingHttpServletRequest(request);

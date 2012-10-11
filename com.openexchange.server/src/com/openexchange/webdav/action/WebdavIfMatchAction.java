@@ -65,35 +65,35 @@ public class WebdavIfMatchAction extends AbstractAction {
 
 	}
 
-	private void check(final WebdavRequest req,final boolean mustMatch) throws WebdavProtocolException {
-		final String header = mustMatch ? "If-Match" : "If-None-Match";
-
-		if(req.getHeader(header) != null) {
-			final WebdavResource res = req.getResource();
-			final String etag = res.getETag();
-
-			if(res.exists() && res.isCollection()) {
+	private void check(WebdavRequest req, boolean mustMatch) throws WebdavProtocolException {
+		String header = req.getHeader(mustMatch ? "If-Match" : "If-None-Match"); 
+		if (null != header) {
+			WebdavResource res = req.getResource();
+			if (res.exists() && res.isCollection()) {
 				throw WebdavProtocolException.Code.GENERAL_ERROR.create(req.getUrl(), HttpServletResponse.SC_PRECONDITION_FAILED);
 			}
 
 			boolean foundMatch = false;
-
-			if(res.exists()) {
-				for(final String tag : req.getHeader(header).split("\\s*,\\s*")) {
-					if(etag.equals(tag) || tag.equals("*")) {
-						foundMatch = true;
+			if (res.exists()) {
+				String eTag = res.getETag();
+				for (String tag : header.split("\\s*,\\s*")) {
+					if (null != tag && 0 < tag.length()) {
+						if ("*".equals(tag) || eTag.equals(tag) || 
+								(tag.startsWith("\"") && tag.endsWith("\"") && 2 < tag.length() && 
+										eTag.equals( tag.substring(1, tag.length() - 1)))) {
+							foundMatch = true;
+							break;
+						}
 					}
 				}
 			}
 
-			if(foundMatch == mustMatch) {
+			if (foundMatch == mustMatch) {
 				return;
 			}
 
 			throw WebdavProtocolException.Code.GENERAL_ERROR.create(req.getUrl(), HttpServletResponse.SC_PRECONDITION_FAILED);
 		}
 	}
-
-
 
 }

@@ -69,7 +69,7 @@ import java.util.Map;
 import java.util.TimeZone;
 
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import com.openexchange.log.LogFactory;
 
 import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.api2.TasksSQLInterface;
@@ -87,12 +87,12 @@ import com.openexchange.groupware.calendar.Constants;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.importexport.ImportResult;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.tasks.Task;
 import com.openexchange.groupware.tasks.TaskField;
 import com.openexchange.groupware.tasks.TasksSQLImpl;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
-import com.openexchange.importexport.ImportResult;
 import com.openexchange.importexport.exceptions.ImportExportExceptionCodes;
 import com.openexchange.importexport.formats.Format;
 import com.openexchange.importexport.osgi.ImportExportServices;
@@ -407,10 +407,11 @@ public class ICalImporter extends AbstractImporter {
 					if(isChange){
 						appointmentObj.setRecurrenceID(masterID);
 						appointmentObj.removeUid();
-						if(appointmentObj.containsRecurrenceDatePosition())
-							appointmentObj.setRecurrenceDatePosition(calculateRecurrenceDatePosition(appointmentObj.getRecurrenceDatePosition()));
-						else
-							appointmentObj.setRecurrenceDatePosition(calculateRecurrenceDatePosition(appointmentObj.getStartDate()));
+						if(appointmentObj.containsRecurrenceDatePosition()) {
+                            appointmentObj.setRecurrenceDatePosition(calculateRecurrenceDatePosition(appointmentObj.getRecurrenceDatePosition()));
+                        } else {
+                            appointmentObj.setRecurrenceDatePosition(calculateRecurrenceDatePosition(appointmentObj.getStartDate()));
+                        }
 					}
 					final Appointment[] conflicts;
 					if(isChange){
@@ -480,7 +481,11 @@ public class ICalImporter extends AbstractImporter {
 					bob.append(")\n");
 				}
 			}
-			return ImportExportExceptionCodes.TRUNCATION.create(bob.toString());
+			OXException exception = ImportExportExceptionCodes.TRUNCATION.create(bob.toString());
+			for (ProblematicAttribute problematic : problematics) {
+	            exception.addProblematic(problematic);
+            }
+			return exception;
 		}
 		return e;
 	}

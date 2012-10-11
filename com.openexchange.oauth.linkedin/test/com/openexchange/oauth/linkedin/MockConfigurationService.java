@@ -48,12 +48,14 @@
  */
 package com.openexchange.oauth.linkedin;
 
+import java.io.File;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Properties;
 
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.Filter;
 import com.openexchange.config.PropertyListener;
 
 public class MockConfigurationService implements ConfigurationService {
@@ -73,8 +75,9 @@ public class MockConfigurationService implements ConfigurationService {
 
 	@Override
 	public String getProperty(String name, String defaultValue) {
-		if(props.containsKey(name))
-			return props.get(name);
+		if(props.containsKey(name)) {
+            return props.get(name);
+        }
 		return defaultValue;
 	}
 
@@ -98,13 +101,25 @@ public class MockConfigurationService implements ConfigurationService {
 	}
 
 	@Override
-	public Properties getFile(String filename) {
+    public File getDirectory(String directoryName) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public File getFileByName(String fileName) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+	@Override
+	public Properties getFile(String fileName) {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	public String getText(String filename) {
+	public String getText(String fileName) {
 		// TODO Auto-generated method stub
 		return null;
 	}
@@ -150,5 +165,14 @@ public class MockConfigurationService implements ConfigurationService {
 		// TODO Auto-generated method stub
 		return null;
 	}
+
+    /* (non-Javadoc)
+     * @see com.openexchange.config.ConfigurationService#getFilterFromProperty(java.lang.String)
+     */
+    @Override
+    public Filter getFilterFromProperty(String name) {
+        // TODO Auto-generated method stub
+        return null;
+    }
 
 }

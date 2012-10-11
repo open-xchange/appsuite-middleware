@@ -53,7 +53,6 @@ import java.io.IOException;
 import java.io.Reader;
 import java.text.DateFormat;
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
@@ -165,20 +164,20 @@ public class OXHCalendarParser implements ObjectParser<Appointment>{
 
     public static Date parseDate(final String data){
         final List<Locale> locales = Arrays.asList(Locale.US, Locale.UK, Locale.CANADA, Locale.ENGLISH, Locale.FRENCH, Locale.GERMAN, Locale.CHINA);
-        final int[] styles = new int [] {SimpleDateFormat.FULL, SimpleDateFormat.LONG, SimpleDateFormat.MEDIUM, SimpleDateFormat.SHORT };
+        final int[] styles = new int [] {DateFormat.FULL, DateFormat.LONG, DateFormat.MEDIUM, DateFormat.SHORT };
         for(final Locale loc: locales){
             for(final int dateStyle: styles){
                 for(final int timeStyle: styles){
-                    final DateFormat sdf = SimpleDateFormat.getDateTimeInstance(dateStyle, timeStyle, loc);
+                    final DateFormat sdf = DateFormat.getDateTimeInstance(dateStyle, timeStyle, loc);
                     try { return sdf.parse(data);
                         } catch (final ParseException e) {/*Next*/ }
                 }
-                final DateFormat sdf = SimpleDateFormat.getDateInstance(dateStyle, loc);
+                final DateFormat sdf = DateFormat.getDateInstance(dateStyle, loc);
                 try { return sdf.parse(data);
                     } catch (final ParseException e) {/*Next*/ }
                 }
         }
-        final DateFormat sdf = SimpleDateFormat.getInstance();
+        final DateFormat sdf = DateFormat.getInstance();
         try { return sdf.parse(data);
             } catch (final ParseException e) {/*Next*/ }
 

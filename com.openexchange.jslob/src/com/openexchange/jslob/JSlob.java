@@ -78,7 +78,8 @@ public class JSlob {
     public static final JSlob EMPTY_JSLOB = new EmptyJSlob();
 
     private JSONObject jsonObject;
-
+    private JSONObject metaObject;
+    
     private JSlobId id;
 
     /**
@@ -86,6 +87,20 @@ public class JSlob {
      */
     public JSlob() {
         super();
+    }
+
+    @Override
+    public String toString() {
+        final StringBuilder builder = new StringBuilder(128);
+        builder.append("JSlob {");
+        if (jsonObject != null) {
+            builder.append("jsonObject=").append(jsonObject).append(", ");
+        }
+        if (id != null) {
+            builder.append("id=").append(id);
+        }
+        builder.append('}');
+        return builder.toString();
     }
 
     /**
@@ -96,6 +111,7 @@ public class JSlob {
     public JSlob(final JSONObject jsonObject) {
         super();
         this.jsonObject = jsonObject;
+        this.metaObject = new JSONObject();
     }
 
     /**
@@ -137,5 +153,24 @@ public class JSlob {
         this.jsonObject = jsonObject;
         return this;
     }
+    
+    /**
+     * Gets the json object with unmodifiable metadata describing the regular payload data
+     * @return The metadata object
+     */
+    public JSONObject getMetaObject() {
+		return metaObject;
+	}
+    
+    /**
+     * Sets the json object with unmodifiable metadata describing the regular payload data
+     * @param The metadata object
+     * @return This JSlob with new metadata object applied
+     */
+    public JSlob setMetaObject(JSONObject metaObject) {
+		this.metaObject = metaObject;
+		return this;
+    }
+    
 
 }

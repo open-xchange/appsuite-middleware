@@ -18,16 +18,19 @@ package org.apache.tika.parser.odf;
 
 import java.io.InputStream;
 
-import junit.framework.TestCase;
-
+import org.apache.tika.TikaTest;
+import org.apache.tika.metadata.DublinCore;
+import org.apache.tika.metadata.HttpHeaders;
+import org.apache.tika.metadata.MSOffice;
 import org.apache.tika.metadata.Metadata;
+import org.apache.tika.parser.AutoDetectParser;
 import org.apache.tika.parser.ParseContext;
 import org.apache.tika.parser.Parser;
 import org.apache.tika.parser.opendocument.OpenOfficeParser;
 import org.apache.tika.sax.BodyContentHandler;
 import org.xml.sax.ContentHandler;
 
-public class ODFParserTest extends TestCase {
+public class ODFParserTest extends TikaTest {
     /**
      * For now, allow us to run some tests against both
      *  the old and the new parser
@@ -50,14 +53,14 @@ public class ODFParserTest extends TestCase {
 
              assertEquals(
                    "application/vnd.oasis.opendocument.text",
-                   metadata.get(Metadata.CONTENT_TYPE));
+                   metadata.get(HttpHeaders.CONTENT_TYPE));
 
              String content = handler.toString();
              assertTrue(content.contains("Tika is part of the Lucene project."));
              assertTrue(content.contains("Solr"));
              assertTrue(content.contains("one embedded"));
              assertTrue(content.contains("Rectangle Title"));
-             assertTrue(content.contains("a blue background and dark border"));
+             assertTrue(content.contains("a blue background and dark border"));        
           } finally {
              input.close();
           }
@@ -75,14 +78,25 @@ public class ODFParserTest extends TestCase {
 
              assertEquals(
                    "application/vnd.oasis.opendocument.text",
-                   metadata.get(Metadata.CONTENT_TYPE));
-             assertEquals("2007-09-14T11:07:10", metadata.get(Metadata.DATE));
-             assertEquals("2007-09-14T11:06:08", metadata.get(Metadata.CREATION_DATE));
-             assertEquals("en-US", metadata.get(Metadata.LANGUAGE));
-             assertEquals("PT1M7S", metadata.get(Metadata.EDIT_TIME));
+                   metadata.get(HttpHeaders.CONTENT_TYPE));
+             assertEquals("2007-09-14T11:07:10", metadata.get(DublinCore.DATE));
+             assertEquals("2007-09-14T11:06:08", metadata.get(MSOffice.CREATION_DATE));
+             assertEquals("en-US", metadata.get(DublinCore.LANGUAGE));
+             assertEquals("PT1M7S", metadata.get(MSOffice.EDIT_TIME));
              assertEquals(
                    "NeoOffice/2.2$Unix OpenOffice.org_project/680m18$Build-9161",
                    metadata.get("generator"));
+             
+             // Check the document statistics
+             assertEquals("1", metadata.get(MSOffice.PAGE_COUNT));
+             assertEquals("1", metadata.get(MSOffice.PARAGRAPH_COUNT));
+             assertEquals("14", metadata.get(MSOffice.WORD_COUNT));
+             assertEquals("78", metadata.get(MSOffice.CHARACTER_COUNT));
+             assertEquals("0", metadata.get(MSOffice.TABLE_COUNT));
+             assertEquals("0", metadata.get(MSOffice.OBJECT_COUNT));
+             assertEquals("0", metadata.get(MSOffice.IMAGE_COUNT));
+             
+             // Check the old style statistics (these will be removed shortly)
              assertEquals("0", metadata.get("nbTab"));
              assertEquals("0", metadata.get("nbObject"));
              assertEquals("0", metadata.get("nbImg"));
@@ -118,28 +132,35 @@ public class ODFParserTest extends TestCase {
            Metadata metadata = new Metadata();
            ContentHandler handler = new BodyContentHandler();
            new OpenDocumentParser().parse(input, handler, metadata);
-
+  
            assertEquals(
                    "application/vnd.oasis.opendocument.formula",
-                   metadata.get(Metadata.CONTENT_TYPE));
-           assertEquals(null, metadata.get(Metadata.DATE));
-           assertEquals("2006-01-27T11:55:22", metadata.get(Metadata.CREATION_DATE));
-           assertEquals("The quick brown fox jumps over the lazy dog", metadata.get(Metadata.TITLE));
-           assertEquals("Gym class featuring a brown fox and lazy dog", metadata.get(Metadata.SUBJECT));
-           assertEquals("PT0S", metadata.get(Metadata.EDIT_TIME));
+                   metadata.get(HttpHeaders.CONTENT_TYPE));
+           assertEquals(null, metadata.get(DublinCore.DATE));
+           assertEquals("2006-01-27T11:55:22", metadata.get(MSOffice.CREATION_DATE));
+           assertEquals("The quick brown fox jumps over the lazy dog", metadata.get(DublinCore.TITLE));
+           assertEquals("Gym class featuring a brown fox and lazy dog", metadata.get(DublinCore.SUBJECT));
+           assertEquals("PT0S", metadata.get(MSOffice.EDIT_TIME));
            assertEquals("1", metadata.get("editing-cycles"));
            assertEquals(
                    "OpenOffice.org/2.2$Win32 OpenOffice.org_project/680m14$Build-9134",
                    metadata.get("generator"));
-           assertEquals("Pangram, fox, dog", metadata.get(Metadata.KEYWORDS));
-
+           assertEquals("Pangram, fox, dog", metadata.get(MSOffice.KEYWORDS));
+           
            // User defined metadata
            assertEquals("Text 1", metadata.get("custom:Info 1"));
            assertEquals("2", metadata.get("custom:Info 2"));
            assertEquals("false", metadata.get("custom:Info 3"));
            assertEquals("true", metadata.get("custom:Info 4"));
-
+           
            // No statistics present
+           assertEquals(null, metadata.get(MSOffice.PAGE_COUNT));
+           assertEquals(null, metadata.get(MSOffice.PARAGRAPH_COUNT));
+           assertEquals(null, metadata.get(MSOffice.WORD_COUNT));
+           assertEquals(null, metadata.get(MSOffice.CHARACTER_COUNT));
+           assertEquals(null, metadata.get(MSOffice.TABLE_COUNT));
+           assertEquals(null, metadata.get(MSOffice.OBJECT_COUNT));
+           assertEquals(null, metadata.get(MSOffice.IMAGE_COUNT));
            assertEquals(null, metadata.get("nbTab"));
            assertEquals(null, metadata.get("nbObject"));
            assertEquals(null, metadata.get("nbImg"));
@@ -147,7 +168,7 @@ public class ODFParserTest extends TestCase {
            assertEquals(null, metadata.get("nbPara"));
            assertEquals(null, metadata.get("nbWord"));
            assertEquals(null, metadata.get("nbCharacter"));
-
+  
            // Note - contents of maths files not currently supported
            String content = handler.toString();
            assertEquals("", content);
@@ -166,31 +187,40 @@ public class ODFParserTest extends TestCase {
            Metadata metadata = new Metadata();
            ContentHandler handler = new BodyContentHandler();
            new OpenDocumentParser().parse(input, handler, metadata);
-
+  
            assertEquals(
                    "application/vnd.oasis.opendocument.text",
-                   metadata.get(Metadata.CONTENT_TYPE));
-           assertEquals("2009-10-05T21:22:38", metadata.get(Metadata.DATE));
-           assertEquals("2009-10-05T19:04:01", metadata.get(Metadata.CREATION_DATE));
-           assertEquals("Apache Tika", metadata.get(Metadata.TITLE));
-           assertEquals("Test document", metadata.get(Metadata.SUBJECT));
-           assertEquals("A rather complex document", metadata.get(Metadata.DESCRIPTION));
-           assertEquals("Bart Hanssens", metadata.get(Metadata.CREATOR));
+                   metadata.get(HttpHeaders.CONTENT_TYPE));
+           assertEquals("2009-10-05T21:22:38", metadata.get(DublinCore.DATE));
+           assertEquals("2009-10-05T19:04:01", metadata.get(MSOffice.CREATION_DATE));
+           assertEquals("Apache Tika", metadata.get(DublinCore.TITLE));
+           assertEquals("Test document", metadata.get(DublinCore.SUBJECT));
+           assertEquals("A rather complex document", metadata.get(DublinCore.DESCRIPTION));
+           assertEquals("Bart Hanssens", metadata.get(DublinCore.CREATOR));
            assertEquals("Bart Hanssens", metadata.get("initial-creator"));
            assertEquals("2", metadata.get("editing-cycles"));
-           assertEquals("PT02H03M24S", metadata.get(Metadata.EDIT_TIME));
+           assertEquals("PT02H03M24S", metadata.get(MSOffice.EDIT_TIME));
            assertEquals(
                    "OpenOffice.org/3.1$Unix OpenOffice.org_project/310m19$Build-9420",
                    metadata.get("generator"));
-           assertEquals("Apache, Lucene, Tika", metadata.get(Metadata.KEYWORDS));
-
+           assertEquals("Apache, Lucene, Tika", metadata.get(MSOffice.KEYWORDS));
+           
            // User defined metadata
            assertEquals("Bart Hanssens", metadata.get("custom:Editor"));
            assertEquals(null, metadata.get("custom:Info 2"));
            assertEquals(null, metadata.get("custom:Info 3"));
            assertEquals(null, metadata.get("custom:Info 4"));
-
-           // No statistics present
+           
+           // Check the document statistics
+           assertEquals("2", metadata.get(MSOffice.PAGE_COUNT));
+           assertEquals("13", metadata.get(MSOffice.PARAGRAPH_COUNT));
+           assertEquals("54", metadata.get(MSOffice.WORD_COUNT));
+           assertEquals("351", metadata.get(MSOffice.CHARACTER_COUNT));
+           assertEquals("0", metadata.get(MSOffice.TABLE_COUNT));
+           assertEquals("2", metadata.get(MSOffice.OBJECT_COUNT));
+           assertEquals("0", metadata.get(MSOffice.IMAGE_COUNT));
+           
+           // Check the old style statistics (these will be removed shortly)
            assertEquals("0", metadata.get("nbTab"));
            assertEquals("2", metadata.get("nbObject"));
            assertEquals("0", metadata.get("nbImg"));
@@ -198,7 +228,7 @@ public class ODFParserTest extends TestCase {
            assertEquals("13", metadata.get("nbPara"));
            assertEquals("54", metadata.get("nbWord"));
            assertEquals("351", metadata.get("nbCharacter"));
-
+  
            String content = handler.toString();
            assertTrue(content.contains(
                  "Apache Tika Tika is part of the Lucene project."
@@ -207,4 +237,51 @@ public class ODFParserTest extends TestCase {
           input.close();
       }
    }
+
+    public void testODPMasterFooter() throws Exception {
+        InputStream input = ODFParserTest.class.getResourceAsStream(
+            "/test-documents/testMasterFooter.odp");
+        try {
+            Metadata metadata = new Metadata();
+            ContentHandler handler = new BodyContentHandler();
+            new AutoDetectParser().parse(input, handler, metadata);
+  
+            String content = handler.toString();
+            assertContains("Master footer is here", content);
+        } finally {
+            input.close();
+        }
+    }  
+
+    public void testODTFooter() throws Exception {
+        InputStream input = ODFParserTest.class.getResourceAsStream(
+            "/test-documents/testFooter.odt");
+        try {
+            Metadata metadata = new Metadata();
+            ContentHandler handler = new BodyContentHandler();
+            new AutoDetectParser().parse(input, handler, metadata);
+  
+            String content = handler.toString();
+            assertContains("Here is some text...", content);
+            assertContains("Here is some text on page 2", content);
+            assertContains("Here is footer text", content);
+        } finally {
+            input.close();
+        }
+    }  
+
+    public void testODSFooter() throws Exception {
+        InputStream input = ODFParserTest.class.getResourceAsStream(
+            "/test-documents/testFooter.ods");
+        try {
+            Metadata metadata = new Metadata();
+            ContentHandler handler = new BodyContentHandler();
+            new AutoDetectParser().parse(input, handler, metadata);
+  
+            String content = handler.toString();
+            assertContains("Here is a footer in the center area", content);
+        } finally {
+            input.close();
+        }
+    }  
 }

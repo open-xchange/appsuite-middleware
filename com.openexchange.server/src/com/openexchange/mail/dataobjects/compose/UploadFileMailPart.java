@@ -61,6 +61,7 @@ import javax.activation.DataSource;
 import javax.mail.Part;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.upload.UploadFile;
+import com.openexchange.java.Streams;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.mime.ContentDisposition;
@@ -82,7 +83,7 @@ public abstract class UploadFileMailPart extends MailPart implements ComposedMai
     private static final long serialVersionUID = 257902073011243269L;
 
     private static final transient org.apache.commons.logging.Log LOG =
-        com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(UploadFileMailPart.class));
+        com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(UploadFileMailPart.class));
 
     private final File uploadFile;
 
@@ -100,7 +101,12 @@ public abstract class UploadFileMailPart extends MailPart implements ComposedMai
         super();
         this.uploadFile = uploadFile.getTmpFile();
         final String preparedFileName = uploadFile.getPreparedFileName();
-        setContentType(prepareContentType(uploadFile.getContentType(), preparedFileName));
+        try {
+            setContentType(prepareContentType(uploadFile.getContentType(), preparedFileName));
+        } catch (final OXException e) {
+            // Retry with guess by file name
+            setContentType(MimeType2ExtMap.getContentType(preparedFileName));
+        }
         {
             final ContentType contentType = getContentType();
             if (contentType.startsWith("text/") && "GB18030".equalsIgnoreCase(contentType.getCharsetParameter())) {
@@ -112,14 +118,11 @@ public abstract class UploadFileMailPart extends MailPart implements ComposedMai
                 } catch (final IOException e) {
                     // Ignore
                 } finally {
-                    if (null != in) {
-                        try {
-                            in.close();
-                        } catch (final IOException e) {
-                            // Ignore
-                        }
-                    }
+                    Streams.close(in);
                 }
+            } else if (contentType.startsWith("application/force")) {
+                contentType.setBaseType(MimeType2ExtMap.getContentType(preparedFileName));
+                setContentType(contentType);
             }
         }
         setFileName(preparedFileName);

@@ -171,16 +171,19 @@ public class ResourceTestManager implements TestManager {
             return getClient().execute(request);
         } catch (OXException e) {
             setLastException(e);
-            if (failOnError)
+            if (failOnError) {
                 fail("AjaxException during resource creation: " + e.getLocalizedMessage());
+            }
         } catch (IOException e) {
             setLastException(e);
-            if (failOnError)
+            if (failOnError) {
                 fail("IOException during resource creation: " + e.getLocalizedMessage());
+            }
         } catch (JSONException e) {
             setLastException(e);
-            if (failOnError)
+            if (failOnError) {
                 fail("JsonException during resource creation: " + e.getLocalizedMessage());
+            }
         }
         return null;
     }
@@ -193,7 +196,8 @@ public class ResourceTestManager implements TestManager {
     protected void extractInfo(AbstractAJAXResponse response) {
         setLastResponse(response);
         setLastModification(response.getTimestamp());
-        if (response.hasError())
+        if (response.hasError()) {
             setLastException(response.getException());
+        }
     }
 }

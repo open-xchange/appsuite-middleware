@@ -51,12 +51,9 @@ package com.openexchange.admin.reseller.storage.interfaces;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
-import java.util.HashSet;
 import java.util.Map;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import com.openexchange.admin.reseller.daemons.ClientAdminThreadExtended;
 import com.openexchange.admin.reseller.rmi.dataobjects.ResellerAdmin;
 import com.openexchange.admin.reseller.rmi.dataobjects.Restriction;
@@ -99,8 +96,8 @@ public abstract class OXResellerStorageInterface {
     public static OXResellerStorageInterface getInstance() throws StorageException {
         synchronized (OXResellerStorageInterface.class) {
             if (null == implementingClass) {
-                cache = ClientAdminThreadExtended.cache;
-                prop = cache.getProperties();
+//                cache = ClientAdminThreadExtended.cache;
+//                prop = cache.getProperties();
                 final String className = prop.getProp(PropertyHandlerExtended.RESELLER_STORAGE, null);
                 if (null != className) {
                     try {
@@ -168,12 +165,35 @@ public abstract class OXResellerStorageInterface {
     public abstract ResellerAdmin[] list(final String search_pattern) throws StorageException;
 
     /**
+     * @param search_pattern
+     * @param pid
+     * @return
+     * @throws StorageException
+     */
+    public abstract ResellerAdmin[] list(final String search_pattern, int pid) throws StorageException;
+
+    /**
      * @param adm
      * @return The right ResellerAdmin[] data, in any other case an exception is raised
      * @throws StorageException
      */
     public abstract ResellerAdmin[] getData(final ResellerAdmin[] admins) throws StorageException;
     
+    /**
+     * @param adm
+     * @return The right ResellerAdmin[] data, in any other case an exception is raised
+     * @throws StorageException
+     */
+    public abstract ResellerAdmin[] getData(final ResellerAdmin[] admins, int pid) throws StorageException;
+
+    /**
+     * @param adm
+     * @param pid
+     * @return
+     * @throws StorageException
+     */
+    public abstract boolean existsAdmin(final ResellerAdmin adm, int pid) throws StorageException;
+
     /**
      * @param adm
      * @return
@@ -265,14 +285,14 @@ public abstract class OXResellerStorageInterface {
      * @param restrictions
      * @throws StorageException
      */
-    public abstract void applyRestrictionsToContext(final HashSet<Restriction> restrictions, final Context ctx) throws StorageException;
+    public abstract void applyRestrictionsToContext(final Restriction[] restrictions, final Context ctx) throws StorageException;
     
     /**
      * @param ctx
      * @return
      * @throws StorageException
      */
-    public abstract HashSet<Restriction> getRestrictionsFromContext(final Context ctx) throws StorageException;
+    public abstract Restriction[] getRestrictionsFromContext(final Context ctx) throws StorageException;
     
     /**
      * @throws StorageException
@@ -290,6 +310,12 @@ public abstract class OXResellerStorageInterface {
      */
     public abstract void updateModuleAccessRestrictions() throws StorageException, OXResellerException;
     
+    /**
+     * @throws StorageException
+     * @throws OXResellerException
+     */
+    public abstract void updateRestrictions() throws StorageException, OXResellerException;
+
     /**
      * @param ctx
      * @return

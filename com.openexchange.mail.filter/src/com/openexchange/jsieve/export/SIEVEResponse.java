@@ -73,11 +73,11 @@ public class SIEVEResponse {
         WARNINGS("WARNINGS",12),
         UNKNOWN("UNKNOWN",99);
 
-        private String sieveCode;
+        private final String sieveCode;
         
         private String message;
         
-        private int detailnumber;
+        private final int detailnumber;
         
         private Code(final String sieveCode, final int detailNumber) {
             this.sieveCode = sieveCode;

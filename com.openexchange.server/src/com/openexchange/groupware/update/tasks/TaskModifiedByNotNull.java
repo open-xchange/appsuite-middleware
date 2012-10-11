@@ -53,7 +53,6 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.tasks.Mapping;
@@ -77,7 +76,7 @@ public class TaskModifiedByNotNull implements UpdateTask {
     /**
      * Logger.
      */
-    private static final Log LOG = LogFactory.getLog(TaskModifiedByNotNull
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(TaskModifiedByNotNull
         .class);
 
     /**

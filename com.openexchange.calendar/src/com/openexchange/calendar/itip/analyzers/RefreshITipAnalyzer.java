@@ -82,10 +82,12 @@ public class RefreshITipAnalyzer extends AbstractITipAnalyzer {
         super(util, services);
     }
 
+    @Override
     public List<ITipMethod> getMethods() {
         return Arrays.asList(ITipMethod.REFRESH);
     }
 
+    @Override
     public ITipAnalysis analyze(ITipMessage message, Map<String, String> header, TypeWrapper wrapper, Locale locale, User user, Context ctx, Session session) throws OXException {
         ITipAnalysis analysis = new ITipAnalysis();
         analysis.setMessage(message);
@@ -106,7 +108,7 @@ public class RefreshITipAnalyzer extends AbstractITipAnalyzer {
         refreshed = util.resolveUid(appointment.getUid(), session);
         
         if (isException) {
-            refreshed = findAndRemoveMatchingException(appointment, util.getExceptions((CalendarDataObject)refreshed, session));
+            refreshed = findAndRemoveMatchingException(appointment, util.getExceptions(refreshed, session));
         }
         
         if (refreshed == null) {

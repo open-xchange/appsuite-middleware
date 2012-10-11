@@ -64,7 +64,7 @@ import com.openexchange.groupware.upload.UploadFile;
  */
 public class UploadEvent {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(UploadEvent.class));
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(UploadEvent.class));
 
     /*-
      * ------------ Constants ------------

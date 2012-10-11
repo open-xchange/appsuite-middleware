@@ -51,9 +51,10 @@ package com.openexchange.service.indexing.mail.job;
 
 import java.util.List;
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.index.IndexAccess;
+import com.openexchange.index.solr.mail.MailUUID;
+import com.openexchange.log.LogFactory;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.service.indexing.mail.MailJobInfo;
 
@@ -99,36 +100,26 @@ public final class RemoveByIDsJob extends AbstractMailJob {
     }
 
     @Override
-    public void performJob() throws OXException, InterruptedException {
+    protected void performMailJob() throws OXException, InterruptedException {
         final List<String> mailIds = this.mailIds;
         if (null == mailIds) {
             return;
         }
-        IndexAccess<MailMessage> indexAccess = null;
         try {
             /*
              * Check flags of contained mails
              */
-            indexAccess = getIndexAccess();
-            final StringBuilder queryBuilder = new StringBuilder(128);
-            queryBuilder.append('(').append(FIELD_USER).append(':').append(userId).append(')');
-            queryBuilder.append(" AND (").append(FIELD_CONTEXT).append(':').append(contextId).append(')');
-            queryBuilder.append(" AND (").append(FIELD_ACCOUNT).append(':').append(accountId).append(')');
-            queryBuilder.append(" AND (").append(FIELD_FULL_NAME).append(":\"").append(fullName).append("\")");
-            final int resLen = queryBuilder.length();
+            final IndexAccess<MailMessage> indexAccess = storageAccess.getIndexAccess();
             // Iterate identifiers
             for (final String id : mailIds) {
-                queryBuilder.setLength(resLen);
-                queryBuilder.append(" AND (").append(FIELD_ID).append(":\"").append(id).append("\")");
-                indexAccess.deleteByQuery(queryBuilder.toString());
+                final MailUUID indexId = new MailUUID(contextId, userId, accountId, fullName, id);
+                indexAccess.deleteById(indexId.getUUID());
             }
             if (DEBUG) {
                 LOG.debug(mailIds.size() + " mails deleted from index; folder job: " + info);
             }
         } catch (final RuntimeException e) {
             LOG.error(SIMPLE_NAME + " \"" + info + "\" failed.", e);
-        } finally {
-            releaseAccess(indexAccess);
         }
     }
 

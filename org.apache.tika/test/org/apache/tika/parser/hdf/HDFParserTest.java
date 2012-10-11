@@ -21,6 +21,7 @@ import java.io.InputStream;
 
 //TIKA imports
 import org.apache.tika.metadata.Metadata;
+import org.apache.tika.parser.ParseContext;
 import org.apache.tika.parser.Parser;
 import org.apache.tika.parser.hdf.HDFParser;
 import org.apache.tika.sax.BodyContentHandler;
@@ -30,9 +31,9 @@ import org.xml.sax.ContentHandler;
 import junit.framework.TestCase;
 
 /**
- *
+ * 
  * Test suite for the {@link HDFParser}.
- *
+ * 
  */
 public class HDFParserTest extends TestCase {
 
@@ -46,15 +47,15 @@ public class HDFParserTest extends TestCase {
 
         /*
          * this is a publicly available HDF5 file from the MLS mission:
-         *
-         *
+         * 
+         * 
          * ftp://acdisc.gsfc.nasa.gov/data/s4pa///Aura_MLS_Level2/ML2O3.002//2009
          * /MLS-Aura_L2GP-O3_v02-23-c01_2009d122.he5
          */
         InputStream stream = HDFParser.class
                 .getResourceAsStream("/test-documents/test.he5");
         try {
-            parser.parse(stream, handler, metadata);
+            parser.parse(stream, handler, metadata, new ParseContext());
         } finally {
             stream.close();
         }

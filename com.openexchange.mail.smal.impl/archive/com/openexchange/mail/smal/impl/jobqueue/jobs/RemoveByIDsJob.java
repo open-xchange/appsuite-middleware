@@ -70,7 +70,7 @@ public final class RemoveByIDsJob extends AbstractMailSyncJob {
     private static final String SIMPLE_NAME = RemoveByIDsJob.class.getSimpleName();
 
     private static final org.apache.commons.logging.Log LOG =
-        com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(RemoveByIDsJob.class));
+        com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(RemoveByIDsJob.class));
 
     private static final boolean DEBUG = LOG.isDebugEnabled();
 

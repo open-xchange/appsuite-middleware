@@ -20,7 +20,10 @@ import java.io.InputStream;
 
 import junit.framework.TestCase;
 
+import org.apache.tika.metadata.DublinCore;
+import org.apache.tika.metadata.HttpHeaders;
 import org.apache.tika.metadata.Metadata;
+import org.apache.tika.parser.ParseContext;
 import org.apache.tika.sax.BodyContentHandler;
 import org.xml.sax.ContentHandler;
 
@@ -32,16 +35,16 @@ public class EpubParserTest extends TestCase {
         try {
             Metadata metadata = new Metadata();
             ContentHandler handler = new BodyContentHandler();
-            new EpubParser().parse(input, handler, metadata);
+            new EpubParser().parse(input, handler, metadata, new ParseContext());
 
             assertEquals("application/epub+zip",
-                    metadata.get(Metadata.CONTENT_TYPE));
+                    metadata.get(HttpHeaders.CONTENT_TYPE));
             assertEquals("en",
-                    metadata.get(Metadata.LANGUAGE));
+                    metadata.get(DublinCore.LANGUAGE));
             assertEquals("This is an ePub test publication for Tika.",
-                    metadata.get(Metadata.DESCRIPTION));
+                    metadata.get(DublinCore.DESCRIPTION));
             assertEquals("Apache",
-                    metadata.get(Metadata.PUBLISHER));
+                    metadata.get(DublinCore.PUBLISHER));
 
             String content = handler.toString();
             assertTrue(content.contains("Plus a simple div"));

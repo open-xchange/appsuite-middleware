@@ -49,27 +49,34 @@
 
 package com.openexchange.ajax.requesthandler;
 
+import static com.openexchange.ajax.requesthandler.Dispatcher.PREFIX;
+import static com.openexchange.tools.servlet.http.Tools.isMultipartContent;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicReference;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import org.apache.commons.fileupload.FileUploadBase;
-import org.apache.commons.fileupload.servlet.ServletRequestContext;
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.SessionServlet;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.requesthandler.responseRenderers.APIResponseRenderer;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.contexts.impl.ContextImpl;
+import com.openexchange.groupware.ldap.UserImpl;
+import com.openexchange.log.LogFactory;
+import com.openexchange.session.Session;
+import com.openexchange.sessiond.impl.SessionObject;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.servlet.http.Tools;
 import com.openexchange.tools.session.ServerSession;
+import com.openexchange.tools.session.ServerSessionAdapter;
 
 /**
  * {@link DispatcherServlet} - The main dispatcher servlet which delegates request to dispatcher framework.
@@ -83,6 +90,8 @@ public class DispatcherServlet extends SessionServlet {
     private static final long serialVersionUID = -8060034833311074781L;
 
     private static final Log LOG = com.openexchange.exception.Log.valueOf(LogFactory.getLog(DispatcherServlet.class));
+    
+    private static final Session NO_SESSION = new SessionObject("");
 
     /*-
      * /!\ These must be static for our servlet container to work properly. /!\
@@ -107,11 +116,6 @@ public class DispatcherServlet extends SessionServlet {
     public static Dispatcher getDispatcher() {
         return DISPATCHER.get();
     }
-
-    /**
-     * The prefix reference.
-     */
-    protected static final AtomicReference<String> PREFIX = new AtomicReference<String>();
 
     /**
      * Sets the prefix.
@@ -196,6 +200,11 @@ public class DispatcherServlet extends SessionServlet {
     }
 
     /**
+     * The <code>ETag</code> result type.
+     */
+    private static final AJAXRequestResult.ResultType ETAG = AJAXRequestResult.ResultType.ETAG;
+
+    /**
      * Handles given HTTP request and generates an appropriate result using referred {@link AJAXActionService}.
      *
      * @param httpRequest The HTTP request to handle
@@ -214,14 +223,19 @@ public class DispatcherServlet extends SessionServlet {
         final Dispatcher dispatcher = DISPATCHER.get();
         try {
             final AJAXRequestDataTools requestDataTools = getAjaxRequestDataTools();
-            final ServerSession session = getSessionObject(httpRequest, dispatcher.mayUseFallbackSession(requestDataTools.getModule(PREFIX.get(), httpRequest), requestDataTools.getAction(httpRequest)));
+            final String module = requestDataTools.getModule(PREFIX.get(), httpRequest);
+			final String action2 = requestDataTools.getAction(httpRequest);
+			ServerSession session = getSessionObject(httpRequest, dispatcher.mayUseFallbackSession(module, action2));
+            if (session == null && dispatcher.mayOmitSession(module, action2)) {
+            	session = fakeSession();
+            }
             if (null == session) {
                 throw AjaxExceptionCodes.MISSING_PARAMETER.create(PARAMETER_SESSION);
             }
             /*
              * Parse AJAXRequestData
              */
-            final AJAXRequestData requestData = requestDataTools.parseRequest(httpRequest, preferStream, FileUploadBase.isMultipartContent(new ServletRequestContext(httpRequest)), session, PREFIX.get());
+            final AJAXRequestData requestData = requestDataTools.parseRequest(httpRequest, preferStream, isMultipartContent(httpRequest), session, PREFIX.get());
             requestData.setSession(session);
             /*
              * Start dispatcher processing
@@ -234,7 +248,7 @@ public class DispatcherServlet extends SessionServlet {
             /*
              * Check result's type
              */
-            if (AJAXRequestResult.ResultType.ETAG.equals(result.getType())) {
+            if (ETAG.equals(result.getType())) {
                 httpResponse.setStatus(HttpServletResponse.SC_NOT_MODIFIED);
                 final long expires = result.getExpires();
                 Tools.setETag(requestData.getETag(), expires > 0 ? new Date(System.currentTimeMillis() + expires) : null, httpResponse);
@@ -245,6 +259,10 @@ public class DispatcherServlet extends SessionServlet {
              */
             sendResponse(requestData, result, httpRequest, httpResponse);
         } catch (final OXException e) {
+            if (AjaxExceptionCodes.BAD_REQUEST.equals(e)) {
+                httpResponse.sendError(HttpServletResponse.SC_BAD_REQUEST, e.getMessage());
+                return;
+            }
             LOG.error(e.getMessage(), e);
             APIResponseRenderer.writeResponse(new Response().setException(e), action, httpRequest, httpResponse);
         } catch (final RuntimeException e) {
@@ -258,7 +276,11 @@ public class DispatcherServlet extends SessionServlet {
         }
     }
 
-  
+	private ServerSession fakeSession() {
+		final UserImpl user = new UserImpl();
+		user.setAttributes(new HashMap<String, Set<String>>());
+		return new ServerSessionAdapter(NO_SESSION, new ContextImpl(-1), user);
+	}
 
 	/**
      * Sends a proper response to requesting client after request has been orderly dispatched.
@@ -282,9 +304,5 @@ public class DispatcherServlet extends SessionServlet {
         }
         candidate.write(requestData, result, httpRequest, httpResponse);
     }
-
-    
-
-   
 
 }

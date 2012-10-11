@@ -50,7 +50,7 @@
 package com.openexchange.rdiff.osgi;
 
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import com.openexchange.log.LogFactory;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.rdiff.RdiffService;
 import com.openexchange.rdiff.internal.RdiffServiceImpl;
@@ -95,8 +95,7 @@ public final class RdiffActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        // TODO Auto-generated method stub
-        return null;
+        return EMPTY_CLASSES;
     }
 
 }

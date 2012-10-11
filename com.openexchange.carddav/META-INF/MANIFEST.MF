@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: CardDAV
 Bundle-SymbolicName: com.openexchange.carddav
-Bundle-Version: 6.21.0
+Bundle-Version: 6.22.0
 Bundle-Activator: com.openexchange.carddav.osgi.CarddavActivator
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
@@ -30,6 +30,8 @@ Import-Package: com.openexchange.authentication,
  com.openexchange.login.internal,
  com.openexchange.osgi,
  com.openexchange.preferences,
+ com.openexchange.search,
+ com.openexchange.search.internal.operands,
  com.openexchange.server,
  com.openexchange.server.impl,
  com.openexchange.session,
@@ -57,8 +59,8 @@ Import-Package: com.openexchange.authentication,
  javax.servlet,
  javax.servlet.http,
  org.apache.commons.logging,
- org.jdom,
- org.jdom.output,
+ org.jdom2,
+ org.jdom2.output,
  org.osgi.framework,
  org.osgi.service.http,
  org.osgi.util.tracker

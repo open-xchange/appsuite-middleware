@@ -103,7 +103,6 @@ import com.openexchange.mail.mime.ParameterizedHeader;
 import com.openexchange.mail.mime.PlainTextAddress;
 import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.mail.mime.converters.MimeMessageConverter;
-import com.openexchange.mail.mime.dataobjects.MIMEMultipartMailPart;
 import com.openexchange.mail.mime.utils.MimeMessageUtility;
 import com.openexchange.mail.structure.Base64JSONString;
 import com.openexchange.mail.structure.StructureHandler;
@@ -127,7 +126,7 @@ public final class MIMEStructureHandler implements StructureHandler {
     /**
      * The logger.
      */
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(MIMEStructureHandler.class));
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(MIMEStructureHandler.class));
 
     private static final MailDateFormat MAIL_DATE_FORMAT;
 
@@ -194,6 +193,8 @@ public final class MIMEStructureHandler implements StructureHandler {
         return this;
     }
 
+    private static final int MB = 1048576;
+
     @Override
     public boolean handleEnd(final MailMessage mail) throws OXException {
         /*
@@ -204,30 +205,24 @@ public final class MIMEStructureHandler implements StructureHandler {
             return true;
         }
         /*
-         * Write message to byte array
+         * Write headers to byte array
          */
-        byte[] bytes;
+        final byte[] bytes;
         {
             final ByteArrayOutputStream buf = new UnsynchronizedByteArrayOutputStream(2048);
-            mail.writeTo(buf);
+            MimeMessageUtility.writeHeaders(mail, buf);
             bytes = buf.toByteArray();
         }
-        /*
-         * Detect first empty line
-         */
-        final int pos = MIMEMultipartMailPart.getHeaderEnd(bytes);
-        if (pos <= 0) {
-            // No headers ?
+        final int length = bytes.length;
+        if (length <= 0 || length >= MB) {
+            // No headers or far too many bytes
             return true;
         }
-        final byte[] bs = new byte[pos + 1]; // Append last \n
-        System.arraycopy(bytes, 0, bs, 0, pos + 1);
-        bytes = null;
         /*
          * Insert literal base64-encoded headers
          */
         try {
-            headersJsonObject.put("x-original-headers", new String(Base64.encodeBase64(bs))); // ASCII-only, no charset needed
+            headersJsonObject.put("x-original-headers", new String(Base64.encodeBase64(bytes))); // ASCII-only, no charset needed
         } catch (final JSONException e) {
             throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
         }

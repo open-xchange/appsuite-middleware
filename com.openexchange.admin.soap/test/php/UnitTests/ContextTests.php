@@ -26,13 +26,13 @@ class ContextTests extends PHPUnit_Framework_TestCase {
 		global $OXMASTER_ADMIN_PASS;
 		
 		$random_id = generateContextId();
-		$name = "soap_test_admin_" . $random_id;
+		$name = "soapTestAdmin" . $random_id;
 		$user = getFullUserObject($name, $random_id);	
 
 		$ctx = new Context();
 		$ctx->id = $random_id;
 		$ctx->maxQuota = 1;
-		$ctx->name = "soap_test_context" . $random_id;
+		$ctx->name = "soapTestContext" . $random_id;
 
 		// TODO: FIX THE HASHSET OPTIONS IN SOAP
 		/*
@@ -83,7 +83,7 @@ class ContextTests extends PHPUnit_Framework_TestCase {
 		global $OXMASTER_ADMIN_PASS;
 		
 		$random_id = generateContextId();		
-		$name = "soap_test_admin_" . $random_id;
+		$name = "soapTestAdmin" . $random_id;
 		$user = getFullUserObject($name, $random_id);		
 
 		$ctx = new Context();
@@ -148,7 +148,7 @@ class ContextTests extends PHPUnit_Framework_TestCase {
 		global $OXMASTER_ADMIN_PASS;
 		
 		$random_id = generateContextId();		
-		$name = "soap_test_admin_" . $random_id;
+		$name = "soapTestAdmin" . $random_id;
 		$user = getFullUserObject($name, $random_id);		
 
 		$ctx = new Context();

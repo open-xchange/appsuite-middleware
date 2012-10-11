@@ -87,6 +87,12 @@ public final class CIFSFile extends DefaultFile {
         setIsCurrentVersion(true);
     }
 
+    @Override
+    public String toString() {
+        final String url = getURL();
+        return url == null ? super.toString() : url;
+    }
+
     /**
      * Parses specified SMB file.
      *
@@ -124,9 +130,7 @@ public final class CIFSFile extends DefaultFile {
                 if (set.contains(Field.LAST_MODIFIED) || set.contains(Field.LAST_MODIFIED_UTC)) {
                     setLastModified(new Date(smbFile.getIfModifiedSince()));
                 }
-                if (set.contains(Field.TITLE)) {
-                    setTitle(smbFile.getName());
-                }
+                setTitle(smbFile.getName());
                 if (set.contains(Field.FILE_MIMETYPE)) {
                     setFileMIMEType(smbFile.getContentType());
                 }

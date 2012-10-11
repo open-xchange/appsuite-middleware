@@ -170,7 +170,7 @@ public class AbstractSimpleClientTest extends TestCase {
     public String[] credentials(String user) throws Exception {
         Properties properties = getAJAXProperties();
         return new String[] {
-            properties.getProperty(user),
+            properties.getProperty(user) + "@" + properties.getProperty("contextName"),
             properties.getProperty("password")
         };
     }

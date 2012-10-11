@@ -79,21 +79,12 @@ public class Rescheduling implements ChangeDescriptionGenerator {
         SAME_DAY, DIFFERENT_DAYS
     }
 
-    private String[] FIELDS = new String[] { "start_date", "end_date" };
-    private Style style;
-
-    public Rescheduling(Style style) {
-        this.style = style;
-    }
+    private final String[] FIELDS = new String[] { "start_date", "end_date" };
     
+    @Override
     public List<Sentence> getDescriptions(Context ctx, Appointment original, Appointment updated, AppointmentDiff diff, Locale locale, TimeZone timezone) {
-        String msg = null;
-        switch (style) {
-        case FAIT_ACCOMPLI: msg = Messages.HAS_RESCHEDULED; break;
-        case ASK: msg = Messages.ASK_RESCHEDULE; break;
-        case INTENTION: msg = Messages.INTENTION_RESCHEDULE; break;
-        }
-
+        String msg = Messages.HAS_RESCHEDULED;
+      
         return Arrays.asList(
             new Sentence(msg)
             .add(timeString(original, diff, locale, timezone), ArgumentType.ORIGINAL)
@@ -121,14 +112,14 @@ public class Rescheduling implements ChangeDescriptionGenerator {
         Date startDate = updated.getStartDate();
 		Date endDate = updated.getEndDate();
 
-		DateFormat longDate = SimpleDateFormat.getDateInstance(DateFormat.LONG, locale);
+		DateFormat longDate = DateFormat.getDateInstance(DateFormat.LONG, locale);
         longDate.setTimeZone(timezone);
         if (updated.getFullTime()) {
         	longDate.setTimeZone(TimeZone.getTimeZone("UTC"));
         	endDate = forceCorrectDay(endDate);
         }
         
-        DateFormat time = SimpleDateFormat.getTimeInstance(DateFormat.SHORT, locale);
+        DateFormat time = DateFormat.getTimeInstance(DateFormat.SHORT, locale);
         time.setTimeZone(timezone);
 		switch (format) {
         case SAME_DAY:
@@ -151,7 +142,7 @@ public class Rescheduling implements ChangeDescriptionGenerator {
         Date startDate = original.getStartDate();
 		Date endDate = original.getEndDate();
 
-		DateFormat longDate = SimpleDateFormat.getDateInstance(DateFormat.LONG, locale);
+		DateFormat longDate = DateFormat.getDateInstance(DateFormat.LONG, locale);
         if (original.getFullTime()) {
             longDate.setTimeZone(TimeZone.getTimeZone("UTC"));
         	endDate = forceCorrectDay(endDate);
@@ -159,7 +150,7 @@ public class Rescheduling implements ChangeDescriptionGenerator {
             longDate.setTimeZone(timezone);
         }
         
-        DateFormat time = SimpleDateFormat.getTimeInstance(DateFormat.SHORT, locale);
+        DateFormat time = DateFormat.getTimeInstance(DateFormat.SHORT, locale);
         time.setTimeZone(timezone);
         
 		switch (format) {
@@ -218,6 +209,7 @@ public class Rescheduling implements ChangeDescriptionGenerator {
     }
 
 
+    @Override
     public String[] getFields() {
         return FIELDS;
     }

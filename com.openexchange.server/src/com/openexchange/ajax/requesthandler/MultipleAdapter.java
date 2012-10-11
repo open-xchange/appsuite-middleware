@@ -54,6 +54,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.Map.Entry;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.regex.Pattern;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.fields.RequestConstants;
@@ -87,9 +88,26 @@ public class MultipleAdapter implements MultipleHandler {
         result = new AtomicReference<AJAXRequestResult>();
     }
 
-    public static AJAXRequestData parse(String module, final String action, final JSONObject jsonObject, final ServerSession session, final boolean secure) throws JSONException {
+    /**
+     * The pattern to split by commas.
+     */
+    private static final Pattern SPLIT_CSV = Pattern.compile("\\s*,\\s*");
+
+    public static AJAXRequestData parse(String module, String path, String action, final JSONObject jsonObject, final ServerSession session, final boolean secure) throws JSONException {
         final AJAXRequestData request = new AJAXRequestData();
         request.setSecure(secure);
+
+        /*
+         * Check for decorators
+         */
+        if (jsonObject.hasAndNotNull("decorators")) {
+            final String parameter = jsonObject.getString("decorators");
+            if (null != parameter) {
+                for (final String id : SPLIT_CSV.split(parameter, 0)) {
+                    request.addDecoratorId(id.trim());
+                }
+            }
+        }
 
         request.setHostname(jsonObject.getString(HOSTNAME));
         request.setRoute(jsonObject.getString(ROUTE));
@@ -106,17 +124,14 @@ public class MultipleAdapter implements MultipleHandler {
             	}
             }
         }
-        String path = "";
-
-        if (module.contains("/")) {
-        	final int slash = module.indexOf('/');
-			path = module.substring(slash);
-        	module = module.substring(0, slash);
+        if (path.startsWith("/")) {
+        	path = path.substring(1);
         }
         request.setModule(module);
         request.setFormat("json");
         request.setAction(action);
         request.setServletRequestURI(path);
+        request.setPathInfo(path);
 
         return request;
     }
@@ -127,7 +142,7 @@ public class MultipleAdapter implements MultipleHandler {
         if (null == actionService) {
             throw AjaxExceptionCodes.UNKNOWN_ACTION.create( action);
         }
-        final AJAXRequestData request = parse("", action, jsonObject, session, secure);
+        final AJAXRequestData request = parse("", "", action, jsonObject, session, secure);
         final AJAXRequestResult requestResult;
         try {
             requestResult = actionService.perform(request, session);

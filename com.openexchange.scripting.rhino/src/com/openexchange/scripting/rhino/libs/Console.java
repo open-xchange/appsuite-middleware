@@ -1,7 +1,6 @@
 package com.openexchange.scripting.rhino.libs;
 
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.mozilla.javascript.Context;
 import org.mozilla.javascript.Scriptable;
 import org.mozilla.javascript.ScriptableObject;
@@ -25,7 +24,7 @@ public class Console {
 	private Log log = null;
 
 	public Console(String def) {
-		log = com.openexchange.log.Log.valueOf(LogFactory.getLog(def));
+		log = com.openexchange.log.LogFactory.getLog(def);
 	}
 
 	public void log(Object... values) {

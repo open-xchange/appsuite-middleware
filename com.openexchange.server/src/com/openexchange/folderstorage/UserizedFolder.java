@@ -103,6 +103,20 @@ public interface UserizedFolder extends ParameterizedFolder {
     void setLastModifiedUTC(Date lastModifiedUTC);
 
     /**
+     * Gets the creation date in UTC.
+     *
+     * @return The creation date in UTC
+     */
+    Date getCreationDateUTC();
+
+    /**
+     * Sets the creation date in UTC.
+     *
+     * @param creationDateUTC The creation date in UTC
+     */
+    void setCreationDateUTC(Date creationDateUTC);
+
+    /**
      * Gets the locale for this user-sensitive folder.
      *
      * @return The locale for this user-sensitive folder

@@ -1,3 +1,7 @@
+* 2012-06-18 - thorben.betten@open-xchange.com
+
+- Fix for bug 22319: Support for IDN domains in IMAP authentication bundle
+
 * 2011-03-01 - marcus.klein@open-xchange.com
 
  - Bugfix #18465: Compiling sources everywhere to Java5 compatible class files.

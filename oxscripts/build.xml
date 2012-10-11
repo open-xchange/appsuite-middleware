@@ -19,7 +19,6 @@
     <target name="postInstall">
         <antcall target="patchAndInstallConfigIniTemplate"/>
         <antcall target="patchAndInstallScripts"/>
-    	<antcall target="installSystemFiles"/>
     </target>
 
     <target name="patchAndInstallConfigIniTemplate" description="Patches and installs config.ini.template file.">
@@ -54,7 +53,6 @@
         <chmod perm="755" file="${sbinInstallDir}/listExecutedUpdateTasks"/>
         <chmod perm="755" file="${sbinInstallDir}/logincounter"/>
         <chmod perm="755" file="${sbinInstallDir}/open-xchange"/>
-        <chmod perm="755" file="${sbinInstallDir}/oxreport"/>
         <chmod perm="755" file="${sbinInstallDir}/restoregabdefaults"/>
         <chmod perm="755" file="${sbinInstallDir}/runupdate"/>
 
@@ -80,12 +78,5 @@
             <replacefilter token="@bundle.d@" value="${bundle.dDir}"/>
         </replace>
     </target>
-
-	<target name="installSystemFiles">
-        <copy todir="${destDir}/" overwrite="true">
-            <fileset dir="system"/>
-            <mapper type="glob" from="*.${distribution}" to="*"/>
-        </copy>
-	</target>
 
 </project>

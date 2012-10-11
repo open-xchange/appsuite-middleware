@@ -91,8 +91,8 @@ public class ReminderParser extends DataParser {
 
     protected void parseElementReminder(final ReminderObject reminder,
         final JSONObject json) throws JSONException, OXException {
-        if (json.has(ReminderFields.LAST_MODIFIED)) {
-            reminder.setLastModified(parseDate(json, ReminderFields.LAST_MODIFIED));
+        if (json.has(DataFields.LAST_MODIFIED)) {
+            reminder.setLastModified(parseDate(json, DataFields.LAST_MODIFIED));
         }
         if (json.has(ReminderFields.TARGET_ID)) {
             reminder.setTargetId(parseInt(json, ReminderFields.TARGET_ID));
@@ -118,7 +118,7 @@ public class ReminderParser extends DataParser {
         /* parseElementDataObject(reminder, json); doesn't work because
          * ReminderObject is not a subclass of DataObject */
         if (json.has(DataFields.ID)) {
-            reminder.setObjectId(parseInt(json, ReminderFields.ID));
+            reminder.setObjectId(parseInt(json, DataFields.ID));
         }
     }
 }

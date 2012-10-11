@@ -77,7 +77,7 @@ import com.openexchange.session.Session;
  */
 public abstract class ComposedMailMessage extends MailMessage {
 
-    private static final transient org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(ComposedMailMessage.class));
+    private static final transient org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(ComposedMailMessage.class));
 
     /**
      * Serial version UID
@@ -87,6 +87,8 @@ public abstract class ComposedMailMessage extends MailMessage {
     private final Session session;
 
     private final Context ctx;
+
+    private ComposeType sendType;
 
     private transient MimeMessageFiller filler;
 
@@ -100,6 +102,24 @@ public abstract class ComposedMailMessage extends MailMessage {
         this.session = session;
         this.ctx = ctx;
         recipients = new HashSet<InternetAddress>();
+    }
+
+    /**
+     * Sets the send type.
+     * 
+     * @param sendType The send type
+     */
+    public void setSendType(ComposeType sendType) {
+        this.sendType = sendType;
+    }
+
+    /**
+     * Gets the send type.
+     * 
+     * @return The send type
+     */
+    public ComposeType getSendType() {
+        return sendType;
     }
 
     /**

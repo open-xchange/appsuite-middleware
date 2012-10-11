@@ -61,7 +61,7 @@ import com.openexchange.session.Session;
  */
 public final class MALPollPushManagerService implements PushManagerService {
 
-    private static boolean startTimerTaskPerListener;
+    private static volatile boolean startTimerTaskPerListener;
 
     /**
      * Sets whether to start a timer task per listener.

@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Open-Xchange Mail Filter
 Bundle-SymbolicName: com.openexchange.mail.filter
-Bundle-Version: 6.21.0
+Bundle-Version: 6.22.0
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-Activator: com.openexchange.mailfilter.osgi.Activator
@@ -11,6 +11,7 @@ Import-Package: com.openexchange.ajax,
  com.openexchange.ajax.writer,
  com.openexchange.config,
  com.openexchange.configuration,
+ com.openexchange.dispatcher,
  com.openexchange.exception,
  com.openexchange.groupware,
  com.openexchange.groupware.contexts,
@@ -36,6 +37,8 @@ Import-Package: com.openexchange.ajax,
  javax.mail.internet,
  javax.net,
  javax.net.ssl,
+ javax.security.auth,
+ javax.security.sasl,
  javax.servlet,
  javax.servlet.http,
  org.apache.commons.logging,

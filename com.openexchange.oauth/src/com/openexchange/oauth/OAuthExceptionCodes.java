@@ -95,14 +95,22 @@ public enum OAuthExceptionCodes implements OXExceptionCode {
      */
     MISSING_ARGUMENT(OAuthExceptionMessages.MISSING_ARGUMENT_MSG, Category.CATEGORY_ERROR, 8),
     /**
-     * Token has expired
+     * Your '%1$s' password changed. You have to authorize the server to use your account with the new password. To do so, go to Configuration -> My Social Configuration -> Accounts. Then try again.
      */
     TOKEN_EXPIRED(OAuthExceptionMessages.TOKEN_EXPIRED_MSG, Category.CATEGORY_TRY_AGAIN, 9),
     /**
      * An OAuth error occurred: %1$s
      */
-    OAUTH_ERROR(OAuthExceptionMessages.OAUTH_ERROR_MSG, Category.CATEGORY_ERROR, 10),
-
+    OAUTH_ERROR(OAuthExceptionMessages.OAUTH_ERROR_MSG, Category.CATEGORY_ERROR, 10),     
+    /**
+     * "The address %1 is not white-listed as for the %2 OAuth API"
+     */
+    NOT_A_WHITELISTED_URL(OAuthExceptionMessages.NOT_A_WHITELISTED_URL_MSG, Category.CATEGORY_PERMISSION_DENIED, 11), 
+    /**
+     * The request sent was missing its body
+     */
+    MISSING_BODY(OAuthExceptionMessages.MISSING_BODY_MSG, Category.CATEGORY_ERROR, 12), 
+    INVALID_ACCOUNT(OAuthExceptionMessages.INVALID_ACCOUNT_MSG, Category.CATEGORY_ERROR, 13),
     ;
 
     private final Category category;

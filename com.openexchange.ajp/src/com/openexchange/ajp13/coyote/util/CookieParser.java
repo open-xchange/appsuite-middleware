@@ -68,7 +68,7 @@ import com.openexchange.tools.regex.RFC2616Regex;
 public final class CookieParser {
 
     private static final org.apache.commons.logging.Log LOG =
-        com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(CookieParser.class));
+        com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(CookieParser.class));
 
     private static final boolean DEBUG = LOG.isDebugEnabled();
 

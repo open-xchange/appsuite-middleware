@@ -56,7 +56,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.AJAXServlet;
-import com.openexchange.ajax.fields.AppointmentFields;
+import com.openexchange.ajax.fields.DataFields;
 import com.openexchange.ajax.parser.AppointmentParser;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.writer.AppointmentWriter;
@@ -87,7 +87,7 @@ responseDescription = "Nothing, except the standard response object with empty d
 public final class UpdateAction extends AppointmentAction {
 
     private static final org.apache.commons.logging.Log LOG =
-        com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(UpdateAction.class));
+        com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(UpdateAction.class));
 
     /**
      * Initializes a new {@link UpdateAction}.
@@ -126,14 +126,14 @@ public final class UpdateAction extends AppointmentAction {
         final JSONObject jsonResponseObj = new JSONObject();
 
         if (conflicts == null) {
-            jsonResponseObj.put(AppointmentFields.ID, appointmentObj.getObjectID());
+            jsonResponseObj.put(DataFields.ID, appointmentObj.getObjectID());
             timestamp = appointmentObj.getLastModified();
         } else {
             final JSONArray jsonConflictArray = new JSONArray();
             final AppointmentWriter appointmentWriter = new AppointmentWriter(timeZone);
-            for (int a = 0; a < conflicts.length; a++) {
+            for (final Appointment conflict : conflicts) {
                 final JSONObject jsonAppointmentObj = new JSONObject();
-                appointmentWriter.writeAppointment(conflicts[a], jsonAppointmentObj);
+                appointmentWriter.writeAppointment(conflict, jsonAppointmentObj);
                 jsonConflictArray.put(jsonAppointmentObj);
             }
 

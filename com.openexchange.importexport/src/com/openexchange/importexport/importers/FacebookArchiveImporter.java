@@ -9,7 +9,7 @@ import java.util.Map;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 import com.openexchange.exception.OXException;
-import com.openexchange.importexport.ImportResult;
+import com.openexchange.groupware.importexport.ImportResult;
 import com.openexchange.importexport.formats.Format;
 import com.openexchange.tools.session.ServerSession;
 
@@ -54,7 +54,7 @@ public class FacebookArchiveImporter extends AbstractImporter {
             zis.close();
             is.close();
         } catch (final IOException e) {
-            final org.apache.commons.logging.Log log = org.apache.commons.logging.LogFactory.getLog(FacebookArchiveImporter.class);
+            final org.apache.commons.logging.Log log = com.openexchange.log.LogFactory.getLog(FacebookArchiveImporter.class);
             log.error("Unexpected exception.", e);
         }
 

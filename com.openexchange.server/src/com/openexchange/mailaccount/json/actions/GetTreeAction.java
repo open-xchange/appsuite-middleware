@@ -69,7 +69,7 @@ import com.openexchange.tools.session.ServerSession;
  */
 public final class GetTreeAction extends AbstractMailAccountTreeAction {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(GetTreeAction.class));
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(GetTreeAction.class));
 
     public static final String ACTION = "get_tree";
 

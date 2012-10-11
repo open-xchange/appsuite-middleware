@@ -54,12 +54,14 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Enumeration;
 import java.util.Hashtable;
+import java.util.Map.Entry;
 import java.util.Properties;
-
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import com.openexchange.log.LogFactory;
 
 import com.openexchange.admin.properties.AdminProperties;
+import com.openexchange.admin.services.AdminServiceRegistry;
+import com.openexchange.config.ConfigurationService;
 
 public class PropertyHandler {
     
@@ -72,23 +74,19 @@ public class PropertyHandler {
     private final static Log log = LogFactory.getLog(PropertyHandler.class);
 
     private String configdirname;
-    private Properties sysprops = null;
+    private final Properties sysprops;
     
-    private static final String PROPERTIES_USER             = "USER_PROP_CONFIG";
-    protected static final String PROPERTIES_GROUP            = "GROUP_PROP_CONFIG";
-    private static final String PROPERTIES_RESOURCE         = "RESOURCE_PROP_CONFIG";
-    private static final String PROPERTIES_RMI              = "RMI_PROP_CONFIG";
+    //private static final String PROPERTIES_USER             = "USER_PROP_CONFIG";
+    //private static final String PROPERTIES_GROUP            = "GROUP_PROP_CONFIG";
+    //private static final String PROPERTIES_RESOURCE         = "RESOURCE_PROP_CONFIG";
+    //private static final String PROPERTIES_RMI              = "RMI_PROP_CONFIG";
     protected final static String PROPERTIES_SQL = "SQL_PROP_CONFIG";
-
 
     // The following lines define the property values for the database implementations
     public static final String GROUP_STORAGE = "GROUP_STORAGE";
     public static final String RESOURCE_STORAGE = "RESOURCE_STORAGE";
-    public static final String TOOL_STORAGE = "TOOL_STORAGE";
     public static final String USER_STORAGE = "USER_STORAGE";
-    
-    
-    
+
     public PropertyHandler(final Properties sysprops) {
         this.allPropValues = new Hashtable<String, Object>();
         this.sysprops = sysprops;
@@ -146,12 +144,22 @@ public class PropertyHandler {
     public String getGroupProp( final String key, final String fallBack ) {
         String retBool = fallBack;
         
-        if ( this.groupPropValues == null ) {
-            if ( this.allPropValues.containsKey( PROPERTIES_GROUP ) ) {
-                this.groupPropValues = (Hashtable<String, String>)this.allPropValues.get( PROPERTIES_GROUP );
-            } else {
-                if(log.isDebugEnabled()){
-                    log.debug(  "Property '" + PROPERTIES_GROUP + "' not found in file: " + this.configdirname  );
+        synchronized (this) {
+            if ( this.groupPropValues == null ) {
+                ConfigurationService service = AdminServiceRegistry.getInstance().getService(ConfigurationService.class);
+                if (null == service) {
+                    service = AdminCache.getConfigurationService();
+                }
+                if (null == service) {
+                    if (log.isDebugEnabled()) {
+                        log.debug("Service '" + ConfigurationService.class.getName() + "' is missing.");
+                    }
+                } else {
+                    final Properties properties = service.getFile("Group.properties");
+                    final Hashtable<String, String> ht = this.groupPropValues = new Hashtable<String, String>(properties.size());
+                    for (final Entry<Object, Object> entry : properties.entrySet()) {
+                        ht.put(entry.getKey().toString(), entry.getValue().toString());
+                    }
                 }
             }
         }
@@ -160,7 +168,7 @@ public class PropertyHandler {
             retBool =  this.groupPropValues.get( key ).toString();
         } else {
             if(log.isDebugEnabled()){
-                log.debug( "Property '" + key + "' not found in file " + this.allPropValues.get( AdminProperties.Prop.PROPERTIES_GROUP_FILE ) +"! Using fallback :" + fallBack );
+                log.debug( "Property '" + key + "' not found in file 'Group.properties'! Using fallback :" + fallBack );
             }
         }
         
@@ -176,12 +184,22 @@ public class PropertyHandler {
     public boolean getGroupProp( final String key, final boolean fallBack ) {
         boolean retBool = fallBack;
         
-        if ( this.groupPropValues == null ) {
-            if ( this.allPropValues.containsKey( PROPERTIES_GROUP ) ) {
-                this.groupPropValues = (Hashtable<String, String>)this.allPropValues.get( PROPERTIES_GROUP );
-            } else {
-                if(log.isDebugEnabled()){
-                    log.debug(  "Property '" + PROPERTIES_GROUP + "' not found in file: " + this.configdirname );
+        synchronized (this) {
+            if ( this.groupPropValues == null ) {
+                ConfigurationService service = AdminServiceRegistry.getInstance().getService(ConfigurationService.class);
+                if (null == service) {
+                    service = AdminCache.getConfigurationService();
+                }
+                if (null == service) {
+                    if (log.isDebugEnabled()) {
+                        log.debug("Service '" + ConfigurationService.class.getName() + "' is missing.");
+                    }
+                } else {
+                    final Properties properties = service.getFile("Group.properties");
+                    final Hashtable<String, String> ht = this.groupPropValues = new Hashtable<String, String>(properties.size());
+                    for (final Entry<Object, Object> entry : properties.entrySet()) {
+                        ht.put(entry.getKey().toString(), entry.getValue().toString());
+                    }
                 }
             }
         }
@@ -190,7 +208,7 @@ public class PropertyHandler {
             retBool = Boolean.parseBoolean( this.groupPropValues.get( key ).toString() ); 
         } else {
             if(log.isDebugEnabled()){
-                log.debug("Property '" + key + "' not found in file " + this.allPropValues.get( AdminProperties.Prop.PROPERTIES_GROUP_FILE ) +"! Using fallback :" + fallBack );
+                log.debug("Property '" + key + "' not found in file 'Group.properties'! Using fallback :" + fallBack );
             }
         }
         
@@ -206,12 +224,22 @@ public class PropertyHandler {
     public boolean getUserProp( final String key, final boolean fallBack ) {
         boolean retBool = fallBack;
         
-        if ( this.userPropValues == null ) {
-            if ( this.allPropValues.containsKey( PROPERTIES_USER ) ) {
-                this.userPropValues = (Hashtable<String, String>)this.allPropValues.get( PROPERTIES_USER );
-            } else {
-                if(log.isDebugEnabled()){
-                    log.debug( "Property '" + PROPERTIES_USER + "' not found in file: " + this.configdirname );
+        synchronized (this) {
+            if ( this.userPropValues == null ) {
+                ConfigurationService service = AdminServiceRegistry.getInstance().getService(ConfigurationService.class);
+                if (null == service) {
+                    service = AdminCache.getConfigurationService();
+                }
+                if (null == service) {
+                    if (log.isDebugEnabled()) {
+                        log.debug("Service '" + ConfigurationService.class.getName() + "' is missing.");
+                    }
+                } else {
+                    final Properties properties = service.getFile("AdminUser.properties");
+                    final Hashtable<String, String> ht = this.userPropValues = new Hashtable<String, String>(properties.size());
+                    for (final Entry<Object, Object> entry : properties.entrySet()) {
+                        ht.put(entry.getKey().toString(), entry.getValue().toString());
+                    }
                 }
             }
         }
@@ -221,7 +249,7 @@ public class PropertyHandler {
             retBool = Boolean.parseBoolean( val ); 
         } else {
             if(log.isDebugEnabled()){
-                log.debug( "Property '" + key + "' not found in file " + this.allPropValues.get( AdminProperties.Prop.PROPERTIES_USER_FILE ) +"! Using fallback :" + fallBack );
+                log.debug( "Property '" + key + "' not found in file 'AdminUser.properties'! Using fallback :" + fallBack );
             }
         }
         
@@ -237,12 +265,22 @@ public class PropertyHandler {
     public String getUserProp( final String key, final String fallBack ) {
         String retBool = fallBack;
         
-        if ( this.userPropValues == null ) {
-            if ( this.allPropValues.containsKey( PROPERTIES_USER ) ) {
-                this.userPropValues = (Hashtable<String, String>)this.allPropValues.get( PROPERTIES_USER );
-            } else {
-                if(log.isDebugEnabled()){
-                    log.debug( "Property '" + PROPERTIES_USER + "' not found in file: " + this.configdirname);
+        synchronized (this) {
+            if ( this.userPropValues == null ) {
+                ConfigurationService service = AdminServiceRegistry.getInstance().getService(ConfigurationService.class);
+                if (null == service) {
+                    service = AdminCache.getConfigurationService();
+                }
+                if (null == service) {
+                    if (log.isDebugEnabled()) {
+                        log.debug("Service '" + ConfigurationService.class.getName() + "' is missing.");
+                    }
+                } else {
+                    final Properties properties = service.getFile("AdminUser.properties");
+                    final Hashtable<String, String> ht = this.userPropValues = new Hashtable<String, String>(properties.size());
+                    for (final Entry<Object, Object> entry : properties.entrySet()) {
+                        ht.put(entry.getKey().toString(), entry.getValue().toString());
+                    }
                 }
             }
         }
@@ -251,10 +289,9 @@ public class PropertyHandler {
             retBool =  this.userPropValues.get( key ).toString();
         } else {
             if(log.isDebugEnabled()){
-                log.debug( "Property '" + key + "' not found in file " + this.allPropValues.get( AdminProperties.Prop.PROPERTIES_USER_FILE ) +"! Using fallback :" + fallBack );
+                log.debug( "Property '" + key + "' not found in file 'AdminUser.properties'! Using fallback :" + fallBack );
             }
         }
-        
         return retBool; 
     }
     
@@ -270,12 +307,22 @@ public class PropertyHandler {
     public boolean getResourceProp( final String key, final boolean fallBack ) {
         boolean retBool = fallBack;
         
-        if ( this.resPropValues == null ) {
-            if ( this.allPropValues.containsKey( PROPERTIES_RESOURCE ) ) {
-                this.resPropValues = (Hashtable<String, String>)this.allPropValues.get( PROPERTIES_RESOURCE );
-            } else {
-                if(log.isDebugEnabled()){
-                    log.debug( "Property '" + PROPERTIES_RESOURCE + "' not found in file: " + this.configdirname);
+        synchronized (this) {
+            if ( this.resPropValues == null ) {
+                ConfigurationService service = AdminServiceRegistry.getInstance().getService(ConfigurationService.class);
+                if (null == service) {
+                    service = AdminCache.getConfigurationService();
+                }
+                if (null == service) {
+                    if (log.isDebugEnabled()) {
+                        log.debug("Service '" + ConfigurationService.class.getName() + "' is missing.");
+                    }
+                } else {
+                    final Properties properties = service.getFile("Resource.properties");
+                    final Hashtable<String, String> ht = this.resPropValues = new Hashtable<String, String>(properties.size());
+                    for (final Entry<Object, Object> entry : properties.entrySet()) {
+                        ht.put(entry.getKey().toString(), entry.getValue().toString());
+                    }
                 }
             }
         }
@@ -284,7 +331,7 @@ public class PropertyHandler {
             retBool = Boolean.parseBoolean( this.resPropValues.get( key ).toString() ); 
         } else {
             if(log.isDebugEnabled()){
-                log.debug( "Property '" + key + "' not found in file " + this.allPropValues.get( AdminProperties.Prop.PROPERTIES_RESOURCE_FILE ) +"! Using fallback :" + fallBack );
+                log.debug( "Property '" + key + "' not found in file 'Resource.properties'! Using fallback :" + fallBack );
             }
         }
         
@@ -301,12 +348,22 @@ public class PropertyHandler {
     public int getRmiProp( final String key, final int fallBack ) {
         int retInt = fallBack;
         
-        if ( this.rmiPropValues == null ) {
-            if ( this.allPropValues.containsKey( PROPERTIES_RMI ) ) {
-                this.rmiPropValues = (Hashtable<String, String>)this.allPropValues.get( PROPERTIES_RMI );
-            } else {
-                if(log.isDebugEnabled()){
-                    log.debug(  "Property '" + PROPERTIES_RMI + "' not found in file: " + this.configdirname );
+        synchronized (this) {
+            if ( this.rmiPropValues == null ) {
+                ConfigurationService service = AdminServiceRegistry.getInstance().getService(ConfigurationService.class);
+                if (null == service) {
+                    service = AdminCache.getConfigurationService();
+                }
+                if (null == service) {
+                    if (log.isDebugEnabled()) {
+                        log.debug("Service '" + ConfigurationService.class.getName() + "' is missing.");
+                    }
+                } else {
+                    final Properties properties = service.getFile("RMI.properties");
+                    final Hashtable<String, String> ht = this.rmiPropValues = new Hashtable<String, String>(properties.size());
+                    for (final Entry<Object, Object> entry : properties.entrySet()) {
+                        ht.put(entry.getKey().toString(), entry.getValue().toString());
+                    }
                 }
             }
         }
@@ -315,7 +372,7 @@ public class PropertyHandler {
             retInt = Integer.parseInt( this.rmiPropValues.get( key ).toString() ); 
         } else {
             if(log.isDebugEnabled()){
-                log.debug( "Property '" + key + "' not found in file " + this.allPropValues.get( AdminProperties.Prop.PROPERTIES_RMI_FILE ) +"! Using fallback :" + fallBack );
+                log.debug( "Property '" + key + "' not found in file 'RMI.properties'! Using fallback :" + fallBack );
             }
         }
         
@@ -338,7 +395,7 @@ public class PropertyHandler {
         final Properties configprops  = new Properties();
         configprops.load( new FileInputStream(file) );
         
-        final Enumeration enumi = configprops.propertyNames();
+        final Enumeration<?> enumi = configprops.propertyNames();
         while ( enumi.hasMoreElements() ) {
             final String param = (String)enumi.nextElement();
             String value = configprops.getProperty( param );
@@ -354,10 +411,10 @@ public class PropertyHandler {
             if ( param.toLowerCase().endsWith( "_prop" ) ) {
                 final Properties customprops = new Properties();
                 customprops.load( new FileInputStream( value ) );
-                final Enumeration enuma = customprops.propertyNames();
+                final Enumeration<?> enuma = customprops.propertyNames();
                 Hashtable<String, String> custconfig = new Hashtable<String, String>();
                 if ( this.allPropValues.containsKey( param + "_CONFIG" ) ) {
-                    custconfig = (Hashtable)this.allPropValues.get( param + "_CONFIG" );
+                    custconfig = (Hashtable<String, String>)this.allPropValues.get( param + "_CONFIG" );
                 }
                 while ( enuma.hasMoreElements() ){
                     final String param_ = (String)enuma.nextElement();
@@ -379,40 +436,51 @@ public class PropertyHandler {
         }
     }
     
-    private String stringReplacer( String source, final String find, final String replacement ) {
+    private String stringReplacer(final String source, final String find, final String replacement ) {
         int i = 0;
         int j;
         final int k = find.length();
         final int m = replacement.length();
-        
-        while ( i < source.length() ) {
-            j = source.indexOf( find, i );
+
+        String src = source;
+        while ( i < src.length() ) {
+            j = src.indexOf( find, i );
             
             if ( j == -1 ) {
                 break;
             }
             
             if ( j == 0 ) {
-                source = replacement + source.substring( j + k );
-            } else if ( j + k == source.length() ) {
-                source = source.substring( 0, j ) + replacement;
+                src = replacement + src.substring( j + k );
+            } else if ( j + k == src.length() ) {
+                src = src.substring( 0, j ) + replacement;
             } else {
-                source = source.substring( 0, j ) + replacement + source.substring( j + k );
+                src = src.substring( 0, j ) + replacement + src.substring( j + k );
             }
             i = j + m;
         }
         
-        return source;
+        return src;
     }
 
     public String getResourceProp(final String key, final String fallback) {
         String retval = fallback;
-        if ( this.resPropValues == null ) {
-            if ( this.allPropValues.containsKey( PROPERTIES_RESOURCE ) ) {
-                this.resPropValues = (Hashtable<String, String>)this.allPropValues.get( PROPERTIES_RESOURCE );
-            } else {
-                if(log.isDebugEnabled()){
-                    log.debug(  "Property '" + PROPERTIES_RESOURCE + "' not found in file: " + this.configdirname );
+        synchronized (this) {
+            if ( this.resPropValues == null ) {
+                ConfigurationService service = AdminServiceRegistry.getInstance().getService(ConfigurationService.class);
+                if (null == service) {
+                    service = AdminCache.getConfigurationService();
+                }
+                if (null == service) {
+                    if (log.isDebugEnabled()) {
+                        log.debug("Service '" + ConfigurationService.class.getName() + "' is missing.");
+                    }
+                } else {
+                    final Properties properties = service.getFile("Resource.properties");
+                    final Hashtable<String, String> ht = this.resPropValues = new Hashtable<String, String>(properties.size());
+                    for (final Entry<Object, Object> entry : properties.entrySet()) {
+                        ht.put(entry.getKey().toString(), entry.getValue().toString());
+                    }
                 }
             }
         }
@@ -421,7 +489,7 @@ public class PropertyHandler {
             retval = this.resPropValues.get( key ).toString(); 
         } else {
             if(log.isDebugEnabled()){
-                log.debug("Property '" + key + "' not found in file " + this.allPropValues.get( AdminProperties.Prop.PROPERTIES_RESOURCE_FILE ) +"! Using fallback :" + fallback );
+                log.debug("Property '" + key + "' not found in file 'Resource.properties'! Using fallback :" + fallback );
             }
         }
         return retval;
@@ -436,18 +504,30 @@ public class PropertyHandler {
     public String getSqlProp(final String key, final String fallBack) {
         String retString = fallBack;
 
-        if (this.sqlPropValues == null) {
-            if (this.allPropValues.containsKey(PROPERTIES_SQL)) {
-                this.sqlPropValues = (Hashtable<String, String>) this.allPropValues.get(PROPERTIES_SQL);
-            } else {
-                log.error("Property '" + PROPERTIES_SQL + "' not found.");
+        synchronized (this) {
+            if ( this.sqlPropValues == null ) {
+                ConfigurationService service = AdminServiceRegistry.getInstance().getService(ConfigurationService.class);
+                if (null == service) {
+                    service = AdminCache.getConfigurationService();
+                }
+                if (null == service) {
+                    if (log.isDebugEnabled()) {
+                        log.debug("Service '" + ConfigurationService.class.getName() + "' is missing.");
+                    }
+                } else {
+                    final Properties properties = service.getFile("Sql.properties");
+                    final Hashtable<String, String> ht = this.sqlPropValues = new Hashtable<String, String>(properties.size());
+                    for (final Entry<Object, Object> entry : properties.entrySet()) {
+                        ht.put(entry.getKey().toString(), entry.getValue().toString());
+                    }
+                }
             }
         }
 
         if (this.sqlPropValues != null && this.sqlPropValues.containsKey(key)) {
             retString = this.sqlPropValues.get(key).toString();
         } else {
-            log.error("Property '" + key + "' not found in file " + this.allPropValues.get(AdminProperties.Prop.PROPERTIES_SQL_FILE) + "! Using fallback :" + fallBack);
+            log.error("Property '" + key + "' not found in file 'Sql.properties'! Using fallback :" + fallBack);
         }
 
         return retString;

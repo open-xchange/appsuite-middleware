@@ -186,7 +186,7 @@ public final class FolderStorageActivator implements BundleActivator {
 	}
 
 	private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log
-			.valueOf(org.apache.commons.logging.LogFactory
+			.valueOf(com.openexchange.log.LogFactory
 					.getLog(FolderStorageActivator.class));
 
 
@@ -294,7 +294,7 @@ public final class FolderStorageActivator implements BundleActivator {
 			}
 			// Drop service trackers
 			if (null != serviceTrackers) {
-				for (final ServiceTracker serviceTracker : serviceTrackers) {
+				for (final ServiceTracker<?,?> serviceTracker : serviceTrackers) {
 					serviceTracker.close();
 				}
 				serviceTrackers.clear();
@@ -302,7 +302,7 @@ public final class FolderStorageActivator implements BundleActivator {
 			}
 			// Unregister previously registered services
 			if (null != serviceRegistrations) {
-				for (final ServiceRegistration serviceRegistration : serviceRegistrations) {
+				for (final ServiceRegistration<?> serviceRegistration : serviceRegistrations) {
 					serviceRegistration.unregister();
 				}
 				serviceRegistrations.clear();

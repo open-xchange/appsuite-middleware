@@ -63,7 +63,7 @@ import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import com.openexchange.log.LogFactory;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
@@ -306,7 +306,9 @@ public class DBQuotaFileStorage implements QuotaFileStorage {
             }
         } catch (final OXException q) {
             try {
-                fileStorage.deleteFile(file);
+            	if (file != null) {
+                    fileStorage.deleteFile(file);
+            	}
             } catch (final OXException f) {
                 throw new OXException(f);
             }

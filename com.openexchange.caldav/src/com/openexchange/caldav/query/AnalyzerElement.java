@@ -60,7 +60,7 @@ import java.util.List;
  */
 public abstract class AnalyzerElement {
     
-    private List<AnalyzerElement> children = new ArrayList<AnalyzerElement>();
+    private final List<AnalyzerElement> children = new ArrayList<AnalyzerElement>();
     protected boolean capturing;
     
     protected abstract boolean applyAndExtract(Filter filter, List<Object> extracted);

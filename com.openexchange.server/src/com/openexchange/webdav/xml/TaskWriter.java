@@ -55,14 +55,24 @@ import static com.openexchange.webdav.xml.fields.CalendarFields.END_DATE;
 import static com.openexchange.webdav.xml.fields.CalendarFields.START_DATE;
 import static com.openexchange.webdav.xml.fields.DataFields.LAST_MODIFIED;
 import static com.openexchange.webdav.xml.fields.DataFields.OBJECT_ID;
-import static com.openexchange.webdav.xml.fields.TaskFields.*;
+import static com.openexchange.webdav.xml.fields.TaskFields.ACTUAL_COSTS;
+import static com.openexchange.webdav.xml.fields.TaskFields.ACTUAL_DURATION;
+import static com.openexchange.webdav.xml.fields.TaskFields.BILLING_INFORMATION;
+import static com.openexchange.webdav.xml.fields.TaskFields.COMPANIES;
+import static com.openexchange.webdav.xml.fields.TaskFields.CURRENCY;
+import static com.openexchange.webdav.xml.fields.TaskFields.DATE_COMPLETED;
+import static com.openexchange.webdav.xml.fields.TaskFields.PERCENT_COMPLETED;
+import static com.openexchange.webdav.xml.fields.TaskFields.PRIORITY;
+import static com.openexchange.webdav.xml.fields.TaskFields.STATUS;
+import static com.openexchange.webdav.xml.fields.TaskFields.TARGET_COSTS;
+import static com.openexchange.webdav.xml.fields.TaskFields.TARGET_DURATION;
+import static com.openexchange.webdav.xml.fields.TaskFields.TRIP_METER;
 import java.io.OutputStream;
 import java.util.Date;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.jdom.Element;
-import org.jdom.output.XMLOutputter;
+import org.jdom2.Element;
+import org.jdom2.output.XMLOutputter;
 import com.openexchange.api2.TasksSQLInterface;
 import com.openexchange.exception.OXException;
 import com.openexchange.exception.OXException.Generic;
@@ -75,6 +85,7 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.tasks.Task;
 import com.openexchange.groupware.tasks.TasksSQLImpl;
+import com.openexchange.log.LogFactory;
 import com.openexchange.session.Session;
 import com.openexchange.tools.iterator.SearchIterator;
 
@@ -159,11 +170,11 @@ public class TaskWriter extends CalendarWriter {
             if (exc.isGeneric(Generic.NOT_FOUND)) {
                 writeResponseElement(eProp, 0, HttpServletResponse.SC_NOT_FOUND, XmlServlet.OBJECT_NOT_FOUND_EXCEPTION, xo, os);
             } else {
-                writeResponseElement(eProp, 0, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, XmlServlet.SERVER_ERROR_EXCEPTION, xo, os);
+                writeResponseElement(eProp, 0, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, getErrorMessage(XmlServlet.SERVER_ERROR_EXCEPTION, XmlServlet.SERVER_ERROR_STATUS), xo, os);
             }
         } catch (final Exception ex) {
             LOG.error(ex.getMessage(), ex);
-            writeResponseElement(eProp, 0, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, XmlServlet.SERVER_ERROR_EXCEPTION, xo, os);
+            writeResponseElement(eProp, 0, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, getErrorMessage(XmlServlet.SERVER_ERROR_EXCEPTION, XmlServlet.SERVER_ERROR_STATUS), xo, os);
         }
     }
 

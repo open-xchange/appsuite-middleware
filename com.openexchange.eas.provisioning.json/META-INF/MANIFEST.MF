@@ -1,0 +1,33 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Mobility Configuration Servlet
+Bundle-SymbolicName: com.openexchange.eas.provisioning.json
+Bundle-Version: 6.22.0
+Bundle-Activator: com.openexchange.mobile.configuration.json.osgi.MobilityProvisioningActivator
+Bundle-Vendor: Open-Xchange Inc.
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Import-Package: com.openexchange.ajax,
+ com.openexchange.ajax.container,
+ com.openexchange.ajax.writer,
+ com.openexchange.config,
+ com.openexchange.dispatcher,
+ com.openexchange.exception,
+ com.openexchange.groupware.contexts,
+ com.openexchange.groupware.contexts.impl,
+ com.openexchange.groupware.ldap,
+ com.openexchange.i18n,
+ com.openexchange.log,
+ com.openexchange.osgi,
+ com.openexchange.session,
+ com.openexchange.tools.servlet,
+ com.openexchange.tools.session,
+ javax.servlet,
+ javax.servlet.http,
+ org.apache.commons.logging,
+ org.json,
+ org.osgi.framework,
+ org.osgi.service.http,
+ org.osgi.util.tracker
+Export-Package: com.openexchange.mobile.configuration.json.action,
+ com.openexchange.mobile.configuration.json.container,
+ com.openexchange.mobile.configuration.json.servlet

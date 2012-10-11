@@ -62,9 +62,9 @@ import javax.mail.MessagingException;
 import javax.mail.NoSuchProviderException;
 import javax.mail.Session;
 import javax.mail.Store;
+import javax.mail.internet.IDNA;
 import javax.security.auth.login.LoginException;
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import com.openexchange.authentication.Authenticated;
 import com.openexchange.authentication.AuthenticationService;
 import com.openexchange.authentication.LoginExceptionCodes;
@@ -74,6 +74,7 @@ import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
+import com.openexchange.log.LogFactory;
 import com.openexchange.mail.api.MailConfig.LoginSource;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mailaccount.MailAccount;
@@ -81,6 +82,25 @@ import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.user.UserService;
 
 public class IMAPAuthentication implements AuthenticationService {
+
+    private static final class AuthenticatedImpl implements Authenticated {
+
+        private final String[] splitted;
+
+        protected AuthenticatedImpl(String[] splitted) {
+            this.splitted = splitted;
+        }
+
+        @Override
+        public String getContextInfo() {
+            return splitted[0];
+        }
+
+        @Override
+        public String getUserInfo() {
+            return splitted[1];
+        }
+    }
 
     private enum PropertyNames {
         IMAP_TIMEOUT("IMAP_TIMEOUT"),
@@ -103,7 +123,7 @@ public class IMAPAuthentication implements AuthenticationService {
 
     private static Properties props;
 
-    private final static String IMAP_AUTH_PROPERTY_FILE = "/opt/open-xchange/etc/groupware/imapauth.properties";
+    private final static String IMAP_AUTH_PROPERTY_FILE = "/opt/open-xchange/etc/imapauth.properties";
 
     /**
      * The string for <code>ISO-8859-1</code> character encoding.
@@ -127,6 +147,7 @@ public class IMAPAuthentication implements AuthenticationService {
     /**
      * {@inheritDoc}
      */
+    @Override
     public Authenticated handleLoginInfo(final LoginInfo loginInfo) throws OXException {
         // IMAPConnection def = null;
 
@@ -180,7 +201,7 @@ public class IMAPAuthentication implements AuthenticationService {
             }
 
             if (props.get(PropertyNames.IMAP_SERVER.name) != null) {
-                host = (String) props.get(PropertyNames.IMAP_SERVER.name);
+                host = IDNA.toASCII((String) props.get(PropertyNames.IMAP_SERVER.name));
             }
 
             if (props.get(PropertyNames.IMAP_PORT.name) != null) {
@@ -245,7 +266,7 @@ public class IMAPAuthentication implements AuthenticationService {
 	            /*
 	             * Get IMAP server from primary account
 	             */
-	            host = defaultMailAccount.getMailServer();
+	            host = IDNA.toASCII(defaultMailAccount.getMailServer());
 	            port = defaultMailAccount.getMailPort();
 	            USE_IMAPS = defaultMailAccount.isMailSecure();
 	            LOG.debug("Parsed IMAP Infos: " + (USE_IMAPS ? "imaps" : "imap") + " " + host + " " + port + "  (" + userId + "@" + ctxId + ")");
@@ -318,16 +339,7 @@ public class IMAPAuthentication implements AuthenticationService {
                 LOG.debug("Using \"defaultcontext\" as context name!");
                 splitted[0] = "defaultcontext";
             }
-            return new Authenticated() {
-
-                public String getContextInfo() {
-                    return splitted[0];
-                }
-
-                public String getUserInfo() {
-                    return splitted[1];
-                }
-            };
+            return new AuthenticatedImpl(splitted);
         } catch (final ConfigurationException e) {
             LOG.error("Error reading auth plugin config!", e);
             throw LoginExceptionCodes.COMMUNICATION.create(e);
@@ -352,6 +364,11 @@ public class IMAPAuthentication implements AuthenticationService {
                 throw LoginExceptionCodes.COMMUNICATION.create(e);
             }
         }
+    }
+
+    @Override
+    public Authenticated handleAutoLoginInfo(final LoginInfo loginInfo) throws OXException {
+        throw LoginExceptionCodes.NOT_SUPPORTED.create(IMAPAuthentication.class.getName());
     }
 
     private static void initConfig() throws OXException {

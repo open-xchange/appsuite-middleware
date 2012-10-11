@@ -53,6 +53,8 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.security.PrivilegedActionException;
+import java.security.PrivilegedExceptionAction;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -61,8 +63,8 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import javax.mail.internet.IDNA;
+import javax.security.auth.Subject;
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.jsieve.SieveException;
 import org.apache.jsieve.TagArgument;
 import org.apache.jsieve.parser.generated.ParseException;
@@ -89,6 +91,7 @@ import com.openexchange.jsieve.export.SieveTextFilter.ClientRulesAndRequire;
 import com.openexchange.jsieve.export.SieveTextFilter.RuleListAndNextUid;
 import com.openexchange.jsieve.export.exceptions.OXSieveHandlerException;
 import com.openexchange.jsieve.export.exceptions.OXSieveHandlerInvalidCredentialsException;
+import com.openexchange.log.LogFactory;
 import com.openexchange.mailfilter.ajax.Credentials;
 import com.openexchange.mailfilter.ajax.Parameter;
 import com.openexchange.mailfilter.ajax.actions.AbstractRequest.Parameters;
@@ -112,6 +115,8 @@ public class MailfilterAction extends AbstractAction<Rule, MailfilterRequest> {
 
     private static final ConcurrentMap<Key, MailfilterAction> INSTANCES = new ConcurrentHashMap<Key, MailfilterAction>();
 
+    private static final String KERBEROS_SESSION_SUBJECT = "kerberosSubject";
+
     /**
      * Gets the {@link MailfilterAction} instance for specified session.
      *
@@ -122,7 +127,8 @@ public class MailfilterAction extends AbstractAction<Rule, MailfilterRequest> {
         final Key key = new Key(session.getUserId(), session.getContextId());
         MailfilterAction action = INSTANCES.get(key);
         if (null == action) {
-            final MailfilterAction newaction = new MailfilterAction();
+            final Subject subject = (Subject)session.getParameter(KERBEROS_SESSION_SUBJECT);
+            final MailfilterAction newaction = new MailfilterAction(subject);
             action = INSTANCES.putIfAbsent(key, newaction);
             if (null == action) {
                 action = newaction;
@@ -181,11 +187,14 @@ public class MailfilterAction extends AbstractAction<Rule, MailfilterRequest> {
 
     private boolean useSIEVEResponseCodes = false;
     
+    private final Subject krbSubject;
+    
     /**
      * Default constructor.
      */
-    public MailfilterAction() {
+    public MailfilterAction(final Subject krbSubject) {
         super();
+        this.krbSubject = krbSubject;
         final ConfigurationService config = MailFilterServletServiceRegistry.getServiceRegistry().getService(
                 ConfigurationService.class);
         scriptname = config.getProperty(MailFilterProperties.Values.SCRIPT_NAME.property);
@@ -193,6 +202,21 @@ public class MailfilterAction extends AbstractAction<Rule, MailfilterRequest> {
         mutex = new Object();
     }
 
+    private void handlerConnect(final SieveHandler sieveHandler) throws UnsupportedEncodingException, IOException, OXSieveHandlerException, OXSieveHandlerInvalidCredentialsException, PrivilegedActionException {
+        if (null != krbSubject) {
+            Subject.doAs(krbSubject, new PrivilegedExceptionAction<Object>() {
+
+                @Override
+                public Object run() throws Exception {
+                    sieveHandler.initializeConnection();
+                    return null;
+                }
+            });
+        } else {
+            sieveHandler.initializeConnection();
+        }
+    }
+    
     /**
      * {@inheritDoc}
      */
@@ -204,7 +228,7 @@ public class MailfilterAction extends AbstractAction<Rule, MailfilterRequest> {
             // First fetch configuration:
             JSONObject tests = null;
             try {
-                sieveHandler.initializeConnection();
+                handlerConnect(sieveHandler);
                 final Capabilities capabilities = sieveHandler.getCapabilities();
                 final ArrayList<String> sieve = capabilities.getSieve();
                 tests = getTestAndActionObjects(new HashSet<String>(capabilities.getSieve()));
@@ -227,6 +251,8 @@ public class MailfilterAction extends AbstractAction<Rule, MailfilterRequest> {
                 throw OXMailfilterExceptionCode.NAN.create(nfe, getNANString(nfe));
             } catch (final RuntimeException re) {
                 throw OXMailfilterExceptionCode.PROBLEM.create(re, re.getMessage());
+            } catch (final PrivilegedActionException e) {
+                throw OXMailfilterExceptionCode.SIEVE_COMMUNICATION_ERROR.create(e);
             } finally {
                 if (null != sieveHandler) {
                     try {
@@ -252,7 +278,7 @@ public class MailfilterAction extends AbstractAction<Rule, MailfilterRequest> {
             final SieveTextFilter sieveTextFilter = new SieveTextFilter(credentials);
             final SieveHandler sieveHandler = connectRight(credentials);
             try {
-                sieveHandler.initializeConnection();
+                handlerConnect(sieveHandler);
                 final String activeScript = sieveHandler.getActiveScript();
                 final String script = sieveHandler.getScript(activeScript);
                 final RuleListAndNextUid rulesandid = sieveTextFilter.readScriptFromString(script);
@@ -292,6 +318,8 @@ public class MailfilterAction extends AbstractAction<Rule, MailfilterRequest> {
                 throw OXMailfilterExceptionCode.NAN.create(nfe, getNANString(nfe));
             } catch (final RuntimeException re) {
                 throw OXMailfilterExceptionCode.PROBLEM.create(re, re.getMessage());
+            } catch (final PrivilegedActionException e) {
+                throw OXMailfilterExceptionCode.SIEVE_COMMUNICATION_ERROR.create(e);
             } finally {
                 if (null != sieveHandler) {
                     try {
@@ -317,7 +345,7 @@ public class MailfilterAction extends AbstractAction<Rule, MailfilterRequest> {
             final SieveTextFilter sieveTextFilter = new SieveTextFilter(credentials);
             final SieveHandler sieveHandler = connectRight(credentials);
             try {
-                sieveHandler.initializeConnection();
+                handlerConnect(sieveHandler);
                 final String script = sieveHandler.getScript(sieveHandler.getActiveScript());
                 if (log.isDebugEnabled()) {
                     log.debug("The following sieve script will be parsed:\n" + script);
@@ -358,6 +386,8 @@ public class MailfilterAction extends AbstractAction<Rule, MailfilterRequest> {
                 throw OXMailfilterExceptionCode.NAN.create(nfe, getNANString(nfe));
             } catch (final RuntimeException re) {
                 throw OXMailfilterExceptionCode.PROBLEM.create(re, re.getMessage());
+            } catch (final PrivilegedActionException e) {
+                throw OXMailfilterExceptionCode.SIEVE_COMMUNICATION_ERROR.create(e);
             } finally {
                 if (null != sieveHandler) {
                     try {
@@ -382,7 +412,7 @@ public class MailfilterAction extends AbstractAction<Rule, MailfilterRequest> {
             final SieveTextFilter sieveTextFilter = new SieveTextFilter(credentials);
             final SieveHandler sieveHandler = connectRight(credentials);
             try {
-                sieveHandler.initializeConnection();
+                handlerConnect(sieveHandler);
                 final String activeScript = sieveHandler.getActiveScript();
                 final String script = sieveHandler.getScript(activeScript);
                 final RuleListAndNextUid rules = sieveTextFilter.readScriptFromString(script);
@@ -393,6 +423,16 @@ public class MailfilterAction extends AbstractAction<Rule, MailfilterRequest> {
                 final String body = request.getBody();
                 final JSONObject json = new JSONObject(body);
                 final Rule newrule = CONVERTER.parse(json);
+
+                if (isVacationRule(newrule)) {
+                    // A vacation rule...
+                    final ArrayList<Rule> clientrules = clientrulesandrequire.getRules();
+                    for (final Rule rule : clientrules) {
+                        if (isVacationRule(rule)) {
+                            throw OXMailfilterExceptionCode.DUPLICATE_VACATION_RULE.create();
+                        }
+                    }
+                }
 
                 changeIncomingVacationRule(newrule);
 
@@ -442,6 +482,8 @@ public class MailfilterAction extends AbstractAction<Rule, MailfilterRequest> {
                 throw OXMailfilterExceptionCode.NAN.create(nfe, getNANString(nfe));
             } catch (final RuntimeException re) {
                 throw OXMailfilterExceptionCode.PROBLEM.create(re, re.getMessage());
+            } catch (final PrivilegedActionException e) {
+                throw OXMailfilterExceptionCode.SIEVE_COMMUNICATION_ERROR.create(e);
             } finally {
                 if (null != sieveHandler) {
                     try {
@@ -463,7 +505,7 @@ public class MailfilterAction extends AbstractAction<Rule, MailfilterRequest> {
             final SieveTextFilter sieveTextFilter = new SieveTextFilter(credentials);
             final SieveHandler sieveHandler = connectRight(credentials);
             try {
-                sieveHandler.initializeConnection();
+                handlerConnect(sieveHandler);
                 final String activeScript = sieveHandler.getActiveScript();
                 final String script = sieveHandler.getScript(activeScript);
                 final RuleListAndNextUid rules = sieveTextFilter.readScriptFromString(script);
@@ -516,6 +558,8 @@ public class MailfilterAction extends AbstractAction<Rule, MailfilterRequest> {
                 throw OXMailfilterExceptionCode.NAN.create(nfe, getNANString(nfe));
             } catch (final RuntimeException re) {
                 throw OXMailfilterExceptionCode.PROBLEM.create(re, re.getMessage());
+            } catch (final PrivilegedActionException e) {
+                throw OXMailfilterExceptionCode.SIEVE_COMMUNICATION_ERROR.create(e);
             } finally {
                 if (null != sieveHandler) {
                     try {
@@ -540,7 +584,7 @@ public class MailfilterAction extends AbstractAction<Rule, MailfilterRequest> {
             final SieveTextFilter sieveTextFilter = new SieveTextFilter(credentials);
             final SieveHandler sieveHandler = connectRight(credentials);
             try {
-                sieveHandler.initializeConnection();
+                handlerConnect(sieveHandler);
                 final String activeScript = fixParsingError(sieveHandler.getActiveScript());
                 final String script = fixParsingError(sieveHandler.getScript(activeScript));
                 final RuleListAndNextUid rules = sieveTextFilter.readScriptFromString(script);
@@ -588,6 +632,8 @@ public class MailfilterAction extends AbstractAction<Rule, MailfilterRequest> {
                 throw OXMailfilterExceptionCode.NAN.create(nfe, getNANString(nfe));
             } catch (final RuntimeException re) {
                 throw OXMailfilterExceptionCode.PROBLEM.create(re, re.getMessage());
+            } catch (final PrivilegedActionException e) {
+                throw OXMailfilterExceptionCode.SIEVE_COMMUNICATION_ERROR.create(e);
             } finally {
                 if (null != sieveHandler) {
                     try {
@@ -608,7 +654,7 @@ public class MailfilterAction extends AbstractAction<Rule, MailfilterRequest> {
             final Credentials credentials = request.getCredentials();
             final SieveHandler sieveHandler = connectRight(credentials);
             try {
-                sieveHandler.initializeConnection();
+                handlerConnect(sieveHandler);
                 final String activeScript = sieveHandler.getActiveScript();
 
                 writeScript(sieveHandler, activeScript, "");
@@ -630,6 +676,8 @@ public class MailfilterAction extends AbstractAction<Rule, MailfilterRequest> {
                 throw OXMailfilterExceptionCode.NAN.create(nfe, getNANString(nfe));
             } catch (final RuntimeException re) {
                 throw OXMailfilterExceptionCode.PROBLEM.create(re, re.getMessage());
+            } catch (final PrivilegedActionException e) {
+                throw OXMailfilterExceptionCode.SIEVE_COMMUNICATION_ERROR.create(e);
             } finally {
                 if (null != sieveHandler) {
                     try {
@@ -650,7 +698,7 @@ public class MailfilterAction extends AbstractAction<Rule, MailfilterRequest> {
             final Credentials credentials = request.getCredentials();
             final SieveHandler sieveHandler = connectRight(credentials);
             try {
-                sieveHandler.initializeConnection();
+                handlerConnect(sieveHandler);
                 final String activeScript = sieveHandler.getActiveScript();
                 return sieveHandler.getScript(activeScript);
             } catch (final UnsupportedEncodingException e) {
@@ -670,6 +718,8 @@ public class MailfilterAction extends AbstractAction<Rule, MailfilterRequest> {
                 throw OXMailfilterExceptionCode.NAN.create(nfe, getNANString(nfe));
             } catch (final RuntimeException re) {
                 throw OXMailfilterExceptionCode.PROBLEM.create(re, re.getMessage());
+            } catch (final PrivilegedActionException e) {
+                throw OXMailfilterExceptionCode.SIEVE_COMMUNICATION_ERROR.create(e);
             } finally {
                 if (null != sieveHandler) {
                     try {
@@ -812,6 +862,11 @@ public class MailfilterAction extends AbstractAction<Rule, MailfilterRequest> {
             throw OXMailfilterExceptionCode.NO_VALID_CREDSRC.create();
         }
         return sieveHandler;
+    }
+
+    private boolean isVacationRule(final Rule newrule) {
+        final RuleComment ruleComment = newrule.getRuleComment();
+        return (null != ruleComment) && (null != ruleComment.getFlags()) && ruleComment.getFlags().contains("vacation") && ActionCommand.Commands.VACATION.equals(newrule.getIfCommand().getActioncommands().get(0).getCommand());
     }
 
     private void changeIncomingVacationRule(final Rule newrule) throws SieveException {

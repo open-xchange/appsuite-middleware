@@ -4,23 +4,27 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.config.cascade.ComposedConfigProperty;
 import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
+import com.openexchange.contact.ContactFieldOperand;
+import com.openexchange.contact.ContactService;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.contact.ContactInterface;
-import com.openexchange.groupware.contact.ContactInterfaceDiscoveryService;
-import com.openexchange.groupware.contact.ContactInterfaceProvider;
-import com.openexchange.groupware.contact.ContactSearchMultiplexer;
+import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.contact.helpers.ContactMerger;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.groupware.search.ContactSearchObject;
 import com.openexchange.halo.ContactHalo;
 import com.openexchange.halo.HaloContactDataSource;
 import com.openexchange.halo.HaloContactQuery;
+import com.openexchange.search.CompositeSearchTerm;
+import com.openexchange.search.CompositeSearchTerm.CompositeOperation;
+import com.openexchange.search.SingleSearchTerm;
+import com.openexchange.search.SingleSearchTerm.SingleOperation;
+import com.openexchange.search.internal.operands.ConstantOperand;
 import com.openexchange.session.SessionSpecificContainerRetrievalService;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.session.ServerSession;
@@ -29,21 +33,17 @@ import com.openexchange.user.UserService;
 public class ContactHaloImpl implements ContactHalo {
 
 	private final UserService userService;
-	private final ContactInterfaceDiscoveryService contactDiscoveryService;
-	private final ContactSearchMultiplexer contactSearchMultiplexer;
-
+	private final ContactService contactService;
 	private final ConfigViewFactory configViews;
 
 	private final Map<String, HaloContactDataSource> contactDataSources = new ConcurrentHashMap<String, HaloContactDataSource>();
 
 	public ContactHaloImpl(final UserService userService,
-			final ContactInterfaceDiscoveryService contactDiscoveryService,
+			final ContactService contactService,
 			final SessionSpecificContainerRetrievalService sessionScope,
 			final ConfigViewFactory configViews) {
 		this.userService = userService;
-		this.contactDiscoveryService = contactDiscoveryService;
-		this.contactSearchMultiplexer = new ContactSearchMultiplexer(
-				contactDiscoveryService);
+		this.contactService = contactService;
 		this.configViews = configViews;
 	}
 
@@ -55,13 +55,16 @@ public class ContactHaloImpl implements ContactHalo {
 			throw new OXException(1).setPrefix("HALO").setLogMessage(
 					"Unknown halo provider '" + provider + "'");
 		}
+		if(! (contact.getInternalUserId() > 0) && ! contact.containsEmail1() & ! contact.containsEmail2() & ! contact.containsEmail3()){
+			throw new OXException(2).setPrefix("HALO").setLogMessage("Cannot search a contact that is neither an internal user nor has an e-mail address!");
+		}
 		return dataSource.investigate(buildQuery(contact, session), req,
 				session);
 	}
 
 	private HaloContactQuery buildQuery(Contact contact, final ServerSession session)
 			throws OXException {
-		final HaloContactQuery contactQuery = new HaloContactQuery();
+		HaloContactQuery contactQuery = new HaloContactQuery();
 
 		// Try to find a user with a given eMail address
 
@@ -101,27 +104,29 @@ public class ContactHaloImpl implements ContactHalo {
 		final List<Contact> contactsToMerge = new ArrayList<Contact>();
 		if (user != null) {
 			// Load the associated contact
-			final ContactInterfaceProvider contactInterfaceProvider = contactDiscoveryService
-					.getContactInterfaceProvider(6, session.getContextId());
-			final ContactInterface contactInterface = contactInterfaceProvider
-					.newContactInterface(session);
-			contactsToMerge.add(contactInterface.getObjectById(
-					user.getContactId(), 6));
-
+			contact = contactService.getUser(session, user.getId());
+			contactsToMerge.add(contact);
 		} else {
 			// Try to find a contact
-			final ContactSearchObject cso = new ContactSearchObject();
-			cso.setEmail1(contact.getEmail1());
-			cso.setEmail2(contact.getEmail1());
-			cso.setEmail3(contact.getEmail1());
-			cso.setOrSearch(true);
-
-			final SearchIterator<Contact> result = contactSearchMultiplexer
-					.extendedSearch(session, cso, -1, null, null,
-							Contact.ALL_COLUMNS);
-			while (result.hasNext()) {
-				contactsToMerge.add(result.next());
-			}
+			final ContactField[] searchFields = { ContactField.EMAIL1, ContactField.EMAIL2, ContactField.EMAIL3 };
+			final CompositeSearchTerm orTerm = new CompositeSearchTerm(CompositeOperation.OR);
+        	for (final ContactField field : searchFields) {        		
+        		final SingleSearchTerm term = new SingleSearchTerm(SingleOperation.EQUALS);
+        		term.addOperand(new ContactFieldOperand(field));
+        		term.addOperand(new ConstantOperand<String>(contact.getEmail1()));
+        		orTerm.addSearchTerm(term);
+        	}
+        	SearchIterator<Contact> iterator = null;
+        	try {
+            	iterator = contactService.searchContacts(session, orTerm);
+    			while (iterator.hasNext()) {
+    				contactsToMerge.add(iterator.next());
+    			}
+        	} finally {
+        		if (null != iterator) {
+        			iterator.close();
+        		}
+        	}
 		}
 		contactQuery.setMergedContacts(contactsToMerge);
 

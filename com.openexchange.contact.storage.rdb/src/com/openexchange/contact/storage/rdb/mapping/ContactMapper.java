@@ -110,6 +110,11 @@ public class ContactMapper extends DefaultDbMapper<Contact, ContactField> {
             public String get(Contact contact) { 
                 return contact.getDisplayName();
             }
+
+			@Override
+			public void remove(Contact contact) {
+				contact.removeDisplayName();				
+			}
         });
 
         mappings.put(ContactField.SUR_NAME, new VarCharMapping<Contact>("field02", "Sur name") {
@@ -128,6 +133,11 @@ public class ContactMapper extends DefaultDbMapper<Contact, ContactField> {
             public String get(Contact contact) { 
                 return contact.getSurName();
             }
+
+			@Override
+			public void remove(Contact contact) {
+				contact.removeSurName();				
+			}
         });
 
         mappings.put(ContactField.GIVEN_NAME, new VarCharMapping<Contact>("field03", "Given name") {
@@ -146,6 +156,11 @@ public class ContactMapper extends DefaultDbMapper<Contact, ContactField> {
             public String get(Contact contact) { 
                 return contact.getGivenName();
             }
+
+			@Override
+			public void remove(Contact contact) {
+				contact.removeGivenName();				
+			}
         });
 
         mappings.put(ContactField.MIDDLE_NAME, new VarCharMapping<Contact>("field04", "Middle name") {
@@ -164,6 +179,11 @@ public class ContactMapper extends DefaultDbMapper<Contact, ContactField> {
             public String get(Contact contact) { 
                 return contact.getMiddleName();
             }
+
+			@Override
+			public void remove(Contact contact) {
+				contact.removeMiddleName();				
+			}
         });
 
         mappings.put(ContactField.SUFFIX, new VarCharMapping<Contact>("field05", "Suffix") {
@@ -182,6 +202,11 @@ public class ContactMapper extends DefaultDbMapper<Contact, ContactField> {
             public String get(Contact contact) { 
                 return contact.getSuffix();
             }
+
+			@Override
+			public void remove(Contact contact) {
+				contact.removeSuffix();				
+			}
         });
 
         mappings.put(ContactField.TITLE, new VarCharMapping<Contact>("field06", "Title") {
@@ -200,6 +225,11 @@ public class ContactMapper extends DefaultDbMapper<Contact, ContactField> {
             public String get(Contact contact) { 
                 return contact.getTitle();
             }
+
+			@Override
+			public void remove(Contact contact) {
+				contact.removeTitle();				
+			}
         });
 
         mappings.put(ContactField.STREET_HOME, new VarCharMapping<Contact>("field07", "Street home") {
@@ -218,6 +248,11 @@ public class ContactMapper extends DefaultDbMapper<Contact, ContactField> {
             public String get(Contact contact) { 
                 return contact.getStreetHome();
             }
+
+			@Override
+			public void remove(Contact contact) {
+				contact.removeStreetHome();				
+			}
         });
 
         mappings.put(ContactField.POSTAL_CODE_HOME, new VarCharMapping<Contact>("field08", "Postal code home") {
@@ -236,6 +271,11 @@ public class ContactMapper extends DefaultDbMapper<Contact, ContactField> {
             public String get(Contact contact) { 
                 return contact.getPostalCodeHome();
             }
+
+			@Override
+			public void remove(Contact contact) {
+				contact.removePostalCodeHome();				
+			}
         });
 
         mappings.put(ContactField.CITY_HOME, new VarCharMapping<Contact>("field09", "City home") {
@@ -254,6 +294,11 @@ public class ContactMapper extends DefaultDbMapper<Contact, ContactField> {
             public String get(Contact contact) { 
                 return contact.getCityHome();
             }
+
+			@Override
+			public void remove(Contact contact) {
+				contact.removeCityHome();				
+			}
         });
 
         mappings.put(ContactField.STATE_HOME, new VarCharMapping<Contact>("field10", "State home") {
@@ -272,6 +317,11 @@ public class ContactMapper extends DefaultDbMapper<Contact, ContactField> {
             public String get(Contact contact) { 
                 return contact.getStateHome();
             }
+
+			@Override
+			public void remove(Contact contact) {
+				contact.removeStateHome();				
+			}
         });
 
         mappings.put(ContactField.COUNTRY_HOME, new VarCharMapping<Contact>("field11", "Country home") {
@@ -290,6 +340,11 @@ public class ContactMapper extends DefaultDbMapper<Contact, ContactField> {
             public String get(Contact contact) { 
                 return contact.getCountryHome();
             }
+
+			@Override
+			public void remove(Contact contact) {
+				contact.removeCountryHome();				
+			}
         });
 
         mappings.put(ContactField.MARITAL_STATUS, new VarCharMapping<Contact>("field12", "Martial status") {
@@ -308,6 +363,11 @@ public class ContactMapper extends DefaultDbMapper<Contact, ContactField> {
             public String get(Contact contact) { 
                 return contact.getMaritalStatus();
             }
+
+			@Override
+			public void remove(Contact contact) {
+				contact.removeMaritalStatus();				
+			}
         });
 
         mappings.put(ContactField.NUMBER_OF_CHILDREN, new VarCharMapping<Contact>("field13", "Number of children") {
@@ -326,6 +386,11 @@ public class ContactMapper extends DefaultDbMapper<Contact, ContactField> {
             public String get(Contact contact) { 
                 return contact.getNumberOfChildren();
             }
+
+			@Override
+			public void remove(Contact contact) {
+				contact.removeNumberOfChildren();				
+			}
         });
 
         mappings.put(ContactField.PROFESSION, new VarCharMapping<Contact>("field14", "Profession") {
@@ -344,6 +409,11 @@ public class ContactMapper extends DefaultDbMapper<Contact, ContactField> {
             public String get(Contact contact) { 
                 return contact.getProfession();
             }
+
+			@Override
+			public void remove(Contact contact) {
+				contact.removeProfession();				
+			}
         });
 
         mappings.put(ContactField.NICKNAME, new VarCharMapping<Contact>("field15", "Nickname") {
@@ -362,6 +432,11 @@ public class ContactMapper extends DefaultDbMapper<Contact, ContactField> {
             public String get(Contact contact) { 
                 return contact.getNickname();
             }
+
+			@Override
+			public void remove(Contact contact) {
+				contact.removeNickname();				
+			}
         });
 
         mappings.put(ContactField.SPOUSE_NAME, new VarCharMapping<Contact>("field16", "Spouse name") {
@@ -380,6 +455,11 @@ public class ContactMapper extends DefaultDbMapper<Contact, ContactField> {
             public String get(Contact contact) { 
                 return contact.getSpouseName();
             }
+
+			@Override
+			public void remove(Contact contact) {
+				contact.removeSpouseName();				
+			}
         });
 
         mappings.put(ContactField.NOTE, new VarCharMapping<Contact>("field17", "Note") {
@@ -398,6 +478,11 @@ public class ContactMapper extends DefaultDbMapper<Contact, ContactField> {
             public String get(Contact contact) { 
                 return contact.getNote();
             }
+
+			@Override
+			public void remove(Contact contact) {
+				contact.removeNote();				
+			}
         });
 
         mappings.put(ContactField.COMPANY, new VarCharMapping<Contact>("field18", "Company") {
@@ -416,6 +501,11 @@ public class ContactMapper extends DefaultDbMapper<Contact, ContactField> {
             public String get(Contact contact) { 
                 return contact.getCompany();
             }
+
+			@Override
+			public void remove(Contact contact) {
+				contact.removeCompany();				
+			}
         });
 
         mappings.put(ContactField.DEPARTMENT, new VarCharMapping<Contact>("field19", "Department") {
@@ -434,6 +524,11 @@ public class ContactMapper extends DefaultDbMapper<Contact, ContactField> {
             public String get(Contact contact) { 
                 return contact.getDepartment();
             }
+
+			@Override
+			public void remove(Contact contact) {
+				contact.removeDepartment();				
+			}
         });
 
         mappings.put(ContactField.POSITION, new VarCharMapping<Contact>("field20", "Position") {
@@ -452,6 +547,11 @@ public class ContactMapper extends DefaultDbMapper<Contact, ContactField> {
             public String get(Contact contact) { 
                 return contact.getPosition();
             }
+
+			@Override
+			public void remove(Contact contact) {
+				contact.removePosition();				
+			}
         });
 
         mappings.put(ContactField.EMPLOYEE_TYPE, new VarCharMapping<Contact>("field21", "Employee type") {
@@ -470,6 +570,11 @@ public class ContactMapper extends DefaultDbMapper<Contact, ContactField> {
             public String get(Contact contact) { 
                 return contact.getEmployeeType();
             }
+
+			@Override
+			public void remove(Contact contact) {
+				contact.removeEmployeeType();				
+			}
         });
 
         mappings.put(ContactField.ROOM_NUMBER, new VarCharMapping<Contact>("field22", "Room number") {
@@ -488,6 +593,11 @@ public class ContactMapper extends DefaultDbMapper<Contact, ContactField> {
             public String get(Contact contact) { 
                 return contact.getRoomNumber();
             }
+
+			@Override
+			public void remove(Contact contact) {
+				contact.removeRoomNumber();				
+			}
         });
 
         mappings.put(ContactField.STREET_BUSINESS, new VarCharMapping<Contact>("field23", "Street business") {
@@ -506,6 +616,11 @@ public class ContactMapper extends DefaultDbMapper<Contact, ContactField> {
             public String get(Contact contact) { 
                 return contact.getStreetBusiness();
             }
+
+			@Override
+			public void remove(Contact contact) {
+				contact.removeStreetBusiness();				
+			}
         });
 
         mappings.put(ContactField.POSTAL_CODE_BUSINESS, new VarCharMapping<Contact>("field24", "Postal code business") {
@@ -524,6 +639,11 @@ public class ContactMapper extends DefaultDbMapper<Contact, ContactField> {
             public String get(Contact contact) { 
                 return contact.getPostalCodeBusiness();
             }
+
+			@Override
+			public void remove(Contact contact) {
+				contact.removePostalCodeBusiness();				
+			}
         });
 
         mappings.put(ContactField.CITY_BUSINESS, new VarCharMapping<Contact>("field25", "City business") {
@@ -542,6 +662,11 @@ public class ContactMapper extends DefaultDbMapper<Contact, ContactField> {
             public String get(Contact contact) { 
                 return contact.getCityBusiness();
             }
+
+			@Override
+			public void remove(Contact contact) {
+				contact.removeCityBusiness();				
+			}
         });
 
         mappings.put(ContactField.STATE_BUSINESS, new VarCharMapping<Contact>("field26", "State business") {
@@ -560,6 +685,11 @@ public class ContactMapper extends DefaultDbMapper<Contact, ContactField> {
             public String get(Contact contact) { 
                 return contact.getStateBusiness();
             }
+
+			@Override
+			public void remove(Contact contact) {
+				contact.removeStateBusiness();				
+			}
         });
 
         mappings.put(ContactField.COUNTRY_BUSINESS, new VarCharMapping<Contact>("field27", "Country business") {
@@ -578,6 +708,11 @@ public class ContactMapper extends DefaultDbMapper<Contact, ContactField> {
             public String get(Contact contact) { 
                 return contact.getCountryBusiness();
             }
+
+			@Override
+			public void remove(Contact contact) {
+				contact.removeCountryBusiness();				
+			}
         });
 
         mappings.put(ContactField.NUMBER_OF_EMPLOYEE, new VarCharMapping<Contact>("field28", "Number of employee") {
@@ -596,6 +731,11 @@ public class ContactMapper extends DefaultDbMapper<Contact, ContactField> {
             public String get(Contact contact) { 
                 return contact.getNumberOfEmployee();
             }
+
+			@Override
+			public void remove(Contact contact) {
+				contact.removeNumberOfEmployee();				
+			}
         });
 
         mappings.put(ContactField.SALES_VOLUME, new VarCharMapping<Contact>("field29", "Sales volume") {
@@ -614,6 +754,11 @@ public class ContactMapper extends DefaultDbMapper<Contact, ContactField> {
             public String get(Contact contact) { 
                 return contact.getSalesVolume();
             }
+
+			@Override
+			public void remove(Contact contact) {
+				contact.removeSalesVolume();				
+			}
         });
 
         mappings.put(ContactField.TAX_ID, new VarCharMapping<Contact>("field30", "Tax id") {
@@ -632,6 +777,11 @@ public class ContactMapper extends DefaultDbMapper<Contact, ContactField> {
             public String get(Contact contact) { 
                 return contact.getTaxID();
             }
+
+			@Override
+			public void remove(Contact contact) {
+				contact.removeTaxID();				
+			}
         });
 
         mappings.put(ContactField.COMMERCIAL_REGISTER, new VarCharMapping<Contact>("field31", "Commercial register") {
@@ -650,6 +800,11 @@ public class ContactMapper extends DefaultDbMapper<Contact, ContactField> {
             public String get(Contact contact) { 
                 return contact.getCommercialRegister();
             }
+
+			@Override
+			public void remove(Contact contact) {
+				contact.removeCommercialRegister();				
+			}
         });
 
         mappings.put(ContactField.BRANCHES, new VarCharMapping<Contact>("field32", "Branches") {
@@ -668,6 +823,11 @@ public class ContactMapper extends DefaultDbMapper<Contact, ContactField> {
             public String get(Contact contact) { 
                 return contact.getBranches();
             }
+
+			@Override
+			public void remove(Contact contact) {
+				contact.removeBranches();				
+			}
         });
 
         mappings.put(ContactField.BUSINESS_CATEGORY, new VarCharMapping<Contact>("field33", "Business category") {
@@ -686,6 +846,11 @@ public class ContactMapper extends DefaultDbMapper<Contact, ContactField> {
             public String get(Contact contact) { 
                 return contact.getBusinessCategory();
             }
+
+			@Override
+			public void remove(Contact contact) {
+				contact.removeBusinessCategory();				
+			}
         });
 
         mappings.put(ContactField.INFO, new VarCharMapping<Contact>("field34", "Info") {
@@ -704,6 +869,11 @@ public class ContactMapper extends DefaultDbMapper<Contact, ContactField> {
             public String get(Contact contact) { 
                 return contact.getInfo();
             }
+
+			@Override
+			public void remove(Contact contact) {
+				contact.removeInfo();				
+			}
         });
 
         mappings.put(ContactField.MANAGER_NAME, new VarCharMapping<Contact>("field35", "Manager's name") {
@@ -722,6 +892,11 @@ public class ContactMapper extends DefaultDbMapper<Contact, ContactField> {
             public String get(Contact contact) { 
                 return contact.getManagerName();
             }
+
+			@Override
+			public void remove(Contact contact) {
+				contact.removeManagerName();
+			}
         });
 
         mappings.put(ContactField.ASSISTANT_NAME, new VarCharMapping<Contact>("field36", "Assistant's name") {
@@ -740,6 +915,11 @@ public class ContactMapper extends DefaultDbMapper<Contact, ContactField> {
             public String get(Contact contact) { 
                 return contact.getAssistantName();
             }
+
+			@Override
+			public void remove(Contact contact) {
+				contact.removeAssistantName();				
+			}
         });
 
         mappings.put(ContactField.STREET_OTHER, new VarCharMapping<Contact>("field37", "Street other") {
@@ -758,6 +938,11 @@ public class ContactMapper extends DefaultDbMapper<Contact, ContactField> {
             public String get(Contact contact) { 
                 return contact.getStreetOther();
             }
+
+			@Override
+			public void remove(Contact contact) {
+				contact.removeStreetHome();
+			}
         });
 
         mappings.put(ContactField.POSTAL_CODE_OTHER, new VarCharMapping<Contact>("field38", "Postal code other") {
@@ -776,6 +961,11 @@ public class ContactMapper extends DefaultDbMapper<Contact, ContactField> {
             public String get(Contact contact) { 
                 return contact.getPostalCodeOther();
             }
+
+			@Override
+			public void remove(Contact contact) {
+				contact.removePostalCodeHome();				
+			}
         });
 
         mappings.put(ContactField.CITY_OTHER, new VarCharMapping<Contact>("field39", "City other") {
@@ -794,6 +984,11 @@ public class ContactMapper extends DefaultDbMapper<Contact, ContactField> {
             public String get(Contact contact) { 
                 return contact.getCityOther();
             }
+
+			@Override
+			public void remove(Contact contact) {
+				contact.removeCityOther();				
+			}
         });
 
         mappings.put(ContactField.STATE_OTHER, new VarCharMapping<Contact>("field40", "State other") {
@@ -812,6 +1007,11 @@ public class ContactMapper extends DefaultDbMapper<Contact, ContactField> {
             public String get(Contact contact) { 
                 return contact.getStateOther();
             }
+
+			@Override
+			public void remove(Contact contact) {
+				contact.removeStateOther();				
+			}
         });
 
         mappings.put(ContactField.COUNTRY_OTHER, new VarCharMapping<Contact>("field41", "Country other") {
@@ -830,6 +1030,11 @@ public class ContactMapper extends DefaultDbMapper<Contact, ContactField> {
             public String get(Contact contact) { 
                 return contact.getCountryOther();
             }
+
+			@Override
+			public void remove(Contact contact) {
+				contact.removeCountryOther();				
+			}
         });
 
         mappings.put(ContactField.TELEPHONE_ASSISTANT, new VarCharMapping<Contact>("field42", "Telephone assistant") {
@@ -848,6 +1053,11 @@ public class ContactMapper extends DefaultDbMapper<Contact, ContactField> {
             public String get(Contact contact) { 
                 return contact.getTelephoneAssistant();
             }
+
+			@Override
+			public void remove(Contact contact) {
+				contact.removeTelephoneAssistant();				
+			}
         });
 
         mappings.put(ContactField.TELEPHONE_BUSINESS1, new VarCharMapping<Contact>("field43", "Telephone business 1") {
@@ -866,6 +1076,11 @@ public class ContactMapper extends DefaultDbMapper<Contact, ContactField> {
             public String get(Contact contact) { 
                 return contact.getTelephoneBusiness1();
             }
+
+			@Override
+			public void remove(Contact contact) {
+				contact.removeTelephoneBusiness1();				
+			}
         });
 
         mappings.put(ContactField.TELEPHONE_BUSINESS2, new VarCharMapping<Contact>("field44", "Telephone business 2") {
@@ -884,6 +1099,11 @@ public class ContactMapper extends DefaultDbMapper<Contact, ContactField> {
             public String get(Contact contact) { 
                 return contact.getTelephoneBusiness2();
             }
+
+			@Override
+			public void remove(Contact contact) {
+				contact.removeTelephoneBusiness2();				
+			}
         });
 
         mappings.put(ContactField.FAX_BUSINESS, new VarCharMapping<Contact>("field45", "FAX business") {
@@ -902,6 +1122,11 @@ public class ContactMapper extends DefaultDbMapper<Contact, ContactField> {
             public String get(Contact contact) { 
                 return contact.getFaxBusiness();
             }
+
+			@Override
+			public void remove(Contact contact) {
+				contact.removeFaxBusiness();				
+			}
         });
 
         mappings.put(ContactField.TELEPHONE_CALLBACK, new VarCharMapping<Contact>("field46", "Telephone callback") {
@@ -920,6 +1145,11 @@ public class ContactMapper extends DefaultDbMapper<Contact, ContactField> {
             public String get(Contact contact) { 
                 return contact.getTelephoneCallback();
             }
+
+			@Override
+			public void remove(Contact contact) {
+				contact.removeTelephoneCallback();				
+			}
         });
 
         mappings.put(ContactField.TELEPHONE_CAR, new VarCharMapping<Contact>("field47", "Telephone car") {
@@ -938,6 +1168,11 @@ public class ContactMapper extends DefaultDbMapper<Contact, ContactField> {
             public String get(Contact contact) { 
                 return contact.getTelephoneCar();
             }
+
+			@Override
+			public void remove(Contact contact) {
+				contact.removeTelephoneCar();				
+			}
         });
 
         mappings.put(ContactField.TELEPHONE_COMPANY, new VarCharMapping<Contact>("field48", "Telephone company") {
@@ -956,6 +1191,11 @@ public class ContactMapper extends DefaultDbMapper<Contact, ContactField> {
             public String get(Contact contact) { 
                 return contact.getTelephoneCompany();
             }
+
+			@Override
+			public void remove(Contact contact) {
+				contact.removeTelephoneCompany();
+			}
         });
 
         mappings.put(ContactField.TELEPHONE_HOME1, new VarCharMapping<Contact>("field49", "Telephone home 1") {
@@ -974,6 +1214,11 @@ public class ContactMapper extends DefaultDbMapper<Contact, ContactField> {
             public String get(Contact contact) { 
                 return contact.getTelephoneHome1();
             }
+
+			@Override
+			public void remove(Contact contact) {
+				contact.removeTelephoneHome1();				
+			}
         });
 
         mappings.put(ContactField.TELEPHONE_HOME2, new VarCharMapping<Contact>("field50", "Telephone home 2") {
@@ -992,6 +1237,11 @@ public class ContactMapper extends DefaultDbMapper<Contact, ContactField> {
             public String get(Contact contact) { 
                 return contact.getTelephoneHome2();
             }
+
+			@Override
+			public void remove(Contact contact) {
+				contact.removeTelephoneHome2();				
+			}
         });
 
         mappings.put(ContactField.FAX_HOME, new VarCharMapping<Contact>("field51", "FAX home") {
@@ -1010,6 +1260,11 @@ public class ContactMapper extends DefaultDbMapper<Contact, ContactField> {
             public String get(Contact contact) { 
                 return contact.getFaxHome();
             }
+
+			@Override
+			public void remove(Contact contact) {
+				contact.removeFaxHome();				
+			}
         });
 
         mappings.put(ContactField.TELEPHONE_ISDN, new VarCharMapping<Contact>("field52", "Telephone ISDN") {
@@ -1028,6 +1283,11 @@ public class ContactMapper extends DefaultDbMapper<Contact, ContactField> {
             public String get(Contact contact) { 
                 return contact.getTelephoneISDN();
             }
+
+			@Override
+			public void remove(Contact contact) {
+				contact.removeTelephoneISDN();				
+			}
         });
 
         mappings.put(ContactField.CELLULAR_TELEPHONE1, new VarCharMapping<Contact>("field53", "Cellular telephone 1") {
@@ -1046,6 +1306,11 @@ public class ContactMapper extends DefaultDbMapper<Contact, ContactField> {
             public String get(Contact contact) { 
                 return contact.getCellularTelephone1();
             }
+
+			@Override
+			public void remove(Contact contact) {
+				contact.removeCellularTelephone1();				
+			}
         });
 
         mappings.put(ContactField.CELLULAR_TELEPHONE2, new VarCharMapping<Contact>("field54", "Cellular telephone 2") {
@@ -1064,6 +1329,11 @@ public class ContactMapper extends DefaultDbMapper<Contact, ContactField> {
             public String get(Contact contact) { 
                 return contact.getCellularTelephone2();
             }
+
+			@Override
+			public void remove(Contact contact) {
+				contact.removeCellularTelephone2();				
+			}
         });
 
         mappings.put(ContactField.TELEPHONE_OTHER, new VarCharMapping<Contact>("field55", "Telephone other") {
@@ -1082,6 +1352,11 @@ public class ContactMapper extends DefaultDbMapper<Contact, ContactField> {
             public String get(Contact contact) { 
                 return contact.getTelephoneOther();
             }
+
+			@Override
+			public void remove(Contact contact) {
+				contact.removeTelephoneOther();				
+			}
         });
 
         mappings.put(ContactField.FAX_OTHER, new VarCharMapping<Contact>("field56", "FAX other") {
@@ -1100,6 +1375,11 @@ public class ContactMapper extends DefaultDbMapper<Contact, ContactField> {
             public String get(Contact contact) { 
                 return contact.getFaxOther();
             }
+
+			@Override
+			public void remove(Contact contact) {
+				contact.removeFaxOther();				
+			}
         });
 
         mappings.put(ContactField.TELEPHONE_PAGER, new VarCharMapping<Contact>("field57", "Telephone pager") {
@@ -1118,6 +1398,11 @@ public class ContactMapper extends DefaultDbMapper<Contact, ContactField> {
             public String get(Contact contact) { 
                 return contact.getTelephonePager();
             }
+
+			@Override
+			public void remove(Contact contact) {
+				contact.removeTelephonePager();				
+			}
         });
 
         mappings.put(ContactField.TELEPHONE_PRIMARY, new VarCharMapping<Contact>("field58", "Telephone primary") {
@@ -1136,6 +1421,11 @@ public class ContactMapper extends DefaultDbMapper<Contact, ContactField> {
             public String get(Contact contact) { 
                 return contact.getTelephonePrimary();
             }
+
+			@Override
+			public void remove(Contact contact) {
+				contact.removeTelephonePrimary();				
+			}
         });
 
         mappings.put(ContactField.TELEPHONE_RADIO, new VarCharMapping<Contact>("field59", "Telephone radio") {
@@ -1154,6 +1444,11 @@ public class ContactMapper extends DefaultDbMapper<Contact, ContactField> {
             public String get(Contact contact) { 
                 return contact.getTelephoneRadio();
             }
+
+			@Override
+			public void remove(Contact contact) {
+				contact.removeTelephoneRadio();				
+			}
         });
 
         mappings.put(ContactField.TELEPHONE_TELEX, new VarCharMapping<Contact>("field60", "Telephone telex") {
@@ -1172,6 +1467,11 @@ public class ContactMapper extends DefaultDbMapper<Contact, ContactField> {
             public String get(Contact contact) { 
                 return contact.getTelephoneTelex();
             }
+
+			@Override
+			public void remove(Contact contact) {
+				contact.removeTelephoneTelex();				
+			}
         });
 
         mappings.put(ContactField.TELEPHONE_TTYTDD, new VarCharMapping<Contact>("field61", "Telephone TTY/TDD") {
@@ -1190,6 +1490,11 @@ public class ContactMapper extends DefaultDbMapper<Contact, ContactField> {
             public String get(Contact contact) { 
                 return contact.getTelephoneTTYTTD();
             }
+
+			@Override
+			public void remove(Contact contact) {
+				contact.removeTelephoneTTYTTD();				
+			}
         });
 
         mappings.put(ContactField.INSTANT_MESSENGER1, new VarCharMapping<Contact>("field62", "Instantmessenger 1") {
@@ -1208,6 +1513,11 @@ public class ContactMapper extends DefaultDbMapper<Contact, ContactField> {
             public String get(Contact contact) { 
                 return contact.getInstantMessenger1();
             }
+
+			@Override
+			public void remove(Contact contact) {
+				contact.removeInstantMessenger1();				
+			}
         });
 
         mappings.put(ContactField.INSTANT_MESSENGER2, new VarCharMapping<Contact>("field63", "Instantmessenger 2") {
@@ -1226,6 +1536,11 @@ public class ContactMapper extends DefaultDbMapper<Contact, ContactField> {
             public String get(Contact contact) { 
                 return contact.getInstantMessenger2();
             }
+
+			@Override
+			public void remove(Contact contact) {
+				contact.removeInstantMessenger2();				
+			}
         });
 
         mappings.put(ContactField.TELEPHONE_IP, new VarCharMapping<Contact>("field64", "Telephone IP") {
@@ -1244,6 +1559,11 @@ public class ContactMapper extends DefaultDbMapper<Contact, ContactField> {
             public String get(Contact contact) { 
                 return contact.getTelephoneIP();
             }
+
+			@Override
+			public void remove(Contact contact) {
+				contact.removeTelephoneIP();				
+			}
         });
 
         mappings.put(ContactField.EMAIL1, new VarCharMapping<Contact>("field65", "Email 1") {
@@ -1262,6 +1582,11 @@ public class ContactMapper extends DefaultDbMapper<Contact, ContactField> {
             public String get(Contact contact) { 
                 return contact.getEmail1();
             }
+
+			@Override
+			public void remove(Contact contact) {
+				contact.removeEmail1();				
+			}
         });
 
         mappings.put(ContactField.EMAIL2, new VarCharMapping<Contact>("field66", "Email 2") {
@@ -1280,6 +1605,11 @@ public class ContactMapper extends DefaultDbMapper<Contact, ContactField> {
             public String get(Contact contact) { 
                 return contact.getEmail2();
             }
+
+			@Override
+			public void remove(Contact contact) {
+				contact.removeEmail2();				
+			}
         });
 
         mappings.put(ContactField.EMAIL3, new VarCharMapping<Contact>("field67", "Email 3") {
@@ -1298,6 +1628,11 @@ public class ContactMapper extends DefaultDbMapper<Contact, ContactField> {
             public String get(Contact contact) { 
                 return contact.getEmail3();
             }
+
+			@Override
+			public void remove(Contact contact) {
+				contact.removeEmail3();				
+			}
         });
 
         mappings.put(ContactField.URL, new VarCharMapping<Contact>("field68", "URL") {
@@ -1316,6 +1651,11 @@ public class ContactMapper extends DefaultDbMapper<Contact, ContactField> {
             public String get(Contact contact) { 
                 return contact.getURL();
             }
+
+			@Override
+			public void remove(Contact contact) {
+				contact.removeURL();				
+			}
         });
 
         mappings.put(ContactField.CATEGORIES, new VarCharMapping<Contact>("field69", "Categories") {
@@ -1334,6 +1674,11 @@ public class ContactMapper extends DefaultDbMapper<Contact, ContactField> {
             public String get(Contact contact) { 
                 return contact.getCategories();
             }
+
+			@Override
+			public void remove(Contact contact) {
+				contact.removeCategories();
+			}
         });
 
         mappings.put(ContactField.USERFIELD01, new VarCharMapping<Contact>("field70", "Dynamic Field 1") {
@@ -1352,6 +1697,11 @@ public class ContactMapper extends DefaultDbMapper<Contact, ContactField> {
             public String get(Contact contact) { 
                 return contact.getUserField01();
             }
+
+			@Override
+			public void remove(Contact contact) {
+				contact.removeUserField01();				
+			}
         });
 
         mappings.put(ContactField.USERFIELD02, new VarCharMapping<Contact>("field71", "Dynamic Field 2") {
@@ -1370,6 +1720,11 @@ public class ContactMapper extends DefaultDbMapper<Contact, ContactField> {
             public String get(Contact contact) { 
                 return contact.getUserField02();
             }
+
+			@Override
+			public void remove(Contact contact) {
+				contact.removeUserField02();				
+			}
         });
 
         mappings.put(ContactField.USERFIELD03, new VarCharMapping<Contact>("field72", "Dynamic Field 3") {
@@ -1388,6 +1743,11 @@ public class ContactMapper extends DefaultDbMapper<Contact, ContactField> {
             public String get(Contact contact) { 
                 return contact.getUserField03();
             }
+
+			@Override
+			public void remove(Contact contact) {
+				contact.removeUserField03();				
+			}
         });
 
         mappings.put(ContactField.USERFIELD04, new VarCharMapping<Contact>("field73", "Dynamic Field 4") {
@@ -1406,6 +1766,11 @@ public class ContactMapper extends DefaultDbMapper<Contact, ContactField> {
             public String get(Contact contact) { 
                 return contact.getUserField04();
             }
+
+			@Override
+			public void remove(Contact contact) {
+				contact.removeUserField04();				
+			}
         });
 
         mappings.put(ContactField.USERFIELD05, new VarCharMapping<Contact>("field74", "Dynamic Field 5") {
@@ -1424,6 +1789,11 @@ public class ContactMapper extends DefaultDbMapper<Contact, ContactField> {
             public String get(Contact contact) { 
                 return contact.getUserField05();
             }
+
+			@Override
+			public void remove(Contact contact) {
+				contact.removeUserField05();				
+			}
         });
 
         mappings.put(ContactField.USERFIELD06, new VarCharMapping<Contact>("field75", "Dynamic Field 6") {
@@ -1442,6 +1812,11 @@ public class ContactMapper extends DefaultDbMapper<Contact, ContactField> {
             public String get(Contact contact) { 
                 return contact.getUserField06();
             }
+
+			@Override
+			public void remove(Contact contact) {
+				contact.removeUserField06();				
+			}
         });
 
         mappings.put(ContactField.USERFIELD07, new VarCharMapping<Contact>("field76", "Dynamic Field 7") {
@@ -1460,6 +1835,11 @@ public class ContactMapper extends DefaultDbMapper<Contact, ContactField> {
             public String get(Contact contact) { 
                 return contact.getUserField07();
             }
+
+			@Override
+			public void remove(Contact contact) {
+				contact.removeUserField07();				
+			}
         });
 
         mappings.put(ContactField.USERFIELD08, new VarCharMapping<Contact>("field77", "Dynamic Field 8") {
@@ -1478,6 +1858,11 @@ public class ContactMapper extends DefaultDbMapper<Contact, ContactField> {
             public String get(Contact contact) { 
                 return contact.getUserField08();
             }
+
+			@Override
+			public void remove(Contact contact) {
+				contact.removeUserField08();				
+			}
         });
 
         mappings.put(ContactField.USERFIELD09, new VarCharMapping<Contact>("field78", "Dynamic Field 9") {
@@ -1496,6 +1881,11 @@ public class ContactMapper extends DefaultDbMapper<Contact, ContactField> {
             public String get(Contact contact) { 
                 return contact.getUserField09();
             }
+
+			@Override
+			public void remove(Contact contact) {
+				contact.removeUserField09();				
+			}
         });
 
         mappings.put(ContactField.USERFIELD10, new VarCharMapping<Contact>("field79", "Dynamic Field 10") {
@@ -1514,6 +1904,11 @@ public class ContactMapper extends DefaultDbMapper<Contact, ContactField> {
             public String get(Contact contact) { 
                 return contact.getUserField10();
             }
+
+			@Override
+			public void remove(Contact contact) {
+				contact.removeUserField10();				
+			}
         });
 
         mappings.put(ContactField.USERFIELD11, new VarCharMapping<Contact>("field80", "Dynamic Field 11") {
@@ -1532,6 +1927,11 @@ public class ContactMapper extends DefaultDbMapper<Contact, ContactField> {
             public String get(Contact contact) { 
                 return contact.getUserField11();
             }
+
+			@Override
+			public void remove(Contact contact) {
+				contact.removeUserField11();				
+			}
         });
 
         mappings.put(ContactField.USERFIELD12, new VarCharMapping<Contact>("field81", "Dynamic Field 12") {
@@ -1550,6 +1950,11 @@ public class ContactMapper extends DefaultDbMapper<Contact, ContactField> {
             public String get(Contact contact) { 
                 return contact.getUserField12();
             }
+
+			@Override
+			public void remove(Contact contact) {
+				contact.removeUserField12();				
+			}
         });
 
         mappings.put(ContactField.USERFIELD13, new VarCharMapping<Contact>("field82", "Dynamic Field 13") {
@@ -1568,6 +1973,11 @@ public class ContactMapper extends DefaultDbMapper<Contact, ContactField> {
             public String get(Contact contact) { 
                 return contact.getUserField13();
             }
+
+			@Override
+			public void remove(Contact contact) {
+				contact.removeUserField13();				
+			}
         });
 
         mappings.put(ContactField.USERFIELD14, new VarCharMapping<Contact>("field83", "Dynamic Field 14") {
@@ -1586,6 +1996,11 @@ public class ContactMapper extends DefaultDbMapper<Contact, ContactField> {
             public String get(Contact contact) { 
                 return contact.getUserField14();
             }
+
+			@Override
+			public void remove(Contact contact) {
+				contact.removeUserField14();				
+			}
         });
 
         mappings.put(ContactField.USERFIELD15, new VarCharMapping<Contact>("field84", "Dynamic Field 15") {
@@ -1604,6 +2019,11 @@ public class ContactMapper extends DefaultDbMapper<Contact, ContactField> {
             public String get(Contact contact) { 
                 return contact.getUserField15();
             }
+
+			@Override
+			public void remove(Contact contact) {
+				contact.removeUserField15();				
+			}
         });
 
         mappings.put(ContactField.USERFIELD16, new VarCharMapping<Contact>("field85", "Dynamic Field 16") {
@@ -1622,6 +2042,11 @@ public class ContactMapper extends DefaultDbMapper<Contact, ContactField> {
             public String get(Contact contact) { 
                 return contact.getUserField16();
             }
+
+			@Override
+			public void remove(Contact contact) {
+				contact.removeUserField16();				
+			}
         });
 
         mappings.put(ContactField.USERFIELD17, new VarCharMapping<Contact>("field86", "Dynamic Field 17") {
@@ -1640,6 +2065,11 @@ public class ContactMapper extends DefaultDbMapper<Contact, ContactField> {
             public String get(Contact contact) { 
                 return contact.getUserField17();
             }
+
+			@Override
+			public void remove(Contact contact) {
+				contact.removeUserField17();				
+			}
         });
 
         mappings.put(ContactField.USERFIELD18, new VarCharMapping<Contact>("field87", "Dynamic Field 18") {
@@ -1658,6 +2088,11 @@ public class ContactMapper extends DefaultDbMapper<Contact, ContactField> {
             public String get(Contact contact) { 
                 return contact.getUserField18();
             }
+
+			@Override
+			public void remove(Contact contact) {
+				contact.removeUserField18();				
+			}
         });
 
         mappings.put(ContactField.USERFIELD19, new VarCharMapping<Contact>("field88", "Dynamic Field 19") {
@@ -1676,6 +2111,11 @@ public class ContactMapper extends DefaultDbMapper<Contact, ContactField> {
             public String get(Contact contact) { 
                 return contact.getUserField19();
             }
+
+			@Override
+			public void remove(Contact contact) {
+				contact.removeUserField19();				
+			}
         });
 
         mappings.put(ContactField.USERFIELD20, new VarCharMapping<Contact>("field89", "Dynamic Field 20") {
@@ -1694,6 +2134,11 @@ public class ContactMapper extends DefaultDbMapper<Contact, ContactField> {
             public String get(Contact contact) { 
                 return contact.getUserField20();
             }
+
+			@Override
+			public void remove(Contact contact) {
+				contact.removeUserField20();				
+			}
         });
 
         mappings.put(ContactField.OBJECT_ID, new IntegerMapping<Contact>("intfield01", "Object id") {
@@ -1712,6 +2157,11 @@ public class ContactMapper extends DefaultDbMapper<Contact, ContactField> {
             public Integer get(Contact contact) { 
                 return contact.getObjectID();
             }
+
+			@Override
+			public void remove(Contact contact) {
+				contact.removeObjectID();				
+			}
         });
 
         mappings.put(ContactField.NUMBER_OF_DISTRIBUTIONLIST, new IntegerMapping<Contact>("intfield02", "Number of distributionlists") {
@@ -1730,6 +2180,11 @@ public class ContactMapper extends DefaultDbMapper<Contact, ContactField> {
             public Integer get(Contact contact) { 
                 return contact.getNumberOfDistributionLists();
             }
+
+			@Override
+			public void remove(Contact contact) {
+				contact.removeNumberOfDistributionLists();				
+			}
         });
 
         mappings.put(ContactField.DISTRIBUTIONLIST, new DefaultDbMapping<DistributionListEntryObject[], Contact>(null, null, 0) {
@@ -1753,6 +2208,11 @@ public class ContactMapper extends DefaultDbMapper<Contact, ContactField> {
 			public DistributionListEntryObject[] get(ResultSet resultSet) throws SQLException {
 				return null;
 			}
+
+			@Override
+			public void remove(Contact contact) {
+				contact.removeDistributionLists();				
+			}
 		});
 
         mappings.put(ContactField.NUMBER_OF_LINKS, new IntegerMapping<Contact>("intfield03", "Number of links") {
@@ -1771,6 +2231,11 @@ public class ContactMapper extends DefaultDbMapper<Contact, ContactField> {
             public Integer get(Contact contact) { 
                 return contact.getNumberOfLinks();
             }
+
+			@Override
+			public void remove(Contact contact) {
+				contact.removeNumberOfLinks();				
+			}
         });
 
         mappings.put(ContactField.FOLDER_ID, new IntegerMapping<Contact>("fid", "Folder id") {
@@ -1789,6 +2254,11 @@ public class ContactMapper extends DefaultDbMapper<Contact, ContactField> {
             public Integer get(Contact contact) { 
                 return contact.getParentFolderID();
             }
+
+			@Override
+			public void remove(Contact contact) {
+				contact.removeParentFolderID();				
+			}
         });
 
 		mappings.put(ContactField.CONTEXTID, new IntegerMapping<Contact>("cid", "Context ID") {
@@ -1807,6 +2277,11 @@ public class ContactMapper extends DefaultDbMapper<Contact, ContactField> {
             public Integer get(Contact contact) { 
                 return contact.getContextId();
             }
+
+			@Override
+			public void remove(Contact contact) {
+				contact.removeContextID();				
+			}
         });
 
         mappings.put(ContactField.PRIVATE_FLAG, new IntegerMapping<Contact>("pflag", "Private Flag") {
@@ -1835,6 +2310,11 @@ public class ContactMapper extends DefaultDbMapper<Contact, ContactField> {
         			statement.setNull(parameterIndex, this.getSqlType());
         		}
         	}
+
+			@Override
+			public void remove(Contact contact) {
+				contact.removePrivateFlag();				
+			}
         });
 
         mappings.put(ContactField.CREATED_BY, new IntegerMapping<Contact>("created_from", "Created by") {
@@ -1853,6 +2333,11 @@ public class ContactMapper extends DefaultDbMapper<Contact, ContactField> {
             public Integer get(Contact contact) { 
                 return contact.getCreatedBy();
             }
+
+			@Override
+			public void remove(Contact contact) {
+				contact.removeCreatedBy();				
+			}
         });
 
         mappings.put(ContactField.MODIFIED_BY, new IntegerMapping<Contact>("changed_from", "Modified by") {
@@ -1871,6 +2356,11 @@ public class ContactMapper extends DefaultDbMapper<Contact, ContactField> {
             public Integer get(Contact contact) { 
                 return contact.getModifiedBy();
             }
+
+			@Override
+			public void remove(Contact contact) {
+				contact.removeModifiedBy();				
+			}
         });
 
         mappings.put(ContactField.CREATION_DATE, new BigIntMapping<Contact>("creating_date", "Creation date") {
@@ -1889,6 +2379,11 @@ public class ContactMapper extends DefaultDbMapper<Contact, ContactField> {
             public Long get(Contact contact) { 
                 return contact.getCreationDate().getTime();
             }
+
+			@Override
+			public void remove(Contact contact) {
+				contact.removeCreationDate();				
+			}
         });
 
         mappings.put(ContactField.LAST_MODIFIED, new BigIntMapping<Contact>("changing_date", "Changing date") {
@@ -1907,6 +2402,11 @@ public class ContactMapper extends DefaultDbMapper<Contact, ContactField> {
             public Long get(Contact contact) { 
                 return contact.getLastModified().getTime();
             }
+
+			@Override
+			public void remove(Contact contact) {
+				contact.removeLastModified();				
+			}
         });
 
         mappings.put(ContactField.BIRTHDAY, new DateMapping<Contact>("timestampfield01", "Birthday") {
@@ -1925,6 +2425,11 @@ public class ContactMapper extends DefaultDbMapper<Contact, ContactField> {
             public Date get(Contact contact) { 
                 return contact.getBirthday();
             }
+
+			@Override
+			public void remove(Contact contact) {
+				contact.removeBirthday();				
+			}
         });
 
         mappings.put(ContactField.ANNIVERSARY, new DateMapping<Contact>("timestampfield02", "Anniversary") {
@@ -1943,6 +2448,11 @@ public class ContactMapper extends DefaultDbMapper<Contact, ContactField> {
             public Date get(Contact contact) { 
                 return contact.getAnniversary();
             }
+
+			@Override
+			public void remove(Contact contact) {
+				contact.removeAnniversary();				
+			}
         });
 
         mappings.put(ContactField.IMAGE1, new DefaultDbMapping<byte[], Contact>("image1", "Image 1", Types.VARBINARY) {
@@ -1966,6 +2476,11 @@ public class ContactMapper extends DefaultDbMapper<Contact, ContactField> {
 			public byte[] get(ResultSet resultSet) throws SQLException {
 				return resultSet.getBytes(this.getColumnLabel());
 			}
+
+			@Override
+			public void remove(Contact contact) {
+				contact.removeImage1();				
+			}
 		});
 
         mappings.put(ContactField.IMAGE1_CONTENT_TYPE, new VarCharMapping<Contact>("mime_type", "Image 1 Content Type") {
@@ -1984,6 +2499,11 @@ public class ContactMapper extends DefaultDbMapper<Contact, ContactField> {
             public String get(Contact contact) { 
                 return contact.getImageContentType();
             }
+
+			@Override
+			public void remove(Contact contact) {
+				contact.removeImageContentType();				
+			}
         });
 
         mappings.put(ContactField.IMAGE_LAST_MODIFIED, new BigIntMapping<Contact>("changing_date", "Image 1 Changing date") {
@@ -2002,6 +2522,11 @@ public class ContactMapper extends DefaultDbMapper<Contact, ContactField> {
             public Long get(Contact contact) { 
                 return contact.getImageLastModified().getTime();
             }
+
+			@Override
+			public void remove(Contact contact) {
+				contact.removeImageLastModified();				
+			}
         });
 
         mappings.put(ContactField.INTERNAL_USERID, new IntegerMapping<Contact>("userid", "User ID") {
@@ -2020,6 +2545,11 @@ public class ContactMapper extends DefaultDbMapper<Contact, ContactField> {
             public Integer get(Contact contact) { 
                 return contact.getInternalUserId();
             }
+
+			@Override
+			public void remove(Contact contact) {
+				contact.removeInternalUserId();				
+			}
         });
 
         mappings.put(ContactField.COLOR_LABEL, new IntegerMapping<Contact>("intfield05", "Color Label") {
@@ -2038,6 +2568,11 @@ public class ContactMapper extends DefaultDbMapper<Contact, ContactField> {
             public Integer get(Contact contact) { 
                 return contact.getLabel();
             }
+
+			@Override
+			public void remove(Contact contact) {
+				contact.removeLabel();				
+			}
         });
 
         mappings.put(ContactField.FILE_AS, new VarCharMapping<Contact>("field90", "File As") {
@@ -2056,6 +2591,11 @@ public class ContactMapper extends DefaultDbMapper<Contact, ContactField> {
             public String get(Contact contact) { 
                 return contact.getFileAs();
             }
+
+			@Override
+			public void remove(Contact contact) {
+				contact.removeFileAs();				
+			}
         });
 
         mappings.put(ContactField.DEFAULT_ADDRESS, new IntegerMapping<Contact>("intfield06", "Default address") {
@@ -2074,6 +2614,11 @@ public class ContactMapper extends DefaultDbMapper<Contact, ContactField> {
             public Integer get(Contact contact) { 
                 return contact.getDefaultAddress();
             }
+
+			@Override
+			public void remove(Contact contact) {
+				contact.removeDefaultAddress();				
+			}
         });
 
         mappings.put(ContactField.MARK_AS_DISTRIBUTIONLIST, new IntegerMapping<Contact>("intfield07", "Mark as Distribution List") {
@@ -2092,6 +2637,11 @@ public class ContactMapper extends DefaultDbMapper<Contact, ContactField> {
             public Integer get(Contact contact) { 
                 return contact.getMarkAsDistribtuionlist() ? Integer.valueOf(1) : Integer.valueOf(0);
             }
+
+			@Override
+			public void remove(Contact contact) {
+				contact.removeMarkAsDistributionlist();				
+			}
         });
 
         mappings.put(ContactField.NUMBER_OF_ATTACHMENTS, new IntegerMapping<Contact>("intfield08", "Number of attachments") {
@@ -2110,6 +2660,11 @@ public class ContactMapper extends DefaultDbMapper<Contact, ContactField> {
             public Integer get(Contact contact) { 
                 return contact.getNumberOfAttachments();
             }
+
+			@Override
+			public void remove(Contact contact) {
+				contact.removeNumberOfAttachments();				
+			}
         });
 
         mappings.put(ContactField.YOMI_FIRST_NAME, new VarCharMapping<Contact>("yomiFirstName", "Yomi First Name") {
@@ -2128,6 +2683,11 @@ public class ContactMapper extends DefaultDbMapper<Contact, ContactField> {
             public String get(Contact contact) { 
                 return contact.getYomiFirstName();
             }
+
+			@Override
+			public void remove(Contact contact) {
+				contact.removeYomiFirstName();				
+			}
         });
 
         mappings.put(ContactField.YOMI_LAST_NAME, new VarCharMapping<Contact>("yomiLastName", "Yomi Last Name") {
@@ -2146,6 +2706,11 @@ public class ContactMapper extends DefaultDbMapper<Contact, ContactField> {
             public String get(Contact contact) { 
                 return contact.getYomiLastName();
             }
+
+			@Override
+			public void remove(Contact contact) {
+				contact.removeYomiLastName();				
+			}
         });
 
         mappings.put(ContactField.YOMI_COMPANY, new VarCharMapping<Contact>("yomiCompany", "Yomi Company") {
@@ -2164,6 +2729,11 @@ public class ContactMapper extends DefaultDbMapper<Contact, ContactField> {
             public String get(Contact contact) { 
                 return contact.getYomiCompany();
             }
+
+			@Override
+			public void remove(Contact contact) {
+				contact.removeYomiCompany();				
+			}
         });
 
         mappings.put(ContactField.NUMBER_OF_IMAGES, new IntegerMapping<Contact>("intfield04", "Number of images") {
@@ -2183,6 +2753,11 @@ public class ContactMapper extends DefaultDbMapper<Contact, ContactField> {
             public Integer get(Contact contact) { 
                 return contact.getNumberOfImages();
             }
+
+			@Override
+			public void remove(Contact contact) {
+				contact.setNumberOfImages(0);				
+			}
         });
 
         mappings.put(ContactField.USE_COUNT, new IntegerMapping<Contact>("useCount", "Use Count") {
@@ -2201,6 +2776,11 @@ public class ContactMapper extends DefaultDbMapper<Contact, ContactField> {
             public Integer get(Contact contact) { 
                 return contact.getUseCount();
             }
+
+			@Override
+			public void remove(Contact contact) {
+				contact.removeUseCount();				
+			}
         });
 
         mappings.put(ContactField.HOME_ADDRESS, new VarCharMapping<Contact>("homeAddress", "Home Address") {
@@ -2219,6 +2799,11 @@ public class ContactMapper extends DefaultDbMapper<Contact, ContactField> {
             public String get(Contact contact) { 
                 return contact.getAddressHome();
             }
+
+			@Override
+			public void remove(Contact contact) {
+				contact.removeAddressHome();				
+			}
         });
 
         mappings.put(ContactField.BUSINESS_ADDRESS, new VarCharMapping<Contact>("businessAddress", "Business Address") {
@@ -2237,6 +2822,11 @@ public class ContactMapper extends DefaultDbMapper<Contact, ContactField> {
             public String get(Contact contact) { 
                 return contact.getAddressBusiness();
             }
+
+			@Override
+			public void remove(Contact contact) {
+				contact.removeAddressBusiness();				
+			}
         });
 
         mappings.put(ContactField.OTHER_ADDRESS, new VarCharMapping<Contact>("otherAddress", "Other Address") {
@@ -2256,6 +2846,11 @@ public class ContactMapper extends DefaultDbMapper<Contact, ContactField> {
             public String get(Contact contact) { 
                 return contact.getAddressOther();
             }
+
+			@Override
+			public void remove(Contact contact) {
+				contact.removeAddressOther();				
+			}
         });
 
         mappings.put(ContactField.UID, new VarCharMapping<Contact>("uid", "UID") {
@@ -2274,6 +2869,34 @@ public class ContactMapper extends DefaultDbMapper<Contact, ContactField> {
             public String get(Contact contact) { 
                 return contact.getUid();
             }
+
+			@Override
+			public void remove(Contact contact) {
+				contact.removeUid();				
+			}
+        });
+        
+        mappings.put(ContactField.FILENAME, new VarCharMapping<Contact>("filename", "Filename") {
+
+            @Override
+            public void set(Contact contact, String value) { 
+                contact.setFilename(value);
+            }
+
+            @Override
+            public boolean isSet(Contact contact) {
+                return contact.containsFilename();
+            }
+
+            @Override
+            public String get(Contact contact) { 
+                return contact.getFilename();
+            }
+
+			@Override
+			public void remove(Contact contact) {
+				contact.removeFilename();				
+			}
         });
         
 		return mappings;

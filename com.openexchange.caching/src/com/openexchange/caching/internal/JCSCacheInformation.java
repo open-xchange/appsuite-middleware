@@ -69,7 +69,7 @@ import com.openexchange.caching.CacheInformationMBean;
  */
 public class JCSCacheInformation extends StandardMBean implements CacheInformationMBean {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(JCSCacheInformation.class));
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(JCSCacheInformation.class));
 
     private final CompositeCacheManager cacheHub;
 

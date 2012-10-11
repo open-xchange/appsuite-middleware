@@ -60,10 +60,11 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletResponse;
 import com.openexchange.ajp13.AJPv13Config;
 import com.openexchange.ajp13.AJPv13Connection;
-import com.openexchange.ajp13.AbstractAJPv13Request;
 import com.openexchange.ajp13.AJPv13RequestHandler;
 import com.openexchange.ajp13.AJPv13Response;
+import com.openexchange.ajp13.AJPv13Server;
 import com.openexchange.ajp13.AJPv13ServiceRegistry;
+import com.openexchange.ajp13.AbstractAJPv13Request;
 import com.openexchange.ajp13.BlockableBufferedOutputStream;
 import com.openexchange.ajp13.exception.AJPv13BrokenCycleException;
 import com.openexchange.ajp13.exception.AJPv13Exception;
@@ -94,7 +95,7 @@ public final class AJPv13Task implements Task<Object>, com.openexchange.ajp13.wa
     /**
      * The logger constant.
      */
-    protected static final org.apache.commons.logging.Log LOG = Log.valueOf(org.apache.commons.logging.LogFactory.getLog(AJPv13Task.class));
+    protected static final org.apache.commons.logging.Log LOG = Log.valueOf(com.openexchange.log.LogFactory.getLog(AJPv13Task.class));
 
     /**
      * Whether debug log level is enabled.
@@ -338,6 +339,11 @@ public final class AJPv13Task implements Task<Object>, com.openexchange.ajp13.wa
         return thread.getStackTrace();
     }
 
+    @Override
+    public Thread getThread() {
+        return thread;
+    }
+
     /**
      * Gets currently executing thread's name.
      *
@@ -507,7 +513,7 @@ public final class AJPv13Task implements Task<Object>, com.openexchange.ajp13.wa
                     monitor.incrementNumRequests();
                     processing = false;
                 }
-                AJPv13ServerImpl.decrementNumberOfOpenAJPSockets();
+                AJPv13Server.decrementNumberOfOpenAJPSockets();
                 /*
                  * Drop logging info for executing thread
                  */

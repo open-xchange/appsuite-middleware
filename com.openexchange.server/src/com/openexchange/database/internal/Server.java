@@ -55,7 +55,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import com.openexchange.log.LogFactory;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.database.ConfigDatabaseService;
 import com.openexchange.database.DBPoolingExceptionCodes;
@@ -73,9 +73,9 @@ public final class Server {
 
     private static final String SELECT = "SELECT server_id FROM server WHERE name=?";
 
-    private static String serverName;
+    private static volatile String serverName;
 
-    private static ConfigDatabaseService configDatabaseService;
+    private static volatile ConfigDatabaseService configDatabaseService;
 
     private static int serverId = -1;
 
@@ -104,13 +104,15 @@ public final class Server {
     }
 
     public static final void start(final ConfigurationService service) throws OXException {
-        serverName = service.getProperty(PROPERTY_NAME);
+        final String serverName = service.getProperty(PROPERTY_NAME);
         if (null == serverName || serverName.length() == 0) {
             throw DBPoolingExceptionCodes.NO_SERVER_NAME.create();
         }
+        Server.serverName = serverName;
     }
 
     public static String getServerName() throws OXException {
+        final String serverName = Server.serverName;
         if (null == serverName) {
             throw DBPoolingExceptionCodes.NOT_INITIALIZED.create(Server.class.getName());
         }
@@ -122,6 +124,7 @@ public final class Server {
         Connection con = null;
         PreparedStatement stmt = null;
         ResultSet result = null;
+        final ConfigDatabaseService configDatabaseService = Server.configDatabaseService;
         try {
             con = configDatabaseService.getReadOnly();
             stmt = con.prepareStatement(SELECT);

@@ -54,7 +54,7 @@ import junit.framework.TestSuite;
 
 /**
  * {@link UnitTests}
- *
+ * 
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
 public class UnitTests {
@@ -66,6 +66,7 @@ public class UnitTests {
     public static Test suite() {
         final TestSuite tests = new TestSuite();
         tests.addTestSuite(Bug16158Test.class);
+        tests.addTestSuite(Bug22838Test.class);
         return tests;
     }
 }

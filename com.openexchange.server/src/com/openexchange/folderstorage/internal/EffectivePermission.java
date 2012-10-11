@@ -52,13 +52,19 @@ package com.openexchange.folderstorage.internal;
 import gnu.trove.EmptyTIntSet;
 import gnu.trove.set.TIntSet;
 import gnu.trove.set.hash.TIntHashSet;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.ContentType;
 import com.openexchange.folderstorage.Permission;
 import com.openexchange.folderstorage.Type;
+import com.openexchange.folderstorage.database.contentType.InfostoreContentType;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.infostore.InfostoreFacades;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 
@@ -70,6 +76,30 @@ import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class EffectivePermission implements Permission {
+
+    private static final long serialVersionUID = -6459987256871091818L;
+
+    private static final int MODULE_INFOSTORE = InfostoreContentType.getInstance().getModule();
+
+    /**
+     * <code>"9"</code>
+     */
+    private static final String INFOSTORE = Integer.toString(FolderObject.SYSTEM_INFOSTORE_FOLDER_ID);
+
+    /**
+     * <code>"10"</code>
+     */
+    private static final String INFOSTORE_USER = Integer.toString(FolderObject.SYSTEM_USER_INFOSTORE_FOLDER_ID);
+
+    /**
+     * <code>"15"</code>
+     */
+    private static final String INFOSTORE_PUBLIC = Integer.toString(FolderObject.SYSTEM_PUBLIC_INFOSTORE_FOLDER_ID);
+
+    /**
+     * <code>"9"</code>, <code>"10"</code>, and <code>"15"</code>
+     */
+    private static final Set<String> SYSTEM_INFOSTORES = Collections.unmodifiableSet(new HashSet<String>(Arrays.asList(INFOSTORE, INFOSTORE_PUBLIC, INFOSTORE_USER)));
 
     /**
      * The configuration profile of the current logged in user.
@@ -209,7 +239,17 @@ public final class EffectivePermission implements Permission {
         if (!getUserConfig().hasModuleAccess(module)) {
             return false;
         }
-        return allowedContentTypes.isEmpty() ? true : allowedContentTypes.contains(module);
+        if (MODULE_INFOSTORE == module && !InfostoreFacades.isInfoStoreAvailable() && !SYSTEM_INFOSTORES.contains(folderId) && isNumericId()) {
+            return false;
+        }
+        if (!allowedContentTypes.isEmpty() && !allowedContentTypes.contains(module)) {
+            return false;
+        }
+        return true;
+    }
+
+    private boolean isNumericId() {
+        return Tools.getUnsignedInteger(folderId) >= 0;
     }
 
     private UserConfiguration getUserConfig() {

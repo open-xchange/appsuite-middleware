@@ -51,14 +51,16 @@ package com.openexchange.groupware.contact.datasource;
 
 import static com.openexchange.ajax.AJAXServlet.PARAMETER_FOLDERID;
 import static com.openexchange.ajax.AJAXServlet.PARAMETER_ID;
-import gnu.trove.map.TIntObjectMap;
-import gnu.trove.map.hash.TIntObjectHashMap;
+
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import com.openexchange.contact.ContactService;
 import com.openexchange.conversion.Data;
 import com.openexchange.conversion.DataArguments;
 import com.openexchange.conversion.DataExceptionCodes;
@@ -66,8 +68,6 @@ import com.openexchange.conversion.DataProperties;
 import com.openexchange.conversion.DataSource;
 import com.openexchange.conversion.SimpleData;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.contact.ContactInterface;
-import com.openexchange.groupware.contact.ContactInterfaceDiscoveryService;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
@@ -86,7 +86,7 @@ import com.openexchange.tools.versit.converter.OXContainerConverter;
  */
 public final class ContactDataSource implements DataSource {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(ContactDataSource.class));
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(ContactDataSource.class));
 
     private static final Class<?>[] TYPES = { InputStream.class, byte[].class };
 
@@ -134,18 +134,20 @@ public final class ContactDataSource implements DataSource {
          */
         final Contact[] contacts = new Contact[len];
         {
-            final ContactInterfaceDiscoveryService discoveryService = ServerServiceRegistry.getInstance().getService(
-                ContactInterfaceDiscoveryService.class,
-                true);
-            final TIntObjectMap<ContactInterface> tmp = new TIntObjectHashMap<ContactInterface>(len);
+        	final ContactService contactService = ServerServiceRegistry.getInstance().getService(ContactService.class, true);
+//            final ContactInterfaceDiscoveryService discoveryService = ServerServiceRegistry.getInstance().getService(
+//                ContactInterfaceDiscoveryService.class,
+//                true);
+//            final TIntObjectMap<ContactInterface> tmp = new TIntObjectHashMap<ContactInterface>(len);
             for (int i = 0; i < len; i++) {
-                final int folderId = folderIds[i];
-                ContactInterface contactInterface = tmp.get(folderId);
-                if (null == contactInterface) {
-                    contactInterface = discoveryService.newContactInterface(folderId, session);
-                    tmp.put(folderId, contactInterface);
-                }
-                contacts[i] = contactInterface.getObjectById(objectIds[i], folderId);
+            	contacts[i] = contactService.getContact(session, Integer.toString(folderIds[i]), Integer.toString(objectIds[i]));            	
+//                final int folderId = folderIds[i];
+//                ContactInterface contactInterface = tmp.get(folderId);
+//                if (null == contactInterface) {
+//                    contactInterface = discoveryService.newContactInterface(folderId, session);
+//                    tmp.put(folderId, contactInterface);
+//                }
+//                contacts[i] = contactInterface.getObjectById(objectIds[i], folderId);
             }
         }
         /*

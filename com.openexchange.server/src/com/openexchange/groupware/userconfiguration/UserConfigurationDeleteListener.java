@@ -65,7 +65,7 @@ import com.openexchange.groupware.delete.DeleteListener;
  */
 public final class UserConfigurationDeleteListener implements DeleteListener {
 
-	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
+	private static final org.apache.commons.logging.Log LOG = com.openexchange.log.LogFactory
 			.getLog(UserConfigurationDeleteListener.class);
 
 	/**

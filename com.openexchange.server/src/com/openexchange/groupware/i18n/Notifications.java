@@ -602,7 +602,7 @@ public class Notifications implements LocalizableStrings {
      * MESSAGE SUBJECT PREFIXES
      */
 
-    public static final String APPOINTMENT_CREATE_TITLE = "New Appointment";
+    public static final String APPOINTMENT_CREATE_TITLE = "New appointment";
 
     public static final String APPOINTMENT_UPDATE_TITLE = "Appointment changed";
 

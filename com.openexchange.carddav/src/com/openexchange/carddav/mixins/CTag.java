@@ -50,10 +50,11 @@
 package com.openexchange.carddav.mixins;
 
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 import com.openexchange.carddav.GroupwareCarddavFactory;
+import com.openexchange.carddav.resources.CardDAVCollection;
 import com.openexchange.exception.OXException;
+import com.openexchange.log.LogFactory;
 import com.openexchange.webdav.protocol.helpers.SingleXMLPropertyMixin;
 
 /**
@@ -69,42 +70,44 @@ import com.openexchange.webdav.protocol.helpers.SingleXMLPropertyMixin;
  */
 public class CTag extends SingleXMLPropertyMixin {
 
-    private static final Log LOG = LogFactory.getLog(CTag.class);
-
+	protected static final Log LOG = com.openexchange.log.Log.loggerFor(CTag.class);
+	
+	private final GroupwareCarddavFactory factory;
+    private final CardDAVCollection collection;
     private long timestamp = -1;
-    private final GroupwareCarddavFactory factory;
     
-    public CTag(GroupwareCarddavFactory factory) {
+    public CTag(GroupwareCarddavFactory factory, CardDAVCollection collection) {
         super("http://calendarserver.org/ns/", "getctag");
         this.factory = factory;
+        this.collection = collection;
     }
 
     @Override
     protected String getValue() {
-        return "http://www.open-xchange.com/carddav/ctag/aggr_" + getTimestamp();
+        return "http://www.open-xchange.com/carddav/ctag/" + getTimestamp();
     }
-
-    public long getTimestamp() {
+    
+    private long getTimestamp() {
 		if (-1 == this.timestamp) {
-				try {
-					String token = null;
-					final String overrrideSyncToken = this.factory.getOverrideNextSyncToken();
-					if (null != overrrideSyncToken && 0 < overrrideSyncToken.length()) {
-						this.factory.setOverrideNextSyncToken(null);
-						token = overrrideSyncToken;
-					}
-					if (null != token) {
+			try {
+				String token = null;
+				final String overrrideSyncToken = this.factory.getOverrideNextSyncToken();
+				if (null != overrrideSyncToken && 0 < overrrideSyncToken.length()) {
+					this.factory.setOverrideNextSyncToken(null);
+					token = overrrideSyncToken;
+				}
+				if (null != token) {
 					try {
 						this.timestamp = Long.parseLong(token);
-						LOG.debug("Overriding timestamp property to '" + this.timestamp + "' for user '" + this.factory.getUser() + "'.");
-					} catch (final NumberFormatException e) {
+						LOG.debug("Overriding CTag property to '" + timestamp + "' for user '" + factory.getUser() + "'.");
+					} catch (NumberFormatException e) {
 						LOG.warn("Invalid sync token: '" + token + "'.");
 					}
-					}
-					if (-1 == this.timestamp) {
-						this.timestamp = this.factory.getState().getLastModified().getTime();
-					}
-			} catch (final OXException e) {
+				}
+				if (-1 == this.timestamp) {
+					this.timestamp = this.collection.getLastModified().getTime();
+				}
+			} catch (OXException e) {
 		        LOG.error(e.getMessage(), e);
 		        this.timestamp = 0;
 			}

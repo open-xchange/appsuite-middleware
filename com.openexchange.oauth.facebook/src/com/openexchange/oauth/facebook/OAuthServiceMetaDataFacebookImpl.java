@@ -61,6 +61,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.http.deferrer.DeferringURLService;
+import com.openexchange.oauth.API;
 import com.openexchange.oauth.AbstractOAuthServiceMetaData;
 import com.openexchange.oauth.DefaultOAuthToken;
 import com.openexchange.oauth.OAuthConstants;
@@ -115,7 +116,13 @@ public class OAuthServiceMetaDataFacebookImpl extends AbstractOAuthServiceMetaDa
 
     @Override
     public String getScope() {
-        return "offline_access,publish_stream,read_stream,status_update,friends_birthday,friends_work_history,friends_about_me,friends_hometown";
+        return "offline_access,publish_stream,read_stream,status_update,user_about_me,friends_about_me," +
+        		"user_activities,friends_activities,user_birthday,friends_birthday,user_education_history," +
+        		"friends_education_history,user_events,friends_events,user_hometown,friends_hometown," +
+        		"user_interests,friends_interests,user_likes,friends_likes,user_location,friends_location," +
+        		"user_photos,friends_photos,user_relationships,friends_relationships,user_relationship_details," +
+        		"friends_relationship_details,user_status,friends_status,user_videos,friends_videos," +
+        		"user_website,friends_website,user_work_history,friends_work_history,email";
     }
 
     @Override
@@ -160,8 +167,8 @@ public class OAuthServiceMetaDataFacebookImpl extends AbstractOAuthServiceMetaDa
             builder.append("&code=").append(code);
             final URL url = new URL(builder.toString());
             final URLConnection connection = url.openConnection();
-            connection.setConnectTimeout(2500);
-            connection.setReadTimeout(2500);
+            connection.setConnectTimeout(10000);
+            connection.setReadTimeout(10000);
             connection.connect();
             /*
              * Initialize a reader on URL connection...
@@ -202,5 +209,10 @@ public class OAuthServiceMetaDataFacebookImpl extends AbstractOAuthServiceMetaDa
         }
         return new DefaultOAuthToken(token, "");
     }
+
+	@Override
+	public API getAPI() {
+		return API.FACEBOOK;
+	}
 
 }

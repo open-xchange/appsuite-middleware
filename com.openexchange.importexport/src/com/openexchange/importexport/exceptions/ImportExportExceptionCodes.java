@@ -120,10 +120,6 @@ public enum ImportExportExceptionCodes implements OXExceptionCode {
     NO_FIELD_FOR_NAMING_IN_LINE(NO_FIELD_FOR_NAMING_IN_LINE_MSG, CATEGORY_USER_INPUT, 808),
     /** Could not read InputStream as string */
     IOEXCEPTION(IOEXCEPTION_MSG, CATEGORY_ERROR, 902),
-    /** Broken CSV file: Lines have different number of cells, line #1 has %d, line #%d has %d. Is this really a CSV file? */
-    BROKEN_CSV(BROKEN_CSV_MSG, CATEGORY_USER_INPUT, 1000),
-    /** Illegal state: Found data after presumed last line. */
-    DATA_AFTER_LAST_LINE(DATA_AFTER_LAST_LINE_MSG, CATEGORY_ERROR, 1001),
     /** Cannot find an importer for format %s into folders %s */
     NO_IMPORTER(NO_IMPORTER_MSG, CATEGORY_SERVICE_DOWN, 1100),
     /** Cannot find an exporter for folder %s to format %s */
@@ -147,6 +143,9 @@ public enum ImportExportExceptionCodes implements OXExceptionCode {
     NO_FILE_UPLOADED(NO_FILE_UPLOADED_MSG, Category.CATEGORY_ERROR, 1309),
     COULD_NOT_CREATE(COULD_NOT_CREATE_MSG, Category.CATEGORY_ERROR, 1309),
     TRUNCATION(TRUNCATION_MSG, Category.CATEGORY_TRUNCATED, 1310),
+    TEMP_FILE_NOT_FOUND(TEMP_FILE_NOT_FOUND_MSG, Category.CATEGORY_ERROR, 1311),
+    NEED_FOLDER(NEED_FOLDER_MSG, Category.CATEGORY_USER_INPUT, 1312), 
+    IRREGULAR_COLUMN_ID(IRREGULAR_COLUMN_ID_MSG, Category.CATEGORY_USER_INPUT, 1313),
     ;
 
     private String message;

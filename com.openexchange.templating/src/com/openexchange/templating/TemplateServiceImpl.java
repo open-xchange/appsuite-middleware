@@ -73,7 +73,7 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import com.openexchange.log.LogFactory;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
@@ -247,12 +247,12 @@ public class TemplateServiceImpl implements TemplateService {
     protected String loadFromFileSystem(final String defaultTemplateName) throws OXException {
         final File templateFile = getTemplateFile(defaultTemplateName);
         if (!templateFile.exists() || !templateFile.exists() || !templateFile.canRead()) {
-            return "Unfilled Template.";
+        	throw TemplateErrorMessage.TemplateNotFound.create(defaultTemplateName);
         }
         BufferedReader reader = null;
         try {
-            final StringBuilder builder = new StringBuilder();
             reader = new BufferedReader(new FileReader(templateFile));
+            final StringBuilder builder = new StringBuilder();
             String line = null;
             while ((line = reader.readLine()) != null) {
                 builder.append(line).append('\n');
@@ -423,8 +423,8 @@ public class TemplateServiceImpl implements TemplateService {
     }
     
     @Override
-    public TemplatingHelper createHelper(final Object rootObject, final Session session) {
-        return new TemplatingHelperImpl(rootObject, session, this);
+    public TemplatingHelper createHelper(final Object rootObject, final Session session, boolean createCopy) {
+        return new TemplatingHelperImpl(rootObject, session, this, createCopy);
     }
 
 

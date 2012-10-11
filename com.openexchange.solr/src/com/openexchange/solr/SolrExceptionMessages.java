@@ -66,26 +66,24 @@ public final class SolrExceptionMessages implements LocalizableStrings {
         super();
     }
 
-    // Could not find solr core entry for user %1$s and module %2$s in context %3$s.
-    public static final String CORE_ENTRY_NOT_FOUND_MSG = "Did not find solr core entry for user %1$s and module %2$s in context %3$s.";
+    // Could not find Apache Solr Core entry for user %1$s and module %2$s in context %3$s.
+    // Apache Solr Core" is a proper name, no translation applicable
+    public static final String CORE_ENTRY_NOT_FOUND_MSG = "Did not find Apache Solr Core entry for user %1$s and module %2$s in context %3$s.";
 
-    // Could not find solr core store for given attributes. %1$s.
-    public static final String CORE_STORE_ENTRY_NOT_FOUND_MSG = "Could not find solr core store for given attributes. %1$s.";
+    // Could not find Apache Solr Core store for given attributes. %1$s.
+    // "Apache Solr Core" is a proper name, no translation applicable
+    public static final String CORE_STORE_ENTRY_NOT_FOUND_MSG = "Could not find Apache Solr Core store for given attributes. %1$s.";
 
     // All core stores seem to be full.
     public static final String NO_FREE_CORE_STORE_MSG = "All core stores seem to be full.";   
     
-    // This cores instance directory (%1$s) already exists and its structure is inconsistent.
-    public static final String INSTANCE_DIR_EXISTS_MSG = "This cores instance directory (%1$s) already exists and its structure is inconsistent.";
+    // This Apache Solr Core's instance directory (%1$s) already exists and its structure is inconsistent.
+    // Apache Solr Core" is a proper name, no translation applicable
+    public static final String INSTANCE_DIR_EXISTS_MSG = "This Apache Solr Core's instance directory (%1$s) already exists and its structure is inconsistent.";
 
-    // An index fault occurred: %1$s
-    public static final String INDEX_FAULT_MSG = "An index fault occurred: %1$s";
-
-    // The file or directory %1$s does not exist.
-    public static final String FILE_EXISTS_ERROR_MSG = "The file or directory %1$s does not exist.";
-
-    // Could neither delegate solr request to a local nor to a remote server instance.
-    public static final String DELEGATION_ERROR_MSG = "Could neither delegate solr request to a local nor to a remote server instance.";
+    // Could neither delegate Apache Solr request to a local nor to a remote server instance.
+    // "Apache Solr" is a proper name, no translation applicable
+    public static final String DELEGATION_ERROR_MSG = "Could neither delegate Apache Solr request to a local nor to a remote server instance.";
 
     // Could not parse URI: %1$s.
     public static final String URI_PARSE_ERROR_MSG = "Could not parse URI: %1$s.";
@@ -93,13 +91,28 @@ public final class SolrExceptionMessages implements LocalizableStrings {
     // Remote error: %1$s.
     public static final String REMOTE_ERROR_MSG = "Remote error: %1$s.";
 
-    // Could not parse solr core identifier %1$s.
-    public static final String IDENTIFIER_PARSE_ERROR_MSG = "Could not parse solr core identifier %1$s.";
+    // Could not parse Apache Solr Core identifier %1$s.
+    // "Apache Solr Core" is a proper name, no translation applicable
+    public static final String IDENTIFIER_PARSE_ERROR_MSG = "Could not parse Apache Solr Core identifier %1$s.";
 
     // Unknown module: %1$s.
     public static final String UNKNOWN_MODULE_MSG = "Unknown module: %1$s.";
 
-    // Can not reach solr core store. URI %1$s does not lead to an existing directory.
-    public static final String CORE_STORE_NOT_EXISTS_ERROR_MSG = "Can not reach solr core store. URI %1$s does not lead to an existing directory.";
+    // Can not reach Apache Solr Core Store. URI %1$s does not lead to an existing directory.
+    // Apache Solr Core Stores" is a proper name, no translation applicable
+    public static final String CORE_STORE_NOT_EXISTS_ERROR_MSG = "Can not reach Apache Solr Core Store. URI %1$s does not lead to an existing directory.";
+
+    // The affected Apache Solr Core %1$s is not started up yet. Please try again later.
+    // "Apache Solr Core" is a proper name, no translation applicable
+	public static final String CORE_NOT_STARTED_MSG = "The affected Apache Solr Core %1$s is not started up yet. Please try again later.";
+
+	// The document with uuid %1$s could not be found.
+    public static final String DOCUMENT_NOT_FOUND_MSG = "The document with uuid %1$s could not be found.";
+
+    // %1$s is not a valid field for sorting.
+    public static final String INVALID_SORT_FIELD_MSG = "%1$s is not a valid field for sorting.";
+
+    // An error occurred: %1$s
+    public static final String ERROR_MSG = "An error occurred: %1$s";
     
 }

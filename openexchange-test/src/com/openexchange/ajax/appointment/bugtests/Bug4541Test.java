@@ -62,7 +62,7 @@ public class Bug4541Test extends AppointmentTest {
 		loadAppointment = loadAppointment(getWebConversation(), objectId, newFolderId, timeZone, getHostName(), getSessionId());
 		compareObject(appointmentObj, loadAppointment, appointmentObj.getStartDate().getTime(), appointmentObj.getEndDate().getTime());
 
-		deleteAppointment(getWebConversation(), objectId, newFolderId, getHostName(), getSessionId());
+		deleteAppointment(getWebConversation(), objectId, newFolderId, getHostName(), getSessionId(), false);
 		FolderTest.deleteFolder(getWebConversation(), new int[] { newFolderId }, getHostName(), getLogin(), getPassword(), "");
 	}
 }

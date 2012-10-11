@@ -65,7 +65,7 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import com.openexchange.mail.mime.MimeType2ExtMap;
 import com.openexchange.mail.mime.utils.MimeMessageUtility;
-import com.openexchange.mail.text.HTMLProcessing;
+import com.openexchange.mail.text.HtmlProcessing;
 import com.openexchange.messaging.generic.internal.TimeZoneUtils;
 
 /**
@@ -185,12 +185,12 @@ public final class Utility {
         try {
             return future.get();
         } catch (final InterruptedException e) {
-            com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(Utility.class)).error(e.getMessage(), e);
+            com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(Utility.class)).error(e.getMessage(), e);
             Thread.currentThread().interrupt();
             throw new IllegalStateException(e);
         } catch (final ExecutionException e) {
             final Throwable cause = e.getCause();
-            com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(Utility.class)).error(cause.getMessage(), cause);
+            com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(Utility.class)).error(cause.getMessage(), cause);
             return DEFAULT_MAIL_DATE_FORMAT;
         }
     }
@@ -266,7 +266,7 @@ public final class Utility {
      * @see #htmlFormat(String, boolean)
      */
     public static String htmlFormat(final String plainText) {
-        return HTMLProcessing.htmlFormat(plainText);
+        return HtmlProcessing.htmlFormat(plainText);
     }
 
     /**
@@ -278,7 +278,7 @@ public final class Utility {
      * @return properly escaped HTML content
      */
     public static String htmlFormat(final String plainText, final boolean withQuote) {
-        return HTMLProcessing.htmlFormat(plainText, withQuote);
+        return HtmlProcessing.htmlFormat(plainText, withQuote);
     }
 
     /**
@@ -291,7 +291,7 @@ public final class Utility {
         if (htmlContent == null || htmlContent.length() == 0) {
             return "";
         }
-        return HTMLProcessing.html2text(getConformHTML(htmlContent, "UTF-8"), true);
+        return HtmlProcessing.html2text(htmlContent, true);
     }
 
     /**
@@ -304,7 +304,7 @@ public final class Utility {
      * @return The given content with all non-HTML links converted to valid HTML links
      */
     public static String formatHrefLinks(final String content) {
-        return HTMLProcessing.formatHrefLinks(content);
+        return HtmlProcessing.formatHrefLinks(content);
     }
 
     /**
@@ -315,7 +315,7 @@ public final class Utility {
      * @return The HTML content conform to W3C standards
      */
     public static String getConformHTML(final String htmlContent, final String charset) {
-        return HTMLProcessing.getConformHTML(htmlContent, charset);
+        return HtmlProcessing.getConformHTML(htmlContent, charset);
     }
 
     /**
@@ -325,7 +325,7 @@ public final class Utility {
      * @return A newly created DOM document or <code>null</code> if given string cannot be transformed to a DOM document
      */
     public static Document createDOMDocument(final String string) {
-        return HTMLProcessing.createDOMDocument(string);
+        return HtmlProcessing.createDOMDocument(string);
     }
 
     /**
@@ -335,7 +335,7 @@ public final class Utility {
      * @return The pretty-printed XML/HTML string
      */
     public static String prettyPrintXML(final String string) {
-        return HTMLProcessing.prettyPrintXML(string);
+        return HtmlProcessing.prettyPrintXML(string);
     }
 
     /**
@@ -345,7 +345,7 @@ public final class Utility {
      * @return The pretty-printed XML/HTML node
      */
     public static String prettyPrintXML(final Node node) {
-        return HTMLProcessing.prettyPrintXML(node);
+        return HtmlProcessing.prettyPrintXML(node);
     }
 
     /**

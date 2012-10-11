@@ -92,7 +92,7 @@ public class Bug6408Test extends ReminderTest {
 		assertTrue("no reminder find for target id " + targetId + " in response", found);
 
 		deleteReminder(getWebConversation(), reminderArray[pos].getObjectId(), getHostName(), getSessionId());
-		AppointmentTest.deleteAppointment(getWebConversation(), targetId, folderId, getHostName(), getSessionId());
+		AppointmentTest.deleteAppointment(getWebConversation(), targetId, folderId, getHostName(), getSessionId(), false);
 	}
 }
 

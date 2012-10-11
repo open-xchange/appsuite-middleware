@@ -60,7 +60,7 @@ import java.util.List;
  */
 public class Filter {
 
-    private List<Filter> filters = new ArrayList<Filter>();
+    private final List<Filter> filters = new ArrayList<Filter>();
 
     public List<Filter> getFilters() {
         return filters;

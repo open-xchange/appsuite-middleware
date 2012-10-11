@@ -63,22 +63,26 @@ public class CapturingWebdavResponse implements WebdavResponse {
 		this.delegate = delegate;
 	}
 
-	public OutputStream getOutputStream() throws IOException {
+	@Override
+    public OutputStream getOutputStream() throws IOException {
 		if(stream != null) {
 			return stream;
 		}
 		return stream = new CapturingOutputStream(delegate.getOutputStream());
 	}
 
-	public int getStatus() {
+	@Override
+    public int getStatus() {
 		return delegate.getStatus();
 	}
 
-	public void setHeader(final String header, final String value) {
+	@Override
+    public void setHeader(final String header, final String value) {
 		delegate.setHeader(header, value);
 	}
 
-	public void setStatus(final int status) {
+	@Override
+    public void setStatus(final int status) {
 		delegate.setStatus(status);
 	}
 
@@ -150,10 +154,12 @@ public class CapturingWebdavResponse implements WebdavResponse {
 		}
 	}
 
-	public void setContentType(final String s) {
+	@Override
+    public void setContentType(final String s) {
 		delegate.setContentType(s);
 	}
 
+    @Override
     public void sendString(final String notFound) throws IOException {
         final byte[] bytes = notFound.getBytes("UTF-8");
         setHeader("Content-Length", String.valueOf(bytes.length));

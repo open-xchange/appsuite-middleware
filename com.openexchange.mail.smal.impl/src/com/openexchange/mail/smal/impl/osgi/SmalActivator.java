@@ -54,13 +54,12 @@ import java.util.Hashtable;
 import org.osgi.service.event.EventConstants;
 import org.osgi.service.event.EventHandler;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.context.ContextService;
-import com.openexchange.database.CreateTableService;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.groupware.delete.DeleteListener;
 import com.openexchange.groupware.update.UpdateTaskProviderService;
 import com.openexchange.index.IndexFacadeService;
-import com.openexchange.langdetect.LanguageDetectionService;
 import com.openexchange.mail.api.MailProvider;
 import com.openexchange.mail.smal.SmalAccessService;
 import com.openexchange.mail.smal.impl.SmalProvider;
@@ -68,9 +67,8 @@ import com.openexchange.mail.smal.impl.SmalServiceLookup;
 import com.openexchange.mail.smal.impl.index.IndexEventHandler;
 import com.openexchange.mail.smal.impl.internal.SmalDeleteListenerImpl;
 import com.openexchange.mail.smal.impl.internal.SmalUpdateTaskProviderServiceImpl;
-import com.openexchange.mail.smal.impl.internal.tasks.CreateMailSyncTable;
+import com.openexchange.mail.smal.impl.internal.tasks.DropMailSyncTable;
 import com.openexchange.mail.smal.impl.internal.tasks.SMALCheckTableTask;
-import com.openexchange.mail.smal.impl.internal.tasks.SMALCreateTableTask;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.service.indexing.IndexingService;
@@ -99,7 +97,7 @@ public class SmalActivator extends HousekeepingActivator {
     @Override
     protected Class<?>[] getNeededServices() {
         return new Class<?>[] {
-            ConfigurationService.class, ThreadPoolService.class, TimerService.class, LanguageDetectionService.class };
+            ConfigurationService.class, ConfigViewFactory.class, ThreadPoolService.class, TimerService.class };
     }
 
     @Override
@@ -138,10 +136,9 @@ public class SmalActivator extends HousekeepingActivator {
          * Register update task, create table job and delete listener
          */
         {
-            registerService(CreateTableService.class, new CreateMailSyncTable());
             registerService(UpdateTaskProviderService.class, new SmalUpdateTaskProviderServiceImpl(
-                new SMALCreateTableTask(),
-                new SMALCheckTableTask()));
+                new SMALCheckTableTask(),
+                new DropMailSyncTable()));
             registerService(DeleteListener.class, new SmalDeleteListenerImpl());
         }
     }

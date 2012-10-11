@@ -125,7 +125,7 @@ public final class VirtualFolderDeleteListener implements DeleteListener {
                 try {
                     stmt.close();
                 } catch (final SQLException e) {
-                    com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(VirtualFolderDeleteListener.class)).error(e.getMessage(), e);
+                    com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(VirtualFolderDeleteListener.class)).error(e.getMessage(), e);
                 }
             }
         }

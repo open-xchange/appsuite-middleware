@@ -38,19 +38,19 @@ public class ListTest extends AbstractContactTest {
 
 		// Check order of returned contacts
 		for (int i = 0; i < contactArray.length; i++) {
-            int[] ids = objectIdAndFolderId[i];
+            final int[] ids = objectIdAndFolderId[i];
             assertTrue("Returned contacts object id differs from the requested one.", ids[0] == contactArray[i].getObjectID());
             assertTrue("Returned contacts folder id differs from the requested one.", ids[1] == contactArray[i].getParentFolderID());
         }
 	}
 
 	public void testSortDuration() throws Exception {
-	    int size = 10000;
-	    List<Contact> contacts = new ArrayList<Contact>();
-	    int[][] objectIdsAndFolderIds = new int[size][2];
+	    final int size = 10000;
+	    final List<Contact> contacts = new ArrayList<Contact>();
+	    final int[][] objectIdsAndFolderIds = new int[size][2];
 	    for (int i = 0; i < size; i++) {
-	        int objectId = (size - 1) - i;
-	        Contact contact = createContactObject("testList");
+	        final int objectId = (size - 1) - i;
+	        final Contact contact = createContactObject("testList");
 	        contact.setObjectID(objectId);
             contacts.add(contact);
 
@@ -58,7 +58,7 @@ public class ListTest extends AbstractContactTest {
         }
 
 	    // Sort loaded contacts in the order they were requested
-	    long start = System.currentTimeMillis();
+	    final long start = System.currentTimeMillis();
         final List<Contact> sortedContacts = new ArrayList<Contact>(contacts.size());
         for (int i = 0; i < objectIdsAndFolderIds.length; i++) {
             final int[] objectIdsAndFolderId = objectIdsAndFolderIds[i];
@@ -72,8 +72,8 @@ public class ListTest extends AbstractContactTest {
                 }
             }
         }
-        long end = System.currentTimeMillis();
-        long diff = end -start;
+        final long end = System.currentTimeMillis();
+        final long diff = end -start;
 
 	    System.out.println("Duration: " + diff);
 	}
@@ -116,7 +116,7 @@ public class ListTest extends AbstractContactTest {
 		contactArray = listContact(objectIdAndFolderId3, cols);
 		assertEquals("check response array", 2, contactArray.length);
 
-		deleteContact(objectId, contactFolderId);
+		deleteContact(objectId, contactFolderId, true);
 	}
 
     // Node 2652
@@ -139,7 +139,7 @@ public class ListTest extends AbstractContactTest {
                 assertNotNull(objectData.opt(2));
             }
         } finally {
-            deleteContact(objectId, contactFolderId);
+            deleteContact(objectId, contactFolderId, true);
         }
     }
 

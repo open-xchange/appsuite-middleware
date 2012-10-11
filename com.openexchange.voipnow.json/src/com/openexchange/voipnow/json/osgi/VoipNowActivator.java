@@ -52,6 +52,7 @@ package com.openexchange.voipnow.json.osgi;
 import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
 import com.openexchange.api2.ContactInterfaceFactory;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.groupware.contact.ContactInterfaceDiscoveryService;
 import com.openexchange.groupware.settings.PreferencesItemService;
 import com.openexchange.osgi.RegistryServiceTrackerCustomizer;
@@ -70,6 +71,11 @@ import com.openexchange.voipnow.json.services.ServiceRegistry;
 public class VoipNowActivator extends AJAXModuleActivator {
 
     /**
+     * The {@link DefaultDeferringURLService} reference.
+     */
+    public static final java.util.concurrent.atomic.AtomicReference<DispatcherPrefixService> PREFIX = new java.util.concurrent.atomic.AtomicReference<DispatcherPrefixService>();
+
+    /**
      * Initializes a new {@link VoipNowActivator}.
      */
     public VoipNowActivator() {
@@ -78,12 +84,13 @@ public class VoipNowActivator extends AJAXModuleActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return EMPTY_CLASSES;
+        return new Class<?>[] { DispatcherPrefixService.class };
     }
 
     @Override
     protected void startBundle() throws Exception {
         try {
+            PREFIX.set(getService(DispatcherPrefixService.class));
             /*
              * Register user multiple service
              */
@@ -117,7 +124,7 @@ public class VoipNowActivator extends AJAXModuleActivator {
             openTrackers();
         } catch (final Throwable e) {
             final org.apache.commons.logging.Log LOG =
-                com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(VoipNowActivator.class));
+                com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(VoipNowActivator.class));
             LOG.error(e.getMessage(), e);
             // throw e;
         }
@@ -127,9 +134,10 @@ public class VoipNowActivator extends AJAXModuleActivator {
     protected void stopBundle() throws Exception {
         try {
             cleanUp();
+            PREFIX.set(null);
         } catch (final Exception e) {
             final org.apache.commons.logging.Log LOG =
-                com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(VoipNowActivator.class));
+                com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(VoipNowActivator.class));
             LOG.error(e.getMessage(), e);
             throw e;
         }

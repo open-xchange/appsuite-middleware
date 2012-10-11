@@ -54,24 +54,15 @@ import java.util.TimeZone;
 
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.api2.RdbContactSQLImpl;
-import com.openexchange.contact.ContactFieldOperand;
 import com.openexchange.contacts.json.ContactRequest;
 import com.openexchange.documentation.RequestMethod;
 import com.openexchange.documentation.annotations.Action;
 import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.contact.ContactExceptionCodes;
 import com.openexchange.groupware.contact.ContactInterface;
-import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
-import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.search.CompositeSearchTerm;
-import com.openexchange.search.CompositeSearchTerm.CompositeOperation;
-import com.openexchange.search.SingleSearchTerm;
-import com.openexchange.search.internal.operands.ConstantOperand;
 import com.openexchange.server.ServiceLookup;
-import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.session.ServerSession;
 
 
@@ -115,30 +106,9 @@ public class GetUserAction extends ContactAction {
     
     @Override
     protected AJAXRequestResult perform2(final ContactRequest request) throws OXException {
-    	final int userID = Integer.parseInt(request.getObjectID());    	
-        final SearchIterator<Contact> contacts = getContactService().searchContacts(request.getSession(), getSearchTermForUser(userID));
-    	final Contact contact;
-        if (null != contacts && contacts.hasNext()) {
-    		contact = contacts.next();
-    	} else {
-    		throw ContactExceptionCodes.CONTACT_NOT_FOUND.create(userID, request.getSession().getContextId());
-    	}
-        final Date lastModified = contact.getLastModified();
-        applyTimezoneOffset(contact, request.getTimeZone());
-        return new AJAXRequestResult(contact, lastModified, "contact");
+    	final int userID = Integer.parseInt(request.getObjectID());
+    	final Contact contact = getContactService().getUser(request.getSession(), userID);
+        return new AJAXRequestResult(contact, contact.getLastModified(), "contact");
     }
     
-    private static CompositeSearchTerm getSearchTermForUser(final int userID) {
-    	final CompositeSearchTerm andTerm = new CompositeSearchTerm(CompositeOperation.AND);
-		final SingleSearchTerm folderIDTerm = new SingleSearchTerm(SingleSearchTerm.SingleOperation.EQUALS);
-		folderIDTerm.addOperand(new ContactFieldOperand(ContactField.FOLDER_ID)); 
-		folderIDTerm.addOperand(new ConstantOperand<String>(Integer.toString(FolderObject.SYSTEM_LDAP_FOLDER_ID)));
-		andTerm.addSearchTerm(folderIDTerm);
-    	final SingleSearchTerm userIDTerm = new SingleSearchTerm(SingleSearchTerm.SingleOperation.EQUALS);
-		userIDTerm.addOperand(new ContactFieldOperand(ContactField.INTERNAL_USERID)); 
-		userIDTerm.addOperand(new ConstantOperand<Integer>(userID));
-    	andTerm.addSearchTerm(userIDTerm);
-		return andTerm;
-    }
-
 }

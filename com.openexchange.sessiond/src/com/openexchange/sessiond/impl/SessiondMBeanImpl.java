@@ -94,10 +94,12 @@ public final class SessiondMBeanImpl extends StandardMBean implements SessiondMB
         SessionHandler.removeContextSessions(contextId, true);
     }
 
+    @Override
     public int[] getNumberOfShortTermSessions() {
         return SessionHandler.getNumberOfShortTermSessions();
     }
 
+    @Override
     public int[] getNumberOfLongTermSessions() {
         return SessionHandler.getNumberOfLongTermSessions();
     }

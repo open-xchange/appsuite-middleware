@@ -57,6 +57,7 @@ import java.util.TimeZone;
 import com.openexchange.ajax.AppointmentTest;
 import com.openexchange.ajax.ContactTest;
 import com.openexchange.ajax.ResourceTest;
+import com.openexchange.ajax.framework.AJAXClient.User;
 import com.openexchange.ajax.group.GroupTest;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.CalendarObject;
@@ -118,7 +119,7 @@ public class UpdateTest extends AppointmentTest {
         appointmentObj.removeParentFolderID();
 
         updateAppointment(getWebConversation(), appointmentObj, objectId, appointmentFolderId, timeZone, PROTOCOL + getHostName(), getSessionId());
-        deleteAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getSessionId());
+        deleteAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getSessionId(), false);
     }
 
     public void testUpdateAppointmentWithParticipant() throws Exception {
@@ -146,7 +147,7 @@ public class UpdateTest extends AppointmentTest {
         appointmentObj.removeParentFolderID();
 
         updateAppointment(getWebConversation(), appointmentObj, objectId, appointmentFolderId, timeZone, PROTOCOL + getHostName(), getSessionId());
-        deleteAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getSessionId());
+        deleteAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getSessionId(), false);
     }
 
     public void testUpdateRecurrenceWithPosition() throws Exception {
@@ -169,6 +170,7 @@ public class UpdateTest extends AppointmentTest {
         appointmentObj.setParentFolderID(appointmentFolderId);
         appointmentObj.setRecurrenceType(Appointment.DAILY);
         appointmentObj.setInterval(1);
+        appointmentObj.setOrganizer(User.User1.name());
         appointmentObj.setUntil(until);
         appointmentObj.setIgnoreConflicts(true);
         final int objectId = insertAppointment(getWebConversation(), appointmentObj, timeZone, PROTOCOL + getHostName(), getSessionId());
@@ -187,6 +189,7 @@ public class UpdateTest extends AppointmentTest {
         appointmentObj.setParentFolderID(appointmentFolderId);
         appointmentObj.setRecurrencePosition(changeExceptionPosition);
         appointmentObj.setIgnoreConflicts(true);
+        appointmentObj.setOrganizer(User.User1.name());
 
         final int newObjectId = updateAppointment(getWebConversation(), appointmentObj, objectId, appointmentFolderId, timeZone, PROTOCOL + getHostName(), getSessionId());
         assertFalse("object id of the update is equals with the old object id", newObjectId == objectId);
@@ -197,7 +200,7 @@ public class UpdateTest extends AppointmentTest {
         // Loaded change exception MUST NOT contain any recurrence information except recurrence identifier and position.
         compareObject(appointmentObj, loadAppointment, newStartTime, newEndTime);
 
-        deleteAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getSessionId());
+        deleteAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getSessionId(), false);
     }
 
     // Node 356
@@ -229,6 +232,7 @@ public class UpdateTest extends AppointmentTest {
 
         appointmentObj.setStartDate(calendarStart.getTime());
         appointmentObj.setEndDate(calendarEnd.getTime());
+        appointmentObj.setOrganizer(User.User1.name());
 
         final Calendar recurrenceStart = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
         final int startDay = calendarStart.get(Calendar.DAY_OF_MONTH);
@@ -263,7 +267,7 @@ public class UpdateTest extends AppointmentTest {
 
         assertTrue("object with object_id: " + objectId + " not found in response", found);
 
-        deleteAppointment(getWebConversation(), objectId, appointmentFolderId, getHostName(), getSessionId());
+        deleteAppointment(getWebConversation(), objectId, appointmentFolderId, getHostName(), getSessionId(), false);
     }
 
     // Bug 12700    FIXME

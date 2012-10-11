@@ -58,6 +58,7 @@ import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.usersetting.UserSettingMailStorage;
+import com.openexchange.session.PutIfAbsent;
 import com.openexchange.session.Session;
 
 /**
@@ -66,10 +67,10 @@ import com.openexchange.session.Session;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class ServerSessionAdapter implements ServerSession {
+public class ServerSessionAdapter implements ServerSession, PutIfAbsent {
 
     private static final org.apache.commons.logging.Log LOG =
-        com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(ServerSessionAdapter.class));
+        com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(ServerSessionAdapter.class));
 
     /**
      * Gets the server session for specified session.
@@ -146,10 +147,13 @@ public class ServerSessionAdapter implements ServerSession {
      * Initializes a new {@link ServerSessionAdapter}.
      * 
      * @param session The delegate session
-     * @throws OXException If context look-up fails
+     * @throws OXException If initialization fails
      */
     public ServerSessionAdapter(final Session session) throws OXException {
         super();
+        if (null == session) {
+            throw new OXException(new IllegalArgumentException("Session is null."));
+        }
         if (ServerSession.class.isInstance(session)) {
             this.serverSession = (ServerSession) session;
         } else {
@@ -163,9 +167,13 @@ public class ServerSessionAdapter implements ServerSession {
      * 
      * @param session The delegate session
      * @param ctx The session's context object
+     * @throws IllegalArgumentException If session argument is <code>null</code>
      */
     public ServerSessionAdapter(final Session session, final Context ctx) {
         super();
+        if (null == session) {
+            throw new IllegalArgumentException("Session is null.");
+        }
         if (ServerSession.class.isInstance(session)) {
             this.serverSession = (ServerSession) session;
         } else {
@@ -180,9 +188,13 @@ public class ServerSessionAdapter implements ServerSession {
      * @param session The delegate session
      * @param ctx The session's context object
      * @param user The session's user object
+     * @throws IllegalArgumentException If session argument is <code>null</code>
      */
     public ServerSessionAdapter(final Session session, final Context ctx, final User user) {
         super();
+        if (null == session) {
+            throw new IllegalArgumentException("Session is null.");
+        }
         if (ServerSession.class.isInstance(session)) {
             this.serverSession = (ServerSession) session;
         } else {
@@ -198,9 +210,13 @@ public class ServerSessionAdapter implements ServerSession {
      * @param session The delegate session
      * @param ctx The session's context object
      * @param user The session's user object
+     * @throws IllegalArgumentException If session argument is <code>null</code>
      */
     public ServerSessionAdapter(final Session session, final Context ctx, final User user, final UserConfiguration userConfiguration) {
         super();
+        if (null == session) {
+            throw new IllegalArgumentException("Session is null.");
+        }
         if (ServerSession.class.isInstance(session)) {
             this.serverSession = (ServerSession) session;
         } else {
@@ -274,6 +290,20 @@ public class ServerSessionAdapter implements ServerSession {
     @Override
     public void setParameter(final String name, final Object value) {
         session().setParameter(name, value);
+    }
+
+    @Override
+    public Object setParameterIfAbsent(String name, Object value) {
+        final Session session = session();
+        if (session instanceof PutIfAbsent) {
+            return ((PutIfAbsent) session).setParameterIfAbsent(name, value);
+        }
+        final Object prev = session.getParameter(name);
+        if (null == prev) {
+            session.setParameter(name, value);
+            return null;
+        }
+        return prev;
     }
 
     @Override

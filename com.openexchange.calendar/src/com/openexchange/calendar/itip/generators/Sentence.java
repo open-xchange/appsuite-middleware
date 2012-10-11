@@ -63,10 +63,10 @@ import com.openexchange.i18n.tools.StringHelper;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class Sentence {
-    private String message;
-    private List<Object> arguments = new ArrayList<Object>();
-    private List<ArgumentType> types = new ArrayList<ArgumentType>();
-    private List<Object[]> extra = new ArrayList<Object[]>();
+    private final String message;
+    private final List<Object> arguments = new ArrayList<Object>();
+    private final List<ArgumentType> types = new ArrayList<ArgumentType>();
+    private final List<Object[]> extra = new ArrayList<Object[]>();
     
     public Sentence(String message) {
         this.message = message;

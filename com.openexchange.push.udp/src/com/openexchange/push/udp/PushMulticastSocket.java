@@ -57,7 +57,7 @@ import java.net.SocketException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import com.openexchange.log.LogFactory;
 import com.openexchange.push.udp.registry.PushServiceRegistry;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.threadpool.ThreadPools;
@@ -74,7 +74,7 @@ public class PushMulticastSocket implements Runnable {
 
     private Future<Object> thread;
 
-    private static MulticastSocket multicastSocket;
+    private static volatile MulticastSocket multicastSocket;
 
     private boolean running = true;
 

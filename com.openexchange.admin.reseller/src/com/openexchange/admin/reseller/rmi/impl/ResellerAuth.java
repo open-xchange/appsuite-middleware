@@ -81,6 +81,7 @@ public class ResellerAuth extends OXCommonImpl implements BasicAuthenticatorPlug
     /* (non-Javadoc)
      * @see com.openexchange.admin.plugins.OXBasicAuthenticatorPluginInterface#doAuthentication(com.openexchange.admin.rmi.dataobjects.Credentials)
      */
+    @Override
     public void doAuthentication(Credentials authdata) throws InvalidCredentialsException {
         try {
             doNullCheck(authdata);

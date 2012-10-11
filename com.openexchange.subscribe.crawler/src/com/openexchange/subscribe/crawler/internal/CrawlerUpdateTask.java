@@ -63,7 +63,7 @@ import java.util.HashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import com.openexchange.log.LogFactory;
 import org.ho.yaml.Yaml;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.subscribe.crawler.CrawlerDescription;
@@ -157,15 +157,15 @@ public class CrawlerUpdateTask implements Runnable {
                 currentCrawlers.put(crawler.getId(), crawler);
             }
 
-            CrawlerDescription possibleNewCrawlerDescription = (CrawlerDescription) Yaml.load(crawlerDescriptionString);
+            CrawlerDescription possibleNewCrawlerDescription = Yaml.loadType(crawlerDescriptionString, CrawlerDescription.class);
             CrawlerDescription currentCrawlerDescription = currentCrawlers.get(possibleNewCrawlerDescription.getId());
             // Check each file if it is compatible and of higher priority
             if (possibleNewCrawlerDescription != null) {
                 LOG.info("There is a possible new crawler description : " + ymlFilename);
                 // is it compatible to the installed API?
-                if (possibleNewCrawlerDescription.getCrawlerApiVersion() <= activator.getCRAWLER_API_VERSION()) {
+                if (possibleNewCrawlerDescription.getCrawlerApiVersion() <= Activator.getCRAWLER_API_VERSION()) {
                     LOG.info("The API version fits");
-                    final String path = config.getProperty(Activator.PATH_PROPERTY);
+                    final String path = config.getProperty(Activator.DIR_NAME_PROPERTY);
                     // it is an updated description for an existing crawler
                     if (currentCrawlerDescription != null) {
                         LOG.info("There is an old description that could be replaced");
@@ -173,7 +173,7 @@ public class CrawlerUpdateTask implements Runnable {
                             LOG.info("The priority is higher than the existing file so it will be replaced");
                             //removal needs to happen before saving in case of the filename being the same
                             activator.removeCrawlerFromFilesystem(config, possibleNewCrawlerDescription.getId());
-                            Yaml.dump(possibleNewCrawlerDescription, new File(path + ymlFilename));
+                            Yaml.dump(possibleNewCrawlerDescription, new File(config.getDirectory(path), ymlFilename));
                             activator.restartSingleCrawler(possibleNewCrawlerDescription.getId(), config);
                         } else {
                             LOG.info("The priority is lower than that of the existing file so nothing will be done");
@@ -181,10 +181,10 @@ public class CrawlerUpdateTask implements Runnable {
                         // it is a description for a completely new crawler
                     } else {
                         // only download configurations for new crawlers if this is enabled by configuration-file
-                        boolean onlyUpdateInstalled = Boolean.parseBoolean(config.getProperty(activator.ONLY_UPDATE_INSTALLED));
+                        boolean onlyUpdateInstalled = Boolean.parseBoolean(config.getProperty(Activator.ONLY_UPDATE_INSTALLED));
                         if (!onlyUpdateInstalled){
                             LOG.info("It is a completely new crawler and will be saved");
-                            Yaml.dump(possibleNewCrawlerDescription, new File(path + ymlFilename));
+                            Yaml.dump(possibleNewCrawlerDescription, new File(config.getDirectory(path), ymlFilename));
                             activator.restartSingleCrawler(possibleNewCrawlerDescription.getId(), config);
                         } else {
                             LOG.info("Configuration forbids to install any crawlers that are not updates to existing services. Nothing will be done.");

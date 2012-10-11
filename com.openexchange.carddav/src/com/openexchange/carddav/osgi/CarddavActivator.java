@@ -1,9 +1,7 @@
 package com.openexchange.carddav.osgi;
 
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.osgi.service.http.HttpService;
-import com.openexchange.carddav.mixins.AddressbookHomeSet;
 import com.openexchange.carddav.servlet.CardDAV;
 import com.openexchange.carddav.servlet.CarddavPerformer;
 import com.openexchange.config.cascade.ConfigViewFactory;
@@ -12,15 +10,14 @@ import com.openexchange.folderstorage.FolderService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.user.UserService;
 import com.openexchange.webdav.directory.PathRegistration;
-import com.openexchange.webdav.protocol.helpers.PropertyMixin;
 import com.openexchange.webdav.protocol.osgi.OSGiPropertyMixin;
 
 public class CarddavActivator extends HousekeepingActivator {
 
-    private static final Log LOG = LogFactory.getLog(CarddavActivator.class);
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(CarddavActivator.class);
     private static final Class<?>[] NEEDED = new Class[] { HttpService.class, FolderService.class, ConfigViewFactory.class, UserService.class, ContactService.class };
 
-    private OSGiPropertyMixin mixin;
+    private volatile OSGiPropertyMixin mixin;
 
     @Override
     protected Class<?>[] getNeededServices() {
@@ -36,10 +33,10 @@ public class CarddavActivator extends HousekeepingActivator {
             getService(HttpService.class).registerServlet("/servlet/dav/carddav", new CardDAV(), null, null);
             
             CarddavPerformer performer = CarddavPerformer.getInstance();
-            mixin = new OSGiPropertyMixin(context, performer);
+            final OSGiPropertyMixin mixin = new OSGiPropertyMixin(context, performer);
             performer.setGlobalMixins(mixin);
+            this.mixin = mixin;
             
-            registerService(PropertyMixin.class, new AddressbookHomeSet());
             registerService(PathRegistration.class, new PathRegistration("carddav"));
 
             openTrackers();
@@ -50,7 +47,11 @@ public class CarddavActivator extends HousekeepingActivator {
     
     @Override
     protected void stopBundle() throws Exception {
-        mixin.close();
+        final OSGiPropertyMixin mixin = this.mixin;
+        if (null != mixin) {
+            mixin.close();
+            this.mixin = null;
+        }
         super.stopBundle();
     }
 

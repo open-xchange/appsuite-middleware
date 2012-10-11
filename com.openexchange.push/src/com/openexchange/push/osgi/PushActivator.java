@@ -82,7 +82,7 @@ public final class PushActivator extends HousekeepingActivator {
     @Override
     public void startBundle() throws Exception {
         final org.apache.commons.logging.Log log =
-            com.openexchange.log.Log.valueOf(com.openexchange.log.Log.valueOf(com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(PushActivator.class))));
+            com.openexchange.log.Log.valueOf(com.openexchange.log.Log.valueOf(com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(PushActivator.class))));
         try {
             if (log.isInfoEnabled()) {
                 log.info("starting bundle: com.openexchange.push");
@@ -117,7 +117,7 @@ public final class PushActivator extends HousekeepingActivator {
     @Override
     public void stopBundle() throws Exception {
         final org.apache.commons.logging.Log log =
-            com.openexchange.log.Log.valueOf(com.openexchange.log.Log.valueOf(com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(PushActivator.class))));
+            com.openexchange.log.Log.valueOf(com.openexchange.log.Log.valueOf(com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(PushActivator.class))));
         try {
             if (log.isInfoEnabled()) {
                 log.info("stopping bundle: com.openexchange.push");

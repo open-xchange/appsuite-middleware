@@ -65,6 +65,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.TimeZone;
+
 import net.fortuna.ical4j.data.CalendarBuilder;
 import net.fortuna.ical4j.data.ParserException;
 import net.fortuna.ical4j.model.Component;
@@ -72,6 +73,7 @@ import net.fortuna.ical4j.model.Parameter;
 import net.fortuna.ical4j.model.Property;
 import net.fortuna.ical4j.model.component.CalendarComponent;
 import net.fortuna.ical4j.model.component.VEvent;
+import net.fortuna.ical4j.model.component.VFreeBusy;
 import net.fortuna.ical4j.model.component.VToDo;
 import net.fortuna.ical4j.model.property.Completed;
 import net.fortuna.ical4j.model.property.DateProperty;
@@ -79,19 +81,25 @@ import net.fortuna.ical4j.model.property.DtEnd;
 import net.fortuna.ical4j.model.property.DtStart;
 import net.fortuna.ical4j.model.property.Due;
 import net.fortuna.ical4j.util.CompatibilityHints;
+
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+
 import com.openexchange.data.conversion.ical.ConversionError;
 import com.openexchange.data.conversion.ical.ConversionWarning;
+import com.openexchange.data.conversion.ical.FreeBusyInformation;
 import com.openexchange.data.conversion.ical.ICalParser;
 import com.openexchange.data.conversion.ical.ical4j.internal.AppointmentConverters;
 import com.openexchange.data.conversion.ical.ical4j.internal.AttributeConverter;
+import com.openexchange.data.conversion.ical.ical4j.internal.FreeBusyConverters;
 import com.openexchange.data.conversion.ical.ical4j.internal.ParserTools;
 import com.openexchange.data.conversion.ical.ical4j.internal.TaskConverters;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.container.Appointment;
+import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.tasks.Task;
+import com.openexchange.log.LogFactory;
+
 import edu.emory.mathcs.backport.java.util.Arrays;
 
 /**
@@ -108,13 +116,13 @@ public class ICal4JParser implements ICalParser {
 
     private static final Map<String, Integer> WEEKDAYS = new HashMap<String, Integer>(7);
     static {
-        WEEKDAYS.put("MO", Integer.valueOf(Appointment.MONDAY));
-        WEEKDAYS.put("TU", Integer.valueOf(Appointment.TUESDAY));
-        WEEKDAYS.put("WE", Integer.valueOf(Appointment.WEDNESDAY));
-        WEEKDAYS.put("TH", Integer.valueOf(Appointment.THURSDAY));
-        WEEKDAYS.put("FR", Integer.valueOf(Appointment.FRIDAY));
-        WEEKDAYS.put("SA", Integer.valueOf(Appointment.SATURDAY));
-        WEEKDAYS.put("SO", Integer.valueOf(Appointment.SUNDAY));
+        WEEKDAYS.put("MO", Integer.valueOf(CalendarObject.MONDAY));
+        WEEKDAYS.put("TU", Integer.valueOf(CalendarObject.TUESDAY));
+        WEEKDAYS.put("WE", Integer.valueOf(CalendarObject.WEDNESDAY));
+        WEEKDAYS.put("TH", Integer.valueOf(CalendarObject.THURSDAY));
+        WEEKDAYS.put("FR", Integer.valueOf(CalendarObject.FRIDAY));
+        WEEKDAYS.put("SA", Integer.valueOf(CalendarObject.SATURDAY));
+        WEEKDAYS.put("SO", Integer.valueOf(CalendarObject.SUNDAY));
     }
 
     public ICal4JParser() {
@@ -174,6 +182,61 @@ public class ICal4JParser implements ICalParser {
 
         return appointments;
     }
+
+	@Override
+	public List<FreeBusyInformation> parseFreeBusy(String icalText, TimeZone defaultTZ, Context ctx, List<ConversionError> errors, List<ConversionWarning> warnings) throws ConversionError {
+        try {
+            return parseFreeBusy(new ByteArrayInputStream(icalText.getBytes(UTF8)), defaultTZ, ctx, errors, warnings);
+        } catch (UnsupportedEncodingException e) {
+            LOG.error(e.getMessage(), e);
+        }
+        return Collections.emptyList();
+	}
+
+	@Override
+	public List<FreeBusyInformation> parseFreeBusy(InputStream ical, TimeZone defaultTZ, Context ctx, List<ConversionError> errors, List<ConversionWarning> warnings) throws ConversionError {
+        List<FreeBusyInformation> fbInfos = new ArrayList<FreeBusyInformation>();
+        BufferedReader reader = null;
+        try {
+            reader = new BufferedReader(new InputStreamReader(ical, UTF8));
+            while (true) {
+                net.fortuna.ical4j.model.Calendar calendar = parse(reader);
+                if (null == calendar) { 
+                	break; 
+                }
+                int i = 0;
+                for (Object componentObj : calendar.getComponents("VFREEBUSY")) {
+                    Component vevent = (Component) componentObj;
+                    try {
+                        fbInfos.add(convertFreeBusy(i++, (VFreeBusy)vevent, defaultTZ, ctx, warnings));
+                    } catch (ConversionError conversionError) {
+                        errors.add(conversionError);
+                    }
+                }
+            }
+        } catch (UnsupportedEncodingException e) {
+            LOG.error(e.getMessage(), e);
+            // IGNORE
+        } catch (ConversionError e) {
+        	errors.add(e);
+        } finally {
+            closeSafe(reader);
+        }
+        return fbInfos;
+	}
+	
+	private FreeBusyInformation convertFreeBusy(int index, VFreeBusy freeBusy, TimeZone defaultTZ, Context ctx, List<ConversionWarning> warnings) throws ConversionError {
+        FreeBusyInformation fbInfo = new FreeBusyInformation();
+        TimeZone tz = determineTimeZone(freeBusy, defaultTZ);
+        for (AttributeConverter<VFreeBusy, FreeBusyInformation> converter : FreeBusyConverters.REQUEST) {
+            if (converter.hasProperty(freeBusy)) {
+				converter.parse(index, freeBusy, fbInfo, tz, ctx, warnings);
+            }
+        }
+        fbInfo.setTimezone(getTimeZoneID(tz));
+        return fbInfo;
+
+	}
 
     @Override
     public String parseProperty(final String propertyName, final InputStream ical) {
@@ -287,7 +350,7 @@ public class ICal4JParser implements ICalParser {
 
     private static final TimeZone determineTimeZone(final CalendarComponent component,
         final TimeZone defaultTZ){
-        for (final String name : new String[] { DtStart.DTSTART, DtEnd.DTEND, Due.DUE, Completed.COMPLETED }) {
+        for (final String name : new String[] { Property.DTSTART, Property.DTEND, Property.DUE, Property.COMPLETED }) {
             final DateProperty dateProp = (DateProperty) component.getProperty(name);
             if (dateProp != null) {
                 return chooseTimeZone(dateProp, defaultTZ);

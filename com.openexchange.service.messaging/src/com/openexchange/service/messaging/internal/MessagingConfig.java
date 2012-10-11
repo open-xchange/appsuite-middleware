@@ -57,7 +57,7 @@ import java.util.Collections;
 import java.util.List;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
-import com.openexchange.service.messaging.MessagingServiceExceptionCodes;
+import com.openexchange.service.messaging.MessagingServiceExceptionCode;
 
 /**
  * {@link MessagingConfig} - The configuration for messaging service.
@@ -66,7 +66,7 @@ import com.openexchange.service.messaging.MessagingServiceExceptionCodes;
  */
 public final class MessagingConfig {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(MessagingConfig.class));
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(MessagingConfig.class));
 
     private static volatile MessagingConfig instance;
 
@@ -145,9 +145,9 @@ public final class MessagingConfig {
                 }
             }
         } catch (final RuntimeException e) {
-            throw MessagingServiceExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+            throw MessagingServiceExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
         } catch (final UnknownHostException e) {
-            throw MessagingServiceExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+            throw MessagingServiceExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
     }
 

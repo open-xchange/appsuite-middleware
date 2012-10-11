@@ -49,12 +49,14 @@
 
 package com.openexchange.folderstorage;
 
+import java.io.Serializable;
+
 /**
  * {@link Permission} - A folder permission.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface Permission extends Cloneable {
+public interface Permission extends Cloneable, Serializable {
 
     /**
      * The constant for no permission at all.

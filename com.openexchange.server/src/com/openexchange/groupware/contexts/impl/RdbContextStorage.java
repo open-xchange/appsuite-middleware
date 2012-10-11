@@ -211,7 +211,9 @@ public class RdbContextStorage extends ContextStorage {
             throw ContextExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
             closeSQLStuff(result, stmt);
-            DBPool.closeReaderSilent(ctx, con);
+            if (null != con) {
+                DBPool.closeReaderSilent(ctx, con);
+            }
         }
     }
 

@@ -84,7 +84,8 @@ public final class ParserTools {
      * the time will be 00:00 UTC
      */
     public static Date parseDateConsideringDateType(final CalendarComponent component, final DateProperty property, final TimeZone timeZone) {
-        return parseDate(component, property, timeZone);
+        DateProperty value = (DateProperty)component.getProperty(property.getName());
+        return toDateConsideringDateType(value, timeZone);
     }
 
     /**
@@ -96,7 +97,10 @@ public final class ParserTools {
         final TimeZone UTC = TimeZone.getTimeZone("UTC");
         Date date;
         if (isDateTime) {
-            date = toDate(value, timeZone);
+            date = new Date(value.getDate().getTime());
+            if (inDefaultTimeZone(value, timeZone)) {
+                date = recalculate(date, timeZone);
+            }
         } else {
             date = toDate(value, UTC);
         }
@@ -202,8 +206,9 @@ public final class ParserTools {
     	List<String> candidates1 = new LinkedList<String>();
     	if(tzidName.contains(",")){
     		String[] split = tzidName.split(",");
-    		for(String tmp: split)
-    			candidates1.add(tmp.trim());
+    		for(String tmp: split) {
+                candidates1.add(tmp.trim());
+            }
     	} else {
     		candidates1.add(tzidName);
     	}
@@ -231,14 +236,15 @@ public final class ParserTools {
     	int highestNumberOccurrences = 0;
     	for(TimeZone cand: candidates2){
     		int offset = cand.getRawOffset();
-    		if(!occurrences.containsKey(offset))
-    			occurrences.put(offset, 0);
+    		if(!occurrences.containsKey(offset)) {
+                occurrences.put(offset, 0);
+            }
     		int numOccurrences = ((Integer)occurrences.get(offset))+1;
     		occurrences.put(offset, numOccurrences);
     		highestNumberOccurrences = highestNumberOccurrences < numOccurrences ? numOccurrences : highestNumberOccurrences; 
     	}
     	//select the most often occurring ones and take the one with the shortest name (probably a generic name)
-    	Integer mostCommonOffset = (Integer) occurrences.getKey((Integer)highestNumberOccurrences);
+    	Integer mostCommonOffset = (Integer) occurrences.getKey(highestNumberOccurrences);
     	int maxlength = Integer.MAX_VALUE;
     	TimeZone candidate = null;
     	for(TimeZone cand: candidates2){

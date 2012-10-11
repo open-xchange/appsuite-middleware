@@ -72,6 +72,7 @@ import com.openexchange.mail.usersetting.UserSettingMailDeleteListener;
 import com.openexchange.mailaccount.internal.MailAccountDeleteListener;
 import com.openexchange.preferences.UserSettingServerDeleteListener;
 import com.openexchange.server.services.ServerServiceRegistry;
+import com.openexchange.sessiond.impl.SessionDeleteListener;
 import com.openexchange.tools.file.QuotaUsageDelete;
 import com.openexchange.tools.oxfolder.OXFolderDeleteListener;
 
@@ -91,7 +92,7 @@ public final class DeleteRegistry {
     /**
      * The singleton instance.
      */
-    private static DeleteRegistry instance;
+    private static volatile DeleteRegistry instance;
 
     /**
      * Initializes singleton instance.
@@ -164,6 +165,7 @@ public final class DeleteRegistry {
      */
     private DeleteListener[] getStaticListeners() {
         return new DeleteListener[] {
+            new SessionDeleteListener(),
             /*
              * Insert module delete listener
              */

@@ -63,7 +63,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import com.openexchange.admin.daemons.ClientAdminThread;
 import com.openexchange.admin.properties.AdminProperties;
 import com.openexchange.admin.rmi.dataobjects.Context;
@@ -74,6 +73,10 @@ import com.openexchange.admin.rmi.dataobjects.Server;
 import com.openexchange.admin.rmi.dataobjects.User;
 import com.openexchange.admin.rmi.exceptions.EnforceableDataObjectException;
 import com.openexchange.admin.rmi.exceptions.InvalidDataException;
+import com.openexchange.admin.rmi.exceptions.NoSuchGroupException;
+import com.openexchange.admin.rmi.exceptions.NoSuchObjectException;
+import com.openexchange.admin.rmi.exceptions.NoSuchResourceException;
+import com.openexchange.admin.rmi.exceptions.NoSuchUserException;
 import com.openexchange.admin.rmi.exceptions.PoolException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.services.AdminServiceRegistry;
@@ -88,6 +91,7 @@ import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.update.UpdateStatus;
 import com.openexchange.groupware.update.Updater;
+import com.openexchange.log.LogFactory;
 import com.openexchange.sql.builder.StatementBuilder;
 import com.openexchange.sql.grammar.BitAND;
 import com.openexchange.sql.grammar.BitOR;
@@ -843,13 +847,13 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
     }
 
     @Override
-    public int getContextIDByContextname(final String ctxname) throws StorageException {
-        return getByNameForConfigDB(ctxname, "context", "SELECT cid FROM context WHERE name=?");
+    public int getContextIDByContextname(String ctxName) throws StorageException, NoSuchObjectException {
+        return getByNameForConfigDB(ctxName, "context", "SELECT cid FROM context WHERE name=?");
     }
 
     @Override
-    public int getDatabaseIDByDatabasename(final String dbname) throws StorageException {
-        return getByNameForConfigDB(dbname, "database", "SELECT db_pool_id FROM db_pool WHERE name=?");
+    public int getDatabaseIDByDatabasename(String dbName) throws StorageException, NoSuchObjectException {
+        return getByNameForConfigDB(dbName, "database", "SELECT db_pool_id FROM db_pool WHERE name=?");
     }
 
     /**
@@ -975,35 +979,33 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
     }
 
     @Override
-    public int getGroupIDByGroupname(final Context ctx, final String groupname) throws StorageException {
-        Connection con = null;
-        PreparedStatement prep_check = null;
-        ResultSet rs = null;
+    public int getGroupIDByGroupname(Context ctx, String groupName) throws StorageException, NoSuchGroupException {
+        final Connection con;
         try {
-            con = cache.getConnectionForContext(ctx.getId().intValue());
-            prep_check = con.prepareStatement("SELECT id from groups where cid = ? and identifier = ?");
-            prep_check.setInt(1,ctx.getId().intValue());
-            prep_check.setString(2, groupname);
-            rs = prep_check.executeQuery();
-            if (rs.next()) {
-                // grab id and return 
-                return rs.getInt("id");
-            }else{
-                throw new StorageException("No such group "+groupname+" in context "+ctx.getId().intValue()+"");
-            }
-        } catch (final PoolException e) {
+            con = cache.getConnectionForContext(i(ctx.getId()));
+        } catch (PoolException e) {
             log.error("Pool Error",e);
             throw new StorageException(e);
-        } catch (final SQLException e) {
+        }
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        try {
+            stmt = con.prepareStatement("SELECT id from groups where cid=? and identifier=?");
+            stmt.setInt(1, i(ctx.getId()));
+            stmt.setString(2, groupName);
+            rs = stmt.executeQuery();
+            if (rs.next()) {
+                return rs.getInt(1);
+            }
+            throw new NoSuchGroupException("No such group " + groupName + " in context " + ctx.getId());
+        } catch (SQLException e) {
             log.error("SQL Error",e);
             throw new StorageException(e.toString());
         } finally {
-            closeRecordSet(rs);
-            closePreparedStatement(prep_check);
-
+            closeSQLStuff(rs, stmt);
             try {
-                cache.pushConnectionForContext(ctx.getId().intValue(), con);
-            } catch (final PoolException e) {
+                cache.pushConnectionForContext(i(ctx.getId()), con);
+            } catch (PoolException e) {
                 log.error("Error pushing ox db read connection to pool!", e);
             }
         }
@@ -1046,35 +1048,33 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
     }
 
     @Override
-    public int getResourceIDByResourcename(final Context ctx, final String resourcename) throws StorageException {
-        Connection con = null;
-        PreparedStatement prep_check = null;
-        ResultSet rs = null;
+    public int getResourceIDByResourcename(Context ctx, String resourceName) throws StorageException, NoSuchResourceException {
+        final Connection con;
         try {
-            con = cache.getConnectionForContext(ctx.getId().intValue());
-            prep_check = con.prepareStatement("SELECT id from resource where cid = ? and identifier = ?");
-            prep_check.setInt(1,ctx.getId().intValue());
-            prep_check.setString(2, resourcename);
-            rs = prep_check.executeQuery();
-            if (rs.next()) {
-                // grab username and return 
-                return rs.getInt("id");
-            }else{
-                throw new StorageException("No such resource "+resourcename+" in context "+ctx.getId().intValue()+"");
-            }
-        } catch (final PoolException e) {
+            con = cache.getConnectionForContext(i(ctx.getId()));
+        } catch (PoolException e) {
             log.error("Pool Error",e);
             throw new StorageException(e);
-        } catch (final SQLException e) {
+        }
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        try {
+            stmt = con.prepareStatement("SELECT id from resource where cid=? and identifier=?");
+            stmt.setInt(1, i(ctx.getId()));
+            stmt.setString(2, resourceName);
+            rs = stmt.executeQuery();
+            if (rs.next()) {
+                return rs.getInt(1);
+            }
+            throw new NoSuchResourceException("No such resource " + resourceName + " in context " + ctx.getId());
+        } catch (SQLException e) {
             log.error("SQL Error",e);
             throw new StorageException(e.toString());
         } finally {
-            closeRecordSet(rs);
-            closePreparedStatement(prep_check);
-
+            closeSQLStuff(rs, stmt);
             try {
-                cache.pushConnectionForContext(ctx.getId().intValue(), con);
-            } catch (final PoolException e) {
+                cache.pushConnectionForContext(i(ctx.getId()), con);
+            } catch (PoolException e) {
                 log.error("Error pushing ox db read connection to pool!", e);
             }
         }
@@ -1116,42 +1116,39 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
     }
 
     @Override
-    public int getServerIDByServername(final String servername) throws StorageException {
-        return getByNameForConfigDB(servername, "server", "SELECT server_id FROM server WHERE name=?");
+    public int getServerIDByServername(String serverName) throws StorageException, NoSuchObjectException {
+        return getByNameForConfigDB(serverName, "server", "SELECT server_id FROM server WHERE name=?");
     }
 
     @Override
-    public int getUserIDByUsername(final Context ctx, final String username) throws StorageException {
-        Connection con = null;
-        PreparedStatement prep_check = null;
-        ResultSet rs = null;
+    public int getUserIDByUsername(Context ctx, String userName) throws StorageException, NoSuchUserException {
+        final Connection con;
         try {
-            con = cache.getConnectionForContext(ctx.getId().intValue());
-            prep_check = con.prepareStatement("SELECT id from login2user where cid = ? and uid = ?");
-            prep_check.setInt(1,ctx.getId().intValue());
-            prep_check.setString(2, username);
-            rs = prep_check.executeQuery();
-            if (rs.next()) {
-                // grab user id and return 
-                return rs.getInt("id");
-            }else{
-                throw new StorageException("No such user "+username+" in context "+ctx.getId().intValue()+"");
-            }
-        } catch (final PoolException e) {
+            con = cache.getConnectionForContext(i(ctx.getId()));
+        } catch (PoolException e) {
             log.error("Pool Error",e);
             throw new StorageException(e);
-        } catch (final SQLException e) {
+        }
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        try {
+            stmt = con.prepareStatement("SELECT id from login2user where cid=? and uid=?");
+            stmt.setInt(1, i(ctx.getId()));
+            stmt.setString(2, userName);
+            rs = stmt.executeQuery();
+            if (rs.next()) {
+                // grab user id and return 
+                return rs.getInt(1);
+            }
+            throw new NoSuchUserException("No such user " + userName + " in context " + ctx.getId());
+        } catch (SQLException e) {
             log.error("SQL Error",e);
             throw new StorageException(e.toString());
         } finally {
-            closeRecordSet(rs);
-            closePreparedStatement(prep_check);
-
+            closeSQLStuff(rs, stmt);
             try {
-                if(con != null) {
-                    cache.pushConnectionForContext(ctx.getId().intValue(), con);
-                }
-            } catch (final PoolException e) {
+                cache.pushConnectionForContext(i(ctx.getId()), con);
+            } catch (PoolException e) {
                 log.error("Error pushing ox db read connection to pool!", e);
             }
         }
@@ -1641,29 +1638,29 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
         }
     }
 
-    private int getByNameForConfigDB(final String name, final String objectname, final String SQLQuery) throws StorageException {
-        Connection con = null;
+    private static int getByNameForConfigDB(String name, String objectName, String query) throws StorageException, NoSuchObjectException {
+        final Connection con;
+        try {
+            con = cache.getConnectionForConfigDB();
+        } catch (final PoolException e) {
+            log.error(e.getMessage(), e);
+            throw new StorageException(e);
+        }
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
-            con = cache.getConnectionForConfigDB();
-            stmt = con.prepareStatement(SQLQuery);
+            stmt = con.prepareStatement(query);
             stmt.setString(1, name);
             rs = stmt.executeQuery();
             if (rs.next()) {
                 return rs.getInt(1);
-            } else {
-                throw new StorageException("No such " + objectname + " " + name);
             }
-        } catch (final SQLException e) {
+            throw new NoSuchObjectException("No such " + objectName + " " + name);
+        } catch (SQLException e) {
             log.error("SQL Error",e);
             throw new StorageException(e.toString());
-        } catch (final PoolException e) {
-            log.error(e.getMessage(), e);
-            throw new StorageException(e);
         } finally {
-            closeRecordSet(rs);
-            closePreparedStatement(stmt);
+            closeSQLStuff(rs, stmt);
             try {
                 cache.pushConnectionForConfigDB(con);
             } catch (final PoolException e) {

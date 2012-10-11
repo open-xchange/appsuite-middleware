@@ -16,14 +16,15 @@
  */
 package org.apache.tika.mime;
 
+import java.io.ByteArrayInputStream;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.SortedSet;
-
 import junit.framework.TestCase;
 
 import org.apache.tika.config.TikaConfig;
+import org.apache.tika.metadata.Metadata;
+import org.apache.tika.metadata.TikaMetadataKeys;
 
 /**
  * These tests try to ensure that the MimeTypesReader
@@ -31,18 +32,17 @@ import org.apache.tika.config.TikaConfig;
  * To do this, it tests that various aspects of the
  *  mime-types.xml file have ended up correctly as
  *  globs, matches, magics etc.
- *
+ *  
  * If you make updates to mime-types.xml, then the
  *  checks in this test may no longer hold true.
  * As such, if tests here start failing after your
  *  changes, please review the test details, and
- *  update it to match the new state of the file!
+ *  update it to match the new state of the file! 
  */
 public class MimeTypesReaderTest extends TestCase {
 
     private MimeTypes mimeTypes;
-    private SortedSet<Magic> magics;
-    private SortedSet<MimeType> xmls;
+    private List<Magic> magics;
 
     @Override
     @SuppressWarnings("unchecked")
@@ -52,11 +52,7 @@ public class MimeTypesReaderTest extends TestCase {
 
         Field magicsField = mimeTypes.getClass().getDeclaredField("magics");
         magicsField.setAccessible(true);
-        magics = (SortedSet<Magic>)magicsField.get(mimeTypes);
-
-        Field xmlsField = mimeTypes.getClass().getDeclaredField("xmls");
-        xmlsField.setAccessible(true);
-        xmls = (SortedSet<MimeType>)xmlsField.get(mimeTypes);
+        magics = (List<Magic>)magicsField.get(mimeTypes);
     }
 
     public void testHtmlMatches() throws Exception {
@@ -66,8 +62,8 @@ public class MimeTypesReaderTest extends TestCase {
        MimeType html = mimeTypes.forName("text/html");
        assertTrue(html.hasMagic());
        assertTrue(
-             "There should be at least "+minMatches+" HTML matches, found " + html.getMagics().length,
-             html.getMagics().length >= minMatches
+             "There should be at least "+minMatches+" HTML matches, found " + html.getMagics().size(),
+             html.getMagics().size() >= minMatches
        );
 
        // Check on the overall magics
@@ -91,8 +87,8 @@ public class MimeTypesReaderTest extends TestCase {
        MimeType excel = mimeTypes.forName("application/vnd.ms-excel");
        assertTrue(excel.hasMagic());
        assertTrue(
-             "There should be at least "+minMatches+" Excel matches, found " + excel.getMagics().length,
-             excel.getMagics().length >= minMatches
+             "There should be at least "+minMatches+" Excel matches, found " + excel.getMagics().size(),
+             excel.getMagics().size() >= minMatches
        );
 
        // Check on the overall magics
@@ -108,7 +104,7 @@ public class MimeTypesReaderTest extends TestCase {
              excelMagics.size() >= minMatches
        );
     }
-
+    
     /**
      * @since TIKA-515
      */
@@ -119,6 +115,58 @@ public class MimeTypesReaderTest extends TestCase {
         } catch (Exception e) {
             fail(e.getMessage());
         }
+    }
+    
+    /**
+     * TIKA-746 Ensures that the custom mimetype maps were also 
+     *  loaded and used
+     */
+    public void testCustomMimeTypes() {
+       // Check that it knows about our two special ones
+       String helloWorld = "hello/world";
+       String helloWorldFile = "hello/world-file";
+       try {
+          assertNotNull(this.mimeTypes.forName(helloWorld));
+          assertNotNull(this.mimeTypes.forName(helloWorldFile));
+       } catch (Exception e) {
+          fail(e.getMessage());
+       }
+       
+       // Check that the details come through as expected
+       try {
+          MimeType hw = this.mimeTypes.forName(helloWorld);
+          MimeType hwf = this.mimeTypes.forName(helloWorldFile);
+          
+          // The parent has no comments, globs etc
+          assertEquals("", hw.getDescription());
+          assertEquals("", hw.getExtension());
+          assertEquals(0, hw.getExtensions().size());
+          
+          // The file one does
+          assertEquals("A \"Hello World\" file", hwf.getDescription());
+          assertEquals(".hello.world", hwf.getExtension());
+          
+          // Check that we can correct detect with the file one:
+          // By name
+          Metadata m = new Metadata();
+          m.add(TikaMetadataKeys.RESOURCE_NAME_KEY, "test.hello.world");
+          assertEquals(hwf.toString(), this.mimeTypes.detect(null, m).toString());
+          
+          // By contents
+          m = new Metadata();
+          ByteArrayInputStream s = new ByteArrayInputStream(
+                "Hello, World!".getBytes("ASCII"));
+          assertEquals(hwf.toString(), this.mimeTypes.detect(s, m).toString());
+       } catch (Exception e) {
+          fail(e.getMessage());
+       }
+    }
+    
+    public void testGetExtensionForPowerPoint() throws Exception {
+        MimeType mt = this.mimeTypes.forName("application/vnd.ms-powerpoint");
+        String ext = mt.getExtension();
+        assertEquals(".ppt",ext);
+        assertEquals(".ppt",mt.getExtensions().get(0));
     }
 
 }

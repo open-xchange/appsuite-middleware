@@ -90,12 +90,12 @@ public final class ModifyCharsetStandardProvider {
          */
         CharsetProvider charsetProvider = null;
         try {
-            charsetProvider = new JapaneseReplacementCharsetProvider(backupCharsetProvider);
+            charsetProvider = new AsianReplacementCharsetProvider(backupCharsetProvider);
         } catch (final UnsupportedCharsetException e) {
             /*
              * Leave unchanged since fall-back charset "CP50220" is not support by JVM
              */
-            com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(ModifyCharsetStandardProvider.class)).warn(
+            com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(ModifyCharsetStandardProvider.class)).warn(
                 new StringBuilder("Charset \"CP50220\" is not supported by JVM \"").append(System.getProperty("java.vm.vendor")).append(" v").append(
                     System.getProperty("java.vm.version")).append("\". Japanese encoding \"ISO-2022-JP\" not supported ! ! !").toString());
         }
@@ -105,7 +105,7 @@ public final class ModifyCharsetStandardProvider {
             /*
              * Leave unchanged since fall-back charset "WINDOWS-1252" is not support by JVM
              */
-            com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(ModifyCharsetStandardProvider.class)).warn(
+            com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(ModifyCharsetStandardProvider.class)).warn(
                 new StringBuilder("Charset \"WINDOWS-1252\" is not supported by JVM \"").append(System.getProperty("java.vm.vendor")).append(" v").append(
                     System.getProperty("java.vm.version")).append("\".").toString());
         }
@@ -115,13 +115,14 @@ public final class ModifyCharsetStandardProvider {
             /*
              * Leave unchanged since fall-back charset "WINDOWS-1252" is not support by JVM
              */
-            com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(ModifyCharsetStandardProvider.class)).warn(
+            com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(ModifyCharsetStandardProvider.class)).warn(
                 new StringBuilder("Charset \"WINDOWS-1252\" is not supported by JVM \"").append(System.getProperty("java.vm.vendor")).append(" v").append(
                     System.getProperty("java.vm.version")).append("\".").toString());
         }
         if (null == charsetProvider) {
             return null;
         }
+        charsetProvider = new CachingCharsetProvider(charsetProvider);
         /*
          * Reinitialize field
          */

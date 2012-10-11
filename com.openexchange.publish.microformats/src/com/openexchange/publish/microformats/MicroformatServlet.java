@@ -62,16 +62,17 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import com.openexchange.log.LogFactory;
+
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.contact.ContactService;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.contact.ContactInterface;
-import com.openexchange.groupware.contact.ContactInterfaceDiscoveryService;
 import com.openexchange.groupware.container.Contact;
-import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.html.HtmlService;
@@ -111,15 +112,15 @@ public class MicroformatServlet extends OnlinePublicationServlet {
 
     private static Map<String, Map<String, Object>> additionalTemplateVariables = new HashMap<String, Map<String, Object>>();
 
-    private static UserService userService;
+    private static volatile UserService userService;
 
-    private static StringTranslator translator;
+    private static volatile StringTranslator translator;
 
-    private static ConfigurationService configService;
+    private static volatile ConfigurationService configService;
 
-    private static ContactInterfaceDiscoveryService contacts;
+    private static volatile ContactService contacts;
 
-    private static HtmlService htmlService;
+    private static volatile HtmlService htmlService;
 
     private static final DateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd");
     static {
@@ -159,7 +160,7 @@ public class MicroformatServlet extends OnlinePublicationServlet {
         additionalTemplateVariables.put(module, additionalVars);
     }
 
-    public static void setContactInterfaceDiscoveryService(final ContactInterfaceDiscoveryService service) {
+    public static void setContactService(final ContactService service) {
         contacts = service;
     }
 
@@ -263,10 +264,7 @@ public class MicroformatServlet extends OnlinePublicationServlet {
 	}
 
 	private Contact getContact(final PublicationSession publicationSession, final Context context) throws OXException {
-        final ContactInterface contactInterface = contacts.getContactInterfaceProvider(FolderObject.SYSTEM_LDAP_FOLDER_ID, context.getContextId()).newContactInterface(publicationSession);
-        final Contact contact = contactInterface.getUserById(publicationSession.getUserId(), false);
-
-        return contact;
+        return contacts.getUser(publicationSession, publicationSession.getUserId()); 
     }
 
 

@@ -54,15 +54,12 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 import java.util.TimeZone;
-
 import javax.servlet.http.HttpServletResponse;
-
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.jdom.Attribute;
-import org.jdom.Element;
-
+import org.jdom2.Attribute;
+import org.jdom2.Element;
 import com.openexchange.caldav.CaldavProtocol;
+import com.openexchange.log.LogFactory;
 import com.openexchange.webdav.protocol.WebdavPath;
 import com.openexchange.webdav.protocol.WebdavProtocolException;
 
@@ -73,7 +70,7 @@ import com.openexchange.webdav.protocol.WebdavProtocolException;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class FilterParser {
-    private static final Log LOG = LogFactory.getLog(FilterParser.class);
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(FilterParser.class);
     
     public Filter parse(Element rootElement) throws WebdavProtocolException {
         Filter filter = new Filter();
@@ -84,7 +81,7 @@ public class FilterParser {
     private static final String DATETIME_PATTERN = "yyyyMMdd'T'HHmmss'Z'";
 
     private void initChildFilters(Filter filter, Element rootElement) throws WebdavProtocolException {
-        List children = rootElement.getChildren("comp-filter", CaldavProtocol.CAL_NS);
+        List<Element> children = rootElement.getChildren("comp-filter", CaldavProtocol.CAL_NS);
         for (Object cObj : children) {
             Element compFilterElement = (Element) cObj;
             CompFilter compFilter = new CompFilter();

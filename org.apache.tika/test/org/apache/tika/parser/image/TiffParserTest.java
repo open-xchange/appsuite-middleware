@@ -17,9 +17,14 @@
 package org.apache.tika.parser.image;
 
 import junit.framework.TestCase;
+
+import org.apache.tika.parser.ParseContext;
 import org.apache.tika.parser.Parser;
 import org.apache.tika.parser.image.TiffParser;
+import org.apache.tika.metadata.DublinCore;
+import org.apache.tika.metadata.HttpHeaders;
 import org.apache.tika.metadata.Metadata;
+import org.apache.tika.metadata.TIFF;
 import org.xml.sax.helpers.DefaultHandler;
 
 import java.io.InputStream;
@@ -31,27 +36,27 @@ public class TiffParserTest extends TestCase {
 
     public void testTIFF() throws Exception {
         Metadata metadata = new Metadata();
-        metadata.set(Metadata.CONTENT_TYPE, "image/tiff");
+        metadata.set(HttpHeaders.CONTENT_TYPE, "image/tiff");
         InputStream stream =
             getClass().getResourceAsStream("/test-documents/testTIFF.tif");
-        parser.parse(stream, new DefaultHandler(), metadata);
+        parser.parse(stream, new DefaultHandler(), metadata, new ParseContext());
 
         assertEquals("Licensed to the Apache Software Foundation (ASF) under one or " +
         		"more contributor license agreements.  See the NOTICE file " +
         		"distributed with this work for additional information regarding " +
-        		"copyright ownership.", metadata.get(Metadata.DESCRIPTION));
-
+        		"copyright ownership.", metadata.get(DublinCore.DESCRIPTION));
+        
         // All EXIF/TIFF tags
-        assertEquals("Inch", metadata.get(Metadata.RESOLUTION_UNIT));
-
+        assertEquals("Inch", metadata.get(TIFF.RESOLUTION_UNIT));
+        
         // Core EXIF/TIFF tags
-        assertEquals("100", metadata.get(Metadata.IMAGE_WIDTH));
-        assertEquals("75", metadata.get(Metadata.IMAGE_LENGTH));
-        assertEquals("8", metadata.get(Metadata.BITS_PER_SAMPLE));
-        assertEquals("3", metadata.get(Metadata.SAMPLES_PER_PIXEL));
-
+        assertEquals("100", metadata.get(TIFF.IMAGE_WIDTH));
+        assertEquals("75", metadata.get(TIFF.IMAGE_LENGTH));
+        assertEquals("8", metadata.get(TIFF.BITS_PER_SAMPLE));
+        assertEquals("3", metadata.get(TIFF.SAMPLES_PER_PIXEL));
+        
         // Embedded XMP
-        List<String> subject = Arrays.asList(metadata.getValues(Metadata.SUBJECT));
+        List<String> subject = Arrays.asList(metadata.getValues(DublinCore.SUBJECT));
         assertTrue("got " + subject, subject.contains("cat"));
         assertTrue("got " + subject, subject.contains("garden"));
     }

@@ -1,0 +1,23 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Univention Server Authentication
+Bundle-SymbolicName: com.openexchange.authentication.ucs
+Bundle-Version: 6.22.0
+Bundle-Activator: com.openexchange.authentication.ucs.osgi.Activator
+Bundle-Vendor: Open-Xchange Inc.
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Import-Package: com.openexchange.authentication,
+ com.openexchange.configuration,
+ com.openexchange.exception,
+ com.openexchange.groupware,
+ com.openexchange.groupware.contexts,
+ com.openexchange.groupware.contexts.impl,
+ com.openexchange.groupware.ldap,
+ com.openexchange.log,
+ com.openexchange.sessiond,
+ com.openexchange.sessiond.event,
+ com.openexchange.tools.ssl,
+ javax.naming,
+ javax.naming.directory,
+ org.apache.commons.logging,
+ org.osgi.framework

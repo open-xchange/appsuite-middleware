@@ -52,17 +52,19 @@ package com.openexchange.webdav;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Date;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.jdom.output.XMLOutputter;
+import com.openexchange.log.LogFactory;
+import org.jdom2.output.XMLOutputter;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
+
+import com.openexchange.contact.ContactService;
 import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.contact.ContactInterface;
-import com.openexchange.groupware.contact.ContactInterfaceDiscoveryService;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
@@ -85,7 +87,7 @@ import com.openexchange.webdav.xml.fields.DataFields;
  *
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
  */
-public final class contacts extends XmlServlet<ContactInterface> {
+public final class contacts extends XmlServlet<ContactService> {
 
     private static final long serialVersionUID = -3731372041610025543L;
 
@@ -102,10 +104,15 @@ public final class contacts extends XmlServlet<ContactInterface> {
     protected Interface getInterface() {
         return Interface.WEBDAV_XML;
     }
+    
+    @Override
+    protected boolean isServletDisabled() {
+        return true;
+    }
 
     @Override
     protected void parsePropChilds(final HttpServletRequest req, final HttpServletResponse resp,
-            final XmlPullParser parser, final PendingInvocations<ContactInterface> pendingInvocations)
+            final XmlPullParser parser, final PendingInvocations<ContactService> pendingInvocations)
             throws XmlPullParserException, IOException, OXException {
         final Session session = getSession(req);
 
@@ -123,7 +130,6 @@ public final class contacts extends XmlServlet<ContactInterface> {
             final int method = contactparser.getMethod();
 
             final Date lastModified = contactobject.getLastModified();
-            contactobject.removeLastModified();
 
             final int inFolder = contactparser.getFolder();
 
@@ -162,16 +168,13 @@ public final class contacts extends XmlServlet<ContactInterface> {
 
     @Override
     protected void performActions(final OutputStream os, final Session session,
-            final PendingInvocations<ContactInterface> pendingInvocations) throws IOException {
-        //final ContactSQLInterface contactsql = new RdbContactSQLInterface(session);
+            final PendingInvocations<ContactService> pendingInvocations) throws IOException {
+        final ContactService contactService = ServerServiceRegistry.getInstance().getService(ContactService.class);
         while (!pendingInvocations.isEmpty()) {
             final QueuedContact qcon = (QueuedContact) pendingInvocations.poll();
             if (null != qcon) {
                 qcon.setLastModifiedCache(pendingInvocations.getLastModifiedCache());
-                /*
-                 * Appropriate ContactInterface has to be detected per contact
-                 */
-                qcon.actionPerformed(null, os, session.getUserId());
+                qcon.actionPerformed(contactService, os, session.getUserId());
             }
         }
     }
@@ -207,7 +210,7 @@ public final class contacts extends XmlServlet<ContactInterface> {
         return (uc.hasWebDAVXML() && uc.hasContact());
     }
 
-    private final class QueuedContact implements QueuedAction<ContactInterface> {
+    private final class QueuedContact implements QueuedAction<ContactService> {
 
         private final Contact contactObject;
 
@@ -246,15 +249,14 @@ public final class contacts extends XmlServlet<ContactInterface> {
         }
 
         @Override
-        public void actionPerformed(final ContactInterface nullInterface, final OutputStream os, final int user)
+        public void actionPerformed(final ContactService contactService, final OutputStream os, final int user)
                 throws IOException {
 
             final XMLOutputter xo = new XMLOutputter();
-
+            if (contactObject.getLastModified() == null) {
+            	contactObject.setLastModified(lastModified);
+            }
             try {
-                final ContactInterface contactInterface = ServerServiceRegistry.getInstance().getService(
-                    ContactInterfaceDiscoveryService.class).newContactInterface(inFolder, session);
-
                 switch (action) {
                 case DataParser.SAVE:
                     if (contactObject.containsObjectID()) {
@@ -264,10 +266,11 @@ public final class contacts extends XmlServlet<ContactInterface> {
 
                         final Date currentLastModified = lastModifiedCache.getLastModified(contactObject.getObjectID(), lastModified);
                         lastModifiedCache.update(contactObject.getObjectID(), 0, lastModified);
-                        contactInterface.updateContactObject(contactObject, inFolder, currentLastModified);
+                        contactService.updateContact(session, Integer.toString(inFolder), Integer.toString(contactObject.getObjectID()), 
+                        		contactObject, currentLastModified);
                         lastModifiedCache.update(contactObject.getObjectID(), 0, contactObject.getLastModified());
                     } else {
-                        contactInterface.insertContactObject(contactObject);
+                        contactService.createContact(session, Integer.toString(inFolder), contactObject);
                         lastModifiedCache.update(contactObject.getObjectID(), 0, contactObject.getLastModified());
                     }
                     break;
@@ -275,14 +278,15 @@ public final class contacts extends XmlServlet<ContactInterface> {
                     if (lastModified == null) {
                         throw WebdavExceptionCode.MISSING_FIELD.create(DataFields.LAST_MODIFIED);
                     }
-
-                    contactInterface.deleteContactObject(contactObject.getObjectID(), inFolder, lastModified);
+                    contactService.deleteContact(session, Integer.toString(inFolder), Integer.toString(contactObject.getObjectID()), 
+                    		contactObject.getLastModified());
                     break;
                 default:
                     throw WebdavExceptionCode.INVALID_ACTION.create(Integer.valueOf(action));
                 }
                 writeResponse(contactObject, HttpServletResponse.SC_OK, OK, clientId, os, xo);
             } catch (final OXException exc) {
+            	exc.log(LOG);
                 if (exc.isMandatory()) {
                     LOG.debug(_parsePropChilds, exc);
                     writeResponse(contactObject, HttpServletResponse.SC_CONFLICT, getErrorMessage(exc,
@@ -293,8 +297,7 @@ public final class contacts extends XmlServlet<ContactInterface> {
                             PERMISSION_EXCEPTION), clientId, os, xo);
                 } else if (exc.isConflict()) {
                     LOG.debug(_parsePropChilds, exc);
-                    writeResponse(contactObject, HttpServletResponse.SC_CONFLICT, getErrorMessage(exc,
-                            CONFLICT_EXCEPTION), clientId, os, xo);
+                    writeResponse(contactObject, HttpServletResponse.SC_CONFLICT, MODIFICATION_EXCEPTION, clientId, os, xo);
                 } else if (exc.isNotFound()) {
                     LOG.debug(_parsePropChilds, exc);
                     writeResponse(contactObject, HttpServletResponse.SC_NOT_FOUND, OBJECT_NOT_FOUND_EXCEPTION,

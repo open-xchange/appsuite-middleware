@@ -56,11 +56,11 @@ import java.util.Date;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.jdom.Document;
-import org.jdom.Element;
-import org.jdom.Namespace;
-import org.jdom.output.XMLOutputter;
+import com.openexchange.log.LogFactory;
+import org.jdom2.Document;
+import org.jdom2.Element;
+import org.jdom2.Namespace;
+import org.jdom2.output.XMLOutputter;
 import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
 import com.openexchange.exception.OXException.Generic;
@@ -122,6 +122,11 @@ public final class attachments extends OXServlet {
     @Override
     protected Interface getInterface() {
         return Interface.WEBDAV_XML;
+    }
+    
+    @Override
+    protected boolean isServletDisabled() {
+        return true;
     }
 
     @Override

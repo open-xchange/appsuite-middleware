@@ -50,14 +50,13 @@
 package com.openexchange.admin.rmi.impl;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import com.openexchange.admin.daemons.AdminDaemon;
 import com.openexchange.admin.rmi.OXAdminCoreInterface;
+import com.openexchange.log.LogFactory;
 
 public class OXAdminCoreImpl implements OXAdminCoreInterface {
 
@@ -70,22 +69,25 @@ public class OXAdminCoreImpl implements OXAdminCoreInterface {
         this.context = context;
     }
 
+    @Override
     public boolean allPluginsLoaded() {
-        final ArrayList<Bundle> bundlelist = AdminDaemon.getBundlelist();
-        final Bundle[] bundles = context.getBundles();
-        final List<Bundle> allbundlelist = Arrays.asList(bundles);
-        // First one is the system bundle, which is always loaded, so we ignore it here. As we cannot remove
-        // in this type of list we make a new one...
-        final List<Bundle> subList = allbundlelist.subList(1, allbundlelist.size());
-
-        final boolean containsAll = bundlelist.containsAll(subList);
-        if (containsAll) {
+        Bundle[] bundles = context.getBundles();
+        List<Bundle> fragments = new ArrayList<Bundle>();
+        List<Bundle> notStarted = new ArrayList<Bundle>();
+        for (Bundle bundle : bundles) {
+            if (!AdminDaemon.isNoFragment(bundle)) {
+                fragments.add(bundle);
+            } else if (Bundle.ACTIVE != bundle.getState()) {
+                notStarted.add(bundle);
+            }
+        }
+        if (notStarted.isEmpty()) {
             return true;
         }
-        // We have to introduce a new list because a sublist can't be modified
-        final ArrayList<Bundle> arrayList = new ArrayList<Bundle>(subList);
-        arrayList.removeAll(bundlelist);
-        log.error("The following bundles aren't started: " + arrayList);
+        if (!fragments.isEmpty()) {
+            log.info("System contains the following fragments which will not be started: " + fragments);
+        }
+        log.error("The following bundles aren't started: " + notStarted);
         return false;
     }
 }

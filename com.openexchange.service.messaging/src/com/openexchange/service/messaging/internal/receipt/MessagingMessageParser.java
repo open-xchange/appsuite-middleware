@@ -54,7 +54,7 @@ import java.util.Arrays;
 import java.util.UUID;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.util.UUIDs;
-import com.openexchange.service.messaging.MessagingServiceExceptionCodes;
+import com.openexchange.service.messaging.MessagingServiceExceptionCode;
 import com.openexchange.service.messaging.internal.Constants;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 
@@ -92,7 +92,7 @@ public final class MessagingMessageParser {
             {
                 final int[] magic = new int[] { (b[pos++] & 0xff), (b[pos++] & 0xff), (b[pos++] & 0xff) };
                 if (!Arrays.equals(Constants.MAGIC, magic)) {
-                    throw MessagingServiceExceptionCodes.BROKEN_MAGIC_BYTES.create(Arrays.toString(magic));
+                    throw MessagingServiceExceptionCode.BROKEN_MAGIC_BYTES.create(Arrays.toString(magic));
                 }
             }
             /*
@@ -118,12 +118,12 @@ public final class MessagingMessageParser {
                 ret = new MessagingParsedMessage(uuid, prefixCode, cnum, getRemainingBytes());
                 break;
             default:
-                throw MessagingServiceExceptionCodes.UNKNOWN_PREFIX_CODE.create(Integer.valueOf(prefixCode));
+                throw MessagingServiceExceptionCode.UNKNOWN_PREFIX_CODE.create(Integer.valueOf(prefixCode));
             }
             ret.setContiguous(contiguous);
             return ret;
         } catch (final ArrayIndexOutOfBoundsException e) {
-            throw MessagingServiceExceptionCodes.INVALID_MSG_PACKAGE.create(e, new Object[0]);
+            throw MessagingServiceExceptionCode.INVALID_MSG_PACKAGE.create(e, new Object[0]);
         }
     }
 
@@ -170,7 +170,7 @@ public final class MessagingMessageParser {
             }
         }
         if (nextByte() != STRING_TERMINATOR) {
-            throw MessagingServiceExceptionCodes.UNPARSEABLE_STRING.create();
+            throw MessagingServiceExceptionCode.UNPARSEABLE_STRING.create();
         }
         if (encoded) {
             return new String(decodeQuotedPrintable(sb.toString().getBytes(com.openexchange.java.Charsets.US_ASCII)), com.openexchange.java.Charsets.UTF_8);
@@ -203,11 +203,11 @@ public final class MessagingMessageParser {
                     final int u = Character.digit((char) bytes[++i], 16);
                     final int l = Character.digit((char) bytes[++i], 16);
                     if (u == -1 || l == -1) {
-                        throw MessagingServiceExceptionCodes.INVALID_QUOTED_PRINTABLE.create();
+                        throw MessagingServiceExceptionCode.INVALID_QUOTED_PRINTABLE.create();
                     }
                     buffer.write((char) ((u << 4) + l));
                 } catch (final ArrayIndexOutOfBoundsException e) {
-                    throw MessagingServiceExceptionCodes.INVALID_QUOTED_PRINTABLE.create();
+                    throw MessagingServiceExceptionCode.INVALID_QUOTED_PRINTABLE.create();
                 }
             } else {
                 buffer.write(b);

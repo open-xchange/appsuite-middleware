@@ -52,13 +52,14 @@ package com.openexchange.webdav.xml;
 
 import java.util.Date;
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import com.openexchange.log.LogFactory;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.session.Session;
 import com.openexchange.webdav.xml.fields.AppointmentFields;
+import com.openexchange.webdav.xml.fields.CalendarFields;
 
 /**
  * AppointmentParser
@@ -103,7 +104,7 @@ public class AppointmentParser extends CalendarParser {
 			ao.setShownAs(getValueAsInt(parser));
 
 			return ;
-		} else if (isTag(parser, AppointmentFields.DELETE_EXCEPTIONS)) {
+		} else if (isTag(parser, CalendarFields.DELETE_EXCEPTIONS)) {
 			try {
 				final String _s = getValue(parser);
 
@@ -131,10 +132,10 @@ public class AppointmentParser extends CalendarParser {
 		} else if (isTag(parser, AppointmentFields.LOCATION)) {
 			ao.setLocation(getValue(parser));
 			return ;
-		} else if (isTag(parser, AppointmentFields.ALARM)) {
+		} else if (isTag(parser, CalendarFields.ALARM)) {
 			ao.setAlarm(getValueAsInt(parser));
 			return ;
-		} else if (isTag(parser, AppointmentFields.ALARM_FLAG)) {
+		} else if (isTag(parser, CalendarFields.ALARM_FLAG)) {
 			ao.setAlarmFlag(getValueAsBoolean(parser));
 			return ;
 		} else if (isTag(parser, AppointmentFields.IGNORE_CONFLICTS)) {

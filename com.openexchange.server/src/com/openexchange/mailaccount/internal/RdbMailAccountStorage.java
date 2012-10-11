@@ -78,6 +78,8 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.Callable;
+import java.util.concurrent.locks.Lock;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.mail.internet.IDNA;
@@ -120,7 +122,7 @@ import com.openexchange.tools.sql.DBUtils;
  */
 public final class RdbMailAccountStorage implements MailAccountStorageService {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(RdbMailAccountStorage.class));
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(RdbMailAccountStorage.class));
 
     /**
      * The constant in the Java programming language, sometimes referred to as a type code, that identifies the generic SQL type VARCHAR.
@@ -179,18 +181,24 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
 
     private static final String PARAM_POP3_STORAGE_FOLDERS = "com.openexchange.mailaccount.pop3Folders";
 
-    private static Object getSessionLock(final Session session) {
-        final Object lock = session.getParameter(Session.PARAM_LOCK);
-        return null == lock ? session : lock;
+    private static <V> V performSynchronized(final Callable<V> task, final Session session) throws Exception {
+        Lock lock = (Lock) session.getParameter(Session.PARAM_LOCK);
+        if (null == lock) {
+            lock = Session.EMPTY_LOCK;
+        }
+        lock.lock();
+        try {
+            return task.call();
+        } finally {
+            lock.unlock();
+        }
     }
 
     private static void dropPOP3StorageFolders(final int userId, final int contextId) {
         final SessiondService service = ServerServiceRegistry.getInstance().getService(SessiondService.class);
         if (null != service) {
             for (final Session session : service.getSessions(userId, contextId)) {
-                synchronized (getSessionLock(session)) {
-                    session.setParameter(PARAM_POP3_STORAGE_FOLDERS, null);
-                }
+                session.setParameter(PARAM_POP3_STORAGE_FOLDERS, null);
             }
         }
     }
@@ -211,18 +219,30 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
     public static Set<String> getPOP3StorageFolders(final Session session) throws OXException {
         Set<String> set = (Set<String>) session.getParameter(PARAM_POP3_STORAGE_FOLDERS);
         if (null == set) {
-            synchronized (getSessionLock(session)) {
-                set = (Set<String>) session.getParameter(PARAM_POP3_STORAGE_FOLDERS);
-                if (null == set) {
-                    set = getPOP3StorageFolders0(session);
-                    session.setParameter(PARAM_POP3_STORAGE_FOLDERS, set);
-                }
+            try {
+                final Callable<Set<String>> task = new Callable<Set<String>>() {
+                    
+                    @Override
+                    public Set<String> call() throws OXException {
+                        Set<String> set = (Set<String>) session.getParameter(PARAM_POP3_STORAGE_FOLDERS);
+                        if (null == set) {
+                            set = getPOP3StorageFolders0(session);
+                            session.setParameter(PARAM_POP3_STORAGE_FOLDERS, set);
+                        }
+                        return set;
+                    }
+                };
+                set = performSynchronized(task, session);
+            } catch (final OXException e) {
+                throw e;
+            } catch (final Exception e) {
+                throw MailAccountExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
             }
         }
         return set;
     }
 
-    private static Set<String> getPOP3StorageFolders0(final Session session) throws OXException {
+    static Set<String> getPOP3StorageFolders0(final Session session) throws OXException {
         final int contextId = session.getContextId();
         final Connection con = Database.get(contextId, false);
         PreparedStatement stmt = null;
@@ -672,26 +692,11 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
 
     @Override
     public MailAccount getMailAccount(final int id, final int user, final int cid) throws OXException {
+        final Connection rcon = Database.get(cid, false);
         try {
-            final Connection rcon = Database.get(cid, false);
-            try {
-                return getMailAccount(id, user, cid, rcon);
-            } finally {
-                Database.back(cid, false, rcon);
-            }
-        } catch (final OXException mae) {
-            if (MailAccountExceptionCodes.NOT_FOUND.getPrefix().equals(mae.getPrefix()) && MailAccountExceptionCodes.NOT_FOUND.getNumber() != mae.getCode()) {
-                throw mae;
-            }
-            /*
-             * Read-only failed, retry with read-write connection
-             */
-            final Connection wcon = Database.get(cid, true);
-            try {
-                return getMailAccount(id, user, cid, wcon);
-            } finally {
-                Database.back(cid, true, wcon);
-            }
+            return getMailAccount(id, user, cid, rcon);
+        } finally {
+            Database.back(cid, false, rcon);
         }
     }
 

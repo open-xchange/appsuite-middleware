@@ -70,7 +70,7 @@ import com.openexchange.threadpool.ThreadPoolService;
 final class AJPv13RefusedExecutionBehavior implements RefusedExecutionBehavior<Object> {
 
     private static final org.apache.commons.logging.Log LOG =
-        com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(AJPv13RefusedExecutionBehavior.class));
+        com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(AJPv13RefusedExecutionBehavior.class));
 
     private final AJPv13TaskWatcher watcher;
 

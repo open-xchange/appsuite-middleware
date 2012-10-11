@@ -53,6 +53,8 @@ import org.json.JSONArray;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.contexts.SimContext;
+import com.openexchange.groupware.ldap.SimUser;
 import com.openexchange.messaging.IndexRange;
 import com.openexchange.messaging.MessagingField;
 import com.openexchange.messaging.OrderDirection;
@@ -80,7 +82,7 @@ public class AllTest extends AbstractMessagingActionTest {
         requestData.putParameter("account", "12");
         requestData.putParameter("columns", "id,subject");
 
-        final SimServerSession session = new SimServerSession(null, null, null);
+        final SimServerSession session = new SimServerSession(new SimContext(1), new SimUser(), null);
         final AJAXRequestResult result = action.perform(requestData, session);
 
         assertNotNull(result);
@@ -113,7 +115,7 @@ public class AllTest extends AbstractMessagingActionTest {
         requestData.putParameter("sort", "subject");
         requestData.putParameter("columns", "id,subject");
 
-        final SimServerSession session = new SimServerSession(null, null, null);
+        final SimServerSession session = new SimServerSession(new SimContext(1), new SimUser(), null);
         final AJAXRequestResult result = action.perform(requestData, session);
 
         assertNotNull(result);
@@ -146,7 +148,7 @@ public class AllTest extends AbstractMessagingActionTest {
         requestData.putParameter("order", "desc");
         requestData.putParameter("columns", "id,subject");
 
-        final SimServerSession session = new SimServerSession(null, null, null);
+        final SimServerSession session = new SimServerSession(new SimContext(1), new SimUser(), null);
         final AJAXRequestResult result = action.perform(requestData, session);
 
         assertNotNull(result);
@@ -178,7 +180,7 @@ public class AllTest extends AbstractMessagingActionTest {
         requestData.putParameter("account", "12");
         requestData.putParameter("columns", "id,subject");
 
-        SimServerSession session = new SimServerSession(null, null, null);
+        SimServerSession session = new SimServerSession(new SimContext(1), new SimUser(), null);
         AJAXRequestResult result = action.perform(requestData, session);
 
         assertNotNull(result);

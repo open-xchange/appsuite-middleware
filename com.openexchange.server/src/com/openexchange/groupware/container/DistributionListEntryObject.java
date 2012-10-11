@@ -49,13 +49,12 @@
 
 package com.openexchange.groupware.container;
 
+import java.io.Serializable;
 import javax.mail.internet.AddressException;
-import javax.mail.internet.InternetAddress;
+
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.contact.ContactConfig;
 import com.openexchange.groupware.contact.ContactExceptionCodes;
 import com.openexchange.mail.mime.QuotedInternetAddress;
-import com.openexchange.tools.StringCollection;
 
 /**
  * DistributionListObject
@@ -63,7 +62,9 @@ import com.openexchange.tools.StringCollection;
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
  */
 
-public class DistributionListEntryObject {
+public class DistributionListEntryObject implements Serializable {
+
+    private static final long serialVersionUID = 3878123169840216186L;
 
     public static final int INDEPENDENT = 0;
 
@@ -191,14 +192,27 @@ public class DistributionListEntryObject {
      * @throws OXException If specified email address is invalid
      */
     public void setEmailaddress(final String emailaddress) throws OXException {
-        /*
-         * Verify email address with JavaMail's InternetAddress class
-         */
-        try {
-            new QuotedInternetAddress(emailaddress);
-        } catch (final AddressException e) {
-            throw ContactExceptionCodes.INVALID_EMAIL.create(e, emailaddress);
-        }
+    	this.setEmailaddress(emailaddress, null != emailaddress && 0 < emailaddress.length());
+    }
+
+    /**
+     * Sets the distribution list entry's email address
+     * 
+     * @param emailaddress The email address to set
+     * @param verifyAddress <code>true</code>, if the address should be verified, <code>false</code>, otherwise
+     * @throws OXException If specified email address is invalid and verification is enabled
+     */
+    public void setEmailaddress(String emailaddress, boolean verifyAddress) throws OXException {
+    	if (verifyAddress) {
+	        /*
+	         * Verify email address with JavaMail's InternetAddress class
+	         */
+	        try {
+	            new QuotedInternetAddress(emailaddress);
+	        } catch (final AddressException e) {
+	            throw ContactExceptionCodes.INVALID_EMAIL.create(e, emailaddress);
+	        }
+    	}
         this.emailaddress = emailaddress;
         b_emailaddress = true;
     }
@@ -355,18 +369,4 @@ public class DistributionListEntryObject {
         b_folderid = false;
     }
 
-    public boolean isValid() {
-        try {
-            if (emailaddress == null || StringCollection.isEmpty(emailaddress)) {
-                return false;
-            }
-            if (ContactConfig.getInstance().getProperty("validate_contact_email").equals("true")) {
-                final InternetAddress ia = new QuotedInternetAddress(emailaddress);
-                ia.validate();
-            }
-        } catch (final AddressException ae) {
-            return false;
-        }
-        return true;
-    }
 }

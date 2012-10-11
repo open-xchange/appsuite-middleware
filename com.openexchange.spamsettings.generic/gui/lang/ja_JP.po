@@ -1,0 +1,24 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: NAME\n"
+"POT-Creation-Date: 2011-04-05 14:10+0200\n"
+"PO-Revision-Date: 2011-04-13 10:13+0900\n"
+"Last-Translator: KK <kkusunoki@nextit.jp>\n"
+"Language-Team: NAME <EMAIL>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=INTEGER; plural=EXPRESSION;\n"
+
+msgid "Spam settings"
+msgstr "迷惑メール設定"
+
+msgid "Change spam settings"
+msgstr "迷惑メールの設定を変更する"
+
+msgid "Modify your spam configuration."
+msgstr "迷惑メールの構成を修正する"
+
+msgid "Your settings have been saved."
+msgstr "設定が保存されました。"
+

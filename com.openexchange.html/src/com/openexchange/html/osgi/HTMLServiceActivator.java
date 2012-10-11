@@ -51,6 +51,7 @@ package com.openexchange.html.osgi;
 
 import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -63,13 +64,15 @@ import java.util.Properties;
 import net.htmlparser.jericho.Config;
 import net.htmlparser.jericho.LoggerProvider;
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.w3c.tidy.Report;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.html.HtmlService;
 import com.openexchange.html.internal.HtmlServiceImpl;
 import com.openexchange.html.internal.parser.handler.HTMLFilterHandler;
+import com.openexchange.html.internal.parser.handler.HTMLImageFilterHandler;
 import com.openexchange.html.services.ServiceRegistry;
+import com.openexchange.java.Streams;
+import com.openexchange.log.LogFactory;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.proxy.ProxyRegistry;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayInputStream;
@@ -85,7 +88,7 @@ public class HTMLServiceActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ConfigurationService.class };
+        return new Class<?>[] { ConfigurationService.class, DispatcherPrefixService.class };
     }
 
     @Override
@@ -101,6 +104,7 @@ public class HTMLServiceActivator extends HousekeepingActivator {
     @Override
     public void startBundle() throws Exception {
         try {
+            HTMLImageFilterHandler.PREFIX.set(getService(DispatcherPrefixService.class));
             /*
              * Configure
              */
@@ -139,6 +143,7 @@ public class HTMLServiceActivator extends HousekeepingActivator {
              * Restore
              */
             restore();
+            HTMLImageFilterHandler.PREFIX.set(null);
         } catch (final Exception e) {
             LOG.error(e.getMessage(), e);
             throw e;
@@ -149,20 +154,12 @@ public class HTMLServiceActivator extends HousekeepingActivator {
     private void apply(final ConfigurationService configurationService) {
         ServiceRegistry.getInstance().addService(ConfigurationService.class, configurationService);
         /*
-         * Set resource bundle for messages
-         */
-        Report.setResourceBundleFrom(getTidyMessages(configurationService.getProperty("TidyMessages")));
-        /*
-         * Initialize properties
-         */
-        final Properties properties = getTidyConfiguration(configurationService.getProperty("TidyConfiguration"));
-        /*
          * Initialize maps
          */
         final Map<Character, String> htmlCharMap;
         final Map<String, Character> htmlEntityMap;
         {
-            final Object[] maps = getHTMLEntityMaps(configurationService.getProperty("HTMLEntities"));
+            final Object[] maps = getHTMLEntityMaps(configurationService.getFileByName("HTMLEntities.properties"));
             htmlCharMap = (Map<Character, String>) maps[0];
             htmlEntityMap = (Map<String, Character>) maps[1];
             /*
@@ -174,29 +171,23 @@ public class HTMLServiceActivator extends HousekeepingActivator {
         /*
          * Register HTML service
          */
-        registerService(HtmlService.class, new HtmlServiceImpl(properties, htmlCharMap, htmlEntityMap), null);
+        registerService(HtmlService.class, new HtmlServiceImpl(htmlCharMap, htmlEntityMap), null);
     }
 
-    public static Object[] getHTMLEntityMaps(final String htmlEntityFilename) {
+    public static Object[] getHTMLEntityMaps(final File htmlEntityFile) {
         final Map<Character, String> htmlCharMap = new HashMap<Character, String>();
         final Map<String, Character> htmlEntityMap = new HashMap<String, Character>();
         final Properties htmlEntities = new Properties();
         InputStream in = null;
         try {
-            in = new FileInputStream(htmlEntityFilename);
+            in = new FileInputStream(htmlEntityFile);
             htmlEntities.load(in);
         } catch (final IOException e) {
             LOG.error(e.getMessage(), e);
             return getDefaultHTMLEntityMaps();
         } finally {
-            if (null != in) {
-                try {
-                    in.close();
-                } catch (final IOException e) {
-                    LOG.error(e.getMessage(), e);
-                }
-                in = null;
-            }
+            Streams.close(in);
+            in = null;
         }
         /*
          * Build up map

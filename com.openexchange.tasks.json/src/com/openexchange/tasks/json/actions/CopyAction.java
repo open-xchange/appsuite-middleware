@@ -53,8 +53,8 @@ import java.util.Date;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.AJAXServlet;
+import com.openexchange.ajax.fields.DataFields;
 import com.openexchange.ajax.fields.FolderChildFields;
-import com.openexchange.ajax.fields.TaskFields;
 import com.openexchange.ajax.parser.DataParser;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.api2.TasksSQLInterface;
@@ -101,7 +101,7 @@ public class CopyAction extends TaskAction {
         final Date timestamp = new Date(0);
 
         final JSONObject jsonResponseObject = new JSONObject();
-        jsonResponseObject.put(TaskFields.ID, taskObj.getObjectID());
+        jsonResponseObject.put(DataFields.ID, taskObj.getObjectID());
 
         return new AJAXRequestResult(jsonResponseObject, timestamp, "json");
     }

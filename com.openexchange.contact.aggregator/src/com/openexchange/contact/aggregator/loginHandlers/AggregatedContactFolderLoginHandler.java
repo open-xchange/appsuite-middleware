@@ -56,7 +56,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import com.openexchange.log.LogFactory;
 import com.openexchange.config.cascade.ComposedConfigProperty;
 import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
@@ -132,7 +132,7 @@ public class AggregatedContactFolderLoginHandler implements LoginHandlerService 
         this.executor = executor;
     }
 
-    private static final Log LOG = LogFactory.getLog(AggregatedContactFolderLoginHandler.class);
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(AggregatedContactFolderLoginHandler.class);
 
     public void handleLogin(final LoginResult login) throws OXException {
         final int cid = login.getSession().getContextId();

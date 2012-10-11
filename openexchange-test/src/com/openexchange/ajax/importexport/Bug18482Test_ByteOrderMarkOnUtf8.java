@@ -104,10 +104,12 @@ public class Bug18482Test_ByteOrderMarkOnUtf8 extends AbstractManagedContactTest
 	private void testWithBOM(int... bom) throws Exception{
 		byte[] bytes = csv.getBytes(com.openexchange.java.Charsets.UTF_8);
 		byte[] streambase = new byte[bom.length + bytes.length];
-		for(int i = 0; i < bom.length; i++)
-			streambase[i] = (byte) bom[i];
-		for(int i = bom.length; i < streambase.length; i++)
-			streambase[i] = bytes[i - bom.length];
+		for(int i = 0; i < bom.length; i++) {
+            streambase[i] = (byte) bom[i];
+        }
+		for(int i = bom.length; i < streambase.length; i++) {
+            streambase[i] = bytes[i - bom.length];
+        }
 
 		InputStream stream = new ByteArrayInputStream( streambase );
 		CSVImportRequest importRequest = new CSVImportRequest(folderID, stream);

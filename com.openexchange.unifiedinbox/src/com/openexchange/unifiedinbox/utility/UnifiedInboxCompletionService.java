@@ -129,6 +129,7 @@ public final class UnifiedInboxCompletionService<V> implements TrackingCompletio
         this.completionQueue = completionQueue;
     }
 
+    @Override
     public Future<V> submit(final Callable<V> task) {
         if (task == null) {
             throw new NullPointerException();
@@ -142,6 +143,7 @@ public final class UnifiedInboxCompletionService<V> implements TrackingCompletio
         return f;
     }
 
+    @Override
     public Future<V> submit(final Runnable task, final V result) {
         if (task == null) {
             throw new NullPointerException();
@@ -155,6 +157,7 @@ public final class UnifiedInboxCompletionService<V> implements TrackingCompletio
         return f;
     }
 
+    @Override
     public Future<V> take() throws InterruptedException {
         final Future<V> f = completionQueue.take();
         if (0 == --count) {
@@ -163,6 +166,7 @@ public final class UnifiedInboxCompletionService<V> implements TrackingCompletio
         return f;
     }
 
+    @Override
     public Future<V> poll() {
         final Future<V> f = completionQueue.poll();
         if (null != f && 0 == --count) {
@@ -171,6 +175,7 @@ public final class UnifiedInboxCompletionService<V> implements TrackingCompletio
         return f;
     }
 
+    @Override
     public Future<V> poll(final long timeout, final TimeUnit unit) throws InterruptedException {
         final Future<V> f = completionQueue.poll(timeout, unit);
         if (null != f && 0 == --count) {
@@ -179,6 +184,7 @@ public final class UnifiedInboxCompletionService<V> implements TrackingCompletio
         return f;
     }
 
+    @Override
     public long getDuration() {
         return duration;
     }

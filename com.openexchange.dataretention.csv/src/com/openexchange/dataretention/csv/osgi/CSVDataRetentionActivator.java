@@ -64,7 +64,7 @@ import com.openexchange.osgi.HousekeepingActivator;
  */
 public final class CSVDataRetentionActivator extends HousekeepingActivator {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(CSVDataRetentionActivator.class));
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(CSVDataRetentionActivator.class));
 
     /**
      * Initializes a new {@link CSVDataRetentionActivator}.

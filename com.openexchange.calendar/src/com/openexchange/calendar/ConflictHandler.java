@@ -59,7 +59,7 @@ import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import com.openexchange.log.LogFactory;
 import com.openexchange.calendar.api.CalendarCollection;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.calendar.CalendarConfig;
@@ -68,6 +68,7 @@ import com.openexchange.groupware.calendar.Constants;
 import com.openexchange.groupware.calendar.OXCalendarExceptionCodes;
 import com.openexchange.groupware.calendar.RecurringResultInterface;
 import com.openexchange.groupware.calendar.RecurringResultsInterface;
+import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.groupware.contexts.Context;
@@ -106,7 +107,7 @@ public class ConflictHandler {
 
     public CalendarDataObject[] getConflicts() throws OXException {
         final Context ctx = Tools.getContext(so);
-        if (cdao.getShownAs() == CalendarDataObject.FREE || !UserConfigurationStorage.getInstance().getUserConfigurationSafe(so.getUserId(), ctx).hasConflictHandling()) {
+        if (cdao.getShownAs() == Appointment.FREE || !UserConfigurationStorage.getInstance().getUserConfigurationSafe(so.getUserId(), ctx).hasConflictHandling()) {
             return NO_CONFLICTS; // According to bug #5267 and modularisation concept
         } else if (!create && !cdao.containsStartDate() && !cdao.containsEndDate() && !cdao.containsParticipants() && !cdao.containsRecurrenceType() && !cdao.containsShownAs()) {
             if (LOG.isDebugEnabled()) {
@@ -117,7 +118,7 @@ public class ConflictHandler {
             return NO_CONFLICTS; // Past single apps should never conflict
         } else if (cdao.isSequence() && recColl.checkMillisInThePast(recColl.getMaxUntilDate(cdao).getTime())) {
             return NO_CONFLICTS; // Past series apps should never conflict
-        } else if (!create && !cdao.containsShownAs() && (cdao.getShownAs() == CalendarDataObject.FREE)) {
+        } else if (!create && !cdao.containsShownAs() && (cdao.getShownAs() == Appointment.FREE)) {
             //if (cdao.getShownAs() == CalendarDataObject.FREE) {
             return NO_CONFLICTS; // According to bug #5267
             //}

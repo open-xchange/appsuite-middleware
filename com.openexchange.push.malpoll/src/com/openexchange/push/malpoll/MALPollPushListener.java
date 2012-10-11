@@ -79,7 +79,7 @@ import com.openexchange.timer.TimerService;
  */
 public final class MALPollPushListener implements PushListener {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(MALPollPushListener.class));
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(MALPollPushListener.class));
 
     private static final boolean DEBUG_ENABLED = LOG.isDebugEnabled();
 

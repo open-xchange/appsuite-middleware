@@ -1,6 +1,8 @@
 package com.openexchange.webdav.xml.appointment.recurrence;
 
 import java.util.Date;
+import java.util.Locale;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.exception.OXException;
@@ -68,7 +70,7 @@ public class Bug8447Test extends AbstractRecurrenceTest {
 			loadAppointment(webCon, exceptionObjectId, appointmentFolderId, PROTOCOL + hostName, login, password, context);
 			fail("object not found exception expected!");
 		} catch (final OXException exc) {
-			assertExceptionMessage(exc.getMessage(), XmlServlet.OBJECT_NOT_FOUND_STATUS);
+			assertExceptionMessage(exc.getDisplayMessage(Locale.ENGLISH), XmlServlet.OBJECT_NOT_FOUND_STATUS);
 		}
 
 		deleteAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getLogin(), getPassword(), context);

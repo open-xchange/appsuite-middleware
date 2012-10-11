@@ -50,11 +50,12 @@
 package com.openexchange.groupware.tools.mappings.json;
 
 import java.util.Date;
-
+import java.util.TimeZone;
+import org.apache.commons.logging.Log;
 import org.json.JSONException;
 import org.json.JSONObject;
-
 import com.openexchange.exception.OXException;
+import com.openexchange.session.Session;
 
 /**
  * {@link DateMapping} - JSON specific mapping implementation for Dates.
@@ -64,22 +65,58 @@ import com.openexchange.exception.OXException;
  */
 public abstract class DateMapping<O> extends DefaultJsonMapping<Date, O> {
 
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(DateMapping.class);
+
+	/**
+	 * Initializes a new {@link DateMapping}.
+	 * 
+	 * @param ajaxName The AJAX name
+	 * @param columnID The column identifier
+	 */
 	public DateMapping(final String ajaxName, final int columnID) {
 		super(ajaxName, columnID);
 	}
 
 	@Override
-	public void deserialize(final JSONObject from, final O to) throws JSONException, OXException {
-		final long value = from.getLong(getAjaxName());
-		this.set(to, new Date(value));
+	public void deserialize(JSONObject from, O to) throws JSONException, OXException {
+		final String ajaxName = getAjaxName();
+		if (from.isNull(ajaxName)) {
+            set(to, null);
+        } else {
+            final Object object = from.get(ajaxName);
+            if (object instanceof Number) {
+                set(to, new Date(((Number) object).longValue()));
+            } else if (null != object) {
+                final String sObject = object.toString();
+                if (!isEmpty(sObject)) {
+                    try {
+                        set(to, new Date(Long.parseLong(sObject)));
+                    } catch (final NumberFormatException e) {
+                        throw new JSONException("JSONObject[\""+ajaxName+"\"] is not a number: " + object);
+                    }
+                }
+            } else {
+                throw new JSONException("JSONObject[\""+ajaxName+"\"] is not a number: " + object);
+            }
+        }
 	}
 
-	@Override
-	public void serialize(final O from, final JSONObject to) throws JSONException {
-		final Date value = this.get(from);
-		if (null != value) {
-			to.put(getAjaxName(), value.getTime());
+	private static boolean isEmpty(final String string) {
+        if (null == string) {
+            return true;
         }
+        final int len = string.length();
+        boolean isWhitespace = true;
+        for (int i = 0; isWhitespace && i < len; i++) {
+            isWhitespace = Character.isWhitespace(string.charAt(i));
+        }
+        return isWhitespace;
+    }
+
+	@Override
+	public Object serialize(O from, TimeZone timeZone, Session session) throws JSONException {
+		final Date value = this.get(from);
+		return null == value ? JSONObject.NULL : Long.valueOf(value.getTime());
 	}
 
 }

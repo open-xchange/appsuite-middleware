@@ -1,0 +1,16 @@
+Source: open-xchange-grizzly
+Section: web
+Priority: optional
+Maintainer: Marc Arens <marc.arens@open-xchange.com>
+Build-Depends: debhelper (>= 4.0.0), ant (>= 1.7.0), ant-optional (>= 1.7.0), sun-java6-jdk|java6-sdk, open-xchange-core (>= @OXVERSION@)
+Standards-Version: 3.8.4
+Homepage: http://www.open-xchange.com
+
+Package: open-xchange-grizzly
+Architecture: all
+Pre-Depends: open-xchange-core (>= @OXVERSION@)
+Depends: ${misc:Depends}
+Conflicts: open-xchange-ajp
+Provides: open-xchange-httpservice
+Description: The Open-Xchange HTTP Server and Servlet Container
+ This package implements an HTTP Server and provides the OSGi HTTP service.

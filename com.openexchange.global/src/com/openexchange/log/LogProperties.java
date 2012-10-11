@@ -50,7 +50,6 @@
 package com.openexchange.log;
 
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.List;
 import java.util.TreeSet;
 import java.util.concurrent.ConcurrentHashMap;
@@ -118,7 +117,29 @@ public final class LogProperties {
      * @see #isEnabled()
      */
     public static Props optLogProperties() {
-        return THREAD_LOCAL.get(Thread.currentThread());
+        Props props = THREAD_LOCAL.get(Thread.currentThread());
+        if (props == null) {
+        	return null;
+        }
+        return props.copy();
+    }
+
+    /**
+     * Gets the thread-local log properties for specified thread.
+     *
+     * @param thread The thread
+     * @return The log properties or <code>null</code>
+     * @see #isEnabled()
+     */
+    public static Props optLogProperties(final Thread thread) {
+        if (null == thread) {
+            return null;
+        }
+        final Props props = THREAD_LOCAL.get(thread);
+        if (props == null) {
+            return null;
+        }
+        return props.copy();
     }
 
     /**
@@ -138,7 +159,7 @@ public final class LogProperties {
         final Thread thread = Thread.currentThread();
         Props props = THREAD_LOCAL.get(thread);
         if (null == props) {
-            final Props newprops = new Props(new HashMap<String, Object>(16));
+            final Props newprops = new Props(new ConcurrentHashMap<String, Object>(16));
             props = THREAD_LOCAL.putIfAbsent(thread, newprops);
             if (null == props) {
                 props = newprops;
@@ -158,7 +179,7 @@ public final class LogProperties {
         if (null == props) {
             return;
         }
-        THREAD_LOCAL.put(other, new Props(new HashMap<String, Object>(props.getMap())));
+        THREAD_LOCAL.put(other, new Props(new ConcurrentHashMap<String, Object>(props.getMap())));
     }
 
     /**
@@ -167,7 +188,6 @@ public final class LogProperties {
      * @param name The property name
      * @return The log property or <code>null</code> if absent
      */
-    @SuppressWarnings("unchecked")
     public static <V> V getLogProperty(final String name) {
         final Thread thread = Thread.currentThread();
         final Props props = THREAD_LOCAL.get(thread);

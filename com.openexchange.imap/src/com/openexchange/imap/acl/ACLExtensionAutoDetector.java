@@ -60,7 +60,7 @@ import com.openexchange.imap.config.IMAPConfig;
  */
 final class ACLExtensionAutoDetector {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(ACLExtensionAutoDetector.class));
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(ACLExtensionAutoDetector.class));
 
     private static final boolean DEBUG = LOG.isDebugEnabled();
 

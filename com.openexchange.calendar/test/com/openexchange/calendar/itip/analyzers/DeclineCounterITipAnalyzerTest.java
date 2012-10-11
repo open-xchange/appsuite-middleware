@@ -64,8 +64,6 @@ import com.openexchange.data.conversion.ical.itip.ITipMessage;
 import com.openexchange.data.conversion.ical.itip.ITipMethod;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.calendar.CalendarDataObject;
-import com.openexchange.groupware.container.Appointment;
-import com.openexchange.groupware.container.DataObject;
 import com.openexchange.sim.SimBuilder;
 
 
@@ -97,7 +95,7 @@ public class DeclineCounterITipAnalyzerTest extends AbstractITipAnalyzerTest {
         
         ITipAnalysis analysis = new DeclineCounterITipAnalyzer(integrationBuilder.getSim(ITipIntegrationUtility.class), null).analyze(message, null, null, session);
         
-        assertEquals(12, ((Appointment) analysis.getAnnotations().get(0).getAppointment()).getObjectID());
+        assertEquals(12, analysis.getAnnotations().get(0).getAppointment().getObjectID());
         assertActions(analysis, ITipAction.DECLINE, ITipAction.REFRESH);
     }
     
@@ -124,7 +122,7 @@ public class DeclineCounterITipAnalyzerTest extends AbstractITipAnalyzerTest {
         
         ITipAnalysis analysis = new DeclineCounterITipAnalyzer(integrationBuilder.getSim(ITipIntegrationUtility.class), null).analyze(message, null, null, session);
         
-        assertEquals(13, ((Appointment) analysis.getAnnotations().get(0).getAppointment()).getObjectID());
+        assertEquals(13, analysis.getAnnotations().get(0).getAppointment().getObjectID());
         assertActions(analysis, ITipAction.DECLINE, ITipAction.REFRESH);
     }
     
@@ -198,7 +196,7 @@ public class DeclineCounterITipAnalyzerTest extends AbstractITipAnalyzerTest {
         
         List<ITipAnnotation> annotations = analysis.getAnnotations();
         assertEquals(1, annotations.size());
-        assertEquals("This is an update to an appointment that already changed in the meantime. It is best to just ignore this one.", annotations.get(0).getMessage());
+        assertEquals("This is an update to an appointment that has been changed in the meantime. Best ignore it.", annotations.get(0).getMessage());
         
         assertActions(analysis, ITipAction.IGNORE);
     }

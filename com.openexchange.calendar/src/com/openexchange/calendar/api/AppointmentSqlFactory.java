@@ -56,7 +56,7 @@ import java.util.List;
 import java.util.Set;
 
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import com.openexchange.log.LogFactory;
 
 import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.calendar.CalendarSql;
@@ -71,9 +71,9 @@ import com.openexchange.session.Session;
  */
 public class AppointmentSqlFactory implements AppointmentSqlFactoryService {
 
-	private static final Log LOG = LogFactory.getLog(AppointmentSqlFactory.class);
+	private static final Log LOG = com.openexchange.log.Log.loggerFor(AppointmentSqlFactory.class);
 	
-    private List<CalendarFeature> features = new ArrayList<CalendarFeature>();
+    private final List<CalendarFeature> features = new ArrayList<CalendarFeature>();
     
     public AppointmentSQLInterface createAppointmentSqlOmittingFeatures(Session session, String...omitFeatures) {
         Set<String> skip = new HashSet<String>(Arrays.asList(omitFeatures));

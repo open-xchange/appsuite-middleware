@@ -137,7 +137,7 @@ public final class IMAPFolderConverter {
         }
     }
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(IMAPFolderConverter.class));
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(IMAPFolderConverter.class));
 
     private static final boolean DEBUG = LOG.isDebugEnabled();
 
@@ -149,6 +149,8 @@ public final class IMAPFolderConverter {
     private static final String ATTRIBUTE_NON_EXISTENT = "\\nonexistent";
 
     private static final String ATTRIBUTE_HAS_CHILDREN = "\\haschildren";
+
+    private static final String ATTRIBUTE_NO_INFERIORS = "\\noinferiors";
 
     // private static final String ATTRIBUTE_HAS_NO_CHILDREN = "\\HasNoChildren";
 
@@ -264,15 +266,35 @@ public final class IMAPFolderConverter {
                         session,
                         accountId);
                     final char sep = mailFolder.getSeparator();
+                    final StringBuilder tmp = new StringBuilder(32);
                     boolean shared = false;
+                    String owner = null;
                     for (int i = 0; !shared && i < userNamespaces.length; i++) {
                         final String userNamespace = userNamespaces[i];
-                        if ((userNamespace.length() > 0) && (imapFullName.equals(userNamespace) || imapFullName.startsWith(new StringBuilder(
-                            userNamespace).append(sep).toString()))) {
-                            shared = true;
+                        if (!isEmpty(userNamespace)) {
+                            if (imapFullName.equals(userNamespace)) {
+                                shared = true;
+                            } else {
+                                tmp.setLength(0);
+                                final String prefix = tmp.append(userNamespace).append(sep).toString();
+                                if (imapFullName.startsWith(prefix)) {
+                                    shared = true;
+                                    /*-
+                                     * "Other Users/user1"
+                                     *  vs.
+                                     * "Other Users/user1/My shared folder"
+                                     */
+                                    final int pLen = prefix.length();
+                                    final int pos = imapFullName.indexOf(sep, pLen);
+                                    owner = pos < 0 ? imapFullName.substring(pLen) : imapFullName.substring(pLen, pos);
+                                }
+                            }
                         }
                     }
                     mailFolder.setShared(shared);
+                    if (null != owner) {
+                        mailFolder.setOwner(owner);
+                    }
                 }
                 /*-
                  * -------------------------------------------------------------------
@@ -299,6 +321,10 @@ public final class IMAPFolderConverter {
                         }
                         if (imapConfig.getImapCapabilities().hasChildren() && attrs.contains(ATTRIBUTE_HAS_CHILDREN)) {
                             mailFolder.setSubfolders(true);
+                        }
+                        if (attrs.contains(ATTRIBUTE_NO_INFERIORS)) {
+                            mailFolder.setSubfolders(true);
+                            mailFolder.setSubscribedSubfolders(false);
                         }
                     }
                     if (!mailFolder.containsSubfolders()) {
@@ -834,6 +860,18 @@ public final class IMAPFolderConverter {
         } else {
             LOG.debug("Failed MYRIGHTS for: " + fullName, e);
         }
+    }
+
+    private static boolean isEmpty(final String string) {
+        if (null == string) {
+            return true;
+        }
+        final int len = string.length();
+        boolean isWhitespace = true;
+        for (int i = 0; isWhitespace && i < len; i++) {
+            isWhitespace = Character.isWhitespace(string.charAt(i));
+        }
+        return isWhitespace;
     }
 
 }

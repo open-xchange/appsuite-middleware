@@ -2,7 +2,7 @@ package com.openexchange.webdav.action;
 
 import java.util.Date;
 
-import org.jdom.Namespace;
+import org.jdom2.Namespace;
 
 import com.openexchange.test.XMLCompare;
 import com.openexchange.webdav.protocol.Protocol;
@@ -243,7 +243,7 @@ public class PropfindTest extends ActionTestCase {
 		final Date lastModified = factory.resolveResource(SPECIAL_URL).getLastModified();
 
 		final String body = "<?xml version=\"1.0\" encoding=\"utf-8\" ?><D:propfind xmlns:D=\"DAV:\"><D:prop><D:getlastmodified/></D:prop></D:propfind>";
-		final String expect = "<?xml version=\"1.0\" encoding=\"utf-8\" ?><D:multistatus xmlns:D=\"DAV:\"><D:response><D:href>http://localhost"+testCollection+"/special%20characters%3F</D:href><D:propstat><D:prop><D:getlastmodified>"+Utils.convert(lastModified)+"</D:getlastmodified></D:prop><D:status>HTTP/1.1 200 OK</D:status></D:propstat></D:response></D:multistatus>";
+		final String expect = "<?xml version=\"1.0\" encoding=\"utf-8\" ?><D:multistatus xmlns:D=\"DAV:\"><D:response><D:href>http://localhost"+testCollection+"/special%20characters%3F/</D:href><D:propstat><D:prop><D:getlastmodified>"+Utils.convert(lastModified)+"</D:getlastmodified></D:prop><D:status>HTTP/1.1 200 OK</D:status></D:propstat></D:response></D:multistatus>";
 
 		final MockWebdavRequest req = new MockWebdavRequest(factory, "http://localhost/");
 		final MockWebdavResponse res = new MockWebdavResponse();
@@ -258,7 +258,8 @@ public class PropfindTest extends ActionTestCase {
 		final XMLCompare compare = new XMLCompare();
 		compare.setCheckTextNames("href");
 
-		assertTrue(compare.compare(expect, res.getResponseBodyAsString()));
+		String response = res.getResponseBodyAsString();
+		assertTrue(compare.compare(expect, response));
 	}
 
     // Bug 9837
@@ -268,7 +269,7 @@ public class PropfindTest extends ActionTestCase {
         final Date lastModified = factory.resolveResource(problematicUrl).getLastModified();
 
         final String body = "<?xml version=\"1.0\" encoding=\"utf-8\" ?><D:propfind xmlns:D=\"DAV:\"><D:prop><D:getlastmodified/></D:prop></D:propfind>";
-        final String expect = "<?xml version=\"1.0\" encoding=\"utf-8\" ?><D:multistatus xmlns:D=\"DAV:\"><D:response><D:href>http://localhost"+testCollection+"/contains%2F%2Fslahes%5C%5Cand%20backslashes</D:href><D:propstat><D:prop><D:getlastmodified>"+Utils.convert(lastModified)+"</D:getlastmodified></D:prop><D:status>HTTP/1.1 200 OK</D:status></D:propstat></D:response></D:multistatus>";
+        final String expect = "<?xml version=\"1.0\" encoding=\"utf-8\" ?><D:multistatus xmlns:D=\"DAV:\"><D:response><D:href>http://localhost"+testCollection+"/contains%2F%2Fslahes%5C%5Cand%20backslashes/</D:href><D:propstat><D:prop><D:getlastmodified>"+Utils.convert(lastModified)+"</D:getlastmodified></D:prop><D:status>HTTP/1.1 200 OK</D:status></D:propstat></D:response></D:multistatus>";
 
         final MockWebdavRequest req = new MockWebdavRequest(factory, "http://localhost/");
         final MockWebdavResponse res = new MockWebdavResponse();
@@ -283,7 +284,8 @@ public class PropfindTest extends ActionTestCase {
         final XMLCompare compare = new XMLCompare();
         compare.setCheckTextNames("href");
 
-        assertTrue(compare.compare(expect, res.getResponseBodyAsString()));
+        String response = res.getResponseBodyAsString();
+		assertTrue(compare.compare(expect, response));
 
     }
 

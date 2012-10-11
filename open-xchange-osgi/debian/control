@@ -5,12 +5,13 @@ Maintainer: Marcus Klein <marcus.klein@open-xchange.com>
 Build-Depends: debhelper (>= 4.0.0), ant (>= 1.7.0), ant-optional (>= 1.7.0), sun-java6-jdk|java6-sdk
 Standards-Version: 3.8.4
 Homepage: http://www.open-xchange.com
-Build-Conflicts: ecj, libecj-java-gcj, ecj-gcj, libecj-java, gcj-4.3-base, libgcj-common, libgcj9-0, libgcj-bc, libgcj9-jar, java-gcj-compat-headless, gcj-4.3, java-gcj-compat, java-gcj-compat-dev
 
 Package: open-xchange-osgi
 Architecture: all
 Depends: ${misc:Depends}, adduser, sun-java6-jre|java6-runtime
-Replaces: open-xchange-common (<< 6.21.0), open-xchange-activation (<< 6.21.0)
-Breaks: open-xchange-common (<< 6.21.0), open-xchange-activation (<< 6.21.0)
-Conflicts: open-xchange-common (<< 6.21.0), open-xchange-activation (<< 6.21.0)
-Description: OSGi bundles commonly used by all Open-Xchange packages
+Replaces: open-xchange-common, open-xchange-activation
+Conflicts: open-xchange-common, open-xchange-activation
+Provides: open-xchange-common, open-xchange-activation
+Description: 3rd party OSGi bundles used by the Open-Xchange backend
+ This package installes 3rd party OSGi bundles for the Open-Xchange backend. This includes the Equinox OSGi framework and the servlet API.
+ Furthermore libraries from the Apache Commons project are installed: CLI, Lang, Logging and some Apache service mix bundles.

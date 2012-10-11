@@ -73,4 +73,10 @@ public @interface DispatcherNotes {
      * @return Whether to allow access using the fallback session or not
      */
     boolean allowPublicSession() default false;
+
+    /**
+     * Indicates that this action may be called without a session
+     * @return whether to allow access to this action without a session
+     */
+	boolean noSession() default false;
 }

@@ -58,7 +58,7 @@ import java.util.Map;
 import java.util.Set;
 import javax.mail.internet.MimeUtility;
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import com.openexchange.log.LogFactory;
 import com.openexchange.tools.versit.Parameter;
 import com.openexchange.tools.versit.ParameterValue;
 import com.openexchange.tools.versit.ParameterValueDefinition;

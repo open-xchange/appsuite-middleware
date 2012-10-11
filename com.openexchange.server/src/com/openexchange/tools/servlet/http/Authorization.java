@@ -62,24 +62,63 @@ public final class Authorization {
 
     private static final String BASIC_AUTH = "basic";
 
+    private static final String SPNEGO_AUTH = "negotiate";
+
     private Authorization() {
         super();
+    }
+
+    public static boolean checkForAuthorizationHeader(String authHeader) {
+        final String authScheme = extractAuthScheme(authHeader);
+        if (null == authScheme) {
+            return false;
+        }
+        if (!(authScheme.equalsIgnoreCase(BASIC_AUTH) || authScheme.equalsIgnoreCase(SPNEGO_AUTH))) {
+            return false;
+        }
+        return true;
+    }
+
+    private static String extractAuthScheme(String authHeader) {
+        if (isEmpty(authHeader)) {
+            return null;
+        }
+        final int spacePos = authHeader.indexOf(' ');
+        if (-1 == spacePos) {
+            return null;
+        }
+        return authHeader.substring(0, spacePos);
     }
 
     /**
      * Checks if the client sends a correct basic authorization header.
      *
-     * @param auth Authorization header.
+     * @param authHeader Authorization header.
      * @return <code>true</code> if the client sent a correct authorization header.
      */
-    public static boolean checkForBasicAuthorization(final String auth) {
-        if (null == auth) {
+    public static boolean checkForBasicAuthorization(final String authHeader) {
+        final String authScheme = extractAuthScheme(authHeader);
+        if (null == authScheme) {
             return false;
         }
-        if (auth.length() <= BASIC_AUTH.length()) {
+        if (!authScheme.equalsIgnoreCase(BASIC_AUTH)) {
             return false;
         }
-        if (!auth.substring(0, BASIC_AUTH.length()).equalsIgnoreCase(BASIC_AUTH)) {
+        return true;
+    }
+
+    /**
+     * Checks if the client sends a correct kerberos authorization header.
+     *
+     * @param authHeader Authorization header.
+     * @return <code>true</code> if the client sent a correct authorization header.
+     */
+    public static boolean checkForKerberosAuthorization(final String authHeader) {
+        final String authScheme = extractAuthScheme(authHeader);
+        if (null == authScheme) {
+            return false;
+        }
+        if (!authScheme.equalsIgnoreCase(SPNEGO_AUTH)) {
             return false;
         }
         return true;
@@ -88,7 +127,7 @@ public final class Authorization {
     public static class Credentials {
         private final String login;
         private final String password;
-        Credentials(final String login, final String password) {
+        public Credentials(final String login, final String password) {
             super();
             this.login = login;
             this.password = password;
@@ -109,7 +148,7 @@ public final class Authorization {
     private static final char UNKNOWN = '\ufffd';
 
     public static Credentials decode(final String auth) throws UnsupportedCharsetException {
-        final byte[] decoded = Base64.decode(auth.substring(6));
+        final byte[] decoded = Base64.decode(auth.substring(BASIC_AUTH.length() + 1));
         String userpass = new String(decoded, com.openexchange.java.Charsets.UTF_8).trim();
         if (userpass.indexOf(UNKNOWN) >= 0) {
             userpass = new String(decoded, com.openexchange.java.Charsets.ISO_8859_1).trim();
@@ -136,4 +175,15 @@ public final class Authorization {
         return (pass != null && !StringCollection.isEmpty(pass));
     }
 
+    private static boolean isEmpty(final String string) {
+        if (null == string) {
+            return true;
+        }
+        final int len = string.length();
+        boolean isWhitespace = true;
+        for (int i = 0; isWhitespace && i < len; i++) {
+            isWhitespace = Character.isWhitespace(string.charAt(i));
+        }
+        return isWhitespace;
+    }
 }

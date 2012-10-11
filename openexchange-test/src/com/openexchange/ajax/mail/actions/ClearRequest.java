@@ -64,17 +64,18 @@ import com.openexchange.ajax.framework.AbstractAJAXParser;
 public class ClearRequest extends AbstractMailRequest<ClearResponse> {
 
 	private final String[] folderIds;
+	private boolean hardDelete = false;
 	private boolean failOnError = true;
 
-	public ClearRequest(String folderId){
+	public ClearRequest(final String folderId){
 		this.folderIds = new String [] {folderId};
 	}
 
-	public ClearRequest(String[] folderIds){
+	public ClearRequest(final String[] folderIds){
 		this.folderIds = folderIds;
 	}
 
-	public ClearRequest(String[] folderIds, boolean failOnError){
+	public ClearRequest(final String[] folderIds, final boolean failOnError){
 		this.folderIds = folderIds;
 		this.failOnError = failOnError;
 	}
@@ -88,6 +89,16 @@ public class ClearRequest extends AbstractMailRequest<ClearResponse> {
         return array;
 	}
 
+    /**
+     * Sets the hard delete flag
+     *
+     * @param hardDelete The hard delete flag to set
+     */
+    public ClearRequest setHardDelete(final boolean hardDelete) {
+        this.hardDelete = hardDelete;
+        return this;
+    }
+
 	@Override
     public com.openexchange.ajax.framework.AJAXRequest.Method getMethod() {
 		return Method.PUT;
@@ -96,7 +107,8 @@ public class ClearRequest extends AbstractMailRequest<ClearResponse> {
 	@Override
     public com.openexchange.ajax.framework.AJAXRequest.Parameter[] getParameters() {
 		return new Parameter[] {
-	            new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_CLEAR)};
+	            new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_CLEAR),
+	            new Parameter(AJAXServlet.PARAMETER_HARDDELETE, hardDelete) };
 	}
 
 	@Override

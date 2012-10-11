@@ -58,7 +58,7 @@ import java.sql.SQLWarning;
 import java.sql.Savepoint;
 import java.sql.Statement;
 import java.util.Map;
-import com.openexchange.database.internal.Assignment;
+import com.openexchange.database.internal.AssignmentImpl;
 import com.openexchange.database.internal.Pools;
 import com.openexchange.database.internal.ReplicationMonitor;
 
@@ -71,7 +71,7 @@ public abstract class JDBC3ConnectionReturner implements Connection {
 
     private final Pools pools;
 
-    private final Assignment assign;
+    private final AssignmentImpl assign;
 
     protected Connection delegate;
 
@@ -81,7 +81,7 @@ public abstract class JDBC3ConnectionReturner implements Connection {
 
     private final boolean usedAsRead;
 
-    public JDBC3ConnectionReturner(final Pools pools, final Assignment assign, final Connection delegate, final boolean noTimeout, final boolean write, final boolean usedAsRead) {
+    public JDBC3ConnectionReturner(final Pools pools, final AssignmentImpl assign, final Connection delegate, final boolean noTimeout, final boolean write, final boolean usedAsRead) {
         super();
         this.pools = pools;
         this.assign = assign;
@@ -92,18 +92,24 @@ public abstract class JDBC3ConnectionReturner implements Connection {
     }
 
     @Override
+    public String toString() {
+        return delegate.toString();
+    }
+
+    @Override
     public void clearWarnings() throws SQLException {
         checkForAlreadyClosed();
         delegate.clearWarnings();
     }
 
     @Override
-    public void close() {
+    public void close() throws SQLException {
+        if (null == delegate) {
+            throw new SQLException("Connection is already closed.");
+        }
         final Connection toReturn = delegate;
         delegate = null;
-        if (null != toReturn) {
-            ReplicationMonitor.backAndIncrementTransaction(pools, assign, toReturn, noTimeout, write, usedAsRead);
-        }
+        ReplicationMonitor.backAndIncrementTransaction(pools, assign, toReturn, noTimeout, write, usedAsRead);
     }
 
     @Override

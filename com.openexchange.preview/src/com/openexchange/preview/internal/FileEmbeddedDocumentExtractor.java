@@ -56,11 +56,13 @@ import java.io.InputStream;
 import java.util.HashSet;
 import java.util.Set;
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import com.openexchange.log.LogFactory;
 import org.apache.tika.config.TikaConfig;
 import org.apache.tika.extractor.EmbeddedDocumentExtractor;
 import org.apache.tika.io.IOUtils;
+import org.apache.tika.metadata.HttpHeaders;
 import org.apache.tika.metadata.Metadata;
+import org.apache.tika.metadata.TikaMetadataKeys;
 import org.apache.tika.mime.MediaType;
 import org.apache.tika.mime.MimeTypeException;
 import org.xml.sax.ContentHandler;
@@ -120,7 +122,7 @@ public final class FileEmbeddedDocumentExtractor implements EmbeddedDocumentExtr
     public void parseEmbedded(final InputStream inputStream, final ContentHandler contentHandler, final Metadata metadata, final boolean outputHtml) throws SAXException, IOException {
         InputStream in = inputStream;
         try {
-            final String resourceName = metadata.get(Metadata.RESOURCE_NAME_KEY);
+            final String resourceName = metadata.get(TikaMetadataKeys.RESOURCE_NAME_KEY);
             String name = resourceName;
             if (name == null) {
                 name = Integer.toString(count++);
@@ -128,7 +130,7 @@ public final class FileEmbeddedDocumentExtractor implements EmbeddedDocumentExtr
             /*
              * MIME type
              */
-            String contentType = metadata.get(Metadata.CONTENT_TYPE);
+            String contentType = metadata.get(HttpHeaders.CONTENT_TYPE);
             if (name.indexOf('.') == -1 && contentType != null) {
                 try {
                     name += config.getMimeRepository().forName(contentType).getExtension();

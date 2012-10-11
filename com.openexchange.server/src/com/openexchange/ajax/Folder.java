@@ -75,7 +75,6 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -83,11 +82,12 @@ import org.json.JSONWriter;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.customizer.folder.AdditionalFolderFieldList;
 import com.openexchange.ajax.customizer.folder.BulkAdditionalFolderFieldsList;
-import com.openexchange.ajax.fields.FolderFields;
+import com.openexchange.ajax.fields.FolderChildFields;
 import com.openexchange.ajax.fields.ResponseFields;
 import com.openexchange.ajax.helper.ParamContainer;
 import com.openexchange.ajax.parser.FolderParser;
 import com.openexchange.ajax.parser.MessagingFolderParser;
+import com.openexchange.ajax.requesthandler.DefaultDispatcherPrefixService;
 import com.openexchange.ajax.writer.FolderWriter;
 import com.openexchange.ajax.writer.FolderWriter.FolderFieldWriter;
 import com.openexchange.ajax.writer.MessagingFolderWriter;
@@ -102,6 +102,7 @@ import com.openexchange.exception.OXException.Generic;
 import com.openexchange.exception.OXExceptionConstants;
 import com.openexchange.folderstorage.messaging.MessagingFolderIdentifier;
 import com.openexchange.groupware.EnumComponent;
+import com.openexchange.groupware.container.DataObject;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
@@ -114,6 +115,7 @@ import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.json.OXJSONWriter;
+import com.openexchange.log.LogFactory;
 import com.openexchange.mail.FullnameArgument;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailServletInterface;
@@ -262,7 +264,7 @@ public class Folder extends SessionServlet implements OXExceptionConstants {
         } else if (actionStr.equalsIgnoreCase(ACTION_GET)) {
             actionGetFolder(req, resp);
         } else {
-            throw getWrappingOXException(new Exception("Action \"" + actionStr + "\" NOT supported via GET on /ajax/folders"));
+            throw getWrappingOXException(new Exception("Action \"" + actionStr + "\" NOT supported via GET on "+DefaultDispatcherPrefixService.getInstance().getPrefix() + "folders"));
         }
     }
 
@@ -282,7 +284,7 @@ public class Folder extends SessionServlet implements OXExceptionConstants {
         } else if (actionStr.equalsIgnoreCase("removetestfolders")) {
             actionPutRemoveTestFolder(req, resp);
         } else {
-            throw getWrappingOXException(new Exception("Action \"" + actionStr + "\" NOT supported via PUT on /ajax/folders"));
+            throw getWrappingOXException(new Exception("Action \"" + actionStr + "\" NOT supported via PUT on "+DefaultDispatcherPrefixService.getInstance().getPrefix() + "folders"));
         }
     }
 
@@ -452,8 +454,8 @@ public class Folder extends SessionServlet implements OXExceptionConstants {
                         lastModified = null == modified ? lastModified : Math.max(lastModified, modified.getTime());
                         jsonWriter.array();
                         try {
-                            for (int j = 0; j < writers.length; j++) {
-                                writers[j].writeField(jsonWriter, listFolder, false);
+                            for (final FolderFieldWriter writer : writers) {
+                                writer.writeField(jsonWriter, listFolder, false);
                             }
                         } finally {
                             jsonWriter.endArray();
@@ -474,8 +476,8 @@ public class Folder extends SessionServlet implements OXExceptionConstants {
                         lastModified = null == modified ? lastModified : Math.max(lastModified, modified.getTime());
                         jsonWriter.array();
                         try {
-                            for (int j = 0; j < writers.length; j++) {
-                                writers[j].writeField(jsonWriter, listFolder, false);
+                            for (final FolderFieldWriter writer : writers) {
+                                writer.writeField(jsonWriter, listFolder, false);
                             }
                         } finally {
                             jsonWriter.endArray();
@@ -496,8 +498,8 @@ public class Folder extends SessionServlet implements OXExceptionConstants {
                         lastModified = null == modified ? lastModified : Math.max(lastModified, modified.getTime());
                         jsonWriter.array();
                         try {
-                            for (int j = 0; j < writers.length; j++) {
-                                writers[j].writeField(jsonWriter, listFolder, false);
+                            for (final FolderFieldWriter writer : writers) {
+                                writer.writeField(jsonWriter, listFolder, false);
                             }
                         } finally {
                             jsonWriter.endArray();
@@ -518,8 +520,8 @@ public class Folder extends SessionServlet implements OXExceptionConstants {
                         lastModified = modified == null ? lastModified : Math.max(lastModified, modified.getTime());
                         jsonWriter.array();
                         try {
-                            for (int j = 0; j < writers.length; j++) {
-                                writers[j].writeField(jsonWriter, listFolder, false);
+                            for (final FolderFieldWriter writer : writers) {
+                                writer.writeField(jsonWriter, listFolder, false);
                             }
                         } finally {
                             jsonWriter.endArray();
@@ -567,8 +569,8 @@ public class Folder extends SessionServlet implements OXExceptionConstants {
                         lastModified = null == modified ? lastModified : Math.max(lastModified, modified.getTime());
                         jsonWriter.array();
                         try {
-                            for (int j = 0; j < writers.length; j++) {
-                                writers[j].writeField(jsonWriter, fo, false, FolderObject.getFolderString(fo.getObjectID(), locale), -1);
+                            for (final FolderFieldWriter writer : writers) {
+                                writer.writeField(jsonWriter, fo, false, FolderObject.getFolderString(fo.getObjectID(), locale), -1);
                             }
                         } finally {
                             jsonWriter.endArray();
@@ -635,8 +637,8 @@ public class Folder extends SessionServlet implements OXExceptionConstants {
                             FolderObject.createVirtualSharedFolderObject(displayNames.get(displayName).intValue(), displayName);
                         jsonWriter.array();
                         try {
-                            for (int j = 0; j < writers.length; j++) {
-                                writers[j].writeField(jsonWriter, virtualOwnerFolder, false, null, 1);
+                            for (final FolderFieldWriter writer : writers) {
+                                writer.writeField(jsonWriter, virtualOwnerFolder, false, null, 1);
                             }
                         } finally {
                             jsonWriter.endArray();
@@ -803,8 +805,8 @@ public class Folder extends SessionServlet implements OXExceptionConstants {
                         lastModified = fo.getLastModified() == null ? lastModified : Math.max(lastModified, fo.getLastModified().getTime());
                         jsonWriter.array();
                         try {
-                            for (int j = 0; j < writers.length; j++) {
-                                writers[j].writeField(jsonWriter, fo, false);
+                            for (final FolderFieldWriter writer : writers) {
+                                writer.writeField(jsonWriter, fo, false);
                             }
                         } finally {
                             jsonWriter.endArray();
@@ -984,15 +986,15 @@ public class Folder extends SessionServlet implements OXExceptionConstants {
                                 final JSONArray ja = new JSONArray();
                                 putter.setJSONArray(ja);
                                 // TODO: Translation for INBOX?!
-                                for (int j = 0; j < writers.length; j++) {
-                                    writers[j].writeField(putter, mailInterface.getAccountID(), f, strHelper.getString(MailStrings.INBOX), -1, null, -1, all);
+                                for (final MailFolderFieldWriter writer : writers) {
+                                    writer.writeField(putter, mailInterface.getAccountID(), f, strHelper.getString(MailStrings.INBOX), -1, null, -1, all);
                                 }
                                 jsonWriter.value(ja);
                             } else {
                                 final JSONArray ja = new JSONArray();
                                 putter.setJSONArray(ja);
-                                for (int j = 0; j < writers.length; j++) {
-                                    writers[j].writeField(putter, mailInterface.getAccountID(), f, null, -1, null, -1, all);
+                                for (final MailFolderFieldWriter writer : writers) {
+                                    writer.writeField(putter, mailInterface.getAccountID(), f, null, -1, null, -1, all);
                                 }
                                 jsonWriter.value(ja);
                             }
@@ -1025,11 +1027,11 @@ public class Folder extends SessionServlet implements OXExceptionConstants {
                         final MessagingFolderFieldWriter[] writers =
                             com.openexchange.ajax.writer.MessagingFolderWriter.getMessagingFolderFieldWriter(columns, session);
                         final com.openexchange.ajax.writer.MessagingFolderWriter.JSONArrayPutter putter = newMessagingArrayPutter();
-                        for (int i = 0; i < subfolders.length; i++) {
+                        for (final MessagingFolder subfolder : subfolders) {
                             final JSONArray ja = new JSONArray();
                             putter.setJSONArray(ja);
-                            for (int j = 0; j < writers.length; j++) {
-                                writers[j].writeField(putter, serviceId, accountId, subfolders[i], null, -1, null, -1, all);
+                            for (final MessagingFolderFieldWriter writer : writers) {
+                                writer.writeField(putter, serviceId, accountId, subfolder, null, -1, null, -1, all);
                             }
                             jsonWriter.value(ja);
                         }
@@ -1513,7 +1515,7 @@ public class Folder extends SessionServlet implements OXExceptionConstants {
                  * Add deleted OX folders from above
                  */
                 q.addAll(deletedQueue);
-                final FolderFieldWriter idWriter = folderWriter.getFolderFieldWriter(new int[] { FolderObject.OBJECT_ID })[0];
+                final FolderFieldWriter idWriter = folderWriter.getFolderFieldWriter(new int[] { DataObject.OBJECT_ID })[0];
                 size = q.size();
                 iter = q.iterator();
                 for (int i = 0; i < size; i++) {
@@ -1660,8 +1662,7 @@ public class Folder extends SessionServlet implements OXExceptionConstants {
                         throw ThreadPools.launderThrowable(e, OXException.class);
                     }
                     // Write arrays
-                    for (int i = 0; i < arrays.length; i++) {
-                        final JSONArray array = arrays[i];
+                    for (final JSONArray array : arrays) {
                         if (null != array) {
                             jsonWriter.value(array);
                         }
@@ -1896,8 +1897,8 @@ public class Folder extends SessionServlet implements OXExceptionConstants {
                      */
                     final int accountId = mfi.getAccountId();
                     boolean done = false;
-                    if (jsonObj.has(FolderFields.FOLDER_ID)) {
-                        final MessagingFolderIdentifier pfi = new MessagingFolderIdentifier(jsonObj.getString(FolderFields.FOLDER_ID));
+                    if (jsonObj.has(FolderChildFields.FOLDER_ID)) {
+                        final MessagingFolderIdentifier pfi = new MessagingFolderIdentifier(jsonObj.getString(FolderChildFields.FOLDER_ID));
                         if (accountId != pfi.getAccountId()) {
                             /*
                              * Move to another account... Use new folder storage API
@@ -1985,7 +1986,7 @@ public class Folder extends SessionServlet implements OXExceptionConstants {
          */
         try {
             final Context ctx = session.getContext();
-            final String parentFolder = paramContainer.checkStringParam(FolderFields.FOLDER_ID);
+            final String parentFolder = paramContainer.checkStringParam(FolderChildFields.FOLDER_ID);
             int parentFolderId = -1;
             if ((parentFolderId = getUnsignedInteger(parentFolder)) >= 0) {
                 final FolderSQLInterface foldersqlinterface = new RdbFolderSQLInterface(session);
@@ -2473,8 +2474,8 @@ public class Folder extends SessionServlet implements OXExceptionConstants {
                 final JSONArray ja = new JSONArray();
                 final com.openexchange.mail.json.writer.FolderWriter.JSONArrayPutter putter =
                     new com.openexchange.mail.json.writer.FolderWriter.JSONArrayPutter().setJSONArray(ja);
-                for (int i = 0; i < mailFolderWriters.length; i++) {
-                    mailFolderWriters[i].writeField(
+                for (final MailFolderFieldWriter mailFolderWriter : mailFolderWriters) {
+                    mailFolderWriter.writeField(
                         putter,
                         accountId,
                         rootFolder,
@@ -2549,8 +2550,8 @@ public class Folder extends SessionServlet implements OXExceptionConstants {
                     new com.openexchange.ajax.writer.MessagingFolderWriter.JSONArrayPutter(ja);
                 final String displayName = messagingAccount.getDisplayName();
                 final String fqn = MessagingFolderIdentifier.getFQN(serviceId, accountId, MessagingFolder.ROOT_FULLNAME);
-                for (int i = 0; i < writers.length; i++) {
-                    writers[i].writeField(putter, serviceId, accountId, rootFolder, displayName, -1, fqn, FolderObject.MESSAGING, false);
+                for (final MessagingFolderFieldWriter writer : writers) {
+                    writer.writeField(putter, serviceId, accountId, rootFolder, displayName, -1, fqn, FolderObject.MESSAGING, false);
                 }
                 arrays[index] = ja;
                 return null;

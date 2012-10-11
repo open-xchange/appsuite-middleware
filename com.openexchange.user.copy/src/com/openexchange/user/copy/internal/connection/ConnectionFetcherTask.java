@@ -54,7 +54,7 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Map;
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import com.openexchange.log.LogFactory;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
@@ -73,7 +73,7 @@ import com.openexchange.user.copy.internal.context.ContextLoadTask;
  */
 public class ConnectionFetcherTask implements CopyUserTaskService {
 
-    private static final Log LOG = LogFactory.getLog(ConnectionFetcherTask.class);
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(ConnectionFetcherTask.class);
 
     private final DatabaseService service;
 

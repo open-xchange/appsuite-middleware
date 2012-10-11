@@ -155,6 +155,8 @@ public class AutoconfigParser {
                 docs.add(parseDocumentation(parser));
             } else if (name.equalsIgnoreCase(INSTRUCTION)) {
                 instructions.add(parseInstruction(parser));
+            } else {
+                ignoreTag(parser, name);
             }
         }
         parser.require(END_TAG, null, EMAIL_PROVIDER);
@@ -229,10 +231,25 @@ public class AutoconfigParser {
                 server.setSocketType(parseSimpleText(parser, SOCKET_TYPE));
             } else if (name.equalsIgnoreCase(USERNAME)) {
                 server.setUsername(parseSimpleText(parser, USERNAME));
+            } else {
+                ignoreTag(parser, name);
             }
         }
         parser.require(END_TAG, null, tag);
         return server;
+    }
+
+    /**
+     * @param parser
+     * @param name
+     * @throws XmlPullParserException
+     * @throws IOException
+     */
+    private void ignoreTag(XmlPullParser parser, String name) throws XmlPullParserException, IOException {
+        while (parser.next() != END_TAG || !parser.getName().equalsIgnoreCase(name)) {
+            ;
+        }
+        parser.require(END_TAG, null, name);
     }
 
     /**

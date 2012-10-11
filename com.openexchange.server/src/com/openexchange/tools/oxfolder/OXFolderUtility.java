@@ -66,6 +66,7 @@ import com.openexchange.group.GroupStorage;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.data.Check;
+import com.openexchange.groupware.infostore.InfostoreFacades;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
@@ -82,7 +83,7 @@ import com.openexchange.tools.session.ServerSession;
  */
 public final class OXFolderUtility {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(OXFolderUtility.class));
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(OXFolderUtility.class));
 
     private static final String STR_EMPTY = "";
 
@@ -91,6 +92,37 @@ public final class OXFolderUtility {
      */
     private OXFolderUtility() {
         super();
+    }
+
+    /**
+     * Gets the appropriate accessible module for DB folder queries.
+     * 
+     * @param accessibleModules The accessible modules as indicated by user configuration
+     * @return The appropriate accessible module for DB folder queries
+     */
+    public static int[] getAccessibleModulesForFolders(final int[] accessibleModules) {
+        if (null == accessibleModules) {
+            return null;
+        }
+        if (!InfostoreFacades.isInfoStoreAvailable()) {
+            final int pos = Arrays.binarySearch(accessibleModules, FolderObject.INFOSTORE);
+            if (pos >= 0) {
+                // Remove Infostore module identifier to ignore infostore folders
+                final int mlen = accessibleModules.length - 1;
+                final int[] modules = new int[mlen];
+                if (0 == pos) {
+                    System.arraycopy(accessibleModules, 1, modules, 0, modules.length);
+                } else {
+                    System.arraycopy(accessibleModules, 0, modules, 0, pos);
+                    final int len = mlen - pos;
+                    if (len > 0) {
+                        System.arraycopy(accessibleModules, pos + 1, modules, pos, len);
+                    }
+                }
+                return modules;
+            }
+        }
+        return accessibleModules;
     }
 
     /**
@@ -233,7 +265,7 @@ public final class OXFolderUtility {
         final boolean isPrivate = (folderObj.getType() == FolderObject.PRIVATE || folderObj.getType() == FolderObject.SHARED);
         final TIntList adminEntities = new TIntArrayList(isPrivate ? 1 : 4);
         final int permissionsSize = folderObj.getPermissions().size();
-        final Iterator<OCLPermission> iter = folderObj.getPermissions().iterator();
+        Iterator<OCLPermission> iter = folderObj.getPermissions().iterator();
         final int creator = folderObj.containsCreatedBy() ? folderObj.getCreatedBy() : userId;
         final boolean isDefaultFolder = folderObj.containsDefaultFolder() ? folderObj.isDefaultFolder() : false;
         boolean creatorIsAdmin = false;
@@ -255,20 +287,31 @@ public final class OXFolderUtility {
             }
         }
         if (!isPrivate && !adminEntities.contains(creator)) {
-            final OCLPermission oclPerm = new OCLPermission();
-            oclPerm.setEntity(creator);
-            oclPerm.setGroupPermission(false);
-            oclPerm.setFolderAdmin(true);
-            oclPerm.setAllPermission(
-                OCLPermission.NO_PERMISSIONS,
-                OCLPermission.NO_PERMISSIONS,
-                OCLPermission.NO_PERMISSIONS,
-                OCLPermission.NO_PERMISSIONS);
-            oclPerm.setSystem(0);
-            final List<OCLPermission> nList = new ArrayList<OCLPermission>(folderObj.getPermissions());
-            nList.add(oclPerm);
-            adminEntities.add(creator);
-            folderObj.setPermissions(nList);
+            iter = folderObj.getPermissions().iterator();
+            boolean found = false;
+            for (int i = 0; !found && i < permissionsSize; i++) {
+                final OCLPermission oclPerm = iter.next();
+                if (oclPerm.getEntity() == creator) {
+                    oclPerm.setFolderAdmin(true);
+                    found = true;
+                }
+            }
+            if (!found) {
+                final OCLPermission oclPerm = new OCLPermission();
+                oclPerm.setEntity(creator);
+                oclPerm.setGroupPermission(false);
+                oclPerm.setFolderAdmin(true);
+                oclPerm.setAllPermission(
+                    OCLPermission.NO_PERMISSIONS,
+                    OCLPermission.NO_PERMISSIONS,
+                    OCLPermission.NO_PERMISSIONS,
+                    OCLPermission.NO_PERMISSIONS);
+                oclPerm.setSystem(0);
+                final List<OCLPermission> nList = new ArrayList<OCLPermission>(folderObj.getPermissions());
+                nList.add(oclPerm);
+                adminEntities.add(creator);
+                folderObj.setPermissions(nList);
+            }
         }
         if (adminEntities.isEmpty()) {
             throw OXFolderExceptionCode.NO_FOLDER_ADMIN.create();
@@ -490,6 +533,7 @@ public final class OXFolderUtility {
                 folderObj.getObjectID(),
                 folderObj.getType(userConfig.getUserId()),
                 folderObj.getModule(),
+                folderObj.getCreatedBy(),
                 userConfig);
         retval.setFolderAdmin(true);
         retval.setAllPermission(
@@ -608,6 +652,9 @@ public final class OXFolderUtility {
             enforcedType = FolderObject.PRIVATE;
             break;
         case FolderObject.SYSTEM_PUBLIC_FOLDER_ID:
+            enforcedType = FolderObject.PUBLIC;
+            break;
+        case FolderObject.SYSTEM_INFOSTORE_FOLDER_ID:
             enforcedType = FolderObject.PUBLIC;
             break;
         case FolderObject.SYSTEM_USER_INFOSTORE_FOLDER_ID:

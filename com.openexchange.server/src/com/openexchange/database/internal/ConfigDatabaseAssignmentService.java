@@ -56,6 +56,6 @@ package com.openexchange.database.internal;
  */
 interface ConfigDatabaseAssignmentService {
 
-    Assignment getConfigDBAssignment();
+    AssignmentImpl getConfigDBAssignment();
 
 }

@@ -64,7 +64,7 @@ import com.openexchange.folderstorage.FolderStorage;
 public final class OutlookFolderStorageServiceTracker implements ServiceTrackerCustomizer<FolderStorage,FolderStorage> {
 
     private static final org.apache.commons.logging.Log LOG =
-        com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(OutlookFolderStorageServiceTracker.class));
+        com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(OutlookFolderStorageServiceTracker.class));
 
     private final BundleContext context;
 

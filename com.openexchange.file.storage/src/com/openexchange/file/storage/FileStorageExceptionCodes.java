@@ -123,7 +123,7 @@ public enum FileStorageExceptionCodes implements OXExceptionCode {
      */
     MISSING_PARAMETER(FileStorageExceptionMessages.MISSING_PARAMETER_MSG, Category.CATEGORY_USER_INPUT, 17),
     /**
-     * Invalid parameter: %1$s with value '%2$s'.
+     * Invalid parameter: %1$s with type '%2$s'. Expected '%3$s'.
      */
     INVALID_PARAMETER(FileStorageExceptionMessages.INVALID_PARAMETER_MSG, Category.CATEGORY_USER_INPUT, 18),
     /**
@@ -157,7 +157,7 @@ public enum FileStorageExceptionCodes implements OXExceptionCode {
     /**
      * File %1$s not found in folder %2$s.
      */
-    FILE_NOT_FOUND(FileStorageExceptionMessages.FILE_NOT_FOUND_MSG, Category.CATEGORY_ERROR, 26),
+    FILE_NOT_FOUND(FileStorageExceptionMessages.FILE_NOT_FOUND_MSG, Category.CATEGORY_USER_INPUT, 26),
     /**
      * No account manager could be found for service: %1$s.
      */
@@ -165,7 +165,18 @@ public enum FileStorageExceptionCodes implements OXExceptionCode {
     /**
      * Invalid URL "%1$s". Error: %2$s.
      */
-    INVALID_URL(FileStorageExceptionMessages.INVALID_URL_MSG, Category.CATEGORY_USER_INPUT, 28);
+    INVALID_URL(FileStorageExceptionMessages.INVALID_URL_MSG, Category.CATEGORY_USER_INPUT, 28),
+    /**
+     * No such folder.
+     */
+    NO_SUCH_FOLDER(FileStorageExceptionMessages.NO_SUCH_FOLDER_MSG, Category.CATEGORY_USER_INPUT, 29),
+    
+    ;
+
+    /**
+     * The prefix constant.
+     */
+    public static final String PREFIX = "FILE_STORAGE";
 
     private final Category category;
 
@@ -196,7 +207,7 @@ public enum FileStorageExceptionCodes implements OXExceptionCode {
 
     @Override
     public String getPrefix() {
-        return "FILE_STORAGE";
+        return PREFIX;
     }
 
     public String getHelp() {

@@ -51,10 +51,10 @@ package com.openexchange.webdav.xml;
 
 import java.io.OutputStream;
 import java.util.Date;
-import org.jdom.Element;
-import org.jdom.Namespace;
-import org.jdom.Verifier;
-import org.jdom.output.XMLOutputter;
+import org.jdom2.Element;
+import org.jdom2.Namespace;
+import org.jdom2.Verifier;
+import org.jdom2.output.XMLOutputter;
 import com.openexchange.groupware.container.DataObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
@@ -69,7 +69,7 @@ import com.openexchange.webdav.xml.fields.DataFields;
  */
 public class DataWriter {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(DataWriter.class));
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(DataWriter.class));
 
     private static final boolean DEBUG = LOG.isDebugEnabled();
 
@@ -255,6 +255,28 @@ public class DataWriter {
          * Return cleansed string
          */
         return retvalBuilder.toString();
+    }
+
+    /**
+     * Gets the error message for given arguments.
+     * 
+     * @param message The message template in <tt>printf</tt> style
+     * @param arg The message argument
+     * @return The error message
+     */
+    protected static String getErrorMessage(final String message, final String arg) {
+        return String.format(message, arg);
+    }
+
+    /**
+     * Gets the error message for given arguments.
+     * 
+     * @param message The message template in <tt>printf</tt> style
+     * @param errorCode The error code
+     * @return The error message
+     */
+    protected static String getErrorMessage(final String message, final int errorCode) {
+        return getErrorMessage(message, Integer.toString(errorCode));
     }
 
 }

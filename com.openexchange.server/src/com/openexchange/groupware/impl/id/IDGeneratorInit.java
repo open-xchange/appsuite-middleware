@@ -63,7 +63,7 @@ import com.openexchange.server.services.ServerServiceRegistry;
  */
 public final class IDGeneratorInit implements Initialization {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(IDGeneratorInit.class));
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(IDGeneratorInit.class));
 
     private final AtomicBoolean started;
 

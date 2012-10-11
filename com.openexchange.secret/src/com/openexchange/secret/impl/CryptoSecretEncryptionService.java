@@ -51,9 +51,9 @@ package com.openexchange.secret.impl;
 
 import java.security.GeneralSecurityException;
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import com.openexchange.crypto.CryptoService;
 import com.openexchange.exception.OXException;
+import com.openexchange.log.LogFactory;
 import com.openexchange.secret.Decrypter;
 import com.openexchange.secret.RankingAwareSecretService;
 import com.openexchange.secret.SecretEncryptionService;
@@ -263,6 +263,9 @@ public class CryptoSecretEncryptionService<T> implements SecretEncryptionService
 
     private String decrypthWithPasswordSecretService(final String toDecrypt, final Session session) throws OXException {
         final String secret = passwordSecretService.getSecret(session);
+        if (isEmpty(secret)) {
+            return null;
+        }
         final String decrypted = crypto.decrypt(toDecrypt, secret);
         if (DEBUG) {
             LOG.debug("Decrypted password with former crypt mechanism");

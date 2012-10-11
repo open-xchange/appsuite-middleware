@@ -110,6 +110,15 @@ public final class ServerServiceRegistry {
     }
 
     /**
+     * Adds a service bound to its class to this service registry
+     *
+     * @param service The service
+     */
+    public <S extends Object> void addService(final S service) {
+        services.put(service.getClass(), service);
+    }
+
+    /**
      * Gets the service defined by given class
      *
      * @param <S> The type of service's class

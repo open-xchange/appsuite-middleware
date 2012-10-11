@@ -49,10 +49,13 @@
 
 package com.openexchange.groupware.tools.mappings.json;
 
+import java.util.TimeZone;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import com.openexchange.groupware.tools.mappings.DefaultMapping;
+import com.openexchange.session.Session;
 
 /**
  * {@link DefaultJsonMapping} - Default JSON specific mapping implementation.
@@ -66,7 +69,7 @@ public abstract class DefaultJsonMapping<T, O> extends DefaultMapping<T, O> impl
 	private final String ajaxName;
 	private final int columnID;
 	
-	public DefaultJsonMapping(final String ajaxName, final int columnID) {
+	public DefaultJsonMapping(String ajaxName, int columnID) {
 		this.ajaxName = ajaxName;
 		this.columnID = columnID;
 	}
@@ -83,10 +86,26 @@ public abstract class DefaultJsonMapping<T, O> extends DefaultMapping<T, O> impl
 	
 	@Override
 	public void serialize(O from, JSONObject to) throws JSONException {
-		final T value = this.get(from);
-		if (null != value && 0 < String.valueOf(value).length()) {
-			to.put(getAjaxName(), value);
-        }
+		this.serialize(from, to, null);
 	}
 
+	@Override
+	public void serialize(O from, JSONObject to, TimeZone timeZone) throws JSONException {
+		this.serialize(from, to, timeZone, null);
+	}
+
+	@Override
+	public void serialize(O from, JSONObject to, TimeZone timeZone, Session session) throws JSONException {
+		to.put(getAjaxName(), serialize(from, timeZone, session));
+	}
+
+	/**
+	 * Override this <code>serialize</code>-method if needed.
+	 */
+	@Override
+	public Object serialize(O from, TimeZone timeZone, Session session) throws JSONException {
+		final T value = this.get(from);
+		return null != value ? value : JSONObject.NULL;
+	}
+	
 }

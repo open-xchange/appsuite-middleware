@@ -52,7 +52,7 @@ package com.openexchange.webdav.xml;
 import java.io.IOException;
 import java.util.ArrayList;
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import com.openexchange.log.LogFactory;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 import com.openexchange.exception.OXException;
@@ -62,7 +62,10 @@ import com.openexchange.groupware.container.LinkEntryObject;
 import com.openexchange.session.Session;
 import com.openexchange.tools.encoding.Base64;
 import com.openexchange.webdav.WebdavExceptionCode;
+import com.openexchange.webdav.xml.fields.CommonFields;
 import com.openexchange.webdav.xml.fields.ContactFields;
+import com.openexchange.webdav.xml.fields.DataFields;
+import com.openexchange.webdav.xml.fields.FolderChildFields;
 
 /**
  * ContactParser
@@ -99,7 +102,7 @@ public class ContactParser extends CommonParser {
             parser.nextText();
             return;
         }
-
+        
         if (isTag(parser, ContactFields.LAST_NAME)) {
             contactobject.setSurName(getValue(parser));
             return;
@@ -121,7 +124,7 @@ public class ContactParser extends CommonParser {
         } else if (isTag(parser, ContactFields.BUSINESS_CATEGORY)) {
             contactobject.setBusinessCategory(getValue(parser));
             return;
-        } else if (isTag(parser, ContactFields.CATEGORIES)) {
+        } else if (isTag(parser, CommonFields.CATEGORIES)) {
             contactobject.setCategories(getValue(parser));
             return;
         } else if (isTag(parser, ContactFields.MOBILE1)) {
@@ -435,12 +438,12 @@ public class ContactParser extends CommonParser {
     protected void parseElementEntry(final XmlPullParser parser, final DistributionListEntryObject entry) throws OXException, XmlPullParserException, IOException {
         String s = null;
 
-        if ((s = parser.getAttributeValue(XmlServlet.NAMESPACE, ContactFields.ID)) != null) {
+        if ((s = parser.getAttributeValue(XmlServlet.NAMESPACE, DataFields.ID)) != null) {
             final int contact_id = Integer.parseInt(s);
             entry.setEntryID(contact_id);
         }
 
-        if ((s = parser.getAttributeValue(XmlServlet.NAMESPACE, ContactFields.FOLDER_ID)) != null) {
+        if ((s = parser.getAttributeValue(XmlServlet.NAMESPACE, FolderChildFields.FOLDER_ID)) != null) {
             final int folderId = Integer.parseInt(s);
             entry.setFolderID(folderId);
         }

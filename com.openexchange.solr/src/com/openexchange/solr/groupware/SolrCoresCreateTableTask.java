@@ -3,7 +3,6 @@ package com.openexchange.solr.groupware;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
-
 import com.openexchange.database.DBPoolingExceptionCodes;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
@@ -34,10 +33,14 @@ public class SolrCoresCreateTableTask extends UpdateTaskAdapter {
 			for (int i = 0; i < createTableService.tablesToCreate().length; i++) {
 				final String table = tables[i];
 				if (!DBUtils.tableExists(con, table)) {
-					final String statement = statements[i];
-					final PreparedStatement stmt = con.prepareStatement(statement);
-					stmt.executeUpdate();
-					stmt.close();
+				    PreparedStatement stmt = null;
+					try {
+                        final String statement = statements[i];
+                        stmt = con.prepareStatement(statement);
+                        stmt.executeUpdate();
+                    } finally {
+                        DBUtils.closeSQLStuff(stmt);
+                    }
 				}				
 			}
 			con.commit();

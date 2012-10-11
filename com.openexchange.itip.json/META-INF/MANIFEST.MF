@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: ITIP JSON Interface
 Bundle-SymbolicName: com.openexchange.itip.json
-Bundle-Version: 6.21.0
+Bundle-Version: 6.22.0
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Import-Package: com.openexchange.ajax,
@@ -16,6 +16,7 @@ Import-Package: com.openexchange.ajax,
  com.openexchange.conversion,
  com.openexchange.data.conversion.ical,
  com.openexchange.data.conversion.ical.itip,
+ com.openexchange.dispatcher,
  com.openexchange.documentation,
  com.openexchange.exception,
  com.openexchange.groupware,
@@ -24,6 +25,7 @@ Import-Package: com.openexchange.ajax,
  com.openexchange.groupware.container.participants,
  com.openexchange.groupware.ldap,
  com.openexchange.groupware.userconfiguration,
+ com.openexchange.log,
  com.openexchange.multiple,
  com.openexchange.osgi,
  com.openexchange.server,

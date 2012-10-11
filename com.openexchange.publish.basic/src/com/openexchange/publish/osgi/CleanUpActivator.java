@@ -51,16 +51,12 @@ package com.openexchange.publish.osgi;
 
 import java.util.Dictionary;
 import java.util.Hashtable;
-import java.util.LinkedList;
-import java.util.List;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.event.EventConstants;
 import org.osgi.service.event.EventHandler;
 import com.openexchange.context.ContextService;
+import com.openexchange.file.storage.FileStorageEventConstants;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.publish.helpers.AbstractPublicationService;
 import com.openexchange.publish.impl.EntityCleanUp;
 import com.openexchange.publish.impl.FolderCleanUpEventHandler;
 import com.openexchange.publish.impl.InfostoreCleanUpEventHandler;
@@ -72,42 +68,28 @@ import com.openexchange.publish.impl.InfostoreCleanUpEventHandler;
  */
 public class CleanUpActivator extends HousekeepingActivator {
 
-    private List<ServiceRegistration<?>> registrations;
-
     @Override
     public void startBundle() throws Exception {
         final ContextService contexts = getService(ContextService.class);
 
-        final EntityCleanUp entityCleanUp = new EntityCleanUp(AbstractPublicationService.getDefaultStorage());
-
-        registrations = new LinkedList<ServiceRegistration<?>>();
+        final EntityCleanUp entityCleanUp = new EntityCleanUp();
 
         registerHandler(
-            context,
             new FolderCleanUpEventHandler(entityCleanUp, "contacts", FolderObject.CONTACT, contexts),
             "com/openexchange/groupware/folder/delete");
 
         registerHandler(
-            context,
             new FolderCleanUpEventHandler(entityCleanUp, "infostore", FolderObject.INFOSTORE, contexts),
             "com/openexchange/groupware/folder/delete");
 
-        registerHandler(context, new InfostoreCleanUpEventHandler(entityCleanUp, contexts), "com/openexchange/groupware/infostore/delete");
+        registerHandler(new InfostoreCleanUpEventHandler(entityCleanUp, contexts), FileStorageEventConstants.DELETE_TOPIC);
 
     }
 
-    private void registerHandler(final BundleContext context, final EventHandler handler, final String topic) {
+    private void registerHandler(final EventHandler handler, final String topic) {
         final Dictionary<String, Object> serviceProperties = new Hashtable<String, Object>(1);
         serviceProperties.put(EventConstants.EVENT_TOPIC, new String[] { topic });
-        registrations.add(context.registerService(EventHandler.class.getName(), handler, serviceProperties));
-    }
-
-    @Override
-    public void stopBundle() throws Exception {
-        for (final ServiceRegistration<?> registration : registrations) {
-            registration.unregister();
-        }
-        registrations = null;
+        registerService(EventHandler.class, handler, serviceProperties);
     }
 
     @Override

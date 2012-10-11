@@ -1,0 +1,6 @@
+opt/open-xchange/etc/settings/upsell-multiple-gui.properties
+opt/open-xchange/etc/upsell.properties
+opt/open-xchange/etc/upsell_mail_body_ox_enduser.tmpl
+opt/open-xchange/etc/upsell_mail_body_ox_enduser.tmpl_de_DE
+opt/open-xchange/etc/upsell_mail_subject_ox_enduser.tmpl
+opt/open-xchange/etc/upsell_mail_subject_ox_enduser.tmpl_de_DE

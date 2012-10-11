@@ -48,12 +48,10 @@
  */
 package com.openexchange.admin.storage.interfaces;
 
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
 import java.sql.Connection;
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import com.openexchange.admin.daemons.ClientAdminThread;
+import com.openexchange.admin.daemons.AdminDaemon;
+import com.openexchange.admin.exceptions.OXGenericException;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Database;
 import com.openexchange.admin.rmi.dataobjects.Group;
@@ -62,16 +60,16 @@ import com.openexchange.admin.rmi.dataobjects.Server;
 import com.openexchange.admin.rmi.dataobjects.User;
 import com.openexchange.admin.rmi.exceptions.EnforceableDataObjectException;
 import com.openexchange.admin.rmi.exceptions.InvalidDataException;
+import com.openexchange.admin.rmi.exceptions.NoSuchGroupException;
+import com.openexchange.admin.rmi.exceptions.NoSuchObjectException;
+import com.openexchange.admin.rmi.exceptions.NoSuchResourceException;
+import com.openexchange.admin.rmi.exceptions.NoSuchUserException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.tools.AdminCache;
 import com.openexchange.admin.tools.PropertyHandler;
+import com.openexchange.log.LogFactory;
 
 public abstract class OXToolStorageInterface {
-
-    /**
-     * Proxy attribute for the class implementing this interface.
-     */
-    private static Class<? extends OXToolStorageInterface> implementingClass;
 
     private static final Log log = LogFactory.getLog(OXToolStorageInterface.class);
 
@@ -80,58 +78,21 @@ public abstract class OXToolStorageInterface {
     protected static PropertyHandler prop = null;
 
     static {
-        cache = ClientAdminThread.cache;
-        prop = cache.getProperties();
+        try {
+            cache = AdminDaemon.getCache();
+            prop = cache.getProperties();
+        } catch (OXGenericException e) {
+            log.warn(e.getMessage(), e);
+        }
     }
 
     /**
      * Creates a new instance implementing the group storage interface.
      * @return an instance implementing the group storage interface.
-     * @throws com.openexchange.admin.rmi.exceptions.StorageException Storage exception
      */
-    public static OXToolStorageInterface getInstance() throws StorageException {
-        synchronized (OXToolStorageInterface.class) {
-            if (null == implementingClass) {
-                final String className = prop.getProp(PropertyHandler.TOOL_STORAGE, null);
-                if (null != className) {
-                    try {
-                        implementingClass = Class.forName(className).asSubclass(OXToolStorageInterface.class);
-                    } catch (final ClassNotFoundException e) {
-                        log.error(e.getMessage(), e);
-                        throw new StorageException(e);
-                    }
-                } else {
-                    final StorageException storageException = new StorageException("Property for tool_storage not defined");
-                    log.error(storageException.getMessage(), storageException);
-                    throw storageException;
-                }
-            }
-        }
-        Constructor<? extends OXToolStorageInterface> cons;
-        try {
-            cons = implementingClass.getConstructor(new Class[] {});
-            return cons.newInstance(new Object[] {});
-        } catch (final SecurityException e) {
-            log.error(e.getMessage(), e);
-            throw new StorageException(e);
-        } catch (final NoSuchMethodException e) {
-            log.error(e.getMessage(), e);
-            throw new StorageException(e);
-        } catch (final IllegalArgumentException e) {
-            log.error(e.getMessage(), e);
-            throw new StorageException(e);
-        } catch (final InstantiationException e) {
-            log.error(e.getMessage(), e);
-            throw new StorageException(e);
-        } catch (final IllegalAccessException e) {
-            log.error(e.getMessage(), e);
-            throw new StorageException(e);
-        } catch (final InvocationTargetException e) {
-            log.error(e.getMessage(), e);
-            throw new StorageException(e);
-        }
+    public static OXToolStorageInterface getInstance() {
+        return new com.openexchange.admin.storage.mysqlStorage.OXToolMySQLStorage();
     }
-
 
     /**
      * Checks if given domain is used by any user,group or resource as mailaddress in given context.
@@ -357,9 +318,9 @@ public abstract class OXToolStorageInterface {
 
     public abstract int getAdminForContext(final Context ctx) throws StorageException;
 
-    public abstract int getContextIDByContextname(final String ctxname) throws StorageException;
+    public abstract int getContextIDByContextname(String ctxName) throws StorageException, NoSuchObjectException;
 
-    public abstract int getDatabaseIDByDatabasename(final String dbname) throws StorageException;
+    public abstract int getDatabaseIDByDatabasename(String dbName) throws StorageException, NoSuchObjectException;
 
     /**
      * load Database with the given ID
@@ -386,17 +347,17 @@ public abstract class OXToolStorageInterface {
      */
     public abstract int getGidNumberOfGroup(final Context ctx, final int group_id, final Connection con) throws StorageException;
 
-    public abstract int getGroupIDByGroupname(final Context ctx, final String groupname) throws StorageException;
+    public abstract int getGroupIDByGroupname(Context ctx, String groupName) throws StorageException, NoSuchGroupException;
 
     public abstract String getGroupnameByGroupID(final Context ctx,final int group_id) throws StorageException;
 
-    public abstract int getResourceIDByResourcename(final Context ctx,final String resourcename) throws StorageException;
+    public abstract int getResourceIDByResourcename(Context ctx, String resourceName) throws StorageException, NoSuchResourceException;
 
     public abstract String getResourcenameByResourceID(final Context ctx,final int resource_id) throws StorageException;
 
-    public abstract int getServerIDByServername(final String servername) throws StorageException;
+    public abstract int getServerIDByServername(String serverName) throws StorageException, NoSuchObjectException;
 
-    public abstract int getUserIDByUsername(final Context ctx,final String username) throws StorageException;
+    public abstract int getUserIDByUsername(Context ctx, String userName) throws StorageException, NoSuchUserException;
 
     public abstract String getUsernameByUserID(final Context ctx,final int user_id) throws StorageException;
 

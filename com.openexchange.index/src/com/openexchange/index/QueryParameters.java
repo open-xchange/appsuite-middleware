@@ -50,6 +50,7 @@
 package com.openexchange.index;
 
 import java.util.Map;
+import java.util.Set;
 import com.openexchange.index.IndexDocument.Type;
 
 /**
@@ -58,6 +59,10 @@ import com.openexchange.index.IndexDocument.Type;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class QueryParameters {
+    
+    public static enum Order {
+        ASC, DESC;
+    }
 
     /**
      * The builder for {@link QueryParameters} instances.
@@ -66,19 +71,30 @@ public final class QueryParameters {
 
         int off;
         int len;
-        String queryString;
+        String pattern;
+        Set<String> folders;
+        IndexField sortField;
+        Order order;
         Map<String, Object> parameters;
-        String handler;
+        SearchHandler handler;
         Type type;
+        Object searchTerm;
 
         /**
          * Initializes a new builder.
          */
-        public Builder(final String queryString) {
+        public Builder(final String pattern) {
             super();
+            init();
+            this.pattern = pattern;
+        }
+        
+        private void init() {
             off = 0;
             len = Integer.MAX_VALUE;
-            this.queryString = queryString;
+            folders = null;
+            sortField = null;
+            order = null;
         }
 
         /**
@@ -91,6 +107,11 @@ public final class QueryParameters {
             this.parameters = parameters;
         }
 
+        public Builder setSearchTerm(final Object searchTerm) {
+            this.searchTerm = searchTerm;
+            return this;
+        }
+
         public Builder setOffset(final int off) {
             this.off = off;
             return this;
@@ -101,8 +122,8 @@ public final class QueryParameters {
             return this;
         }
 
-        public Builder setQueryString(final String queryString) {
-            this.queryString = queryString;
+        public Builder setPattern(final String pattern) {
+            this.pattern = pattern;
             return this;
         }
 
@@ -111,7 +132,7 @@ public final class QueryParameters {
             return this;
         }
 
-        public Builder setHandler(final String handler) {
+        public Builder setHandler(final SearchHandler handler) {
             this.handler = handler;
             return this;
         }
@@ -120,36 +141,71 @@ public final class QueryParameters {
             this.type = type;
             return this;
         }
+        
+        public Builder setFolders(final Set<String> folders) {
+            this.folders = folders;
+            return this;
+        }
+        
+        public Builder setSortField(final IndexField sortField) {
+            this.sortField = sortField;
+            return this;
+        }
+        
+        public Builder setOrder(final Order order) {
+            this.order = order;
+            return this;
+        }
 
         public QueryParameters build() {
             return new QueryParameters(this);
         }
-
     }
 
     private final int off;
 
     private final int len;
 
-    private final String queryString;
+    private final String pattern;
 
     private final Map<String, Object> parameters;
 
-    private final String handler;
+    private final SearchHandler handler;
+
+    private final Object searchTerm;
 
     private final Type type;
+
+    private final Set<String> folders;
+    
+    private final IndexField sortField;
+    
+    private final Order order;
 
     /**
      * Initializes a new {@link QueryParameters}.
      */
     QueryParameters(final Builder builder) {
         super();
-        this.handler = builder.handler;
-        this.len = builder.len;
-        this.off = builder.off;
-        this.parameters = builder.parameters;
-        this.queryString = builder.queryString;
-        this.type = builder.type;
+        handler = builder.handler;
+        len = builder.len;
+        off = builder.off;
+        parameters = builder.parameters;
+        pattern = builder.pattern;
+        type = builder.type;
+        searchTerm = builder.searchTerm;
+        folders = builder.folders;
+        sortField = builder.sortField;
+        order = builder.order;
+    }
+
+    /**
+     * Gets the search term or <code>null</code> if not set.
+     *
+     * @return The search term
+     */
+    public Object getSearchTerm() {
+        return searchTerm;
     }
 
     /**
@@ -171,12 +227,21 @@ public final class QueryParameters {
     }
 
     /**
-     * Gets the query string.
+     * Gets the query string or <code>null</code> if not set.
      * 
      * @return The query string
      */
-    public String getQueryString() {
-        return queryString;
+    public String getPattern() {
+        return pattern;
+    }
+    
+    /**
+     * Gets the folder or <code>null</code> if not set.
+     * 
+     * @return The folder
+     */
+    public Set<String> getFolders() {
+        return folders;
     }
 
     /**
@@ -193,7 +258,7 @@ public final class QueryParameters {
      * 
      * @return The handler
      */
-    public String getHandler() {
+    public SearchHandler getHandler() {
         return handler;
     }
 
@@ -204,6 +269,24 @@ public final class QueryParameters {
      */
     public Type getType() {
         return type;
+    }
+    
+    /**
+     * Gets the sortField
+     *
+     * @return The sortField
+     */
+    public IndexField getSortField() {
+        return sortField;
+    }
+    
+    /**
+     * Gets the order
+     *
+     * @return The order
+     */
+    public Order getOrder() {
+        return order;
     }
 
 }

@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Open-Xchange File Storage JSON Bundle
 Bundle-SymbolicName: com.openexchange.file.storage.json
-Bundle-Version: 6.21.0
+Bundle-Version: 6.22.0
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Import-Package: com.openexchange.ajax,
@@ -23,6 +23,9 @@ Import-Package: com.openexchange.ajax,
  com.openexchange.file.storage.meta,
  com.openexchange.file.storage.parse,
  com.openexchange.file.storage.registry,
+ com.openexchange.folderstorage,
+ com.openexchange.folderstorage.filestorage.contentType,
+ com.openexchange.folderstorage.type,
  com.openexchange.groupware,
  com.openexchange.groupware.attach,
  com.openexchange.groupware.attach.util,
@@ -33,6 +36,8 @@ Import-Package: com.openexchange.ajax,
  com.openexchange.groupware.upload,
  com.openexchange.groupware.upload.impl,
  com.openexchange.i18n,
+ com.openexchange.index,
+ com.openexchange.index.filestore,
  com.openexchange.java,
  com.openexchange.log,
  com.openexchange.mail,

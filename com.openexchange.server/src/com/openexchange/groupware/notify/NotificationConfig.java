@@ -49,13 +49,17 @@
 
 package com.openexchange.groupware.notify;
 
+import java.io.File;
+import java.util.HashMap;
+import java.util.Map;
+
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import com.openexchange.log.LogFactory;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.configuration.ConfigurationExceptionCodes;
-import com.openexchange.configuration.SystemConfig;
-import com.openexchange.configuration.SystemConfig.Property;
 import com.openexchange.exception.OXException;
 import com.openexchange.server.Initialization;
+import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.conf.AbstractConfig;
 
 /**
@@ -64,8 +68,6 @@ import com.openexchange.tools.conf.AbstractConfig;
 public class NotificationConfig extends AbstractConfig implements Initialization {
 
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(NotificationConfig.class));
-
-    private static final Property KEY = Property.NOTIFICATION;
 
     public enum NotificationProperty{
 
@@ -86,6 +88,8 @@ public class NotificationConfig extends AbstractConfig implements Initialization
         }
 
     }
+    
+    private static Map<String, String> overriddenProperties = null;
 
     private static NotificationConfig INSTANCE = new NotificationConfig();
 
@@ -95,15 +99,22 @@ public class NotificationConfig extends AbstractConfig implements Initialization
 
     @Override
     protected String getPropertyFileName() throws OXException {
-        final String filename = SystemConfig.getProperty(KEY);
+        ConfigurationService configService = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
+		final File file = configService.getFileByName("notification.properties");
+        final String filename = null == file ? null : file.getPath();
         if (null == filename) {
-            throw ConfigurationExceptionCodes.PROPERTY_MISSING.create(
-                KEY.getPropertyName());
+            throw ConfigurationExceptionCodes.PROPERTY_MISSING.create("notification.properties");
         }
         return filename;
     }
 
     public static String getProperty(final NotificationProperty prop, final String def) {
+    	if (overriddenProperties != null) {
+    		String overridden = overriddenProperties.get(prop.name);
+    		if (overridden != null) {
+    			return overridden;
+    		}
+    	}
         if(!INSTANCE.isPropertiesLoadInternal()) {
             try {
                 INSTANCE.loadPropertiesInternal();
@@ -124,6 +135,17 @@ public class NotificationConfig extends AbstractConfig implements Initialization
             return def;
         }
         return Boolean.parseBoolean(boolVal);
+    }
+    
+    public static void override(NotificationProperty prop, String value) {
+    	if (overriddenProperties == null) {
+    		overriddenProperties = new HashMap<String, String>();
+    	}
+    	overriddenProperties.put(prop.name, value);
+    }
+    
+    public static void forgetOverrides() {
+    	overriddenProperties = null;
     }
 
     @Override

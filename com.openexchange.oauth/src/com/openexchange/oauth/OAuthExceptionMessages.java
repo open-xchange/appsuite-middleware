@@ -128,11 +128,17 @@ public final class OAuthExceptionMessages implements LocalizableStrings {
     // Missing argument: %1$s
     public static final String MISSING_ARGUMENT_MSG = "Missing argument: %1$s";
 
-    // OAuth Token has expired. Please authorize this account and try again.
+    // Your '%1$s' password changed. You have to authorize the server to use your account with the new password. To do so, go to Configuration -> My Social Configuration -> Accounts. Then try again.
     public static final String TOKEN_EXPIRED_MSG = "Your '%1$s' password changed. You have to authorize the server to use your account with the new password. To do so, go to Configuration -> My Social Configuration -> Accounts. Then try again.";
 
     // An OAuth error occurred: %1$s
     public static final String OAUTH_ERROR_MSG = "An OAuth error occurred: %1$s";
+
+	public static final String NOT_A_WHITELISTED_URL_MSG = "The address %1$s is not white-listed as for the %2$s OAuth API";
+
+	public static final String MISSING_BODY_MSG = "The request sent was missing its body";
+
+	public static final String INVALID_ACCOUNT_MSG = "The account is invalid, please recreate it.";
 
     /**
      * Initializes a new {@link OAuthExceptionMessages}.

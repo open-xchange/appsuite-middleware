@@ -93,7 +93,7 @@ import com.openexchange.messaging.generic.internet.MimeStringMessagingHeader;
  */
 public class MailMessagingPart implements MessagingPart {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(MailMessagingPart.class));
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(MailMessagingPart.class));
 
     private static final boolean WARN_ENABLED = LOG.isWarnEnabled();
 

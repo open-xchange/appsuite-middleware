@@ -54,7 +54,6 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.login.Interface;
 import com.openexchange.login.internal.LoginPerformer;
@@ -73,7 +72,7 @@ import com.openexchange.webdav.acl.servlets.WebdavPrincipalPerformer.Action;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class WebdavPrincipalServlet extends OXServlet {
-    private static final transient Log LOG = LogFactory.getLog(WebdavPrincipalServlet.class);
+    private static final transient Log LOG = com.openexchange.log.Log.loggerFor(WebdavPrincipalServlet.class);
 
     @Override
     protected Interface getInterface() {
@@ -143,6 +142,11 @@ public class WebdavPrincipalServlet extends OXServlet {
     @Override
     protected void doTrace(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
         doIt(req, resp, Action.TRACE);
+    }
+
+    @Override
+    protected void doReport(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
+        doIt(req, resp, Action.REPORT);
     }
 
     private void doIt(final HttpServletRequest req, final HttpServletResponse resp, final Action action) throws ServletException, IOException {

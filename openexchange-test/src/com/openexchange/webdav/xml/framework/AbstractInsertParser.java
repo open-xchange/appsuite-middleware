@@ -51,7 +51,7 @@ package com.openexchange.webdav.xml.framework;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.jdom.Document;
+import org.jdom2.Document;
 import com.openexchange.groupware.container.DataObject;
 import com.openexchange.webdav.xml.types.Response;
 

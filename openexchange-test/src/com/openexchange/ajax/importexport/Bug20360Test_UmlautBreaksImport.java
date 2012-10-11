@@ -63,12 +63,12 @@ import com.openexchange.groupware.container.Contact;
 
 public class Bug20360Test_UmlautBreaksImport extends AbstractManagedContactTest {
 
-	private String vcard = 
+	private final String vcard = 
 		"BEGIN:VCARD\n" + 
 		"VERSION:3.0\n" + 
-		"N;CHARSET=UTF-8:Täst;Üser\n" + 
-		"FN;CHARSET=UTF-8:Sträto\n" + 
-		"EMAIL;TYPE=PREF,INTERNET:schneider@sträto.de\n" +
+		"N;CHARSET=UTF-8:T\u00e4st;\u00dcser\n" + 
+		"FN;CHARSET=UTF-8:Str\u00e4to\n" + 
+		"EMAIL;TYPE=PREF,INTERNET:schneider@str\u00e4to.de\n" +
 		"EMAIL:schneider@strato.de\n" +
 		"END:VCARD\n";
 
@@ -88,7 +88,7 @@ public class Bug20360Test_UmlautBreaksImport extends AbstractManagedContactTest 
 
 		assertTrue(actual.containsEmail1());
 		assertTrue(actual.containsEmail2());
-		assertEquals("schneider@sträto.de", actual.getEmail1());
+		assertEquals("schneider@str\u00e4to.de", actual.getEmail1());
 		assertEquals("schneider@strato.de", actual.getEmail2());
 
 	}

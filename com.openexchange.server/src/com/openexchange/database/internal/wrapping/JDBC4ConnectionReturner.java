@@ -59,7 +59,7 @@ import java.sql.SQLException;
 import java.sql.SQLXML;
 import java.sql.Struct;
 import java.util.Properties;
-import com.openexchange.database.internal.Assignment;
+import com.openexchange.database.internal.AssignmentImpl;
 import com.openexchange.database.internal.Pools;
 
 /**
@@ -69,7 +69,7 @@ import com.openexchange.database.internal.Pools;
  */
 public class JDBC4ConnectionReturner extends JDBC3ConnectionReturner {
 
-    public JDBC4ConnectionReturner(Pools pools, Assignment assign, Connection delegate, boolean noTimeout, boolean write, boolean usedAsRead) {
+    public JDBC4ConnectionReturner(Pools pools, AssignmentImpl assign, Connection delegate, boolean noTimeout, boolean write, boolean usedAsRead) {
         super(pools, assign, delegate, noTimeout, write, usedAsRead);
     }
 

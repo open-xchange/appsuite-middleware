@@ -64,7 +64,7 @@ import com.openexchange.tools.session.ServerSession;
  */
 public class PublicationServlet extends MultipleAdapterServlet {
 
-    private static PublicationMultipleHandlerFactory multipleFactory;
+    private static volatile PublicationMultipleHandlerFactory multipleFactory;
 
 
     public static void setFactory(PublicationMultipleHandlerFactory factory) {

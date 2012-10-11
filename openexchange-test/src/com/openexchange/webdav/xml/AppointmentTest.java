@@ -57,13 +57,15 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashSet;
+
+import org.apache.commons.httpclient.Credentials;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.UsernamePasswordCredentials;
 import org.apache.commons.httpclient.auth.AuthScope;
-import org.jdom.Document;
-import org.jdom.Element;
-import org.jdom.input.SAXBuilder;
-import org.jdom.output.XMLOutputter;
+import org.jdom2.Document;
+import org.jdom2.Element;
+import org.jdom2.input.SAXBuilder;
+import org.jdom2.output.XMLOutputter;
 import org.xml.sax.SAXException;
 import com.meterware.httpunit.GetMethodWebRequest;
 import com.meterware.httpunit.PutMethodWebRequest;
@@ -503,7 +505,7 @@ public class AppointmentTest extends AbstractWebdavXMLTest {
 
         final HttpClient httpclient = new HttpClient();
 
-        httpclient.getState().setCredentials(AuthScope.ANY, new UsernamePasswordCredentials(login+"@"+context, password));
+        httpclient.getState().setCredentials(AuthScope.ANY, getCredentials(login, password, context));
         final PropFindMethod propFindMethod = new PropFindMethod(host + AbstractAppointmentRequest.URL);
         propFindMethod.setDoAuthentication(true);
 
@@ -569,7 +571,7 @@ public class AppointmentTest extends AbstractWebdavXMLTest {
 
         final HttpClient httpclient = new HttpClient();
 
-        httpclient.getState().setCredentials(AuthScope.ANY, new UsernamePasswordCredentials(login+"@"+context, password));
+        httpclient.getState().setCredentials(AuthScope.ANY, getCredentials(login, password, context));
         final PropFindMethod propFindMethod = new PropFindMethod(host + AbstractAppointmentRequest.URL);
         propFindMethod.setDoAuthentication(true);
 
@@ -634,7 +636,7 @@ public class AppointmentTest extends AbstractWebdavXMLTest {
 
         final HttpClient httpclient = new HttpClient();
 
-        httpclient.getState().setCredentials(AuthScope.ANY, new UsernamePasswordCredentials(login, password));
+        httpclient.getState().setCredentials(AuthScope.ANY, getCredentials(login, password, context));
         final PropFindMethod propFindMethod = new PropFindMethod(host + AbstractAppointmentRequest.URL);
         propFindMethod.setDoAuthentication(true);
 
@@ -660,7 +662,12 @@ public class AppointmentTest extends AbstractWebdavXMLTest {
     }
 
 
-    protected int getFreeBusyState(final WebConversation webCon, String contextid, String username, String context, Date start, Date end) throws IOException, SAXException {
+    private static Credentials getCredentials(String login, String password,
+			String context) {
+		return new UsernamePasswordCredentials((context == null || context.equals("")) ? login : login+"@"+context, password);
+	}
+
+	protected int getFreeBusyState(final WebConversation webCon, String contextid, String username, String context, Date start, Date end) throws IOException, SAXException {
 
         String url = "http://"+getHostName()+"/servlet/webdav.freebusy?contextid="+contextid+"&username="+username+"&server="+context+"&start="+start.getTime()+"&end="+end.getTime();
         WebRequest request = new GetMethodWebRequest(url);

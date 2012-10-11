@@ -88,7 +88,7 @@ responseDescription = "An array with appointment data. Each array element descri
 public final class SearchAction extends AppointmentAction {
 
     private static final org.apache.commons.logging.Log LOG =
-        com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(SearchAction.class));
+        com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(SearchAction.class));
 
     /**
      * Initializes a new {@link SearchAction}.

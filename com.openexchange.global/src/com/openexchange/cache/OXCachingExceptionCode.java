@@ -12,19 +12,19 @@ public enum OXCachingExceptionCode implements OXExceptionCode {
     /**
      * A put into the cache failed.
      */
-    FAILED_PUT("Put into cache failed.", CATEGORY_ERROR, 1),
+    FAILED_PUT(OXCachingExceptionMessage.FAILED_PUT_MSG, CATEGORY_ERROR, 1),
     /**
      * The default element attributes could not be retrieved
      */
-    FAILED_ATTRIBUTE_RETRIEVAL("The default element attributes could not be retrieved", CATEGORY_ERROR, 2),
+    FAILED_ATTRIBUTE_RETRIEVAL(OXCachingExceptionMessage.FAILED_ATTRIBUTE_RETRIEVAL_MSG, CATEGORY_ERROR, 2),
     /**
      * Remove on cache failed
      */
-    FAILED_REMOVE("Remove on cache failed", CATEGORY_ERROR, 3),
+    FAILED_REMOVE(OXCachingExceptionMessage.FAILED_REMOVE_MSG, CATEGORY_ERROR, 3),
     /**
      * Cache %s could not be initialized due to following error: %s
      */
-    FAILED_INIT("Cache %s could not be initialized due to following error: %s", CATEGORY_ERROR, 4);
+    FAILED_INIT(OXCachingExceptionMessage.FAILED_INIT_MSG, CATEGORY_ERROR, 4);
 
     /**
      * Message of the exception.

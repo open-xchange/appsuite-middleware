@@ -85,43 +85,53 @@ public class MockITipIntegrationUtility implements ITipIntegrationUtility {
         this.appointment = appointment;
     }
 
+    @Override
     public void changeConfirmationForExternalParticipant(Appointment update, ConfirmationChange change, Session session) throws OXException {
 
     }
 
+    @Override
     public void createAppointment(CalendarDataObject appointment, Session session) throws OXException {
 
     }
 
+    @Override
     public void deleteAppointment(Appointment appointment, Session session, Date clientLastModified) throws OXException {
 
     }
 
+    @Override
     public List<Appointment> getConflicts(CalendarDataObject appointment, Session session) throws OXException {
         return null;
     }
 
+    @Override
     public List<Appointment> getExceptions(Appointment original, Session session) throws OXException {
         return exceptions;
     }
 
+    @Override
     public int getPrivateCalendarFolderId(Session session) throws OXException {
         return 0;
     }
 
+    @Override
     public Appointment reloadAppointment(Appointment address, Session session) throws OXException {
         return this.appointment;
     }
 
+    @Override
     public CalendarDataObject resolveUid(String uid, Session session) throws OXException {
         return null;
     }
 
+    @Override
     public void updateAppointment(CalendarDataObject update, Session session, Date clientLastModified) throws OXException {
 
     }
 
-	public int getFolderIdForUser(int appId, int userId, int contextId)
+	@Override
+    public int getFolderIdForUser(int appId, int userId, int contextId)
 			throws OXException {
 		// TODO Auto-generated method stub
 		return 0;

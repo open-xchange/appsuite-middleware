@@ -53,11 +53,14 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Arrays;
 import java.util.List;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+
 import com.openexchange.ajax.fields.DataFields;
 import com.openexchange.ajax.fields.FolderChildFields;
+import com.openexchange.contact.ContactService;
 import com.openexchange.conversion.Data;
 import com.openexchange.conversion.DataArguments;
 import com.openexchange.conversion.DataExceptionCodes;
@@ -67,8 +70,6 @@ import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
 import com.openexchange.exception.OXException.ProblematicAttribute;
 import com.openexchange.exception.OXException.Truncated;
-import com.openexchange.groupware.contact.ContactInterface;
-import com.openexchange.groupware.contact.ContactInterfaceDiscoveryService;
 import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.contexts.Context;
@@ -90,7 +91,7 @@ import com.openexchange.tools.versit.filetokenizer.VCardTokenizer;
  */
 public final class ContactInsertDataHandler implements DataHandler {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(ContactInsertDataHandler.class));
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(ContactInsertDataHandler.class));
 
     private static final String[] ARGS = { "com.openexchange.groupware.contact.folder" };
 
@@ -159,10 +160,9 @@ public final class ContactInsertDataHandler implements DataHandler {
                     /*
                      * Store contact object
                      */
-                    final ContactInterface contactInterface = ServerServiceRegistry.getInstance().getService(
-                        ContactInterfaceDiscoveryService.class).newContactInterface(contact.getParentFolderID(), session);
+                    final ContactService contactService = ServerServiceRegistry.getInstance().getService(ContactService.class);
                     try {
-                        contactInterface.insertContactObject(contact);
+                    	contactService.createContact(session, Integer.toString(contact.getParentFolderID()), contact);
                     } catch (final OXException oxEx) {
                         LOG.debug("Cannot store contact object", oxEx);
                         throw handleDataTruncation(oxEx);

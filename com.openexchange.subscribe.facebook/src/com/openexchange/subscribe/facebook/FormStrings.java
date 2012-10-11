@@ -59,7 +59,7 @@ import com.openexchange.i18n.LocalizableStrings;
  */
 public class FormStrings implements LocalizableStrings {
 
-    public static final String ACCOUNT_LABEL = "The OAuth Account to use";
+    public static final String ACCOUNT_LABEL = "Select an existing account";
 
 
 }

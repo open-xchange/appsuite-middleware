@@ -104,7 +104,7 @@ import com.openexchange.tools.session.ServerSession;
 responseDescription = "HTML page with javascript callback as per introduction. Contains a JSON-Array of ids of the newly created attachments. The order of the ids corresponds to the indexes in the request.")
 public final class AttachAction extends AbstractAttachmentAction {
 
-    private static final org.apache.commons.logging.Log LOG = Log.valueOf(org.apache.commons.logging.LogFactory.getLog(AttachAction.class));
+    private static final org.apache.commons.logging.Log LOG = Log.valueOf(com.openexchange.log.LogFactory.getLog(AttachAction.class));
 
     private static final String DATASOURCE = "datasource";
 

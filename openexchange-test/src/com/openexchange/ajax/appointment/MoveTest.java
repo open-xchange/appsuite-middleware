@@ -4,6 +4,7 @@ import java.util.Date;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.ajax.AppointmentTest;
+import com.openexchange.ajax.framework.AJAXClient.User;
 import com.openexchange.groupware.configuration.AbstractConfigWrapper;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.FolderObject;
@@ -27,6 +28,7 @@ public class MoveTest extends AppointmentTest {
 		appointmentObj.setTitle("testMove2PrivateFolder" + date);
 		appointmentObj.setStartDate(new Date(startTime));
 		appointmentObj.setEndDate(new Date(endTime));
+		appointmentObj.setOrganizer(User.User1.name());
 		appointmentObj.setParentFolderID(appointmentFolderId);
 		appointmentObj.setIgnoreConflicts(true);
 		appointmentObj.setShownAs(Appointment.RESERVED);
@@ -45,7 +47,7 @@ public class MoveTest extends AppointmentTest {
 		appointmentObj.setObjectID(objectId);
 		compareObject(appointmentObj, loadAppointment, appointmentObj.getStartDate().getTime(), appointmentObj.getEndDate().getTime());
 
-		deleteAppointment(getWebConversation(), objectId, targetFolder, PROTOCOL + getHostName(), getSessionId());
+		deleteAppointment(getWebConversation(), objectId, targetFolder, PROTOCOL + getHostName(), getSessionId(), false);
 		com.openexchange.webdav.xml.FolderTest.deleteFolder(getWebConversation(), new int[] { targetFolder }, PROTOCOL + getHostName(), login, password, context);
 	}
 
@@ -55,6 +57,7 @@ public class MoveTest extends AppointmentTest {
 		appointmentObj.setTitle("testMove2PublicFolder" + date);
 		appointmentObj.setStartDate(new Date(startTime));
 		appointmentObj.setEndDate(new Date(endTime));
+		appointmentObj.setOrganizer(User.User1.name());
 		appointmentObj.setParentFolderID(appointmentFolderId);
 		appointmentObj.setIgnoreConflicts(true);
 		appointmentObj.setShownAs(Appointment.RESERVED);
@@ -73,7 +76,7 @@ public class MoveTest extends AppointmentTest {
 		appointmentObj.setObjectID(objectId);
 		compareObject(appointmentObj, loadAppointment, appointmentObj.getStartDate().getTime(), appointmentObj.getEndDate().getTime());
 
-		deleteAppointment(getWebConversation(), objectId, targetFolder, PROTOCOL + getHostName(), getSessionId());
+		deleteAppointment(getWebConversation(), objectId, targetFolder, PROTOCOL + getHostName(), getSessionId(), false);
 		com.openexchange.webdav.xml.FolderTest.deleteFolder(getWebConversation(), new int[] { targetFolder }, PROTOCOL + getHostName(), login, password, context);
 	}
 }

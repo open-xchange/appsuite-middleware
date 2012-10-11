@@ -95,7 +95,7 @@ import com.openexchange.threadpool.ThreadRenamer;
 public final class ElasticSearchTextFillerQueue implements Runnable {
 
     private static final org.apache.commons.logging.Log LOG =
-        org.apache.commons.logging.LogFactory.getLog(ElasticSearchTextFillerQueue.class);
+        com.openexchange.log.LogFactory.getLog(ElasticSearchTextFillerQueue.class);
 
     private static final boolean DEBUG = LOG.isDebugEnabled();
 

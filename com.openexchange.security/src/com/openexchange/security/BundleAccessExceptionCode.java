@@ -10,7 +10,7 @@ public enum BundleAccessExceptionCode implements OXExceptionCode {
 	/**
 	 * Access to bundle %1$s is not permitted
 	 */
-	ACCESS_DENIED("Access to bundle %1$s is not permitted", CATEGORY_PERMISSION_DENIED, 1);
+	ACCESS_DENIED(BundleAccessExceptionMessage.ACCESS_DENIED, CATEGORY_PERMISSION_DENIED, 1);
 
 	private final String message;
 

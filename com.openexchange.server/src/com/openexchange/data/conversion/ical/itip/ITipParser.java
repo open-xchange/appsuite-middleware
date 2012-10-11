@@ -64,9 +64,9 @@ import com.openexchange.groupware.contexts.Context;
  */
 public interface ITipParser {
    
-    List<ITipMessage> parseMessage(String icalText, TimeZone defaultTZ, Context ctx, List<ConversionError> errors, List<ConversionWarning> warnings) throws ConversionError;
+    List<ITipMessage> parseMessage(String icalText, TimeZone defaultTZ, Context ctx, int owner, List<ConversionError> errors, List<ConversionWarning> warnings) throws ConversionError;
 
-    List<ITipMessage> parseMessage(InputStream ical, TimeZone defaultTZ, Context ctx, List<ConversionError> errors, List<ConversionWarning> warnings) throws ConversionError;
+    List<ITipMessage> parseMessage(InputStream ical, TimeZone defaultTZ, Context ctx, int owner, List<ConversionError> errors, List<ConversionWarning> warnings) throws ConversionError;
 
     String parseProperty(String propertyName, final InputStream ical);
 

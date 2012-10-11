@@ -55,9 +55,7 @@ package com.openexchange.sessiond.impl;
 final class UserKey {
 
     private final int userId;
-
     private final int cid;
-
     private final int hash;
 
     public UserKey(final int userId, final int cid) {
@@ -69,6 +67,24 @@ final class UserKey {
         result = prime * result + cid;
         result = prime * result + userId;
         hash = result;
+    }
+    
+    /**
+     * Gets the user identifier
+     *
+     * @return The user identifier
+     */
+    public int getUserId() {
+        return userId;
+    }
+    
+    /**
+     * Gets the context identifier
+     *
+     * @return The context identifier
+     */
+    public int getCid() {
+        return cid;
     }
 
     @Override

@@ -101,7 +101,7 @@ import com.openexchange.tools.servlet.http.Tools;
 public final class HttpServletRequestImpl implements HttpServletRequest {
 
     private static final org.apache.commons.logging.Log LOG =
-        Log.valueOf(org.apache.commons.logging.LogFactory.getLog(HttpServletRequestImpl.class));
+        Log.valueOf(com.openexchange.log.LogFactory.getLog(HttpServletRequestImpl.class));
 
     /**
      * The name of the "Content-Type" header.
@@ -392,7 +392,7 @@ public final class HttpServletRequestImpl implements HttpServletRequest {
             try {
                 ct = new ContentType(value);
             } catch (final OXException e) {
-                com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(HttpServletRequestImpl.class)).error(
+                com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(HttpServletRequestImpl.class)).error(
                     e.getMessage(),
                     e);
                 throw new AJPv13Exception(AJPCode.INVALID_CONTENT_TYPE, true, e, value);
@@ -547,6 +547,10 @@ public final class HttpServletRequestImpl implements HttpServletRequest {
     @Override
     public void setCharacterEncoding(final String characterEncoding) throws UnsupportedEncodingException {
         String charset = characterEncoding;
+        if (null == charset) {
+            charset = "ISO-8859-1";
+            return;
+        }
         final int mlen;
         if (charset.charAt(0) == '"' && charset.charAt((mlen = charset.length() - 1)) == '"') {
             charset = charset.substring(1, mlen);
@@ -750,6 +754,20 @@ public final class HttpServletRequestImpl implements HttpServletRequest {
         return values.get(0);
     }
 
+    private static final Enumeration EMPTY_ENUM = new Enumeration() {
+
+        @Override
+        public boolean hasMoreElements() {
+            return false;
+        }
+
+        @Override
+        public Object nextElement() {
+            return null;
+        }
+
+    };
+
     /**
      * Creates a new {@link Enumeration} for specified array.
      *
@@ -758,6 +776,9 @@ public final class HttpServletRequestImpl implements HttpServletRequest {
      * @return A new {@link Enumeration}
      */
     protected static <T> Enumeration<T> makeEnumeration(final List<T> list) {
+        if (null == list) {
+            return EMPTY_ENUM;
+        }
         return (new Enumeration<T>() {
 
             private final int size = list.size();
@@ -1078,16 +1099,46 @@ public final class HttpServletRequestImpl implements HttpServletRequest {
         return session;
     }
 
-    private static final String DEFAULT_PATH = "/";
+    private static volatile Boolean autologin;
 
-    private static void configureCookie(final Cookie jsessionIdCookie) {
-        jsessionIdCookie.setPath(DEFAULT_PATH);
-        final ConfigurationService configurationService = AJPv13ServiceRegistry.getInstance().getService(ConfigurationService.class);
+    private static boolean autologin() {
+        Boolean tmp = autologin;
+        if (null == tmp) {
+            synchronized (HttpServletResponseImpl.class) {
+                tmp = autologin;
+                if (null == tmp) {
+                    final ConfigurationService configurationService = AJPv13ServiceRegistry.getInstance().getService(ConfigurationService.class);
+                    tmp = Boolean.valueOf(null != configurationService && configurationService.getBoolProperty("com.openexchange.sessiond.autologin", false));
+                    autologin = tmp;
+                }
+            }
+        }
+        return tmp.booleanValue();
+    }
+
+    private static volatile Integer maxAge;
+
+    private static int maxAge() {
+        Integer tmp = maxAge;
+        if (null == tmp) {
+            synchronized (HttpServletResponseImpl.class) {
+                tmp = maxAge;
+                if (null == tmp) {
+                    final ConfigurationService service = AJPv13ServiceRegistry.getInstance().getService(ConfigurationService.class);
+                    tmp = Integer.valueOf(ConfigTools.parseTimespanSecs(null == service ?  "1W" : service.getProperty("com.openexchange.cookie.ttl", "1W")));
+                    maxAge = tmp;
+                }
+            }
+        }
+        return tmp.intValue();
+    }
+
+    public static void configureCookie(final Cookie jsessionIdCookie) {
         /*
          * Check if auto-login is enabled
          */
-        if (null != configurationService && configurationService.getBoolProperty("com.openexchange.sessiond.autologin", false)) {
-            final int maxAge = ConfigTools.parseTimespanSecs(configurationService.getProperty("com.openexchange.cookie.ttl", "1W"));
+        if (autologin()) {
+            final int maxAge = maxAge();
             jsessionIdCookie.setMaxAge(maxAge);
         } else {
             jsessionIdCookie.setMaxAge(-1); // cookies auto-expire

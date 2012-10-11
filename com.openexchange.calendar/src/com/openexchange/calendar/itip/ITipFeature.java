@@ -2,18 +2,15 @@ package com.openexchange.calendar.itip;
 
 import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.calendar.api.CalendarFeature;
-import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.contexts.Context;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
-import com.openexchange.user.UserService;
 
 public class ITipFeature implements CalendarFeature {
 
 	private static final String ITIP = "itip";
 
-	private ServiceLookup services;
+	private final ServiceLookup services;
 	
 	
 	public ITipFeature(ServiceLookup services) {
@@ -23,13 +20,15 @@ public class ITipFeature implements CalendarFeature {
 
 
 
-	public String getId() {
+	@Override
+    public String getId() {
 		return ITIP;
 	}
 
 	
 	
-	public AppointmentSQLInterface wrap(AppointmentSQLInterface delegate,
+	@Override
+    public AppointmentSQLInterface wrap(AppointmentSQLInterface delegate,
 			Session session) throws OXException {
 		
 		return new ITipConsistencyCalendar(delegate, session, services);

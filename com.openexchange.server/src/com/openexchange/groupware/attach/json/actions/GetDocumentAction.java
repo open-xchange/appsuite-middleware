@@ -51,7 +51,7 @@ package com.openexchange.groupware.attach.json.actions;
 
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
-import com.openexchange.ajax.Attachment;
+import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.container.ByteArrayFileHolder;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
@@ -84,7 +84,7 @@ import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 public final class GetDocumentAction extends AbstractAttachmentAction {
 
     private static final org.apache.commons.logging.Log LOG =
-        Log.valueOf(org.apache.commons.logging.LogFactory.getLog(GetDocumentAction.class));
+        Log.valueOf(com.openexchange.log.LogFactory.getLog(GetDocumentAction.class));
 
     /**
      * Initializes a new {@link GetDocumentAction}.
@@ -97,17 +97,17 @@ public final class GetDocumentAction extends AbstractAttachmentAction {
     public AJAXRequestResult perform(final AJAXRequestData requestData, final ServerSession session) throws OXException {
         require(
             requestData,
-            Attachment.PARAMETER_FOLDERID,
-            Attachment.PARAMETER_ATTACHEDID,
-            Attachment.PARAMETER_MODULE,
-            Attachment.PARAMETER_ID);
+            AJAXServlet.PARAMETER_FOLDERID,
+            AJAXServlet.PARAMETER_ATTACHEDID,
+            AJAXServlet.PARAMETER_MODULE,
+            AJAXServlet.PARAMETER_ID);
 
         int folderId, attachedId, moduleId, id;
-        final String contentType = requestData.getParameter(Attachment.PARAMETER_CONTENT_TYPE);
-        folderId = requireNumber(requestData, Attachment.PARAMETER_FOLDERID);
-        attachedId = requireNumber(requestData, Attachment.PARAMETER_ATTACHEDID);
-        moduleId = requireNumber(requestData, Attachment.PARAMETER_MODULE);
-        id = requireNumber(requestData, Attachment.PARAMETER_ID);
+        final String contentType = requestData.getParameter(AJAXServlet.PARAMETER_CONTENT_TYPE);
+        folderId = requireNumber(requestData, AJAXServlet.PARAMETER_FOLDERID);
+        attachedId = requireNumber(requestData, AJAXServlet.PARAMETER_ATTACHEDID);
+        moduleId = requireNumber(requestData, AJAXServlet.PARAMETER_MODULE);
+        id = requireNumber(requestData, AJAXServlet.PARAMETER_ID);
 
         requestData.setFormat("file");
         return document(

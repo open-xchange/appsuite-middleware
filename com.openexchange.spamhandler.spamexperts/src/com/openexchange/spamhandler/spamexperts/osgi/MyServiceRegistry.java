@@ -49,7 +49,7 @@
 
 package com.openexchange.spamhandler.spamexperts.osgi;
 
-import com.openexchange.server.osgiservice.ServiceRegistry;
+import com.openexchange.osgi.ServiceRegistry;
 
 /**
 * {@link MyServiceRegistry} - A registry for services 

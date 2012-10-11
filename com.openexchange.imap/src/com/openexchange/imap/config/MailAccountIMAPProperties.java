@@ -66,7 +66,7 @@ import com.openexchange.mailaccount.MailAccount;
  */
 public final class MailAccountIMAPProperties extends MailAccountProperties implements IIMAPProperties {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(MailAccountIMAPProperties.class));
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(MailAccountIMAPProperties.class));
 
     /**
      * Initializes a new {@link MailAccountIMAPProperties}.

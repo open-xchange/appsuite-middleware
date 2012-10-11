@@ -61,7 +61,7 @@ import com.openexchange.mail.dataobjects.MailFolder;
  */
 public final class MailFolderType implements FolderType {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(MailFolderType.class));
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(MailFolderType.class));
 
     private static final int LEN = MailFolder.DEFAULT_FOLDER_ID.length();
 

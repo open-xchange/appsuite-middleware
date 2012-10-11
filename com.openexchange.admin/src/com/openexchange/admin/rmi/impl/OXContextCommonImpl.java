@@ -53,7 +53,7 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashSet;
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import com.openexchange.log.LogFactory;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
@@ -180,7 +180,7 @@ public abstract class OXContextCommonImpl extends OXCommonImpl {
      */
     protected Object callPluginMethod(final String method, final Object... args) throws StorageException {
         Object ret = null;
-        final ArrayList<Bundle> bundles = AdminDaemon.getBundlelist();
+        final java.util.List<Bundle> bundles = AdminDaemon.getBundlelist();
         for (final Bundle bundle : bundles) {
             final String bundlename = bundle.getSymbolicName();
             if (Bundle.ACTIVE == bundle.getState()) {
@@ -238,7 +238,7 @@ public abstract class OXContextCommonImpl extends OXCommonImpl {
      * @throws StorageException
      */
     protected boolean isAnyPluginLoaded() throws StorageException {
-        final ArrayList<Bundle> bundles = AdminDaemon.getBundlelist();
+        final java.util.List<Bundle> bundles = AdminDaemon.getBundlelist();
         for (final Bundle bundle : bundles) {
             if (Bundle.ACTIVE == bundle.getState()) {
                 final ServiceReference[] servicereferences = bundle.getRegisteredServices();

@@ -5,9 +5,11 @@ Maintainer: Marcus Klein <marcus.klein@open-xchange.com>
 Build-Depends: debhelper (>= 4.0.0), ant (>= 1.7.0), ant-optional (>= 1.7.0), sun-java6-jdk|java6-sdk, open-xchange-osgi (>= @OXVERSION@)
 Standards-Version: 3.8.4
 Homepage: http://www.open-xchange.com
-Build-Conflicts: ecj, libecj-java-gcj, ecj-gcj, libecj-java, gcj-4.3-base, libgcj-common, libgcj9-0, libgcj-bc, libgcj9-jar, java-gcj-compat-headless, gcj-4.3, java-gcj-compat, java-gcj-compat-dev
 
 Package: open-xchange-log4j
 Architecture: all
-Depends: ${misc:Depends}, sun-java6-jre|java6-runtime, open-xchange-osgi (>= @OXVERSION@)
+Depends: ${misc:Depends}, open-xchange-osgi (>= @OXVERSION@)
+Replaces: open-xchange-commons-logging-log4j (<< 6.21.0-0)
+Conflicts: open-xchange-commons-logging-log4j (<< 6.21.0-0)
+Breaks: open-xchange-commons-logging-log4j (<< 6.21.0-0)
 Description: log4j library bundle and xml configuration file

@@ -51,7 +51,7 @@ package com.openexchange.database.internal;
 
 import java.util.Properties;
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import com.openexchange.log.LogFactory;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.database.DBPoolingExceptionCodes;
 import com.openexchange.exception.OXException;
@@ -77,10 +77,6 @@ public final class Configuration {
 
     Configuration() {
         super();
-    }
-
-    boolean isWriteDefined() {
-        return Boolean.parseBoolean(getProperty(Property.SEPERATE_WRITE, "false"));
     }
 
     String getReadUrl() {
@@ -199,9 +195,6 @@ public final class Configuration {
         } catch (final ClassNotFoundException e) {
             throw DBPoolingExceptionCodes.NO_DRIVER.create(e, readDriverClass);
         }
-        if (!isWriteDefined()) {
-            return;
-        }
         final String writeDriverClass = getProperty(Property.WRITE_DRIVER_CLASS);
         if (null == writeDriverClass) {
             throw DBPoolingExceptionCodes.PROPERTY_MISSING.create(Property.WRITE_DRIVER_CLASS.getPropertyName());
@@ -237,7 +230,6 @@ public final class Configuration {
         poolConfig.testOnDeactivate = getBoolean(Property.TEST_ON_DEACTIVATE, poolConfig.testOnDeactivate);
         poolConfig.testOnIdle = getBoolean(Property.TEST_ON_IDLE, poolConfig.testOnIdle);
         poolConfig.testThreads = getBoolean(Property.TEST_THREADS, poolConfig.testThreads);
-        poolConfig.forceWriteOnly = getBoolean(Property.WRITE_ONLY, false);
         LOG.info(poolConfig.toString());
     }
 
@@ -257,8 +249,6 @@ public final class Configuration {
         READ_DRIVER_CLASS("readDriverClass"),
         /** Class name of driver for configdb write. */
         WRITE_DRIVER_CLASS("writeDriverClass"),
-        /** Use a seperate pool for write connections. */
-        SEPERATE_WRITE("useSeparateWrite"),
         /** Interval of the cleaner threads. */
         CLEANER_INTERVAL("cleanerInterval"),
         /** Minimum of idle connections. */
@@ -282,9 +272,7 @@ public final class Configuration {
         /** Validate connections on a pool clean run. */
         TEST_ON_IDLE("testOnIdle"),
         /** Test threads if they use connections correctly. */
-        TEST_THREADS("testThreads"),
-        /** Forces the use of the write db on all requests */
-        WRITE_ONLY("writeOnly");
+        TEST_THREADS("testThreads");
 
         private String propertyName;
 

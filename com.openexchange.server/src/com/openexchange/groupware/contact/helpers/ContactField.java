@@ -208,6 +208,7 @@ public enum ContactField{
     BUSINESS_ADDRESS(Contact.ADDRESS_BUSINESS, "businessAddress", "BUSINESS_ADDRESS", "businessAddress", ContactFields.ADDRESS_BUSINESS, Types.VARCHAR),
     OTHER_ADDRESS(Contact.ADDRESS_OTHER, "otherAddress", "OTHER_ADDRESS", "otherAddress", ContactFields.ADDRESS_OTHER, Types.VARCHAR),
     UID(Contact.UID, "uid", "UID", "uid", ContactFields.UID, Types.VARCHAR),
+    FILENAME(Contact.FILENAME, "filename", "FILENAME", "filename", "", Types.VARCHAR)
     ;
 
     private int columnNumber, sqlType;
@@ -225,6 +226,7 @@ public enum ContactField{
         this.sqlType = sqlType;
     }
 
+    @Deprecated
 	public int getNumber(){
 		return columnNumber;
 	}
@@ -234,10 +236,12 @@ public enum ContactField{
 	 * 
 	 * @return the field name
 	 */
+    @Deprecated
 	public String getFieldName(){
 		return fieldName;
 	}
 
+    @Deprecated
 	public String getReadableName(){
 		return readableName;
 	}
@@ -247,35 +251,42 @@ public enum ContactField{
 	 * 
 	 * @return the database name, or <code>""</code> if there's no database column associated with this field
 	 */
+    @Deprecated
 	public String getDbName(){
 		return dbName;
 	}
 
+    @Deprecated
 	public String getEnglishOutlookName(){
 		return englishOutlook.getNameOfField(this);
 	}
 
+    @Deprecated
 	public String getFrenchOutlookName(){
 		return frenchOutlook.getNameOfField(this);
 	}
 
+    @Deprecated
 	public String getGermanOutlookName(){
 		return germanOutlook.getNameOfField(this);
 	}
 
+    @Deprecated
 	public String getAjaxName(){
 		return ajaxName;
 	}
 
+    @Deprecated
 	public String getVCardElementName(){
 		return readableName; //TODO get real VCard element name
 	}
 	
+    @Deprecated
 	public int getSQLType() {
         return sqlType;
     }
 
-
+    @Deprecated
 	public static ContactField getByDBFieldName(final String dbFieldName){
         if( null == dbFieldName) {
             return null;
@@ -292,6 +303,7 @@ public enum ContactField{
 		return null;
 	}
 
+    @Deprecated
 	public static ContactField getByDisplayName(final String displayName){
 	    if( null == displayName) {
             return null;
@@ -308,6 +320,7 @@ public enum ContactField{
 		return null;
 	}
 
+    @Deprecated
 	public static ContactField getByFieldName(final String fieldName){
 	       if( null == fieldName) {
             return null;
@@ -324,6 +337,7 @@ public enum ContactField{
 		return null;
 	}
 
+    @Deprecated
 	public static ContactField getByValue(final int value){
 		for(final ContactField field: values()){
 			if(value == field.getNumber()){
@@ -333,18 +347,22 @@ public enum ContactField{
 		return null;
 	}
 
+    @Deprecated
 	public static ContactField getByEnglishOutlookName(final String outlook){
 		return englishOutlook.getFieldByName(outlook);
 	}
 
+    @Deprecated
 	public static ContactField getByFrenchOutlookName(final String outlook){
 		return frenchOutlook.getFieldByName(outlook);
 	}
 
+    @Deprecated
 	public static ContactField getByGermanOutlookName(final String outlook){
 		return germanOutlook.getFieldByName(outlook);
 	}
 
+    @Deprecated
 	public static ContactField getByAjaxName(final String value){
 		for(final ContactField field: values()){
 			if(value.equals(field.getAjaxName())){
@@ -354,7 +372,7 @@ public enum ContactField{
 		return null;
 	}
 
-
+    @Deprecated
 	public static ContactField getBySimilarity(String value){ //I call this the "d7-compatibility mode"
 		String needle = value.replaceAll("[_\\. ]", "").toLowerCase();
 		for(final ContactField field: values()){
@@ -370,7 +388,7 @@ public enum ContactField{
 		return null;
 	}
 
-
+    @Deprecated
 	public Object doSwitch(final ContactSwitcher switcher, final Object... objects) throws OXException {
         switch(this){
         case DISPLAY_NAME : return switcher.displayname(objects);
@@ -500,11 +518,13 @@ public enum ContactField{
     }
     
     private static final EnumSet<ContactField> VIRTUAL_FIELDS = EnumSet.of(IMAGE1_URL);
+    @Deprecated
     public boolean isVirtual() {
         return VIRTUAL_FIELDS.contains(this);
     }
     
     private static final EnumSet<ContactField> NON_DB_FIELDS = EnumSet.of(IMAGE1_URL, IMAGE1_CONTENT_TYPE, IMAGE_LAST_MODIFIED, IMAGE1, DISTRIBUTIONLIST, LINKS);
+    @Deprecated
     public boolean isDBField() {
         return !NON_DB_FIELDS.contains(this);
     }

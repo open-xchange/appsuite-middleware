@@ -2,16 +2,19 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Importexport
 Bundle-SymbolicName: com.openexchange.importexport
-Bundle-Version: 6.21.0
+Bundle-Version: 6.22.0
 Bundle-Activator: com.openexchange.importexport.osgi.ImportExportActivator
 Bundle-Vendor: OPENEXCHANGE
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Import-Package: com.openexchange.ajax,
+ com.openexchange.ajax.container,
  com.openexchange.ajax.requesthandler,
  com.openexchange.ajax.requesthandler.osgiservice,
  com.openexchange.ajax.writer,
  com.openexchange.api2,
  com.openexchange.config,
+ com.openexchange.contact,
+ com.openexchange.contacts.json.mapping,
  com.openexchange.data.conversion.ical,
  com.openexchange.documentation,
  com.openexchange.exception,
@@ -23,9 +26,14 @@ Import-Package: com.openexchange.ajax,
  com.openexchange.groupware.contexts,
  com.openexchange.groupware.contexts.impl,
  com.openexchange.groupware.generic,
+ com.openexchange.groupware.importexport,
+ com.openexchange.groupware.importexport.csv,
  com.openexchange.groupware.ldap,
  com.openexchange.groupware.search,
  com.openexchange.groupware.tasks,
+ com.openexchange.groupware.tools.mappings,
+ com.openexchange.groupware.tools.mappings.json,
+ com.openexchange.groupware.upload,
  com.openexchange.groupware.userconfiguration,
  com.openexchange.i18n,
  com.openexchange.java,

@@ -50,6 +50,9 @@
 package com.openexchange.groupware.upload.impl;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import com.openexchange.groupware.upload.UploadFile;
 
 /**
@@ -78,6 +81,14 @@ public class UploadFileImpl implements UploadFile {
      */
     public UploadFileImpl() {
         super();
+    }
+
+    @Override
+    public InputStream openStream() throws IOException {
+        if (null == tmpFile) {
+            throw new IOException("No such file");
+        }
+        return new FileInputStream(tmpFile);
     }
 
     /**

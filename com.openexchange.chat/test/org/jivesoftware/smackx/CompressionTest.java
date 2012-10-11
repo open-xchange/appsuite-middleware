@@ -91,8 +91,9 @@ public class CompressionTest extends SmackTestCase {
         super.setUp();
         XMPPConnection setupConnection = new XMPPConnection(getServiceName());
         setupConnection.connect();
-        if (!setupConnection.getAccountManager().supportsAccountCreation())
+        if (!setupConnection.getAccountManager().supportsAccountCreation()) {
             fail("Server does not support account creation");
+        }
 
         // Create the test account
         try {

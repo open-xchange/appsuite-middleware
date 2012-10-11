@@ -58,7 +58,6 @@ import java.net.URL;
 import java.nio.charset.UnsupportedCharsetException;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Properties;
 import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -79,6 +78,7 @@ import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.html.HtmlService;
 import com.openexchange.html.internal.jericho.JerichoParser;
+import com.openexchange.html.internal.jericho.JerichoParser.ParsingDeniedException;
 import com.openexchange.html.internal.jericho.handler.FilterJerichoHandler;
 import com.openexchange.html.internal.parser.HtmlParser;
 import com.openexchange.html.internal.parser.handler.HTMLFilterHandler;
@@ -97,15 +97,13 @@ import com.openexchange.proxy.ProxyRegistry;
  */
 public final class HtmlServiceImpl implements HtmlService {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(HtmlServiceImpl.class));
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(HtmlServiceImpl.class));
 
     private static final boolean DEBUG = LOG.isDebugEnabled();
 
-    private static final String CHARSET_US_ASCII = "US-ASCII";
-
     private static final String CHARSET_UTF_8 = "UTF-8";
 
-    private static final Pattern PAT_META_CT = Pattern.compile("<meta[^>]*?http-equiv=\"?content-type\"?[^>]*?>", Pattern.CASE_INSENSITIVE);
+    // private static final Pattern PAT_META_CT = Pattern.compile("<meta[^>]*?http-equiv=\"?content-type\"?[^>]*?>", Pattern.CASE_INSENSITIVE);
 
     private static final String TAG_E_HEAD = "</head>";
 
@@ -114,8 +112,6 @@ public final class HtmlServiceImpl implements HtmlService {
     /*-
      * Member stuff
      */
-
-    private final Properties tidyConfiguration;
 
     private final Map<Character, String> htmlCharMap;
 
@@ -128,9 +124,8 @@ public final class HtmlServiceImpl implements HtmlService {
      * @param htmlCharMap The HTML entity to string map
      * @param htmlEntityMap The string to HTML entity map
      */
-    public HtmlServiceImpl(final Properties tidyConfiguration, final Map<Character, String> htmlCharMap, final Map<String, Character> htmlEntityMap) {
+    public HtmlServiceImpl(final Map<Character, String> htmlCharMap, final Map<String, Character> htmlEntityMap) {
         super();
-        this.tidyConfiguration = tidyConfiguration;
         this.htmlCharMap = htmlCharMap;
         this.htmlEntityMap = htmlEntityMap;
     }
@@ -352,12 +347,18 @@ public final class HtmlServiceImpl implements HtmlService {
         }
     }
 
-    private static void appendAnchor(final String url, final StringBuilder builder) throws MalformedURLException, IDNAException {
-        builder.append("<a href=\"");
-        if (url.startsWith("www") || url.startsWith("news")) {
-            builder.append("http://");
+    private static void appendAnchor(final String url, final StringBuilder builder) throws IDNAException {
+        try {
+            final String checkedUrl = checkURL(url);
+            builder.append("<a href=\"");
+            if (url.startsWith("www") || url.startsWith("news")) {
+                builder.append("http://");
+            }
+            builder.append(checkedUrl).append("\" target=\"_blank\">").append(url).append("</a>");
+        } catch (final MalformedURLException e) {
+            // Append as-is
+            builder.append(url);
         }
-        builder.append(checkURL(url)).append("\" target=\"_blank\">").append(url).append("</a>");
     }
 
     /**
@@ -457,37 +458,82 @@ public final class HtmlServiceImpl implements HtmlService {
     }
 
     @Override
-    public String sanitize(final String htmlContent, final String optConfigName, final boolean dropExternalImages, final boolean[] modified) {
-        final long st = DEBUG ? System.currentTimeMillis() : 0L;
-        String confName = optConfigName;
-        if (null != confName && !confName.endsWith(".properties")) {
-            confName += ".properties";
-        }
-        String html = replaceHexEntities(htmlContent);
-        html = processDownlevelRevealedConditionalComments(html);
-        // html = replaceHexNbsp(html);
-        final FilterJerichoHandler handler;
-        {
-            final String definition = null == confName ? null : getConfiguration().getText(confName);
-            if (null == definition) {
-                handler = new FilterJerichoHandler(html.length());
-            } else {
-                handler = new FilterJerichoHandler(html.length(), definition);
+    public String sanitize(final String htmlContent, final String optConfigName, final boolean dropExternalImages, final boolean[] modified, final String cssPrefix) {
+        try {
+            final long st = DEBUG ? System.currentTimeMillis() : 0L;
+            String confName = optConfigName;
+            if (null != confName && !confName.endsWith(".properties")) {
+                confName += ".properties";
             }
+            String html = replaceHexEntities(htmlContent);
+            html = processDownlevelRevealedConditionalComments(html);
+            html = dropDoubleAccents(html);
+            // html = replaceHexNbsp(html);
+            final FilterJerichoHandler handler;
+            {
+                final String definition = null == confName ? null : getConfiguration().getText(confName);
+                if (null == definition) {
+                    handler = new FilterJerichoHandler(html.length());
+                } else {
+                    handler = new FilterJerichoHandler(html.length(), definition);
+                }
+            }
+            JerichoParser.parse(html, handler.setDropExternalImages(dropExternalImages).setCssPrefix(cssPrefix));
+            if (dropExternalImages && null != modified) {
+                modified[0] |= handler.isImageURLFound();
+            }
+            final String retval = handler.getHTML();
+            if (DEBUG) {
+                final long dur = System.currentTimeMillis() - st;
+                LOG.debug("\tHTMLServiceImpl.sanitize() took " + dur + "msec.");
+            }
+            return retval;
+        } catch (final ParsingDeniedException e) {
+            LOG.warn("HTML content will be returned un-sanitized. Reason: "+e.getMessage(), e);
+            return htmlContent;
         }
-        JerichoParser.parse(html, handler.setDropExternalImages(dropExternalImages));
-        if (dropExternalImages && null != modified) {
-            modified[0] |= handler.isImageURLFound();
-        }
-        final String retval = handler.getHTML();
-        if (DEBUG) {
-            final long dur = System.currentTimeMillis() - st;
-            LOG.debug("\tHTMLServiceImpl.sanitize() took " + dur + "msec.");
-        }
-        return retval;
     }
 
-    private static final Pattern PATTERN_HEADING_WS = Pattern.compile("(\r?\n) +");
+    private static final Pattern PATTERN_TAG = Pattern.compile("<\\w+?[^>]*>");
+
+    private static final Pattern PATTERN_DOUBLE_ACCENTS = Pattern.compile(Pattern.quote("\u0060\u0060")+"|"+Pattern.quote("\u00b4\u00b4"));
+
+    private static final Pattern PATTERN_ACCENT1 = Pattern.compile(Pattern.quote("\u0060"));
+
+    private static final Pattern PATTERN_ACCENT2 = Pattern.compile(Pattern.quote("\u00b4"));
+
+    private static String dropDoubleAccents(final String html) {
+        if (null == html || (html.indexOf('\u0060') < 0 && html.indexOf('\u00b4') < 0)) {
+            return html;
+        }
+        final Matcher m = PATTERN_TAG.matcher(html);
+        if (!m.find()) {
+            /*
+             * No conditional comments found
+             */
+            return html;
+        }
+        int lastMatch = 0;
+        final StringBuilder sb = new StringBuilder(html.length());
+        do {
+            sb.append(html.substring(lastMatch, m.start()));
+            final String match = m.group();
+            if (!isEmpty(match)) {
+                if (match.indexOf('\u0060') < 0 && match.indexOf('\u00b4') < 0) {
+                    sb.append(match);
+                } else {
+                    sb.append(PATTERN_DOUBLE_ACCENTS.matcher(match).replaceAll(""));
+                }
+            }
+            lastMatch = m.end();
+        } while (m.find());
+        sb.append(html.substring(lastMatch));
+        String ret = PATTERN_ACCENT1.matcher(sb.toString()).replaceAll("&#96;");
+        ret = PATTERN_ACCENT2.matcher(ret).replaceAll("&#180;");
+        return ret;
+    }
+
+    private static final Pattern PATTERN_HEADING_WS = Pattern.compile("(\r?\n|^) +");
 
     @Override
     public String html2text(final String htmlContent, final boolean appendHref) {
@@ -495,7 +541,8 @@ public final class HtmlServiceImpl implements HtmlService {
 //        HTMLParser.parse(htmlContent, handler);
 //        return handler.getText();
 
-        String prepared = insertBlockquoteMarker(htmlContent);
+        String prepared = prepareSignatureStart(htmlContent);
+        prepared = insertBlockquoteMarker(prepared);
         prepared = insertSpaceMarker(prepared);
         String text = quoteText(new Renderer(new Segment(new Source(prepared), 0, prepared.length())).setMaxLineLength(9999).setIncludeHyperlinkURLs(appendHref).toString());
         // Drop heading whitespaces
@@ -503,6 +550,19 @@ public final class HtmlServiceImpl implements HtmlService {
         // ... but keep enforced ones
         text = whitespaceText(text);
         return text;
+    }
+
+    private static final Pattern PATTERN_SIGNATURE_START = Pattern.compile("(?:\r?\n|^)([ \t]*)-- (\r?\n)");
+
+    private static String prepareSignatureStart(final String htmlContent) {
+        final Matcher m = PATTERN_SIGNATURE_START.matcher(htmlContent);
+        if (!m.find()) {
+            return htmlContent;
+        }
+        final StringBuffer sb = new StringBuffer(htmlContent.length());
+        m.appendReplacement(sb, "$1--&#160;$2");
+        m.appendTail(sb);
+        return sb.toString();
     }
 
     private static final String SPACE_MARKER = "--?space?--";
@@ -860,40 +920,100 @@ public final class HtmlServiceImpl implements HtmlService {
     }
 
     private static final Pattern PATTERN_BASE_TAG = Pattern.compile(
-        "<base[^>]*href=\\s*(?:\"|')(\\S*?)(?:\"|')[^>]*>(.*?</base>)?",
+        "<base[^>]*href=\\s*(?:\"|')(\\S*?)(?:\"|')[^>]*/?>",
         Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
 
+    private static final Pattern BACKGROUND_PATTERN = Pattern.compile(
+        "(<[a-zA-Z]+[^>]*?)(?:(?:background=([^\\s>]*))|(?:background=\"([^\"]*)\"))([^>]*/?>)",
+        Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
+
     private static String checkBaseTag(final String htmlContent, final boolean externalImagesAllowed, final int end) {
-        final Matcher m = PATTERN_BASE_TAG.matcher(htmlContent);
+        Matcher m = PATTERN_BASE_TAG.matcher(htmlContent);
         if (!m.find() || m.end() >= end) {
             return htmlContent;
         }
-        final StringBuilder sb = new StringBuilder(htmlContent.length());
-        final MatcherReplacer mr = new MatcherReplacer(m, htmlContent);
         /*
-         * Check first found <base> tag
+         * Find bases
          */
-        if (externalImagesAllowed) {
-            final String href = m.group(1).trim().toLowerCase(Locale.ENGLISH);
-            if (href.startsWith("http://") || href.startsWith("https://")) {
-                /*
-                 * Base tag contains an absolute URL
-                 */
-                mr.appendLiteralReplacement(sb, m.group(0));
-            } else {
-                mr.appendLiteralReplacement(sb, "");
-            }
-        } else {
-            mr.appendLiteralReplacement(sb, "");
+        String base = m.group(1);
+        if (base.endsWith("/")) {
+            base = base.substring(0, base.length()-1);
         }
         /*
-         * Drop any subsequent <base> tag
+         * Convert to absolute URIs
          */
-        while (m.find() && m.end() < end) {
-            mr.appendLiteralReplacement(sb, "");
+        String html = htmlContent.substring(0, m.start()) + htmlContent.substring(m.end());
+        m = IMG_PATTERN.matcher(html);
+        MatcherReplacer mr = new MatcherReplacer(m, html);
+        final StringBuilder sb = new StringBuilder(html.length());
+        if (m.find()) {
+            /*
+             * Replace images
+             */
+            do {
+                final String imgTag = m.group();
+                final int pos = imgTag.indexOf("src=");
+                final int epos;
+                if (pos >= 0) {
+                    String href;
+                    char c = imgTag.charAt(pos+4);
+                    if ('"' == c) {
+                        epos = imgTag.indexOf('"', pos+5);
+                        href = imgTag.substring(pos+5, epos);
+                    } else if ('\'' == c) {
+                        epos = imgTag.indexOf('\'', pos+5);
+                        href = imgTag.substring(pos+5, epos);
+                    } else {
+                        epos = imgTag.indexOf('>', pos+4);
+                        href = imgTag.substring(pos+4, epos);
+                    }
+                    if (!href.startsWith("cid") && !href.startsWith("http")) {
+                        if (href.charAt(0) != '/') {
+                            href = '/' + href;
+                        }
+                        final String replacement = imgTag.substring(0, pos) + "src=\"" + base + href + "\"" + imgTag.substring(epos);
+                        mr.appendLiteralReplacement(sb, replacement);
+                    }
+                }
+            } while (m.find());
         }
         mr.appendTail(sb);
-        return sb.toString();
+        html = sb.toString();
+        sb.setLength(0);
+        m = BACKGROUND_PATTERN.matcher(html);
+        mr = new MatcherReplacer(m, html);
+        if (m.find()) {
+            /*
+             * Replace images
+             */
+            do {
+                final String backgroundTag = m.group();
+                /*
+                 * Extract href
+                 */
+                int pos;
+                int epos;
+                String href = m.group(2);
+                if (href == null) {
+                    href = m.group(3);
+                    pos = m.start(3);
+                    epos = m.end(3);
+                } else {
+                    pos = m.start(2);
+                    epos = m.end(2);
+                }
+                if (!href.startsWith("cid") && !href.startsWith("http")) {
+                    if (href.charAt(0) != '/') {
+                        href = '/' + href;
+                    }
+                    final String replacement = backgroundTag.substring(0, pos) + base + href + backgroundTag.substring(epos);
+                    mr.appendLiteralReplacement(sb, replacement);
+                }
+            } while (m.find());
+        }
+        mr.appendTail(sb);
+        html = sb.toString();
+        return html;
     }
 
     @Override
@@ -1138,7 +1258,8 @@ public final class HtmlServiceImpl implements HtmlService {
         return htmlContent;
     }
 
-    private static final Pattern PATTERN_CC = Pattern.compile("(<!(?:--)?\\[if)([^\\]]+\\]>)(.*?)(<!\\[endif\\](?:--)?>)", Pattern.DOTALL);
+    private static final Pattern PATTERN_CC = Pattern.compile("(<!(?:--)?\\[if)([^\\]]+\\](?:--!?)?>)(.*?)((?:<!\\[endif\\])?(?:--)?>)", Pattern.DOTALL);
+    private static final Pattern PATTERN_CC2 = Pattern.compile("(<!(?:--)?\\[if)([^\\]]+\\](?:--!?)?>)(.*?)(<!\\[endif\\](?:--)?>)", Pattern.DOTALL);
 
     private static final String CC_START_IF = "<!-- [if";
 
@@ -1150,26 +1271,31 @@ public final class HtmlServiceImpl implements HtmlService {
      * Processes detected downlevel-revealed <a href="http://en.wikipedia.org/wiki/Conditional_comment">conditional comments</a> through
      * adding dashes before and after each <code>if</code> statement tag to complete them as a valid HTML comment and leaves center code
      * open to rendering on non-IE browsers:
-     * 
+     *
      * <pre>
      * &lt;![if !IE]&gt;
      * &lt;link rel=&quot;stylesheet&quot; type=&quot;text/css&quot; href=&quot;non-ie.css&quot;&gt;
      * &lt;![endif]&gt;
      * </pre>
-     * 
+     *
      * is turned to
-     * 
+     *
      * <pre>
      * &lt;!--[if !IE]&gt;--&gt;
      * &lt;link rel=&quot;stylesheet&quot; type=&quot;text/css&quot; href=&quot;non-ie.css&quot;&gt;
      * &lt;!--&lt;![endif]--&gt;
      * </pre>
-     * 
+     *
      * @param htmlContent The HTML content possibly containing downlevel-revealed conditional comments
      * @return The HTML content whose downlevel-revealed conditional comments contain valid HTML for non-IE browsers
      */
     private static String processDownlevelRevealedConditionalComments(final String htmlContent) {
-        final Matcher m = PATTERN_CC.matcher(htmlContent);
+        final String ret = processDownlevelRevealedConditionalComments0(htmlContent, PATTERN_CC2);
+        return processDownlevelRevealedConditionalComments0(ret, PATTERN_CC);
+    }
+    
+    private static String processDownlevelRevealedConditionalComments0(final String htmlContent, final Pattern p) {
+        final Matcher m = p.matcher(htmlContent);
         if (!m.find()) {
             /*
              * No conditional comments found
@@ -1180,21 +1306,33 @@ public final class HtmlServiceImpl implements HtmlService {
         final StringBuilder sb = new StringBuilder(htmlContent.length() + 128);
         do {
             sb.append(htmlContent.substring(lastMatch, m.start()));
-            sb.append(CC_START_IF).append(m.group(2));
-            final String wrappedContent = m.group(3);
-            if (!wrappedContent.startsWith("-->", 0)) {
-                sb.append(CC_END_IF);
-            }
-            sb.append(wrappedContent);
-            if (wrappedContent.endsWith("<!--")) {
-                sb.append(m.group(4));
-            } else {
-                sb.append(CC_ENDIF);
+            final String condition = m.group(2);
+            if (isValidCondition(condition)) {
+                sb.append(CC_START_IF).append(condition);
+                final String wrappedContent = m.group(3);
+                if (!wrappedContent.startsWith("-->", 0)) {
+                    sb.append(CC_END_IF);
+                }
+                sb.append(wrappedContent);
+                if (wrappedContent.endsWith("<!--")) {
+                    sb.append(m.group(4));
+                } else {
+                    sb.append(CC_ENDIF);
+                }
             }
             lastMatch = m.end();
         } while (m.find());
         sb.append(htmlContent.substring(lastMatch));
         return sb.toString();
+    }
+
+    private static final Pattern PAT_VALID_COND = Pattern.compile("[a-zA-Z_0-9 -!]+");
+
+    private static boolean isValidCondition(final String condition) {
+        if (isEmpty(condition)) {
+            return false;
+        }
+        return PAT_VALID_COND.matcher(condition.substring(0, condition.indexOf(']'))).matches();
     }
 
     /**

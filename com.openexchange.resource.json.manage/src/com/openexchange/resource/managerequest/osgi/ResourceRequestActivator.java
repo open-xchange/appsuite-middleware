@@ -66,7 +66,7 @@ import com.openexchange.user.UserService;
 public final class ResourceRequestActivator extends AJAXModuleActivator {
 
     private static final org.apache.commons.logging.Log LOG =
-        com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(ResourceRequestActivator.class));
+        com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(ResourceRequestActivator.class));
 
     /**
      * Initializes a new {@link ResourceRequestActivator}

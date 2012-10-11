@@ -75,9 +75,9 @@ import com.openexchange.server.ServiceExceptionCode;
  */
 public final class JCSCacheServiceInit {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(JCSCacheServiceInit.class));
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(JCSCacheServiceInit.class));
 
-    private static final String PROP_CACHE_CONF_FILE = "com.openexchange.caching.configfile";
+    private static final String PROP_CACHE_CONF_FILE_NAME = "com.openexchange.caching.configfile";
 
     private final static String DEFAULT_REGION = "jcs.default";
 
@@ -286,6 +286,18 @@ public final class JCSCacheServiceInit {
     }
 
     /**
+     * Loads the cache configuration from given properties.
+     *
+     * @param properties The properties
+     * @throws OXException If configuration of JCS caching system fails
+     */
+    public void loadConfiguration(final Properties properties) throws OXException {
+        initializeCompositeCacheManager(true);
+        configure(properties);
+        LOG.info("JCS caching system successfully configured with properties from property set.");
+    }
+
+    /**
      * Loads the default cache configuration file.
      *
      * @throws OXException If configuration of JCS caching system fails
@@ -332,20 +344,24 @@ public final class JCSCacheServiceInit {
         /*
          * Check default cache configuration file defined through property
          */
-        final String cacheConfigFile = configurationService.getProperty(PROP_CACHE_CONF_FILE);
-        if (cacheConfigFile == null) {
-            final OXException ce = CacheExceptionCode.MISSING_CONFIGURATION_PROPERTY.create(PROP_CACHE_CONF_FILE);
+        final String cacheConfigFileName = configurationService.getProperty(PROP_CACHE_CONF_FILE_NAME);
+        if (cacheConfigFileName == null) {
+            final OXException ce = CacheExceptionCode.MISSING_CONFIGURATION_PROPERTY.create(PROP_CACHE_CONF_FILE_NAME);
             if (errorIfNull) {
                 throw ce;
             }
             LOG.warn(ce.getMessage(), ce);
             return;
         }
-        initializeCompositeCacheManager(obtainMutex);
-        final Properties properties = loadProperties(cacheConfigFile.trim());
-        configure(properties);
-        checkDefaultAuxiliary();
-        defaultCacheRegions = Collections.unmodifiableSet(new HashSet<String>(Arrays.asList(ccmInstance.getCacheNames())));
+        try {
+            final Properties properties = loadProperties(new FileInputStream(configurationService.getFileByName(cacheConfigFileName)));
+            initializeCompositeCacheManager(obtainMutex);
+            configure(properties);
+            checkDefaultAuxiliary();
+            defaultCacheRegions = Collections.unmodifiableSet(new HashSet<String>(Arrays.asList(ccmInstance.getCacheNames())));
+        } catch (final IOException e) {
+            throw CacheExceptionCode.IO_ERROR.create(e, e.getMessage());
+        }
     }
 
     /**

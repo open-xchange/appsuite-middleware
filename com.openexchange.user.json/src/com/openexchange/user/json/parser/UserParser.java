@@ -58,7 +58,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.fields.ContactFields;
-import com.openexchange.ajax.fields.DistributionListFields;
+import com.openexchange.ajax.fields.DataFields;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.DistributionListEntryObject;
@@ -186,8 +186,8 @@ public final class UserParser {
         for (int a = 0; a < jdistributionlist.length(); a++) {
             final JSONObject entry = jdistributionlist.getJSONObject(a);
             distributionlist[a] = new DistributionListEntryObject();
-            if (entry.has(DistributionListFields.ID)) {
-                distributionlist[a].setEntryID(parseInt(entry, DistributionListFields.ID));
+            if (entry.has(DataFields.ID)) {
+                distributionlist[a].setEntryID(parseInt(entry, DataFields.ID));
             }
 
             if (entry.has(UserField.FIRST_NAME.getName())) {
@@ -211,7 +211,7 @@ public final class UserParser {
         for (int a = 0; a < links.length; a++) {
             links[a] = new LinkEntryObject();
             final JSONObject entry = jlinks.getJSONObject(a);
-            if (entry.has(ContactFields.ID)) {
+            if (entry.has(DataFields.ID)) {
                 links[a].setLinkID(parseInt(entry, UserField.ID.getName()));
             }
 

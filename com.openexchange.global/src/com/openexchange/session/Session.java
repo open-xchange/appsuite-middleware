@@ -49,12 +49,52 @@
 
 package com.openexchange.session;
 
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.Condition;
+import java.util.concurrent.locks.Lock;
+
 /**
  * {@link Session}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface Session {
+
+    /**
+     * The empty lock, doing nothing on invocations.
+     */
+    public static final Lock EMPTY_LOCK = new Lock() {
+        
+        @Override
+        public void unlock() {
+            // ignore
+        }
+        
+        @Override
+        public boolean tryLock(long time, TimeUnit unit) throws InterruptedException {
+            return true;
+        }
+        
+        @Override
+        public boolean tryLock() {
+            return true;
+        }
+        
+        @Override
+        public Condition newCondition() {
+            throw new UnsupportedOperationException("Empty lock provides no condition.");
+        }
+        
+        @Override
+        public void lockInterruptibly() throws InterruptedException {
+            // ignore
+        }
+        
+        @Override
+        public void lock() {
+            // ignore
+        }
+    };
 
     /**
      * The parameter name for session lock. The parameter value is an instance of <code>java.uitl.concurrent.locks.Lock</code>.

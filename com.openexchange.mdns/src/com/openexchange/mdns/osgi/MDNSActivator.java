@@ -56,6 +56,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.eclipse.osgi.framework.console.CommandProvider;
 import org.osgi.framework.ServiceReference;
+import org.osgi.util.tracker.ServiceTracker;
 import com.openexchange.mdns.MDNSService;
 import com.openexchange.mdns.MDNSServiceInfo;
 import com.openexchange.mdns.internal.MDNSCommandProvider;
@@ -74,9 +75,9 @@ import com.openexchange.threadpool.behavior.CallerRunsBehavior;
  */
 public final class MDNSActivator extends HousekeepingActivator {
 
-    private volatile MDNSServiceImpl mdnsService;
+    volatile MDNSServiceImpl mdnsService;
 
-    protected final AtomicReference<MDNSServiceInfo> serviceInfoReference;
+    final AtomicReference<MDNSServiceInfo> serviceInfoReference;
 
     /**
      * Initializes a new {@link MDNSActivator}.
@@ -88,52 +89,83 @@ public final class MDNSActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return EMPTY_CLASSES;
+        return new Class<?>[] { ThreadPoolService.class };
+    }
+
+    @Override
+    public <S> void registerService(Class<S> clazz, S service) {
+        super.registerService(clazz, service);
+    }
+
+    @Override
+    public <S> ServiceTracker<S, S> track(Class<S> clazz, SimpleRegistryListener<S> listener) {
+        return super.track(clazz, listener);
+    }
+
+    @Override
+    public <S> boolean addService(Class<S> clazz, S service) {
+        return super.addService(clazz, service);
+    }
+
+    @Override
+    public <S> boolean removeService(Class<? extends S> clazz) {
+        return super.removeService(clazz);
+    }
+
+    @Override
+    public void openTrackers() {
+        super.openTrackers();
     }
 
     @Override
     protected void startBundle() throws Exception {
         final Log log = com.openexchange.log.Log.valueOf(LogFactory.getLog(MDNSActivator.class));
         log.info("Starting bundle: com.openexchange.mdns");
-        try {
-            /*
-             * Create mDNS service
-             */
-            final MDNSServiceImpl mdnsService = new MDNSServiceImpl();
-            this.mdnsService = mdnsService;
-            registerService(MDNSService.class, mdnsService, null);
-            registerService(CommandProvider.class, new MDNSCommandProvider(mdnsService), null);
+        final Runnable starter = new Runnable() {
 
-            track(ThreadPoolService.class, new SimpleRegistryListener<ThreadPoolService>() {
+            @Override
+            public void run() {
+                try {
+                    /*
+                     * Create mDNS service
+                     */
+                    final MDNSServiceImpl mdnsService = new MDNSServiceImpl();
+                    MDNSActivator.this.mdnsService = mdnsService;
+                    registerService(MDNSService.class, mdnsService);
+                    registerService(CommandProvider.class, new MDNSCommandProvider(mdnsService));
 
-                @Override
-                public void added(final ServiceReference<ThreadPoolService> ref, final ThreadPoolService service) {
-                    final Task<Void> task = new AbstractTask<Void>() {
+                    track(ThreadPoolService.class, new SimpleRegistryListener<ThreadPoolService>() {
 
                         @Override
-                        public Void call() throws Exception {
-                            final String serviceId = "openexchange.service.lookup";
-                            final int port = 6666;
-                            final String info = new StringBuilder("open-xchange lookup service @").append(getHostName()).toString();
-                            serviceInfoReference.set(mdnsService.registerService(serviceId, port, info));
-                            log.info("MDNS Lookup Service successfully registered.");
-                            return null;
-                        }
-                    };
-                    service.submit(task, CallerRunsBehavior.<Void> getInstance());
-                    addService(ThreadPoolService.class, service);
-                }
+                        public void added(final ServiceReference<ThreadPoolService> ref, final ThreadPoolService service) {
+                            final Task<Void> task = new AbstractTask<Void>() {
 
-                @Override
-                public void removed(final ServiceReference<ThreadPoolService> ref, final ThreadPoolService service) {
-                    removeService(ThreadPoolService.class);
+                                @Override
+                                public Void call() throws Exception {
+                                    final String serviceId = "openexchange.service.lookup";
+                                    final int port = 6666;
+                                    final String info = new StringBuilder("open-xchange lookup service @").append(getHostName()).toString();
+                                    serviceInfoReference.set(mdnsService.registerService(serviceId, port, info));
+                                    log.info("MDNS Lookup Service successfully registered.");
+                                    return null;
+                                }
+                            };
+                            service.submit(task, CallerRunsBehavior.<Void> getInstance());
+                            addService(ThreadPoolService.class, service);
+                        }
+
+                        @Override
+                        public void removed(final ServiceReference<ThreadPoolService> ref, final ThreadPoolService service) {
+                            removeService(ThreadPoolService.class);
+                        }
+                    });
+                    openTrackers();
+                } catch (final Exception e) {
+                    log.error("Starting bundle failed: com.openexchange.mdns", e);
                 }
-            });
-            openTrackers();
-        } catch (final Exception e) {
-            log.error("Starting bundle failed: com.openexchange.mdns", e);
-            throw e;
-        }
+            }
+        };
+        new Thread(starter).run();
     }
 
     protected String getHostName() {

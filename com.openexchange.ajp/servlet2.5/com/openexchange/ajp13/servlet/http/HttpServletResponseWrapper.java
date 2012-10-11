@@ -351,11 +351,17 @@ public class HttpServletResponseWrapper extends ServletResponseWrapper implement
         if (cookie.getVersion() > 0) {
             composer.append(COOKIE_PARAMS[1]).append(cookie.getVersion());
         }
-        if (cookie.getPath() != null) {
-            composer.append(COOKIE_PARAMS[2]).append(cookie.getPath());
+        {
+            final String path = cookie.getPath();
+            if (!isEmpty(path)) {
+                composer.append(COOKIE_PARAMS[2]).append(path);
+            }
         }
-        if (cookie.getDomain() != null) {
-            composer.append(COOKIE_PARAMS[3]).append(cookie.getDomain());
+        {
+            final String domain = cookie.getDomain();
+            if (!isEmpty(domain)) {
+                composer.append(COOKIE_PARAMS[3]).append(domain);
+            }
         }
         if (cookie.getSecure()) {
             composer.append(COOKIE_PARAMS[4]);
@@ -370,6 +376,18 @@ public class HttpServletResponseWrapper extends ServletResponseWrapper implement
             composer.append("; HttpOnly");
         }
         return composer.toString();
+    }
+
+    private static boolean isEmpty(final String string) {
+        if (null == string) {
+            return true;
+        }
+        final int len = string.length();
+        boolean isWhitespace = true;
+        for (int i = 0; isWhitespace && i < len; i++) {
+            isWhitespace = Character.isWhitespace(string.charAt(i));
+        }
+        return isWhitespace;
     }
 
     @Override

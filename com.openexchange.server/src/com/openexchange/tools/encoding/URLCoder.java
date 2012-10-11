@@ -54,7 +54,7 @@ import java.io.IOException;
 import java.nio.charset.Charset;
 import java.util.BitSet;
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import com.openexchange.log.LogFactory;
 import com.openexchange.java.Charsets;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 

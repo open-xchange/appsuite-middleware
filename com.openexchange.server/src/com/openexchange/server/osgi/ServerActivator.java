@@ -59,7 +59,6 @@ import javax.servlet.ServletException;
 import net.htmlparser.jericho.Config;
 import net.htmlparser.jericho.LoggerProvider;
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.json.JSONObject;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
@@ -71,15 +70,16 @@ import org.osgi.service.http.HttpService;
 import org.osgi.service.http.NamespaceException;
 import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
+import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.Attachment;
 import com.openexchange.ajax.Folder;
 import com.openexchange.ajax.Infostore;
 import com.openexchange.ajax.customizer.folder.AdditionalFolderField;
 import com.openexchange.ajax.customizer.folder.osgi.FolderFieldCollector;
 import com.openexchange.ajax.requesthandler.AJAXRequestHandler;
+import com.openexchange.ajax.requesthandler.Dispatcher;
 import com.openexchange.api2.ContactInterfaceFactory;
 import com.openexchange.api2.RdbContactInterfaceFactory;
-import com.openexchange.authentication.AuthenticationService;
 import com.openexchange.cache.registry.CacheAvailabilityRegistry;
 import com.openexchange.caching.CacheService;
 import com.openexchange.charset.CustomCharsetProvider;
@@ -108,10 +108,10 @@ import com.openexchange.event.impl.EventQueue;
 import com.openexchange.event.impl.osgi.EventHandlerRegistration;
 import com.openexchange.event.impl.osgi.OSGiEventDispatcher;
 import com.openexchange.exception.OXException;
+import com.openexchange.file.storage.FileStorageAccountManagerLookupService;
 import com.openexchange.file.storage.composition.IDBasedFileAccessFactory;
 import com.openexchange.file.storage.parse.FileMetadataParserService;
 import com.openexchange.file.storage.registry.FileStorageServiceRegistry;
-import com.openexchange.filemanagement.internal.ManagedFileImageDataSource;
 import com.openexchange.folder.FolderDeleteListenerService;
 import com.openexchange.folder.FolderService;
 import com.openexchange.folder.internal.FolderDeleteListenerServiceTrackerCustomizer;
@@ -128,7 +128,6 @@ import com.openexchange.groupware.contact.ContactInterfaceProvider;
 import com.openexchange.groupware.contact.datahandler.ContactInsertDataHandler;
 import com.openexchange.groupware.contact.datahandler.ContactJSONDataHandler;
 import com.openexchange.groupware.contact.datasource.ContactDataSource;
-import com.openexchange.groupware.contact.datasource.ContactImageDataSource;
 import com.openexchange.groupware.contact.internal.ContactInterfaceDiscoveryServiceImpl;
 import com.openexchange.groupware.datahandler.ICalInsertDataHandler;
 import com.openexchange.groupware.datahandler.ICalJSONDataHandler;
@@ -142,7 +141,7 @@ import com.openexchange.groupware.settings.PreferencesItemService;
 import com.openexchange.html.HtmlService;
 import com.openexchange.i18n.I18nService;
 import com.openexchange.id.IDGeneratorService;
-import com.openexchange.image.servlet.ImageServlet;
+import com.openexchange.log.LogFactory;
 import com.openexchange.login.LoginHandlerService;
 import com.openexchange.mail.MailCounterImpl;
 import com.openexchange.mail.MailIdleCounterImpl;
@@ -150,7 +149,6 @@ import com.openexchange.mail.api.MailProvider;
 import com.openexchange.mail.cache.MailAccessCacheEventListener;
 import com.openexchange.mail.cache.MailSessionEventHandler;
 import com.openexchange.mail.conversion.ICalMailPartDataSource;
-import com.openexchange.mail.conversion.InlineImageDataSource;
 import com.openexchange.mail.conversion.VCardAttachMailDataHandler;
 import com.openexchange.mail.conversion.VCardMailPartDataSource;
 import com.openexchange.mail.loginhandler.MailLoginHandler;
@@ -193,6 +191,7 @@ import com.openexchange.systemname.SystemNameService;
 import com.openexchange.textxtraction.TextXtractService;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.timer.TimerService;
+import com.openexchange.tools.images.ImageScalingService;
 import com.openexchange.tools.session.SessionHolder;
 import com.openexchange.tools.strings.StringParser;
 import com.openexchange.user.UserService;
@@ -249,8 +248,9 @@ public final class ServerActivator extends HousekeepingActivator {
             ConfigurationService.class, CacheService.class, EventAdmin.class, SessiondService.class, SpringParser.class, JDOMParser.class,
             TimerService.class, ThreadPoolService.class, CalendarAdministrationService.class, AppointmentSqlFactoryService.class,
             CalendarCollectionService.class, MessagingServiceRegistry.class, HtmlService.class, IDBasedFileAccessFactory.class,
-            FileStorageServiceRegistry.class, CryptoService.class, HttpService.class, SystemNameService.class,
-            ConfigViewFactory.class, StringParser.class, PreviewService.class, TextXtractService.class, SecretEncryptionFactoryService.class
+            FileStorageServiceRegistry.class, FileStorageAccountManagerLookupService.class, CryptoService.class, HttpService.class,
+            SystemNameService.class, ImageScalingService.class, ConfigViewFactory.class, StringParser.class, PreviewService.class,
+            TextXtractService.class, SecretEncryptionFactoryService.class
         };
 
     private static volatile BundleContext CONTEXT;
@@ -347,7 +347,7 @@ public final class ServerActivator extends HousekeepingActivator {
         }
         
         CONTEXT = context;
-        JSONObject.setMaxSize(getService(ConfigurationService.class).getIntProperty("com.openexchange.json.maxSize", 1000));
+        JSONObject.setMaxSize(getService(ConfigurationService.class).getIntProperty("com.openexchange.json.maxSize", 2500));
         Config.LoggerProvider = LoggerProvider.DISABLED;
         // get version information from MANIFEST file
         final Dictionary<?, ?> headers = context.getBundle().getHeaders();
@@ -435,8 +435,6 @@ public final class ServerActivator extends HousekeepingActivator {
          *     new BundleServiceTracker&lt;MonitorService&gt;(context, MonitorService.getInstance(), MonitorService.class)));
          */
 
-        // Search for AuthenticationService
-        track(AuthenticationService.class, new AuthenticationCustomizer(context));
         // Search for ConfigJumpService
         track(
             ConfigJumpService.class,
@@ -534,27 +532,27 @@ public final class ServerActivator extends HousekeepingActivator {
             props.put(STR_IDENTIFIER, "com.openexchange.contact");
             registerService(DataSource.class, new ContactDataSource(), props);
         }
-        {
-            final InlineImageDataSource dataSource = InlineImageDataSource.getInstance();
-            final Dictionary<String, Object> props = new Hashtable<String, Object>(1);
-            props.put(STR_IDENTIFIER, dataSource.getRegistrationName());
-            registerService(DataSource.class, dataSource, props);
-            ImageServlet.addMapping(dataSource.getRegistrationName(), dataSource.getAlias());
-        }
-        {
-            final ContactImageDataSource dataSource = ContactImageDataSource.getInstance();
-            final Dictionary<String, Object> props = new Hashtable<String, Object>(1);
-            props.put(STR_IDENTIFIER, dataSource.getRegistrationName());
-            registerService(DataSource.class, dataSource, props);
-            ImageServlet.addMapping(dataSource.getRegistrationName(), dataSource.getAlias());
-        }
-        {
-            final ManagedFileImageDataSource dataSource = new ManagedFileImageDataSource();
-            final Dictionary<String, Object> props = new Hashtable<String, Object>(1);
-            props.put(STR_IDENTIFIER, dataSource.getRegistrationName());
-            registerService(DataSource.class, dataSource, props);
-            ImageServlet.addMapping(dataSource.getRegistrationName(), dataSource.getAlias());
-        }
+//        {
+//            final InlineImageDataSource dataSource = InlineImageDataSource.getInstance();
+//            final Dictionary<String, Object> props = new Hashtable<String, Object>(1);
+//            props.put(STR_IDENTIFIER, dataSource.getRegistrationName());
+//            registerService(DataSource.class, dataSource, props);
+//            ImageServlet.addMapping(dataSource.getRegistrationName(), dataSource.getAlias());
+//        }
+//        {
+//            final ContactImageDataSource dataSource = ContactImageDataSource.getInstance();
+//            final Dictionary<String, Object> props = new Hashtable<String, Object>(1);
+//            props.put(STR_IDENTIFIER, dataSource.getRegistrationName());
+//            registerService(DataSource.class, dataSource, props);
+//            ImageServlet.addMapping(dataSource.getRegistrationName(), dataSource.getAlias());
+//        }
+//        {
+//            final ManagedFileImageDataSource dataSource = new ManagedFileImageDataSource();
+//            final Dictionary<String, Object> props = new Hashtable<String, Object>(1);
+//            props.put(STR_IDENTIFIER, dataSource.getRegistrationName());
+//            registerService(DataSource.class, dataSource, props);
+//            ImageServlet.addMapping(dataSource.getRegistrationName(), dataSource.getAlias());
+//        }
         /*
          * Register data handlers
          */
@@ -662,6 +660,7 @@ public final class ServerActivator extends HousekeepingActivator {
             eventHandlerList.clear();
             // Stop all inside the server.
             starter.stop();
+            AJAXServlet.exitTracker();
             /*
              * Clear service registry
              */
@@ -689,26 +688,27 @@ public final class ServerActivator extends HousekeepingActivator {
         http.registerServlet("/servlet/webdav.attachments", new com.openexchange.webdav.attachments(), null, null);
         http.registerServlet("/servlet/webdav.infostore", new com.openexchange.webdav.Infostore(), null, null);
         http.registerServlet("/servlet/webdav.freebusy", new com.openexchange.webdav.freebusy(), null, null);
-//        http.registerServlet("/ajax/tasks", new com.openexchange.ajax.Tasks(), null, null);
-//        http.registerServlet("/ajax/contacts", new com.openexchange.ajax.Contact(), null, null);
-//        http.registerServlet("/ajax/mail", new com.openexchange.ajax.Mail(), null, null);
+//        http.registerServlet(prefix+"tasks", new com.openexchange.ajax.Tasks(), null, null);
+//        http.registerServlet(prefix+"contacts", new com.openexchange.ajax.Contact(), null, null);
+//        http.registerServlet(prefix+"mail", new com.openexchange.ajax.Mail(), null, null);
 
-        http.registerServlet("/ajax/mail.attachment", new com.openexchange.ajax.MailAttachment(), null, null);
-        // http.registerServlet("/ajax/calendar", new com.openexchange.ajax.Appointment(), null, null);
-        // http.registerServlet("/ajax/config", new com.openexchange.ajax.ConfigMenu(), null, null);
-        // http.registerServlet("/ajax/attachment", new com.openexchange.ajax.Attachment(), null, null);
-        // http.registerServlet("/ajax/reminder", new com.openexchange.ajax.Reminder(), null, null);
-        // http.registerServlet("/ajax/group", new com.openexchange.ajax.Group(), null, null);
-        // http.registerServlet("/ajax/resource", new com.openexchange.ajax.Resource(), null, null);
-        http.registerServlet("/ajax/link", new com.openexchange.ajax.Link(), null, null);
-        http.registerServlet("/ajax/multiple", new com.openexchange.ajax.Multiple(), null, null);
-        // http.registerServlet("/ajax/quota", new com.openexchange.ajax.Quota(), null, null);
-        http.registerServlet("/ajax/control", new com.openexchange.ajax.ConfigJump(), null, null);
-        // http.registerServlet("/ajax/file", new com.openexchange.ajax.AJAXFile(), null, null);
-        // http.registerServlet("/ajax/import", new com.openexchange.ajax.ImportServlet(), null, null);
-        // http.registerServlet("/ajax/export", new com.openexchange.ajax.ExportServlet(), null, null);
-        http.registerServlet("/ajax/image", new com.openexchange.image.servlet.ImageServlet(), null, null);
-        http.registerServlet("/ajax/sync", new com.openexchange.ajax.SyncServlet(), null, null);
+        final String prefix = Dispatcher.PREFIX.get();
+        http.registerServlet(prefix+"mail.attachment", new com.openexchange.ajax.MailAttachment(), null, null);
+        // http.registerServlet(prefix+"calendar", new com.openexchange.ajax.Appointment(), null, null);
+        // http.registerServlet(prefix+"config", new com.openexchange.ajax.ConfigMenu(), null, null);
+        // http.registerServlet(prefix+"attachment", new com.openexchange.ajax.Attachment(), null, null);
+        // http.registerServlet(prefix+"reminder", new com.openexchange.ajax.Reminder(), null, null);
+        // http.registerServlet(prefix+"group", new com.openexchange.ajax.Group(), null, null);
+        // http.registerServlet(prefix+"resource", new com.openexchange.ajax.Resource(), null, null);
+        http.registerServlet(prefix+"link", new com.openexchange.ajax.Link(), null, null);
+        http.registerServlet(prefix+"multiple", new com.openexchange.ajax.Multiple(), null, null);
+        // http.registerServlet(prefix+"quota", new com.openexchange.ajax.Quota(), null, null);
+        http.registerServlet(prefix+"control", new com.openexchange.ajax.ConfigJump(), null, null);
+        // http.registerServlet(prefix+"file", new com.openexchange.ajax.AJAXFile(), null, null);
+        // http.registerServlet(prefix+"import", new com.openexchange.ajax.ImportServlet(), null, null);
+        // http.registerServlet(prefix+"export", new com.openexchange.ajax.ExportServlet(), null, null);
+        //http.registerServlet(prefix+"image", new com.openexchange.image.servlet.ImageServlet(), null, null);
+        http.registerServlet(prefix+"sync", new com.openexchange.ajax.SyncServlet(), null, null);
     }
 
 }

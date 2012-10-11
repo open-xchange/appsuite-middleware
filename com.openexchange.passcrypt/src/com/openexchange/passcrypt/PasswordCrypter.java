@@ -115,6 +115,7 @@ public class PasswordCrypter implements LoginHandlerService, EncryptedItemDetect
         // Nothing to to.
     }
 
+    @Override
     public boolean hasEncryptedItems(final ServerSession session) throws OXException {
         return false;
     }

@@ -1,0 +1,17 @@
+Source: open-xchange-mobile-config
+Section: web
+Priority: optional
+Maintainer: Alexander Quast <alexander.quast@open-xchange.com>
+Build-Depends: debhelper (>= 4.0.0), ant (>= 1.7.0), ant-optional (>= 1.7.0), sun-java6-jdk|java6-sdk
+Standards-Version: 3.8.4
+Homepage: http://www.open-xchange.com
+
+Package: open-xchange-mobile-config
+Architecture: all
+Depends: ${misc:Depends}, open-xchange
+Replaces: open-xchange-gui-mobile-v2
+Conflicts: open-xchange-gui-mobile-v2
+Description: Contains the mobile web app backend plugin
+ This package needs to be installed on the backend hosts of a cluster installation. It adds configuration files to the backend allowing the
+ administrator to define some defaults for the mobile web app. Additionally it adds configuration paths on the backend for the mobile web
+ app that allows to store end user preferences.  

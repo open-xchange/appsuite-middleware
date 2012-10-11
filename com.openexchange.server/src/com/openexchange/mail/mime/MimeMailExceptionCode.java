@@ -2,9 +2,11 @@
 package com.openexchange.mail.mime;
 
 import com.openexchange.exception.Category;
+import com.openexchange.exception.LogLevel;
 import com.openexchange.exception.OXException;
 import com.openexchange.exception.OXExceptionCode;
 import com.openexchange.exception.OXExceptionFactory;
+import com.openexchange.exception.OXExceptionStrings;
 import com.openexchange.mail.MailExceptionCode;
 
 /**
@@ -24,24 +26,24 @@ public enum MimeMailExceptionCode implements OXExceptionCode {
      * There was an issue in authenticating your E-Mail password. This may be because of a recent password change. To continue please logout
      * now and then log back in with your most current password. (server=%1$s | user=%2$s)
      */
-    LOGIN_FAILED("There was an issue in authenticating your E-Mail password. This may be because of a recent password change. " + "To continue please logout now and then log back in with your most current password. (server=%1$s | user=%2$s)", Category.CATEGORY_PERMISSION_DENIED, 1000),
+    LOGIN_FAILED(MimeMailExceptionMessage.LOGIN_FAILED_MSG, Category.CATEGORY_PERMISSION_DENIED, 1000),
     /**
      * Wrong or missing login data to access mail server %1$s. Error message from mail server: %2$s
      */
-    INVALID_CREDENTIALS("Wrong or missing login data to access mail server %1$s. Error message from mail server: %2$s", Category.CATEGORY_PERMISSION_DENIED, 1001),
+    INVALID_CREDENTIALS(MimeMailExceptionMessage.INVALID_CREDENTIALS_MSG, Category.CATEGORY_PERMISSION_DENIED, 1001),
     /**
      * Wrong or missing login data to access mail server %1$s with login %2$s (user=%3$s, context=%4$s). Error message from mail server:
      * %5$s
      */
-    INVALID_CREDENTIALS_EXT("Wrong or missing login data to access mail server %1$s with login %2$s (user=%3$s, context=%4$s). Error message from mail server: %5$s", Category.CATEGORY_PERMISSION_DENIED, INVALID_CREDENTIALS.detailNumber),
+    INVALID_CREDENTIALS_EXT(MimeMailExceptionMessage.INVALID_CREDENTIALS_EXT_MSG, Category.CATEGORY_PERMISSION_DENIED, INVALID_CREDENTIALS.detailNumber),
     /**
      * Mail folder "%1$s" could not be found.
      */
-    FOLDER_NOT_FOUND("Mail folder \"%1$s\" could not be found.", Category.CATEGORY_ERROR, 1002),
+    FOLDER_NOT_FOUND(MimeMailExceptionMessage.FOLDER_NOT_FOUND_MSG, Category.CATEGORY_ERROR, 1002),
     /**
      * Mail folder "%1$s" could not be found on mail server %2$s with login %3$s (user=%4$s, context=%5$s).
      */
-    FOLDER_NOT_FOUND_EXT("Mail folder \"%1$s\" could not be found on mail server %2$s with login %3$s (user=%4$s, context=%5$s).", Category.CATEGORY_ERROR, FOLDER_NOT_FOUND.detailNumber),
+    FOLDER_NOT_FOUND_EXT(MimeMailExceptionMessage.FOLDER_NOT_FOUND_EXT_MSG, Category.CATEGORY_ERROR, FOLDER_NOT_FOUND.detailNumber),
     /**
      * Folder "%1$s" has been closed due to some reason.<br>
      * Probably your request took too long.
@@ -50,19 +52,19 @@ public enum MimeMailExceptionCode implements OXExceptionCode {
      * reason. Following the exception, the Folder is reset to the "closed" state.
      * </p>
      */
-    FOLDER_CLOSED("Folder \"%1$s\" is closed due to some reason.\nProbably your request took too long", Category.CATEGORY_ERROR, 1003),
+    FOLDER_CLOSED(MimeMailExceptionMessage.FOLDER_CLOSED_MSG, Category.CATEGORY_ERROR, 1003),
     /**
      * Folder "%1$s" has been closed on mail server %2$s with login %3$s (user=%4$s, context=%5$s) due to some reason.<br>
      * Probably your request took too long.
      */
-    FOLDER_CLOSED_EXT("Folder \"%1$s\" has been closed on mail server %2$s with login %3$s (user=%4$s, context=%5$s) due to some reason.\nProbably your request took too long.", Category.CATEGORY_ERROR, FOLDER_CLOSED.detailNumber),
+    FOLDER_CLOSED_EXT(MimeMailExceptionMessage.FOLDER_CLOSED_EXT_MSG, Category.CATEGORY_ERROR, FOLDER_CLOSED.detailNumber),
     /**
      * Illegal write attempt: %1$s
      * <p>
      * The exception thrown when a write is attempted on a read-only attribute of any Messaging object.
      * </p>
      */
-    ILLEGAL_WRITE("Illegal write attempt: %1$s", Category.CATEGORY_ERROR, 1004),
+    ILLEGAL_WRITE(MimeMailExceptionMessage.ILLEGAL_WRITE_MSG, Category.CATEGORY_ERROR, 1004),
     /**
      * Mail(s) could not be found in folder
      * <p>
@@ -70,45 +72,45 @@ public enum MimeMailExceptionCode implements OXExceptionCode {
      * <code>isExpunged()</code> and <code>getMessageNumber()</code>.
      * </p>
      */
-    MESSAGE_REMOVED(String.format(MailExceptionCode.MAIL_NOT_FOUND.getMessage(), "", ""), MailExceptionCode.MAIL_NOT_FOUND.getCategory(), MailExceptionCode.MAIL_NOT_FOUND.getNumber()),
+    MESSAGE_REMOVED(MimeMailExceptionMessage.MESSAGE_REMOVED, MailExceptionCode.MAIL_NOT_FOUND.getCategory(), MailExceptionCode.MAIL_NOT_FOUND.getNumber()),
     /**
      * Method not supported: %1$s
      * <p>
      * The exception thrown when a method is not supported by the implementation
      * </p>
      */
-    METHOD_NOT_SUPPORTED("Method not supported: %1$s", Category.CATEGORY_ERROR, 1006),
+    METHOD_NOT_SUPPORTED(MimeMailExceptionMessage.METHOD_NOT_SUPPORTED_MSG, Category.CATEGORY_ERROR, 1006),
     /**
      * Session attempts to instantiate a provider that doesn't exist: %1$s
      */
-    NO_SUCH_PROVIDER("Session attempts to instantiate a provider that doesn't exist: %1$s", Category.CATEGORY_ERROR, 1007),
+    NO_SUCH_PROVIDER(MimeMailExceptionMessage.NO_SUCH_PROVIDER_MSG, Category.CATEGORY_ERROR, 1007),
     /**
      * Invalid email address %1$s
      */
-    INVALID_EMAIL_ADDRESS("Invalid email address %1$s", Category.CATEGORY_USER_INPUT, 1008),
+    INVALID_EMAIL_ADDRESS(MimeMailExceptionMessage.INVALID_EMAIL_ADDRESS_MSG, Category.CATEGORY_USER_INPUT, 1008),
     /**
      * Wrong message header: %1$s
      * <p>
      * The exception thrown due to an error in parsing RFC822 or MIME headers
      * </p>
      */
-    PARSE_ERROR("Wrong message header: %1$s", Category.CATEGORY_USER_INPUT, 1009),
+    PARSE_ERROR(MimeMailExceptionMessage.PARSE_ERROR_MSG, Category.CATEGORY_USER_INPUT, 1009),
     /**
      * An attempt was made to open a read-only folder with read-write "%1$s"
      */
-    READ_ONLY_FOLDER("An attempt was made to open a read-only folder with read-write \"%1$s\"", Category.CATEGORY_PERMISSION_DENIED, 1010),
+    READ_ONLY_FOLDER(MimeMailExceptionMessage.READ_ONLY_FOLDER_MSG, Category.CATEGORY_PERMISSION_DENIED, 1010),
     /**
      * An attempt was made to open a read-only folder with read-write "%1$s" on mail server %2$s with login %3$s (user=%4$s, context=%5$s)
      */
-    READ_ONLY_FOLDER_EXT("An attempt was made to open a read-only folder with read-write \"%1$s\" on mail server %2$s with login %3$s (user=%4$s, context=%5$s)", Category.CATEGORY_PERMISSION_DENIED, 1010),
+    READ_ONLY_FOLDER_EXT(MimeMailExceptionMessage.READ_ONLY_FOLDER_EXT_MSG, Category.CATEGORY_PERMISSION_DENIED, 1010),
     /**
      * Invalid search expression: %1$s
      */
-    SEARCH_ERROR("Invalid search expression: %1$s", Category.CATEGORY_USER_INPUT, 1011),
+    SEARCH_ERROR(MimeMailExceptionMessage.SEARCH_ERROR_MSG, Category.CATEGORY_USER_INPUT, 1011),
     /**
      * Message could not be sent because it is too large
      */
-    MESSAGE_TOO_LARGE("Message could not be sent because it is too large", Category.CATEGORY_USER_INPUT, 1012),
+    MESSAGE_TOO_LARGE(MimeMailExceptionMessage.MESSAGE_TOO_LARGE_MSG, Category.CATEGORY_USER_INPUT, 1012),
     /**
      * Message could not be sent to following recipients: %1$s
      * <p>
@@ -116,19 +118,19 @@ public enum MimeMailExceptionCode implements OXExceptionCode {
      * sent and valid addresses to which the message was not sent.
      * </p>
      */
-    SEND_FAILED("Message could not be sent to the following recipients: %1$s", Category.CATEGORY_USER_INPUT, 1013),
+    SEND_FAILED(MimeMailExceptionMessage.SEND_FAILED_MSG, Category.CATEGORY_USER_INPUT, 1013),
     /**
      * Message could not be sent to following recipients: %1$s %2$s (arbitrary server information)
      */
-    SEND_FAILED_EXT("Message could not be sent to the following recipients: %1$s %2$s", Category.CATEGORY_USER_INPUT, 1013),
+    SEND_FAILED_EXT(MimeMailExceptionMessage.SEND_FAILED_EXT_MSG, Category.CATEGORY_USER_INPUT, 1013),
     /**
      * Lost connection to mail server.
      */
-    STORE_CLOSED("Lost connection to mail server.", Category.CATEGORY_SERVICE_DOWN, 1014),
+    STORE_CLOSED(MimeMailExceptionMessage.STORE_CLOSED_MSG, Category.CATEGORY_SERVICE_DOWN, 1014),
     /**
      * Connection closed to mail server %1$s with login %2$s (user=%3$s, context=%4$s).
      */
-    STORE_CLOSED_EXT("Connection closed to mail server %1$s with login %2$s (user=%3$s, context=%4$s).", STORE_CLOSED.category, STORE_CLOSED.detailNumber),
+    STORE_CLOSED_EXT(MimeMailExceptionMessage.STORE_CLOSED_EXT_MSG, STORE_CLOSED.category, STORE_CLOSED.detailNumber),
     /**
      * Could not bind mail connection to local port %1$s
      * <p>
@@ -136,7 +138,7 @@ public enum MimeMailExceptionCode implements OXExceptionCode {
      * requested local address could not be assigned.
      * </p>
      */
-    BIND_ERROR("Could not bind connection to local port %1$s", Category.CATEGORY_CONFIGURATION, 1015),
+    BIND_ERROR(MimeMailExceptionMessage.BIND_ERROR_MSG, Category.CATEGORY_CONFIGURATION, 1015),
     /**
      * Connection was refused or timed out while attempting to connect to remote mail server %1$s for user %2$s.
      * <p>
@@ -144,11 +146,11 @@ public enum MimeMailExceptionCode implements OXExceptionCode {
      * is listening on the remote address/port).
      * </p>
      */
-    CONNECT_ERROR("Connection was refused or timed out while attempting to connect to remote server %1$s for user %2$s.", Category.CATEGORY_SERVICE_DOWN, 1016),
+    CONNECT_ERROR(MimeMailExceptionMessage.CONNECT_ERROR_MSG, Category.CATEGORY_SERVICE_DOWN, 1016),
     /**
      * Connection was reset
      */
-    CONNECTION_RESET("Connection was reset. Please try again.", Category.CATEGORY_TRY_AGAIN, 1017),
+    CONNECTION_RESET(MimeMailExceptionMessage.CONNECTION_RESET_MSG, Category.CATEGORY_TRY_AGAIN, 1017),
     /**
      * No route to host: mail server %1$s cannot be reached
      * <p>
@@ -156,88 +158,88 @@ public enum MimeMailExceptionCode implements OXExceptionCode {
      * because of an intervening firewall, or if an intermediate router is down.
      * </p>
      */
-    NO_ROUTE_TO_HOST("No route to host: server (%1$s) cannot be reached", Category.CATEGORY_SERVICE_DOWN, 1018),
+    NO_ROUTE_TO_HOST(MimeMailExceptionMessage.NO_ROUTE_TO_HOST_MSG, Category.CATEGORY_SERVICE_DOWN, 1018),
     /**
      * Port %1$s was unreachable on remote mail server
      */
-    PORT_UNREACHABLE("Port %1$s was unreachable on remote server", Category.CATEGORY_SERVICE_DOWN, 1019),
+    PORT_UNREACHABLE(MimeMailExceptionMessage.PORT_UNREACHABLE_MSG, Category.CATEGORY_SERVICE_DOWN, 1019),
     /**
      * Connection is broken due to a socket exception on remote mail server: %1$s
      */
-    BROKEN_CONNECTION("Connection is broken due to a socket exception on remote server: %1$s", Category.CATEGORY_SERVICE_DOWN, 1020),
+    BROKEN_CONNECTION(MimeMailExceptionMessage.BROKEN_CONNECTION_MSG, Category.CATEGORY_SERVICE_DOWN, 1020),
     /**
      * A socket error occurred: %1$s
      */
-    SOCKET_ERROR("A socket error occurred: %1$s", Category.CATEGORY_ERROR, 1021),
+    SOCKET_ERROR(MimeMailExceptionMessage.SOCKET_ERROR_MSG, Category.CATEGORY_ERROR, 1021),
     /**
      * The IP address of host "%1$s" could not be determined
      */
-    UNKNOWN_HOST("The IP address of host \"%1$s\" could not be determined", Category.CATEGORY_SERVICE_DOWN, 1022),
+    UNKNOWN_HOST(MimeMailExceptionMessage.UNKNOWN_HOST_MSG, Category.CATEGORY_SERVICE_DOWN, 1022),
     /**
      * Messaging error: %1$s
      */
-    MESSAGING_ERROR("Messaging error: %1$s", Category.CATEGORY_ERROR, 1023),
+    MESSAGING_ERROR(MimeMailExceptionMessage.MESSAGING_ERROR_MSG, Category.CATEGORY_ERROR, 1023),
     /**
      * The quota on mail server exceeded.
      */
-    QUOTA_EXCEEDED("The quota on mail server exceeded.", Category.CATEGORY_CAPACITY, 1024),
+    QUOTA_EXCEEDED(MimeMailExceptionMessage.QUOTA_EXCEEDED_MSG, Category.CATEGORY_CAPACITY, 1024),
     /**
      * The quota on mail server "%1$s" exceeded with login %2$s (user=%3$s, context=%4$s).
      */
-    QUOTA_EXCEEDED_EXT("The quota on mail server \"%1$s\" exceeded with login %2$s (user=%3$s, context=%4$s).", QUOTA_EXCEEDED.category, QUOTA_EXCEEDED.detailNumber),
+    QUOTA_EXCEEDED_EXT(MimeMailExceptionMessage.QUOTA_EXCEEDED_EXT_MSG, QUOTA_EXCEEDED.category, QUOTA_EXCEEDED.detailNumber),
     /**
      * A command to mail server failed. Server response: %1$s
      */
-    COMMAND_FAILED("A command to mail server failed. Server response: %1$s.", Category.CATEGORY_ERROR, 1025),
+    COMMAND_FAILED(MimeMailExceptionMessage.COMMAND_FAILED_MSG, Category.CATEGORY_ERROR, 1025),
     /**
      * A command failed on mail server %1$s with login %2$s (user=%3$s, context=%4$s). Server response: %5$s
      */
-    COMMAND_FAILED_EXT("A command failed on mail server %1$s with login %2$s (user=%3$s, context=%4$s). Server response: %5$s", COMMAND_FAILED.category, COMMAND_FAILED.detailNumber),
+    COMMAND_FAILED_EXT(MimeMailExceptionMessage.COMMAND_FAILED_EXT_MSG, COMMAND_FAILED.category, COMMAND_FAILED.detailNumber),
     /**
      * Mail server indicates a bad command. Server response: %1$s
      */
-    BAD_COMMAND("Mail server indicates a bad command. Server response: %1$s", Category.CATEGORY_ERROR, 1026),
+    BAD_COMMAND(MimeMailExceptionMessage.BAD_COMMAND_MSG, Category.CATEGORY_ERROR, 1026),
     /**
      * Bad command indicated by mail server %1$s with login %2$s (user=%3$s, context=%4$s). Server response: %5$s
      */
-    BAD_COMMAND_EXT("Bad command indicated by mail server %1$s with login %2$s (user=%3$s, context=%4$s). Server response: %5$s", BAD_COMMAND.category, BAD_COMMAND.detailNumber),
+    BAD_COMMAND_EXT(MimeMailExceptionMessage.BAD_COMMAND_EXT_MSG, BAD_COMMAND.category, BAD_COMMAND.detailNumber),
     /**
      * An error in mail server protocol. Error message: %1$s
      */
-    PROTOCOL_ERROR("An error in mail server protocol. Error message: %1$s", Category.CATEGORY_ERROR, 1027),
+    PROTOCOL_ERROR(MimeMailExceptionMessage.PROTOCOL_ERROR_MSG, Category.CATEGORY_ERROR, 1027),
     /**
      * An error in protocol to mail server %1$s with login %2$s (user=%3$s, context=%4$s). Error message: %5$s
      */
-    PROTOCOL_ERROR_EXT("An error in protocol to mail server %1$s with login %2$s (user=%3$s, context=%4$s). Error message: %5$s", PROTOCOL_ERROR.category, PROTOCOL_ERROR.detailNumber),
+    PROTOCOL_ERROR_EXT(MimeMailExceptionMessage.PROTOCOL_ERROR_EXT_MSG, PROTOCOL_ERROR.category, PROTOCOL_ERROR.detailNumber),
     /**
      * Message could not be sent: %1$s
      */
-    SEND_FAILED_MSG("Message could not be sent: %1$s", Category.CATEGORY_ERROR, 1028),
+    SEND_FAILED_MSG(MimeMailExceptionMessage.SEND_FAILED_MSG, Category.CATEGORY_ERROR, 1028),
     /**
      * Message could not be sent: %1$s %2$s (arbitrary server information)
      */
-    SEND_FAILED_MSG_EXT("Message could not be sent: %1$s %2$s", Category.CATEGORY_ERROR, 1028),
+    SEND_FAILED_MSG_EXT(MimeMailExceptionMessage.SEND_FAILED_EXT_MSG, Category.CATEGORY_ERROR, 1028),
     /**
      * Message cannot be displayed.
      */
-    MESSAGE_NOT_DISPLAYED("Message cannot be displayed.", Category.CATEGORY_SERVICE_DOWN, 1029),
+    MESSAGE_NOT_DISPLAYED(MimeMailExceptionMessage.MESSAGE_NOT_DISPLAYED_MSG, Category.CATEGORY_SERVICE_DOWN, 1029),
     /**
      * Wrong or missing login data to access mail transport server %1$s. Error message from mail transport server: %2$s
      */
-    TRANSPORT_INVALID_CREDENTIALS("Wrong or missing login data to access mail transport server %1$s. Error message from mail transport server: %2$s", Category.CATEGORY_PERMISSION_DENIED, 1030),
+    TRANSPORT_INVALID_CREDENTIALS(MimeMailExceptionMessage.TRANSPORT_INVALID_CREDENTIALS_MSG, Category.CATEGORY_PERMISSION_DENIED, 1030),
     /**
      * Wrong or missing login data to access mail transport server %1$s with login %2$s (user=%3$s, context=%4$s). Error message from mail
      * transport server: %5$s
      */
-    TRANSPORT_INVALID_CREDENTIALS_EXT("Wrong or missing login data to access mail transport server %1$s with login %2$s (user=%3$s, context=%4$s). Error message from mail transport server: %5$s", Category.CATEGORY_PERMISSION_DENIED, TRANSPORT_INVALID_CREDENTIALS.detailNumber),
+    TRANSPORT_INVALID_CREDENTIALS_EXT(MimeMailExceptionMessage.TRANSPORT_INVALID_CREDENTIALS_EXT_MSG, Category.CATEGORY_PERMISSION_DENIED, TRANSPORT_INVALID_CREDENTIALS.detailNumber),
     /**
      * Error processing mail server response. The administrator has been informed.
      */
-    PROCESSING_ERROR("Error processing mail server response. The administrator has been informed.", Category.CATEGORY_ERROR, 1031),
+    PROCESSING_ERROR(MimeMailExceptionMessage.PROCESSING_ERROR_MSG, Category.CATEGORY_ERROR, 1031),
     /**
      * Error processing %1$s mail server response for login %2$s (user=%3$s, context=%4$s). The administrator has been informed.
      */
-    PROCESSING_ERROR_EXT("Error processing %1$s mail server response for login %2$s (user=%3$s, context=%4$s). The administrator has been informed.", Category.CATEGORY_ERROR, PROCESSING_ERROR.detailNumber),
+    PROCESSING_ERROR_EXT(MimeMailExceptionMessage.PROCESSING_ERROR_EXT_MSG, Category.CATEGORY_ERROR, PROCESSING_ERROR.detailNumber),
     /**
      * An I/O error occurred: %1$s
      */
@@ -245,16 +247,16 @@ public enum MimeMailExceptionCode implements OXExceptionCode {
     /**
      * I/O error "%1$s" occurred in communication with "%2$s" mail server for login %3$s (user=%4$s, context=%5$s).
      */
-    IO_ERROR_EXT(MailExceptionCode.IO_ERROR, "I/O error \"%1$s\" occurred in communication with \"%2$s\" mail server for login %3$s (user=%4$s, context=%5$s)."),
+    IO_ERROR_EXT(MailExceptionCode.IO_ERROR, MimeMailExceptionMessage.IO_ERROR_EXT_MSG),
     /**
      * Error processing mail server response. The administrator has been informed. Error message: %1$s
      */
-    PROCESSING_ERROR_WE("Error processing mail server response. The administrator has been informed. Error message: %1$s", Category.CATEGORY_ERROR, PROCESSING_ERROR.detailNumber),
+    PROCESSING_ERROR_WE(MimeMailExceptionMessage.PROCESSING_ERROR_WE_MSG, Category.CATEGORY_ERROR, PROCESSING_ERROR.detailNumber),
     /**
      * Error processing %1$s mail server response for login %2$s (user=%3$s, context=%4$s). The administrator has been informed. Error
      * message: %5$s
      */
-    PROCESSING_ERROR_WE_EXT("Error processing %1$s mail server response for login %2$s (user=%3$s, context=%4$s). The administrator has been informed. Error message: %5$s", Category.CATEGORY_ERROR, PROCESSING_ERROR_WE.detailNumber), ;
+    PROCESSING_ERROR_WE_EXT(MimeMailExceptionMessage.PROCESSING_ERROR_WE_EXT_MSG, Category.CATEGORY_ERROR, PROCESSING_ERROR_WE.detailNumber), ;
 
     private final String message;
 
@@ -311,7 +313,7 @@ public enum MimeMailExceptionCode implements OXExceptionCode {
      * @return The newly created {@link OXException} instance
      */
     public OXException create() {
-        return OXExceptionFactory.getInstance().create(this, new Object[0]);
+        return create(this, new Object[0]);
     }
 
     /**
@@ -321,7 +323,7 @@ public enum MimeMailExceptionCode implements OXExceptionCode {
      * @return The newly created {@link OXException} instance
      */
     public OXException create(final Object... args) {
-        return OXExceptionFactory.getInstance().create(this, (Throwable) null, args);
+        return create(null, args);
     }
 
     /**
@@ -332,6 +334,21 @@ public enum MimeMailExceptionCode implements OXExceptionCode {
      * @return The newly created {@link OXException} instance
      */
     public OXException create(final Throwable cause, final Object... args) {
-        return OXExceptionFactory.getInstance().create(this, cause, args);
+        final Category category = getCategory();
+        final MimeMailException ret;
+        if (category.getLogLevel().implies(LogLevel.DEBUG)) {
+            ret = new MimeMailException(getNumber(), getMessage(), cause, args);
+        } else {
+            ret =
+                new MimeMailException(
+                    getNumber(),
+                    Category.EnumType.TRY_AGAIN.equals(category.getType()) ? OXExceptionStrings.MESSAGE_RETRY : OXExceptionStrings.MESSAGE,
+                    cause,
+                    new Object[0]);
+            ret.setLogMessage(getMessage(), args);
+        }
+        ret.addCategory(category);
+        ret.setPrefix(getPrefix());
+        return ret;
     }
 }

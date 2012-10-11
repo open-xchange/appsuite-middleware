@@ -70,6 +70,14 @@ public interface Mapper<O, E extends Enum<E>> extends Factory<O>, ArrayFactory<E
 	Mapping<? extends Object, O> get(E field) throws OXException;
 	
 	/**
+     * Gets an optional mapping for the supplied field.
+	 * 
+	 * @param field the field
+	 * @return the mapping, or <code>null</code> if no mapping is available
+	 */
+    Mapping<? extends Object, O> opt(final E field);
+
+	/**
 	 * Merges all differences that are set in the updated object into the 
 	 * original one.
 	 * 

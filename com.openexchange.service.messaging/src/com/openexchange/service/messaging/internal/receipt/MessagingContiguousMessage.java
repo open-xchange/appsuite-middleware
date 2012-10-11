@@ -57,7 +57,7 @@ import java.util.List;
 import java.util.Map;
 import com.openexchange.service.messaging.Message;
 import com.openexchange.exception.OXException;
-import com.openexchange.service.messaging.MessagingServiceExceptionCodes;
+import com.openexchange.service.messaging.MessagingServiceExceptionCode;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayInputStream;
 
 /**
@@ -68,7 +68,7 @@ import com.openexchange.tools.stream.UnsynchronizedByteArrayInputStream;
 public final class MessagingContiguousMessage {
 
     private static final org.apache.commons.logging.Log LOG =
-        com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(MessagingContiguousMessage.class));
+        com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(MessagingContiguousMessage.class));
 
     private final String topic;
 
@@ -126,15 +126,15 @@ public final class MessagingContiguousMessage {
                 }
                 ois = new ObjectInputStream(new UnsynchronizedByteArrayInputStream(bb.getBytes()));
             } catch (final IOException e) {
-                throw MessagingServiceExceptionCodes.IO_ERROR.create(e, e.getMessage());
+                throw MessagingServiceExceptionCode.IO_ERROR.create(e, e.getMessage());
             }
             try {
                 @SuppressWarnings("unchecked") final Map<String, Serializable> properties = (Map<String, Serializable>) ois.readObject();
                 return new Message(topic, properties);
             } catch (final IOException e) {
-                throw MessagingServiceExceptionCodes.IO_ERROR.create(e, e.getMessage());
+                throw MessagingServiceExceptionCode.IO_ERROR.create(e, e.getMessage());
             } catch (final ClassNotFoundException e) {
-                throw MessagingServiceExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+                throw MessagingServiceExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
             } finally {
                 try {
                     ois.close();

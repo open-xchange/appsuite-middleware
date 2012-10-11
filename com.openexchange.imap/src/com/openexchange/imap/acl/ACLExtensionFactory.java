@@ -61,7 +61,7 @@ import com.openexchange.mailaccount.MailAccount;
  */
 public final class ACLExtensionFactory {
 
-    private static ACLExtensionFactory instance;
+    private static volatile ACLExtensionFactory instance;
 
     static void createInstance() {
         instance = new ACLExtensionFactory();

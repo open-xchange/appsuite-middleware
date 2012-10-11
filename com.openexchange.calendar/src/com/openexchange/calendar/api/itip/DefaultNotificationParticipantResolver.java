@@ -405,7 +405,7 @@ public class DefaultNotificationParticipantResolver implements
 		resourceConfiguration.setSendITIP(false);
 
 		for (final Integer resourceId : resourceIds) {
-			final Resource resource = resources.getResource(resourceId, ctx);
+			final Resource resource = resources.getResource(resourceId.intValue(), ctx);
 			if (resource.getMail() != null) {
 				final NotificationParticipant participant = new NotificationParticipant(
 						ITipRole.ATTENDEE, false, resource.getMail());
@@ -436,7 +436,7 @@ public class DefaultNotificationParticipantResolver implements
 			final NotificationParticipant participant = new NotificationParticipant(
 					role, true, mail);
 			participant.setDisplayName(e.getDisplayName());
-			participant.setTimezone(TimeZone.getDefault());
+            participant.setTimezone(TimeZone.getTimeZone(appointment.getTimezone()));
 			participant.setLocale(user.getLocale());
 			final ConfirmableParticipant cp = statusMap.get(e.getEmailAddress());
 			if (cp != null) {

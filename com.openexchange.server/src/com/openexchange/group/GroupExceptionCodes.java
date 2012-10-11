@@ -12,60 +12,60 @@ public enum GroupExceptionCodes implements OXExceptionCode {
     /**
      * A database connection Cannot be obtained.
      */
-    NO_CONNECTION("Cannot get database connection.", Category.CATEGORY_SERVICE_DOWN, 1),
+    NO_CONNECTION(GroupExceptionMessage.NO_CONNECTION_MSG, Category.CATEGORY_SERVICE_DOWN, 1),
     /**
      * SQL Problem: "%1$s".
      */
-    SQL_ERROR("SQL Problem: \"%1$s\"", Category.CATEGORY_ERROR, 2),
+    SQL_ERROR(GroupExceptionMessage.SQL_ERROR_MSG, Category.CATEGORY_ERROR, 2),
     /**
      * No group given.
      */
-    NULL("No group given.", Category.CATEGORY_ERROR, 3),
+    NULL(GroupExceptionMessage.NULL_MSG, Category.CATEGORY_ERROR, 3),
     /**
      * The mandatory field %1$s is not defined.
      */
-    MANDATORY_MISSING("The mandatory field %1$s is not defined.", Category.CATEGORY_USER_INPUT, 4),
+    MANDATORY_MISSING(GroupExceptionMessage.MANDATORY_MISSING_MSG, Category.CATEGORY_USER_INPUT, 4),
     /**
-     * The simple name contains this not allowed characters: "%s".
+     * The simple name contains invalid characters: "%1$s".
      */
-    NOT_ALLOWED_SIMPLE_NAME("The simple name contains this not allowed " + "characters: \"%1$s\".", Category.CATEGORY_USER_INPUT, 5),
+    NOT_ALLOWED_SIMPLE_NAME(GroupExceptionMessage.NOT_ALLOWED_SIMPLE_NAME_MSG, Category.CATEGORY_USER_INPUT, 5),
     /**
-     * Another group with same identifier name exists: %1$d.
+     * Another group with the same identifier name exists: %1$d.
      */
-    DUPLICATE("Another group with same identifier name exists: %1$d.", Category.CATEGORY_USER_INPUT, 6),
+    DUPLICATE(GroupExceptionMessage.DUPLICATE_MSG, Category.CATEGORY_USER_INPUT, 6),
     /**
      * Group contains a not existing member %1$d.
      */
-    NOT_EXISTING_MEMBER("Group contains a not existing member %1$d.", Category.CATEGORY_USER_INPUT, 7),
+    NOT_EXISTING_MEMBER(GroupExceptionMessage.NOT_EXISTING_MEMBER_MSG, Category.CATEGORY_USER_INPUT, 7),
     /**
      * Group contains invalid data: "%1$s".
      */
-    INVALID_DATA("Group contains invalid data: \"%1$s\".", Category.CATEGORY_USER_INPUT, 8),
+    INVALID_DATA(GroupExceptionMessage.INVALID_DATA_MSG, Category.CATEGORY_USER_INPUT, 8),
     /**
      * You are not allowed to create groups.
      */
-    NO_CREATE_PERMISSION("You are not allowed to create groups.", Category.CATEGORY_PERMISSION_DENIED, 9),
+    NO_CREATE_PERMISSION(GroupExceptionMessage.NO_CREATE_PERMISSION_MSG, Category.CATEGORY_PERMISSION_DENIED, 9),
     /**
      * Edit Conflict. Your change cannot be completed because somebody else has made a conflicting change to the same item. Please
      * refresh or synchronize and try again.
      */
-    MODIFIED("Edit Conflict. Your change cannot be completed because somebody else has made a conflicting change to the same item. " + "Please refresh or synchronize and try again.", Category.CATEGORY_CONFLICT, 10),
+    MODIFIED(GroupExceptionMessage.MODIFIED_MSG, Category.CATEGORY_CONFLICT, 10),
     /**
      * You are not allowed to change groups.
      */
-    NO_MODIFY_PERMISSION("You are not allowed to change groups.", Category.CATEGORY_PERMISSION_DENIED, 11),
+    NO_MODIFY_PERMISSION(GroupExceptionMessage.NO_MODIFY_PERMISSION_MSG, Category.CATEGORY_PERMISSION_DENIED, 11),
     /**
      * You are not allowed to delete groups.
      */
-    NO_DELETE_PERMISSION("You are not allowed to delete groups.", Category.CATEGORY_PERMISSION_DENIED, 12),
+    NO_DELETE_PERMISSION(GroupExceptionMessage.NO_DELETE_PERMISSION_MSG, Category.CATEGORY_PERMISSION_DENIED, 12),
     /**
      * Group "%1$s" can not be deleted.
      */
-    NO_GROUP_DELETE("Group \"%1$s\" can not be deleted.", Category.CATEGORY_USER_INPUT, 13),
+    NO_GROUP_DELETE(GroupExceptionMessage.NO_GROUP_DELETE_MSG, Category.CATEGORY_USER_INPUT, 13),
     /**
      * Group "%1$s" can not be changed.
      */
-    NO_GROUP_UPDATE("Group \"%1$s\" can not be changed.", Category.CATEGORY_USER_INPUT, 14);
+    NO_GROUP_UPDATE(GroupExceptionMessage.NO_GROUP_UPDATE_MSG, Category.CATEGORY_USER_INPUT, 14);
 
     /**
      * Message of the exception.

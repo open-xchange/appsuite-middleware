@@ -25,8 +25,8 @@
   static Logger log = Logger.getLogger(SolrCore.class.getName());
 %>
 <%
-  // NOTE -- this file will be removed in a future release
-  log.warning("Using deprecated JSP: " + request.getRequestURL().append("?").append(request.getQueryString()) + " -- check the ShowFileRequestHandler"  );
+    // NOTE -- this file will be removed in a future release
+  log.warning("Using deprecated JSP: " + request.getRequestURL().append("?").append(request.getPattern()) + " -- check the ShowFileRequestHandler"  );
 
   Reader input = new InputStreamReader(schema.getInputStream());
   char[] buf = new char[4096];

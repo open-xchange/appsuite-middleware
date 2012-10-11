@@ -1,0 +1,131 @@
+/*
+ *
+ *    OPEN-XCHANGE legal information
+ *
+ *    All intellectual property rights in the Software are protected by
+ *    international copyright laws.
+ *
+ *
+ *    In some countries OX, OX Open-Xchange, open xchange and OXtender
+ *    as well as the corresponding Logos OX Open-Xchange and OX are registered
+ *    trademarks of the Open-Xchange, Inc. group of companies.
+ *    The use of the Logos is not covered by the GNU General Public License.
+ *    Instead, you are allowed to use these Logos according to the terms and
+ *    conditions of the Creative Commons License, Version 2.5, Attribution,
+ *    Non-commercial, ShareAlike, and the interpretation of the term
+ *    Non-commercial applicable to the aforementioned license is published
+ *    on the web site http://www.open-xchange.com/EN/legal/index.html.
+ *
+ *    Please make sure that third-party modules and libraries are used
+ *    according to their respective licenses.
+ *
+ *    Any modifications to this package must retain all copyright notices
+ *    of the original copyright holder(s) for the original code used.
+ *
+ *    After any such modifications, the original and derivative code shall remain
+ *    under the copyright of the copyright holder(s) and/or original author(s)per
+ *    the Attribution and Assignment Agreement that can be located at
+ *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
+ *    given Attribution for the derivative code and a license granting use.
+ *
+ *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Mail: info@open-xchange.com
+ *
+ *
+ *     This program is free software; you can redistribute it and/or modify it
+ *     under the terms of the GNU General Public License, Version 2 as published
+ *     by the Free Software Foundation.
+ *
+ *     This program is distributed in the hope that it will be useful, but
+ *     WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+ *     or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License
+ *     for more details.
+ *
+ *     You should have received a copy of the GNU General Public License along
+ *     with this program; if not, write to the Free Software Foundation, Inc., 59
+ *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
+ *
+ */
+
+package com.openexchange.realtime.packet;
+
+import java.util.concurrent.atomic.AtomicReference;
+import com.openexchange.conversion.simple.SimpleConverter;
+import com.openexchange.exception.OXException;
+import com.openexchange.server.ServiceLookup;
+import com.openexchange.tools.session.ServerSession;
+
+/**
+ * {@link Payload} - Represents a stanza's payload that is any (POJO) object linked with its format identifier.
+ * 
+ * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a> JavaDoc
+ */
+public class Payload {
+
+    /**
+     * The <tt>ServiceLookup</tt> reference.
+     */
+    public static AtomicReference<ServiceLookup> SERVICES = new AtomicReference<ServiceLookup>();
+
+    private String format;
+
+    private Object data;
+
+    /**
+     * Initializes a new {@link Payload}.
+     * 
+     * @param data The payload's data object
+     * @param format The data object's format
+     */
+    public Payload(Object data, String format) {
+        this.data = data;
+        this.format = format;
+    }
+
+    /**
+     * Gets the data object.
+     * 
+     * @return The data object
+     */
+    public Object getData() {
+        return data;
+    }
+
+    /**
+     * Sets the payload data object and its format.
+     * 
+     * @param data The data object
+     * @param format The data object's format
+     */
+    public void setData(Object data, String format) {
+        this.data = data;
+        this.format = format;
+    }
+
+    /**
+     * Gets the data object's format identifier.
+     * 
+     * @return The format identifier.
+     */
+    public String getFormat() {
+        return format;
+    }
+
+    /**
+     * Converts this payload's data object to specified format.
+     * 
+     * @param toFormat The format to convert into
+     * @param session The Open-Xchange session
+     * @return A new {@link Payload payload} with desired format
+     * @throws OXException If conversion fails
+     */
+    public Payload to(String toFormat, ServerSession session) throws OXException {
+        if (toFormat.equals(format)) {
+            return new Payload(data, toFormat);
+        }
+        SimpleConverter converter = SERVICES.get().getService(SimpleConverter.class);
+        return new Payload(converter.convert(format, toFormat, data, session), toFormat);
+    }
+
+}

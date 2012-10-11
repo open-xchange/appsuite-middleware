@@ -10,18 +10,10 @@
 	<classpathentry kind="lib" path="lib/gdata-core-1.0.jar"/>
 	<classpathentry kind="lib" path="lib/google-collect-1.0-rc1.jar"/>
 	<classpathentry kind="lib" path="lib/jsr305.jar"/>
-	<classpathentry kind="lib" path="lib/commons-collections-3.2.1.jar" sourcepath="source/commons-collections_3.2.1_sources.jar"/>
-	<classpathentry kind="lib" path="lib/commons-lang-2.4.jar" sourcepath="source/commons-lang_2.4_sources.jar"/>
-	<classpathentry kind="lib" path="lib/commons-logging-1.1.1.jar" sourcepath="source/commons-logging_1.1.1_sources.jar"/>
-	<classpathentry kind="lib" path="lib/cssparser-0.9.5.jar" sourcepath="source/cssparser_0.9.5_sources.jar"/>
 	<classpathentry kind="lib" path="lib/facebook-java-api-1.8-final.jar" sourcepath="source/facebook-java-api-1.8-final-sources.jar"/>
 	<classpathentry kind="lib" path="lib/htmlunit-core-js-2.5.jar"/>
-	<classpathentry kind="lib" path="lib/jaxb-api-2.1.jar"/>
-	<classpathentry kind="lib" path="lib/jaxb-impl-2.1.jar"/>
 	<classpathentry kind="lib" path="lib/json-1.0.jar"/>
 	<classpathentry kind="lib" path="lib/jsr173-api-1.0.jar"/>
-	<classpathentry kind="lib" path="lib/jyaml-1.3.jar" sourcepath="source/jyaml_1.3_sources.jar"/>
-	<classpathentry kind="lib" path="lib/nekohtml-1.9.12.jar" sourcepath="source/nekohtml_1.9.12_sources.jar"/>
 	<classpathentry kind="lib" path="lib/sac-1.3.jar" sourcepath="source/sac_1.3_sources.jar"/>
 	<classpathentry kind="lib" path="lib/serializer-2.7.1.jar"/>
 	<classpathentry kind="lib" path="lib/xalan-2.7.1.jar" sourcepath="source/xalan_2.7.1_sources.jar"/>
@@ -37,8 +29,5 @@
 	<classpathentry kind="lib" path="lib/oauth-httpclient4-20100601.jar" sourcepath="source/oauth-httpclient4-20100601-sources.jar"/>
 	<classpathentry kind="lib" path="lib/oauth-provider-20100601.jar" sourcepath="source/oauth-provider-20100601-sources.jar"/>
 	<classpathentry kind="lib" path="lib/apache-mime4j-0.6.jar"/>
-	<classpathentry kind="lib" path="lib/httpclient-4.1.jar"/>
-	<classpathentry kind="lib" path="lib/httpcore-4.1.jar"/>
-	<classpathentry kind="lib" path="lib/httpmime-4.1.jar"/>
 	<classpathentry kind="output" path="build"/>
 </classpath>

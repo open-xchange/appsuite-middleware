@@ -98,7 +98,7 @@ import com.openexchange.mail.uuencode.UUEncodedPart;
  */
 public final class RawJSONMessageHandler implements MailMessageHandler {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(RawJSONMessageHandler.class));
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(RawJSONMessageHandler.class));
 
     /**
      * The max. allowed body size of 16 KB.
@@ -211,6 +211,11 @@ public final class RawJSONMessageHandler implements MailMessageHandler {
             jsonObject.put(MailJSONField.NESTED_MESSAGES.getKey(), nestedMsgsArr);
         }
         return nestedMsgsArr;
+    }
+
+    @Override
+    public boolean handleMultipartEnd(final MailPart mp, final String id) throws OXException {
+        return true;
     }
 
     @Override

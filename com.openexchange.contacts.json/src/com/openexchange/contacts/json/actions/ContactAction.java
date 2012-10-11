@@ -53,9 +53,6 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.TimeZone;
-
-import org.json.JSONException;
-
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
@@ -64,8 +61,9 @@ import com.openexchange.contacts.json.ContactRequest;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contact.ContactInterfaceDiscoveryService;
 import com.openexchange.groupware.container.Contact;
-import com.openexchange.server.ServiceExceptionCodes;
+import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
+import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -92,24 +90,19 @@ public abstract class ContactAction implements AJAXActionService {
     @Override
     public AJAXRequestResult perform(final AJAXRequestData requestData, final ServerSession session) throws OXException {
         final ContactRequest contactRequest = new ContactRequest(requestData, session);
-
-		return perform(contactRequest);
-//        try {
-//			return perform2(contactRequest);
-//		} catch (final JSONException e) {
-//			throw OXJSONExceptionCodes.JSON_READ_ERROR.create(e);
-//		}
+//		AJAXRequestResult perform = perform(contactRequest);
+		return perform2(contactRequest);
     }
 
     protected abstract AJAXRequestResult perform(ContactRequest req) throws OXException;
 
-    protected abstract AJAXRequestResult perform2(ContactRequest req) throws OXException, JSONException;
+    protected abstract AJAXRequestResult perform2(ContactRequest req) throws OXException;
 
     protected ContactInterfaceDiscoveryService getContactInterfaceDiscoveryService() throws OXException {
         try {
             return serviceLookup.getService(ContactInterfaceDiscoveryService.class);
         } catch (final IllegalStateException e) {
-            throw ServiceExceptionCodes.SERVICE_UNAVAILABLE.create(ContactInterfaceDiscoveryService.class.getName());
+            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(ContactInterfaceDiscoveryService.class.getName());
         }
     }
 
@@ -123,7 +116,7 @@ public abstract class ContactAction implements AJAXActionService {
         try {
             return serviceLookup.getService(ContactService.class);
         } catch (final IllegalStateException e) {
-            throw ServiceExceptionCodes.SERVICE_UNAVAILABLE.create(ContactService.class.getName());
+            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(ContactService.class.getName());
         }
     }
 
@@ -136,20 +129,7 @@ public abstract class ContactAction implements AJAXActionService {
      */
     protected static Date getLatestModified(final Date lastModified, final Contact contact) {
     	final Date contactLastModified = contact.getLastModified();
-    	return lastModified.after(contactLastModified) ? lastModified : contactLastModified;
-    }
-    
-    /**
-     * Applies the timezone offsets to the last modified and creation dates in 
-     * the supplied contact.  
-     * 
-     * @param contact the contact to patch the times for
-     * @param timeZone the user's timezone
-     */
-    protected static void applyTimezoneOffset(final Contact contact, final TimeZone timeZone) {
-        // Correct last modified and creation date with users timezone
-        contact.setLastModified(getCorrectedTime(contact.getLastModified(), timeZone));
-        contact.setCreationDate(getCorrectedTime(contact.getCreationDate(), timeZone));
+    	return null == contactLastModified || lastModified.after(contactLastModified) ? lastModified : contactLastModified;
     }
     
     protected static Date getCorrectedTime(final Date date, final TimeZone timeZone) {
@@ -163,5 +143,11 @@ public abstract class ContactAction implements AJAXActionService {
         calendar.add(Calendar.MILLISECOND, offset);
 
         return calendar.getTime();
+    }
+    
+    protected static <T> void close(SearchIterator<T> searchIterator) throws OXException {
+    	if (null != searchIterator) {
+			searchIterator.close();
+    	}
     }
 }

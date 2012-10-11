@@ -52,7 +52,7 @@ package com.openexchange.groupware.ldap;
 import java.sql.Connection;
 import java.util.Date;
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import com.openexchange.log.LogFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.cache.CacheFolderStorage;
 import com.openexchange.groupware.contexts.Context;
@@ -70,7 +70,7 @@ public abstract class UserStorage {
     /**
      * The instance
      */
-    private static UserStorage instance;
+    private static volatile UserStorage instance;
 
     /**
      * Default constructor.
@@ -185,6 +185,16 @@ public abstract class UserStorage {
      * @throws OXException if an error occurs.
      */
     public abstract User searchUser(String email, Context context) throws OXException;
+
+    /**
+     * Searches user(s) by mail login.
+     * 
+     * @param login The mail login
+     * @param context The associated context
+     * @return The queried users or an empty array of none found
+     * @throws OXException If search fails
+     */
+    public abstract User[] searchUserByMailLogin(final String login, final Context context) throws OXException;
 
     /**
      * Search for matching login name.
@@ -323,7 +333,23 @@ public abstract class UserStorage {
      * @return an instance implementing the user storage interface.
      */
     public static UserStorage getInstance() {
-        return instance;
+        UserStorage tmp = instance;
+        if (null == tmp) {
+            synchronized (UserStorage.class) {
+                tmp = instance;
+                if (null == tmp) {
+                    try {
+                        tmp = new CachingUserStorage(new RdbUserStorage());
+                        tmp.startInternal();
+                        instance = tmp;
+                    } catch (final OXException e) {
+                        // Cannot occur
+                        LOG.warn(e.getMessage(), e);
+                    }
+                }
+            }
+        }
+        return tmp;
     }
 
     /**

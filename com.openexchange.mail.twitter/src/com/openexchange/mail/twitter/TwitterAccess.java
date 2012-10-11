@@ -71,7 +71,7 @@ public final class TwitterAccess extends MailAccess<TwitterFolderStorage, Twitte
 
     private static final long serialVersionUID = -3267143544763657976L;
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(TwitterAccess.class));
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(TwitterAccess.class));
 
     /*
      * Member section

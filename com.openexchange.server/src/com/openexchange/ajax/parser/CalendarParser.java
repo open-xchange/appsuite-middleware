@@ -57,6 +57,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.fields.CalendarFields;
+import com.openexchange.ajax.fields.CommonFields;
 import com.openexchange.ajax.fields.ParticipantsFields;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.CalendarObject;
@@ -185,12 +186,24 @@ public class CalendarParser extends CommonParser {
             calendarobject.setOrganizer(parseString(jsonobject, CalendarFields.ORGANIZER));
         }
 
-        if (jsonobject.has(CalendarFields.UID)) {
-            calendarobject.setUid(parseString(jsonobject, CalendarFields.UID));
+        if (jsonobject.has(CommonFields.UID)) {
+            calendarobject.setUid(parseString(jsonobject, CommonFields.UID));
         }
 
         if (jsonobject.has(CalendarFields.SEQUENCE)) {
             calendarobject.setSequence(parseInt(jsonobject, CalendarFields.SEQUENCE));
+        }
+
+        if (jsonobject.has(CalendarFields.ORGANIZER_ID)) {
+            calendarobject.setOrganizerId(parseInt(jsonobject, CalendarFields.ORGANIZER_ID));
+        }
+
+        if (jsonobject.has(CalendarFields.PRINCIPAL)) {
+            calendarobject.setPrincipal(parseString(jsonobject, CalendarFields.PRINCIPAL));
+        }
+
+        if (jsonobject.has(CalendarFields.PRINCIPAL_ID)) {
+            calendarobject.setPrincipalId(parseInt(jsonobject, CalendarFields.PRINCIPAL_ID));
         }
 
         parseField(parseAll, calendarobject, timeZone, jsonobject);

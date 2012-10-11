@@ -33,7 +33,7 @@ import org.apache.tika.parser.chm.lzx.ChmBlockInfo;
 
 /**
  * Tests major functionality of ChmBlockInfo
- *
+ * 
  */
 public class TestChmBlockInfo extends TestCase {
     private byte[] data;
@@ -97,8 +97,9 @@ public class TestChmBlockInfo extends TestCase {
     }
 
     public void testToString() {
-        if (chmBlockInfo == null)
+        if (chmBlockInfo == null) {
             testGetChmBlockInfo();
+        }
         Assert.assertTrue(chmBlockInfo.toString().length() > 0);
     }
 

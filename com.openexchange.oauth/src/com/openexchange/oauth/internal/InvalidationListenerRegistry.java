@@ -64,7 +64,7 @@ import com.openexchange.oauth.OAuthAccountInvalidationListener;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class InvalidationListenerRegistry {
-    private static InvalidationListenerRegistry instance;
+    private static volatile InvalidationListenerRegistry instance;
 
     /**
      * Initializes the registry instance.

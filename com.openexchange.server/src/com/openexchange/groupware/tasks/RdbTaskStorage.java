@@ -63,8 +63,9 @@ import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import com.openexchange.log.LogFactory;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.container.DataObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.search.Order;
 import com.openexchange.groupware.search.TaskSearchObject;
@@ -350,7 +351,7 @@ public class RdbTaskStorage extends TaskStorage {
     public boolean existsTask(final Context ctx, final Connection con, final int taskId, final StorageType type) throws OXException {
         final StringBuilder sql = new StringBuilder();
         sql.append("SELECT ");
-        sql.append(Mapping.getMapping(Task.OBJECT_ID).getDBColumnName());
+        sql.append(Mapping.getMapping(DataObject.OBJECT_ID).getDBColumnName());
         sql.append(" FROM ");
         sql.append(SQL.TASK_TABLES.get(type));
         sql.append(" WHERE cid=? AND id=?");

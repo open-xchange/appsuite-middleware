@@ -140,10 +140,12 @@ public class CommonAppointments {
 
         for (int recurrenceField : recurrenceFields) {
             if (source.contains(recurrenceField)) {
-                if (recurrenceField == CalendarObject.UNTIL && target.contains(CalendarObject.RECURRENCE_COUNT))
+                if (recurrenceField == CalendarObject.UNTIL && target.contains(CalendarObject.RECURRENCE_COUNT)) {
                     continue;
-                if (recurrenceField == CalendarObject.RECURRENCE_COUNT && target.contains(CalendarObject.UNTIL))
+                }
+                if (recurrenceField == CalendarObject.RECURRENCE_COUNT && target.contains(CalendarObject.UNTIL)) {
                     continue;
+                }
                 target.set(recurrenceField, source.get(recurrenceField));
             }
         }
@@ -320,6 +322,9 @@ public class CommonAppointments {
             }
             return cdao;
         } catch (final OXException e) {
+            if (e.getPrefix().equals("APP")) {
+                throw e;
+            }
             e.printStackTrace();
             return Collections.EMPTY_LIST;
         }
@@ -335,6 +340,9 @@ public class CommonAppointments {
             }
             return cdao;
         } catch (final OXException e) {
+            if (e.getPrefix().equals("APP")) {
+                throw e;
+            }
             e.printStackTrace();
             return Collections.EMPTY_LIST;
         }

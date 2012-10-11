@@ -60,7 +60,7 @@ import java.io.InputStream;
  */
 final class CallbackInputStream extends InputStream implements FileRemovedListener {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(CallbackInputStream.class));
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(CallbackInputStream.class));
 
     private final InputStream delegate;
 

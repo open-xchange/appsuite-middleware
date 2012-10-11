@@ -174,7 +174,7 @@ public final class JSlobId {
         if (id != null) {
             builder.append("id=").append(id).append(", ");
         }
-        builder.append("hashCode=").append(hashCode).append('}');
+        builder.append('}');
         return builder.toString();
     }
 

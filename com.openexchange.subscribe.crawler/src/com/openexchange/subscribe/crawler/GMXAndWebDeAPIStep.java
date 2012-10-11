@@ -50,6 +50,7 @@
 package com.openexchange.subscribe.crawler;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLEncoder;
@@ -62,7 +63,6 @@ import java.util.regex.Pattern;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.httpclient.NameValuePair;
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -74,6 +74,7 @@ import com.gargoylesoftware.htmlunit.WebRequestSettings;
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
+import com.openexchange.subscribe.SubscriptionErrorMessage;
 import com.openexchange.subscribe.crawler.internal.AbstractStep;
 import com.openexchange.subscribe.crawler.internal.LoginStep;
 
@@ -90,7 +91,7 @@ public class GMXAndWebDeAPIStep extends AbstractStep<Contact[], Object> implemen
 
     private List<NameValuePair> parameters;
 
-    private static final Log LOG = LogFactory.getLog(GMXAndWebDeAPIStep.class);
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(GMXAndWebDeAPIStep.class);
 
     public GMXAndWebDeAPIStep() {
         super();
@@ -103,7 +104,7 @@ public class GMXAndWebDeAPIStep extends AbstractStep<Contact[], Object> implemen
      * @param url
      * @param parameters
      */
-    public GMXAndWebDeAPIStep(String url, List<NameValuePair> parameters) {
+    public GMXAndWebDeAPIStep(final String url, final List<NameValuePair> parameters) {
         super();
         this.url = url;
         this.parameters = parameters;
@@ -114,93 +115,108 @@ public class GMXAndWebDeAPIStep extends AbstractStep<Contact[], Object> implemen
      * @see com.openexchange.subscribe.crawler.internal.AbstractStep#execute(com.gargoylesoftware.htmlunit.WebClient)
      */
     @Override
-    public void execute(WebClient webClient) throws OXException {
+    public void execute(final WebClient webClient) throws OXException {
         List<Contact> contactObjects = new ArrayList<Contact>();
         try {
             String urlString = url;
+            String parameterString = "";
 
-            // adding the parameters to the url
+            // summing up the parameters into one string
             if (!parameters.isEmpty()) {
-                urlString += "?";
+                //urlString += "?";
                 boolean isFirst = true;
                 for (NameValuePair nvp : parameters) {
                     if (!isFirst) {
-                        urlString += "&";
+                        parameterString += "&";
                     } else {
                         isFirst = false;
                     }
-                    urlString += URLEncoder.encode(nvp.getName(), "utf-8") + "=" + URLEncoder.encode(nvp.getValue(), "utf-8");
+                    parameterString += URLEncoder.encode(nvp.getName(), "utf-8") + "=" + URLEncoder.encode(nvp.getValue(), "utf-8");
                 }
             }
-
+            
             if (debuggingEnabled) {
-                LOG.error("complete URL : " + urlString);
+                LOG.error("DEBUG: complete URL : " + urlString);
             }
 
             WebRequestSettings requestSettings = new WebRequestSettings(new URL(urlString), HttpMethod.POST);
 
-            // adding the parameters to the request as well (just to be sure)
-            // requestSettings.setRequestParameters(new ArrayList());
-            // for (NameValuePair nvp : parameters) {
-            // requestSettings.getRequestParameters().add(nvp);
-            // }
-
+            HashMap<String, String> initialMap = new HashMap<String, String>();
+            initialMap.put("Content-Type", "application/x-www-form-urlencoded;charset=\"UTF-8\"");
+            requestSettings.setAdditionalHeaders(initialMap);
+          
+            // Adding the parameters to the Body as well
+            requestSettings.setRequestBody(parameterString);
+            webClient.setRedirectEnabled(false);
             HtmlPage page = webClient.getPage(requestSettings);
 
             if (debuggingEnabled) {
-                LOG.error("Status Code : " + page.getWebResponse().getStatusCode());
-                LOG.error("URL : " + page.getWebResponse().getUrl());
-                LOG.error("webResponse : " + page.getWebResponse().getContentAsString());
+                LOG.error("DEBUG: Status Code : " + page.getWebResponse().getStatusCode());
+                LOG.error("DEBUG: URL : " + page.getWebResponse().getUrl());
+                LOG.error("DEBUG: webResponse : " + page.getWebResponse().getContentAsString());
             }
         } catch (FailingHttpStatusCodeException e) {
-            // catch the 401 that appears after logging in (for whatever reason ...)
-            if (e.getStatusCode() == 401) {
+            // catch the 302 that appears after logging in
+            if (e.getStatusCode() == 302 || e.getMessage().trim().startsWith("302")) {
                 // LOG.error(e.getResponse().getUrl());
                 Pattern pattern = Pattern.compile("([^?]*)\\?session=(.*)");
-                Matcher matcher = pattern.matcher(e.getResponse().getUrl().toString());
+                //Matcher matcher = pattern.matcher(e.getResponse().getUrl().toString());
+                String location = "";
+                List<NameValuePair> responseHeaders = e.getResponse().getResponseHeaders();
+                for (NameValuePair nvp : responseHeaders){
+                    if (nvp.getName().equals("Location")){
+                        location = nvp.getValue();
+                    }
+                }
+                if (null != location && location.endsWith("error_bad_password")) {
+                    throw SubscriptionErrorMessage.INVALID_LOGIN.create();
+                }
+                Matcher matcher = pattern.matcher(location);
                 if (matcher.find() && matcher.groupCount() == 2) {
                     String newUrlBase = matcher.group(1);
                     String functionCall = "json/PersonService/getAll";
                     String session = matcher.group(2);
-                    // System.out.println("Session : " + session);
-                    String toEncode = username + ":sid=" + session;
-                    // System.out.println(toEncode);
+                    
+                    String toEncode = username + ":sid=" + session;  
                     Base64 encoder = new Base64();
-                    byte[] bytes = encoder.encode(toEncode.getBytes());
-                    String base64Encoded = new String(bytes);
+                    String base64Encoded = "";
+                    try {
+                        base64Encoded = new String(encoder.encode(toEncode.getBytes("UTF-8")));
+                    } catch (UnsupportedEncodingException e2) {
+                        LOG.error(e2);
+                    }                                        
+                    
                     // remove the whitespaces otherwise there is an error
-                    base64Encoded = base64Encoded.replaceAll("\\W", "");
-                    // System.out.println(base64Encoded);
+                    base64Encoded = base64Encoded.replaceAll("\\s", "");
+                    
                     String apiURL = newUrlBase + functionCall;
                     try {
-                        // System.out.println(base64Encoded);
                         WebRequestSettings requestSettingsForAPICall = new WebRequestSettings(new URL(apiURL), HttpMethod.POST);
                         HashMap<String, String> map = new HashMap<String, String>();
                         map.put("Authorization", "Basic " + base64Encoded);
-                        map.put("Content-Type", "application/json");
+                        map.put("Content-Type", "application/json;charset=\"UTF-8\"");
                         requestSettingsForAPICall.setAdditionalHeaders(map);
                         requestSettingsForAPICall.setRequestBody("{\"search\":null}");
                         Page page = webClient.getPage(requestSettingsForAPICall);
-                        // System.out.println(page.getWebResponse().getContentAsString());
                         String allContactsPage = page.getWebResponse().getContentAsString("UTF-8");
                         contactObjects = parseJSONIntoContacts(allContactsPage);
                         executedSuccessfully = true;
                     } catch (MalformedURLException e1) {
-                        LOG.error(e1);
+                        LOG.error(e1.getMessage(), e1);
                     } catch (FailingHttpStatusCodeException e1) {
-                        LOG.error(e1);
+                        LOG.error(e1.getMessage(), e1);
                     } catch (IOException e1) {
-                        LOG.error(e1);
+                        LOG.error(e1.getMessage(), e1);
                     }
 
                 } else {
-                    LOG.error(e);
+                    LOG.error(e.getMessage(), e);
                 }
             } else {
-                LOG.error(e);
+                LOG.error(e.getMessage(), e);
             }
-        } catch (IOException e) {
-            LOG.error(e);
+        } catch (final IOException e) {
+            LOG.error(e.getMessage(), e);
         }
         output = contactObjects.toArray(new Contact[contactObjects.size()]);
 
@@ -211,42 +227,53 @@ public class GMXAndWebDeAPIStep extends AbstractStep<Contact[], Object> implemen
      * @return
      */
     private List<Contact> parseJSONIntoContacts(String allContactsPage) {
-        System.out.println(allContactsPage);
         List<Contact> contacts = new ArrayList<Contact>();
         try {
             JSONObject allContentJSON = new JSONObject(allContactsPage);
             JSONArray allContactsJSON = (JSONArray) allContentJSON.get("response");
             for (int i = 0; i < allContactsJSON.length(); i++) {
                 try {
-                    JSONObject contactJSON = allContactsJSON.getJSONObject(i);
-                    Contact contact = new Contact();
-                    if (contactJSON.has("name"))
+                	final JSONObject contactJSON = allContactsJSON.getJSONObject(i);
+                    final Contact contact = new Contact();
+                    if (contactJSON.has("name")) {
                         contact.setSurName(contactJSON.getString("name"));
-                    if (contactJSON.has("firstName"))
+                    }
+                    if (contactJSON.has("firstName")) {
                         contact.setGivenName(contactJSON.getString("firstName"));
-                    if (contactJSON.has("comment"))
+                    }
+                    if (contactJSON.has("comment")) {
                         contact.setNote(contactJSON.getString("comment"));
-                    if (contactJSON.has("position"))
+                    }
+                    if (contactJSON.has("position")) {
                         contact.setPosition(contactJSON.getString("position"));
-                    if (contactJSON.has("shortName"))
+                    }
+                    if (contactJSON.has("shortName")) {
                         contact.setNickname(contactJSON.getString("shortName"));
-                    if (contactJSON.has("title"))
+                    }
+                    if (contactJSON.has("title")) {
                         contact.setTitle(contactJSON.getString("title"));
-                    if (contactJSON.has("company"))
+                    }
+                    if (contactJSON.has("company")) {
                         contact.setCompany(contactJSON.getString("company"));
+                    }
+                    //setting the displayname
+                    contact.setDisplayName(contact.getGivenName() + " " + contact.getSurName());
 
-                    if (contactJSON.has("birthday")) {
+                    if (JSONObject.NULL != contactJSON.get("birthday") && contactJSON.has("birthday")) {                        
                         JSONObject birthdayJSON = contactJSON.getJSONObject("birthday");
                         String day = "";
                         String month = "";
                         String year = "";
-                        if (birthdayJSON.has("day"))
+                        if (birthdayJSON.has("day")) {
                             day = birthdayJSON.getString("day");
-                        if (birthdayJSON.has("month"))
+                        }
+                        if (birthdayJSON.has("month")) {
                             month = birthdayJSON.getString("month");
-                        if (birthdayJSON.has("day"))
+                        }
+                        if (birthdayJSON.has("day")) {
                             year = birthdayJSON.getString("year");
-                        Calendar calendar = Calendar.getInstance();
+                        }
+                        final Calendar calendar = Calendar.getInstance();
                         if (!day.equals("") && !month.equals("") && !year.equals("")) {
                             calendar.set(Integer.parseInt(year), Integer.parseInt(month) - 1, Integer.parseInt(day));
                             contact.setBirthday(calendar.getTime());
@@ -256,31 +283,39 @@ public class GMXAndWebDeAPIStep extends AbstractStep<Contact[], Object> implemen
                         }
 
                         if (contactJSON.has("location")) {
-                            JSONArray addressesJSON = contactJSON.getJSONArray("location");
+                            final JSONArray addressesJSON = contactJSON.getJSONArray("location");
                             for (int a = 0; a < addressesJSON.length(); a++) {
-                                JSONObject addressJSON = addressesJSON.getJSONObject(a);
+                                final JSONObject addressJSON = addressesJSON.getJSONObject(a);
                                 if (addressJSON.has("classifier")) {
-                                    JSONObject classifier = addressJSON.getJSONObject("classifier");
+                                    final JSONObject classifier = addressJSON.getJSONObject("classifier");
                                     if (classifier.has("name")) {
-                                        String type = classifier.getString("name");
+                                        final String type = classifier.getString("name");
                                         if (type.equals("BUSINESS")) {
-                                            if (addressJSON.has("address"))
+                                            if (addressJSON.has("address")) {
                                                 contact.setStreetBusiness(addressJSON.getString("address"));
-                                            if (addressJSON.has("postcode"))
+                                            }
+                                            if (addressJSON.has("postcode")) {
                                                 contact.setPostalCodeBusiness(addressJSON.getString("postcode"));
-                                            if (addressJSON.has("town"))
+                                            }
+                                            if (addressJSON.has("town")) {
                                                 contact.setCityBusiness(addressJSON.getString("town"));
-                                            if (addressJSON.has("country"))
+                                            }
+                                            if (addressJSON.has("country")) {
                                                 contact.setCountryBusiness(addressJSON.getString("country"));
+                                            }
                                         } else if (type.equals("PRIVATE")) {
-                                            if (addressJSON.has("address"))
+                                            if (addressJSON.has("address")) {
                                                 contact.setStreetHome(addressJSON.getString("address"));
-                                            if (addressJSON.has("postcode"))
+                                            }
+                                            if (addressJSON.has("postcode")) {
                                                 contact.setPostalCodeHome(addressJSON.getString("postcode"));
-                                            if (addressJSON.has("town"))
+                                            }
+                                            if (addressJSON.has("town")) {
                                                 contact.setCityHome(addressJSON.getString("town"));
-                                            if (addressJSON.has("country"))
+                                            }
+                                            if (addressJSON.has("country")) {
                                                 contact.setCountryHome(addressJSON.getString("country"));
+                                            }
                                         }
                                     }
                                 }
@@ -288,19 +323,21 @@ public class GMXAndWebDeAPIStep extends AbstractStep<Contact[], Object> implemen
                         }
 
                         if (contactJSON.has("fax")) {
-                            JSONArray faxesJSON = contactJSON.getJSONArray("fax");
+                            final JSONArray faxesJSON = contactJSON.getJSONArray("fax");
                             for (int a = 0; a < faxesJSON.length(); a++) {
-                                JSONObject faxJSON = faxesJSON.getJSONObject(a);
+                                final JSONObject faxJSON = faxesJSON.getJSONObject(a);
                                 if (faxJSON.has("classifier")) {
-                                    JSONObject classifier = faxJSON.getJSONObject("classifier");
+                                    final JSONObject classifier = faxJSON.getJSONObject("classifier");
                                     if (classifier.has("name")) {
-                                        String type = classifier.getString("name");
+                                        final String type = classifier.getString("name");
                                         if (type.equals("BUSINESS")) {
-                                            if (faxJSON.has("number"))
+                                            if (faxJSON.has("number")) {
                                                 contact.setFaxBusiness(faxJSON.getString("number"));
+                                            }
                                         } else if (type.equals("PRIVATE")) {
-                                            if (faxJSON.has("number"))
+                                            if (faxJSON.has("number")) {
                                                 contact.setFaxHome(faxJSON.getString("number"));
+                                            }
                                         }
                                     }
                                 }
@@ -308,19 +345,21 @@ public class GMXAndWebDeAPIStep extends AbstractStep<Contact[], Object> implemen
                         }
 
                         if (contactJSON.has("messaging")) {
-                            JSONArray messagingJSON = contactJSON.getJSONArray("messaging");
+                            final JSONArray messagingJSON = contactJSON.getJSONArray("messaging");
                             for (int a = 0; a < messagingJSON.length(); a++) {
-                                JSONObject instantMessengerJSON = messagingJSON.getJSONObject(a);
+                                final JSONObject instantMessengerJSON = messagingJSON.getJSONObject(a);
                                 if (instantMessengerJSON.has("classifier")) {
-                                    JSONObject classifier = instantMessengerJSON.getJSONObject("classifier");
+                                    final JSONObject classifier = instantMessengerJSON.getJSONObject("classifier");
                                     if (classifier.has("name")) {
-                                        String type = classifier.getString("name");
+                                        final String type = classifier.getString("name");
                                         if (type.equals("BUSINESS")) {
-                                            if (instantMessengerJSON.has("messenger") && instantMessengerJSON.has("messengerAccount"))
+                                            if (instantMessengerJSON.has("messenger") && instantMessengerJSON.has("messengerAccount")) {
                                                 contact.setInstantMessenger1(instantMessengerJSON.getString("messengerAccount") + " (" + instantMessengerJSON.getString("messenger") + ")");
+                                            }
                                         } else if (type.equals("PRIVATE")) {
-                                            if (instantMessengerJSON.has("messenger") && instantMessengerJSON.has("messengerAccount"))
+                                            if (instantMessengerJSON.has("messenger") && instantMessengerJSON.has("messengerAccount")) {
                                                 contact.setInstantMessenger2(instantMessengerJSON.getString("messengerAccount") + " (" + instantMessengerJSON.getString("messenger") + ")");
+                                            }
                                         }
                                     }
                                 }
@@ -328,19 +367,21 @@ public class GMXAndWebDeAPIStep extends AbstractStep<Contact[], Object> implemen
                         }
 
                         if (contactJSON.has("mobilePhone")) {
-                            JSONArray mobilePhonesJSON = contactJSON.getJSONArray("mobilePhone");
+                            final JSONArray mobilePhonesJSON = contactJSON.getJSONArray("mobilePhone");
                             for (int a = 0; a < mobilePhonesJSON.length(); a++) {
-                                JSONObject mobilePhoneJSON = mobilePhonesJSON.getJSONObject(a);
+                                final JSONObject mobilePhoneJSON = mobilePhonesJSON.getJSONObject(a);
                                 if (mobilePhoneJSON.has("classifier")) {
-                                    JSONObject classifier = mobilePhoneJSON.getJSONObject("classifier");
+                                    final JSONObject classifier = mobilePhoneJSON.getJSONObject("classifier");
                                     if (classifier.has("name")) {
-                                        String type = classifier.getString("name");
+                                        final String type = classifier.getString("name");
                                         if (type.equals("BUSINESS")) {
-                                            if (mobilePhoneJSON.has("number"))
+                                            if (mobilePhoneJSON.has("number")) {
                                                 contact.setCellularTelephone1(mobilePhoneJSON.getString("number"));
+                                            }
                                         } else if (type.equals("PRIVATE")) {
-                                            if (mobilePhoneJSON.has("number"))
+                                            if (mobilePhoneJSON.has("number")) {
                                                 contact.setCellularTelephone2(mobilePhoneJSON.getString("number"));
+                                            }
                                         }
                                     }
                                 }
@@ -348,19 +389,21 @@ public class GMXAndWebDeAPIStep extends AbstractStep<Contact[], Object> implemen
                         }
 
                         if (contactJSON.has("phone")) {
-                            JSONArray phonesJSON = contactJSON.getJSONArray("phone");
+                            final JSONArray phonesJSON = contactJSON.getJSONArray("phone");
                             for (int a = 0; a < phonesJSON.length(); a++) {
-                                JSONObject phoneJSON = phonesJSON.getJSONObject(a);
+                                final JSONObject phoneJSON = phonesJSON.getJSONObject(a);
                                 if (phoneJSON.has("classifier")) {
-                                    JSONObject classifier = phoneJSON.getJSONObject("classifier");
+                                    final JSONObject classifier = phoneJSON.getJSONObject("classifier");
                                     if (classifier.has("name")) {
-                                        String type = classifier.getString("name");
+                                        final String type = classifier.getString("name");
                                         if (type.equals("BUSINESS")) {
-                                            if (phoneJSON.has("number"))
+                                            if (phoneJSON.has("number")) {
                                                 contact.setTelephoneBusiness1(phoneJSON.getString("number"));
+                                            }
                                         } else if (type.equals("PRIVATE")) {
-                                            if (phoneJSON.has("number"))
+                                            if (phoneJSON.has("number")) {
                                                 contact.setTelephoneHome1(phoneJSON.getString("number"));
+                                            }
                                         }
                                     }
                                 }
@@ -368,19 +411,21 @@ public class GMXAndWebDeAPIStep extends AbstractStep<Contact[], Object> implemen
                         }
 
                         if (contactJSON.has("email")) {
-                            JSONArray emailsJSON = contactJSON.getJSONArray("email");
+                            final JSONArray emailsJSON = contactJSON.getJSONArray("email");
                             for (int a = 0; a < emailsJSON.length(); a++) {
-                                JSONObject emailJSON = emailsJSON.getJSONObject(a);
+                                final JSONObject emailJSON = emailsJSON.getJSONObject(a);
                                 if (emailJSON.has("classifier")) {
-                                    JSONObject classifier = emailJSON.getJSONObject("classifier");
+                                    final JSONObject classifier = emailJSON.getJSONObject("classifier");
                                     if (classifier.has("name")) {
-                                        String type = classifier.getString("name");
+                                        final String type = classifier.getString("name");
                                         if (type.equals("BUSINESS")) {
-                                            if (emailJSON.has("address"))
+                                            if (emailJSON.has("address")) {
                                                 contact.setEmail1(emailJSON.getString("address"));
+                                            }
                                         } else if (type.equals("PRIVATE")) {
-                                            if (emailJSON.has("address"))
+                                            if (emailJSON.has("address")) {
                                                 contact.setEmail2(emailJSON.getString("address"));
+                                            }
                                         }
                                     }
                                 }
@@ -388,16 +433,17 @@ public class GMXAndWebDeAPIStep extends AbstractStep<Contact[], Object> implemen
                         }
 
                         if (contactJSON.has("url")) {
-                            JSONArray urlsJSON = contactJSON.getJSONArray("phone");
+                            final JSONArray urlsJSON = contactJSON.getJSONArray("phone");
                             for (int a = 0; a < urlsJSON.length(); a++) {
-                                JSONObject urlJSON = urlsJSON.getJSONObject(a);
+                                final JSONObject urlJSON = urlsJSON.getJSONObject(a);
                                 if (urlJSON.has("classifier")) {
-                                    JSONObject classifier = urlJSON.getJSONObject("classifier");
+                                    final JSONObject classifier = urlJSON.getJSONObject("classifier");
                                     if (classifier.has("name")) {
-                                        String type = classifier.getString("name");
+                                        final String type = classifier.getString("name");
                                         if (type.equals("BUSINESS")) {
-                                            if (urlJSON.has("uri"))
+                                            if (urlJSON.has("uri")) {
                                                 contact.setURL(urlJSON.getString("uri"));
+                                            }
                                         }
                                     }
                                 }
@@ -408,11 +454,11 @@ public class GMXAndWebDeAPIStep extends AbstractStep<Contact[], Object> implemen
 
                     contacts.add(contact);
                     // An error in parsing one contact should not bring them all down
-                } catch (JSONException e) {
+                } catch (final JSONException e) {
                     LOG.error(e);
                 }
             }
-        } catch (JSONException e) {
+        } catch (final JSONException e) {
             LOG.error(e);
         }
         return contacts;
@@ -422,7 +468,7 @@ public class GMXAndWebDeAPIStep extends AbstractStep<Contact[], Object> implemen
         return url;
     }
 
-    public void setUrl(String url) {
+    public void setUrl(final String url) {
         this.url = url;
     }
 
@@ -430,7 +476,7 @@ public class GMXAndWebDeAPIStep extends AbstractStep<Contact[], Object> implemen
         return parameters;
     }
 
-    public void setParameters(List<NameValuePair> parameters) {
+    public void setParameters(final List<NameValuePair> parameters) {
         this.parameters = parameters;
     }
 
@@ -439,7 +485,7 @@ public class GMXAndWebDeAPIStep extends AbstractStep<Contact[], Object> implemen
      * @see com.openexchange.subscribe.crawler.internal.LoginStep#setUsername(java.lang.String)
      */
     @Override
-    public void setUsername(String username) {
+    public void setUsername(final String username) {
         parameters.add(new NameValuePair("username", username));
         this.username = username;
 
@@ -450,7 +496,7 @@ public class GMXAndWebDeAPIStep extends AbstractStep<Contact[], Object> implemen
      * @see com.openexchange.subscribe.crawler.internal.LoginStep#setPassword(java.lang.String)
      */
     @Override
-    public void setPassword(String password) {
+    public void setPassword(final String password) {
         parameters.add(new NameValuePair("password", password));
         this.password = password;
     }

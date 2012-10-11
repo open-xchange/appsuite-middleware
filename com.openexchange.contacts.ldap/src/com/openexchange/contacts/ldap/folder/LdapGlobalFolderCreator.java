@@ -94,7 +94,7 @@ public class LdapGlobalFolderCreator {
 
     }
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(LdapGlobalFolderCreator.class));
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(LdapGlobalFolderCreator.class));
 
     public static FolderIDAndAdminID createGlobalFolder(final Context ctx, final FolderProperties folderprops) throws OXException, SQLException {
         // First search for a folder with the name if is doesn't exist create it

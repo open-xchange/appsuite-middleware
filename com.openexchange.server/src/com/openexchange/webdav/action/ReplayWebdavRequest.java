@@ -55,9 +55,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
 import java.util.Map;
-import org.jdom.Document;
-import org.jdom.JDOMException;
-import org.jdom.input.SAXBuilder;
+import org.jdom2.Document;
+import org.jdom2.JDOMException;
+import org.jdom2.input.SAXBuilder;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 import com.openexchange.webdav.action.ifheader.IfHeader;
 import com.openexchange.webdav.action.ifheader.IfHeaderParseException;
@@ -75,7 +75,8 @@ public class ReplayWebdavRequest implements WebdavRequest{
 		this.delegate = req;
 	}
 
-	public InputStream getBody() throws IOException {
+	@Override
+    public InputStream getBody() throws IOException {
 		if(this.body != null) {
 			return new ByteArrayInputStream(this.body);
 		}
@@ -96,63 +97,78 @@ public class ReplayWebdavRequest implements WebdavRequest{
 		return new ByteArrayInputStream(this.body);
 	}
 
-	public Document getBodyAsDocument() throws JDOMException, IOException {
+	@Override
+    public Document getBodyAsDocument() throws JDOMException, IOException {
 		return new SAXBuilder().build(getBody());
 	}
 
-	public WebdavCollection getCollection() throws WebdavProtocolException {
+	@Override
+    public WebdavCollection getCollection() throws WebdavProtocolException {
 		return delegate.getCollection();
 	}
 
-	public WebdavResource getDestination() throws WebdavProtocolException {
+	@Override
+    public WebdavResource getDestination() throws WebdavProtocolException {
 		return delegate.getDestination();
 	}
 
-	public WebdavPath getDestinationUrl() {
+	@Override
+    public WebdavPath getDestinationUrl() {
 		return delegate.getDestinationUrl();
 	}
 
-	public String getHeader(final String header) {
+	@Override
+    public String getHeader(final String header) {
 		return delegate.getHeader(header);
 	}
 
-	public List<String> getHeaderNames() {
+	@Override
+    public List<String> getHeaderNames() {
 		return delegate.getHeaderNames();
 	}
 
-	public IfHeader getIfHeader() throws IfHeaderParseException {
+	@Override
+    public IfHeader getIfHeader() throws IfHeaderParseException {
 		return delegate.getIfHeader();
 	}
 
-	public WebdavResource getResource() throws WebdavProtocolException {
+	@Override
+    public WebdavResource getResource() throws WebdavProtocolException {
 		return delegate.getResource();
 	}
 
-	public WebdavPath getUrl() {
+	@Override
+    public WebdavPath getUrl() {
 		return delegate.getUrl();
 	}
 
-	public String getURLPrefix() {
+	@Override
+    public String getURLPrefix() {
 		return delegate.getURLPrefix();
 	}
 
-	public int getDepth(final int depth) {
+	@Override
+    public int getDepth(final int depth) {
 		return delegate.getDepth(depth);
 	}
 
-	public WebdavFactory getFactory() throws WebdavProtocolException {
+	@Override
+    public WebdavFactory getFactory() throws WebdavProtocolException {
 		return delegate.getFactory();
 	}
 
-	public String getCharset() {
+	@Override
+    public String getCharset() {
 		return delegate.getCharset();
 	}
 
-	public boolean hasBody() {
+	@Override
+    public boolean hasBody() {
 	    return delegate.hasBody();
 	}
 
-	public Map<String, Object> getUserInfo() {
+	@Override
+    public Map<String, Object> getUserInfo() {
 	    return delegate.getUserInfo();
 	}
 }

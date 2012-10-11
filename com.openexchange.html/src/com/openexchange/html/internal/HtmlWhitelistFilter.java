@@ -53,6 +53,7 @@ import static com.openexchange.html.internal.HtmlServiceImpl.PATTERN_URL;
 import static com.openexchange.html.internal.css.CSSMatcher.checkCSS;
 import static com.openexchange.html.internal.css.CSSMatcher.containsCSSElement;
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStreamReader;
 import java.util.Collections;
@@ -78,7 +79,7 @@ import net.htmlparser.jericho.StartTag;
 import net.htmlparser.jericho.StartTagType;
 import net.htmlparser.jericho.Tag;
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import com.openexchange.log.LogFactory;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.html.internal.parser.handler.HTMLFilterHandler;
 import com.openexchange.html.services.ServiceRegistry;
@@ -536,8 +537,7 @@ public final class HtmlWhitelistFilter {
             if (null == staticHTMLMap) {
                 String mapStr = null;
                 {
-                    final String whitelist =
-                        ServiceRegistry.getInstance().getService(ConfigurationService.class).getProperty("Whitelist");
+                    final File whitelist = ServiceRegistry.getInstance().getService(ConfigurationService.class).getFileByName("whitelist.properties");
                     if (null == whitelist) {
                         if (LOG.isWarnEnabled()) {
                             LOG.warn("Using default white list");

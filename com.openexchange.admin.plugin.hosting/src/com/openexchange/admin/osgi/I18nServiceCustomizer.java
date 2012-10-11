@@ -49,12 +49,9 @@
 
 package com.openexchange.admin.osgi;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
-
 import com.openexchange.admin.services.I18nServices;
 import com.openexchange.i18n.I18nService;
 
@@ -63,28 +60,31 @@ import com.openexchange.i18n.I18nService;
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public class I18nServiceCustomizer implements ServiceTrackerCustomizer {
+public class I18nServiceCustomizer implements ServiceTrackerCustomizer<I18nService,I18nService> {
 
     private final BundleContext context;
 
-    public I18nServiceCustomizer(BundleContext context) {
+    public I18nServiceCustomizer(final BundleContext context) {
         super();
         this.context = context;
     }
 
-    public Object addingService(ServiceReference reference) {
-        I18nService i18n = (I18nService) context.getService(reference);
+    @Override
+    public I18nService addingService(final ServiceReference<I18nService> reference) {
+        final I18nService i18n = context.getService(reference);
         I18nServices.getInstance().addService(i18n);
         return i18n;
     }
 
-    public void modifiedService(ServiceReference reference, Object service) {
+    @Override
+    public void modifiedService(final ServiceReference<I18nService> reference, final I18nService service) {
         // Nothing to do.
     }
 
-    public void removedService(ServiceReference reference, Object service) {
+    @Override
+    public void removedService(final ServiceReference<I18nService> reference, final I18nService service) {
         try {
-            I18nServices.getInstance().removeService((I18nService) service);
+            I18nServices.getInstance().removeService(service);
         } finally {
             context.ungetService(reference);
         }

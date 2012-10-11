@@ -66,7 +66,7 @@ import com.openexchange.tools.codec.QuotedPrintable;
  */
 public final class AjpMessage {
 
-    private static final org.apache.commons.logging.Log log = Log.valueOf(org.apache.commons.logging.LogFactory.getLog(AjpMessage.class));
+    private static final org.apache.commons.logging.Log log = Log.valueOf(com.openexchange.log.LogFactory.getLog(AjpMessage.class));
 
     // ------------------------------------------------------------ Constructor
 

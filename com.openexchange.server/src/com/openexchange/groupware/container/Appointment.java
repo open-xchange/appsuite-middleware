@@ -60,6 +60,8 @@ import com.openexchange.groupware.calendar.Constants;
  */
 public class Appointment extends CalendarObject implements Cloneable {
 
+    private static final long serialVersionUID = 8822932551489524746L;
+
     public static final int LOCATION = 400;
 
     public static final int FULL_TIME = 401;
@@ -308,55 +310,48 @@ public class Appointment extends CalendarObject implements Cloneable {
 
     @Override
     public Appointment clone() {
-        try {
-            final Appointment appointmentobject = (Appointment) super.clone();/* new AppointmentObject(); */
+        Appointment appointmentobject = (Appointment) super.clone();
 
-            for(int field: ALL_COLUMNS) {
-                if(contains(field)) {
-                    appointmentobject.set(field, get(field));
-                }
+        for (int field : ALL_COLUMNS) {
+            if (contains(field)) {
+                appointmentobject.set(field, get(field));
             }
-
-            if (containsLabel()) {
-                appointmentobject.setLabel(getLabel());
-            }
-            if (containsFullTime()) {
-                appointmentobject.setFullTime(getFullTime());
-            }
-            if (containsLocation()) {
-                appointmentobject.setLocation(getLocation());
-            }
-            if (containsShownAs()) {
-                appointmentobject.setShownAs(getShownAs());
-            }
-            if (containsOccurrence()) {
-                appointmentobject.setOccurrence(getOccurrence());
-            }
-            if (containsTimezone()) {
-                appointmentobject.setTimezone(getTimezoneFallbackUTC());
-            }
-            if (containsUid()) {
-                appointmentobject.setUid(getUid());
-            }
-            if (containsOrganizer()) {
-                appointmentobject.setOrganizer(getOrganizer());
-            }
-            if (containsPrincipal()) {
-                appointmentobject.setPrincipal(getPrincipal());
-            }
-            if (containsOrganizerId()) {
-                appointmentobject.setOrganizerId(getOrganizerId());
-            }
-            if (containsPrincipalId()) {
-                appointmentobject.setPrincipalId(getPrincipalId());
-            }
-            return appointmentobject;
-        } catch (final CloneNotSupportedException e) {
-            /*
-             * Cannot occur since we are cloneable
-             */
-            throw new InternalError(e.getMessage());
         }
+
+        if (containsLabel()) {
+            appointmentobject.setLabel(getLabel());
+        }
+        if (containsFullTime()) {
+            appointmentobject.setFullTime(getFullTime());
+        }
+        if (containsLocation()) {
+            appointmentobject.setLocation(getLocation());
+        }
+        if (containsShownAs()) {
+            appointmentobject.setShownAs(getShownAs());
+        }
+        if (containsOccurrence()) {
+            appointmentobject.setOccurrence(getOccurrence());
+        }
+        if (containsTimezone()) {
+            appointmentobject.setTimezone(getTimezoneFallbackUTC());
+        }
+        if (containsUid()) {
+            appointmentobject.setUid(getUid());
+        }
+        if (containsOrganizer()) {
+            appointmentobject.setOrganizer(getOrganizer());
+        }
+        if (containsPrincipal()) {
+            appointmentobject.setPrincipal(getPrincipal());
+        }
+        if (containsOrganizerId()) {
+            appointmentobject.setOrganizerId(getOrganizerId());
+        }
+        if (containsPrincipalId()) {
+            appointmentobject.setPrincipalId(getPrincipalId());
+        }
+        return appointmentobject;
     }
 
     @Override

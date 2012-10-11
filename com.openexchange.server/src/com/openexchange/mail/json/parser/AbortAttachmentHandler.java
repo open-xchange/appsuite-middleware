@@ -49,6 +49,8 @@
 
 package com.openexchange.mail.json.parser;
 
+import java.util.List;
+
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.dataobjects.MailPart;
@@ -63,7 +65,7 @@ import com.openexchange.session.Session;
  */
 public final class AbortAttachmentHandler extends AbstractAttachmentHandler {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(AbortAttachmentHandler.class));
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(AbortAttachmentHandler.class));
 
     private TextBodyMailPart textPart;
 
@@ -105,7 +107,7 @@ public final class AbortAttachmentHandler extends AbstractAttachmentHandler {
     }
 
     @Override
-    public ComposedMailMessage[] generateComposedMails(final ComposedMailMessage source) throws OXException {
+    public ComposedMailMessage[] generateComposedMails(final ComposedMailMessage source, List<OXException> warnings) throws OXException {
         source.setBodyPart(textPart);
         for (final MailPart attachment : attachments) {
             source.addEnclosedPart(attachment);

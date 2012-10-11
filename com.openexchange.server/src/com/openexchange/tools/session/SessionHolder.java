@@ -53,11 +53,32 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.session.Session;
 
+/**
+ * {@link SessionHolder} - Provides a {@link Session} instance.
+ *
+ * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ */
 public interface SessionHolder {
 
+	/**
+	 * Gets the <tt>Session</tt> instance.
+	 * 
+	 * @return The <tt>Session</tt> instance
+	 */
 	public Session getSessionObject();
 
+	/**
+	 * Gets the context reference.
+	 * 
+	 * @return The context reference
+	 */
 	public Context getContext();
 
+	/**
+     * Gets the user reference.
+     * 
+     * @return The user reference
+     */
 	public User getUser();
 }

@@ -58,11 +58,11 @@ import com.openexchange.groupware.notify.State.Type;
  */
 public class ITipContainer {
 
-    private ITipMethod method;
+    private final ITipMethod method;
 
-    private Type type;
+    private final Type type;
 
-    private int userId;
+    private final int userId;
 
     public ITipContainer() {
         this(ITipMethod.NO_METHOD, null, -1);

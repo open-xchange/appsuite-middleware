@@ -135,6 +135,31 @@ public class AJAXRequestResult {
             throw new UnsupportedOperationException("Method not allowed for empty AJAX request result.");
         }
 
+        @Override
+        public void setParameter(final String name, final Object value) {
+            throw new UnsupportedOperationException("Method not allowed for empty AJAX request result.");
+        };
+
+        @Override
+        public void setResponseProperty(final String name, final Object value) {
+            throw new UnsupportedOperationException("Method not allowed for empty AJAX request result.");
+        };
+
+        @Override
+        public void removeHeader(final String header) {
+            throw new UnsupportedOperationException("Method not allowed for empty AJAX request result.");
+        };
+
+        @Override
+        public void removeParameter(final String name) {
+            throw new UnsupportedOperationException("Method not allowed for empty AJAX request result.");
+        };
+
+        @Override
+        public void removeResponseProperty(final String name) {
+            throw new UnsupportedOperationException("Method not allowed for empty AJAX request result.");
+        };
+
     };
 
     /**
@@ -142,7 +167,7 @@ public class AJAXRequestResult {
      */
     public static enum ResultType {
         /**
-         * A common request result which should be further handled.
+         * A common request result which should be further processed.
          */
         COMMON,
         /**
@@ -165,9 +190,15 @@ public class AJAXRequestResult {
 
     private final Map<String, Object> parameters;
 
+    private final Map<String, Object> responseProperties;
+
     private String format;
 
     private long expires;
+
+    private OXException exception;
+
+    private long duration;
 
     /**
      * Initializes a new {@link AJAXRequestResult} with data and time stamp set to <code>null</code>.
@@ -216,17 +247,77 @@ public class AJAXRequestResult {
      */
     public AJAXRequestResult(final Object resultObject, final Date timestamp, final String format) {
         super();
+        duration = -1L;
         headers = new LinkedHashMap<String, String>(8);
-        parameters = new HashMap<String, Object>(4);
+        parameters = new HashMap<String, Object>(8);
+        responseProperties = new HashMap<String, Object>(4);
         this.resultObject = resultObject;
         this.timestamp = null == timestamp ? null : new Date(timestamp.getTime());
-        if (format == null) {
-            this.format = JSON;
-        } else {
-            this.format = format;
-        }
+        this.format = null == format ? JSON : format;
         resultType = ResultType.COMMON;
         expires = -1;
+    }
+
+    /**
+     * Gets the duration.
+     * 
+     * @return The duration or <code>-1</code> if not set
+     */
+    public long getDuration() {
+        return duration;
+    }
+
+    /**
+     * Sets the duration
+     * 
+     * @param duration The duration to set
+     * @return This AJAX request result with duration applied
+     */
+    public AJAXRequestResult setDuration(final long duration) {
+        this.duration = duration < 0 ? -1L : duration;
+        return this;
+    }
+
+    /**
+     * Sets the duration by given processing start time stamp.
+     * 
+     * <pre>
+     * System.currentTimeMillis() - start;
+     * </pre>
+     * 
+     * @param start The start time stamp
+     * @return This AJAX request result with duration applied
+     */
+    public AJAXRequestResult setDurationByStart(final long start) {
+        return setDuration(System.currentTimeMillis() - start);
+    }
+
+    /**
+     * Adds given duration.
+     * 
+     * @param duration The duration to add
+     * @return This AJAX request result with duration applied
+     */
+    public AJAXRequestResult addDuration(final long duration) {
+        if (this.duration < 0) {
+            return setDuration(duration);
+        }
+        this.duration += duration;
+        return this;
+    }
+
+    /**
+     * Adds given duration by given start time stamp.
+     * 
+     * <pre>
+     * System.currentTimeMillis() - start;
+     * </pre>
+     * 
+     * @param start The start time stamp
+     * @return This AJAX request result with duration applied
+     */
+    public AJAXRequestResult addDurationByStart(final long start) {
+        return addDuration(System.currentTimeMillis() - start);
     }
 
     /**
@@ -330,9 +421,9 @@ public class AJAXRequestResult {
     }
 
     /**
-     * Sets the resultObject
+     * Sets the result object
      * 
-     * @param resultObject The resultObject to set
+     * @param resultObject The result object to set
      */
     public void setResultObject(final Object resultObject) {
         this.resultObject = resultObject;
@@ -366,7 +457,7 @@ public class AJAXRequestResult {
     }
 
     /**
-     * sets the time stamp.
+     * Sets the time stamp.
      * 
      * @param timestamp The time stamp.
      */
@@ -405,7 +496,18 @@ public class AJAXRequestResult {
      * Sets a header value
      */
     public void setHeader(final String header, final String value) {
-        headers.put(header, value);
+        if (null == value) {
+            headers.remove(header);
+        } else {
+            headers.put(header, value);
+        }
+    }
+
+    /**
+     * Removes a header value
+     */
+    public void removeHeader(final String header) {
+        headers.remove(header);
     }
 
     /**
@@ -439,13 +541,22 @@ public class AJAXRequestResult {
     }
 
     /**
+     * Removes a parameter.
+     * 
+     * @param name The parameter name
+     */
+    public void removeParameter(final String name) {
+        parameters.remove(name);
+    }
+
+    /**
      * Gets the associated parameter value.
      * 
      * @param name The parameter name
      * @return The associated value or <code>null</code> if there is no such parameter
      */
     public Object getParameter(final String name) {
-        return headers.get(name);
+        return parameters.get(name);
     }
 
     /**
@@ -455,6 +566,48 @@ public class AJAXRequestResult {
      */
     public Map<String, Object> getParameters() {
         return new HashMap<String, Object>(parameters);
+    }
+
+    /**
+     * Sets a response property.
+     * 
+     * @param name The property name
+     * @param value The value; if <code>null</code> a remove is performed
+     */
+    public void setResponseProperty(final String name, final Object value) {
+        if (null == value) {
+            responseProperties.remove(name);
+        } else {
+            responseProperties.put(name, value);
+        }
+    }
+
+    /**
+     * Removes a response property.
+     * 
+     * @param name The property name
+     */
+    public void removeResponseProperty(final String name) {
+        responseProperties.remove(name);
+    }
+
+    /**
+     * Gets the associated response property.
+     * 
+     * @param name The parameter name
+     * @return The associated response property or <code>null</code> if there is no such parameter
+     */
+    public Object getResponseProperty(final String name) {
+        return responseProperties.get(name);
+    }
+
+    /**
+     * Gets the response properties.
+     * 
+     * @return The response properties
+     */
+    public Map<String, Object> getResponseProperties() {
+        return responseProperties;
     }
 
     @Override
@@ -472,6 +625,14 @@ public class AJAXRequestResult {
     public void setResultObject(final Object object, final String format) {
         setResultObject(object);
         setFormat(format);
+    }
+
+    public void setException(final OXException exception) {
+        this.exception = exception;
+    }
+
+    public OXException getException() {
+        return exception;
     }
 
 }

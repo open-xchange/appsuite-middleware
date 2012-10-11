@@ -49,6 +49,7 @@
 
 package com.openexchange.mail.json.actions;
 
+import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.Mail;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
@@ -71,7 +72,7 @@ import com.openexchange.tools.session.ServerSession;
 public final class GetStructureAction extends AbstractMailAction {
 
     private static final org.apache.commons.logging.Log LOG =
-        Log.valueOf(org.apache.commons.logging.LogFactory.getLog(GetStructureAction.class));
+        Log.valueOf(com.openexchange.log.LogFactory.getLog(GetStructureAction.class));
 
     /**
      * Initializes a new {@link GetStructureAction}.
@@ -90,7 +91,7 @@ public final class GetStructureAction extends AbstractMailAction {
              * Read in parameters
              */
             AJAXRequestResult data = getJSONNullResult();
-            final String folderPath = req.checkParameter(Mail.PARAMETER_FOLDERID);
+            final String folderPath = req.checkParameter(AJAXServlet.PARAMETER_FOLDERID);
             // final String uid = paramContainer.checkStringParam(PARAMETER_ID);
             final boolean unseen;
             {
@@ -118,16 +119,19 @@ public final class GetStructureAction extends AbstractMailAction {
             final MailServletInterface mailInterface = getMailInterface(req);
             final String uid;
             {
-                String tmp2 = req.getParameter(Mail.PARAMETER_ID);
+                String tmp2 = req.getParameter(AJAXServlet.PARAMETER_ID);
                 if (null == tmp2) {
                     tmp2 = req.getParameter(Mail.PARAMETER_MESSAGE_ID);
                     if (null == tmp2) {
-                        throw AjaxExceptionCodes.MISSING_PARAMETER.create(Mail.PARAMETER_ID);
+                        throw AjaxExceptionCodes.MISSING_PARAMETER.create(AJAXServlet.PARAMETER_ID);
                     }
                     uid = mailInterface.getMailIDByMessageID(folderPath, tmp2);
                 } else {
                     uid = tmp2;
                 }
+            }
+            if (isEmpty(uid)) {
+                throw AjaxExceptionCodes.MISSING_PARAMETER.create(AJAXServlet.PARAMETER_ID);
             }
             /*
              * Get message
@@ -171,6 +175,11 @@ public final class GetStructureAction extends AbstractMailAction {
                         "Most likely this is caused by concurrent access of multiple clients ").append(
                         "while one performed a delete on affected mail.").toString(),
                     e);
+                final Object[] args = e.getDisplayArgs();
+                final String uid = null == args || 0 == args.length ? null : args[0].toString();
+                if ("undefined".equalsIgnoreCase(uid)) {
+                    throw MailExceptionCode.PROCESSING_ERROR.create(e, new Object[0]);
+                }
             } else {
                 LOG.error(e.getMessage(), e);
             }

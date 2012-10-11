@@ -51,6 +51,7 @@ package com.openexchange.contacts.json.actions;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.TimeZone;
 
@@ -62,28 +63,16 @@ import com.openexchange.ajax.fields.ContactFields;
 import com.openexchange.ajax.fields.SearchFields;
 import com.openexchange.ajax.parser.DataParser;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.contact.ContactFieldOperand;
 import com.openexchange.contacts.json.ContactRequest;
 import com.openexchange.documentation.RequestMethod;
 import com.openexchange.documentation.annotations.Action;
 import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.contact.ContactConfig;
 import com.openexchange.groupware.contact.ContactSearchMultiplexer;
-import com.openexchange.groupware.contact.Search;
-import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.search.ContactSearchObject;
 import com.openexchange.groupware.search.Order;
-import com.openexchange.search.CompositeSearchTerm;
-import com.openexchange.search.CompositeSearchTerm.CompositeOperation;
-import com.openexchange.search.SearchTerm;
-import com.openexchange.search.SingleSearchTerm;
-import com.openexchange.search.SingleSearchTerm.SingleOperation;
-import com.openexchange.search.internal.operands.ColumnOperand;
-import com.openexchange.search.internal.operands.ConstantOperand;
 import com.openexchange.server.ServiceLookup;
-import com.openexchange.tools.StringCollection;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.servlet.OXJSONExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
@@ -127,7 +116,7 @@ public class SearchAction extends ContactAction {
         final ContactSearchObject searchObject = createContactSearchObject((JSONObject) req.getData());
         final ContactSearchMultiplexer multiplexer = new ContactSearchMultiplexer(getContactInterfaceDiscoveryService());
         SearchIterator<Contact> it = null;
-        final List<Contact> contacts = new ArrayList<Contact>();
+        final List<Contact> contacts = new LinkedList<Contact>();
         try {
             it = multiplexer.extendedSearch(session, searchObject, sort, order, collation, columns);
             while (it.hasNext()) {
@@ -154,288 +143,33 @@ public class SearchAction extends ContactAction {
     }
 
     @Override
-    protected AJAXRequestResult perform2(final ContactRequest request) throws OXException, JSONException {
-    	final JSONObject jsonObject = request.getJSONData();
-        final SearchTerm<?> searchTerm = jsonObject.hasAndNotNull("pattern") ? parseSearchTerm(jsonObject) :  
-        	parseSearchTermAlternative(jsonObject);
-        final List<Contact> contacts = new ArrayList<Contact>();
+    protected AJAXRequestResult perform2(final ContactRequest request) throws OXException {
+    	JSONObject jsonObject = request.getJSONData();
+    	    	
+        ContactSearchObject contactSearch = createContactSearchObject(jsonObject);
+//        SearchTerm<?> searchTerm = new SearchTermParser(jsonObject).getSearchTerm();
+        
+        List<Contact> contacts = new ArrayList<Contact>();
         Date lastModified = new Date(0);
         SearchIterator<Contact> searchIterator = null;
         try {
-            searchIterator = getContactService().searchContacts(request.getSession(), searchTerm, request.getFields(), 
+            searchIterator = getContactService().searchContacts(request.getSession(), contactSearch, request.getFields(), 
             		request.getSortOptions());
+//            searchIterator = getContactService().searchContacts(request.getSession(), searchTerm, request.getFields(), 
+//            		request.getSortOptions());
             while (searchIterator.hasNext()) {
-                final Contact contact = searchIterator.next();
+                Contact contact = searchIterator.next();
                 lastModified = getLatestModified(lastModified, contact);
-                applyTimezoneOffset(contact, request.getTimeZone());
                 contacts.add(contact);
             }
         } finally {
-        	if (null != searchIterator) {
-        		searchIterator.close();
-        	}
+        	close(searchIterator);
         }
         request.sortInternalIfNeeded(contacts);
         return new AJAXRequestResult(contacts, lastModified, "contact");
     }
 
-    /**
-     * Parses a search term from JSON.
-     * 
-     * @param json
-     * @return
-     * @throws JSONException
-     * @throws OXException
-     */
-    private static SearchTerm<?> parseSearchTerm(final JSONObject json) throws JSONException, OXException {
-    	if (false == json.hasAndNotNull("pattern")) {
-    		throw OXException.mandatoryField("pattern");
-    	}
-    	final String pattern = json.getString("pattern");
-    	/*
-    	 * use start letter term when set
-    	 */
-    	SearchTerm<?> searchTerm = json.hasAndNotNull("startletter") ? getStartLetterTerm(pattern) : null;
-    	if (null == searchTerm || null == searchTerm.getOperands() || 0 == searchTerm.getOperands().length) {
-    		/*
-    		 * fallback to display name search
-    		 */
-    		searchTerm = getSearchTerm(ContactField.DISPLAY_NAME, pattern, true, true);
-    	}
-    	/*
-    	 * combine with folders term when set
-    	 */
-    	final SearchTerm<?> foldersTerm = json.hasAndNotNull("folder") ? parseFoldersTerm(json) : null;
-    	if (null != foldersTerm && null != foldersTerm.getOperands() && 0 < foldersTerm.getOperands().length) {
-    		searchTerm = null == searchTerm ? foldersTerm : getCompositeTerm(foldersTerm, searchTerm);
-    	} 
-    	return searchTerm;
-    }
-    
-    /**
-     * Parses an alternative search term from JSON.
-     * 
-     * @param json
-     * @return
-     * @throws JSONException
-     * @throws OXException
-     */
-    private SearchTerm<?> parseSearchTermAlternative(final JSONObject json) throws JSONException, OXException {
-    	/*
-    	 * create composite term
-    	 */
-    	final boolean emailAutoComplete = json.has("emailAutoComplete") && json.getBoolean("emailAutoComplete");
-    	final boolean orSearch = emailAutoComplete || json.has("orSearch") && json.getBoolean("orSearch");
-    	CompositeSearchTerm searchTerm = new CompositeSearchTerm(orSearch ? CompositeOperation.OR : CompositeOperation.AND);
-    	/*
-    	 * add search criteria
-    	 */
-    	for (final ContactField field : ALTERNATIVE_SEARCH_FIELDS) {
-        	if (json.hasAndNotNull(field.getAjaxName())) {
-        		final String pattern = json.getString(field.getAjaxName());
-        		searchTerm.addSearchTerm(getSearchTerm(field, pattern, false == orSearch, true));
-        	}
-		}
-    	/*
-    	 * combine with email auto complete 
-    	 */
-    	if (emailAutoComplete) {
-    		searchTerm = getCompositeTerm(searchTerm, HAS_EMAIL_TERM);
-    	}
-    	/*
-    	 * combine with folders term when set
-    	 */
-    	final SearchTerm<?> foldersTerm = json.hasAndNotNull("folder") ? parseFoldersTerm(json) : null;
-    	if (null != foldersTerm && null != foldersTerm.getOperands() && 0 < foldersTerm.getOperands().length) {
-    		searchTerm = getCompositeTerm(foldersTerm, searchTerm);
-    	}
-    	return searchTerm;
-    }
-    
-    /**
-     * Creates a new 'AND' composite search term using the supplied terms as
-     * operands.
-     * 
-     * @param term1 the first term
-     * @param term2 the second term
-     * @return the composite search term
-     */
-    private static CompositeSearchTerm getCompositeTerm(final SearchTerm<?> term1, final SearchTerm<?> term2) {
-		final CompositeSearchTerm andTerm = new CompositeSearchTerm(CompositeOperation.AND);    		
-		andTerm.addSearchTerm(term1);
-		andTerm.addSearchTerm(term2);
-		return andTerm;
-    }
-
-    /**
-     * Parses the "folder" information from the supplied json object and puts 
-     * the folder IDs into a suitable search term. 
-     * 
-     * @param json
-     * @return
-     * @throws JSONException
-     * @throws OXException
-     */
-    private static SearchTerm<?> parseFoldersTerm(final JSONObject json) throws JSONException, OXException {
-		if (JSONArray.class.isInstance(json.get("folder"))) {
-			return getFoldersTerm(DataParser.parseJSONStringArray(json, "folder"));			
-        } else {
-        	return getFolderTerm(DataParser.parseString(json, "folder"));
-        }
-    }
-    
-    /**
-     * Creates a search term to find contacts based on their parent folder.
-     * 
-     * @param folderIDs the IDs of the folders
-     * @return the search term
-     */
-	private static SearchTerm<?> getFoldersTerm(final String[] folderIDs) {
-		if (null == folderIDs || 0 == folderIDs.length) {
-			return null;			
-		} else if (1 == folderIDs.length) {
-			return getFolderTerm(folderIDs[0]);
-		} else {
-    		final CompositeSearchTerm orTerm = new CompositeSearchTerm(CompositeOperation.OR);
-			for (final String folderID : folderIDs) {
-				orTerm.addSearchTerm(getFolderTerm(folderID));
-			}
-			return orTerm;
-		}
-	}
-	
-    /**
-     * Creates a search term to find contacts based on their parent folder.
-     * 
-     * @param folderID the ID of the folder
-     * @return the search term
-     */
-    private static SingleSearchTerm getFolderTerm(final String folderID) {
-    	final SingleSearchTerm term = new SingleSearchTerm(SingleOperation.EQUALS);
-    	term.addOperand(new ContactFieldOperand(ContactField.FOLDER_ID));
-    	term.addOperand(new ConstantOperand<String>(folderID));
-    	return term;
-    }
-	
-    /**
-     * Creates a search term to find contacts based on their start letter.
-     * 
-     * @param pattern the start letter pattern
-     * @return the search term
-     */
-	private static SearchTerm<?> getStartLetterTerm(final String pattern) {
-		final String field = ContactConfig.getInstance().getString(ContactConfig.Property.LETTER_FIELD);            
-		if (".".equals(pattern) || "#".equals(pattern)) {
-			final CompositeSearchTerm andTerm = new CompositeSearchTerm(CompositeOperation.AND);
-			final CompositeSearchTerm orTerm = new CompositeSearchTerm(CompositeOperation.OR);
-			final SingleSearchTerm lessThanTerm = new SingleSearchTerm(SingleOperation.LESS_THAN);
-			lessThanTerm.addOperand(new ColumnOperand(field));
-			lessThanTerm.addOperand(new ConstantOperand<String>("0%"));
-			orTerm.addSearchTerm(lessThanTerm);
-			final SingleSearchTerm greaterThanTerm = new SingleSearchTerm(SingleOperation.GREATER_THAN);
-			greaterThanTerm.addOperand(new ColumnOperand(field));
-			greaterThanTerm.addOperand(new ConstantOperand<String>("z%"));
-			orTerm.addSearchTerm(greaterThanTerm);
-			andTerm.addSearchTerm(orTerm);
-			final SingleSearchTerm notEqualsTerm = new SingleSearchTerm(SingleOperation.NOT_EQUALS);
-			notEqualsTerm.addOperand(new ColumnOperand(field));
-			notEqualsTerm.addOperand(new ConstantOperand<String>("z%"));
-			andTerm.addSearchTerm(notEqualsTerm);
-			return andTerm;
-		} else if (pattern.matches("\\d")) {
-			final CompositeSearchTerm andTerm = new CompositeSearchTerm(CompositeOperation.AND);
-			final SingleSearchTerm greaterThanTerm = new SingleSearchTerm(SingleOperation.GREATER_THAN);
-			greaterThanTerm.addOperand(new ColumnOperand(field));
-			greaterThanTerm.addOperand(new ConstantOperand<String>("0%"));
-			andTerm.addSearchTerm(greaterThanTerm);
-			final SingleSearchTerm lessThanTerm = new SingleSearchTerm(SingleOperation.LESS_THAN);
-			lessThanTerm.addOperand(new ColumnOperand(field));
-			lessThanTerm.addOperand(new ConstantOperand<String>("a%"));
-			andTerm.addSearchTerm(lessThanTerm);
-			return andTerm;
-		} else if (false == "all".equals(pattern)) {
-			/*
-			 * ( ! ( <field> IS NULL ) AND <field> LIKE '<pattern>%' ) OR ( <field> IS NULL AND <fallbackField> LIKE '<pattern>%' )
-			 */
-			final ContactField fallbackField = ContactField.DISPLAY_NAME;
-			final CompositeSearchTerm orTerm = new CompositeSearchTerm(CompositeOperation.OR);
-			final CompositeSearchTerm andTerm = new CompositeSearchTerm(CompositeOperation.AND);
-			final CompositeSearchTerm andTerm2 = new CompositeSearchTerm(CompositeOperation.AND);
-			/*
-			 * ! ( <field> IS NULL )
-			 */
-			final CompositeSearchTerm notTerm = new CompositeSearchTerm(CompositeOperation.NOT);
-			final SingleSearchTerm isNullTerm = new SingleSearchTerm(SingleOperation.ISNULL);
-			isNullTerm.addOperand(new ColumnOperand(field));
-			notTerm.addSearchTerm(isNullTerm);
-			andTerm.addSearchTerm(notTerm);
-			/*
-			 * <field> LIKE '<pattern>%'
-			 */
-			final String preparedPattern = StringCollection.prepareForSearch(pattern, false, true, true);
-			final SingleSearchTerm equalsTerm = new SingleSearchTerm(SingleOperation.EQUALS);
-			equalsTerm.addOperand(new ColumnOperand(field));
-			equalsTerm.addOperand(new ConstantOperand<String>(preparedPattern));
-			andTerm.addSearchTerm(equalsTerm);
-			/*
-			 * <field> IS NULL
-			 */
-			andTerm2.addSearchTerm(isNullTerm);
-			/*
-			 * <fallbackField> LIKE '<pattern>%'
-			 */
-			final SingleSearchTerm equalsTerm2 = new SingleSearchTerm(SingleOperation.EQUALS);
-			equalsTerm2.addOperand(new ContactFieldOperand(fallbackField));
-			equalsTerm2.addOperand(new ConstantOperand<String>(preparedPattern));
-			andTerm2.addSearchTerm(equalsTerm2);
-
-			orTerm.addSearchTerm(andTerm);
-			orTerm.addSearchTerm(andTerm2);
-			return orTerm;
-		} else {
-			/*
-			 * no valid start letter pattern
-			 */
-			return null;
-		}
-	}
-   
-    private static final ContactField[] ALTERNATIVE_SEARCH_FIELDS = { ContactField.SUR_NAME, ContactField.GIVEN_NAME, 
-    	ContactField.DISPLAY_NAME, ContactField.EMAIL1, ContactField.EMAIL2, ContactField.EMAIL3, ContactField.COMPANY,
-    	ContactField.STREET_BUSINESS, ContactField.CITY_BUSINESS, ContactField.DEPARTMENT, ContactField.CATEGORIES, 
-    	ContactField.YOMI_FIRST_NAME, ContactField.YOMI_LAST_NAME, ContactField.YOMI_COMPANY    	
-    };
-    
-    private static final CompositeSearchTerm HAS_EMAIL_TERM;
-    static {
-    	final ContactField[] emailFields = { ContactField.EMAIL1, ContactField.EMAIL2, ContactField.EMAIL3 };
-		final CompositeSearchTerm andTerm = new CompositeSearchTerm(CompositeOperation.AND);
-    	for (final ContactField field : emailFields) {
-    		final SingleSearchTerm term = new SingleSearchTerm(SingleOperation.ISNULL);
-    		term.addOperand(new ContactFieldOperand(field));
-    		andTerm.addSearchTerm(term);
-    	}
-    	final CompositeSearchTerm notTerm = new CompositeSearchTerm(CompositeOperation.NOT);
-    	notTerm.addSearchTerm(andTerm);
-    	final SingleSearchTerm distributionListTerm = new SingleSearchTerm(SingleOperation.GREATER_THAN);
-    	distributionListTerm.addOperand(new ContactFieldOperand(ContactField.NUMBER_OF_DISTRIBUTIONLIST));
-    	distributionListTerm.addOperand(new ConstantOperand<Integer>(0));
-    	HAS_EMAIL_TERM = new CompositeSearchTerm(CompositeOperation.OR);
-    	HAS_EMAIL_TERM.addSearchTerm(notTerm);
-    	HAS_EMAIL_TERM.addSearchTerm(distributionListTerm);
-    	
-    }
-    
-    private static SingleSearchTerm getSearchTerm(final ContactField field, final String pattern, final boolean prependWildcard, 
-    		final boolean appendWildcard) throws OXException {
-		final SingleSearchTerm term = new SingleSearchTerm(SingleOperation.EQUALS);
-		term.addOperand(new ContactFieldOperand(field));
-		Search.checkPatternLength(pattern);
-		term.addOperand(new ConstantOperand<String>(StringCollection.prepareForSearch(pattern, prependWildcard, appendWildcard, true)));
-		return term;
-    }
-
-    private ContactSearchObject createContactSearchObject(final JSONObject json) throws OXException {
+    private static ContactSearchObject createContactSearchObject(JSONObject json) throws OXException {
         ContactSearchObject searchObject = null;
         try {
             searchObject = new ContactSearchObject();

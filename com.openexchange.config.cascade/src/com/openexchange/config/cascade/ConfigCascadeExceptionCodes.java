@@ -70,6 +70,11 @@ public enum ConfigCascadeExceptionCodes implements OXExceptionCode {
     CAN_NOT_SET_PROPERTY(ConfigCascadeExceptionMessages.CAN_NOT_SET_PROPERTY_MSG, Category.CATEGORY_ERROR, 4),
     ;
 
+    /**
+     * The prefix for ConfigCascadeException.
+     */
+    public static final String PREFIX = "CONF";
+
     private final Category category;
 
     private final int detailNumber;
@@ -84,7 +89,7 @@ public enum ConfigCascadeExceptionCodes implements OXExceptionCode {
 
     @Override
     public String getPrefix() {
-        return "CONF";
+        return PREFIX;
     }
 
     @Override

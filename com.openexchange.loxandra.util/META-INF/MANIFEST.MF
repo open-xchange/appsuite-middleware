@@ -1,0 +1,9 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Open-Xchange Loxandra Util Bundle
+Bundle-SymbolicName: com.openexchange.loxandra.util
+Bundle-Version: 6.21.0
+Bundle-Vendor: Open-Xchange
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Import-Package: com.openexchange.log,
+ org.apache.commons.logging

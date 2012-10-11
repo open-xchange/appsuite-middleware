@@ -49,22 +49,35 @@
 
 package com.openexchange.preview.thirdwing;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Observable;
 import java.util.Observer;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.locks.Condition;
+import java.util.concurrent.locks.ReentrantLock;
 import java.util.regex.Pattern;
+
+import net.thirdwing.common.IContentIterator;
+import net.thirdwing.common.IConversionJob;
 import net.thirdwing.common.UpdateMessages;
+import net.thirdwing.exception.XHTMLConversionException;
+import net.thirdwing.io.IOUnit;
+
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Streams;
 import com.openexchange.preview.PreviewExceptionCodes;
 import com.openexchange.session.Session;
-import com.openexchange.threadpool.AbstractTask;
 
 /**
  * {@link TransformationObservationTask}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public class TransformationObservationTask extends AbstractTask<String> implements Observer {
+public class TransformationObservationTask implements Observer {
 
     /*
      * TODO:
@@ -90,26 +103,65 @@ public class TransformationObservationTask extends AbstractTask<String> implemen
     private final Session session;
 
     private final AtomicBoolean done;
-
-    private String content;
+    private final AtomicBoolean hasMore;
+    
+    private final ReentrantLock lock = new ReentrantLock();
+    private final Condition signal = lock.newCondition();
+    private final AtomicBoolean pageRendered;
+    
+    
+    private final List<String> content;
 
     private OXException exception;
+	private final int pages;
+	private final IConversionJob transformer;
+	private final File file;
+	private IContentIterator contentIterator;
 
 
-    public TransformationObservationTask(final StreamProvider streamProvider, final Session session) {
+    public TransformationObservationTask(final StreamProvider streamProvider, final Session session, final int pages, final IConversionJob transformer, final File file) {
         super();
         this.streamProvider = streamProvider;
         this.session = session;
         done = new AtomicBoolean(false);
+        hasMore = new AtomicBoolean(true);
+        pageRendered = new AtomicBoolean(true);
+        
+        content = new ArrayList<String>();
+        this.pages = pages;
+        this.transformer = transformer;
+        this.file = file;
     }
 
-    @Override
-    public String call() {
-        while (!done.get()) {
-            // Loop
-        }
+    public List<String> call() {
+    	
+    	FileInputStream fis = null;
+    	try {
+        	transformer.addObserver(this);
+        	final IOUnit unit = new IOUnit((fis = new FileInputStream(file)));
+        	unit.setStreamProvider(streamProvider);
+        	contentIterator = transformer.transformDocument(unit, 80, true); 
+        	while (contentIterator.hasNext() && !done.get()) {
+        		try {
+        			contentIterator.writeNextContent();
+        		} finally {
+        		}
+				// Wait for Event
+				
+				
+            }
+    	} catch (final FileNotFoundException e) {
+			exception = PreviewExceptionCodes.ERROR.create();
+		} catch (final XHTMLConversionException e) {
+			exception = PreviewExceptionCodes.ERROR.create();
+		} finally {
+		    if (contentIterator != null) {
+		        contentIterator.releaseData();
+		    }
+    		Streams.close(fis);
+    	}
 
-        done.set(false);
+    	//System.out.println(content);
         return content;
     }
 
@@ -121,23 +173,40 @@ public class TransformationObservationTask extends AbstractTask<String> implemen
     public void update(final Observable o, final Object obj) {
         final UpdateMessages message = (UpdateMessages) obj;
         final String key = message.getKey();
-        if (key.equals(UpdateMessages.HTML_TRANSFORMATION_FINISHED) || key.equals(UpdateMessages.PAGE_TRANSFORMATION_FINISHED)) {
+        //System.out.println("UpdateMessage.getKey(): " + key);
+        final boolean htmlFinished = key.equals(UpdateMessages.HTML_TRANSFORMATION_FINISHED);
+		final boolean pageFinished = key.equals(UpdateMessages.PAGE_TRANSFORMATION_FINISHED);
+		if (htmlFinished || pageFinished) {
             try {
-                this.content = streamProvider.getDocumentContent();
+                //Thread.sleep(2000);
+            	final String page = streamProvider.getDocumentContent();
+            	//System.out.println(page);
+            	if (htmlFinished) {
+    				//this.content.set(this.content.size() - 1, page); // *shrugs* Recovery. For some reason the page before the last is reported twice
+                    //this.content.add(page);
+            	} else {
+    				this.content.add(page);
+            	}
             } catch (final OXException e) {
                 exception = e;
+
             } finally {
-                done.compareAndSet(false, true);
+            	if ((pages != -1 && this.content.size() >= pages) || htmlFinished) {
+                    done.compareAndSet(false, true);
+            	}
+            	if (htmlFinished) {
+            		hasMore.set(false);
+            	}
             }
         } else if (key.equals(UpdateMessages.HTML_TRANSFORMATION_FAILED)) {
             final Exception e = (Exception) message.getData();
             exception = PreviewExceptionCodes.ERROR.create(e);
             done.compareAndSet(false, true);
         } else if (key.equals(UpdateMessages.PREVIEW_IMAGE_CREATION_STARTED) || message.getKey().equals(UpdateMessages.PREVIEW_IMAGE_CREATION_FAILED)) {
-            final Object data = message.getData();
-            System.out.println(data.toString());
         }
     }
-
-
+    
+    public boolean hasMoreContent() {
+    	return hasMore.get();
+    }
 }

@@ -5,7 +5,7 @@
 package com.openexchange.proxy.servlet.osgi;
 
 import javax.servlet.ServletException;
-import org.apache.commons.logging.LogFactory;
+import com.openexchange.log.LogFactory;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.http.HttpService;

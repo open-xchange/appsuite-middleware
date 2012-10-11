@@ -70,18 +70,10 @@ public abstract class IntegerMapping<O> extends DefaultJsonMapping<Integer, O> {
 	public void deserialize(final JSONObject from, final O to) throws JSONException, OXException {
 		final long value = from.getLong(getAjaxName());
 		final int intValue = (int)value;
-	    if ((long)intValue != value) {
+	    if (intValue != value) {
 	        throw new IllegalArgumentException(value + " cannot be cast to int without changing its value.");
 	    }
 		this.set(to, Integer.valueOf(intValue));
-	}
-
-	@Override
-	public void serialize(final O from, final JSONObject to) throws JSONException {
-		final Integer value = this.get(from);
-		if (null != value) {
-			to.put(getAjaxName(), value.longValue());
-        }
 	}
 
 }

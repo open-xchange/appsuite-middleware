@@ -49,6 +49,8 @@
 
 package com.openexchange.mail.json.actions;
 
+import java.util.ArrayList;
+import java.util.List;
 import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
@@ -71,7 +73,7 @@ import com.openexchange.tools.session.ServerSession;
 public final class AutosaveAction extends AbstractMailAction {
 
     private static final org.apache.commons.logging.Log LOG =
-        com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(AutosaveAction.class));
+        com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(AutosaveAction.class));
 
     /**
      * Initializes a new {@link AutosaveAction}.
@@ -88,13 +90,14 @@ public final class AutosaveAction extends AbstractMailAction {
             final ServerSession session = req.getSession();
             final MailServletInterface mailInterface = getMailInterface(req);
             String msgIdentifier = null;
+            final List<OXException> warnings = new ArrayList<OXException>();
             {
                 final JSONObject jsonMailObj = (JSONObject) req.getRequest().getData();
                 /*
                  * Parse with default account's transport provider
                  */
                 final ComposedMailMessage composedMail =
-                    MessageParser.parse4Draft(jsonMailObj, (UploadEvent) null, session, MailAccount.DEFAULT_ID);
+                    MessageParser.parse4Draft(jsonMailObj, (UploadEvent) null, session, MailAccount.DEFAULT_ID, warnings);
                 if ((composedMail.getFlags() & MailMessage.FLAG_DRAFT) == 0) {
                     LOG.warn("Missing \\Draft flag on action=autosave in JSON message object", new Throwable());
                     composedMail.setFlag(MailMessage.FLAG_DRAFT, true);
@@ -130,12 +133,14 @@ public final class AutosaveAction extends AbstractMailAction {
                 }
             }
             if (msgIdentifier == null) {
-                throw MailExceptionCode.SEND_FAILED_UNKNOWN.create();
+                throw MailExceptionCode.DRAFT_FAILED_UNKNOWN.create();
             }
             /*
              * Fill JSON response object
              */
-            return new AJAXRequestResult(msgIdentifier, "string");
+            final AJAXRequestResult result = new AJAXRequestResult(msgIdentifier, "string");
+            result.addWarnings(warnings);
+            return result;
         } catch (final RuntimeException e) {
             throw MailExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
         }

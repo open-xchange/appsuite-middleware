@@ -82,7 +82,7 @@ public class ProxyServletActivator extends AbstractSessionServletActivator {
 
     @Override
     public void startBundle() throws Exception {
-        final org.apache.commons.logging.Log log = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(ProxyServletActivator.class));
+        final org.apache.commons.logging.Log log = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(ProxyServletActivator.class));
         try {
             if (log.isInfoEnabled()) {
                 log.info("starting bundle: com.openexchange.proxy.servlet");
@@ -116,7 +116,7 @@ public class ProxyServletActivator extends AbstractSessionServletActivator {
 
     @Override
     public void stopBundle() throws Exception {
-        final org.apache.commons.logging.Log log = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(ProxyServletActivator.class));
+        final org.apache.commons.logging.Log log = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(ProxyServletActivator.class));
         try {
             if (log.isInfoEnabled()) {
                 log.info("stopping bundle: com.openexchange.proxy.servlet");

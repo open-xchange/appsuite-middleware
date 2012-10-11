@@ -77,6 +77,10 @@ import java.util.Queue;
 import com.openexchange.cache.impl.FolderCacheManager;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
+import com.openexchange.file.storage.FileStorageAccount;
+import com.openexchange.file.storage.FileStorageAccountAccess;
+import com.openexchange.file.storage.FileStorageFolder;
+import com.openexchange.file.storage.FileStorageService;
 import com.openexchange.folderstorage.ContentType;
 import com.openexchange.folderstorage.Folder;
 import com.openexchange.folderstorage.FolderExceptionErrorMessage;
@@ -101,6 +105,7 @@ import com.openexchange.folderstorage.database.getfolder.SystemPublicFolder;
 import com.openexchange.folderstorage.database.getfolder.SystemRootFolder;
 import com.openexchange.folderstorage.database.getfolder.SystemSharedFolder;
 import com.openexchange.folderstorage.database.getfolder.VirtualListFolder;
+import com.openexchange.folderstorage.filestorage.FileStorageFolderIdentifier;
 import com.openexchange.folderstorage.type.PrivateType;
 import com.openexchange.folderstorage.type.PublicType;
 import com.openexchange.folderstorage.type.SharedType;
@@ -108,6 +113,7 @@ import com.openexchange.folderstorage.type.SystemType;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.i18n.FolderStrings;
+import com.openexchange.groupware.infostore.InfostoreFacades;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.tools.iterator.FolderObjectIterator;
@@ -137,7 +143,7 @@ import com.openexchange.tools.sql.DBUtils;
 public final class DatabaseFolderStorage implements FolderStorage {
 
     private static final org.apache.commons.logging.Log LOG =
-        com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(DatabaseFolderStorage.class));
+        com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(DatabaseFolderStorage.class));
 
     private static final String PARAM_CONNECTION = DatabaseParameterConstants.PARAM_CONNECTION;
 
@@ -229,6 +235,8 @@ public final class DatabaseFolderStorage implements FolderStorage {
          */
     }
 
+    private static final int MAX = 3;
+
     @Override
     public void checkConsistency(final String treeId, final StorageParameters storageParameters) throws OXException {
         final DatabaseService databaseService = DatabaseServiceRegistry.getService(DatabaseService.class, true);
@@ -254,11 +262,19 @@ public final class DatabaseFolderStorage implements FolderStorage {
              */
             final Context context = session.getContext();
             int[] nonExistingParents = OXFolderSQL.getNonExistingParents(context, con);
+            /*
+             * Some variables
+             */
             final TIntSet shared = new TIntHashSet();
             final OXFolderManager manager = OXFolderManager.getInstance(session, con, con);
             final OXFolderAccess folderAccess = getFolderAccess(context, con);
             final int userId = session.getUserId();
             final long now = System.currentTimeMillis();
+            /*
+             * Iterate folders
+             */
+            int runCount = 0;
+            final TIntSet tmp = new TIntHashSet();
             do {
                 for (final int folderId : nonExistingParents) {
                     if (folderId >= FolderObject.MIN_FOLDER_ID) {
@@ -269,13 +285,18 @@ public final class DatabaseFolderStorage implements FolderStorage {
                         }
                     }
                 }
-                final TIntSet tmp = new TIntHashSet(OXFolderSQL.getNonExistingParents(context, con));
-                tmp.removeAll(shared.toArray());
-                for (int i = 0; i < FolderObject.MIN_FOLDER_ID; i++) {
-                    tmp.remove(i);
+                tmp.clear();
+                tmp.addAll(OXFolderSQL.getNonExistingParents(context, con));
+                if (tmp.isEmpty()) {
+                    nonExistingParents = null;
+                } else {
+                    tmp.removeAll(shared.toArray());
+                    for (int i = 0; i < FolderObject.MIN_FOLDER_ID; i++) {
+                        tmp.remove(i);
+                    }
+                    nonExistingParents = tmp.toArray();
                 }
-                nonExistingParents = tmp.toArray();
-            } while (null != nonExistingParents && nonExistingParents.length > 0);
+            } while (++runCount <= MAX && null != nonExistingParents && nonExistingParents.length > 0);
         } finally {
             if (null != con && close) {
                 databaseService.backWritable(contextId, con);
@@ -499,7 +520,7 @@ public final class DatabaseFolderStorage implements FolderStorage {
 
     private static final int[] PUBLIC_FOLDER_IDS =
         {
-            FolderObject.SYSTEM_PUBLIC_FOLDER_ID, FolderObject.SYSTEM_USER_INFOSTORE_FOLDER_ID,
+            FolderObject.SYSTEM_PUBLIC_FOLDER_ID, FolderObject.SYSTEM_INFOSTORE_FOLDER_ID, FolderObject.SYSTEM_USER_INFOSTORE_FOLDER_ID,
             FolderObject.SYSTEM_PUBLIC_INFOSTORE_FOLDER_ID };
 
     private static int getFolderType(final int parentId, final Context ctx, final Connection con) throws OXException, OXException {
@@ -791,7 +812,7 @@ public final class DatabaseFolderStorage implements FolderStorage {
                     final int folderId = getUnsignedInteger(folderIdentifier);
 
                     if (folderId < 0) {
-                        throw OXFolderExceptionCode.NOT_EXISTS.create(folderIdentifier, ctx.getContextId());
+                        throw OXFolderExceptionCode.NOT_EXISTS.create(folderIdentifier, Integer.valueOf(ctx.getContextId()));
                     }
 
                     if (FolderObject.SYSTEM_ROOT_FOLDER_ID == folderId) {
@@ -816,7 +837,7 @@ public final class DatabaseFolderStorage implements FolderStorage {
                 final int folderId = getUnsignedInteger(folderIdentifier);
 
                 if (folderId < 0) {
-                    throw OXFolderExceptionCode.NOT_EXISTS.create(folderIdentifier, ctx.getContextId());
+                    throw OXFolderExceptionCode.NOT_EXISTS.create(folderIdentifier, Integer.valueOf(ctx.getContextId()));
                 }
 
                 final FolderObject fo =
@@ -1250,6 +1271,57 @@ public final class DatabaseFolderStorage implements FolderStorage {
                     list.add(new DatabaseId(sa[0], i, sa[1]));
                 }
                 return list.toArray(new SortableId[list.size()]);
+            }
+
+            if (FolderObject.SYSTEM_USER_INFOSTORE_FOLDER_ID == parentId) {
+                if (!InfostoreFacades.isInfoStoreAvailable()) {
+                    final Session session = storageParameters.getSession();
+                    final FileStorageAccount defaultAccount = DatabaseFolderConverter.getDefaultFileStorageAccess(session);
+                    if (null != defaultAccount) {
+                        final FileStorageService fileStorageService = defaultAccount.getFileStorageService();
+                        final String defaultId = FileStorageAccount.DEFAULT_ID;
+                        final FileStorageAccountAccess defaultFileStorageAccess = fileStorageService.getAccountAccess(defaultId, session);
+                        defaultFileStorageAccess.connect();
+                        try {
+                            final FileStorageFolder personalFolder = defaultFileStorageAccess.getFolderAccess().getPersonalFolder();
+                            final FileStorageFolderIdentifier fsfi = new FileStorageFolderIdentifier(
+                                fileStorageService.getId(),
+                                defaultAccount.getId(),
+                                personalFolder.getId());
+                            return new SortableId[] { new DatabaseId(fsfi.toString(), 0, personalFolder.getName()) };
+                            // TODO: Shared?
+                        } finally {
+                            defaultFileStorageAccess.close();
+                        }
+                    }
+                }
+            }
+
+            if (FolderObject.SYSTEM_PUBLIC_INFOSTORE_FOLDER_ID == parentId) {
+                if (!InfostoreFacades.isInfoStoreAvailable()) {
+                    final Session session = storageParameters.getSession();
+                    final FileStorageAccount defaultAccount = DatabaseFolderConverter.getDefaultFileStorageAccess(session);
+                    if (null != defaultAccount) {
+                        final FileStorageService fileStorageService = defaultAccount.getFileStorageService();
+                        final String defaultId = FileStorageAccount.DEFAULT_ID;
+                        final FileStorageAccountAccess defaultFileStorageAccess = fileStorageService.getAccountAccess(defaultId, session);
+                        defaultFileStorageAccess.connect();
+                        try {
+                            final FileStorageFolder[] publicFolders = defaultFileStorageAccess.getFolderAccess().getPublicFolders();
+                            final SortableId[] ret = new SortableId[publicFolders.length];
+                            final String serviceId = fileStorageService.getId();
+                            final String accountId = defaultAccount.getId();
+                            for (int i = 0; i < publicFolders.length; i++) {
+                                final FileStorageFolder folder = publicFolders[i];
+                                final FileStorageFolderIdentifier fsfi = new FileStorageFolderIdentifier(serviceId, accountId, folder.getId());
+                                ret[i] = new DatabaseId(fsfi.toString(), i, folder.getName());
+                            }
+                            return ret;
+                        } finally {
+                            defaultFileStorageAccess.close();
+                        }
+                    }
+                }
             }
 
             /*-

@@ -50,13 +50,16 @@
 package com.openexchange.file.storage.config.osgi;
 
 import java.util.Properties;
+import java.util.concurrent.ConcurrentMap;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
+import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.file.storage.FileStorageAccountManagerProvider;
-import com.openexchange.file.storage.config.ConfigFileStorageAccountManagerProvider;
-import com.openexchange.file.storage.config.ConfigFileStorageAccountParser;
-import com.openexchange.file.storage.config.services.ConfigFileStorageServiceRegistry;
+import com.openexchange.file.storage.config.ConfigFileStorageAuthenticator;
+import com.openexchange.file.storage.config.internal.ConfigFileStorageAccountManagerProvider;
+import com.openexchange.file.storage.config.internal.ConfigFileStorageAccountParser;
 import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.osgi.ServiceRegistry;
 
 /**
  * {@link ConfigFileStorageActivator}
@@ -80,23 +83,21 @@ public final class ConfigFileStorageActivator extends HousekeepingActivator {
 
     @Override
     protected void handleUnavailability(final Class<?> clazz) {
-        final org.apache.commons.logging.Log logger = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(ConfigFileStorageActivator.class));
+        final org.apache.commons.logging.Log logger = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(ConfigFileStorageActivator.class));
         if (logger.isWarnEnabled()) {
             logger.warn("Absent service: " + clazz.getName());
         }
         if (ConfigurationService.class.equals(clazz)) {
             dropFileStorageProperties();
         }
-        ConfigFileStorageServiceRegistry.getServiceRegistry().removeService(clazz);
     }
 
     @Override
     protected void handleAvailability(final Class<?> clazz) {
-        final org.apache.commons.logging.Log logger = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(ConfigFileStorageActivator.class));
+        final org.apache.commons.logging.Log logger = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(ConfigFileStorageActivator.class));
         if (logger.isInfoEnabled()) {
             logger.info("Re-available service: " + clazz.getName());
         }
-        ConfigFileStorageServiceRegistry.getServiceRegistry().addService(clazz, getService(clazz));
         if (ConfigurationService.class.equals(clazz)) {
             parseFileStorageProperties(getService(ConfigurationService.class));
         }
@@ -104,27 +105,50 @@ public final class ConfigFileStorageActivator extends HousekeepingActivator {
 
     @Override
     protected void startBundle() throws Exception {
-        final org.apache.commons.logging.Log log = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(ConfigFileStorageActivator.class));
+        final org.apache.commons.logging.Log log = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(ConfigFileStorageActivator.class));
         try {
             if (log.isInfoEnabled()) {
                 log.info("starting bundle: com.openexchange.file.storage.config");
             }
             /*
-             * (Re-)Initialize service registry with available services
-             */
-            final ServiceRegistry registry = ConfigFileStorageServiceRegistry.getServiceRegistry();
-            registry.clearRegistry();
-            final Class<?>[] classes = getNeededServices();
-            for (final Class<?> classe : classes) {
-                final Object service = getService(classe);
-                if (null != service) {
-                    registry.addService(classe, service);
-                }
-            }
-            /*
              * Parse file storage configuration
              */
-            parseFileStorageProperties(registry.getService(ConfigurationService.class, true));
+            parseFileStorageProperties(getService(ConfigurationService.class));
+            /*
+             * Tracker
+             */
+            final BundleContext context = this.context;
+            final ConcurrentMap<ConfigFileStorageAuthenticator, ConfigFileStorageAuthenticator> authenticators = ConfigFileStorageAccountParser.getInstance().getAuthenticators();
+            final ServiceTrackerCustomizer<ConfigFileStorageAuthenticator, ConfigFileStorageAuthenticator> customizer = new ServiceTrackerCustomizer<ConfigFileStorageAuthenticator, ConfigFileStorageAuthenticator>() {
+
+                @Override
+                public ConfigFileStorageAuthenticator addingService(final ServiceReference<ConfigFileStorageAuthenticator> reference) {
+                    final ConfigFileStorageAuthenticator authenticator = context.getService(reference);
+                    if (null == authenticators.putIfAbsent(authenticator, authenticator)) {
+                        return authenticator;
+                    }
+                    context.ungetService(reference);
+                    return null;
+                }
+
+                @Override
+                public void modifiedService(final ServiceReference<ConfigFileStorageAuthenticator> reference, final ConfigFileStorageAuthenticator authenticator) {
+                    // Nope
+                }
+
+                @Override
+                public void removedService(final ServiceReference<ConfigFileStorageAuthenticator> reference, final ConfigFileStorageAuthenticator authenticator) {
+                    if (null != authenticator) {
+                        try {
+                            authenticators.remove(authenticator);
+                        } finally {
+                            context.ungetService(reference);
+                        }
+                    }
+                }
+            };
+            track(ConfigFileStorageAuthenticator.class, customizer);
+            openTrackers();
             /*
              * Register services
              */
@@ -137,7 +161,7 @@ public final class ConfigFileStorageActivator extends HousekeepingActivator {
 
     @Override
     protected void stopBundle() throws Exception {
-        final org.apache.commons.logging.Log log = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(ConfigFileStorageActivator.class));
+        final org.apache.commons.logging.Log log = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(ConfigFileStorageActivator.class));
         try {
             if (log.isInfoEnabled()) {
                 log.info("stopping bundle: com.openexchange.file.storage.config");

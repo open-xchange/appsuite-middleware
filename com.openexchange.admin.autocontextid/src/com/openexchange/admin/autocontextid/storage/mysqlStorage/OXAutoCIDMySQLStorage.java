@@ -52,7 +52,7 @@ package com.openexchange.admin.autocontextid.storage.mysqlStorage;
 import java.sql.Connection;
 import java.sql.SQLException;
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import com.openexchange.log.LogFactory;
 import com.openexchange.admin.autocontextid.daemons.ClientAdminThreadExtended;
 import com.openexchange.admin.autocontextid.storage.sqlStorage.OXAutoCIDSQLStorage;
 import com.openexchange.admin.rmi.exceptions.PoolException;
@@ -74,6 +74,7 @@ public final class OXAutoCIDMySQLStorage extends OXAutoCIDSQLStorage {
     }
 
     public OXAutoCIDMySQLStorage() {
+        super();
     }
 
     /* (non-Javadoc)
@@ -81,17 +82,18 @@ public final class OXAutoCIDMySQLStorage extends OXAutoCIDSQLStorage {
      */
     @Override
     public int generateContextId() throws StorageException {
-        Connection con = null;
+        final Connection con;
         try {
             con = cache.getConnectionForConfigDB();
+        } catch (final PoolException e) {
+            log.error(e.getMessage(), e);
+            throw new StorageException(e.getMessage());
+        }
+        try {
             con.setAutoCommit(false);
             int id = IDGenerator.getId(con, -2);
             con.commit();
             return id;
-        } catch (final PoolException e) {
-            log.error(e.getMessage(), e);
-            doRollback(con);
-            throw new StorageException(e.getMessage());
         } catch (final SQLException e) {
             log.error(e.getMessage(), e);
             doRollback(con);
@@ -101,7 +103,7 @@ public final class OXAutoCIDMySQLStorage extends OXAutoCIDSQLStorage {
         }
     }
 
-    private void doRollback(final Connection con) {
+    private static void doRollback(final Connection con) {
         try {
             con.rollback();
         } catch (final SQLException e2) {

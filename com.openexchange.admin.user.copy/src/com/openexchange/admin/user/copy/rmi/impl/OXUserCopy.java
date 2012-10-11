@@ -51,7 +51,6 @@ package com.openexchange.admin.user.copy.rmi.impl;
 
 import static com.openexchange.java.Autoboxing.i;
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.osgi.framework.BundleContext;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
@@ -60,6 +59,7 @@ import com.openexchange.admin.rmi.exceptions.DatabaseUpdateException;
 import com.openexchange.admin.rmi.exceptions.InvalidCredentialsException;
 import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 import com.openexchange.admin.rmi.exceptions.NoSuchContextException;
+import com.openexchange.admin.rmi.exceptions.NoSuchObjectException;
 import com.openexchange.admin.rmi.exceptions.NoSuchUserException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.rmi.exceptions.UserExistsException;
@@ -68,6 +68,7 @@ import com.openexchange.admin.rmi.impl.OXCommonImpl;
 import com.openexchange.admin.rmi.impl.OXUser;
 import com.openexchange.admin.user.copy.rmi.OXUserCopyInterface;
 import com.openexchange.exception.OXException;
+import com.openexchange.log.LogFactory;
 import com.openexchange.user.copy.UserCopyService;
 
 public class OXUserCopy extends OXCommonImpl implements OXUserCopyInterface {
@@ -86,6 +87,7 @@ public class OXUserCopy extends OXCommonImpl implements OXUserCopyInterface {
         this.service = service;
     }
 
+    @Override
     public User copyUser(final User user, final Context src, final Context dest, final Credentials auth) throws InvalidDataException, InvalidCredentialsException, StorageException, NoSuchUserException, DatabaseUpdateException, NoSuchContextException, UserExistsException {
         try {
             doNullCheck(user);
@@ -104,7 +106,11 @@ public class OXUserCopy extends OXCommonImpl implements OXUserCopyInterface {
             checkContextAndSchema(src);
             checkContextAndSchema(dest);
 
-            setIdOrGetIDFromNameAndIdObject(src, user);
+            try {
+                setIdOrGetIDFromNameAndIdObject(src, user);
+            } catch (NoSuchObjectException e) {
+                throw new NoSuchUserException(e);
+            }
             user.testMandatoryCreateFieldsNull();
             final Integer userid = user.getId();
 
@@ -132,7 +138,7 @@ public class OXUserCopy extends OXCommonImpl implements OXUserCopyInterface {
         final int newUserId;
         try {
             newUserId = service.copyUser(i(src.getId()), i(dest.getId()), i(user.getId()));
-        } catch (OXException e) {
+        } catch (final OXException e) {
             LOG.error(e.getMessage(), e);
             throw new StorageException(e.getMessage());
         }

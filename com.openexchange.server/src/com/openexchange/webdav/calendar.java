@@ -55,8 +55,8 @@ import java.util.Date;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.jdom.output.XMLOutputter;
+import com.openexchange.log.LogFactory;
+import org.jdom2.output.XMLOutputter;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 import com.openexchange.api2.AppointmentSQLInterface;
@@ -104,6 +104,11 @@ public final class calendar extends XmlServlet<AppointmentSQLInterface> {
     @Override
     protected Interface getInterface() {
         return Interface.WEBDAV_XML;
+    }
+    
+    @Override
+    protected boolean isServletDisabled() {
+        return true;
     }
 
     @Override
@@ -188,7 +193,7 @@ public final class calendar extends XmlServlet<AppointmentSQLInterface> {
         }
         // For removing the sequence information we need to tell the server that the appointment no longer has a recurrence type.
         if (!appointmentobject.containsRecurrenceType()) {
-            appointmentobject.setRecurrenceType(CalendarDataObject.NO_RECURRENCE);
+            appointmentobject.setRecurrenceType(CalendarObject.NO_RECURRENCE);
         }
     }
 
@@ -349,6 +354,7 @@ public final class calendar extends XmlServlet<AppointmentSQLInterface> {
 //                }
 //            }
             catch (final OXException exc) {
+            	exc.log(LOG);
                 if (exc.isMandatory()) {
                     LOG.debug(_parsePropChilds, exc);
                     writeResponse(appointmentobject, HttpServletResponse.SC_CONFLICT, getErrorMessage(exc,
@@ -359,8 +365,7 @@ public final class calendar extends XmlServlet<AppointmentSQLInterface> {
                             PERMISSION_EXCEPTION), clientId, os, xo);
                 } else if (exc.isConflict()) {
                     LOG.debug(_parsePropChilds, exc);
-                    writeResponse(appointmentobject, HttpServletResponse.SC_CONFLICT, getErrorMessage(exc,
-                            CONFLICT_EXCEPTION), clientId, os, xo);
+                    writeResponse(appointmentobject, HttpServletResponse.SC_CONFLICT, MODIFICATION_EXCEPTION, clientId, os, xo);
                 } else if (exc.isNotFound()) {
                     LOG.debug(_parsePropChilds, exc);
                     writeResponse(appointmentobject, HttpServletResponse.SC_NOT_FOUND, OBJECT_NOT_FOUND_EXCEPTION,

@@ -49,25 +49,53 @@
 
 package com.openexchange.admin.user.copy.osgi;
 
-import org.osgi.framework.BundleActivator;
-import org.osgi.framework.BundleContext;
-import org.osgi.util.tracker.ServiceTracker;
+import org.apache.commons.logging.Log;
+import com.openexchange.admin.tools.AdminCache;
+import com.openexchange.config.ConfigurationService;
+import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.user.copy.UserCopyService;
 
-public class Activator implements BundleActivator {
-
-    private ServiceTracker tracker;
+/**
+ * {@link Activator}
+ *
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ */
+public class Activator extends HousekeepingActivator {
 
     public Activator() {
         super();
     }
 
-    public void start(BundleContext context) throws Exception {
-        tracker = new ServiceTracker(context, UserCopyService.class.getName(), new RMIUserCopyRegisterer(context));
-        tracker.open();
+    @Override
+    public void startBundle() throws Exception {
+        final Log log = com.openexchange.log.Log.loggerFor(Activator.class);
+        try {
+            ConfigurationService configurationService = getService(ConfigurationService.class);
+            AdminCache.compareAndSetConfigurationService(null, configurationService);
+            track(UserCopyService.class, new RMIUserCopyRegisterer(context));
+            openTrackers();
+            log.info("Started bundle: com.openexchange.admin.user.copy");
+        } catch (final Exception e) {
+            log.error("Error starting bundle: com.openexchange.admin.user.copy", e);
+            throw e;
+        }
     }
 
-    public void stop(BundleContext context) throws Exception {
-        tracker.close();
+    @Override
+    public void stopBundle() throws Exception {
+        final Log log = com.openexchange.log.Log.loggerFor(Activator.class);
+        try {
+            closeTrackers();
+            cleanUp();
+            log.info("Stopped bundle: com.openexchange.admin.user.copy");
+        } catch (final Exception e) {
+            log.error("Error stopping bundle: com.openexchange.admin.user.copy", e);
+            throw e;
+        }
+    }
+
+    @Override
+    protected Class<?>[] getNeededServices() {
+        return new Class<?>[] { ConfigurationService.class };
     }
 }

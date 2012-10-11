@@ -49,6 +49,11 @@
 
 package com.openexchange.ajp13;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
+import java.net.URLEncoder;
+import java.util.regex.Pattern;
+
 /**
  * {@link AJPv13Utility} - Provides some utility methods for AJP processing
  *
@@ -61,6 +66,38 @@ public final class AJPv13Utility {
      */
     private AJPv13Utility() {
         super();
+    }
+
+    private static final Pattern P_DOT = Pattern.compile("\\.");
+
+    private static final Pattern P_MINUS = Pattern.compile("-");
+
+    /**
+     * Generates URL-encoding of specified text.
+     * 
+     * @param text The text
+     * @return The URL-encoded text
+     */
+    public static String urlEncode(final String text) {
+        try {
+            return P_MINUS.matcher(P_DOT.matcher(URLEncoder.encode(text, "iso-8859-1")).replaceAll("%2E")).replaceAll("%2D");
+        } catch (final UnsupportedEncodingException e) {
+            return text;
+        }
+    }
+
+    /**
+     * Generates URL-decoding of specified text.
+     * 
+     * @param text The text
+     * @return The URL-decoded text
+     */
+    public static String urlDecode(final String text) {
+        try {
+            return URLDecoder.decode(text, "iso-8859-1");
+        } catch (final UnsupportedEncodingException e) {
+            return text;
+        }
     }
 
     /**

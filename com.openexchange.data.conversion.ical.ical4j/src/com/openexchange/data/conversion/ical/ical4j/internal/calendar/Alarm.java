@@ -51,10 +51,10 @@ package com.openexchange.data.conversion.ical.ical4j.internal.calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.TimeZone;
-
-import net.fortuna.ical4j.model.Component;
 import net.fortuna.ical4j.model.ComponentList;
 import net.fortuna.ical4j.model.Dur;
+import net.fortuna.ical4j.model.Parameter;
+import net.fortuna.ical4j.model.Property;
 import net.fortuna.ical4j.model.component.CalendarComponent;
 import net.fortuna.ical4j.model.component.VAlarm;
 import net.fortuna.ical4j.model.component.VEvent;
@@ -62,7 +62,6 @@ import net.fortuna.ical4j.model.component.VToDo;
 import net.fortuna.ical4j.model.property.Action;
 import net.fortuna.ical4j.model.property.Description;
 import net.fortuna.ical4j.model.property.Trigger;
-
 import com.openexchange.data.conversion.ical.ConversionError;
 import com.openexchange.data.conversion.ical.ConversionWarning;
 import com.openexchange.data.conversion.ical.Mode;
@@ -78,10 +77,12 @@ import com.openexchange.groupware.tasks.Task;
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
  */
 public class Alarm<T extends CalendarComponent, U extends CalendarObject> extends AbstractVerifyingAttributeConverter<T,U> {
+    @Override
     public boolean isSet(final U calendar) {
         return true;
     }
 
+    @Override
     public void emit(final Mode mode, final int index, final U calendar, final T component, final List<ConversionWarning> warnings, final Context ctx, final Object... args) throws ConversionError {
         if(Task.class.isAssignableFrom(calendar.getClass())) {
             emitTaskAlarm((Task)calendar, (VToDo) component, warnings);
@@ -91,11 +92,12 @@ public class Alarm<T extends CalendarComponent, U extends CalendarObject> extend
     }
 
     private void emitAppointmentAlarm(final Appointment appointmentObject, final VEvent component, final List<ConversionWarning> warnings) {
-        if(0 >= appointmentObject.getAlarm()) {
+        if (false == appointmentObject.containsAlarm() || 0 > appointmentObject.getAlarm()) {
             return;
         }
         final VAlarm alarm = new VAlarm();
-        final Dur duration = new Dur(String.format("-PT%dM", Integer.valueOf(appointmentObject.getAlarm())));
+        final Dur duration = new Dur(String.format("%sPT%dM", 
+            0 == appointmentObject.getAlarm() ? "" : "-", Integer.valueOf(appointmentObject.getAlarm())));
         final Trigger trigger = new Trigger(duration);
         alarm.getProperties().add(trigger);
 
@@ -134,74 +136,146 @@ public class Alarm<T extends CalendarComponent, U extends CalendarObject> extend
     }
 
 
+    @Override
     public boolean hasProperty(final T t) {
         return true; // Not strictly true, but to inlcude the warning we have to enter #parse always
     }
 
-    public void parse(final int index, final T component, final U cObj, final TimeZone timeZone, final Context ctx, final List<ConversionWarning> warnings) throws ConversionError {
-       final VAlarm alarm = getAlarm(index, component, warnings);
-       boolean useDuration = false;
-        if(alarm == null) {
-            return;
-        }
-
-        net.fortuna.ical4j.model.Date icaldate = alarm.getTrigger().getDateTime();
-        if(null == icaldate) {
-            icaldate = alarm.getTrigger().getDate();
-        }
-
-        Date remindOn = null;
-        int temp = 0;
-        
-        if(null == icaldate) {
-            final Dur duration = alarm.getTrigger().getDuration();
-            if(!duration.isNegative()) {
-                return;
+    @Override
+    public void parse(final int index, final T component, final U calendarObject, final TimeZone timeZone, final Context ctx, final List<ConversionWarning> warnings) throws ConversionError {
+        /*
+         * get relevant alarm trigger
+         */
+        Trigger trigger = getTrigger(index, component, warnings);
+        if (null != trigger) {
+            /*
+             * determine related date
+             */
+            Parameter relatedParameter = trigger.getParameter("RELATED");
+            Date relatedDate = null != relatedParameter && "END".equals(relatedParameter.getValue()) ? 
+                calendarObject.getEndDate() : calendarObject.getStartDate();
+            if (Appointment.class.isAssignableFrom(calendarObject.getClass())) {
+                /*
+                 * set relative alarm timespan 
+                 */
+                Long duration = parseTriggerDuration(index, trigger, relatedDate, timeZone, warnings);
+                if (null != duration) {
+                    Appointment appointment = (Appointment)calendarObject;
+                    appointment.setAlarmFlag(true);
+                    appointment.setAlarm((int)(duration.longValue() / 60));
+                }
+            } else if (Task.class.isAssignableFrom(calendarObject.getClass())) {
+                /*
+                 * set absolute alarm date-time
+                 */
+                Date date = parseTriggerDate(index, trigger, relatedDate, timeZone, warnings);
+                if (null != date) {
+                    Task task = (Task)calendarObject;
+                    task.setAlarmFlag(true);
+                    task.setAlarm(date);
+                }
+            } else {
+                warnings.add(new ConversionWarning(index, "Can only parse alarms for appointments and tasks"));
             }
-            temp = ((((duration.getWeeks() * 7+ duration.getDays()) * 24  + duration.getHours() ) * 60 + duration.getMinutes()) * 60 + duration.getSeconds());  
-            useDuration = true;
+        }        
+    }
+    
+    private Trigger getTrigger(int index, T component, List<ConversionWarning> warnings) {
+        /*
+         * check mozilla x-props
+         */
+        if (null != component.getProperty("X-MOZ-LASTACK")) {
+            Property mozillaSnoozeTime = component.getProperty("X-MOZ-SNOOZE-TIME");
+            if (null == mozillaSnoozeTime) {
+                /*
+                 * alarm is acknowledged and not snoozed, so don't import vAlarm at all
+                 */
+                return null;
+            } else {
+                /*
+                 * snooze - 'remind again'
+                 */
+                return new Trigger(mozillaSnoozeTime.getParameters(), mozillaSnoozeTime.getValue());
+            }
+        } 
+        /*
+         * check default vAlarm
+         */
+        ComponentList alarms = null;
+        if (VEvent.class.isAssignableFrom(component.getClass())) {
+            alarms = ((VEvent)component).getAlarms();
+        } else if (VToDo.class.isAssignableFrom(component.getClass())) {
+            alarms = ((VToDo)component).getAlarms();
         } else {
-            remindOn = ParserTools.recalculateAsNeeded(icaldate, alarm.getTrigger(), timeZone);
+            warnings.add(new ConversionWarning(index, "Can only extract alarms from VTODO or VEVENT components"));
         }
-
-        final int delta = useDuration ? temp  : (int) ((cObj.getStartDate().getTime() - remindOn.getTime())/1000);
-
-        if(Appointment.class.isAssignableFrom(cObj.getClass())) {
-            final Appointment appObj = (Appointment) cObj;
-            appObj.setAlarm(delta / 60);
-            appObj.setAlarmFlag(true); // bugfix: 7473
+        if (null != alarms) {
+            for (int i = 0; i < alarms.size(); i++) {
+                VAlarm alarm = (VAlarm)alarms.get(i);
+                if (null != alarm.getTrigger() && "DISPLAY".equalsIgnoreCase(alarm.getAction().getValue())) {
+                    return alarm.getTrigger();
+                }
+                warnings.add(new ConversionWarning(index, "Can only convert DISPLAY alarms with triggers"));
+            }
+        }
+                
+        return null;
+    }
+    
+    /**
+     * Parses the alarm trigger as absolute date-time.
+     * 
+     * @param index the current conversion index
+     * @param trigger the iCal trigger property
+     * @param start the date where the trigger is targeted at
+     * @param timeZone the default timezone
+     * @param warnings the conversion warnings
+     * @return the duration, or <code>null</code> if none was found
+     */
+    private java.util.Date parseTriggerDate(int index, Trigger trigger, java.util.Date start, TimeZone timeZone, List<ConversionWarning> warnings) {
+        Dur duration = trigger.getDuration();
+        if (null != duration) {
+            if (false == duration.isNegative() && false == new Dur("PT0S").equals(duration)) {
+                warnings.add(new ConversionWarning(index, "Ignoring non-negative duration for alarm trigger"));
+                return null;
+            } else if (null == start) {
+                warnings.add(new ConversionWarning(index, "Need corresponding time for relative trigger"));
+                return null;
+            } else {
+                return duration.getTime(start);
+            }
+        } else if (null != trigger.getDateTime()) {
+            return ParserTools.recalculateAsNeeded(trigger.getDateTime(), trigger, timeZone);
         } else {
-            final Task taskObj = (Task) cObj;
-            taskObj.setAlarm(new Date(taskObj.getStartDate().getTime() - delta * 1000));
-            taskObj.setAlarmFlag(true); // bugfix: 7473
+            return null;
         }
     }
 
-    private VAlarm getAlarm(final int index, final Component component, final List<ConversionWarning> warnings) {
-        ComponentList alarms = null;
-        if(VEvent.class.isAssignableFrom(component.getClass())) {
-            final VEvent event = (VEvent) component;
-            alarms = event.getAlarms();
-        } else if (VToDo.class.isAssignableFrom(component.getClass())) {
-            final VToDo todo = (VToDo) component;
-            alarms = todo.getAlarms();
-        }
-
-        if(alarms.size() == 0) {
+    /**
+     * Parses the alarm trigger as relative duration in seconds.
+     * 
+     * @param index the current conversion index
+     * @param trigger the iCal trigger property
+     * @param start the date where the trigger is targeted at
+     * @param timeZone the default timezone
+     * @param warnings the conversion warnings
+     * @return the duration, or <code>null</code> if none was found
+     */
+    private Long parseTriggerDuration(int index, Trigger trigger, java.util.Date start, TimeZone timeZone, List<ConversionWarning> warnings) {
+        Dur duration = trigger.getDuration();
+        if (null != duration) {
+            if (false == duration.isNegative() && false == new Dur("PT0S").equals(duration)) {
+                warnings.add(new ConversionWarning(index, "Ignoring non-negative duration for alarm trigger"));
+                return null;
+            } else {
+                return new Long((((duration.getWeeks() * 7 + duration.getDays()) * 24  + duration.getHours() ) * 60 + duration.getMinutes()) * 60 + duration.getSeconds());  
+            }
+        } else if (null != trigger.getDateTime()) {
+            java.util.Date date = ParserTools.recalculateAsNeeded(trigger.getDateTime(), trigger, timeZone);
+            return new Long((start.getTime() - date.getTime()) / 1000);
+        } else {
             return null;
         }
-
-        final int size = alarms.size();
-        for(int i = 0; i < size; i++) {
-            final VAlarm alarm = (VAlarm) alarms.get(0);
-
-            if(null != alarm.getTrigger() && "DISPLAY".equalsIgnoreCase(alarm.getAction().getValue())) {
-                return alarm;
-            }
-            warnings.add(new ConversionWarning(index, "Can only convert DISPLAY alarms with triggers"));
-
-        }
-        return null;
     }
 
 }

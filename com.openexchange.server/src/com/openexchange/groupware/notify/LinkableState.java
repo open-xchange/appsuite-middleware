@@ -52,7 +52,7 @@ package com.openexchange.groupware.notify;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import com.openexchange.log.LogFactory;
 import com.openexchange.configuration.ServerConfig;
 import com.openexchange.configuration.ServerConfig.Property;
 import com.openexchange.groupware.Types;
@@ -79,17 +79,21 @@ public abstract class LinkableState implements State {
 
     protected static volatile Template object_link_template;
 
-    private static String hostname;
+    private static final String hostname;
 
-    private static UnknownHostException warnSpam;
+    private static final UnknownHostException warnSpam;
 
     static {
+        UnknownHostException uhe = null;
+        String hn;
         try {
-            hostname = InetAddress.getLocalHost().getCanonicalHostName();
+            hn = InetAddress.getLocalHost().getCanonicalHostName();
         } catch (final UnknownHostException e) {
-            hostname = "localhost";
-            warnSpam = e;
+            hn = "localhost";
+            uhe = e;
         }
+        hostname = hn;
+        warnSpam = uhe;
     }
 
     @Override

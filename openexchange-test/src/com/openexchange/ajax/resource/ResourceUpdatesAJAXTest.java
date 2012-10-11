@@ -98,8 +98,9 @@ public class ResourceUpdatesAJAXTest extends AbstractResourceTest{
 
     @Override
     protected void tearDown() throws Exception {
-        if(resource != null)
+        if(resource != null) {
             Executor.execute(getSession(), new ResourceDeleteRequest(resource));
+        }
         super.tearDown();
     }
 

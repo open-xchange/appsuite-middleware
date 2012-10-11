@@ -51,7 +51,6 @@ package com.openexchange.contact.internal;
 
 import java.util.HashSet;
 import java.util.Set;
-
 import com.openexchange.groupware.contact.helpers.ContactField;
 
 /**
@@ -69,20 +68,45 @@ public class QueryFields {
 	}
 	
 	public QueryFields(final ContactField[] fields) {
+		this(fields, null);
+	}	
+
+	public QueryFields(final ContactField[] fields, final ContactField[] allowedFields) {
 		super();
+		
 		if (null == fields) {
-			this.queriedFields = ContactField.values();
-			this.needsAttachmentInfo = true;
+			if (null == allowedFields) {
+				this.queriedFields = ContactField.values();
+				this.needsAttachmentInfo = true;
+			} else {
+		    	this.needsAttachmentInfo = false;
+		        final Set<ContactField> preparedFields = new HashSet<ContactField>();
+		        for (final ContactField field : allowedFields) {
+		            preparedFields.add(field);
+		            if (ContactField.LAST_MODIFIED_OF_NEWEST_ATTACHMENT.equals(field)) {
+		            	// add attachment information
+		            	this.needsAttachmentInfo = true;
+		            	preparedFields.add(ContactField.NUMBER_OF_ATTACHMENTS);
+		            }
+		        }
+		        this.queriedFields = preparedFields.toArray(new ContactField[preparedFields.size()]);
+			}
 		} else {
 	    	this.needsAttachmentInfo = false;
 	        final Set<ContactField> preparedFields = new HashSet<ContactField>();
-	        // always add permission specific fields
-	        preparedFields.add(ContactField.CREATED_BY);
-	        preparedFields.add(ContactField.PRIVATE_FLAG);
-	        preparedFields.add(ContactField.FOLDER_ID);
-	        preparedFields.add(ContactField.CONTEXTID);
-	        // add requested fields
+	        if (null == allowedFields) {
+		        // always add permission specific fields
+		        preparedFields.add(ContactField.CREATED_BY);
+		        preparedFields.add(ContactField.PRIVATE_FLAG);
+                preparedFields.add(ContactField.FOLDER_ID);
+                preparedFields.add(ContactField.OBJECT_ID);
+                preparedFields.add(ContactField.CONTEXTID);
+	        }
+	        // add requested fields if allowed
 	        for (final ContactField field : fields) {
+	        	if (null != allowedFields && false == contains(allowedFields, field)) {
+	        		continue;
+	        	}
 	            preparedFields.add(field);
 	            if (ContactField.LAST_MODIFIED_OF_NEWEST_ATTACHMENT.equals(field)) {
 	            	// add attachment information
@@ -92,7 +116,16 @@ public class QueryFields {
 	        }
 	        this.queriedFields = preparedFields.toArray(new ContactField[preparedFields.size()]);
 		}
-	}	
+	}
+	
+	private static boolean contains(final ContactField[] fields, final ContactField field) {
+		for (final ContactField presentField : fields) {
+			if (presentField.equals(field)) {
+				return true;
+			}
+		}
+		return false;
+	}
 
 	/**
 	 * @return the needsAttachmentInfo

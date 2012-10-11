@@ -144,7 +144,7 @@ public class OSGiChatServiceRegistry implements ChatServiceRegistry {
                 return service;
             }
             final org.apache.commons.logging.Log logger =
-                org.apache.commons.logging.LogFactory.getLog(OSGiChatServiceRegistry.Customizer.class);
+                com.openexchange.log.LogFactory.getLog(OSGiChatServiceRegistry.Customizer.class);
             if (logger.isWarnEnabled()) {
                 logger.warn(new StringBuilder(128).append("Chat service ").append(service.getDisplayName()).append(
                     " could not be added to registry. Another service is already registered with identifier: ").append(service.getId()).toString());

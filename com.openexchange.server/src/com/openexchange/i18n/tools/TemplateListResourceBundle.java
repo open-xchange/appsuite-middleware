@@ -67,7 +67,7 @@ import java.util.ResourceBundle;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import com.openexchange.log.LogFactory;
 import com.openexchange.tools.Collections;
 
 public abstract class TemplateListResourceBundle extends ResourceBundle {
@@ -86,7 +86,7 @@ public abstract class TemplateListResourceBundle extends ResourceBundle {
 
     private static Lock INIT_LOCK = new ReentrantLock();
 
-    protected static boolean initialized;
+    protected static volatile boolean initialized;
 
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(TemplateListResourceBundle.class));
 

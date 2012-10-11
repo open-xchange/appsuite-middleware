@@ -82,7 +82,7 @@ import com.openexchange.tools.session.ServerSession;
 
 public class EmailContactHalo extends AbstractContactHalo implements HaloContactDataSource {
 
-	private ServiceLookup services;
+	private final ServiceLookup services;
 	
 	public EmailContactHalo(ServiceLookup services) {
 		this.services = services;
@@ -110,7 +110,13 @@ public class EmailContactHalo extends AbstractContactHalo implements HaloContact
 		
 		MailService mailService = services.getService(MailService.class);
 		MailAccountStorageService mailAccountService = services.getService(MailAccountStorageService.class);
-		MailAccount[] userMailAccounts = mailAccountService.getUserMailAccounts(session.getUserId(), session.getContextId());
+		
+		MailAccount[] userMailAccounts;
+		if(searchingExternalMailboxesIsFast()){
+			userMailAccounts = mailAccountService.getUserMailAccounts(session.getUserId(), session.getContextId());
+		} else {
+			userMailAccounts = new MailAccount[]{mailAccountService.getDefaultMailAccount(session.getUserId(), session.getContextId())};
+		}
 
 
 		List<MailMessage> messages = new LinkedList<MailMessage>();
@@ -161,10 +167,12 @@ public class EmailContactHalo extends AbstractContactHalo implements HaloContact
 		for (String addr : addresses) {
 			queries.add(new FromTerm(addr));
 		}
-		if (queries.size() == 3)
-			return new ORTerm(new ORTerm(queries.get(0), queries.get(1)), queries.get(2));
-		if (queries.size() == 2)
-			return new ORTerm(queries.get(0), queries.get(1));
+		if (queries.size() == 3) {
+            return new ORTerm(new ORTerm(queries.get(0), queries.get(1)), queries.get(2));
+        }
+		if (queries.size() == 2) {
+            return new ORTerm(queries.get(0), queries.get(1));
+        }
 		return queries.get(0);
 	}
 
@@ -173,10 +181,16 @@ public class EmailContactHalo extends AbstractContactHalo implements HaloContact
 		for (String addr : addresses) {
 			queries.add(new ORTerm(new CcTerm(addr), new ToTerm(addr)));
 		}
-		if (queries.size() == 3)
-			return new ORTerm(new ORTerm(queries.get(0), queries.get(1)), queries.get(2));
-		if (queries.size() == 2)
-			return new ORTerm(queries.get(0), queries.get(1));
+		if (queries.size() == 3) {
+            return new ORTerm(new ORTerm(queries.get(0), queries.get(1)), queries.get(2));
+        }
+		if (queries.size() == 2) {
+            return new ORTerm(queries.get(0), queries.get(1));
+        }
 		return queries.get(0);
+	}
+	
+	protected boolean searchingExternalMailboxesIsFast(){
+		return false; //TODO: once indexing is implemented, this should check whether it is turned on. 
 	}
 }

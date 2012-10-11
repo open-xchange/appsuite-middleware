@@ -73,6 +73,8 @@ import com.openexchange.tools.oxfolder.OXFolderAccess;
  * @author <a href="mailto:martin.kauss@open-xchange.org">Martin Kauss</a>
  */
 public interface CalendarSqlImp {
+    
+    PreparedStatement getAllAppointments(Context c, Date d1, Date d2, String select, Connection readcon, int orderBy, Order orderDir) throws OXException, SQLException;
 
     PreparedStatement getAllAppointmentsForUser(Context c, int uid, int groups[], UserConfiguration uc, Date d1, Date d2, String select, Connection readcon, Date since, int orderBy, Order orderDir) throws OXException, SQLException;
 

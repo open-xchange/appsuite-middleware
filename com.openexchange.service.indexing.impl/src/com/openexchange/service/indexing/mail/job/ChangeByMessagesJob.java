@@ -49,20 +49,15 @@
 
 package com.openexchange.service.indexing.mail.job;
 
-import java.util.Arrays;
 import java.util.List;
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.index.IndexAccess;
-import com.openexchange.mail.MailField;
-import com.openexchange.mail.MailSortField;
-import com.openexchange.mail.OrderDirection;
-import com.openexchange.mail.api.IMailFolderStorage;
-import com.openexchange.mail.api.IMailMessageStorage;
-import com.openexchange.mail.api.MailAccess;
+import com.openexchange.index.mail.MailIndexField;
+import com.openexchange.log.LogFactory;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.service.indexing.mail.MailJobInfo;
+import com.openexchange.service.indexing.mail.StorageAccess;
 
 /**
  * {@link ChangeByMessagesJob} - Changes the flags of specified mails in index.
@@ -103,37 +98,27 @@ public final class ChangeByMessagesJob extends AbstractMailJob {
         return this;
     }
 
-    private static final MailField[] FIELDS = new MailField[] { MailField.ID, MailField.FLAGS };
-
     @Override
-    public void performJob() throws OXException, InterruptedException {
+    protected void performMailJob() throws OXException, InterruptedException {
         List<MailMessage> messages = this.messages;
         if (null == messages) {
-            MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = null;
             try {
-                mailAccess = mailAccessFor();
-                /*
-                 * Get the mails from mail storage
-                 */
-                mailAccess.connect(true);
                 /*
                  * Fetch mails
                  */
-                messages = Arrays.asList(mailAccess.getMessageStorage().searchMessages(fullName, null, MailSortField.RECEIVED_DATE, OrderDirection.ASC, null, FIELDS));
+                messages = storageAccess.allMailsFromStorage(fullName);
             } finally {
-                getSmalAccessService().closeUnwrappedInstance(mailAccess);
-                mailAccess = null;
+                storageAccess.releaseAccess();
             }
         }
         if (null == messages || messages.isEmpty()) {
             return;
         }
-        IndexAccess<MailMessage> indexAccess = null;
         try {
             /*
              * Check flags of contained mails
              */
-            indexAccess = getIndexAccess();
+            final IndexAccess<MailMessage> indexAccess = storageAccess.getIndexAccess();
             for (final MailMessage message : messages) {
                 message.setAccountId(accountId);
                 message.setFolder(fullName);
@@ -141,11 +126,9 @@ public final class ChangeByMessagesJob extends AbstractMailJob {
             /*
              * Change flags
              */
-            indexAccess.change(toDocuments(messages), IndexAccess.ALL_FIELDS);
+            indexAccess.change(toDocuments(messages), MailIndexField.getFor(StorageAccess.FIELDS));
         } catch (final RuntimeException e) {
             LOG.warn(SIMPLE_NAME + " failed: " + info, e);
-        } finally {
-            releaseAccess(indexAccess);
         }
     }
 

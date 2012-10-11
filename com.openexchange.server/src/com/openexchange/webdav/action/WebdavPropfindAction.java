@@ -55,12 +55,12 @@ import java.util.List;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.jdom.Document;
-import org.jdom.Element;
-import org.jdom.JDOMException;
-import org.jdom.Namespace;
-import org.jdom.output.XMLOutputter;
+import com.openexchange.log.LogFactory;
+import org.jdom2.Document;
+import org.jdom2.Element;
+import org.jdom2.JDOMException;
+import org.jdom2.Namespace;
+import org.jdom2.output.XMLOutputter;
 
 import com.openexchange.webdav.loader.LoadingHints;
 import com.openexchange.webdav.protocol.Protocol;
@@ -161,8 +161,8 @@ public class WebdavPropfindAction extends AbstractAction {
 			marshaller = new PropfindResponseMarshaller(req.getURLPrefix(), req.getCharset());
 			loadingHints.setProps(LoadingHints.Property.SOME);
 
-			for(final Element props : (List<Element>) requestBody.getRootElement().getChildren("prop", DAV_NS)){
-				for(final Element requested : (List<Element>) props.getChildren()) {
+			for(final Element props : requestBody.getRootElement().getChildren("prop", DAV_NS)){
+				for(final Element requested : props.getChildren()) {
 					((PropfindResponseMarshaller) marshaller).addProperty(requested.getNamespaceURI(), requested.getName());
 					loadingHints.addProperty(requested.getNamespaceURI(), requested.getName());
 				}

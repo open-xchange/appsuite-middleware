@@ -59,14 +59,14 @@ import java.util.EnumMap;
 import java.util.Map;
 import java.util.Map.Entry;
 import org.apache.commons.codec.binary.Base64;
-import org.apache.commons.logging.LogFactory;
+import com.openexchange.log.LogFactory;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Java7ConcurrentLinkedQueue;
 import com.openexchange.log.Log;
-import com.openexchange.mail.text.HTMLProcessing;
+import com.openexchange.mail.text.HtmlProcessing;
 import com.openexchange.mail.utils.DisplayMode;
 import com.openexchange.messaging.BinaryContent;
 import com.openexchange.messaging.DateMessagingHeader;
@@ -233,7 +233,7 @@ public class MessagingMessageWriter {
             if (null == session || null == mode) {
                 return ((StringContent) content).getData();
             }
-            return HTMLProcessing.formatTextForDisplay(((StringContent) content).getData(), session.getUserSettingMail(), mode);
+            return HtmlProcessing.formatTextForDisplay(((StringContent) content).getData(), session.getUserSettingMail(), mode);
         }
 
         @Override

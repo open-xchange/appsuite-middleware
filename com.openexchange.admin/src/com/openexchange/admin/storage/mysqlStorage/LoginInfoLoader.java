@@ -60,7 +60,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import com.openexchange.log.LogFactory;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.exceptions.PoolException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
@@ -84,6 +84,7 @@ public class LoginInfoLoader implements Filter<Context, Context> {
         this.cache = cache;
     }
 
+    @Override
     public Context[] filter(final Collection<Context> input) throws PipesAndFiltersException {
         final Map<Integer, Context> contexts = new HashMap<Integer, Context>(input.size());
         for (final Context context : input) {

@@ -49,7 +49,6 @@
 
 package com.openexchange.tools.file;
 
-import com.openexchange.exception.OXException;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.InputStream;
@@ -57,7 +56,9 @@ import java.net.URI;
 import java.sql.Connection;
 import java.util.Random;
 import junit.framework.TestCase;
+import com.openexchange.database.Assignment;
 import com.openexchange.database.DatabaseService;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextImpl;
 import com.openexchange.test.DelayedInputStream;
@@ -133,69 +134,7 @@ public class QuotaFileStorageTest extends TestCase {
         rmdir(tempFile);
     }
 
-    public void testExclusiveLock() throws Exception{
-        final File tempFile = File.createTempFile("filestorage", ".tmp");
-        tempFile.deleteOnExit();
-
-        tempFile.delete();
-
-        fs = new LocalFileStorage(new URI("file://"+tempFile.getAbsolutePath()));
-        final TestQuotaFileStorage quotaStorage = new TestQuotaFileStorage(new ContextImpl(1), fs, new DummyDatabaseService());
-        quotaStorage.setQuota(10000);
-        quotaStorage.setUsage(5000);
-
-        final Thread[] threads = new Thread[100];
-        for(int i = 0; i < threads.length; i++) {
-            threads[i] = new AddAndRemoveThread(50,quotaStorage);
-        }
-
-        for(final Thread thread : threads) { thread.start(); }
-        for(final Thread thread : threads) { thread.join(); }
-
-        assertEquals(5000, quotaStorage.getUsage());
-        rmdir(tempFile);
-    }
-
-    public void testConcurrentLock() throws Exception  {
-        final File tempFile = File.createTempFile("filestorage", ".tmp");
-        tempFile.deleteOnExit();
-
-        tempFile.delete();
-
-        fs = new LocalFileStorage(new URI("file://"+tempFile.getAbsolutePath()));
-        final TestQuotaFileStorage quotaStorage = new TestQuotaFileStorage(new ContextImpl(1), fs, new DummyDatabaseService());
-        quotaStorage.setQuota(10000);
-
-        final int size = 1000;
-        final int tests = 2;
-        final long delay = 6000;
-
-        quotaStorage.setQuota(size*tests);
-        quotaStorage.setUsage(0);
-
-
-
-        final SaveFileThread[] saveFiles = new SaveFileThread[tests];
-
-        for(int i = 0; i < saveFiles.length; i++) {
-            final DelayedInputStream is = new DelayedInputStream(new ByteArrayInputStream(new byte[size]), delay);
-            saveFiles[i] = new SaveFileThread(is, quotaStorage);
-            saveFiles[i].start();
-        }
-
-
-        for(int i = 0; i < saveFiles.length; i++) {
-            saveFiles[i].join();
-            if(saveFiles[i].getException() != null) {
-                saveFiles[i].getException().printStackTrace();
-                assertTrue(false);
-            }
-        }
-
-        assertFalse(new File(tempFile,".lock").exists());
-        rmdir(tempFile);
-    }
-
+    
     public static final class TestQuotaFileStorage extends DBQuotaFileStorage {
 
         public TestQuotaFileStorage(final Context ctx, final FileStorage fs, final DatabaseService dbs) throws OXException {
@@ -240,54 +179,7 @@ public class QuotaFileStorageTest extends TestCase {
         }
     }
 
-    private static final class AddAndRemoveThread extends Thread{
-        private final int counter;
-        private final FileStorage fs;
-        private final byte[] bytes = new byte[10];
-        private final Random r = new Random();
-
-        public AddAndRemoveThread(final int counter, final FileStorage fs) {
-            super();
-            this.counter = counter;
-            this.fs = fs;
-        }
-
-        @Override
-        public void run() {
-            for(int i = 0; i < counter; i++) {
-                try {
-                    final int w = r.nextInt(200);
-                    final String id = fs.saveNewFile(new ByteArrayInputStream(bytes));
-                    Thread.sleep(w);
-                    fs.deleteFile(id);
-                } catch (final Exception e) {
-                    e.printStackTrace();
-                }
-            }
-        }
-    }
-
-    private static final class SaveFileThread extends Thread {
-        private final InputStream data;
-        private final FileStorage fs;
-        private Exception exception;
-
-        public SaveFileThread(final InputStream data, final FileStorage fs){
-            this.data = data;
-            this.fs = fs;
-        }
-
-        public Exception getException(){ return exception; }
-
-        @Override
-        public void run() {
-            try {
-                fs.saveNewFile(data);
-            } catch (final OXException e) {
-                exception = e;
-            }
-        }
-    }
+   
 
     static final class DummyDatabaseService implements DatabaseService {
 
@@ -409,6 +301,15 @@ public class QuotaFileStorageTest extends TestCase {
         @Override
         public int getServerId() {
             return 0;
+        }
+
+        /* (non-Javadoc)
+         * @see com.openexchange.database.DatabaseService#writeAssignment(java.sql.Connection, com.openexchange.database.Assignment)
+         */
+        @Override
+        public void writeAssignment(final Connection con, final Assignment assignment) throws OXException {
+            // TODO Auto-generated method stub
+            
         }
     }
 

@@ -52,27 +52,22 @@ package com.openexchange.spamhandler.spamexperts.osgi;
 import static com.openexchange.spamhandler.spamexperts.osgi.MyServiceRegistry.getServiceRegistry;
 
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.osgi.service.http.HttpService;
 
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.context.ContextService;
 import com.openexchange.database.DatabaseService;
-import com.openexchange.server.ServiceException;
-import com.openexchange.server.osgiservice.DeferredActivator;
-import com.openexchange.server.osgiservice.ServiceRegistry;
-import com.openexchange.tools.service.SessionServletRegistration;
+import com.openexchange.exception.OXException;
+import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.osgi.ServiceRegistry;
+import com.openexchange.tools.servlet.http.HTTPServletRegistration;
 import com.openexchange.user.UserService;
 
-public class MyActivator extends DeferredActivator {
+public class MyActivator extends HousekeepingActivator {
 	
-	private static transient final Log LOG = LogFactory.getLog(MyActivator.class);
+	private static final Log LOG = com.openexchange.log.Log.loggerFor(MyActivator.class);
 
-	// add services which we need in our plugins later
-	private static final Class<?>[] NEEDED_SERVICES = { UserService.class,DatabaseService.class,ContextService.class,ConfigurationService.class,HttpService.class};
-	
-	private SessionServletRegistration servletRegistration;
-	
+	private HTTPServletRegistration servletRegistration;
 
 	public MyActivator() {
 		super();		
@@ -80,11 +75,11 @@ public class MyActivator extends DeferredActivator {
 	
 	@Override
 	protected Class<?>[] getNeededServices() {
-		return NEEDED_SERVICES;
+		return new Class<?>[] { UserService.class,DatabaseService.class,ContextService.class,ConfigurationService.class,HttpService.class};
 	}
 
 	@Override
-	protected void handleAvailability(Class<?> clazz) {
+	protected void handleAvailability(final Class<?> clazz) {
 		if (LOG.isWarnEnabled()) {
 			LOG.warn("Absent service: " + clazz.getName());
 		}
@@ -93,7 +88,7 @@ public class MyActivator extends DeferredActivator {
 	}
 
 	@Override
-	protected void handleUnavailability(Class<?> clazz) {
+	protected void handleUnavailability(final Class<?> clazz) {
 		if (LOG.isInfoEnabled()) {
 			LOG.info("Re-available service: " + clazz.getName());
 		}
@@ -120,7 +115,7 @@ public class MyActivator extends DeferredActivator {
 			
 			
 			// register the http info/sso servlet
-			servletRegistration = new SessionServletRegistration(context, new com.openexchange.spamhandler.spamexperts.impl.MyServlet(), getFromConfig("com.openexchange.custom.spamexperts.panel_servlet"));
+			servletRegistration = new HTTPServletRegistration(context, new com.openexchange.spamhandler.spamexperts.impl.MyServlet(), getFromConfig("com.openexchange.custom.spamexperts.panel_servlet"));
 			
 			
 		} catch (final Throwable t) {
@@ -130,22 +125,19 @@ public class MyActivator extends DeferredActivator {
 		
 	}
 	
-	private String getFromConfig(String key) throws ServiceException{
-        ConfigurationService configservice = MyServiceRegistry.getServiceRegistry().getService(ConfigurationService.class,true);
+	private String getFromConfig(final String key) throws OXException {
+        final ConfigurationService configservice = MyServiceRegistry.getServiceRegistry().getService(ConfigurationService.class,true);
         return configservice.getProperty(key);
     }
 
 	@Override
 	protected void stopBundle() throws Exception {
 		try {
-			
-			
 			// stop info/sso servlet 
 			if(servletRegistration != null) {
-			    servletRegistration.remove();
+			    servletRegistration.unregister();
 			    servletRegistration = null;
 			}
-			
 			getServiceRegistry().clearRegistry();
 		} catch (final Throwable t) {
 			LOG.error(t.getMessage(), t);

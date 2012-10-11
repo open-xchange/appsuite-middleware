@@ -159,14 +159,17 @@ public final class FileStorageFolderIdentifier {
         if (null == identifier) {
             throw FolderExceptionErrorMessage.MISSING_FOLDER_ID.create();
         }
-
-        List<String> components = IDMangler.unmangle(identifier);
-
-        if (components.isEmpty() || components.size() == 1) {
+        // Parse identifier
+        final List<String> components = IDMangler.unmangle(identifier);
+        if (components.isEmpty()) {
+            throw FolderExceptionErrorMessage.INVALID_FOLDER_ID.create(identifier);
+        }
+        final int size = components.size();
+        if (size == 1) {
             throw FolderExceptionErrorMessage.INVALID_FOLDER_ID.create(identifier);
         }
         serviceId = components.get(0);
-        if (components.size() == 2) {
+        if (size == 2) {
             /*
              * Have only service and account ID, so expect root folder
              */
@@ -209,7 +212,8 @@ public final class FileStorageFolderIdentifier {
         this.serviceId = serviceId;
         this.accountId = accountId;
         this.folderId = folderId;
-        fqn = new StringBuilder(64).append(serviceId).append(DELIM).append(accountId).append('/').append(folderId).toString();
+        // Parseable identifier
+        fqn = IDMangler.mangle(serviceId, accountId, folderId);
         /*
          * Hash code
          */

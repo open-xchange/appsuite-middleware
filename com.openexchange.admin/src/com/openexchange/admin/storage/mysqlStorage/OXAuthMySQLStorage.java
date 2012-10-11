@@ -57,11 +57,12 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import com.openexchange.log.LogFactory;
 
 import com.openexchange.admin.daemons.ClientAdminThread;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
+import com.openexchange.admin.rmi.exceptions.NoSuchUserException;
 import com.openexchange.admin.rmi.exceptions.PoolException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.storage.interfaces.OXAuthStorageInterface;
@@ -81,6 +82,7 @@ public class OXAuthMySQLStorage extends OXAuthStorageInterface {
     public OXAuthMySQLStorage() {
     }
 
+    @Override
     public boolean authenticate(final Credentials authdata) {
         return false;
     }
@@ -90,6 +92,7 @@ public class OXAuthMySQLStorage extends OXAuthStorageInterface {
      * Authenticates the admin user of the system within context.
      * 
      */
+    @Override
     public boolean authenticate(final Credentials authdata, final Context ctx) throws StorageException {
 
         if (authdata != null && authdata.getLogin() != null && authdata.getPassword() != null) {
@@ -98,7 +101,12 @@ public class OXAuthMySQLStorage extends OXAuthStorageInterface {
             //disabling caching for admin-password as fix for bug 15200
             //if(cachedAdminCredentials == null ) {
                 final OXToolStorageInterface instance = OXToolStorageInterface.getInstance();
-                final int uid = instance.getUserIDByUsername(ctx, authdata.getLogin());
+                int uid;
+                try {
+                    uid = instance.getUserIDByUsername(ctx, authdata.getLogin());
+                } catch (NoSuchUserException e) {
+                    throw new StorageException(e);
+                }
                 if (instance.isContextAdmin(ctx, uid)) {
                     Connection sql_con = null;
                     PreparedStatement prep = null;
@@ -196,6 +204,7 @@ public class OXAuthMySQLStorage extends OXAuthStorageInterface {
         }
     }
 
+    @Override
     public boolean authenticateUser(final Credentials authdata, final Context ctx) throws StorageException {
 
         if (authdata != null && authdata.getLogin() != null && authdata.getPassword() != null) {

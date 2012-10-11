@@ -1,0 +1,73 @@
+<div class="calendar-detail">
+    <div class="date">
+        <div class="interval">
+            ${formatters.interval}
+        </div>
+        <div class="day">
+            ${formatters.dateSpec}
+        </div>
+    </div>
+    <div class="title clear-title">
+        ${(mail.appointment.title!"")?html}
+    </div>
+    <div class="location">
+        ${(mail.appointment.location!"")?html}
+    </div>
+	<div class="calendar-buttons" style="display:none"></div>
+    <div class="note">
+        ${labels.noteAsHTML}
+    </div>
+    <div class="participants">
+        <div class="label">
+            ${labels.participantsLabel}
+        </div>
+        <div class="participant-list">
+            <#list mail.participants as participant>
+            <div class="participant">
+                <span class="person">${participant.displayName}</span>
+                <#if (participant.confirmStatus??)>
+                    <#if (participant.confirmStatus == "ACCEPT" )>
+                    <span class="status accepted">&#10003</span>
+                    <#elseif (participant.confirmStatus == "DECLINE" )>
+                    <span class="status declined"> x</span>
+                    <#elseif (participant.confirmStatus == "TENTATIVE" )>
+                    <span class="status tentative"> ?</span>
+                    </#if>
+                </#if>
+                <span class="comment">${(participant.comment!"")?html}</span>
+            </div>
+            </#list>
+        </div>
+        <div class="participants-clear"></div>
+    </div>
+    <div class="participants">
+        <div class="label">
+            ${labels.resourcesLabel}
+        </div>
+        <div class="participant-list">
+            <#list mail.resources as participant>
+            <div class="participant">
+                <span class="resource">${participant.displayName}</span>
+            </div>
+            </#list>
+        </div>
+        <div class="participants-clear"></div>
+    </div>
+    <div>
+        <div class="label">
+            ${labels.detailsLabel}
+        </div><span class="detail-label">${labels.showAsLabel}&nbsp;</span><span class="detail"><span class="shown_as_label ${labels.showAsClass}">${labels.showAs}</span></span><br>
+        <span class="detail-label">${labels.createdLabel}&nbsp;</span><span class="detail"><span>${formatters.created}</span> <span>-</span> <span>${labels.creator}</span></span>
+		<#if labels.directLink??>
+			<br>
+        	<span class="detail-label">${labels.directLinkLabel}&nbsp;</span><span class="detail"><a href="${labels.directLink}">${labels.directLink}</a> <span></span>
+		</#if>
+
+    </div>
+	<div class="attachmentNote">
+		${labels.attachmentNote!""}
+	</div>
+	<div class="justification">
+		${labels.justification!""}
+	</div>
+</div>

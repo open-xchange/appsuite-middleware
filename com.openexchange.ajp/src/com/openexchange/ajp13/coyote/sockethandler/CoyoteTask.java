@@ -55,14 +55,14 @@ import java.net.SocketException;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicInteger;
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import com.openexchange.ajp13.AJPv13Server;
 import com.openexchange.ajp13.coyote.ActionCode;
 import com.openexchange.ajp13.coyote.AjpProcessor;
 import com.openexchange.ajp13.coyote.Constants;
 import com.openexchange.ajp13.coyote.ExceptionUtils;
-import com.openexchange.ajp13.najp.AJPv13ServerImpl;
 import com.openexchange.ajp13.najp.AJPv13TaskMonitor;
 import com.openexchange.ajp13.watcher.AJPv13TaskWatcher;
+import com.openexchange.log.LogFactory;
 import com.openexchange.monitoring.MonitoringInfo;
 import com.openexchange.threadpool.Task;
 import com.openexchange.threadpool.ThreadRenamer;
@@ -75,7 +75,7 @@ import com.openexchange.threadpool.ThreadRenamer;
 public final class CoyoteTask implements Task<Object> {
 
     private static final org.apache.commons.logging.Log LOG =
-        com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(CoyoteTask.class));
+        com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(CoyoteTask.class));
 
     /**
      * The client socket.
@@ -209,7 +209,7 @@ public final class CoyoteTask implements Task<Object> {
             ajpProcessor.action(ActionCode.STOP, null);
             // ajpProcessor.recycle();
             closeQuitely(client);
-            AJPv13ServerImpl.decrementNumberOfOpenAJPSockets();
+            AJPv13Server.decrementNumberOfOpenAJPSockets();
         }
         // }
         return null;

@@ -28,6 +28,7 @@ import java.util.Set;
 import junit.framework.TestCase;
 
 import org.apache.tika.config.TikaConfig;
+import org.apache.tika.metadata.HttpHeaders;
 import org.apache.tika.metadata.Metadata;
 import org.apache.tika.mime.MediaType;
 import org.apache.tika.mime.MediaTypeRegistry;
@@ -112,7 +113,7 @@ public class CompositeParserTest extends TestCase {
 
        // Canonical and Canonical
        metadata = new Metadata();
-       metadata.add(Metadata.CONTENT_TYPE, bmpCanonical.toString());
+       metadata.add(HttpHeaders.CONTENT_TYPE, bmpCanonical.toString());
        canonical.parse(new ByteArrayInputStream(new byte[0]), handler, metadata, new ParseContext());
        assertEquals("True", metadata.get("BMP"));
        assertEquals("True", metadata.get("Canonical"));
@@ -120,7 +121,7 @@ public class CompositeParserTest extends TestCase {
 
        // Alias and Alias
        metadata = new Metadata();
-       metadata.add(Metadata.CONTENT_TYPE, bmpAlias.toString());
+       metadata.add(HttpHeaders.CONTENT_TYPE, bmpAlias.toString());
        alias.parse(new ByteArrayInputStream(new byte[0]), handler, metadata, new ParseContext());
        assertEquals("True", metadata.get("BMP"));
        assertEquals("True", metadata.get("Alias"));
@@ -128,7 +129,7 @@ public class CompositeParserTest extends TestCase {
 
        // Alias type and Canonical parser
        metadata = new Metadata();
-       metadata.add(Metadata.CONTENT_TYPE, bmpAlias.toString());
+       metadata.add(HttpHeaders.CONTENT_TYPE, bmpAlias.toString());
        canonical.parse(new ByteArrayInputStream(new byte[0]), handler, metadata, new ParseContext());
        assertEquals("True", metadata.get("BMP"));
        assertEquals("True", metadata.get("Canonical"));
@@ -136,7 +137,7 @@ public class CompositeParserTest extends TestCase {
 
        // Canonical type and Alias parser
        metadata = new Metadata();
-       metadata.add(Metadata.CONTENT_TYPE, bmpCanonical.toString());
+       metadata.add(HttpHeaders.CONTENT_TYPE, bmpCanonical.toString());
        alias.parse(new ByteArrayInputStream(new byte[0]), handler, metadata, new ParseContext());
        assertEquals("True", metadata.get("BMP"));
        assertEquals("True", metadata.get("Alias"));
@@ -145,7 +146,7 @@ public class CompositeParserTest extends TestCase {
        // And when both are there, will go for the last one
        //  to be registered (which is the alias one)
        metadata = new Metadata();
-       metadata.add(Metadata.CONTENT_TYPE, bmpCanonical.toString());
+       metadata.add(HttpHeaders.CONTENT_TYPE, bmpCanonical.toString());
        both.parse(new ByteArrayInputStream(new byte[0]), handler, metadata, new ParseContext());
        assertEquals("True", metadata.get("BMP"));
        assertEquals("True", metadata.get("Alias"));

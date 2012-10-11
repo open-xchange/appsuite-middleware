@@ -51,6 +51,7 @@ package com.openexchange.authentication.service;
 
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
+import javax.security.auth.login.LoginException;
 import com.openexchange.authentication.Authenticated;
 import com.openexchange.authentication.AuthenticationService;
 import com.openexchange.authentication.LoginInfo;
@@ -101,6 +102,41 @@ public final class Authentication {
         });
     }
 
+    /**
+     * Performs an autologin using an authentication service.
+     * @param login entered login.
+     * @param pass entered password.
+     * @param properties The optional properties
+     * @return a string array with two elements in which the first contains the login info for the context and the second contains the
+     * login info for the user.
+     * @throws LoginException if something with the login info is wrong.
+     */
+    public static Authenticated autologin(final String login, final String pass, final Map<String, Object> properties) throws OXException {
+        final AuthenticationService auth = SERVICE_REF.get();
+        if (null == auth) {
+            return null;
+        }
+        return auth.handleAutoLoginInfo(new LoginInfo() {
+            @Override
+            public String getPassword() {
+                return pass;
+            }
+            @Override
+            public String getUsername() {
+                return login;
+            }
+            @Override
+            public Map<String, Object> getProperties() {
+                return properties;
+            }
+        });
+    }
+
+    /**
+     * Gets the registered {@code AuthenticationService}.
+     * 
+     * @return The registered {@code AuthenticationService} or <code>null</code>
+     */
     public static AuthenticationService getService() {
         return SERVICE_REF.get();
     }

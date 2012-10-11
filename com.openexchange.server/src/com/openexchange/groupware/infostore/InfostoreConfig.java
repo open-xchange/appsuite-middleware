@@ -49,15 +49,16 @@
 
 package com.openexchange.groupware.infostore;
 
+import java.io.File;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import com.openexchange.log.LogFactory;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.configuration.ServerConfig;
-import com.openexchange.configuration.SystemConfig;
-import com.openexchange.configuration.SystemConfig.Property;
 import com.openexchange.exception.OXException;
 import com.openexchange.server.Initialization;
+import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.conf.AbstractConfig;
 
 
@@ -72,11 +73,9 @@ public class InfostoreConfig extends AbstractConfig implements Initialization {
 		MAX_UPLOAD_SIZE;
 	}
 
-    private static final Property KEY = Property.INFOSTORE;
-
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(InfostoreConfig.class));
 
-    private static InfostoreConfig singleton;
+    private static volatile InfostoreConfig singleton;
 
     private static final Lock INIT_LOCK = new ReentrantLock();
 
@@ -86,11 +85,17 @@ public class InfostoreConfig extends AbstractConfig implements Initialization {
     private InfostoreConfig() { super(); }
 
     public static InfostoreConfig getInstance() {
-        if(singleton != null) {
-			return singleton;
-		}
-
-        return singleton = new InfostoreConfig();
+        InfostoreConfig ret = singleton;
+        if (null == ret) {
+            synchronized (InfostoreConfig.class) {
+                ret = singleton;
+                if (null == ret) {
+                    ret = new InfostoreConfig();
+                    singleton = ret;
+                }
+            }
+        }
+        return ret;
     }
 
     /**
@@ -98,18 +103,20 @@ public class InfostoreConfig extends AbstractConfig implements Initialization {
      */
     @Override
     protected String getPropertyFileName() throws OXException {
-        final String filename = SystemConfig.getProperty(KEY);
+        final File file = ServerServiceRegistry.getInstance().getService(ConfigurationService.class).getFileByName("infostore.properties");
+        final String filename = null == file ? null : file.getPath();
         if (null == filename) {
-            throw new RuntimeException("Property " + KEY.getPropertyName()
-                + " is not defined in system.properties.");
+            throw new RuntimeException("Properties file 'infostore.properties' is not available.");
         }
         return filename;
     }
 
     public static String getProperty(final String key) {
-    	if(!loaded || singleton == null) {
+    	InfostoreConfig singleton = InfostoreConfig.singleton;
+        if(!loaded || singleton == null) {
 			try {
-				getInstance().start();
+			    singleton = getInstance();
+				singleton.start();
 			} catch (final OXException e) {
 				LOG.error("Can't init config:",e);
 			}

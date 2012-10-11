@@ -65,7 +65,6 @@ import com.openexchange.calendar.itip.ITipIntegrationUtility;
 import com.openexchange.calendar.itip.generators.ITipMailGeneratorFactory;
 import com.openexchange.calendar.itip.sender.MailSenderService;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.calendar.RecurringResultInterface;
 import com.openexchange.groupware.calendar.RecurringResultsInterface;
 import com.openexchange.groupware.container.Appointment;
@@ -84,11 +83,13 @@ public class CancelPerformer extends AbstrakterDingeMacher {
     }
 
 
+    @Override
     public Collection<ITipAction> getSupportedActions() {
         return EnumSet.of(ITipAction.DELETE);
     }
 
 
+    @Override
     public List<Appointment> perform(ITipAction action, ITipAnalysis analysis, Session session) throws OXException {
         List<ITipChange> changes = analysis.getChanges();
         List<Appointment> deleted = new ArrayList<Appointment>();

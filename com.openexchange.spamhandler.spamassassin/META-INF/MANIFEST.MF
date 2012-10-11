@@ -2,13 +2,14 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: SpamAssassinSpamHandler
 Bundle-SymbolicName: com.openexchange.spamhandler.spamassassin
-Bundle-Version: 6.21.0
+Bundle-Version: 6.22.0
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Import-Package: com.openexchange.api2,
  com.openexchange.config,
  com.openexchange.exception,
  com.openexchange.groupware,
+ com.openexchange.i18n,
  com.openexchange.log,
  com.openexchange.mail,
  com.openexchange.mail.api,

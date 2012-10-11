@@ -50,6 +50,7 @@
 package com.openexchange.groupware.container;
 
 import com.openexchange.groupware.container.participants.AbstractConfirmableParticipant;
+import com.openexchange.groupware.container.participants.ConfirmableParticipant;
 
 /**
  * {@link ExternalUserParticipant} - Represents an external user participant.
@@ -58,11 +59,13 @@ import com.openexchange.groupware.container.participants.AbstractConfirmablePart
  */
 public class ExternalUserParticipant extends AbstractConfirmableParticipant implements Comparable<Participant> {
 
+    private static final long serialVersionUID = 7731174024066565165L;
+
     private int id = NO_ID;
 
     private String displayName;
 
-    private final String emailaddress;
+    private String emailaddress;
 
     private boolean ignoreNotification;
 
@@ -73,9 +76,10 @@ public class ExternalUserParticipant extends AbstractConfirmableParticipant impl
      */
     public ExternalUserParticipant(final String emailAddress) {
         super();
-        emailaddress = emailAddress;
+        setEmailAddress(emailAddress);
     }
 
+    @Deprecated
     @Override
     public void setIdentifier(final int id) {
         this.id = id;
@@ -98,7 +102,11 @@ public class ExternalUserParticipant extends AbstractConfirmableParticipant impl
 
     @Override
     public String getEmailAddress() {
-        return emailaddress;
+        return emailaddress == null ? null : emailaddress.toLowerCase();
+    }
+    
+    public void setEmailAddress(String emailaddress) {
+        this.emailaddress = emailaddress == null ? null : emailaddress.toLowerCase();
     }
 
     @Override
@@ -173,13 +181,20 @@ public class ExternalUserParticipant extends AbstractConfirmableParticipant impl
     }
 
     @Override
-    public Object clone() throws CloneNotSupportedException {
-        return super.clone();
+    public ExternalUserParticipant clone() throws CloneNotSupportedException {
+        ExternalUserParticipant retval = (ExternalUserParticipant) super.clone();
+
+        retval.setDisplayName(this.getDisplayName());
+        retval.emailaddress = this.emailaddress;
+        retval.setIdentifier(this.getIdentifier());
+        retval.setIgnoreNotification(this.isIgnoreNotification());
+
+        return retval;
     }
 
     @Override
-    public Participant getClone() throws CloneNotSupportedException {
-        return (Participant) clone();
+    public ConfirmableParticipant getClone() throws CloneNotSupportedException {
+        return clone();
     }
 
     @Override

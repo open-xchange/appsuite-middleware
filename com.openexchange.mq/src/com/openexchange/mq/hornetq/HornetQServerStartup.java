@@ -59,7 +59,6 @@ import java.util.regex.Pattern;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.hornetq.api.core.TransportConfiguration;
 import org.hornetq.core.config.Configuration;
 import org.hornetq.core.config.impl.ConfigurationImpl;
@@ -87,6 +86,7 @@ import org.xml.sax.InputSource;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.UnsynchronizedStringReader;
+import com.openexchange.log.LogFactory;
 import com.openexchange.mq.MQConstants;
 import com.openexchange.mq.MQExceptionCodes;
 import com.openexchange.mq.MQServerStartup;
@@ -145,7 +145,7 @@ public final class HornetQServerStartup implements MQServerStartup {
                     /*
                      * Parse into configuration
                      */
-                    final String configPath = service.getProperty("CONFIGPATH", "/tmp/hornetq");
+                    final String configPath = "/tmp/hornetq";
                     final Configuration configuration;
                     {
                         hornetqConfigXml = PATTERN_CONFIGPATH.matcher(hornetqConfigXml).replaceAll(configPath);

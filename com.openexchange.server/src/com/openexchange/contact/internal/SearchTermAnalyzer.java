@@ -72,10 +72,20 @@ public class SearchTermAnalyzer {
     	this.analyzeTerm(term);
     }
     
+    /**
+     * Gets the detected folder IDs present in the underlying term.
+     * 
+     * @return the folder IDs
+     */
     public List<String> getFolderIDs() {
     	return this.folderIDs;
     }
     
+    /**
+     * Gets a value indicating whether folder IDs have been detected or not.
+     *  
+     * @return
+     */
     public boolean hasFolderIDs() {
     	return null != this.folderIDs && 0 < this.folderIDs.size();
     }
@@ -86,7 +96,7 @@ public class SearchTermAnalyzer {
 		} else if (CompositeSearchTerm.class.isInstance(term)) {
 			this.analyzeTerm((CompositeSearchTerm)term);
 		} else {
-			throw new IllegalArgumentException("Need either an 'SingleSearchTerm' or 'CompositeSearchTerm'.");
+			throw new IllegalArgumentException("Need either a 'SingleSearchTerm' or 'CompositeSearchTerm'.");
 		}
 	}
 

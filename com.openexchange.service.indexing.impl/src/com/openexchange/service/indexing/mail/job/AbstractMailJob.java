@@ -49,47 +49,31 @@
 
 package com.openexchange.service.indexing.mail.job;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
-import com.openexchange.index.IndexAccess;
+import com.openexchange.groupware.Types;
 import com.openexchange.index.IndexDocument;
 import com.openexchange.index.IndexDocument.Type;
 import com.openexchange.index.IndexFacadeService;
 import com.openexchange.index.StandardIndexDocument;
-import com.openexchange.index.solr.mail.SolrMailConstants;
-import com.openexchange.mail.MailExceptionCode;
-import com.openexchange.mail.api.IMailFolderStorage;
-import com.openexchange.mail.api.IMailMessageStorage;
-import com.openexchange.mail.api.MailAccess;
-import com.openexchange.mail.api.MailConfig;
+import com.openexchange.index.solr.IndexFolderManager;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.service.MailService;
 import com.openexchange.mail.smal.SmalAccessService;
-import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.service.indexing.StandardIndexingJob;
-import com.openexchange.service.indexing.impl.Services;
-import com.openexchange.service.indexing.mail.Constants;
-import com.openexchange.service.indexing.mail.FakeSession;
 import com.openexchange.service.indexing.mail.MailJobInfo;
-import com.openexchange.session.Session;
-import com.openexchange.tools.sql.DBUtils;
+import com.openexchange.service.indexing.mail.StorageAccess;
 
 /**
  * {@link AbstractMailJob} - The abstract mail job.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public abstract class AbstractMailJob extends StandardIndexingJob implements SolrMailConstants {
+public abstract class AbstractMailJob extends StandardIndexingJob {
 
     private static final long serialVersionUID = 8617301658519763880L;
 
@@ -137,14 +121,20 @@ public abstract class AbstractMailJob extends StandardIndexingJob implements Sol
     protected final int accountId;
 
     /**
+     * The storage access.
+     */
+    protected final StorageAccess storageAccess;
+
+    /**
      * Initializes a new {@link AbstractMailJob}.
      */
     protected AbstractMailJob(final MailJobInfo info) {
         super();
         this.info = info;
-        this.accountId = info.accountId;
-        this.userId = info.userId;
-        this.contextId = info.contextId;
+        accountId = info.accountId;
+        userId = info.userId;
+        contextId = info.contextId;        
+        storageAccess = new StorageAccess(info);
     }
 
     @Override
@@ -152,42 +142,22 @@ public abstract class AbstractMailJob extends StandardIndexingJob implements Sol
         return new Class<?>[] { DatabaseService.class, MailService.class, IndexFacadeService.class, SmalAccessService.class };
     }
 
-    /**
-     * Gets the associated index access.
-     * 
-     * @return The index access
-     * @throws OXException If access cannot be returned
-     */
-    protected IndexAccess<MailMessage> getIndexAccess() throws OXException {
-        final IndexFacadeService service = Services.getService(IndexFacadeService.class);
-        if (null == service) {
-            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(IndexFacadeService.class.getName());
+    @Override
+    public final void performJob() throws OXException, InterruptedException {        
+        try {
+            performMailJob();
+        } finally {
+            storageAccess.close();
         }
-        return service.acquireIndexAccess(com.openexchange.groupware.Types.EMAIL, userId, contextId);
     }
 
     /**
-     * Releases specified index access.
+     * Performs this job's task.
      * 
-     * @param indexAccess The index access to release (<code>null</code> is no-op)
+     * @throws OXException If performing job fails for any reason
+     * @throws InterruptedException If job has been interrupted
      */
-    protected static void releaseAccess(final IndexAccess<MailMessage> indexAccess) {
-        if (null == indexAccess) {
-            return;
-        }
-        final IndexFacadeService indexFacade = Services.getService(IndexFacadeService.class);
-        if (null != indexFacade) {
-            try {
-                indexFacade.releaseIndexAccess(indexAccess);
-            } catch (final OXException e) {
-                final Log log = com.openexchange.log.Log.valueOf(LogFactory.getLog(AbstractMailJob.class));
-                log.warn("Closing index access failed.", e);
-            } catch (final RuntimeException e) {
-                final Log log = com.openexchange.log.Log.valueOf(LogFactory.getLog(AbstractMailJob.class));
-                log.warn("Closing index access failed.", e);
-            }
-        }
-    }
+    protected abstract void performMailJob() throws OXException, InterruptedException;
 
     /**
      * Converts <code>MailMessage</code> collection to an <code>IndexDocument</code> list.
@@ -206,57 +176,66 @@ public abstract class AbstractMailJob extends StandardIndexingJob implements Sol
         return documents;
     }
 
-    /**
-     * Gets the tracked SMAL access service.
-     * 
-     * @return The SMAL access service
-     */
-    protected SmalAccessService getSmalAccessService() {
-        return Services.getService(SmalAccessService.class);
-    }
-
-    /**
-     * Gets a new unconnected {@link MailAccess} instance appropriate for this job.
-     * 
-     * @return The new {@link MailAccess} instance
-     * @throws OXException If initialization of {@link MailAccess} instance fails
-     */
-    protected MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccessFor() throws OXException {
-        /*
-         * Fake session & signaling not to lookup cache
-         */
-        final Session session = new FakeSession(info.primaryPassword, info.userId, info.contextId);
-        session.setParameter("com.openexchange.mail.lookupMailAccessCache", Boolean.FALSE);
-        final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess =
-            getSmalAccessService().getUnwrappedInstance(session, accountId);
-        /*
-         * Safety close & not cacheable
-         */
-        mailAccess.close(true);
-        mailAccess.setCacheable(false);
-        /*
-         * Parameterize configuration
-         */
-        final MailConfig mailConfig = mailAccess.getMailConfig();
-        mailConfig.setLogin(info.login);
-        mailConfig.setPassword(info.password);
-        mailConfig.setServer(info.server);
-        mailConfig.setPort(info.port);
-        mailConfig.setSecure(info.secure);
-        return mailAccess;
-    }
-
-    /**
-     * Checks if a sync should be performed for specified full name with default span of 1 hour.
-     * 
-     * @param fullName The full name
-     * @param now The current time milliseconds
-     * @return <code>true</code> if a sync should be performed for passed full name; otherwise <code>false</code>
-     * @throws OXException If an error occurs
-     */
-    protected boolean shouldSync(final String fullName, final long now) throws OXException {
-        return shouldSync(fullName, now, Constants.HOUR_MILLIS);
-    }
+//    /**
+//     * Restores the time stamp to specified value (performs a <small>DELETE</small> if <tt>stamp</tt> is <tt>-1</tt>).
+//     * 
+//     * @param fullName The folder full name
+//     * @param stamp The time stamp to restore to
+//     * @return <code>true</code> if successfully restored; otherwise <code>false</code>
+//     */
+//    protected boolean restoreTimeStamp(final String fullName, final long stamp) {
+//        final DatabaseService databaseService = Services.getService(DatabaseService.class);
+//        if (null == databaseService) {
+//            return false;
+//        }
+//        final Connection con;
+//        try {
+//            con = databaseService.getWritable(contextId);
+//        } catch (final OXException e) {
+//            final Log logger = com.openexchange.log.Log.loggerFor(AbstractMailJob.class);
+//            logger.warn("An Open-Xchange error occurred: " + e.getMessage(), e);
+//            return false;
+//        }
+//        PreparedStatement stmt = null;
+//        try {
+//            int pos = 1;
+//            if (stamp >= 0) {
+//                stmt = con.prepareStatement("UPDATE mailSync SET timestamp = ? WHERE cid = ? AND user = ? AND accountId = ? AND fullName = ?");
+//                stmt.setLong(pos++, stamp);
+//            } else {
+//                stmt = con.prepareStatement("DELETE FROM mailSync WHERE cid = ? AND user = ? AND accountId = ? AND fullName = ?");
+//            }
+//            stmt.setLong(pos++, contextId);
+//            stmt.setLong(pos++, userId);
+//            stmt.setLong(pos++, accountId);
+//            stmt.setString(pos, fullName);
+//            return stmt.executeUpdate() > 0;
+//        } catch (final SQLException e) {
+//            final Log logger = com.openexchange.log.Log.loggerFor(AbstractMailJob.class);
+//            logger.warn("A SQL error occurred: " + e.getMessage(), e);
+//            return false;
+//        } catch (final RuntimeException e) {
+//            final Log logger = com.openexchange.log.Log.loggerFor(AbstractMailJob.class);
+//            logger.warn("A runtime error occurred: " + e.getMessage(), e);
+//            return false;
+//        } finally {
+//            DBUtils.closeSQLStuff(stmt);
+//            databaseService.backWritable(contextId, con);
+//        }
+//    }
+//
+//    /**
+//     * Checks if a sync should be performed for specified full name with default span of 1 hour.
+//     * 
+//     * @param fullName The full name
+//     * @param now The current time milliseconds
+//     * @param box Simple container for previous time stamp
+//     * @return <code>true</code> if a sync should be performed for passed full name; otherwise <code>false</code>
+//     * @throws OXException If an error occurs
+//     */
+//    protected boolean shouldSync(final String fullName, final long now, final long[] box) throws OXException {
+//        return shouldSync(fullName, now, Constants.HOUR_MILLIS, box);
+//    }
 
     /**
      * Checks if a sync should be performed because given span is exceeded for specified full name.
@@ -264,106 +243,118 @@ public abstract class AbstractMailJob extends StandardIndexingJob implements Sol
      * @param fullName The full name
      * @param now The current time milliseconds
      * @param span The max. allowed span; if exceeded the folder is considered to be synchronized
+     * @param box Simple container for previous time stamp
      * @return <code>true</code> if a sync should be performed for passed full name; otherwise <code>false</code>
      * @throws OXException If an error occurs
      */
-    protected boolean shouldSync(final String fullName, final long now, final long span) throws OXException {
-        final DatabaseService databaseService = Services.getService(DatabaseService.class);
-        if (null == databaseService) {
-            return false;
-        }
-        final Connection con = databaseService.getWritable(contextId);
-        PreparedStatement stmt = null;
-        ResultSet rs = null;
-        try {
-            stmt =
-                con.prepareStatement("SELECT timestamp, sync FROM mailSync WHERE cid = ? AND user = ? AND accountId = ? AND fullName = ?");
-            int pos = 1;
-            stmt.setLong(pos++, contextId);
-            stmt.setLong(pos++, userId);
-            stmt.setLong(pos++, accountId);
-            stmt.setString(pos, fullName);
-            rs = stmt.executeQuery();
-            if (!rs.next()) {
-                DBUtils.closeSQLStuff(rs, stmt);
-                stmt = con.prepareStatement("INSERT INTO mailSync (cid, user, accountId, fullName, timestamp, sync) VALUES (?,?,?,?,?,?)");
-                pos = 1;
-                stmt.setLong(pos++, contextId);
-                stmt.setLong(pos++, userId);
-                stmt.setLong(pos++, accountId);
-                stmt.setString(pos++, fullName);
-                stmt.setLong(pos++, now);
-                stmt.setInt(pos, 0);
-                try {
-                    stmt.executeUpdate();
-                    return true;
-                } catch (final Exception e) {
-                    /*
-                     * Another INSERTed in the meantime
-                     */
-                    return false;
-                }
+    protected boolean shouldSync(final String fullName, final long now, final long span, final long[] box) throws OXException {
+        if (!IndexFolderManager.isLocked(contextId, userId, Types.EMAIL, String.valueOf(accountId), fullName)) {
+            if (IndexFolderManager.isIndexed(contextId, userId, Types.EMAIL, String.valueOf(accountId), fullName)) {
+                final long timestamp = IndexFolderManager.getTimestamp(contextId, userId, Types.EMAIL, String.valueOf(accountId), fullName);
+                return ((now - timestamp) > span);
             }
-            final long stamp = rs.getLong(1);
-            if ((now - stamp) > span) {
-                /*
-                 * Ensure sync flag is NOT set
-                 */
-                if (rs.getInt(2) > 0) {
-                    DBUtils.closeSQLStuff(rs, stmt);
-                    stmt =
-                        con.prepareStatement("UPDATE mailSync SET sync = ? WHERE cid = ? AND user = ? AND accountId = ? AND fullName = ?");
-                    pos = 1;
-                    stmt.setInt(pos++, 0);
-                    stmt.setLong(pos++, contextId);
-                    stmt.setLong(pos++, userId);
-                    stmt.setLong(pos++, accountId);
-                    stmt.setString(pos, fullName);
-                    stmt.executeUpdate();
-                }
-                return true;
-            }
-            return false;
-        } catch (final SQLException e) {
-            throw MailExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
-        } finally {
-            DBUtils.closeSQLStuff(rs, stmt);
-            databaseService.backWritable(contextId, con);
+            return true;
         }
+        return false;
+//        
+//        final DatabaseService databaseService = Services.getService(DatabaseService.class);
+//        if (null == databaseService) {
+//            return false;
+//        }
+//        final Connection con = databaseService.getWritable(contextId);
+//        PreparedStatement stmt = null;
+//        ResultSet rs = null;
+//        try {
+//            stmt =
+//                con.prepareStatement("SELECT timestamp, sync FROM mailSync WHERE cid = ? AND user = ? AND accountId = ? AND fullName = ?");
+//            int pos = 1;
+//            stmt.setLong(pos++, contextId);
+//            stmt.setLong(pos++, userId);
+//            stmt.setLong(pos++, accountId);
+//            stmt.setString(pos, fullName);
+//            rs = stmt.executeQuery();
+//            if (!rs.next()) {
+//                DBUtils.closeSQLStuff(rs, stmt);
+//                box[0] = -1L;
+//                stmt = con.prepareStatement("INSERT INTO mailSync (cid, user, accountId, fullName, timestamp, sync) VALUES (?,?,?,?,?,?)");
+//                pos = 1;
+//                stmt.setLong(pos++, contextId);
+//                stmt.setLong(pos++, userId);
+//                stmt.setLong(pos++, accountId);
+//                stmt.setString(pos++, fullName);
+//                stmt.setLong(pos++, now);
+//                stmt.setInt(pos, 0);
+//                try {
+//                    stmt.executeUpdate();
+//                    return true;
+//                } catch (final Exception e) {
+//                    /*
+//                     * Another INSERTed in the meantime
+//                     */
+//                    return false;
+//                }
+//            }
+//            final long stamp = rs.getLong(1);
+//            box[0] = stamp;
+//            if ((now - stamp) > span) {
+//                /*
+//                 * Ensure sync flag is NOT set
+//                 */
+//                if (rs.getInt(2) > 0) {
+//                    DBUtils.closeSQLStuff(rs, stmt);
+//                    stmt =
+//                        con.prepareStatement("UPDATE mailSync SET sync = ? WHERE cid = ? AND user = ? AND accountId = ? AND fullName = ?");
+//                    pos = 1;
+//                    stmt.setInt(pos++, 0);
+//                    stmt.setLong(pos++, contextId);
+//                    stmt.setLong(pos++, userId);
+//                    stmt.setLong(pos++, accountId);
+//                    stmt.setString(pos, fullName);
+//                    stmt.executeUpdate();
+//                }
+//                return true;
+//            }
+//            return false;
+//        } catch (final SQLException e) {
+//            throw MailExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
+//        } finally {
+//            DBUtils.closeSQLStuff(rs, stmt);
+//            databaseService.backWritable(contextId, con);
+//        }
     }
 
-    /**
-     * Updates the time stamp and unsets the sync flag.
-     * 
-     * @param fullName The folder full name
-     * @param stamp The time stamp
-     * @return <code>true</code> if operation was successful; otherwise <code>false</code>
-     * @throws OXException If an error occurs
-     */
-    protected boolean setTimestampAndUnsetSyncFlag(final String fullName, final long stamp) throws OXException {
-        final DatabaseService databaseService = Services.getService(DatabaseService.class);
-        if (null == databaseService) {
-            return false;
-        }
-        final Connection con = databaseService.getWritable(contextId);
-        PreparedStatement stmt = null;
-        try {
-            stmt =
-                con.prepareStatement("UPDATE mailSync SET sync = 0, timestamp = ? WHERE cid = ? AND user = ? AND accountId = ? AND fullName = ? AND sync = 1");
-            int pos = 1;
-            stmt.setLong(pos++, stamp);
-            stmt.setLong(pos++, contextId);
-            stmt.setLong(pos++, userId);
-            stmt.setLong(pos++, accountId);
-            stmt.setString(pos, fullName);
-            return stmt.executeUpdate() > 0;
-        } catch (final SQLException e) {
-            throw MailExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
-        } finally {
-            DBUtils.closeSQLStuff(stmt);
-            databaseService.backWritable(contextId, con);
-        }
-    }
+//    /**
+//     * Updates the time stamp and unsets the sync flag.
+//     * 
+//     * @param fullName The folder full name
+//     * @param stamp The time stamp
+//     * @return <code>true</code> if operation was successful; otherwise <code>false</code>
+//     * @throws OXException If an error occurs
+//     */
+//    protected boolean setTimestampAndUnsetSyncFlag(final String fullName, final long stamp) throws OXException {
+//        final DatabaseService databaseService = Services.getService(DatabaseService.class);
+//        if (null == databaseService) {
+//            return false;
+//        }
+//        final Connection con = databaseService.getWritable(contextId);
+//        PreparedStatement stmt = null;
+//        try {
+//            stmt =
+//                con.prepareStatement("UPDATE mailSync SET sync = 0, timestamp = ? WHERE cid = ? AND user = ? AND accountId = ? AND fullName = ? AND sync = 1");
+//            int pos = 1;
+//            stmt.setLong(pos++, stamp);
+//            stmt.setLong(pos++, contextId);
+//            stmt.setLong(pos++, userId);
+//            stmt.setLong(pos++, accountId);
+//            stmt.setString(pos, fullName);
+//            return stmt.executeUpdate() > 0;
+//        } catch (final SQLException e) {
+//            throw MailExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
+//        } finally {
+//            DBUtils.closeSQLStuff(stmt);
+//            databaseService.backWritable(contextId, con);
+//        }
+//    }
 
     /**
      * Updates the time stamp.
@@ -374,29 +365,31 @@ public abstract class AbstractMailJob extends StandardIndexingJob implements Sol
      * @throws OXException If an error occurs
      */
     protected boolean setTimestamp(final String fullName, final long stamp) throws OXException {
-        final DatabaseService databaseService = Services.getService(DatabaseService.class);
-        if (null == databaseService) {
-            return false;
-        }
-        final Connection con = databaseService.getWritable(contextId);
-        PreparedStatement stmt = null;
-        try {
-            stmt =
-                con.prepareStatement("UPDATE mailSync SET timestamp = ? WHERE cid = ? AND user = ? AND accountId = ? AND fullName = ? AND sync = 1");
-            int pos = 1;
-            stmt.setLong(pos++, stamp);
-            stmt.setLong(pos++, contextId);
-            stmt.setLong(pos++, userId);
-            stmt.setLong(pos++, accountId);
-            stmt.setString(pos, fullName);
-            return stmt.executeUpdate() > 0;
-        } catch (final SQLException e) {
-            throw MailExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
-        } finally {
-            DBUtils.closeSQLStuff(stmt);
-            databaseService.backWritable(contextId, con);
-        }
+        return IndexFolderManager.setTimestamp(contextId, userId, Types.EMAIL, String.valueOf(accountId), fullName, stamp);
     }
+//        final DatabaseService databaseService = Services.getService(DatabaseService.class);
+//        if (null == databaseService) {
+//            return false;
+//        }
+//        final Connection con = databaseService.getWritable(contextId);
+//        PreparedStatement stmt = null;
+//        try {
+//            stmt =
+//                con.prepareStatement("UPDATE mailSync SET timestamp = ? WHERE cid = ? AND user = ? AND accountId = ? AND fullName = ? AND sync = 1");
+//            int pos = 1;
+//            stmt.setLong(pos++, stamp);
+//            stmt.setLong(pos++, contextId);
+//            stmt.setLong(pos++, userId);
+//            stmt.setLong(pos++, accountId);
+//            stmt.setString(pos, fullName);
+//            return stmt.executeUpdate() > 0;
+//        } catch (final SQLException e) {
+//            throw MailExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
+//        } finally {
+//            DBUtils.closeSQLStuff(stmt);
+//            databaseService.backWritable(contextId, con);
+//        }
+//    }
 
     /**
      * Unsets the sync flag.
@@ -406,58 +399,60 @@ public abstract class AbstractMailJob extends StandardIndexingJob implements Sol
      * @throws OXException If an error occurs
      */
     protected boolean unsetSyncFlag(final String fullName) throws OXException {
-        final DatabaseService databaseService = Services.getService(DatabaseService.class);
-        if (null == databaseService) {
-            return false;
-        }
-        final Connection con = databaseService.getWritable(contextId);
-        PreparedStatement stmt = null;
-        try {
-            stmt =
-                con.prepareStatement("UPDATE mailSync SET sync = 0 WHERE cid = ? AND user = ? AND accountId = ? AND fullName = ? AND sync = 1");
-            int pos = 1;
-            stmt.setLong(pos++, contextId);
-            stmt.setLong(pos++, userId);
-            stmt.setLong(pos++, accountId);
-            stmt.setString(pos, fullName);
-            return stmt.executeUpdate() > 0;
-        } catch (final SQLException e) {
-            throw MailExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
-        } finally {
-            DBUtils.closeSQLStuff(stmt);
-            databaseService.backWritable(contextId, con);
-        }
+        return IndexFolderManager.unlock(contextId, userId, Types.EMAIL, String.valueOf(accountId), fullName);
     }
+//        final DatabaseService databaseService = Services.getService(DatabaseService.class);
+//        if (null == databaseService) {
+//            return false;
+//        }
+//        final Connection con = databaseService.getWritable(contextId);
+//        PreparedStatement stmt = null;
+//        try {
+//            stmt =
+//                con.prepareStatement("UPDATE mailSync SET sync = 0 WHERE cid = ? AND user = ? AND accountId = ? AND fullName = ? AND sync = 1");
+//            int pos = 1;
+//            stmt.setLong(pos++, contextId);
+//            stmt.setLong(pos++, userId);
+//            stmt.setLong(pos++, accountId);
+//            stmt.setString(pos, fullName);
+//            return stmt.executeUpdate() > 0;
+//        } catch (final SQLException e) {
+//            throw MailExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
+//        } finally {
+//            DBUtils.closeSQLStuff(stmt);
+//            databaseService.backWritable(contextId, con);
+//        }
+//    }
 
-    /**
-     * Drops the entry associated with specified full name.
-     * 
-     * @param fullName The full name
-     * @throws OXException If removal fails
-     */
-    protected void dropFolderEntry(final String fullName) throws OXException {
-        final DatabaseService databaseService = Services.getService(DatabaseService.class);
-        if (null == databaseService) {
-            return;
-        }
-        final Connection con = databaseService.getWritable(contextId);
-        PreparedStatement stmt = null;
-        try {
-            stmt = con.prepareStatement("DELETE FROM mailSync WHERE cid = ? AND user = ? AND accountId = ? AND fullName = ?");
-            int pos = 1;
-            stmt.setLong(pos++, contextId);
-            stmt.setLong(pos++, userId);
-            stmt.setLong(pos++, accountId);
-            stmt.setString(pos, fullName);
-            stmt.executeUpdate();
-        } catch (final SQLException e) {
-            throw MailExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
-        } finally {
-            DBUtils.closeSQLStuff(stmt);
-            databaseService.backWritable(contextId, con);
-        }
-    }
-
+//    /**
+//     * Drops the entry associated with specified full name.
+//     * 
+//     * @param fullName The full name
+//     * @throws OXException If removal fails
+//     */
+//    protected void dropFolderEntry(final String fullName) throws OXException {
+//        final DatabaseService databaseService = Services.getService(DatabaseService.class);
+//        if (null == databaseService) {
+//            return;
+//        }
+//        final Connection con = databaseService.getWritable(contextId);
+//        PreparedStatement stmt = null;
+//        try {
+//            stmt = con.prepareStatement("DELETE FROM mailSync WHERE cid = ? AND user = ? AND accountId = ? AND fullName = ?");
+//            int pos = 1;
+//            stmt.setLong(pos++, contextId);
+//            stmt.setLong(pos++, userId);
+//            stmt.setLong(pos++, accountId);
+//            stmt.setString(pos, fullName);
+//            stmt.executeUpdate();
+//        } catch (final SQLException e) {
+//            throw MailExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
+//        } finally {
+//            DBUtils.closeSQLStuff(stmt);
+//            databaseService.backWritable(contextId, con);
+//        }
+//    }
+//
     /**
      * Checks if this call succeeds in setting the sync flag.
      * 
@@ -467,59 +462,61 @@ public abstract class AbstractMailJob extends StandardIndexingJob implements Sol
      * @throws OXException If an error occurs
      */
     protected boolean wasAbleToSetSyncFlag(final String fullName, final long now) throws OXException {
-        final DatabaseService databaseService = Services.getService(DatabaseService.class);
-        if (null == databaseService) {
-            return false;
-        }
-        final Connection con = databaseService.getWritable(contextId);
-        PreparedStatement stmt = null;
-        ResultSet rs = null;
-        try {
-            stmt = con.prepareStatement("SELECT sync FROM mailSync WHERE cid = ? AND user = ? AND accountId = ? AND fullName = ?");
-            int pos = 1;
-            stmt.setLong(pos++, contextId);
-            stmt.setLong(pos++, userId);
-            stmt.setLong(pos++, accountId);
-            stmt.setString(pos, fullName);
-            rs = stmt.executeQuery();
-            if (!rs.next()) {
-                DBUtils.closeSQLStuff(rs, stmt);
-                stmt = con.prepareStatement("INSERT INTO mailSync (cid, user, accountId, fullName, timestamp, sync) VALUES (?,?,?,?,?,?)");
-                pos = 1;
-                stmt.setLong(pos++, contextId);
-                stmt.setLong(pos++, userId);
-                stmt.setLong(pos++, accountId);
-                stmt.setString(pos++, fullName);
-                stmt.setLong(pos++, now);
-                stmt.setInt(pos, 1);
-                try {
-                    stmt.executeUpdate();
-                    return true;
-                } catch (final Exception e) {
-                    /*
-                     * Another INSERTed in the meantime
-                     */
-                    return false;
-                }
-            }
-            /*
-             * Try to set sync flag
-             */
-            DBUtils.closeSQLStuff(rs, stmt);
-            stmt =
-                con.prepareStatement("UPDATE mailSync SET sync = 1 WHERE cid = ? AND user = ? AND accountId = ? AND fullName = ? AND sync = 0");
-            pos = 1;
-            stmt.setLong(pos++, contextId);
-            stmt.setLong(pos++, userId);
-            stmt.setLong(pos++, accountId);
-            stmt.setString(pos, fullName);
-            return stmt.executeUpdate() > 0;
-        } catch (final SQLException e) {
-            throw MailExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
-        } finally {
-            DBUtils.closeSQLStuff(rs, stmt);
-            databaseService.backWritable(contextId, con);
-        }
+        return IndexFolderManager.lock(contextId, userId, Types.EMAIL, String.valueOf(accountId), fullName);
     }
+//        final DatabaseService databaseService = Services.getService(DatabaseService.class);
+//        if (null == databaseService) {
+//            return false;
+//        }
+//        final Connection con = databaseService.getWritable(contextId);
+//        PreparedStatement stmt = null;
+//        ResultSet rs = null;
+//        try {
+//            stmt = con.prepareStatement("SELECT sync FROM mailSync WHERE cid = ? AND user = ? AND accountId = ? AND fullName = ?");
+//            int pos = 1;
+//            stmt.setLong(pos++, contextId);
+//            stmt.setLong(pos++, userId);
+//            stmt.setLong(pos++, accountId);
+//            stmt.setString(pos, fullName);
+//            rs = stmt.executeQuery();
+//            if (!rs.next()) {
+//                DBUtils.closeSQLStuff(rs, stmt);
+//                stmt = con.prepareStatement("INSERT INTO mailSync (cid, user, accountId, fullName, timestamp, sync) VALUES (?,?,?,?,?,?)");
+//                pos = 1;
+//                stmt.setLong(pos++, contextId);
+//                stmt.setLong(pos++, userId);
+//                stmt.setLong(pos++, accountId);
+//                stmt.setString(pos++, fullName);
+//                stmt.setLong(pos++, now);
+//                stmt.setInt(pos, 1);
+//                try {
+//                    stmt.executeUpdate();
+//                    return true;
+//                } catch (final Exception e) {
+//                    /*
+//                     * Another INSERTed in the meantime
+//                     */
+//                    return false;
+//                }
+//            }
+//            /*
+//             * Try to set sync flag
+//             */
+//            DBUtils.closeSQLStuff(rs, stmt);
+//            stmt =
+//                con.prepareStatement("UPDATE mailSync SET sync = 1 WHERE cid = ? AND user = ? AND accountId = ? AND fullName = ? AND sync = 0");
+//            pos = 1;
+//            stmt.setLong(pos++, contextId);
+//            stmt.setLong(pos++, userId);
+//            stmt.setLong(pos++, accountId);
+//            stmt.setString(pos, fullName);
+//            return stmt.executeUpdate() > 0;
+//        } catch (final SQLException e) {
+//            throw MailExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
+//        } finally {
+//            DBUtils.closeSQLStuff(rs, stmt);
+//            databaseService.backWritable(contextId, con);
+//        }
+//    }
 
 }

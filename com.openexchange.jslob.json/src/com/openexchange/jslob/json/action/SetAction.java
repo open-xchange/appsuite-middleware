@@ -49,7 +49,12 @@
 
 package com.openexchange.jslob.json.action;
 
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+import org.json.JSONException;
 import org.json.JSONObject;
+import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.documentation.RequestMethod;
 import com.openexchange.documentation.annotations.Action;
@@ -59,6 +64,7 @@ import com.openexchange.jslob.JSlob;
 import com.openexchange.jslob.JSlobService;
 import com.openexchange.jslob.json.JSlobRequest;
 import com.openexchange.server.ServiceLookup;
+import com.openexchange.tools.servlet.AjaxExceptionCodes;
 
 /**
  * {@link SetAction}
@@ -71,21 +77,24 @@ import com.openexchange.server.ServiceLookup;
     , description = "Sets the JSlob associated with the current user and context. Performs a delete if the passed JSlob is null." 
     , method = RequestMethod.PUT
     , parameters = {
-        @Parameter(name = "serviceId", description = "Identifier for the JSLobService lookup in the JSlobServiceRegistry.", optional=true)
-        , @Parameter(name = "id", description = "The path of the JSlob.", optional=true)
+        @Parameter(name = "serviceId", description = "Optional identifier for the JSlob. Default is <tt>com.openexchange.jslob.config</tt>", optional=true)
+        , @Parameter(name = "id", description = "The path of the JSlob.", optional=false)
     }
     , requestBody = "The JSON object to set with the current user and context or null to delete the JSlob."
 )
 
 public final class SetAction extends JSlobAction {
 
+    private final List<Method> restMethods;
+
     /**
      * Initializes a new {@link SetAction}.
      * 
      * @param services The service look-up
      */
-    public SetAction(final ServiceLookup services) {
-        super(services);
+    public SetAction(final ServiceLookup services, final Map<String, JSlobAction> actions) {
+        super(services, actions);
+        restMethods = Arrays.asList(Method.DELETE, Method.PUT);
     }
 
     @Override
@@ -101,14 +110,72 @@ public final class SetAction extends JSlobAction {
         /*
          * A null value is considered as a remove operation
          */
-        final JSlob jslob = null == data ? JSlob.EMPTY_JSLOB : new JSlob((JSONObject) data);
+        final JSlob jslob = null == data || JSONObject.NULL.equals(data) ? JSlob.EMPTY_JSLOB : new JSlob((JSONObject) data);
         jslobService.set(id, jslob, jslobRequest.getUserId(), jslobRequest.getContextId());
         return new AJAXRequestResult();
     }
 
     @Override
+    protected AJAXRequestResult performREST(final JSlobRequest jslobRequest, final Method method) throws OXException, JSONException {
+        /*
+         * REST style access
+         */
+        final AJAXRequestData requestData = jslobRequest.getRequestData();
+        final String pathInfo = requestData.getPathInfo();
+        if (Method.DELETE.equals(method)) {
+            // E.g. pathInfo="11" (preceding "jslob" removed)
+            if (isEmpty(pathInfo)) {
+                throw AjaxExceptionCodes.BAD_REQUEST.create();
+            }
+            final String[] pathElements = SPLIT_PATH.split(pathInfo);
+            final int length = pathElements.length;
+            if (0 == length) {
+                throw AjaxExceptionCodes.BAD_REQUEST.create();
+            }
+            if (1 == length) {
+                /*-
+                 *  DELETE /jslob/11
+                 */
+                requestData.setAction("set");
+                requestData.putParameter("id", pathElements[0]);
+                requestData.setData(null);
+            } else {
+                throw AjaxExceptionCodes.UNKNOWN_ACTION.create(pathInfo);
+            }
+            return perform(jslobRequest);
+        } else if (Method.PUT.equals(method)) {
+            // E.g. pathInfo="11" (preceding "jslob" removed)
+            if (isEmpty(pathInfo)) {
+                throw AjaxExceptionCodes.BAD_REQUEST.create();
+            }
+            final String[] pathElements = SPLIT_PATH.split(pathInfo);
+            final int length = pathElements.length;
+            if (0 == length) {
+                throw AjaxExceptionCodes.BAD_REQUEST.create();
+            }
+            if (1 == length) {
+                /*-
+                 *  PUT /jslob/11
+                 */
+                requestData.setAction("set");
+                requestData.putParameter("id", pathElements[0]);
+            } else {
+                throw AjaxExceptionCodes.UNKNOWN_ACTION.create(pathInfo);
+            }
+            return perform(jslobRequest);
+        } else {
+            throw AjaxExceptionCodes.BAD_REQUEST.create();
+        }
+    }
+
+    @Override
     public String getAction() {
         return "set";
+    }
+
+    @Override
+    public List<Method> getRESTMethods() {
+        return restMethods;
     }
 
 }

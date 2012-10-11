@@ -49,11 +49,14 @@
 
 package com.openexchange.admin.storage.sqlStorage;
 
-import com.openexchange.admin.rmi.exceptions.PoolException;
-
 import java.sql.Connection;
+import com.openexchange.admin.rmi.exceptions.PoolException;
+import com.openexchange.database.Assignment;
+import com.openexchange.database.DatabaseService;
 
 public interface OXAdminPoolInterface {
+
+    void setService(DatabaseService service);
 
     Connection getConnectionForConfigDB() throws PoolException;
 
@@ -68,4 +71,9 @@ public interface OXAdminPoolInterface {
     boolean pushConnectionForContextNoTimeout(int contextId, Connection con) throws PoolException;
 
     int getServerId() throws PoolException;
+
+    void writeAssignment(Connection con, Assignment assign) throws PoolException;
+
+    void removeService();
+
 }

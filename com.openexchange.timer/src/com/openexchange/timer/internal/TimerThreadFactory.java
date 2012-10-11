@@ -91,7 +91,7 @@ final class TimerThreadFactory implements java.util.concurrent.ThreadFactory {
 
     private static final class TimerUncaughtExceptionhandler implements UncaughtExceptionHandler {
 
-        private static final org.apache.commons.logging.Log LOG1 = org.apache.commons.logging.LogFactory.getLog(TimerUncaughtExceptionhandler.class);
+        private static final org.apache.commons.logging.Log LOG1 = com.openexchange.log.LogFactory.getLog(TimerUncaughtExceptionhandler.class);
 
         /**
          * Initializes a new {@link TimerUncaughtExceptionhandler}.

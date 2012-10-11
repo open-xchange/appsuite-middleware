@@ -53,10 +53,10 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import org.jdom.Document;
-import org.jdom.Element;
-import org.jdom.JDOMException;
-import org.jdom.Namespace;
+import org.jdom2.Document;
+import org.jdom2.Element;
+import org.jdom2.JDOMException;
+import org.jdom2.Namespace;
 import com.openexchange.caldav.CaldavProtocol;
 import com.openexchange.caldav.GroupwareCaldavFactory;
 import com.openexchange.webdav.action.WebdavPropfindAction;
@@ -82,6 +82,7 @@ public class CaldavMultigetReport extends WebdavPropfindAction {
         super(protocol);
     }
 
+    @Override
     public void perform(WebdavRequest req, WebdavResponse res) throws WebdavProtocolException {
         final Element response = new Element("multistatus", DAV_NS);
 
@@ -130,7 +131,7 @@ public class CaldavMultigetReport extends WebdavPropfindAction {
             return Collections.emptyList();
         }
 
-        List children = requestBody.getRootElement().getChildren("href", DAV_NS);
+        List<Element> children = requestBody.getRootElement().getChildren("href", DAV_NS);
         if (children == null || children.isEmpty()) {
             return Collections.emptyList();
         }

@@ -50,6 +50,7 @@
 package com.openexchange.imap;
 
 import static com.openexchange.mail.dataobjects.MailFolder.DEFAULT_FOLDER_ID;
+import java.util.HashSet;
 import java.util.Set;
 import javax.mail.Flags;
 import javax.mail.Folder;
@@ -85,7 +86,7 @@ import com.sun.mail.imap.Rights.Right;
  */
 public abstract class IMAPFolderWorker extends MailMessageStorageLong {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(IMAPFolderWorker.class));
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(IMAPFolderWorker.class));
 
     protected static final String STR_INBOX = "INBOX";
 
@@ -114,6 +115,8 @@ public abstract class IMAPFolderWorker extends MailMessageStorageLong {
 
     protected IMAPFolder imapFolder;
 
+    protected final Set<IMAPFolder> otherFolders;
+
     protected int holdsMessages = -1;
 
     /**
@@ -134,6 +137,7 @@ public abstract class IMAPFolderWorker extends MailMessageStorageLong {
         usm = UserSettingMailStorage.getInstance().getUserSettingMail(session.getUserId(), ctx);
         imapConfig = imapAccess.getIMAPConfig();
         aclExtension = imapConfig.getACLExtension();
+        otherFolders = new HashSet<IMAPFolder>(4);
     }
 
     @Override
@@ -183,6 +187,18 @@ public abstract class IMAPFolderWorker extends MailMessageStorageLong {
     }
 
     /**
+     * Adds specified IMAP folder to set of maintained opened folders.
+     * 
+     * @param folder The IMAP folder to add
+     */
+    protected void addOpenedFolder(final IMAPFolder folder) {
+        if (null == folder) {
+            return;
+        }
+        otherFolders.add(folder);
+    }
+
+    /**
      * Closes remembered IMAP folder (if non-<code>null</code>).
      *
      * @throws OXException If closing remembered IMAP folder fails
@@ -201,12 +217,24 @@ public abstract class IMAPFolderWorker extends MailMessageStorageLong {
         }
     }
 
+    private void closeOtherFolders() {
+        for (final IMAPFolder f : otherFolders) {
+            try {
+                f.close(false);
+            } catch (final Exception e) {
+                // Ignore
+            }
+        }
+        otherFolders.clear();
+    }
+
     /**
      * Resets the IMAP folder by setting field {@link #imapFolder} to <code>null</code> and field {@link #holdsMessages} to <code>-1</code>.
      */
     protected void resetIMAPFolder() {
         holdsMessages = -1;
         imapFolder = null;
+        closeOtherFolders();
     }
 
     /**
@@ -255,6 +283,9 @@ public abstract class IMAPFolderWorker extends MailMessageStorageLong {
         if (null == fullName) {
             throw MailExceptionCode.MISSING_FULLNAME.create();
         }
+        if (imapFolder == this.imapFolder) {
+            closeOtherFolders();
+        }
         final boolean isDefaultFolder = DEFAULT_FOLDER_ID.equals(fullName);
         final boolean isIdenticalFolder;
         if (isDefaultFolder) {
@@ -285,7 +316,7 @@ public abstract class IMAPFolderWorker extends MailMessageStorageLong {
                      * Folder is open, so close folder
                      */
                     try {
-                        imapFolder.close(Folder.READ_WRITE == mode);
+                        imapFolder.close(false/*Folder.READ_WRITE == mode*/);
                     } finally {
                         if (imapFolder == this.imapFolder) {
                             resetIMAPFolder();

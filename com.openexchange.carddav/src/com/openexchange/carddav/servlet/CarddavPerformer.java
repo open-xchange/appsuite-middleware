@@ -56,7 +56,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 import com.openexchange.carddav.CarddavProtocol;
 import com.openexchange.carddav.GroupwareCarddavFactory;
@@ -106,11 +105,11 @@ import com.openexchange.webdav.protocol.helpers.PropertyMixin;
  */
 public class CarddavPerformer implements SessionHolder {
 
-    private static final Log LOG = LogFactory.getLog(CarddavPerformer.class);
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(CarddavPerformer.class);
 
-    private static CarddavPerformer INSTANCE = null;
+    private static volatile CarddavPerformer INSTANCE = null;
 
-    private static ServiceLookup services;
+    private static volatile ServiceLookup services;
 
     public static void setServices(ServiceLookup lookup) {
         services = lookup;
@@ -122,10 +121,17 @@ public class CarddavPerformer implements SessionHolder {
      * @return The instance of {@link InfostorePerformer}.
      */
     public static CarddavPerformer getInstance() {
-        if (INSTANCE == null) {
-            return INSTANCE = new CarddavPerformer();
+        CarddavPerformer retval = CarddavPerformer.INSTANCE;
+        if (retval == null) {
+            synchronized (CarddavPerformer.class) {
+                retval = CarddavPerformer.INSTANCE;
+                if (retval == null) {
+                    retval = new CarddavPerformer();
+                    CarddavPerformer.INSTANCE = retval;
+                }
+            }
         }
-        return INSTANCE;
+        return retval;
     }
 
     public static enum Action {
@@ -255,6 +261,7 @@ public class CarddavPerformer implements SessionHolder {
         return lifeCycle;
     }
 
+    @Override
     public ServerSession getSessionObject() {
         sessionNotNull();
         return session.get();
@@ -267,10 +274,12 @@ public class CarddavPerformer implements SessionHolder {
         }
     }
 
+    @Override
     public Context getContext() {
         return session.get().getContext();
     }
 
+    @Override
     public User getUser() {
         return session.get().getUser();
     }
@@ -281,6 +290,7 @@ public class CarddavPerformer implements SessionHolder {
             webdavRequest.setUrlPrefix("/carddav/");
             final ServletWebdavResponse webdavResponse = new ServletWebdavResponse(resp);
 
+            sess.setParameter("user-agent", req.getHeader("user-agent"));
             session.set(sess);
             if (LOG.isDebugEnabled()) {
                 LOG.debug("Executing " + action);

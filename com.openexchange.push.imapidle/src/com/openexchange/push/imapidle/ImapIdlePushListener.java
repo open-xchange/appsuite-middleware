@@ -55,6 +55,7 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
+import javax.mail.Folder;
 import javax.mail.MessagingException;
 import com.openexchange.exception.OXException;
 import com.openexchange.imap.IMAPCapabilities;
@@ -83,7 +84,7 @@ import com.sun.mail.imap.IMAPStore;
  */
 public final class ImapIdlePushListener implements PushListener, Runnable {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(ImapIdlePushListener.class));
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(ImapIdlePushListener.class));
 
     /**
      * @author choeger
@@ -146,7 +147,7 @@ public final class ImapIdlePushListener implements PushListener, Runnable {
 
     private static volatile String folder;
 
-    private static int errordelay;
+    private static volatile int errordelay;
 
     /**
      * Gets the account ID constant.
@@ -485,6 +486,7 @@ public final class ImapIdlePushListener implements PushListener, Runnable {
             }
             return true;
         }
+        final int errDelay = errordelay;
         MailAccess<?, ?> mailAccess = null;
         try {
             final Session session = getSession();
@@ -505,7 +507,7 @@ public final class ImapIdlePushListener implements PushListener, Runnable {
             final IMAPStore imapStore = istore.getImapStore();
             final IMAPFolder inbox = (IMAPFolder) imapStore.getFolder(folder);
             try {
-                inbox.open(IMAPFolder.READ_WRITE);
+                inbox.open(Folder.READ_WRITE);
                 if (isDebugEnabled()) {
                     LOG.info("starting IDLE for Context: " + session.getContextId() + ", Login: " + session.getLoginName() + ", Session: " + session.getSessionID());
                 }
@@ -592,12 +594,12 @@ public final class ImapIdlePushListener implements PushListener, Runnable {
                 return false;
             }
             dropSessionRef("MSG".equals(e.getPrefix()) && 1001 == e.getCode());
-            LOG.info("Interrupted while IDLE'ing: " + e.getMessage() + ", sleeping for " + errordelay + "ms", e);
+            LOG.info("Interrupted while IDLE'ing: " + e.getMessage() + ", sleeping for " + errDelay + "ms", e);
             if (isDebugEnabled()) {
                 LOG.error(e);
             }
             try {
-                Thread.sleep(errordelay);
+                Thread.sleep(errDelay);
             } catch (final InterruptedException e1) {
                 ThreadPools.unexpectedlyInterrupted(Thread.currentThread());
                 if (isDebugEnabled()) {
@@ -606,12 +608,12 @@ public final class ImapIdlePushListener implements PushListener, Runnable {
             }
         } catch (final MessagingException e) {
             dropSessionRef(e instanceof javax.mail.AuthenticationFailedException);
-            LOG.info("Interrupted while IDLE'ing: " + e.getMessage() + ", sleeping for " + errordelay + "ms", e);
+            LOG.info("Interrupted while IDLE'ing: " + e.getMessage() + ", sleeping for " + errDelay + "ms", e);
             if (isDebugEnabled()) {
                 LOG.error(e);
             }
             try {
-                Thread.sleep(errordelay);
+                Thread.sleep(errDelay);
             } catch (final InterruptedException e1) {
                 ThreadPools.unexpectedlyInterrupted(Thread.currentThread());
                 if (isDebugEnabled()) {
@@ -622,12 +624,12 @@ public final class ImapIdlePushListener implements PushListener, Runnable {
             throw e;
         } catch (final RuntimeException e) {
             dropSessionRef(false);
-            LOG.info("Interrupted while IDLE'ing: " + e.getMessage() + ", sleeping for " + errordelay + "ms", e);
+            LOG.info("Interrupted while IDLE'ing: " + e.getMessage() + ", sleeping for " + errDelay + "ms", e);
             if (isDebugEnabled()) {
                 LOG.error(e);
             }
             try {
-                Thread.sleep(errordelay);
+                Thread.sleep(errDelay);
             } catch (final InterruptedException e1) {
                 ThreadPools.unexpectedlyInterrupted(Thread.currentThread());
                 if (isDebugEnabled()) {

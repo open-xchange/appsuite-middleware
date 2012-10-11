@@ -122,7 +122,7 @@ public class Bug18490Test extends AbstractMailFilterTest {
         final TestMail testMail = new TestMail();
         testMail.setSubject("Bug18490 testmail");
         testMail.setTo(Arrays.asList(new String[] { client.getValues().getSendAddress() }));
-        testMail.setFrom(Arrays.asList(new String[] { client.getValues().getSendAddress() }));
+        testMail.setFrom(client.getValues().getSendAddress());
         testMail.setContentType(MailContentType.PLAIN.toString());
         testMail.setBody("Move me...");
         testMail.sanitize();

@@ -53,15 +53,14 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
+
 import junit.framework.TestCase;
-import com.openexchange.api2.ContactInterfaceFactory;
-import com.openexchange.api2.ContactSQLInterface;
+
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.contexts.SimContext;
 import com.openexchange.publish.Publication;
-import com.openexchange.publish.services.SimContactSQLInterface;
-import com.openexchange.session.Session;
+import com.openexchange.publish.services.SimContactService;
 
 
 /**
@@ -71,7 +70,6 @@ import com.openexchange.session.Session;
  *
  */
 public class ContactFolderLoaderTest extends TestCase {
-    private ContactInterfaceFactory contactSQLFactory;
     private ContactFolderLoader contactLoader;
     private int cid;
     private int folderId;
@@ -82,7 +80,8 @@ public class ContactFolderLoaderTest extends TestCase {
 
     @Override
     public void setUp() {
-        final SimContactSQLInterface contacts = new SimContactSQLInterface();
+    	
+    	final SimContactService contactService = new SimContactService();
 
         cid = 1;
         folderId = 12;
@@ -94,20 +93,11 @@ public class ContactFolderLoaderTest extends TestCase {
         publication.setEntityId(String.valueOf(folderId));
         publication.setContext(new SimContext(cid));
 
-        contacts.simulateContact(cid, folderId, id1, "Hans");
-        contacts.simulateContact(cid, folderId, id2, "Peter");
-        contacts.simulateDistributionList(cid, folderId, id3, "DistriList");
+        contactService.simulateContact(cid, folderId, id1, "Hans");
+        contactService.simulateContact(cid, folderId, id2, "Peter");
+        contactService.simulateDistributionList(cid, folderId, id3, "DistriList");
 
-        contactSQLFactory = new ContactInterfaceFactory() {
-
-            @Override
-            public ContactSQLInterface create(final int folderId, final Session session) throws OXException {
-                return contacts;
-            }
-
-        };
-
-        contactLoader = new ContactFolderLoader(contactSQLFactory);
+        contactLoader = new ContactFolderLoader(contactService);
     }
 
     public void testLoadFolder() throws OXException {

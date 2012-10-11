@@ -37,7 +37,6 @@ sub doRequest {
     	           # First the mandatory fields
     	           SOAP::Data->name("name" => $name),
     	           SOAP::Data->name("displayname" => $displayname),
-    	           SOAP::Data->name("email" => $email),
     	           # And here the optional fields
     	           SOAP::Data->name("members" => @members )
     	           )),

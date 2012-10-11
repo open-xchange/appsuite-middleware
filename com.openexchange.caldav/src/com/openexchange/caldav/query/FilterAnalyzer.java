@@ -61,7 +61,7 @@ import java.util.List;
  */
 public class FilterAnalyzer {
 
-    private List<AnalyzerElement> analyzers;
+    private final List<AnalyzerElement> analyzers;
 
     public FilterAnalyzer(List<AnalyzerElement> analyzers) {
         super();

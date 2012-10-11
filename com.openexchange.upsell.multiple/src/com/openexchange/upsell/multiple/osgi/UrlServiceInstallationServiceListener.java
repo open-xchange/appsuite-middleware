@@ -54,9 +54,8 @@ import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.openexchange.upsell.multiple.api.UpsellURLService;
 
-
 /**
- *
+ * 
  *
  * @author <a href="mailto:dennis.sieben@open-xchange.com">Dennis Sieben</a>
  *
@@ -74,10 +73,12 @@ public class UrlServiceInstallationServiceListener implements ServiceTrackerCust
     @Override
     public UpsellURLService addingService(final ServiceReference<UpsellURLService> serviceReference) {
         final UpsellURLService service = context.getService(serviceReference);
-        if (null == MyServiceRegistry.getServiceRegistry().getService(UpsellURLService.class)) {
-            MyServiceRegistry.getServiceRegistry().addService(UpsellURLService.class, service);
-        } else {
-            LOG.error("Duplicate URL GENERATOR Service detected: " + serviceReference.getClass().getName());
+        if (service != null) {
+            if (null == MyServiceRegistry.getServiceRegistry().getService(UpsellURLService.class)) {
+                MyServiceRegistry.getServiceRegistry().addService(UpsellURLService.class, service);
+            } else {
+                LOG.error("Duplicate URL GENERATOR Service detected: " + serviceReference.getClass().getName());
+            }
         }
         return service;
     }
@@ -89,7 +90,9 @@ public class UrlServiceInstallationServiceListener implements ServiceTrackerCust
 
     @Override
     public void removedService(final ServiceReference<UpsellURLService> arg0, final UpsellURLService o) {
-        MyServiceRegistry.getServiceRegistry().removeService(UpsellURLService.class);
+        if (o != null) {
+            MyServiceRegistry.getServiceRegistry().removeService(UpsellURLService.class);
+        }
         context.ungetService(arg0);
     }
 

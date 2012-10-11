@@ -58,19 +58,20 @@ import java.util.List;
 import java.util.Set;
 import org.junit.Test;
 import com.openexchange.ajax.fields.AppointmentFields;
+import com.openexchange.ajax.fields.CalendarFields;
 import com.openexchange.calendar.AppointmentDiff;
 import com.openexchange.calendar.itip.ITipAction;
 import com.openexchange.calendar.itip.ITipAnalysis;
 import com.openexchange.calendar.itip.ITipAnnotation;
 import com.openexchange.calendar.itip.ITipChange;
 import com.openexchange.calendar.itip.ITipIntegrationUtility;
-import com.openexchange.calendar.itip.ITipChange.Type;
 import com.openexchange.calendar.itip.analyzers.UpdateITipAnalyzer;
 import com.openexchange.data.conversion.ical.itip.ITipMessage;
 import com.openexchange.data.conversion.ical.itip.ITipMethod;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.container.Appointment;
+import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.sim.SimBuilder;
 import static com.openexchange.time.TimeTools.D;
 
@@ -161,13 +162,18 @@ public class UpdateITipAnalyzerTest extends AbstractITipAnalyzerTest {
     public void testNewSeriesWithExceptions() throws OXException {
         // Simulate ITipIntegration without appointments
         CalendarDataObject appointment = appointment("123-123-123-123");
-        appointment.setRecurrenceType(CalendarDataObject.WEEKLY);
+        appointment.setRecurrenceType(CalendarObject.WEEKLY);
         appointment.setInterval(1);
+        appointment.setObjectID(1);
 
         CalendarDataObject ex1 = appointment("123-123-123-123");
+        ex1.setObjectID(101);
         CalendarDataObject ex2 = appointment("123-123-123-123");
+        ex2.setObjectID(102);
         CalendarDataObject ex3 = appointment("123-123-123-123");
+        ex3.setObjectID(103);
         CalendarDataObject ex4 = appointment("123-123-123-123");
+        ex4.setObjectID(104);
 
         SimBuilder integrationBuilder = new SimBuilder();
         integrationBuilder.expectCall("resolveUid", "123-123-123-123", session).andReturn(null);
@@ -209,15 +215,15 @@ public class UpdateITipAnalyzerTest extends AbstractITipAnalyzerTest {
         assertTrue(changes.get(3).isException());
         assertTrue(changes.get(4).isException());
         
-        assertSame(appointment, changes.get(1).getMasterAppointment());
-        assertSame(appointment, changes.get(2).getMasterAppointment());
-        assertSame(appointment, changes.get(3).getMasterAppointment());
-        assertSame(appointment, changes.get(4).getMasterAppointment());
+        assertEquals(appointment, changes.get(1).getMasterAppointment());
+        assertEquals(appointment, changes.get(2).getMasterAppointment());
+        assertEquals(appointment, changes.get(3).getMasterAppointment());
+        assertEquals(appointment, changes.get(4).getMasterAppointment());
 
-        assertSame(ex1, changes.get(1).getNewAppointment());
-        assertSame(ex2, changes.get(2).getNewAppointment());
-        assertSame(ex3, changes.get(3).getNewAppointment());
-        assertSame(ex4, changes.get(4).getNewAppointment());
+        assertEquals(ex1, changes.get(1).getNewAppointment());
+        assertEquals(ex2, changes.get(2).getNewAppointment());
+        assertEquals(ex3, changes.get(3).getNewAppointment());
+        assertEquals(ex4, changes.get(4).getNewAppointment());
         
         assertActions(analysis, ITipAction.ACCEPT, ITipAction.DECLINE,  ITipAction.TENTATIVE, ITipAction.DELEGATE, ITipAction.COUNTER);
 
@@ -377,8 +383,8 @@ public class UpdateITipAnalyzerTest extends AbstractITipAnalyzerTest {
         Set<String> differingFieldNames = diff.getDifferingFieldNames();
         
         assertEquals(2, differingFieldNames.size());
-        assertTrue(differingFieldNames.contains(AppointmentFields.START_DATE));
-        assertTrue(differingFieldNames.contains(AppointmentFields.END_DATE));
+        assertTrue(differingFieldNames.contains(CalendarFields.START_DATE));
+        assertTrue(differingFieldNames.contains(CalendarFields.END_DATE));
         
         assertActions(analysis, ITipAction.ACCEPT, ITipAction.DECLINE,  ITipAction.TENTATIVE, ITipAction.DELEGATE, ITipAction.COUNTER);
  
@@ -390,7 +396,7 @@ public class UpdateITipAnalyzerTest extends AbstractITipAnalyzerTest {
         SimBuilder integrationBuilder = new SimBuilder();
 
         CalendarDataObject appointment = appointment("123-123-123-123");
-        appointment.setRecurrenceType(CalendarDataObject.WEEKLY);
+        appointment.setRecurrenceType(CalendarObject.WEEKLY);
         appointment.setInterval(1);
 
         CalendarDataObject newException = appointment("123-123-123-123");
@@ -437,7 +443,7 @@ public class UpdateITipAnalyzerTest extends AbstractITipAnalyzerTest {
         SimBuilder integrationBuilder = new SimBuilder();
 
         CalendarDataObject appointment = appointment("123-123-123-123");
-        appointment.setRecurrenceType(CalendarDataObject.WEEKLY);
+        appointment.setRecurrenceType(CalendarObject.WEEKLY);
         appointment.setInterval(1);
 
         CalendarDataObject newException = appointment("123-123-123-123");
@@ -483,7 +489,7 @@ public class UpdateITipAnalyzerTest extends AbstractITipAnalyzerTest {
         SimBuilder integrationBuilder = new SimBuilder();
 
         CalendarDataObject appointment = appointment("123-123-123-123");
-        appointment.setRecurrenceType(CalendarDataObject.WEEKLY);
+        appointment.setRecurrenceType(CalendarObject.WEEKLY);
         appointment.setInterval(1);
 
         CalendarDataObject newException = appointment("123-123-123-123");
@@ -531,7 +537,7 @@ public class UpdateITipAnalyzerTest extends AbstractITipAnalyzerTest {
         SimBuilder integrationBuilder = new SimBuilder();
 
         CalendarDataObject appointment = appointment("123-123-123-123");
-        appointment.setRecurrenceType(CalendarDataObject.WEEKLY);
+        appointment.setRecurrenceType(CalendarObject.WEEKLY);
         appointment.setInterval(1);
 
         CalendarDataObject changedException = appointment("123-123-123-123");
@@ -588,7 +594,7 @@ public class UpdateITipAnalyzerTest extends AbstractITipAnalyzerTest {
         SimBuilder integrationBuilder = new SimBuilder();
 
         CalendarDataObject appointment = appointment("123-123-123-123");
-        appointment.setRecurrenceType(CalendarDataObject.WEEKLY);
+        appointment.setRecurrenceType(CalendarObject.WEEKLY);
         appointment.setInterval(1);
 
         CalendarDataObject changedException = appointment("123-123-123-123");
@@ -644,7 +650,7 @@ public class UpdateITipAnalyzerTest extends AbstractITipAnalyzerTest {
         SimBuilder integrationBuilder = new SimBuilder();
 
         CalendarDataObject appointment = appointment("123-123-123-123");
-        appointment.setRecurrenceType(CalendarDataObject.WEEKLY);
+        appointment.setRecurrenceType(CalendarObject.WEEKLY);
         appointment.setInterval(1);
 
         CalendarDataObject changedException = appointment("123-123-123-123");
@@ -706,7 +712,7 @@ public class UpdateITipAnalyzerTest extends AbstractITipAnalyzerTest {
         SimBuilder integrationBuilder = new SimBuilder();
 
         CalendarDataObject appointment = appointment("123-123-123-123");
-        appointment.setRecurrenceType(CalendarDataObject.WEEKLY);
+        appointment.setRecurrenceType(CalendarObject.WEEKLY);
         appointment.setInterval(1);
 
         CalendarDataObject ex1 = appointment("123-123-123-123");
@@ -1012,7 +1018,7 @@ public class UpdateITipAnalyzerTest extends AbstractITipAnalyzerTest {
         assertEquals(1, annotations.size());
         
         ITipAnnotation error = annotations.get(0);
-        assertEquals("This is an update to an appointment that already changed in the meantime. It is best to just ignore this one.", error.getMessage());
+        assertEquals("This is an update to an appointment that has been changed in the meantime. Best ignore it.", error.getMessage());
         
         assertActions(analysis, ITipAction.IGNORE);
     }
@@ -1043,7 +1049,7 @@ public class UpdateITipAnalyzerTest extends AbstractITipAnalyzerTest {
         assertEquals(1, annotations.size());
         
         ITipAnnotation error = annotations.get(0);
-        assertEquals("An attendee wants to change an appointment that could not be found. Probably the appointment was deleted at some point, so it is best to just ignore this update.", error.getMessage());
+        assertEquals("An attendee wants to change an appointment that could not be found. Probably the appointment was deleted. Best ignore it.", error.getMessage());
 
         assertActions(analysis, ITipAction.IGNORE);
         

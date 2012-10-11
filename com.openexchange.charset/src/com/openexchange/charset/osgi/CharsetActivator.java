@@ -64,7 +64,7 @@ import com.openexchange.osgi.HousekeepingActivator;
  */
 public final class CharsetActivator extends HousekeepingActivator implements ServiceTrackerCustomizer<CharsetProvider, CharsetProvider> {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(CharsetActivator.class));
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(CharsetActivator.class));
 
     private CollectionCharsetProvider collectionCharsetProvider;
 

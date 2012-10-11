@@ -96,7 +96,7 @@ public final class DeleteAction extends AbstractOAuthAJAXActionService {
              */
             final OAuthService oAuthService = getOAuthService();
             oAuthService.deleteAccount(Tools.getUnsignedInteger(accountId), session.getUserId(), session.getContextId());
-        } else {
+        } else if(request.getData() instanceof JSONArray) {
             JSONArray jsonArray = (JSONArray) request.getData();
             for (int i = 0; i < jsonArray.length(); i++) {
                 try {
@@ -114,6 +114,12 @@ public final class DeleteAction extends AbstractOAuthAJAXActionService {
                     throw AjaxExceptionCodes.JSON_ERROR.create(e);
                 }
             }
+        } else if (request.getData() == null) {
+        	request.require("id");
+        	int id = request.getParameter("id", int.class).intValue();
+        	final OAuthService oAuthService = getOAuthService();
+            oAuthService.deleteAccount(id, session.getUserId(), session.getContextId());
+        	
         }
         /*
          * Return appropriate result

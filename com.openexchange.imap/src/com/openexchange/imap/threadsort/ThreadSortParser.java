@@ -50,6 +50,7 @@
 package com.openexchange.imap.threadsort;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 import com.openexchange.exception.OXException;
 import com.openexchange.imap.IMAPException;
@@ -62,7 +63,7 @@ import com.openexchange.imap.IMAPException;
  */
 final class ThreadSortParser {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(ThreadSortParser.class));
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(ThreadSortParser.class));
 
     private static final boolean DEBUG = LOG.isDebugEnabled();
 
@@ -72,7 +73,7 @@ final class ThreadSortParser {
      * Initializes a new {@link ThreadSortParser}.
      */
     ThreadSortParser() {
-        threads = new ArrayList<ThreadSortNode>();
+        threads = new LinkedList<ThreadSortNode>();
     }
 
     /**
@@ -89,24 +90,25 @@ final class ThreadSortParser {
         if (DEBUG) {
             LOG.debug(new StringBuilder("Start parse: ").append(threadList).toString());
         }
-        if ((threadList.charAt(0) >= '0') && (threadList.charAt(0) <= '9')) {
+        final int length = threadList.length();
+        if (threadList.charAt(0) == '{') {
             // Now in a thread the thread starts normally with a number.
-            final int message = getMessageID(threadList);
+            final MessageId message = getMessageID(threadList);
             if (DEBUG) {
                 LOG.debug(new StringBuilder("Found message: ").append(message).toString());
             }
-            final ThreadSortNode actual = new ThreadSortNode(message);
+            final ThreadSortNode actual = new ThreadSortNode(message, -1L);
             recthreads.add(actual);
             // Now thread ends or answers are there.
-            final int messageIDLength = String.valueOf(message).length();
-            if ((threadList.length() > messageIDLength) && (threadList.charAt(messageIDLength) == ' ')) {
+            final int messageIDLength = message.getSlen();
+            if ((length > messageIDLength) && (threadList.charAt(messageIDLength) == ' ')) {
                 if (DEBUG) {
                     LOG.debug("Parsing child threads.");
                 }
                 final List<ThreadSortNode> childThreads = new ArrayList<ThreadSortNode>();
                 parse(threadList.substring(messageIDLength + 1), childThreads);
                 actual.addChildren(childThreads);
-            } else if (threadList.length() > messageIDLength) {
+            } else if (length > messageIDLength) {
                 throw IMAPException.create(
                     IMAPException.Code.THREAD_SORT_PARSING_ERROR,
                     "Found unexpected character: " + threadList.charAt(messageIDLength));
@@ -133,7 +135,7 @@ final class ThreadSortParser {
                     if (DEBUG) {
                         LOG.debug("Parsing childs of thread with no parent.");
                     }
-                    final ThreadSortNode emptyParent = new ThreadSortNode(-1);
+                    final ThreadSortNode emptyParent = new ThreadSortNode(MessageId.DUMMY, -1L);
                     recthreads.add(emptyParent);
                     final List<ThreadSortNode> childThreads = new ArrayList<ThreadSortNode>();
                     parse(subList, childThreads);
@@ -144,7 +146,7 @@ final class ThreadSortParser {
                     recthreads.addAll(childThreads);
                 }
                 pos += closingBracket + 1;
-            } while (pos < threadList.length());
+            } while (pos < length);
             if (DEBUG) {
                 LOG.debug(new StringBuilder("List: ").append(recthreads).toString());
             }
@@ -153,26 +155,15 @@ final class ThreadSortParser {
         }
     }
 
-    private int getMessageID(final String threadList) {
+    private MessageId getMessageID(final String threadList) {
         if (DEBUG) {
             LOG.debug(new StringBuilder("Parsing messageID: ").append(threadList).toString());
         }
-        int pos = 0;
-        while (pos < threadList.length()) {
-            final char actual = threadList.charAt(pos);
-            if ((actual < '0') || (actual > '9')) {
-                break;
-            }
-            pos++;
-        }
-        if (pos == 0) {
-            return -1;
-        }
-        final int id = Integer.parseInt(threadList.substring(0, pos));
+        final MessageId messageId = MessageId.valueOf(threadList, 0, threadList.indexOf('}') + 1);
         if (DEBUG) {
-            LOG.debug(new StringBuilder("Parsed number: ").append(id).toString());
+            LOG.debug(new StringBuilder("Parsed number: ").append(messageId).toString());
         }
-        return id;
+        return messageId;
     }
 
     private int findMatchingBracket(final String threadList) {
@@ -214,11 +205,11 @@ final class ThreadSortParser {
      * @return The tree nodes list with first tree node pulled-up
      */
     static List<ThreadSortNode> pullUpFirst(final List<ThreadSortNode> threads) {
-        final List<ThreadSortNode> newthreads = new ArrayList<ThreadSortNode>();
+        final List<ThreadSortNode> newthreads = new LinkedList<ThreadSortNode>();
         final int size = threads.size();
         for (int i = 0; i < size; i++) {
             ThreadSortNode actual = threads.get(i);
-            if (actual.msgNum == -1) {
+            if (MessageId.DUMMY == actual.msgId) {
                 final List<ThreadSortNode> childs = actual.getChilds();
                 actual = childs.remove(0);
                 newthreads.add(actual);

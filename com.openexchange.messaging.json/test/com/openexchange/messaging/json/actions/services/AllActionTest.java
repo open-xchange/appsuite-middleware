@@ -53,8 +53,11 @@ import junit.framework.TestCase;
 import org.json.JSONArray;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.contexts.SimContext;
+import com.openexchange.groupware.ldap.SimUser;
 import com.openexchange.messaging.SimMessagingService;
 import com.openexchange.messaging.registry.SimMessagingServiceRegistry;
+import com.openexchange.tools.session.SimServerSession;
 
 /**
  * {@link AllActionTest}
@@ -74,7 +77,7 @@ public class AllActionTest extends TestCase {
 
         final AllAction action = new AllAction(registry);
 
-        final AJAXRequestResult result = action.perform(null, null);
+        final AJAXRequestResult result = action.perform(null, new SimServerSession(new SimContext(1), new SimUser(), null));
 
         assertNotNull(result);
 
@@ -101,7 +104,7 @@ public class AllActionTest extends TestCase {
         final AllAction action = new AllAction(registry);
 
         try {
-            final AJAXRequestResult result = action.perform(null, null);
+            final AJAXRequestResult result = action.perform(null, new SimServerSession(new SimContext(1), new SimUser(), null));
             fail("Should not swallow exceptions");
             assertNull(result);
         } catch (final OXException x) {

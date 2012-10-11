@@ -188,7 +188,7 @@ public class OXFolderTools {
             userId,
             userConfig,
             ctx,
-            con), getFolderModule(folderId, ctx, con), userConfig);
+            con), getFolderModule(folderId, ctx, con), getFolderOwner(folderId, ctx, con), userConfig);
         retval.setEntity(userId);
         retval.setAllPermission(
             OCLPermission.NO_PERMISSIONS,

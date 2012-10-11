@@ -57,7 +57,7 @@ import java.util.Set;
 import javax.mail.internet.IDNA;
 import javax.mail.internet.InternetAddress;
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import com.openexchange.log.LogFactory;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.mail.MailListField;
 import com.openexchange.mail.MailServletInterface;
@@ -74,7 +74,7 @@ import com.openexchange.tools.session.ServerSession;
  */
 public class EMailFolderContactSource implements ContactSource {
 
-    private static final Log LOG = LogFactory.getLog(EMailFolderContactSource.class);
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(EMailFolderContactSource.class);
     
     private final MailFolderDiscoverer discoverer;
     private int limit = 3000;

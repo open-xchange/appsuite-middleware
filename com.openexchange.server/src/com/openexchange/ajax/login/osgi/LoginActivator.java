@@ -49,36 +49,66 @@
 
 package com.openexchange.ajax.login.osgi;
 
-import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
 import org.osgi.framework.Filter;
+import org.osgi.framework.ServiceReference;
 import org.osgi.service.http.HttpService;
 import org.osgi.util.tracker.ServiceTracker;
+import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.dispatcher.DispatcherPrefixService;
+import com.openexchange.oauth.provider.OAuthProviderService;
+import com.openexchange.oauth.provider.v2.OAuth2ProviderService;
+import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.server.services.ServerServiceRegistry;
 
 /**
  * {@link LoginActivator}
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public class LoginActivator implements BundleActivator {
-
-    private ServiceTracker<Object, Object> tracker;
+public class LoginActivator extends HousekeepingActivator {
 
     public LoginActivator() {
         super();
     }
 
     @Override
-    public void start(final BundleContext context) throws Exception {
-        final Filter filter = context.createFilter("(|(" + Constants.OBJECTCLASS + '=' + ConfigurationService.class.getName() + ")(" + Constants.OBJECTCLASS + '=' + HttpService.class.getName() + "))");
-        tracker = new ServiceTracker<Object, Object>(context, filter, new LoginServletRegisterer(context));
-        tracker.open();
+    protected Class<?>[] getNeededServices() {
+        return EMPTY_CLASSES;
     }
 
     @Override
-    public void stop(final BundleContext context) throws Exception {
-        tracker.close();
+    protected void startBundle() throws Exception {
+        final BundleContext context = this.context;
+        class ServerServiceRegistryTracker<S> implements ServiceTrackerCustomizer<S, S> {
+
+            @Override
+            public S addingService(final ServiceReference<S> reference) {
+                final S service = context.getService(reference);
+                ServerServiceRegistry.getInstance().addService(service);
+                return service;
+            }
+
+            @Override
+            public void modifiedService(final ServiceReference<S> reference, final S service) {
+                // Nothing
+            }
+
+            @Override
+            public void removedService(final ServiceReference<S> reference, final S service) {
+                context.ungetService(reference);
+                ServerServiceRegistry.getInstance().removeService(service.getClass());
+            }
+            
+        }
+        track(OAuthProviderService.class, new ServerServiceRegistryTracker<OAuthProviderService>());
+        track(OAuth2ProviderService.class, new ServerServiceRegistryTracker<OAuth2ProviderService>());
+        
+        final Filter filter = context.createFilter("(|(" + Constants.OBJECTCLASS + '=' + ConfigurationService.class.getName() + ")(" + Constants.OBJECTCLASS + '=' + HttpService.class.getName() + ")(" + Constants.OBJECTCLASS + '=' + DispatcherPrefixService.class.getName() + "))");
+        rememberTracker(new ServiceTracker<Object, Object>(context, filter, new LoginServletRegisterer(context)));
+        openTrackers();
     }
+
 }

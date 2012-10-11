@@ -49,6 +49,7 @@
 
 package com.openexchange.mail.mime.processing;
 
+import static com.openexchange.mail.mime.filler.MimeMessageFiller.setReplyHeaders;
 import static com.openexchange.mail.mime.utils.MimeMessageUtility.parseAddressList;
 import static com.openexchange.mail.mime.utils.MimeMessageUtility.unfold;
 import static java.util.regex.Matcher.quoteReplacement;
@@ -79,6 +80,7 @@ import com.openexchange.groupware.i18n.MailStrings;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.i18n.tools.StringHelper;
+import com.openexchange.java.Streams;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailPath;
 import com.openexchange.mail.MailSessionCache;
@@ -90,6 +92,7 @@ import com.openexchange.mail.dataobjects.CompositeMailMessage;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.mime.ContentType;
+import com.openexchange.mail.mime.ManagedMimeMessage;
 import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.mail.mime.MimeDefaultSession;
 import com.openexchange.mail.mime.MimeMailException;
@@ -99,7 +102,7 @@ import com.openexchange.mail.mime.converters.MimeMessageConverter;
 import com.openexchange.mail.mime.utils.MimeMessageUtility;
 import com.openexchange.mail.parser.MailMessageParser;
 import com.openexchange.mail.parser.handlers.InlineContentHandler;
-import com.openexchange.mail.text.HTMLProcessing;
+import com.openexchange.mail.text.HtmlProcessing;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.usersetting.UserSettingMailStorage;
 import com.openexchange.mail.utils.CharsetDetector;
@@ -118,7 +121,7 @@ import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 public final class MimeReply {
 
     private static final org.apache.commons.logging.Log LOG =
-        com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(MimeReply.class));
+        com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(MimeReply.class));
 
     private static final String PREFIX_RE = "Re: ";
 
@@ -191,6 +194,23 @@ public final class MimeReply {
             usm);
     }
 
+    private static final Pattern PAT_META_CT = Pattern.compile("<meta[^>]*?http-equiv=\"?content-type\"?[^>]*?>", Pattern.CASE_INSENSITIVE);
+
+    private static String replaceMetaEquiv(final String html, final ContentType contentType) {
+        final Matcher m = PAT_META_CT.matcher(html);
+        final MatcherReplacer mr = new MatcherReplacer(m, html);
+        final StringBuilder replaceBuffer = new StringBuilder(html.length());
+        if (m.find()) {
+            replaceBuffer.append("<meta content=\"").append(contentType.getBaseType().toLowerCase(Locale.ENGLISH));
+            replaceBuffer.append("; charset=").append(contentType.getCharsetParameter()).append("\" http-equiv=\"Content-Type\" />");
+            final String replacement = replaceBuffer.toString();
+            replaceBuffer.setLength(0);
+            mr.appendLiteralReplacement(replaceBuffer, replacement);
+        }
+        mr.appendTail(replaceBuffer);
+        return replaceBuffer.toString();
+    }
+
     /**
      * Composes a reply message from specified original message based on MIME objects from <code>JavaMail</code> API.
      * 
@@ -207,6 +227,8 @@ public final class MimeReply {
      */
     private static MailMessage getReplyMail(final MailMessage originalMsg, final MailPath msgref, final boolean replyAll, final boolean preferToAsRecipient, final Session session, final int accountId, final javax.mail.Session mailSession, final UserSettingMail userSettingMail) throws OXException {
         try {
+            originalMsg.setAccountId(accountId);
+            final MailMessage origMsg = ManagedMimeMessage.clone(originalMsg);
             final Context ctx = ContextStorage.getStorageContext(session.getContextId());
             final UserSettingMail usm =
                 userSettingMail == null ? UserSettingMailStorage.getInstance().getUserSettingMail(session.getUserId(), ctx) : userSettingMail;
@@ -218,7 +240,7 @@ public final class MimeReply {
              * Set headers of reply message
              */
             final String subjectPrefix = PREFIX_RE;
-            String subjectHdrValue = MimeMessageUtility.checkNonAscii(originalMsg.getHeader(MessageHeaders.HDR_SUBJECT, null));
+            String subjectHdrValue = MimeMessageUtility.checkNonAscii(origMsg.getHeader(MessageHeaders.HDR_SUBJECT, null));
             if (subjectHdrValue == null) {
                 subjectHdrValue = "";
             }
@@ -236,7 +258,7 @@ public final class MimeReply {
              */
             final InternetAddress[] recipientAddrs;
             if (preferToAsRecipient) {
-                final String hdrVal = originalMsg.getHeader(MessageHeaders.HDR_TO, MessageHeaders.HDR_ADDR_DELIM);
+                final String hdrVal = origMsg.getHeader(MessageHeaders.HDR_TO, MessageHeaders.HDR_ADDR_DELIM);
                 if (null == hdrVal) {
                     recipientAddrs = new InternetAddress[0];
                 } else {
@@ -246,12 +268,22 @@ public final class MimeReply {
                 final Set<InternetAddress> tmpSet = new LinkedHashSet<InternetAddress>(4);
                 final boolean fromAdded;
                 {
-                    final String[] replyTo = originalMsg.getHeader(MessageHeaders.HDR_REPLY_TO);
+                    final String[] replyTo = origMsg.getHeader(MessageHeaders.HDR_REPLY_TO);
                     if (MimeMessageUtility.isEmptyHeader(replyTo)) {
+                        final String owner = MimeProcessingUtility.getFolderOwnerIfShared(msgref.getFolder(), msgref.getAccountId(), session);
+                        if (null != owner) {
+                            final User[] users = UserStorage.getInstance().searchUserByMailLogin(owner, ctx);
+                            if (null != users && users.length > 0) {
+                                final InternetAddress onBehalfOf = new QuotedInternetAddress(users[0].getMail(), true);
+                                replyMsg.setFrom(onBehalfOf);
+                                final QuotedInternetAddress sender = new QuotedInternetAddress(usm.getSendAddr(), true);
+                                replyMsg.setSender(sender);
+                            }
+                        }
                         /*
                          * Set from as recipient
                          */
-                        tmpSet.addAll(Arrays.asList(originalMsg.getFrom()));
+                        tmpSet.addAll(Arrays.asList(origMsg.getFrom()));
                         fromAdded = true;
                     } else {
                         /*
@@ -272,7 +304,7 @@ public final class MimeReply {
                      * 
                      */
                     if (!fromAdded) {
-                        tmpSet.addAll(Arrays.asList(originalMsg.getFrom()));
+                        tmpSet.addAll(Arrays.asList(origMsg.getFrom()));
                     }
                 }
                 recipientAddrs = tmpSet.toArray(new InternetAddress[tmpSet.size()]);
@@ -318,7 +350,7 @@ public final class MimeReply {
                 /*
                  * Add filtered recipients from 'To' field
                  */
-                String hdrVal = originalMsg.getHeader(MessageHeaders.HDR_TO, MessageHeaders.HDR_ADDR_DELIM);
+                String hdrVal = origMsg.getHeader(MessageHeaders.HDR_TO, MessageHeaders.HDR_ADDR_DELIM);
                 InternetAddress[] toAddrs = null;
                 if (hdrVal != null) {
                     filteredAddrs.addAll(filter(filter, (toAddrs = parseAddressList(hdrVal, true))));
@@ -351,7 +383,7 @@ public final class MimeReply {
                  * Filter recipients from 'Cc' field
                  */
                 filteredAddrs.clear();
-                hdrVal = originalMsg.getHeader(MessageHeaders.HDR_CC, MessageHeaders.HDR_ADDR_DELIM);
+                hdrVal = origMsg.getHeader(MessageHeaders.HDR_CC, MessageHeaders.HDR_ADDR_DELIM);
                 if (hdrVal != null) {
                     filteredAddrs.addAll(filter(filter, parseAddressList(unfold(hdrVal), true)));
                 }
@@ -362,7 +394,7 @@ public final class MimeReply {
                  * Filter recipients from 'Bcc' field
                  */
                 filteredAddrs.clear();
-                hdrVal = originalMsg.getHeader(MessageHeaders.HDR_BCC, MessageHeaders.HDR_ADDR_DELIM);
+                hdrVal = origMsg.getHeader(MessageHeaders.HDR_BCC, MessageHeaders.HDR_ADDR_DELIM);
                 if (hdrVal != null) {
                     filteredAddrs.addAll(filter(filter, parseAddressList(unfold(hdrVal), true)));
                 }
@@ -397,14 +429,14 @@ public final class MimeReply {
              * Add reply text
              */
             final ContentType retvalContentType = new ContentType();
-            final String replyText;
+            String replyText;
             {
                 final List<String> list = new ArrayList<String>();
                 {
                     final User user = UserStorage.getStorageUser(session.getUserId(), ctx);
                     final Locale locale = user.getLocale();
                     final LocaleAndTimeZone ltz = new LocaleAndTimeZone(locale, user.getTimeZone());
-                    generateReplyText(originalMsg, retvalContentType, StringHelper.valueOf(locale), ltz, usm, mailSession, list);
+                    generateReplyText(origMsg, retvalContentType, StringHelper.valueOf(locale), ltz, usm, mailSession, list);
                 }
                 final StringBuilder replyTextBuilder = new StringBuilder(8192 << 1);
                 for (int i = list.size() - 1; i >= 0; i--) {
@@ -456,10 +488,17 @@ public final class MimeReply {
             /*
              * Set message's content directly to reply text
              */
+            if (retvalContentType.startsWith("text/htm")) {
+                retvalContentType.setCharsetParameter("UTF-8");
+                replyText = replaceMetaEquiv(replyText, retvalContentType);
+            }
             replyMsg.setText(replyText, retvalContentType.getCharsetParameter(), retvalContentType.getSubType());
             replyMsg.setHeader(MessageHeaders.HDR_MIME_VERSION, "1.0");
             replyMsg.setHeader(MessageHeaders.HDR_CONTENT_TYPE, MimeMessageUtility.foldContentType(retvalContentType.toString()));
             replyMsg.saveChanges();
+            // Remove generated Message-Id for template message
+            replyMsg.removeHeader(MessageHeaders.HDR_MESSAGE_ID);
+            setReplyHeaders(origMsg, replyMsg);
             replyMail = MimeMessageConverter.convertMessage(replyMsg);
             if (null != msgref) {
                 replyMail.setMsgref(msgref);
@@ -555,7 +594,7 @@ public final class MimeReply {
             }
             found = true;
         }
-        if (found) {
+        if (found && !usm.isDropReplyForwardPrefix()) {
             final boolean isHtml = retvalContentType.startsWith(TEXT_HTM);
             String replyPrefix = strHelper.getString(MailStrings.REPLY_PREFIX);
             {
@@ -600,11 +639,10 @@ public final class MimeReply {
                 final char nextLine = '\n';
                 if (isHtml) {
                     replyPrefix =
-                        HTMLProcessing.htmlFormat(new StringBuilder(replyPrefix.length() + 1).append(replyPrefix).append(nextLine).append(
-                            nextLine).toString());
+                        HtmlProcessing.htmlFormat(new StringBuilder(replyPrefix.length() + 1).append(replyPrefix).append(nextLine).toString());
                 } else {
                     replyPrefix =
-                        new StringBuilder(replyPrefix.length() + 1).append(replyPrefix).append(nextLine).append(nextLine).toString();
+                        new StringBuilder(replyPrefix.length() + 1).append(replyPrefix).append(nextLine).toString();
                 }
             }
             /*-
@@ -641,6 +679,7 @@ public final class MimeReply {
                     replyTextBody = quoteHtml(textBuilder.toString());
                 } else {
                     textBuilder.insert(0, replyPrefix);
+                    textBuilder.insert(replyPrefix.length(), '\n');
                     replyTextBody = quoteText(textBuilder.toString());
                 }
                 textBuilder.setLength(0);
@@ -671,7 +710,7 @@ public final class MimeReply {
         final int count = multipartPart.getEnclosedCount();
         final ContentType partContentType = new ContentType();
         boolean found = false;
-        if (pc.usm.isDisplayHtmlInlineContent() && mpContentType.startsWith(MimeTypes.MIME_MULTIPART_ALTERNATIVE) && count >= 2) {
+        if (pc.usm.isDisplayHtmlInlineContent() && mpContentType.startsWithAny(MimeTypes.MIME_MULTIPART_ALTERNATIVE, MimeTypes.MIME_MULTIPART_RELATED) && count >= 2) {
             /*
              * Prefer HTML content within multipart/alternative part
              */
@@ -686,7 +725,7 @@ public final class MimeReply {
             /*
              * Get any text content
              */
-            found = getTextContent(false, multipartPart, count, partContentType, pc);
+            found = getTextContent(true, multipartPart, count, partContentType, pc);
         }
         /*
          * Look for enclosed messages in any case
@@ -702,15 +741,26 @@ public final class MimeReply {
                  * Create message from input stream
                  */
                 final InputStream is = part.getInputStream();
-                final ByteArrayOutputStream tmp = new UnsynchronizedByteArrayOutputStream(8192);
-                final byte[] buf = new byte[4096];
-                int read = -1;
-                while ((read = is.read(buf, 0, buf.length)) != -1) {
-                    tmp.write(buf, 0, read);
+                try {
+                    final ByteArrayOutputStream tmp = new UnsynchronizedByteArrayOutputStream(8192);
+                    final byte[] buf = new byte[4096];
+                    int read = -1;
+                    while ((read = is.read(buf, 0, buf.length)) != -1) {
+                        tmp.write(buf, 0, read);
+                    }
+                    final MailMessage attachedMsg = MimeMessageConverter.convertMessage(tmp.toByteArray());// MimeMessage(mailSession,
+                    // part.getInputStream());
+                    found |= generateReplyText(
+                        attachedMsg,
+                        pc.retvalContentType,
+                        pc.strHelper,
+                        pc.ltz,
+                        pc.usm,
+                        pc.mailSession,
+                        pc.replyTexts);
+                } finally {
+                    Streams.close(is);
                 }
-                final MailMessage attachedMsg = MimeMessageConverter.convertMessage(tmp.toByteArray());// MimeMessage(mailSession,
-                // part.getInputStream());
-                found |= generateReplyText(attachedMsg, pc.retvalContentType, pc.strHelper, pc.ltz, pc.usm, pc.mailSession, pc.replyTexts);
             }
         }
         return found;
@@ -718,19 +768,47 @@ public final class MimeReply {
 
     private static boolean getTextContent(final boolean preferHTML, final MailPart multipartPart, final int count, final ContentType partContentType, final ParameterContainer pc) throws OXException, MessagingException, IOException {
         boolean found = false;
-        for (int i = 0; !found && i < count; i++) {
+        if (preferHTML) {
+            for (int i = 0; !found && i < count; i++) {
+                final MailPart part = multipartPart.getEnclosedMailPart(i);
+                partContentType.setContentType(part.getContentType());
+                if (partContentType.startsWith(TEXT_HTM) && MimeProcessingUtility.isInline(part, partContentType) && !MimeProcessingUtility.isSpecial(partContentType.getBaseType())) {
+                    if (pc.retvalContentType.getPrimaryType() == null) {
+                        pc.retvalContentType.setContentType(partContentType);
+                        final String charset = MessageUtility.checkCharset(part, partContentType);
+                        pc.retvalContentType.setCharsetParameter(charset);
+                        final String text = MimeProcessingUtility.readContent(part, charset);
+                        pc.textBuilder.append(text);
+                    } else {
+                        final String charset = MessageUtility.checkCharset(part, partContentType);
+                        partContentType.setCharsetParameter(charset);
+                        final String text =
+                            MimeProcessingUtility.handleInlineTextPart(part, partContentType, pc.usm.isDisplayHtmlInlineContent());
+                        MimeProcessingUtility.appendRightVersion(pc.retvalContentType, partContentType, text, pc.textBuilder);
+                    }
+                    found = true;
+                } else if (partContentType.startsWith(MULTIPART)) {
+                    found |= gatherAllTextContents(part, partContentType, pc);
+                }
+            }
+            if (found) {
+                return true;
+            }
+        }
+        /*
+         * Any text/* part
+         */
+        found = false;
+        for (int i = 0; i < count; i++) {
             final MailPart part = multipartPart.getEnclosedMailPart(i);
             partContentType.setContentType(part.getContentType());
-            if (partContentType.startsWith(preferHTML ? TEXT_HTM : TEXT) && MimeProcessingUtility.isInline(part, partContentType) && !MimeProcessingUtility.isSpecial(partContentType.getBaseType())) {
+            if (partContentType.startsWith(TEXT) && !partContentType.startsWith(TEXT_HTM) && MimeProcessingUtility.isInline(part, partContentType) && !MimeProcessingUtility.isSpecial(partContentType.getBaseType())) {
                 if (pc.retvalContentType.getPrimaryType() == null) {
                     pc.retvalContentType.setContentType(partContentType);
                     final String charset = MessageUtility.checkCharset(part, partContentType);
                     pc.retvalContentType.setCharsetParameter(charset);
                     final String text =
-                        preferHTML ? MimeProcessingUtility.readContent(part, charset) : MimeProcessingUtility.handleInlineTextPart(
-                            part,
-                            pc.retvalContentType,
-                            pc.usm.isDisplayHtmlInlineContent());
+                        MimeProcessingUtility.handleInlineTextPart(part, pc.retvalContentType, pc.usm.isDisplayHtmlInlineContent());
                     pc.textBuilder.append(text);
                 } else {
                     final String charset = MessageUtility.checkCharset(part, partContentType);

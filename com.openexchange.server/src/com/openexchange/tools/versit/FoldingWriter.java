@@ -89,14 +89,12 @@ public class FoldingWriter implements VersitDefinition.Writer {
     }
 
     private void writeLong(String s) throws IOException {
-        w.write("\n");
-        w.write(INDENTATION);
-        if (s.length() > MAX) {
-            w.write(s.substring(0, MAX - INDENTATION.length() - 2));
-            writeLong(s.substring(MAX - INDENTATION.length() - 2, s.length()));
-        } else {
-            w.write(s);
-        }
+    	int length = MAX - INDENTATION.length() - 2;
+    	for (int offset = 0; offset < s.length(); offset += length) {
+            w.write("\n");
+            w.write(INDENTATION);
+            w.write(s, offset, offset + length < s.length() ? length : s.length() - offset);
+    	}
     }
 
     public void writeln() throws IOException {

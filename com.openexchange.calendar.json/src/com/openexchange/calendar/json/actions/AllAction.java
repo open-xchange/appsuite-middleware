@@ -52,7 +52,7 @@ package com.openexchange.calendar.json.actions;
 import static com.openexchange.tools.TimeZoneUtils.getTimeZone;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.TimeZone;
@@ -99,7 +99,7 @@ import com.openexchange.tools.session.ServerSession;
 public final class AllAction extends AppointmentAction {
 
     private static final org.apache.commons.logging.Log LOG =
-        com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(AllAction.class));
+        com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(AllAction.class));
 
     /**
      * Initializes a new {@link AllAction}.
@@ -174,7 +174,7 @@ public final class AllAction extends AppointmentAction {
 
                 // Workaround to fill appointments with alarm times
                 // TODO: Move me down into the right layer if there is time for some refactoring.
-                if (com.openexchange.tools.arrays.Arrays.contains(columns, Appointment.ALARM)) {
+                if (com.openexchange.tools.arrays.Arrays.contains(columns, CalendarObject.ALARM)) {
                     if (!appointment.containsAlarm() && appointment.containsUserParticipants()) {
                         final OXFolderAccess ofa = new OXFolderAccess(session.getContext());
 
@@ -277,23 +277,23 @@ public final class AllAction extends AppointmentAction {
                     timestamp = lastModified;
                 }
             }
+            it.close();
+            it = null;
 
             if (listOrder && !objectList.isEmpty()) {
-                final DateOrderObject[] dateOrderObjectArray = objectList.toArray(new DateOrderObject[objectList.size()]);
-                Arrays.sort(dateOrderObjectArray);
+                Collections.sort(objectList);
 
                 switch (orderDir) {
                 case ASCENDING:
                 case NO_ORDER:
-                    for (int a = 0; a < dateOrderObjectArray.length; a++) {
-                        final Appointment appointmentObj = (Appointment) dateOrderObjectArray[a].getObject();
-                        checkAndAddAppointment(appointmentList, appointmentObj, startUTC, endUTC, calColl);
+                    for (final DateOrderObject dateOrderObject : objectList) {
+                        checkAndAddAppointment(appointmentList, (Appointment) dateOrderObject.getObject(), startUTC, endUTC, calColl);
                     }
                     break;
                 case DESCENDING:
-                    for (int a = dateOrderObjectArray.length - 1; a >= 0; a--) {
-                        final Appointment appointmentObj = (Appointment) dateOrderObjectArray[a].getObject();
-                        checkAndAddAppointment(appointmentList, appointmentObj, startUTC, endUTC, calColl);
+                    Collections.reverse(objectList);
+                    for (final DateOrderObject dateOrderObject : objectList) {
+                        checkAndAddAppointment(appointmentList, (Appointment) dateOrderObject.getObject(), startUTC, endUTC, calColl);
                     }
                 }
             }

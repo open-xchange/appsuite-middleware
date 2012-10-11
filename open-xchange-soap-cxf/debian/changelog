@@ -1,0 +1,47 @@
+open-xchange-soap-cxf (6.22.0-5) unstable; urgency=low
+
+  * Fifth release candidate for 6.22.0
+
+ -- Marcus Klein <marcus.kleni@open-xchange.com>  Wed, 10 Oct 2012 11:23:47 +0200
+
+open-xchange-soap-cxf (6.22.0-4) unstable; urgency=low
+
+  * Fourth release candidate for 6.22.0
+
+ -- Marcus Klein <marcus.kleni@open-xchange.com>  Tue, 09 Oct 2012 15:16:10 +0200
+
+open-xchange-soap-cxf (6.22.0-3) unstable; urgency=low
+
+  * Third release candidate for 6.22.0
+
+ -- Marcus Klein <marcus.kleni@open-xchange.com>  Fri, 05 Oct 2012 15:03:25 +0200
+
+open-xchange-soap-cxf (6.22.0-2) unstable; urgency=low
+
+  * Second release candidate for 6.22.0
+
+ -- Marcus Klein <marcus.kleni@open-xchange.com>  Thu, 04 Oct 2012 18:54:55 +0200
+
+open-xchange-soap-cxf (6.22.0-1) unstable; urgency=low
+
+  * First release candidate for 6.22.0
+
+ -- Marcus Klein <marcus.kleni@open-xchange.com>  Tue, 21 Aug 2012 09:19:13 +0200
+
+open-xchange-soap-cxf (6.22.0-0) unstable; urgency=low
+
+  * prepare for 6.22.0
+
+ -- Marcus Klein <marcus.kleni@open-xchange.com>  Mon, 20 Aug 2012 16:18:29 +0200
+
+open-xchange-soap-cxf (6.21.0-1) unstable; urgency=low
+
+  * Release build for EDP drop #2
+
+ -- Marcus Klein <marcus.kleni@open-xchange.com>  Tue, 03 Jul 2012 18:43:59 +0200
+
+open-xchange-soap-cxf (6.21.0-0) unstable; urgency=low
+
+  * Initial release
+
+ -- Marcus Klein <marcus.kleni@open-xchange.com>  Tue, 26 Jun 2012 12:01:29 +0200

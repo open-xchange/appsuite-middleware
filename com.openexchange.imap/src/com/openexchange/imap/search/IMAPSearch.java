@@ -50,20 +50,25 @@
 package com.openexchange.imap.search;
 
 import static com.openexchange.mail.MailServletInterface.mailInterfaceMonitor;
-import static com.openexchange.mail.mime.utils.MIMEStorageUtility.getFetchProfile;
+import static com.openexchange.mail.mime.utils.MimeStorageUtility.getFetchProfile;
 import gnu.trove.list.TIntList;
 import gnu.trove.list.array.TIntArrayList;
+import gnu.trove.list.linked.TIntLinkedList;
+import java.util.LinkedList;
+import java.util.List;
 import javax.mail.FolderClosedException;
 import javax.mail.Message;
 import javax.mail.MessagingException;
 import javax.mail.StoreClosedException;
 import javax.mail.search.SearchException;
 import javax.mail.search.SearchTerm;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.imap.IMAPCapabilities;
 import com.openexchange.imap.IMAPException;
 import com.openexchange.imap.command.FetchIMAPCommand;
 import com.openexchange.imap.config.IMAPConfig;
+import com.openexchange.imap.services.IMAPServiceRegistry;
 import com.openexchange.mail.MailField;
 import com.openexchange.mail.MailFields;
 import com.openexchange.mail.config.MailProperties;
@@ -72,6 +77,7 @@ import com.sun.mail.iap.ProtocolException;
 import com.sun.mail.iap.Response;
 import com.sun.mail.imap.IMAPFolder;
 import com.sun.mail.imap.protocol.IMAPProtocol;
+import com.sun.mail.imap.protocol.MessageSet;
 
 /**
  * {@link IMAPSearch}
@@ -81,7 +87,7 @@ import com.sun.mail.imap.protocol.IMAPProtocol;
 public final class IMAPSearch {
 
     private static final org.apache.commons.logging.Log LOG =
-        com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(IMAPSearch.class));
+        com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(IMAPSearch.class));
 
     /**
      * No instantiation
@@ -163,6 +169,22 @@ public final class IMAPSearch {
         return list.toArray();
     }
 
+    private static volatile Integer umlautFilterThreshold;
+    private static int umlautFilterThreshold() {
+        Integer i = umlautFilterThreshold;
+        if (null == i) {
+            synchronized (IMAPSearch.class) {
+                i = umlautFilterThreshold;
+                if (null == i) {
+                    final ConfigurationService service = IMAPServiceRegistry.getService(ConfigurationService.class);
+                    i = Integer.valueOf(null == service ? 50 : service.getIntProperty("com.openexchange.imap.umlautFilterThreshold", 50));
+                    umlautFilterThreshold = i;
+                }
+            }
+        }
+        return i.intValue();
+    }
+
     private static int[] issueIMAPSearch(final IMAPFolder imapFolder, final com.openexchange.mail.search.SearchTerm<?> searchTerm) throws OXException, FolderClosedException, StoreClosedException {
         try {
             if (searchTerm.containsWildcard()) {
@@ -172,7 +194,8 @@ public final class IMAPSearch {
                 return issueNonWildcardSearch(searchTerm.getNonWildcardJavaMailSearchTerm(), imapFolder);
             }
             final int[] seqNums = issueNonWildcardSearch(searchTerm.getJavaMailSearchTerm(), imapFolder);
-            if ((seqNums.length <= 50) && !searchTerm.isAscii()) {
+            final int umlautFilterThreshold = umlautFilterThreshold();
+            if ((umlautFilterThreshold > 0) && (seqNums.length <= umlautFilterThreshold) && !searchTerm.isAscii()) {
                 /*
                  * Search with respect to umlauts in pre-selected messages
                  */
@@ -280,8 +303,35 @@ public final class IMAPSearch {
             @Override
             public Object doCommand(final IMAPProtocol protocol) throws ProtocolException {
                 try {
-                    return protocol.search(term);
+                    final int messageCount = imapFolder.getMessageCount();
+                    if (messageCount <= 0) {
+                        return new int[0];
+                    }
+                    final List<MessageSet> sets = new LinkedList<MessageSet>();
+                    {
+                        int chunkSize = MailProperties.getInstance().getMailFetchLimit();
+                        int start = 1;
+                        while (start <= messageCount) {
+                            if ((start + chunkSize) > messageCount) {
+                                chunkSize = (messageCount - start + 1);
+                            }
+                            sets.add(new MessageSet(start, start + chunkSize - 1));
+                            start += chunkSize;
+                        }
+                        if (start <= messageCount) {
+                            sets.add(new MessageSet(start, messageCount));
+                        }
+                    }
+                    final TIntList ret = new TIntLinkedList();
+                    final MessageSet[] arr = new MessageSet[1];
+                    for (final MessageSet messageSet : sets) {
+                        arr[0] = messageSet;
+                        ret.add(protocol.search(arr, term));
+                    }
+                    return ret.toArray();
                 } catch (final SearchException e) {
+                    throw new ProtocolException(e.getMessage(), e);
+                } catch (final MessagingException e) {
                     throw new ProtocolException(e.getMessage(), e);
                 }
             }

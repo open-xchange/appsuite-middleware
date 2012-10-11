@@ -11,94 +11,99 @@ import com.openexchange.exception.OXExceptionFactory;
  */
 public enum LdapConfigurationExceptionCode implements OXExceptionCode {
     /**
-     * The given value for authtype "%s" is not a possible one
+     * The value given for authtype "%s" is invalid
      */
-    AUTH_TYPE_WRONG("The given value for authtype \"%s\" is not a possible one", Category.CATEGORY_CONFIGURATION, 1),
+    AUTH_TYPE_WRONG(LdapConfigurationExceptionMessage.AUTH_TYPE_WRONG_MSG, Category.CATEGORY_CONFIGURATION, 1),
 
     /**
-     * The given value for authtype "%s" is not a possible one
+     * The value given for sorting "%s" is invalid
      */
-    SORTING_WRONG("The given value for sorting \"%s\" is not a possible one", Category.CATEGORY_CONFIGURATION, 2),
+    SORTING_WRONG(LdapConfigurationExceptionMessage.SORTING_WRONG_MSG, Category.CATEGORY_CONFIGURATION, 2),
 
     /**
-     * The given value for searchScope "%s" is not a possible one
+     * The value given for searchScope "%s" is invalid
      */
-    SEARCH_SCOPE_WRONG("The given value for searchScope \"%s\" is not a possible one", Category.CATEGORY_CONFIGURATION, 3),
+    SEARCH_SCOPE_WRONG(LdapConfigurationExceptionMessage.SEARCH_SCOPE_WRONG_MSG, Category.CATEGORY_CONFIGURATION, 3),
 
     /**
      * The parameter "%s" is not set in the property file %s
      */
-    PARAMETER_NOT_SET("The parameter \"%s\" is not set in property file \"%s\"", Category.CATEGORY_CONFIGURATION, 4),
+    PARAMETER_NOT_SET(LdapConfigurationExceptionMessage.PARAMETER_NOT_SET_MSG, Category.CATEGORY_CONFIGURATION, 4),
 
     /**
      * Value for context "%s" is no integer value
      */
-    NO_INTEGER_VALUE("Value for context \"%s\" is no integer value", Category.CATEGORY_CONFIGURATION, 5),
+    NO_INTEGER_VALUE(LdapConfigurationExceptionMessage.NO_INTEGER_VALUE_MSG, Category.CATEGORY_CONFIGURATION, 5),
 
     /**
-     * Mapping file %s not valid
+     * The configured mapping file "%1$s" is empty.
      */
-    INVALID_MAPPING_FILE("Mapping file \"%s\" not valid", Category.CATEGORY_CONFIGURATION, 6),
+    INVALID_MAPPING_FILE(LdapConfigurationExceptionMessage.INVALID_MAPPING_FILE_MSG, Category.CATEGORY_CONFIGURATION, 6),
 
     /**
      * The given value for pagesize "%s" is no integer value
      */
-    INVALID_PAGESIZE("The given value for pagesize \"%s\" is no integer value", Category.CATEGORY_CONFIGURATION, 7),
+    INVALID_PAGESIZE(LdapConfigurationExceptionMessage.INVALID_PAGESIZE_MSG, Category.CATEGORY_CONFIGURATION, 7),
 
     /**
-     * The given value for userauthtype "%s" is not a possible one
+     * The value given for userauthtype "%s" is invalid
      */
-    USER_AUTH_TYPE_WRONG("The given value for userauthtype \"%s\" is not a possible one", Category.CATEGORY_CONFIGURATION, 8),
+    USER_AUTH_TYPE_WRONG(LdapConfigurationExceptionMessage.USER_AUTH_TYPE_WRONG_MSG, Category.CATEGORY_CONFIGURATION, 8),
 
     /**
-     * The given value for userSearchScope "%s" is not a possible one
+     * The value given for userSearchScope "%s" is invalid
      */
-    USER_SEARCH_SCOPE_WRONG("The given value for userSearchScope \"%s\" is not a possible one", Category.CATEGORY_CONFIGURATION, 9),
+    USER_SEARCH_SCOPE_WRONG(LdapConfigurationExceptionMessage.USER_SEARCH_SCOPE_WRONG_MSG, Category.CATEGORY_CONFIGURATION, 9),
 
     /**
-     * The given value for userLoginSource "%s" is not a possible one
+     * The value given for userLoginSource "%s" is invalid
      */
-    USER_LOGIN_SOURCE_WRONG("The given value for userLoginSource \"%s\" is not a possible one", Category.CATEGORY_CONFIGURATION, 10),
+    USER_LOGIN_SOURCE_WRONG(LdapConfigurationExceptionMessage.USER_LOGIN_SOURCE_WRONG_MSG, Category.CATEGORY_CONFIGURATION, 10),
 
     /**
-     * The given value for contactTypes "%s" is not a possible one
+     * The value given for contactTypes "%s" is invalid
      */
-    CONTACT_TYPES_WRONG("The given value for contactTypes \"%s\" is not a possible one", Category.CATEGORY_CONFIGURATION, 11),
+    CONTACT_TYPES_WRONG(LdapConfigurationExceptionMessage.CONTACT_TYPES_WRONG_MSG, Category.CATEGORY_CONFIGURATION, 11),
 
     /**
-     * The given value for searchScope_distributionlist "%s" is not a possible one
+     * The value given for searchScope_distributionlist "%s" is invalid
      */
-    SEARCH_SCOPE_DISTRI_WRONG("The given value for searchScope_distributionlist \"%s\" is not a possible one", Category.CATEGORY_CONFIGURATION, 12),
+    SEARCH_SCOPE_DISTRI_WRONG(LdapConfigurationExceptionMessage.SEARCH_SCOPE_DISTRI_WRONG_MSG, Category.CATEGORY_CONFIGURATION, 12),
 
     /**
      * Abstract pathname "%1$s" does not denote a directory.
      */
-    NOT_DIRECTORY("Abstract pathname \"%1$s\" does not denote a directory.", Category.CATEGORY_CONFIGURATION, 13),
+    NOT_DIRECTORY(LdapConfigurationExceptionMessage.NOT_DIRECTORY_MSG, Category.CATEGORY_CONFIGURATION, 13),
 
     /**
      * The directory "%1$s" is not a context identifier.
      */
-    DIRECTORY_IS_NOT_A_CONTEXT_ID("The directory \"%1$s\" is not a context identifier.", Category.CATEGORY_CONFIGURATION, 14),
+    DIRECTORY_IS_NOT_A_CONTEXT_ID(LdapConfigurationExceptionMessage.DIRECTORY_IS_NOT_A_CONTEXT_ID_MSG, Category.CATEGORY_CONFIGURATION, 14),
 
     /**
-     * The given value for referrals "%s" is not a possible one
+     * The value given for referrals "%s" is not a possible one
      */
-    REFERRALS_WRONG("The given value for referrals \"%s\" is not a possible one", Category.CATEGORY_CONFIGURATION, 15),
+    REFERRALS_WRONG(LdapConfigurationExceptionMessage.REFERRALS_WRONG_MSG, Category.CATEGORY_CONFIGURATION, 15),
 
     /**
-     * The given value for refreshinterval "%s" is no integer value
+     * The value given for refreshinterval "%s" is no integer value
      */
-    INVALID_REFRESHINTERVAL("The given value for refreshinterval \"%s\" is no integer value", Category.CATEGORY_CONFIGURATION, 16),
+    INVALID_REFRESHINTERVAL(LdapConfigurationExceptionMessage.INVALID_REFRESHINTERVAL_MSG, Category.CATEGORY_CONFIGURATION, 16),
 
     /**
-     * The given value for pooltimeout "%s" in file "%s" is no integer value
+     * The value given for pooltimeout "%s" in file "%s" is no integer value
      */
-    INVALID_POOLTIMEOUT("The given value for pooltimeout \"%s\" in file \"%s\" is no integer value", Category.CATEGORY_CONFIGURATION, 17),
+    INVALID_POOLTIMEOUT(LdapConfigurationExceptionMessage.INVALID_POOLTIMEOUT_MSG, Category.CATEGORY_CONFIGURATION, 17),
 
     /**
-     * The given value for derefAliases "%s" in file "%s" is not a possible one
+     * The value given for derefAliases "%s" in file "%s" is not a possible one
      */
-    DEREF_ALIASES_WRONG("The given value for derefAliases \"%s\" in file \"%s\" is not a possible one", Category.CATEGORY_CONFIGURATION, 18);
+    DEREF_ALIASES_WRONG(LdapConfigurationExceptionMessage.DEREF_ALIASES_WRONG_MSG, Category.CATEGORY_CONFIGURATION, 18),
+
+    /**
+     * The value given for storagePriority "%s" in file "%s" is no integer value
+     */
+    INVALID_STORAGE_PRIORITY( LdapConfigurationExceptionMessage.INVALID_STORAGE_PRIORITY, Category.CATEGORY_CONFIGURATION, 19);
 
 
     /**

@@ -52,10 +52,8 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Properties;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import com.openexchange.admin.tools.PropertyHandler;
 
 public class PropertyHandlerExtended extends PropertyHandler {
@@ -65,7 +63,6 @@ public class PropertyHandlerExtended extends PropertyHandler {
     // The following lines define the property values for the database implementations
     public static final String RESELLER_STORAGE = "RESELLER_STORAGE";
 
-    @SuppressWarnings("unused")
     private PropertyHandlerExtended() {
         super(null);
     }
@@ -73,7 +70,7 @@ public class PropertyHandlerExtended extends PropertyHandler {
     public PropertyHandlerExtended(final Properties sysprops) {
         super(sysprops);
         final StringBuilder configfile = new StringBuilder(); 
-        configfile.append(sysprops.getProperty("configdir"));
+        configfile.append(sysprops.getProperty("openexchange.propdir"));
         configfile.append(File.separatorChar);
         configfile.append("plugin");
         configfile.append(File.separatorChar);

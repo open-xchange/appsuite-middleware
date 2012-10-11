@@ -51,25 +51,30 @@ package com.openexchange.user.json.actions;
 
 import java.util.Date;
 import java.util.Locale;
-
+import org.json.JSONException;
 import org.json.JSONObject;
-
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.api2.ContactInterfaceFactory;
+import com.openexchange.contact.ContactService;
+import com.openexchange.contacts.json.mapping.ContactMapper;
 import com.openexchange.documentation.RequestMethod;
 import com.openexchange.documentation.Type;
 import com.openexchange.documentation.annotations.Action;
 import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contact.ContactInterface;
+import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.ldap.User;
+import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.user.UserService;
 import com.openexchange.user.json.Constants;
 import com.openexchange.user.json.Utility;
+import com.openexchange.user.json.field.UserField;
+import com.openexchange.user.json.mapping.UserMapper;
 import com.openexchange.user.json.parser.ParsedUser;
 import com.openexchange.user.json.parser.UserParser;
 import com.openexchange.user.json.services.ServiceRegistry;
@@ -78,6 +83,7 @@ import com.openexchange.user.json.services.ServiceRegistry;
  * {@link UpdateAction} - Maps the action to an <tt>update</tt> action.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 @Action(method = RequestMethod.PUT, name = "update", description = "Update a user.", parameters = { 
 		@Parameter(name = "session", description = "A session ID previously obtained from the login module."),
@@ -99,8 +105,84 @@ public final class UpdateAction extends AbstractUserAction {
         super();
     }
 
+    private static ContactField[] CONTACT_FIELDS = {
+        ContactField.DISTRIBUTIONLIST, ContactField.LINKS, ContactField.CATEGORIES, ContactField.COLOR_LABEL, ContactField.PRIVATE_FLAG,
+        ContactField.NUMBER_OF_ATTACHMENTS, ContactField.FOLDER_ID, ContactField.OBJECT_ID, ContactField.INTERNAL_USERID,
+        ContactField.CREATED_BY, ContactField.CREATION_DATE, ContactField.MODIFIED_BY, ContactField.LAST_MODIFIED, ContactField.STATE_HOME,
+        ContactField.COMPANY, ContactField.CELLULAR_TELEPHONE1, ContactField.STREET_HOME, ContactField.STREET_BUSINESS, ContactField.TELEPHONE_HOME1,
+        ContactField.STATE_BUSINESS, ContactField.DISPLAY_NAME, ContactField.SUR_NAME, ContactField.CITY_HOME, ContactField.MIDDLE_NAME,
+        ContactField.BIRTHDAY, ContactField.FAX_BUSINESS, ContactField.GIVEN_NAME, ContactField.POSTAL_CODE_HOME, ContactField.POSTAL_CODE_BUSINESS,
+        ContactField.TELEPHONE_BUSINESS1, ContactField.CITY_BUSINESS };
+
+    private static UserField[] USER_FIELDS = { UserField.ID, UserField.LOCALE, UserField.TIME_ZONE };
+
     @Override
     public AJAXRequestResult perform(final AJAXRequestData request, final ServerSession session) throws OXException {
+        /*
+         * Parse parameters
+         */
+        final int id = checkIntParameter(AJAXServlet.PARAMETER_ID, request);
+        final Date clientLastModified = new Date(checkLongParameter(AJAXServlet.PARAMETER_TIMESTAMP, request));
+        /*
+         * Get user service to get contact ID
+         */
+        final UserService userService = ServiceRegistry.getInstance().getService(UserService.class, true);
+        final User storageUser = userService.getUser(id, session.getContext());
+        final int contactId = storageUser.getContactId();
+        /*
+         * Parse user & contact data
+         */
+        final JSONObject jData = (JSONObject) request.getData();
+        Contact parsedUserContact;
+        User parsedUser;
+		try {
+			parsedUserContact = ContactMapper.getInstance().deserialize(jData, CONTACT_FIELDS);
+			jData.put(UserField.ID.getName(), id);
+			parsedUser = UserMapper.getInstance().deserialize(jData, USER_FIELDS);
+		} catch (final JSONException e) {
+            throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
+		}
+        /*
+         * Update contact
+         */
+        final ContactService contactService = ServiceRegistry.getInstance().getService(ContactService.class, true);
+        if (parsedUserContact.containsDisplayName()) {
+            final String displayName = parsedUserContact.getDisplayName();
+            if (null != displayName) {
+                if (isEmpty(displayName)) {
+                    parsedUserContact.removeDisplayName();
+                } else {
+                    // Remove display name if equal to storage version to avoid update conflict
+                    final Contact storageContact = contactService.getUser(session, id);
+                    if (displayName.equals(storageContact.getDisplayName())) {
+                        parsedUserContact.removeDisplayName();
+                    }
+                }
+            }
+        }
+        contactService.updateContact(session, Integer.toString(Constants.USER_ADDRESS_BOOK_FOLDER_ID), Integer.toString(contactId), 
+        		parsedUserContact, clientLastModified);
+        /*
+         * Update user if necessary, too
+         */
+        final String parsedTimeZone = parsedUser.getTimeZone();
+        final Locale parsedLocale = parsedUser.getLocale();
+        if ((null != parsedTimeZone) || (null != parsedLocale)) {
+            if (null == parsedTimeZone) {
+            	UserMapper.getInstance().get(UserField.TIME_ZONE).copy(storageUser, parsedUser);
+            }
+            if (null == parsedLocale) {
+            	UserMapper.getInstance().get(UserField.LOCALE).copy(storageUser, parsedUser);
+            }
+            userService.updateUser(parsedUser, session.getContext());
+        }
+        /*
+         * Return contact last-modified from server
+         */
+        return new AJAXRequestResult(new JSONObject(), parsedUserContact.getLastModified());
+    }
+
+    public AJAXRequestResult performOLD(final AJAXRequestData request, final ServerSession session) throws OXException {
         /*
          * Parse parameters
          */
@@ -146,6 +228,18 @@ public final class UpdateAction extends AbstractUserAction {
          */
         final Date lastModified = contactInterface.getUserById(id, false).getLastModified();
         return new AJAXRequestResult(new JSONObject(), lastModified);
+    }
+
+    private static boolean isEmpty(final String string) {
+        if (null == string) {
+            return true;
+        }
+        final int len = string.length();
+        boolean isWhitespace = true;
+        for (int i = 0; isWhitespace && i < len; i++) {
+            isWhitespace = Character.isWhitespace(string.charAt(i));
+        }
+        return isWhitespace;
     }
 
 }

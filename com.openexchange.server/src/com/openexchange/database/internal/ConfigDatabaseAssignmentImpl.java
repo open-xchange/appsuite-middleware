@@ -56,14 +56,14 @@ package com.openexchange.database.internal;
  */
 final class ConfigDatabaseAssignmentImpl implements ConfigDatabaseAssignmentService {
 
-    private final Assignment configDB = new Assignment(0, 0, Constants.CONFIGDB_READ_ID, Constants.CONFIGDB_WRITE_ID, null);
+    private final AssignmentImpl configDB = new AssignmentImpl(0, 0, Constants.CONFIGDB_READ_ID, Constants.CONFIGDB_WRITE_ID, null);
 
     ConfigDatabaseAssignmentImpl() {
         super();
     }
 
     @Override
-    public Assignment getConfigDBAssignment() {
+    public AssignmentImpl getConfigDBAssignment() {
         return configDB;
     }
 }

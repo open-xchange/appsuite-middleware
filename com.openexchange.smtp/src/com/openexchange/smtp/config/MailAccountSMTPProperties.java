@@ -51,7 +51,7 @@ package com.openexchange.smtp.config;
 
 import java.nio.charset.Charset;
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import com.openexchange.log.LogFactory;
 import com.openexchange.mail.transport.config.MailAccountTransportProperties;
 import com.openexchange.mailaccount.MailAccount;
 

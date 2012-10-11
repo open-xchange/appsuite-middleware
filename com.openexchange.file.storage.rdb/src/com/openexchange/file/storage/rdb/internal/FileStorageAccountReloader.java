@@ -55,6 +55,7 @@ import com.openexchange.caching.dynamic.Refresher;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageAccount;
 import com.openexchange.file.storage.FileStorageService;
+import com.openexchange.file.storage.ServiceAware;
 
 /**
  * {@link FileStorageAccountReloader}
@@ -62,7 +63,7 @@ import com.openexchange.file.storage.FileStorageService;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since Open-Xchange v6.18.2
  */
-public final class FileStorageAccountReloader extends Refresher<FileStorageAccount> implements FileStorageAccount {
+public final class FileStorageAccountReloader extends Refresher<FileStorageAccount> implements FileStorageAccount, ServiceAware {
 
     private static final long serialVersionUID = -522777266183406469L;
 
@@ -130,6 +131,16 @@ public final class FileStorageAccountReloader extends Refresher<FileStorageAccou
     public FileStorageService getFileStorageService() {
         updateDelegate();
         return delegate.getFileStorageService();
+    }
+
+    @Override
+    public String getServiceId() {
+        updateDelegate();
+        if (delegate instanceof ServiceAware) {
+            return ((ServiceAware) delegate).getServiceId();
+        }
+        final FileStorageService service = delegate.getFileStorageService();
+        return null == service ? null : service.getId();
     }
 
 }

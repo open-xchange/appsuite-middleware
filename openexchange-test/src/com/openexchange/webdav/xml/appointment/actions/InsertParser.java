@@ -49,7 +49,7 @@
 
 package com.openexchange.webdav.xml.appointment.actions;
 
-import org.jdom.Document;
+import org.jdom2.Document;
 import com.openexchange.groupware.Types;
 import com.openexchange.webdav.xml.framework.AbstractInsertParser;
 import com.openexchange.webdav.xml.types.Response;

@@ -103,3 +103,62 @@ CREATE TABLE context_server2db_pool (
     INDEX (db_schema),
     FOREIGN KEY(`cid`) REFERENCES context (`cid`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+
+CREATE TABLE `oauthServiceProvider` (
+  `id` INT4 unsigned NOT NULL,
+  `requestTokenUrl` varchar(255) NOT NULL,
+  `userAuthorizationUrl` varchar(255) NOT NULL,
+  `accessTokenURL` varchar(255) DEFAULT NULL,
+  PRIMARY KEY  (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+
+CREATE TABLE `oauthConsumer` (
+  `id` INT4 unsigned NOT NULL,
+  `providerId` INT4 unsigned NOT NULL,
+  `key` varchar(255) NOT NULL,
+  `secret` varchar(255) NOT NULL,
+  `callbackUrl` varchar(255) DEFAULT NULL,
+  `name` varchar(127) DEFAULT NULL,
+  PRIMARY KEY  (`id`),
+  KEY `providerIndex` (`providerId`),
+  KEY `keyIndex` (`key`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+
+CREATE TABLE `oauthConsumerProperty` (
+  `id` INT4 unsigned NOT NULL,
+  `name` varchar(32) NOT NULL,
+  `value` varchar(255) NOT NULL,
+  PRIMARY KEY  (`id`,`name`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+
+CREATE TABLE `oauth2Client` (
+  `id` INT4 unsigned NOT NULL,
+  `providerId` INT4 unsigned NOT NULL,
+  `key` varchar(255) NOT NULL,
+  `secret` varchar(255) NOT NULL,
+  `callbackUrl` varchar(255) DEFAULT NULL,
+  `name` varchar(127) DEFAULT NULL,
+  PRIMARY KEY  (`id`),
+  KEY `providerIndex` (`providerId`),
+  KEY `keyIndex` (`key`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+
+CREATE TABLE `oauth2ClientProperty` (
+  `id` INT4 unsigned NOT NULL,
+  `name` varchar(32) NOT NULL,
+  `value` varchar(255) NOT NULL,
+  PRIMARY KEY  (`id`,`name`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+
+CREATE TABLE `oauthNonce` (
+  `nonce` varchar(255) NOT NULL,
+  PRIMARY KEY  (`nonce`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+
+CREATE TABLE `solrCoreStores` (
+  `id` INT4 UNSIGNED NOT NULL,
+  `uri` VARCHAR(255) COLLATE utf8_unicode_ci NOT NULL,
+  `maxCores` INT4 UNSIGNED NOT NULL,
+  `numCores` INT4 UNSIGNED NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;

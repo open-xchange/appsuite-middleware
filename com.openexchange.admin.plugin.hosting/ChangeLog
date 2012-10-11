@@ -1,3 +1,28 @@
+* 2012-08-14 - marcus.klein@open-xchange.com
+
+ - Fix for bug 22580: Do not get into a NullPointerException if starting of the administration hosting plugin fails.
+
+* 2012-06-11 - jan.bauerdick@open-xchange.com
+
+ - Refactored to run in groupware VM
+ - Register RMI as OSGi-service
+
+* 2012-06-06 - marcus.klein@open-xchange.com
+
+ - Fix for bug 22263: RequireBundle is still necessary for com.openexchange.admin & com.openexchange.admin.plugin.hosting bundles.
+
+* 2012-05-23 - marcus.klein@open-xchange.com
+
+ - Fix for bug 22163: Using cache write through for context to database assignment to prevent missing information while reading from slave.
+
+* 2012-05-04 - marcus.klein@open-xchange.com
+
+ - Fix for bug 21826: Logging every create, change and delete operation of contexts, users, groups and resources.
+
+* 2012-04-12 - marcus.klein@open-xchange.com
+
+ - Fix for bug 21788: Removed sort from SQL query to reduce response time. Sorting now in code.
+
 * 2012-03-12 - marcus.klein@open-xchange.com
 
  - Fix for bug 21707: oxinstaller works now with completely new path for configuration files.

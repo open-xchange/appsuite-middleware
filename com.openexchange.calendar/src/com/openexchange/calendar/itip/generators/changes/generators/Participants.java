@@ -51,7 +51,6 @@ package com.openexchange.calendar.itip.generators.changes.generators;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.EnumMap;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -70,6 +69,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.group.Group;
 import com.openexchange.group.GroupService;
 import com.openexchange.groupware.container.Appointment;
+import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.container.Change;
 import com.openexchange.groupware.container.ConfirmationChange;
 import com.openexchange.groupware.container.Difference;
@@ -86,8 +86,6 @@ import com.openexchange.resource.Resource;
 import com.openexchange.resource.ResourceService;
 import com.openexchange.user.UserService;
 import static com.openexchange.ajax.fields.AppointmentFields.*;
-import static com.openexchange.ajax.fields.CalendarFields.NOTE;
-import static com.openexchange.ajax.fields.CalendarFields.TITLE;
 
 /**
  * {@link Participants}
@@ -104,99 +102,54 @@ public class Participants implements ChangeDescriptionGenerator{
         ADD, REMOVE, ACCEPT, DECLINE, TENTATIVE
     }
 
-    private static final Map<ChangeType, Map<Style, String>> PARTICIPANT_MESSAGE_MAP = new HashMap<ChangeType, Map<Style, String>>(){{
-        put(ChangeType.ADD, new EnumMap<Style, String>(Style.class){{
-            put(Style.ASK, Messages.ASK_ADD_PARTICIPANT);
-            put(Style.INTENTION, Messages.INTENTION_ADD_PARTICIPANT);
-            put(Style.FAIT_ACCOMPLI, Messages.HAS_ADDED_PARTICIPANT);
-        }});
+    private static final Map<ChangeType, String> PARTICIPANT_MESSAGE_MAP = new HashMap<ChangeType, String>(){{
+        put(ChangeType.ADD, Messages.HAS_ADDED_PARTICIPANT);
         
-        put(ChangeType.REMOVE, new EnumMap<Style, String>(Style.class){{
-            put(Style.ASK, Messages.ASK_REMOVE_PARTICIPANT);
-            put(Style.INTENTION, Messages.INTENTION_REMOVE_PARTICIPANT);
-            put(Style.FAIT_ACCOMPLI, Messages.HAS_REMOVED_PARTICIPANT);
-        }});
+        put(ChangeType.REMOVE,  Messages.HAS_REMOVED_PARTICIPANT);
 
-        EnumMap<Style, String> changeStateMsgs = new EnumMap<Style, String>(Style.class){{
-            put(Style.ASK, Messages.HAS_CHANGED_STATE);
-            put(Style.INTENTION, Messages.HAS_CHANGED_STATE);
-            put(Style.FAIT_ACCOMPLI, Messages.HAS_CHANGED_STATE);
-        }};
-        put(ChangeType.ACCEPT, changeStateMsgs);
-        put(ChangeType.DECLINE, changeStateMsgs);
-        put(ChangeType.TENTATIVE, changeStateMsgs);
+        put(ChangeType.ACCEPT, Messages.HAS_CHANGED_STATE);
+        put(ChangeType.DECLINE, Messages.HAS_CHANGED_STATE);
+        put(ChangeType.TENTATIVE, Messages.HAS_CHANGED_STATE);
 
     }};
     
-    private static final Map<ChangeType, Map<Style, String>> STATE_MESSAGE_MAP = new HashMap<ChangeType, Map<Style, String>>(){{
+    private static final Map<ChangeType, String> STATE_MESSAGE_MAP = new HashMap<ChangeType, String>(){{
       
-        put(ChangeType.ACCEPT, new EnumMap<Style, String>(Style.class){{
-            put(Style.ASK, Messages.ACCEPTED);
-            put(Style.INTENTION, Messages.ACCEPTED);
-            put(Style.FAIT_ACCOMPLI, Messages.ACCEPTED);
-        }});
-        put(ChangeType.DECLINE, new EnumMap<Style, String>(Style.class){{
-            put(Style.ASK, Messages.DECLINED);
-            put(Style.INTENTION, Messages.DECLINED);
-            put(Style.FAIT_ACCOMPLI, Messages.DECLINED);
-        }});
-        put(ChangeType.TENTATIVE, new EnumMap<Style, String>(Style.class){{
-            put(Style.ASK, Messages.TENTATIVELY_ACCEPTED);
-            put(Style.INTENTION, Messages.TENTATIVELY_ACCEPTED);
-            put(Style.FAIT_ACCOMPLI, Messages.TENTATIVELY_ACCEPTED);
-        }});
-
-    }};
+        put(ChangeType.ACCEPT,  Messages.ACCEPTED);
+        put(ChangeType.DECLINE, Messages.DECLINED);
+        put(ChangeType.TENTATIVE, Messages.TENTATIVELY_ACCEPTED);
+     }};
     
 
-    private static final Map<ChangeType, Map<Style, String>> GROUP_MESSAGE_MAP = new HashMap<ChangeType, Map<Style, String>>(){{
-        put(ChangeType.ADD, new EnumMap<Style, String>(Style.class){{
-            put(Style.ASK, Messages.ASK_INVITE_GROUP);
-            put(Style.INTENTION, Messages.INTENTION_INVITE_GROUP);
-            put(Style.FAIT_ACCOMPLI, Messages.HAS_INVITED_GROUP);
-        }});
-        
-        put(ChangeType.REMOVE, new EnumMap<Style, String>(Style.class){{
-            put(Style.ASK, Messages.ASK_REMOVE_GROUP);
-            put(Style.INTENTION, Messages.INTENTION_REMOVE_GROUP);
-            put(Style.FAIT_ACCOMPLI, Messages.HAS_REMOVED_GROUP);
-        }});
+    private static final Map<ChangeType,String> GROUP_MESSAGE_MAP = new HashMap<ChangeType, String>(){{
+        put(ChangeType.ADD, Messages.HAS_INVITED_GROUP);
+        put(ChangeType.REMOVE, Messages.HAS_REMOVED_GROUP);
     }};
     
-    private static final Map<ChangeType, Map<Style, String>> RESOURCE_MESSAGE_MAP = new HashMap<ChangeType, Map<Style, String>>(){{
-        put(ChangeType.ADD, new EnumMap<Style, String>(Style.class){{
-            put(Style.ASK, Messages.ASK_ADD_RESOURCE);
-            put(Style.INTENTION, Messages.INTENTION_ADD_RESOURCE);
-            put(Style.FAIT_ACCOMPLI, Messages.HAS_ADDED_RESOURCE);
-        }});
-        
-        put(ChangeType.REMOVE, new EnumMap<Style, String>(Style.class){{
-            put(Style.ASK, Messages.ASK_REMOVE_RESOURCE);
-            put(Style.INTENTION, Messages.INTENTION_REMOVE_RESOURCE);
-            put(Style.FAIT_ACCOMPLI, Messages.HAS_REMOVED_RESOURCE);
-        }});
+    private static final Map<ChangeType, String> RESOURCE_MESSAGE_MAP = new HashMap<ChangeType, String>(){{
+        put(ChangeType.ADD,  Messages.HAS_ADDED_RESOURCE);
+        put(ChangeType.REMOVE, Messages.HAS_REMOVED_RESOURCE);
     }};
     
     
     
-    private UserService users;
-    private GroupService groups;
-    private ResourceService resources;
-    private Style style;
+    private final UserService users;
+    private final GroupService groups;
+    private final ResourceService resources;
 
-	private boolean stateChanges;
+	private final boolean stateChanges;
     
     
     
-    public Participants(UserService users, GroupService groups, ResourceService resources, Style style, boolean stateChanges) {
+    public Participants(UserService users, GroupService groups, ResourceService resources, boolean stateChanges) {
         super();
         this.users = users;
         this.groups = groups;
         this.resources = resources;
-        this.style = style;
         this.stateChanges = stateChanges;
     }
 
+    @Override
     public List<Sentence> getDescriptions(Context ctx, Appointment original, Appointment updated, AppointmentDiff diff, Locale locale, TimeZone timezone) throws OXException {
         
         List<Integer> userIds = new ArrayList<Integer>();
@@ -269,10 +222,10 @@ public class Participants implements ChangeDescriptionGenerator{
             	continue;
             }
             switch (changeType) {
-            case ADD: case REMOVE: changes.add(new Sentence(PARTICIPANT_MESSAGE_MAP.get(changeType).get(style)).add(u.getDisplayName(), ArgumentType.PARTICIPANT)); break;
-            case ACCEPT: changes.add(new Sentence(PARTICIPANT_MESSAGE_MAP.get(changeType).get(style)).add(u.getDisplayName(), ArgumentType.PARTICIPANT).add(STATE_MESSAGE_MAP.get(changeType).get(style), ArgumentType.STATUS, ConfirmStatus.ACCEPT)); break;
-            case DECLINE: changes.add(new Sentence(PARTICIPANT_MESSAGE_MAP.get(changeType).get(style)).add(u.getDisplayName(), ArgumentType.PARTICIPANT).add(STATE_MESSAGE_MAP.get(changeType).get(style), ArgumentType.STATUS, ConfirmStatus.DECLINE)); break;
-            case TENTATIVE: changes.add(new Sentence(PARTICIPANT_MESSAGE_MAP.get(changeType).get(style)).add(u.getDisplayName(), ArgumentType.PARTICIPANT).add(STATE_MESSAGE_MAP.get(changeType).get(style), ArgumentType.STATUS, ConfirmStatus.TENTATIVE)); break;
+            case ADD: case REMOVE: changes.add(new Sentence(PARTICIPANT_MESSAGE_MAP.get(changeType)).add(u.getDisplayName(), ArgumentType.PARTICIPANT)); break;
+            case ACCEPT: changes.add(new Sentence(PARTICIPANT_MESSAGE_MAP.get(changeType)).add(u.getDisplayName(), ArgumentType.PARTICIPANT).add(STATE_MESSAGE_MAP.get(changeType), ArgumentType.STATUS, ConfirmStatus.ACCEPT)); break;
+            case DECLINE: changes.add(new Sentence(PARTICIPANT_MESSAGE_MAP.get(changeType)).add(u.getDisplayName(), ArgumentType.PARTICIPANT).add(STATE_MESSAGE_MAP.get(changeType), ArgumentType.STATUS, ConfirmStatus.DECLINE)); break;
+            case TENTATIVE: changes.add(new Sentence(PARTICIPANT_MESSAGE_MAP.get(changeType)).add(u.getDisplayName(), ArgumentType.PARTICIPANT).add(STATE_MESSAGE_MAP.get(changeType), ArgumentType.STATUS, ConfirmStatus.TENTATIVE)); break;
             }
         }
         
@@ -287,10 +240,10 @@ public class Participants implements ChangeDescriptionGenerator{
             	continue;
             }
             switch (changeType) {
-            case ADD: case REMOVE: changes.add(new Sentence(PARTICIPANT_MESSAGE_MAP.get(changeType).get(style)).add(mail, ArgumentType.PARTICIPANT)); break;
-            case ACCEPT: changes.add(new Sentence(PARTICIPANT_MESSAGE_MAP.get(changeType).get(style)).add(mail, ArgumentType.PARTICIPANT).add(STATE_MESSAGE_MAP.get(changeType).get(style), ArgumentType.STATUS, ConfirmStatus.ACCEPT)); break;
-            case DECLINE: changes.add(new Sentence(PARTICIPANT_MESSAGE_MAP.get(changeType).get(style)).add(mail, ArgumentType.PARTICIPANT).add(STATE_MESSAGE_MAP.get(changeType).get(style), ArgumentType.STATUS, ConfirmStatus.DECLINE)); break;
-            case TENTATIVE: changes.add(new Sentence(PARTICIPANT_MESSAGE_MAP.get(changeType).get(style)).add(mail, ArgumentType.PARTICIPANT).add(STATE_MESSAGE_MAP.get(changeType).get(style), ArgumentType.STATUS, ConfirmStatus.TENTATIVE)); break;
+            case ADD: case REMOVE: changes.add(new Sentence(PARTICIPANT_MESSAGE_MAP.get(changeType)).add(mail, ArgumentType.PARTICIPANT)); break;
+            case ACCEPT: changes.add(new Sentence(PARTICIPANT_MESSAGE_MAP.get(changeType)).add(mail, ArgumentType.PARTICIPANT).add(STATE_MESSAGE_MAP.get(changeType), ArgumentType.STATUS, ConfirmStatus.ACCEPT)); break;
+            case DECLINE: changes.add(new Sentence(PARTICIPANT_MESSAGE_MAP.get(changeType)).add(mail, ArgumentType.PARTICIPANT).add(STATE_MESSAGE_MAP.get(changeType), ArgumentType.STATUS, ConfirmStatus.DECLINE)); break;
+            case TENTATIVE: changes.add(new Sentence(PARTICIPANT_MESSAGE_MAP.get(changeType)).add(mail, ArgumentType.PARTICIPANT).add(STATE_MESSAGE_MAP.get(changeType), ArgumentType.STATUS, ConfirmStatus.TENTATIVE)); break;
             }
         }
         
@@ -301,7 +254,7 @@ public class Participants implements ChangeDescriptionGenerator{
                 continue;
             }
             switch (changeType) {
-            case ADD: case REMOVE: changes.add(new Sentence(GROUP_MESSAGE_MAP.get(changeType).get(style)).add(group.getDisplayName(), ArgumentType.PARTICIPANT)); break;
+            case ADD: case REMOVE: changes.add(new Sentence(GROUP_MESSAGE_MAP.get(changeType)).add(group.getDisplayName(), ArgumentType.PARTICIPANT)); break;
             default: // Skip
             }
         }
@@ -313,7 +266,7 @@ public class Participants implements ChangeDescriptionGenerator{
                 continue;
             }
             switch (changeType) {
-            case ADD: case REMOVE: changes.add(new Sentence(RESOURCE_MESSAGE_MAP.get(changeType).get(style)).add(resource.getDisplayName(), ArgumentType.PARTICIPANT)); break;
+            case ADD: case REMOVE: changes.add(new Sentence(RESOURCE_MESSAGE_MAP.get(changeType)).add(resource.getDisplayName(), ArgumentType.PARTICIPANT)); break;
             default: // Skip
             }
         }
@@ -332,13 +285,13 @@ public class Participants implements ChangeDescriptionGenerator{
                 int newStatus = cchange.getNewStatus();
                 ChangeType changeType = null;
                 switch (newStatus) {
-                case Appointment.ACCEPT: 
+                case CalendarObject.ACCEPT: 
                     changeType = ChangeType.ACCEPT; 
                     break;
-                case Appointment.DECLINE: 
+                case CalendarObject.DECLINE: 
                     changeType = ChangeType.DECLINE; 
                     break;
-                case Appointment.TENTATIVE: 
+                case CalendarObject.TENTATIVE: 
                     changeType = ChangeType.TENTATIVE; 
                     break;
                 }
@@ -383,6 +336,7 @@ public class Participants implements ChangeDescriptionGenerator{
         }
     }
 
+    @Override
     public String[] getFields() {
         return FIELDS;
     }

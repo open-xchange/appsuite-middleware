@@ -50,7 +50,7 @@
 package com.openexchange.document.converter.osgi;
 
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import com.openexchange.log.LogFactory;
 import com.openexchange.document.converter.DocumentConverterService;
 import com.openexchange.document.converter.internal.JODConverterDocumentConverterService;
 import com.openexchange.filemanagement.ManagedFileManagement;

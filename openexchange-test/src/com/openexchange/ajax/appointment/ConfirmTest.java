@@ -58,6 +58,6 @@ public class ConfirmTest extends AppointmentTest {
 
 		assertTrue("user participant with id " + secondUserId + " not found", found);
 
-        deleteAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getSessionId());
+        deleteAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getSessionId(), false);
     }
 }

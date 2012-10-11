@@ -56,6 +56,8 @@ package com.openexchange.groupware.container;
  */
 public class ExternalGroupParticipant implements Participant, Comparable<Participant> {
 
+    private static final long serialVersionUID = -2048639372069048097L;
+
     private int id;
 
     private String displayName;
@@ -71,7 +73,7 @@ public class ExternalGroupParticipant implements Participant, Comparable<Partici
      */
     public ExternalGroupParticipant(final String emailAddress) {
         super();
-        emailaddress = emailAddress;
+        setEmailAddress(emailAddress);
     }
 
     /**
@@ -84,7 +86,9 @@ public class ExternalGroupParticipant implements Participant, Comparable<Partici
 
     /**
      * {@inheritDoc}
+     * @deprecated
      */
+    @Deprecated
     @Override
     public void setIdentifier(final int id) {
         this.id = id;
@@ -119,14 +123,14 @@ public class ExternalGroupParticipant implements Participant, Comparable<Partici
      */
     @Override
     public String getEmailAddress() {
-        return emailaddress;
+        return emailaddress == null ? null : emailaddress.toLowerCase();
     }
 
     /**
      * {@inheritDoc}
      */
     public void setEmailAddress(final String emailaddress) {
-        this.emailaddress = emailaddress;
+        this.emailaddress = emailaddress == null ? null : emailaddress.toLowerCase();
     }
 
     /**
@@ -183,13 +187,20 @@ public class ExternalGroupParticipant implements Participant, Comparable<Partici
     }
 
     @Override
-    public Object clone() throws CloneNotSupportedException {
-        return super.clone();
+    public ExternalGroupParticipant clone() throws CloneNotSupportedException {
+        ExternalGroupParticipant retval = (ExternalGroupParticipant) super.clone();
+
+        retval.setDisplayName(this.getDisplayName());
+        retval.setEmailAddress(this.getEmailAddress());
+        retval.setIdentifier(this.getIdentifier());
+        retval.setIgnoreNotification(this.isIgnoreNotification());
+
+        return retval;
     }
 
     @Override
     public Participant getClone() throws CloneNotSupportedException {
-        return (Participant) clone();
+        return clone();
     }
 
     @Override

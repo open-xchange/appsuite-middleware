@@ -53,6 +53,7 @@ import static com.openexchange.java.Autoboxing.I;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import com.openexchange.groupware.container.DataObject;
 import com.openexchange.groupware.tasks.Mapper;
 import com.openexchange.groupware.tasks.Task;
 
@@ -68,12 +69,17 @@ public class ObjectID implements Mapper<Integer> {
 
     @Override
     public int getId() {
-        return Task.OBJECT_ID;
+        return DataObject.OBJECT_ID;
     }
 
     @Override
     public String getDBColumnName() {
         return "id";
+    }
+
+    @Override
+    public String getDisplayName() {
+        throw new UnsupportedOperationException();
     }
 
     @Override
@@ -106,4 +112,4 @@ public class ObjectID implements Mapper<Integer> {
     public void set(final Task task, final Integer value) {
         task.setObjectID(value.intValue());
     }
-};
+}

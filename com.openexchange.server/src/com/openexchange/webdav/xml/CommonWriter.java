@@ -51,7 +51,7 @@ package com.openexchange.webdav.xml;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
-import org.jdom.Element;
+import org.jdom2.Element;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.attach.AttachmentMetadata;
 import com.openexchange.groupware.container.CommonObject;

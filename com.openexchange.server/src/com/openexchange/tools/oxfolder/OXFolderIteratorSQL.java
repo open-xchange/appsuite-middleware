@@ -81,7 +81,6 @@ import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.i18n.Groups;
-import com.openexchange.groupware.ldap.RdbUserStorage;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.tools.iterator.FolderObjectIterator;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
@@ -93,19 +92,20 @@ import com.openexchange.threadpool.ThreadPools;
 import com.openexchange.tools.StringCollection;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorException;
+import com.openexchange.tools.iterator.SearchIteratorExceptionCodes;
 import com.openexchange.tools.oxfolder.memory.Condition;
 import com.openexchange.tools.oxfolder.memory.ConditionTreeMap;
 import com.openexchange.tools.oxfolder.memory.ConditionTreeMapManagement;
 
 /**
  * This class provides SQL related methods to fill instances of <code>com.openexchange.tools.iterator.FolderObjectIterator</code>
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class OXFolderIteratorSQL {
 
     private static final org.apache.commons.logging.Log LOG =
-        com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(OXFolderIteratorSQL.class));
+        com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(OXFolderIteratorSQL.class));
 
     private static final boolean DEBUG = LOG.isDebugEnabled();
 
@@ -189,7 +189,7 @@ public final class OXFolderIteratorSQL {
 
         /**
          * Initializes a new {@link Parameter}.
-         * 
+         *
          * @param user The user ID
          * @param groups The user's group IDs
          * @param userConfig The user configuration
@@ -205,7 +205,7 @@ public final class OXFolderIteratorSQL {
 
         /**
          * Sets the since time stamp.
-         * 
+         *
          * @param since The since time stamp
          * @return This parameter object with since time stamp applied
          */
@@ -216,7 +216,7 @@ public final class OXFolderIteratorSQL {
 
         /**
          * Sets the connection.
-         * 
+         *
          * @param con The connection
          * @return This parameter object with connection applied
          */
@@ -227,7 +227,7 @@ public final class OXFolderIteratorSQL {
 
         /**
          * Sets the folder ID.
-         * 
+         *
          * @param folderId The folder ID
          * @return This parameter object with folder ID applied
          */
@@ -238,7 +238,7 @@ public final class OXFolderIteratorSQL {
 
         /**
          * Sets the module.
-         * 
+         *
          * @param module The module
          * @return This parameter object with module applied
          */
@@ -249,7 +249,7 @@ public final class OXFolderIteratorSQL {
 
         /**
          * Sets the type.
-         * 
+         *
          * @param type The type
          * @return This parameter object with type applied
          */
@@ -278,7 +278,7 @@ public final class OXFolderIteratorSQL {
      * <li>Context ID</li>
      * <li>Context ID</li>
      * <ol>
-     * 
+     *
      * @param fields The fields to select
      * @param permissionIds The user's permission identifiers
      * @param accessibleModules The user's accessible modules
@@ -311,7 +311,7 @@ public final class OXFolderIteratorSQL {
      * <li>Context ID</li>
      * <li>Context ID</li>
      * <ol>
-     * 
+     *
      * @param folderTable The folder table name
      * @param permissionTable The permission table name
      * @param fields The fields to select
@@ -439,7 +439,7 @@ public final class OXFolderIteratorSQL {
 
     /**
      * Parses denoted fields out of specified <code>ORDER BY</code> statement; <code>" ORDER BY co.field01 DESC "</code>
-     * 
+     *
      * @param orderBy The <code>ORDER BY</code> statement
      * @return The parsed fields
      */
@@ -461,11 +461,11 @@ public final class OXFolderIteratorSQL {
 
     /**
      * Prepares given <code>ORDER BY</code> statement to be used within a <code>UNION</code> statement.
-     * 
+     *
      * <pre>
      * ORDER BY co.field01 DESC -&gt; ORDER BY field01 DESC
      * </pre>
-     * 
+     *
      * @param orderBy The <code>ORDER BY</code> statement
      * @return The prepared <code>ORDER BY</code> statement
      */
@@ -529,7 +529,7 @@ public final class OXFolderIteratorSQL {
 
     /**
      * Gets the user-visible root folders.
-     * 
+     *
      * @param userId The user identifier
      * @param memberInGroups The user's group identifiers
      * @param userConfig The user's configuration
@@ -662,7 +662,7 @@ public final class OXFolderIteratorSQL {
                 if (null == threadPool) {
                     task.run();
                 } else {
-                    threadPool.submit(ThreadPools.task(task));
+                    threadPool.submit(ThreadPools.trackableTask(task));
                 }
                 // Retry from storage...
             }
@@ -869,7 +869,7 @@ public final class OXFolderIteratorSQL {
                 if (null == threadPool) {
                     task.run();
                 } else {
-                    threadPool.submit(ThreadPools.task(task));
+                    threadPool.submit(ThreadPools.trackableTask(task));
                 }
                 // Retry from storage...
             }
@@ -935,7 +935,7 @@ public final class OXFolderIteratorSQL {
 
     /**
      * Checks if specified folder is visible.
-     * 
+     *
      * @param folderId The folder identifier
      * @param userId The user identifier
      * @param memberInGroups The user's group identifiers
@@ -967,7 +967,7 @@ public final class OXFolderIteratorSQL {
                 if (null == threadPool) {
                     task.run();
                 } else {
-                    threadPool.submit(ThreadPools.task(task));
+                    threadPool.submit(ThreadPools.trackableTask(task));
                 }
                 // Retry from storage...
             }
@@ -1024,7 +1024,7 @@ public final class OXFolderIteratorSQL {
 
     /**
      * Gets visible subfolders' identifiers from specified parent.
-     * 
+     *
      * @param parent The parent identifier
      * @param userId The user identifier
      * @param memberInGroups The user's group identifiers
@@ -1058,7 +1058,7 @@ public final class OXFolderIteratorSQL {
                 if (null == threadPool) {
                     task.run();
                 } else {
-                    threadPool.submit(ThreadPools.task(task));
+                    threadPool.submit(ThreadPools.trackableTask(task));
                 }
                 // Retry from storage...
             }
@@ -1171,7 +1171,7 @@ public final class OXFolderIteratorSQL {
                 if (null == threadPool) {
                     task.run();
                 } else {
-                    threadPool.submit(ThreadPools.task(task));
+                    threadPool.submit(ThreadPools.trackableTask(task));
                 }
                 // Retry from storage...
             }
@@ -1187,7 +1187,7 @@ public final class OXFolderIteratorSQL {
             throw e;
         } catch (final Exception e) {
             closeResources(stuff.rs, stuff.stmt, stuff.closeCon ? stuff.readCon : null, true, ctx);
-            throw SearchIteratorException.Code.UNEXPECTED_ERROR.create("FLD", e, e.getMessage());
+            throw SearchIteratorExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage()).setPrefix("FLD");
         }
     }
 
@@ -1245,7 +1245,7 @@ public final class OXFolderIteratorSQL {
 
     /**
      * Gets all visible public folders that are not visible in hierarchic tree-view (because any ancestor folder is not visible)
-     * 
+     *
      * @param userId The user ID
      * @param groups The user's group IDs
      * @param userConfig The user configuration
@@ -1260,7 +1260,7 @@ public final class OXFolderIteratorSQL {
 
     /**
      * Gets all visible public folders that are not visible in hierarchic tree-view (because any ancestor folder is not visible)
-     * 
+     *
      * @param userId The user ID
      * @param groups The user's group IDs
      * @param userConfig The user configuration
@@ -1277,7 +1277,7 @@ public final class OXFolderIteratorSQL {
     /**
      * Gets specified module's visible public folders that are not visible in hierarchic tree-view (because any ancestor folder is not
      * visible)
-     * 
+     *
      * @param module The module whose non-hierarchic-visible folders should be determined
      * @param userId The user ID
      * @param groups The user's group IDs
@@ -1293,7 +1293,7 @@ public final class OXFolderIteratorSQL {
 
     /**
      * Checks for non-tree-visible folder of specified module.
-     * 
+     *
      * @param module The module
      * @param userId The user ID
      * @param groups The user's group IDs
@@ -1869,7 +1869,7 @@ public final class OXFolderIteratorSQL {
                 if (null == threadPool) {
                     task.run();
                 } else {
-                    threadPool.submit(ThreadPools.task(task));
+                    threadPool.submit(ThreadPools.trackableTask(task));
                 }
                 // Retry from storage...
             }
@@ -1973,7 +1973,7 @@ public final class OXFolderIteratorSQL {
                 if (null == threadPool) {
                     task.run();
                 } else {
-                    threadPool.submit(ThreadPools.task(task));
+                    threadPool.submit(ThreadPools.trackableTask(task));
                 }
                 // Retry from storage...
             }
@@ -2034,7 +2034,7 @@ public final class OXFolderIteratorSQL {
 
     /**
      * Gets formerly user-visible folders which were deleted since specified time stamp.
-     * 
+     *
      * @param since The time stamp
      * @param userId The user identifier
      * @param memberInGroups The user's group identifiers
@@ -2050,7 +2050,7 @@ public final class OXFolderIteratorSQL {
 
     /**
      * Gets formerly user-visible folders which were deleted since specified time stamp.
-     * 
+     *
      * @param since The time stamp
      * @param userId The user identifier
      * @param memberInGroups The user's group identifiers
@@ -2117,7 +2117,7 @@ public final class OXFolderIteratorSQL {
 
     /**
      * Gets user-visible folders which were modified since specified time stamp.
-     * 
+     *
      * @param since The time stamp
      * @param userId The user identifier
      * @param memberInGroups The user's group identifiers
@@ -2193,7 +2193,7 @@ public final class OXFolderIteratorSQL {
      * new maximum timestamp value.
      * ...
      * </code>
-     * 
+     *
      * @param since The time stamp
      * @param ctx The context
      * @return <b>All</b> modified folders since given time stamp
@@ -2215,7 +2215,7 @@ public final class OXFolderIteratorSQL {
      * new maximum timestamp value.
      * ...
      * </code>
-     * 
+     *
      * @param since The time stamp
      * @param ctx The context
      * @param con The connection to use
@@ -2301,7 +2301,7 @@ public final class OXFolderIteratorSQL {
     private static String permissionIds(final int userId, final int[] memberInGroups, final Context ctx) throws OXException {
         int[] groups = memberInGroups;
         if (null == groups || 0 == groups.length) {
-            groups = RdbUserStorage.getInstance().getUser(userId, ctx).getGroups();
+            groups = UserStorage.getInstance().getUser(userId, ctx).getGroups();
             if (null == groups || 0 == groups.length) {
                 groups = new int[] { GroupStorage.GROUP_ZERO_IDENTIFIER };
             }

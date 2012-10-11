@@ -61,12 +61,13 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Enumeration;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.UUID;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import com.openexchange.log.LogFactory;
 import org.osgi.framework.ServiceException;
 import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.api2.TasksSQLInterface;
@@ -199,8 +200,8 @@ public final class ical extends PermissionServlet {
                 throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(ICalEmitter.class.getName());
             }
             final ICalSession iSession = emitter.createSession();
-            final List<ConversionWarning> warnings = new ArrayList<ConversionWarning>();
-            final List<ConversionError> errors = new ArrayList<ConversionError>();
+            final List<ConversionWarning> warnings = new LinkedList<ConversionWarning>();
+            final List<ConversionError> errors = new LinkedList<ConversionError>();
 
             final AppointmentSQLInterface appointmentSql = ServerServiceRegistry.getInstance().getService(AppointmentSqlFactoryService.class).createAppointmentSql(sessionObj);
             final CalendarCollectionService recColl = ServerServiceRegistry.getInstance().getService(CalendarCollectionService.class);

@@ -49,6 +49,11 @@
 
 package com.openexchange.ajax.fields;
 
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
+
 /**
  *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
@@ -74,6 +79,11 @@ public final class ResponseFields {
      * Name of the JSON attribute containing the error categories.
      */
     public static final String ERROR_CATEGORIES = "categories";
+
+    /**
+     * <b>Deprecated</b>: Name of the JSON attribute containing the error category.
+     */
+    public static final String ERROR_CATEGORY = "category";
 
     /**
      * Name of the JSON attribute containing the error code.
@@ -119,6 +129,24 @@ public final class ResponseFields {
      * Name of the JSON attribute containing the array of truncated attribute identifier.
      */
     public static final String TRUNCATED = "truncated";
+
+    /**
+     * A set of reserved identifiers.
+     */
+    public static final Set<String> RESERVED_IDENTIFIERS = Collections.unmodifiableSet(new HashSet<String>(Arrays.asList(
+        DATA,
+        WARNINGS,
+        ERROR,
+        ERROR_CATEGORIES,
+        ERROR_CODE,
+        ERROR_ID,
+        ERROR_PARAMS,
+        ERROR_STACK,
+        LENGTHS,
+        MAX_SIZES,
+        PROBLEMATIC,
+        TIMESTAMP,
+        TRUNCATED)));
 
     /**
      * Prevent instantiation.

@@ -58,6 +58,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TimeZone;
 import com.openexchange.ajax.fields.AppointmentFields;
+import com.openexchange.ajax.fields.CalendarFields;
 import com.openexchange.calendar.AppointmentDiff;
 import com.openexchange.calendar.AppointmentDiff.FieldUpdate;
 import com.openexchange.calendar.itip.ITipAction;
@@ -74,7 +75,7 @@ import com.openexchange.calendar.itip.generators.TypeWrapper;
 import com.openexchange.calendar.itip.generators.changes.ChangeDescriber;
 import com.openexchange.calendar.itip.generators.changes.generators.Details;
 import com.openexchange.calendar.itip.generators.changes.generators.Rescheduling;
-import com.openexchange.calendar.itip.generators.changes.generators.Style;
+import com.openexchange.calendar.itip.generators.changes.generators.ShownAs;
 import com.openexchange.context.ContextService;
 import com.openexchange.data.conversion.ical.itip.ITipMessage;
 import com.openexchange.data.conversion.ical.itip.ITipMethod;
@@ -82,7 +83,9 @@ import com.openexchange.data.conversion.ical.itip.ITipSpecialHandling;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.container.Appointment;
+import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.container.Change;
+import com.openexchange.groupware.container.CommonObject;
 import com.openexchange.groupware.container.ConfirmationChange;
 import com.openexchange.groupware.container.Difference;
 import com.openexchange.groupware.container.ExternalUserParticipant;
@@ -215,7 +218,7 @@ public class ReplyITipAnalyzer extends AbstractITipAnalyzer {
 			// TODO
 
 			FieldUpdate update = diff
-					.getUpdateFor(AppointmentFields.CONFIRMATIONS);
+					.getUpdateFor(CalendarFields.CONFIRMATIONS);
 			if (update != null) {
 				final Difference difference = (Difference) update.getExtraInfo();
 				final List<Change> changed = difference.getChanged();
@@ -254,9 +257,8 @@ public class ReplyITipAnalyzer extends AbstractITipAnalyzer {
 				.add(stateChange, ArgumentType.STATUS, newStatus).getMessage(wrapper, locale));
 			}
 			
-			final Style style = Style.ASK;
-			final ChangeDescriber cd = new ChangeDescriber(new Rescheduling(style),
-					new Details(style));
+			final ChangeDescriber cd = new ChangeDescriber(new Rescheduling(),
+					new Details(), new ShownAs());
 			
 			change.setDiffDescription(cd.getChanges(ctx, change.getCurrentAppointment(), change.getNewAppointment(), diff, wrapper, locale, tz));
 			
@@ -286,8 +288,8 @@ public class ReplyITipAnalyzer extends AbstractITipAnalyzer {
 		if (method == ITipMethod.COUNTER) {
 			// Alright, the counter may overwrite any field
 			final AppointmentDiff diff = AppointmentDiff.compare(original, update,
-					Appointment.PARTICIPANTS, Appointment.USERS,
-					Appointment.CONFIRMATIONS);
+					CalendarObject.PARTICIPANTS, CalendarObject.USERS,
+					CalendarObject.CONFIRMATIONS);
 			final Set<Integer> skipFields = skipFieldsInCounter(message);
 			
 			
@@ -295,7 +297,7 @@ public class ReplyITipAnalyzer extends AbstractITipAnalyzer {
 				if (skipFields.contains(field)) {
 					continue; // Skip
 				}
-				if (field != Appointment.PARTICIPANTS && field != Appointment.USERS && field != Appointment.CONFIRMATIONS && !diff.anyFieldChangedOf(field)) {
+				if (field != CalendarObject.PARTICIPANTS && field != CalendarObject.USERS && field != CalendarObject.CONFIRMATIONS && !diff.anyFieldChangedOf(field)) {
 					if (original.contains(field)) {
 						update.set(field, original.get(field));
 					}
@@ -309,8 +311,8 @@ public class ReplyITipAnalyzer extends AbstractITipAnalyzer {
 		} else {
 			// The Reply may only override participant states
 			final AppointmentDiff diff = AppointmentDiff.compare(update, original,
-					Appointment.PARTICIPANTS, Appointment.USERS,
-					Appointment.CONFIRMATIONS);
+					CalendarObject.PARTICIPANTS, CalendarObject.USERS,
+					CalendarObject.CONFIRMATIONS);
 			for (final FieldUpdate upd : diff.getUpdates()) {
 				update.set(upd.getFieldNumber(), upd.getNewValue());
 			}
@@ -535,9 +537,9 @@ public class ReplyITipAnalyzer extends AbstractITipAnalyzer {
 
 	private Set<Integer> skipFieldsInCounter(final ITipMessage message) {
 		final Set<Integer> skipList = new HashSet<Integer>();
-		skipList.add(Appointment.NUMBER_OF_LINKS); 
+		skipList.add(CommonObject.NUMBER_OF_LINKS); 
 		if (message.hasFeature(ITipSpecialHandling.MICROSOFT)) {
-			skipList.add(Appointment.TITLE);
+			skipList.add(CalendarObject.TITLE);
 		}
 		return skipList;
 	}

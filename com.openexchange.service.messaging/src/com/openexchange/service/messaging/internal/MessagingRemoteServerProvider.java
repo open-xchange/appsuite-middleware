@@ -73,7 +73,7 @@ import com.openexchange.mdns.MDNSServiceInfo;
 public final class MessagingRemoteServerProvider extends ServiceTracker<MDNSService, MDNSService> {
 
     private static final org.apache.commons.logging.Log LOG =
-        com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(MessagingRemoteServerProvider.class));
+        com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(MessagingRemoteServerProvider.class));
 
     private static volatile MessagingRemoteServerProvider instance;
 

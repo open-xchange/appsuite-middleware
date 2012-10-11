@@ -54,8 +54,9 @@ import java.util.Date;
 import java.util.Locale;
 import java.util.Map;
 import com.openexchange.folderstorage.ContentType;
-import com.openexchange.folderstorage.FolderField;
 import com.openexchange.folderstorage.Folder;
+import com.openexchange.folderstorage.FolderExtension;
+import com.openexchange.folderstorage.FolderField;
 import com.openexchange.folderstorage.FolderProperty;
 import com.openexchange.folderstorage.ParameterizedFolder;
 import com.openexchange.folderstorage.Permission;
@@ -78,6 +79,8 @@ public final class UserizedFolderImpl implements UserizedFolder {
 
     private Date lastModifiedUTC;
 
+    private Date creationDateUTC;
+
     private Locale locale;
 
     private Boolean deefault;
@@ -97,6 +100,8 @@ public final class UserizedFolderImpl implements UserizedFolder {
     private Date lastModified;
 
     private volatile Map<FolderField, FolderProperty> properties;
+
+    private int[] totalAndUnread;
 
     /**
      * Initializes a new {@link UserizedFolderImpl} from specified folder.
@@ -125,6 +130,7 @@ public final class UserizedFolderImpl implements UserizedFolder {
             clone.folder = (Folder) clone.folder.clone();
             clone.ownPermission = ownPermission == null ? null : (Permission) ownPermission.clone();
             clone.lastModifiedUTC = null == lastModifiedUTC ? null : new Date(lastModifiedUTC.getTime());
+            clone.creationDateUTC = null == creationDateUTC ? null : new Date(creationDateUTC.getTime());
             clone.locale = (Locale) (null == locale ? null : locale.clone());
             return clone;
         } catch (final CloneNotSupportedException e) {
@@ -323,6 +329,16 @@ public final class UserizedFolderImpl implements UserizedFolder {
     }
 
     @Override
+    public Date getCreationDateUTC() {
+        return creationDateUTC == null ? null : new Date(creationDateUTC.getTime());
+    }
+
+    @Override
+    public void setCreationDateUTC(final Date creationDateUTC) {
+        this.creationDateUTC = creationDateUTC == null ? null : new Date(creationDateUTC.getTime());
+    }
+
+    @Override
     public int getCapabilities() {
         return folder.getCapabilities();
     }
@@ -344,11 +360,31 @@ public final class UserizedFolderImpl implements UserizedFolder {
 
     @Override
     public int getTotal() {
+        if (null == totalAndUnread) {
+            if (folder instanceof FolderExtension) {
+                totalAndUnread = ((FolderExtension) folder).getTotalAndUnread();
+                if (null != totalAndUnread) {
+                    return totalAndUnread[0];
+                }
+            }
+        } else {
+            return totalAndUnread[0];
+        }
         return folder.getTotal();
     }
 
     @Override
     public int getUnread() {
+        if (null == totalAndUnread) {
+            if (folder instanceof FolderExtension) {
+                totalAndUnread = ((FolderExtension) folder).getTotalAndUnread();
+                if (null != totalAndUnread) {
+                    return totalAndUnread[1];
+                }
+            }
+        } else {
+            return totalAndUnread[1];
+        }
         return folder.getUnread();
     }
 

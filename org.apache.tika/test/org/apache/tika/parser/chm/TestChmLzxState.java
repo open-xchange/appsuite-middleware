@@ -85,8 +85,9 @@ public class TestChmLzxState extends TestCase {
     }
 
     public void testToString() throws TikaException {
-        if (chmLzxState == null)
+        if (chmLzxState == null) {
             testChmLzxStateConstructor();
+        }
         Assert.assertTrue(chmLzxState.toString().length() > 20);
     }
 

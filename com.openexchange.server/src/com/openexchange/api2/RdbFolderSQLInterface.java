@@ -61,7 +61,7 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Queue;
 import java.util.Set;
-import com.openexchange.ajax.fields.FolderFields;
+import com.openexchange.ajax.fields.FolderChildFields;
 import com.openexchange.cache.impl.FolderCacheManager;
 import com.openexchange.cache.impl.FolderQueryCacheManager;
 import com.openexchange.exception.OXException;
@@ -131,7 +131,7 @@ public class RdbFolderSQLInterface implements FolderSQLInterface {
         FolderObject.VIRTUAL_LIST_TASK_FOLDER_ID, FolderObject.VIRTUAL_LIST_CALENDAR_FOLDER_ID,
         FolderObject.VIRTUAL_LIST_CONTACT_FOLDER_ID, FolderObject.VIRTUAL_LIST_INFOSTORE_FOLDER_ID };
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(RdbFolderSQLInterface.class));
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(RdbFolderSQLInterface.class));
 
     private final int userId;
 
@@ -254,7 +254,7 @@ public class RdbFolderSQLInterface implements FolderSQLInterface {
         try {
             if (insert) {
                 if (!folderobject.containsParentFolderID()) {
-                    throw OXFolderExceptionCode.MISSING_FOLDER_ATTRIBUTE.create(FolderFields.FOLDER_ID, Integer.valueOf(ctx.getContextId()));
+                    throw OXFolderExceptionCode.MISSING_FOLDER_ATTRIBUTE.create(FolderChildFields.FOLDER_ID, Integer.valueOf(ctx.getContextId()));
                 }
                 final int parentFolderID = folderobject.getParentFolderID();
                 if (parentFolderID == FolderObject.SYSTEM_PUBLIC_FOLDER_ID && !userConfiguration.hasFullPublicFolderAccess()) {

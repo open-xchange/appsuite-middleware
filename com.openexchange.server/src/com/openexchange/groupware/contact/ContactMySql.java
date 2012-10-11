@@ -62,14 +62,16 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import com.openexchange.log.LogFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contact.Contacts.Mapper;
 import com.openexchange.groupware.contact.sqlinjectors.IntSQLInjector;
 import com.openexchange.groupware.contact.sqlinjectors.SQLInjector;
 import com.openexchange.groupware.contact.sqlinjectors.StringSQLInjector;
 import com.openexchange.groupware.contact.sqlinjectors.TimestampSQLInjector;
+import com.openexchange.groupware.container.CommonObject;
 import com.openexchange.groupware.container.Contact;
+import com.openexchange.groupware.container.DataObject;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
@@ -1255,20 +1257,20 @@ public class ContactMySql implements ContactSql {
                             final String value = values[i];
                             sb.append(" ( co.").append(field).append(" LIKE ").append(value).append(") ").append(searchHabit).append(' ');
                             modified = true;
-                        } else if (fields[i] == Contact.NUMBER_OF_DISTRIBUTIONLIST || fields[i] == Contact.NUMBER_OF_LINKS) {
+                        } else if (fields[i] == Contact.NUMBER_OF_DISTRIBUTIONLIST || fields[i] == CommonObject.NUMBER_OF_LINKS) {
                             String field = "";
                             if (fields[i] == Contact.NUMBER_OF_DISTRIBUTIONLIST) {
                                 field = Contacts.mapping[Contact.NUMBER_OF_DISTRIBUTIONLIST].getDBFieldName();
-                            } else if (fields[i] == Contact.NUMBER_OF_LINKS) {
-                                field = Contacts.mapping[Contact.NUMBER_OF_LINKS].getDBFieldName();
+                            } else if (fields[i] == CommonObject.NUMBER_OF_LINKS) {
+                                field = Contacts.mapping[CommonObject.NUMBER_OF_LINKS].getDBFieldName();
                             }
                             final String value = values[i];
                             sb.append('(').append("co.").append(field).append(" = ").append(value).append(") ").append(searchHabit).append(
                                 ' ');
                             modified = true;
                         } else {
-                            if (fields[i] == Contact.CATEGORIES) {
-                                final String field = Contacts.mapping[Contact.CATEGORIES].getDBFieldName();
+                            if (fields[i] == CommonObject.CATEGORIES) {
+                                final String field = Contacts.mapping[CommonObject.CATEGORIES].getDBFieldName();
                                 String value = values[i];
 
                                 if (!"*".equals(value) && null != value) {
@@ -1416,7 +1418,7 @@ public class ContactMySql implements ContactSql {
                     final List<SQLInjector> injectors = instance.injectors;
                     final Date[] d = cso.getCreationDateRange();
                     try {
-                        final String field = Contacts.mapping[Contact.CREATION_DATE].getDBFieldName();
+                        final String field = Contacts.mapping[DataObject.CREATION_DATE].getDBFieldName();
                         sb.append("co.").append(field).append(" >= ? ").append(searchHabit).append(' ');
                         sb.append("co.").append(field).append(" <= ? ");
                         if (isSingleSelect) {
@@ -1434,7 +1436,7 @@ public class ContactMySql implements ContactSql {
                         LOG.error("Could not Format Creating_Date Date for Range Search! ", e);
                     }
                 }
-                return Contact.CREATION_DATE;
+                return DataObject.CREATION_DATE;
             }
         });
         searchFillers.add(new SearchFiller() {
@@ -1447,7 +1449,7 @@ public class ContactMySql implements ContactSql {
                     final List<SQLInjector> injectors = instance.injectors;
                     final Date[] d = cso.getLastModifiedRange();
                     try {
-                        final String field = Contacts.mapping[Contact.LAST_MODIFIED].getDBFieldName();
+                        final String field = Contacts.mapping[DataObject.LAST_MODIFIED].getDBFieldName();
                         sb.append("co.").append(field).append(" >= ? ").append(searchHabit).append(' ');
                         sb.append("co.").append(field).append(" <= ? ");
                         if (isSingleSelect) {
@@ -1465,7 +1467,7 @@ public class ContactMySql implements ContactSql {
                         LOG.error("Could not Format LastModified Date for Range Search! ", e);
                     }
                 }
-                return Contact.LAST_MODIFIED;
+                return DataObject.LAST_MODIFIED;
             }
         });
         searchFillers.add(new SearchFiller() {
@@ -1825,7 +1827,7 @@ public class ContactMySql implements ContactSql {
                     final String searchHabit = instance.search_habit;
                     final List<SQLInjector> injectors = instance.injectors;
 
-                    final String field = Contacts.mapping[Contact.CATEGORIES].getDBFieldName();
+                    final String field = Contacts.mapping[CommonObject.CATEGORIES].getDBFieldName();
                     String value = cso.getCatgories().trim();
 
                     if (!"*".equals(value)) {
@@ -1857,7 +1859,7 @@ public class ContactMySql implements ContactSql {
                         }
                     }
                 }
-                return Contact.CATEGORIES;
+                return CommonObject.CATEGORIES;
             }
 
         });

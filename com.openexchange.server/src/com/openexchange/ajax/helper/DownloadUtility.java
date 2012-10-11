@@ -73,7 +73,7 @@ import com.openexchange.tools.servlet.AjaxExceptionCodes;
  */
 public final class DownloadUtility {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(DownloadUtility.class));
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(DownloadUtility.class));
 
     /**
      * Initializes a new {@link DownloadUtility}.
@@ -222,7 +222,20 @@ public final class DownloadUtility {
         return new CheckedDownload(contentType.getBaseType(), overridingDisposition, in);
     }
 
-    private static void appendFilenameParameter(final String fileName, final String baseCT, final String userAgent, final StringBuilder appendTo) {
+    /**
+     * Appends the <tt>"filename"</tt> parameter to specified {@link StringBuilder} instance; e.g.
+     * 
+     * <pre>
+     * "attachment; filename="readme.txt"
+     *            ^---------------------^
+     * </pre>
+     * 
+     * @param fileName The file name
+     * @param baseCT The base content type; e.g <tt>"application/octet-stream"</tt> or <tt>"text/plain"</tt>
+     * @param userAgent The user agent identifier
+     * @param appendTo The {@link StringBuilder} instanc to append to
+     */
+    public static void appendFilenameParameter(final String fileName, final String baseCT, final String userAgent, final StringBuilder appendTo) {
         if (null == fileName) {
             appendTo.append("; filename=\"").append(DEFAULT_FILENAME).append('"').toString();
             return;

@@ -49,6 +49,9 @@
 
 package com.openexchange.html.internal.jericho;
 
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import net.htmlparser.jericho.CharacterReference;
@@ -61,8 +64,11 @@ import net.htmlparser.jericho.StreamedSource;
 import net.htmlparser.jericho.Tag;
 import net.htmlparser.jericho.TagType;
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.html.internal.parser.HtmlHandler;
+import com.openexchange.html.services.ServiceRegistry;
+import com.openexchange.java.Streams;
+import com.openexchange.log.LogFactory;
 
 /**
  * {@link JerichoParser} - Parses specified real-life HTML document.
@@ -75,6 +81,40 @@ public final class JerichoParser {
 
     private static final boolean DEBUG = LOG.isDebugEnabled();
 
+    public static final class ParsingDeniedException extends RuntimeException {
+
+        private static final long serialVersionUID = 150733382242549446L;
+
+        /**
+         * Initializes a new {@link ParsingDeniedException}.
+         */
+        ParsingDeniedException() {
+            super();
+        }
+
+        /**
+         * Initializes a new {@link ParsingDeniedException}.
+         */
+        ParsingDeniedException(String message, Throwable cause) {
+            super(message, cause);
+        }
+
+        /**
+         * Initializes a new {@link ParsingDeniedException}.
+         */
+        ParsingDeniedException(String message) {
+            super(message);
+        }
+
+        /**
+         * Initializes a new {@link ParsingDeniedException}.
+         */
+        ParsingDeniedException(Throwable cause) {
+            super(cause);
+        }
+
+    } // End of ParsingDeniedException
+
     /**
      * Initializes a new {@link JerichoParser}.
      */
@@ -84,25 +124,49 @@ public final class JerichoParser {
 
     private static final Pattern BODY_START = Pattern.compile("<body.*?>", Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
 
+    private static volatile Integer maxLength;
+    private static int maxLength() {
+        Integer i = maxLength;
+        if (null == maxLength) {
+            synchronized (JerichoParser.class) {
+                i = maxLength;
+                if (null == maxLength) {
+                    // Default is 512KB
+                    final ConfigurationService service = ServiceRegistry.getInstance().getService(ConfigurationService.class);
+                    final int defaultMaxLength = 1048576 >> 1;
+                    i = Integer.valueOf(null == service ? defaultMaxLength : service.getIntProperty("com.openexchange.html.maxLength", defaultMaxLength));
+                    maxLength = i;
+                }
+            }
+        }
+        return i.intValue();
+    }
+
     /**
      * Ensure given HTML content has a <code>&lt;body&gt;</code> tag.
      * 
      * @param html The HTML content to check
      * @return The checked HTML content possibly with surrounded with a <code>&lt;body&gt;</code> tag
+     * @throws ParsingDeniedException If specified HTML content cannot be parsed without wasting too many JVM resources
      */
-    private static String checkBody(final String html) {
+    private static StreamedSource checkBody(final String html) {
         if (null == html) {
-            return html;
+            return null;
+        }
+        final int maxLength = maxLength();
+        final boolean big = html.length() > maxLength;
+        if (big) {
+            throw new ParsingDeniedException("HTML content is too big: max. " + maxLength + ", but is " + html.length());
         }
         if (BODY_START.matcher(html).find()) {
-            return html;
+            return new StreamedSource(html);
         }
         // <body> tag missing
         String sep = System.getProperty("line.separator");
         if (null == sep) {
             sep = "\n";
         }
-        return new StringBuilder(html.length() + 16).append("<body>").append(sep).append(html).append(sep).append("</body>").toString();
+        return new StreamedSource(new StringBuilder(html.length() + 16).append("<body>").append(sep).append(html).append(sep).append("</body>"));
     }
 
     private static final Pattern NESTED_TAG = Pattern.compile("^(?:\r?\n *)?(<[^>]+>)");
@@ -114,29 +178,56 @@ public final class JerichoParser {
      * 
      * @param html The real-life HTML document
      * @param handler The HTML handler
+     * @throws ParsingDeniedException If specified HTML content cannot be parsed without wasting too many JVM resources
      */
     public static void parse(final String html, final JerichoHandler handler) {
         final long st = DEBUG ? System.currentTimeMillis() : 0L;
-        final StreamedSource streamedSource = new StreamedSource(checkBody(html));
-        streamedSource.setLogger(null);
-        int lastSegmentEnd = 0;
-        for (final Segment segment : streamedSource) {
-            if (segment.getEnd() <= lastSegmentEnd) {
+        StreamedSource streamedSource = null;
+        try {
+            streamedSource = checkBody(html);
+            streamedSource.setLogger(null);
+            int lastSegmentEnd = 0;
+            for (final Segment segment : streamedSource) {
+                if (segment.getEnd() <= lastSegmentEnd) {
+                    /*
+                     * If this tag is inside the previous tag (e.g. a server tag) then ignore it as it was already output along with the
+                     * previous tag.
+                     */
+                    continue;
+                }
+                lastSegmentEnd = segment.getEnd();
                 /*
-                 * If this tag is inside the previous tag (e.g. a server tag) then ignore it as it was already output along with the
-                 * previous tag.
+                 * Handle current segment
                  */
-                continue;
+                handleSegment(handler, segment, false);
             }
-            lastSegmentEnd = segment.getEnd();
-            /*
-             * Handle current segment
-             */
-            handleSegment(handler, segment, true);
+            if (DEBUG) {
+                final long dur = System.currentTimeMillis() - st;
+                LOG.debug("\tJerichoParser.parse() took " + dur + "msec.");
+            }
+        } catch (final StackOverflowError parserOverflow) {
+            throw new ParsingDeniedException("Parser overflow detected.", parserOverflow);
+        } finally {
+            Streams.close(streamedSource);
         }
-        if (DEBUG) {
-            final long dur = System.currentTimeMillis() - st;
-            LOG.debug("\tJerichoParser.parse() took " + dur + "msec.");
+    }
+
+    private static enum EnumTagType {
+        START_TAG, END_TAG, DOCTYPE_DECLARATION, CDATA_SECTION, COMMENT;
+
+        private static final Map<TagType, EnumTagType> MAPPING;
+        static {
+            final Map<TagType, EnumTagType> m = new HashMap<TagType, EnumTagType>(5);
+            m.put(StartTagType.NORMAL, START_TAG);
+            m.put(EndTagType.NORMAL, END_TAG);
+            m.put(StartTagType.DOCTYPE_DECLARATION, DOCTYPE_DECLARATION);
+            m.put(StartTagType.CDATA_SECTION, CDATA_SECTION);
+            m.put(StartTagType.COMMENT, COMMENT);
+            MAPPING = Collections.unmodifiableMap(m);
+        }
+
+        protected static EnumTagType enumFor(final TagType tagType) {
+            return MAPPING.get(tagType);
         }
     }
 
@@ -144,6 +235,35 @@ public final class JerichoParser {
         if (segment instanceof Tag) {
             final Tag tag = (Tag) segment;
             final TagType tagType = tag.getTagType();
+
+            final EnumTagType enumType = EnumTagType.enumFor(tagType);
+            if (null == enumType) {
+                if (!segment.isWhiteSpace()) {
+                    handler.handleUnknownTag(tag);
+                }
+            } else {
+                switch (enumType) {
+                case START_TAG:
+                    handler.handleStartTag((StartTag) tag);
+                    break;
+                case END_TAG:
+                    handler.handleEndTag((EndTag) tag);
+                    break;
+                case DOCTYPE_DECLARATION:
+                    handler.handleDocDeclaration(segment.toString());
+                    break;
+                case CDATA_SECTION:
+                    handler.handleCData(segment.toString());
+                    break;
+                case COMMENT:
+                    handler.handleComment(segment.toString());
+                    break;
+                default:
+                    break;
+                }
+            }
+            /*-
+             * 
             if (tagType == StartTagType.NORMAL) {
                 handler.handleStartTag((StartTag) tag);
             } else if (tagType == EndTagType.NORMAL) {
@@ -159,6 +279,8 @@ public final class JerichoParser {
                     handler.handleUnknownTag(tag);
                 }
             }
+             * 
+             */
         } else if (segment instanceof CharacterReference) {
             final CharacterReference characterReference = (CharacterReference) segment;
             handler.handleCharacterReference(characterReference);

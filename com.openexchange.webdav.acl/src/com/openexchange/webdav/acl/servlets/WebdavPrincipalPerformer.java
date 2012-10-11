@@ -54,7 +54,6 @@ import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
@@ -63,6 +62,7 @@ import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.SessionHolder;
 import com.openexchange.user.UserService;
 import com.openexchange.webdav.InfostorePerformer;
+import com.openexchange.webdav.acl.PrincipalProtocol;
 import com.openexchange.webdav.acl.PrincipalWebdavFactory;
 import com.openexchange.webdav.action.AbstractAction;
 import com.openexchange.webdav.action.OXWebdavMaxUploadSizeAction;
@@ -85,6 +85,7 @@ import com.openexchange.webdav.action.WebdavMoveAction;
 import com.openexchange.webdav.action.WebdavOptionsAction;
 import com.openexchange.webdav.action.WebdavPropfindAction;
 import com.openexchange.webdav.action.WebdavProppatchAction;
+import com.openexchange.webdav.action.WebdavReportAction;
 import com.openexchange.webdav.action.WebdavRequestCycleAction;
 import com.openexchange.webdav.action.WebdavTraceAction;
 import com.openexchange.webdav.action.WebdavUnlockAction;
@@ -98,11 +99,11 @@ import com.openexchange.webdav.protocol.helpers.PropertyMixin;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class WebdavPrincipalPerformer implements SessionHolder{
-    private static final Log LOG = LogFactory.getLog(WebdavPrincipalPerformer.class);
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(WebdavPrincipalPerformer.class);
 
     private static WebdavPrincipalPerformer INSTANCE = null;
 
-    private static ServiceLookup services;
+    private static volatile ServiceLookup services;
 
     public static void setServices(final ServiceLookup lookup){
         services = lookup;
@@ -121,12 +122,12 @@ public class WebdavPrincipalPerformer implements SessionHolder{
     }
 
     public static enum Action {
-        UNLOCK, PROPPATCH, PROPFIND, OPTIONS, MOVE, MKCOL, LOCK, COPY, DELETE, GET, HEAD, PUT, TRACE
+        UNLOCK, PROPPATCH, PROPFIND, OPTIONS, MOVE, MKCOL, LOCK, COPY, DELETE, GET, HEAD, PUT, TRACE, REPORT
     }
 
     private final PrincipalWebdavFactory factory;
 
-    private final Protocol protocol = new Protocol();
+    private final Protocol protocol = new PrincipalProtocol();
 
     private final Map<Action, WebdavAction> actions = new EnumMap<Action, WebdavAction>(Action.class);
 
@@ -147,6 +148,7 @@ public class WebdavPrincipalPerformer implements SessionHolder{
         WebdavAction head;
         WebdavAction put;
         WebdavAction trace;
+        WebdavAction report;
 
 
         this.factory = new PrincipalWebdavFactory(services.getService(UserService.class),this);
@@ -162,6 +164,7 @@ public class WebdavPrincipalPerformer implements SessionHolder{
         delete = prepare(new WebdavDeleteAction(), true, true, new WebdavExistsAction(), new WebdavIfAction(0, true, false));
         get = prepare(new WebdavGetAction(), true, false, new WebdavExistsAction(), new WebdavIfAction(0, false, false));
         head = prepare(new WebdavHeadAction(), true, true, new WebdavExistsAction(), new WebdavIfAction(0, false, false));
+        report = prepare(new WebdavReportAction(protocol), true, true, new WebdavExistsAction(), new WebdavIfAction(0, false, false));
 
         final OXWebdavPutAction oxWebdavPut = new OXWebdavPutAction();
         oxWebdavPut.setSessionHolder(this);
@@ -185,6 +188,7 @@ public class WebdavPrincipalPerformer implements SessionHolder{
         actions.put(Action.HEAD, head);
         actions.put(Action.PUT, put);
         actions.put(Action.TRACE, trace);
+        actions.put(Action.REPORT, report);
 
         makeLockNullTolerant();
 

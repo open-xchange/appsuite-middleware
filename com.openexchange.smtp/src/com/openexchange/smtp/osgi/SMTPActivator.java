@@ -69,7 +69,7 @@ import com.openexchange.smtp.SMTPProvider;
  */
 public final class SMTPActivator extends HousekeepingActivator {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(SMTPActivator.class));
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(SMTPActivator.class));
 
     /**
      * Initializes a new {@link SMTPActivator}

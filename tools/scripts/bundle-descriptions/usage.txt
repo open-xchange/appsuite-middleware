@@ -1,0 +1,2 @@
+clear; find ~/dev/ox6/ -name "MANIFEST.MF" | ruby xtract-desc.rb | ruby mediawikify.rb > ~/wiki.tmp
+

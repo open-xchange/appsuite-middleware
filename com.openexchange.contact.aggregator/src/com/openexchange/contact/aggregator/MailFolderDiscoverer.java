@@ -56,7 +56,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import com.openexchange.log.LogFactory;
 import com.openexchange.folderstorage.ContentType;
 import com.openexchange.folderstorage.FolderResponse;
 import com.openexchange.folderstorage.FolderService;
@@ -75,9 +75,9 @@ import com.openexchange.tools.session.ServerSession;
  */
 public class MailFolderDiscoverer {
 
-    private static final Log LOG = LogFactory.getLog(MailFolderDiscoverer.class);
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(MailFolderDiscoverer.class);
     
-    private FolderService folderService;
+    private final FolderService folderService;
 
     public MailFolderDiscoverer(FolderService folderService) {
         super();

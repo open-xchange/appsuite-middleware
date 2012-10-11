@@ -54,6 +54,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
 import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -88,17 +89,15 @@ import javax.mail.internet.MimeUtility;
 import org.apache.commons.codec.DecoderException;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.codec.net.QuotedPrintableCodec;
+import com.openexchange.contact.ContactService;
 import com.openexchange.conversion.ConversionService;
 import com.openexchange.conversion.Data;
 import com.openexchange.conversion.DataProperties;
 import com.openexchange.exception.OXException;
 import com.openexchange.filemanagement.ManagedFile;
 import com.openexchange.filemanagement.ManagedFileManagement;
-import com.openexchange.groupware.contact.ContactInterface;
-import com.openexchange.groupware.contact.ContactInterfaceDiscoveryService;
 import com.openexchange.groupware.contact.Contacts;
 import com.openexchange.groupware.container.Contact;
-import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.i18n.MailStrings;
 import com.openexchange.groupware.ldap.User;
@@ -113,7 +112,10 @@ import com.openexchange.java.Charsets;
 import com.openexchange.log.LogProperties;
 import com.openexchange.log.Props;
 import com.openexchange.mail.MailExceptionCode;
+import com.openexchange.mail.MailPath;
+import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.config.MailProperties;
+import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.dataobjects.compose.ComposeType;
@@ -130,6 +132,7 @@ import com.openexchange.mail.mime.MimeType2ExtMap;
 import com.openexchange.mail.mime.MimeTypes;
 import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.mail.mime.datasource.MessageDataSource;
+import com.openexchange.mail.mime.utils.ImageMatcher;
 import com.openexchange.mail.mime.utils.MimeMessageUtility;
 import com.openexchange.mail.mime.utils.sourcedimage.SourcedImage;
 import com.openexchange.mail.mime.utils.sourcedimage.SourcedImageUtility;
@@ -158,7 +161,7 @@ import com.openexchange.user.UserService;
  */
 public class MimeMessageFiller {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(MimeMessageFiller.class));
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(MimeMessageFiller.class));
 
     private static final boolean DEBUG = LOG.isDebugEnabled();
 
@@ -197,7 +200,11 @@ public class MimeMessageFiller {
 
     protected final UserSettingMail usm;
 
+    protected int accountId;
+
     private Set<String> uploadFileIDs;
+
+    private Set<String> contentIds;
 
     private final HtmlService htmlService;
 
@@ -224,6 +231,25 @@ public class MimeMessageFiller {
         this.session = session;
         this.ctx = ctx;
         this.usm = usm;
+    }
+    
+    /**
+     * Sets the account identifier
+     *
+     * @param accountId The account identifier to set
+     */
+    public MimeMessageFiller setAccountId(final int accountId) {
+        this.accountId = accountId;
+        return this;
+    }
+    
+    /**
+     * Gets the account identifier
+     *
+     * @return The account identifier
+     */
+    public int getAccountId() {
+        return accountId;
     }
 
     /*
@@ -266,20 +292,24 @@ public class MimeMessageFiller {
         /*
          * Set organization to context-admin's company field setting
          */
-        try {
-            final ContactInterface contactInterface =
-                ServerServiceRegistry.getInstance().getService(ContactInterfaceDiscoveryService.class).newContactInterface(
-                    FolderObject.SYSTEM_LDAP_FOLDER_ID,
-                    session);
-
-            final Contact c = contactInterface.getUserById(ctx.getMailadmin(), false);
-            if (null != c && c.getCompany() != null && c.getCompany().length() > 0) {
-                final String encoded =
-                    MimeUtility.fold(14, MimeUtility.encodeText(c.getCompany(), MailProperties.getInstance().getDefaultMimeCharset(), null));
-                mimeMessage.setHeader(MessageHeaders.HDR_ORGANIZATION, encoded);
+        if (accountId <= 0) {
+            try {
+                final ContactService contactService = ServerServiceRegistry.getInstance().getService(ContactService.class);
+                final String organization = contactService.getOrganization(session);
+                if (null != organization && 0 < organization.length()) {
+                    final String encoded =
+                        MimeUtility.fold(
+                            14,
+                            MimeUtility.encodeText(organization, MailProperties.getInstance().getDefaultMimeCharset(), null));
+                    mimeMessage.setHeader(MessageHeaders.HDR_ORGANIZATION, encoded);
+                }
+            } catch (final Exception e) {
+                if (DEBUG) { // Include stack trace as well
+                    LOG.warn("Header \"Organization\" could not be set", e);
+                } else {
+                    LOG.warn("Header \"Organization\" could not be set.");
+                }
             }
-        } catch (final Exception e) {
-            LOG.error("Header \"Organization\" could not be set", e);
         }
         /*
          * Add header X-Originating-IP containing the IP address of the client
@@ -357,39 +387,73 @@ public class MimeMessageFiller {
             /*
              * Get from
              */
-            final InternetAddress from = mail.getFrom()[0];
+            InternetAddress from = mail.getFrom()[0];
+            InternetAddress sender = null;
+            if (false) {
+                final MailPath msgref = mail.getMsgref();
+                if (msgref != null) {
+                    final ComposeType sendType = mail.getSendType();
+                    if (ComposeType.REPLY.equals(sendType) || ComposeType.FORWARD.equals(sendType)) {
+                        MailAccess<?, ?> access = null;
+                        try {
+                            access = MailAccess.getInstance(session, msgref.getAccountId());
+                            access.connect();
+                            final MailFolder refFolder = access.getFolderStorage().getFolder(msgref.getFolder());
+                            if (refFolder.isShared()) {
+                                final String owner = refFolder.getOwner();
+                                if (null != owner) {
+                                    final User[] users = UserStorage.getInstance().searchUserByMailLogin(owner, ctx);
+                                    if (null != users && users.length > 0) {
+                                        final InternetAddress onBehalfOf = new QuotedInternetAddress(users[0].getMail(), true);
+                                        sender = from;
+                                        from = onBehalfOf;
+                                    }
+                                }
+                            }
+                        } catch (final Exception e) {
+                            // Ignore
+                            LOG.warn("Couldn't resolve on-behalf-of address.", e);
+                        } finally {
+                            if (null != access) {
+                                access.close(true);
+                            }
+                        }
+                    }
+                }
+            }
             mimeMessage.setFrom(from);
             /*
              * Determine sender
              */
-            InternetAddress sender = null;
-            final MailAccountStorageService mass = ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class);
-            if (null != mass) {
-                try {
-                    final int userId = session.getUserId();
-                    final int contextId = session.getContextId();
-                    int id = mass.getByPrimaryAddress(from.getAddress(), userId, contextId);
-                    if (id < 0) {
-                        id = mass.getByPrimaryAddress(IDNA.toIDN(from.getAddress()), userId, contextId);
+            if (null == sender) {
+                final MailAccountStorageService mass = ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class);
+                if (null != mass) {
+                    try {
+                        final int userId = session.getUserId();
+                        final int contextId = session.getContextId();
+                        int id = mass.getByPrimaryAddress(from.getAddress(), userId, contextId);
                         if (id < 0) {
-                            /*
-                             * No appropriate mail account found which matches from address
-                             */
-                            final String sendAddr = usm.getSendAddr();
-                            if (sendAddr != null && sendAddr.length() > 0) {
-                                try {
-                                    sender = new QuotedInternetAddress(sendAddr, true);
-                                } catch (final AddressException e) {
-                                    LOG.error("Default send address cannot be parsed", e);
+                            id = mass.getByPrimaryAddress(IDNA.toIDN(from.getAddress()), userId, contextId);
+                            if (id < 0) {
+                                /*
+                                 * No appropriate mail account found which matches from address
+                                 */
+                                final String sendAddr = usm.getSendAddr();
+                                if (sendAddr != null && sendAddr.length() > 0) {
+                                    try {
+                                        sender = new QuotedInternetAddress(sendAddr, true);
+                                    } catch (final AddressException e) {
+                                        LOG.error("Default send address cannot be parsed", e);
+                                    }
                                 }
                             }
                         }
+                    } catch (final OXException e) {
+                        /*
+                         * Conflict during look-up
+                         */
+                        LOG.debug(e.getMessage(), e);
                     }
-                } catch (final OXException e) {
-                    /*
-                     * Conflict during look-up
-                     */
-                    LOG.debug(e.getMessage(), e);
                 }
             }
             final List<InternetAddress> aliases;
@@ -587,7 +651,7 @@ public class MimeMessageFiller {
      * @param mimeMessage The MIME message
      * @throws MessagingException If setting the reply headers fails
      */
-    public void setReplyHeaders(final MailMessage referencedMail, final MimeMessage mimeMessage) throws MessagingException {
+    public static void setReplyHeaders(final MailMessage referencedMail, final MimeMessage mimeMessage) throws MessagingException {
         if (null == referencedMail) {
             /*
              * Obviously referenced mail does no more exist; cancel setting reply headers Message-Id, In-Reply-To, and References.
@@ -759,7 +823,7 @@ public class MimeMessageFiller {
              * If any condition is true, we ought to create a multipart/ message
              */
             if (sendMultipartAlternative) {
-                final Multipart alternativeMultipart = createMultipartAlternative(mail, content, embeddedImages, images, textBodyPart);
+                final Multipart alternativeMultipart = createMultipartAlternative(mail, content, embeddedImages, images, textBodyPart, type);
                 if (primaryMultipart == null) {
                     primaryMultipart = alternativeMultipart;
                 } else {
@@ -795,9 +859,9 @@ public class MimeMessageFiller {
                          * Well-formed HTML
                          */
                         final String wellFormedHTMLContent = htmlService.getConformHTML(content, charset);
-                        primaryMultipart.addBodyPart(createTextBodyPart(wellFormedHTMLContent, charset, false, true), 0);
+                        primaryMultipart.addBodyPart(createTextBodyPart(toArray(wellFormedHTMLContent, content), charset, false, true, type), 0);
                     } else {
-                        primaryMultipart.addBodyPart(createTextBodyPart(plainText, charset, false, false), 0);
+                        primaryMultipart.addBodyPart(createTextBodyPart(toArray(plainText, plainText), charset, false, false, type), 0);
                     }
                 } else {
                     /*-
@@ -834,7 +898,30 @@ public class MimeMessageFiller {
                      * Add referenced parts from ONE referenced mail
                      */
                     for (int i = 0; i < size; i++) {
-                        addMessageBodyPart(primaryMultipart, mail.getEnclosedMailPart(i), false);
+                        if (null == contentIds) {
+                            final MailPart mailPart = mail.getEnclosedMailPart(i);
+                            if (mailPart.getContentType().startsWith("image/")) {
+                                if (null == mailPart.getContentId()) {
+                                    // A regular file-attachment image
+                                    addMessageBodyPart(primaryMultipart, mailPart, false);
+                                }
+                            } else {
+                                addMessageBodyPart(primaryMultipart, mailPart, false);
+                            }
+                        } else {
+                            final MailPart mailPart = mail.getEnclosedMailPart(i);
+                            boolean add = true;
+                            if (mailPart.getContentType().startsWith("image/")) {
+                                final String contentId = mailPart.getContentId();
+                                if (null != contentId /*&& contentIds.contains(contentId)*/) {
+                                    // Ignore
+                                    add = false;
+                                }
+                            }
+                            if (add) {
+                                addMessageBodyPart(primaryMultipart, mailPart, false);
+                            }
+                        }
                     }
                 }
             }
@@ -899,6 +986,12 @@ public class MimeMessageFiller {
              * Finally set multipart
              */
             if (primaryMultipart != null) {
+                if (1 == primaryMultipart.getCount()) {
+                    final Object cto = primaryMultipart.getBodyPart(0).getContent();
+                    if (cto instanceof Multipart) {
+                        primaryMultipart = (Multipart) cto;
+                    }
+                }
                 mimeMessage.setContent(primaryMultipart);
             }
             return;
@@ -941,9 +1034,9 @@ public class MimeMessageFiller {
                     if (text == null || text.length() == 0) {
                         mailText = "";
                     } else if (isHtml) {
-                        mailText = performLineFolding(htmlService.html2text(text, true), usm.getAutoLinebreak());
+                        mailText = ComposeType.NEW_SMS.equals(type) ? text : performLineFolding(htmlService.html2text(text, true), usm.getAutoLinebreak());
                     } else {
-                        mailText = performLineFolding(text, usm.getAutoLinebreak());
+                        mailText = ComposeType.NEW_SMS.equals(type) ? text : performLineFolding(text, usm.getAutoLinebreak());
                     }
                 } else {
                     mailText = htmlService.getConformHTML(content, mail.getContentType().getCharsetParameter());
@@ -1060,6 +1153,24 @@ public class MimeMessageFiller {
      * @throws MessagingException If a messaging error occurs
      */
     protected final Multipart createMultipartAlternative(final ComposedMailMessage mail, final String mailBody, final boolean embeddedImages, final Map<String, SourcedImage> images, final TextBodyMailPart textBodyPart) throws OXException, MessagingException {
+        return createMultipartAlternative(mail, mailBody, embeddedImages, images, textBodyPart, null);
+    }
+
+    /**
+     * Creates a "multipart/alternative" object.
+     *
+     * @param mail The source composed mail
+     * @param mailBody The composed mail's HTML content
+     * @param embeddedImages <code>true</code> if specified HTML content contains inline images (an appropriate "multipart/related" object
+     *            is going to be created ); otherwise <code>false</code>.
+     * @param images
+     * @param textBodyPart The text body part
+     * @param type The optional compose type
+     * @return An appropriate "multipart/alternative" object.
+     * @throws OXException If a mail error occurs
+     * @throws MessagingException If a messaging error occurs
+     */
+    protected final Multipart createMultipartAlternative(final ComposedMailMessage mail, final String mailBody, final boolean embeddedImages, final Map<String, SourcedImage> images, final TextBodyMailPart textBodyPart, final ComposeType type) throws OXException, MessagingException {
         /*
          * Create an "alternative" multipart
          */
@@ -1102,9 +1213,9 @@ public class MimeMessageFiller {
          */
         final String plainText = textBodyPart.getPlainText();
         if (null == plainText) {
-            alternativeMultipart.addBodyPart(createTextBodyPart(htmlContent, charset, true, true), 0);
+            alternativeMultipart.addBodyPart(createTextBodyPart(toArray(htmlContent, mailBody), charset, true, true, type), 0);
         } else {
-            alternativeMultipart.addBodyPart(createTextBodyPart(plainText, charset, true, false), 0);
+            alternativeMultipart.addBodyPart(createTextBodyPart(toArray(plainText, plainText), charset, true, false, type), 0);
         }
         return alternativeMultipart;
     }
@@ -1164,7 +1275,6 @@ public class MimeMessageFiller {
                     final Map.Entry<String, String> e = iter.next();
                     relatedImageBodyPart.setHeader(e.getKey(), e.getValue());
                 }
-
             } else {
                 final DataSource dataSource;
                 if ("base64".equalsIgnoreCase(image.getTransferEncoding())) {
@@ -1201,6 +1311,24 @@ public class MimeMessageFiller {
              */
             relatedMultipart.addBodyPart(relatedImageBodyPart);
         }
+        /*
+         * Remember Content-Ids
+         */
+        contentIds = new HashSet<String>(8);
+        final int count = relatedMultipart.getCount();
+        for (int i = 0; i < count; i++) {
+            final BodyPart bodyPart = relatedMultipart.getBodyPart(i);
+            String[] header = bodyPart.getHeader(MessageHeaders.HDR_CONTENT_TYPE);
+            if (null != header && 0 < header.length && header[0].toLowerCase(Locale.US).startsWith("image/")) {
+                header = bodyPart.getHeader(MessageHeaders.HDR_CONTENT_ID);
+                if (null != header && 0 < header.length) {
+                    contentIds.add(header[0]);   
+                }
+            }
+        }
+        /*
+         * Return multipart/related
+         */
         return relatedMultipart;
     }
 
@@ -1357,21 +1485,39 @@ public class MimeMessageFiller {
      * @return A body part of type <code>text/plain</code> from given HTML content
      * @throws MessagingException If a messaging error occurs
      */
-    protected final BodyPart createTextBodyPart(final String content, final String charset, final boolean appendHref, final boolean isHtml) throws MessagingException {
+//    protected final BodyPart createTextBodyPart(final String content, final String charset, final boolean appendHref, final boolean isHtml) throws MessagingException {
+//        return createTextBodyPart(content, charset, appendHref, isHtml, null);
+//    }
+
+    /**
+     * Creates a body part of type <code>text/plain</code> from given HTML content
+     *
+     * @param contents The contents array
+     * @param charset The character encoding
+     * @param appendHref <code>true</code> to append URLs contained in <i>href</i>s and <i>src</i>s; otherwise <code>false</code>
+     * @param isHtml Whether provided content is HTML or not
+     * @param type The compose type
+     * @return A body part of type <code>text/plain</code> from given HTML content
+     * @throws MessagingException If a messaging error occurs
+     */
+    protected final BodyPart createTextBodyPart(final String[] contents, final String charset, final boolean appendHref, final boolean isHtml, final ComposeType type) throws MessagingException {
         /*
-         * Convert html content to regular text. First: Create a body part for text content
+         * Convert HTML content to regular text. First: Create a body part for text content
          */
         final MimeBodyPart text = new MimeBodyPart();
         /*
          * Define text content
          */
         final String textContent;
-        if (content == null || content.length() == 0) {
-            textContent = "";
-        } else if (isHtml) {
-            textContent = performLineFolding(htmlService.html2text(content, appendHref), usm.getAutoLinebreak());
-        } else {
-            textContent = performLineFolding(content, usm.getAutoLinebreak());
+        {
+            final String content = contents[0];
+            if (content == null || content.length() == 0) {
+                textContent = "";
+            } else if (isHtml) {
+                textContent = ComposeType.NEW_SMS.equals(type) ? contents[1] : performLineFolding(htmlService.html2text(content, appendHref), usm.getAutoLinebreak());
+            } else {
+                textContent = ComposeType.NEW_SMS.equals(type) ? content : performLineFolding(content, usm.getAutoLinebreak());
+            }
         }
         text.setText(textContent, charset);
         // text.setText(performLineFolding(getConverter().convertWithQuotes(
@@ -1443,26 +1589,44 @@ public class MimeMessageFiller {
     }
 
     private static final Pattern PATTERN_SRC = Pattern.compile("<img[^>]*?src=\"([^\"]+)\"[^>]*/?>", Pattern.CASE_INSENSITIVE);
-
     private static final Pattern PATTERN_AMP = Pattern.compile(Pattern.quote("&amp;"));
 
+    private static String blankSrc(final String imageTag) {
+        if (isEmpty(imageTag)) {
+            return imageTag;
+        }
+        final Matcher srcMatcher = PATTERN_SRC.matcher(imageTag);
+        if (!srcMatcher.find()) {
+            return imageTag;
+        }
+        final StringBuffer sb = new StringBuffer(imageTag.length());
+        srcMatcher.appendReplacement(sb, "");
+        srcMatcher.appendTail(sb);
+        return sb.toString();
+    }
+
+    private static final String VERSION_NAME = Version.NAME;
+
     /**
-     * Processes referenced local images, inserts them as inlined html images and adds their binary data to parental instance of <code>
+     * Processes referenced local images, inserts them as inlined HTML images and adds their binary data to parental instance of <code>
      * {@link Multipart}</code>.
      *
-     * @param htmlContent The html content whose &lt;img&gt; tags must be replaced with real content IDs
+     * @param htmlContent The HTML content whose &lt;img&gt; tags must be replaced with real content IDs
      * @param mp The parental instance of <code>{@link Multipart}</code>
      * @param msgFiller The message filler
-     * @return the replaced html content
+     * @return The replaced HTML content
      * @throws MessagingException If appending as body part fails
      * @throws OXException If a mail error occurs
      */
     protected final static String processReferencedLocalImages(final String htmlContent, final Multipart mp, final MimeMessageFiller msgFiller) throws MessagingException, OXException {
-        final Matcher m = MimeMessageUtility.PATTERN_REF_IMG.matcher(htmlContent);
-        final MatcherReplacer mr = new MatcherReplacer(m, htmlContent);
-        final StringBuilder sb = new StringBuilder(htmlContent.length());
+        if (isEmpty(htmlContent)) {
+            return htmlContent;
+        }
+        final ImageMatcher m = ImageMatcher.matcher(htmlContent);
+        final StringBuffer sb = new StringBuffer(htmlContent.length());
         if (m.find()) {
-            final Set<String> uploadFileIDs = msgFiller.uploadFileIDs = new HashSet<String>();
+            final Set<String> uploadFileIDs = msgFiller.uploadFileIDs = new HashSet<String>(4);
+            final Set<String> trackedIds = new HashSet<String>(4);
             final ManagedFileManagement mfm = ServerServiceRegistry.getInstance().getService(ManagedFileManagement.class);
             final ConversionService conversionService = ServerServiceRegistry.getInstance().getService(ConversionService.class);
             final Session session = msgFiller.session;
@@ -1470,9 +1634,9 @@ public class MimeMessageFiller {
             do {
                 final String imageTag = m.group();
                 if (MimeMessageUtility.isValidImageUri(imageTag)) {
-                    final String id = m.group(5);
+                    final String id = m.getManagedFileId();
                     final ImageProvider imageProvider;
-                    if (mfm.contains(id)) {
+                    if (null != id && mfm.contains(id)) {
                         try {
                             imageProvider = new ManagedFileImageProvider(mfm.getByID(id));
                         } catch (final OXException e) {
@@ -1486,36 +1650,46 @@ public class MimeMessageFiller {
                              * Anyway, replace image tag
                              */
                             tmp.setLength(0);
-                            mr.appendLiteralReplacement(sb, imageTag);
+                            m.appendLiteralReplacement(sb, blankSrc(imageTag));
                             continue;
                         }
                     } else {
                         final ImageLocation imageLocation;
+                        String blankImageTag = null;
                         {
-                            final String match = imageTag;
-                            final Matcher srcMatcher = PATTERN_SRC.matcher(match);
+                            final Matcher srcMatcher = PATTERN_SRC.matcher(imageTag);
                             if (srcMatcher.find()) {
                                 ImageLocation il;
                                 try {
                                     il = ImageUtility.parseImageLocationFrom(PATTERN_AMP.matcher(srcMatcher.group(1)).replaceAll("&"));
                                 } catch (final IllegalArgumentException e) {
+                                    final StringBuffer bblankImageTag = new StringBuffer(imageTag.length());
+                                    srcMatcher.appendReplacement(bblankImageTag, "");
+                                    srcMatcher.appendTail(bblankImageTag);
+                                    blankImageTag = bblankImageTag.toString();
                                     il = null;
                                 }
                                 imageLocation = il;
                             } else {
-                                imageLocation = ImageUtility.parseImageLocationFrom(match);
+                                ImageLocation il;
+                                try {
+                                    il = ImageUtility.parseImageLocationFrom(imageTag);
+                                } catch (final IllegalArgumentException e) {
+                                    il = null;
+                                }
+                                imageLocation = il;
                             }
                         }
                         if (null == imageLocation) {
                             if (LOG.isWarnEnabled()) {
                                 tmp.setLength(0);
-                                LOG.warn(tmp.append("No image found with id \"").append(id).append("\". Referenced image is skipped.").toString());
+                                LOG.warn(tmp.append("No image found with id \"").append(m.getImageId()).append("\". Referenced image is skipped.").toString());
                             }
                             /*
                              * Anyway, replace image tag
                              */
                             tmp.setLength(0);
-                            mr.appendLiteralReplacement(sb, imageTag);
+                            m.appendLiteralReplacement(sb, null == blankImageTag ? blankSrc(imageTag) : blankImageTag);
                             continue;
                         }
                         final ImageDataSource dataSource =
@@ -1530,47 +1704,68 @@ public class MimeMessageFiller {
                              * Anyway, replace image tag
                              */
                             tmp.setLength(0);
-                            mr.appendLiteralReplacement(sb, imageTag);
+                            m.appendLiteralReplacement(sb, blankSrc(imageTag));
                             continue;
                         }
                         try {
                             imageProvider = new ImageDataImageProvider(dataSource, imageLocation, session);
                         } catch (final OXException e) {
-                            if (MailExceptionCode.IMAGE_ATTACHMENT_NOT_FOUND.equals(e)) {
+                            if (MailExceptionCode.IMAGE_ATTACHMENT_NOT_FOUND.equals(e) || MailExceptionCode.MAIL_NOT_FOUND.equals(e)) {
                                 tmp.setLength(0);
-                                mr.appendLiteralReplacement(sb, imageTag);
+                                m.appendLiteralReplacement(sb, imageTag);
                                 continue;
                             }
                             throw e;
                         }
                     }
-                    final boolean appendBodyPart;
-                    if (uploadFileIDs.contains(id)) {
-                        appendBodyPart = false;
+                    final String iid;
+                    if (null == id) {
+                        iid = urlDecode(m.getImageId());
                     } else {
                         /*
                          * Remember id to avoid duplicate attachment and for later cleanup
                          */
                         uploadFileIDs.add(id);
-                        appendBodyPart = true;
+                        iid = id;
                     }
-                    mr.appendLiteralReplacement(
-                        sb,
-                        imageTag.replaceFirst(
-                            "(?i)src=\"[^\"]*\"",
-                            "src=\"cid:" + processLocalImage(imageProvider, id, appendBodyPart, tmp, mp) + "\""));
-                    // mr.appendLiteralReplacement(sb, IMG_PAT.replaceFirst("#1#", processLocalImage(imageProvider, id, appendBodyPart, tmp,
-                    // mp)));
+                    final boolean appendBodyPart = trackedIds.add(iid);
+                    /*
+                     * Replace "src" attribute
+                     */
+                    String iTag = imageTag.replaceFirst("(?i)src=\"[^\"]*\"", "src=\"cid:" + processLocalImage(imageProvider, iid, appendBodyPart, tmp, mp) + "\"");
+                    iTag = iTag.replaceFirst("(?i)id=\"[^\"]*@" + VERSION_NAME + "\"", "");
+                    m.appendLiteralReplacement(sb, iTag);
                 } else {
                     /*
                      * Re-append as-is
                      */
-                    mr.appendLiteralReplacement(sb, imageTag);
+                    m.appendLiteralReplacement(sb, imageTag);
                 }
             } while (m.find());
         }
-        mr.appendTail(sb);
+        m.appendTail(sb);
         return sb.toString();
+    }
+
+    private static String urlDecode(final String s) {
+        try {
+            return URLDecoder.decode(replaceURLCodePoints(s), "ISO-8859-1");
+        } catch (final UnsupportedEncodingException e) {
+            return s;
+        }
+    }
+
+    private static final Pattern PATTERN_CODE_POINT = Pattern.compile("%u00([a-fA-F0-9]{2})");
+
+    private static String replaceURLCodePoints(final String s) {
+        final Matcher m = PATTERN_CODE_POINT.matcher(s);
+        final StringBuffer buffer = new StringBuffer(s.length());
+        while (m.find()) {
+            final char[] chars = Character.toChars(Integer.parseInt(m.group(1), 16));
+            m.appendReplacement(buffer, Matcher.quoteReplacement(new String(chars)));
+        }
+        m.appendTail(buffer);
+        return buffer.toString();
     }
 
     private static final Pattern PATTERN_DASHES = Pattern.compile("-+");
@@ -1617,30 +1812,51 @@ public class MimeMessageFiller {
         /*
          * ... and cid
          */
-        tmp.setLength(0);
-        tmp.append(PATTERN_DASHES.matcher(id).replaceAll("")).append('@').append(Version.NAME);
-        final String cid = tmp.toString();
-        if (appendBodyPart) {
-            /*
-             * Append body part
-             */
-            final MimeBodyPart imgBodyPart = new MimeBodyPart();
-            imgBodyPart.setDataHandler(new DataHandler(imageProvider.getDataSource()));
+        final String cid;
+        {
             tmp.setLength(0);
-            imgBodyPart.setContentID(tmp.append('<').append(cid).append('>').toString());
-            final ContentDisposition contentDisposition = new ContentDisposition(Part.INLINE);
-            if (fileName != null) {
-                contentDisposition.setFilenameParameter(fileName);
+            final int atPos = id.indexOf('@');
+            tmp.append(PATTERN_DASHES.matcher(atPos < 0 ? id : id.substring(0, atPos)).replaceAll(""));
+            tmp.append('@').append(VERSION_NAME);
+            cid = tmp.toString();
+        }
+        if (appendBodyPart) {
+            boolean found = false;
+            {
+                final Set<String> set = new HashSet<String>(2);
+                final int count = mp.getCount();
+                for (int i = 0; !found && i < count; i++) {
+                    final BodyPart bodyPart = mp.getBodyPart(i);
+                    final String[] header = bodyPart.getHeader(MessageHeaders.HDR_CONTENT_ID);
+                    if (null != header && 0 < header.length) {
+                        set.clear();
+                        set.addAll(Arrays.asList(header));
+                        found = set.contains(cid);
+                    }
+                }
             }
-            imgBodyPart.setHeader(
-                MessageHeaders.HDR_CONTENT_DISPOSITION,
-                MimeMessageUtility.foldContentDisposition(contentDisposition.toString()));
-            final ContentType ct = new ContentType(imageProvider.getContentType());
-            if (fileName != null && !ct.containsNameParameter()) {
-                ct.setNameParameter(fileName);
+            /*
+             * Append body part if not found
+             */
+            if (!found) {
+                final MimeBodyPart imgBodyPart = new MimeBodyPart();
+                imgBodyPart.setDataHandler(new DataHandler(imageProvider.getDataSource()));
+                tmp.setLength(0);
+                imgBodyPart.setContentID(tmp.append('<').append(cid).append('>').toString());
+                final ContentDisposition contentDisposition = new ContentDisposition(Part.INLINE);
+                if (fileName != null) {
+                    contentDisposition.setFilenameParameter(fileName);
+                }
+                imgBodyPart.setHeader(
+                    MessageHeaders.HDR_CONTENT_DISPOSITION,
+                    MimeMessageUtility.foldContentDisposition(contentDisposition.toString()));
+                final ContentType ct = new ContentType(imageProvider.getContentType());
+                if (fileName != null && !ct.containsNameParameter()) {
+                    ct.setNameParameter(fileName);
+                }
+                imgBodyPart.setHeader(MessageHeaders.HDR_CONTENT_TYPE, MimeMessageUtility.foldContentType(ct.toString()));
+                mp.addBodyPart(imgBodyPart);
             }
-            imgBodyPart.setHeader(MessageHeaders.HDR_CONTENT_TYPE, MimeMessageUtility.foldContentType(ct.toString()));
-            mp.addBodyPart(imgBodyPart);
         }
         return cid;
     }
@@ -1672,6 +1888,19 @@ public class MimeMessageFiller {
             }
         }
         return true;
+    }
+
+    private static String[] toArray(final String... contents) {
+        if (null == contents) {
+            return new String[0];
+        }
+        final int length = contents.length;
+        if (0 == length) {
+            return new String[0];
+        }
+        final String[] ret = new String[length];
+        System.arraycopy(contents, 0, ret, 0, length);
+        return ret;
     }
 
     private static interface ImageProvider {
@@ -1743,5 +1972,17 @@ public class MimeMessageFiller {
             return fileName;
         }
     } // End of ImageDataImageProvider
+
+    private static boolean isEmpty(final String string) {
+        if (null == string) {
+            return true;
+        }
+        final int len = string.length();
+        boolean isWhitespace = true;
+        for (int i = 0; isWhitespace && i < len; i++) {
+            isWhitespace = Character.isWhitespace(string.charAt(i));
+        }
+        return isWhitespace;
+    }
 
 }

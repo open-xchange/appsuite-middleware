@@ -62,7 +62,6 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import com.openexchange.ajax.PermissionServlet;
 import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.calendar.printing.blocks.CPFactory;
@@ -73,10 +72,18 @@ import com.openexchange.calendar.printing.blocks.WeekPartitioningStrategy;
 import com.openexchange.calendar.printing.blocks.WorkWeekPartitioningStrategy;
 import com.openexchange.calendar.printing.days.Day;
 import com.openexchange.calendar.printing.days.Partitioner;
+import com.openexchange.config.cascade.ConfigView;
+import com.openexchange.config.cascade.ConfigViewFactory;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
 import com.openexchange.groupware.calendar.CalendarCollectionService;
 import com.openexchange.groupware.container.Appointment;
+import com.openexchange.groupware.container.CalendarObject;
+import com.openexchange.groupware.container.DataObject;
+import com.openexchange.groupware.container.FolderChildObject;
 import com.openexchange.java.Strings;
+import com.openexchange.log.LogFactory;
+import com.openexchange.session.Session;
 import com.openexchange.templating.OXTemplate;
 import com.openexchange.templating.TemplateService;
 import com.openexchange.tools.iterator.SearchIterator;
@@ -106,6 +113,7 @@ public class CPServlet extends PermissionServlet {
     private static final String DAYS = "days";
 
     private static final String I18N = "i18n";
+    private static final String DOCUMENT_TITLE = "documentTitle";
 
     private static TemplateService templates = null;
 
@@ -170,10 +178,10 @@ public class CPServlet extends PermissionServlet {
             SearchIterator<Appointment> iterator;
             if (params.hasFolder()) {
                 iterator = appointmentSql.getAppointmentsBetweenInFolder(params.getFolder(), new int[] {
-                    Appointment.OBJECT_ID, Appointment.FOLDER_ID, Appointment.USERS }, params.getStart(), params.getEnd(), -1, null);
+                    DataObject.OBJECT_ID, FolderChildObject.FOLDER_ID, CalendarObject.USERS }, params.getStart(), params.getEnd(), -1, null);
             } else {
                 iterator = appointmentSql.getAppointmentsBetween(session.getUserId(), params.getStart(), params.getEnd(), new int[] {
-                    Appointment.OBJECT_ID, Appointment.FOLDER_ID, Appointment.USERS }, -1, null);
+                    DataObject.OBJECT_ID, FolderChildObject.FOLDER_ID, CalendarObject.USERS }, -1, null);
             }
             final List<Appointment> idList = SearchIteratorAdapter.toList(iterator);
 
@@ -210,6 +218,7 @@ public class CPServlet extends PermissionServlet {
             variables.put(DEBUG, debuggingItems);
             variables.put(DAYS, perDayList);
             variables.put(I18N, new I18n(I18nServices.getInstance().getService(locale)));
+            variables.put(DOCUMENT_TITLE, getDocumentTitle(session));
 
             for (final CPAppointment app : partitions.getAppointments()) {
                 debuggingItems.add(app.getTitle());
@@ -222,6 +231,24 @@ public class CPServlet extends PermissionServlet {
         } catch (final Throwable t) {
             writeException(resp, t);
         }
+    }
+
+    private String getDocumentTitle(Session session) {
+        ConfigViewFactory configViewFactory = CPServiceRegistry.getInstance().getService(ConfigViewFactory.class);
+        String retval = null;
+        if (null != configViewFactory) {
+            ConfigView configView;
+            try {
+                configView = configViewFactory.getView(session.getUserId(), session.getContextId());
+                retval = configView.get("ui/product/name", String.class);
+            } catch (OXException e) {
+                LOG.error(e.getMessage(), e);
+            }
+        }
+        if (null == retval) {
+            retval = "Open-Xchange";
+        }
+        return retval;
     }
 
     /**

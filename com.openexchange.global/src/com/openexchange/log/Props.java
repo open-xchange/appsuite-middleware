@@ -50,6 +50,8 @@
 package com.openexchange.log;
 
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import org.apache.commons.logging.Log;
 
 /**
  * {@link Props} - The log properties associated with a certain {@link Thread thread}.
@@ -57,6 +59,8 @@ import java.util.Map;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class Props {
+
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(Props.class);
 
     private final Map<String, Object> map;
 
@@ -68,6 +72,11 @@ public final class Props {
     protected Props(final Map<String, Object> map) {
         super();
         this.map = map;
+    }
+
+    @Override
+    public String toString() {
+        return map.toString();
     }
 
     /**
@@ -97,7 +106,12 @@ public final class Props {
      */
     @SuppressWarnings("unchecked")
     public <V> V get(final String name) {
-        return (V) map.get(name);
+        try {
+            return (V) map.get(name);
+        } catch (final ClassCastException e) {
+            LOG.warn("Type mismatch", e);
+            return null;
+        }
     }
 
     /**
@@ -105,9 +119,16 @@ public final class Props {
      * 
      * @param name The property name
      * @param value The property value
+     * @return <code>true</code> if there was already a mapping for specified property name (that is now overwritten); otherwise <code>false</code>
      */
-    public <V> void put(final String key, final V value) {
-        map.put(key, value);
+    public <V> boolean put(final String name, final V value) {
+        if (null == name) {
+            return false;
+        }
+        if (null == value) {
+            return (null != map.remove(name));
+        }
+        return (null != map.put(name, value));
     }
 
     /**
@@ -118,5 +139,14 @@ public final class Props {
     public void remove(final String name) {
         map.remove(name);
     }
+
+	/**
+	 * Creates a shallow copy of this log properties.
+	 * 
+	 * @return The shallow copy
+	 */
+	public Props copy() {
+		return new Props(new ConcurrentHashMap<String, Object>(map));
+	}
 
 }

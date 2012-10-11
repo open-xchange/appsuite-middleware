@@ -1,0 +1,20 @@
+Source: open-xchange-authentication-kerberos
+Section: web
+Priority: optional
+Maintainer: Marcus Klein <marcus.klein@open-xchange.com>
+Build-Depends: debhelper (>= 4.0.0), ant (>= 1.7.0), ant-optional (>= 1.7.0), sun-java6-jdk|java6-sdk, open-xchange-core (>= @OXVERSION@)
+Standards-Version: 3.8.4
+Homepage: http://www.open-xchange.com
+
+Package: open-xchange-authentication-kerberos
+Architecture: all
+Pre-Depends: open-xchange-core (>= @OXVERSION@)
+Depends: ${misc:Depends}
+Conflicts: open-xchange-authentication-database, open-xchange-authentication-ldap, open-xchange-authentication-imap
+Provides: open-xchange-authentication
+Description: Module for authenticating users in a Kerberos domain
+ This package installs the OSGi bundle implementing the OSGi AuthenticationService for the backend. The implementation uses the Kerberos
+ domain controller (KDC) of the domain to authenticate login requests. Additionally this implementation is able to verify the service ticket
+ sent by the browser from the desktop login.
+ This authentication module is mutually exclusive with any other authentication module. Only one authentication module can be installed on
+ the backend.

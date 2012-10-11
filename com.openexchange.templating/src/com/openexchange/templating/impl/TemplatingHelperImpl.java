@@ -65,21 +65,24 @@ import com.openexchange.templating.TemplatingHelper;
  */
 public class TemplatingHelperImpl implements TemplatingHelper {
 
-    private Object rootObject;
-    private Session session;
-    private TemplateServiceImpl templateService;
+    private final Object rootObject;
+    private final Session session;
+    private final TemplateServiceImpl templateService;
+    private final boolean createCopy;
 
-    public TemplatingHelperImpl(Object rootObject, Session session, TemplateServiceImpl templateServiceImpl) {
+    public TemplatingHelperImpl(Object rootObject, Session session, TemplateServiceImpl templateServiceImpl, boolean createCopy) {
         super();
         this.rootObject = rootObject;
         this.session = session;
         this.templateService = templateServiceImpl;
+        this.createCopy = createCopy;
     }
 
+    @Override
     public String include(String templateName) throws OXException {
         OXTemplate template = null;
         if (session != null) {
-            template = templateService.loadTemplate(templateName, templateName, session);
+            template = templateService.loadTemplate(templateName, templateName, session, createCopy);
         } else {
             template = templateService.loadTemplate(templateName);
         }

@@ -60,6 +60,7 @@ import com.openexchange.ajp13.AJPv13CPingRequest;
 import com.openexchange.ajp13.AJPv13Config;
 import com.openexchange.ajp13.AJPv13Connection;
 import com.openexchange.ajp13.AJPv13ForwardRequest;
+import com.openexchange.ajp13.AJPv13Request;
 import com.openexchange.ajp13.AJPv13RequestBody;
 import com.openexchange.ajp13.AJPv13RequestHandler;
 import com.openexchange.ajp13.AJPv13Response;
@@ -68,7 +69,6 @@ import com.openexchange.ajp13.AJPv13ServletOutputStream;
 import com.openexchange.ajp13.AJPv13Utility;
 import com.openexchange.ajp13.BlockableBufferedInputStream;
 import com.openexchange.ajp13.BlockableBufferedOutputStream;
-import com.openexchange.ajp13.AJPv13Request;
 import com.openexchange.ajp13.exception.AJPv13Exception;
 import com.openexchange.ajp13.exception.AJPv13Exception.AJPCode;
 import com.openexchange.ajp13.exception.AJPv13TimeoutException;
@@ -99,7 +99,7 @@ public final class AJPv13RequestHandlerImpl implements AJPv13RequestHandler {
 
     private static final byte[] EMPTY_BYTES = new byte[0];
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(AJPv13RequestHandlerImpl.class));
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(AJPv13RequestHandlerImpl.class));
 
     private HttpServlet servlet;
 
@@ -515,7 +515,7 @@ public final class AJPv13RequestHandlerImpl implements AJPv13RequestHandler {
             }
             HttpServlet servlet = HttpServletManager.getServlet(path, servletId);
             if (servlet == null) {
-                servlet = new HttpErrorServlet("No servlet bound to path/alias: " + requestURI);
+                servlet = new HttpErrorServlet("No servlet bound to path/alias: " + AJPv13Utility.urlEncode(requestURI));
             }
             this.servlet = servlet;
             // servletId = pathStorage.length() > 0 ? pathStorage.toString() : null;

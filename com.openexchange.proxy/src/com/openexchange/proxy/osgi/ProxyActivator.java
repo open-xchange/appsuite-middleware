@@ -60,7 +60,7 @@ public class ProxyActivator extends HousekeepingActivator {
 
 	@Override
     public void startBundle() throws Exception {
-	    final org.apache.commons.logging.Log log = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(ProxyActivator.class));
+	    final org.apache.commons.logging.Log log = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(ProxyActivator.class));
         try {
             if (log.isInfoEnabled()) {
                 log.info("starting bundle: com.openexchange.proxy");
@@ -73,7 +73,7 @@ public class ProxyActivator extends HousekeepingActivator {
 
 	@Override
     public void stopBundle() throws Exception {
-	    final org.apache.commons.logging.Log log = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(ProxyActivator.class));
+	    final org.apache.commons.logging.Log log = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(ProxyActivator.class));
         try {
             if (log.isInfoEnabled()) {
                 log.info("stopping bundle: com.openexchange.proxy");

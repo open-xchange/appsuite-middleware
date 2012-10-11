@@ -1,5 +1,7 @@
 package com.openexchange.groupware.importexport;
 
+import com.openexchange.importexport.formats.Format;
+
 
 public class ConversionPath {
 	private final String folder;

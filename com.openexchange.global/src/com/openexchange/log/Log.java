@@ -71,13 +71,23 @@ public final class Log implements org.apache.commons.logging.Log {
     }
 
     /**
+     * Gets the appropriate {@link org.apache.commons.logging.Log logger} for specified class.
+     * 
+     * @param clazz The class
+     * @return The logger.
+     */
+    public static org.apache.commons.logging.Log loggerFor(final Class<?> clazz) {
+        return valueOf(com.openexchange.log.LogFactory.getLog(clazz));
+    }
+
+    /**
      * Gets the appropriate {@link com.openexchange.log.Log} for specified {@link org.apache.commons.logging.Log} instance.
      *
      * @param log The {@link org.apache.commons.logging.Log} instance
      * @return The appropriate instance
      */
     public static org.apache.commons.logging.Log valueOf(final org.apache.commons.logging.Log log) {
-        if (log instanceof Log) {
+        if ((log instanceof Log) || (log instanceof PropertiesAppendingLogWrapper)) {
             return log;
         }
         return new Log(log);

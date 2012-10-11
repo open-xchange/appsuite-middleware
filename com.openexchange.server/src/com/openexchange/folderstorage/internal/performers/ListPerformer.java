@@ -64,7 +64,7 @@ import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CompletionService;
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import com.openexchange.log.LogFactory;
 import com.openexchange.concurrent.CallerRunsCompletionService;
 import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
@@ -185,6 +185,9 @@ public final class ListPerformer extends AbstractUserizedFolderPerformer {
         }
         try {
             final UserizedFolder[] ret = doList(treeId, parentId, all, openedStorages, checkOnly);
+            for (final UserizedFolder userizedFolder : ret) {
+                userizedFolder.setParentID(parentId);
+            }
             /*
              * Commit
              */

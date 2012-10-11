@@ -102,7 +102,7 @@ public final class MessagingFolderType implements FolderType {
         try {
             pfi = new MessagingFolderIdentifier(folderId);
         } catch (final OXException e) {
-            // com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(MessagingFolderType.class)).warn(e.getMessage(), e);
+            // com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(MessagingFolderType.class)).warn(e.getMessage(), e);
             return false;
         }
         /*

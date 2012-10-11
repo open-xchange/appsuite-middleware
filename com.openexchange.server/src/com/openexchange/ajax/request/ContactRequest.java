@@ -58,7 +58,7 @@ import java.util.List;
 import java.util.TimeZone;
 import java.util.UUID;
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import com.openexchange.log.LogFactory;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -613,10 +613,7 @@ public class ContactRequest {
         }
 
         final int leftHandLimit = DataParser.parseInt(jsonObj, AJAXServlet.LEFT_HAND_LIMIT);
-        int rightHandLimit = DataParser.parseInt(jsonObj, AJAXServlet.RIGHT_HAND_LIMIT);
-        if (rightHandLimit == 0) {
-            rightHandLimit = 50000;
-        }
+        final int rightHandLimit = DataParser.parseInt(jsonObj, AJAXServlet.RIGHT_HAND_LIMIT);
 
         timestamp = new Date(0);
 
@@ -658,7 +655,7 @@ public class ContactRequest {
     private int[] removeVirtual(final int[] columns) {
         final TIntList helper = new TIntArrayList(columns.length);
         for (final int col : columns) {
-            if (col == Contact.LAST_MODIFIED_UTC) {
+            if (col == DataObject.LAST_MODIFIED_UTC) {
                 // SKIP
             } else if (col == Contact.IMAGE1_URL) {
                 helper.add(Contact.IMAGE1);

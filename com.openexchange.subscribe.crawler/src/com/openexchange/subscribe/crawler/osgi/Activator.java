@@ -56,7 +56,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Stack;
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import com.openexchange.log.LogFactory;
 import org.ho.yaml.Yaml;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
@@ -83,7 +83,7 @@ public class Activator implements BundleActivator {
 
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(Activator.class));
 
-    public static final String PATH_PROPERTY = "com.openexchange.subscribe.crawler.path";
+    public static final String DIR_NAME_PROPERTY = "com.openexchange.subscribe.crawler.path";
 
     public static final String UPDATE_INTERVAL = "com.openexchange.subscribe.crawler.updateinterval";
 
@@ -134,12 +134,12 @@ public class Activator implements BundleActivator {
 
     public ArrayList<CrawlerDescription> getCrawlersFromFilesystem(final ConfigurationService config) {
         final ArrayList<CrawlerDescription> crawlers = new ArrayList<CrawlerDescription>();
-        final String path = config.getProperty(PATH_PROPERTY);
-        if (path == null) {
-            LOG.warn(PATH_PROPERTY + " not set. Skipping crawler initialisation");
+        String dirName = config.getProperty(DIR_NAME_PROPERTY);
+        File directory = config.getDirectory(dirName);
+        if (directory == null) {
+            LOG.warn(DIR_NAME_PROPERTY + " not set or crawler configuration directory not found. Skipping crawler initialisation");
             return crawlers;
         }
-        final File directory = new File(path);
         final File[] files = directory.listFiles();
         if (files == null) {
             LOG.warn("Could not find crawler descriptions in " + directory + ". Skipping crawler initialisation.");
@@ -149,7 +149,7 @@ public class Activator implements BundleActivator {
         for (final File file : files) {
             try {
                 if (file.isFile() && file.getPath().endsWith(".yml")) {
-                    crawlers.add((CrawlerDescription) Yaml.load(file));
+                    crawlers.add(Yaml.loadType(file, CrawlerDescription.class));
                 }
             } catch (final FileNotFoundException e) {
                 // Should not appear because file existence is checked before.
@@ -159,15 +159,15 @@ public class Activator implements BundleActivator {
     }
 
     public boolean removeCrawlerFromFilesystem(final ConfigurationService config, final String crawlerIdToDelete) {
-        final String path = config.getProperty(PATH_PROPERTY);
-        if (path != null) {
-            final File directory = new File(path);
+        final String dirName = config.getProperty(DIR_NAME_PROPERTY);
+        if (dirName != null) {
+            final File directory = config.getDirectory(dirName);
             final File[] files = directory.listFiles();
             if (files != null) {
                 for (final File file : files) {
                     try {
                         if (file.isFile() && file.getPath().endsWith(".yml")) {
-                            final CrawlerDescription crawler = (CrawlerDescription) Yaml.load(file);
+                            final CrawlerDescription crawler = Yaml.loadType(file, CrawlerDescription.class);
                             if (crawler.getId().equals(crawlerIdToDelete)) {
                                 return file.delete();
                             }

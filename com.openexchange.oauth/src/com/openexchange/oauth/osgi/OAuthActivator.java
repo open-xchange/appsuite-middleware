@@ -49,26 +49,34 @@
 
 package com.openexchange.oauth.osgi;
 
+import org.osgi.framework.ServiceReference;
 import org.osgi.service.event.EventAdmin;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.context.ContextService;
 import com.openexchange.crypto.CryptoService;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.database.provider.DBProvider;
+import com.openexchange.http.client.builder.HTTPResponseProcessor;
+import com.openexchange.http.deferrer.CustomRedirectURLDetermination;
 import com.openexchange.id.IDGeneratorService;
 import com.openexchange.oauth.OAuthAccountDeleteListener;
 import com.openexchange.oauth.OAuthAccountInvalidationListener;
+import com.openexchange.oauth.OAuthHTTPClientFactory;
 import com.openexchange.oauth.OAuthService;
 import com.openexchange.oauth.OAuthServiceMetaDataRegistry;
+import com.openexchange.oauth.httpclient.impl.scribe.ScribeHTTPClientFactoryImpl;
+import com.openexchange.oauth.internal.CallbackRegistry;
 import com.openexchange.oauth.internal.DeleteListenerRegistry;
 import com.openexchange.oauth.internal.InvalidationListenerRegistry;
 import com.openexchange.oauth.internal.OAuthServiceImpl;
 import com.openexchange.oauth.services.ServiceRegistry;
 import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.osgi.SimpleRegistryListener;
 import com.openexchange.secret.SecretEncryptionFactoryService;
 import com.openexchange.secret.recovery.EncryptedItemDetectorService;
 import com.openexchange.secret.recovery.SecretMigrator;
 import com.openexchange.sessiond.SessiondService;
+import com.openexchange.timer.TimerService;
 import com.openexchange.tools.session.SessionHolder;
 
 /**
@@ -91,12 +99,12 @@ public final class OAuthActivator extends HousekeepingActivator {
     protected Class<?>[] getNeededServices() {
         return new Class<?>[] {
             DatabaseService.class, SessiondService.class, EventAdmin.class, SecretEncryptionFactoryService.class, SessionHolder.class,
-            CryptoService.class, ConfigViewFactory.class };
+            CryptoService.class, ConfigViewFactory.class, TimerService.class };
     }
 
     @Override
     protected void handleAvailability(final Class<?> clazz) {
-        final org.apache.commons.logging.Log logger = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(OAuthActivator.class));
+        final org.apache.commons.logging.Log logger = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(OAuthActivator.class));
         if (logger.isInfoEnabled()) {
             logger.info("Re-available service: " + clazz.getName());
         }
@@ -105,7 +113,7 @@ public final class OAuthActivator extends HousekeepingActivator {
 
     @Override
     protected void handleUnavailability(final Class<?> clazz) {
-        final org.apache.commons.logging.Log logger = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(OAuthActivator.class));
+        final org.apache.commons.logging.Log logger = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(OAuthActivator.class));
         if (logger.isWarnEnabled()) {
             logger.warn("Absent service: " + clazz.getName());
         }
@@ -114,7 +122,7 @@ public final class OAuthActivator extends HousekeepingActivator {
 
     @Override
     public void startBundle() throws Exception {
-        final org.apache.commons.logging.Log log = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(OAuthActivator.class));
+        final org.apache.commons.logging.Log log = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(OAuthActivator.class));
         try {
             if (log.isInfoEnabled()) {
                 log.info("starting bundle: com.openexchange.oauth");
@@ -150,6 +158,9 @@ public final class OAuthActivator extends HousekeepingActivator {
             /*
              * Register
              */
+            CallbackRegistry cbRegistry = new CallbackRegistry();
+            getService(TimerService.class).scheduleAtFixedRate(cbRegistry, 600000, 600000);
+            
             delegateServices = new OSGiDelegateServiceMap();
             delegateServices.put(DBProvider.class, new OSGiDatabaseServiceDBProvider().start(context));
             delegateServices.put(ContextService.class, new OSGiContextService().start(context));
@@ -160,11 +171,35 @@ public final class OAuthActivator extends HousekeepingActivator {
                 delegateServices.get(DBProvider.class),
                 delegateServices.get(IDGeneratorService.class),
                 registry,
-                delegateServices.get(ContextService.class));
+                delegateServices.get(ContextService.class),
+                cbRegistry);
+            
+            registerService(CustomRedirectURLDetermination.class, cbRegistry);
             registerService(OAuthService.class, oauthService, null);
             registerService(OAuthServiceMetaDataRegistry.class, registry, null);
             registerService(EncryptedItemDetectorService.class, oauthService, null);
             registerService(SecretMigrator.class, oauthService, null);
+            
+            final ScribeHTTPClientFactoryImpl oauthFactory = new ScribeHTTPClientFactoryImpl();
+			registerService(OAuthHTTPClientFactory.class, oauthFactory);
+			
+			SimpleRegistryListener<HTTPResponseProcessor> listener = new SimpleRegistryListener<HTTPResponseProcessor>() {
+
+				@Override
+                public void added(ServiceReference<HTTPResponseProcessor> ref,
+						HTTPResponseProcessor service) {
+					oauthFactory.registerProcessor(service);
+				}
+
+				@Override
+                public void removed(ServiceReference<HTTPResponseProcessor> ref,
+						HTTPResponseProcessor service) {
+					oauthFactory.forgetProcessor(service);
+				}
+
+
+			};
+			track(HTTPResponseProcessor.class, listener );
 
         } catch (final Exception e) {
             log.error("Starting bundle \"com.openexchange.oauth\" failed.", e);
@@ -174,7 +209,7 @@ public final class OAuthActivator extends HousekeepingActivator {
 
     @Override
     public void stopBundle() throws Exception {
-        final org.apache.commons.logging.Log log = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(OAuthActivator.class));
+        final org.apache.commons.logging.Log log = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(OAuthActivator.class));
         try {
             if (log.isInfoEnabled()) {
                 log.info("stopping bundle: com.openexchange.oauth");

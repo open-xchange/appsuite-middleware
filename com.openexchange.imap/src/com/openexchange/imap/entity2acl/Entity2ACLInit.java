@@ -64,7 +64,7 @@ public final class Entity2ACLInit implements Initialization {
 
     private static final Entity2ACLInit instance = new Entity2ACLInit();
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(Entity2ACLInit.class));
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(Entity2ACLInit.class));
 
     /**
      * @return The singleton instance of {@link Entity2ACLInit}

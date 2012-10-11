@@ -49,6 +49,8 @@
 
 package com.openexchange.folderstorage;
 
+import java.io.Serializable;
+
 /**
  * {@link FolderField} - A pair of a field and its name.
  * <p>
@@ -56,7 +58,9 @@ package com.openexchange.folderstorage;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class FolderField {
+public final class FolderField implements Serializable {
+
+    private static final long serialVersionUID = 3017091379073715144L;
 
     private final int field;
 

@@ -6,14 +6,14 @@
  * 
  */
 
-$SOAPHOST = "cc-server-apache.netline.de";
+$SOAPHOST = "localhost";
 
 $OXMASTER_ADMIN = "oxadminmaster";
-$OXMASTER_ADMIN_PASS = "netline";
+$OXMASTER_ADMIN_PASS = "admin_master_password";
 
-$CONTEXT_ID = 1;
+$CONTEXT_ID = 2;
 $CONTEXT_ADMIN = "oxadmin";
-$CONTEXT_ADMIN_PASS = "secret";
+$CONTEXT_ADMIN_PASS = "admin_password";
 
 class Credentials {
 	var $login;
@@ -101,7 +101,6 @@ class User {
 	var $fax_business;
 	var $fax_home;
 	var $fax_other;
-	var $gUI_Spam_filter_capabilities_enabled;
 	var $given_name;
 	var $guiPreference;
 	var $id;
@@ -142,7 +141,7 @@ class User {
 	var $smtpPort;
 	var $smtpSchema;
 	var $smtpServer;
-	var $spam_filter_enabled;
+	var $gui_spam_filter_enabled;
 	var $spouse_name;
 	var $state_business;
 	var $state_home;
@@ -307,21 +306,20 @@ function getCredentialsObject($user, $password) {
 function getContextObject($context_id){
 	$ctx = new Context();
 	$ctx->id = $context_id;
-	$ctx->idset = true;
 	return $ctx;
 }
 
 function getUserObject($user_id){
 	$usr = new User();
 	$usr->id = $user_id;
-	$usr->idset = true;
 	return $usr;
 }
 
 
 // some error handling functions
 function handleSoapFault($SoapFault) {
-	printf($SoapFault->faultstring . "\n");
+	printf("faultcode: "       . $SoapFault->faultcode . "\n");
+	printf("faultstring: " . $SoapFault->faultstring . "\n");
 }
 
 function handleExcepion($SoapException) {
@@ -399,8 +397,8 @@ function getFullUserObject($name, $random_id) {
 	$user->email1 = $name . "@context" . $random_id . ".org";
 	$user->primaryEmail = $name . "@context" . $random_id . ".org";
 	//$user->aliases = $name . "@context" . $random_id . ".org";
-	$user->anniversary = "1337-02-02T00:00:00.00Z";	
-	$user->birthday = "1337-02-02T00:00:00.00Z";
+	$user->anniversary = "2007-02-02T00:00:00.00Z";	
+	$user->birthday = "2007-02-02T00:00:00.00Z";
 	$user->assistant_name = $name." assistant name";
 	$user->branches = $name."_branches";
 	$user->business_category = $name."_business_category";
@@ -430,10 +428,9 @@ function getFullUserObject($name, $random_id) {
 	$user->fax_business = $name."_fax_business";
 	$user->fax_home = $name."_fax_home";
 	$user->fax_other = $name."_fax_other";
-	$user->gUI_Spam_filter_capabilities_enabled = "false";
 	
 	$user->imapLogin = $name."_imapLogin";
-	$user->imapServer = "imaps://".$name."_imapserver:993";
+	$user->imapServer = "imaps://".$name."Imapserver:993";
 	
 	$user->info = $name."_info";
 	$user->instant_messenger1 = $name."_instant_messenger1";
@@ -461,9 +458,9 @@ function getFullUserObject($name, $random_id) {
 	$user->room_number = $name."_room_number";
 	$user->sales_volume = $name."_sales_volume";	
 	
-	$user->smtpServer = "smtps://".$name."_smtpServer:583";
+	$user->smtpServer = "smtps://".$name."SmtpServer:583";
 	
-	$user->spam_filter_enabled = true;
+	$user->gui_spam_filter_enabled = true;
 	$user->spouse_name = $name."_spouse_name";
 	$user->state_business = $name."_state_business";
 	$user->state_home = $name."_state_home";
@@ -532,9 +529,18 @@ function modifyUserData($user,$changed_suffix){
 	$user->given_name = $user->given_name.$changed_suffix;
 	$user->sur_name = $user->sur_name.$changed_suffix;
 	$user->password = $user->password.$changed_suffix;
+	if (!is_array($user->aliases)) {
+	    $user->aliases = array();
+	}
+	array_push($user->aliases, $user->primaryEmail);
+	$key = 'aliases';
+    for ($i = 0; $i < count($user->aliases); $i++) {
+        $user->$key = $changed_suffix.$user->aliases[$i];
+        $key .= ' ';
+    }
 	$user->email1 = $changed_suffix.$user->email1;
-	$user->primaryEmail = $changed_suffix.$user->primaryEmail;	
-	$user->anniversary = "1981-02-02T00:00:00.00Z";	
+	$user->primaryEmail = $changed_suffix.$user->primaryEmail;
+	$user->anniversary = "1981-02-02T00:00:00.00Z";
 	$user->birthday = "1981-02-02T00:00:00.00Z";
 	$user->assistant_name = $changed_suffix.$user->assistant_name;
 	$user->branches = $changed_suffix.$user->branches;
@@ -559,11 +565,11 @@ function modifyUserData($user,$changed_suffix){
 	$user->fax_business = $user->fax_business.$changed_suffix;
 	$user->fax_home = $user->fax_home.$changed_suffix;
 	$user->fax_other = $user->fax_other.$changed_suffix;
-	$user->gUI_Spam_filter_capabilities_enabled = "true";
-	
+	$user->gui_spam_filter_enabled = "true";
+
 	$user->imapLogin = $user->imapLogin.$changed_suffix;
-	$user->imapServer = $user->imapServer.$changed_suffix;
-	
+	$user->imapServer = "imaps://".$user->imapServer.$changed_suffix.":993";
+
 	$user->info = $user->info.$changed_suffix;
 	$user->instant_messenger1 = $user->instant_messenger1.$changed_suffix;
 	$user->instant_messenger2 = $user->instant_messenger2.$changed_suffix;
@@ -589,10 +595,9 @@ function modifyUserData($user,$changed_suffix){
 	$user->profession = $user->profession.$changed_suffix;
 	$user->room_number = $user->room_number.$changed_suffix;
 	$user->sales_volume = $user->sales_volume.$changed_suffix;	
-	
-	$user->smtpServer = $user->smtpServer.$changed_suffix;
-	
-	$user->spam_filter_enabled = false;
+
+	$user->smtpServer = "smtps://".$user->smtpServer.$changed_suffix.":583";
+
 	$user->spouse_name = $user->spouse_name.$changed_suffix;
 	$user->state_business = $user->state_business.$changed_suffix;
 	$user->state_home = $user->state_home.$changed_suffix;

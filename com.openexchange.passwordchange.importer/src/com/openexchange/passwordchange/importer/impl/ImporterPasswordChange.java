@@ -68,7 +68,7 @@ import com.openexchange.tools.sql.DBUtils;
  */
 public final class ImporterPasswordChange extends PasswordChangeService {
 
-    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(ImporterPasswordChange.class);
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.LogFactory.getLog(ImporterPasswordChange.class);
 
     /**
      * Initializes a new {@link ImporterPasswordChange}

@@ -112,8 +112,8 @@ readProp() {
     fi
 }
 
-CACHECCF=$OXPREFIX/etc/groupware/cache.ccf
-SESSIONCACHECCF=$OXPREFIX/etc/groupware/sessioncache.ccf
+CACHECCF=$OXPREFIX/etc/cache.ccf
+SESSIONCACHECCF=$OXPREFIX/etc/sessioncache.ccf
 
 
 
@@ -159,16 +159,16 @@ if [ -n "$SESSIONLPORT" ] && [ -n "$SERVERLPORT" ] && \
       echo
 fi
 
-ADMINCACHECCF=$OXPREFIX/etc/admindaemon/cache.ccf
-ADMINSYSTEMPROPS=$OXPREFIX/etc/admindaemon/system.properties
+ADMINCACHECCF=$OXPREFIX/etc/cache.ccf
+ADMINSYSTEMPROPS=$OXPREFIX/etc/system.properties
 
 if [ -s $ADMINSYSTEMPROPS ]; then
     ADMINCACHECCFPATH=$(readProp com.openexchange.caching.configfile $ADMINSYSTEMPROPS)
     if [ -z "$ADMINCACHECCFPATH" ] || \
-	[ "$ADMINCACHECCFPATH" != "etc/admindaemon/cache.ccf" ]; then
+	[ "$ADMINCACHECCFPATH" != "cache.ccf" ]; then
 	warn "com.openexchange.caching.configfile in $ADMINSYSTEMPROPS is either empty"
 	warn "or contains the wrong path."
-	warn "correct path must be etc/admindaemon/cache.ccf"
+	warn "correct path must be cache.ccf"
     fi
 fi
 
@@ -195,16 +195,6 @@ if [ -s $ADMINCACHECCF ]; then
 	[ "$SESSIONLPORT" == "$ADMINLPORT" ]; then
 	warn "TcpListenerPort in"
 	warn "$SESSIONCACHECCF is configured to use the same port as"
-	warn "TcpListenerPort in"
-	warn "$ADMINCACHECCF"
-	warn "that will not work, please choose different ports"
-	echo
-	echo
-    fi
-
-    if [ -n "$SERVERLPORT" ] && [ -n "$ADMINLPORT" ] && [ "$SERVERLPORT" == "$ADMINLPORT" ]; then
-	warn "TcpListenerPort in"
-	warn "$CACHECCF is configured to use the same port as"
 	warn "TcpListenerPort in"
 	warn "$ADMINCACHECCF"
 	warn "that will not work, please choose different ports"

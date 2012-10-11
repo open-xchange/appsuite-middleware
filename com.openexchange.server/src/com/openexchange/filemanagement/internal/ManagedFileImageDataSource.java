@@ -52,6 +52,7 @@ package com.openexchange.filemanagement.internal;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
+import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.conversion.Data;
 import com.openexchange.conversion.DataArguments;
 import com.openexchange.conversion.DataExceptionCodes;
@@ -136,6 +137,11 @@ public final class ManagedFileImageDataSource implements ImageDataSource {
     @Override
     public ImageLocation parseUrl(final String url) {
         return ImageUtility.parseImageLocationFrom(url);
+    }
+
+    @Override
+    public ImageLocation parseRequest(AJAXRequestData requestData) {
+        return ImageUtility.parseImageLocationFrom(requestData);
     }
 
     @Override

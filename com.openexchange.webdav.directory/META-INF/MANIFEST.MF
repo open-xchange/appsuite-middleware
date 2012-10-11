@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Directory Plug-in
 Bundle-SymbolicName: com.openexchange.webdav.directory
-Bundle-Version: 6.21.0
+Bundle-Version: 6.22.0
 Bundle-Activator: com.openexchange.webdav.directory.osgi.DAVDirectoryActivator
 Bundle-Vendor: OPENEXCHANGE
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
@@ -12,6 +12,7 @@ Import-Package: com.openexchange.authentication,
  com.openexchange.groupware.contexts,
  com.openexchange.groupware.contexts.impl,
  com.openexchange.groupware.ldap,
+ com.openexchange.log,
  com.openexchange.login,
  com.openexchange.login.internal,
  com.openexchange.osgi,

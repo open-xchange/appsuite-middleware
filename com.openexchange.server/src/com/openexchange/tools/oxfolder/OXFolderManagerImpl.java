@@ -70,6 +70,7 @@ import com.openexchange.ajax.fields.FolderFields;
 import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.cache.impl.FolderCacheManager;
 import com.openexchange.cache.impl.FolderQueryCacheManager;
+import com.openexchange.contact.ContactService;
 import com.openexchange.database.provider.DBPoolProvider;
 import com.openexchange.database.provider.StaticDBPoolProvider;
 import com.openexchange.event.impl.EventClient;
@@ -115,7 +116,7 @@ import com.openexchange.tools.sql.DBUtils;
  */
 final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionConstants {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(OXFolderManagerImpl.class));
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(OXFolderManagerImpl.class));
 
     /**
      * No options.
@@ -244,6 +245,8 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
         }
         if (!folderObj.containsType()) {
             throw OXFolderExceptionCode.MISSING_FOLDER_ATTRIBUTE.create(FolderFields.TYPE, "", Integer.valueOf(ctx.getContextId()));
+        } else if (FolderObject.SYSTEM_INFOSTORE_FOLDER_ID == folderObj.getParentFolderID()) {
+            folderObj.setType(FolderObject.PUBLIC);
         }
         if (folderObj.getPermissions() == null || folderObj.getPermissions().size() == 0) {
             throw OXFolderExceptionCode.MISSING_FOLDER_ATTRIBUTE.create(FolderFields.PERMISSIONS,
@@ -1276,24 +1279,28 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
 
     @Override
     public FolderObject deleteFolder(final FolderObject fo, final boolean checkPermissions, final long lastModified) throws OXException {
-        if (fo.getObjectID() <= 0) {
+        final int folderId = fo.getObjectID();
+        if (folderId <= 0) {
             throw OXFolderExceptionCode.INVALID_OBJECT_ID.create(OXFolderUtility.getFolderName(fo));
         }
-        if (fo.getObjectID() < FolderObject.MIN_FOLDER_ID) {
+        if (folderId < FolderObject.MIN_FOLDER_ID) {
             throw OXFolderExceptionCode.NO_SYSTEM_FOLDER_MOVE.create(OXFolderUtility.getFolderName(fo), Integer.valueOf(ctx.getContextId()));
+        }
+        if (!fo.containsCreatedBy() || fo.getCreatedBy() <= 0) {
+            fo.setCreatedBy(getOXFolderAccess().getFolderOwner(folderId));
         }
         if (!fo.containsParentFolderID() || fo.getParentFolderID() <= 0) {
             /*
              * Incomplete, whereby its existence is checked
              */
-            fo.setParentFolderID(getOXFolderAccess().getParentFolderID(fo.getObjectID()));
+            fo.setParentFolderID(getOXFolderAccess().getParentFolderID(folderId));
         } else {
             /*
              * Check existence
              */
             try {
-                if (!OXFolderSQL.exists(fo.getObjectID(), readCon, ctx)) {
-                    throw OXFolderExceptionCode.NOT_EXISTS.create(Integer.valueOf(fo.getObjectID()), Integer.valueOf(ctx.getContextId()));
+                if (!OXFolderSQL.exists(folderId, readCon, ctx)) {
+                    throw OXFolderExceptionCode.NOT_EXISTS.create(Integer.valueOf(folderId), Integer.valueOf(ctx.getContextId()));
                 }
             } catch (final SQLException e) {
                 throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
@@ -1303,15 +1310,15 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
             /*
              * Check permissions
              */
-            final EffectivePermission p = getOXFolderAccess().getFolderPermission(fo.getObjectID(), user.getId(), userConfig);
+            final EffectivePermission p = getOXFolderAccess().getFolderPermission(folderId, user.getId(), userConfig);
             if (!p.isFolderVisible()) {
                 if (p.getUnderlyingPermission().isFolderVisible()) {
-                    throw OXFolderExceptionCode.NOT_VISIBLE.create(Integer.valueOf(fo.getObjectID()),
+                    throw OXFolderExceptionCode.NOT_VISIBLE.create(Integer.valueOf(folderId),
                         OXFolderUtility.getUserName(user.getId(), ctx),
                         Integer.valueOf(ctx.getContextId()));
                 }
                 throw OXFolderExceptionCode.NOT_VISIBLE.create(CATEGORY_PERMISSION_DENIED,
-                    Integer.valueOf(fo.getObjectID()),
+                    Integer.valueOf(folderId),
                     OXFolderUtility.getUserName(user.getId(), ctx),
                     Integer.valueOf(ctx.getContextId()));
             }
@@ -1336,7 +1343,7 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
         final TIntObjectMap<TIntObjectMap<?>> deleteableFolders;
         try {
             deleteableFolders = gatherDeleteableFolders(
-                fo.getObjectID(),
+                folderId,
                 user.getId(),
                 userConfig,
                 StringCollection.getSqlInString(user.getId(), user.getGroups()));
@@ -1346,7 +1353,7 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
         /*
          * Remember folder type
          */
-        final int type = getOXFolderAccess().getFolderType(fo.getObjectID());
+        final int type = getOXFolderAccess().getFolderType(folderId);
         /*
          * Delete folders
          */
@@ -1386,7 +1393,7 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
                  * Load return value
                  */
                 fo.fill(FolderObject.loadFolderObjectFromDB(
-                    fo.getObjectID(),
+                    folderId,
                     ctx,
                     wc,
                     true,
@@ -1650,26 +1657,7 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
     }
 
     private void deleteContainedContacts(final int folderID) throws OXException {
-        Connection readCon = this.readCon;
-        Connection writeCon = this.writeCon;
-        final boolean createReadCon = (readCon == null);
-        final boolean createWriteCon = (writeCon == null);
-        if (createReadCon) {
-            readCon = DBPool.pickup(ctx);
-        }
-        if (createWriteCon) {
-            writeCon = DBPool.pickupWriteable(ctx);
-        }
-        try {
-            Contacts.trashContactsFromFolder(folderID, session, readCon, writeCon, false);
-        } finally {
-            if (createReadCon && readCon != null) {
-                DBPool.push(ctx, readCon);
-            }
-            if (createWriteCon && writeCon != null) {
-                DBPool.pushWrite(ctx, writeCon);
-            }
-        }
+        ServerServiceRegistry.getInstance().getService(ContactService.class).deleteContacts(session, String.valueOf(folderID));
     }
 
     private void deleteContainedDocuments(final int folderID) throws OXException {
@@ -1781,13 +1769,6 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
         }
         /*
          * Check, if folder has subfolders
-         */
-        if (!delFolder.hasSubfolders()) {
-            deleteableIDs.put(folderID, null);
-            return;
-        }
-        /*
-         * No subfolders detected
          */
         final TIntList subfolders = OXFolderSQL.getSubfolderIDs(delFolder.getObjectID(), readCon, ctx);
         if (subfolders.isEmpty()) {

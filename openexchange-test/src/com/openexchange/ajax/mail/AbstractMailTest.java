@@ -62,7 +62,6 @@ import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.framework.CommonAllResponse;
 import com.openexchange.ajax.framework.Executor;
 import com.openexchange.ajax.mail.actions.AllRequest;
-import com.openexchange.ajax.mail.actions.DeleteRequest;
 import com.openexchange.ajax.mail.actions.GetRequest;
 import com.openexchange.ajax.mail.actions.GetResponse;
 import com.openexchange.ajax.mail.actions.SendRequest;
@@ -90,6 +89,11 @@ public abstract class AbstractMailTest extends AbstractAJAXSession {
      */
     protected AbstractMailTest(final String name) {
         super(name);
+    }
+
+    @Override
+    protected void setUp() throws Exception {
+        super.setUp();
     }
 
     /**
@@ -206,7 +210,7 @@ public abstract class AbstractMailTest extends AbstractAJAXSession {
      */
     protected final void clearFolder(final String folder) throws OXException, IOException, SAXException,
             JSONException {
-        Executor.execute(getSession(), new DeleteRequest(getFolderAndIDs(folder), true));
+        Executor.execute(getSession(), new com.openexchange.ajax.mail.actions.ClearRequest(folder).setHardDelete(true));
     }
 
     /**

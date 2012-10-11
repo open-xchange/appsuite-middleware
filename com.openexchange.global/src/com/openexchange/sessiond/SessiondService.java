@@ -71,7 +71,10 @@ public interface SessiondService {
 
     /**
      * Creates a new session object in the SessionD storage with the given session parameters.
-     *
+     * <p>
+     * If passed <tt>parameterObject</tt> implements {@link Parameterized} interface, then generated {@link Session session} is added to it
+     * with {@link Parameterized#PARAM_SESSION} name.
+     * 
      * @param parameterObject The parameter object describing the session to create
      * @return The session identifier of the newly created session as a <code>String</code>
      * @throws OXException If creating the session fails
@@ -86,14 +89,6 @@ public interface SessiondService {
      * @throws OXException If new password cannot be applied or corresponding session does not exist or is expired
      */
     public void changeSessionPassword(String sessionId, String newPassword) throws OXException;
-
-    /**
-     * Refreshes the time stamp of the session with the given session identifier.
-     *
-     * @param sessionId The Session identifier
-     * @return <code>true</code> if the session time stamp was updated or <code>false</code> if the session identifier was invalid or expired
-     */
-    public boolean refreshSession(final String sessionId);
 
     /**
      * Removes the session with the given session identifier.

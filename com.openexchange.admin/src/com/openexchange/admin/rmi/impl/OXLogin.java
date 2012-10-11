@@ -53,7 +53,7 @@ import java.rmi.RemoteException;
 import java.util.ArrayList;
 
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import com.openexchange.log.LogFactory;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
@@ -68,6 +68,7 @@ import com.openexchange.admin.rmi.exceptions.DatabaseUpdateException;
 import com.openexchange.admin.rmi.exceptions.InvalidCredentialsException;
 import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 import com.openexchange.admin.rmi.exceptions.NoSuchContextException;
+import com.openexchange.admin.rmi.exceptions.NoSuchUserException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.storage.interfaces.OXToolStorageInterface;
 import com.openexchange.admin.storage.interfaces.OXUserStorageInterface;
@@ -91,22 +92,30 @@ public class OXLogin extends OXCommonImpl implements OXLoginInterface {
         }
     }
 
+    @Override
     public void login(final Context ctx, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException,DatabaseUpdateException {        
         new BasicAuthenticator().doUserAuthentication(auth, ctx);
         triggerUpdateProcess(ctx);
     }
 
+    @Override
     public void login(final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException {
         doNullCheck(auth);
         new BasicAuthenticator().doAuthentication(auth);
     }
 
+    @Override
     public User login2User(final Context ctx, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException {
         new BasicAuthenticator().doUserAuthentication(auth, ctx);
         
         triggerUpdateProcess(ctx);
 
-        final int user_id = tool.getUserIDByUsername(ctx, auth.getLogin());
+        int user_id;
+        try {
+            user_id = tool.getUserIDByUsername(ctx, auth.getLogin());
+        } catch (NoSuchUserException e) {
+            throw new StorageException(e);
+        }
         tool.isContextAdmin(ctx, user_id);
         final User retval = new User(user_id);
         retval.setName(auth.getLogin());
@@ -115,7 +124,7 @@ public class OXLogin extends OXCommonImpl implements OXLoginInterface {
 
         User[] retusers = oxu.getData(ctx, new User[] { retval });
 
-        final ArrayList<Bundle> bundles = AdminDaemon.getBundlelist();
+        final java.util.List<Bundle> bundles = AdminDaemon.getBundlelist();
         for (final Bundle bundle : bundles) {
             final String bundlename = bundle.getSymbolicName();
             if (Bundle.ACTIVE == bundle.getState()) {

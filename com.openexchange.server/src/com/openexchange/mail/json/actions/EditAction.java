@@ -49,11 +49,14 @@
 
 package com.openexchange.mail.json.actions;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import org.json.JSONException;
 import org.json.JSONObject;
-import com.openexchange.ajax.Mail;
+import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
@@ -80,7 +83,7 @@ import com.openexchange.tools.session.ServerSession;
 public final class EditAction extends AbstractMailAction {
 
     private static final org.apache.commons.logging.Log LOG =
-        com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(EditAction.class));
+        com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(EditAction.class));
 
     /**
      * Initializes a new {@link EditAction}.
@@ -93,6 +96,8 @@ public final class EditAction extends AbstractMailAction {
     @Override
     protected AJAXRequestResult perform(final MailRequest req) throws OXException {
         final AJAXRequestData request = req.getRequest();
+        final List<OXException> warnings = new ArrayList<OXException>();
+        
         try {
             if (!request.hasUploads()) {
                 throw AjaxExceptionCodes.UNKNOWN_ACTION.create("edit");
@@ -104,7 +109,7 @@ public final class EditAction extends AbstractMailAction {
              */
             String msgIdentifier = null;
             {
-                final JSONObject jsonMailObj = new JSONObject(uploadEvent.getFormField(Mail.UPLOAD_FORMFIELD_MAIL));
+                final JSONObject jsonMailObj = new JSONObject(uploadEvent.getFormField(AJAXServlet.UPLOAD_FORMFIELD_MAIL));
                 //final ServerSession session = (ServerSession) uploadEvent.getParameter(UPLOAD_PARAM_SESSION);
                 /*
                  * Resolve "From" to proper mail account
@@ -136,7 +141,7 @@ public final class EditAction extends AbstractMailAction {
                  */
                 if (jsonMailObj.hasAndNotNull(MailJSONField.FLAGS.getKey()) && (jsonMailObj.getInt(MailJSONField.FLAGS.getKey()) & MailMessage.FLAG_DRAFT) > 0) {
                     final ComposedMailMessage composedMail =
-                        MessageParser.parse4Draft(jsonMailObj, uploadEvent, session, MailAccount.DEFAULT_ID);
+                        MessageParser.parse4Draft(jsonMailObj, uploadEvent, session, MailAccount.DEFAULT_ID, warnings);
                     /*
                      * ... and edit draft
                      */
@@ -151,7 +156,16 @@ public final class EditAction extends AbstractMailAction {
             /*
              * Create JSON response object
              */
-            return new AJAXRequestResult(msgIdentifier, "string");
+            final AJAXRequestResult result = new AJAXRequestResult(msgIdentifier, "string");
+            result.addWarnings(warnings);
+            return result;
+        } catch (final OXException e) {
+            final Object[] args = e.getDisplayArgs();
+            final String uid = null == args || 0 == args.length ? null : args[0].toString();
+            if (MailExceptionCode.MAIL_NOT_FOUND.equals(e) && "undefined".equalsIgnoreCase(uid)) {
+                throw MailExceptionCode.PROCESSING_ERROR.create(e, new Object[0]);
+            }
+            throw e;
         } catch (final JSONException e) {
             throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
         } catch (final RuntimeException e) {

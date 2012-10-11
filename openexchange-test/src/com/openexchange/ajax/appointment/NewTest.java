@@ -57,7 +57,9 @@ import com.openexchange.ajax.AppointmentTest;
 import com.openexchange.ajax.ContactTest;
 import com.openexchange.ajax.FolderTest;
 import com.openexchange.ajax.ResourceTest;
+import com.openexchange.ajax.framework.AJAXClient.User;
 import com.openexchange.ajax.group.GroupTest;
+import com.openexchange.ajax.resource.ResourceTools;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.Contact;
@@ -83,6 +85,7 @@ public class NewTest extends AppointmentTest {
         appointmentObj.setTitle("testSimple");
         appointmentObj.setStartDate(new Date(startTime));
         appointmentObj.setEndDate(new Date(endTime));
+        appointmentObj.setOrganizer(User.User1.name());
         appointmentObj.setShownAs(Appointment.ABSENT);
         appointmentObj.setParentFolderID(appointmentFolderId);
         appointmentObj.setIgnoreConflicts(true);
@@ -90,7 +93,7 @@ public class NewTest extends AppointmentTest {
         appointmentObj.setObjectID(objectId);
         final Appointment loadAppointment = loadAppointment(getWebConversation(), objectId, appointmentFolderId, timeZone, PROTOCOL + getHostName(), getSessionId());
         compareObject(appointmentObj, loadAppointment, startTime, endTime);
-        deleteAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getSessionId());
+        deleteAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getSessionId(), false);
     }
 
     public void testFullTime() throws Exception {
@@ -111,6 +114,7 @@ public class NewTest extends AppointmentTest {
         appointmentObj.setTitle("testFullTime");
         appointmentObj.setStartDate(start);
         appointmentObj.setEndDate(end);
+        appointmentObj.setOrganizer(User.User1.name());
         appointmentObj.setShownAs(Appointment.ABSENT);
         appointmentObj.setParentFolderID(appointmentFolderId);
         appointmentObj.setIgnoreConflicts(true);
@@ -120,7 +124,7 @@ public class NewTest extends AppointmentTest {
         appointmentObj.setObjectID(objectId);
         final Appointment loadAppointment = loadAppointment(getWebConversation(), objectId, appointmentFolderId, timeZone, PROTOCOL + getHostName(), getSessionId());
         compareObject(appointmentObj, loadAppointment, start.getTime(), end.getTime());
-        deleteAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getSessionId());
+        deleteAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getSessionId(), false);
     }
 
 
@@ -142,6 +146,7 @@ public class NewTest extends AppointmentTest {
         appointmentObj.setTitle("testFullTime");
         appointmentObj.setStartDate(start);
         appointmentObj.setEndDate(end);
+        appointmentObj.setOrganizer(User.User1.name());
         appointmentObj.setShownAs(Appointment.ABSENT);
         appointmentObj.setParentFolderID(appointmentFolderId);
         appointmentObj.setIgnoreConflicts(true);
@@ -151,7 +156,7 @@ public class NewTest extends AppointmentTest {
         appointmentObj.setObjectID(objectId);
         final Appointment loadAppointment = loadAppointment(getWebConversation(), objectId, appointmentFolderId, timeZone, PROTOCOL + getHostName(), getSessionId());
         compareObject(appointmentObj, loadAppointment, start.getTime(), end.getTime());
-        deleteAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getSessionId());
+        deleteAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getSessionId(), false);
     }
 
 
@@ -185,6 +190,7 @@ public class NewTest extends AppointmentTest {
         appointmentObj.setTitle("testFullTime rounds down");
         appointmentObj.setStartDate(start);
         appointmentObj.setEndDate(end);
+        appointmentObj.setOrganizer(User.User1.name());
         appointmentObj.setShownAs(Appointment.ABSENT);
         appointmentObj.setParentFolderID(appointmentFolderId);
         appointmentObj.setIgnoreConflicts(true);
@@ -198,7 +204,7 @@ public class NewTest extends AppointmentTest {
         appointmentObj.setEndDate(expectedEnd);
 
         compareObject(appointmentObj, loadAppointment, expectedStart.getTime(), expectedEnd.getTime());
-        deleteAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getSessionId());
+        deleteAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getSessionId(), false);
     }
 
     public void testShouldRoundFullTimeSeriesAsWell() throws Exception {
@@ -233,6 +239,7 @@ public class NewTest extends AppointmentTest {
         appointmentObj.setTitle("testFullTime rounds down");
         appointmentObj.setStartDate(start);
         appointmentObj.setEndDate(end);
+        appointmentObj.setOrganizer(User.User1.name());
         appointmentObj.setShownAs(Appointment.ABSENT);
         appointmentObj.setParentFolderID(appointmentFolderId);
         appointmentObj.setIgnoreConflicts(true);
@@ -255,7 +262,7 @@ public class NewTest extends AppointmentTest {
 
         loadAppointment = loadAppointment(getWebConversation(), objectId, 2, appointmentFolderId, c.getTimeZone(), PROTOCOL + getHostName(), getSessionId());
 
-        Calendar check = new GregorianCalendar();
+        final Calendar check = new GregorianCalendar();
         check.setTimeZone(c.getTimeZone());
         check.setTime(loadAppointment.getStartDate());
 
@@ -272,7 +279,7 @@ public class NewTest extends AppointmentTest {
         assertEquals(0, check.get(Calendar.MILLISECOND));
 
 
-        deleteAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getSessionId());
+        deleteAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getSessionId(), false);
     }
 
     public void testUserParticipant() throws Exception {
@@ -296,7 +303,7 @@ public class NewTest extends AppointmentTest {
         appointmentObj.setObjectID(objectId);
         final Appointment loadAppointment = loadAppointment(getWebConversation(), objectId, appointmentFolderId, timeZone, PROTOCOL + getHostName(), getSessionId());
         compareObject(appointmentObj, loadAppointment, startTime, endTime);
-        deleteAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getSessionId());
+        deleteAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getSessionId(), false);
     }
 
     public void testGroupParticipant() throws Exception {
@@ -321,7 +328,7 @@ public class NewTest extends AppointmentTest {
         appointmentObj.setObjectID(objectId);
         final Appointment loadAppointment = loadAppointment(getWebConversation(), objectId, appointmentFolderId, timeZone, PROTOCOL + getHostName(), getSessionId());
         compareObject(appointmentObj, loadAppointment, startTime, endTime);
-        deleteAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getSessionId());
+        deleteAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getSessionId(), false);
     }
 
     public void testResourceParticipant() throws Exception {
@@ -345,7 +352,7 @@ public class NewTest extends AppointmentTest {
         appointmentObj.setObjectID(objectId);
         final Appointment loadAppointment = loadAppointment(getWebConversation(), objectId, appointmentFolderId, timeZone, PROTOCOL + getHostName(), getSessionId());
         compareObject(appointmentObj, loadAppointment, startTime, endTime);
-        deleteAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getSessionId());
+        deleteAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getSessionId(), false);
     }
 
     public void testAllParticipants() throws Exception {
@@ -372,7 +379,7 @@ public class NewTest extends AppointmentTest {
         appointmentObj.setObjectID(objectId);
         final Appointment loadAppointment = loadAppointment(getWebConversation(), objectId, appointmentFolderId, timeZone, PROTOCOL + getHostName(), getSessionId());
         compareObject(appointmentObj, loadAppointment, startTime, endTime);
-        deleteAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getSessionId());
+        deleteAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getSessionId(), false);
     }
 
     public void testSpecialCharacters() throws Exception {
@@ -380,6 +387,7 @@ public class NewTest extends AppointmentTest {
         appointmentObj.setTitle("testSpecialCharacters - \u00F6\u00E4\u00FC-:,;.#?!\u00A7$%&/()=\"<>");
         appointmentObj.setStartDate(new Date(startTime));
         appointmentObj.setEndDate(new Date(endTime));
+        appointmentObj.setOrganizer(User.User1.name());
         appointmentObj.setShownAs(Appointment.ABSENT);
         appointmentObj.setParentFolderID(appointmentFolderId);
         appointmentObj.setIgnoreConflicts(true);
@@ -387,7 +395,7 @@ public class NewTest extends AppointmentTest {
         appointmentObj.setObjectID(objectId);
         final Appointment loadAppointment = loadAppointment(getWebConversation(), objectId, appointmentFolderId, timeZone, PROTOCOL + getHostName(), getSessionId());
         compareObject(appointmentObj, loadAppointment, startTime, endTime);
-        deleteAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getSessionId());
+        deleteAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getSessionId(), false);
     }
 
     public void testPrivateFolder() throws Exception {
@@ -398,6 +406,7 @@ public class NewTest extends AppointmentTest {
         appointmentObj.setTitle("testPrivateFolder");
         appointmentObj.setStartDate(new Date(startTime));
         appointmentObj.setEndDate(new Date(endTime));
+        appointmentObj.setOrganizer(User.User1.name());
         appointmentObj.setShownAs(Appointment.ABSENT);
         appointmentObj.setParentFolderID(targetFolder);
         appointmentObj.setIgnoreConflicts(true);
@@ -406,7 +415,7 @@ public class NewTest extends AppointmentTest {
         appointmentObj.setObjectID(objectId);
         final Appointment loadAppointment = loadAppointment(getWebConversation(), objectId, targetFolder, timeZone, PROTOCOL + getHostName(), getSessionId());
         compareObject(appointmentObj, loadAppointment, startTime, endTime);
-        deleteAppointment(getWebConversation(), objectId, targetFolder, PROTOCOL + getHostName(), getSessionId());
+        deleteAppointment(getWebConversation(), objectId, targetFolder, PROTOCOL + getHostName(), getSessionId(), false);
         com.openexchange.webdav.xml.FolderTest.deleteFolder(getWebConversation(), new int[] { targetFolder }, PROTOCOL + getHostName(), getLogin(), getPassword(), "");
     }
 
@@ -418,6 +427,7 @@ public class NewTest extends AppointmentTest {
         appointmentObj.setTitle("testPrivateFolder");
         appointmentObj.setStartDate(new Date(startTime));
         appointmentObj.setEndDate(new Date(endTime));
+        appointmentObj.setOrganizer(User.User1.name());
         appointmentObj.setShownAs(Appointment.ABSENT);
         appointmentObj.setParentFolderID(targetFolder);
         appointmentObj.setIgnoreConflicts(true);
@@ -426,7 +436,7 @@ public class NewTest extends AppointmentTest {
         appointmentObj.setObjectID(objectId);
         final Appointment loadAppointment = loadAppointment(getWebConversation(), objectId, targetFolder, timeZone, PROTOCOL + getHostName(), getSessionId());
         compareObject(appointmentObj, loadAppointment, startTime, endTime);
-        deleteAppointment(getWebConversation(), objectId, targetFolder, PROTOCOL + getHostName(), getSessionId());
+        deleteAppointment(getWebConversation(), objectId, targetFolder, PROTOCOL + getHostName(), getSessionId(), false);
         com.openexchange.webdav.xml.FolderTest.deleteFolder(getWebConversation(), new int[] { targetFolder }, PROTOCOL + getHostName(), getLogin(), getPassword(), "");
     }
 
@@ -448,6 +458,7 @@ public class NewTest extends AppointmentTest {
         appointmentObj.setTitle("testSharedFolder");
         appointmentObj.setStartDate(new Date(startTime));
         appointmentObj.setEndDate(new Date(endTime));
+        appointmentObj.setOrganizer(User.User1.name());
         appointmentObj.setShownAs(Appointment.ABSENT);
         appointmentObj.setParentFolderID(targetFolder);
         appointmentObj.setIgnoreConflicts(true);
@@ -456,8 +467,16 @@ public class NewTest extends AppointmentTest {
         appointmentObj.setObjectID(objectId);
         final Appointment loadAppointment = loadAppointment(getSecondWebConversation(), objectId, targetFolder, timeZone, PROTOCOL + getHostName(), getSecondSessionId());
         compareObject(appointmentObj, loadAppointment, startTime, endTime);
-        deleteAppointment(getSecondWebConversation(), objectId, targetFolder, PROTOCOL + getHostName(), getSecondSessionId());
-        com.openexchange.webdav.xml.FolderTest.deleteFolder(getWebConversation(), new int[] { targetFolder }, PROTOCOL + getHostName(), getLogin(), getPassword(), "");
+        try {
+            deleteAppointment(getSecondWebConversation(), objectId, targetFolder, PROTOCOL + getHostName(), getSecondSessionId(), false);
+        } catch (final Exception e) {
+            // Ignore
+        }
+        try {
+            com.openexchange.webdav.xml.FolderTest.deleteFolder(getWebConversation(), new int[] { targetFolder }, PROTOCOL + getHostName(), getLogin(), getPassword(), "");
+        } catch (final Exception e) {
+            // Ignore
+        }
     }
 
     public void testDailyRecurrence() throws Exception {
@@ -474,6 +493,7 @@ public class NewTest extends AppointmentTest {
         appointmentObj.setTitle("testDailyRecurrence");
         appointmentObj.setStartDate(new Date(startTime));
         appointmentObj.setEndDate(new Date(endTime));
+        appointmentObj.setOrganizer(User.User1.name());
         appointmentObj.setShownAs(Appointment.ABSENT);
         appointmentObj.setParentFolderID(appointmentFolderId);
         appointmentObj.setRecurrenceType(Appointment.DAILY);
@@ -484,7 +504,7 @@ public class NewTest extends AppointmentTest {
         appointmentObj.setObjectID(objectId);
         final Appointment loadAppointment = loadAppointment(getWebConversation(), objectId, appointmentFolderId, timeZone, PROTOCOL + getHostName(), getSessionId());
         compareObject(appointmentObj, loadAppointment, startTime, endTime);
-        deleteAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getSessionId());
+        deleteAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getSessionId(), false);
     }
 
     public void testWeeklyRecurrence() throws Exception {
@@ -501,6 +521,7 @@ public class NewTest extends AppointmentTest {
         appointmentObj.setTitle("testWeeklyRecurrence");
         appointmentObj.setStartDate(new Date(startTime));
         appointmentObj.setEndDate(new Date(endTime));
+        appointmentObj.setOrganizer(User.User1.name());
         appointmentObj.setShownAs(Appointment.ABSENT);
         appointmentObj.setParentFolderID(appointmentFolderId);
         appointmentObj.setRecurrenceType(Appointment.WEEKLY);
@@ -512,7 +533,7 @@ public class NewTest extends AppointmentTest {
         appointmentObj.setObjectID(objectId);
         final Appointment loadAppointment = loadAppointment(getWebConversation(), objectId, appointmentFolderId, timeZone, PROTOCOL + getHostName(), getSessionId());
         compareObject(appointmentObj, loadAppointment, startTime, endTime);
-        deleteAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getSessionId());
+        deleteAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getSessionId(), false);
     }
 
     public void testMonthlyRecurrenceDayInMonth() throws Exception {
@@ -529,6 +550,7 @@ public class NewTest extends AppointmentTest {
         appointmentObj.setTitle("testMonthlyRecurrenceDayInMonth");
         appointmentObj.setStartDate(new Date(startTime));
         appointmentObj.setEndDate(new Date(endTime));
+        appointmentObj.setOrganizer(User.User1.name());
         appointmentObj.setShownAs(Appointment.ABSENT);
         appointmentObj.setParentFolderID(appointmentFolderId);
         appointmentObj.setRecurrenceType(Appointment.MONTHLY);
@@ -540,7 +562,7 @@ public class NewTest extends AppointmentTest {
         appointmentObj.setObjectID(objectId);
         final Appointment loadAppointment = loadAppointment(getWebConversation(), objectId, appointmentFolderId, timeZone, PROTOCOL + getHostName(), getSessionId());
         compareObject(appointmentObj, loadAppointment, loadAppointment.getStartDate().getTime(), loadAppointment.getEndDate().getTime());
-        deleteAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getSessionId());
+        deleteAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getSessionId(), false);
     }
 
     public void testMonthlyRecurrenceDays() throws Exception {
@@ -557,6 +579,7 @@ public class NewTest extends AppointmentTest {
         appointmentObj.setTitle("testMonthlyRecurrenceDays");
         appointmentObj.setStartDate(new Date(startTime));
         appointmentObj.setEndDate(new Date(endTime));
+        appointmentObj.setOrganizer(User.User1.name());
         appointmentObj.setShownAs(Appointment.ABSENT);
         appointmentObj.setParentFolderID(appointmentFolderId);
         appointmentObj.setRecurrenceType(Appointment.MONTHLY);
@@ -569,7 +592,7 @@ public class NewTest extends AppointmentTest {
         appointmentObj.setObjectID(objectId);
         final Appointment loadAppointment = loadAppointment(getWebConversation(), objectId, appointmentFolderId, timeZone, PROTOCOL + getHostName(), getSessionId());
         compareObject(appointmentObj, loadAppointment, loadAppointment.getStartDate().getTime(), loadAppointment.getEndDate().getTime());
-        deleteAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getSessionId());
+        deleteAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getSessionId(), false);
     }
 
     public void testYearlyRecurrenceDayInMonth() throws Exception {
@@ -586,6 +609,7 @@ public class NewTest extends AppointmentTest {
         appointmentObj.setTitle("testYearlyRecurrenceDayInMonth");
         appointmentObj.setStartDate(new Date(startTime));
         appointmentObj.setEndDate(new Date(endTime));
+        appointmentObj.setOrganizer(User.User1.name());
         appointmentObj.setShownAs(Appointment.ABSENT);
         appointmentObj.setParentFolderID(appointmentFolderId);
         appointmentObj.setRecurrenceType(Appointment.YEARLY);
@@ -598,7 +622,7 @@ public class NewTest extends AppointmentTest {
         appointmentObj.setObjectID(objectId);
         final Appointment loadAppointment = loadAppointment(getWebConversation(), objectId, appointmentFolderId, timeZone, PROTOCOL + getHostName(), getSessionId());
         compareObject(appointmentObj, loadAppointment, loadAppointment.getStartDate().getTime(), loadAppointment.getEndDate().getTime());
-        deleteAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getSessionId());
+        deleteAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getSessionId(), false);
     }
 
     public void testYearlyRecurrenceDays() throws Exception {
@@ -615,6 +639,7 @@ public class NewTest extends AppointmentTest {
         appointmentObj.setTitle("testYearlyRecurrenceDays");
         appointmentObj.setStartDate(new Date(startTime));
         appointmentObj.setEndDate(new Date(endTime));
+        appointmentObj.setOrganizer(User.User1.name());
         appointmentObj.setShownAs(Appointment.ABSENT);
         appointmentObj.setParentFolderID(appointmentFolderId);
         appointmentObj.setRecurrenceType(Appointment.YEARLY);
@@ -628,7 +653,7 @@ public class NewTest extends AppointmentTest {
         appointmentObj.setObjectID(objectId);
         final Appointment loadAppointment = loadAppointment(getWebConversation(), objectId, appointmentFolderId, timeZone, PROTOCOL + getHostName(), getSessionId());
         compareObject(appointmentObj, loadAppointment, loadAppointment.getStartDate().getTime(), loadAppointment.getEndDate().getTime());
-        deleteAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getSessionId());
+        deleteAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getSessionId(), false);
     }
 
     public void testConflict() throws Exception {
@@ -644,7 +669,7 @@ public class NewTest extends AppointmentTest {
         try {
             appointmentObj.setIgnoreConflicts(false);
             final int objectId2 = insertAppointment(getWebConversation(), appointmentObj, timeZone, PROTOCOL + getHostName(), getSessionId());
-            deleteAppointment(getWebConversation(), objectId2, appointmentFolderId, PROTOCOL + getHostName(), getSessionId());
+            deleteAppointment(getWebConversation(), objectId2, appointmentFolderId, PROTOCOL + getHostName(), getSessionId(), true);
             fail("conflict exception expected here!");
         } catch (final OXException exc) {
             assertTrue(true);
@@ -652,9 +677,9 @@ public class NewTest extends AppointmentTest {
 
         appointmentObj.setIgnoreConflicts(true);
         final int objectId2 = insertAppointment(getWebConversation(), appointmentObj, timeZone, PROTOCOL + getHostName(), getSessionId());
-        deleteAppointment(getWebConversation(), objectId2, appointmentFolderId, PROTOCOL + getHostName(), getSessionId());
+        deleteAppointment(getWebConversation(), objectId2, appointmentFolderId, PROTOCOL + getHostName(), getSessionId(), false);
 
-        deleteAppointment(getWebConversation(), objectId1, appointmentFolderId, PROTOCOL + getHostName(), getSessionId());
+        deleteAppointment(getWebConversation(), objectId1, appointmentFolderId, PROTOCOL + getHostName(), getSessionId(), false);
     }
 
     public void testConflictWithResource() throws Exception {
@@ -665,8 +690,8 @@ public class NewTest extends AppointmentTest {
         appointmentObj.setShownAs(Appointment.ABSENT);
         appointmentObj.setParentFolderID(appointmentFolderId);
         appointmentObj.setIgnoreConflicts(true);
-
-        final int resourceParticipantId = GroupTest.searchGroup(getWebConversation(), groupParticipant, PROTOCOL, getHostName(), getSessionId())[0].getIdentifier();
+        
+        final int resourceParticipantId = ResourceTools.getSomeResource(getClient());
 
         final com.openexchange.groupware.container.Participant[] participants = new com.openexchange.groupware.container.Participant[2];
         participants[0] = new UserParticipant(userId);
@@ -676,24 +701,24 @@ public class NewTest extends AppointmentTest {
 
         final int objectId1 = insertAppointment(getWebConversation(), appointmentObj, timeZone, PROTOCOL + getHostName(), getSessionId());
 
+        appointmentObj.setIgnoreConflicts(false);
         try {
-            appointmentObj.setIgnoreConflicts(false);
             final int objectId2 = insertAppointment(getWebConversation(), appointmentObj, timeZone, PROTOCOL + getHostName(), getSessionId());
-            deleteAppointment(getWebConversation(), objectId2, appointmentFolderId, PROTOCOL + getHostName(), getSessionId());
+            deleteAppointment(getWebConversation(), objectId2, appointmentFolderId, PROTOCOL + getHostName(), getSessionId(), true);
             assertEquals("conflict expected here object id should be 0", 0, objectId2);
         } catch (final OXException exc) {
-            assertTrue(true);
+            // Exception is expected
         }
 
         appointmentObj.setIgnoreConflicts(true);
         try {
             final int objectId2 = insertAppointment(getWebConversation(), appointmentObj, timeZone, PROTOCOL + getHostName(), getSessionId());
-            deleteAppointment(getWebConversation(), objectId2, appointmentFolderId, PROTOCOL + getHostName(), getSessionId());
+            deleteAppointment(getWebConversation(), objectId2, appointmentFolderId, PROTOCOL + getHostName(), getSessionId(), true);
             assertEquals("conflict expected here object id should be 0", 0, objectId2);
         } catch (final OXException exc) {
             assertTrue(true);
         }
 
-        deleteAppointment(getWebConversation(), objectId1, appointmentFolderId, PROTOCOL + getHostName(), getSessionId());
+        deleteAppointment(getWebConversation(), objectId1, appointmentFolderId, PROTOCOL + getHostName(), getSessionId(), false);
     }
 }

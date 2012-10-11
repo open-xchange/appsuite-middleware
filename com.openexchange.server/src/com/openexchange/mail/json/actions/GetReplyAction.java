@@ -53,6 +53,7 @@ import java.util.Iterator;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.Mail;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
@@ -113,8 +114,8 @@ public final class GetReplyAction extends AbstractMailAction {
             }
             for (int i = 0; i < length; i++) {
                 final JSONObject folderAndID = paths.getJSONObject(i);
-                requestData.putParameter(Mail.PARAMETER_FOLDERID, folderAndID.getString(Mail.PARAMETER_FOLDERID));
-                requestData.putParameter(Mail.PARAMETER_ID, folderAndID.get(Mail.PARAMETER_ID).toString());
+                requestData.putParameter(AJAXServlet.PARAMETER_FOLDERID, folderAndID.getString(AJAXServlet.PARAMETER_FOLDERID));
+                requestData.putParameter(AJAXServlet.PARAMETER_ID, folderAndID.get(AJAXServlet.PARAMETER_ID).toString());
             }
             requestData.setState(request.getState());
             /*
@@ -132,8 +133,8 @@ public final class GetReplyAction extends AbstractMailAction {
             /*
              * Read in parameters
              */
-            final String folderPath = req.checkParameter(Mail.PARAMETER_FOLDERID);
-            final String uid = req.checkParameter(Mail.PARAMETER_ID);
+            final String folderPath = req.checkParameter(AJAXServlet.PARAMETER_FOLDERID);
+            final String uid = req.checkParameter(AJAXServlet.PARAMETER_ID);
             final String view = req.getParameter(Mail.PARAMETER_VIEW);
             final UserSettingMail usmNoSave = (UserSettingMail) session.getUserSettingMail().clone();
             /*
@@ -144,13 +145,25 @@ public final class GetReplyAction extends AbstractMailAction {
              * Overwrite settings with request's parameters
              */
             detectDisplayMode(true, view, usmNoSave);
+            if (Boolean.parseBoolean(req.getParameter("dropPrefix"))) {
+                usmNoSave.setDropReplyForwardPrefix(true);
+            }
             /*
              * Get mail interface
              */
             final MailServletInterface mailInterface = getMailInterface(req);
             final MailMessage mail = mailInterface.getReplyMessageForDisplay(folderPath, uid, false, usmNoSave);
-            mail.setAccountId(mailInterface.getAccountID());
+            if (!mail.containsAccountId()) {
+                mail.setAccountId(mailInterface.getAccountID());
+            }
             return new AJAXRequestResult(mail, "mail");
+        } catch (final OXException e) {
+            final Object[] args = e.getDisplayArgs();
+            final String uid = null == args || 0 == args.length ? null : args[0].toString();
+            if (MailExceptionCode.MAIL_NOT_FOUND.equals(e) && "undefined".equalsIgnoreCase(uid)) {
+                throw MailExceptionCode.PROCESSING_ERROR.create(e, new Object[0]);
+            }
+            throw e;
         } catch (final RuntimeException e) {
             throw MailExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
         }

@@ -72,13 +72,10 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.fileupload.FileItem;
-import org.apache.commons.fileupload.FileUploadBase;
 import org.apache.commons.fileupload.FileUploadException;
 import org.apache.commons.fileupload.disk.DiskFileItemFactory;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
-import org.apache.commons.fileupload.servlet.ServletRequestContext;
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -98,9 +95,11 @@ import com.openexchange.groupware.upload.impl.UploadListener;
 import com.openexchange.groupware.upload.impl.UploadRegistry;
 import com.openexchange.groupware.upload.impl.UploadUtility;
 import com.openexchange.java.Charsets;
+import com.openexchange.log.LogFactory;
 import com.openexchange.monitoring.MonitoringInfo;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.servlet.CountingHttpServletRequest;
+import com.openexchange.tools.servlet.http.Tools;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 
 /**
@@ -231,6 +230,8 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
 
     public static final String ACTION_LOGIN = "login";
 
+    public static final String ACTION_OAUTH = "oauth";
+
     public static final String ACTION_STORE = "store";
 
     public static final String ACTION_LOGOUT = "logout";
@@ -349,6 +350,8 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
     public static final String PARAMETER_TYPE = "type";
 
     public static final String PARAMETER_USER = "user";
+
+    public static final String PARAMETER_USER_ID = "user_id";
 
     public static final String PARAMETER_TEMPLATE = "template";
 
@@ -578,11 +581,14 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
     public static String getServletSpecificURI(final HttpServletRequest req) {
         String uri;
         try {
-            final String characterEncoding = req.getCharacterEncoding();
-            uri =
-                URLDecoder.decode(
-                    req.getRequestURI(),
-                    characterEncoding == null ? ServerConfig.getProperty(ServerConfig.Property.DefaultEncoding) : characterEncoding);
+            String characterEncoding = req.getCharacterEncoding();
+            if (null == characterEncoding) {
+                characterEncoding = ServerConfig.getProperty(ServerConfig.Property.DefaultEncoding);
+                if (null == characterEncoding) {
+                    characterEncoding = "ISO-8859-1";
+                }
+            }
+            uri = URLDecoder.decode(req.getRequestURI(), characterEncoding);
         } catch (final UnsupportedEncodingException e) {
             LOG.error("Unsupported encoding", e);
             uri = req.getRequestURI();
@@ -743,9 +749,26 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
     private static final int SIZE_THRESHOLD = 1048576;
 
     /**
-     * Creates a new {@link ServletFileUpload} instance.
+     * The file cleaning tracker.
+     */
+    private static volatile DeleteOnExitFileCleaningTracker tracker;
+    
+    /**
+     * Exits the file cleaning tracker.
+     */
+    public static void exitTracker() {
+        AJAXServlet.servletFileUpload = null;
+        final DeleteOnExitFileCleaningTracker tracker = AJAXServlet.tracker;
+        if (null != tracker) {
+            tracker.deleteAllTracked();
+            AJAXServlet.tracker = null;
+        }
+    }
+
+    /**
+     * Creates a new {@code ServletFileUpload} instance.
      *
-     * @return A new {@link ServletFileUpload} instance
+     * @return A new {@code ServletFileUpload} instance
      */
     private static ServletFileUpload newFileUploadBase() {
         /*
@@ -757,6 +780,9 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
          */
         factory.setSizeThreshold(SIZE_THRESHOLD);
         factory.setRepository(new File(ServerConfig.getProperty(Property.UploadDirectory)));
+        final DeleteOnExitFileCleaningTracker tracker = new DeleteOnExitFileCleaningTracker(false);
+        factory.setFileCleaningTracker(tracker);
+        AJAXServlet.tracker = tracker;
         /*
          * Create a new file upload handler
          */
@@ -769,7 +795,7 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
     }
 
     private static final Set<String> UPLOAD_ACTIONS =
-        new HashSet<String>(Arrays.asList(ACTION_NEW, ACTION_UPLOAD, ACTION_APPEND, ACTION_UPDATE, ACTION_ATTACH, ACTION_COPY));
+        new HashSet<String>(Arrays.asList(ACTION_NEW, ACTION_UPLOAD, ACTION_APPEND, ACTION_UPDATE, ACTION_ATTACH, ACTION_COPY, "import"));
 
 
 
@@ -781,7 +807,7 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
      * @throws OXException Id processing the upload fails
      */
     public static final UploadEvent processUploadStatic(final HttpServletRequest req) throws OXException {
-        if (!FileUploadBase.isMultipartContent(new ServletRequestContext(req))) {
+        if (!Tools.isMultipartContent(req)) {
             // No multipart content
             throw UploadException.UploadCode.NO_MULTIPART_CONTENT.create();
         }
@@ -801,7 +827,7 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
          * ######################### ENSURE YOUR ACTION IS CONTAINED IN UPLOAD_ACTIONS ! ! ! #########################
          * ###########################################################################################################
          */
-        if (mayUpload(action)) {
+        if (!mayUpload(action)) {
             throw UploadException.UploadCode.UNKNOWN_ACTION_VALUE.create(action);
         }
         /*
@@ -856,7 +882,7 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
     }
 
     protected static boolean mayUpload(final String action) {
-        return !UPLOAD_ACTIONS.contains(action) && !com.openexchange.groupware.importexport.Format.containsConstantName(action);
+        return UPLOAD_ACTIONS.contains(action) || Arrays.asList("CSV", "VCARD","ICAL").contains(action); //Boo! Bad hack to get importer/export bundle working
     }
 
     private static boolean isEmpty(final String string) {

@@ -55,10 +55,13 @@ import javax.management.MalformedObjectNameException;
 import javax.management.NotCompliantMBeanException;
 import javax.management.ObjectName;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.openexchange.caching.CacheInformationMBean;
+import com.openexchange.caching.CacheKeyService;
 import com.openexchange.caching.CacheService;
+import com.openexchange.caching.DefaultCacheKeyService;
 import com.openexchange.caching.internal.JCSCacheInformation;
 import com.openexchange.caching.internal.JCSCacheService;
 import com.openexchange.caching.internal.JCSCacheServiceInit;
@@ -67,6 +70,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.management.ManagementService;
 import com.openexchange.osgi.DeferredActivator;
 import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.osgi.SimpleRegistryListener;
 
 /**
  * {@link CacheActivator} - The {@link DeferredActivator} implementation for cache bundle.
@@ -75,9 +79,9 @@ import com.openexchange.osgi.HousekeepingActivator;
  */
 public final class CacheActivator extends HousekeepingActivator {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(CacheActivator.class));
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(CacheActivator.class));
 
-    private static volatile CacheService cacheService;
+    static volatile CacheService cacheService;
 
     /**
      * Gets the cacheService
@@ -123,15 +127,33 @@ public final class CacheActivator extends HousekeepingActivator {
     @Override
     protected void startBundle() throws Exception {
         JCSCacheServiceInit.initInstance();
-        JCSCacheServiceInit.getInstance().start(getService(ConfigurationService.class));
+        final ConfigurationService service = getService(ConfigurationService.class);
+        JCSCacheServiceInit.getInstance().start(service);
+        registerService(CacheKeyService.class, new DefaultCacheKeyService());
         /*
          * Register service
          */
-        final Dictionary<String, String> dictionary = new Hashtable<String, String>();
-        dictionary.put("name", "oxcache");
-        final JCSCacheService jcsCacheService = JCSCacheService.getInstance();
-        registerService(CacheService.class, jcsCacheService, dictionary);
-        cacheService = jcsCacheService;
+        if (null == service || service.getBoolProperty("com.openexchange.caching.jcs.enabled", true)) {
+            final Dictionary<String, Object> dictionary = new Hashtable<String, Object>(2);
+            dictionary.put("name", "oxcache");
+            dictionary.put(Constants.SERVICE_RANKING, Integer.valueOf(10));
+            final JCSCacheService jcsCacheService = JCSCacheService.getInstance();
+            registerService(CacheService.class, jcsCacheService, dictionary);
+            cacheService = jcsCacheService;
+        } else {
+            track(CacheService.class, new SimpleRegistryListener<CacheService>() {
+
+                @Override
+                public void added(ServiceReference<CacheService> ref, CacheService service) {
+                    cacheService = service;
+                }
+
+                @Override
+                public void removed(ServiceReference<CacheService> ref, CacheService service) {
+                    cacheService = null;
+                }
+            });
+        }
         final class ServiceTrackerCustomizerImpl implements ServiceTrackerCustomizer<ManagementService, ManagementService> {
 
             private final BundleContext bundleContext;

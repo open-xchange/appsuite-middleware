@@ -55,16 +55,20 @@ import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.api2.ContactInterfaceFactory;
+import com.openexchange.contact.ContactService;
+import com.openexchange.contacts.json.mapping.ContactMapper;
 import com.openexchange.documentation.RequestMethod;
 import com.openexchange.documentation.annotations.Action;
 import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contact.ContactInterface;
+import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.user.UserService;
 import com.openexchange.user.json.Constants;
+import com.openexchange.user.json.UserContact;
 import com.openexchange.user.json.services.ServiceRegistry;
 import com.openexchange.user.json.writer.UserWriter;
 
@@ -72,6 +76,7 @@ import com.openexchange.user.json.writer.UserWriter;
  * {@link GetAction} - Maps the action to a <tt>get</tt> action.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 @Action(method = RequestMethod.GET, name = "get", description = "Get a user.", parameters = { 
 		@Parameter(name = "session", description = "A session ID previously obtained from the login module."),
@@ -93,6 +98,40 @@ public final class GetAction extends AbstractUserAction {
 
     @Override
     public AJAXRequestResult perform(final AJAXRequestData request, final ServerSession session) throws OXException {
+        /*
+         * Parse parameters
+         */
+        final int[] columns = parseOptionalIntArrayParameter(AJAXServlet.PARAMETER_COLUMNS, request);
+        final ContactField[] contactFields;
+        if (null == columns || 0 == columns.length) {
+            contactFields = ContactMapper.getInstance().getAllFields();
+        } else {
+            contactFields = ContactMapper.getInstance().getFields(columns);
+        }
+        final String idParam = request.getParameter("id");
+        int userId;
+        if (null == idParam) {
+            userId = session.getUserId();
+        } else {
+            userId = checkIntParameter("id", request);
+        }
+        /*
+         * Obtain user from user service
+         */
+        final UserService userService = ServiceRegistry.getInstance().getService(UserService.class, true);
+        final User user = userService.getUser(userId, session.getContext());
+        /*
+         * Obtain user's contact
+         */
+        final ContactService contactService = ServiceRegistry.getInstance().getService(ContactService.class, true);
+        final Contact contact = contactService.getUser(session, userId, contactFields);
+        /*
+         * Return appropriate result
+         */
+        return new AJAXRequestResult(new UserContact(contact, user), contact.getLastModified(), "usercontact");
+    }
+    
+    public AJAXRequestResult performOLD(final AJAXRequestData request, final ServerSession session) throws OXException {
         /*
          * Parse parameters
          */

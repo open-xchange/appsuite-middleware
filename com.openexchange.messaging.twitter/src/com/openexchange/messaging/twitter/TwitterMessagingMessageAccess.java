@@ -264,7 +264,7 @@ public final class TwitterMessagingMessageAccess implements MessagingMessageAcce
              * Sort
              */
             if (null != sortField) {
-                com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(TwitterMessagingMessageAccess.class)).warn("Sort not yet supported");
+                com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(TwitterMessagingMessageAccess.class)).warn("Sort not yet supported");
             }
             /*
              * Return

@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Open-Xchange Password Change Script
 Bundle-SymbolicName: com.openexchange.passwordchange.script
-Bundle-Version: 6.21.0
+Bundle-Version: 6.22.0
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Import-Package: com.openexchange.config,
@@ -12,6 +12,8 @@ Import-Package: com.openexchange.config,
  com.openexchange.groupware,
  com.openexchange.groupware.contexts,
  com.openexchange.groupware.ldap,
+ com.openexchange.i18n,
+ com.openexchange.log,
  com.openexchange.osgi,
  com.openexchange.passwordchange,
  com.openexchange.server,

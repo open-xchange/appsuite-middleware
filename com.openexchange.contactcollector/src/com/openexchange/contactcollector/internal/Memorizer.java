@@ -50,6 +50,7 @@
 package com.openexchange.contactcollector.internal;
 
 import static com.openexchange.mail.mime.QuotedInternetAddress.toIDN;
+
 import java.io.UnsupportedEncodingException;
 import java.text.MessageFormat;
 import java.util.Collections;
@@ -62,27 +63,34 @@ import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeUtility;
 import javax.mail.internet.ParseException;
+
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import com.openexchange.log.LogFactory;
+
 import com.openexchange.concurrent.TimeoutConcurrentMap;
+import com.openexchange.contact.ContactFieldOperand;
+import com.openexchange.contact.ContactService;
 import com.openexchange.contactcollector.osgi.CCServiceRegistry;
 import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.contact.ContactInterface;
-import com.openexchange.groupware.contact.ContactInterfaceDiscoveryService;
+import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
-import com.openexchange.groupware.container.DataObject;
-import com.openexchange.groupware.container.FolderChildObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.groupware.search.ContactSearchObject;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.preferences.ServerUserSetting;
+import com.openexchange.search.CompositeSearchTerm;
+import com.openexchange.search.CompositeSearchTerm.CompositeOperation;
+import com.openexchange.search.SingleSearchTerm;
+import com.openexchange.search.SingleSearchTerm.SingleOperation;
+import com.openexchange.search.internal.operands.ConstantOperand;
+import com.openexchange.server.ServiceLookup;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.session.Session;
 import com.openexchange.tools.iterator.SearchIterator;
@@ -136,7 +144,7 @@ public class Memorizer implements Runnable {
         final Set<InternetAddress> aliases;
         final UserConfiguration userConfig;
         try {
-            final CCServiceRegistry serviceRegistry = CCServiceRegistry.getInstance();
+            final ServiceLookup serviceRegistry = CCServiceRegistry.getInstance();
             final ContextService contextService = serviceRegistry.getService(ContextService.class);
             if (null == contextService) {
                 LOG.warn("Contact collector run aborted: missing context service");
@@ -187,7 +195,10 @@ public class Memorizer implements Runnable {
         }
     }
 
-    private static final int[] COLUMNS = { DataObject.OBJECT_ID, FolderChildObject.FOLDER_ID, DataObject.LAST_MODIFIED, Contact.USE_COUNT };
+    private static final ContactField[] FIELDS = { 
+    	ContactField.OBJECT_ID, ContactField.FOLDER_ID, ContactField.LAST_MODIFIED, ContactField.USE_COUNT };
+
+	private static final ContactField[] SEARCH_FIELDS = { ContactField.EMAIL1, ContactField.EMAIL1, ContactField.EMAIL3 }; 
 
     private int memorizeContact(final InternetAddress address, final Context ctx, final UserConfiguration userConfig) throws OXException {
         /*
@@ -208,17 +219,17 @@ public class Memorizer implements Runnable {
         /*
          * Check if such a contact already exists
          */
-        final ContactInterface contactInterface =
-            CCServiceRegistry.getInstance().getService(ContactInterfaceDiscoveryService.class).getContactInterfaceProvider(
-                contact.getParentFolderID(),
-                ctx.getContextId()).newContactInterface(session);
+        final ContactService contactService = CCServiceRegistry.getInstance().getService(ContactService.class);
         final Contact foundContact;
         {
-            final ContactSearchObject searchObject = new ContactSearchObject();
-            searchObject.setEmailAutoComplete(true);
-            searchObject.setDynamicSearchField(new int[] { Contact.EMAIL1, Contact.EMAIL2, Contact.EMAIL3, });
-            searchObject.setDynamicSearchFieldValue(new String[] { contact.getEmail1(), contact.getEmail1(), contact.getEmail1() });
-            final SearchIterator<Contact> iterator = contactInterface.getContactsByExtendedSearch(searchObject, 0, null, null, COLUMNS);
+        	final CompositeSearchTerm orTerm = new CompositeSearchTerm(CompositeOperation.OR);
+        	for (final ContactField field : SEARCH_FIELDS) {        		
+        		final SingleSearchTerm term = new SingleSearchTerm(SingleOperation.EQUALS);
+        		term.addOperand(new ContactFieldOperand(field));
+        		term.addOperand(new ConstantOperand<String>(contact.getEmail1()));
+        		orTerm.addSearchTerm(term);
+        	}
+        	final SearchIterator<Contact> iterator = contactService.searchContacts(session, orTerm, FIELDS);
             try {
                 if (iterator.hasNext()) {
                     foundContact = iterator.next();
@@ -240,7 +251,7 @@ public class Memorizer implements Runnable {
                 final OCLPermission perm = folderAccess.getFolderPermission(folderId, session.getUserId(), userConfig);
                 if (perm.canCreateObjects()) {
                     contact.setUseCount(1);
-                    contactInterface.insertContactObject(contact);
+                    contactService.createContact(session, Integer.toString(contact.getParentFolderID()), contact);
                     retval = contact.getObjectID();
                 } else {
                     retval = -1;
@@ -255,7 +266,8 @@ public class Memorizer implements Runnable {
             final OCLPermission perm =
                 new OXFolderAccess(ctx).getFolderPermission(foundContact.getParentFolderID(), session.getUserId(), userConfig);
             if (perm.canWriteAllObjects()) {
-                contactInterface.updateContactObject(foundContact, foundContact.getParentFolderID(), foundContact.getLastModified());
+                contactService.updateContact(session, Integer.toString(contact.getParentFolderID()), 
+                		Integer.toString(foundContact.getObjectID()), foundContact, foundContact.getLastModified());
             }
             retval = foundContact.getObjectID();
         }

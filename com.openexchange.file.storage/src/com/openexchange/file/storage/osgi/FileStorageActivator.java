@@ -61,11 +61,11 @@ import com.openexchange.osgi.HousekeepingActivator;
  */
 public final class FileStorageActivator extends HousekeepingActivator {
 
-    private OSGIFileStorageServiceRegistry registry;
+    private volatile OSGIFileStorageServiceRegistry registry;
 
-    private OSGIFileStorageAccountManagerLookupService lookupService;
+    private volatile OSGIFileStorageAccountManagerLookupService lookupService;
 
-    private OSGIEventAdminLookup eventAdminLookup;
+    private volatile OSGIEventAdminLookup eventAdminLookup;
 
     /**
      * Initializes a new {@link FileStorageActivator}.
@@ -76,13 +76,12 @@ public final class FileStorageActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        // TODO Auto-generated method stub
-        return null;
+        return EMPTY_CLASSES;
     }
 
     @Override
     protected void startBundle() throws Exception {
-        final org.apache.commons.logging.Log log = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(FileStorageActivator.class));
+        final org.apache.commons.logging.Log log = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(FileStorageActivator.class));
         try {
             if (log.isInfoEnabled()) {
                 log.info("starting bundle: com.openexchange.file.storage");
@@ -90,15 +89,18 @@ public final class FileStorageActivator extends HousekeepingActivator {
             /*
              * Start registry tracking
              */
-            registry = new OSGIFileStorageServiceRegistry();
+            final OSGIFileStorageServiceRegistry registry = new OSGIFileStorageServiceRegistry();
             registry.start(context);
+            this.registry = registry;
             /*
              * Start provider tracking
              */
-            eventAdminLookup = new OSGIEventAdminLookup();
+            final OSGIEventAdminLookup eventAdminLookup = new OSGIEventAdminLookup();
             eventAdminLookup.start(context);
-            lookupService = new OSGIFileStorageAccountManagerLookupService(eventAdminLookup);
+            final OSGIFileStorageAccountManagerLookupService lookupService = new OSGIFileStorageAccountManagerLookupService(eventAdminLookup);
             lookupService.start(context);
+            this.eventAdminLookup = eventAdminLookup;
+            this.lookupService = lookupService;
             /*
              * Register services
              */
@@ -112,7 +114,7 @@ public final class FileStorageActivator extends HousekeepingActivator {
 
     @Override
     public void stopBundle() throws Exception {
-        final org.apache.commons.logging.Log log = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(FileStorageActivator.class));
+        final org.apache.commons.logging.Log log = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(FileStorageActivator.class));
         try {
             if (log.isInfoEnabled()) {
                 log.info("stopping bundle: com.openexchange.file.storage");
@@ -121,21 +123,25 @@ public final class FileStorageActivator extends HousekeepingActivator {
             /*
              * Stop look-up service
              */
+            final OSGIFileStorageAccountManagerLookupService lookupService = this.lookupService;
             if (null != lookupService) {
                 lookupService.stop();
-                lookupService = null;
+                this.lookupService = null;
             }
             /*
              * Stop registry
              */
+            final OSGIFileStorageServiceRegistry registry = this.registry;
             if (null != registry) {
                 registry.stop();
-                registry = null;
+                this.registry = null;
             }
+            final OSGIEventAdminLookup eventAdminLookup = this.eventAdminLookup;
             if (null != eventAdminLookup) {
                 eventAdminLookup.stop();
-                eventAdminLookup = null;
+                this.eventAdminLookup = null;
             }
+            cleanUp();
         } catch (final Exception e) {
             log.error("Stopping bundle \"com.openexchange.file.storage\" failed.", e);
             throw e;

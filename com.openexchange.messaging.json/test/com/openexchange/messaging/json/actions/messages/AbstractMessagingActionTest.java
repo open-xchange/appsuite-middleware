@@ -55,6 +55,8 @@ import junit.framework.TestCase;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.contexts.SimContext;
+import com.openexchange.groupware.ldap.SimUser;
 import com.openexchange.messaging.MessagingAccountAccess;
 import com.openexchange.messaging.MessagingField;
 import com.openexchange.messaging.MessagingService;
@@ -74,13 +76,13 @@ public abstract class AbstractMessagingActionTest extends TestCase {
     protected MessagingServiceRegistry registry = TestRegistryBuilder.buildTestRegistry();
 
     protected AJAXRequestResult perform(final AJAXRequestData req) throws OXException {
-        final SimServerSession session = new SimServerSession(null, null, null);
+        final SimServerSession session = new SimServerSession(new SimContext(1), new SimUser(), null);
         return getAction().perform(req, session);
     }
 
     protected void assertFails(final AJAXRequestData requestData) throws OXException {
         final AbstractMessagingAction action = getAction();
-        final SimServerSession session = new SimServerSession(null, null, null);
+        final SimServerSession session = new SimServerSession(new SimContext(1), new SimUser(), null);
         try {
             final AJAXRequestResult result = action.perform(requestData, session);
             fail("Should have thrown exception");

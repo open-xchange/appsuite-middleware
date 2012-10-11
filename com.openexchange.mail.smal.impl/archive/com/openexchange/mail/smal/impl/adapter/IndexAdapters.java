@@ -68,7 +68,7 @@ public final class IndexAdapters {
     private static final Locale DEFAULT_LOCALE = LanguageDetectionService.DEFAULT_LOCALE;
 
     private static final org.apache.commons.logging.Log LOG =
-        com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(IndexAdapters.class));
+        com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(IndexAdapters.class));
 
     private static final boolean DEBUG = LOG.isDebugEnabled();
 

@@ -14,7 +14,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import com.openexchange.log.LogFactory;
 
 import com.openexchange.admin.contextrestore.dataobjects.VersionInformation;
 import com.openexchange.admin.contextrestore.rmi.exceptions.OXContextRestoreException;
@@ -24,8 +24,8 @@ import com.openexchange.admin.contextrestore.storage.sqlStorage.OXContextRestore
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.exceptions.PoolException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
-import com.openexchange.database.DBPoolingException;
 import com.openexchange.databaseold.Database;
+import com.openexchange.exception.OXException;
 
 /**
  * This class contains all the mysql database related code
@@ -87,7 +87,7 @@ public final class OXContextRestoreMySQLStorage extends OXContextRestoreSQLStora
         } catch (final FileNotFoundException e) {
             dorollback(connection, connection2, e);
             throw e;
-        } catch (final DBPoolingException e) {
+        } catch (final OXException e) {
             dorollback(connection, connection2, e);
             throw new StorageException(new PoolException(e.getMessage()));
         } catch (final IOException e) {
@@ -152,7 +152,7 @@ public final class OXContextRestoreMySQLStorage extends OXContextRestoreSQLStora
                 throw new OXContextRestoreException(Code.NO_ENTRIES_IN_VERSION_TABLE);
             }
             
-        } catch (final DBPoolingException e) {
+        } catch (final OXException e) {
             throw new StorageException(new PoolException(e.getMessage()));
         } finally {
             if (null != prepareStatement) {

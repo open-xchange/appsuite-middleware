@@ -79,7 +79,7 @@ import com.openexchange.threadpool.ThreadPoolService;
  */
 public final class ThreadPoolServiceImpl implements ThreadPoolService {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(ThreadPoolServiceImpl.class));
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(ThreadPoolServiceImpl.class));
 
     /**
      * Creates a new {@link ThreadPoolServiceImpl} with the given properties.

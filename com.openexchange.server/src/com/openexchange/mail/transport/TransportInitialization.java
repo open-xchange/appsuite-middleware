@@ -63,7 +63,7 @@ import com.openexchange.server.Initialization;
  */
 public final class TransportInitialization implements Initialization {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(TransportInitialization.class));
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(TransportInitialization.class));
 
     private static final TransportInitialization instance = new TransportInitialization();
 

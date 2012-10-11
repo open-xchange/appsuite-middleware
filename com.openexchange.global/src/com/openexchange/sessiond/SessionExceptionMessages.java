@@ -58,9 +58,10 @@ import com.openexchange.i18n.LocalizableStrings;
  */
 public final class SessionExceptionMessages implements LocalizableStrings {
 
-    public static final String SESSIOND_EXCEPTION_MSG = "Sessiond Exception";
+    public static final String SESSIOND_EXCEPTION_MSG = "Sessiond exception";
 
-    public static final String MAX_SESSION_EXCEPTION_MSG = "Max Session size reached";
+    // Maximum number of sessions elapsed
+    public static final String MAX_SESSION_EXCEPTION_MSG = "Maximum number of sessions elapsed";
 
     public static final String SESSIOND_CONFIG_EXCEPTION_MSG = "Sessiond Config Exception";
 
@@ -70,9 +71,9 @@ public final class SessionExceptionMessages implements LocalizableStrings {
 
     public static final String PASSWORD_UPDATE_FAILED_MSG = "Password could not be changed";
 
-    public static final String MAX_SESSION_PER_USER_EXCEPTION_MSG = "Max. session size for user %1$s in context %2$s exceeded";
+    public static final String MAX_SESSION_PER_USER_EXCEPTION_MSG = "Max. number of sessions exceeded for user %1$s in context %2$s";
 
-    public static final String DUPLICATE_AUTHID_MSG = "Found duplicate used authentication identifier. Login of existing session: %1$s. Current denied login request: %2$s.";
+    public static final String DUPLICATE_AUTHID_MSG = "Authentication identifier duplicate found. Existing session login: %1$s. Current denied login request: %2$s.";
 
     // This message is thrown if an inconsistancy in SessionD bundle is detected when it returns the wrong session for a given session identifier.
     // %1$s session identifier of returned session.
@@ -102,7 +103,7 @@ public final class SessionExceptionMessages implements LocalizableStrings {
     public static final String WRONG_SESSION_SECRET_MSG = "Your session was invalidated. Please try again.";
 
     // Max. number of sessions exceeded for client %1$s of user %2$s in context %3$s exceeded
-    public static final String MAX_SESSION_PER_CLIENT_EXCEPTION_MSG = "Max. number of sessions exceeded for client %1$s of user %2$s in context %3$s exceeded";
+    public static final String MAX_SESSION_PER_CLIENT_EXCEPTION_MSG = "Max. number of sessions exceeded for client %1$s of user %2$s in context %3$s";
 
     private SessionExceptionMessages() {
         super();

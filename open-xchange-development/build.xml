@@ -3,56 +3,44 @@
     <description>
         Open-Xchange Collaboration Suite Server Development Configuration
     </description>
+	
+    <target name="init">
+    	<pathconvert targetos="unix" property="basedir.unix">
+    		<path location="${basedir}"/>
+    	</pathconvert>
+    	<echo message="baseDir: ${basedir.unix}" />
+        <property name="tmpDir" value="${basedir.unix}/tmp"/>
+    	<echo message="tmpDir: ${tmpDir}" />
+        <property name="confDir" value="${basedir.unix}/conf"/>
+    	<echo message="confDir: ${confDir}" />
+    	<property name="solrDir" value="${basedir.unix}/solr" />
+    	<echo message="solrDir: ${solrDir}" />
+    	<property name="snappyDir" value="${basedir.unix}/snappy" />
+    	<echo message="snappyDir: ${snappyDir}" />
+    </target>
 
-    <!-- Directories -->
-    <property name="tmpDir" value="tmp"/>
-    <property name="adminTmpDir" value="adminTmp"/>
-    <property name="confDir" value="conf"/>
-    <property name="adminConfDir" value="adminConf"/>
-
-    <!-- Replacements -->
-    <property name="confInstallDir" value="${basedir}/${tmpDir}"/>
-
-    <!-- Data Retention property file -->
-    <property name="dataretention.properties" value="${basedir}/${tmpDir}/dataretention.properties"/>
-
-    <target name="prepare">
+    <target name="prepare" depends="init">
         <mkdir dir="${tmpDir}"/>
-        <mkdir dir="${adminTmpDir}"/>
     </target>
 
     <target name="patchConfig" depends="prepare">
-        <property name="patchConfDir" value="${tmpDir}"/>
-        <copy todir="${patchConfDir}" overwrite="true">
+        <copy todir="${tmpDir}" overwrite="true">
             <fileset dir="${confDir}"/>
         </copy>
         <antcall target="patchConfigFiles">
-            <param name="confSubstPatch" value="${confInstallDir}"/>
-            <param name="patchConfDir" value="${patchConfDir}"/>
-        </antcall>
-    </target>
-
-    <target name="patchAdminConfig" depends="prepare">
-        <property name="patchConfDir" value="${adminTmpDir}"/>
-        <copy todir="${patchConfDir}" overwrite="true">
-            <fileset dir="${adminConfDir}"/>
-        </copy>
-        <antcall target="patchAdminConfigFiles">
-            <param name="confAdminSubstPatch" value="${basedir}/${adminTmpDir}"/>
-            <param name="confGroupSubstPatch" value="${basedir}/${tmpDir}"/>
+            <param name="confSubstPatch" value="${tmpDir}"/>
+            <param name="patchConfDir" value="${tmpDir}"/>
         </antcall>
     </target>
 
     <target name="install">
         <antcall target="patchConfig"/>
-        <antcall target="patchAdminConfig"/>
     </target>
 
     <target name="default" depends="install"/>
 
-    <target name="clean">
+    <target name="clean" depends="init">
         <delete dir="${tmpDir}"/>
-        <delete dir="${adminTmpDir}"/>
     </target>
 
     <target name="patchConfigFiles">
@@ -60,19 +48,21 @@
     	<antcall target="patchCrawlerProperties"/>
         <antcall target="patchPath"/>
         <antcall target="patchDataRetentionProperties"/>
-    </target>
-
-    <target name="patchAdminConfigFiles">
-        <fail message="Define confGroupSubstPatch." unless="confGroupSubstPatch"/>
-        <fail message="Define confAdminSubstPatch." unless="confAdminSubstPatch"/>
-        <antcall target="patchAdminPath"/>
+        <antcall target="patchServerProperties"/>
+    	<antcall target="pathSolrProperties"/>
+    	<antcall target="pathSnappyProperties"/>
     </target>
 	
-	<target name="patchCrawlerProperties">
-        <move tofile="${patchConfDir}/crawler.properties" file="${patchConfDir}/crawler.properties.in" overwrite="true"/>
-        <replace file="${patchConfDir}/crawler.properties">
-            <replacefilter token="@oxgroupwaresysconfdir@" value="${basedir}"/>
-        </replace>
+	<target name="pathSolrProperties">
+		<replace dir="${patchConfDir}">
+		    <replacefilter token="@oxsolrdir@" value="${solrDir}"/>
+		</replace>
+	</target>
+	
+	<target name="pathSnappyProperties">
+		<replace dir="${patchConfDir}">
+		    <replacefilter token="@oxsnappydir@" value="${snappyDir}"/>
+		</replace>
 	</target>
 
     <target name="patchPath">
@@ -84,28 +74,26 @@
         </move>
         <replace dir="${patchConfDir}">
             <replacefilter token="@oxgroupwaresysconfdir@" value="${confSubstPatch}"/>
+            <replacefilter token="@oxconfdir@" value="${confSubstPatch}"/>
         </replace>
     </target>
 
-    <target name="patchAdminPath">
-        <move todir="${patchConfDir}" includeemptydirs="false">
-            <fileset dir="${patchConfDir}">
-                <include name="*.in"/>
-            </fileset>
-            <mapper type="glob" from="*.in" to="*"/>
-        </move>
-        <replace dir="${patchConfDir}">
-            <replacefilter token="$PWD/" value=""/>
-            <replacefilter token="INITIAL_OX_SQL_DIR=@oxconfdir@" value="INITIAL_OX_SQL_DIR=${basedir}/../com.openexchange.admin/etc"/>
-            <replacefilter token="@oxconfdir@" value="${confAdminSubstPatch}"/>
-            <replacefilter token="@serverconfdir@" value="${confGroupSubstPatch}"/>
-            <replacefilter token="@oxgroupwaresysconfdir@" value="${confGroupSubstPatch}"/>
+	<target name="patchServerProperties">
+    	<pathconvert targetos="unix" property="uploadDir">
+    		<path location="${java.io.tmpdir}"/>
+    	</pathconvert>
+        <replace file="${patchConfDir}/server.properties" token="UPLOAD_DIRECTORY=/tmp/" value="UPLOAD_DIRECTORY=${uploadDir}" />
+	</target>
+	
+	<target name="patchCrawlerProperties">
+        <move tofile="${patchConfDir}/crawler.properties" file="${patchConfDir}/crawler.properties" overwrite="true"/>
+        <replace file="${patchConfDir}/crawler.properties">
+            <replacefilter token="@oxgroupwaresysconfdir@" value="${basedir.unix}"/>
         </replace>
-    </target>
+	</target>
 
     <target name="patchDataRetentionProperties">
-        <replace file="${dataretention.properties}" token="com.openexchange.dataretention.dir=/var/log/open-xchange" value="com.openexchange.dataretention.dir=${confInstallDir}">
-        </replace>
+        <replace file="${patchConfDir}/dataretention.properties" token="com.openexchange.dataretention.dir=/var/log/open-xchange" value="com.openexchange.dataretention.dir=${patchConfDir}" />
     </target>
 
 </project>

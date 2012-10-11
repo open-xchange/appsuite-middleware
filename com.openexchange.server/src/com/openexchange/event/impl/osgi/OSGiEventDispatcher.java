@@ -49,12 +49,11 @@
 
 package com.openexchange.event.impl.osgi;
 
-import java.util.ArrayList;
 import java.util.Dictionary;
 import java.util.Hashtable;
-import java.util.List;
+import java.util.Queue;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.event.Event;
@@ -69,31 +68,32 @@ import com.openexchange.event.impl.TaskEventInterface2;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.tasks.Task;
+import com.openexchange.log.LogFactory;
 import com.openexchange.session.Session;
 
 /**
  * Grabs events from the OSGi Event Admin and disseminates them to server listeners. Only handles appointments, and has to be extended once
  * needed.
- *
+ * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class OSGiEventDispatcher implements EventHandlerRegistration, EventDispatcher {
 
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(OSGiEventDispatcher.class));
 
-    private final List<AppointmentEventInterface> appointmentListeners;
+    private final Queue<AppointmentEventInterface> appointmentListeners;
 
-    private final List<TaskEventInterface> taskListeners;
+    private final Queue<TaskEventInterface> taskListeners;
 
-    private ServiceRegistration serviceRegistration;
+    private volatile ServiceRegistration<EventHandler> serviceRegistration;
 
     /**
      * Initializes a new {@link OSGiEventDispatcher}.
      */
     public OSGiEventDispatcher() {
         super();
-        appointmentListeners = new ArrayList<AppointmentEventInterface>();
-        taskListeners = new ArrayList<TaskEventInterface>();
+        appointmentListeners = new ConcurrentLinkedQueue<AppointmentEventInterface>();
+        taskListeners = new ConcurrentLinkedQueue<TaskEventInterface>();
     }
 
     @Override
@@ -202,42 +202,43 @@ public class OSGiEventDispatcher implements EventHandlerRegistration, EventDispa
     public void handleEvent(final Event event) {
         try {
             final CommonEvent commonEvent = (CommonEvent) event.getProperty(CommonEvent.EVENT_KEY);
+            if (commonEvent != null) {
+                final Object actionObj = commonEvent.getActionObj();
+                final Object oldObj = commonEvent.getOldObj();
+                final Session session = commonEvent.getSession();
 
-            final Object actionObj = commonEvent.getActionObj();
-            final Object oldObj = commonEvent.getOldObj();
-            final Session session = commonEvent.getSession();
-
-            final int module = commonEvent.getModule();
-            final int action = commonEvent.getAction();
-            if (Types.APPOINTMENT == module) {
-                if (CommonEvent.INSERT == action) {
-                    created((Appointment) actionObj, session);
-                } else if (CommonEvent.UPDATE == action || CommonEvent.MOVE == action) {
-                    modified((Appointment) oldObj, (Appointment) actionObj, session);
-                } else if (CommonEvent.DELETE == action) {
-                    deleted((Appointment) actionObj, session);
-                } else if (CommonEvent.CONFIRM_ACCEPTED == action) {
-                    accepted((Appointment) actionObj, session);
-                } else if (CommonEvent.CONFIRM_DECLINED == action) {
-                    declined((Appointment) actionObj, session);
-                } else if (CommonEvent.CONFIRM_TENTATIVE == action) {
-                    tentativelyAccepted((Appointment) actionObj, session);
-                } else if (CommonEvent.CONFIRM_WAITING == action) {
-                    waiting((Appointment) actionObj, session);
-                }
-            } else if (Types.TASK == module) {
-                if (CommonEvent.INSERT == action) {
-                    created((Task) actionObj, session);
-                } else if (CommonEvent.UPDATE == action || CommonEvent.MOVE == action) {
-                    modified((Task) oldObj, (Task) actionObj, session);
-                } else if (CommonEvent.DELETE == action) {
-                    deleted((Task) actionObj, session);
-                } else if (CommonEvent.CONFIRM_ACCEPTED == action) {
-                    accepted((Task) oldObj, (Task) actionObj, session);
-                } else if (CommonEvent.CONFIRM_DECLINED == action) {
-                    declined((Task) oldObj, (Task) actionObj, session);
-                } else if (CommonEvent.CONFIRM_TENTATIVE == action) {
-                    tentativelyAccepted((Task) oldObj, (Task) actionObj, session);
+                final int module = commonEvent.getModule();
+                final int action = commonEvent.getAction();
+                if (Types.APPOINTMENT == module) {
+                    if (CommonEvent.INSERT == action) {
+                        created((Appointment) actionObj, session);
+                    } else if (CommonEvent.UPDATE == action || CommonEvent.MOVE == action) {
+                        modified((Appointment) oldObj, (Appointment) actionObj, session);
+                    } else if (CommonEvent.DELETE == action) {
+                        deleted((Appointment) actionObj, session);
+                    } else if (CommonEvent.CONFIRM_ACCEPTED == action) {
+                        accepted((Appointment) actionObj, session);
+                    } else if (CommonEvent.CONFIRM_DECLINED == action) {
+                        declined((Appointment) actionObj, session);
+                    } else if (CommonEvent.CONFIRM_TENTATIVE == action) {
+                        tentativelyAccepted((Appointment) actionObj, session);
+                    } else if (CommonEvent.CONFIRM_WAITING == action) {
+                        waiting((Appointment) actionObj, session);
+                    }
+                } else if (Types.TASK == module) {
+                    if (CommonEvent.INSERT == action) {
+                        created((Task) actionObj, session);
+                    } else if (CommonEvent.UPDATE == action || CommonEvent.MOVE == action) {
+                        modified((Task) oldObj, (Task) actionObj, session);
+                    } else if (CommonEvent.DELETE == action) {
+                        deleted((Task) actionObj, session);
+                    } else if (CommonEvent.CONFIRM_ACCEPTED == action) {
+                        accepted((Task) oldObj, (Task) actionObj, session);
+                    } else if (CommonEvent.CONFIRM_DECLINED == action) {
+                        declined((Task) oldObj, (Task) actionObj, session);
+                    } else if (CommonEvent.CONFIRM_TENTATIVE == action) {
+                        tentativelyAccepted((Task) oldObj, (Task) actionObj, session);
+                    }
                 }
             }
         } catch (final Exception e) {
@@ -251,14 +252,15 @@ public class OSGiEventDispatcher implements EventHandlerRegistration, EventDispa
     public void registerService(final BundleContext context) {
         final Dictionary<String, Object> serviceProperties = new Hashtable<String, Object>(1);
         serviceProperties.put(EventConstants.EVENT_TOPIC, new String[] { "com/openexchange/groupware/*" });
-        serviceRegistration = context.registerService(EventHandler.class.getName(), this, serviceProperties);
+        serviceRegistration = context.registerService(EventHandler.class, this, serviceProperties);
     }
 
     @Override
     public void unregisterService() {
+        final ServiceRegistration<EventHandler> serviceRegistration = this.serviceRegistration;
         if (null != serviceRegistration) {
             serviceRegistration.unregister();
-            serviceRegistration = null;
+            this.serviceRegistration = null;
         }
     }
 }

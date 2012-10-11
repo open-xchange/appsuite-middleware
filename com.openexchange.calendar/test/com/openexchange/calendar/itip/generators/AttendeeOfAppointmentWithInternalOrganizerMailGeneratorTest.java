@@ -49,10 +49,7 @@
 
 package com.openexchange.calendar.itip.generators;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.*;
 import static com.openexchange.time.TimeTools.*;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -134,19 +131,7 @@ public class AttendeeOfAppointmentWithInternalOrganizerMailGeneratorTest extends
         NotificationMailGenerator generator = new NotificationMailGenerator(null, null, resolver, util, original, appointment, user, user, null, session);
         NotificationMail notificationMail =  generator.generateUpdateMailFor("external1@otherdomain.ox");
 
-        assertNotNull(notificationMail);
-        assertEquals("external1@otherdomain.ox", notificationMail.getRecipient().getEmail());
-        assertEquals("organizer@domain.ox", notificationMail.getSender().getEmail());
-        assertEquals(appointment.getObjectID(), notificationMail.getAppointment().getObjectID());
-        
-        ITipMessage message = notificationMail.getMessage();
-        assertNotNull(message);
-        assertEquals(ITipMethod.REQUEST, message.getMethod());
-        assertEquals(appointment.getObjectID(), message.getAppointment().getObjectID());
-    
-        assertEquals("notify.appointment.accept", notificationMail.getTemplateName());
-
-
+        assertNull(notificationMail);
     }
     
     private void confirmFor(String email, ConfirmStatus status, Appointment appointment) {
@@ -309,6 +294,7 @@ public class AttendeeOfAppointmentWithInternalOrganizerMailGeneratorTest extends
 
     public static final class MockParticipantResolver implements NotificationParticipantResolver {
 
+        @Override
         public List<NotificationParticipant> resolveAllRecipients(Appointment original, Appointment appointment, User user, User onBehalfOf, Context ctx) {
             return new ArrayList<NotificationParticipant>(Arrays.asList(
                 new NotificationParticipant(ITipRole.ORGANIZER, false, "organizer@domain.ox", 11),
@@ -328,6 +314,7 @@ public class AttendeeOfAppointmentWithInternalOrganizerMailGeneratorTest extends
             return new NotificationParticipant(ITipRole.ATTENDEE, false, "internal1@domain.ox", 13);
         }
 
+        @Override
         public List<NotificationParticipant> getAllParticipants(List<NotificationParticipant> allRecipients, Appointment appointment, User user, Context ctx) {
             return allRecipients;
         }
@@ -335,6 +322,7 @@ public class AttendeeOfAppointmentWithInternalOrganizerMailGeneratorTest extends
         /* (non-Javadoc)
          * @see com.openexchange.calendar.itip.generators.NotificationParticipantResolver#getResources(com.openexchange.groupware.container.Appointment, com.openexchange.groupware.contexts.Context)
          */
+        @Override
         public List<NotificationParticipant> getResources(Appointment appointment, Context ctx) throws OXException {
             // TODO Auto-generated method stub
             return null;

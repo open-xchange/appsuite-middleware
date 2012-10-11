@@ -50,7 +50,7 @@
 package com.openexchange.contact.storage.osgi;
 
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import com.openexchange.log.LogFactory;
 import com.openexchange.contact.storage.ContactStorage;
 import com.openexchange.contact.storage.internal.DefaultContactStorageRegistry;
 import com.openexchange.contact.storage.registry.ContactStorageRegistry;

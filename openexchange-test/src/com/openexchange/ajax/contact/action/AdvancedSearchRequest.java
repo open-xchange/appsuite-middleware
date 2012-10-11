@@ -52,14 +52,18 @@ public class AdvancedSearchRequest extends AbstractContactRequest<SearchResponse
 			throws IOException, JSONException {
 		Params params = new Params(
 				AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_TERMSEARCH);
-		if(columns != null)
-			params.add(AJAXServlet.PARAMETER_COLUMNS, Strings.join(columns, ","));
-		if (orderBy != -1)
-			params.add(AJAXServlet.PARAMETER_SORT, String.valueOf(orderBy));
-		if (orderDir != null)
-			params.add(AJAXServlet.PARAMETER_ORDER, orderDir);
-		if (collation != null)
-			params.add(AJAXServlet.PARAMETER_COLLATION, collation);
+		if(columns != null) {
+            params.add(AJAXServlet.PARAMETER_COLUMNS, Strings.join(columns, ","));
+        }
+		if (orderBy != -1) {
+            params.add(AJAXServlet.PARAMETER_SORT, String.valueOf(orderBy));
+        }
+		if (orderDir != null) {
+            params.add(AJAXServlet.PARAMETER_ORDER, orderDir);
+        }
+		if (collation != null) {
+            params.add(AJAXServlet.PARAMETER_COLLATION, collation);
+        }
 
 		return params.toArray();
 	}

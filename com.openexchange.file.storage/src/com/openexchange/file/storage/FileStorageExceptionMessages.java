@@ -105,11 +105,11 @@ public final class FileStorageExceptionMessages implements LocalizableStrings {
     //  Missing parameter: %1$s
     public static final String MISSING_PARAMETER_MSG = "Missing parameter: %1$s.";
 
-    // Invalid parameter: %1$s with value '%2$s'.
-    public static final String INVALID_PARAMETER_MSG = "Invalid parameter: %1$s with value '%2$s'.";
+    // Invalid parameter: %1$s with type '%2$s'. Expected '%3$s'.
+    public static final String INVALID_PARAMETER_MSG = "Invalid parameter: %1$s with type '%2$s'. Expected '%3$s'.";
 
     // File part is read-only: %1$s
-    public static final String READ_ONLY_MSG = "File part is read-only.: %1$s";
+    public static final String READ_ONLY_MSG = "File part is read-only: %1$s";
 
     // Unknown color label index: %1$s
     public static final String UNKNOWN_COLOR_LABEL_MSG = "Unknown color label index: %1$s";
@@ -137,6 +137,9 @@ public final class FileStorageExceptionMessages implements LocalizableStrings {
 
     // Invalid URL "%1$s". Error: %2$s.
     public static final String INVALID_URL_MSG = "Invalid URL \"%1$s\". Error: %2$s.";
+
+    // No such folder.
+    public static final String NO_SUCH_FOLDER_MSG = "No such folder.";
 
     /**
      * Initializes a new {@link OXExceptionMessages}.

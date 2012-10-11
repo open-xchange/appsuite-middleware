@@ -50,6 +50,7 @@
 package com.openexchange.ajax.container;
 
 import java.io.InputStream;
+import com.openexchange.java.Streams;
 
 /**
  * {@link FileHolder} - The basic {@link IFileHolder} implementation.
@@ -68,6 +69,8 @@ public class FileHolder implements IFileHolder {
     private String name;
 
     private String disposition;
+
+    private String delivery;
 
     /**
      * Initializes a new {@link FileHolder}.
@@ -101,6 +104,7 @@ public class FileHolder implements IFileHolder {
      * @param is The input stream
      */
     public void setStream(final InputStream is) {
+        Streams.close(this.is);
         this.is = is;
     }
 
@@ -158,6 +162,20 @@ public class FileHolder implements IFileHolder {
      */
     public void setDisposition(final String disposition) {
         this.disposition = disposition;
+    }  
+
+    /**
+     * Sets the delivery
+     *
+     * @param delivery The delivery to set
+     */
+    public void setDelivery(String delivery) {
+        this.delivery = delivery;
+    }
+
+    @Override
+    public String getDelivery() {
+        return delivery;
     }
 
 }

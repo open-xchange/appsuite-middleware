@@ -18,6 +18,7 @@ package org.apache.tika.parser.pkg;
 
 import java.io.InputStream;
 
+import org.apache.tika.metadata.HttpHeaders;
 import org.apache.tika.metadata.Metadata;
 import org.apache.tika.parser.AutoDetectParser;
 import org.apache.tika.parser.Parser;
@@ -42,7 +43,7 @@ public class TarParserTest extends AbstractPkgTest {
             stream.close();
         }
 
-        assertEquals("application/x-tar", metadata.get(Metadata.CONTENT_TYPE));
+        assertEquals("application/x-tar", metadata.get(HttpHeaders.CONTENT_TYPE));
         String content = handler.toString();
         assertTrue(content.contains("test-documents/testEXCEL.xls"));
         assertTrue(content.contains("Sample Excel Worksheet"));
@@ -80,11 +81,11 @@ public class TarParserTest extends AbstractPkgTest {
        } finally {
            stream.close();
        }
-
+       
        // Should have found all 9 documents, but not the directory
        assertEquals(9, tracker.filenames.size());
        assertEquals(9, tracker.mediatypes.size());
-
+       
        // Should have names but not content types, as tar doesn't
        //  store the content types
        assertEquals("test-documents/testEXCEL.xls", tracker.filenames.get(0));
@@ -96,7 +97,7 @@ public class TarParserTest extends AbstractPkgTest {
        assertEquals("test-documents/testTXT.txt", tracker.filenames.get(6));
        assertEquals("test-documents/testWORD.doc", tracker.filenames.get(7));
        assertEquals("test-documents/testXML.xml", tracker.filenames.get(8));
-
+       
        for(String type : tracker.mediatypes) {
           assertNull(type);
        }

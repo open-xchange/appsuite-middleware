@@ -59,8 +59,6 @@ import java.sql.SQLException;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextImpl;
-import com.openexchange.groupware.downgrade.DowngradeEvent;
-import com.openexchange.groupware.downgrade.DowngradeRegistry;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.server.impl.DBPool;
@@ -73,7 +71,7 @@ import com.openexchange.server.impl.DBPool;
 public class RdbUserConfigurationStorage extends UserConfigurationStorage {
 
     private static final org.apache.commons.logging.Log LOG =
-        org.apache.commons.logging.LogFactory.getLog(RdbUserConfigurationStorage.class);
+        com.openexchange.log.LogFactory.getLog(RdbUserConfigurationStorage.class);
 
     /**
      * Initializes a new {@link RdbUserConfigurationStorage}

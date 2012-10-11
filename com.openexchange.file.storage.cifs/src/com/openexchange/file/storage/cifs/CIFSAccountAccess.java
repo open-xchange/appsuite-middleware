@@ -72,7 +72,7 @@ import com.openexchange.session.Session;
  */
 public final class CIFSAccountAccess implements FileStorageAccountAccess {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(CIFSAccountAccess.class));
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(CIFSAccountAccess.class));
 
     /*-
      * Member stuff

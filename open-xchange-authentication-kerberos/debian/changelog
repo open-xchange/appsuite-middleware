@@ -1,0 +1,47 @@
+open-xchange-authentication-kerberos (6.22.0-5) unstable; urgency=low
+
+  * Fifth release candidate for 6.22.0
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Wed, 10 Oct 2012 11:23:53 +0200
+
+open-xchange-authentication-kerberos (6.22.0-4) unstable; urgency=low
+
+  * Fourth release candidate for 6.22.0
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Tue, 09 Oct 2012 15:16:15 +0200
+
+open-xchange-authentication-kerberos (6.22.0-3) unstable; urgency=low
+
+  * Third release candidate for 6.22.0
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Fri, 05 Oct 2012 15:03:31 +0200
+
+open-xchange-authentication-kerberos (6.22.0-2) unstable; urgency=low
+
+  * Second release candidate for 6.22.0
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Thu, 04 Oct 2012 18:55:01 +0200
+
+open-xchange-authentication-kerberos (6.22.0-1) unstable; urgency=low
+
+  * First release candidate for 6.22.0
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Tue, 21 Aug 2012 09:19:19 +0200
+
+open-xchange-authentication-kerberos (6.22.0-0) unstable; urgency=low
+
+  * prepare for 6.22.0
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Mon, 20 Aug 2012 16:18:37 +0200
+
+open-xchange-authentication-kerberos (6.21.0-1) unstable; urgency=low
+
+  * Release build for EDP drop #2
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Tue, 03 Jul 2012 18:44:05 +0200
+
+open-xchange-authentication-kerberos (6.21.0-0) unstable; urgency=low
+
+  * Initial package.
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Mon, 25 Jun 2012 16:40:11 +0200

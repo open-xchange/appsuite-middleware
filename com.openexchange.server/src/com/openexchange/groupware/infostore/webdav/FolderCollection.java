@@ -62,7 +62,7 @@ import java.util.Set;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import com.openexchange.log.LogFactory;
 
 import com.openexchange.cache.impl.FolderCacheManager;
 import com.openexchange.database.provider.DBProvider;
@@ -428,6 +428,9 @@ public class FolderCollection extends AbstractCollection implements OXWebdavReso
             }
             propertyHelper.dumpPropertiesToDB();
 			lockHelper.dumpLocksToDB();
+			exists = true;
+		} catch (WebdavProtocolException x) {
+			throw x;
 		} catch (final Exception x) {
 		    throw WebdavProtocolException.generalError(x, url, HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 		}

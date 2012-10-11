@@ -112,8 +112,8 @@ public class HTMLWrapper extends PassthroughWrapper {
         }
         return "unknown";
 	}
-    
-    private String wrap(String string, Object argument) {
+
+	private String wrap(String string, Object argument) {
         if (argument == null) {
             return "";
         }

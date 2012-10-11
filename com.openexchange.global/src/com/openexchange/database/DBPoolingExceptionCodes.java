@@ -65,15 +65,15 @@ public enum DBPoolingExceptionCodes {
      */
     NO_CONFIG_DB(NO_CONFIG_DB_MSG, Category.CATEGORY_SERVICE_DOWN, 1),
     /**
-     * Resolving database for context %1$d and server %2$d not possible!
+     * Database for context %1$d and server %2$d can not be resolved
      */
     RESOLVE_FAILED(RESOLVE_FAILED_MSG, Category.CATEGORY_ERROR, 2),
     /**
-     * Cannot get connection to database %d.
+     * No connection to database %1$d
      */
     NO_CONNECTION(NO_CONNECTION_MSG, Category.CATEGORY_SERVICE_DOWN, 3),
     /**
-     * Cannot set schema in database connection.
+     * Schema can not be set on database connection
      */
     SCHEMA_FAILED(SCHEMA_FAILED_MSG, Category.CATEGORY_CONNECTIVITY, 4),
     /**
@@ -93,7 +93,7 @@ public enum DBPoolingExceptionCodes {
      */
     NO_DRIVER(NO_DRIVER_MSG, Category.CATEGORY_CONFIGURATION, 8),
     /**
-     * Cannot return connection to pool %d.
+     * Connection to pool %1$d can not be returned
      */
     RETURN_FAILED(RETURN_FAILED_MSG, Category.CATEGORY_ERROR, 9),
     /**
@@ -107,7 +107,7 @@ public enum DBPoolingExceptionCodes {
     /**
      * Connection used for %1$d milliseconds.
      */
-    TOO_LONG(TOO_LONG_MSG, Category.CATEGORY_SERVICE_DOWN, 12),
+    TOO_LONG(TOO_LONG_MSG, Category.CATEGORY_WARNING, 12),
     /**
      * %1$d statements aren't closed.
      */
@@ -143,7 +143,11 @@ public enum DBPoolingExceptionCodes {
     /**
      * Transaction counter is missing for context %1$d.
      */
-    TRANSACTION_MISSING(TRANSACTION_MISSING_MSG, Category.CATEGORY_CONFIGURATION, 21);
+    TRANSACTION_MISSING(TRANSACTION_MISSING_MSG, Category.CATEGORY_CONFIGURATION, 21),
+    /**
+     * Inserting database assignment for context %1$d and server %2$d failed!
+     */
+    INSERT_FAILED(INSERT_FAILED_MSG, Category.CATEGORY_ERROR, 22);
 
     /**
      * Message of the exception.
@@ -203,7 +207,10 @@ public enum DBPoolingExceptionCodes {
         return create(null, logArguments);
     }
 
-    private static final String PREFIX = "CAC";
+    /**
+     * The prefix code.
+     */
+    public static final String PREFIX = "DBP";
 
     /**
      * Creates an {@link OXException} instance using this error code.

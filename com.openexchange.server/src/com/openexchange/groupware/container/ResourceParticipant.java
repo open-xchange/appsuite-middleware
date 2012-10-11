@@ -58,6 +58,8 @@ import com.openexchange.resource.Resource;
  */
 public class ResourceParticipant implements Participant, Comparable<Participant> {
 
+    private static final long serialVersionUID = 4133897083017380091L;
+
     private int id = NO_ID;
 
     private String displayName;
@@ -97,7 +99,9 @@ public class ResourceParticipant implements Participant, Comparable<Participant>
 
     /**
      * {@inheritDoc}
+     * @deprecated
      */
+    @Deprecated
     @Override
     public void setIdentifier(final int id) {
         this.id = id;
@@ -132,14 +136,14 @@ public class ResourceParticipant implements Participant, Comparable<Participant>
      */
     @Override
     public String getEmailAddress() {
-        return emailaddress;
+        return emailaddress == null ? null : emailaddress.toLowerCase();
     }
 
     /**
      * {@inheritDoc}
      */
     public void setEmailAddress(final String emailaddress) {
-        this.emailaddress = emailaddress;
+        this.emailaddress = emailaddress == null ? null : emailaddress.toLowerCase();
     }
 
     /**
@@ -189,13 +193,20 @@ public class ResourceParticipant implements Participant, Comparable<Participant>
     }
 
     @Override
-    public Object clone() throws CloneNotSupportedException {
-        return super.clone();
+    public ResourceParticipant clone() throws CloneNotSupportedException {
+        ResourceParticipant retval = (ResourceParticipant) super.clone();
+
+        retval.setDisplayName(this.getDisplayName());
+        retval.setEmailAddress(this.getEmailAddress());
+        retval.setIdentifier(this.getIdentifier());
+        retval.setIgnoreNotification(this.isIgnoreNotification());
+
+        return retval;
     }
 
     @Override
     public Participant getClone() throws CloneNotSupportedException {
-        return (Participant) clone();
+        return clone();
     }
 
     @Override

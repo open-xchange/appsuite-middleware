@@ -67,6 +67,7 @@ public final class ConditionTree {
 
     private static final Condition CONDITION_ADMIN = new Condition() {
 
+        @Override
         public boolean fulfilled(final Permission p) {
             return p.admin;
         }
@@ -74,6 +75,7 @@ public final class ConditionTree {
 
     private static final Condition CONDITION_READ_FOLDER = new Condition() {
 
+        @Override
         public boolean fulfilled(final Permission p) {
             return p.readFolder;
         }

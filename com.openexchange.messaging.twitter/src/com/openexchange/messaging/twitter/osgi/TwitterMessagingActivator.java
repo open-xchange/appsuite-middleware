@@ -93,7 +93,7 @@ public final class TwitterMessagingActivator extends HousekeepingActivator {
 
     @Override
     protected void handleAvailability(final Class<?> clazz) {
-        final org.apache.commons.logging.Log logger = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(TwitterMessagingActivator.class));
+        final org.apache.commons.logging.Log logger = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(TwitterMessagingActivator.class));
         if (logger.isInfoEnabled()) {
             logger.info("Re-available service: " + clazz.getName());
         }
@@ -102,7 +102,7 @@ public final class TwitterMessagingActivator extends HousekeepingActivator {
 
     @Override
     protected void handleUnavailability(final Class<?> clazz) {
-        final org.apache.commons.logging.Log logger = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(TwitterMessagingActivator.class));
+        final org.apache.commons.logging.Log logger = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(TwitterMessagingActivator.class));
         if (logger.isWarnEnabled()) {
             logger.warn("Absent service: " + clazz.getName());
         }
@@ -140,7 +140,7 @@ public final class TwitterMessagingActivator extends HousekeepingActivator {
             registerService(OAuthAccountDeleteListener.class, new TwitterOAuthAccountDeleteListener(), null);
             registerService(OAuthAccountInvalidationListener.class, new TwitterOAuthAccountDeleteListener(), null);
         } catch (final Exception e) {
-            com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(TwitterMessagingActivator.class)).error(
+            com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(TwitterMessagingActivator.class)).error(
                 e.getMessage(),
                 e);
             throw e;
@@ -159,7 +159,7 @@ public final class TwitterMessagingActivator extends HousekeepingActivator {
              */
             getServiceRegistry().clearRegistry();
         } catch (final Exception e) {
-            com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(TwitterMessagingActivator.class)).error(
+            com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(TwitterMessagingActivator.class)).error(
                 e.getMessage(),
                 e);
             throw e;

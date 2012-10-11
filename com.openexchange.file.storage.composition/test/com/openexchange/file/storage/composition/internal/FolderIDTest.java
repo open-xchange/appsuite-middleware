@@ -51,6 +51,7 @@ package com.openexchange.file.storage.composition.internal;
 
 import static org.junit.Assert.assertEquals;
 import org.junit.Test;
+import com.openexchange.file.storage.composition.FolderID;
 
 /**
  * {@link FolderIDTest}

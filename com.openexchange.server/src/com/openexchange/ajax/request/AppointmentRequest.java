@@ -65,7 +65,7 @@ import java.util.List;
 import java.util.TimeZone;
 import java.util.regex.Pattern;
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import com.openexchange.log.LogFactory;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -244,7 +244,7 @@ public class AppointmentRequest extends CalendarRequest {
         final JSONObject jsonResponseObj = new JSONObject();
 
         if (conflicts == null) {
-            jsonResponseObj.put(AppointmentFields.ID, appointmentObj.getObjectID());
+            jsonResponseObj.put(DataFields.ID, appointmentObj.getObjectID());
             timestamp = appointmentObj.getLastModified();
         } else {
             final JSONArray jsonConflictArray = new JSONArray();
@@ -289,7 +289,7 @@ public class AppointmentRequest extends CalendarRequest {
         final JSONObject jsonResponseObj = new JSONObject();
 
         if (conflicts == null) {
-            jsonResponseObj.put(AppointmentFields.ID, appointmentObj.getObjectID());
+            jsonResponseObj.put(DataFields.ID, appointmentObj.getObjectID());
             timestamp = appointmentObj.getLastModified();
         } else {
             final JSONArray jsonConflictArray = new JSONArray();
@@ -752,7 +752,7 @@ public class AppointmentRequest extends CalendarRequest {
 
                 // Workaround to fill appointments with alarm times
                 // TODO: Move me down into the right layer if there is time for some refactoring.
-                if (com.openexchange.tools.arrays.Arrays.contains(columns, Appointment.ALARM)) {
+                if (com.openexchange.tools.arrays.Arrays.contains(columns, CalendarObject.ALARM)) {
                     if (!appointment.containsAlarm() && appointment.containsUserParticipants()) {
                         final OXFolderAccess ofa = new OXFolderAccess(ctx);
 
@@ -917,7 +917,7 @@ public class AppointmentRequest extends CalendarRequest {
                     0,
                     0,
                     recurrencePosition,
-                    recColl.MAX_OCCURRENCESE,
+                    CalendarCollectionService.MAX_OCCURRENCESE,
                     true);
                 if (recuResults.size() == 0) {
                     if (LOG.isWarnEnabled()) {
@@ -1257,7 +1257,7 @@ public class AppointmentRequest extends CalendarRequest {
                 jsonConflictArray.put(jsonAppointmentObj);
             }
         } else {
-            jsonResponseObj.put(AppointmentFields.ID, appointmentObj.getObjectID());
+            jsonResponseObj.put(DataFields.ID, appointmentObj.getObjectID());
             timestamp = appointmentObj.getLastModified();
         }
 

@@ -49,8 +49,8 @@
 
 package com.openexchange.publish.osgi;
 
-import com.openexchange.api2.ContactInterfaceFactory;
 import com.openexchange.caching.CacheService;
+import com.openexchange.contact.ContactService;
 import com.openexchange.groupware.infostore.InfostoreFacade;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.publish.PublicationDataLoaderService;
@@ -79,7 +79,7 @@ public class LoaderActivator extends HousekeepingActivator {
         compositeLoader.registerLoader("infostore/object", new InfostoreDocumentLoader(infostore, users, userConfigs));
         compositeLoader.registerLoader("infostore", new InfostoreFolderLoader(infostore, users, userConfigs));
 
-        final ContactFolderLoader contactLoader = new ContactFolderLoader(getService(ContactInterfaceFactory.class));
+        final ContactFolderLoader contactLoader = new ContactFolderLoader(getService(ContactService.class));
         compositeLoader.registerLoader("contacts", contactLoader);
 
         registerService(PublicationDataLoaderService.class, new CachingLoader(this, compositeLoader), null);
@@ -92,7 +92,7 @@ public class LoaderActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class[] { CacheService.class, InfostoreFacade.class, UserService.class, UserConfigurationService.class };
+        return new Class[] { CacheService.class, InfostoreFacade.class, UserService.class, UserConfigurationService.class, ContactService.class };
     }
 
 }

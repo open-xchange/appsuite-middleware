@@ -58,9 +58,11 @@ import com.openexchange.contacts.ldap.ldap.LdapGetter;
 import com.openexchange.contacts.ldap.property.FolderProperties;
 import com.openexchange.contacts.ldap.property.Mappings;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.container.CommonObject;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.DataObject;
 import com.openexchange.groupware.container.DistributionListEntryObject;
+import com.openexchange.groupware.container.FolderChildObject;
 
 
 /**
@@ -71,7 +73,7 @@ import com.openexchange.groupware.container.DistributionListEntryObject;
  */
 public class Mapper {
 
-    protected static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(Mapper.class));
+    protected static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(Mapper.class));
 
     public interface SetterDateClosure {
 
@@ -641,7 +643,7 @@ public class Mapper {
                 retval.setTelephonePrimary(attribute);
             }
         });
-        stringSetter(parameterObject, mappings.getCategories(), Contact.CATEGORIES, new SetterClosure() {
+        stringSetter(parameterObject, mappings.getCategories(), CommonObject.CATEGORIES, new SetterClosure() {
             @Override
             public void set(final String attribute) {
                 retval.setCategories(attribute);
@@ -776,10 +778,10 @@ public class Mapper {
      */
     // protected to be able to test this
     protected static void commonParts(final Set<Integer> cols, final int folderid, final int adminid, final Contact retval, final Mappings mappings, final LdapGetter getter) throws OXException {
-        if (cols.contains(Contact.FOLDER_ID)) {
+        if (cols.contains(FolderChildObject.FOLDER_ID)) {
             retval.setParentFolderID(folderid);
         }
-        if (cols.contains(Contact.CREATED_BY)) {
+        if (cols.contains(DataObject.CREATED_BY)) {
             retval.setCreatedBy(adminid);
         }
 

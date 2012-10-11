@@ -332,8 +332,9 @@ public class TaskTestManager implements TestManager{
         for (int i = 0; i < columns.length; i++) {
             int column = columns[i];
             Mapper attributeMapping = Mapping.getMapping(column);
-            if (taskAsArray.isNull(i) || attributeMapping == null || taskAsArray.get(i) == null)
+            if (taskAsArray.isNull(i) || attributeMapping == null || taskAsArray.get(i) == null) {
                 continue;
+            }
             // FIXME the following method does not honor, that the backend sends shifted timestamps for JavaScript.
             // FIXME set time zone in frontend to Pacific/Honolulu and some tests fail!
             Object newValue = transformColumn(column, taskAsArray.get(i));
@@ -361,8 +362,9 @@ public class TaskTestManager implements TestManager{
      */
     public Task findTaskByID(int id, List<Task> tasks) {
         for (Task task : tasks) {
-            if (id == task.getObjectID())
+            if (id == task.getObjectID()) {
                 return task;
+            }
         }
         fail("Task with id=" + id + " not found");
         return null;
@@ -399,21 +401,26 @@ public class TaskTestManager implements TestManager{
             lastException = exc;
             throw exc;
         } catch (OXException e) {
-            if (getFailOnError())
+            if (getFailOnError()) {
                 fail("AJAXException during " + action + ": " + e.getMessage());
+            }
         } catch (IOException e) {
-            if (getFailOnError())
+            if (getFailOnError()) {
                 fail("IOException during " + action + ": " + e.getMessage());
+            }
         } catch (SAXException e) {
-            if (getFailOnError())
+            if (getFailOnError()) {
                 fail("SAXException during " + action + ": " + e.getMessage());
+            }
         } catch (JSONException e) {
-            if (getFailOnError())
+            if (getFailOnError()) {
                 fail("JSONException during " + action + ": " + e.getMessage());
+            }
         } catch (Exception e) {
             e.printStackTrace();
-            if (getFailOnError())
+            if (getFailOnError()) {
                 fail("Unexpected exception during " + action + ": " + e.getMessage());
+            }
         }
     }
 

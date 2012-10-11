@@ -91,7 +91,7 @@ public class ICalParserBugTests extends AbstractICalParserTest {
         "CLASS"    ,    "PRIVATE",
         "ATTENDEE" ,     "MAILTO:mickey@disney.invalid");
 
-        assertWarningWhenParsingAppointment(icalText, "Private Appointments can not have attendees. Removing attendees and accepting appointment anyway.");
+        assertWarningWhenParsingAppointment(icalText, "Private appointments can not have attendees. Removing attendees and accepting appointment anyway.");
 
         final Appointment appointment = parseAppointment(icalText);
 
@@ -237,10 +237,12 @@ public class ICalParserBugTests extends AbstractICalParserTest {
             assertEquals("Organizer should match", "ChinShimVeron.Koh@some-it.invalid", appointment.getOrganizer());
             boolean choegerFound = false, holgerFound = false;
             for(Participant p : appointment.getParticipants()){
-                if(p.getEmailAddress().matches("choeger@open-xchange.com"))
+                if(p.getEmailAddress().matches("choeger@open-xchange.com")) {
                     choegerFound = true;
-                if(p.getEmailAddress().matches("Holger.Achtziger@open-xchange.com"))
+                }
+                if(p.getEmailAddress().matches("Holger.Achtziger@open-xchange.com")) {
                     holgerFound = true;
+                }
             }
             assertTrue("Should contain CHoeger", choegerFound);
             assertTrue("Should contain Holger", holgerFound);

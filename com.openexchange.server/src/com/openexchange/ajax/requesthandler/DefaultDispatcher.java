@@ -57,6 +57,7 @@ import java.util.List;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.regex.Pattern;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Java7ConcurrentLinkedQueue;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
@@ -70,7 +71,7 @@ import com.openexchange.tools.session.ServerSession;
 public class DefaultDispatcher implements Dispatcher {
 
     private static final org.apache.commons.logging.Log LOG =
-        com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(DefaultDispatcher.class));
+        com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(DefaultDispatcher.class));
 
     private final ConcurrentMap<String, AJAXActionServiceFactory> actionFactories;
 
@@ -92,7 +93,9 @@ public class DefaultDispatcher implements Dispatcher {
 
     @Override
     public void end(final AJAXState state) {
-        state.close();
+        if (null != state) {
+            state.close();
+        }
     }
 
     @Override
@@ -145,7 +148,7 @@ public class DefaultDispatcher implements Dispatcher {
          */
         final AJAXActionService action = factory.createActionService(modifiedRequestData.getAction());
         if (action == null) {
-            throw AjaxExceptionCodes.UNKNOWN_ACTION.create(modifiedRequestData.getAction());
+            throw AjaxExceptionCodes.UNKNOWN_ACTION_IN_MODULE.create(modifiedRequestData.getAction(), modifiedRequestData.getModule());
         }
         /*
          * Is it possible to serve request by ETag?
@@ -216,11 +219,13 @@ public class DefaultDispatcher implements Dispatcher {
         return result;
     }
 
+    private static final Pattern SPLIT_SLASH = Pattern.compile("/");
+
     private AJAXActionServiceFactory lookupFactory(final String module) {
         AJAXActionServiceFactory serviceFactory = actionFactories.get(module);
         if (serviceFactory == null && module.contains("/")) {
             // Fallback for backwards compatibility. File Download Actions sometimes append the filename to the module.
-            serviceFactory = actionFactories.get(module.split("/")[0]);
+            serviceFactory = actionFactories.get(SPLIT_SLASH.split(module, 0)[0]);
         }
         return serviceFactory;
     }
@@ -242,19 +247,31 @@ public class DefaultDispatcher implements Dispatcher {
         synchronized (actionFactories) {
             AJAXActionServiceFactory current = actionFactories.putIfAbsent(module, factory);
             if (null != current) {
-                try {
-                    current = actionFactories.get(module);
-                    final CombinedActionFactory combinedFactory;
-                    if (current instanceof CombinedActionFactory) {
-                        combinedFactory = (CombinedActionFactory) current;
-                    } else {
-                        combinedFactory = new CombinedActionFactory();
-                        combinedFactory.add(current);
-                        actionFactories.put(module, combinedFactory);
+                synchronized (actionFactories) {
+                    try {
+                        current = actionFactories.get(module);
+                        final Module moduleAnnotation = current.getClass().getAnnotation(Module.class);
+                        if (null == moduleAnnotation) {
+                            final StringBuilder sb = new StringBuilder(512).append("There is already a factory associated with module \"");
+                            sb.append(module).append("\": ").append(current.getClass().getName());
+                            sb.append(". Therefore registration is denied for factory \"").append(factory.getClass().getName());
+                            sb.append("\". Unless these two factories provide the \"").append(Module.class.getName()).append(
+                                "\" annotation to specify what actions are supported by each factory.");
+                            LOG.warn(sb.toString());
+                        } else {
+                            final CombinedActionFactory combinedFactory;
+                            if (current instanceof CombinedActionFactory) {
+                                combinedFactory = (CombinedActionFactory) current;
+                            } else {
+                                combinedFactory = new CombinedActionFactory();
+                                combinedFactory.add(current);
+                                actionFactories.put(module, combinedFactory);
+                            }
+                            combinedFactory.add(factory);
+                        }
+                    } catch (final IllegalArgumentException e) {
+                        LOG.error(e.getMessage());
                     }
-                    combinedFactory.add(factory);
-                } catch (final IllegalArgumentException e) {
-                    LOG.error(e.getMessage());
                 }
             }
         }
@@ -299,6 +316,19 @@ public class DefaultDispatcher implements Dispatcher {
         	return false;
         }
 		return actionMetadata.allowPublicSession();
+	}
+	
+	@Override
+    public boolean mayOmitSession(final String module, final String action) throws OXException {
+		final AJAXActionServiceFactory factory = lookupFactory(module);
+        if (factory == null) {
+            return false;
+        }
+        final DispatcherNotes actionMetadata = getActionMetadata(factory.createActionService(action));
+        if (actionMetadata == null) {
+        	return false;
+        }
+		return actionMetadata.noSession();
 	}
 
 }

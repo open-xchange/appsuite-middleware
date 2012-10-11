@@ -51,9 +51,11 @@ package com.openexchange.publish.impl;
 
 import java.util.Collection;
 import java.util.LinkedList;
-import com.openexchange.api2.ContactInterfaceFactory;
+
+import com.openexchange.contact.ContactService;
+import com.openexchange.contact.SortOptions;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.contact.ContactInterface;
+import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.search.Order;
 import com.openexchange.publish.Publication;
@@ -70,15 +72,15 @@ import com.openexchange.tools.iterator.SearchIterator;
  */
 public class ContactFolderLoader implements PublicationDataLoaderService {
 
-    private final ContactInterfaceFactory factory;
+    private final ContactService contactService;
 
     /**
      * Initializes a new {@link ContactFolderLoader}.
      * @param contacts
      */
-    public ContactFolderLoader(final ContactInterfaceFactory contacts) {
+    public ContactFolderLoader(final ContactService contactService) {
         super();
-        this.factory = contacts;
+        this.contactService = contactService;
     }
 
     /* (non-Javadoc)
@@ -88,16 +90,22 @@ public class ContactFolderLoader implements PublicationDataLoaderService {
     public Collection<? extends Object> load(final Publication publication) throws OXException {
         final LinkedList<Contact> list = new LinkedList<Contact>();
         try {
-            final int folderId = Integer.parseInt(publication.getEntityId());
-            final ContactInterface contacts = factory.create(folderId, new PublicationSession(publication));
-            final int numberOfContacts = contacts.getNumberOfContacts(folderId);
-            final SearchIterator<Contact> contactsInFolder = contacts.getContactsInFolder(folderId, 0, numberOfContacts, Contact.GIVEN_NAME, Order.ASCENDING, null, Contact.ALL_COLUMNS);
-            while(contactsInFolder.hasNext()) {
-                final Contact next = contactsInFolder.next();
-                if(!next.getMarkAsDistribtuionlist()) {
-                    list.add(next);
-                }
-            }
+        	
+        	SearchIterator<Contact> searchIterator = null;
+        	try {
+        		searchIterator = contactService.getAllContacts(new PublicationSession(publication), publication.getEntityId(), 
+        				new SortOptions(ContactField.GIVEN_NAME, Order.ASCENDING));
+        		while (searchIterator.hasNext()) {
+                    final Contact next = searchIterator.next();
+                    if(!next.getMarkAsDistribtuionlist()) {
+                        list.add(next);
+                    }
+        		}
+        	} finally {
+        		if (null != searchIterator) {
+        			searchIterator.close();
+        		}
+        	}
         } catch (final OXException e) {
             throw e;
         }

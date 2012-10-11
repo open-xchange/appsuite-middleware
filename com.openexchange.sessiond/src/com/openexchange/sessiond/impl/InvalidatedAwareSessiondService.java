@@ -52,22 +52,21 @@ package com.openexchange.sessiond.impl;
 import java.util.Collection;
 import java.util.Collections;
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.log.LogFactory;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.AddSessionParameter;
 import com.openexchange.sessiond.SessionMatcher;
-import com.openexchange.sessiond.SessiondService;
+import com.openexchange.sessiond.SessiondServiceExtended;
 import com.openexchange.sessiond.cache.SessionCache;
-
 
 /**
  * {@link InvalidatedAwareSessiondService}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class InvalidatedAwareSessiondService implements SessiondService {
+public final class InvalidatedAwareSessiondService implements SessiondServiceExtended {
 
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(InvalidatedAwareSessiondService.class));
 
@@ -108,6 +107,12 @@ public final class InvalidatedAwareSessiondService implements SessiondService {
     }
 
     @Override
+    public boolean hasForContext(final int contextId) {
+        checkInvalidatedAndRemoveIfPresent(contextId);
+        return impl.hasForContext(contextId);
+    }
+
+    @Override
     public String addSession(final AddSessionParameter param) throws OXException {
         checkInvalidatedAndRemoveIfPresent(param.getContext().getContextId());
         return impl.addSession(param);
@@ -117,17 +122,6 @@ public final class InvalidatedAwareSessiondService implements SessiondService {
     public void changeSessionPassword(final String sessionId, final String newPassword) throws OXException {
         impl.getSession(sessionId); // Invoked to implicitly check for invalidated-marker
         impl.changeSessionPassword(sessionId, newPassword);
-    }
-
-    @Override
-    public boolean refreshSession(final String sessionId) {
-        // Check for refreshed session's validity
-        final Session session = impl.getSession(sessionId);
-        if (null == session || checkInvalidatedAndRemoveIfPresent(session.getContextId())) {
-            // Eh... ?
-            return false;
-        }
-        return true;
     }
 
     @Override
@@ -234,11 +228,6 @@ public final class InvalidatedAwareSessiondService implements SessiondService {
 
     @Override
     public String toString() {
-        return impl.toString();
+        return InvalidatedAwareSessiondService.class.getName() + "," + impl.toString();
     }
-
-    
-
-    
-
 }

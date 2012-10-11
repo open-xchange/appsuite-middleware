@@ -49,17 +49,13 @@
 
 package com.openexchange.groupware.importexport;
 
-import com.openexchange.exception.OXException;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
-
 import java.util.List;
-
 import junit.framework.JUnit4TestAdapter;
-
 import org.junit.Test;
-
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.importexport.csv.CSVParser;
 
 /**
@@ -111,7 +107,7 @@ public class CSVParserTest {
 			parser.parse();
 		} catch (final OXException e){
 			assertTrue("Exception caught" , true);
-			assertEquals("Correct exception thrown" , "I_E-1000" , e.getErrorCode());
+			assertEquals("Correct exception thrown" , "CSV-1000" , e.getErrorCode());
 			return;
 		}
 		fail("Unparsable CSV given, but no exception thrown!");
@@ -125,7 +121,7 @@ public class CSVParserTest {
 			parser.parse();
 		} catch (final OXException e){
 			assertTrue("Exception caught" , true);
-			assertEquals("Correct exception thrown" , "I_E-1000" , e.getErrorCode());
+			assertEquals("Correct exception thrown" , "CSV-1000" , e.getErrorCode());
 			return;
 		}
 		fail("Unparsable CSV given, but no exception thrown!");

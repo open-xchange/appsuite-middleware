@@ -65,9 +65,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.SortedSet;
 import java.util.TreeSet;
-import javax.activation.MimetypesFileTypeMap;
+import javax.activation.FileTypeMap;
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import com.openexchange.database.provider.DBProvider;
 import com.openexchange.database.tx.DBService;
 import com.openexchange.exception.OXException;
@@ -90,6 +89,7 @@ import com.openexchange.groupware.results.Delta;
 import com.openexchange.groupware.results.DeltaImpl;
 import com.openexchange.groupware.results.TimedResult;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
+import com.openexchange.log.LogFactory;
 import com.openexchange.session.Session;
 import com.openexchange.tools.file.FileStorage;
 import com.openexchange.tools.file.QuotaFileStorage;
@@ -534,7 +534,7 @@ public class AttachmentBaseImpl extends DBService implements AttachmentBase {
         if (attachment.getFilename() != null && (attachment.getFileMIMEType() == null || attachment.getFileMIMEType().equals(
             "application/unknown"))) {
             // Try guessing by filename
-            final String mimetypes = MimetypesFileTypeMap.getDefaultFileTypeMap().getContentType(attachment.getFilename());
+            final String mimetypes = FileTypeMap.getDefaultFileTypeMap().getContentType(attachment.getFilename());
             attachment.setFileMIMEType(mimetypes);
         }
     }

@@ -143,7 +143,8 @@ public final class CapabilitiesCache {
         private CacheKey getKeyInternal() {
             CacheKey tmp = key;
             if (null == tmp) {
-                key = tmp = IMAPServiceRegistry.getService(CacheService.class).newCacheKey(MailCacheCode.CAPS.getCode(), user);
+                final CacheService service = IMAPServiceRegistry.getService(CacheService.class);
+                key = tmp = null == service ? null : service.newCacheKey(MailCacheCode.CAPS.getCode(), user);
             }
             return tmp;
         }

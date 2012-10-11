@@ -64,7 +64,7 @@ public final class AJPv13ServletInputStream extends ServletInputStream {
 
     private static final byte[] EMPTY_BYTES = new byte[0];
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(AJPv13ServletInputStream.class));
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(AJPv13ServletInputStream.class));
 
     private final AJPv13Connection ajpCon;
 

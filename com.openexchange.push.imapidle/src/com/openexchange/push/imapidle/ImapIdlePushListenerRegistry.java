@@ -57,7 +57,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import com.openexchange.log.LogFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.push.PushListener;
 import com.openexchange.push.PushUtility;
@@ -162,7 +162,7 @@ public final class ImapIdlePushListenerRegistry {
             try {
                 l.open();
             } catch (final OXException e) {
-                com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(ImapIdlePushListenerRegistry.class)).error(
+                com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(ImapIdlePushListenerRegistry.class)).error(
                     MessageFormat.format("Opening IMAP IDLE listener failed. Removing listener from registry: {0}", l.toString()),
                     e);
                 i.remove();

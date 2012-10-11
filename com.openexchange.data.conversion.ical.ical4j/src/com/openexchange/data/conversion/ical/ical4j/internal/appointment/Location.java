@@ -79,7 +79,7 @@ public class Location extends AbstractVerifyingAttributeConverter<VEvent, Appoin
 
     @Override
     public boolean hasProperty(final VEvent event) {
-        return event.getLocation() != null;
+        return event.getLocation() != null && event.getProperty("LOCATION").getValue().length() > 0;
     }
 
     @Override

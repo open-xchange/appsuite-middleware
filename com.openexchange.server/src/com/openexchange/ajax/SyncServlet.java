@@ -61,6 +61,7 @@ import org.json.JSONException;
 import org.json.JSONWriter;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.helper.ParamContainer;
+import com.openexchange.ajax.requesthandler.DefaultDispatcherPrefixService;
 import com.openexchange.ajax.writer.ResponseWriter;
 import com.openexchange.api2.sync.FolderSyncInterface;
 import com.openexchange.api2.sync.RdbFolderSyncInterface;
@@ -91,7 +92,7 @@ public class SyncServlet extends PermissionServlet {
 
 	private static final long serialVersionUID = 8749478304854849616L;
 
-	private static final transient org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
+	private static final transient org.apache.commons.logging.Log LOG = com.openexchange.log.LogFactory
 			.getLog(SyncServlet.class);
 
 	public static final String ACTION_REFRESH_SERVER = "refresh_server";
@@ -158,7 +159,7 @@ public class SyncServlet extends PermissionServlet {
 			actionPutClearFolderContent(req, resp);
 		} else {
 			throw getWrappingOXException(new Exception("Action \"" + actionStr
-					+ "\" NOT supported via PUT on /ajax/sync"));
+					+ "\" NOT supported via PUT on "+DefaultDispatcherPrefixService.getInstance().getPrefix() + "sync"));
 		}
 	}
 

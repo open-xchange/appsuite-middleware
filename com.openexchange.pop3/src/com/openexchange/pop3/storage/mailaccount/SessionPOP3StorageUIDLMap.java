@@ -54,11 +54,11 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import com.openexchange.exception.OXException;
-import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.pop3.POP3Access;
 import com.openexchange.pop3.services.POP3ServiceRegistry;
 import com.openexchange.pop3.storage.FullnameUIDPair;
@@ -85,36 +85,29 @@ public final class SessionPOP3StorageUIDLMap implements POP3StorageUIDLMap {
         final Session session = pop3Access.getSession();
         final String key = SessionParameterNames.getUIDLMap(pop3Access.getAccountId());
         SessionPOP3StorageUIDLMap cached;
-        final Lock lock = (Lock) session.getParameter(Session.PARAM_LOCK);
+        Lock lock = (Lock) session.getParameter(Session.PARAM_LOCK);
         if (null == lock) {
-            synchronized (session) {
-                try {
-                    cached = (SessionPOP3StorageUIDLMap) session.getParameter(key);
-                } catch (final ClassCastException e) {
-                    cached = null;
-                }
-                if (null == cached) {
-                    cached = new SessionPOP3StorageUIDLMap(new RdbPOP3StorageUIDLMap(pop3Access), session, key);
-                    session.setParameter(key, cached);
-                }
-            }
-        } else {
-            lock.lock();
+            lock = Session.EMPTY_LOCK;
+        }
+        lock.lock();
+        try {
             try {
-                try {
-                    cached = (SessionPOP3StorageUIDLMap) session.getParameter(key);
-                } catch (final ClassCastException e) {
-                    cached = null;
-                }
-                if (null == cached) {
-                    cached = new SessionPOP3StorageUIDLMap(new RdbPOP3StorageUIDLMap(pop3Access), session, key);
-                    session.setParameter(key, cached);
-                }
-            } finally {
-                lock.unlock();
+                cached = (SessionPOP3StorageUIDLMap) session.getParameter(key);
+            } catch (final ClassCastException e) {
+                cached = null;
             }
+            if (null == cached) {
+                cached = new SessionPOP3StorageUIDLMap(new RdbPOP3StorageUIDLMap(pop3Access));
+                session.setParameter(key, cached);
+            }
+        } finally {
+            lock.unlock();
         }
         return cached;
+    }
+
+    static enum Mode {
+        NONE,RE_INIT,START_TIMER;
     }
 
     /*-
@@ -129,23 +122,29 @@ public final class SessionPOP3StorageUIDLMap implements POP3StorageUIDLMap {
 
     private final ReadWriteLock rwLock;
 
-    private final int[] mode;
+    private final AtomicReference<Mode> mode;
 
-    private SessionPOP3StorageUIDLMap(final POP3StorageUIDLMap delegatee, final Session session, final String key) throws OXException {
+    private SessionPOP3StorageUIDLMap(final POP3StorageUIDLMap delegatee) throws OXException {
         super();
         rwLock = new ReentrantReadWriteLock();
         this.delegatee = delegatee;
         pair2uidl = new ConcurrentHashMap<FullnameUIDPair, String>();
         uidl2pair = new ConcurrentHashMap<String, FullnameUIDPair>();
-        mode = new int[] { 1 };
-        final ClearMapsRunnable cmr = new ClearMapsRunnable(session, key, uidl2pair, pair2uidl, rwLock, mode);
+        mode = new AtomicReference<Mode>(Mode.RE_INIT);
+        initTimerTask();
+        init();
+    }
+
+    private void initTimerTask() {
+        final ClearMapsRunnable cmr = new ClearMapsRunnable(uidl2pair, pair2uidl, rwLock, mode);
+        final TimerService timerService = POP3ServiceRegistry.getServiceRegistry().getService(TimerService.class);
         final ScheduledTimerTask timerTask =
-            POP3ServiceRegistry.getServiceRegistry().getService(TimerService.class).scheduleWithFixedDelay(
+            timerService.scheduleWithFixedDelay(
                 cmr,
-                SessionCacheProperties.SCHEDULED_TASK_INITIAL_DELAY,
+                SessionCacheProperties.SCHEDULED_TASK_DELAY,
                 SessionCacheProperties.SCHEDULED_TASK_DELAY);
         cmr.setTimerTask(timerTask);
-        init();
+        mode.set(Mode.RE_INIT);
     }
 
     private void init() throws OXException {
@@ -157,15 +156,15 @@ public final class SessionPOP3StorageUIDLMap implements POP3StorageUIDLMap {
             pair2uidl.put(entry.getValue(), entry.getKey());
             uidl2pair.put(entry.getKey(), entry.getValue());
         }
-        mode[0] = 0;
+        mode.set(Mode.NONE);
     }
 
     private void checkInit(final Lock obtainedReadLock) throws OXException {
-        final int m = mode[0];
-        if (-1 == m) {
-            throw MailExceptionCode.UNEXPECTED_ERROR.create("Error mode. Try again.");
+        final Mode m = mode.get();
+        if (Mode.START_TIMER == m) {
+            initTimerTask();
         }
-        if (1 == m) {
+        if (Mode.RE_INIT == m) {
             /*
              * Upgrade lock: unlock first to acquire write lock
              */
@@ -315,26 +314,20 @@ public final class SessionPOP3StorageUIDLMap implements POP3StorageUIDLMap {
 
     private static final class ClearMapsRunnable implements Runnable {
 
-        private final Session tsession;
-
-        private final String tkey;
-
         private final Map<String, FullnameUIDPair> tuidl2pair;
 
         private final Map<FullnameUIDPair, String> tpair2uidl;
 
         private final ReadWriteLock trwLock;
 
-        private final int[] tmode;
+        private final AtomicReference<Mode> tmode;
 
-        private ScheduledTimerTask timerTask;
+        private volatile ScheduledTimerTask timerTask;
 
         private int countEmptyRuns;
 
-        public ClearMapsRunnable(final Session tsession, final String tkey, final Map<String, FullnameUIDPair> tuidl2pair, final Map<FullnameUIDPair, String> tpair2uidl, final ReadWriteLock trwLock, final int[] tmode) {
+        public ClearMapsRunnable(final Map<String, FullnameUIDPair> tuidl2pair, final Map<FullnameUIDPair, String> tpair2uidl, final ReadWriteLock trwLock, final AtomicReference<Mode> tmode) {
             super();
-            this.tsession = tsession;
-            this.tkey = tkey;
             this.trwLock = trwLock;
             this.tuidl2pair = tuidl2pair;
             this.tpair2uidl = tpair2uidl;
@@ -349,11 +342,15 @@ public final class SessionPOP3StorageUIDLMap implements POP3StorageUIDLMap {
                 if (tuidl2pair.isEmpty() && tpair2uidl.isEmpty()) {
                     if (countEmptyRuns >= SessionCacheProperties.SCHEDULED_TASK_ALLOWED_EMPTY_RUNS) {
                         // Destroy!
-                        timerTask.cancel();
-                        synchronized (tsession) {
-                            tsession.setParameter(tkey, null);
-                            tmode[0] = -1;
+                        final ScheduledTimerTask timerTask = this.timerTask;
+                        if (null != timerTask) {
+                            timerTask.cancel();
                         }
+                        tmode.set(Mode.START_TIMER);
+                        // synchronized (tsession) {
+                        // tsession.setParameter(tkey, null);
+                        // tmode[0] = -1;
+                        // }
                     }
                     countEmptyRuns++;
                     return;
@@ -361,7 +358,7 @@ public final class SessionPOP3StorageUIDLMap implements POP3StorageUIDLMap {
                 countEmptyRuns = 0;
                 tuidl2pair.clear();
                 tpair2uidl.clear();
-                tmode[0] = 1;
+                tmode.set(Mode.RE_INIT);
             } finally {
                 writeLock.unlock();
             }

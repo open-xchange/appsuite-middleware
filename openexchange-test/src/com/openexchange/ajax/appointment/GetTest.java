@@ -59,6 +59,7 @@ import com.openexchange.ajax.ResourceTest;
 import com.openexchange.ajax.appointment.action.GetRequest;
 import com.openexchange.ajax.appointment.action.GetResponse;
 import com.openexchange.ajax.framework.AJAXClient;
+import com.openexchange.ajax.framework.AJAXClient.User;
 import com.openexchange.ajax.framework.AJAXSession;
 import com.openexchange.ajax.framework.Executor;
 import com.openexchange.ajax.group.GroupTest;
@@ -82,6 +83,7 @@ public class GetTest extends AppointmentTest {
 
     public void testGet() throws Exception {
         final Appointment appointmentObj = createAppointmentObject("testGet");
+        appointmentObj.setOrganizer(User.User1.name());
         final int objectId = insertAppointment(getWebConversation(), appointmentObj, timeZone, PROTOCOL + getHostName(), getSessionId());
 
         final Appointment loadAppointment = loadAppointment(getWebConversation(), objectId, appointmentFolderId, timeZone, PROTOCOL + getHostName(), getSessionId());
@@ -89,7 +91,7 @@ public class GetTest extends AppointmentTest {
         appointmentObj.setObjectID(objectId);
         compareObject(appointmentObj, loadAppointment, appointmentObj.getStartDate().getTime(), appointmentObj.getEndDate().getTime());
 
-        deleteAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getSessionId());
+        deleteAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getSessionId(), false);
     }
 
     public void testGetWithParticipants() throws Exception {
@@ -113,7 +115,7 @@ public class GetTest extends AppointmentTest {
         appointmentObj.setObjectID(objectId);
         compareObject(appointmentObj, loadAppointment, appointmentObj.getStartDate().getTime(), appointmentObj.getEndDate().getTime());
 
-        deleteAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getSessionId());
+        deleteAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getSessionId(), false);
     }
 
     public void testGetWithAllFields() throws Exception {
@@ -159,7 +161,7 @@ public class GetTest extends AppointmentTest {
         appointmentObj.setObjectID(objectId);
         compareObject(appointmentObj, loadAppointment, newStartTime, newEndTime);
 
-        deleteAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getSessionId());
+        deleteAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getSessionId(), false);
     }
 
     public void testGetWithAllFieldsOnUpdate() throws Exception {
@@ -212,7 +214,7 @@ public class GetTest extends AppointmentTest {
         appointmentObj.setParentFolderID(appointmentFolderId);
         compareObject(appointmentObj, loadAppointment, newStartTime, newEndTime);
 
-        deleteAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getSessionId());
+        deleteAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getSessionId(), false);
     }
 
     // Node 2652
@@ -233,7 +235,7 @@ public class GetTest extends AppointmentTest {
             assertTrue(appointment.has("last_modified_utc"));
 
         } finally {
-            deleteAppointment(getWebConversation(), objectId, appointmentFolderId, getHostName(), getSessionId());
+            deleteAppointment(getWebConversation(), objectId, appointmentFolderId, getHostName(), getSessionId(), false);
         }
     }
 }

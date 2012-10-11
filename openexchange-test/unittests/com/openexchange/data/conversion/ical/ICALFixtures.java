@@ -84,6 +84,10 @@ public class ICALFixtures {
         bob.append("DTEND:").append(dateTime.format(end)).append('\n');
     }
 
+    private void localDTStartAndDue(final StringBuilder bob, final Date start, final Date end) {
+        bob.append("DTSTART:").append(dateTime.format(start)).append('\n');
+        bob.append("DUE:").append(dateTime.format(end)).append('\n');
+    }
 
     public String veventWithUTCDTStartAndDTEnd(final Date start, final Date end) {
         final StringBuilder bob = new StringBuilder();
@@ -102,6 +106,11 @@ public class ICALFixtures {
     private void utcDTStartAndDTEnd(final StringBuilder bob, final Date start, final Date end) {
         bob.append("DTSTART:").append(dateTime.format(start)).append("Z\n");
         bob.append("DTEND:").append(dateTime.format(end)).append("Z\n");
+    }
+
+    private void utcDTStartAndDue(final StringBuilder bob, final Date start, final Date end) {
+        bob.append("DTSTART:").append(dateTime.format(start)).append("Z\n");
+        bob.append("DUE:").append(dateTime.format(end)).append("Z\n");
     }
 
 
@@ -139,6 +148,11 @@ public class ICALFixtures {
         bob.append("DTEND;TZID=").append(timeZone).append(':').append(dateTime.format(end)).append('\n');
     }
 
+    private void timezoneDTStartAndDue(final StringBuilder bob, final Date start, final Date end, final String timeZone) {
+        bob.append("DTSTART;TZID=").append(timeZone).append(':').append(dateTime.format(start)).append('\n');
+        bob.append("DUE;TZID=").append(timeZone).append(':').append(dateTime.format(end)).append('\n');
+    }
+
 
     public String veventWithDTStartAndDTEndInCustomTimezone(final Date start, final Date end) {
         final StringBuilder bob = new StringBuilder();
@@ -160,6 +174,11 @@ public class ICALFixtures {
     private void customTimezoneDTStartAndDTEnd(final StringBuilder bob, final Date start, final Date end) {
         bob.append("DTSTART;TZID=").append("/custom/Japan").append(':').append(dateTime.format(start)).append('\n');
         bob.append("DTEND;TZID=").append("/custom/Japan").append(':').append(dateTime.format(end)).append('\n');
+    }
+
+    private void customTimezoneDTStartAndDue(final StringBuilder bob, final Date start, final Date end) {
+        bob.append("DTSTART;TZID=").append("/custom/Japan").append(':').append(dateTime.format(start)).append('\n');
+        bob.append("DUE;TZID=").append("/custom/Japan").append(':').append(dateTime.format(end)).append('\n');
     }
 
 
@@ -378,13 +397,13 @@ public class ICALFixtures {
     }
 
 
-    public String vtodoWithLocalDTStartAndDTEnd(final Date start, final Date end) {
+    public String vtodoWithLocalDTStartAndDue(final Date start, final Date end) {
         final StringBuilder bob = new StringBuilder();
 
         beginCalendar(bob);
         beginTodo(bob);
 
-        localDTStartAndDTEnd(bob, start, end);
+        localDTStartAndDue(bob, start, end);
 
         endTodo(bob);
         endCalendar(bob);
@@ -392,13 +411,13 @@ public class ICALFixtures {
         return bob.toString();
     }
 
-    public String vtodoWithUTCDTStartAndDTEnd(final Date start, final Date end) {
+    public String vtodoWithUTCDTStartAndDue(final Date start, final Date end) {
         final StringBuilder bob = new StringBuilder();
 
         beginCalendar(bob);
         beginTodo(bob);
 
-        utcDTStartAndDTEnd(bob, start, end);
+        utcDTStartAndDue(bob, start, end);
 
         endTodo(bob);
         endCalendar(bob);
@@ -406,13 +425,13 @@ public class ICALFixtures {
         return bob.toString();
     }
 
-    public String vtodoWithDTStartAndEndInTimeZone(final Date start, final Date end, final TimeZone timeZone) {
+    public String vtodoWithDTStartAndDueInTimeZone(final Date start, final Date end, final TimeZone timeZone) {
         final StringBuilder bob = new StringBuilder();
 
         beginCalendar(bob);
         beginTodo(bob);
 
-        timezoneDTStartAndDTEnd(bob, start, end, timeZone.getID());
+        timezoneDTStartAndDue(bob, start, end, timeZone.getID());
 
         endTodo(bob);
         endCalendar(bob);
@@ -420,7 +439,7 @@ public class ICALFixtures {
         return bob.toString();
     }
 
-    public String vtodoWithDTStartAndDTEndInCustomTimezone(final Date start, final Date end) {
+    public String vtodoWithDTStartAndDueInCustomTimezone(final Date start, final Date end) {
         final StringBuilder bob = new StringBuilder();
 
         beginCalendar(bob);
@@ -429,7 +448,7 @@ public class ICALFixtures {
 
         beginTodo(bob);
 
-        customTimezoneDTStartAndDTEnd(bob, start, end);
+        customTimezoneDTStartAndDue(bob, start, end);
 
         endTodo(bob);
         endCalendar(bob);
@@ -548,7 +567,7 @@ public class ICALFixtures {
         beginCalendar(bob);
         beginTodo(bob);
 
-        utcDTStartAndDTEnd(bob, start, end);
+        utcDTStartAndDue(bob, start, end);
 
         bob.append("BEGIN:VALARM\n");
         bob.append(trigger).append('\n');

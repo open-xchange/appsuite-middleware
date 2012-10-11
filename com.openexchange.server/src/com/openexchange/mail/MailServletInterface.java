@@ -198,7 +198,7 @@ public abstract class MailServletInterface {
     /**
      * Returns a thread-view-sorted instance of <code>SearchIterator</code> containing all messages located in given folder.
      */
-    public abstract List<List<MailMessage>> getAllSimpleThreadStructuredMessages(String folder, int sortCol, int order, int[] fields) throws OXException;
+    public abstract List<List<MailMessage>> getAllSimpleThreadStructuredMessages(String folder, boolean includeSent, boolean cache, int sortCol, int order, int[] fields, int[] fromToIndices, long max) throws OXException;
 
     /**
      * Returns a thread-view-sorted instance of <code>SearchIterator</code> containing a selection of messages located in given folder.
@@ -336,9 +336,14 @@ public abstract class MailServletInterface {
     public abstract boolean deleteMessages(String folder, String[] msgUIDs, boolean hardDelete) throws OXException;
 
     /**
-     * Clears all messages out of given folder. <b>NOTE</b> this is a hard delete, thus no copies are created
+     * Clears all messages out of given folder.
      */
     public abstract boolean clearFolder(final String folderArg) throws OXException;
+
+    /**
+     * Clears all messages out of given folder.
+     */
+    public abstract boolean clearFolder(final String folderArg, boolean hardDelete) throws OXException;
 
     /**
      * Copies or moves (if <code>move</code> is set) the defined message from source folder to destination folder.

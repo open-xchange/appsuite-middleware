@@ -53,7 +53,7 @@ import static com.openexchange.java.Autoboxing.I;
 import java.io.File;
 import java.util.Properties;
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import com.openexchange.log.LogFactory;
 import com.openexchange.config.ConfigTools;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
@@ -94,6 +94,10 @@ public final class ServerConfig {
     private String jmxBindAddress;
 
     private Boolean checkIP;
+
+    private String ipMaskV4;
+
+    private String ipMaskV6;
 
     private final ClientWhitelist clientWhitelist;
 
@@ -173,6 +177,8 @@ public final class ServerConfig {
         jmxBindAddress = getPropertyInternal(Property.JMX_BIND_ADDRESS);
         // Check IP
         checkIP = Boolean.valueOf(getPropertyInternal(Property.IP_CHECK));
+        ipMaskV4 = getPropertyInternal(Property.IP_MASK_V4);
+        ipMaskV6 = getPropertyInternal(Property.IP_MASK_V6);
         // IP check whitelist
         clientWhitelist.clear();
         clientWhitelist.add(getPropertyInternal(Property.IP_CHECK_WHITELIST));
@@ -243,6 +249,12 @@ public final class ServerConfig {
             case IP_CHECK:
                 value = SINGLETON.checkIP;
                 break;
+            case IP_MASK_V4:
+                value = SINGLETON.ipMaskV4;
+                break;
+            case IP_MASK_V6:
+                value = SINGLETON.ipMaskV6;
+                break;
             case IP_CHECK_WHITELIST:
                 value = SINGLETON.clientWhitelist;
                 break;
@@ -301,6 +313,12 @@ public final class ServerConfig {
             break;
         case IP_CHECK:
             value = SINGLETON.checkIP.toString();
+            break;
+        case IP_MASK_V4:
+            value = SINGLETON.ipMaskV4.toString();
+            break;
+        case IP_MASK_V6:
+            value = SINGLETON.ipMaskV6.toString();
             break;
         case MAX_BODY_SIZE:
             value = Integer.toString(SINGLETON.maxBodySize);
@@ -454,6 +472,16 @@ public final class ServerConfig {
          * Setting this parameter to <code>false</code> will only log the different client IP addresses with debug level.
          */
         IP_CHECK("com.openexchange.IPCheck", Boolean.TRUE.toString()),
+        /**
+        * Subnet mask for accepting IP-ranges.
+        * Using CIDR-Notation for v4 and v6 or dotted decimal only for v4.
+        * Examples:
+        * com.openexchange.IPMaskV4=255.255.255.0
+        * com.openexchange.IPMaskV4=/24
+        * com.openexchange.IPMaskV6=/60
+        */
+        IP_MASK_V4("com.openexchange.IPMaskV4", ""),
+        IP_MASK_V6("com.openexchange.IPMaskV6", ""),
         /**
          * The comma-separated list of client patterns that do bypass IP check
          */

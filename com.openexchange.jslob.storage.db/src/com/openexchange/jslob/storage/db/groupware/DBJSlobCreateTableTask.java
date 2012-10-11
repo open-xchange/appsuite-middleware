@@ -60,7 +60,7 @@ import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTaskAdapter;
 import com.openexchange.jslob.JSlobExceptionCodes;
-import com.openexchange.server.ServiceExceptionCodes;
+import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.sql.DBUtils;
 
@@ -87,7 +87,7 @@ public class DBJSlobCreateTableTask extends UpdateTaskAdapter {
     public void perform(final PerformParameters params) throws OXException {
         final DatabaseService dbService = services.getService(DatabaseService.class);
         if (dbService == null) {
-            throw ServiceExceptionCodes.SERVICE_UNAVAILABLE.create(DatabaseService.class.getName());
+            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(DatabaseService.class.getName());
         }
         final int contextId = params.getContextId();
         final Connection writeCon = dbService.getForUpdateTask(contextId);

@@ -68,6 +68,7 @@ import com.openexchange.groupware.container.DistributionListEntryObject;
 import com.openexchange.groupware.container.LinkEntryObject;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
+import com.openexchange.tools.servlet.http.Tools;
 import com.openexchange.user.json.Utility;
 import com.openexchange.user.json.field.DistributionListField;
 import com.openexchange.user.json.field.UserField;
@@ -79,7 +80,7 @@ import com.openexchange.user.json.field.UserField;
  */
 public final class UserWriter {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(UserWriter.class));
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(UserWriter.class));
 
     private static final boolean WARN = LOG.isWarnEnabled();
 
@@ -793,7 +794,7 @@ public final class UserWriter {
             @Override
             public void writeField(final JSONValuePutter jsonPutter, final User user, final Contact contact) throws JSONException {
                 final String s = contact.getEmail1();
-                jsonPutter.put(UserField.EMAIL1.getName(), null == s ? JSONObject.NULL : s);
+                jsonPutter.put(UserField.EMAIL1.getName(), null == s ? JSONObject.NULL : Tools.toIDN(s));
             }
         });
         m.put(UserField.EMAIL2.getColumn(), new UserFieldWriter() {
@@ -801,7 +802,7 @@ public final class UserWriter {
             @Override
             public void writeField(final JSONValuePutter jsonPutter, final User user, final Contact contact) throws JSONException {
                 final String s = contact.getEmail2();
-                jsonPutter.put(UserField.EMAIL2.getName(), null == s ? JSONObject.NULL : s);
+                jsonPutter.put(UserField.EMAIL2.getName(), null == s ? JSONObject.NULL : Tools.toIDN(s));
             }
         });
         m.put(UserField.EMAIL3.getColumn(), new UserFieldWriter() {
@@ -809,7 +810,7 @@ public final class UserWriter {
             @Override
             public void writeField(final JSONValuePutter jsonPutter, final User user, final Contact contact) throws JSONException {
                 final String s = contact.getEmail3();
-                jsonPutter.put(UserField.EMAIL3.getName(), null == s ? JSONObject.NULL : s);
+                jsonPutter.put(UserField.EMAIL3.getName(), null == s ? JSONObject.NULL : Tools.toIDN(s));
             }
         });
         m.put(UserField.TELEPHONE_ISDN.getColumn(), new UserFieldWriter() {

@@ -51,6 +51,7 @@ package com.openexchange.messaging.twitter;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.locks.Lock;
 import com.openexchange.exception.OXException;
 import com.openexchange.messaging.MessagingAccount;
 import com.openexchange.messaging.MessagingAccountManager;
@@ -123,7 +124,12 @@ public abstract class AbstractTwitterMessagingAccess {
                      */
                     Integer oAuthAccountId = (Integer) configuration.get(TwitterConstants.TWITTER_OAUTH_ACCOUNT);
                     if (null == oAuthAccountId) {
-                        synchronized (getSessionLock(session)) {
+                        Lock lock = (Lock) session.getParameter(Session.PARAM_LOCK);
+                        if (null == lock) {
+                            lock = Session.EMPTY_LOCK;
+                        }
+                        lock.lock();
+                        try {
                             oAuthAccountId = (Integer) configuration.get(TwitterConstants.TWITTER_OAUTH_ACCOUNT);
                             if (null == oAuthAccountId) {
                                 final String token = (String) configuration.get(TwitterConstants.TWITTER_TOKEN);
@@ -146,6 +152,8 @@ public abstract class AbstractTwitterMessagingAccess {
                             } else {
                                 oAuthAccount = oAuthService.getAccount(oAuthAccountId.intValue(), session, userId, contextId);
                             }
+                        } finally {
+                            lock.unlock();
                         }
                     } else {
                         oAuthAccount = oAuthService.getAccount(oAuthAccountId.intValue(), session, userId, contextId);
@@ -167,11 +175,6 @@ public abstract class AbstractTwitterMessagingAccess {
         twitterAccess = tmp;
     }
 
-    private static Object getSessionLock(final Session session) {
-        final Object lock = session.getParameter(Session.PARAM_LOCK);
-        return lock == null ? session : lock;
-    }
-
     private boolean testOAuthTwitterAccess(final TwitterAccess newTwitterAccess) {
         try {
             /*
@@ -182,7 +185,7 @@ public abstract class AbstractTwitterMessagingAccess {
             newTwitterAccess.getFriendsTimeline(paging);
             return true;
         } catch (final OXException e) {
-            final org.apache.commons.logging.Log logger = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(AbstractTwitterMessagingAccess.class));
+            final org.apache.commons.logging.Log logger = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(AbstractTwitterMessagingAccess.class));
             if (logger.isDebugEnabled()) {
                 logger.debug(e.getMessage(), e);
             }

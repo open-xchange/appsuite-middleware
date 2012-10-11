@@ -59,6 +59,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
+import org.json.JSONObject;
 import com.openexchange.datatypes.genericonf.DynamicFormDescription;
 import com.openexchange.datatypes.genericonf.FormElement;
 import com.openexchange.exception.OXException;
@@ -173,7 +174,11 @@ public class OXMFPublicationService extends AbstractPublicationService {
     }
 
     public OXTemplate loadTemplate(final Publication publication) throws OXException {
-        final String templateName = (String) publication.getConfiguration().get(TEMPLATE);
+        final Object object = publication.getConfiguration().get(TEMPLATE);
+        if (null == object || JSONObject.NULL.equals(object)) {
+            return templateService.loadTemplate(defaultTemplateName);
+        }
+        final String templateName = object.toString();
         try {
             if (templateName == null || "".equals(templateName)) {
                 return templateService.loadTemplate(defaultTemplateName);

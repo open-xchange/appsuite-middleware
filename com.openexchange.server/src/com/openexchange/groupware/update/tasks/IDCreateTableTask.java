@@ -68,7 +68,7 @@ import com.openexchange.groupware.update.UpdateTaskAdapter;
  */
 public class IDCreateTableTask extends UpdateTaskAdapter {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(IDCreateTableTask.class));
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(IDCreateTableTask.class));
 
     @Override
     public String[] getDependencies() {

@@ -61,19 +61,30 @@ public enum CryptoErrorMessage implements OXExceptionCode {
     /**
      * Bad password.
      */
-    BadPassword(CATEGORY_USER_INPUT, 1, "Provide correct password.", "Wrong Password."),
+    BadPassword(CATEGORY_USER_INPUT, 1, CryptoExceptionMessage.BAD_PASSWORD_HELP, CryptoExceptionMessage.BAD_PASSWORD_MSG),
     /**
      * Encoding error.
      */
-    EncodingException(CATEGORY_ERROR, 2, "Check the encoding.", "Error during encoding operation."),
+    EncodingException(CATEGORY_ERROR, 2, CryptoExceptionMessage.ENCODING_ERROR_HELP, CryptoExceptionMessage.ENCODING_ERROR_MSG),
     /**
      * Security Exception.
      */
-    SecurityException(CATEGORY_ERROR, 3, "Check cipher initialization", "General Security Exception occurred."),
+    SecurityException(CATEGORY_ERROR, 3, CryptoExceptionMessage.SECURITY_EXCEPTION_HELP, CryptoExceptionMessage.SECURITY_EXCEPTION_MSG),
     /**
-     * No salt given.
+     * Arbitrary byte sequence is missing to generate a secure key.
      */
-    NoSalt(CATEGORY_USER_INPUT, 4, "Provide salt", "No salt given.");
+    NoSalt(CATEGORY_USER_INPUT, 4, CryptoExceptionMessage.NO_SALT_HELP, CryptoExceptionMessage.NO_SALT_MSG);
+
+    private static final String PREFIX = "CRP";
+    
+    /**
+     * Gets the prefix.
+     * 
+     * @return The prefix
+     */
+    public static String getPrefixx() {
+        return PREFIX;
+    }
 
     private Category category;
 
@@ -92,7 +103,7 @@ public enum CryptoErrorMessage implements OXExceptionCode {
 
     @Override
     public String getPrefix() {
-        return "CRP";
+        return PREFIX;
     }
 
     @Override
@@ -117,7 +128,7 @@ public enum CryptoErrorMessage implements OXExceptionCode {
 
     /**
      * Creates a new {@link OXException} instance pre-filled with this code's attributes.
-     *
+     * 
      * @return The newly created {@link OXException} instance
      */
     public OXException create() {
@@ -126,7 +137,7 @@ public enum CryptoErrorMessage implements OXExceptionCode {
 
     /**
      * Creates a new {@link OXException} instance pre-filled with this code's attributes.
-     *
+     * 
      * @param args The message arguments in case of printf-style message
      * @return The newly created {@link OXException} instance
      */
@@ -136,7 +147,7 @@ public enum CryptoErrorMessage implements OXExceptionCode {
 
     /**
      * Creates a new {@link OXException} instance pre-filled with this code's attributes.
-     *
+     * 
      * @param cause The optional initial cause
      * @param args The message arguments in case of printf-style message
      * @return The newly created {@link OXException} instance

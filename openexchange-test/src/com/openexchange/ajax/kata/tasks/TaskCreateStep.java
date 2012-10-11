@@ -95,8 +95,9 @@ public class TaskCreateStep extends AbstractStep implements IdentitySource<Task>
     @Override
     public void rememberIdentityValues(Task task) {
         entry.setLastModified(task.getLastModified());
-        if(task.containsParentFolderID())
+        if(task.containsParentFolderID()) {
             entry.setParentFolderID(task.getParentFolderID());
+        }
     }
 
     /* (non-Javadoc)

@@ -55,19 +55,22 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import com.openexchange.log.LogFactory;
+
 import com.openexchange.ajax.container.ByteArrayFileHolder;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestDataTools;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.requesthandler.responseRenderers.FileResponseRenderer;
+import com.openexchange.contact.ContactService;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.contact.ContactInterface;
-import com.openexchange.groupware.contact.ContactInterfaceDiscoveryService;
+import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.java.Strings;
@@ -99,9 +102,9 @@ public class ContactPictureServlet extends OnlinePublicationServlet {
         contactPublisher = service;
     }
 
-    private static ContactInterfaceDiscoveryService contacts;
+    private static volatile ContactService contacts;
 
-    public static void setContactInterfaceDiscoveryService(final ContactInterfaceDiscoveryService service) {
+    public static void setContactService(final ContactService service) {
         contacts = service;
     }
     
@@ -159,9 +162,8 @@ public class ContactPictureServlet extends OnlinePublicationServlet {
     }
 
     private Contact loadContact(final Publication publication, final int folderId, final int contactId) throws OXException {
-        final ContactInterface contactInterface = contacts.newContactInterface(folderId, new PublicationSession(publication));
-        contactInterface.getObjectsById(new int[][]{{contactId, folderId}}, new int[]{Contact.IMAGE1, Contact.IMAGE1_CONTENT_TYPE});
-        return contactInterface.getObjectById(contactId, folderId);
+    	return contacts.getContact(new PublicationSession(publication), Integer.toString(folderId), Integer.toString(contactId), 
+    			new ContactField[] { ContactField.IMAGE1, ContactField.IMAGE_LAST_MODIFIED } ); 
     }
 
     private Map<String, String> getPublicationArguments(final HttpServletRequest req) throws UnsupportedEncodingException {

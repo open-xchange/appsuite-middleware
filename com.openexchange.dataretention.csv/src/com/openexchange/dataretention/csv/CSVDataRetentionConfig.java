@@ -65,7 +65,7 @@ import com.openexchange.dataretention.DataRetentionExceptionMessages;
  */
 public final class CSVDataRetentionConfig {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(CSVDataRetentionConfig.class));
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(CSVDataRetentionConfig.class));
 
     private static volatile CSVDataRetentionConfig instance;
 

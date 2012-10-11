@@ -55,8 +55,8 @@ import java.util.Map;
 import java.util.Set;
 import org.json.JSONException;
 import org.json.JSONObject;
-import com.openexchange.ajax.fields.CommonFields;
 import com.openexchange.ajax.fields.DataFields;
+import com.openexchange.ajax.fields.FolderChildFields;
 import com.openexchange.data.conversion.ical.ConversionWarning;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.importexport.ImportResult;
@@ -98,7 +98,7 @@ public class ImportExportWriter extends DataWriter {
         if (importResult.hasError()) {
             final OXException exception = importResult.getException();
             final JSONObject jsonObject = new JSONObject();
-            ResponseWriter.addException(jsonObject, exception, session.getUser().getLocale());
+            ResponseWriter.addException(jsonObject, exception, null != session ? session.getUser().getLocale() : null);
 
             jsonwriter.object();
             writeDepth1(jsonObject);
@@ -110,7 +110,7 @@ public class ImportExportWriter extends DataWriter {
                 for (final ConversionWarning warning : warnings) {
                     jsonwriter.object();
                     final JSONObject jsonWarning = new JSONObject();
-                    ResponseWriter.addWarning(jsonWarning, warning,  session.getUser().getLocale());
+                    ResponseWriter.addWarning(jsonWarning, warning, null != session ? session.getUser().getLocale() : null);
                     writeDepth1(jsonWarning);
                     jsonwriter.endObject();
                 }
@@ -118,14 +118,14 @@ public class ImportExportWriter extends DataWriter {
 
                 writeParameter(DataFields.ID, importResult.getObjectId());
                 writeParameter(DataFields.LAST_MODIFIED, importResult.getDate());
-                writeParameter(CommonFields.FOLDER_ID, importResult.getFolder());
+                writeParameter(FolderChildFields.FOLDER_ID, importResult.getFolder());
             }
             jsonwriter.endObject();
         } else {
     		jsonwriter.object();
     		writeParameter(DataFields.ID, importResult.getObjectId());
     		writeParameter(DataFields.LAST_MODIFIED, importResult.getDate());
-    		writeParameter(CommonFields.FOLDER_ID, importResult.getFolder());
+    		writeParameter(FolderChildFields.FOLDER_ID, importResult.getFolder());
     		jsonwriter.endObject();
         }
    }

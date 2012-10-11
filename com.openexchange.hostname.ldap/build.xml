@@ -1,117 +1,28 @@
-<project name="com.openexchange.hostname.ldap" default="install" basedir=".">
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="com.openexchange.hostname.ldap overrides" basedir=".">
 
-	<!-- Customizable values -->
-	<property name="destdir" value="" />
-	<property name="prefix" value="/opt/open-xchange" />
+    <description>
+        Inserts the path to the configuration files into the configuration properties files.
+    </description>
 
-	<!-- Constants -->
-	<property name="tmp.dir" value="tmp" />
-	<property name="lib.dir" value="lib" />
-	<property name="conf.dir" value="conf" />
+    <import file="build-project.xml"/>
 
-	<property file="META-INF/MANIFEST.MF" />
-	<property file="build.properties" />
+    <target name="installConf" description="Patches ldaphostname.properties before installing it.">
+        <antcall target="patchConf"/>
+        <copy todir="${destDir}/${confInstallDir}">
+            <fileset dir="${tmpDir}/${confDir}"/>
+        </copy>
+    </target>
 
-	<property name="version" value="${Bundle-Version}" />
-	<property name="bundle.name" value="${Bundle-SymbolicName}.jar" />
-	<property name="composite.name" value="open-xchange-hostname-ldap-${version}" />
-
-	<!-- Install Constants -->
-	<property name="bundlesdir" value="${prefix}/bundles" />
-	<property name="bundle.d" value="${prefix}/etc/groupware/osgi/bundle.d" />
-    <property name="templatingdir" value="${prefix}/templates"/>
-	<property name="conf.install.dir" value="${prefix}/etc/groupware" />
-	<property name="confInstallCopyDir" location="${destdir}${conf.install.dir}" />
-
-	<!-- Bundle dependencies -->
-	<property name="commonBundle" value="com.openexchange.common" />
-	<property name="cachingBundle" value="com.openexchange.caching"/>
-    <property name="configreadBundle" value="com.openexchange.configread"/>
-
-	<!-- JAR names for classpath -->
-	<property name="osgijar" value="org.eclipse.osgi_3.6.1.R36x_v20100806.jar" />
-	<property name="osgiservicesjar" value="org.eclipse.osgi.services_3.2.100.v20100503.jar" />
-	<property name="commonsloggingjar" value="org.apache.commons.logging_1.0.4.v200706111724.jar" />
-	<property name="globaljar" value="com.openexchange.global.jar" />
-	<property name="cachingjar" value="com.openexchange.caching.jar"/>
-	<property name="commonjar" value="common.jar"/>
-	<property name="serverjar" value="com.openexchange.server.jar" />
-	<property name="configreadjar" value="com.openexchange.configread.jar" />
-
-	<!-- Classpath -->
-	<path id="project.classpath">
-		<pathelement location="${bundlesdir}/${osgijar}" />
-		<pathelement location="${bundlesdir}/${osgiservicesjar}" />
-		<pathelement location="${bundlesdir}/${commonsloggingjar}" />
-		<pathelement location="${bundlesdir}/${globaljar}" />
-		<pathelement location="${bundlesdir}/${serverjar}" />
-		<pathelement location="${bundlesdir}/${cachingBundle}/${cachingjar}"/>
-		<pathelement location="${bundlesdir}/${commonBundle}/${commonjar}"/>
-		<pathelement location="${bundlesdir}/${configreadBundle}/${configreadjar}" />
-	</path>
-
-	<!-- Compile -->
-	<target name="prepare">
-		<mkdir dir="${output..}" />
-		<mkdir dir="${tmp.dir}" />
-	</target>
-
-	<target name="compile" depends="prepare">
-		<javac srcdir="${source..}" destdir="${output..}" debug="true" encoding="UTF-8" source="1.5" compiler="javac1.5" target="1.5">
-			<classpath refid="project.classpath" />
-		</javac>
-	</target>
-
-	<target name="jar" depends="prepare,compile">
-		<jar jarfile="${tmp.dir}/${bundle.name}" manifest="META-INF/MANIFEST.MF">
-			<fileset dir="${output..}" />
-		</jar>
-	</target>
-
-	<!-- Install targets -->
-	<target name="install">
-		<antcall target="installJar" />
-		<antcall target="installConfig" />
-	</target>
-
-	<target name="installConfig">
-		<mkdir dir="${destdir}/${bundle.d}" />
-		<echo file="${destdir}/${bundle.d}/${Bundle-SymbolicName}.ini" message="${bundlesdir}/${bundle.name}@start${line.separator}" />
-	    <copy todir="${destdir}/${conf.install.dir}">
-	        <fileset dir="etc"/>
-	    </copy>
-	</target>
-
-	<target name="installJar" depends="jar">
-		<mkdir dir="${destdir}/${bundlesdir}" />
-		<copy todir="${destdir}/${bundlesdir}">
-			<fileset dir="${tmp.dir}">
-				<include name="${bundle.name}" />
-			</fileset>
-		</copy>
-	</target>
-
-	<!-- Dist -->
-	<target name="dist" depends="clean">
-		<property name="dist-package" value="dist-package" />
-		<delete dir="${dist-package}" />
-		<mkdir dir="${dist-package}/${composite.name}" />
-		<copy todir="${dist-package}/${composite.name}">
-			<fileset dir=".">
-				<exclude name="**${dist-package}/**" />
-				<exclude name="**debian/**" />
-				<exclude name="**CVS/**" />
-				<exclude name="Todo" />
-			</fileset>
-		</copy>
-		<tar destfile="../${composite.name}.tar.gz" basedir="${dist-package}" includes="${composite.name}/" compression="gzip" />
-		<!-- dpkg-source does not like anything else -->
-		<delete dir="${dist-package}" />
-	</target>
-
-	<target name="clean">
-		<delete dir="${tmp.dir}" />
-		<delete dir="${output..}" />
-	</target>
+    <target name="patchConf">
+        <mkdir dir="${tmpDir}/${confDir}"/>
+        <copy todir="${tmpDir}/${confDir}" overwrite="true">
+            <fileset dir="${confDir}"/>
+        </copy>
+        <move tofile="${tmpDir}/${confDir}/ldaphostname.properties" file="${tmpDir}/${confDir}/ldaphostname.properties.in" overwrite="true"/>
+        <replace file="${tmpDir}/${confDir}/ldaphostname.properties">
+            <replacefilter token="@confDir@" value="${confInstallDir}"/>
+        </replace>
+    </target>
 
 </project>

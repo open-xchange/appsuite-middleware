@@ -70,7 +70,7 @@ public class PropertyHandler {
 
     public static final String bundlename = "com.openexchange.contacts.ldap.";
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(PropertyHandler.class));
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(PropertyHandler.class));
 
     private static PropertyHandler singleton = new PropertyHandler();
 

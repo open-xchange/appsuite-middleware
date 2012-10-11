@@ -54,6 +54,8 @@ import static com.openexchange.groupware.tasks.StorageType.DELETED;
 import static com.openexchange.groupware.tasks.StorageType.REMOVED;
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Autoboxing.f;
+import static com.openexchange.tools.sql.DBUtils.autocommit;
+import static com.openexchange.tools.sql.DBUtils.isTransactionRollbackException;
 import static com.openexchange.tools.sql.DBUtils.rollback;
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -67,7 +69,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import com.openexchange.log.LogFactory;
 import com.openexchange.event.impl.EventClient;
 import com.openexchange.exception.OXException;
 import com.openexchange.group.GroupStorage;
@@ -90,6 +92,7 @@ import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
+import com.openexchange.tools.sql.DBUtils;
 
 /**
  * This class contains logic methods for the tasks.
@@ -204,7 +207,7 @@ public final class TaskLogic {
             task.setPrivateFlag(false);
         }
         if (!task.containsRecurrenceType()) {
-            task.setRecurrenceType(Task.NO_RECURRENCE);
+            task.setRecurrenceType(CalendarObject.NO_RECURRENCE);
         }
         if (!task.containsNumberOfAttachments()) {
             task.setNumberOfAttachments(0);
@@ -358,24 +361,24 @@ public final class TaskLogic {
      * @throws OXException if a necessary recurrence attribute is missing.
      */
     private static void checkRecurrence(final Task task, final Task oldTask) throws OXException {
-        if (Task.NO_RECURRENCE == task.getRecurrenceType() && oldTask != null && Task.NO_RECURRENCE == oldTask.getRecurrenceType()) {
+        if (CalendarObject.NO_RECURRENCE == task.getRecurrenceType() && oldTask != null && CalendarObject.NO_RECURRENCE == oldTask.getRecurrenceType()) {
             return;
         }
         // First simple checks on start and end date.
-        if (Task.NO_RECURRENCE != task.getRecurrenceType()) {
+        if (CalendarObject.NO_RECURRENCE != task.getRecurrenceType()) {
             if (null == oldTask) {
                 if (!task.containsStartDate()) {
-                    throw TaskExceptionCode.MISSING_RECURRENCE_VALUE.create(Integer.valueOf(Task.START_DATE));
+                    throw TaskExceptionCode.MISSING_RECURRENCE_VALUE.create(Integer.valueOf(CalendarObject.START_DATE));
                 }
                 if (!task.containsEndDate()) {
-                    throw TaskExceptionCode.MISSING_RECURRENCE_VALUE.create(Integer.valueOf(Task.END_DATE));
+                    throw TaskExceptionCode.MISSING_RECURRENCE_VALUE.create(Integer.valueOf(CalendarObject.END_DATE));
                 }
             } else {
                 if (task.containsStartDate() && null == task.getStartDate()) {
-                    throw TaskExceptionCode.MISSING_RECURRENCE_VALUE.create(Integer.valueOf(Task.START_DATE));
+                    throw TaskExceptionCode.MISSING_RECURRENCE_VALUE.create(Integer.valueOf(CalendarObject.START_DATE));
                 }
                 if (task.containsEndDate() && null == task.getEndDate()) {
-                    throw TaskExceptionCode.MISSING_RECURRENCE_VALUE.create(Integer.valueOf(Task.START_DATE));
+                    throw TaskExceptionCode.MISSING_RECURRENCE_VALUE.create(Integer.valueOf(CalendarObject.START_DATE));
                 }
             }
         }
@@ -383,7 +386,7 @@ public final class TaskLogic {
         copyRecurringValues(task, oldTask);
         // Remove values for check
         boolean daysRemoved = false;
-        if (Task.NO_RECURRENCE != task.getRecurrenceType() && task.containsDays() && 0 == task.getDays()) {
+        if (CalendarObject.NO_RECURRENCE != task.getRecurrenceType() && task.containsDays() && 0 == task.getDays()) {
             daysRemoved = true;
             task.removeDays();
         }
@@ -421,26 +424,26 @@ public final class TaskLogic {
         if (null == oldTask) {
             return;
         }
-        if ((task.containsRecurrenceType() && Task.NO_RECURRENCE != task.getRecurrenceType()) || (!task.containsRecurrenceType() && oldTask.containsRecurrenceType())) {
+        if ((task.containsRecurrenceType() && CalendarObject.NO_RECURRENCE != task.getRecurrenceType()) || (!task.containsRecurrenceType() && oldTask.containsRecurrenceType())) {
             if (!task.containsRecurrenceType()) {
                 task.setRecurrenceType(oldTask.getRecurrenceType());
             }
-            if (Task.DAILY == task.getRecurrenceType() || Task.WEEKLY == task.getRecurrenceType() || Task.MONTHLY == task.getRecurrenceType()) {
+            if (CalendarObject.DAILY == task.getRecurrenceType() || CalendarObject.WEEKLY == task.getRecurrenceType() || CalendarObject.MONTHLY == task.getRecurrenceType()) {
                 if (!task.containsInterval() && oldTask.containsInterval()) {
                     task.setInterval(oldTask.getInterval());
                 }
             }
-            if (Task.WEEKLY == task.getRecurrenceType()) {
+            if (CalendarObject.WEEKLY == task.getRecurrenceType()) {
                 if (!task.containsDays() && oldTask.containsDays()) {
                     task.setDays(oldTask.getDays());
                 }
             }
-            if (Task.MONTHLY == task.getRecurrenceType() || Task.YEARLY == task.getRecurrenceType()) {
+            if (CalendarObject.MONTHLY == task.getRecurrenceType() || CalendarObject.YEARLY == task.getRecurrenceType()) {
                 if (!task.containsDayInMonth() && oldTask.containsDayInMonth()) {
                     task.setDayInMonth(oldTask.getDayInMonth());
                 }
             }
-            if (Task.YEARLY == task.getRecurrenceType()) {
+            if (CalendarObject.YEARLY == task.getRecurrenceType()) {
                 if (!task.containsMonth() && oldTask.containsMonth()) {
                     task.setMonth(oldTask.getMonth());
                 }
@@ -614,8 +617,8 @@ public final class TaskLogic {
 
         // If the end of recurrence information is changed from 'after x occurrences' to 'at *date*'
         // the field recurrence_count has explicitly to be unset.
-        if (oldTask.containsOccurrence() && !task.containsOccurrence()) {
-            fields.add(I(Task.RECURRENCE_COUNT));
+        if (oldTask.containsOccurrence() && !task.containsOccurrence() && task.containsUntil()) {
+            fields.add(I(CalendarObject.RECURRENCE_COUNT));
         }
 
         final int[] retval = new int[fields.size()];
@@ -784,26 +787,55 @@ public final class TaskLogic {
      * @throws OXException if an exception occurs.
      */
     public static void deleteTask(final Session session, final Context ctx, final int userId, final Task task, final Date lastModified) throws OXException {
-        final Connection con = DBPool.pickupWriteable(ctx);
         try {
-            con.setAutoCommit(false);
-            deleteTask(ctx, con, userId, task, lastModified);
-            informDelete(session, ctx, con, task);
-            con.commit();
+            final DBUtils.TransactionRollbackCondition condition = new DBUtils.TransactionRollbackCondition(3);
+            do {
+                final Connection con = DBPool.pickupWriteable(ctx);
+                condition.resetTransactionRollbackException();
+                try {
+                    DBUtils.startTransaction(con);
+                    final Task t = clone(task);
+                    deleteTask(ctx, con, userId, t, lastModified);
+                    informDelete(session, ctx, con, t);
+                    con.commit();
+                } catch (final SQLException e) {
+                    rollback(con);
+                    if (!condition.isFailedTransactionRollback(e)) {
+                        throw TaskExceptionCode.DELETE_FAILED.create(e, e.getMessage());
+                    }
+                } catch (final OXException e) {
+                    rollback(con);
+                    if (!condition.isFailedTransactionRollback(e)) {
+                        throw e;
+                    }
+                } catch (final RuntimeException e) {
+                    rollback(con);
+                    if (!condition.isFailedTransactionRollback(e)) {
+                        throw TaskExceptionCode.DELETE_FAILED.create(e, e.getMessage());
+                    }
+                } finally {
+                    autocommit(con);
+                    DBPool.closeWriterSilent(ctx, con);
+                }
+            } while (condition.checkRetry());
         } catch (final SQLException e) {
-            rollback(con);
-            throw TaskExceptionCode.DELETE_FAILED.create(e, e.getMessage());
-        } catch (final OXException e) {
-            rollback(con);
-            throw e;
-        } finally {
-            try {
-                con.setAutoCommit(true);
-            } catch (final SQLException e) {
-                LOG.error("Problem setting auto commit to true.", e);
+            if (isTransactionRollbackException(e)) {
+                throw TaskExceptionCode.DELETE_FAILED_RETRY.create(e, e.getMessage());
             }
-            DBPool.closeWriterSilent(ctx, con);
+            throw TaskExceptionCode.DELETE_FAILED.create(e, e.getMessage());
         }
+    }
+
+    private static final int[] ALL_COLUMNS = Task.ALL_COLUMNS;
+
+    private static Task clone(final Task task) {
+        final Task ret = new Task();
+        for (final int field : ALL_COLUMNS) {
+            if (task.contains(field)) {
+                ret.set(field, task.get(field));
+            }
+        }
+        return ret;
     }
 
     private static Set<Folder> deleteParticipants(final Context ctx, final Connection con, final int taskId) throws OXException {

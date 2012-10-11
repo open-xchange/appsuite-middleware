@@ -52,9 +52,7 @@ package com.openexchange.sessiond;
 import java.io.FileInputStream;
 import java.util.Properties;
 import java.util.UUID;
-
 import junit.framework.TestCase;
-
 import com.openexchange.groupware.Init;
 import com.openexchange.groupware.configuration.AbstractConfigWrapper;
 import com.openexchange.groupware.contexts.Context;
@@ -232,7 +230,7 @@ public class SessiondTest extends TestCase {
                 return "test";
             }
         });
-        sessiondCon.refreshSession(sessionId);
+        sessiondCon.getSession(sessionId);
     }
 
     public void testDeleteSession() throws Exception {
@@ -326,7 +324,6 @@ public class SessiondTest extends TestCase {
                 return "test";
             }
         });
-        sessiondCon.refreshSession(sessionId);
         sessiondCon.getSession(sessionId);
     }
 }

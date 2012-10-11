@@ -95,7 +95,7 @@ public final class JSlobServiceTracker implements ServiceTrackerCustomizer<JSlob
         try {
             JSlobServiceRegistryImpl.getInstance().removeJSlobService(service);
         } catch (final OXException e) {
-            org.apache.commons.logging.LogFactory.getLog(JSlobServiceTracker.class).error(e.getMessage(), e);
+            com.openexchange.log.LogFactory.getLog(JSlobServiceTracker.class).error(e.getMessage(), e);
         } finally {
             context.ungetService(reference);
         }

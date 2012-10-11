@@ -65,7 +65,7 @@ import com.openexchange.server.services.ServerServiceRegistry;
  */
 public class UnifiedInboxEnablement implements PreferencesItemService {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(UnifiedInboxEnablement.class));
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(UnifiedInboxEnablement.class));
 
     /**
      * Default constructor.

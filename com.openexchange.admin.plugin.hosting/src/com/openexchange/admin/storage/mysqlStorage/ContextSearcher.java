@@ -58,7 +58,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import com.openexchange.log.LogFactory;
 import com.openexchange.admin.rmi.exceptions.PoolException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.tools.AdminCacheExtended;
@@ -91,6 +91,7 @@ public class ContextSearcher extends AbstractTask<Collection<Integer>> {
         threadRenamer.renamePrefix("listContext searcher");
     }
 
+    @Override
     public Collection<Integer> call() throws StorageException {
         final Connection con;
         try {

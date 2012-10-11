@@ -63,14 +63,14 @@ import com.openexchange.tools.servlet.OXJSONExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
 /**
- * {@link Resource} - The servlet handling requests to "/ajax/resource"
+ * {@link Resource} - The servlet handling requests to "resource"
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  *
  */
 public class Resource extends DataServlet {
 
-	private static final transient org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
+	private static final transient org.apache.commons.logging.Log LOG = com.openexchange.log.LogFactory
 			.getLog(Resource.class);
 
 	/**

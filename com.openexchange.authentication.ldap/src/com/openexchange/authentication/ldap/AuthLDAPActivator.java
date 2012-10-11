@@ -52,11 +52,11 @@ package com.openexchange.authentication.ldap;
 import java.util.Properties;
 import javax.security.auth.login.LoginException;
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.osgi.framework.ServiceRegistration;
 import com.openexchange.authentication.AuthenticationService;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
+import com.openexchange.log.LogFactory;
 import com.openexchange.osgi.DeferredActivator;
 
 /**
@@ -68,7 +68,7 @@ public class AuthLDAPActivator extends DeferredActivator {
 	
 	private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(AuthLDAPActivator.class));
 
-	private ServiceRegistration registration;
+	private ServiceRegistration<AuthenticationService> registration;
 
 	public AuthLDAPActivator() {
 	    super();
@@ -101,8 +101,7 @@ public class AuthLDAPActivator extends DeferredActivator {
 
         if (null == registration) {
             final LDAPAuthentication impl = new LDAPAuthentication(props);
-            registration = context.registerService(AuthenticationService.class
-                .getName(), impl, null);
+            registration = context.registerService(AuthenticationService.class, impl, null);
         } else {
             LOG.error("Duplicate startup of deferred activator.");
         }

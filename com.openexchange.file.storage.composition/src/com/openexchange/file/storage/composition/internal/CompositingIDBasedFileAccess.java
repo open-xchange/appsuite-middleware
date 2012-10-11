@@ -60,16 +60,21 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import org.osgi.service.event.Event;
+import org.osgi.service.event.EventAdmin;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.File.Field;
 import com.openexchange.file.storage.FileStorageAccount;
 import com.openexchange.file.storage.FileStorageAccountAccess;
 import com.openexchange.file.storage.FileStorageAccountManager;
+import com.openexchange.file.storage.FileStorageEventHelper;
 import com.openexchange.file.storage.FileStorageFileAccess;
 import com.openexchange.file.storage.FileStorageFileAccess.IDTuple;
 import com.openexchange.file.storage.FileStorageFileAccess.SortDirection;
 import com.openexchange.file.storage.FileStorageService;
+import com.openexchange.file.storage.composition.FileID;
+import com.openexchange.file.storage.composition.FolderID;
 import com.openexchange.file.storage.composition.IDBasedFileAccess;
 import com.openexchange.groupware.results.AbstractTimedResult;
 import com.openexchange.groupware.results.Delta;
@@ -163,7 +168,7 @@ public abstract class CompositingIDBasedFileAccess extends AbstractService<Trans
 
     @Override
     public TimedResult<File> getDocuments(final List<String> ids, final List<Field> columns) throws OXException {
-        final List<File> files = new ArrayList<File>(100);
+        final List<File> files = new ArrayList<File>(ids.size());
         for (final String id : ids) {
             if(exists(id, FileStorageFileAccess.CURRENT_VERSION)) {
                 final File fileMetadata = getFileMetadata(id, FileStorageFileAccess.CURRENT_VERSION);
@@ -233,29 +238,39 @@ public abstract class CompositingIDBasedFileAccess extends AbstractService<Trans
         final FolderID id = new FolderID(folderId);
 
         getFileAccess(id.getService(), id.getAccountId()).removeDocument(id.getFolderId(), sequenceNumber);
+        // TODO: Does this method really make sense? Skipping possible delete event.     
     }
 
     @Override
     public List<String> removeDocument(final List<String> ids, final long sequenceNumber) throws OXException {
         final Map<FileStorageFileAccess, List<IDTuple>> deleteOperations = new HashMap<FileStorageFileAccess, List<IDTuple>>();
-        for (final String id : ids) {
+        final List<File> reloaded = new ArrayList<File>();
+        for (final String id : ids) {            
             final FileID fileID = new FileID(id);
             final FileStorageFileAccess fileAccess = getFileAccess(fileID.getService(), fileID.getAccountId());
-
             List<IDTuple> deletes = deleteOperations.get(fileAccess);
             if (deletes == null) {
                 deletes = new ArrayList<IDTuple>();
                 deleteOperations.put(fileAccess, deletes);
             }
 
-            deletes.add(new FileStorageFileAccess.IDTuple(fileID.getFolderId(), fileID.getFileId()));
+            deletes.add(new FileStorageFileAccess.IDTuple(fileID.getFolderId(), fileID.getFileId()));     
+            TimedResult<File> documents = fileAccess.getDocuments(deletes, Arrays.asList(new Field[] { Field.ID, Field.FOLDER_ID }));
+            if (documents != null) {
+                SearchIterator<File> it = documents.results();
+                while (it.hasNext()) {
+                    File file = it.next();
+                    reloaded.add(file);
+                }
+            }            
         }
 
+        
         final List<String> notDeleted = new ArrayList<String>(ids.size());
-
         for (final Map.Entry<FileStorageFileAccess, List<IDTuple>> deleteOp : deleteOperations.entrySet()) {
             final FileStorageFileAccess access = deleteOp.getKey();
-            final List<IDTuple> conflicted = access.removeDocument(deleteOp.getValue(), sequenceNumber);
+            final List<IDTuple> toDelete = deleteOp.getValue();
+            final List<IDTuple> conflicted = access.removeDocument(toDelete, sequenceNumber);
             for (final IDTuple tuple : conflicted) {
                 final FileStorageAccountAccess accountAccess = access.getAccountAccess();
                 notDeleted.add(new FileID(
@@ -264,30 +279,86 @@ public abstract class CompositingIDBasedFileAccess extends AbstractService<Trans
                     tuple.getFolder(),
                     tuple.getId()).toUniqueID());
             }
+            
+            /*
+             * Send event
+             */
+            String serviceId = access.getAccountAccess().getService().getId();
+            String accountId = access.getAccountAccess().getAccountId();
+            toDelete.removeAll(conflicted);
+            for (IDTuple tuple : toDelete) {
+                String fileFolder = tuple.getFolder();
+                String id = tuple.getId();
+                if (fileFolder == null) {
+                    /*
+                     * Reload the document to get it's folder id.
+                     */
+                    for (File file : reloaded) {
+                        if (file.getId().equals(id)) {
+                            fileFolder = file.getFolderId();                            
+                        }
+                    }
+                } else {
+                    
+                }
+                String folderId = new FolderID(serviceId, accountId, fileFolder).toUniqueID();
+                String objectId = new FileID(serviceId, accountId, fileFolder, id).toUniqueID();
+                postEvent(FileStorageEventHelper.buildDeleteEvent(session, serviceId, accountId, folderId, objectId, null));
+            }
         }
         return notDeleted;
     }
 
     @Override
     public int[] removeVersion(final String id, final int[] versions) throws OXException {
-        final FileID fileID = new FileID(id);
-
-        return getFileAccess(fileID.getService(), fileID.getAccountId()).removeVersion(fileID.getFolderId(), fileID.getFileId(), versions);
+        FileID fileID = new FileID(id);
+        FileStorageFileAccess access = getFileAccess(fileID.getService(), fileID.getAccountId());
+        int[] notRemoved = access.removeVersion(fileID.getFolderId(), fileID.getFileId(), versions);
+        
+        String serviceId = access.getAccountAccess().getService().getId();
+        String accountId = access.getAccountAccess().getAccountId();
+        Set<Integer> removed = new HashSet<Integer>(versions.length);
+        for (int i : versions) {
+            removed.add(Integer.valueOf(i));
+        }
+        
+        for (int i : notRemoved) {
+            removed.remove(Integer.valueOf(i));
+        }
+        
+        String objectId = fileID.getFileId();
+        FolderID folderID;
+        String fileFolder = fileID.getFolderId();
+        if (fileFolder == null) {
+            /*
+             * Reload the document to get it's folder id.
+             */
+            File fileMetadata = access.getFileMetadata(fileFolder, objectId, FileStorageFileAccess.CURRENT_VERSION);
+            folderID = new FolderID(serviceId, accountId, fileMetadata.getFolderId());
+        } else {
+            folderID = new FolderID(serviceId, accountId, fileFolder);
+        }
+        
+        postEvent(FileStorageEventHelper.buildDeleteEvent(session, serviceId, accountId, folderID.toUniqueID(), fileID.toUniqueID(), removed));
+        return notRemoved;
     }
 
     private static interface FileAccessDelegation {
-
+        
         public void call(FileStorageFileAccess access) throws OXException;
+        
     }
 
     protected void save(final File document, final InputStream data, final long sequenceNumber, final List<Field> modifiedColumns, final FileAccessDelegation delegation) throws OXException {
-        final String id = document.getId();
+        String id = document.getId();
         FolderID folderID = null;
         if(document.getFolderId() != null) {
             folderID = new FolderID(document.getFolderId());
         }
+
+        Event event = null;
         if (id != FileStorageFileAccess.NEW) {
-            final FileID fileID = new FileID(id);
+            FileID fileID = new FileID(id);
             if(folderID == null) {
                 folderID = new FolderID(fileID.getService(), fileID.getAccountId(), fileID.getFolderId());
             }
@@ -295,17 +366,31 @@ public abstract class CompositingIDBasedFileAccess extends AbstractService<Trans
                 move(document, data, sequenceNumber, modifiedColumns);
                 return;
             }
-
-            document.setId(fileID.getFileId());
-            if(folderID == null) {
-                folderID = new FolderID(fileID.getService(), fileID.getAccountId(), fileID.getFolderId());
-            }
-        }
+            
+            document.setId(fileID.getFileId());        
+            event = FileStorageEventHelper.buildUpdateEvent(session, fileID.getService(), fileID.getAccountId(), folderID.toUniqueID(), fileID.toUniqueID());
+        }        
+        
         document.setFolderId(folderID.getFolderId());
-        delegation.call(getFileAccess(folderID.getService(), folderID.getAccountId()));
-        document.setId(new FileID(folderID.getService(), folderID.getAccountId(), document.getFolderId(), document.getId()).toUniqueID());
-        document.setFolderId(new FolderID(folderID.getService(), folderID.getAccountId(), document.getFolderId()).toUniqueID());
-
+        FileStorageFileAccess fileAccess = getFileAccess(folderID.getService(), folderID.getAccountId());
+        FolderID srcFolder = null;
+        if (id != null) {            
+            File fileMetadata = fileAccess.getFileMetadata(folderID.getFolderId(), new FileID(id).getFileId(), FileStorageFileAccess.CURRENT_VERSION);
+            srcFolder = new FolderID(folderID.getService(), folderID.getAccountId(), fileMetadata.getFolderId());
+        }
+        delegation.call(fileAccess);
+        
+        FileID fileID = new FileID(folderID.getService(), folderID.getAccountId(), document.getFolderId(), document.getId());
+        document.setId(fileID.toUniqueID());
+        document.setFolderId(new FolderID(folderID.getService(), folderID.getAccountId(), document.getFolderId()).toUniqueID());        
+        if (event == null) {
+            event = FileStorageEventHelper.buildCreateEvent(session, fileID.getService(), fileID.getAccountId(), folderID.toUniqueID(), fileID.toUniqueID());
+        } else if (modifiedColumns != null && modifiedColumns.contains(Field.FOLDER_ID)) {
+            event = FileStorageEventHelper.buildCreateEvent(session, fileID.getService(), fileID.getAccountId(), folderID.toUniqueID(), fileID.toUniqueID());
+            postEvent(FileStorageEventHelper.buildDeleteEvent(session, fileID.getService(), fileID.getAccountId(), srcFolder.toUniqueID(), fileID.toUniqueID(), null));
+        }
+        
+        postEvent(event);
     }
 
     protected void move(final File document, InputStream data, final long sequenceNumber, final List<Field> modifiedColumns) throws OXException {
@@ -340,11 +425,16 @@ public abstract class CompositingIDBasedFileAccess extends AbstractService<Trans
         }
 
         destAccess.saveDocument(document, data, FileStorageFileAccess.UNDEFINED_SEQUENCE_NUMBER);
-
-        document.setId(new FileID(folderId.getService(), folderId.getAccountId(), document.getFolderId(), document.getId()).toUniqueID());
+        FileID newId = new FileID(folderId.getService(), folderId.getAccountId(), document.getFolderId(), document.getId());
+        document.setId(newId.toUniqueID());
         document.setFolderId(new FolderID(folderId.getService(), folderId.getAccountId(), document.getFolderId()).toUniqueID());
 
         sourceAccess.removeDocument(Arrays.asList(new FileStorageFileAccess.IDTuple(id.getFolderId(), id.getFileId())), sequenceNumber);
+        
+        Event deleteEvent = FileStorageEventHelper.buildDeleteEvent(session, id.getService(), id.getAccountId(), new FolderID(id.getService(), id.getAccountId(), id.getFolderId()).toUniqueID(), id.toUniqueID(), null);
+        Event createEvent = FileStorageEventHelper.buildCreateEvent(session, folderId.getService(), folderId.getAccountId(), folderId.toUniqueID(), newId.toUniqueID());
+        postEvent(deleteEvent);
+        postEvent(createEvent);
     }
 
     @Override
@@ -464,7 +554,28 @@ public abstract class CompositingIDBasedFileAccess extends AbstractService<Trans
     @Override
     public void touch(final String id) throws OXException {
         final FileID fileID = new FileID(id);
-        getFileAccess(fileID.getService(), fileID.getAccountId()).touch(fileID.getFolderId(), fileID.getFileId());
+        FileStorageFileAccess fileAccess = getFileAccess(fileID.getService(), fileID.getAccountId());
+        fileAccess.touch(fileID.getFolderId(), fileID.getFileId());
+        
+        /*
+         * Post event
+         */
+        String fileFolder = fileID.getFolderId();
+        FolderID folderID;
+        if (fileFolder == null) {
+            File metadata = fileAccess.getFileMetadata(null, id, FileStorageFileAccess.CURRENT_VERSION);
+            folderID = new FolderID(metadata.getFolderId());
+        } else {
+            folderID = new FolderID(fileID.getService(), fileID.getAccountId(), fileID.getFolderId());
+        }
+        
+        Event event = FileStorageEventHelper.buildUpdateEvent(session, fileID.getService(), fileID.getAccountId(), folderID.toUniqueID(), fileID.toUniqueID());
+        postEvent(event);
+    }
+    
+    protected void postEvent(Event event) {
+        EventAdmin eventAdmin = getEventAdmin();
+        eventAdmin.postEvent(event);
     }
 
     @Override
@@ -524,8 +635,8 @@ public abstract class CompositingIDBasedFileAccess extends AbstractService<Trans
     }
 
     protected List<FileStorageFileAccess> getAllFileStorageAccesses() throws OXException {
-        final List<FileStorageFileAccess> retval = new ArrayList<FileStorageFileAccess>();
         final List<FileStorageService> allFileStorageServices = getAllFileStorageServices();
+        final List<FileStorageFileAccess> retval = new ArrayList<FileStorageFileAccess>(allFileStorageServices.size());
         for (final FileStorageService fileStorageService : allFileStorageServices) {
             final FileStorageAccountManager accountManager = fileStorageService.getAccountManager();
             final List<FileStorageAccount> accounts = accountManager.getAccounts(session);
@@ -541,66 +652,39 @@ public abstract class CompositingIDBasedFileAccess extends AbstractService<Trans
     protected abstract FileStorageService getFileStorageService(String serviceId) throws OXException;
 
     protected abstract List<FileStorageService> getAllFileStorageServices() throws OXException;
+    
+    protected abstract EventAdmin getEventAdmin();
 
     // Transaction Handling
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.tx.AbstractService#commit(java.lang.Object)
-     */
+
     @Override
     protected void commit(final Transaction transaction) throws TransactionException {
-        // TODO Auto-generated method stub
-
+        // Nothing
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.tx.AbstractService#createTransaction()
-     */
     @Override
     protected Transaction createTransaction() throws TransactionException {
-        // TODO Auto-generated method stub
         return null;
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.tx.AbstractService#rollback(java.lang.Object)
-     */
     @Override
     protected void rollback(final Transaction transaction) throws TransactionException {
-        // TODO Auto-generated method stub
-
+        // Nothing
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.tx.TransactionAware#setCommitsTransaction(boolean)
-     */
     @Override
     public void setCommitsTransaction(final boolean commits) {
-        // TODO Auto-generated method stub
-
+        // Nothing
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.tx.TransactionAware#setRequestTransactional(boolean)
-     */
     @Override
     public void setRequestTransactional(final boolean transactional) {
-        // TODO Auto-generated method stub
-
+        // Nothing
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.tx.TransactionAware#setTransactional(boolean)
-     */
     @Override
     public void setTransactional(final boolean transactional) {
-        // TODO Auto-generated method stub
-
+        // Nothing
     }
 
     @Override

@@ -49,7 +49,7 @@
 
 package com.openexchange.mail.mime.processing;
 
-import static com.openexchange.mail.text.HTMLProcessing.htmlFormat;
+import static com.openexchange.mail.text.HtmlProcessing.htmlFormat;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.text.DateFormat;
@@ -60,7 +60,9 @@ import javax.mail.Part;
 import javax.mail.internet.InternetAddress;
 import com.openexchange.exception.OXException;
 import com.openexchange.html.HtmlService;
+import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.config.MailProperties;
+import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.mime.ContentDisposition;
 import com.openexchange.mail.mime.ContentType;
@@ -71,6 +73,7 @@ import com.openexchange.mail.utils.CharsetDetector;
 import com.openexchange.mail.utils.MessageUtility;
 import com.openexchange.mail.uuencode.UUEncodedMultiPart;
 import com.openexchange.server.services.ServerServiceRegistry;
+import com.openexchange.session.Session;
 
 /**
  * {@link MimeProcessingUtility} - Provides some utility methods for {@link MimeForward} and {@link MimeReply}
@@ -79,13 +82,41 @@ import com.openexchange.server.services.ServerServiceRegistry;
  */
 public final class MimeProcessingUtility {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(MimeProcessingUtility.class));
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(MimeProcessingUtility.class));
 
     /**
      * No instantiation
      */
     private MimeProcessingUtility() {
         super();
+    }
+
+    /**
+     * Gets denoted folder's owner if it is shared.
+     * 
+     * @param fullName The full name
+     * @param accountId The account identifier
+     * @param session The session
+     * @return The owner or <code>null</code>
+     */
+    static final String getFolderOwnerIfShared(final String fullName, final int accountId, final Session session) {
+        if (null == fullName) {
+            return null;
+        }
+        MailAccess<?, ?> access = null;
+        try {
+            access = MailAccess.getInstance(session, accountId);
+            access.connect(false);
+            final MailFolder folder = access.getFolderStorage().getFolder(fullName);
+            return folder.isShared() ? folder.getOwner() : null;
+        } catch (final Exception e) {
+            LOG.warn("Couldn't resolve owner for " + fullName, e);
+            return null;
+        } finally {
+            if (null != access) {
+                access.close(true);
+            }
+        }
     }
 
     /**

@@ -52,7 +52,7 @@ package com.openexchange.push.mq;
 import javax.jms.JMSException;
 import javax.jms.Topic;
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import com.openexchange.log.LogFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.mq.MQService;
 import com.openexchange.mq.topic.MQTopicAsyncSubscriber;
@@ -76,7 +76,7 @@ public class PushMQInit {
 
     private final MQService mqService;
 
-    private static PushMQInit init;
+    private static volatile PushMQInit init;
 
     /**
      * Initializes a new {@link PushMQInit}.

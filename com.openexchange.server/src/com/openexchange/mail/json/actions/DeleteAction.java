@@ -55,7 +55,7 @@ import java.util.List;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import com.openexchange.ajax.Mail;
+import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.documentation.RequestMethod;
 import com.openexchange.documentation.annotations.Action;
@@ -98,7 +98,7 @@ public final class DeleteAction extends AbstractMailAction {
             /*
              * Read in parameters
              */
-            final boolean hardDelete = "1".equals(req.getParameter(Mail.PARAMETER_HARDDELETE));
+            final boolean hardDelete = "1".equals(req.getParameter(AJAXServlet.PARAMETER_HARDDELETE));
             final JSONArray jsonIDs = (JSONArray) req.getRequest().getData();
             /*
              * Get mail interface
@@ -114,8 +114,8 @@ public final class DeleteAction extends AbstractMailAction {
                 final List<MailPath> l = new ArrayList<MailPath>(length);
                 for (int i = 0; i < length; i++) {
                     final JSONObject obj = jsonIDs.getJSONObject(i);
-                    final FullnameArgument fa = MailFolderUtility.prepareMailFolderParam(obj.getString(Mail.PARAMETER_FOLDERID));
-                    l.add(new MailPath(fa.getAccountId(), fa.getFullname(), obj.getString(Mail.PARAMETER_ID)));
+                    final FullnameArgument fa = MailFolderUtility.prepareMailFolderParam(obj.getString(AJAXServlet.PARAMETER_FOLDERID));
+                    l.add(new MailPath(fa.getAccountId(), fa.getFullname(), obj.getString(AJAXServlet.PARAMETER_ID)));
                 }
                 Collections.sort(l, MailPath.COMPARATOR);
                 String lastFldArg = l.get(0).getFolderArgument();

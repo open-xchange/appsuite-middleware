@@ -97,18 +97,18 @@ public class LinkedInConnectionTest extends TestCase {
      */
     public void _testAccountCreation(){
         // This is basically scribes example
-        org.scribe.oauth.OAuthService service = new ServiceBuilder().provider(LinkedInApi.class).apiKey(apiKey).apiSecret(apiSecret).build();
+        final org.scribe.oauth.OAuthService service = new ServiceBuilder().provider(LinkedInApi.class).apiKey(apiKey).apiSecret(apiSecret).build();
 
         System.out.println("=== LinkedIn's OAuth Workflow ===");
         System.out.println();
 
         // Obtain the Request Token
         System.out.println("Fetching the Request Token...");
-        Token requestToken = service.getRequestToken();
+        final Token requestToken = service.getRequestToken();
         System.out.println("Got the Request Token!");
         System.out.println();
 
-        DefaultOAuthToken oAuthToken = new DefaultOAuthToken();
+        final DefaultOAuthToken oAuthToken = new DefaultOAuthToken();
         oAuthToken.setToken(requestToken.getToken());
         oAuthToken.setSecret(requestToken.getSecret());
 
@@ -116,43 +116,59 @@ public class LinkedInConnectionTest extends TestCase {
         System.out.println("And paste the verifier here");
         System.out.print(">>");
 
-        Scanner in = new Scanner(System.in);
-        Verifier verifier = new Verifier(in.nextLine());
+        final Scanner in = new Scanner(System.in);
+        final Verifier verifier = new Verifier(in.nextLine());
         System.out.println();
 
         // Trade the Request Token and Verifier for the Access Token
         System.out.println("Trading the Request Token for an Access Token...");
-        Token accessToken = service.getAccessToken(requestToken, verifier);
+        final Token accessToken = service.getAccessToken(requestToken, verifier);
         System.out.println("Got the Access Token!");
         System.out.println("(if you're curious it looks like this: " + accessToken.getToken() + "(Token), "+accessToken.getSecret()+"(Secret) )");
         System.out.println();
     }
 
-    public void testXMLParsing() {
+    public void testUsageOfExistingAccount() throws OXException {
+        final List<Contact> contacts = linkedIn.getContacts(null,1,1,1);
+        for (final Contact contact : contacts){
+            System.out.println(contact.getGivenName() + " " + contact.getSurName()+", "+contact.getEmail1());
+        }
+    }
+
+    public void testXMLParsing() throws OXException {
+        BufferedReader reader = null;
         try {
-            BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream("/Users/karstenwill/Documents/Development/ox_projectset_workspace/com.openexchange.oauth.linkedin/local_only/linkedin.xml"), "UTF8"));
+            reader = new BufferedReader(new InputStreamReader(new FileInputStream("/Users/karstenwill/Documents/Development/ox_projectset_workspace/com.openexchange.oauth.linkedin/local_only/linkedin.xml"), "UTF8"));
             String string = "";
             String line;
             while ((line = reader.readLine()) != null) {
                 string += line + "\n";
             }
-            List<Contact> contacts = new LinkedInXMLParser().parseConnections(string);
+            final List<Contact> contacts = new LinkedInXMLParser().parseConnections(string);
             System.out.println("No of contacts : " + contacts.size());
-            for (Contact contact : contacts) {
+            for (final Contact contact : contacts) {
                 if (contact.getSurName().equals("Geck")) {
                     System.out.println("Birthday : " + contact.getBirthday());
                     System.out.println("telephone_home1  : " + contact.getTelephoneHome1());
                     System.out.println("note  : " + contact.getNote());
                 }
             }
-        } catch (FileNotFoundException e) {
+        } catch (final FileNotFoundException e) {
             e.printStackTrace();
-        } catch (IOException e) {
+        } catch (final IOException e) {
             e.printStackTrace();
+        } finally {
+            if (null != reader) {
+                try {
+                    reader.close();
+                } catch (final IOException e) {
+                    // Ignore
+                }
+            }
         }
     }
 
-    public void testGetMyContacts() {
+    public void _testGetMyContacts() throws OXException {
         final List<Contact> contacts = linkedIn.getContacts(null,1,1,1);
         boolean found = false;
         for (final Contact contact : contacts){
@@ -164,44 +180,44 @@ public class LinkedInConnectionTest extends TestCase {
     }
 
 
-    public void testGetContacts() {
+    public void _testGetContacts() throws OXException {
     	linkedIn.getContacts(null,1,1,1);
     }
 
-    public void testGetProfileForEMail() throws OXException, JSONException {
+    public void _testGetProfileForEMail() throws OXException, JSONException {
     	final JSONObject fullProfile = linkedIn.getFullProfileByEMail(Arrays.asList("tobiasprinz@gmx.net"),null,1,1,1);
     	assertEquals("Tobias", fullProfile.getString("firstName"));
     	assertEquals("Prinz", fullProfile.getString("lastName"));
     }
 
-	public void testGetProfileForId() throws OXException, JSONException {
+	public void _testGetProfileForId() throws OXException, JSONException {
 		final JSONObject profile = linkedIn.getProfileForId(LI_ID_KLEIN,null,1,1,1);
 		assertEquals("Marcus", profile.getString("firstName"));
 	}
 
-	public void testGetConnections() throws Exception {
+	public void _testGetConnections() throws Exception {
 		final JSONObject connections = linkedIn.getConnections(null,1,1,1);
 		final List<String> ids = linkedIn.extractIds(connections.getJSONArray("values"));
 		assertTrue("Should contain either Kleini or Big Kauss in contact list", ids.contains(LI_ID_KAUSS) || ids.contains(LI_ID_KLEIN)); //you're an OX programmer, aren't you?
 	}
 
-	public void testGetUsersConnectionsIds() throws OXException {
+	public void _testGetUsersConnectionsIds() throws OXException {
 		final List<String> connectionIds = linkedIn.getUsersConnectionsIds(null,1,1,1);
 		assertTrue("Should contain either Kleini or Big Kauss in contact list", connectionIds.contains(LI_ID_KAUSS) || connectionIds.contains(LI_ID_KLEIN)); //you're an OX programmer, aren't you?
 	}
 
-	public void testGetRelationToViewer() throws Exception {
+	public void _testGetRelationToViewer() throws Exception {
 		final JSONObject relations = linkedIn.getRelationToViewer(LI_ID_KAUSS, null,1,1,1);
 		assertTrue("Should know Martin", relations.getJSONObject("relationToViewer").getInt("distance") > 0);
 	}
 
-	public void testNetworkUpdates() throws Exception {
+	public void _testNetworkUpdates() throws Exception {
 		final JSONObject updateObj = linkedIn.getNetworkUpdates(null,1,1,1);
 		final JSONArray updates = updateObj.getJSONArray("values");
 		assertTrue("Something should have happened lately", updates.length() > 0);
 	}
 
-	public void testMessageInbox() throws Exception {
+	public void _testMessageInbox() throws Exception {
 		final JSONObject inbox = linkedIn.getMessageInbox(null,1,1,1);
 		assertEquals("Should have zero messages.", 0, inbox.getInt("_total"));
 	}

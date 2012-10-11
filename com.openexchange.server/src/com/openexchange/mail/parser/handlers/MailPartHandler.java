@@ -86,7 +86,7 @@ import com.openexchange.mail.uuencode.UUEncodedPart;
  */
 public final class MailPartHandler implements MailMessageHandler {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(MailPartHandler.class));
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(MailPartHandler.class));
 
     private static final class TextMailPart extends MailPart {
 
@@ -183,6 +183,11 @@ public final class MailPartHandler implements MailMessageHandler {
     public void setSequenceId(final String id) {
         this.id = id;
         mailPart = null;
+    }
+
+    @Override
+    public boolean handleMultipartEnd(final MailPart mp, final String id) throws OXException {
+        return true;
     }
 
     /*

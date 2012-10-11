@@ -73,48 +73,56 @@ public abstract class OXGroupSQLStorage extends OXGroupStorageInterface {
      * @see com.openexchange.admin.storage.interfaces.OXGroupStorageInterface#addMember(com.openexchange.admin.rmi.dataobjects.Context,
      *      int, User[])
      */
+    @Override
     abstract public void addMember(final Context ctx, final int grp_id, final User[] members) throws StorageException;
 
     /**
      * @see com.openexchange.admin.storage.interfaces.OXGroupStorageInterface#change(com.openexchange.admin.rmi.dataobjects.Context,
      *      com.openexchange.admin.rmi.dataobjects.Group)
      */
+    @Override
     abstract public void change(final Context ctx, final Group grp) throws StorageException;
 
     /**
      * @see com.openexchange.admin.storage.interfaces.OXGroupStorageInterface#create(com.openexchange.admin.rmi.dataobjects.Context,
      *      com.openexchange.admin.rmi.dataobjects.Group)
      */
+    @Override
     abstract public int create(final Context ctx, final Group grp) throws StorageException;
 
     /**
      * @see com.openexchange.admin.storage.interfaces.OXGroupStorageInterface#getMembers(com.openexchange.admin.rmi.dataobjects.Context,
      *      int)
      */
+    @Override
     abstract public User[] getMembers(final Context ctx, final int grp_id) throws StorageException;
 
     /**
      * @see com.openexchange.admin.storage.interfaces.OXGroupStorageInterface#list(com.openexchange.admin.rmi.dataobjects.Context,
      *      java.lang.String)
      */
+    @Override
     abstract public Group[] list(final Context ctx, final String pattern) throws StorageException;
 
     /**
      * @see com.openexchange.admin.storage.interfaces.OXGroupStorageInterface#removeMember(com.openexchange.admin.rmi.dataobjects.Context,
      *      int, User[])
      */
+    @Override
     abstract public void removeMember(final Context ctx, final int grp_id, final User[] members) throws StorageException;
 
     /**
      * @see com.openexchange.admin.storage.interfaces.OXGroupStorageInterface#deleteRecoveryData(com.openexchange.admin.rmi.dataobjects.Context,
      *      int, java.sql.Connection)
      */
+    @Override
     abstract public void deleteRecoveryData(final Context ctx, final int group_id, Connection con) throws StorageException;
 
     /**
      * @see com.openexchange.admin.storage.interfaces.OXGroupStorageInterface#deleteAllRecoveryData(com.openexchange.admin.rmi.dataobjects.Context,
      *      java.sql.Connection)
      */
+    @Override
     abstract public void deleteAllRecoveryData(final Context ctx, Connection con) throws StorageException;
 
 }

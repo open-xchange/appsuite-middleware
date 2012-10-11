@@ -58,7 +58,7 @@ import java.text.DecimalFormat;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicBoolean;
 import com.openexchange.exception.OXException;
-import com.openexchange.service.messaging.MessagingServiceExceptionCodes;
+import com.openexchange.service.messaging.MessagingServiceExceptionCode;
 import com.openexchange.service.messaging.internal.Constants;
 import com.openexchange.service.messaging.internal.MessageHandlerTracker;
 import com.openexchange.service.messaging.internal.MessagingConfig;
@@ -70,7 +70,7 @@ import com.openexchange.service.messaging.internal.MessagingConfig;
  */
 public final class MessagingServer implements Runnable {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(MessagingServer.class));
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(MessagingServer.class));
 
     private static final int BUFFER_LENGTH = Constants.PACKAGE_LENGTH;
 
@@ -126,7 +126,7 @@ public final class MessagingServer implements Runnable {
                 }
                 serverSocket.setReceiveBufferSize(Constants.PACKAGE_LENGTH);
             } catch (final IOException e) {
-                throw MessagingServiceExceptionCodes.BIND_ERROR.create(Integer.valueOf(listenerPort));
+                throw MessagingServiceExceptionCode.BIND_ERROR.create(Integer.valueOf(listenerPort));
             }
             /*
              * Initialize server threads

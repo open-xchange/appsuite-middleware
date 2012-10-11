@@ -50,8 +50,8 @@
 package com.openexchange.oauth.linkedin.osgi;
 
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.log.LogFactory;
 import com.openexchange.oauth.OAuthService;
 import com.openexchange.oauth.OAuthServiceMetaData;
 import com.openexchange.oauth.linkedin.LinkedInService;
@@ -85,7 +85,7 @@ public class Activator extends HousekeepingActivator {
 
     @Override
     public void unregisterServices() {
-        unregisterServices();
+        super.unregisterServices();
     }
 
     public OAuthService getOauthService() {

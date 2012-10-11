@@ -49,11 +49,15 @@
 
 package com.openexchange.jslob.json.action;
 
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
+import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
+import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.documentation.RequestMethod;
-import com.openexchange.documentation.Type;
 import com.openexchange.documentation.annotations.Action;
 import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
@@ -62,6 +66,7 @@ import com.openexchange.jslob.JSlob;
 import com.openexchange.jslob.JSlobService;
 import com.openexchange.jslob.json.JSlobRequest;
 import com.openexchange.server.ServiceLookup;
+import com.openexchange.tools.servlet.AjaxExceptionCodes;
 
 /**
  * {@link GetAction}
@@ -71,43 +76,110 @@ import com.openexchange.server.ServiceLookup;
  */
 @Action(
     name = "get"
-    , description = "Get a specific JSlob associated with the current user and context." 
+    , description = "Get a specific JSlob associated with the current user and context.<br><br>Examples:<br>" +
+    		"Consider the first element of a config cascade preference path to be the id of the jslob:<br>" + 
+    		"<br>" + 
+    		"ui/somekey = somevalue\n" + 
+    		"<br>" + 
+    		"results in<br>" + 
+    		"<br>" + 
+    		"GET /ajax/jslob?action=get&id=ui<br>" + 
+    		"<br>" + 
+    		"{\"somekey\": \"somevalue\"} <br>" + 
+    		"<br>" + 
+    		"while currently all config cascade properties are mixed into every JSLob" +
+    		"<br><br>" +
+    		"Or in a REST-like fashion vie GET request:<br>" +
+    		"GET /ajax/jslob/ui" +
+    		"<br>" + 
+            "{\"somekey\": \"somevalue\"} <br>"
     , method = RequestMethod.GET
     , parameters = {
-        @Parameter(name = "serviceId", description = "Identifier for the JSLobService lookup in the JSlobServiceRegistry.", optional=true)
+        @Parameter(name = "serviceId", description = "Optional identifier for the JSlob. Default is <tt>com.openexchange.jslob.config</tt>", optional=true)
         , @Parameter(name = "id", description = "The identifier of the JSlob.")
     }
 )
 public final class GetAction extends JSlobAction {
+
+    private final List<Method> restMethods;
 
     /**
      * Initializes a new {@link GetAction}.
      * 
      * @param services The service look-up
      */
-    public GetAction(final ServiceLookup services) {
-        super(services);
+    public GetAction(final ServiceLookup services, final Map<String, JSlobAction> actions) {
+        super(services, actions);
+        restMethods = Collections.singletonList(Method.GET);
     }
 
     @Override
     protected AJAXRequestResult perform(final JSlobRequest jslobRequest) throws OXException {
+        /*
+         * We got an action string
+         */
         String serviceId = jslobRequest.getParameter("serviceId", String.class);
         if (null == serviceId) {
             serviceId = DEFAULT_SERVICE_ID;
         }
         final JSlobService jslobService = getJSlobService(serviceId);
-
+   
         final String id = jslobRequest.checkParameter("id");
         final JSlob jslob = jslobService.get(id, jslobRequest.getUserId(), jslobRequest.getContextId());
-
+   
         final String serlvetRequestURI = jslobRequest.getRequestData().getSerlvetRequestURI();
         if (!isEmpty(serlvetRequestURI)) {
             final List<JSONPathElement> jPath = JSONPathElement.parsePath(serlvetRequestURI);
             final Object object = JSONPathElement.getPathFrom(jPath, jslob);
             return new AJAXRequestResult(null == object ? JSONObject.NULL : object, "json");
         }
-
+   
         return new AJAXRequestResult(jslob, "jslob");
+    }
+
+    @Override
+    protected AJAXRequestResult performREST(final JSlobRequest jslobRequest, final Method method) throws OXException, JSONException {
+        if (!Method.GET.equals(method)) {
+            throw AjaxExceptionCodes.BAD_REQUEST.create();
+        }
+        /*
+         * REST style access
+         */
+        final AJAXRequestData requestData = jslobRequest.getRequestData();
+        final String pathInfo = requestData.getPathInfo();
+        if (isEmpty(pathInfo)) {
+            requestData.setAction("all");
+        } else {
+            final String[] pathElements = SPLIT_PATH.split(pathInfo);
+            final int length = pathElements.length;
+            if (0 == length) {
+                /*-
+                 * "Get all JSlobs"
+                 *  GET /jslob
+                 */
+                requestData.setAction("all");
+            } else if (1 == length) {
+                /*-
+                 * "Get specific JSlob"
+                 *  GET /jslob/11
+                 */
+                final String element = pathElements[0];
+                if (element.indexOf(',') < 0) {
+                    requestData.setAction("get");
+                    requestData.putParameter("id", element);
+                } else {
+                    requestData.setAction("list");
+                    final JSONArray array = new JSONArray();
+                    for (final String id : SPLIT_CSV.split(element)) {
+                        array.put(id);
+                    }
+                    requestData.setData(array);
+                }
+            } else {
+                throw AjaxExceptionCodes.UNKNOWN_ACTION.create(pathInfo);
+            }
+        }
+        return actions.get(requestData.getAction()).perform(jslobRequest);
     }
 
     @Override
@@ -115,16 +187,9 @@ public final class GetAction extends JSlobAction {
         return "get";
     }
 
-    private static boolean isEmpty(final String string) {
-        if (null == string) {
-            return true;
-        }
-        final int len = string.length();
-        boolean isWhitespace = true;
-        for (int i = 0; isWhitespace && i < len; i++) {
-            isWhitespace = Character.isWhitespace(string.charAt(i));
-        }
-        return isWhitespace;
+    @Override
+    public List<Method> getRESTMethods() {
+        return restMethods;
     }
 
 }

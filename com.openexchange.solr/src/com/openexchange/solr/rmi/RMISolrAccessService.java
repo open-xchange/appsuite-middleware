@@ -58,7 +58,6 @@ import org.apache.solr.client.solrj.response.UpdateResponse;
 import org.apache.solr.common.SolrInputDocument;
 import org.apache.solr.common.params.SolrParams;
 import com.openexchange.exception.OXException;
-import com.openexchange.solr.SolrCoreConfiguration;
 import com.openexchange.solr.SolrCoreIdentifier;
 
 
@@ -71,36 +70,6 @@ public interface RMISolrAccessService extends Remote {
     
     public static final String RMI_NAME = "OXSolrRMI";   
     
-    /**
-     * Creates and starts up a new solr core.
-     * 
-     * @param identifier The cores name.
-     * @param instanceDir The cores instance directory.
-     * @param dataDir The cores data directory where the index files are placed in.
-     * @param schemaPath The path to the cores schema xml file.
-     * @param configPath The path to the cores configuration xml file.
-     * @return If starting the core was successfull or not.
-     * @throws OXException If the core could not be created or started.
-     */
-    boolean startCoreRmi(SolrCoreConfiguration configuration) throws RemoteException, OXException;
-
-    /**
-     * Shuts down a running core.
-     * If the core was not running, this call will be ignored.
-     * 
-     * @param identifier The cores name.
-     * @return If stopping the core was successfull or not.
-     * @throws OXException If the core could not be stopped.
-     */
-    boolean stopCoreRmi(SolrCoreIdentifier identifier) throws RemoteException, OXException;
-
-    /**
-     * Reloads a running core.
-     * 
-     * @param identifier The cores name.
-     * @throws OXException If an error occurrs during reloading the core.
-     */
-    void reloadCoreRmi(SolrCoreIdentifier identifier) throws RemoteException, OXException;
         
     /**
      * See {@link SolrServer#add(SolrInputDocument)} for details.

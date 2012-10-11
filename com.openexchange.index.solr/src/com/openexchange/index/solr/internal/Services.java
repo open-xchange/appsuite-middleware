@@ -49,15 +49,7 @@
 
 package com.openexchange.index.solr.internal;
 
-import java.util.Locale;
-import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import com.openexchange.exception.OXException;
-import com.openexchange.index.IndexConstants;
-import com.openexchange.langdetect.LanguageDetectionService;
-import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
 
 /**
@@ -66,64 +58,12 @@ import com.openexchange.server.ServiceLookup;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class Services {
-
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(Services.class));
-
-    private static final boolean DEBUG = LOG.isDebugEnabled();
-
+    
     /**
      * Initializes a new {@link Services}.
      */
     private Services() {
         super();
-    }
-
-    private static final Set<Locale> KNOWN_LOCALES = IndexConstants.KNOWN_LOCALES;
-
-    /**
-     * Checks if specified locale is supported.
-     * 
-     * @param locale The locale to check
-     * @return <code>true</code> if supported; otherwise <code>false</code>
-     */
-    public static boolean isSupportedLocale(final Locale locale) {
-        final String language = locale.getLanguage();
-        for (final Locale loc : KNOWN_LOCALES) {
-            if (language.equals(loc.getLanguage())) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    private static final Locale DEFAULT_LOCALE = LanguageDetectionService.DEFAULT_LOCALE;
-
-    /**
-     * Detects the locale.
-     * 
-     * @param str The string source
-     * @return The detected locale
-     * @throws OXException If language detection fails
-     */
-    public static Locale detectLocale(final String str) throws OXException {
-        try {
-            final LanguageDetectionService detectionService = optService(LanguageDetectionService.class);
-            if (null == detectionService) {
-                LOG.warn("Missing language detection service. Using fall-back locale \"" + DEFAULT_LOCALE + "\".");
-                return DEFAULT_LOCALE;
-            }
-            final Locale locale = detectionService.findLanguages(str).get(0);
-            if (KNOWN_LOCALES.contains(locale)) {
-                return locale;
-            }
-            if (DEBUG) {
-                LOG.debug("Detected locale \"" + locale + "\" is not supported. Using fall-back locale \"" + DEFAULT_LOCALE + "\".");
-            }
-            return DEFAULT_LOCALE;
-        } catch (final IllegalStateException e) {
-            // Missing service
-            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(e, LanguageDetectionService.class.getName());
-        }
     }
 
     private static final AtomicReference<ServiceLookup> REF = new AtomicReference<ServiceLookup>();

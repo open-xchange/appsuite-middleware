@@ -84,7 +84,7 @@ public class PortalSearchTest extends AppointmentTest {
 
 		assertTrue("object with id " + objectId + " not found in response", found);
 
-		deleteAppointment(getWebConversation(), objectId, appointmentFolderId, getHostName(), getSessionId());
+		deleteAppointment(getWebConversation(), objectId, appointmentFolderId, getHostName(), getSessionId(), false);
     }
 }
 

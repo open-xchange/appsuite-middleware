@@ -99,7 +99,7 @@ public abstract class MailMessageStorage implements IMailMessageStorage {
      * <p>
      * This method may be overridden in implementing subclass if a faster way can be achieved.
      *
-     * @param folder The folder fullname
+     * @param folder The folder full name
      * @param indexRange The index range specifying the desired sub-list in sorted list; may be <code>null</code> to obtain complete list.
      *            Range begins at the specified start index and extends to the message at index <code>end - 1</code>. Thus the length of the
      *            range is <code>end - start</code>.
@@ -212,7 +212,7 @@ public abstract class MailMessageStorage implements IMailMessageStorage {
      * <p>
      * This is a convenience method that may be overridden if a faster way can be achieved.
      *
-     * @param folder The folder fullname
+     * @param folder The folder full name
      * @param sortField The sort field
      * @param order The sort order
      * @param fields The fields to pre-fill in returned instances of {@link MailMessage}
@@ -235,8 +235,8 @@ public abstract class MailMessageStorage implements IMailMessageStorage {
      * <p>
      * This is a convenience method that may be overridden if a faster way can be achieved.
      *
-     * @param sourceFolder The source folder fullname
-     * @param destFolder The destination folder fullname
+     * @param sourceFolder The source folder full name
+     * @param destFolder The destination folder full name
      * @param mailIds The mail IDs in source folder
      * @param fast <code>true</code> to perform a fast move operation, meaning the corresponding mail IDs in destination folder are ignored
      *            and an empty array of String is returned; otherwise <code>false</code>
@@ -294,7 +294,7 @@ public abstract class MailMessageStorage implements IMailMessageStorage {
     /**
      * Gets all new and modified messages in specified folder. By default the constant {@link #EMPTY_RETVAL} is returned.
      *
-     * @param folder The folder fullname
+     * @param folder The folder full name
      * @param fields The fields to pre-fill in returned instances of {@link MailMessage}
      * @return All new and modified messages in specified folder
      * @throws OXException If mails cannot be returned
@@ -307,7 +307,7 @@ public abstract class MailMessageStorage implements IMailMessageStorage {
     /**
      * Gets all deleted messages in specified folder. By default the constant {@link #EMPTY_RETVAL} is returned.
      *
-     * @param folder The folder fullname
+     * @param folder The folder full name
      * @param fields The fields to pre-fill in returned instances of {@link MailMessage}
      * @return All deleted messages in specified folder
      * @throws OXException If mails cannot be returned

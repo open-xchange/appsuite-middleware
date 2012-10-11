@@ -55,7 +55,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.calendar.api.CalendarCollection;
 import com.openexchange.calendar.itip.generators.AttachmentMemory;
@@ -76,6 +75,7 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.notify.State;
 import com.openexchange.groupware.search.AppointmentSearchObject;
 import com.openexchange.groupware.search.Order;
+import com.openexchange.log.LogFactory;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 import com.openexchange.tools.iterator.SearchIterator;
@@ -87,7 +87,7 @@ import com.openexchange.tools.iterator.SearchIterator;
  */
 public class NotifyingCalendar extends ITipCalendarWrapper implements AppointmentSQLInterface {
 
-	private static final Log LOG = LogFactory.getLog(NotifyingCalendar.class);
+	private static final Log LOG = com.openexchange.log.Log.loggerFor(NotifyingCalendar.class);
 
 	private final AppointmentSQLInterface delegate;
 
@@ -251,6 +251,11 @@ public class NotifyingCalendar extends ITipCalendarWrapper implements Appointmen
     }
 
     @Override
+    public SearchIterator<Appointment> getAppointmentsBetween(Date start, Date end, int cols[], int orderBy, Order order) throws OXException, SQLException {
+        return delegate.getAppointmentsBetween(start, end, cols, orderBy, order);
+    }
+
+    @Override
     public SearchIterator<Appointment> getAppointmentsBetweenInFolder(final int folderId, final int[] cols, final Date start, final Date end, final int from, final int to, final int orderBy, final Order orderDir) throws OXException, SQLException {
         return delegate.getAppointmentsBetweenInFolder(folderId, cols, start, end, from, to, orderBy, orderDir);
     }
@@ -379,7 +384,7 @@ public class NotifyingCalendar extends ITipCalendarWrapper implements Appointmen
         try {
             final CalendarDataObject original = getObjectById(object_id);
             final Date retval = delegate.setUserConfirmation(object_id, folderId, user_id, confirm, confirm_message);
-            final CalendarDataObject reloaded = getObjectById(object_id, folderId);
+            final CalendarDataObject reloaded = getObjectById(object_id);
             final ITipMailGenerator generator = generators.create(original, reloaded, session, onBehalfOf(folderId));
             final List<NotificationParticipant> recipients = generator.getRecipients();
             for (final NotificationParticipant notificationParticipant : recipients) {
@@ -474,27 +479,31 @@ public class NotifyingCalendar extends ITipCalendarWrapper implements Appointmen
     }
 
     private void calculateExceptionPosition(final CalendarDataObject source, final CalendarDataObject target, final boolean isDelete) throws OXException {
-        if (source.containsRecurrenceDatePosition()) {
-            target.setRecurrenceDatePosition(source.getRecurrenceDatePosition());
-        }
-        if (source.containsRecurrencePosition()) {
-            target.setRecurrencePosition(source.getRecurrencePosition());
-        }
-        if (!isDelete && target.isException()) {
-            return;
-        }
-        if (target.containsRecurrenceDatePosition() && target.getRecurrenceDatePosition() != null || target.containsRecurrencePosition() && target.getRecurrencePosition() != 0) {
-            calendarCollection.setRecurrencePositionOrDateInDAO(target);
-            RecurringResultsInterface recResults;
-            if (!target.isException()) {
-                recResults = calendarCollection.calculateRecurring(target, 0, 0, target.getRecurrencePosition());
-                if (recResults == null) {
-                	return;
-                }
-                final RecurringResultInterface recurringResult = recResults.getRecurringResult(0);
-                target.setStartDate(new Date(recurringResult.getStart()));
-                target.setEndDate(new Date(recurringResult.getEnd()));
+        try {
+            if (source.containsRecurrenceDatePosition()) {
+                target.setRecurrenceDatePosition(source.getRecurrenceDatePosition());
             }
+            if (source.containsRecurrencePosition()) {
+                target.setRecurrencePosition(source.getRecurrencePosition());
+            }
+            if (!isDelete && target.isException()) {
+                return;
+            }
+            if (target.containsRecurrenceDatePosition() && target.getRecurrenceDatePosition() != null || target.containsRecurrencePosition() && target.getRecurrencePosition() != 0) {
+                calendarCollection.setRecurrencePositionOrDateInDAO(target, true);
+                RecurringResultsInterface recResults;
+                if (!target.isException()) {
+                    recResults = calendarCollection.calculateRecurring(target, 0, 0, target.getRecurrencePosition());
+                    if (recResults == null) {
+                    	return;
+                    }
+                    final RecurringResultInterface recurringResult = recResults.getRecurringResult(0);
+                    target.setStartDate(new Date(recurringResult.getStart()));
+                    target.setEndDate(new Date(recurringResult.getEnd()));
+                }
+            }
+        } catch (final OXException x) {
+            // IGNORE: This is all best effort
         }
     }
 

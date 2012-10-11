@@ -196,32 +196,22 @@ public final class FolderCache {
         mailCache.get(entry);
         FolderMap folderMap = entry.getValue();
         if (null == folderMap) {
-            final Lock lock = (Lock) session.getParameter(Session.PARAM_LOCK);
+            Lock lock = (Lock) session.getParameter(Session.PARAM_LOCK);
             if (null == lock) {
-                synchronized (session) {
-                    mailCache.get(entry);
-                    folderMap = entry.getValue();
-                    if (null == folderMap) {
-                        final FolderMap newMap = new FolderMap(MailAccount.DEFAULT_ID == accountId ? MAX_CAPACITY_DEFAULT_ACCOUNT : MAX_CAPACITY_PER_ACCOUNT);
-                        entry.setValue(newMap);
-                        mailCache.put(entry);
-                        folderMap = newMap;
-                    }
+                lock = Session.EMPTY_LOCK;
+            }
+            lock.lock();
+            try {
+                mailCache.get(entry);
+                folderMap = entry.getValue();
+                if (null == folderMap) {
+                    final FolderMap newMap = new FolderMap(MailAccount.DEFAULT_ID == accountId ? MAX_CAPACITY_DEFAULT_ACCOUNT : MAX_CAPACITY_PER_ACCOUNT);
+                    entry.setValue(newMap);
+                    mailCache.put(entry);
+                    folderMap = newMap;
                 }
-            } else {
-                lock.lock();
-                try {
-                    mailCache.get(entry);
-                    folderMap = entry.getValue();
-                    if (null == folderMap) {
-                        final FolderMap newMap = new FolderMap(MailAccount.DEFAULT_ID == accountId ? MAX_CAPACITY_DEFAULT_ACCOUNT : MAX_CAPACITY_PER_ACCOUNT);
-                        entry.setValue(newMap);
-                        mailCache.put(entry);
-                        folderMap = newMap;
-                    }
-                } finally {
-                    lock.unlock();
-                }
+            } finally {
+                lock.unlock();
             }
         }
         /*

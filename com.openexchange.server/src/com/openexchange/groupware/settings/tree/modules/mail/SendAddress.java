@@ -109,10 +109,12 @@ public class SendAddress implements PreferencesItemService {
             @Override
             public void writeValue(final Session session, final Context ctx, final User user, final Setting setting) throws OXException {
                 final String newAlias = setting.getSingleValue().toString();
-                final String[] aliases = user.getAliases();
                 boolean found = false;
-                for (int i = 0; aliases != null && i < aliases.length && !found; i++) {
-                    found = aliases[i].equals(newAlias);
+                final String[] aliases = user.getAliases();
+                if (null != aliases) {
+                    for (int i = 0; !found && i < aliases.length; i++) {
+                        found = aliases[i].equals(newAlias);
+                    }
                 }
                 if (user.getMail().equals(newAlias)) {
                     found = true;

@@ -50,6 +50,9 @@
 package com.openexchange.tools.versit.converter;
 
 import static com.openexchange.tools.io.IOUtils.closeStreamStuff;
+import java.awt.Rectangle;
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -75,7 +78,10 @@ import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.StringTokenizer;
 import java.util.TimeZone;
-import javax.activation.MimetypesFileTypeMap;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import javax.activation.FileTypeMap;
+import javax.imageio.ImageIO;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.IDNA;
 import javax.mail.internet.InternetAddress;
@@ -101,12 +107,14 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.tasks.Task;
 import com.openexchange.java.Charsets;
+import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
 import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.tools.ImageTypeDetector;
 import com.openexchange.tools.TimeZoneUtils;
+import com.openexchange.tools.images.ImageScalingService;
 import com.openexchange.tools.io.IOUtils;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 import com.openexchange.tools.versit.Parameter;
@@ -165,7 +173,7 @@ public class OXContainerConverter {
 
     private static final String P_CLASS = "CLASS";
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(OXContainerConverter.class));
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(OXContainerConverter.class));
 
     private static final String CHARSET_ISO_8859_1 = "ISO-8859-1";
 
@@ -270,7 +278,7 @@ public class OXContainerConverter {
         try {
             final Task taskContainer = new Task();
             // CLASS
-            PrivacyProperty(taskContainer, object, P_CLASS, Task.PRIVATE_FLAG);
+            PrivacyProperty(taskContainer, object, P_CLASS, CommonObject.PRIVATE_FLAG);
             // COMPLETED
             DateTimeProperty(taskContainer, object, P_COMPLETED, Task.DATE_COMPLETED);
             // GEO is ignored
@@ -309,7 +317,7 @@ public class OXContainerConverter {
                 }
             }
             // SUMMARY
-            StringProperty(taskContainer, object, P_SUMMARY, Task.TITLE);
+            StringProperty(taskContainer, object, P_SUMMARY, CalendarObject.TITLE);
             // TODO UID
             // property = object.getProperty("UID");
             // if (property != null) {
@@ -320,8 +328,8 @@ public class OXContainerConverter {
             // }
             // URL is ignored
             // DUE and DURATION
-            if (!DateTimeProperty(taskContainer, object, "DUE", Task.END_DATE)) {
-                DurationProperty(taskContainer, object, "DURATION", P_DTSTART, Task.END_DATE);
+            if (!DateTimeProperty(taskContainer, object, "DUE", CalendarObject.END_DATE)) {
+                DurationProperty(taskContainer, object, "DURATION", P_DTSTART, CalendarObject.END_DATE);
             }
             // Multiple properties
             final int count = object.getPropertyCount();
@@ -361,7 +369,7 @@ public class OXContainerConverter {
                 taskContainer.setCategories(cats.toString());
             }
             // DESCRIPTION (fix: 7718)
-            StringProperty(taskContainer, object, P_DESCRIPTION, Task.NOTE);
+            StringProperty(taskContainer, object, P_DESCRIPTION, CalendarObject.NOTE);
             // VALARM
             AddAlarms(taskContainer, object);
             return taskContainer;
@@ -374,10 +382,10 @@ public class OXContainerConverter {
     public CalendarDataObject convertAppointment(final VersitObject object) throws ConverterException {
         final CalendarDataObject appContainer = new CalendarDataObject();
         // CLASS
-        PrivacyProperty(appContainer, object, P_CLASS, Task.PRIVATE_FLAG);
+        PrivacyProperty(appContainer, object, P_CLASS, CommonObject.PRIVATE_FLAG);
         // CREATED is ignored
         // DESCRIPTION
-        StringProperty(appContainer, object, P_DESCRIPTION, Appointment.NOTE);
+        StringProperty(appContainer, object, P_DESCRIPTION, CalendarObject.NOTE);
         // DTSTART
         Property property = object.getProperty(P_DTSTART);
         if (property != null) {
@@ -400,7 +408,7 @@ public class OXContainerConverter {
         // TODO SEQUENCE
         // STATUS is ignored
         // SUMMARY
-        StringProperty(appContainer, object, P_SUMMARY, Appointment.TITLE);
+        StringProperty(appContainer, object, P_SUMMARY, CalendarObject.TITLE);
         // TRANSP
         property = object.getProperty("TRANSP");
         if (property != null) {
@@ -424,13 +432,13 @@ public class OXContainerConverter {
         // URL is ignored
         // TODO RECURRENCE-ID
         // DTEND and DURATION
-        if (!DateTimeProperty(appContainer, object, "DTEND", Appointment.END_DATE) && !DurationProperty(
+        if (!DateTimeProperty(appContainer, object, "DTEND", CalendarObject.END_DATE) && !DurationProperty(
             appContainer,
             object,
             "DURATION",
             P_DTSTART,
-            Appointment.END_DATE)) {
-            DateTimeProperty(appContainer, object, "DSTART", Appointment.END_DATE);
+            CalendarObject.END_DATE)) {
+            DateTimeProperty(appContainer, object, "DSTART", CalendarObject.END_DATE);
         }
         // Multiple properties
         final StringBuilder cats = new StringBuilder();
@@ -528,7 +536,32 @@ public class OXContainerConverter {
                      * Apply image data as it is since ValueDefinition#parse(Scanner s, Property property) already decodes value dependent
                      * on "ENCODING" parameter
                      */
-                    contactContainer.setImage1((byte[]) propertyValue);
+                	byte[] imageData = (byte[])propertyValue;
+                	Rectangle clipRect = extractClipRect(property.getParameter("X-ABCROP-RECTANGLE"));
+                	if (null != clipRect) {
+                		/*
+                		 * determine image format
+                		 */                		
+        				String formatName = "JPEG";
+        				Parameter typeParameter = property.getParameter("TYPE");
+        				if (null != typeParameter && 1 == typeParameter.getValueCount()) {
+        					String type = typeParameter.getValue(0).getText();
+        					if (null != type && 0 < type.length()) {
+        						formatName = type; 
+        					}
+        				}                		
+        				/*
+                		 * try to crop the image
+                		 */
+                		try {
+                			imageData = doABCrop(imageData, clipRect, formatName);
+                		} catch (IOException e) {
+                			LOG.error("error cropping image, falling back to uncropped image.", e);
+                		} catch (OXException e) {
+                			LOG.error("error cropping image, falling back to uncropped image.", e);
+						}
+                	}
+                    contactContainer.setImage1(imageData);
                     value = null;
                 } else if (propertyValue instanceof URI) {
                     loadImageFromURL(contactContainer, propertyValue.toString());
@@ -614,7 +647,7 @@ public class OXContainerConverter {
         // URL
         StringProperty(contactContainer, object, "URL", Contact.URL);
         // UID
-        StringProperty(contactContainer, object, "UID", Contact.UID);
+        StringProperty(contactContainer, object, "UID", CommonObject.UID);
         // VERSION is ignored
         // TODO CLASS
         // KEY is ignored
@@ -744,6 +777,47 @@ public class OXContainerConverter {
                     ComplexProperty(contactContainer, phones[idx][FAX], index[idx][FAX], value);
                 }
             }
+            // IM
+            else if ("IMPP".equals(property.name)) {
+                String value = property.getValue().toString();
+                if (null != value) {
+                    try {
+                        value = java.net.URLDecoder.decode(value, "UTF-8");
+                    } catch (UnsupportedEncodingException e) {
+                        LOG.debug("Error decoding IMPP value", e);
+                    }
+                }                
+                Parameter type = property.getParameter(P_TYPE);
+                boolean set = false;
+                if (null != type) {
+                    for (int j = 0; j < type.getValueCount() && false == set; j++) {
+                        String typeValue = type.getValue(j).getText();
+                        if (PARAM_HOME.equalsIgnoreCase(typeValue)) {
+                            /*
+                             * use IM 2 if possible
+                             */
+                            contactContainer.setInstantMessenger2(value);
+                            set = true;
+                        } else if (PARAM_WORK.equalsIgnoreCase(typeValue)) {
+                            /*
+                             * use IM 1 if possible
+                             */
+                            contactContainer.setInstantMessenger1(value);
+                            set = true;
+                        }
+                    }
+                }
+                /*
+                 * fill first available
+                 */
+                if (false == set) {
+                    if (false == contactContainer.containsInstantMessenger2()) {
+                        contactContainer.setInstantMessenger2(value);
+                    } else if (false == contactContainer.containsInstantMessenger1()) {
+                        contactContainer.setInstantMessenger1(value);
+                    }
+                }
+            }
             // EMAIL
             else if (P_EMAIL.equals(property.name)) {
                 final String value = property.getValue().toString();
@@ -785,7 +859,89 @@ public class OXContainerConverter {
                             throw new ConverterException(e);
                         }
                     } else {
-                        ComplexProperty(contactContainer, emails, emailIndex, value);
+                        Parameter type = property.getParameter(P_TYPE);
+                        int set = 0;
+                        if (null != type) {
+                            for (int j = 0; j < type.getValueCount() && 0 == set; j++) {
+                                String typeValue = type.getValue(j).getText();
+                                if (PARAM_HOME.equalsIgnoreCase(typeValue)) {
+                                    /*
+                                     * use email 2 if possible
+                                     */
+                                    if (contactContainer.containsEmail2()) {
+                                        // try to move somewhere else
+                                        if (false == contactContainer.containsEmail1()) {
+                                            contactContainer.setEmail1(contactContainer.getEmail2());
+                                        } else if (false == contactContainer.containsEmail3()) {
+                                            contactContainer.setEmail3(contactContainer.getEmail2());
+                                        } else {
+                                            LOG.debug("Can only save one 'home' email address, going to overwrite existing value.");
+                                        }
+                                    }
+                                    contactContainer.setEmail2(value);
+                                    set = 2;
+                                } else if (PARAM_WORK.equalsIgnoreCase(typeValue)) {
+                                    /*
+                                     * use email 1 if possible
+                                     */
+                                    if (contactContainer.containsEmail1()) {
+                                        // try to move somewhere else
+                                        if (false == contactContainer.containsEmail2()) {
+                                            contactContainer.setEmail2(contactContainer.getEmail1());
+                                        } else if (false == contactContainer.containsEmail3()) {
+                                            contactContainer.setEmail3(contactContainer.getEmail1());
+                                        } else {
+                                            LOG.debug("Can only save one 'work' email address, going to overwrite existing value.");                                           
+                                        }
+                                    }
+                                    contactContainer.setEmail1(value);
+                                    set = 1;
+                                } else if ("other".equalsIgnoreCase(typeValue)) {
+                                    /*
+                                     * use email 3 if possible
+                                     */
+                                    if (contactContainer.containsEmail3()) {
+                                        // try to move somewhere else
+                                        if (false == contactContainer.containsEmail1()) {
+                                            contactContainer.setEmail1(contactContainer.getEmail3());
+                                        } else if (false == contactContainer.containsEmail2()) {
+                                            contactContainer.setEmail2(contactContainer.getEmail3());
+                                        } else {
+                                            LOG.debug("Can only save one 'other' email address, going to overwrite existing value.");                                           
+                                        }
+                                    }
+                                    contactContainer.setEmail3(value);
+                                    set = 3;
+                                }
+                            }
+                        }
+                        /*
+                         * fill first available
+                         */
+                        if (0 == set) {
+                            if (false == contactContainer.containsEmail1()) {
+                                contactContainer.setEmail1(value);
+                                set = 1;
+                            } else if (false == contactContainer.containsEmail2()) {
+                                contactContainer.setEmail2(value);
+                                set = 2;
+                            } else if (false == contactContainer.containsEmail3()) {
+                                contactContainer.setEmail3(value);
+                                set = 3;
+                            }
+                        }
+                        /*
+                         * mark default address if defined
+                         */
+                        if (0 < set && null != type) {
+                            for (int j = 0; j < type.getValueCount(); j++) {
+                                if ("pref".equalsIgnoreCase(type.getValue(j).getText())) {
+                                    contactContainer.setDefaultAddress(set);
+                                    break;
+                                }
+                            }
+                        }
+//                        ComplexProperty(contactContainer, emails, emailIndex, value);
                     }
                 } else {
                     // fix for: 7719
@@ -818,7 +974,7 @@ public class OXContainerConverter {
                 }
             }
         }
-        ListValue(contactContainer, Contact.CATEGORIES, cats, ",");
+        ListValue(contactContainer, CommonObject.CATEGORIES, cats, ",");
 
         return contactContainer;
     }
@@ -835,6 +991,79 @@ public class OXContainerConverter {
         }
     }
 
+    /**
+     * Extracts the clipping information from the supplied 'X-ABCROP-RECTANGLE'
+     * rectangle if defined. The result's 'width' and 'height' properties 
+     * represent the dimensions of the target image. The 'x' property is the 
+     * horizontal offset to draw the source image in the target image from the 
+     * left border, the 'y' property is the vertical offset from the bottom.
+     * 
+     * @param cropParameter the 'X-ABCROP-RECTANGLE' parameter
+     * @return the clipping rectangle, or <code>null</code>, if not defined
+     */
+    private static Rectangle extractClipRect(Parameter cropParameter) {
+    	if (null != cropParameter && 0 < cropParameter.getValueCount()) {
+    		Pattern clipRectPattern = Pattern.compile("ABClipRect_1&([-+]?\\d+?)&([-+]?\\d+?)&([-+]?\\d+?)&([-+]?\\d+?)&");
+    		for (int i = 0; i < cropParameter.getValueCount(); i++) {
+    			String text = cropParameter.getValue(i).getText();
+    			Matcher matcher = clipRectPattern.matcher(text);
+    			if (matcher.find()) {
+    				try {
+        				int offsetLeft = Integer.parseInt(matcher.group(1));                				
+        				int offsetBottom = Integer.parseInt(matcher.group(2));                				
+        				int targetWidth = Integer.parseInt(matcher.group(3));                				
+        				int targetHeight = Integer.parseInt(matcher.group(4));
+        				return new Rectangle(offsetLeft, offsetBottom, targetWidth, targetHeight);
+    				} catch (NumberFormatException e) {
+    					LOG.warn("unable to parse clipping rectangle from " + text, e);
+    				}
+    			}
+    		}
+    	}    	
+		return null;
+    }
+    
+    /**
+     * Performs a crop operation on the source image as defined by the 
+     * supplied clipping rectangle. 
+     * 
+     * @param source the source image
+     * @param clipRect the clip rectangle from an 'X-ABCROP-RECTANGLE' property 
+     * @param imageFormat the target image format
+     * @return the cropped image
+     * @throws IOException
+     * @throws OXException 
+     */
+    private static byte[] doABCrop(byte[] source, Rectangle clipRect, String imageFormat) throws IOException, OXException {
+    	InputStream inputStream = null;
+    	ByteArrayOutputStream outputStream = null;
+    	try {
+    		/*
+    		 * read source image
+    		 */
+    		inputStream = new ByteArrayInputStream(source);
+        	BufferedImage sourceImage = ImageIO.read(inputStream);
+        	/*
+        	 * crop the image
+        	 */
+        	ImageScalingService imageService = ServerServiceRegistry.getInstance().getService(ImageScalingService.class, true);
+        	BufferedImage targetImage = imageService.crop(sourceImage, clipRect.x * -1, 
+        			clipRect.height + clipRect.y - sourceImage.getHeight(), clipRect.width, clipRect.height);
+//        	BufferedImage targetImage = imageService.crop(sourceImage, clipRect.x * -1 - 1, 
+//        			clipRect.height + clipRect.y - sourceImage.getHeight(), clipRect.width - 1, clipRect.height - 1);
+    		/*
+    		 * write back to byte array
+    		 */    		
+    		outputStream = new ByteArrayOutputStream();
+    		ImageIO.write(targetImage, imageFormat, outputStream);
+    		outputStream.flush();
+    		return outputStream.toByteArray();
+    	} finally {
+    		Streams.close(inputStream);
+    		Streams.close(outputStream);
+    	}
+    }
+    
     /**
      * Open a new {@link URLConnection URL connection} to specified parameter's value which indicates to be an URI/URL. The image's data and
      * its MIME type is then read from opened connection and put into given {@link Contact contact container}.
@@ -1067,7 +1296,7 @@ public class OXContainerConverter {
             throw new ConverterException("RRULE without DTSTART");
         }
         final Calendar cal = ((DateTimeValue) start.getValue()).calendar;
-        final int[] recurTypes = { Task.NONE, Task.NONE, Task.NONE, Task.DAILY, Task.WEEKLY, Task.MONTHLY, Task.YEARLY };
+        final int[] recurTypes = { CalendarObject.NONE, CalendarObject.NONE, CalendarObject.NONE, CalendarObject.DAILY, CalendarObject.WEEKLY, CalendarObject.MONTHLY, CalendarObject.YEARLY };
         calContainerObj.setRecurrenceType(recurTypes[recur.Freq]);
         if (recur.Until != null) {
             calContainerObj.setUntil(recur.Until.calendar.getTime());
@@ -1555,9 +1784,12 @@ public class OXContainerConverter {
             addProperty(object, P_TEL, P_TYPE, new String[] { "isdn" }, contact.getTelephoneISDN());
             addProperty(object, P_TEL, P_TYPE, new String[] { "pager" }, contact.getTelephonePager());
             // EMAIL
-            addProperty(object, P_EMAIL, contact.getEmail1());
-            addProperty(object, P_EMAIL, contact.getEmail2());
-            addProperty(object, P_EMAIL, contact.getEmail3());
+            addProperty(object, P_EMAIL, P_TYPE, 1 == contact.getDefaultAddress() ? 
+                new String[] { "INTERNET", PARAM_WORK, "pref" } : new String[] { "INTERNET", PARAM_WORK }, contact.getEmail1());
+            addProperty(object, P_EMAIL, P_TYPE, 2 == contact.getDefaultAddress() ? 
+                new String[] { "INTERNET", PARAM_HOME, "pref" } : new String[] { "INTERNET", PARAM_HOME }, contact.getEmail2());
+            addProperty(object, P_EMAIL, P_TYPE, 3 == contact.getDefaultAddress() ? 
+                new String[] { "INTERNET", "pref", "other" } : new String[] { "INTERNET", "other" }, contact.getEmail3());
             // MAILER is ignored
             // TZ is ignored
             // GEO is ignored
@@ -1615,10 +1847,16 @@ public class OXContainerConverter {
             }
         }
         // CATEGORIES
-        final String s = contact.getCategories();
-        if (s != null) {
-            addProperty(object, P_CATEGORIES, getList(s, ','));
-        }
+        if (null != contact.getCategories() && 0 < contact.getCategories().length()) {
+            ArrayList<String> categories = new ArrayList<String>();
+            StringTokenizer tokenizer = new StringTokenizer(contact.getCategories(), ",");
+            while (tokenizer.hasMoreTokens()) {
+                categories.add(tokenizer.nextToken());
+            }
+            if (0 < categories.size()) {
+                addProperty(object, P_CATEGORIES, categories);
+            }
+        }       
         // NOTE
         addProperty(object, "NOTE", contact.getNote());
         // REV
@@ -1629,6 +1867,9 @@ public class OXContainerConverter {
         addProperty(object, "URL", contact.getURL());
         // UID
         addProperty(object, "UID", contact.getUid());
+        // IMPP
+        addProperty(object, "IMPP", P_TYPE, new String[] { PARAM_WORK }, contact.getInstantMessenger1());
+        addProperty(object, "IMPP", P_TYPE, new String[] { PARAM_HOME }, contact.getInstantMessenger2());
         // TODO CLASS
         // KEY is ignored
         return object;
@@ -1636,15 +1877,22 @@ public class OXContainerConverter {
 
     private void addADR(final VersitObject object, final Contact contactContainer, final String[] type, final int street, final int city, final int state, final int postalCode, final int country) throws ConverterException {
         try {
-            final ArrayList<ArrayList<Object>> adr = new ArrayList<ArrayList<Object>>(7);
-            adr.add(null);
-            adr.add(null);
-            adr.add(makeList(getStreet(street, contactContainer)));
-            adr.add(makeList(getCity(city, contactContainer)));
-            adr.add(makeList(getState(state, contactContainer)));
-            adr.add(makeList(getPostalCode(postalCode, contactContainer)));
-            adr.add(makeList(getCountry(country, contactContainer)));
-            addProperty(object, "ADR", P_TYPE, type, adr);
+        	String streetValue = getStreet(street, contactContainer);
+        	String cityValue = getCity(city, contactContainer);
+        	String stateValue = getState(state, contactContainer);
+        	String postalCodeValue = getPostalCode(postalCode, contactContainer);
+        	String countryValue = getCountry(country, contactContainer);
+        	if (null != streetValue || null != cityValue || null != stateValue || null != postalCodeValue || null != countryValue) {
+                final ArrayList<ArrayList<Object>> adr = new ArrayList<ArrayList<Object>>(7);
+                adr.add(null);
+                adr.add(null);
+                adr.add(makeList(streetValue));
+                adr.add(makeList(cityValue));
+                adr.add(makeList(stateValue));
+                adr.add(makeList(postalCodeValue));
+                adr.add(makeList(countryValue));
+                addProperty(object, "ADR", P_TYPE, type, adr);
+        	}
         } catch (final Exception e) {
             throw new ConverterException(e);
         }
@@ -1970,7 +2218,7 @@ public class OXContainerConverter {
     }
 
     private static String getMimeType(final String filename) {
-        return MimetypesFileTypeMap.getDefaultFileTypeMap().getContentType(filename);
+        return FileTypeMap.getDefaultFileTypeMap().getContentType(filename);
     }
 
     private static boolean isValidImage(final byte[] data) {

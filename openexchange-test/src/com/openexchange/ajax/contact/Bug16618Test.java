@@ -51,7 +51,6 @@ package com.openexchange.ajax.contact;
 
 import java.util.Date;
 import java.util.TimeZone;
-import com.openexchange.ajax.ContactTest;
 import com.openexchange.ajax.contact.action.AllRequest;
 import com.openexchange.ajax.contact.action.DeleteRequest;
 import com.openexchange.ajax.contact.action.InsertRequest;
@@ -62,6 +61,7 @@ import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.framework.CommonAllResponse;
 import com.openexchange.ajax.framework.CommonListResponse;
 import com.openexchange.ajax.framework.ListIDs;
+import com.openexchange.contact.Data;
 import com.openexchange.groupware.container.Contact;
 
 /**
@@ -106,7 +106,7 @@ public class Bug16618Test extends AbstractAJAXSession {
         folderId = client.getValues().getPrivateContactFolder();
         contact.setParentFolderID(folderId);
 
-        contact.setImage1(ContactTest.image);
+        contact.setImage1(Data.image);
 
         final InsertRequest insertContactReq = new InsertRequest(contact);
         final InsertResponse insertContactResp = client.execute(insertContactReq);

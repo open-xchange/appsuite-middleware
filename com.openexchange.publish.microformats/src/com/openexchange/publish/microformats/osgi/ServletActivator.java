@@ -50,15 +50,16 @@
 package com.openexchange.publish.microformats.osgi;
 
 import javax.servlet.ServletException;
+
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import com.openexchange.log.LogFactory;
 import org.osgi.service.http.HttpService;
 import org.osgi.service.http.NamespaceException;
 
 import com.openexchange.ajax.requesthandler.responseRenderers.FileResponseRenderer;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.contact.ContactService;
 import com.openexchange.context.ContextService;
-import com.openexchange.groupware.contact.ContactInterfaceDiscoveryService;
 import com.openexchange.groupware.infostore.InfostoreFacade;
 import com.openexchange.html.HtmlService;
 import com.openexchange.i18n.I18nService;
@@ -89,8 +90,8 @@ public class ServletActivator extends HousekeepingActivator {
     private I18nServiceTrackerCustomizer customizer;
 
     private static final Class<?>[] NEEDED_SERVICES = {
-        HttpService.class, PublicationDataLoaderService.class, ContextService.class, TemplateService.class,
-        ContactInterfaceDiscoveryService.class, UserConfigurationService.class, UserService.class, InfostoreFacade.class, ConfigurationService.class, HtmlService.class, ImageScalingService.class};
+        HttpService.class, PublicationDataLoaderService.class, ContextService.class, TemplateService.class, ContactService.class, 
+        UserConfigurationService.class, UserService.class, InfostoreFacade.class, ConfigurationService.class, HtmlService.class, ImageScalingService.class};
 
     @Override
     protected Class<?>[] getNeededServices() {
@@ -128,7 +129,7 @@ public class ServletActivator extends HousekeepingActivator {
         final PublicationDataLoaderService dataLoader = getService(PublicationDataLoaderService.class);
         final ContextService contexts = getService(ContextService.class);
         final TemplateService templates = getService(TemplateService.class);
-        final ContactInterfaceDiscoveryService contacts = getService(ContactInterfaceDiscoveryService.class);
+        final ContactService contacts = getService(ContactService.class);
         final InfostoreFacade infostore = getService(InfostoreFacade.class);
         final UserConfigurationService userConfigs = getService(UserConfigurationService.class);
         final UserService users = getService(UserService.class);
@@ -152,8 +153,8 @@ public class ServletActivator extends HousekeepingActivator {
         MicroformatServlet.setHtmlService(htmlService);
         final MicroformatServlet microformatServlet = new MicroformatServlet();
 
-        ContactPictureServlet.setContactInterfaceDiscoveryService(contacts);
-        MicroformatServlet.setContactInterfaceDiscoveryService(contacts);
+        ContactPictureServlet.setContactService(contacts);
+        MicroformatServlet.setContactService(contacts);
 
         InfostoreFileServlet.setUserConfigs(userConfigs);
         InfostoreFileServlet.setUsers(users);

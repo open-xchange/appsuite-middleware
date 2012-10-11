@@ -53,12 +53,12 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import com.openexchange.datatypes.genericonf.DynamicFormDescription;
 import com.openexchange.datatypes.genericonf.FormElement;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.log.LogFactory;
 import com.openexchange.subscribe.AbstractSubscribeService;
 import com.openexchange.subscribe.Subscription;
 import com.openexchange.subscribe.SubscriptionErrorMessage;
@@ -89,7 +89,7 @@ public class MSNSubscribeService  extends AbstractSubscribeService {
 
         final DynamicFormDescription form = new DynamicFormDescription();
 
-        final FormElement oauthAccount = FormElement.custom("oauthAccount", "account", "The OAuthAccount to use");
+        final FormElement oauthAccount = FormElement.custom("oauthAccount", "account", FormStrings.ACCOUNT_LABEL);
         oauthAccount.setOption("type", activator.getOAuthServiceMetaData().getId());
         form.add(oauthAccount);
 

@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Social OX Plug-In for LinkedIn
 Bundle-SymbolicName: com.openexchange.oauth.linkedin
-Bundle-Version: 6.21.0
+Bundle-Version: 6.22.0
 Bundle-Activator: com.openexchange.oauth.linkedin.osgi.Activator
 Bundle-Vendor: OPENEXCHANGE
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
@@ -28,8 +28,15 @@ Import-Package: com.openexchange.config,
  org.json,
  org.osgi.framework,
  org.osgi.util.tracker,
+ org.scribe.builder,
+ org.scribe.builder.api,
+ org.scribe.exceptions,
+ org.scribe.extractors,
+ org.scribe.model,
+ org.scribe.oauth,
+ org.scribe.services,
+ org.scribe.utils,
  org.w3c.dom,
  org.xml.sax
-Bundle-ClassPath: .,
- lib/scribe-1.1.0.jar
+Bundle-ClassPath: .
 Export-Package: com.openexchange.oauth.linkedin

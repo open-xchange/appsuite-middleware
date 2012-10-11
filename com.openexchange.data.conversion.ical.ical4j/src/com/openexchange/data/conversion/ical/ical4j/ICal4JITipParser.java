@@ -68,7 +68,7 @@ import net.fortuna.ical4j.model.component.VEvent;
 import net.fortuna.ical4j.model.property.Comment;
 import net.fortuna.ical4j.model.property.Method;
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import com.openexchange.log.LogFactory;
 import com.openexchange.data.conversion.ical.ConversionError;
 import com.openexchange.data.conversion.ical.ConversionWarning;
 import com.openexchange.data.conversion.ical.ical4j.internal.AppointmentConverters;
@@ -90,16 +90,18 @@ public class ICal4JITipParser extends ICal4JParser implements ITipParser {
 
     private static Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(ICal4JITipParser.class));
 
-    public List<ITipMessage> parseMessage(String icalText, TimeZone defaultTZ, Context ctx, List<ConversionError> errors, List<ConversionWarning> warnings) throws ConversionError {
+    @Override
+    public List<ITipMessage> parseMessage(String icalText, TimeZone defaultTZ, Context ctx, int owner, List<ConversionError> errors, List<ConversionWarning> warnings) throws ConversionError {
         try {
-            return parseMessage(new ByteArrayInputStream(icalText.getBytes("UTF-8")), defaultTZ, ctx, errors, warnings);
+            return parseMessage(new ByteArrayInputStream(icalText.getBytes("UTF-8")), defaultTZ, ctx, owner, errors, warnings);
         } catch (UnsupportedEncodingException e) {
             LOG.error(e.getMessage(), e);
         }
         return Collections.emptyList();
     }
 
-    public List<ITipMessage> parseMessage(InputStream ical, TimeZone defaultTZ, Context ctx, List<ConversionError> errors, List<ConversionWarning> warnings) throws ConversionError {
+    @Override
+    public List<ITipMessage> parseMessage(InputStream ical, TimeZone defaultTZ, Context ctx, int owner, List<ConversionError> errors, List<ConversionWarning> warnings) throws ConversionError {
         List<ITipMessage> messages = new ArrayList<ITipMessage>();
         Map<String, ITipMessage> messagesPerUID = new HashMap<String, ITipMessage>();
         BufferedReader reader = null;
@@ -110,13 +112,13 @@ public class ICal4JITipParser extends ICal4JParser implements ITipParser {
             
             boolean microsoft = looksLikeMicrosoft(calendar);
             
-            Method method = (Method) calendar.getProperty(Method.METHOD);
+            Method method = (Method) calendar.getProperty(Property.METHOD);
             ITipMethod methodValue = (method == null) ? ITipMethod.NO_METHOD : ITipMethod.get(method.getValue());
             
             List<AttributeConverter<VEvent, Appointment>> converters = AppointmentConverters.getConverters(methodValue);
 
             int i = 0;
-            for (Object componentObj : calendar.getComponents(VEvent.VEVENT)) {
+            for (Object componentObj : calendar.getComponents(Component.VEVENT)) {
                 Component vevent = (Component) componentObj;
                 try {
                     CalendarDataObject appointment = convertAppointment(i++, (VEvent) vevent, defaultTZ, converters, ctx, warnings);
@@ -130,13 +132,16 @@ public class ICal4JITipParser extends ICal4JParser implements ITipParser {
                         messagesPerUID.put(appointment.getUid(), message);
                         messages.add(message);
                     }
+                    if (owner > 0) {
+                        message.setOwner(owner);
+                    }
                     if (appointment.containsRecurrenceDatePosition()) {
                         message.addException(appointment);
                     } else {
                         message.setAppointment(appointment);
                     }
-                    if (vevent.getProperty(Comment.COMMENT) != null ) {
-                        message.setComment(vevent.getProperty(Comment.COMMENT).getValue());
+                    if (vevent.getProperty(Property.COMMENT) != null ) {
+                        message.setComment(vevent.getProperty(Property.COMMENT).getValue());
                     }
                     
                 } catch (ConversionError conversionError) {

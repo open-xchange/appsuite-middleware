@@ -52,7 +52,7 @@ package com.openexchange.management.internal;
 import static com.openexchange.management.services.ManagementServiceRegistry.getServiceRegistry;
 import java.util.concurrent.atomic.AtomicBoolean;
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import com.openexchange.log.LogFactory;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.server.Initialization;
@@ -110,7 +110,7 @@ public final class ManagementInit implements Initialization {
             }
             final int jmxPort = c.getIntProperty("JMXPort", 9999);
             agent.setJmxPort(jmxPort);
-            final int jmxServerPort = c.getIntProperty("JMXServerPort", 3000);
+            final int jmxServerPort = c.getIntProperty("JMXServerPort", -1);
             agent.setJmxServerPort(jmxServerPort);
             agent.setJmxSinglePort(c.getBoolProperty("JMXSinglePort", false));
             agent.setJmxBindAddr(bindAddress);

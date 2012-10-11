@@ -50,19 +50,14 @@
 package com.openexchange.service.indexing.mail.job;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.index.IndexAccess;
 import com.openexchange.index.IndexDocument;
 import com.openexchange.index.solr.mail.SolrMailUtility;
-import com.openexchange.mail.MailField;
+import com.openexchange.log.LogFactory;
 import com.openexchange.mail.MailFields;
-import com.openexchange.mail.api.IMailFolderStorage;
-import com.openexchange.mail.api.IMailMessageStorage;
-import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.service.indexing.mail.MailJobInfo;
 
@@ -115,7 +110,7 @@ public final class AddByIDsJob extends AbstractMailJob {
      * @return This folder job
      */
     public AddByIDsJob setMails(final List<MailMessage> mails) {
-        this.mailIds = new ArrayList<String>(mails.size());
+        mailIds = new ArrayList<String>(mails.size());
         for (final MailMessage mailMessage : mails) {
             final String mailId = mailMessage.getMailId();
             if (null != mailId) {
@@ -137,41 +132,25 @@ public final class AddByIDsJob extends AbstractMailJob {
     }
 
     @Override
-    public void performJob() throws OXException, InterruptedException {
+    protected void performMailJob() throws OXException, InterruptedException {
         final List<String> mailIds = this.mailIds;
         if (null == mailIds) {
             return;
         }
-        IndexAccess<MailMessage> indexAccess = null;
         try {
             /*
              * Check flags of contained mails
              */
-            indexAccess = getIndexAccess();
+            final IndexAccess<MailMessage> indexAccess = storageAccess.getIndexAccess();
             final List<MailMessage> mails;
-            {
-                MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = null;
-                try {
-                    mailAccess = mailAccessFor();
-                    /*
-                     * Get the mails from mail storage
-                     */
-                    mailAccess.connect(false);
-                    /*
-                     * Fetch mails
-                     */
-                    final MailFields fields = new MailFields(SolrMailUtility.getIndexableFields());
-                    // fields.removeMailField(MailField.BODY);  <--- Allow body!
-                    fields.removeMailField(MailField.FULL);
-                    mails =
-                        Arrays.asList(mailAccess.getMessageStorage().getMessages(
-                            fullName,
-                            mailIds.toArray(new String[mailIds.size()]),
-                            fields.toArray()));
-                } finally {
-                    getSmalAccessService().closeUnwrappedInstance(mailAccess);
-                    mailAccess = null;
-                }
+            try {
+                /*
+                 * Fetch mails
+                 */
+                MailFields fields = SolrMailUtility.getIndexableFields(indexAccess);
+                mails = storageAccess.allMailsFromStorage(fullName, fields.toArray());
+            } finally {
+                storageAccess.releaseMailAccess();
             }
             /*
              * Add them to index
@@ -183,10 +162,10 @@ public final class AddByIDsJob extends AbstractMailJob {
                     indexAccess.addEnvelopeData(documents);
                     break;
                 case BODY:
-                    indexAccess.addContent(documents);
+                    indexAccess.addContent(documents, true);
                     break;
                 default:
-                    indexAccess.addAttachments(documents);
+                    indexAccess.addAttachments(documents, true);
                     break;
                 }
             } catch (final OXException e) {
@@ -198,10 +177,10 @@ public final class AddByIDsJob extends AbstractMailJob {
                             indexAccess.addEnvelopeData(document);
                             break;
                         case BODY:
-                            indexAccess.addContent(document);
+                            indexAccess.addContent(document, true);
                             break;
                         default:
-                            indexAccess.addAttachments(document);
+                            indexAccess.addAttachments(document, true);
                             break;
                         }
                     } catch (final Exception inner) {
@@ -214,8 +193,6 @@ public final class AddByIDsJob extends AbstractMailJob {
             }
         } catch (final RuntimeException e) {
             LOG.warn(SIMPLE_NAME + " failed: " + info, e);
-        } finally {
-            releaseAccess(indexAccess);
         }
     }
 

@@ -18,6 +18,7 @@ package org.apache.tika.parser.pkg;
 
 import java.io.InputStream;
 
+import org.apache.tika.metadata.HttpHeaders;
 import org.apache.tika.metadata.Metadata;
 import org.apache.tika.parser.AutoDetectParser;
 import org.apache.tika.parser.Parser;
@@ -42,7 +43,7 @@ public class GzipParserTest extends AbstractPkgTest {
             stream.close();
         }
 
-        assertEquals("application/x-gzip", metadata.get(Metadata.CONTENT_TYPE));
+        assertEquals("application/x-gzip", metadata.get(HttpHeaders.CONTENT_TYPE));
         String content = handler.toString();
         assertTrue(content.contains("test-documents/testEXCEL.xls"));
         assertTrue(content.contains("Sample Excel Worksheet"));
@@ -80,18 +81,18 @@ public class GzipParserTest extends AbstractPkgTest {
        } finally {
            stream.close();
        }
-
+       
        // Should find a single entry, for the (compressed) tar file
        assertEquals(1, tracker.filenames.size());
        assertEquals(1, tracker.mediatypes.size());
-
+       
        assertEquals(null, tracker.filenames.get(0));
        assertEquals(null, tracker.mediatypes.get(0));
 
        // Tar file starts with the directory name
        assertEquals("test-documents/", new String(tracker.lastSeenStart, 0, 15, "ASCII"));
     }
-
+    
     public void testSvgzParsing() throws Exception {
         Parser parser = new AutoDetectParser(); // Should auto-detect!
         ContentHandler handler = new BodyContentHandler();
@@ -105,7 +106,7 @@ public class GzipParserTest extends AbstractPkgTest {
             stream.close();
         }
 
-        assertEquals("application/x-gzip", metadata.get(Metadata.CONTENT_TYPE));
+        assertEquals("application/x-gzip", metadata.get(HttpHeaders.CONTENT_TYPE));
         String content = handler.toString();
         assertTrue(content.contains("Test SVG image"));
     }

@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: WebDAV ACL
 Bundle-SymbolicName: com.openexchange.webdav.acl
-Bundle-Version: 6.21.0
+Bundle-Version: 6.22.0
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Import-Package: com.openexchange.authentication,
@@ -12,6 +12,7 @@ Import-Package: com.openexchange.authentication,
  com.openexchange.groupware.contexts,
  com.openexchange.groupware.contexts.impl,
  com.openexchange.groupware.ldap,
+ com.openexchange.log,
  com.openexchange.login,
  com.openexchange.login.internal,
  com.openexchange.osgi,
@@ -25,13 +26,16 @@ Import-Package: com.openexchange.authentication,
  com.openexchange.user,
  com.openexchange.webdav,
  com.openexchange.webdav.action,
+ com.openexchange.webdav.loader,
  com.openexchange.webdav.protocol,
  com.openexchange.webdav.protocol.helpers,
  com.openexchange.webdav.protocol.osgi,
+ com.openexchange.webdav.xml.resources,
  javax.servlet;version="2.4.0",
  javax.servlet.http;version="2.4.0",
  org.apache.commons.logging,
- org.jdom,
+ org.jdom2,
+ org.jdom2.output,
  org.osgi.framework,
  org.osgi.service.http,
  org.osgi.util.tracker

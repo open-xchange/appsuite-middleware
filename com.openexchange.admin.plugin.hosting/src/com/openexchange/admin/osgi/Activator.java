@@ -50,12 +50,16 @@
 package com.openexchange.admin.osgi;
 
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import com.openexchange.admin.PluginStarter;
+import com.openexchange.admin.daemons.ClientAdminThreadExtended;
 import com.openexchange.admin.exceptions.OXGenericException;
 import com.openexchange.admin.services.AdminServiceRegistry;
+import com.openexchange.admin.tools.AdminCache;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.context.ContextService;
+import com.openexchange.database.DatabaseService;
 import com.openexchange.i18n.I18nService;
+import com.openexchange.log.LogFactory;
 import com.openexchange.management.ManagementService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.osgi.RegistryServiceTrackerCustomizer;
@@ -70,6 +74,9 @@ public class Activator extends HousekeepingActivator {
 
     @Override
     public void startBundle() throws Exception {
+        final ConfigurationService configurationService = getService(ConfigurationService.class);
+        AdminCache.compareAndSetConfigurationService(null, configurationService);
+        AdminServiceRegistry.getInstance().addService(ConfigurationService.class, configurationService);
         track(ThreadPoolService.class, new RegistryServiceTrackerCustomizer<ThreadPoolService>(context, AdminServiceRegistry.getInstance(), ThreadPoolService.class));
         track(ContextService.class, new RegistryServiceTrackerCustomizer<ContextService>(context, AdminServiceRegistry.getInstance(), ContextService.class));
         track(I18nService.class, new I18nServiceCustomizer(context));
@@ -78,7 +85,8 @@ public class Activator extends HousekeepingActivator {
         openTrackers();
         this.starter = new PluginStarter();
         try {
-            this.starter.start(context);
+            this.starter.start(context, configurationService);
+            track(DatabaseService.class, new DatabaseServiceCustomizer(context, ClientAdminThreadExtended.cache.getPool())).open();
         } catch (final OXGenericException e) {
             LOG.fatal(e.getMessage(), e);
         }
@@ -93,6 +101,6 @@ public class Activator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return null;
+        return new Class<?>[] { ConfigurationService.class };
     }
 }

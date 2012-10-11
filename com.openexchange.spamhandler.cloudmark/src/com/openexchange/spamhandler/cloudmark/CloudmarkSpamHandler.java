@@ -54,9 +54,9 @@ import javax.mail.Address;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
+import com.openexchange.log.LogFactory;
 import com.openexchange.mail.MailField;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.dataobjects.MailMessage;
@@ -103,6 +103,10 @@ public final class CloudmarkSpamHandler extends SpamHandler {
             for (int i = 0; i < mailMessage.length; i++) {
                 final MailTransport transport = MailTransport.getInstance(session);
                 try {
+                    if (isEmpty(targetSpamEmailAddress)) {
+                        LOG.error("There is no value configured for 'com.openexchange.spamhandler.cloudmark.targetSpamEmailAddress', cannot process spam reporting to cloudmark.");
+                        return;
+                    }
                     transport.sendRawMessage(mailMessage[i].getSourceBytes(), new Address[] { new InternetAddress(targetSpamEmailAddress, true) });
                 } catch (final AddressException e) {
                     LOG.error("The configured target eMail address is not valid", e);
@@ -127,6 +131,18 @@ public final class CloudmarkSpamHandler extends SpamHandler {
         } finally {
             mailAccess.close(true);
         }
+    }
+
+    private static boolean isEmpty(final String string) {
+        if (null == string) {
+            return true;
+        }
+        final int len = string.length();
+        boolean isWhitespace = true;
+        for (int i = 0; isWhitespace && i < len; i++) {
+            isWhitespace = Character.isWhitespace(string.charAt(i));
+        }
+        return isWhitespace;
     }
 
     @Override

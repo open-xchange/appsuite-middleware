@@ -22,6 +22,7 @@ import java.util.TreeMap;
 
 import junit.framework.TestCase;
 
+import org.apache.tika.metadata.HttpHeaders;
 import org.apache.tika.metadata.Metadata;
 import org.apache.tika.mime.MediaType;
 
@@ -64,7 +65,7 @@ public class TypeDetectorTest extends TestCase {
 
     private void assertDetect(MediaType type, String name){
         Metadata metadata = new Metadata();
-        metadata.set(Metadata.CONTENT_TYPE, name);
+        metadata.set(HttpHeaders.CONTENT_TYPE, name);
         try {
             assertEquals(type, detector.detect(null, metadata));
         } catch (IOException e) {

@@ -50,11 +50,13 @@
 package com.openexchange.caldav.servlet;
 
 import java.io.IOException;
+
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+
 import com.openexchange.config.cascade.ComposedConfigProperty;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.exception.OXException;
@@ -77,9 +79,9 @@ public class CalDAV extends OXServlet {
 
 	private static final long serialVersionUID = -7768308794451862636L;
 
-	private static final transient Log LOG = LogFactory.getLog(CalDAV.class);
+	private static final transient Log LOG = com.openexchange.log.Log.loggerFor(CalDAV.class);
     
-    private static ServiceLookup services;
+    private static volatile ServiceLookup services;
     
     public static void setServiceLookup(final ServiceLookup serviceLookup) {
         services = serviceLookup;
@@ -149,6 +151,11 @@ public class CalDAV extends OXServlet {
     @Override
     protected void doPut(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
         doIt(req, resp, CaldavPerformer.Action.PUT);
+    }
+
+    @Override
+    protected void doPost(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
+        doIt(req, resp, CaldavPerformer.Action.POST);
     }
 
     @Override

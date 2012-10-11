@@ -35,7 +35,7 @@
 	<property name="configjar" value="com.openexchange.configread.jar" />
 	<property name="serverjar" value="com.openexchange.server.jar" />
 
-	<property name="mailjar" value="mail-1.4.3.jar" />
+	<property name="mailjar" value="mail-1.4.5.jar" />
 	<property name="httpclientjar" value="commons-httpclient-3.1.jar" />
 	<property name="fileuploadjar" value="commons-fileupload-1.2.1.jar" />
 

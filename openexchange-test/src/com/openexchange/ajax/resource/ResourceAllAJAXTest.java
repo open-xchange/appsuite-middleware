@@ -87,7 +87,7 @@ public final class ResourceAllAJAXTest extends AbstractResourceTest {
 			 */
 			final Resource resource = new Resource();
 			resource.setAvailable(true);
-			resource.setMail("my.resource@domain.tdl");
+			resource.setMail("my.resource@dom"+System.currentTimeMillis()+"ain.tdl");
 			resource.setSimpleName(ResourceAllAJAXTest.class.getName());
 			resource.setDisplayName(ResourceAllAJAXTest.class.getName());
 			resource.setDescription(ResourceAllAJAXTest.class.getName());

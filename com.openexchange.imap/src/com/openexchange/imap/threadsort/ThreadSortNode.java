@@ -50,6 +50,7 @@
 package com.openexchange.imap.threadsort;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -63,18 +64,24 @@ public class ThreadSortNode {
     /**
      * The number of this tree node's message.
      */
-    final int msgNum;
+    final MessageId msgId;
+
+    /**
+     * The UID.
+     */
+    final long uid;
 
     private final List<ThreadSortNode> childs;
 
     /**
      * Initializes a new {@link ThreadSortNode}.
      *
-     * @param msgNum The number of this tree node's message.
+     * @param msgId The identifier of this tree node's message.
      */
-    ThreadSortNode(final int msgNum) {
-        this.msgNum = msgNum;
+    public ThreadSortNode(final MessageId msgId, final long uid) {
+        this.msgId = msgId;
         childs = new ArrayList<ThreadSortNode>();
+        this.uid = uid;
     }
 
     /**
@@ -82,7 +89,7 @@ public class ThreadSortNode {
      *
      * @param child The child to add.
      */
-    void addChild(final ThreadSortNode child) {
+    public void addChild(final ThreadSortNode child) {
         childs.add(child);
     }
 
@@ -91,13 +98,31 @@ public class ThreadSortNode {
      *
      * @param childThreads The children to add.
      */
-    void addChildren(final List<ThreadSortNode> childThreads) {
+    public void addChildren(final List<ThreadSortNode> childThreads) {
         childs.addAll(childThreads);
     }
 
     @Override
     public String toString() {
-        return new StringBuilder().append(msgNum).append(' ').append(childs).toString();
+        return new StringBuilder().append(msgId).append(' ').append(childs).toString();
+    }
+
+    /**
+     * Gets the UID.
+     *
+     * @return The UID
+     */
+    public long getUid() {
+        return uid;
+    }
+
+    /**
+     * Gets the message identifier
+     *
+     * @return The message identifier
+     */
+    public MessageId getMsgId() {
+        return msgId;
     }
 
     /**
@@ -106,7 +131,7 @@ public class ThreadSortNode {
      * @return The number of this tree node's message.
      */
     public int getMsgNum() {
-        return msgNum;
+        return msgId.getMessageNumber();
     }
 
     /**
@@ -117,4 +142,51 @@ public class ThreadSortNode {
     public List<ThreadSortNode> getChilds() {
         return childs;
     }
+
+    /**
+     * Filters from nodes those sub-trees which solely consist of nodes associated with given full name
+     * 
+     * @param fullName The full name to filter with
+     * @param threadList The nodes
+     */
+    public static void filterFullName(final String sentFullName, final List<ThreadSortNode> threadList) {
+        for (final Iterator<ThreadSortNode> iterator = threadList.iterator(); iterator.hasNext();) {
+            if (checkFullName(sentFullName, iterator.next())) {
+                iterator.remove();
+            }
+        }
+    }
+
+    private static boolean checkFullName(final String fullName, final ThreadSortNode node) {
+        if (!fullName.equals(node.msgId.getFullName())) {
+            return false;
+        }
+        final List<ThreadSortNode> childs = node.getChilds();
+        if (null != childs) {
+            for (final ThreadSortNode child : childs) {
+                if (!checkFullName(fullName, child)) {
+                    return false;
+                }
+            }
+        }
+        // Solely consists of threadables associated with given full name
+        return true;
+    }
+
+    /**
+     * Applies specified full name to every node.
+     * 
+     * @param fullName The full name to apply
+     * @param threadList The thread list to apply to
+     */
+    public static void applyFullName(final String fullName, final List<ThreadSortNode> threadList) {
+        if (null == threadList) {
+            return;
+        }
+        for (final ThreadSortNode node : threadList) {
+            node.msgId.setFullName(fullName);
+            applyFullName(fullName, node.getChilds());
+        }
+    }
+
 }

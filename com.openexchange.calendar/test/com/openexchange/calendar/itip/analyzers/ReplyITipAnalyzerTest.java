@@ -63,12 +63,12 @@ import com.openexchange.calendar.itip.ITipAnalysis;
 import com.openexchange.calendar.itip.ITipAnnotation;
 import com.openexchange.calendar.itip.ITipChange;
 import com.openexchange.calendar.itip.ITipIntegrationUtility;
-import com.openexchange.calendar.itip.ITipChange.Type;
 import com.openexchange.calendar.itip.analyzers.ReplyITipAnalyzer;
 import com.openexchange.data.conversion.ical.itip.ITipMessage;
 import com.openexchange.data.conversion.ical.itip.ITipMethod;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.calendar.CalendarDataObject;
+import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.container.ExternalUserParticipant;
 import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.container.UserParticipant;
@@ -192,7 +192,7 @@ public class ReplyITipAnalyzerTest extends AbstractITipAnalyzerTest {
         CalendarDataObject appointment = appointment("123-123-123-123");
 
         // With a user that has accepted
-        ExternalUserParticipant externalParticipant = new ExternalUserParticipant("partyCrasher@somewhere.invalid");
+        ExternalUserParticipant externalParticipant = new ExternalUserParticipant("partycrasher@somewhere.invalid");
         externalParticipant.setStatus(ConfirmStatus.ACCEPT);
         appointment.setParticipants(new Participant[] { externalParticipant });
 
@@ -249,13 +249,13 @@ public class ReplyITipAnalyzerTest extends AbstractITipAnalyzerTest {
                 break;
             case Participant.EXTERNAL_USER:
                 ExternalUserParticipant externalInMergedAppointment = (ExternalUserParticipant) participant;
-                if (externalInMergedAppointment.getEmailAddress().contains("partyCrasher")) {
+                if (externalInMergedAppointment.getEmailAddress().contains("partycrasher")) {
                     // Our Party Crasher
                     foundPartyCrasher = true;
                 } else {
                     // External Participant
                     assertEquals(externalParticipant.getEmailAddress(), externalInMergedAppointment.getEmailAddress());
-                    assertEquals(CalendarDataObject.ACCEPT, externalInMergedAppointment.getConfirm());
+                    assertEquals(CalendarObject.ACCEPT, externalInMergedAppointment.getConfirm());
                 }
                 break;
             default:
@@ -396,7 +396,7 @@ public class ReplyITipAnalyzerTest extends AbstractITipAnalyzerTest {
 
         // The reply contains an appointment
         CalendarDataObject appointment = appointment("123-123-123-123");
-        appointment.setRecurrenceType(CalendarDataObject.WEEKLY);
+        appointment.setRecurrenceType(CalendarObject.WEEKLY);
         appointment.setInterval(1);
         
         // And an exception
@@ -404,7 +404,7 @@ public class ReplyITipAnalyzerTest extends AbstractITipAnalyzerTest {
         changedException.setRecurrenceDatePosition(new Date(12345));
         
         // With a user that has accepted
-        ExternalUserParticipant externalParticipant = new ExternalUserParticipant("partyCrasher@somewhere.invalid");
+        ExternalUserParticipant externalParticipant = new ExternalUserParticipant("partycrasher@somewhere.invalid");
         externalParticipant.setStatus(status);
         changedException.setParticipants(new Participant[] { externalParticipant });
 
@@ -470,13 +470,13 @@ public class ReplyITipAnalyzerTest extends AbstractITipAnalyzerTest {
                 break;
             case Participant.EXTERNAL_USER:
                 ExternalUserParticipant externalInMergedAppointment = (ExternalUserParticipant) participant;
-                if (externalInMergedAppointment.getEmailAddress().contains("partyCrasher")) {
+                if (externalInMergedAppointment.getEmailAddress().contains("partycrasher")) {
                     // Our Party Crasher
                     foundPartyCrasher = true;
                 } else {
                     // External Participant
                     assertEquals(externalParticipant.getEmailAddress(), externalInMergedAppointment.getEmailAddress());
-                    assertEquals(CalendarDataObject.ACCEPT, externalInMergedAppointment.getConfirm());
+                    assertEquals(CalendarObject.ACCEPT, externalInMergedAppointment.getConfirm());
                 }
                 break;
             default:
@@ -626,7 +626,7 @@ public class ReplyITipAnalyzerTest extends AbstractITipAnalyzerTest {
         assertEquals(1, annotations.size());
         
         ITipAnnotation error = annotations.get(0);
-        assertEquals("An attendee wanted to change his/her participant state in an appointment that could not be found. Probably the appointment was already cancelled.", error.getMessage());
+        assertEquals("An attendee wanted to change his/her participant state in an appointment that could not be found. Probably the appointment was already canceled.", error.getMessage());
         
         
         integrationBuilder.assertAllWereCalled();
@@ -678,7 +678,7 @@ public class ReplyITipAnalyzerTest extends AbstractITipAnalyzerTest {
         assertEquals(1, annotations.size());
         
         ITipAnnotation error = annotations.get(0);
-        assertEquals("An attendee wanted to change his/her participant state in an appointment that could not be found. Probably the appointment was already cancelled.", error.getMessage());
+        assertEquals("An attendee wanted to change his/her participant state in an appointment that could not be found. Probably the appointment was already canceled.", error.getMessage());
 
 
         integrationBuilder.assertAllWereCalled();

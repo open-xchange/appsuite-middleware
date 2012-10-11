@@ -57,6 +57,7 @@ import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
@@ -69,6 +70,7 @@ import com.openexchange.mdns.MDNSExceptionCodes;
 import com.openexchange.mdns.MDNSService;
 import com.openexchange.mdns.MDNSServiceEntry;
 import com.openexchange.mdns.MDNSServiceInfo;
+import com.openexchange.mdns.MDNSServiceListener;
 
 /**
  * {@link MDNSServiceImpl} - The mDNS service implementation backed by <a href="http://sourceforge.net/projects/jmdns/">JmDNS</a>.
@@ -78,7 +80,7 @@ import com.openexchange.mdns.MDNSServiceInfo;
 public final class MDNSServiceImpl implements MDNSService, MDNSReregisterer {
 
     private static final org.apache.commons.logging.Log LOG =
-        com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(MDNSServiceImpl.class));
+        com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(MDNSServiceImpl.class));
 
     /**
      * Maps service identifiers to available services
@@ -94,6 +96,8 @@ public final class MDNSServiceImpl implements MDNSService, MDNSReregisterer {
     private final Lock rlock;
 
     private final Lock wlock;
+
+    private final List<MDNSServiceListener> listeners;
 
     /**
      * Initializes a new {@link MDNSServiceImpl}.
@@ -120,6 +124,7 @@ public final class MDNSServiceImpl implements MDNSService, MDNSReregisterer {
             final ReadWriteLock rw = new ReentrantReadWriteLock();
             rlock = rw.readLock();
             wlock = rw.writeLock();
+            listeners = new CopyOnWriteArrayList<MDNSServiceListener>();
         } catch (final IOException e) {
             throw MDNSExceptionCodes.IO_ERROR.create(e, e.getMessage());
         }
@@ -145,6 +150,38 @@ public final class MDNSServiceImpl implements MDNSService, MDNSReregisterer {
         } finally {
             wlock.unlock();
         }
+    }
+
+    @Override
+    public void serviceAdded(final String serviceId, final MDNSServiceEntry entry) {
+        for (final MDNSServiceListener listener : listeners) {
+            try {
+                listener.onServiceAdded(serviceId, entry);
+            } catch (final Exception e) {
+                LOG.warn("Listener '" + listener.getClass().getName() + "' failed.", e);
+            }
+        }
+    }
+
+    @Override
+    public void serviceRemoved(final String serviceId, final MDNSServiceEntry entry) {
+        for (final MDNSServiceListener listener : listeners) {
+            try {
+                listener.onServiceRemoved(serviceId, entry);
+            } catch (final Exception e) {
+                LOG.warn("Listener '" + listener.getClass().getName() + "' failed.", e);
+            }
+        }
+    }
+
+    @Override
+    public void addListener(final MDNSServiceListener listener) {
+        listeners.add(listener);
+    }
+
+    @Override
+    public void removeListener(final MDNSServiceListener listener) {
+        listeners.remove(listener);
     }
 
     @Override

@@ -52,7 +52,6 @@ package com.openexchange.admin.tools;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
@@ -74,25 +73,59 @@ import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.Properties;
 import java.util.StringTokenizer;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import com.openexchange.admin.exceptions.OXGenericException;
 import com.openexchange.admin.properties.AdminProperties;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.admin.rmi.dataobjects.PasswordMechObject;
-import com.openexchange.admin.rmi.dataobjects.User;
 import com.openexchange.admin.rmi.dataobjects.UserModuleAccess;
 import com.openexchange.admin.rmi.exceptions.DatabaseLockedException;
 import com.openexchange.admin.rmi.exceptions.PoolException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
+import com.openexchange.admin.services.AdminServiceRegistry;
 import com.openexchange.admin.storage.sqlStorage.OXAdminPoolDBPool;
 import com.openexchange.admin.storage.sqlStorage.OXAdminPoolInterface;
+import com.openexchange.config.ConfigurationService;
+import com.openexchange.java.Streams;
+import com.openexchange.log.LogFactory;
 import com.openexchange.tools.sql.DBUtils;
 
 public class AdminCache {
+
+    private static final AtomicReference<ConfigurationService> CONF_SERVICE = new AtomicReference<ConfigurationService>();
+
+    /**
+     * Gets the <tt>ConfigurationService</tt>.
+     * 
+     * @return The <tt>ConfigurationService</tt> or <code>null</code>
+     */
+    public static ConfigurationService getConfigurationService() {
+        return CONF_SERVICE.get();
+    }
+
+    /**
+     * Atomically sets the <tt>ConfigurationService</tt> to the given updated <tt>ConfigurationService</tt> reference if the current value <tt>==</tt> the expected value.
+     * 
+     * @param expect the expected <tt>ConfigurationService</tt>
+     * @param update the new <tt>ConfigurationService</tt>
+     * @return <code>true</code> if successful. <code>false</code> return indicates that the actual <tt>ConfigurationService</tt> was not equal to the expected <tt>ConfigurationService</tt>.
+     */
+    public static boolean compareAndSetConfigurationService(final ConfigurationService expect, final ConfigurationService update) {
+        return CONF_SERVICE.compareAndSet(expect, update);
+    }
+
+    /**
+     * Sets the <tt>ConfigurationService</tt>.
+     * 
+     * @param service The <tt>ConfigurationService</tt> to set
+     */
+    public static void setConfigurationService(final ConfigurationService service) {
+        CONF_SERVICE.set(service);
+    }
 
     private static final String DATABASE_INIT_SCRIPTS_ERROR_MESSAGE = "An error occured while reading the database initialization scripts.";
 
@@ -136,7 +169,7 @@ public class AdminCache {
 
     public static final String PATTERN_REGEX_FUNCTION = "CREATE\\s+(FUNCTION|PROCEDURE) (.*?)END\\s*//";
 
-    private Properties fallback_access_combinations = new Properties();
+    private final Properties fallback_access_combinations = new Properties();
 
     private HashMap<String, UserModuleAccess> named_access_combinations = null;
 
@@ -144,11 +177,11 @@ public class AdminCache {
         super();
     }
 
-    public void initCache() throws OXGenericException {
+    public void initCache(final ConfigurationService service) throws OXGenericException {
         this.prop = new PropertyHandler(System.getProperties());
-        cacheSqlScripts();
+        cacheSqlScripts(service);
         configureAuthentication(); // disabling authentication mechs
-        readMasterCredentials();
+        readMasterCredentials(service);
         this.log.info("Init Cache");
         initPool();
         this.adminCredentialsCache = new Hashtable<Integer, Credentials>();
@@ -292,23 +325,11 @@ public class AdminCache {
     private Properties loadAccessCombinations() {
         // Load properties from file , if does not exists use fallback
         // properties!
-        final String access_prop_file = this.prop.getProp("ACCESS_COMBINATIONS_FILE", "/opt/open-xchange/etc/admindaemon/ModuleAccessDefinitions.properties");
-
-        Properties access_props = new Properties();
-
-        try {
-            // Load all defined combinations from file
-            access_props.load(new FileInputStream(access_prop_file));
-        } catch (FileNotFoundException e) {
-            log.error("Access combinations file \"" + access_prop_file + "\" could not be found!!!", e);
-            // If no combinations were found, init defaults
-            access_props = getFallbackAccessCombinations();
-        } catch (IOException e) {
-            log.error("IO Error occured while processing access combinations file \"" + access_prop_file + "\"");
-            // If no combinations were found, init defaults
-            access_props = getFallbackAccessCombinations();
+        final ConfigurationService service = AdminServiceRegistry.getInstance().getService(ConfigurationService.class);
+        if (null == service) {
+            throw new IllegalStateException("Absent service: " + ConfigurationService.class.getName());
         }
-        return access_props;
+        return service.getFile("ModuleAccessDefinitions.properties");
     }
 
     private Properties getFallbackAccessCombinations() {
@@ -321,7 +342,15 @@ public class AdminCache {
     }
 
     protected void initPool() {
-        this.pool = new OXAdminPoolDBPool(this.prop);
+        this.pool = new OXAdminPoolDBPool();
+    }
+
+    protected void initPool(OXAdminPoolInterface pool) {
+        this.pool = pool;
+    }
+
+    public OXAdminPoolInterface getPool() {
+        return pool;
     }
 
     public Credentials getMasterCredentials() {
@@ -475,51 +504,49 @@ public class AdminCache {
         }
     }
 
-    private String getInitialOXDBSqlDir() {
-        return prop.getSqlProp("INITIAL_OX_SQL_DIR", "/opt/open-xchange/etc/mysql");
-    }
-
-    private void cacheSqlScripts() {
+    private void cacheSqlScripts(final ConfigurationService service) {
 
         if (prop.getSqlProp("LOG_PARSED_QUERIES", "false").equalsIgnoreCase("true")) {
             log_parsed_sql_queries = true;
         }
 
         // ox
-        ox_queries_initial = convertData2Objects(getInitialOXDBSqlDir(), getInitialOXDBOrder());
+        ox_queries_initial = convertData2Objects(getInitialOXDBOrder(), service);
     }
 
-    private ArrayList<String> convertData2Objects(String sql_path, String[] sql_files_order) {
-        ArrayList<String> al = new ArrayList<String>();
-
+    private ArrayList<String> convertData2Objects(String[] sql_files_order, final ConfigurationService service) {
+        final ArrayList<String> al = new ArrayList<String>(sql_files_order.length);
+        final Pattern p = Pattern.compile("(" + PATTERN_REGEX_FUNCTION + "|" + PATTERN_REGEX_NORMAL + ")", Pattern.DOTALL + Pattern.CASE_INSENSITIVE);
         for (int a = 0; a < sql_files_order.length; a++) {
-            File tmp = new File(sql_path + File.separatorChar + sql_files_order[a]);
-
-            try {
-                FileInputStream fis = new FileInputStream(tmp);
-                byte[] b = new byte[(int) tmp.length()];
-                fis.read(b);
-                fis.close();
-                String data = new String(b);
-                Pattern p = Pattern.compile("(" + PATTERN_REGEX_FUNCTION + "|" + PATTERN_REGEX_NORMAL + ")", Pattern.DOTALL + Pattern.CASE_INSENSITIVE);
-                Matcher matchy = p.matcher(data);
-                while (matchy.find()) {
-                    String exec = matchy.group(0).replaceAll("END\\s*//", "END");
-                    al.add(exec);
+            final File tmp = service.getFileByName(sql_files_order[a]);
+            if (null != tmp) {
+                FileInputStream fis = null;
+                try {
+                    fis = new FileInputStream(tmp);
+                    final byte[] b = new byte[(int) tmp.length()];
+                    fis.read(b);
+                    fis.close();
+                    final String data = new String(b);
+                    final Matcher matchy = p.matcher(data);
+                    while (matchy.find()) {
+                        final String exec = matchy.group(0).replaceAll("END\\s*//", "END");
+                        al.add(exec);
+                        if (log_parsed_sql_queries) {
+                            log.info(exec);
+                        }
+                    }
                     if (log_parsed_sql_queries) {
-                        log.info(exec);
+                        if (log.isInfoEnabled()) {
+                            log.info(tmp + " PARSED!");
+                        }
                     }
+                } catch (final Exception exp) {
+                    log.fatal("Parse/Read error on " + tmp, exp);
+                    return null;
+                } finally {
+                    Streams.close(fis);
                 }
-                if (log_parsed_sql_queries) {
-                    if (log.isInfoEnabled()) {
-                        log.info(tmp + " PARSED!");
-                    }
-                }
-            } catch (Exception exp) {
-                log.fatal("Parse/Read error on " + tmp, exp);
-                al = null;
             }
-
         }
         return al;
     }
@@ -574,18 +601,18 @@ public class AdminCache {
         if (user.getPasswordMech() == null) {
             String pwmech = getProperties().getUserProp(AdminProperties.User.DEFAULT_PASSWORD_MECHANISM, "SHA");
             pwmech = "{" + pwmech + "}";
-            if (pwmech.equalsIgnoreCase(User.CRYPT_MECH)) {
-                user.setPasswordMech(User.CRYPT_MECH);
-            } else if (pwmech.equalsIgnoreCase(User.SHA_MECH)) {
-                user.setPasswordMech(User.SHA_MECH);
+            if (pwmech.equalsIgnoreCase(PasswordMechObject.CRYPT_MECH)) {
+                user.setPasswordMech(PasswordMechObject.CRYPT_MECH);
+            } else if (pwmech.equalsIgnoreCase(PasswordMechObject.SHA_MECH)) {
+                user.setPasswordMech(PasswordMechObject.SHA_MECH);
             } else {
                 log.warn("WARNING: unknown password mechanism " + pwmech + " using SHA");
-                user.setPasswordMech(User.SHA_MECH);
+                user.setPasswordMech(PasswordMechObject.SHA_MECH);
             }
         }
-        if (user.getPasswordMech().equals(User.CRYPT_MECH)) {
+        if (user.getPasswordMech().equals(PasswordMechObject.CRYPT_MECH)) {
             passwd = UnixCrypt.crypt(user.getPassword());
-        } else if (user.getPasswordMech().equals(User.SHA_MECH)) {
+        } else if (user.getPasswordMech().equals(PasswordMechObject.SHA_MECH)) {
             passwd = SHACrypt.makeSHAPasswd(user.getPassword());
         } else {
             log.error("unsupported password mechanism: " + user.getPasswordMech());
@@ -595,7 +622,7 @@ public class AdminCache {
     }
 
     private String[] getInitialOXDBOrder() {
-        return getOrdered(prop.getSqlProp("INITIAL_OX_SQL_ORDER", "sequences.sql,ldap2sql.sql,oxfolder.sql,settings.sql" + ",calendar.sql,contacts.sql,tasks.sql,projects.sql,infostore.sql,attachment.sql,forum.sql,pinboard.sql," + "misc.sql,ical_vcard.sql"));
+        return getOrdered(prop.getSqlProp("INITIAL_OX_SQL_ORDER", "sequences.sql,ldap2sql.sql,oxfolder.sql,virtualfolder.sql,settings.sql,calendar.sql,contacts.sql,tasks.sql,infostore.sql,attachment.sql,misc.sql,ical_vcard.sql"));
     }
 
     private void configureAuthentication() {
@@ -611,43 +638,35 @@ public class AdminCache {
         log.debug("ContextAuthentication mechanism disabled: " + contextAuthenticationDisabled);
     }
 
-    private void readMasterCredentials() throws OXGenericException {
-        // TODO Reading the property 
-        final String masterfile = this.prop.getProp("MASTER_AUTH_FILE", "/opt/open-xchange/etc/mpasswd");
-        final File tmp = new File(masterfile);
-        if (!tmp.exists()) {
-            throw new OXGenericException("Fatal! Master auth file does not exists: " + masterfile);
-        }
-        if (!tmp.canRead()) {
-            throw new OXGenericException("Cannot read master auth file " + masterfile + "!");
-        }
-        final BufferedReader bf;
+    private void readMasterCredentials(final ConfigurationService service) throws OXGenericException {
+        BufferedReader bf = null;
         try {
-            bf = new BufferedReader(new FileReader(tmp));
-        } catch (FileNotFoundException e) {
-            throw new OXGenericException("File with master credentials ca not be read: " + masterfile, e);
-        }
-        try {
-            String line = null;
-            while ((line = bf.readLine()) != null) {
-                if (!line.startsWith("#")) {
-                    if (line.indexOf(":") != -1) {
-                        // ok seems to be a line with user:pass entry
-                        final String[] user_pass_combination = line.split(":");
-                        if (user_pass_combination.length > 0) {
-                            this.masterCredentials = new Credentials(user_pass_combination[0], user_pass_combination[1]);
-                            this.log.debug("Master credentials successfully set!");
+            final File file = service.getFileByName("mpasswd");
+            if (null != file) {
+                bf = new BufferedReader(new FileReader(file), 2048);
+                String line = null;
+                while ((line = bf.readLine()) != null) {
+                    if (!line.startsWith("#")) {
+                        if (line.indexOf(':') >= 0) {
+                            // ok seems to be a line with user:pass entry
+                            final String[] user_pass_combination = line.split(":");
+                            if (user_pass_combination.length > 0) {
+                                this.masterCredentials = new Credentials(user_pass_combination[0], user_pass_combination[1]);
+                                this.log.debug("Master credentials successfully set!");
+                            }
                         }
                     }
                 }
             }
         } catch (IOException e) {
-            throw new OXGenericException("Error processing master auth file: " + masterfile, e);
+            throw new OXGenericException("Error processing master auth file: mpasswd", e);
         } finally {
-            try {
-                bf.close();
-            } catch (IOException e) {
-                log.error(e.getMessage(), e);
+            if (null != bf) {
+                try {
+                    bf.close();
+                } catch (IOException e) {
+                    log.error(e.getMessage(), e);
+                }
             }
         }
         if (masterCredentials == null) {

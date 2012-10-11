@@ -63,7 +63,6 @@ import com.openexchange.templating.OXTemplate;
 import com.openexchange.templating.OXTemplateExceptionHandler;
 import com.openexchange.templating.TemplateService;
 import com.openexchange.templating.TemplatingHelper;
-import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link OXMFPublicationServiceTest}
@@ -320,7 +319,7 @@ public class OXMFPublicationServiceTest extends TestCase {
         }
 
         @Override
-        public TemplatingHelper createHelper(final Object rootObject, final Session session) {
+        public TemplatingHelper createHelper(final Object rootObject, final Session session, boolean createCopy) {
             return null;
         }
     }

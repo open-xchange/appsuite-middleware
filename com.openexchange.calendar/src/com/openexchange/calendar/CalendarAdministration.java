@@ -62,7 +62,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import com.openexchange.log.LogFactory;
 import com.openexchange.calendar.api.CalendarCollection;
 import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
@@ -72,6 +72,8 @@ import com.openexchange.groupware.Types;
 import com.openexchange.groupware.calendar.CalendarAdministrationService;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.container.Appointment;
+import com.openexchange.groupware.container.CalendarObject;
+import com.openexchange.groupware.container.DataObject;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.contexts.Context;
@@ -558,6 +560,8 @@ public class CalendarAdministration implements CalendarAdministrationService {
         PreparedStatement pst4 = null;
         PreparedStatement pst5 = null;
         PreparedStatement pst6 = null;
+        PreparedStatement pst7 = null;
+        PreparedStatement pst8 = null;
         final CalendarCollection collection = new CalendarCollection();
         try {
         	/*
@@ -601,17 +605,17 @@ public class CalendarAdministration implements CalendarAdministrationService {
             replace.append("UPDATE ");
             replace.append(CalendarSql.DATES_TABLE_NAME);
             replace.append(" pd SET ");
-            replace.append(collection.getFieldName(Appointment.CREATED_BY));
+            replace.append(collection.getFieldName(DataObject.CREATED_BY));
             replace.append(" = ");
             replace.append(deleteEvent.getContext().getMailadmin());
             replace.append(", ");
-            replace.append(collection.getFieldName(Appointment.LAST_MODIFIED));
+            replace.append(collection.getFieldName(DataObject.LAST_MODIFIED));
             replace.append(" = ");
             replace.append(System.currentTimeMillis());
             replace.append(" WHERE cid = ");
             replace.append(deleteEvent.getContext().getContextId());
             replace.append(" AND ");
-            replace.append(collection.getFieldName(Appointment.CREATED_BY));
+            replace.append(collection.getFieldName(DataObject.CREATED_BY));
             replace.append(" = ");
             replace.append(deleteEvent.getId());
             pst3 = writecon.prepareStatement(replace.toString());
@@ -622,17 +626,17 @@ public class CalendarAdministration implements CalendarAdministrationService {
             replace_modified_by.append("UPDATE ");
             replace_modified_by.append(CalendarSql.DATES_TABLE_NAME);
             replace_modified_by.append(" pd SET ");
-            replace_modified_by.append(collection.getFieldName(Appointment.MODIFIED_BY));
+            replace_modified_by.append(collection.getFieldName(DataObject.MODIFIED_BY));
             replace_modified_by.append(" = ");
             replace_modified_by.append(deleteEvent.getContext().getMailadmin());
             replace_modified_by.append(", ");
-            replace_modified_by.append(collection.getFieldName(Appointment.LAST_MODIFIED));
+            replace_modified_by.append(collection.getFieldName(DataObject.LAST_MODIFIED));
             replace_modified_by.append(" = ");
             replace_modified_by.append(System.currentTimeMillis());
             replace_modified_by.append(" WHERE cid = ");
             replace_modified_by.append(deleteEvent.getContext().getContextId());
             replace_modified_by.append(" AND ");
-            replace_modified_by.append(collection.getFieldName(Appointment.MODIFIED_BY));
+            replace_modified_by.append(collection.getFieldName(DataObject.MODIFIED_BY));
             replace_modified_by.append(" = ");
             replace_modified_by.append(deleteEvent.getId());
             pst4 = writecon.prepareStatement(replace_modified_by.toString());
@@ -658,6 +662,48 @@ public class CalendarAdministration implements CalendarAdministrationService {
             pst6 = writecon.prepareStatement(delete_participant_rights.toString());
             pst6.addBatch();
             pst6.executeBatch();
+            
+            StringBuilder replaceOrganizerId = new StringBuilder();
+            replaceOrganizerId.append("UPDATE ");
+            replaceOrganizerId.append(CalendarSql.DATES_TABLE_NAME);
+            replaceOrganizerId.append(" pd SET ");
+            replaceOrganizerId.append(collection.getFieldName(CalendarObject.ORGANIZER_ID));
+            replaceOrganizerId.append(" = ");
+            replaceOrganizerId.append("NULL ");
+            replaceOrganizerId.append(", ");
+            replaceOrganizerId.append(collection.getFieldName(DataObject.LAST_MODIFIED));
+            replaceOrganizerId.append(" = ");
+            replaceOrganizerId.append(System.currentTimeMillis());
+            replaceOrganizerId.append(" WHERE cid = ");
+            replaceOrganizerId.append(deleteEvent.getContext().getContextId());
+            replaceOrganizerId.append(" AND ");
+            replaceOrganizerId.append(collection.getFieldName(CalendarObject.ORGANIZER_ID));
+            replaceOrganizerId.append(" = ");
+            replaceOrganizerId.append(deleteEvent.getId());
+            pst7 = writecon.prepareStatement(replaceOrganizerId.toString());
+            pst7.addBatch();
+            pst7.executeBatch();
+            
+            StringBuilder replacePrincipalId = new StringBuilder();
+            replacePrincipalId.append("UPDATE ");
+            replacePrincipalId.append(CalendarSql.DATES_TABLE_NAME);
+            replacePrincipalId.append(" pd SET ");
+            replacePrincipalId.append(collection.getFieldName(CalendarObject.PRINCIPAL_ID));
+            replacePrincipalId.append(" = ");
+            replacePrincipalId.append("NULL ");
+            replacePrincipalId.append(", ");
+            replacePrincipalId.append(collection.getFieldName(DataObject.LAST_MODIFIED));
+            replacePrincipalId.append(" = ");
+            replacePrincipalId.append(System.currentTimeMillis());
+            replacePrincipalId.append(" WHERE cid = ");
+            replacePrincipalId.append(deleteEvent.getContext().getContextId());
+            replacePrincipalId.append(" AND ");
+            replacePrincipalId.append(collection.getFieldName(CalendarObject.PRINCIPAL_ID));
+            replacePrincipalId.append(" = ");
+            replacePrincipalId.append(deleteEvent.getId());
+            pst8 = writecon.prepareStatement(replacePrincipalId.toString());
+            pst8.addBatch();
+            pst8.executeBatch();
 
         } finally {
             if (rs2 != null) {
@@ -677,6 +723,12 @@ public class CalendarAdministration implements CalendarAdministrationService {
             }
             if (pst6 != null) {
                 collection.closePreparedStatement(pst6);
+            }
+            if (pst7 != null) {
+                collection.closePreparedStatement(pst7);
+            }
+            if (pst8 != null) {
+                collection.closePreparedStatement(pst8);
             }
         }
     }
@@ -704,12 +756,12 @@ public class CalendarAdministration implements CalendarAdministrationService {
         final CalendarCollection collection = new CalendarCollection();
         u1 = new StringBuilder(128);
         u1.append("UPDATE prg_dates pd SET ");
-        u1.append(collection.getFieldName(Appointment.MODIFIED_BY));
+        u1.append(collection.getFieldName(DataObject.MODIFIED_BY));
         u1.append(" = ? ,");
-        u1.append(collection.getFieldName(Appointment.LAST_MODIFIED));
+        u1.append(collection.getFieldName(DataObject.LAST_MODIFIED));
         u1.append(" = ? ");
         u1.append(" WHERE cid = ? AND ");
-        u1.append(collection.getFieldName(Appointment.OBJECT_ID));
+        u1.append(collection.getFieldName(DataObject.OBJECT_ID));
         u1.append(" = ?");
     }
 

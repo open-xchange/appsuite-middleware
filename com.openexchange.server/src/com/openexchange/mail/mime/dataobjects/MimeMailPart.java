@@ -64,16 +64,20 @@ import javax.mail.Part;
 import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.mime.ContentType;
+import com.openexchange.mail.mime.ManagedMimeMessage;
+import com.openexchange.mail.mime.MessageHeaders;
+import com.openexchange.mail.mime.MimeCleanUp;
 import com.openexchange.mail.mime.MimeDefaultSession;
 import com.openexchange.mail.mime.MimeMailException;
 import com.openexchange.mail.mime.MimeTypes;
-import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.mail.mime.converters.MimeMessageConverter;
 import com.openexchange.mail.mime.datasource.MessageDataSource;
+import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayInputStream;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 
@@ -82,17 +86,34 @@ import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class MimeMailPart extends MailPart implements MimeRawSource {
+public final class MimeMailPart extends MailPart implements MimeRawSource, MimeCleanUp {
 
     private static final long serialVersionUID = -1142595512657302179L;
 
-    private static final transient org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(MimeMailPart.class));
+    private static final transient org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(MimeMailPart.class));
 
     /**
      * The max. in-memory size in bytes.
      */
     // TODO: Make configurable
     private static final int MAX_INMEMORY_SIZE = 131072; // 128KB
+
+    private static volatile Boolean useMimeMultipartMailPart;
+
+    private static boolean useMimeMultipartMailPart() {
+        Boolean tmp = useMimeMultipartMailPart;
+        if (null == tmp) {
+            synchronized (MimeMailPart.class) {
+                tmp = useMimeMultipartMailPart;
+                if (null == tmp) {
+                    final ConfigurationService service = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
+                    tmp = Boolean.valueOf(null != service && service.getBoolProperty("com.openexchange.mail.mime.useMimeMultipartMailPart", false));
+                    useMimeMultipartMailPart = tmp;
+                }
+            }
+        }
+        return tmp.booleanValue();
+    }
 
     private static final String ERR_NULL_PART = "Underlying part is null";
 
@@ -160,11 +181,41 @@ public final class MimeMailPart extends MailPart implements MimeRawSource {
     private boolean handleMissingStartBoundary;
 
     /**
+     * Constructor.
+     */
+    public MimeMailPart() {
+        super();
+    }
+
+    /**
      * Constructor - Only applies specified part, but does not set any attributes.
      */
     public MimeMailPart(final Part part) {
         super();
         applyPart(part);
+    }
+
+    /**
+     * Initializes a new {@link MimeMailPart}.
+     * 
+     * @param multipart The multipart
+     * @throws OXException If setting multipart as content fails
+     */
+    public MimeMailPart(final Multipart multipart) throws OXException {
+        super();
+        isMulti = true;
+        this.multipart = new JavaMailMultipartWrapper(multipart);
+        final String contentType = multipart.getContentType();
+        if (null != contentType) {
+            setContentType(contentType);
+        }
+        try {
+            final MimeBodyPart part = new MimeBodyPart();
+            part.setContent(multipart);
+            this.part = part;
+        } catch (final MessagingException e) {
+            throw MimeMailException.handleMessagingException(e);
+        }
     }
 
     /**
@@ -223,6 +274,17 @@ public final class MimeMailPart extends MailPart implements MimeRawSource {
      */
     public Part getPart() {
         return part;
+    }
+
+    @Override
+    public void cleanUp() {
+        if (part instanceof ManagedMimeMessage) {
+            try {
+                ((ManagedMimeMessage) part).cleanUp();
+            } catch (final Exception e) {
+                com.openexchange.log.Log.loggerFor(MimeMailPart.class).warn("Couldn't clean-up MIME resource.", e);
+            }
+        }
     }
 
     @Override
@@ -410,6 +472,9 @@ public final class MimeMailPart extends MailPart implements MimeRawSource {
             throw new IllegalStateException(ERR_NULL_PART);
         }
         try {
+            if (part instanceof MimeMessage && !(part instanceof com.sun.mail.imap.IMAPMessage)) {
+                saneContentType();
+            }
             part.writeTo(out);
         } catch (final UnsupportedEncodingException e) {
             LOG.error("Unsupported encoding in a message detected and monitored: \"" + e.getMessage() + '"', e);
@@ -422,6 +487,17 @@ public final class MimeMailPart extends MailPart implements MimeRawSource {
                 throw MailExceptionCode.NO_CONTENT.create(e, new Object[0]);
             }
             throw MimeMailException.handleMessagingException(e);
+        }
+    }
+
+    private void saneContentType() throws MessagingException {
+        final String[] header = part.getHeader(MessageHeaders.HDR_CONTENT_TYPE);
+        if (null != header && header.length > 0) {
+            try {
+                part.setHeader(MessageHeaders.HDR_CONTENT_TYPE, new ContentType(header[0]).toString());
+            } catch (final Exception e) {
+                // Ignore
+            }
         }
     }
 
@@ -733,7 +809,7 @@ public final class MimeMailPart extends MailPart implements MimeRawSource {
         if (null == multipart) {
             try {
                 final int size = part.getSize();
-                if (size > 0 && size <= MAX_INMEMORY_SIZE) {
+                if (useMimeMultipartMailPart() && (size > 0) && (size <= MAX_INMEMORY_SIZE)) {
                     /*
                      * If size is less than or equal to 1MB, use the in-memory implementation
                      */

@@ -51,7 +51,7 @@ package com.openexchange.configuration;
 
 import java.io.File;
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import com.openexchange.log.LogFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.server.Initialization;
 import com.openexchange.tools.conf.AbstractConfig;
@@ -183,61 +183,17 @@ public final class SystemConfig extends AbstractConfig implements Initialization
          */
         CACHE("Cache"),
         /**
-         * calendar.properties.
-         */
-        CALENDAR("Calendar"),
-        /**
-         * infostore.properties.
-         */
-        INFOSTORE("Infostore"),
-        /**
-         * attachment.properties.
-         */
-        ATTACHMENT("Attachment"),
-        /**
-         * notification.properties.
-         */
-        NOTIFICATION("Notification"),
-        /**
          * UserConfigurationStorage.
          */
         USER_CONF_STORAGE("UserConfigurationStorage"),
-        /**
-         * Directory in which all property files for servlet mapping are kept.
-         */
-        ServletMappingDir("ServletMappingDir"),
         /**
          * Spring XML file with overrides for WebDAV.
          */
         WebdavOverrides("WEBDAVOVERRIDES"),
         /**
-         * HTMLEntities.properties configuration file.
+         * Mime type file name; <code>mime.types</code>
          */
-        HTMLEntities("HTMLEntities"),
-        /**
-         * Mime type file.
-         */
-        MimeTypeFile("MimeTypeFile"),
-        /**
-         * Mail cache configuration file.
-         */
-        MailCacheConfig("MailCacheConfig"),
-        /**
-         * push component configuration file.
-         */
-        PUSH("PUSHPROPERTIES"),
-        /**
-         * TidyMessages.properties
-         */
-        TidyMessages("TidyMessages"),
-        /**
-         * TidyConfiguration.properties
-         */
-        TidyConfiguration("TidyConfiguration"),
-        /**
-         * White list for both HTML tags/attributes and CSS key-value-pairs
-         */
-        Whitelist("Whitelist");
+        MimeTypeFileName("MimeTypeFileName");
 
         /**
          * Name of the property in the server.properties file.

@@ -1,16 +1,20 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
-	<classpathentry exported="true" kind="lib" path="lib/lucene-spellchecker-3.3.0.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/lucene-spatial-3.3.0.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/apache-solr-langid-3.6.0.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/apache-solr-core-3.6.0.jar" sourcepath="sources/solr"/>
+	<classpathentry exported="true" kind="lib" path="lib/apache-solr-solrj-3.6.0.jar" sourcepath="sources/solr"/>
+	<classpathentry exported="true" kind="lib" path="lib/jsonic-1.2.7.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/langdetect-1.1-20120112.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/lucene-analyzers-3.6.0.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/lucene-core-3.6.0.jar" sourcepath="sources/lucene"/>
+	<classpathentry exported="true" kind="lib" path="lib/lucene-highlighter-3.6.0.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/lucene-memory-3.6.0.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/lucene-queries-3.6.0.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/lucene-spatial-3.6.0.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/lucene-spellchecker-3.6.0.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/slf4j-jcl-1.6.1.jar"/>
+	<classpathentry exported="true" kind="lib" path="cfg/"/>
 	<classpathentry exported="true" kind="lib" path="lib/velocity-1.7.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/lucene-analyzers-3.3.0.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/lucene-core-3.3.0.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/lucene-highlighter-3.3.0.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/lucene-memory-3.3.0.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/lucene-queries-3.3.0.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/jcl-over-slf4j-1.6.1.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/apache-solr-core-3.3.0.jar" sourcepath="sources/embedded"/>
-	<classpathentry exported="true" kind="lib" path="lib/apache-solr-solrj-3.3.0.jar" sourcepath="sources/apache-solr-solrj-3.3.0-src.zip"/>
 	<classpathentry kind="lib" path="lib/slf4j-api-1.6.1.jar"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.6"/>
 	<classpathentry kind="con" path="org.eclipse.pde.core.requiredPlugins"/>

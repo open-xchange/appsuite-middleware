@@ -60,6 +60,7 @@ import java.util.Locale;
 import java.util.Set;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.IDNA;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.UserStorage;
@@ -314,6 +315,17 @@ public abstract class MailConfig {
      * @return The mail login of specified user
      */
     public static final String getMailLogin(final MailAccount mailAccount, final String userLoginInfo) {
+        return saneLogin(getMailLogin0(mailAccount, userLoginInfo));
+    }
+
+    /**
+     * Gets the mail login with respect to configured login source.
+     *
+     * @param mailAccount The mail account used to determine the login
+     * @param userLoginInfo The login information of the user
+     * @return The mail login of specified user
+     */
+    private static final String getMailLogin0(final MailAccount mailAccount, final String userLoginInfo) {
         if (!mailAccount.isDefaultAccount()) {
             return mailAccount.getLogin();
         }
@@ -326,7 +338,7 @@ public abstract class MailConfig {
                 return QuotedInternetAddress.toACE(mailAccount.getPrimaryAddress());
             } catch (final AddressException e) {
                 final String primaryAddress = mailAccount.getPrimaryAddress();
-                com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(MailConfig.class)).warn(
+                com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(MailConfig.class)).warn(
                     "Login source primary email address \"" + primaryAddress + "\" could not be converted to ASCII. Using unicode representation.",
                     e);
                 return primaryAddress;
@@ -521,6 +533,24 @@ public abstract class MailConfig {
     }
 
     /**
+     * Gets the sane (puny-code) representation of passed login in case it appears to be an Internet address. 
+     * 
+     * @param login The login
+     * @return The sane login
+     */
+    private static final String saneLogin(final String login) {
+        final ConfigurationService service = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
+        if (!(null == service ? true : service.getBoolProperty("com.openexchange.mail.saneLogin", true))) {
+            return login;
+        }
+        try {
+            return IDNA.toACE(login);
+        } catch (final Exception e) {
+            return login;
+        }
+    }
+
+    /**
      * Fills login and password in specified instance of {@link MailConfig}.
      *
      * @param mailConfig The mail config whose login and password shall be set
@@ -533,7 +563,7 @@ public abstract class MailConfig {
         // Assign login
         final String slogin = session.getLoginName();
         if (proxyDelimiter != null && slogin.contains(proxyDelimiter)) {
-            mailConfig.login = slogin;
+            mailConfig.login = saneLogin(slogin);
         } else {
             mailConfig.login = getMailLogin(mailAccount, userLoginInfo);
         }
@@ -735,7 +765,7 @@ public abstract class MailConfig {
      * @param login The login
      */
     public void setLogin(final String login) {
-        this.login = login;
+        this.login = saneLogin(login);
     }
 
     /**

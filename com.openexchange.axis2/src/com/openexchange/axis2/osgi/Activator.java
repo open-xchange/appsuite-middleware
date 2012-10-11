@@ -46,59 +46,38 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
+
 package com.openexchange.axis2.osgi;
 
-import java.util.concurrent.atomic.AtomicBoolean;
-
+import java.util.LinkedList;
+import java.util.Queue;
+import org.osgi.framework.BundleActivator;
 import org.osgi.service.http.HttpService;
-
 import com.openexchange.axis2.internal.Axis2ServletInit;
-import com.openexchange.axis2.services.Axis2ServletServiceRegistry;
+import com.openexchange.axis2.services.Axis2ServletServices;
 import com.openexchange.config.ConfigurationService;
-import com.openexchange.server.osgiservice.DeferredActivator;
-import com.openexchange.server.osgiservice.ServiceRegistry;
+import com.openexchange.osgi.HousekeepingActivator;
 
-public class Activator extends DeferredActivator {
+/**
+ * {@link Activator}
+ */
+public class Activator extends HousekeepingActivator {
 
-    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(Activator.class);
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.loggerFor(Activator.class);
 
-    private final AtomicBoolean started;
-
-    //private ServiceRegistration serviceRegistration;
+    private volatile Queue<BundleActivator> activators;
+    private volatile Axis2ServletInit servletInit;
 
     /**
      * Initializes a new {@link Axis2ServletActivator}
      */
     public Activator() {
         super();
-        started = new AtomicBoolean();
     }
-
-    private static final Class<?>[] NEEDED_SERVICES = { ConfigurationService.class, HttpService.class };
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return NEEDED_SERVICES;
-    }
-
-
-    @Override
-    protected void handleAvailability(Class<?> clazz) {
-        if (LOG.isInfoEnabled()) {
-            LOG.info("Re-available service: " + clazz.getName());
-        }
-        Axis2ServletServiceRegistry.getServiceRegistry().addService(clazz, getService(clazz));
-    }
-
-    @Override
-    protected void handleUnavailability(final Class<?> clazz) {
-        /*
-         * Never stop the server even if a needed service is absent
-         */
-        if (LOG.isWarnEnabled()) {
-            LOG.warn("Absent service: " + clazz.getName());
-        }
-        Axis2ServletServiceRegistry.getServiceRegistry().removeService(clazz);
+        return new Class<?>[] { ConfigurationService.class, HttpService.class };
     }
 
     @Override
@@ -107,32 +86,33 @@ public class Activator extends DeferredActivator {
             /*
              * (Re-)Initialize server service registry with available services
              */
+            Axis2ServletServices.setServiceLookup(this);
+            final Axis2ServletInit servletInit = Axis2ServletInit.newInstance(context);
+            servletInit.start();
+            this.servletInit = servletInit;
+            /*
+             * Start-up 3rd party activators
+             */
+            final Queue<BundleActivator> activators = new LinkedList<BundleActivator>();
+            this.activators = activators;
             {
-                final ServiceRegistry registry = Axis2ServletServiceRegistry.getServiceRegistry();
-                registry.clearRegistry();
-                final Class<?>[] classes = getNeededServices();
-                for (int i = 0; i < classes.length; i++) {
-                    final Object service = getService(classes[i]);
-                    if (null != service) {
-                        registry.addService(classes[i], service);
-                    }
-                }
+                final org.apache.axis2.osgi.internal.Activator axis2Activator = new org.apache.axis2.osgi.internal.Activator();
+                axis2Activator.start(context);
+                activators.offer(axis2Activator);
             }
-            if (!started.compareAndSet(false, true)) {
-                /*
-                 * Don't start the server again. A duplicate call to
-                 * startBundle() is probably caused by temporary absent
-                 * service(s) whose re-availability causes to trigger this
-                 * method again.
-                 */
-                LOG.info("A temporary absent service is available again");
-                return;
+            {
+                final org.apache.axiom.locator.Activator axiomActivator = new org.apache.axiom.locator.Activator();
+                axiomActivator.start(context);
+                activators.offer(axiomActivator);
             }
-
-            Axis2ServletInit.getInstance().start();
+            {
+                org.apache.geronimo.osgi.locator.Activator geronimoActivator = new org.apache.geronimo.osgi.locator.Activator();
+                geronimoActivator.start(context);
+                activators.offer(geronimoActivator);
+            }
 
             // TODO: ConfigTree may be needed or not...
-            //serviceRegistration = context.registerService(PreferencesItemService.class.getName(), new MailFilterPreferencesItem(), null);
+            // serviceRegistration = context.registerService(PreferencesItemService.class.getName(), new MailFilterPreferencesItem(), null);
         } catch (final Throwable t) {
             LOG.error(t.getMessage(), t);
             throw t instanceof Exception ? (Exception) t : new Exception(t);
@@ -143,16 +123,24 @@ public class Activator extends DeferredActivator {
     @Override
     public void stopBundle() throws Exception {
         try {
-//          if (null != serviceRegistration) {
-//          serviceRegistration.unregister();
-//          serviceRegistration = null;
-//          }
-            Axis2ServletInit.getInstance().stop();
+            final Queue<BundleActivator> activators = this.activators;
+            if (null != activators) {
+                BundleActivator activator;
+                while ((activator = activators.poll()) != null) {
+                    activator.stop(context);
+                }
+                this.activators = null;
+            }
 
+            final Axis2ServletInit servletInit = this.servletInit;
+            if (null != servletInit) {
+                servletInit.stop();
+                this.servletInit = null;
+            }
             /*
              * Clear service registry
              */
-            Axis2ServletServiceRegistry.getServiceRegistry().clearRegistry();
+            Axis2ServletServices.setServiceLookup(null);
         } catch (final Throwable t) {
             LOG.error(t.getMessage(), t);
             throw t instanceof Exception ? (Exception) t : new Exception(t);

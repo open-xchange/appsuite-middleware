@@ -62,6 +62,7 @@ import javax.mail.SendFailedException;
 import javax.mail.internet.AddressException;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.api.MailConfig;
+import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.session.Session;
 import com.sun.mail.smtp.SMTPSendFailedException;
 
@@ -73,17 +74,37 @@ import com.sun.mail.smtp.SMTPSendFailedException;
  * The detail number range in subclasses generated in mail bundles is supposed to start with 2000 and may go up to 2999.
  * <p>
  * The detail number range in subclasses generated in transport bundles is supposed to start with 3000 and may go up to 3999.
- *
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class MimeMailException extends OXException {
 
-    private static final transient org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(MimeMailException.class));
+    private static final transient org.apache.commons.logging.Log LOG =
+        com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(MimeMailException.class));
 
     private static final long serialVersionUID = -3401580182929349354L;
 
-    private MimeMailException() {
-        super();
+    /**
+     * Initializes a new {@link MimeMailException}.
+     * 
+     * @param code
+     * @param displayMessage
+     * @param displayArgs
+     */
+    public MimeMailException(final int code, final String displayMessage, final Object... displayArgs) {
+        super(code, displayMessage, displayArgs);
+    }
+
+    /**
+     * Initializes a new {@link MimeMailException}.
+     * 
+     * @param code
+     * @param displayMessage
+     * @param cause
+     * @param displayArgs
+     */
+    public MimeMailException(final int code, final String displayMessage, final Throwable cause, final Object... displayArgs) {
+        super(code, displayMessage, cause, displayArgs);
     }
 
     /**
@@ -91,7 +112,7 @@ public class MimeMailException extends OXException {
      * <p>
      * This is just a convenience method that simply invokes {@link #handleMessagingException(MessagingException, MailConfig)} with the
      * latter parameter set to <code>null</code>.
-     *
+     * 
      * @param e The messaging exception
      * @return An appropriate instance of {@link OXException}
      */
@@ -101,7 +122,7 @@ public class MimeMailException extends OXException {
 
     /**
      * Handles given instance of {@link MessagingException} and creates an appropriate instance of {@link OXException}
-     *
+     * 
      * @param e The messaging exception
      * @param mailConfig The corresponding mail configuration used to add information like mail server etc.
      * @return An appropriate instance of {@link OXException}
@@ -129,7 +150,7 @@ public class MimeMailException extends OXException {
 
     /**
      * Handles given instance of {@link MessagingException} and creates an appropriate instance of {@link OXException}
-     *
+     * 
      * @param e The messaging exception
      * @param mailConfig The corresponding mail configuration used to add information like mail server etc.
      * @param session The session providing user information
@@ -137,10 +158,11 @@ public class MimeMailException extends OXException {
      */
     public static OXException handleMessagingException(final MessagingException e, final MailConfig mailConfig, final Session session) {
         try {
-            if ((e instanceof javax.mail.AuthenticationFailedException) || ((e.getMessage() != null) && (e.getMessage().toLowerCase(
-                Locale.ENGLISH).indexOf(ERR_AUTH_FAILED) != -1))) {
-                final boolean temporary = (e.getMessage() != null) && ERR_TMP.equals(e.getMessage().toLowerCase(Locale.ENGLISH));
-                if (temporary) {
+            if ((e instanceof javax.mail.AuthenticationFailedException) || ((e.getMessage() != null) && (e.getMessage().toLowerCase(Locale.ENGLISH).indexOf(ERR_AUTH_FAILED) != -1))) {
+                if (null != mailConfig && MailAccount.DEFAULT_ID == mailConfig.getAccountId()) {
+                    return MimeMailExceptionCode.LOGIN_FAILED.create(e, mailConfig.getServer(), mailConfig.getLogin());
+                }
+                if ((e.getMessage() != null) && ERR_TMP.equals(e.getMessage().toLowerCase(Locale.ENGLISH))) {
                     return MimeMailExceptionCode.LOGIN_FAILED.create(
                         e,
                         mailConfig == null ? STR_EMPTY : mailConfig.getServer(),
@@ -231,7 +253,7 @@ public class MimeMailException extends OXException {
                     final SMTPSendFailedException smtpExc = (SMTPSendFailedException) nextException;
                     final Address[] invalidAddresses = smtpExc.getInvalidAddresses();
                     if (null == invalidAddresses || invalidAddresses.length == 0) {
-                        return MimeMailExceptionCode.SEND_FAILED_MSG_EXT.create(exc, exc.getMessage(), '('+smtpExc.getMessage()+')');
+                        return MimeMailExceptionCode.SEND_FAILED_MSG_EXT.create(exc, exc.getMessage(), '(' + smtpExc.getMessage() + ')');
                     }
                 }
                 String serverInfo = null;
@@ -243,7 +265,10 @@ public class MimeMailException extends OXException {
                     // No invalid addresses available
                     return MimeMailExceptionCode.SEND_FAILED_MSG.create(exc, exc.getMessage());
                 }
-                return MimeMailExceptionCode.SEND_FAILED_EXT.create(exc, Arrays.toString(addrs), null == serverInfo ? "" : '('+serverInfo+')');
+                return MimeMailExceptionCode.SEND_FAILED_EXT.create(
+                    exc,
+                    Arrays.toString(addrs),
+                    null == serverInfo ? "" : '(' + serverInfo + ')');
             } else if (e instanceof javax.mail.StoreClosedException) {
                 if (null != mailConfig && null != session) {
                     return MimeMailExceptionCode.STORE_CLOSED_EXT.create(

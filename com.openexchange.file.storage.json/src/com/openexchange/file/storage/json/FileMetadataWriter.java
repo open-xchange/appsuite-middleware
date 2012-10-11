@@ -53,7 +53,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.TimeZone;
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import com.openexchange.log.LogFactory;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -87,6 +87,7 @@ public class FileMetadataWriter {
         while (files.hasNext()) {
             array.put(writeArray(files.next(), columns, timeZone));
         }
+        files.close();
         return array;
     }
 

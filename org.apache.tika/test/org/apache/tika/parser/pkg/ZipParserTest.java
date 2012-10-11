@@ -19,6 +19,7 @@ package org.apache.tika.parser.pkg;
 import java.io.InputStream;
 
 import org.apache.tika.Tika;
+import org.apache.tika.metadata.HttpHeaders;
 import org.apache.tika.metadata.Metadata;
 import org.apache.tika.parser.AutoDetectParser;
 import org.apache.tika.parser.Parser;
@@ -43,7 +44,7 @@ public class ZipParserTest extends AbstractPkgTest {
             stream.close();
         }
 
-        assertEquals("application/zip", metadata.get(Metadata.CONTENT_TYPE));
+        assertEquals("application/zip", metadata.get(HttpHeaders.CONTENT_TYPE));
         String content = handler.toString();
         assertTrue(content.contains("testEXCEL.xls"));
         assertTrue(content.contains("Sample Excel Worksheet"));
@@ -81,11 +82,11 @@ public class ZipParserTest extends AbstractPkgTest {
        } finally {
            stream.close();
        }
-
+       
        // Should have found all 9 documents
        assertEquals(9, tracker.filenames.size());
        assertEquals(9, tracker.mediatypes.size());
-
+       
        // Should have names but not content types, as zip doesn't
        //  store the content types
        assertEquals("testEXCEL.xls", tracker.filenames.get(0));
@@ -97,7 +98,7 @@ public class ZipParserTest extends AbstractPkgTest {
        assertEquals("testTXT.txt", tracker.filenames.get(6));
        assertEquals("testWORD.doc", tracker.filenames.get(7));
        assertEquals("testXML.xml", tracker.filenames.get(8));
-
+       
        for(String type : tracker.mediatypes) {
           assertNull(type);
        }

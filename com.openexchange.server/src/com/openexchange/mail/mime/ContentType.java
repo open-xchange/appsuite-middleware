@@ -54,6 +54,7 @@ import java.util.Iterator;
 import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import org.apache.commons.logging.Log;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.mime.utils.MimeMessageUtility;
@@ -243,7 +244,17 @@ public class ContentType extends ParameterizedHeader {
     /**
      * The regular expression that should match whole content type
      */
-    private static final Pattern PATTERN_CONTENT_TYPE = Pattern.compile("(?:\"?([\\p{ASCII}&&[^/;\\s\"]]+)(?:/([\\p{ASCII}&&[^;\\s\"]]+))?\"?)|(?:/([\\p{ASCII}&&[^;\\s\"]]+))");
+    // private static final Pattern PATTERN_CONTENT_TYPE = Pattern.compile("(?:\"?([[\\p{L}\\p{ASCII}]&&[^/;\\s\"]]+)(?:/([[\\p{L}\\p{ASCII}]&&[^;\\s\"]]+))?\"?)|(?:/([[\\p{L}\\p{ASCII}]&&[^;\\s\"]]+))");
+    private static final Pattern PATTERN_CONTENT_TYPE = Pattern.compile("(?:\"?([\\p{L}_0-9-]+)(?:/([\\p{L}_0-9-]+))?\"?)|(?:/([\\p{L}_0-9-]+))");
+
+    private static final Pattern PATTERN_TOKEN = Pattern.compile("[\\p{L}_0-9-.+]*");
+
+    private static boolean isInvalidToken(final String token) {
+        if (null == token) {
+            return true;
+        }
+        return !PATTERN_TOKEN.matcher(token).matches();
+    }
 
     /**
      * The regular expression capturing whitespace characters.
@@ -280,6 +291,8 @@ public class ContentType extends ParameterizedHeader {
 
     private String baseType;
 
+    private String lcBaseType;
+
     /**
      * Initializes a new {@link ContentType}
      */
@@ -307,6 +320,7 @@ public class ContentType extends ParameterizedHeader {
         primaryType = null;
         subType = null;
         baseType = null;
+        lcBaseType = null;
     }
 
     @Override
@@ -361,6 +375,13 @@ public class ContentType extends ParameterizedHeader {
         return true;
     }
 
+    private String getLowerCaseBaseType() {
+        if (null == lcBaseType) {
+            lcBaseType = toLowerCase(getBaseType());
+        }
+        return lcBaseType;
+    }
+
     private void parseContentType(final String contentType) throws OXException {
         parseContentType(contentType, true);
     }
@@ -372,7 +393,74 @@ public class ContentType extends ParameterizedHeader {
         }
         final String cts = prepareParameterizedHeader(contentType);
         int pos = cts.indexOf(';');
-        final Matcher ctMatcher = PATTERN_CONTENT_TYPE.matcher(pos < 0 ? cts : cts.substring(0, pos));
+        final String type = pos < 0 ? cts : cts.substring(0, pos);
+        // Check for '/' character
+        final int slashPos = type.indexOf(DELIMITER);
+        if (slashPos >= 0) {
+            try {
+                // Primary type
+                {
+                    String pt = 0 == slashPos ? DEFAULT_PRIMTYPE : type.substring(0, slashPos).trim();
+                    char fc;
+                    if ((fc = pt.charAt(0)) == '"' || fc == '\'') {
+                        pt = pt.substring(1);
+                    }
+                    if (pt.toLowerCase(Locale.US).startsWith("content-type:")) {
+                        pt = pt.substring(13);
+                        if ((fc = pt.charAt(0)) == '"' || fc == '\'') {
+                            pt = pt.substring(1);
+                        }
+                    }
+                    if (isInvalidToken(pt)) {
+                        throw MailExceptionCode.INVALID_CONTENT_TYPE.create(contentType);
+                    }
+                    primaryType = pt.length() <= 0 ? DEFAULT_PRIMTYPE : pt;
+                }
+                // Subtype
+                {
+                    String st = slashPos < type.length() ? type.substring(slashPos + 1).trim() : DEFAULT_SUBTYPE;
+                    final int mlen = st.length() - 1;
+                    char lc;
+                    if (mlen > 0 && ((lc = st.charAt(mlen)) == '"' || lc == '\'')) {
+                        st = st.substring(0, mlen);
+                    }
+                    if (isInvalidToken(st)) {
+                        throw MailExceptionCode.INVALID_CONTENT_TYPE.create(contentType);
+                    }
+                    if (st.trim().length() <= 0) {
+                        if ("multipart".equals(primaryType)) {
+                            subType = "mixed";
+                        } else if ("text".equals(primaryType)) {
+                            subType = "plain";
+                        } else {
+                            subType = DEFAULT_SUBTYPE;
+                        }
+                    } else {
+                        subType = st;
+                    }
+                }
+                baseType = new StringBuilder(16).append(primaryType).append(DELIMITER).append(subType).toString();
+                lcBaseType = null;
+                if (paramList) {
+                    if (pos < 0) {
+                        parameterList = new ParameterList();
+                    } else {
+                        try {
+                            parameterList = pos < cts.length() ? new ParameterList(cts.substring(pos + 1)) : new ParameterList();
+                        } catch (final RuntimeException e) {
+                            throw MailExceptionCode.INVALID_CONTENT_TYPE.create(e, contentType);
+                        }
+                    }
+                }
+                return;
+            } catch (final OXException e) {
+                // Content-Type could not be parsed the simple way
+                final Log logger = com.openexchange.log.Log.loggerFor(ContentType.class);
+                logger.debug(e.getMessage(), e);
+            }
+        }
+        // Try with regex-based parsing
+        final Matcher ctMatcher = PATTERN_CONTENT_TYPE.matcher(type);
         if (ctMatcher.find()) {
             if (ctMatcher.start() != 0) {
                 throw MailExceptionCode.INVALID_CONTENT_TYPE.create(contentType);
@@ -413,6 +501,7 @@ public class ContentType extends ParameterizedHeader {
                 }
             }
             baseType = new StringBuilder(16).append(primaryType).append(DELIMITER).append(subType).toString();
+            lcBaseType = null;
             if (paramList) {
                 parameterList = new ParameterList(cts.substring(ctMatcher.end()));
             }
@@ -420,6 +509,7 @@ public class ContentType extends ParameterizedHeader {
             primaryType = "text";
             subType = "plain";
             baseType = new StringBuilder(16).append(primaryType).append(DELIMITER).append(subType).toString();
+            lcBaseType = null;
             if (paramList) {
                 parameterList = new ParameterList(pos < 0 ? cts : cts.substring(pos));
                 final String name = parameterList.getParameter("name");
@@ -433,6 +523,7 @@ public class ContentType extends ParameterizedHeader {
                             subType = DEFAULT_SUBTYPE;
                         }
                         baseType = new StringBuilder(16).append(primaryType).append(DELIMITER).append(subType).toString();
+                        lcBaseType = null;
                     }
                 }
             }
@@ -459,6 +550,7 @@ public class ContentType extends ParameterizedHeader {
         subType = contentType.getSubType();
         parameterList = (ParameterList) contentType.parameterList.clone();
         baseType = new StringBuilder(16).append(primaryType).append(DELIMITER).append(subType).toString();
+        lcBaseType = null;
     }
 
     /**
@@ -476,6 +568,7 @@ public class ContentType extends ParameterizedHeader {
     public ContentType setPrimaryType(final String primaryType) {
         this.primaryType = primaryType;
         baseType = null;
+        lcBaseType = null;
         return this;
     }
 
@@ -494,6 +587,7 @@ public class ContentType extends ParameterizedHeader {
     public ContentType setSubType(final String subType) {
         this.subType = subType;
         baseType = null;
+        lcBaseType = null;
         return this;
     }
 
@@ -599,7 +693,26 @@ public class ContentType extends ParameterizedHeader {
         if (null == prefix) {
             throw new IllegalArgumentException("Prefix is null");
         }
-        return toLowerCase(getBaseType()).startsWith(toLowerCase(prefix), 0);
+        return getLowerCaseBaseType().startsWith(toLowerCase(prefix), 0);
+    }
+
+    /**
+     * Checks if Content-Type's base type ignore-case starts with any of specified prefixes.
+     *
+     * @param prefixes The prefixes
+     * @return <code>true</code> if Content-Type's base type ignore-case starts with any of specified prefixes; otherwise <code>false</code>
+     */
+    public boolean startsWithAny(final String... prefixes) {
+        if (null == prefixes) {
+            return false;
+        }
+        final String lowerCase = getLowerCaseBaseType();
+        for (final String prefix : prefixes) {
+            if (null != prefix && lowerCase.startsWith(toLowerCase(prefix), 0)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**

@@ -58,7 +58,7 @@ import java.util.concurrent.Callable;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import com.openexchange.log.LogFactory;
 
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Filestore;
@@ -155,6 +155,7 @@ public class FilestoreDataMover implements Callable<Void> {
      * @throws ProgrammErrorException
      * 
      */
+    @Override
     public Void call() throws StorageException, IOException, InterruptedException, ProgrammErrorException {
         try {
             copy();

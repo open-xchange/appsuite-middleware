@@ -50,14 +50,17 @@
 package com.openexchange.service.indexing.impl;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Callable;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Future;
 import java.util.concurrent.PriorityBlockingQueue;
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import com.openexchange.exception.OXException;
+import com.openexchange.log.LogFactory;
 import com.openexchange.service.indexing.IndexingJob;
 import com.openexchange.service.indexing.IndexingJob.Behavior;
 import com.openexchange.threadpool.AbstractTask;
@@ -92,6 +95,11 @@ public final class IndexingJobExecutor implements Callable<Void> {
         @Override
         public void performJob() throws OXException {
             // Nothing to do
+        }
+
+        @Override
+        public java.util.Map<String,?> getProperties() {
+            return Collections.emptyMap();
         }
 
         @Override
@@ -157,8 +165,8 @@ public final class IndexingJobExecutor implements Callable<Void> {
         super();
         this.maxConcurrentJobs = maxConcurrentJobs;
         this.threadPool = threadPool;
-        this.queue = new BoundedPriorityBlockingQueue<IndexingJob>(CAPACITY);
-        this.serviceLookup = Services.getServiceLookup();
+        queue = new BoundedPriorityBlockingQueue<IndexingJob>(CAPACITY);
+        serviceLookup = Services.getServiceLookup();
     }
 
     @Override
@@ -185,12 +193,16 @@ public final class IndexingJobExecutor implements Callable<Void> {
                 }
                 queue.drainTo(jobs, maxConcurrentJobs);
                 final boolean quit = jobs.remove(POISON);
+                if (quit) {
+                    return null;
+                }
+                final CountDownLatch latch = new CountDownLatch(jobs.size());
                 for (final IndexingJob indexingJob : jobs) {
                     if (Behavior.DELEGATE.equals(indexingJob.getBehavior()) || serviceLookup.servesAll(indexingJob.getNeededServices())) {
                         /*
                          * Delegate to thread pool; awaiting currently absent services
                          */
-                        threadPool.submit(new IndexingJobTask(indexingJob), callerRunsBehavior);
+                        threadPool.submit(new IndexingJobTask(indexingJob, latch), callerRunsBehavior);
                     } else {
                         try {
                             performJob(indexingJob);
@@ -204,13 +216,19 @@ public final class IndexingJobExecutor implements Callable<Void> {
                              * return null;
                              */
                             Thread.interrupted(); // clear interrupt status
+                        } finally {
+                            latch.countDown();
                         }
                     }
                 }
+                latch.await();
                 if (quit) {
                     return null;
                 }
                 jobs.clear();
+            } catch (final InterruptedException e) {
+                Thread.currentThread().interrupt();
+                LOG.info("Job consumer run interrupted.", e);
             } catch (final RuntimeException e) {
                 // Consumer run failed...
                 LOG.info("Job consumer run terminated with unchecked error.", e);
@@ -300,14 +318,21 @@ public final class IndexingJobExecutor implements Callable<Void> {
 
         private final IndexingJob job;
 
-        public IndexingJobTask(final IndexingJob job) {
+        private final CountDownLatch latch;
+
+        protected IndexingJobTask(final IndexingJob job, final CountDownLatch latch) {
             super();
             this.job = job;
+            this.latch = latch;
         }
 
         @Override
         public Void call() throws Exception {
-            performJob(job);
+            try {
+                performJob(job);
+            } finally {
+                latch.countDown();
+            }
             return null;
         }
 
@@ -327,6 +352,11 @@ public final class IndexingJobExecutor implements Callable<Void> {
         public IndexingJobWrapper(final IndexingJob job) {
             super();
             this.job = job;
+        }
+
+        @Override
+        public Map<String, ?> getProperties() {
+            return job.getProperties();
         }
 
         @Override

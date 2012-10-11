@@ -58,7 +58,7 @@ import java.util.Date;
 import java.util.Map;
 import java.util.Set;
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import com.openexchange.log.LogFactory;
 import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.calendar.CalendarCollectionService;
@@ -233,7 +233,7 @@ public final class AppointmentRepairRecurrenceDatePosition implements UpdateTask
         final CalendarCollectionService recColl = ServerServiceRegistry.getInstance().getService(
             CalendarCollectionService.class);
         recColl.fillDAO(appointment);
-        final RecurringResultsInterface rrs = recColl.calculateRecurring(appointment, 0, 0, recurrencePosition, recColl.MAX_OCCURRENCESE, true);
+        final RecurringResultsInterface rrs = recColl.calculateRecurring(appointment, 0, 0, recurrencePosition, CalendarCollectionService.MAX_OCCURRENCESE, true);
         if (null == rrs) {
             throw OXCalendarExceptionCodes.UNABLE_TO_CALCULATE_RECURRING_POSITION_NO_INPUT.create();
         }

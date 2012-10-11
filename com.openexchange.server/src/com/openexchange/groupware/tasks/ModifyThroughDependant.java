@@ -53,6 +53,7 @@ import static com.openexchange.groupware.tasks.StorageType.ACTIVE;
 import java.sql.Connection;
 import java.util.Date;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.container.DataObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.reminder.TargetService;
 
@@ -83,7 +84,7 @@ public final class ModifyThroughDependant implements TargetService {
         }
         final Date lastModified = task.getLastModified();
         task.setLastModified(new Date());
-        stor.updateTask(ctx, con, task, lastModified, new int[] { Task.LAST_MODIFIED }, ACTIVE);
+        stor.updateTask(ctx, con, task, lastModified, new int[] { DataObject.LAST_MODIFIED }, ACTIVE);
     }
 
     @Override

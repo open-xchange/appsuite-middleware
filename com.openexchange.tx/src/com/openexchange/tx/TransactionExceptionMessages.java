@@ -58,11 +58,11 @@ import com.openexchange.i18n.LocalizableStrings;
  */
 public final class TransactionExceptionMessages implements LocalizableStrings {
 
-    public static final String NO_COMPLETE_ROLLBACK_MSG = "This transaction could not be fully undone. Some components are probably not consistent anymore. Run the recovery tool!";
+    public static final String NO_COMPLETE_ROLLBACK_MSG = "This transaction could not be fully undone. Some components are probably not consistent anymore. Run the recovery tool.";
 
     public static final String CANNOT_COMMIT_MSG = "Cannot commit transaction to write DB";
 
-    public static final String CANNOT_ROLLBACK_MSG = "Cannot rollback transaction in write DB";
+    public static final String CANNOT_ROLLBACK_MSG = "Cannot roll back transaction in write DB";
 
     public static final String CANNOT_FINISH_MSG = "Cannot finish transaction";
 

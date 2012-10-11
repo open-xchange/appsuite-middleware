@@ -60,8 +60,9 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.ResourceBundle;
 import java.util.concurrent.atomic.AtomicBoolean;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.osgi.service.event.EventAdmin;
-import org.w3c.tidy.Report;
 import com.openexchange.ajp13.AJPv13Config;
 import com.openexchange.ajp13.AJPv13Server;
 import com.openexchange.ajp13.AJPv13ServiceRegistry;
@@ -83,6 +84,9 @@ import com.openexchange.config.ConfigurationServiceHolder;
 import com.openexchange.config.internal.ConfigurationImpl;
 import com.openexchange.config.internal.filewatcher.FileWatcher;
 import com.openexchange.configuration.ServerConfig;
+import com.openexchange.contact.ContactService;
+import com.openexchange.contact.internal.ContactServiceImpl;
+import com.openexchange.contact.internal.ContactServiceLookup;
 import com.openexchange.contact.storage.internal.DefaultContactStorageRegistry;
 import com.openexchange.contact.storage.rdb.internal.RdbContactStorage;
 import com.openexchange.contact.storage.registry.ContactStorageRegistry;
@@ -146,12 +150,14 @@ import com.openexchange.mail.transport.config.TransportPropertiesInit;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.mailaccount.UnifiedInboxManagement;
 import com.openexchange.mailaccount.internal.MailAccountStorageInit;
+import com.openexchange.osgi.ServiceRegistry;
 import com.openexchange.push.udp.registry.PushServiceRegistry;
 import com.openexchange.resource.ResourceService;
 import com.openexchange.resource.internal.ResourceServiceImpl;
 import com.openexchange.server.Initialization;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.server.services.I18nServices;
+import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.sessiond.impl.SessiondInit;
 import com.openexchange.sessiond.impl.SessiondServiceImpl;
@@ -164,6 +170,7 @@ import com.openexchange.subscribe.internal.ContactFolderMultipleUpdaterStrategy;
 import com.openexchange.subscribe.internal.ContactFolderUpdaterStrategy;
 import com.openexchange.subscribe.internal.StrategyFolderUpdaterService;
 import com.openexchange.subscribe.internal.SubscriptionExecutionServiceImpl;
+import com.openexchange.subscribe.osgi.SubscriptionServiceRegistry;
 import com.openexchange.test.TestInit;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.threadpool.internal.ThreadPoolProperties;
@@ -175,6 +182,7 @@ import com.openexchange.tools.events.TestEventAdmin;
 import com.openexchange.tools.file.FileStorage;
 import com.openexchange.tools.file.QuotaFileStorage;
 import com.openexchange.tools.file.external.FileStorageFactory;
+import com.openexchange.tools.file.internal.CompositeFileStorageFactory;
 import com.openexchange.tools.file.internal.DBQuotaFileStorageFactory;
 import com.openexchange.tools.file.internal.LocalFileStorageFactory;
 import com.openexchange.user.UserService;
@@ -192,6 +200,8 @@ import com.openexchange.xml.spring.impl.DefaultSpringParser;
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public final class Init {
+
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(Init.class));
 
     // private static Properties infostoreProps = null;
 
@@ -226,8 +236,12 @@ public final class Init {
                 if (null == AJPv13Server.getInstance()) {
                     AJPv13Server.setInstance(new com.openexchange.ajp13.najp.AJPv13ServerImpl());
                 }
-                AJPv13Server.startAJPServer();
-                HttpManagersInit.getInstance().start();
+                try {
+                    AJPv13Server.startAJPServer();
+                    HttpManagersInit.getInstance().start();
+                } catch (OXException e) {
+                    LOG.error(e.getMessage(), e);
+                }
             }
 
             @Override
@@ -301,10 +315,6 @@ public final class Init {
         if (null != propDir1) {
             System.setProperty("openexchange.propdir", propDir1);
         }
-        final String propDir2 = TestInit.getTestProperty("openexchange.propdir2");
-        if (null != propDir2) {
-            System.setProperty("openexchange.propdir2", propDir2);
-        }
     }
 
     public static void startServer() throws Exception {
@@ -319,6 +329,7 @@ public final class Init {
          */
         injectProperty();
         injectTestServices();
+
         for (final Initialization init : inits) {
             init.start();
             started.add(init);
@@ -361,6 +372,8 @@ public final class Init {
         startAndInjectImportExportServices();
         startAndInjectSubscribeServices();
         startAndInjectContactStorageServices();
+        startAndInjectContactServices();
+        
     }
 
     public static void startAndInjectConfigBundle() {
@@ -370,7 +383,9 @@ public final class Init {
         final ConfigurationService config = new ConfigurationImpl();
         services.put(ConfigurationService.class, config);
         TestServiceRegistry.getInstance().addService(ConfigurationService.class, config);
+        AJPv13ServiceRegistry.SERVICE_REGISTRY.set(new ServiceRegistry());
         AJPv13ServiceRegistry.getInstance().addService(ConfigurationService.class, config);
+        
     }
 
     private static void startAndInjectThreadPoolBundle() {
@@ -388,7 +403,7 @@ public final class Init {
                     props.getRefusedExecutionBehavior());
             services.put(ThreadPoolService.class, threadPool);
             TestServiceRegistry.getInstance().addService(ThreadPoolService.class, threadPool);
-            ThreadPoolActivator.REF.set(threadPool);
+            ThreadPoolActivator.REF_THREAD_POOL.set(threadPool);
             final TimerService timer = new CustomThreadPoolExecutorTimerService(threadPool.getThreadPoolExecutor());
             services.put(TimerService.class, timer);
             TestServiceRegistry.getInstance().addService(TimerService.class, timer);
@@ -427,16 +442,14 @@ public final class Init {
         if (null == TestServiceRegistry.getInstance().getService(HtmlService.class)) {
             final ConfigurationService configService = (ConfigurationService) services.get(ConfigurationService.class);
             com.openexchange.html.services.ServiceRegistry.getInstance().addService(ConfigurationService.class, configService);
-            Report.setResourceBundleFrom(HTMLServiceActivator.getTidyMessages(configService.getProperty("TidyMessages")));
-            final Properties properties = HTMLServiceActivator.getTidyConfiguration(configService.getProperty("TidyConfiguration"));
-            final Object[] maps = HTMLServiceActivator.getHTMLEntityMaps(configService.getProperty("HTMLEntities"));
+            final Object[] maps = HTMLServiceActivator.getHTMLEntityMaps(configService.getFileByName("HTMLEntities.properties"));
             @SuppressWarnings("unchecked")
             final Map<String, Character> htmlEntityMap = (Map<String, Character>) maps[1];
             htmlEntityMap.put("apos", Character.valueOf('\''));
             @SuppressWarnings("unchecked")
             final Map<Character, String> htmlCharMap = (Map<Character, String>) maps[0];
             htmlCharMap.put(Character.valueOf('\''), "apos");
-            final HtmlService service = new HtmlServiceImpl(properties, htmlCharMap, htmlEntityMap);
+            final HtmlService service = new HtmlServiceImpl(htmlCharMap, htmlEntityMap);
             services.put(HtmlService.class, service);
             TestServiceRegistry.getInstance().addService(HtmlService.class, service);
         }
@@ -513,6 +526,20 @@ public final class Init {
     }
 
     private static void startAndInjectImportExportServices() throws OXException {
+        if (null == com.openexchange.importexport.osgi.ImportExportServices.LOOKUP.get()) {
+            com.openexchange.importexport.osgi.ImportExportServices.LOOKUP.set(new ServiceLookup() {
+                @Override
+                public <S> S getService(final Class<? extends S> clazz) {
+                    return TestServiceRegistry.getInstance().getService(clazz);
+                }
+                @Override
+                public <S> S getOptionalService(final Class<? extends S> clazz) {
+                    return null;
+                }
+            });
+            SubscriptionServiceRegistry.getInstance().addService(
+                ContactInterfaceDiscoveryService.class, services.get(ContactInterfaceDiscoveryService.class));
+        }
     }
     
     private static void startAndInjectIDGeneratorService() {
@@ -544,6 +571,23 @@ public final class Init {
                     return null;
                 }
             });                
+        }
+    }
+
+    private static void startAndInjectContactServices() {
+        if (null == TestServiceRegistry.getInstance().getService(ContactService.class)) {
+            final ContactService contactService = new ContactServiceImpl();
+            ContactServiceLookup.set(new ServiceLookup() {
+                @Override
+                public <S> S getService(final Class<? extends S> clazz) {
+                    return TestServiceRegistry.getInstance().getService(clazz);
+                }
+                @Override
+                public <S> S getOptionalService(final Class<? extends S> clazz) {
+                    return null;
+                }
+            });
+            TestServiceRegistry.getInstance().addService(ContactService.class, contactService);
         }
     }
 
@@ -601,7 +645,7 @@ public final class Init {
         /*
          * May be invoked multiple times
          */
-        final FileStorageFactory fileStorageStarter = new LocalFileStorageFactory();
+        final FileStorageFactory fileStorageStarter = new CompositeFileStorageFactory();
         FileStorage.setFileStorageStarter(fileStorageStarter);
         final DatabaseService dbService = (DatabaseService) services.get(DatabaseService.class);
         QuotaFileStorage.setQuotaFileStorageStarter(new DBQuotaFileStorageFactory(dbService, fileStorageStarter));
@@ -635,6 +679,7 @@ public final class Init {
             imapServiceRegistry.addService(UnifiedInboxManagement.class, services.get(UnifiedInboxManagement.class));
             imapServiceRegistry.addService(ThreadPoolService.class, services.get(ThreadPoolService.class));
             imapServiceRegistry.addService(TimerService.class, services.get(TimerService.class));
+            imapServiceRegistry.addService(DatabaseService.class, services.get(DatabaseService.class));
             IMAPStoreCache.initInstance();
             /*
              * Register IMAP bundle
@@ -643,8 +688,9 @@ public final class Init {
         }
     }
 
-    private static void startAndInjectContactCollector() throws Exception {
-        final CCServiceRegistry reg = CCServiceRegistry.getInstance();
+    private static void startAndInjectContactCollector() {
+        CCServiceRegistry.SERVICE_REGISTRY.set(new ServiceRegistry());
+        final ServiceRegistry reg = CCServiceRegistry.getInstance();
         if (null == reg.getService(TimerService.class)) {
             reg.addService(TimerService.class, services.get(TimerService.class));
             reg.addService(ThreadPoolService.class, services.get(ThreadPoolService.class));
@@ -818,7 +864,6 @@ public final class Init {
     public static void dropProperty() {
         final Properties sysProps = System.getProperties();
         sysProps.remove("openexchange.propdir");
-        sysProps.remove("openexchange.propdir2");
     }
 
     public static void dropConfigBundle() {
