@@ -838,102 +838,28 @@ public final class Threadable implements Cloneable, Serializable, Iterable<Threa
                 final Response response = r[len];
                 if (response.isOK()) {
                     try {
-                        final String sReferences = MessageHeaders.HDR_REFERENCES;
-                        final HeaderHandler refsHeaderHandler = handlers.get(sReferences);
                         final List<Threadable> threadables = new ArrayList<Threadable>(messageCount);
                         final String fullName = imapFolder.getFullName();
-                        for (int j = 0; j < len; j++) {
-                            if ("FETCH".equals(((IMAPResponse) r[j]).getKey())) {
-                                final FetchResponse fetchResponse = (FetchResponse) r[j];
-                                final Threadable t;
-                                // Check for ENVELOPE
-                                final ENVELOPE envelope = getItemOf(ENVELOPE.class, fetchResponse);
-                                if (null != envelope) {
-                                    t = new Threadable().setFullName(fullName);
-                                    t.messageNumber = fetchResponse.getNumber();
-                                    t.subject = MimeMessageUtility.decodeEnvelopeSubject(envelope.subject);
-                                    t.messageId = envelope.messageId;
-                                    t.inReplyTo = envelope.inReplyTo;
-                                    // Check for UID
-                                    final UID uid = getItemOf(UID.class, fetchResponse);
-                                    if (null != uid) {
-                                        t.uid = uid.uid;
-                                    }
-                                    if (includeReferences()) {
-                                        InputStream headerStream;
-                                        BODY body = getItemOf(BODY.class, fetchResponse);
-                                        if (null == body) {
-                                            final RFC822DATA rfc822data = getItemOf(RFC822DATA.class, fetchResponse);
-                                            headerStream = null == rfc822data ? null : rfc822data.getByteArrayInputStream();
-                                        } else {
-                                            headerStream = body.getByteArrayInputStream();
-                                        }
-                                        body = null;
-                                        if (null != headerStream) {
-                                            final InternetHeaders h = new InternetHeaders();
-                                            h.load(headerStream);
-                                            headerStream = null;
-                                            final String refs = h.getHeader(sReferences, null);
-                                            if (null != refs && null != refsHeaderHandler) {
-                                                refsHeaderHandler.handle(new Header(sReferences, refs), t);
-                                            }
-                                        }
-                                    }
-                                } else {
-                                    // Check for BODY resp. RFC822DATA
-                                    final InternetHeaders h;
-                                    {
-                                        final InputStream headerStream;
-                                        final BODY body = getItemOf(BODY.class, fetchResponse);
-                                        if (null == body) {
-                                            final RFC822DATA rfc822data = getItemOf(RFC822DATA.class, fetchResponse);
-                                            headerStream = null == rfc822data ? null : rfc822data.getByteArrayInputStream();
-                                        } else {
-                                            headerStream = body.getByteArrayInputStream();
-                                        }
-                                        if (null == headerStream) {
-                                            h = null;
-                                        } else {
-                                            h = new InternetHeaders();
-                                            h.load(headerStream);
-                                        }
-                                    }
-                                    if (h == null) {
-                                        t = null;
-                                    } else {
-                                        t = new Threadable().setFullName(fullName);
-                                        t.messageNumber = fetchResponse.getNumber();
-                                        for (final Enumeration<?> e = h.getAllHeaders(); e.hasMoreElements();) {
-                                            final Header hdr = (Header) e.nextElement();
-                                            final HeaderHandler headerHandler = handlers.get(hdr.getName());
-                                            if (null != headerHandler) {
-                                                headerHandler.handle(hdr, t);
-                                            }
-                                        }
-                                        // Check for UID
-                                        final UID uid = getItemOf(UID.class, fetchResponse);
-                                        if (null != uid) {
-                                            t.uid = uid.uid;
-                                        }
-                                    }
+                        final String sFetch = "FETCH";
+                        if (fetchSingleFields) {
+                            for (int j = 0; j < len; j++) {
+                                if (sFetch.equals(((IMAPResponse) r[j]).getKey())) {
+                                    handleByFields(handlers, threadables, fullName, (FetchResponse) r[j]);
+                                    r[j] = null;
                                 }
-                                if (null != t) {
-                                    // Check References and In-Reply-To
-                                    if (null != t.inReplyTo) {
-                                        if (null == t.refs) {
-                                            t.refs = new String[] { t.inReplyTo };
-                                        } else {
-                                            final String[] tmp = t.refs;
-                                            t.refs = new String[tmp.length + 1];
-                                            System.arraycopy(tmp, 0, t.refs, 0, tmp.length);
-                                            t.refs[tmp.length] = t.inReplyTo;
-                                        }
-                                    }
-                                    threadables.add(t);
+                            }
+                        } else {
+                            final boolean includeReferences = includeReferences();
+                            final String sReferences = MessageHeaders.HDR_REFERENCES;
+                            final HeaderHandler refsHeaderHandler = handlers.get(sReferences);
+                            for (int j = 0; j < len; j++) {
+                                if (sFetch.equals(((IMAPResponse) r[j]).getKey())) {
+                                    handleByEnvelope(threadables, fullName, includeReferences, sReferences, refsHeaderHandler, (FetchResponse) r[j]);
                                     r[j] = null;
                                 }
                             }
                         }
+                        // Handle remaining responses
                         protocol.notifyResponseHandlers(r);
                         final Threadable first = threadables.remove(0);
                         {
@@ -964,6 +890,106 @@ public final class Threadable implements Cloneable, Serializable, Iterable<Threa
                     protocol.handleResult(response);
                 }
                 return null;
+            }
+
+            private void handleByFields(final Map<String, HeaderHandler> handlers, final List<Threadable> threadables, final String fullName, final FetchResponse fetchResponse) throws MessagingException {
+                // Check for BODY / RFC822DATA
+                final InternetHeaders h;
+                {
+                    final InputStream headerStream;
+                    final BODY body = getItemOf(BODY.class, fetchResponse);
+                    if (null == body) {
+                        final RFC822DATA rfc822data = getItemOf(RFC822DATA.class, fetchResponse);
+                        headerStream = null == rfc822data ? null : rfc822data.getByteArrayInputStream();
+                    } else {
+                        headerStream = body.getByteArrayInputStream();
+                    }
+                    if (null == headerStream) {
+                        h = null;
+                    } else {
+                        h = new InternetHeaders();
+                        h.load(headerStream);
+                    }
+                }
+                final Threadable t;
+                if (h == null) {
+                    t = null;
+                } else {
+                    t = new Threadable().setFullName(fullName);
+                    t.messageNumber = fetchResponse.getNumber();
+                    for (final Enumeration<?> e = h.getAllHeaders(); e.hasMoreElements();) {
+                        final Header hdr = (Header) e.nextElement();
+                        final HeaderHandler headerHandler = handlers.get(hdr.getName());
+                        if (null != headerHandler) {
+                            headerHandler.handle(hdr, t);
+                        }
+                    }
+                    // Check for UID
+                    final UID uid = getItemOf(UID.class, fetchResponse);
+                    if (null != uid) {
+                        t.uid = uid.uid;
+                    }
+                }
+                if (null != t) {
+                    add2List(t, threadables);
+                }
+            }
+
+            private void handleByEnvelope(final List<Threadable> threadables, final String fullName, final boolean includeReferences, final String sReferences, final HeaderHandler refsHeaderHandler, final FetchResponse fetchResponse) throws MessagingException {
+                final ENVELOPE envelope = getItemOf(ENVELOPE.class, fetchResponse);
+                final Threadable t;
+                if (null == envelope) {
+                    t = null;
+                } else {
+                    t = new Threadable().setFullName(fullName);
+                    t.messageNumber = fetchResponse.getNumber();
+                    t.subject = MimeMessageUtility.decodeEnvelopeSubject(envelope.subject);
+                    t.messageId = envelope.messageId;
+                    t.inReplyTo = envelope.inReplyTo;
+                    // Check for UID
+                    final UID uid = getItemOf(UID.class, fetchResponse);
+                    if (null != uid) {
+                        t.uid = uid.uid;
+                    }
+                    if (includeReferences) {
+                        InputStream headerStream;
+                        BODY body = getItemOf(BODY.class, fetchResponse);
+                        if (null == body) {
+                            final RFC822DATA rfc822data = getItemOf(RFC822DATA.class, fetchResponse);
+                            headerStream = null == rfc822data ? null : rfc822data.getByteArrayInputStream();
+                        } else {
+                            headerStream = body.getByteArrayInputStream();
+                        }
+                        body = null;
+                        if (null != headerStream) {
+                            final InternetHeaders h = new InternetHeaders();
+                            h.load(headerStream);
+                            headerStream = null;
+                            final String refs = h.getHeader(sReferences, null);
+                            if (null != refs && null != refsHeaderHandler) {
+                                refsHeaderHandler.handle(new Header(sReferences, refs), t);
+                            }
+                        }
+                    }
+                }
+                if (null != t) {
+                    add2List(t, threadables);
+                }
+            }
+
+            private void add2List(final Threadable t, final List<Threadable> threadables) {
+                // Check References and In-Reply-To
+                if (null != t.inReplyTo) {
+                    if (null == t.refs) {
+                        t.refs = new String[] { t.inReplyTo };
+                    } else {
+                        final String[] tmp = t.refs;
+                        t.refs = new String[tmp.length + 1];
+                        System.arraycopy(tmp, 0, t.refs, 0, tmp.length);
+                        t.refs[tmp.length] = t.inReplyTo;
+                    }
+                }
+                threadables.add(t);
             }
 
         }));
