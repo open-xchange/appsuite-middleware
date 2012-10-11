@@ -147,22 +147,31 @@ public class AJAXRequestData {
      */
     private String route;
 
+    /** The upload event */
     private volatile UploadEvent uploadEvent;
 
+    /** The format */
     private String format;
 
+    /** The state reference */
     private AJAXState state;
 
+    /** The eTag */
     private String eTag;
 
+    /** The expires millis */
     private long expires;
 
+    /** The path information */
     private String pathInfo;
 
+    /** The HTTP Servlet request */
     private HttpServletRequest httpServletRequest;
 
+    /** The decorator identifiers */
     private final List<String> decoratorIds;
 
+    /** The multipart flag. */
     private boolean multipart;
 
     /**
