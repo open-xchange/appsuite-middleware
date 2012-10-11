@@ -92,7 +92,7 @@ Bundle-ClassPath: .,
  lib/rabin-hash-function-2.0.jar,
  lib/scribe_head.jar,
  lib/tnef-1.8.0.jar,
- lib/trove-3.0.3.jarlib/high-scale-lib-1.1.4.jar,
+ lib/trove-3.0.3.jar,
  lib/high-scale-lib-1.1.4.jar
 Export-Package: com.davekoelle,
  com.google.common.annotations,
