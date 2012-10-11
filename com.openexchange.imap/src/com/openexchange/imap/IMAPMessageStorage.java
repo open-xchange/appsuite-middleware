@@ -237,7 +237,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
      * String constants
      */
 
-    private static final String STR_MSEC = "msec";
+    private static final char[] STR_MSEC = new char[] { 'm','s','e','c' };
 
     private static final boolean LOOK_UP_INBOX_ONLY = true;
 

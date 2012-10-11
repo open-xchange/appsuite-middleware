@@ -2,6 +2,10 @@
 
  - Fix for bug 23238: Properly dealing with transient map on serialization attempt
 
+* 2012-10-10 - jan.bauerdick@open-xchange.com
+
+ - Refactored report client, added yearly login counter
+
 * 2012-10-09 - tobias.friedrich@open-xchange.com
 
  - Fix for bug 23207: Use contact service to modify attachment count 

@@ -92,11 +92,11 @@ public class ReportConfiguration {
     public String getLicenseKeys() {
         StringBuilder retval = new StringBuilder();
 
-        for (int currentFetchPosition = 1; properties.getProperty("com.openexchange.licensekey."+currentFetchPosition) != null; currentFetchPosition++) {
+        for (int currentFetchPosition = 1; properties.getProperty("com.openexchange.licensekey." + currentFetchPosition) != null; currentFetchPosition++) {
             if (retval.length() > 0) {
                 retval.append(",");
             }
-            retval.append(properties.getProperty("com.openexchange.licensekey."+currentFetchPosition));
+            retval.append(properties.getProperty("com.openexchange.licensekey." + currentFetchPosition));
         }
 
         return retval.toString();
@@ -104,9 +104,10 @@ public class ReportConfiguration {
 
     public String getUseProxy() {
         if (null != properties.getProperty("com.openexchange.report.client.proxy.useproxy")) {
-            return properties.getProperty("com.openexchange.report.client.proxy.useproxy");
+            return (properties.getProperty("com.openexchange.report.client.proxy.useproxy"));
+        } else {
+            return "";
         }
-        return "";
     }
 
     public String getProxyAddress() {

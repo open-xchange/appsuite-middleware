@@ -87,9 +87,9 @@ public class FreeBusyData {
     /**
      * Initializes a new {@link FreeBusyData}.
      * 
-     * @param participant 
-     * @param from
-     * @param until
+     * @param participant The participant, represented either as e-mail address or group-, user- or resource-ID
+     * @param from The lower (inclusive) limit of the time-range  
+     * @param until The upper (exclusive) limit of the time-range
      */
     public FreeBusyData(String participant, Date from, Date until) {
         super();
@@ -99,20 +99,38 @@ public class FreeBusyData {
         this.until = until;
     }
 
+    /**
+     * Removes all free/busy intervals.
+     */
     public void clear() {
         this.intervals.clear();
     }
     
+    /**
+     * Adds a free/busy interval.
+     * 
+     * @param interval The interval
+     */
     public void add(FreeBusyInterval interval) {
         this.intervals.add(interval);
     }
     
+    /**
+     * Adds multiple intervals.
+     * 
+     * @param intervals The intervals to add
+     */
     public void addAll(Collection<? extends FreeBusyInterval> intervals) {
         if (null != intervals) {
             this.intervals.addAll(intervals);
         }
     }
     
+    /**
+     * Adds all data from another {@link FreeBusyData} instance, i.e. all intervals and warnings.
+     * 
+     * @param data The data to add
+     */
     public void add(FreeBusyData data) {
         if (null != data) {
             if (data.hasWarnings()) {
@@ -126,6 +144,11 @@ public class FreeBusyData {
         }
     }
     
+    /**
+     * Gets all intervals.
+     * 
+     * @return The intervals.
+     */
     public List<FreeBusyInterval> getIntervals() {
         return Collections.unmodifiableList(this.intervals);
     }
@@ -211,8 +234,27 @@ public class FreeBusyData {
     * Normalizes the contained free/busy intervals. 
     */
     public void normalize() {
-        if (2 > this.intervals.size()) {
-            return; // nothing to do
+        /*
+         * normalize to interval boundaries
+         */
+        Iterator<FreeBusyInterval> iterator = intervals.iterator();
+        while (iterator.hasNext()) {
+            FreeBusyInterval interval = iterator.next();
+            if (null != interval.getEndTime() && interval.getEndTime().after(getFrom()) &&
+                null != interval.getStartTime() && interval.getStartTime().before(getUntil())) {
+                if (interval.getStartTime().before(getFrom())) {
+                    interval.setStartTime(getFrom());
+                }
+                if (interval.getEndTime().after(getUntil())) {
+                    interval.setEndTime(getUntil());
+                }
+            } else {
+                // outside range
+                iterator.remove();
+            }            
+        }
+        if (2 > intervals.size()) {
+            return; // nothing more to do
         }
         /*
          * expand intervals to match all possible boundaries 
@@ -241,7 +283,7 @@ public class FreeBusyData {
          */
         Collections.sort(expandedIntervals);
         ArrayList<FreeBusyInterval> mergedIntervals = new ArrayList<FreeBusyInterval>();
-        Iterator<FreeBusyInterval> iterator = expandedIntervals.iterator();
+        iterator = expandedIntervals.iterator();
         FreeBusyInterval current = iterator.next();
         while (iterator.hasNext()) {
             FreeBusyInterval next = iterator.next();

@@ -122,6 +122,7 @@ public abstract class AbstractMethodHandler implements MethodHandler {
                     requestData.putParameter(name, entry.getValue()[0]);
                 }
             }
+            requestData.examineServletRequest(req);
         }
         /*
          * Check for ETag header to support client caching

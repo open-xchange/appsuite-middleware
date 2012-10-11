@@ -101,7 +101,58 @@ public final class Threadable implements Cloneable, Serializable {
     /**
      * The logger constant.
      */
-    static final transient org.apache.commons.logging.Log LOG = Log.loggerFor(Threadable.class);
+    private static final transient org.apache.commons.logging.Log LOG = Log.loggerFor(Threadable.class);
+
+    /**
+     * The empty <code>References</code>.
+     */
+    private static final String[] EMPTY_REFS = new String[0];
+
+    private static interface HeaderHandler {
+
+        void handle(Header hdr, Threadable threadable) throws MessagingException;
+
+    }
+
+    private static final Map<String, HeaderHandler> HANDLERS;
+    static {
+        final Map<String, HeaderHandler> m = new HashMap<String, HeaderHandler>(4);
+        m.put(MessageHeaders.HDR_SUBJECT, new HeaderHandler() {
+
+            @Override
+            public void handle(final Header hdr, final Threadable threadable) throws MessagingException {
+                threadable.subject = MimeMessageUtility.decodeMultiEncodedHeader(MimeMessageUtility.checkNonAscii(hdr.getValue()));
+            }
+        });
+        m.put(MessageHeaders.HDR_REFERENCES, new HeaderHandler() {
+
+            private final Pattern split = Pattern.compile(" +");
+
+            @Override
+            public void handle(final Header hdr, final Threadable threadable) throws MessagingException {
+                threadable.refs = split.split(MimeMessageUtility.decodeMultiEncodedHeader(hdr.getValue()));
+            }
+        });
+        m.put(MessageHeaders.HDR_MESSAGE_ID, new HeaderHandler() {
+
+            @Override
+            public void handle(final Header hdr, final Threadable threadable) throws MessagingException {
+                threadable.messageId = MimeMessageUtility.decodeMultiEncodedHeader(hdr.getValue());
+            }
+        });
+        m.put(MessageHeaders.HDR_IN_REPLY_TO, new HeaderHandler() {
+
+            @Override
+            public void handle(final Header hdr, final Threadable threadable) throws MessagingException {
+                threadable.inReplyTo = MimeMessageUtility.decodeMultiEncodedHeader(hdr.getValue());
+            }
+        });
+        HANDLERS = Collections.unmodifiableMap(m);
+    }
+
+    /*-
+     * -------------------- Members --------------------
+     */
 
     Threadable next;
     Threadable kid;
@@ -117,7 +168,7 @@ public final class Threadable implements Cloneable, Serializable {
     private boolean hasRe;
 
     /**
-     * Initializes a new {@code Threadable}.
+     * Initializes a new dummy {@code Threadable}.
      */
     public Threadable() {
         super();
@@ -258,19 +309,11 @@ public final class Threadable implements Cloneable, Serializable {
         }
     }
 
-    private static boolean isEmpty(final String string) {
-        if (null == string) {
-            return true;
-        }
-        final int len = string.length();
-        boolean isWhitespace = true;
-        for (int i = 0; isWhitespace && i < len; i++) {
-            isWhitespace = Character.isWhitespace(string.charAt(i));
-        }
-        return isWhitespace;
-    }
 
-    void flushSubjectCache() {
+    /**
+     * Flushes formerly cached (simple) subject.
+     */
+    protected void flushSubjectCache() {
         subject2 = null;
     }
 
@@ -292,7 +335,7 @@ public final class Threadable implements Cloneable, Serializable {
      * Returns the IDs of the set of messages referenced by this one. This list should be ordered from oldest-ancestor to youngest-ancestor.
      */
     public String[] messageReferences() {
-        return refs;
+        return refs == null ? EMPTY_REFS : refs;
     }
 
     /**
@@ -369,8 +412,13 @@ public final class Threadable implements Cloneable, Serializable {
         flushSubjectCache();
     }
 
-    public void setChild(final Threadable kid) {
-        this.kid = kid;
+    /**
+     * Sets the child.
+     *
+     * @param child The child
+     */
+    public void setChild(final Threadable child) {
+        this.kid = child;
         flushSubjectCache();
     }
 
@@ -397,13 +445,12 @@ public final class Threadable implements Cloneable, Serializable {
 
     private static final class ThreadableEnumeration implements Enumeration<Threadable> {
 
-        Threadable tail;
+        private Threadable tail;
+        private Enumeration<Threadable> kids;
+        private final boolean recursive;
 
-        Enumeration<Threadable> kids;
-
-        boolean recursive;
-
-        ThreadableEnumeration(final Threadable thread, final boolean recursive) {
+        protected ThreadableEnumeration(final Threadable thread, final boolean recursive) {
+            super();
             this.recursive = recursive;
             if (recursive) {
                 tail = thread;
@@ -440,58 +487,17 @@ public final class Threadable implements Cloneable, Serializable {
 
         @Override
         public boolean hasMoreElements() {
-            if (tail != null) {
-                return true;
-            } else if (kids != null && kids.hasMoreElements()) {
-                return true;
-            } else {
-                return false;
-            }
+            return ((null != tail) || ((kids != null) && kids.hasMoreElements()));
         }
     }
 
-    private interface HeaderHandler {
-
-        void handle(Header hdr, Threadable threadable) throws MessagingException;
-
-    }
-
-    static final Map<String, HeaderHandler> HANDLERS = new HashMap<String, HeaderHandler>() {
-
-        {
-            put(MessageHeaders.HDR_SUBJECT, new HeaderHandler() {
-
-                @Override
-                public void handle(final Header hdr, final Threadable threadable) throws MessagingException {
-                    threadable.subject = MimeMessageUtility.decodeMultiEncodedHeader(MimeMessageUtility.checkNonAscii(hdr.getValue()));
-                }
-            });
-            put(MessageHeaders.HDR_REFERENCES, new HeaderHandler() {
-
-                private final Pattern split = Pattern.compile(" +");
-
-                @Override
-                public void handle(final Header hdr, final Threadable threadable) throws MessagingException {
-                    threadable.refs = split.split(MimeMessageUtility.decodeMultiEncodedHeader(hdr.getValue()));
-                }
-            });
-            put(MessageHeaders.HDR_MESSAGE_ID, new HeaderHandler() {
-
-                @Override
-                public void handle(final Header hdr, final Threadable threadable) throws MessagingException {
-                    threadable.messageId = MimeMessageUtility.decodeMultiEncodedHeader(hdr.getValue());
-                }
-            });
-            put(MessageHeaders.HDR_IN_REPLY_TO, new HeaderHandler() {
-
-                @Override
-                public void handle(final Header hdr, final Threadable threadable) throws MessagingException {
-                    threadable.inReplyTo = MimeMessageUtility.decodeMultiEncodedHeader(hdr.getValue());
-                }
-            });
-        }
-    };
-
+    /**
+     * Converts passed {@link Threadable} to an IMAP-conform THREAD=REFERENCES result string.
+     *
+     * @param threadable The instance
+     * @param filter The filter
+     * @return The resulting THREAD=REFERENCES string
+     */
     public static String toThreadReferences(final Threadable threadable, final TIntSet filter) {
         final StringBuilder sb = new StringBuilder(256);
         toThreadReferences0(threadable, filter, sb);
@@ -722,7 +728,7 @@ public final class Threadable implements Cloneable, Serializable {
      * @return <code>true</code> to include "References" header; else <code>false</code>
      */
     static boolean includeReferences() {
-        return false;
+        return true;
     }
 
     /**
@@ -742,6 +748,8 @@ public final class Threadable implements Cloneable, Serializable {
              */
             return null;
         }
+        final org.apache.commons.logging.Log log = LOG;
+        final Map<String, HeaderHandler> handlers = HANDLERS;
         return (Threadable) (imapFolder.doCommand(new IMAPFolder.ProtocolCommand() {
 
             @Override
@@ -783,8 +791,8 @@ public final class Threadable implements Cloneable, Serializable {
                     final long start = System.currentTimeMillis();
                     r = protocol.command(command, null);
                     final long dur = System.currentTimeMillis() - start;
-                    if (LOG.isInfoEnabled()) {
-                        LOG.info('"' + command + "\" for \"" + imapFolder.getFullName() + "\" (" + imapFolder.getStore().toString() + ") took " + dur + "msec.");
+                    if (log.isInfoEnabled()) {
+                        log.info('"' + command + "\" for \"" + imapFolder.getFullName() + "\" (" + imapFolder.getStore().toString() + ") took " + dur + "msec.");
                     }
                     mailInterfaceMonitor.addUseTime(dur);
                 }
@@ -792,6 +800,8 @@ public final class Threadable implements Cloneable, Serializable {
                 final Response response = r[len];
                 if (response.isOK()) {
                     try {
+                        final String sReferences = MessageHeaders.HDR_REFERENCES;
+                        final HeaderHandler refsHeaderHandler = handlers.get(sReferences);
                         final List<Threadable> threadables = new ArrayList<Threadable>(messageCount);
                         final String fullName = imapFolder.getFullName();
                         for (int j = 0; j < len; j++) {
@@ -810,6 +820,26 @@ public final class Threadable implements Cloneable, Serializable {
                                     final UID uid = getItemOf(UID.class, fetchResponse);
                                     if (null != uid) {
                                         t.uid = uid.uid;
+                                    }
+                                    if (includeReferences()) {
+                                        InputStream headerStream;
+                                        BODY body = getItemOf(BODY.class, fetchResponse);
+                                        if (null == body) {
+                                            final RFC822DATA rfc822data = getItemOf(RFC822DATA.class, fetchResponse);
+                                            headerStream = null == rfc822data ? null : rfc822data.getByteArrayInputStream();
+                                        } else {
+                                            headerStream = body.getByteArrayInputStream();
+                                        }
+                                        body = null;
+                                        if (null != headerStream) {
+                                            final InternetHeaders h = new InternetHeaders();
+                                            h.load(headerStream);
+                                            headerStream = null;
+                                            final String refs = h.getHeader(sReferences, null);
+                                            if (null != refs && null != refsHeaderHandler) {
+                                                refsHeaderHandler.handle(new Header(sReferences, refs), t);
+                                            }
+                                        }
                                     }
                                 } else {
                                     // Check for BODY resp. RFC822DATA
@@ -837,7 +867,7 @@ public final class Threadable implements Cloneable, Serializable {
                                         t.messageNumber = fetchResponse.getNumber();
                                         for (final Enumeration<?> e = h.getAllHeaders(); e.hasMoreElements();) {
                                             final Header hdr = (Header) e.nextElement();
-                                            final HeaderHandler headerHandler = HANDLERS.get(hdr.getName());
+                                            final HeaderHandler headerHandler = handlers.get(hdr.getName());
                                             if (null != headerHandler) {
                                                 headerHandler.handle(hdr, t);
                                             }
@@ -919,5 +949,17 @@ public final class Threadable implements Cloneable, Serializable {
             }
         }
         return null;
+    }
+
+    private static boolean isEmpty(final String string) {
+        if (null == string) {
+            return true;
+        }
+        final int len = string.length();
+        boolean isWhitespace = true;
+        for (int i = 0; isWhitespace && i < len; i++) {
+            isWhitespace = Character.isWhitespace(string.charAt(i));
+        }
+        return isWhitespace;
     }
 }

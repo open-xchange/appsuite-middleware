@@ -147,7 +147,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
 
     private static final String STR_INBOX = "INBOX";
 
-    private static final String STR_MSEC = "msec";
+    private static final char[] STR_MSEC = new char[] { 'm','s','e','c' };
 
     private final AccessedIMAPStore imapStore;
 
