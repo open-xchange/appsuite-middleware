@@ -9996,16 +9996,16 @@ msgstr ""
 msgid "Bad request. The server is unable to handle the request."
 msgstr ""
 
-#. Missing request body.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/servlet/AjaxExceptionMessages.java:134
-msgid "Missing request body."
-msgstr ""
-
 #. The file \"%1$s\" (\"%2$s\") can't be imported as image. Only image types (JPG, GIF, BMP or PNG) are supported.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/servlet/AjaxExceptionMessages.java:134
 msgid ""
 "The file \"%1$s\" (\"%2$s\") can't be imported as image. Only image types "
 "(JPG, GIF, BMP or PNG) are supported."
+msgstr ""
+
+#. Missing request body.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/servlet/AjaxExceptionMessages.java:137
+msgid "Missing request body."
 msgstr ""
 
 #. *
