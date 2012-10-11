@@ -139,15 +139,16 @@ public class Threader {
         return result;
     }
 
-    // buildContainer() does three things:
-    //
-    // = It walks the tree of threadables, and wraps each in a
-    // ThreadContainer object.
-    // = It indexes each ThreadContainer object in the id_table, under
-    // the message ID of the contained IThreadable.
-    // = For each of the IThreadable's references, it ensures that there
-    // is a ThreadContainer in the table (an empty one, if necessary.)
-    //
+    /**
+     * <code>buildContainer()</code> does three things:
+     * <ul>
+     * <li>It walks the tree of {@code Threadable}s, and wraps each in a {@code ThreadContainer} object.</li>
+     * <li>It indexes each {@code ThreadContainer} object in the id_table, under the message ID of the contained {@code Threadable}.</li>
+     * <li>For each of the {@code Threadable}'s references, it ensures that there is a {@code ThreadContainer} in the table (an empty one, if necessary.)</li>
+     * </ul>
+     * 
+     * @param threadable The {@code Threadable} instance to build container for
+     */
     private void buildContainer(final Threadable threadable) {
         String id = threadable.messageID();
         ThreadContainer container = idMap.get(id);
@@ -187,17 +188,15 @@ public class Threader {
         ThreadContainer parentRef = null;
         {
             final String[] refs = threadable.messageReferences();
-            final int len = (refs == null ? 0 : refs.length);
+            final int len = refs.length;
             for (int i = 0; i < len; i++) {
                 final String refString = refs[i];
                 ThreadContainer ref = idMap.get(refString);
-
                 if (ref == null) {
                     ref = new ThreadContainer();
                     // ref.debug_id = ref_string;
                     idMap.put(refString, ref);
                 }
-
                 // If we have references A B C D, make D be a child of C, etc,
                 // except if they have parents already.
                 //
@@ -214,7 +213,7 @@ public class Threader {
             }
         }
 
-        // At this point `parent_ref' is set to the container of the last element
+        // At this point 'parent_ref' is set to the container of the last element
         // in the references field. Make that be the parent of this container,
         // unless doing so would introduce a circularity.
         //
@@ -377,34 +376,26 @@ public class Threader {
     // still get threaded (to the extent possible, at least.)
     //
     private void gatherSubjects() {
-
         int count = 0;
         for (ThreadContainer c = rootNode.child; c != null; c = c.next) {
             count++;
         }
-
         // Make the hash table large enough to not need to be rehashed.
-        final Map<String, ThreadContainer> subjTable = new HashMap<String, ThreadContainer>((int) (count * 1.2), (float) 0.9);
-
+        final Map<String, ThreadContainer> subjTable = new HashMap<String, ThreadContainer>(count << 1, (float) 0.9);
         count = 0;
         for (ThreadContainer c = rootNode.child; c != null; c = c.next) {
             Threadable threadable = c.threadable;
-
             // If there is no threadable, this is a dummy node in the root set.
             // Only root set members may be dummies, and they always have at least
             // two kids. Take the first kid as representative of the subject.
             if (threadable == null) {
                 threadable = c.child.threadable;
             }
-
             final String subj = threadable.simplifiedSubject();
-
-            if (subj == null || subj == "") {
+            if (isEmpty(subj)) {
                 continue;
             }
-
             final ThreadContainer old = subjTable.get(subj);
-
             // Add this container to the table if:
             // - There is no container in the table with this subject, or
             // - This one is a dummy container and the old one is not: the dummy
@@ -438,7 +429,7 @@ public class Threader {
             final String subj = threadable.simplifiedSubject();
 
             // Don't thread together all subjectless messages; let them dangle.
-            if (subj == null || subj == "") {
+            if (isEmpty(subj)) {
                 continue;
             }
 
@@ -648,6 +639,18 @@ public class Threader {
                 }
             }
         }
+    }
+
+    private static boolean isEmpty(final String string) {
+        if (null == string) {
+            return true;
+        }
+        final int len = string.length();
+        boolean isWhitespace = true;
+        for (int i = 0; isWhitespace && i < len; i++) {
+            isWhitespace = Character.isWhitespace(string.charAt(i));
+        }
+        return isWhitespace;
     }
 
 }
