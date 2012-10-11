@@ -68,7 +68,7 @@ public interface FreeBusyService {
      * overlapping timeslots each of the participants' free/busy data are merged implicitly to the most conflicting busy times. 
      * 
      * @param session The session
-     * @param participants A list of participants, identified either by their internal user-/resource-ID or e-mail address. 
+     * @param participants A list of participants, identified either by their internal user-/group/-resource-ID or e-mail address. 
      * @param from The lower (inclusive) limit of the requested time-range 
      * @param until The upper (exclusive) limit of the requested time-range
      * @return A list of free/busy data, with each list item representing the free/busy data of one requested participant  
@@ -80,7 +80,7 @@ public interface FreeBusyService {
      * Gets the available free/busy data for a list of participants.
      * 
      * @param session The session
-     * @param participants A list of participants, identified either by their internal user-/resource-ID or e-mail address. 
+     * @param participants A list of participants, identified either by their internal user-/group-/resource-ID or e-mail address. 
      * @param from The lower (inclusive) limit of the requested time-range 
      * @param until The upper (exclusive) limit of the requested time-range
      * @return A list of free/busy data, with each list item representing the free/busy data of one requested participant  
@@ -93,7 +93,7 @@ public interface FreeBusyService {
      * overlapping timeslots in the participants' free/busy data are merged implicitly to the most conflicting busy times. 
      * 
      * @param session The session
-     * @param participant A participant, identified either by its internal user-/resource-ID or e-mail address. 
+     * @param participant A participant, identified either by its internal user-/group-/resource-ID or e-mail address. 
      * @param from The lower (inclusive) limit of the requested time-range 
      * @param until The upper (exclusive) limit of the requested time-range
      * @return The free/busy data  
@@ -105,7 +105,7 @@ public interface FreeBusyService {
      * Gets the available free/busy data for a participant.
      * 
      * @param session The session
-     * @param participant A participant, identified either by its internal user-/resource-ID or e-mail address. 
+     * @param participant A participant, identified either by its internal user-/group-/resource-ID or e-mail address. 
      * @param from The lower (inclusive) limit of the requested time-range 
      * @param until The upper (exclusive) limit of the requested time-range
      * @return The free/busy data  
