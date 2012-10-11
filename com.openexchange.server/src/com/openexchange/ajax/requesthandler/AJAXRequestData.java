@@ -100,31 +100,46 @@ public class AJAXRequestData {
         InputStream getInputStream() throws IOException;
     }
 
+    /** Map for parameters */
     private final Map<String, String> params;
+
+    /** The {@code Parameterizable} reference */
     private Parameterizable parameterizable;
 
+    /** Map for headers */
     private final Map<String, String> headers;
 
+    /** Map for properties */
     private final Map<String, Object> properties;
 
+    /** Associated server session */
     private ServerSession session;
 
+    /** Whether a secure connection has been established */
     private boolean secure;
 
+    /** The request body data */
     private Object data;
 
+    /** The module string */
     private String module;
 
+    /** The action string */
     private String action;
 
+    /** The upload stream provider */
     private InputStreamProvider uploadStreamProvider;
 
+    /** List of uploaded files */
     private final List<UploadFile> files;
 
+    /** The host name */
     private String hostname;
 
+    /** The remote address */
     private String remoteAddress;
 
+    /** The Servlet's request URI */
     private String servletRequestUri;
 
     /**
