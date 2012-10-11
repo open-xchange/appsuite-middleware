@@ -8,7 +8,7 @@ BuildRequires: open-xchange-core
 BuildRequires: open-xchange-admin
 BuildRequires: java-devel >= 1.6.0
 Version:       @OXVERSION@
-%define        ox_release 5
+%define        ox_release 1
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -78,6 +78,10 @@ Fourth release candidate for 6.22.0
 Third release candidate for 6.22.0
 * Thu Oct 04 2012 Jan Bauerdick <jan.bauerdick@open-xchange.com>
 Second release candidate for 6.22.0
+* Tue Sep 04 2012 Jan Bauerdick <jan.bauerdick@open-xchange.com>
+First release candidate for 6.23.0
+* Mon Sep 03 2012 Jan Bauerdick <jan.bauerdick@open-xchange.com>
+prepare for next EDP drop
 * Tue Aug 21 2012 Jan Bauerdick <jan.bauerdick@open-xchange.com>
 First release candidate for 6.22.0
 * Mon Aug 20 2012 Jan Bauerdick <jan.bauerdick@open-xchange.com>
