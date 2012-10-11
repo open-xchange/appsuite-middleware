@@ -18,6 +18,14 @@ set -e
 # the debian-policy package
 
 
+TEMPLATES="iPhoneTemplate.tmpl mobile.configuration.generator.properties winMobileTemplate.tmpl"
+for FILE in ${TEMPLATES}; do
+    if dpkg-divert --list | grep $FILE; then
+	dpkg-divert --package open-xchange-mobile-configuration-generator \
+	   --rename --remove /opt/open-xchange/templates/${FILE}
+    fi
+done
+
 case "$1" in
     configure)
     ;;

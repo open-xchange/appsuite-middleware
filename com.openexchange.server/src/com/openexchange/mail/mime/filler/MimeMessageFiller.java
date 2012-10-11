@@ -200,6 +200,8 @@ public class MimeMessageFiller {
 
     protected final UserSettingMail usm;
 
+    protected int accountId;
+
     private Set<String> uploadFileIDs;
 
     private Set<String> contentIds;
@@ -229,6 +231,25 @@ public class MimeMessageFiller {
         this.session = session;
         this.ctx = ctx;
         this.usm = usm;
+    }
+    
+    /**
+     * Sets the account identifier
+     *
+     * @param accountId The account identifier to set
+     */
+    public MimeMessageFiller setAccountId(final int accountId) {
+        this.accountId = accountId;
+        return this;
+    }
+    
+    /**
+     * Gets the account identifier
+     *
+     * @return The account identifier
+     */
+    public int getAccountId() {
+        return accountId;
     }
 
     /*
@@ -271,24 +292,24 @@ public class MimeMessageFiller {
         /*
          * Set organization to context-admin's company field setting
          */
-        try {
-        	final ContactService contactService = ServerServiceRegistry.getInstance().getService(ContactService.class);
-        	final String organization = contactService.getOrganization(session);
-//            final ContactInterface contactInterface =
-//                ServerServiceRegistry.getInstance().getService(ContactInterfaceDiscoveryService.class).newContactInterface(
-//                    FolderObject.SYSTEM_LDAP_FOLDER_ID,
-//                    session);
-//
-//            final Contact c = contactInterface.getUserById(ctx.getMailadmin(), false);
-//            if (null != c && c.getCompany() != null && c.getCompany().length() > 0) {
-            if (null != organization && 0 < organization.length()) {
-                final String encoded =
-                        MimeUtility.fold(14, MimeUtility.encodeText(organization, MailProperties.getInstance().getDefaultMimeCharset(), null));
-//                		MimeUtility.fold(14, MimeUtility.encodeText(c.getCompany(), MailProperties.getInstance().getDefaultMimeCharset(), null));
-                mimeMessage.setHeader(MessageHeaders.HDR_ORGANIZATION, encoded);
+        if (accountId <= 0) {
+            try {
+                final ContactService contactService = ServerServiceRegistry.getInstance().getService(ContactService.class);
+                final String organization = contactService.getOrganization(session);
+                if (null != organization && 0 < organization.length()) {
+                    final String encoded =
+                        MimeUtility.fold(
+                            14,
+                            MimeUtility.encodeText(organization, MailProperties.getInstance().getDefaultMimeCharset(), null));
+                    mimeMessage.setHeader(MessageHeaders.HDR_ORGANIZATION, encoded);
+                }
+            } catch (final Exception e) {
+                if (DEBUG) { // Include stack trace as well
+                    LOG.warn("Header \"Organization\" could not be set", e);
+                } else {
+                    LOG.warn("Header \"Organization\" could not be set.");
+                }
             }
-        } catch (final Exception e) {
-            LOG.error("Header \"Organization\" could not be set", e);
         }
         /*
          * Add header X-Originating-IP containing the IP address of the client
@@ -1568,21 +1589,39 @@ public class MimeMessageFiller {
     }
 
     private static final Pattern PATTERN_SRC = Pattern.compile("<img[^>]*?src=\"([^\"]+)\"[^>]*/?>", Pattern.CASE_INSENSITIVE);
-
     private static final Pattern PATTERN_AMP = Pattern.compile(Pattern.quote("&amp;"));
 
+    private static String blankSrc(final String imageTag) {
+        if (isEmpty(imageTag)) {
+            return imageTag;
+        }
+        final Matcher srcMatcher = PATTERN_SRC.matcher(imageTag);
+        if (!srcMatcher.find()) {
+            return imageTag;
+        }
+        final StringBuffer sb = new StringBuffer(imageTag.length());
+        srcMatcher.appendReplacement(sb, "");
+        srcMatcher.appendTail(sb);
+        return sb.toString();
+    }
+
+    private static final String VERSION_NAME = Version.NAME;
+
     /**
-     * Processes referenced local images, inserts them as inlined html images and adds their binary data to parental instance of <code>
+     * Processes referenced local images, inserts them as inlined HTML images and adds their binary data to parental instance of <code>
      * {@link Multipart}</code>.
      *
-     * @param htmlContent The html content whose &lt;img&gt; tags must be replaced with real content IDs
+     * @param htmlContent The HTML content whose &lt;img&gt; tags must be replaced with real content IDs
      * @param mp The parental instance of <code>{@link Multipart}</code>
      * @param msgFiller The message filler
-     * @return the replaced html content
+     * @return The replaced HTML content
      * @throws MessagingException If appending as body part fails
      * @throws OXException If a mail error occurs
      */
     protected final static String processReferencedLocalImages(final String htmlContent, final Multipart mp, final MimeMessageFiller msgFiller) throws MessagingException, OXException {
+        if (isEmpty(htmlContent)) {
+            return htmlContent;
+        }
         final ImageMatcher m = ImageMatcher.matcher(htmlContent);
         final StringBuffer sb = new StringBuffer(htmlContent.length());
         if (m.find()) {
@@ -1611,26 +1650,30 @@ public class MimeMessageFiller {
                              * Anyway, replace image tag
                              */
                             tmp.setLength(0);
-                            m.appendLiteralReplacement(sb, imageTag);
+                            m.appendLiteralReplacement(sb, blankSrc(imageTag));
                             continue;
                         }
                     } else {
                         final ImageLocation imageLocation;
+                        String blankImageTag = null;
                         {
-                            final String match = imageTag;
-                            final Matcher srcMatcher = PATTERN_SRC.matcher(match);
+                            final Matcher srcMatcher = PATTERN_SRC.matcher(imageTag);
                             if (srcMatcher.find()) {
                                 ImageLocation il;
                                 try {
                                     il = ImageUtility.parseImageLocationFrom(PATTERN_AMP.matcher(srcMatcher.group(1)).replaceAll("&"));
                                 } catch (final IllegalArgumentException e) {
+                                    final StringBuffer bblankImageTag = new StringBuffer(imageTag.length());
+                                    srcMatcher.appendReplacement(bblankImageTag, "");
+                                    srcMatcher.appendTail(bblankImageTag);
+                                    blankImageTag = bblankImageTag.toString();
                                     il = null;
                                 }
                                 imageLocation = il;
                             } else {
                                 ImageLocation il;
                                 try {
-                                    il = ImageUtility.parseImageLocationFrom(match);
+                                    il = ImageUtility.parseImageLocationFrom(imageTag);
                                 } catch (final IllegalArgumentException e) {
                                     il = null;
                                 }
@@ -1646,7 +1689,7 @@ public class MimeMessageFiller {
                              * Anyway, replace image tag
                              */
                             tmp.setLength(0);
-                            m.appendLiteralReplacement(sb, imageTag);
+                            m.appendLiteralReplacement(sb, null == blankImageTag ? blankSrc(imageTag) : blankImageTag);
                             continue;
                         }
                         final ImageDataSource dataSource =
@@ -1661,7 +1704,7 @@ public class MimeMessageFiller {
                              * Anyway, replace image tag
                              */
                             tmp.setLength(0);
-                            m.appendLiteralReplacement(sb, imageTag);
+                            m.appendLiteralReplacement(sb, blankSrc(imageTag));
                             continue;
                         }
                         try {
@@ -1690,7 +1733,7 @@ public class MimeMessageFiller {
                      * Replace "src" attribute
                      */
                     String iTag = imageTag.replaceFirst("(?i)src=\"[^\"]*\"", "src=\"cid:" + processLocalImage(imageProvider, iid, appendBodyPart, tmp, mp) + "\"");
-                    iTag = iTag.replaceFirst("(?i)id=\"[^\"]*@" + Version.NAME + "\"", "");
+                    iTag = iTag.replaceFirst("(?i)id=\"[^\"]*@" + VERSION_NAME + "\"", "");
                     m.appendLiteralReplacement(sb, iTag);
                 } else {
                     /*
@@ -1774,7 +1817,7 @@ public class MimeMessageFiller {
             tmp.setLength(0);
             final int atPos = id.indexOf('@');
             tmp.append(PATTERN_DASHES.matcher(atPos < 0 ? id : id.substring(0, atPos)).replaceAll(""));
-            tmp.append('@').append(Version.NAME);
+            tmp.append('@').append(VERSION_NAME);
             cid = tmp.toString();
         }
         if (appendBodyPart) {

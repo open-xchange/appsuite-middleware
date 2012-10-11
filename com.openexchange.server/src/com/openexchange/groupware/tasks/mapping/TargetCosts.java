@@ -55,6 +55,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
+import com.openexchange.groupware.tasks.AttributeNames;
 import com.openexchange.groupware.tasks.Mapper;
 import com.openexchange.groupware.tasks.Task;
 
@@ -79,6 +80,11 @@ public final class TargetCosts implements Mapper<Float> {
     @Override
     public String getDBColumnName() {
         return "target_costs";
+    }
+
+    @Override
+    public String getDisplayName() {
+        return AttributeNames.TARGET_COSTS;
     }
 
     @Override

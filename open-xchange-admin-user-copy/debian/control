@@ -11,4 +11,9 @@ Architecture: all
 Depends: ${misc:Depends}, open-xchange-admin (>= @OXVERSION@)
 Replaces: open-xchange-admin-plugin-user-copy, open-xchange-admin-plugin-user-copy-client, open-xchange-user-copy
 Conflicts: open-xchange-admin-plugin-user-copy, open-xchange-admin-plugin-user-copy-client, open-xchange-user-copy
-Description: Open Xchange Admin User Copy Plugin
+Description: Extension to copy users into other contexts
+ This package installs administrative OSGi bundles that provide the extension to copy a user into another context. This is mainly used to
+ combine several users into the same context. To complete the move of a user, the user can be deleted in the source context after copying
+ it to the destination context.
+ This extension only copies all the private data of a user. All public information in a context does not belong to any user and therefore it is
+ not copied at all. The sharing information of the private data of a user needs to be removed.

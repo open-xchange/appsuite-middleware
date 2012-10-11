@@ -21,7 +21,14 @@ Import-Package: com.openexchange.config,
  org.apache.commons.codec.binary,
  org.apache.commons.logging,
  org.json,
- org.osgi.framework
+ org.osgi.framework,
+ org.scribe.builder,
+ org.scribe.builder.api,
+ org.scribe.exceptions,
+ org.scribe.extractors,
+ org.scribe.model,
+ org.scribe.oauth,
+ org.scribe.services,
+ org.scribe.utils
 Export-Package: com.openexchange.oauth.yahoo
-Bundle-ClassPath: .,
- lib/scribe_head.jar
+Bundle-ClassPath: .

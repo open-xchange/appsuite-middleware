@@ -76,7 +76,7 @@ public abstract class Entity2ACL {
     /**
      * Singleton
      */
-    private static Entity2ACL singleton;
+    private static volatile Entity2ACL singleton;
 
     /**
      * Creates a new instance implementing the {@link Entity2ACL} interface.

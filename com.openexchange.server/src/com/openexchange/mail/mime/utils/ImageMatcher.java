@@ -56,7 +56,11 @@ import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.image.ImageActionFactory;
 
 /**
- * {@link ImageMatcher}
+ * {@link ImageMatcher} - Looks up occurrences of
+ * <ul>
+ * <li>&lt;img src="/ajax/image/...uid=xyz"&gt; and</li>
+ * <li>&lt;img src="/ajax/file/...id=xyz"&gt;</li>
+ * </ul>
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */

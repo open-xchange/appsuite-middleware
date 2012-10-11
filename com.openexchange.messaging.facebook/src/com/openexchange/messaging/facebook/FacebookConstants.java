@@ -94,12 +94,12 @@ public final class FacebookConstants {
     /**
      * The HTTP client field which accesses "httpClient_" in class {@link HttpWebConnection}.
      */
-    public static Field HTTP_CLIENT_FIELD;
+    public static volatile Field HTTP_CLIENT_FIELD;
 
     /**
      * The connection manager field which accesses "httpConnectionManager" in class {@link HttpClient}.
      */
-    public static Field CONNECTION_MANAGER_FIELD;
+    public static volatile Field CONNECTION_MANAGER_FIELD;
 
     /**
      * The folder identifier for a user's wall posts.

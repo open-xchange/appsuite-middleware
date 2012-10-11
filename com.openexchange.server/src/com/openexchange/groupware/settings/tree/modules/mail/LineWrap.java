@@ -49,6 +49,7 @@
 
 package com.openexchange.groupware.settings.tree.modules.mail;
 
+import java.math.BigInteger;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
@@ -112,8 +113,13 @@ public class LineWrap implements PreferencesItemService {
                 final UserSettingMailStorage storage = UserSettingMailStorage.getInstance();
                 final UserSettingMail settings = storage.getUserSettingMail(user.getId(), ctx);
                 if (null != settings) {
+                    final String s = setting.getSingleValue().toString();
                     try {
-                        settings.setAutoLinebreak(Integer.parseInt(setting.getSingleValue().toString()));
+                        try {
+                            settings.setAutoLinebreak(Integer.parseInt(s));
+                        } catch (NumberFormatException e) {
+                            settings.setAutoLinebreak(new BigInteger(s).intValue());
+                        }
                         storage.saveUserSettingMail(settings, user.getId(), ctx);
                     } catch (final NumberFormatException e) {
                         throw SettingExceptionCodes.JSON_READ_ERROR.create(e);

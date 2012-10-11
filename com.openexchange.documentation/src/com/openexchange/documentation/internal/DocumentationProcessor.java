@@ -50,7 +50,6 @@
 package com.openexchange.documentation.internal;
 
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.openexchange.documentation.AnnotatedServices;
 import com.openexchange.documentation.DescriptionFactory;
 import com.openexchange.documentation.descriptions.ModuleDescription;
@@ -58,13 +57,13 @@ import com.openexchange.exception.OXException;
 
 /**
  * {@link DocumentationProcessor} - Adds or removes the documentation from service objects to/from the registry.
- * 
+ *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 public class DocumentationProcessor {
-	
+
     private static final Log LOG = com.openexchange.log.Log.loggerFor(DocumentationProcessor.class);
-    
+
 	private final DefaultDocumentationRegistry registry;
 	private final DescriptionFactory factory;
 
@@ -77,17 +76,17 @@ public class DocumentationProcessor {
         this.factory = factory;
     }
 
-	public void add(final ModuleDescription description) {		
+	public void add(final ModuleDescription description) {
 		try {
             this.registry.addModule(description);
         } catch (final OXException e) {
             LOG.error("error adding module description", e);
         }
 	}
-	
+
     /**
-     * Processes the supplied service and adds the associated description to the registry. 
-     * 
+     * Processes the supplied service and adds the associated description to the registry.
+     *
      * @param service the service to add
      */
 	public void add(final Object service) {
@@ -101,10 +100,10 @@ public class DocumentationProcessor {
 	        this.add(((ModuleDescription)service));
 	    }
 	}
-	
+
 	/**
-     * Processes the supplied service and removes the associated description from the registry. 
-	 * 
+     * Processes the supplied service and removes the associated description from the registry.
+	 *
 	 * @param service the service to remove
 	 */
 	public void remove(final Object service) {
@@ -120,12 +119,12 @@ public class DocumentationProcessor {
             LOG.warn("Unable to get extract documentation from " + service);
         }
 	}
-	
+
 	public void remove(final ModuleDescription description) {
 		this.remove(description.getName());
 	}
 
-	private void remove(final String module) {		
+	private void remove(final String module) {
 		if (null != module) {
 			try {
                 this.registry.removeModule(module);
@@ -133,6 +132,6 @@ public class DocumentationProcessor {
                 LOG.error("error removing module description", e);
             }
 		}
-	}	
-	
+	}
+
 }

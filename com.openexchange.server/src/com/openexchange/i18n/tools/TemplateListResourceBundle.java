@@ -86,7 +86,7 @@ public abstract class TemplateListResourceBundle extends ResourceBundle {
 
     private static Lock INIT_LOCK = new ReentrantLock();
 
-    protected static boolean initialized;
+    protected static volatile boolean initialized;
 
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(TemplateListResourceBundle.class));
 

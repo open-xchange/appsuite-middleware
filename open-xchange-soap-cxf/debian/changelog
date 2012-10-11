@@ -4,6 +4,30 @@ open-xchange-soap-cxf (6.23.0-0) unstable; urgency=low
 
  -- Marcus Klein <marcus.kleni@open-xchange.com>  Mon, 03 Sep 2012 13:45:52 +0200
 
+open-xchange-soap-cxf (6.22.0-5) unstable; urgency=low
+
+  * Fifth release candidate for 6.22.0
+
+ -- Marcus Klein <marcus.kleni@open-xchange.com>  Wed, 10 Oct 2012 11:23:47 +0200
+
+open-xchange-soap-cxf (6.22.0-4) unstable; urgency=low
+
+  * Fourth release candidate for 6.22.0
+
+ -- Marcus Klein <marcus.kleni@open-xchange.com>  Tue, 09 Oct 2012 15:16:10 +0200
+
+open-xchange-soap-cxf (6.22.0-3) unstable; urgency=low
+
+  * Third release candidate for 6.22.0
+
+ -- Marcus Klein <marcus.kleni@open-xchange.com>  Fri, 05 Oct 2012 15:03:25 +0200
+
+open-xchange-soap-cxf (6.22.0-2) unstable; urgency=low
+
+  * Second release candidate for 6.22.0
+
+ -- Marcus Klein <marcus.kleni@open-xchange.com>  Thu, 04 Oct 2012 18:54:55 +0200
+
 open-xchange-soap-cxf (6.22.0-1) unstable; urgency=low
 
   * First release candidate for 6.22.0

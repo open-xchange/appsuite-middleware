@@ -12,4 +12,6 @@ Depends: ${misc:Depends}, adduser, sun-java6-jre|java6-runtime
 Replaces: open-xchange-common, open-xchange-activation
 Conflicts: open-xchange-common, open-xchange-activation
 Provides: open-xchange-common, open-xchange-activation
-Description: OSGi bundles commonly used by all Open-Xchange packages
+Description: 3rd party OSGi bundles used by the Open-Xchange backend
+ This package installes 3rd party OSGi bundles for the Open-Xchange backend. This includes the Equinox OSGi framework and the servlet API.
+ Furthermore libraries from the Apache Commons project are installed: CLI, Lang, Logging and some Apache service mix bundles.

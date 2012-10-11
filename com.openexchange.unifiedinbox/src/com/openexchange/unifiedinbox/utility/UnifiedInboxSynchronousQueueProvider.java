@@ -68,7 +68,7 @@ public abstract class UnifiedInboxSynchronousQueueProvider {
         super();
     }
 
-    private static UnifiedInboxSynchronousQueueProvider instance;
+    private static volatile UnifiedInboxSynchronousQueueProvider instance;
 
     /**
      * Initializes appropriate instance of synchronous queue provider.

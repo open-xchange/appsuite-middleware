@@ -53,19 +53,19 @@ import java.io.ByteArrayOutputStream;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-
+import javax.activation.MimetypesFileTypeMap;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.contacts.json.actions.ContactAction;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.upload.UploadFile;
 import com.openexchange.groupware.upload.impl.UploadEvent;
+import com.openexchange.java.Streams;
+import com.openexchange.log.LogFactory;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.servlet.OXJSONExceptionCodes;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
@@ -152,30 +152,54 @@ public class RequestTools {
 	}
     
     public static void setImageData(final Contact contact, final UploadFile file) throws OXException {
+        checkIsImageFile(file);
         FileInputStream fis = null;
+        ByteArrayOutputStream outputStream = null;
         try {
             fis = new FileInputStream(file.getTmpFile());
-            final ByteArrayOutputStream tmp = new UnsynchronizedByteArrayOutputStream((int) file.getSize());
+            outputStream = new UnsynchronizedByteArrayOutputStream((int) file.getSize());
             final byte[] buf = new byte[2048];
             int len = -1;
             while ((len = fis.read(buf)) != -1) {
-                tmp.write(buf, 0, len);
+                outputStream.write(buf, 0, len);
             }
-            contact.setImage1(tmp.toByteArray());
+            contact.setImage1(outputStream.toByteArray());
             contact.setImageContentType(file.getContentType());
         } catch (final FileNotFoundException e) {
             throw AjaxExceptionCodes.NO_UPLOAD_IMAGE.create(e);
         } catch (final IOException e) {
             throw AjaxExceptionCodes.UNEXPECTED_ERROR.create(e, "I/O error while reading uploaded contact image.");
         } finally {
-            if (fis != null) {
-                try {
-                    fis.close();
-                } catch (final IOException e) {
-                    LOG.warn("Error while closing FileInputStream for contact image upload.", e);
-                }
+            Streams.close(outputStream);
+            Streams.close(fis);
+        }
+    }
+    
+    private static void checkIsImageFile(UploadFile file) throws OXException {
+        if (null == file) {
+            throw AjaxExceptionCodes.NO_UPLOAD_IMAGE.create();
+        }
+        String contentType = file.getContentType();
+        if (isImageContentType(contentType)) {
+            return;            
+        }
+        String mimeType = null;
+        if (null != file.getPreparedFileName()) {
+            mimeType = new MimetypesFileTypeMap().getContentType(file.getPreparedFileName());
+            if (isImageContentType(mimeType)) {
+                return;
             }
         }
+        String readableType = null != contentType ? contentType : null != mimeType ? mimeType : "application/unknown";
+//        int idx = readableType.indexOf('/');
+//        if (-1 < idx && idx < readableType.length()) {
+//            readableType = readableType.substring(idx + 1);
+//        }
+        throw AjaxExceptionCodes.NO_IMAGE_FILE.create(file.getPreparedFileName(), readableType);
+    }
+    
+    private static boolean isImageContentType(String contentType) {
+        return null != contentType && contentType.toLowerCase().startsWith("image");
     }
 
 }

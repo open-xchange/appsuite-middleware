@@ -75,7 +75,7 @@ public class InfostoreConfig extends AbstractConfig implements Initialization {
 
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(InfostoreConfig.class));
 
-    private static InfostoreConfig singleton;
+    private static volatile InfostoreConfig singleton;
 
     private static final Lock INIT_LOCK = new ReentrantLock();
 
@@ -85,11 +85,17 @@ public class InfostoreConfig extends AbstractConfig implements Initialization {
     private InfostoreConfig() { super(); }
 
     public static InfostoreConfig getInstance() {
-        if(singleton != null) {
-			return singleton;
-		}
-
-        return singleton = new InfostoreConfig();
+        InfostoreConfig ret = singleton;
+        if (null == ret) {
+            synchronized (InfostoreConfig.class) {
+                ret = singleton;
+                if (null == ret) {
+                    ret = new InfostoreConfig();
+                    singleton = ret;
+                }
+            }
+        }
+        return ret;
     }
 
     /**
@@ -106,9 +112,11 @@ public class InfostoreConfig extends AbstractConfig implements Initialization {
     }
 
     public static String getProperty(final String key) {
-    	if(!loaded || singleton == null) {
+    	InfostoreConfig singleton = InfostoreConfig.singleton;
+        if(!loaded || singleton == null) {
 			try {
-				getInstance().start();
+			    singleton = getInstance();
+				singleton.start();
 			} catch (final OXException e) {
 				LOG.error("Can't init config:",e);
 			}

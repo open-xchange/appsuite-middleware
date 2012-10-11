@@ -229,12 +229,12 @@ jcs.region.GlobalFolderCache.elementattributes.IsLateral=false
 # TCP Lateral Cache to broadcast PUTS and REMOVALS (and possibly GETS) to other local caches
 jcs.auxiliary.LTCP=org.apache.jcs.auxiliary.lateral.socket.tcp.LateralTCPCacheFactory
 jcs.auxiliary.LTCP.attributes=org.apache.jcs.auxiliary.lateral.socket.tcp.TCPLateralCacheAttributes
-# jcs.auxiliary.LTCP.attributes.TcpServers=127.0.0.1:57461
+# jcs.auxiliary.LTCP.attributes.TcpServers=oxhost2:57461
 jcs.auxiliary.LTCP.attributes.TcpListenerPort=57462
 # Define UDP discovery here, but ensure you do not specify static TCP server via jcs.auxiliary.LTCP.attributes.TcpServers
 jcs.auxiliary.LTCP.attributes.UdpDiscoveryAddr=224.168.32.1
 jcs.auxiliary.LTCP.attributes.UdpDiscoveryPort=6780
-jcs.auxiliary.LTCP.attributes.UdpDiscoveryEnabled=true
+jcs.auxiliary.LTCP.attributes.UdpDiscoveryEnabled=false
 # Setting Receive equal to false means the cache operates in send-only mode
 jcs.auxiliary.LTCP.attributes.Receive=true
 # Setting AllowGet equal to false would cause the auxiliary cache to return null from any get request

@@ -97,7 +97,7 @@ public class CassandraEAVStorageImpl implements EAVStorage {
 	
 	private static final Log log = com.openexchange.log.Log.loggerFor(CassandraEAVStorageImpl.class);
 	
-	private static Cluster cluster;
+	private static volatile Cluster cluster;
 	private static volatile Keyspace keyspace;
 	private static final String node = "192.168.33.37"; //TODO: fetch dynamic
 	private static final String keyspaceName = "OX";
@@ -109,7 +109,7 @@ public class CassandraEAVStorageImpl implements EAVStorage {
 	private static final UUIDSerializer us = UUIDSerializer.get();
 	private static final CompositeSerializer cs	= CompositeSerializer.get();
 
-	private static ConfigurableConsistencyLevel configurableConsistencyLevel;
+	private static volatile ConfigurableConsistencyLevel configurableConsistencyLevel;
 	
 	public CassandraEAVStorageImpl() {
 		initKeyspace();
@@ -124,9 +124,15 @@ public class CassandraEAVStorageImpl implements EAVStorage {
 	 * KeyspaceNotDefinedException will be thrown if the keyspace does not exist
 	 */
 	private final void initKeyspace() {
-		
+	    Cluster cluster = CassandraEAVStorageImpl.cluster;
 		if (cluster == null) {
-            cluster = HFactory.getOrCreateCluster("Local Cluster", node);
+            synchronized (cluster) {
+                cluster = CassandraEAVStorageImpl.cluster;
+                if (cluster == null) {
+                    cluster = HFactory.getOrCreateCluster("Local Cluster", node);
+                    CassandraEAVStorageImpl.cluster = cluster;
+                }
+            }
         }
 		
 		KeyspaceDefinition kDef = cluster.describeKeyspace(keyspaceName);
@@ -175,7 +181,8 @@ public class CassandraEAVStorageImpl implements EAVStorage {
 	 * <li><b>ALL</b>: Blocks for all the replicas before returning to the client.
 	 */
 	private final static void defineConsistencyLevels() {
-		configurableConsistencyLevel = new ConfigurableConsistencyLevel();
+	    final ConfigurableConsistencyLevel configurableConsistencyLevel = new ConfigurableConsistencyLevel();
+		CassandraEAVStorageImpl.configurableConsistencyLevel = configurableConsistencyLevel;
 		
 		Map<String, HConsistencyLevel> readCLMap = new HashMap<String, HConsistencyLevel>();
 		Map<String, HConsistencyLevel> writeCLMap = new HashMap<String, HConsistencyLevel>();

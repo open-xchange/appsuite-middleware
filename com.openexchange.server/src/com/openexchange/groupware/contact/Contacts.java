@@ -184,9 +184,14 @@ public final class Contacts {
         if (null == mime) {
             throw ContactExceptionCodes.MIME_TYPE_NOT_DEFINED.create();
         }
-        final int scaledWidth = Integer.parseInt(ContactConfig.getInstance().getProperty(PROP_SCALE_IMAGE_WIDTH));
-        final int scaledHeight = Integer.parseInt(ContactConfig.getInstance().getProperty(PROP_SCALE_IMAGE_HEIGHT));
-        final long max_size = Long.parseLong(ContactConfig.getInstance().getProperty(PROP_MAX_IMAGE_SIZE));
+        String tempWidth = ContactConfig.getInstance().getProperty(PROP_SCALE_IMAGE_WIDTH);
+		final int scaledWidth = tempWidth == null ? 90 : Integer.parseInt(tempWidth);
+
+		String tempHeight = ContactConfig.getInstance().getProperty(PROP_SCALE_IMAGE_HEIGHT);
+        final int scaledHeight = tempHeight == null ? 90 : Integer.parseInt(tempHeight);
+        
+        String tempSize = ContactConfig.getInstance().getProperty(PROP_MAX_IMAGE_SIZE);
+		final long max_size = tempSize == null ? 4 * 1024 * 1024 : Long.parseLong(tempSize);
 
         String myMime;
         if ((mime.toLowerCase().indexOf("jpg") != -1) || (mime.toLowerCase().indexOf("jpeg") != -1)) {
@@ -513,7 +518,8 @@ public final class Contacts {
                 writeContactLinkArrayInsert(contact.getLinks(), contact.getObjectID(), contextId, writecon);
             }
             if (contact.containsImage1()) {
-                if (ContactConfig.getInstance().getProperty(PROP_SCALE_IMAGES).equalsIgnoreCase("true")) {
+                String shouldScale = ContactConfig.getInstance().getProperty(PROP_SCALE_IMAGES);
+				if (shouldScale == null || shouldScale.equalsIgnoreCase("true")) {
                     try {
                         contact.setImage1(scaleContactImage(contact.getImage1(), contact.getImageContentType()));
                     } catch (final OXException e) {
@@ -880,7 +886,7 @@ public final class Contacts {
 
             if (co.containsImage1()) {
                 if (co.getImage1() != null) {
-                    if (ContactConfig.getInstance().getProperty(PROP_SCALE_IMAGES).equalsIgnoreCase("true")) {
+                    if ("true".equalsIgnoreCase(ContactConfig.getInstance().getProperty(PROP_SCALE_IMAGES))) {
                         try {
                             co.setImage1(scaleContactImage(co.getImage1(), co.getImageContentType()));
                         } catch (final OXException e) {

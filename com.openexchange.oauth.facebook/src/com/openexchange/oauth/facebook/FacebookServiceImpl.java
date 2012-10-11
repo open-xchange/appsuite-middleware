@@ -89,7 +89,7 @@ public class FacebookServiceImpl implements FacebookService {
     }
 
     @Override
-    public List<Contact> getContacts(final Session session, final int user, final int contextId, final int accountId) {
+    public List<Contact> getContacts(final Session session, final int user, final int contextId, final int accountId) throws OXException {
 
         List<Contact> contacts = new ArrayList<Contact>();
         final OAuthService service = new ServiceBuilder().provider(FacebookApi.class).apiKey(facebookMetaData.getAPIKey()).apiSecret(
@@ -132,7 +132,7 @@ public class FacebookServiceImpl implements FacebookService {
 
     }
 
-    public List<Contact> parseIntoContacts(final String jsonString) {
+    public List<Contact> parseIntoContacts(final String jsonString) throws OXException {
         final List<Contact> contacts = new ArrayList<Contact>();
 
         try {
@@ -188,6 +188,16 @@ public class FacebookServiceImpl implements FacebookService {
                 contacts.add(contact);
             }
         } catch (final JSONException e) {
+        	// Maybe this is a JSONObject with an error
+        	try {
+        		JSONObject obj = new JSONObject(jsonString);
+        		if (obj.has("error")) {
+        			LOG.error(obj.get("error").toString());
+        			throw OXException.general(obj.getJSONObject("error").getString("message"));
+        		}
+        	} catch (JSONException x) {
+        		// Give up
+        	}
             LOG.error(e);
         }
 

@@ -56,7 +56,6 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.AJAXServlet;
-import com.openexchange.ajax.fields.AppointmentFields;
 import com.openexchange.ajax.fields.DataFields;
 import com.openexchange.ajax.parser.AppointmentParser;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
@@ -130,9 +129,9 @@ public final class NewAction extends AppointmentAction {
         } else {
             final JSONArray jsonConflictArray = new JSONArray();
             final AppointmentWriter appointmentWriter = new AppointmentWriter(timeZone);
-            for (int a = 0; a < conflicts.length; a++) {
+            for (final Appointment conflict : conflicts) {
                 final JSONObject jsonAppointmentObj = new JSONObject();
-                appointmentWriter.writeAppointment(conflicts[a], jsonAppointmentObj);
+                appointmentWriter.writeAppointment(conflict, jsonAppointmentObj);
                 jsonConflictArray.put(jsonAppointmentObj);
             }
 

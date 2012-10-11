@@ -64,7 +64,7 @@ public abstract class GroupStorage {
 
     public static final int GROUP_ZERO_IDENTIFIER = 0;
 
-    private static GroupStorage instance;
+    private static volatile GroupStorage instance;
 
     /**
      * Private constructor to prevent instantiation.

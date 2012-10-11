@@ -181,6 +181,13 @@ public final class MimeMailPart extends MailPart implements MimeRawSource, MimeC
     private boolean handleMissingStartBoundary;
 
     /**
+     * Constructor.
+     */
+    public MimeMailPart() {
+        super();
+    }
+
+    /**
      * Constructor - Only applies specified part, but does not set any attributes.
      */
     public MimeMailPart(final Part part) {
@@ -465,6 +472,9 @@ public final class MimeMailPart extends MailPart implements MimeRawSource, MimeC
             throw new IllegalStateException(ERR_NULL_PART);
         }
         try {
+            if (part instanceof MimeMessage && !(part instanceof com.sun.mail.imap.IMAPMessage)) {
+                saneContentType();
+            }
             part.writeTo(out);
         } catch (final UnsupportedEncodingException e) {
             LOG.error("Unsupported encoding in a message detected and monitored: \"" + e.getMessage() + '"', e);
@@ -477,6 +487,17 @@ public final class MimeMailPart extends MailPart implements MimeRawSource, MimeC
                 throw MailExceptionCode.NO_CONTENT.create(e, new Object[0]);
             }
             throw MimeMailException.handleMessagingException(e);
+        }
+    }
+
+    private void saneContentType() throws MessagingException {
+        final String[] header = part.getHeader(MessageHeaders.HDR_CONTENT_TYPE);
+        if (null != header && header.length > 0) {
+            try {
+                part.setHeader(MessageHeaders.HDR_CONTENT_TYPE, new ContentType(header[0]).toString());
+            } catch (final Exception e) {
+                // Ignore
+            }
         }
     }
 

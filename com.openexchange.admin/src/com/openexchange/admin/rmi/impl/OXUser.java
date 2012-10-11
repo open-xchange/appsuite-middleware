@@ -77,6 +77,7 @@ import com.openexchange.admin.rmi.exceptions.EnforceableDataObjectException;
 import com.openexchange.admin.rmi.exceptions.InvalidCredentialsException;
 import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 import com.openexchange.admin.rmi.exceptions.NoSuchContextException;
+import com.openexchange.admin.rmi.exceptions.NoSuchObjectException;
 import com.openexchange.admin.rmi.exceptions.NoSuchUserException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.storage.interfaces.OXUserStorageInterface;
@@ -156,7 +157,11 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
 
             checkContextAndSchema(ctx);
 
-            setIdOrGetIDFromNameAndIdObject(ctx, usrdata);
+            try {
+                setIdOrGetIDFromNameAndIdObject(ctx, usrdata);
+            } catch (NoSuchObjectException e) {
+                throw new NoSuchUserException(e);
+            }
             usrdata.testMandatoryCreateFieldsNull();
             userid = usrdata.getId();
 
@@ -295,7 +300,11 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
         try {
             basicauth.doAuthentication(auth, ctx);
             checkContextAndSchema(ctx);
-            setIdOrGetIDFromNameAndIdObject(ctx, user);
+            try {
+                setIdOrGetIDFromNameAndIdObject(ctx, user);
+            } catch (NoSuchObjectException e) {
+                throw new NoSuchUserException(e);
+            }
             final int user_id = user.getId().intValue();
             if (!tool.existsUser(ctx, user_id)) {
                 throw new NoSuchUserException("No such user " + user_id + " in context " + ctx.getId());
@@ -354,7 +363,11 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
         try {
             basicauth.doAuthentication(auth, ctx);
             checkContextAndSchema(ctx);
-            setIdOrGetIDFromNameAndIdObject(ctx, user);
+            try {
+                setIdOrGetIDFromNameAndIdObject(ctx, user);
+            } catch (NoSuchObjectException e) {
+                throw new NoSuchUserException(e);
+            }
             final int user_id = user.getId().intValue();
             if (!tool.existsUser(ctx, user_id)) {
                 throw new NoSuchUserException("No such user " + user_id + " in context " + ctx.getId());
@@ -677,7 +690,11 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
         checkContextAndSchema(ctx);
 
         try {
-            setUserIdInArrayOfUsers(ctx, users);
+            try {
+                setUserIdInArrayOfUsers(ctx, users);
+            } catch (NoSuchObjectException e) {
+                throw new NoSuchUserException(e);
+            }
             // FIXME: Change function from int to user object
             if (!tool.existsUser(ctx, users)) {
                 final NoSuchUserException noSuchUserException = new NoSuchUserException("No such user(s) " + getUserIdArrayFromUsersAsString(users) + " in context " + ctx.getId());
@@ -963,7 +980,11 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
         try {
             basicauth.doAuthentication(auth, ctx);
             checkContextAndSchema(ctx);
-            setIdOrGetIDFromNameAndIdObject(ctx, user);
+            try {
+                setIdOrGetIDFromNameAndIdObject(ctx, user);
+            } catch (NoSuchObjectException e) {
+                throw new NoSuchUserException(e);
+            }
             final int user_id = user.getId().intValue();
             if (!tool.existsUser(ctx, user_id)) {
                 throw new NoSuchUserException("No such user " + user_id + " in context " + ctx.getId());
@@ -1007,7 +1028,11 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
         try {
             basicauth.doAuthentication(auth, ctx);
             checkContextAndSchema(ctx);
-            setIdOrGetIDFromNameAndIdObject(ctx, user);
+            try {
+                setIdOrGetIDFromNameAndIdObject(ctx, user);
+            } catch (NoSuchObjectException e) {
+                throw new NoSuchUserException(e);
+            }
             final int user_id = user.getId().intValue();
 
             if (!tool.existsUser(ctx, user_id)) {

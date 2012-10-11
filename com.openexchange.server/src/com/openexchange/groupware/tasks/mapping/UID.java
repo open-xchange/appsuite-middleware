@@ -85,6 +85,11 @@ public final class UID implements Mapper<String> {
     }
 
     @Override
+    public String getDisplayName() {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
     public void toDB(final PreparedStatement stmt, final int pos, final Task task) throws SQLException {
         stmt.setString(pos, task.getUid());
     }

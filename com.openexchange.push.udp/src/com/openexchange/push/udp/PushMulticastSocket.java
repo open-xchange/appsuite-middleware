@@ -74,7 +74,7 @@ public class PushMulticastSocket implements Runnable {
 
     private Future<Object> thread;
 
-    private static MulticastSocket multicastSocket;
+    private static volatile MulticastSocket multicastSocket;
 
     private boolean running = true;
 

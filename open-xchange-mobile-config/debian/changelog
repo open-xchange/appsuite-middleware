@@ -4,6 +4,30 @@ open-xchange-mobile-config (6.23.0-0) unstable; urgency=low
 
  -- Marcus Klein <jenkins@hudson-slave-1.netline.de>  Mon, 03 Sep 2012 13:46:40 +0200
 
+open-xchange-mobile-config (6.22.0-5) unstable; urgency=low
+
+  * Fifth release candidate for 6.22.0
+
+ -- Marcus Klein <jenkins@hudson-slave-1.netline.de>  Wed, 10 Oct 2012 11:24:22 +0200
+
+open-xchange-mobile-config (6.22.0-4) unstable; urgency=low
+
+  * Fourth release candidate for 6.22.0
+
+ -- Marcus Klein <jenkins@hudson-slave-1.netline.de>  Tue, 09 Oct 2012 15:16:44 +0200
+
+open-xchange-mobile-config (6.22.0-3) unstable; urgency=low
+
+  * Third release candidate for 6.22.0
+
+ -- Marcus Klein <jenkins@hudson-slave-1.netline.de>  Fri, 05 Oct 2012 15:04:00 +0200
+
+open-xchange-mobile-config (6.22.0-2) unstable; urgency=low
+
+  * Second release candidate for 6.22.0
+
+ -- Marcus Klein <jenkins@hudson-slave-1.netline.de>  Thu, 04 Oct 2012 18:55:30 +0200
+
 open-xchange-mobile-config (6.22.0-1) unstable; urgency=low
 
   * First release candidate for 6.22.0

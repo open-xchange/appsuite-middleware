@@ -50,19 +50,19 @@
 package com.openexchange.carddav.resources;
 
 import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
-
 import javax.servlet.http.HttpServletResponse;
-
 import org.apache.commons.logging.Log;
-
 import com.openexchange.carddav.CarddavProtocol;
 import com.openexchange.carddav.GroupwareCarddavFactory;
-import com.openexchange.log.LogFactory;
+import com.openexchange.java.Streams;
+import com.openexchange.tools.stream.UnsynchronizedByteArrayInputStream;
+import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 import com.openexchange.tools.versit.Versit;
 import com.openexchange.tools.versit.VersitDefinition;
 import com.openexchange.tools.versit.VersitObject;
@@ -128,18 +128,29 @@ public abstract class CardDAVResource extends AbstractResource {
 	}
 	
     private VersitObject readBody(InputStream body) throws WebdavProtocolException {
+        ByteArrayOutputStream outputStream = null;
     	try {
             VersitDefinition def = Versit.getDefinition("text/vcard");
-            VersitDefinition.Reader versitReader = def.getReader(body, "UTF-8");
+            VersitDefinition.Reader versitReader = null;
+            if (LOG.isTraceEnabled()) {
+                int length = 2048;
+                byte[] buffer = new byte[length];
+                outputStream = new UnsynchronizedByteArrayOutputStream(8192);
+                for (int read = body.read(buffer, 0, length); read > 0; read = body.read(buffer, 0, length)) {
+                    outputStream.write(buffer, 0, read);
+                }
+                byte[] bytes = outputStream.toByteArray();
+                LOG.trace(new String(bytes, "UTF-8"));
+                versitReader = def.getReader(new UnsynchronizedByteArrayInputStream(bytes), "UTF-8");
+            } else {
+                versitReader = def.getReader(body, "UTF-8");
+            }
             return def.parse(versitReader);
         } catch (IOException e) {
         	throw this.protocolException(e);
         } finally {
-            try {
-                body.close();
-            } catch (IOException e) {
-                LOG.error(e);
-            }
+            Streams.close(outputStream);
+            Streams.close(body);
         }
     }	
 
@@ -206,7 +217,11 @@ public abstract class CardDAVResource extends AbstractResource {
 
 	@Override
 	public InputStream getBody() throws WebdavProtocolException {
-        return new ByteArrayInputStream(this.getVCard().getBytes());
+	    String body = this.getVCard();
+	    if (LOG.isTraceEnabled()) {
+	        LOG.trace(body);
+	    }
+        return null != body ? new ByteArrayInputStream(body.getBytes()) : null;
 	}
 
 	@Override

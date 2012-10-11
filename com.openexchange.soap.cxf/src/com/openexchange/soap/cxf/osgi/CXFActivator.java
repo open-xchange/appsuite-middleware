@@ -60,7 +60,7 @@ import org.osgi.service.http.HttpService;
 import org.osgi.service.http.NamespaceException;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.soap.cxf.TransformGenericElementsInterceptor;
+import com.openexchange.soap.cxf.interceptor.TransformGenericElementsInterceptor;
 
 /**
  * {@link CXFActivator} - The activator for CXF bundle.

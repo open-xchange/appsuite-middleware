@@ -90,6 +90,7 @@ import com.openexchange.ajax.requesthandler.responseRenderers.APIResponseRendere
 import com.openexchange.ajax.writer.LoginWriter;
 import com.openexchange.ajax.writer.ResponseWriter;
 import com.openexchange.authentication.LoginExceptionCodes;
+import com.openexchange.authentication.ResultCode;
 import com.openexchange.config.ConfigTools;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.configuration.ClientWhitelist;
@@ -127,6 +128,7 @@ import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.servlet.OXJSONExceptionCodes;
 import com.openexchange.tools.servlet.http.Authorization;
 import com.openexchange.tools.servlet.http.Authorization.Credentials;
+import com.openexchange.tools.servlet.http.Cookies;
 import com.openexchange.tools.servlet.http.Tools;
 import com.openexchange.tools.session.ServerSessionAdapter;
 
@@ -697,7 +699,11 @@ public class Login extends AJAXServlet {
                         return;
                     }
                 } catch (final OXException e) {
-                    e.log(LOG);
+                    if (AjaxExceptionCodes.DISABLED_ACTION.equals(e)) {
+                        LOG.debug(e.getMessage(), e);
+                    } else {
+                        e.log(LOG);
+                    }
                     if (SessionServlet.isIpCheckError(e) && null != session) {
                         try {
                             // Drop Open-Xchange cookies
@@ -1026,7 +1032,7 @@ public class Login extends AJAXServlet {
     private void configureCookie(final Cookie cookie, final boolean secure, final String serverName) {
         cookie.setPath("/");
         final LoginConfiguration conf = confReference.get();
-        if (conf.cookieForceHTTPS || secure) {
+        if (secure || (conf.cookieForceHTTPS && !Cookies.isLocalLan(serverName))) {
             cookie.setSecure(true);
         }
         if (conf.sessiondAutoLogin || conf.cookieExpiry < 0) {
@@ -1127,14 +1133,17 @@ public class Login extends AJAXServlet {
                 return true;
             }
             addHeadersAndCookies(result, resp);
-            if (null != result.getCode()) {
-                switch (result.getCode()) {
-                case FAILED:
-                    return true;
-                case REDIRECT:
-                    throw LoginExceptionCodes.REDIRECT.create(result.getRedirect());
-                default:
-                    break;
+            {
+                final ResultCode code = result.getCode();
+                if (null != code) {
+                    switch (code) {
+                    case FAILED:
+                        return true;
+                    case REDIRECT:
+                        throw LoginExceptionCodes.REDIRECT.create(result.getRedirect());
+                    default:
+                        break;
+                    }
                 }
             }
             final Session session = result.getSession();
@@ -1247,11 +1256,17 @@ public class Login extends AJAXServlet {
         }
         final String clientIP = parseClientIP(req);
         final String userAgent = parseUserAgent(req);
+        final boolean isVolatile = parseVolatile(req, false);
         final Map<String, List<String>> headers = copyHeaders(req);
         final com.openexchange.authentication.Cookie[] cookies = Tools.getCookieFromHeader(req);
         final LoginRequest loginRequest = new LoginRequest() {
 
             private final String hash = HashCalculator.getHash(req, userAgent, client);
+
+            @Override
+            public boolean isVolatile() {
+                return isVolatile;
+            }
 
             @Override
             public String getLogin() {
@@ -1316,11 +1331,17 @@ public class Login extends AJAXServlet {
         final String client = parseClient(req, false);
         final String clientIP = parseClientIP(req);
         final String userAgent = parseUserAgent(req);
+        final boolean isVolatile = parseVolatile(req, false);
         final Map<String, List<String>> headers = copyHeaders(req);
         final com.openexchange.authentication.Cookie[] cookies = Tools.getCookieFromHeader(req);
         return new LoginRequest() {
 
             private final String hash = HashCalculator.getHash(req, client);
+
+            @Override
+            public boolean isVolatile() {
+                return isVolatile;
+            }
 
             @Override
             public String getVersion() {
@@ -1377,6 +1398,14 @@ public class Login extends AJAXServlet {
                 return cookies;
             }
         };
+    }
+
+    private static boolean parseVolatile(final HttpServletRequest req, final boolean fallback) {
+        final String parameter = req.getParameter(LoginFields.VOLATILE);
+        if (isEmpty(parameter)) {
+            return fallback;
+        }
+        return Boolean.parseBoolean(parameter.trim());
     }
 
     private static String parseUserAgent(final HttpServletRequest req) {
@@ -1486,11 +1515,17 @@ public class Login extends AJAXServlet {
         final String client = parseClient(req);
         final String clientIP = parseClientIP(req);
         final String userAgent = parseUserAgent(req);
+        final boolean isVolatile = parseVolatile(req, false);
         final Map<String, List<String>> headers = copyHeaders(req);
         final com.openexchange.authentication.Cookie[] cookies = Tools.getCookieFromHeader(req);
         final LoginRequest request = new LoginRequest() {
 
             private final String hash = HashCalculator.getHash(req, userAgent, client);
+
+            @Override
+            public boolean isVolatile() {
+                return isVolatile;
+            }
 
             @Override
             public String getVersion() {
@@ -1561,6 +1596,18 @@ public class Login extends AJAXServlet {
         writeSecretCookie(resp, session, session.getHash(), req.isSecure(), req.getServerName());
         addHeadersAndCookies(result, resp);
         resp.sendRedirect(generateRedirectURL(null, conf.httpAuthAutoLogin, session.getSessionID()));
+    }
+
+    private static boolean isEmpty(final String string) {
+        if (null == string) {
+            return true;
+        }
+        final int len = string.length();
+        boolean isWhitespace = true;
+        for (int i = 0; isWhitespace && i < len; i++) {
+            isWhitespace = Character.isWhitespace(string.charAt(i));
+        }
+        return isWhitespace;
     }
 
     protected String generateRedirectURL(final String uiWebPathParam, final String shouldStore, final String sessionId) {

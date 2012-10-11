@@ -337,4 +337,13 @@ public interface ContactStorage {
      */
     void delete(Session session, String folderId, String id, Date lastRead) throws OXException;
     
+    /**
+     * Deletes all contacts in a folder.
+     * 
+     * @param session the session
+     * @param folderId the ID of the parent folder
+     * @throws OXException
+     */
+    void delete(Session session, String folderId) throws OXException;
+    
 }

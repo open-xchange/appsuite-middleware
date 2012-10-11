@@ -22,6 +22,11 @@ public class XMPPLoginRequest implements LoginRequest {
     }
 
     @Override
+    public boolean isVolatile() {
+        return false;
+    }
+
+    @Override
     public String getVersion() {
         return "";
     }

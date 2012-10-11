@@ -11,7 +11,10 @@ Architecture: all
 Depends: ${misc:Depends}, open-xchange-admin-user-copy (>= @OXVERSION@), open-xchange-soap-cxf (>= @OXVERSION@)
 Replaces: open-xchange-admin-plugin-user-copy-soap (<< 6.21.0-0)
 Conflicts: open-xchange-admin-plugin-user-copy-soap (<< 6.21.0-0)
-Description: Open Xchange Admin User Copy Bundle SOAP server
+Description: SOAP interface for extension to copy user into other contexts
+ This package installs the OSGi bundle that provides the administrative SOAP interface to copy users into other contexts. SOAP allows
+ administrative clients written in any programming language while RMI requires clients written in Java. For a description of copying users
+ into other contexts see the package description of package open-xchange-admin-user-copy.
 
 ###### http://wiki.debian.org/Renaming_a_Package #####
 Package: open-xchange-admin-plugin-user-copy-soap

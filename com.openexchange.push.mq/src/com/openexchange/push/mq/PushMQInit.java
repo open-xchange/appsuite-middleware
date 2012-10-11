@@ -76,7 +76,7 @@ public class PushMQInit {
 
     private final MQService mqService;
 
-    private static PushMQInit init;
+    private static volatile PushMQInit init;
 
     /**
      * Initializes a new {@link PushMQInit}.

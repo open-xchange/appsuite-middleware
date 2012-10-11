@@ -107,7 +107,7 @@ public enum DBPoolingExceptionCodes {
     /**
      * Connection used for %1$d milliseconds.
      */
-    TOO_LONG(TOO_LONG_MSG, Category.CATEGORY_SERVICE_DOWN, 12),
+    TOO_LONG(TOO_LONG_MSG, Category.CATEGORY_WARNING, 12),
     /**
      * %1$d statements aren't closed.
      */

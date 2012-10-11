@@ -3093,6 +3093,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
             final long uid;
             try {
                 final MimeMessageFiller filler = new MimeMessageFiller(session, ctx);
+                filler.setAccountId(accountId);
                 composedMail.setFiller(filler);
                 /*
                  * Set headers

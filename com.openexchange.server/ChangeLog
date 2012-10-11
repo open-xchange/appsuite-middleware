@@ -1,38 +1,231 @@
+* 2012-10-10 - thorben.betten@open-xchange.com
+
+ - Fix for bug 23238: Properly dealing with transient map on serialization attempt
+
+* 2012-10-09 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 23207: Use contact service to modify attachment count 
+
 * 2012-10-09 - thorben.betten@open-xchange.com
 
+ - Fix for bug 23219: Handle subsequent CRLFs in binary value
+ - Fix for bug 23176: Checking for indication of 302 HTTP error code in thrown exception's message
  - Fix for bug 23229: Added CSS3 styles to white-list filter
+
+* 2012-10-08 - thorben.betten@open-xchange.com
+
+ - Fix for bug 23199: Fixed composing reply text
+ - Fix for bug 23202: Fixed possible NPE
+ - Fix for bug 23203: Fixed possible NPE
+ - Fix for bug 23204: Fixed possible NPE
+ - Fix for bug 23205: Fixed possible NPE
+
+* 2012-10-08 - marcus.klein@open-xchange.com
+
+ - Fix for bug 23197: Removed snappy-java from OSGi 3rd party bundles.
 
 * 2012-10-05 - jan.bauerdick@open-xchange.com
 
  - Improved c.o.aws for AWS S3 encryption
  - New bundle c.o.aws.s3: AWS S3 based file storage
 
+* 2012-10-05 - thorben.betten@open-xchange.com
+
+ - Fix for bug 23189: Further simplified and improved regex to look-up CSS blocks
+
+* 2012-10-05 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 23184: Corrected attachment condition
+ - Fix for bug 23174: Send SC_CONFLICT when trying to create an appointment with already existing UID 
+ 
+* 2012-10-04 - thorben.betten@open-xchange.com
+
+ - Fix for bug 23170: Restored class' path
+ - Fix for bug 23172: Proper file name on attachment download
+
+* 2012-10-04 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 23173: Skip group permissions during owner evaluation 
+ - Fix for bug 23171: Query for user- instead of contact-ID to get context administrator 
+
+* 2012-10-04 - francisco.laguna@open-xchange.com
+
+ - Fix for bug 23129: Adjustments to the login step configuration to match google website.
+
+* 2012-10-03 - thorben.betten@open-xchange.com
+
+ - Fix for bug 23169: Sane file name for created ZIP file
+
+* 2012-10-02 - francisco.laguna@open-xchange.com
+
+ - Fix for bug 23130 & bug 23131: Lack of defaults led to RTE. 
+ - Fix for bug 23065: Ported MSN subscriber to new version 5 API.
+
+* 2012-10-02 - thorben.betten@open-xchange.com
+
+ - Fix for bug 23155: Added option to disable manual umlauts-filtering
+ - Fix for bug 22910: fixed checkconfigconsistency
+ - Fix for bug 23162: Respond with 404 (Not found) if an empty image stream is detected
+
+* 2012-10-01 - francisco.laguna@open-xchange.com
+
+ - Fix for bug 23134: Ported CVS fixes
+ - Fix for bug 23135: Ported CVS fixes
+
+* 2012-10-01 - thorben.betten@open-xchange.com
+
+ - Fix for bug 23146: Log if unsupported charset is detected
+ - Fix for bug 23148: Safe sanitizing of Content-Type header
+ - Fix for bug 23149: Introduced limitation for number of accepted CSS block segments
+ - Fix for bug 23084: Grab HTML content if only text part available
+
 * 2012-09-29 - thorben.betten@open-xchange.com
 
  - Fix for bug 23141: Introduced special FileCleaningTracker which invokes File.deleteOnExit() on each incoming file upload
+ - Fix for bug 23139: Configuration option whether to prefer GSSAPI authentication mechanism if supported by SIEVE backend
+ - Fix for bug 23042: Sanitize Content-Type header prior to writing a message's content
+ - Fix for bug 23039: Convert string representation of a decimal number with arbitrary length to an integer value
+
+* 2012-09-28 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 22723: Use last-modified of parent folder for initial sync-token calculation 
+
+* 2012-09-28 - thorben.betten@open-xchange.com
+
+ - Fix for bug 23126: Un-quote date strings if necessary
+ - Fix for bug 22835: Detect if another vacation rule has already been specified before. Throw error if present.
+
+* 2012-09-27 - thorben.betten@open-xchange.com
+
+ - Fix for bug 23116: Added import to server bundle
+
+* 2012-09-27 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 21373: Send SC_FORBIDDEN when trying to move an appointment series to another folder 
+ - Fix for bug 21650: Make all folders available via CardDAV 
 
 * 2012-09-27 - martin.herfurth@open-xchange.com
 
  - Fix for bug 23105: Mail addresses should not be case sensitive.
 
-* 2012-09-20 - martin.herfurth@open-xchange.com
+* 2012-09-26 - thorben.betten@open-xchange.com
 
- - Fix for bug 23072: Bad All day appointments conflict when in different timezone.
+ - Fix for bug 22923: Dealing with possible "Unmarshalling Error" when parsing empty date field
+
+* 2012-09-26 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 23095: Validate contact image size and content type
+ - Fix for bug 23078: List contacts from deleted folders as deleted resources
+
+* 2012-09-25 - thorben.betten@open-xchange.com
+
+ - Fix for bug 21882: Added update task to remove listed unnecessary indexes
+
+* 2012-09-25 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 23083: Ignore requests to set the 'image1_url' of a contact
+ - Fix for bug 23076: Correctly pass last-modified when appointment has no changes 
+ - Fix for bug 22723: Use also deleted items for initial sync-token calculations  
+
+* 2012-09-24 - thorben.betten@open-xchange.com
+
+ - Fix for bug 23068: Fixed NPE on social/subscription refresh
+ - Fix for bug 23080: Added "smarttagtype" to list of known HTML tags
+ - Fix for bug 23081: Support for HTML5 <wbr> tag
+ - Fix for bug 23082: Fixed possible npe
+
+* 2012-09-24 - marcus.klein@open-xchange.com
+
+ - Fix for bug 22524: All CLTs now use the Java options defined for CLTs and not the options for the backend server.
+ - Fix for bug 23001: Fix for bug 22909 was wrong and caused this bug. Reading now licensekeys.properties correctly.
+
+* 2012-09-24 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 23067: More sophisticated checks for participant changes
+ - Fix for bug 23048: Ensure appointments in public folders have at least one internal user as participant
+ - Fix for bug 23077: Provide empty default alarms
+
+* 2012-09-21 - thorben.betten@open-xchange.com
+
+ - Fix for bug 23062: Check content of JSON object for non-null
+
+* 2012-09-21 - marcus.klein@open-xchange.com
+
+ - Fix for bug 23061: Added buddy classloading to bundle with JYaml library to solve crawler description object loading from YML files.
+ - Fix for bug 22658: Complete path has been removed from the configuration file. Relative path are now used. Fixed a problem creating the
+   path for new crawler descriptions.
+ - Fix for bug 22198: Permissions of crawlers directory and path for crawler descriptions to write are now correct.
+ - Fix for bug 22983: Restored redirecting functionality on autologin request for SAML integration.
+
+* 2012-09-21 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 22974: Exclude distribution lists from synchronization
+ - Fix for bug 23058: Assume a status of 'COMPLETED' for tasks that are 100% completed implicitly
+
+* 2012-09-21 - martin.herfurth@open-xchange.com
+
+ - Fix for bug 23055: External Participant with different upper/lower case spelling are detected as party crasher.
+
+* 2012-09-20 - marcus.klein@open-xchange.com
+
+ - Fix for bug 22405: Extended build system to support arbitrary resources in bundles. Added fetcher.properties to bundle resources.
 
 * 2012-09-20 - martin.herfurth@open-xchange.com
 
  - Fix for bug 23055: External participant detected as "Party Crasher".
+ - Fix for bug 23072: Bad All day appointments conflict when in different timezone.
+
+* 2012-09-20 - thorben.betten@open-xchange.com
+
+ - Fix for bug 22980: No "hidden" mailbox expunge anymore
+ - Fix for bug 22897: Delete only matching session if marked for removal
+ - Fix for bug 23037: Properly mapping parsed TNEF read receipt to a multipart
+
+* 2012-09-20 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 23046: Skip validation of URL property in vCards
 
 * 2012-09-19 - martin.herfurth@open-xchange.com
 
  - Fix for bug 21054: Wrong sorting of Recurring Appointments in Week view.
 
+* 2012-09-19 - francisco.laguna@open-xchange.com
+
+ - Fix for bug 22525: Remove I18nService from needed services array in subscription json activator, since they are discovered dynamically.
+
+* 2012-09-19 - marcus.klein@open-xchange.com
+
+ - Fix for bug 22776: Made the new administration SOAP interface based on Apache CXF as conform as possible to previous Axis2 framework.
+
+* 2012-09-19 - thorben.betten@open-xchange.com
+
+ - Fix for bug 23025: Return proper JSON response if GAB is disabled for requested user(s)
+ - Fix for bug 23045: More lenient scanner behavior for VCard parsing
+
+* 2012-09-18 - thorben.betten@open-xchange.com
+
+ - Fix for bug 22881: Fixed update operation for personal data
+ - Fix for bug 23036: Fixed possible IndexOutOfBoundsException when accessing arguments
+
+* 2012-09-18 - francisco.laguna@open-xchange.com
+
+ - Fix for bug 22989: Respond with proper error message if a subscription can not be loaded.
+ - Fix for bug 22990: Fixed NPE.
+
+* 2012-09-18 - marcus.klein@open-xchange.com
+
+ - Fix for bug 22064: If parsing of the JSON value fails a understandable exception message is now generated for the user.
+
 * 2012-09-17 - thorben.betten@open-xchange.com
 
+ - Fix for bug 23034: Added property to specify whether stack trace should be included in returned JSON response
+ - Fix for bug 23030: Check possible null dereference when acquiring mail session cache
  - Fix for bug 23005: Proper response code if auto-login is disabled
+ - Fix for bug 21996: ForceHttps setting only applies to non-local endpoints
 
 * 2012-09-16 - thorben.betten@open-xchange.com
 
+ - Fix for bug 22951: Added missing "autosave" action to mail module
  - Fix for bug 23006: Fixed logging of exceptions
 
 * 2012-09-15 - thorben.betten@open-xchange.com
@@ -47,6 +240,17 @@
 
  - Fix for bug 22983: Add former "category" field providing previously used category number for downward compatibility
  - Fix for bug 22992: Prevent NPE in crypto service
+ - Fix for bug 23024: Added missing import
+ - Fix for bug 23013: Use default template name if JSONObject.NULL is provided
+ - Fix for bug 22611: Checking for JSONObject.NULL representation
+
+* 2012-09-14 - marcus.klein@open-xchange.com
+
+ - Fix for bug 22978: Defined the ResellerAdmin SOAP object completely new by hand. Looks much more clean now and works as expected. Added
+   support for SOAP data class inheritance to ReplacingXMLStreamReader for subclasses for reseller interface.
+ - Fix for bug 22981: Corrected permissions on ox-scriptconf.sh so showruntimestats can be executed by munin user.
+ - Fix for bug 22853: Commented everywhere the lateral TCP servers entry.
+ - Fix for bug 23008: Wrote better description for the open-xchange package.
 
 * 2012-09-14 - tobias.friedrich@open-xchange.com
 
@@ -62,6 +266,19 @@
  - Fix for bug 22917: Added previous naming for downward compatibility
  - Fix for bug 22975: Select high log level for all error categories to let them be logged
 
+* 2012-09-11 - marcus.klein@open-xchange.com
+
+ - Fix for bug 22939: Checking for missing credentials and throwing an InvalidCredentialsException with message "Credentials are missing".
+ - Fix for bug 22909: Removed second configuration directory from report client CLT.
+ - Fix for bug 22969: Made generic elements transformation for SOAP CXF more robust against wrong client requests.
+ - Fix for bug 10007: Corrected return codes of CLTs if object is not found through its name.
+
+* 2012-09-10 - marcus.klein@open-xchange.com
+
+ - Fix for bug 22949: Missed to start OSGi service trackers for DatabaseService.
+ - Fix for bug 22961: Added conflict to old open-xchange-commons-logging-log4j package.
+ - Fix for bug 22869: Iterating now all bundles in system excluding bundle fragments and checking if bundles are in active state.
+
 * 2012-09-07 - thorben.betten@open-xchange.com
 
  - Fix for bug 22943: Limit max. size of parseable HTML content; configurable through 'com.openexchange.html.maxLength'
@@ -70,9 +287,23 @@
 
  - New bundle c.o.aws.autoscaling: Monitoring of instances and load-balancers, add/remove instances if necessary
 
+* 2012-09-07 - marcus.klein@open-xchange.com
+
+ - Fix for bug 22937: Preventing NullPointerExceptions in SOAP administrator reseller service if optional restrictions are not sent.
+ - Fix for bug 22933: Pushing the DatabaseService into AdminCache instances of administration autocontextid bundle.
+ - Fix for bug 22669: Not using any reflection mechanisms anymore to instantiate OXToolStorageInterface to prevent NullPointerException.
+
 * 2012-09-06 - jan.bauerdick@open-xchange.com
 
  - New bundle c.o.aws.ec2: Start and stop EC2 instances and register them with the load-balancer
+
+* 2012-09-06 - marcus.klein@open-xchange.com
+
+ - Fix for bug 22872: Publishing directly the object of a RMI Remote interface instead of its stub makes the objects not disappear anymore.
+
+* 2012-09-05 - marcus.klein@open-xchange.com
+
+ - Fix for bug 22915: No NPE if SOAP method is not found.
 
 * 2012-09-05 - thorben.betten@open-xchange.com
 
@@ -128,6 +359,7 @@
 * 2012-08-27 - thorben.betten@open-xchange.com
 
  - Fix for bug 22755: Proper Content-Disposition header when downloading a file with Safari
+ - Fix for bug 22860: Prevent NPE in file management
 
 * 2012-08-24 - jan.bauerdick@open-xchange.com
 
@@ -423,6 +655,11 @@
  - Fix for bug 22297: Cancel consistency check for EAS folder tree (because not used, yet)
  - Fix for bug 22152: Applying proper user identifier to temporary session if free-busy request is performed for a user participant
 
+* 2012-06-15 - jan.bauerdick@open-xchange.com
+
+ - Moved package c.o.admin.autocontextid.console to dedicated bundle
+ - Moved packages c.o.admin.reseller.rmi & c.o.admin.reseller.console to dedicated bundles
+
 * 2012-06-15 - thorben.betten@open-xchange.com
 
  - Fix for bug 22312: Context-sensitive locks & lowered timeout on tryLock() invocation to reduce possible concurrent cache access attempts
@@ -441,6 +678,11 @@
  - Fix for bug 22294: Dealing with possible empty sub-type
  - Fix for bug 22298: Showing proper error message for failed authentication against primary mail account & introduced property to specify
                       how long such a failed authentication is remembered to avoid possible DoS attack
+
+* 2012-06-11 - jan.bauerdick@open-xchange.com
+
+ - Refactored to run in groupware VM
+ - Register RMI as OSGi-service
 
 * 2012-06-11 - thorben.betten@open-xchange.com
 

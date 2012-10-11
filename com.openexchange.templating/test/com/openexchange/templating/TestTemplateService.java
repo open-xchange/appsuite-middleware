@@ -58,6 +58,7 @@ import com.openexchange.config.SimConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
+import com.openexchange.session.SimSession;
 import com.openexchange.sim.SimBuilder;
 import com.openexchange.templating.OXTemplate.TemplateLevel;
 import com.openexchange.templating.impl.OXFolderHelper;
@@ -108,8 +109,9 @@ public class TestTemplateService extends TestCase {
         final UserConfiguration noInfostore = new UserConfiguration(0,0,new int[0],null);
         noInfostore.setInfostore(false);
 
-        session = new ServerSessionAdapter(null, null, null, userConfig);
-        sessionWithoutInfostore = new ServerSessionAdapter(null, null, null, noInfostore);
+        SimSession simSession = new SimSession();
+        session = new ServerSessionAdapter(simSession, null, null, userConfig);
+        sessionWithoutInfostore = new ServerSessionAdapter(simSession, null, null, noInfostore);
     }
 
     @Override
@@ -287,7 +289,7 @@ public class TestTemplateService extends TestCase {
 
     }
 
-    public void testListBasicTemplates() throws OXException {
+    public void testListBasicTemplates() {
         final List<String> names = templateService.getBasicTemplateNames();
         assertEquals(1, names.size());
         assertEquals("test-template.tmpl", names.get(0));

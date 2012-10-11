@@ -50,7 +50,6 @@
 package com.openexchange.tasks.json.actions;
 
 import java.util.Date;
-import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.parser.TaskParser;
@@ -94,11 +93,11 @@ public class ConfirmAction extends TaskAction {
      * @see com.openexchange.tasks.json.actions.TaskAction#perform(com.openexchange.tasks.json.TaskRequest)
      */
     @Override
-    protected AJAXRequestResult perform(final TaskRequest req) throws OXException, JSONException {
+    protected AJAXRequestResult perform(final TaskRequest req) throws OXException {
         final JSONObject data = (JSONObject) req.getRequest().getData();
         final Task task = new Task();
-        new TaskParser(req.getTimeZone()).parse(task, data);
         final ServerSession session = req.getSession();
+        new TaskParser(req.getTimeZone()).parse(task, data, session.getUser().getLocale());
         final TasksSQLInterface taskSql = new TasksSQLImpl(session);
         final int taskIdFromParameter = req.optInt(AJAXServlet.PARAMETER_ID);
         final int taskId;

@@ -135,13 +135,7 @@ public final class LoginPerformer {
      * @throws LoginException If login fails
      */
     public LoginResult doLogin(final LoginRequest request) throws OXException {
-        final HashMap<String, Object> properties = new HashMap<String, Object>();
-        return doLogin(request, properties, new LoginPerformerClosure() {
-            @Override
-            public Authenticated doAuthentication(final LoginResultImpl retval) throws OXException {
-                return Authentication.login(request.getLogin(), request.getPassword(), properties);
-            }
-        });
+        return doLogin(request, new HashMap<String, Object>());
     }
 
     public LoginResult doLogin(final LoginRequest request, final Map<String, Object> properties) throws OXException {
@@ -180,8 +174,9 @@ public final class LoginPerformer {
     private static final Pattern SPLIT = Pattern.compile(" *, *");
 
     private static final String PARAM_SESSION = Parameterized.PARAM_SESSION;
+    private static final String PARAM_VOLATILE = Parameterized.PARAM_VOLATILE;
 
-    private static final int MAX_RETRY = 3;
+    private static final int MAX_RETRY = 1;
 
     /**
      * Performs the login for specified login request.
@@ -211,8 +206,9 @@ public final class LoginPerformer {
                 retval.setHeaders(responseEnhancement.getHeaders());
                 retval.setCookies(responseEnhancement.getCookies());
                 retval.setRedirect(responseEnhancement.getRedirect());
-                retval.setCode(responseEnhancement.getCode());
-                if (ResultCode.REDIRECT.equals(responseEnhancement.getCode()) || ResultCode.FAILED.equals(responseEnhancement.getCode())) {
+                final ResultCode code = responseEnhancement.getCode();
+                retval.setCode(code);
+                if (ResultCode.REDIRECT.equals(code) || ResultCode.FAILED.equals(code)) {
                     return retval;
                 }
             }
@@ -238,6 +234,7 @@ public final class LoginPerformer {
                 int cnt = 0;
                 while (null == session && cnt++ < MAX_RETRY) {
                     final AddSessionParameterImpl parameterObject = new AddSessionParameterImpl(username, request, user, ctx);
+                    parameterObject.setParameter(PARAM_VOLATILE, Boolean.valueOf(request.isVolatile()));
                     final String sessionId = sessiondService.addSession(parameterObject);
                     // Look-up generated session instance
                     session = parameterObject.getParameter(PARAM_SESSION);

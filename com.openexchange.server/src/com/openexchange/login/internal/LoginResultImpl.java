@@ -98,6 +98,11 @@ final class LoginResultImpl implements LoginResult {
         return request;
     }
 
+    /**
+     * Sets the login request.
+     * 
+     * @param request The login request
+     */
     void setRequest(final LoginRequest request) {
         this.request = request;
     }
@@ -107,6 +112,11 @@ final class LoginResultImpl implements LoginResult {
         return context;
     }
 
+    /**
+     * Sets the context.
+     * 
+     * @param context The context
+     */
     public void setContext(final Context context) {
         this.context = context;
     }
@@ -116,6 +126,11 @@ final class LoginResultImpl implements LoginResult {
         return user;
     }
 
+    /**
+     * Sets the user
+     * 
+     * @param user The user
+     */
     public void setUser(final User user) {
         this.user = user;
     }
@@ -125,10 +140,20 @@ final class LoginResultImpl implements LoginResult {
         return session;
     }
 
+    /**
+     * Sets the session.
+     * 
+     * @param session The session
+     */
     public void setSession(final Session session) {
         this.session = session;
     }
 
+    /**
+     * Sets the cookies.
+     * 
+     * @param cookies The cookies
+     */
     void setCookies(Cookie[] cookies) {
         this.cookies = cookies;
     }
@@ -138,6 +163,11 @@ final class LoginResultImpl implements LoginResult {
         return this.cookies;
     }
 
+    /**
+     * Sets the headers
+     * 
+     * @param headers The headers
+     */
     void setHeaders(Header[] headers) {
         this.headers = headers;
     }
@@ -157,10 +187,20 @@ final class LoginResultImpl implements LoginResult {
         return code;
     }
 
+    /**
+     * Sets the redirect URI.
+     * 
+     * @param redirect The redirect URI
+     */
     public void setRedirect(final String redirect) {
         this.redirect = redirect;
     }
 
+    /**
+     * Sets the result code.
+     * 
+     * @param code The result code
+     */
     public void setCode(final ResultCode code) {
         this.code = code;
     }

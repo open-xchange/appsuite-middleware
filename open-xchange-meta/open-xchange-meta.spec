@@ -118,7 +118,7 @@ Authors:
 %package -n	open-xchange-meta-mobility
 Group:          Applications/Productivity
 Summary:	The Open-Xchange Meta package for Business Mobility
-Requires:	open-xchange-eas, open-xchange-usm, open-xchange-help-usm-eas, open-xchange-eas-provisioning-mail, open-xchange-eas-provisioning-ui
+Requires:	open-xchange-eas, open-xchange-usm, open-xchange-help-usm-eas, open-xchange-eas-provisioning-mail, open-xchange-eas-provisioning-gui
 
 
 %description -n open-xchange-meta-mobility
@@ -150,7 +150,7 @@ Group:          Applications/Productivity
 Summary:	The Open-Xchange Meta package for OX into Parallels integration
 Requires:	%{oxcommon}
 Requires:	%{alllang}
-Requires:	open-xchange-custom-parallels, open-xchange-custom-parallels-gui, open-xchange-spamhandler-spamassassin, open-xchange-admin-soap, open-xchange-easylogin, open-xchange-meta-admin, open-xchange-meta-pubsub, open-xchange-meta-messaging, open-xchange-meta-gui
+Requires:	open-xchange-parallels, open-xchange-custom-parallels-gui, open-xchange-spamhandler-spamassassin, open-xchange-admin-soap, open-xchange-meta-admin, open-xchange-meta-pubsub, open-xchange-meta-messaging, open-xchange-meta-gui
 Conflicts:	open-xchange-admin-plugin-autocontextid, open-xchange-admin-plugin-reseller
 
 
@@ -266,6 +266,14 @@ Authors:
 %doc README.TXT
 
 %changelog
+* Wed Oct 10 2012 Carsten Hoeger <choeger@open-xchange.com>
+Fifth release candidate for 6.22.0
+* Tue Oct 09 2012 Carsten Hoeger <choeger@open-xchange.com>
+Fourth release candidate for 6.22.0
+* Fri Oct 05 2012 Carsten Hoeger <choeger@open-xchange.com>
+Third release candidate for 6.22.0
+* Thu Oct 04 2012 Carsten Hoeger <choeger@open-xchange.com>
+Second release candidate for 6.22.0
 * Tue Aug 21 2012 Carsten Hoeger <choeger@open-xchange.com>
 First release candidate for 6.22.0
 * Mon Aug 20 2012 Carsten Hoeger <choeger@open-xchange.com>

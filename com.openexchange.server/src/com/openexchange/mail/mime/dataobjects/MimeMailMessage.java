@@ -84,7 +84,7 @@ public final class MimeMailMessage extends MailMessage implements MimeRawSource,
      */
     public MimeMailMessage() {
         super();
-        mailPart = new MimeMailPart((Part) null);
+        mailPart = new MimeMailPart();
     }
 
     /**

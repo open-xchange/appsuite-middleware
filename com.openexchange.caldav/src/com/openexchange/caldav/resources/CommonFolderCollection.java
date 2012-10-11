@@ -276,8 +276,9 @@ public abstract class CommonFolderCollection<T extends CommonObject> extends Com
 	 */
 	private Syncstatus<WebdavResource> getSyncStatus(Date since) throws OXException {
 		Syncstatus<WebdavResource> multistatus = new Syncstatus<WebdavResource>();
-		Date nextSyncToken = new Date(since.getTime());
+//		Date nextSyncToken = new Date(since.getTime());
         boolean initialSync = 0 == since.getTime();
+		Date nextSyncToken = Tools.getLatestModified(since, this.folder);
 		/*
 		 * new and modified objects
 		 */
@@ -294,19 +295,19 @@ public abstract class CommonFolderCollection<T extends CommonObject> extends Com
 		/*
 		 * deleted objects
 		 */
-		if (false == initialSync) {
-		    Collection<T> deletedObjects = this.getDeletedObjects(since);
-    		for (T object : deletedObjects) {
-    			// only include objects that are not also modified (due to move operations)
-    			if (false == contains(modifiedObjects, object.getUid())) {
-    				// add resource to multistatus
+	    Collection<T> deletedObjects = this.getDeletedObjects(since);
+		for (T object : deletedObjects) {
+			// only include objects that are not also modified (due to move operations)
+			if (null != object.getUid() && false == contains(modifiedObjects, object.getUid())) {
+		        if (false == initialSync) {
+	                // add resource to multistatus
     				WebdavResource resource = createResource(object, constructPathForChildResource(object));
     				multistatus.addStatus(new WebdavStatusImpl<WebdavResource>(
     						HttpServletResponse.SC_NOT_FOUND, resource.getUrl(), resource));
-    				// remember aggregated last modified for parent folder
-    				nextSyncToken = Tools.getLatestModified(nextSyncToken, object);
-    			}
-    		}
+		        }
+				// remember aggregated last modified for parent folder
+				nextSyncToken = Tools.getLatestModified(nextSyncToken, object);
+			}
 		}
 		/*
 		 * Return response with new next sync-token in response

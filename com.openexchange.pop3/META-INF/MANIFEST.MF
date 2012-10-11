@@ -46,6 +46,7 @@ Import-Package: com.openexchange.api2,
  com.openexchange.tools.sql,
  com.openexchange.tools.ssl,
  com.openexchange.user,
+ com.planetj.math.rabinhash,
  com.sun.mail.pop3,
  gnu.trove,
  gnu.trove.map,
@@ -61,6 +62,5 @@ Import-Package: com.openexchange.api2,
  org.osgi.framework,
  org.osgi.util.tracker
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
-Bundle-ClassPath: .,
- lib/rabin-hash-function-2.0.jar
+Bundle-ClassPath: .
 Bundle-Activator: com.openexchange.pop3.osgi.POP3Activator

@@ -65,7 +65,6 @@ import java.util.concurrent.ConcurrentMap;
 import javax.mail.internet.IDNA;
 import javax.security.auth.Subject;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import org.apache.jsieve.SieveException;
 import org.apache.jsieve.TagArgument;
 import org.apache.jsieve.parser.generated.ParseException;
@@ -92,6 +91,7 @@ import com.openexchange.jsieve.export.SieveTextFilter.ClientRulesAndRequire;
 import com.openexchange.jsieve.export.SieveTextFilter.RuleListAndNextUid;
 import com.openexchange.jsieve.export.exceptions.OXSieveHandlerException;
 import com.openexchange.jsieve.export.exceptions.OXSieveHandlerInvalidCredentialsException;
+import com.openexchange.log.LogFactory;
 import com.openexchange.mailfilter.ajax.Credentials;
 import com.openexchange.mailfilter.ajax.Parameter;
 import com.openexchange.mailfilter.ajax.actions.AbstractRequest.Parameters;
@@ -423,6 +423,16 @@ public class MailfilterAction extends AbstractAction<Rule, MailfilterRequest> {
                 final String body = request.getBody();
                 final JSONObject json = new JSONObject(body);
                 final Rule newrule = CONVERTER.parse(json);
+
+                if (isVacationRule(newrule)) {
+                    // A vacation rule...
+                    final ArrayList<Rule> clientrules = clientrulesandrequire.getRules();
+                    for (final Rule rule : clientrules) {
+                        if (isVacationRule(rule)) {
+                            throw OXMailfilterExceptionCode.DUPLICATE_VACATION_RULE.create();
+                        }
+                    }
+                }
 
                 changeIncomingVacationRule(newrule);
 
@@ -852,6 +862,11 @@ public class MailfilterAction extends AbstractAction<Rule, MailfilterRequest> {
             throw OXMailfilterExceptionCode.NO_VALID_CREDSRC.create();
         }
         return sieveHandler;
+    }
+
+    private boolean isVacationRule(final Rule newrule) {
+        final RuleComment ruleComment = newrule.getRuleComment();
+        return (null != ruleComment) && (null != ruleComment.getFlags()) && ruleComment.getFlags().contains("vacation") && ActionCommand.Commands.VACATION.equals(newrule.getIfCommand().getActioncommands().get(0).getCommand());
     }
 
     private void changeIncomingVacationRule(final Rule newrule) throws SieveException {

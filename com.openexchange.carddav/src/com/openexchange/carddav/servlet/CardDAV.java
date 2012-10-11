@@ -56,8 +56,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
-
 import com.openexchange.carddav.servlet.CarddavPerformer.Action;
 import com.openexchange.config.cascade.ComposedConfigProperty;
 import com.openexchange.config.cascade.ConfigViewFactory;
@@ -83,7 +81,7 @@ public class CardDAV extends OXServlet {
 
 	private static final transient Log LOG = com.openexchange.log.Log.loggerFor(CardDAV.class);
     
-    private static ServiceLookup services;
+    private static volatile ServiceLookup services;
     
     public static void setServiceLookup(ServiceLookup serviceLookup) {
         services = serviceLookup;

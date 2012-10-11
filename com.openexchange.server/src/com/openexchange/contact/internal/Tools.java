@@ -49,6 +49,7 @@
 
 package com.openexchange.contact.internal;
 
+import java.sql.SQLException;
 import java.text.Collator;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -66,6 +67,7 @@ import com.openexchange.contact.storage.registry.ContactStorageRegistry;
 import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
 import com.openexchange.folder.FolderService;
+import com.openexchange.folder.FolderService.Storage;
 import com.openexchange.groupware.contact.ContactConfig;
 import com.openexchange.groupware.contact.ContactConfig.Property;
 import com.openexchange.groupware.contact.ContactExceptionCodes;
@@ -92,6 +94,7 @@ import com.openexchange.session.Session;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.oxfolder.OXFolderIteratorSQL;
+import com.openexchange.userconf.UserConfigurationService;
 
 /**
  * {@link Tools} - Static utility functions for the contact service.
@@ -201,12 +204,24 @@ public final class Tools {
      * @return the context
      * @throws OXException
      */
-    public static Context getContext(final int contextID) throws OXException {
+    public static Context getContext(int contextID) throws OXException {
         final Context context = ContactServiceLookup.getService(ContextService.class, true).getContext(contextID);
         if (null == context) {
             throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create("Unable to get context '" + contextID + "'.");
         }
         return context;
+    }
+    
+    /**
+     * Gets the user configuration.
+     * 
+     * @param session
+     * @return
+     * @throws OXException
+     */
+    public static UserConfiguration getUserConfig(Session session) throws OXException {
+        return ContactServiceLookup.getService(UserConfigurationService.class, true).getUserConfiguration(
+            session.getUserId(), getContext(session));
     }
 
     /**
@@ -223,32 +238,66 @@ public final class Tools {
 	/**
 	 * Gets a folder.
 	 *  
-	 * @param contextID
-	 * @param folderId
+     * @param contextID the context ID
+     * @param folderId the folder ID
 	 * @return
 	 * @throws OXException
 	 */
-	public static FolderObject getFolder(final int contextID, final String folderId) throws OXException {
-		return ContactServiceLookup.getService(FolderService.class, true).getFolderObject(parse(folderId), contextID);
-	}
-	
-	/**
-	 * Gets the permissions of a folder.
-	 * 
-	 * @param contextID
-	 * @param folderId
-	 * @param userID
-	 * @return
-	 * @throws OXException
-	 */
-	public static EffectivePermission getPermission(final int contextID, final String folderId, final int userID) throws OXException {
-		return ContactServiceLookup.getService(FolderService.class, true).getFolderPermission(parse(folderId), userID, contextID);
-	}
-	
-	public static FolderService getFolderService() throws OXException {
-		return ContactServiceLookup.getService(FolderService.class, true); 
-	}	
-	
+    public static FolderObject getFolder(int contextID, String folderId) throws OXException {
+        return getFolder(contextID, folderId, false);
+    }
+    
+    /**
+     * Gets a folder.
+     * 
+     * @param contextID the context ID
+     * @param folderId the folder ID
+     * @param deleted <code>true</code> to also query the backup folder table, <code>false</code>, otherwise
+     * @return
+     * @throws OXException
+     */
+    public static FolderObject getFolder(int contextID, String folderId, boolean deleted) throws OXException {
+        FolderService folderService = ContactServiceLookup.getService(FolderService.class, true);
+        try {
+            return folderService.getFolderObject(parse(folderId), contextID, Storage.LIVE_WORKING);
+        } catch (OXException e) {
+            if (deleted && "FLD-0008".equals(e.getErrorCode())) {
+                // not found, also try backup folder tree
+                return folderService.getFolderObject(parse(folderId), contextID, Storage.LIVE_BACKUP);
+            }
+            throw e;
+        }
+    }
+    
+    /**
+     * Gets the permissions of a folder.
+     * 
+     * @param session
+     * @param folder
+     * @return
+     * @throws OXException
+     */
+    public static EffectivePermission getPermission(Session session, FolderObject folder) throws OXException {
+        try {
+            return folder.getEffectiveUserPermission(session.getUserId(), getUserConfig(session));
+        } catch (SQLException e) {
+            throw ContactExceptionCodes.UNEXPECTED_ERROR.create(e);
+        }
+    }
+
+    /**
+     * Gets the permissions of a folder.
+     * 
+     * @param contextID the context ID
+     * @param folderId the folder ID
+     * @param userID the user ID
+     * @return
+     * @throws OXException
+     */
+    public static EffectivePermission getPermission(int contextID, String folderId, int userID) throws OXException {
+        return ContactServiceLookup.getService(FolderService.class, true).getFolderPermission(parse(folderId), userID, contextID);
+    }
+    
 	/**
 	 * Checks whether the supplied string is empty, that is it is either 
 	 * <code>null</code>, or consists of whitespace characters exclusively.

@@ -1,7 +1,5 @@
-# SOME DESCRIPTIVE TITLE.
 # Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
 # This file is distributed under the same license as the PACKAGE package.
-# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
 #
 #. *
 #. * Mail(s) could not be found in folder
@@ -17,23 +15,19 @@
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe.json/src/com/openexchange/subscribe/json/SubscriptionJSONExceptionMessage.java:88
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe.json/src/com/openexchange/subscribe/json/SubscriptionJSONExceptionMessage.java:90
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe.json/src/com/openexchange/subscribe/json/SubscriptionJSONExceptionMessage.java:92
-#, fuzzy
+# Antje Faber, 2012.
 msgid ""
 msgstr ""
 "Project-Id-Version: OX6 error messages\n"
 "Report-Msgid-Bugs-To: \n"
-"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
-"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
-"Language-Team: LANGUAGE <LL@li.org>\n"
-"Language: \n"
+"PO-Revision-Date: 2012-10-01 17:32+0200\n"
+"Last-Translator: Antje Faber\n"
+"Language-Team: Japanese <kde-i18n-de@kde.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"#-#-#-#-#  server.vi_VI.po (OX6 server messages)  #-#-#-#-#\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
-"X-Generator: Pootle 1.1.0\n"
-"#-#-#-#-#  errors.vi_VI.po (OX6 error messages)  #-#-#-#-#\n"
-"Plural-Forms: nplurals=1; plural=0;\n"
+"X-Generator: Lokalize 1.0\n"
 
 #. The client send a ticket within the browser request and the verification of this ticket failed.
 #. %1$s will be replaced with a detailed exception message.
@@ -81,6 +75,42 @@ msgstr ""
 #. %1$s is replaced with the session identifier.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.authentication.kerberos/src/com/openexchange/kerberos/KerberosExceptionMessages.java:91
 msgid "No Kerberos delegation ticket found in session %1$s."
+msgstr ""
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.aws.loadbalancing/src/com/openexchange/aws/loadbalancing/exceptions/OXAWSLoadBalancingExceptionMessages.java:61
+msgid "Name of loadbalancer missing."
+msgstr ""
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.aws.loadbalancing/src/com/openexchange/aws/loadbalancing/exceptions/OXAWSLoadBalancingExceptionMessages.java:63
+msgid "No zone specified."
+msgstr ""
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.aws.loadbalancing/src/com/openexchange/aws/loadbalancing/exceptions/OXAWSLoadBalancingExceptionMessages.java:65
+msgid "Could not create loadbalancer."
+msgstr ""
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.aws.loadbalancing/src/com/openexchange/aws/loadbalancing/exceptions/OXAWSLoadBalancingExceptionMessages.java:67
+msgid "Could not register instance with id %1$s with the loadbalancer."
+msgstr ""
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.aws.loadbalancing/src/com/openexchange/aws/loadbalancing/exceptions/OXAWSLoadBalancingExceptionMessages.java:69
+msgid "Could not deregister instance with id %1$s from the loadbalancer."
+msgstr ""
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.aws/src/com/openexchange/aws/exceptions/OXAWSExceptionMessages.java:61
+msgid "Missing access key."
+msgstr ""
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.aws/src/com/openexchange/aws/exceptions/OXAWSExceptionMessages.java:63
+msgid "Missing secret key."
+msgstr ""
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.aws/src/com/openexchange/aws/exceptions/OXAWSExceptionMessages.java:65
+msgid "EC2 region not set."
+msgstr ""
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.aws/src/com/openexchange/aws/exceptions/OXAWSExceptionMessages.java:67
+msgid "Loadbalancing region not set."
 msgstr ""
 
 #. A cache error occurred: %1$s
@@ -188,31 +218,31 @@ msgstr ""
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar.printing/src/com/openexchange/calendar/printing/CalendarPrintingStrings.java:61
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/FolderStrings.java:94
 msgid "Calendar"
-msgstr "Lịch"
+msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar.printing/src/com/openexchange/calendar/printing/CalendarPrintingStrings.java:63
 msgid "Week"
-msgstr "Tuần"
+msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar.printing/src/com/openexchange/calendar/printing/CalendarPrintingStrings.java:65
 msgid "All-day events"
-msgstr "Các sự kiện trong ngày"
+msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar.printing/src/com/openexchange/calendar/printing/CalendarPrintingStrings.java:67
 msgid "Events"
-msgstr "Sự kiện"
+msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar.printing/src/com/openexchange/calendar/printing/CalendarPrintingStrings.java:69
 msgid "Location"
-msgstr "Vị trí"
+msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar.printing/src/com/openexchange/calendar/printing/CalendarPrintingStrings.java:71
 msgid "Participants"
-msgstr "Những người tham dự"
+msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar.printing/src/com/openexchange/calendar/printing/CalendarPrintingStrings.java:73
 msgid "Comments"
-msgstr "Ghi chú"
+msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/HRRStrings.java:61
 msgid "No recurrence"
@@ -531,9 +561,8 @@ msgid "Temporary"
 msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/Messages.java:90
-#, fuzzy
 msgid "Absent"
-msgstr "Sự kiện"
+msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/Messages.java:92
 msgid "Free"
@@ -667,14 +696,12 @@ msgid "Direct link:"
 msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/Messages.java:178
-#, fuzzy
 msgid "Where:"
-msgstr "Tuần"
+msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/Messages.java:180
-#, fuzzy
 msgid "Participants:"
-msgstr "Những người tham dự"
+msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/Messages.java:182
 msgid "Details:"
@@ -1607,6 +1634,7 @@ msgstr ""
 #. *
 #. * A SQL error occurred: %1$s
 #.
+#. A SQL error occurred: %1$s
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.datatypes.genericonf.storage/src/com/openexchange/datatypes/genericonf/storage/GenericConfigurationStorageExceptionMessage.java:68
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:67
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/id/IDExceptionMessages.java:68
@@ -1620,6 +1648,7 @@ msgstr ""
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/downgrade/DowngradeFailedExceptionMessage.java:70
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/userconfiguration/UserConfigurationExceptionMessage.java:71
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:324
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.snippet/src/com/openexchange/snippet/SnippetExceptionMessages.java:78
 msgid "A SQL error occurred: %1$s"
 msgstr ""
 
@@ -1839,8 +1868,8 @@ msgstr ""
 #. File storage account %1$s of service "%2$s" could not be found for user %3$s in context %4$s.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:76
 msgid ""
-"File storage account %1$s of service \"%2$s\" could not be found for user "
-"%3$s in context %4$s."
+"File storage account %1$s of service \"%2$s\" could not be found for user %3"
+"$s in context %4$s."
 msgstr ""
 
 #. The operation is not supported by service %1$s.
@@ -2584,8 +2613,8 @@ msgstr ""
 #. An I/O error occurred while creating the socket connection to IMAP server (%1$s): %2$s
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/entity2acl/Entity2ACLExceptionMessage.java:73
 msgid ""
-"An I/O error occurred while creating the socket connection to IMAP server "
-"(%1$s): %2$s"
+"An I/O error occurred while creating the socket connection to IMAP server (%1"
+"$s): %2$s"
 msgstr ""
 
 #. Missing property %1$s in system.properties.
@@ -3149,9 +3178,8 @@ msgid "Drafts folder"
 msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.messaging.mail/src/com/openexchange/messaging/mail/FormStrings.java:77
-#, fuzzy
 msgid "Sent"
-msgstr "Sự kiện"
+msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.messaging.mail/src/com/openexchange/messaging/mail/FormStrings.java:79
 msgid "Sent folder"
@@ -3324,8 +3352,8 @@ msgstr ""
 #. No attachment found with section identifier %1$s in message %2$s in folder %3$s.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.messaging/src/com/openexchange/messaging/MessagingExceptionMessages.java:130
 msgid ""
-"No attachment found with section identifier %1$s in message %2$s in folder "
-"%3$s."
+"No attachment found with section identifier %1$s in message %2$s in folder %3"
+"$s."
 msgstr ""
 
 #. Message %1$s not found in folder %2$s.
@@ -4345,6 +4373,21 @@ msgstr ""
 msgid "The session information didn't match any ServerSession"
 msgstr ""
 
+#. * The received message is missing the \"kind\" key.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime.atmosphere/src/com/openexchange/realtime/atmosphere/AtmosphereExceptionMessage.java:64
+msgid "The received message is missing the \"kind\" key."
+msgstr ""
+
+#. * Could not find a parser for a message of kind: . \"%1$s\"
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime.atmosphere/src/com/openexchange/realtime/atmosphere/AtmosphereExceptionMessage.java:66
+msgid "Could not find a parser for a message of kind: . \"%1$s\""
+msgstr ""
+
+#. * Error while building Stanza: \"%1$s\"
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime.atmosphere/src/com/openexchange/realtime/atmosphere/AtmosphereExceptionMessage.java:68
+msgid "Error while building Stanza: \"%1$s\""
+msgstr ""
+
 #. Unknown channel %1$s
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/RealtimeExceptionMessages.java:63
 msgid "Unknown channel %1$s"
@@ -4689,8 +4732,8 @@ msgstr ""
 #. User "%2$s" must not create subfolders below folder "%2$s" in context "%3$s".
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/folderstorage/FolderExceptionMessages.java:149
 msgid ""
-"User \"%2$s\" must not create subfolders below folder \"%2$s\" in context "
-"\"%3$s\"."
+"User \"%2$s\" must not create subfolders below folder \"%2$s\" in context \"%"
+"3$s\"."
 msgstr ""
 
 #. No mail folder allowed below a public folder.
@@ -4719,6 +4762,11 @@ msgid ""
 "Found two folders named \"%1$s\" located below the parent folder \"%2$s\". "
 "Please rename one of the folders. There should be no two folders with the "
 "same name."
+msgstr ""
+
+#. An unexpected error occurred: %1$s. Please try again.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/folderstorage/FolderExceptionMessages.java:167
+msgid "An unexpected error occurred: %1$s. Please try again."
 msgstr ""
 
 #. SQL Problem: "%1$s".
@@ -5437,8 +5485,8 @@ msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:61
 msgid ""
-"Found a user contact outside global address book in folder %1$d in context "
-"%2$d."
+"Found a user contact outside global address book in folder %1$d in context %2"
+"$d."
 msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:63
@@ -5567,8 +5615,8 @@ msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:115
 msgid ""
-"A contact with private flag cannot be stored in a public folder. Folder: "
-"%1$d context %2$d user %3$d"
+"A contact with private flag cannot be stored in a public folder. Folder: %1"
+"$d context %2$d user %3$d"
 msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:117
@@ -7471,8 +7519,8 @@ msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/update/UpdateExceptionMessages.java:74
 msgid ""
-"Unable to determine next update task to execute. Executed: %1$s. Enqueued: "
-"%2$s. Scheduled: %3$s."
+"Unable to determine next update task to execute. Executed: %1$s. Enqueued: %2"
+"$s. Scheduled: %3$s."
 msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/update/UpdateExceptionMessages.java:76
@@ -7796,8 +7844,8 @@ msgstr ""
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:192
 msgid ""
-"Message field %1$s cannot be handled on server %2$s with login %3$s (user="
-"%4$s, context=%5$s)"
+"Message field %1$s cannot be handled on server %2$s with login %3$s (user=%4"
+"$s, context=%5$s)"
 msgstr ""
 
 #. *
@@ -8039,8 +8087,8 @@ msgstr ""
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:363
 msgid ""
-"Checking default folders on server %1$s for user %2$s (%3$s) in context on "
-"%4$s failed: %5$s"
+"Checking default folders on server %1$s for user %2$s (%3$s) in context on %4"
+"$s failed: %5$s"
 msgstr ""
 
 #. *
@@ -8092,8 +8140,8 @@ msgstr ""
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:398
 msgid ""
-"A folder named %1$s already exists on server %2$s with login %3$s (user="
-"%4$s, context=%5$s)."
+"A folder named %1$s already exists on server %2$s with login %3$s (user=%4"
+"$s, context=%5$s)."
 msgstr ""
 
 #. *
@@ -8101,8 +8149,8 @@ msgstr ""
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:408
 msgid ""
-"No create access on mail folder %1$s on server %2$s with login %3$s (user="
-"%4$s, context=%5$s)."
+"No create access on mail folder %1$s on server %2$s with login %3$s (user=%4"
+"$s, context=%5$s)."
 msgstr ""
 
 #. *
@@ -8248,8 +8296,8 @@ msgstr ""
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:513
 msgid ""
-"Mail folder cannot be created/renamed. Folder name exceeds max length of "
-"%1$s."
+"Mail folder cannot be created/renamed. Folder name exceeds max length of %1"
+"$s."
 msgstr ""
 
 #. *
@@ -8342,8 +8390,8 @@ msgstr ""
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:110
 msgid ""
-"Folder \"%1$s\" has been closed on mail server %2$s with login %3$s (user="
-"%4$s, context=%5$s) .\n"
+"Folder \"%1$s\" has been closed on mail server %2$s with login %3$s (user=%4"
+"$s, context=%5$s) .\n"
 "Probably your request took too long."
 msgstr ""
 
@@ -8451,8 +8499,8 @@ msgstr ""
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:197
 msgid ""
-"Connection closed to mail server %1$s with login %2$s (user=%3$s, context="
-"%4$s)."
+"Connection closed to mail server %1$s with login %2$s (user=%3$s, context=%4"
+"$s)."
 msgstr ""
 
 #. *
@@ -8553,8 +8601,8 @@ msgstr ""
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:274
 msgid ""
-"A command failed on mail server %1$s with login %2$s (user=%3$s, context="
-"%4$s). Server response: %5$s"
+"A command failed on mail server %1$s with login %2$s (user=%3$s, context=%4"
+"$s). Server response: %5$s"
 msgstr ""
 
 #. *
@@ -8585,8 +8633,8 @@ msgstr ""
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:294
 msgid ""
-"Error in protocol to mail server %1$s with login %2$s (user=%3$s, context="
-"%4$s). Error message: %5$s"
+"Error in protocol to mail server %1$s with login %2$s (user=%3$s, context=%4"
+"$s). Error message: %5$s"
 msgstr ""
 
 #. *
@@ -8625,9 +8673,8 @@ msgstr ""
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:320
 msgid ""
-"Wrong or missing login data to access mail transport server %1$s with login "
-"%2$s (user=%3$s, context=%4$s). Error message from mail transport server: "
-"%5$s"
+"Wrong or missing login data to access mail transport server %1$s with login %"
+"2$s (user=%3$s, context=%4$s). Error message from mail transport server: %5$s"
 msgstr ""
 
 #. *
@@ -8689,8 +8736,8 @@ msgstr ""
 #. Found two mail accounts with same identifier %1$s for user %2$s in context %3$s.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mailaccount/MailAccountExceptionStrings.java:68
 msgid ""
-"Found two mail accounts with same identifier %1$s for user %2$s in context "
-"%3$s."
+"Found two mail accounts with same identifier %1$s for user %2$s in context %3"
+"$s."
 msgstr ""
 
 #. Found two mail accounts with same email address %1$s for user %2$s in context %3$s.
@@ -9107,8 +9154,8 @@ msgstr ""
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:159
 msgid ""
-"Parent folder %1$s does not allow folder's module setting (%2$s) in context "
-"%3$s"
+"Parent folder %1$s does not allow folder's module setting (%2$s) in context %"
+"3$s"
 msgstr ""
 
 #. *
@@ -9268,8 +9315,8 @@ msgstr ""
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:264
 msgid ""
-"User %1$s is not allowed to move all subfolders of folder %2$s in context "
-"%3$s"
+"User %1$s is not allowed to move all subfolders of folder %2$s in context %3"
+"$s"
 msgstr ""
 
 #. *
@@ -9656,8 +9703,8 @@ msgstr ""
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:499
 msgid ""
-"Only the folder visibility permission is allowed to be changed for folder "
-"%1$s in context %2$s."
+"Only the folder visibility permission is allowed to be changed for folder %1"
+"$s in context %2$s."
 msgstr ""
 
 #. *
@@ -9818,6 +9865,11 @@ msgstr ""
 #. Bad request. The server is unable to handle the request.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/servlet/AjaxExceptionMessages.java:131
 msgid "Bad request. The server is unable to handle the request."
+msgstr ""
+
+#. Missing request body.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/servlet/AjaxExceptionMessages.java:134
+msgid "Missing request body."
 msgstr ""
 
 #. *
@@ -10169,6 +10221,11 @@ msgstr ""
 #. No such snippet found for identifier: %1$s
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.snippet/src/com/openexchange/snippet/SnippetExceptionMessages.java:69
 msgid "No such snippet found for identifier: %1$s"
+msgstr ""
+
+#. No such snippet attachment found for identifier %1$s in snippet %2$s
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.snippet/src/com/openexchange/snippet/SnippetExceptionMessages.java:81
+msgid "No such snippet attachment found for identifier %1$s in snippet %2$s"
 msgstr ""
 
 #. Could not find Apache Solr Core entry for user %1$s and module %2$s in context %3$s.
@@ -12654,9 +12711,8 @@ msgid "Pacific/Pitcairn"
 msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:491
-#, fuzzy
 msgid "Pacific/Pohnpei"
-msgstr "Những người tham dự"
+msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:492
 msgid "Pacific/Ponape"
@@ -12671,9 +12727,8 @@ msgid "Pacific/Rarotonga"
 msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:495
-#, fuzzy
 msgid "Pacific/Saipan"
-msgstr "Những người tham dự"
+msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:496
 msgid "Pacific/Samoa"
@@ -12782,3 +12837,4 @@ msgstr ""
 #: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:522
 msgid "Zulu"
 msgstr ""
+

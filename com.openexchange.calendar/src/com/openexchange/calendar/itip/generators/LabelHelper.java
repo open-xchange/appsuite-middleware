@@ -84,13 +84,15 @@ public class LabelHelper {
 	private DelegationState delegationState;
 	private final ServiceLookup services;
 	
-	private static String fallbackHostname;
+	private static final String fallbackHostname;
 	static {
-        try {
-            fallbackHostname = InetAddress.getLocalHost().getCanonicalHostName();
+	    String fbHostname;
+	    try {
+            fbHostname = InetAddress.getLocalHost().getCanonicalHostName();
         } catch (final UnknownHostException e) {
-            fallbackHostname = "localhost";
+            fbHostname = "localhost";
         }
+	    fallbackHostname = fbHostname;
     }
 	
     public LabelHelper(final DateHelper dateHelper, final TimeZone timezone, final NotificationMail mail, final Locale locale, final Context ctx, final TypeWrapper wrapper, final ServiceLookup services) {

@@ -51,10 +51,7 @@ package com.openexchange.carddav.resources;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Date;
-import java.util.List;
 import java.util.TimeZone;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
@@ -63,9 +60,7 @@ import com.openexchange.carddav.Tools;
 import com.openexchange.carddav.mapping.CardDAVMapper;
 import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
-import com.openexchange.groupware.container.DistributionListEntryObject;
 import com.openexchange.groupware.tools.mappings.MappedTruncation;
 import com.openexchange.groupware.tools.mappings.Mapping;
 import com.openexchange.tools.versit.Versit;
@@ -127,11 +122,23 @@ public class ContactResource extends CardDAVResource {
 			throw protocolException(HttpServletResponse.SC_NOT_FOUND);
 		}
 		try {
-        	/*
-        	 * Insert contact
-        	 */
-        	this.factory.getContactService().createContact(factory.getSession(), Integer.toString(contact.getParentFolderID()), contact);
-            LOG.debug(this.getUrl() + ": created.");
+		    if (false == contact.getMarkAsDistribtuionlist()) {
+	            /*
+	             * Insert contact
+	             */
+	            this.factory.getContactService().createContact(factory.getSession(), Integer.toString(contact.getParentFolderID()), contact);
+	            LOG.debug(this.getUrl() + ": created.");
+		    } else {
+	            /*
+	             * Insert & delete not supported contact (next sync cleans up the client) 
+	             */
+                LOG.warn(this.getUrl() + ": contact groups not supported, performing immediate deletion of this resource.");
+		        contact.removeDistributionLists();
+		        contact.removeNumberOfDistributionLists();
+                this.factory.getContactService().createContact(factory.getSession(), Integer.toString(contact.getParentFolderID()), contact);
+                this.factory.getContactService().deleteContact(factory.getSession(), Integer.toString(contact.getParentFolderID()), 
+                    Integer.toString(contact.getObjectID()), contact.getLastModified());
+		    }
         } catch (OXException e) {
         	if (handle(e)) {
         		this.create();
@@ -211,7 +218,7 @@ public class ContactResource extends CardDAVResource {
 			/*
 			 * Deserialize contact
 			 */
-			Contact newContact = isGroup(versitObject) ? deserializeAsGroup(versitObject) : deserializeAsContact(versitObject);
+			Contact newContact = isGroup(versitObject) ? deserializeAsTemporaryGroup(versitObject) : deserializeAsContact(versitObject);
 		    if (this.exists()) {
 		    	/*
 		    	 * Update previously set metadata
@@ -268,7 +275,7 @@ public class ContactResource extends CardDAVResource {
 
 	@Override
 	protected String generateVCard() throws WebdavProtocolException {
-		return contact.getMarkAsDistribtuionlist() ? serializeAsGroup() : serializeAsContact();
+		return serializeAsContact();
 	}
 
 	@Override
@@ -280,153 +287,19 @@ public class ContactResource extends CardDAVResource {
 		return CONVERTER.convertContact(versitObject);
 	}
 	
-	private Contact deserializeAsGroup(VersitObject versitObject) throws OXException {
-		Contact contact = new Contact();
-		contact.setMarkAsDistributionlist(true);
-		String formattedName = versitObject.getProperty("FN").getValue().toString(); 
-		contact.setDisplayName(formattedName);
-		contact.setSurName(formattedName);
-		String uid = versitObject.getProperty("UID").getValue().toString();
-		if (null != uid && 0 < uid.length()) {
-			contact.setUid(uid);
-		}
-		List<String> uids = extractMembers(versitObject);
-		contact.setDistributionList(resolveMembers(uids));
-		return contact;
-	}
-	
-	private DistributionListEntryObject[] resolveMembers(List<String> uids) throws OXException {
-		List<DistributionListEntryObject> members = new ArrayList<DistributionListEntryObject>();
-		for (String uid : uids) {
-			DistributionListEntryObject member = resolveMember(uid);
-			if (null != member) {
-				members.add(member); 
-			} else {
-				LOG.warn("Unable to resolve group member " + uid);
-			}
-			
-		}
-		return members.toArray(new DistributionListEntryObject[members.size()]);
-	}
-
-	private List<String> resolveMembers(DistributionListEntryObject[] members) throws OXException {
-		List<String> uids = new ArrayList<String>();
-		if (null != members && 0 < members.length) {
-			// TODO optimize this		
-			Collection<Contact> allContacts = factory.getState().getContacts();
-			for (Contact contact : allContacts) {
-				for (DistributionListEntryObject member : members) {
-					if (member.getEntryID() == contact.getObjectID() && member.getFolderID() == contact.getParentFolderID()) {
-						uids.add(contact.getUid());
-						break;
-					}
-				}
-			}
-		}
-		return uids;
-	}
-
-	private DistributionListEntryObject resolveMember(String uid) {
-		ContactField[] distListMemberFields = { ContactField.OBJECT_ID, ContactField.FOLDER_ID, ContactField.DISPLAY_NAME, 
-				ContactField.MARK_AS_DISTRIBUTIONLIST, ContactField.GIVEN_NAME, ContactField.SUR_NAME, 
-				ContactField.EMAIL1, ContactField.EMAIL2, ContactField.EMAIL3 };
-		try {						
-			Contact contact = factory.getState().waitFor(uid, distListMemberFields);
-			if (null != contact) {
-				if (contact.getMarkAsDistribtuionlist()) {
-					LOG.debug(getUrl() + ": referenced distribution list member with '" + uid + 
-							"' is a distribution list by itself, skipping.");
-					return null;
-				} else {
-					return createMember(contact);
-				}
-			} else {
-				LOG.warn(getUrl() + ": unable to get distribution list member with uid '" + uid + "'.");
-			}
-		} catch (OXException e) {
-			LOG.error("Error resolving member '" + uid + "'", e);
-		} catch (InterruptedException e) {
-			LOG.warn("Thread interrupted while waiting for member '" + uid + "'", e);
-		}		
-		return null;
-	}
-
-	private static DistributionListEntryObject createMember(Contact contact) throws OXException {
-		DistributionListEntryObject member = new DistributionListEntryObject();
-		member.setEntryID(contact.getObjectID());
-		member.setFolderID(contact.getParentFolderID());
-		member.setDisplayname(contact.getDisplayName());
-		member.setFirstname(contact.getGivenName());
-		member.setLastname(contact.getSurName());
-		if (null != contact.getEmail1() && 0 < contact.getEmail1().trim().length()) {
-			member.setEmailaddress(contact.getEmail1());
-			member.setEmailfield(DistributionListEntryObject.EMAILFIELD1);
-		} else if (null != contact.getEmail2() && 0 < contact.getEmail2().trim().length()) {
-			member.setEmailaddress(contact.getEmail2());
-			member.setEmailfield(DistributionListEntryObject.EMAILFIELD2);
-		} else if (null != contact.getEmail3() && 0 < contact.getEmail3().trim().length()) {
-			member.setEmailaddress(contact.getEmail3());
-			member.setEmailfield(DistributionListEntryObject.EMAILFIELD3);
-		} else {
-			member.setEmailaddress(null);
-			member.setEmailfield(DistributionListEntryObject.EMAILFIELD1);
-		}
-		return member;
-	}
-	
-    private static List<String> extractMembers(VersitObject versitObject) {
-    	final List<String> uids = new ArrayList<String>();
-        for (int i = 0, size = versitObject.getPropertyCount(); i < size; i++) {
-            final com.openexchange.tools.versit.Property property = versitObject.getProperty(i);
-            if (property.getName().equals("X-ADDRESSBOOKSERVER-MEMBER")) {
-            	String uid = extractMemberUID(property);
-            	if (null == uid) {
-            		LOG.warn("Got no value for 'X-ADDRESSBOOKSERVER-MEMBER' property, skipping.");
-            		continue;
-            	} else {
-            		uids.add(uid);
-            	}
-            }
-        }    	
-    	return uids;
-    }
-
-    private static String extractMemberUID(com.openexchange.tools.versit.Property property) {
-    	String uid = null;
-    	Object value = property.getValue();
-    	if (null != value) {
-    		uid = (String)value;
-        	String prefix = "urn:uuid:";
-    		if (uid.toLowerCase().startsWith(prefix) && prefix.length() < uid.length()) {
-    			uid = uid.substring(prefix.length());
-    		}
-    	} 
-    	return uid;
-    }
-	
-	private String serializeAsGroup() throws WebdavProtocolException {
-        StringBuilder stringBuilder = new StringBuilder();
-        String name = this.getDisplayName();
-        stringBuilder
-        	.append("BEGIN:VCARD\r\n")
-        	.append("VERSION:3.0\r\n")
-        	.append("X-ADDRESSBOOKSERVER-KIND:group\r\n")
-        	.append("N:").append(name).append("\r\n")
-        	.append("FN:").append(name).append("\r\n")
-        	.append("UID:").append(this.getUID()).append("\r\n")
-        ;
-        try {
-            List<String> uids = this.resolveMembers(contact.getDistributionList());
-            for (String uid : uids) {
-                stringBuilder.append("X-ADDRESSBOOKSERVER-MEMBER:urn:uuid:").append(uid).append("\r\n");
-            }
-        } catch (final OXException e) {
-        	throw protocolException(e);
+    private Contact deserializeAsTemporaryGroup(VersitObject versitObject) throws OXException {
+        Contact contact = new Contact();
+        contact.setMarkAsDistributionlist(true);
+        String formattedName = versitObject.getProperty("FN").getValue().toString(); 
+        contact.setDisplayName(formattedName);
+        contact.setSurName(formattedName);
+        String uid = versitObject.getProperty("UID").getValue().toString();
+        if (null != uid && 0 < uid.length()) {
+            contact.setUid(uid);
         }
-        stringBuilder.append("END:VCARD\r\n");
-        return stringBuilder.toString();
-	}
-
+        return contact;
+    }
+    
 	private String serializeAsContact() throws WebdavProtocolException {
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         VersitDefinition contactDef = Versit.getDefinition("text/vcard");

@@ -70,7 +70,7 @@ public abstract class UserStorage {
     /**
      * The instance
      */
-    private static UserStorage instance;
+    private static volatile UserStorage instance;
 
     /**
      * Default constructor.

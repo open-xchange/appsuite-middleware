@@ -51,7 +51,7 @@
 	</target>
 
 	<target name="createAndInstallLibs">
-		<symlink resource="${bundlesDir}/org.apache.commons.cli_1.0.0.v20080604-1500.jar" link="${destDir}/${prefix}/${libDir}/org.apache.commons.cli_1.0.0.v20080604-1500.jar" overwrite="true" />
+		<symlink resource="${bundlesDir}/org.apache.commons.cli_1.2.0.v201105210650.jar" link="${destDir}/${prefix}/${libDir}/org.apache.commons.cli_1.2.0.v201105210650.jar" overwrite="true" />
     	<symlink resource="${bundlesDir}/${Bundle-SymbolicName}/${Bundle-SymbolicName}.jar" link="${destDir}/${prefix}/${libDir}/${Bundle-SymbolicName}.jar" overwrite="true"/>
     	<symlink resource="${bundlesDir}/${Bundle-SymbolicName}/lib/opencsv-2.0.jar" link="${destDir}/${prefix}/${libDir}/opencsv-2.0.jar" overwrite="true"/>
 	</target>

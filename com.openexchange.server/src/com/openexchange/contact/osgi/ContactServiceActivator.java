@@ -50,16 +50,17 @@
 package com.openexchange.contact.osgi;
 
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
-
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.contact.ContactService;
 import com.openexchange.contact.internal.ContactServiceImpl;
 import com.openexchange.contact.internal.ContactServiceLookup;
 import com.openexchange.contact.storage.registry.ContactStorageRegistry;
 import com.openexchange.context.ContextService;
 import com.openexchange.folder.FolderService;
+import com.openexchange.log.LogFactory;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.server.services.ServerServiceRegistry;
+import com.openexchange.userconf.UserConfigurationService;
 
 /**
  * {@link ContactServiceActivator}
@@ -79,7 +80,8 @@ public class ContactServiceActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ContactStorageRegistry.class, ContextService.class, FolderService.class };
+        return new Class<?>[] { ContactStorageRegistry.class, ContextService.class, FolderService.class, ConfigurationService.class, 
+            UserConfigurationService.class };
     }
     
     @Override

@@ -1755,7 +1755,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @param anniversary A {@link Date} containing the anniversary
      */
-    final public void setAnniversary(final Date anniversary) {
+    public final void setAnniversary(final Date anniversary) {
         if (null == anniversary) {
             this.anniversaryset = true;
         }

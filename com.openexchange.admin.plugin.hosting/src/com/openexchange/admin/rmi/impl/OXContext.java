@@ -87,6 +87,7 @@ import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 import com.openexchange.admin.rmi.exceptions.NoSuchContextException;
 import com.openexchange.admin.rmi.exceptions.NoSuchDatabaseException;
 import com.openexchange.admin.rmi.exceptions.NoSuchFilestoreException;
+import com.openexchange.admin.rmi.exceptions.NoSuchObjectException;
 import com.openexchange.admin.rmi.exceptions.NoSuchReasonException;
 import com.openexchange.admin.rmi.exceptions.OXContextException;
 import com.openexchange.admin.rmi.exceptions.PoolException;
@@ -138,7 +139,11 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
 
         new BasicAuthenticator(context).doAuthentication(auth);
 
-        setIdOrGetIDFromNameAndIdObject(null, ctx);
+        try {
+            setIdOrGetIDFromNameAndIdObject(null, ctx);
+        } catch (NoSuchObjectException e) {
+            throw new NoSuchContextException(e);
+        }
         log.debug(ctx);
 
         Context backup_ctx = null; // used for invalidating old login mappings in the cache
@@ -254,7 +259,11 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
         final BasicAuthenticator basicAuthenticator = new BasicAuthenticator(context);
         basicAuthenticator.doAuthentication(auth);
 
-        setIdOrGetIDFromNameAndIdObject(null, ctx);
+        try {
+            setIdOrGetIDFromNameAndIdObject(null, ctx);
+        } catch (NoSuchObjectException e) {
+            throw new NoSuchContextException(e);
+        }
         log.debug(ctx);
         try {
             if (!tool.existsContext(ctx)) {
@@ -326,7 +335,11 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
 
         new BasicAuthenticator(context).doAuthentication(auth);
 
-        setIdOrGetIDFromNameAndIdObject(null, ctx);
+        try {
+            setIdOrGetIDFromNameAndIdObject(null, ctx);
+        } catch (NoSuchObjectException e) {
+            throw new NoSuchContextException(e);
+        }
         log.debug(ctx + " - " + reason);
         try {
             if (!tool.existsContext(ctx)) {
@@ -433,7 +446,11 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
 
         new BasicAuthenticator(context).doAuthentication(auth);
 
-        setIdOrGetIDFromNameAndIdObject(null, ctx);
+        try {
+            setIdOrGetIDFromNameAndIdObject(null, ctx);
+        } catch (NoSuchObjectException e) {
+            throw new NoSuchContextException(e);
+        }
         log.debug(ctx);
         try {
             if (!tool.existsContext(ctx)) {
@@ -510,7 +527,11 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
                 if (!ctx.isListrun()) {
                     filled = false;
                 }
-                setIdOrGetIDFromNameAndIdObject(null, ctx);
+                try {
+                    setIdOrGetIDFromNameAndIdObject(null, ctx);
+                } catch (NoSuchObjectException e) {
+                    throw new NoSuchContextException(e);
+                }
                 log.debug(ctx);
                 try {
                     if (!tool.existsContext(ctx)) {
@@ -638,7 +659,11 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
         }
         new BasicAuthenticator().doAuthentication(auth);
 
-        setIdOrGetIDFromNameAndIdObject(null, db);
+        try {
+            setIdOrGetIDFromNameAndIdObject(null, db);
+        } catch (NoSuchObjectException e) {
+            throw new NoSuchDatabaseException(e);
+        }
         log.debug(db);
         try {
             if( !tool.existsDatabase(db.getId()) ) {
@@ -716,8 +741,17 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
 
         new BasicAuthenticator().doAuthentication(auth);
 
-        setIdOrGetIDFromNameAndIdObject(null, ctx);
-        setIdOrGetIDFromNameAndIdObject(null, db);
+        try {
+            setIdOrGetIDFromNameAndIdObject(null, ctx);
+        } catch (NoSuchObjectException e) {
+            throw new NoSuchContextException(e);
+        }
+        try {
+            setIdOrGetIDFromNameAndIdObject(null, db);
+        } catch (NoSuchObjectException e) {
+            // FIXME normally NoSuchDatabaseException needs to be thrown here. Unfortunately it is not already in the throws declaration.
+            throw new StorageException(e);
+        }
         final int reason_id = reason.getId();
         if (log.isDebugEnabled()) {
             log.debug(ctx + " - " + db + " - " + reason_id);
@@ -795,7 +829,11 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
             throw new OXContextException(e);
         }
         try {
-            setIdOrGetIDFromNameAndIdObject(null, ctx);
+            try {
+                setIdOrGetIDFromNameAndIdObject(null, ctx);
+            } catch (NoSuchObjectException e) {
+                throw new NoSuchContextException(e);
+            }
             if (!tool.existsContext(ctx)) {
                 throw new NoSuchContextException();
             } else if (!tool.existsStore(dst_filestore.getId().intValue())) {
@@ -937,7 +975,11 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
 
         new BasicAuthenticator(context).doAuthentication(auth);
 
-        setIdOrGetIDFromNameAndIdObject(null, ctx);
+        try {
+            setIdOrGetIDFromNameAndIdObject(null, ctx);
+        } catch (NoSuchObjectException e) {
+            throw new NoSuchContextException(e);
+        }
 
         log.debug(ctx+" - "+access);
 
@@ -987,7 +1029,11 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
 
         new BasicAuthenticator(context).doAuthentication(auth);
 
-        setIdOrGetIDFromNameAndIdObject(null, ctx);
+        try {
+            setIdOrGetIDFromNameAndIdObject(null, ctx);
+        } catch (NoSuchObjectException e) {
+            throw new NoSuchContextException(e);
+        }
 
         log.debug(ctx+" - "+access_combination_name);
 
@@ -1044,7 +1090,11 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
         }
         new BasicAuthenticator(context).doAuthentication(auth);
 
-        setIdOrGetIDFromNameAndIdObject(null, ctx);
+        try {
+            setIdOrGetIDFromNameAndIdObject(null, ctx);
+        } catch (NoSuchObjectException e) {
+            throw new NoSuchContextException(e);
+        }
 
         log.debug(ctx);
 
@@ -1084,7 +1134,11 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
 
         new BasicAuthenticator(context).doAuthentication(auth);
 
-        setIdOrGetIDFromNameAndIdObject(null, ctx);
+        try {
+            setIdOrGetIDFromNameAndIdObject(null, ctx);
+        } catch (NoSuchObjectException e) {
+            throw new NoSuchContextException(e);
+        }
 
         log.debug(ctx);
 
@@ -1119,7 +1173,11 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
 
         new BasicAuthenticator(context).doAuthentication(auth);
 
-        setIdOrGetIDFromNameAndIdObject(null, ctx);
+        try {
+            setIdOrGetIDFromNameAndIdObject(null, ctx);
+        } catch (NoSuchObjectException e) {
+            throw new NoSuchContextException(e);
+        }
 
         log.debug(ctx);
 

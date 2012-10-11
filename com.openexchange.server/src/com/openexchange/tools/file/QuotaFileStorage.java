@@ -60,7 +60,7 @@ import com.openexchange.tools.file.external.QuotaFileStorageFactory;
 
 public final class QuotaFileStorage extends FileStorage {
 
-    private static QuotaFileStorageFactory qfss;
+    private static volatile QuotaFileStorageFactory qfss;
 
     private com.openexchange.tools.file.external.QuotaFileStorage qfs;
 

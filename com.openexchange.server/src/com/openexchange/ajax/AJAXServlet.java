@@ -75,7 +75,6 @@ import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.fileupload.FileUploadException;
 import org.apache.commons.fileupload.disk.DiskFileItemFactory;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
-import org.apache.commons.io.FileCleaningTracker;
 import org.apache.commons.logging.Log;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -752,16 +751,16 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
     /**
      * The file cleaning tracker.
      */
-    private static volatile FileCleaningTracker tracker;
+    private static volatile DeleteOnExitFileCleaningTracker tracker;
     
     /**
      * Exits the file cleaning tracker.
      */
     public static void exitTracker() {
         AJAXServlet.servletFileUpload = null;
-        final FileCleaningTracker tracker = AJAXServlet.tracker;
+        final DeleteOnExitFileCleaningTracker tracker = AJAXServlet.tracker;
         if (null != tracker) {
-            tracker.exitWhenFinished();
+            tracker.deleteAllTracked();
             AJAXServlet.tracker = null;
         }
     }
@@ -781,7 +780,7 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
          */
         factory.setSizeThreshold(SIZE_THRESHOLD);
         factory.setRepository(new File(ServerConfig.getProperty(Property.UploadDirectory)));
-        final FileCleaningTracker tracker = new DeleteOnExitFileCleaningTracker();
+        final DeleteOnExitFileCleaningTracker tracker = new DeleteOnExitFileCleaningTracker(false);
         factory.setFileCleaningTracker(tracker);
         AJAXServlet.tracker = tracker;
         /*

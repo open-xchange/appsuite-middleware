@@ -46,6 +46,5 @@ Import-Package: com.openexchange.ajax,
  org.osgi.service.event,
  org.osgi.service.http,
  org.osgi.util.tracker
-Bundle-ClassPath: .,
- lib/xSocket-2.7.1.jar
+Bundle-ClassPath: .
 Bundle-Activator: com.openexchange.ajp13.osgi.AJPv13Activator

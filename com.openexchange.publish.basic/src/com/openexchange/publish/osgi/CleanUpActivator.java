@@ -51,10 +51,6 @@ package com.openexchange.publish.osgi;
 
 import java.util.Dictionary;
 import java.util.Hashtable;
-import java.util.LinkedList;
-import java.util.List;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.event.EventConstants;
 import org.osgi.service.event.EventHandler;
 import com.openexchange.context.ContextService;
@@ -72,42 +68,28 @@ import com.openexchange.publish.impl.InfostoreCleanUpEventHandler;
  */
 public class CleanUpActivator extends HousekeepingActivator {
 
-    private List<ServiceRegistration<?>> registrations;
-
     @Override
     public void startBundle() throws Exception {
         final ContextService contexts = getService(ContextService.class);
 
         final EntityCleanUp entityCleanUp = new EntityCleanUp();
 
-        registrations = new LinkedList<ServiceRegistration<?>>();
-
         registerHandler(
-            context,
             new FolderCleanUpEventHandler(entityCleanUp, "contacts", FolderObject.CONTACT, contexts),
             "com/openexchange/groupware/folder/delete");
 
         registerHandler(
-            context,
             new FolderCleanUpEventHandler(entityCleanUp, "infostore", FolderObject.INFOSTORE, contexts),
             "com/openexchange/groupware/folder/delete");
 
-        registerHandler(context, new InfostoreCleanUpEventHandler(entityCleanUp, contexts), FileStorageEventConstants.DELETE_TOPIC);
+        registerHandler(new InfostoreCleanUpEventHandler(entityCleanUp, contexts), FileStorageEventConstants.DELETE_TOPIC);
 
     }
 
-    private void registerHandler(final BundleContext context, final EventHandler handler, final String topic) {
+    private void registerHandler(final EventHandler handler, final String topic) {
         final Dictionary<String, Object> serviceProperties = new Hashtable<String, Object>(1);
         serviceProperties.put(EventConstants.EVENT_TOPIC, new String[] { topic });
-        registrations.add(context.registerService(EventHandler.class.getName(), handler, serviceProperties));
-    }
-
-    @Override
-    public void stopBundle() throws Exception {
-        for (final ServiceRegistration<?> registration : registrations) {
-            registration.unregister();
-        }
-        registrations = null;
+        registerService(EventHandler.class, handler, serviceProperties);
     }
 
     @Override
