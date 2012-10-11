@@ -55,10 +55,10 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import org.junit.Before;
 import org.junit.Test;
+import com.openexchange.realtime.util.ElementPath;
 
 
 /**
@@ -196,7 +196,10 @@ public class PayloadTreeNodeTest {
      */
     @Test
     public void testSetChildren() {
-        fail("Not yet implemented");
+        assertFalse(parentPayloadTreeNode.hasChildren());
+        parentPayloadTreeNode.setChildren(filledPayloadTreeNodeList);
+        assertTrue(parentPayloadTreeNode.hasChildren());
+        assertEquals(filledPayloadTreeNodeList, parentPayloadTreeNode.getChildren());
     }
 
     /**
@@ -204,7 +207,12 @@ public class PayloadTreeNodeTest {
      */
     @Test
     public void testAddChild() {
-        fail("Not yet implemented");
+        assertFalse(parentPayloadTreeNode.hasChildren());
+        parentPayloadTreeNode.addChild(payloadTreeNode1);
+        parentPayloadTreeNode.addChild(payloadTreeNode2);
+        parentPayloadTreeNode.addChild(payloadTreeNode3);
+        assertTrue(parentPayloadTreeNode.hasChildren());
+        assertEquals(filledPayloadTreeNodeList, parentPayloadTreeNode.getChildren());
     }
 
     /**
@@ -212,7 +220,12 @@ public class PayloadTreeNodeTest {
      */
     @Test
     public void testAddChildren() {
-        fail("Not yet implemented");
+        assertFalse(parentPayloadTreeNode.hasChildren());
+        parentPayloadTreeNode.addChildren(emptyPayloadTreeNodeList);
+        assertFalse(parentPayloadTreeNode.hasChildren());
+        parentPayloadTreeNode.addChildren(filledPayloadTreeNodeList);
+        assertTrue(parentPayloadTreeNode.hasChildren());
+        assertEquals(filledPayloadTreeNodeList, parentPayloadTreeNode.getChildren());
     }
 
     /**
@@ -220,7 +233,11 @@ public class PayloadTreeNodeTest {
      */
     @Test
     public void testRemoveChild() {
-        fail("Not yet implemented");
+        assertFalse(parentPayloadTreeNode.hasChildren());
+        parentPayloadTreeNode.addChild(payloadTreeNode1);
+        assertTrue(parentPayloadTreeNode.hasChildren());
+        assertEquals(1,parentPayloadTreeNode.getNumberOfChildren());
+        assertEquals(payloadTreeNode1,parentPayloadTreeNode.getChildren().get(0));
     }
 
     /**
@@ -228,7 +245,14 @@ public class PayloadTreeNodeTest {
      */
     @Test
     public void testRemoveChildren() {
-        fail("Not yet implemented");
+        assertFalse(parentPayloadTreeNode.hasChildren());
+        parentPayloadTreeNode.addChildren(filledPayloadTreeNodeList);
+        assertTrue(parentPayloadTreeNode.hasChildren());
+        emptyPayloadTreeNodeList.add(payloadTreeNode1);
+        emptyPayloadTreeNodeList.add(payloadTreeNode2);
+        parentPayloadTreeNode.removeChildren(emptyPayloadTreeNodeList);
+        assertEquals(1, parentPayloadTreeNode.getNumberOfChildren());
+        assertEquals(payloadTreeNode3, parentPayloadTreeNode.getChildren().get(0));
     }
 
     /**
@@ -236,7 +260,7 @@ public class PayloadTreeNodeTest {
      */
     @Test
     public void testGetData() {
-        fail("Not yet implemented");
+        assertEquals(payloadElement1.getData(), payloadTreeNode1.getData());
     }
 
     /**
@@ -244,7 +268,8 @@ public class PayloadTreeNodeTest {
      */
     @Test
     public void testSetData() {
-        fail("Not yet implemented");
+        payloadTreeNode1.setData(2, "Integer");
+        assertEquals(2, payloadTreeNode1.getData());
     }
 
     /**
@@ -252,7 +277,7 @@ public class PayloadTreeNodeTest {
      */
     @Test
     public void testGetElementName() {
-        fail("Not yet implemented");
+        assertEquals(payloadElement1.getElementName(), payloadTreeNode1.getElementName());
     }
 
     /**
@@ -260,7 +285,7 @@ public class PayloadTreeNodeTest {
      */
     @Test
     public void testGetFormat() {
-        fail("Not yet implemented");
+        assertEquals(payloadElement1.getFormat(), payloadTreeNode1.getFormat());
     }
 
     /**
@@ -268,7 +293,7 @@ public class PayloadTreeNodeTest {
      */
     @Test
     public void testGetElementPath() {
-        fail("Not yet implemented");
+        assertEquals(new ElementPath(payloadElement1.getNamespace(), payloadElement1.getElementName()), payloadTreeNode1.getElementPath());
     }
 
     /**
@@ -276,7 +301,7 @@ public class PayloadTreeNodeTest {
      */
     @Test
     public void testGetNamespace() {
-        fail("Not yet implemented");
+        assertEquals(payloadElement1.getNamespace(), payloadTreeNode1.getNamespace());
     }
 
     /**
@@ -284,7 +309,9 @@ public class PayloadTreeNodeTest {
      */
     @Test
     public void testEqualsObject() {
-        fail("Not yet implemented");
+        assertEquals(new PayloadTreeNode(payloadElement1), new PayloadTreeNode(payloadElement1));
+        assertEquals(new PayloadTreeNode(payloadElement1).addChild(payloadTreeNode2), new PayloadTreeNode(payloadElement1).addChild(payloadTreeNode2));
+        assertEquals(new PayloadTreeNode(payloadElement1).addChild(payloadTreeNode2), new PayloadTreeNode(payloadElement1).addChild(payloadTreeNode3));
     }
 
     /**
@@ -295,4 +322,8 @@ public class PayloadTreeNodeTest {
         fail("Not yet implemented");
     }
 
+    @Test
+    public void testNesting() {
+        
+    }
 }

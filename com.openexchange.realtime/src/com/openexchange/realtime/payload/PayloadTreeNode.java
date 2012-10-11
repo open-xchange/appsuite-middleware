@@ -165,34 +165,37 @@ public class PayloadTreeNode {
      * Add a node to the children of this node.
      * 
      * @param node the node to add
-     * @return true if the child was added, else false
+     * @return This PayloadTreeNode
      */
-    public boolean addChild(PayloadTreeNode node) {
+    public PayloadTreeNode addChild(PayloadTreeNode node) {
         node.parent = this;
-        return children.add(node);
+        children.add(node);
+        return this;
     }
 
     /**
      * Add a Collection of nodes to the children of this node.
      * 
      * @param nodes the nodes to add
-     * @return true if the children changed, else false
+     * @return This PayloadTreeNode
      */
-    public boolean addChildren(Collection<PayloadTreeNode> nodes) {
+    public PayloadTreeNode addChildren(Collection<PayloadTreeNode> nodes) {
         for (PayloadTreeNode node : nodes) {
             node.parent = this;
         }
-        return children.addAll(nodes);
+        children.addAll(nodes);
+        return this;
     }
 
     /**
      * Remove a node from the children of this node.
      * 
      * @param node The node to remove
-     * @return True if the node was removed, else false
+     * @return Ths PayloadTreeNode
      */
-    public boolean removeChild(PayloadTreeNode node) {
-        return children.remove(node);
+    public PayloadTreeNode removeChild(PayloadTreeNode node) {
+        children.remove(node);
+        return this;
     }
 
     /**
@@ -201,8 +204,9 @@ public class PayloadTreeNode {
      * @param nodes The nodes to remove
      * @return
      */
-    public boolean removeChildren(Collection<PayloadTreeNode> nodes) {
-        return children.removeAll(nodes);
+    public PayloadTreeNode removeChildren(Collection<PayloadTreeNode> nodes) {
+        children.removeAll(nodes);
+        return this;
     }
 
     // -------------------------------------------------------------------------
