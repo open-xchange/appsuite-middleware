@@ -58,6 +58,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -94,7 +95,7 @@ import com.sun.mail.imap.protocol.UID;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @see Threader
  */
-public final class Threadable implements Cloneable, Serializable {
+public final class Threadable implements Cloneable, Serializable, Iterable<Threadable> {
 
     private static final long serialVersionUID = -680041493836177453L;
 
@@ -318,10 +319,46 @@ public final class Threadable implements Cloneable, Serializable {
     }
 
     /**
-     * Returns each subsequent element in the set of messages of which this IThreadable is the root. Order is unimportant.
+     * Returns each subsequent element in the set of messages of which this {@code Threadable} as the root. Order is unimportant.
      */
     public Enumeration<Threadable> allElements() {
         return new ThreadableEnumeration(this, true);
+    }
+
+    @Override
+    public Iterator<Threadable> iterator() {
+        return new IteratorImpl(this);
+    }
+
+    /**
+     * Gets the number of this {@code Threadable}'s top elements.
+     *
+     * @return The number of top elements
+     */
+    public int tops() {
+        int count = 1;
+        Threadable t = this.next;
+        while (t != null) {
+            count++;
+            t = t.next;
+        }
+        return count;
+    }
+
+    /**
+     * Gets the size of this {@code Threadable}.
+     *
+     * @return The size
+     */
+    public int size() {
+        int count = 0;
+        for (final Enumeration<Threadable> e = allElements(); e.hasMoreElements();) {
+            final Threadable t = e.nextElement();
+            if (!t.isDummy()) {
+                count++;
+            }
+        }
+        return count;
     }
 
     /**
@@ -929,6 +966,43 @@ public final class Threadable implements Cloneable, Serializable {
             }
 
         }));
+    }
+
+    private static final class IteratorImpl implements Iterator<Threadable> {
+
+        private final Enumeration<Threadable> e;
+        private Threadable cur;
+
+        protected IteratorImpl(final Threadable t) {
+            super();
+            this.e = t.allElements();
+        }
+
+        @Override
+        public boolean hasNext() {
+            if (!e.hasMoreElements()) {
+                return false;
+            }
+            do {
+                cur = e.nextElement();
+            } while (cur.isDummy() && e.hasMoreElements());
+            return !cur.isDummy();
+        }
+
+        @Override
+        public Threadable next() {
+            if (null == cur || cur.isDummy()) {
+                throw new NoSuchElementException();
+            }
+            final Threadable t = cur;
+            cur = null;
+            return t;
+        }
+
+        @Override
+        public void remove() {
+            throw new UnsupportedOperationException("remove() not supported");
+        }
     }
 
     /**

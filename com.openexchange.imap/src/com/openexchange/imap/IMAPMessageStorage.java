@@ -1551,8 +1551,8 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                     } else {
                         threadable = new Threader().thread(threadable);
                     }
+                    threadList = Threadable.toNodeList(threadable);
                     cached = threadableResult.cached;
-                    threadList = Threadable.toNodeList(threadableResult.threadable);
                     if (logIt) {
                         final long dur = System.currentTimeMillis() - st;
                         LOG.info("\tIMAPMessageStorage.getThreadSortedMessages(): In-application thread-sort took " + dur + "msec for folder " + fullName);
