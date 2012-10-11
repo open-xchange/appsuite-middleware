@@ -87,10 +87,6 @@ fi
 Fifth release candidate for 6.22.0
 * Tue Oct 09 2012 Marc Arens <marc.arens@open-xchange.com>
 Fourth release candidate for 6.22.0
-* Tue Aug 21 2012 Marc Arens <marc.arens@open-xchange.com>
-First release candidate for 6.22.0
-* Mon Aug 20 2012 Marc Arens <marc.arens@open-xchange.com>
-prepare for 6.22.0
 * Fri Oct 05 2012 Marc Arens <marc.arens@open-xchange.com>
 Third release candidate for 6.22.0
 * Thu Oct 04 2012 Marc Arens <marc.arens@open-xchange.com>
