@@ -1035,6 +1035,9 @@ public class AJAXRequestData {
      * @return <code>true</code> if existent; else <code>false</code>
      */
     public boolean containsProperty(final String name) {
+        if (null == name) {
+            return false;
+        }
         return properties.containsKey(name);
     }
 
@@ -1045,9 +1048,12 @@ public class AJAXRequestData {
      * @return The value or <code>null</code> if absent
      */
     public <V> V getProperty(final String name) {
+        if (null == name) {
+            return null;
+        }
         try {
             return (V) properties.get(name);
-        } catch (final ClassCastException e) {
+        } catch (final RuntimeException e) {
             return null;
         }
     }
