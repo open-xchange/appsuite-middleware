@@ -62,7 +62,6 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.AJAXServlet;
-import com.openexchange.dispatcher.Parameterizable;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.notify.hostname.HostnameService;
 import com.openexchange.server.services.ServerServiceRegistry;
@@ -115,6 +114,7 @@ public class AJAXRequestDataTools {
      * @throws IOException If an I/O error occurs
      * @throws OXException If an OX error occurs
      */
+    @SuppressWarnings("unused")
     public AJAXRequestData parseRequest(final HttpServletRequest req, final boolean preferStream, final boolean isFileUpload, final ServerSession session, final String prefix) throws IOException, OXException {
         final AJAXRequestData retval = new AJAXRequestData();
         parseHostName(retval, req, session);
@@ -144,9 +144,6 @@ public class AJAXRequestDataTools {
             @SuppressWarnings("unchecked") final Set<Entry<String, String[]>> entrySet = req.getParameterMap().entrySet();
             for (final Entry<String, String[]> entry : entrySet) {
                 retval.putParameter(entry.getKey(), entry.getValue()[0]);
-            }
-            if (req instanceof Parameterizable) {
-                retval.setParameterizable((Parameterizable) req);
             }
         }
         /*

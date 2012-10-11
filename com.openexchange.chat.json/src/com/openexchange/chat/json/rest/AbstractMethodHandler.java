@@ -61,7 +61,6 @@ import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestDataTools;
 import com.openexchange.ajax.requesthandler.DispatcherServlet;
-import com.openexchange.dispatcher.Parameterizable;
 import com.openexchange.exception.OXException;
 import com.openexchange.tools.session.ServerSession;
 
@@ -117,9 +116,7 @@ public abstract class AbstractMethodHandler implements MethodHandler {
                     requestData.putParameter(name, entry.getValue()[0]);
                 }
             }
-            if (req instanceof Parameterizable) {
-                requestData.setParameterizable((Parameterizable) req);
-            }
+            requestData.examineServletRequest(req);
         }
         /*
          * Check for ETag header to support client caching

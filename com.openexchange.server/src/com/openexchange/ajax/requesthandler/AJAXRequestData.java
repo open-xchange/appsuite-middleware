@@ -226,12 +226,15 @@ public class AJAXRequestData {
     }
     
     /**
-     * Sets the parameterizable instance.
+     * Examines specified {@code HttpServletRequest} instance.
      *
-     * @param parameterizable The parameterizable instance to set
+     * @param servletRequest The HTTP Servlet request to examine
      */
-    public void setParameterizable(final Parameterizable parameterizable) {
-        this.parameterizable = parameterizable;
+    public void examineServletRequest(final HttpServletRequest servletRequest) {
+        if (null == servletRequest) {
+            return;
+        }
+        this.parameterizable = servletRequest instanceof Parameterizable ? (Parameterizable) servletRequest : null;
     }
 
     /**
@@ -302,6 +305,7 @@ public class AJAXRequestData {
      * @param httpServletRequest The HTTP Servlet request to set
      */
     public void setHttpServletRequest(final HttpServletRequest httpServletRequest) {
+        examineServletRequest(httpServletRequest);
         this.httpServletRequest = httpServletRequest;
     }
 
