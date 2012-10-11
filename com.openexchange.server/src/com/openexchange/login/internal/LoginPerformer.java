@@ -56,6 +56,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CompletionService;
 import java.util.regex.Pattern;
 import javax.security.auth.login.LoginException;
 import javax.servlet.http.HttpServletRequest;
@@ -92,6 +93,7 @@ import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.Parameterized;
 import com.openexchange.sessiond.SessiondService;
+import com.openexchange.threadpool.ThreadPoolCompletionService;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.threadpool.ThreadPools;
 import com.openexchange.threadpool.behavior.CallerRunsBehavior;
@@ -161,7 +163,7 @@ public final class LoginPerformer {
             public Authenticated doAuthentication(final LoginResultImpl retval) throws OXException {
                 try {
                     return Authentication.autologin(request.getLogin(), request.getPassword(), properties);
-                } catch (OXException e) {
+                } catch (final OXException e) {
                     if (LoginExceptionCodes.NOT_SUPPORTED.equals(e)) {
                         return null;
                     }
@@ -380,11 +382,24 @@ public final class LoginPerformer {
                 handleSafely(login, handler, true);
             }
         } else {
+            CompletionService<Void> completionService = null;
+            int blocking = 0;
             for (final Iterator<LoginHandlerService> it = LoginHandlerRegistry.getInstance().getLoginHandlers(); it.hasNext();) {
                 final LoginHandlerService handler = it.next();
                 if (handler instanceof Blocking) {
                     // Current LoginHandlerService must not be invoked concurrently
-                    handleSafely(login, handler, true);
+                    if (null == completionService) {
+                        completionService = new ThreadPoolCompletionService<Void>(executor);
+                    }
+                    final Runnable task = new Runnable() {
+                        
+                        @Override
+                        public void run() {
+                            handleSafely(login, handler, true);
+                        }
+                    };
+                    completionService.submit(task, null);
+                    blocking++;
                 } else {
                     executor.submit(new LoginPerformerTask() {
 
@@ -394,6 +409,16 @@ public final class LoginPerformer {
                             return null;
                         }
                     }, CallerRunsBehavior.getInstance());
+                }
+            }
+            // Await completion of blocking LoginHandlerServices
+            if (blocking > 0 && null != completionService) {
+                for (int i = 0; i < blocking; i++) {
+                    try {
+                        completionService.take();
+                    } catch (final InterruptedException e) {
+                        Thread.currentThread().interrupt();
+                    }
                 }
             }
         }
@@ -406,11 +431,24 @@ public final class LoginPerformer {
                 handleSafely(logout, it.next(), false);
             }
         } else {
+            CompletionService<Void> completionService = null;
+            int blocking = 0;
             for (final Iterator<LoginHandlerService> it = LoginHandlerRegistry.getInstance().getLoginHandlers(); it.hasNext();) {
                 final LoginHandlerService handler = it.next();
                 if (handler instanceof Blocking) {
                     // Current LoginHandlerService must not be invoked concurrently
-                    handleSafely(logout, handler, false);
+                    if (null == completionService) {
+                        completionService = new ThreadPoolCompletionService<Void>(executor);
+                    }
+                    final Runnable task = new Runnable() {
+                        
+                        @Override
+                        public void run() {
+                            handleSafely(logout, handler, false);
+                        }
+                    };
+                    completionService.submit(task, null);
+                    blocking++;
                 } else {
                     executor.submit(new LoginPerformerTask() {
                         @Override
@@ -419,6 +457,16 @@ public final class LoginPerformer {
                             return null;
                         }
                     }, CallerRunsBehavior.getInstance());
+                }
+            }
+            // Await completion of blocking LoginHandlerServices
+            if (blocking > 0 && null != completionService) {
+                for (int i = 0; i < blocking; i++) {
+                    try {
+                        completionService.take();
+                    } catch (final InterruptedException e) {
+                        Thread.currentThread().interrupt();
+                    }
                 }
             }
         }
