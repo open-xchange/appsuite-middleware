@@ -8,7 +8,7 @@ BuildRequires: open-xchange-core
 BuildRequires: open-xchange-oauth
 BuildRequires: java-devel >= 1.6.0
 Version:       @OXVERSION@
-%define        ox_release 1
+%define        ox_release 2
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -47,6 +47,8 @@ ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} 
 /opt/open-xchange/osgi/bundle.d/*
 
 %changelog
+* Thu Oct 11 2012 Marcus Klein <marcus.klein@open-xchange.com>
+Release build for EDP drop #5
 * Tue Sep 04 2012 Marcus Klein <marcus.klein@open-xchange.com>
 First release candidate for 6.23.0
 * Mon Sep 03 2012 Marcus Klein <marcus.klein@open-xchange.com>

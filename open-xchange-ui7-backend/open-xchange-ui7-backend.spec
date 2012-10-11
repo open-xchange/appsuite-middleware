@@ -47,3 +47,9 @@ ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} 
 %dir /opt/open-xchange/etc/
 %config(noreplace) /opt/open-xchange/etc/*
 
+
+%changelog
+* Thu Oct 11 2012 Viktor Pracht <viktor.pracht@open-xchange.com>
+Release build for EDP drop #5
+* Tue Sep 11 2012 Viktor Pracht <viktor.pracht@open-xchange.com>
+Initial release

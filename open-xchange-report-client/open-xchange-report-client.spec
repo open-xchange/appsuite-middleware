@@ -8,7 +8,7 @@ BuildRequires: open-xchange-core
 BuildRequires: open-xchange-admin
 BuildRequires: java-devel >= 1.6.0
 Version:       @OXVERSION@
-%define        ox_release 1
+%define        ox_release 2
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -55,6 +55,8 @@ fi
 %config(noreplace) /opt/open-xchange/etc/*
 
 %changelog
+* Thu Oct 11 2012 Carsten Hoeger <choeger@open-xchange.com>
+Release build for EDP drop #5
 * Wed Oct 10 2012 Carsten Hoeger <choeger@open-xchange.com>
 Fifth release candidate for 6.22.0
 * Tue Oct 09 2012 Carsten Hoeger <choeger@open-xchange.com>
