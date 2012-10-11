@@ -5,8 +5,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import junit.framework.TestCase;
 import org.osgi.framework.BundleContext;
+import junit.framework.TestCase;
 import com.openexchange.authentication.Cookie;
 import com.openexchange.java.util.UUIDs;
 import com.openexchange.login.Interface;
@@ -166,11 +166,6 @@ public class IntegrationTest extends TestCase {
             @Override
             public String getVersion() {
                 return "";
-            }
-
-            @Override
-            public boolean isVolatile() {
-                return false;
             }
 
             @Override
