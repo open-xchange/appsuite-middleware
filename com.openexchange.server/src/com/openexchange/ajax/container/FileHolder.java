@@ -50,6 +50,7 @@
 package com.openexchange.ajax.container;
 
 import java.io.InputStream;
+import com.openexchange.java.Streams;
 
 /**
  * {@link FileHolder} - The basic {@link IFileHolder} implementation.
@@ -103,6 +104,7 @@ public class FileHolder implements IFileHolder {
      * @param is The input stream
      */
     public void setStream(final InputStream is) {
+        Streams.close(this.is);
         this.is = is;
     }
 

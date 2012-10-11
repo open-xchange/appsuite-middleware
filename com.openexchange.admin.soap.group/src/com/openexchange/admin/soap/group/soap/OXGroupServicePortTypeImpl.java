@@ -654,7 +654,10 @@ public class OXGroupServicePortTypeImpl implements OXGroupServicePortType {
         if (tmp != null) {
             user.setMail_folder_trash_name(tmp);
         }
-
+        Boolean mailEnabled = soapUser.isMailenabled();
+        if (null != mailEnabled) {
+            user.setMailenabled(mailEnabled);
+        }
         tmp = soapUser.getManagerName();
         if (tmp != null) {
             user.setManager_name(tmp);

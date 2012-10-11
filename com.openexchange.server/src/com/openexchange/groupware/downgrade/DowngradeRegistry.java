@@ -155,7 +155,7 @@ public final class DowngradeRegistry {
 		}
 	};
 
-	private static DowngradeRegistry instance;
+	private static volatile DowngradeRegistry instance;
 
 	/**
 	 * Initializes the singleton instance of {@link DowngradeRegistry}

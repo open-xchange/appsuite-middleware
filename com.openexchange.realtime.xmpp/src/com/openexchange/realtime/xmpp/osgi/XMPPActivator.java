@@ -33,7 +33,7 @@ public class XMPPActivator extends HousekeepingActivator {
 
     @Override
     protected void startBundle() throws Exception {
-        XMPPChatExtension.services = this;
+        XMPPChatExtension.SERVICES_REFERENCE.set(this);
 
         final XMPPChannel channel = new XMPPChannel();
         final XMPPHandler handler = new XMPPHandler();
@@ -96,6 +96,12 @@ public class XMPPActivator extends HousekeepingActivator {
         // Core Extensions registration
         registerService(XMPPExtension.class, new XMPPChatExtension());
 
+    }
+
+    @Override
+    protected void stopBundle() throws Exception {
+        XMPPChatExtension.SERVICES_REFERENCE.set(null);
+        super.stopBundle();
     }
 
 }

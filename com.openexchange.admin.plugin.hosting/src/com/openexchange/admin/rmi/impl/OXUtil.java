@@ -56,7 +56,6 @@ import java.net.URISyntaxException;
 import java.rmi.RemoteException;
 import java.util.Arrays;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.openexchange.admin.rmi.OXUtilInterface;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.admin.rmi.dataobjects.Database;
@@ -66,8 +65,10 @@ import com.openexchange.admin.rmi.dataobjects.Server;
 import com.openexchange.admin.rmi.exceptions.EnforceableDataObjectException;
 import com.openexchange.admin.rmi.exceptions.InvalidCredentialsException;
 import com.openexchange.admin.rmi.exceptions.InvalidDataException;
+import com.openexchange.admin.rmi.exceptions.NoSuchObjectException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.storage.interfaces.OXUtilStorageInterface;
+import com.openexchange.log.LogFactory;
 
 /**
  * Implementation class for the RMI interface for util
@@ -424,7 +425,12 @@ public class OXUtil extends OXCommonImpl implements OXUtilInterface {
         basicauth.doAuthentication(null == auth ? new Credentials("","") : auth);
 
         log.debug(database);
-        setIdOrGetIDFromNameAndIdObject(null, database);
+        try {
+            setIdOrGetIDFromNameAndIdObject(null, database);
+        } catch (NoSuchObjectException e) {
+         // FIXME normally NoSuchDatabaseException needs to be thrown here. Unfortunately it is not already in the throws declaration.
+            throw new StorageException(e);
+        }
         if (!tool.existsDatabase(i(database.getId()))) {
             throw new InvalidDataException("No such database " + database);
         }
@@ -449,7 +455,11 @@ public class OXUtil extends OXCommonImpl implements OXUtilInterface {
 
         log.debug(server);
 
-        setIdOrGetIDFromNameAndIdObject(null, server);
+        try {
+            setIdOrGetIDFromNameAndIdObject(null, server);
+        } catch (NoSuchObjectException e) {
+            throw new InvalidDataException(e);
+        }
         if (!tool.existsServer(server.getId())) {
             throw new InvalidDataException("No such server " + server);
         }
@@ -525,7 +535,12 @@ public class OXUtil extends OXCommonImpl implements OXUtilInterface {
 
         log.debug(db);
 
-        setIdOrGetIDFromNameAndIdObject(null, db);
+        try {
+            setIdOrGetIDFromNameAndIdObject(null, db);
+        } catch (NoSuchObjectException e) {
+            // FIXME normally NoSuchDatabaseException needs to be thrown here. Unfortunately it is not already in the throws declaration.
+            throw new StorageException(e);
+        }
         final Integer id = db.getId();
         if (!tool.existsDatabase(id)) {
             throw new InvalidDataException("No such database with id " + id);

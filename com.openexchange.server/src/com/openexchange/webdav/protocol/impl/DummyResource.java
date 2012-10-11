@@ -57,6 +57,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.servlet.http.HttpServletResponse;
 
@@ -74,7 +75,7 @@ import com.openexchange.webdav.protocol.helpers.AbstractResource;
 
 public class DummyResource extends AbstractResource implements WebdavResource  {
 
-	private static int lockIds;
+	private static final AtomicInteger lockIds = new AtomicInteger();
 
 	private boolean exists;
 	protected DummyResourceManager mgr;
@@ -291,7 +292,7 @@ public class DummyResource extends AbstractResource implements WebdavResource  {
 				return;
 			//}
 		}
-		lock.setToken("opaquelocktoken:"+(lockIds++));
+		lock.setToken("opaquelocktoken:"+(lockIds.incrementAndGet()));
 		locks.put(lock.getToken(),lock);
 	}
 

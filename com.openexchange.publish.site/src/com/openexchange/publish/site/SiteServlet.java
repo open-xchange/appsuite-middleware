@@ -106,7 +106,7 @@ public class SiteServlet extends HttpServlet {
         contexts = service;
     }
 
-    private static IDBasedFileAccessFactory files;
+    private static volatile IDBasedFileAccessFactory files;
 
     public static void setFileAccess(final IDBasedFileAccessFactory fileAccess) {
         files = fileAccess;

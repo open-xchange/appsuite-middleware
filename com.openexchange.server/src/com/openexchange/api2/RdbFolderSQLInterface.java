@@ -62,7 +62,6 @@ import java.util.LinkedList;
 import java.util.Queue;
 import java.util.Set;
 import com.openexchange.ajax.fields.FolderChildFields;
-import com.openexchange.ajax.fields.FolderFields;
 import com.openexchange.cache.impl.FolderCacheManager;
 import com.openexchange.cache.impl.FolderQueryCacheManager;
 import com.openexchange.exception.OXException;

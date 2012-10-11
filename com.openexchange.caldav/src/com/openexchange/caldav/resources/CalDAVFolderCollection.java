@@ -127,7 +127,7 @@ public abstract class CalDAVFolderCollection<T extends CalendarObject> extends C
             return factory.getUser();
         } else if (null != folder.getPermissions()) {
             for (Permission permission : folder.getPermissions()) {
-                if (permission.isAdmin()) {
+                if (permission.isAdmin() && false == permission.isGroup()) {
                     return factory.resolveUser(permission.getEntity());
                 }
             }
@@ -207,6 +207,20 @@ public abstract class CalDAVFolderCollection<T extends CalendarObject> extends C
         }       
     }
     
+    @Override
+    public void setDisplayName(String displayName) throws WebdavProtocolException {
+        if (false == this.folder.isDefault() && PrivateType.getInstance().equals(this.folder.getType())) {
+            this.folder.setName(displayName);
+            try {
+                factory.getFolderService().updateFolder(folder, this.folder.getLastModified(), factory.getSession());
+            } catch (OXException e) {
+                throw protocolException(e);
+            }
+        } else {
+            throw protocolException(HttpServletResponse.SC_FORBIDDEN);
+        }
+    }
+
     protected abstract List<T> getObjectsInRange(Date from, Date until) throws OXException;
     
     private static FilterAnalyzer VEVENT_RANGE_QUERY_ANALYZER = new FilterAnalyzerBuilder()
@@ -230,11 +244,11 @@ public abstract class CalDAVFolderCollection<T extends CalendarObject> extends C
     public List<WebdavResource> filter(Filter filter) throws WebdavProtocolException {
         List<Object> arguments = new ArrayList<Object>(2);
         if (VEVENT_RANGE_QUERY_ANALYZER.match(filter, arguments) || VTODO_RANGE_QUERY_ANALYZER.match(filter, arguments)) {
-            Date from = toDate(arguments.get(0));
+            Date from = arguments.isEmpty() ? null : toDate(arguments.get(0));
             if (null == from || from.before(getIntervalStart())) {
                 from = getIntervalStart();
             }
-            Date until = toDate(arguments.get(1));
+            Date until = arguments.isEmpty() ? null : toDate(arguments.get(1));
             if (null == until || until.after(getIntervalEnd())) {
                 until = getIntervalEnd();
             }

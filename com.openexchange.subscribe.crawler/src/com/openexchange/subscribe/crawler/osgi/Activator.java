@@ -134,9 +134,10 @@ public class Activator implements BundleActivator {
 
     public ArrayList<CrawlerDescription> getCrawlersFromFilesystem(final ConfigurationService config) {
         final ArrayList<CrawlerDescription> crawlers = new ArrayList<CrawlerDescription>();
-        final File directory = config.getDirectory(DIR_NAME_PROPERTY);
+        String dirName = config.getProperty(DIR_NAME_PROPERTY);
+        File directory = config.getDirectory(dirName);
         if (directory == null) {
-            LOG.warn(DIR_NAME_PROPERTY + " not set. Skipping crawler initialisation");
+            LOG.warn(DIR_NAME_PROPERTY + " not set or crawler configuration directory not found. Skipping crawler initialisation");
             return crawlers;
         }
         final File[] files = directory.listFiles();
@@ -148,7 +149,7 @@ public class Activator implements BundleActivator {
         for (final File file : files) {
             try {
                 if (file.isFile() && file.getPath().endsWith(".yml")) {
-                    crawlers.add((CrawlerDescription) Yaml.load(file));
+                    crawlers.add(Yaml.loadType(file, CrawlerDescription.class));
                 }
             } catch (final FileNotFoundException e) {
                 // Should not appear because file existence is checked before.
@@ -166,7 +167,7 @@ public class Activator implements BundleActivator {
                 for (final File file : files) {
                     try {
                         if (file.isFile() && file.getPath().endsWith(".yml")) {
-                            final CrawlerDescription crawler = (CrawlerDescription) Yaml.load(file);
+                            final CrawlerDescription crawler = Yaml.loadType(file, CrawlerDescription.class);
                             if (crawler.getId().equals(crawlerIdToDelete)) {
                                 return file.delete();
                             }

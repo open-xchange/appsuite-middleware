@@ -76,6 +76,10 @@ import com.openexchange.sessiond.SessiondServiceExtended;
  */
 public class SessiondServiceImpl implements SessiondServiceExtended {
 
+    private static final String PARAM_SESSION = Parameterized.PARAM_SESSION;
+
+    private static final String PARAM_VOLATILE = Parameterized.PARAM_VOLATILE;
+
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(SessiondServiceImpl.class));
 
     private final Lock migrateLock;
@@ -92,12 +96,20 @@ public class SessiondServiceImpl implements SessiondServiceExtended {
 
     @Override
     public String addSession(final AddSessionParameter param) throws OXException {
-        final SessionImpl session = SessionHandler.addSession(param.getUserId(), param.getUserLoginInfo(), param.getPassword(), param.getContext().getContextId(), param.getClientIP(), param.getFullLogin(), param.getAuthId(), param.getHash(), param.getClient());
+        final Parameterized parameterized = (param instanceof Parameterized) ? (Parameterized) param : null;
+        final boolean isVolatile;
+        if (null == parameterized) {
+            isVolatile = false;
+        } else {
+            final Boolean parameter = parameterized.<Boolean> getParameter(PARAM_VOLATILE);
+            isVolatile = null == parameter ? false : parameter.booleanValue();
+        }
+        final SessionImpl session = SessionHandler.addSession(param.getUserId(), param.getUserLoginInfo(), param.getPassword(), param.getContext().getContextId(), param.getClientIP(), param.getFullLogin(), param.getAuthId(), param.getHash(), param.getClient(), isVolatile);
         if (null == session) {
             return null;
         }
-        if (param instanceof Parameterized) {
-            ((Parameterized) param).setParameter(Parameterized.PARAM_SESSION, session);
+        if (null != parameterized) {
+            parameterized.setParameter(PARAM_SESSION, session);
         }
         return session.getSessionID();
     }

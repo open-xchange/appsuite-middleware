@@ -64,7 +64,6 @@ import com.openexchange.contact.ContactService;
 import com.openexchange.folderstorage.FolderService;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.log.LogFactory;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.SessionHolder;
@@ -108,9 +107,9 @@ public class CarddavPerformer implements SessionHolder {
 
     private static final Log LOG = com.openexchange.log.Log.loggerFor(CarddavPerformer.class);
 
-    private static CarddavPerformer INSTANCE = null;
+    private static volatile CarddavPerformer INSTANCE = null;
 
-    private static ServiceLookup services;
+    private static volatile ServiceLookup services;
 
     public static void setServices(ServiceLookup lookup) {
         services = lookup;
@@ -122,10 +121,17 @@ public class CarddavPerformer implements SessionHolder {
      * @return The instance of {@link InfostorePerformer}.
      */
     public static CarddavPerformer getInstance() {
-        if (INSTANCE == null) {
-            return INSTANCE = new CarddavPerformer();
+        CarddavPerformer retval = CarddavPerformer.INSTANCE;
+        if (retval == null) {
+            synchronized (CarddavPerformer.class) {
+                retval = CarddavPerformer.INSTANCE;
+                if (retval == null) {
+                    retval = new CarddavPerformer();
+                    CarddavPerformer.INSTANCE = retval;
+                }
+            }
         }
-        return INSTANCE;
+        return retval;
     }
 
     public static enum Action {

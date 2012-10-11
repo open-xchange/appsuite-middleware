@@ -62,7 +62,6 @@ public class ReportConfiguration {
 
     public ReportConfiguration() throws IOException {
         properties = new Properties();
-
         loadProperties(System.getProperties().getProperty("openexchange.propdir"), "reportclient.properties");
         loadProperties(System.getProperties().getProperty("openexchange.propdir"), "licensekeys.properties");
     }
@@ -75,17 +74,14 @@ public class ReportConfiguration {
             }
             final File licensePropFile = new File(propDir, propFile);
             if (!licensePropFile.exists() || !licensePropFile.isFile()) {
-                throw new IOException(new StringBuilder("Property file \"").append(propDir).append("/").append(propFile).append(
-                    "\" couldn't be found").toString());
+                throw new IOException(new StringBuilder("Property file \"").append(propDir).append("/").append(propFile).append("\" couldn't be found").toString());
             }
             try {
                 in = new FileInputStream(licensePropFile);
             } catch (final FileNotFoundException e) {
-                throw new IOException(new StringBuilder("Property file \"").append(propDir).append("/").append(propFile).append(
-                    "\" couldn't be found").toString());
+                throw new IOException(new StringBuilder("Property file \"").append(propDir).append("/").append(propFile).append("\" couldn't be found").toString());
             }
         }
-
         try {
             properties.load(in);
         } finally {
@@ -116,42 +112,36 @@ public class ReportConfiguration {
 
     public String getProxyAddress() {
         if (null != properties.getProperty("com.openexchange.report.client.proxy.address")) {
-            return (properties.getProperty("com.openexchange.report.client.proxy.address"));
-        } else {
-            return "";
+            return properties.getProperty("com.openexchange.report.client.proxy.address");
         }
+        return "";
     }
 
     public String getProxyPort() {
         if (null != properties.getProperty("com.openexchange.report.client.proxy.port")) {
-            return (properties.getProperty("com.openexchange.report.client.proxy.port"));
-        } else {
-            return "";
+            return properties.getProperty("com.openexchange.report.client.proxy.port");
         }
+        return "";
     }
 
     public String getProxyAuthRequired() {
         if (null != properties.getProperty("com.openexchange.report.client.proxy.authrequired")) {
-            return (properties.getProperty("com.openexchange.report.client.proxy.authrequired"));
-        } else {
-            return "";
+            return properties.getProperty("com.openexchange.report.client.proxy.authrequired");
         }
+        return "";
     }
 
     public String getProxyUsername() {
         if (null != properties.getProperty("com.openexchange.report.client.proxy.username")) {
-            return (properties.getProperty("com.openexchange.report.client.proxy.username"));
-        } else {
-            return "";
+            return properties.getProperty("com.openexchange.report.client.proxy.username");
         }
+        return "";
     }
 
     public String getProxyPassword() {
         if (null != properties.getProperty("com.openexchange.report.client.proxy.password")) {
-            return (properties.getProperty("com.openexchange.report.client.proxy.password"));
-        } else {
-            return "";
+            return properties.getProperty("com.openexchange.report.client.proxy.password");
         }
+        return "";
     }
-
 }

@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.task.actions;
 
+import java.util.Locale;
 import java.util.TimeZone;
 import org.json.JSONObject;
 import com.openexchange.ajax.container.Response;
@@ -79,7 +80,7 @@ public class GetResponse extends AbstractAJAXResponse {
     public Task getTask(final TimeZone timeZone) throws OXException {
         if (null == task) {
             final Task parsed = new Task();
-            new TaskParser(true, timeZone).parse(parsed, (JSONObject) getData());
+            new TaskParser(true, timeZone).parse(parsed, (JSONObject) getData(), Locale.ENGLISH);
             this.task = parsed;
         }
         return task;

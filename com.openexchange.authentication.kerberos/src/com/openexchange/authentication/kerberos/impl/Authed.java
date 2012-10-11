@@ -80,9 +80,11 @@ public class Authed implements Authenticated, SessionEnhancement, ResponseEnhanc
     }
 
     @Override
-    public void enhanceSession(Session session) {
-        session.setParameter(SESSION_SUBJECT, principal.getDelegateSubject());
-        session.setParameter(SESSION_PRINCIPAL, principal);
+    public void enhanceSession(final Session session) {
+        if (null != session) {
+            session.setParameter(SESSION_SUBJECT, principal.getDelegateSubject());
+            session.setParameter(SESSION_PRINCIPAL, principal);
+        }
     }
 
     @Override

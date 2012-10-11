@@ -127,10 +127,12 @@ public class FileResponseRenderer implements ResponseRenderer {
     @Override
     public void write(final AJAXRequestData request, final AJAXRequestResult result, final HttpServletRequest req, final HttpServletResponse resp) {
         IFileHolder file = (IFileHolder) result.getResultObject();
+        final String fileContentType = file.getContentType();
+        final String fileName = file.getName();
 
         String contentType = req.getParameter(PARAMETER_CONTENT_TYPE);
         if (null == contentType) {
-            contentType = file.getContentType();
+            contentType = fileContentType;
         }
         String delivery = req.getParameter(DELIVERY);
         if (delivery == null) {
@@ -146,12 +148,18 @@ public class FileResponseRenderer implements ResponseRenderer {
             file = rotateIfImage(file);
             file = cropIfImage(request, file);
             file = scaleIfImage(request, file);
-            documentData = new BufferedInputStream(file.getStream());
+            InputStream stream = file.getStream();
+            if (null == stream) {
+                // React with 404
+                resp.sendError(HttpServletResponse.SC_NOT_FOUND, "Image not found.");
+                return;
+            }
+            documentData = new BufferedInputStream(stream);
             final String userAgent = req.getHeader("user-agent");
             if (SAVE_AS_TYPE.equals(contentType) || (delivery != null && delivery.equalsIgnoreCase(DOWNLOAD))) {
                 if (null == contentDisposition) {
                     final StringBuilder sb = new StringBuilder(32).append("attachment");
-                    DownloadUtility.appendFilenameParameter(file.getName(), SAVE_AS_TYPE, userAgent, sb);
+                    DownloadUtility.appendFilenameParameter(fileName, SAVE_AS_TYPE, userAgent, sb);
                     resp.setHeader("Content-Disposition", sb.toString());
                 } else {
                     final StringBuilder sb = new StringBuilder(32).append(contentDisposition.trim());
@@ -161,7 +169,7 @@ public class FileResponseRenderer implements ResponseRenderer {
                 }
                 resp.setContentType(contentType);
             } else {
-                final CheckedDownload checkedDownload = DownloadUtility.checkInlineDownload(documentData, file.getName(), file.getContentType(), contentDisposition, userAgent);
+                final CheckedDownload checkedDownload = DownloadUtility.checkInlineDownload(documentData, fileName, fileContentType, contentDisposition, userAgent);
                 if (delivery == null || !delivery.equalsIgnoreCase(VIEW)) {
                     if (contentDisposition == null) {
                         resp.setHeader("Content-Disposition", checkedDownload.getContentDisposition());
@@ -281,8 +289,9 @@ public class FileResponseRenderer implements ResponseRenderer {
             /*
              * Scale to new input stream
              */
-            final InputStream scaled = scaler.scale(file.getStream(), width, height, ScaleType.getType(request.getParameter("scaleType")));
-            return new FileHolder(scaled, -1, "image/png", file.getName());
+            final InputStream input = file.getStream();
+            final InputStream scaled = null == input ? null : scaler.scale(input, width, height, ScaleType.getType(request.getParameter("scaleType")));
+            return new FileHolder(scaled, -1, "image/png", "");
         } finally {
             Streams.close(file);
         }

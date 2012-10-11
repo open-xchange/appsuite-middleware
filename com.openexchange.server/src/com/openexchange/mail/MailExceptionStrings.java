@@ -82,9 +82,9 @@ public final class MailExceptionStrings implements LocalizableStrings {
     public final static String MISSING_PARAMETER_MSG = "Missing parameter %1$s";
 
     /**
-     * Invalid CATEGORY_PERMISSION_DENIED values: fp=%1$s orp=%2$s owp=%3$s odp=%4$s
+     * Invalid permission values: fp=%1$s orp=%2$s owp=%3$s odp=%4$s
      */
-    public final static String INVALID_PERMISSION_MSG = "Invalid CATEGORY_PERMISSION_DENIED values: fp=%1$s orp=%2$s owp=%3$s odp=%4$s";
+    public final static String INVALID_PERMISSION_MSG = "Invalid permission values: fp=%1$s orp=%2$s owp=%3$s odp=%4$s";
 
     /**
      * A JSON error occurred: %1$s
@@ -516,7 +516,7 @@ public final class MailExceptionStrings implements LocalizableStrings {
      * The attachments to this mail exceeded the size limit for attachments. Instead of sending the attachment in the email, the attachment
      * was published and the link added to your email. Whoever receives the email can then download the attachment.
      */
-    public final static String USED_PUBLISHING_FEATURE_MSG = "The attachments to this E-Mail exceeded the size limit for attachments. Instead of sending the attachment with the E-Mail, the attachment was  and the link added to your E-Mail. Whoever receives the E-Mail can then download the attachment.";
+    public final static String USED_PUBLISHING_FEATURE_MSG = "The attachments to this E-Mail exceeded the size limit for attachments. Instead of sending the attachment with the E-Mail, the attachment was published and the link added to your E-Mail. Whoever receives the E-Mail can then download the attachment.";
 
     // Draft message could not be saved
     public static final String DRAFT_FAILED_UNKNOWN_MSG = "Draft message could not be saved";

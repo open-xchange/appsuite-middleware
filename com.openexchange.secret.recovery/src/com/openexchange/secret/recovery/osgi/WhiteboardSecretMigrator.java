@@ -51,7 +51,6 @@ package com.openexchange.secret.recovery.osgi;
 
 import java.util.Collection;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import org.osgi.framework.BundleContext;
 import org.osgi.util.tracker.ServiceTracker;
 import com.openexchange.exception.OXException;
@@ -61,7 +60,7 @@ import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link WhiteboardSecretMigrator}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */

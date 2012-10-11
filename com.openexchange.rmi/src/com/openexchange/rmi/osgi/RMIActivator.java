@@ -64,7 +64,7 @@ public class RMIActivator extends HousekeepingActivator {
 
     private static final Log log = com.openexchange.log.Log.loggerFor(RMIActivator.class);
 
-    private static ServiceRegistry serviceRegistry;
+    private static volatile ServiceRegistry serviceRegistry;
 
     private RMITrackerCustomizer rmiTrackerCustomizer;
 

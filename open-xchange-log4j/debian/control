@@ -9,4 +9,7 @@ Homepage: http://www.open-xchange.com
 Package: open-xchange-log4j
 Architecture: all
 Depends: ${misc:Depends}, open-xchange-osgi (>= @OXVERSION@)
+Replaces: open-xchange-commons-logging-log4j (<< 6.21.0-0)
+Conflicts: open-xchange-commons-logging-log4j (<< 6.21.0-0)
+Breaks: open-xchange-commons-logging-log4j (<< 6.21.0-0)
 Description: log4j library bundle and xml configuration file

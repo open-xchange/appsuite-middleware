@@ -57,11 +57,12 @@ package com.openexchange.dav.caldav;
 public final class UserAgents {
 
 	public static final String MACOS_10_7_3 = "CalendarStore/5.0.2 (1166); iCal/5.0.2 (1571); Mac OS X/10.7.3 (11D50d)";
+	
+	public static final String LIGHTNING_1_7 = "Mozilla/5.0 (Windows NT 6.1; WOW64; rv:15.0) Gecko/20120907 Thunderbird/15.0.1 Lightning/1.7";
 		
 	public static final String[] MACOS_ALL = {
 		MACOS_10_7_3
-	};
-	
+	};	
 	
 	private UserAgents() {
 		// prevent instantiation

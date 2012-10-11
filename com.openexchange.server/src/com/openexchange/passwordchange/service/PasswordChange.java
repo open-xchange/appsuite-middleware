@@ -58,7 +58,7 @@ import com.openexchange.passwordchange.PasswordChangeService;
  */
 public final class PasswordChange {
 
-    private static PasswordChangeService service;
+    private static volatile PasswordChangeService service;
 
     /**
      * Default constructor.

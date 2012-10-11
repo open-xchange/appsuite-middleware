@@ -67,7 +67,7 @@ public class WorkflowFactory {
 
         Workflow workflow = null;
         try {
-            workflow = (Workflow) Yaml.load(new File(filename));
+            workflow = Yaml.loadType(new File(filename), Workflow.class);
             //checkSanity(workflow);
         } catch (final FileNotFoundException e) {
         }
@@ -79,7 +79,7 @@ public class WorkflowFactory {
 
         Workflow workflow = null;
 
-        workflow = (Workflow) Yaml.load(string);
+        workflow = Yaml.loadType(string, Workflow.class);
         //checkSanity(workflow);
 
         return workflow;

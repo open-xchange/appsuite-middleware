@@ -41,15 +41,15 @@ if [ ${1:-0} -eq 2 ]; then
     # prevent bash from expanding, see bug 13316
     GLOBIGNORE='*'
 
-    ##
-    ## start update from < 6.21
-    ##
     ox_move_config_file /opt/open-xchange/etc/groupware /opt/open-xchange/etc mailfilter.properties
-    ##
-    ## end update from < 6.21
-    ##
 
     ox_update_permissions "/opt/open-xchange/etc/mailfilter.properties" root:open-xchange 640
+
+    # SoftwareChange_Request-1140
+    pfile=/opt/open-xchange/etc/mailfilter.properties
+    if ! ox_exists_property com.openexchange.mail.filter.preferGSSAPI $pfile; then
+        ox_set_property com.openexchange.mail.filter.preferGSSAPI false $pfile
+    fi
 fi
 
 %clean
@@ -65,6 +65,14 @@ fi
 %config(noreplace)%attr(640,root,open-xchange) /opt/open-xchange/etc/mailfilter.properties
 
 %changelog
+* Wed Oct 10 2012 Marcus Klein <marcus.klein@open-xchange.com>
+Fifth release candidate for 6.22.0
+* Tue Oct 09 2012 Marcus Klein <marcus.klein@open-xchange.com>
+Fourth release candidate for 6.22.0
+* Fri Oct 05 2012 Marcus Klein <marcus.klein@open-xchange.com>
+Third release candidate for 6.22.0
+* Thu Oct 04 2012 Marcus Klein <marcus.klein@open-xchange.com>
+Second release candidate for 6.22.0
 * Tue Aug 21 2012 Marcus Klein <marcus.klein@open-xchange.com>
 First release candidate for 6.22.0
 * Mon Aug 20 2012 Marcus Klein <marcus.klein@open-xchange.com>

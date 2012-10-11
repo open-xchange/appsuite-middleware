@@ -455,6 +455,7 @@ public final class MimeMessageConverter {
              * Fill message
              */
             final MimeMessageFiller filler = new MimeMessageFiller(composedMail.getSession(), composedMail.getContext());
+            filler.setAccountId(composedMail.getAccountId());
             composedMail.setFiller(filler);
             /*
              * Set headers
@@ -491,6 +492,7 @@ public final class MimeMessageConverter {
              * Fill message
              */
             final MimeMessageFiller filler = new MimeMessageFiller(composedMail.getSession(), composedMail.getContext());
+            filler.setAccountId(composedMail.getAccountId());
             composedMail.setFiller(filler);
             /*
              * Set headers

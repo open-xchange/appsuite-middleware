@@ -54,22 +54,21 @@ import static com.openexchange.mail.mime.utils.MimeStorageUtility.getFetchProfil
 import gnu.trove.list.TIntList;
 import gnu.trove.list.array.TIntArrayList;
 import gnu.trove.list.linked.TIntLinkedList;
-
 import java.util.LinkedList;
 import java.util.List;
-
 import javax.mail.FolderClosedException;
 import javax.mail.Message;
 import javax.mail.MessagingException;
 import javax.mail.StoreClosedException;
 import javax.mail.search.SearchException;
 import javax.mail.search.SearchTerm;
-
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.imap.IMAPCapabilities;
 import com.openexchange.imap.IMAPException;
 import com.openexchange.imap.command.FetchIMAPCommand;
 import com.openexchange.imap.config.IMAPConfig;
+import com.openexchange.imap.services.IMAPServiceRegistry;
 import com.openexchange.mail.MailField;
 import com.openexchange.mail.MailFields;
 import com.openexchange.mail.config.MailProperties;
@@ -170,6 +169,22 @@ public final class IMAPSearch {
         return list.toArray();
     }
 
+    private static volatile Integer umlautFilterThreshold;
+    private static int umlautFilterThreshold() {
+        Integer i = umlautFilterThreshold;
+        if (null == i) {
+            synchronized (IMAPSearch.class) {
+                i = umlautFilterThreshold;
+                if (null == i) {
+                    final ConfigurationService service = IMAPServiceRegistry.getService(ConfigurationService.class);
+                    i = Integer.valueOf(null == service ? 50 : service.getIntProperty("com.openexchange.imap.umlautFilterThreshold", 50));
+                    umlautFilterThreshold = i;
+                }
+            }
+        }
+        return i.intValue();
+    }
+
     private static int[] issueIMAPSearch(final IMAPFolder imapFolder, final com.openexchange.mail.search.SearchTerm<?> searchTerm) throws OXException, FolderClosedException, StoreClosedException {
         try {
             if (searchTerm.containsWildcard()) {
@@ -179,7 +194,8 @@ public final class IMAPSearch {
                 return issueNonWildcardSearch(searchTerm.getNonWildcardJavaMailSearchTerm(), imapFolder);
             }
             final int[] seqNums = issueNonWildcardSearch(searchTerm.getJavaMailSearchTerm(), imapFolder);
-            if ((seqNums.length <= 50) && !searchTerm.isAscii()) {
+            final int umlautFilterThreshold = umlautFilterThreshold();
+            if ((umlautFilterThreshold > 0) && (seqNums.length <= umlautFilterThreshold) && !searchTerm.isAscii()) {
                 /*
                  * Search with respect to umlauts in pre-selected messages
                  */

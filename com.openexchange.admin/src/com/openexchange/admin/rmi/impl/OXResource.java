@@ -73,6 +73,7 @@ import com.openexchange.admin.rmi.exceptions.EnforceableDataObjectException;
 import com.openexchange.admin.rmi.exceptions.InvalidCredentialsException;
 import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 import com.openexchange.admin.rmi.exceptions.NoSuchContextException;
+import com.openexchange.admin.rmi.exceptions.NoSuchObjectException;
 import com.openexchange.admin.rmi.exceptions.NoSuchResourceException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.storage.interfaces.OXResourceStorageInterface;
@@ -136,8 +137,12 @@ public class OXResource extends OXCommonImpl implements OXResourceInterface{
         }
         
         try {
-            setIdOrGetIDFromNameAndIdObject(ctx, res);
-            
+            try {
+                setIdOrGetIDFromNameAndIdObject(ctx, res);
+            } catch (NoSuchObjectException e) {
+                throw new NoSuchResourceException(e);
+            }
+
             res.testMandatoryCreateFieldsNull();
             
             final int resource_ID = res.getId();        
@@ -332,7 +337,11 @@ public class OXResource extends OXCommonImpl implements OXResourceInterface{
         try {
             basicauth.doAuthentication(auth,ctx);
             
-            setIdOrGetIDFromNameAndIdObject(ctx, res);
+            try {
+                setIdOrGetIDFromNameAndIdObject(ctx, res);
+            } catch (NoSuchObjectException e) {
+                throw new NoSuchResourceException(e);
+            }
             if (log.isDebugEnabled()) {
                 log.debug(ctx + " - " + res + " - " + auth);
             }
@@ -410,9 +419,13 @@ public class OXResource extends OXCommonImpl implements OXResourceInterface{
             log.error(e.getMessage(), e);
             throw e;
         }        
-        
-        setIdOrGetIDFromNameAndIdObject(ctx, res);
-        
+
+        try {
+            setIdOrGetIDFromNameAndIdObject(ctx, res);
+        } catch (NoSuchObjectException e) {
+            throw new NoSuchResourceException(e);
+        }
+
         final int resource_id = res.getId().intValue();
         
         if (log.isDebugEnabled()) {

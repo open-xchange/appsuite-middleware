@@ -56,7 +56,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.Mail;
-import com.openexchange.ajax.fields.CommonFields;
 import com.openexchange.ajax.fields.DataFields;
 import com.openexchange.ajax.fields.FolderChildFields;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
@@ -148,8 +147,7 @@ public final class GetVersitAction extends AbstractMailAction {
             final OXJSONWriter jsonWriter = new OXJSONWriter();
             jsonWriter.array();
             final JSONObject jo = new JSONObject();
-            for (int i = 0; i < insertedObjs.length; i++) {
-                final CommonObject current = insertedObjs[i];
+            for (final CommonObject current : insertedObjs) {
                 jo.reset();
                 jo.put(DataFields.ID, current.getObjectID());
                 jo.put(FolderChildFields.FOLDER_ID, current.getParentFolderID());

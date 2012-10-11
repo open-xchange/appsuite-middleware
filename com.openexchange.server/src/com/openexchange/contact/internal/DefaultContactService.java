@@ -267,15 +267,22 @@ public abstract class DefaultContactService implements ContactService {
 		}
 	}
 
-	@Override
-	public void deleteContact(Session session, String folderId, String id, Date lastRead) throws OXException {
-		Check.argNotNull(session, "session");
-		Check.argNotNull(folderId, "folderId");
-		Check.argNotNull(id, "id");
-		Check.argNotNull(lastRead, "lastRead");
-		this.doDeleteContact(session, folderId, id, lastRead);
-	}
-	
+    @Override
+    public void deleteContact(Session session, String folderId, String id, Date lastRead) throws OXException {
+        Check.argNotNull(session, "session");
+        Check.argNotNull(folderId, "folderId");
+        Check.argNotNull(id, "id");
+        Check.argNotNull(lastRead, "lastRead");
+        this.doDeleteContact(session, folderId, id, lastRead);
+    }
+    
+    @Override
+    public void deleteContacts(Session session, String folderId) throws OXException {
+        Check.argNotNull(session, "session");
+        Check.argNotNull(folderId, "folderId");
+        this.doDeleteContacts(session, folderId);
+    }
+    
 	@Override
     public Contact getUser(Session session, int userID, ContactField[] fields) throws OXException {
 		Check.argNotNull(session, "session");
@@ -338,8 +345,10 @@ public abstract class DefaultContactService implements ContactService {
 	protected abstract void doUpdateContact(Session session, String folderID, String objectID, Contact contact, Date lastRead) 
 			throws OXException;
 	
-	protected abstract void doDeleteContact(Session session, String folderID, String objectID, Date lastRead) throws OXException;
-	
+    protected abstract void doDeleteContact(Session session, String folderID, String objectID, Date lastRead) throws OXException;
+    
+    protected abstract void doDeleteContacts(Session session, String folderID) throws OXException;
+    
 	protected abstract <O> SearchIterator<Contact> doGetContacts(boolean deleted, Session session, String folderID,
 			String[] ids, ContactField[] fields, SortOptions sortOptions, Date since) throws OXException;
 	

@@ -50,11 +50,9 @@
 package com.openexchange.caldav.mixins;
 
 import org.apache.commons.logging.Log;
-import com.openexchange.caldav.CaldavProtocol;
 import com.openexchange.caldav.resources.CommonFolderCollection;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.log.LogFactory;
 import com.openexchange.webdav.protocol.Protocol;
 import com.openexchange.webdav.protocol.helpers.SingleXMLPropertyMixin;
 
@@ -86,7 +84,7 @@ public class Owner extends SingleXMLPropertyMixin {
         try {
             owner = collection.getOwner();
         } catch (OXException e) {
-            LOG.error("error determining owner from collection", e);
+            LOG.warn("error determining owner from folder collection '" + collection.getFolder() + "'", e);
         }
         return null != owner ? "<D:href>/principals/users/" + owner.getLoginInfo() + "</D:href>" : null;
     }

@@ -295,7 +295,7 @@ public final class LdapUtility {
     /**
      * Proxy attribute to store the customization properties.
      */
-    private static Properties customization;
+    private static volatile Properties customization;
 
     /**
      * Returns the properties for the customization of the ldap interface.

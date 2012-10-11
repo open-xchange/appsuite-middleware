@@ -63,7 +63,7 @@ public final class FolderDeleteListenerRegistry {
 
     private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(FolderDeleteListenerRegistry.class));
 
-    private static FolderDeleteListenerRegistry instance;
+    private static volatile FolderDeleteListenerRegistry instance;
 
     /**
      * Initializes the registry instance.

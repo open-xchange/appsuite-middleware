@@ -49,6 +49,7 @@
 
 package com.openexchange.jsieve.export;
 
+import static com.openexchange.mailfilter.services.MailFilterServletServiceRegistry.getServiceRegistry;
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -76,7 +77,6 @@ import com.openexchange.jsieve.export.exceptions.OXSieveHandlerException;
 import com.openexchange.jsieve.export.exceptions.OXSieveHandlerInvalidCredentialsException;
 import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.mailfilter.internal.MailFilterProperties;
-import com.openexchange.mailfilter.services.MailFilterServletServiceRegistry;
 
 /**
  * This class is used to deal with the communication with sieve. For a description of the communication system to sieve see
@@ -231,7 +231,7 @@ public class SieveHandler {
      */
     public void initializeConnection() throws IOException, OXSieveHandlerException, UnsupportedEncodingException, OXSieveHandlerInvalidCredentialsException {
         measureStart();
-        final ConfigurationService config = MailFilterServletServiceRegistry.getServiceRegistry().getService(ConfigurationService.class);
+        final ConfigurationService config = getServiceRegistry().getService(ConfigurationService.class);
 
         useSIEVEResponseCodes = Boolean.parseBoolean(config.getProperty(MailFilterProperties.Values.USE_SIEVE_RESPONSE_CODES.property));
 
@@ -347,9 +347,12 @@ public class SieveHandler {
         }
         measureStart();
         String useAuth = "PLAIN";
-        // FIXME: make that configurable?
-        // stronger mechs win
-        if( sasl.contains("GSSAPI") ) {
+        final boolean preferGSSAPI;
+        {
+            final ConfigurationService service = getServiceRegistry().getService(ConfigurationService.class);
+            preferGSSAPI = null != service && service.getBoolProperty("com.openexchange.mail.filter.preferGSSAPI", false);
+        }
+        if (preferGSSAPI && sasl.contains("GSSAPI")) {
             useAuth = "GSSAPI";
         }
         if (!selectAuth(useAuth, commandBuilder)) {

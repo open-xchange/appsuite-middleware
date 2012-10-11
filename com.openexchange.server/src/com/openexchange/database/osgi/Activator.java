@@ -75,10 +75,10 @@ public class Activator implements BundleActivator {
     @Override
     public void start(final BundleContext context) throws Exception {
         createTableRegistration = context.registerService(CreateTableService.class, new CreateReplicationTable(), null);
-        trackers.push(new ServiceTracker<ConfigurationService, ConfigurationService>(context, ConfigurationService.class.getName(), new DatabaseServiceRegisterer(context)));
-        trackers.push(new ServiceTracker<ManagementService, ManagementService>(context, ManagementService.class.getName(), new ManagementServiceCustomizer(context)));
-        trackers.push(new ServiceTracker<TimerService, TimerService>(context, TimerService.class.getName(), new TimerServiceCustomizer(context)));
-        trackers.push(new ServiceTracker<CacheService, CacheService>(context, CacheService.class.getName(), new CacheServiceCustomizer(context)));
+        trackers.push(new ServiceTracker<ConfigurationService, ConfigurationService>(context, ConfigurationService.class, new DatabaseServiceRegisterer(context)));
+        trackers.push(new ServiceTracker<ManagementService, ManagementService>(context, ManagementService.class, new ManagementServiceCustomizer(context)));
+        trackers.push(new ServiceTracker<TimerService, TimerService>(context, TimerService.class, new TimerServiceCustomizer(context)));
+        trackers.push(new ServiceTracker<CacheService, CacheService>(context, CacheService.class, new CacheServiceCustomizer(context)));
         for (final ServiceTracker<?, ?> tracker : trackers) {
             tracker.open();
         }

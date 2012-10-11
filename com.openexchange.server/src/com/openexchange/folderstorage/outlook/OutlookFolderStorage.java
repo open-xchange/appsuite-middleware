@@ -2326,7 +2326,16 @@ public final class OutlookFolderStorage implements FolderStorage {
                         }
                     }
                 } catch (final OXException e) {
-                    if (MailExceptionCode.ACCOUNT_DOES_NOT_EXIST.equals(e)) {
+                    if (MailExceptionCode.UNKNOWN_PROTOCOL.equals(e)) {
+                        if (LOG.isDebugEnabled()) {
+                            LOG.debug(e.getMessage(), e);
+                        }
+                        parameters.addWarning(e);
+                        /*
+                         * Return empty map
+                         */
+                        return new TreeMap<String, List<String>>(comparator);
+                    } else if (MailExceptionCode.ACCOUNT_DOES_NOT_EXIST.equals(e)) {
                         if (LOG.isDebugEnabled()) {
                             LOG.debug(e.getMessage(), e);
                         }

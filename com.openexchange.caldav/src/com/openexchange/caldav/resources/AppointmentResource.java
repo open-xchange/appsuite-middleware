@@ -64,6 +64,7 @@ import java.util.Set;
 import javax.servlet.http.HttpServletResponse;
 import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.caldav.GroupwareCaldavFactory;
+import com.openexchange.caldav.ParticipantTools;
 import com.openexchange.caldav.Patches;
 import com.openexchange.caldav.Tools;
 import com.openexchange.data.conversion.ical.ConversionError;
@@ -72,9 +73,11 @@ import com.openexchange.data.conversion.ical.ICalEmitter;
 import com.openexchange.data.conversion.ical.ICalSession;
 import com.openexchange.exception.OXException;
 import com.openexchange.exception.OXException.Truncated;
+import com.openexchange.folderstorage.type.PublicType;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.CalendarObject;
+import com.openexchange.groupware.container.Participant;
 import com.openexchange.java.Streams;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 import com.openexchange.webdav.protocol.WebdavPath;
@@ -163,14 +166,17 @@ public class AppointmentResource extends CalDAVResource<Appointment> {
                 Patches.Incoming.patchResources(originalAppointment, appointmentToSave);
                 Patches.Incoming.patchParticipantListRemovingAliases(factory, appointmentToSave);
                 Patches.Incoming.patchParticipantListRemovingDoubleUsers(appointmentToSave);
+                if (PublicType.getInstance().equals(parent.getFolder().getType())) {
+                    Patches.Incoming.addUserParticipantIfEmpty(factory.getSession().getUserId(), appointmentToSave);
+                }
             }
             checkForExplicitRemoves(originalAppointment, appointmentToSave);
             if (false == containsChanges(originalAppointment, appointmentToSave)) {
                 LOG.debug("No changes detected in " + appointmentToSave + ", skipping update.");
             } else {
                 getAppointmentInterface().updateAppointmentObject(appointmentToSave, parentFolderID, clientLastModified);
+                clientLastModified = appointmentToSave.getLastModified();
             }
-            clientLastModified = appointmentToSave.getLastModified();
             /*
              * update change exceptions
              */
@@ -185,6 +191,9 @@ public class AppointmentResource extends CalDAVResource<Appointment> {
                     if (false == Patches.Incoming.tryRestoreParticipants(originalException, exceptionToSave)) {
                         Patches.Incoming.patchParticipantListRemovingAliases(factory, exceptionToSave);
                         Patches.Incoming.patchParticipantListRemovingDoubleUsers(exceptionToSave);
+                        if (PublicType.getInstance().equals(parent.getFolder().getType())) {
+                            Patches.Incoming.addUserParticipantIfEmpty(factory.getSession().getUserId(), exceptionToSave);
+                        }
                     }
                 } else {
                     /*
@@ -194,6 +203,9 @@ public class AppointmentResource extends CalDAVResource<Appointment> {
                     if (false == Patches.Incoming.tryRestoreParticipants(originalAppointment, exceptionToSave)) {
                         Patches.Incoming.patchParticipantListRemovingAliases(factory, exceptionToSave);
                         Patches.Incoming.patchParticipantListRemovingDoubleUsers(exceptionToSave);
+                        if (PublicType.getInstance().equals(parent.getFolder().getType())) {
+                            Patches.Incoming.addUserParticipantIfEmpty(factory.getSession().getUserId(), exceptionToSave);
+                        }
                     }
                 }
                 /*
@@ -236,6 +248,9 @@ public class AppointmentResource extends CalDAVResource<Appointment> {
              */
             appointmentToSave.removeObjectID(); // in case it's already assigned due to retry operations
             appointmentToSave.setParentFolderID(null != object ? object.getParentFolderID() : parentFolderID);
+            if (PublicType.getInstance().equals(parent.getFolder().getType())) {
+                Patches.Incoming.addUserParticipantIfEmpty(factory.getSession().getUserId(), appointmentToSave);
+            }
             getAppointmentInterface().insertAppointmentObject(this.appointmentToSave);
             Date clientLastModified = appointmentToSave.getLastModified();
             /*
@@ -359,6 +374,9 @@ public class AppointmentResource extends CalDAVResource<Appointment> {
     }
 
     private List<CalendarDataObject> parse(final String iCal) throws ConversionError {
+        if (LOG.isTraceEnabled()) {
+            LOG.trace(iCal);
+        }
         /*
          * apply patches
          */
@@ -382,6 +400,8 @@ public class AppointmentResource extends CalDAVResource<Appointment> {
             return true;
         } else if (String.class.isInstance(value1) && String.class.isInstance(value2)) {
             return 0 != ((String)value1).trim().compareTo(((String)value2).trim());
+        } else if (Participant[].class.isInstance(value1)) {
+            return false == ParticipantTools.equals((Participant[])value1, (Participant[])value2, true);
         } else if (Comparable.class.isInstance(value1)) {
             return 0 != ((Comparable)value1).compareTo(value2);
         } else {

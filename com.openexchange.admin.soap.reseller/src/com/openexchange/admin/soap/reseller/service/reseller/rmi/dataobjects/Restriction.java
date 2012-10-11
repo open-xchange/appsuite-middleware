@@ -79,7 +79,7 @@ public class Restriction
     }
 
     public void setValue(final String value) {
-        set("value", "http://dataobjects.rmi.reseller.admin.openexchange.com/xsd", value);
+        set("value", "http://dataobjects.rmi.reseller.admin.openexchange.com/xsd", String.class, value);
     }
 
     private <V extends Serializable> void set(final String name, final String namespace, final V value) {
@@ -87,6 +87,13 @@ public class Restriction
             rest = new ArrayList<JAXBElement<? extends Serializable>>();
         }
         rest.add(new JAXBElement<V>(new QName(namespace, name), (Class<V>) value.getClass(), value));
+    }
+
+    private <V extends Serializable> void set(String name, String namespace, Class<V> clazz, V value) {
+        if (rest == null) {
+            rest = new ArrayList<JAXBElement<? extends Serializable>>();
+        }
+        rest.add(new JAXBElement<V>(new QName(namespace, name), clazz, value));
     }
 
     private <V> V get(final String name) {

@@ -84,11 +84,6 @@ public final class HazelcastElementAttributes implements ElementAttributes {
     }
 
     @Override
-    public void setVersion(final long version) {
-        // Huh?
-    }
-
-    @Override
     public void setMaxLifeSeconds(final long mls) {
         mapConfig.setTimeToLiveSeconds((int) mls);
     }
@@ -128,11 +123,6 @@ public final class HazelcastElementAttributes implements ElementAttributes {
         if (null != mapEntry) {
             map.get(mapEntry.getKey());
         }
-    }
-
-    @Override
-    public long getVersion() {
-        return 0;
     }
 
     @Override

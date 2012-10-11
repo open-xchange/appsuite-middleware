@@ -19,15 +19,8 @@ set -e
 # the debian-policy package
 
 
-TEMPLATES="iPhoneTemplate.tmpl mobile.configuration.generator.properties winMobileTemplate.tmpl"
-
 case "$1" in
     remove|abort-install|disappear)
-        for FILE in ${TEMPLATES}; do
-            dpkg-divert --package open-xchange-eas-provisioning --remove --rename --divert /opt/open-xchange/templates/${FILE}.dpkg-bak \
-                /opt/open-xchange/templates/${FILE}
-            rm -f /opt/open-xchange/templates/${FILE}
-        done
     ;;
 
     purge|upgrade|failed-upgrade|abort-upgrade)

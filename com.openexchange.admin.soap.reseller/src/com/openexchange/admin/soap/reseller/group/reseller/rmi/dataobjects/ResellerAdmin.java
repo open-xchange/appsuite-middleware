@@ -1,137 +1,151 @@
+/*
+ *
+ *    OPEN-XCHANGE legal information
+ *
+ *    All intellectual property rights in the Software are protected by
+ *    international copyright laws.
+ *
+ *
+ *    In some countries OX, OX Open-Xchange, open xchange and OXtender
+ *    as well as the corresponding Logos OX Open-Xchange and OX are registered
+ *    trademarks of the Open-Xchange, Inc. group of companies.
+ *    The use of the Logos is not covered by the GNU General Public License.
+ *    Instead, you are allowed to use these Logos according to the terms and
+ *    conditions of the Creative Commons License, Version 2.5, Attribution,
+ *    Non-commercial, ShareAlike, and the interpretation of the term
+ *    Non-commercial applicable to the aforementioned license is published
+ *    on the web site http://www.open-xchange.com/EN/legal/index.html.
+ *
+ *    Please make sure that third-party modules and libraries are used
+ *    according to their respective licenses.
+ *
+ *    Any modifications to this package must retain all copyright notices
+ *    of the original copyright holder(s) for the original code used.
+ *
+ *    After any such modifications, the original and derivative code shall remain
+ *    under the copyright of the copyright holder(s) and/or original author(s)per
+ *    the Attribution and Assignment Agreement that can be located at
+ *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
+ *    given Attribution for the derivative code and a license granting use.
+ *
+ *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Mail: info@open-xchange.com
+ *
+ *
+ *     This program is free software; you can redistribute it and/or modify it
+ *     under the terms of the GNU General Public License, Version 2 as published
+ *     by the Free Software Foundation.
+ *
+ *     This program is distributed in the hope that it will be useful, but
+ *     WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+ *     or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License
+ *     for more details.
+ *
+ *     You should have received a copy of the GNU General Public License along
+ *     with this program; if not, write to the Free Software Foundation, Inc., 59
+ *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
+ *
+ */
 
 package com.openexchange.admin.soap.reseller.group.reseller.rmi.dataobjects;
 
-import java.util.ArrayList;
 import java.util.List;
-import javax.xml.bind.JAXBElement;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlElementRef;
-import javax.xml.bind.annotation.XmlElementRefs;
+import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlType;
-import com.openexchange.admin.soap.reseller.group.rmi.dataobjects.EnforceableDataObject;
-
 
 /**
- * <p>Java-Klasse f\u00fcr ResellerAdmin complex type.
- * 
- * <p>Das folgende Schemafragment gibt den erwarteten Content an, der in dieser Klasse enthalten ist.
- * 
- * <pre>
- * &lt;complexType name="ResellerAdmin">
- *   &lt;complexContent>
- *     &lt;extension base="{http://dataobjects.rmi.admin.openexchange.com/xsd}EnforceableDataObject">
- *       &lt;sequence>
- *         &lt;element name="displayname" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
- *         &lt;element name="displaynameset" type="{http://www.w3.org/2001/XMLSchema}boolean" minOccurs="0"/>
- *         &lt;element name="id" type="{http://www.w3.org/2001/XMLSchema}int" minOccurs="0"/>
- *         &lt;element name="idset" type="{http://www.w3.org/2001/XMLSchema}boolean" minOccurs="0"/>
- *         &lt;element name="mandatoryMembersChange" type="{http://www.w3.org/2001/XMLSchema}string" maxOccurs="unbounded" minOccurs="0"/>
- *         &lt;element name="mandatoryMembersCreate" type="{http://www.w3.org/2001/XMLSchema}string" maxOccurs="unbounded" minOccurs="0"/>
- *         &lt;element name="mandatoryMembersDelete" type="{http://www.w3.org/2001/XMLSchema}string" maxOccurs="unbounded" minOccurs="0"/>
- *         &lt;element name="mandatoryMembersRegister" type="{http://www.w3.org/2001/XMLSchema}string" maxOccurs="unbounded" minOccurs="0"/>
- *         &lt;element name="name" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
- *         &lt;element name="nameset" type="{http://www.w3.org/2001/XMLSchema}boolean" minOccurs="0"/>
- *         &lt;element name="parentId" type="{http://www.w3.org/2001/XMLSchema}int" minOccurs="0"/>
- *         &lt;element name="parentIdset" type="{http://www.w3.org/2001/XMLSchema}boolean" minOccurs="0"/>
- *         &lt;element name="password" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
- *         &lt;element name="passwordMech" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
- *         &lt;element name="passwordMechset" type="{http://www.w3.org/2001/XMLSchema}boolean" minOccurs="0"/>
- *         &lt;element name="passwordset" type="{http://www.w3.org/2001/XMLSchema}boolean" minOccurs="0"/>
- *         &lt;element name="restrictions" type="{http://dataobjects.rmi.reseller.admin.openexchange.com/xsd}Restriction" maxOccurs="unbounded" minOccurs="0"/>
- *         &lt;element name="restrictionsset" type="{http://www.w3.org/2001/XMLSchema}boolean" minOccurs="0"/>
- *       &lt;/sequence>
- *     &lt;/extension>
- *   &lt;/complexContent>
- * &lt;/complexType>
- * </pre>
- * 
- * 
+ * <p>SOAP mapping class for ResellerAdmin complex type.
+ *
+ * @author <a href="mailto:marcus@open-xchange.com">Marcus Klein</a>
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "ResellerAdmin", propOrder = {
-    "rest"
+    "name",
+    "passwordMech",
+    "password",
+    "parentId",
+    "restrictions",
+    "displayName",
+    "id"
 })
-public class ResellerAdmin
-    extends EnforceableDataObject
-{
+public class ResellerAdmin {
 
-    @XmlElementRefs({
-        @XmlElementRef(name = "mandatoryMembersDelete", namespace = "http://dataobjects.rmi.reseller.admin.openexchange.com/xsd", type = JAXBElement.class),
-        @XmlElementRef(name = "name", namespace = "http://dataobjects.rmi.reseller.admin.openexchange.com/xsd", type = JAXBElement.class),
-        @XmlElementRef(name = "passwordMech", namespace = "http://dataobjects.rmi.reseller.admin.openexchange.com/xsd", type = JAXBElement.class),
-        @XmlElementRef(name = "displaynameset", namespace = "http://dataobjects.rmi.reseller.admin.openexchange.com/xsd", type = JAXBElement.class),
-        @XmlElementRef(name = "idset", namespace = "http://dataobjects.rmi.reseller.admin.openexchange.com/xsd", type = JAXBElement.class),
-        @XmlElementRef(name = "nameset", namespace = "http://dataobjects.rmi.reseller.admin.openexchange.com/xsd", type = JAXBElement.class),
-        @XmlElementRef(name = "mandatoryMembersCreate", namespace = "http://dataobjects.rmi.reseller.admin.openexchange.com/xsd", type = JAXBElement.class),
-        @XmlElementRef(name = "mandatoryMembersRegister", namespace = "http://dataobjects.rmi.reseller.admin.openexchange.com/xsd", type = JAXBElement.class),
-        @XmlElementRef(name = "displayname", namespace = "http://dataobjects.rmi.reseller.admin.openexchange.com/xsd", type = JAXBElement.class),
-        @XmlElementRef(name = "parentIdset", namespace = "http://dataobjects.rmi.reseller.admin.openexchange.com/xsd", type = JAXBElement.class),
-        @XmlElementRef(name = "restrictionsset", namespace = "http://dataobjects.rmi.reseller.admin.openexchange.com/xsd", type = JAXBElement.class),
-        @XmlElementRef(name = "id", namespace = "http://dataobjects.rmi.reseller.admin.openexchange.com/xsd", type = JAXBElement.class),
-        @XmlElementRef(name = "restrictions", namespace = "http://dataobjects.rmi.reseller.admin.openexchange.com/xsd", type = JAXBElement.class),
-        @XmlElementRef(name = "password", namespace = "http://dataobjects.rmi.reseller.admin.openexchange.com/xsd", type = JAXBElement.class),
-        @XmlElementRef(name = "mandatoryMembersChange", namespace = "http://dataobjects.rmi.reseller.admin.openexchange.com/xsd", type = JAXBElement.class),
-        @XmlElementRef(name = "parentId", namespace = "http://dataobjects.rmi.reseller.admin.openexchange.com/xsd", type = JAXBElement.class),
-        @XmlElementRef(name = "passwordset", namespace = "http://dataobjects.rmi.reseller.admin.openexchange.com/xsd", type = JAXBElement.class),
-        @XmlElementRef(name = "passwordMechset", namespace = "http://dataobjects.rmi.reseller.admin.openexchange.com/xsd", type = JAXBElement.class)
-    })
-    protected List<JAXBElement<?>> rest;
+    @XmlElement(nillable = true)
+    protected Integer id;
 
-    /**
-     * Ruft das restliche Contentmodell ab. 
-     * 
-     * <p>
-     * Sie rufen diese "catch-all"-Eigenschaft aus folgendem Grund ab: 
-     * Der Feldname "MandatoryMembersChange" wird von zwei verschiedenen Teilen eines Schemas verwendet. Siehe: 
-     * Zeile 0 von http://192.168.32.167/servlet/axis2/services/OXResellerGroupService?wsdl#types7
-     * Zeile 0 von http://192.168.32.167/servlet/axis2/services/OXResellerGroupService?wsdl#types4
-     * <p>
-     * Um diese Eigenschaft zu entfernen, wenden Sie eine Eigenschaftenanpassung f\u00fcr eine
-     * der beiden folgenden Deklarationen an, um deren Namen zu \u00e4ndern: 
-     * Gets the value of the rest property.
-     * 
-     * <p>
-     * This accessor method returns a reference to the live list,
-     * not a snapshot. Therefore any modification you make to the
-     * returned list will be present inside the JAXB object.
-     * This is why there is not a <CODE>set</CODE> method for the rest property.
-     * 
-     * <p>
-     * For example, to add a new item, do as follows:
-     * <pre>
-     *    getRest().add(newItem);
-     * </pre>
-     * 
-     * 
-     * <p>
-     * Objects of the following type(s) are allowed in the list
-     * {@link JAXBElement }{@code <}{@link String }{@code >}
-     * {@link JAXBElement }{@code <}{@link String }{@code >}
-     * {@link JAXBElement }{@code <}{@link Boolean }{@code >}
-     * {@link JAXBElement }{@code <}{@link String }{@code >}
-     * {@link JAXBElement }{@code <}{@link Boolean }{@code >}
-     * {@link JAXBElement }{@code <}{@link Boolean }{@code >}
-     * {@link JAXBElement }{@code <}{@link String }{@code >}
-     * {@link JAXBElement }{@code <}{@link String }{@code >}
-     * {@link JAXBElement }{@code <}{@link String }{@code >}
-     * {@link JAXBElement }{@code <}{@link Boolean }{@code >}
-     * {@link JAXBElement }{@code <}{@link Boolean }{@code >}
-     * {@link JAXBElement }{@code <}{@link Integer }{@code >}
-     * {@link JAXBElement }{@code <}{@link Restriction }{@code >}
-     * {@link JAXBElement }{@code <}{@link String }{@code >}
-     * {@link JAXBElement }{@code <}{@link Integer }{@code >}
-     * {@link JAXBElement }{@code <}{@link String }{@code >}
-     * {@link JAXBElement }{@code <}{@link Boolean }{@code >}
-     * {@link JAXBElement }{@code <}{@link Boolean }{@code >}
-     * 
-     * 
-     */
-    public List<JAXBElement<?>> getRest() {
-        if (rest == null) {
-            rest = new ArrayList<JAXBElement<?>>();
-        }
-        return this.rest;
+    @XmlElement(nillable = true)
+    protected Integer parentId;
+
+    @XmlElement(nillable = true)
+    protected String name;
+
+    @XmlElement(nillable = true)
+    protected String password;
+
+    @XmlElement(nillable = true)
+    protected String passwordMech;
+
+    @XmlElement(name="displayname", nillable = true)
+    protected String displayName;
+
+    @XmlElement(nillable = true)
+    protected List<Restriction> restrictions;
+
+    public Integer getId() {
+        return id;
     }
 
+    public void setId(Integer id) {
+        this.id = id;
+    }
+
+    public Integer getParentId() {
+        return parentId;
+    }
+
+    public void setParentId(Integer parentId) {
+        this.parentId = parentId;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    public String getPasswordMech() {
+        return passwordMech;
+    }
+
+    public void setPasswordMech(String passwordMech) {
+        this.passwordMech = passwordMech;
+    }
+
+    public String getDisplayName() {
+        return displayName;
+    }
+
+    public void setDisplayName(String displayName) {
+        this.displayName = displayName;
+    }
+
+    public List<Restriction> getRestrictions() {
+        return restrictions;
+    }
+
+    public void setRestrictions(List<Restriction> restrictions) {
+        this.restrictions = restrictions;
+    }
 }

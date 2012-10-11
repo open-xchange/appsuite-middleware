@@ -8,21 +8,23 @@ BuildRequires: open-xchange-soap-cxf
 BuildRequires: open-xchange-admin-user-copy
 BuildRequires: java-devel >= 1.6.0
 Version:	@OXVERSION@
-%define		ox_release 1
+%define		ox_release 5
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GPL-2.0
 BuildRoot:      %{_tmppath}/%{name}-%{version}-build
 URL:            http://www.open-xchange.com/
 Source:         %{name}_%{version}.orig.tar.bz2
-Summary:        Open Xchange Admin User Copy Bundle SOAP server
+Summary:        SOAP interface for extension to copy user into other contexts
 Requires:       open-xchange-soap-cxf >= @OXVERSION@
-Requires:	open-xchange-admin-user-copy >= @OXVERSION@
+Requires:       open-xchange-admin-user-copy >= @OXVERSION@
 Provides:       open-xchange-admin-plugin-user-copy-soap = %{version}
 Obsoletes:      open-xchange-admin-plugin-user-copy-soap <= %{version}
 
 %description
-Open Xchange Admin User Copy Bundle SOAP server
+This package installs the OSGi bundle that provides the administrative SOAP interface to copy users into other contexts. SOAP allows
+administrative clients written in any programming language while RMI requires clients written in Java. For a description of copying users
+into other contexts see the package description of package open-xchange-admin-user-copy.
 
 Authors:
 --------
@@ -49,6 +51,14 @@ ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} 
 /opt/open-xchange/osgi/bundle.d/*
 
 %changelog
+* Wed Oct 10 2012 Marcus Klein <marcus.klein@open-xchange.com>
+Fifth release candidate for 6.22.0
+* Tue Oct 09 2012 Marcus Klein <marcus.klein@open-xchange.com>
+Fourth release candidate for 6.22.0
+* Fri Oct 05 2012 Marcus Klein <marcus.klein@open-xchange.com>
+Third release candidate for 6.22.0
+* Thu Oct 04 2012 Marcus Klein <marcus.klein@open-xchange.com>
+Second release candidate for 6.22.0
 * Tue Aug 21 2012 Marcus Klein <marcus.klein@open-xchange.com>
 First release candidate for 6.22.0
 * Mon Aug 20 2012 Marcus Klein <marcus.klein@open-xchange.com>

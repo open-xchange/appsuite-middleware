@@ -79,6 +79,7 @@ import com.openexchange.webdav.protocol.helpers.AbstractCollection;
 public class RootCollection extends AbstractCollection {
 
     private static final String EXPOSED_COLLECTIONS_PROPERTY = "com.openexchange.carddav.exposedCollections";
+    private static final String REDUCED_AGGREGATED_COLLECTION_PROPERTY = "com.openexchange.carddav.reducedAggregatedCollection";
     private static final String USER_AGENT_FOR_AGGREGATED_COLLECTION_PROPERTY = "com.openexchange.carddav.userAgentForAggregatedCollection";
     private static final Log LOG = com.openexchange.log.Log.loggerFor(RootCollection.class);
     private static final String DISPLAY_NAME = "Addressbooks";
@@ -89,6 +90,7 @@ public class RootCollection extends AbstractCollection {
     private final WebdavPath url;
     private String exposedCollections = null;
     private Pattern userAgentForAggregatedCollection = null;
+    private Boolean reducedAggregatedCollection = null;
 
     /**
      * Initializes a new {@link RootCollection}.
@@ -191,8 +193,12 @@ public class RootCollection extends AbstractCollection {
 			/*
 			 * this is the aggregated collection
 			 */
-			return new AggregatedCollection(factory,  constructPathForChildResource(AGGREGATED_FOLDER_ID), AGGREGATED_DISPLAY_NAME);
-		} 
+		    if (this.isReducedAggregatedCollection()) {
+                return new ReducedAggregatedCollection(factory, constructPathForChildResource(AGGREGATED_FOLDER_ID), AGGREGATED_DISPLAY_NAME);
+		    } else {
+	            return new AggregatedCollection(factory, constructPathForChildResource(AGGREGATED_FOLDER_ID), AGGREGATED_DISPLAY_NAME);
+		    }
+		}
 		if (isUseFolderCollections()) {
 			/*
 			 * search available folders
@@ -235,6 +241,18 @@ public class RootCollection extends AbstractCollection {
             }
         }
         return this.exposedCollections;
+    }
+
+    private Boolean isReducedAggregatedCollection() {
+        if (null == this.reducedAggregatedCollection) {
+            reducedAggregatedCollection = Boolean.TRUE;
+            try {
+                reducedAggregatedCollection = Boolean.parseBoolean(factory.getConfigValue(REDUCED_AGGREGATED_COLLECTION_PROPERTY, "true"));
+            } catch (OXException e) {
+                LOG.error("error getting reduced aggregated collection property from config, falling back to 'true'", e);
+            }
+        }
+        return this.reducedAggregatedCollection;
     }
 
     private Pattern getUserAgentForAggregatedCollection() {

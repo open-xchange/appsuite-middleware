@@ -59,6 +59,7 @@ import java.util.HashSet;
 import java.util.Locale;
 import java.util.Set;
 import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletRequest;
 import com.google.common.net.InternetDomainName;
 import com.openexchange.ajax.Login;
 import com.openexchange.config.ConfigurationService;
@@ -77,6 +78,31 @@ public final class Cookies {
      */
     private Cookies() {
         super();
+    }
+
+    private static final Set<String> LOCALS = Collections.unmodifiableSet(new HashSet<String>(Arrays.asList("localhost", "127.0.0.1","::1")));
+
+    /**
+     * Checks if specified request's server name is considered as part of local LAN.
+     * 
+     * @param request The request
+     * @return <code>true</code> if considered as part of local LAN; otherwise <code>false</code>
+     */
+    public static boolean isLocalLan(final HttpServletRequest request) {
+        return isLocalLan(request.getServerName());
+    }
+
+    /**
+     * Checks if specified server name is considered as part of local LAN.
+     * 
+     * @param serverName The server name
+     * @return <code>true</code> if considered as part of local LAN; otherwise <code>false</code>
+     */
+    public static boolean isLocalLan(final String serverName) {
+        if (isEmpty(serverName)) {
+            return false;
+        }
+        return LOCALS.contains(serverName.toLowerCase(Locale.US));
     }
 
     private static volatile Boolean domainEnabled;
@@ -236,6 +262,18 @@ public final class Cookies {
         } catch (final UnsupportedEncodingException e) {
             return text;
         }
+    }
+
+    private static boolean isEmpty(final String string) {
+        if (null == string) {
+            return true;
+        }
+        final int len = string.length();
+        boolean isWhitespace = true;
+        for (int i = 0; isWhitespace && i < len; i++) {
+            isWhitespace = Character.isWhitespace(string.charAt(i));
+        }
+        return isWhitespace;
     }
 
     /**

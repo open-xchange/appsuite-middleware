@@ -77,6 +77,7 @@ import com.openexchange.admin.rmi.exceptions.InvalidCredentialsException;
 import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 import com.openexchange.admin.rmi.exceptions.NoSuchContextException;
 import com.openexchange.admin.rmi.exceptions.NoSuchGroupException;
+import com.openexchange.admin.rmi.exceptions.NoSuchObjectException;
 import com.openexchange.admin.rmi.exceptions.NoSuchUserException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.storage.interfaces.OXGroupStorageInterface;
@@ -147,7 +148,11 @@ public class OXGroup extends OXCommonImpl implements OXGroupInterface {
             throw e;
         }
 
-        setIdOrGetIDFromNameAndIdObject(ctx, grp);
+        try {
+            setIdOrGetIDFromNameAndIdObject(ctx, grp);
+        } catch (NoSuchObjectException e) {
+            throw new NoSuchGroupException(e);
+        }
 
         if (log.isDebugEnabled()) {
             log.debug(ctx + " - " + grp + " - " + Arrays.toString(members)
@@ -160,7 +165,11 @@ public class OXGroup extends OXCommonImpl implements OXGroupInterface {
             throw new NoSuchGroupException("No such group");
         }
 
-        setUserIdInArrayOfUsers(ctx, members);
+        try {
+            setUserIdInArrayOfUsers(ctx, members);
+        } catch (NoSuchObjectException e) {
+            throw new NoSuchUserException(e);
+        }
         if (!tool.existsUser(ctx, members)) {
             throw new NoSuchUserException("No such user");
         }
@@ -244,7 +253,11 @@ public class OXGroup extends OXCommonImpl implements OXGroupInterface {
                 }
             }
             
-            setIdOrGetIDFromNameAndIdObject(ctx, grp);
+            try {
+                setIdOrGetIDFromNameAndIdObject(ctx, grp);
+            } catch (NoSuchObjectException e) {
+                throw new NoSuchGroupException(e);
+            }
             grp.testMandatoryCreateFieldsNull();
             if (!tool.existsGroup(ctx, grp.getId())) {
                 throw new NoSuchGroupException("No such group");
@@ -532,7 +545,11 @@ public class OXGroup extends OXCommonImpl implements OXGroupInterface {
 
             for (final Group elem : grp) {
                 // should we allow of deleting the users group?
-                setIdOrGetIDFromNameAndIdObject(ctx, elem);
+                try {
+                    setIdOrGetIDFromNameAndIdObject(ctx, elem);
+                } catch (NoSuchObjectException e) {
+                    throw new NoSuchGroupException(e);
+                }
                 final int grp_id = elem.getId();
                 if (1 == grp_id) {
                     throw new InvalidDataException("Group with id " + grp_id
@@ -664,9 +681,13 @@ public class OXGroup extends OXCommonImpl implements OXGroupInterface {
             log.error(e.getMessage(), e);
             throw e;
         }
-        
-        setIdOrGetIDFromNameAndIdObject(ctx, grp);
-        
+
+        try {
+            setIdOrGetIDFromNameAndIdObject(ctx, grp);
+        } catch (NoSuchObjectException e) {
+            throw new NoSuchGroupException(e);
+        }
+
         final int grp_id = grp.getId().intValue();
 
         if (log.isDebugEnabled()) {
@@ -839,7 +860,11 @@ public class OXGroup extends OXCommonImpl implements OXGroupInterface {
             throw e;
         }
 
-        setIdOrGetIDFromNameAndIdObject(ctx, grp);
+        try {
+            setIdOrGetIDFromNameAndIdObject(ctx, grp);
+        } catch (NoSuchObjectException e) {
+            throw new NoSuchGroupException(e);
+        }
         final int grp_id = grp.getId().intValue();
 
         if (log.isDebugEnabled()) {
@@ -920,7 +945,11 @@ public class OXGroup extends OXCommonImpl implements OXGroupInterface {
 
         checkContextAndSchema(ctx);
 
-        setIdOrGetIDFromNameAndIdObject(ctx, usr);
+        try {
+            setIdOrGetIDFromNameAndIdObject(ctx, usr);
+        } catch (NoSuchObjectException e) {
+            throw new NoSuchUserException(e);
+        }
         if (!tool.existsUser(ctx, usr)) {
             throw new NoSuchUserException("No such user");
         }
@@ -953,7 +982,11 @@ public class OXGroup extends OXCommonImpl implements OXGroupInterface {
             throw e;
         }
 
-        setIdOrGetIDFromNameAndIdObject(ctx, grp);
+        try {
+            setIdOrGetIDFromNameAndIdObject(ctx, grp);
+        } catch (NoSuchObjectException e) {
+            throw new NoSuchGroupException(e);
+        }
         final int grp_id = grp.getId().intValue();
         if (log.isDebugEnabled()) {
             log.debug(ctx + " - " + grp_id + " - " + Arrays.toString(members)
@@ -962,7 +995,11 @@ public class OXGroup extends OXCommonImpl implements OXGroupInterface {
 
         checkContextAndSchema(ctx);
 
-        setUserIdInArrayOfUsers(ctx, members);
+        try {
+            setUserIdInArrayOfUsers(ctx, members);
+        } catch (NoSuchObjectException e) {
+            throw new NoSuchUserException(e);
+        }
         if (!tool.existsUser(ctx, members)) {
             throw new NoSuchUserException("No such user");
         }

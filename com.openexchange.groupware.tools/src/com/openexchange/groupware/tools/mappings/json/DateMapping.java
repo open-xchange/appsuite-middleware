@@ -87,16 +87,31 @@ public abstract class DateMapping<O> extends DefaultJsonMapping<Date, O> {
             if (object instanceof Number) {
                 set(to, new Date(((Number) object).longValue()));
             } else if (null != object) {
-                try {
-                    set(to, new Date(Long.parseLong(object.toString())));
-                } catch (final NumberFormatException e) {
-                    throw new JSONException("JSONObject[\""+ajaxName+"\"] is not a number: " + object);
+                final String sObject = object.toString();
+                if (!isEmpty(sObject)) {
+                    try {
+                        set(to, new Date(Long.parseLong(sObject)));
+                    } catch (final NumberFormatException e) {
+                        throw new JSONException("JSONObject[\""+ajaxName+"\"] is not a number: " + object);
+                    }
                 }
             } else {
                 throw new JSONException("JSONObject[\""+ajaxName+"\"] is not a number: " + object);
             }
         }
 	}
+
+	private static boolean isEmpty(final String string) {
+        if (null == string) {
+            return true;
+        }
+        final int len = string.length();
+        boolean isWhitespace = true;
+        for (int i = 0; isWhitespace && i < len; i++) {
+            isWhitespace = Character.isWhitespace(string.charAt(i));
+        }
+        return isWhitespace;
+    }
 
 	@Override
 	public Object serialize(O from, TimeZone timeZone, Session session) throws JSONException {

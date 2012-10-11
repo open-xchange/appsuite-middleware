@@ -113,6 +113,10 @@ public final class Mapping {
                 return "private";
             }
             @Override
+            public String getDisplayName() {
+                throw new UnsupportedOperationException();
+            }
+            @Override
             public void toDB(final PreparedStatement stmt, final int pos,
                 final Task task) throws SQLException {
                 stmt.setBoolean(pos, task.getPrivateFlag());
@@ -148,6 +152,10 @@ public final class Mapping {
             @Override
             public String getDBColumnName() {
                 return "creating_date";
+            }
+            @Override
+            public String getDisplayName() {
+                throw new UnsupportedOperationException();
             }
             @Override
             public void toDB(final PreparedStatement stmt, final int pos,
@@ -189,6 +197,10 @@ public final class Mapping {
                 return "last_modified";
             }
             @Override
+            public String getDisplayName() {
+                throw new UnsupportedOperationException();
+            }
+            @Override
             public void toDB(final PreparedStatement stmt, final int pos,
                 final Task task) throws SQLException {
                 stmt.setLong(pos, task.getLastModified().getTime());
@@ -225,6 +237,10 @@ public final class Mapping {
             @Override
             public String getDBColumnName() {
                 return "created_from";
+            }
+            @Override
+            public String getDisplayName() {
+                throw new UnsupportedOperationException();
             }
             @Override
             public void toDB(final PreparedStatement stmt, final int pos,
@@ -264,6 +280,10 @@ public final class Mapping {
                 return "changed_from";
             }
             @Override
+            public String getDisplayName() {
+                throw new UnsupportedOperationException();
+            }
+            @Override
             public void toDB(final PreparedStatement stmt, final int pos,
                 final Task task) throws SQLException {
                 stmt.setInt(pos, task.getModifiedBy());
@@ -301,6 +321,10 @@ public final class Mapping {
             @Override
             public String getDBColumnName() {
                 return "start";
+            }
+            @Override
+            public String getDisplayName() {
+                throw new UnsupportedOperationException();
             }
             @Override
             public void toDB(final PreparedStatement stmt, final int pos,
@@ -348,6 +372,10 @@ public final class Mapping {
                 return "end";
             }
             @Override
+            public String getDisplayName() {
+                throw new UnsupportedOperationException();
+            }
+            @Override
             public void toDB(final PreparedStatement stmt, final int pos,
                 final Task task) throws SQLException {
                 if (null == task.getEndDate()) {
@@ -390,6 +418,10 @@ public final class Mapping {
             @Override
             public String getDBColumnName() {
                 return "completed";
+            }
+            @Override
+            public String getDisplayName() {
+                throw new UnsupportedOperationException();
             }
             @Override
             public void toDB(final PreparedStatement stmt, final int pos,
@@ -437,6 +469,10 @@ public final class Mapping {
                 return "title";
             }
             @Override
+            public String getDisplayName() {
+                throw new UnsupportedOperationException();
+            }
+            @Override
             public void toDB(final PreparedStatement stmt, final int pos,
                 final Task task) throws SQLException {
                 if (null == task.getTitle()) {
@@ -478,6 +514,10 @@ public final class Mapping {
             @Override
             public String getDBColumnName() {
                 return "description";
+            }
+            @Override
+            public String getDisplayName() {
+                throw new UnsupportedOperationException();
             }
             @Override
             public void toDB(final PreparedStatement stmt, final int pos,
@@ -524,6 +564,10 @@ public final class Mapping {
                 return "priority";
             }
             @Override
+            public String getDisplayName() {
+                throw new UnsupportedOperationException();
+            }
+            @Override
             public void toDB(final PreparedStatement stmt, final int pos,
                 final Task task) throws SQLException {
                 stmt.setInt(pos, task.getPriority());
@@ -563,6 +607,10 @@ public final class Mapping {
                 return "progress";
             }
             @Override
+            public String getDisplayName() {
+                throw new UnsupportedOperationException();
+            }
+            @Override
             public void toDB(final PreparedStatement stmt, final int pos,
                 final Task task) throws SQLException {
                 stmt.setInt(pos, task.getPercentComplete());
@@ -600,6 +648,10 @@ public final class Mapping {
             @Override
             public String getDBColumnName() {
                 return "categories";
+            }
+            @Override
+            public String getDisplayName() {
+                throw new UnsupportedOperationException();
             }
             @Override
             public void toDB(final PreparedStatement stmt, final int pos,
@@ -646,6 +698,10 @@ public final class Mapping {
                 return "project";
             }
             @Override
+            public String getDisplayName() {
+                throw new UnsupportedOperationException();
+            }
+            @Override
             public void toDB(final PreparedStatement stmt, final int pos,
                 final Task task) throws SQLException {
                 stmt.setInt(pos, task.getProjectID());
@@ -687,6 +743,10 @@ public final class Mapping {
             @Override
             public String getDBColumnName() {
                 return "currency";
+            }
+            @Override
+            public String getDisplayName() {
+                throw new UnsupportedOperationException();
             }
             @Override
             public void toDB(final PreparedStatement stmt, final int pos,
@@ -733,6 +793,10 @@ public final class Mapping {
                 return "trip_meter";
             }
             @Override
+            public String getDisplayName() {
+                throw new UnsupportedOperationException();
+            }
+            @Override
             public void toDB(final PreparedStatement stmt, final int pos,
                 final Task task) throws SQLException {
                 if (null == task.getTripMeter()) {
@@ -775,6 +839,10 @@ public final class Mapping {
             @Override
             public String getDBColumnName() {
                 return "billing";
+            }
+            @Override
+            public String getDisplayName() {
+                throw new UnsupportedOperationException();
             }
             @Override
             public void toDB(final PreparedStatement stmt, final int pos,
@@ -821,6 +889,10 @@ public final class Mapping {
                 return "companies";
             }
             @Override
+            public String getDisplayName() {
+                throw new UnsupportedOperationException();
+            }
+            @Override
             public void toDB(final PreparedStatement stmt, final int pos,
                 final Task task) throws SQLException {
                 if (null == task.getCompanies()) {
@@ -865,6 +937,10 @@ public final class Mapping {
                 return "color_label";
             }
             @Override
+            public String getDisplayName() {
+                throw new UnsupportedOperationException();
+            }
+            @Override
             public void toDB(final PreparedStatement stmt, final int pos,
                 final Task task) throws SQLException {
                 stmt.setInt(pos, task.getLabel());
@@ -904,6 +980,10 @@ public final class Mapping {
                 return "recurrence_type";
             }
             @Override
+            public String getDisplayName() {
+                throw new UnsupportedOperationException();
+            }
+            @Override
             public void toDB(final PreparedStatement stmt, final int pos,
                 final Task task) throws SQLException {
                 stmt.setInt(pos, task.getRecurrenceType());
@@ -939,6 +1019,10 @@ public final class Mapping {
             @Override
             public String getDBColumnName() {
                 return "recurrence_interval";
+            }
+            @Override
+            public String getDisplayName() {
+                throw new UnsupportedOperationException();
             }
             @Override
             public void toDB(final PreparedStatement stmt, final int pos,
@@ -978,6 +1062,10 @@ public final class Mapping {
             @Override
             public String getDBColumnName() {
                 return "recurrence_days";
+            }
+            @Override
+            public String getDisplayName() {
+                throw new UnsupportedOperationException();
             }
             @Override
             public void toDB(final PreparedStatement stmt, final int pos,
@@ -1023,6 +1111,10 @@ public final class Mapping {
                 return "recurrence_dayinmonth";
             }
             @Override
+            public String getDisplayName() {
+                throw new UnsupportedOperationException();
+            }
+            @Override
             public void toDB(final PreparedStatement stmt, final int pos,
                 final Task task) throws SQLException {
                 stmt.setInt(pos, task.getDayInMonth());
@@ -1062,6 +1154,10 @@ public final class Mapping {
                 return "recurrence_month";
             }
             @Override
+            public String getDisplayName() {
+                throw new UnsupportedOperationException();
+            }
+            @Override
             public void toDB(final PreparedStatement stmt, final int pos,
                 final Task task) throws SQLException {
                 stmt.setInt(pos, task.getMonth());
@@ -1099,6 +1195,10 @@ public final class Mapping {
             @Override
             public String getDBColumnName() {
                 return "recurrence_until";
+            }
+            @Override
+            public String getDisplayName() {
+                throw new UnsupportedOperationException();
             }
             @Override
             public void toDB(final PreparedStatement stmt, final int pos,
@@ -1144,6 +1244,10 @@ public final class Mapping {
             @Override
             public String getDBColumnName() {
                 return "number_of_attachments";
+            }
+            @Override
+            public String getDisplayName() {
+                throw new UnsupportedOperationException();
             }
             @Override
             public void toDB(final PreparedStatement stmt, final int pos,

@@ -140,9 +140,9 @@ public final class EventQueue {
 
     private static final AtomicBoolean isFirst = new AtomicBoolean(true);
 
-    private static boolean isInit;
+    private static volatile boolean isInit;
 
-    private static boolean noDelay;
+    private static volatile boolean noDelay;
 
     private static List<EventObject> queue1;
 
@@ -150,7 +150,7 @@ public final class EventQueue {
 
     private static int delay = 180000;
 
-    private static boolean isEnabled;
+    private static volatile boolean isEnabled;
 
     static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(EventQueue.class));
 

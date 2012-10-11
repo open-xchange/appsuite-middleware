@@ -108,7 +108,7 @@ public class BinaryValueDefinition extends ValueDefinition {
     @Override
     public Object parse(final Scanner s, final Property property) throws IOException {
         final StringBuilder sb = new StringBuilder();
-        while (!(s.peek < ' ' && s.peek != '\t' || s.peek == 0x7f)) {
+        while ((s.peek >= ' ' || s.peek == '\t') && s.peek != 0x7f) {
             sb.append((char) s.read());
         }
         final String text = sb.toString();

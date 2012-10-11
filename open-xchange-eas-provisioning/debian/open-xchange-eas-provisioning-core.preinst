@@ -14,16 +14,8 @@ set -e
 # the debian-policy package
 
 
-TEMPLATES="iPhoneTemplate.tmpl mobile.configuration.generator.properties winMobileTemplate.tmpl"
-
 case "$1" in
     install|upgrade)
-        if dpkg --compare-versions "$2" lt "6.21.0-0"; then
-            for FILE in ${TEMPLATES}; do
-                dpkg-divert --package open-xchange-eas-provisioning --add --rename --divert /opt/open-xchange/templates/${FILE}.dpkg-bak \
-                    /opt/open-xchange/templates/${FILE}
-            done
-        fi
     ;;
 
     abort-upgrade)

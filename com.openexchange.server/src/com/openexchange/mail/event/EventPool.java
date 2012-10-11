@@ -88,7 +88,7 @@ public final class EventPool implements Runnable {
 
     private static final boolean DEBUG_ENABLED = LOG.isDebugEnabled();
 
-    private static EventPool instance;
+    private static volatile EventPool instance;
 
     /**
      * Initializes this event pool.

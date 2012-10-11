@@ -51,13 +51,17 @@ package com.openexchange.ajax.parser;
 
 import static com.openexchange.ajax.fields.TaskFields.ACTUAL_DURATION;
 import static com.openexchange.ajax.fields.TaskFields.TARGET_DURATION;
+import java.util.Locale;
 import java.util.TimeZone;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.fields.CalendarFields;
 import com.openexchange.ajax.fields.TaskFields;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.tasks.Mapping;
 import com.openexchange.groupware.tasks.Task;
+import com.openexchange.groupware.tasks.TaskExceptionCode;
+import com.openexchange.server.services.I18nServices;
 import com.openexchange.tools.servlet.OXJSONExceptionCodes;
 
 /**
@@ -75,10 +79,10 @@ public class TaskParser extends CalendarParser {
         super(parseAll, timeZone);
     }
 
-    public void parse(final Task taskobject, final JSONObject jsonobject)
+    public void parse(Task taskobject, JSONObject jsonobject, Locale locale)
         throws OXException {
         try {
-            parseElementTask(taskobject, jsonobject);
+            parseElementTask(taskobject, jsonobject, locale);
         } catch (final OXException e) {
             throw e;
         } catch (final Exception e) {
@@ -86,7 +90,7 @@ public class TaskParser extends CalendarParser {
         }
     }
 
-    protected void parseElementTask(final Task taskobject, final JSONObject json) throws JSONException, OXException {
+    protected void parseElementTask(final Task taskobject, final JSONObject json, Locale locale) throws JSONException, OXException {
         if (json.has(CalendarFields.START_DATE)) {
             taskobject.setStartDate(parseDate(json, CalendarFields.START_DATE));
         }
@@ -97,10 +101,18 @@ public class TaskParser extends CalendarParser {
             taskobject.setStatus(parseInt(json, TaskFields.STATUS));
         }
         if (json.has(TaskFields.ACTUAL_COSTS)) {
-            taskobject.setActualCosts(parseFloat(json, TaskFields.ACTUAL_COSTS));
+            try {
+                taskobject.setActualCosts(parseFloat(json, TaskFields.ACTUAL_COSTS));
+            } catch (OXException e) {
+                throw handleParseException(e, parseString(json, TaskFields.ACTUAL_COSTS), Task.ACTUAL_COSTS, locale);
+            }
         }
         if (json.has(ACTUAL_DURATION)) {
-            taskobject.setActualDuration(parseLong(json, ACTUAL_DURATION));
+            try {
+                taskobject.setActualDuration(parseLong(json, ACTUAL_DURATION));
+            } catch (OXException e) {
+                throw handleParseException(e, parseString(json, TaskFields.ACTUAL_DURATION), Task.ACTUAL_DURATION, locale);
+            }
         }
         if (json.has(TaskFields.PERCENT_COMPLETED)) {
             taskobject.setPercentComplete(parseInt(json, TaskFields.PERCENT_COMPLETED));
@@ -112,10 +124,18 @@ public class TaskParser extends CalendarParser {
             taskobject.setBillingInformation(parseString(json, TaskFields.BILLING_INFORMATION));
         }
         if (json.has(TaskFields.TARGET_COSTS)) {
-            taskobject.setTargetCosts(parseFloat(json, TaskFields.TARGET_COSTS));
+            try {
+                taskobject.setTargetCosts(parseFloat(json, TaskFields.TARGET_COSTS));
+            } catch (OXException e) {
+                throw handleParseException(e, parseString(json, TaskFields.TARGET_COSTS), Task.TARGET_COSTS, locale);
+            }
         }
         if (json.has(TARGET_DURATION)) {
-            taskobject.setTargetDuration(parseLong(json, TARGET_DURATION));
+            try {
+                taskobject.setTargetDuration(parseLong(json, TARGET_DURATION));
+            } catch (OXException e) {
+                throw handleParseException(e, parseString(json, TARGET_DURATION), Task.TARGET_DURATION, locale);
+            }
         }
         if (json.has(TaskFields.PRIORITY)) {
             taskobject.setPriority(parseInt(json, TaskFields.PRIORITY));
@@ -133,5 +153,16 @@ public class TaskParser extends CalendarParser {
             taskobject.setAlarm(parseTime(json, CalendarFields.ALARM, timeZone));
         }
         parseElementCalendar(taskobject, json);
+    }
+
+    private static OXException handleParseException(OXException e, String jsonValue, int attributeId, Locale locale) throws OXException {
+        if (OXJSONExceptionCodes.CONTAINS_NON_DIGITS.equals(e) || OXJSONExceptionCodes.INVALID_VALUE.equals(e)) {
+            throw TaskExceptionCode.CONTAINS_NON_DIGITS.create(e, jsonValue, translate(locale, Mapping.getMapping(attributeId).getDisplayName()));
+        }
+        throw e;
+    }
+
+    private static String translate(Locale locale, String attributeName) {
+        return I18nServices.getInstance().translate(locale, attributeName);
     }
 }

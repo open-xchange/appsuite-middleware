@@ -63,6 +63,7 @@ public enum SubscriptionJSONErrorMessages implements OXExceptionCode {
 
     MISSING_PARAMETER(SubscriptionSourceMultipleHandler.CLASS_ID * 100 + 1, SubscriptionJSONExceptionMessage.MISSING_PARAMETER_MSG, SubscriptionJSONExceptionMessage.MISSING_PARAMETER_HELP, CATEGORY_ERROR),
     UNKNOWN_ACTION(SubscriptionSourceMultipleHandler.CLASS_ID * 100 + 2, SubscriptionJSONExceptionMessage.UNKNOWN_ACTION_MSG, SubscriptionJSONExceptionMessage.UNKNOWN_ACTION_HELP, CATEGORY_ERROR),
+    UNKNOWN_SUBSCRIPTION(SubscriptionSourceMultipleHandler.CLASS_ID * 100 + 2, SubscriptionJSONExceptionMessage.UNKNOWN_SUBSCRIPTION, "", CATEGORY_USER_INPUT),
 
     JSONEXCEPTION(SubscriptionSourceJSONWriter.CLASS_ID * 100 + 1, SubscriptionJSONExceptionMessage.JSONEXCEPTION_MSG, SubscriptionJSONExceptionMessage.JSONEXCEPTION_HELP, CATEGORY_ERROR),
     MISSING_FIELD(SubscriptionSourceJSONWriter.CLASS_ID * 100 + 2, SubscriptionJSONExceptionMessage.MISSING_FIELD_MSG, SubscriptionJSONExceptionMessage.MISSING_FIELD_HELP, CATEGORY_ERROR),
@@ -70,7 +71,6 @@ public enum SubscriptionJSONErrorMessages implements OXExceptionCode {
 
     THROWABLE(SubscriptionSourceMultipleHandler.CLASS_ID * 100 + 3, SubscriptionJSONExceptionMessage.THROWABLE_MSG, SubscriptionJSONExceptionMessage.THROWABLE_HELP, CATEGORY_ERROR),
     UNKNOWN_COLUMN(SubscriptionJSONWriter.CLASS_ID * 100 + 1, SubscriptionJSONExceptionMessage.UNKNOWN_COLUMN_MSG, SubscriptionJSONExceptionMessage.UNKNOWN_COLUMN_HELP, CATEGORY_USER_INPUT),
-
     ;
 
     private Category category;

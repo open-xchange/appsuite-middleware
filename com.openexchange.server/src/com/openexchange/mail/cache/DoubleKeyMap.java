@@ -49,6 +49,7 @@
 
 package com.openexchange.mail.cache;
 
+import java.io.IOException;
 import java.io.Serializable;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
@@ -61,13 +62,12 @@ import java.util.concurrent.ConcurrentHashMap;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-final class DoubleKeyMap<K1, K2, V> implements Serializable {
+final class DoubleKeyMap<K1, K2, V extends Serializable> implements Serializable {
 
     private static final long serialVersionUID = 4691428774420782654L;
 
-    private final transient Map<K1, Map<K2, V>> map;
-
-    private final transient Class<V> clazz;
+    private volatile transient Map<K1, Map<K2, V>> map;
+    private final Class<V> clazz;
 
     /**
      * Initializes a new {@link DoubleKeyMap}.
@@ -75,8 +75,37 @@ final class DoubleKeyMap<K1, K2, V> implements Serializable {
      * @param clazz he class of the values
      */
     public DoubleKeyMap(final Class<V> clazz) {
+        super();
         map = new ConcurrentHashMap<K1, Map<K2, V>>();
         this.clazz = clazz;
+    }
+
+    private void writeObject(final java.io.ObjectOutputStream out) throws IOException {
+        out.defaultWriteObject();
+        out.flush();
+    }
+    
+    private void readObject(final java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
+        in.defaultReadObject();
+        // Read in size
+        map = new ConcurrentHashMap<K1, Map<K2, V>>();
+    }
+
+    /**
+     * Lazy initialization of associated map.
+     */
+    private Map<K1, Map<K2, V>> getMap() {
+        Map<K1, Map<K2, V>> m = map;
+        if (null == m) {
+            synchronized (this) {
+                m = map;
+                if (null == m) {
+                    m = new ConcurrentHashMap<K1, Map<K2, V>>();
+                    map = m;
+                }
+            }
+        }
+        return m;
     }
 
     /**
@@ -86,7 +115,11 @@ final class DoubleKeyMap<K1, K2, V> implements Serializable {
      * @return <code>true</code> if first key is contained in this map; otherwise <code>false</code>
      */
     public boolean containsKey(final K1 k1) {
-        return map.containsKey(k1);
+        final Map<K1, Map<K2, V>> m = map;
+        if (null == m) {
+            return false;
+        }
+        return m.containsKey(k1);
     }
 
     /**
@@ -97,7 +130,11 @@ final class DoubleKeyMap<K1, K2, V> implements Serializable {
      * @return <code>true</code> if key pair is contained in this map; otherwise <code>false</code>
      */
     public boolean containsKeyPair(final K1 k1, final K2 k2) {
-        final Map<K2, V> innerMap = map.get(k1);
+        final Map<K1, Map<K2, V>> m = map;
+        if (null == m) {
+            return false;
+        }
+        final Map<K2, V> innerMap = m.get(k1);
         if (null == innerMap) {
             return false;
         }
@@ -111,7 +148,11 @@ final class DoubleKeyMap<K1, K2, V> implements Serializable {
      * @return All values associated with given first key or <code>null</code> if none found
      */
     public V[] getValues(final K1 k1) {
-        final Map<K2, V> innerMap = map.get(k1);
+        final Map<K1, Map<K2, V>> m = map;
+        if (null == m) {
+            return null;
+        }
+        final Map<K2, V> innerMap = m.get(k1);
         if (innerMap == null) {
             return null;
         }
@@ -127,7 +168,11 @@ final class DoubleKeyMap<K1, K2, V> implements Serializable {
      * @return The values associated with given first key and given second keys
      */
     public V[] getValues(final K1 k1, final K2[] keys) {
-        final Map<K2, V> innerMap = map.get(k1);
+        final Map<K1, Map<K2, V>> m = map;
+        if (null == m) {
+            return null;
+        }
+        final Map<K2, V> innerMap = m.get(k1);
         if (innerMap == null) {
             return null;
         }
@@ -147,7 +192,11 @@ final class DoubleKeyMap<K1, K2, V> implements Serializable {
      * @return The single value associated with given key pair or <code>null</code> if not present
      */
     public V getValue(final K1 k1, final K2 k2) {
-        final Map<K2, V> innerMap = map.get(k1);
+        final Map<K1, Map<K2, V>> m = map;
+        if (null == m) {
+            return null;
+        }
+        final Map<K2, V> innerMap = m.get(k1);
         if (null == innerMap) {
             return null;
         }
@@ -165,10 +214,11 @@ final class DoubleKeyMap<K1, K2, V> implements Serializable {
         if ((k1 == null) || (keys == null) || (values == null)) {
             throw new IllegalArgumentException("Argument must not be null");
         }
-        Map<K2, V> innerMap = this.map.get(k1);
+        final Map<K1, Map<K2, V>> m = getMap();
+        Map<K2, V> innerMap = m.get(k1);
         if (innerMap == null) {
             innerMap = new ConcurrentHashMap<K2, V>(values.length);
-            this.map.put(k1, innerMap);
+            m.put(k1, innerMap);
         }
         for (int i = 0; i < values.length; i++) {
             if (values[i] != null) {
@@ -189,10 +239,11 @@ final class DoubleKeyMap<K1, K2, V> implements Serializable {
         if ((k1 == null) || (k2 == null) || (value == null)) {
             throw new IllegalArgumentException("Argument must not be null");
         }
-        Map<K2, V> innerMap = this.map.get(k1);
+        final Map<K1, Map<K2, V>> m = getMap();
+        Map<K2, V> innerMap = m.get(k1);
         if (innerMap == null) {
             innerMap = new ConcurrentHashMap<K2, V>();
-            this.map.put(k1, innerMap);
+            m.put(k1, innerMap);
         }
         return innerMap.put(k2, value);
     }
@@ -203,7 +254,11 @@ final class DoubleKeyMap<K1, K2, V> implements Serializable {
      * @param k1 The first key
      */
     public void removeValues(final K1 k1) {
-        map.remove(k1);
+        final Map<K1, Map<K2, V>> m = map;
+        if (null == m) {
+            return;
+        }
+        m.remove(k1);
     }
 
     /**
@@ -213,7 +268,11 @@ final class DoubleKeyMap<K1, K2, V> implements Serializable {
      * @param keys The second keys
      */
     public void removeValues(final K1 k1, final K2[] keys) {
-        final Map<K2, V> innerMap = map.get(k1);
+        final Map<K1, Map<K2, V>> m = map;
+        if (null == m) {
+            return;
+        }
+        final Map<K2, V> innerMap = m.get(k1);
         if (null == innerMap) {
             return;
         }
@@ -224,7 +283,7 @@ final class DoubleKeyMap<K1, K2, V> implements Serializable {
             /*
              * Remove empty inner map
              */
-            map.remove(k1);
+            m.remove(k1);
         }
     }
 
@@ -236,7 +295,11 @@ final class DoubleKeyMap<K1, K2, V> implements Serializable {
      * @return The removed value or <code>null</code> if not present
      */
     public V removeValue(final K1 k1, final K2 k2) {
-        final Map<K2, V> innerMap = map.get(k1);
+        final Map<K1, Map<K2, V>> m = map;
+        if (null == m) {
+            return null;
+        }
+        final Map<K2, V> innerMap = m.get(k1);
         if (null == innerMap) {
             return null;
         }
@@ -245,7 +308,7 @@ final class DoubleKeyMap<K1, K2, V> implements Serializable {
             /*
              * Remove empty inner map
              */
-            map.remove(k1);
+            m.remove(k1);
         }
         return retval;
     }
@@ -257,11 +320,15 @@ final class DoubleKeyMap<K1, K2, V> implements Serializable {
      * @return <code>true</code> if no values are bound to given first key; otherwise <code>false</code>
      */
     public boolean isEmpty(final K1 k1) {
-        final Map<K2, V> innerMap = map.get(k1);
+        final Map<K1, Map<K2, V>> m = map;
+        if (null == m) {
+            return false;
+        }
+        final Map<K2, V> innerMap = m.get(k1);
         if (null == innerMap) {
             return true;
         } else if (innerMap.isEmpty()) {
-            map.remove(k1);
+            m.remove(k1);
             return true;
         }
         return false;
@@ -273,14 +340,21 @@ final class DoubleKeyMap<K1, K2, V> implements Serializable {
      * @return <code>true</code> if whole map is empty; otherwise <code>false</code>
      */
     public boolean isEmpty() {
-        return map.isEmpty();
+        final Map<K1, Map<K2, V>> m = map;
+        if (null == m) {
+            return true;
+        }
+        return m.isEmpty();
     }
 
     /**
      * Clears whole map.
      */
     public void clear() {
-        map.clear();
+        final Map<K1, Map<K2, V>> m = map;
+        if (null != m) {
+            m.clear();
+        }
     }
 
 }

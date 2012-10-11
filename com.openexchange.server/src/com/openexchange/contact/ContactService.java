@@ -50,7 +50,6 @@
 package com.openexchange.contact;
 
 import java.util.Date;
-
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
@@ -382,6 +381,15 @@ public interface ContactService {
      * @throws OXException
      */
     void deleteContact(Session session, String folderId, String id, Date lastRead) throws OXException;
+
+    /**
+     * Deletes all contacts in a folder.
+     * 
+     * @param session the session
+     * @param folderId the ID of the parent folder
+     * @throws OXException
+     */
+    void deleteContacts(Session session, String folderId) throws OXException;
 
     /**
      * Gets a user's contact with all fields.<p>

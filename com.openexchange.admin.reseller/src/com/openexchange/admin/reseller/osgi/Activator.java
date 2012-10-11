@@ -50,7 +50,6 @@
 package com.openexchange.admin.reseller.osgi;
 
 import java.rmi.Remote;
-import java.rmi.server.UnicastRemoteObject;
 import java.util.Hashtable;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -59,7 +58,6 @@ import com.openexchange.admin.plugins.BasicAuthenticatorPluginInterface;
 import com.openexchange.admin.plugins.OXContextPluginInterface;
 import com.openexchange.admin.plugins.OXUserPluginInterface;
 import com.openexchange.admin.reseller.daemons.ClientAdminThreadExtended;
-import com.openexchange.admin.reseller.rmi.OXResellerInterface;
 import com.openexchange.admin.reseller.rmi.impl.OXReseller;
 import com.openexchange.admin.reseller.rmi.impl.OXResellerContextImpl;
 import com.openexchange.admin.reseller.rmi.impl.OXResellerUserImpl;
@@ -74,10 +72,7 @@ import com.openexchange.osgi.HousekeepingActivator;
 public class Activator extends HousekeepingActivator {
 
     private static final Log LOG = LogFactory.getLog(Activator.class);
-    
-    /**
-     * Initializes a new {@link Activator}.
-     */
+
     public Activator() {
         super();
     }
@@ -90,28 +85,26 @@ public class Activator extends HousekeepingActivator {
             initCache(configurationService);
 
             final OXReseller reseller = new OXReseller();
-            OXResellerInterface reseller_stub = (OXResellerInterface) UnicastRemoteObject.exportObject(reseller, 0);
-            registerService(Remote.class, reseller_stub, null);
+            registerService(Remote.class, reseller, null);
             LOG.info("RMI Interface for reseller bundle bound to RMI registry");
 
             final Hashtable<String, String> props = new Hashtable<String, String>();
             props.put("name", "BasicAuthenticator");
             LOG.info(BasicAuthenticatorPluginInterface.class.getName());
             registerService(BasicAuthenticatorPluginInterface.class, new ResellerAuth(), props);
-            
+
             props.clear();
             props.put("name", "OXContext");
             LOG.info(OXContextPluginInterface.class.getName());
             registerService(OXContextPluginInterface.class, new OXResellerContextImpl(), props);
-            
+
             props.clear();
             props.put("name", "OXUser");
             LOG.info(OXUserPluginInterface.class.getName());
             registerService(OXUserPluginInterface.class, new OXResellerUserImpl(), props);
-            
+
             track(DatabaseService.class, new DatabaseServiceCustomizer(context, ClientAdminThreadExtended.cache.getPool()));
             openTrackers();
-            
         } catch (final StorageException e) {
             LOG.fatal("Error while creating one instance for RMI interface", e);
             throw e;
@@ -125,7 +118,7 @@ public class Activator extends HousekeepingActivator {
     }
 
     @Override
-    public void stopBundle() throws Exception {
+    public void stopBundle() {
         closeTrackers();
         unregisterServices();
     }

@@ -101,6 +101,7 @@ import com.openexchange.log.Props;
 import com.openexchange.timer.ScheduledTimerTask;
 import com.openexchange.timer.TimerService;
 import com.openexchange.tools.servlet.UploadServletException;
+import com.openexchange.tools.servlet.http.Cookies;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 
 /**
@@ -1252,7 +1253,7 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
                  */
                 final long cl = Long.parseLong(hValue);
                 if (cl < Integer.MAX_VALUE) {
-                    request.setContentLength((int) cl);
+                    request.setContentLength(cl);
                 }
             } else if (hId == Constants.SC_REQ_CONTENT_TYPE || (hId == -1 && hName.equalsIgnoreCase("Content-Type"))) {
                 /*
@@ -1693,7 +1694,7 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
                                 response.addCookie(respCookie2);
                             }
                             current.setMaxAge(0); // delete
-                            current.setSecure(forceHttps || request.isSecure());
+                            current.setSecure(request.isSecure() || (forceHttps && !Cookies.isLocalLan(request)));
                             response.addCookie(current);
                             deleteAttempt = true;
                             continue NextCookie;
@@ -1719,14 +1720,14 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
                                 response.addCookie(respCookie2);
                             }
                             current.setMaxAge(0); // delete
-                            current.setSecure(forceHttps || request.isSecure());
+                            current.setSecure(request.isSecure() || (forceHttps && !Cookies.isLocalLan(request)));
                             response.addCookie(current);
                             deleteAttempt = true;
                             continue NextCookie;
                         }
                         jsessionIDCookie = current;
                         LogProperties.putLogProperty("com.openexchange.ajp13.httpSession", id);
-                        jsessionIDCookie.setSecure(forceHttps || request.isSecure());
+                        jsessionIDCookie.setSecure(request.isSecure() || (forceHttps && !Cookies.isLocalLan(request)));
                         httpSessionCookie = jsessionIDCookie;
                         httpSessionJoined = true;
                     } else {
@@ -1751,7 +1752,7 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
                                 response.addCookie(respCookie2);
                             }
                             current.setMaxAge(0); // delete
-                            current.setSecure(forceHttps || request.isSecure());
+                            current.setSecure(request.isSecure() || (forceHttps && !Cookies.isLocalLan(request)));
                             response.addCookie(current);
                             deleteAttempt = true;
                             continue NextCookie;
@@ -1777,14 +1778,14 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
                                 response.addCookie(respCookie2);
                             }
                             current.setMaxAge(0); // delete
-                            current.setSecure(forceHttps || request.isSecure());
+                            current.setSecure(request.isSecure() || (forceHttps && !Cookies.isLocalLan(request)));
                             response.addCookie(current);
                             deleteAttempt = true;
                             continue NextCookie;
                         }
                         jsessionIDCookie = current;
                         LogProperties.putLogProperty("com.openexchange.ajp13.httpSession", id);
-                        jsessionIDCookie.setSecure(forceHttps || request.isSecure());
+                        jsessionIDCookie.setSecure(request.isSecure() || (forceHttps && !Cookies.isLocalLan(request)));
                         httpSessionCookie = jsessionIDCookie;
                         httpSessionJoined = true;
                     }
@@ -1821,7 +1822,7 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
         final String id = jsessionIDVal.toString();
         final Cookie jsessionIDCookie = newJsessionIdCookie(id, domain);
         LogProperties.putLogProperty("com.openexchange.ajp13.httpSession", id);
-        jsessionIDCookie.setSecure(forceHttps || request.isSecure());
+        jsessionIDCookie.setSecure(request.isSecure() || (forceHttps && !Cookies.isLocalLan(request)));
         httpSessionCookie = jsessionIDCookie;
         httpSessionJoined = false;
         /*
@@ -1857,7 +1858,7 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
         }
         final Cookie jsessionIDCookie = newJsessionIdCookie(jsessionIdVal, domain);
         LogProperties.putLogProperty("com.openexchange.ajp13.httpSession", jsessionIdVal);
-        jsessionIDCookie.setSecure(forceHttps || request.isSecure());
+        jsessionIDCookie.setSecure(request.isSecure() || (forceHttps && !Cookies.isLocalLan(request)));
         httpSessionCookie = jsessionIDCookie;
         httpSessionJoined = join;
         /*
@@ -2302,7 +2303,6 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
     private final class KeepAliveRunnable implements Runnable {
 
         private final AjpProcessor ajpProcessor;
-
         private final int max;
 
         /**

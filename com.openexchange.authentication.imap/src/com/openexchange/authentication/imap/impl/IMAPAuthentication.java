@@ -83,6 +83,25 @@ import com.openexchange.user.UserService;
 
 public class IMAPAuthentication implements AuthenticationService {
 
+    private static final class AuthenticatedImpl implements Authenticated {
+
+        private final String[] splitted;
+
+        protected AuthenticatedImpl(String[] splitted) {
+            this.splitted = splitted;
+        }
+
+        @Override
+        public String getContextInfo() {
+            return splitted[0];
+        }
+
+        @Override
+        public String getUserInfo() {
+            return splitted[1];
+        }
+    }
+
     private enum PropertyNames {
         IMAP_TIMEOUT("IMAP_TIMEOUT"),
         IMAP_CONNECTIONTIMEOUT("IMAP_CONNECTIONTIMEOUT"),
@@ -320,18 +339,7 @@ public class IMAPAuthentication implements AuthenticationService {
                 LOG.debug("Using \"defaultcontext\" as context name!");
                 splitted[0] = "defaultcontext";
             }
-            return new Authenticated() {
-
-                @Override
-                public String getContextInfo() {
-                    return splitted[0];
-                }
-
-                @Override
-                public String getUserInfo() {
-                    return splitted[1];
-                }
-            };
+            return new AuthenticatedImpl(splitted);
         } catch (final ConfigurationException e) {
             LOG.error("Error reading auth plugin config!", e);
             throw LoginExceptionCodes.COMMUNICATION.create(e);

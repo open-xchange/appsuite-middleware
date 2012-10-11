@@ -71,10 +71,10 @@ public class AttachmentQueryCatalog {
 
     private static final String REMEMBER_DEL = "INSERT INTO del_attachment (id, del_date, cid, attached, module) VALUES (?,?,?,?,?)";
 
-    private static String INSERT;
-    private static String UPDATE;
-    private static String FIELDS;
-    private static String SELECT_BY_ID;
+    private static final String INSERT;
+    private static final String UPDATE;
+    private static final String FIELDS;
+    private static final String SELECT_BY_ID;
     private static final String SELECT_NEWEST_CREATION_DATE = "SELECT attached,MAX(creation_date) AS creation_date FROM prg_attachment WHERE cid=? AND module=? AND attached IN (";
     private static final String SELECT_FILE_ID = "SELECT file_id FROM prg_attachment WHERE id = ? AND cid = ? ";
 

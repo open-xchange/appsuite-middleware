@@ -122,7 +122,7 @@ public class NoSQLSessionStorageService implements SessionStorageService {
 
     private final ScheduledTimerTask cleanupTask;
 
-    private static NoSQLSessionStorageService instance;
+    private static volatile NoSQLSessionStorageService instance;
 
     public NoSQLSessionStorageService(NoSQLSessionStorageConfiguration config) {
         HOST = config.getHost();

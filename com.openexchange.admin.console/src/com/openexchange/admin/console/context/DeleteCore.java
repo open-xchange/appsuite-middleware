@@ -69,7 +69,7 @@ public abstract class DeleteCore extends ContextAbstraction {
         setContextOption(parser, NeededQuadState.eitheror);
         setContextNameOption(parser, NeededQuadState.eitheror);
     }
-    
+
     protected final void commonfunctions(final AdminParser parser, final String[] args) {
         setOptions(parser);
         setExtensionOptions(parser, ContextConsoleDeleteInterface.class);

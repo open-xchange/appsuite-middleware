@@ -798,7 +798,7 @@ public final class JsonMessageHandler implements MailMessageHandler {
                         boolean b = true;
                         for (int i = len-1; b && i >= 0; i--) {
                             final JSONObject jObject = attachments.getJSONObject(i);
-                            if (jObject.getString(keyContentType).startsWith("text/plain")) {
+                            if (jObject.getString(keyContentType).startsWith("text/plain") && jObject.hasAndNotNull(keyContent)) {
                                 final String newContent = jObject.getString(keyContent) + content;
                                 jObject.put(keyContent, newContent);
                                 jObject.put(keySize, newContent.length());
