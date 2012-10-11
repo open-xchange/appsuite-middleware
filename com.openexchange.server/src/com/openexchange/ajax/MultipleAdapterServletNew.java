@@ -68,6 +68,7 @@ import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.writer.ResponseWriter;
+import com.openexchange.dispatcher.Parameterizable;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.notify.hostname.HostnameService;
 import com.openexchange.log.LogFactory;
@@ -268,6 +269,9 @@ public abstract class MultipleAdapterServletNew extends PermissionServlet {
             @SuppressWarnings("unchecked") final Set<Entry<String, String[]>> entrySet = req.getParameterMap().entrySet();
             for (final Entry<String, String[]> entry : entrySet) {
                 retval.putParameter(entry.getKey(), entry.getValue()[0]);
+            }
+            if (req instanceof Parameterizable) {
+                retval.setParameterizable((Parameterizable) req);
             }
         }
         if (preferStream) {

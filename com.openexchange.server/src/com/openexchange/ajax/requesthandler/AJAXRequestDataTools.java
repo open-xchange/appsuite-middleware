@@ -62,6 +62,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.AJAXServlet;
+import com.openexchange.dispatcher.Parameterizable;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.notify.hostname.HostnameService;
 import com.openexchange.server.services.ServerServiceRegistry;
@@ -126,7 +127,6 @@ public class AJAXRequestDataTools {
          * Set the module
          */
         retval.setModule(getModule(prefix, req));
-
         /*
          * Set request URI
          */
@@ -144,6 +144,9 @@ public class AJAXRequestDataTools {
             @SuppressWarnings("unchecked") final Set<Entry<String, String[]>> entrySet = req.getParameterMap().entrySet();
             for (final Entry<String, String[]> entry : entrySet) {
                 retval.putParameter(entry.getKey(), entry.getValue()[0]);
+            }
+            if (req instanceof Parameterizable) {
+                retval.setParameterizable((Parameterizable) req);
             }
         }
         /*

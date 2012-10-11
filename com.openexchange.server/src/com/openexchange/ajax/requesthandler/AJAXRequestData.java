@@ -68,6 +68,7 @@ import org.json.JSONObject;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.fields.RequestConstants;
 import com.openexchange.ajax.parser.DataParser;
+import com.openexchange.dispatcher.Parameterizable;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.upload.UploadFile;
 import com.openexchange.groupware.upload.impl.UploadEvent;
@@ -100,6 +101,7 @@ public class AJAXRequestData {
     }
 
     private final Map<String, String> params;
+    private Parameterizable parameterizable;
 
     private final Map<String, String> headers;
 
@@ -200,6 +202,7 @@ public class AJAXRequestData {
         copy.properties.putAll(properties);
         copy.decoratorIds.addAll(decoratorIds);
         copy.files.addAll(files);
+        copy.parameterizable = parameterizable;
         copy.session = session;
         copy.secure = secure;
         copy.action = action;
@@ -220,6 +223,15 @@ public class AJAXRequestData {
         copy.uploadEvent = null;
         copy.uploadStreamProvider = null;
         return copy;
+    }
+    
+    /**
+     * Sets the parameterizable instance.
+     *
+     * @param parameterizable The parameterizable instance to set
+     */
+    public void setParameterizable(final Parameterizable parameterizable) {
+        this.parameterizable = parameterizable;
     }
 
     /**
@@ -390,6 +402,11 @@ public class AJAXRequestData {
             params.remove(name);
         } else {
             params.put(name, value);
+        }
+        final Parameterizable parameterizable = this.parameterizable;
+        if (null != parameterizable) {
+            // Write-though
+            parameterizable.putParameter(name, value);
         }
     }
 
