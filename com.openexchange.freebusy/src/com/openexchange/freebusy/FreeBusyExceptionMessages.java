@@ -68,6 +68,7 @@ public final class FreeBusyExceptionMessages implements LocalizableStrings {
     public static final String COMMUNICATION_FAILURE_MSG = "A communication error occured while processing the free/busy request (\"%1$s\").";
     public static final String EXTERNAL_ERROR_MSG = "An external error occured while processing the free/busy request (\"%1$s\").";
     public static final String INTERNAL_ERROR_MSG = "An internal error occured while processing the free/busy request (\"%1$s\").";
+    public static final String CONFIGURATION_ERROR_MSG = "A configuration error occured (\"%1$s\").";
     
     /**
      * Prevent instantiation.

@@ -49,23 +49,21 @@
 
 package com.openexchange.ews;
 
-import com.microsoft.schemas.exchange.services._2006.messages.ExchangeServicePortType;
 
 /**
- * {@link ExchangeWebService}
+ * {@link EWSFactoryService}
  * 
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public interface ExchangeWebService {
+public interface EWSFactoryService {
     
-    ExchangeServicePortType getServicePort();
-
-    Config getConfig();
-    
-    Folders getFolders();
-    
-    Items getItems();
-
-    Availability getAvailability();
+    /**
+     * Creates a new {@link ExchangeWebService}.
+     * 
+     * @param url The URL to the service (usually [SERVER]/EWS/Exchange.asmx)
+     * @param userName The exchange username 
+     * @param password The password
+     */
+    ExchangeWebService create(String url, String userName, String password);
 
 }

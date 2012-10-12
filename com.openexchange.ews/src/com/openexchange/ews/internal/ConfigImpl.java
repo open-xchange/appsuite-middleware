@@ -47,23 +47,22 @@
  *
  */
 
-package com.openexchange.ews;
+package com.openexchange.ews.internal;
 
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.SSLSession;
 import javax.xml.ws.BindingProvider;
 import com.microsoft.schemas.exchange.services._2006.types.ExchangeVersionType;
+import com.openexchange.ews.Config;
 import com.openexchange.tools.ssl.TrustAllSSLSocketFactory;
 
 
 /**
- * {@link EWSConfig}
- * 
- * Allows access to different configuration properties for the Exchange Web Service.
+ * {@link ConfigImpl}
  * 
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class EWSConfig {
+public class ConfigImpl implements Config {
     
     private static final String SSL_SOCKET_FACTORY = "com.sun.xml.internal.ws.transport.https.client.SSLSocketFactory";
     private static final String HOSTNAME_VERIFIER = "com.sun.xml.internal.ws.transport.https.client.hostname.verifier";
@@ -80,39 +79,67 @@ public class EWSConfig {
     private final BindingProvider bindingProvier;
     
     /**
-     * Initializes a new {@link EWSConfig}.
+     * Initializes a new {@link ConfigImpl}.
      * 
      * @param bindingProvier The underlying binding provider
      */
-    public EWSConfig(BindingProvider bindingProvier) {
+    public ConfigImpl(BindingProvider bindingProvier) {
         super();
         this.bindingProvier = bindingProvier;
     }
 
+    /* (non-Javadoc)
+     * @see com.openexchange.ews.Config#setEndpointAddress(java.lang.String)
+     */
+    @Override
     public void setEndpointAddress(String endpoint) {
         put(BindingProvider.ENDPOINT_ADDRESS_PROPERTY, endpoint);
     }
     
+    /* (non-Javadoc)
+     * @see com.openexchange.ews.Config#getEndpointAddress()
+     */
+    @Override
     public String getEndpointAddress() {
         return (String)get(BindingProvider.ENDPOINT_ADDRESS_PROPERTY);
     }
     
+    /* (non-Javadoc)
+     * @see com.openexchange.ews.Config#setUserName(java.lang.String)
+     */
+    @Override
     public void setUserName(String userName) {
         put(BindingProvider.USERNAME_PROPERTY, userName);
     }
     
+    /* (non-Javadoc)
+     * @see com.openexchange.ews.Config#getUserName()
+     */
+    @Override
     public String getUserName() {
         return (String)get(BindingProvider.USERNAME_PROPERTY);
     }
     
+    /* (non-Javadoc)
+     * @see com.openexchange.ews.Config#setPassword(java.lang.String)
+     */
+    @Override
     public void setPassword(String password) {
         put(BindingProvider.PASSWORD_PROPERTY, password);
     }
     
+    /* (non-Javadoc)
+     * @see com.openexchange.ews.Config#getPassword()
+     */
+    @Override
     public String getPassword() {
         return (String)get(BindingProvider.PASSWORD_PROPERTY);
     }
     
+    /* (non-Javadoc)
+     * @see com.openexchange.ews.Config#setTrustAllCerts(boolean)
+     */
+    @Override
     public void setTrustAllCerts(boolean trustAllCerts) {
         if (trustAllCerts) {
             put(SSL_SOCKET_FACTORY, TrustAllSSLSocketFactory.getDefault());
@@ -121,11 +148,19 @@ public class EWSConfig {
         }
     }
 
+    /* (non-Javadoc)
+     * @see com.openexchange.ews.Config#isTrustAllCerts()
+     */
+    @Override
     public boolean isTrustAllCerts() {
         Object socketFactory = get(SSL_SOCKET_FACTORY);
         return null != socketFactory && TrustAllSSLSocketFactory.getDefault().equals(socketFactory);
     }
 
+    /* (non-Javadoc)
+     * @see com.openexchange.ews.Config#setIgnoreHostnameValidation(boolean)
+     */
+    @Override
     public void setIgnoreHostnameValidation(boolean ignoreHostnameValidation) {
         if (ignoreHostnameValidation) {
             put(HOSTNAME_VERIFIER, IGNORING_HOSTNAME_VERIFIER);
@@ -134,14 +169,26 @@ public class EWSConfig {
         }        
     }
     
+    /* (non-Javadoc)
+     * @see com.openexchange.ews.Config#isIgnoreHostnameValidation()
+     */
+    @Override
     public boolean isIgnoreHostnameValidation() {
         return null != get(HOSTNAME_VERIFIER);  
     }    
     
+    /* (non-Javadoc)
+     * @see com.openexchange.ews.Config#getExchangeVersion()
+     */
+    @Override
     public ExchangeVersionType getExchangeVersion() {
         return this.exchangeVersion;
     }
 
+    /* (non-Javadoc)
+     * @see com.openexchange.ews.Config#setExchangeVersion(com.microsoft.schemas.exchange.services._2006.types.ExchangeVersionType)
+     */
+    @Override
     public void setExchangeVersion(ExchangeVersionType version) {
         this.exchangeVersion = version;
     }

@@ -47,25 +47,56 @@
  *
  */
 
-package com.openexchange.ews;
+package com.openexchange.ews.osgi;
 
-import com.microsoft.schemas.exchange.services._2006.messages.ExchangeServicePortType;
+import org.apache.commons.logging.Log;
+import com.openexchange.ews.EWSFactoryService;
+import com.openexchange.ews.ExchangeWebService;
+import com.openexchange.ews.internal.ExchangeWebServiceImpl;
+import com.openexchange.log.LogFactory;
+import com.openexchange.osgi.HousekeepingActivator;
 
 /**
- * {@link ExchangeWebService}
- * 
+ * {@link EWSActivator}
+ *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public interface ExchangeWebService {
-    
-    ExchangeServicePortType getServicePort();
+public class EWSActivator extends HousekeepingActivator {
 
-    Config getConfig();
-    
-    Folders getFolders();
-    
-    Items getItems();
+    private final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(EWSActivator.class));
 
-    Availability getAvailability();
+    /**
+     * Initializes a new {@link EWSActivator}.
+     */
+    public EWSActivator() {
+        super();
+    }
+
+    @Override
+    protected Class<?>[] getNeededServices() {
+        return new Class<?>[] { };
+    }
+
+    @Override
+    protected void startBundle() throws Exception {
+        try {
+            LOG.info("starting bundle: com.openexchange.ews");
+            registerService(EWSFactoryService.class, new EWSFactoryService() {
+                @Override
+                public ExchangeWebService create(String url, String userName, String password) {
+                    return new ExchangeWebServiceImpl(url, userName, password);
+                }
+            });
+        } catch (Exception e) {
+            LOG.error("error starting com.openexchange.ews", e);
+            throw e;
+        }
+    }
+
+    @Override
+    protected void stopBundle() throws Exception {
+        LOG.info("stopping bundle: com.openexchange.ews");
+        super.stopBundle();
+    }
 
 }

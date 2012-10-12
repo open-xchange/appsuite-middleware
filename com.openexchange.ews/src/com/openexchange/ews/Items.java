@@ -49,23 +49,23 @@
 
 package com.openexchange.ews;
 
-import com.microsoft.schemas.exchange.services._2006.messages.ExchangeServicePortType;
+import java.util.List;
+import com.microsoft.schemas.exchange.services._2006.types.BaseFolderIdType;
+import com.microsoft.schemas.exchange.services._2006.types.DefaultShapeNamesType;
+import com.microsoft.schemas.exchange.services._2006.types.ItemQueryTraversalType;
+import com.microsoft.schemas.exchange.services._2006.types.ItemType;
+import com.microsoft.schemas.exchange.services._2006.types.RestrictionType;
+
 
 /**
- * {@link ExchangeWebService}
+ * {@link Items}
+ * 
+ * Simplifies access to items using EWS.
  * 
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public interface ExchangeWebService {
+public interface Items {
     
-    ExchangeServicePortType getServicePort();
-
-    Config getConfig();
-    
-    Folders getFolders();
-    
-    Items getItems();
-
-    Availability getAvailability();
+    List<ItemType> findItems(BaseFolderIdType parentFolderID, RestrictionType restriction, ItemQueryTraversalType traversal, DefaultShapeNamesType shape);
 
 }
