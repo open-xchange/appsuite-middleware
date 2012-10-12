@@ -49,6 +49,7 @@
 
 package com.openexchange.imap.thread;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -71,6 +72,27 @@ public final class ThreadableMapping {
         super();
         refsMap = new HashMap<String, List<Threadable>>(capacity << 1, 0.9f);
         messageIdMap = new HashMap<String, Threadable>(capacity, 0.9f);
+    }
+
+    /**
+     * Gets those {@code Threadable} instances whose <code>References</code> header contain specified <code>Message-Id</code> header.
+     *
+     * @param messageId The <code>Message-Id</code> header
+     * @return The {@code Threadable} instances
+     */
+    public List<Threadable> getRefs(final String messageId) {
+        final List<Threadable> list = refsMap.get(messageId);
+        return list == null ? Collections.<Threadable>emptyList() : Collections.<Threadable>unmodifiableList(list);
+    }
+
+    /**
+     * Gets the {@code Threadable} instance whose <code>Message-Id</code> header matches given <code>Message-Id</code> header
+     *
+     * @param messageId The <code>Message-Id</code> header
+     * @return The {@code Threadable} instance
+     */
+    public Threadable getMessageId(final String messageId) {
+        return messageIdMap.get(messageId);
     }
 
     /**
