@@ -296,9 +296,13 @@ public class Threader {
         }
     }
 
-    // Find the root set of the ThreadContainers (and return a root node.)
-    // A container is in the root set if it has no parents.
-    //
+    /**
+     * Find the root set of the ThreadContainers (and return a root node.)
+     * <p>
+     * A container is in the root set if it has no parents.
+     * 
+     * @return The root container
+     */
     private ThreadContainer findRootSet() {
         final ThreadContainer root = new ThreadContainer();
         // root.debug_id = "((root))";
@@ -314,10 +318,13 @@ public class Threader {
         return root;
     }
 
-    // Walk through the threads and discard any empty container objects.
-    // After calling this, there will only be any empty container objects
-    // at depth 0, and those will all have at least two kids.
-    //
+    /**
+     * Walk through the threads and discard any empty container objects.
+     * <p>
+     * After calling this, there will only be any empty container objects at depth 0, and those will all have at least two kids.
+     * 
+     * @param parent The parent container
+     */
     private void pruneEmptyContainers(final ThreadContainer parent) {
         ThreadContainer container, prev, next;
         for (prev = null, container = parent.child, next = container.next; container != null; prev = container, container = next, next =
@@ -406,10 +413,11 @@ public class Threader {
         }
     }
 
-    // If any two members of the root set have the same subject, merge them.
-    // This is so that messages which don't have References headers at all
-    // still get threaded (to the extent possible, at least.)
-    //
+    /**
+     * If any two members of the root set have the same subject, merge them.
+     * <p>
+     * This is so that messages which don't have <code>References</code> headers at all still get threaded (to the extent possible, at least.)
+     */
     private void gatherSubjects() {
         int count = 0;
         for (ThreadContainer c = rootNode.child; c != null; c = c.next) {
@@ -653,8 +661,12 @@ public class Threader {
              */
         }
 
-        // Returns true if child is under self's tree. This is used for
-        // detecting circularities in the references header.
+        /**
+         * Returns <code>true</code> if child is under self's tree. This is used for detecting circularities in the references header.
+         * 
+         * @param target The target container
+         * @return <code>true</code> if child is under self's tree; otherwise <code>false</code>
+         */
         boolean findChild(final ThreadContainer target) {
             if (child == null) {
                 return false;
@@ -665,9 +677,12 @@ public class Threader {
             }
         }
 
+        /**
+         * Reverse the children (child through child.next.next.next...)
+         */
         void reverseChildren() {
             if (child != null) {
-                // nreverse the children (child through child.next.next.next...)
+                // reverse the children (child through child.next.next.next...)
                 ThreadContainer kid, prev, rest;
                 for (prev = null, kid = child, rest = kid.next; kid != null; prev = kid, kid = rest, rest =
                     (rest == null ? null : rest.next)) {

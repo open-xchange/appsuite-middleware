@@ -50,6 +50,7 @@
 package com.openexchange.imap.thread;
 
 import java.io.Serializable;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.Iterator;
@@ -154,18 +155,37 @@ public final class Threadable implements Cloneable, Serializable, Iterable<Threa
         if (isDummy()) {
             return "[dummy]";
         }
-
-        String s = "[ " + messageId + ": " + subject + " (";
+        final StringBuilder builder = new StringBuilder(32);
+        builder.append("Threadable [");
+        if (fullName != null) {
+            builder.append("fullName=").append(fullName).append(", ");
+        }
+        if (subject != null) {
+            builder.append("subject=").append(subject).append(", ");
+        }
+        if (date > 0L) {
+            builder.append("date=").append(new Date(date)).append(", ");
+        }
+        if (messageId != null) {
+            builder.append("messageId=").append(messageId).append(", ");
+        }
+        if (inReplyTo != null) {
+            builder.append("inReplyTo=").append(inReplyTo).append(", ");
+        }
         if (refs != null) {
-            for (int i = 0; i < refs.length; i++) {
-                s += " " + refs[i];
-            }
+            builder.append("refs=").append(Arrays.toString(refs)).append(", ");
         }
-        if (date > 0) {
-            s += " \"" + new Date(date) + "\"";
+        if (messageNumber > 0) {
+            builder.append("messageNumber=").append(messageNumber);
         }
-        return s + " ) ]";
+        if (uid > 0L) {
+            builder.append(", uid=").append(uid).append(", ");
+        }
+        builder.append("hasRe=").append(hasRe).append("]");
+        return builder.toString();
     }
+
+
 
     private static final Pattern PATTERN_SUBJECT = Pattern.compile(
         "^\\s*(Re|Sv|Vs|Aw|\u0391\u03A0|\u03A3\u03A7\u0395\u03A4|R|Rif|Res|Odp|Ynt)(?:\\[.*?\\]|\\(.*?\\))?:(?:\\s*)(.*)(?:\\s*)",
