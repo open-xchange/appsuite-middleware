@@ -39,7 +39,9 @@ public class ImportRequest {
 	public ImportRequest(AJAXRequestData request, ServerSession session) throws OXException {
 		this.session = session;
 		this.request = request;
-
+		if (!request.containsParameter("callback")) {
+			request.putParameter("callback", "import"); // hack to stay backwards-compatible with 6.20 version that did not comply to the HTTP API
+		}
 		if(request.getParameter(AJAXServlet.PARAMETER_FOLDERID) == null){
 			throw ImportExportExceptionCodes.NEED_FOLDER.create();
 		}
