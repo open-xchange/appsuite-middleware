@@ -2097,6 +2097,10 @@ msgid ""
 "An internal error occured while processing the free/busy request (\"%1$s\")."
 msgstr ""
 
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.freebusy/src/com/openexchange/freebusy/FreeBusyExceptionMessages.java:71
+msgid "A configuration error occured (\"%1$s\")."
+msgstr ""
+
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.frontend.uwa/src/com/openexchange/frontend/uwa/UWAWidgetExceptionMessages.java:64
 msgid "The database returned an error: %1$s"
 msgstr ""
