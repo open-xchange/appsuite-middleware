@@ -1764,26 +1764,30 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                 final ThreadableResult sentThreadableResult = getFrom(future);
                 threadableMapping = new ThreadableMapping(threadList.size()).initWith(sentThreadableResult.threadable);
                 // Add 'References' to FetchProfile if absent
-                boolean found = false;
-                final String[] headerNames = fetchProfile.getHeaderNames();
-                for (int i = 0; !found && i < headerNames.length; i++) {
-                    if (MessageHeaders.HDR_REFERENCES.equalsIgnoreCase(headerNames[i])) {
-                        found = true;
+                {
+                    boolean found = false;
+                    final String[] headerNames = fetchProfile.getHeaderNames();
+                    for (int i = 0; !found && i < headerNames.length; i++) {
+                        if (MessageHeaders.HDR_REFERENCES.equalsIgnoreCase(headerNames[i])) {
+                            found = true;
+                        }
+                    }
+                    if (!found) {
+                        fetchProfile.add(MessageHeaders.HDR_REFERENCES);
                     }
                 }
-                if (!found) {
-                    fetchProfile.add(MessageHeaders.HDR_REFERENCES);
-                }
-                // Add ENVELOPPE item to FetchProfile if absent (for 'Message-Id' header)
-                found = false;
-                final Item[] items = fetchProfile.getItems();
-                for (int i = 0; !found && i < items.length; i++) {
-                    if (FetchProfile.Item.ENVELOPE == items[i]) {
-                        found = true;
+                // Add ENVELOPE item to FetchProfile if absent (for 'Message-Id' header)
+                {
+                    boolean found = false;
+                    final Item[] items = fetchProfile.getItems();
+                    for (int i = 0; !found && i < items.length; i++) {
+                        if (FetchProfile.Item.ENVELOPE == items[i]) {
+                            found = true;
+                        }
                     }
-                }
-                if (!found) {
-                    fetchProfile.add(FetchProfile.Item.ENVELOPE);
+                    if (!found) {
+                        fetchProfile.add(FetchProfile.Item.ENVELOPE);
+                    }
                 }
             } else {
                 threadableMapping = null;
@@ -1876,8 +1880,8 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
         // Is this message referenced?
         final String messageId = m.getFirstHeader(MessageHeaders.HDR_MESSAGE_ID);
         if (null != messageId) {
-            // TODO:
-            List<Threadable> refs = threadableMapping.getRefs(messageId);
+            final Set<Threadable> refs = threadableMapping.getRefs(messageId);
+            //
         }
         // Has this message references?
         

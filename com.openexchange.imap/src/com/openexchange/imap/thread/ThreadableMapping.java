@@ -51,9 +51,11 @@ package com.openexchange.imap.thread;
 
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * {@link ThreadableMapping} - A <code>Message-Id</code> and <code>References</code> mapping from specified {@code Threadable} instance.
@@ -80,9 +82,9 @@ public final class ThreadableMapping {
      * @param messageId The <code>Message-Id</code> header
      * @return The {@code Threadable} instances
      */
-    public List<Threadable> getRefs(final String messageId) {
+    public Set<Threadable> getRefs(final String messageId) {
         final List<Threadable> list = refsMap.get(messageId);
-        return list == null ? Collections.<Threadable>emptyList() : Collections.<Threadable>unmodifiableList(list);
+        return list == null ? Collections.<Threadable>emptySet() : new LinkedHashSet<Threadable>(list);
     }
 
     /**
