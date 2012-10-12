@@ -51,8 +51,15 @@ Import-Package: com.openexchange.config,
  org.apache.commons.logging.impl,
  org.osgi.framework,
  org.osgi.service.event,
- org.osgi.util.tracker
+ org.osgi.util.tracker,
+ org.scribe.builder,
+ org.scribe.builder.api,
+ org.scribe.exceptions,
+ org.scribe.extractors,
+ org.scribe.model,
+ org.scribe.oauth,
+ org.scribe.services,
+ org.scribe.utils
 Export-Package: com.openexchange.oauth
-Bundle-ClassPath: .,
- lib/scribe_head.jar
+Bundle-ClassPath: .
 Bundle-Activator: com.openexchange.oauth.osgi.Activator

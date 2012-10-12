@@ -78,6 +78,11 @@ public class ObjectID implements Mapper<Integer> {
     }
 
     @Override
+    public String getDisplayName() {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
     public boolean isSet(final Task task) {
         return task.containsObjectID();
     }
@@ -107,4 +112,4 @@ public class ObjectID implements Mapper<Integer> {
     public void set(final Task task, final Integer value) {
         task.setObjectID(value.intValue());
     }
-};
+}

@@ -51,7 +51,6 @@ package com.openexchange.groupware.tasks.mapping;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.Date;
 import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.tasks.Mapper;
@@ -74,7 +73,7 @@ public class Alarm implements Mapper<Date>{
     }
 
     @Override
-    public void fromDB(final ResultSet result, final int pos, final Task task) throws SQLException {
+    public void fromDB(final ResultSet result, final int pos, final Task task) {
         throw new UnsupportedOperationException();
     }
 
@@ -85,6 +84,11 @@ public class Alarm implements Mapper<Date>{
 
     @Override
     public String getDBColumnName() {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public String getDisplayName() {
         throw new UnsupportedOperationException();
     }
 
@@ -104,7 +108,7 @@ public class Alarm implements Mapper<Date>{
     }
 
     @Override
-    public void toDB(final PreparedStatement stmt, final int pos, final Task task) throws SQLException {
+    public void toDB(final PreparedStatement stmt, final int pos, final Task task) {
         throw new UnsupportedOperationException();
     }
 }

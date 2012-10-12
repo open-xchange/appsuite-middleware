@@ -83,6 +83,9 @@ public class ReaderScanner extends Scanner {
                 Column = 2;
             } else {
                 // CRLF without WSP: line complete
+                if (c == '\r' || c == '\n') {
+                    continue;
+                }
                 r.unread(c);
                 Column = 0;
                 return -2;

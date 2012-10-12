@@ -122,9 +122,9 @@ public class LdapConfigurationExceptionMessage implements LocalizableStrings {
     public final static String CONTACT_TYPES_WRONG_MSG = "The value given for contactTypes \"%s\" is invalid";
 
     /**
-     * The value given for searchScope_distributionlist "%s" is invalid
+     * The value given for searchScope_distributionlist "%1$s" is invalid
      */
-    public final static String SEARCH_SCOPE_DISTRI_WRONG_MSG = "The given value for searchScope_distributionlist \"%s\" is invalide";
+    public final static String SEARCH_SCOPE_DISTRI_WRONG_MSG = "The given value for searchScope_distributionlist \"%1$s\" is invalid";
 
     /**
      * Abstract pathname "%1$s" does not denote a directory.

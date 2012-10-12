@@ -97,6 +97,11 @@ public final class Status implements Mapper<Integer> {
         return "state";
     }
 
+    @Override
+    public String getDisplayName() {
+        throw new UnsupportedOperationException();
+    }
+
     /**
      * {@inheritDoc}
      */

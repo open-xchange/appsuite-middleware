@@ -54,7 +54,6 @@ import java.util.Date;
 import java.util.List;
 import javax.servlet.http.HttpServletResponse;
 import com.openexchange.caldav.GroupwareCaldavFactory;
-import com.openexchange.caldav.mixins.CalendarHomeSet;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.ContentType;
 import com.openexchange.folderstorage.FolderResponse;
@@ -98,7 +97,6 @@ public class CalDAVRootCollection extends CommonCollection {
     public CalDAVRootCollection(GroupwareCaldavFactory factory) {
         super(factory, new WebdavPath());
         this.factory = factory;
-        includeProperties(new CalendarHomeSet());
     }
     
     @Override

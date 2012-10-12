@@ -15,7 +15,7 @@ License:       GPL-2.0
 BuildRoot:     %{_tmppath}/%{name}-%{version}-build
 URL:           http://www.open-xchange.com/
 Source:        %{name}_%{version}.orig.tar.bz2
-Summary:       Open Xchange Admin AutocontextId Plugin
+Summary:       Administrative extension to automatically create context identifiers
 Requires:      open-xchange-core >= @OXVERSION@
 Requires:      open-xchange-admin >= @OXVERSION@
 Provides:      open-xchange-admin-plugin-autocontextid = %{version}
@@ -24,7 +24,8 @@ Provides:      open-xchange-admin-plugin-autocontextid-client = %{version}
 Obsoletes:     open-xchange-admin-plugin-autocontextid-client <= %{version}
 
 %description
-Open Xchange Admin AutocontextId Plugin
+This package adds the administrative OSGi bundle that creates for every newly created context a straight rising context identifier. Without
+this extension an identifier must be given when creating a context.
 
 Authors:
 --------
@@ -64,6 +65,18 @@ done
 %config(noreplace) /opt/open-xchange/etc/mysql/*
 
 %changelog
+* Wed Oct 10 2012 Jan Bauerdick <jan.bauerdick@open-xchange.com>
+Fifth release candidate for 6.22.0
+* Tue Oct 09 2012 Jan Bauerdick <jan.bauerdick@open-xchange.com>
+Fourth release candidate for 6.22.0
+* Fri Oct 05 2012 Jan Bauerdick <jan.bauerdick@open-xchange.com>
+Third release candidate for 6.22.0
+* Thu Oct 04 2012 Jan Bauerdick <jan.bauerdick@open-xchange.com>
+Second release candidate for 6.22.0
+* Tue Sep 04 2012 Jan Bauerdick <jan.bauerdick@open-xchange.com>
+First release candidate for 6.23.0
+* Mon Sep 03 2012 Jan Bauerdick <jan.bauerdick@open-xchange.com>
+prepare for next EDP drop
 * Tue Aug 21 2012 Jan Bauerdick <jan.bauerdick@open-xchange.com>
 First release candidate for 6.22.0
 * Mon Aug 20 2012 Jan Bauerdick <jan.bauerdick@open-xchange.com>

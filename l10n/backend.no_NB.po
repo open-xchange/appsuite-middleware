@@ -1,7 +1,5 @@
-# SOME DESCRIPTIVE TITLE.
 # Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
 # This file is distributed under the same license as the PACKAGE package.
-# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
 #
 #. *
 #. * Mail(s) could not be found in folder
@@ -17,19 +15,20 @@
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe.json/src/com/openexchange/subscribe/json/SubscriptionJSONExceptionMessage.java:88
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe.json/src/com/openexchange/subscribe/json/SubscriptionJSONExceptionMessage.java:90
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe.json/src/com/openexchange/subscribe/json/SubscriptionJSONExceptionMessage.java:92
-#, fuzzy
+# Antje Faber, 2012.
 msgid ""
 msgstr ""
-"Project-Id-Version: PACKAGE VERSION\n"
+"Project-Id-Version: backend\n"
 "Report-Msgid-Bugs-To: \n"
-"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
-"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
-"Language-Team: LANGUAGE <LL@li.org>\n"
+"PO-Revision-Date: 2012-10-01 17:34+0200\n"
+"Last-Translator: Antje Faber\n"
+"Language-Team: Japanese <kde-i18n-de@kde.org>\n"
 "Language: \n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"X-Generator: Lokalize 1.0\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
 
 #. The client send a ticket within the browser request and the verification of this ticket failed.
 #. %1$s will be replaced with a detailed exception message.
@@ -77,6 +76,42 @@ msgstr ""
 #. %1$s is replaced with the session identifier.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.authentication.kerberos/src/com/openexchange/kerberos/KerberosExceptionMessages.java:91
 msgid "No Kerberos delegation ticket found in session %1$s."
+msgstr ""
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.aws.loadbalancing/src/com/openexchange/aws/loadbalancing/exceptions/OXAWSLoadBalancingExceptionMessages.java:61
+msgid "Name of loadbalancer missing."
+msgstr ""
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.aws.loadbalancing/src/com/openexchange/aws/loadbalancing/exceptions/OXAWSLoadBalancingExceptionMessages.java:63
+msgid "No zone specified."
+msgstr ""
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.aws.loadbalancing/src/com/openexchange/aws/loadbalancing/exceptions/OXAWSLoadBalancingExceptionMessages.java:65
+msgid "Could not create loadbalancer."
+msgstr ""
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.aws.loadbalancing/src/com/openexchange/aws/loadbalancing/exceptions/OXAWSLoadBalancingExceptionMessages.java:67
+msgid "Could not register instance with id %1$s with the loadbalancer."
+msgstr ""
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.aws.loadbalancing/src/com/openexchange/aws/loadbalancing/exceptions/OXAWSLoadBalancingExceptionMessages.java:69
+msgid "Could not deregister instance with id %1$s from the loadbalancer."
+msgstr ""
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.aws/src/com/openexchange/aws/exceptions/OXAWSExceptionMessages.java:61
+msgid "Missing access key."
+msgstr ""
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.aws/src/com/openexchange/aws/exceptions/OXAWSExceptionMessages.java:63
+msgid "Missing secret key."
+msgstr ""
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.aws/src/com/openexchange/aws/exceptions/OXAWSExceptionMessages.java:65
+msgid "EC2 region not set."
+msgstr ""
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.aws/src/com/openexchange/aws/exceptions/OXAWSExceptionMessages.java:67
+msgid "Loadbalancing region not set."
 msgstr ""
 
 #. A cache error occurred: %1$s
@@ -1600,6 +1635,7 @@ msgstr ""
 #. *
 #. * A SQL error occurred: %1$s
 #.
+#. A SQL error occurred: %1$s
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.datatypes.genericonf.storage/src/com/openexchange/datatypes/genericonf/storage/GenericConfigurationStorageExceptionMessage.java:68
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:67
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/id/IDExceptionMessages.java:68
@@ -1613,6 +1649,7 @@ msgstr ""
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/downgrade/DowngradeFailedExceptionMessage.java:70
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/userconfiguration/UserConfigurationExceptionMessage.java:71
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:324
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.snippet/src/com/openexchange/snippet/SnippetExceptionMessages.java:78
 msgid "A SQL error occurred: %1$s"
 msgstr ""
 
@@ -4337,6 +4374,21 @@ msgstr ""
 msgid "The session information didn't match any ServerSession"
 msgstr ""
 
+#. * The received message is missing the \"kind\" key.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime.atmosphere/src/com/openexchange/realtime/atmosphere/AtmosphereExceptionMessage.java:64
+msgid "The received message is missing the \"kind\" key."
+msgstr ""
+
+#. * Could not find a parser for a message of kind: . \"%1$s\"
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime.atmosphere/src/com/openexchange/realtime/atmosphere/AtmosphereExceptionMessage.java:66
+msgid "Could not find a parser for a message of kind: . \"%1$s\""
+msgstr ""
+
+#. * Error while building Stanza: \"%1$s\"
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime.atmosphere/src/com/openexchange/realtime/atmosphere/AtmosphereExceptionMessage.java:68
+msgid "Error while building Stanza: \"%1$s\""
+msgstr ""
+
 #. Unknown channel %1$s
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/RealtimeExceptionMessages.java:63
 msgid "Unknown channel %1$s"
@@ -4711,6 +4763,11 @@ msgid ""
 "Found two folders named \"%1$s\" located below the parent folder \"%2$s\". "
 "Please rename one of the folders. There should be no two folders with the "
 "same name."
+msgstr ""
+
+#. An unexpected error occurred: %1$s. Please try again.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/folderstorage/FolderExceptionMessages.java:167
+msgid "An unexpected error occurred: %1$s. Please try again."
 msgstr ""
 
 #. SQL Problem: "%1$s".
@@ -9812,6 +9869,11 @@ msgstr ""
 msgid "Bad request. The server is unable to handle the request."
 msgstr ""
 
+#. Missing request body.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/servlet/AjaxExceptionMessages.java:134
+msgid "Missing request body."
+msgstr ""
+
 #. *
 #. * Exception while writing JSON.
 #.
@@ -10161,6 +10223,11 @@ msgstr ""
 #. No such snippet found for identifier: %1$s
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.snippet/src/com/openexchange/snippet/SnippetExceptionMessages.java:69
 msgid "No such snippet found for identifier: %1$s"
+msgstr ""
+
+#. No such snippet attachment found for identifier %1$s in snippet %2$s
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.snippet/src/com/openexchange/snippet/SnippetExceptionMessages.java:81
+msgid "No such snippet attachment found for identifier %1$s in snippet %2$s"
 msgstr ""
 
 #. Could not find Apache Solr Core entry for user %1$s and module %2$s in context %3$s.
@@ -12772,3 +12839,5 @@ msgstr ""
 #: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:522
 msgid "Zulu"
 msgstr ""
+
+

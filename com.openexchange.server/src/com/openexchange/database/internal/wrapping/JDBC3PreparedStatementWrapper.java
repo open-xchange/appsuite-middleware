@@ -67,7 +67,6 @@ import java.sql.Time;
 import java.sql.Timestamp;
 import java.util.Calendar;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 
 /**
  * {@link JDBC3PreparedStatementWrapper}

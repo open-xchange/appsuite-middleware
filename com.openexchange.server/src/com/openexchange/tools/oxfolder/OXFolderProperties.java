@@ -71,6 +71,7 @@ import com.openexchange.cache.registry.CacheAvailabilityRegistry;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.PropertyEvent;
 import com.openexchange.config.PropertyListener;
+import com.openexchange.database.DatabaseService;
 import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
@@ -116,7 +117,7 @@ public final class OXFolderProperties implements Initialization, CacheAvailabili
 
     private boolean ignoreSharedAddressbook = false;
 
-    private volatile boolean enableInternalUsersEdit = false;
+    volatile boolean enableInternalUsersEdit = false;
 
     private boolean enableSharedFolderCaching = true;
 
@@ -273,119 +274,27 @@ public final class OXFolderProperties implements Initialization, CacheAvailabili
                 final ThreadPoolService pool = ThreadPools.getThreadPool();
                 if (null == pool) {
                     // Run in this thread
-                    updatePermissions();
+                    updatePermissions(enableInternalUsersEdit);
                 } else {
                     // Run in separate thread
                     final Runnable r = new Runnable() {
 
                         @Override
                         public void run() {
-                            updatePermissions();
+                            updatePermissions(enableInternalUsersEdit);
                         }
                     };
                     pool.submit(ThreadPools.task(r), CallerRunsBehavior.getInstance());
                 }
             }
 
-            private void updatePermissions() {
-                /*
-                 * Update permissions
-                 */
-                final Map<String, Set<Integer>> map = getSchemasAndContexts();
-                if (!map.isEmpty()) {
-                    final int size = map.size();
-                    final Iterator<Set<Integer>> iter = map.values().iterator();
-                    for (int i = 0; i < size; i++) {
-                        final Set<Integer> cids = iter.next();
-                        if (!cids.isEmpty()) {
-                            updateGABWritePermission(cids.iterator().next().intValue());
-                        }
-                    }
-                }
-                if (logger.isInfoEnabled()) {
-                    logger.info(MessageFormat.format(
-                        "Property ''ENABLE_INTERNAL_USER_EDIT'' change propagated. ENABLE_INTERNAL_USER_EDIT={0}",
-                        Boolean.valueOf(enableInternalUsersEdit)));
-                }
-                /*
-                 * Clear folder cache to ensure removal of all cached instances of global address book
-                 */
-                if (FolderCacheManager.isInitialized()) {
-                    try {
-                        FolderCacheManager.getInstance().clearAll();
-                    } catch (final OXException e) {
-                        logger.error(e.getMessage(), e);
-                    }
-                }
-            }
-
-            private void updateGABWritePermission(final int contextId) {
-                Connection con = null;
-                try {
-                    con = Database.get(contextId, true);
-                } catch (final OXException e) {
-                    logger.error(e.getMessage(), e);
-                }
-                if (null != con) {
-                    PreparedStatement ps = null;
-                    try {
-                        ps = con.prepareStatement("UPDATE oxfolder_permissions SET owp = ? WHERE fuid = ?");
-                        ps.setInt(1, enableInternalUsersEdit ? OCLPermission.WRITE_OWN_OBJECTS : OCLPermission.NO_PERMISSIONS);
-                        ps.setInt(2, FolderObject.SYSTEM_LDAP_FOLDER_ID);
-                        ps.executeUpdate();
-                    } catch (final SQLException e) {
-                        logger.error(e.getMessage(), e);
-                    } finally {
-                        DBUtils.closeSQLStuff(ps);
-                        Database.back(contextId, true, con);
-                    }
-                }
-            }
-
-            private Map<String, Set<Integer>> getSchemasAndContexts() {
-                try {
-                    Connection writeCon = null;
-                    PreparedStatement stmt = null;
-                    ResultSet rs = null;
-                    try {
-                        writeCon = Database.get(false);
-                        stmt = writeCon.prepareStatement("SELECT db_schema, cid FROM context_server2db_pool");
-                        rs = stmt.executeQuery();
-
-                        final Map<String, Set<Integer>> schemasAndContexts = new HashMap<String, Set<Integer>>();
-
-                        while (rs.next()) {
-                            final String schemaName = rs.getString(1);
-                            final int contextId = rs.getInt(2);
-
-                            Set<Integer> contextIds = schemasAndContexts.get(schemaName);
-                            if (null == contextIds) {
-                                contextIds = new HashSet<Integer>();
-                                schemasAndContexts.put(schemaName, contextIds);
-                            }
-                            contextIds.add(Integer.valueOf(contextId));
-                        }
-
-                        return schemasAndContexts;
-                    } finally {
-                        DBUtils.closeSQLStuff(rs, stmt);
-                        if (writeCon != null) {
-                            Database.back(false, writeCon);
-                        }
-                    }
-                } catch (final OXException e) {
-                    logger.error(e.getMessage(), e);
-                } catch (final SQLException e) {
-                    logger.error(e.getMessage(), e);
-                }
-                return Collections.emptyMap();
-            }
-
         }));
         if (null == value) {
             LOG.warn("Missing property ENABLE_INTERNAL_USER_EDIT");
         } else {
-            enableInternalUsersEdit = Boolean.parseBoolean(value.trim());
+            final boolean enableInternalUsersEdit = Boolean.parseBoolean(value.trim());
+            updatePermissions(enableInternalUsersEdit);
+            this.enableInternalUsersEdit = enableInternalUsersEdit;
         }
         /*
          * Log info
@@ -515,5 +424,115 @@ public final class OXFolderProperties implements Initialization, CacheAvailabili
     public static ObjectName getObjectName(final String className, final String domain) throws MalformedObjectNameException {
         final int pos = className.lastIndexOf('.');
         return new ObjectName(domain, "name", pos == -1 ? className : className.substring(pos + 1));
+    }
+
+    /**
+     * Updates according to given flag.
+     * 
+     * @param enableInternalUsersEdit The flag
+     */
+    public static void updatePermissions(final boolean enableInternalUsersEdit) {
+        /*
+         * Update permissions
+         */
+        final Map<String, Set<Integer>> map = getSchemasAndContexts();
+        if (!map.isEmpty()) {
+            final int size = map.size();
+            final Iterator<Set<Integer>> iter = map.values().iterator();
+            for (int i = 0; i < size; i++) {
+                final Set<Integer> cids = iter.next();
+                if (!cids.isEmpty()) {
+                    updateGABWritePermission(enableInternalUsersEdit, cids.iterator().next().intValue());
+                }
+            }
+        }
+        if (LOG.isInfoEnabled()) {
+            LOG.info(MessageFormat.format(
+                "Property ''ENABLE_INTERNAL_USER_EDIT'' change propagated. ENABLE_INTERNAL_USER_EDIT={0}",
+                Boolean.valueOf(enableInternalUsersEdit)));
+        }
+        /*
+         * Clear folder cache to ensure removal of all cached instances of global address book
+         */
+        if (FolderCacheManager.isInitialized()) {
+            try {
+                FolderCacheManager.getInstance().clearAll();
+            } catch (final OXException e) {
+                LOG.error(e.getMessage(), e);
+            }
+        }
+    }
+
+    private static void updateGABWritePermission(final boolean enableInternalUsersEdit, final int contextId) {
+        Connection con = null;
+        try {
+            con = Database.get(contextId, true);
+        } catch (final OXException e) {
+            LOG.error(e.getMessage(), e);
+        }
+        if (null != con) {
+            PreparedStatement ps = null;
+            try {
+                ps = con.prepareStatement("UPDATE oxfolder_permissions SET owp = ? WHERE fuid = ?");
+                ps.setInt(1, enableInternalUsersEdit ? OCLPermission.WRITE_OWN_OBJECTS : OCLPermission.NO_PERMISSIONS);
+                ps.setInt(2, FolderObject.SYSTEM_LDAP_FOLDER_ID);
+                ps.executeUpdate();
+            } catch (final SQLException e) {
+                LOG.error(e.getMessage(), e);
+            } finally {
+                DBUtils.closeSQLStuff(ps);
+                Database.back(contextId, true, con);
+            }
+        }
+    }
+
+    private static Map<String, Set<Integer>> getSchemasAndContexts() {
+        try {
+            DatabaseService databaseService;
+            {
+                final com.openexchange.database.internal.Initialization dbInitialization = com.openexchange.database.internal.Initialization.getInstance();
+                databaseService = dbInitialization.getDatabaseService();
+                if (null == databaseService) {
+                    databaseService = dbInitialization.startIfAbsent(ServerServiceRegistry.getInstance().getService(ConfigurationService.class));
+                }
+                if (null == databaseService) {
+                    return Collections.emptyMap();
+                }
+            }
+            Connection con = null;
+            PreparedStatement stmt = null;
+            ResultSet rs = null;
+            try {
+                con = databaseService.getReadOnly();
+                stmt = con.prepareStatement("SELECT db_schema, cid FROM context_server2db_pool");
+                rs = stmt.executeQuery();
+
+                final Map<String, Set<Integer>> schemasAndContexts = new HashMap<String, Set<Integer>>();
+
+                while (rs.next()) {
+                    final String schemaName = rs.getString(1);
+                    final int contextId = rs.getInt(2);
+
+                    Set<Integer> contextIds = schemasAndContexts.get(schemaName);
+                    if (null == contextIds) {
+                        contextIds = new HashSet<Integer>();
+                        schemasAndContexts.put(schemaName, contextIds);
+                    }
+                    contextIds.add(Integer.valueOf(contextId));
+                }
+
+                return schemasAndContexts;
+            } finally {
+                DBUtils.closeSQLStuff(rs, stmt);
+                if (con != null) {
+                    databaseService.backReadOnly(con);
+                }
+            }
+        } catch (final OXException e) {
+            LOG.error(e.getMessage(), e);
+        } catch (final SQLException e) {
+            LOG.error(e.getMessage(), e);
+        }
+        return Collections.emptyMap();
     }
 }

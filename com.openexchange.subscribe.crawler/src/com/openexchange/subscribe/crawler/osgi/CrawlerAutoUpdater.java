@@ -52,11 +52,11 @@ package com.openexchange.subscribe.crawler.osgi;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.log.LogFactory;
 import com.openexchange.subscribe.crawler.internal.CrawlerUpdateTask;
 import com.openexchange.timer.ScheduledTimerTask;
 import com.openexchange.timer.TimerService;
@@ -113,7 +113,7 @@ public class CrawlerAutoUpdater implements ServiceTrackerCustomizer<Object, Obje
             final long updateInterval = Integer.parseInt(configurationService.getProperty(Activator.UPDATE_INTERVAL));
             // Insert daily TimerTask to look for updates
             scheduledTimerTask = timerService.scheduleWithFixedDelay(crawlerUpdateTask, 30 * 1000, updateInterval);
-            LOG.info("Task for crawler auto-update initialised");
+            LOG.info("Task for crawler auto-update initialized");
         }
         return obj;
     }

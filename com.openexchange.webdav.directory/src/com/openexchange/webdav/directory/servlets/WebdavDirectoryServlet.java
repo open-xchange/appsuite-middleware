@@ -68,7 +68,7 @@ import com.openexchange.webdav.protocol.WebdavStatus;
 
 
 /**
- * {@link WebdavPrincipalServlet}
+ * {@link WebdavDirectoryServlet}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
@@ -155,9 +155,9 @@ public class WebdavDirectoryServlet extends OXServlet {
         }
         try {
         	WebdavDirectoryPerformer.getInstance().doIt(req, resp, action, session);
-        } catch (OXException x) {
+        } catch (final OXException x) {
         	if (WebdavStatus.class.isInstance(x)) {
-        		WebdavStatus status = (WebdavStatus) x;
+        		final WebdavStatus status = (WebdavStatus) x;
         		resp.setStatus(status.getStatus());
         		resp.sendError(status.getStatus());
 

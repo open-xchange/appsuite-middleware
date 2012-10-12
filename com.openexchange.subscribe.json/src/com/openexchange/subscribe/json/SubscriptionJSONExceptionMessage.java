@@ -93,4 +93,6 @@ public class SubscriptionJSONExceptionMessage implements LocalizableStrings {
 
     public final static String UNKNOWN_COLUMN_HELP = "Please ask only for columns the server knows";
 
+	public static final String UNKNOWN_SUBSCRIPTION = "Unknown Subscription";
+
 }

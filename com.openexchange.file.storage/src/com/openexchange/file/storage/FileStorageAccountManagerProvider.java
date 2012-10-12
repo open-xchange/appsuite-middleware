@@ -68,10 +68,10 @@ public interface FileStorageAccountManagerProvider {
     /**
      * Whether this provider supports specified {@link FileStorageService file storage service}.
      *
-     * @param service The file storage service
+     * @param serviceId The file storage service identifier
      * @return <code>true</code> if this provider supports specified file storage service; otherwise <code>false</code>
      */
-    boolean supports(FileStorageService service);
+    boolean supports(String serviceId);
 
     /**
      * Gets the appropriate file storage account manager for specified account identifier and session.
@@ -86,11 +86,11 @@ public interface FileStorageAccountManagerProvider {
     /**
      * Gets the appropriate account manager for specified {@link FileStorageService file storage service}.
      *
-     * @param service The file storage service
+     * @param serviceId The file storage service identifier
      * @return The appropriate account manager for specified file storage service.
      * @throws OXException If an appropriate account manager cannot be returned
      */
-    FileStorageAccountManager getAccountManagerFor(FileStorageService service) throws OXException;
+    FileStorageAccountManager getAccountManagerFor(String serviceId) throws OXException;
 
     /**
      * Gets the ranking of this provider.

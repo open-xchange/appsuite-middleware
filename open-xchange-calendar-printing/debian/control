@@ -10,4 +10,6 @@ Package: open-xchange-calendar-printing
 Architecture: all
 Pre-Depends: open-xchange-core (>= @OXVERSION@)
 Depends: ${misc:Depends}
-Description: Printing calendars via templating
+Description: Extension to render calendar views using templates
+ This package installs the OSGi bundle that renders calendar views using templates. Example templates are installed by this package, too.
+ Modifying the templates easily allows administrators to modify the calendar print views.

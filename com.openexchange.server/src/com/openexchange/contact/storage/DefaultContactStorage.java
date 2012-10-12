@@ -83,23 +83,23 @@ public abstract class DefaultContactStorage implements ContactStorage {
     
     @Override
     public SearchIterator<Contact> all(Session session, final String folderId, final ContactField[] fields) throws OXException {
-		return this.all(session, folderId, fields, SortOptions.EMPTY);
+        return this.all(session, folderId, fields, SortOptions.EMPTY);
     }
 
     @Override
     public SearchIterator<Contact> list(Session session, final String folderId, final String[] ids, final ContactField[] fields) throws OXException {
-    	return this.list(session, folderId, ids, fields, SortOptions.EMPTY);    	
+        return this.list(session, folderId, ids, fields, SortOptions.EMPTY);        
     }
     
-	@Override
-	public <O> SearchIterator<Contact> search(Session session, SearchTerm<O> term, ContactField[] fields) throws OXException {
+    @Override
+    public <O> SearchIterator<Contact> search(Session session, SearchTerm<O> term, ContactField[] fields) throws OXException {
         return this.search(session, term, fields, SortOptions.EMPTY);
-	}
+    }
 
-	@Override
-	public SearchIterator<Contact> search(Session session, ContactSearchObject contactSearch, ContactField[] fields) throws OXException {
+    @Override
+    public SearchIterator<Contact> search(Session session, ContactSearchObject contactSearch, ContactField[] fields) throws OXException {
         return this.search(session, contactSearch, fields, SortOptions.EMPTY);
-	}
+    }
 
     @Override
     public SearchIterator<Contact> deleted(Session session, String folderId, Date since, ContactField[] fields) throws OXException {
@@ -118,6 +118,59 @@ public abstract class DefaultContactStorage implements ContactStorage {
     @Override
     public SearchIterator<Contact> search(Session session, ContactSearchObject contactSearch, ContactField[] fields, SortOptions sortOptions) throws OXException {
         return search(session, getSearchTerm(contactSearch), fields, sortOptions);
+    }
+    
+    /**
+     * Default implementation that first queries all contacts in the folder
+     * and then deletes them one after the other. Override if applicable for 
+     * storage.
+     */
+    @Override
+    public void delete(Session session, String folderId) throws OXException {
+        Date simulatedLastRead = new Date(Long.MAX_VALUE); // on folder deletion, the client's last modified timestamp is not used
+        SearchIterator<Contact> searchIterator = null;
+        try {
+            searchIterator = this.all(session, folderId, new ContactField[] { ContactField.OBJECT_ID });
+            if (null != searchIterator) {
+                while (searchIterator.hasNext()) {
+                    delete(session, folderId, String.valueOf(searchIterator.next().getObjectID()), simulatedLastRead);
+                }
+            }
+        } finally {
+            if (null != searchIterator) {
+                try {
+                    searchIterator.close();
+                } catch (OXException e) {
+                    // ignore
+                }
+            }
+        }
+    }
+    
+    /**
+     * Default implementation that first queries the contacts in the folder
+     * and then deletes them one after the other. Override if applicable for 
+     * storage.
+     */
+    @Override
+    public void delete(Session session, String folderId, String[] ids, Date lastRead) throws OXException {
+        SearchIterator<Contact> searchIterator = null;
+        try {
+            searchIterator = this.all(session, folderId, new ContactField[] { ContactField.OBJECT_ID });
+            if (null != searchIterator) {
+                while (searchIterator.hasNext()) {
+                    delete(session, folderId, String.valueOf(searchIterator.next().getObjectID()), lastRead);
+                }
+            }
+        } finally {
+            if (null != searchIterator) {
+                try {
+                    searchIterator.close();
+                } catch (OXException e) {
+                    // ignore
+                }
+            }
+        }
     }
 
     /**

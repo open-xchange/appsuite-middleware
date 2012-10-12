@@ -15,14 +15,16 @@ License:       GPL-2.0
 BuildRoot:     %{_tmppath}/%{name}-%{version}-build
 URL:           http://www.open-xchange.com/
 Source:        %{name}_%{version}.orig.tar.bz2
-Summary:       Open Xchange Admin Context Restore Plugin
+Summary:       Extension to restore context data from a database dump
 Requires:      open-xchange-core >= @OXVERSION@
 Requires:      open-xchange-admin >= @OXVERSION@
 Provides:      open-xchange-admin-plugin-contextrestore = %{version}
 Obsoletes:     open-xchange-admin-plugin-contextrestore <= %{version}
 
 %description
-Open Xchange Admin Context Restore Plugin
+This package adds the OSGi bundle that allows to restore a complete context from a MySQL database dump file. Only the table rows for the
+given context are extracted from the database dump file and inserted into the currently registered database servers. This can be used to
+restore accidentially deleted contexts.
 
 Authors:
 --------
@@ -57,8 +59,21 @@ ox_move_config_file /opt/open-xchange/etc/admindaemon /opt/open-xchange/etc plug
 /opt/open-xchange/lib/*
 %dir /opt/open-xchange/etc/plugin
 %config(noreplace) /opt/open-xchange/etc/plugin/*
+%doc com.openexchange.admin.contextrestore/ChangeLog
 
 %changelog
+* Wed Oct 10 2012 Jan Bauerdick <jan.bauerdick@open-xchange.com>
+Fifth release candidate for 6.22.0
+* Tue Oct 09 2012 Jan Bauerdick <jan.bauerdick@open-xchange.com>
+Fourth release candidate for 6.22.0
+* Fri Oct 05 2012 Jan Bauerdick <jan.bauerdick@open-xchange.com>
+Third release candidate for 6.22.0
+* Thu Oct 04 2012 Jan Bauerdick <jan.bauerdick@open-xchange.com>
+Second release candidate for 6.22.0
+* Tue Sep 04 2012 Jan Bauerdick <jan.bauerdick@open-xchange.com>
+First release candidate for 6.23.0
+* Mon Sep 03 2012 Jan Bauerdick <jan.bauerdick@open-xchange.com>
+prepare for next EDP drop
 * Tue Aug 21 2012 Jan Bauerdick <jan.bauerdick@open-xchange.com>
 First release candidate for 6.22.0
 * Mon Aug 20 2012 Jan Bauerdick <jan.bauerdick@open-xchange.com>

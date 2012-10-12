@@ -55,6 +55,7 @@ import com.openexchange.file.storage.FileStorageAccountManager;
 import com.openexchange.file.storage.FileStorageAccountManagerProvider;
 import com.openexchange.file.storage.FileStorageService;
 import com.openexchange.file.storage.config.ConfigFileStorageAccount;
+import com.openexchange.file.storage.registry.FileStorageServiceRegistry;
 import com.openexchange.session.Session;
 
 /**
@@ -76,14 +77,14 @@ public final class ConfigFileStorageAccountManagerProvider implements FileStorag
     }
 
     @Override
-    public boolean supports(final FileStorageService service) {
-        final Map<String, ConfigFileStorageAccountImpl> accounts = parser.getAccountsFor(service.getId());
+    public boolean supports(final String serviceId) {
+        final Map<String, ConfigFileStorageAccountImpl> accounts = parser.getAccountsFor(serviceId);
         return (null != accounts && !accounts.isEmpty());
     }
 
     @Override
-    public FileStorageAccountManager getAccountManagerFor(final FileStorageService service) throws OXException {
-        return new ConfigFileStorageAccountManager(service);
+    public FileStorageAccountManager getAccountManagerFor(final String serviceId) throws OXException {
+        return new ConfigFileStorageAccountManager(Services.getService(FileStorageServiceRegistry.class).getFileStorageService(serviceId));
     }
 
     @Override

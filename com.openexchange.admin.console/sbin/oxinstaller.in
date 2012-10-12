@@ -491,7 +491,7 @@ setup()
     echo setting up open-xchange configuration ${CONFDIR}
 
     # this formular and parameters are from Holger
-    SERVEROPTS="-server -Xmx${SERVER_MEMORY}m -XX:+UseConcMarkSweepGC -XX:+UseParNewGC -XX:+AggressiveOpts -XX:+CMSClassUnloadingEnabled -XX:MaxPermSize=128M -Dsun.net.inetaddr.ttl=3600 -Dnetworkaddress.cache.ttl=3600 -Dnetworkaddress.cache.negative.ttl=10"
+    SERVEROPTS="-server -Xmx${SERVER_MEMORY}m -XX:+UseConcMarkSweepGC -XX:+UseParNewGC -XX:+AggressiveOpts -XX:+CMSClassUnloadingEnabled -XX:MaxPermSize=128M -Dsun.net.inetaddr.ttl=3600 -Dnetworkaddress.cache.ttl=3600 -Dnetworkaddress.cache.negative.ttl=10 -Dorg.osgi.framework.bootdelegation=*"
 
     v_setprop JAVA_XTRAOPTS "\"$SERVEROPTS\"" ${CONFDIR}/ox-scriptconf.sh
 
@@ -546,14 +546,14 @@ setup()
     v_cache_hosting ${CONFDIR}/sessioncache.ccf SessionLTCP $UDP_SESS_DISC_PORT
     v_setprop jcs.auxiliary.SessionLTCP.attributes.TcpListenerPort $GWSCACHEPORT ${CONFDIR}/sessioncache.ccf
 
-    v_setprop com.openexchange.push.udp.senderAddress "$OXCLUSTERIP" ${CONFDIR}/push.properties
-    v_setprop com.openexchange.push.udp.multicastAddress "$UDPDISCOVERYADDR" ${CONFDIR}/push.properties
-    v_setprop com.openexchange.push.udp.multicastPort "$PUSHMCPORT" ${CONFDIR}/push.properties
-    v_setprop com.openexchange.push.udp.multicastEnabled true ${CONFDIR}/push.properties
-    v_setprop com.openexchange.push.udp.pushEnabled true ${CONFDIR}/push.properties
-    v_setprop com.openexchange.push.udp.registerPort $OLPORT ${CONFDIR}/push.properties
-    v_setprop com.openexchange.push.udp.registerDistributionEnabled false  ${CONFDIR}/push.properties
-    v_setprop com.openexchange.push.udp.eventDistributionEnabled true ${CONFDIR}/push.properties
+    v_setprop com.openexchange.push.udp.senderAddress "$OXCLUSTERIP" ${CONFDIR}/push-udp.properties
+    v_setprop com.openexchange.push.udp.multicastAddress "$UDPDISCOVERYADDR" ${CONFDIR}/push-udp.properties
+    v_setprop com.openexchange.push.udp.multicastPort "$PUSHMCPORT" ${CONFDIR}/push-udp.properties
+    v_setprop com.openexchange.push.udp.multicastEnabled true ${CONFDIR}/push-udp.properties
+    v_setprop com.openexchange.push.udp.pushEnabled true ${CONFDIR}/push-udp.properties
+    v_setprop com.openexchange.push.udp.registerPort $OLPORT ${CONFDIR}/push-udp.properties
+    v_setprop com.openexchange.push.udp.registerDistributionEnabled false  ${CONFDIR}/push-udp.properties
+    v_setprop com.openexchange.push.udp.eventDistributionEnabled true ${CONFDIR}/push-udp.properties
 
     #
     # administration configuration files

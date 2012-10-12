@@ -94,7 +94,6 @@ public final class InterfaceTests {
         tests.addTest(com.openexchange.ajax.subscribe.SubscribeTestSuite.suite());
         tests.addTest(com.openexchange.ajax.user.UserAJAXSuite.suite());
         tests.addTest(com.openexchange.ajax.importexport.VCardTestSuite.suite());
-        tests.addTest(com.openexchange.ajax.jslob.JSlobAJAXSuite.suite());
         tests.addTest(com.openexchange.ajax.updater.UpdaterTestSuite.suite());
 
         tests.addTest(com.openexchange.webdav.xml.appointment.AppointmentWebdavSuite.suite());

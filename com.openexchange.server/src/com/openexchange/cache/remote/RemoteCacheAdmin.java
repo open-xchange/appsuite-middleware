@@ -69,7 +69,7 @@ public class RemoteCacheAdmin {
 
 	private static final int REGISTRY_PORT = 57462;
 
-	private static RemoteCacheAdmin instance;
+	private static volatile RemoteCacheAdmin instance;
 
 	private static final AtomicBoolean initialized = new AtomicBoolean();
 

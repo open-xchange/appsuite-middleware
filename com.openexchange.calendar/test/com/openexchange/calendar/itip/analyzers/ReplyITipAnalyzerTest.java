@@ -404,7 +404,7 @@ public class ReplyITipAnalyzerTest extends AbstractITipAnalyzerTest {
         changedException.setRecurrenceDatePosition(new Date(12345));
         
         // With a user that has accepted
-        ExternalUserParticipant externalParticipant = new ExternalUserParticipant("partyCrasher@somewhere.invalid");
+        ExternalUserParticipant externalParticipant = new ExternalUserParticipant("partycrasher@somewhere.invalid");
         externalParticipant.setStatus(status);
         changedException.setParticipants(new Participant[] { externalParticipant });
 

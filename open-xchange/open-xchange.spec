@@ -14,7 +14,7 @@ BuildRoot:     %{_tmppath}/%{name}-%{version}-build
 URL:           http://www.open-xchange.com/
 Source:        %{name}_%{version}.orig.tar.bz2
 Source1:       open-xchange.init
-Summary:       Open-Xchange Backend
+Summary:       The Open-Xchange backend
 Requires:      open-xchange-core >= @OXVERSION@
 Requires:      open-xchange-authentication
 Requires:      open-xchange-authorization
@@ -24,7 +24,8 @@ Requires:      open-xchange-theme-default
 Requires:      open-xchange-smtp >= @OXVERSION@
 
 %description
-This package only contains the dependencies to install a working Open-Xchange 7 backend system.
+This package provides the dependencies to install a working Open-Xchange backend system. By installing this package a minimal backend is
+installed. Additionally this package provides the init script for starting the backend on system boot.
 
 Authors:
 --------
@@ -84,6 +85,25 @@ if [ ${1:-0} -eq 2 ]; then
 
     # prevent bash from expanding, see bug 13316
     GLOBIGNORE='*'
+
+    # SoftwareChange_Request-1142
+    pfile=/opt/open-xchange/etc/imap.properties
+    if ! ox_exists_property com.openexchange.imap.umlautFilterThreshold $pfile; then
+        ox_set_property com.openexchange.imap.umlautFilterThreshold 50 $pfile
+    fi
+
+    # SoftwareChange_Request-1124
+    pfile=/opt/open-xchange/etc/server.properties
+    if ! ox_exists_property com.openexchange.ajax.response.includeStackTraceOnError $pfile; then
+        ox_set_property com.openexchange.ajax.response.includeStackTraceOnError false $pfile
+    fi
+
+    # SoftwareChange_Request-1117
+    pfile=/opt/open-xchange/etc/server.properties
+    if ! ox_exists_property com.openexchange.webdav.disabled $pfile; then
+        ox_set_property com.openexchange.webdav.disabled false $pfile
+    fi
+
     # SoftwareChange_Request-1105
     pfile=/opt/open-xchange/etc/cache.ccf
     ptmp=${pfile}.$$
@@ -107,6 +127,7 @@ if [ ${1:-0} -eq 2 ]; then
         ox_set_property com.openexchange.carddav.exposedCollections "0" $pfile
     fi
     # SoftwareChange_Request-1091
+    pfile=/opt/open-xchange/etc/contact.properties
     if ! ox_exists_property contactldap.configuration.path $pfile; then
         ox_remove_property contactldap.configuration.path $pfile
     fi
@@ -177,6 +198,18 @@ fi
 /sbin/rcopen-xchange
 
 %changelog
+* Wed Oct 10 2012 Marcus Klein <marcus.klein@open-xchange.com>
+Fifth release candidate for 6.22.0
+* Tue Oct 09 2012 Marcus Klein <marcus.klein@open-xchange.com>
+Fourth release candidate for 6.22.0
+* Fri Oct 05 2012 Marcus Klein <marcus.klein@open-xchange.com>
+Third release candidate for 6.22.0
+* Thu Oct 04 2012 Marcus Klein <marcus.klein@open-xchange.com>
+Second release candidate for 6.22.0
+* Tue Sep 04 2012 Marcus Klein <marcus.klein@open-xchange.com>
+First release candidate for 6.23.0
+* Mon Sep 03 2012 Marcus Klein <marcus.klein@open-xchange.com>
+prepare for next EDP drop
 * Tue Aug 21 2012 Marcus Klein <marcus.klein@open-xchange.com>
 First release candidate for 6.22.0
 * Mon Aug 20 2012 Marcus Klein <marcus.klein@open-xchange.com>

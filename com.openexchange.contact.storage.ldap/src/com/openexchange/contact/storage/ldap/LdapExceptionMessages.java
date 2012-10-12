@@ -90,7 +90,7 @@ public final class LdapExceptionMessages implements LocalizableStrings {
     public final static String USER_SEARCH_SCOPE_WRONG_MSG = "The value given for userSearchScope \"%s\" is invalid";
     public final static String USER_LOGIN_SOURCE_WRONG_MSG = "The value given for userLoginSource \"%s\" is invalid";
     public final static String CONTACT_TYPES_WRONG_MSG = "The value given for contactTypes \"%s\" is invalid";
-    public final static String SEARCH_SCOPE_DISTRI_WRONG_MSG = "The given value for searchScope_distributionlist \"%s\" is invalide";
+    public final static String SEARCH_SCOPE_DISTRI_WRONG_MSG = "The given value for searchScope_distributionlist \"%1$s\" is invalid";
     public final static String NOT_DIRECTORY_MSG = "Abstract pathname \"%1$s\" does not denote a directory.";
     public final static String DIRECTORY_IS_NOT_A_CONTEXT_ID_MSG = "The directory \"%1$s\" is not a context identifier.";
     public final static String REFERRALS_WRONG_MSG = "The value given for referrals \"%s\" is not a possible one";

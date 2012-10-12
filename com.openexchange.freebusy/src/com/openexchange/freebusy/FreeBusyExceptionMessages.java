@@ -63,6 +63,12 @@ public final class FreeBusyExceptionMessages implements LocalizableStrings {
     public static final String NO_PROVIDERS_AVAILABLE_MSG = "No free/busy providers available";
     public static final String AMBIGUOUS_PARTICIPANT_MSG = "The participant \"%1$s\" is ambiguous.";
     public static final String PARTICIPANT_NOT_FOUND_MSG = "The participant \"%1$s\" can't be found.";
+    public static final String FREEBUSY_NOT_ENABLED_MSG = "Free/busy is not enabled for user %1$d in context %2$d.";
+    public static final String DATA_NOT_AVAILABLE_MSG = "Free/busy data for \"%1$s\" is not available.";
+    public static final String COMMUNICATION_FAILURE_MSG = "A communication error occured while processing the free/busy request (\"%1$s\").";
+    public static final String EXTERNAL_ERROR_MSG = "An external error occured while processing the free/busy request (\"%1$s\").";
+    public static final String INTERNAL_ERROR_MSG = "An internal error occured while processing the free/busy request (\"%1$s\").";
+    public static final String CONFIGURATION_ERROR_MSG = "A configuration error occured (\"%1$s\").";
     
     /**
      * Prevent instantiation.

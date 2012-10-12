@@ -60,7 +60,6 @@ import org.apache.commons.logging.Log;
 import com.openexchange.config.cascade.ComposedConfigProperty;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.exception.OXException;
-import com.openexchange.log.LogFactory;
 import com.openexchange.login.Interface;
 import com.openexchange.login.internal.LoginPerformer;
 import com.openexchange.server.ServiceLookup;
@@ -82,7 +81,7 @@ public class CalDAV extends OXServlet {
 
 	private static final transient Log LOG = com.openexchange.log.Log.loggerFor(CalDAV.class);
     
-    private static ServiceLookup services;
+    private static volatile ServiceLookup services;
     
     public static void setServiceLookup(final ServiceLookup serviceLookup) {
         services = serviceLookup;

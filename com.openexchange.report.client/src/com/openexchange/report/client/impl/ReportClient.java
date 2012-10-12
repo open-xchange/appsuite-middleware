@@ -49,21 +49,14 @@
 
 package com.openexchange.report.client.impl;
 
-import java.io.IOException;
 import java.lang.reflect.Field;
-import java.net.MalformedURLException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import javax.management.AttributeNotFoundException;
-import javax.management.InstanceNotFoundException;
-import javax.management.IntrospectionException;
 import javax.management.InvalidAttributeValueException;
-import javax.management.MBeanException;
 import javax.management.MBeanServerConnection;
 import javax.management.MalformedObjectNameException;
-import javax.management.ReflectionException;
 import org.json.JSONException;
 import com.openexchange.admin.console.AbstractJMXTools;
 import com.openexchange.admin.console.AdminParser;
@@ -93,17 +86,17 @@ public class ReportClient extends AbstractJMXTools {
     private static final char OPT_CSV_SHORT = 'c';
 
     private static final String OPT_CSV_LONG = "csv";
-    
+
     private static final String OPT_ADVANCEDREPORT_LONG = "advancedreport";
-    
+
     private static final char OPT_ADVANCEDREPORT_SHORT = 'a';
 
     private static final String OPT_SAVEREPORT_LONG = "savereport";
-    
+
     private static final char OPT_SAVEREPORT_SHORT = 'f';
-    
+
     private static final String OPT_SHOWCOMBINATION_LONG = "showaccesscombination";
-    
+
     private static final char OPT_SHOWCOMBINATION_SHORT = 'b';
 
     private CLIOption displayonly = null;
@@ -111,14 +104,16 @@ public class ReportClient extends AbstractJMXTools {
     private CLIOption sendonly = null;
 
     private CLIOption csv = null;
-    
+
     private CLIOption advancedreport = null;
 
     private CLIOption savereport = null;
-    
+
     private CLIOption showcombi = null;
-    
-    public enum ReportMode { SENDONLY, DISPLAYONLY, SAVEONLY, MULTIPLE, DISPLAYANDSEND, NONE };
+
+    public enum ReportMode {
+        SENDONLY, DISPLAYONLY, SAVEONLY, MULTIPLE, DISPLAYANDSEND, NONE
+    };
 
     public static void main(final String args[]) {
         final AbstractJMXTools t = new ReportClient();
@@ -126,23 +121,23 @@ public class ReportClient extends AbstractJMXTools {
     }
 
     @Override
-    protected void furtherOptionsHandling(final AdminParser parser, final HashMap<String, String[]> env) throws InterruptedException, IOException, MalformedURLException, InstanceNotFoundException, AttributeNotFoundException, IntrospectionException, MBeanException, ReflectionException {
+    protected void furtherOptionsHandling(final AdminParser parser, final HashMap<String, String[]> env) {
         try {
-            final String combi = (String)parser.getOptionValue(this.showcombi); 
-            if( null != combi ) {
+            final String combi = (String) parser.getOptionValue(this.showcombi);
+            if (null != combi) {
                 displayCombinationAndExit(combi);
             }
 
             ReportMode mode = ReportMode.NONE;
             boolean savereport = false;
 
-            if( null != parser.getOptionValue(this.savereport) ) {
+            if (null != parser.getOptionValue(this.savereport)) {
                 mode = ReportMode.SAVEONLY;
                 savereport = true;
             }
 
             if (null != parser.getOptionValue(this.sendonly)) {
-                if( ReportMode.NONE != mode ) {
+                if (ReportMode.NONE != mode) {
                     mode = ReportMode.MULTIPLE;
                 } else {
                     mode = ReportMode.SENDONLY;
@@ -150,9 +145,9 @@ public class ReportClient extends AbstractJMXTools {
             }
 
             if (null != parser.getOptionValue(this.displayonly)) {
-                if( ReportMode.SENDONLY == mode  ) {
+                if (ReportMode.SENDONLY == mode) {
                     mode = ReportMode.DISPLAYANDSEND;
-                } else if( ReportMode.NONE != mode) {
+                } else if (ReportMode.NONE != mode) {
                     mode = ReportMode.MULTIPLE;
                 } else {
                     mode = ReportMode.DISPLAYONLY;
@@ -163,34 +158,35 @@ public class ReportClient extends AbstractJMXTools {
             final MBeanServerConnection initConnection = initConnection(false, env);
             final List<Total> totals = ObjectHandler.getTotalObjects(initConnection);
             List<ContextDetail> contextDetails = null;
-            if( null != parser.getOptionValue(this.advancedreport) ) {
+            if (null != parser.getOptionValue(this.advancedreport)) {
                 contextDetails = ObjectHandler.getDetailObjects(initConnection);
             }
             List<MacDetail> macDetails = ObjectHandler.getMacObjects(initConnection);
             final String[] versions = VersionHandler.getServerVersion();
             final ClientLoginCount clc = ObjectHandler.getClientLoginCount(initConnection);
+            final ClientLoginCount clcYear = ObjectHandler.getClientLoginCount(initConnection, true);
 
             switch (mode) {
             case SENDONLY:
             case SAVEONLY:
-                new TransportHandler().sendReport(totals, macDetails, contextDetails, versions, clc, savereport);
+                new TransportHandler().sendReport(totals, macDetails, contextDetails, versions, clc, clcYear, savereport);
                 break;
-            
+
             case DISPLAYONLY:
-                print(totals, contextDetails, macDetails, versions, parser, clc);
+                print(totals, contextDetails, macDetails, versions, parser, clc, clcYear);
                 break;
 
             case NONE:
                 System.out.println("No option selected. Using the default (display and send)");
             case MULTIPLE:
-                if( ReportMode.NONE != mode ) {
+                if (ReportMode.NONE != mode) {
                     System.out.println("Too many arguments. Using the default (display and send)");
                 }
             case DISPLAYANDSEND:
             default:
                 savereport = false;
-                new TransportHandler().sendReport(totals, macDetails, contextDetails, versions, clc, savereport);
-                print(totals, contextDetails, macDetails, versions, parser, clc);
+                new TransportHandler().sendReport(totals, macDetails, contextDetails, versions, clc, clcYear, savereport);
+                print(totals, contextDetails, macDetails, versions, parser, clc, clcYear);
                 break;
             }
         } catch (final MalformedObjectNameException e) {
@@ -213,46 +209,54 @@ public class ReportClient extends AbstractJMXTools {
 
     @Override
     public void setFurtherOptions(final AdminParser parser) {
-        this.sendonly = setShortLongOpt(parser,
+        this.sendonly = setShortLongOpt(
+            parser,
             OPT_SEND_ONLY_SHORT,
             OPT_SEND_ONLY_LONG,
             "Send report without displaying it (Disables default)",
             false,
             NeededQuadState.notneeded);
-        this.displayonly = setShortLongOpt(parser, OPT_DISPLAY_ONLY_SHORT,
+        this.displayonly = setShortLongOpt(
+            parser,
+            OPT_DISPLAY_ONLY_SHORT,
             OPT_DISPLAY_ONLY_LONG,
             "Display report without sending it (Disables default)",
             false,
             NeededQuadState.notneeded);
-        this.csv = setShortLongOpt(parser, OPT_CSV_SHORT,
-            OPT_CSV_LONG,
-            "Show output as CSV",
-            false,
-            NeededQuadState.notneeded);
-        this.advancedreport = setShortLongOpt(parser, OPT_ADVANCEDREPORT_SHORT,
+        this.csv = setShortLongOpt(parser, OPT_CSV_SHORT, OPT_CSV_LONG, "Show output as CSV", false, NeededQuadState.notneeded);
+        this.advancedreport = setShortLongOpt(
+            parser,
+            OPT_ADVANCEDREPORT_SHORT,
             OPT_ADVANCEDREPORT_LONG,
             "Run an advanced report (could take some time with a lot of contexts)",
             false,
             NeededQuadState.notneeded);
-        this.savereport = setShortLongOpt(parser, OPT_SAVEREPORT_SHORT,
+        this.savereport = setShortLongOpt(
+            parser,
+            OPT_SAVEREPORT_SHORT,
             OPT_SAVEREPORT_LONG,
             "Save the report as JSON String instead of sending it",
             false,
             NeededQuadState.notneeded);
-        this.showcombi = setShortLongOpt(parser, OPT_SHOWCOMBINATION_SHORT,
+        this.showcombi = setShortLongOpt(
+            parser,
+            OPT_SHOWCOMBINATION_SHORT,
             OPT_SHOWCOMBINATION_LONG,
             "Show access combination for bitmask",
             true,
             NeededQuadState.notneeded);
     }
 
-    private void print(final List<Total> totals, final List<ContextDetail> contextDetails, final List<MacDetail> macDetails, final String[] versions, final AdminParser parser, final ClientLoginCount clc) {
+    private void print(final List<Total> totals, final List<ContextDetail> contextDetails, final List<MacDetail> macDetails, final String[] versions, final AdminParser parser, final ClientLoginCount clc, final ClientLoginCount clcYear) {
         System.out.println("");
 
         if (null != parser.getOptionValue(this.csv)) {
             new CSVWriter(System.out, ObjectHandler.createVersionList(versions)).write();
         } else {
-            new TableWriter(System.out, new ColumnFormat[] { new ColumnFormat(Align.LEFT), new ColumnFormat(Align.LEFT) }, ObjectHandler.createVersionList(versions)).write();
+            new TableWriter(
+                System.out,
+                new ColumnFormat[] { new ColumnFormat(Align.LEFT), new ColumnFormat(Align.LEFT) },
+                ObjectHandler.createVersionList(versions)).write();
         }
 
         System.out.println("");
@@ -260,7 +264,10 @@ public class ReportClient extends AbstractJMXTools {
         if (null != parser.getOptionValue(this.csv)) {
             new CSVWriter(System.out, ObjectHandler.createTotalList(totals)).write();
         } else {
-            new TableWriter(System.out, new ColumnFormat[] { new ColumnFormat(Align.LEFT), new ColumnFormat(Align.LEFT) }, ObjectHandler.createTotalList(totals)).write();
+            new TableWriter(
+                System.out,
+                new ColumnFormat[] { new ColumnFormat(Align.LEFT), new ColumnFormat(Align.LEFT) },
+                ObjectHandler.createTotalList(totals)).write();
         }
 
         System.out.println("");
@@ -268,7 +275,11 @@ public class ReportClient extends AbstractJMXTools {
         if (null != parser.getOptionValue(this.csv)) {
             new CSVWriter(System.out, ObjectHandler.createMacList(macDetails)).write();
         } else {
-            new TableWriter(System.out, new ColumnFormat[] { new ColumnFormat(Align.LEFT), new ColumnFormat(Align.LEFT), new ColumnFormat(Align.LEFT), new ColumnFormat(Align.LEFT) }, ObjectHandler.createMacList(macDetails)).write();
+            new TableWriter(
+                System.out,
+                new ColumnFormat[] {
+                    new ColumnFormat(Align.LEFT), new ColumnFormat(Align.LEFT), new ColumnFormat(Align.LEFT), new ColumnFormat(Align.LEFT) },
+                ObjectHandler.createMacList(macDetails)).write();
         }
 
         System.out.println("");
@@ -276,10 +287,22 @@ public class ReportClient extends AbstractJMXTools {
         if (null != parser.getOptionValue(this.csv)) {
             new CSVWriter(System.out, ObjectHandler.createLogincountList(clc)).write();
         } else {
-            new TableWriter(System.out, new ColumnFormat[] { new ColumnFormat(Align.LEFT), new ColumnFormat(Align.LEFT), new ColumnFormat(Align.LEFT), new ColumnFormat(Align.LEFT), new ColumnFormat(Align.LEFT) }, ObjectHandler.createLogincountList(clc)).write();
+            new TableWriter(System.out, new ColumnFormat[] {
+                new ColumnFormat(Align.LEFT), new ColumnFormat(Align.LEFT), new ColumnFormat(Align.LEFT), new ColumnFormat(Align.LEFT),
+                new ColumnFormat(Align.LEFT) }, ObjectHandler.createLogincountList(clc)).write();
         }
 
-        if( null != contextDetails ) {
+        System.out.println("");
+
+        if (null != parser.getOptionValue(this.csv)) {
+            new CSVWriter(System.out, ObjectHandler.createLogincountListYear(clcYear)).write();
+        } else {
+            new TableWriter(System.out, new ColumnFormat[] {
+                new ColumnFormat(Align.LEFT), new ColumnFormat(Align.LEFT), new ColumnFormat(Align.LEFT), new ColumnFormat(Align.LEFT),
+                new ColumnFormat(Align.LEFT) }, ObjectHandler.createLogincountListYear(clcYear)).write();
+        }
+
+        if (null != contextDetails) {
             System.out.println("");
 
             if (null != parser.getOptionValue(this.csv)) {
@@ -295,60 +318,61 @@ public class ReportClient extends AbstractJMXTools {
     /*
      * FIXME: This should be read from the admin api somewhere later
      */
-    private static final Map<String, String> ADMIN_COMBI_MAP = 
-        Collections.unmodifiableMap(new HashMap<String, String>() {
-            private static final long serialVersionUID = 8762945373815023607L;
-            { 
-                put("CALENDAR","access-calendar");
-                put("CONTACTS","access-contacts");
-                put("DELEGATE_TASKS","access-delegate-tasks");
-                put("EDIT_PUBLIC_FOLDERS","access-edit-public-folder");
-                put("FORUM","access-forum");
-                put("ICAL","access-ical");
-                put("INFOSTORE","access-infostore");
-                put("PINBOARD_WRITE_ACCESS","access-pinboard-write");
-                put("PROJECTS","access-projects");
-                put("READ_CREATE_SHARED_FOLDERS","access-read-create-shared-Folders");
-                put("RSS_BOOKMARKS","access-rss-bookmarks");
-                put("RSS_PORTAL","access-rss-portal");
-                put("SYNCML","access-syncml");
-                put("TASKS","access-tasks");
-                put("VCARD","access-vcard");
-                put("WEBDAV","access-webdav");
-                put("WEBDAV_XML","access-webdav-xml");
-                put("WEBMAIL","access-webmail");
-                put("EDIT_GROUP","access-edit-group");
-                put("EDIT_RESOURCE","access-edit-resource");
-                put("EDIT_PASSWORD","access-edit-password");
-                put("COLLECT_EMAIL_ADDRESSES","access-collect-email-addresses");
-                put("MULTIPLE_MAIL_ACCOUNTS","access-multiple-mail-accounts");
-                put("SUBSCRIPTION","access-subscription");
-                put("PUBLICATION","access-publication");
-                put("ACTIVE_SYNC","access-active-sync");
-                put("USM","access-usm");
-                put("OLOX20","access-olox20");
-                put("DENIED_PORTAL","access-denied-portal");
-            }});
-    
+    private static final Map<String, String> ADMIN_COMBI_MAP = Collections.unmodifiableMap(new HashMap<String, String>() {
+
+        private static final long serialVersionUID = 8762945373815023607L;
+        {
+            put("CALENDAR", "access-calendar");
+            put("CONTACTS", "access-contacts");
+            put("DELEGATE_TASKS", "access-delegate-tasks");
+            put("EDIT_PUBLIC_FOLDERS", "access-edit-public-folder");
+            put("FORUM", "access-forum");
+            put("ICAL", "access-ical");
+            put("INFOSTORE", "access-infostore");
+            put("PINBOARD_WRITE_ACCESS", "access-pinboard-write");
+            put("PROJECTS", "access-projects");
+            put("READ_CREATE_SHARED_FOLDERS", "access-read-create-shared-Folders");
+            put("RSS_BOOKMARKS", "access-rss-bookmarks");
+            put("RSS_PORTAL", "access-rss-portal");
+            put("SYNCML", "access-syncml");
+            put("TASKS", "access-tasks");
+            put("VCARD", "access-vcard");
+            put("WEBDAV", "access-webdav");
+            put("WEBDAV_XML", "access-webdav-xml");
+            put("WEBMAIL", "access-webmail");
+            put("EDIT_GROUP", "access-edit-group");
+            put("EDIT_RESOURCE", "access-edit-resource");
+            put("EDIT_PASSWORD", "access-edit-password");
+            put("COLLECT_EMAIL_ADDRESSES", "access-collect-email-addresses");
+            put("MULTIPLE_MAIL_ACCOUNTS", "access-multiple-mail-accounts");
+            put("SUBSCRIPTION", "access-subscription");
+            put("PUBLICATION", "access-publication");
+            put("ACTIVE_SYNC", "access-active-sync");
+            put("USM", "access-usm");
+            put("OLOX20", "access-olox20");
+            put("DENIED_PORTAL", "access-denied-portal");
+        }
+    });
+
     private void displayCombinationAndExit(final String combi) {
         int accCombi;
         try {
             accCombi = Integer.parseInt(combi);
-            final Class<UserConfiguration> clazz = UserConfiguration.class; 
-            for(final Field f : clazz.getFields() ) {
-                if( f.getType().getName().equals("int") ) {
+            final Class<UserConfiguration> clazz = UserConfiguration.class;
+            for (final Field f : clazz.getFields()) {
+                if (f.getType().getName().equals("int")) {
                     String shortName = ADMIN_COMBI_MAP.get(f.getName());
-                    if( null != shortName ) {
+                    if (null != shortName) {
                         final int bit = f.getInt(clazz);
-                        if( (bit & accCombi) == bit ) {
-                            System.out.printf("%c[32m%35s: on%c[0m\n", 27,shortName,27);
+                        if ((bit & accCombi) == bit) {
+                            System.out.printf("%c[32m%35s: on%c[0m\n", 27, shortName, 27);
                         } else {
-                            System.out.printf("%c[31m%35s: off%c[0m\n", 27,shortName,27);
+                            System.out.printf("%c[31m%35s: off%c[0m\n", 27, shortName, 27);
                         }
                     }
                 }
             }
-        } catch( NumberFormatException e ) {
+        } catch (NumberFormatException e) {
             System.err.println(combi + " is not a number");
             System.exit(1);
         } catch (IllegalArgumentException e) {

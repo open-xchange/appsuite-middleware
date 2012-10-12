@@ -52,6 +52,7 @@ package com.openexchange.imap.thread;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
+import org.apache.commons.logging.Log;
 
 /**
  * {@link Threader} - This is an implementation of a message threading algorithm, as originally devised by Zamie Zawinski. See <a
@@ -63,17 +64,52 @@ import java.util.Map;
  */
 public class Threader {
 
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(Threader.class);
+    private static final boolean DEBUG = LOG.isDebugEnabled();
+
     private ThreadContainer rootNode; // has kids, and no next
-
     private Map<String, ThreadContainer> idMap; // maps message IDs to ThreadContainers
-
-    private int bogusIdCount = 0; // tick of how many dup IDs we've seen
+    private int bogusIdCount; // tick of how many dup IDs we've seen
+    private boolean insistOnRe;
 
     /**
      * Initializes a new {@link Threader}.
      */
     public Threader() {
         super();
+        bogusIdCount = 0;
+        insistOnRe = true;
+    }
+
+    /**
+     * Sets the <code>insistOnRe</code> flag. Default is <code>true</code>.
+     * <p>
+     * If disabled, those messages are grouped to threads which have an equal subject, regardless if one is the response (has "Re: " prefix)
+     * of the other.
+     * <p>
+     * By default exactly that case is prevented:
+     * 
+     * <pre>
+     * // - If that container is a non-dummy, and that message's subject begins
+     * // with &quot;Re:&quot;, but *this* message's subject does *not*, then make that
+     * // be a child of this one -- they were misordered. (This happens
+     * // somewhat implicitly, since if there are two messages, one with Re:
+     * // and one without, the one without will be in the hash table,
+     * // regardless of the order in which they were seen.)
+     * //
+     * // - Otherwise, make a new dummy container and make both messages be a
+     * // child of it. This catches the both-are-replies and neither-are-
+     * // replies cases, and makes them be siblings instead of asserting a
+     * // hierarchical relationship which might not be true.
+     * 
+     * </pre>
+     * 
+     * @param insistOnRe The <code>insistOnRe</code> flag to set
+     * @return This threader with new behavior applied
+     */
+    public Threader setInsistOnRe(boolean insistOnRe) {
+        this.insistOnRe = insistOnRe;
+        return this;
     }
 
     /**
@@ -87,6 +123,8 @@ public class Threader {
         if (threadableRoot == null) {
             return null;
         }
+        final long st = DEBUG ? System.currentTimeMillis() : 0L;
+
         idMap = new HashMap<String, ThreadContainer>();
 
         for (final Enumeration<Threadable> e = threadableRoot.allElements(); e.hasMoreElements();) {
@@ -107,7 +145,7 @@ public class Threader {
         gatherSubjects();
 
         if (rootNode.next != null) {
-            throw new Error("root node has a next?" + rootNode);
+            throw new IllegalStateException("root node has a next?" + rootNode);
         }
 
         for (ThreadContainer r = rootNode.child; r != null; r = r.next) {
@@ -126,18 +164,26 @@ public class Threader {
         // their underlying threadables.
         rootNode.flush();
         rootNode = null;
+
+        if (DEBUG && null != result) {
+            final long dur = System.currentTimeMillis() - st;
+            LOG.debug("Threader.thread() took " + dur + "msec for " + result.fullName);
+        }
+
         return result;
     }
 
-    // buildContainer() does three things:
-    //
-    // = It walks the tree of threadables, and wraps each in a
-    // ThreadContainer object.
-    // = It indexes each ThreadContainer object in the id_table, under
-    // the message ID of the contained IThreadable.
-    // = For each of the IThreadable's references, it ensures that there
-    // is a ThreadContainer in the table (an empty one, if necessary.)
-    //
+    /**
+     * <code>buildContainer()</code> does three things:
+     * <ul>
+     * <li>It walks the tree of {@code Threadable}s, and wraps each in a {@code ThreadContainer} object.</li>
+     * <li>It indexes each {@code ThreadContainer} object in the id_table, under the message ID of the contained {@code Threadable}.</li>
+     * <li>For each of the {@code Threadable}'s references, it ensures that there is a {@code ThreadContainer} in the table (an empty one,
+     * if necessary.)</li>
+     * </ul>
+     * 
+     * @param threadable The {@code Threadable} instance to build container for
+     */
     private void buildContainer(final Threadable threadable) {
         String id = threadable.messageID();
         ThreadContainer container = idMap.get(id);
@@ -177,17 +223,15 @@ public class Threader {
         ThreadContainer parentRef = null;
         {
             final String[] refs = threadable.messageReferences();
-            final int len = (refs == null ? 0 : refs.length);
+            final int len = refs.length;
             for (int i = 0; i < len; i++) {
                 final String refString = refs[i];
                 ThreadContainer ref = idMap.get(refString);
-
                 if (ref == null) {
                     ref = new ThreadContainer();
                     // ref.debug_id = ref_string;
                     idMap.put(refString, ref);
                 }
-
                 // If we have references A B C D, make D be a child of C, etc,
                 // except if they have parents already.
                 //
@@ -204,7 +248,7 @@ public class Threader {
             }
         }
 
-        // At this point `parent_ref' is set to the container of the last element
+        // At this point 'parent_ref' is set to the container of the last element
         // in the references field. Make that be the parent of this container,
         // unless doing so would introduce a circularity.
         //
@@ -367,34 +411,26 @@ public class Threader {
     // still get threaded (to the extent possible, at least.)
     //
     private void gatherSubjects() {
-
         int count = 0;
         for (ThreadContainer c = rootNode.child; c != null; c = c.next) {
             count++;
         }
-
         // Make the hash table large enough to not need to be rehashed.
-        final Map<String, ThreadContainer> subjTable = new HashMap<String, ThreadContainer>((int) (count * 1.2), (float) 0.9);
-
+        final Map<String, ThreadContainer> subjTable = new HashMap<String, ThreadContainer>(count << 1, (float) 0.9);
         count = 0;
         for (ThreadContainer c = rootNode.child; c != null; c = c.next) {
             Threadable threadable = c.threadable;
-
             // If there is no threadable, this is a dummy node in the root set.
             // Only root set members may be dummies, and they always have at least
             // two kids. Take the first kid as representative of the subject.
             if (threadable == null) {
                 threadable = c.child.threadable;
             }
-
             final String subj = threadable.simplifiedSubject();
-
-            if (subj == null || subj == "") {
+            if (isEmpty(subj)) {
                 continue;
             }
-
             final ThreadContainer old = subjTable.get(subj);
-
             // Add this container to the table if:
             // - There is no container in the table with this subject, or
             // - This one is a dummy container and the old one is not: the dummy
@@ -428,7 +464,7 @@ public class Threader {
             final String subj = threadable.simplifiedSubject();
 
             // Don't thread together all subjectless messages; let them dangle.
-            if (subj == null || subj == "") {
+            if (isEmpty(subj)) {
                 continue;
             }
 
@@ -498,6 +534,13 @@ public class Threader {
                 c.next = old.child;
                 old.child = c;
 
+            } else if (!insistOnRe && (c.threadable != null && !c.threadable.subjectIsReply() && // c has *no* Re, and
+            !old.threadable.subjectIsReply())) { // old does not, too.
+                // Make this message be a child of the other.
+                c.parent = old;
+                c.next = old.child;
+                old.child = c;
+
             } else {
                 // Make the old and new messages be children of a new dummy container.
                 // We do this by creating a new container object for old->msg and
@@ -537,11 +580,8 @@ public class Threader {
     private static final class ThreadContainer {
 
         Threadable threadable;
-
         ThreadContainer parent;
-
         ThreadContainer child;
-
         ThreadContainer next;
 
         /**
@@ -641,6 +681,18 @@ public class Threader {
                 }
             }
         }
+    }
+
+    private static boolean isEmpty(final String string) {
+        if (null == string) {
+            return true;
+        }
+        final int len = string.length();
+        boolean isWhitespace = true;
+        for (int i = 0; isWhitespace && i < len; i++) {
+            isWhitespace = Character.isWhitespace(string.charAt(i));
+        }
+        return isWhitespace;
     }
 
 }

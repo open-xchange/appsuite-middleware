@@ -93,7 +93,7 @@ public class OutlookCsvImportAction extends AbstractImportAction {
 
             final File dir = conf.getDirectory(dirName);
             if (dir == null || !dir.isDirectory()) {
-                LOG.error("Directory " + dirName + " supposedly containing import mappers information wasn't actually a directory, defaulting to deprecated mappers as fallback.");
+                LOG.error("Directory " + dir + " supposedly containing import mappers information wasn't actually a directory, defaulting to deprecated mappers as fallback.");
                 return outlook;
             }
             final File[] files = dir.listFiles();

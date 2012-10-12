@@ -61,7 +61,7 @@ import com.openexchange.mail.parser.MailMessageParser;
  */
 public abstract class PartModifier {
 
-    private static PartModifier instance;
+    private static volatile PartModifier instance;
 
     /**
      * Performs possible modifications on specified mail part

@@ -26,8 +26,15 @@ Import-Package: com.openexchange.config,
  org.apache.commons.logging,
  org.json,
  org.osgi.framework,
- org.osgi.util.tracker
+ org.osgi.util.tracker,
+ org.scribe.builder,
+ org.scribe.builder.api,
+ org.scribe.exceptions,
+ org.scribe.extractors,
+ org.scribe.model,
+ org.scribe.oauth,
+ org.scribe.services,
+ org.scribe.utils
 Bundle-Activator: com.openexchange.oauth.facebook.osgi.Activator
-Bundle-ClassPath: .,
- lib/scribe_head.jar
+Bundle-ClassPath: .
 Export-Package: com.openexchange.oauth.facebook

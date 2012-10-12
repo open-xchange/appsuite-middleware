@@ -52,7 +52,6 @@ package com.openexchange.groupware.attach.json.actions;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import com.openexchange.ajax.AJAXServlet;
-import com.openexchange.ajax.Attachment;
 import com.openexchange.ajax.container.ByteArrayFileHolder;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;

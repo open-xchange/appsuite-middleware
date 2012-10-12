@@ -124,6 +124,19 @@ public enum SessionExceptionCodes implements OXExceptionCode {
     private static final String PREFIX = "SES";
 
     /**
+     * Checks if specified {@code OXException}'s prefix is equal to this {@code OXExceptionCode} enumeration.
+     *
+     * @param e The {@code OXException} to check
+     * @return <code>true</code> if prefix is equal; otherwise <code>false</code>
+     */
+    public static boolean hasPrefix(final OXException e) {
+        if (null == e) {
+            return false;
+        }
+        return PREFIX.equals(e.getPrefix());
+    }
+
+    /**
      * Gets the error prefix for these error codes.
      *
      * @return The error prefix

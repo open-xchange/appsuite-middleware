@@ -112,15 +112,15 @@ public class MicroformatServlet extends OnlinePublicationServlet {
 
     private static Map<String, Map<String, Object>> additionalTemplateVariables = new HashMap<String, Map<String, Object>>();
 
-    private static UserService userService;
+    private static volatile UserService userService;
 
-    private static StringTranslator translator;
+    private static volatile StringTranslator translator;
 
-    private static ConfigurationService configService;
+    private static volatile ConfigurationService configService;
 
-    private static ContactService contacts;
+    private static volatile ContactService contacts;
 
-    private static HtmlService htmlService;
+    private static volatile HtmlService htmlService;
 
     private static final DateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd");
     static {

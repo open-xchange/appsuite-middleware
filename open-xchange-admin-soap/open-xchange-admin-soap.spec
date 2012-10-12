@@ -14,12 +14,15 @@ License:        GPL-2.0
 BuildRoot:      %{_tmppath}/%{name}-%{version}-build
 URL:            http://www.open-xchange.com/
 Source:         %{name}_%{version}.orig.tar.bz2
-Summary:        Open Xchange Admin SOAP API
+Summary:        The Open-Xchange administrative SOAP interface
 Requires:       open-xchange-soap-cxf >= @OXVERSION@
 Requires:	open-xchange-admin >= @OXVERSION@
 
 %description
-Open Xchange Admin SOAP API
+This package installs the OSGi bundles that provide a SOAP interface to administer the backend installation. This is an extension to the
+administrative RMI interfaces. RMI can only be used with Java while SOAP enables a lot of programming languages for administrative clients.
+This package contains the SOAP interfaces for registering, changing and deleting servers, databases and filestores. It also add the
+interfaces for creating, changing and deleting contexts, users, groups and resources.
 
 Authors:
 --------
@@ -46,6 +49,18 @@ ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} 
 /opt/open-xchange/osgi/bundle.d/*
 
 %changelog
+* Wed Oct 10 2012 Marcus Klein <marcus.klein@open-xchange.com>
+Fifth release candidate for 6.22.0
+* Tue Oct 09 2012 Marcus Klein <marcus.klein@open-xchange.com>
+Fourth release candidate for 6.22.0
+* Fri Oct 05 2012 Marcus Klein <marcus.klein@open-xchange.com>
+Third release candidate for 6.22.0
+* Thu Oct 04 2012 Marcus Klein <marcus.klein@open-xchange.com>
+Second release candidate for 6.22.0
+* Tue Sep 04 2012 Marcus Klein <marcus.klein@open-xchange.com>
+First release candidate for 6.23.0
+* Mon Sep 03 2012 Marcus Klein <marcus.klein@open-xchange.com>
+prepare for next EDP drop
 * Tue Aug 21 2012 Marcus Klein <marcus.klein@open-xchange.com>
 First release candidate for 6.22.0
 * Mon Aug 20 2012 Marcus Klein <marcus.klein@open-xchange.com>

@@ -107,7 +107,7 @@ public class InfostoreFileServlet extends OnlinePublicationServlet {
         infostorePublisher = service;
     }
 
-    private static InfostoreFacade infostore;
+    private static volatile InfostoreFacade infostore;
 
     public static void setInfostore(final InfostoreFacade service) {
         infostore = service;

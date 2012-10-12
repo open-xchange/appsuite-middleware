@@ -76,10 +76,6 @@ public class LostAndFoundInterfaceTests {
     	tests.addTestSuite(com.openexchange.ajax.appointment.recurrence.Bug12280Test.class);
     	tests.addTestSuite(com.openexchange.ajax.appointment.recurrence.Bug12495Test.class);
     	tests.addTestSuite(com.openexchange.ajax.appointment.recurrence.Bug12496Test.class);
-    	tests.addTestSuite(com.openexchange.ajax.chat.conversation.tests.ChatChunkTest.class);
-    	tests.addTestSuite(com.openexchange.ajax.chat.conversation.tests.ChatMessageTest.class);
-    	tests.addTestSuite(com.openexchange.ajax.chat.conversation.tests.ChatTest.class);
-    	tests.addTestSuite(com.openexchange.ajax.chat.roster.tests.AllTest.class);
     	tests.addTestSuite(com.openexchange.ajax.contact.Bug18862Test.class);
     	tests.addTestSuite(com.openexchange.ajax.contact.Bug19543Test_DeletingContactsInDistributionList.class);
     	tests.addTestSuite(com.openexchange.ajax.contact.Bug19984Test.class);

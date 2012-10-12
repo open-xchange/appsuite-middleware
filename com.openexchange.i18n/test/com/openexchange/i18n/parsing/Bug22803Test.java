@@ -63,7 +63,7 @@ import com.openexchange.exception.OXException;
 public class Bug22803Test {
 
     @SuppressWarnings("static-method")
-    @Test(timeout=100000)
+    @Test(timeout=200)
     public void testWithTab() throws UnsupportedEncodingException, OXException {
         Translations translations = new POParser().parse(new ByteArrayInputStream(PO_CONTENTS.getBytes("UTF-8")), "Bug22803Test");
         String actual = translations.translate("Date range in search must contain 2 and not %d values.");

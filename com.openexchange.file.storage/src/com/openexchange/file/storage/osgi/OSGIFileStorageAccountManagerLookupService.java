@@ -68,7 +68,6 @@ import com.openexchange.file.storage.FileStorageAccountManager;
 import com.openexchange.file.storage.FileStorageAccountManagerLookupService;
 import com.openexchange.file.storage.FileStorageAccountManagerProvider;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
-import com.openexchange.file.storage.FileStorageService;
 import com.openexchange.log.LogFactory;
 import com.openexchange.session.Session;
 
@@ -146,7 +145,7 @@ public class OSGIFileStorageAccountManagerLookupService implements FileStorageAc
     public FileStorageAccountManager getAccountManager(final String accountId, final Session session) throws OXException {
         initIfAbsent(null);
 
-        final String paramName = PARAM_DEFAULT_ACCOUNT + '@' + accountId;
+        final String paramName = new StringBuilder(PARAM_DEFAULT_ACCOUNT).append('@').append(accountId).toString();
         FileStorageAccountManager accountManager = (FileStorageAccountManager) session.getParameter(paramName);
         if (null == accountManager) {
             FileStorageAccountManagerProvider candidate = null;
@@ -168,33 +167,34 @@ public class OSGIFileStorageAccountManagerLookupService implements FileStorageAc
     }
 
     @Override
-    public FileStorageAccountManager getAccountManagerFor(final FileStorageService service) throws OXException {
-        initIfAbsent(service.getId());
+    public FileStorageAccountManager getAccountManagerFor(final String serviceId) throws OXException {
+        initIfAbsent(serviceId);
 
         FileStorageAccountManagerProvider candidate = null;
         for (final FileStorageAccountManagerProvider provider : providers.keySet()) {
-            if (provider.supports(service) && ((null == candidate) || (provider.getRanking() > candidate.getRanking()))) {
+            if (provider.supports(serviceId) && ((null == candidate) || (provider.getRanking() > candidate.getRanking()))) {
                 candidate = provider;
             }
         }
         if (null == candidate) {
-            throw FileStorageExceptionCodes.NO_ACCOUNT_MANAGER_FOR_SERVICE.create(service.getId());
+            throw FileStorageExceptionCodes.NO_ACCOUNT_MANAGER_FOR_SERVICE.create(serviceId);
         }
-        return candidate.getAccountManagerFor(service);
+        return candidate.getAccountManagerFor(serviceId);
     }
 
     private void initIfAbsent(final String serviceId) throws OXException {
         Future<Void> future = serializer.get();
         if (null == future) {
+            if (null == serviceId) {
+                final String msg = "serviceId is null";
+                throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(new NullPointerException(msg), msg);
+            }
             final BundleContext bundleContext = this.bundleContext;
             final FutureTask<Void> ft = new FutureTask<Void>(new Callable<Void>() {
 
                 @Override
                 public Void call() throws OXException {
                     if (null == bundleContext) {
-                        if (null == serviceId) {
-                            throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create("Missing bundle context.");
-                        }
                         throw FileStorageExceptionCodes.NO_ACCOUNT_MANAGER_FOR_SERVICE.create(serviceId);
                     }
                     try {
@@ -204,9 +204,6 @@ public class OSGIFileStorageAccountManagerLookupService implements FileStorageAc
                             providers.putIfAbsent(addMe, PRESENT);
                         }
                     } catch (final InvalidSyntaxException e) {
-                        if (null == serviceId) {
-                            throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
-                        }
                         throw FileStorageExceptionCodes.NO_ACCOUNT_MANAGER_FOR_SERVICE.create(e, serviceId);
                     } catch (final RuntimeException e) {
                         throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
@@ -226,6 +223,7 @@ public class OSGIFileStorageAccountManagerLookupService implements FileStorageAc
         } catch (final InterruptedException e) {
             // Keep interrupted flag
             Thread.currentThread().interrupt();
+            throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         } catch (final ExecutionException e) {
             final Throwable cause = e.getCause();
             if (cause instanceof OXException) {

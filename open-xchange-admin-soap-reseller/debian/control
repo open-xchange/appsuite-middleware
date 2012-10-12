@@ -11,7 +11,10 @@ Architecture: all
 Depends: ${misc:Depends}, open-xchange-admin-reseller (>= @OXVERSION@), open-xchange-soap-cxf (>= @OXVERSION@)
 Replaces: open-xchange-admin-plugin-reseller-soap (<< 6.21.0-0)
 Conflicts: open-xchange-admin-plugin-reseller-soap (<< 6.21.0-0)
-Description: Open Xchange Admin Reseller Plugin SOAP server
+Description: SOAP interfaces for the reseller administration level
+ This package installs the SOAP interfaces for the reseller level administration RMI interfaces. See the open-xchange-admin-reseller package
+ for a description of the reseller administration level. The SOAP interfaces allow any programming languages for the reseller
+ administration clients while RMI only allows Java clients.
 
 ###### http://wiki.debian.org/Renaming_a_Package #####
 Package: open-xchange-admin-plugin-reseller-soap

@@ -116,9 +116,9 @@ public class SessionControl {
     }
 
     /**
-     * Gets the creation-time timestamp
+     * Gets the creation-time time stamp
      *
-     * @return The creation-time timestamp
+     * @return The creation-time time stamp
      */
     public long getCreationTime() {
         return creationTime;

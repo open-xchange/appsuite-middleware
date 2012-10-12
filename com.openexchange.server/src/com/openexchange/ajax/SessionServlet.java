@@ -142,7 +142,7 @@ public abstract class SessionServlet extends AJAXServlet {
 
     private static final Lock RANGE_LOCK = new ReentrantLock();
 
-    private static SubnetMask allowedSubnet;
+    private static volatile SubnetMask allowedSubnet;
 
     protected SessionServlet() {
         super();

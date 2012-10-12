@@ -69,7 +69,7 @@ public final class CacheAvailabilityRegistry {
 
 	private static final AtomicBoolean INITIALIZED = new AtomicBoolean();
 
-	private static CacheAvailabilityRegistry instance;
+	private static volatile CacheAvailabilityRegistry instance;
 
 	/**
 	 * Initializes the singleton instance of {@link CacheAvailabilityRegistry}

@@ -59,6 +59,8 @@ import com.openexchange.file.storage.FileStorageAccountManagerProvider;
 import com.openexchange.file.storage.config.ConfigFileStorageAuthenticator;
 import com.openexchange.file.storage.config.internal.ConfigFileStorageAccountManagerProvider;
 import com.openexchange.file.storage.config.internal.ConfigFileStorageAccountParser;
+import com.openexchange.file.storage.config.internal.Services;
+import com.openexchange.file.storage.registry.FileStorageServiceRegistry;
 import com.openexchange.osgi.HousekeepingActivator;
 
 /**
@@ -78,7 +80,7 @@ public final class ConfigFileStorageActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ConfigurationService.class };
+        return new Class<?>[] { ConfigurationService.class, FileStorageServiceRegistry.class };
     }
 
     @Override
@@ -110,6 +112,7 @@ public final class ConfigFileStorageActivator extends HousekeepingActivator {
             if (log.isInfoEnabled()) {
                 log.info("starting bundle: com.openexchange.file.storage.config");
             }
+            Services.setServices(this);
             /*
              * Parse file storage configuration
              */
@@ -166,6 +169,7 @@ public final class ConfigFileStorageActivator extends HousekeepingActivator {
             if (log.isInfoEnabled()) {
                 log.info("stopping bundle: com.openexchange.file.storage.config");
             }
+            Services.setServices(null);
             cleanUp();
             dropFileStorageProperties();
         } catch (final Exception e) {

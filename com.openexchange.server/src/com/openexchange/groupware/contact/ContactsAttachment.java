@@ -50,67 +50,207 @@
 package com.openexchange.groupware.contact;
 
 import static com.openexchange.java.Autoboxing.I;
-import java.util.Date;
+import com.openexchange.contact.ContactService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.attach.AttachmentAuthorization;
 import com.openexchange.groupware.attach.AttachmentEvent;
 import com.openexchange.groupware.attach.AttachmentListener;
+import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
+import com.openexchange.server.impl.EffectivePermission;
+import com.openexchange.server.services.ServerServiceRegistry;
+import com.openexchange.session.Session;
+import com.openexchange.tools.oxfolder.OXFolderAccess;
 
 /**
- * Contacts
- * @author <a href="mailto:ben.pahne@open-xchange.com">Benjamin Frederic Pahne</a>
+ * {@link ContactsAttachment}
+ * 
+ * Attachment listener and -authorizer for the contacts module.
+ * 
+ * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 public class ContactsAttachment implements AttachmentListener, AttachmentAuthorization {
 
+    /**
+     * Initializes a new {@link ContactsAttachment}.
+     */
     public ContactsAttachment () {
         super();
     }
 
     @Override
-    public long attached(final AttachmentEvent e) throws OXException {
-        final int userId = e.getUser().getId();
-        final int[] groups = e.getUser().getGroups();
-        final Contact co = Contacts.getContactById(e.getAttachedId(), userId, groups, e.getContext(), e.getUserConfig(), e.getWriteConnection());
-        co.setNumberOfAttachments(co.getNumberOfAttachments() + 1);
-        Contacts.performContactStorageUpdate(co, co.getParentFolderID(), co.getLastModified(), userId, groups, e.getContext(), e.getUserConfig());
-        return co.getLastModified().getTime();
+    public long attached(AttachmentEvent event) throws OXException {
+        return modifyAttachmentCount(event.getSession(), String.valueOf(event.getFolderId()), String.valueOf(event.getAttachedId()), 1); 
     }
 
     @Override
-    public long detached(final AttachmentEvent event) throws OXException {
-        final Contact co = Contacts.getContactById(event.getAttachedId(),event.getUser().getId(),event.getUser().getGroups(),event.getContext(),event.getUserConfig(),event.getWriteConnection());
-        if (co.getNumberOfAttachments() < 1) {
+    public long detached(AttachmentEvent event) throws OXException {
+        return modifyAttachmentCount(event.getSession(), String.valueOf(event.getFolderId()), String.valueOf(event.getAttachedId()), 
+            -1 * event.getDetached().length);
+    }
+
+    @Override
+    public void checkMayAttach(int folderId, int objectId, User user, UserConfiguration userConfig, Context ctx) throws OXException {
+        checkPermissions(folderId, objectId, user, userConfig, ctx, true, true);
+    }
+
+    @Override
+    public void checkMayDetach(int folderId, int objectId, User user, UserConfiguration userConfig, Context ctx) throws OXException {
+        checkMayAttach(folderId, objectId, user, userConfig, ctx);
+    }
+
+    @Override
+    public void checkMayReadAttachments(int folderId, int objectId, User user, UserConfiguration userConfig, Context ctx) 
+        throws OXException {
+        checkPermissions(folderId, objectId, user, userConfig, ctx, true, false);
+    }
+
+    /**
+     * Checks a user's object permissions for a specific contact, throwing appropriate exceptions in case of the requested permissions 
+     * are not met.
+     * 
+     * @param folderID The parent folder ID of the contact
+     * @param objectID the object ID of the contact
+     * @param user The user to check the permissions for
+     * @param userConfig The user configuration
+     * @param context The context
+     * @param needsReadAccess <code>true</code> whether read access is requested, <code>false</code>, otherwise
+     * @param needsWriteAccess <code>true</code> whether write access is requested, <code>false</code>, otherwise
+     * @throws OXException
+     */
+    private static void checkPermissions(int folderID, int objectID, final User user, UserConfiguration userConfig, final Context context, 
+        boolean needsReadAccess, boolean needsWriteAccess) throws OXException {
+        if (needsReadAccess || needsWriteAccess) {
+            OXFolderAccess folderAccess = new OXFolderAccess(context);
+            EffectivePermission permission = folderAccess.getFolderPermission(folderID, user.getId(), userConfig);
+            if (needsReadAccess && false == permission.canReadOwnObjects()) {
+                throw ContactExceptionCodes.NO_ACCESS_PERMISSION.create(I(folderID), I(context.getContextId()), I(user.getId()));
+            }
+            if (needsWriteAccess && false == permission.canWriteOwnObjects()) {
+                throw ContactExceptionCodes.NO_CHANGE_PERMISSION.create(I(objectID), I(context.getContextId()));
+            }
+            ContactService contactService = ServerServiceRegistry.getInstance().getService(ContactService.class);
+            //TODO: this Session may not be sufficient for all storages
+            Session session = new Session() {
+                @Override
+                public int getContextId() {
+                    return context.getContextId();
+                }
+                @Override
+                public String getLocalIp() {
+                    throw new UnsupportedOperationException();
+                }
+                @Override
+                public void setLocalIp(String ip) {
+                    throw new UnsupportedOperationException();
+                }
+                @Override
+                public String getLoginName() {
+                    throw new UnsupportedOperationException();
+                }
+                @Override
+                public boolean containsParameter(String name) {
+                    return false;
+                }
+                @Override
+                public Object getParameter(String name) {
+                    return null;
+                }
+                @Override
+                public String getPassword() {
+                    throw new UnsupportedOperationException();
+                }
+                @Override
+                public String getRandomToken() {
+                    throw new UnsupportedOperationException();
+                }
+                @Override
+                public String getSecret() {
+                    throw new UnsupportedOperationException();
+                }
+                @Override
+                public String getSessionID() {
+                    throw new UnsupportedOperationException();
+                }
+                @Override
+                public int getUserId() {
+                    return user.getId();
+                }
+                @Override
+                public String getUserlogin() {
+                    return user.getLoginInfo();
+                }
+                @Override
+                public String getLogin() {
+                    throw new UnsupportedOperationException();
+                }
+                @Override
+                public void setParameter(String name, Object value) {
+                    throw new UnsupportedOperationException();
+                }
+                @Override
+                public void removeRandomToken() {
+                    throw new UnsupportedOperationException();
+                }
+                @Override
+                public String getAuthId() {
+                    throw new UnsupportedOperationException();
+                }
+                @Override
+                public String getHash() {
+                    throw new UnsupportedOperationException();
+                }
+                @Override
+                public void setHash(String hash) {
+                    throw new UnsupportedOperationException();
+                }
+                @Override
+                public String getClient() {
+                    throw new UnsupportedOperationException();
+                }
+                @Override
+                public void setClient(String client) {
+                    throw new UnsupportedOperationException();
+                }
+            };
+            Contact contact = contactService.getContact(session, Integer.toString(folderID), Integer.toString(objectID), 
+                new ContactField[] { ContactField.CREATED_BY, ContactField.PRIVATE_FLAG });
+            if (contact.getCreatedBy() != session.getUserId()) {
+                if (contact.getPrivateFlag() || needsReadAccess && false == permission.canReadAllObjects()) {
+                    throw ContactExceptionCodes.NO_ACCESS_PERMISSION.create(I(folderID), I(context.getContextId()), I(user.getId()));
+                }
+                if (needsWriteAccess && false == permission.canWriteAllObjects()) {
+                    throw ContactExceptionCodes.NO_CHANGE_PERMISSION.create(I(objectID), I(context.getContextId()));
+                }
+            }
+        }        
+    }
+    
+    /**
+     * Increases or decreases the attachment count for a contact.
+     * 
+     * @param session The session
+     * @param folderID The parent folder ID
+     * @param objectID the object ID
+     * @param delta The delta to increase/decrease the number of attachments property
+     * @return The updated last modified timestamp
+     * @throws OXException
+     */
+    private static long modifyAttachmentCount(Session session, String folderID, String objectID, int delta) throws OXException {
+        ContactService contactService = ServerServiceRegistry.getInstance().getService(ContactService.class);
+        Contact contact = contactService.getContact(session, folderID, objectID, 
+            new ContactField[] { ContactField.NUMBER_OF_ATTACHMENTS, ContactField.LAST_MODIFIED });
+        if (0 > contact.getNumberOfAttachments() + delta) {
             throw ContactExceptionCodes.TOO_FEW_ATTACHMENTS.create();
         }
-        final int[] xx = event.getDetached();
-        co.setNumberOfAttachments(co.getNumberOfAttachments()-xx.length);
-        final Date d = new Date(System.currentTimeMillis());
-        Contacts.performContactStorageUpdate(co,co.getParentFolderID(),d,event.getUser().getId(),event.getUser().getGroups(),event.getContext(),event.getUserConfig());
-        return co.getLastModified().getTime();
-    }
-
-    @Override
-    public void checkMayAttach(final int folderId, final int objectId, final User user, final UserConfiguration userConfig, final Context ctx) throws OXException {
-        final boolean back = Contacts.performContactWriteCheckByID(folderId, objectId,user.getId(),ctx,userConfig);
-        if (!back) {
-            throw ContactExceptionCodes.NO_CHANGE_PERMISSION.create(I(objectId), I(ctx.getContextId()));
+        if (0 != delta) {
+            contact.setNumberOfAttachments(contact.getNumberOfAttachments() + delta);
+            contactService.updateContact(session, folderID, objectID, contact, contact.getLastModified());
         }
+        return contact.getLastModified().getTime();
     }
-
-    @Override
-    public void checkMayDetach(final int folderId, final int objectId, final User user, final UserConfiguration userConfig, final Context ctx) throws OXException {
-        checkMayAttach(folderId, objectId,user,userConfig,ctx);
-    }
-
-    @Override
-    public void checkMayReadAttachments(final int folderId, final int objectId, final User user, final UserConfiguration userConfig, final Context ctx) throws OXException {
-        final boolean back = Contacts.performContactReadCheckByID(folderId, objectId,user.getId(),ctx,userConfig);
-        if (!back) {
-            throw ContactExceptionCodes.NO_ACCESS_PERMISSION.create(I(folderId), I(ctx.getContextId()), I(user.getId()));
-        }
-    }
+    
 }

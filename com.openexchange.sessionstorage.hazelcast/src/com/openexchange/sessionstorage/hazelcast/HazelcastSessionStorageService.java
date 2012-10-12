@@ -86,7 +86,7 @@ public class HazelcastSessionStorageService implements SessionStorageService {
 
     private final ScheduledTimerTask cleanupTask;
 
-    private static HazelcastSessionStorageService instance;
+    private static volatile HazelcastSessionStorageService instance;
 
     private static Log LOG = LogFactory.getLog(HazelcastSessionStorageService.class);
 

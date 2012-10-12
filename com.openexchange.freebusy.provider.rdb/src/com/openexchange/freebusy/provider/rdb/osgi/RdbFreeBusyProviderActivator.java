@@ -54,6 +54,7 @@ import com.openexchange.context.ContextService;
 import com.openexchange.freebusy.provider.FreeBusyProvider;
 import com.openexchange.freebusy.provider.rdb.RdbFreeBusyProvider;
 import com.openexchange.freebusy.provider.rdb.RdbFreeBusyProviderLookup;
+import com.openexchange.group.GroupService;
 import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
 import com.openexchange.log.LogFactory;
 import com.openexchange.osgi.HousekeepingActivator;
@@ -78,7 +79,8 @@ public class RdbFreeBusyProviderActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { UserService.class, ResourceService.class, AppointmentSqlFactoryService.class, ContextService.class };
+        return new Class<?>[] { UserService.class, ResourceService.class, AppointmentSqlFactoryService.class, ContextService.class, 
+            GroupService.class };
     }
 
     @Override

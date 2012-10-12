@@ -53,13 +53,11 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
-import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.CompositeFileStorageAccountManagerProvider;
-import com.openexchange.file.storage.FileStorageAccountManagerLookupService;
 import com.openexchange.file.storage.FileStorageAccountManagerProvider;
 import com.openexchange.file.storage.FileStorageService;
+import com.openexchange.file.storage.webdav.WebDAVConstants;
 import com.openexchange.file.storage.webdav.WebDAVFileStorageService;
-import com.openexchange.file.storage.webdav.WebDAVServices;
 
 /**
  * {@link WebDAVServiceRegisterer}
@@ -68,15 +66,10 @@ import com.openexchange.file.storage.webdav.WebDAVServices;
  */
 public final class WebDAVServiceRegisterer implements ServiceTrackerCustomizer<FileStorageAccountManagerProvider, FileStorageAccountManagerProvider> {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(WebDAVServiceRegisterer.class));
-
     private final BundleContext context;
-
     private volatile FileStorageAccountManagerProvider provider;
     private volatile WebDAVFileStorageService service;
     private volatile ServiceRegistration<FileStorageService> registration;
-    private volatile ServiceReference<FileStorageAccountManagerProvider> reference;
-    private volatile int ranking;
 
     /**
      * Initializes a new {@link WebDAVServiceRegisterer}.
@@ -89,27 +82,20 @@ public final class WebDAVServiceRegisterer implements ServiceTrackerCustomizer<F
     @Override
     public FileStorageAccountManagerProvider addingService(final ServiceReference<FileStorageAccountManagerProvider> reference) {
         final FileStorageAccountManagerProvider provider = context.getService(reference);
-        final int ranking = provider.getRanking();
+        if (!provider.supports(WebDAVConstants.ID)) {
+            context.ungetService(reference);
+            return null;
+        }
         synchronized (this) {
             WebDAVFileStorageService service = this.service;
             if (null == service) {
                 /*
                  * Try to create CIFS service
                  */
-                try {
-                    service = WebDAVFileStorageService.newInstance();
-                    if (!provider.supports(service)) {
-                        context.ungetService(reference);
-                        return null;
-                    }
-                    this.registration = context.registerService(FileStorageService.class, service, null);
-                    this.reference = reference;
-                    this.ranking = ranking;
-                    this.service = service;
-                    this.provider = provider;
-                } catch (final OXException e) {
-                    LOG.warn("Registration of \"" + WebDAVFileStorageService.class.getName() + "\" failed.", e);
-                }
+                service = WebDAVFileStorageService.newInstance();
+                this.registration = context.registerService(FileStorageService.class, service, null);
+                this.service = service;
+                this.provider = provider;
             } else {
                 /*
                  * Already created before, but new provider
@@ -121,8 +107,6 @@ public final class WebDAVServiceRegisterer implements ServiceTrackerCustomizer<F
                     unregisterService(reference);
                     service = WebDAVFileStorageService.newInstance(compositeProvider);
                     this.registration = context.registerService(FileStorageService.class, service, null);
-                    this.reference = reference;
-                    this.ranking = ranking;
                     this.service = service;
                     this.provider = compositeProvider;
                 }
@@ -133,14 +117,24 @@ public final class WebDAVServiceRegisterer implements ServiceTrackerCustomizer<F
     }
 
     @Override
-    public void modifiedService(final ServiceReference<FileStorageAccountManagerProvider> reference, final FileStorageAccountManagerProvider service) {
+    public void modifiedService(final ServiceReference<FileStorageAccountManagerProvider> reference, final FileStorageAccountManagerProvider provider) {
         // Ignore
     }
 
     @Override
-    public void removedService(final ServiceReference<FileStorageAccountManagerProvider> reference, final FileStorageAccountManagerProvider service) {
-        if (null != service) {
-            unregisterService(reference);
+    public void removedService(final ServiceReference<FileStorageAccountManagerProvider> reference, final FileStorageAccountManagerProvider provider) {
+        if (null != provider) {
+            synchronized (this) {
+                final CompositeFileStorageAccountManagerProvider compositeProvider = this.service.getCompositeAccountManager();
+                if (null == compositeProvider) {
+                    unregisterService(reference);
+                } else {
+                    compositeProvider.removeProvider(provider);
+                    if (!compositeProvider.hasAnyProvider()) {
+                        unregisterService(reference);
+                    }
+                }
+            }
         }
     }
 
@@ -150,13 +144,11 @@ public final class WebDAVServiceRegisterer implements ServiceTrackerCustomizer<F
             registration.unregister();
             this.registration = null;
         }
-        final ServiceReference<FileStorageAccountManagerProvider> reference = null == ref ? this.reference : ref;
+        final ServiceReference<FileStorageAccountManagerProvider> reference = ref;
         if (null != reference) {
             context.ungetService(reference);
         }
-        this.reference = null;
         this.service = null;
-        this.ranking = 0;
     }
 
 }

@@ -283,11 +283,6 @@ public final class ElementAttributesImpl implements ElementAttributes, Cloneable
     }
 
     @Override
-    public long getVersion() {
-        return version;
-    }
-
-    @Override
     public void setIdleTime(final long idle) {
         maxIdleTimeSeconds = idle;
     }
@@ -326,11 +321,6 @@ public final class ElementAttributesImpl implements ElementAttributes, Cloneable
     @Override
     public void setSize(final int size) {
         this.size = size;
-    }
-
-    @Override
-    public void setVersion(final long version) {
-        this.version = version;
     }
 
 }

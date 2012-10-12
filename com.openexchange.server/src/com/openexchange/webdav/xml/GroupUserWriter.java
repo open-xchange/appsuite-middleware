@@ -53,14 +53,10 @@ import java.io.OutputStream;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
-
 import javax.mail.internet.InternetAddress;
-
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import org.jdom2.Element;
 import org.jdom2.output.XMLOutputter;
-
 import com.openexchange.contact.ContactFieldOperand;
 import com.openexchange.contact.ContactService;
 import com.openexchange.contact.SortOptions;
@@ -71,6 +67,7 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.search.Order;
+import com.openexchange.log.LogFactory;
 import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.search.CompositeSearchTerm;
 import com.openexchange.search.CompositeSearchTerm.CompositeOperation;
@@ -81,7 +78,6 @@ import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.tools.StringCollection;
 import com.openexchange.tools.iterator.SearchIterator;
-import com.openexchange.webdav.xml.fields.ContactFields;
 import com.openexchange.webdav.xml.fields.DataFields;
 import com.openexchange.webdav.xml.fields.FolderChildFields;
 
@@ -211,10 +207,10 @@ public class GroupUserWriter extends ContactWriter {
         try {
         	final ContactService contactService = ServerServiceRegistry.getInstance().getService(ContactService.class);
         	final String preparedPattern = StringCollection.prepareForSearch(searchpattern, false);
-			final ContactField[] searchFields = { ContactField.DISPLAY_NAME, ContactField.GIVEN_NAME, ContactField.SUR_NAME, 
+			final ContactField[] searchFields = { ContactField.DISPLAY_NAME, ContactField.GIVEN_NAME, ContactField.SUR_NAME,
 					ContactField.EMAIL1, ContactField.EMAIL2, ContactField.EMAIL3, ContactField.CATEGORIES };
 			final CompositeSearchTerm orTerm = new CompositeSearchTerm(CompositeOperation.OR);
-        	for (final ContactField field : searchFields) {        		
+        	for (final ContactField field : searchFields) {
         		final SingleSearchTerm term = new SingleSearchTerm(SingleOperation.EQUALS);
         		term.addOperand(new ContactFieldOperand(field));
         		term.addOperand(new ConstantOperand<String>(preparedPattern));
@@ -226,8 +222,8 @@ public class GroupUserWriter extends ContactWriter {
 			final CompositeSearchTerm andTerm = new CompositeSearchTerm(CompositeOperation.AND);
 			andTerm.addSearchTerm(folderTerm);
 			andTerm.addSearchTerm(orTerm);
-        	
-            it = contactService.searchContacts(sessionObj, andTerm, changeFields, 
+
+            it = contactService.searchContacts(sessionObj, andTerm, changeFields,
             		new SortOptions(ContactField.DISPLAY_NAME, Order.ASCENDING));
             writeIterator(it, false, xo, os);
         } finally {
@@ -311,9 +307,9 @@ public class GroupUserWriter extends ContactWriter {
     public void addElementMemberInGroups(final Element eProp, final User u) {
         final Element eMemberInGroups = new Element("memberingroups", XmlServlet.NS);
         final int groupId[] = u.getGroups();
-        for (int a = 0; a < groupId.length; a++) {
+        for (final int element : groupId) {
             final Element eMember = new Element("member", XmlServlet.NS);
-            eMember.addContent(Integer.toString(groupId[a]));
+            eMember.addContent(Integer.toString(element));
             eMemberInGroups.addContent(eMember);
         }
 

@@ -59,6 +59,7 @@ import com.openexchange.admin.rmi.exceptions.DatabaseUpdateException;
 import com.openexchange.admin.rmi.exceptions.InvalidCredentialsException;
 import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 import com.openexchange.admin.rmi.exceptions.NoSuchContextException;
+import com.openexchange.admin.rmi.exceptions.NoSuchObjectException;
 import com.openexchange.admin.rmi.exceptions.NoSuchUserException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.rmi.exceptions.UserExistsException;
@@ -105,7 +106,11 @@ public class OXUserCopy extends OXCommonImpl implements OXUserCopyInterface {
             checkContextAndSchema(src);
             checkContextAndSchema(dest);
 
-            setIdOrGetIDFromNameAndIdObject(src, user);
+            try {
+                setIdOrGetIDFromNameAndIdObject(src, user);
+            } catch (NoSuchObjectException e) {
+                throw new NoSuchUserException(e);
+            }
             user.testMandatoryCreateFieldsNull();
             final Integer userid = user.getId();
 

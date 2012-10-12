@@ -71,11 +71,11 @@ public class TemplateExceptionMessage implements LocalizableStrings {
 
     public final static String UnderlyingException_HELP = "Please correct the template";
 
-    public final static String UnderlyingException_MSG = "The underlying templating system threw an exception: %s";
+    public final static String UnderlyingException_MSG = "The underlying templating system threw an exception: %1$s";
 
     public final static String TemplateNotFound_HELP = "Please use an existing template";
 
-    public final static String TemplateNotFound_MSG = "The template %2 does not exist.";
+    public final static String TemplateNotFound_MSG = "The template %1$s does not exist.";
 
     public final static String SQLException_HELP = "An underlying system threw an SQL exception";
 

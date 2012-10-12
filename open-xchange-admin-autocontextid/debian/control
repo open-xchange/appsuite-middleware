@@ -11,4 +11,6 @@ Architecture: all
 Depends: ${misc:Depends}, open-xchange-admin (>= @OXVERSION@)
 Replaces: open-xchange-admin-plugin-autocontextid, open-xchange-admin-plugin-autocontextid-client
 Conflicts: open-xchange-admin-plugin-autocontextid, open-xchange-admin-plugin-autocontextid-client
-Description: Open Xchange Admin AutocontextId Plugin
+Description: Administrative extension to automatically create context identifiers
+ This package adds the administrative OSGi bundle that creates for every newly created context a straight rising context identifier. Without
+ this extension an identifier must be given when creating a context.

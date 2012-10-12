@@ -316,15 +316,14 @@ public class OXReseller extends OXCommonImpl implements OXResellerInterface {
         }
     }
 
-    /*
-     * (non-Javadoc)
-     * @see
-     * com.openexchange.admin.reseller.rmi.OXResellerInterface#getAvailableRestrictions(com.openexchange.admin.rmi.dataobjects.Credentials)
-     */
     @Override
-    public Restriction[] getAvailableRestrictions(final Credentials creds) throws RemoteException, InvalidCredentialsException, StorageException, OXResellerException {
+    public Restriction[] getAvailableRestrictions(final Credentials creds) throws InvalidCredentialsException, StorageException, OXResellerException {
+        if (null == creds) {
+            throw new InvalidCredentialsException("Credentials are missing.");
+        }
+
         try {
-            if( ClientAdminThread.cache.getMasterCredentials().getLogin().equals(creds.getLogin()) ) {
+            if (ClientAdminThread.cache.getMasterCredentials().getLogin().equals(creds.getLogin())) {
                 basicauth.doAuthentication(creds);
             } else {
                 resellerauth.doAuthentication(creds);

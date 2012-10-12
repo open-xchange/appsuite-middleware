@@ -49,11 +49,17 @@
 
 package com.openexchange.contacts.json.actions;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.contact.ContactService;
 import com.openexchange.contacts.json.ContactRequest;
 import com.openexchange.documentation.RequestMethod;
 import com.openexchange.documentation.annotations.Action;
@@ -118,29 +124,51 @@ public class DeleteAction extends ContactAction {
     }
     
     @Override
-    protected AJAXRequestResult perform2(final ContactRequest req) throws OXException {
-        final ServerSession session = req.getSession();
-        final long timestamp = req.getTimestamp();
-        final Date date = new Date(timestamp);
-        
-        if (req.getData() instanceof JSONObject) {
-            final int[] deleteRequestData = req.getDeleteRequestData();
-            getContactService().deleteContact(session, Integer.toString(deleteRequestData[1]), Integer.toString(deleteRequestData[0]), date);
+    protected AJAXRequestResult perform2(ContactRequest request) throws OXException {
+        ServerSession session = request.getSession();
+        Date lastRead = new Date(request.getTimestamp());
+        if (request.getData() instanceof JSONObject) {
+            int[] deleteRequestData = request.getDeleteRequestData();
+            getContactService().deleteContact(session, Integer.toString(deleteRequestData[1]), Integer.toString(deleteRequestData[0]), lastRead);
         } else {
-            JSONArray jsonArray = (JSONArray) req.getData();
-            for (int i = 0; i < jsonArray.length(); i++) {
-                try {
-                    JSONObject json = jsonArray.getJSONObject(i);
-                    final int id = json.getInt("id");
-                    final int folder = json.getInt("folder");
-                    getContactService().deleteContact(session, String.valueOf(folder), String.valueOf(id), date);
-                } catch (JSONException e) {
-                    throw AjaxExceptionCodes.JSON_ERROR.create(e);
+            Map<String, List<String>> objectIDsPerFolder = null;
+            try {
+                objectIDsPerFolder = getObjectIDsPerFolder((JSONArray)request.getData());
+            } catch (JSONException e) {
+                throw AjaxExceptionCodes.JSON_ERROR.create(e);
+            }
+            if (null != objectIDsPerFolder && 0 < objectIDsPerFolder.size()) {
+                ContactService contactService = getContactService();
+                for (Entry<String, List<String>> entry : objectIDsPerFolder.entrySet()) {
+                    String[] objectIDs = entry.getValue().toArray(new String[entry.getValue().size()]);
+                    contactService.deleteContacts(session, entry.getKey(), objectIDs, lastRead);
                 }
             }
         }
-        final JSONObject response = new JSONObject();
-        return new AJAXRequestResult(response, date, "json");
+        return new AJAXRequestResult(new JSONObject(), lastRead, "json");
+    }
+    
+    /**
+     * Gets a map containing object IDs for a folder from the supplied {@link JSONArray} that is expected in the format
+     * <code>[{"folder":55,"id":"456"}, {"folder":32,"id":"77"}, {"folder":55,"id":"18"}, ...]</code>
+     * 
+     * @param jsonArray The JSON array to get the data for
+     * @return The object IDs per folder
+     * @throws JSONException
+     */
+    private static Map<String, List<String>> getObjectIDsPerFolder(JSONArray jsonArray) throws JSONException {
+        Map<String, List<String>> objectIDsPerFolder = new HashMap<String, List<String>>();
+        for (int i = 0; i < jsonArray.length(); i++) {
+            JSONObject objectAndFolderID = jsonArray.getJSONObject(i);
+            String folderID = objectAndFolderID.getString("folder");
+            List<String> objectIDs = objectIDsPerFolder.get(folderID);
+            if (null == objectIDs) {
+                objectIDs = new ArrayList<String>();
+                objectIDsPerFolder.put(folderID, objectIDs);
+            }
+            objectIDs.add(objectAndFolderID.getString("id"));            
+        }
+        return objectIDsPerFolder;
     }
 
 }

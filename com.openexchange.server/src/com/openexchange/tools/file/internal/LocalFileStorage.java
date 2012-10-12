@@ -68,8 +68,8 @@ import java.util.concurrent.locks.ReentrantLock;
 import javax.activation.MimetypesFileTypeMap;
 import org.apache.commons.logging.Log;
 import com.openexchange.java.Streams;
-import com.openexchange.log.LogFactory;
 import com.openexchange.exception.OXException;
+import com.openexchange.log.LogFactory;
 import com.openexchange.tools.file.external.FileStorage;
 import com.openexchange.tools.file.external.FileStorageCodes;
 
@@ -159,9 +159,7 @@ public class LocalFileStorage implements FileStorage {
     public LocalFileStorage(final URI uri) throws OXException {
         super();
         storage = new File(uri);
-
        	alreadyInitialized = storage.exists();
-
     }
 
     /**

@@ -35,7 +35,7 @@ public class AtmosphereRTActivator extends HousekeepingActivator {
 	protected void startBundle() throws Exception {
 		
 	    //Set the ServiceLookup reference directly as class variable
-	    OXRTConversionHandler.services = this;
+	    OXRTConversionHandler.SERVICES_REFERENCE.set(this);
 	    
 		final HandlerLibrary handlerLibrary = new HandlerLibrary();
 		
@@ -63,12 +63,12 @@ public class AtmosphereRTActivator extends HousekeepingActivator {
 		
 		registerService(Channel.class, new RTAtmosphereChannel(handler, handlerLibrary));
 	}
-	
-	@Override
-	public void stop(BundleContext context) throws Exception {
-		getService(AtmosphereService.class).unregister("rt");
-		super.stop(context);
-	}
 
+	@Override
+    protected void stopBundle() throws Exception {
+	    OXRTConversionHandler.SERVICES_REFERENCE.set(null);
+	    getService(AtmosphereService.class).unregister("rt");
+	    super.stopBundle();
+	}
 	
 }

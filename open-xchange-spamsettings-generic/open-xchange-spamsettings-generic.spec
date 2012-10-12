@@ -68,8 +68,21 @@ ant -lib build/lib -Dbasedir=build -Dhtdoc=%{docroot} -DdestDir=%{buildroot} -Dp
 %defattr(-,root,root)
 %dir %{docroot}/ox6/plugins/com.openexchange.spamsettings.generic
 %{docroot}/ox6/plugins/com.openexchange.spamsettings.generic/*
+%doc com.openexchange.spamsettings.generic/ChangeLog
 
 %changelog
+* Wed Oct 10 2012 Carsten Hoeger <choeger@open-xchange.com>
+Fifth release candidate for 6.22.0
+* Tue Oct 09 2012 Carsten Hoeger <choeger@open-xchange.com>
+Fourth release candidate for 6.22.0
+* Fri Oct 05 2012 Carsten Hoeger <choeger@open-xchange.com>
+Third release candidate for 6.22.0
+* Thu Oct 04 2012 Carsten Hoeger <choeger@open-xchange.com>
+Second release candidate for 6.22.0
+* Tue Sep 04 2012 Carsten Hoeger <choeger@open-xchange.com>
+First release candidate for 6.23.0
+* Mon Sep 03 2012 Carsten Hoeger <choeger@open-xchange.com>
+prepare for next EDP drop
 * Tue Aug 21 2012 Carsten Hoeger <choeger@open-xchange.com>
 First release candidate for 6.22.0
 * Mon Aug 20 2012 Carsten Hoeger <choeger@open-xchange.com>

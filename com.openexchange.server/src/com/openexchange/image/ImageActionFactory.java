@@ -92,18 +92,20 @@ public class ImageActionFactory implements AJAXActionServiceFactory {
     /**
      * Gets the registration name for given URL.
      * 
-     * @param url The url
+     * @param url The URL
      * @return The associated registration name or <code>null</code>
      */
     public static String getRegistrationNameFor(final String url) {
         if (null == url) {
             return null;
         }
-        final String ALIAS = DefaultDispatcherPrefixService.getInstance().getPrefix() + ALIAS_APPENDIX;
         String s = url;
-        final int pos = s.indexOf(ALIAS);
-        if (pos >= 0) {
-            s = s.substring(pos + ALIAS.length());
+        {
+            final String path = DefaultDispatcherPrefixService.getInstance().getPrefix() + ALIAS_APPENDIX;
+            final int pos = s.indexOf(path);
+            if (pos >= 0) {
+                s = s.substring(pos + path.length());
+            }
         }
         for (final Entry<String, String> entry : alias2regName.entrySet()) {
             final String alias = entry.getKey();

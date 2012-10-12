@@ -205,7 +205,7 @@ public class CalendarMySQL implements CalendarSqlImp {
                 SQLException;
     }
 
-    private static AppointmentSqlFactoryService factory;
+    private static volatile AppointmentSqlFactoryService factory;
     
     public static void setApppointmentSqlFactory(final AppointmentSqlFactoryService factory) {
         CalendarMySQL.factory = factory;

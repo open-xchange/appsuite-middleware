@@ -27,8 +27,6 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.documentation"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.documentation.json"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.file.storage"/>
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.file.storage.cifs"/>
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.file.storage.cmis"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.file.storage.composition"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.file.storage.config"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.file.storage.generic"/>
@@ -102,6 +100,7 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.user.json"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.xml"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,org.apache.tika"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,org.ho.jyaml"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,org.jboss.netty"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,org.xmlpull"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,oxscripts"/>

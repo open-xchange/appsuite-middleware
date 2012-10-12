@@ -14,12 +14,14 @@ License:       GPL-2.0
 BuildRoot:     %{_tmppath}/%{name}-%{version}-build
 URL:           http://www.open-xchange.com/
 Source:        %{name}_%{version}.orig.tar.bz2
-Summary:       Default Open-Xchange Authorization implementation
+Summary:       Module implementing the default authorization
 Provides:      open-xchange-authorization
 Requires:      open-xchange-core >= @OXVERSION@
 
 %description
-Default Open-Xchange Authorization implementation.
+This package installs the OSGi bundle publishing the OSGi AuthorizationService. This bundle implements the default authorization method
+for the backend. When a user got authenticated a second step is to verify that he is authorized to use Open-Xchange currently. The default
+implementation checks wether the context of the user is enabled.
 
 Authors:
 --------
@@ -45,6 +47,18 @@ ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} 
 /opt/open-xchange/osgi/bundle.d/*
 
 %changelog
+* Wed Oct 10 2012 Marcus Klein <marcus.klein@open-xchange.com>
+Fifth release candidate for 6.22.0
+* Tue Oct 09 2012 Marcus Klein <marcus.klein@open-xchange.com>
+Fourth release candidate for 6.22.0
+* Fri Oct 05 2012 Marcus Klein <marcus.klein@open-xchange.com>
+Third release candidate for 6.22.0
+* Thu Oct 04 2012 Marcus Klein <marcus.klein@open-xchange.com>
+Second release candidate for 6.22.0
+* Tue Sep 04 2012 Marcus Klein <marcus.klein@open-xchange.com>
+First release candidate for 6.23.0
+* Mon Sep 03 2012 Marcus Klein <marcus.klein@open-xchange.com>
+prepare for next EDP drop
 * Tue Aug 21 2012 Marcus Klein <marcus.klein@open-xchange.com>
 First release candidate for 6.22.0
 * Mon Aug 20 2012 Marcus Klein <marcus.klein@open-xchange.com>

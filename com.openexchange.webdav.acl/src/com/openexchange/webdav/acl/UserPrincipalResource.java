@@ -53,8 +53,9 @@ import java.io.InputStream;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
-
 import com.openexchange.groupware.ldap.User;
+import com.openexchange.webdav.acl.mixins.AddressbookHomeSet;
+import com.openexchange.webdav.acl.mixins.CalendarHomeSet;
 import com.openexchange.webdav.acl.mixins.CurrentUserPrincipal;
 import com.openexchange.webdav.acl.mixins.PrincipalURL;
 import com.openexchange.webdav.protocol.Protocol.Property;
@@ -82,6 +83,7 @@ public class UserPrincipalResource extends AbstractResource {
         this.user = u;
         this.url = url;
         includeProperties(new PrincipalURL(factory.getSessionHolder()), new CurrentUserPrincipal(factory.getSessionHolder()));
+        includeProperties(new AddressbookHomeSet(), new CalendarHomeSet());
     }
 
     @Override

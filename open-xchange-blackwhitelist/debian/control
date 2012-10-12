@@ -10,4 +10,6 @@ Package: open-xchange-blackwhitelist
 Architecture: all
 Pre-Depends: open-xchange-core (>= @OXVERSION@)
 Depends: ${misc:Depends}
-Description: Blackwhitelist
+Description: JSON interface for some black/white list implementation
+ This package installs an OSGi bundle that adds the JSON interface for some black/white list implementation. The concrete implementation
+ needs to be installed additionally and is not required by this package.

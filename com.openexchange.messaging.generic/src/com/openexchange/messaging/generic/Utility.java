@@ -291,7 +291,7 @@ public final class Utility {
         if (htmlContent == null || htmlContent.length() == 0) {
             return "";
         }
-        return HtmlProcessing.html2text(getConformHTML(htmlContent, "UTF-8"), true);
+        return HtmlProcessing.html2text(htmlContent, true);
     }
 
     /**

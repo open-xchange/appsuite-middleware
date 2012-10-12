@@ -64,7 +64,7 @@ public abstract class UserConfigurationStorage {
     private static final org.apache.commons.logging.Log LOG = com.openexchange.log.LogFactory
             .getLog(UserConfigurationStorage.class);
 
-    private static UserConfigurationStorage singleton;
+    private static volatile UserConfigurationStorage singleton;
 
     private boolean started;
 
@@ -83,7 +83,7 @@ public abstract class UserConfigurationStorage {
      */
     static void setInstance(final UserConfigurationStorage singleton) throws OXException {
         UserConfigurationStorage.singleton = singleton;
-        UserConfigurationStorage.singleton.start();
+        singleton.start();
     }
 
     /**
@@ -92,8 +92,8 @@ public abstract class UserConfigurationStorage {
      * @throws OXException If singleton cannot be configured
      */
     static void releaseInstance() throws OXException {
-        UserConfigurationStorage.singleton.stop();
-        UserConfigurationStorage.singleton = null;
+        singleton.stop();
+        singleton = null;
     }
 
     /**

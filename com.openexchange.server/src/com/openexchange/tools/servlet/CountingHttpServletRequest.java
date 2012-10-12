@@ -63,6 +63,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import com.openexchange.config.ConfigTools;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.dispatcher.Parameterizable;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.stream.CountingInputStream;
 
@@ -72,12 +73,11 @@ import com.openexchange.tools.stream.CountingInputStream;
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class CountingHttpServletRequest implements HttpServletRequest {
+public final class CountingHttpServletRequest implements HttpServletRequest, Parameterizable {
 
     private final HttpServletRequest servletRequest;
-
     private final long max;
-
+    private final Parameterizable parameterizable;
     private volatile ServletInputStream servletInputStream;
 
     /**
@@ -94,6 +94,14 @@ public final class CountingHttpServletRequest implements HttpServletRequest {
         super();
         this.max = max;
         this.servletRequest = servletRequest;
+        parameterizable = servletRequest instanceof Parameterizable ? (Parameterizable) servletRequest : null;
+    }
+
+    @Override
+    public void putParameter(String name, String value) {
+        if (null != parameterizable) {
+            parameterizable.putParameter(name, value);
+        }
     }
 
     @Override

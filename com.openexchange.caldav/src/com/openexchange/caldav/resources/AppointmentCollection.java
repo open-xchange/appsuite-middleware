@@ -59,6 +59,8 @@ import java.util.Map;
 import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.caldav.GroupwareCaldavFactory;
 import com.openexchange.caldav.Patches;
+import com.openexchange.caldav.mixins.DefaultAlarmVeventDate;
+import com.openexchange.caldav.mixins.DefaultAlarmVeventDatetime;
 import com.openexchange.caldav.mixins.SupportedCalendarComponentSet;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.UserizedFolder;
@@ -93,7 +95,8 @@ public class AppointmentCollection extends CalDAVFolderCollection<Appointment> {
     public AppointmentCollection(GroupwareCaldavFactory factory, WebdavPath url, UserizedFolder folder, int order) throws OXException {
         super(factory, url, folder, order);
         this.factory = factory;
-        includeProperties(new SupportedCalendarComponentSet(SupportedCalendarComponentSet.VEVENT));
+        includeProperties(new SupportedCalendarComponentSet(SupportedCalendarComponentSet.VEVENT),
+            new DefaultAlarmVeventDate(), new DefaultAlarmVeventDatetime());
     }
     
     private AppointmentSQLInterface getAppointmentInterface() {

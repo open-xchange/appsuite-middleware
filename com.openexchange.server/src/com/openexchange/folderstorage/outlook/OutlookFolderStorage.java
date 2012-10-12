@@ -417,12 +417,20 @@ public final class OutlookFolderStorage implements FolderStorage {
                 if (started) {
                     folderStorage.rollback(storageParameters);
                 }
-                LOG.warn("Checking consistency failed for tree " + treeId, e);
-            } catch (final Exception e) {
+                if (LOG.isDebugEnabled()) {
+                    LOG.warn("Checking consistency failed for folder " + folderId + " in tree " + treeId, e);
+                } else {
+                    LOG.warn("Checking consistency failed for folder " + folderId + " in tree " + treeId + ": " + e.getMessage());
+                }
+            } catch (final RuntimeException e) {
                 if (started) {
                     folderStorage.rollback(storageParameters);
                 }
-                LOG.warn("Checking consistency failed for tree " + treeId, e);
+                if (LOG.isDebugEnabled()) {
+                    LOG.warn("Checking consistency failed for folder " + folderId + " in tree " + treeId, e);
+                } else {
+                    LOG.warn("Checking consistency failed for folder " + folderId + " in tree " + treeId + ": " + e.getMessage());
+                }
             }
         }
     }
@@ -2318,7 +2326,16 @@ public final class OutlookFolderStorage implements FolderStorage {
                         }
                     }
                 } catch (final OXException e) {
-                    if (MailExceptionCode.ACCOUNT_DOES_NOT_EXIST.equals(e)) {
+                    if (MailExceptionCode.UNKNOWN_PROTOCOL.equals(e)) {
+                        if (LOG.isDebugEnabled()) {
+                            LOG.debug(e.getMessage(), e);
+                        }
+                        parameters.addWarning(e);
+                        /*
+                         * Return empty map
+                         */
+                        return new TreeMap<String, List<String>>(comparator);
+                    } else if (MailExceptionCode.ACCOUNT_DOES_NOT_EXIST.equals(e)) {
                         if (LOG.isDebugEnabled()) {
                             LOG.debug(e.getMessage(), e);
                         }

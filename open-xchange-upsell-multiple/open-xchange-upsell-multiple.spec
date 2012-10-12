@@ -48,8 +48,21 @@ ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} 
 %dir /opt/open-xchange/etc/settings
 %config(noreplace) /opt/open-xchange/etc/*
 %config(noreplace) /opt/open-xchange/etc/settings/*
+%doc com.openexchange.upsell.multiple/ChangeLog
 
 %changelog
+* Wed Oct 10 2012 Carsten Hoeger <choeger@open-xchange.com>
+Fifth release candidate for 6.22.0
+* Tue Oct 09 2012 Carsten Hoeger <choeger@open-xchange.com>
+Fourth release candidate for 6.22.0
+* Fri Oct 05 2012 Carsten Hoeger <choeger@open-xchange.com>
+Third release candidate for 6.22.0
+* Thu Oct 04 2012 Carsten Hoeger <choeger@open-xchange.com>
+Second release candidate for 6.22.0
+* Tue Sep 04 2012 Carsten Hoeger <choeger@open-xchange.com>
+First release candidate for 6.23.0
+* Mon Sep 03 2012 Carsten Hoeger <choeger@open-xchange.com>
+prepare for next EDP drop
 * Tue Aug 21 2012 Carsten Hoeger <choeger@open-xchange.com>
 First release candidate for 6.22.0
 * Mon Aug 20 2012 Carsten Hoeger <choeger@open-xchange.com>
