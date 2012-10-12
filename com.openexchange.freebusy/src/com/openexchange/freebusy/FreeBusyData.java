@@ -231,8 +231,13 @@ public class FreeBusyData {
     }
     
     /**
-    * Normalizes the contained free/busy intervals. 
-    */
+     * Normalizes the contained free/busy intervals. This means<ul>
+     * <li>the intervals are sorted chronologically, i.e. the earliest interval is first</li>
+     * <li>all intervals beyond or above the 'from' and 'until' range are removed, intervals overlapping the boundaries are shortened to 
+     * fit</li>
+     * <li>overlapping intervals are merged so that only the most conflicting ones of overlapping time ranges are used</li>
+     * </ul>  
+     */
     public void normalize() {
         /*
          * normalize to interval boundaries

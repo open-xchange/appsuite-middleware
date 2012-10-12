@@ -47,25 +47,84 @@
  *
  */
 
-package com.openexchange.ews;
+package com.openexchange.ews.internal;
 
+import java.net.URL;
+import javax.xml.namespace.QName;
+import javax.xml.ws.BindingProvider;
+import com.microsoft.schemas.exchange.services._2006.messages.ExchangeService;
 import com.microsoft.schemas.exchange.services._2006.messages.ExchangeServicePortType;
+import com.openexchange.ews.Availability;
+import com.openexchange.ews.Config;
+import com.openexchange.ews.ExchangeWebService;
+import com.openexchange.ews.Folders;
+import com.openexchange.ews.Items;
 
 /**
- * {@link ExchangeWebService}
+ * {@link ExchangeWebServiceImpl}
  * 
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public interface ExchangeWebService {
+public class ExchangeWebServiceImpl implements ExchangeWebService {
     
-    ExchangeServicePortType getServicePort();
+    private final ExchangeServicePortType port;
+    private final ConfigImpl config;
+    private final FoldersImpl folders;
+    private final ItemsImpl items;
+    private final AvailabilityImpl availibility;
 
-    Config getConfig();
-    
-    Folders getFolders();
-    
-    Items getItems();
+    /**
+     * Initializes a new {@link ExchangeWebServiceImpl}.
+     * 
+     * @param url The URL to the service (usually [SERVER]/EWS/Exchange.asmx)
+     * @param userName The exchange username 
+     * @param password The password
+     */
+    public ExchangeWebServiceImpl(String url, String userName, String password) {
+        super();
+        this.port = createService();
+        this.config = new ConfigImpl((BindingProvider)port);
+        config.setEndpointAddress(url);
+        config.setUserName(userName);
+        config.setPassword(password);
+        this.folders = new FoldersImpl(this, port);
+        this.items = new ItemsImpl(this, port); 
+        this.availibility = new AvailabilityImpl(this, port);
+    }    
 
-    Availability getAvailability();
+    @Override
+    public ExchangeServicePortType getServicePort() {
+        return port;
+    }
+
+    @Override
+    public Config getConfig() {
+        return config;
+    }
+
+    @Override
+    public Folders getFolders() {
+        return folders;
+    }
+
+    @Override
+    public Items getItems() {
+        return items;
+    }
+    
+    @Override
+    public Availability getAvailability() {
+        return availibility;
+    }
+    
+    private static ExchangeServicePortType createService() {
+        ExchangeService service = new ExchangeService(getWsdlLocation(), 
+                new QName("http://schemas.microsoft.com/exchange/services/2006/messages", "ExchangeService"));
+        return service.getExchangeServicePort();
+    }
+    
+    private static URL getWsdlLocation() {
+        return ExchangeWebService.class.getResource("/META-INF/Services.wsdl");
+    }
 
 }

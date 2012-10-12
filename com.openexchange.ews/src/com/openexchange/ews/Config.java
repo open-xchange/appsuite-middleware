@@ -49,23 +49,32 @@
 
 package com.openexchange.ews;
 
-import com.microsoft.schemas.exchange.services._2006.messages.ExchangeServicePortType;
+import com.microsoft.schemas.exchange.services._2006.types.ExchangeVersionType;
 
-/**
- * {@link ExchangeWebService}
- * 
- * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
- */
-public interface ExchangeWebService {
-    
-    ExchangeServicePortType getServicePort();
+public interface Config {
 
-    Config getConfig();
-    
-    Folders getFolders();
-    
-    Items getItems();
+    void setEndpointAddress(String endpoint);
 
-    Availability getAvailability();
+    String getEndpointAddress();
+
+    void setUserName(String userName);
+
+    String getUserName();
+
+    void setPassword(String password);
+
+    String getPassword();
+
+    void setTrustAllCerts(boolean trustAllCerts);
+
+    boolean isTrustAllCerts();
+
+    void setIgnoreHostnameValidation(boolean ignoreHostnameValidation);
+
+    boolean isIgnoreHostnameValidation();
+
+    ExchangeVersionType getExchangeVersion();
+
+    void setExchangeVersion(ExchangeVersionType version);
 
 }

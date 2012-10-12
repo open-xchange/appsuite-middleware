@@ -49,23 +49,47 @@
 
 package com.openexchange.ews;
 
-import com.microsoft.schemas.exchange.services._2006.messages.ExchangeServicePortType;
+import java.util.List;
+import com.microsoft.schemas.exchange.services._2006.types.BaseFolderIdType;
+import com.microsoft.schemas.exchange.services._2006.types.BaseFolderType;
+import com.microsoft.schemas.exchange.services._2006.types.DefaultShapeNamesType;
+import com.microsoft.schemas.exchange.services._2006.types.FolderQueryTraversalType;
+import com.microsoft.schemas.exchange.services._2006.types.RestrictionType;
 
 /**
- * {@link ExchangeWebService}
+ * {@link Folders}
+ * 
+ * Simplifies access to folders using EWS.
  * 
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public interface ExchangeWebService {
+public interface Folders {
+    /**
+     * Gets a folder with all properties.
+     * 
+     * @param folderID The folder ID
+     * @return The folder
+     */
+    BaseFolderType getFolder(BaseFolderIdType folderID);
     
-    ExchangeServicePortType getServicePort();
-
-    Config getConfig();
+    /**
+     * Gets a folder.
+     * 
+     * @param folderID The folder ID
+     * @param shape The folder shape
+     * @return The folder
+     */
+    BaseFolderType getFolder(BaseFolderIdType folderID, DefaultShapeNamesType shape);
     
-    Folders getFolders();
-    
-    Items getItems();
-
-    Availability getAvailability();
+    /**
+     * Searches for a folder based on a restriction.
+     * 
+     * @param parentFolderID
+     * @param restriction
+     * @param traversal
+     * @param shape
+     * @return
+     */
+    List<BaseFolderType> findFolders(BaseFolderIdType parentFolderID, RestrictionType restriction, FolderQueryTraversalType traversal, DefaultShapeNamesType shape);
 
 }

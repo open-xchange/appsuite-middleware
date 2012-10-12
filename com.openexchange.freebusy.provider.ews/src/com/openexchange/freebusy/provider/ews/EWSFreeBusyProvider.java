@@ -58,13 +58,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import javax.mail.internet.AddressException;
-import javax.xml.ws.Holder;
 import org.apache.commons.logging.Log;
 import com.microsoft.schemas.exchange.services._2006.messages.FreeBusyResponseType;
-import com.microsoft.schemas.exchange.services._2006.messages.GetUserAvailabilityRequestType;
-import com.microsoft.schemas.exchange.services._2006.messages.GetUserAvailabilityResponseType;
 import com.microsoft.schemas.exchange.services._2006.types.ExchangeVersionType;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.ews.EWSFactoryService;
 import com.openexchange.ews.ExchangeWebService;
 import com.openexchange.exception.OXException;
 import com.openexchange.freebusy.FreeBusyData;
@@ -129,10 +127,8 @@ public class EWSFreeBusyProvider implements FreeBusyProvider {
             for (Date currentFrom = from; currentFrom.before(until); currentFrom = addDays(currentFrom, MAX_DAYS)) {
                 Date maxUntil = addDays(currentFrom, MAX_DAYS);
                 Date currentUntil = until.before(maxUntil) ? until : maxUntil;
-                List<FreeBusyResponseType> freeBusyResponses = null;
-                
-                freeBusyResponses = getFreeBusyResponses(filteredParticipants, currentFrom, currentUntil);
-                
+                List<FreeBusyResponseType> freeBusyResponses = null;                
+                freeBusyResponses = getFreeBusyResponses(filteredParticipants, currentFrom, currentUntil);                
                 if (null == freeBusyResponses) {
                     LOG.warn("Got no free/busy response from EWS");
                     continue;
@@ -180,18 +176,7 @@ public class EWSFreeBusyProvider implements FreeBusyProvider {
     }
         
     private List<FreeBusyResponseType> getFreeBusyResponses(List<String> emailAddresses, Date from, Date until) {
-        GetUserAvailabilityResponseType userAvailibility = getUserAvailibility(emailAddresses, from, until);
-        if (null == userAvailibility || null == userAvailibility.getFreeBusyResponseArray()) { 
-            return null;
-        }
-        return userAvailibility.getFreeBusyResponseArray().getFreeBusyResponse();
-    }
-    
-    private GetUserAvailabilityResponseType getUserAvailibility(List<String> emailAddresses, Date from, Date until) {
-        Holder<GetUserAvailabilityResponseType> responseHolder = new Holder<GetUserAvailabilityResponseType>();
-        GetUserAvailabilityRequestType request = Tools.createAvailabilityRequest(emailAddresses, from, until, isDetailedData());
-        this.ews.getServicePort().getUserAvailability(request, ews.getRequestVersion(), responseHolder, ews.getVersionHolder());
-        return responseHolder.value;
+        return ews.getAvailability().getFreeBusy(emailAddresses, from, until, isDetailedData());
     }
     
     private boolean hasAllowedEmailSuffix(String participant) {
@@ -262,7 +247,7 @@ public class EWSFreeBusyProvider implements FreeBusyProvider {
 
     private static ExchangeWebService createWebService() throws OXException {
         ConfigurationService configService = EWSFreeBusyProviderLookup.getService(ConfigurationService.class);
-        ExchangeWebService ews = new ExchangeWebService(
+        ExchangeWebService ews = EWSFreeBusyProviderLookup.getService(EWSFactoryService.class).create(
             configService.getProperty("com.openexchange.freebusy.provider.ews.url"), 
             configService.getProperty("com.openexchange.freebusy.provider.ews.userName"), 
             configService.getProperty("com.openexchange.freebusy.provider.ews.password"));

@@ -49,23 +49,17 @@
 
 package com.openexchange.ews;
 
-import com.microsoft.schemas.exchange.services._2006.messages.ExchangeServicePortType;
+import java.util.Date;
+import java.util.List;
+import com.microsoft.schemas.exchange.services._2006.messages.FreeBusyResponseType;
 
 /**
- * {@link ExchangeWebService}
+ * {@link Availability}
  * 
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public interface ExchangeWebService {
+public interface Availability {
     
-    ExchangeServicePortType getServicePort();
-
-    Config getConfig();
+    List<FreeBusyResponseType> getFreeBusy(List<String> emailAddresses, Date from, Date until, boolean detailed);
     
-    Folders getFolders();
-    
-    Items getItems();
-
-    Availability getAvailability();
-
 }

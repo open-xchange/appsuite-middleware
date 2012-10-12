@@ -71,6 +71,7 @@ public enum FreeBusyExceptionCodes implements OXExceptionCode {
     COMMUNICATION_FAILURE(FreeBusyExceptionMessages.COMMUNICATION_FAILURE_MSG, CATEGORY_SERVICE_DOWN, 6),
     EXTERNAL_ERROR(FreeBusyExceptionMessages.EXTERNAL_ERROR_MSG, CATEGORY_ERROR, 7),
     INTERNAL_ERROR(FreeBusyExceptionMessages.INTERNAL_ERROR_MSG, CATEGORY_ERROR, 8),
+    CONFIGURATION_ERROR(FreeBusyExceptionMessages.CONFIGURATION_ERROR_MSG, CATEGORY_CONFIGURATION, 9),
     ;
 
     private static final String PREFIX = "FRB";
