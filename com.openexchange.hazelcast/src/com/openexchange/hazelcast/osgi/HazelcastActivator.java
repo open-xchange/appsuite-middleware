@@ -316,7 +316,7 @@ public class HazelcastActivator extends HousekeepingActivator {
                 tcpIpConfig.setMembers(members);
                 // Set interfaces, too
                 final Interfaces interfaces = config.getNetworkConfig().getInterfaces();
-                interfaces.setEnabled(true);
+                // interfaces.setEnabled(true);
                 interfaces.setInterfaces(members);
             } else {
                 if (logger.isInfoEnabled()) {
