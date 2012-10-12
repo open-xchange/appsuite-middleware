@@ -5,8 +5,9 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.LinkedList;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.regex.Pattern;
 import org.apache.commons.logging.Log;
@@ -265,26 +266,22 @@ public class HazelcastActivator extends HousekeepingActivator {
             /*
              * Append to existing network configuration
              */
-            final List<String> members = resolve2Members(nodes);
+            final Set<String> members = resolve2Members(nodes);
             if (!members.isEmpty()) {
                 final TcpIpConfig tcpIpConfig = join.getTcpIpConfig();
-                List<String> cur = new ArrayList<String>(tcpIpConfig.getMembers());
+                Set<String> cur = new LinkedHashSet<String>(tcpIpConfig.getMembers());
                 if (logger.isInfoEnabled()) {
                     logger.info("\nHazelcast:\n\tRe-Starting Hazelcast instance:\n\tExisting members: " + cur + "\n\tNew members: " + members + "\n");
                 }
                 for (final String candidate : members) {
-                    if (!cur.contains(candidate)) {
-                        cur.add(candidate);
-                    }
+                    cur.add(candidate);
                 }
-                tcpIpConfig.setMembers(cur);
+                tcpIpConfig.setMembers(new ArrayList<String>(cur));
                 // Set interfaces, too
                 final Interfaces interfaces = config.getNetworkConfig().getInterfaces();
-                cur = new ArrayList<String>(interfaces.getInterfaces());
+                cur = new LinkedHashSet<String>(interfaces.getInterfaces());
                 for (final String candidate : members) {
-                    if (!cur.contains(candidate)) {
-                        cur.add(candidate);
-                    }
+                    cur.add(candidate);
                 }
                 interfaces.setInterfaces(cur);
             } else {
@@ -308,12 +305,12 @@ public class HazelcastActivator extends HousekeepingActivator {
             final TcpIpConfig tcpIpConfig = join.getTcpIpConfig();
             tcpIpConfig.setEnabled(true).setConnectionTimeoutSeconds(10);
             tcpIpConfig.clear();
-            final List<String> members = resolve2Members(nodes);
+            final Set<String> members = resolve2Members(nodes);
             if (!members.isEmpty()) {
                 if (logger.isInfoEnabled()) {
                     logger.info("\nHazelcast:\n\tStarting Hazelcast instance:\n\tInitial members: " + members + "\n");
                 }
-                tcpIpConfig.setMembers(members);
+                tcpIpConfig.setMembers(new ArrayList<String>(members));
                 // Set interfaces, too
                 final Interfaces interfaces = config.getNetworkConfig().getInterfaces();
                 // interfaces.setEnabled(true);
@@ -327,8 +324,8 @@ public class HazelcastActivator extends HousekeepingActivator {
     }
 
     private static final Pattern SPLIT = Pattern.compile("\\%");
-    private static List<String> resolve2Members(final List<InetAddress> nodes) {
-        final List<String> members = new LinkedList<String>();
+    private static Set<String> resolve2Members(final List<InetAddress> nodes) {
+        final Set<String> members = new LinkedHashSet<String>(nodes.size());
         for (final InetAddress inetAddress : nodes) {
             final String[] addressArgs = SPLIT.split(inetAddress.getHostAddress(), 0);
             for (final String address : addressArgs) {
