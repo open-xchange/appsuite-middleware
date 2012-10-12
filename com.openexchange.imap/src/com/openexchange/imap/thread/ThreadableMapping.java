@@ -1,0 +1,127 @@
+/*
+ *
+ *    OPEN-XCHANGE legal information
+ *
+ *    All intellectual property rights in the Software are protected by
+ *    international copyright laws.
+ *
+ *
+ *    In some countries OX, OX Open-Xchange, open xchange and OXtender
+ *    as well as the corresponding Logos OX Open-Xchange and OX are registered
+ *    trademarks of the Open-Xchange, Inc. group of companies.
+ *    The use of the Logos is not covered by the GNU General Public License.
+ *    Instead, you are allowed to use these Logos according to the terms and
+ *    conditions of the Creative Commons License, Version 2.5, Attribution,
+ *    Non-commercial, ShareAlike, and the interpretation of the term
+ *    Non-commercial applicable to the aforementioned license is published
+ *    on the web site http://www.open-xchange.com/EN/legal/index.html.
+ *
+ *    Please make sure that third-party modules and libraries are used
+ *    according to their respective licenses.
+ *
+ *    Any modifications to this package must retain all copyright notices
+ *    of the original copyright holder(s) for the original code used.
+ *
+ *    After any such modifications, the original and derivative code shall remain
+ *    under the copyright of the copyright holder(s) and/or original author(s)per
+ *    the Attribution and Assignment Agreement that can be located at
+ *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
+ *    given Attribution for the derivative code and a license granting use.
+ *
+ *     Copyright (C) 2004-2020 Open-Xchange, Inc.
+ *     Mail: info@open-xchange.com
+ *
+ *
+ *     This program is free software; you can redistribute it and/or modify it
+ *     under the terms of the GNU General Public License, Version 2 as published
+ *     by the Free Software Foundation.
+ *
+ *     This program is distributed in the hope that it will be useful, but
+ *     WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+ *     or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License
+ *     for more details.
+ *
+ *     You should have received a copy of the GNU General Public License along
+ *     with this program; if not, write to the Free Software Foundation, Inc., 59
+ *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
+ *
+ */
+
+package com.openexchange.imap.thread;
+
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+
+/**
+ * {@link ThreadableMapping} - A <code>Message-Id</code> and <code>References</code> mapping from specified {@code Threadable} instance.
+ * 
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ */
+public final class ThreadableMapping {
+
+    private final Map<String, List<Threadable>> refsMap;
+    private final Map<String, Threadable> messageIdMap;
+
+    /**
+     * Initializes a new {@link ThreadableMapping}.
+     */
+    public ThreadableMapping(final int capacity) {
+        super();
+        refsMap = new HashMap<String, List<Threadable>>(capacity << 1, 0.9f);
+        messageIdMap = new HashMap<String, Threadable>(capacity, 0.9f);
+    }
+
+    /**
+     * Fills this mapping with specified {@code Threadable} instance.
+     * 
+     * @param t The {@code Threadable} instance
+     * @return This mapping
+     */
+    public ThreadableMapping initWith(final Threadable t) {
+        fill(t, messageIdMap, refsMap);
+        return this;
+    }
+
+    private static void fill(final Threadable t, final Map<String, Threadable> messageIdMap, final Map<String, List<Threadable>> refsMap) {
+        Threadable current = t;
+        while (null != current) {
+            final String[] refs = t.refs;
+            if (null != refs) {
+                for (final String reference : refs) {
+                    if (!isEmpty(reference)) {
+                        List<Threadable> list = refsMap.get(reference);
+                        if (null == list) {
+                            list = new LinkedList<Threadable>();
+                            refsMap.put(reference, list);
+                        }
+                        list.add(current);
+                    }
+                }
+            }
+            final String messageId = t.messageId;
+            if (!isEmpty(messageId)) {
+                messageIdMap.put(messageId, current);
+            }
+            final Threadable kid = current.kid;
+            if (null != kid) {
+                fill(kid, messageIdMap, refsMap);
+            }
+            current = current.next;
+        }
+    }
+
+    private static boolean isEmpty(final String string) {
+        if (null == string) {
+            return true;
+        }
+        final int len = string.length();
+        boolean isWhitespace = true;
+        for (int i = 0; isWhitespace && i < len; i++) {
+            isWhitespace = Character.isWhitespace(string.charAt(i));
+        }
+        return isWhitespace;
+    }
+
+}
