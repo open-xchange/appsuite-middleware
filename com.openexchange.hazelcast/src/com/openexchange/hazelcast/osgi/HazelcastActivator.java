@@ -25,6 +25,7 @@ import com.hazelcast.config.NetworkConfig;
 import com.hazelcast.config.TcpIpConfig;
 import com.hazelcast.core.Hazelcast;
 import com.hazelcast.core.HazelcastInstance;
+import com.hazelcast.impl.GroupProperties;
 import com.hazelcast.nio.Address;
 import com.openexchange.cluster.discovery.ClusterDiscoveryService;
 import com.openexchange.cluster.discovery.ClusterListener;
@@ -220,6 +221,7 @@ public class HazelcastActivator extends HousekeepingActivator {
              */
             final String xml = getService(ConfigurationService.class).getText("hazelcast.xml");
             final Config config = new InMemoryXmlConfig(xml);
+            config.setProperty(GroupProperties.PROP_REDO_GIVE_UP_THRESHOLD, "10");
             configureNetworkJoin(nodes, false, config, logger);
             // for (final InetAddress address : nodes) {
             // tcpIpConfig.addAddress(new Address(address, config.getNetworkConfig().getPort()));
