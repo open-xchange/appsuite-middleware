@@ -390,6 +390,62 @@ public class ContactServiceImpl extends DefaultContactService {
     }
 
     @Override
+    protected void doDeleteContacts(Session session, String folderID, String[] objectIDs, Date lastRead) throws OXException {
+        final int userID = session.getUserId();
+        final int contextID = session.getContextId();
+        final ContactStorage storage = Tools.getStorage(session, folderID);
+        /*
+         * check folder
+         */
+        FolderObject folder = Tools.getFolder(contextID, folderID);
+        Check.isContactFolder(folder, session);
+        /*
+         * check general permissions
+         */
+        EffectivePermission permission = Tools.getPermission(contextID, folderID, userID);
+        Check.canDeleteOwn(permission, session, folderID);
+        /*
+         * check currently stored contacts
+         */
+        SearchIterator<Contact> contacts = null;
+        List<Contact> storedContacts = new ArrayList<Contact>();
+        try {
+            contacts = storage.list(session, folderID, objectIDs, new ContactField[] { ContactField.CREATED_BY,
+                ContactField.LAST_MODIFIED, ContactField.OBJECT_ID });
+            while (contacts.hasNext()) {
+                Contact storedContact = contacts.next();
+                if (storedContact.getCreatedBy() != userID) {
+                    Check.canDeleteAll(permission, session, folderID);
+                }
+                Check.lastModifiedBefore(storedContact, lastRead);
+                storedContacts.add(storedContact);
+            }
+        } finally {
+            if (null != contacts) {
+                try {
+                    contacts.close();
+                } catch (OXException e) {
+                    LOG.warn("error closing iterator", e);
+                }
+            }            
+        }
+        /*
+         * delete contacts from storage
+         */
+        storage.delete(session, folderID, objectIDs, lastRead);
+        /*
+         * broadcast event
+         */
+        EventClient eventClient = new EventClient(session);
+        for (Contact storedContact : storedContacts) {
+            storedContact.setContextId(contextID);
+            storedContact.setParentFolderID(parse(folderID));
+            storedContact.setObjectID(storedContact.getObjectID());
+            eventClient.delete(storedContact, folder);
+        }
+    }
+
+    @Override
     protected void doDeleteContacts(final Session session, final String folderID) throws OXException {
         final int userID = session.getUserId();
         final int contextID = session.getContextId();
