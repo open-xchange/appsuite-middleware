@@ -124,6 +124,7 @@ import com.openexchange.imap.sort.IMAPSort;
 import com.openexchange.imap.thread.Threadable;
 import com.openexchange.imap.thread.ThreadableCache;
 import com.openexchange.imap.thread.ThreadableCache.ThreadableCacheEntry;
+import com.openexchange.imap.thread.Threadables;
 import com.openexchange.imap.thread.Threader;
 import com.openexchange.imap.thread.nntp.ThreadableImpl;
 import com.openexchange.imap.threadsort.MessageId;
@@ -1374,7 +1375,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
      */
     protected ThreadableResult getThreadableFor(final IMAPFolder f, final boolean sorted, final boolean cache, final int limit) throws MessagingException {
         if (!ThreadableCache.isThreadableCacheEnabled()) {
-            Threadable threadable = Threadable.getAllThreadablesFrom(f, limit);
+            Threadable threadable = Threadables.getAllThreadablesFrom(f, limit);
             if (sorted) {
                 if (useCommonsNetThreader()) {
                     threadable = ((ThreadableImpl) new org.apache.commons.net.nntp.Threader().thread(new ThreadableImpl(threadable))).getDelegatee();
@@ -1393,7 +1394,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
             final long st = logIt ? System.currentTimeMillis() : 0L;
             TLongCollection uids = null;
             if (null == entry.getThreadable() || sorted != entry.isSorted()) {
-                Threadable threadable = Threadable.getAllThreadablesFrom(imapFolder, limit);
+                Threadable threadable = Threadables.getAllThreadablesFrom(imapFolder, limit);
                 if (sorted) {
                     if (useCommonsNetThreader()) {
                         threadable = ((ThreadableImpl) new org.apache.commons.net.nntp.Threader().thread(new ThreadableImpl(threadable))).getDelegatee();
@@ -1417,7 +1418,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                         @Override
                         public void run() {
                             try {
-                                Threadable threadable = Threadable.getAllThreadablesFrom(imapFolder, limit);
+                                Threadable threadable = Threadables.getAllThreadablesFrom(imapFolder, limit);
                                 if (sorted) {
                                     if (useCommonsNetThreader()) {
                                         threadable = ((ThreadableImpl) new org.apache.commons.net.nntp.Threader().thread(new ThreadableImpl(threadable))).getDelegatee();
@@ -1438,7 +1439,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                     }
                     return new ThreadableResult((Threadable) retval.clone(), true);
                 }
-                Threadable threadable = Threadable.getAllThreadablesFrom(imapFolder, limit);
+                Threadable threadable = Threadables.getAllThreadablesFrom(imapFolder, limit);
                 if (sorted) {
                     if (useCommonsNetThreader()) {
                         threadable = ((ThreadableImpl) new org.apache.commons.net.nntp.Threader().thread(new ThreadableImpl(threadable))).getDelegatee();
@@ -1527,15 +1528,15 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                     final ThreadableResult threadableResult = getThreadableFor(imapFolder, false, cache, limit);
                     final ThreadableResult sentThreadableResult = getFrom(future);
                     Threadable threadable = threadableResult.threadable;
-                    Threadable.append(threadable, sentThreadableResult.threadable);
+                    Threadables.append(threadable, sentThreadableResult.threadable);
                     // Sort them by thread reference
                     if (useCommonsNetThreader()) {
                         threadable = ((ThreadableImpl) new org.apache.commons.net.nntp.Threader().thread(new ThreadableImpl(threadable))).getDelegatee();
                     } else {
                         threadable = new Threader().thread(threadable);
                     }
-                    threadable = Threadable.filterFullName(sentFullName, threadable);
-                    threadList = Threadable.toNodeList(threadable);
+                    threadable = Threadables.filterFullName(sentFullName, threadable);
+                    threadList = Threadables.toNodeList(threadable);
                     ThreadSortNode.filterFullName(sentFullName, threadList);
                     cached = threadableResult.cached || sentThreadableResult.cached;
                     if (logIt) {
@@ -1551,7 +1552,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                     } else {
                         threadable = new Threader().thread(threadable);
                     }
-                    threadList = Threadable.toNodeList(threadable);
+                    threadList = Threadables.toNodeList(threadable);
                     cached = threadableResult.cached;
                     if (logIt) {
                         final long dur = System.currentTimeMillis() - st;
@@ -1870,13 +1871,13 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                  */
                 threadResp = ThreadSortUtil.getThreadResponse(imapFolder, sortRange);
             } else {
-                Threadable threadable = Threadable.getAllThreadablesFrom(imapFolder, -1);
+                Threadable threadable = Threadables.getAllThreadablesFrom(imapFolder, -1);
                 if (useCommonsNetThreader()) {
                     threadable = ((ThreadableImpl) new org.apache.commons.net.nntp.Threader().thread(new ThreadableImpl(threadable))).getDelegatee();
                 } else {
                     threadable = new Threader().thread(threadable);
                 }
-                threadResp = Threadable.toThreadReferences(threadable, null == filter ? null : new TIntHashSet(filter));
+                threadResp = Threadables.toThreadReferences(threadable, null == filter ? null : new TIntHashSet(filter));
             }
             /*
              * Parse THREAD response to a list structure and extract sequence numbers
