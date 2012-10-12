@@ -1395,7 +1395,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
             final long st = logIt ? System.currentTimeMillis() : 0L;
             TLongCollection uids = null;
             if (null == entry.getThreadable() || sorted != entry.isSorted()) {
-                Threadable threadable = Threadables.getAllThreadablesFrom(imapFolder, limit);
+                Threadable threadable = Threadables.getAllThreadablesFrom(f, limit);
                 if (sorted) {
                     if (useCommonsNetThreader()) {
                         threadable = ((ThreadableImpl) new org.apache.commons.net.nntp.Threader().thread(new ThreadableImpl(threadable))).getDelegatee();
@@ -1403,12 +1403,12 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                         threadable = new Threader().thread(threadable);
                     }
                 }
-                entry.set(new TLongHashSet(IMAPCommandsCollection.getUIDCollection(imapFolder)), threadable, sorted);
+                entry.set(new TLongHashSet(IMAPCommandsCollection.getUIDCollection(f)), threadable, sorted);
                 if (logIt) {
                     final long dur = System.currentTimeMillis() - st;
                     LOG.info("\tNew ThreadableCacheEntry queried for \"" + f.getFullName() + "\" in " + dur + "msec");
                 }
-            } else if (entry.reconstructNeeded((uids = IMAPCommandsCollection.getUIDCollection(imapFolder)))) {
+            } else if (entry.reconstructNeeded((uids = IMAPCommandsCollection.getUIDCollection(f)))) {
                 final TLongHashSet uidsSet = new TLongHashSet(uids);
                 if (cache) {
                     // Immediately return cached state & reconstruct ansynchronously
@@ -1419,7 +1419,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                         @Override
                         public void run() {
                             try {
-                                Threadable threadable = Threadables.getAllThreadablesFrom(imapFolder, limit);
+                                Threadable threadable = Threadables.getAllThreadablesFrom(f, limit);
                                 if (sorted) {
                                     if (useCommonsNetThreader()) {
                                         threadable = ((ThreadableImpl) new org.apache.commons.net.nntp.Threader().thread(new ThreadableImpl(threadable))).getDelegatee();
@@ -1440,7 +1440,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                     }
                     return new ThreadableResult((Threadable) retval.clone(), true);
                 }
-                Threadable threadable = Threadables.getAllThreadablesFrom(imapFolder, limit);
+                Threadable threadable = Threadables.getAllThreadablesFrom(f, limit);
                 if (sorted) {
                     if (useCommonsNetThreader()) {
                         threadable = ((ThreadableImpl) new org.apache.commons.net.nntp.Threader().thread(new ThreadableImpl(threadable))).getDelegatee();
