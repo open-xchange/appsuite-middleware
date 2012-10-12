@@ -20,6 +20,7 @@ import com.hazelcast.config.Config;
 import com.hazelcast.config.InMemoryXmlConfig;
 import com.hazelcast.config.Interfaces;
 import com.hazelcast.config.Join;
+import com.hazelcast.config.MapConfig;
 import com.hazelcast.config.NetworkConfig;
 import com.hazelcast.config.TcpIpConfig;
 import com.hazelcast.core.Hazelcast;
@@ -28,6 +29,8 @@ import com.hazelcast.nio.Address;
 import com.openexchange.cluster.discovery.ClusterDiscoveryService;
 import com.openexchange.cluster.discovery.ClusterListener;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.hazelcast.HazelcastMBean;
+import com.openexchange.management.ManagementService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.timer.TimerService;
 import com.openexchange.tools.strings.TimeSpanParser;
@@ -85,6 +88,7 @@ public class HazelcastActivator extends HousekeepingActivator {
          * new member joins.
          */
         final BundleContext context = this.context;
+        track(ManagementService.class, new ManagementRegisterer(context));
         track(ClusterDiscoveryService.class, new ServiceTrackerCustomizer<ClusterDiscoveryService, ClusterDiscoveryService>() {
 
             @Override
@@ -230,6 +234,17 @@ public class HazelcastActivator extends HousekeepingActivator {
             if (logger.isInfoEnabled()) {
                 logger.info("\nHazelcast:\n\tStarted in " + (System.currentTimeMillis() - stamp) + "msec.\n");
             }
+            /*
+             * Create dummy map for JMX-based communication
+             */
+            final MapConfig mapConfig = new MapConfig();
+            mapConfig.setName(HazelcastMBean.MAP_NAME);
+            mapConfig.setBackupCount(MapConfig.DEFAULT_BACKUP_COUNT);
+            mapConfig.setEvictionPercentage(MapConfig.DEFAULT_EVICTION_PERCENTAGE);
+            mapConfig.setEvictionPolicy("LRU");
+            mapConfig.setMaxIdleSeconds(60);
+            mapConfig.setTimeToLiveSeconds(300);
+            hazelcastInstance.getConfig().addMapConfig(mapConfig);
             return InitMode.INITIALIZED;
         }
     }
