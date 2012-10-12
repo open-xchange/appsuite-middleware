@@ -277,6 +277,15 @@ public abstract class DefaultContactService implements ContactService {
     }
     
     @Override
+    public void deleteContacts(Session session, String folderId, String[] ids, Date lastRead) throws OXException {
+        Check.argNotNull(session, "session");
+        Check.argNotNull(folderId, "folderId");
+        Check.argNotNull(ids, "ids");
+        Check.argNotNull(lastRead, "lastRead");
+        this.doDeleteContacts(session, folderId, ids, lastRead);
+    }
+    
+    @Override
     public void deleteContacts(Session session, String folderId) throws OXException {
         Check.argNotNull(session, "session");
         Check.argNotNull(folderId, "folderId");
@@ -347,6 +356,8 @@ public abstract class DefaultContactService implements ContactService {
 	
     protected abstract void doDeleteContact(Session session, String folderID, String objectID, Date lastRead) throws OXException;
     
+    protected abstract void doDeleteContacts(Session session, String folderID, String[] objectIDs, Date lastRead) throws OXException;
+
     protected abstract void doDeleteContacts(Session session, String folderID) throws OXException;
     
 	protected abstract <O> SearchIterator<Contact> doGetContacts(boolean deleted, Session session, String folderID,

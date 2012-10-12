@@ -65,6 +65,8 @@ public class SolrActivator extends HousekeepingActivator {
 
     private ObjectName solrMBeanName;
 
+    private int rmiPort = -1;
+
 	@Override
 	protected Class<?>[] getNeededServices() {
 		return new Class<?>[] { ConfigurationService.class, DatabaseService.class, ThreadPoolService.class, HazelcastInstance.class };
@@ -160,10 +162,10 @@ public class SolrActivator extends HousekeepingActivator {
         try {
             RMISolrAccessService stub = (RMISolrAccessService) UnicastRemoteObject.exportObject(solrRMI, 0);
             final InetAddress addr = InetAddress.getLocalHost();
-            int rmiPort = config.getIntProperty("RMI_PORT", 1099);
+            rmiPort  = config.getIntProperty("RMI_PORT", 1099);
             Registry registry = null;
             try {
-                registry = LocateRegistry.createRegistry(rmiPort, RMISocketFactory.getDefaultSocketFactory(), new RMIServerSocketFactory() {
+                registry = LocateRegistry.createRegistry(rmiPort , RMISocketFactory.getDefaultSocketFactory(), new RMIServerSocketFactory() {
                     @Override
                     public ServerSocket createServerSocket(int port) throws IOException {
                         ServerSocket socket = new ServerSocket(port, 0, addr);
@@ -174,7 +176,7 @@ public class SolrActivator extends HousekeepingActivator {
             } catch (RemoteException e) {
                 LOG.info("RMI registry seems to be already exported.");
                 try {
-                    registry = LocateRegistry.getRegistry(addr.getHostAddress(), rmiPort);
+                    registry = LocateRegistry.getRegistry(addr.getHostAddress(), rmiPort );
                 } catch (RemoteException r) {
                     LOG.error("Could not get RMI registry. SolrServerRMI will not be registered!", r);
                     solrRMI = null;
@@ -195,17 +197,17 @@ public class SolrActivator extends HousekeepingActivator {
 	}
 
 	private void unregisterRMIInterface() throws UnknownHostException, NotBoundException {
-		try {
-			LOG.info("Unregistering Solr RMI Interface.");
-			ConfigurationService config = getService(ConfigurationService.class);
-			InetAddress addr = InetAddress.getLocalHost();
-			int rmiPort = config.getIntProperty("RMI_PORT", 1099);
-			Registry registry = LocateRegistry.getRegistry(addr.getHostAddress(), rmiPort);
+		if (rmiPort > 0) {
+            try {
+                LOG.info("Unregistering Solr RMI Interface.");
+                InetAddress addr = InetAddress.getLocalHost();
+                Registry registry = LocateRegistry.getRegistry(addr.getHostAddress(), rmiPort);
 
-			registry.unbind(RMISolrAccessService.RMI_NAME);
-		} catch (RemoteException r) {
-			LOG.error("Could not get RMI registry.", r);
-		}
+                registry.unbind(RMISolrAccessService.RMI_NAME);
+            } catch (RemoteException r) {
+                LOG.error("Could not get RMI registry.", r);
+            }
+        }
 	}
 
 }

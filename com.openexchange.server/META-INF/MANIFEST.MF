@@ -238,7 +238,8 @@ Import-Package: com.davekoelle,
  org.springframework.beans.factory,
  org.w3c.dom,
  org.xml.sax,
- org.xmlpull.v1
+ org.xmlpull.v1,
+ sun.misc
 Export-Package: com.openexchange.ajax,
  com.openexchange.ajax.container,
  com.openexchange.ajax.customizer.folder,

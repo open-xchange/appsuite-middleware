@@ -72,6 +72,12 @@ public class EWSException extends Exception {
         this.code = responseMessage.getResponseCode();
         this.category = ResponseClassType.ERROR.equals(responseMessage.getResponseClass()) ? Category.ERROR : Category.WARNING;
     }
+    
+    public EWSException(String message) {
+        super(message);
+        this.code = "0";
+        this.category = Category.ERROR;
+    }
 
     public String getCode() {
         return this.code;

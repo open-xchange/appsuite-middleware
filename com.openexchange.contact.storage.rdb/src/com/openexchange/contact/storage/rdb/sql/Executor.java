@@ -650,11 +650,7 @@ public class Executor {
                 stringBuilder.append(" IN (").append(Tools.toCSV(objectIDs)).append(')');
             }
         }
-        if (Long.MIN_VALUE == minLastModified) {
-            stringBuilder.append(';');
-        } else {
-            stringBuilder.append(" AND ").append(Mappers.CONTACT.get(ContactField.LAST_MODIFIED).getColumnLabel()).append("<=?;");
-        }
+        stringBuilder.append(';');
         PreparedStatement stmt = null;
         int parameterIndex = 1;
         try {

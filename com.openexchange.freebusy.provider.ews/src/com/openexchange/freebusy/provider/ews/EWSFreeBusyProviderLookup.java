@@ -64,7 +64,7 @@ import com.openexchange.server.ServiceLookup;
 public class EWSFreeBusyProviderLookup {
 
     /**
-     * Initializes a new {@link RdbFreeBusyProviderLookup}.
+     * Initializes a new {@link EWSFreeBusyProviderLookup}.
      */
     private EWSFreeBusyProviderLookup() {
         super();
@@ -82,7 +82,7 @@ public class EWSFreeBusyProviderLookup {
     }
 
     public static <S extends Object> S getService(Class<? extends S> c) throws OXException {
-        return EWSFreeBusyProviderLookup.getService(c, false);
+        return EWSFreeBusyProviderLookup.getService(c, true);
     }
     
     public static <S extends Object> S getService(Class<? extends S> c, boolean throwOnAbsence) throws OXException {

@@ -392,6 +392,17 @@ public interface ContactService {
     void deleteContacts(Session session, String folderId) throws OXException;
 
     /**
+     * Deletes multiple contacts from a folder.
+     * 
+     * @param session the session
+     * @param folderId the ID of the parent folder
+     * @param ids the object IDs 
+     * @param lastRead the time the objects were last read from the storage
+     * @throws OXException
+     */
+    void deleteContacts(Session session, String folderId, String[] ids, Date lastRead) throws OXException;
+
+    /**
      * Gets a user's contact with all fields.<p>
      * If the current user has no adequate permissions, no exception is thrown, 
      * but the queried contact fields are limited to fields defined by 

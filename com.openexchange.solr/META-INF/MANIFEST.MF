@@ -7,10 +7,12 @@ Bundle-Activator: com.openexchange.solr.osgi.SolrActivator
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Eclipse-RegisterBuddy: com.openexchange.hazelcast
+Eclipse-BuddyPolicy: boot
 Import-Package: com.hazelcast.cluster,
  com.hazelcast.config,
  com.hazelcast.core,
  com.hazelcast.examples,
+ com.hazelcast.impl.concurrentmap,
  com.hazelcast.jmx,
  com.hazelcast.monitor,
  com.hazelcast.nio,

@@ -289,7 +289,7 @@ public final class ThreadableCache {
                 return null;
             }
             // Check root nodes
-            final List<Threadable> list = Threadable.unfold(threadable);
+            final List<Threadable> list = Threadables.unfold(threadable);
             boolean done = false;
             mainLoop: while (!done) {
 
@@ -303,7 +303,7 @@ public final class ThreadableCache {
                 }
                 if (i < size) {
                     final Threadable removed = list.remove(i);
-                    list.addAll(i, Threadable.unfold(removed.kid));
+                    list.addAll(i, Threadables.unfold(removed.kid));
                     continue mainLoop;
                 }
                 done = true;
@@ -312,7 +312,7 @@ public final class ThreadableCache {
             for (final Threadable node : list) {
                 node.kid = removeDeleted(deletedUids, node.kid);
             }
-            return Threadable.fold(list);
+            return Threadables.fold(list);
         }
 
     } // End of ThreadSortCacheEntry class

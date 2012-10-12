@@ -122,7 +122,7 @@ public final class ThreadableLoginHandler implements LoginHandlerService {
                                         final IMAPFolder sent = (IMAPFolder) ((IMAPAccess) mailAccess).getIMAPStore().getFolder(sentFolder);
                                         sent.open(Folder.READ_ONLY);
                                         try {
-                                            final Threadable threadable = Threadable.getAllThreadablesFrom(sent, -1);
+                                            final Threadable threadable = Threadables.getAllThreadablesFrom(sent, -1);
                                             entry.set(new TLongHashSet(IMAPCommandsCollection.getUIDCollection(sent)), threadable, false);
                                         } finally {
                                             sent.close(false);

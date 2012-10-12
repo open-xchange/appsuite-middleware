@@ -365,4 +365,10 @@ public class SimContactService implements ContactService {
         
     }
 
+    @Override
+    public void deleteContacts(Session session, String folderId, String[] ids, Date lastRead) throws OXException {
+        // TODO Auto-generated method stub
+        
+    }
+
 }

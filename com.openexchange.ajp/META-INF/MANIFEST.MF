@@ -46,6 +46,7 @@ Import-Package: com.openexchange.ajax,
  org.osgi.framework,
  org.osgi.service.event,
  org.osgi.service.http,
- org.osgi.util.tracker
+ org.osgi.util.tracker,
+ sun.misc
 Bundle-ClassPath: .
 Bundle-Activator: com.openexchange.ajp13.osgi.AJPv13Activator

@@ -103,7 +103,8 @@ Import-Package: com.openexchange.api2,
  org.apache.commons.net.whois,
  org.cliffc.high_scale_lib,
  org.osgi.framework,
- org.osgi.service.event
+ org.osgi.service.event,
+ sun.misc
 Export-Package: com.openexchange.imap,
  com.openexchange.imap.config,
  com.openexchange.imap.notify

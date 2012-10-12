@@ -8,7 +8,10 @@ Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Export-Package: com.microsoft.schemas.exchange.services._2006.messages,
  com.microsoft.schemas.exchange.services._2006.types,
  com.openexchange.ews
-Import-Package: com.openexchange.tools.ssl,
+Import-Package: com.openexchange.log,
+ com.openexchange.osgi,
+ com.openexchange.tools.ssl,
  javax.net.ssl,
  org.apache.commons.codec,
+ org.apache.commons.logging,
  org.osgi.framework

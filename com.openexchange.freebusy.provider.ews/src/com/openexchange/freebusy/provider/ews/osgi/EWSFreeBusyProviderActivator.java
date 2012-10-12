@@ -51,6 +51,7 @@ package com.openexchange.freebusy.provider.ews.osgi;
 
 import org.apache.commons.logging.Log;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.ews.EWSFactoryService;
 import com.openexchange.freebusy.provider.FreeBusyProvider;
 import com.openexchange.freebusy.provider.ews.EWSFreeBusyProvider;
 import com.openexchange.freebusy.provider.ews.EWSFreeBusyProviderLookup;
@@ -75,7 +76,7 @@ public class EWSFreeBusyProviderActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ConfigurationService.class };
+        return new Class<?>[] { ConfigurationService.class, EWSFactoryService.class };
     }
 
     @Override

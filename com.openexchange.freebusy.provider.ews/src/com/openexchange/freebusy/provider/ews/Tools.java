@@ -51,23 +51,12 @@ package com.openexchange.freebusy.provider.ews;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Date;
 import java.util.List;
-import com.microsoft.schemas.exchange.services._2006.messages.GetUserAvailabilityRequestType;
 import com.microsoft.schemas.exchange.services._2006.messages.ResponseMessageType;
-import com.microsoft.schemas.exchange.services._2006.types.ArrayOfMailboxData;
 import com.microsoft.schemas.exchange.services._2006.types.CalendarEvent;
-import com.microsoft.schemas.exchange.services._2006.types.DayOfWeekType;
-import com.microsoft.schemas.exchange.services._2006.types.Duration;
-import com.microsoft.schemas.exchange.services._2006.types.EmailAddress;
 import com.microsoft.schemas.exchange.services._2006.types.FreeBusyView;
-import com.microsoft.schemas.exchange.services._2006.types.FreeBusyViewOptionsType;
 import com.microsoft.schemas.exchange.services._2006.types.LegacyFreeBusyType;
-import com.microsoft.schemas.exchange.services._2006.types.MailboxData;
-import com.microsoft.schemas.exchange.services._2006.types.MeetingAttendeeType;
 import com.microsoft.schemas.exchange.services._2006.types.ResponseClassType;
-import com.microsoft.schemas.exchange.services._2006.types.SerializableTimeZone;
-import com.microsoft.schemas.exchange.services._2006.types.SerializableTimeZoneTime;
 import com.openexchange.ews.DateConverter;
 import com.openexchange.ews.EWSException;
 import com.openexchange.exception.OXException;
@@ -83,19 +72,6 @@ import com.openexchange.freebusy.FreeBusyInterval;
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 public final class Tools {
-    
-    private static final SerializableTimeZone LEGACY_TIMEZONE;
-    static {
-        SerializableTimeZoneTime standardTime = new SerializableTimeZoneTime();
-        standardTime.setBias(0);
-        standardTime.setTime("00:00:00");
-        standardTime.setDayOrder((short)1);
-        standardTime.setDayOfWeek(DayOfWeekType.SUNDAY);
-        LEGACY_TIMEZONE = new SerializableTimeZone();
-        LEGACY_TIMEZONE.setBias(0);
-        LEGACY_TIMEZONE.setStandardTime(standardTime);
-        LEGACY_TIMEZONE.setDaylightTime(standardTime);
-    }
     
     public static OXException getError(String participant, ResponseMessageType responseMessage) {
         if (null != responseMessage && false == ResponseClassType.SUCCESS.equals(responseMessage.getResponseClass())) {
@@ -147,36 +123,4 @@ public final class Tools {
         }
     }
         
-    public static GetUserAvailabilityRequestType createAvailabilityRequest(List<String> emailAddresses, Date from, Date until, boolean detailed) {
-        GetUserAvailabilityRequestType getUserAvailabilityRequestType = new GetUserAvailabilityRequestType();
-        getUserAvailabilityRequestType.setTimeZone(LEGACY_TIMEZONE);
-        getUserAvailabilityRequestType.setFreeBusyViewOptions(getFreebusyViewOptions(from, until, detailed));
-        getUserAvailabilityRequestType.setMailboxDataArray(getMailboxData(emailAddresses));
-        return getUserAvailabilityRequestType;
-    }   
-    
-    public static ArrayOfMailboxData getMailboxData(List<String> emailAddresses) {
-        ArrayOfMailboxData mailboxData = new ArrayOfMailboxData();
-        for (String address : emailAddresses) {
-            EmailAddress emailAddress = new EmailAddress();
-            emailAddress.setAddress(address);
-            MailboxData mailbox = new MailboxData();
-            mailbox.setEmail(emailAddress);
-            mailbox.setAttendeeType(MeetingAttendeeType.REQUIRED);
-            mailboxData.getMailboxData().add(mailbox);
-        }
-        return mailboxData;
-    }
-        
-    public static FreeBusyViewOptionsType getFreebusyViewOptions(Date from, Date until, boolean detailed) {
-        FreeBusyViewOptionsType freeBusyViewOptionsType = new FreeBusyViewOptionsType();
-        Duration duration = new Duration();
-        duration.setStartTime(DateConverter.DEFAULT.getXMLCalendar(from));
-        duration.setEndTime(DateConverter.DEFAULT.getXMLCalendar(until));
-        freeBusyViewOptionsType.setTimeWindow(duration);
-        // http://msdn.microsoft.com/en-us/library/exchange/exchangewebservices.freebusyviewtype(v=exchg.140)
-        freeBusyViewOptionsType.getRequestedView().add(detailed ? "Detailed" : "FreeBusy");
-        return freeBusyViewOptionsType;
-    }
- 
 }
