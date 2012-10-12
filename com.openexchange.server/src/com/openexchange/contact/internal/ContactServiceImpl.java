@@ -430,6 +430,21 @@ public class ContactServiceImpl extends DefaultContactService {
             }            
         }
         /*
+         * ensure all contacts were found
+         */
+        for (String objectID : objectIDs) {
+            boolean found = false;
+            for (Contact contact : storedContacts) {
+                if (contact.getObjectID() == parse(objectID)) {
+                    found = true;
+                    break;
+                }
+            }
+            if (false == found) {
+                throw ContactExceptionCodes.CONTACT_NOT_FOUND.create(parse(objectID), contextID);
+            }
+        }        
+        /*
          * delete contacts from storage
          */
         storage.delete(session, folderID, objectIDs, lastRead);

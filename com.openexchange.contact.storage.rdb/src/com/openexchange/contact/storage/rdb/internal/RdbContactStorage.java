@@ -349,6 +349,64 @@ public class RdbContactStorage extends DefaultContactStorage {
     }
     
     @Override
+    public void delete(Session session, String folderId, String[] ids, Date lastRead) throws OXException {
+        boolean committed = false;
+        int contextID = session.getContextId();
+        int userID = session.getUserId();
+        int folderID = parse(folderId);
+        int[] objectIDs = parse(ids);
+        long minLastModified = lastRead.getTime();
+        DatabaseService databaseService = getDatabaseService();
+        Connection connection = databaseService.getWritable(contextID);
+        try {
+            connection.setAutoCommit(false);
+            /*
+             * ensure there is no previous record in the 'deleted' tables
+             */
+            executor.delete(connection, Table.DELETED_CONTACTS, contextID, folderID, objectIDs, minLastModified);
+            executor.delete(connection, Table.DELETED_IMAGES, contextID, Integer.MIN_VALUE, objectIDs, minLastModified);
+            executor.delete(connection, Table.DELETED_DISTLIST, contextID, Integer.MIN_VALUE, objectIDs);
+            /*
+             * insert copied records to 'deleted' tables 
+             */
+            executor.insertFrom(connection,  Table.CONTACTS, Table.DELETED_CONTACTS, contextID, folderID, objectIDs, minLastModified);
+            executor.insertFrom(connection, Table.IMAGES, Table.DELETED_IMAGES, contextID, Integer.MIN_VALUE, objectIDs, minLastModified);
+            executor.insertFrom(connection, Table.DISTLIST, Table.DELETED_DISTLIST, contextID, Integer.MIN_VALUE, objectIDs);
+            /*
+             * delete records in original tables
+             */
+            executor.delete(connection, Table.CONTACTS, contextID, folderID, objectIDs, minLastModified);
+            executor.delete(connection, Table.IMAGES, contextID, Integer.MIN_VALUE, objectIDs, minLastModified);
+            executor.delete(connection, Table.DISTLIST, contextID, Integer.MIN_VALUE, objectIDs);
+            /*
+             * update meta data
+             */
+            Contact contact = new Contact();
+            contact.setLastModified(new Date());
+            contact.setModifiedBy(userID);
+            executor.update(connection, Table.DELETED_CONTACTS, contextID, folderID, objectIDs, contact, new ContactField[] { 
+                    ContactField.MODIFIED_BY, ContactField.LAST_MODIFIED }, Long.MIN_VALUE);
+            /*
+             * commit
+             */
+            connection.commit();
+            committed = true;
+        } catch (SQLException e) {
+            DBUtils.rollback(connection);
+            throw ContactExceptionCodes.SQL_PROBLEM.create(e);
+        } catch (OXException e) {
+            DBUtils.rollback(connection);
+            throw e;
+        } finally {
+            if (false == committed) {
+                DBUtils.rollback(connection);
+            }
+            DBUtils.autocommit(connection);
+            databaseService.backWritable(contextID, connection);
+        }
+    }
+    
+    @Override
     public void update(Session session, String folderId, String id, Contact contact, Date lastRead) throws OXException {
     	boolean committed = false;
         int contextID = session.getContextId();
