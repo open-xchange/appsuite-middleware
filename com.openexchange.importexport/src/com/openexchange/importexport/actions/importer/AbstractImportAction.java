@@ -52,6 +52,7 @@ import java.util.List;
 
 import org.json.JSONException;
 
+import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
@@ -70,6 +71,7 @@ public abstract class AbstractImportAction implements AJAXActionService {
 	@Override
 	public AJAXRequestResult perform(AJAXRequestData requestData,
 			ServerSession session) throws OXException {
+
 		return perform(new ImportRequest(requestData, session));
 	}
 
