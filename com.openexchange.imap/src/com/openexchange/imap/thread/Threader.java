@@ -416,7 +416,7 @@ public class Threader {
             count++;
         }
         // Make the hash table large enough to not need to be rehashed.
-        final Map<String, ThreadContainer> subjTable = new HashMap<String, ThreadContainer>(count << 1, (float) 0.9);
+        final Map<String, ThreadContainer> subjTable = new HashMap<String, ThreadContainer>(count << 1, 0.9f);
         count = 0;
         for (ThreadContainer c = rootNode.child; c != null; c = c.next) {
             Threadable threadable = c.threadable;
