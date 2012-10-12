@@ -27,6 +27,7 @@ import com.hazelcast.nio.Address;
 import com.openexchange.cluster.discovery.ClusterDiscoveryService;
 import com.openexchange.cluster.discovery.ClusterListener;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.hazelcast.ClassLoaderAwareHazelcastInstance;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.timer.TimerService;
 import com.openexchange.tools.strings.TimeSpanParser;
@@ -222,8 +223,8 @@ public class HazelcastActivator extends HousekeepingActivator {
             /*
              * Create appropriate Hazelcast instance from configuration
              */
-//            final HazelcastInstance hazelcastInstance = new ClassLoaderAwareHazelcastInstance(Hazelcast.newHazelcastInstance(config), false);
-            final HazelcastInstance hazelcastInstance = Hazelcast.newHazelcastInstance(config);
+            final HazelcastInstance hazelcastInstance = new ClassLoaderAwareHazelcastInstance(Hazelcast.newHazelcastInstance(config), false);
+            // final HazelcastInstance hazelcastInstance = Hazelcast.newHazelcastInstance(config);
             registerService(HazelcastInstance.class, hazelcastInstance);
             REF_HAZELCAST_INSTANCE.set(hazelcastInstance);
             if (logger.isInfoEnabled()) {
