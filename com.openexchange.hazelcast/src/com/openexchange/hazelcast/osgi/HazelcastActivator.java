@@ -18,7 +18,6 @@ import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.hazelcast.config.Config;
 import com.hazelcast.config.InMemoryXmlConfig;
-import com.hazelcast.config.Interfaces;
 import com.hazelcast.config.Join;
 import com.hazelcast.config.MapConfig;
 import com.hazelcast.config.NetworkConfig;
@@ -255,20 +254,20 @@ public class HazelcastActivator extends HousekeepingActivator {
 
         @Override
         public String getHelp() {
-            StringBuilder help = new StringBuilder();
+            final StringBuilder help = new StringBuilder();
             help.append("\taddnode - Add a solr node.\n");
             return help.toString();
         }
         
-        public void _addnode(CommandInterpreter commandInterpreter) {
-            String ip = commandInterpreter.nextArgument();
-            HazelcastInstance hazelcast = REF_HAZELCAST_INSTANCE.get();
-            Join join = hazelcast.getConfig().getNetworkConfig().getJoin();
-            TcpIpConfig tcpIpConfig = join.getTcpIpConfig();
+        public void _addnode(final CommandInterpreter commandInterpreter) {
+            final String ip = commandInterpreter.nextArgument();
+            final HazelcastInstance hazelcast = REF_HAZELCAST_INSTANCE.get();
+            final Join join = hazelcast.getConfig().getNetworkConfig().getJoin();
+            final TcpIpConfig tcpIpConfig = join.getTcpIpConfig();
             try {
                 tcpIpConfig.addAddress(new Address(InetAddress.getByName(ip), hazelcast.getConfig().getNetworkConfig().getPort()));
                 hazelcast.getLifecycleService().restart();
-            } catch (UnknownHostException e) {
+            } catch (final UnknownHostException e) {
                 LOG.error("Could not register node.", e);
             }
         }
@@ -286,7 +285,7 @@ public class HazelcastActivator extends HousekeepingActivator {
             final Set<String> members = resolve2Members(nodes);
             if (!members.isEmpty()) {
                 final TcpIpConfig tcpIpConfig = join.getTcpIpConfig();
-                Set<String> cur = new LinkedHashSet<String>(tcpIpConfig.getMembers());
+                final Set<String> cur = new LinkedHashSet<String>(tcpIpConfig.getMembers());
                 if (logger.isInfoEnabled()) {
                     logger.info("\nHazelcast:\n\tRe-Starting Hazelcast instance:\n\tExisting members: " + cur + "\n\tNew members: " + members + "\n");
                 }
@@ -294,13 +293,6 @@ public class HazelcastActivator extends HousekeepingActivator {
                     cur.add(candidate);
                 }
                 tcpIpConfig.setMembers(new ArrayList<String>(cur));
-                // Set interfaces, too
-                final Interfaces interfaces = config.getNetworkConfig().getInterfaces();
-                cur = new LinkedHashSet<String>(interfaces.getInterfaces());
-                for (final String candidate : members) {
-                    cur.add(candidate);
-                }
-                interfaces.setInterfaces(cur);
             } else {
                 if (logger.isInfoEnabled()) {
                     logger.info("\nHazelcast:\n\tRe-Starting Hazelcast instance:\n\tNo additional members\n");
@@ -328,10 +320,6 @@ public class HazelcastActivator extends HousekeepingActivator {
                     logger.info("\nHazelcast:\n\tStarting Hazelcast instance:\n\tInitial members: " + members + "\n");
                 }
                 tcpIpConfig.setMembers(new ArrayList<String>(members));
-                // Set interfaces, too
-                final Interfaces interfaces = config.getNetworkConfig().getInterfaces();
-                // interfaces.setEnabled(true);
-                interfaces.setInterfaces(members);
             } else {
                 if (logger.isInfoEnabled()) {
                     logger.info("\nHazelcast:\n\tStarting Hazelcast instance:\n\tNo initial members\n");
