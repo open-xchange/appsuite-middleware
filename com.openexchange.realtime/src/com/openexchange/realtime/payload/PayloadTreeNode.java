@@ -51,6 +51,7 @@ package com.openexchange.realtime.payload;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import com.openexchange.realtime.util.ElementPath;
 
@@ -122,12 +123,12 @@ public class PayloadTreeNode {
     }
 
     /**
-     * Gets the children of this node
+     * Gets an unmodifiable view of the children of this node.
      * 
-     * @return The children
+     * @return Unmodifiable view of the children of this node.
      */
-    public List<PayloadTreeNode> getChildren() {
-        return children;
+    public Collection<PayloadTreeNode> getChildren() {
+        return Collections.unmodifiableCollection(children);
     }
 
     /**
@@ -273,7 +274,7 @@ public class PayloadTreeNode {
      * @return Null or the ElementPath of the PayloadElement associated with this node
      */
     public ElementPath getElementPath() {
-        if(payloadElement != null) {
+        if (payloadElement != null) {
             return new ElementPath(getNamespace(), getElementName());
         }
         return null;
@@ -282,11 +283,11 @@ public class PayloadTreeNode {
     /**
      * Get the namespace of the PayloadElement associated with this node.
      * 
-     * @return Null or the namespace of the PayloadElement associated with this node 
+     * @return Null or the namespace of the PayloadElement associated with this node
      * @see com.openexchange.realtime.payload.PayloadElement#getNamespace()
      */
     public String getNamespace() {
-        if(payloadElement != null) {
+        if (payloadElement != null) {
             return payloadElement.getNamespace();
         }
         return null;
@@ -296,8 +297,6 @@ public class PayloadTreeNode {
     public int hashCode() {
         final int prime = 31;
         int result = 1;
-        result = prime * result + ((children == null) ? 0 : children.hashCode());
-        result = prime * result + ((parent == null) ? 0 : parent.hashCode());
         result = prime * result + ((payloadElement == null) ? 0 : payloadElement.hashCode());
         return result;
     }
@@ -311,16 +310,6 @@ public class PayloadTreeNode {
         if (!(obj instanceof PayloadTreeNode))
             return false;
         PayloadTreeNode other = (PayloadTreeNode) obj;
-        if (children == null) {
-            if (other.children != null)
-                return false;
-        } else if (!children.equals(other.children))
-            return false;
-        if (parent == null) {
-            if (other.parent != null)
-                return false;
-        } else if (!parent.equals(other.parent))
-            return false;
         if (payloadElement == null) {
             if (other.payloadElement != null)
                 return false;
@@ -331,7 +320,7 @@ public class PayloadTreeNode {
 
     @Override
     public String toString() {
-        return "PayloadTreeNode [ payloadElement=" + payloadElement + ", children=" + children + "]";
+        return "PayloadTreeNode [parent=" + parent + ", payloadElement=" + payloadElement + ", children=" + children + "]";
     }
 
 }

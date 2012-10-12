@@ -237,7 +237,7 @@ public class PayloadTreeNodeTest {
         parentPayloadTreeNode.addChild(payloadTreeNode1);
         assertTrue(parentPayloadTreeNode.hasChildren());
         assertEquals(1,parentPayloadTreeNode.getNumberOfChildren());
-        assertEquals(payloadTreeNode1,parentPayloadTreeNode.getChildren().get(0));
+        assertEquals(payloadTreeNode1,parentPayloadTreeNode.getChildren().toArray()[0]);
     }
 
     /**
@@ -252,7 +252,7 @@ public class PayloadTreeNodeTest {
         emptyPayloadTreeNodeList.add(payloadTreeNode2);
         parentPayloadTreeNode.removeChildren(emptyPayloadTreeNodeList);
         assertEquals(1, parentPayloadTreeNode.getNumberOfChildren());
-        assertEquals(payloadTreeNode3, parentPayloadTreeNode.getChildren().get(0));
+        assertEquals(payloadTreeNode3, parentPayloadTreeNode.getChildren().toArray()[0]);
     }
 
     /**
@@ -314,16 +314,4 @@ public class PayloadTreeNodeTest {
         assertEquals(new PayloadTreeNode(payloadElement1).addChild(payloadTreeNode2), new PayloadTreeNode(payloadElement1).addChild(payloadTreeNode3));
     }
 
-    /**
-     * Test method for {@link com.openexchange.realtime.payload.PayloadTreeNode#toString()}.
-     */
-    @Test
-    public void testToString() {
-        fail("Not yet implemented");
-    }
-
-    @Test
-    public void testNesting() {
-        
-    }
 }

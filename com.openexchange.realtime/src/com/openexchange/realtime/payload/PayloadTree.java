@@ -56,4 +56,13 @@ package com.openexchange.realtime.payload;
  */
 public class PayloadTree {
 
+    private PayloadTreeNode root;
+
+    public PayloadTree(PayloadTreeNode root) {
+        this.root = root;
+    }
+    
+    private int getNumberOfNodes() {
+        throw new UnsupportedOperationException("Not implemented yet!");
+    }
 }
