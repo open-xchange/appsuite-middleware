@@ -146,6 +146,32 @@ public abstract class DefaultContactStorage implements ContactStorage {
             }
         }
     }
+    
+    /**
+     * Default implementation that first queries the contacts in the folder
+     * and then deletes them one after the other. Override if applicable for 
+     * storage.
+     */
+    @Override
+    public void delete(Session session, String folderId, String[] ids, Date lastRead) throws OXException {
+        SearchIterator<Contact> searchIterator = null;
+        try {
+            searchIterator = this.all(session, folderId, new ContactField[] { ContactField.OBJECT_ID });
+            if (null != searchIterator) {
+                while (searchIterator.hasNext()) {
+                    delete(session, folderId, String.valueOf(searchIterator.next().getObjectID()), lastRead);
+                }
+            }
+        } finally {
+            if (null != searchIterator) {
+                try {
+                    searchIterator.close();
+                } catch (OXException e) {
+                    // ignore
+                }
+            }
+        }
+    }
 
     /**
      * Gets all contact fields.
