@@ -19,6 +19,7 @@ import com.hazelcast.config.Config;
 import com.hazelcast.config.InMemoryXmlConfig;
 import com.hazelcast.config.Interfaces;
 import com.hazelcast.config.Join;
+import com.hazelcast.config.NetworkConfig;
 import com.hazelcast.config.TcpIpConfig;
 import com.hazelcast.core.Hazelcast;
 import com.hazelcast.core.HazelcastInstance;
@@ -292,6 +293,8 @@ public class HazelcastActivator extends HousekeepingActivator {
                 }
             }
         } else {
+            config.getNetworkConfig().setPort(NetworkConfig.DEFAULT_PORT);
+            config.getNetworkConfig().setPortAutoIncrement(true);
             /*
              * Disable: Multicast, AWS and ...
              */
@@ -313,6 +316,7 @@ public class HazelcastActivator extends HousekeepingActivator {
                 tcpIpConfig.setMembers(members);
                 // Set interfaces, too
                 final Interfaces interfaces = config.getNetworkConfig().getInterfaces();
+                interfaces.setEnabled(true);
                 interfaces.setInterfaces(members);
             } else {
                 if (logger.isInfoEnabled()) {
