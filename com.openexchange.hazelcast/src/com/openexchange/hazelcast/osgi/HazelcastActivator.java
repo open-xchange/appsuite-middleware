@@ -202,7 +202,7 @@ public class HazelcastActivator extends HousekeepingActivator {
                 }
                 final long st = System.currentTimeMillis();
                 final Config config = prevHazelcastInstance.getConfig();
-                configureNetworkJoin(nodes, true, config);
+                configureNetworkJoin(nodes, true, config, logger);
                 prevHazelcastInstance.getLifecycleService().restart();
                 if (logger.isInfoEnabled()) {
                     logger.info("\nHazelcast:\n\tRe-Started in " + (System.currentTimeMillis() - st) + "msec.\n");
@@ -214,7 +214,7 @@ public class HazelcastActivator extends HousekeepingActivator {
              */
             final String xml = getService(ConfigurationService.class).getText("hazelcast.xml");
             final Config config = new InMemoryXmlConfig(xml);
-            configureNetworkJoin(nodes, false, config);
+            configureNetworkJoin(nodes, false, config, logger);
             // for (final InetAddress address : nodes) {
             // tcpIpConfig.addAddress(new Address(address, config.getNetworkConfig().getPort()));
             // }
@@ -255,7 +255,7 @@ public class HazelcastActivator extends HousekeepingActivator {
         }
     }
 
-    private void configureNetworkJoin(final List<InetAddress> nodes, final boolean append, final Config config) {
+    private void configureNetworkJoin(final List<InetAddress> nodes, final boolean append, final Config config, final Log logger) {
         /*
          * Get reference to network join
          */
@@ -268,6 +268,9 @@ public class HazelcastActivator extends HousekeepingActivator {
             if (!members.isEmpty()) {
                 final TcpIpConfig tcpIpConfig = join.getTcpIpConfig();
                 List<String> cur = new ArrayList<String>(tcpIpConfig.getMembers());
+                if (logger.isInfoEnabled()) {
+                    logger.info("\nHazelcast:\n\tRe-Starting Hazelcast instance:\n\tExisting members: " + cur + "\n\tNew members: " + members + "\n");
+                }
                 for (final String candidate : members) {
                     if (!cur.contains(candidate)) {
                         cur.add(candidate);
@@ -283,6 +286,10 @@ public class HazelcastActivator extends HousekeepingActivator {
                     }
                 }
                 interfaces.setInterfaces(cur);
+            } else {
+                if (logger.isInfoEnabled()) {
+                    logger.info("\nHazelcast:\n\tRe-Starting Hazelcast instance:\n\tNo additional members\n");
+                }
             }
         } else {
             /*
@@ -300,10 +307,17 @@ public class HazelcastActivator extends HousekeepingActivator {
             tcpIpConfig.clear();
             final List<String> members = resolve2Members(nodes);
             if (!members.isEmpty()) {
+                if (logger.isInfoEnabled()) {
+                    logger.info("\nHazelcast:\n\tStarting Hazelcast instance:\n\tInitial members: " + members + "\n");
+                }
                 tcpIpConfig.setMembers(members);
                 // Set interfaces, too
                 final Interfaces interfaces = config.getNetworkConfig().getInterfaces();
                 interfaces.setInterfaces(members);
+            } else {
+                if (logger.isInfoEnabled()) {
+                    logger.info("\nHazelcast:\n\tStarting Hazelcast instance:\n\tNo initial members\n");
+                }
             }
         }
     }
