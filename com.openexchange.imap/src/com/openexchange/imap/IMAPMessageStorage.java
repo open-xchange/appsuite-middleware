@@ -243,7 +243,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
     private static final boolean LOOK_UP_INBOX_ONLY = true;
 
     private static volatile Boolean useImapThreaderIfSupported;
-    /** <b>Only</b> Applies to: getThreadSortedMessages(...) in ISimplifiedThreadStructure */
+    /** <b>Only</b> applies to: getThreadSortedMessages(...) in ISimplifiedThreadStructure */
     static boolean useImapThreaderIfSupported() {
         Boolean b = useImapThreaderIfSupported;
         if (null == b) {
