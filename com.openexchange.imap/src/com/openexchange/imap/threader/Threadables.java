@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.imap.thread;
+package com.openexchange.imap.threader;
 
 import static com.openexchange.mail.MailServletInterface.mailInterfaceMonitor;
 import gnu.trove.set.TIntSet;

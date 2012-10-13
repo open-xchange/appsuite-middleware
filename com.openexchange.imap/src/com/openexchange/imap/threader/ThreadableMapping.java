@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.imap.thread;
+package com.openexchange.imap.threader;
 
 import java.util.Collections;
 import java.util.HashMap;

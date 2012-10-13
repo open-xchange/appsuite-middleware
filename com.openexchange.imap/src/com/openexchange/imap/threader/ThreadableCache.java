@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.imap.thread;
+package com.openexchange.imap.threader;
 
 import gnu.trove.ConcurrentTIntObjectHashMap;
 import gnu.trove.TLongCollection;

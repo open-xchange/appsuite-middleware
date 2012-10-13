@@ -56,7 +56,7 @@ import java.util.Collection;
 /**
  * {@link MessageId} - A message identifier in thread-sort string;
  * <p>
- * E.g. <b><code>"${23}"</code></b> or <b><code>"${INBOX/110}"</code></b> or <b><code>"${0/INBOX/110}"</code></b>.
+ * E.g. <code>"${23}"</code> or <code>"${INBOX/110}"</code> or <code>"${0/INBOX/110}"</code>.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
