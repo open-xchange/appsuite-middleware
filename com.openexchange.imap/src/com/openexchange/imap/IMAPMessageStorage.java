@@ -264,11 +264,8 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
      */
 
     private MailAccount mailAccount;
-
     private Locale locale;
-
     private IIMAPProperties imapProperties;
-
     private final IMAPFolderStorage imapFolderStorage;
 
     /**
