@@ -50,7 +50,9 @@
 package com.openexchange.imap.threader;
 
 import static com.openexchange.mail.MailServletInterface.mailInterfaceMonitor;
+import gnu.trove.TLongCollection;
 import gnu.trove.set.TIntSet;
+import gnu.trove.set.hash.TLongHashSet;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -64,11 +66,19 @@ import javax.mail.Header;
 import javax.mail.MessagingException;
 import javax.mail.internet.InternetHeaders;
 import org.apache.commons.logging.Log;
+import com.openexchange.config.ConfigurationService;
+import com.openexchange.imap.IMAPCommandsCollection;
 import com.openexchange.imap.IMAPException;
+import com.openexchange.imap.IMAPMessageStorage;
+import com.openexchange.imap.services.IMAPServiceRegistry;
+import com.openexchange.imap.threader.ThreadableCache.ThreadableCacheEntry;
+import com.openexchange.imap.threader.nntp.ThreadableImpl;
 import com.openexchange.imap.threadsort.ThreadSortNode;
 import com.openexchange.imap.util.ImapUtility;
 import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.mail.mime.utils.MimeMessageUtility;
+import com.openexchange.session.Session;
+import com.openexchange.threadpool.ThreadPools;
 import com.sun.mail.iap.BadCommandException;
 import com.sun.mail.iap.CommandFailedException;
 import com.sun.mail.iap.ProtocolException;
@@ -83,21 +93,160 @@ import com.sun.mail.imap.protocol.Item;
 import com.sun.mail.imap.protocol.RFC822DATA;
 import com.sun.mail.imap.protocol.UID;
 
-
 /**
  * {@link Threadables} - Utility class for {@code Threadable}.
- *
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class Threadables {
 
     private static final Log LOG = com.openexchange.log.Log.loggerFor(Threadables.class);
+    private static final boolean INFO = LOG.isInfoEnabled();
 
     /**
      * Initializes a new {@link Threadables}.
      */
     private Threadables() {
         super();
+    }
+
+    private static volatile Boolean useCommonsNetThreader;
+
+    /**
+     * Whether to use {@code org.apache.commons.net.nntp.Threader} instead of {@code Threader}.
+     * 
+     * @return <code>true</code> to use Commons Net threader; otherwise <code>false</code>
+     */
+    public static boolean useCommonsNetThreader() {
+        Boolean b = useCommonsNetThreader;
+        if (null == b) {
+            synchronized (IMAPMessageStorage.class) {
+                b = useCommonsNetThreader;
+                if (null == b) {
+                    final ConfigurationService service = IMAPServiceRegistry.getService(ConfigurationService.class);
+                    b = Boolean.valueOf(null != service && service.getBoolProperty("com.openexchange.imap.useCommonsNetThreader", false));
+                    useCommonsNetThreader = b;
+                }
+            }
+        }
+        return b.booleanValue();
+    }
+
+    /**
+     * Simple container class.
+     */
+    public static final class ThreadableResult {
+
+        /** The associated {@code Threadable} */
+        public final Threadable threadable;
+        /** The cached flag */
+        public final boolean cached;
+
+        protected ThreadableResult(final Threadable threadable, final boolean cached) {
+            super();
+            this.threadable = threadable;
+            this.cached = cached;
+        }
+    }
+
+    /**
+     * Gets the <tt>Threadable</tt> with cache look-up.
+     * 
+     * @param imapFolder The IMAP folder
+     * @param sorted Whether the returned <tt>Threadable</tt> is supposed to be thread-sorted
+     * @param cache <code>true</code> to immediately return a possibly cached element; otherwise <code>false</code>
+     * @param limit The max. number of messages
+     * @param accountId The account identifier
+     * @param session The associated user session
+     * @return The <tt>Threadable</tt> either from cache or newly generated
+     * @throws MessagingException If <tt>Threadable</tt> cannot be returned for any reason
+     */
+    public static ThreadableResult getThreadableFor(final IMAPFolder imapFolder, final boolean sorted, final boolean cache, final int limit, final int accountId, final Session session) throws MessagingException {
+        if (!ThreadableCache.isThreadableCacheEnabled()) {
+            Threadable threadable = Threadables.getAllThreadablesFrom(imapFolder, limit);
+            if (sorted) {
+                if (useCommonsNetThreader()) {
+                    threadable = ((ThreadableImpl) new org.apache.commons.net.nntp.Threader().thread(new ThreadableImpl(threadable))).getDelegatee();
+                } else {
+                    threadable = new Threader().thread(threadable);
+                }
+            }
+            return new ThreadableResult(threadable, false);
+        }
+        /*
+         * Fetch from cache (if present)
+         */
+        final ThreadableCacheEntry entry = ThreadableCache.getInstance().getEntry(imapFolder.getFullName(), accountId, session);
+        synchronized (entry) {
+            final boolean logIt = INFO; // TODO: Switch to DEBUG
+            final long st = logIt ? System.currentTimeMillis() : 0L;
+            TLongCollection uids = null;
+            if (null == entry.getThreadable() || sorted != entry.isSorted()) {
+                Threadable threadable = Threadables.getAllThreadablesFrom(imapFolder, limit);
+                if (sorted) {
+                    if (useCommonsNetThreader()) {
+                        threadable = ((ThreadableImpl) new org.apache.commons.net.nntp.Threader().thread(new ThreadableImpl(threadable))).getDelegatee();
+                    } else {
+                        threadable = new Threader().thread(threadable);
+                    }
+                }
+                entry.set(new TLongHashSet(IMAPCommandsCollection.getUIDCollection(imapFolder)), threadable, sorted);
+                if (logIt) {
+                    final long dur = System.currentTimeMillis() - st;
+                    LOG.info("\tNew ThreadableCacheEntry queried for \"" + imapFolder.getFullName() + "\" in " + dur + "msec");
+                }
+            } else if (entry.reconstructNeeded((uids = IMAPCommandsCollection.getUIDCollection(imapFolder)))) {
+                final TLongHashSet uidsSet = new TLongHashSet(uids);
+                if (cache) {
+                    // Immediately return cached state & reconstruct ansynchronously
+                    final Threadable retval = (Threadable) entry.getThreadable().clone();
+                    // Runnable instance
+                    final Runnable task = new Runnable() {
+
+                        @Override
+                        public void run() {
+                            try {
+                                Threadable threadable = Threadables.getAllThreadablesFrom(imapFolder, limit);
+                                if (sorted) {
+                                    if (useCommonsNetThreader()) {
+                                        threadable = ((ThreadableImpl) new org.apache.commons.net.nntp.Threader().thread(new ThreadableImpl(
+                                            threadable))).getDelegatee();
+                                    } else {
+                                        threadable = new Threader().thread(threadable);
+                                    }
+                                }
+                                entry.set(uidsSet, threadable, sorted);
+                            } catch (final Exception e) {
+                                entry.set(null, null, sorted);
+                            }
+                        }
+                    };
+                    ThreadPools.getThreadPool().submit(ThreadPools.trackableTask(task));
+                    if (INFO) {
+                        final long dur = System.currentTimeMillis() - st;
+                        LOG.info("\tExisting ThreadableCacheEntry queried for \"" + imapFolder.getFullName() + "\" in " + dur + "msec. Reconstruct performed ansynchronously separate thread.");
+                    }
+                    return new ThreadableResult((Threadable) retval.clone(), true);
+                }
+                Threadable threadable = Threadables.getAllThreadablesFrom(imapFolder, limit);
+                if (sorted) {
+                    if (useCommonsNetThreader()) {
+                        threadable = ((ThreadableImpl) new org.apache.commons.net.nntp.Threader().thread(new ThreadableImpl(threadable))).getDelegatee();
+                    } else {
+                        threadable = new Threader().thread(threadable);
+                    }
+                }
+                entry.set(uidsSet, threadable, sorted);
+                if (logIt) {
+                    final long dur = System.currentTimeMillis() - st;
+                    LOG.info("\tNew ThreadableCacheEntry queried for \"" + imapFolder.getFullName() + "\" in " + dur + "msec");
+                }
+            } else if (INFO) {
+                final long dur = System.currentTimeMillis() - st;
+                LOG.info("\tExisting ThreadableCacheEntry queried for \"" + imapFolder.getFullName() + "\" in " + dur + "msec");
+            }
+        }
+        return new ThreadableResult((Threadable) entry.getThreadable().clone(), false);
     }
 
     private static interface HeaderHandler {
@@ -248,7 +397,13 @@ public final class Threadables {
                             final HeaderHandler refsHeaderHandler = handlers.get(sReferences);
                             for (int j = 0; j < len; j++) {
                                 if (sFetch.equals(((IMAPResponse) r[j]).getKey())) {
-                                    handleByEnvelope(threadables, fullName, includeReferences, sReferences, refsHeaderHandler, (FetchResponse) r[j]);
+                                    handleByEnvelope(
+                                        threadables,
+                                        fullName,
+                                        includeReferences,
+                                        sReferences,
+                                        refsHeaderHandler,
+                                        (FetchResponse) r[j]);
                                     r[j] = null;
                                 }
                             }
@@ -410,8 +565,8 @@ public final class Threadables {
     }
 
     /**
-     * Converts passed {@link Threadable} to an IMAP-conform THREAD=REFERENCES result string;
-     * <br>e.g:&nbsp;<code>"((1)(2)(3)(4)(5)(6)(7)(8)(9)(10)(11)(12)(13))"</code>.
+     * Converts passed {@link Threadable} to an IMAP-conform THREAD=REFERENCES result string; <br>
+     * e.g:&nbsp;<code>"((1)(2)(3)(4)(5)(6)(7)(8)(9)(10)(11)(12)(13))"</code>.
      * 
      * @param threadable The instance
      * @param filter The filter
@@ -627,7 +782,5 @@ public final class Threadables {
         // Solely consists of threadables associated with given full name
         return true;
     }
-
-    
 
 }
