@@ -88,11 +88,11 @@ public class UpdateAction extends AbstractWriteAction {
         final IDBasedFileAccess fileAccess = request.getFileAccess();
 
         final File file = request.getFile();
-        if(file.getId() == null) {
-            throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create( "Request Body", "Missing field 'id'");
+        if (file.getId() == null) {
+            throw AjaxExceptionCodes.MISSING_PARAMETER.create("id");
         }
 
-        if( request.hasUploads() ) {
+        if (request.hasUploads()) {
             fileAccess.saveDocument(file, request.getUploadedFileData(), request.getTimestamp(), request.getSentColumns());
         } else {
             fileAccess.saveFileMetadata(file, request.getTimestamp(), request.getSentColumns());
