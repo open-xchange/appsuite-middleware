@@ -56,6 +56,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import com.openexchange.mail.dataobjects.MailMessage;
+import com.openexchange.mail.mime.MessageHeaders;
 
 /**
  * {@link ThreadableMapping} - A <code>Message-Id</code> and <code>References</code> mapping from specified {@code Threadable} instance.
@@ -64,80 +66,105 @@ import java.util.Set;
  */
 public final class ThreadableMapping {
 
-    private final Map<String, List<Threadable>> refsMap;
-    private final Map<String, List<Threadable>> messageIdMap;
+    private final Map<String, List<MailMessage>> refsMap;
+    private final Map<String, List<MailMessage>> messageIdMap;
 
     /**
      * Initializes a new {@link ThreadableMapping}.
      */
     public ThreadableMapping(final int capacity) {
         super();
-        refsMap = new HashMap<String, List<Threadable>>(capacity << 1, 0.9f);
-        messageIdMap = new HashMap<String, List<Threadable>>(capacity, 0.9f);
+        refsMap = new HashMap<String, List<MailMessage>>(capacity << 1, 0.9f);
+        messageIdMap = new HashMap<String, List<MailMessage>>(capacity, 0.9f);
     }
 
     /**
-     * Gets those {@code Threadable} instances whose <code>References</code> header contain specified <code>Message-Id</code> header.
+     * Checks specified {@link Iterable} and adds elements to <code>thread</code> if appropriate.
+     * 
+     * @param toCheck The {@link Iterable} to check
+     * @param thread The thread to add into
+     */
+    public void checkFor(final Iterable<MailMessage> toCheck, final List<MailMessage> thread) {
+        for (final MailMessage mail : toCheck) {
+            final String messageId = mail.getMessageId();
+            if (!isEmpty(messageId)) {
+                // Those mails that refer to specified mail
+                final List<MailMessage> referencees = refsMap.get(messageId);
+                if (null != referencees) {
+                    thread.addAll(referencees);
+                }
+            }
+            final String[] sReferences = mail.getReferences();
+            if (null != sReferences) {
+                for (final String sReference : sReferences) {
+                    // Those mails that are referenced by specified mail
+                    final List<MailMessage> references = messageIdMap.get(sReference);
+                    if (null != references) {
+                        thread.addAll(references);
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * Gets those {@code MailMessage} instances whose <code>References</code> header contain specified <code>Message-Id</code> header.
      * 
      * @param messageId The <code>Message-Id</code> header
-     * @return The {@code Threadable} instances
+     * @return The {@code MailMessage} instances
      */
-    public Set<Threadable> getRefs(final String messageId) {
-        final List<Threadable> list = refsMap.get(messageId);
-        return list == null ? Collections.<Threadable> emptySet() : new LinkedHashSet<Threadable>(list);
+    public Set<MailMessage> getRefs(final String messageId) {
+        final List<MailMessage> list = refsMap.get(messageId);
+        return list == null ? Collections.<MailMessage> emptySet() : new LinkedHashSet<MailMessage>(list);
     }
 
     /**
-     * Gets the {@code Threadable} instances whose <code>Message-Id</code> header matches given <code>Message-Id</code> header
-     *
-     * @param messageId The <code>Message-Id</code> header
-     * @return The {@code Threadable} instances
-     */
-    public List<Threadable> getMessageId(final String messageId) {
-        return messageIdMap.get(messageId);
-    }
-
-    /**
-     * Fills this mapping with specified {@code Threadable} instance.
+     * Gets the {@code MailMessage} instances whose <code>Message-Id</code> header matches given <code>Message-Id</code> header
      * 
-     * @param t The {@code Threadable} instance
+     * @param messageId The <code>Message-Id</code> header
+     * @return The {@code MailMessage} instances
+     */
+    public Set<MailMessage> getMessageId(final String messageId) {
+        final List<MailMessage> list = messageIdMap.get(messageId);
+        return list == null ? Collections.<MailMessage> emptySet() : new LinkedHashSet<MailMessage>(list);
+    }
+
+    /**
+     * Fills this mapping with specified {@code MailMessage} instances.
+     * 
+     * @param mails The {@code MailMessage} instances
      * @return This mapping
      */
-    public ThreadableMapping initWith(final Threadable t) {
-        fill(t, messageIdMap, refsMap);
+    public ThreadableMapping initWith(final List<MailMessage> mails) {
+        fill(mails, messageIdMap, refsMap);
         return this;
     }
 
-    private static void fill(final Threadable t, final Map<String, List<Threadable>> messageIdMap, final Map<String, List<Threadable>> refsMap) {
-        Threadable current = t;
-        while (null != current) {
-            final String[] refs = t.refs;
+    private static void fill(final List<MailMessage> mails, final Map<String, List<MailMessage>> messageIdMap, final Map<String, List<MailMessage>> refsMap) {
+        final String hdrMessageId = MessageHeaders.HDR_MESSAGE_ID;
+        for (final MailMessage current : mails) {
+            final String[] refs = current.getReferences();
             if (null != refs) {
                 for (final String reference : refs) {
                     if (!isEmpty(reference)) {
-                        List<Threadable> list = refsMap.get(reference);
+                        List<MailMessage> list = refsMap.get(reference);
                         if (null == list) {
-                            list = new LinkedList<Threadable>();
+                            list = new LinkedList<MailMessage>();
                             refsMap.put(reference, list);
                         }
                         list.add(current);
                     }
                 }
             }
-            final String messageId = t.messageId;
+            final String messageId = current.getFirstHeader(hdrMessageId);
             if (!isEmpty(messageId)) {
-                List<Threadable> list = messageIdMap.get(messageId);
+                List<MailMessage> list = messageIdMap.get(messageId);
                 if (null == list) {
-                    list = new LinkedList<Threadable>();
+                    list = new LinkedList<MailMessage>();
                     messageIdMap.put(messageId, list);
                 }
                 list.add(current);
             }
-            final Threadable kid = current.kid;
-            if (null != kid) {
-                fill(kid, messageIdMap, refsMap);
-            }
-            current = current.next;
         }
     }
 

@@ -49,6 +49,8 @@
 
 package com.openexchange.imap.threader;
 
+import static com.openexchange.imap.command.NewFetchIMAPCommand.getFetchCommand;
+import static com.openexchange.imap.command.NewFetchIMAPCommand.handleFetchRespone;
 import static com.openexchange.mail.MailServletInterface.mailInterfaceMonitor;
 import gnu.trove.TLongCollection;
 import gnu.trove.set.TIntSet;
@@ -62,11 +64,13 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
+import javax.mail.FetchProfile;
 import javax.mail.Header;
 import javax.mail.MessagingException;
 import javax.mail.internet.InternetHeaders;
 import org.apache.commons.logging.Log;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.exception.OXException;
 import com.openexchange.imap.IMAPCommandsCollection;
 import com.openexchange.imap.IMAPException;
 import com.openexchange.imap.IMAPMessageStorage;
@@ -75,6 +79,7 @@ import com.openexchange.imap.threader.ThreadableCache.ThreadableCacheEntry;
 import com.openexchange.imap.threader.nntp.ThreadableImpl;
 import com.openexchange.imap.threadsort.ThreadSortNode;
 import com.openexchange.imap.util.ImapUtility;
+import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.mail.mime.utils.MimeMessageUtility;
 import com.openexchange.session.Session;
@@ -176,7 +181,7 @@ public final class Threadables {
      */
     public static ThreadableResult getThreadableFor(final IMAPFolder imapFolder, final boolean sorted, final boolean cache, final int limit, final int accountId, final Session session) throws MessagingException {
         if (!ThreadableCache.isThreadableCacheEnabled()) {
-            Threadable threadable = Threadables.getAllThreadablesFrom(imapFolder, limit);
+            Threadable threadable = getAllThreadablesFrom(imapFolder, limit);
             if (sorted) {
                 if (useCommonsNetThreader()) {
                     threadable = ((ThreadableImpl) new org.apache.commons.net.nntp.Threader().thread(new ThreadableImpl(threadable))).getDelegatee();
@@ -195,7 +200,7 @@ public final class Threadables {
             final long st = logIt ? System.currentTimeMillis() : 0L;
             TLongCollection uids = null;
             if (null == entry.getThreadable() || sorted != entry.isSorted()) {
-                Threadable threadable = Threadables.getAllThreadablesFrom(imapFolder, limit);
+                Threadable threadable = getAllThreadablesFrom(imapFolder, limit);
                 if (sorted) {
                     if (useCommonsNetThreader()) {
                         threadable = ((ThreadableImpl) new org.apache.commons.net.nntp.Threader().thread(new ThreadableImpl(threadable))).getDelegatee();
@@ -219,7 +224,7 @@ public final class Threadables {
                         @Override
                         public void run() {
                             try {
-                                Threadable threadable = Threadables.getAllThreadablesFrom(imapFolder, limit);
+                                Threadable threadable = getAllThreadablesFrom(imapFolder, limit);
                                 if (sorted) {
                                     if (useCommonsNetThreader()) {
                                         threadable = ((ThreadableImpl) new org.apache.commons.net.nntp.Threader().thread(new ThreadableImpl(
@@ -241,7 +246,7 @@ public final class Threadables {
                     }
                     return new ThreadableResult((Threadable) retval.clone(), true);
                 }
-                Threadable threadable = Threadables.getAllThreadablesFrom(imapFolder, limit);
+                Threadable threadable = getAllThreadablesFrom(imapFolder, limit);
                 if (sorted) {
                     if (useCommonsNetThreader()) {
                         threadable = ((ThreadableImpl) new org.apache.commons.net.nntp.Threader().thread(new ThreadableImpl(threadable))).getDelegatee();
@@ -302,6 +307,97 @@ public final class Threadables {
             }
         });
         HANDLERS = Collections.unmodifiableMap(m);
+    }
+
+    /**
+     * Gets the <tt>MailMessage</tt>s for given IMAP folder.
+     * 
+     * @param imapFolder The IMAP folders
+     * @param limit The max. number of messages or <code>-1</code>
+     * @param fetchProfile The FETCH profile
+     * @return The fetched <tt>MailMessage</tt>s
+     * @throws MessagingException If an error occurs
+     */
+    @SuppressWarnings("unchecked")
+    public static List<MailMessage> getAllMailsFrom(final IMAPFolder imapFolder, final int limit, final FetchProfile fetchProfile) throws MessagingException {
+        final int messageCount = imapFolder.getMessageCount();
+        if (messageCount <= 0) {
+            /*
+             * Empty folder...
+             */
+            return Collections.emptyList();
+        }
+        final org.apache.commons.logging.Log log = LOG;
+        return (List<MailMessage>) (imapFolder.doCommand(new IMAPFolder.ProtocolCommand() {
+
+            @Override
+            public Object doCommand(IMAPProtocol protocol) throws ProtocolException {
+                final String command;
+                final Response[] r;
+                {
+                    StringBuilder sb = new StringBuilder(128).append("FETCH ");
+                    if (1 == messageCount) {
+                        sb.append("1");
+                    } else {
+                        if (limit < 0 || limit >= messageCount) {
+                            sb.append("1:*");
+                        } else {
+                            sb.append(messageCount - limit + 1).append(':').append(messageCount);
+                        }
+                    }
+                    sb.append(" (").append(getFetchCommand(protocol.isREV1(), fetchProfile, false)).append(')');
+                    command = sb.toString();
+                    sb = null;
+                    final long start = System.currentTimeMillis();
+                    r = protocol.command(command, null);
+                    final long dur = System.currentTimeMillis() - start;
+                    if (log.isInfoEnabled()) {
+                        log.info('"' + command + "\" for \"" + imapFolder.getFullName() + "\" (" + imapFolder.getStore().toString() + ") took " + dur + "msec.");
+                    }
+                    mailInterfaceMonitor.addUseTime(dur);
+                }
+                final int len = r.length - 1;
+                final Response response = r[len];
+                if (response.isOK()) {
+                    try {
+                        final List<MailMessage> mails = new ArrayList<MailMessage>(messageCount);
+                        final String fullName = imapFolder.getFullName();
+                        final char sep = imapFolder.getSeparator();
+                        final String sFetch = "FETCH";
+                        for (int j = 0; j < len; j++) {
+                            if (sFetch.equals(((IMAPResponse) r[j]).getKey())) {
+                                mails.add(handleFetchRespone((FetchResponse) r[j], fullName, sep));
+                                r[j] = null;
+                            }
+                        }
+                        // Handle remaining responses
+                        protocol.notifyResponseHandlers(r);
+                        return mails;
+                    } catch (final MessagingException e) {
+                        throw new ProtocolException(e.getMessage(), e);
+                    } catch (final OXException e) {
+                        throw new ProtocolException(e.getMessage(), e);
+                    }
+                } else if (response.isBAD()) {
+                    if (ImapUtility.isInvalidMessageset(response)) {
+                        return null;
+                    }
+                    throw new BadCommandException(IMAPException.getFormattedMessage(
+                        IMAPException.Code.PROTOCOL_ERROR,
+                        command,
+                        response.toString() + " (" + imapFolder.getStore().toString() + ")"));
+                } else if (response.isNO()) {
+                    throw new CommandFailedException(IMAPException.getFormattedMessage(
+                        IMAPException.Code.PROTOCOL_ERROR,
+                        command,
+                        response.toString() + " (" + imapFolder.getStore().toString() + ")"));
+                } else {
+                    protocol.handleResult(response);
+                }
+                return null;
+            }
+            
+        }));
     }
 
     /**

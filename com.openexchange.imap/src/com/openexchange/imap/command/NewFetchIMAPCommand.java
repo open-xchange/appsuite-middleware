@@ -51,8 +51,6 @@ package com.openexchange.imap.command;
 
 import gnu.trove.map.hash.TIntIntHashMap;
 import gnu.trove.map.hash.TLongIntHashMap;
-import gnu.trove.set.TIntSet;
-import gnu.trove.set.hash.TIntHashSet;
 import java.io.IOException;
 import java.io.InputStream;
 import java.text.ParseException;
@@ -75,7 +73,6 @@ import javax.mail.internet.InternetAddress;
 import javax.mail.internet.InternetHeaders;
 import javax.mail.internet.MailDateFormat;
 import com.openexchange.exception.OXException;
-import com.openexchange.mail.MailListField;
 import com.openexchange.mail.dataobjects.IDMailMessage;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.mime.ContentType;
@@ -119,28 +116,18 @@ public final class NewFetchIMAPCommand extends AbstractIMAPCommand<MailMessage[]
     private static final int LENGTH_WITH_UID = 13; // "UID FETCH <nums> (<command>)"
 
     private final char separator;
-
     private String[] args;
-
     private final String command;
-
     private boolean uid;
-
     private final int length;
-
     private int index;
-
     private final MailMessage[] retval;
-
     private boolean determineAttachmentByHeader;
-
     private final String fullname;
-
     private final Set<FetchItemHandler> lastHandlers;
-
     private final TLongIntHashMap uid2index;
-
     private final TIntIntHashMap seqNum2index;
+
 
     /**
      * Initializes a new {@link NewFetchIMAPCommand}.
@@ -378,37 +365,10 @@ public final class NewFetchIMAPCommand extends AbstractIMAPCommand<MailMessage[]
             }
         }
         index++;
-        final IDMailMessage mail = new IDMailMessage(null, fullname);
-        // mail.setRecentCount(recentCount);
-        mail.setSeparator(separator);
-        mail.setSeqnum(seqNum);
         boolean error = false;
+        MailMessage mail;
         try {
-            final int itemCount = fetchResponse.getItemCount();
-            for (int j = 0; j < itemCount; j++) {
-                final Item item = fetchResponse.getItem(j);
-                FetchItemHandler itemHandler = MAP.get(item.getClass());
-                if (null == itemHandler) {
-                    itemHandler = getItemHandlerByItem(item);
-                    if (null == itemHandler) {
-                        if (WARN) {
-                            LOG.warn("Unknown FETCH item: " + item.getClass().getName());
-                        }
-                    } else {
-                        lastHandlers.add(itemHandler);
-                        itemHandler.handleItem(item, mail, LOG);
-                    }
-                } else {
-                    lastHandlers.add(itemHandler);
-                    itemHandler.handleItem(item, mail, LOG);
-                }
-            }
-            if (determineAttachmentByHeader) {
-                final String cts = mail.getHeader(MessageHeaders.HDR_CONTENT_TYPE, null);
-                if (null != cts) {
-                    mail.setHasAttachment(new ContentType(cts).startsWith("multipart/mixed"));
-                }
-            }
+            mail = handleFetchRespone(fetchResponse, fullname, separator, lastHandlers, determineAttachmentByHeader);
         } catch (final MessagingException e) {
             /*
              * Discard corrupt message
@@ -416,20 +376,22 @@ public final class NewFetchIMAPCommand extends AbstractIMAPCommand<MailMessage[]
             if (WARN) {
                 final OXException imapExc = MimeMailException.handleMessagingException(e);
                 LOG.warn(
-                    new StringBuilder(128).append("Message #").append(mail.getSeqnum()).append(" discarded: ").append(imapExc.getMessage()).toString(),
+                    new StringBuilder(128).append("Message #").append(seqNum).append(" discarded: ").append(imapExc.getMessage()).toString(),
                     imapExc);
             }
             error = true;
+            mail = null;
         } catch (final OXException e) {
             /*
              * Discard corrupt message
              */
             if (WARN) {
                 LOG.warn(
-                    new StringBuilder(128).append("Message #").append(mail.getSeqnum()).append(" discarded: ").append(e.getMessage()).toString(),
+                    new StringBuilder(128).append("Message #").append(seqNum).append(" discarded: ").append(e.getMessage()).toString(),
                     e);
             }
             error = true;
+            mail = null;
         }
         if (!error) {
             retval[pos] = mail;
@@ -437,100 +399,60 @@ public final class NewFetchIMAPCommand extends AbstractIMAPCommand<MailMessage[]
         return true;
     }
 
-    private static final TIntSet ENV_FIELDS;
-
-    static {
-        final TIntSet set = new TIntHashSet(6);
-        /*
-         * The Envelope is an aggregation of the common attributes of a Message: From, To, Cc, Bcc, ReplyTo, Subject and Date.
-         */
-        set.add(MailListField.FROM.getField());
-        set.add(MailListField.TO.getField());
-        set.add(MailListField.CC.getField());
-        set.add(MailListField.BCC.getField());
-        set.add(MailListField.SUBJECT.getField());
-        set.add(MailListField.SENT_DATE.getField());
-        /*-
-         * Discard the two extra fetch profile items contained in JavaMail's ENVELOPE constant: RFC822.SIZE and INTERNALDATE
-         * set.add(MailListField.RECEIVED_DATE.getField());
-         * set.add(MailListField.SIZE.getField());
-         */
-        ENV_FIELDS = set;
-    }
-
-    /*-
-     * private static void addFetchItem(final FetchProfile fp, final int field) {
-        if (field == MailListField.ID.getField()) {
-            fp.add(UIDFolder.FetchProfileItem.UID);
-        } else if (field == MailListField.ATTACHMENT.getField()) {
-            fp.add(FetchProfile.Item.CONTENT_INFO);
-        } else if (field == MailListField.FROM.getField()) {
-            fp.add(MessageHeaders.HDR_FROM);
-        } else if (field == MailListField.TO.getField()) {
-            fp.add(MessageHeaders.HDR_TO);
-        } else if (field == MailListField.CC.getField()) {
-            fp.add(MessageHeaders.HDR_CC);
-        } else if (field == MailListField.BCC.getField()) {
-            fp.add(MessageHeaders.HDR_BCC);
-        } else if (field == MailListField.SUBJECT.getField()) {
-            fp.add(MessageHeaders.HDR_SUBJECT);
-        } else if (field == MailListField.SIZE.getField()) {
-            fp.add(IMAPFolder.FetchProfileItem.SIZE);
-        } else if (field == MailListField.SENT_DATE.getField()) {
-            fp.add(MessageHeaders.HDR_DATE);
-        } else if (field == MailListField.FLAGS.getField()) {
-            if (!fp.contains(FetchProfile.Item.FLAGS)) {
-                fp.add(FetchProfile.Item.FLAGS);
-            }
-        } else if (field == MailListField.DISPOSITION_NOTIFICATION_TO.getField()) {
-            fp.add(MessageHeaders.HDR_DISP_NOT_TO);
-        } else if (field == MailListField.PRIORITY.getField()) {
-            fp.add(MessageHeaders.HDR_X_PRIORITY);
-        } else if (field == MailListField.COLOR_LABEL.getField()) {
-            if (!fp.contains(FetchProfile.Item.FLAGS)) {
-                fp.add(FetchProfile.Item.FLAGS);
-            }
-        } else if ((field == MailListField.FLAG_SEEN.getField()) && !fp.contains(FetchProfile.Item.FLAGS)) {
-            fp.add(FetchProfile.Item.FLAGS);
-        }
-    }
+    /**
+     * Converts given FETCH response to an appropriate {@link MailMessage} instance.
+     * 
+     * @param fetchResponse The FETCH response to handle
+     * @param fullName The full name of associated folder
+     * @param separator The separator character
+     * @return The resulting mail message
+     * @throws MessagingException If a messaging error occurs
+     * @throws OXException If an OX error occurs
      */
+    public static MailMessage handleFetchRespone(final FetchResponse fetchResponse, final String fullName, final char separator) throws MessagingException, OXException {
+        return handleFetchRespone(fetchResponse, fullName, separator, null, false);
+    }
 
-    /*-
-     * private static FetchItemHandler[] createItemHandlers(final int itemCount, final FetchResponse f,
-            final boolean loadBody) {
-        final FetchItemHandler[] itemHandlers = new FetchItemHandler[itemCount];
+    private static MailMessage handleFetchRespone(final FetchResponse fetchResponse, final String fullName, final char separator, final Set<FetchItemHandler> lastHandlers, final boolean determineAttachmentByHeader) throws MessagingException, OXException {
+        final IDMailMessage mail = new IDMailMessage(null, fullName);
+        // mail.setRecentCount(recentCount);
+        if (separator != '\0') {
+            mail.setSeparator(separator);
+        }
+        mail.setSeqnum(fetchResponse.getNumber());
+        final int itemCount = fetchResponse.getItemCount();
+        final Map<Class<? extends Item>, FetchItemHandler> map = MAP;
         for (int j = 0; j < itemCount; j++) {
-            final Item item = f.getItem(j);
-            FetchItemHandler h = MAP.get(item.getClass());
-            if (null == h) {
-                // Try through instanceof checks
-                if ((item instanceof RFC822DATA) || (item instanceof BODY)) {
-                    if (loadBody) {
-                        h = BODY_ITEM_HANDLER;
-                    } else {
-                        h = HEADER_ITEM_HANDLER;
+            final Item item = fetchResponse.getItem(j);
+            FetchItemHandler itemHandler = map.get(item.getClass());
+            if (null == itemHandler) {
+                itemHandler = getItemHandlerByItem(item);
+                if (null == itemHandler) {
+                    if (WARN) {
+                        LOG.warn("Unknown FETCH item: " + item.getClass().getName());
                     }
-                } else if (item instanceof UID) {
-                    h = UID_ITEM_HANDLER;
-                } else if (item instanceof INTERNALDATE) {
-                    h = INTERNALDATE_ITEM_HANDLER;
-                } else if (item instanceof Flags) {
-                    h = FLAGS_ITEM_HANDLER;
-                } else if (item instanceof ENVELOPE) {
-                    h = ENVELOPE_ITEM_HANDLER;
-                } else if (item instanceof RFC822SIZE) {
-                    h = SIZE_ITEM_HANDLER;
-                } else if (item instanceof BODYSTRUCTURE) {
-                    h = BODYSTRUCTURE_ITEM_HANDLER;
+                } else {
+                    if (null != lastHandlers) {
+                        lastHandlers.add(itemHandler);
+                    }
+                    itemHandler.handleItem(item, mail, LOG);
                 }
+            } else {
+                if (null != lastHandlers) {
+                    lastHandlers.add(itemHandler);
+                }
+                itemHandler.handleItem(item, mail, LOG);
             }
-            itemHandlers[j] = h;
         }
-        return itemHandlers;
+        if (determineAttachmentByHeader) {
+            final String cts = mail.getHeader(MessageHeaders.HDR_CONTENT_TYPE, null);
+            if (null != cts) {
+                mail.setHasAttachment(new ContentType(cts).startsWith("multipart/mixed"));
+            }
+        }
+        return mail;
     }
-     */
-
+    
     private static FetchItemHandler getItemHandlerByItem(final Item item) {
         if ((item instanceof RFC822DATA) || (item instanceof BODY)) {
             return HEADER_ITEM_HANDLER;
@@ -1070,7 +992,7 @@ public final class NewFetchIMAPCommand extends AbstractIMAPCommand<MailMessage[]
      * @param loadBody <code>true</code> if message body should be loaded; otherwise <code>false</code>
      * @return The FETCH items to craft a FETCH command
      */
-    private static String getFetchCommand(final boolean isRev1, final FetchProfile fp, final boolean loadBody) {
+    public static String getFetchCommand(final boolean isRev1, final FetchProfile fp, final boolean loadBody) {
         final StringBuilder command = new StringBuilder(128);
         final boolean envelope;
         if (fp.contains(FetchProfile.Item.ENVELOPE)) {
