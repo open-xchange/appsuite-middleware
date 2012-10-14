@@ -60,7 +60,7 @@ import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.mime.MessageHeaders;
 
 /**
- * {@link ThreadableMapping} - A <code>Message-Id</code> and <code>References</code> mapping from specified {@code Threadable} instance.
+ * {@link ThreadableMapping} - A <code>Message-Id</code> and <code>References</code> mapping from specified {@code MailMessage} instances.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
