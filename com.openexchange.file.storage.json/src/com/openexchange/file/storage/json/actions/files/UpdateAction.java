@@ -84,14 +84,12 @@ public class UpdateAction extends AbstractWriteAction {
     @Override
     public AJAXRequestResult handle(final InfostoreRequest request) throws OXException {
         request.requireFileMetadata().require(Param.TIMESTAMP);
-
-        final IDBasedFileAccess fileAccess = request.getFileAccess();
-
         final File file = request.getFile();
         if (file.getId() == null) {
             throw AjaxExceptionCodes.MISSING_PARAMETER.create("id");
         }
 
+        final IDBasedFileAccess fileAccess = request.getFileAccess();
         if (request.hasUploads()) {
             fileAccess.saveDocument(file, request.getUploadedFileData(), request.getTimestamp(), request.getSentColumns());
         } else {
