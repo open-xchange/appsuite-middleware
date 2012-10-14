@@ -316,21 +316,22 @@ public final class MimeStorageUtility {
     private static final EnumSet<MailField> ENV_FIELDS;
 
     static {
-        ENV_FIELDS = EnumSet.noneOf(MailField.class);
+        final EnumSet<MailField> set = EnumSet.noneOf(MailField.class);
         /*
          * The Envelope is an aggregation of the common attributes of a Message: From, To, Cc, Bcc, ReplyTo, Subject and Date.
          */
-        ENV_FIELDS.add(MailField.FROM);
-        ENV_FIELDS.add(MailField.TO);
-        ENV_FIELDS.add(MailField.CC);
-        ENV_FIELDS.add(MailField.BCC);
-        ENV_FIELDS.add(MailField.SUBJECT);
-        ENV_FIELDS.add(MailField.SENT_DATE);
+        set.add(MailField.FROM);
+        set.add(MailField.TO);
+        set.add(MailField.CC);
+        set.add(MailField.BCC);
+        set.add(MailField.SUBJECT);
+        set.add(MailField.SENT_DATE);
         /*
          * Discard the two extra fetch profile items contained in JavaMail's ENVELOPE constant: RFC822.SIZE and INTERNALDATE
          */
-        // ENV_FIELDS.add(MailListField.RECEIVED_DATE);
-        // ENV_FIELDS.add(MailListField.SIZE);
+        // set.add(MailListField.RECEIVED_DATE);
+        // set.add(MailListField.SIZE);
+        ENV_FIELDS = set;
     }
 
     private static final EnumSet<MailField> ENUM_SET_FULL =
@@ -445,6 +446,7 @@ public final class MimeStorageUtility {
             }
             if (set.contains(MailField.PRIORITY)) {
                 names.remove(HeaderName.valueOf("X-Priority"));
+                names.remove(HeaderName.valueOf("Importance"));
             }
             /*
              * Iterate fields
@@ -463,31 +465,32 @@ public final class MimeStorageUtility {
     }
 
     private static final EnumMap<MailField, FetchProfile.Item> FIELD2ITEM;
-
     private static final EnumMap<MailField, List<String>> FIELD2STRING;
 
     static {
         /*
          * Item map
          */
-        FIELD2ITEM = new EnumMap<MailField, FetchProfile.Item>(MailField.class);
-        FIELD2ITEM.put(MailField.HEADERS, IMAPFolder.FetchProfileItem.HEADERS);
-        FIELD2ITEM.put(MailField.ID, UIDFolder.FetchProfileItem.UID);
-        FIELD2ITEM.put(MailField.CONTENT_TYPE, FetchProfile.Item.CONTENT_INFO);
-        FIELD2ITEM.put(MailField.SIZE, IMAPFolder.FetchProfileItem.SIZE);
-        FIELD2ITEM.put(MailField.FLAGS, FetchProfile.Item.FLAGS);
+        final EnumMap<MailField, FetchProfile.Item> field2item = new EnumMap<MailField, FetchProfile.Item>(MailField.class);
+        field2item.put(MailField.HEADERS, IMAPFolder.FetchProfileItem.HEADERS);
+        field2item.put(MailField.ID, UIDFolder.FetchProfileItem.UID);
+        field2item.put(MailField.CONTENT_TYPE, FetchProfile.Item.CONTENT_INFO);
+        field2item.put(MailField.SIZE, IMAPFolder.FetchProfileItem.SIZE);
+        field2item.put(MailField.FLAGS, FetchProfile.Item.FLAGS);
+        FIELD2ITEM = field2item;
         /*
          * String map
          */
-        FIELD2STRING = new EnumMap<MailField, List<String>>(MailField.class);
-        FIELD2STRING.put(MailField.FROM, Collections.singletonList(MessageHeaders.HDR_FROM));
-        FIELD2STRING.put(MailField.TO, Collections.singletonList(MessageHeaders.HDR_TO));
-        FIELD2STRING.put(MailField.CC, Collections.singletonList(MessageHeaders.HDR_CC));
-        FIELD2STRING.put(MailField.BCC, Collections.singletonList(MessageHeaders.HDR_BCC));
-        FIELD2STRING.put(MailField.SUBJECT, Collections.singletonList(MessageHeaders.HDR_SUBJECT));
-        FIELD2STRING.put(MailField.SENT_DATE, Collections.singletonList(MessageHeaders.HDR_DATE));
-        FIELD2STRING.put(MailField.DISPOSITION_NOTIFICATION_TO, Collections.singletonList(MessageHeaders.HDR_DISP_NOT_TO));
-        FIELD2STRING.put(MailField.PRIORITY, Arrays.asList(MessageHeaders.HDR_IMPORTANCE, MessageHeaders.HDR_X_PRIORITY));
+        final EnumMap<MailField, List<String>> field2string = new EnumMap<MailField, List<String>>(MailField.class);
+        field2string.put(MailField.FROM, Collections.singletonList(MessageHeaders.HDR_FROM));
+        field2string.put(MailField.TO, Collections.singletonList(MessageHeaders.HDR_TO));
+        field2string.put(MailField.CC, Collections.singletonList(MessageHeaders.HDR_CC));
+        field2string.put(MailField.BCC, Collections.singletonList(MessageHeaders.HDR_BCC));
+        field2string.put(MailField.SUBJECT, Collections.singletonList(MessageHeaders.HDR_SUBJECT));
+        field2string.put(MailField.SENT_DATE, Collections.singletonList(MessageHeaders.HDR_DATE));
+        field2string.put(MailField.DISPOSITION_NOTIFICATION_TO, Collections.singletonList(MessageHeaders.HDR_DISP_NOT_TO));
+        field2string.put(MailField.PRIORITY, Arrays.asList(MessageHeaders.HDR_IMPORTANCE, MessageHeaders.HDR_X_PRIORITY));
+        FIELD2STRING = field2string;
     }
 
     private static void addFetchItem(final FetchProfile fp, final MailField field) {

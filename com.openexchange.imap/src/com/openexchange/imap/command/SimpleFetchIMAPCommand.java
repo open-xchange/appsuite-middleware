@@ -348,95 +348,23 @@ public final class SimpleFetchIMAPCommand extends AbstractIMAPCommand<TLongObjec
     private static final Set<Integer> ENV_FIELDS;
 
     static {
-        ENV_FIELDS = new HashSet<Integer>(6);
+        final Set<Integer> set = new HashSet<Integer>(6);
         /*
          * The Envelope is an aggregation of the common attributes of a Message: From, To, Cc, Bcc, ReplyTo, Subject and Date.
          */
-        ENV_FIELDS.add(Integer.valueOf(MailListField.FROM.getField()));
-        ENV_FIELDS.add(Integer.valueOf(MailListField.TO.getField()));
-        ENV_FIELDS.add(Integer.valueOf(MailListField.CC.getField()));
-        ENV_FIELDS.add(Integer.valueOf(MailListField.BCC.getField()));
-        ENV_FIELDS.add(Integer.valueOf(MailListField.SUBJECT.getField()));
-        ENV_FIELDS.add(Integer.valueOf(MailListField.SENT_DATE.getField()));
+        set.add(Integer.valueOf(MailListField.FROM.getField()));
+        set.add(Integer.valueOf(MailListField.TO.getField()));
+        set.add(Integer.valueOf(MailListField.CC.getField()));
+        set.add(Integer.valueOf(MailListField.BCC.getField()));
+        set.add(Integer.valueOf(MailListField.SUBJECT.getField()));
+        set.add(Integer.valueOf(MailListField.SENT_DATE.getField()));
         /*-
          * Discard the two extra fetch profile items contained in JavaMail's ENVELOPE constant: RFC822.SIZE and INTERNALDATE
-         * ENV_FIELDS.add(Integer.valueOf(MailListField.RECEIVED_DATE.getField()));
-         * ENV_FIELDS.add(Integer.valueOf(MailListField.SIZE.getField()));
+         * set.add(Integer.valueOf(MailListField.RECEIVED_DATE.getField()));
+         * set.add(Integer.valueOf(MailListField.SIZE.getField()));
          */
+        ENV_FIELDS = set;
     }
-
-    /*-
-     * private static void addFetchItem(final FetchProfile fp, final int field) {
-        if (field == MailListField.ID.getField()) {
-            fp.add(UIDFolder.FetchProfileItem.UID);
-        } else if (field == MailListField.ATTACHMENT.getField()) {
-            fp.add(FetchProfile.Item.CONTENT_INFO);
-        } else if (field == MailListField.FROM.getField()) {
-            fp.add(MessageHeaders.HDR_FROM);
-        } else if (field == MailListField.TO.getField()) {
-            fp.add(MessageHeaders.HDR_TO);
-        } else if (field == MailListField.CC.getField()) {
-            fp.add(MessageHeaders.HDR_CC);
-        } else if (field == MailListField.BCC.getField()) {
-            fp.add(MessageHeaders.HDR_BCC);
-        } else if (field == MailListField.SUBJECT.getField()) {
-            fp.add(MessageHeaders.HDR_SUBJECT);
-        } else if (field == MailListField.SIZE.getField()) {
-            fp.add(IMAPFolder.FetchProfileItem.SIZE);
-        } else if (field == MailListField.SENT_DATE.getField()) {
-            fp.add(MessageHeaders.HDR_DATE);
-        } else if (field == MailListField.FLAGS.getField()) {
-            if (!fp.contains(FetchProfile.Item.FLAGS)) {
-                fp.add(FetchProfile.Item.FLAGS);
-            }
-        } else if (field == MailListField.DISPOSITION_NOTIFICATION_TO.getField()) {
-            fp.add(MessageHeaders.HDR_DISP_NOT_TO);
-        } else if (field == MailListField.PRIORITY.getField()) {
-            fp.add(MessageHeaders.HDR_X_PRIORITY);
-        } else if (field == MailListField.COLOR_LABEL.getField()) {
-            if (!fp.contains(FetchProfile.Item.FLAGS)) {
-                fp.add(FetchProfile.Item.FLAGS);
-            }
-        } else if ((field == MailListField.FLAG_SEEN.getField()) && !fp.contains(FetchProfile.Item.FLAGS)) {
-            fp.add(FetchProfile.Item.FLAGS);
-        }
-    }
-     */
-
-    /*-
-     * private static FetchItemHandler[] createItemHandlers(final int itemCount, final FetchResponse f,
-            final boolean loadBody) {
-        final FetchItemHandler[] itemHandlers = new FetchItemHandler[itemCount];
-        for (int j = 0; j < itemCount; j++) {
-            final Item item = f.getItem(j);
-            FetchItemHandler h = MAP.get(item.getClass());
-            if (null == h) {
-                // Try through instanceof checks
-                if ((item instanceof RFC822DATA) || (item instanceof BODY)) {
-                    if (loadBody) {
-                        h = BODY_ITEM_HANDLER;
-                    } else {
-                        h = HEADER_ITEM_HANDLER;
-                    }
-                } else if (item instanceof UID) {
-                    h = UID_ITEM_HANDLER;
-                } else if (item instanceof INTERNALDATE) {
-                    h = INTERNALDATE_ITEM_HANDLER;
-                } else if (item instanceof Flags) {
-                    h = FLAGS_ITEM_HANDLER;
-                } else if (item instanceof ENVELOPE) {
-                    h = ENVELOPE_ITEM_HANDLER;
-                } else if (item instanceof RFC822SIZE) {
-                    h = SIZE_ITEM_HANDLER;
-                } else if (item instanceof BODYSTRUCTURE) {
-                    h = BODYSTRUCTURE_ITEM_HANDLER;
-                }
-            }
-            itemHandlers[j] = h;
-        }
-        return itemHandlers;
-    }
-     */
 
     private static FetchItemHandler getItemHandlerByItem(final Item item) {
         if ((item instanceof RFC822DATA) || (item instanceof BODY)) {

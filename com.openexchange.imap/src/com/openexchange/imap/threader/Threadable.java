@@ -57,7 +57,7 @@ import java.util.Iterator;
 import java.util.NoSuchElementException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import com.openexchange.imap.threadsort.MessageId;
+import com.openexchange.imap.threadsort.MessageInfo;
 
 /**
  * {@code Threadable} - An element within thread-sorted structure holding needed message information.
@@ -133,12 +133,12 @@ public final class Threadable implements Cloneable, Serializable, Iterable<Threa
     }
 
     /**
-     * Gets the appropriate {@code MessageId} for this {@code Threadable}.
+     * Gets the appropriate {@code MessageInfo} for this {@code Threadable}.
      * 
-     * @return The appropriate {@code MessageId}
+     * @return The appropriate {@code MessageInfo}
      */
-    public MessageId toMessageId() {
-        return new MessageId(messageNumber).setFullName(fullName);
+    public MessageInfo toMessageInfo() {
+        return new MessageInfo(messageNumber).setFullName(fullName);
     }
 
     /**

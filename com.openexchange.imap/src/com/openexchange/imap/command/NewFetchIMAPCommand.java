@@ -51,6 +51,8 @@ package com.openexchange.imap.command;
 
 import gnu.trove.map.hash.TIntIntHashMap;
 import gnu.trove.map.hash.TLongIntHashMap;
+import gnu.trove.set.TIntSet;
+import gnu.trove.set.hash.TIntHashSet;
 import java.io.IOException;
 import java.io.InputStream;
 import java.text.ParseException;
@@ -435,24 +437,25 @@ public final class NewFetchIMAPCommand extends AbstractIMAPCommand<MailMessage[]
         return true;
     }
 
-    private static final Set<Integer> ENV_FIELDS;
+    private static final TIntSet ENV_FIELDS;
 
     static {
-        ENV_FIELDS = new HashSet<Integer>(6);
+        final TIntSet set = new TIntHashSet(6);
         /*
          * The Envelope is an aggregation of the common attributes of a Message: From, To, Cc, Bcc, ReplyTo, Subject and Date.
          */
-        ENV_FIELDS.add(Integer.valueOf(MailListField.FROM.getField()));
-        ENV_FIELDS.add(Integer.valueOf(MailListField.TO.getField()));
-        ENV_FIELDS.add(Integer.valueOf(MailListField.CC.getField()));
-        ENV_FIELDS.add(Integer.valueOf(MailListField.BCC.getField()));
-        ENV_FIELDS.add(Integer.valueOf(MailListField.SUBJECT.getField()));
-        ENV_FIELDS.add(Integer.valueOf(MailListField.SENT_DATE.getField()));
+        set.add(MailListField.FROM.getField());
+        set.add(MailListField.TO.getField());
+        set.add(MailListField.CC.getField());
+        set.add(MailListField.BCC.getField());
+        set.add(MailListField.SUBJECT.getField());
+        set.add(MailListField.SENT_DATE.getField());
         /*-
          * Discard the two extra fetch profile items contained in JavaMail's ENVELOPE constant: RFC822.SIZE and INTERNALDATE
-         * ENV_FIELDS.add(Integer.valueOf(MailListField.RECEIVED_DATE.getField()));
-         * ENV_FIELDS.add(Integer.valueOf(MailListField.SIZE.getField()));
+         * set.add(MailListField.RECEIVED_DATE.getField());
+         * set.add(MailListField.SIZE.getField());
          */
+        ENV_FIELDS = set;
     }
 
     /*-

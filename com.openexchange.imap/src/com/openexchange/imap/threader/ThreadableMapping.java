@@ -65,7 +65,7 @@ import java.util.Set;
 public final class ThreadableMapping {
 
     private final Map<String, List<Threadable>> refsMap;
-    private final Map<String, Threadable> messageIdMap;
+    private final Map<String, List<Threadable>> messageIdMap;
 
     /**
      * Initializes a new {@link ThreadableMapping}.
@@ -73,27 +73,27 @@ public final class ThreadableMapping {
     public ThreadableMapping(final int capacity) {
         super();
         refsMap = new HashMap<String, List<Threadable>>(capacity << 1, 0.9f);
-        messageIdMap = new HashMap<String, Threadable>(capacity, 0.9f);
+        messageIdMap = new HashMap<String, List<Threadable>>(capacity, 0.9f);
     }
 
     /**
      * Gets those {@code Threadable} instances whose <code>References</code> header contain specified <code>Message-Id</code> header.
-     *
+     * 
      * @param messageId The <code>Message-Id</code> header
      * @return The {@code Threadable} instances
      */
     public Set<Threadable> getRefs(final String messageId) {
         final List<Threadable> list = refsMap.get(messageId);
-        return list == null ? Collections.<Threadable>emptySet() : new LinkedHashSet<Threadable>(list);
+        return list == null ? Collections.<Threadable> emptySet() : new LinkedHashSet<Threadable>(list);
     }
 
     /**
-     * Gets the {@code Threadable} instance whose <code>Message-Id</code> header matches given <code>Message-Id</code> header
+     * Gets the {@code Threadable} instances whose <code>Message-Id</code> header matches given <code>Message-Id</code> header
      *
      * @param messageId The <code>Message-Id</code> header
-     * @return The {@code Threadable} instance
+     * @return The {@code Threadable} instances
      */
-    public Threadable getMessageId(final String messageId) {
+    public List<Threadable> getMessageId(final String messageId) {
         return messageIdMap.get(messageId);
     }
 
@@ -108,7 +108,7 @@ public final class ThreadableMapping {
         return this;
     }
 
-    private static void fill(final Threadable t, final Map<String, Threadable> messageIdMap, final Map<String, List<Threadable>> refsMap) {
+    private static void fill(final Threadable t, final Map<String, List<Threadable>> messageIdMap, final Map<String, List<Threadable>> refsMap) {
         Threadable current = t;
         while (null != current) {
             final String[] refs = t.refs;
@@ -126,7 +126,12 @@ public final class ThreadableMapping {
             }
             final String messageId = t.messageId;
             if (!isEmpty(messageId)) {
-                messageIdMap.put(messageId, current);
+                List<Threadable> list = messageIdMap.get(messageId);
+                if (null == list) {
+                    list = new LinkedList<Threadable>();
+                    messageIdMap.put(messageId, list);
+                }
+                list.add(current);
             }
             final Threadable kid = current.kid;
             if (null != kid) {

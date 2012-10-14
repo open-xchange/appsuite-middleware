@@ -133,6 +133,19 @@ public final class Threadables {
     }
 
     /**
+     * Performs threading algorithm on specified {@code Threadable} instance.
+     * 
+     * @param threadable
+     * @return
+     */
+    public static Threadable applyThreaderTo(final Threadable threadable) {
+        if (useCommonsNetThreader()) {
+            return ((ThreadableImpl) new org.apache.commons.net.nntp.Threader().thread(new ThreadableImpl(threadable))).getDelegatee();
+        }
+        return new Threader().thread(threadable);
+    }
+
+    /**
      * Simple container class.
      */
     public static final class ThreadableResult {
@@ -584,7 +597,7 @@ public final class Threadables {
             while (null != t) {
                 sb.append('(');
                 if (t.messageNumber > 0) {
-                    sb.append(t.toMessageId());
+                    sb.append(t.toMessageInfo());
                 }
                 final Threadable kid = t.kid;
                 if (null != kid) {
@@ -606,7 +619,7 @@ public final class Threadables {
                 if (filter.contains(t.messageNumber)) {
                     sb.append('(');
                     if (t.messageNumber > 0) {
-                        sb.append(t.toMessageId());
+                        sb.append(t.toMessageInfo());
                     }
                     final Threadable kid = t.kid;
                     if (null != kid) {
@@ -670,7 +683,7 @@ public final class Threadables {
             if (cur.isDummy()) {
                 fillInList(cur.kid, list);
             } else {
-                final ThreadSortNode node = new ThreadSortNode(cur.toMessageId(), cur.uid);
+                final ThreadSortNode node = new ThreadSortNode(cur.toMessageInfo(), cur.uid);
                 list.add(node);
                 // Check kids
                 final Threadable kid = cur.kid;
