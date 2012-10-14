@@ -1,3 +1,7 @@
+* 2012-10-14 - thorben.betten@open-xchange.com
+
+ - Fix for bug 23190: Maintain file name during move operation
+
 * 2012-10-10 - thorben.betten@open-xchange.com
 
  - Fix for bug 23238: Properly dealing with transient map on serialization attempt
