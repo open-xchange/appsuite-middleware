@@ -136,12 +136,16 @@ final class ThreadContainer {
      * @return <code>true</code> if child is under self's tree; otherwise <code>false</code>
      */
     boolean findChild(final ThreadContainer target) {
-        if (child == null) {
+        try {
+            if (child == null) {
+                return false;
+            } else if (child == target) {
+                return true;
+            } else {
+                return child.findChild(target);
+            }
+        } catch (final StackOverflowError error) {
             return false;
-        } else if (child == target) {
-            return true;
-        } else {
-            return child.findChild(target);
         }
     }
 
