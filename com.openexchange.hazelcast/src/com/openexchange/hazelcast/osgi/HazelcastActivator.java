@@ -25,7 +25,6 @@ import com.hazelcast.config.TcpIpConfig;
 import com.hazelcast.core.Hazelcast;
 import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.impl.GroupProperties;
-import com.hazelcast.nio.Address;
 import com.openexchange.cluster.discovery.ClusterDiscoveryService;
 import com.openexchange.cluster.discovery.ClusterListener;
 import com.openexchange.config.ConfigurationService;
@@ -175,8 +174,8 @@ public class HazelcastActivator extends HousekeepingActivator {
             }
         });
         openTrackers();
-        
-        registerService(CommandProvider.class, new UtilCommandProvider(), null);
+        // CommandProvider for OSGi console
+        registerService(CommandProvider.class, new UtilCommandProvider(this), null);
     }
 
     /**
@@ -187,6 +186,34 @@ public class HazelcastActivator extends HousekeepingActivator {
     long getDelay() {
         final String delay = getService(ConfigurationService.class).getProperty("com.openexchange.hazelcast.startupDelay", "60000");
         return TimeSpanParser.parseTimespan(delay).longValue();
+    }
+
+    public static final class UtilCommandProvider implements CommandProvider {
+
+        private final HazelcastActivator activator;
+
+        public UtilCommandProvider(final HazelcastActivator activator) {
+            super();
+            this.activator = activator;
+        }
+
+        @Override
+        public String getHelp() {
+            final StringBuilder help = new StringBuilder();
+            help.append("\taddnode - Add a solr node.\n");
+            return help.toString();
+        }
+        
+        public void _addnode(final CommandInterpreter commandInterpreter) {
+            final String ip = commandInterpreter.nextArgument();
+            try {
+                activator.init(Collections.singletonList(InetAddress.getByName(ip)), true, System.currentTimeMillis(), LOG);
+                commandInterpreter.println("Added node to Hazelcast cluster: " + ip);
+            } catch (UnknownHostException e) {
+                LOG.error("Could not register node.", e);
+                commandInterpreter.println("Couldn't resolve IP: " + ip);
+            }
+        }
     }
 
     /**
@@ -254,7 +281,7 @@ public class HazelcastActivator extends HousekeepingActivator {
      *         done by another call
      */
     InitMode init(final List<InetAddress> nodes, final boolean force, final long stamp, final Log logger) {
-        synchronized (this) {
+        synchronized (REF_HAZELCAST_INSTANCE) {
             final HazelcastInstance prevHazelcastInstance = REF_HAZELCAST_INSTANCE.get();
             if (null != prevHazelcastInstance) {
                 // Already initialized
@@ -308,29 +335,6 @@ public class HazelcastActivator extends HousekeepingActivator {
         }
     }
     
-    public static final class UtilCommandProvider implements CommandProvider {
-
-        @Override
-        public String getHelp() {
-            final StringBuilder help = new StringBuilder();
-            help.append("\taddnode - Add a solr node.\n");
-            return help.toString();
-        }
-        
-        public void _addnode(final CommandInterpreter commandInterpreter) {
-            final String ip = commandInterpreter.nextArgument();
-            final HazelcastInstance hazelcast = REF_HAZELCAST_INSTANCE.get();
-            final Join join = hazelcast.getConfig().getNetworkConfig().getJoin();
-            final TcpIpConfig tcpIpConfig = join.getTcpIpConfig();
-            try {
-                tcpIpConfig.addAddress(new Address(InetAddress.getByName(ip), hazelcast.getConfig().getNetworkConfig().getPort()));
-                hazelcast.getLifecycleService().restart();
-            } catch (final UnknownHostException e) {
-                LOG.error("Could not register node.", e);
-            }
-        }
-    }
-
     private InitMode configureNetworkJoin(final List<InetAddress> nodes, final boolean append, final Config config, final Log logger) {
         /*
          * Get reference to network join
