@@ -20,7 +20,10 @@
 package com.openexchange.classloader;
 
 /**
- * Originally taken <a href="from http://sling.apache.org/site/apache-sling.html">Apache Sling</a>.
+ * Originally taken from <a href="from http://sling.apache.org/site/apache-sling.html">Apache Sling</a>.
+ * <p>
+ * &nbsp;&nbsp;<img src="http://sling.apache.org/site/media.data/logo.png">
+ * <p>
  * <p>
  * &nbsp;&nbsp;<img src="http://sling.apache.org/site/media.data/logo.png">
  * <p>

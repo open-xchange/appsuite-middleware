@@ -28,7 +28,10 @@ import java.util.List;
 import org.apache.commons.logging.Log;
 
 /**
- * Originally taken <a href="from http://sling.apache.org/site/apache-sling.html">Apache Sling</a>.
+ * Originally taken from <a href="from http://sling.apache.org/site/apache-sling.html">Apache Sling</a>.
+ * <p>
+ * &nbsp;&nbsp;<img src="http://sling.apache.org/site/media.data/logo.png">
+ * <p>
  * <p>
  * &nbsp;&nbsp;<img src="http://sling.apache.org/site/media.data/logo.png">
  * <p>
