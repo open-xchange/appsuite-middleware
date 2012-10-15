@@ -61,6 +61,7 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.mail.MessagingException;
+import org.apache.commons.logging.Log;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.ThreadSortMailMessage;
@@ -79,7 +80,7 @@ import com.sun.mail.imap.protocol.IMAPResponse;
  */
 public final class ThreadSortUtil {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(ThreadSortUtil.class));
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(ThreadSortUtil.class);
 
     /**
      * Prevent instantiation
@@ -287,6 +288,7 @@ public final class ThreadSortUtil {
      * @throws MessagingException If a messaging error occurs
      */
     public static String getThreadResponse(final IMAPFolder imapFolder, final String sortRange) throws MessagingException {
+        final Log log = LOG;
         final Object val = imapFolder.doCommand(new IMAPFolder.ProtocolCommand() {
 
             @Override
@@ -294,11 +296,15 @@ public final class ThreadSortUtil {
                 final Response[] r;
                 {
                     final String commandStart = "THREAD REFERENCES UTF-8 ";
+                    final String command =
+                        new StringBuilder(commandStart.length() + sortRange.length()).append(commandStart).append(sortRange).toString();
                     final long start = System.currentTimeMillis();
-                    r = p.command(
-                        new StringBuilder(commandStart.length() + sortRange.length()).append(commandStart).append(sortRange).toString(),
-                        null);
-                    mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
+                    r = p.command(command, null);
+                    final long dur = System.currentTimeMillis() - start;
+                    if (log.isInfoEnabled()) {
+                        log.info('"' + command + "\" for \"" + imapFolder.getFullName() + "\" (" + imapFolder.getStore().toString() + ") took " + dur + "msec.");
+                    }
+                    mailInterfaceMonitor.addUseTime(dur);
                 }
                 final Response response = r[r.length - 1];
                 String retval = null;

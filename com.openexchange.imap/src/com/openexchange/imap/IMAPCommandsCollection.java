@@ -87,7 +87,7 @@ import javax.mail.Store;
 import javax.mail.StoreClosedException;
 import javax.mail.event.FolderEvent;
 import com.openexchange.exception.OXException;
-import com.openexchange.imap.command.FetchIMAPCommand;
+import com.openexchange.imap.command.MessageFetchIMAPCommand;
 import com.openexchange.imap.command.FlagsIMAPCommand;
 import com.openexchange.imap.command.IMAPNumArgSplitter;
 import com.openexchange.imap.dataobjects.ExtendedIMAPFolder;
@@ -1822,7 +1822,7 @@ public final class IMAPCommandsCollection {
                     final boolean body = set.contains(MailField.BODY) || set.contains(MailField.FULL);
                     final MailField sort = MailField.toField((sortField == null ? MailSortField.RECEIVED_DATE : sortField).getListField());
                     final FetchProfile fp = null == sort ? getFetchProfile(fields, fastFetch) : getFetchProfile(fields, sort, fastFetch);
-                    newMsgs = new FetchIMAPCommand(folder, p.isREV1(), newMsgSeqNums, fp, false, false, body).doCommand();
+                    newMsgs = new MessageFetchIMAPCommand(folder, p.isREV1(), newMsgSeqNums, fp, false, false, body).doCommand();
                 } catch (final MessagingException e) {
                     throw wrapException(e, null);
                 }
