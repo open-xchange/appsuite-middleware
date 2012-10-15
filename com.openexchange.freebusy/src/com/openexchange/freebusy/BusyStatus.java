@@ -76,14 +76,15 @@ public enum BusyStatus {
     TEMPORARY(Appointment.TEMPORARY),
     
     /**
+     * Busy / <code>Appointment.RESERVED</code>
+     */
+    RESERVED(Appointment.RESERVED),
+
+    /**
      * Out of Office (OOF) / <code>Appointment.ABSENT</code>
      */
     ABSENT(Appointment.ABSENT),
     
-    /**
-     * Busy / <code>Appointment.RESERVED</code>
-     */
-    RESERVED(Appointment.RESERVED),
     ;
 
     /**
@@ -128,7 +129,7 @@ public enum BusyStatus {
 
     /**
      * Gets a value indicating whether this busy status is more conflicting than another one, i.e. it denotes a 'more busy' state
-     * (in the order: <code>RESERVED > ABSENT > TEMPORARY > FREE > UNKNOWN</code>).
+     * (in the order: <code>ABSENT > RESERVED > TEMPORARY > FREE > UNKNOWN</code>).
      * 
      * @param other The busy status to compare
      * @return <code>true</code>, if this status is more conflicting, <code>false</code>, otherwise
