@@ -1,17 +1,6 @@
 package com.openexchange.solr.osgi;
 
-import java.io.IOException;
-import java.net.InetAddress;
-import java.net.ServerSocket;
-import java.net.UnknownHostException;
-import java.rmi.AlreadyBoundException;
-import java.rmi.NotBoundException;
-import java.rmi.RemoteException;
-import java.rmi.registry.LocateRegistry;
-import java.rmi.registry.Registry;
-import java.rmi.server.RMIServerSocketFactory;
-import java.rmi.server.RMISocketFactory;
-import java.rmi.server.UnicastRemoteObject;
+import java.rmi.Remote;
 import javax.management.MalformedObjectNameException;
 import javax.management.NotCompliantMBeanException;
 import javax.management.ObjectName;
@@ -64,8 +53,7 @@ public class SolrActivator extends HousekeepingActivator {
     private SolrMBean solrMBean;
 
     private ObjectName solrMBeanName;
-
-    private int rmiPort = -1;
+    
 
 	@Override
 	protected Class<?>[] getNeededServices() {
@@ -84,7 +72,8 @@ public class SolrActivator extends HousekeepingActivator {
 		SolrCoreConfigServiceImpl coreService = new SolrCoreConfigServiceImpl();
 		registerService(SolrCoreConfigService.class, coreService);
 		addService(SolrCoreConfigService.class, coreService);
-		registerRMIInterface();
+		solrRMI = new RMISolrAccessImpl(embeddedAccess);
+		registerService(Remote.class, solrRMI);
 
 		SolrCoresCreateTableService createTableService = new SolrCoresCreateTableService();
 		registerService(CreateTableService.class, createTableService);
@@ -107,8 +96,8 @@ public class SolrActivator extends HousekeepingActivator {
 	@Override
 	protected void stopBundle() throws Exception {
 		super.stopBundle();
-
-		unregisterRMIInterface();
+		
+		solrRMI = null;
 		ManagementService managementService = Services.optService(ManagementService.class);
 		if (managementService != null && solrMBeanName != null) {
 		    managementService.unregisterMBean(solrMBeanName);
@@ -151,62 +140,6 @@ public class SolrActivator extends HousekeepingActivator {
             LOG.error(e.getMessage(), e);
         } catch (NotCompliantMBeanException e) {
             LOG.error(e.getMessage(), e);
-        }
-	}
-
-	private void registerRMIInterface() {
-		LOG.info("Registering Solr RMI Interface.");
-		ConfigurationService config = getService(ConfigurationService.class);
-		EmbeddedSolrAccessImpl embeddedAccess = this.delegationAccess.getEmbeddedServerAccess();
-		solrRMI = new RMISolrAccessImpl(embeddedAccess);
-        try {
-            RMISolrAccessService stub = (RMISolrAccessService) UnicastRemoteObject.exportObject(solrRMI, 0);
-            final InetAddress addr = InetAddress.getLocalHost();
-            rmiPort  = config.getIntProperty("RMI_PORT", 1099);
-            Registry registry = null;
-            try {
-                registry = LocateRegistry.createRegistry(rmiPort , RMISocketFactory.getDefaultSocketFactory(), new RMIServerSocketFactory() {
-                    @Override
-                    public ServerSocket createServerSocket(int port) throws IOException {
-                        ServerSocket socket = new ServerSocket(port, 0, addr);
-                        return socket;
-                    }
-
-                });
-            } catch (RemoteException e) {
-                LOG.info("RMI registry seems to be already exported.");
-                try {
-                    registry = LocateRegistry.getRegistry(addr.getHostAddress(), rmiPort );
-                } catch (RemoteException r) {
-                    LOG.error("Could not get RMI registry. SolrServerRMI will not be registered!", r);
-                    solrRMI = null;
-                }
-            }
-
-            if (registry != null) {
-                registry.bind(RMISolrAccessService.RMI_NAME, stub);
-            }
-        } catch (RemoteException e) {
-            LOG.error(e.getMessage(), e);
-        } catch (UnknownHostException e) {
-            LOG.error(e.getMessage(), e);
-        } catch (AlreadyBoundException e) {
-            LOG.error(e.getMessage(), e);
-        }
-		
-	}
-
-	private void unregisterRMIInterface() throws UnknownHostException, NotBoundException {
-		if (rmiPort > 0) {
-            try {
-                LOG.info("Unregistering Solr RMI Interface.");
-                InetAddress addr = InetAddress.getLocalHost();
-                Registry registry = LocateRegistry.getRegistry(addr.getHostAddress(), rmiPort);
-
-                registry.unbind(RMISolrAccessService.RMI_NAME);
-            } catch (RemoteException r) {
-                LOG.error("Could not get RMI registry.", r);
-            }
         }
 	}
 
