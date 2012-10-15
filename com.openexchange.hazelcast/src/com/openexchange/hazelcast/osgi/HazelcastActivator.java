@@ -233,6 +233,7 @@ public class HazelcastActivator extends HousekeepingActivator {
             if (!cur.removeAll(members)) {
                 return InitMode.NONE;
             }
+            tcpIpConfig.clear();
             tcpIpConfig.setMembers(new ArrayList<String>(cur));
             hazelcastInstance.getLifecycleService().restart();
             if (logger.isInfoEnabled()) {
@@ -360,6 +361,7 @@ public class HazelcastActivator extends HousekeepingActivator {
             for (final String candidate : members) {
                 cur.add(candidate);
             }
+            tcpIpConfig.clear();
             tcpIpConfig.setMembers(new ArrayList<String>(cur));
         } else {
             config.getNetworkConfig().setPort(NetworkConfig.DEFAULT_PORT);
