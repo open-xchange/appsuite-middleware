@@ -54,7 +54,7 @@ import com.openexchange.realtime.MessageDispatcher;
 import com.openexchange.realtime.StanzaSender;
 import com.openexchange.realtime.packet.Stanza;
 import com.openexchange.realtime.payload.PayloadElement;
-import com.openexchange.realtime.payload.PayloadTransformer;
+import com.openexchange.realtime.payload.PayloadElementTransformer;
 import com.openexchange.realtime.util.ElementPath;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.session.ServerSession;
@@ -65,7 +65,7 @@ import com.openexchange.tools.session.ServerSession;
  * 
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
-public class OXRTConversionHandler implements PayloadTransformer {
+public class OXRTConversionHandler implements PayloadElementTransformer {
 
     public static ServiceLookup services;
 

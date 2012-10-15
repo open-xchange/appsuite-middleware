@@ -57,7 +57,7 @@ import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link PayloadElement} - Represents a stanza's payload element that is any (POJO) object linked with its format identifier. Namespace and
- * elementName are used for unique identification (@see ElementPath) of payload elements and determine which {@link PayloadTransformer}
+ * elementName are used for unique identification (@see ElementPath) of payload elements and determine which {@link PayloadElementTransformer}
  * to use. Payloads can form n-ary trees: Payload = data , {Payload}
  * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>

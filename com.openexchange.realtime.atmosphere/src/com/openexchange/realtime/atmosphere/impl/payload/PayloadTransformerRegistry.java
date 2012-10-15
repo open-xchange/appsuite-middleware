@@ -54,11 +54,11 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import com.openexchange.osgi.ServiceRegistry;
-import com.openexchange.realtime.payload.PayloadTransformer;
+import com.openexchange.realtime.payload.PayloadElementTransformer;
 import com.openexchange.realtime.util.ElementPath;
 
 /**
- * {@link PayloadTransformerRegistry} - Tracks registered {@link PayloadTransformer handlers} and
+ * {@link PayloadTransformerRegistry} - Tracks registered {@link PayloadElementTransformer handlers} and
  * makes them accessible through {@link #getHandlerFor(String)}.
  * This is important to the AtmosphereChannel and associated Channel handler.
  * The Channel can decide if it is able to process incoming Stanzas into POJOs
@@ -73,14 +73,14 @@ public class PayloadTransformerRegistry extends ServiceRegistry {
 
     private static final PayloadTransformerRegistry INSTANCE = new PayloadTransformerRegistry();
 
-    private final Map<ElementPath, PayloadTransformer> handlers;
+    private final Map<ElementPath, PayloadElementTransformer> handlers;
 
     /**
      * Encapsulated constructor.
      */
     private PayloadTransformerRegistry() {
         super();
-        handlers = new ConcurrentHashMap<ElementPath, PayloadTransformer>();
+        handlers = new ConcurrentHashMap<ElementPath, PayloadElementTransformer>();
     }
 
     /**
@@ -98,7 +98,7 @@ public class PayloadTransformerRegistry extends ServiceRegistry {
      * @param stanzaClass The Stanza subclass we want to transform.
      * @return The appropriate handler or <code>null</code> if none is applicable.
      */
-    public PayloadTransformer getHandlerFor(ElementPath elementPath) {
+    public PayloadElementTransformer getHandlerFor(ElementPath elementPath) {
         return handlers.get(elementPath);
     }
 
@@ -107,7 +107,7 @@ public class PayloadTransformerRegistry extends ServiceRegistry {
      * 
      * @param transformer The handler to add
      */
-    public void add(PayloadTransformer transformer) {
+    public void add(PayloadElementTransformer transformer) {
         handlers.put(transformer.getElementPath(), transformer);
     }
 
@@ -116,7 +116,7 @@ public class PayloadTransformerRegistry extends ServiceRegistry {
      * 
      * @param transformer The handler to remove
      */
-    public void remove(PayloadTransformer transformer) {
+    public void remove(PayloadElementTransformer transformer) {
         handlers.remove(transformer.getElementPath());
     }
 

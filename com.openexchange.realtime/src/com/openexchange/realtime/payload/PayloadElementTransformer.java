@@ -55,12 +55,12 @@ import com.openexchange.realtime.util.ElementPath;
 import com.openexchange.tools.session.ServerSession;
 
 /**
- * {@link PayloadTransformer} - Used to transform Payload elemnts of incoming and outgoing Stanzas.
+ * {@link PayloadElementTransformer} - Used to transform PayloadTrees of incoming and outgoing Stanzas.
  * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
-public interface PayloadTransformer {
+public interface PayloadElementTransformer {
 
     /**
      * Get the complete path to an element in a namespace that this PayloadTransformer is able to process.
@@ -74,7 +74,7 @@ public interface PayloadTransformer {
      * 
      * @param paylaod The incoming Payload to process
      * @param session The currently active session
-     * @return 
+     * @return
      * @throws OXException When transformation fails
      */
     public PayloadElement incoming(PayloadElement payload, ServerSession session) throws OXException;

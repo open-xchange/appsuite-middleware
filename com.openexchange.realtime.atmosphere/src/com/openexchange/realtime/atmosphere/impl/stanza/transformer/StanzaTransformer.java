@@ -54,7 +54,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.realtime.atmosphere.impl.payload.PayloadTransformerRegistry;
 import com.openexchange.realtime.packet.Stanza;
 import com.openexchange.realtime.payload.PayloadElement;
-import com.openexchange.realtime.payload.PayloadTransformer;
+import com.openexchange.realtime.payload.PayloadElementTransformer;
 import com.openexchange.realtime.payload.PayloadTree;
 import com.openexchange.realtime.payload.PayloadTreeNode;
 import com.openexchange.realtime.util.ElementPath;
@@ -89,7 +89,7 @@ public abstract class StanzaTransformer<T> {
     }
 
     private void incoming(PayloadTreeNode node, ServerSession session) throws OXException {
-        PayloadTransformer transformer = getPayloadTransformer(node.getElementPath());
+        PayloadElementTransformer transformer = getPayloadTransformer(node.getElementPath());
         PayloadElement result = transformer.incoming(node.getPayloadElement(), session);
         node.setPayloadElement(result);
         for (PayloadTreeNode child : node.getChildren()) {
@@ -115,7 +115,7 @@ public abstract class StanzaTransformer<T> {
     }
 
     private void outgoing(PayloadTreeNode node, ServerSession session) throws OXException {
-        PayloadTransformer transformer = getPayloadTransformer(node.getElementPath());
+        PayloadElementTransformer transformer = getPayloadTransformer(node.getElementPath());
         PayloadElement result = transformer.outgoing(node.getPayloadElement(), session);
         node.setPayloadElement(result);
         for (PayloadTreeNode child : node.getChildren()) {
@@ -123,8 +123,8 @@ public abstract class StanzaTransformer<T> {
         }
     }
 
-    private PayloadTransformer getPayloadTransformer(ElementPath elementPath) throws OXException {
-        PayloadTransformer transformer = transformers.getHandlerFor(elementPath);
+    private PayloadElementTransformer getPayloadTransformer(ElementPath elementPath) throws OXException {
+        PayloadElementTransformer transformer = transformers.getHandlerFor(elementPath);
         if (transformer == null) {
             throw OXException.general("No transformer for " + elementPath); // TODO: write proper OXEX
         }

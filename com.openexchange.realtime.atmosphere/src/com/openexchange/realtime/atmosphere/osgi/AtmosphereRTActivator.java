@@ -12,7 +12,7 @@ import com.openexchange.realtime.atmosphere.OXRTConversionHandler;
 import com.openexchange.realtime.atmosphere.impl.RTAtmosphereChannel;
 import com.openexchange.realtime.atmosphere.impl.RTAtmosphereHandler;
 import com.openexchange.realtime.atmosphere.impl.payload.PayloadTransformerRegistry;
-import com.openexchange.realtime.payload.PayloadTransformer;
+import com.openexchange.realtime.payload.PayloadElementTransformer;
 import com.openexchange.sessiond.SessiondService;
 
 public class AtmosphereRTActivator extends HousekeepingActivator {
@@ -41,15 +41,15 @@ public class AtmosphereRTActivator extends HousekeepingActivator {
 
         final PayloadTransformerRegistry payloadTransformerRegistry = PayloadTransformerRegistry.getInstance();
 
-        track(PayloadTransformer.class, new SimpleRegistryListener<PayloadTransformer>() {
+        track(PayloadElementTransformer.class, new SimpleRegistryListener<PayloadElementTransformer>() {
 
             @Override
-            public void added(ServiceReference<PayloadTransformer> ref, PayloadTransformer service) {
+            public void added(ServiceReference<PayloadElementTransformer> ref, PayloadElementTransformer service) {
                 payloadTransformerRegistry.add(service);
             }
 
             @Override
-            public void removed(ServiceReference<PayloadTransformer> ref, PayloadTransformer service) {
+            public void removed(ServiceReference<PayloadElementTransformer> ref, PayloadElementTransformer service) {
                 payloadTransformerRegistry.remove(service);
             }
 
