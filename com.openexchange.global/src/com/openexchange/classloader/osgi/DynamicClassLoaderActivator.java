@@ -32,6 +32,10 @@ import org.osgi.util.tracker.ServiceTracker;
 import com.openexchange.classloader.impl.DynamicClassLoaderManagerFactory;
 
 /**
+ * Originally taken <a href="from http://sling.apache.org/site/apache-sling.html">Apache Sling</a>.
+ * <p>
+ * &nbsp;&nbsp;<img src="http://sling.apache.org/site/media.data/logo.png">
+ * <p>
  * This activator registers the dynamic class loader manager. It listens for bundle events and reregisters the class loader manager if a
  * bundle event for a used bundle occurs.
  */

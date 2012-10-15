@@ -28,6 +28,10 @@ import org.osgi.service.packageadmin.PackageAdmin;
 import com.openexchange.classloader.DynamicClassLoaderManager;
 
 /**
+ * Originally taken <a href="from http://sling.apache.org/site/apache-sling.html">Apache Sling</a>.
+ * <p>
+ * &nbsp;&nbsp;<img src="http://sling.apache.org/site/media.data/logo.png">
+ * <p>
  * This is the service factory for the dynamic class loader manager.
  */
 public class DynamicClassLoaderManagerFactory implements ServiceFactory<DynamicClassLoaderManager> {

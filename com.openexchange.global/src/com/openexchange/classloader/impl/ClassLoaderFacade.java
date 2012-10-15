@@ -28,6 +28,10 @@ import java.util.List;
 import org.apache.commons.logging.Log;
 
 /**
+ * Originally taken <a href="from http://sling.apache.org/site/apache-sling.html">Apache Sling</a>.
+ * <p>
+ * &nbsp;&nbsp;<img src="http://sling.apache.org/site/media.data/logo.png">
+ * <p>
  * The <code>ClassLoaderFacade</code> is a facade for the dynamic class loading.
  * <p>
  * This class loader is returned to the clients of the dynamic

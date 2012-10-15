@@ -16,19 +16,21 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+
 package com.openexchange.classloader.impl;
 
 import java.io.IOException;
 import java.net.URL;
 import java.util.Enumeration;
-
 import org.osgi.framework.Bundle;
 
 /**
- * The <code>BundleProxyClassLoader</code> is a class loader
- * delegating to a bundle.
- * We don't need to cache as the {@link ClassLoaderFacade} is
- * already doing this.
+ * Originally taken <a href="from http://sling.apache.org/site/apache-sling.html">Apache Sling</a>.
+ * <p>
+ * &nbsp;&nbsp;<img src="http://sling.apache.org/site/media.data/logo.png">
+ * <p>
+ * The <code>BundleProxyClassLoader</code> is a class loader delegating to a bundle. We don't need to cache as the {@link ClassLoaderFacade}
+ * is already doing this.
  */
 public class BundleProxyClassLoader extends ClassLoader {
 
@@ -46,23 +48,28 @@ public class BundleProxyClassLoader extends ClassLoader {
     // at least Java 5 you can prevent the occurence of duplicate boot classloader
     // resources by overriding ClassLoader.getResources(...) instead of
     // ClassLoader.findResources(...).
+    @Override
     @SuppressWarnings("unchecked")
     public Enumeration<URL> findResources(String name) throws IOException {
         return this.bundle.getResources(name);
     }
 
+    @Override
     public URL findResource(String name) {
         return this.bundle.getResource(name);
     }
 
+    @Override
     public Class<?> findClass(String name) throws ClassNotFoundException {
         return this.bundle.loadClass(name);
     }
 
+    @Override
     public URL getResource(String name) {
         return this.findResource(name);
     }
 
+    @Override
     protected Class<?> loadClass(String name, boolean resolve) throws ClassNotFoundException {
         Class<?> clazz = this.findClass(name);
         if (resolve) {

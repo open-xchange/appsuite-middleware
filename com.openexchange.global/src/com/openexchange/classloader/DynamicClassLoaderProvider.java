@@ -20,6 +20,10 @@
 package com.openexchange.classloader;
 
 /**
+ * Originally taken <a href="from http://sling.apache.org/site/apache-sling.html">Apache Sling</a>.
+ * <p>
+ * &nbsp;&nbsp;<img src="http://sling.apache.org/site/media.data/logo.png">
+ * <p>
  * A dynamic class loader provider allows to provide class loaders that will be used by the dynamic class loading mechanism.
  * <p>
  * For instance a JCR class loader provider could provide some class loader loading classes from a content repository etc.
@@ -27,9 +31,9 @@ package com.openexchange.classloader;
 public interface DynamicClassLoaderProvider {
 
     /**
-     * Gets the class loader used for dynamic class loading. The returned class loader should use the provided parent class loader as one
-     * of its parent class loaders. This ensures that the returned class loader has access to all dynamically loaded classes that are not
-     * part of this class loader. When the class loader is not needed anymore, it is released by calling the {@link #release(ClassLoader)}
+     * Gets the class loader used for dynamic class loading. The returned class loader should use the provided parent class loader as one of
+     * its parent class loaders. This ensures that the returned class loader has access to all dynamically loaded classes that are not part
+     * of this class loader. When the class loader is not needed anymore, it is released by calling the {@link #release(ClassLoader)}
      * method.
      * 
      * @param parent The parent class loader for this dynamic class loader.
@@ -39,8 +43,8 @@ public interface DynamicClassLoaderProvider {
     ClassLoader getClassLoader(ClassLoader parent);
 
     /**
-     * Releases the provided class loader. When the class loader is not needed anymore, e.g. when the dynamic class loader is shutdown, it is
-     * released with this method. The implementation can use this hook to free any allocated resources etc.
+     * Releases the provided class loader. When the class loader is not needed anymore, e.g. when the dynamic class loader is shutdown, it
+     * is released with this method. The implementation can use this hook to free any allocated resources etc.
      * 
      * @param classLoader The class loader.
      * @see #getClassLoader(ClassLoader)

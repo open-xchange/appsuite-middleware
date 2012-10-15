@@ -20,6 +20,10 @@
 package com.openexchange.classloader;
 
 /**
+ * Originally taken <a href="from http://sling.apache.org/site/apache-sling.html">Apache Sling</a>.
+ * <p>
+ * &nbsp;&nbsp;<img src="http://sling.apache.org/site/media.data/logo.png">
+ * <p>
  * The dynamic class loader manager is a central service managing all dynamic class loaders.
  * <p>
  * It provides a class loader that can be used by bundles requiring access to all publicly available classes. The default implementation

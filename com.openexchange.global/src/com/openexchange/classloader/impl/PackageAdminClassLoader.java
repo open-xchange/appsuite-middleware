@@ -32,6 +32,10 @@ import org.osgi.service.packageadmin.ExportedPackage;
 import org.osgi.service.packageadmin.PackageAdmin;
 
 /**
+ * Originally taken <a href="from http://sling.apache.org/site/apache-sling.html">Apache Sling</a>.
+ * <p>
+ * &nbsp;&nbsp;<img src="http://sling.apache.org/site/media.data/logo.png">
+ * <p>
  * The <code>PackageAdminClassLoader</code> loads classes and resources through the {@link org.osgi.service.packageadmin.PackageAdmin} service.
  */
 class PackageAdminClassLoader extends ClassLoader {
