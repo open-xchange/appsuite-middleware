@@ -68,6 +68,7 @@ import com.openexchange.api2.RdbContactSQLImpl;
 import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.importexport.formats.Format;
+import com.openexchange.importexport.formats.csv.DutchOutlookMapper;
 import com.openexchange.importexport.formats.csv.EnglishOutlookMapper;
 import com.openexchange.importexport.formats.csv.FrenchOutlookMapper;
 import com.openexchange.importexport.formats.csv.GermanOutlookMapper;
@@ -86,6 +87,7 @@ public class OutlookCSVContactImportTest extends AbstractContactTest{
 		((CSVContactImporter) imp).addFieldMapper(new EnglishOutlookMapper());
 		((CSVContactImporter) imp).addFieldMapper(new GermanOutlookMapper());
 		((CSVContactImporter) imp).addFieldMapper(new FrenchOutlookMapper());
+		((CSVContactImporter) imp).addFieldMapper(new DutchOutlookMapper());
 	}
 
 	//workaround for JUnit 3 runner
