@@ -78,7 +78,12 @@ final class HazelcastClusterListener implements ClusterListener {
 
     @Override
     public void removed(final InetAddress address) {
-        // Nothing
+        final InitMode initMode = activator.remove(Collections.<InetAddress> singletonList(address), logger);
+        if (InitMode.RE_INITIALIZED.equals(initMode)) {
+            if (logger.isInfoEnabled()) {
+                logger.info("\nHazelcast:\n\tRe-Initialized Hazelcast instance via cluster listener notification about a disappeared Open-Xchange node: "+address+"\n");
+            }
+        }
     }
 
     @Override
