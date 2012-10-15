@@ -112,11 +112,11 @@ import com.openexchange.imap.command.AbstractIMAPCommand;
 import com.openexchange.imap.command.BodyFetchIMAPCommand;
 import com.openexchange.imap.command.BodystructureFetchIMAPCommand;
 import com.openexchange.imap.command.CopyIMAPCommand;
-import com.openexchange.imap.command.FetchIMAPCommand;
-import com.openexchange.imap.command.FetchIMAPCommand.FetchProfileModifier;
+import com.openexchange.imap.command.MessageFetchIMAPCommand;
+import com.openexchange.imap.command.MessageFetchIMAPCommand.FetchProfileModifier;
 import com.openexchange.imap.command.FlagsIMAPCommand;
 import com.openexchange.imap.command.MoveIMAPCommand;
-import com.openexchange.imap.command.NewFetchIMAPCommand;
+import com.openexchange.imap.command.MailMessageFetchIMAPCommand;
 import com.openexchange.imap.command.SimpleFetchIMAPCommand;
 import com.openexchange.imap.config.IIMAPProperties;
 import com.openexchange.imap.search.IMAPSearch;
@@ -631,10 +631,10 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                         LOG.debug(sb.toString(), e);
                     }
                     if (0 == retry) {
-                        session.setParameter(key, FetchIMAPCommand.NO_BODYSTRUCTURE_PROFILE_MODIFIER);
+                        session.setParameter(key, MessageFetchIMAPCommand.NO_BODYSTRUCTURE_PROFILE_MODIFIER);
                         retry++;
                     } else if (1 == retry) {
-                        session.setParameter(key, FetchIMAPCommand.HEADERLESS_PROFILE_MODIFIER);
+                        session.setParameter(key, MessageFetchIMAPCommand.HEADERLESS_PROFILE_MODIFIER);
                         retry++;
                     } else {
                         throw MimeMailException.handleMessagingException(e, imapConfig, session);
@@ -658,10 +658,10 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                     LOG.debug(sb.toString(), e);
                 }
                 if (0 == retry) {
-                    session.setParameter(key, FetchIMAPCommand.NO_BODYSTRUCTURE_PROFILE_MODIFIER);
+                    session.setParameter(key, MessageFetchIMAPCommand.NO_BODYSTRUCTURE_PROFILE_MODIFIER);
                     retry++;
                 } else if (1 == retry) {
-                    session.setParameter(key, FetchIMAPCommand.HEADERLESS_PROFILE_MODIFIER);
+                    session.setParameter(key, MessageFetchIMAPCommand.HEADERLESS_PROFILE_MODIFIER);
                     retry++;
                 } else {
                     throw handleRuntimeException(e);
@@ -676,13 +676,13 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
         final TLongObjectHashMap<MailMessage> map = new TLongObjectHashMap<MailMessage>(len);
         // final MailMessage[] tmp = new NewFetchIMAPCommand(imapFolder, getSeparator(imapFolder), isRev1, array, fetchProfile, false,
         // false, false).setDetermineAttachmentByHeader(byContentType).doCommand();
-        final NewFetchIMAPCommand command;
+        final MailMessageFetchIMAPCommand command;
         if (array instanceof long[]) {
             command =
-                new NewFetchIMAPCommand(imapFolder, getSeparator(imapFolder), isRev1, (long[]) array, fetchProfile).setDetermineAttachmentByHeader(byContentType);
+                new MailMessageFetchIMAPCommand(imapFolder, getSeparator(imapFolder), isRev1, (long[]) array, fetchProfile).setDetermineAttachmentByHeader(byContentType);
         } else {
             command =
-                new NewFetchIMAPCommand(imapFolder, getSeparator(imapFolder), isRev1, (int[]) array, fetchProfile).setDetermineAttachmentByHeader(byContentType);
+                new MailMessageFetchIMAPCommand(imapFolder, getSeparator(imapFolder), isRev1, (int[]) array, fetchProfile).setDetermineAttachmentByHeader(byContentType);
         }
         final long start = System.currentTimeMillis();
         final MailMessage[] tmp = command.doCommand();
@@ -1248,10 +1248,10 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                     final long start = System.currentTimeMillis();
                     if (filter == null) {
                         msgs =
-                            new FetchIMAPCommand(imapFolder, imapConfig.getImapCapabilities().hasIMAP4rev1(), fetchProfile, size, body).doCommand();
+                            new MessageFetchIMAPCommand(imapFolder, imapConfig.getImapCapabilities().hasIMAP4rev1(), fetchProfile, size, body).doCommand();
                     } else {
                         msgs =
-                            new FetchIMAPCommand(
+                            new MessageFetchIMAPCommand(
                                 imapFolder,
                                 imapConfig.getImapCapabilities().hasIMAP4rev1(),
                                 filter,
@@ -1266,10 +1266,10 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                 } else {
                     if (filter == null) {
                         msgs =
-                            new FetchIMAPCommand(imapFolder, imapConfig.getImapCapabilities().hasIMAP4rev1(), fetchProfile, size, body).doCommand();
+                            new MessageFetchIMAPCommand(imapFolder, imapConfig.getImapCapabilities().hasIMAP4rev1(), fetchProfile, size, body).doCommand();
                     } else {
                         msgs =
-                            new FetchIMAPCommand(
+                            new MessageFetchIMAPCommand(
                                 imapFolder,
                                 imapConfig.getImapCapabilities().hasIMAP4rev1(),
                                 filter,
@@ -1355,7 +1355,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                 return Collections.emptyList();
             }
             final int limit = max <= 0 ? -1 : (messageCount <= max ? -1 : (int) max);
-            final boolean mergeWithSent = includeSent && !sentFullName.equals(fullName);
+            final boolean mergeWithSent = true; //includeSent && !sentFullName.equals(fullName);
             if (mergeWithSent) {
                 sentFolder = (IMAPFolder) imapStore.getFolder(sentFullName);
                 sentFolder.open(READ_ONLY);
@@ -1472,7 +1472,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
             final Message[] msgs;
             if (!mergeWithSent) {
                 msgs =
-                    new FetchIMAPCommand(
+                    new MessageFetchIMAPCommand(
                         imapFolder,
                         imapConfig.getImapCapabilities().hasIMAP4rev1(),
                         MessageInfo.toSeqNums(messageIds),
@@ -1620,18 +1620,20 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                         fetchProfile.add(hdrReferences);
                     }
                 }
-                // Add ENVELOPE item to FetchProfile if absent (for 'Message-Id' header)
+                // Add ENVELOPE_ONLY item to FetchProfile if absent (for 'Message-Id' header)
                 {
                     boolean found = false;
                     final Item envelope = FetchProfile.Item.ENVELOPE;
+                    final Item envelopeOnly = MailMessageFetchIMAPCommand.ENVELOPE_ONLY;
                     final Item[] items = fetchProfile.getItems();
                     for (int i = 0; !found && i < items.length; i++) {
-                        if (envelope == items[i]) {
+                        final Item cur = items[i];
+                        if (envelope == cur || envelopeOnly == cur) {
                             found = true;
                         }
                     }
                     if (!found) {
-                        fetchProfile.add(envelope);
+                        fetchProfile.add(envelopeOnly);
                     }
                 }
                 // Get ThreadableMapping
@@ -1861,7 +1863,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
              * Include body
              */
             Message[] msgs =
-                new FetchIMAPCommand(
+                new MessageFetchIMAPCommand(
                     imapFolder,
                     imapConfig.getImapCapabilities().hasIMAP4rev1(),
                     MessageInfo.toSeqNums(messageIds),

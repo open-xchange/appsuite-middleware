@@ -49,8 +49,8 @@
 
 package com.openexchange.imap.threader;
 
-import static com.openexchange.imap.command.NewFetchIMAPCommand.getFetchCommand;
-import static com.openexchange.imap.command.NewFetchIMAPCommand.handleFetchRespone;
+import static com.openexchange.imap.command.MailMessageFetchIMAPCommand.getFetchCommand;
+import static com.openexchange.imap.command.MailMessageFetchIMAPCommand.handleFetchRespone;
 import static com.openexchange.mail.MailServletInterface.mailInterfaceMonitor;
 import gnu.trove.TLongCollection;
 import gnu.trove.set.TIntSet;

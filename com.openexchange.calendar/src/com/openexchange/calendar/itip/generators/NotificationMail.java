@@ -302,10 +302,6 @@ public class NotificationMail {
     	if (appointment != null && stateType.equals(Type.DELETED)) {
     	    return false;
     	}
-    	if (appointment != null && (stateType.equals(Type.ACCEPTED) || stateType.equals(Type.DECLINED) 
-    	                        || stateType.equals(Type.TENTATIVELY_ACCEPTED))) {
-    	    return false;
-    	}
     	if (! anInterestingFieldChanged()) {
     		return false;
     	}

@@ -96,7 +96,7 @@ import com.sun.mail.imap.protocol.RFC822SIZE;
 import com.sun.mail.imap.protocol.UID;
 
 /**
- * {@link NewFetchIMAPCommand} - performs a prefetch of messages in given folder with only those fields set that need to be present for
+ * {@link MailMessageFetchIMAPCommand} - performs a prefetch of messages in given folder with only those fields set that need to be present for
  * display and sorting. A corresponding instance of <code>javax.mail.FetchProfile</code> is going to be generated from given fields.
  * <p>
  * This method avoids calling JavaMail's fetch() methods which implicitly requests whole message envelope (FETCH 1:* (ENVELOPE INTERNALDATE
@@ -105,14 +105,13 @@ import com.sun.mail.imap.protocol.UID;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class NewFetchIMAPCommand extends AbstractIMAPCommand<MailMessage[]> {
+public final class MailMessageFetchIMAPCommand extends AbstractIMAPCommand<MailMessage[]> {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(NewFetchIMAPCommand.class));
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(MailMessageFetchIMAPCommand.class));
 
     private static final boolean WARN = LOG.isWarnEnabled();
 
     private static final int LENGTH = 9; // "FETCH <nums> (<command>)"
-
     private static final int LENGTH_WITH_UID = 13; // "UID FETCH <nums> (<command>)"
 
     private final char separator;
@@ -128,9 +127,8 @@ public final class NewFetchIMAPCommand extends AbstractIMAPCommand<MailMessage[]
     private final TLongIntHashMap uid2index;
     private final TIntIntHashMap seqNum2index;
 
-
     /**
-     * Initializes a new {@link NewFetchIMAPCommand}.
+     * Initializes a new {@link MailMessageFetchIMAPCommand}.
      *
      * @param imapFolder The IMAP folder providing connected protocol
      * @param separator The separator character
@@ -139,7 +137,7 @@ public final class NewFetchIMAPCommand extends AbstractIMAPCommand<MailMessage[]
      * @param fp The fetch profile to use
      * @throws MessagingException If initialization fails
      */
-    public NewFetchIMAPCommand(final IMAPFolder imapFolder, final char separator, final boolean isRev1, final int[] seqNums, final FetchProfile fp) throws MessagingException {
+    public MailMessageFetchIMAPCommand(final IMAPFolder imapFolder, final char separator, final boolean isRev1, final int[] seqNums, final FetchProfile fp) throws MessagingException {
         super(imapFolder);
         final int messageCount = imapFolder.getMessageCount();
         if (messageCount <= 0) {
@@ -164,7 +162,7 @@ public final class NewFetchIMAPCommand extends AbstractIMAPCommand<MailMessage[]
     }
 
     /**
-     * Initializes a new {@link NewFetchIMAPCommand}.
+     * Initializes a new {@link MailMessageFetchIMAPCommand}.
      *
      * @param imapFolder The IMAP folder providing connected protocol
      * @param separator The separator character
@@ -173,7 +171,7 @@ public final class NewFetchIMAPCommand extends AbstractIMAPCommand<MailMessage[]
      * @param fp The fetch profile to use
      * @throws MessagingException If initialization fails
      */
-    public NewFetchIMAPCommand(final IMAPFolder imapFolder, final char separator, final boolean isRev1, final long[] uids, final FetchProfile fp) throws MessagingException {
+    public MailMessageFetchIMAPCommand(final IMAPFolder imapFolder, final char separator, final boolean isRev1, final long[] uids, final FetchProfile fp) throws MessagingException {
         super(imapFolder);
         final int messageCount = imapFolder.getMessageCount();
         if (messageCount <= 0) {
@@ -213,7 +211,7 @@ public final class NewFetchIMAPCommand extends AbstractIMAPCommand<MailMessage[]
      *            only; otherwise <code>false</code>
      * @return This FETCH IMAP command with value applied
      */
-    public NewFetchIMAPCommand setDetermineAttachmentByHeader(final boolean determineAttachmentByHeader) {
+    public MailMessageFetchIMAPCommand setDetermineAttachmentByHeader(final boolean determineAttachmentByHeader) {
         this.determineAttachmentByHeader = determineAttachmentByHeader;
         return this;
     }
@@ -984,9 +982,31 @@ public final class NewFetchIMAPCommand extends AbstractIMAPCommand<MailMessage[]
      * ++++++++++++++ End of item handlers ++++++++++++++
      */
 
+    public static final class FetchItem extends FetchProfile.Item {
+
+        /**
+         * Initializes a new {@link FetchItem}.
+         * 
+         * @param name The name
+         */
+        protected FetchItem(String name) {
+            super(name);
+        }
+
+    }
+
+    /**
+     * This is the Envelope item. Despite of JavaMail's ENVELOPE item, this item does not include INTERNALDATE nor RFC822.SIZE; it solely
+     * consists of the ENVELOPE.
+     * <p>
+     * The Envelope is an aggregration of the common attributes of a Message. Implementations should include the following attributes: From,
+     * To, Cc, Bcc, ReplyTo, Subject and Date. More items may be included as well.
+     */
+    public static final FetchProfile.Item ENVELOPE_ONLY = new FetchItem("ENVELOPE_ONLY");
+
     /**
      * Turns given fetch profile into FETCH items to craft a FETCH command.
-     *
+     * 
      * @param isRev1 Whether IMAP protocol is revision 1 or not
      * @param fp The fetch profile to convert
      * @param loadBody <code>true</code> if message body should be loaded; otherwise <code>false</code>
@@ -1003,6 +1023,13 @@ public final class NewFetchIMAPCommand extends AbstractIMAPCommand<MailMessage[]
                 command.append("ENVELOPE INTERNALDATE RFC822.SIZE");
                 envelope = true;
             }
+        } else if (fp.contains(ENVELOPE_ONLY)) {
+            if (loadBody) {
+                command.append("INTERNALDATE");
+            } else {
+                command.append("ENVELOPE");
+            }
+            envelope = false;
         } else {
             command.append("INTERNALDATE");
             envelope = false;
