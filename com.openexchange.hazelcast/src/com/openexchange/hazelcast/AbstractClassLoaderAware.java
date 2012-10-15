@@ -52,6 +52,7 @@ package com.openexchange.hazelcast;
 import java.io.Serializable;
 import java.util.concurrent.atomic.AtomicReference;
 import com.hazelcast.core.Hazelcasts;
+import com.openexchange.hazelcast.kryo.KryoWrapper;
 
 
 /**

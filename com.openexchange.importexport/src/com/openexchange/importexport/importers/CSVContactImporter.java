@@ -426,7 +426,7 @@ public class CSVContactImporter extends AbstractImporter {
             currentMapper.getNameOfField(ContactField.MIDDLE_NAME));
     }
 
-	public void addFieldMapper(PropertyDrivenMapper mapper) {
+	public void addFieldMapper(ContactFieldMapper mapper) {
 		if (mappers == null) {
 			mappers = new LinkedList<ContactFieldMapper>();
 		}
