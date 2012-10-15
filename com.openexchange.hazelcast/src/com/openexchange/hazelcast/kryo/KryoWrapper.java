@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.hazelcast;
+package com.openexchange.hazelcast.kryo;
 
 import java.io.ObjectStreamException;
 import java.io.Serializable;
