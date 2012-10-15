@@ -8,6 +8,7 @@ Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Export-Package: com.openexchange.authentication,
  com.openexchange.cache,
  com.openexchange.cache.dynamic,
+ com.openexchange.classloader,
  com.openexchange.configjump,
  com.openexchange.contactcollector,
  com.openexchange.counter,
@@ -43,6 +44,7 @@ Import-Package: com.openexchange.exception,
  org.json,
  org.osgi.framework,
  org.osgi.service.event,
+ org.osgi.service.packageadmin;version="1.2.0",
  org.osgi.util.tracker
 Bundle-Activator: com.openexchange.server.GlobalActivator
 Bundle-ClassPath: lib/stringsearch-2.jar,

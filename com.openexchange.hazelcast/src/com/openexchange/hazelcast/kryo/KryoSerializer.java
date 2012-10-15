@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.hazelcast;
+package com.openexchange.hazelcast.kryo;
 
 import com.esotericsoftware.kryo.Kryo;
 import com.esotericsoftware.kryo.io.Input;

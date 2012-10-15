@@ -241,6 +241,11 @@ public class WebserviceCollector implements ServiceListener {
     }
 
     private boolean isWebservice(final Object service) {
-        return (null != service.getClass().getAnnotation(WebService.class));
+        try {
+            final Class<? extends Object> clazz = service.getClass();
+            return (null == clazz) ? false : (null != clazz.getAnnotation(WebService.class));
+        } catch (final Exception e) {
+            return false;
+        }
     }
 }
