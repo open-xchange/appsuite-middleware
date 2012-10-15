@@ -51,67 +51,84 @@ package com.openexchange.realtime.atmosphere.impl.stanza.transformer;
 
 import java.util.List;
 import com.openexchange.exception.OXException;
-import com.openexchange.realtime.StanzaSender;
 import com.openexchange.realtime.atmosphere.impl.payload.PayloadTransformerRegistry;
-import com.openexchange.realtime.atmosphere.osgi.AtmosphereServiceRegistry;
 import com.openexchange.realtime.packet.Stanza;
 import com.openexchange.realtime.payload.PayloadElement;
 import com.openexchange.realtime.payload.PayloadTransformer;
+import com.openexchange.realtime.payload.PayloadTree;
+import com.openexchange.realtime.payload.PayloadTreeNode;
 import com.openexchange.realtime.util.ElementPath;
 import com.openexchange.tools.session.ServerSession;
 
 /**
- * {@link StanzaTransformer} - Transforms a Stanza "from" one representation "to" another by iterating over all the Payloads found
- * in the Stanza, and recursively applying the the proper PayloadTransformers. 
+ * {@link StanzaTransformer} - Transforms a Stanza "from" one representation "to" another by iterating over all the PayloadTrees found in
+ * the Stanza, and recursively applying the the proper PayloadTransformers.
  * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
 public abstract class StanzaTransformer<T> {
 
-    private final AtmosphereServiceRegistry services = AtmosphereServiceRegistry.getInstance();
     private final PayloadTransformerRegistry transformers = PayloadTransformerRegistry.getInstance();
-    
+
     /**
-     * Handle an incoming {@link Stanza}.
-     * <p>
-     * Channel handlers can decide to delegate the processing of stanzas to the proper {@OXRTHandler} when they can't be
-     * handled internally. The TransformingStanzaHandler's concern is to process and validate it so that the stanza can be handled by the
-     * MessageDispatcher.
-     * </p>
+     * Transform an incoming {@link Stanza} by transforming every PayloadTree of the Stanza.
      * 
      * @param stanza The incoming stanza to process
      * @param session The currently active session
      * @throws OXException When transformation of the Stanza fails
      */
-    public T incoming(Stanza stanza, ServerSession session) throws OXException {
-        List<PayloadElement> payloads = stanza.getPayloads();
-        for (PayloadElement payload : payloads) {
-            //get Handler for element from namespace and transform element
-            ElementPath elementPath = new ElementPath(payload.getNamespace(), payload.getElementName());
-            PayloadTransformer transformer = transformers.getHandlerFor(elementPath);
-            if (transformer == null) {
-                throw OXException.general("No transformer for " + elementPath);
+    public void incoming(Stanza stanza, ServerSession session) throws OXException {
+        List<PayloadTree> payloadTrees = stanza.getPayloads();
+        for (PayloadTree tree : payloadTrees) {
+            PayloadTreeNode root = tree.getRoot();
+            if (root != null) {
+                incoming(root, session);
             }
-            PayloadElement result = transformer.incoming(payload, session);
-            //TODO: create new Stanza prefilled with copied basics and add payloads?
         }
-        throw new UnsupportedOperationException("Not implemented yet!");
+    }
+
+    private void incoming(PayloadTreeNode node, ServerSession session) throws OXException {
+        PayloadTransformer transformer = getPayloadTransformer(node.getElementPath());
+        PayloadElement result = transformer.incoming(node.getPayloadElement(), session);
+        node.setPayloadElement(result);
+        for (PayloadTreeNode child : node.getChildren()) {
+            incoming(child, session);
+        }
     }
 
     /**
-     * Handle an outgoing {@link Stanza}.
-     * <p>
-     * Calling <code>Channel.send()</code> delegates the processing of the stanza to this method.
-     * </p>
+     * Transform an outgoing {@link Stanza} by transforming every PayloadTree of the Stanza.
      * 
-     * @param stanza the stanza to process
-     * @param session the currently active session
-     * @param sender the StanzaSender to use for finally sending the processed Stanza
-     * @throws OXException
+     * @param stanza The outgoing stanza to process
+     * @param session The currently active session
+     * @throws OXException When transformation of the Stanza fails
      */
-    public T outgoing(Stanza stanza, ServerSession session, StanzaSender sender) throws OXException {
-        throw new UnsupportedOperationException("Not implemented yet!");
+    public void outgoing(Stanza stanza, ServerSession session) throws OXException {
+        List<PayloadTree> payloadTrees = stanza.getPayloads();
+        for (PayloadTree tree : payloadTrees) {
+            PayloadTreeNode root = tree.getRoot();
+            if (root != null) {
+                outgoing(root, session);
+            }
+        }
+    }
+
+    private void outgoing(PayloadTreeNode node, ServerSession session) throws OXException {
+        PayloadTransformer transformer = getPayloadTransformer(node.getElementPath());
+        PayloadElement result = transformer.outgoing(node.getPayloadElement(), session);
+        node.setPayloadElement(result);
+        for (PayloadTreeNode child : node.getChildren()) {
+            outgoing(child, session);
+        }
+    }
+
+    private PayloadTransformer getPayloadTransformer(ElementPath elementPath) throws OXException {
+        PayloadTransformer transformer = transformers.getHandlerFor(elementPath);
+        if (transformer == null) {
+            throw OXException.general("No transformer for " + elementPath); // TODO: write proper OXEX
+        }
+        return transformer;
     }
 
 }

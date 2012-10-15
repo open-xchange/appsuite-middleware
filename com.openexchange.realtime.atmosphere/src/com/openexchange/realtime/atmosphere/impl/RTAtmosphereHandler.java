@@ -78,7 +78,7 @@ import com.openexchange.realtime.MessageDispatcher;
 import com.openexchange.realtime.StanzaSender;
 import com.openexchange.realtime.atmosphere.impl.payload.PayloadTransformerRegistry;
 import com.openexchange.realtime.atmosphere.impl.stanza.StanzaWriter;
-import com.openexchange.realtime.atmosphere.impl.stanza.builder.BuilderSelector;
+import com.openexchange.realtime.atmosphere.impl.stanza.builder.StanzaBuilderSelector;
 import com.openexchange.realtime.atmosphere.impl.stanza.builder.StanzaBuilder;
 import com.openexchange.realtime.atmosphere.impl.stanza.transformer.StanzaTransformer;
 import com.openexchange.realtime.atmosphere.impl.stanza.transformer.StanzaTransformerSelector;
@@ -207,7 +207,7 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
                         throw ex;
                     }
                     JSONObject json = new JSONObject(postData);
-                    StanzaBuilder<? extends Stanza> stanzaBuilder = BuilderSelector.getBuilder(atmosphereState.id, json);
+                    StanzaBuilder<? extends Stanza> stanzaBuilder = StanzaBuilderSelector.getBuilder(atmosphereState.id, json);
                     handleIncoming(stanzaBuilder.build(), atmosphereState);
                     printBroadcasters("Broadcasters after POST Request");
                     printSessions("Sessions after POST Request");

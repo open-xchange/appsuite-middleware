@@ -50,6 +50,7 @@
 package com.openexchange.realtime.packet;
 
 import com.openexchange.realtime.payload.PayloadElement;
+import com.openexchange.realtime.payload.PayloadTree;
 
 /**
  * {@link IQ} - Used for command exchanges.
@@ -118,12 +119,12 @@ public class IQ extends Stanza {
     }
 
     @Override
-    public boolean addPayload(PayloadElement payload) {
+    public boolean addPayload(PayloadTree tree) {
         throw new UnsupportedOperationException("Not implemented yet!");
     }
 
     @Override
-    public boolean removePayload(PayloadElement payload) {
+    public boolean removePayload(PayloadTree tree) {
         throw new UnsupportedOperationException("Not implemented yet!");
     }
 

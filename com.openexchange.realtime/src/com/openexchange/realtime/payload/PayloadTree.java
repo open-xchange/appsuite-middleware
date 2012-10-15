@@ -49,6 +49,14 @@
 
 package com.openexchange.realtime.payload;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import com.openexchange.realtime.util.ElementPath;
+
 /**
  * {@link PayloadTree} - Stanzas carry a payload that resembles an n-ary tree. This class handles the representation of this payload.
  * 
@@ -58,11 +66,161 @@ public class PayloadTree {
 
     private PayloadTreeNode root;
 
+    /**
+     * Initializes a new {@link PayloadTree} with an empty root node.
+     * 
+     * @param root The root node of the new PayloadTree
+     */
+    public PayloadTree() {
+        root = new PayloadTreeNode();
+    }
+
+    /**
+     * Initializes a new {@link PayloadTree} with an initial root node.
+     * 
+     * @param root The root node of the new PayloadTree
+     */
     public PayloadTree(PayloadTreeNode root) {
         this.root = root;
     }
-    
-    private int getNumberOfNodes() {
-        throw new UnsupportedOperationException("Not implemented yet!");
+
+    /**
+     * Gets the root node of this PayloadTree.
+     * 
+     * @return The root
+     */
+    public PayloadTreeNode getRoot() {
+        return root;
+    }
+
+    /**
+     * Sets the root node of this PayloadTree.
+     * 
+     * @param root The root to set
+     */
+    public void setRoot(PayloadTreeNode root) {
+        this.root = root;
+    }
+
+    /**
+     * Check if this PayloadTreeNode is empty.
+     * 
+     * @return true if the root node is null, false otherwise.
+     */
+    public boolean isEmpty() {
+        return (root == null);
+    }
+
+    /**
+     * Get the number of nodes forming this PayloadTree.
+     * 
+     * @return The number of nodes forming this PayloadTree.
+     */
+    public int getNumberOfNodes() {
+        int numberOfNodes = 0;
+
+        if (root != null) {
+            numberOfNodes += 1;
+            numberOfNodes = recursiveGetNumberOfNodes(root);
+        }
+
+        return numberOfNodes;
+    }
+
+    /**
+     * Recursively count the number of nodes below a given PayloadTreeNode.
+     * 
+     * @param node The node where we start counting
+     * @return The number of nodes below a given PayloadTreeNode
+     */
+    public int recursiveGetNumberOfNodes(PayloadTreeNode node) {
+        int numberOfNodes = node.getNumberOfChildren();
+
+        for (PayloadTreeNode child : node.getChildren()) {
+            numberOfNodes += recursiveGetNumberOfNodes(child);
+        }
+
+        return numberOfNodes;
+    }
+
+    /**
+     * Get the namespaces of all PayloadElements found in this PayloadTree.
+     * 
+     * @return An empty Collection if the PayloadElements don't contain namespaces or the namespaces of of the PayloadElements associated
+     *         with this tree
+     */
+    public Collection<String> getNamespaces() {
+        if (root != null) {
+            return recursivelyGetNamespaces(root);
+        }
+
+        return Collections.emptySet();
+    }
+
+    /**
+     * Recursively get the namespaces of PayloadElements contained in PaloadTreeNodes below a given node.
+     * 
+     * @param node The PayloadTreeNode where the search should start, must not be null.
+     * @return An empty Collection if the PayloadElements don't contain namespaces or the namespaces of the PayloadElements below the given
+     *         node
+     * @throws IllegalArgumentException If obligatory parameter is missing.
+     */
+    public Collection<String> recursivelyGetNamespaces(PayloadTreeNode node) {
+        if (node == null) {
+            throw new IllegalArgumentException("Obligatory parameter node missing.");
+        }
+        
+        Set<String> namespaces = new HashSet<String>();
+
+        namespaces.add(node.getNamespace());
+        for (PayloadTreeNode child : node.getChildren()) {
+            namespaces.addAll(recursivelyGetNamespaces(child));
+        }
+
+        return namespaces;
+    }
+
+    /**
+     * Search PayloadTreeNodes with PayloadElements matching a given ElementPath identifying the PayloadElements in this PayloadTree.
+     * 
+     * @param elementPath ElementPath identifying the PayloadElements
+     * @return An empty Collection if no node with matching payloads can be found, a Collection containing the PayloadTreeNodes otherwise.
+     * @throws IllegalArgumentException If obligatory parameter is missing.
+     */
+    public Collection<PayloadTreeNode> search(ElementPath elementPath) {
+        if (elementPath == null) {
+            throw new IllegalArgumentException("Obligatory parameter elementPath missing.");
+        }
+        if (root != null) {
+            return recursiveSearch(root, elementPath);
+        }
+
+        return Collections.emptyList();
+
+    }
+
+    /**
+     * Recursively find PayloadTreeNodes with PayloadElements matching a given ElementPath identifying the PayloadElements.
+     * 
+     * @param node The PayloadTreeNode where the recursive find starts. The node is inclued in the search, must not be null
+     * @param elementPath ElementPath identifying the PayloadElements, must not be null
+     * @return An empty Collection if no node with matching payloads can be found, a Collection containing the PayloadTreeNodes otherwise.
+     * @throws IllegalArgumentException If obligatory parameter is missing.
+     */
+    private Collection<PayloadTreeNode> recursiveSearch(PayloadTreeNode node, ElementPath elementPath) {
+        if (node == null || elementPath == null) {
+            throw new IllegalArgumentException("Obligatory parameter missing.");
+        }
+        
+        List<PayloadTreeNode> matches = new ArrayList<PayloadTreeNode>();
+
+        if (elementPath.equals(node.getElementPath())) {
+            matches.add(node);
+        }
+        for (PayloadTreeNode child : node.getChildren()) {
+            matches.addAll(recursiveSearch(child, elementPath));
+        }
+
+        return matches;
     }
 }

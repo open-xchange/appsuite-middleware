@@ -57,18 +57,18 @@ import com.openexchange.realtime.packet.Presence;
 import com.openexchange.realtime.packet.Stanza;
 
 /**
- * {@link StanzaHandlerSelector} - Select a StanzaTransformer suitable for the given type of Stanza.
+ * {@link StanzaHandlerSelector} - Select a StanzaHandler suitable for the given type of Stanza.
  * 
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
 public class StanzaHandlerSelector {
 
     /**
-     * Select a StanzaTransformer suitable for the given type of Stanza.
+     * Select a StanzaHandler suitable for the given type of Stanza.
      * 
-     * @param stanza The Stanza that has to be transformed from representation a to represtation b
-     * @return a StanzaTransformer suitable for the given type of Stanza
-     * @throws OXException If no suitable StanzaTransformer can be found
+     * @param stanza The Stanza that has to be handled
+     * @return a StanzaHandler suitable for the given type of Stanza
+     * @throws OXException If no suitable StanzaHandler can be found
      */
     public static StanzaHandler<? extends Stanza> getStanzaHandler(Stanza stanza) throws OXException {
         /*

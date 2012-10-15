@@ -84,9 +84,8 @@ public interface PayloadTransformer {
      * 
      * @param payload The Payload to process
      * @param session The currently active session
-     * @param sender The StanzaSender to use for finally sending the processed Stanza
      * @throws OXException
      */
-    public PayloadElement outgoing(PayloadElement payload, ServerSession session, StanzaSender sender) throws OXException;
+    public PayloadElement outgoing(PayloadElement payload, ServerSession session) throws OXException;
 
 }

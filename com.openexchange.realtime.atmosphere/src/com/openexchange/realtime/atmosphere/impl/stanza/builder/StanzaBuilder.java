@@ -58,6 +58,8 @@ import com.openexchange.realtime.atmosphere.AtmosphereExceptionCode;
 import com.openexchange.realtime.packet.ID;
 import com.openexchange.realtime.packet.Stanza;
 import com.openexchange.realtime.payload.PayloadElement;
+import com.openexchange.realtime.payload.PayloadTree;
+import com.openexchange.realtime.payload.PayloadTreeNode;
 
 /**
  * {@link StanzaBuilder} - Abstract Stanza parser class, gathering common fields and methods.
@@ -68,12 +70,16 @@ import com.openexchange.realtime.payload.PayloadElement;
 public abstract class StanzaBuilder<T extends Stanza> {
 
     private static Log LOG = com.openexchange.log.Log.loggerFor(StanzaBuilder.class);
+
     protected ID from;
+
     protected JSONObject json;
+
     protected T stanza;
 
     /**
      * Set the obligatory {@link Stanza} elements.
+     * 
      * @throws OXException for errors happening while building the Stanza
      */
     protected void basics() throws OXException {
@@ -86,7 +92,7 @@ public abstract class StanzaBuilder<T extends Stanza> {
     private void from() {
         stanza.setFrom(from);
     }
-    
+
     private void to() {
         if (json.has("to")) {
             stanza.setTo(new ID(json.optString("to")));
@@ -98,7 +104,7 @@ public abstract class StanzaBuilder<T extends Stanza> {
             stanza.setId(json.optString("to"));
         }
     }
-    
+
     private void payloads() throws OXException {
         if (json.has("payloads")) {
             JSONArray payloads = json.optJSONArray("payloads");
@@ -112,21 +118,25 @@ public abstract class StanzaBuilder<T extends Stanza> {
                     LOG.error(exception);
                     throw exception;
                 }
+                PayloadTree tree = new PayloadTree();
+                String namespace = null;
                 if (payload.has("namespace")) {
-                    String namespace = payload.optString("namespace");
-                    stanza.addPayload(new PayloadElement(payload, "json", namespace, elementName ));
-                } else {
-                    stanza.addPayload(new PayloadElement(payload, "json", null, elementName ));
+                    namespace = payload.optString("namespace");
                 }
+                PayloadElement element = new PayloadElement(payload, "json", namespace, elementName);
+                PayloadTreeNode node = new PayloadTreeNode(element);
+                tree.setRoot(node);
+                stanza.addPayload(tree);
             }
         }
     }
-    
+
     /**
      * Build a validated Stanza of type T
+     * 
      * @return a validated Stanza of type T
-     * @throws OXException if the Stanza couldn't be build due to validation or other errors 
+     * @throws OXException if the Stanza couldn't be build due to validation or other errors
      */
-    public abstract T build() throws OXException; 
+    public abstract T build() throws OXException;
 
 }

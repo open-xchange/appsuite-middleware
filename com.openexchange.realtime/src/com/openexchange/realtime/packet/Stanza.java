@@ -50,11 +50,12 @@
 package com.openexchange.realtime.packet;
 
 import java.util.ArrayList;
-import java.util.Collections;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import com.openexchange.realtime.payload.PayloadElement;
+import com.openexchange.realtime.payload.PayloadTree;
+import com.openexchange.realtime.payload.PayloadTreeNode;
 
 /**
  * {@link Stanza} - Abstract information unit that can be send from one entity to another.
@@ -70,20 +71,18 @@ public abstract class Stanza {
     // All 3 basic stanza types either have an optional or mandatory id field
     private String id;
 
-    // All child elements of this Stanza
-    protected List<PayloadElement> payloads = new ArrayList<PayloadElement>();
-    
-    // Extension elements of this Stanza, subset of payloads
-    protected List<PayloadElement> extensions = new ArrayList<PayloadElement>();
+    // Payloads carried by this Stanza as n-ary trees
+    List<PayloadTree> payloads;
 
-    // The namespaces of child elements of this Stanza
-    protected List<String> namespaces = new ArrayList<String>();
+    // Extension elements of this Stanza as n-ary trees, subset of payloads
+    protected List<PayloadTree> extensions;
 
     /**
      * Initializes a new {@link Stanza}.
      */
     protected Stanza() {
-        super();
+        payloads = new ArrayList<PayloadTree>();
+        extensions = new ArrayList<PayloadTree>();
     }
 
     /**
@@ -146,41 +145,43 @@ public abstract class Stanza {
      * @return empty Set or the namespaces of the payloads of this Stanza.
      */
     public Set<String> getNamespaces() {
-        return new HashSet<String>(namespaces);
+        Set<String> namespaces = new HashSet<String>();
+        for (PayloadTree tree : payloads) {
+            namespaces.addAll(tree.getNamespaces());
+        }
+        return namespaces;
     }
 
     /**
-     * Add a Payload to the Stanza and keep track of the payload's namespace.
+     * Get all Payloads of this Stanza.
      * 
-     * @param payload The Payload to add.
-     * @return true if the Stanza didn't already contain the Payload
+     * @return A List of PayloadTrees.
      */
-    public abstract boolean addPayload(final PayloadElement payload);
-
-    /**
-     * Remove a Payload from the Stanza and forget about its namespace.
-     * 
-     * @param payload The Payload to remove
-     * @return true if the Stanza contained this Payload
-     */
-    public abstract boolean removePayload(final PayloadElement payload);
-
-    /**
-     * Get an unmodifiable view of the structured information of this Stanza.
-     * 
-     * @return null or the structured information of this Stanza.
-     */
-    public List<PayloadElement> getPayloads() {
-        return Collections.unmodifiableList(payloads);
+    public List<PayloadTree> getPayloads() {
+        return payloads;
     }
     
     /**
-     * Get all Payloads that aren't part of the basic Presence Schema.
+     * Get all Payloads that aren't part of the basic Stanza Schema.
      * 
      * @return A List of extension Payloads.
      */
-    public List<PayloadElement> getExtensions() {
+    public List<PayloadTree> getExtensions() {
         return extensions;
     }
+    
+    /**
+     * Add a payload to this Stanza.
+     * @param payload The PayloadTreeNoode to add to this Stanza
+     * @return true if the PayloadTreeNode could be added to this Stanza 
+     */
+    public abstract boolean addPayload(final PayloadTree payload);
+    
+    /**
+     * Remove a PayloadTree from this Stanza.
+     * @param payload The PayloadTree to add to this Stanza
+     * @return true if the PayloadTree could be removed from this Stanza 
+     */
+    public abstract boolean removePayload(final PayloadTree payload);
 
 }

@@ -56,7 +56,8 @@ import java.util.List;
 import com.openexchange.realtime.util.ElementPath;
 
 /**
- * {@link PayloadTreeNode} -
+ * {@link PayloadTreeNode} - A Node of the complete PayloadTree found in a Stanza. Holds a PayloadElement as data and may hava 0 - n
+ * children.
  * 
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
@@ -291,6 +292,21 @@ public class PayloadTreeNode {
             return payloadElement.getNamespace();
         }
         return null;
+    }
+
+    /**
+     * Get the namespaces of the PayloadElements associated with this node and all children.
+     * 
+     * @return An empty Collection if the PayloadElements don't contain namespaces or a Collection of the namespaces of the PayloadElement
+     *         associated with this node and all children
+     */
+    public Collection<String> getNamespaces() {
+        ArrayList<String> namespaces = new ArrayList<String>();
+        namespaces.add(getNamespace());
+        for (PayloadTreeNode child : children) {
+            namespaces.addAll(child.getNamespaces());
+        }
+        return namespaces;
     }
 
     @Override

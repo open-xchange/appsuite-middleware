@@ -49,7 +49,7 @@
 
 package com.openexchange.realtime.packet;
 
-import com.openexchange.realtime.payload.PayloadElement;
+import com.openexchange.realtime.payload.PayloadTree;
 
 /**
  * {@link Message} - A regular message associated with a certain {@link Type type}.
@@ -102,12 +102,12 @@ public class Message extends Stanza {
     }
 
     @Override
-    public boolean addPayload(PayloadElement payload) {
+    public boolean addPayload(PayloadTree tree) {
         throw new UnsupportedOperationException("Not implemented yet!");
     }
 
     @Override
-    public boolean removePayload(PayloadElement payload) {
+    public boolean removePayload(PayloadTree tree) {
         throw new UnsupportedOperationException("Not implemented yet!");
     }
 

@@ -56,11 +56,11 @@ import com.openexchange.realtime.packet.ID;
 import com.openexchange.realtime.packet.Stanza;
 
 /**
- * {@link BuilderSelector} - Select and instantiate a new StanzaBuilder matching the client's message.
+ * {@link StanzaBuilderSelector} - Select and instantiate a new StanzaBuilder matching the client's message.
  * 
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
-public class BuilderSelector {
+public class StanzaBuilderSelector {
 
     /**
      * Get a parser that is adequate for he JSONObject that has to be parsed.
