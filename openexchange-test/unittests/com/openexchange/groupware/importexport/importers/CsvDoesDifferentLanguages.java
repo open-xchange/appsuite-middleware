@@ -58,7 +58,6 @@ import com.openexchange.groupware.container.Expectations;
 import com.openexchange.groupware.importexport.ImportResult;
 import com.openexchange.groupware.importexport.csv.CSVParser;
 import com.openexchange.importexport.importers.CSVContactImporter;
-import com.openexchange.importexport.importers.OutlookCSVContactImporter;
 import com.openexchange.server.services.ServerServiceRegistry;
 
 
@@ -147,7 +146,7 @@ public class CsvDoesDifferentLanguages extends TestCase {
         List<String> header = list.get(0);
         List<String> data = list.get(1);
 
-        CSVContactImporter importer = new OutlookCSVContactImporter();
+        CSVContactImporter importer = new CSVContactImporter();
         boolean[] atLeastOneFieldInserted = new boolean[]{false};
         ContactSwitcher conSet = importer.getContactSwitcher();
         ImportResult result = new ImportResult();
