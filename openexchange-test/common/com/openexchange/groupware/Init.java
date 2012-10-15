@@ -595,6 +595,10 @@ public final class Init {
          */
         final ConfigurationService config = (ConfigurationService) services.get(ConfigurationService.class);
         final String directory_name = config.getProperty("i18n.language.path");
+        if (directory_name == null) {
+        	LOG.error("Tried to load i18n files and did not find a property");
+        	return;
+        }
         final File dir = new File(directory_name);
         final I18nServices i18nServices = I18nServices.getInstance();
         try {
