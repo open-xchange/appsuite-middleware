@@ -247,9 +247,6 @@ public final class SimpleThreadStructureAction extends AbstractMailAction implem
                 if (!props.put(LOG_PROPERTY_ACCOUNT_ID, Integer.toString(arg.getAccountId()))) {
                     names.add(LOG_PROPERTY_ACCOUNT_ID);
                 }
-                if (!props.put(LOG_PROPERTY_LOGIN, mailInterface.getMailConfig().getLogin())) {
-                    names.add(LOG_PROPERTY_LOGIN);
-                }
             }
             int[] columns = req.checkIntArray(AJAXServlet.PARAMETER_COLUMNS);
             final String sort = req.getParameter(AJAXServlet.PARAMETER_SORT);
