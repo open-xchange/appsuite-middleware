@@ -29,6 +29,7 @@ import org.osgi.framework.ServiceRegistration;
 import org.osgi.framework.SynchronousBundleListener;
 import org.osgi.service.packageadmin.PackageAdmin;
 import org.osgi.util.tracker.ServiceTracker;
+import com.openexchange.classloader.DynamicClassLoaderManager;
 import com.openexchange.classloader.impl.DynamicClassLoaderManagerFactory;
 
 /**
@@ -48,7 +49,7 @@ public class DynamicClassLoaderActivator implements SynchronousBundleListener, B
     private volatile ServiceTracker<PackageAdmin, PackageAdmin> packageAdminTracker;
 
     /** The service registration for the dynamic class loader manager. */
-    private volatile ServiceRegistration<DynamicClassLoaderManagerFactory> serviceReg;
+    private volatile ServiceRegistration<?> serviceReg;
 
     /** The dynamic class loader service factory. */
     private volatile DynamicClassLoaderManagerFactory service;
@@ -87,14 +88,14 @@ public class DynamicClassLoaderActivator implements SynchronousBundleListener, B
         final DynamicClassLoaderManagerFactory service =
             new DynamicClassLoaderManagerFactory(this.bundleContext, this.packageAdminTracker.getService());
         this.service = service;
-        this.serviceReg = bundleContext.registerService(DynamicClassLoaderManagerFactory.class, service, props);
+        this.serviceReg = bundleContext.registerService(new String[] {DynamicClassLoaderManager.class.getName()}, service, props);
     }
 
     /**
      * Unregister the dynamic class loader manager factory.
      */
     protected void unregisterManagerFactory() {
-        final ServiceRegistration<DynamicClassLoaderManagerFactory> serviceReg = this.serviceReg;
+        final ServiceRegistration<?> serviceReg = this.serviceReg;
         if (serviceReg != null) {
             serviceReg.unregister();
             this.serviceReg = null;
