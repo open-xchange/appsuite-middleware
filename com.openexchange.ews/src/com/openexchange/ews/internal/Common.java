@@ -63,6 +63,7 @@ import com.microsoft.schemas.exchange.services._2006.types.ContainmentModeType;
 import com.microsoft.schemas.exchange.services._2006.types.ContainsExpressionType;
 import com.microsoft.schemas.exchange.services._2006.types.FieldURIOrConstantType;
 import com.microsoft.schemas.exchange.services._2006.types.IsEqualToType;
+import com.microsoft.schemas.exchange.services._2006.types.OrType;
 import com.microsoft.schemas.exchange.services._2006.types.PathToUnindexedFieldType;
 import com.microsoft.schemas.exchange.services._2006.types.RequestServerVersion;
 import com.microsoft.schemas.exchange.services._2006.types.ResponseClassType;
@@ -70,8 +71,9 @@ import com.microsoft.schemas.exchange.services._2006.types.RestrictionType;
 import com.microsoft.schemas.exchange.services._2006.types.SearchExpressionType;
 import com.microsoft.schemas.exchange.services._2006.types.ServerVersionInfo;
 import com.microsoft.schemas.exchange.services._2006.types.UnindexedFieldURIType;
-import com.openexchange.ews.EWSException;
+import com.openexchange.ews.EWSExceptionCodes;
 import com.openexchange.ews.ExchangeWebService;
+import com.openexchange.exception.OXException;
 
 /**
  * {@link Common}
@@ -108,9 +110,25 @@ public abstract class Common {
         isEqualTo.setPath(getPathToUnindexedField(fieldURI));
         isEqualTo.setFieldURIOrConstant(constantType);
         RestrictionType restriction = new RestrictionType();
-        restriction.setSearchExpression(new JAXBElement<SearchExpressionType>(new QName("http://schemas.microsoft.com/exchange/services/2006/types",
-            "IsEqualTo"), SearchExpressionType.class, isEqualTo));
+        restriction.setSearchExpression(getSearchExpression("IsEqualTo", isEqualTo));
         return restriction;
+    }
+    
+    protected RestrictionType getIsEqualRestriction(UnindexedFieldURIType fieldURI, List<String> equalTos) {
+        if (0 == equalTos.size()) {
+            throw new IllegalArgumentException("equalTos");
+        } else if (1 == equalTos.size()) {
+            return getIsEqualRestriction(fieldURI, equalTos);
+        } else {
+            OrType or = new OrType();
+            for (String equalTo : equalTos) {
+                IsEqualToType isEqualTo = getIsEqualTo(fieldURI, equalTo);
+                or.getSearchExpression().add(getSearchExpression("IsEqualTo", isEqualTo));
+            }
+            RestrictionType restriction = new RestrictionType();
+            restriction.setSearchExpression(getSearchExpression("Or", or));
+            return restriction;
+        }
     }
     
     protected RestrictionType getContainsRestriction(UnindexedFieldURIType fieldURI, String contains) {
@@ -121,8 +139,7 @@ public abstract class Common {
         containsExpression.setConstant(constantValue);
         containsExpression.setContainmentMode(ContainmentModeType.SUBSTRING);
         RestrictionType restriction = new RestrictionType();
-        restriction.setSearchExpression(new JAXBElement<SearchExpressionType>(new QName("http://schemas.microsoft.com/exchange/services/2006/types",
-            "Contains"), SearchExpressionType.class, containsExpression));
+        restriction.setSearchExpression(getSearchExpression("Contains", containsExpression));
         return restriction;
     }
     
@@ -132,20 +149,66 @@ public abstract class Common {
         QName qName = new QName("http://schemas.microsoft.com/exchange/services/2006/types", "FieldURI");
         return new JAXBElement<PathToUnindexedFieldType>(qName, PathToUnindexedFieldType.class, pathToUnindexedField);
     }
+    
+    protected static IsEqualToType getIsEqualTo(UnindexedFieldURIType fieldURI, String equalTo) {
+        IsEqualToType isEqualTo = new IsEqualToType();
+        isEqualTo.setPath(getPathToUnindexedField(fieldURI));
+        isEqualTo.setFieldURIOrConstant(getConstantType(equalTo));
+        return isEqualTo;
+    }
+    
+    protected static FieldURIOrConstantType getConstantType(String value) {
+        ConstantValueType constantValue = new ConstantValueType();
+        constantValue.setValue(value);
+        FieldURIOrConstantType constantType = new FieldURIOrConstantType();
+        constantType.setConstant(constantValue);
+        return constantType;
+    }
+    
+    protected static JAXBElement<SearchExpressionType> getSearchExpression(String name, SearchExpressionType value) {
+        return new JAXBElement<SearchExpressionType>(
+            new QName("http://schemas.microsoft.com/exchange/services/2006/types", name), SearchExpressionType.class, value);
+    }
 
-    protected static void check(ResponseMessageType responseMessage) throws EWSException {
-        if (null != responseMessage && false == ResponseClassType.SUCCESS.equals(responseMessage.getResponseClass())) {
-            throw new EWSException(responseMessage);
+    /**
+     * Checks the supplied response message, and throws an appropriate exception if there are errors or warnings.
+     * 
+     * @param responseMessage The response message to check
+     * @throws OXException
+     */
+    protected static void check(ResponseMessageType responseMessage) throws OXException {
+        if (null == responseMessage) {
+            throw EWSExceptionCodes.NO_RESPONSE.create();
+        }
+        if (false == ResponseClassType.SUCCESS.equals(responseMessage.getResponseClass())) {
+            throw EWSExceptionCodes.create(responseMessage);
+        }
+    }
+    
+    /**
+     * Checks the supplied response messages, throwing an appropriate exception if there are errors or warnings.
+     * 
+     * @param responseMessages The response messages to check
+     * @throws OXException
+     */
+    protected static void check(List<ResponseMessageType> responseMessages) throws OXException {
+        if (null == responseMessages || 0 == responseMessages.size()) {
+            throw EWSExceptionCodes.NO_RESPONSE.create();
+        }
+        for (ResponseMessageType responseMessage : responseMessages) {
+            check(responseMessage);
+            
         }
     }
     
     /**
      * Extracts the response messages from the supplied response holder.
      * 
-     * @param responseHolder the response holder
-     * @return the response messages, or <code>null</code> if there are none
+     * @param responseHolder The response holder
+     * @return The response messages
+     * @throws OXException If there are no respsonses
      */
-    protected static List<ResponseMessageType> getResponseMessages(Holder<? extends BaseResponseMessageType> responseHolder) {
+    protected static List<ResponseMessageType> getResponseMessages(Holder<? extends BaseResponseMessageType> responseHolder) throws OXException {
         if (null != responseHolder && null != responseHolder.value) {
             ArrayOfResponseMessagesType responseMessages = responseHolder.value.getResponseMessages();
             if (null != responseMessages) {
@@ -156,29 +219,29 @@ public abstract class Common {
                     for (JAXBElement<? extends ResponseMessageType> element : elements) {
                         responses.add(element.getValue());
                     }
+                    return responses;
                 }
             }
         }
-        return null;
+        throw EWSExceptionCodes.NO_RESPONSE.create();
     }
     
     /**
-     * Extracts a single response messages from the supplied response holder.
+     * Extracts a single response messages from the supplied response holder. 
      * 
-     * @param responseHolder the response holder
-     * @return the response message, or <code>null</code> if there is none
-     * @throws EWSException 
+     * @param responseHolder The response holder
+     * @return The response message
+     * @throws OXException If there are 0 or more than 1 responses 
      */
-    protected static ResponseMessageType getResponseMessage(Holder<? extends BaseResponseMessageType> responseHolder) {
+    protected static ResponseMessageType getResponseMessage(Holder<? extends BaseResponseMessageType> responseHolder) throws OXException {
         List<ResponseMessageType> responseMessages = getResponseMessages(responseHolder);
         if (null == responseMessages || 0 == responseMessages.size()) {
-            return null;
+            throw EWSExceptionCodes.NO_RESPONSE.create();
         } else if (1 != responseMessages.size()) {
-            throw new IllegalStateException("Expected a single response message");
+            throw EWSExceptionCodes.UNEXPECTED_RESPONSE_COUNT.create(1, 2);
         } else {
             return responseMessages.get(0);
         }
     }
-
 
 }

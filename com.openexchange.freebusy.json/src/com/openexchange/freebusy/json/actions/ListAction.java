@@ -49,7 +49,7 @@
 
 package com.openexchange.freebusy.json.actions;
 
-import java.util.List;
+import java.util.Map;
 import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.documentation.RequestMethod;
@@ -91,7 +91,7 @@ public class ListAction extends FreeBusyAction {
 
     @Override
     protected AJAXRequestResult perform(FreeBusyRequest request) throws OXException {
-        List<FreeBusyData> freeBusyData;
+        Map<String, FreeBusyData> freeBusyData;
         if (request.isMerged()) {
             freeBusyData = getFreeBusyService().getMergedFreeBusy(
                 request.getSession(), request.getParticipants(), request.getFrom(), request.getUntil());

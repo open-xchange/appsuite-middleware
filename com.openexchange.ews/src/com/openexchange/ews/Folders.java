@@ -53,24 +53,16 @@ import java.util.List;
 import com.microsoft.schemas.exchange.services._2006.types.BaseFolderIdType;
 import com.microsoft.schemas.exchange.services._2006.types.BaseFolderType;
 import com.microsoft.schemas.exchange.services._2006.types.DefaultShapeNamesType;
+import com.microsoft.schemas.exchange.services._2006.types.DistinguishedFolderIdNameType;
 import com.microsoft.schemas.exchange.services._2006.types.FolderQueryTraversalType;
-import com.microsoft.schemas.exchange.services._2006.types.RestrictionType;
+import com.openexchange.exception.OXException;
 
 /**
  * {@link Folders}
  * 
- * Simplifies access to folders using EWS.
- * 
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 public interface Folders {
-    /**
-     * Gets a folder with all properties.
-     * 
-     * @param folderID The folder ID
-     * @return The folder
-     */
-    BaseFolderType getFolder(BaseFolderIdType folderID);
     
     /**
      * Gets a folder.
@@ -78,18 +70,41 @@ public interface Folders {
      * @param folderID The folder ID
      * @param shape The folder shape
      * @return The folder
+     * @throws OXException 
      */
-    BaseFolderType getFolder(BaseFolderIdType folderID, DefaultShapeNamesType shape);
+    BaseFolderType getFolder(BaseFolderIdType folderID, DefaultShapeNamesType shape) throws OXException;
+
+    /**
+     * Gets a folder based on it's distinguished folder ID name.
+     * 
+     * @param distinguishedFolderIdName The distinguished folder ID name
+     * @param shape The folder shape
+     * @return The folder
+     */
+    BaseFolderType getFolder(DistinguishedFolderIdNameType distinguishedFolderIdName, DefaultShapeNamesType shape) throws OXException;
     
     /**
-     * Searches for a folder based on a restriction.
+     * Searches for folders by their display name. 
      * 
-     * @param parentFolderID
-     * @param restriction
-     * @param traversal
-     * @param shape
-     * @return
+     * @param parentFolderID The parent folder ID
+     * @param name The folder's display name
+     * @param traversal The traversal type
+     * @param shape The folder shape
+     * @return The found folders
+     * @throws OXException
      */
-    List<BaseFolderType> findFolders(BaseFolderIdType parentFolderID, RestrictionType restriction, FolderQueryTraversalType traversal, DefaultShapeNamesType shape);
+    List<BaseFolderType> findFoldersByName(BaseFolderIdType parentFolderID, String name, FolderQueryTraversalType traversal, DefaultShapeNamesType shape) throws OXException;
 
+    /**
+     * Searches for a folder by it's display name. 
+     * 
+     * @param parentFolderID The parent folder ID
+     * @param name The folder's display name
+     * @param traversal The traversal type
+     * @param shape The folder shape
+     * @return The found folder
+     * @throws OXException
+     */
+    BaseFolderType findFolderByName(BaseFolderIdType parentFolderID, String name, FolderQueryTraversalType traversal, DefaultShapeNamesType shape) throws OXException;
+    
 }
