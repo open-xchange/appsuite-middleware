@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.imap.thread.nntp;
+package com.openexchange.imap.threader.nntp;
 
 import java.util.Enumeration;
 import java.util.Iterator;
@@ -61,12 +61,12 @@ import org.apache.commons.net.nntp.Threadable;
  */
 public final class ThreadableImpl implements Threadable, Iterable<ThreadableImpl> {
 
-    private final com.openexchange.imap.thread.Threadable delegatee;
+    private final com.openexchange.imap.threader.Threadable delegatee;
 
     /**
      * Initializes a new {@link ThreadableImpl}.
      */
-    public ThreadableImpl(final com.openexchange.imap.thread.Threadable delegatee) {
+    public ThreadableImpl(final com.openexchange.imap.threader.Threadable delegatee) {
         super();
         this.delegatee = delegatee;
     }
@@ -76,7 +76,7 @@ public final class ThreadableImpl implements Threadable, Iterable<ThreadableImpl
      * 
      * @return The delegatee
      */
-    public com.openexchange.imap.thread.Threadable getDelegatee() {
+    public com.openexchange.imap.threader.Threadable getDelegatee() {
         return delegatee;
     }
 
@@ -146,9 +146,9 @@ public final class ThreadableImpl implements Threadable, Iterable<ThreadableImpl
 
     private static final class IteratorImpl implements Iterator<ThreadableImpl> {
 
-        private final Enumeration<com.openexchange.imap.thread.Threadable> enumeration;
+        private final Enumeration<com.openexchange.imap.threader.Threadable> enumeration;
 
-        protected IteratorImpl(final Enumeration<com.openexchange.imap.thread.Threadable> enumeration) {
+        protected IteratorImpl(final Enumeration<com.openexchange.imap.threader.Threadable> enumeration) {
             super();
             this.enumeration = enumeration;
         }

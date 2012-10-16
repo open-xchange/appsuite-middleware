@@ -68,18 +68,26 @@ import com.openexchange.api2.RdbContactSQLImpl;
 import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.importexport.formats.Format;
-import com.openexchange.importexport.importers.OutlookCSVContactImporter;
+import com.openexchange.importexport.formats.csv.DutchOutlookMapper;
+import com.openexchange.importexport.formats.csv.EnglishOutlookMapper;
+import com.openexchange.importexport.formats.csv.FrenchOutlookMapper;
+import com.openexchange.importexport.formats.csv.GermanOutlookMapper;
+import com.openexchange.importexport.importers.CSVContactImporter;
 
 public class OutlookCSVContactImportTest extends AbstractContactTest{
 	public String IMPORT_HEADERS = ContactField.GIVEN_NAME.getEnglishOutlookName()+","+ContactField.EMAIL1.getEnglishOutlookName()+","+ContactField.BIRTHDAY.getEnglishOutlookName()+"\n";
 	public String IMPORT_ONE = IMPORT_HEADERS + NAME1+", "+EMAIL1+", "+DATE1;
 	public static String DATE1 = "4/1/1981";
 
+	@SuppressWarnings("deprecation")
 	public OutlookCSVContactImportTest(){
 		super();
 		defaultFormat = Format.OUTLOOK_CSV;
-		imp = new OutlookCSVContactImporter();
-		assertFalse("Should read from property file", ( (OutlookCSVContactImporter) imp).isUsingFallback());
+		imp = new CSVContactImporter();
+		((CSVContactImporter) imp).addFieldMapper(new EnglishOutlookMapper());
+		((CSVContactImporter) imp).addFieldMapper(new GermanOutlookMapper());
+		((CSVContactImporter) imp).addFieldMapper(new FrenchOutlookMapper());
+		((CSVContactImporter) imp).addFieldMapper(new DutchOutlookMapper());
 	}
 
 	//workaround for JUnit 3 runner

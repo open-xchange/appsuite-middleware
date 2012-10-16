@@ -54,18 +54,18 @@ import gnu.trove.list.array.TIntArrayList;
 import java.util.Collection;
 
 /**
- * {@link MessageId} - A message identifier in thread-sort string;
+ * {@link MessageInfo} - A message information in thread-sort string;
  * <p>
- * E.g. <b><code>"${23}"</code></b> or <b><code>"${INBOX/110}"</code></b> or <b><code>"${0/INBOX/110}"</code></b>.
+ * E.g. <code>"${23}"</code> or <code>"${INBOX/110}"</code> or <code>"${0/INBOX/110}"</code>.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class MessageId {
+public final class MessageInfo {
 
     /**
      * The dummy message identifier.
      */
-    public static final MessageId DUMMY = new MessageId(-1);
+    public static final MessageInfo DUMMY = new MessageInfo(-1);
 
     /**
      * The <code>'/'</code> character which separates folder's full name from mail's ID in a mail path
@@ -78,9 +78,9 @@ public final class MessageId {
      * @param messageIds The message identifiers
      * @return The message numbers
      */
-    public static TIntList toSeqNums(final Collection<MessageId> messageIds) {
+    public static TIntList toSeqNums(final Collection<MessageInfo> messageIds) {
         final TIntList ret = new TIntArrayList(messageIds.size());
-        for (final MessageId messageId : messageIds) {
+        for (final MessageInfo messageId : messageIds) {
             ret.add(messageId.messageNumber);
         }
         return ret;
@@ -92,10 +92,10 @@ public final class MessageId {
      * @param messageIds The message identifiers
      * @return The message numbers
      */
-    public static int[] toSeqNumsArray(final Collection<MessageId> messageIds) {
+    public static int[] toSeqNumsArray(final Collection<MessageInfo> messageIds) {
         final int[] ret = new int[messageIds.size()];
         int i = 0;
-        for (final MessageId messageId : messageIds) {
+        for (final MessageInfo messageId : messageIds) {
             ret[i++] = messageId.messageNumber;
         }
         return ret;
@@ -107,7 +107,7 @@ public final class MessageId {
      * @param msgId The message idenfifier's string representation
      * @return The message identifier
      */
-    public static MessageId valueOf(final String msgId) {
+    public static MessageInfo valueOf(final String msgId) {
         return valueOf(msgId, 0, msgId.length());
     }
 
@@ -117,7 +117,7 @@ public final class MessageId {
      * @param msgId The message idenfifier's string representation
      * @return The message identifier
      */
-    public static MessageId valueOf(final String msgId, final int off, final int len) {
+    public static MessageInfo valueOf(final String msgId, final int off, final int len) {
         if (isEmpty(msgId)) {
             return null;
         }
@@ -128,18 +128,18 @@ public final class MessageId {
         final int end = '}' == msgId.charAt(len - 1) ? len - 1 : len;
         final int sepPos = msgId.lastIndexOf(SEPERATOR, end);
         if (sepPos < 0) {
-            return new MessageId(getUnsignedInteger(msgId.substring(pos, end))).setSlen(len);
+            return new MessageInfo(getUnsignedInteger(msgId.substring(pos, end))).setSlen(len);
         }
         final String firstPart = msgId.substring(pos, sepPos);
         final int firstSep = firstPart.indexOf(SEPERATOR);
         if (firstSep < 0) {
-            return new MessageId().setFullName(firstPart).setMessageNumber(getUnsignedInteger(msgId.substring(sepPos + 1, end))).setSlen(len);
+            return new MessageInfo().setFullName(firstPart).setMessageNumber(getUnsignedInteger(msgId.substring(sepPos + 1, end))).setSlen(len);
         }
         final int accId = getUnsignedInteger(firstPart.substring(0, firstSep));
         if (accId < 0) {
-            return new MessageId().setFullName(firstPart).setMessageNumber(getUnsignedInteger(msgId.substring(sepPos + 1, end))).setSlen(len);
+            return new MessageInfo().setFullName(firstPart).setMessageNumber(getUnsignedInteger(msgId.substring(sepPos + 1, end))).setSlen(len);
         }
-        final MessageId messageId = new MessageId().setAccountId(accId).setSlen(len);
+        final MessageInfo messageId = new MessageInfo().setAccountId(accId).setSlen(len);
         return messageId.setFullName(firstPart.substring(firstSep + 1)).setMessageNumber(getUnsignedInteger(msgId.substring(sepPos + 1, end)));
     }
 
@@ -156,26 +156,23 @@ public final class MessageId {
     }
 
     private int messageNumber;
-
     private String fullName;
-
     private int accountId;
-
     private int slen;
 
     /**
-     * Initializes a new {@link MessageId}.
+     * Initializes a new {@link MessageInfo}.
      */
-    public MessageId() {
+    public MessageInfo() {
         this(-1);
     }
 
     /**
-     * Initializes a new {@link MessageId}.
+     * Initializes a new {@link MessageInfo}.
      * 
      * @param messageNumber The message number
      */
-    public MessageId(final int messageNumber) {
+    public MessageInfo(final int messageNumber) {
         super();
         this.messageNumber = messageNumber;
         accountId = -1;
@@ -197,7 +194,7 @@ public final class MessageId {
      * @param slen The <code>slen</code> to set
      * @return This message identifier
      */
-    public MessageId setSlen(final int slen) {
+    public MessageInfo setSlen(final int slen) {
         this.slen = slen;
         return this;
     }
@@ -217,7 +214,7 @@ public final class MessageId {
      * @param messageNumber The message number to set
      * @return This message identifier
      */
-    public MessageId setMessageNumber(final int messageNumber) {
+    public MessageInfo setMessageNumber(final int messageNumber) {
         this.messageNumber = messageNumber;
         return this;
     }
@@ -237,7 +234,7 @@ public final class MessageId {
      * @param fullName The full name to set
      * @return This message identifier
      */
-    public MessageId setFullName(final String fullName) {
+    public MessageInfo setFullName(final String fullName) {
         this.fullName = fullName;
         return this;
     }
@@ -257,7 +254,7 @@ public final class MessageId {
      * @param accountId The account identifier to set
      * @return This message identifier
      */
-    public MessageId setAccountId(final int accountId) {
+    public MessageInfo setAccountId(final int accountId) {
         this.accountId = accountId;
         return this;
     }
@@ -291,10 +288,10 @@ public final class MessageId {
         if (this == obj) {
             return true;
         }
-        if (!(obj instanceof MessageId)) {
+        if (!(obj instanceof MessageInfo)) {
             return false;
         }
-        final MessageId other = (MessageId) obj;
+        final MessageInfo other = (MessageInfo) obj;
         // if (accountId != other.accountId) {
         // return false;
         // }

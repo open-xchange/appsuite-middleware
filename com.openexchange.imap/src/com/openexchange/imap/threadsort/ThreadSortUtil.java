@@ -61,6 +61,7 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.mail.MessagingException;
+import org.apache.commons.logging.Log;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.ThreadSortMailMessage;
@@ -79,7 +80,7 @@ import com.sun.mail.imap.protocol.IMAPResponse;
  */
 public final class ThreadSortUtil {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(ThreadSortUtil.class));
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(ThreadSortUtil.class);
 
     /**
      * Prevent instantiation
@@ -95,12 +96,12 @@ public final class ThreadSortUtil {
      *            <code>&quot;&#042;&nbsp;THREAD&nbsp;(1&nbsp;(2)(3)(4)(5))(6)(7)(8)((9)(10)(11)(12)(13)(14)(15)(16)(17)(18)(19))&quot;</code>
      * @return A newly allocated array of <code>int</code> filled with message's sequence number
      */
-    public static List<MessageId> getSeqNumsFromThreadResponse(final String threadResponse) {
+    public static List<MessageInfo> getSeqNumsFromThreadResponse(final String threadResponse) {
         if (null == threadResponse) {
             return Collections.emptyList();
         }
         final char[] chars = threadResponse.toCharArray();
-        final List<MessageId> list = new LinkedList<MessageId>();
+        final List<MessageInfo> list = new LinkedList<MessageInfo>();
         int start = threadResponse.indexOf('{', 0);
         if (start < 0) {
             return Collections.emptyList();
@@ -109,7 +110,7 @@ public final class ThreadSortUtil {
         do {
             end = threadResponse.indexOf('}', start + 2);
             if (end >= 0) {
-                list.add(MessageId.valueOf(threadResponse, start, end - start));
+                list.add(MessageInfo.valueOf(threadResponse, start, end - start));
                 start = threadResponse.indexOf('{', end + 1);
             } else {
                 start = threadResponse.indexOf('{', start + 2);
@@ -124,18 +125,18 @@ public final class ThreadSortUtil {
      * @param threadList
      * @return The message identifiers
      */
-    public static List<MessageId> fromThreadResponse(final List<ThreadSortNode> threadList) {
+    public static List<MessageInfo> fromThreadResponse(final List<ThreadSortNode> threadList) {
         if (null == threadList || threadList.isEmpty()) {
             return Collections.emptyList();
         }
-        final List<MessageId> list = new LinkedList<MessageId>();
+        final List<MessageInfo> list = new LinkedList<MessageInfo>();
         recThreadResponse(threadList, list);
         return list;
     }
 
-    private static void recThreadResponse(final List<ThreadSortNode> threadList, final List<MessageId> list) {
+    private static void recThreadResponse(final List<ThreadSortNode> threadList, final List<MessageInfo> list) {
         for (final ThreadSortNode threadSortNode : threadList) {
-            list.add(threadSortNode.msgId);
+            list.add(threadSortNode.msgInfo);
             final List<ThreadSortNode> childs = threadSortNode.getChilds();
             if (null != childs) {
                 recThreadResponse(childs, list);
@@ -161,7 +162,7 @@ public final class ThreadSortUtil {
 
     private static void recSeqNumsAsList(final List<ThreadSortNode> threadList, final TIntList l, final int initialCapacity) {
         for (final ThreadSortNode threadSortNode : threadList) {
-            l.add(threadSortNode.msgId.getMessageNumber());
+            l.add(threadSortNode.msgInfo.getMessageNumber());
             final List<ThreadSortNode> childs = threadSortNode.getChilds();
             if (null != childs) {
                 recSeqNumsAsList(childs, l, initialCapacity);
@@ -173,7 +174,7 @@ public final class ThreadSortUtil {
      * Extracts sequence numbers from specified thread list
      * 
      * @param threadList The thread list
-     * @return The extracted sequence numbers
+     * @return The extracted sequence numbers; &lt;full-name&gt; &lt;=&gt; &lt;sequence-numbers&gt;
      */
     public static Map<String, TIntList> extractSeqNumsAsMap(final List<ThreadSortNode> threadList) {
         if (null == threadList || threadList.isEmpty()) {
@@ -187,7 +188,7 @@ public final class ThreadSortUtil {
 
     private static void recSeqNumsAsMap(final List<ThreadSortNode> threadList, final Map<String, TIntList> m, final int initialCapacity) {
         for (final ThreadSortNode threadSortNode : threadList) {
-            final MessageId messageId = threadSortNode.msgId;
+            final MessageInfo messageId = threadSortNode.msgInfo;
             final String fn = messageId.getFullName();
             TIntList list = m.get(fn);
             if (null == list) {
@@ -287,6 +288,7 @@ public final class ThreadSortUtil {
      * @throws MessagingException If a messaging error occurs
      */
     public static String getThreadResponse(final IMAPFolder imapFolder, final String sortRange) throws MessagingException {
+        final Log log = LOG;
         final Object val = imapFolder.doCommand(new IMAPFolder.ProtocolCommand() {
 
             @Override
@@ -294,11 +296,15 @@ public final class ThreadSortUtil {
                 final Response[] r;
                 {
                     final String commandStart = "THREAD REFERENCES UTF-8 ";
+                    final String command =
+                        new StringBuilder(commandStart.length() + sortRange.length()).append(commandStart).append(sortRange).toString();
                     final long start = System.currentTimeMillis();
-                    r = p.command(
-                        new StringBuilder(commandStart.length() + sortRange.length()).append(commandStart).append(sortRange).toString(),
-                        null);
-                    mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
+                    r = p.command(command, null);
+                    final long dur = System.currentTimeMillis() - start;
+                    if (log.isInfoEnabled()) {
+                        log.info('"' + command + "\" for \"" + imapFolder.getFullName() + "\" (" + imapFolder.getStore().toString() + ") took " + dur + "msec.");
+                    }
+                    mailInterfaceMonitor.addUseTime(dur);
                 }
                 final Response response = r[r.length - 1];
                 String retval = null;
@@ -422,10 +428,10 @@ public final class ThreadSortUtil {
      * @param map The map providing mails by sequence number
      * @return A structured list reflecting thread-order structure
      */
-    public static List<ThreadSortMailMessage> toThreadSortStructure(final List<ThreadSortNode> threadList, final Map<MessageId, MailMessage> map) {
+    public static List<ThreadSortMailMessage> toThreadSortStructure(final List<ThreadSortNode> threadList, final Map<MessageInfo, MailMessage> map) {
         final List<ThreadSortMailMessage> list = new ArrayList<ThreadSortMailMessage>(threadList.size());
         for (final ThreadSortNode node : threadList) {
-            final MailMessage rootMail = map.get(node.msgId);
+            final MailMessage rootMail = map.get(node.msgInfo);
             if (null != rootMail) {
                 rootMail.setThreadLevel(0);
                 final ThreadSortMailMessage tsmm = new ThreadSortMailMessage(rootMail);
@@ -439,9 +445,9 @@ public final class ThreadSortUtil {
         return list;
     }
 
-    private static void processSubnodes(final List<ThreadSortNode> nodes, final int level, final ThreadSortMailMessage parent, final Map<MessageId, MailMessage> map) {
+    private static void processSubnodes(final List<ThreadSortNode> nodes, final int level, final ThreadSortMailMessage parent, final Map<MessageInfo, MailMessage> map) {
         for (final ThreadSortNode node : nodes) {
-            final ThreadSortMailMessage tsmm = tsmmFor(map.get(node.msgId), level);
+            final ThreadSortMailMessage tsmm = tsmmFor(map.get(node.msgInfo), level);
             if (null != tsmm) {
                 parent.addChildMessage(tsmm);
 

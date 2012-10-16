@@ -542,6 +542,7 @@ public final class HtmlServiceImpl implements HtmlService {
 //        return handler.getText();
 
         String prepared = prepareSignatureStart(htmlContent);
+        prepared = prepareHrTag(prepared);
         prepared = insertBlockquoteMarker(prepared);
         prepared = insertSpaceMarker(prepared);
         String text = quoteText(new Renderer(new Segment(new Source(prepared), 0, prepared.length())).setMaxLineLength(9999).setIncludeHyperlinkURLs(appendHref).toString());
@@ -552,8 +553,27 @@ public final class HtmlServiceImpl implements HtmlService {
         return text;
     }
 
-    private static final Pattern PATTERN_SIGNATURE_START = Pattern.compile("(?:\r?\n|^)([ \t]*)-- (\r?\n)");
+    private static final Pattern PATTERN_HR = Pattern.compile("<hr[^>]*>(.*?</hr>)?", Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
+    private static String prepareHrTag(final String htmlContent) {
+        final Matcher m = PATTERN_HR.matcher(htmlContent);
+        if (!m.find()) {
+            return htmlContent;
+        }
+        final StringBuffer sb = new StringBuffer(htmlContent.length());
+        final String repl = "<br>---------------------------------------------<br>";
+        do {
+            final String tail = m.group(1);
+            if (null == tail || "</hr>".equals(tail)) {
+                m.appendReplacement(sb, Matcher.quoteReplacement(repl));
+            } else {
+                m.appendReplacement(sb, Matcher.quoteReplacement(repl + tail.substring(0, tail.length() - 5)));
+            }
+        } while (m.find());
+        m.appendTail(sb);
+        return sb.toString();
+    }
 
+    private static final Pattern PATTERN_SIGNATURE_START = Pattern.compile("(?:\r?\n|^)([ \t]*)-- (\r?\n)");
     private static String prepareSignatureStart(final String htmlContent) {
         final Matcher m = PATTERN_SIGNATURE_START.matcher(htmlContent);
         if (!m.find()) {

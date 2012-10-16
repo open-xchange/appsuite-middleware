@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.imap.thread;
+package com.openexchange.imap.threader;
 
 import gnu.trove.set.hash.TLongHashSet;
 import javax.mail.Folder;
@@ -56,7 +56,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.imap.IMAPAccess;
 import com.openexchange.imap.IMAPCommandsCollection;
 import com.openexchange.imap.IMAPProtocol;
-import com.openexchange.imap.thread.ThreadableCache.ThreadableCacheEntry;
+import com.openexchange.imap.threader.ThreadableCache.ThreadableCacheEntry;
 import com.openexchange.login.LoginHandlerService;
 import com.openexchange.login.LoginResult;
 import com.openexchange.mail.api.IMailFolderStorage;
@@ -122,7 +122,7 @@ public final class ThreadableLoginHandler implements LoginHandlerService {
                                         final IMAPFolder sent = (IMAPFolder) ((IMAPAccess) mailAccess).getIMAPStore().getFolder(sentFolder);
                                         sent.open(Folder.READ_ONLY);
                                         try {
-                                            final Threadable threadable = Threadable.getAllThreadablesFrom(sent, -1);
+                                            final Threadable threadable = Threadables.getAllThreadablesFrom(sent, -1);
                                             entry.set(new TLongHashSet(IMAPCommandsCollection.getUIDCollection(sent)), threadable, false);
                                         } finally {
                                             sent.close(false);

@@ -50,12 +50,12 @@ package com.openexchange.importexport.actions;
 
 import java.util.HashMap;
 import java.util.Map;
+
 import com.openexchange.ajax.requesthandler.AJAXActionService;
-import com.openexchange.importexport.actions.importer.CsvImportAction;
+import com.openexchange.importexport.actions.importer.CSVImportAction;
 import com.openexchange.importexport.actions.importer.FacebookArchiveImportAction;
 import com.openexchange.importexport.actions.importer.FacebookFriendsImportAction;
 import com.openexchange.importexport.actions.importer.ICalImportAction;
-import com.openexchange.importexport.actions.importer.OutlookCsvImportAction;
 import com.openexchange.importexport.actions.importer.VCardImportAction;
 import com.openexchange.importexport.formats.Format;
 
@@ -64,8 +64,8 @@ public class ImportActionFactory extends AbstractIEActionFactory{
     @Override
     protected Map<Format, AJAXActionService> getActions(){
     	return new HashMap<Format, AJAXActionService>(){{
-    		put(Format.CSV, new CsvImportAction());
-    		put(Format.OUTLOOK_CSV, new OutlookCsvImportAction());
+    		put(Format.CSV, new CSVImportAction());
+    		put(Format.OUTLOOK_CSV, new CSVImportAction());
     		put(Format.VCARD, new VCardImportAction());
     		put(Format.ICAL, new ICalImportAction());
 

@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.imap.thread;
+package com.openexchange.imap.threader;
 
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -296,9 +296,13 @@ public class Threader {
         }
     }
 
-    // Find the root set of the ThreadContainers (and return a root node.)
-    // A container is in the root set if it has no parents.
-    //
+    /**
+     * Find the root set of the ThreadContainers (and return a root node.)
+     * <p>
+     * A container is in the root set if it has no parents.
+     * 
+     * @return The root container
+     */
     private ThreadContainer findRootSet() {
         final ThreadContainer root = new ThreadContainer();
         // root.debug_id = "((root))";
@@ -314,10 +318,13 @@ public class Threader {
         return root;
     }
 
-    // Walk through the threads and discard any empty container objects.
-    // After calling this, there will only be any empty container objects
-    // at depth 0, and those will all have at least two kids.
-    //
+    /**
+     * Walk through the threads and discard any empty container objects.
+     * <p>
+     * After calling this, there will only be any empty container objects at depth 0, and those will all have at least two kids.
+     * 
+     * @param parent The parent container
+     */
     private void pruneEmptyContainers(final ThreadContainer parent) {
         ThreadContainer container, prev, next;
         for (prev = null, container = parent.child, next = container.next; container != null; prev = container, container = next, next =
@@ -406,17 +413,18 @@ public class Threader {
         }
     }
 
-    // If any two members of the root set have the same subject, merge them.
-    // This is so that messages which don't have References headers at all
-    // still get threaded (to the extent possible, at least.)
-    //
+    /**
+     * If any two members of the root set have the same subject, merge them.
+     * <p>
+     * This is so that messages which don't have <code>References</code> headers at all still get threaded (to the extent possible, at least.)
+     */
     private void gatherSubjects() {
         int count = 0;
         for (ThreadContainer c = rootNode.child; c != null; c = c.next) {
             count++;
         }
         // Make the hash table large enough to not need to be rehashed.
-        final Map<String, ThreadContainer> subjTable = new HashMap<String, ThreadContainer>(count << 1, (float) 0.9);
+        final Map<String, ThreadContainer> subjTable = new HashMap<String, ThreadContainer>(count << 1, 0.9f);
         count = 0;
         for (ThreadContainer c = rootNode.child; c != null; c = c.next) {
             Threadable threadable = c.threadable;
@@ -570,116 +578,6 @@ public class Threader {
 
             // we've done a merge, so keep the same `prev' next time around.
             c = prev;
-        }
-    }
-
-    /**
-     * The ThreadContainer object is used to encapsulate an IThreadable object (it holds some intermediate state used while threading.) This
-     * is a private class that doesn't escape from this module.
-     */
-    private static final class ThreadContainer {
-
-        Threadable threadable;
-        ThreadContainer parent;
-        ThreadContainer child;
-        ThreadContainer next;
-
-        /**
-         * Initializes a new {@link Threader.ThreadContainer}.
-         */
-        ThreadContainer() {
-            super();
-        }
-
-        // Copy the ThreadContainer tree structure down into the underlying
-        // Threadable objects (that is, make the Threadable tree look like
-        // the ThreadContainer tree.)
-        //
-        @SuppressWarnings("null")
-        void flush() {
-            ThreadContainer tc = this;
-            while (tc != null) {
-                final Threadable threadable = tc.threadable;
-                final boolean hasThreadable = threadable != null;
-                if (tc.parent != null && !hasThreadable) {
-                    // Only the rootNode is allowed to not have a threadable.
-                    throw new Error("no threadable in " + this.toString());
-                }
-                // Drop parent reference
-                tc.parent = null;
-                // Handle child
-                final ThreadContainer childContainer = tc.child;
-                if (hasThreadable) {
-                    threadable.setChild(childContainer == null ? null : childContainer.threadable);
-                }
-                if (childContainer != null) {
-                    childContainer.flush();
-                    tc.child = null;
-                }
-                // Handle next
-                final ThreadContainer nextContainer = tc.next;
-                if (hasThreadable) {
-                    threadable.setNext(nextContainer == null ? null : nextContainer.threadable);
-                }
-                // Drop next reference & point to next sibling
-                tc.next = null;
-                tc.threadable = null;
-                tc = nextContainer;
-            }
-            /*-
-             * 
-             * 
-
-            if (threadable != null) {
-                threadable.setChild(child == null ? null : child.threadable);
-            }
-
-            if (child != null) {
-                child.flush();
-                child = null;
-            }
-
-            if (threadable != null) {
-                threadable.setNext(next == null ? null : next.threadable);
-            }
-
-            if (next != null) {
-                next.flush();
-                next = null;
-            }
-
-            threadable = null;
-             * 
-             */
-        }
-
-        // Returns true if child is under self's tree. This is used for
-        // detecting circularities in the references header.
-        boolean findChild(final ThreadContainer target) {
-            if (child == null) {
-                return false;
-            } else if (child == target) {
-                return true;
-            } else {
-                return child.findChild(target);
-            }
-        }
-
-        void reverseChildren() {
-            if (child != null) {
-                // nreverse the children (child through child.next.next.next...)
-                ThreadContainer kid, prev, rest;
-                for (prev = null, kid = child, rest = kid.next; kid != null; prev = kid, kid = rest, rest =
-                    (rest == null ? null : rest.next)) {
-                    kid.next = prev;
-                }
-                child = prev;
-
-                // then do it for the kids
-                for (kid = child; kid != null; kid = kid.next) {
-                    kid.reverseChildren();
-                }
-            }
         }
     }
 

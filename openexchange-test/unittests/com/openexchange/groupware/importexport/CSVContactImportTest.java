@@ -67,6 +67,11 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.importexport.formats.Format;
+import com.openexchange.importexport.formats.csv.DutchOutlookMapper;
+import com.openexchange.importexport.formats.csv.EnglishOutlookMapper;
+import com.openexchange.importexport.formats.csv.FrenchOutlookMapper;
+import com.openexchange.importexport.formats.csv.GermanOutlookMapper;
+import com.openexchange.importexport.formats.csv.OxAjaxnameMapper;
 import com.openexchange.importexport.importers.CSVContactImporter;
 
 /**
@@ -92,6 +97,7 @@ public class CSVContactImportTest extends AbstractContactTest {
     public CSVContactImportTest(){
         super();
         imp = new CSVContactImporter();
+        ((CSVContactImporter) imp).addFieldMapper(new OxAjaxnameMapper());
         defaultFormat = Format.CSV;
     }
 

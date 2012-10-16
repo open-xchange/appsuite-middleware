@@ -239,7 +239,8 @@ public final class IMAPException extends OXException {
          */
         NO_MOVE_TO_SUBFLD(IMAPCode.NO_MOVE_TO_SUBFLD),
         /**
-         * Message could not be moved to trash folder
+         * This message could not be moved to trash folder, possibly because your mailbox is nearly full.<br>
+         * In that case, please try to empty your deleted items first, or delete smaller messages first.
          */
         MOVE_ON_DELETE_FAILED(IMAPCode.MOVE_ON_DELETE_FAILED),
         /**
@@ -690,13 +691,15 @@ public final class IMAPException extends OXException {
          */
         NO_MOVE_TO_SUBFLD_EXT("Mail folder %1$s must not be moved to subsequent folder %2$s on server %3$s with login %4$s (user=%5$s, context=%6$s)", NO_MOVE_TO_SUBFLD),
         /**
-         * Message could not be moved to trash folder
+         * This message could not be moved to trash folder, possibly because your mailbox is nearly full.<br>
+         * In that case, please try to empty your deleted items first, or delete smaller messages first.
          */
-        MOVE_ON_DELETE_FAILED("Message could not be moved to trash folder", Category.CATEGORY_CAPACITY, 2034),
+        MOVE_ON_DELETE_FAILED("This message could not be moved to trash folder, possibly because your mailbox is nearly full.\nIn that case, please try to empty your deleted items first, or delete smaller messages first.", Category.CATEGORY_CAPACITY, 2034),
         /**
-         * Message could not be moved to trash folder on server %1$s with login %2$s (user=%3$s, context=%4$s)
+         * This message could not be moved to trash folder on server %1$s with login %2$s (user=%3$s, context=%4$s), possibly because your mailbox is nearly full.<br>
+         * In that case, please try to empty your deleted items first, or delete smaller messages first.
          */
-        MOVE_ON_DELETE_FAILED_EXT("Message could not be moved to trash folder on server %1$s with login %2$s (user=%3$s, context=%4$s)", MOVE_ON_DELETE_FAILED),
+        MOVE_ON_DELETE_FAILED_EXT("This message could not be moved to trash folder on server %1$s with login %2$s (user=%3$s, context=%4$s), possibly because your mailbox is nearly full.\nIn that case, please try to empty your deleted items first, or delete smaller messages first.", MOVE_ON_DELETE_FAILED),
         /**
          * Missing %1$s folder in mail move operation
          */

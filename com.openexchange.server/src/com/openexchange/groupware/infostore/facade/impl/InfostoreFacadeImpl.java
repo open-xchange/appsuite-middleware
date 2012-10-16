@@ -801,7 +801,8 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
                 }
 
 
-                if (document.getFileName() != null && !document.getFileName().equals(oldDocument.getFileName())) {
+                final String oldFileName = oldDocument.getFileName();
+                if (document.getFileName() != null && !document.getFileName().equals(oldFileName)) {
                     final InfostoreFilenameReservation reservation = reserve(
                         document.getFileName(),
                         oldDocument.getFolderId(),
@@ -812,8 +813,16 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
                 	updatedCols.add(Metadata.FILENAME_LITERAL);
                 }
                 
-                if (!updatedCols.contains(Metadata.TITLE_LITERAL) && oldDocument.getFileName() != null && oldDocument.getTitle() != null && oldDocument.getFileName().equals(oldDocument.getTitle())) {
-                	document.setTitle(document.getFileName());
+                final String oldTitle = oldDocument.getTitle();
+                if (!updatedCols.contains(Metadata.TITLE_LITERAL) && oldFileName != null && oldTitle != null && oldFileName.equals(oldTitle)) {
+                	final String fileName = document.getFileName();
+                	if (null == fileName) {
+                	    document.setTitle(oldFileName);
+                	    document.setFileName(oldFileName);
+                        updatedCols.add(Metadata.FILENAME_LITERAL);
+                    } else {
+                        document.setTitle(fileName);
+                    }
                 	updatedCols.add(Metadata.TITLE_LITERAL);
                 }
 

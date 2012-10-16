@@ -68,9 +68,9 @@ import com.openexchange.imap.IMAPCommandsCollection;
 import com.openexchange.mail.MailListField;
 import com.openexchange.mail.mime.ContentType;
 import com.openexchange.mail.mime.ExtendedMimeMessage;
+import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.mail.mime.MimeMailException;
 import com.openexchange.mail.mime.MimeTypes;
-import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.mail.mime.utils.MimeMessageUtility;
 import com.sun.mail.iap.Response;
 import com.sun.mail.imap.IMAPFolder;
@@ -87,7 +87,7 @@ import com.sun.mail.imap.protocol.RFC822SIZE;
 import com.sun.mail.imap.protocol.UID;
 
 /**
- * {@link FetchIMAPCommand} - performs a prefetch of messages in given folder with only those fields set that need to be present for display
+ * {@link MessageFetchIMAPCommand} - performs a prefetch of messages in given folder with only those fields set that need to be present for display
  * and sorting. A corresponding instance of <code>javax.mail.FetchProfile</code> is going to be generated from given fields.
  * <p>
  * This method avoids calling JavaMail's fetch() methods which implicitly requests whole message envelope (FETCH 1:* (ENVELOPE INTERNALDATE
@@ -96,9 +96,9 @@ import com.sun.mail.imap.protocol.UID;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class FetchIMAPCommand extends AbstractIMAPCommand<Message[]> {
+public final class MessageFetchIMAPCommand extends AbstractIMAPCommand<Message[]> {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(FetchIMAPCommand.class));
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(MessageFetchIMAPCommand.class));
 
     private static interface SeqNumFetcher {
 
@@ -161,27 +161,18 @@ public final class FetchIMAPCommand extends AbstractIMAPCommand<Message[]> {
     }
 
     private final char separator;
-
     private String[] args;
-
     private final String command;
-
     private SeqNumFetcher seqNumFetcher;
-
     private boolean uid;
-
     private int length;
-
     private int index;
-
     private ExtendedMimeMessage[] retval;
-
     private final boolean loadBody;
-
     private boolean determineAttachmentByHeader;
 
     /**
-     * Initializes a new {@link FetchIMAPCommand}.
+     * Initializes a new {@link MessageFetchIMAPCommand}.
      *
      * @param imapFolder - the IMAP folder
      * @param isRev1 Whether IMAP server has <i>IMAP4rev1</i> capability or not
@@ -192,12 +183,12 @@ public final class FetchIMAPCommand extends AbstractIMAPCommand<Message[]> {
      *            <code>arr</code> is of type <code>Message[]</code> or <code>int[]</code>
      * @throws MessagingException
      */
-    public FetchIMAPCommand(final IMAPFolder imapFolder, final boolean isRev1, final Object arr, final FetchProfile fp, final boolean isSequential, final boolean keepOrder) throws MessagingException {
+    public MessageFetchIMAPCommand(final IMAPFolder imapFolder, final boolean isRev1, final Object arr, final FetchProfile fp, final boolean isSequential, final boolean keepOrder) throws MessagingException {
         this(imapFolder, isRev1, arr, fp, isSequential, keepOrder, false);
     }
 
     /**
-     * Initializes a new {@link FetchIMAPCommand}.
+     * Initializes a new {@link MessageFetchIMAPCommand}.
      *
      * @param imapFolder - the IMAP folder
      * @param isRev1 Whether IMAP server has <i>IMAP4rev1</i> capability or not
@@ -209,7 +200,7 @@ public final class FetchIMAPCommand extends AbstractIMAPCommand<Message[]> {
      * @param loadBody <code>true</code> to load complete messages' bodies; otherwise <code>false</code>
      * @throws MessagingException
      */
-    public FetchIMAPCommand(final IMAPFolder imapFolder, final boolean isRev1, final Object arr, final FetchProfile fp, final boolean isSequential, final boolean keepOrder, final boolean loadBody) throws MessagingException {
+    public MessageFetchIMAPCommand(final IMAPFolder imapFolder, final boolean isRev1, final Object arr, final FetchProfile fp, final boolean isSequential, final boolean keepOrder, final boolean loadBody) throws MessagingException {
         super(imapFolder);
         if (imapFolder.getMessageCount() <= 0) {
             returnDefaultValue = true;
@@ -248,7 +239,7 @@ public final class FetchIMAPCommand extends AbstractIMAPCommand<Message[]> {
      *            only; otherwise <code>false</code>
      * @return This FETCH IMAP command with value applied
      */
-    public FetchIMAPCommand setDetermineAttachmentyHeader(final boolean determineAttachmentByHeader) {
+    public MessageFetchIMAPCommand setDetermineAttachmentyHeader(final boolean determineAttachmentByHeader) {
         this.determineAttachmentByHeader = determineAttachmentByHeader;
         return this;
     }
@@ -334,7 +325,7 @@ public final class FetchIMAPCommand extends AbstractIMAPCommand<Message[]> {
      * @param fetchLen - the total message count
      * @throws MessagingException If a messaging error occurs
      */
-    public FetchIMAPCommand(final IMAPFolder imapFolder, final boolean isRev1, final FetchProfile fp, final int fetchLen) throws MessagingException {
+    public MessageFetchIMAPCommand(final IMAPFolder imapFolder, final boolean isRev1, final FetchProfile fp, final int fetchLen) throws MessagingException {
         this(imapFolder, isRev1, fp, fetchLen, false);
     }
 
@@ -350,7 +341,7 @@ public final class FetchIMAPCommand extends AbstractIMAPCommand<Message[]> {
      * @param loadBody <code>true</code> to load complete messages' bodies; otherwise <code>false</code>
      * @throws MessagingException If a messaging error occurs
      */
-    public FetchIMAPCommand(final IMAPFolder imapFolder, final boolean isRev1, final FetchProfile fp, final int fetchLen, final boolean loadBody) throws MessagingException {
+    public MessageFetchIMAPCommand(final IMAPFolder imapFolder, final boolean isRev1, final FetchProfile fp, final int fetchLen, final boolean loadBody) throws MessagingException {
         super(imapFolder);
         final int messageCount = imapFolder.getMessageCount();
         if (messageCount <= 0) {
