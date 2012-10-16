@@ -52,6 +52,8 @@ package com.openexchange.importexport.importers;
 import static com.openexchange.importexport.formats.csv.CSVLibrary.getFolderObject;
 import static com.openexchange.importexport.formats.csv.CSVLibrary.transformInputStreamToString;
 import static com.openexchange.java.Autoboxing.I;
+
+import java.io.IOException;
 import java.io.InputStream;
 import java.sql.SQLException;
 import java.text.DateFormat;
@@ -84,6 +86,7 @@ import com.openexchange.importexport.exceptions.ImportExportExceptionCodes;
 import com.openexchange.importexport.formats.Format;
 import com.openexchange.importexport.formats.csv.ContactFieldMapper;
 import com.openexchange.importexport.formats.csv.PropertyDrivenMapper;
+import com.openexchange.importexport.importers.CSVContactImporter.ImportIntention;
 import com.openexchange.groupware.importexport.ImportResult;
 import com.openexchange.groupware.importexport.csv.CSVParser;
 import com.openexchange.importexport.osgi.ImportExportServices;
@@ -160,13 +163,15 @@ public class CSVContactImporter extends AbstractImporter {
         if (!canImport(sessObj, format, folders, optionalParams)) {
             throw ImportExportExceptionCodes.CANNOT_IMPORT.create(folder, format);
         }
+
         String csvStr = transformInputStreamToString(is, "UTF-8");
         CSVParser csvParser = getCSVParser();
         List<List<String>> csv = csvParser.parse(csvStr);
-
-        final Iterator<List<String>> iter = csv.iterator();
+        if (csv.size() < 2) {
+        	throw ImportExportExceptionCodes.NO_CONTENT.create();
+        }
         // get header fields
-        final List<String> fields = iter.next();
+        final List<String> fields = csv.get(0);
         if (!checkFields(fields)) {
             throw ImportExportExceptionCodes.NO_VALID_CSV_COLUMNS.create();
         }
@@ -176,6 +181,11 @@ public class CSVContactImporter extends AbstractImporter {
 
         // re-read now the we have guessed the format and the encoding
         if (!"UTF-8".equalsIgnoreCase(currentMapper.getEncoding())) {
+        	try {
+				is.reset();
+			} catch (IOException e) {
+				LOG.error("Tried to reset an uploaded stream to parse it again after having guessed the encoding, but couldn't; CSV parsed might be weird");
+			}
             csvStr = transformInputStreamToString(is, currentMapper.getEncoding());
             csv = csvParser.parse(csvStr);
         }
@@ -183,10 +193,11 @@ public class CSVContactImporter extends AbstractImporter {
         // reading entries...
         final List<ImportIntention> intentions = new LinkedList<ImportIntention>();
         final ContactSwitcher conSet = getContactSwitcher();
-        int lineNumber = 1;
-        while (iter.hasNext()) {
+        for(int lineNumber = 1; lineNumber < csv.size(); lineNumber++) {
             // ...and writing them
-            intentions.add(writeEntry(fields, iter.next(), folder, conSet, lineNumber++, sessObj));
+        	List<String> row = csv.get(lineNumber);
+        	ImportIntention intention = writeEntry(fields, row, folder, conSet, lineNumber, sessObj);
+            intentions.add(intention);
         }
 
         // Build a list of contacts to insert
@@ -264,16 +275,6 @@ public class CSVContactImporter extends AbstractImporter {
 
             contactObj.setParentFolderID(Integer.parseInt(folder.trim()));
             if (atLeastOneFieldInserted[0]) {
-//                final ContactInterface contactInterface = ServerServiceRegistry.getInstance().getService(
-//                    ContactInterfaceDiscoveryService.class).newContactInterface(contactObj.getParentFolderID(), session);
-//                if (contactInterface instanceof OverridingContactInterface) {
-//                    ((OverridingContactInterface) contactInterface).forceInsertContactObject(contactObj);
-//                    canOverrideInCaseOfTruncation = true;
-//                } else {
-//                    contactInterface.insertContactObject(contactObj);
-//                }
-//                result.setObjectId(Integer.toString(contactObj.getObjectID()));
-//                result.setDate(contactObj.getLastModified());
                 if (result.getException() != null) {
                     return new ImportIntention(result, contactObj);
                 }
@@ -375,7 +376,7 @@ public class CSVContactImporter extends AbstractImporter {
         return field.getReadableName();
     }
 
-    private static final class ImportIntention {
+    public static final class ImportIntention {
         public Contact contact;
         public ImportResult result;
 

@@ -152,6 +152,8 @@ public class ImportExportExceptionMessages implements LocalizableStrings {
 	
 	public static final String IRREGULAR_COLUMN_ID_MSG ="Columns should be numbers, could not convert %s into number";
 	
+	public static final String NO_CONTENT_MSG = "The uploaded file did not contain any content";
+	
     private ImportExportExceptionMessages() {
         super();
     }
