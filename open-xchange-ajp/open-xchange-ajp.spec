@@ -55,7 +55,7 @@ if [ ${1:-0} -eq 2 ]; then
     # SoftwareChange_Request-1120
     pfile=/opt/open-xchange/etc/ajp.properties
     if ! ox_exists_property AJP_BACKLOG $pfile; then
-       ox_set_property AJP_BACKLOG 0
+       ox_set_property AJP_BACKLOG 0 $pfile
     fi
 
     # SoftwareChange_Request-1081
