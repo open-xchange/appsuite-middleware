@@ -52,6 +52,12 @@ if [ ${1:-0} -eq 2 ]; then
     ##
     ox_move_config_file /opt/open-xchange/etc/groupware /opt/open-xchange/etc ajp.properties
 
+    # SoftwareChange_Request-1120
+    pfile=/opt/open-xchange/etc/ajp.properties
+    if ! ox_exists_property AJP_BACKLOG $pfile; then
+       ox_set_property AJP_BACKLOG 0
+    fi
+
     # SoftwareChange_Request-1081
     pfile=/opt/open-xchange/etc/ajp.properties
     ox_remove_property AJP_COYOTE_SOCKET_HANDLER $pfile
