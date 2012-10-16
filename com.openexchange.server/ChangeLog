@@ -1,3 +1,8 @@
+* 2012-10-16 - martin.herfurth@open-xchange.com
+
+ - Fix for bug 21795: Ignoring updates on Appointments with outdated sequence on request.
+                      Added parameter
+
 * 2012-10-15 - viktor.pracht@open-xchange.com
 
  - Fix for bug 23337: missing values in ui.properties

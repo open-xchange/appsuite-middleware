@@ -532,6 +532,14 @@ public class CalendarSql implements AppointmentSQLInterface {
             final CalendarOperation co = new CalendarOperation();
             final CalendarSqlImp cimp = CalendarSql.cimp;
             final CalendarDataObject edao = cimp.loadObjectForUpdate(cdao, session, ctx, inFolder, writecon, checkPermissions);
+            
+            if (cdao.isIgnoreOutdatedSequence() && cdao.getSequence() < edao.getSequence()) {
+                // Silently ignore updates on Appointments with an outdated Sequence. OLOX2-Requirement.
+                cdao.setLastModified(edao.getLastModified());
+                LOG.info("Ignored update on Appointmentt due to outdated sequence: " + edao.getContextID() + "-" + edao.getObjectID() + " (cid-objectId)");
+                return null;
+            }
+            
             if (co.prepareUpdateAction(cdao, edao, session.getUserId(), inFolder, user.getTimeZone())) {
                 // Insert-through-update detected
                 throw OXCalendarExceptionCodes.UPDATE_WITHOUT_OBJECT_ID.create();
