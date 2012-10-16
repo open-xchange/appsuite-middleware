@@ -5,13 +5,9 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.json.JSONArray;
-
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
-import com.openexchange.appstore.noms.actions.ClearAction;
 import com.openexchange.appstore.noms.actions.ListAction;
-import com.openexchange.appstore.noms.actions.RegisterAction;
 import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceLookup;
 
@@ -22,13 +18,7 @@ public class NOMSAppActionFactory implements AJAXActionServiceFactory {
 	
 	public NOMSAppActionFactory(ServiceLookup services) {
 		this.services = services;
-		
-		JSONArray database = new JSONArray();
-		
-		ACTIONS.put("GET", new RegisterAction(database));
-		ACTIONS.put("POST", new RegisterAction(database));
-		ACTIONS.put("list", new ListAction(database));
-		ACTIONS.put("clear", new ClearAction(database));
+		ACTIONS.put("list", new ListAction(services));
 	}
 	
 	@Override
@@ -39,7 +29,7 @@ public class NOMSAppActionFactory implements AJAXActionServiceFactory {
 
 	@Override
 	public Collection<?> getSupportedServices() {
-		return Arrays.asList("GET", "POST", "list", "clear");
+		return Arrays.asList("list");
 	}
 
 }
