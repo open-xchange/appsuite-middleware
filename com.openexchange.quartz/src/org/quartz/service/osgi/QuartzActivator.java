@@ -57,9 +57,11 @@ import org.quartz.Scheduler;
 import org.quartz.SchedulerFactory;
 import org.quartz.impl.StdSchedulerFactory;
 import org.quartz.service.QuartzService;
+import org.quartz.service.internal.QuartzProperties;
 import org.quartz.service.internal.QuartzServiceImpl;
 import org.quartz.service.internal.Services;
 import com.hazelcast.core.HazelcastInstance;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.osgi.HousekeepingActivator;
 
 
@@ -78,7 +80,7 @@ public class QuartzActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { HazelcastInstance.class };
+        return new Class<?>[] { HazelcastInstance.class, ConfigurationService.class };
     }
 
     @Override
@@ -89,6 +91,12 @@ public class QuartzActivator extends HousekeepingActivator {
         try {
             System.setProperty("org.terracotta.quartz.skipUpdateCheck", "true");
             
+            ConfigurationService config = getService(ConfigurationService.class);
+            boolean startLocalScheduler = config.getBoolProperty(QuartzProperties.START_LOCAL_SCHEDULER, true);
+            boolean startClusteredScheduler = config.getBoolProperty(QuartzProperties.START_CLUSTERED_SCHEDULER, true);
+            int localThreads = config.getIntProperty(QuartzProperties.LOCAL_THREADS, 3);
+            int clusteredThreads = config.getIntProperty(QuartzProperties.CLUSTERED_THREADS, 3);
+            
             // Specify properties
             Properties localProperties = new Properties();
             localProperties.put("org.quartz.scheduler.instanceName", "OX-Local-Scheduler");
@@ -96,7 +104,7 @@ public class QuartzActivator extends HousekeepingActivator {
             localProperties.put("org.quartz.scheduler.rmi.proxy", false);
             localProperties.put("org.quartz.scheduler.wrapJobExecutionInUserTransaction", false);
             localProperties.put("org.quartz.threadPool.class", "org.quartz.simpl.SimpleThreadPool");
-            localProperties.put("org.quartz.threadPool.threadCount", "10");
+            localProperties.put("org.quartz.threadPool.threadCount", String.valueOf(localThreads));
             localProperties.put("org.quartz.threadPool.threadPriority", "5");
             localProperties.put("org.quartz.threadPool.threadsInheritContextClassLoaderOfInitializingThread", true);
             localProperties.put("org.quartz.jobStore.misfireThreshold", "60000");
@@ -110,7 +118,7 @@ public class QuartzActivator extends HousekeepingActivator {
             clusteredProperties.put("org.quartz.scheduler.rmi.proxy", false);
             clusteredProperties.put("org.quartz.scheduler.wrapJobExecutionInUserTransaction", false);
             clusteredProperties.put("org.quartz.threadPool.class", "org.quartz.simpl.SimpleThreadPool");
-            clusteredProperties.put("org.quartz.threadPool.threadCount", "10");
+            clusteredProperties.put("org.quartz.threadPool.threadCount", String.valueOf(clusteredThreads));
             clusteredProperties.put("org.quartz.threadPool.threadPriority", "5");
             clusteredProperties.put("org.quartz.threadPool.threadsInheritContextClassLoaderOfInitializingThread", true);
             clusteredProperties.put("org.quartz.jobStore.misfireThreshold", "60000");
@@ -122,8 +130,13 @@ public class QuartzActivator extends HousekeepingActivator {
             SchedulerFactory csf = new StdSchedulerFactory(clusteredProperties);
             localScheduler = lsf.getScheduler();
             clusteredScheduler = csf.getScheduler();
-            localScheduler.start();
-            clusteredScheduler.start();
+            if (startLocalScheduler) {
+                localScheduler.start();
+            }
+            
+            if (startClusteredScheduler) {
+                clusteredScheduler.start();
+            }
 
             quartzServiceRegistration = context.registerService(QuartzService.class, new QuartzServiceImpl(localScheduler, clusteredScheduler), null);
             log.info("Bundle successfully started: org.quartz");

@@ -53,25 +53,26 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
+
 import junit.framework.JUnit4TestAdapter;
+
 import org.junit.Test;
+
 import com.openexchange.api2.ContactSQLInterface;
 import com.openexchange.api2.RdbContactSQLImpl;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.importexport.formats.Format;
-import com.openexchange.importexport.formats.csv.DutchOutlookMapper;
-import com.openexchange.importexport.formats.csv.EnglishOutlookMapper;
-import com.openexchange.importexport.formats.csv.FrenchOutlookMapper;
-import com.openexchange.importexport.formats.csv.GermanOutlookMapper;
 import com.openexchange.importexport.formats.csv.OxAjaxnameMapper;
+import com.openexchange.importexport.formats.csv.OxReadableNameMapper;
 import com.openexchange.importexport.importers.CSVContactImporter;
 
 /**
@@ -98,6 +99,7 @@ public class CSVContactImportTest extends AbstractContactTest {
         super();
         imp = new CSVContactImporter();
         ((CSVContactImporter) imp).addFieldMapper(new OxAjaxnameMapper());
+        ((CSVContactImporter) imp).addFieldMapper(new OxReadableNameMapper());
         defaultFormat = Format.CSV;
     }
 

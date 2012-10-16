@@ -47,34 +47,22 @@
  *
  */
 
-package com.openexchange.freebusy.provider;
+package org.quartz.service.internal;
 
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import com.openexchange.exception.OXException;
-import com.openexchange.freebusy.FreeBusyData;
-import com.openexchange.session.Session;
 
 /**
- * {@link FreeBusyProvider}
- * 
- * Provider of free/busy information.
+ * {@link QuartzProperties}
  *
- * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public interface FreeBusyProvider {
+public class QuartzProperties {
     
-    /**
-     * Gets the available free/busy data for a list participants.
-     * 
-     * @param session The session
-     * @param participants A list of participants, identified either by their internal user-/resource-ID or e-mail address. 
-     * @param from The lower (inclusive) limit of the requested time-range 
-     * @param until The upper (exclusive) limit of the requested time-range
-     * @return A map of free/busy data, with each entry representing the free/busy data of one requested participant  
-     * @throws OXException
-     */
-    Map<String, FreeBusyData> getFreeBusy(Session session, List<String> participants, Date from, Date until);
+    public static final String START_LOCAL_SCHEDULER = "com.openexchange.quartz.startLocalScheduler";
     
+    public static final String START_CLUSTERED_SCHEDULER = "com.openexchange.quartz.startClusteredScheduler";
+    
+    public static final String LOCAL_THREADS = "com.openexchange.quartz.localThreads";
+    
+    public static final String CLUSTERED_THREADS = "com.openexchange.quartz.clusteredThreads";
+
 }

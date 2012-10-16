@@ -50,7 +50,6 @@
 package com.openexchange.freebusy.provider.ews;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.Date;
@@ -62,6 +61,7 @@ import org.apache.commons.logging.Log;
 import com.microsoft.schemas.exchange.services._2006.messages.FreeBusyResponseType;
 import com.microsoft.schemas.exchange.services._2006.types.ExchangeVersionType;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.ews.EWSExceptionCodes;
 import com.openexchange.ews.EWSFactoryService;
 import com.openexchange.ews.ExchangeWebService;
 import com.openexchange.exception.OXException;
@@ -105,7 +105,7 @@ public class EWSFreeBusyProvider implements FreeBusyProvider {
     }
     
     @Override
-    public List<FreeBusyData> getFreeBusy(Session session, List<String> participants, Date from, Date until) {
+    public Map<String, FreeBusyData> getFreeBusy(Session session, List<String> participants, Date from, Date until) {
         /*
          * prepare participant's free/busy data
          */
@@ -128,15 +128,21 @@ public class EWSFreeBusyProvider implements FreeBusyProvider {
                 Date maxUntil = addDays(currentFrom, MAX_DAYS);
                 Date currentUntil = until.before(maxUntil) ? until : maxUntil;
                 List<FreeBusyResponseType> freeBusyResponses = null;                
-                freeBusyResponses = getFreeBusyResponses(filteredParticipants, currentFrom, currentUntil);                
-                if (null == freeBusyResponses) {
-                    LOG.warn("Got no free/busy response from EWS");
+                try {
+                    freeBusyResponses = getFreeBusyResponses(filteredParticipants, currentFrom, currentUntil);
+                    if (null == freeBusyResponses || 0 == freeBusyResponses.size()) {
+                        throw EWSExceptionCodes.NO_RESPONSE.create();
+                    } else if (freeBusyResponses.size() != filteredParticipants.size()) {
+                        throw EWSExceptionCodes.UNEXPECTED_RESPONSE_COUNT.create(filteredParticipants.size(), freeBusyResponses.size()); 
+                    }
+                } catch (OXException e) {
+                    for (int i = 0; i < filteredParticipants.size(); i++) {
+                        String participant = filteredParticipants.get(i);
+                        FreeBusyData freeBusyData = freeBusyInformation.get(participant);
+                        freeBusyData.addWarning(e);
+                    }
                     continue;
-                }
-                if (freeBusyResponses.size() != filteredParticipants.size()) {
-                    LOG.warn("Response array size different from requested participants, unable to map times to participants");
-                    continue;
-                }
+                }                
                 /*
                  * add data from all filtered participants
                  */
@@ -159,23 +165,10 @@ public class EWSFreeBusyProvider implements FreeBusyProvider {
                 }
             }
         }
-        /*
-         * create list result from free/busy information
-         */
-        List<FreeBusyData> freeBusyDataList = new ArrayList<FreeBusyData>(); 
-        for (String participant : participants) {
-            freeBusyDataList.add(freeBusyInformation.get(participant));
-        }
-        return freeBusyDataList;
-    }
-
-    @Override
-    public FreeBusyData getFreeBusy(Session session, String participant, Date from, Date until) {
-        List<FreeBusyData> freeBusyData = this.getFreeBusy(session, Arrays.asList(new String[] { participant }), from, until);
-        return null != freeBusyData && 0 < freeBusyData.size() ? freeBusyData.get(0) : null; 
+        return freeBusyInformation;
     }
         
-    private List<FreeBusyResponseType> getFreeBusyResponses(List<String> emailAddresses, Date from, Date until) {
+    private List<FreeBusyResponseType> getFreeBusyResponses(List<String> emailAddresses, Date from, Date until) throws OXException {
         return ews.getAvailability().getFreeBusy(emailAddresses, from, until, isDetailedData());
     }
     

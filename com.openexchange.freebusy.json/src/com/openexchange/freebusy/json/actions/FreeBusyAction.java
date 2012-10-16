@@ -50,8 +50,9 @@
 package com.openexchange.freebusy.json.actions;
 
 import java.util.Date;
-import java.util.List;
 import java.util.Locale;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.TimeZone;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -112,11 +113,11 @@ public abstract class FreeBusyAction implements AJAXActionService {
         return serviceLookup.getService(FreeBusyService.class);
     }
     
-    protected JSONObject serialize(List<FreeBusyData> freeBusyData, TimeZone timeZone, Locale locale) throws OXException {
+    protected JSONObject serialize(Map<String, FreeBusyData> freeBusyData, TimeZone timeZone, Locale locale) throws OXException {
         try {
             JSONObject jsonObject = new JSONObject();
-            for (FreeBusyData data : freeBusyData) {
-                jsonObject.put(data.getParticipant(), serialize(data, timeZone, locale));
+            for (Entry<String, FreeBusyData> entry : freeBusyData.entrySet()) {
+                jsonObject.put(entry.getKey(), serialize(entry.getValue(), timeZone, locale));
             }
             return jsonObject;
         } catch (JSONException e) {

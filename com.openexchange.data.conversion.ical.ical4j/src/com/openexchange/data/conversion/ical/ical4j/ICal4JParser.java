@@ -414,7 +414,7 @@ public class ICal4JParser implements ICalParser {
                 if(line.startsWith("BEGIN:VCALENDAR")) {
                     beginFound = true;
                 } else if ( !beginFound && !"".equals(line)) {
-                    throw new ConversionError(-1, ConversionWarning.Code.DOES_NOT_LOOK_LIKE_ICAL_FILE);
+                    continue; // ignore bad lines between "VCALENDAR" Tags.
                 }
                 if(!line.startsWith("END:VCALENDAR")){ //hack to fix bug 11958
                 	if(line.matches("^\\s*BEGIN:VTIMEZONE")){
