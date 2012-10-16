@@ -1765,6 +1765,34 @@ msgstr ""
 msgid "Could not load configuration or necessary field from configuration"
 msgstr ""
 
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.ews/src/com/openexchange/ews/EWSExceptionMessages.java:63
+msgid "Got %1$d instead of %2$d response messages"
+msgstr ""
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.ews/src/com/openexchange/ews/EWSExceptionMessages.java:64
+msgid "Got no response messages"
+msgstr ""
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.ews/src/com/openexchange/ews/EWSExceptionMessages.java:65
+msgid "EWS error: %1$s (%2$s)"
+msgstr ""
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.ews/src/com/openexchange/ews/EWSExceptionMessages.java:66
+msgid "EWS warning: %1$s (%2$s)"
+msgstr ""
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.ews/src/com/openexchange/ews/EWSExceptionMessages.java:67
+msgid "Object \"%1$s\" not found"
+msgstr ""
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.ews/src/com/openexchange/ews/EWSExceptionMessages.java:68
+msgid "The name \"%1$s\" is ambiguous"
+msgstr ""
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.ews/src/com/openexchange/ews/EWSExceptionMessages.java:69
+msgid "An external error occured: %1$s"
+msgstr ""
+
 #. A CIFS/SMB error occurred: %1$s
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.cifs/src/com/openexchange/file/storage/cifs/CIFSExceptionMessages.java:66
 msgid "A CIFS/SMB error occurred: %1$s"
@@ -2942,6 +2970,10 @@ msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.importexport/src/com/openexchange/importexport/exceptions/ImportExportExceptionMessages.java:153
 msgid "Columns should be numbers, could not convert %s into number"
+msgstr ""
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.importexport/src/com/openexchange/importexport/exceptions/ImportExportExceptionMessages.java:155
+msgid "The uploaded file did not contain any content"
 msgstr ""
 
 #. No IndexAccess implementation was found for module %1$s.
