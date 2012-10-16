@@ -155,7 +155,7 @@ public final class Mp3ImageDataSource implements ImageDataSource {
             try {
                 final File tmpFile = managedFile.getFile();
                 // Create MP3 file
-                final MP3File mp3 = new MP3File(tmpFile);
+                final MP3File mp3 = new MP3File(tmpFile, MP3File.LOAD_IDV2TAG, true);
                 // Get appropriate cover tag
                 final TagField imageField = mp3.getID3v2Tag().getFirstField(FieldKey.COVER_ART);
                 if (imageField instanceof AbstractID3v2Frame) {
