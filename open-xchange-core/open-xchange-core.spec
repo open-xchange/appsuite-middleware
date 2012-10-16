@@ -189,6 +189,15 @@ if [ ${1:-0} -eq 2 ]; then
     # prevent bash from expanding, see bug 13316
     GLOBIGNORE='*'
 
+    # SoftwareChange_Request-1148
+    pfile=/opt/open-xchange/etc/whitelist.properties
+    if ! ox_exists_property "html.style.word-break" $pfile; then
+       ox_set_property "html.style.word-break" '"break-all"' $pfile
+    fi
+    if ! ox_exists_property "html.style.word-wrap" $pfile; then
+       ox_set_property "html.style.word-wrap" '"break-word"' $pfile
+    fi
+
     # SoftwareChange_Request-1125
     pfile=/opt/open-xchange/etc/contactcollector.properties
     if ! ox_exists_property com.openexchange.contactcollector.folder.deleteDenied $pfile; then
