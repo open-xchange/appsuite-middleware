@@ -51,6 +51,7 @@ package com.openexchange.freebusy.provider;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import com.openexchange.exception.OXException;
 import com.openexchange.freebusy.FreeBusyData;
 import com.openexchange.session.Session;
@@ -71,20 +72,9 @@ public interface FreeBusyProvider {
      * @param participants A list of participants, identified either by their internal user-/resource-ID or e-mail address. 
      * @param from The lower (inclusive) limit of the requested time-range 
      * @param until The upper (exclusive) limit of the requested time-range
-     * @return A list of free/busy data, with each list item representing the free/busy data of one requested participant  
+     * @return A map of free/busy data, with each entry representing the free/busy data of one requested participant  
      * @throws OXException
      */
-    List<FreeBusyData> getFreeBusy(Session session, List<String> participants, Date from, Date until);
-    
-    /**
-     * Gets the available free/busy data for a participant.
-     * 
-     * @param session The session
-     * @param participant A participant, identified either by its internal user-/resource-ID or e-mail address. 
-     * @param from The lower (inclusive) limit of the requested time-range 
-     * @param until The upper (exclusive) limit of the requested time-range
-     * @return The free/busy data  
-     */
-    FreeBusyData getFreeBusy(Session session, String participant, Date from, Date until);
+    Map<String, FreeBusyData> getFreeBusy(Session session, List<String> participants, Date from, Date until);
     
 }

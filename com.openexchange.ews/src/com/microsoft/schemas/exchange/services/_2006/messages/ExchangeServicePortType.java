@@ -669,6 +669,47 @@ public interface ExchangeServicePortType {
 
     /**
      * 
+     * @param timeZoneContext
+     * @param request
+     * @param serverVersion
+     * @param createItemResult
+     * @param impersonation
+     * @param requestVersion
+     * @param mailboxCulture
+     */
+    @WebMethod(operationName = "CreateItem", action = "http://schemas.microsoft.com/exchange/services/2006/messages/CreateItem")
+    public void createItem(
+        @WebParam(name = "CreateItem", targetNamespace = "http://schemas.microsoft.com/exchange/services/2006/messages", partName = "request")
+        CreateItemType request,
+        @WebParam(name = "RequestServerVersion", targetNamespace = "http://schemas.microsoft.com/exchange/services/2006/types", header = true, partName = "RequestVersion")
+        RequestServerVersion requestVersion,
+        @WebParam(name = "CreateItemResponse", targetNamespace = "http://schemas.microsoft.com/exchange/services/2006/messages", mode = WebParam.Mode.OUT, partName = "CreateItemResult")
+        Holder<CreateItemResponseType> createItemResult,
+        @WebParam(name = "ServerVersionInfo", targetNamespace = "http://schemas.microsoft.com/exchange/services/2006/types", header = true, mode = WebParam.Mode.OUT, partName = "ServerVersion")
+        Holder<ServerVersionInfo> serverVersion);
+
+    /**
+     * 
+     * @param request
+     * @param serverVersion
+     * @param impersonation
+     * @param requestVersion
+     * @param mailboxCulture
+     * @param deleteItemResult
+     */
+    @WebMethod(operationName = "DeleteItem", action = "http://schemas.microsoft.com/exchange/services/2006/messages/DeleteItem")
+    public void deleteItem(
+        @WebParam(name = "DeleteItem", targetNamespace = "http://schemas.microsoft.com/exchange/services/2006/messages", partName = "request")
+        DeleteItemType request,
+        @WebParam(name = "RequestServerVersion", targetNamespace = "http://schemas.microsoft.com/exchange/services/2006/types", header = true, partName = "RequestVersion")
+        RequestServerVersion requestVersion,
+        @WebParam(name = "DeleteItemResponse", targetNamespace = "http://schemas.microsoft.com/exchange/services/2006/messages", mode = WebParam.Mode.OUT, partName = "DeleteItemResult")
+        Holder<DeleteItemResponseType> deleteItemResult,
+        @WebParam(name = "ServerVersionInfo", targetNamespace = "http://schemas.microsoft.com/exchange/services/2006/types", header = true, mode = WebParam.Mode.OUT, partName = "ServerVersion")
+        Holder<ServerVersionInfo> serverVersion);
+
+    /**
+     * 
      * @param request
      * @param serverVersion
      * @param impersonation

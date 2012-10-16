@@ -67,7 +67,9 @@ import com.microsoft.schemas.exchange.services._2006.types.SerializableTimeZone;
 import com.microsoft.schemas.exchange.services._2006.types.SerializableTimeZoneTime;
 import com.openexchange.ews.Availability;
 import com.openexchange.ews.DateConverter;
+import com.openexchange.ews.EWSExceptionCodes;
 import com.openexchange.ews.ExchangeWebService;
+import com.openexchange.exception.OXException;
 
 /**
  * {@link AvailabilityImpl}
@@ -94,10 +96,11 @@ public class AvailabilityImpl extends Common implements Availability {
     }
 
     @Override
-    public List<FreeBusyResponseType> getFreeBusy(List<String> emailAddresses, Date from, Date until, boolean detailed) {
+    public List<FreeBusyResponseType> getFreeBusy(List<String> emailAddresses, Date from, Date until, boolean detailed) throws OXException {
         GetUserAvailabilityResponseType userAvailibility = getUserAvailibility(emailAddresses, from, until, detailed);
-        if (null == userAvailibility || null == userAvailibility.getFreeBusyResponseArray()) { 
-            return null;
+        if (null == userAvailibility || null == userAvailibility.getFreeBusyResponseArray() || 
+            null == userAvailibility.getFreeBusyResponseArray().getFreeBusyResponse()) { 
+            throw EWSExceptionCodes.NO_RESPONSE.create();
         }
         return userAvailibility.getFreeBusyResponseArray().getFreeBusyResponse();
     }

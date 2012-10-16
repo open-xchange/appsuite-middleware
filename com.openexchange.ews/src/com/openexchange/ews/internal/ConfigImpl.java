@@ -198,8 +198,11 @@ public class ConfigImpl implements Config {
     }
 
     private Object remove(String key) {
-        return bindingProvier.getRequestContext().remove(key);
-        
+        if (bindingProvier.getRequestContext().containsKey(key)) {
+            return bindingProvier.getRequestContext().remove(key);
+        } else {
+            return null;
+        }
     }
     
     private Object get(String key) {

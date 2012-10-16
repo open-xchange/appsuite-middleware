@@ -262,9 +262,10 @@ public final class MailExceptionStrings implements LocalizableStrings {
     public final static String UNSUPPORTED_MIME_TYPE_MSG = "Unsupported MIME type %1$s";
 
     /**
-     * Mail could not be moved to trash folder. Quota exceeded
+     * This message could not be moved to trash folder as your mailbox is nearly full.<br>
+     * Please try to empty your deleted items first, or delete smaller messages first.
      */
-    public final static String DELETE_FAILED_OVER_QUOTA_MSG = "Mail could not be moved to trash folder. Quota exceeded.";
+    public final static String DELETE_FAILED_OVER_QUOTA_MSG = "This message could not be moved to trash folder as your mailbox is nearly full.\nPlease try to empty your deleted items first, or delete smaller messages first.";
 
     /**
      * The message part with sequence ID %1$s could not be found in message %2$s in folder %3$s

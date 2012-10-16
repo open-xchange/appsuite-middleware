@@ -47,22 +47,31 @@
  *
  */
 
-package com.openexchange.ajax.fields;
+package com.openexchange.ews;
 
-public interface AppointmentFields extends CalendarFields {
+import com.openexchange.i18n.LocalizableStrings;
 
-	public static final String LOCATION = "location";
-
-	public static final String FULL_TIME = "full_time";
-
-	public static final String SHOW_AS = "shown_as";
-
-	public static final String IGNORE_CONFLICTS = "ignore_conflicts";
-
-	public static final String HARD_CONFLICT = "hard_conflict";
-
-	public static final String TIMEZONE = "timezone";
+/**
+ * {@link EWSExceptionMessages} 
+ * 
+ * Translatable messages for {@link EWSExceptionCodes}.
+ *
+ * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ */
+public final class EWSExceptionMessages implements LocalizableStrings {
     
-    public static final String IGNORE_OUTDATED_SEQUENCE = "ignoreOutdatedSequence";
-
+    public static final String UNEXPECTED_RESPONSE_COUNT_MSG = "Got %1$d instead of %2$d response messages";
+    public static final String NO_RESPONSE_MSG = "Got no response messages";
+    public static final String EWS_ERROR_MSG = "EWS error: %1$s (%2$s)";
+    public static final String EWS_WARNING_MSG = "EWS warning: %1$s (%2$s)";
+    public static final String NOT_FOUND_MSG = "Object \"%1$s\" not found";
+    public static final String AMBIGUOUS_NAME_MSG = "The name \"%1$s\" is ambiguous";
+    public static final String EXTERNAL_ERROR_MSG = "An external error occured: %1$s";
+    
+    /**
+     * Prevent instantiation. Ambiguous 
+     */
+    private EWSExceptionMessages() {
+        super();
+    }
 }

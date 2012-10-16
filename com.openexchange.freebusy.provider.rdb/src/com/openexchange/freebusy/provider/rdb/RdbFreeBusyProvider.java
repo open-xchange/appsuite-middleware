@@ -50,7 +50,6 @@
 package com.openexchange.freebusy.provider.rdb;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -98,19 +97,7 @@ public class RdbFreeBusyProvider implements FreeBusyProvider {
     }
     
     @Override
-    public List<FreeBusyData> getFreeBusy(Session session, List<String> participants, Date from, Date until) {
-        Map<String, FreeBusyData> freeBusyInformation = this.getFreeBusyInformation(session, participants, from, until);
-        return new ArrayList<FreeBusyData>(freeBusyInformation.values());
-    }
-
-    @Override
-    public FreeBusyData getFreeBusy(Session session, String participant, Date from, Date until) {
-        Map<String, FreeBusyData> freeBusyInformation = this.getFreeBusyInformation(
-            session, Arrays.asList(new String[] { participant }), from, until);
-        return freeBusyInformation.get(participant);
-    }
-    
-    private Map<String, FreeBusyData> getFreeBusyInformation(Session session, List<String> participants, Date from, Date until) {
+    public Map<String, FreeBusyData> getFreeBusy(Session session, List<String> participants, Date from, Date until) {
         Map<String, FreeBusyData> freeBusyInformation = new HashMap<String, FreeBusyData>();
         for (String participant : participants) {
             FreeBusyData freeBusyData = freeBusyInformation.get(participant);
@@ -136,7 +123,7 @@ public class RdbFreeBusyProvider implements FreeBusyProvider {
                             for (int member : groupMembers) {
                                 memberIDs.add(Integer.toString(member));                                
                             }
-                            Map<String, FreeBusyData> memberInformation = this.getFreeBusyInformation(session, memberIDs, from, until);
+                            Map<String, FreeBusyData> memberInformation = this.getFreeBusy(session, memberIDs, from, until);
                             for (Entry<String, FreeBusyData> entry : memberInformation.entrySet()) {
                                 FreeBusyData memberData = freeBusyInformation.get(entry.getKey());
                                 if (null == memberData) {
@@ -157,7 +144,7 @@ public class RdbFreeBusyProvider implements FreeBusyProvider {
         }
         return freeBusyInformation;
     }
-    
+
     private void fillFreeBusyData(FreeBusyData freeBusyData, SearchIterator<Appointment> freeBusyInformation) throws OXException {
         if (null != freeBusyInformation) {
             try {
