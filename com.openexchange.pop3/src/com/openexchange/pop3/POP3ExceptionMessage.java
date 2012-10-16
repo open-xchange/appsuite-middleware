@@ -176,9 +176,10 @@ public class POP3ExceptionMessage implements LocalizableStrings {
      */
     public final static String NO_MOVE_TO_SUBFLD_MSG = "Mail folder %1$s must not be moved to subsequent folder %2$s";
     /**
-     * Message could not be moved to trash folder
+     * This message could not be moved to trash folder, possibly because your mailbox is nearly full.<br>
+     * In that case, please try to empty your deleted items first, or delete smaller messages first.
      */
-    public final static String MOVE_ON_DELETE_FAILED_MSG = "Message could not be moved to trash folder";
+    public final static String MOVE_ON_DELETE_FAILED_MSG = "This message could not be moved to trash folder, possibly because your mailbox is nearly full.\nIn that case, please try to empty your deleted items first, or delete smaller messages first.";
     /**
      * Missing %1$s folder in mail move operation
      */
