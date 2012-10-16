@@ -51,6 +51,7 @@ package com.openexchange.freebusy;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import com.openexchange.exception.OXException;
 import com.openexchange.session.Session;
 
@@ -65,16 +66,16 @@ public interface FreeBusyService {
     
     /**
      * Gets the available free/busy data for a list of participants. The data is pre-processed and sorted by time, so that any 
-     * overlapping timeslots each of the participants' free/busy data are merged implicitly to the most conflicting busy times. 
+     * overlapping intervals each of the participants' free/busy data are merged implicitly to the most conflicting busy times. 
      * 
      * @param session The session
      * @param participants A list of participants, identified either by their internal user-/group/-resource-ID or e-mail address. 
      * @param from The lower (inclusive) limit of the requested time-range 
      * @param until The upper (exclusive) limit of the requested time-range
-     * @return A list of free/busy data, with each list item representing the free/busy data of one requested participant  
+     * @return A map of free/busy data, with each entry representing the free/busy data of one requested participant  
      * @throws OXException
      */
-    List<FreeBusyData> getMergedFreeBusy(Session session, List<String> participants, Date from, Date until) throws OXException;
+    Map<String, FreeBusyData> getMergedFreeBusy(Session session, List<String> participants, Date from, Date until) throws OXException;
     
     /**
      * Gets the available free/busy data for a list of participants.
@@ -83,14 +84,14 @@ public interface FreeBusyService {
      * @param participants A list of participants, identified either by their internal user-/group-/resource-ID or e-mail address. 
      * @param from The lower (inclusive) limit of the requested time-range 
      * @param until The upper (exclusive) limit of the requested time-range
-     * @return A list of free/busy data, with each list item representing the free/busy data of one requested participant  
+     * @return A map of free/busy data, with each entry representing the free/busy data of one requested participant  
      * @throws OXException
      */
-    List<FreeBusyData> getFreeBusy(Session session, List<String> participants, Date from, Date until) throws OXException;
+    Map<String, FreeBusyData> getFreeBusy(Session session, List<String> participants, Date from, Date until) throws OXException;
     
     /**
      * Gets the available free/busy data for a participant. The data is pre-processed and sorted by time, so that any 
-     * overlapping timeslots in the participants' free/busy data are merged implicitly to the most conflicting busy times. 
+     * overlapping intervals in the participants' free/busy data are merged implicitly to the most conflicting busy times. 
      * 
      * @param session The session
      * @param participant A participant, identified either by its internal user-/group-/resource-ID or e-mail address. 

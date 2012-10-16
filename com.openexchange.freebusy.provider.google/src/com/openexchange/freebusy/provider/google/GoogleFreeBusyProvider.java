@@ -50,7 +50,6 @@
 package com.openexchange.freebusy.provider.google;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -95,7 +94,7 @@ public class GoogleFreeBusyProvider implements FreeBusyProvider {
     }
     
     @Override
-    public List<FreeBusyData> getFreeBusy(Session session, List<String> participants, Date from, Date until) {
+    public Map<String, FreeBusyData> getFreeBusy(Session session, List<String> participants, Date from, Date until) {
         /*
          * prepare participant's free/busy data
          */
@@ -133,22 +132,9 @@ public class GoogleFreeBusyProvider implements FreeBusyProvider {
                 }
             }
         }
-        /*
-         * create list result from free/busy information
-         */
-        List<FreeBusyData> freeBusyDataList = new ArrayList<FreeBusyData>(); 
-        for (String participant : participants) {
-            freeBusyDataList.add(freeBusyInformation.get(participant));
-        }
-        return freeBusyDataList;
+        return freeBusyInformation;
     }
 
-    @Override
-    public FreeBusyData getFreeBusy(Session session, String participant, Date from, Date until) {
-        List<FreeBusyData> freeBusyData = this.getFreeBusy(session, Arrays.asList(new String[] { participant }), from, until);
-        return null != freeBusyData && 0 < freeBusyData.size() ? freeBusyData.get(0) : null; 
-    }
-        
     private boolean hasAllowedEmailSuffix(String participant) {
         String[] emailSuffixes = getEmailSuffixes();
         if (null != emailSuffixes && 0 < emailSuffixes.length) {

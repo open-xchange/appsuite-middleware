@@ -52,6 +52,7 @@ package com.openexchange.ews.internal;
 import java.util.List;
 import javax.xml.ws.Holder;
 import com.microsoft.schemas.exchange.services._2006.messages.ExchangeServicePortType;
+import com.microsoft.schemas.exchange.services._2006.messages.FindFolderResponseMessageType;
 import com.microsoft.schemas.exchange.services._2006.messages.FindFolderResponseType;
 import com.microsoft.schemas.exchange.services._2006.messages.FindFolderType;
 import com.microsoft.schemas.exchange.services._2006.messages.FolderInfoResponseMessageType;
@@ -60,12 +61,17 @@ import com.microsoft.schemas.exchange.services._2006.messages.GetFolderType;
 import com.microsoft.schemas.exchange.services._2006.types.BaseFolderIdType;
 import com.microsoft.schemas.exchange.services._2006.types.BaseFolderType;
 import com.microsoft.schemas.exchange.services._2006.types.DefaultShapeNamesType;
+import com.microsoft.schemas.exchange.services._2006.types.DistinguishedFolderIdNameType;
+import com.microsoft.schemas.exchange.services._2006.types.DistinguishedFolderIdType;
 import com.microsoft.schemas.exchange.services._2006.types.FolderQueryTraversalType;
 import com.microsoft.schemas.exchange.services._2006.types.FolderResponseShapeType;
 import com.microsoft.schemas.exchange.services._2006.types.NonEmptyArrayOfBaseFolderIdsType;
 import com.microsoft.schemas.exchange.services._2006.types.RestrictionType;
+import com.microsoft.schemas.exchange.services._2006.types.UnindexedFieldURIType;
+import com.openexchange.ews.EWSExceptionCodes;
 import com.openexchange.ews.ExchangeWebService;
 import com.openexchange.ews.Folders;
+import com.openexchange.exception.OXException;
 
 /**
  * {@link FoldersImpl}
@@ -79,12 +85,7 @@ public class FoldersImpl extends Common implements Folders {
     }
     
     @Override
-    public BaseFolderType getFolder(BaseFolderIdType folderID) {
-        return getFolder(folderID, DefaultShapeNamesType.ALL_PROPERTIES);
-    }
-    
-    @Override
-    public BaseFolderType getFolder(BaseFolderIdType folderID, DefaultShapeNamesType shape) {
+    public BaseFolderType getFolder(BaseFolderIdType folderID, DefaultShapeNamesType shape) throws OXException {
         NonEmptyArrayOfBaseFolderIdsType folderIds = new NonEmptyArrayOfBaseFolderIdsType();
         folderIds.getFolderIdOrDistinguishedFolderId().add(folderID);
         FolderResponseShapeType folderShape = new FolderResponseShapeType();
@@ -95,16 +96,49 @@ public class FoldersImpl extends Common implements Folders {
         Holder<GetFolderResponseType> responseHolder = new Holder<GetFolderResponseType>();
         port.getFolder(request, getRequestVersion(), responseHolder, getVersionHolder());
         FolderInfoResponseMessageType responseMessage = (FolderInfoResponseMessageType)getResponseMessage(responseHolder);
-        if (null != responseMessage.getFolders() && null != responseMessage.getFolders().getFolderOrCalendarFolderOrContactsFolder() &&
-            1 == responseMessage.getFolders().getFolderOrCalendarFolderOrContactsFolder().size()) {
-            return responseMessage.getFolders().getFolderOrCalendarFolderOrContactsFolder().get(0);
+        check(responseMessage);
+        if (null == responseMessage.getFolders() || null == responseMessage.getFolders().getFolderOrCalendarFolderOrContactsFolder() ||
+            0 == responseMessage.getFolders().getFolderOrCalendarFolderOrContactsFolder().size()) {
+            throw EWSExceptionCodes.NO_RESPONSE.create();
+        } else if (1 != responseMessage.getFolders().getFolderOrCalendarFolderOrContactsFolder().size()) {
+            throw EWSExceptionCodes.UNEXPECTED_RESPONSE_COUNT.create(1, responseMessage.getFolders().getFolderOrCalendarFolderOrContactsFolder().size());
         } else {
-            return null;
+            return responseMessage.getFolders().getFolderOrCalendarFolderOrContactsFolder().get(0);
         }
     }
-
+    
     @Override
-    public List<BaseFolderType> findFolders(BaseFolderIdType parentFolderID, RestrictionType restriction, FolderQueryTraversalType traversal, DefaultShapeNamesType shape) {
+    public BaseFolderType getFolder(DistinguishedFolderIdNameType distinguishedFolderIdName, DefaultShapeNamesType shape) throws OXException {
+        DistinguishedFolderIdType distinguishedFolderIdType = new DistinguishedFolderIdType();
+        distinguishedFolderIdType.setId(distinguishedFolderIdName);
+        return getFolder(distinguishedFolderIdType, shape);
+    }
+    
+    @Override
+    public List<BaseFolderType> findFoldersByName(BaseFolderIdType parentFolderID, String displayName, FolderQueryTraversalType traversal, DefaultShapeNamesType shape) throws OXException {
+        RestrictionType restriction = getIsEqualRestriction(UnindexedFieldURIType.FOLDER_DISPLAY_NAME, displayName);
+        List<BaseFolderType> folders = findFolders(parentFolderID, restriction, traversal, shape);
+        if (null == folders || 0 == folders.size()) {
+            throw EWSExceptionCodes.NOT_FOUND.create(displayName);
+        } else {
+            return folders;
+        }
+    }
+    
+    @Override
+    public BaseFolderType findFolderByName(BaseFolderIdType parentFolderID, String displayName, FolderQueryTraversalType traversal, DefaultShapeNamesType shape) throws OXException {
+        RestrictionType restriction = getIsEqualRestriction(UnindexedFieldURIType.FOLDER_DISPLAY_NAME, displayName);
+        List<BaseFolderType> folders = findFolders(parentFolderID, restriction, traversal, shape);
+        if (null == folders || 0 == folders.size()) {
+            throw EWSExceptionCodes.NOT_FOUND.create(displayName);
+        } else if (1 < folders.size()) {
+            throw EWSExceptionCodes.AMBIGUOUS_NAME.create(displayName);
+        } else {
+            return folders.get(0);
+        }
+    }
+    
+    private List<BaseFolderType> findFolders(BaseFolderIdType parentFolderID, RestrictionType restriction, FolderQueryTraversalType traversal, DefaultShapeNamesType shape) throws OXException {
         NonEmptyArrayOfBaseFolderIdsType parentFolderIDs = new NonEmptyArrayOfBaseFolderIdsType();
         parentFolderIDs.getFolderIdOrDistinguishedFolderId().add(parentFolderID);
         FolderResponseShapeType folderShape = new FolderResponseShapeType();
@@ -116,9 +150,9 @@ public class FoldersImpl extends Common implements Folders {
         request.setParentFolderIds(parentFolderIDs);
         Holder<FindFolderResponseType> responseHolder = new Holder<FindFolderResponseType>();
         port.findFolder(request, getRequestVersion(), responseHolder, getVersionHolder());
-        FolderInfoResponseMessageType responseMessage = (FolderInfoResponseMessageType)getResponseMessage(responseHolder);
-        return null != responseMessage.getFolders() ? responseMessage.getFolders().getFolderOrCalendarFolderOrContactsFolder() : null;
+        FindFolderResponseMessageType responseMessage = (FindFolderResponseMessageType)getResponseMessage(responseHolder);
+        check(responseMessage);
+        return null != responseMessage.getRootFolder().getFolders() ? responseMessage.getRootFolder().getFolders().getFolderOrCalendarFolderOrContactsFolder() : null;
     }
-    
 
 }

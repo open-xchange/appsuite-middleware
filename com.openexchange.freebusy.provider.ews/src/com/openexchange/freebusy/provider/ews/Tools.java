@@ -58,7 +58,7 @@ import com.microsoft.schemas.exchange.services._2006.types.FreeBusyView;
 import com.microsoft.schemas.exchange.services._2006.types.LegacyFreeBusyType;
 import com.microsoft.schemas.exchange.services._2006.types.ResponseClassType;
 import com.openexchange.ews.DateConverter;
-import com.openexchange.ews.EWSException;
+import com.openexchange.ews.EWSExceptionCodes;
 import com.openexchange.exception.OXException;
 import com.openexchange.freebusy.BusyStatus;
 import com.openexchange.freebusy.FreeBusyExceptionCodes;
@@ -75,11 +75,11 @@ public final class Tools {
     
     public static OXException getError(String participant, ResponseMessageType responseMessage) {
         if (null != responseMessage && false == ResponseClassType.SUCCESS.equals(responseMessage.getResponseClass())) {
-            EWSException ewsException = new EWSException(responseMessage);
+            OXException ewsException = EWSExceptionCodes.create(responseMessage);
             if ("ErrorMailRecipientNotFound".equals(responseMessage.getResponseCode())) {
                 return FreeBusyExceptionCodes.PARTICIPANT_NOT_FOUND.create(ewsException, participant);               
             } else {
-                return OXException.general("Unknown error: " + responseMessage.getMessageText());             
+                return ewsException;             
             }
         }
         return null;

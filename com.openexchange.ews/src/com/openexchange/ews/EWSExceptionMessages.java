@@ -47,34 +47,31 @@
  *
  */
 
-package com.openexchange.freebusy.provider;
+package com.openexchange.ews;
 
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import com.openexchange.exception.OXException;
-import com.openexchange.freebusy.FreeBusyData;
-import com.openexchange.session.Session;
+import com.openexchange.i18n.LocalizableStrings;
 
 /**
- * {@link FreeBusyProvider}
+ * {@link EWSExceptionMessages} 
  * 
- * Provider of free/busy information.
+ * Translatable messages for {@link EWSExceptionCodes}.
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public interface FreeBusyProvider {
+public final class EWSExceptionMessages implements LocalizableStrings {
+    
+    public static final String UNEXPECTED_RESPONSE_COUNT_MSG = "Got %1$d instead of %2$d response messages";
+    public static final String NO_RESPONSE_MSG = "Got no response messages";
+    public static final String EWS_ERROR_MSG = "EWS error: %1$s (%2$s)";
+    public static final String EWS_WARNING_MSG = "EWS warning: %1$s (%2$s)";
+    public static final String NOT_FOUND_MSG = "Object \"%1$s\" not found";
+    public static final String AMBIGUOUS_NAME_MSG = "The name \"%1$s\" is ambiguous";
+    public static final String EXTERNAL_ERROR_MSG = "An external error occured: %1$s";
     
     /**
-     * Gets the available free/busy data for a list participants.
-     * 
-     * @param session The session
-     * @param participants A list of participants, identified either by their internal user-/resource-ID or e-mail address. 
-     * @param from The lower (inclusive) limit of the requested time-range 
-     * @param until The upper (exclusive) limit of the requested time-range
-     * @return A map of free/busy data, with each entry representing the free/busy data of one requested participant  
-     * @throws OXException
+     * Prevent instantiation. Ambiguous 
      */
-    Map<String, FreeBusyData> getFreeBusy(Session session, List<String> participants, Date from, Date until);
-    
+    private EWSExceptionMessages() {
+        super();
+    }
 }
