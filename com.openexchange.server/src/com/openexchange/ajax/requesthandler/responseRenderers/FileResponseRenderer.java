@@ -85,17 +85,15 @@ public class FileResponseRenderer implements ResponseRenderer {
     private static final int BUFLEN = 2048;
 
     private static final String PARAMETER_CONTENT_DISPOSITION = "content_disposition";
-
     private static final String PARAMETER_CONTENT_TYPE = "content_type";
 
-    protected static final String SAVE_AS_TYPE = "application/octet-stream";
+    private static final String SAVE_AS_TYPE = "application/octet-stream";
 
     private volatile ImageScalingService scaler;
-    
+
     private final String DELIVERY = "delivery";
-    
+
     private final String DOWNLOAD = "download";
-    
     private final String VIEW = "view";
 
     /**
@@ -121,7 +119,7 @@ public class FileResponseRenderer implements ResponseRenderer {
 
     @Override
     public boolean handles(final AJAXRequestData request, final AJAXRequestResult result) {
-        return result.getResultObject() instanceof IFileHolder;
+        return (result.getResultObject() instanceof IFileHolder);
     }
 
     @Override

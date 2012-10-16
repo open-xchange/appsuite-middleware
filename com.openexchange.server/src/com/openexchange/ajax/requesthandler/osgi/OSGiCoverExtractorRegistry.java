@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2020 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2012 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -49,79 +49,65 @@
 
 package com.openexchange.ajax.requesthandler.osgi;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
-import com.openexchange.ajax.requesthandler.AJAXResultDecorator;
-import com.openexchange.ajax.requesthandler.AJAXResultDecoratorRegistry;
+import com.openexchange.ajax.requesthandler.converters.cover.CoverExtractor;
+import com.openexchange.ajax.requesthandler.converters.cover.CoverExtractorRegistry;
+import com.openexchange.ajax.requesthandler.converters.cover.Mp3CoverExtractor;
+import com.openexchange.exception.OXException;
 
 /**
- * {@link OSGiAJAXResultDecoratorRegistry}
+ * {@link OSGiCoverExtractorRegistry} - An OSGi-based {@link CoverExtractorRegistry}.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class OSGiAJAXResultDecoratorRegistry implements AJAXResultDecoratorRegistry, ServiceTrackerCustomizer<AJAXResultDecorator, AJAXResultDecorator> {
+public final class OSGiCoverExtractorRegistry implements CoverExtractorRegistry, ServiceTrackerCustomizer<CoverExtractor, CoverExtractor> {
 
-    /**
-     * The backing map.
-     */
-    final ConcurrentMap<String, AJAXResultDecorator> map;
+    private static final Object PRESENT = new Object();
 
-    /**
-     * The bundle context.
-     */
+    private final ConcurrentMap<CoverExtractor, Object> map;
     private final BundleContext context;
 
     /**
-     * Initializes a new {@link OSGiChatServiceRegistry}.
+     * Initializes a new {@link OSGiCoverExtractorRegistry}.
      */
-    public OSGiAJAXResultDecoratorRegistry(final BundleContext context) {
+    public OSGiCoverExtractorRegistry(final BundleContext context) {
         super();
         this.context = context;
-        map = new ConcurrentHashMap<String, AJAXResultDecorator>(8);
+        map = new ConcurrentHashMap<CoverExtractor, Object>();
+        // Add default extractor
+        map.put(new Mp3CoverExtractor(), PRESENT);
     }
 
     @Override
-    public List<AJAXResultDecorator> getDecorators() {
-        return new ArrayList<AJAXResultDecorator>(map.values());
+    public Collection<CoverExtractor> getExtractors() throws OXException {
+        return Collections.unmodifiableCollection(map.keySet());
     }
 
     @Override
-    public AJAXResultDecorator getDecorator(final String identifier) {
-        return map.get(identifier);
-    }
-
-    @Override
-    public AJAXResultDecorator addingService(final ServiceReference<AJAXResultDecorator> reference) {
-        final AJAXResultDecorator service = context.getService(reference);
-        if (null == map.putIfAbsent(service.getIdentifier(), service)) {
-            return service;
-        }
-        final org.apache.commons.logging.Log logger = com.openexchange.log.LogFactory.getLog(OSGiAJAXResultDecoratorRegistry.class);
-        if (logger.isWarnEnabled()) {
-            logger.warn(new StringBuilder(128).append("Another AJAXResultDecorator is already registered with identifier: ").append(
-                service.getIdentifier()).toString());
+    public CoverExtractor addingService(final ServiceReference<CoverExtractor> reference) {
+        final CoverExtractor coverExtractor = context.getService(reference);
+        if (null == map.putIfAbsent(coverExtractor, PRESENT)) {
+            return coverExtractor;
         }
         context.ungetService(reference);
         return null;
     }
 
     @Override
-    public void modifiedService(final ServiceReference<AJAXResultDecorator> reference, final AJAXResultDecorator service) {
-        // Nothing to do
+    public void modifiedService(final ServiceReference<CoverExtractor> reference, final CoverExtractor service) {
+        // Ignore
     }
 
     @Override
-    public void removedService(final ServiceReference<AJAXResultDecorator> reference, final AJAXResultDecorator service) {
-        try {
-            map.remove(service.getIdentifier());
-        } finally {
-            context.ungetService(reference);
-        }
+    public void removedService(final ServiceReference<CoverExtractor> reference, final CoverExtractor service) {
+        map.remove(service);
+        context.ungetService(reference);
     }
 
 }
