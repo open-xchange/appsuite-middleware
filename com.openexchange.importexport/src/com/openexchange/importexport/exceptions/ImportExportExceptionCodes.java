@@ -146,6 +146,7 @@ public enum ImportExportExceptionCodes implements OXExceptionCode {
     TEMP_FILE_NOT_FOUND(TEMP_FILE_NOT_FOUND_MSG, Category.CATEGORY_ERROR, 1311),
     NEED_FOLDER(NEED_FOLDER_MSG, Category.CATEGORY_USER_INPUT, 1312), 
     IRREGULAR_COLUMN_ID(IRREGULAR_COLUMN_ID_MSG, Category.CATEGORY_USER_INPUT, 1313),
+    NO_CONTENT(NO_CONTENT_MSG, Category.CATEGORY_USER_INPUT, 1314),
     ;
 
     private String message;
