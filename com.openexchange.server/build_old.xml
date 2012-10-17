@@ -414,7 +414,8 @@
         <move tofile="${patch.bin.dir}/restoregabdefaults" file="${patch.bin.dir}/restoregabdefaults.in" overwrite="true"/>
         <move tofile="${patch.bin.dir}/listExecutedUpdateTasks" file="${patch.bin.dir}/listExecutedUpdateTasks.in" overwrite="true"/>
         <move tofile="${patch.bin.dir}/logincounter" file="${patch.bin.dir}/logincounter.in" overwrite="true"/>
-        <replace dir="${patch.bin.dir}" includes="checkconsistency checkconfigconsistency open-xchange-groupware oxreport resetversion runupdate schemasandversions listExecutedUpdateTasks logincounter forceupdatetask restoregabdefaults">
+    	<move tofile="${patch.bin.dir}/lastlogintimestamp" file="${patch.bin.dir}/lastlogintimestamp" overwrite="true"/>
+    	<replace dir="${patch.bin.dir}" includes="checkconsistency checkconfigconsistency open-xchange-groupware oxreport resetversion runupdate schemasandversions listExecutedUpdateTasks logincounter lastlogintimestamp forceupdatetask restoregabdefaults">
             <replacefilter token="@oxfunctions@" value="${common.conf.install.dir}/oxfunctions.sh"/>
             <replacefilter token="@oxscriptconf@" value="${conf.subst.patch}/ox-scriptconf.sh"/>
             <replacefilter token="@prefix@" value="${prefix}"/>
