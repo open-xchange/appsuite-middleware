@@ -90,7 +90,7 @@ public final class LastLoginTimeStampTool {
         opts.addOption("u", "user", true, "A valid user identifier");
         opts.addOption("t", "client", true, "A client identifier; e.g \"com.openexchange.ox.gui.dhtml\"");
 
-        opts.addOption("d", "datepattern", true, "The date pattern used for formatting retrieved time stamp; e.g \"EEE, d MMM yyyy HH:mm:ss Z\" would yield \"Wed, 4 Jul 2001 12:08:56 -0700\"");
+        opts.addOption("d", "datepattern", true, "The optional date pattern used for formatting retrieved time stamp; e.g \"EEE, d MMM yyyy HH:mm:ss Z\" would yield \"Wed, 4 Jul 2001 12:08:56 -0700\"");
 
         opts.addOption("p", "port", true, "The optional JMX port (default:9999)");
         opts.addOption("l", "login", true, "The optional JMX login (if JMX has authentication enabled)");
