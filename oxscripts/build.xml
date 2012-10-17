@@ -52,7 +52,8 @@
         <chmod perm="755" file="${sbinInstallDir}/getmissingservices"/>
         <chmod perm="755" file="${sbinInstallDir}/listExecutedUpdateTasks"/>
         <chmod perm="755" file="${sbinInstallDir}/logincounter"/>
-        <chmod perm="755" file="${sbinInstallDir}/open-xchange"/>
+    	<chmod perm="755" file="${sbinInstallDir}/lastlogintimestamp"/>
+    	<chmod perm="755" file="${sbinInstallDir}/open-xchange"/>
         <chmod perm="755" file="${sbinInstallDir}/restoregabdefaults"/>
         <chmod perm="755" file="${sbinInstallDir}/runupdate"/>
     	<chmod perm="755" file="${sbinInstallDir}/setupautoscaling"/>
@@ -70,7 +71,7 @@
             <fileset dir="${sbinDir}"/>
             <mapper type="glob" from="*.in" to="*"/>
         </copy>
-        <replace dir="${patchSbinDir}" includes="checkconsistency checkconfigconsistency closesessions forceupdatetask getmissingservices listExecutedUpdateTasks logincounter open-xchange restoregabdefaults runupdate setupautoscaling">
+        <replace dir="${patchSbinDir}" includes="checkconsistency checkconfigconsistency closesessions forceupdatetask getmissingservices listExecutedUpdateTasks logincounter lastlogintimestamp open-xchange restoregabdefaults runupdate setupautoscaling">
             <replacefilter token="@oxfunctions@" value="${prefix}/${libDir}/oxfunctions.sh"/>
             <replacefilter token="@oxscriptconf@" value="${confInstallDir}/ox-scriptconf.sh"/>
             <replacefilter token="@prefix@" value="${prefix}"/>

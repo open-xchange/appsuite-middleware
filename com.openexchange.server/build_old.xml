@@ -305,6 +305,7 @@
         <chmod perm="755" file="${bin.install.copy.dir}/checkconfigconsistency"/>
         <chmod perm="755" file="${bin.install.copy.dir}/listExecutedUpdateTasks"/>
         <chmod perm="755" file="${bin.install.copy.dir}/logincounter"/>
+    	<chmod perm="755" file="${bin.install.copy.dir}/lastlogintimestamp"/>
         <chmod perm="755" file="${bin.install.copy.dir}/oxreport"/>
         <chmod perm="755" file="${bin.install.copy.dir}/resetversion"/>
         <chmod perm="755" file="${bin.install.copy.dir}/runupdate"/>
