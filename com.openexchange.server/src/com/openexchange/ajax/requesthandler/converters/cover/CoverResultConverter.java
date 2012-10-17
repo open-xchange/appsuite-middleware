@@ -56,7 +56,6 @@ import com.openexchange.ajax.requesthandler.Converter;
 import com.openexchange.ajax.requesthandler.ResultConverter;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Streams;
-import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
@@ -107,7 +106,7 @@ public final class CoverResultConverter implements ResultConverter {
              */
             final CoverExtractorRegistry extractorRegistry = CoverExtractorRegistry.REGISTRY_REFERENCE.get();
             if (null == extractorRegistry) {
-                throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(CoverExtractorRegistry.class.getName());
+                throw AjaxExceptionCodes.UNSUPPORTED_FORMAT.create(getOutputFormat());
             }
             CoverExtractor extractor = null;
             for (final CoverExtractor cur : extractorRegistry.getExtractors()) {
@@ -117,7 +116,7 @@ public final class CoverResultConverter implements ResultConverter {
                 }
             }
             if (null == extractor) {
-                throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(CoverExtractor.class.getName());
+                throw AjaxExceptionCodes.UNSUPPORTED_FORMAT.create(getOutputFormat());
             }
             result.setResultObject(extractor.extractCover(fileHolder), getOutputFormat());
         } finally {

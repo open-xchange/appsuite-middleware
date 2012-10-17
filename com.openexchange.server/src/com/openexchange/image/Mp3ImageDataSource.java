@@ -49,7 +49,6 @@
 
 package com.openexchange.image;
 
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -82,7 +81,6 @@ import com.openexchange.file.storage.composition.IDBasedFileAccess;
 import com.openexchange.file.storage.composition.IDBasedFileAccessFactory;
 import com.openexchange.filemanagement.ManagedFile;
 import com.openexchange.filemanagement.ManagedFileManagement;
-import com.openexchange.java.Streams;
 import com.openexchange.mail.mime.MimeType2ExtMap;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
@@ -149,9 +147,7 @@ public final class Mp3ImageDataSource implements ImageDataSource {
         String mimeType = null;
         byte[] imageBytes = null;
         {
-            final byte[] mp3Bytes = optData(fileId, folderId, ServerSessionAdapter.valueOf(session));
-            final ManagedFileManagement fileManagement = ServerServiceRegistry.getInstance().getService(ManagedFileManagement.class);
-            final ManagedFile managedFile = fileManagement.createManagedFile(mp3Bytes);
+            final ManagedFile managedFile = optData(fileId, folderId, ServerSessionAdapter.valueOf(session), ServerServiceRegistry.getInstance().getService(ManagedFileManagement.class));
             try {
                 final File tmpFile = managedFile.getFile();
                 // Create MP3 file
@@ -303,28 +299,13 @@ public final class Mp3ImageDataSource implements ImageDataSource {
         }
     }
 
-    private static byte[] optData(final String fileId, final String folderId, final ServerSession session) throws OXException {
+    private static ManagedFile optData(final String fileId, final String folderId, final ServerSession session, final ManagedFileManagement fileManagement) throws OXException {
         if (!session.getUserConfiguration().hasInfostore()) {
             throw FileStorageExceptionCodes.FILE_NOT_FOUND.create(fileId, folderId);
         }
         final ServerServiceRegistry serviceRegistry = ServerServiceRegistry.getInstance();
         final IDBasedFileAccess fileAccess = serviceRegistry.getService(IDBasedFileAccessFactory.class).createAccess(session);
-        InputStream mp3File = null;
-        try {
-            mp3File = fileAccess.getDocument(fileId, FileStorageFileAccess.CURRENT_VERSION);
-            final ByteArrayOutputStream outputStream = Streams.newByteArrayOutputStream(8192);
-            final byte[] buf = new byte[2048];
-            for (int r = mp3File.read(buf, 0, 2048); r > 0; r = mp3File.read(buf, 0, 2048)) {
-                outputStream.write(buf, 0, r);
-            }
-            return outputStream.toByteArray();
-        } catch (final IOException e) {
-            throw FileStorageExceptionCodes.IO_ERROR.create(e, e.getMessage());
-        } catch (final RuntimeException e) {
-            throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
-        } finally {
-            Streams.close(mp3File);
-        }
+        return fileManagement.createManagedFile(fileAccess.getDocument(fileId, FileStorageFileAccess.CURRENT_VERSION)); // Stream is closed during creation of ManagedFile
     }
 
     private static final Set<String> MIME_TYPES = Collections.unmodifiableSet(new HashSet<String>(Arrays.asList(

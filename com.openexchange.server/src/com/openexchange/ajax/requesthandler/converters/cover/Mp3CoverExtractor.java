@@ -76,7 +76,7 @@ import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 
 /**
- * {@link Mp3CoverExtractor}
+ * {@link Mp3CoverExtractor} - The {@link CoverExtractor} for MP3 files.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
