@@ -1,6 +1,7 @@
 * 2012-10-17 - thorben.betten@open-xchange.com
 
  - Fix for bug 23409: Keep track of already merged messages
+ - Fix for bug 23400: Aggressively cleaning cache
 
 * 2012-10-16 - martin.herfurth@open-xchange.com
 
