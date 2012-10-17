@@ -26,4 +26,4 @@ Import-Package: com.openexchange.api2,
  org.apache.commons.logging,
  org.osgi.framework,
  org.osgi.util.tracker
-Bundle-Activator: com.openexchange.freebusy.provider.rdb.osgi.RdbFreeBusyProviderActivator
+Bundle-Activator: com.openexchange.freebusy.provider.internal.osgi.InternalFreeBusyProviderActivator
