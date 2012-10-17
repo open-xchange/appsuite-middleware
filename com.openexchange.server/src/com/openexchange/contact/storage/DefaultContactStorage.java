@@ -49,10 +49,17 @@
 
 package com.openexchange.contact.storage;
 
+import java.util.Arrays;
+import java.util.Calendar;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+import java.util.TimeZone;
+import org.apache.commons.logging.Log;
+import com.openexchange.contact.ContactFieldOperand;
 import com.openexchange.contact.SortOptions;
 import com.openexchange.contact.storage.internal.SearchAdapter;
 import com.openexchange.exception.OXException;
@@ -60,8 +67,14 @@ import com.openexchange.groupware.contact.ContactExceptionCodes;
 import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.search.ContactSearchObject;
+import com.openexchange.search.CompositeSearchTerm;
+import com.openexchange.search.CompositeSearchTerm.CompositeOperation;
 import com.openexchange.search.SearchTerm;
+import com.openexchange.search.SingleSearchTerm;
+import com.openexchange.search.SingleSearchTerm.SingleOperation;
+import com.openexchange.search.internal.operands.ConstantOperand;
 import com.openexchange.session.Session;
+import com.openexchange.tools.iterator.FilteringSearchIterator;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorAdapter;
 
@@ -73,6 +86,11 @@ import com.openexchange.tools.iterator.SearchIteratorAdapter;
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 public abstract class DefaultContactStorage implements ContactStorage {
+    
+    /**
+     * Named logger instance.
+     */
+    protected static final Log LOG = com.openexchange.log.Log.loggerFor(DefaultContactStorage.class);
     
     /**
      * Initializes a new {@link DefaultContactStorage}.
@@ -137,13 +155,7 @@ public abstract class DefaultContactStorage implements ContactStorage {
                 }
             }
         } finally {
-            if (null != searchIterator) {
-                try {
-                    searchIterator.close();
-                } catch (OXException e) {
-                    // ignore
-                }
-            }
+            close(searchIterator);
         }
     }
     
@@ -163,16 +175,133 @@ public abstract class DefaultContactStorage implements ContactStorage {
                 }
             }
         } finally {
-            if (null != searchIterator) {
-                try {
-                    searchIterator.close();
-                } catch (OXException e) {
-                    // ignore
-                }
-            }
+            close(searchIterator);
         }
     }
+    
+    /**
+     * Default implementation that first queries the contacts that actually
+     * contain a birthday, and then filters the results. Override if 
+     * applicable for storage.
+     */
+    @Override
+    public SearchIterator<Contact> searchByBirthday(Session session, List<String> folderIDs, Date from, Date until, ContactField[] fields, SortOptions sortOptions) throws OXException {
+        SearchIterator<Contact> searchIterator = this.search(
+            session, getAnnualDateTerm(folderIDs, ContactField.BIRTHDAY), addUniquely(fields, ContactField.BIRTHDAY), sortOptions);
+        return filterByAnnualDate(searchIterator, from, until, ContactField.BIRTHDAY); 
+    }
+    
+    /**
+     * Default implementation that first queries the contacts that actually
+     * contain an anniversary, and then filters the results. Override if 
+     * applicable for storage.
+     */
+    @Override
+    public SearchIterator<Contact> searchByAnniversary(Session session, List<String> folderIDs, Date from, Date until, ContactField[] fields, SortOptions sortOptions) throws OXException {
+        SearchIterator<Contact> searchIterator = this.search(
+            session, getAnnualDateTerm(folderIDs, ContactField.ANNIVERSARY), addUniquely(fields, ContactField.ANNIVERSARY), sortOptions);
+        return filterByAnnualDate(searchIterator, from, until, ContactField.ANNIVERSARY); 
+    }
 
+    /**
+     * Constructs a search term to find contacts what have a value greater 
+     * than 0 for the supplied date field, combined with an additional 
+     * restriction for the parent folder IDs. This does only work for the 
+     * 'birthday'- and 'anniversary' fields. 
+     * 
+     * @param folderIDs the possible folder IDs, or <code>null</code> if not relevant
+     * @param dateField One of <code>ContactField.ANNIVERSARY</code> or <code>ContactField.BIRTHDAY</code> 
+     * @return A search term
+     */
+    private static SearchTerm<?> getAnnualDateTerm(List<String> folderIDs, ContactField dateField) {
+        SingleSearchTerm hasDateTerm = new SingleSearchTerm(SingleOperation.GREATER_OR_EQUAL);
+        hasDateTerm.addOperand(new ContactFieldOperand(dateField));
+        hasDateTerm.addOperand(new ConstantOperand<Date>(new Date(0)));
+        if (null != folderIDs && 0 < folderIDs.size()) {
+            CompositeSearchTerm folderIDsTerm = new CompositeSearchTerm(CompositeOperation.OR);
+            for (String parentFolderID : folderIDs) {
+                SingleSearchTerm folderIDTerm = new SingleSearchTerm(SingleOperation.EQUALS);
+                folderIDTerm.addOperand(new ContactFieldOperand(ContactField.FOLDER_ID));
+                folderIDTerm.addOperand(new ConstantOperand<String>(parentFolderID));
+                folderIDsTerm.addSearchTerm(folderIDTerm);
+            }
+            CompositeSearchTerm andTerm = new CompositeSearchTerm(CompositeOperation.AND);
+            andTerm.addSearchTerm(folderIDsTerm);
+            andTerm.addSearchTerm(hasDateTerm);
+            return andTerm;
+        } else {
+            return hasDateTerm;
+        }
+    }
+    
+    /**
+     * Filters out contacts whose month/day portion of the date field falls 
+     * between the supplied period. This does only work for the 'birthday'-
+     * and 'anniversary' fields. 
+     * 
+     * @param searchIterator The contact search iterator to filter
+     * @param from The lower (inclusive) limit of the requested time-range 
+     * @param until The upper (exclusive) limit of the requested time-range
+     * @param dateField One of <code>ContactField.ANNIVERSARY</code> or <code>ContactField.BIRTHDAY</code> 
+     * @return A filtering search iterator
+     * @throws OXException
+     */
+    private static SearchIterator<Contact> filterByAnnualDate(SearchIterator<Contact> searchIterator, final Date from, final Date until, 
+        final ContactField dateField) throws OXException {
+        if (from.after(until)) {
+            throw new IllegalArgumentException("from must not be after until");
+        }        
+        /*
+         * get from/until years
+         */
+        final Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
+        calendar.setTime(from);
+        final int fromYear = calendar.get(Calendar.YEAR);
+        calendar.setTime(until);
+        final int untilYear = calendar.get(Calendar.YEAR);
+        /*
+         * wrap condition into filtering iterator
+         */
+        return new FilteringSearchIterator<Contact>(searchIterator) {
+            
+            @Override
+            public boolean accept(Contact thing) throws OXException {
+                Date date = ContactField.ANNIVERSARY.equals(dateField) ? thing.getAnniversary() :
+                    ContactField.BIRTHDAY.equals(dateField) ? thing.getBirthday() : null;
+                if (null != date) {
+                    calendar.setTime(date);
+                    for (int y = fromYear; y <= untilYear; y++) {
+                        calendar.set(Calendar.YEAR, y);
+                        if (calendar.getTime().before(until) && false == calendar.getTime().before(from)) {
+                            return true;
+                        }
+                    }                
+                }
+                return false;
+            }
+        };
+    }
+
+    /**
+     * Adds one or more fields to a given field array uniquely.
+     * 
+     * @param fields The fields
+     * @param fieldsToAdd The fields to add uniquely
+     * @return A new array containing both the <code>fields</code> and <code>fieldsToAdd</code>
+     */
+    protected static ContactField[] addUniquely(ContactField[] fields, ContactField...fieldsToAdd) {
+        if (null == fields || 0 == fields.length) {
+            return fieldsToAdd;
+        } else if (null == fieldsToAdd || 0 == fieldsToAdd.length) {
+            return fields;
+        } else {
+            Set<ContactField> contactFields = new HashSet<ContactField>(fields.length + fieldsToAdd.length);
+            contactFields.addAll(Arrays.asList(fields));
+            contactFields.addAll(Arrays.asList(fieldsToAdd));
+            return contactFields.toArray(new ContactField[contactFields.size()]);
+        }
+    }
+    
     /**
      * Gets all contact fields.
      * 
@@ -180,6 +309,21 @@ public abstract class DefaultContactStorage implements ContactStorage {
      */
     protected static ContactField[] allFields() {
         return ContactField.values();
+    }
+    
+    /**
+     * Closes a search iterator silently.
+     * 
+     * @param searchIterator The search iterator to close, or <code>null</code>
+     */
+    protected static <T> void close(SearchIterator<T> searchIterator) {
+        if (null != searchIterator) {
+            try {
+                searchIterator.close();
+            } catch (OXException e) {
+                LOG.warn("error closing search iterator", e);
+            }
+        }        
     }
     
     /**

@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.ajp13.najp;
+package com.openexchange.ajp13.watcher;
 
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;

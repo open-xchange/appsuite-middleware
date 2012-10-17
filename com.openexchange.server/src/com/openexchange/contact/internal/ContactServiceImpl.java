@@ -794,4 +794,74 @@ public class ContactServiceImpl extends DefaultContactService {
 				queryFields.needsAttachmentInfo(), session, true);
 	}
 
+    @Override
+    protected SearchIterator<Contact> doSearchContactsWithBirthday(Session session, Date from, Date until, List<String> folderIDs, ContactField[] fields, SortOptions sortOptions) throws OXException {
+        int userID = session.getUserId();
+        int contextID = session.getContextId();
+        /*
+         * determine queried storages according to searched folders
+         */
+        Map<ContactStorage, List<String>> queriedStorages = Tools.getStorages(session, 
+            null == folderIDs ? Tools.getVisibleFolders(contextID, userID) : folderIDs);
+        if (null == queriedStorages || 0 == queriedStorages.size()) {
+            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create("No contact storage found for queried folder IDs");
+        }
+        /*
+         * prepare fields and sort options
+         */
+        QueryFields queryFields = new QueryFields(fields);
+        if (null == sortOptions) {
+            sortOptions = SortOptions.EMPTY;
+        }
+        /*
+         * perform searches
+         */
+        List<SearchIterator<Contact>> searchIterators = new ArrayList<SearchIterator<Contact>>();
+        for (Entry<ContactStorage, List<String>> queriedStorage : queriedStorages.entrySet()) {
+            /*
+             * get results, filtered respecting object permission restrictions, adding attachment info as needed
+             */
+            SearchIterator<Contact> searchIterator = queriedStorage.getKey().searchByBirthday(
+                session, queriedStorage.getValue(), from, until, fields, sortOptions);
+            searchIterators.add(new ResultIterator(searchIterator, queryFields.needsAttachmentInfo(), session));
+        }
+        return 2 > searchIterators.size() ? searchIterators.get(0) :
+            new ContactMergerator(Tools.getComparator(sortOptions), searchIterators);
+    }
+
+    @Override
+    protected SearchIterator<Contact> doSearchContactsWithAnniversary(Session session, Date from, Date until, List<String> folderIDs, ContactField[] fields, SortOptions sortOptions) throws OXException {
+        int userID = session.getUserId();
+        int contextID = session.getContextId();
+        /*
+         * determine queried storages according to searched folders
+         */
+        Map<ContactStorage, List<String>> queriedStorages = Tools.getStorages(session, 
+            null == folderIDs ? Tools.getVisibleFolders(contextID, userID) : folderIDs);
+        if (null == queriedStorages || 0 == queriedStorages.size()) {
+            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create("No contact storage found for queried folder IDs");
+        }
+        /*
+         * prepare fields and sort options
+         */
+        QueryFields queryFields = new QueryFields(fields);
+        if (null == sortOptions) {
+            sortOptions = SortOptions.EMPTY;
+        }
+        /*
+         * perform searches
+         */
+        List<SearchIterator<Contact>> searchIterators = new ArrayList<SearchIterator<Contact>>();
+        for (Entry<ContactStorage, List<String>> queriedStorage : queriedStorages.entrySet()) {
+            /*
+             * get results, filtered respecting object permission restrictions, adding attachment info as needed
+             */
+            SearchIterator<Contact> searchIterator = queriedStorage.getKey().searchByAnniversary(
+                session, queriedStorage.getValue(), from, until, fields, sortOptions);
+            searchIterators.add(new ResultIterator(searchIterator, queryFields.needsAttachmentInfo(), session));
+        }
+        return 2 > searchIterators.size() ? searchIterators.get(0) :
+            new ContactMergerator(Tools.getComparator(sortOptions), searchIterators);
+    }
+
 }

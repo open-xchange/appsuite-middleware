@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.freebusy.provider.rdb;
+package com.openexchange.freebusy.provider.internal;
 
 import java.util.concurrent.atomic.AtomicReference;
 import com.openexchange.exception.OXException;
@@ -55,18 +55,18 @@ import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
 
 /**
- * {@link RdbFreeBusyProviderLookup} 
+ * {@link InternalFreeBusyProviderLookup} 
  * 
  * Provides access to services.
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class RdbFreeBusyProviderLookup {
+public class InternalFreeBusyProviderLookup {
 
     /**
-     * Initializes a new {@link RdbFreeBusyProviderLookup}.
+     * Initializes a new {@link InternalFreeBusyProviderLookup}.
      */
-    private RdbFreeBusyProviderLookup() {
+    private InternalFreeBusyProviderLookup() {
         super();
     }
 
@@ -82,7 +82,7 @@ public class RdbFreeBusyProviderLookup {
     }
 
     public static <S extends Object> S getService(Class<? extends S> c) throws OXException {
-        return RdbFreeBusyProviderLookup.getService(c, false);
+        return InternalFreeBusyProviderLookup.getService(c, true);
     }
     
     public static <S extends Object> S getService(Class<? extends S> c, boolean throwOnAbsence) throws OXException {

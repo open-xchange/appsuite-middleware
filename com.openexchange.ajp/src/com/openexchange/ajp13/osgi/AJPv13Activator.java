@@ -220,7 +220,7 @@ public final class AJPv13Activator extends HousekeepingActivator {
 
         @Override
         public void start() throws OXException {
-            AJPv13Server.setInstance(new com.openexchange.ajp13.najp.AJPv13ServerImpl());
+            AJPv13Server.setInstance(new com.openexchange.ajp13.AJPv13ServerImpl());
             AJPv13Config.getInstance().start();
             AJPv13Server.startAJPServer();
         }

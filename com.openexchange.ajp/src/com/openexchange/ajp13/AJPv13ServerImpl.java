@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.ajp13.najp;
+package com.openexchange.ajp13;
 
 import java.io.IOException;
 import java.net.ServerSocket;
@@ -56,14 +56,10 @@ import java.text.DecimalFormat;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicBoolean;
 import org.apache.commons.logging.Log;
-import com.openexchange.ajp13.AJPv13Config;
-import com.openexchange.ajp13.AJPv13Server;
-import com.openexchange.ajp13.AJPv13ServiceRegistry;
 import com.openexchange.ajp13.coyote.sockethandler.CoyoteSocketHandler;
 import com.openexchange.ajp13.exception.AJPv13Exception;
 import com.openexchange.ajp13.exception.AJPv13Exception.AJPCode;
 import com.openexchange.ajp13.monitoring.AJPv13Monitors;
-import com.openexchange.ajp13.najp.threadpool.AJPv13SocketHandler;
 import com.openexchange.ajp13.servlet.ServletConfigLoader;
 import com.openexchange.config.ConfigurationService;
 
@@ -94,17 +90,8 @@ public final class AJPv13ServerImpl extends AJPv13Server implements Runnable {
     public AJPv13ServerImpl() {
         super();
         running = new AtomicBoolean();
-
-        final ConfigurationService service = AJPv13ServiceRegistry.getServiceRegistry().getService(ConfigurationService.class);
-        final boolean coyote = null == service || service.getBoolProperty("AJP_COYOTE_SOCKET_HANDLER", true);
-        if (coyote) {
-            socketHandler = new CoyoteSocketHandler();
-            LOG.info("------------ Started Coyote socket handler ------------");
-        } else {
-            socketHandler = new AJPv13SocketHandler();
-            LOG.warn("\n\tOutdated AJP socket handler configured. Please consider to set \"AJP_COYOTE_SOCKET_HANDLER\" property to \"TRUE\".\n");
-            LOG.info("------------ Started AJP socket handler ------------");
-        }
+        socketHandler = new CoyoteSocketHandler();
+        LOG.info("------------ Started AJP Coyote socket handler ------------");
     }
 
     /**
