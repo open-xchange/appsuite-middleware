@@ -67,7 +67,9 @@ import org.jaudiotagger.tag.TagException;
 import org.jaudiotagger.tag.TagField;
 import org.jaudiotagger.tag.datatype.DataTypes;
 import org.jaudiotagger.tag.id3.AbstractID3v2Frame;
+import org.jaudiotagger.tag.id3.AbstractTagFrameBody;
 import org.jaudiotagger.tag.id3.framebody.FrameBodyAPIC;
+import org.jaudiotagger.tag.id3.framebody.FrameBodyPIC;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.conversion.Data;
 import com.openexchange.conversion.DataArguments;
@@ -155,10 +157,21 @@ public final class Mp3ImageDataSource implements ImageDataSource {
                 // Get appropriate cover tag
                 final TagField imageField = mp3.getID3v2Tag().getFirstField(FieldKey.COVER_ART);
                 if (imageField instanceof AbstractID3v2Frame) {
-                    final FrameBodyAPIC imageFrameBody = (FrameBodyAPIC) ((AbstractID3v2Frame) imageField).getBody();
-                    if (!imageFrameBody.isImageUrl()) {
-                        imageBytes = (byte[]) imageFrameBody.getObjectValue(DataTypes.OBJ_PICTURE_DATA);
-                        mimeType = (String) imageFrameBody.getObjectValue(DataTypes.OBJ_MIME_TYPE);
+                    final AbstractTagFrameBody body = ((AbstractID3v2Frame) imageField).getBody();
+                    if (body instanceof FrameBodyAPIC) {
+                        final FrameBodyAPIC imageFrameBody = (FrameBodyAPIC) body;
+                        if (!imageFrameBody.isImageUrl()) {
+                            imageBytes = (byte[]) imageFrameBody.getObjectValue(DataTypes.OBJ_PICTURE_DATA);
+                            mimeType = (String) imageFrameBody.getObjectValue(DataTypes.OBJ_MIME_TYPE);
+                        }
+                    } else if (body instanceof FrameBodyPIC) {
+                        final FrameBodyPIC imageFrameBody = (FrameBodyPIC) body;
+                        if (!imageFrameBody.isImageUrl()) {
+                            imageBytes = (byte[]) imageFrameBody.getObjectValue(DataTypes.OBJ_PICTURE_DATA);
+                            mimeType = (String) imageFrameBody.getObjectValue(DataTypes.OBJ_MIME_TYPE);
+                        }
+                    } else {
+                        LOG.warn("Extracting cover image from MP3 failed. Unknown frame body class: " + body.getClass().getName());
                     }
                 }
             } catch (final IOException e) {

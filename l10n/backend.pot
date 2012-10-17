@@ -10054,6 +10054,16 @@ msgstr ""
 msgid "Missing request body."
 msgstr ""
 
+#. An HTTP error occurred. Status %1$s. Message %2$s.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/servlet/AjaxExceptionMessages.java:140
+msgid "An HTTP error occurred. Status %1$s. Message %2$s."
+msgstr ""
+
+#. Unsupported format: %1$s
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/servlet/AjaxExceptionMessages.java:143
+msgid "Unsupported format: %1$s"
+msgstr ""
+
 #. *
 #. * Exception while writing JSON.
 #.
