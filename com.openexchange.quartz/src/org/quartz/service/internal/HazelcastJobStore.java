@@ -150,16 +150,16 @@ public class HazelcastJobStore implements JobStore {
         }
         
         this.signaler = signaler;
-        jobsByGroup = hazelcast.getMap("quartzJobsByGroup");
-        triggersByGroup = hazelcast.getMap("quartzTriggersByGroup");
-        jobKeys = hazelcast.getSet("quartzJobKeys");
-        triggersByKey = hazelcast.getMap("quartzTriggersByKey");
-        triggersByJobKey = hazelcast.getMap("quartzTriggersByJobKey");
-        calendarsByName = hazelcast.getMap("quartzCalendarsByName");
-        pausedTriggerGroups = hazelcast.getSet("quartzPausedTriggerGroups");
-        pausedJobGroups = hazelcast.getSet("quartzPausedJobGroups");
-        lock = hazelcast.getLock("quartzJobStoreLock");
-        blockedJobs = hazelcast.getSet("quartzBlockedJobs");            
+        jobsByGroup = hazelcast.getMap(instanceName + '/' + "quartzJobsByGroup");
+        triggersByGroup = hazelcast.getMap(instanceName + '/' + "quartzTriggersByGroup");
+        jobKeys = hazelcast.getSet(instanceName + '/' + "quartzJobKeys");
+        triggersByKey = hazelcast.getMap(instanceName + '/' + "quartzTriggersByKey");
+        triggersByJobKey = hazelcast.getMap(instanceName + '/' + "quartzTriggersByJobKey");
+        calendarsByName = hazelcast.getMap(instanceName + '/' + "quartzCalendarsByName");
+        pausedTriggerGroups = hazelcast.getSet(instanceName + '/' + "quartzPausedTriggerGroups");
+        pausedJobGroups = hazelcast.getSet(instanceName + '/' + "quartzPausedJobGroups");
+        lock = hazelcast.getLock(instanceName + '/' + "quartzJobStoreLock");
+        blockedJobs = hazelcast.getSet(instanceName + '/' + "quartzBlockedJobs");            
         
         triggersByKey.addIndex("trigger.nextFireTime", true);
         triggersByKey.addIndex("trigger.misfireInstruction", false);
@@ -209,7 +209,7 @@ public class HazelcastJobStore implements JobStore {
             String group = key.getGroup();
             IMap<JobKey, JobDetail> jobsByKey = jobsByGroup.get(group);
             if (jobsByKey == null) {
-                jobsByKey = hazelcast.getMap("quartzJobsByKey/" + group);
+                jobsByKey = hazelcast.getMap(instanceName + '/' + "quartzJobsByKey/" + group);
                 jobsByKey.put(key, newJob);
                 jobKeys.add(key);
                 jobsByGroup.put(group, jobsByKey);
@@ -240,7 +240,7 @@ public class HazelcastJobStore implements JobStore {
             String group = key.getGroup();
             ISet<TriggerKey> triggersByKey = triggersByGroup.get(group);
             if (triggersByKey == null) {
-                triggersByKey = hazelcast.getSet("quartzTriggerKeys/" + group);
+                triggersByKey = hazelcast.getSet(instanceName + '/' + "quartzTriggerKeys/" + group);
                 triggersByGroup.put(group, triggersByKey);
                 storeTrigger(triggersByKey, newTrigger);
             } else {
@@ -283,7 +283,7 @@ public class HazelcastJobStore implements JobStore {
         ISet<TriggerKey> triggers = triggersByJobKey.get(jobKey);
         if (triggers == null) {
             HazelcastInstance hazelcast = getHazelcast();
-            triggers = hazelcast.getSet("quartzTriggersByJobKey/" + jobKey.toString());
+            triggers = hazelcast.getSet(instanceName + '/' + "quartzTriggersByJobKey/" + jobKey.toString());
             triggersByJobKey.put(jobKey, triggers);
         }
         
@@ -947,17 +947,8 @@ public class HazelcastJobStore implements JobStore {
             LOG.debug("Got lock. " + System.nanoTime());
         }
         
-        long now = System.currentTimeMillis();
         long firstAcquiredTriggerFireTime = 0L;
         try {
-//            EntryObject e = new PredicateBuilder().getEntryObject();
-//            PredicateBuilder query = e.get("trigger.nextFireTime").isNotNull()
-//                .and(e.get("trigger.nextFireTime").lessEqual(new Date(noLaterThan + timeWindow))
-//                .and(e.get("trigger.misfireInstruction").equal(Trigger.MISFIRE_INSTRUCTION_IGNORE_MISFIRE_POLICY)
-//                .or(e.get("trigger.misfireInstruction").notEqual(Trigger.MISFIRE_INSTRUCTION_IGNORE_MISFIRE_POLICY)
-//                .and(e.get("trigger.nextFireTime").greaterEqual(new Date(now - getMisfireThreshold()))))));
-//                        
-//            Collection<TriggerStateWrapper> filteredTriggers = triggersByKey.values(query);
             Collection<TriggerStateWrapper> filteredTriggers = triggersByKey.values();
             if (filteredTriggers == null) {
                 return returnList;

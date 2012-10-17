@@ -66,6 +66,7 @@ import org.quartz.TriggerBuilder;
 import org.quartz.TriggerKey;
 import org.quartz.impl.matchers.GroupMatcher;
 import org.quartz.service.QuartzService;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.service.indexing.IndexingService;
 import com.openexchange.service.indexing.JobInfo;
@@ -77,6 +78,8 @@ import com.openexchange.service.indexing.JobInfo;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public class IndexingServiceImpl implements IndexingService {
+    
+    private static final String SCHEDULER_NAME = "com.openexchange.service.indexing";
     
     private static final Log LOG = com.openexchange.log.Log.loggerFor(IndexingServiceImpl.class);
     
@@ -184,10 +187,17 @@ public class IndexingServiceImpl implements IndexingService {
         return sb.toString();
     }
 
-    Scheduler getScheduler() {
+    Scheduler getScheduler() throws OXException {
+        ConfigurationService config = Services.getService(ConfigurationService.class);
+        int threads = config.getIntProperty(IndexingProperties.WORKER_THREADS, 5);
         QuartzService quartzService = Services.getService(QuartzService.class);
-        Scheduler scheduler = quartzService.getClusteredScheduler();
+        Scheduler scheduler = quartzService.getClusteredScheduler(SCHEDULER_NAME, true, threads);
         return scheduler;
+    }
+    
+    public void shutdown() {
+        QuartzService quartzService = Services.getService(QuartzService.class);
+        quartzService.releaseClusteredScheduler(SCHEDULER_NAME);
     }
     
 }
