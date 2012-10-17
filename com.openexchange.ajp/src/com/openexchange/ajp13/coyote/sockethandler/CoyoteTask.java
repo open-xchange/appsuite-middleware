@@ -60,7 +60,7 @@ import com.openexchange.ajp13.coyote.ActionCode;
 import com.openexchange.ajp13.coyote.AjpProcessor;
 import com.openexchange.ajp13.coyote.Constants;
 import com.openexchange.ajp13.coyote.ExceptionUtils;
-import com.openexchange.ajp13.najp.AJPv13TaskMonitor;
+import com.openexchange.ajp13.watcher.AJPv13TaskMonitor;
 import com.openexchange.ajp13.watcher.AJPv13TaskWatcher;
 import com.openexchange.log.LogFactory;
 import com.openexchange.monitoring.MonitoringInfo;

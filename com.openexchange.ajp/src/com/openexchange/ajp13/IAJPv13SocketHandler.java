@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.ajp13.najp;
+package com.openexchange.ajp13;
 
 import java.net.Socket;
 
