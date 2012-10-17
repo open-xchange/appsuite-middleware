@@ -60,8 +60,13 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Iterator;
 import java.util.Locale;
+import javax.imageio.IIOImage;
 import javax.imageio.ImageIO;
+import javax.imageio.ImageWriteParam;
+import javax.imageio.ImageWriter;
+import javax.imageio.stream.ImageOutputStream;
 import org.apache.commons.logging.Log;
 import com.drew.imaging.ImageMetadataReader;
 import com.drew.imaging.ImageProcessingException;
@@ -126,12 +131,25 @@ public class JavaImageScalingService implements ImageScalingService {
         BufferedImage scaled = op.filter(image, null);
 
         UnsynchronizedByteArrayOutputStream baos = new UnsynchronizedByteArrayOutputStream(8192);
+        
+        Iterator<ImageWriter> iter = ImageIO.getImageWritersByFormatName("jpeg");
+        ImageWriter writer = iter.next();
+        ImageWriteParam iwp = writer.getDefaultWriteParam();
+        iwp.setCompressionMode(ImageWriteParam.MODE_EXPLICIT);
+        iwp.setProgressiveMode(ImageWriteParam.MODE_DEFAULT);
+        iwp.setCompressionQuality(1.0f);
+        ImageOutputStream imageOutputStream = ImageIO.createImageOutputStream(baos);
+        writer.setOutput(imageOutputStream);
+        IIOImage iioImage = new IIOImage(scaled, null, null);
+        writer.write(null, iioImage, iwp);
+        writer.dispose();
 
-        if (!ImageIO.write(scaled, "png", baos)) {
-            throw new IOException("Couldn't scale image");
+        try {
+            return Streams.newByteArrayInputStream(baos.toByteArray());
+        } finally {
+            imageOutputStream.close();
+            baos.close();
         }
-
-        return Streams.newByteArrayInputStream(baos.toByteArray());
     }
 
     @Override
