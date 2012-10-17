@@ -22,6 +22,10 @@ Requires:      open-xchange-mailstore
 Requires:      open-xchange-httpservice
 Requires:      open-xchange-theme-default
 Requires:      open-xchange-smtp >= @OXVERSION@
+%if 0%{?rhel_version}
+# Bug #23216
+Requires:      redhat-lsb
+%endif
 
 %description
 This package provides the dependencies to install a working Open-Xchange backend system. By installing this package a minimal backend is
