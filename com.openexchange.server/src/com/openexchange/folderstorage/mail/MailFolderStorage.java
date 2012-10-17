@@ -487,7 +487,7 @@ public final class MailFolderStorage implements FolderStorage {
             mailAccess.connect(null == accessFast ? true : !accessFast.booleanValue());
             final String fullname = arg.getFullname();
             /*
-             * Only backup if fullname does not denote trash (sub)folder
+             * Only backup if full name does not denote trash (sub)folder
              */
             final String trashFullname = mailAccess.getFolderStorage().getTrashFolder();
             final boolean hardDelete = fullname.startsWith(trashFullname);
