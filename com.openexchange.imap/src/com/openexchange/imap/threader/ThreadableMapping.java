@@ -51,6 +51,7 @@ package com.openexchange.imap.threader;
 
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -65,6 +66,63 @@ import com.openexchange.mail.mime.MessageHeaders;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class ThreadableMapping {
+
+    private static final class MessageKey {
+        final String fullName;
+        final String id;
+        final int hash;
+
+        MessageKey(String id, String fullName) {
+            super();
+            this.id = id;
+            this.fullName = fullName;
+            // Hash
+            final int prime = 31;
+            int result = 1;
+            result = prime * result + ((fullName == null) ? 0 : fullName.hashCode());
+            result = prime * result + ((id == null) ? 0 : id.hashCode());
+            hash = result;
+        }
+
+        @Override
+        public int hashCode() {
+            return hash;
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (this == obj) {
+                return true;
+            }
+            if (!(obj instanceof MessageKey)) {
+                return false;
+            }
+            MessageKey other = (MessageKey) obj;
+            if (fullName == null) {
+                if (other.fullName != null) {
+                    return false;
+                }
+            } else if (!fullName.equals(other.fullName)) {
+                return false;
+            }
+            if (id == null) {
+                if (other.id != null) {
+                    return false;
+                }
+            } else if (!id.equals(other.id)) {
+                return false;
+            }
+            return true;
+        }
+
+    } // End of class MessageKey
+
+    private static MessageKey keyFor(final MailMessage mailMessage) {
+        if (null == mailMessage) {
+            return null;
+        }
+        return new MessageKey(mailMessage.getMailId(), mailMessage.getFolder());
+    }
 
     private final Map<String, List<MailMessage>> refsMap;
     private final Map<String, List<MailMessage>> messageIdMap;
@@ -85,13 +143,18 @@ public final class ThreadableMapping {
      * @param thread The thread to add into
      */
     public void checkFor(final Iterable<MailMessage> toCheck, final List<MailMessage> thread) {
+        final Set<MessageKey> processed = new HashSet<MessageKey>(thread.size());
         for (final MailMessage mail : toCheck) {
             final String messageId = mail.getMessageId();
             if (!isEmpty(messageId)) {
                 // Those mails that refer to specified mail
                 final List<MailMessage> referencees = refsMap.get(messageId);
                 if (null != referencees) {
-                    thread.addAll(referencees);
+                    for (final MailMessage candidate : referencees) {
+                        if (processed.add(keyFor(candidate))) {
+                            thread.add(candidate);
+                        }
+                    }
                 }
             }
             final String[] sReferences = mail.getReferences();
@@ -100,7 +163,11 @@ public final class ThreadableMapping {
                     // Those mails that are referenced by specified mail
                     final List<MailMessage> references = messageIdMap.get(sReference);
                     if (null != references) {
-                        thread.addAll(references);
+                        for (final MailMessage candidate : references) {
+                            if (processed.add(keyFor(candidate))) {
+                                thread.add(candidate);
+                            }
+                        }
                     }
                 }
             }
