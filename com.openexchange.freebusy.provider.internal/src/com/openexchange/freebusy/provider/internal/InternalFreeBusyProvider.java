@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.freebusy.provider.rdb;
+package com.openexchange.freebusy.provider.internal;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -77,23 +77,23 @@ import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.user.UserService;
 
 /**
- * {@link RdbFreeBusyProvider}
+ * {@link InternalFreeBusyProvider}
  * 
  * Provider of free/busy information.
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class RdbFreeBusyProvider implements FreeBusyProvider {
+public class InternalFreeBusyProvider implements FreeBusyProvider {
     
     /**
-     * Initializes a new {@link RdbFreeBusyProvider}.
+     * Initializes a new {@link InternalFreeBusyProvider}.
      */
-    public RdbFreeBusyProvider() {
+    public InternalFreeBusyProvider() {
         super();
     }
     
     private AppointmentSQLInterface getAppointmentSql(Session session) throws OXException {
-        return RdbFreeBusyProviderLookup.getService(AppointmentSqlFactoryService.class).createAppointmentSql(session);
+        return InternalFreeBusyProviderLookup.getService(AppointmentSqlFactoryService.class).createAppointmentSql(session);
     }
     
     @Override
@@ -106,7 +106,7 @@ public class RdbFreeBusyProvider implements FreeBusyProvider {
                 freeBusyInformation.put(participant, freeBusyData);
             }
             try {
-                Context context = RdbFreeBusyProviderLookup.getService(ContextService.class).getContext(session.getContextId());
+                Context context = InternalFreeBusyProviderLookup.getService(ContextService.class).getContext(session.getContextId());
                 int userID = getUserID(context, participant);
                 if (-1 != userID) {
                     fillFreeBusyData(freeBusyData, getAppointmentSql(session).getFreeBusyInformation(
@@ -166,7 +166,7 @@ public class RdbFreeBusyProvider implements FreeBusyProvider {
     }
     
     private static int[] getGroupMembers(Context context, String participant) throws OXException {
-        GroupService groupService = RdbFreeBusyProviderLookup.getService(GroupService.class);
+        GroupService groupService = InternalFreeBusyProviderLookup.getService(GroupService.class);
         Group group = null;
         try {
             group = groupService.getGroup(context, Integer.parseInt(participant));
@@ -183,7 +183,7 @@ public class RdbFreeBusyProvider implements FreeBusyProvider {
     }
     
     private static int getUserID(Context context, String participant) throws OXException {
-        UserService userService = RdbFreeBusyProviderLookup.getService(UserService.class);
+        UserService userService = InternalFreeBusyProviderLookup.getService(UserService.class);
         User user = null;
         try {
             user = userService.getUser(Integer.parseInt(participant), context);
@@ -207,7 +207,7 @@ public class RdbFreeBusyProvider implements FreeBusyProvider {
     }
     
     private static int getResourceID(Context context, String participant) throws OXException {
-        ResourceService resourceService = RdbFreeBusyProviderLookup.getService(ResourceService.class);
+        ResourceService resourceService = InternalFreeBusyProviderLookup.getService(ResourceService.class);
         Resource resource = null;
         try {
             resource = resourceService.getResource(Integer.parseInt(participant), context);

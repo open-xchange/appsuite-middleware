@@ -47,13 +47,13 @@
  *
  */
 
-package com.openexchange.freebusy.provider.rdb.osgi;
+package com.openexchange.freebusy.provider.internal.osgi;
 
 import org.apache.commons.logging.Log;
 import com.openexchange.context.ContextService;
 import com.openexchange.freebusy.provider.FreeBusyProvider;
-import com.openexchange.freebusy.provider.rdb.RdbFreeBusyProvider;
-import com.openexchange.freebusy.provider.rdb.RdbFreeBusyProviderLookup;
+import com.openexchange.freebusy.provider.internal.InternalFreeBusyProvider;
+import com.openexchange.freebusy.provider.internal.InternalFreeBusyProviderLookup;
 import com.openexchange.group.GroupService;
 import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
 import com.openexchange.log.LogFactory;
@@ -62,18 +62,18 @@ import com.openexchange.resource.ResourceService;
 import com.openexchange.user.UserService;
 
 /**
- * {@link RdbFreeBusyProviderActivator}
+ * {@link InternalFreeBusyProviderActivator}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class RdbFreeBusyProviderActivator extends HousekeepingActivator {
+public class InternalFreeBusyProviderActivator extends HousekeepingActivator {
 
-    private final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(RdbFreeBusyProviderActivator.class));
+    private final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(InternalFreeBusyProviderActivator.class));
 
     /**
-     * Initializes a new {@link RdbFreeBusyProviderActivator}.
+     * Initializes a new {@link InternalFreeBusyProviderActivator}.
      */
-    public RdbFreeBusyProviderActivator() {
+    public InternalFreeBusyProviderActivator() {
         super();
     }
 
@@ -87,8 +87,8 @@ public class RdbFreeBusyProviderActivator extends HousekeepingActivator {
     protected void startBundle() throws Exception {
         try {
             LOG.info("starting bundle: com.openexchange.freebusy.provider.rdb");
-            RdbFreeBusyProviderLookup.set(this);
-            registerService(FreeBusyProvider.class, new RdbFreeBusyProvider());
+            InternalFreeBusyProviderLookup.set(this);
+            registerService(FreeBusyProvider.class, new InternalFreeBusyProvider());
         } catch (Exception e) {
             LOG.error("error starting com.openexchange.freebusy.provider.rdb", e);
             throw e;            
@@ -98,7 +98,7 @@ public class RdbFreeBusyProviderActivator extends HousekeepingActivator {
     @Override
     protected void stopBundle() throws Exception {
         LOG.info("stopping bundle: com.openexchange.freebusy.provider.rdb");
-        RdbFreeBusyProviderLookup.set(null);            
+        InternalFreeBusyProviderLookup.set(null);            
         super.stopBundle();
     }
 
