@@ -170,6 +170,8 @@ public final class Mp3ImageDataSource implements ImageDataSource {
                             imageBytes = (byte[]) imageFrameBody.getObjectValue(DataTypes.OBJ_PICTURE_DATA);
                             mimeType = (String) imageFrameBody.getObjectValue(DataTypes.OBJ_MIME_TYPE);
                         }
+                    } else {
+                        LOG.warn("Extracting cover image from MP3 failed. Unknown frame body class: " + body.getClass().getName());
                     }
                 }
             } catch (final IOException e) {

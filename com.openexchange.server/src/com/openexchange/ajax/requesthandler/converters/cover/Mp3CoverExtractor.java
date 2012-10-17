@@ -57,6 +57,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
+import org.apache.commons.logging.Log;
 import org.jaudiotagger.audio.exceptions.InvalidAudioFrameException;
 import org.jaudiotagger.audio.exceptions.ReadOnlyFileException;
 import org.jaudiotagger.audio.mp3.MP3File;
@@ -83,6 +84,8 @@ import com.openexchange.tools.servlet.AjaxExceptionCodes;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class Mp3CoverExtractor implements CoverExtractor {
+
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(Mp3CoverExtractor.class);
 
     /**
      * Initializes a new {@link Mp3CoverExtractor}.
@@ -146,6 +149,8 @@ public final class Mp3CoverExtractor implements CoverExtractor {
                         coverFile.setDisposition(file.getDisposition());
                         return coverFile;
                     }
+                } else {
+                    LOG.warn("Extracting cover image from MP3 failed. Unknown frame body class: " + body.getClass().getName());
                 }
             }
             throw AjaxExceptionCodes.BAD_REQUEST.create();
