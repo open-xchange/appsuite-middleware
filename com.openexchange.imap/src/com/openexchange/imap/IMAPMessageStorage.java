@@ -94,6 +94,7 @@ import javax.mail.MessagingException;
 import javax.mail.Multipart;
 import javax.mail.Part;
 import javax.mail.StoreClosedException;
+import javax.mail.UIDFolder;
 import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeUtility;
 import javax.mail.internet.ParameterList;
@@ -112,11 +113,11 @@ import com.openexchange.imap.command.AbstractIMAPCommand;
 import com.openexchange.imap.command.BodyFetchIMAPCommand;
 import com.openexchange.imap.command.BodystructureFetchIMAPCommand;
 import com.openexchange.imap.command.CopyIMAPCommand;
+import com.openexchange.imap.command.FlagsIMAPCommand;
+import com.openexchange.imap.command.MailMessageFetchIMAPCommand;
 import com.openexchange.imap.command.MessageFetchIMAPCommand;
 import com.openexchange.imap.command.MessageFetchIMAPCommand.FetchProfileModifier;
-import com.openexchange.imap.command.FlagsIMAPCommand;
 import com.openexchange.imap.command.MoveIMAPCommand;
-import com.openexchange.imap.command.MailMessageFetchIMAPCommand;
 import com.openexchange.imap.command.SimpleFetchIMAPCommand;
 import com.openexchange.imap.config.IIMAPProperties;
 import com.openexchange.imap.search.IMAPSearch;
@@ -1634,6 +1635,21 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                     }
                     if (!found) {
                         fetchProfile.add(envelopeOnly);
+                    }
+                }
+                // Add UID item to FetchProfile if absent
+                {
+                    boolean found = false;
+                    final Item uid = UIDFolder.FetchProfileItem.UID;
+                    final Item[] items = fetchProfile.getItems();
+                    for (int i = 0; !found && i < items.length; i++) {
+                        final Item cur = items[i];
+                        if (uid == cur) {
+                            found = true;
+                        }
+                    }
+                    if (!found) {
+                        fetchProfile.add(uid);
                     }
                 }
                 // Get ThreadableMapping

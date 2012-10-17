@@ -39,13 +39,12 @@ ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} 
 %clean
 %{__rm} -rf %{buildroot}
 
-%files -f %{configfiles}
+%files
 %defattr(-,root,root)
 %dir /opt/open-xchange/bundles/
 /opt/open-xchange/bundles/*
 %dir /opt/open-xchange/osgi/bundle.d/
 /opt/open-xchange/osgi/bundle.d/*
-%dir /opt/open-xchange/etc/
 
 %changelog
 * Wed Oct 10 2012 Marcus Klein <marcus.klein@open-xchange.com>

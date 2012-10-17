@@ -1,3 +1,7 @@
+* 2012-10-17 - thorben.betten@open-xchange.com
+
+ - Fix for bug 23409: Keep track of already merged messages
+
 * 2012-10-16 - martin.herfurth@open-xchange.com
 
  - Fix for bug 21795: Ignoring updates on Appointments with outdated sequence on request.
