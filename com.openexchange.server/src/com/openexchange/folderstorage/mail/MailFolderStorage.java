@@ -491,6 +491,7 @@ public final class MailFolderStorage implements FolderStorage {
              */
             final String trashFullname = mailAccess.getFolderStorage().getTrashFolder();
             final boolean hardDelete = fullname.startsWith(trashFullname);
+            final Map<String, Map<?, ?>> subfolders = subfolders(fullname, mailAccess);
             mailAccess.getFolderStorage().deleteFolder(fullname, hardDelete);
             addWarnings(mailAccess, storageParameters);
             postEvent(accountId, fullname, false, true, false, storageParameters);
@@ -510,7 +511,6 @@ public final class MailFolderStorage implements FolderStorage {
                 // New folder in trash folder
                 postEvent(accountId, trashFullname, false, storageParameters);
             }
-            final Map<String, Map<?, ?>> subfolders = subfolders(fullname, mailAccess);
             postEvent4Subfolders(accountId, subfolders, storageParameters);
         } finally {
             closeMailAccess(mailAccess);
