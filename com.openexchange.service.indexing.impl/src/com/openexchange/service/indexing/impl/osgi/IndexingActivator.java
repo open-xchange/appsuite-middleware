@@ -94,6 +94,8 @@ public class IndexingActivator extends HousekeepingActivator {
     private ObjectName indexingMBeanName;
 
     private IndexingServiceMBeanImpl indexingMBean;
+
+    private IndexingServiceImpl serviceImpl;
     
     @Override
     protected Class<?>[] getNeededServices() {
@@ -113,7 +115,7 @@ public class IndexingActivator extends HousekeepingActivator {
     protected void startBundle() throws Exception {
         LOG.info("Starting bundle: com.openexchange.service.indexing");
         Services.setServiceLookup(this);
-        IndexingService serviceImpl = new IndexingServiceImpl();
+        serviceImpl = new IndexingServiceImpl();
         addService(IndexingService.class, serviceImpl);
         registerService(IndexingService.class, serviceImpl);
         
@@ -134,6 +136,10 @@ public class IndexingActivator extends HousekeepingActivator {
             managementService.unregisterMBean(indexingMBeanName);
             indexingMBean = null;
         }        
+        
+        if (serviceImpl != null) {
+            serviceImpl.shutdown();
+        }
     }
     
     private void registerMBean(IndexingServiceImpl indexingService) {

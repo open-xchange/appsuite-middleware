@@ -47,71 +47,16 @@
  *
  */
 
-package org.quartz.service.osgi;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.osgi.framework.ServiceRegistration;
-import org.quartz.service.QuartzService;
-import org.quartz.service.internal.QuartzServiceImpl;
-import org.quartz.service.internal.Services;
-import com.hazelcast.core.HazelcastInstance;
-import com.openexchange.config.ConfigurationService;
-import com.openexchange.osgi.HousekeepingActivator;
+package com.openexchange.service.indexing.impl.internal;
 
 
 /**
- * {@link QuartzActivator}
+ * {@link IndexingProperties}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public class QuartzActivator extends HousekeepingActivator {
-
-    private volatile ServiceRegistration<QuartzService> quartzServiceRegistration;
+public class IndexingProperties {
     
-    private QuartzServiceImpl quartzServiceImpl;
-
-
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { HazelcastInstance.class, ConfigurationService.class };
-    }
-
-    @Override
-    protected void startBundle() throws Exception {
-        Services.setServiceLookup(this);
-        final Log log = LogFactory.getLog(QuartzActivator.class);
-        log.info("Starting bundle: org.quartz");
-        try {
-            System.setProperty("org.terracotta.quartz.skipUpdateCheck", "true");
-            quartzServiceImpl = new QuartzServiceImpl();
-            quartzServiceRegistration = context.registerService(QuartzService.class, quartzServiceImpl, null);
-            log.info("Bundle successfully started: org.quartz");
-        } catch (final Exception e) {
-            log.error("Failed starting bundle: org.quartz", e);
-            throw e;
-        }        
-    }
-    
-    @Override
-    protected void stopBundle() throws Exception {
-        final Log log = LogFactory.getLog(QuartzActivator.class);
-        log.info("Stopping bundle: org.quartz");
-        try {            
-            final ServiceRegistration<QuartzService> quartzServiceRegistration = this.quartzServiceRegistration;
-            if (null != quartzServiceRegistration) {
-                quartzServiceRegistration.unregister();
-                this.quartzServiceRegistration = null;
-            }
-            
-            if (quartzServiceImpl != null) {
-                quartzServiceImpl.shutdown();
-            }
-            log.info("Bundle successfully stopped: org.quartz");
-        } catch (final Exception e) {
-            log.error("Failed stopping bundle: org.quartz", e);
-            throw e;
-        }
-    }
+    public static final String WORKER_THREADS = "com.openexchange.service.indexing.workerThreads";
 
 }
