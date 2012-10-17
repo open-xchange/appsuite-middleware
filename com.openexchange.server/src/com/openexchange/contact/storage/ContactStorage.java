@@ -50,6 +50,7 @@
 package com.openexchange.contact.storage;
 
 import java.util.Date;
+import java.util.List;
 import com.openexchange.contact.SortOptions;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contact.ContactExceptionCodes;
@@ -357,4 +358,32 @@ public interface ContactStorage {
      */
     void delete(Session session, String folderId) throws OXException;
     
+    /**
+     * Searches for contacts whose birthday falls into the specified period.
+     * 
+     * @param session the session
+     * @param folderIDs the IDs of the parent folder
+     * @param from The lower (inclusive) limit of the requested time-range 
+     * @param until The upper (exclusive) limit of the requested time-range
+     * @param fields the contact fields that should be retrieved
+     * @param sortOptions the options to sort the results 
+     * @return the contacts found with the search
+     * @throws OXException
+     */
+    SearchIterator<Contact> searchByBirthday(Session session, List<String> folderIDs, Date from, Date until, ContactField[] fields, SortOptions sortOptions) throws OXException;
+
+    /**
+     * Searches for contacts whose anniversary falls into the specified period.
+     * 
+     * @param session the session
+     * @param folderIDs the IDs of the parent folder
+     * @param from The lower (inclusive) limit of the requested time-range 
+     * @param until The upper (exclusive) limit of the requested time-range
+     * @param fields the contact fields that should be retrieved
+     * @param sortOptions the options to sort the results 
+     * @return the contacts found with the search
+     * @throws OXException
+     */
+    SearchIterator<Contact> searchByAnniversary(Session session, List<String> folderIDs, Date from, Date until, ContactField[] fields, SortOptions sortOptions) throws OXException;
+
 }
