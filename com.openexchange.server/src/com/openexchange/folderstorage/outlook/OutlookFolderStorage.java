@@ -637,7 +637,7 @@ public final class OutlookFolderStorage implements FolderStorage {
                 }
             }
         }
-        if (global) {
+        {
             /*
              * Cleanse from other session-bound memory tables, too
              */
