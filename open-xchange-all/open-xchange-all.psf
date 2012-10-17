@@ -18,6 +18,7 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-dav"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-imap"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-smtp"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-file-storage-cifs"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-oauth"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-l10n"/>
