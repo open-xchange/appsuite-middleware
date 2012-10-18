@@ -90,6 +90,15 @@ if [ ${1:-0} -eq 2 ]; then
     # prevent bash from expanding, see bug 13316
     GLOBIGNORE='*'
 
+    # SoftwareChange_Request-1068
+    # -----------------------------------------------------------------------
+    pfile=/opt/open-xchange/etc/ox-scriptconf.sh
+    jopts=$(eval ox_read_property JAVA_XTRAOPTS $pfile)
+    jopts=${jopts//\"/}
+    if ! echo $jopts | grep "osgi.compatibility.bootdelegation" > /dev/null; then
+        ox_set_property JAVA_XTRAOPTS \""$jopts -Dosgi.compatibility.bootdelegation=true"\" $pfile
+    fi
+
     # SoftwareChange_Request-1135
     pfile=/opt/open-xchange/etc/contact.properties
     for key in scale_images scale_image_width scale_image_height; do

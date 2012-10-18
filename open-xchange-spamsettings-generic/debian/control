@@ -11,8 +11,3 @@ Architecture: all
 Pre-Depends: open-xchange-core (>= @OXVERSION@)
 Depends: ${misc:Depends}
 Description: This bundle provides a generic interface for spam settings
-
-Package: open-xchange-spamsettings-generic-gui
-Architecture: all
-Depends: ${misc:Depends}, open-xchange-gui
-Description: General Messaging SMS GUI Bundle.

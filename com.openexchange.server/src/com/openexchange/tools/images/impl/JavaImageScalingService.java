@@ -183,15 +183,24 @@ public class JavaImageScalingService implements ImageScalingService {
             if (exifTransformation == null) {
                 return Streams.newByteArrayInputStream(managedFile.getInputStream());
             }
-   
-            AffineTransformOp op = new AffineTransformOp(exifTransformation, AffineTransformOp.TYPE_BICUBIC);
+            
             BufferedImage image = ImageIO.read(managedFile.getInputStream());
-            ColorModel cm = (image.getType() == BufferedImage.TYPE_BYTE_GRAY) ? image.getColorModel() : null;
-            BufferedImage destinationImage = op.createCompatibleDestImage(image, cm);
+
+            int newWidth;
+            int newHeight;
+            if (imageInformation.orientation <= 4) {
+                newWidth = image.getWidth();
+                newHeight = image.getHeight();
+            } else {
+                newWidth = image.getHeight();
+                newHeight = image.getWidth();
+            }
+            BufferedImage destinationImage = new BufferedImage(newWidth, newHeight, image.getType());
+
             Graphics2D g = destinationImage.createGraphics();
             g.setBackground(Color.WHITE);
             g.clearRect(0, 0, destinationImage.getWidth(), destinationImage.getHeight());
-            destinationImage = op.filter(image, destinationImage);
+            g.drawImage(image, exifTransformation, null);
    
             UnsynchronizedByteArrayOutputStream baos = new UnsynchronizedByteArrayOutputStream();
             if (!ImageIO.write(destinationImage, fileType, baos)) {
