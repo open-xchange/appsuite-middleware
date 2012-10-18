@@ -59,7 +59,6 @@ import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.contact.ContactService;
 import com.openexchange.contacts.json.ContactRequest;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.contact.ContactInterfaceDiscoveryService;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
@@ -82,29 +81,24 @@ public abstract class ContactAction implements AJAXActionService {
     public static final int[] COLUMNS_ALIAS_LIST = new int[] {
         20, 1, 5, 2, 500, 501, 502, 505, 523, 525, 526, 527, 542, 555, 102, 602, 592, 101, 551, 552, 543, 547, 548, 549, 556, 569 };
 
-    public ContactAction(final ServiceLookup serviceLookup) {
+    public ContactAction(ServiceLookup serviceLookup) {
         super();
         this.serviceLookup = serviceLookup;
     }
 
     @Override
-    public AJAXRequestResult perform(final AJAXRequestData requestData, final ServerSession session) throws OXException {
-        final ContactRequest contactRequest = new ContactRequest(requestData, session);
-//		AJAXRequestResult perform = perform(contactRequest);
-		return perform2(contactRequest);
+    public AJAXRequestResult perform(AJAXRequestData requestData, ServerSession session) throws OXException {
+		return perform(new ContactRequest(requestData, session));
     }
 
-    protected abstract AJAXRequestResult perform(ContactRequest req) throws OXException;
-
-    protected abstract AJAXRequestResult perform2(ContactRequest req) throws OXException;
-
-    protected ContactInterfaceDiscoveryService getContactInterfaceDiscoveryService() throws OXException {
-        try {
-            return serviceLookup.getService(ContactInterfaceDiscoveryService.class);
-        } catch (final IllegalStateException e) {
-            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(ContactInterfaceDiscoveryService.class.getName());
-        }
-    }
+    /**
+     * Performs the request.
+     * 
+     * @param request The request
+     * @return The AJAX result
+     * @throws OXException
+     */
+    protected abstract AJAXRequestResult perform(ContactRequest request) throws OXException;
 
     /**
      * Gets the contact service.

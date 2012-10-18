@@ -51,14 +51,10 @@ package com.openexchange.contacts.json.actions;
 
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.LinkedList;
 import java.util.List;
-import java.util.TimeZone;
-
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-
 import com.openexchange.ajax.fields.ContactFields;
 import com.openexchange.ajax.fields.SearchFields;
 import com.openexchange.ajax.parser.DataParser;
@@ -68,14 +64,11 @@ import com.openexchange.documentation.RequestMethod;
 import com.openexchange.documentation.annotations.Action;
 import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.contact.ContactSearchMultiplexer;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.search.ContactSearchObject;
-import com.openexchange.groupware.search.Order;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.servlet.OXJSONExceptionCodes;
-import com.openexchange.tools.session.ServerSession;
 
 
 /**
@@ -98,65 +91,20 @@ public class SearchAction extends ContactAction {
      * Initializes a new {@link SearchAction}.
      * @param serviceLookup
      */
-    public SearchAction(final ServiceLookup serviceLookup) {
+    public SearchAction(ServiceLookup serviceLookup) {
         super(serviceLookup);
     }
 
     @Override
-    protected AJAXRequestResult perform(final ContactRequest req) throws OXException {
-        final ServerSession session = req.getSession();
-        final int[] columns = req.getColumns();
-        final int sort = req.getSort();
-        final Order order = req.getOrder();
-        final String collation = req.getCollation();
-        Date lastModified = null;
-        Date timestamp = new Date(0);
-        final TimeZone timeZone = req.getTimeZone();
-
-        final ContactSearchObject searchObject = createContactSearchObject((JSONObject) req.getData());
-        final ContactSearchMultiplexer multiplexer = new ContactSearchMultiplexer(getContactInterfaceDiscoveryService());
-        SearchIterator<Contact> it = null;
-        final List<Contact> contacts = new LinkedList<Contact>();
-        try {
-            it = multiplexer.extendedSearch(session, searchObject, sort, order, collation, columns);
-            while (it.hasNext()) {
-                final Contact contact = it.next();
-                lastModified = contact.getLastModified();
-
-                // Correct last modified and creation date with users timezone
-                contact.setLastModified(getCorrectedTime(contact.getLastModified(), timeZone));
-                contact.setCreationDate(getCorrectedTime(contact.getCreationDate(), timeZone));
-                contacts.add(contact);
-
-
-                if (lastModified != null && timestamp.before(lastModified)) {
-                    timestamp = lastModified;
-                }
-            }
-        } finally {
-            if (it != null) {
-                it.close();
-            }
-        }
-
-        return new AJAXRequestResult(contacts, lastModified, "contact");
-    }
-
-    @Override
-    protected AJAXRequestResult perform2(final ContactRequest request) throws OXException {
+    protected AJAXRequestResult perform(ContactRequest request) throws OXException {
     	JSONObject jsonObject = request.getJSONData();
-    	    	
         ContactSearchObject contactSearch = createContactSearchObject(jsonObject);
-//        SearchTerm<?> searchTerm = new SearchTermParser(jsonObject).getSearchTerm();
-        
         List<Contact> contacts = new ArrayList<Contact>();
         Date lastModified = new Date(0);
         SearchIterator<Contact> searchIterator = null;
         try {
             searchIterator = getContactService().searchContacts(request.getSession(), contactSearch, request.getFields(), 
             		request.getSortOptions());
-//            searchIterator = getContactService().searchContacts(request.getSession(), searchTerm, request.getFields(), 
-//            		request.getSortOptions());
             while (searchIterator.hasNext()) {
                 Contact contact = searchIterator.next();
                 lastModified = getLatestModified(lastModified, contact);
@@ -175,7 +123,7 @@ public class SearchAction extends ContactAction {
             searchObject = new ContactSearchObject();
             if (json.has("folder")) {
                 if (json.get("folder").getClass().equals(JSONArray.class)) {
-                    for (final int folder : DataParser.parseJSONIntArray(json, "folder")) {
+                    for (int folder : DataParser.parseJSONIntArray(json, "folder")) {
                         searchObject.addFolder(folder);
                     }
                 } else {
@@ -222,7 +170,7 @@ public class SearchAction extends ContactAction {
             searchObject.setYomiCompany(DataParser.parseString(json, ContactFields.YOMI_COMPANY));
             searchObject.setYomiFirstname(DataParser.parseString(json, ContactFields.YOMI_FIRST_NAME));
             searchObject.setYomiLastName(DataParser.parseString(json, ContactFields.YOMI_LAST_NAME));
-        } catch (final JSONException e) {
+        } catch (JSONException e) {
             throw OXJSONExceptionCodes.JSON_READ_ERROR.create(e);
         }
 

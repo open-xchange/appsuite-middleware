@@ -101,6 +101,13 @@ public class ContactRequest {
     private final AJAXRequestData request;
     private final ServerSession session;
 
+    /**
+     * Initializes a new {@link ContactRequest}.
+     * 
+     * @param request The request
+     * @param session The session
+     * @throws OXException
+     */
     public ContactRequest(final AJAXRequestData request, final ServerSession session) throws OXException {
         super();
         this.request = request;
@@ -137,7 +144,7 @@ public class ContactRequest {
     	    if (rightHandLimit < leftHandLimit) {
     	        throw OXJSONExceptionCodes.INVALID_VALUE.create(rightHandLimit, "right_hand_limit");
     	    }
-            sortOptions.setLimit(leftHandLimit);
+            sortOptions.setLimit(rightHandLimit - leftHandLimit);
     	}    	
         if (false == isInternalSort()) {
        		sortOptions.setCollation(this.getCollation());
@@ -178,15 +185,6 @@ public class ContactRequest {
      */
     public ContactField[] getFields() throws OXException {
     	return getFields((ContactField[])null);
-//    	final int[] columnIDs = RequestTools.getColumnsAsIntArray(request, "columns");
-//    	if (this.isInternalSort()) {
-//        	return ContactMapper.getInstance().getFields(columnIDs, VIRTUAL_FIELDS, ContactField.LAST_MODIFIED,
-//        			ContactField.YOMI_LAST_NAME, ContactField.SUR_NAME, ContactField.YOMI_FIRST_NAME, ContactField.GIVEN_NAME, 
-//        			ContactField.DISPLAY_NAME, ContactField.YOMI_COMPANY, ContactField.COMPANY, ContactField.EMAIL1, ContactField.EMAIL2, 
-//        			ContactField.USE_COUNT);
-//    	} else {
-//        	return ContactMapper.getInstance().getFields(columnIDs, VIRTUAL_FIELDS, ContactField.LAST_MODIFIED);
-//    	}
     }    
 
     public ContactField[] getFields(final ContactField...mandatoryFields) throws OXException {

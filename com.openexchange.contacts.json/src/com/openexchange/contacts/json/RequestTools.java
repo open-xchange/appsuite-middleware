@@ -54,7 +54,6 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import javax.activation.MimetypesFileTypeMap;
-import org.apache.commons.logging.Log;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -65,7 +64,6 @@ import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.upload.UploadFile;
 import com.openexchange.groupware.upload.impl.UploadEvent;
 import com.openexchange.java.Streams;
-import com.openexchange.log.LogFactory;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.servlet.OXJSONExceptionCodes;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
@@ -77,8 +75,6 @@ import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public class RequestTools {
-
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(RequestTools.class));
 
     public static int[] getColumnsAsIntArray(final AJAXRequestData request, final String parameter) throws OXException {
         final String valueStr = request.getParameter("columns");

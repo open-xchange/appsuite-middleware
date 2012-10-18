@@ -65,7 +65,6 @@ import com.openexchange.documentation.RequestMethod;
 import com.openexchange.documentation.annotations.Action;
 import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.contact.ContactInterface;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
@@ -91,40 +90,9 @@ public class DeleteAction extends ContactAction {
     public DeleteAction(final ServiceLookup serviceLookup) {
         super(serviceLookup);
     }
-
-    @Override
-    protected AJAXRequestResult perform(final ContactRequest req) throws OXException {
-        final ServerSession session = req.getSession();
-        final long timestamp = req.getTimestamp();
-        final Date date = new Date(timestamp);
-        if (req.getData() instanceof JSONObject) {
-            final int[] deleteRequestData = req.getDeleteRequestData();
-            final ContactInterface contactInterface = getContactInterfaceDiscoveryService().newContactInterface(
-                deleteRequestData[1],
-                session);
-            contactInterface.deleteContactObject(deleteRequestData[0], deleteRequestData[1], date);
-        } else {
-            JSONArray jsonArray = (JSONArray) req.getData();
-            for (int i = 0; i < jsonArray.length(); i++) {
-                try {
-                    JSONObject json = jsonArray.getJSONObject(i);
-                    final int id = json.getInt("id");
-                    final int folder = json.getInt("folder");
-                    final ContactInterface contactInterface = getContactInterfaceDiscoveryService().newContactInterface(
-                        folder,
-                        session);
-                    contactInterface.deleteContactObject(id, folder, date);
-                } catch (JSONException e) {
-                    throw AjaxExceptionCodes.JSON_ERROR.create(e);
-                }
-            }
-        }
-        final JSONObject response = new JSONObject();
-        return new AJAXRequestResult(response, date, "json");
-    }
     
     @Override
-    protected AJAXRequestResult perform2(ContactRequest request) throws OXException {
+    protected AJAXRequestResult perform(ContactRequest request) throws OXException {
         ServerSession session = request.getSession();
         Date lastRead = new Date(request.getTimestamp());
         if (request.getData() instanceof JSONObject) {

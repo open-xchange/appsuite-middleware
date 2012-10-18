@@ -50,7 +50,6 @@
 package com.openexchange.contacts.json.actions;
 
 import java.sql.Connection;
-import java.util.Date;
 import org.apache.commons.logging.Log;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -66,10 +65,7 @@ import com.openexchange.groupware.attach.AttachmentBase;
 import com.openexchange.groupware.attach.AttachmentMetadata;
 import com.openexchange.groupware.attach.AttachmentMetadataFactory;
 import com.openexchange.groupware.attach.Attachments;
-import com.openexchange.groupware.contact.ContactInterface;
-import com.openexchange.groupware.contact.ContactInterfaceDiscoveryService;
 import com.openexchange.groupware.container.Contact;
-import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.container.LinkObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
@@ -81,7 +77,6 @@ import com.openexchange.session.Session;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorException;
 import com.openexchange.tools.servlet.OXJSONExceptionCodes;
-import com.openexchange.tools.session.ServerSession;
 
 
 /**
@@ -106,57 +101,7 @@ public class CopyAction extends ContactAction {
     }
 
     @Override
-    protected AJAXRequestResult perform(final ContactRequest req) throws OXException {
-        final ServerSession session = req.getSession();
-        final int id = req.getId();
-        final int inFolder = req.getFolder();
-        Date timestamp = new Date(0);
-        final int folderId = req.getFolderFromJSON();
-        final Context ctx = session.getContext();
-
-        final ContactInterfaceDiscoveryService discoveryService = getContactInterfaceDiscoveryService();
-        final ContactInterface srcContactInterface = discoveryService.newContactInterface(inFolder, session);
-
-        final ContactInterface contactInterface = discoveryService.newContactInterface(folderId, session);
-
-        final Contact contact = srcContactInterface.getObjectById(id, inFolder);
-        final int origObjectId = contact.getObjectID();
-        contact.removeObjectID();
-        final int origFolderId = contact.getParentFolderID();
-        contact.setParentFolderID(folderId);
-
-        if (inFolder == FolderObject.SYSTEM_LDAP_FOLDER_ID) {
-            contact.removeInternalUserId();
-        }
-
-        contact.setNumberOfAttachments(0);
-        contactInterface.insertContactObject(contact);
-
-        final User user = session.getUser();
-        final UserConfiguration uc = session.getUserConfiguration();
-        /*
-         * Check attachments
-         */
-        copyAttachments(folderId, session, ctx, contact, origObjectId, origFolderId, user, uc);
-        /*
-         * Check links
-         */
-        copyLinks(folderId, session, ctx, contact, origObjectId, origFolderId, user);
-
-        timestamp = contact.getLastModified();
-
-        final JSONObject response = new JSONObject();
-        try {
-            response.put("id", contact.getObjectID());
-        } catch (final JSONException e) {
-            throw OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e);
-        }
-
-        return new AJAXRequestResult(response, timestamp, "json");
-    }
-    
-    @Override
-    protected AJAXRequestResult perform2(final ContactRequest request) throws OXException {
+    protected AJAXRequestResult perform(final ContactRequest request) throws OXException {
         /*
          * prepare original contact
          */
