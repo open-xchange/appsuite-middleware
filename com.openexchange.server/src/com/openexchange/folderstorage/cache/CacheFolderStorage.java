@@ -467,16 +467,9 @@ public final class CacheFolderStorage implements FolderStorage {
             /*
              * Perform create operation via non-cache storage
              */
-            final String folderId;
-            if (null == session) {
-                final CreatePerformer perf = new CreatePerformer(storageParameters.getUser(), storageParameters.getContext(), registry);
-                perf.setCheck4Duplicates(false);
-                folderId = perf.doCreate(folder);
-            } else {
-                final CreatePerformer createPerformer = new CreatePerformer(ServerSessionAdapter.valueOf(session), registry);
-                createPerformer.setCheck4Duplicates(false);
-                folderId = createPerformer.doCreate(folder);
-            }
+            final CreatePerformer createPerformer = null == session ? new CreatePerformer(storageParameters.getUser(), storageParameters.getContext(), registry) : new CreatePerformer(ServerSessionAdapter.valueOf(session), registry);
+            createPerformer.setCheck4Duplicates(false);
+            final String folderId = createPerformer.doCreate(folder);
             /*
              * Get folder from appropriate storage
              */
@@ -487,11 +480,13 @@ public final class CacheFolderStorage implements FolderStorage {
             /*
              * Load created folder from real tree
              */
-            final Folder createdFolder = loadFolder(realTreeId, folderId, StorageType.WORKING, true, storageParameters);
             final int contextId = storageParameters.getContextId();
             final int userId = storageParameters.getUserId();
             final FolderMapManagement folderMapManagement = FolderMapManagement.getInstance();
-            {
+            Folder createdFolder = null;
+            try {
+                createdFolder = loadFolder(realTreeId, folderId, StorageType.WORKING, true, storageParameters);
+                // Iterate its permissions to determine involved entities
                 for (final Permission permission : createdFolder.getPermissions()) {
                     if (!permission.isGroup()) {
                         final int entity = permission.getEntity();
@@ -506,9 +501,15 @@ public final class CacheFolderStorage implements FolderStorage {
                         }
                     }
                 }
-            }
-            if (createdFolder.isCacheable()) {
-                putFolder(createdFolder, realTreeId, storageParameters);
+                if (createdFolder.isCacheable()) {
+                    putFolder(createdFolder, realTreeId, storageParameters);
+                }
+            } catch (final OXException e) {
+                if (LOG.isDebugEnabled()) {
+                    LOG.warn("Newly created folder could not be loaded from appropriate storage.", e);
+                } else {
+                    LOG.warn("Newly created folder could not be loaded from appropriate storage.");
+                }
             }
             /*
              * Remove parent from cache(s)
@@ -524,12 +525,14 @@ public final class CacheFolderStorage implements FolderStorage {
                     folderMap.remove(folder.getParentID(), tid, session);
                 }
             }
-            for (final String tid : trees) {
-                final CacheKey cacheKey = newCacheKey(createdFolder.getParentID(), tid);
-                cache.removeFromGroup(cacheKey, sContextId);
-                final FolderMap folderMap = folderMapManagement.optFor(userId, contextId);
-                if (null != folderMap) {
-                    folderMap.remove(createdFolder.getParentID(), tid, session);
+            if (null != createdFolder) {
+                for (final String tid : trees) {
+                    final CacheKey cacheKey = newCacheKey(createdFolder.getParentID(), tid);
+                    cache.removeFromGroup(cacheKey, sContextId);
+                    final FolderMap folderMap = folderMapManagement.optFor(userId, contextId);
+                    if (null != folderMap) {
+                        folderMap.remove(createdFolder.getParentID(), tid, session);
+                    }
                 }
             }
             /*
@@ -539,9 +542,11 @@ public final class CacheFolderStorage implements FolderStorage {
             if (parentFolder.isCacheable()) {
                 putFolder(parentFolder, realTreeId, storageParameters);
             }
-            parentFolder = loadFolder(realTreeId, createdFolder.getParentID(), StorageType.WORKING, true, storageParameters);
-            if (parentFolder.isCacheable()) {
-                putFolder(parentFolder, realTreeId, storageParameters);
+            if (null != createdFolder) {
+                parentFolder = loadFolder(realTreeId, createdFolder.getParentID(), StorageType.WORKING, true, storageParameters);
+                if (parentFolder.isCacheable()) {
+                    putFolder(parentFolder, realTreeId, storageParameters);
+                }
             }
         } finally {
             lock.unlock();
