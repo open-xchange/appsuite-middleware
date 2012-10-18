@@ -1,4 +1,4 @@
-﻿
+
 Name:          open-xchange-freebusy-ews
 BuildArch:     noarch
 #!BuildIgnore: post-build-checks
