@@ -364,6 +364,9 @@ public class DelegationSolrAccessImpl implements SolrAccessService {
                         
                         return embeddedAccess;
                     } catch (Exception e) {
+                        if (embeddedAccess.hasActiveCore(identifier)) {
+                            embeddedAccess.stopCore(identifier);
+                        }
                         throw SolrExceptionCodes.DELEGATION_ERROR.create(e);
                     }
                 } else {

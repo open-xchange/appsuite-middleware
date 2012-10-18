@@ -1,5 +1,5 @@
 
-Name:           open-xchange-file-storage-cifs
+Name:           open-xchange-file-storage-cmis
 BuildArch:      noarch
 #!BuildIgnore: post-build-checks
 BuildRequires:  ant
@@ -14,12 +14,12 @@ License:        GPL-2.0
 BuildRoot:      %{_tmppath}/%{name}-%{version}-build
 URL:            http://www.open-xchange.com/
 Source:         %{name}_%{version}.orig.tar.bz2
-Summary:        The Open Xchange backend CIFS file storage extension
+Summary:        The Open Xchange backend CMIS file storage extension
 Requires:       open-xchange-core >= @OXVERSION@
-Provides:       open-xchange-file-storage-cifs = %{version}
+Provides:       open-xchange-file-storage-cmis = %{version}
 
 %description
-Adds CIFS file storage service to the backend installation.
+Adds CMIS file storage service to the backend installation.
 
 Authors:
 --------

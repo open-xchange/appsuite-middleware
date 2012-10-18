@@ -161,8 +161,10 @@ public class HazelcastJobStore implements JobStore {
         lock = hazelcast.getLock(instanceName + '/' + "quartzJobStoreLock");
         blockedJobs = hazelcast.getSet(instanceName + '/' + "quartzBlockedJobs");            
         
-        triggersByKey.addIndex("trigger.nextFireTime", true);
-        triggersByKey.addIndex("trigger.misfireInstruction", false);
+        if (triggersByKey.isEmpty()) {
+            triggersByKey.addIndex("trigger.nextFireTime", true);
+            triggersByKey.addIndex("trigger.misfireInstruction", false);
+        }        
     }
 
     @Override

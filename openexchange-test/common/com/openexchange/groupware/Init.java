@@ -232,7 +232,7 @@ public final class Init {
                 AJPv13Config.getInstance().start();
                 ServletConfigLoader.initDefaultInstance(AJPv13Config.getServletConfigs());
                 if (null == AJPv13Server.getInstance()) {
-                    AJPv13Server.setInstance(new com.openexchange.ajp13.najp.AJPv13ServerImpl());
+                    AJPv13Server.setInstance(new com.openexchange.ajp13.AJPv13ServerImpl());
                 }
                 try {
                     AJPv13Server.startAJPServer();
