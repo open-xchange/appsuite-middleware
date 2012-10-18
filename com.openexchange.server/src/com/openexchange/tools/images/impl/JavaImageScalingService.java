@@ -195,7 +195,7 @@ public class JavaImageScalingService implements ImageScalingService {
                 newWidth = image.getHeight();
                 newHeight = image.getWidth();
             }
-            BufferedImage destinationImage = new BufferedImage(newWidth, newHeight, BufferedImage.TYPE_INT_RGB);
+            BufferedImage destinationImage = new BufferedImage(newWidth, newHeight, image.getType());
 
             Graphics2D g = destinationImage.createGraphics();
             g.setBackground(Color.WHITE);
