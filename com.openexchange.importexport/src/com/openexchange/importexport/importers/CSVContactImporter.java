@@ -396,6 +396,7 @@ public class CSVContactImporter extends AbstractImporter {
     }
     
 	public boolean checkFields(final List<String> fields) {
+		currentMapper = null;
         int highestAmountOfMappedFields = 0;
 
         for (ContactFieldMapper mapper : getMappers()) {

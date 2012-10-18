@@ -151,7 +151,7 @@ public class CSVContactImportTest extends AbstractContactTest {
     }
 
     @Test public void importOneDistributionList() throws Exception{
-        final List<ImportResult> results = importStuff(ContactField.DISPLAY_NAME.getReadableName() + "," + ContactField.MARK_AS_DISTRIBUTIONLIST.getAjaxName() + "\n" + "my list,true");
+        final List<ImportResult> results = importStuff(ContactField.DISPLAY_NAME.getAjaxName() + "," + ContactField.MARK_AS_DISTRIBUTIONLIST.getAjaxName() + "\n" + "my list,true");
         assertTrue("One result?" , results.size() == 1);
         final ImportResult res = results.get(0);
         if(res.hasError()){
@@ -225,7 +225,7 @@ public class CSVContactImportTest extends AbstractContactTest {
         try {
             imp.importData(sessObj, defaultFormat, is, folders, null);
         } catch (final OXException e) {
-            assertEquals("Checking malformed file with wrong header" , malformedCSV, e.getErrorCode());
+            assertEquals("Checking malformed file with wrong header" , notASingleImport, e.getErrorCode());
             return;
         }
         fail("Should throw exception");
