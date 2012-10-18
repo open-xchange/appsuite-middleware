@@ -64,6 +64,55 @@ public class Attachment {
     
     static {
         ALLOWED_TYPES.add("application/pdf");
+        ALLOWED_TYPES.add("application/x-pdf");
+        ALLOWED_TYPES.add("application/acrobat");
+        ALLOWED_TYPES.add("applications/vnd.pdf");
+        ALLOWED_TYPES.add("text/pdf");
+        ALLOWED_TYPES.add("text/x-pdf");
+        
+        /*
+         * Microsoft Office Mime-Types (see http://filext.com/faq/office_mime_types.php):
+         */
+        ALLOWED_TYPES.add("application/msword");
+        ALLOWED_TYPES.add("application/vnd.ms-excel");
+        ALLOWED_TYPES.add("application/vnd.ms-powerpoint");
+        ALLOWED_TYPES.add("application/vnd.openxmlformats-officedocument.wordprocessingml.document");
+        ALLOWED_TYPES.add("application/vnd.openxmlformats-officedocument.wordprocessingml.template");
+        ALLOWED_TYPES.add("application/vnd.ms-word.document.macroEnabled.12");
+        ALLOWED_TYPES.add("application/vnd.ms-word.template.macroEnabled.12");
+        ALLOWED_TYPES.add("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+        ALLOWED_TYPES.add("application/vnd.openxmlformats-officedocument.spreadsheetml.template");
+        ALLOWED_TYPES.add("application/vnd.ms-excel.sheet.macroEnabled.12");
+        ALLOWED_TYPES.add("application/vnd.ms-excel.template.macroEnabled.12");
+        ALLOWED_TYPES.add("application/vnd.ms-excel.addin.macroEnabled.12");
+        ALLOWED_TYPES.add("application/vnd.ms-excel.sheet.binary.macroEnabled.12");
+        ALLOWED_TYPES.add("application/vnd.openxmlformats-officedocument.presentationml.presentation");
+        ALLOWED_TYPES.add("application/vnd.openxmlformats-officedocument.presentationml.template");
+        ALLOWED_TYPES.add("application/vnd.openxmlformats-officedocument.presentationml.slideshow");
+        ALLOWED_TYPES.add("application/vnd.ms-powerpoint.addin.macroEnabled.12");
+        ALLOWED_TYPES.add("application/vnd.ms-powerpoint.presentation.macroEnabled.12");
+        ALLOWED_TYPES.add("application/vnd.ms-powerpoint.template.macroEnabled.12");
+        ALLOWED_TYPES.add("application/vnd.ms-powerpoint.slideshow.macroEnabled.12");
+        
+        /*
+         * OpenOffice Mime-Types (see http://books.evc-cit.info/odbook/ch01.html#mimetype-table):
+         */
+        ALLOWED_TYPES.add("application/vnd.oasis.opendocument.text");
+        ALLOWED_TYPES.add("application/vnd.oasis.opendocument.text-template");
+        ALLOWED_TYPES.add("application/vnd.oasis.opendocument.graphics");
+        ALLOWED_TYPES.add("application/vnd.oasis.opendocument.graphics-template");
+        ALLOWED_TYPES.add("application/vnd.oasis.opendocument.presentation");
+        ALLOWED_TYPES.add("application/vnd.oasis.opendocument.presentation-template");
+        ALLOWED_TYPES.add("application/vnd.oasis.opendocument.spreadsheet");
+        ALLOWED_TYPES.add("application/vnd.oasis.opendocument.spreadsheet-template");
+        ALLOWED_TYPES.add("application/vnd.oasis.opendocument.chart");
+        ALLOWED_TYPES.add("application/vnd.oasis.opendocument.chart-template");
+        ALLOWED_TYPES.add("application/vnd.oasis.opendocument.image");
+        ALLOWED_TYPES.add("application/vnd.oasis.opendocument.image-template");
+        ALLOWED_TYPES.add("application/vnd.oasis.opendocument.formula");
+        ALLOWED_TYPES.add("application/vnd.oasis.opendocument.formula-template");
+        ALLOWED_TYPES.add("application/vnd.oasis.opendocument.text-master");
+        ALLOWED_TYPES.add("application/vnd.oasis.opendocument.text-web");
     }
 
     private int module;
