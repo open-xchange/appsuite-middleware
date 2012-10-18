@@ -62,7 +62,7 @@ import com.openexchange.freebusy.BusyStatus;
 import com.openexchange.freebusy.FreeBusyData;
 import com.openexchange.freebusy.FreeBusyExceptionCodes;
 import com.openexchange.freebusy.FreeBusyInterval;
-import com.openexchange.freebusy.provider.FreeBusyProvider;
+import com.openexchange.freebusy.provider.InternalFreeBusyProvider;
 import com.openexchange.group.Group;
 import com.openexchange.group.GroupService;
 import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
@@ -77,23 +77,73 @@ import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.user.UserService;
 
 /**
- * {@link InternalFreeBusyProvider}
+ * {@link InternalFreeBusyProviderImpl}
  * 
  * Provider of free/busy information.
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class InternalFreeBusyProvider implements FreeBusyProvider {
+public class InternalFreeBusyProviderImpl implements InternalFreeBusyProvider {
     
     /**
-     * Initializes a new {@link InternalFreeBusyProvider}.
+     * Initializes a new {@link InternalFreeBusyProviderImpl}.
      */
-    public InternalFreeBusyProvider() {
+    public InternalFreeBusyProviderImpl() {
         super();
     }
     
     private AppointmentSQLInterface getAppointmentSql(Session session) throws OXException {
         return InternalFreeBusyProviderLookup.getService(AppointmentSqlFactoryService.class).createAppointmentSql(session);
+    }
+    
+    @Override
+    public FreeBusyData getUserFreeBusy(Session session, int userID, Date from, Date until) {
+        FreeBusyData freeBusyData = new FreeBusyData(String.valueOf(userID), from, until);
+        try {
+            fillFreeBusyData(freeBusyData, getAppointmentSql(session).getFreeBusyInformation(userID, Participant.USER, from, until));
+        } catch (OXException e) {
+            freeBusyData.addWarning(e);
+        }
+        return freeBusyData;
+    }
+
+    @Override
+    public FreeBusyData getResourceFreeBusy(Session session, int resourceID, Date from, Date until) {
+        FreeBusyData freeBusyData = new FreeBusyData(String.valueOf(resourceID), from, until);
+        try {
+            fillFreeBusyData(freeBusyData, getAppointmentSql(session).getFreeBusyInformation(
+                resourceID, Participant.RESOURCE, from, until));
+        } catch (OXException e) {
+            freeBusyData.addWarning(e);
+        }
+        return freeBusyData;
+    }
+
+    @Override
+    public Map<String, FreeBusyData> getGroupFreeBusy(Session session, int groupID, Date from, Date until) {
+        Map<String, FreeBusyData> freeBusyInformation = new HashMap<String, FreeBusyData>();
+        FreeBusyData groupData = new FreeBusyData(String.valueOf(groupID), from, until);
+        freeBusyInformation.put(String.valueOf(groupID), groupData);
+        try {
+            Context context = InternalFreeBusyProviderLookup.getService(ContextService.class).getContext(session.getContextId());
+            Group group = InternalFreeBusyProviderLookup.getService(GroupService.class).getGroup(context, groupID);
+            if (null == group) {
+                throw FreeBusyExceptionCodes.PARTICIPANT_NOT_FOUND.create(String.valueOf(groupID));
+            }
+            int[] groupMembers = group.getMember();
+            if (null != groupMembers && 0 < groupMembers.length) {
+                AppointmentSQLInterface appointmentSql = getAppointmentSql(session);
+                for (int member : groupMembers) {
+                    FreeBusyData memberData = new FreeBusyData(String.valueOf(member), from, until);
+                    freeBusyInformation.put(String.valueOf(member), memberData);
+                    fillFreeBusyData(memberData, appointmentSql.getFreeBusyInformation(member, Participant.USER, from, until));
+                    groupData.add(memberData);
+                }            
+            }
+        } catch (OXException e) {
+            groupData.addWarning(e);
+        }
+        return freeBusyInformation;
     }
     
     @Override
@@ -228,5 +278,5 @@ public class InternalFreeBusyProvider implements FreeBusyProvider {
         }        
         return null != resource ? resource.getIdentifier() : -1; 
     }
-    
+
 }

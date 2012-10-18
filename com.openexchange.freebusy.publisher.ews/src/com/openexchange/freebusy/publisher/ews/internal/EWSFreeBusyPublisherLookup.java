@@ -47,59 +47,60 @@
  *
  */
 
-package com.openexchange.freebusy.provider.internal.osgi;
+package com.openexchange.freebusy.publisher.ews.internal;
 
-import org.apache.commons.logging.Log;
-import com.openexchange.context.ContextService;
-import com.openexchange.freebusy.provider.InternalFreeBusyProvider;
-import com.openexchange.freebusy.provider.internal.InternalFreeBusyProviderImpl;
-import com.openexchange.freebusy.provider.internal.InternalFreeBusyProviderLookup;
-import com.openexchange.group.GroupService;
-import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
-import com.openexchange.log.LogFactory;
-import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.resource.ResourceService;
-import com.openexchange.user.UserService;
+import java.util.concurrent.atomic.AtomicReference;
+import com.openexchange.exception.OXException;
+import com.openexchange.server.ServiceExceptionCode;
+import com.openexchange.server.ServiceLookup;
 
 /**
- * {@link InternalFreeBusyProviderActivator}
+ * {@link EWSFreeBusyPublisherLookup} 
+ * 
+ * Provides access to services.
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class InternalFreeBusyProviderActivator extends HousekeepingActivator {
-
-    private final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(InternalFreeBusyProviderActivator.class));
+public class EWSFreeBusyPublisherLookup {
 
     /**
-     * Initializes a new {@link InternalFreeBusyProviderActivator}.
+     * Initializes a new {@link EWSFreeBusyPublisherLookup}.
      */
-    public InternalFreeBusyProviderActivator() {
+    private EWSFreeBusyPublisherLookup() {
         super();
     }
 
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { UserService.class, ResourceService.class, AppointmentSqlFactoryService.class, ContextService.class, 
-            GroupService.class };
+    private static AtomicReference<ServiceLookup> ref = new AtomicReference<ServiceLookup>();
+
+    /**
+     * Gets the service look-up
+     *
+     * @return The service look-up or <code>null</code>
+     */
+    public static ServiceLookup get() {
+        return ref.get();
     }
 
-    @Override
-    protected void startBundle() throws Exception {
-        try {
-            LOG.info("starting bundle: com.openexchange.freebusy.provider.internal");
-            InternalFreeBusyProviderLookup.set(this);
-            registerService(InternalFreeBusyProvider.class, new InternalFreeBusyProviderImpl());
-        } catch (Exception e) {
-            LOG.error("error starting com.openexchange.freebusy.provider.internal", e);
-            throw e;            
+    public static <S extends Object> S getService(Class<? extends S> c) throws OXException {
+        return getService(c, true);
+    }
+    
+    public static <S extends Object> S getService(Class<? extends S> c, boolean throwOnAbsence) throws OXException {
+        ServiceLookup serviceLookup = ref.get();
+        S service = null == serviceLookup ? null : serviceLookup.getService(c);
+        if (null == service && throwOnAbsence) {
+            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(c.getName());
         }
+        return service;
     }
 
-    @Override
-    protected void stopBundle() throws Exception {
-        LOG.info("stopping bundle: com.openexchange.freebusy.provider.internal");
-        InternalFreeBusyProviderLookup.set(null);            
-        super.stopBundle();
+    /**
+     * Sets the service look-up
+     *
+     * @param serviceLookup The service look-up or <code>null</code>
+     */
+    public static void set(ServiceLookup serviceLookup) {
+        ref.set(serviceLookup);
     }
 
 }

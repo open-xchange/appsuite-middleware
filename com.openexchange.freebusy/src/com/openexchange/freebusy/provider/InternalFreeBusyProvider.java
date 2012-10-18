@@ -47,59 +47,58 @@
  *
  */
 
-package com.openexchange.freebusy.provider.internal.osgi;
+package com.openexchange.freebusy.provider;
 
-import org.apache.commons.logging.Log;
-import com.openexchange.context.ContextService;
-import com.openexchange.freebusy.provider.InternalFreeBusyProvider;
-import com.openexchange.freebusy.provider.internal.InternalFreeBusyProviderImpl;
-import com.openexchange.freebusy.provider.internal.InternalFreeBusyProviderLookup;
-import com.openexchange.group.GroupService;
-import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
-import com.openexchange.log.LogFactory;
-import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.resource.ResourceService;
-import com.openexchange.user.UserService;
+import java.util.Date;
+import java.util.Map;
+import com.openexchange.exception.OXException;
+import com.openexchange.freebusy.FreeBusyData;
+import com.openexchange.session.Session;
 
 /**
- * {@link InternalFreeBusyProviderActivator}
+ * {@link InternalFreeBusyProvider}
+ * 
+ * Provider for internal free/busy information.
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class InternalFreeBusyProviderActivator extends HousekeepingActivator {
-
-    private final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(InternalFreeBusyProviderActivator.class));
+public interface InternalFreeBusyProvider extends FreeBusyProvider {
+    
+    /**
+     * Gets the available free/busy data for an internal user.
+     * 
+     * @param session The session
+     * @param userID The user ID
+     * @param from The lower (inclusive) limit of the requested time-range 
+     * @param until The upper (exclusive) limit of the requested time-range
+     * @return The free/busy data
+     * @throws OXException 
+     */
+    FreeBusyData getUserFreeBusy(Session session, int userID, Date from, Date until);
 
     /**
-     * Initializes a new {@link InternalFreeBusyProviderActivator}.
+     * Gets the available free/busy data for an internal resource.
+     * 
+     * @param session The session
+     * @param resourceID The resource ID
+     * @param from The lower (inclusive) limit of the requested time-range 
+     * @param until The upper (exclusive) limit of the requested time-range
+     * @return The free/busy data
+     * @throws OXException 
      */
-    public InternalFreeBusyProviderActivator() {
-        super();
-    }
+    FreeBusyData getResourceFreeBusy(Session session, int resourceID, Date from, Date until);
 
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { UserService.class, ResourceService.class, AppointmentSqlFactoryService.class, ContextService.class, 
-            GroupService.class };
-    }
-
-    @Override
-    protected void startBundle() throws Exception {
-        try {
-            LOG.info("starting bundle: com.openexchange.freebusy.provider.internal");
-            InternalFreeBusyProviderLookup.set(this);
-            registerService(InternalFreeBusyProvider.class, new InternalFreeBusyProviderImpl());
-        } catch (Exception e) {
-            LOG.error("error starting com.openexchange.freebusy.provider.internal", e);
-            throw e;            
-        }
-    }
-
-    @Override
-    protected void stopBundle() throws Exception {
-        LOG.info("stopping bundle: com.openexchange.freebusy.provider.internal");
-        InternalFreeBusyProviderLookup.set(null);            
-        super.stopBundle();
-    }
-
+    /**
+     * Gets the available free/busy data for an internal group.
+     * 
+     * @param session The session
+     * @param groupID The group ID
+     * @param from The lower (inclusive) limit of the requested time-range 
+     * @param until The upper (exclusive) limit of the requested time-range
+     * @return A map of free/busy data, with each entry representing the free/busy data of each group participant, along with the 
+     *         aggregated data for the whole group  
+     * @throws OXException 
+     */
+    Map<String, FreeBusyData> getGroupFreeBusy(Session session, int groupID, Date from, Date until) throws OXException;
+    
 }

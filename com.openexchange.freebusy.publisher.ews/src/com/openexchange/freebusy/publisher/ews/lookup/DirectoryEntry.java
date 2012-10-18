@@ -47,59 +47,63 @@
  *
  */
 
-package com.openexchange.freebusy.provider.internal.osgi;
-
-import org.apache.commons.logging.Log;
-import com.openexchange.context.ContextService;
-import com.openexchange.freebusy.provider.InternalFreeBusyProvider;
-import com.openexchange.freebusy.provider.internal.InternalFreeBusyProviderImpl;
-import com.openexchange.freebusy.provider.internal.InternalFreeBusyProviderLookup;
-import com.openexchange.group.GroupService;
-import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
-import com.openexchange.log.LogFactory;
-import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.resource.ResourceService;
-import com.openexchange.user.UserService;
+package com.openexchange.freebusy.publisher.ews.lookup;
 
 /**
- * {@link InternalFreeBusyProviderActivator}
- *
+ * {@link DirectoryEntry}
+ * 
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class InternalFreeBusyProviderActivator extends HousekeepingActivator {
-
-    private final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(InternalFreeBusyProviderActivator.class));
+public class DirectoryEntry {
+    
+    private String mail;
+    private String legacyExchangeDN;
+    private String nameInNameSpace;
+    private String sAMAccountName;
 
     /**
-     * Initializes a new {@link InternalFreeBusyProviderActivator}.
+     * Initializes a new {@link DirectoryEntry}.
      */
-    public InternalFreeBusyProviderActivator() {
+    public DirectoryEntry() {
         super();
     }
 
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { UserService.class, ResourceService.class, AppointmentSqlFactoryService.class, ContextService.class, 
-            GroupService.class };
+
+    public String getLegacyExchangeDN() {
+        return legacyExchangeDN;
+    }
+
+    public void setLegacyExchangeDN(String legacyExchangeDN) {
+        this.legacyExchangeDN = legacyExchangeDN;
+    }
+
+    public String getMail() {
+        return mail;
+    }
+
+    public void setMail(String mail) {
+        this.mail = mail;
+    }
+
+    public String getNameInNameSpace() {
+        return nameInNameSpace;
+    }
+
+    public void setNameInNameSpace(String nameInNameSpace) {
+        this.nameInNameSpace = nameInNameSpace;
+    }
+
+    public String getsAMAccountName() {
+        return sAMAccountName;
+    }
+
+    public void setsAMAccountName(String sAMAccountName) {
+        this.sAMAccountName = sAMAccountName;
     }
 
     @Override
-    protected void startBundle() throws Exception {
-        try {
-            LOG.info("starting bundle: com.openexchange.freebusy.provider.internal");
-            InternalFreeBusyProviderLookup.set(this);
-            registerService(InternalFreeBusyProvider.class, new InternalFreeBusyProviderImpl());
-        } catch (Exception e) {
-            LOG.error("error starting com.openexchange.freebusy.provider.internal", e);
-            throw e;            
-        }
-    }
-
-    @Override
-    protected void stopBundle() throws Exception {
-        LOG.info("stopping bundle: com.openexchange.freebusy.provider.internal");
-        InternalFreeBusyProviderLookup.set(null);            
-        super.stopBundle();
+    public String toString() {
+        return nameInNameSpace;
     }
 
 }

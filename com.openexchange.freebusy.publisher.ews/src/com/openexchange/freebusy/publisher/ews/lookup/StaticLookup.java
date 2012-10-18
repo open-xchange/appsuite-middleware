@@ -47,59 +47,40 @@
  *
  */
 
-package com.openexchange.freebusy.provider.internal.osgi;
+package com.openexchange.freebusy.publisher.ews.lookup;
 
-import org.apache.commons.logging.Log;
-import com.openexchange.context.ContextService;
-import com.openexchange.freebusy.provider.InternalFreeBusyProvider;
-import com.openexchange.freebusy.provider.internal.InternalFreeBusyProviderImpl;
-import com.openexchange.freebusy.provider.internal.InternalFreeBusyProviderLookup;
-import com.openexchange.group.GroupService;
-import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
-import com.openexchange.log.LogFactory;
-import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.resource.ResourceService;
-import com.openexchange.user.UserService;
+import com.openexchange.exception.OXException;
+import com.openexchange.freebusy.publisher.ews.Tools;
+import com.openexchange.groupware.ldap.User;
 
 /**
- * {@link InternalFreeBusyProviderActivator}
- *
+ * {@link StaticLookup}
+ * 
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class InternalFreeBusyProviderActivator extends HousekeepingActivator {
-
-    private final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(InternalFreeBusyProviderActivator.class));
-
+public class StaticLookup extends Lookup {
+    
+    private final String template;
+    
     /**
-     * Initializes a new {@link InternalFreeBusyProviderActivator}.
+     * Initializes a new {@link StaticLookup}.
      */
-    public InternalFreeBusyProviderActivator() {
+    public StaticLookup(String template) {
         super();
+        this.template = template;
+    }
+    
+    public StaticLookup() throws OXException {
+        this(Tools.getConfigProperty("com.openexchange.freebusy.publisher.ews.lookup.static"));
     }
 
     @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { UserService.class, ResourceService.class, AppointmentSqlFactoryService.class, ContextService.class, 
-            GroupService.class };
-    }
-
-    @Override
-    protected void startBundle() throws Exception {
-        try {
-            LOG.info("starting bundle: com.openexchange.freebusy.provider.internal");
-            InternalFreeBusyProviderLookup.set(this);
-            registerService(InternalFreeBusyProvider.class, new InternalFreeBusyProviderImpl());
-        } catch (Exception e) {
-            LOG.error("error starting com.openexchange.freebusy.provider.internal", e);
-            throw e;            
+    public String[] getLegacyExchangeDNs(User[] users) {
+        String[] legacyExchangeDNs = new String[users.length];
+        for (int i = 0; i < users.length; i++) {
+            legacyExchangeDNs[i] = super.replaceUserAttributes(template, users[i]);
         }
+        return legacyExchangeDNs;
     }
-
-    @Override
-    protected void stopBundle() throws Exception {
-        LOG.info("stopping bundle: com.openexchange.freebusy.provider.internal");
-        InternalFreeBusyProviderLookup.set(null);            
-        super.stopBundle();
-    }
-
+    
 }

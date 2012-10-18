@@ -47,59 +47,46 @@
  *
  */
 
-package com.openexchange.freebusy.provider.internal.osgi;
+package com.openexchange.freebusy.publisher.ews.lookup;
 
-import org.apache.commons.logging.Log;
-import com.openexchange.context.ContextService;
-import com.openexchange.freebusy.provider.InternalFreeBusyProvider;
-import com.openexchange.freebusy.provider.internal.InternalFreeBusyProviderImpl;
-import com.openexchange.freebusy.provider.internal.InternalFreeBusyProviderLookup;
-import com.openexchange.group.GroupService;
-import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
-import com.openexchange.log.LogFactory;
-import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.resource.ResourceService;
-import com.openexchange.user.UserService;
+import com.openexchange.exception.OXException;
+import com.openexchange.groupware.ldap.User;
 
 /**
- * {@link InternalFreeBusyProviderActivator}
- *
+ * {@link Lookup}
+ * 
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class InternalFreeBusyProviderActivator extends HousekeepingActivator {
-
-    private final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(InternalFreeBusyProviderActivator.class));
-
-    /**
-     * Initializes a new {@link InternalFreeBusyProviderActivator}.
-     */
-    public InternalFreeBusyProviderActivator() {
+public abstract class Lookup {
+    
+    public Lookup() {
         super();
     }
-
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { UserService.class, ResourceService.class, AppointmentSqlFactoryService.class, ContextService.class, 
-            GroupService.class };
+    
+    public abstract String[] getLegacyExchangeDNs(User[] users) throws OXException;
+    
+    public String getLegacyExchangeDN(User user) throws OXException {
+        String[] legacyExchangeDNs = getLegacyExchangeDNs(new User[0]);
+        return null != legacyExchangeDNs && 0 < legacyExchangeDNs.length ? legacyExchangeDNs[0] : null;
     }
+    
+    protected String replaceUserAttributes(String template, User user) {
+        String value = new String(template);
+        value = value
+            .replaceAll("\\[displayName\\]", null != user.getDisplayName() ? user.getDisplayName() : "")
+            .replaceAll("\\[contactId\\]", String.valueOf(user.getContactId()))
+            .replaceAll("\\[givenName\\]", null != user.getGivenName() ? user.getGivenName() : "")
+            .replaceAll("\\[surName\\]", null != user.getSurname() ? user.getSurname() : "")
+            .replaceAll("\\[userId\\]", String.valueOf(user.getId()))
+            .replaceAll("\\[imapLogin\\]", null != user.getImapLogin() ? user.getImapLogin() : "")
+            .replaceAll("\\[imapServer\\]", null != user.getImapServer() ? user.getImapServer() : "")
+            .replaceAll("\\[mailDomain\\]", null != user.getMailDomain() ? user.getMailDomain() : "")
+            .replaceAll("\\[mail\\]", null != user.getMail() ? user.getMail() : "")
+            .replaceAll("\\[loginInfo\\]", null != user.getLoginInfo() ? user.getLoginInfo() : "")
+        ;
+        return value;
 
-    @Override
-    protected void startBundle() throws Exception {
-        try {
-            LOG.info("starting bundle: com.openexchange.freebusy.provider.internal");
-            InternalFreeBusyProviderLookup.set(this);
-            registerService(InternalFreeBusyProvider.class, new InternalFreeBusyProviderImpl());
-        } catch (Exception e) {
-            LOG.error("error starting com.openexchange.freebusy.provider.internal", e);
-            throw e;            
-        }
+        
+        
     }
-
-    @Override
-    protected void stopBundle() throws Exception {
-        LOG.info("stopping bundle: com.openexchange.freebusy.provider.internal");
-        InternalFreeBusyProviderLookup.set(null);            
-        super.stopBundle();
-    }
-
 }

@@ -47,58 +47,71 @@
  *
  */
 
-package com.openexchange.freebusy.provider.internal.osgi;
+package com.openexchange.freebusy.publisher.ews.osgi;
 
+import java.util.concurrent.TimeUnit;
 import org.apache.commons.logging.Log;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.context.ContextService;
+import com.openexchange.ews.EWSFactoryService;
 import com.openexchange.freebusy.provider.InternalFreeBusyProvider;
-import com.openexchange.freebusy.provider.internal.InternalFreeBusyProviderImpl;
-import com.openexchange.freebusy.provider.internal.InternalFreeBusyProviderLookup;
-import com.openexchange.group.GroupService;
-import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
+import com.openexchange.freebusy.publisher.ews.Tools;
+import com.openexchange.freebusy.publisher.ews.internal.EWSFreeBusyPublisherLookup;
+import com.openexchange.freebusy.publisher.ews.internal.Publisher;
 import com.openexchange.log.LogFactory;
 import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.resource.ResourceService;
+import com.openexchange.timer.ScheduledTimerTask;
+import com.openexchange.timer.TimerService;
 import com.openexchange.user.UserService;
 
 /**
- * {@link InternalFreeBusyProviderActivator}
+ * {@link EWSFreeBusyPublisherActivator}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class InternalFreeBusyProviderActivator extends HousekeepingActivator {
+public class EWSFreeBusyPublisherActivator extends HousekeepingActivator {
 
-    private final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(InternalFreeBusyProviderActivator.class));
+    private final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(EWSFreeBusyPublisherActivator.class));
+    
+    private ScheduledTimerTask publishTask = null;
 
     /**
-     * Initializes a new {@link InternalFreeBusyProviderActivator}.
+     * Initializes a new {@link EWSFreeBusyPublisherActivator}.
      */
-    public InternalFreeBusyProviderActivator() {
+    public EWSFreeBusyPublisherActivator() {
         super();
     }
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { UserService.class, ResourceService.class, AppointmentSqlFactoryService.class, ContextService.class, 
-            GroupService.class };
+        return new Class<?>[] { ConfigurationService.class, InternalFreeBusyProvider.class, UserService.class, ContextService.class, 
+            EWSFactoryService.class, TimerService.class };
     }
 
     @Override
     protected void startBundle() throws Exception {
         try {
-            LOG.info("starting bundle: com.openexchange.freebusy.provider.internal");
-            InternalFreeBusyProviderLookup.set(this);
-            registerService(InternalFreeBusyProvider.class, new InternalFreeBusyProviderImpl());
+            LOG.info("starting bundle: com.openexchange.freebusy.publisher.ews");
+            EWSFreeBusyPublisherLookup.set(this);
+            int initialDelay = Tools.getConfigPropertyInt("com.openexchange.freebusy.publisher.ews.initialDelay", 5);
+            int delay = Tools.getConfigPropertyInt("com.openexchange.freebusy.publisher.ews.delay", 15);
+            publishTask = EWSFreeBusyPublisherLookup.getService(TimerService.class).scheduleWithFixedDelay(
+                new Publisher(), initialDelay, delay, TimeUnit.MINUTES);
+            LOG.info("Scheduled first publication cycle to run in " + initialDelay + 
+                " minutes, then repeating with a delay of " + delay + " minutes.");
         } catch (Exception e) {
-            LOG.error("error starting com.openexchange.freebusy.provider.internal", e);
-            throw e;            
+            LOG.error("error starting com.openexchange.freebusy.publisher.ews", e);
+            throw e;
         }
     }
 
     @Override
     protected void stopBundle() throws Exception {
-        LOG.info("stopping bundle: com.openexchange.freebusy.provider.internal");
-        InternalFreeBusyProviderLookup.set(null);            
+        LOG.info("stopping bundle: com.openexchange.freebusy.publisher.ews");
+        if (null != publishTask) {
+            LOG.info("Stopping publication cycle.");
+            publishTask.cancel(true);
+        }
         super.stopBundle();
     }
 
