@@ -33,9 +33,6 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.file.storage.infostore"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.file.storage.json"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.folder.json"/>
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.freebusy"/>
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.freebusy.json"/>
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.freebusy.provider.internal"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.frontend.uwa"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.frontend.uwa.json"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.global"/>
