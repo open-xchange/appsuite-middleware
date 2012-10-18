@@ -72,7 +72,7 @@ import com.openexchange.server.ServiceLookup;
     @Parameter(name = "from", description = "The lower (inclusive) limit of the requested time-range."),
     @Parameter(name = "until", description = "The upper (exclusive) limit of the requested time-range."),
     @Parameter(name = "merged", type = Type.BOOLEAN, optional = true, description = "Whether to pre-process the free/busy data on the " + 
-    "server or not. This includes sorting as well as merging overlapping free/busy intervals."),
+    "server or not. This includes sorting as well as merging overlapping free/busy intervals.")
 }, requestBody = "An array of participants to get the free/busy data for. Each participant may be either an internal user-, group- or " +
     "resource-ID, or an e-mail address for external participants.",
 responseDescription = "Response: The free/busy data for all requested participants. Besides a combined data element for a requested " +
