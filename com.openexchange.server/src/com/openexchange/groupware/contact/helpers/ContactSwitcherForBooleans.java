@@ -108,8 +108,11 @@ public class ContactSwitcherForBooleans extends	AbstractContactSwitcherWithDeleg
 	@Override
 	public Object privateflag(final Object... objects) throws OXException {
 		return delegate.privateflag( determineBooleanValue(objects) );
-
 	}
 
+	@Override
+	public Object markasdistributionlist(Object[] objects) throws OXException {
+		return delegate.markasdistributionlist( determineBooleanValue(objects));
+	}
 
 }
