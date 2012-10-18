@@ -1,3 +1,7 @@
+* 2012-10-18 - thorben.betten@open-xchange.com
+
+ - Fix for bug 23403: Try to detect a non-plain-text attachment although Content-Type indicates to be plain text
+
 * 2012-10-17 - thorben.betten@open-xchange.com
 
  - Fix for bug 23409: Keep track of already merged messages
