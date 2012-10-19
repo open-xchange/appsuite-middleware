@@ -67,7 +67,6 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.search.ContactSearchObject;
 import com.openexchange.server.ServiceLookup;
-import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.servlet.OXJSONExceptionCodes;
 
 
@@ -100,19 +99,8 @@ public class SearchAction extends ContactAction {
     	JSONObject jsonObject = request.getJSONData();
         ContactSearchObject contactSearch = createContactSearchObject(jsonObject);
         List<Contact> contacts = new ArrayList<Contact>();
-        Date lastModified = new Date(0);
-        SearchIterator<Contact> searchIterator = null;
-        try {
-            searchIterator = getContactService().searchContacts(request.getSession(), contactSearch, request.getFields(), 
-            		request.getSortOptions());
-            while (searchIterator.hasNext()) {
-                Contact contact = searchIterator.next();
-                lastModified = getLatestModified(lastModified, contact);
-                contacts.add(contact);
-            }
-        } finally {
-        	close(searchIterator);
-        }
+        Date lastModified = addContacts(contacts, getContactService().searchContacts(request.getSession(), contactSearch, request.getFields(), 
+            request.getSortOptions()));
         request.sortInternalIfNeeded(contacts);
         return new AJAXRequestResult(contacts, lastModified, "contact");
     }

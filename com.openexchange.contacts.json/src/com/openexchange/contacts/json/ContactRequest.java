@@ -49,10 +49,9 @@
 
 package com.openexchange.contacts.json;
 
-import gnu.trove.list.TIntList;
-import gnu.trove.list.array.TIntArrayList;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.List;
@@ -74,7 +73,6 @@ import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.contact.helpers.SpecialAlphanumSortContactComparator;
 import com.openexchange.groupware.contact.helpers.UseCountComparator;
 import com.openexchange.groupware.container.Contact;
-import com.openexchange.groupware.container.DataObject;
 import com.openexchange.groupware.search.Order;
 import com.openexchange.groupware.upload.impl.UploadEvent;
 import com.openexchange.search.Operand;
@@ -82,6 +80,7 @@ import com.openexchange.search.SearchExceptionMessages;
 import com.openexchange.search.SearchTerm;
 import com.openexchange.tools.TimeZoneUtils;
 import com.openexchange.tools.arrays.Arrays;
+import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.servlet.OXJSONExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
@@ -201,6 +200,9 @@ public class ContactRequest {
     		fields = Arrays.add(fields, mandatoryFields);
     	}
     	final int[] columnIDs = RequestTools.getColumnsAsIntArray(request, "columns");
+    	if (null == columnIDs) {
+    	    throw OXJSONExceptionCodes.MISSING_FIELD.create("columns");
+    	}
     	return ContactMapper.getInstance().getFields(columnIDs, VIRTUAL_FIELDS, fields);
     }    
 
@@ -218,41 +220,59 @@ public class ContactRequest {
     }
 
     /**
-     * {@link ContactSearchTermParser}
-     *
-     * Custom {@link SearchTermParser} producing {@link ContactFieldOperand}s 
-     * from ajax names.
+     * Gets the requested start date ('start').
+     * 
+     * @return The start date
+     * @throws OXException
      */
-    private static final class ContactSearchTermParser extends SearchTermParser {
-        
-        public static final ContactSearchTermParser INSTANCE = new ContactSearchTermParser();
-        
-        private ContactSearchTermParser() {
-            super();
+    public Date getStart() throws OXException {
+        return getDate("start");
+    }
+    
+    /**
+     * Gets the requested end date ('end').
+     * 
+     * @return The end date
+     * @throws OXException
+     */
+    public Date getEnd() throws OXException {
+        return getDate("end");
+    }
+    
+    private Date getDate(String parameterName) throws OXException {
+        String value = request.getParameter(parameterName);
+        if (null == value) {
+            throw AjaxExceptionCodes.MISSING_PARAMETER.create(parameterName);
         }
-        
-        @Override
-        protected Operand<?> parseOperand(final JSONObject operand) throws OXException {
-            if (false == operand.hasAndNotNull(SearchTermFields.FIELD)) {
-                throw SearchExceptionMessages.PARSING_FAILED_MISSING_FIELD.create(SearchTermFields.FIELD);
-            }
-            ContactField field = ContactMapper.getInstance().getMappedField(operand.optString(SearchTermFields.FIELD));
-            return new ContactFieldOperand(field);
+        try {
+            return new Date(Long.parseLong(value.trim()));
+        } catch (NumberFormatException e) {
+            throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create(parameterName, value);
         }
     }
 
     /**
      * Gets the requested folder ID ('folder').
      * 
-     * @return the folder ID
+     * @return The folder ID
      * @throws OXException
      */
     public String getFolderID() throws OXException {
-    	final String folderID = request.getParameter("folder");
-    	if (null == folderID || 0 == folderID.length()) {
+        String folderID = optFolderID();
+        if (null == folderID || 0 == folderID.length()) {
             throw OXJSONExceptionCodes.MISSING_FIELD.create("folder");
-    	}
-    	return folderID;
+        }
+        return folderID;
+    }
+    
+    /**
+     * Gets the requested folder ID ('folder').
+     * 
+     * @return The folder ID, or <code>null</code> if not present
+     * @throws OXException
+     */
+    public String optFolderID() throws OXException {
+        return request.getParameter("folder");
     }
     
     /**
@@ -299,30 +319,6 @@ public class ContactRequest {
     	return folderID;
     }
     
-    /**
-     * Gets a map containing the requested folder IDs as keys mapped to the 
-     * corresponding object IDs as values. 
-     * @return
-     * @throws OXException
-     * @throws JSONException
-     */
-    public Map<String, List<String>> getListIDs() throws OXException, JSONException {
-        final JSONArray jsonArray = (JSONArray)request.getData();
-        if (jsonArray == null) {
-            throw OXJSONExceptionCodes.MISSING_FIELD.create("data");
-        }
-        final Map<String, List<String>> ids = new HashMap<String, List<String>>();
-        for (int i = 0; i < jsonArray.length(); i++) {
-            final JSONObject jsonObject = jsonArray.getJSONObject(i);
-            final String folderID = jsonObject.getString("folder");
-            if (false == ids.containsKey(folderID)) {
-            	ids.put(folderID, new ArrayList<String>());
-            }
-            ids.get(folderID).add(jsonObject.getString("id"));
-        }
-        return ids;
-    }
-
     public int getId() throws OXException {
     	//TODO: as String 
         if (request.isSet("id")) {
@@ -347,10 +343,6 @@ public class ContactRequest {
 
     public ServerSession getSession() {
         return session;
-    }
-
-    public int[] getColumns() throws OXException {
-        return checkOrInsertLastModified(removeVirtual(RequestTools.getColumnsAsIntArray(request, "columns")));
     }
 
     public int getSort() throws OXException {
@@ -386,6 +378,49 @@ public class ContactRequest {
         return RequestTools.buildObjectIdAndFolderId(data);
     }
 
+    /**
+     * Gets a map containing object IDs for a folder from the supplied {@link JSONArray} that is expected in the format
+     * <code>[{"folder":55,"id":"456"}, {"folder":32,"id":"77"}, {"folder":55,"id":"18"}, ...]</code>
+     * 
+     * @param jsonArray The JSON array to get the data for
+     * @return The object IDs per folder
+     * @throws OXException 
+     */
+    public Map<String, List<String>> getObjectIDsPerFolder(JSONArray jsonArray) throws OXException {
+        try {
+            Map<String, List<String>> objectIDsPerFolder = new HashMap<String, List<String>>();
+            for (int i = 0; i < jsonArray.length(); i++) {
+                JSONObject objectAndFolderID = jsonArray.getJSONObject(i);
+                String folderID = objectAndFolderID.getString("folder");
+                List<String> objectIDs = objectIDsPerFolder.get(folderID);
+                if (null == objectIDs) {
+                    objectIDs = new ArrayList<String>();
+                    objectIDsPerFolder.put(folderID, objectIDs);
+                }
+                objectIDs.add(objectAndFolderID.getString("id"));            
+            }
+            return objectIDsPerFolder;
+        } catch (JSONException e) {
+            throw OXJSONExceptionCodes.JSON_READ_ERROR.create(e);
+        }
+    }
+
+    /**
+     * Gets a map containing object IDs for a folder from the request's data object that is expected in the format
+     * <code>[{"folder":55,"id":"456"}, {"folder":32,"id":"77"}, {"folder":55,"id":"18"}, ...]</code>
+     * 
+     * @param jsonArray The JSON array to get the data for
+     * @return The object IDs per folder
+     * @throws OXException 
+     */
+    public Map<String, List<String>> getObjectIDsPerFolder() throws OXException {
+        JSONArray jsonArray = (JSONArray)request.getData();
+        if (null == jsonArray) {
+            throw OXJSONExceptionCodes.MISSING_FIELD.create("data");
+        }
+        return getObjectIDsPerFolder(jsonArray);
+    }
+    
     public boolean containsImage() throws OXException {
         return request.hasUploads();
     }
@@ -450,35 +485,32 @@ public class ContactRequest {
         return request.getData();
     }
 
-    private int[] removeVirtual(final int[] columns) {
-        final TIntList helper = new TIntArrayList(columns.length);
-        for (final int col : columns) {
-            if (col == DataObject.LAST_MODIFIED_UTC) {
-                // SKIP
-            } else if (col == Contact.IMAGE1_URL) {
-                helper.add(Contact.IMAGE1);
-            } else {
-                helper.add(col);
-            }
-
-        }
-        return helper.toArray();
-    }
-
-    private int[] checkOrInsertLastModified(final int[] columns) {
-        if (!Arrays.contains(columns, DataObject.LAST_MODIFIED)) {
-            final int[] newColumns = new int[columns.length + 1];
-            System.arraycopy(columns, 0, newColumns, 0, columns.length);
-            newColumns[columns.length] = DataObject.LAST_MODIFIED;
-
-            return newColumns;
-        } else {
-            return columns;
-        }
-    }
-
     public String getIgnore() {
         return request.getParameter("ignore");
+    }
+
+    /**
+     * {@link ContactSearchTermParser}
+     *
+     * Custom {@link SearchTermParser} producing {@link ContactFieldOperand}s 
+     * from ajax names.
+     */
+    private static final class ContactSearchTermParser extends SearchTermParser {
+        
+        public static final ContactSearchTermParser INSTANCE = new ContactSearchTermParser();
+        
+        private ContactSearchTermParser() {
+            super();
+        }
+        
+        @Override
+        protected Operand<?> parseOperand(final JSONObject operand) throws OXException {
+            if (false == operand.hasAndNotNull(SearchTermFields.FIELD)) {
+                throw SearchExceptionMessages.PARSING_FAILED_MISSING_FIELD.create(SearchTermFields.FIELD);
+            }
+            ContactField field = ContactMapper.getInstance().getMappedField(operand.optString(SearchTermFields.FIELD));
+            return new ContactFieldOperand(field);
+        }
     }
 
 }
