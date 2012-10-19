@@ -53,16 +53,13 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.contact.ContactService;
 import com.openexchange.contacts.json.ContactRequest;
 import com.openexchange.documentation.RequestMethod;
 import com.openexchange.documentation.annotations.Action;
 import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.server.ServiceLookup;
-
 
 /**
  * {@link ListUserAction}
@@ -87,16 +84,9 @@ public class ListUserAction extends ContactAction {
 
     @Override
     protected AJAXRequestResult perform(ContactRequest request) throws OXException {
-        int[] userIDs = request.getUserIds();
         List<Contact> contacts = new ArrayList<Contact>();
-        Date lastModified = new Date(0);
-        ContactService contactService = getContactService();
-        ContactField[] fields = request.getFields();
-        for (int userID : userIDs) {
-            Contact contact = contactService.getUser(request.getSession(), userID, fields);
-            lastModified = getLatestModified(lastModified, contact);
-            contacts.add(contact);
-        }
+        Date lastModified = addContacts(contacts, getContactService().getUsers(
+            request.getSession(), request.getUserIds(), request.getFields()));
         return new AJAXRequestResult(contacts, lastModified, "contact");
     }
 

@@ -49,14 +49,10 @@
 
 package com.openexchange.contacts.json.actions;
 
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import org.json.JSONArray;
-import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.contact.ContactService;
@@ -66,7 +62,6 @@ import com.openexchange.documentation.annotations.Action;
 import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceLookup;
-import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
 
@@ -99,12 +94,7 @@ public class DeleteAction extends ContactAction {
             int[] deleteRequestData = request.getDeleteRequestData();
             getContactService().deleteContact(session, Integer.toString(deleteRequestData[1]), Integer.toString(deleteRequestData[0]), lastRead);
         } else {
-            Map<String, List<String>> objectIDsPerFolder = null;
-            try {
-                objectIDsPerFolder = getObjectIDsPerFolder((JSONArray)request.getData());
-            } catch (JSONException e) {
-                throw AjaxExceptionCodes.JSON_ERROR.create(e);
-            }
+            Map<String, List<String>> objectIDsPerFolder = request.getObjectIDsPerFolder();
             if (null != objectIDsPerFolder && 0 < objectIDsPerFolder.size()) {
                 ContactService contactService = getContactService();
                 for (Entry<String, List<String>> entry : objectIDsPerFolder.entrySet()) {
@@ -116,27 +106,4 @@ public class DeleteAction extends ContactAction {
         return new AJAXRequestResult(new JSONObject(), lastRead, "json");
     }
     
-    /**
-     * Gets a map containing object IDs for a folder from the supplied {@link JSONArray} that is expected in the format
-     * <code>[{"folder":55,"id":"456"}, {"folder":32,"id":"77"}, {"folder":55,"id":"18"}, ...]</code>
-     * 
-     * @param jsonArray The JSON array to get the data for
-     * @return The object IDs per folder
-     * @throws JSONException
-     */
-    private static Map<String, List<String>> getObjectIDsPerFolder(JSONArray jsonArray) throws JSONException {
-        Map<String, List<String>> objectIDsPerFolder = new HashMap<String, List<String>>();
-        for (int i = 0; i < jsonArray.length(); i++) {
-            JSONObject objectAndFolderID = jsonArray.getJSONObject(i);
-            String folderID = objectAndFolderID.getString("folder");
-            List<String> objectIDs = objectIDsPerFolder.get(folderID);
-            if (null == objectIDs) {
-                objectIDs = new ArrayList<String>();
-                objectIDsPerFolder.put(folderID, objectIDs);
-            }
-            objectIDs.add(objectAndFolderID.getString("id"));            
-        }
-        return objectIDsPerFolder;
-    }
-
 }

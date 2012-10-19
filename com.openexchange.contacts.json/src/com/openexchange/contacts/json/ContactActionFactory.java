@@ -56,6 +56,8 @@ import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
 import com.openexchange.contacts.json.actions.AdvancedSearchAction;
 import com.openexchange.contacts.json.actions.AllAction;
+import com.openexchange.contacts.json.actions.AnniversariesAction;
+import com.openexchange.contacts.json.actions.BirthdaysAction;
 import com.openexchange.contacts.json.actions.ContactAction;
 import com.openexchange.contacts.json.actions.CopyAction;
 import com.openexchange.contacts.json.actions.DeleteAction;
@@ -76,14 +78,16 @@ import com.openexchange.server.ServiceLookup;
  * {@link ContactActionFactory}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
+ * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 @Module(name = "contact", description = "Provides access to contact information.")
 public class ContactActionFactory implements AJAXActionServiceFactory {
 
-    private static final Map<String, ContactAction> actions = new ConcurrentHashMap<String, ContactAction>(12);
+    private final Map<String, ContactAction> actions;
 
     public ContactActionFactory(final ServiceLookup serviceLookup) {
         super();
+        actions = new ConcurrentHashMap<String, ContactAction>(14);
         actions.put("get", new GetAction(serviceLookup));
         actions.put("all", new AllAction(serviceLookup));
         actions.put("list", new ListAction(serviceLookup));
@@ -96,6 +100,8 @@ public class ContactActionFactory implements AJAXActionServiceFactory {
         actions.put("copy", new CopyAction(serviceLookup));
         actions.put("search", new SearchAction(serviceLookup));
         actions.put("advancedSearch", new AdvancedSearchAction(serviceLookup));
+        actions.put("birthdays", new BirthdaysAction(serviceLookup));
+        actions.put("anniversaries", new AnniversariesAction(serviceLookup));
     }
 
     @Override

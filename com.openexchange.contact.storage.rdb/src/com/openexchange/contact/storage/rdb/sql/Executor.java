@@ -54,6 +54,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -262,6 +263,72 @@ public class Executor {
         }
     }
 
+    /**
+     * Select contacts whose month/day portion of the date field falls between the supplied period. This does only work for the 
+     * 'birthday'- and 'anniversary' fields. 
+     * 
+     * @param connection The connection to use
+     * @param contextID The context ID
+     * @param folderIDs The folder IDs, or <code>null</code> if there's no restriction on folders
+     * @param from The lower (inclusive) limit of the requested time-range 
+     * @param until The upper (exclusive) limit of the requested time-range
+     * @param fields The contact fields to select
+     * @param sortOptions The sort options to apply
+     * @param dateField One of <code>ContactField.ANNIVERSARY</code> or <code>ContactField.BIRTHDAY</code>
+     * @return The found contacts
+     * @throws SQLException
+     * @throws OXException
+     */
+    public List<Contact> selectByAnnualDate(Connection connection, int contextID, int[] folderIDs, Date from, Date until,  
+        ContactField[] fields, SortOptions sortOptions, ContactField dateField) throws SQLException, OXException {
+        /*
+         * construct query string
+         */
+        StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder.append("SELECT ").append(Mappers.CONTACT.getColumns(fields)).append(" FROM ").append(Table.CONTACTS)
+            .append(" WHERE ").append(Mappers.CONTACT.get(ContactField.CONTEXTID).getColumnLabel()).append("=?");
+        if (null != folderIDs && 0 < folderIDs.length) {
+            stringBuilder.append(" AND ").append(Mappers.CONTACT.get(ContactField.FOLDER_ID).getColumnLabel());
+            if (1 == folderIDs.length) {
+                stringBuilder.append('=').append(folderIDs[0]);
+            } else {
+                stringBuilder.append(" IN (").append(Tools.toCSV(folderIDs)).append(')');
+            }        
+        }
+        stringBuilder.append(" AND 1=(FLOOR(DATEDIFF(?,").append(Mappers.CONTACT.get(dateField).getColumnLabel()).append(")/365.25))")
+            .append("-(FLOOR(DATEDIFF(?,").append(Mappers.CONTACT.get(dateField).getColumnLabel()).append(")/365.25))");
+        if (null != sortOptions && false == SortOptions.EMPTY.equals(sortOptions)) {
+            stringBuilder.append(' ').append(Tools.getOrderClause(sortOptions));
+            if (0 < sortOptions.getLimit()) {
+                stringBuilder.append(' ').append(Tools.getLimitClause(sortOptions));
+            }
+        }
+        stringBuilder.append(';');
+        /*
+         * prepare statement
+         */
+        PreparedStatement stmt = null;
+        int parameterIndex = 1;
+        ResultSet resultSet = null;
+        List<Contact> contacts = new ArrayList<Contact>();
+        try {
+            stmt = connection.prepareStatement(stringBuilder.toString());
+            stmt.setInt(parameterIndex++, contextID);
+            stmt.setTimestamp(parameterIndex++, new Timestamp(until.getTime()));
+            stmt.setTimestamp(parameterIndex++, new Timestamp(from.getTime()));
+            /*
+             * execute and read out results
+             */
+            resultSet = logExecuteQuery(stmt);
+            while (resultSet.next()) {
+                contacts.add(Mappers.CONTACT.fromResultSet(resultSet, fields));
+            }
+            return contacts; 
+        } finally {
+            closeSQLStuff(resultSet, stmt);
+        }
+    }
+    
     public List<Contact> select(Connection connection, Table table, int contextID, ContactSearchObject contactSearch, 
     		ContactField[] fields, SortOptions sortOptions) throws SQLException, OXException {
         /*
