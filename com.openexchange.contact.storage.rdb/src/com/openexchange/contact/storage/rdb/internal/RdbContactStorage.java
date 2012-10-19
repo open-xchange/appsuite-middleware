@@ -598,6 +598,66 @@ public class RdbContactStorage extends DefaultContactStorage {
     public SearchIterator<Contact> list(Session session, String folderId, String[] ids, ContactField[] fields, SortOptions sortOptions) throws OXException {
     	return this.getContacts(false, session, folderId, ids, null, fields, null, sortOptions);
     }
+    
+    @Override
+    public SearchIterator<Contact> searchByBirthday(Session session, List<String> folderIDs, Date from, Date until, ContactField[] fields, SortOptions sortOptions) throws OXException {
+        return searchByAnnualDate(session, folderIDs, from, until, fields, sortOptions, ContactField.BIRTHDAY); 
+    }
+
+    @Override
+    public SearchIterator<Contact> searchByAnniversary(Session session, List<String> folderIDs, Date from, Date until, ContactField[] fields, SortOptions sortOptions) throws OXException {
+        return searchByAnnualDate(session, folderIDs, from, until, fields, sortOptions, ContactField.ANNIVERSARY); 
+    }
+
+    private SearchIterator<Contact> searchByAnnualDate(Session session, List<String> folderIDs, Date from, Date until, ContactField[] fields, SortOptions sortOptions, ContactField dateField) throws OXException {
+        /*
+         * prepare select
+         */
+        int contextID = session.getContextId();
+        DatabaseService databaseService = getDatabaseService();
+        Connection connection = databaseService.getReadOnly(contextID);
+        int[] parentFolderIDs = null != folderIDs ? parse(folderIDs.toArray(new String[folderIDs.size()])) : null;        
+        try {
+            /*
+             * check fields
+             */
+            QueryFields queryFields = new QueryFields(fields, ContactField.OBJECT_ID);
+            if (false == queryFields.hasContactData()) {
+                return null; // nothing to do
+            }
+            /*
+             * get contact data
+             */        
+            List<Contact> contacts = executor.selectByAnnualDate(connection, contextID, parentFolderIDs, from, until, 
+                queryFields.getContactDataFields(), sortOptions, dateField); 
+            if (null != contacts && 0 < contacts.size()) {
+                /*
+                 * merge image data if needed
+                 */
+                if (queryFields.hasImageData()) {
+                    contacts = mergeImageData(connection, Table.IMAGES, contextID, contacts, queryFields.getImageDataFields());
+                }
+                /*
+                 * merge distribution list data if needed
+                 */
+                if (queryFields.hasDistListData()) {
+                    contacts = mergeDistListData(connection, Table.DISTLIST, contextID, contacts);
+                }
+                /*
+                 * merge attachment information in advance if needed
+                 */
+                //TODO: at this stage, we break the storage separation, since we assume that attachments are stored in the same database
+                if (PREFETCH_ATTACHMENT_INFO && queryFields.hasAttachmentData()) {
+                    contacts = mergeAttachmentData(connection, contextID, contacts);                
+                }
+            }
+            return getSearchIterator(contacts);
+        } catch (SQLException e) {
+            throw ContactExceptionCodes.SQL_PROBLEM.create(e);
+        } finally {
+            databaseService.backReadOnly(contextID, connection);
+        }
+    }
 
     /**
      * Gets contacts from the database.

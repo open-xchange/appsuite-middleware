@@ -204,19 +204,20 @@ public abstract class DefaultContactStorage implements ContactStorage {
     }
 
     /**
-     * Constructs a search term to find contacts what have a value greater 
-     * than 0 for the supplied date field, combined with an additional 
-     * restriction for the parent folder IDs. This does only work for the 
-     * 'birthday'- and 'anniversary' fields. 
+     * Constructs a search term to find contacts what have a value != 
+     * <code>null</code> for the supplied date field, combined with an 
+     * additional restriction for the parent folder IDs. This does only work 
+     * for the 'birthday'- and 'anniversary' fields. 
      * 
      * @param folderIDs the possible folder IDs, or <code>null</code> if not relevant
      * @param dateField One of <code>ContactField.ANNIVERSARY</code> or <code>ContactField.BIRTHDAY</code> 
      * @return A search term
      */
     private static SearchTerm<?> getAnnualDateTerm(List<String> folderIDs, ContactField dateField) {
-        SingleSearchTerm hasDateTerm = new SingleSearchTerm(SingleOperation.GREATER_OR_EQUAL);
-        hasDateTerm.addOperand(new ContactFieldOperand(dateField));
-        hasDateTerm.addOperand(new ConstantOperand<Date>(new Date(0)));
+        CompositeSearchTerm hasDateTerm = new CompositeSearchTerm(CompositeOperation.NOT);
+        SingleSearchTerm isNullTerm = new SingleSearchTerm(SingleOperation.ISNULL);
+        isNullTerm.addOperand(new ContactFieldOperand(dateField));
+        hasDateTerm.addSearchTerm(isNullTerm);
         if (null != folderIDs && 0 < folderIDs.size()) {
             CompositeSearchTerm folderIDsTerm = new CompositeSearchTerm(CompositeOperation.OR);
             for (String parentFolderID : folderIDs) {

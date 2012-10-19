@@ -50,6 +50,7 @@
 package com.openexchange.contacts.json.actions;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
@@ -63,36 +64,45 @@ import com.openexchange.server.ServiceLookup;
 
 
 /**
- * {@link AdvancedSearchAction}
+ * {@link BirthdaysAction}
  *
- * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-@Action(method = RequestMethod.PUT, name = "advanchedSearch", description = "Search contacts by filter (since 6.20).", parameters = {
+@Action(method = RequestMethod.GET, name = "birthdays", description = "Search contacts whose birthday falls into a timerange.", parameters = {
     @Parameter(name = "session", description = "A session ID previously obtained from the login module."),
+    @Parameter(name = "start", description = "The lower (inclusive) limit of the requested time-range."),
+    @Parameter(name = "end", description = "The upper (exclusive) limit of the requested time-range."),
     @Parameter(name = "columns", description = "The requested fields."),
-    @Parameter(name = "sort", optional=true, description = "The identifier of a column which determines the sort order of the response. If this parameter is specified, then the parameter order must be also specified."),
+    @Parameter(name = "folder", optional=true, description = "Object ID of the parent folder that is searched. If not set, all visible folders are used."),
+    @Parameter(name = "sort", optional=true, description = "The identifier of a column which determines the sort order of the response. If this parameter is specified, then the parameter order must be also specified. In case of use of column 609 (use count depending order for collected contacts with global address book) the parameter \"order\" ist NOT necessary and will be ignored."),
     @Parameter(name = "order", optional=true, description = "\"asc\" if the response entires should be sorted in the ascending order, \"desc\" if the response entries should be sorted in the descending order. If this parameter is specified, then the parameter sort must be also specified."),
-    @Parameter(name = "collation", description = "(preliminary, since 6.20) - allows you to specify a collation to sort the contacts by. As of 6.20, only supports \"gbk\" and \"gb2312\", not needed for other languages. Parameter sort should be set for this to work.")
-}, requestBody = "An Object as described in Search Filter.",
-responseDescription = "An array with contact data. Each array element describes one contact and is itself an array. The elements of each array contain the information specified by the corresponding identifiers in the columns parameter.")
-public class AdvancedSearchAction extends ContactAction {
+    @Parameter(name = "collation", optional=true, description = "Allows you to specify a collation to sort the contacts by. As of 6.20, only supports \"gbk\" and \"gb2312\", not needed for other languages. Parameter sort should be set for this to work.")
+}, responseDescription = "Response with timestamp: An array with contact data. Each array element describes one contact and is itself an array. The elements of each array contain the information specified by the corresponding identifiers in the columns parameter.")
+public class BirthdaysAction extends ContactAction {
 
     /**
-     * Initializes a new {@link AdvancedSearchAction}.
+     * Initializes a new {@link BirthdaysAction}.
      * @param serviceLookup
      */
-    public AdvancedSearchAction(ServiceLookup serviceLookup) {
+    public BirthdaysAction(ServiceLookup serviceLookup) {
         super(serviceLookup);
     }
-    
+
     @Override
     protected AJAXRequestResult perform(ContactRequest request) throws OXException {
+        String folderID = request.optFolderID();
         List<Contact> contacts = new ArrayList<Contact>();
-        Date lastModified = addContacts(contacts, getContactService().searchContacts(
-            request.getSession(), request.getSearchFilter(), request.getFields(), request.getSortOptions())); 
+        Date lastModified;
+        if (null != folderID) {
+            List<String> folderIDs = Arrays.asList(new String[] { folderID });
+            lastModified = addContacts(contacts, getContactService().searchContactsWithBirthday(
+                request.getSession(), folderIDs, request.getStart(), request.getEnd(), request.getFields(), request.getSortOptions()));
+        } else {
+            lastModified = addContacts(contacts, getContactService().searchContactsWithBirthday(
+                request.getSession(), request.getStart(), request.getEnd(), request.getFields(), request.getSortOptions()));
+        }
         request.sortInternalIfNeeded(contacts);
         return new AJAXRequestResult(contacts, lastModified, "contact");
     }
-    
+
 }
