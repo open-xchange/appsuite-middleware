@@ -50,7 +50,13 @@
 package com.openexchange.importexport.formats.csv;
 
 import com.openexchange.groupware.contact.helpers.ContactField;
-
+/**
+ * This class maps names of fields found in OX CSV files to names used by OX internally and vice versa. This class has been generated automatically
+ * from i18n files.
+ *
+ * @deprecated Use the PropertyDrivenMapper with .properties files instead.
+ * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias 'Tierlieb' Prinz</a>
+ */
 public class OxAjaxnameMapper extends AbstractOutlookMapper {
 	public OxAjaxnameMapper() {
 		ContactField[] fields = ContactField.values();

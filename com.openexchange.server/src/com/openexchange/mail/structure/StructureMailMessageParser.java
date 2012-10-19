@@ -330,6 +330,8 @@ public final class StructureMailMessageParser {
                 final String contentTypeByFileName = MimeType2ExtMap.getContentType(partFileName);
                 if (!MimeTypes.MIME_APPL_OCTET.equals(contentTypeByFileName) && !isText(contentTypeByFileName)) {
                     contentType.setBaseType(contentTypeByFileName);
+                    mailPart.setContentType(contentType);
+                    mailPart.setHeader(MessageHeaders.HDR_CONTENT_TYPE, contentType.toString());
                     if (!mailPart.containsSequenceId()) {
                         mailPart.setSequenceId(getSequenceId(prefix, partCount));
                     }
