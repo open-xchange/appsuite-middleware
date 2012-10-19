@@ -2,7 +2,7 @@ package com.openexchange.realtime.example.atmosphere.test;
 
 import org.osgi.service.http.HttpService;
 import com.openexchange.conversion.simple.SimplePayloadConverter;
-import com.openexchange.http.grizzly.services.atmosphere.AtmosphereService;
+import com.openexchange.http.grizzly.service.atmosphere.AtmosphereService;
 import com.openexchange.log.Log;
 import com.openexchange.log.LogFactory;
 import com.openexchange.osgi.HousekeepingActivator;

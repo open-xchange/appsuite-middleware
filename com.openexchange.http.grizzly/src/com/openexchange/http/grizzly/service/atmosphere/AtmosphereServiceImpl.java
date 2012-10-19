@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.http.grizzly.services.atmosphere;
+package com.openexchange.http.grizzly.service.atmosphere;
 
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;

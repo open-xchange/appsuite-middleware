@@ -43,7 +43,7 @@
  * GPL Version 2 license.
  */
 
-package com.openexchange.http.grizzly.services.http;
+package com.openexchange.http.grizzly.service.http;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -71,7 +71,8 @@ import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.http.grizzly.GrizzlyExceptionMessage;
 import com.openexchange.http.grizzly.osgi.GrizzlyServiceRegistry;
-import com.openexchange.http.grizzly.servletfilters.RequestReportingFilter;
+import com.openexchange.http.grizzly.servletfilter.RequestReportingFilter;
+import com.openexchange.http.grizzly.servletfilter.ResponseWrappingFilter;
 
 /**
  * OSGi Main HttpHandler.
@@ -228,6 +229,8 @@ public class OSGiMainHandler extends HttpHandler implements OSGiHandler {
                     RequestReportingFilter.class.getName(),
                     null);
             }
+            
+            servletHandler.addFilter(new ResponseWrappingFilter(), ResponseWrappingFilter.class.getName(), null);
 
             /*
              * Servlet would be started several times if registered with multiple aliases. Starting means: 1. Set ContextPath 2. Instantiate

@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.http.grizzly.services.atmosphere;
+package com.openexchange.http.grizzly.service.atmosphere;
 
 import java.util.Collections;
 import java.util.Enumeration;

@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.http.grizzly.filters.backendroute;
+package com.openexchange.http.grizzly.filter.backendroute;
 
 import java.util.Map;
 import java.util.regex.Matcher;

@@ -42,63 +42,55 @@
  * GPL Version 2 license.
  */
 
-package com.openexchange.http.grizzly.services.http;
+package com.openexchange.http.grizzly.service.http;
 
-import org.osgi.service.http.HttpContext;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
-import javax.servlet.Filter;
-import javax.servlet.FilterChain;
-import javax.servlet.FilterConfig;
-import javax.servlet.ServletException;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
+import org.glassfish.grizzly.http.server.HttpServer;
+import org.osgi.framework.Bundle;
+import org.osgi.framework.ServiceFactory;
+import org.osgi.framework.ServiceRegistration;
+import org.osgi.service.http.HttpService;
+import com.openexchange.log.Log;
+import com.openexchange.log.LogFactory;
 
 /**
- * OSGi Authentication filter.
+ * Grizzly OSGi {@link HttpService} {@link ServiceFactory}.
  *
  * @author Hubert Iwaniuk
+ * @since Jan 20, 2009
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
-public class OSGiAuthFilter implements Filter {
-    private final HttpContext httpContext;
+public class HttpServiceFactory implements ServiceFactory<HttpService> {
 
-    public OSGiAuthFilter(
-            final HttpContext httpContext) {
-        this.httpContext = httpContext;
+    private static final org.apache.commons.logging.Log LOG = Log.valueOf(LogFactory.getLog(HttpServiceFactory.class));
+
+    private final OSGiMainHandler mainHttpHandler;
+
+    public HttpServiceFactory(final HttpServer httpServer, final Bundle bundle) {
+        mainHttpHandler = new OSGiMainHandler(bundle);
+        httpServer.getServerConfiguration().addHttpHandler(mainHttpHandler, "/");
+    }
+
+    @Override
+    public HttpService getService(final Bundle bundle, final ServiceRegistration<HttpService> serviceRegistration) {
+        LOG.info(new StringBuilder().append("Bundle: ").append(bundle).append(", is getting HttpService with serviceRegistration: ").append(
+            serviceRegistration).toString());
+
+        return new HttpServiceImpl(bundle);
+    }
+
+    @Override
+    public void ungetService(final Bundle bundle, final ServiceRegistration<HttpService> serviceRegistration, final HttpService httpServiceObj) {
+        LOG.info(new StringBuilder().append("Bundle: ").append(bundle).append(", is ungetting HttpService with serviceRegistration: ").append(
+            serviceRegistration).toString());
+        mainHttpHandler.uregisterAllLocal();
     }
 
     /**
-     * {@inheritDoc}
+     * Clean up.
      */
-    @Override
-    public void init(final FilterConfig filterConfig) throws ServletException {
-        // nothing to do here
+    public void stop() {
+        LOG.info("Stoping main handler");
+        mainHttpHandler.unregisterAll();
     }
-
-    /**
-     * OSGi integration. Relies on {@link HttpContext#handleSecurity(HttpServletRequest, HttpServletResponse)}.
-     * <p/>
-     * If {@link HttpContext#handleSecurity(HttpServletRequest, HttpServletResponse)} returns <code>true</code> proceed
-     * to next {@link Filter} in {@link FilterChain}, else do nothing so processing stops here.
-     * <p/>
-     * {@inheritDoc}
-     */
-    @Override
-    public void doFilter(final ServletRequest request, final ServletResponse response, final FilterChain chain)
-            throws IOException, ServletException {
-        if (httpContext.handleSecurity((HttpServletRequest) request, (HttpServletResponse) response)) {
-            chain.doFilter(request, response);
-        }
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void destroy() {
-        // nothing to do here
-    }
+    
 }

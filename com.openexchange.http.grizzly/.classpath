@@ -11,7 +11,7 @@
 	<classpathentry exported="true" kind="lib" path="lib/grizzly-framework-2.2.18-sources.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/grizzly-framework-2.2.18.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/grizzly-http-2.2.18-sources.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/grizzly-http-2.2.18.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/grizzly-http-2.2.18.jar" sourcepath="lib/grizzly-http-2.2.18-sources.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/grizzly-http-server-2.2.18-sources.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/grizzly-http-server-2.2.18.jar" sourcepath="lib/grizzly-http-server-2.2.18-sources.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/grizzly-http-servlet-2.2.18-sources.jar"/>

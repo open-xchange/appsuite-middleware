@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.http.grizzly.filters.backendroute;
+package com.openexchange.http.grizzly.filter.backendroute;
 
 import java.nio.ByteBuffer;
 import java.util.HashMap;

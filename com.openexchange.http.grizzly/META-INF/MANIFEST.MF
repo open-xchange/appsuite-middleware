@@ -58,7 +58,7 @@ Bundle-ClassPath: .,
  lib/atmosphere-compat-tomcat7-1.1.0-SNAPSHOT.jar,
  lib/atmosphere-runtime-1.1.0-SNAPSHOT-sources.jar,
  lib/atmosphere-runtime-1.1.0-SNAPSHOT.jar
-Export-Package: com.openexchange.http.grizzly.services.atmosphere,
+Export-Package: com.openexchange.http.grizzly.service.atmosphere,
  org.atmosphere.cache,
  org.atmosphere.client,
  org.atmosphere.config,

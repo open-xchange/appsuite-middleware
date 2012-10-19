@@ -47,54 +47,55 @@
  *
  */
 
-package com.openexchange.http.grizzly.addons;
+package com.openexchange.http.grizzly.service.atmosphere;
 
-import java.util.ArrayList;
-import java.util.List;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.glassfish.grizzly.filterchain.Filter;
-import org.glassfish.grizzly.filterchain.FilterChainBuilder;
-import org.glassfish.grizzly.http.server.AddOn;
-import org.glassfish.grizzly.http.server.HttpServerFilter;
-import org.glassfish.grizzly.http.server.NetworkListener;
-import com.openexchange.config.ConfigurationService;
-import com.openexchange.http.grizzly.filters.backendroute.AppendBackendRouteFilter;
-import com.openexchange.http.grizzly.osgi.GrizzlyServiceRegistry;
-import com.openexchange.http.grizzly.util.FilterChainUtils;
+import org.atmosphere.cpr.AtmosphereHandler;
+import org.atmosphere.cpr.Broadcaster;
+
 
 /**
- * {@link GrizzlOXAddOn}
- * 
+ * {@link AtmosphereService} allows other bundles in the OSGi environment to
+ * dynamically register {@link AtmosphereHandlers} into the URI namespace below
+ * the configured context/mapping of the {@link AtmosphereServlet}.
+ * <p>
+ * A bundle may later unregister its {@link AtmosphereHandlers} again.
+ * </p>
+ * <p>
+ * Handlers added to the service will handle requests at
+ * <code>
+ * com.openexchange.http.realtime.contextPath
+ * + com.openexchange.http.atmosphere.servletMapping + handlerMapping
+ * </code>
+ * </p>
+ *
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
-public class GrizzlOXAddOn implements AddOn {
+public interface AtmosphereService {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(GrizzlOXAddOn.class);
-
-    private final List<Filter> filters = new ArrayList<Filter>();
-
-    public GrizzlOXAddOn() {
-        //1. BackendRouteFilter
-        ConfigurationService configurationService = GrizzlyServiceRegistry.getInstance().getService(ConfigurationService.class);
-        final String backendRoute = configurationService.getProperty("com.openexchange.http.grizzly.backendRoute", "");
-        AppendBackendRouteFilter appendBackendRouteFilter = new AppendBackendRouteFilter(backendRoute);
-        filters.add(appendBackendRouteFilter);
-    }
-
-    @Override
-    public void setup(NetworkListener networkListener, FilterChainBuilder builder) {
-        AddOn[] addOns = networkListener.getAddOns();
-        for (AddOn addOn : addOns) {
-            LOG.info("Current Addon is: " + addOn.getClass());
-        }
-        int httpServerFilterIdx = builder.indexOfType(HttpServerFilter.class);
-        if (httpServerFilterIdx > 0) {
-            builder.addAll(httpServerFilterIdx -1 , filters);
-        }
-        if(LOG.isDebugEnabled()) {
-            LOG.debug("FilterChain after adding Watchers:\n" + FilterChainUtils.formatFilterChainString(builder.build()));
-        }
-    }
-
+    /**
+     * Add an {@link AtmosphereHandler} to be serviced by the
+     * {@link AtmosphereServlet}.
+     *
+     * @param handlerMapping    the mapping for this handler  
+     * @param handler           instance of {@link AtmosphereHandler}
+     */
+    void addAtmosphereHandler(String handlerMapping, AtmosphereHandler handler);
+        
+    /**
+     * Add an {@link AtmosphereHandler} serviced by the
+     * {@link AtmosphereServlet}.
+     *
+     * @param handlerMapping    the mapping for this handler
+     * @param handler           implementation of an {@link AtmosphereHandler}
+     * @param broadcaster       a {@link Broadcaster} to associate with this
+     *                           {@link AtmosphereHandler}.
+     */
+    void addAtmosphereHandler(String handlerMapping, AtmosphereHandler handler, Broadcaster broadcaster);
+    
+    /**
+     * Unregister a previously registered {@link AtmosphereHandler}.
+     * @param handlerMapping    the mapping used while registering the handler
+     */
+    void unregister(String handlerMapping);
+    
 }

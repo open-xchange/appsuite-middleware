@@ -47,55 +47,39 @@
  *
  */
 
-package com.openexchange.http.grizzly.services.atmosphere;
+package com.openexchange.http.grizzly.servletfilter;
 
-import org.atmosphere.cpr.AtmosphereHandler;
-import org.atmosphere.cpr.Broadcaster;
+import java.io.IOException;
+import javax.servlet.Filter;
+import javax.servlet.FilterChain;
+import javax.servlet.FilterConfig;
+import javax.servlet.ServletException;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
+import javax.servlet.http.HttpServletResponse;
+import com.openexchange.http.grizzly.wrapper.HttpServletResponseWrapper;
 
 
 /**
- * {@link AtmosphereService} allows other bundles in the OSGi environment to
- * dynamically register {@link AtmosphereHandlers} into the URI namespace below
- * the configured context/mapping of the {@link AtmosphereServlet}.
- * <p>
- * A bundle may later unregister its {@link AtmosphereHandlers} again.
- * </p>
- * <p>
- * Handlers added to the service will handle requests at
- * <code>
- * com.openexchange.http.realtime.contextPath
- * + com.openexchange.http.atmosphere.servletMapping + handlerMapping
- * </code>
- * </p>
+ * {@link ResponseWrappingFilter} - Wrap the Response in an {@link HttpServletResponseWrapper}
  *
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
-public interface AtmosphereService {
+public class ResponseWrappingFilter implements Filter {
 
-    /**
-     * Add an {@link AtmosphereHandler} to be serviced by the
-     * {@link AtmosphereServlet}.
-     *
-     * @param handlerMapping    the mapping for this handler  
-     * @param handler           instance of {@link AtmosphereHandler}
-     */
-    void addAtmosphereHandler(String handlerMapping, AtmosphereHandler handler);
-        
-    /**
-     * Add an {@link AtmosphereHandler} serviced by the
-     * {@link AtmosphereServlet}.
-     *
-     * @param handlerMapping    the mapping for this handler
-     * @param handler           implementation of an {@link AtmosphereHandler}
-     * @param broadcaster       a {@link Broadcaster} to associate with this
-     *                           {@link AtmosphereHandler}.
-     */
-    void addAtmosphereHandler(String handlerMapping, AtmosphereHandler handler, Broadcaster broadcaster);
-    
-    /**
-     * Unregister a previously registered {@link AtmosphereHandler}.
-     * @param handlerMapping    the mapping used while registering the handler
-     */
-    void unregister(String handlerMapping);
-    
+    @Override
+    public void init(FilterConfig filterConfig) {
+    }
+
+    @Override
+    public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
+        HttpServletResponse httpServletResponse = (HttpServletResponse) response;
+        HttpServletResponseWrapper httpServletResponseWrapper = new HttpServletResponseWrapper(httpServletResponse);
+        chain.doFilter(request, httpServletResponseWrapper);
+    }
+
+    @Override
+    public void destroy() {
+    }
+
 }

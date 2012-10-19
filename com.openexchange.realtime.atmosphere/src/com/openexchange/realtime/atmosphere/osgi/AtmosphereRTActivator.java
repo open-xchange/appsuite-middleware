@@ -3,7 +3,7 @@ package com.openexchange.realtime.atmosphere.osgi;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 
-import com.openexchange.http.grizzly.services.atmosphere.AtmosphereService;
+import com.openexchange.http.grizzly.service.atmosphere.AtmosphereService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.osgi.SimpleRegistryListener;
 import com.openexchange.realtime.Channel;

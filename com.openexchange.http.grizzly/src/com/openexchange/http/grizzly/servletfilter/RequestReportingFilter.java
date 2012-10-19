@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.http.grizzly.servletfilters;
+package com.openexchange.http.grizzly.servletfilter;
 
 import java.io.IOException;
 import javax.servlet.Filter;

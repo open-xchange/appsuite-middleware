@@ -42,7 +42,7 @@
  * GPL Version 2 license.
  */
 
-package com.openexchange.http.grizzly.services.http;
+package com.openexchange.http.grizzly.service.http;
 
 import org.osgi.service.http.HttpContext;
 import org.osgi.framework.Bundle;

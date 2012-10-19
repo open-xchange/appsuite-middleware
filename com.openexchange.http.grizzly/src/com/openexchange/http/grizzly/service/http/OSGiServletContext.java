@@ -42,7 +42,7 @@
  * GPL Version 2 license.
  */
 
-package com.openexchange.http.grizzly.services.http;
+package com.openexchange.http.grizzly.service.http;
 
 import static java.text.MessageFormat.format;
 import java.io.IOException;

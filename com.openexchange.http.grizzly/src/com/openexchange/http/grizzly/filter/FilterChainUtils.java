@@ -1,4 +1,4 @@
-package com.openexchange.http.grizzly.util;
+package com.openexchange.http.grizzly.filter;
 
 import org.glassfish.grizzly.filterchain.Filter;
 import org.glassfish.grizzly.filterchain.FilterChain;
