@@ -85,6 +85,12 @@ import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.importexport.exceptions.ImportExportExceptionCodes;
 import com.openexchange.importexport.formats.Format;
 import com.openexchange.importexport.formats.csv.ContactFieldMapper;
+import com.openexchange.importexport.formats.csv.DutchOutlookMapper;
+import com.openexchange.importexport.formats.csv.EnglishOutlookMapper;
+import com.openexchange.importexport.formats.csv.FrenchOutlookMapper;
+import com.openexchange.importexport.formats.csv.GermanOutlookMapper;
+import com.openexchange.importexport.formats.csv.OxAjaxnameMapper;
+import com.openexchange.importexport.formats.csv.OxReadableNameMapper;
 import com.openexchange.importexport.formats.csv.PropertyDrivenMapper;
 import com.openexchange.importexport.importers.CSVContactImporter.ImportIntention;
 import com.openexchange.groupware.importexport.ImportResult;
@@ -179,13 +185,13 @@ public class CSVContactImporter extends AbstractImporter {
         }
 
         // re-read now the we have guessed the format and the encoding
-        if (!"UTF-8".equalsIgnoreCase(currentMapper.getEncoding())) {
+        if (!"UTF-8".equalsIgnoreCase(getCurrentMapper().getEncoding())) {
         	try {
 				is.reset();
 			} catch (IOException e) {
 				LOG.error("Tried to reset an uploaded stream to parse it again after having guessed the encoding, but couldn't; CSV parsed might be weird");
 			}
-            csvStr = transformInputStreamToString(is, currentMapper.getEncoding());
+            csvStr = transformInputStreamToString(is, getCurrentMapper().getEncoding());
         }
         // reading entries...
         final List<ImportIntention> intentions = new LinkedList<ImportIntention>();
@@ -390,9 +396,10 @@ public class CSVContactImporter extends AbstractImporter {
     }
     
 	public boolean checkFields(final List<String> fields) {
+		currentMapper = null;
         int highestAmountOfMappedFields = 0;
 
-        for (ContactFieldMapper mapper : mappers) {
+        for (ContactFieldMapper mapper : getMappers()) {
             int mappedFields = 0;
             for (final String name : fields) {
                 if (mapper.getFieldByName(name) != null) {
@@ -405,21 +412,21 @@ public class CSVContactImporter extends AbstractImporter {
             }
 
         }
-        return currentMapper != null;
+        return getCurrentMapper() != null;
     }
     
     protected boolean passesSanityTestForDisplayName(List<String> headers) {
         return Collections.any(
             headers,
-            currentMapper.getNameOfField(ContactField.DISPLAY_NAME),
-            currentMapper.getNameOfField(ContactField.SUR_NAME),
-            currentMapper.getNameOfField(ContactField.GIVEN_NAME),
-            currentMapper.getNameOfField(ContactField.EMAIL1),
-            currentMapper.getNameOfField(ContactField.EMAIL2),
-            currentMapper.getNameOfField(ContactField.EMAIL3),
-            currentMapper.getNameOfField(ContactField.COMPANY),
-            currentMapper.getNameOfField(ContactField.NICKNAME),
-            currentMapper.getNameOfField(ContactField.MIDDLE_NAME));
+            getCurrentMapper().getNameOfField(ContactField.DISPLAY_NAME),
+            getCurrentMapper().getNameOfField(ContactField.SUR_NAME),
+            getCurrentMapper().getNameOfField(ContactField.GIVEN_NAME),
+            getCurrentMapper().getNameOfField(ContactField.EMAIL1),
+            getCurrentMapper().getNameOfField(ContactField.EMAIL2),
+            getCurrentMapper().getNameOfField(ContactField.EMAIL3),
+            getCurrentMapper().getNameOfField(ContactField.COMPANY),
+            getCurrentMapper().getNameOfField(ContactField.NICKNAME),
+            getCurrentMapper().getNameOfField(ContactField.MIDDLE_NAME));
     }
 
 	public void addFieldMapper(ContactFieldMapper mapper) {
@@ -428,10 +435,30 @@ public class CSVContactImporter extends AbstractImporter {
 		}
 		mappers.add(mapper);
 	}
+
+
+	private LinkedList<ContactFieldMapper> getMappers() {
+		if (mappers == null) {
+			LOG.debug("Using fallback for mappers, should have been loaded from .properties files before");
+			mappers = new LinkedList<ContactFieldMapper>();
+			mappers.add(new GermanOutlookMapper());
+			mappers.add(new FrenchOutlookMapper());
+			mappers.add(new DutchOutlookMapper());
+			mappers.add(new EnglishOutlookMapper());
+			mappers.add(new OxAjaxnameMapper());
+			mappers.add(new OxReadableNameMapper());
+		}
+		return mappers;
+	}
 	
     protected ContactField getRelevantField(final String name) {
-        return currentMapper.getFieldByName(name);
+        return getCurrentMapper().getFieldByName(name);
     }
+
+
+	private ContactFieldMapper getCurrentMapper() {
+		return currentMapper;
+	}
 
     protected CSVParser getCSVParser() {
         final CSVParser result = new CSVParser();
@@ -444,7 +471,7 @@ public class CSVContactImporter extends AbstractImporter {
     }
 
     public String getEncoding() {
-        return currentMapper.getEncoding();
+        return getCurrentMapper().getEncoding();
     }
 
 }

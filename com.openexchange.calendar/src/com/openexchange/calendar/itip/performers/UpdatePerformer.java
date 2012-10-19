@@ -165,14 +165,18 @@ public class UpdatePerformer extends AbstrakterDingeMacher {
         }
         
         if (write) {
-            util.updateAppointment(update, session, original.getLastModified());
+            CalendarDataObject clone = update.clone();
+            util.updateAppointment(clone, session, original.getLastModified());
         }
         
         saveConfirmations(session, appointmentDiff, update);
         
         appointment.setObjectID(update.getObjectID());
         appointment.setParentFolderID(update.getParentFolderID());
-        appointment.setRecurrencePosition(update.getRecurrencePosition());
+        
+        if (update.containsRecurrencePosition()) {
+            appointment.setRecurrencePosition(update.getRecurrencePosition());
+        }
     }
 
     private void saveConfirmations(Session session, AppointmentDiff appointmentDiff, Appointment update) throws OXException {

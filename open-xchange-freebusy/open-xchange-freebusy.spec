@@ -1,4 +1,4 @@
-﻿
+
 Name:          open-xchange-freebusy
 BuildArch:     noarch
 #!BuildIgnore: post-build-checks
@@ -41,8 +41,6 @@ ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} 
 %defattr(-,root,root)
 %dir /opt/open-xchange/bundles/
 /opt/open-xchange/bundles/*
-%dir /opt/open-xchange/etc/
-%config(noreplace) /opt/open-xchange/etc/*
 %dir /opt/open-xchange/osgi/bundle.d/
 /opt/open-xchange/osgi/bundle.d/*
 

@@ -1,10 +1,11 @@
-﻿
+
 Name:          open-xchange-freebusy-ews
 BuildArch:     noarch
 #!BuildIgnore: post-build-checks
 BuildRequires: ant
 BuildRequires: ant-nodeps
 BuildRequires: open-xchange-core
+BuildRequires: open-xchange-freebusy
 BuildRequires: java-devel >= 1.6.0
 Version:       @OXVERSION@
 %define        ox_release 1

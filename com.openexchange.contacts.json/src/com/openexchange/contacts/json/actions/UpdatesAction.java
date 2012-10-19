@@ -63,7 +63,6 @@ import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.server.ServiceLookup;
-import com.openexchange.tools.iterator.SearchIterator;
 
 
 /**
@@ -93,39 +92,21 @@ public class UpdatesAction extends ContactAction {
 
     @Override
     protected AJAXRequestResult perform(ContactRequest request) throws OXException {
-        Date lastModified = new Date(0);
         ContactService contactService = getContactService();
         Date since = new Date(request.getTimestamp());
-        SearchIterator<Contact> searchIterator = null;
         /*
          * add modified contacts
          */
-        List<Contact> modifiedContacts = new ArrayList<Contact>(); 
-        try {
-            searchIterator = contactService.getModifiedContacts(request.getSession(), request.getFolderID(), since, request.getFields());
-            while (searchIterator.hasNext()) {
-                Contact contact = searchIterator.next();
-                lastModified = getLatestModified(lastModified, contact);
-                modifiedContacts.add(contact);
-            }
-        } finally {
-            close(searchIterator);
-        }
+        List<Contact> modifiedContacts = new ArrayList<Contact>();
+        Date lastModified = addContacts(modifiedContacts, contactService.getModifiedContacts(
+            request.getSession(), request.getFolderID(), since, request.getFields()));
         /*
          * add deleted contacts
          */
         List<Contact> deletedContacts = new ArrayList<Contact>(); 
         if (false == "deleted".equals(request.getIgnore())) {
-	        try {
-	            searchIterator = contactService.getDeletedContacts(request.getSession(), request.getFolderID(), since, request.getFields());
-	            while (searchIterator.hasNext()) {
-	                Contact contact = searchIterator.next();
-	                lastModified = getLatestModified(lastModified, contact);
-	                deletedContacts.add(contact);
-	            }
-	        } finally {
-	            close(searchIterator);
-	        }
+            lastModified = addContacts(deletedContacts, contactService.getDeletedContacts(
+                request.getSession(), request.getFolderID(), since, request.getFields()));
         }
         Map<String, List<Contact>> responseMap = new HashMap<String, List<Contact>>(2);
         responseMap.put("modified", modifiedContacts);

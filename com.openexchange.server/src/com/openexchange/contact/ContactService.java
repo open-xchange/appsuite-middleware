@@ -459,6 +459,7 @@ public interface ContactService {
 
     /**
      * Gets a user's contact with all fields.<p>
+     * 
      * If the current user has no adequate permissions, no exception is thrown, 
      * but the queried contact fields are limited to fields defined by 
      * <code>ContactService.LIMITED_USER_FIELDS</code>.
@@ -486,7 +487,7 @@ public interface ContactService {
     Contact getUser(Session session, int userID, ContactField[] fields) throws OXException;
     
     /**
-     * Gets a user contacts with all fields.<p>
+     * Gets user contacts with all fields.<p>
      * 
      * If the current user has no adequate permissions, no exception is thrown, 
      * but the queried contact fields are limited to the fields defined by 

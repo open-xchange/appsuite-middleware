@@ -1775,7 +1775,6 @@
     <wsdl:service name="ExchangeService">
 		<wsdl:port name="ExchangeServicePort" binding="tns:ExchangeServiceBinding">
 			<soap:address location="https://exchange.example.com/EWS/Exchange.asmx"/>
-<!--			<soap:address location="https://prototyp-exchange2010.open-xchange.com/EWS/Exchange.asmx"/>-->
 		</wsdl:port>
 	</wsdl:service>
 </wsdl:definitions>

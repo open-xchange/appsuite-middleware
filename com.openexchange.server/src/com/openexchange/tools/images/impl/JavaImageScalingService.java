@@ -137,7 +137,7 @@ public class JavaImageScalingService implements ImageScalingService {
         ImageWriteParam iwp = writer.getDefaultWriteParam();
         iwp.setCompressionMode(ImageWriteParam.MODE_EXPLICIT);
         iwp.setProgressiveMode(ImageWriteParam.MODE_DEFAULT);
-        iwp.setCompressionQuality(1.0f);
+        iwp.setCompressionQuality(0.8f);
         ImageOutputStream imageOutputStream = ImageIO.createImageOutputStream(baos);
         writer.setOutput(imageOutputStream);
         IIOImage iioImage = new IIOImage(scaled, null, null);

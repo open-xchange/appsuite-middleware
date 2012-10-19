@@ -822,7 +822,7 @@ public class ContactServiceImpl extends DefaultContactService {
              * get results, filtered respecting object permission restrictions, adding attachment info as needed
              */
             SearchIterator<Contact> searchIterator = queriedStorage.getKey().searchByBirthday(
-                session, queriedStorage.getValue(), from, until, fields, sortOptions);
+                session, queriedStorage.getValue(), from, until, queryFields.getFields(), sortOptions);
             searchIterators.add(new ResultIterator(searchIterator, queryFields.needsAttachmentInfo(), session));
         }
         return 2 > searchIterators.size() ? searchIterators.get(0) :
@@ -857,7 +857,7 @@ public class ContactServiceImpl extends DefaultContactService {
              * get results, filtered respecting object permission restrictions, adding attachment info as needed
              */
             SearchIterator<Contact> searchIterator = queriedStorage.getKey().searchByAnniversary(
-                session, queriedStorage.getValue(), from, until, fields, sortOptions);
+                session, queriedStorage.getValue(), from, until, queryFields.getFields(), sortOptions);
             searchIterators.add(new ResultIterator(searchIterator, queryFields.needsAttachmentInfo(), session));
         }
         return 2 > searchIterators.size() ? searchIterators.get(0) :
