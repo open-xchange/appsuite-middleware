@@ -219,15 +219,22 @@ public abstract class DefaultContactStorage implements ContactStorage {
         isNullTerm.addOperand(new ContactFieldOperand(dateField));
         hasDateTerm.addSearchTerm(isNullTerm);
         if (null != folderIDs && 0 < folderIDs.size()) {
-            CompositeSearchTerm folderIDsTerm = new CompositeSearchTerm(CompositeOperation.OR);
-            for (String parentFolderID : folderIDs) {
+            CompositeSearchTerm andTerm = new CompositeSearchTerm(CompositeOperation.AND);
+            if (1 == folderIDs.size()) {
                 SingleSearchTerm folderIDTerm = new SingleSearchTerm(SingleOperation.EQUALS);
                 folderIDTerm.addOperand(new ContactFieldOperand(ContactField.FOLDER_ID));
-                folderIDTerm.addOperand(new ConstantOperand<String>(parentFolderID));
-                folderIDsTerm.addSearchTerm(folderIDTerm);
+                folderIDTerm.addOperand(new ConstantOperand<String>(folderIDs.get(0)));
+                andTerm.addSearchTerm(folderIDTerm);
+            } else {
+                CompositeSearchTerm folderIDsTerm = new CompositeSearchTerm(CompositeOperation.OR);
+                for (String parentFolderID : folderIDs) {
+                    SingleSearchTerm folderIDTerm = new SingleSearchTerm(SingleOperation.EQUALS);
+                    folderIDTerm.addOperand(new ContactFieldOperand(ContactField.FOLDER_ID));
+                    folderIDTerm.addOperand(new ConstantOperand<String>(parentFolderID));
+                    folderIDsTerm.addSearchTerm(folderIDTerm);
+                }
+                andTerm.addSearchTerm(folderIDsTerm);
             }
-            CompositeSearchTerm andTerm = new CompositeSearchTerm(CompositeOperation.AND);
-            andTerm.addSearchTerm(folderIDsTerm);
             andTerm.addSearchTerm(hasDateTerm);
             return andTerm;
         } else {
