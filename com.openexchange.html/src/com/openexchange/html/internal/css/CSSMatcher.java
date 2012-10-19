@@ -90,8 +90,6 @@ public final class CSSMatcher {
 
     private static final Pattern PATTERN_IS_PATTERN;
 
-    private static final Pattern PATTERN_STYLE_BLOCK;
-
     private static final Pattern PATTERN_COLOR_RGB;
 
     static {
@@ -171,8 +169,6 @@ public final class CSSMatcher {
 
         PATTERN_IS_PATTERN = Pattern.compile("[unNcd*t]+");
         
-        PATTERN_STYLE_BLOCK = Pattern.compile("((?:#|\\.|[a-zA-Z]).*?\\s+\\{)([^\\}]+)\\}");
-
         PATTERN_COLOR_RGB = Pattern.compile(strCOLOR_RGB_FUNC, Pattern.CASE_INSENSITIVE);
     }
 
@@ -260,6 +256,7 @@ public final class CSSMatcher {
         }
     }
 
+    private static final Pattern PATTERN_STYLE_BLOCK = Pattern.compile("((?:#|\\.|[a-zA-Z])[^{]*?\\{)([^}]+)\\}");
     private static final Pattern CRLF = Pattern.compile("\r?\n( {2,})?");
 
     /**
@@ -439,9 +436,12 @@ public final class CSSMatcher {
         final String css = CRLF.matcher(cssBuilder).replaceAll(" ");
         final StringBuilder cssElemsBuffer = new StringBuilder(css.length());
         final Matcher m = PATTERN_STYLE_BLOCK.matcher(css);
+        if (!m.find()) {
+            return false;
+        }
         cssBuilder.setLength(0);
         int lastPos = 0;
-        while (m.find()) {
+        do {
             // Check prefix part
             cssElemsBuffer.append(css.substring(lastPos, m.start()));
             modified |= checkCSSElements(cssElemsBuffer, styleMap, removeIfAbsent);
@@ -457,7 +457,7 @@ public final class CSSMatcher {
             cssBuilder.append(prefix);
             cssBuilder.append(block);
             lastPos = m.end();
-        }
+        } while (m.find());
         cssElemsBuffer.append(css.substring(lastPos, css.length()));
         modified |= checkCSSElements(cssElemsBuffer, styleMap, removeIfAbsent);
         final String tail = cssElemsBuffer.toString();

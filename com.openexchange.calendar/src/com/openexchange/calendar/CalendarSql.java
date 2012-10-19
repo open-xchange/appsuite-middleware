@@ -536,7 +536,7 @@ public class CalendarSql implements AppointmentSQLInterface {
             if (cdao.isIgnoreOutdatedSequence() && cdao.getSequence() < edao.getSequence()) {
                 // Silently ignore updates on Appointments with an outdated Sequence. OLOX2-Requirement.
                 cdao.setLastModified(edao.getLastModified());
-                LOG.info("Ignored update on Appointmentt due to outdated sequence: " + edao.getContextID() + "-" + edao.getObjectID() + " (cid-objectId)");
+                LOG.info("Ignored update on Appointment due to outdated sequence: " + edao.getContextID() + "-" + edao.getObjectID() + " (cid-objectId)");
                 return null;
             }
             

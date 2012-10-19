@@ -1,3 +1,11 @@
+* 2012-10-19 - thorben.betten@open-xchange.com
+
+ - Fix for bug 23437: Proper specification of character filter in Java regex expression
+
+* 2012-10-19 - martin.herfurth@open-xchange.com
+
+ - Fix for bug 23092: Wrong Confirmation Status as external participant was sent.
+
 * 2012-10-18 - thorben.betten@open-xchange.com
 
  - Fix for bug 23403: Try to detect a non-plain-text attachment although Content-Type indicates to be plain text
