@@ -72,6 +72,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.json.OXJSONWriter;
 import com.openexchange.json.cache.JsonCacheService;
 import com.openexchange.json.cache.JsonCaches;
+import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailListField;
 import com.openexchange.mail.MailServletInterface;
 import com.openexchange.mail.config.MailProperties;
@@ -538,8 +539,9 @@ public final class MailConverter implements ResultConverter, MailActionConstants
         }
         final MailServletInterface mailInterface = getMailInterface(requestData, session);
         final List<OXException> warnings = new ArrayList<OXException>(2);
-        final JSONObject jMail =
-            MessageWriter.writeMailMessage(
+        final JSONObject jMail;
+        try {
+            jMail = MessageWriter.writeMailMessage(
                 mail.getAccountId(),
                 mail,
                 displayMode,
@@ -550,6 +552,16 @@ public final class MailConverter implements ResultConverter, MailActionConstants
                 token,
                 ttlMillis,
                 mimeFilter);
+        } catch (final OXException e) {
+            if (MailExceptionCode.MAIL_NOT_FOUND.equals(e)) {
+                LOG.warn(
+                    new StringBuilder("Requested mail could not be found. ").append(
+                        "Most likely this is caused by concurrent access of multiple clients ").append(
+                        "while one performed a delete on affected mail.").toString(),
+                    e);
+            }
+            throw e;
+        }
         if (mail.containsPrevSeen()) {
             try {
                 jMail.put("unseen", wasUnseen);

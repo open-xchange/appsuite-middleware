@@ -256,7 +256,7 @@ public final class MessageWriter {
                 if (undelegatedAccountId >= 0) {
                     try {
                         jsonObject.put(FolderChildFields.FOLDER_ID, prepareFullname(undelegatedAccountId, fullName));
-                    } catch (JSONException e) {
+                    } catch (final JSONException e) {
                         throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
                     }
                 }
@@ -276,6 +276,12 @@ public final class MessageWriter {
                 }
             }
             return jsonObject;
+        } catch (final OXException e) {
+            final Throwable cause = e.getCause();
+            if (null != cause && cause.getClass().getName().startsWith("MessageRemoved")) {
+                throw MailExceptionCode.MAIL_NOT_FOUND.create(cause, mail.getMailId(), mail.getFolder());
+            }
+            throw e;
         } finally {
             for (final String name : removees) {
                 props.remove(name);

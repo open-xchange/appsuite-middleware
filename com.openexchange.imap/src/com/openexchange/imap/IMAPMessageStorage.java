@@ -1040,7 +1040,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                 }
                 msg = (IMAPMessage) imapFolder.getMessage(msgnum);
             }
-            if (msg == null) {
+            if (msg == null || msg.isExpunged()) {
                 // throw new OXException(OXException.Code.MAIL_NOT_FOUND,
                 // String.valueOf(msgUID), imapFolder
                 // .toString());
