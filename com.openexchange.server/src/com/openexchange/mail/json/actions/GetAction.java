@@ -381,7 +381,7 @@ public final class GetAction extends AbstractMailAction {
                         "while one performed a delete on affected mail.").toString(),
                     e);
                 final Object[] args = e.getDisplayArgs();
-                final String uid = null == args || 0 == args.length ? null : args[0].toString();
+                final String uid = null == args || 0 == args.length ? null : (null == args[0] ? null : args[0].toString());
                 if ("undefined".equalsIgnoreCase(uid)) {
                     throw MailExceptionCode.PROCESSING_ERROR.create(e, new Object[0]);
                 }
