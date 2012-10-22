@@ -211,23 +211,24 @@ public class HttpServletResponseWrapper implements HttpServletResponse {
     }
 
     /**
-     * Set or remove a header from this response.
+     * Set a header to a specified value or remove a header from this response.
      * 
      * @param headerName The name of the header that should be set or removed
-     * @param headerValue if the value is null then the header will be removed, otherwise the header will be set to the specified value
+     * @param headerValue If the value is null then the header will be removed, otherwise the header will be set to the specified value
+     * @throws IllegalStateException if the underlying Response is already committed
      */
     @Override
     public void setHeader(String headerName, String headerValue) {
         Response internalResponse = ServletUtils.getInternalResponse(httpServletResponse);
 
         if (httpServletResponse.isCommitted())
-            return;
+            throw new IllegalStateException("Respone is already committed");
 
         if (headerValue == null) {
             HttpResponsePacket httpResponsePacket = internalResponse.getResponse();
             MimeHeaders responseMimeHeaders = httpResponsePacket.getHeaders();
             responseMimeHeaders.removeHeader(headerName);
-        } else { // delegate to the original response
+        } else { // delegate to the original response implementation
             httpServletResponse.setHeader(headerName, headerValue);
         }
     }
