@@ -63,7 +63,6 @@ import java.util.TreeMap;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Callable;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.DelayQueue;
 import java.util.concurrent.Delayed;
@@ -84,6 +83,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
+import org.cliffc.high_scale_lib.NonBlockingHashMap;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.log.LogProperties;
 import com.openexchange.threadpool.AbstractTask;
@@ -284,7 +284,7 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
     /**
      * Set containing all worker threads in pool.
      */
-    private final ConcurrentMap<Worker, Object> workers = new ConcurrentHashMap<Worker, Object>();
+    private final ConcurrentMap<Worker, Object> workers = new NonBlockingHashMap<Worker, Object>(1024);
     private final Set<Worker> workerSet = workers.keySet();
 
     /**
@@ -1179,7 +1179,7 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
 
         ActiveTaskWatcher() {
             super();
-            tasks = new ConcurrentHashMap<Long, TaskInfo>(8192);
+            tasks = new NonBlockingHashMap<Long, TaskInfo>(8192);
             final ConfigurationService service = ThreadPoolServiceRegistry.getService(ConfigurationService.class);
             minWaitTime = null == service ? 20000L : service.getIntProperty("AJP_WATCHER_FREQUENCY", 20000);
             maxRunningTime = null == service ? 60000L : service.getIntProperty("AJP_WATCHER_MAX_RUNNING_TIME", 60000);
@@ -1577,6 +1577,7 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
     @Override
     protected void afterExecute(final Runnable r, final Throwable throwable) {
         super.afterExecute(r, throwable);
+        LogProperties.removeLogProperties(); // Drop possible log properties
         if (r instanceof CustomFutureTask<?>) {
             final CustomFutureTask<?> customFutureTask = (CustomFutureTask<?>) r;
             final Trackable trackable = customFutureTask.getTrackable();
