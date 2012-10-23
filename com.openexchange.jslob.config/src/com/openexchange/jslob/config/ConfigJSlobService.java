@@ -59,7 +59,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-
 import org.apache.commons.logging.Log;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -109,8 +108,8 @@ public final class ConfigJSlobService implements JSlobService {
      */
 
     private final ServiceLookup services;
-
     private final Map<String, Map<String, AttributedProperty>> preferenceItems;
+    private final Map<String, AttributedProperty> coreAttributes;
 
     /**
      * Initializes a new {@link ConfigJSlobService}.
@@ -120,16 +119,27 @@ public final class ConfigJSlobService implements JSlobService {
     public ConfigJSlobService(final ServiceLookup services) throws OXException {
         super();
         this.services = services;
-        preferenceItems = initPreferenceItems();
+        final Map<String, Map<String, AttributedProperty>> preferenceItems = initPreferenceItems();
+        this.preferenceItems = preferenceItems;
+        // Initialize core properties
+        Map<String, AttributedProperty> coreAttributes = preferenceItems.get("core");
+        if (null == coreAttributes) {
+            coreAttributes = new HashMap<String, AttributedProperty>(128);
+            preferenceItems.put("core", coreAttributes);
+        }
+        this.coreAttributes = coreAttributes;
     }
 
     private Map<String, Map<String, AttributedProperty>> initPreferenceItems() throws OXException {
+        // Read from config cascade
         final ConfigView view = getConfigViewFactory().getView();
         final Map<String, ComposedConfigProperty<String>> all = view.all();
+        // Logger
+        final Log logger = com.openexchange.log.Log.valueOf(LogFactory.getLog(ConfigJSlobService.class));
+        // Initialize resulting map
         final int initialCapacity = all.size() >> 1;
         final Map<String, Map<String, AttributedProperty>> preferenceItems =
             new HashMap<String, Map<String, AttributedProperty>>(initialCapacity);
-        final Log logger = com.openexchange.log.Log.valueOf(LogFactory.getLog(ConfigJSlobService.class));
         for (final Map.Entry<String, ComposedConfigProperty<String>> entry : all.entrySet()) {
             // Check for existence of "preferencePath"
             final ComposedConfigProperty<String> property = entry.getValue();
