@@ -47,28 +47,35 @@
  *
  */
 
-package com.openexchange.tools.images.osgi;
+package com.openexchange.spamhandler.parallels.osgi;
 
-import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.tools.images.ImageTransformationService;
-import com.openexchange.tools.images.impl.JavaImageTransformationService;
+import org.osgi.framework.BundleActivator;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.Filter;
+import org.osgi.util.tracker.ServiceTracker;
+import com.openexchange.config.ConfigurationService;
+import com.openexchange.context.ContextService;
+import com.openexchange.osgi.Tools;
+import com.openexchange.user.UserService;
 
+public class Activator implements BundleActivator {
 
-/**
- * {@link ImageToolsActivator}
- *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
- */
-public class ImageToolsActivator extends HousekeepingActivator {
+    private ServiceTracker<Object,Object> tracker;
 
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class[0];
+    public Activator() {
+        super();
     }
 
     @Override
-    protected void startBundle() throws Exception {
-        registerService(ImageTransformationService.class, new JavaImageTransformationService());
+    public void start(BundleContext context) throws Exception {
+        Filter filter = Tools.generateServiceFilter(context, ConfigurationService.class, ContextService.class, UserService.class);
+        tracker = new ServiceTracker<Object, Object>(context, filter, new SpamdServiceRegisterer(context));
+        tracker.open();
     }
 
+    @Override
+    public void stop(BundleContext context) {
+        tracker.close();
+        tracker = null;
+    }
 }

@@ -47,28 +47,37 @@
  *
  */
 
-package com.openexchange.tools.images.osgi;
+package com.openexchange.tools.images.impl;
 
-import com.openexchange.osgi.HousekeepingActivator;
+import java.awt.image.BufferedImage;
+import java.io.IOException;
+import java.io.InputStream;
 import com.openexchange.tools.images.ImageTransformationService;
-import com.openexchange.tools.images.impl.JavaImageTransformationService;
-
+import com.openexchange.tools.images.ImageTransformations;
+import com.openexchange.tools.images.transformations.ImageTransformationsImpl;
 
 /**
- * {@link ImageToolsActivator}
- *
+ * {@link JavaImageTransformationService}
+ * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class ImageToolsActivator extends HousekeepingActivator {
-
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class[0];
+public class JavaImageTransformationService implements ImageTransformationService {
+    
+    /**
+     * Initializes a new {@link JavaImageTransformationService}.
+     */
+    public JavaImageTransformationService() {
+        super();
     }
 
     @Override
-    protected void startBundle() throws Exception {
-        registerService(ImageTransformationService.class, new JavaImageTransformationService());
+    public ImageTransformations transfom(BufferedImage sourceImage) {
+        return new ImageTransformationsImpl(sourceImage);
+    }
+
+    @Override
+    public ImageTransformations transfom(InputStream imageStream) throws IOException {
+        return new ImageTransformationsImpl(imageStream);
     }
 
 }

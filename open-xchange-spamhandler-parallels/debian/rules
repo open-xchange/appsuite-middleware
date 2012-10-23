@@ -3,7 +3,7 @@
 # Uncomment this to turn on verbose mode.
 #export DH_VERBOSE=1
 
-pkgname=open-xchange-parallels
+pkgname=open-xchange-spamhandler-parallels
 installroot=$(CURDIR)/debian/$(pkgname)
 
 configure: configure-stamp
@@ -39,7 +39,7 @@ binary-indep: build install
 binary-arch: build install
 	dh_testdir
 	dh_testroot
-	dh_installchangelogs com.openexchange.custom.parallels/ChangeLog
+	dh_installchangelogs
 	dh_installdocs
 	dh_installexamples
 #	dh_install

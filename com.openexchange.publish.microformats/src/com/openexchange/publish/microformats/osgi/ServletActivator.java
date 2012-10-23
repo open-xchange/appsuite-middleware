@@ -70,7 +70,7 @@ import com.openexchange.publish.microformats.InfostoreFileServlet;
 import com.openexchange.publish.microformats.MicroformatServlet;
 import com.openexchange.publish.microformats.OnlinePublicationServlet;
 import com.openexchange.templating.TemplateService;
-import com.openexchange.tools.images.ImageScalingService;
+import com.openexchange.tools.images.ImageTransformationService;
 import com.openexchange.user.UserService;
 import com.openexchange.userconf.UserConfigurationService;
 
@@ -91,7 +91,7 @@ public class ServletActivator extends HousekeepingActivator {
 
     private static final Class<?>[] NEEDED_SERVICES = {
         HttpService.class, PublicationDataLoaderService.class, ContextService.class, TemplateService.class, ContactService.class, 
-        UserConfigurationService.class, UserService.class, InfostoreFacade.class, ConfigurationService.class, HtmlService.class, ImageScalingService.class};
+        UserConfigurationService.class, UserService.class, InfostoreFacade.class, ConfigurationService.class, HtmlService.class, ImageTransformationService.class};
 
     @Override
     protected Class<?>[] getNeededServices() {
@@ -135,7 +135,7 @@ public class ServletActivator extends HousekeepingActivator {
         final UserService users = getService(UserService.class);
         final ConfigurationService configService = getService(ConfigurationService.class);
         final HtmlService htmlService = getService(HtmlService.class);
-        final ImageScalingService imageScalingService = getService(ImageScalingService.class);
+        final ImageTransformationService imageScalingService = getService(ImageTransformationService.class);
 
         if (null == httpService || null == dataLoader || null == contexts || null == templates || null == contacts || null == userConfigs || null == users || configService == null || htmlService == null || imageScalingService == null) {
             return;

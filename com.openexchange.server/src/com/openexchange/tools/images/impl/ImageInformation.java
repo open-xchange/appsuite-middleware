@@ -47,28 +47,29 @@
  *
  */
 
-package com.openexchange.tools.images.osgi;
-
-import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.tools.images.ImageTransformationService;
-import com.openexchange.tools.images.impl.JavaImageTransformationService;
-
+package com.openexchange.tools.images.impl;
 
 /**
- * {@link ImageToolsActivator}
- *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * {@link ImageInformation}
+ * 
+ * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  */
-public class ImageToolsActivator extends HousekeepingActivator {
+public class ImageInformation {
 
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class[0];
+    public final int orientation;
+
+    public final int width;
+
+    public final int height;
+
+    public ImageInformation(int orientation, int width, int height) {
+        this.orientation = orientation;
+        this.width = width;
+        this.height = height;
     }
 
     @Override
-    protected void startBundle() throws Exception {
-        registerService(ImageTransformationService.class, new JavaImageTransformationService());
+    public String toString() {
+        return String.format("%dx%d,%d", this.width, this.height, this.orientation);
     }
-
 }

@@ -47,28 +47,37 @@
  *
  */
 
-package com.openexchange.tools.images.osgi;
+package com.openexchange.spamhandler.parallels;
 
-import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.tools.images.ImageTransformationService;
-import com.openexchange.tools.images.impl.JavaImageTransformationService;
-
+import com.openexchange.config.ConfigurationService;
 
 /**
- * {@link ImageToolsActivator}
+ * {@link Configuration}
  *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public class ImageToolsActivator extends HousekeepingActivator {
+public class Configuration {
 
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class[0];
+    private final int port;
+    private final int xmlPort;
+
+    private Configuration(int port, int xmlPort) {
+        super();
+        this.port = port;
+        this.xmlPort = xmlPort;
     }
 
-    @Override
-    protected void startBundle() throws Exception {
-        registerService(ImageTransformationService.class, new JavaImageTransformationService());
+    public static Configuration getInstance(ConfigurationService configService) {
+        int port = configService.getIntProperty("com.openexchange.spamhandler.spamassassin.port", 783);
+        int xmlPort = configService.getIntProperty("com.openexchange.custom.parallels.antispam.xmlrpc.port", 3100);
+        return new Configuration(port, xmlPort);
     }
 
+    public int getPort() {
+        return port;
+    }
+
+    public int getXmlPort() {
+        return xmlPort;
+    }
 }

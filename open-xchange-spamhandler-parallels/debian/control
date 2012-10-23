@@ -1,0 +1,18 @@
+Source: open-xchange-spamhandler-parallels
+Section: web
+Priority: optional
+Maintainer: Marcus Klein <marcus.klein@open-xchange.com>
+Build-Depends: debhelper (>= 4.0.0), ant (>= 1.7.0), ant-optional (>= 1.7.0), sun-java6-jdk|java6-sdk, open-xchange-spamhandler-spamassassin (>=@OXVERSION@)
+Standards-Version: 3.8.4
+Homepage: http://www.open-xchange.com
+
+Package: open-xchange-spamhandler-parallels
+Architecture: all
+Depends: ${misc:Depends}, open-xchange-parallels (>=@OXVERSION@), open-xchange-spamhandler-spamassassin (>=@OXVERSION@)
+Conflicts: open-xchange-spamhandler-cloudmark, open-xchange-spamhandler-default, open-xchange-spamhandler-spamexperts
+Provides: open-xchange-spamhandler
+Description: Spam handler for Parallels extensions
+ This package contains the spam handler implementation for Parallels extension. This spam handler extends the spam handler for SpamAssassin
+ by configuring user specific host names, ports and user names.
+ Not necessarily SpamAssassin will be used with Parallels extensions. Therefore the spam handler for Parallels extension is located in its
+ own package to be able to replace it with every other possible spam handler implementation.

@@ -47,28 +47,55 @@
  *
  */
 
-package com.openexchange.tools.images.osgi;
+package com.openexchange.tools.images.transformations;
 
-import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.tools.images.ImageTransformationService;
-import com.openexchange.tools.images.impl.JavaImageTransformationService;
-
+import java.awt.image.BufferedImage;
+import java.io.IOException;
+import com.mortennobel.imagescaling.DimensionConstrain;
+import com.mortennobel.imagescaling.ResampleOp;
+import com.openexchange.tools.images.ScaleType;
+import com.openexchange.tools.images.impl.AutoDimensionConstrain;
+import com.openexchange.tools.images.impl.ContainDimensionConstrain;
+import com.openexchange.tools.images.impl.CoverDimensionConstrain;
+import com.openexchange.tools.images.impl.ImageInformation;
 
 /**
- * {@link ImageToolsActivator}
- *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * {@link ScaleTransformation}
+ * 
+ * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  */
-public class ImageToolsActivator extends HousekeepingActivator {
-
+public class ScaleTransformation implements ImageTransformation {
+    
+    private final int maxWidth, maxHeight;
+    private final ScaleType scaleType;
+    
+    public ScaleTransformation(int maxWidth, int maxHeight, ScaleType scaleType) {
+        super();
+        this.maxWidth = maxWidth;
+        this.maxHeight = maxHeight;
+        this.scaleType = scaleType;
+    }
+    
     @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class[0];
+    public BufferedImage perform(BufferedImage sourceImage, ImageInformation imageInformation) throws IOException {
+        DimensionConstrain constrain;
+        switch (scaleType) {
+        case COVER:
+            constrain = new CoverDimensionConstrain(maxWidth, maxHeight);
+            break;
+        case CONTAIN:
+            constrain = new ContainDimensionConstrain(maxWidth, maxHeight);
+            break;
+        default:
+            constrain = new AutoDimensionConstrain(maxWidth, maxHeight);
+            break;
+        }
+        return new ResampleOp(constrain).filter(sourceImage, null);
     }
 
     @Override
-    protected void startBundle() throws Exception {
-        registerService(ImageTransformationService.class, new JavaImageTransformationService());
+    public boolean needsImageInformation() {
+        return false;
     }
 
 }

@@ -47,28 +47,36 @@
  *
  */
 
-package com.openexchange.tools.images.osgi;
+package com.openexchange.tools.images.transformations;
 
-import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.tools.images.ImageTransformationService;
-import com.openexchange.tools.images.impl.JavaImageTransformationService;
-
+import java.awt.image.BufferedImage;
+import java.io.IOException;
+import com.openexchange.tools.images.ImageTransformations;
+import com.openexchange.tools.images.impl.ImageInformation;
 
 /**
- * {@link ImageToolsActivator}
- *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * {@link ImageTransformation}
+ * 
+ * Default {@link ImageTransformations} implementation.
+ * 
+ * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class ImageToolsActivator extends HousekeepingActivator {
-
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class[0];
-    }
-
-    @Override
-    protected void startBundle() throws Exception {
-        registerService(ImageTransformationService.class, new JavaImageTransformationService());
-    }
-
+public interface ImageTransformation {
+    
+    /**
+     * Performs the image transformation.
+     * 
+     * @param sourceImage The source image
+     * @param imageInformation The additionl image information, or <code>null</code> if not needed
+     * @return The resulting image
+     */
+    BufferedImage perform(BufferedImage sourceImage, ImageInformation imageInformation) throws IOException;
+    
+    /**
+     * Gets a value indicating whether the transformation needs additional image information or not.
+     * 
+     * @return <code>true</code>, if additional information is required, <code>false</code>, otherwise
+     */
+    boolean needsImageInformation();
+    
 }

@@ -67,9 +67,9 @@ import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.requesthandler.ResponseRenderer;
 import com.openexchange.exception.OXException;
-import com.openexchange.java.Streams;
 import com.openexchange.log.LogFactory;
-import com.openexchange.tools.images.ImageScalingService;
+import com.openexchange.tools.images.ImageTransformationService;
+import com.openexchange.tools.images.ImageTransformations;
 import com.openexchange.tools.images.ScaleType;
 import com.openexchange.tools.servlet.http.Tools;
 
@@ -89,7 +89,7 @@ public class FileResponseRenderer implements ResponseRenderer {
 
     private static final String SAVE_AS_TYPE = "application/octet-stream";
 
-    private volatile ImageScalingService scaler;
+    private volatile ImageTransformationService scaler;
 
     private final String DELIVERY = "delivery";
 
@@ -113,7 +113,7 @@ public class FileResponseRenderer implements ResponseRenderer {
      *
      * @param scaler The image scaler
      */
-    public void setScaler(final ImageScalingService scaler) {
+    public void setScaler(final ImageTransformationService scaler) {
         this.scaler = scaler;
     }
 
@@ -143,9 +143,7 @@ public class FileResponseRenderer implements ResponseRenderer {
 
         InputStream documentData = null;
         try {
-            file = rotateIfImage(file);
-            file = cropIfImage(request, file);
-            file = scaleIfImage(request, file);
+            file = transformIfImage(request, file);
             InputStream stream = file.getStream();
             if (null == stream) {
                 // React with 404
@@ -234,89 +232,44 @@ public class FileResponseRenderer implements ResponseRenderer {
         }
     }
 
-    private IFileHolder rotateIfImage(final IFileHolder file) throws IOException, OXException {
-        final ImageScalingService scaler = this.scaler;
-        if (scaler == null) {
-            return file;
-        }
-
-        if (!isImage(file)) {
-            return file;
-        }
-
-        final InputStream rotated = scaler.rotateAccordingExif(file.getStream(), file.getContentType());
-        if (null == rotated) {
-            // TODO: What to to then?
-        }
-        return new FileHolder(rotated, -1, file.getContentType(), file.getName());
-    }
-
-    /**
-     * Scale possible image data.
-     *
-     * @param request The request data
-     * @param file The file holder
-     * @return The possibly scaled file holder
-     * @throws IOException If an I/O error occurs
-     * @throws OXException If an Open-Xchange error occurs
-     */
-    private IFileHolder scaleIfImage(final AJAXRequestData request, final IFileHolder file) throws IOException, OXException {
-        final ImageScalingService scaler = this.scaler;
-        if (scaler == null) {
-            return file;
-        }
-
-        if (!isImage(file)) {
-            return file;
-        }
-
+    private IFileHolder transformIfImage(AJAXRequestData request, IFileHolder file) throws IOException, OXException {
         /*
-         * Start scaling if appropriate parameters are present
+         * check input
          */
-        int width = -1, height = -1;
-        if (request.isSet("width")) {
-            width = request.getParameter("width", int.class).intValue();
-        }
-        if (request.isSet("height")) {
-            height = request.getParameter("height", int.class).intValue();
-        }
-        if (width == -1 && height == -1) {
+        if (null == this.scaler || false == isImage(file)) {
             return file;
         }
-        try {
-            /*
-             * Scale to new input stream
-             */
-            final InputStream input = file.getStream();
-            final InputStream scaled = null == input ? null : scaler.scale(input, width, height, ScaleType.getType(request.getParameter("scaleType")));
-            return new FileHolder(scaled, -1, "image/png", "");
-        } finally {
-            Streams.close(file);
+        /*
+         * build transformations
+         */
+        ImageTransformations transformations = scaler.transfom(file.getStream());
+        transformations.rotate();
+        if (request.isSet("cropWidth") || request.isSet("cropHeight")) {
+            transformations.crop(
+                request.isSet("cropX") ? request.getParameter("cropX", int.class).intValue() : 0,
+                request.isSet("cropY") ? request.getParameter("cropY", int.class).intValue() : 0,
+                request.getParameter("cropWidth", int.class).intValue(),
+                request.getParameter("cropHeight", int.class).intValue()
+            );
         }
+        if (request.isSet("width") || request.isSet("height")) {
+            transformations.scale(
+                request.isSet("width") ? request.getParameter("width", int.class).intValue() : 0,
+                request.isSet("cropY") ? request.getParameter("cropY", int.class).intValue() : 0,
+                ScaleType.getType(request.getParameter("scaleType"))
+            );
+        }
+        /*
+         * transform
+         */
+        InputStream transformed = transformations.getInputStream(file.getContentType());
+        if (null == transformed) {
+            LOG.warn("Got no resulting input stream from transformation, falling back to original input");
+            return file;
+        }
+        return new FileHolder(transformed, -1, file.getContentType(), file.getName());
     }
     
-    private IFileHolder cropIfImage(final AJAXRequestData request, final IFileHolder file) throws IOException, OXException {
-    	if (null == this.scaler || false == isImage(file) || false == request.isSet("cropWidth") || false == request.isSet("cropHeight")) {
-    		return file;
-    	}
-    	/*
-    	 * get crop parameters
-    	 */
-    	final int cropX = request.isSet("cropX") ? request.getParameter("cropX", int.class).intValue() : 0;
-    	final int cropY = request.isSet("cropY") ? request.getParameter("cropY", int.class).intValue() : 0;
-    	final int cropWidth = request.getParameter("cropWidth", int.class).intValue();
-    	final int cropHeight = request.getParameter("cropHeight", int.class).intValue();
-    	/*
-    	 * crop to new input stream
-    	 */
-        try {
-            final InputStream croppedImage = scaler.crop(file.getStream(), cropX, cropY, cropWidth, cropHeight, file.getContentType());
-            return new FileHolder(croppedImage, -1, file.getContentType(), file.getName());
-        } finally {
-            Streams.close(file);
-        }    
-    }
-
     private boolean isImage(final IFileHolder file) {
         String contentType = file.getContentType();
         if (null == contentType || !contentType.startsWith("image/")) {

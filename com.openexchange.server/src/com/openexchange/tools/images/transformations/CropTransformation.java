@@ -47,28 +47,59 @@
  *
  */
 
-package com.openexchange.tools.images.osgi;
+package com.openexchange.tools.images.transformations;
 
-import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.tools.images.ImageTransformationService;
-import com.openexchange.tools.images.impl.JavaImageTransformationService;
-
+import java.awt.Color;
+import java.awt.Graphics2D;
+import java.awt.image.BufferedImage;
+import java.io.IOException;
+import com.openexchange.tools.images.impl.ImageInformation;
 
 /**
- * {@link ImageToolsActivator}
- *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * {@link CropTransformation}
+ * 
+ * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class ImageToolsActivator extends HousekeepingActivator {
-
+public class CropTransformation implements ImageTransformation {
+    
+    private final int x, y, width, height;
+    
+    public CropTransformation(int x, int y, int width, int height) {
+        super();
+        this.x = x;
+        this.y = y;
+        this.width = width;
+        this.height = height;
+    }
+    
     @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class[0];
+    public BufferedImage perform(BufferedImage sourceImage, ImageInformation imageInformation) throws IOException {
+        /*
+         * prepare target image
+         */
+        BufferedImage targetImage = null; 
+        if (0 <= x && sourceImage.getWidth() > x && sourceImage.getWidth() >= x + width &&
+                0 <= y && sourceImage.getHeight() > y && sourceImage.getHeight() >= y + height) {
+            /*
+             * extract sub-image directly
+             */
+            targetImage = sourceImage.getSubimage(x, y, width, height);
+        } else {
+            /*
+             * draw partial region to target image
+             */
+            targetImage = new BufferedImage(width, height, sourceImage.getType());
+            Graphics2D graphics = targetImage.createGraphics();
+            graphics.setBackground(new Color(255, 255, 255, 0));
+            graphics.clearRect(0, 0, width, height);
+            graphics.drawImage(sourceImage, x, y, null);
+        }
+        return targetImage;
     }
 
     @Override
-    protected void startBundle() throws Exception {
-        registerService(ImageTransformationService.class, new JavaImageTransformationService());
+    public boolean needsImageInformation() {
+        return false;
     }
 
 }
