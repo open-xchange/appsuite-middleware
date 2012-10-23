@@ -47,37 +47,35 @@
  *
  */
 
-package com.openexchange.jslob.config.osgi;
+package com.openexchange.spamhandler.parallels.osgi;
 
-import com.openexchange.config.cascade.ConfigViewFactory;
-import com.openexchange.jslob.JSlobService;
-import com.openexchange.jslob.config.ConfigJSlobService;
-import com.openexchange.jslob.storage.registry.JSlobStorageRegistry;
-import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.sessiond.SessiondService;
+import org.osgi.framework.BundleActivator;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.Filter;
+import org.osgi.util.tracker.ServiceTracker;
+import com.openexchange.config.ConfigurationService;
+import com.openexchange.context.ContextService;
+import com.openexchange.osgi.Tools;
+import com.openexchange.user.UserService;
 
-/**
- * {@link ConfigJSlobActivator}
- * 
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- */
-public final class ConfigJSlobActivator extends HousekeepingActivator {
+public class Activator implements BundleActivator {
 
-    /**
-     * Initializes a new {@link ConfigJSlobActivator}.
-     */
-    public ConfigJSlobActivator() {
+    private ServiceTracker<Object,Object> tracker;
+
+    public Activator() {
         super();
     }
 
     @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { JSlobStorageRegistry.class, ConfigViewFactory.class, SessiondService.class };
+    public void start(BundleContext context) throws Exception {
+        Filter filter = Tools.generateServiceFilter(context, ConfigurationService.class, ContextService.class, UserService.class);
+        tracker = new ServiceTracker<Object, Object>(context, filter, new SpamdServiceRegisterer(context));
+        tracker.open();
     }
 
     @Override
-    protected void startBundle() throws Exception {
-        registerService(JSlobService.class, new ConfigJSlobService(this));
+    public void stop(BundleContext context) {
+        tracker.close();
+        tracker = null;
     }
-
 }

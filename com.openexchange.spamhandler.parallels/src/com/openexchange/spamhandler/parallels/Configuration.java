@@ -47,37 +47,37 @@
  *
  */
 
-package com.openexchange.jslob.config.osgi;
+package com.openexchange.spamhandler.parallels;
 
-import com.openexchange.config.cascade.ConfigViewFactory;
-import com.openexchange.jslob.JSlobService;
-import com.openexchange.jslob.config.ConfigJSlobService;
-import com.openexchange.jslob.storage.registry.JSlobStorageRegistry;
-import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.sessiond.SessiondService;
+import com.openexchange.config.ConfigurationService;
 
 /**
- * {@link ConfigJSlobActivator}
- * 
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * {@link Configuration}
+ *
+ * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public final class ConfigJSlobActivator extends HousekeepingActivator {
+public class Configuration {
 
-    /**
-     * Initializes a new {@link ConfigJSlobActivator}.
-     */
-    public ConfigJSlobActivator() {
+    private final int port;
+    private final int xmlPort;
+
+    private Configuration(int port, int xmlPort) {
         super();
+        this.port = port;
+        this.xmlPort = xmlPort;
     }
 
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { JSlobStorageRegistry.class, ConfigViewFactory.class, SessiondService.class };
+    public static Configuration getInstance(ConfigurationService configService) {
+        int port = configService.getIntProperty("com.openexchange.spamhandler.spamassassin.port", 783);
+        int xmlPort = configService.getIntProperty("com.openexchange.custom.parallels.antispam.xmlrpc.port", 3100);
+        return new Configuration(port, xmlPort);
     }
 
-    @Override
-    protected void startBundle() throws Exception {
-        registerService(JSlobService.class, new ConfigJSlobService(this));
+    public int getPort() {
+        return port;
     }
 
+    public int getXmlPort() {
+        return xmlPort;
+    }
 }

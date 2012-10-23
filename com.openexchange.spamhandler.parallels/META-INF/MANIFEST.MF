@@ -1,0 +1,27 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Spamhandler for Parallels integration
+Bundle-SymbolicName: com.openexchange.spamhandler.parallels
+Bundle-Version: 6.23.0
+Bundle-Activator: com.openexchange.spamhandler.parallels.osgi.Activator
+Bundle-Vendor: Open-Xchange, Inc.
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Import-Package: com.openexchange.config,
+ com.openexchange.context,
+ com.openexchange.exception,
+ com.openexchange.groupware.contexts,
+ com.openexchange.groupware.ldap,
+ com.openexchange.log,
+ com.openexchange.mail,
+ com.openexchange.osgi,
+ com.openexchange.session,
+ com.openexchange.spamhandler.spamassassin.api,
+ com.openexchange.user,
+ javax.xml.parsers,
+ org.apache.commons.httpclient;version="[3.0.0,4.0.0)",
+ org.apache.commons.httpclient.methods;version="[3.0.0,4.0.0)",
+ org.apache.commons.logging,
+ org.osgi.framework,
+ org.osgi.util.tracker,
+ org.w3c.dom,
+ org.xml.sax
