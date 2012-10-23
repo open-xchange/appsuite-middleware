@@ -50,19 +50,22 @@
 package com.openexchange.sessiond.osgi;
 
 import static com.openexchange.sessiond.services.SessiondServiceRegistry.getServiceRegistry;
+import java.util.List;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
+import com.openexchange.exception.OXException;
+import com.openexchange.sessiond.impl.SessionControl;
+import com.openexchange.sessiond.impl.SessionHandler;
 import com.openexchange.sessionstorage.SessionStorageService;
-
 
 /**
  * {@link SessionStorageServiceTracker}
- *
+ * 
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  */
 public class SessionStorageServiceTracker implements ServiceTrackerCustomizer<SessionStorageService, SessionStorageService> {
-    
+
     private final BundleContext context;
 
     /**
@@ -77,6 +80,15 @@ public class SessionStorageServiceTracker implements ServiceTrackerCustomizer<Se
     public SessionStorageService addingService(ServiceReference<SessionStorageService> reference) {
         SessionStorageService service = context.getService(reference);
         getServiceRegistry().addService(SessionStorageService.class, service);
+        List<SessionControl> sessions = SessionHandler.getSessions();
+        for (SessionControl session : sessions) {
+            try {
+                service.addSession(session.getSession());
+            } catch (OXException e) {
+
+                e.printStackTrace();
+            }
+        }
         return service;
     }
 

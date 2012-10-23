@@ -52,7 +52,6 @@ package com.openexchange.sessionstorage.hazelcast;
 import java.util.ArrayList;
 import java.util.List;
 import com.hazelcast.core.HazelcastInstance;
-import com.hazelcast.core.Hazelcasts;
 import com.hazelcast.core.IMap;
 import com.openexchange.crypto.CryptoService;
 import com.openexchange.exception.OXException;
@@ -89,13 +88,12 @@ public class HazelcastSessionStorageService implements SessionStorageService {
     /**
      * Initializes a new {@link HazelcastSessionStorageService}.
      */
-    @SuppressWarnings("unchecked")
     public HazelcastSessionStorageService(HazelcastSessionStorageConfiguration config) {
         super();
         encryptionKey = config.getEncryptionKey();
         lifetime = config.getLifetime();
         hazelcast = HazelcastSessionStorageServiceRegistry.getRegistry().getService(HazelcastInstance.class);
-        sessions = Hazelcasts.wrapWithClassloader(getClass(), IMap.class, hazelcast.getMap("sessions"));
+        sessions = hazelcast.getMap("sessions");
         cryptoService = config.getCryptoService();
         timerService = config.getTimerService();
         cleanupTask = timerService.scheduleWithFixedDelay(new HazelcastCleanupTask(), lifetime, lifetime);
@@ -121,7 +119,7 @@ public class HazelcastSessionStorageService implements SessionStorageService {
             ss.setPassword(crypt(ss.getPassword()));
             sessions.put(session.getSessionID(), ss);
         } catch (Exception e) {
-            throw OXHazelcastSessionStorageExceptionCodes.HAZELCAST_SESSIONSTORAGE_SAVE_FAILED.create(session.getSessionID());
+            throw OXHazelcastSessionStorageExceptionCodes.HAZELCAST_SESSIONSTORAGE_SAVE_FAILED.create(e, session.getSessionID());
         }
     }
 
@@ -130,7 +128,7 @@ public class HazelcastSessionStorageService implements SessionStorageService {
         try {
             sessions.remove(sessionId);
         } catch (Exception e) {
-            throw OXHazelcastSessionStorageExceptionCodes.HAZELCAST_SESSIONSTORAGE_REMOVE_FAILED.create(sessionId);
+            throw OXHazelcastSessionStorageExceptionCodes.HAZELCAST_SESSIONSTORAGE_REMOVE_FAILED.create(e, sessionId);
         }
     }
 
