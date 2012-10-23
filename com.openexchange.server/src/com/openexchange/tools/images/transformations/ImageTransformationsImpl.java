@@ -156,7 +156,7 @@ public class ImageTransformationsImpl implements ImageTransformations {
     }
 
     @Override
-    public byte[] getbytes(String formatName) throws IOException {
+    public byte[] getBytes(String formatName) throws IOException {
         if (null == formatName || 0 == formatName.length()) {
             LOG.debug("No format name specified, falling back to 'jpeg'.");
             return write(getImage(), "jpeg");
@@ -167,7 +167,7 @@ public class ImageTransformationsImpl implements ImageTransformations {
 
     @Override
     public InputStream getInputStream(String formatName) throws IOException {
-        return Streams.newByteArrayInputStream(getbytes(formatName));
+        return Streams.newByteArrayInputStream(getBytes(formatName));
     }
     
     /**

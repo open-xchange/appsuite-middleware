@@ -103,7 +103,7 @@ public interface ImageTransformations {
      * 
      * @return The resulting image data
      */
-    byte[] getbytes(String formatName) throws IOException;
+    byte[] getBytes(String formatName) throws IOException;
     
     /**
      * Applies all transformations and provides an input stream on the resulting raw image data in the given format.
