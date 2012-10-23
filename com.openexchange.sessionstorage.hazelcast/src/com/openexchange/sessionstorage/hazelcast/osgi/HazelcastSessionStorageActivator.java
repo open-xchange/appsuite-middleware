@@ -126,7 +126,6 @@ public class HazelcastSessionStorageActivator extends HousekeepingActivator {
     public void stopBundle() throws Exception {
         LOG.info("Stopping bundle: com.openexchange.sessionstorage.hazelcast");
         if (service != null) {
-            service.cleanUp();
             service.removeCleanupTask();
             unregisterServices();
         }
