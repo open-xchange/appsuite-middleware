@@ -52,6 +52,7 @@ package com.openexchange.tools.images.impl;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.io.InputStream;
+import com.openexchange.java.UnsynchronizedByteArrayInputStream;
 import com.openexchange.tools.images.ImageTransformationService;
 import com.openexchange.tools.images.ImageTransformations;
 import com.openexchange.tools.images.transformations.ImageTransformationsImpl;
@@ -78,6 +79,11 @@ public class JavaImageTransformationService implements ImageTransformationServic
     @Override
     public ImageTransformations transfom(InputStream imageStream) throws IOException {
         return new ImageTransformationsImpl(imageStream);
+    }
+
+    @Override
+    public ImageTransformations transfom(byte[] imageData) throws IOException {
+        return transfom(new UnsynchronizedByteArrayInputStream(imageData));
     }
 
 }

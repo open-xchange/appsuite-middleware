@@ -73,6 +73,14 @@ public interface ImageTransformation {
     BufferedImage perform(BufferedImage sourceImage, ImageInformation imageInformation) throws IOException;
     
     /**
+     * Gets a value indicating whether the supplied image format is supported by the transformation or not.
+     * 
+     * @param formatName The image format name, e.g. <code>jpeg</code> or <code>tiff</code>
+     * @return <code>true</code>, if the format is supported, <code>false</code>, otherwise
+     */
+    boolean supports(String formatName);
+    
+    /**
      * Gets a value indicating whether the transformation needs additional image information or not.
      * 
      * @return <code>true</code>, if additional information is required, <code>false</code>, otherwise

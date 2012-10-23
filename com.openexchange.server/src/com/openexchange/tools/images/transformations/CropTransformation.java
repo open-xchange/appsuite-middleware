@@ -102,4 +102,9 @@ public class CropTransformation implements ImageTransformation {
         return false;
     }
 
+    @Override
+    public boolean supports(String formatName) {
+        return true;
+    }
+
 }

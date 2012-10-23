@@ -74,12 +74,12 @@ public class RotateTransformation implements ImageTransformation {
     @Override
     public BufferedImage perform(BufferedImage sourceImage, ImageInformation imageInformation) throws IOException {
         if (null == imageInformation) {
-            LOG.warn("No image information available, unable to rotate image");
+            LOG.debug("No image information available, unable to rotate image");
             return sourceImage;
         }
         AffineTransform exifTransformation = getExifTransformation(imageInformation);
         if (null == exifTransformation) {
-            LOG.warn("No EXIF transformation available, unable to rotate image");
+            LOG.debug("No EXIF transformation available, unable to rotate image");
             return sourceImage;
         }
         int newWidth;
@@ -143,6 +143,12 @@ public class RotateTransformation implements ImageTransformation {
     @Override
     public boolean needsImageInformation() {
         return true;
+    }
+
+    @Override
+    public boolean supports(String formatName) {
+        return null != formatName && "jpeg".equalsIgnoreCase(formatName) || "jpg".equalsIgnoreCase(formatName) || 
+            "tiff".equalsIgnoreCase(formatName) || "pds".equalsIgnoreCase(formatName);
     }
 
 }

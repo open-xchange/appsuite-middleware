@@ -53,6 +53,7 @@ import java.awt.image.BufferedImage;
 import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -143,42 +144,70 @@ public class ImageTransformationsImpl implements ImageTransformations {
 
     @Override
     public BufferedImage getImage() throws IOException {
-        BufferedImage image = this.getSourceImage();
-        if (null != sourceImage) {
-            ImageInformation imageInformation = getImageInformation(this.metadata);
-            for (ImageTransformation transformation : transformations) {
-                image = transformation.perform(image, imageInformation);
-            }
-        } else {
-            LOG.debug("Got no source image, skipping transformations.");
-        }
-        return image;
+        return getImage(null);
     }
 
     @Override
     public byte[] getBytes(String formatName) throws IOException {
-        if (null == formatName || 0 == formatName.length()) {
-            LOG.debug("No format name specified, falling back to 'jpeg'.");
-            return write(getImage(), "jpeg");
-        } else {
-            return write(getImage(), getImageFormat(formatName));
-        }
+        return write(getImage(formatName), getImageFormat(formatName));
     }
 
     @Override
     public InputStream getInputStream(String formatName) throws IOException {
-        return Streams.newByteArrayInputStream(getBytes(formatName));
+        String imageFormat = getImageFormat(formatName);
+        if (false == needsTransformation(imageFormat) && null != sourceImageStream) {
+            // nothing to do at all
+            return sourceImageStream;
+        } else {
+            return Streams.newByteArrayInputStream(getBytes(imageFormat));
+        }            
     }
     
     /**
-     * Gets the source image
+     * gets a value indicating whether the denoted format name leads to transformations or not.
      * 
+     * @param formatName The format name
+     * @return <code>true</code>, if there are transformations for the targte image format, <code>false</code>, otherwise
+     */
+    private boolean needsTransformation(String formatName) {
+        for (ImageTransformation transformation : transformations) {
+            if (transformation.supports(formatName)) {
+                return true;                                        
+            }
+        }
+        return false;
+    }
+    
+    /**
+     * Gets the resulting image after applying all transformations.
+     * 
+     * @param formatName the image format to use, or <code>null</code> if not relevant
+     * @return The transformed image
+     * @throws IOException
+     */
+    private BufferedImage getImage(String formatName) throws IOException {
+        BufferedImage image = getSourceImage(formatName);
+        if (null != image) {
+            ImageInformation imageInformation = null != this.metadata ? getImageInformation(this.metadata) : null;
+            for (ImageTransformation transformation : transformations) {
+                if (transformation.supports(formatName)) {
+                    image = transformation.perform(image, imageInformation);                                        
+                }
+            }
+        }
+        return image;
+    }
+    
+    /**
+     * Gets the source image, either from the supplied buffered image or the supplied stream, extracting image metadata as needed.
+     * 
+     * @param formatName The format to use, e.g. "jpeg" or "tiff"
      * @return The source image
      * @throws IOException
      */
-    private BufferedImage getSourceImage() throws IOException {
+    private BufferedImage getSourceImage(String formatName) throws IOException {
         if (null == this.sourceImage && null != this.sourceImageStream) {
-            sourceImage = needsMetadata() ? readAndExtractMetadata(sourceImageStream) : read(sourceImageStream); 
+            this.sourceImage = needsMetadata(formatName) ? readAndExtractMetadata(sourceImageStream) : read(sourceImageStream); 
         }
         return sourceImage;
     }
@@ -186,11 +215,15 @@ public class ImageTransformationsImpl implements ImageTransformations {
     /**
      * Gets a value indicating whether additional metadata is required for one of the transformations or not.
      * 
+     * @param formatName The format to use, e.g. "jpeg" or "tiff"
      * @return <code>true</code>, if metadata is needed, <code>false</code>, otherwise
      */
-    private boolean needsMetadata() {
+    private boolean needsMetadata(String formatName) {
+        if (null == formatName || 0 == formatName.length()) {
+            return false;
+        }
         for (ImageTransformation transformation : transformations) {
-            if (transformation.needsImageInformation()) {
+            if (transformation.supports(formatName) && transformation.needsImageInformation()) {
                 return true;
             }
         }
@@ -206,23 +239,44 @@ public class ImageTransformationsImpl implements ImageTransformations {
      * @throws IOException
      */
     private static byte[] write(BufferedImage image, String formatName) throws IOException {
+        UnsynchronizedByteArrayOutputStream outputStream = null;
+        try {
+            outputStream = new UnsynchronizedByteArrayOutputStream(8192);
+            if ("jpeg".equalsIgnoreCase(formatName) || "jpg".equalsIgnoreCase(formatName)) {
+                writeJPEG(image, formatName, outputStream);
+            } else {
+                write(image, formatName, outputStream);            
+            }
+            return outputStream.toByteArray();
+        } finally {
+            Streams.close(outputStream);
+        }
+    }
+    
+    private static void write(BufferedImage image, String formatName, OutputStream output) throws IOException {
+        if (false == ImageIO.write(image, formatName, output)) {
+            throw new IOException("no appropriate writer is found");
+        }
+    }
+    
+    private static void writeJPEG(BufferedImage image, String formatName, OutputStream output) throws IOException {
         ImageWriter writer = null;
-        UnsynchronizedByteArrayOutputStream baos = null;
         ImageOutputStream imageOutputStream = null;
         try {
-            baos = new UnsynchronizedByteArrayOutputStream(8192);
             Iterator<ImageWriter> iter = ImageIO.getImageWritersByFormatName(formatName);
             if (null == iter || false == iter.hasNext()) {
-                throw new IOException("No image writer for fromat " + formatName);
+                iter = ImageIO.getImageWritersByMIMEType(formatName);
+                if (null == iter || false == iter.hasNext()) {
+                    throw new IOException("No image writer for format " + formatName);
+                }
             }
             writer = iter.next();
             ImageWriteParam iwp = writer.getDefaultWriteParam();
-            adjustWriteParams(iwp);
-            imageOutputStream = ImageIO.createImageOutputStream(baos);
+            adjustJPEGWriteParams(iwp);
+            imageOutputStream = ImageIO.createImageOutputStream(output);
             writer.setOutput(imageOutputStream);
             IIOImage iioImage = new IIOImage(image, null, null);
             writer.write(null, iioImage, iwp);
-            return baos.toByteArray();
         } finally {
             if (null != writer) {
                 writer.dispose();
@@ -230,7 +284,6 @@ public class ImageTransformationsImpl implements ImageTransformations {
             if (null != imageOutputStream) {
                 imageOutputStream.close();
             }
-            Streams.close(baos);
         }
     }
     
@@ -240,7 +293,7 @@ public class ImageTransformationsImpl implements ImageTransformations {
      * 
      * @param parameters The parameters to adjust
      */
-    private static void adjustWriteParams(ImageWriteParam parameters) {
+    private static void adjustJPEGWriteParams(ImageWriteParam parameters) {
         try {
             parameters.setCompressionMode(ImageWriteParam.MODE_EXPLICIT);
         } catch (UnsupportedOperationException e) {
@@ -300,6 +353,27 @@ public class ImageTransformationsImpl implements ImageTransformations {
         }
     }
     
+//    private BufferedImage read(InputStream inputStream, String formatName) throws IOException {
+//        Iterator<ImageReader> imageReadersByFormatName = ImageIO.getImageReadersByFormatName(formatName);
+//        ManagedFile managedFile = null;
+//        try {
+//            ManagedFileManagement mfm = ServerServiceRegistry.getInstance().getService(ManagedFileManagement.class);
+//            managedFile = mfm.createManagedFile(inputStream);
+//            try {
+//                metadata = ImageMetadataReader.readMetadata(new BufferedInputStream(managedFile.getInputStream()), false);
+//            } catch (ImageProcessingException e) {
+//                LOG.warn("error getting metadata", e);
+//            }
+//            return ImageIO.read(managedFile.getInputStream());
+//        } catch (OXException e) {
+//            throw new IOException("error accessing managed file", e);
+//        } finally {
+//            if (managedFile != null) {
+//                managedFile.delete();
+//            }
+//        }
+//    }
+//    
     /**
      * Extracts image information from the supplied metadata.
      * 
@@ -347,8 +421,11 @@ public class ImageTransformationsImpl implements ImageTransformations {
             if (0 < idx) {
                 value = value.substring(0, idx);
             }
-        } 
-        return value;
+            return value;
+        } else {
+            LOG.debug("No format name specified, falling back to 'jpeg'.");
+            return "jpeg";
+        }
     }
 
 }

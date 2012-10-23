@@ -98,4 +98,9 @@ public class ScaleTransformation implements ImageTransformation {
         return false;
     }
 
+    @Override
+    public boolean supports(String formatName) {
+        return true;
+    }
+
 }

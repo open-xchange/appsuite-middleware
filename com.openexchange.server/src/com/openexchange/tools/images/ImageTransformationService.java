@@ -77,4 +77,13 @@ public interface ImageTransformationService {
      */
     ImageTransformations transfom(InputStream imageStream) throws IOException;
     
+    /**
+     * Initializes a new {@link ImageTransformations} working on the supplied source image data. 
+     * 
+     * @param sourceImage The source image data to use
+     * @return A new {@link ImageTransformations} instance for the image
+     * @throws IOException 
+     */
+    ImageTransformations transfom(byte[] imageData) throws IOException;
+    
 }
