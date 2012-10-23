@@ -22,7 +22,6 @@ Provides:       open-xchange-authentication
 Provides:       open-xchange-custom-parallels = %{version}
 Obsoletes:      open-xchange-custom-parallels <= %{version}
 Conflicts:      open-xchange-authentication-database open-xchange-authentication-ldap open-xchange-authentication-imap open-xchange-authentication-kerberos
-Suggests:       open-xchange-spamhandler-parallels
 
 %description
 This package contains the authentication bundle and a bundle for branding. The spam handler is installed with a separate package.
