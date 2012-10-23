@@ -82,6 +82,9 @@ public final class JSlobExceptionMessages implements LocalizableStrings {
     // Referenced JSlob %1$s must not be set for service %2$s. Nothing will be done.
     public static final String SET_NOT_SUPPORTED = "Referenced JSlob %1$s must not be set for service %2$s. Nothing will be done.";
 
+    // "%1$s" is a reserved identifier. Please choose a different one.
+    public static final String RESERVED_IDENTIFIER = "\"%1$s\" is a reserved identifier. Please choose a different one.";
+
     /**
      * Initializes a new {@link JSlobExceptionMessages}.
      */

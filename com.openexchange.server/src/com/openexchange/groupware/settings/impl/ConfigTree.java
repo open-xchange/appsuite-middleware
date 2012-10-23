@@ -49,16 +49,20 @@
 
 package com.openexchange.groupware.settings.impl;
 
+import java.util.Collection;
 import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Set;
+import java.util.regex.Pattern;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.settings.IValueHandler;
 import com.openexchange.groupware.settings.PreferencesItemService;
 import com.openexchange.groupware.settings.Setting;
 import com.openexchange.groupware.settings.SettingExceptionCodes;
 import com.openexchange.groupware.settings.SharedNode;
+import com.openexchange.log.LogFactory;
 
 /**
  * This class is a container for the settings tree.
@@ -91,6 +95,8 @@ public final class ConfigTree {
         return SINGLETON;
     }
 
+    private static final Pattern SPLIT = Pattern.compile("/");
+
     /**
      * Resolves a path to the according setting object.
      * @param path Path to resolve.
@@ -99,7 +105,7 @@ public final class ConfigTree {
      * object.
      */
     public Setting getSettingByPath(final String path) throws OXException {
-        final String[] pathParts = path.split("/");
+        final String[] pathParts = SPLIT.split(path, 0);
         return new ValueSetting(getSettingByPath(tree, pathParts));
     }
 
@@ -116,12 +122,7 @@ public final class ConfigTree {
         if (path.length != 0) {
             final String[] remainingPath = new String[path.length - 1];
             System.arraycopy(path, 1, remainingPath, 0, path.length - 1);
-            final Setting child;
-            if (0 == path[0].length()) {
-                child = actual;
-            } else {
-                child = actual.getElement(path[0]);
-            }
+            final Setting child = 0 == path[0].length() ? actual : actual.getElement(path[0]);
             if (null == child) {
                 final StringBuilder sb = new StringBuilder(path[0]);
                 Setting parent = actual;
@@ -163,6 +164,33 @@ public final class ConfigTree {
         return retval;
     }
 
+    /**
+     * Gets all available leaf settings.
+     *
+     * @return All available leaf settings
+     */
+    public Collection<Setting> getSettings() {
+        final List<Setting> settings = new LinkedList<Setting>();
+        gatherSettings(tree, settings);
+        return settings;
+    }
+
+    private static <T extends AbstractSetting<? extends T>> void gatherSettings(final T current, final List<Setting> settings) {
+        if (current.isLeaf()) {
+            settings.add(current);
+        } else {
+            for (final T child : current.getElements()) {
+                gatherSettings(child, settings);
+            }
+        }
+    }
+
+    /**
+     * Adds specified <code>PreferencesItemService</code> instance to this configuration tree.
+     *
+     * @param item The item to add
+     * @throws OXException If add operation fails
+     */
     public void addPreferencesItem(final PreferencesItemService item)
         throws OXException {
         addSharedValue(null, item.getPath(), item.getSharedValue());
