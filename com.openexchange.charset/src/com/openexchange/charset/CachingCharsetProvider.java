@@ -78,13 +78,12 @@ public final class CachingCharsetProvider extends CharsetProvider {
         }
         
         @Override
-        public boolean contains(Charset cs) {
+        public boolean contains(final Charset cs) {
             return false;
         }
     };
 
     private final CharsetProvider standardProvider;
-
     private final ConcurrentMap<String, Charset> cache;
 
     /**
