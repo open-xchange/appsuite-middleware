@@ -114,7 +114,7 @@ import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.tools.ImageTypeDetector;
 import com.openexchange.tools.TimeZoneUtils;
-import com.openexchange.tools.images.ImageScalingService;
+import com.openexchange.tools.images.ImageTransformationService;
 import com.openexchange.tools.io.IOUtils;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 import com.openexchange.tools.versit.Parameter;
@@ -1046,11 +1046,9 @@ public class OXContainerConverter {
         	/*
         	 * crop the image
         	 */
-        	ImageScalingService imageService = ServerServiceRegistry.getInstance().getService(ImageScalingService.class, true);
-        	BufferedImage targetImage = imageService.crop(sourceImage, clipRect.x * -1, 
-        			clipRect.height + clipRect.y - sourceImage.getHeight(), clipRect.width, clipRect.height);
-//        	BufferedImage targetImage = imageService.crop(sourceImage, clipRect.x * -1 - 1, 
-//        			clipRect.height + clipRect.y - sourceImage.getHeight(), clipRect.width - 1, clipRect.height - 1);
+        	ImageTransformationService imageService = ServerServiceRegistry.getInstance().getService(ImageTransformationService.class, true);
+        	BufferedImage targetImage = imageService.transfom(sourceImage).crop(clipRect.x * -1, 
+        			clipRect.height + clipRect.y - sourceImage.getHeight(), clipRect.width, clipRect.height).getImage();
     		/*
     		 * write back to byte array
     		 */    		

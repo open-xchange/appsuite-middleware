@@ -6,7 +6,7 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.calendar.json"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.charset"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.cluster.discovery"/>
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.cluster.discovery.mdns"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.cluster.discovery.static"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.common"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.config.cascade"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.config.cascade.context"/>
@@ -32,6 +32,7 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.file.storage.generic"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.file.storage.infostore"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.file.storage.json"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.file.storage.rdb"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.folder.json"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.frontend.uwa"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.frontend.uwa.json"/>

@@ -90,7 +90,7 @@ import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.mail.mime.utils.ImageMatcher;
 import com.openexchange.osgi.SimpleRegistryListener;
 import com.openexchange.server.services.ServerServiceRegistry;
-import com.openexchange.tools.images.ImageScalingService;
+import com.openexchange.tools.images.ImageTransformationService;
 import com.openexchange.tools.session.ServerSession;
 
 
@@ -239,15 +239,15 @@ public class DispatcherActivator extends AbstractSessionServletActivator {
             
         });
 
-        track(ImageScalingService.class, new SimpleRegistryListener<ImageScalingService>() {
+        track(ImageTransformationService.class, new SimpleRegistryListener<ImageTransformationService>() {
 
             @Override
-            public void added(final ServiceReference<ImageScalingService> ref, final ImageScalingService thing) {
+            public void added(final ServiceReference<ImageTransformationService> ref, final ImageTransformationService thing) {
                 fileRenderer.setScaler(thing);
             }
 
             @Override
-            public void removed(final ServiceReference<ImageScalingService> ref, final ImageScalingService thing) {
+            public void removed(final ServiceReference<ImageTransformationService> ref, final ImageTransformationService thing) {
                 fileRenderer.setScaler(null);
             }
 
