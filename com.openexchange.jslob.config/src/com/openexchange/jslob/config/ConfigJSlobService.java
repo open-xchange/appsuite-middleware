@@ -124,7 +124,6 @@ public final class ConfigJSlobService implements JSlobService {
     private final Map<String, Map<String, AttributedProperty>> preferenceItems;
     private final BiMap<String, String> core2AttributeMap;
     private final BiMap<String, String> attribute2CoreMap;
-    private final Map<String, AttributedProperty> coreAttributes;
 
     /**
      * Initializes a new {@link ConfigJSlobService}.
@@ -136,13 +135,7 @@ public final class ConfigJSlobService implements JSlobService {
         this.services = services;
         final Map<String, Map<String, AttributedProperty>> preferenceItems = initPreferenceItems();
         this.preferenceItems = preferenceItems;
-        // Initialize core properties
-        Map<String, AttributedProperty> coreAttributes = preferenceItems.get(CORE);
-        if (null == coreAttributes) {
-            coreAttributes = new HashMap<String, AttributedProperty>(128);
-            preferenceItems.put(CORE, coreAttributes);
-        }
-        this.coreAttributes = coreAttributes;
+        // TODO: Initialize core name mapping
         core2AttributeMap = HashBiMap.create(128);
         attribute2CoreMap = core2AttributeMap.inverse();
     }
@@ -190,15 +183,6 @@ public final class ConfigJSlobService implements JSlobService {
         return services.getService(SessiondService.class);
     }
 
-    /**
-     * Gets the core attributes
-     *
-     * @return The core attributes
-     */
-    public Map<String, AttributedProperty> getCoreAttributes() {
-        return coreAttributes;
-    }
-
     @Override
     public Collection<JSlob> get(final int userId, final int contextId) throws OXException {
         final Collection<JSlob> list = getStorage().list(new JSlobId(SERVICE_ID, null, userId, contextId));
@@ -215,30 +199,14 @@ public final class ConfigJSlobService implements JSlobService {
             }
             ret.add(jSlob);
         }
+        ret.add(getCoreJslob(userId, contextId));
         return ret;
     }
 
     @Override
     public JSlob get(final String id, final int userId, final int contextId) throws OXException {
         if (CORE.equals(id)) {
-            try {
-                // Special handling then
-                final Session session = getSessiondService().getAnyActiveSessionForUser(userId, contextId);
-                final SettingStorage stor = SettingStorage.getInstance(session);
-                final ConfigTree configTree = ConfigTree.getInstance();
-                final JSONObject jObject = new JSONObject();
-                for (final Setting setting : configTree.getSettings()) {
-                    String attributeName = core2AttributeMap.get(setting.getPath());
-                    if (null == attributeName) {
-                        attributeName = setting.getPath();
-                    }
-                    stor.readValues(setting);
-                    jObject.put(attributeName, convert2JS(setting));
-                }
-                return new JSlob(jObject);
-            } catch (final JSONException e) {
-                throw JSlobExceptionCodes.JSON_ERROR.create(e, e.getMessage());
-            }
+            return getCoreJslob(userId, contextId);
         }
         /*
          * Get from storage
@@ -259,6 +227,35 @@ public final class ConfigJSlobService implements JSlobService {
             }
         }
         return jsonJSlob;
+    }
+
+    /**
+     * Gets the special <code>"core"</code> {@link JSlob} instance.
+     *
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     * @return The special <code>"core"</code> {@link JSlob} instance.
+     * @throws OXException If operation fails
+     */
+    private JSlob getCoreJslob(final int userId, final int contextId) throws OXException {
+        try {
+            // Special handling then
+            final Session session = getSessiondService().getAnyActiveSessionForUser(userId, contextId);
+            final SettingStorage stor = SettingStorage.getInstance(session);
+            final ConfigTree configTree = ConfigTree.getInstance();
+            final JSONObject jObject = new JSONObject();
+            for (final Setting setting : configTree.getSettings()) {
+                String attributeName = core2AttributeMap.get(setting.getPath());
+                if (null == attributeName) {
+                    attributeName = setting.getPath();
+                }
+                stor.readValues(setting);
+                jObject.put(attributeName, convert2JS(setting));
+            }
+            return new JSlob(jObject);
+        } catch (final JSONException e) {
+            throw JSlobExceptionCodes.JSON_ERROR.create(e, e.getMessage());
+        }
     }
 
     /**
