@@ -82,6 +82,7 @@ import com.openexchange.mail.index.MailUtility;
 import com.openexchange.mail.search.SearchTerm;
 import com.openexchange.mail.smal.impl.index.IndexAccessAdapter;
 import com.openexchange.mail.smal.impl.index.IndexDocumentHelper;
+import com.openexchange.mail.smal.impl.index.UserWhitelist;
 import com.openexchange.mail.utils.MailPasswordUtil;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountStorageService;
@@ -221,7 +222,7 @@ public final class SmalMessageStorage extends AbstractSMALStorage implements IMa
             final SimpleSearchTermVisitor visitor = new SimpleSearchTermVisitor();
             searchTerm.accept(visitor);
             if (visitor.simple) {
-                parameters = builder.setHandler(SearchHandler.SIMPLE).setPattern(searchTerm.getPattern().toString()).build();
+                parameters = builder.setHandler(SearchHandler.SIMPLE).setSearchTerm(searchTerm.getPattern().toString()).build();
             } else {
                 parameters = builder.setHandler(SearchHandler.CUSTOM).setSearchTerm(searchTerm).build();
             }
@@ -466,7 +467,11 @@ public final class SmalMessageStorage extends AbstractSMALStorage implements IMa
         return messageStorage.getPrimaryContents(folder, mailIds);
     }
     
-    private void submitJob(JobInfo jobInfo) throws OXException {        
+    private void submitJob(JobInfo jobInfo) throws OXException {    
+        if (!UserWhitelist.isIndexingAllowed(session.getLogin())) {
+            return;
+        }
+        
         IndexingService indexingService = SmalServiceLookup.getServiceStatic(IndexingService.class);
         if (indexingService == null) {
             throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(IndexingService.class);

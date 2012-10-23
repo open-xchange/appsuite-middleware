@@ -122,7 +122,7 @@ public final class SmalServiceLookup implements ServiceLookup {
     public <S> S getOptionalService(final Class<? extends S> clazz) {
         final ServiceLookup serviceLookup = serviceLookupReference.get();
         if (null == serviceLookup) {
-            return null;
+            throw new IllegalStateException("Missing Service '" + clazz.getName() + "'");
         }
         return serviceLookup.getOptionalService(clazz);
     }
