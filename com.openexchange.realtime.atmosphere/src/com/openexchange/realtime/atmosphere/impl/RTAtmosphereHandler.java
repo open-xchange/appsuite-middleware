@@ -80,6 +80,8 @@ import com.openexchange.realtime.atmosphere.impl.payload.PayloadElementTransform
 import com.openexchange.realtime.atmosphere.impl.stanza.StanzaWriter;
 import com.openexchange.realtime.atmosphere.impl.stanza.builder.StanzaBuilderSelector;
 import com.openexchange.realtime.atmosphere.impl.stanza.builder.StanzaBuilder;
+import com.openexchange.realtime.atmosphere.impl.stanza.handler.StanzaHandler;
+import com.openexchange.realtime.atmosphere.impl.stanza.handler.StanzaHandlerSelector;
 import com.openexchange.realtime.atmosphere.impl.stanza.transformer.StanzaTransformer;
 import com.openexchange.realtime.atmosphere.impl.stanza.transformer.StanzaTransformerSelector;
 import com.openexchange.realtime.atmosphere.osgi.AtmosphereServiceRegistry;
@@ -514,6 +516,10 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
      * @throws OXException
      */
     protected void handleIncoming(Stanza stanza, RTAtmosphereState atmosphereState) throws OXException {
+        StanzaTransformer<? extends Stanza> stanzaTransformer = StanzaTransformerSelector.getStanzaTransformer(stanza);
+        stanzaTransformer.incoming(stanza, atmosphereState.session);
+        StanzaHandler<? extends Stanza> stanzaHandler = StanzaHandlerSelector.getStanzaHandler(stanza);
+        stanzaHandler
         if (isInternal(stanza)) {
             handleInternally(stanza, atmosphereState);
         } else {
