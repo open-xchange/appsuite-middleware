@@ -52,46 +52,13 @@ package com.openexchange.tools.images;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.io.InputStream;
-import com.openexchange.exception.OXException;
 
 /**
- * {@link ImageScalingService}
+ * {@link ImageTransformationService}
  * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public interface ImageScalingService {
-
-    public InputStream scale(InputStream pictureData, int maxWidth, int maxHeight, ScaleType scaleType) throws IOException;
-    public InputStream rotateAccordingExif(InputStream pictureData, String contentType) throws IOException, OXException;
-    
-    /**
-     * Creates a cropped version of the supplied image as defined by a rectangular region. Coordinates out of the bounds of the original 
-     * image are possible, resulting in empty areas in the cropped image.    
-     * 
-     * @param pictureData An input stream for the source image
-     * @param x The X coordinate of the upper-left corner of the specified rectangular region
-     * @param y The Y coordinate of the upper-left corner of the specified rectangular region
-     * @param width The width of the specified rectangular region
-     * @param height The height of the specified rectangular region 
-     * @param contentType The content type of the image 
-     * @return A stream for the cropped image
-     * @throws IOException
-     */
-    InputStream crop(InputStream pictureData, int x, int y, int width, int height, String contentType) throws IOException;
-    
-    /**
-     * Creates a cropped version of the supplied image as defined by a rectangular region. Coordinates out of the bounds of the original 
-     * image are possible, resulting in empty areas in the cropped image.    
-     * 
-     * @param sourceImage The source image
-     * @param x The X coordinate of the upper-left corner of the specified rectangular region
-     * @param y The Y coordinate of the upper-left corner of the specified rectangular region
-     * @param width The width of the specified rectangular region
-     * @param height The height of the specified rectangular region 
-     * @return The cropped image
-     * @throws IOException
-     */
-	BufferedImage crop(BufferedImage sourceImage, int x, int y, int width, int height) throws IOException;
+public interface ImageTransformationService {
 	
 	/**
 	 * Initializes a new {@link ImageTransformations} working on the supplied source image. 
@@ -99,7 +66,7 @@ public interface ImageScalingService {
 	 * @param sourceImage The source image to use
 	 * @return A new {@link ImageTransformations} instance for the image
 	 */
-    ImageTransformations createTransformations(BufferedImage sourceImage);
+    ImageTransformations transfom(BufferedImage sourceImage);
     
     /**
      * Initializes a new {@link ImageTransformations} working on the supplied source image stream. 
@@ -108,6 +75,6 @@ public interface ImageScalingService {
      * @return A new {@link ImageTransformations} instance for the stream
      * @throws IOException 
      */
-    ImageTransformations createTransformations(InputStream imageStream) throws IOException;
+    ImageTransformations transfom(InputStream imageStream) throws IOException;
     
 }

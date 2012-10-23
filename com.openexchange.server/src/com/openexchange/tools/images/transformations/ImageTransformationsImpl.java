@@ -92,11 +92,10 @@ public class ImageTransformationsImpl implements ImageTransformations {
     
     private static Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(ImageTransformationsImpl.class));
     
-    private BufferedImage sourceImage;
     private final InputStream sourceImageStream;
     private final List<ImageTransformation> transformations;
-    
-    private Metadata metadata = null;    
+    private BufferedImage sourceImage;
+    private Metadata metadata;    
     
     private ImageTransformationsImpl(BufferedImage sourceImage, InputStream sourceImageStream) {
         super();
@@ -158,7 +157,12 @@ public class ImageTransformationsImpl implements ImageTransformations {
 
     @Override
     public byte[] getbytes(String formatName) throws IOException {
-        return write(getImage(), getImageFormat(formatName));
+        if (null == formatName || 0 == formatName.length()) {
+            LOG.debug("No format name specified, falling back to 'jpeg'.");
+            return write(getImage(), "jpeg");
+        } else {
+            return write(getImage(), getImageFormat(formatName));
+        }
     }
 
     @Override
@@ -223,7 +227,9 @@ public class ImageTransformationsImpl implements ImageTransformations {
             if (null != writer) {
                 writer.dispose();
             }
-            imageOutputStream.close();
+            if (null != imageOutputStream) {
+                imageOutputStream.close();
+            }
             Streams.close(baos);
         }
     }
@@ -326,14 +332,23 @@ public class ImageTransformationsImpl implements ImageTransformations {
     }
 
     /**
-     * Strips a leading "image/" from the supplied value if necessary if an image format was passed as content type.
+     * Strips a leading "image/" as well as trailing additional properties after the first ";" from the supplied value if necessary from 
+     * image formats passed as content type.
      * 
-     * @param value
-     * @return
+     * @param value The value
+     * @return The cleaned image format
      */
     private static String getImageFormat(String value) {
-        return null != value && value.toLowerCase().startsWith("image/") ? 
-                value.substring(6) : value; 
+        if (null != value) {
+            if (value.toLowerCase().startsWith("image/")) {
+                value = value.substring(6);
+            }
+            int idx = value.indexOf(';'); 
+            if (0 < idx) {
+                value = value.substring(0, idx);
+            }
+        } 
+        return value;
     }
 
 }
