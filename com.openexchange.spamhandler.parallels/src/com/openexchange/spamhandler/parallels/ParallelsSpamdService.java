@@ -1,6 +1,53 @@
+/*
+ *
+ *    OPEN-XCHANGE legal information
+ *
+ *    All intellectual property rights in the Software are protected by
+ *    international copyright laws.
+ *
+ *
+ *    In some countries OX, OX Open-Xchange, open xchange and OXtender
+ *    as well as the corresponding Logos OX Open-Xchange and OX are registered
+ *    trademarks of the Open-Xchange, Inc. group of companies.
+ *    The use of the Logos is not covered by the GNU General Public License.
+ *    Instead, you are allowed to use these Logos according to the terms and
+ *    conditions of the Creative Commons License, Version 2.5, Attribution,
+ *    Non-commercial, ShareAlike, and the interpretation of the term
+ *    Non-commercial applicable to the aforementioned license is published
+ *    on the web site http://www.open-xchange.com/EN/legal/index.html.
+ *
+ *    Please make sure that third-party modules and libraries are used
+ *    according to their respective licenses.
+ *
+ *    Any modifications to this package must retain all copyright notices
+ *    of the original copyright holder(s) for the original code used.
+ *
+ *    After any such modifications, the original and derivative code shall remain
+ *    under the copyright of the copyright holder(s) and/or original author(s)per
+ *    the Attribution and Assignment Agreement that can be located at
+ *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
+ *    given Attribution for the derivative code and a license granting use.
+ *
+ *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Mail: info@open-xchange.com
+ *
+ *
+ *     This program is free software; you can redistribute it and/or modify it
+ *     under the terms of the GNU General Public License, Version 2 as published
+ *     by the Free Software Foundation.
+ *
+ *     This program is distributed in the hope that it will be useful, but
+ *     WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+ *     or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License
+ *     for more details.
+ *
+ *     You should have received a copy of the GNU General Public License along
+ *     with this program; if not, write to the Free Software Foundation, Inc., 59
+ *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
+ *
+ */
 
-
-package com.openexchange.custom.parallels.impl;
+package com.openexchange.spamhandler.parallels;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -13,37 +60,40 @@ import org.apache.commons.httpclient.HttpException;
 import org.apache.commons.httpclient.URI;
 import org.apache.commons.httpclient.URIException;
 import org.apache.commons.httpclient.methods.PostMethod;
-import org.osgi.framework.ServiceException;
+import org.apache.commons.logging.Log;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
+import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.session.Session;
 import com.openexchange.spamhandler.spamassassin.api.SpamdProvider;
 import com.openexchange.spamhandler.spamassassin.api.SpamdService;
-
+import com.openexchange.user.UserService;
 
 public class ParallelsSpamdService implements SpamdService {
 
-    private static final ParallelsSpamdService singleton = new ParallelsSpamdService();
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.loggerFor(ParallelsSpamdService.class);
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(ParallelsSpamdService.class);
     private static final String POA_SPAM_PROVIDER_ATTRIBUTE_NAME = "POA_SPAM_PROVIDER";
 
-    /**
-     * Gets the singleton instance of {@link ParallelsSpamdService}.
-     * 
-     * @return The singleton instance of {@link ParallelsSpamdService}
-     */
-    public static ParallelsSpamdService getInstance() {
-        return singleton;
+    private final Configuration config;
+    private final ContextService contextService;
+    private final UserService userService;
+
+    public ParallelsSpamdService(Configuration config, ContextService contextService, UserService userService) {
+        super();
+        this.config = config;
+        this.contextService = contextService;
+        this.userService = userService;
     }
 
     @Override
-    public SpamdProvider getProvider(final Session session) throws OXException{
+    public SpamdProvider getProvider(final Session session) throws OXException {
 
         /**
          * 1. sent primary email address via xmlrpc to smtpserver of user to port specified in config
@@ -150,44 +200,19 @@ public class ParallelsSpamdService implements SpamdService {
         try {
 
             // spamd port from configuration
-            int spamd_provider_port = 783; // default port of spamd process
-            try {
-                spamd_provider_port = Integer.parseInt(ParallelsOXAuthentication.getFromConfig("com.openexchange.spamhandler.spamassassin.port"));
-
-            } catch (final NumberFormatException e1) {
-                LOG.error("error reading mandatory spamd port in antispam plugin, using fallback port "+spamd_provider_port+" now",e1);
-            } catch (final ServiceException e1) {
-                LOG.error("error reading mandatory spamd port in antispam plugin, using fallback port "+spamd_provider_port+" now",e1);
-            }
-
-            if(LOG.isDebugEnabled()){
-                LOG.debug("Using port "+spamd_provider_port+" for connections to spamd service");
-
-            }
+            int spamd_provider_port = config.getPort();
+            LOG.debug("Using port " + spamd_provider_port + " for connections to spamd service");
 
             // get the user object from the OX API to retrieve users primary mail address
-            final User oxuser = ParallelsInfoServlet.getUserObjectFromSession(session);
-
-
+            final User oxuser = getUser(session);
 
             // get all needed infos to make the xmlrpc request
             final String xml_rpc_prim_email = oxuser.getMail(); // primary mail of the user for the xml-rpc request to made
 
             final java.net.URI tp = new java.net.URI(oxuser.getSmtpServer());// this will always be the smtp://host:port of the user
             final String xmlrpc_server = tp.getHost();
-            int xml_rpc_port = 3100; // xmlrpc service port to connect to
-            try {
-                xml_rpc_port = Integer.parseInt(ParallelsOXAuthentication.getFromConfig("com.openexchange.custom.parallels.antispam.xmlrpc.port"));
-            } catch (final NumberFormatException e1) {
-                LOG.error("error reading mandatory xmlrpc port in antispam plugin, using fallback port "+xml_rpc_port+" now",e1);
-            } catch (final ServiceException e) {
-                LOG.error("error reading mandatory xmlrpc port in antispam plugin, using fallback port "+xml_rpc_port+" now",e);
-            }
-            if(LOG.isDebugEnabled()){
-                LOG.debug("Using port "+xml_rpc_port+" for connections to xmlrpc service");
-
-            }
-
+            int xml_rpc_port = config.getXmlPort();
+            LOG.debug("Using port " + xml_rpc_port + " for connections to xmlrpc service");
 
             final String URL_to_xmlrpc = "http://" +xmlrpc_server+":"+xml_rpc_port;
             post_method.setURI(new URI(URL_to_xmlrpc));
@@ -266,12 +291,10 @@ public class ParallelsSpamdService implements SpamdService {
                 }
                 // return spamprovider to api
                 return sp_provider;
-            }else{
-                LOG.error("got error response from xml-rpc service for primary mail "+xml_rpc_prim_email);
-                LOG.error(xml_rpc_response);
-                throw MailExceptionCode.SPAM_HANDLER_INIT_FAILED.create("got error response from xml-rpc service for primary mail "+xml_rpc_prim_email);
             }
-
+            LOG.error("got error response from xml-rpc service for primary mail "+xml_rpc_prim_email);
+            LOG.error(xml_rpc_response);
+            throw MailExceptionCode.SPAM_HANDLER_INIT_FAILED.create("got error response from xml-rpc service for primary mail "+xml_rpc_prim_email);
         } catch (final OXException e) {
             LOG.fatal("error loading user object from session", e);
             throw MailExceptionCode.SPAM_HANDLER_INIT_FAILED.create(e,"error loading user object from session");
@@ -301,8 +324,12 @@ public class ParallelsSpamdService implements SpamdService {
         }
     }
 
-    private String getXmlRpcRequestBody(final String primary_mail){
+    private User getUser(Session session) throws OXException {
+        Context context = contextService.getContext(session.getContextId());
+        return userService.getUser(session.getUserId(), context);
+    }
 
+    private static String getXmlRpcRequestBody(final String primary_mail){
         // make the xml-rpc request
         final StringBuilder sb = new StringBuilder();
         sb.append("<?xml version=\"1.0\"?>");
@@ -321,10 +348,9 @@ public class ParallelsSpamdService implements SpamdService {
         sb.append("</params>");
         sb.append("</methodCall>");
         return sb.toString();
-
     }
 
-    private SpamdProvider getSpamdProvider(final String hostname,final int port, final String username) {
+    private static SpamdProvider getSpamdProvider(final String hostname,final int port, final String username) {
         return new SpamdProvider() {
 
             @Override
@@ -341,10 +367,6 @@ public class ParallelsSpamdService implements SpamdService {
             public String getUsername() {
                 return username;
             }
-
         };
     }
-
-
-
 }
