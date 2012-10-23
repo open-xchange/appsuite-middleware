@@ -94,6 +94,10 @@ public enum JSlobExceptionCodes implements OXExceptionCode {
      * Referenced JSlob %1$s must not be set for service %2$s. Nothing will be done.
      */
     SET_NOT_SUPPORTED(JSlobExceptionMessages.SET_NOT_SUPPORTED, CATEGORY_WARNING, 8),
+    /**
+     * "%1$s" is a reserved identifier. Please choose a different one.
+     */
+    RESERVED_IDENTIFIER(JSlobExceptionMessages.RESERVED_IDENTIFIER, EnumCategory.CATEGORY_USER_INPUT, 9),
     
     ;
     

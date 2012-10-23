@@ -3,7 +3,6 @@ package com.openexchange.custom.parallels.osgi;
 
 import java.rmi.Remote;
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.http.HttpService;
@@ -14,14 +13,12 @@ import com.openexchange.config.ConfigurationService;
 import com.openexchange.context.ContextService;
 import com.openexchange.custom.parallels.impl.ParallelsHostnameService;
 import com.openexchange.custom.parallels.impl.ParallelsOXAuthentication;
-import com.openexchange.custom.parallels.impl.ParallelsSpamdService;
 import com.openexchange.custom.parallels.soap.OXServerServicePortType;
 import com.openexchange.custom.parallels.soap.OXServerServicePortTypeImpl;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.notify.hostname.HostnameService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.osgi.ServiceRegistry;
-import com.openexchange.spamhandler.spamassassin.api.SpamdService;
 import com.openexchange.tools.servlet.http.HTTPServletRegistration;
 import com.openexchange.user.UserService;
 
@@ -132,7 +129,6 @@ public class SoapParallelsActivator extends HousekeepingActivator {
         if (LOG.isDebugEnabled()) {
             LOG.debug("Successfully registered POA hostname/directlinks plugin");
         }
-        context.registerService(SpamdService.class.getName(), ParallelsSpamdService.getInstance(), null);
         // Register SOAP service
         final OXServerServicePortTypeImpl soapService = new OXServerServicePortTypeImpl();
         registerService(OXServerServicePortType.class, soapService);

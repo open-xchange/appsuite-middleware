@@ -50,8 +50,8 @@
 package com.openexchange.tools.images.osgi;
 
 import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.tools.images.ImageScalingService;
-import com.openexchange.tools.images.impl.JavaImageScalingService;
+import com.openexchange.tools.images.ImageTransformationService;
+import com.openexchange.tools.images.impl.JavaImageTransformationService;
 
 
 /**
@@ -68,7 +68,7 @@ public class ImageToolsActivator extends HousekeepingActivator {
 
     @Override
     protected void startBundle() throws Exception {
-        registerService(ImageScalingService.class, new JavaImageScalingService());
+        registerService(ImageTransformationService.class, new JavaImageTransformationService());
     }
 
 }

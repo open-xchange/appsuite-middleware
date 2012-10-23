@@ -527,7 +527,7 @@ public class Executor {
         return insertFrom(connection, from, to, contextID, folderID, objectIDs, Long.MIN_VALUE);
     }
     
-    public int insertFrom(Connection connection, Table from, Table to, int contextID, int folderID, int[] objectIDs, long minLastModified) throws SQLException, OXException {
+    public int insertFrom(Connection connection, Table from, Table to, int contextID, int folderID, int[] objectIDs, long maxLastModified) throws SQLException, OXException {
         StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append("REPLACE INTO ").append(to).append(" SELECT * FROM ").append(from).append(" WHERE ");
         if (from.isDistListTable()) {
@@ -554,7 +554,7 @@ public class Executor {
                     stringBuilder.append(" IN (").append(Tools.toCSV(objectIDs)).append(')');
                 }
             }
-            if (Long.MIN_VALUE == minLastModified) {
+            if (Long.MIN_VALUE == maxLastModified) {
                 stringBuilder.append(';');
             } else {
                 stringBuilder.append(" AND ").append(Mappers.CONTACT.get(ContactField.LAST_MODIFIED).getColumnLabel()).append("<=?;");
@@ -571,8 +571,8 @@ public class Executor {
             if (Integer.MIN_VALUE != folderID && false == from.isDistListTable()) {
                 stmt.setInt(parameterIndex++, folderID);
             }
-            if (Long.MIN_VALUE != minLastModified && false == from.isDistListTable()) {
-                stmt.setLong(parameterIndex++, minLastModified);
+            if (Long.MIN_VALUE != maxLastModified && false == from.isDistListTable()) {
+                stmt.setLong(parameterIndex++, maxLastModified);
             }
             /*
              * execute 
@@ -584,7 +584,7 @@ public class Executor {
     }
 
     public int insertFrom(final Connection connection, final Table from, final Table to, final int contextID, final int objectID, 
-        final long minLastModified) throws SQLException, OXException {
+        final long maxLastModified) throws SQLException, OXException {
     final StringBuilder stringBuilder = new StringBuilder();
     stringBuilder.append("REPLACE INTO ").append(to).append(" SELECT * FROM ").append(from).append(" WHERE ");
     if (from.isDistListTable()) {
@@ -594,7 +594,7 @@ public class Executor {
         stringBuilder.append(Mappers.CONTACT.get(ContactField.CONTEXTID).getColumnLabel()).append("=? AND ")
             .append(Mappers.CONTACT.get(ContactField.OBJECT_ID).getColumnLabel()).append("=?");
     }
-    if (Long.MIN_VALUE == minLastModified) {
+    if (Long.MIN_VALUE == maxLastModified) {
         stringBuilder.append(';');
     } else {
         stringBuilder.append(" AND ").append(Mappers.CONTACT.get(ContactField.LAST_MODIFIED).getColumnLabel()).append("<=?;");
@@ -604,8 +604,8 @@ public class Executor {
         stmt = connection.prepareStatement(stringBuilder.toString());
         stmt.setInt(1, contextID);
         stmt.setInt(2, objectID);
-        if (Long.MIN_VALUE != minLastModified) {
-            stmt.setLong(3, minLastModified);
+        if (Long.MIN_VALUE != maxLastModified) {
+            stmt.setLong(3, maxLastModified);
         }
         return logExecuteUpdate(stmt);
     } finally {
@@ -618,12 +618,12 @@ public class Executor {
         return this.insertFrom(connection, from, to, contextID, objectID, Long.MIN_VALUE);
     }
             
-    public int update(Connection connection, Table table, int contextID, int objectID, long minLastModified, Contact contact, ContactField[] fields) throws SQLException, OXException {
+    public int update(Connection connection, Table table, int contextID, int objectID, long maxLastModified, Contact contact, ContactField[] fields) throws SQLException, OXException {
         StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append("UPDATE ").append(table).append(" SET ").append(Mappers.CONTACT.getAssignments(fields)).append(" WHERE ")
             .append(Mappers.CONTACT.get(ContactField.CONTEXTID).getColumnLabel()).append("=? AND ")
             .append(Mappers.CONTACT.get(ContactField.OBJECT_ID).getColumnLabel()).append("=?");
-        if (Long.MIN_VALUE == minLastModified) {
+        if (Long.MIN_VALUE == maxLastModified) {
             stringBuilder.append(';');
         } else {
             stringBuilder.append(" AND ").append(Mappers.CONTACT.get(ContactField.LAST_MODIFIED).getColumnLabel()).append("<=?;");
@@ -634,8 +634,8 @@ public class Executor {
             Mappers.CONTACT.setParameters(stmt, contact, fields);
             stmt.setInt(1 + fields.length, contextID);
             stmt.setInt(2 + fields.length, objectID);
-            if (Long.MIN_VALUE != minLastModified) {
-                stmt.setLong(3 + fields.length, minLastModified);
+            if (Long.MIN_VALUE != maxLastModified) {
+                stmt.setLong(3 + fields.length, maxLastModified);
             }
             return logExecuteUpdate(stmt);
         } finally {
@@ -643,7 +643,7 @@ public class Executor {
         }
     }
     
-    public int update(Connection connection, Table table, int contextID, int folderID, int[] objectIDs, Contact template, ContactField[] fields, long minLastModified) throws SQLException, OXException {
+    public int update(Connection connection, Table table, int contextID, int folderID, int[] objectIDs, Contact template, ContactField[] fields, long maxLastModified) throws SQLException, OXException {
         StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append("UPDATE ").append(table).append(" SET ").append(Mappers.CONTACT.getAssignments(fields)).append(" WHERE ")
             .append(Mappers.CONTACT.get(ContactField.CONTEXTID).getColumnLabel()).append("=?");
@@ -658,7 +658,7 @@ public class Executor {
                 stringBuilder.append(" IN (").append(Tools.toCSV(objectIDs)).append(')');
             }
         }
-        if (Long.MIN_VALUE == minLastModified) {
+        if (Long.MIN_VALUE == maxLastModified) {
             stringBuilder.append(';');
         } else {
             stringBuilder.append(" AND ").append(Mappers.CONTACT.get(ContactField.LAST_MODIFIED).getColumnLabel()).append("<=?;");
@@ -672,8 +672,8 @@ public class Executor {
             if (Integer.MIN_VALUE != folderID) {
                 stmt.setInt(parameterIndex++, folderID);
             }
-            if (Long.MIN_VALUE != minLastModified) {
-                stmt.setLong(parameterIndex++, minLastModified);
+            if (Long.MIN_VALUE != maxLastModified) {
+                stmt.setLong(parameterIndex++, maxLastModified);
             }
             return logExecuteUpdate(stmt);
         } finally {
@@ -698,7 +698,7 @@ public class Executor {
         }
     }
     
-    public int delete(Connection connection, Table table, int contextID, int folderID, int[] objectIDs, long minLastModified) 
+    public int delete(Connection connection, Table table, int contextID, int folderID, int[] objectIDs, long maxLastModified) 
         throws SQLException, OXException {
         StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append("DELETE FROM ").append(table).append(" WHERE ")
@@ -706,8 +706,8 @@ public class Executor {
         if (Integer.MIN_VALUE != folderID) {
             stringBuilder.append(" AND ").append(Mappers.CONTACT.get(ContactField.FOLDER_ID).getColumnLabel()).append("=?");
         }
-        if (Long.MIN_VALUE != minLastModified) {
-            stringBuilder.append(" AND ").append(Mappers.CONTACT.get(ContactField.LAST_MODIFIED).getColumnLabel()).append(">?");
+        if (Long.MIN_VALUE != maxLastModified) {
+            stringBuilder.append(" AND ").append(Mappers.CONTACT.get(ContactField.LAST_MODIFIED).getColumnLabel()).append("<=?");
         }
         if (null != objectIDs && 0 < objectIDs.length) {
             stringBuilder.append(" AND ").append(Mappers.CONTACT.get(ContactField.OBJECT_ID).getColumnLabel());
@@ -726,8 +726,8 @@ public class Executor {
             if (Integer.MIN_VALUE != folderID) {
                 stmt.setInt(parameterIndex++, folderID);
             }
-            if (Long.MIN_VALUE != minLastModified) {
-                stmt.setLong(parameterIndex++, minLastModified);
+            if (Long.MIN_VALUE != maxLastModified) {
+                stmt.setLong(parameterIndex++, maxLastModified);
             }
             /*
              * execute and read out results
@@ -742,30 +742,29 @@ public class Executor {
         return delete(connection, table, contextID, folderID, objectIDs, Long.MIN_VALUE);
     }
     
-    public int deleteSingle(final Connection connection, final Table table, final int contextID, final int objectID, final long minLastModified) 
-        throws SQLException, OXException {
-    final StringBuilder stringBuilder = new StringBuilder();
-    stringBuilder.append("DELETE FROM ").append(table).append(" WHERE ")
-        .append(Mappers.CONTACT.get(ContactField.CONTEXTID).getColumnLabel()).append("=? AND ")
-        .append(Mappers.CONTACT.get(ContactField.OBJECT_ID).getColumnLabel()).append("=?");
-    if (Long.MIN_VALUE == minLastModified) {
-        stringBuilder.append(';');
-    } else {
-        stringBuilder.append(" AND ").append(Mappers.CONTACT.get(ContactField.LAST_MODIFIED).getColumnLabel()).append("<=?;");
-    }             
-    PreparedStatement stmt = null;
-    try {
-        stmt = connection.prepareStatement(stringBuilder.toString());
-        stmt.setInt(1, contextID);
-        stmt.setInt(2, objectID);
-        if (Long.MIN_VALUE != minLastModified) {
-            stmt.setLong(3, minLastModified);
+    public int deleteSingle(Connection connection, Table table, int contextID, int objectID, long maxLastModified) throws SQLException, OXException {
+        StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder.append("DELETE FROM ").append(table).append(" WHERE ")
+            .append(Mappers.CONTACT.get(ContactField.CONTEXTID).getColumnLabel()).append("=? AND ")
+            .append(Mappers.CONTACT.get(ContactField.OBJECT_ID).getColumnLabel()).append("=?");
+        if (Long.MIN_VALUE == maxLastModified) {
+            stringBuilder.append(';');
+        } else {
+            stringBuilder.append(" AND ").append(Mappers.CONTACT.get(ContactField.LAST_MODIFIED).getColumnLabel()).append("<=?;");
+        }             
+        PreparedStatement stmt = null;
+        try {
+            stmt = connection.prepareStatement(stringBuilder.toString());
+            stmt.setInt(1, contextID);
+            stmt.setInt(2, objectID);
+            if (Long.MIN_VALUE != maxLastModified) {
+                stmt.setLong(3, maxLastModified);
+            }
+            return logExecuteUpdate(stmt);
+        } finally {
+            closeSQLStuff(stmt);
         }
-        return logExecuteUpdate(stmt);
-    } finally {
-        closeSQLStuff(stmt);
     }
-}
 
     public int deleteSingle(final Connection connection, final Table table, final int contextID, final int objectID) 
     		throws SQLException, OXException {

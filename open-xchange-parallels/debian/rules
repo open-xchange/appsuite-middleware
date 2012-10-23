@@ -3,7 +3,8 @@
 # Uncomment this to turn on verbose mode.
 #export DH_VERBOSE=1
 
-installroot=$(CURDIR)/debian/open-xchange-parallels
+pkgname=open-xchange-parallels
+installroot=$(CURDIR)/debian/$(pkgname)
 
 configure: configure-stamp
 configure-stamp:
@@ -28,7 +29,7 @@ install: build
 	dh_testroot
 	dh_prep
 	dh_installdirs
-	ant -lib build/lib -Dbasedir=build -DdestDir=$(installroot) -DpackageName=open-xchange-parallels -f build/build.xml build
+	ant -lib build/lib -Dbasedir=build -DdestDir=$(installroot) -DpackageName=$(pkgname) -f build/build.xml build
 
 # Build architecture-independent files here.
 binary-indep: build install
