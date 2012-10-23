@@ -204,7 +204,7 @@ public class PayloadElement {
 
     @Override
     public String toString() {
-        return "PayloadElement [format=" + format + ", namespace=" + namespace + ", elementName=" + elementName + ", data=" + data + "]";
+        return "PayloadElement" + "@" + hashCode() + " " + "[format=" + format + ", namespace=" + namespace + ", elementName=" + elementName + ", data=" + data + "]";
     }
     
     

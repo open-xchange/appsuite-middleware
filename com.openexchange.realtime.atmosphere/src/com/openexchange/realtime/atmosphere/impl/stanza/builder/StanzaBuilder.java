@@ -62,7 +62,7 @@ import com.openexchange.realtime.payload.PayloadTree;
 import com.openexchange.realtime.payload.PayloadTreeNode;
 
 /**
- * {@link StanzaBuilder} - Abstract Stanza parser class, gathering common fields and methods.
+ * {@link StanzaBuilder} - Abstract StanzaBuilder class responsible for 
  * 
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  * @param <T>

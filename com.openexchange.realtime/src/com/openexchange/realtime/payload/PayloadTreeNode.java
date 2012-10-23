@@ -336,7 +336,31 @@ public class PayloadTreeNode {
 
     @Override
     public String toString() {
-        return "PayloadTreeNode [parent=" + parent + ", payloadElement=" + payloadElement + ", children=" + children + "]";
+        return "PayloadTreeNode" + "@" + hashCode() + " [parent=" + (parent == null ? null : parent.getClass().getSimpleName() + "@" + parent.hashCode()) + ", payloadElement=" + payloadElement + ", children=" + children.size() + "]";
+    }
+
+    /**
+     * Recursively format a PayloadTreeNode to a String
+     * 
+     * @param node The PayloadTreeNode where transformation starts
+     * @param numOfTabs Indentation level. Normally one would start with 0.
+     * @return The PayloadTreeNode as String
+     */
+    public String recursiveToString(int numOfTabs) {
+        return recursiveToString(this, numOfTabs);
+    }
+
+    private static String recursiveToString(PayloadTreeNode node, int numOfTabs) {
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < numOfTabs; i++) {
+            sb.append('\t');
+        }
+        sb.append(node);
+        int childIndent = numOfTabs + 1;
+        for (PayloadTreeNode child : node.getChildren()) {
+            sb.append('\n').append(recursiveToString(child, childIndent));
+        }
+        return sb.toString();
     }
 
 }

@@ -51,7 +51,8 @@ package com.openexchange.realtime.atmosphere.impl.stanza.transformer;
 
 import java.util.List;
 import com.openexchange.exception.OXException;
-import com.openexchange.realtime.atmosphere.impl.payload.PayloadTransformerRegistry;
+import com.openexchange.realtime.StanzaFilter;
+import com.openexchange.realtime.atmosphere.impl.payload.PayloadElementTransformerRegistry;
 import com.openexchange.realtime.packet.Stanza;
 import com.openexchange.realtime.payload.PayloadElement;
 import com.openexchange.realtime.payload.PayloadElementTransformer;
@@ -67,9 +68,9 @@ import com.openexchange.tools.session.ServerSession;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
-public abstract class StanzaTransformer<T> {
+public abstract class StanzaTransformer<T> implements StanzaFilter{
 
-    private final PayloadTransformerRegistry transformers = PayloadTransformerRegistry.getInstance();
+    private final PayloadElementTransformerRegistry transformers = PayloadElementTransformerRegistry.getInstance();
 
     /**
      * Transform an incoming {@link Stanza} by transforming every PayloadTree of the Stanza.
@@ -78,6 +79,7 @@ public abstract class StanzaTransformer<T> {
      * @param session The currently active session
      * @throws OXException When transformation of the Stanza fails
      */
+    @Override
     public void incoming(Stanza stanza, ServerSession session) throws OXException {
         List<PayloadTree> payloadTrees = stanza.getPayloads();
         for (PayloadTree tree : payloadTrees) {
@@ -104,6 +106,7 @@ public abstract class StanzaTransformer<T> {
      * @param session The currently active session
      * @throws OXException When transformation of the Stanza fails
      */
+    @Override
     public void outgoing(Stanza stanza, ServerSession session) throws OXException {
         List<PayloadTree> payloadTrees = stanza.getPayloads();
         for (PayloadTree tree : payloadTrees) {

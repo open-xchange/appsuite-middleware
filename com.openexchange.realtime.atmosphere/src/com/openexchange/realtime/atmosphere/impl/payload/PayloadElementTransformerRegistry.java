@@ -58,7 +58,7 @@ import com.openexchange.realtime.payload.PayloadElementTransformer;
 import com.openexchange.realtime.util.ElementPath;
 
 /**
- * {@link PayloadTransformerRegistry} - Tracks registered {@link PayloadElementTransformer handlers} and
+ * {@link PayloadElementTransformerRegistry} - Tracks registered {@link PayloadElementTransformer handlers} and
  * makes them accessible through {@link #getHandlerFor(String)}.
  * This is important to the AtmosphereChannel and associated Channel handler.
  * The Channel can decide if it is able to process incoming Stanzas into POJOs
@@ -69,16 +69,16 @@ import com.openexchange.realtime.util.ElementPath;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a> JavaDoc
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
-public class PayloadTransformerRegistry extends ServiceRegistry {
+public class PayloadElementTransformerRegistry extends ServiceRegistry {
 
-    private static final PayloadTransformerRegistry INSTANCE = new PayloadTransformerRegistry();
+    private static final PayloadElementTransformerRegistry INSTANCE = new PayloadElementTransformerRegistry();
 
     private final Map<ElementPath, PayloadElementTransformer> handlers;
 
     /**
      * Encapsulated constructor.
      */
-    private PayloadTransformerRegistry() {
+    private PayloadElementTransformerRegistry() {
         super();
         handlers = new ConcurrentHashMap<ElementPath, PayloadElementTransformer>();
     }
@@ -88,7 +88,7 @@ public class PayloadTransformerRegistry extends ServiceRegistry {
      * 
      * @return the Registry singleton
      */
-    public static PayloadTransformerRegistry getInstance() {
+    public static PayloadElementTransformerRegistry getInstance() {
         return INSTANCE;
     }
 

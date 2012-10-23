@@ -76,12 +76,13 @@ import com.openexchange.log.Log;
 import com.openexchange.log.LogFactory;
 import com.openexchange.realtime.MessageDispatcher;
 import com.openexchange.realtime.StanzaSender;
-import com.openexchange.realtime.atmosphere.impl.payload.PayloadTransformerRegistry;
+import com.openexchange.realtime.atmosphere.impl.payload.PayloadElementTransformerRegistry;
 import com.openexchange.realtime.atmosphere.impl.stanza.StanzaWriter;
 import com.openexchange.realtime.atmosphere.impl.stanza.builder.StanzaBuilderSelector;
 import com.openexchange.realtime.atmosphere.impl.stanza.builder.StanzaBuilder;
 import com.openexchange.realtime.atmosphere.impl.stanza.transformer.StanzaTransformer;
 import com.openexchange.realtime.atmosphere.impl.stanza.transformer.StanzaTransformerSelector;
+import com.openexchange.realtime.atmosphere.osgi.AtmosphereServiceRegistry;
 import com.openexchange.realtime.packet.ID;
 import com.openexchange.realtime.packet.Stanza;
 import com.openexchange.server.ServiceExceptionCode;
@@ -109,7 +110,7 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
 
     private final ServiceLookup services;
 
-     private final PayloadTransformerRegistry payloadTransformerRegistry;
+     private final PayloadElementTransformerRegistry payloadTransformerRegistry;
 
     // Keep track of sessionID -> RTAtmosphereState to uniquely identify connected clients
     private final ConcurrentHashMap<String, RTAtmosphereState> sessionIdToState;
@@ -123,12 +124,12 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
      * @param library The library to use for OXRTHandler lookups needed for transformations of incoming and outgoing stanzas
      * @param services The service-lookup providing needed services
      */
-    public RTAtmosphereHandler(PayloadTransformerRegistry library, ServiceLookup services) {
+    public RTAtmosphereHandler() {
         super();
         sessionIdToState = new ConcurrentHashMap<String, RTAtmosphereState>();
         userToBroadcasterIDs = new ConcurrentHashMap<String, Set<String>>();
-        this.payloadTransformerRegistry = library;
-        this.services = services;
+        this.payloadTransformerRegistry = PayloadElementTransformerRegistry.getInstance();
+        this.services = AtmosphereServiceRegistry.getInstance();
     }
 
     @Override

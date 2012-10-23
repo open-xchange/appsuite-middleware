@@ -68,11 +68,8 @@ public class PayloadTree {
 
     /**
      * Initializes a new {@link PayloadTree} with an empty root node.
-     * 
-     * @param root The root node of the new PayloadTree
      */
     public PayloadTree() {
-        root = new PayloadTreeNode();
     }
 
     /**
@@ -121,7 +118,7 @@ public class PayloadTree {
 
         if (root != null) {
             numberOfNodes += 1;
-            numberOfNodes = recursiveGetNumberOfNodes(root);
+            numberOfNodes += recursiveGetNumberOfNodes(root);
         }
 
         return numberOfNodes;
@@ -223,4 +220,18 @@ public class PayloadTree {
 
         return matches;
     }
+    
+    @Override
+    public String toString() {
+        String stringRepresentation = PayloadTree.class.getSimpleName() + "@" + hashCode();
+
+        if(root != null) {
+            String treeRep = root.recursiveToString(0);
+            stringRepresentation += "\n" + "|" + "\n";
+            stringRepresentation += treeRep;
+        }
+
+        return stringRepresentation;
+    }
+
 }
