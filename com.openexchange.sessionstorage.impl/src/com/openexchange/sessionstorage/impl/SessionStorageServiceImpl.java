@@ -245,9 +245,14 @@ public class SessionStorageServiceImpl implements SessionStorageService {
     }
 
     @Override
-    public Session getCachedSession(String sessionId) throws OXException {
+    public Session getCachedSession(String sessionId) {
         // TODO Auto-generated method stub
         return null;
+    }
+
+    @Override
+    public void cleanUp() {
+        sessions.clear();
     }
 
     @Override

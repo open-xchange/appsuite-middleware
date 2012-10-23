@@ -201,4 +201,11 @@ public interface SessionStorageService {
      */
     public void checkAuthId(String login, String authId) throws OXException;
 
+    /**
+     * Clean up session storage
+     * 
+     * @throws OXException On error while clearing
+     */
+    public void cleanUp() throws OXException;
+
 }
