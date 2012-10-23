@@ -9,5 +9,7 @@ Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Import-Package: com.openexchange.log,
  com.openexchange.osgi,
  org.apache.commons.logging,
+ org.cliffc.high_scale_lib,
  org.osgi.framework,
- org.osgi.util.tracker
+ org.osgi.util.tracker,
+ sun.misc
