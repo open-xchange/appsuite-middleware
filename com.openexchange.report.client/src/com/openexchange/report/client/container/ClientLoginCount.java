@@ -53,15 +53,16 @@ public class ClientLoginCount {
 
     private String usmeas;
 
+    private String usmeasYear;
+
     private String olox2;
-    
+
     private String mobileapp;
-    
+
     private String caldav;
-    
+
     private String carddav;
 
-    
     /**
      * @return the mobileapp
      */
@@ -69,7 +70,6 @@ public class ClientLoginCount {
         return mobileapp;
     }
 
-    
     /**
      * @param mobileapp the mobileapp to set
      */
@@ -77,7 +77,6 @@ public class ClientLoginCount {
         this.mobileapp = mobileapp;
     }
 
-    
     /**
      * @return the caldav
      */
@@ -85,7 +84,6 @@ public class ClientLoginCount {
         return caldav;
     }
 
-    
     /**
      * @param caldav the caldav to set
      */
@@ -93,7 +91,6 @@ public class ClientLoginCount {
         this.caldav = caldav;
     }
 
-    
     /**
      * @return the carddav
      */
@@ -101,7 +98,6 @@ public class ClientLoginCount {
         return carddav;
     }
 
-    
     /**
      * @param carddav the carddav to set
      */
@@ -125,13 +121,21 @@ public class ClientLoginCount {
         this.olox2 = usmjson;
     }
 
+    public void setUsmeasYear(String usmeasYear) {
+        this.usmeasYear = usmeasYear;
+    }
 
-    /* (non-Javadoc)
+    public String getUsmeasYear() {
+        return usmeasYear;
+    }
+
+    /*
+     * (non-Javadoc)
      * @see java.lang.Object#toString()
      */
     @Override
     public String toString() {
-        return "ClientLoginCount [usmeas=" + usmeas + ", olox2=" + olox2 + ", mobileapp=" + mobileapp + ", caldav=" + caldav + ", carddav=" + carddav + "]";
+        return "ClientLoginCount [usmeas=" + usmeas + ", usmeasYear=" + usmeasYear + ", olox2=" + olox2 + ", mobileapp=" + mobileapp + ", caldav=" + caldav + ", carddav=" + carddav + "]";
     }
 
 }

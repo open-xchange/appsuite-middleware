@@ -74,6 +74,18 @@ public class Property {
         invalid = false;
     }
 
+    @Override
+    public String toString() {
+        final StringBuilder sb = new StringBuilder(32);
+        sb.append(getName());
+        final Object val = getValue();
+        if (null != val) {
+            sb.append(": ");
+            sb.append(val);
+        }
+        return sb.toString();
+    }
+
     public Parameter getParameter(final String name) {
         return Index.get(name.toUpperCase(Locale.ENGLISH));
     }

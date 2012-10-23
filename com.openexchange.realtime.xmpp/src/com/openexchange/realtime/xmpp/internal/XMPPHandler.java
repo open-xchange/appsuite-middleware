@@ -56,6 +56,7 @@ import org.joox.Match;
 import com.openexchange.exception.OXException;
 import com.openexchange.realtime.xmpp.XMPPExtension;
 import com.openexchange.realtime.xmpp.packet.XMPPMessage;
+import com.openexchange.realtime.xmpp.packet.XMPPStanza;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -80,7 +81,7 @@ public class XMPPHandler {
         }
 
         ServerSession session = container.getSession();
-        XMPPMessage xmpp = new XMPPMessage(match, session);
+        XMPPStanza xmpp = XMPPStanza.getStanza(match, session);
         String resource = getComponentResource(session, xmpp);
         XMPPComponent xmppComponent = components.get(resource);
         if (xmppComponent == null) {
@@ -107,7 +108,7 @@ public class XMPPHandler {
         return this.components.get(resource);
     }
 
-    private String getComponentResource(ServerSession session, XMPPMessage xmpp) {
+    private String getComponentResource(ServerSession session, XMPPStanza xmpp) {
         String[] split = xmpp.getTo().getDomain().split(session.getContext().getName());
         return split.length == 0 ? "" : split[0];
     }

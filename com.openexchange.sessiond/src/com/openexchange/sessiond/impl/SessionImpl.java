@@ -78,30 +78,19 @@ public final class SessionImpl implements PutIfAbsent {
     private static final String OBFUSCATION_KEY_PROPERTY = "com.openexchange.sessiond.encryptionKey";
 
     private final String loginName;
-
     private String password;
-
     private final int contextId;
-
     private final int userId;
-
     private final String sessionId;
-
     private final String secret;
-
     private final String login;
-
     private String randomToken;
-
     private String localIp;
-
     private final String authId;
-
     private String hash;
-
     private String client;
-
     private final ConcurrentMap<String, Object> parameters;
+    private boolean isVolatile;
 
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(SessionImpl.class));
 
@@ -341,5 +330,23 @@ public final class SessionImpl implements PutIfAbsent {
     @Override
     public void setClient(final String client) {
         this.client = client;
+    }
+    
+    /**
+     * Gets the volatile flag
+     *
+     * @return The volatile flag
+     */
+    public boolean isVolatile() {
+        return isVolatile;
+    }
+
+    /**
+     * Sets the volatile flag.
+     * 
+     * @param isVolatile The volatile flag
+     */
+    public void setVolatile(final boolean isVolatile) {
+        this.isVolatile = isVolatile;
     }
 }

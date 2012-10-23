@@ -49,6 +49,7 @@
 
 package com.openexchange.realtime.atmosphere;
 
+import java.util.concurrent.atomic.AtomicReference;
 import com.openexchange.exception.OXException;
 import com.openexchange.realtime.MessageDispatcher;
 import com.openexchange.realtime.StanzaSender;
@@ -67,7 +68,10 @@ import com.openexchange.tools.session.ServerSession;
  */
 public class OXRTConversionHandler implements PayloadElementTransformer {
 
-    public static ServiceLookup services;
+    /**
+     * The {@code ServiceLookup} reference.
+     */
+    public static final AtomicReference<ServiceLookup> SERVICES_REFERENCE = new AtomicReference<ServiceLookup>();
 
     private final String format;
     private final ElementPath elementPath;
@@ -111,7 +115,7 @@ public class OXRTConversionHandler implements PayloadElementTransformer {
      * @throws OXException when sending the Stanza fails
      */
     protected void send(Stanza stanza, ServerSession session) throws OXException {
-        services.getService(MessageDispatcher.class).send(stanza, session);
+        SERVICES_REFERENCE.get().getService(MessageDispatcher.class).send(stanza, session);
     }
 
 }

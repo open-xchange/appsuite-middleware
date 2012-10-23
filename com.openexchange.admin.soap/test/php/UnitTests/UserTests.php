@@ -83,13 +83,12 @@ class UserTests extends PHPUnit_Framework_TestCase {
 			$query_user->id = $ret_user->id;
 			$user_get_response = getUserClient($SOAPHOST)->getData($ctx, $query_user, getCredentialsObject($admin_user->name, $admin_user->password));
 			if($user_get_response->name == $user->name){
-				// verfiy user data				
+				// verfiy user data
 				$this->verifyUser($user,$user_get_response);
 			}
-			 
-		}		
-	} 
-	
+		}
+	}
+
 	/*
 	 * This function deletes a user and checks if user was deleted via simple list request
 	 */
@@ -285,7 +284,15 @@ class UserTests extends PHPUnit_Framework_TestCase {
 		$this->assertEquals($expected->mail_folder_sent_name, $server_response->mail_folder_sent_name);
 		$this->assertEquals($expected->mail_folder_spam_name, $server_response->mail_folder_spam_name);
 		$this->assertEquals($expected->mail_folder_trash_name, $server_response->mail_folder_trash_name);
-		$this->assertEquals($expected->mailenabled, $server_response->mailenabled);
+		$expectedMailenabled = $expected->mailenabled;
+		if (is_bool($expectedMailenabled)) {
+		    $expectedMailenabled = var_export($expected->mailenabled, true);
+		}
+		$actualMailenabled = $server_response->mailenabled;
+		if (is_bool($expectedMailenabled)) {
+		    $actualMailenabled = var_export($server_response->mailenabled, true);
+		}
+		$this->assertEquals($expectedMailenabled, $actualMailenabled);
 		$this->assertEquals($expected->manager_name, $server_response->manager_name);
 		$this->assertEquals($expected->marital_status, $server_response->marital_status);
 		$this->assertEquals($expected->middle_name, $server_response->middle_name);

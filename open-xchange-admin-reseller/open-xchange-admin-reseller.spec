@@ -15,7 +15,7 @@ License:       GPL-2.0
 BuildRoot:     %{_tmppath}/%{name}-%{version}-build
 URL:           http://www.open-xchange.com/
 Source:        %{name}_%{version}.orig.tar.bz2
-Summary:       Open Xchange Admin Reseller Plugin
+Summary:       Extends the administration of the backend with the reseller level
 Requires:      open-xchange-core >= @OXVERSION@
 Requires:      open-xchange-admin >= @OXVERSION@
 Requires:      open-xchange-admin-autocontextid >= @OXVERSION@
@@ -23,7 +23,10 @@ Provides:      open-xchange-admin-plugin-reseller = %{version}
 Obsoletes:     open-xchange-admin-plugin-reseller <= %{version}
 
 %description
-Open Xchange Admin Reseller Plugin
+This extension adds the reseller administration level to the administrative RMI interface. The master administrator can now create reseller
+administators which are the allowed to manage contexts on their own. All reseller administrators are completely isolated in the cluster
+installation. For every reseller it looks like he is working with his own cluster installation and he is not able to see contexts of other
+resellers.
 
 Authors:
 --------
@@ -64,8 +67,21 @@ done
 %dir /opt/open-xchange/etc/mysql
 %config(noreplace) /opt/open-xchange/etc/mysql/*
 %doc com.openexchange.admin.reseller.rmi/javadoc
+%doc ./com.openexchange.admin.reseller/ChangeLog
 
 %changelog
+* Wed Oct 10 2012 Jan Bauerdick <jan.bauerdick@open-xchange.com>
+Fifth release candidate for 6.22.0
+* Tue Oct 09 2012 Jan Bauerdick <jan.bauerdick@open-xchange.com>
+Fourth release candidate for 6.22.0
+* Fri Oct 05 2012 Jan Bauerdick <jan.bauerdick@open-xchange.com>
+Third release candidate for 6.22.0
+* Thu Oct 04 2012 Jan Bauerdick <jan.bauerdick@open-xchange.com>
+Second release candidate for 6.22.0
+* Tue Sep 04 2012 Jan Bauerdick <jan.bauerdick@open-xchange.com>
+First release candidate for 6.23.0
+* Mon Sep 03 2012 Jan Bauerdick <jan.bauerdick@open-xchange.com>
+prepare for next EDP drop
 * Tue Aug 21 2012 Jan Bauerdick <jan.bauerdick@open-xchange.com>
 First release candidate for 6.22.0
 * Mon Aug 20 2012 Jan Bauerdick <jan.bauerdick@open-xchange.com>

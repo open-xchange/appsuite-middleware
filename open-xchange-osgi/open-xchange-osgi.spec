@@ -13,7 +13,7 @@ License:       GPL-2.0
 BuildRoot:     %{_tmppath}/%{name}-%{version}-build
 URL:           http://www.open-xchange.com/
 Source:        %{name}_%{version}.orig.tar.bz2
-Summary:       OSGi bundles commonly used by all Open-Xchange packages
+Summary:       3rd party OSGi bundles used by the Open-Xchange backend
 PreReq:        /usr/sbin/useradd
 Provides:      open-xchange-common = %{version}
 Obsoletes:     open-xchange-common <= %{version}
@@ -31,9 +31,9 @@ Requires:      java >= 1.6.0
 Conflicts:     java-ibm
 %endif
 
-
 %description
-OSGi bundles commonly used by all Open-Xchange packages
+This package installes 3rd party OSGi bundles for the Open-Xchange backend. This includes the Equinox OSGi framework and the servlet API.
+Furthermore libraries from the Apache Commons project are installed: CLI, Lang, Logging and some Apache service mix bundles.
 
 Authors:
 --------
@@ -67,6 +67,18 @@ ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} 
 /opt/open-xchange/osgi/bundle.d/*
 
 %changelog
+* Wed Oct 10 2012 Marcus Klein <marcus.klein@open-xchange.com>
+Fifth release candidate for 6.22.0
+* Tue Oct 09 2012 Marcus Klein <marcus.klein@open-xchange.com>
+Fourth release candidate for 6.22.0
+* Fri Oct 05 2012 Marcus Klein <marcus.klein@open-xchange.com>
+Third release candidate for 6.22.0
+* Thu Oct 04 2012 Marcus Klein <marcus.klein@open-xchange.com>
+Second release candidate for 6.22.0
+* Tue Sep 04 2012 Marcus Klein <marcus.klein@open-xchange.com>
+First release candidate for 6.23.0
+* Mon Sep 03 2012 Marcus Klein <marcus.klein@open-xchange.com>
+prepare for next EDP drop
 * Tue Aug 21 2012 Marcus Klein <marcus.klein@open-xchange.com>
 First release candidate for 6.22.0
 * Mon Aug 20 2012 Marcus Klein <marcus.klein@open-xchange.com>

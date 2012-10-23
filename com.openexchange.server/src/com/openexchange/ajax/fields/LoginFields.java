@@ -78,6 +78,8 @@ public class LoginFields {
 
     public static final String USER_AGENT = "clientUserAgent";
 
+    public static final String VOLATILE = "volatile";
+
     private LoginFields() {
         super();
     }

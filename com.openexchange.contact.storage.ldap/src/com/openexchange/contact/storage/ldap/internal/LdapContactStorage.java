@@ -202,6 +202,28 @@ public class LdapContactStorage extends DefaultContactStorage {
         throw LdapExceptionCodes.DELETE_NOT_POSSIBLE.create();
     }
     
+    @Override
+    public SearchIterator<Contact> searchByBirthday(Session session, List<String> folderIDs, Date from, Date until, ContactField[] fields, SortOptions sortOptions) throws OXException {
+        if (null == mapper.opt(ContactField.BIRTHDAY)) {
+            LOG.warn("No LDAP mapping for " + ContactField.BIRTHDAY + ", unable to search contacts by birthday.");
+            return getSearchIterator(null);
+        } else {
+            // use default implementation for now
+            return super.searchByBirthday(session, folderIDs, from, until, fields, sortOptions);
+        }
+    }
+    
+    @Override
+    public SearchIterator<Contact> searchByAnniversary(Session session, List<String> folderIDs, Date from, Date until, ContactField[] fields, SortOptions sortOptions) throws OXException {
+        if (null == mapper.opt(ContactField.ANNIVERSARY)) {
+            LOG.warn("No LDAP mapping for " + ContactField.ANNIVERSARY + ", unable to search contacts by anniversary.");
+            return getSearchIterator(null);
+        } else {
+            // use default implementation for now
+            return super.searchByAnniversary(session, folderIDs, from, until, fields, sortOptions);
+        }
+    }
+    
     protected Contact doGet(Session session, String folderId, String id, ContactField[] fields) throws OXException {
         SearchIterator<Contact> searchIterator = null; 
         try {
@@ -319,6 +341,9 @@ public class LdapContactStorage extends DefaultContactStorage {
 
     protected Contact resolveDistList(LdapExecutor executor, LdapIDResolver idResolver, Contact contact) throws OXException {
         if (contact.getMarkAsDistribtuionlist() && null != contact.getDistributionList() && 0 < contact.getDistributionList().length) {
+            /*
+             * try to resolve all members
+             */
             String[] distlistAttributeNames = mapper.getLdapAttributes(DISTLISTMEMBER_FIELDS);
             for (DistributionListEntryObject member : contact.getDistributionList()) {
                 LdapResult result = null;
@@ -332,8 +357,36 @@ public class LdapContactStorage extends DefaultContactStorage {
                     updateMember(member, referencedContact);
                 }
             }
+            /*
+             * remove invalid members without e-mail address
+             */
+            contact.setDistributionList(filterInvalidMembers(contact.getDistributionList()));
         }
         return contact;
+    }
+    
+    private static DistributionListEntryObject[] filterInvalidMembers(DistributionListEntryObject[] members) {
+        if (null != members && 0 < members.length) {
+            List<DistributionListEntryObject> validMembers = new ArrayList<DistributionListEntryObject>(members.length);
+            for (DistributionListEntryObject member : members) {
+                if (isValid(member)) {
+                    validMembers.add(member);
+                }
+            }
+            return validMembers.toArray(new DistributionListEntryObject[validMembers.size()]);
+        } else {
+            return members;
+        }
+    }
+    
+    /**
+     * Checks whether a distribution list member is valid, i.e. contains an e-mail address.
+     * 
+     * @param member The distribution list member check
+     * @return <code>true</code>, if the member is valid, <code>false</code>, otherwise
+     */
+    private static boolean isValid(DistributionListEntryObject member) {
+        return null != member && null != member.getEmailaddress() && 0 < member.getEmailaddress().trim().length();
     }
 
     private List<Contact> sort(List<Contact> contacts, LdapMapper mapper, SortOptions sortOptions) {

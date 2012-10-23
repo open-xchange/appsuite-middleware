@@ -9,5 +9,5 @@ Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Import-Package: com.openexchange.exception,
  com.openexchange.osgi,
  com.openexchange.session,
- org.osgi.framework;version="1.3.0"
+ org.osgi.framework
 Export-Package: com.openexchange.sessionstorage

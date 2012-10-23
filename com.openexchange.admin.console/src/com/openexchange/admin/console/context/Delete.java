@@ -46,6 +46,7 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
+
 package com.openexchange.admin.console.context;
 
 import java.net.MalformedURLException;
@@ -63,14 +64,13 @@ import com.openexchange.admin.rmi.exceptions.NoSuchContextException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 
 public class Delete extends DeleteCore {
-    public Delete(final String[] args2) {
-        final AdminParser parser = new AdminParser("deletecontext");
 
-        commonfunctions(parser, args2);
+    private Delete() {
+        super();
     }
 
     public static void main(final String args[]) {
-        new Delete(args);
+        new Delete().commonfunctions(new AdminParser("deletecontext"), args);
     }
 
     @Override

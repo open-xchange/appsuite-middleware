@@ -86,20 +86,20 @@ import com.openexchange.tools.iterator.SearchIterator;
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 public class ContactServiceImpl extends DefaultContactService {
-	
+
     public ContactServiceImpl() {
     	super();
     }
-	
+
 	@Override
-    protected void doCreateContact(Session session, String folderID, Contact contact) throws OXException {
-		int userID = session.getUserId();
-		int contextID = session.getContextId();
+    protected void doCreateContact(final Session session, final String folderID, final Contact contact) throws OXException {
+		final int userID = session.getUserId();
+		final int contextID = session.getContextId();
 		final ContactStorage storage = Tools.getStorage(session, folderID);
 		/*
 		 * check supplied contact
 		 */
-		Check.validateProperties(contact);		
+		Check.validateProperties(contact);
 		/*
 		 * check general permissions
 		 */
@@ -133,7 +133,7 @@ public class ContactServiceImpl extends DefaultContactService {
             	contact.setNumberOfImages(0);
             	contact.setImageContentType(null);
         	}
-        }        
+        }
 		if (false == contact.containsUid() || Tools.isEmpty(contact.getUid())) {
 			contact.setUid(UUID.randomUUID().toString());
 		}
@@ -149,12 +149,12 @@ public class ContactServiceImpl extends DefaultContactService {
 		 */
 		new EventClient(session).create(contact, folder);
 	}
-	
+
 	@Override
-    protected void doUpdateAndMoveContact(Session session, String sourceFolderId, String targetFolderId, String objectID, 
-			Contact contact, Date lastRead) throws OXException {
-		int userID = session.getUserId();
-		int contextID = session.getContextId();
+    protected void doUpdateAndMoveContact(final Session session, final String sourceFolderId, final String targetFolderId, final String objectID,
+			final Contact contact, final Date lastRead) throws OXException {
+		final int userID = session.getUserId();
+		final int contextID = session.getContextId();
 		/*
 		 * check supplied contact
 		 */
@@ -233,20 +233,20 @@ public class ContactServiceImpl extends DefaultContactService {
 			/*
 			 * same storage, send update as delta
 			 */
-			sourceStorage.update(session, sourceFolderId, objectID, delta, lastRead);			
+			sourceStorage.update(session, sourceFolderId, objectID, delta, lastRead);
 		} else {
 			/*
 			 * different storage, perform delete & create of complete contact information
 			 */
 			//TODO: move attachments
-			ContactMapper.getInstance().mergeDifferences(storedContact, delta); 
+			ContactMapper.getInstance().mergeDifferences(storedContact, delta);
 			targetStorage.create(session, targetFolderId, storedContact);
 			try {
 				sourceStorage.delete(session, sourceFolderId, objectID, lastRead);
 			} catch (final OXException e) {
 				LOG.warn("error deleting contact from source folder, rolling back move operation", e);
 				// TODO: simple rollback for now
-				targetStorage.delete(session, targetFolderId, Integer.toString(storedContact.getObjectID()), 
+				targetStorage.delete(session, targetFolderId, Integer.toString(storedContact.getObjectID()),
 						storedContact.getLastModified());
 				throw e;
 			}
@@ -257,17 +257,17 @@ public class ContactServiceImpl extends DefaultContactService {
 		ContactMapper.getInstance().mergeDifferences(contact, delta);
 		contact.setObjectID(storedContact.getObjectID());
 		contact.setParentFolderID(storedContact.getParentFolderID());
-		for (ContactStorage contactStorage : Tools.getStorages(session)) {
+		for (final ContactStorage contactStorage : Tools.getStorages(session)) {
 			contactStorage.updateReferences(session, contact);
 		}
 		new EventClient(session).modify(storedContact, contact, targetFolder);
 	}
-	
+
 	@Override
-    protected void doUpdateContact(Session session, String folderID, String objectID, Contact contact, Date lastRead) throws OXException {
-		int userID = session.getUserId();
-		int contextID = session.getContextId();
-		ContactStorage storage = Tools.getStorage(session, folderID);
+    protected void doUpdateContact(final Session session, final String folderID, final String objectID, final Contact contact, final Date lastRead) throws OXException {
+		final int userID = session.getUserId();
+		final int contextID = session.getContextId();
+		final ContactStorage storage = Tools.getStorage(session, folderID);
 		/*
 		 * check supplied contact
 		 */
@@ -278,29 +278,29 @@ public class ContactServiceImpl extends DefaultContactService {
 		/*
 		 * check general permissions
 		 */
-		EffectivePermission permission = Tools.getPermission(contextID, folderID, userID);
-		Check.canWriteOwn(permission, session, folderID);
+		final EffectivePermission permission = Tools.getPermission(contextID, folderID, userID);
+		Check.canWriteOwn(permission, session);
 		/*
 		 * check currently stored contact
 		 */
-		Contact storedContact = storage.get(session, folderID, objectID, ContactField.values());
+		final Contact storedContact = storage.get(session, folderID, objectID, ContactField.values());
         Check.contactNotNull(storedContact, contextID, Tools.parse(objectID));
 		if (storedContact.getCreatedBy() != userID) {
-			Check.canWriteAll(permission, session, folderID);
+			Check.canWriteAll(permission, session);
 		}
 		Check.lastModifiedBefore(storedContact, lastRead);
 		Check.folderEquals(storedContact, folderID, contextID);
 		/*
 		 * check folder
 		 */
-		FolderObject folder = Tools.getFolder(contextID, folderID);
+		final FolderObject folder = Tools.getFolder(contextID, folderID);
 		Check.isContactFolder(folder, session);
 		Check.noPrivateInPublic(folder, contact, session);
 		Check.canWriteInGAB(storage, session, folderID, contact);
 		/*
 		 * check for not allowed changes
 		 */
-		Contact delta = ContactMapper.getInstance().getDifferences(storedContact, contact);
+		final Contact delta = ContactMapper.getInstance().getDifferences(storedContact, contact);
 		if (delta.containsContextId()) {
 			throw ContactExceptionCodes.NO_CHANGE_PERMISSION.create(parse(objectID), contextID);
 		} else if (delta.containsObjectID()) {
@@ -319,7 +319,7 @@ public class ContactServiceImpl extends DefaultContactService {
 		/*
 		 * prepare update
 		 */
-        Date now = new Date();
+        final Date now = new Date();
         delta.setLastModified(now);
         delta.setModifiedBy(userID);
 		if ((false == storedContact.containsUid() || Tools.isEmpty(storedContact.getUid())) && false == delta.containsUid()) {
@@ -331,7 +331,7 @@ public class ContactServiceImpl extends DefaultContactService {
         		delta.setNumberOfImages(1);
         	} else {
         		delta.setNumberOfImages(0);
-        		delta.setImageContentType(null);        		
+        		delta.setImageContentType(null);
         	}
         }
         Tools.invalidateAddressesIfNeeded(delta);
@@ -345,99 +345,226 @@ public class ContactServiceImpl extends DefaultContactService {
 		ContactMapper.getInstance().mergeDifferences(contact, delta);
 		contact.setObjectID(storedContact.getObjectID());
 		contact.setParentFolderID(storedContact.getParentFolderID());
-		for (ContactStorage contactStorage : Tools.getStorages(session)) {
+		for (final ContactStorage contactStorage : Tools.getStorages(session)) {
 			contactStorage.updateReferences(session, contact);
 		}
 		new EventClient(session).modify(storedContact, contact, folder);
 	}
-	
+
+    @Override
+    protected void doDeleteContact(final Session session, final String folderID, final String objectID, final Date lastRead) throws OXException {
+        final int userID = session.getUserId();
+        final int contextID = session.getContextId();
+        final ContactStorage storage = Tools.getStorage(session, folderID);
+        /*
+         * check folder
+         */
+        final FolderObject folder = Tools.getFolder(contextID, folderID);
+        Check.isContactFolder(folder, session);
+        /*
+         * check general permissions
+         */
+        final EffectivePermission permission = Tools.getPermission(contextID, folderID, userID);
+        Check.canDeleteOwn(permission, session, folderID);
+        /*
+         * check currently stored contact
+         */
+        final Contact storedContact = storage.get(session, folderID, objectID, new ContactField[] { ContactField.CREATED_BY,
+                ContactField.LAST_MODIFIED });
+        Check.contactNotNull(storedContact, contextID, Tools.parse(objectID));
+        if (storedContact.getCreatedBy() != userID) {
+            Check.canDeleteAll(permission, session, folderID);
+        }
+        Check.lastModifiedBefore(storedContact, lastRead);
+        /*
+         * delete contact from storage
+         */
+        storage.delete(session, folderID, objectID, lastRead);
+        /*
+         * broadcast event
+         */
+        storedContact.setContextId(contextID);
+        storedContact.setParentFolderID(parse(folderID));
+        storedContact.setObjectID(parse(objectID));
+        new EventClient(session).delete(storedContact, folder);
+    }
+
+    @Override
+    protected void doDeleteContacts(Session session, String folderID, String[] objectIDs, Date lastRead) throws OXException {
+        final int userID = session.getUserId();
+        final int contextID = session.getContextId();
+        final ContactStorage storage = Tools.getStorage(session, folderID);
+        /*
+         * check folder
+         */
+        FolderObject folder = Tools.getFolder(contextID, folderID);
+        Check.isContactFolder(folder, session);
+        /*
+         * check general permissions
+         */
+        EffectivePermission permission = Tools.getPermission(contextID, folderID, userID);
+        Check.canDeleteOwn(permission, session, folderID);
+        /*
+         * check currently stored contacts
+         */
+        SearchIterator<Contact> contacts = null;
+        List<Contact> storedContacts = new ArrayList<Contact>();
+        try {
+            contacts = storage.list(session, folderID, objectIDs, new ContactField[] { ContactField.CREATED_BY,
+                ContactField.LAST_MODIFIED, ContactField.OBJECT_ID });
+            while (contacts.hasNext()) {
+                Contact storedContact = contacts.next();
+                if (storedContact.getCreatedBy() != userID) {
+                    Check.canDeleteAll(permission, session, folderID);
+                }
+                Check.lastModifiedBefore(storedContact, lastRead);
+                storedContacts.add(storedContact);
+            }
+        } finally {
+            if (null != contacts) {
+                try {
+                    contacts.close();
+                } catch (OXException e) {
+                    LOG.warn("error closing iterator", e);
+                }
+            }            
+        }
+        /*
+         * ensure all contacts were found
+         */
+        for (String objectID : objectIDs) {
+            boolean found = false;
+            for (Contact contact : storedContacts) {
+                if (contact.getObjectID() == parse(objectID)) {
+                    found = true;
+                    break;
+                }
+            }
+            if (false == found) {
+                throw ContactExceptionCodes.CONTACT_NOT_FOUND.create(parse(objectID), contextID);
+            }
+        }        
+        /*
+         * delete contacts from storage
+         */
+        storage.delete(session, folderID, objectIDs, lastRead);
+        /*
+         * broadcast event
+         */
+        EventClient eventClient = new EventClient(session);
+        for (Contact storedContact : storedContacts) {
+            storedContact.setContextId(contextID);
+            storedContact.setParentFolderID(parse(folderID));
+            storedContact.setObjectID(storedContact.getObjectID());
+            eventClient.delete(storedContact, folder);
+        }
+    }
+
+    @Override
+    protected void doDeleteContacts(final Session session, final String folderID) throws OXException {
+        final int userID = session.getUserId();
+        final int contextID = session.getContextId();
+        final ContactStorage storage = Tools.getStorage(session, folderID);
+        /*
+         * check folder
+         */
+        final FolderObject folder = Tools.getFolder(contextID, folderID);
+        Check.isContactFolder(folder, session);
+        /*
+         * check general permissions
+         */
+        final EffectivePermission permission = Tools.getPermission(contextID, folderID, userID);
+        Check.canDeleteAll(permission, session, folderID);
+        /*
+         * check currently stored contacts
+         */
+        final List<Contact> storedContacts = new ArrayList<Contact>();
+        SearchIterator<Contact> searchIterator = null;
+        try {
+            searchIterator = storage.all(session, folderID, new ContactField[] { ContactField.CREATED_BY, ContactField.OBJECT_ID });
+            if (null != searchIterator) {
+                while (searchIterator.hasNext()) {
+                    final Contact storedContact = searchIterator.next();
+                    storedContacts.add(storedContact);
+                }
+            }
+        } finally {
+            if (null != searchIterator) {
+                try {
+                    searchIterator.close();
+                } catch (final OXException e) {
+                    LOG.warn("error closing iterator", e);
+                }
+            }
+        }
+        /*
+         * delete contacts from storage
+         */
+        storage.delete(session, folderID);
+        /*
+         * broadcast events
+         */
+        final EventClient eventClient = new EventClient(session);
+        final Date now = new Date();
+        for (final Contact contact : storedContacts) {
+            contact.setContextId(contextID);
+            contact.setParentFolderID(parse(folderID));
+            contact.setLastModified(now);
+            contact.setModifiedBy(userID);
+            eventClient.delete(contact, folder);
+        }
+    }
+
 	@Override
-    protected void doDeleteContact(Session session, String folderID, String objectID, Date lastRead) throws OXException {
-		int userID = session.getUserId();
-		int contextID = session.getContextId();
-		final ContactStorage storage = Tools.getStorage(session, folderID);
+    protected <O> SearchIterator<Contact> doGetContacts(final boolean deleted, final Session session, final String folderID, final String[] ids,
+        final ContactField[] fields, SortOptions sortOptions, final Date since) throws OXException {
+//		int userID = session.getUserId();
+		final int contextID = session.getContextId();
 		/*
 		 * check folder
 		 */
-		final FolderObject folder = Tools.getFolder(contextID, folderID);
+		final FolderObject folder = Tools.getFolder(contextID, folderID, deleted);
 		Check.isContactFolder(folder, session);
 		/*
 		 * check general permissions
 		 */
-		final EffectivePermission permission = Tools.getPermission(contextID, folderID, userID);
-		Check.canDeleteOwn(permission, session, folderID);
-		/*
-		 * check currently stored contact
-		 */
-		final Contact storedContact = storage.get(session, folderID, objectID, new ContactField[] { ContactField.CREATED_BY, 
-				ContactField.LAST_MODIFIED });
-		Check.contactNotNull(storedContact, contextID, Tools.parse(objectID));
-		if (storedContact.getCreatedBy() != userID) {
-			Check.canDeleteAll(permission, session, folderID);
-		}
-		Check.lastModifiedBefore(storedContact, lastRead);
-		/*
-		 * delete contact from storage
-		 */
-		storage.delete(session, folderID, objectID, lastRead);
-		/*
-		 * broadcast event
-		 */
-		storedContact.setContextId(contextID);
-		storedContact.setParentFolderID(parse(folderID));
-		storedContact.setObjectID(parse(objectID));
-		new EventClient(session).delete(storedContact, folder);
-	}
-	
-	@Override
-    protected <O> SearchIterator<Contact> doGetContacts(boolean deleted, Session session, String folderID, String[] ids, 
-        ContactField[] fields, SortOptions sortOptions, Date since) throws OXException {
-		int userID = session.getUserId();
-		int contextID = session.getContextId();
-		/*
-		 * check folder
-		 */
-		final FolderObject folder = Tools.getFolder(contextID, folderID);
-		Check.isContactFolder(folder, session);
-		/*
-		 * check general permissions
-		 */
-		final EffectivePermission permission = Tools.getPermission(contextID, folderID, userID);
+        final EffectivePermission permission = Tools.getPermission(session, folder);
+//        final EffectivePermission permission = Tools.getPermission(contextID, folderID, userID, deleted);
 		Check.canReadOwn(permission, session, folderID);
 		/*
 		 * prepare fields and sort options
 		 */
-		QueryFields queryFields = new QueryFields(fields);
+		final QueryFields queryFields = new QueryFields(fields);
 		if (null == sortOptions) {
 		    sortOptions = SortOptions.EMPTY;
 		}
 		/*
 		 * get contacts from storage
-		 */		
+		 */
 		final ContactStorage storage = Tools.getStorage(session, folderID);
 		SearchIterator<Contact> contacts = null;
 		if (null != since) {
-			contacts = deleted ? storage.deleted(session, folderID, since, queryFields.getFields(), sortOptions) : 
+			contacts = deleted ? storage.deleted(session, folderID, since, queryFields.getFields(), sortOptions) :
 				storage.modified(session, folderID, since, queryFields.getFields(), sortOptions);
 		} else if (null != ids) {
 			contacts = storage.list(session, folderID, ids, queryFields.getFields(), sortOptions);
 		} else {
 			contacts = storage.all(session, folderID, queryFields.getFields(), sortOptions);
-		} 
+		}
 		if (null == contacts) {
 			throw ContactExceptionCodes.UNEXPECTED_ERROR.create("got no results from storage");
 		}
 		/*
 		 * filter results respecting object permission restrictions, adding attachment info as needed
 		 */
-		return new ResultIterator(contacts, queryFields.needsAttachmentInfo(), session, permission.canReadAllObjects());	
+		return new ResultIterator(contacts, queryFields.needsAttachmentInfo(), session, permission.canReadAllObjects());
 	}
-	
+
 	@Override
-    protected <O> SearchIterator<Contact> doSearchContacts(Session session, SearchTerm<O> term, ContactField[] fields, 
+    protected <O> SearchIterator<Contact> doSearchContacts(final Session session, final SearchTerm<O> term, final ContactField[] fields,
 			SortOptions sortOptions) throws OXException {
-		int userID = session.getUserId();
-		int contextID = session.getContextId();
+		final int userID = session.getUserId();
+		final int contextID = session.getContextId();
 		/*
 		 * analyze term
 		 */
@@ -445,7 +572,7 @@ public class ContactServiceImpl extends DefaultContactService {
 		/*
 		 * determine queried storages according to searched folders
 		 */
-		final Map<ContactStorage, List<String>> queriedStorages = Tools.getStorages(session, 
+		final Map<ContactStorage, List<String>> queriedStorages = Tools.getStorages(session,
 				termAnanlyzer.hasFolderIDs() ? termAnanlyzer.getFolderIDs() : Tools.getSearchFolders(contextID, userID));
 		if (null == queriedStorages || 0 == queriedStorages.size()) {
 			throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create("No contact storage found for queried folder IDs");
@@ -453,16 +580,16 @@ public class ContactServiceImpl extends DefaultContactService {
         /*
          * prepare fields and sort options
          */
-        QueryFields queryFields = new QueryFields(fields);
+        final QueryFields queryFields = new QueryFields(fields);
         if (null == sortOptions) {
             sortOptions = SortOptions.EMPTY;
         }
 		/*
 		 * perform searches
 		 */
-		final List<SearchIterator<Contact>> searchIterators = new ArrayList<SearchIterator<Contact>>();		
+		final List<SearchIterator<Contact>> searchIterators = new ArrayList<SearchIterator<Contact>>();
 		for (final Entry<ContactStorage, List<String>> queriedStorage : queriedStorages.entrySet()) {
-			final SearchTerm<?> searchTerm;			
+			final SearchTerm<?> searchTerm;
 			if (termAnanlyzer.hasFolderIDs()) {
 				/*
 				 * leave term as is
@@ -476,7 +603,7 @@ public class ContactServiceImpl extends DefaultContactService {
 				combinedTerm.addSearchTerm(Tools.getFoldersTerm(queriedStorage.getValue()));
 				combinedTerm.addSearchTerm(term);
 				searchTerm = combinedTerm;
-			}			
+			}
 			/*
 			 * get results, filtered respecting object permission restrictions, adding attachment info as needed
 			 */
@@ -484,15 +611,15 @@ public class ContactServiceImpl extends DefaultContactService {
 			    session, searchTerm, queryFields.getFields(), sortOptions);
 			searchIterators.add(new ResultIterator(searchIterator, queryFields.needsAttachmentInfo(), session));
 		}
-		return 2 > searchIterators.size() ? searchIterators.get(0) : 
-			new ContactMergerator(Tools.getComparator(sortOptions), searchIterators);				
+		return 2 > searchIterators.size() ? searchIterators.get(0) :
+			new ContactMergerator(Tools.getComparator(sortOptions), searchIterators);
 	}
-	
+
 	@Override
-    protected SearchIterator<Contact> doSearchContacts(Session session, ContactSearchObject contactSearch, ContactField[] fields, 
+    protected SearchIterator<Contact> doSearchContacts(final Session session, final ContactSearchObject contactSearch, final ContactField[] fields,
 			SortOptions sortOptions) throws OXException {
-		int userID = session.getUserId();
-		int contextID = session.getContextId();
+		final int userID = session.getUserId();
+		final int contextID = session.getContextId();
 		/*
 		 * check supplied search
 		 */
@@ -500,7 +627,7 @@ public class ContactServiceImpl extends DefaultContactService {
 		/*
 		 * determine queried storages according to searched folders
 		 */
-		Map<ContactStorage, List<String>> queriedStorages = Tools.getStorages(session,
+		final Map<ContactStorage, List<String>> queriedStorages = Tools.getStorages(session,
 				contactSearch.hasFolders() ? Tools.toStringList(contactSearch.getFolders()) : Tools.getSearchFolders(contextID, userID));
 		if (null == queriedStorages || 0 == queriedStorages.size()) {
 			throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create("No contact storage found for queried folder IDs");
@@ -508,15 +635,15 @@ public class ContactServiceImpl extends DefaultContactService {
         /*
          * prepare fields and sort options
          */
-        QueryFields queryFields = new QueryFields(fields);
+        final QueryFields queryFields = new QueryFields(fields);
         if (null == sortOptions) {
             sortOptions = SortOptions.EMPTY;
         }
 		/*
 		 * perform searches
 		 */
-		List<SearchIterator<Contact>> searchIterators = new ArrayList<SearchIterator<Contact>>();		
-		for (Entry<ContactStorage, List<String>> queriedStorage : queriedStorages.entrySet()) {
+		final List<SearchIterator<Contact>> searchIterators = new ArrayList<SearchIterator<Contact>>();
+		for (final Entry<ContactStorage, List<String>> queriedStorage : queriedStorages.entrySet()) {
 			/*
 			 * apply folders specific to this storage to contact search
 			 */
@@ -524,42 +651,75 @@ public class ContactServiceImpl extends DefaultContactService {
 			/*
 			 * get results, filtered respecting object permission restrictions, adding attachment info as needed
 			 */
-			SearchIterator<Contact> searchIterator = queriedStorage.getKey().search(
+			final SearchIterator<Contact> searchIterator = queriedStorage.getKey().search(
 			    session, contactSearch, queryFields.getFields(), sortOptions);
 			searchIterators.add(new ResultIterator(searchIterator, queryFields.needsAttachmentInfo(), session));
 		}
 		/*
 		 * deliver sorted results
 		 */
-		return 2 > searchIterators.size() ? searchIterators.get(0) : 
-			new ContactMergerator(Tools.getComparator(sortOptions), searchIterators);				
+		return 2 > searchIterators.size() ? searchIterators.get(0) :
+			new ContactMergerator(Tools.getComparator(sortOptions), searchIterators);
 	}
-	
+
 	@Override
     protected String doGetOrganization(Session session) throws OXException {
-		final String folderID = Integer.toString(FolderObject.SYSTEM_LDAP_FOLDER_ID);
-		final int userID = Tools.getContext(session).getMailadmin();
-		final ContactStorage storage = Tools.getStorage(session, folderID);
-		final Contact contact = storage.get(session, folderID, Integer.toString(userID), new ContactField[] { ContactField.COMPANY } );
+	    /*
+	     * prepare search term for context admin
+	     */
+	    int userID = Tools.getContext(session).getMailadmin();
+		String folderID = Integer.toString(FolderObject.SYSTEM_LDAP_FOLDER_ID);
+		ContactStorage storage = Tools.getStorage(session, folderID);
+        CompositeSearchTerm searchTerm = new CompositeSearchTerm(CompositeOperation.AND);
+        SingleSearchTerm folderIDTerm = new SingleSearchTerm(SingleOperation.EQUALS);
+        folderIDTerm.addOperand(new ContactFieldOperand(ContactField.FOLDER_ID));
+        folderIDTerm.addOperand(new ConstantOperand<String>(folderID));
+        searchTerm.addSearchTerm(folderIDTerm);
+		SingleSearchTerm userIDTerm = new SingleSearchTerm(SingleOperation.EQUALS);
+        userIDTerm.addOperand(new ContactFieldOperand(ContactField.INTERNAL_USERID));
+        userIDTerm.addOperand(new ConstantOperand<Integer>(userID));
+        searchTerm.addSearchTerm(userIDTerm);
+        /*
+         * search        
+         */
+        Contact contact = null;
+        SearchIterator<Contact> searchIterator = null;
+        try {
+            searchIterator = storage.search(session, searchTerm, new ContactField[] { ContactField.COMPANY });
+            if (null != searchIterator && searchIterator.hasNext()) {
+                contact = searchIterator.next();
+            }
+        } finally {
+            if (null != searchIterator) {
+                try {
+                    searchIterator.close();
+                } catch (OXException e) {
+                    LOG.debug("error closing search iterator", e);
+                }
+            }
+        }
+        /*
+         * extract organization
+         */
 		Check.contactNotNull(contact, session.getContextId(), userID);
 		return contact.getCompany();
 	}
-	
+
 	@Override
-    protected <O> SearchIterator<Contact> doGetUsers(Session session, int[] userIDs, SearchTerm<O> term,
-			ContactField[] fields, SortOptions sortOptions) throws OXException {
-		int currentUserID = session.getUserId();
-		int contextID = session.getContextId();
+    protected <O> SearchIterator<Contact> doGetUsers(final Session session, final int[] userIDs, final SearchTerm<O> term,
+			final ContactField[] fields, SortOptions sortOptions) throws OXException {
+		final int currentUserID = session.getUserId();
+		final int contextID = session.getContextId();
 		final String folderID = Integer.toString(FolderObject.SYSTEM_LDAP_FOLDER_ID);
 		final ContactStorage storage = Tools.getStorage(session, folderID);
 		/*
 		 * limit queried fields when necessary due to permissions
 		 */
 		final EffectivePermission permission = Tools.getPermission(contextID, folderID, currentUserID);
-		final QueryFields queryFields;		
+		final QueryFields queryFields;
 		if (permission.canReadAllObjects() || permission.canReadOwnObjects() && 1 == userIDs.length && currentUserID == userIDs[0]) {
 			// no limitation
-			queryFields = new QueryFields(fields);		
+			queryFields = new QueryFields(fields);
 		} else {
 			// restrict queried fields
 			queryFields = new QueryFields(fields, LIMITED_USER_FIELDS);
@@ -570,25 +730,25 @@ public class ContactServiceImpl extends DefaultContactService {
 		/*
 		 * prepare search term for users
 		 */
-        CompositeSearchTerm searchTerm = new CompositeSearchTerm(CompositeOperation.AND);
-        SingleSearchTerm folderIDTerm = new SingleSearchTerm(SingleOperation.EQUALS);
+        final CompositeSearchTerm searchTerm = new CompositeSearchTerm(CompositeOperation.AND);
+        final SingleSearchTerm folderIDTerm = new SingleSearchTerm(SingleOperation.EQUALS);
         folderIDTerm.addOperand(new ContactFieldOperand(ContactField.FOLDER_ID));
         folderIDTerm.addOperand(new ConstantOperand<String>(folderID));
         searchTerm.addSearchTerm(folderIDTerm);
         if (null == userIDs || 0 == userIDs.length) {
-            SingleSearchTerm userIDsTerm = new SingleSearchTerm(SingleOperation.GREATER_THAN);
+            final SingleSearchTerm userIDsTerm = new SingleSearchTerm(SingleOperation.GREATER_THAN);
             userIDsTerm.addOperand(new ContactFieldOperand(ContactField.INTERNAL_USERID));
             userIDsTerm.addOperand(new ConstantOperand<Integer>(Integer.valueOf(0)));
             searchTerm.addSearchTerm(userIDsTerm);
         } else if (1 == userIDs.length) {
-            SingleSearchTerm userIDsTerm = new SingleSearchTerm(SingleOperation.EQUALS);
+            final SingleSearchTerm userIDsTerm = new SingleSearchTerm(SingleOperation.EQUALS);
             userIDsTerm.addOperand(new ContactFieldOperand(ContactField.INTERNAL_USERID));
             userIDsTerm.addOperand(new ConstantOperand<Integer>(Integer.valueOf(userIDs[0])));
             searchTerm.addSearchTerm(userIDsTerm);
         } else {
-            CompositeSearchTerm userIDsTerm = new CompositeSearchTerm(CompositeOperation.OR);
-            for (int userID : userIDs) {
-                SingleSearchTerm userIDTerm = new SingleSearchTerm(SingleOperation.EQUALS);
+            final CompositeSearchTerm userIDsTerm = new CompositeSearchTerm(CompositeOperation.OR);
+            for (final int userID : userIDs) {
+                final SingleSearchTerm userIDTerm = new SingleSearchTerm(SingleOperation.EQUALS);
                 userIDTerm.addOperand(new ContactFieldOperand(ContactField.INTERNAL_USERID));
                 userIDTerm.addOperand(new ConstantOperand<Integer>(Integer.valueOf(userID)));
                 userIDsTerm.addSearchTerm(userIDTerm);
@@ -601,25 +761,25 @@ public class ContactServiceImpl extends DefaultContactService {
 		/*
 		 * get user contacts from storage
 		 */
-		return new ResultIterator(storage.search(session, searchTerm, queryFields.getFields(), sortOptions), 
+		return new ResultIterator(storage.search(session, searchTerm, queryFields.getFields(), sortOptions),
 				queryFields.needsAttachmentInfo(), session, true);
 	}
 
 	@Override
-    protected SearchIterator<Contact> doGetUsers(Session session, int[] userIDs, ContactSearchObject contactSearch,
-			ContactField[] fields, SortOptions sortOptions) throws OXException {
-		int currentUserID = session.getUserId();
-		int contextID = session.getContextId();
-		String folderID = Integer.toString(FolderObject.SYSTEM_LDAP_FOLDER_ID);
-		ContactStorage storage = Tools.getStorage(session, folderID);
+    protected SearchIterator<Contact> doGetUsers(final Session session, final int[] userIDs, final ContactSearchObject contactSearch,
+			final ContactField[] fields, SortOptions sortOptions) throws OXException {
+		final int currentUserID = session.getUserId();
+		final int contextID = session.getContextId();
+		final String folderID = Integer.toString(FolderObject.SYSTEM_LDAP_FOLDER_ID);
+		final ContactStorage storage = Tools.getStorage(session, folderID);
 		/*
 		 * limit queried fields when necessary due to permissions
 		 */
-		EffectivePermission permission = Tools.getPermission(contextID, folderID, currentUserID);
-		QueryFields queryFields;		
+		final EffectivePermission permission = Tools.getPermission(contextID, folderID, currentUserID);
+		QueryFields queryFields;
 		if (permission.canReadAllObjects() || permission.canReadOwnObjects() && 1 == userIDs.length && currentUserID == userIDs[0]) {
 			// no limitation
-			queryFields = new QueryFields(fields);		
+			queryFields = new QueryFields(fields);
 		} else {
 			// restrict queried fields
 			queryFields = new QueryFields(fields, LIMITED_USER_FIELDS);
@@ -630,8 +790,78 @@ public class ContactServiceImpl extends DefaultContactService {
 		/*
 		 * get user contacts from storage
 		 */
-		return new ResultIterator(storage.search(session, contactSearch, queryFields.getFields(), sortOptions), 
+		return new ResultIterator(storage.search(session, contactSearch, queryFields.getFields(), sortOptions),
 				queryFields.needsAttachmentInfo(), session, true);
 	}
+
+    @Override
+    protected SearchIterator<Contact> doSearchContactsWithBirthday(Session session, Date from, Date until, List<String> folderIDs, ContactField[] fields, SortOptions sortOptions) throws OXException {
+        int userID = session.getUserId();
+        int contextID = session.getContextId();
+        /*
+         * determine queried storages according to searched folders
+         */
+        Map<ContactStorage, List<String>> queriedStorages = Tools.getStorages(session, 
+            null == folderIDs ? Tools.getVisibleFolders(contextID, userID) : folderIDs);
+        if (null == queriedStorages || 0 == queriedStorages.size()) {
+            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create("No contact storage found for queried folder IDs");
+        }
+        /*
+         * prepare fields and sort options
+         */
+        QueryFields queryFields = new QueryFields(fields);
+        if (null == sortOptions) {
+            sortOptions = SortOptions.EMPTY;
+        }
+        /*
+         * perform searches
+         */
+        List<SearchIterator<Contact>> searchIterators = new ArrayList<SearchIterator<Contact>>();
+        for (Entry<ContactStorage, List<String>> queriedStorage : queriedStorages.entrySet()) {
+            /*
+             * get results, filtered respecting object permission restrictions, adding attachment info as needed
+             */
+            SearchIterator<Contact> searchIterator = queriedStorage.getKey().searchByBirthday(
+                session, queriedStorage.getValue(), from, until, queryFields.getFields(), sortOptions);
+            searchIterators.add(new ResultIterator(searchIterator, queryFields.needsAttachmentInfo(), session));
+        }
+        return 2 > searchIterators.size() ? searchIterators.get(0) :
+            new ContactMergerator(Tools.getComparator(sortOptions), searchIterators);
+    }
+
+    @Override
+    protected SearchIterator<Contact> doSearchContactsWithAnniversary(Session session, Date from, Date until, List<String> folderIDs, ContactField[] fields, SortOptions sortOptions) throws OXException {
+        int userID = session.getUserId();
+        int contextID = session.getContextId();
+        /*
+         * determine queried storages according to searched folders
+         */
+        Map<ContactStorage, List<String>> queriedStorages = Tools.getStorages(session, 
+            null == folderIDs ? Tools.getVisibleFolders(contextID, userID) : folderIDs);
+        if (null == queriedStorages || 0 == queriedStorages.size()) {
+            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create("No contact storage found for queried folder IDs");
+        }
+        /*
+         * prepare fields and sort options
+         */
+        QueryFields queryFields = new QueryFields(fields);
+        if (null == sortOptions) {
+            sortOptions = SortOptions.EMPTY;
+        }
+        /*
+         * perform searches
+         */
+        List<SearchIterator<Contact>> searchIterators = new ArrayList<SearchIterator<Contact>>();
+        for (Entry<ContactStorage, List<String>> queriedStorage : queriedStorages.entrySet()) {
+            /*
+             * get results, filtered respecting object permission restrictions, adding attachment info as needed
+             */
+            SearchIterator<Contact> searchIterator = queriedStorage.getKey().searchByAnniversary(
+                session, queriedStorage.getValue(), from, until, queryFields.getFields(), sortOptions);
+            searchIterators.add(new ResultIterator(searchIterator, queryFields.needsAttachmentInfo(), session));
+        }
+        return 2 > searchIterators.size() ? searchIterators.get(0) :
+            new ContactMergerator(Tools.getComparator(sortOptions), searchIterators);
+    }
 
 }

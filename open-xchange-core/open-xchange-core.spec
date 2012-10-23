@@ -16,7 +16,7 @@ License:       GPL-2.0
 BuildRoot:     %{_tmppath}/%{name}-%{version}-build
 URL:           http://www.open-xchange.com/            
 Source:        %{name}_%{version}.orig.tar.bz2
-Summary:       The main bundles for the Open-Xchange collaboration suite
+Summary:       The essential core of an Open-Xchange backend
 Requires:      open-xchange-osgi >= @OXVERSION@
 Requires:      open-xchange-xerces
 Provides:      open-xchange-cache = %{version}
@@ -137,10 +137,22 @@ Provides:      open-xchange-xml = %{version}
 Obsoletes:     open-xchange-xml <= %{version}
 Provides:      open-xchange-passwordchange-servlet = %{version}
 Obsoletes:     open-xchange-passwordchange-servlet <= %{version}
-
+Provides:      open-xchange-file-storage-webdav = %{version}
+Obsoletes:     open-xchange-file-storage-webdav <= %{version}
 
 %description
-The main bundles for the Open-Xchange collaboration suite.
+This package installs all essential bundles that are necessary to get a working backend installation. This are the bundles for the main
+modules of Open-Xchange: Mail, Calendar, Contacts, Tasks and InfoStore. Additionally the following functionalities are installed with this
+package:
+* the main caching system using the Java Caching System (JCS)
+* the config cascade allowing administrators to selectively override configuration parameters on context and user level
+* the contact collector storing every contact of read or written emails in a special collected contacts folder
+* the conversion engine converting vCard or iCal email attachments to contacts or appointments
+* the import and export module to import or export complete contact or appointment folders
+* the iMIP implementation to handle invitations with participants through emails
+* auto configuration for external email accounts
+* encrypted storing of passwords for integrated social accounts
+* and a lot more
 
 Authors:
 --------
@@ -177,12 +189,26 @@ if [ ${1:-0} -eq 2 ]; then
     # prevent bash from expanding, see bug 13316
     GLOBIGNORE='*'
 
+    # SoftwareChange_Request-1148
+    pfile=/opt/open-xchange/etc/whitelist.properties
+    if ! ox_exists_property "html.style.word-break" $pfile; then
+       ox_set_property "html.style.word-break" '"break-all"' $pfile
+    fi
+    if ! ox_exists_property "html.style.word-wrap" $pfile; then
+       ox_set_property "html.style.word-wrap" '"break-word"' $pfile
+    fi
+
+    # SoftwareChange_Request-1125
+    pfile=/opt/open-xchange/etc/contactcollector.properties
+    if ! ox_exists_property com.openexchange.contactcollector.folder.deleteDenied $pfile; then
+       ox_set_property com.openexchange.contactcollector.folder.deleteDenied false $pfile
+    fi
+
     ox_update_permissions "/var/log/open-xchange" open-xchange:root 750
     ox_update_permissions "/opt/open-xchange/osgi" open-xchange:root 750
-    ox_update_permissions "/opt/open-xchange/etc/mail.properties" root:open-xchange 640
     ox_update_permissions "/opt/open-xchange/etc/configdb.properties" root:open-xchange 640
-    ox_update_permissions "/opt/open-xchange/etc/server.properties" root:open-xchange 640
-    ox_update_permissions "/opt/open-xchange/etc/filestorage.properties" root:open-xchange 640
+    ox_update_permissions "/opt/open-xchange/etc/mail.properties" root:open-xchange 640
+    ox_update_permissions "/opt/open-xchange/etc/ox-scriptconf.sh" root:root 644
 fi
 
 
@@ -206,8 +232,23 @@ fi
 /opt/open-xchange/sbin/*
 %dir /opt/open-xchange/templates/
 /opt/open-xchange/templates/*
+%doc docs/
+%doc com.openexchange.server/doc/examples
+%doc com.openexchange.server/ChangeLog
 
 %changelog
+* Wed Oct 10 2012 Marcus Klein <marcus.klein@open-xchange.com>
+Fifth release candidate for 6.22.0
+* Tue Oct 09 2012 Marcus Klein <marcus.klein@open-xchange.com>
+Fourth release candidate for 6.22.0
+* Fri Oct 05 2012 Marcus Klein <marcus.klein@open-xchange.com>
+Third release candidate for 6.22.0
+* Thu Oct 04 2012 Marcus Klein <marcus.klein@open-xchange.com>
+Second release candidate for 6.22.0
+* Tue Sep 04 2012 Marcus Klein <marcus.klein@open-xchange.com>
+First release candidate for 6.23.0
+* Mon Sep 03 2012 Marcus Klein <marcus.klein@open-xchange.com>
+prepare for next EDP drop
 * Tue Aug 21 2012 Marcus Klein <marcus.klein@open-xchange.com>
 First release candidate for 6.22.0
 * Mon Aug 20 2012 Marcus Klein <marcus.klein@open-xchange.com>

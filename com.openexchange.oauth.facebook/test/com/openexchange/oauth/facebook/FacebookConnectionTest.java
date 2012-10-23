@@ -63,6 +63,8 @@ import org.scribe.model.Response;
 import org.scribe.model.Token;
 import org.scribe.model.Verb;
 import org.scribe.oauth.OAuthService;
+
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.oauth.facebook.osgi.Activator;
 
@@ -185,7 +187,7 @@ public class FacebookConnectionTest  extends TestCase {
         System.out.println("Thats it man! Go and build something awesome with Scribe! :)");
     }
 
-    public void testUsageOfExistingAccount(){
+    public void testUsageOfExistingAccount() throws OXException{
         final List<Contact> contacts = facebook.getContacts(null,1,1,1);
         for (final Contact contact : contacts){
             System.out.println(contact.getGivenName() + " " + contact.getSurName());

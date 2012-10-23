@@ -108,12 +108,12 @@ public class TaskRequest extends CalendarRequest {
         CalendarObject.NOTE,
         CalendarObject.RECURRENCE_TYPE,
         CalendarObject.PARTICIPANTS,
-        CalendarObject.UID,
+        CommonObject.UID,
         Task.ACTUAL_COSTS,
         Task.ACTUAL_DURATION,
-        Task.ALARM,
+        CalendarObject.ALARM,
         Task.BILLING_INFORMATION,
-        Task.CATEGORIES,
+        CommonObject.CATEGORIES,
         Task.COMPANIES,
         Task.CURRENCY,
         Task.DATE_COMPLETED,
@@ -123,7 +123,7 @@ public class TaskRequest extends CalendarRequest {
         Task.TARGET_COSTS,
         Task.TARGET_DURATION,
         Task.TRIP_METER,
-        Task.COLOR_LABEL
+        CommonObject.COLOR_LABEL
     };
 
     public TaskRequest(final ServerSession session) {
@@ -175,7 +175,7 @@ public class TaskRequest extends CalendarRequest {
         final JSONObject jsonobject = DataParser.checkJSONObject(jsonObj, ResponseFields.DATA);
 
         final TaskParser taskParser = new TaskParser(timeZone);
-        taskParser.parse(task, jsonobject);
+        taskParser.parse(task, jsonobject, session.getUser().getLocale());
 
         final TasksSQLInterface sqlinterface = new TasksSQLImpl(session);
 
@@ -199,7 +199,7 @@ public class TaskRequest extends CalendarRequest {
         final JSONObject jsonobject = DataParser.checkJSONObject(jsonObj, ResponseFields.DATA);
 
         final TaskParser taskParser = new TaskParser(timeZone);
-        taskParser.parse(task, jsonobject);
+        taskParser.parse(task, jsonobject, session.getUser().getLocale());
 
         task.setObjectID(id);
 
@@ -409,7 +409,7 @@ public class TaskRequest extends CalendarRequest {
     public JSONObject actionConfirm(final JSONObject json) throws OXException, JSONException {
         final JSONObject data = DataParser.checkJSONObject(json, ResponseFields.DATA);
         final Task task = new Task();
-        new TaskParser(timeZone).parse(task, data);
+        new TaskParser(timeZone).parse(task, data, session.getUser().getLocale());
         final TasksSQLInterface taskSql = new TasksSQLImpl(session);
         final int taskIdFromParameter = DataParser.parseInt(json, AJAXServlet.PARAMETER_ID);
         final int taskId;
@@ -529,7 +529,7 @@ public class TaskRequest extends CalendarRequest {
         return jsonResponseObject;
     }
 
-    private int[] removeVirtualColumns(final int[] columns) {
+    private static int[] removeVirtualColumns(final int[] columns) {
         final TIntList tmp = new TIntArrayList(columns.length);
         for (final int col : columns) {
             if (col != DataObject.LAST_MODIFIED_UTC) {

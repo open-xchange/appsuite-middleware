@@ -68,10 +68,24 @@ public class FileStorageAccountParser {
 
     private final FileStorageServiceRegistry registry;
 
+    /**
+     * Initializes a new {@link FileStorageAccountParser}.
+     * 
+     * @param serviceRegistry The service registry
+     */
     public FileStorageAccountParser(final FileStorageServiceRegistry serviceRegistry) {
+        super();
         registry = serviceRegistry;
     }
 
+    /**
+     * Parses specified account's JSON representation to a {@code FileStorageAccount}.
+     * 
+     * @param accountJSON
+     * @return
+     * @throws OXException
+     * @throws JSONException
+     */
     public FileStorageAccount parse(final JSONObject accountJSON) throws OXException, JSONException {
         final DefaultFileStorageAccount account = new DefaultFileStorageAccount();
 

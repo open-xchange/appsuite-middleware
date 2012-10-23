@@ -54,6 +54,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -262,6 +263,72 @@ public class Executor {
         }
     }
 
+    /**
+     * Select contacts whose month/day portion of the date field falls between the supplied period. This does only work for the 
+     * 'birthday'- and 'anniversary' fields. 
+     * 
+     * @param connection The connection to use
+     * @param contextID The context ID
+     * @param folderIDs The folder IDs, or <code>null</code> if there's no restriction on folders
+     * @param from The lower (inclusive) limit of the requested time-range 
+     * @param until The upper (exclusive) limit of the requested time-range
+     * @param fields The contact fields to select
+     * @param sortOptions The sort options to apply
+     * @param dateField One of <code>ContactField.ANNIVERSARY</code> or <code>ContactField.BIRTHDAY</code>
+     * @return The found contacts
+     * @throws SQLException
+     * @throws OXException
+     */
+    public List<Contact> selectByAnnualDate(Connection connection, int contextID, int[] folderIDs, Date from, Date until,  
+        ContactField[] fields, SortOptions sortOptions, ContactField dateField) throws SQLException, OXException {
+        /*
+         * construct query string
+         */
+        StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder.append("SELECT ").append(Mappers.CONTACT.getColumns(fields)).append(" FROM ").append(Table.CONTACTS)
+            .append(" WHERE ").append(Mappers.CONTACT.get(ContactField.CONTEXTID).getColumnLabel()).append("=?");
+        if (null != folderIDs && 0 < folderIDs.length) {
+            stringBuilder.append(" AND ").append(Mappers.CONTACT.get(ContactField.FOLDER_ID).getColumnLabel());
+            if (1 == folderIDs.length) {
+                stringBuilder.append('=').append(folderIDs[0]);
+            } else {
+                stringBuilder.append(" IN (").append(Tools.toCSV(folderIDs)).append(')');
+            }        
+        }
+        stringBuilder.append(" AND 1=(FLOOR(DATEDIFF(?,").append(Mappers.CONTACT.get(dateField).getColumnLabel()).append(")/365.25))")
+            .append("-(FLOOR(DATEDIFF(?,").append(Mappers.CONTACT.get(dateField).getColumnLabel()).append(")/365.25))");
+        if (null != sortOptions && false == SortOptions.EMPTY.equals(sortOptions)) {
+            stringBuilder.append(' ').append(Tools.getOrderClause(sortOptions));
+            if (0 < sortOptions.getLimit()) {
+                stringBuilder.append(' ').append(Tools.getLimitClause(sortOptions));
+            }
+        }
+        stringBuilder.append(';');
+        /*
+         * prepare statement
+         */
+        PreparedStatement stmt = null;
+        int parameterIndex = 1;
+        ResultSet resultSet = null;
+        List<Contact> contacts = new ArrayList<Contact>();
+        try {
+            stmt = connection.prepareStatement(stringBuilder.toString());
+            stmt.setInt(parameterIndex++, contextID);
+            stmt.setTimestamp(parameterIndex++, new Timestamp(until.getTime()));
+            stmt.setTimestamp(parameterIndex++, new Timestamp(from.getTime()));
+            /*
+             * execute and read out results
+             */
+            resultSet = logExecuteQuery(stmt);
+            while (resultSet.next()) {
+                contacts.add(Mappers.CONTACT.fromResultSet(resultSet, fields));
+            }
+            return contacts; 
+        } finally {
+            closeSQLStuff(resultSet, stmt);
+        }
+    }
+    
     public List<Contact> select(Connection connection, Table table, int contextID, ContactSearchObject contactSearch, 
     		ContactField[] fields, SortOptions sortOptions) throws SQLException, OXException {
         /*
@@ -455,36 +522,96 @@ public class Executor {
         }
         return rowCount;
     }    
+
+    public int insertFrom(Connection connection, Table from, Table to, int contextID, int folderID, int[] objectIDs) throws SQLException, OXException {
+        return insertFrom(connection, from, to, contextID, folderID, objectIDs, Long.MIN_VALUE);
+    }
     
-    public int insertFrom(final Connection connection, final Table from, final Table to, final int contextID, final int objectID, 
-    		final long minLastModified) throws SQLException, OXException {
-        final StringBuilder stringBuilder = new StringBuilder();
+    public int insertFrom(Connection connection, Table from, Table to, int contextID, int folderID, int[] objectIDs, long minLastModified) throws SQLException, OXException {
+        StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append("REPLACE INTO ").append(to).append(" SELECT * FROM ").append(from).append(" WHERE ");
         if (from.isDistListTable()) {
-        	stringBuilder.append(Mappers.DISTLIST.get(DistListMemberField.CONTEXT_ID).getColumnLabel()).append("=? AND ")
-        		.append(Mappers.DISTLIST.get(DistListMemberField.PARENT_CONTACT_ID).getColumnLabel()).append("=?");
+            stringBuilder.append(Mappers.DISTLIST.get(DistListMemberField.CONTEXT_ID).getColumnLabel()).append("=?");
+            if (null != objectIDs && 0 < objectIDs.length) {
+                stringBuilder.append(" AND ").append(Mappers.DISTLIST.get(DistListMemberField.PARENT_CONTACT_ID).getColumnLabel());
+                if (1 == objectIDs.length) {
+                    stringBuilder.append('=').append(objectIDs[0]);
+                } else {
+                    stringBuilder.append(" IN (").append(Tools.toCSV(objectIDs)).append(')');
+                }
+                stringBuilder.append(';');
+            }            
         } else {
-        	stringBuilder.append(Mappers.CONTACT.get(ContactField.CONTEXTID).getColumnLabel()).append("=? AND ")
-            	.append(Mappers.CONTACT.get(ContactField.OBJECT_ID).getColumnLabel()).append("=?");
+            stringBuilder.append(Mappers.CONTACT.get(ContactField.CONTEXTID).getColumnLabel()).append("=?");
+            if (Integer.MIN_VALUE != folderID) {
+                stringBuilder.append(" AND ").append(Mappers.CONTACT.get(ContactField.FOLDER_ID).getColumnLabel()).append("=?");
+            }
+            if (null != objectIDs && 0 < objectIDs.length) {
+                stringBuilder.append(" AND ").append(Mappers.CONTACT.get(ContactField.OBJECT_ID).getColumnLabel());
+                if (1 == objectIDs.length) {
+                    stringBuilder.append('=').append(objectIDs[0]);
+                } else {
+                    stringBuilder.append(" IN (").append(Tools.toCSV(objectIDs)).append(')');
+                }
+            }
+            if (Long.MIN_VALUE == minLastModified) {
+                stringBuilder.append(';');
+            } else {
+                stringBuilder.append(" AND ").append(Mappers.CONTACT.get(ContactField.LAST_MODIFIED).getColumnLabel()).append("<=?;");
+            }             
         }
-        if (Long.MIN_VALUE == minLastModified) {
-            stringBuilder.append(';');
-        } else {
-            stringBuilder.append(" AND ").append(Mappers.CONTACT.get(ContactField.LAST_MODIFIED).getColumnLabel()).append("<=?;");
-        }             
+        /*
+         * prepare statement
+         */        
         PreparedStatement stmt = null;
+        int parameterIndex = 1;
         try {
             stmt = connection.prepareStatement(stringBuilder.toString());
-            stmt.setInt(1, contextID);
-            stmt.setInt(2, objectID);
-            if (Long.MIN_VALUE != minLastModified) {
-                stmt.setLong(3, minLastModified);
+            stmt.setInt(parameterIndex++, contextID);
+            if (Integer.MIN_VALUE != folderID && false == from.isDistListTable()) {
+                stmt.setInt(parameterIndex++, folderID);
             }
+            if (Long.MIN_VALUE != minLastModified && false == from.isDistListTable()) {
+                stmt.setLong(parameterIndex++, minLastModified);
+            }
+            /*
+             * execute 
+             */
             return logExecuteUpdate(stmt);
         } finally {
             closeSQLStuff(stmt);
         }
     }
+
+    public int insertFrom(final Connection connection, final Table from, final Table to, final int contextID, final int objectID, 
+        final long minLastModified) throws SQLException, OXException {
+    final StringBuilder stringBuilder = new StringBuilder();
+    stringBuilder.append("REPLACE INTO ").append(to).append(" SELECT * FROM ").append(from).append(" WHERE ");
+    if (from.isDistListTable()) {
+        stringBuilder.append(Mappers.DISTLIST.get(DistListMemberField.CONTEXT_ID).getColumnLabel()).append("=? AND ")
+            .append(Mappers.DISTLIST.get(DistListMemberField.PARENT_CONTACT_ID).getColumnLabel()).append("=?");
+    } else {
+        stringBuilder.append(Mappers.CONTACT.get(ContactField.CONTEXTID).getColumnLabel()).append("=? AND ")
+            .append(Mappers.CONTACT.get(ContactField.OBJECT_ID).getColumnLabel()).append("=?");
+    }
+    if (Long.MIN_VALUE == minLastModified) {
+        stringBuilder.append(';');
+    } else {
+        stringBuilder.append(" AND ").append(Mappers.CONTACT.get(ContactField.LAST_MODIFIED).getColumnLabel()).append("<=?;");
+    }             
+    PreparedStatement stmt = null;
+    try {
+        stmt = connection.prepareStatement(stringBuilder.toString());
+        stmt.setInt(1, contextID);
+        stmt.setInt(2, objectID);
+        if (Long.MIN_VALUE != minLastModified) {
+            stmt.setLong(3, minLastModified);
+        }
+        return logExecuteUpdate(stmt);
+    } finally {
+        closeSQLStuff(stmt);
+    }
+}
 
     public int insertFrom(final Connection connection, final Table from, final Table to, final int contextID, final int objectID) 
     		throws SQLException, OXException {
@@ -516,6 +643,44 @@ public class Executor {
         }
     }
     
+    public int update(Connection connection, Table table, int contextID, int folderID, int[] objectIDs, Contact template, ContactField[] fields, long minLastModified) throws SQLException, OXException {
+        StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder.append("UPDATE ").append(table).append(" SET ").append(Mappers.CONTACT.getAssignments(fields)).append(" WHERE ")
+            .append(Mappers.CONTACT.get(ContactField.CONTEXTID).getColumnLabel()).append("=?");
+        if (Integer.MIN_VALUE != folderID) {
+            stringBuilder.append(" AND ").append(Mappers.CONTACT.get(ContactField.FOLDER_ID).getColumnLabel()).append("=?");
+        }
+        if (null != objectIDs && 0 < objectIDs.length) {
+            stringBuilder.append(" AND ").append(Mappers.CONTACT.get(ContactField.OBJECT_ID).getColumnLabel());
+            if (1 == objectIDs.length) {
+                stringBuilder.append('=').append(objectIDs[0]);
+            } else {
+                stringBuilder.append(" IN (").append(Tools.toCSV(objectIDs)).append(')');
+            }
+        }
+        if (Long.MIN_VALUE == minLastModified) {
+            stringBuilder.append(';');
+        } else {
+            stringBuilder.append(" AND ").append(Mappers.CONTACT.get(ContactField.LAST_MODIFIED).getColumnLabel()).append("<=?;");
+        }
+        PreparedStatement stmt = null;
+        try {
+            stmt = connection.prepareStatement(stringBuilder.toString());
+            Mappers.CONTACT.setParameters(stmt, template, fields);
+            int parameterIndex = 1 + fields.length;
+            stmt.setInt(parameterIndex++, contextID);
+            if (Integer.MIN_VALUE != folderID) {
+                stmt.setInt(parameterIndex++, folderID);
+            }
+            if (Long.MIN_VALUE != minLastModified) {
+                stmt.setLong(parameterIndex++, minLastModified);
+            }
+            return logExecuteUpdate(stmt);
+        } finally {
+            closeSQLStuff(stmt);
+        }
+    }
+    
     public int updateMember(Connection connection, Table table, int contextID, DistListMember member, DistListMemberField[] fields) throws SQLException, OXException {
         final StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append("UPDATE ").append(table).append(" SET ").append(Mappers.DISTLIST.getAssignments(fields)).append(" WHERE ")
@@ -533,34 +698,78 @@ public class Executor {
         }
     }
     
-    public int delete(final Connection connection, final Table table, final int contextID, final int objectID, final long minLastModified) 
-    		throws SQLException, OXException {
-        final StringBuilder stringBuilder = new StringBuilder();
+    public int delete(Connection connection, Table table, int contextID, int folderID, int[] objectIDs, long minLastModified) 
+        throws SQLException, OXException {
+        StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append("DELETE FROM ").append(table).append(" WHERE ")
-            .append(Mappers.CONTACT.get(ContactField.CONTEXTID).getColumnLabel()).append("=? AND ")
-            .append(Mappers.CONTACT.get(ContactField.OBJECT_ID).getColumnLabel()).append("=?");
-        if (Long.MIN_VALUE == minLastModified) {
-            stringBuilder.append(';');
-        } else {
-            stringBuilder.append(" AND ").append(Mappers.CONTACT.get(ContactField.LAST_MODIFIED).getColumnLabel()).append("<=?;");
-        }             
+            .append(Mappers.CONTACT.get(ContactField.CONTEXTID).getColumnLabel()).append("=?");
+        if (Integer.MIN_VALUE != folderID) {
+            stringBuilder.append(" AND ").append(Mappers.CONTACT.get(ContactField.FOLDER_ID).getColumnLabel()).append("=?");
+        }
+        if (Long.MIN_VALUE != minLastModified) {
+            stringBuilder.append(" AND ").append(Mappers.CONTACT.get(ContactField.LAST_MODIFIED).getColumnLabel()).append(">?");
+        }
+        if (null != objectIDs && 0 < objectIDs.length) {
+            stringBuilder.append(" AND ").append(Mappers.CONTACT.get(ContactField.OBJECT_ID).getColumnLabel());
+            if (1 == objectIDs.length) {
+                stringBuilder.append('=').append(objectIDs[0]);
+            } else {
+                stringBuilder.append(" IN (").append(Tools.toCSV(objectIDs)).append(')');
+            }
+        }
+        stringBuilder.append(';');
         PreparedStatement stmt = null;
+        int parameterIndex = 1;
         try {
             stmt = connection.prepareStatement(stringBuilder.toString());
-            stmt.setInt(1, contextID);
-            stmt.setInt(2, objectID);
-            if (Long.MIN_VALUE != minLastModified) {
-                stmt.setLong(3, minLastModified);
+            stmt.setInt(parameterIndex++, contextID);
+            if (Integer.MIN_VALUE != folderID) {
+                stmt.setInt(parameterIndex++, folderID);
             }
+            if (Long.MIN_VALUE != minLastModified) {
+                stmt.setLong(parameterIndex++, minLastModified);
+            }
+            /*
+             * execute and read out results
+             */
             return logExecuteUpdate(stmt);
         } finally {
             closeSQLStuff(stmt);
         }
     }
+
+    public int delete(Connection connection, Table table, int contextID, int folderID, int[] objectIDs) throws SQLException, OXException {
+        return delete(connection, table, contextID, folderID, objectIDs, Long.MIN_VALUE);
+    }
     
-    public int delete(final Connection connection, final Table table, final int contextID, final int objectID) 
+    public int deleteSingle(final Connection connection, final Table table, final int contextID, final int objectID, final long minLastModified) 
+        throws SQLException, OXException {
+    final StringBuilder stringBuilder = new StringBuilder();
+    stringBuilder.append("DELETE FROM ").append(table).append(" WHERE ")
+        .append(Mappers.CONTACT.get(ContactField.CONTEXTID).getColumnLabel()).append("=? AND ")
+        .append(Mappers.CONTACT.get(ContactField.OBJECT_ID).getColumnLabel()).append("=?");
+    if (Long.MIN_VALUE == minLastModified) {
+        stringBuilder.append(';');
+    } else {
+        stringBuilder.append(" AND ").append(Mappers.CONTACT.get(ContactField.LAST_MODIFIED).getColumnLabel()).append("<=?;");
+    }             
+    PreparedStatement stmt = null;
+    try {
+        stmt = connection.prepareStatement(stringBuilder.toString());
+        stmt.setInt(1, contextID);
+        stmt.setInt(2, objectID);
+        if (Long.MIN_VALUE != minLastModified) {
+            stmt.setLong(3, minLastModified);
+        }
+        return logExecuteUpdate(stmt);
+    } finally {
+        closeSQLStuff(stmt);
+    }
+}
+
+    public int deleteSingle(final Connection connection, final Table table, final int contextID, final int objectID) 
     		throws SQLException, OXException {
-        return this.delete(connection, table, contextID, objectID, Long.MIN_VALUE);
+        return this.deleteSingle(connection, table, contextID, objectID, Long.MIN_VALUE);
     } 
     
     private static String getCharset(final SortOptions sortOptions) {

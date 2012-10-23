@@ -337,7 +337,7 @@ public final class DatabaseOAuth2ProviderService extends AbstractOAuthProviderSe
                     }
                 }
             };
-            ThreadPools.getThreadPool().submit(ThreadPools.task(loader));
+            ThreadPools.getThreadPool().submit(ThreadPools.trackableTask(loader));
         }
     }
 

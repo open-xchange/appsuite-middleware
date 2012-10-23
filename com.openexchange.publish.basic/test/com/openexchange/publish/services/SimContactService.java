@@ -54,7 +54,6 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-
 import com.openexchange.contact.ContactService;
 import com.openexchange.contact.SortOptions;
 import com.openexchange.exception.OXException;
@@ -359,5 +358,41 @@ public class SimContactService implements ContactService {
 		// TODO Auto-generated method stub
 		return null;
 	}
+
+    @Override
+    public void deleteContacts(Session session, String folderId) throws OXException {
+        // TODO Auto-generated method stub
+        
+    }
+
+    @Override
+    public void deleteContacts(Session session, String folderId, String[] ids, Date lastRead) throws OXException {
+        // TODO Auto-generated method stub
+        
+    }
+
+    @Override
+    public SearchIterator<Contact> searchContactsWithBirthday(Session session, Date from, Date until, ContactField[] fields, SortOptions sortOptions) throws OXException {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public SearchIterator<Contact> searchContactsWithBirthday(Session session, List<String> folderIDs, Date from, Date until, ContactField[] fields, SortOptions sortOptions) throws OXException {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public SearchIterator<Contact> searchContactsWithAnniversary(Session session, Date from, Date until, ContactField[] fields, SortOptions sortOptions) throws OXException {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public SearchIterator<Contact> searchContactsWithAnniversary(Session session, List<String> folderIDs, Date from, Date until, ContactField[] fields, SortOptions sortOptions) throws OXException {
+        // TODO Auto-generated method stub
+        return null;
+    }
 
 }

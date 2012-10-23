@@ -90,12 +90,18 @@ public interface MailActionConstants {
     public static final String LOG_PROPERTY_MAIL_ID = "com.openexchange.mail.mailId";
 
     /**
+     * The log property name for account identifier.
+     */
+    public static final String LOG_PROPERTY_ACCOUNT_ID = "com.openexchange.mail.accountId";
+
+    /**
      * A set containing all log property names.
      */
     public static final Set<String> ALL_LOG_PROPERTIES = Collections.unmodifiableSet(new HashSet<String>(Arrays.asList(
         LOG_PROPERTY_FULL_NAME,
         LOG_PROPERTY_HOST,
         LOG_PROPERTY_LOGIN,
-        LOG_PROPERTY_MAIL_ID)));
+        LOG_PROPERTY_MAIL_ID,
+        LOG_PROPERTY_ACCOUNT_ID)));
 
 }

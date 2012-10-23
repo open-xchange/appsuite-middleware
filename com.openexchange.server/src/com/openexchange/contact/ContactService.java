@@ -50,7 +50,7 @@
 package com.openexchange.contact;
 
 import java.util.Date;
-
+import java.util.List;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
@@ -351,6 +351,60 @@ public interface ContactService {
     SearchIterator<Contact> searchContacts(Session session, ContactSearchObject contactSearch, ContactField[] fields, SortOptions sortOptions) throws OXException;
     
     /**
+     * Searches for contacts whose birthday falls into the specified period.
+     * 
+     * @param session the session
+     * @param from The lower (inclusive) limit of the requested time-range 
+     * @param until The upper (exclusive) limit of the requested time-range
+     * @param fields the contact fields that should be retrieved
+     * @param sortOptions the options to sort the results 
+     * @return the contacts found with the search
+     * @throws OXException
+     */
+    SearchIterator<Contact> searchContactsWithBirthday(Session session, Date from, Date until, ContactField[] fields, SortOptions sortOptions) throws OXException;
+    
+    /**
+     * Searches for contacts whose birthday falls into the specified period.
+     * 
+     * @param session the session
+     * @param folderIDs the IDs of the parent folders
+     * @param from The lower (inclusive) limit of the requested time-range 
+     * @param until The upper (exclusive) limit of the requested time-range
+     * @param fields the contact fields that should be retrieved
+     * @param sortOptions the options to sort the results 
+     * @return the contacts found with the search
+     * @throws OXException
+     */
+    SearchIterator<Contact> searchContactsWithBirthday(Session session, List<String> folderIDs, Date from, Date until, ContactField[] fields, SortOptions sortOptions) throws OXException;
+    
+    /**
+     * Searches for contacts whose anniversary falls into the specified period.
+     * 
+     * @param session the session
+     * @param from The lower (inclusive) limit of the requested time-range 
+     * @param until The upper (exclusive) limit of the requested time-range
+     * @param fields the contact fields that should be retrieved
+     * @param sortOptions the options to sort the results 
+     * @return the contacts found with the search
+     * @throws OXException
+     */
+    SearchIterator<Contact> searchContactsWithAnniversary(Session session, Date from, Date until, ContactField[] fields, SortOptions sortOptions) throws OXException;
+    
+    /**
+     * Searches for contacts whose anniversary falls into the specified period.
+     * 
+     * @param session the session
+     * @param folderIDs the IDs of the parent folders
+     * @param from The lower (inclusive) limit of the requested time-range 
+     * @param until The upper (exclusive) limit of the requested time-range
+     * @param fields the contact fields that should be retrieved
+     * @param sortOptions the options to sort the results 
+     * @return the contacts found with the search
+     * @throws OXException
+     */
+    SearchIterator<Contact> searchContactsWithAnniversary(Session session, List<String> folderIDs, Date from, Date until, ContactField[] fields, SortOptions sortOptions) throws OXException;
+    
+    /**
      * Creates a new contact in a folder.
      * 
      * @param session the session
@@ -384,7 +438,28 @@ public interface ContactService {
     void deleteContact(Session session, String folderId, String id, Date lastRead) throws OXException;
 
     /**
+     * Deletes all contacts in a folder.
+     * 
+     * @param session the session
+     * @param folderId the ID of the parent folder
+     * @throws OXException
+     */
+    void deleteContacts(Session session, String folderId) throws OXException;
+
+    /**
+     * Deletes multiple contacts from a folder.
+     * 
+     * @param session the session
+     * @param folderId the ID of the parent folder
+     * @param ids the object IDs 
+     * @param lastRead the time the objects were last read from the storage
+     * @throws OXException
+     */
+    void deleteContacts(Session session, String folderId, String[] ids, Date lastRead) throws OXException;
+
+    /**
      * Gets a user's contact with all fields.<p>
+     * 
      * If the current user has no adequate permissions, no exception is thrown, 
      * but the queried contact fields are limited to fields defined by 
      * <code>ContactService.LIMITED_USER_FIELDS</code>.
@@ -412,7 +487,7 @@ public interface ContactService {
     Contact getUser(Session session, int userID, ContactField[] fields) throws OXException;
     
     /**
-     * Gets a user contacts with all fields.<p>
+     * Gets user contacts with all fields.<p>
      * 
      * If the current user has no adequate permissions, no exception is thrown, 
      * but the queried contact fields are limited to the fields defined by 

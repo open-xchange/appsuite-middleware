@@ -1,0 +1,15 @@
+Source: open-xchange-mdns
+Section: web
+Priority: optional
+Maintainer: Jan Bauerdick <jan.bauerdick@open-xchange.com>
+Build-Depends: debhelper (>= 4.0.0), ant (>= 1.7.0), ant-optional (>= 1.7.0), sun-java6-jdk|java6-sdk, open-xchange-core (>= @OXVERSION@)
+Standards-Version: 3.8.4
+Homepage: http://www.open-xchange.com
+
+Package: open-xchange-mdns
+Architecture: all
+Pre-Depends: open-xchange-core (>= @OXVERSION@)
+Depends: ${misc:Depends}
+Conflicts: open-xchange-aws
+Description: The Open-Xchange MDNS cluster package
+ This package installs the OSGi bundles needed for the MDNS cluster.

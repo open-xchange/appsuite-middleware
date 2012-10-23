@@ -487,6 +487,19 @@ public class OXException extends Exception implements OXExceptionConstants, Seri
     }
 
     /**
+     * Sets the message intended for being displayed to the user.
+     *
+     * @param displayMessage The displayable message
+     * @param displayArgs The optional arguments
+     * @return This {@link OXException} with display message applied
+     */
+    public OXException setDisplayMessage(final String displayMessage, final Object... displayArgs) {
+        this.displayMessage = null == displayMessage ? OXExceptionStrings.MESSAGE : displayMessage;
+        this.displayArgs = null == displayArgs ? MESSAGE_ARGS_EMPTY : displayArgs;
+        return this;
+    }
+
+    /**
      * Gets the plain log message.
      * 
      * @return The plain log message.

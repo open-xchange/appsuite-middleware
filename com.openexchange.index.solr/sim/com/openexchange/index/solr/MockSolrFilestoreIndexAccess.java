@@ -54,7 +54,7 @@ import org.apache.solr.client.solrj.response.UpdateResponse;
 import org.apache.solr.common.SolrInputDocument;
 import org.apache.solr.common.params.SolrParams;
 import com.openexchange.exception.OXException;
-import com.openexchange.index.solr.internal.filestore.SolrFilestoreIndexAccess;
+import com.openexchange.index.solr.internal.infostore.SolrInfostoreIndexAccess;
 import com.openexchange.solr.SolrCoreIdentifier;
 
 
@@ -63,7 +63,7 @@ import com.openexchange.solr.SolrCoreIdentifier;
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public class MockSolrFilestoreIndexAccess extends SolrFilestoreIndexAccess {
+public class MockSolrFilestoreIndexAccess extends SolrInfostoreIndexAccess {
     
     private final InMemoryIndex index;
 

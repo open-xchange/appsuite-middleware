@@ -50,7 +50,8 @@
 package com.openexchange.contact.internal.mapping;
 
 import javax.mail.internet.AddressException;
-
+import com.openexchange.config.ConfigurationService;
+import com.openexchange.contact.internal.ContactServiceLookup;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contact.ContactExceptionCodes;
 import com.openexchange.groupware.container.Contact;
@@ -63,11 +64,21 @@ import com.openexchange.mail.mime.QuotedInternetAddress;
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 public abstract class EMailMapping extends StringMapping {
+    
+    private Boolean validateEmail = null;
+    
+    private boolean isValidateEmail() throws OXException {
+        if (null == validateEmail) {
+            validateEmail = Boolean.valueOf(
+                ContactServiceLookup.getService(ConfigurationService.class).getBoolProperty("validate_contact_email", true));
+        }
+        return validateEmail.booleanValue();
+    }
 
 	@Override
-	public void validate(final Contact contact) throws OXException {
+	public void validate(Contact contact) throws OXException {
 		super.validate(contact);
-		if (this.isSet(contact)) {
+		if (isValidateEmail() && this.isSet(contact)) {
 			final String value = this.get(contact);
 			if (null != value && !value.trim().isEmpty()) {
 				try {

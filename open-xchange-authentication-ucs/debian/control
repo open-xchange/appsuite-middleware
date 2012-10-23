@@ -12,4 +12,8 @@ Pre-Depends: open-xchange-core (>= @OXVERSION@)
 Depends: ${misc:Depends}
 Conflicts: open-xchange-authentication-database, open-xchange-authentication-imap, open-xchange-authentication-ldap
 Provides: open-xchange-authentication
-Description: The Open-Xchange Univention Corporate Server authentication bundle
+Description: Module for authenticating users on a Univention Corporate Server installation
+ This package installs the OSGi bundle implementing the OSGi AuthenticationService for the backend. The implementation uses Univention
+ Corporate Server to authenticate login requests.
+ This authentication module is mutually exclusive with any other authentication module. Only one authentication module can be installed on
+ the backend.

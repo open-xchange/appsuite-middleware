@@ -158,11 +158,6 @@ public final class ElementAttributes2JCS implements ElementAttributes {
     }
 
     @Override
-    public long getVersion() {
-        return attributes.getVersion();
-    }
-
-    @Override
     public void setIdleTime(final long idle) {
         attributes.setIdleTime(idle);
     }
@@ -200,11 +195,6 @@ public final class ElementAttributes2JCS implements ElementAttributes {
     @Override
     public void setSize(final int size) {
         attributes.setSize(size);
-    }
-
-    @Override
-    public void setVersion(final long version) {
-        attributes.setVersion(version);
     }
 
 }

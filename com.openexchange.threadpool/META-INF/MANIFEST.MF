@@ -15,9 +15,11 @@ Import-Package: com.openexchange.config,
  com.openexchange.sessiond,
  javax.management,
  org.apache.commons.logging,
+ org.cliffc.high_scale_lib,
  org.osgi.framework,
  org.osgi.service.event,
- org.osgi.util.tracker
+ org.osgi.util.tracker,
+ sun.misc
 Export-Package: com.openexchange.threadpool,
  com.openexchange.threadpool.behavior,
  com.openexchange.timer

@@ -177,7 +177,7 @@ public class LinkedInServiceImpl implements LinkedInService{
 
 
     @Override
-    public List<Contact> getContacts(final Session session, final int user, final int contextId, final int accountId) {
+    public List<Contact> getContacts(final Session session, final int user, final int contextId, final int accountId) throws OXException {
     	final Response response = performRequest(session, user, contextId, accountId, Verb.GET, CONNECTIONS_URL);
     	if (response == null) {
     		return Collections.emptyList();

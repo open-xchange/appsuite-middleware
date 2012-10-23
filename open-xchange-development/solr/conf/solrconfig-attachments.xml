@@ -9,7 +9,7 @@
     <dataDir>${solr.core.dataDir}</dataDir>
     <lib dir="${libDir:/opt/open-xchange/solr/lib}" />
 
-    <mainIndex>
+    <configIndex>
         <useCompoundFile>false</useCompoundFile>
         <ramBufferSizeMB>32</ramBufferSizeMB>
         <mergeFactor>10</mergeFactor>
@@ -23,7 +23,7 @@
             <str name="keepOptimizedOnly">false</str>
             <str name="maxCommitsToKeep">1</str>
         </deletionPolicy>
-    </mainIndex>
+    </configIndex>
 
     <updateHandler class="solr.DirectUpdateHandler2" />
 
@@ -56,7 +56,7 @@
 
     <requestHandler name="simpleSearch" class="solr.SearchHandler">
         <lst name="invariants">
-            <str name="defType">dismax</str>
+            <str name="defType">edismax</str>
             <str name="echoParams">explicit</str>
             <float name="tie">0.01</float>
             <str name="qf">
@@ -110,7 +110,6 @@
     <searchComponent name="queryModifier" class="de.kippdata.cria.solrext.searchcomponents.FormalFieldQueryModifier">
         <str name="param1">uuid</str>
         <str name="param2">module</str>
-        <str name="param3">service</str>
         <str name="param4">account</str>        
         <str name="param5">folder</str>
         <str name="param6">id</str>

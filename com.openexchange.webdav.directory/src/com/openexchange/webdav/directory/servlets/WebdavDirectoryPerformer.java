@@ -89,7 +89,7 @@ import com.openexchange.webdav.protocol.WebdavProtocolException;
 import com.openexchange.webdav.protocol.helpers.PropertyMixin;
 
 /**
- * {@link WebdavPrincipalPerformer}
+ * {@link WebdavDirectoryPerformer}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */

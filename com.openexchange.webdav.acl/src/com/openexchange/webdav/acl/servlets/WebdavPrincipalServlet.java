@@ -144,6 +144,11 @@ public class WebdavPrincipalServlet extends OXServlet {
         doIt(req, resp, Action.TRACE);
     }
 
+    @Override
+    protected void doReport(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
+        doIt(req, resp, Action.REPORT);
+    }
+
     private void doIt(final HttpServletRequest req, final HttpServletResponse resp, final Action action) throws ServletException, IOException {
         ServerSession session;
         try {

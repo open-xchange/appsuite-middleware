@@ -34,5 +34,6 @@ Import-Package: com.google.common.annotations,
  org.apache.commons.logging,
  org.cliffc.high_scale_lib,
  org.osgi.framework,
- org.osgi.util.tracker
+ org.osgi.util.tracker,
+ sun.misc
 Bundle-Activator: com.openexchange.caching.hazelcast.osgi.HazelcastCacheActivator

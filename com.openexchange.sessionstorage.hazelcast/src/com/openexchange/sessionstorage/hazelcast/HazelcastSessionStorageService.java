@@ -51,13 +51,11 @@ package com.openexchange.sessionstorage.hazelcast;
 
 import java.util.ArrayList;
 import java.util.List;
-import org.apache.commons.logging.Log;
 import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.core.Hazelcasts;
 import com.hazelcast.core.IMap;
 import com.openexchange.crypto.CryptoService;
 import com.openexchange.exception.OXException;
-import com.openexchange.log.LogFactory;
 import com.openexchange.session.Session;
 import com.openexchange.sessionstorage.SessionStorageService;
 import com.openexchange.sessionstorage.hazelcast.exceptions.OXHazelcastSessionStorageExceptionCodes;
@@ -86,9 +84,7 @@ public class HazelcastSessionStorageService implements SessionStorageService {
 
     private final ScheduledTimerTask cleanupTask;
 
-    private static HazelcastSessionStorageService instance;
-
-    private static Log LOG = LogFactory.getLog(HazelcastSessionStorageService.class);
+    private static volatile HazelcastSessionStorageService instance;
 
     /**
      * Initializes a new {@link HazelcastSessionStorageService}.
@@ -115,9 +111,7 @@ public class HazelcastSessionStorageService implements SessionStorageService {
             sessions.replace(sessionId, s);
             return s;
         }
-        OXException e = OXHazelcastSessionStorageExceptionCodes.HAZELCAST_SESSIONSTORAGE_SESSION_NOT_FOUND.create(sessionId);
-        LOG.info(e.getMessage(), e);
-        throw e;
+        throw OXHazelcastSessionStorageExceptionCodes.HAZELCAST_SESSIONSTORAGE_SESSION_NOT_FOUND.create(sessionId);
     }
 
     @Override
@@ -127,7 +121,6 @@ public class HazelcastSessionStorageService implements SessionStorageService {
             ss.setPassword(crypt(ss.getPassword()));
             sessions.put(session.getSessionID(), ss);
         } catch (Exception e) {
-            LOG.error(e.getMessage(), e);
             throw OXHazelcastSessionStorageExceptionCodes.HAZELCAST_SESSIONSTORAGE_SAVE_FAILED.create(session.getSessionID());
         }
     }
@@ -137,7 +130,6 @@ public class HazelcastSessionStorageService implements SessionStorageService {
         try {
             sessions.remove(sessionId);
         } catch (Exception e) {
-            LOG.error(e.getMessage(), e);
             throw OXHazelcastSessionStorageExceptionCodes.HAZELCAST_SESSIONSTORAGE_REMOVE_FAILED.create(sessionId);
         }
     }
@@ -239,9 +231,7 @@ public class HazelcastSessionStorageService implements SessionStorageService {
                 return s;
             }
         }
-        OXException e = OXHazelcastSessionStorageExceptionCodes.HAZELCAST_SESSIONSTORAGE_SESSION_NOT_FOUND.create();
-        LOG.warn(e.getMessage(), e);
-        throw e;
+        throw OXHazelcastSessionStorageExceptionCodes.HAZELCAST_SESSIONSTORAGE_RANDOM_NOT_FOUND.create(randomToken);
     }
 
     @Override
@@ -252,9 +242,7 @@ public class HazelcastSessionStorageService implements SessionStorageService {
                 return s;
             }
         }
-        OXException e = OXHazelcastSessionStorageExceptionCodes.HAZELCAST_SESSIONSTORAGE_ALTID_NOT_FOUND.create(altId);
-        LOG.error(e.getMessage(), e);
-        throw e;
+        throw OXHazelcastSessionStorageExceptionCodes.HAZELCAST_SESSIONSTORAGE_ALTID_NOT_FOUND.create(altId);
     }
 
     @Override
@@ -290,21 +278,11 @@ public class HazelcastSessionStorageService implements SessionStorageService {
     }
 
     private String crypt(String password) throws OXException {
-        try {
-            return cryptoService.encrypt(password, encryptionKey);
-        } catch (OXException e) {
-            LOG.error(e.getMessage(), e);
-            throw e;
-        }
+        return cryptoService.encrypt(password, encryptionKey);
     }
 
     private String decrypt(String encPassword) throws OXException {
-        try {
-            return cryptoService.decrypt(encPassword, encryptionKey);
-        } catch (OXException e) {
-            LOG.error(e.getMessage(), e);
-            throw e;
-        }
+        return cryptoService.decrypt(encPassword, encryptionKey);
     }
 
     public void cleanupTask() {

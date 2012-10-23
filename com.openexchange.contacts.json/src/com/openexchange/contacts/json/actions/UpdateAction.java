@@ -50,32 +50,19 @@
 package com.openexchange.contacts.json.actions;
 
 import java.util.Date;
-
 import org.json.JSONException;
 import org.json.JSONObject;
-
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.contacts.json.ContactRequest;
 import com.openexchange.contacts.json.RequestTools;
-import com.openexchange.contacts.json.converters.ContactParser;
 import com.openexchange.contacts.json.mapping.ContactMapper;
 import com.openexchange.documentation.RequestMethod;
 import com.openexchange.documentation.annotations.Action;
 import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.contact.ContactInterface;
-import com.openexchange.groupware.contact.ContactInterfaceDiscoveryService;
-import com.openexchange.groupware.contact.Contacts;
 import com.openexchange.groupware.container.Contact;
-import com.openexchange.groupware.container.FolderObject;
-import com.openexchange.groupware.ldap.User;
-import com.openexchange.groupware.upload.UploadFile;
-import com.openexchange.groupware.upload.impl.UploadEvent;
-import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.server.ServiceLookup;
-import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.servlet.OXJSONExceptionCodes;
-import com.openexchange.tools.session.ServerSession;
 
 
 /**
@@ -97,96 +84,12 @@ public class UpdateAction extends ContactAction {
      * Initializes a new {@link UpdateAction}.
      * @param serviceLookup
      */
-    public UpdateAction(final ServiceLookup serviceLookup) {
+    public UpdateAction(ServiceLookup serviceLookup) {
         super(serviceLookup);
     }
 
     @Override
-    protected AJAXRequestResult perform(final ContactRequest req) throws OXException {
-        final ServerSession session = req.getSession();
-        final int folder = req.getFolder();
-        final int id = req.getId();
-        final long timestamp = req.getTimestamp();
-        final Date date = new Date(timestamp);
-        final boolean containsImage = req.containsImage();
-        final JSONObject json = req.getContactJSON(containsImage);
-
-        final ContactParser parser = new ContactParser();
-        final Contact contact = parser.parse(json);
-        contact.setObjectID(id);
-
-        if (containsImage) {
-            UploadEvent uploadEvent = null;
-            try {
-                uploadEvent = req.getUploadEvent();
-                final UploadFile file = uploadEvent.getUploadFileByFieldName("file");
-                if (file == null) {
-                    throw AjaxExceptionCodes.NO_UPLOAD_IMAGE.create();
-                }
-
-                RequestTools.setImageData(contact, file);
-            } finally {
-                if (uploadEvent != null) {
-                    uploadEvent.cleanUp();
-                }
-            }
-        }
-
-        final ContactInterfaceDiscoveryService discoveryService = getContactInterfaceDiscoveryService();
-
-        final ContactInterface contactIface = discoveryService.newContactInterface(folder, session);
-
-        if (contact.containsParentFolderID() && contact.getParentFolderID() > 0) {
-            /*
-             * A move to another folder
-             */
-            final int folderId = contact.getParentFolderID();
-            final ContactInterface targetContactIface = discoveryService.newContactInterface(folderId, session);
-            if (!contactIface.getClass().equals(targetContactIface.getClass())) {
-                /*
-                 * A move to another contact service
-                 */
-                final Contact toMove = contactIface.getObjectById(id, folder);
-                for (int i = 1; i < Contacts.mapping.length; i++) {
-                    if (null != Contacts.mapping[i]) {
-                        if (contact.contains(i)) {
-                            toMove.set(i, contact.get(i));
-                        }
-                    }
-                }
-                if (folder == FolderObject.SYSTEM_LDAP_FOLDER_ID) {
-                    toMove.removeInternalUserId();
-                }
-                toMove.setNumberOfAttachments(0);
-                targetContactIface.insertContactObject(toMove);
-
-                final User user = session.getUser();
-                final UserConfiguration uc = session.getUserConfiguration();
-                /*
-                 * Check attachments
-                 */
-                CopyAction.copyAttachments(folderId, session, session.getContext(), toMove, id, folder, user, uc);
-                /*
-                 * Check links
-                 */
-                CopyAction.copyLinks(folderId, session, session.getContext(), toMove, id, folder, user);
-                /*
-                 * Delete original
-                 */
-                contactIface.deleteContactObject(id, folder, date);
-                final JSONObject response = new JSONObject();
-                return new AJAXRequestResult(response, toMove.getLastModified(), "json");
-            }
-        }
-
-        contactIface.updateContactObject(contact, folder, date);
-
-        final JSONObject response = new JSONObject();
-        return new AJAXRequestResult(response, contact.getLastModified(), "json");
-    }
-
-    @Override
-    protected AJAXRequestResult perform2(final ContactRequest request) throws OXException {
+    protected AJAXRequestResult perform(final ContactRequest request) throws OXException {
         boolean containsImage = request.containsImage();
         JSONObject json = request.getContactJSON(containsImage);
         Contact contact = null;

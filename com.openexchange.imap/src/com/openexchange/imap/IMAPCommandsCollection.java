@@ -57,9 +57,10 @@ import gnu.trove.list.TLongList;
 import gnu.trove.list.array.TIntArrayList;
 import gnu.trove.list.array.TLongArrayList;
 import gnu.trove.map.TLongIntMap;
+import gnu.trove.map.TObjectLongMap;
 import gnu.trove.map.hash.TIntLongHashMap;
 import gnu.trove.map.hash.TLongIntHashMap;
-import gnu.trove.map.hash.TObjectIntHashMap;
+import gnu.trove.map.hash.TObjectLongHashMap;
 import gnu.trove.set.TIntSet;
 import gnu.trove.set.hash.TIntHashSet;
 import java.lang.reflect.Field;
@@ -87,9 +88,9 @@ import javax.mail.Store;
 import javax.mail.StoreClosedException;
 import javax.mail.event.FolderEvent;
 import com.openexchange.exception.OXException;
-import com.openexchange.imap.command.FetchIMAPCommand;
 import com.openexchange.imap.command.FlagsIMAPCommand;
 import com.openexchange.imap.command.IMAPNumArgSplitter;
+import com.openexchange.imap.command.MessageFetchIMAPCommand;
 import com.openexchange.imap.dataobjects.ExtendedIMAPFolder;
 import com.openexchange.imap.sort.IMAPSort;
 import com.openexchange.imap.util.IMAPUpdateableData;
@@ -1822,7 +1823,7 @@ public final class IMAPCommandsCollection {
                     final boolean body = set.contains(MailField.BODY) || set.contains(MailField.FULL);
                     final MailField sort = MailField.toField((sortField == null ? MailSortField.RECEIVED_DATE : sortField).getListField());
                     final FetchProfile fp = null == sort ? getFetchProfile(fields, fastFetch) : getFetchProfile(fields, sort, fastFetch);
-                    newMsgs = new FetchIMAPCommand(folder, p.isREV1(), newMsgSeqNums, fp, false, false, body).doCommand();
+                    newMsgs = new MessageFetchIMAPCommand(folder, p.isREV1(), newMsgSeqNums, fp, false, false, body).doCommand();
                 } catch (final MessagingException e) {
                     throw wrapException(e, null);
                 }
@@ -3062,23 +3063,25 @@ public final class IMAPCommandsCollection {
                 final Response response = r[r.length - 1];
                 final Long retval = Long.valueOf(-1L);
                 if (response.isOK()) {
-                    final TObjectIntHashMap<String> map = new TObjectIntHashMap<String>(messageIds.length, 0.5f, -1);
-                    for (int i = 0; i < messageIds.length; i++) {
-                        map.put(messageIds[i], i + 1);
-                    }
-                    final long[] uids = new long[messageIds.length];
-                    Arrays.fill(uids, -1);
+                    final int length = messageIds.length;
+                    final TObjectLongMap<String> messageId2Uid = new TObjectLongHashMap<String>(length, 0.5f, -1L);
                     for (int i = 0, len = r.length - 1; i < len; i++) {
                         if (!(r[i] instanceof FetchResponse)) {
                             continue;
                         }
                         final FetchResponse fetchResponse = (FetchResponse) r[i];
-                        final int index = map.get(getItemOf(ENVELOPE.class, fetchResponse, "ENVELOPE").messageId);
-                        if (index >= 0) {
-                            final UID uidItem = getItemOf(UID.class, fetchResponse, STR_UID);
-                            uids[index] = uidItem.uid;
-                        }
+                        final String messageId = getItemOf(ENVELOPE.class, fetchResponse, "ENVELOPE").messageId;
+                        final long uid = getItemOf(UID.class, fetchResponse, STR_UID).uid;
+                        messageId2Uid.putIfAbsent(messageId, uid);
                         r[i] = null;
+                    }
+                    final long[] uids = new long[length];
+                    Arrays.fill(uids, -1);
+                    for (int i = 0; i < length; i++) {
+                        final long uid = messageId2Uid.get(messageIds[i]);
+                        if (uid > 0) {
+                            uids[i] = uid;
+                        }
                     }
                     p.notifyResponseHandlers(r);
                     return uids;

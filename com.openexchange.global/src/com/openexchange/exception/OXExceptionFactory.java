@@ -147,7 +147,9 @@ public class OXExceptionFactory {
             ret = new OXException(code.getNumber(), code.getMessage(), cause, args);
         } else {
             if (DISPLAYABLE.contains(category.getType())) {
-                ret = new OXException(code.getNumber(), code.getMessage(), cause, args).setLogMessage(code.getMessage(), args);
+                // Displayed message is equal to logged one
+                final String message = code.getMessage();
+                ret = new OXException(code.getNumber(), message, cause, args).setLogMessage(message, args);
             } else {
                 ret = new OXException(
                     code.getNumber(),

@@ -17,6 +17,14 @@ set -e
 # for details, see http://www.debian.org/doc/debian-policy/ or
 # the debian-policy package
 
+DIVERTFILES="outlook2003.de_DE.properties outlook2003.en_EN.properties outlook2003.fr_FR.properties outlook2003.nl_NL.properties"
+
+for FILE in ${DIVERTFILES}; do
+    if dpkg-divert --list | grep $FILE; then
+        dpkg-divert --package open-xchange --rename --remove /opt/open-xchange/importCSV/${FILE}
+    fi
+done
+
 dpkg-maintscript-helper mv_conffile /opt/open-xchange/etc/groupware/filestorage.properties \
       /opt/open-xchange/etc/filestorage.properties 6.20.99 open-xchange-file-storage-config \
       -- $1 $(dpkg-query -W -f='${Config-Version}' open-xchange-file-storage-config)
@@ -72,15 +80,28 @@ postFix() {
     # prevent bash from expanding, see bug 13316
     GLOBIGNORE='*'
 
+    # SoftwareChange_Request-1148
+    pfile=/opt/open-xchange/etc/whitelist.properties
+    if ! ox_exists_property "html.style.word-break" $pfile; then
+       ox_set_property "html.style.word-break" '"break-all"' $pfile
+    fi
+    if ! ox_exists_property "html.style.word-wrap" $pfile; then
+       ox_set_property "html.style.word-wrap" '"break-word"' $pfile
+    fi
+
+    # SoftwareChange_Request-1125
+    pfile=/opt/open-xchange/etc/contactcollector.properties
+    if ! ox_exists_property com.openexchange.contactcollector.folder.deleteDenied $pfile; then
+       ox_set_property com.openexchange.contactcollector.folder.deleteDenied false $pfile
+    fi
 }
 
 setConfigFilePermissions() {
     ox_update_permissions "/var/log/open-xchange" open-xchange:root 750
     ox_update_permissions "/opt/open-xchange/osgi" open-xchange:root 750
-    ox_update_permissions "/opt/open-xchange/etc/mail.properties" root:open-xchange 640
     ox_update_permissions "/opt/open-xchange/etc/configdb.properties" root:open-xchange 640
-    ox_update_permissions "/opt/open-xchange/etc/server.properties" root:open-xchange 640
-    ox_update_permissions "/opt/open-xchange/etc/filestorage.properties" root:open-xchange 640
+    ox_update_permissions "/opt/open-xchange/etc/mail.properties" root:open-xchange 640
+    ox_update_permissions "/opt/open-xchange/etc/ox-scriptconf.sh" root:root 644
 }
 
 case "$1" in

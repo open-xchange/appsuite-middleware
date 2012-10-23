@@ -316,7 +316,7 @@ public abstract class IMAPFolderWorker extends MailMessageStorageLong {
                      * Folder is open, so close folder
                      */
                     try {
-                        imapFolder.close(Folder.READ_WRITE == mode);
+                        imapFolder.close(false/*Folder.READ_WRITE == mode*/);
                     } finally {
                         if (imapFolder == this.imapFolder) {
                             resetIMAPFolder();

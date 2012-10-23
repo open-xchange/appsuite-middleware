@@ -55,6 +55,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.concurrent.locks.Lock;
 
 /**
  * {@link CachedSession} - Holding cache-able information of a session.
@@ -150,7 +151,7 @@ public final class CachedSession implements Serializable {
                 isEmptyArray = false;
                 toCheck = value;
             }
-            if (isEmptyArray || (Serializable.class.isInstance(toCheck) && toCheck.getClass().getName().startsWith("java."))) {
+            if (isEmptyArray || (Serializable.class.isInstance(toCheck) && !Lock.class.isInstance(toCheck) && toCheck.getClass().getName().startsWith("java."))) {
                 tmpparameters.put(entry.getKey(), (Serializable) value);
             }
         }

@@ -71,6 +71,13 @@ public class FileStorageAccountWriter {
         super();
     }
 
+    /**
+     * Writes given account into its JSON representation.
+     *
+     * @param account The account
+     * @return The resulting JSON
+     * @throws JSONException If writing JSON fails
+     */
     public JSONObject write(final FileStorageAccount account) throws JSONException {
         final JSONObject accountJSON = new JSONObject();
         accountJSON.put(FileStorageAccountConstants.ID, account.getId());

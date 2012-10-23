@@ -1,4 +1,3 @@
-
 package com.openexchange.realtime.atmosphere.osgi;
 
 import org.osgi.framework.BundleContext;
@@ -43,8 +42,8 @@ public class AtmosphereRTActivator extends HousekeepingActivator {
 
         track(PayloadElementTransformer.class, new SimpleRegistryListener<PayloadElementTransformer>() {
 
-            @Override
-            public void added(ServiceReference<PayloadElementTransformer> ref, PayloadElementTransformer service) {
+                    OXRTHandler service) {
+                handlerLibrary.add(service);
                 payloadTransformerRegistry.add(service);
             }
 

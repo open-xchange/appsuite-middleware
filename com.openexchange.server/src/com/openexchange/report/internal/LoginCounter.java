@@ -53,15 +53,16 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.Date;
 import java.util.Map;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 import javax.management.MBeanException;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
+import com.openexchange.log.LogFactory;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.StringCollection;
 import com.openexchange.tools.sql.DBUtils;
@@ -84,6 +85,39 @@ public class LoginCounter implements LoginCounterMBean {
     public LoginCounter() {
         super();
         logger = com.openexchange.log.Log.valueOf(LogFactory.getLog(ReportingMBean.class));
+    }
+
+    @Override
+    public Date getLastLoginTimeStamp(final int userId, final int contextId, final String client) throws MBeanException {
+        final DatabaseService service = ServerServiceRegistry.getInstance().getService(DatabaseService.class);
+        if (null == service) {
+            throw new MBeanException(null, "DatabaseService not available at the moment. Try again later.");
+        }
+        Connection con = null;
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        try {
+            con = service.getReadOnly(contextId);
+            stmt = con.prepareStatement("SELECT value FROM user_attribute WHERE cid=? AND id=? AND name=?");
+            stmt.setInt(1, contextId);
+            stmt.setInt(2, userId);
+            stmt.setString(3, "client:" + client);
+            rs = stmt.executeQuery();
+            if (!rs.next()) {
+                throw new MBeanException(null, "No such entry found (user="+userId+", context="+contextId+", client=\""+client+"\").");
+            }
+            return new Date(Long.parseLong(rs.getString(1)));
+        } catch (final MBeanException e) {
+            throw e;
+        } catch (final Exception e) {
+            logger.error(e.getMessage(), e);
+            throw new MBeanException(null, "Retrieving last login time stamp failed: " + e.getMessage());
+        } finally {
+            closeSQLStuff(rs, stmt);
+            if (null != con) {
+                service.backReadOnly(contextId, con);
+            }
+        }
     }
 
     @Override
@@ -198,6 +232,45 @@ public class LoginCounter implements LoginCounterMBean {
         }
         s.append('$');
         return (s.toString());
+    }
+
+    /**
+     * Closes the ResultSet.
+     *
+     * @param result <code>null</code> or a ResultSet to close.
+     */
+    private static void closeSQLStuff(final ResultSet result) {
+        if (result != null) {
+            try {
+                result.close();
+            } catch (final Exception e) {
+            }
+        }
+    }
+
+    /**
+     * Closes the {@link Statement}.
+     *
+     * @param stmt <code>null</code> or a {@link Statement} to close.
+     */
+    private static void closeSQLStuff(final Statement stmt) {
+        if (null != stmt) {
+            try {
+                stmt.close();
+            } catch (final Exception e) {
+            }
+        }
+    }
+
+    /**
+     * Closes the ResultSet and the Statement.
+     *
+     * @param result <code>null</code> or a ResultSet to close.
+     * @param stmt <code>null</code> or a Statement to close.
+     */
+    private static void closeSQLStuff(final ResultSet result, final Statement stmt) {
+        closeSQLStuff(result);
+        closeSQLStuff(stmt);
     }
 
 }

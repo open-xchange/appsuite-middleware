@@ -51,7 +51,6 @@ package com.openexchange.realtime.xmpp.packet;
 
 import org.joox.Match;
 import com.openexchange.exception.OXException;
-import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -61,14 +60,12 @@ import com.openexchange.tools.session.ServerSession;
  */
 public abstract class XMPPStanza {
 
-    public static ServiceLookup services;
-
     protected JID to;
 
     private String id;
 
     private ServerSession session;
-    
+
     protected XMPPStanza(ServerSession session) {
         this.session = session;
     }
@@ -103,6 +100,20 @@ public abstract class XMPPStanza {
         if (id != null) {
             document.attr("id", id);
         }
+    }
+
+    public static XMPPStanza getStanza(Match xml, ServerSession session) {
+        String id = xml.id().trim().toLowerCase();
+
+        if (id.equals("message")) {
+            return new XMPPMessage(xml, session);
+        } else if (id.equals("presence")) {
+            return new XMPPPresence(session);
+        } else if (id.equals("iq")) {
+            return new XMPPIq(xml, session);
+        }
+
+        return null;
     }
 
     public abstract String toXML(ServerSession session) throws OXException;

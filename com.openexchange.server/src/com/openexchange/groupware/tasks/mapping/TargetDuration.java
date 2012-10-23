@@ -55,6 +55,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
+import com.openexchange.groupware.tasks.AttributeNames;
 import com.openexchange.groupware.tasks.Mapper;
 import com.openexchange.groupware.tasks.Task;
 
@@ -87,6 +88,11 @@ public class TargetDuration implements Mapper<Long> {
     @Override
     public String getDBColumnName() {
         return "target_duration";
+    }
+
+    @Override
+    public String getDisplayName() {
+        return AttributeNames.TARGET_DURATION;
     }
 
     @Override

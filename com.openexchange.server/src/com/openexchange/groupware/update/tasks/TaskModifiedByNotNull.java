@@ -53,7 +53,6 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.tasks.Mapping;

@@ -314,7 +314,6 @@ public final class StructureMailMessageParser {
             mailPart.containsContentType() ? mailPart.getContentType() : new ContentType(MimeTypes.MIME_APPL_OCTET);
         final String lcct = LocaleTools.toLowerCase(contentType.getBaseType());
         final String fileName = getFileName(mailPart.getFileName(), getSequenceId(prefix, partCount), lcct);
-
         /*
          * Parse part dependent on its MIME type
          */
@@ -325,6 +324,23 @@ public final class StructureMailMessageParser {
          *     || disposition.equalsIgnoreCase(Part.INLINE)) && mailPart.getFileName() == null);
          */
         if (isText(lcct)) {
+            final String partFileName = mailPart.getFileName();
+            if (null != partFileName && "base64".equalsIgnoreCase(mailPart.getFirstHeader(MessageHeaders.HDR_CONTENT_TRANSFER_ENC))) {
+                // Possibly not a plain text part
+                final String contentTypeByFileName = MimeType2ExtMap.getContentType(partFileName);
+                if (!MimeTypes.MIME_APPL_OCTET.equals(contentTypeByFileName) && !isText(contentTypeByFileName)) {
+                    contentType.setBaseType(contentTypeByFileName);
+                    mailPart.setContentType(contentType);
+                    mailPart.setHeader(MessageHeaders.HDR_CONTENT_TYPE, contentType.toString());
+                    if (!mailPart.containsSequenceId()) {
+                        mailPart.setSequenceId(getSequenceId(prefix, partCount));
+                    }
+                    if (!handler.handleAttachment(mailPart, mailPart.getSequenceId())) {
+                        stop = true;
+                    }
+                    return;
+                }
+            }
             if (isInline) {
                 final String content = readContent(mailPart, contentType);
                 final UUEncodedMultiPart uuencodedMP;

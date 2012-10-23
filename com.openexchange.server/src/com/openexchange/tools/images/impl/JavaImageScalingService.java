@@ -60,11 +60,14 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-
+import java.util.Iterator;
+import java.util.Locale;
+import javax.imageio.IIOImage;
 import javax.imageio.ImageIO;
-
+import javax.imageio.ImageWriteParam;
+import javax.imageio.ImageWriter;
+import javax.imageio.stream.ImageOutputStream;
 import org.apache.commons.logging.Log;
-
 import com.drew.imaging.ImageMetadataReader;
 import com.drew.imaging.ImageProcessingException;
 import com.drew.metadata.Directory;
@@ -101,7 +104,15 @@ public class JavaImageScalingService implements ImageScalingService {
 
     @Override
     public InputStream scale(InputStream pictureData, int maxWidth, int maxHeight, ScaleType scaleType) throws IOException {
-        BufferedImage image = ImageIO.read(pictureData);
+        if (null == pictureData) {
+            throw new IOException("pictureData == null!");
+        }
+        final BufferedImage image;
+        try {
+            image = ImageIO.read(pictureData);
+        } finally {
+            Streams.close(pictureData);
+        }
 
         DimensionConstrain constrain;
         switch (scaleType) {
@@ -120,27 +131,42 @@ public class JavaImageScalingService implements ImageScalingService {
         BufferedImage scaled = op.filter(image, null);
 
         UnsynchronizedByteArrayOutputStream baos = new UnsynchronizedByteArrayOutputStream(8192);
+        
+        Iterator<ImageWriter> iter = ImageIO.getImageWritersByFormatName("jpeg");
+        ImageWriter writer = iter.next();
+        ImageWriteParam iwp = writer.getDefaultWriteParam();
+        iwp.setCompressionMode(ImageWriteParam.MODE_EXPLICIT);
+        iwp.setProgressiveMode(ImageWriteParam.MODE_DEFAULT);
+        iwp.setCompressionQuality(0.8f);
+        ImageOutputStream imageOutputStream = ImageIO.createImageOutputStream(baos);
+        writer.setOutput(imageOutputStream);
+        IIOImage iioImage = new IIOImage(scaled, null, null);
+        writer.write(null, iioImage, iwp);
+        writer.dispose();
 
-        if (!ImageIO.write(scaled, "png", baos)) {
-            throw new IOException("Couldn't scale image");
+        try {
+            return Streams.newByteArrayInputStream(baos.toByteArray());
+        } finally {
+            imageOutputStream.close();
+            baos.close();
         }
-
-        return new ByteArrayInputStream(baos.toByteArray());
     }
 
     @Override
     public InputStream rotateAccordingExif(InputStream pictureData, String contentType) throws IOException, OXException {
         String fileType;
-        if (contentType.startsWith(CT_JPEG)) {
-            fileType = "jpeg";
-        } else if (contentType.startsWith(CT_JPG)) {
-            fileType = "jpg";
-        } else if (contentType.startsWith(CT_TIFF)) {
-            fileType = "tiff";
-        } else {
-            return pictureData;
+        {
+            final String lcct = null == contentType ? "" : contentType.toLowerCase(Locale.ENGLISH);
+            if (lcct.startsWith(CT_JPEG)) {
+                fileType = "jpeg";
+            } else if (lcct.startsWith(CT_JPG)) {
+                fileType = "jpg";
+            } else if (lcct.startsWith(CT_TIFF)) {
+                fileType = "tiff";
+            } else {
+                return pictureData;
+            }
         }
-
         if (null == pictureData) {
             return pictureData;
         }
@@ -157,15 +183,24 @@ public class JavaImageScalingService implements ImageScalingService {
             if (exifTransformation == null) {
                 return Streams.newByteArrayInputStream(managedFile.getInputStream());
             }
-   
-            AffineTransformOp op = new AffineTransformOp(exifTransformation, AffineTransformOp.TYPE_BICUBIC);
+            
             BufferedImage image = ImageIO.read(managedFile.getInputStream());
-            ColorModel cm = (image.getType() == BufferedImage.TYPE_BYTE_GRAY) ? image.getColorModel() : null;
-            BufferedImage destinationImage = op.createCompatibleDestImage(image, cm);
+
+            int newWidth;
+            int newHeight;
+            if (imageInformation.orientation <= 4) {
+                newWidth = image.getWidth();
+                newHeight = image.getHeight();
+            } else {
+                newWidth = image.getHeight();
+                newHeight = image.getWidth();
+            }
+            BufferedImage destinationImage = new BufferedImage(newWidth, newHeight, image.getType());
+
             Graphics2D g = destinationImage.createGraphics();
             g.setBackground(Color.WHITE);
             g.clearRect(0, 0, destinationImage.getWidth(), destinationImage.getHeight());
-            destinationImage = op.filter(image, destinationImage);
+            g.drawImage(image, exifTransformation, null);
    
             UnsynchronizedByteArrayOutputStream baos = new UnsynchronizedByteArrayOutputStream();
             if (!ImageIO.write(destinationImage, fileType, baos)) {

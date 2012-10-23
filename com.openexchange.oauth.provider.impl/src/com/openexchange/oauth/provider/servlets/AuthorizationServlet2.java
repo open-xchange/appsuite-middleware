@@ -73,7 +73,7 @@ import com.openexchange.oauth.provider.v2.OAuth2ProviderService;
 
 /**
  * {@link AuthorizationServlet2} - Autherization request handler for OAuth2.0.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class AuthorizationServlet2 extends AbstractAuthorizationServlet {

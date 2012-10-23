@@ -50,19 +50,17 @@
 package com.openexchange.file.storage.osgi;
 
 import java.util.Collection;
-import java.util.Dictionary;
-import java.util.Hashtable;
-import java.util.Queue;
 import java.util.concurrent.Callable;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
 import java.util.concurrent.atomic.AtomicReference;
+import org.apache.commons.logging.Log;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
-import org.osgi.service.event.Event;
-import org.osgi.service.event.EventAdmin;
 import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.openexchange.exception.OXException;
@@ -70,8 +68,7 @@ import com.openexchange.file.storage.FileStorageAccountManager;
 import com.openexchange.file.storage.FileStorageAccountManagerLookupService;
 import com.openexchange.file.storage.FileStorageAccountManagerProvider;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
-import com.openexchange.file.storage.FileStorageService;
-import com.openexchange.java.Java7ConcurrentLinkedQueue;
+import com.openexchange.log.LogFactory;
 import com.openexchange.session.Session;
 
 /**
@@ -83,9 +80,14 @@ import com.openexchange.session.Session;
 public class OSGIFileStorageAccountManagerLookupService implements FileStorageAccountManagerLookupService {
 
     /**
+     * Dummy value.
+     */
+    protected static final Object PRESENT = new Object();
+
+    /**
      * The backing queue.
      */
-    protected final Queue<FileStorageAccountManagerProvider> providers;
+    protected final ConcurrentMap<FileStorageAccountManagerProvider, Object> providers;
 
     /**
      * The bundle context reference.
@@ -98,23 +100,17 @@ public class OSGIFileStorageAccountManagerLookupService implements FileStorageAc
     private volatile ServiceTracker<FileStorageAccountManagerProvider, FileStorageAccountManagerProvider> tracker;
 
     /**
-     * The event look-up.
-     */
-    protected final OSGIEventAdminLookup eventAdminLookup;
-
-    /**
-     * Used to "seralize" initialization attempts.
+     * Used to "serialize" initialization attempts.
      */
     private final AtomicReference<Future<Void>> serializer;
 
     /**
      * Initializes a new {@link OSGIFileStorageAccountManagerLookupService}.
      */
-    public OSGIFileStorageAccountManagerLookupService(final OSGIEventAdminLookup eventAdminLookup) {
+    public OSGIFileStorageAccountManagerLookupService() {
         super();
         serializer = new AtomicReference<Future<Void>>();
-        providers = new Java7ConcurrentLinkedQueue<FileStorageAccountManagerProvider>();
-        this.eventAdminLookup = eventAdminLookup;
+        providers = new ConcurrentHashMap<FileStorageAccountManagerProvider, Object>(8);
     }
 
     /**
@@ -149,77 +145,65 @@ public class OSGIFileStorageAccountManagerLookupService implements FileStorageAc
     public FileStorageAccountManager getAccountManager(final String accountId, final Session session) throws OXException {
         initIfAbsent(null);
 
-        FileStorageAccountManager accountManager = (FileStorageAccountManager) session.getParameter(PARAM_DEFAULT_ACCOUNT);
+        final String paramName = new StringBuilder(PARAM_DEFAULT_ACCOUNT).append('@').append(accountId).toString();
+        FileStorageAccountManager accountManager = (FileStorageAccountManager) session.getParameter(paramName);
         if (null == accountManager) {
             FileStorageAccountManagerProvider candidate = null;
-            for (final FileStorageAccountManagerProvider provider : providers) {
-                final FileStorageAccountManager cAccountManager = provider.getAccountManager(accountId, session);
-                if ((null != cAccountManager) && ((null == candidate) || (provider.getRanking() > candidate.getRanking()))) {
-                    candidate = provider;
-                    accountManager = cAccountManager;
+            for (final FileStorageAccountManagerProvider provider : providers.keySet()) {
+                if ((null == candidate) || (provider.getRanking() > candidate.getRanking())) {
+                    final FileStorageAccountManager cAccountManager = provider.getAccountManager(accountId, session);
+                    if (null != cAccountManager) {
+                        candidate = provider;
+                        accountManager = cAccountManager;
+                    }
                 }
             }
             if (null == accountManager) {
                 return null;
             }
-            session.setParameter(PARAM_DEFAULT_ACCOUNT, accountManager);
+            session.setParameter(paramName, accountManager);
         }
         return accountManager;
     }
 
     @Override
-    public FileStorageAccountManager getAccountManagerFor(final FileStorageService service) throws OXException {
-        initIfAbsent(service.getId());
+    public FileStorageAccountManager getAccountManagerFor(final String serviceId) throws OXException {
+        initIfAbsent(serviceId);
 
         FileStorageAccountManagerProvider candidate = null;
-        for (final FileStorageAccountManagerProvider provider : providers) {
-            if (provider.supports(service) && ((null == candidate) || (provider.getRanking() > candidate.getRanking()))) {
+        for (final FileStorageAccountManagerProvider provider : providers.keySet()) {
+            if (provider.supports(serviceId) && ((null == candidate) || (provider.getRanking() > candidate.getRanking()))) {
                 candidate = provider;
             }
         }
         if (null == candidate) {
-            throw FileStorageExceptionCodes.NO_ACCOUNT_MANAGER_FOR_SERVICE.create(service.getId());
+            throw FileStorageExceptionCodes.NO_ACCOUNT_MANAGER_FOR_SERVICE.create(serviceId);
         }
-        return candidate.getAccountManagerFor(service);
+        return candidate.getAccountManagerFor(serviceId);
     }
 
     private void initIfAbsent(final String serviceId) throws OXException {
         Future<Void> future = serializer.get();
         if (null == future) {
+            if (null == serviceId) {
+                final String msg = "serviceId is null";
+                throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(new NullPointerException(msg), msg);
+            }
             final BundleContext bundleContext = this.bundleContext;
             final FutureTask<Void> ft = new FutureTask<Void>(new Callable<Void>() {
 
                 @Override
                 public Void call() throws OXException {
                     if (null == bundleContext) {
-                        if (null == serviceId) {
-                            throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create("Missing bundle context.");
-                        }
                         throw FileStorageExceptionCodes.NO_ACCOUNT_MANAGER_FOR_SERVICE.create(serviceId);
                     }
                     try {
                         final Collection<ServiceReference<FileStorageAccountManagerProvider>> references = bundleContext.getServiceReferences(FileStorageAccountManagerProvider.class, null);
                         for (final ServiceReference<FileStorageAccountManagerProvider> reference : references) {
                             final FileStorageAccountManagerProvider addMe = bundleContext.getService(reference);
-                            if (!providers.contains(addMe)) {
-                                providers.add(addMe);
-                                /*
-                                 * Post event
-                                 */
-                                final EventAdmin eventAdmin = eventAdminLookup.getEventAdmin();
-                                if (null != eventAdmin) {
-                                    final Dictionary<String, Object> dict = new Hashtable<String, Object>(2);
-                                    dict.put(FileStorageAccountManagerProvider.PROPERTY_RANKING, Integer.valueOf(addMe.getRanking()));
-                                    dict.put(FileStorageAccountManagerProvider.PROPERTY_PROVIDER, addMe);
-                                    final Event event = new Event(FileStorageAccountManagerProvider.TOPIC, dict);
-                                    eventAdmin.postEvent(event);
-                                }
-                            }
+                            providers.putIfAbsent(addMe, PRESENT);
                         }
                     } catch (final InvalidSyntaxException e) {
-                        if (null == serviceId) {
-                            throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
-                        }
                         throw FileStorageExceptionCodes.NO_ACCOUNT_MANAGER_FOR_SERVICE.create(e, serviceId);
                     } catch (final RuntimeException e) {
                         throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
@@ -239,6 +223,7 @@ public class OSGIFileStorageAccountManagerLookupService implements FileStorageAc
         } catch (final InterruptedException e) {
             // Keep interrupted flag
             Thread.currentThread().interrupt();
+            throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         } catch (final ExecutionException e) {
             final Throwable cause = e.getCause();
             if (cause instanceof OXException) {
@@ -259,26 +244,12 @@ public class OSGIFileStorageAccountManagerLookupService implements FileStorageAc
             final BundleContext context = bundleContext;
             final FileStorageAccountManagerProvider service = context.getService(reference);
             {
-                final FileStorageAccountManagerProvider addMe = service;
-                if (!providers.contains(addMe)) {
-                    providers.add(addMe);
-                    /*
-                     * Post event
-                     */
-                    final EventAdmin eventAdmin = eventAdminLookup.getEventAdmin();
-                    if (null != eventAdmin) {
-                        final Dictionary<String, Object> dict = new Hashtable<String, Object>(2);
-                        dict.put(FileStorageAccountManagerProvider.PROPERTY_RANKING, Integer.valueOf(addMe.getRanking()));
-                        dict.put(FileStorageAccountManagerProvider.PROPERTY_PROVIDER, addMe);
-                        final Event event = new Event(FileStorageAccountManagerProvider.TOPIC, dict);
-                        eventAdmin.postEvent(event);
-                    }
+                if (null == providers.putIfAbsent(service, PRESENT)) {
                     return service;
                 }
-                final org.apache.commons.logging.Log logger =
-                    com.openexchange.log.LogFactory.getLog(OSGIFileStorageAccountManagerLookupService.Customizer.class);
+                final Log logger = LogFactory.getLog(OSGIFileStorageAccountManagerLookupService.Customizer.class);
                 if (logger.isWarnEnabled()) {
-                    logger.warn(new StringBuilder(128).append("File storage account manager provider ").append(addMe.getClass().getSimpleName()).append(
+                    logger.warn(new StringBuilder(128).append("File storage account manager provider ").append(service.getClass().getSimpleName()).append(
                         " could not be added. Provider is already present.").toString());
                 }
             }
@@ -298,8 +269,7 @@ public class OSGIFileStorageAccountManagerLookupService implements FileStorageAc
         public void removedService(final ServiceReference<FileStorageAccountManagerProvider> reference, final FileStorageAccountManagerProvider service) {
             if (null != service) {
                 try {
-                    final FileStorageAccountManagerProvider removeMe = service;
-                    providers.remove(removeMe);
+                    providers.remove(service);
                 } finally {
                     bundleContext.ungetService(reference);
                 }

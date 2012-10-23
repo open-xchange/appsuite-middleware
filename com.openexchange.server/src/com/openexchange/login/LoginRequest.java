@@ -76,6 +76,8 @@ public interface LoginRequest {
 
     String getHash();
 
+    boolean isVolatile();
+
     Interface getInterface();
 
     Map<String, List<String>> getHeaders();

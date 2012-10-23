@@ -490,8 +490,9 @@ setup()
 
     echo setting up open-xchange configuration ${CONFDIR}
 
-    # this formular and parameters are from Holger
-    SERVEROPTS="-Xmx${SERVER_MEMORY}m -XX:+UseConcMarkSweepGC -XX:MaxPermSize=128M -Dsun.net.inetaddr.ttl=3600 -Dnetworkaddress.cache.ttl=3600 -Dnetworkaddress.cache.negative.ttl=10"
+    CUROPTS=$(eval ox_read_property JAVA_XTRAOPTS ${CONFDIR}/ox-scriptconf.sh)
+    CUROPTS=$(echo $CUROPTS | sed -e 's/"//g' -e 's/-Xmx[0-9]\+m[ ]*//')
+    SERVEROPTS="$CUROPTS -Xmx${SERVER_MEMORY}m"
 
     v_setprop JAVA_XTRAOPTS "\"$SERVEROPTS\"" ${CONFDIR}/ox-scriptconf.sh
 
@@ -546,14 +547,14 @@ setup()
     v_cache_hosting ${CONFDIR}/sessioncache.ccf SessionLTCP $UDP_SESS_DISC_PORT
     v_setprop jcs.auxiliary.SessionLTCP.attributes.TcpListenerPort $GWSCACHEPORT ${CONFDIR}/sessioncache.ccf
 
-    v_setprop com.openexchange.push.udp.senderAddress "$OXCLUSTERIP" ${CONFDIR}/push.properties
-    v_setprop com.openexchange.push.udp.multicastAddress "$UDPDISCOVERYADDR" ${CONFDIR}/push.properties
-    v_setprop com.openexchange.push.udp.multicastPort "$PUSHMCPORT" ${CONFDIR}/push.properties
-    v_setprop com.openexchange.push.udp.multicastEnabled true ${CONFDIR}/push.properties
-    v_setprop com.openexchange.push.udp.pushEnabled true ${CONFDIR}/push.properties
-    v_setprop com.openexchange.push.udp.registerPort $OLPORT ${CONFDIR}/push.properties
-    v_setprop com.openexchange.push.udp.registerDistributionEnabled false  ${CONFDIR}/push.properties
-    v_setprop com.openexchange.push.udp.eventDistributionEnabled true ${CONFDIR}/push.properties
+    v_setprop com.openexchange.push.udp.senderAddress "$OXCLUSTERIP" ${CONFDIR}/push-udp.properties
+    v_setprop com.openexchange.push.udp.multicastAddress "$UDPDISCOVERYADDR" ${CONFDIR}/push-udp.properties
+    v_setprop com.openexchange.push.udp.multicastPort "$PUSHMCPORT" ${CONFDIR}/push-udp.properties
+    v_setprop com.openexchange.push.udp.multicastEnabled true ${CONFDIR}/push-udp.properties
+    v_setprop com.openexchange.push.udp.pushEnabled true ${CONFDIR}/push-udp.properties
+    v_setprop com.openexchange.push.udp.registerPort $OLPORT ${CONFDIR}/push-udp.properties
+    v_setprop com.openexchange.push.udp.registerDistributionEnabled false  ${CONFDIR}/push-udp.properties
+    v_setprop com.openexchange.push.udp.eventDistributionEnabled true ${CONFDIR}/push-udp.properties
 
     #
     # administration configuration files
@@ -561,7 +562,10 @@ setup()
 
     v_setprop SERVER_NAME $SERVER_NAME ${CONFDIR}/AdminDaemon.properties
 
-    CLTOPTS="-Xmx${CLT_MEMORY}m -XX:+UseConcMarkSweepGC -Djava.net.preferIPv4Stack=true"
+    CUROPTS=$(eval ox_read_property JAVA_OXCMD_OPTS ${CONFDIR}/ox-scriptconf.sh)
+    CUROPTS=$(echo $CUROPTS | sed -e 's/"//g' -e 's/-Xmx[0-9]\+m[ ]*//')
+    CLTOPTS="$CUROPTS -Xmx${CLT_MEMORY}m"
+
     v_setprop JAVA_OXCMD_OPTS "\"$CLTOPTS\"" ${CONFDIR}/ox-scriptconf.sh
 
     if [ -z "$DISABLE_RMI_AUTH" ] ; then

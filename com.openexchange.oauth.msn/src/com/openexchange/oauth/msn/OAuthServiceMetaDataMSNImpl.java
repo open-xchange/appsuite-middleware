@@ -59,6 +59,9 @@ import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.methods.PostMethod;
 import org.apache.commons.httpclient.protocol.Protocol;
 import org.apache.commons.logging.Log;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import com.openexchange.log.LogFactory;
 import com.openexchange.http.deferrer.DeferringURLService;
 import com.openexchange.oauth.AbstractOAuthServiceMetaData;
@@ -81,9 +84,9 @@ public class OAuthServiceMetaDataMSNImpl extends AbstractOAuthServiceMetaData {
 
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(OAuthServiceMetaDataMSNImpl.class));
 
-    private static final String accessTokenGrabber = "https://consent.live.com/AccessToken.aspx";
+    private static final String accessTokenGrabber = "https://login.live.com/oauth20_token.srf";
 
-    private static final Object REFRESH_TOKEN_KEY = "wrap_refresh_token";
+    private static final String REFRESH_TOKEN_KEY = "refresh_token";
 
     private final DeferringURLService deferrer;
 
@@ -101,9 +104,12 @@ public class OAuthServiceMetaDataMSNImpl extends AbstractOAuthServiceMetaData {
             if (deferrer != null) {
                 callbackUrl = deferrer.getDeferredURL(callbackUrl);
             }
-            final String authUrl = new StringBuilder("https://consent.live.com/connect.aspx?wrap_client_id=").append(getAPIKey()).append(
-                "&wrap_callback=").append(URLEncoder.encode(callbackUrl, "UTF-8")).append(
-                "&wrap_client_state=js_close_window&mkt=en-us&wrap_scope=WL_Profiles.View,WL_Contacts.View,Messenger.SignIn").toString();
+            // https://login.live.com/oauth20_authorize.srf?client_id=CLIENT_ID&scope=wl.signin&response_type=RESPONSE_TYPE&redirect_uri=REDIRECT_URL
+            final String authUrl = new StringBuilder("https://login.live.com/oauth20_authorize.srf?client_id=")
+            	.append(getAPIKey())
+            	.append("&scope=wl.basic,wl.contacts_birthday,wl.offline_access,wl.contacts_photos,wl.contacts_skydrive,wl.contacts_emails,wl.photos,wl.postal_addresses,wl.skydrive&response_type=code&redirect_uri=")
+            	.append(URLEncoder.encode(callbackUrl, "UTF-8")).toString();
+            
 
             return new OAuthInteraction() {
 
@@ -132,7 +138,7 @@ public class OAuthServiceMetaDataMSNImpl extends AbstractOAuthServiceMetaData {
 
     @Override
     public void processArguments(Map<String, Object> arguments, Map<String, String> parameter, Map<String, Object> state) {
-        String verifier = parameter.get("wrap_verification_code");
+        String verifier = parameter.get("code");
         if (null == verifier) {
             LOG.error("No wrap_verification_code present.");
         }
@@ -143,66 +149,56 @@ public class OAuthServiceMetaDataMSNImpl extends AbstractOAuthServiceMetaData {
 
     @Override
     public OAuthToken getOAuthToken(Map<String, Object> arguments) throws OXException {
-        OutputStreamWriter writer = null;
-        BufferedReader reader = null;
         try {
             String verifier = (String) arguments.get(OAuthConstants.ARGUMENT_PIN);
             String callback = (String) arguments.get(OAuthConstants.ARGUMENT_CALLBACK);
-
+            
             StringBuilder params = new StringBuilder();
-            params.append("?wrap_client_id=").append(getAPIKey());
-            params.append("&wrap_client_secret=").append(getAPISecret());
-            params.append("&wrap_callback=").append(URLEncoder.encode(callback, "UTF-8"));
-            params.append("&wrap_verification_code=").append(verifier);
+            params.append("?client_id=").append(getAPIKey());
+            params.append("&redirect_uri=").append(URLEncoder.encode(callback, "UTF-8"));
+            params.append("&client_secret=").append(URLEncoder.encode(getAPISecret(), "UTF-8"));
+            params.append("&code=").append(verifier);
+            params.append("&grant_type=authorization_code");
 
             HttpClient httpClient = new HttpClient();
             Protocol protocol = new Protocol("https", new TrustAllAdapter(), 443);
-            httpClient.getHostConfiguration().setHost("live.com", 443, protocol);
+            httpClient.getHostConfiguration().setHost("login.live.com", 443, protocol);
             String urlString = accessTokenGrabber;
             PostMethod postMethod = new PostMethod(urlString + params);
-            postMethod.addParameter("wrap_client_id", getAPIKey());
-            postMethod.addParameter("wrap_client_secret", getAPISecret());
-            postMethod.addParameter("wrap_callback", callback);
-            postMethod.addParameter("wrap_verification_code", verifier);
+            
+            addParameter(postMethod, "client_id", getAPIKey());
+            addParameter(postMethod,"redirect_uri", callback);
+            addParameter(postMethod,"client_secret", getAPISecret());
+            addParameter(postMethod,"code", verifier);
+            addParameter(postMethod,"grant_type", "authorization_code");
 
             httpClient.executeMethod(postMethod);
 
             DefaultOAuthToken token = new DefaultOAuthToken();
-            token.setSecret("");
+            token.setSecret(new JSONObject().put("callback", callback).toString());
             String response = postMethod.getResponseBodyAsString();
-            String[] keyValuePairs = response.split("&");
-            for (String keyValuePair : keyValuePairs) {
-                String[] split = keyValuePair.split("=");
-                if (split[0].equals(REFRESH_TOKEN_KEY)) {
-                    token.setToken(split[1]);
-                    return token;
-                }
-            }
-
+            JSONObject responseObj = new JSONObject(response);
+            token.setToken(responseObj.getString(REFRESH_TOKEN_KEY));
+            return token;
         } catch (UnsupportedEncodingException x) {
             LOG.error(x.getMessage(), x);
         } catch (IOException e) {
             throw OAuthExceptionCodes.IO_ERROR.create(e, e.getMessage());
-        } finally {
-            if (writer != null) {
-                try {
-                    writer.close();
-                } catch (IOException e) {
-                    // IGNORE
-                }
-            }
-            if (reader != null) {
-                try {
-                    reader.close();
-                } catch (IOException e) {
-                    // IGNORE
-                }
-            }
-        }
+        } catch (JSONException e) {
+			throw OAuthExceptionCodes.JSON_ERROR.create(e, e.getMessage());
+		}
 
         return super.getOAuthToken(arguments);
         // throw OAuthExceptionCodes.IO_ERROR.create(" ***** Something went terribly wrong!");
     }
+
+	private void addParameter(PostMethod postMethod, String param,
+			String value) {
+		if (value == null)
+			return;
+		postMethod.addParameter(param, value);
+		
+	}
 
 	@Override
 	public API getAPI() {

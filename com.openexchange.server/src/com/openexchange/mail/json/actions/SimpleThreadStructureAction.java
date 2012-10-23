@@ -50,8 +50,10 @@
 package com.openexchange.mail.json.actions;
 
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 import org.json.JSONArray;
 import org.json.JSONValue;
 import com.openexchange.ajax.AJAXServlet;
@@ -62,6 +64,9 @@ import com.openexchange.exception.OXException;
 import com.openexchange.json.cache.JsonCacheService;
 import com.openexchange.json.cache.JsonCaches;
 import com.openexchange.log.Log;
+import com.openexchange.log.LogProperties;
+import com.openexchange.log.Props;
+import com.openexchange.mail.FullnameArgument;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailListField;
 import com.openexchange.mail.MailServletInterface;
@@ -72,6 +77,7 @@ import com.openexchange.mail.dataobjects.ThreadedStructure;
 import com.openexchange.mail.json.MailRequest;
 import com.openexchange.mail.json.MailRequestSha1Calculator;
 import com.openexchange.mail.json.converters.MailConverter;
+import com.openexchange.mail.utils.MailFolderUtility;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.threadpool.ThreadPools;
 import com.openexchange.tools.collections.PropertizedList;
@@ -198,7 +204,7 @@ public final class SimpleThreadStructureAction extends AbstractMailAction implem
                         }
                     }
                 };
-                ThreadPools.getThreadPool().submit(ThreadPools.task(r));
+                ThreadPools.getThreadPool().submit(ThreadPools.trackableTask(r));
                 /*
                  * Return cached JSON result
                  */
@@ -223,14 +229,25 @@ public final class SimpleThreadStructureAction extends AbstractMailAction implem
     }
 
     /**
-     * Performs the request w/o look-up cache.
+     * Performs the request w/o cache look-up.
      */
     protected AJAXRequestResult perform0(final MailRequest req, final MailServletInterface mailInterface, final boolean cache) throws OXException {
+        final Props props = LogProperties.getLogProperties();
+        final Set<String> names = new HashSet<String>(3);
         try {
             /*
              * Read in parameters
              */
             final String folderId = req.checkParameter(Mail.PARAMETER_MAILFOLDER);
+            {
+                final FullnameArgument arg = MailFolderUtility.prepareMailFolderParam(folderId);
+                if (!props.put(LOG_PROPERTY_FULL_NAME, arg.getFullname())) {
+                    names.add(LOG_PROPERTY_FULL_NAME);
+                }
+                if (!props.put(LOG_PROPERTY_ACCOUNT_ID, Integer.toString(arg.getAccountId()))) {
+                    names.add(LOG_PROPERTY_ACCOUNT_ID);
+                }
+            }
             int[] columns = req.checkIntArray(AJAXServlet.PARAMETER_COLUMNS);
             final String sort = req.getParameter(AJAXServlet.PARAMETER_SORT);
             final String order = req.getParameter(AJAXServlet.PARAMETER_ORDER);
@@ -380,6 +397,10 @@ public final class SimpleThreadStructureAction extends AbstractMailAction implem
             return result.setDurationByStart(start);
         } catch (final RuntimeException e) {
             throw MailExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
+        } finally {
+            for (final String name : names) {
+                props.remove(name);
+            }
         }
     }
 

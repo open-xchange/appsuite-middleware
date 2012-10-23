@@ -66,6 +66,10 @@ public class OXAWSExceptionMessages implements LocalizableStrings {
 
     public static final String AWS_NO_LB_REGION_MSG = "Loadbalancing region not set.";
 
+    public static final String AWS_NO_S3_REGION_MSG = "S3 region not set.";
+
+    public static final String AWS_S3_ENCRYPTION_ERROR_MSG = "Error in S3 encryption: %1$s";
+
     /**
      * Initializes a new {@link OXAWSExceptionMessages}.
      */

@@ -59,6 +59,7 @@ import com.openexchange.admin.exceptions.OXGenericException;
 import com.openexchange.admin.plugins.OXContextPluginInterface;
 import com.openexchange.admin.tools.AdminCache;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.database.DatabaseService;
 import com.openexchange.log.LogFactory;
 import com.openexchange.osgi.HousekeepingActivator;
 
@@ -72,6 +73,8 @@ public class Activator extends HousekeepingActivator {
             ConfigurationService service = getService(ConfigurationService.class);
             AdminCache.compareAndSetConfigurationService(null, service);
             initCache(service);
+            track(DatabaseService.class, new DatabaseServiceCustomizer(context, ClientAdminThreadExtended.cache.getPool()));
+            openTrackers();
 
             final Hashtable<String, String> props = new Hashtable<String, String>();
             props.put("name", "OXContext");
@@ -88,8 +91,9 @@ public class Activator extends HousekeepingActivator {
     }
 
     @Override
-    public void stopBundle() throws Exception {
+    public void stopBundle() {
         unregisterServices();
+        closeTrackers();
     }
 
     private void initCache(final ConfigurationService service) throws SQLException, OXGenericException {

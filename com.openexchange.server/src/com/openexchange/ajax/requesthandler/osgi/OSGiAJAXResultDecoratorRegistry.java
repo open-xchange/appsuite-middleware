@@ -55,7 +55,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
-import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.openexchange.ajax.requesthandler.AJAXResultDecorator;
 import com.openexchange.ajax.requesthandler.AJAXResultDecoratorRegistry;
@@ -65,7 +64,7 @@ import com.openexchange.ajax.requesthandler.AJAXResultDecoratorRegistry;
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class OSGiAJAXResultDecoratorRegistry implements AJAXResultDecoratorRegistry {
+public final class OSGiAJAXResultDecoratorRegistry implements AJAXResultDecoratorRegistry, ServiceTrackerCustomizer<AJAXResultDecorator, AJAXResultDecorator> {
 
     /**
      * The backing map.
@@ -73,39 +72,17 @@ public final class OSGiAJAXResultDecoratorRegistry implements AJAXResultDecorato
     final ConcurrentMap<String, AJAXResultDecorator> map;
 
     /**
-     * The tracker instance.
+     * The bundle context.
      */
-    private ServiceTracker<AJAXResultDecorator, AJAXResultDecorator> tracker;
+    private final BundleContext context;
 
     /**
      * Initializes a new {@link OSGiChatServiceRegistry}.
      */
-    public OSGiAJAXResultDecoratorRegistry() {
+    public OSGiAJAXResultDecoratorRegistry(final BundleContext context) {
         super();
+        this.context = context;
         map = new ConcurrentHashMap<String, AJAXResultDecorator>(8);
-    }
-
-    /**
-     * Starts the tracker.
-     * 
-     * @param context The bundle context
-     */
-    public void start(final BundleContext context) {
-        if (null == tracker) {
-            tracker =
-                new ServiceTracker<AJAXResultDecorator, AJAXResultDecorator>(context, AJAXResultDecorator.class, new Customizer(context));
-            tracker.open();
-        }
-    }
-
-    /**
-     * Stops the tracker.
-     */
-    public void stop() {
-        if (null != tracker) {
-            tracker.close();
-            tracker = null;
-        }
     }
 
     @Override
@@ -118,44 +95,33 @@ public final class OSGiAJAXResultDecoratorRegistry implements AJAXResultDecorato
         return map.get(identifier);
     }
 
-    private final class Customizer implements ServiceTrackerCustomizer<AJAXResultDecorator, AJAXResultDecorator> {
-
-        private final BundleContext context;
-
-        protected Customizer(final BundleContext context) {
-            super();
-            this.context = context;
+    @Override
+    public AJAXResultDecorator addingService(final ServiceReference<AJAXResultDecorator> reference) {
+        final AJAXResultDecorator service = context.getService(reference);
+        if (null == map.putIfAbsent(service.getIdentifier(), service)) {
+            return service;
         }
+        final org.apache.commons.logging.Log logger = com.openexchange.log.LogFactory.getLog(OSGiAJAXResultDecoratorRegistry.class);
+        if (logger.isWarnEnabled()) {
+            logger.warn(new StringBuilder(128).append("Another AJAXResultDecorator is already registered with identifier: ").append(
+                service.getIdentifier()).toString());
+        }
+        context.ungetService(reference);
+        return null;
+    }
 
-        @Override
-        public AJAXResultDecorator addingService(final ServiceReference<AJAXResultDecorator> reference) {
-            final AJAXResultDecorator service = context.getService(reference);
-            if (null == map.putIfAbsent(service.getIdentifier(), service)) {
-                return service;
-            }
-            final org.apache.commons.logging.Log logger =
-                com.openexchange.log.LogFactory.getLog(OSGiAJAXResultDecoratorRegistry.Customizer.class);
-            if (logger.isWarnEnabled()) {
-                logger.warn(new StringBuilder(128).append("Another AJAXResultDecorator is already registered with identifier: ").append(
-                    service.getIdentifier()).toString());
-            }
+    @Override
+    public void modifiedService(final ServiceReference<AJAXResultDecorator> reference, final AJAXResultDecorator service) {
+        // Nothing to do
+    }
+
+    @Override
+    public void removedService(final ServiceReference<AJAXResultDecorator> reference, final AJAXResultDecorator service) {
+        try {
+            map.remove(service.getIdentifier());
+        } finally {
             context.ungetService(reference);
-            return null;
         }
-
-        @Override
-        public void modifiedService(final ServiceReference<AJAXResultDecorator> reference, final AJAXResultDecorator service) {
-            // Nothing to do
-        }
-
-        @Override
-        public void removedService(final ServiceReference<AJAXResultDecorator> reference, final AJAXResultDecorator service) {
-            try {
-                map.remove(service.getIdentifier());
-            } finally {
-                context.ungetService(reference);
-            }
-        }
-    } // End of Customizer class
+    }
 
 }

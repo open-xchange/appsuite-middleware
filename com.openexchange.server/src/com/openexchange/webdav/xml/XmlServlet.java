@@ -86,7 +86,6 @@ import com.openexchange.webdav.PermissionServlet;
 import com.openexchange.webdav.QueuedAction;
 import com.openexchange.webdav.WebdavExceptionCode;
 import com.openexchange.webdav.xml.fields.CalendarFields;
-import com.openexchange.webdav.xml.fields.CommonFields;
 import com.openexchange.webdav.xml.fields.DataFields;
 import com.openexchange.webdav.xml.fields.FolderChildFields;
 
@@ -296,15 +295,15 @@ public abstract class XmlServlet<I> extends PermissionServlet {
                         bList = false;
                         final String[] value = eObjectMode.getText().trim().toUpperCase().split(",");
 
-                        for (int a = 0; a < value.length; a++) {
-                            if (value[a].trim().equals("MODIFIED") || value[a].trim().equals("NEW_AND_MODIFIED")) {
+                        for (final String element : value) {
+                            if (element.trim().equals("MODIFIED") || element.trim().equals("NEW_AND_MODIFIED")) {
                                 bModified = true;
-                            } else if (value[a].trim().equals("DELETED")) {
+                            } else if (element.trim().equals("DELETED")) {
                                 bDeleted = true;
-                            } else if (value[a].trim().equals("LIST")) {
+                            } else if (element.trim().equals("LIST")) {
                                 bList = true;
                             } else {
-                                throw WebdavExceptionCode.INVALID_VALUE.create("objectmode", value[a]);
+                                throw WebdavExceptionCode.INVALID_VALUE.create("objectmode", element);
                             }
                         }
                     }
@@ -573,16 +572,16 @@ public abstract class XmlServlet<I> extends PermissionServlet {
         if (conflicts != null) {
             final Element eConflictItems = new Element("conflictitems", Namespace.getNamespace("D", davUri));
             final StringBuilder textBuilder = new StringBuilder(50);
-            for (int a = 0; a < conflicts.length; a++) {
+            for (final Appointment conflict : conflicts) {
                 final Element eConflictItem = new Element("conflictitem", Namespace.getNamespace("D", davUri));
-                if (conflicts[a].getTitle() == null) {
+                if (conflict.getTitle() == null) {
                     eConflictItem.setAttribute("subject", "", NS);
                 } else {
-                    eConflictItem.setAttribute("subject", conflicts[a].getTitle(), NS);
+                    eConflictItem.setAttribute("subject", conflict.getTitle(), NS);
                 }
 
-                eConflictItem.setText(textBuilder.append(conflicts[a].getStartDate().getTime()).append(',').append(
-                        conflicts[a].getEndDate().getTime()).append(',').append(conflicts[a].getFullTime()).toString());
+                eConflictItem.setText(textBuilder.append(conflict.getStartDate().getTime()).append(',').append(
+                        conflict.getEndDate().getTime()).append(',').append(conflict.getFullTime()).toString());
                 textBuilder.setLength(0);
 
                 eConflictItems.addContent(eConflictItem);

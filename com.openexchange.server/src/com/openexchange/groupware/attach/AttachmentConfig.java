@@ -75,17 +75,24 @@ public class AttachmentConfig extends AbstractConfig implements Initialization {
 
 	private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(AttachmentConfig.class));
 
-    private static AttachmentConfig singleton;
+    private static volatile AttachmentConfig _singleton;
 
     private static boolean loaded = false;
 
     private AttachmentConfig(){}
 
     public static AttachmentConfig getInstance(){
-        if(singleton != null) {
-			return singleton;
-		}
-        return singleton = new AttachmentConfig();
+        AttachmentConfig ret = _singleton;
+        if (ret == null) {
+            synchronized (AttachmentConfig.class) {
+                ret = _singleton;
+                if (ret == null) {
+                    ret = new AttachmentConfig();
+                    _singleton = ret;
+                }
+            }
+        }
+        return ret;
     }
 
     /**
@@ -102,14 +109,15 @@ public class AttachmentConfig extends AbstractConfig implements Initialization {
     }
 
     public static String getProperty(final String key) {
-    	if(!loaded || singleton == null) {
+    	AttachmentConfig singleton = _singleton;
+        if(!loaded || singleton == null) {
 			try {
-				getInstance().start();
+			    singleton = getInstance();
+			    singleton.start();
 			} catch (final OXException e) {
 				LOG.error("Can't init config",e);
 			}
 		}
-
         return singleton.getPropertyInternal(key);
     }
 
@@ -136,7 +144,7 @@ public class AttachmentConfig extends AbstractConfig implements Initialization {
 
     @Override
     public void start() throws OXException {
-        if(!loaded || singleton == null) {
+        if(!loaded || _singleton == null) {
             INIT_LOCK.lock();
             try {
                 getInstance().loadPropertiesInternal();
@@ -149,7 +157,7 @@ public class AttachmentConfig extends AbstractConfig implements Initialization {
 
     @Override
     public void stop() throws ConfigurationException {
-        singleton = null;
+        _singleton = null;
         loaded = false;
     }
 }

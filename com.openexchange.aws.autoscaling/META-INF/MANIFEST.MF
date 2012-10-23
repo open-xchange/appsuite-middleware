@@ -20,6 +20,6 @@ Import-Package: com.amazonaws,
  com.openexchange.i18n,
  com.openexchange.log,
  com.openexchange.osgi,
- org.apache.commons.cli;version="1.2.0",
+ org.apache.commons.cli,
  org.apache.commons.logging,
  org.osgi.framework

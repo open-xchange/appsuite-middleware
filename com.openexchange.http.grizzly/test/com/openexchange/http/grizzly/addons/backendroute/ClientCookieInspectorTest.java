@@ -57,7 +57,7 @@ import org.glassfish.grizzly.http.HttpRequestPacket;
 import org.glassfish.grizzly.http.util.Header;
 import org.junit.Before;
 import org.junit.Test;
-import com.openexchange.http.grizzly.filters.backendroute.ClientCookieInspector;
+import com.openexchange.http.grizzly.filter.backendroute.ClientCookieInspector;
 
 /**
  * {@link ClientCookieInspectorTest}
@@ -118,7 +118,7 @@ public class ClientCookieInspectorTest {
     }
     
     /**
-     * Test method for {@link com.openexchange.http.grizzly.filters.backendroute.AbstractCookieInspector#isJSessionIdExistant()}.
+     * Test method for {@link com.openexchange.http.grizzly.filter.backendroute.AbstractCookieInspector#isJSessionIdExistant()}.
      */
     @Test
     public void testIsJSessionIdExistant() {
@@ -131,7 +131,7 @@ public class ClientCookieInspectorTest {
     }
 
     /**
-     * Test method for {@link com.openexchange.http.grizzly.filters.backendroute.AbstractCookieInspector#isJSessionIdValid()}.
+     * Test method for {@link com.openexchange.http.grizzly.filter.backendroute.AbstractCookieInspector#isJSessionIdValid()}.
      */
     @Test
     public void testIsJSessionIdValid() {
@@ -143,7 +143,7 @@ public class ClientCookieInspectorTest {
     }
 
     /**
-     * Test method for {@link com.openexchange.http.grizzly.filters.backendroute.AbstractCookieInspector#getJSessionIdValue()}.
+     * Test method for {@link com.openexchange.http.grizzly.filter.backendroute.AbstractCookieInspector#getJSessionIdValue()}.
      */
     @Test
     public void testGetJSessionIdValue() {
@@ -154,7 +154,7 @@ public class ClientCookieInspectorTest {
         assertEquals(JSESSIONID_VALUE+"."+BACKENDROUTE_WRONG, wrongJSessionIdRouteNoBackendRouteInspector.getJSessionIdValue());
     }
     /**
-     * Test method for {@link com.openexchange.http.grizzly.filters.backendroute.ClientCookieInspector#getCookieHeaderLine()}.
+     * Test method for {@link com.openexchange.http.grizzly.filter.backendroute.ClientCookieInspector#getCookieHeaderLine()}.
      */
     @Test
     public void testGetCookieHeaderLine() {
@@ -175,7 +175,7 @@ public class ClientCookieInspectorTest {
     }
     
     /**
-     * Test method for {@link com.openexchange.http.grizzly.filters.backendroute.AbstractCookieInspector#fixJSessionId()}.
+     * Test method for {@link com.openexchange.http.grizzly.filter.backendroute.AbstractCookieInspector#fixJSessionId()}.
      */
     @Test
     public void testFixJSessionId() {

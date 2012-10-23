@@ -20,37 +20,25 @@ set -e
 CRAWLERCONFFILES="crawler.properties"
 
 for FILE in ${CRAWLERCONFFILES}; do
-    dpkg-maintscript-helper mv_conffile "/opt/open-xchange/etc/groupware/${FILE}" \
-       "/opt/open-xchange/etc/${FILE}" 6.20.99 open-xchange-subscribe-crawler -- $1 \
-       $(dpkg-query -W -f='${Config-Version}' open-xchange-subscribe-crawler)
+    dpkg-maintscript-helper mv_conffile "/opt/open-xchange/etc/groupware/${FILE}" "/opt/open-xchange/etc/${FILE}" 6.20.99 \
+        open-xchange-subscribe-crawler -- $1 $(dpkg-query -W -f='${Config-Version}' open-xchange-subscribe-crawler)
 done
 
-dpkg-maintscript-helper mv_conffile \
-    /opt/open-xchange/etc/groupware/facebooksubscribe.properties \
-    /opt/open-xchange/etc/facebooksubscribe.properties 6.20.99 \
-    open-xchange-subscribe-facebook -- $1 \
+dpkg-maintscript-helper mv_conffile /opt/open-xchange/etc/groupware/facebooksubscribe.properties \
+    /opt/open-xchange/etc/facebooksubscribe.properties 6.20.99 open-xchange-subscribe-facebook -- $1 \
     $(dpkg-query -W -f='${Config-Version}' open-xchange-subscribe-facebook)
-dpkg-maintscript-helper mv_conffile \
-    /opt/open-xchange/etc/groupware/linkedinsubscribe.properties \
-    /opt/open-xchange/etc/linkedinsubscribe.properties 6.20.99 \
-    open-xchange-subscribe-linkedin -- $1 \
+dpkg-maintscript-helper mv_conffile /opt/open-xchange/etc/groupware/linkedinsubscribe.properties \
+    /opt/open-xchange/etc/linkedinsubscribe.properties 6.20.99 open-xchange-subscribe-linkedin -- $1 \
     $(dpkg-query -W -f='${Config-Version}' open-xchange-subscribe-linkedin)
-dpkg-maintscript-helper mv_conffile \
-    /opt/open-xchange/etc/groupware/microformatSubscription.properties \
-    /opt/open-xchange/etc/microformatSubscription.properties 6.20.99 \
-    open-xchange-subscribe-microformats -- $1 \
+dpkg-maintscript-helper mv_conffile /opt/open-xchange/etc/groupware/microformatSubscription.properties \
+    /opt/open-xchange/etc/microformatSubscription.properties 6.20.99 open-xchange-subscribe-microformats -- $1 \
     $(dpkg-query -W -f='${Config-Version}' open-xchange-subscribe-microformats)
-dpkg-maintscript-helper mv_conffile \
-    /opt/open-xchange/etc/groupware/msnsubscribe.properties \
-    /opt/open-xchange/etc/msnsubscribe.properties 6.20.99 \
-    open-xchange-subscribe-msn -- $1 \
+dpkg-maintscript-helper mv_conffile /opt/open-xchange/etc/groupware/msnsubscribe.properties \
+    /opt/open-xchange/etc/msnsubscribe.properties 6.20.99 open-xchange-subscribe-msn -- $1 \
     $(dpkg-query -W -f='${Config-Version}' open-xchange-subscribe-msn)
-dpkg-maintscript-helper mv_conffile \
-    /opt/open-xchange/etc/groupware/yahoosubscribe.properties \
-    /opt/open-xchange/etc/yahoosubscribe.properties 6.20.99 \
-    open-xchange-subscribe-yahoo -- $1 \
+dpkg-maintscript-helper mv_conffile /opt/open-xchange/etc/groupware/yahoosubscribe.properties \
+    /opt/open-xchange/etc/yahoosubscribe.properties 6.20.99 open-xchange-subscribe-yahoo -- $1 \
     $(dpkg-query -W -f='${Config-Version}' open-xchange-subscribe-yahoo)
-
 
 . /opt/open-xchange/lib/oxfunctions.sh
 
@@ -87,7 +75,7 @@ case "$1" in
             # we are in update mode, run postFix to apply fixes
             postFix "$2"
         }
-	setConfigFilePermissions
+        setConfigFilePermissions
     ;;
 
     abort-upgrade|abort-remove|abort-deconfigure)

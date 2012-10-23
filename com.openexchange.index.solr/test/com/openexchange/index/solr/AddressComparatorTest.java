@@ -60,11 +60,11 @@ import com.openexchange.exception.OXException;
 import com.openexchange.index.IndexDocument;
 import com.openexchange.index.QueryParameters.Order;
 import com.openexchange.index.StandardIndexDocument;
-import com.openexchange.index.mail.MailIndexField;
 import com.openexchange.index.solr.internal.Services;
 import com.openexchange.index.solr.internal.mail.AddressComparator;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.MailPart;
+import com.openexchange.mail.index.MailIndexField;
 import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.server.ServiceLookup;
 

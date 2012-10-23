@@ -5,19 +5,13 @@ Bundle-SymbolicName: com.openexchange.index
 Bundle-Version: 6.23.0
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Export-Package: com.openexchange.index
 Import-Package: com.openexchange.config,
  com.openexchange.database,
- com.openexchange.exception,
- com.openexchange.file.storage,
+ com.openexchange.exception, 
  com.openexchange.i18n,
- com.openexchange.mail,
- com.openexchange.mail.dataobjects,
- com.openexchange.osgi,
- com.openexchange.server,
+ com.openexchange.osgi, 
  com.openexchange.session,
  org.apache.commons.logging,
  org.osgi.framework
-Export-Package: com.openexchange.index,
- com.openexchange.index.attachments,
- com.openexchange.index.filestore,
- com.openexchange.index.mail
+

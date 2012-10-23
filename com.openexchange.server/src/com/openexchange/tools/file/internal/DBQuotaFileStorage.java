@@ -116,17 +116,13 @@ public class DBQuotaFileStorage implements QuotaFileStorage {
 
     @Override
     public boolean deleteFile(final String identifier) throws OXException {
-        try {
-            final long fileSize = fileStorage.getFileSize(identifier);
-            final boolean deleted = fileStorage.deleteFile(identifier);
-            if (!deleted) {
-                return false;
-            }
-            decUsage(fileSize);
-            return true;
-        } catch (final OXException e) {
-            throw new OXException(e);
+        final long fileSize = fileStorage.getFileSize(identifier);
+        final boolean deleted = fileStorage.deleteFile(identifier);
+        if (!deleted) {
+            return false;
         }
+        decUsage(fileSize);
+        return true;
     }
 
     /**
@@ -364,64 +360,36 @@ public class DBQuotaFileStorage implements QuotaFileStorage {
 
     @Override
     public SortedSet<String> getFileList() throws OXException {
-        try {
-            return fileStorage.getFileList();
-        } catch (final OXException e) {
-            throw new OXException(e);
-        }
+        return fileStorage.getFileList();
     }
 
     @Override
     public InputStream getFile(final String file) throws OXException {
-        try {
-            return fileStorage.getFile(file);
-        } catch (final OXException e) {
-            throw new OXException(e);
-        }
+        return fileStorage.getFile(file);
     }
 
     @Override
     public long getFileSize(final String name) throws OXException {
-        try {
-            return fileStorage.getFileSize(name);
-        } catch (final OXException e) {
-            throw new OXException(e);
-        }
+        return fileStorage.getFileSize(name);
     }
 
     @Override
     public String getMimeType(final String name) throws OXException {
-        try {
-            return fileStorage.getMimeType(name);
-        } catch (final OXException e) {
-            throw new OXException(e);
-        }
+        return fileStorage.getMimeType(name);
     }
 
     @Override
     public void remove() throws OXException {
-        try {
-            fileStorage.remove();
-        } catch (final OXException e) {
-            throw new OXException(e);
-        }
+        fileStorage.remove();
     }
 
     @Override
     public void recreateStateFile() throws OXException {
-        try {
-            fileStorage.recreateStateFile();
-        } catch (final OXException e) {
-            throw new OXException(e);
-        }
+        fileStorage.recreateStateFile();
     }
 
     @Override
     public boolean stateFileIsCorrect() throws OXException {
-        try {
-            return fileStorage.stateFileIsCorrect();
-        } catch (final OXException e) {
-            throw new OXException(e);
-        }
+        return fileStorage.stateFileIsCorrect();
     }
 }

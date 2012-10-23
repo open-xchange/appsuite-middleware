@@ -49,6 +49,9 @@
 
 package com.openexchange.aws.osgi;
 
+import java.security.MessageDigest;
+import javax.crypto.SecretKey;
+import javax.crypto.spec.SecretKeySpec;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.amazonaws.auth.AWSCredentials;
@@ -63,6 +66,8 @@ import com.amazonaws.services.elasticloadbalancing.AmazonElasticLoadBalancing;
 import com.amazonaws.services.elasticloadbalancing.AmazonElasticLoadBalancingClient;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3Client;
+import com.amazonaws.services.s3.AmazonS3EncryptionClient;
+import com.amazonaws.services.s3.model.EncryptionMaterials;
 import com.openexchange.aws.exceptions.OXAWSExceptionCodes;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.osgi.HousekeepingActivator;
@@ -92,6 +97,14 @@ public class AWSActivator extends HousekeepingActivator {
 
     private String amazonS3Region;
 
+    private boolean s3encryption;
+
+    private String aesKey;
+
+    private String aesSalt;
+
+    private String aesIV;
+
     /**
      * Initializes a new {@link AWSActivator}.
      */
@@ -115,6 +128,7 @@ public class AWSActivator extends HousekeepingActivator {
         autoscalingRegion = configService.getProperty("com.openexchange.aws.autoscalingregion");
         cloudwatchRegion = configService.getProperty("com.openexchange.aws.cloudwatchregion");
         amazonS3Region = configService.getProperty("com.openexchange.aws.s3region");
+        s3encryption = configService.getBoolProperty("com.openexchange.aws.s3encryption", false);
         if (accessKey == null) {
             throw OXAWSExceptionCodes.AWS_NO_ACCESSKEY.create();
         }
@@ -127,6 +141,9 @@ public class AWSActivator extends HousekeepingActivator {
         if (lbRegion == null) {
             throw OXAWSExceptionCodes.AWS_NO_LB_REGION.create();
         }
+        if (amazonS3Region == null) {
+            throw OXAWSExceptionCodes.AWS_NO_S3_REGION.create();
+        }
         AWSCredentials credentials = new BasicAWSCredentials(accessKey, secretKey);
         AmazonEC2 amazonEC2 = new AmazonEC2Client(credentials);
         amazonEC2.setEndpoint(ec2Region);
@@ -136,7 +153,25 @@ public class AWSActivator extends HousekeepingActivator {
         amazonAutoScaling.setEndpoint(autoscalingRegion);
         AmazonCloudWatch amazonCloudWatch = new AmazonCloudWatchClient(credentials);
         amazonCloudWatch.setEndpoint(cloudwatchRegion);
-        AmazonS3 amazonS3 = new AmazonS3Client(credentials);
+        AmazonS3 amazonS3 = null;
+        if (s3encryption) {
+            SecretKey sKey = null;
+            try {
+                aesKey = configService.getProperty("com.openexchange.aws.aeskey");
+                aesSalt = configService.getProperty("com.openexchange.aws.aessalt");
+                aesIV = configService.getProperty("com.openexchange.aws.aesiv");
+                byte[] key = (aesIV + aesKey + aesSalt).getBytes("UTF-8");
+                MessageDigest sha = MessageDigest.getInstance("SHA-256");
+                key = sha.digest();
+                sKey = new SecretKeySpec(key, "AES");
+            } catch (Exception e) {
+                throw OXAWSExceptionCodes.AWS_S3_ENCRYPTION_ERROR.create(e.getMessage());
+            }
+            EncryptionMaterials encryptionMaterials = new EncryptionMaterials(sKey);
+            amazonS3 = new AmazonS3EncryptionClient(credentials, encryptionMaterials);
+        } else {
+            amazonS3 = new AmazonS3Client(credentials);
+        }
         amazonS3.setEndpoint(amazonS3Region);
         registerService(AmazonEC2.class, amazonEC2);
         registerService(AmazonElasticLoadBalancing.class, amazonLoadBalancing);

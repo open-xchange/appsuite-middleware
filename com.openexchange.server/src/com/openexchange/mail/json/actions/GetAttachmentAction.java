@@ -202,6 +202,7 @@ public final class GetAttachmentAction extends AbstractMailAction implements ETa
             /*
              * Read from stream
              */
+            @SuppressWarnings("resource")
             ByteArrayOutputStream out = new UnsynchronizedByteArrayOutputStream();
             /*
              * Write from content's input stream to byte array output stream

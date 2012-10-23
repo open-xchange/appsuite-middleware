@@ -617,7 +617,7 @@ public final class TaskLogic {
 
         // If the end of recurrence information is changed from 'after x occurrences' to 'at *date*'
         // the field recurrence_count has explicitly to be unset.
-        if (oldTask.containsOccurrence() && !task.containsOccurrence()) {
+        if (oldTask.containsOccurrence() && !task.containsOccurrence() && task.containsUntil()) {
             fields.add(I(CalendarObject.RECURRENCE_COUNT));
         }
 

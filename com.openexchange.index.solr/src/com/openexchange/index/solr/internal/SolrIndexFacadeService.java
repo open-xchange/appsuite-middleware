@@ -61,8 +61,8 @@ import com.openexchange.index.IndexAccess;
 import com.openexchange.index.IndexFacadeService;
 import com.openexchange.index.solr.SolrIndexExceptionCodes;
 import com.openexchange.index.solr.internal.attachments.SolrAttachmentIndexAccess;
-import com.openexchange.index.solr.internal.filestore.SolrFilestoreIndexAccess;
-import com.openexchange.index.solr.internal.mail.MailSolrIndexAccess;
+import com.openexchange.index.solr.internal.infostore.SolrInfostoreIndexAccess;
+import com.openexchange.index.solr.internal.mail.SolrMailIndexAccess;
 import com.openexchange.log.LogFactory;
 import com.openexchange.session.Session;
 import com.openexchange.solr.SolrCoreIdentifier;
@@ -84,7 +84,7 @@ public class SolrIndexFacadeService implements IndexFacadeService {
      * Timeout in minutes.
      * An index access will be released after being unused for this time and if it isn't referenced anymore.
      */
-    private static final long SOFT_TIMEOUT = 1;
+    private static final long SOFT_TIMEOUT = 10;
     
     /**
      * Timeout in minutes.
@@ -201,11 +201,14 @@ public class SolrIndexFacadeService implements IndexFacadeService {
         // TODO: Add other modules 
         switch(module) {
         
+//            case Types.EMAIL:
+//                return new MailSolrIndexAccess(identifier);
+            
             case Types.EMAIL:
-                return new MailSolrIndexAccess(identifier);
+                return new SolrMailIndexAccess(identifier);
                 
             case Types.INFOSTORE:
-                return new SolrFilestoreIndexAccess(identifier);
+                return new SolrInfostoreIndexAccess(identifier);
                 
             case Types.ATTACHMENT:
                 return new SolrAttachmentIndexAccess(identifier);

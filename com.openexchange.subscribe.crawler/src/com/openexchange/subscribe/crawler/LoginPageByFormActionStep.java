@@ -149,7 +149,7 @@ public class LoginPageByFormActionStep extends AbstractStep<HtmlPage, Object> im
 
                 boolean linkAvailable = false;
                 for (final HtmlAnchor link : pageAfterLogin.getAnchors()) {
-                    if (link.getHrefAttribute().matches(linkAvailableAfterLogin)) {
+                	if (link.getHrefAttribute().matches(linkAvailableAfterLogin)) {
                         linkAvailable = true;
                     }
                 }

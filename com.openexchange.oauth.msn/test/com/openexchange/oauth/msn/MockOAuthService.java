@@ -68,7 +68,18 @@ import com.openexchange.session.Session;
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
  */
 public class MockOAuthService implements OAuthService {
+	
+	private final OAuthServiceMetaData serviceMetadata;
 
+	public MockOAuthService() {
+		this.serviceMetadata = null;
+	}
+	
+	public MockOAuthService(OAuthServiceMetaData serviceMetadata) {
+		this.serviceMetadata = serviceMetadata;
+	}
+	
+	
     /* (non-Javadoc)
      * @see com.openexchange.oauth.OAuthService#createAccount(java.lang.String, java.util.Map, int, int)
      */
@@ -117,19 +128,18 @@ public class MockOAuthService implements OAuthService {
 
             @Override
             public OAuthServiceMetaData getMetaData() {
-                // TODO Auto-generated method stub
-                return null;
+                return serviceMetadata;
             }
 
             @Override
             public String getSecret() {
-                // TODO Auto-generated method stub
-                return null;
+                
+                return "{\"callback\":\"http://www.open-xchange.com/ajax/oauth/accounts?action=create&respondWithHTML=true&session=740241c6c23b43e69e6426b2fb7f0dd5&displayName=Outlook&serviceId=com.openexchange.oauth.msn&uuid=74296db7-888c-4783-a4fd-9095bc7d0ede\"}";
             }
 
             @Override
             public String getToken() {
-                final String wrap_refresh_token = "AC8FQAAAHgA%241ymI3WoBDHvSXSJl*oFehCMoBYGSrxdgJ*WSyVxWryf3rA92M9aAa5w5PInyCfh6L1RHgQIg00GyFKgBOO26UJXorrEKLCMpq!*wJMShMhWrXvwIwprLJLMzj*xtvHgR3hSpkArQHk7EjdHDsWZBAjDXr7RYdje0MDuZpnDDJoo8S2anpwqPdKvw%24%24&skey=v5wJPJSBpTr9Byadg/hBlISL5VCnMpX2";
+                final String wrap_refresh_token = "ClyCHj05JG8QKLMzxG2pHYkZBswmH5Zpa!JqRSCRi*4NW6rkSPWkDRQowDh55THcaL4CyMrDGQBkPMmdR0o5zKzYKpV0MSSkZCPjFssBWEP5hDZL5t2OrroA*91CJtF6N2Bl2!Rz9*eXz*OqrnZj0ugj4f9OCLNm!QDHD84T18*Cw6*2MSmWwd6XQRKAPzwblGah0N*ADmLHVdvjZuudyupTCOZZ2hY8wT3U1sznF7F*uyvEZIu6dMrAzpTRWQ05z3s66RXoWSbmL0Rj1SH5Cpq6xA0JMji1z46ag5x4tYVzXFybpqiETOZIZ*hIomHmGjq*s5!s0dzI1qefpQklutBOSOe8GEbQ!PgfWiWRSqTRW9lSaIrTRaHB6XJdNZDTRMq*PRW!aIbpqDAyQAq9uMHHYGlagLnyFI9b4YUSPfpVnv5T5ZO0Jym86g6EadWULoYuW5exIqiDfNixZTuG927pC3bpiR*RfJPhm6PdsrlgSSp5v6ABiesTdEpPgWJwww8dIhAkVM3O44aHzf6BAncqICO5z*MnZDTGkMTpJghHJz9j1M4sdjqF5b6z3RX5yg$$";
                 return wrap_refresh_token;
             }
 

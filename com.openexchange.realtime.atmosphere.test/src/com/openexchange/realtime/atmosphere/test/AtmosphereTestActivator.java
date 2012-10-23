@@ -1,7 +1,7 @@
 package com.openexchange.realtime.atmosphere.test;
 
 import org.osgi.service.http.HttpService;
-import com.openexchange.http.grizzly.services.atmosphere.AtmosphereService;
+import com.openexchange.http.grizzly.service.atmosphere.AtmosphereService;
 import com.openexchange.log.Log;
 import com.openexchange.log.LogFactory;
 import com.openexchange.osgi.HousekeepingActivator;

@@ -49,12 +49,16 @@
 
 package com.openexchange.soap.cxf.osgi;
 
+import java.util.List;
 import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import javax.jws.WebService;
 import javax.xml.ws.Endpoint;
 import org.apache.commons.logging.Log;
+import org.apache.cxf.interceptor.DocLiteralInInterceptor;
+import org.apache.cxf.interceptor.Interceptor;
+import org.apache.cxf.message.Message;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceEvent;
@@ -204,7 +208,27 @@ public class WebserviceCollector implements ServiceListener {
         final String address = '/' + name; // MessageFormat.format("/{0}", name);
         Endpoint oldEndpoint;
         try {
-            oldEndpoint = endpoints.replace(name, Endpoint.publish(address, service));
+            // Publish new server endpoint
+            final Endpoint endpoint = Endpoint.publish(address, service);
+            {
+                // Alter server's in-stream interceptors
+                final org.apache.cxf.endpoint.Endpoint serverEndpoint = (org.apache.cxf.endpoint.Endpoint) endpoint.getProperties();
+                final List<Interceptor<? extends Message>> inInterceptors = serverEndpoint.getBinding().getInInterceptors();
+                boolean found = false;
+                int index = 0;
+                for (final Interceptor<? extends Message> interceptor : inInterceptors) {
+                    if (interceptor instanceof DocLiteralInInterceptor) {
+                        found = true;
+                        break;
+                    }
+                    index++;
+                }
+                if (found) {
+                    inInterceptors.remove(index);
+                    inInterceptors.add(index, new com.openexchange.soap.cxf.interceptor.DocLiteralInInterceptor());
+                }
+            }
+            oldEndpoint = endpoints.replace(name, endpoint);
             LOG.info("Publishing endpoint succeeded. Published \"" + name + "\" under address \"" + address + "\".");
         } catch (final Throwable t) {
             ExceptionUtils.handleThrowable(t);
@@ -217,6 +241,11 @@ public class WebserviceCollector implements ServiceListener {
     }
 
     private boolean isWebservice(final Object service) {
-        return (null != service.getClass().getAnnotation(WebService.class));
+        try {
+            final Class<? extends Object> clazz = service.getClass();
+            return (null == clazz) ? false : (null != clazz.getAnnotation(WebService.class));
+        } catch (final Exception e) {
+            return false;
+        }
     }
 }

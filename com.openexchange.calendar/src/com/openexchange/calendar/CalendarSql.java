@@ -117,7 +117,7 @@ public class CalendarSql implements AppointmentSQLInterface {
 
     public static final String PARTICIPANT_TABLE_NAME = "prg_dates_members";
 
-    private static CalendarSqlImp cimp;
+    private static volatile CalendarSqlImp cimp;
 
     private final Session session;
 
@@ -191,6 +191,7 @@ public class CalendarSql implements AppointmentSQLInterface {
 
             mayRead(oclp);
 
+            final CalendarSqlImp cimp = CalendarSql.cimp;
             if (folderType == FolderObject.PRIVATE) {
                 prep = cimp.getPrivateFolderRangeSQL(ctx, session.getUserId(), user.getGroups(), fid, start, end, StringCollection.getSelect(cols, DATES_TABLE_NAME), oclp.canReadAllObjects(), readcon, orderBy, orderDir);
             } else if (folderType == FolderObject.PUBLIC) {
@@ -252,6 +253,7 @@ public class CalendarSql implements AppointmentSQLInterface {
             final int shared_folder_owner = ofa.getFolderOwner(fid);
             mayRead(oclp);
 
+            final CalendarSqlImp cimp = CalendarSql.cimp;
             if (folderType == FolderObject.PRIVATE) {
                 prep = cimp.getPrivateFolderModifiedSinceSQL(ctx, session.getUserId(), user.getGroups(), fid, since, StringCollection.getSelect(cols, DATES_TABLE_NAME), oclp.canReadAllObjects(), readcon, start, end);
             } else if (folderType == FolderObject.PUBLIC) {
@@ -312,6 +314,7 @@ public class CalendarSql implements AppointmentSQLInterface {
             final OXFolderAccess ofa = new OXFolderAccess(readcon, ctx);
             final EffectivePermission oclp = ofa.getFolderPermission(fid, session.getUserId(), userConfig);
             mayRead(oclp);
+            final CalendarSqlImp cimp = CalendarSql.cimp;
             if (ofa.getFolderType(fid, session.getUserId()) == FolderObject.PRIVATE) {
                 final CalendarOperation co = new CalendarOperation();
                 prep = cimp.getPrivateFolderDeletedSinceSQL(ctx, session.getUserId(), fid, since, StringCollection.getSelect(cols, "del_dates"), readcon);
@@ -391,6 +394,7 @@ public class CalendarSql implements AppointmentSQLInterface {
                 closeRead = true;
             }
             final CalendarOperation co = new CalendarOperation();
+            final CalendarSqlImp cimp = CalendarSql.cimp;
             prep = cimp.getPreparedStatement(rcon, cimp.loadAppointment(oid, ctx));
             rs = cimp.getResultSet(prep);
             final CalendarDataObject cdao = co.loadAppointment(rs, oid, inFolder, cimp, rcon, session, ctx, CalendarOperation.READ, inFolder, checkPermissions);
@@ -526,7 +530,16 @@ public class CalendarSql implements AppointmentSQLInterface {
             writecon = DBPool.pickupWriteable(ctx);
 
             final CalendarOperation co = new CalendarOperation();
+            final CalendarSqlImp cimp = CalendarSql.cimp;
             final CalendarDataObject edao = cimp.loadObjectForUpdate(cdao, session, ctx, inFolder, writecon, checkPermissions);
+            
+            if (cdao.isIgnoreOutdatedSequence() && cdao.getSequence() < edao.getSequence()) {
+                // Silently ignore updates on Appointments with an outdated Sequence. OLOX2-Requirement.
+                cdao.setLastModified(edao.getLastModified());
+                LOG.info("Ignored update on Appointment due to outdated sequence: " + edao.getContextID() + "-" + edao.getObjectID() + " (cid-objectId)");
+                return null;
+            }
+            
             if (co.prepareUpdateAction(cdao, edao, session.getUserId(), inFolder, user.getTimeZone())) {
                 // Insert-through-update detected
                 throw OXCalendarExceptionCodes.UPDATE_WITHOUT_OBJECT_ID.create();
@@ -738,6 +751,7 @@ public class CalendarSql implements AppointmentSQLInterface {
         try  {
             try {
                 final OXFolderAccess ofa = new OXFolderAccess(writeCon, ctx);
+                final CalendarSqlImp cimp = CalendarSql.cimp;
                 if (ofa.getFolderType(fid, session.getUserId()) == FolderObject.PRIVATE) {
                     prep = cimp.getPrivateFolderObjects(fid, ctx, writeCon);
                     rs = cimp.getResultSet(prep);
@@ -921,6 +935,7 @@ public class CalendarSql implements AppointmentSQLInterface {
                 readcon = DBPool.pickup(ctx);
                 cols = recColl.checkAndAlterCols(cols);
                 final CalendarOperation co = new CalendarOperation();
+                final CalendarSqlImp cimp = CalendarSql.cimp;
                 prep = cimp.getPreparedStatement(readcon, cimp.getObjectsByidSQL(oids, session.getContextId(), StringCollection.getSelect(cols, DATES_TABLE_NAME)));
                 rs = cimp.getResultSet(prep);
                 co.setOIDS(true, oids);
@@ -1009,6 +1024,7 @@ public class CalendarSql implements AppointmentSQLInterface {
                 }
             }
 
+            final CalendarSqlImp cimp = CalendarSql.cimp;
             stmt = cimp.getSearchStatement(user.getId(), searchObj, cfo, folderAccess, columnBuilder.toString(), orderBy, orderDir, ctx, readcon);
             rs = cimp.getResultSet(stmt);
             co.setResultSet(rs, stmt, cols, cimp, readcon, 0, 0, session, ctx);
@@ -1074,6 +1090,7 @@ public class CalendarSql implements AppointmentSQLInterface {
                 groups = user.getGroups();
                 uc = userConfig;
             }
+            final CalendarSqlImp cimp = CalendarSql.cimp;
             prep = cimp.getSearchQuery(StringCollection.getSelect(cols, DATES_TABLE_NAME), userId, groups, uc, orderBy, orderDir, searchobject, ctx, readcon, cfo, isShared);
             rs = cimp.getResultSet(prep);
             co.setResultSet(rs, prep, cols, cimp, readcon, 0, 0, session, ctx);
@@ -1122,6 +1139,7 @@ public class CalendarSql implements AppointmentSQLInterface {
                 return SearchIteratorAdapter.emptyIterator();
             }
             readcon = DBPool.pickup(ctx);
+            final CalendarSqlImp cimp = CalendarSql.cimp;
             switch(type) {
                 case Participant.USER:
                     private_folder_information = calendarsqlimp.getAllPrivateAppointmentAndFolderIdsForUser(ctx, user.getId(), readcon);
@@ -1174,6 +1192,7 @@ public class CalendarSql implements AppointmentSQLInterface {
             readcon = DBPool.pickup(ctx);
             cols = recColl.checkAndAlterCols(cols);
             final CalendarOperation co = new CalendarOperation();
+            final CalendarSqlImp cimp = CalendarSql.cimp;
             prep = cimp.getActiveAppointments(ctx, session.getUserId(), start, end, StringCollection.getSelect(cols, DATES_TABLE_NAME), readcon);
             final ResultSet rs = cimp.getResultSet(prep);
             co.setResultSet(rs, prep, cols, cimp, readcon, 0, 0, session, ctx);
@@ -1208,6 +1227,7 @@ public class CalendarSql implements AppointmentSQLInterface {
             readcon = DBPool.pickup(ctx);
             cols = recColl.checkAndAlterCols(cols);
             final CalendarOperation co = new CalendarOperation();
+            final CalendarSqlImp cimp = CalendarSql.cimp;
             prep = cimp.getAllAppointmentsForUser(ctx, session.getUserId(), user.getGroups(), userConfig, start, end, StringCollection.getSelect(cols, DATES_TABLE_NAME), readcon, since, orderBy, orderDir);
             rs = cimp.getResultSet(prep);
             co.setResultSet(rs, prep, cols, cimp, readcon, 0, 0, session, ctx);
@@ -1249,6 +1269,7 @@ public class CalendarSql implements AppointmentSQLInterface {
             readcon = DBPool.pickup(ctx);
             cols = recColl.checkAndAlterCols(cols);
             final CalendarOperation co = new CalendarOperation();
+            final CalendarSqlImp cimp = CalendarSql.cimp;
             prep = cimp.getAllAppointments(ctx, start, end, StringCollection.getSelect(cols, DATES_TABLE_NAME), readcon, orderBy, order);
             rs = cimp.getResultSet(prep);
             co.setResultSet(rs, prep, cols, cimp, readcon, 0, 0, session, ctx);
@@ -1272,12 +1293,14 @@ public class CalendarSql implements AppointmentSQLInterface {
     }
 
     public static final CalendarSqlImp getCalendarSqlImplementation() {
+        CalendarSqlImp cimp = CalendarSql.cimp;
         if (cimp != null){
             return cimp;
         }
         LOG.error("No CalendarSqlImp Class found !");
         try {
             cimp = (CalendarSqlImp) Class.forName(default_class).newInstance();
+            CalendarSql.cimp = cimp;
             return cimp;
         } catch(final ClassNotFoundException cnfe) {
             LOG.error(cnfe.getMessage(), cnfe);

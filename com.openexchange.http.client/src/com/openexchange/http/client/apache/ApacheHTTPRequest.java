@@ -2,14 +2,11 @@ package com.openexchange.http.client.apache;
 
 import java.io.IOException;
 import java.util.Map;
-
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpException;
 import org.apache.commons.httpclient.HttpMethodBase;
 import org.apache.commons.httpclient.HttpState;
-
 import com.openexchange.exception.OXException;
-import com.openexchange.http.client.builder.HTTPGenericRequestBuilder;
 import com.openexchange.http.client.builder.HTTPRequest;
 import com.openexchange.http.client.builder.HTTPResponse;
 import com.openexchange.http.client.exceptions.OxHttpClientExceptionCodes;
@@ -23,9 +20,9 @@ public class ApacheHTTPRequest implements HTTPRequest {
 	private HttpClient client;
 	private ApacheClientRequestBuilder coreBuilder;
 	private CommonApacheHTTPRequest reqBuilder;
-	
-	
-	
+
+
+
 	public ApacheHTTPRequest(Map<String, String> headers, Map<String, String> parameters,
 			HttpMethodBase method, HttpClient client, ApacheClientRequestBuilder coreBuilder, CommonApacheHTTPRequest builder) {
 		super();

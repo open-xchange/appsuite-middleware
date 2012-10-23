@@ -1419,7 +1419,7 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
                                 }
                                 if (!np[a].containsConfirm() || time_change) {
                                     np[a].setIsModified(true);
-                                    if (!time_change || np[a].getIdentifier() == uid || np[a].getIdentifier() == sharedFolderOwner) {
+                                    if (!np[a].containsConfirm()) {
                                         np[a].setConfirm(op[bs].getConfirm());
                                     } else {
                                         np[a].setConfirm(CalendarObject.NONE);

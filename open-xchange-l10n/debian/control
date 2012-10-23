@@ -107,6 +107,11 @@ Replaces: open-xchange-lang-zh-tw (<< 6.21.0-0)
 Conflicts: open-xchange-lang-zh-tw (<< 6.21.0-0)
 Description: Package containing Open-Xchange backend localization for zh_TW
 
+Package: open-xchange-l10n-de-ch
+Architecture: all
+Depends: ${misc:Depends}, open-xchange-core (>= @OXVERSION@)
+Description: Package containing Open-Xchange backend localization for de_CH
+
 Package: open-xchange-l10n-ca-es
 Architecture: all
 Depends: ${misc:Depends}, open-xchange-core (>= @OXVERSION@)

@@ -79,6 +79,7 @@ import com.openexchange.concurrent.TimeoutConcurrentMap;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
+import com.openexchange.file.storage.AccountAware;
 import com.openexchange.file.storage.FileStorageAccount;
 import com.openexchange.file.storage.FileStorageAccountAccess;
 import com.openexchange.file.storage.FileStorageAccountManager;
@@ -127,6 +128,8 @@ import com.openexchange.groupware.infostore.InfostoreFacades;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
+import com.openexchange.log.LogProperties;
+import com.openexchange.log.Props;
 import com.openexchange.mail.FullnameArgument;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.dataobjects.MailFolder;
@@ -414,12 +417,20 @@ public final class OutlookFolderStorage implements FolderStorage {
                 if (started) {
                     folderStorage.rollback(storageParameters);
                 }
-                LOG.warn("Checking consistency failed for tree " + treeId, e);
-            } catch (final Exception e) {
+                if (LOG.isDebugEnabled()) {
+                    LOG.warn("Checking consistency failed for folder " + folderId + " in tree " + treeId, e);
+                } else {
+                    LOG.warn("Checking consistency failed for folder " + folderId + " in tree " + treeId + ": " + e.getMessage());
+                }
+            } catch (final RuntimeException e) {
                 if (started) {
                     folderStorage.rollback(storageParameters);
                 }
-                LOG.warn("Checking consistency failed for tree " + treeId, e);
+                if (LOG.isDebugEnabled()) {
+                    LOG.warn("Checking consistency failed for folder " + folderId + " in tree " + treeId, e);
+                } else {
+                    LOG.warn("Checking consistency failed for folder " + folderId + " in tree " + treeId + ": " + e.getMessage());
+                }
             }
         }
     }
@@ -626,7 +637,7 @@ public final class OutlookFolderStorage implements FolderStorage {
                 }
             }
         }
-        if (global) {
+        {
             /*
              * Cleanse from other session-bound memory tables, too
              */
@@ -1478,7 +1489,13 @@ public final class OutlookFolderStorage implements FolderStorage {
                                     /*
                                      * Check if file storage service provides a root folder
                                      */
-                                    final List<FileStorageAccount> userAccounts = fsService.getAccountManager().getAccounts(session);
+                                    final List<FileStorageAccount> userAccounts;
+                                    if (fsService instanceof AccountAware) {
+                                        userAccounts = ((AccountAware) fsService).getAccounts(session);
+                                    } else {
+                                        userAccounts = fsService.getAccountManager().getAccounts(session);
+                                    }
+                                    final Props props = LogProperties.getLogProperties();
                                     for (final FileStorageAccount userAccount : userAccounts) {
                                         if (SERVICE_INFOSTORE.equals(userAccount.getId()) || FileStorageAccount.DEFAULT_ID.equals(userAccount.getId())) {
                                             // Ignore infostore file storage and default account
@@ -1487,12 +1504,18 @@ public final class OutlookFolderStorage implements FolderStorage {
                                         final FileStorageAccountAccess accountAccess = getFSAccountAccess(storageParameters, userAccount);
                                         accountAccess.connect();
                                         try {
+                                            props.put("com.openexchange.file.storage.accountId", userAccount.getId());
+                                            props.put("com.openexchange.file.storage.configuration", userAccount.getConfiguration().toString());
+                                            props.put("com.openexchange.file.storage.serviceId", fsService.getId());
                                             final FileStorageFolder rootFolder = accountAccess.getFolderAccess().getRootFolder();
                                             if (null != rootFolder) {
                                                 fsAccounts.add(userAccount);
                                             }
                                         } finally {
                                             accountAccess.close();
+                                            props.remove("com.openexchange.file.storage.accountId");
+                                            props.remove("com.openexchange.file.storage.configuration");
+                                            props.remove("com.openexchange.file.storage.serviceId");
                                         }
                                     }
                                 }
@@ -2303,7 +2326,16 @@ public final class OutlookFolderStorage implements FolderStorage {
                         }
                     }
                 } catch (final OXException e) {
-                    if (MailExceptionCode.ACCOUNT_DOES_NOT_EXIST.equals(e)) {
+                    if (MailExceptionCode.UNKNOWN_PROTOCOL.equals(e)) {
+                        if (LOG.isDebugEnabled()) {
+                            LOG.debug(e.getMessage(), e);
+                        }
+                        parameters.addWarning(e);
+                        /*
+                         * Return empty map
+                         */
+                        return new TreeMap<String, List<String>>(comparator);
+                    } else if (MailExceptionCode.ACCOUNT_DOES_NOT_EXIST.equals(e)) {
                         if (LOG.isDebugEnabled()) {
                             LOG.debug(e.getMessage(), e);
                         }

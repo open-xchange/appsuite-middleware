@@ -1,0 +1,5 @@
+open-xchange-file-storage-cmis (6.23.0-1) unstable; urgency=low
+
+  * Initial release
+
+ -- Thorben Betten <thorben.betten@open-xchange.com>  Tue, 17 Oct 2012 12:21:28 +0200

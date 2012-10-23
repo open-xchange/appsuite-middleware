@@ -62,12 +62,20 @@ public class LocalFileStorageFactory implements FileStorageFactory {
 
     @Override
     public LocalFileStorage getFileStorage(final URI uri) throws OXException {
-        LocalFileStorage fs;
         try {
-            fs = new LocalFileStorage(uri);
-            return fs;
+            return new LocalFileStorage(uri);
         } catch (final OXException e) {
             throw FileStorageCodes.INSTANTIATIONERROR.create(e, uri);
         }
+    }
+
+    @Override
+    public boolean supports(URI uri) throws OXException {
+        return true;
+    }
+
+    @Override
+    public int getRanking() {
+        return DEFAULT_RANKING;
     }
 }

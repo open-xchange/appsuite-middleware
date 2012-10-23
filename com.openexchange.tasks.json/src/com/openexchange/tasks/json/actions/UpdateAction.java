@@ -50,7 +50,6 @@
 package com.openexchange.tasks.json.actions;
 
 import java.util.Date;
-import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.parser.TaskParser;
@@ -65,7 +64,7 @@ import com.openexchange.groupware.tasks.TasksSQLImpl;
 import com.openexchange.log.Log;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tasks.json.TaskRequest;
-
+import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link UpdateAction}
@@ -91,11 +90,8 @@ public class UpdateAction extends TaskAction {
         super(services);
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.tasks.json.actions.TaskAction#perform(com.openexchange.tasks.json.TaskRequest)
-     */
     @Override
-    protected AJAXRequestResult perform(final TaskRequest req) throws OXException, JSONException {
+    protected AJAXRequestResult perform(final TaskRequest req) throws OXException {
         final int id = req.checkInt(AJAXServlet.PARAMETER_ID);
         final int inFolder = req.checkInt(AJAXServlet.PARAMETER_INFOLDER);
         Date timestamp = req.checkDate(AJAXServlet.PARAMETER_TIMESTAMP);
@@ -103,15 +99,15 @@ public class UpdateAction extends TaskAction {
         final Task task = new Task();
 
         final JSONObject jsonobject = (JSONObject) req.getRequest().getData();
-
+        ServerSession session = req.getSession();
         final TaskParser taskParser = new TaskParser(req.getTimeZone());
-        taskParser.parse(task, jsonobject);
+        taskParser.parse(task, jsonobject, session.getUser().getLocale());
 
         task.setObjectID(id);
 
-        convertExternalToInternalUsersIfPossible(task, req.getSession().getContext(), LOG);
+        convertExternalToInternalUsersIfPossible(task, session.getContext(), LOG);
 
-        final TasksSQLInterface sqlinterface = new TasksSQLImpl(req.getSession());
+        final TasksSQLInterface sqlinterface = new TasksSQLImpl(session);
         sqlinterface.updateTaskObject(task, inFolder, timestamp);
         timestamp = task.getLastModified();
 

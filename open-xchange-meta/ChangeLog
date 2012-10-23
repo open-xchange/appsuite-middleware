@@ -1,3 +1,7 @@
+* 2012-09-11 - choeger@open-xchange.com
+
+ - Bugfix #22963 - open-xchange-meta-mobility has wrong dependencies
+
 * 2011-09-29 - choeger@open-xchange.com
 
  - Bugfix #20464 - open-xchange-meta-parallels should include "conflict with"

@@ -51,13 +51,8 @@ package com.openexchange.solr.internal;
 
 import java.io.Serializable;
 import java.util.concurrent.Callable;
-import com.hazelcast.core.HazelcastInstance;
-import com.hazelcast.core.ILock;
-import com.hazelcast.core.IMap;
-import com.openexchange.exception.OXException;
 import com.openexchange.solr.SolrAccessService;
 import com.openexchange.solr.SolrCoreIdentifier;
-import com.openexchange.solr.osgi.SolrActivator;
 
 
 /**

@@ -126,12 +126,13 @@ public final class MimeType2ExtMap {
                     typeMap = new HashMap<String, String>();
                     extMap = new HashMap<String, List<String>>();
                     final StringBuilder sb = new StringBuilder(128);
+                    final boolean debugEnabled = LOG.isDebugEnabled();
                     {
                         final String homeDir = System.getProperty("user.home");
                         if (homeDir != null) {
                             final File file = new File(sb.append(homeDir).append(File.separatorChar).append(".mime.types").toString());
                             if (file.exists()) {
-                                if (LOG.isDebugEnabled()) {
+                                if (debugEnabled) {
                                     sb.setLength(0);
                                     LOG.debug(sb.append("Loading MIME type file \"").append(file.getPath()).append('"').toString());
                                 }
@@ -147,7 +148,7 @@ public final class MimeType2ExtMap {
                                 new File(sb.append(javaHome).append(File.separatorChar).append("lib").append(File.separator).append(
                                     "mime.types").toString());
                             if (file.exists()) {
-                                if (LOG.isDebugEnabled()) {
+                                if (debugEnabled) {
                                     sb.setLength(0);
                                     LOG.debug(sb.append("Loading MIME type file \"").append(file.getPath()).append('"').toString());
                                 }
@@ -158,7 +159,7 @@ public final class MimeType2ExtMap {
                     {
                         for (final Enumeration<URL> e = ClassLoader.getSystemResources("META-INF/mime.types"); e.hasMoreElements();) {
                             final URL url = e.nextElement();
-                            if (LOG.isDebugEnabled()) {
+                            if (debugEnabled) {
                                 sb.setLength(0);
                                 LOG.debug(sb.append("Loading MIME type file \"").append(url.getFile()).append('"').toString());
                             }
@@ -168,7 +169,7 @@ public final class MimeType2ExtMap {
                     {
                         for (final Enumeration<URL> e = ClassLoader.getSystemResources("META-INF/mimetypes.default"); e.hasMoreElements();) {
                             final URL url = e.nextElement();
-                            if (LOG.isDebugEnabled()) {
+                            if (debugEnabled) {
                                 sb.setLength(0);
                                 LOG.debug(sb.append("Loading MIME type file \"").append(url.getFile()).append('"').toString());
                             }
@@ -181,7 +182,7 @@ public final class MimeType2ExtMap {
                             final ConfigurationService service = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
                             final File file = service.getFileByName(mimeTypesFileName);
                             if (file.exists()) {
-                                if (LOG.isDebugEnabled()) {
+                                if (debugEnabled) {
                                     sb.setLength(0);
                                     LOG.debug(sb.append("Loading MIME type file \"").append(file.getPath()).append('"').toString());
                                 }

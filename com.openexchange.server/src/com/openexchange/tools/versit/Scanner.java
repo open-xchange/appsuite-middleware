@@ -62,10 +62,34 @@ public abstract class Scanner implements VersitDefinition.Reader {
      * Look-ahead character.
      */
     public int peek;
-
     protected int Column;
-
     protected int Line;
+    protected boolean strict;
+
+    /**
+     * Initializes a new {@link Scanner}.
+     */
+    protected Scanner() {
+        super();
+    }
+
+    /**
+     * Sets the strict behavior
+     *
+     * @param strict The strict behavior to set
+     */
+    public void setStrict(boolean strict) {
+        this.strict = strict;
+    }
+
+    /**
+     * Gets the strict behavior
+     *
+     * @return The strict behavior
+     */
+    public boolean isStrict() {
+        return strict;
+    }
 
     public int getColumn() {
         return Column;
@@ -113,7 +137,11 @@ public abstract class Scanner implements VersitDefinition.Reader {
         int retval = 0;
         for (int i = 0; i < digits; i++) {
             if (peek < '0' || peek > '9') {
-                throw new VersitException(this, digits + "-digit number expected");
+                // Obviously a number with less digits than expected
+                if (strict) {
+                    throw new VersitException(this, digits + "-digit number expected");                    
+                }
+                break;
             }
             retval = retval * 10 + read() - '0';
         }
@@ -123,7 +151,10 @@ public abstract class Scanner implements VersitDefinition.Reader {
     public void parseNumber(final StringBuffer sb, final int digits) throws IOException {
         for (int i = 0; i < digits; i++) {
             if (peek < '0' || peek > '9') {
-                throw new IOException(digits + "-digit number expected");
+                if (strict) {
+                    throw new IOException(digits + "-digit number expected");
+                }
+                break;
             }
             sb.append((char) read());
         }

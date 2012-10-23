@@ -232,7 +232,7 @@ public final class Init {
                 AJPv13Config.getInstance().start();
                 ServletConfigLoader.initDefaultInstance(AJPv13Config.getServletConfigs());
                 if (null == AJPv13Server.getInstance()) {
-                    AJPv13Server.setInstance(new com.openexchange.ajp13.najp.AJPv13ServerImpl());
+                    AJPv13Server.setInstance(new com.openexchange.ajp13.AJPv13ServerImpl());
                 }
                 try {
                     AJPv13Server.startAJPServer();
@@ -312,10 +312,6 @@ public final class Init {
         final String propDir1 = TestInit.getTestProperty("openexchange.propdir");
         if (null != propDir1) {
             System.setProperty("openexchange.propdir", propDir1);
-        }
-        final String propDir2 = TestInit.getTestProperty("openexchange.propdir2");
-        if (null != propDir2) {
-            System.setProperty("openexchange.propdir2", propDir2);
         }
     }
 
@@ -599,6 +595,10 @@ public final class Init {
          */
         final ConfigurationService config = (ConfigurationService) services.get(ConfigurationService.class);
         final String directory_name = config.getProperty("i18n.language.path");
+        if (directory_name == null) {
+        	LOG.error("Tried to load i18n files and did not find a property");
+        	return;
+        }
         final File dir = new File(directory_name);
         final I18nServices i18nServices = I18nServices.getInstance();
         try {
@@ -866,7 +866,6 @@ public final class Init {
     public static void dropProperty() {
         final Properties sysProps = System.getProperties();
         sysProps.remove("openexchange.propdir");
-        sysProps.remove("openexchange.propdir2");
     }
 
     public static void dropConfigBundle() {

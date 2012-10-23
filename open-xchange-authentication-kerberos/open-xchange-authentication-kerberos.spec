@@ -23,7 +23,7 @@ License:        GPL-2.0
 BuildRoot:      %{_tmppath}/%{name}-%{version}-build
 URL:            http://www.open-xchange.com/
 Source:         %{name}_%{version}.orig.tar.bz2
-Summary:        The Open-Xchange Kerberos Authentication
+Summary:        Module for authenticating users in a Kerberos domain
 Requires:       open-xchange-core >= @OXVERSION@
 Provides:	open-xchange-authentication
 Conflicts:	open-xchange-authentication-database
@@ -31,8 +31,11 @@ Conflicts:	open-xchange-authentication-imap
 Conflicts:	open-xchange-authentication-ldap
 
 %description
-The Open-Xchange Kerberos Authentication
-
+This package installs the OSGi bundle implementing the OSGi AuthenticationService for the backend. The implementation uses the Kerberos
+domain controller (KDC) of the domain to authenticate login requests. Additionally this implementation is able to verify the service ticket
+sent by the browser from the desktop login.
+This authentication module is mutually exclusive with any other authentication module. Only one authentication module can be installed on
+the backend.
 
 Authors:
 --------
@@ -67,6 +70,18 @@ done
 %config(noreplace) /opt/open-xchange/etc/*
 
 %changelog
+* Wed Oct 10 2012 Marcus Klein <marcus.klein@open-xchange.com>
+Fifth release candidate for 6.22.0
+* Tue Oct 09 2012 Marcus Klein <marcus.klein@open-xchange.com>
+Fourth release candidate for 6.22.0
+* Fri Oct 05 2012 Marcus Klein <marcus.klein@open-xchange.com>
+Third release candidate for 6.22.0
+* Thu Oct 04 2012 Marcus Klein <marcus.klein@open-xchange.com>
+Second release candidate for 6.22.0
+* Tue Sep 04 2012 Marcus Klein <marcus.klein@open-xchange.com>
+First release candidate for 6.23.0
+* Mon Sep 03 2012 Marcus Klein <marcus.klein@open-xchange.com>
+prepare for next EDP drop
 * Tue Aug 21 2012 Marcus Klein <marcus.klein@open-xchange.com>
 First release candidate for 6.22.0
 * Mon Aug 20 2012 Marcus Klein <marcus.klein@open-xchange.com>

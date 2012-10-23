@@ -344,9 +344,17 @@ public class PublicationMultipleHandler implements MultipleHandler {
     private Publication loadPublication(final int id, final Context context, final String target) throws OXException {
         PublicationService service = null;
         if (target != null && !target.equals("")) {
-            service = discovery.getTarget(target).getPublicationService();
+            PublicationTarget t = discovery.getTarget(target);
+			if (t == null) {
+				return null;
+			}
+            service = t.getPublicationService();
         } else {
-            service = discovery.getTarget(context, id).getPublicationService();
+            PublicationTarget t = discovery.getTarget(context, id);
+			if (t == null) {
+				return null;
+			}
+            service = t.getPublicationService();
         }
         if(service == null) {
             return null;

@@ -9,7 +9,7 @@ Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Import-Package: com.openexchange.conversion,
  com.openexchange.conversion.simple,
  com.openexchange.exception,
- com.openexchange.http.grizzly.services.atmosphere,
+ com.openexchange.http.grizzly.service.atmosphere,
  com.openexchange.log,
  com.openexchange.osgi,
  com.openexchange.tools.session,

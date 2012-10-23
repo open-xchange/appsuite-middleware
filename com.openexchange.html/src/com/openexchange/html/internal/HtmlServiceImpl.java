@@ -541,7 +541,9 @@ public final class HtmlServiceImpl implements HtmlService {
 //        HTMLParser.parse(htmlContent, handler);
 //        return handler.getText();
 
-        String prepared = insertBlockquoteMarker(htmlContent);
+        String prepared = prepareSignatureStart(htmlContent);
+        prepared = prepareHrTag(prepared);
+        prepared = insertBlockquoteMarker(prepared);
         prepared = insertSpaceMarker(prepared);
         String text = quoteText(new Renderer(new Segment(new Source(prepared), 0, prepared.length())).setMaxLineLength(9999).setIncludeHyperlinkURLs(appendHref).toString());
         // Drop heading whitespaces
@@ -549,6 +551,38 @@ public final class HtmlServiceImpl implements HtmlService {
         // ... but keep enforced ones
         text = whitespaceText(text);
         return text;
+    }
+
+    private static final Pattern PATTERN_HR = Pattern.compile("<hr[^>]*>(.*?</hr>)?", Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
+    private static String prepareHrTag(final String htmlContent) {
+        final Matcher m = PATTERN_HR.matcher(htmlContent);
+        if (!m.find()) {
+            return htmlContent;
+        }
+        final StringBuffer sb = new StringBuffer(htmlContent.length());
+        final String repl = "<br>---------------------------------------------<br>";
+        do {
+            final String tail = m.group(1);
+            if (null == tail || "</hr>".equals(tail)) {
+                m.appendReplacement(sb, Matcher.quoteReplacement(repl));
+            } else {
+                m.appendReplacement(sb, Matcher.quoteReplacement(repl + tail.substring(0, tail.length() - 5)));
+            }
+        } while (m.find());
+        m.appendTail(sb);
+        return sb.toString();
+    }
+
+    private static final Pattern PATTERN_SIGNATURE_START = Pattern.compile("(?:\r?\n|^)([ \t]*)-- (\r?\n)");
+    private static String prepareSignatureStart(final String htmlContent) {
+        final Matcher m = PATTERN_SIGNATURE_START.matcher(htmlContent);
+        if (!m.find()) {
+            return htmlContent;
+        }
+        final StringBuffer sb = new StringBuffer(htmlContent.length());
+        m.appendReplacement(sb, "$1--&#160;$2");
+        m.appendTail(sb);
+        return sb.toString();
     }
 
     private static final String SPACE_MARKER = "--?space?--";
@@ -906,40 +940,100 @@ public final class HtmlServiceImpl implements HtmlService {
     }
 
     private static final Pattern PATTERN_BASE_TAG = Pattern.compile(
-        "<base[^>]*href=\\s*(?:\"|')(\\S*?)(?:\"|')[^>]*>(.*?</base>)?",
+        "<base[^>]*href=\\s*(?:\"|')(\\S*?)(?:\"|')[^>]*/?>",
         Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
 
+    private static final Pattern BACKGROUND_PATTERN = Pattern.compile(
+        "(<[a-zA-Z]+[^>]*?)(?:(?:background=([^\\s>]*))|(?:background=\"([^\"]*)\"))([^>]*/?>)",
+        Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
+
     private static String checkBaseTag(final String htmlContent, final boolean externalImagesAllowed, final int end) {
-        final Matcher m = PATTERN_BASE_TAG.matcher(htmlContent);
+        Matcher m = PATTERN_BASE_TAG.matcher(htmlContent);
         if (!m.find() || m.end() >= end) {
             return htmlContent;
         }
-        final StringBuilder sb = new StringBuilder(htmlContent.length());
-        final MatcherReplacer mr = new MatcherReplacer(m, htmlContent);
         /*
-         * Check first found <base> tag
+         * Find bases
          */
-        if (externalImagesAllowed) {
-            final String href = m.group(1).trim().toLowerCase(Locale.ENGLISH);
-            if (href.startsWith("http://") || href.startsWith("https://")) {
-                /*
-                 * Base tag contains an absolute URL
-                 */
-                mr.appendLiteralReplacement(sb, m.group(0));
-            } else {
-                mr.appendLiteralReplacement(sb, "");
-            }
-        } else {
-            mr.appendLiteralReplacement(sb, "");
+        String base = m.group(1);
+        if (base.endsWith("/")) {
+            base = base.substring(0, base.length()-1);
         }
         /*
-         * Drop any subsequent <base> tag
+         * Convert to absolute URIs
          */
-        while (m.find() && m.end() < end) {
-            mr.appendLiteralReplacement(sb, "");
+        String html = htmlContent.substring(0, m.start()) + htmlContent.substring(m.end());
+        m = IMG_PATTERN.matcher(html);
+        MatcherReplacer mr = new MatcherReplacer(m, html);
+        final StringBuilder sb = new StringBuilder(html.length());
+        if (m.find()) {
+            /*
+             * Replace images
+             */
+            do {
+                final String imgTag = m.group();
+                final int pos = imgTag.indexOf("src=");
+                final int epos;
+                if (pos >= 0) {
+                    String href;
+                    char c = imgTag.charAt(pos+4);
+                    if ('"' == c) {
+                        epos = imgTag.indexOf('"', pos+5);
+                        href = imgTag.substring(pos+5, epos);
+                    } else if ('\'' == c) {
+                        epos = imgTag.indexOf('\'', pos+5);
+                        href = imgTag.substring(pos+5, epos);
+                    } else {
+                        epos = imgTag.indexOf('>', pos+4);
+                        href = imgTag.substring(pos+4, epos);
+                    }
+                    if (!href.startsWith("cid") && !href.startsWith("http")) {
+                        if (href.charAt(0) != '/') {
+                            href = '/' + href;
+                        }
+                        final String replacement = imgTag.substring(0, pos) + "src=\"" + base + href + "\"" + imgTag.substring(epos);
+                        mr.appendLiteralReplacement(sb, replacement);
+                    }
+                }
+            } while (m.find());
         }
         mr.appendTail(sb);
-        return sb.toString();
+        html = sb.toString();
+        sb.setLength(0);
+        m = BACKGROUND_PATTERN.matcher(html);
+        mr = new MatcherReplacer(m, html);
+        if (m.find()) {
+            /*
+             * Replace images
+             */
+            do {
+                final String backgroundTag = m.group();
+                /*
+                 * Extract href
+                 */
+                int pos;
+                int epos;
+                String href = m.group(2);
+                if (href == null) {
+                    href = m.group(3);
+                    pos = m.start(3);
+                    epos = m.end(3);
+                } else {
+                    pos = m.start(2);
+                    epos = m.end(2);
+                }
+                if (!href.startsWith("cid") && !href.startsWith("http")) {
+                    if (href.charAt(0) != '/') {
+                        href = '/' + href;
+                    }
+                    final String replacement = backgroundTag.substring(0, pos) + base + href + backgroundTag.substring(epos);
+                    mr.appendLiteralReplacement(sb, replacement);
+                }
+            } while (m.find());
+        }
+        mr.appendTail(sb);
+        html = sb.toString();
+        return html;
     }
 
     @Override

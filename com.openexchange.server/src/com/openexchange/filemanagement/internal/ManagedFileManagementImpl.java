@@ -326,11 +326,7 @@ final class ManagedFileManagementImpl implements ManagedFileManagement {
                         }
                         out.flush();
                     } finally {
-                        try {
-                            out.close();
-                        } catch (final IOException e) {
-                            LOG.error(e.getMessage(), e);
-                        }
+                        Streams.close(out);
                     }
                 } else {
                     // Copy content of previous file to newly created file

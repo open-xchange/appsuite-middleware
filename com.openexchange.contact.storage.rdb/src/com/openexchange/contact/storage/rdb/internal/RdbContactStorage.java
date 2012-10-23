@@ -224,7 +224,7 @@ public class RdbContactStorage extends DefaultContactStorage {
         
     @Override
     public void delete(Session session, String folderId, String id, Date lastRead) throws OXException {
-    	boolean committed = false;
+        boolean committed = false;
         int contextID = session.getContextId();
         int userID = session.getUserId();
         int objectID = parse(id);
@@ -236,9 +236,9 @@ public class RdbContactStorage extends DefaultContactStorage {
             /*
              * ensure there is no previous record in the 'deleted' tables
              */
-            executor.delete(connection, Table.DELETED_CONTACTS, contextID, objectID, minLastModified);
-            executor.delete(connection, Table.DELETED_IMAGES, contextID, objectID, minLastModified);
-            executor.delete(connection, Table.DELETED_DISTLIST, contextID, objectID);
+            executor.deleteSingle(connection, Table.DELETED_CONTACTS, contextID, objectID, minLastModified);
+            executor.deleteSingle(connection, Table.DELETED_IMAGES, contextID, objectID, minLastModified);
+            executor.deleteSingle(connection, Table.DELETED_DISTLIST, contextID, objectID);
             /*
              * insert copied records to 'deleted' tables 
              */
@@ -250,11 +250,11 @@ public class RdbContactStorage extends DefaultContactStorage {
             /*
              * delete records in original tables
              */
-            if (0 == executor.delete(connection, Table.CONTACTS, contextID, objectID, minLastModified)) {
+            if (0 == executor.deleteSingle(connection, Table.CONTACTS, contextID, objectID, minLastModified)) {
                 throw ContactExceptionCodes.CONTACT_NOT_FOUND.create(objectID, contextID);
             }
-            executor.delete(connection, Table.IMAGES, contextID, objectID, minLastModified);
-            executor.delete(connection, Table.DISTLIST, contextID, objectID);
+            executor.deleteSingle(connection, Table.IMAGES, contextID, objectID, minLastModified);
+            executor.deleteSingle(connection, Table.DISTLIST, contextID, objectID);
             /*
              * update meta data
              */
@@ -262,12 +262,12 @@ public class RdbContactStorage extends DefaultContactStorage {
             contact.setLastModified(new Date());
             contact.setModifiedBy(userID);
             executor.update(connection, Table.DELETED_CONTACTS, contextID, objectID, minLastModified, contact, new ContactField[] { 
-            		ContactField.MODIFIED_BY, ContactField.LAST_MODIFIED });
+                    ContactField.MODIFIED_BY, ContactField.LAST_MODIFIED });
             /*
              * commit
              */
             connection.commit();
-        	committed = true;
+            committed = true;
         } catch (SQLException e) {
             DBUtils.rollback(connection);
             throw ContactExceptionCodes.SQL_PROBLEM.create(e);
@@ -275,9 +275,132 @@ public class RdbContactStorage extends DefaultContactStorage {
             DBUtils.rollback(connection);
             throw e;
         } finally {
-        	if (false == committed) {
-        		DBUtils.rollback(connection);
-        	}
+            if (false == committed) {
+                DBUtils.rollback(connection);
+            }
+            DBUtils.autocommit(connection);
+            databaseService.backWritable(contextID, connection);
+        }
+    }
+    
+    @Override
+    public void delete(Session session, String folderId) throws OXException {
+        boolean committed = false;
+        int contextID = session.getContextId();
+        int userID = session.getUserId();
+        int folderID = parse(folderId);
+        DatabaseService databaseService = getDatabaseService();
+        Connection connection = databaseService.getWritable(contextID);
+        try {
+            connection.setAutoCommit(false);
+            /*
+             * get a list of object IDs to delete
+             */
+            List<Contact> contacts = executor.select(connection, Table.CONTACTS, contextID, folderID, null, Integer.MIN_VALUE, 
+                new ContactField[] { ContactField.OBJECT_ID }, null, null);
+            if (null == contacts || 0 == contacts.size()) {
+                return; // nothing to do
+            }
+            int[] objectIDs = getObjectIDs(contacts);
+            /*
+             * ensure there is no previous record in the 'deleted' tables
+             */
+            executor.delete(connection, Table.DELETED_CONTACTS, contextID, folderID, null);
+            executor.delete(connection, Table.DELETED_IMAGES, contextID, Integer.MIN_VALUE, objectIDs);
+            executor.delete(connection, Table.DELETED_DISTLIST, contextID, Integer.MIN_VALUE, objectIDs);
+            /*
+             * insert copied records to 'deleted' tables 
+             */
+            executor.insertFrom(connection,  Table.CONTACTS, Table.DELETED_CONTACTS, contextID, folderID, null);
+            executor.insertFrom(connection, Table.IMAGES, Table.DELETED_IMAGES, contextID, Integer.MIN_VALUE, objectIDs);
+            executor.insertFrom(connection, Table.DISTLIST, Table.DELETED_DISTLIST, contextID, Integer.MIN_VALUE, objectIDs);
+            /*
+             * delete records in original tables
+             */
+            executor.delete(connection, Table.CONTACTS, contextID, folderID, null);
+            executor.delete(connection, Table.IMAGES, contextID, Integer.MIN_VALUE, objectIDs);
+            executor.delete(connection, Table.DISTLIST, contextID, Integer.MIN_VALUE, objectIDs);
+            /*
+             * update meta data
+             */
+            Contact contact = new Contact();
+            contact.setLastModified(new Date());
+            contact.setModifiedBy(userID);
+            executor.update(connection, Table.DELETED_CONTACTS, contextID, folderID, null, contact, new ContactField[] { 
+                    ContactField.MODIFIED_BY, ContactField.LAST_MODIFIED }, Long.MIN_VALUE);
+            /*
+             * commit
+             */
+            connection.commit();
+            committed = true;
+        } catch (SQLException e) {
+            DBUtils.rollback(connection);
+            throw ContactExceptionCodes.SQL_PROBLEM.create(e);
+        } catch (OXException e) {
+            DBUtils.rollback(connection);
+            throw e;
+        } finally {
+            if (false == committed) {
+                DBUtils.rollback(connection);
+            }
+            DBUtils.autocommit(connection);
+            databaseService.backWritable(contextID, connection);
+        }
+    }
+    
+    @Override
+    public void delete(Session session, String folderId, String[] ids, Date lastRead) throws OXException {
+        boolean committed = false;
+        int contextID = session.getContextId();
+        int userID = session.getUserId();
+        int folderID = parse(folderId);
+        int[] objectIDs = parse(ids);
+        long minLastModified = lastRead.getTime();
+        DatabaseService databaseService = getDatabaseService();
+        Connection connection = databaseService.getWritable(contextID);
+        try {
+            connection.setAutoCommit(false);
+            /*
+             * ensure there is no previous record in the 'deleted' tables
+             */
+            executor.delete(connection, Table.DELETED_CONTACTS, contextID, folderID, objectIDs, minLastModified);
+            executor.delete(connection, Table.DELETED_IMAGES, contextID, Integer.MIN_VALUE, objectIDs, minLastModified);
+            executor.delete(connection, Table.DELETED_DISTLIST, contextID, Integer.MIN_VALUE, objectIDs);
+            /*
+             * insert copied records to 'deleted' tables 
+             */
+            executor.insertFrom(connection,  Table.CONTACTS, Table.DELETED_CONTACTS, contextID, folderID, objectIDs, minLastModified);
+            executor.insertFrom(connection, Table.IMAGES, Table.DELETED_IMAGES, contextID, Integer.MIN_VALUE, objectIDs, minLastModified);
+            executor.insertFrom(connection, Table.DISTLIST, Table.DELETED_DISTLIST, contextID, Integer.MIN_VALUE, objectIDs);
+            /*
+             * delete records in original tables
+             */
+            executor.delete(connection, Table.CONTACTS, contextID, folderID, objectIDs, minLastModified);
+            executor.delete(connection, Table.IMAGES, contextID, Integer.MIN_VALUE, objectIDs, minLastModified);
+            executor.delete(connection, Table.DISTLIST, contextID, Integer.MIN_VALUE, objectIDs);
+            /*
+             * update meta data
+             */
+            Contact contact = new Contact();
+            contact.setLastModified(new Date());
+            contact.setModifiedBy(userID);
+            executor.update(connection, Table.DELETED_CONTACTS, contextID, folderID, objectIDs, contact, new ContactField[] { 
+                    ContactField.MODIFIED_BY, ContactField.LAST_MODIFIED }, Long.MIN_VALUE);
+            /*
+             * commit
+             */
+            connection.commit();
+            committed = true;
+        } catch (SQLException e) {
+            DBUtils.rollback(connection);
+            throw ContactExceptionCodes.SQL_PROBLEM.create(e);
+        } catch (OXException e) {
+            DBUtils.rollback(connection);
+            throw e;
+        } finally {
+            if (false == committed) {
+                DBUtils.rollback(connection);
+            }
             DBUtils.autocommit(connection);
             databaseService.backWritable(contextID, connection);
         }
@@ -303,7 +426,7 @@ public class RdbContactStorage extends DefaultContactStorage {
              * insert copied record to 'deleted' table when parent folder changes
              */
             if (contact.containsParentFolderID() && false == Integer.toString(contact.getParentFolderID()).equals(folderId)) {
-	            executor.delete(connection, Table.DELETED_CONTACTS, contextID, objectID, minLastModified);
+	            executor.deleteSingle(connection, Table.DELETED_CONTACTS, contextID, objectID, minLastModified);
 	            if (0 == executor.insertFrom(connection, Table.CONTACTS, Table.DELETED_CONTACTS, contextID, objectID, minLastModified)) {
 	                throw ContactExceptionCodes.CONTACT_NOT_FOUND.create(objectID, contextID);
 	            }
@@ -321,7 +444,7 @@ public class RdbContactStorage extends DefaultContactStorage {
                 queryFields.update(Mappers.CONTACT.getAssignedFields(contact));
                 if (null == contact.getImage1()) {
                     // delete previous image if exists
-                    executor.delete(connection, Table.IMAGES, contextID, objectID, minLastModified);
+                    executor.deleteSingle(connection, Table.IMAGES, contextID, objectID, minLastModified);
                 } else {
                     if (null != executor.selectSingle(connection, Table.IMAGES, contextID, objectID, new ContactField[] { 
                     		ContactField.OBJECT_ID })) {
@@ -356,7 +479,7 @@ public class RdbContactStorage extends DefaultContactStorage {
             if (queryFields.hasDistListData()) {
                 //TODO: this is lazy compared to the old implementation
                 // delete any previous entries
-                executor.delete(connection, Table.DISTLIST, contextID, objectID);
+                executor.deleteSingle(connection, Table.DISTLIST, contextID, objectID);
                 if (0 < contact.getNumberOfDistributionLists() && null != contact.getDistributionList()) {
                     // insert distribution list entries
                 	DistListMember[] members = DistListMember.create(contact.getDistributionList(), contextID, objectID);
@@ -474,6 +597,66 @@ public class RdbContactStorage extends DefaultContactStorage {
     @Override
     public SearchIterator<Contact> list(Session session, String folderId, String[] ids, ContactField[] fields, SortOptions sortOptions) throws OXException {
     	return this.getContacts(false, session, folderId, ids, null, fields, null, sortOptions);
+    }
+    
+    @Override
+    public SearchIterator<Contact> searchByBirthday(Session session, List<String> folderIDs, Date from, Date until, ContactField[] fields, SortOptions sortOptions) throws OXException {
+        return searchByAnnualDate(session, folderIDs, from, until, fields, sortOptions, ContactField.BIRTHDAY); 
+    }
+
+    @Override
+    public SearchIterator<Contact> searchByAnniversary(Session session, List<String> folderIDs, Date from, Date until, ContactField[] fields, SortOptions sortOptions) throws OXException {
+        return searchByAnnualDate(session, folderIDs, from, until, fields, sortOptions, ContactField.ANNIVERSARY); 
+    }
+
+    private SearchIterator<Contact> searchByAnnualDate(Session session, List<String> folderIDs, Date from, Date until, ContactField[] fields, SortOptions sortOptions, ContactField dateField) throws OXException {
+        /*
+         * prepare select
+         */
+        int contextID = session.getContextId();
+        DatabaseService databaseService = getDatabaseService();
+        Connection connection = databaseService.getReadOnly(contextID);
+        int[] parentFolderIDs = null != folderIDs ? parse(folderIDs.toArray(new String[folderIDs.size()])) : null;        
+        try {
+            /*
+             * check fields
+             */
+            QueryFields queryFields = new QueryFields(fields, ContactField.OBJECT_ID);
+            if (false == queryFields.hasContactData()) {
+                return null; // nothing to do
+            }
+            /*
+             * get contact data
+             */        
+            List<Contact> contacts = executor.selectByAnnualDate(connection, contextID, parentFolderIDs, from, until, 
+                queryFields.getContactDataFields(), sortOptions, dateField); 
+            if (null != contacts && 0 < contacts.size()) {
+                /*
+                 * merge image data if needed
+                 */
+                if (queryFields.hasImageData()) {
+                    contacts = mergeImageData(connection, Table.IMAGES, contextID, contacts, queryFields.getImageDataFields());
+                }
+                /*
+                 * merge distribution list data if needed
+                 */
+                if (queryFields.hasDistListData()) {
+                    contacts = mergeDistListData(connection, Table.DISTLIST, contextID, contacts);
+                }
+                /*
+                 * merge attachment information in advance if needed
+                 */
+                //TODO: at this stage, we break the storage separation, since we assume that attachments are stored in the same database
+                if (PREFETCH_ATTACHMENT_INFO && queryFields.hasAttachmentData()) {
+                    contacts = mergeAttachmentData(connection, contextID, contacts);                
+                }
+            }
+            return getSearchIterator(contacts);
+        } catch (SQLException e) {
+            throw ContactExceptionCodes.SQL_PROBLEM.create(e);
+        } finally {
+            databaseService.backReadOnly(contextID, connection);
+        }
     }
 
     /**
@@ -683,6 +866,15 @@ public class RdbContactStorage extends DefaultContactStorage {
             if (0 < contact.getNumberOfAttachments()) {
                 objectIDs[i++] = contact.getObjectID();
             }
+        }
+        return Arrays.copyOf(objectIDs, i);
+    }
+    
+    private int[] getObjectIDs(List<Contact> contacts) {
+        int i = 0;
+        int[] objectIDs = new int[contacts.size()];
+        for (Contact contact : contacts) {
+            objectIDs[i++] = contact.getObjectID();
         }
         return Arrays.copyOf(objectIDs, i);
     }

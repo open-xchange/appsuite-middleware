@@ -53,7 +53,6 @@ import gnu.trove.map.TIntObjectMap;
 import gnu.trove.map.hash.TIntObjectHashMap;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -96,6 +95,36 @@ public class Patches {
         private Incoming() {
         	// prevent instantiation
         }
+        
+        /**
+         * Adds the user to the list of participants if needed, i.e. the 
+         * appointment not yet has any internal user participants.
+         * 
+         * @param appointment
+         */
+        public static void addUserParticipantIfEmpty(int userID, Appointment appointment) {
+            if (null == appointment.getParticipants() || 0 == appointment.getParticipants().length) {
+                UserParticipant user = new UserParticipant(userID);
+                user.setConfirm(Appointment.ACCEPT);                
+                appointment.setParticipants(new UserParticipant[] { user });
+            } else {
+                boolean hasSomethingInternal = false;
+                for (Participant participant : appointment.getParticipants()) {
+                    if (Participant.GROUP == participant.getType() || Participant.RESOURCE == participant.getType() || 
+                        Participant.USER == participant.getType() || Participant.RESOURCEGROUP == participant.getType()) {
+                        hasSomethingInternal = true;
+                        break;
+                    }
+                }
+                if (false == hasSomethingInternal) {
+                    Participant[] participants = Arrays.copyOf(appointment.getParticipants(), 1 + appointment.getParticipants().length);
+                    UserParticipant user = new UserParticipant(userID);
+                    user.setConfirm(Appointment.ACCEPT);                
+                    participants[participants.length - 1] = user; 
+                    appointment.setParticipants(participants);
+                }
+            }
+        }
     	
         /**
          * Tries to restore the participant- and user-arrays in the updated 
@@ -113,32 +142,32 @@ public class Patches {
          * @return <code>true</code>, if restoring participants was successful, 
          * <code>false</code>, otherwise
          */
-        public static boolean tryRestoreParticipants(final Appointment original, final Appointment update) {
+        public static boolean tryRestoreParticipants(Appointment original, Appointment update) {
         	/*
         	 * extract individual participants
         	 */
-        	final Set<Participant> originalIndividualParticipants = getIndividualParticipants(original);
-        	final Set<Participant> updateIndividualParticipants = getIndividualParticipants(update);
+        	Set<Participant> originalIndividualParticipants = ParticipantTools.getIndividualParticipants(original);
+        	Set<Participant> updateIndividualParticipants = ParticipantTools.getIndividualParticipants(update);
         	//if (originalIndividualParticipants.equals(updateIndividualParticipants)) {
-        	if (equals(originalIndividualParticipants, updateIndividualParticipants)) {
+        	if (ParticipantTools.equals(originalIndividualParticipants, updateIndividualParticipants, false)) {
         		/*
         		 * no changes in individual participants, restore participants from original 
         		 */
-        		final Participant[] restoredParticipants = original.getParticipants();
-        		final UserParticipant[] restoredUsers = original.getUsers();
-        		for (final Participant participant : updateIndividualParticipants) {
+        		Participant[] restoredParticipants = Arrays.copyOf(original.getParticipants(), original.getParticipants().length);
+        		UserParticipant[] restoredUsers = Arrays.copyOf(original.getUsers(), original.getUsers().length);
+        		for (Participant updatedParticipant : updateIndividualParticipants) {
         			/*
         			 * update matching participants
         			 */
         			for (int i = 0; i < restoredUsers.length; i++) {
         				// we have adequate equals overrides here
-        				if (participant.equals(restoredUsers[i])) { 
-        					restoredUsers[i] = (UserParticipant)participant;
+        				if (updatedParticipant.equals(restoredUsers[i])) { 
+        					restoredUsers[i] = (UserParticipant)updatedParticipant;
         				}					
     				}
         			for (int i = 0; i < restoredParticipants.length; i++) {
-        				if (equals(participant, restoredParticipants[i])) {
-        					restoredParticipants[i] = participant;
+        				if (ParticipantTools.equals(updatedParticipant, restoredParticipants[i])) {
+        					restoredParticipants[i] = updatedParticipant;
         				}        				
     				}
     			}
@@ -254,118 +283,6 @@ public class Patches {
                     prunedParticipants.add(participant);
                 }
             }
-        }
-        
-        /**
-         * Checks whether two sets contain different participants or not, 
-         * ignoring ID differences for external participants.
-         * 
-         * @param participants1 the first list of participants
-         * @param participants2 the second list of participants
-         * @return <code>true</code>, if there are different participants, <code>false</code>, otherwise
-         */
-        private static boolean equals(final Set<Participant> participants1, final Set<Participant> participants2) {
-        	if (null == participants1) {
-        		return null == participants2;
-        	} else if (null == participants2) {
-        		return false;
-        	} else  {
-        		return participants1.size() == participants2.size() && containsAll(participants1, participants2);
-        	}
-        }
-        
-        /**
-         * Determines whether a set of participants contains a collection of 
-         * participants, ignoring ID differences for external participants.
-         * 
-         * @param participants1
-         * @param participants2
-         * @return
-         */
-        private static boolean containsAll(final Set<Participant> participants1, final Collection<Participant> participants2) {
-        	for (final Participant participant2 : participants2) {
-        		if (false == contains(participants1, participant2)) {
-        			return false;
-        		}
-			}
-        	return true;
-        }
-
-        /**
-         * Determines whether a collection of participants contains an participant,
-         * ignoring ID differences for external participants.
-         * 
-         * @param participants
-         * @param participant
-         * @return
-         */
-        private static boolean contains(final Collection<Participant> participants, final Participant participant) {
-        	if (null == participant || null == participants) {
-        		return false;
-        	} else if (Participant.EXTERNAL_USER == participant.getType()) {
-        		for (final Participant p : participants) {
-        			if (null != p && equals(p, participant)) {
-        				return true;
-        			}
-				}
-        		return false; // not found
-        	} else {
-        		return participants.contains(participant);
-        	}
-        }
-        
-        /**
-         * Compares on participant with another, ignoring ID differences for 
-         * external participants. 
-         * 
-         * @param participant1
-         * @param participant2
-         * @return
-         */
-        private static boolean equals(final Participant participant1, final Participant participant2) {
-			if (Participant.EXTERNAL_USER == participant1.getType() && null != participant1.getEmailAddress() &&
-					participant1.getEmailAddress().equals(participant2.getEmailAddress())) {
-				return true; // external participant with same email address counts as equal        				
-			} else {
-				return participant1.equals(participant2);
-			}
-        }
-
-        /**
-         * Gets a set of individual participants of an appointment, i.e. unique 
-         * participants that are either internal or external users. Group- and 
-         * resource-participants are excluded from the result.  
-         * 
-         * @param appointment the appointment to extract the participants from
-         * @return a set of individual participants, that may be empty, but 
-         * never <code>null</code>
-         */
-        private static Set<Participant> getIndividualParticipants(final Appointment appointment) {
-        	final Set<Participant> individualParticipants = new HashSet<Participant>();
-        	if (null != appointment) {
-                final Set<Integer> userIDs = new HashSet<Integer>();
-        		final Participant[] participants = appointment.getParticipants();
-        		if (null != participants) {
-        			for (final Participant participant : participants) {
-        				if (Participant.USER == participant.getType()) {
-        					if (userIDs.add(Integer.valueOf(participant.getIdentifier()))) {
-        						individualParticipants.add(participant);
-        					}
-        	            } else if (Participant.EXTERNAL_USER == participant.getType()) {
-        	                individualParticipants.add(participant);
-        	            }
-    				}
-        		}
-        		final UserParticipant[] userParticipants = appointment.getUsers();
-        		if (null != userParticipants) {
-        			for (final UserParticipant userParticipant : userParticipants) {
-    					if (userIDs.add(Integer.valueOf(userParticipant.getIdentifier()))) {
-    						individualParticipants.add(userParticipant);
-    					}
-    				}
-        		}    		
-        	}
-        	return individualParticipants;
         }
         
     }

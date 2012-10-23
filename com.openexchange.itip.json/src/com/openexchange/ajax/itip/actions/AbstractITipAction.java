@@ -59,7 +59,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
@@ -95,38 +94,38 @@ public abstract class AbstractITipAction implements AJAXActionService{
 
     protected ServiceLookup services;
 
-    public AbstractITipAction(ServiceLookup services) {
+    public AbstractITipAction(final ServiceLookup services) {
         super();
         this.services = services;
     }
 
-    
-    @Override
-    public AJAXRequestResult perform(AJAXRequestData request, ServerSession session) throws OXException {
-        List<ConversionError> errors = new ArrayList<ConversionError>();
-        List<ConversionWarning> warnings = new ArrayList<ConversionWarning>();
 
-        ITipParser itipParser = services.getService(ITipParser.class);
-        ITipAnalyzerService analyzer = services.getService(ITipAnalyzerService.class);
-        
-        String optTimezone = request.getParameter("timezone");
-		TimeZone tz = TimeZone.getTimeZone(optTimezone != null ? optTimezone : session.getUser().getTimeZone());
-        Map<String, String> mailHeader = new HashMap<String, String>();
-        InputStream stream = getInputStreamAndFillMailHeader(request, session, mailHeader);
+    @Override
+    public AJAXRequestResult perform(final AJAXRequestData request, final ServerSession session) throws OXException {
+        final List<ConversionError> errors = new ArrayList<ConversionError>();
+        final List<ConversionWarning> warnings = new ArrayList<ConversionWarning>();
+
+        final ITipParser itipParser = services.getService(ITipParser.class);
+        final ITipAnalyzerService analyzer = services.getService(ITipAnalyzerService.class);
+
+        final String optTimezone = request.getParameter("timezone");
+		final TimeZone tz = TimeZone.getTimeZone(optTimezone != null ? optTimezone : session.getUser().getTimeZone());
+        final Map<String, String> mailHeader = new HashMap<String, String>();
+        final InputStream stream = getInputStreamAndFillMailHeader(request, session, mailHeader);
         int owner = 0;
         if (mailHeader.containsKey(OWNER)) {
             owner = Integer.parseInt(mailHeader.get(OWNER));
         }
-        List<ITipMessage> messages = itipParser.parseMessage(stream, tz, session.getContext(), owner, errors, warnings);
+        final List<ITipMessage> messages = itipParser.parseMessage(stream, tz, session.getContext(), owner, errors, warnings);
 
-        List<ITipAnalysis> analysis = analyzer.analyze(messages, request.getParameter("descriptionFormat"), session, mailHeader);
+        final List<ITipAnalysis> analysis = analyzer.analyze(messages, request.getParameter("descriptionFormat"), session, mailHeader);
         Object result;
         try {
 			result = process(analysis, request, session, tz);
-		} catch (JSONException e) {
+		} catch (final JSONException e) {
 			throw AjaxExceptionCodes.JSON_ERROR.create(e);
 		}
-        
+
         return new AJAXRequestResult(result, new Date());
     }
 
@@ -134,54 +133,54 @@ public abstract class AbstractITipAction implements AJAXActionService{
     protected abstract Object process(List<ITipAnalysis> analysis, AJAXRequestData request, ServerSession session, TimeZone tz) throws JSONException, OXException;
 
 
-    private InputStream getInputStreamAndFillMailHeader(AJAXRequestData request, ServerSession session, Map<String, String> mailHeader) throws OXException {
-        String ds = request.getParameter("dataSource");
+    private InputStream getInputStreamAndFillMailHeader(final AJAXRequestData request, final ServerSession session, final Map<String, String> mailHeader) throws OXException {
+        final String ds = request.getParameter("dataSource");
         if (ds != null) {
-            DataArguments dataArguments = new DataArguments();
+            final DataArguments dataArguments = new DataArguments();
 
-            Object data = request.getData();
+            final Object data = request.getData();
             if (data != null) {
-                JSONObject body = (JSONObject) data;
-                for (String string : body.keySet()) {
+                final JSONObject body = (JSONObject) data;
+                for (final String string : body.keySet()) {
                     dataArguments.put(string, body.opt(string).toString());
                 }
             } else {
-                for (Map.Entry<String, String> entry : request.getParameters().entrySet()) {
+                for (final Map.Entry<String, String> entry : request.getParameters().entrySet()) {
                     dataArguments.put(entry.getKey(), entry.getValue());
                 }
             }
 
-            ConversionService conversionEngine = services.getService(ConversionService.class);
+            final ConversionService conversionEngine = services.getService(ConversionService.class);
 
-            DataSource dataSource = conversionEngine.getDataSource(ds);
+            final DataSource dataSource = conversionEngine.getDataSource(ds);
 
-            Data<InputStream> dsData = dataSource.getData(InputStream.class, dataArguments, session);
+            final Data<InputStream> dsData = dataSource.getData(InputStream.class, dataArguments, session);
             fillMailHeader(dsData, mailHeader);
             return dsData.getData();
         }
-        Object data = request.getData();
+        final Object data = request.getData();
         if (data != null) {
-            JSONObject body = (JSONObject) data;
+            final JSONObject body = (JSONObject) data;
             try {
                 return new ByteArrayInputStream(body.getString("ical").getBytes("UTF-8"));
-            } catch (UnsupportedEncodingException e) {
+            } catch (final UnsupportedEncodingException e) {
                 LOG.error(e.getMessage(), e);
                 return null;
-            } catch (JSONException x) {
+            } catch (final JSONException x) {
     			throw AjaxExceptionCodes.JSON_ERROR.create(x);
             }
         }
         return null;
     }
 
-    private void fillMailHeader(Data<InputStream> dsData, Map<String, String> mailHeader) {
-        Map<String, String> properties = dsData.getDataProperties().toMap();
-        
-        for (String key : properties.keySet()) {
+    private void fillMailHeader(final Data<InputStream> dsData, final Map<String, String> mailHeader) {
+        final Map<String, String> properties = dsData.getDataProperties().toMap();
+
+        for (final String key : properties.keySet()) {
             if (key.startsWith(DataProperties.PROPERTY_EMAIL_HEADER_PREFIX)) {
                 mailHeader.put(key.substring(DataProperties.PROPERTY_EMAIL_HEADER_PREFIX.length() + 1, key.length()), properties.get(key));
             }
-            
+
             if (key.equals(OWNER)) {
                 mailHeader.put(OWNER, properties.get(OWNER));
             }

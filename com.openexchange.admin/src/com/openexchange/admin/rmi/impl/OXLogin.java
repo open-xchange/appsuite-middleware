@@ -66,6 +66,7 @@ import com.openexchange.admin.rmi.exceptions.DatabaseUpdateException;
 import com.openexchange.admin.rmi.exceptions.InvalidCredentialsException;
 import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 import com.openexchange.admin.rmi.exceptions.NoSuchContextException;
+import com.openexchange.admin.rmi.exceptions.NoSuchUserException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.storage.interfaces.OXToolStorageInterface;
 import com.openexchange.admin.storage.interfaces.OXUserStorageInterface;
@@ -107,7 +108,12 @@ public class OXLogin extends OXCommonImpl implements OXLoginInterface {
         
         triggerUpdateProcess(ctx);
 
-        final int user_id = tool.getUserIDByUsername(ctx, auth.getLogin());
+        int user_id;
+        try {
+            user_id = tool.getUserIDByUsername(ctx, auth.getLogin());
+        } catch (NoSuchUserException e) {
+            throw new StorageException(e);
+        }
         tool.isContextAdmin(ctx, user_id);
         final User retval = new User(user_id);
         retval.setName(auth.getLogin());

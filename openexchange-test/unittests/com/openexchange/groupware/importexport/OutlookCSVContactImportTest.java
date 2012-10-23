@@ -68,18 +68,26 @@ import com.openexchange.api2.RdbContactSQLImpl;
 import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.importexport.formats.Format;
-import com.openexchange.importexport.importers.OutlookCSVContactImporter;
+import com.openexchange.importexport.formats.csv.DutchOutlookMapper;
+import com.openexchange.importexport.formats.csv.EnglishOutlookMapper;
+import com.openexchange.importexport.formats.csv.FrenchOutlookMapper;
+import com.openexchange.importexport.formats.csv.GermanOutlookMapper;
+import com.openexchange.importexport.importers.CSVContactImporter;
 
 public class OutlookCSVContactImportTest extends AbstractContactTest{
 	public String IMPORT_HEADERS = ContactField.GIVEN_NAME.getEnglishOutlookName()+","+ContactField.EMAIL1.getEnglishOutlookName()+","+ContactField.BIRTHDAY.getEnglishOutlookName()+"\n";
 	public String IMPORT_ONE = IMPORT_HEADERS + NAME1+", "+EMAIL1+", "+DATE1;
 	public static String DATE1 = "4/1/1981";
 
+	@SuppressWarnings("deprecation")
 	public OutlookCSVContactImportTest(){
 		super();
 		defaultFormat = Format.OUTLOOK_CSV;
-		imp = new OutlookCSVContactImporter();
-		assertFalse("Should read from property file", ( (OutlookCSVContactImporter) imp).isUsingFallback());
+		imp = new CSVContactImporter();
+		((CSVContactImporter) imp).addFieldMapper(new EnglishOutlookMapper());
+		((CSVContactImporter) imp).addFieldMapper(new GermanOutlookMapper());
+		((CSVContactImporter) imp).addFieldMapper(new FrenchOutlookMapper());
+		((CSVContactImporter) imp).addFieldMapper(new DutchOutlookMapper());
 	}
 
 	//workaround for JUnit 3 runner
@@ -176,8 +184,8 @@ public class OutlookCSVContactImportTest extends AbstractContactTest{
 	@Test public void bug9367_should_translate_several_more_fields_in_German() throws UnsupportedEncodingException, NumberFormatException, OXException, OXException {
 		final String file = "\"Anrede\",\"Vorname\",\"Weitere Vornamen\",\"Nachname\",\"Suffix\",\"Firma\",\"Abteilung\",\"Position\",\"Stra\u00dfe gesch\u00e4ftlich\",\"Stra\u00dfe gesch\u00e4ftlich 2\",\"Stra\u00dfe gesch\u00e4ftlich 3\",\"Ort gesch\u00e4ftlich\",\"Region gesch\u00e4ftlich\",\"Postleitzahl gesch\u00e4ftlich\",\"Land/Region gesch\u00e4ftlich\",\"Stra\u00dfe privat\",\"Stra\u00dfe privat 2\",\"Stra\u00dfe privat 3\",\"Ort privat\",\"Bundesland/Kanton privat\",\"Postleitzahl privat\",\"Land/Region privat\",\"Weitere Stra\u00dfe\",\"Weitere Stra\u00dfe 2\",\"Weitere Stra\u00dfe 3\",\"Weiterer Ort\",\"Weiteres/r Bundesland/Kanton\",\"Weitere Postleitzahl\",\"Weiteres/e Land/Region\",\"Telefon Assistent\",\"Fax gesch\u00e4ftlich\",\"Telefon gesch\u00e4ftlich\",\"Telefon gesch\u00e4ftlich 2\",\"R\u00fcckmeldung\",\"Autotelefon\",\"Telefon Firma\",\"Fax privat\",\"Telefon privat\",\"Telefon privat 2\",\"ISDN\",\"Mobiltelefon\",\"Weiteres Fax\",\"Weiteres Telefon\",\"Pager\",\"Haupttelefon\",\"Mobiltelefon 2\",\"Telefon f\u00fcr H\u00f6rbehinderte\",\"Telex\",\"Abrechnungsinformation\",\"Benutzer 1\",\"Benutzer 2\",\"Benutzer 3\",\"Benutzer 4\",\"Beruf\",\"B\u00fcro\",\"E-Mail-Adresse\",\"E-Mail-Typ\",\"E-Mail: Angezeigter Name\",\"E-Mail 2: Adresse\",\"E-Mail 2: Typ\",\"E-Mail 2: Angezeigter Name\",\"E-Mail 3: Adresse\",\"E-Mail 3: Typ\",\"E-Mail 3: Angezeigter Name\",\"Empfohlen von\",\"Geburtstag\",\"Geschlecht\",\"Hobby\",\"Initialen\",\"Internet-Frei/Gebucht\",\"Jahrestag\",\"Kategorien\",\"Kinder\",\"Konto\",\"Name Assistent\",\"Name des/der Vorgesetzten\",\"Notizen\",\"Organisationsnr.\",\"Ort\",\"Partner\",\"Postfach gesch\u00e4ftlich\",\"Postfach privat\",\"Priorit\u00e4t\",\"Privat\",\"Regierungsnr.\",\"Reisekilometer\",\"Sprache\",\"Stichw\u00f6rter\",\"Vertraulichkeit\",\"Verzeichnisserver\",\"Webseite\",\"Weiteres Postfach\""+
 		"\n\"Anrede\",\"Vorname\",\"Zweiter Vorname\",\"Nachname\",\"Namenszusatz\",\"Firma\",\"Abteilung\",\"Position\",\"Stra\u00dfe\",,,\"Stadt\",\"Bundesland\",\"PLZ\",\"Land\",\"Stra\u00dfe\",,,\" Stadt \",\"Bundesland\",\"PLZ\",\"Land\",\"Stra\u00dfe (weitere)\",,,\"Stadt (weitere)\",\"Bundesland (weiteres)\",\"PLZ\",\"Land (weiteres)\",,\"Fax (gesch\u00e4ftlich)\",\"Telefon (gesch\u00e4ftlich)\",\"Telefon (gesch\u00e4ftlich 2)\",,\"Autotelefon\",\"Telefon (Zentrale)\",\"Fax (privat)\",\"Telefon (privat)\",\"Telefon (privat 2)\",,\"Mobiltelefon\",\"Fax (weiteres)\",\"Telefon (weiteres)\",\"Pager\",,,\"Texttelefon\",\"Telex\",,,,,,\"Beruf\",\"Raumnummer\",\"email@geschaeftlich.tld\",\"SMTP\",\"Angezeigter Name (email@geschaeftlich.tld)\",\"email@privat.tld\",\"SMTP\",\"Angezeigter Name (email@privat.tld)\",\"E-Mail (weitere)\",\"SMTP\",\"Angezeigter Name (E-Mail (weitere))\",,\"10.9.2007\",\"Keine Angabe\",,,,\"9.9.2007\",\"Tag1\",,,\"Assistent\",\"Manager\",\"Anmerkungen\",,,\"Ehepartner\",,,\"Niedrig\",\"Ein\",,,,,\"Privat\",,\"URL\"";
-
-		final List<ImportResult> results = importStuff(file, "cp1252");
+		System.out.println(file);
+		final List<ImportResult> results = importStuff(file, "utf-8"); //test-problem: Outlook 2007 German is usually cp1252, but of course not in this test.
 		assertEquals("Only one result" , (Integer) 1 , (Integer) results.size() );
 		final ImportResult res = results.get(0);
 		final Contact conObj = getEntry( Integer.parseInt( res.getObjectId() ) );

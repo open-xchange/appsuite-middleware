@@ -37,7 +37,7 @@ public enum CacheExceptionCode implements OXExceptionCode {
      */
     FAILED_PUT(CacheExceptionMessage.FAILED_PUT, Category.CATEGORY_ERROR, 6),
     /**
-     * 'Save put' into cache failed. An object bound to given key already exists.
+     * 'Safe put' into cache failed. An object bound to given key already exists.
      */
     FAILED_SAFE_PUT(CacheExceptionMessage.FAILED_SAFE_PUT, Category.CATEGORY_ERROR, 7),
     /**

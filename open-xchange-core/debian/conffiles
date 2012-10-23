@@ -1,5 +1,4 @@
 opt/open-xchange/etc/attachment.properties
-opt/open-xchange/etc/autoconfig.properties
 opt/open-xchange/etc/cache.ccf
 opt/open-xchange/etc/cache.properties
 opt/open-xchange/etc/calendar.properties
@@ -26,7 +25,6 @@ opt/open-xchange/etc/mail.properties
 opt/open-xchange/etc/mail-push.properties
 opt/open-xchange/etc/management.properties
 opt/open-xchange/etc/messaging.properties
-opt/open-xchange/etc/messaging-service.properties
 opt/open-xchange/etc/mime.types
 opt/open-xchange/etc/noipcheck.cnf
 opt/open-xchange/etc/notification.properties
@@ -49,3 +47,4 @@ opt/open-xchange/etc/meta/ui.yml
 opt/open-xchange/etc/settings/themes.properties
 opt/open-xchange/etc/settings/ui.properties
 opt/open-xchange/etc/webdav-disabled-message.txt
+opt/open-xchange/etc/quartz.properties

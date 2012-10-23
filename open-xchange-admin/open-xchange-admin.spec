@@ -30,9 +30,17 @@ Provides:      open-xchange-admin-plugin-hosting-lib = %{version}
 Obsoletes:     open-xchange-admin-plugin-hosting-lib <= %{version}
 Provides:      open-xchange-admin-doc = %{version}
 Obsoletes:     open-xchange-admin-doc <= %{version}
+%if 0%{?suse_version}
+Requires:      mysql-client >= 5.0.0
+%endif
+%if 0%{?fedora_version} || 0%{?rhel_version}
+Requires:      mysql >= 5.0.0
+%endif
 
 %description
-This package installs the OSGi bundles to the backend that provide the RMI interface to administer the installation.
+This package installs the OSGi bundles to the backend that provide the RMI interface to administer the installation. This package contains
+the RMI interfaces for the overall administrative tasks like registering, changing and deleting servers, databases and filestores. It also
+contains the interfaces for creating, changing and deleting contexts, users, groups and resources.
 
 Authors:
 --------
@@ -142,8 +150,21 @@ fi
 %dir /opt/open-xchange/sbin/
 /opt/open-xchange/sbin/*
 %doc com.openexchange.admin.rmi/javadoc
+%doc com.openexchange.admin/ChangeLog
 
 %changelog
+* Wed Oct 10 2012 Marcus Klein <marcus.klein@open-xchange.com>
+Fifth release candidate for 6.22.0
+* Tue Oct 09 2012 Marcus Klein <marcus.klein@open-xchange.com>
+Fourth release candidate for 6.22.0
+* Fri Oct 05 2012 Marcus Klein <marcus.klein@open-xchange.com>
+Third release candidate for 6.22.0
+* Thu Oct 04 2012 Marcus Klein <marcus.klein@open-xchange.com>
+Second release candidate for 6.22.0
+* Tue Sep 04 2012 Marcus Klein <marcus.klein@open-xchange.com>
+First release candidate for 6.23.0
+* Mon Sep 03 2012 Marcus Klein <marcus.klein@open-xchange.com>
+prepare for next EDP drop
 * Tue Aug 21 2012 Marcus Klein <marcus.klein@open-xchange.com>
 First release candidate for 6.22.0
 * Mon Aug 20 2012 Marcus Klein <marcus.klein@open-xchange.com>

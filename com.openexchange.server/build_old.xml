@@ -62,7 +62,7 @@
     <property name="osgijar" value="org.eclipse.osgi_3.6.1.R36x_v20100806.jar"/>
     <property name="osgiservicesjar" value="org.eclipse.osgi.services_3.2.100.v20100503.jar"/>
     <property name="servletjar" value="javax.servlet_2.4.0.v200706111738.jar"/>
-    <property name="commonsclijar" value="org.apache.commons.cli_1.0.0.v20080604-1500.jar"/>
+    <property name="commonsclijar" value="org.apache.commons.cli_1.2.0.v201105210650.jar"/>
     <property name="commonsloggingjar" value="org.apache.commons.logging_1.0.4.v200706111724.jar"/>
     <property name="globaljar" value="com.openexchange.global.jar"/>
     <property name="retentionjar" value="com.openexchange.dataretention.jar"/>
@@ -305,6 +305,7 @@
         <chmod perm="755" file="${bin.install.copy.dir}/checkconfigconsistency"/>
         <chmod perm="755" file="${bin.install.copy.dir}/listExecutedUpdateTasks"/>
         <chmod perm="755" file="${bin.install.copy.dir}/logincounter"/>
+    	<chmod perm="755" file="${bin.install.copy.dir}/lastlogintimestamp"/>
         <chmod perm="755" file="${bin.install.copy.dir}/oxreport"/>
         <chmod perm="755" file="${bin.install.copy.dir}/resetversion"/>
         <chmod perm="755" file="${bin.install.copy.dir}/runupdate"/>
@@ -413,7 +414,8 @@
         <move tofile="${patch.bin.dir}/restoregabdefaults" file="${patch.bin.dir}/restoregabdefaults.in" overwrite="true"/>
         <move tofile="${patch.bin.dir}/listExecutedUpdateTasks" file="${patch.bin.dir}/listExecutedUpdateTasks.in" overwrite="true"/>
         <move tofile="${patch.bin.dir}/logincounter" file="${patch.bin.dir}/logincounter.in" overwrite="true"/>
-        <replace dir="${patch.bin.dir}" includes="checkconsistency checkconfigconsistency open-xchange-groupware oxreport resetversion runupdate schemasandversions listExecutedUpdateTasks logincounter forceupdatetask restoregabdefaults">
+    	<move tofile="${patch.bin.dir}/lastlogintimestamp" file="${patch.bin.dir}/lastlogintimestamp" overwrite="true"/>
+    	<replace dir="${patch.bin.dir}" includes="checkconsistency checkconfigconsistency open-xchange-groupware oxreport resetversion runupdate schemasandversions listExecutedUpdateTasks logincounter lastlogintimestamp forceupdatetask restoregabdefaults">
             <replacefilter token="@oxfunctions@" value="${common.conf.install.dir}/oxfunctions.sh"/>
             <replacefilter token="@oxscriptconf@" value="${conf.subst.patch}/ox-scriptconf.sh"/>
             <replacefilter token="@prefix@" value="${prefix}"/>

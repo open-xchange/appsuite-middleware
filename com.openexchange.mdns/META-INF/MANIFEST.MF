@@ -19,6 +19,7 @@ Import-Package: com.openexchange.exception,
  org.cliffc.high_scale_lib,
  org.eclipse.osgi.framework.console,
  org.osgi.framework,
- org.osgi.util.tracker
+ org.osgi.util.tracker,
+ sun.misc
 Bundle-Activator: com.openexchange.mdns.osgi.MDNSActivator
 Export-Package: com.openexchange.mdns

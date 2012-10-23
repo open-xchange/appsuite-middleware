@@ -52,6 +52,8 @@ package com.openexchange.importexport.importers;
 import static com.openexchange.importexport.formats.csv.CSVLibrary.getFolderObject;
 import static com.openexchange.importexport.formats.csv.CSVLibrary.transformInputStreamToString;
 import static com.openexchange.java.Autoboxing.I;
+
+import java.io.IOException;
 import java.io.InputStream;
 import java.sql.SQLException;
 import java.text.DateFormat;
@@ -82,6 +84,15 @@ import com.openexchange.groupware.generic.TargetFolderDefinition;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.importexport.exceptions.ImportExportExceptionCodes;
 import com.openexchange.importexport.formats.Format;
+import com.openexchange.importexport.formats.csv.ContactFieldMapper;
+import com.openexchange.importexport.formats.csv.DutchOutlookMapper;
+import com.openexchange.importexport.formats.csv.EnglishOutlookMapper;
+import com.openexchange.importexport.formats.csv.FrenchOutlookMapper;
+import com.openexchange.importexport.formats.csv.GermanOutlookMapper;
+import com.openexchange.importexport.formats.csv.OxAjaxnameMapper;
+import com.openexchange.importexport.formats.csv.OxReadableNameMapper;
+import com.openexchange.importexport.formats.csv.PropertyDrivenMapper;
+import com.openexchange.importexport.importers.CSVContactImporter.ImportIntention;
 import com.openexchange.groupware.importexport.ImportResult;
 import com.openexchange.groupware.importexport.csv.CSVParser;
 import com.openexchange.importexport.osgi.ImportExportServices;
@@ -98,11 +109,16 @@ import com.openexchange.tools.session.ServerSession;
  */
 public class CSVContactImporter extends AbstractImporter {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(CSVContactImporter.class));
+	private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(CSVContactImporter.class));
 
+	private LinkedList<ContactFieldMapper> mappers;
+
+	private ContactFieldMapper currentMapper;
+
+	
     @Override
     public boolean canImport(final ServerSession session, final Format format, final List<String> folders, final Map<String, String[]> optionalParams) throws OXException {
-        if (!format.equals(getResponsibleFor())) {
+        if (!isResponsibleFor(format)) {
             return false;
         }
 
@@ -146,13 +162,6 @@ public class CSVContactImporter extends AbstractImporter {
         return perm.canCreateObjects();
     }
 
-    protected Format getResponsibleFor() {
-        return Format.CSV;
-    }
-
-    protected String getEncoding() {
-        return "UTF-8";
-    }
 
     @Override
     public List<ImportResult> importData(final ServerSession sessObj, final Format format, final InputStream is, final List<String> folders, final Map<String, String[]> optionalParams) throws OXException {
@@ -160,13 +169,14 @@ public class CSVContactImporter extends AbstractImporter {
         if (!canImport(sessObj, format, folders, optionalParams)) {
             throw ImportExportExceptionCodes.CANNOT_IMPORT.create(folder, format);
         }
-        final String csvStr = transformInputStreamToString(is, getEncoding());
-        final CSVParser csvParser = getCSVParser();
-        final List<List<String>> csv = csvParser.parse(csvStr);
-
-        final Iterator<List<String>> iter = csv.iterator();
+        String csvStr = transformInputStreamToString(is, "UTF-8");
+        CSVParser csvParser = getCSVParser();
+        List<List<String>> csv = csvParser.parse(csvStr);
+        if (csv.size() < 2) {
+        	throw ImportExportExceptionCodes.NO_CONTENT.create();
+        }
         // get header fields
-        final List<String> fields = iter.next();
+        final List<String> fields = csv.get(0);
         if (!checkFields(fields)) {
             throw ImportExportExceptionCodes.NO_VALID_CSV_COLUMNS.create();
         }
@@ -174,17 +184,26 @@ public class CSVContactImporter extends AbstractImporter {
             throw ImportExportExceptionCodes.NO_FIELD_FOR_NAMING.create();
         }
 
+        // re-read now the we have guessed the format and the encoding
+        if (!"UTF-8".equalsIgnoreCase(getCurrentMapper().getEncoding())) {
+        	try {
+				is.reset();
+			} catch (IOException e) {
+				LOG.error("Tried to reset an uploaded stream to parse it again after having guessed the encoding, but couldn't; CSV parsed might be weird");
+			}
+            csvStr = transformInputStreamToString(is, getCurrentMapper().getEncoding());
+        }
         // reading entries...
         final List<ImportIntention> intentions = new LinkedList<ImportIntention>();
         final ContactSwitcher conSet = getContactSwitcher();
-        int lineNumber = 1;
-        while (iter.hasNext()) {
+        for(int lineNumber = 1; lineNumber < csv.size(); lineNumber++) {
             // ...and writing them
-            intentions.add(writeEntry(fields, iter.next(), folder, conSet, lineNumber++, sessObj));
+        	List<String> row = csv.get(lineNumber);
+        	ImportIntention intention = createIntention(fields, row, folder, conSet, lineNumber, sessObj);
+            intentions.add(intention);
         }
 
         // Build a list of contacts to insert
-
         final List<Contact> contacts = new LinkedList<Contact>();
         for(final ImportIntention intention : intentions) {
             if (intention.contact != null) {
@@ -193,7 +212,6 @@ public class CSVContactImporter extends AbstractImporter {
         }
 
         // Insert or update contacts
-
         final FolderUpdaterRegistry updaterRegistry = ImportExportServices.getUpdaterRegistry();
         final TargetFolderDefinition target = new TargetFolderDefinition(folder, sessObj.getUserId(), sessObj.getContext());
 
@@ -234,37 +252,6 @@ public class CSVContactImporter extends AbstractImporter {
         return results;
     }
 
-	protected CSVParser getCSVParser() {
-        return new CSVParser();
-    }
-
-    public boolean checkFields(final List<String> fields) {
-        for (final String fieldname : fields) {
-            if (getRelevantField(fieldname) != null) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    protected boolean passesSanityTestForDisplayName(final List<String> headers) {
-        return Collections.any(
-            headers,
-            ContactField.DISPLAY_NAME.getReadableName(),
-            ContactField.SUR_NAME.getReadableName(),
-            ContactField.GIVEN_NAME.getReadableName(),
-            ContactField.EMAIL1.getReadableName(),
-            ContactField.EMAIL2.getReadableName(),
-            ContactField.EMAIL3.getReadableName(),
-            ContactField.COMPANY.getReadableName(),
-            ContactField.NICKNAME.getReadableName(),
-            ContactField.MIDDLE_NAME.getReadableName());
-    }
-
-    protected boolean passesSanityTestForDisplayName(final Contact con) {
-        return con.contains(ContactField.DISPLAY_NAME.getNumber()) || con.contains(ContactField.SUR_NAME.getNumber()) || con.contains(ContactField.GIVEN_NAME.getNumber()) || con.contains(ContactField.EMAIL1.getNumber()) || con.contains(ContactField.EMAIL2.getNumber()) || con.contains(ContactField.EMAIL3.getNumber()) || con.contains(ContactField.COMPANY.getNumber()) || con.contains(ContactField.NICKNAME.getNumber()) || con.contains(ContactField.MIDDLE_NAME.getNumber());
-    }
-
     /**
      * @param fields Headers of the table; column title
      * @param entry A list of row cells.
@@ -274,7 +261,7 @@ public class CSVContactImporter extends AbstractImporter {
      * @param session The session
      * @return a report containing either the object ID of the entry created OR an error message
      */
-    protected ImportIntention writeEntry(final List<String> fields, final List<String> entry, final String folder, final ContactSwitcher conSet, final int lineNumber, final ServerSession session) {
+    protected ImportIntention createIntention(final List<String> fields, final List<String> entry, final String folder, final ContactSwitcher conSet, final int lineNumber, final ServerSession session) {
         final boolean canOverrideInCaseOfTruncation = false;
         final ImportResult result = new ImportResult();
         result.setFolder(folder);
@@ -289,16 +276,6 @@ public class CSVContactImporter extends AbstractImporter {
 
             contactObj.setParentFolderID(Integer.parseInt(folder.trim()));
             if (atLeastOneFieldInserted[0]) {
-//                final ContactInterface contactInterface = ServerServiceRegistry.getInstance().getService(
-//                    ContactInterfaceDiscoveryService.class).newContactInterface(contactObj.getParentFolderID(), session);
-//                if (contactInterface instanceof OverridingContactInterface) {
-//                    ((OverridingContactInterface) contactInterface).forceInsertContactObject(contactObj);
-//                    canOverrideInCaseOfTruncation = true;
-//                } else {
-//                    contactInterface.insertContactObject(contactObj);
-//                }
-//                result.setObjectId(Integer.toString(contactObj.getObjectID()));
-//                result.setDate(contactObj.getLastModified());
                 if (result.getException() != null) {
                     return new ImportIntention(result, contactObj);
                 }
@@ -365,16 +342,6 @@ public class CSVContactImporter extends AbstractImporter {
         result.setEntryNumber(lineNumber);
     }
 
-    /**
-     * Method used to find a ContactField based on the given field name
-     *
-     * @param name Name of the field
-     * @return a ContactField that was identified by the given name
-     */
-    protected ContactField getRelevantField(final String name) {
-        return ContactField.getByDisplayName(name);
-    }
-
     public ContactSwitcher getContactSwitcher() {
         final ContactSwitcherForSimpleDateFormat dateSwitch = new ContactSwitcherForSimpleDateFormat();
         dateSwitch.addDateFormat(DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.MEDIUM));
@@ -410,7 +377,7 @@ public class CSVContactImporter extends AbstractImporter {
         return field.getReadableName();
     }
 
-    private static final class ImportIntention {
+    public static final class ImportIntention {
         public Contact contact;
         public ImportResult result;
 
@@ -426,6 +393,85 @@ public class CSVContactImporter extends AbstractImporter {
             this.result = result;
             this.contact = contact;
         }
+    }
+    
+	public boolean checkFields(final List<String> fields) {
+		currentMapper = null;
+        int highestAmountOfMappedFields = 0;
+
+        for (ContactFieldMapper mapper : getMappers()) {
+            int mappedFields = 0;
+            for (final String name : fields) {
+                if (mapper.getFieldByName(name) != null) {
+                    mappedFields++;
+                }
+            }
+            if (mappedFields > highestAmountOfMappedFields) {
+                currentMapper = mapper;
+                highestAmountOfMappedFields = mappedFields;
+            }
+
+        }
+        return getCurrentMapper() != null;
+    }
+    
+    protected boolean passesSanityTestForDisplayName(List<String> headers) {
+        return Collections.any(
+            headers,
+            getCurrentMapper().getNameOfField(ContactField.DISPLAY_NAME),
+            getCurrentMapper().getNameOfField(ContactField.SUR_NAME),
+            getCurrentMapper().getNameOfField(ContactField.GIVEN_NAME),
+            getCurrentMapper().getNameOfField(ContactField.EMAIL1),
+            getCurrentMapper().getNameOfField(ContactField.EMAIL2),
+            getCurrentMapper().getNameOfField(ContactField.EMAIL3),
+            getCurrentMapper().getNameOfField(ContactField.COMPANY),
+            getCurrentMapper().getNameOfField(ContactField.NICKNAME),
+            getCurrentMapper().getNameOfField(ContactField.MIDDLE_NAME));
+    }
+
+	public void addFieldMapper(ContactFieldMapper mapper) {
+		if (mappers == null) {
+			mappers = new LinkedList<ContactFieldMapper>();
+		}
+		mappers.add(mapper);
+	}
+
+
+	private LinkedList<ContactFieldMapper> getMappers() {
+		if (mappers == null) {
+			LOG.debug("Using fallback for mappers, should have been loaded from .properties files before");
+			mappers = new LinkedList<ContactFieldMapper>();
+			mappers.add(new GermanOutlookMapper());
+			mappers.add(new FrenchOutlookMapper());
+			mappers.add(new DutchOutlookMapper());
+			mappers.add(new EnglishOutlookMapper());
+			mappers.add(new OxAjaxnameMapper());
+			mappers.add(new OxReadableNameMapper());
+		}
+		return mappers;
+	}
+	
+    protected ContactField getRelevantField(final String name) {
+        return getCurrentMapper().getFieldByName(name);
+    }
+
+
+	private ContactFieldMapper getCurrentMapper() {
+		return currentMapper;
+	}
+
+    protected CSVParser getCSVParser() {
+        final CSVParser result = new CSVParser();
+        result.setTolerant(true);
+        return result;
+    }
+
+    protected boolean isResponsibleFor(Format f) {
+        return Format.CSV == f || Format.OUTLOOK_CSV == f;
+    }
+
+    public String getEncoding() {
+        return getCurrentMapper().getEncoding();
     }
 
 }

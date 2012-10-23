@@ -1,0 +1,5 @@
+open-xchange-freebusy-ews (6.23.0-1) unstable; urgency=low
+
+  * Initial release
+
+ -- Tobias Friedrich <tobias.friedrich@open-xchange.com>  Thu, 18 Oct 2012 10:37:28 +0100

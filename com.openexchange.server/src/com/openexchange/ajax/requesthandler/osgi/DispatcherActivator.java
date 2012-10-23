@@ -59,6 +59,7 @@ import com.openexchange.ajax.requesthandler.AJAXActionCustomizer;
 import com.openexchange.ajax.requesthandler.AJAXActionCustomizerFactory;
 import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
+import com.openexchange.ajax.requesthandler.AJAXResultDecorator;
 import com.openexchange.ajax.requesthandler.AJAXResultDecoratorRegistry;
 import com.openexchange.ajax.requesthandler.Converter;
 import com.openexchange.ajax.requesthandler.DefaultConverter;
@@ -70,6 +71,9 @@ import com.openexchange.ajax.requesthandler.ResultConverter;
 import com.openexchange.ajax.requesthandler.converters.BasicTypeAPIResultConverter;
 import com.openexchange.ajax.requesthandler.converters.BasicTypeJsonConverter;
 import com.openexchange.ajax.requesthandler.converters.DebugConverter;
+import com.openexchange.ajax.requesthandler.converters.cover.CoverExtractor;
+import com.openexchange.ajax.requesthandler.converters.cover.CoverExtractorRegistry;
+import com.openexchange.ajax.requesthandler.converters.cover.CoverResultConverter;
 import com.openexchange.ajax.requesthandler.converters.preview.DownloadPreviewResultConverter;
 import com.openexchange.ajax.requesthandler.converters.preview.FilteredHTMLPreviewResultConverter;
 import com.openexchange.ajax.requesthandler.converters.preview.HTMLPreviewResultConverter;
@@ -98,9 +102,6 @@ import com.openexchange.tools.session.ServerSession;
 public class DispatcherActivator extends AbstractSessionServletActivator {
 
     private final Set<String> servlets = new HashSet<String>();
-
-    private volatile OSGiAJAXResultDecoratorRegistry decoratorRegistry;
-
     private volatile String prefix;
     
     @Override
@@ -125,6 +126,10 @@ public class DispatcherActivator extends AbstractSessionServletActivator {
         for (final ResultConverter converter : BasicTypeJsonConverter.CONVERTERS) {
             defaultConverter.addConverter(converter);
         }
+        /*
+         * Add cover extractor converter
+         */
+        defaultConverter.addConverter(new CoverResultConverter());
         /*
          * Add preview converters
          */
@@ -162,9 +167,14 @@ public class DispatcherActivator extends AbstractSessionServletActivator {
 
         });
 
-        final OSGiAJAXResultDecoratorRegistry decoratorRegistry = new OSGiAJAXResultDecoratorRegistry();
-        decoratorRegistry.start(context);
-        this.decoratorRegistry = decoratorRegistry;
+        final OSGiCoverExtractorRegistry coverExtractorRegistry = new OSGiCoverExtractorRegistry(context);
+        track(CoverExtractor.class, coverExtractorRegistry);
+        registerService(CoverExtractorRegistry.class, coverExtractorRegistry);
+        ServerServiceRegistry.getInstance().addService(CoverExtractorRegistry.class, coverExtractorRegistry);
+        CoverExtractorRegistry.REGISTRY_REFERENCE.set(coverExtractorRegistry);
+
+        final OSGiAJAXResultDecoratorRegistry decoratorRegistry = new OSGiAJAXResultDecoratorRegistry(context);
+        track(AJAXResultDecorator.class, decoratorRegistry);
         registerService(AJAXResultDecoratorRegistry.class, decoratorRegistry);
         ServerServiceRegistry.getInstance().addService(AJAXResultDecoratorRegistry.class, decoratorRegistry);
         DecoratingAJAXActionCustomizer.REGISTRY_REF.set(decoratorRegistry);
@@ -254,13 +264,9 @@ public class DispatcherActivator extends AbstractSessionServletActivator {
         DispatcherServlet.clearRenderer();
         DispatcherServlet.setDispatcher(null);
         DispatcherServlet.setPrefix(null);
-        final OSGiAJAXResultDecoratorRegistry decoratorRegistry = this.decoratorRegistry;
-        if (null != decoratorRegistry) {
-            decoratorRegistry.stop();
-            this.decoratorRegistry = null;
-        }
         ServerServiceRegistry.getInstance().removeService(AJAXResultDecoratorRegistry.class);
         DecoratingAJAXActionCustomizer.REGISTRY_REF.set(null);
+        CoverExtractorRegistry.REGISTRY_REFERENCE.set(null);
         unregisterServlet(this.prefix);
         this.prefix = null;
         ServerServiceRegistry.getInstance().removeService(DispatcherPrefixService.class);

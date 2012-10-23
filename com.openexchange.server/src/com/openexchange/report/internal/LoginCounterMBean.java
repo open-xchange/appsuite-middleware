@@ -71,6 +71,20 @@ public interface LoginCounterMBean {
     public int getNumberOfLogins(Date startDate, Date endDate) throws MBeanException;
 
     /**
+     * Gets the time stamp of last login for specified user for given client.
+     * <p>
+     * The number of milliseconds since January 1, 1970, 00:00:00 GMT.
+     * 
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     * @param client The client identifier
+     * @return The time stamp of last login as UTC <code>long</code><br>
+     *         (the number of milliseconds since January 1, 1970, 00:00:00 GMT)
+     * @throws MBeanException If retrieval fails
+     */
+    Date getLastLoginTimeStamp(int userId, int contextId, String client) throws MBeanException;
+
+    /**
      * Sets the device wildcard to filter by; e.g. <code>"com.openexchange.*"</code>
      *
      * @param wildcard The device wildcard

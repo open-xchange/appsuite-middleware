@@ -53,14 +53,16 @@ import java.text.MessageFormat;
 import java.util.AbstractCollection;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.ConcurrentModificationException;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.TreeMap;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Callable;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.DelayQueue;
 import java.util.concurrent.Delayed;
@@ -81,10 +83,14 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
+import org.cliffc.high_scale_lib.NonBlockingHashMap;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.log.LogProperties;
 import com.openexchange.threadpool.AbstractTask;
 import com.openexchange.threadpool.Task;
 import com.openexchange.threadpool.ThreadRenamer;
+import com.openexchange.threadpool.Trackable;
+import com.openexchange.threadpool.osgi.ThreadPoolServiceRegistry;
 
 /**
  * {@link CustomThreadPoolExecutor} - Copied from Java6's <tt>ThreadPoolExecutor</tt> written by Doug Lea.
@@ -278,7 +284,7 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
     /**
      * Set containing all worker threads in pool.
      */
-    private final ConcurrentMap<Worker, Object> workers = new ConcurrentHashMap<Worker, Object>();
+    private final ConcurrentMap<Worker, Object> workers = new NonBlockingHashMap<Worker, Object>(1024);
     private final Set<Worker> workerSet = workers.keySet();
 
     /**
@@ -293,9 +299,19 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
     private final Thread consumerThread;
 
     /**
+     * The watcher thread.
+     */
+    private final Thread watcherThread;
+
+    /**
      * The task for consuming from delayed work queue.
      */
     private final DelayedQueueConsumer delayedQueueConsumer;
+
+    /**
+     * The task for watching active threads.
+     */
+    private final ActiveTaskWatcher activeTaskWatcher;
 
     /**
      * The number of threads that are actively executing tasks
@@ -772,7 +788,7 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
 
                 // Prepare thread
                 Thread.interrupted(); // clear interrupt status on entry
-                ((CustomThread) Thread.currentThread()).clearInterruptorStack();
+                ((CustomThread) thread).clearInterruptorStack();
                 LogProperties.removeLogProperties(); // Drop possible log properties
 
                 boolean ran = false;
@@ -1153,6 +1169,164 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
         }
     }
 
+    private final class ActiveTaskWatcher implements Runnable {
+        private final ReentrantLock lock = new ReentrantLock(true);
+        private final Condition notEmpty = lock.newCondition();
+        private final ConcurrentMap<Long, TaskInfo> tasks;
+        private final TaskInfo poison = new TaskInfo(null);
+        private final long minWaitTime;
+        private final long maxRunningTime;
+
+        ActiveTaskWatcher() {
+            super();
+            tasks = new NonBlockingHashMap<Long, TaskInfo>(8192);
+            final ConfigurationService service = ThreadPoolServiceRegistry.getService(ConfigurationService.class);
+            minWaitTime = null == service ? 20000L : service.getIntProperty("AJP_WATCHER_FREQUENCY", 20000);
+            maxRunningTime = null == service ? 60000L : service.getIntProperty("AJP_WATCHER_MAX_RUNNING_TIME", 60000);
+        }
+
+        void stopWhenFinished() {
+            final ReentrantLock lock = this.lock;
+            lock.lock();
+            try {
+                tasks.put(Long.valueOf(Long.MAX_VALUE), poison);
+                notEmpty.signal();
+            } finally {
+                lock.unlock();
+            }
+        }
+
+        void addTask(final long number, final Thread thread, final Map<String, Object> logProperties) {
+            final ReentrantLock lock = this.lock;
+            lock.lock();
+            try {
+                tasks.put(Long.valueOf(number), new TaskInfo(thread, logProperties));
+                notEmpty.signal();
+            } finally {
+                lock.unlock();
+            }
+        }
+
+        void removeTask(final long number) {
+            tasks.remove(Long.valueOf(number));
+        }
+
+        @Override
+        public void run() {
+            try {
+                for (;;) {
+                    try {
+                        Thread.sleep(minWaitTime);
+                        if (tasks.isEmpty()) {
+                            final ReentrantLock lock = this.lock;
+                            lock.lockInterruptibly();
+                            try {
+                                try {
+                                    while (tasks.isEmpty()) {
+                                        notEmpty.await();
+                                    }
+                                } catch (final InterruptedException ie) {
+                                    notEmpty.signal(); // propagate to non-interrupted thread
+                                    throw ie;
+                                }
+                            } finally {
+                                lock.unlock();
+                            }
+                        }
+                        // Check for exceeded tasks
+                        final long max = System.currentTimeMillis() - maxRunningTime;
+                        final StringBuilder logBuilder = new StringBuilder(1024);
+                        boolean poisoned = false;
+                        for (final TaskInfo taskInfo : tasks.values()) {
+                            if (poison == taskInfo) {
+                                poisoned = true;
+                                break;
+                            }
+                            if (taskInfo.stamp < max) {
+                                final Thread thread = taskInfo.t;
+                                final Map<String, Object> logProperties = taskInfo.logProperties;
+                                logBuilder.setLength(0);
+                                if (null != logProperties) {
+                                    final Map<String, String> sorted = new TreeMap<String, String>();
+                                    for (final Map.Entry<String, Object> entry : logProperties.entrySet()) {
+                                        final String propertyName = entry.getKey();
+                                        final Object value = entry.getValue();
+                                        if (null != value) {
+                                            sorted.put(propertyName, value.toString());
+                                        }
+                                    }
+                                    for (final Map.Entry<String, String> entry : sorted.entrySet()) {
+                                        logBuilder.append(entry.getKey()).append('=').append(entry.getValue()).append('\n');
+                                    }
+                                    logBuilder.append('\n');
+                                }
+                                logBuilder.append("Worker \"").append(thread.getName());
+                                logBuilder.append("\" exceeds max. running time of ").append(maxRunningTime);
+                                logBuilder.append("msec -> Processing time: ").append(System.currentTimeMillis() - taskInfo.stamp);
+                                logBuilder.append("msec");
+                                logBuilder.append('\n');
+                                appendStackTrace(thread.getStackTrace(), logBuilder);
+                                LOG.info(logBuilder);
+                            }
+                        }
+                        if (poisoned) {
+                            return;
+                        }
+                    } catch (final Exception e) {
+                        LOG.fatal("Watcher run aborted due to an exception!", e);
+                    }
+                }
+            } catch (final Exception e) {
+                LOG.fatal("Watcher aborted execution due to an exception! Watcher is no more active!", e);
+            }
+        }
+
+        void appendStackTrace(final StackTraceElement[] trace, final StringBuilder sb) {
+            if (null == trace) {
+                return;
+            }
+            for (final StackTraceElement ste : trace) {
+                final String className = ste.getClassName();
+                if (null != className) {
+                    sb.append("\tat ").append(className).append('.').append(ste.getMethodName());
+                    if (ste.isNativeMethod()) {
+                        sb.append("(Native Method)");
+                    } else {
+                        final String fileName = ste.getFileName();
+                        if (null == fileName) {
+                            sb.append("(Unknown Source)");
+                        } else {
+                            final int lineNumber = ste.getLineNumber();
+                            sb.append('(').append(fileName);
+                            if (lineNumber >= 0) {
+                                sb.append(':').append(lineNumber);
+                            }
+                            sb.append(')');
+                        }
+                    }
+                    sb.append('\n');
+                }
+            }
+        }
+    }
+
+    private static final class TaskInfo {
+        final Thread t;
+        final long stamp;
+        final Map<String, Object> logProperties;
+
+        TaskInfo(final Thread t) {
+            this(t, Collections.<String, Object> emptyMap());
+        }
+
+        TaskInfo(final Thread t, final Map<String, Object> logProperties) {
+            super();
+            this.t = t;
+            stamp = System.currentTimeMillis();
+            this.logProperties = logProperties;
+        }
+    }
+
     // Public methods
 
     /**
@@ -1254,6 +1428,12 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
         delayedQueueConsumer = new DelayedQueueConsumer();
         consumerThread = new Thread(delayedQueueConsumer, "DelayedQueueConsumer");
         consumerThread.start();
+        /*
+         * Start watcher thread
+         */
+        activeTaskWatcher = new ActiveTaskWatcher();
+        watcherThread = new Thread(activeTaskWatcher, "ActiveTaskWatcher");
+        watcherThread.start();
         /*
          * Monitor threads
          */
@@ -1397,8 +1577,14 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
     @Override
     protected void afterExecute(final Runnable r, final Throwable throwable) {
         super.afterExecute(r, throwable);
+        LogProperties.removeLogProperties(); // Drop possible log properties
         if (r instanceof CustomFutureTask<?>) {
-            ((CustomFutureTask<?>) r).getTask().afterExecute(throwable);
+            final CustomFutureTask<?> customFutureTask = (CustomFutureTask<?>) r;
+            final Trackable trackable = customFutureTask.getTrackable();
+            if (null != trackable) {
+                activeTaskWatcher.removeTask(customFutureTask.getNumber());
+            }
+            customFutureTask.getTask().afterExecute(throwable);
             /*
              * Restore original name
              */
@@ -1413,9 +1599,14 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
     protected void beforeExecute(final Thread thread, final Runnable r) {
         activeCount.incrementAndGet();
         if (r instanceof CustomFutureTask<?>) {
-            final Task<?> task = ((CustomFutureTask<?>) r).getTask();
+            final CustomFutureTask<?> customFutureTask = (CustomFutureTask<?>) r;
+            final Task<?> task = customFutureTask.getTask();
             task.setThreadName((ThreadRenamer) thread);
             task.beforeExecute(thread);
+            final Trackable trackable = customFutureTask.getTrackable();
+            if (null != trackable) {
+                activeTaskWatcher.addTask(customFutureTask.getNumber(), thread, trackable.optLogProperties());
+            }
         } else if (r instanceof ScheduledFutureTask<?>) {
             ((ThreadRenamer) thread).renamePrefix("OXTimer");
         }
@@ -1512,6 +1703,8 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
         try {
             delayedQueueConsumer.cancelTasksOnShutdown = true;
             consumerThread.interrupt();
+            activeTaskWatcher.stopWhenFinished();
+            watcherThread.interrupt();
             if (workers.size() > 0) {
                 // Check if caller can modify worker threads. This
                 // might not be true even if passed above check, if
@@ -1579,6 +1772,8 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
         mainLock.lock();
         try {
             consumerThread.interrupt();
+            activeTaskWatcher.stopWhenFinished();
+            watcherThread.interrupt();
             if (workers.size() > 0) {
                 if (security != null) {
                     for (final Worker w : workerSet) {

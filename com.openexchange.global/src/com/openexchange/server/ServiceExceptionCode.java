@@ -72,10 +72,23 @@ public enum ServiceExceptionCode implements OXExceptionCode {
      */
     SERVICE_INITIALIZATION_FAILED(ServiceExceptionMessage.SERVICE_INITIALIZATION_FAILED_MSG, Category.CATEGORY_ERROR, 3);
 
+    private static final String PREFIX = "SRV";
+
+    /**
+     * Checks if specified {@code OXException}'s prefix is equal to this {@code OXExceptionCode} enumeration.
+     *
+     * @param e The {@code OXException} to check
+     * @return <code>true</code> if prefix is equal; otherwise <code>false</code>
+     */
+    public static boolean hasPrefix(final OXException e) {
+        if (null == e) {
+            return false;
+        }
+        return PREFIX.equals(e.getPrefix());
+    }
+
     private final String message;
-
     private final int detailNumber;
-
     private final Category category;
 
     private ServiceExceptionCode(final String message, final Category category, final int detailNumber) {
@@ -101,7 +114,7 @@ public enum ServiceExceptionCode implements OXExceptionCode {
 
     @Override
     public String getPrefix() {
-        return "SRV";
+        return PREFIX;
     }
 
     @Override

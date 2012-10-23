@@ -749,9 +749,26 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
     private static final int SIZE_THRESHOLD = 1048576;
 
     /**
-     * Creates a new {@link ServletFileUpload} instance.
+     * The file cleaning tracker.
+     */
+    private static volatile DeleteOnExitFileCleaningTracker tracker;
+    
+    /**
+     * Exits the file cleaning tracker.
+     */
+    public static void exitTracker() {
+        AJAXServlet.servletFileUpload = null;
+        final DeleteOnExitFileCleaningTracker tracker = AJAXServlet.tracker;
+        if (null != tracker) {
+            tracker.deleteAllTracked();
+            AJAXServlet.tracker = null;
+        }
+    }
+
+    /**
+     * Creates a new {@code ServletFileUpload} instance.
      *
-     * @return A new {@link ServletFileUpload} instance
+     * @return A new {@code ServletFileUpload} instance
      */
     private static ServletFileUpload newFileUploadBase() {
         /*
@@ -763,6 +780,9 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
          */
         factory.setSizeThreshold(SIZE_THRESHOLD);
         factory.setRepository(new File(ServerConfig.getProperty(Property.UploadDirectory)));
+        final DeleteOnExitFileCleaningTracker tracker = new DeleteOnExitFileCleaningTracker(false);
+        factory.setFileCleaningTracker(tracker);
+        AJAXServlet.tracker = tracker;
         /*
          * Create a new file upload handler
          */
@@ -862,7 +882,7 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
     }
 
     protected static boolean mayUpload(final String action) {
-        return UPLOAD_ACTIONS.contains(action) || Arrays.asList("CSV", "VCARD","ICAL").contains(action); //Boo! Bad hack to get importer/export bundle working
+        return UPLOAD_ACTIONS.contains(action) || Arrays.asList("CSV", "VCARD","ICAL", "OUTLOOK_CSV").contains(action); //Boo! Bad hack to get importer/export bundle working
     }
 
     private static boolean isEmpty(final String string) {

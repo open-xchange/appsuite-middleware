@@ -108,7 +108,11 @@ public final class UpdateAction extends AbstractUserAction {
     private static ContactField[] CONTACT_FIELDS = {
         ContactField.DISTRIBUTIONLIST, ContactField.LINKS, ContactField.CATEGORIES, ContactField.COLOR_LABEL, ContactField.PRIVATE_FLAG,
         ContactField.NUMBER_OF_ATTACHMENTS, ContactField.FOLDER_ID, ContactField.OBJECT_ID, ContactField.INTERNAL_USERID,
-        ContactField.CREATED_BY, ContactField.CREATION_DATE, ContactField.MODIFIED_BY, ContactField.LAST_MODIFIED };
+        ContactField.CREATED_BY, ContactField.CREATION_DATE, ContactField.MODIFIED_BY, ContactField.LAST_MODIFIED, ContactField.STATE_HOME,
+        ContactField.COMPANY, ContactField.CELLULAR_TELEPHONE1, ContactField.STREET_HOME, ContactField.STREET_BUSINESS, ContactField.TELEPHONE_HOME1,
+        ContactField.STATE_BUSINESS, ContactField.DISPLAY_NAME, ContactField.SUR_NAME, ContactField.CITY_HOME, ContactField.MIDDLE_NAME,
+        ContactField.BIRTHDAY, ContactField.FAX_BUSINESS, ContactField.GIVEN_NAME, ContactField.POSTAL_CODE_HOME, ContactField.POSTAL_CODE_BUSINESS,
+        ContactField.TELEPHONE_BUSINESS1, ContactField.CITY_BUSINESS };
 
     private static UserField[] USER_FIELDS = { UserField.ID, UserField.LOCALE, UserField.TIME_ZONE };
 
@@ -142,6 +146,20 @@ public final class UpdateAction extends AbstractUserAction {
          * Update contact
          */
         final ContactService contactService = ServiceRegistry.getInstance().getService(ContactService.class, true);
+        if (parsedUserContact.containsDisplayName()) {
+            final String displayName = parsedUserContact.getDisplayName();
+            if (null != displayName) {
+                if (isEmpty(displayName)) {
+                    parsedUserContact.removeDisplayName();
+                } else {
+                    // Remove display name if equal to storage version to avoid update conflict
+                    final Contact storageContact = contactService.getUser(session, id);
+                    if (displayName.equals(storageContact.getDisplayName())) {
+                        parsedUserContact.removeDisplayName();
+                    }
+                }
+            }
+        }
         contactService.updateContact(session, Integer.toString(Constants.USER_ADDRESS_BOOK_FOLDER_ID), Integer.toString(contactId), 
         		parsedUserContact, clientLastModified);
         /*
@@ -210,6 +228,18 @@ public final class UpdateAction extends AbstractUserAction {
          */
         final Date lastModified = contactInterface.getUserById(id, false).getLastModified();
         return new AJAXRequestResult(new JSONObject(), lastModified);
+    }
+
+    private static boolean isEmpty(final String string) {
+        if (null == string) {
+            return true;
+        }
+        final int len = string.length();
+        boolean isWhitespace = true;
+        for (int i = 0; isWhitespace && i < len; i++) {
+            isWhitespace = Character.isWhitespace(string.charAt(i));
+        }
+        return isWhitespace;
     }
 
 }
