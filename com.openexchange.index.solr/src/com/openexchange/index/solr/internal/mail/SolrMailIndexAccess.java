@@ -261,12 +261,12 @@ public class SolrMailIndexAccess extends AbstractSolrIndexAccess<MailMessage> {
         switch (searchHandler) { 
             case SIMPLE:
             {
-                String pattern = parameters.getPattern();
-                if (pattern == null) {
-                    throw new IllegalArgumentException("Parameter `pattern` must not be null!");
+                Object searchTerm = parameters.getSearchTerm();
+                if (searchTerm == null || !(searchTerm instanceof String)) {
+                    throw new IllegalArgumentException("Parameter `searchTerm` must not be null and of type java.lang.String!");
                 }
                 
-                solrQuery = new SolrQuery(pattern);
+                solrQuery = new SolrQuery((String) searchTerm);
                 solrQuery.setQueryType(config.getProperty(SolrProperties.SIMPLE_HANLDER));
                 addFilterQueries(parameters, solrQuery);
                 break;

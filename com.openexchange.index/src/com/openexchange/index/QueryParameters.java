@@ -70,7 +70,6 @@ public final class QueryParameters {
 
         int off;
         int len;
-        String pattern;
         Set<String> folders;
         IndexField sortField;
         Order order;
@@ -81,10 +80,10 @@ public final class QueryParameters {
         /**
          * Initializes a new builder.
          */
-        public Builder(final String pattern) {
+        public Builder(final Object searchTerm) {
             super();
             init();
-            this.pattern = pattern;
+            this.searchTerm = searchTerm;
         }
         
         private void init() {
@@ -117,11 +116,6 @@ public final class QueryParameters {
 
         public Builder setLength(final int len) {
             this.len = len;
-            return this;
-        }
-
-        public Builder setPattern(final String pattern) {
-            this.pattern = pattern;
             return this;
         }
 
@@ -159,8 +153,6 @@ public final class QueryParameters {
 
     private final int len;
 
-    private final String pattern;
-
     private final Map<String, Object> parameters;
 
     private final SearchHandler handler;
@@ -182,7 +174,6 @@ public final class QueryParameters {
         len = builder.len;
         off = builder.off;
         parameters = builder.parameters;
-        pattern = builder.pattern;
         searchTerm = builder.searchTerm;
         folders = builder.folders;
         sortField = builder.sortField;
@@ -214,15 +205,6 @@ public final class QueryParameters {
      */
     public int getLen() {
         return len;
-    }
-
-    /**
-     * Gets the query string or <code>null</code> if not set.
-     * 
-     * @return The query string
-     */
-    public String getPattern() {
-        return pattern;
     }
     
     /**
