@@ -52,9 +52,7 @@ package com.openexchange.tools.images.impl;
 import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.geom.AffineTransform;
-import java.awt.image.AffineTransformOp;
 import java.awt.image.BufferedImage;
-import java.awt.image.ColorModel;
 import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -84,7 +82,9 @@ import com.openexchange.java.Streams;
 import com.openexchange.log.LogFactory;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.images.ImageScalingService;
+import com.openexchange.tools.images.ImageTransformations;
 import com.openexchange.tools.images.ScaleType;
+import com.openexchange.tools.images.transformations.ImageTransformationsImpl;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 
 /**
@@ -351,6 +351,16 @@ public class JavaImageScalingService implements ImageScalingService {
         public String toString() {
             return String.format("%dx%d,%d", this.width, this.height, this.orientation);
         }
+    }
+
+    @Override
+    public ImageTransformations createTransformations(BufferedImage sourceImage) {
+        return new ImageTransformationsImpl(sourceImage);
+    }
+
+    @Override
+    public ImageTransformations createTransformations(InputStream imageStream) throws IOException {
+        return new ImageTransformationsImpl(imageStream);
     }
 
 }

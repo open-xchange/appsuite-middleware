@@ -70,6 +70,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.java.Streams;
 import com.openexchange.log.LogFactory;
 import com.openexchange.tools.images.ImageScalingService;
+import com.openexchange.tools.images.ImageTransformations;
 import com.openexchange.tools.images.ScaleType;
 import com.openexchange.tools.servlet.http.Tools;
 
@@ -146,6 +147,7 @@ public class FileResponseRenderer implements ResponseRenderer {
             file = rotateIfImage(file);
             file = cropIfImage(request, file);
             file = scaleIfImage(request, file);
+            //file = transformIfImage(request, file);
             InputStream stream = file.getStream();
             if (null == stream) {
                 // React with 404
@@ -251,6 +253,44 @@ public class FileResponseRenderer implements ResponseRenderer {
         return new FileHolder(rotated, -1, file.getContentType(), file.getName());
     }
 
+    private IFileHolder transformIfImage(AJAXRequestData request, IFileHolder file) throws IOException, OXException {
+        /*
+         * check input
+         */
+        if (null == this.scaler || false == isImage(file)) {
+            return file;
+        }
+        /*
+         * build transformations
+         */
+        ImageTransformations transformations = scaler.createTransformations(file.getStream());
+        transformations.rotate();
+        if (request.isSet("cropWidth") || request.isSet("cropHeight")) {
+            transformations.crop(
+                request.isSet("cropX") ? request.getParameter("cropX", int.class).intValue() : 0,
+                request.isSet("cropY") ? request.getParameter("cropY", int.class).intValue() : 0,
+                request.getParameter("cropWidth", int.class).intValue(),
+                request.getParameter("cropHeight", int.class).intValue()
+            );
+        }
+        if (request.isSet("width") || request.isSet("height")) {
+            transformations.scale(
+                request.isSet("width") ? request.getParameter("width", int.class).intValue() : 0,
+                request.isSet("cropY") ? request.getParameter("cropY", int.class).intValue() : 0,
+                ScaleType.getType(request.getParameter("scaleType"))
+            );
+        }
+        /*
+         * transform
+         */
+        InputStream transformed = transformations.getInputStream(file.getContentType());
+        if (null == transformed) {
+            LOG.warn("Got no resulting input stream from transformation, falling back to original input");
+            return file;
+        }
+        return new FileHolder(transformed, -1, file.getContentType(), file.getName());
+    }
+    
     /**
      * Scale possible image data.
      *
