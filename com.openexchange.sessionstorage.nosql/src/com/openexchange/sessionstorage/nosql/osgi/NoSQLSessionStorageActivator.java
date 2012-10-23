@@ -132,7 +132,6 @@ public class NoSQLSessionStorageActivator extends HousekeepingActivator {
     public void stopBundle() throws Exception {
         log.info("Stopping bundle: com.openexchange.sessionstorage.nosql");
         if (service != null) {
-            service.cleanUp();
             service.removeCleanupTask();
             unregisterServices();
         }

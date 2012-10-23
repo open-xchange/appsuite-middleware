@@ -249,11 +249,6 @@ public class HazelcastSessionStorageService implements SessionStorageService {
     }
 
     @Override
-    public void cleanUp() {
-        sessions.clear();
-    }
-
-    @Override
     public void changePassword(String sessionId, String newPassword) throws OXException {
         Session s = lookupSession(sessionId);
         HazelcastStoredSession ss = new HazelcastStoredSession(s);

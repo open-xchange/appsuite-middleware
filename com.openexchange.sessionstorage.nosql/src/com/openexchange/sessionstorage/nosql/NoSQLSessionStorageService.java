@@ -500,13 +500,6 @@ public class NoSQLSessionStorageService implements SessionStorageService {
     }
 
     @Override
-    public void cleanUp() {
-        Mutator<String> mutator = HFactory.createMutator(keyspace, serializer);
-        mutator.addDeletion("*", CF_NAME, null, serializer);
-        mutator.execute();
-    }
-
-    @Override
     public void changePassword(String sessionId, String newPassword) throws OXException {
         SliceQuery<String, String, String> query = HFactory.createSliceQuery(keyspace, serializer, serializer, serializer);
         query.setColumnFamily(CF_NAME).setKey(sessionId).setColumnNames(COLUMN_NAMES);
