@@ -133,8 +133,7 @@ public final class ConfigJSlobService implements JSlobService {
     public ConfigJSlobService(final ServiceLookup services) throws OXException {
         super();
         this.services = services;
-        final Map<String, Map<String, AttributedProperty>> preferenceItems = initPreferenceItems();
-        this.preferenceItems = preferenceItems;
+        this.preferenceItems = initPreferenceItems();
         // TODO: Initialize core name mapping
         core2AttributeMap = HashBiMap.create(128);
         attribute2CoreMap = core2AttributeMap.inverse();
