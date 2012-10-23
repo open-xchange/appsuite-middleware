@@ -122,8 +122,8 @@ public final class ConfigJSlobService implements JSlobService {
 
     private final ServiceLookup services;
     private final Map<String, Map<String, AttributedProperty>> preferenceItems;
-    private final BiMap<String, String> core2AttributeMap;
-    private final BiMap<String, String> attribute2CoreMap;
+    private final Map<String, String> core2AttributeMap;
+    private final Map<String, String> attribute2CoreMap;
 
     /**
      * Initializes a new {@link ConfigJSlobService}.
@@ -135,8 +135,9 @@ public final class ConfigJSlobService implements JSlobService {
         this.services = services;
         this.preferenceItems = initPreferenceItems();
         // TODO: Initialize core name mapping
-        core2AttributeMap = HashBiMap.create(128);
-        attribute2CoreMap = core2AttributeMap.inverse();
+        final BiMap<String, String> biMap = HashBiMap.create(128);
+        core2AttributeMap = biMap;
+        attribute2CoreMap = biMap.inverse();
     }
 
     private Map<String, Map<String, AttributedProperty>> initPreferenceItems() throws OXException {
