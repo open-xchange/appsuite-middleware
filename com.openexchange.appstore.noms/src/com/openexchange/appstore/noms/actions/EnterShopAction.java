@@ -47,44 +47,37 @@
  *
  */
 
-package com.openexchange.sessionstorage.hazelcast;
+package com.openexchange.appstore.noms.actions;
 
-import com.hazelcast.config.MapConfig;
-import com.openexchange.crypto.CryptoService;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import com.openexchange.ajax.requesthandler.AJAXRequestData;
+import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.exception.OXException;
+import com.openexchange.server.ServiceLookup;
+import com.openexchange.tools.servlet.AjaxExceptionCodes;
+import com.openexchange.tools.session.ServerSession;
 
 /**
- * {@link HazelcastSessionStorageConfiguration}
- * 
- * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
+ * {@link EnterShopAction}
+ *
+ * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class HazelcastSessionStorageConfiguration {
+public class EnterShopAction extends AbstractLibertyAction{
 
-    private final String ENCRYPTION_KEY;
-
-    private final CryptoService cryptoService;
-
-    private final MapConfig mapConfig;
-
-    /**
-     * Initializes a new {@link HazelcastSessionStorageConfiguration}.
-     */
-    public HazelcastSessionStorageConfiguration(String encryptionKey, CryptoService cryptoService, MapConfig mapConfig) {
-        super();
-        ENCRYPTION_KEY = encryptionKey;
-        this.cryptoService = cryptoService;
-        this.mapConfig = mapConfig;
-    }
-
-    public String getEncryptionKey() {
-        return ENCRYPTION_KEY;
-    }
-
-    public CryptoService getCryptoService() {
-        return cryptoService;
-    }
-
-    public MapConfig getMapConfig() {
-        return mapConfig;
-    }
-
+	public EnterShopAction(ServiceLookup services) {
+		super(services);
+	}
+	
+	@Override
+	public AJAXRequestResult perform(AJAXRequestData requestData,
+			ServerSession session) throws OXException {
+		try {
+			return new AJAXRequestResult( new JSONObject().put("location", getConfig(session).getStorefrontWithSubstitutions()), "json");
+		} catch (JSONException e) {
+			throw AjaxExceptionCodes.JSON_ERROR.create();
+		}
+	}
+	
 }
