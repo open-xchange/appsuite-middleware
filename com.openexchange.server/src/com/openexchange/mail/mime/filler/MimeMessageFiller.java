@@ -956,7 +956,7 @@ public class MimeMessageFiller {
                     /*
                      * Define content
                      */
-                    final ContentType ct = new ContentType(MimeTypes.MIME_TEXT_X_VCARD);
+                    final ContentType ct = new ContentType(MimeTypes.MIME_TEXT_VCARD);
                     ct.setCharsetParameter(charset);
                     vcardPart.setDataHandler(new DataHandler(new MessageDataSource(userVCard, ct)));
                     if (fileName != null && !ct.containsNameParameter()) {
@@ -1096,40 +1096,20 @@ public class MimeMessageFiller {
      * @throws OXException If a mail error occurs
      */
     protected final String getUserVCard(final String charset) throws OXException {
-        final User userObj = UserStorage.getStorageUser(session.getUserId(), ctx);
-        Connection readCon = null;
         try {
+            ContactService contactService = ServerServiceRegistry.getInstance().getService(ContactService.class);
+            Contact contact = contactService.getUser(session, session.getUserId());
             final OXContainerConverter converter = new OXContainerConverter(session, ctx);
             try {
-                readCon = DBPool.pickup(ctx);
-                Contact contactObj = null;
-                try {
-                    contactObj =
-                        Contacts.getContactById(
-                            userObj.getContactId(),
-                            userObj.getId(),
-                            userObj.getGroups(),
-                            ctx,
-                            UserConfigurationStorage.getInstance().getUserConfigurationSafe(session.getUserId(), ctx),
-                            readCon);
-                } catch (final OXException oxExc) {
-                    throw new OXException(oxExc);
-                } catch (final Exception e) {
-                    throw MailExceptionCode.VERSIT_ERROR.create(e, e.getMessage());
-                }
-                final VersitObject versitObj = converter.convertContact(contactObj, "2.1");
+                final VersitObject versitObj = converter.convertContact(contact, "3.0");
                 final ByteArrayOutputStream os = new UnsynchronizedByteArrayOutputStream();
-                final VersitDefinition def = Versit.getDefinition(MimeTypes.MIME_TEXT_X_VCARD);
+                final VersitDefinition def = Versit.getDefinition(MimeTypes.MIME_TEXT_VCARD);
                 final VersitDefinition.Writer w = def.getWriter(os, MailProperties.getInstance().getDefaultMimeCharset());
                 def.write(w, versitObj);
                 w.flush();
                 os.flush();
                 return new String(os.toByteArray(), Charsets.forName(charset));
             } finally {
-                if (readCon != null) {
-                    DBPool.closeReaderSilent(ctx, readCon);
-                    readCon = null;
-                }
                 converter.close();
             }
         } catch (final ConverterException e) {
