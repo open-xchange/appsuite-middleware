@@ -48,4 +48,3 @@ opt/open-xchange/etc/settings/themes.properties
 opt/open-xchange/etc/settings/ui.properties
 opt/open-xchange/etc/webdav-disabled-message.txt
 opt/open-xchange/etc/quartz.properties
-opt/open-xchange/etc/static-cluster-discovery.properties
