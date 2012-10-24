@@ -5,7 +5,9 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.LinkedHashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
@@ -14,6 +16,7 @@ import org.apache.commons.logging.Log;
 import org.eclipse.osgi.framework.console.CommandInterpreter;
 import org.eclipse.osgi.framework.console.CommandProvider;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.hazelcast.config.Config;
@@ -31,11 +34,12 @@ import com.openexchange.config.ConfigurationService;
 import com.openexchange.hazelcast.HazelcastMBean;
 import com.openexchange.management.ManagementService;
 import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.osgi.ServiceContainer;
 import com.openexchange.timer.TimerService;
 import com.openexchange.tools.strings.TimeSpanParser;
 
 /**
- * {@link HazelcastActivator} - The activator for Hazelcast bundle (registers a {@link HazelcastInstance} for ths JVM)
+ * {@link HazelcastActivator} - The activator for Hazelcast bundle (registers a {@link HazelcastInstance} for this JVM)
  * <p>
  * When should you add node?<br>
  * 1. You reached the limits of your CPU or RAM.<br>
@@ -78,6 +82,15 @@ public class HazelcastActivator extends HousekeepingActivator {
         return new Class[] { ConfigurationService.class, TimerService.class };
     }
 
+    /** Gets the ranking */
+    protected static int getRanking(final ServiceReference<?> reference) {
+        final Object property = reference.getProperty(Constants.SERVICE_RANKING);
+        if (null == property) {
+            return 0;
+        }
+        return ((Integer) property).intValue();
+    }
+
     @Override
     protected void startBundle() throws Exception {
         final Log logger = com.openexchange.log.Log.loggerFor(HazelcastActivator.class);
@@ -99,14 +112,38 @@ public class HazelcastActivator extends HousekeepingActivator {
         track(ManagementService.class, new ManagementRegisterer(context));
         track(ClusterDiscoveryService.class, new ServiceTrackerCustomizer<ClusterDiscoveryService, ClusterDiscoveryService>() {
 
+            private final LinkedList<ServiceContainer<ClusterDiscoveryService>> deactivated = new LinkedList<ServiceContainer<ClusterDiscoveryService>>();
+            private int clusterDiscoveryServiceRanking = 0;
+            private ClusterDiscoveryService clusterDiscoveryService = null;
+
             @Override
             public ClusterDiscoveryService addingService(final ServiceReference<ClusterDiscoveryService> reference) {
-                final ClusterDiscoveryService discovery = context.getService(reference);
+                synchronized (deactivated) {
+                    final ClusterDiscoveryService discovery = context.getService(reference);
+                    startupIfHigherRanked(discovery, getRanking(reference));
+                    return discovery;
+                }
+            }
+
+            private void startupIfHigherRanked(final ClusterDiscoveryService discovery, final int ranking) {
+                if (null != clusterDiscoveryService) {
+                    if (clusterDiscoveryServiceRanking >= ranking) {
+                        deactivated.addFirst(new ServiceContainer<ClusterDiscoveryService>(discovery, ranking));
+                        return;
+                    }
+                    shutdown(clusterDiscoveryService);
+                    deactivated.addFirst(new ServiceContainer<ClusterDiscoveryService>(clusterDiscoveryService, clusterDiscoveryServiceRanking));
+                }
+                clusterDiscoveryService = discovery;
+                clusterDiscoveryServiceRanking = ranking;
+                /*
+                 * Do start-up 
+                 */
                 final long st = System.currentTimeMillis();
                 final List<InetAddress> nodes = discovery.getNodes();
                 if (infoEnabled) {
                     final long et = System.currentTimeMillis();
-                    logger.info("\nHazelcast\n\tAvailable cluster nodes received in "+(et - st)+"msec from "+ClusterDiscoveryService.class.getSimpleName()+":\n\t"+nodes+"\n");
+                    logger.info("\nHazelcast\n\tAvailable cluster nodes received in " + (et - st) + "msec from " + ClusterDiscoveryService.class.getSimpleName() + ":\n\t" + nodes + "\n");
                 }
                 /*-
                  * Wait for at least one via ClusterListener
@@ -146,7 +183,6 @@ public class HazelcastActivator extends HousekeepingActivator {
                         }
                     }
                 }
-                return discovery;
             }
 
             @Override
@@ -159,6 +195,33 @@ public class HazelcastActivator extends HousekeepingActivator {
                 if (null == service) {
                     return;
                 }
+                synchronized (deactivated) {
+                    for (final Iterator<ServiceContainer<ClusterDiscoveryService>> iterator = deactivated.iterator(); iterator.hasNext();) {
+                        final ServiceContainer<ClusterDiscoveryService> box = iterator.next();
+                        if (box.getService() == service) {
+                            // Wasn't active
+                            iterator.remove();
+                            context.ungetService(reference);
+                            return;
+                        }
+                    }
+                    if (service == clusterDiscoveryService) {
+                        shutdown(service);
+                        context.ungetService(reference);
+                        clusterDiscoveryService = null;
+                        clusterDiscoveryServiceRanking = 0;
+                        if (!deactivated.isEmpty()) {
+                            final ServiceContainer<ClusterDiscoveryService> box = deactivated.removeFirst();
+                            startupIfHigherRanked(box.getService(), box.getRanking());
+                        }
+                        return;
+                    }
+                }
+                // Eh...
+                context.ungetService(reference);
+            }
+
+            private void shutdown(final ClusterDiscoveryService service) {
                 final ClusterListener clusterListener = HazelcastActivator.this.clusterListener;
                 if (null != clusterListener) {
                     service.removeListener(clusterListener);
@@ -170,7 +233,6 @@ public class HazelcastActivator extends HousekeepingActivator {
                     REF_HAZELCAST_INSTANCE.set(null);
                 }
                 Hazelcast.shutdownAll();
-                context.ungetService(reference);
             }
         });
         openTrackers();
@@ -203,13 +265,13 @@ public class HazelcastActivator extends HousekeepingActivator {
             help.append("\taddnode - Add a solr node.\n");
             return help.toString();
         }
-        
+
         public void _addnode(final CommandInterpreter commandInterpreter) {
             final String ip = commandInterpreter.nextArgument();
             try {
                 activator.init(Collections.singletonList(InetAddress.getByName(ip)), true, System.currentTimeMillis(), LOG);
                 commandInterpreter.println("Added node to Hazelcast cluster: " + ip);
-            } catch (UnknownHostException e) {
+            } catch (final UnknownHostException e) {
                 LOG.error("Could not register node.", e);
                 commandInterpreter.println("Couldn't resolve IP: " + ip);
             }
@@ -313,7 +375,8 @@ public class HazelcastActivator extends HousekeepingActivator {
             /*
              * Create appropriate Hazelcast instance from configuration
              */
-            // final HazelcastInstance hazelcastInstance = new ClassLoaderAwareHazelcastInstance(Hazelcast.newHazelcastInstance(config), false);
+            // final HazelcastInstance hazelcastInstance = new ClassLoaderAwareHazelcastInstance(Hazelcast.newHazelcastInstance(config),
+            // false);
             final HazelcastInstance hazelcastInstance = Hazelcast.newHazelcastInstance(config);
             registerService(HazelcastInstance.class, hazelcastInstance);
             REF_HAZELCAST_INSTANCE.set(hazelcastInstance);
@@ -334,7 +397,7 @@ public class HazelcastActivator extends HousekeepingActivator {
             return InitMode.INITIALIZED;
         }
     }
-    
+
     private InitMode configureNetworkJoin(final List<InetAddress> nodes, final boolean append, final Config config, final Log logger) {
         /*
          * Get reference to network join
@@ -399,6 +462,7 @@ public class HazelcastActivator extends HousekeepingActivator {
     }
 
     private static final Pattern SPLIT = Pattern.compile("\\%");
+
     private static Set<String> resolve2Members(final List<InetAddress> nodes) {
         final Set<String> members = new LinkedHashSet<String>(nodes.size());
         for (final InetAddress inetAddress : nodes) {

@@ -52,7 +52,10 @@ package com.openexchange.cluster.discovery.sstatic.osgi;
 import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Dictionary;
+import java.util.Hashtable;
 import java.util.List;
+import org.osgi.framework.Constants;
 import com.openexchange.cluster.discovery.ClusterDiscoveryService;
 import com.openexchange.cluster.discovery.ClusterListener;
 import com.openexchange.config.ConfigurationService;
@@ -84,6 +87,8 @@ public class StaticClusterDiscoveryActivator extends HousekeepingActivator {
             }
             nodes = Collections.unmodifiableList(list);
         }
+        final Dictionary<String, Object> props = new Hashtable<String, Object>(1);
+        props.put(Constants.SERVICE_RANKING, Integer.valueOf(0));
         registerService(ClusterDiscoveryService.class, new ClusterDiscoveryService() {
 
             @Override
@@ -100,7 +105,7 @@ public class StaticClusterDiscoveryActivator extends HousekeepingActivator {
             public void removeListener(final ClusterListener listener) {
                 // Ignore
             }
-        });
+        }, props);
     }
 
     private static boolean isEmpty(final String string) {
