@@ -52,7 +52,10 @@ package com.openexchange.tools.images.transformations;
 import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
+import java.awt.image.IndexColorModel;
 import java.io.IOException;
+import org.apache.commons.logging.Log;
+import com.openexchange.log.LogFactory;
 import com.openexchange.tools.images.impl.ImageInformation;
 
 /**
@@ -61,7 +64,9 @@ import com.openexchange.tools.images.impl.ImageInformation;
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 public class CropTransformation implements ImageTransformation {
-    
+
+    private static Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(CropTransformation.class));
+
     private final int x, y, width, height;
     
     public CropTransformation(int x, int y, int width, int height) {
@@ -88,7 +93,12 @@ public class CropTransformation implements ImageTransformation {
             /*
              * draw partial region to target image
              */
-            targetImage = new BufferedImage(width, height, sourceImage.getType());
+            try {
+                targetImage = new BufferedImage(width, height, sourceImage.getType(), (IndexColorModel)sourceImage.getColorModel());
+            } catch (ClassCastException e) {
+                LOG.debug("Can't reuse source image's color model, falling back to defaults.", e);
+                targetImage = new BufferedImage(width, height, sourceImage.getType());
+            }
             Graphics2D graphics = targetImage.createGraphics();
             graphics.setBackground(new Color(255, 255, 255, 0));
             graphics.clearRect(0, 0, width, height);
