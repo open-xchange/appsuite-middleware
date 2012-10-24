@@ -51,6 +51,7 @@ package com.openexchange.sessionstorage.hazelcast;
 
 import java.util.ArrayList;
 import java.util.List;
+import com.hazelcast.config.MapConfig;
 import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.core.IMap;
 import com.openexchange.crypto.CryptoService;
@@ -81,6 +82,8 @@ public class HazelcastSessionStorageService implements SessionStorageService {
 
     private final TimerService timerService;
 
+    private final MapConfig mapConfig;
+
     private final ScheduledTimerTask cleanupTask;
 
     private static volatile HazelcastSessionStorageService instance;
@@ -92,7 +95,9 @@ public class HazelcastSessionStorageService implements SessionStorageService {
         super();
         encryptionKey = config.getEncryptionKey();
         lifetime = config.getLifetime();
+        mapConfig = config.getMapConfig();
         hazelcast = HazelcastSessionStorageServiceRegistry.getRegistry().getService(HazelcastInstance.class);
+        hazelcast.getConfig().addMapConfig(mapConfig);
         sessions = hazelcast.getMap("sessions");
         cryptoService = config.getCryptoService();
         timerService = config.getTimerService();

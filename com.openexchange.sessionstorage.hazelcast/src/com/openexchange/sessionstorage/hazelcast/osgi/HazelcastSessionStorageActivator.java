@@ -50,10 +50,11 @@
 package com.openexchange.sessionstorage.hazelcast.osgi;
 
 import org.apache.commons.logging.Log;
+import com.hazelcast.config.MapConfig;
+import com.hazelcast.config.MaxSizeConfig;
 import com.hazelcast.core.HazelcastInstance;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.crypto.CryptoService;
-import com.openexchange.exception.OXException;
 import com.openexchange.log.LogFactory;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.osgi.ServiceRegistry;
@@ -95,8 +96,6 @@ public class HazelcastSessionStorageActivator extends HousekeepingActivator {
         configService = getService(ConfigurationService.class);
         cryptoService = getService(CryptoService.class);
         hazelcast = getService(HazelcastInstance.class);
-        // Config c = hazelcast.getConfig();
-        // c.setClassLoader(Thread.currentThread().getContextClassLoader());
         timerService = getService(TimerService.class);
         registry = HazelcastSessionStorageServiceRegistry.getRegistry();
         registry.addService(ConfigurationService.class, configService);
@@ -108,15 +107,38 @@ public class HazelcastSessionStorageActivator extends HousekeepingActivator {
         if (enabled) {
             String encryptionKey = configService.getProperty("com.openexchange.sessionstorage.hazelcast.encryptionKey");
             if (encryptionKey == null) {
-                OXException e = OXHazelcastSessionStorageExceptionCodes.HAZELCAST_SESSIONSTORAGE_NO_ENCRYPTION_KEY.create();
-                LOG.error(e.getMessage(), e);
-                throw e;
+                throw OXHazelcastSessionStorageExceptionCodes.HAZELCAST_SESSIONSTORAGE_NO_ENCRYPTION_KEY.create();
             }
+            MapConfig mapConfig = new MapConfig();
+            String mapName = configService.getProperty("com.openexchange.sessionstorage.hazelcast.map.name");
+            int backupCount = configService.getIntProperty("com.openexchange.sessionstorage.hazelcast.map.backupcount", 1);
+            int asyncBackup = configService.getIntProperty("com.openexchange.sessionstorage.hazelcast.map.asyncbackup", 0);
+            int ttl = configService.getIntProperty("com.openexchange.sessionstorage.hazelcast.map.ttl", 0);
+            int maxidle = configService.getIntProperty("com.openexchange.sessionstorage.hazelcast.map.maxidle", 0);
+            String evictionPolicy = configService.getProperty("com.openexchange.sessionstorage.hazelcast.map.evictionpolicy");
+            int evictionPercentage = configService.getIntProperty("com.openexchange.sessionstorage.hazelcast.map.evictionpercentage", 25);
+            int maxSize = configService.getIntProperty("com.openexchange.sessionstorage.hazelcast.map.maxsize", 0);
+            String mergePolicy = configService.getProperty("com.openexchange.sessionstorage.hazelcast.map.mergepolicy");
+            if (mapName == null || !checkEvictionPolicy(evictionPolicy) || !checkMergePolicy(mergePolicy)) {
+                throw OXHazelcastSessionStorageExceptionCodes.HAZELCAST_SESSIONSTORAGE_CONFIG_FILE.create();
+            }
+            mapConfig.setName(mapName);
+            mapConfig.setBackupCount(backupCount);
+            mapConfig.setAsyncBackupCount(asyncBackup);
+            mapConfig.setTimeToLiveSeconds(ttl);
+            mapConfig.setMaxIdleSeconds(maxidle);
+            mapConfig.setEvictionPolicy(evictionPolicy);
+            mapConfig.setEvictionPercentage(evictionPercentage);
+            MaxSizeConfig maxSizeConfig = new MaxSizeConfig();
+            maxSizeConfig.setSize(maxSize);
+            mapConfig.setMaxSizeConfig(maxSizeConfig);
+            mapConfig.setMergePolicy(mergePolicy);
             HazelcastSessionStorageConfiguration config = new HazelcastSessionStorageConfiguration(
                 encryptionKey,
                 lifetime,
                 cryptoService,
-                timerService);
+                timerService,
+                mapConfig);
             service = new HazelcastSessionStorageService(config);
             registerService(SessionStorageService.class, service);
         }
@@ -131,6 +153,14 @@ public class HazelcastSessionStorageActivator extends HousekeepingActivator {
         }
         closeTrackers();
         cleanUp();
+    }
+
+    private boolean checkEvictionPolicy(String evictionPolicy) {
+        return ("NONE".equals(evictionPolicy) || "LRU".equals(evictionPolicy) || "LFU".equals(evictionPolicy));
+    }
+
+    private boolean checkMergePolicy(String mergePolicy) {
+        return ("hz.NO_MERGE".equals(mergePolicy) || "hz.ADD_NEW_ENTRY".equals(mergePolicy) || "hz.HIGHER_HITS".equals(mergePolicy) || "hz.LATEST_UPDATE".equals(mergePolicy));
     }
 
 }
