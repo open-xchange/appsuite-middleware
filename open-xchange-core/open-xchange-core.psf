@@ -85,7 +85,6 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.secret.recovery.json"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.secret.recovery.mail"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.server"/>
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.service.messaging"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.sessiond"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.sessionstorage"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.sleepycat"/>
