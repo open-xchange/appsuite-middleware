@@ -49,79 +49,53 @@
 
 package com.openexchange.appstore.noms.actions;
 
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
-
-import org.apache.commons.codec.binary.Base64;
+import com.openexchange.ajax.requesthandler.AJAXActionService;
+import com.openexchange.config.cascade.ComposedConfigProperty;
+import com.openexchange.config.cascade.ConfigView;
+import com.openexchange.config.cascade.ConfigViewFactory;
+import com.openexchange.exception.OXException;
+import com.openexchange.server.ServiceLookup;
+import com.openexchange.tools.session.ServerSession;
 
 /**
- * {@link LibertyAppStoreConfig}
+ * {@link AbstractLibertyAction}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class LibertyAppStoreConfig {
-	private String url, storefront, gateway, gatewayQuery, userName, password;
-	
-	public LibertyAppStoreConfig(String url, String storefront, String gateway, String gatewayQuery, String userName, String password) {
+public abstract class AbstractLibertyAction implements AJAXActionService{
+	protected ServiceLookup services;
+
+	public AbstractLibertyAction(ServiceLookup services) {
 		super();
-		this.url = url;
-		this.storefront = storefront;
-		this.gateway = gateway;
-		this.gatewayQuery = gatewayQuery;
-		this.userName = userName;
-		this.password = password;
+		this.services = services;
 	}
 
-	public String getUrl() {
-		return url;
-	}
 
-	public void setUrl(String url) {
-		this.url = url;
-	}
-	
-	public String getStorefront() {
-		return storefront;
-	}
-	
-	public String getStorefrontWithSubstitutions() {
-		String ret = getStorefront();
-		ret = ret.replace("[user]", getUserName());
-		ret = ret.replace("[password]", getPassword());
-		return ret;
-	}
 
-	public void setStorefront(String storefront) {
-		this.storefront = storefront;
-	}
-
-	public String getUserName() {
-		return userName;
-	}
-
-	public void setUserName(String userName) {
-		this.userName = userName;
-	}
-
-	public String getPassword() {
-		return password;
-	}
-
-	public void setPassword(String password) {
-		this.password = password;
-	}
-
-	public String getAppLink(String app, String path) {
-		String query = gatewayQuery.replace("[app]", app).replace("[path]", path).replace("[user]", getUserName()).replace("[password]", getPassword());
-	
-		try {
-			return gateway + "?coded=" + Base64.encodeBase64URLSafeString(URLEncoder.encode(query, "UTF-8").getBytes());
-		} catch (UnsupportedEncodingException e) {
-			// Shouldn't happen
-			e.printStackTrace();
-			return null;
+	protected LibertyAppStoreConfig getConfig(ServerSession session) throws OXException {
+		ConfigView view = services.getService(ConfigViewFactory.class).getView(session.getUserId(), session.getContextId());
+		String url = view.property("com.openexchange.liberty.appstore.url", String.class).get();
+		String storefront = view.property("com.openexchange.liberty.appstore.storefront", String.class).get();
+		String gateway = view.property("com.openexchange.liberty.appstore.gateway", String.class).get();
+		String gatewayQuery = view.property("com.openexchange.liberty.appstore.gatewayQuery", String.class).get();
+		
+		String user = null, password = null;
+		
+		ComposedConfigProperty<String> userProp = view.property("com.openexchange.liberty.appstore.user", String.class);
+		if (userProp.isDefined()) {
+			user = userProp.get();
+		} else {
+			user = session.getUserlogin();
 		}
+		
+		ComposedConfigProperty<String> passwordProp = view.property("com.openexchange.liberty.appstore.password", String.class);
+		if (passwordProp.isDefined()) {
+			password = passwordProp.get();
+		} else {
+			password = session.getPassword();
+		}
+		
+		
+		return new LibertyAppStoreConfig(url, storefront, gateway, gatewayQuery, user, password);
 	}
-	
-	
 }
