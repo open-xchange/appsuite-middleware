@@ -96,7 +96,8 @@ public class ImageTransformationsImpl implements ImageTransformations {
     private final InputStream sourceImageStream;
     private final List<ImageTransformation> transformations;
     private BufferedImage sourceImage;
-    private Metadata metadata;    
+    private Metadata metadata;
+    private boolean compress;
     
     private ImageTransformationsImpl(BufferedImage sourceImage, InputStream sourceImageStream) {
         super();
@@ -143,13 +144,24 @@ public class ImageTransformationsImpl implements ImageTransformations {
     }
 
     @Override
+    public ImageTransformations compress() {
+        this.compress = true;
+        return this;
+    }
+
+    @Override
     public BufferedImage getImage() throws IOException {
-        return getImage(null);
+        if (false == needsTransformation(null) && null != sourceImage) {
+            return sourceImage;
+        } else {
+            return getImage(null);
+        }
     }
 
     @Override
     public byte[] getBytes(String formatName) throws IOException {
-        return write(getImage(formatName), getImageFormat(formatName));
+        String imageFormat = getImageFormat(formatName);
+        return write(getImage(imageFormat), imageFormat);
     }
 
     @Override
@@ -238,12 +250,12 @@ public class ImageTransformationsImpl implements ImageTransformations {
      * @return The image data
      * @throws IOException
      */
-    private static byte[] write(BufferedImage image, String formatName) throws IOException {
+    private byte[] write(BufferedImage image, String formatName) throws IOException {
         UnsynchronizedByteArrayOutputStream outputStream = null;
         try {
             outputStream = new UnsynchronizedByteArrayOutputStream(8192);
-            if ("jpeg".equalsIgnoreCase(formatName) || "jpg".equalsIgnoreCase(formatName)) {
-                writeJPEG(image, formatName, outputStream);
+            if (needsCompression(formatName)) {
+                writeCompressed(image, formatName, outputStream);
             } else {
                 write(image, formatName, outputStream);            
             }
@@ -253,13 +265,17 @@ public class ImageTransformationsImpl implements ImageTransformations {
         }
     }
     
+    private boolean needsCompression(String formatName) {
+        return this.compress && null != formatName && "jpeg".equalsIgnoreCase(formatName) || "jpg".equalsIgnoreCase(formatName);        
+    }
+    
     private static void write(BufferedImage image, String formatName, OutputStream output) throws IOException {
         if (false == ImageIO.write(image, formatName, output)) {
             throw new IOException("no appropriate writer is found");
         }
     }
     
-    private static void writeJPEG(BufferedImage image, String formatName, OutputStream output) throws IOException {
+    private static void writeCompressed(BufferedImage image, String formatName, OutputStream output) throws IOException {
         ImageWriter writer = null;
         ImageOutputStream imageOutputStream = null;
         try {
@@ -272,7 +288,7 @@ public class ImageTransformationsImpl implements ImageTransformations {
             }
             writer = iter.next();
             ImageWriteParam iwp = writer.getDefaultWriteParam();
-            adjustJPEGWriteParams(iwp);
+            adjustCompressionParams(iwp);
             imageOutputStream = ImageIO.createImageOutputStream(output);
             writer.setOutput(imageOutputStream);
             IIOImage iioImage = new IIOImage(image, null, null);
@@ -288,12 +304,12 @@ public class ImageTransformationsImpl implements ImageTransformations {
     }
     
     /**
-     * Tries to adjust the default settings on the supplied image write parameters, ignoring any {@link UnsupportedOperationException}s
-     * that may occur. 
+     * Tries to adjust the default settings on the supplied image write parameters to apply compression, ignoring any 
+     * {@link UnsupportedOperationException}s that may occur. 
      * 
-     * @param parameters The parameters to adjust
+     * @param parameters The parameters to adjust for compression
      */
-    private static void adjustJPEGWriteParams(ImageWriteParam parameters) {
+    private static void adjustCompressionParams(ImageWriteParam parameters) {
         try {
             parameters.setCompressionMode(ImageWriteParam.MODE_EXPLICIT);
         } catch (UnsupportedOperationException e) {
@@ -353,27 +369,6 @@ public class ImageTransformationsImpl implements ImageTransformations {
         }
     }
     
-//    private BufferedImage read(InputStream inputStream, String formatName) throws IOException {
-//        Iterator<ImageReader> imageReadersByFormatName = ImageIO.getImageReadersByFormatName(formatName);
-//        ManagedFile managedFile = null;
-//        try {
-//            ManagedFileManagement mfm = ServerServiceRegistry.getInstance().getService(ManagedFileManagement.class);
-//            managedFile = mfm.createManagedFile(inputStream);
-//            try {
-//                metadata = ImageMetadataReader.readMetadata(new BufferedInputStream(managedFile.getInputStream()), false);
-//            } catch (ImageProcessingException e) {
-//                LOG.warn("error getting metadata", e);
-//            }
-//            return ImageIO.read(managedFile.getInputStream());
-//        } catch (OXException e) {
-//            throw new IOException("error accessing managed file", e);
-//        } finally {
-//            if (managedFile != null) {
-//                managedFile.delete();
-//            }
-//        }
-//    }
-//    
     /**
      * Extracts image information from the supplied metadata.
      * 

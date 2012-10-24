@@ -148,7 +148,7 @@ public class RotateTransformation implements ImageTransformation {
     @Override
     public boolean supports(String formatName) {
         return null != formatName && "jpeg".equalsIgnoreCase(formatName) || "jpg".equalsIgnoreCase(formatName) || 
-            "tiff".equalsIgnoreCase(formatName) || "pds".equalsIgnoreCase(formatName);
+            "tiff".equalsIgnoreCase(formatName) || "psd".equalsIgnoreCase(formatName);
     }
 
 }
