@@ -39,7 +39,7 @@ import com.openexchange.timer.TimerService;
 import com.openexchange.tools.strings.TimeSpanParser;
 
 /**
- * {@link HazelcastActivator} - The activator for Hazelcast bundle (registers a {@link HazelcastInstance} for ths JVM)
+ * {@link HazelcastActivator} - The activator for Hazelcast bundle (registers a {@link HazelcastInstance} for this JVM)
  * <p>
  * When should you add node?<br>
  * 1. You reached the limits of your CPU or RAM.<br>
