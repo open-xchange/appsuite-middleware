@@ -87,6 +87,8 @@ import javax.mail.internet.IDNA;
 import javax.mail.internet.InternetAddress;
 import org.apache.commons.codec.DecoderException;
 import org.apache.commons.codec.net.QuotedPrintableCodec;
+import com.openexchange.config.ConfigurationService;
+import com.openexchange.configuration.ConfigurationExceptionCodes;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.calendar.CalendarCollectionService;
 import com.openexchange.groupware.calendar.CalendarDataObject;
@@ -115,6 +117,7 @@ import com.openexchange.session.Session;
 import com.openexchange.tools.ImageTypeDetector;
 import com.openexchange.tools.TimeZoneUtils;
 import com.openexchange.tools.images.ImageTransformationService;
+import com.openexchange.tools.images.ScaleType;
 import com.openexchange.tools.io.IOUtils;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 import com.openexchange.tools.versit.Parameter;
@@ -1029,14 +1032,13 @@ public class OXContainerConverter {
      * 
      * @param source the source image
      * @param clipRect the clip rectangle from an 'X-ABCROP-RECTANGLE' property 
-     * @param imageFormat the target image format
+     * @param formatName the target image format
      * @return the cropped image
      * @throws IOException
      * @throws OXException 
      */
-    private static byte[] doABCrop(byte[] source, Rectangle clipRect, String imageFormat) throws IOException, OXException {
+    private static byte[] doABCrop(byte[] source, Rectangle clipRect, String formatName) throws IOException, OXException {
     	InputStream inputStream = null;
-    	ByteArrayOutputStream outputStream = null;
     	try {
     		/*
     		 * read source image
@@ -1047,21 +1049,59 @@ public class OXContainerConverter {
         	 * crop the image
         	 */
         	ImageTransformationService imageService = ServerServiceRegistry.getInstance().getService(ImageTransformationService.class, true);
-        	BufferedImage targetImage = imageService.transfom(sourceImage).crop(clipRect.x * -1, 
-        			clipRect.height + clipRect.y - sourceImage.getHeight(), clipRect.width, clipRect.height).getImage();
-    		/*
-    		 * write back to byte array
-    		 */    		
-    		outputStream = new ByteArrayOutputStream();
-    		ImageIO.write(targetImage, imageFormat, outputStream);
-    		outputStream.flush();
-    		return outputStream.toByteArray();
+        	return imageService.transfom(sourceImage).crop(clipRect.x * -1, 
+        			clipRect.height + clipRect.y - sourceImage.getHeight(), clipRect.width, clipRect.height).getBytes(formatName);
     	} finally {
     		Streams.close(inputStream);
-    		Streams.close(outputStream);
     	}
     }
     
+    /**
+     * Scales an image if needed to fit into the supplied rectangular area.
+     * 
+     * @param source The image data
+     * @param maxWidth The maximum target width
+     * @param maxHeight The maximum target height
+     * @param formatName The image format name
+     * @return The scaled image
+     * @throws IOException
+     * @throws OXException
+     */
+    private static byte[] scaleImage(byte[] source, int maxWidth, int maxHeight, String formatName) throws IOException, OXException {
+        ImageTransformationService imageService = ServerServiceRegistry.getInstance().getService(ImageTransformationService.class, true);
+        return imageService.transfom(source).scale(maxWidth, maxHeight, ScaleType.CONTAIN).getBytes(formatName);
+    }
+
+    /**
+     * Scales a contact image if configured via <code>com.openexchange.contact.scaleVCardImages</code>.
+     * 
+     * @param source The image data
+     * @param formatName The image format name
+     * @return The scaled image data, or the unchanged <code>source</code> if not configured
+     * @throws IOException
+     * @throws OXException
+     */
+    private static byte[] scaleImageIfNeeded(byte[] source, String formatName) throws IOException, OXException {
+        if (null != source) {
+            ConfigurationService configService = ServerServiceRegistry.getInstance().getService(ConfigurationService.class, true);
+            String value = configService.getProperty("com.openexchange.contact.scaleVCardImages", "");
+            if (null != value && 0 < value.length()) {
+                int idx = value.indexOf('x');
+                if (1 > idx) {
+                    throw ConfigurationExceptionCodes.INVALID_CONFIGURATION.create(value);    
+                }
+                try {
+                    int maxWidth = Integer.parseInt(value.substring(0, idx));
+                    int maxHeight = Integer.parseInt(value.substring(idx + 1));
+                    return scaleImage(source, maxWidth, maxHeight, formatName);
+                } catch (NumberFormatException e) {
+                    throw ConfigurationExceptionCodes.INVALID_CONFIGURATION.create(e, value);
+                }
+            }
+        } 
+        return source;
+    }
+
     /**
      * Open a new {@link URLConnection URL connection} to specified parameter's value which indicates to be an URI/URL. The image's data and
      * its MIME type is then read from opened connection and put into given {@link Contact contact container}.
@@ -1703,7 +1743,7 @@ public class OXContainerConverter {
             addProperty(object, P_OPEN_XCHANGE_CTYPE, CTYPE_CONTACT);
             // PHOTO
             if (contact.getImage1() != null) {
-                final byte[] imageData = contact.getImage1();
+                byte[] imageData = contact.getImage1();
                 // First try as URI
                 try {
                     addProperty(object, "PHOTO", "VALUE", new String[] { "URI" }, new URI(new String(imageData, Charsets.ISO_8859_1)));
@@ -1724,6 +1764,13 @@ public class OXContainerConverter {
                             param = mimeType.toUpperCase();
                         }
                         type.addValue(new ParameterValue(param));
+                    }
+                    try {
+                        imageData = 1 == 1 ? scaleImageIfNeeded(imageData, contact.getImageContentType()) : imageData;
+                    } catch (IOException x) {
+                        LOG.error("error scaling image, falling back to unscaled image.", x);
+                    } catch (OXException x) {
+                        LOG.error("error scaling image, falling back to unscaled image.", x);
                     }
                     /*
                      * Add image data as it is since ValueDefinition#write(FoldingWriter fw, Property property)) applies proper encoding
