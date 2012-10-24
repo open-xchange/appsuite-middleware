@@ -1421,9 +1421,6 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
                                     np[a].setIsModified(true);
                                     if (!np[a].containsConfirm()) {
                                         np[a].setConfirm(op[bs].getConfirm());
-                                    } else {
-                                        np[a].setConfirm(CalendarObject.NONE);
-                                        np[a].setConfirmMessage(null);
                                     }
                                 }
                                 if (!np[a].containsConfirmMessage()) {

@@ -62,8 +62,8 @@ import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.attach.index.Attachment;
+import com.openexchange.index.AccountFolders;
 import com.openexchange.index.IndexAccess;
-import com.openexchange.index.IndexConstants;
 import com.openexchange.index.IndexDocument;
 import com.openexchange.index.IndexFacadeService;
 import com.openexchange.index.IndexResult;
@@ -125,11 +125,10 @@ public class MailFolderJob extends AbstractMailJob {
             MailAccess<? extends IMailFolderStorage,? extends IMailMessageStorage> mailAccess = mailService.getMailAccess(fakeSession, info.accountId);        
             try {
                 mailAccess.connect();
-                Map<String, Object> params = new HashMap<String, Object>();
-                params.put(IndexConstants.ACCOUNT, String.valueOf(info.accountId));
-                Builder queryBuilder = new Builder(params);
+                AccountFolders accountFolders = new AccountFolders(String.valueOf(info.accountId), Collections.singleton(info.folder));
+                Builder queryBuilder = new Builder();
                 QueryParameters mailAllQuery = queryBuilder.setHandler(SearchHandler.ALL_REQUEST)
-                    .setFolders(Collections.singleton(info.folder))
+                    .setAccountFolders(Collections.singleton(accountFolders))
                     .setSortField(MailIndexField.RECEIVED_DATE)
                     .setOrder(Order.DESC)
                     .build();
@@ -172,12 +171,10 @@ public class MailFolderJob extends AbstractMailJob {
                     
                     IndexFolderManager.deleteFolderEntry(info.contextId, info.userId, Types.EMAIL, String.valueOf(info.accountId), info.folder);
                     mailIndex.deleteByQuery(mailAllQuery);
-                    Map<String, Object> attachmentAllParams = new HashMap<String, Object>();
-                    params.put(IndexConstants.MODULE, new Integer(Types.EMAIL));
-                    params.put(IndexConstants.ACCOUNT, Integer.toString(info.accountId));                
-                    QueryParameters attachmentAllQuery = new Builder(attachmentAllParams)
+                    QueryParameters attachmentAllQuery = new Builder()
                         .setHandler(SearchHandler.ALL_REQUEST)
-                        .setFolders(Collections.singleton(info.folder))
+                        .setAccountFolders(Collections.singleton(accountFolders))
+                        .setModule(Types.EMAIL)
                         .build();
                     attachmentIndex.deleteByQuery(attachmentAllQuery);                
                 }
