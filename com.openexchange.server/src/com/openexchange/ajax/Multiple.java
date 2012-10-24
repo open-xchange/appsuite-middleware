@@ -239,6 +239,19 @@ public class Multiple extends SessionServlet {
                 }
                 moduleCandidate.append('/');
             }
+            if (MODULE_MAIL.equals(module)) {
+                if (action.equalsIgnoreCase(AJAXServlet.ACTION_UPDATE)) {
+                    if (MailRequest.isMove(jsonObj)) {
+                        handles = false;
+                    } else if (MailRequest.isStoreFlags(jsonObj)) {
+                        handles = false;
+                    } else if (MailRequest.isColorLabel(jsonObj)) {
+                        handles = false;
+                    }
+                } else if (action.equalsIgnoreCase(AJAXServlet.ACTION_COPY)) {
+                    handles = false;
+                }
+            }
             if (handles) {
                 final AJAXRequestData request = MultipleAdapter.parse(moduleCandidate.toString(), module.substring(moduleCandidate.length()), action, jsonObj, session, Tools.considerSecure(req));
                 jsonWriter.object();
