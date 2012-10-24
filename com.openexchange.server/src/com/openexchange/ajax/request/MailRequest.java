@@ -245,15 +245,15 @@ public final class MailRequest {
         }
     }
 
-    private static boolean isMove(final JSONObject jsonObject) throws JSONException {
+    public static boolean isMove(final JSONObject jsonObject) throws JSONException {
         return jsonObject.has(ResponseFields.DATA) && jsonObject.getJSONObject(ResponseFields.DATA).has(FolderChildFields.FOLDER_ID);
     }
 
-    private static boolean isStoreFlags(final JSONObject jsonObject) throws JSONException {
+    public static boolean isStoreFlags(final JSONObject jsonObject) throws JSONException {
         return jsonObject.has(ResponseFields.DATA) && jsonObject.getJSONObject(ResponseFields.DATA).has(MailJSONField.FLAGS.getKey());
     }
 
-    private static boolean isColorLabel(final JSONObject jsonObject) throws JSONException {
+    public static boolean isColorLabel(final JSONObject jsonObject) throws JSONException {
         return jsonObject.has(ResponseFields.DATA) && jsonObject.getJSONObject(ResponseFields.DATA).has(CommonFields.COLORLABEL);
     }
 
