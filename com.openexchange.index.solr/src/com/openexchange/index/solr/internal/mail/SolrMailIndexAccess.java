@@ -62,8 +62,8 @@ import org.apache.solr.common.SolrInputDocument;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.Types;
+import com.openexchange.index.AccountFolders;
 import com.openexchange.index.FacetParameters;
-import com.openexchange.index.IndexConstants;
 import com.openexchange.index.IndexDocument;
 import com.openexchange.index.IndexField;
 import com.openexchange.index.IndexResult;
@@ -74,6 +74,7 @@ import com.openexchange.index.SearchHandler;
 import com.openexchange.index.solr.internal.AbstractSolrIndexAccess;
 import com.openexchange.index.solr.internal.Services;
 import com.openexchange.index.solr.internal.SolrIndexResult;
+import com.openexchange.index.solr.internal.attachments.SolrAttachmentField;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.index.MailIndexField;
 import com.openexchange.mail.index.MailUUID;
@@ -282,12 +283,12 @@ public class SolrMailIndexAccess extends AbstractSolrIndexAccess<MailMessage> {
             
             case GET_REQUEST:
             {
-                String[] ids = getStringArrayParameter(parameters, IndexConstants.IDS);
+                Set<String> ids = parameters.getIndexIds();
                 if (ids == null) {
-                    throw new IllegalArgumentException("Parameter `ids` must not be null!");
+                    throw new IllegalArgumentException("Parameter `indexIds` must not be null!");
                 }
                 
-                solrQuery = new SolrQuery(stringArrayToQuery(ids));
+                solrQuery = new SolrQuery(stringSetToQuery(ids));
                 solrQuery.setQueryType(config.getProperty(SolrProperties.GET_HANDLER));
                 addFilterQueries(parameters, solrQuery);
                 break;
@@ -315,13 +316,21 @@ public class SolrMailIndexAccess extends AbstractSolrIndexAccess<MailMessage> {
     }
     
     private void addFilterQueries(QueryParameters parameters, SolrQuery solrQuery) {
-        String account = getStringParameter(parameters, IndexConstants.ACCOUNT);
-        if (account == null) {
-            Integer intAccount = getIntParameter(parameters, IndexConstants.ACCOUNT);
-            account = intAccount == null ? null : String.valueOf(intAccount);
+        Set<AccountFolders> all = parameters.getAccountFolders();
+        Set<String> queries = new HashSet<String>();
+        if (all != null) {
+            for (AccountFolders accountFolders : all) {
+                String account = accountFolders.getAccount();
+                Set<String> folders = accountFolders.getFolders();
+                if (folders.isEmpty()) {
+                    queries.add(buildQueryString(SolrMailField.ACCOUNT.solrName(), account));
+                } else {
+                    queries.add(catenateQueriesWithAnd(buildQueryString(SolrAttachmentField.ACCOUNT.solrName(), account), buildQueryStringWithOr(SolrMailField.FULL_NAME.solrName(), folders)));
+                }
+            }
         }
-        addFilterQueryIfNotNull(solrQuery, buildQueryString(SolrMailField.ACCOUNT.solrName(), account));
-        addFilterQueryIfNotNull(solrQuery, buildQueryStringWithOr(SolrMailField.FULL_NAME.solrName(), parameters.getFolders()));        
+        
+        addFilterQueryIfNotNull(solrQuery, catenateQueriesWithOr(queries.toArray(new String[queries.size()])));   
     }
     
     private SolrInputDocument convertToDocument(IndexDocument<MailMessage> document) throws OXException {

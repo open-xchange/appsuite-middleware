@@ -49,8 +49,6 @@
 
 package com.openexchange.index.solr;
 
-import java.util.HashMap;
-import java.util.Map;
 import junit.framework.TestCase;
 import com.openexchange.groupware.Types;
 import com.openexchange.index.IndexAccess;
@@ -100,9 +98,7 @@ public class SolrIndexFacadeTest extends TestCase {
             final IndexDocument<MailMessage> document = new StandardIndexDocument<MailMessage>(message);
             indexAccess.addContent(document, true);
             final FromTerm fromTerm = new FromTerm("Alice");
-            final Map<String, Object> params = new HashMap<String, Object>();
-//            params.put("accountId", 0);
-            final QueryParameters qp = new QueryParameters.Builder(params).setHandler(SearchHandler.CUSTOM).setSearchTerm(fromTerm).build();
+            final QueryParameters qp = new QueryParameters.Builder().setHandler(SearchHandler.CUSTOM).setSearchTerm(fromTerm).build();
             final IndexResult<MailMessage> result = indexAccess.query(qp, null);
             facade.releaseIndexAccess(indexAccess);
         } catch (final Exception e) {

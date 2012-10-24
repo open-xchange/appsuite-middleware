@@ -49,7 +49,6 @@
 
 package com.openexchange.index;
 
-import java.util.Map;
 import java.util.Set;
 
 /**
@@ -70,39 +69,52 @@ public final class QueryParameters {
 
         int off;
         int len;
-        Set<String> folders;
+//        Set<String> folders;
         IndexField sortField;
         Order order;
-        Map<String, Object> parameters;
+//        Map<String, Object> parameters;
         SearchHandler handler;
         Object searchTerm;
+        Set<AccountFolders> accountFolders;
+        int module;
+        Set<String> indexIds;
 
         /**
          * Initializes a new builder.
          */
-        public Builder(final Object searchTerm) {
+//        public Builder(final Object searchTerm) {
+//            super();
+//            init();
+//            this.searchTerm = searchTerm;
+//        }
+        
+        public Builder() {
             super();
             init();
-            this.searchTerm = searchTerm;
         }
         
         private void init() {
             off = 0;
             len = Integer.MAX_VALUE;
-            folders = null;
+//            folders = null;
             sortField = null;
             order = null;
+            handler = null;
+            searchTerm = null;
+            accountFolders = null;
+            module = -1;
+            indexIds = null;
         }
 
         /**
          * Initializes a new builder.
          */
-        public Builder(final Map<String, Object> parameters) {
-            super();
-            off = 0;
-            len = Integer.MAX_VALUE;
-            this.parameters = parameters;
-        }
+//        public Builder(final Map<String, Object> parameters) {
+//            super();
+//            off = 0;
+//            len = Integer.MAX_VALUE;
+//            this.parameters = parameters;
+//        }
 
         public Builder setSearchTerm(final Object searchTerm) {
             this.searchTerm = searchTerm;
@@ -118,21 +130,31 @@ public final class QueryParameters {
             this.len = len;
             return this;
         }
-
-        public Builder setParameters(final Map<String, Object> parameters) {
-            this.parameters = parameters;
+        
+        public Builder setModule(final int module) {
+            this.module = module;
             return this;
         }
+        
+        public Builder setIndexIds(final Set<String> indexIds) {
+            this.indexIds = indexIds;
+            return this;
+        }
+
+//        public Builder setParameters(final Map<String, Object> parameters) {
+//            this.parameters = parameters;
+//            return this;
+//        }
 
         public Builder setHandler(final SearchHandler handler) {
             this.handler = handler;
             return this;
         }
         
-        public Builder setFolders(final Set<String> folders) {
-            this.folders = folders;
-            return this;
-        }
+//        public Builder setFolders(final Set<String> folders) {
+//            this.folders = folders;
+//            return this;
+//        }
         
         public Builder setSortField(final IndexField sortField) {
             this.sortField = sortField;
@@ -141,6 +163,15 @@ public final class QueryParameters {
         
         public Builder setOrder(final Order order) {
             this.order = order;
+            return this;
+        }
+        
+        /**
+         * Sets accounts and corresponding folders to filter search results.
+         * You can filter by multiple accounts and multiple folders per account.
+         */
+        public Builder setAccountFolders(final Set<AccountFolders> accountFolders) {
+            this.accountFolders = accountFolders;
             return this;
         }
 
@@ -153,17 +184,24 @@ public final class QueryParameters {
 
     private final int len;
 
-    private final Map<String, Object> parameters;
+//    private final Map<String, Object> parameters;
 
     private final SearchHandler handler;
 
     private final Object searchTerm;
 
-    private final Set<String> folders;
+//    private final Set<String> folders;
     
     private final IndexField sortField;
     
     private final Order order;
+    
+    private final Set<AccountFolders> accountFolders;
+    
+    private final int module;
+    
+    private final Set<String> indexIds;
+    
 
     /**
      * Initializes a new {@link QueryParameters}.
@@ -173,11 +211,14 @@ public final class QueryParameters {
         handler = builder.handler;
         len = builder.len;
         off = builder.off;
-        parameters = builder.parameters;
+//        parameters = builder.parameters;
         searchTerm = builder.searchTerm;
-        folders = builder.folders;
+//        folders = builder.folders;
         sortField = builder.sortField;
         order = builder.order;
+        accountFolders = builder.accountFolders;
+        module = builder.module;
+        indexIds = builder.indexIds;
     }
 
     /**
@@ -207,23 +248,31 @@ public final class QueryParameters {
         return len;
     }
     
-    /**
-     * Gets the folder or <code>null</code> if not set.
-     * 
-     * @return The folder
-     */
-    public Set<String> getFolders() {
-        return folders;
+    public int getModule() {
+        return module;
     }
+    
+    public Set<String> getIndexIds() {
+        return indexIds;
+    }
+    
+//    /**
+//     * Gets the folder or <code>null</code> if not set.
+//     * 
+//     * @return The folder
+//     */
+//    public Set<String> getFolders() {
+//        return folders;
+//    }
 
-    /**
-     * Gets the parameters.
-     * 
-     * @return The parameters
-     */
-    public Map<String, Object> getParameters() {
-        return parameters;
-    }
+//    /**
+//     * Gets the parameters.
+//     * 
+//     * @return The parameters
+//     */
+//    public Map<String, Object> getParameters() {
+//        return parameters;
+//    }
 
     /**
      * Gets the handler.
@@ -250,6 +299,14 @@ public final class QueryParameters {
      */
     public Order getOrder() {
         return order;
+    }
+    
+    /**
+     * Gets the set of accounts and folders.
+     * @return The account folders
+     */
+    public Set<AccountFolders> getAccountFolders() {
+        return accountFolders;
     }
 
 }

@@ -63,8 +63,8 @@ import com.openexchange.groupware.Types;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.infostore.index.InfostoreIndexField;
 import com.openexchange.groupware.infostore.index.InfostoreUUID;
+import com.openexchange.index.AccountFolders;
 import com.openexchange.index.FacetParameters;
-import com.openexchange.index.IndexConstants;
 import com.openexchange.index.IndexDocument;
 import com.openexchange.index.IndexField;
 import com.openexchange.index.IndexResult;
@@ -229,10 +229,6 @@ public class SolrInfostoreIndexAccess extends AbstractSolrIndexAccess<DocumentMe
             
             case ALL_REQUEST:
             {
-                if (parameters.getFolders() == null) {
-                    throw new IllegalArgumentException("Parameter `folders` must not be null!");
-                }
-                
                 solrQuery = new SolrQuery("*:*");
                 solrQuery.setQueryType(config.getProperty(SolrProperties.ALL_HANLDER));                
                 addFilterQueries(parameters, solrQuery);             
@@ -241,12 +237,12 @@ public class SolrInfostoreIndexAccess extends AbstractSolrIndexAccess<DocumentMe
             
             case GET_REQUEST:
             {                
-                String[] ids = getStringArrayParameter(parameters, IndexConstants.IDS);
+                Set<String> ids = parameters.getIndexIds();
                 if (ids == null) {
-                    throw new IllegalArgumentException("Parameter `ids` must not be null!");
+                    throw new IllegalArgumentException("Parameter `indexIds` must not be null!");
                 }
                 
-                solrQuery = new SolrQuery(stringArrayToQuery(ids));
+                solrQuery = new SolrQuery(stringSetToQuery(ids));
                 solrQuery.setQueryType(config.getProperty(SolrProperties.GET_HANDLER));
                 addFilterQueries(parameters, solrQuery);
                 break;
@@ -260,7 +256,18 @@ public class SolrInfostoreIndexAccess extends AbstractSolrIndexAccess<DocumentMe
     }
     
     private void addFilterQueries(QueryParameters parameters, SolrQuery solrQuery) {
-        addFilterQueryIfNotNull(solrQuery, buildQueryStringWithOr(SolrAttachmentField.FOLDER.solrName(), parameters.getFolders()));
+        Set<AccountFolders> all = parameters.getAccountFolders();
+        Set<String> queries = new HashSet<String>();
+        if (all != null) {
+            for (AccountFolders accountFolders : all) {
+                Set<String> folders = accountFolders.getFolders();
+                if (!folders.isEmpty()) {
+                    queries.add(buildQueryStringWithOr(SolrInfostoreField.FOLDER.solrName(), folders));
+                }
+            }
+        }
+        
+        addFilterQueryIfNotNull(solrQuery, catenateQueriesWithOr(queries.toArray(new String[queries.size()])));
     }
     
     private void setSortAndOrder(QueryParameters parameters, SolrQuery solrQuery) {

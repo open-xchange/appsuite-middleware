@@ -50,13 +50,11 @@
 package com.openexchange.mail.smal.impl;
 
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import org.apache.commons.logging.Log;
 import com.openexchange.exception.OXException;
+import com.openexchange.index.AccountFolders;
 import com.openexchange.index.IndexAccess;
-import com.openexchange.index.IndexConstants;
 import com.openexchange.index.IndexDocument;
 import com.openexchange.index.IndexResult;
 import com.openexchange.index.QueryParameters;
@@ -201,12 +199,9 @@ public final class SmalMessageStorage extends AbstractSMALStorage implements IMa
                 return messageStorage.searchMessages(folder, indexRange, sortField, order, searchTerm, fields);
             }
             
-            final Map<String, Object> params = new HashMap<String, Object>(1);
-            params.put(IndexConstants.ACCOUNT, accountId);
-            final QueryParameters.Builder builder = new QueryParameters.Builder(params)
-                                                    .setOffset(0)
-                                                    .setLength(Integer.MAX_VALUE)
-                                                    .setFolders(Collections.singleton(folder));
+            final AccountFolders accountFolders = new AccountFolders(String.valueOf(accountId), Collections.singleton(folder));
+            final QueryParameters.Builder builder = new QueryParameters.Builder()
+                                                    .setAccountFolders(Collections.singleton(accountFolders));
             
             
             if (null != sortField) {
