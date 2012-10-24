@@ -51,6 +51,7 @@ package com.openexchange.mail.json.osgi;
 
 import java.util.LinkedList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
 import javax.mail.internet.InternetAddress;
 import org.apache.commons.logging.Log;
 import org.json.JSONArray;
@@ -77,6 +78,7 @@ import com.openexchange.mail.json.MailActionFactory;
 import com.openexchange.mail.json.converters.MailConverter;
 import com.openexchange.mail.json.converters.MailJSONConverter;
 import com.openexchange.server.ExceptionOnAbsenceServiceLookup;
+import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.servlet.OXJSONExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
@@ -89,6 +91,11 @@ import com.openexchange.tools.session.ServerSession;
 public final class MailJSONActivator extends AJAXModuleActivator {
 
     protected static final Log LOG = com.openexchange.log.Log.loggerFor(MailJSONActivator.class);
+
+    /**
+     * The {@link ServiceLookup} reference.
+     */
+    public static final AtomicReference<ServiceLookup> SERVICES = new AtomicReference<ServiceLookup>();
 
     /**
      * Initializes a new {@link MailJSONActivator}.
@@ -104,13 +111,21 @@ public final class MailJSONActivator extends AJAXModuleActivator {
 
     @Override
     protected void startBundle() throws Exception {
-        registerModule(new MailActionFactory(new ExceptionOnAbsenceServiceLookup(this)), "mail");
+        final ServiceLookup serviceLookup = new ExceptionOnAbsenceServiceLookup(this);
+        SERVICES.set(serviceLookup);
+        registerModule(new MailActionFactory(serviceLookup), "mail");
         final MailConverter converter = MailConverter.getInstance();
         registerService(ResultConverter.class, converter);
         registerService(ResultConverter.class, new MailJSONConverter(converter));
 
         final ContactField[] fields = new ContactField[] { ContactField.OBJECT_ID, ContactField.FOLDER_ID, ContactField.NUMBER_OF_IMAGES };
         registerService(AJAXResultDecorator.class, new DecoratorImpl(converter, fields));
+    }
+
+    @Override
+    protected void stopBundle() throws Exception {
+        super.stopBundle();
+        SERVICES.set(null);
     }
 
     private final class DecoratorImpl implements AJAXResultDecorator {
