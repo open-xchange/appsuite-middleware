@@ -155,7 +155,7 @@ public class QuartzIndexingJob implements Job {
     private void startUpIndex(JobInfo jobInfo) throws OXException {
         IndexFacadeService indexFacade = Services.getService(IndexFacadeService.class);
         IndexAccess<?> indexAccess = indexFacade.acquireIndexAccess(jobInfo.getModule(), jobInfo.userId, jobInfo.contextId);
-        QueryParameters queryParameters = new QueryParameters.Builder("Something").setLength(0).setHandler(SearchHandler.SIMPLE).build();
+        QueryParameters queryParameters = new QueryParameters.Builder().setLength(0).setHandler(SearchHandler.SIMPLE).setSearchTerm("something").build();
         indexAccess.query(queryParameters, null);
         indexFacade.releaseIndexAccess(indexAccess);
     }

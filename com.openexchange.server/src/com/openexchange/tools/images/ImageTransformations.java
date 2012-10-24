@@ -92,6 +92,13 @@ public interface ImageTransformations {
     ImageTransformations crop(int x, int y, int width, int height);
     
     /**
+     * Adds a compression transformation, leading to the image being written out compressed depending on the chosen output format.
+     * 
+     * @return A self reference
+     */
+    ImageTransformations compress();
+    
+    /**
      * Applies all transformations and returns the result as image.
      * 
      * @return The resulting image

@@ -262,7 +262,7 @@ public class FileResponseRenderer implements ResponseRenderer {
         /*
          * transform
          */
-        InputStream transformed = transformations.getInputStream(file.getContentType());
+        InputStream transformed = transformations.compress().getInputStream(file.getContentType());
         if (null == transformed) {
             LOG.warn("Got no resulting input stream from transformation, falling back to original input");
             return file;

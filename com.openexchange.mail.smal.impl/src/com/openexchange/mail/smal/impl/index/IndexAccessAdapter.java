@@ -49,20 +49,21 @@
 
 package com.openexchange.mail.smal.impl.index;
 
+import static com.openexchange.mail.index.MailUtility.releaseAccess;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import org.apache.commons.logging.Log;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.Types;
+import com.openexchange.index.AccountFolders;
 import com.openexchange.index.IndexAccess;
 import com.openexchange.index.IndexFacadeService;
 import com.openexchange.index.IndexResult;
 import com.openexchange.index.QueryParameters;
+import com.openexchange.index.QueryParameters.Order;
 import com.openexchange.index.SearchHandler;
 import com.openexchange.index.StandardIndexDocument;
 import com.openexchange.mail.MailExceptionCode;
@@ -75,7 +76,6 @@ import com.openexchange.mail.index.MailUUID;
 import com.openexchange.mail.smal.impl.SmalServiceLookup;
 import com.openexchange.service.indexing.IndexingService;
 import com.openexchange.session.Session;
-import static com.openexchange.mail.index.MailUtility.releaseAccess;;
 
 /**
  * {@link IndexAccessAdapter}
@@ -130,7 +130,7 @@ public final class IndexAccessAdapter {
         }
     }
 
-    public void delete(final int accountId, final String fullName, final String[] optMailIds, final Session session) throws OXException, InterruptedException {
+    public void delete(final int accountId, final String folder, final String[] optMailIds, final Session session) throws OXException, InterruptedException {
         final IndexFacadeService facade = SmalServiceLookup.getServiceStatic(IndexFacadeService.class);
         if (null == facade) {
             // Index service missing
@@ -145,20 +145,19 @@ public final class IndexAccessAdapter {
              * Delete whole folder?
              */
             if (null == optMailIds || 0 == optMailIds.length) {
-                final Map<String, Object> params = new HashMap<String, Object>();
-                params.put("accountId", accountId);
-                final QueryParameters query = new QueryParameters.Builder(params)
-                .setHandler(SearchHandler.ALL_REQUEST)
-                .setFolders(Collections.singleton(fullName)).build();
+                final AccountFolders accountFolders = new AccountFolders(String.valueOf(accountId), Collections.singleton(folder));
+                final QueryParameters.Builder builder = new QueryParameters.Builder()
+                                                        .setAccountFolders(Collections.singleton(accountFolders))
+                                                        .setHandler(SearchHandler.ALL_REQUEST);
                 
-                indexAccess.deleteByQuery(query);
+                indexAccess.deleteByQuery(builder.build());
                 return;
             }
             /*
              * Delete by identifier
              */
             for (final String id : optMailIds) {
-                final MailUUID indexId = MailUUID.newUUID(contextId, userId, accountId, fullName, id);
+                final MailUUID indexId = MailUUID.newUUID(contextId, userId, accountId, folder, id);
                 indexAccess.deleteById(indexId.toString());
             }
         } finally {
@@ -166,13 +165,15 @@ public final class IndexAccessAdapter {
         }
     }
 
-    private boolean exists(final int userId, final int contextId, final int accountId, final String fullName, final IndexAccess<MailMessage> indexAccess) throws OXException, InterruptedException {
-        // Query parameters
-        final Map<String, Object> params = new HashMap<String, Object>();
-        params.put("accountId", accountId);
-        final QueryParameters qp =
-            new QueryParameters.Builder(params).setLength(1).setOffset(0).setHandler(
-                SearchHandler.ALL_REQUEST).setFolders(Collections.singleton(fullName)).build();
+    private boolean exists(final int userId, final int contextId, final int accountId, final String folder, final IndexAccess<MailMessage> indexAccess) throws OXException, InterruptedException {
+        final AccountFolders accountFolders = new AccountFolders(String.valueOf(accountId), Collections.singleton(folder));
+        final QueryParameters qp = new QueryParameters.Builder()
+                            .setLength(1)
+                            .setOffset(0)
+                            .setHandler(SearchHandler.ALL_REQUEST)
+                            .setAccountFolders(Collections.singleton(accountFolders))
+                            .build();
+        
         final Set<MailIndexField> fields = new HashSet<MailIndexField>(1);
         fields.add(MailIndexField.ID);
         return indexAccess.query(qp, fields).getNumFound() > 0L;
@@ -203,7 +204,7 @@ public final class IndexAccessAdapter {
         }
     }
 
-    public List<MailMessage> getMessages(final int accountId, final String fullName, final Session session, final MailSortField sortField, final OrderDirection order) throws OXException, InterruptedException {
+    public List<MailMessage> getMessages(final int accountId, final String folder, final Session session, final MailSortField sortField, final OrderDirection order) throws OXException, InterruptedException {
         final IndexFacadeService facade = SmalServiceLookup.getServiceStatic(IndexFacadeService.class);
         if (null == facade) {
             // Index service missing
@@ -218,26 +219,31 @@ public final class IndexAccessAdapter {
              */
             final int contextId = session.getContextId();
             final int userId = session.getUserId();
-            if ((accountId >= 0) && (null != fullName) && !exists(userId, contextId, accountId, fullName, indexAccess)) {
-                throw MailExceptionCode.FOLDER_NOT_FOUND.create(fullName);
+            if ((accountId >= 0) && (null != folder) && !exists(userId, contextId, accountId, folder, indexAccess)) {
+                throw MailExceptionCode.FOLDER_NOT_FOUND.create(folder);
             }
 
-            final Map<String, Object> params = new HashMap<String, Object>();
-            params.put("accountId", accountId);
-            if (null != sortField) {
+            MailIndexField indexSortField = null;
+            if (sortField != null) {
                 final MailField field = MailField.getField(sortField.getField());
-                final MailIndexField indexSortField = MailIndexField.getFor(field);
-                if (indexSortField != null) {
-                    params.put("sort", indexSortField);
-                }
-
-                if (order != null) {
-                    params.put("order", OrderDirection.DESC.equals(order) ? "desc" : "asc");
-                }
+                indexSortField = MailIndexField.getFor(field);
             }
-            final QueryParameters query =
-                new QueryParameters.Builder(params).setHandler(SearchHandler.ALL_REQUEST).setFolders(Collections.singleton(fullName)).build();
-            final IndexResult<MailMessage> result = indexAccess.query(query, null);
+            
+            Order indexOrder = null;
+            if (order != null) {
+                indexOrder = OrderDirection.DESC.equals(order) ? Order.DESC : Order.ASC;
+            }
+            final AccountFolders accountFolders = new AccountFolders(String.valueOf(accountId), Collections.singleton(folder));
+            final QueryParameters.Builder builder = new QueryParameters.Builder()
+                                            .setHandler(SearchHandler.ALL_REQUEST)
+                                            .setAccountFolders(Collections.singleton(accountFolders))
+                                            .setSortField(indexSortField)
+                                            .setOrder(indexOrder);
+            
+            
+                                            
+                                            
+            final IndexResult<MailMessage> result = indexAccess.query(builder.build(), null);
             final List<MailMessage> mails = new ArrayList<MailMessage>();
             mails.addAll(IndexDocumentHelper.messagesFrom(result.getResults()));
 

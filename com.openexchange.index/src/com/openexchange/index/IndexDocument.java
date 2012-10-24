@@ -49,7 +49,6 @@
 
 package com.openexchange.index;
 
-import java.util.Map;
 
 /**
  * {@link IndexDocument} - Represents an indexed document.
@@ -64,6 +63,4 @@ public interface IndexDocument<V> {
      * @return The associated object
      */
     public V getObject();
-    
-    public Map<String, Object> getProperties();
 }

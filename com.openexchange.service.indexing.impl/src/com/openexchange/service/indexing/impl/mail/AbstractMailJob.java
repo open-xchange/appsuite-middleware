@@ -51,9 +51,9 @@ package com.openexchange.service.indexing.impl.mail;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
+import java.util.Set;
 import org.apache.commons.logging.Log;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.Types;
@@ -63,8 +63,8 @@ import com.openexchange.groupware.attach.index.ObjectIdTerm;
 import com.openexchange.groupware.attach.index.SearchTerm;
 import com.openexchange.groupware.tools.chunk.ChunkPerformer;
 import com.openexchange.groupware.tools.chunk.Performable;
+import com.openexchange.index.AccountFolders;
 import com.openexchange.index.IndexAccess;
-import com.openexchange.index.IndexConstants;
 import com.openexchange.index.IndexDocument;
 import com.openexchange.index.IndexFacadeService;
 import com.openexchange.index.QueryParameters;
@@ -187,29 +187,27 @@ public abstract class AbstractMailJob implements IndexingJob {
                 
                 List<String> subList = idsToDelete.subList(off, len);
                 SearchTerm<?>[] idTerms = new SearchTerm<?>[subList.size()];
-                String[] mailUuids = new String[subList.size()];
+                Set<String> mailUuids = new HashSet<String>(subList.size());
                 int i = 0;        
                 for (String id : subList) {
-                    mailUuids[i] = MailUUID.newUUID(info.contextId, info.userId, info.accountId, info.folder, id).toString();
+                    mailUuids.add(MailUUID.newUUID(info.contextId, info.userId, info.accountId, info.folder, id).toString());
                     idTerms[i] = new ObjectIdTerm(id);
                     ++i;
                 }                    
                 
-                Map<String, Object> deleteMailsParams = new HashMap<String, Object>();
-                deleteMailsParams.put(IndexConstants.IDS, mailUuids);
-                QueryParameters deleteMailsQuery = new QueryParameters.Builder(deleteMailsParams)
+                QueryParameters deleteMailsQuery = new QueryParameters.Builder()
                     .setHandler(SearchHandler.GET_REQUEST)
+                    .setIndexIds(mailUuids)
                     .build();
                 mailIndex.deleteByQuery(deleteMailsQuery);
                 
-                SearchTerm<?> orTerm = new ORTerm(idTerms);
-                Map<String, Object> deleteAttachmentsParams = new HashMap<String, Object>();
-                deleteAttachmentsParams.put(IndexConstants.MODULE, new Integer(Types.EMAIL));
-                deleteAttachmentsParams.put(IndexConstants.ACCOUNT, String.valueOf(info.accountId));
-                QueryParameters deleteAttachmentsQuery = new QueryParameters.Builder(deleteAttachmentsParams)
+                SearchTerm<?> orTerm = new ORTerm(idTerms);                
+                AccountFolders accountFolders = new AccountFolders(String.valueOf(info.accountId), Collections.singleton(String.valueOf(info.folder)));
+                QueryParameters deleteAttachmentsQuery = new QueryParameters.Builder()
                     .setHandler(SearchHandler.CUSTOM)
                     .setSearchTerm(orTerm)
-                    .setFolders(Collections.singleton(info.folder))
+                    .setModule(Types.EMAIL)
+                    .setAccountFolders(Collections.singleton(accountFolders))
                     .build();
                 attachmentIndex.deleteByQuery(deleteAttachmentsQuery);
                 

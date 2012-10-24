@@ -49,12 +49,14 @@
 
 package com.openexchange.index.solr;
 
+import java.util.Collections;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.Map;
 import junit.framework.TestCase;
 import com.openexchange.groupware.infostore.DocumentMetadata;
+import com.openexchange.index.AccountFolders;
 import com.openexchange.index.IndexConstants;
 import com.openexchange.index.IndexResult;
 import com.openexchange.index.QueryParameters;
@@ -100,13 +102,11 @@ public class SolrFilestoreIndexAccessTest extends TestCase {
         file.setVersion(26);
         file.setVersionComment("Version comment...");
         
-        Map<String, Object> parameters = new HashMap<String, Object>();
-        parameters.put(IndexConstants.ACCOUNT, "sada689");
         StandardIndexDocument<DocumentMetadata> document = new StandardIndexDocument<DocumentMetadata>(file);
-        document.setProperties(parameters);
+//        document.setProperties(parameters);
         indexAccess.addEnvelopeData(document);
         
-        QueryParameters query = new QueryParameters.Builder(parameters).setHandler(SearchHandler.ALL_REQUEST).build();
+        QueryParameters query = new QueryParameters.Builder().setHandler(SearchHandler.ALL_REQUEST).setAccountFolders(Collections.singleton(new AccountFolders("sada689"))).build();
         IndexResult<DocumentMetadata> result = indexAccess.query(query, null);
         assertTrue("Wrong result size", result.getNumFound() == 1);
         DocumentMetadata reloaded = result.getResults().get(0).getObject();

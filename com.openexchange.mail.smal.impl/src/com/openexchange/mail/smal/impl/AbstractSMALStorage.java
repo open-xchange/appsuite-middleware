@@ -64,6 +64,7 @@ import com.openexchange.mail.api.IMailMessageStorage;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mail.dataobjects.MailFolder;
+import com.openexchange.mail.smal.impl.index.UserWhitelist;
 import com.openexchange.mail.smal.impl.processor.DefaultProcessorStrategy;
 import com.openexchange.mail.smal.impl.processor.DoNothingProcessor;
 import com.openexchange.mail.smal.impl.processor.MailFolderInfo;
@@ -289,6 +290,10 @@ public abstract class AbstractSMALStorage {
      * @throws OXException
      */
     protected void submitFolderJob(String folder) throws OXException {
+        if (!UserWhitelist.isIndexingAllowed(session.getLogin())) {
+            return;
+        }
+        
         MailConfig config = delegateMailAccess.getMailConfig();                
         Builder builder = MailJobInfo.newBuilder(MailFolderJob.class)
             .login(config.getLogin())
