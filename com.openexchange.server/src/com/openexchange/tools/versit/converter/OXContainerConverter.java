@@ -1067,9 +1067,27 @@ public class OXContainerConverter {
      * @throws IOException
      * @throws OXException
      */
-    private static byte[] scaleImage(byte[] source, int maxWidth, int maxHeight, String formatName) throws IOException, OXException {
-        ImageTransformationService imageService = ServerServiceRegistry.getInstance().getService(ImageTransformationService.class, true);
-        return imageService.transfom(source).scale(maxWidth, maxHeight, ScaleType.CONTAIN).getBytes(formatName);
+    private static byte[] scaleImageIfNeeded(byte[] source, int maxWidth, int maxHeight, String formatName) throws IOException, OXException {
+        InputStream inputStream = null;
+        try {
+            /*
+             * read source image
+             */
+            inputStream = new ByteArrayInputStream(source);
+            BufferedImage sourceImage = ImageIO.read(inputStream);
+            /*
+             * scale the image if needed
+             */
+            if (sourceImage.getWidth() > maxWidth || sourceImage.getHeight() > maxHeight) {
+                ImageTransformationService imageService = ServerServiceRegistry.getInstance().getService(
+                    ImageTransformationService.class, true);
+                return imageService.transfom(sourceImage).scale(maxWidth, maxHeight, ScaleType.CONTAIN).getBytes(formatName);
+            } else {
+                return source;
+            }
+        } finally {
+            Streams.close(inputStream);
+        }
     }
 
     /**
@@ -1093,7 +1111,7 @@ public class OXContainerConverter {
                 try {
                     int maxWidth = Integer.parseInt(value.substring(0, idx));
                     int maxHeight = Integer.parseInt(value.substring(idx + 1));
-                    return scaleImage(source, maxWidth, maxHeight, formatName);
+                    return scaleImageIfNeeded(source, maxWidth, maxHeight, formatName);
                 } catch (NumberFormatException e) {
                     throw ConfigurationExceptionCodes.INVALID_CONFIGURATION.create(e, value);
                 }
