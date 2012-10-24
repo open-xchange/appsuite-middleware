@@ -57,10 +57,12 @@ import org.apache.commons.logging.LogFactory;
 import org.eclipse.osgi.framework.console.CommandProvider;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTracker;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.mdns.MDNSService;
 import com.openexchange.mdns.MDNSServiceInfo;
 import com.openexchange.mdns.internal.MDNSCommandProvider;
 import com.openexchange.mdns.internal.MDNSServiceImpl;
+import com.openexchange.mdns.internal.Services;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.osgi.SimpleRegistryListener;
 import com.openexchange.threadpool.AbstractTask;
@@ -89,7 +91,7 @@ public final class MDNSActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ThreadPoolService.class };
+        return new Class<?>[] { ThreadPoolService.class, ConfigurationService.class };
     }
 
     @Override
@@ -120,6 +122,12 @@ public final class MDNSActivator extends HousekeepingActivator {
     @Override
     protected void startBundle() throws Exception {
         final Log log = com.openexchange.log.Log.valueOf(LogFactory.getLog(MDNSActivator.class));
+        final ConfigurationService service = getService(ConfigurationService.class);
+        if (null != service && !service.getBoolProperty("com.openexchange.mdns.enabled", true)) {
+            log.info("Startup of bundle disabled: com.openexchange.mdns");
+            return;
+        }
+        Services.setServiceLookup(this);
         log.info("Starting bundle: com.openexchange.mdns");
         final Runnable starter = new Runnable() {
 
@@ -192,6 +200,7 @@ public final class MDNSActivator extends HousekeepingActivator {
                 mdnsService.close();
                 this.mdnsService = null;
             }
+            Services.setServiceLookup(null);
             super.stopBundle();
         } catch (final Exception e) {
             log.error("Stopping bundle failed: com.openexchange.mdns", e);
