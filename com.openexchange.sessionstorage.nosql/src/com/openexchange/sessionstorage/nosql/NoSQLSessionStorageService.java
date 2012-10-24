@@ -585,6 +585,30 @@ public class NoSQLSessionStorageService implements SessionStorageService {
         mutator.execute();
     }
 
+    @Override
+    public void cleanUp() {
+        long time = System.currentTimeMillis();
+        Mutator<String> mutator = HFactory.createMutator(keyspace, serializer);
+        RangeSlicesQuery<String, String, String> query = HFactory.createRangeSlicesQuery(keyspace, serializer, serializer, serializer);
+        query.setColumnFamily(CF_NAME);
+        query.setColumnNames(COLUMN_NAMES);
+        QueryResult<OrderedRows<String, String, String>> result = query.execute();
+        OrderedRows<String, String, String> rows = result.get();
+        List<Row<String, String, String>> rowsList = rows.getList();
+        Iterator<Row<String, String, String>> rowIterator = rowsList.iterator();
+        while (rowIterator.hasNext()) {
+            Row<String, String, String> row = rowIterator.next();
+            ColumnSlice<String, String> columns = row.getColumnSlice();
+            List<HColumn<String, String>> columnList = columns.getColumns();
+            for (HColumn<String, String> column : columnList) {
+                if (time > column.getClock() + LIFETIME) {
+                    mutator.addDeletion(row.getKey(), CF_NAME, column.getName(), serializer);
+                }
+            }
+        }
+        mutator.execute();
+    }
+
     public static NoSQLSessionStorageService getStorageService() {
         return instance;
     }
