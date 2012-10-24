@@ -106,29 +106,30 @@ public abstract class StanzaBuilder<T extends Stanza> {
     }
 
     private void payloads() throws OXException {
-        if (json.has("payloads")) {
-            JSONArray payloads = json.optJSONArray("payloads");
-            for (int i = 0; i < payloads.length(); i++) {
-                JSONObject payload = payloads.optJSONObject(i);
-                String elementName;
-                try {
-                    elementName = payload.getString("element");
-                } catch (JSONException e) {
-                    OXException exception = AtmosphereExceptionCode.MISSING_KEY.create("element");
-                    LOG.error(exception);
-                    throw exception;
-                }
-                PayloadTree tree = new PayloadTree();
-                String namespace = null;
-                if (payload.has("namespace")) {
-                    namespace = payload.optString("namespace");
-                }
-                PayloadElement element = new PayloadElement(payload, "json", namespace, elementName);
-                PayloadTreeNode node = new PayloadTreeNode(element);
-                tree.setRoot(node);
-                stanza.addPayload(tree);
-            }
-        }
+        throw new UnsupportedOperationException("Not implemented yet!");
+//        if (json.has("payloads")) {
+//            JSONArray payloads = json.optJSONArray("payloads");
+//            for (int i = 0; i < payloads.length(); i++) {
+//                JSONObject payload = payloads.optJSONObject(i);
+//                String elementName;
+//                try {
+//                    elementName = payload.getString("element");
+//                } catch (JSONException e) {
+//                    OXException exception = AtmosphereExceptionCode.MISSING_KEY.create("element");
+//                    LOG.error(exception);
+//                    throw exception;
+//                }
+//                PayloadTree tree = new PayloadTree();
+//                String namespace = null;
+//                if (payload.has("namespace")) {
+//                    namespace = payload.optString("namespace");
+//                }
+//                PayloadElement element = new PayloadElement(payload, "json", namespace, elementName);
+//                PayloadTreeNode node = new PayloadTreeNode(element);
+//                tree.setRoot(node);
+//                stanza.addPayload(tree);
+//            }
+//        }
     }
 
     /**

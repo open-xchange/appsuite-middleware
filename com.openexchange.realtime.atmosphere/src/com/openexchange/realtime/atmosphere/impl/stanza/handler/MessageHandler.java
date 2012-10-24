@@ -47,21 +47,33 @@
  *
  */
 
-package com.openexchange.realtime.atmosphere.impl.stanza.transformer;
+package com.openexchange.realtime.atmosphere.impl.stanza.handler;
 
+import com.openexchange.exception.OXException;
 import com.openexchange.realtime.packet.Message;
+import com.openexchange.realtime.packet.Stanza;
+import com.openexchange.tools.session.ServerSession;
 
 /**
- * {@link MessageTransformer} - StanzaTransformer that can transform Message Stanzas from representation a to representation b.
+ * {@link MessageHandler} Handle incoming and outgoing Message Stanzas that have previously been transformed to the common POJO
+ * representation that can be handled by the realtime framework.
  * 
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
-public class MessageTransformer extends StanzaTransformer<Message> {
+public class MessageHandler implements StanzaHandler {
 
-    private Message mesage;
-
-    public MessageTransformer(Message mesage) {
-        this.mesage = mesage;
+    @Override
+    public void incoming(Stanza stanza, ServerSession session) throws OXException {
+        throw new UnsupportedOperationException("Not implemented yet!");
     }
 
+    @Override
+    public void outgoing(Stanza stanza, ServerSession session) throws OXException {
+        throw new UnsupportedOperationException("Not implemented yet!");
+    }
+
+    @Override
+    public Class<Message> getStanzaClass() {
+        return Message.class;
+    }
 }

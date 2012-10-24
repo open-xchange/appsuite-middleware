@@ -47,21 +47,23 @@
  *
  */
 
-package com.openexchange.realtime.atmosphere.impl.stanza.transformer;
+package com.openexchange.realtime.atmosphere.impl.stanza.handler;
 
-import com.openexchange.realtime.packet.Presence;
-
+import com.openexchange.realtime.StanzaFilter;
+import com.openexchange.realtime.packet.Stanza;
 
 /**
- * {@link PresenceTransformer} - StanzaTransformer that can transform Presence Stanzas from representation a to representation b.
- *
+ * {@link StanzaHandler} Abstract superclass for StanzaHandlers.
+ * 
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
-public class PresenceTransformer extends StanzaTransformer<Presence> {
-    private Presence presence;
+public interface StanzaHandler extends StanzaFilter {
 
-    public PresenceTransformer(Presence presence) {
-        this.presence = presence;
-    }
+    /**
+     * Get the Stanza class that this StanzaHandler is able to handle.
+     * 
+     * @return The Stanza class that this StanzaHandler is able to handle.
+     */
+    public Class<? extends Stanza> getStanzaClass();
 
 }

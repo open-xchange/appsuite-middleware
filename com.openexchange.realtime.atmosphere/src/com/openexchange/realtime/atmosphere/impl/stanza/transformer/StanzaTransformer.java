@@ -52,7 +52,8 @@ package com.openexchange.realtime.atmosphere.impl.stanza.transformer;
 import java.util.List;
 import com.openexchange.exception.OXException;
 import com.openexchange.realtime.StanzaFilter;
-import com.openexchange.realtime.atmosphere.impl.payload.PayloadElementTransformerRegistry;
+import com.openexchange.realtime.atmosphere.AtmosphereExceptionCode;
+import com.openexchange.realtime.atmosphere.osgi.PayloadElementTransformerRegistry;
 import com.openexchange.realtime.packet.Stanza;
 import com.openexchange.realtime.payload.PayloadElement;
 import com.openexchange.realtime.payload.PayloadElementTransformer;
@@ -62,13 +63,14 @@ import com.openexchange.realtime.util.ElementPath;
 import com.openexchange.tools.session.ServerSession;
 
 /**
- * {@link StanzaTransformer} - Transforms a Stanza "from" one representation "to" another by iterating over all the PayloadTrees found in
- * the Stanza, and recursively applying the the proper PayloadTransformers.
+ * {@link StanzaTransformer} - Transforms a Stanza "from" one representation "to" another by visiting all the PayloadTrees found in the
+ * Stanza, and recursively applying the proper PayloadTransformers.
  * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
-public abstract class StanzaTransformer<T> implements StanzaFilter{
+
+public class StanzaTransformer implements StanzaFilter {
 
     private final PayloadElementTransformerRegistry transformers = PayloadElementTransformerRegistry.getInstance();
 
@@ -83,6 +85,7 @@ public abstract class StanzaTransformer<T> implements StanzaFilter{
     public void incoming(Stanza stanza, ServerSession session) throws OXException {
         List<PayloadTree> payloadTrees = stanza.getPayloads();
         for (PayloadTree tree : payloadTrees) {
+            // TODO: Use ThreadService to transform trees in parallel
             PayloadTreeNode root = tree.getRoot();
             if (root != null) {
                 incoming(root, session);
@@ -92,8 +95,7 @@ public abstract class StanzaTransformer<T> implements StanzaFilter{
 
     private void incoming(PayloadTreeNode node, ServerSession session) throws OXException {
         PayloadElementTransformer transformer = getPayloadTransformer(node.getElementPath());
-        PayloadElement result = transformer.incoming(node.getPayloadElement(), session);
-        node.setPayloadElement(result);
+        node.setPayloadElement(transformer.incoming(node.getPayloadElement(), session));
         for (PayloadTreeNode child : node.getChildren()) {
             incoming(child, session);
         }
@@ -129,7 +131,7 @@ public abstract class StanzaTransformer<T> implements StanzaFilter{
     private PayloadElementTransformer getPayloadTransformer(ElementPath elementPath) throws OXException {
         PayloadElementTransformer transformer = transformers.getHandlerFor(elementPath);
         if (transformer == null) {
-            throw OXException.general("No transformer for " + elementPath); // TODO: write proper OXEX
+            throw AtmosphereExceptionCode.MISSING_TRANSFORMER_FOR_PAYLOADELEMENT.create(elementPath);
         }
         return transformer;
     }

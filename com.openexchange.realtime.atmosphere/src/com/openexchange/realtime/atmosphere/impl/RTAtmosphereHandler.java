@@ -76,15 +76,14 @@ import com.openexchange.log.Log;
 import com.openexchange.log.LogFactory;
 import com.openexchange.realtime.MessageDispatcher;
 import com.openexchange.realtime.StanzaSender;
-import com.openexchange.realtime.atmosphere.impl.payload.PayloadElementTransformerRegistry;
-import com.openexchange.realtime.atmosphere.impl.stanza.StanzaWriter;
-import com.openexchange.realtime.atmosphere.impl.stanza.builder.StanzaBuilderSelector;
 import com.openexchange.realtime.atmosphere.impl.stanza.builder.StanzaBuilder;
+import com.openexchange.realtime.atmosphere.impl.stanza.builder.StanzaBuilderSelector;
 import com.openexchange.realtime.atmosphere.impl.stanza.handler.StanzaHandler;
 import com.openexchange.realtime.atmosphere.impl.stanza.handler.StanzaHandlerSelector;
 import com.openexchange.realtime.atmosphere.impl.stanza.transformer.StanzaTransformer;
-import com.openexchange.realtime.atmosphere.impl.stanza.transformer.StanzaTransformerSelector;
+import com.openexchange.realtime.atmosphere.impl.stanza.writer.StanzaWriter;
 import com.openexchange.realtime.atmosphere.osgi.AtmosphereServiceRegistry;
+import com.openexchange.realtime.atmosphere.osgi.PayloadElementTransformerRegistry;
 import com.openexchange.realtime.packet.ID;
 import com.openexchange.realtime.packet.Stanza;
 import com.openexchange.server.ServiceExceptionCode;
@@ -515,31 +514,12 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
      * @param atmosphereState The associated state
      * @throws OXException
      */
-    protected void handleIncoming(Stanza stanza, RTAtmosphereState atmosphereState) throws OXException {
-        StanzaTransformer<? extends Stanza> stanzaTransformer = StanzaTransformerSelector.getStanzaTransformer(stanza);
-        stanzaTransformer.incoming(stanza, atmosphereState.session);
-        StanzaHandler<? extends Stanza> stanzaHandler = StanzaHandlerSelector.getStanzaHandler(stanza);
-        stanzaHandler
-        if (isInternal(stanza)) {
-            handleInternally(stanza, atmosphereState);
-        } else {
-            dispatchStanza(stanza, atmosphereState);
-        }
-    }
-
-    private boolean isInternal(Stanza stanza) {
-        boolean isInternal = false;
-        return isInternal;
-    }
-
-    /**
-     * Handle the Stanza internally instead of handing it over to the message dispatcher.
-     * 
-     * @param stanza the incoming stanza
-     * @param serverSession the associated serverSession
-     * @throws OXException
-     */
-    private void handleInternally(Stanza stanza, RTAtmosphereState atmosphereState) {
+    protected <T extends Stanza> void handleIncoming(T stanza, RTAtmosphereState atmosphereState) throws OXException {
+        ServerSession session = atmosphereState.session;
+        StanzaTransformer stanzaTransformer = new StanzaTransformer();
+        stanzaTransformer.incoming(stanza, session);
+        StanzaHandler stanzaHandler = StanzaHandlerSelector.getStanzaHandler(stanza);
+        stanzaHandler.incoming(stanza, session);
     }
 
     /**
@@ -564,13 +544,15 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
      * 
      * @param stanza The incoming Stanza in JSON form
      * @param atmosphereState The AtmosphereState associated with the incoming Stanza
+     * @return 
      * @throws OXException
      */
-    private void dispatchStanza(Stanza stanza, RTAtmosphereState atmosphereState) throws OXException {
-        StanzaTransformer<? extends Stanza> stanzaTransformer = StanzaTransformerSelector.getStanzaTransformer(stanza);
-        Stanza pojoStanza = stanzaTransformer.incoming(stanza, atmosphereState.session);
-        MessageDispatcher messageDispatcher = serviceRegistry.getService(MessageDispatcher.class, true);
-        messageDispatcher.send(pojoStanza, atmosphereState.session);
+    private <T extends Stanza> void dispatchStanza(T stanza, RTAtmosphereState atmosphereState) throws OXException {
+        ServerSession session = atmosphereState.session;
+        StanzaTransformer stanzaTransformer = new StanzaTransformer();
+        stanzaTransformer.incoming(stanza, session);
+        MessageDispatcher messageDispatcher = AtmosphereServiceRegistry.getInstance().getService(MessageDispatcher.class, true);
+        messageDispatcher.send(stanza, session);
     }
 
     /**
@@ -581,8 +563,9 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
      * @throws OXException if no transformer for the given Stanza can be found
      */
     public void handleOutgoing(Stanza stanza, ServerSession serverSession) throws OXException {
-        StanzaTransformer<? extends Stanza> stanzaTransformer = StanzaTransformerSelector.getStanzaTransformer(stanza);
-        Stanza pojoStanza = stanzaTransformer.outgoing(stanza, serverSession, this);
+        StanzaTransformer stanzaTransformer = new StanzaTransformer();
+        stanzaTransformer.outgoing(stanza, serverSession);
+        send(stanza);
     }
 
 }

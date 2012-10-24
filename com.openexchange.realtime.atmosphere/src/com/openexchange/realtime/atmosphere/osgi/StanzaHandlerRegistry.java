@@ -47,43 +47,68 @@
  *
  */
 
-package com.openexchange.realtime.atmosphere.impl.stanza.transformer;
+package com.openexchange.realtime.atmosphere.osgi;
 
-import com.openexchange.exception.OXException;
-import com.openexchange.realtime.atmosphere.AtmosphereExceptionCode;
-import com.openexchange.realtime.packet.IQ;
-import com.openexchange.realtime.packet.Message;
-import com.openexchange.realtime.packet.Presence;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import com.openexchange.osgi.ServiceRegistry;
+import com.openexchange.realtime.atmosphere.impl.stanza.handler.StanzaHandler;
 import com.openexchange.realtime.packet.Stanza;
 
 /**
- * {@link StanzaTransformerSelector} - Select a StanzaTransformer suitable for the given type of Stanza.
- * 
+ * {@link StanzaHandlerRegistry} - Tracks registered StanzaHandlers and
+ * makes them accessible through {@link #getHandlerFor(Class<? extends Stanza>)}.
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
-public class StanzaTransformerSelector {
+public class StanzaHandlerRegistry extends ServiceRegistry {
+
+    private static final StanzaHandlerRegistry INSTANCE = new StanzaHandlerRegistry();
+
+    private final Map<Class<? extends Stanza>, StanzaHandler> handlers;
 
     /**
-     * Select a StanzaTransformer suitable for the given type of Stanza.
-     * 
-     * @param stanza The Stanza that has to be transformed from representation a to represtation b
-     * @return a StanzaTransformer suitable for the given type of Stanza
-     * @throws OXException If no suitable StanzaTransformer can be found
+     * Encapsulated constructor.
      */
-    public static StanzaTransformer<? extends Stanza> getStanzaTransformer(Stanza stanza) throws OXException {
-        /*
-         * We could replace this with a Stanza.accept() and StanzaVisitor.visit() pattern if instancof becomes too ugly and we want real
-         * multiple dispatch in Java
-         */
-        if (stanza instanceof Presence) {
-            return new PresenceTransformer((Presence) stanza);
-        } else if (stanza instanceof IQ) {
-            return new IQTransformer((IQ) stanza);
-        } else if (stanza instanceof Message) {
-            return new MessageTransformer((Message) stanza);
-        } else {
-            throw AtmosphereExceptionCode.MISSING_TRANSFORMER_FOR_STANZA.create(stanza.getClass().getName());
-        }
+    private StanzaHandlerRegistry() {
+        super();
+        handlers = new ConcurrentHashMap<Class<? extends Stanza>, StanzaHandler>();
+    }
+
+    /**
+     * Get the Registry singleton.
+     * 
+     * @return the Registry singleton
+     */
+    public static StanzaHandlerRegistry getInstance() {
+        return INSTANCE;
+    }
+
+    /**
+     * Gets the appropriate handler for the specified Stanz class.
+     * 
+     * @param stanzaClass The Stanza subclass we want to handle.
+     * @return The appropriate handler or <code>null</code> if none is applicable.
+     */
+    public StanzaHandler getHandlerFor(Stanza stanza) {
+        return handlers.get(stanza.getClass());
+    }
+
+    /**
+     * Adds specified handler/transformer to this library.
+     * 
+     * @param transformer The handler to add
+     */
+    public void add(StanzaHandler handler) {
+        handlers.put(handler.getStanzaClass(), handler);
+    }
+
+    /**
+     * Removes specified handler/transformer from this library.
+     * 
+     * @param transformer The handler to remove
+     */
+    public void remove(StanzaHandler handler) {
+        handlers.remove(handler.getStanzaClass());
     }
 
 }

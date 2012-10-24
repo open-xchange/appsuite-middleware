@@ -47,75 +47,35 @@
  *
  */
 
-package com.openexchange.realtime.atmosphere;
+package com.openexchange.realtime.atmosphere.impl.stanza.handler;
 
-import java.util.concurrent.atomic.AtomicReference;
 import com.openexchange.exception.OXException;
-import com.openexchange.realtime.MessageDispatcher;
-import com.openexchange.realtime.StanzaSender;
+import com.openexchange.realtime.packet.IQ;
+import com.openexchange.realtime.packet.Presence;
 import com.openexchange.realtime.packet.Stanza;
-import com.openexchange.realtime.payload.PayloadElement;
-import com.openexchange.realtime.payload.PayloadElementTransformer;
-import com.openexchange.realtime.util.ElementPath;
-import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.session.ServerSession;
 
+
 /**
- * {@link OXRTConversionHandler} - Handles Conversion of Stanzas for a given namespace by telling the Stanza payload the format it should
- * convert itslef into, getting the MessageDispatcher and delegating the further processing of the Stanza.
- * 
+ * {@link IQHandler} Handle incoming and outgoing IQ Stanzas that have previously been transformed to the common POJO
+ * representation that can be handled by the realtime framework.
+ *
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
-public class OXRTConversionHandler implements PayloadElementTransformer {
-
-    /**
-     * The {@code ServiceLookup} reference.
-     */
-    public static final AtomicReference<ServiceLookup> SERVICES_REFERENCE = new AtomicReference<ServiceLookup>();
-
-    private final String format;
-    private final ElementPath elementPath;
-
-    /**
-     * Initializes a new {@link OXRTConversionHandler}.
-     * 
-     * @param elementPath the path to an element in a namespace this OXRTConversionHandler can handle
-     * @param format the format of POJOs that incoming Stanzas should be converted to
-     */
-    public OXRTConversionHandler(ElementPath elementPath, String format) {
-        this.elementPath = elementPath;
-        this.format = format;
-    }
-
-    @Override
-    public ElementPath getElementPath() {
-        return elementPath; 
-    }
+public class IQHandler implements StanzaHandler {
 
     @Override
     public void incoming(Stanza stanza, ServerSession session) throws OXException {
-        PayloadElement payload = stanza.getPayload();
-        if(payload != null) {
-            stanza.setPayload(payload.to(format, session));
-        }
-        send(stanza, session);
+        throw new UnsupportedOperationException("Not implemented yet!");
     }
 
     @Override
-    public void outgoing(Stanza stanza, ServerSession session, StanzaSender sender) throws OXException {
-        stanza.setPayload(stanza.getPayload().to("json", session));
-        sender.send(stanza);
+    public void outgoing(Stanza stanza, ServerSession session) throws OXException {
+        throw new UnsupportedOperationException("Not implemented yet!");
     }
 
-    /**
-     * Send the Stanza by getting the MessageDispatcher service and letting it handle the further processing of the Stanza.
-     * 
-     * @param stanza the stanza to send
-     * @param session the associated ServerSession
-     * @throws OXException when sending the Stanza fails
-     */
-    protected void send(Stanza stanza, ServerSession session) throws OXException {
-        SERVICES_REFERENCE.get().getService(MessageDispatcher.class).send(stanza, session);
+    @Override
+    public Class<IQ> getStanzaClass() {
+        return IQ.class;
     }
-
 }

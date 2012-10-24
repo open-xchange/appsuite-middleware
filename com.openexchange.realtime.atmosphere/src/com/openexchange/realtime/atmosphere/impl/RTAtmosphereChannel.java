@@ -52,7 +52,7 @@ package com.openexchange.realtime.atmosphere.impl;
 import java.util.Set;
 import com.openexchange.exception.OXException;
 import com.openexchange.realtime.Channel;
-import com.openexchange.realtime.atmosphere.impl.payload.PayloadElementTransformerRegistry;
+import com.openexchange.realtime.atmosphere.osgi.PayloadElementTransformerRegistry;
 import com.openexchange.realtime.packet.ID;
 import com.openexchange.realtime.packet.Stanza;
 import com.openexchange.tools.session.ServerSession;

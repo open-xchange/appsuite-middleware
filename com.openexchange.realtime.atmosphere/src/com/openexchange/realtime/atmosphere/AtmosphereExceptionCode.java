@@ -69,8 +69,10 @@ public enum AtmosphereExceptionCode implements OXExceptionCode {
     MISSING_BUILDER_FOR_ELEMENT(AtmosphereExceptionMessage.MISSING_BUILDER_FOR_ELEMENT_MSG, CATEGORY_ERROR, 3),
     /** Error while building Stanza: \"%1$s\" */
     ERROR_WHILE_BUILDING(AtmosphereExceptionMessage.ERROR_WHILE_BUILDING_MSG, CATEGORY_ERROR, 4),
-    /** Could not find a transformer for the specified stanza: . \"%1$s\" */
-    MISSING_TRANSFORMER_FOR_STANZA(AtmosphereExceptionMessage.MISSING_TRANSFORMER_FOR_STANZA_MSG, CATEGORY_ERROR, 5),
+    /** Could not find a transformer for the PayloadElement: \"%1$s\" */
+    MISSING_TRANSFORMER_FOR_PAYLOADELEMENT(AtmosphereExceptionMessage.MISSING_TRANSFORMER_FOR_PAYLOADELEMENT_MSG, CATEGORY_ERROR, 5),
+    /** Could not find a handler for the specified stanza: . \"%1$s\" */
+    MISSING_HANDLER_FOR_STANZA(AtmosphereExceptionMessage.MISSING_HANDLER_FOR_STANZA_MSG, CATEGORY_ERROR, 6),
     ;
 
     private final String message;

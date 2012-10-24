@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.realtime.atmosphere.impl.payload;
+package com.openexchange.realtime.atmosphere.osgi;
 
 import java.util.HashSet;
 import java.util.Map;
@@ -60,10 +60,6 @@ import com.openexchange.realtime.util.ElementPath;
 /**
  * {@link PayloadElementTransformerRegistry} - Tracks registered {@link PayloadElementTransformer handlers} and
  * makes them accessible through {@link #getHandlerFor(String)}.
- * This is important to the AtmosphereChannel and associated Channel handler.
- * The Channel can decide if it is able to process incoming Stanzas into POJOs
- * and back again. The Channel handler can delegate the transformation to the
- * proper OXRTHandler.
  * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a> JavaDoc

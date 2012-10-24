@@ -47,21 +47,31 @@
  *
  */
 
-package com.openexchange.realtime.atmosphere.impl.stanza.transformer;
+package com.openexchange.realtime.atmosphere.presence;
 
-import com.openexchange.realtime.packet.IQ;
-
+import com.openexchange.exception.OXException;
+import com.openexchange.realtime.atmosphere.impl.stanza.handler.StanzaHandler;
+import com.openexchange.realtime.packet.Presence;
+import com.openexchange.tools.session.ServerSession;
 
 /**
- * {@link IQTransformer} - StanzaTransformer that can transform IQ Stanzas from representation a to representation b.
- *
+ * {@link PresenceHandler} Handle incoming and outgoing Presence Stanzas that have previously been transformed to the common POJO
+ * representation that can be handled by the realtime framework.
+ * 
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
-public class IQTransformer extends StanzaTransformer<IQ> {
-    private IQ iq;
+public class PresenceHandler implements StanzaHandler<Presence> {
 
-    public IQTransformer(IQ iq) {
-        this.iq = iq;
+    @Override
+    public void incoming(Presence stanza, ServerSession session) throws OXException {
     }
-    
+
+    @Override
+    public void outgoing(Presence stanza, ServerSession session) throws OXException {
+    }
+
+    @Override
+    public Class getStanzaClass() {
+        return Presence.class;
+    }
 }

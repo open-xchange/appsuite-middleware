@@ -51,6 +51,7 @@ package com.openexchange.realtime.atmosphere.impl.stanza.handler;
 
 import com.openexchange.exception.OXException;
 import com.openexchange.realtime.atmosphere.AtmosphereExceptionCode;
+import com.openexchange.realtime.atmosphere.osgi.StanzaHandlerRegistry;
 import com.openexchange.realtime.packet.IQ;
 import com.openexchange.realtime.packet.Message;
 import com.openexchange.realtime.packet.Presence;
@@ -70,20 +71,12 @@ public class StanzaHandlerSelector {
      * @return a StanzaHandler suitable for the given type of Stanza
      * @throws OXException If no suitable StanzaHandler can be found
      */
-    public static StanzaHandler<? extends Stanza> getStanzaHandler(Stanza stanza) throws OXException {
-        /*
-         * We could replace this with a Stanza.accept() and StanzaVisitor.visit() pattern if instancof becomes too ugly and we want real
-         * multiple dispatch in Java
-         */
-        if (stanza instanceof Presence) {
-            StanzaHandler handler = stanzaHandlerRegistry.lookup(Presence.class);
-        } else if (stanza instanceof IQ) {
-            StanzaHandler handler = stanzaHandlerRegistry.lookup(IQ.class);
-        } else if (stanza instanceof Message) {
-            StanzaHandler handler = stanzaHandlerRegistry.lookup(Message.class);
-        } else {
+    public static StanzaHandler getStanzaHandler(Stanza stanza) throws OXException {
+        StanzaHandler handler = StanzaHandlerRegistry.getInstance().getHandlerFor(stanza);
+        if (handler == null) {
             throw AtmosphereExceptionCode.MISSING_HANDLER_FOR_STANZA.create(stanza.getClass().getName());
         }
+        return handler;
     }
 
 }
