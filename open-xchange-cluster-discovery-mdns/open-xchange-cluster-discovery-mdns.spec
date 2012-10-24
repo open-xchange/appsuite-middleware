@@ -5,7 +5,6 @@ BuildArch:     noarch
 BuildRequires: ant
 BuildRequires: ant-nodeps
 BuildRequires: open-xchange-core
-BuildRequires: open-xchange-mdns
 BuildRequires: java-devel >= 1.6.0
 Version:       @OXVERSION@
 %define        ox_release 1
@@ -17,7 +16,6 @@ URL:           http://www.open-xchange.com/
 Source:        %{name}_%{version}.orig.tar.bz2
 Summary:       Module for a cluster discovery service implementation based on Zeroconf
 Requires:      open-xchange-core >= @OXVERSION@
-Requires:      open-xchange-mdns >= @OXVERSION@
 Provides:      open-xchange-cluster-discovery
 Conflicts:     open-xchange-cluster-discovery-static
 
