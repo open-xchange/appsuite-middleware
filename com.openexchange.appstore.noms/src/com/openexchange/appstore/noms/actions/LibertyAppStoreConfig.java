@@ -49,17 +49,25 @@
 
 package com.openexchange.appstore.noms.actions;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+
+import org.apache.commons.codec.binary.Base64;
+
 /**
  * {@link LibertyAppStoreConfig}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class LibertyAppStoreConfig {
-	private String url, userName, password;
+	private String url, storefront, gateway, gatewayQuery, userName, password;
 	
-	public LibertyAppStoreConfig(String url, String userName, String password) {
+	public LibertyAppStoreConfig(String url, String storefront, String gateway, String gatewayQuery, String userName, String password) {
 		super();
 		this.url = url;
+		this.storefront = storefront;
+		this.gateway = gateway;
+		this.gatewayQuery = gatewayQuery;
 		this.userName = userName;
 		this.password = password;
 	}
@@ -70,6 +78,21 @@ public class LibertyAppStoreConfig {
 
 	public void setUrl(String url) {
 		this.url = url;
+	}
+	
+	public String getStorefront() {
+		return storefront;
+	}
+	
+	public String getStorefrontWithSubstitutions() {
+		String ret = getStorefront();
+		ret = ret.replace("[user]", getUserName());
+		ret = ret.replace("[password]", getPassword());
+		return ret;
+	}
+
+	public void setStorefront(String storefront) {
+		this.storefront = storefront;
 	}
 
 	public String getUserName() {
@@ -86,6 +109,18 @@ public class LibertyAppStoreConfig {
 
 	public void setPassword(String password) {
 		this.password = password;
+	}
+
+	public String getAppLink(String app, String path) {
+		String query = gatewayQuery.replace("[app]", app).replace("[path]", path).replace("[user]", getUserName()).replace("[password]", getPassword());
+	
+		try {
+			return gateway + "?coded=" + Base64.encodeBase64URLSafeString(URLEncoder.encode(query, "UTF-8").getBytes());
+		} catch (UnsupportedEncodingException e) {
+			// Shouldn't happen
+			e.printStackTrace();
+			return null;
+		}
 	}
 	
 	

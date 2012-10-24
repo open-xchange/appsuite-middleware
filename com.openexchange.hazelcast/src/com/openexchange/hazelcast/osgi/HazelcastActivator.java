@@ -16,6 +16,7 @@ import org.apache.commons.logging.Log;
 import org.eclipse.osgi.framework.console.CommandInterpreter;
 import org.eclipse.osgi.framework.console.CommandProvider;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.BundleException;
 import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
@@ -71,10 +72,16 @@ public class HazelcastActivator extends HousekeepingActivator {
     protected volatile ClusterListener clusterListener;
 
     /**
+     * The {@code AtomicReference} for {@code ClusterDiscoveryService}.
+     */
+    protected final AtomicReference<ClusterDiscoveryService> clusterDiscoveryServiceReference;
+
+    /**
      * Initializes a new {@link HazelcastActivator}.
      */
     public HazelcastActivator() {
         super();
+        clusterDiscoveryServiceReference = new AtomicReference<ClusterDiscoveryService>();
     }
 
     @Override
@@ -112,12 +119,26 @@ public class HazelcastActivator extends HousekeepingActivator {
         track(ManagementService.class, new ManagementRegisterer(context));
         track(ClusterDiscoveryService.class, new ServiceTrackerCustomizer<ClusterDiscoveryService, ClusterDiscoveryService>() {
 
+            private final boolean isSingleton = true;
             private final LinkedList<ServiceContainer<ClusterDiscoveryService>> deactivated = new LinkedList<ServiceContainer<ClusterDiscoveryService>>();
             private int clusterDiscoveryServiceRanking = 0;
             private ClusterDiscoveryService clusterDiscoveryService = null;
 
             @Override
             public ClusterDiscoveryService addingService(final ServiceReference<ClusterDiscoveryService> reference) {
+                if (isSingleton) {
+                    final ClusterDiscoveryService discovery = context.getService(reference);
+                    if (!clusterDiscoveryServiceReference.compareAndSet(null, discovery)) {
+                        final StringBuilder msg = new StringBuilder();
+                        msg.append("\n\t").append(ClusterDiscoveryService.class.getName()).append(" is a singleton service!");
+                        msg.append("\n\tThis service is already tracked as \"").append(clusterDiscoveryServiceReference.get().getClass().getName()).append("\".");
+                        msg.append("\n\tDenying \"").append(discovery.getClass().getName()).append("\".");
+                        final BundleException be = new BundleException(msg.toString(), BundleException.ACTIVATOR_ERROR);
+                        throw new IllegalStateException(msg.toString(), be);
+                    }
+                    startupIfHigherRanked(discovery, getRanking(reference));
+                    return discovery;
+                }
                 synchronized (deactivated) {
                     final ClusterDiscoveryService discovery = context.getService(reference);
                     startupIfHigherRanked(discovery, getRanking(reference));
@@ -193,6 +214,12 @@ public class HazelcastActivator extends HousekeepingActivator {
             @Override
             public void removedService(final ServiceReference<ClusterDiscoveryService> reference, final ClusterDiscoveryService service) {
                 if (null == service) {
+                    return;
+                }
+                if (isSingleton) {
+                    shutdown(service);
+                    context.ungetService(reference);
+                    clusterDiscoveryServiceReference.set(null);
                     return;
                 }
                 synchronized (deactivated) {

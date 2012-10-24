@@ -47,37 +47,38 @@
  *
  */
 
-package com.openexchange.sessionstorage.hazelcast;
+package com.openexchange.appstore.noms.actions;
 
-import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import com.openexchange.ajax.requesthandler.AJAXRequestData;
+import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.exception.OXException;
+import com.openexchange.server.ServiceLookup;
+import com.openexchange.tools.servlet.AjaxExceptionCodes;
+import com.openexchange.tools.session.ServerSession;
 
 /**
- * {@link HazelcastCleanupTask}
- * 
- * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
+ * {@link EnterAppAction}
+ *
+ * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class HazelcastCleanupTask implements Runnable {
+public class EnterAppAction extends AbstractLibertyAction {
+	
+	public EnterAppAction(ServiceLookup services) {
+		super(services);
+	}
 
-    private static final Log LOG = LogFactory.getLog(HazelcastCleanupTask.class);
+	@Override
+	public AJAXRequestResult perform(AJAXRequestData requestData,
+			ServerSession session) throws OXException {
+		
+		try {
+			return new AJAXRequestResult(new JSONObject().put("location", getConfig(session).getAppLink(requestData.getParameter("app"), requestData.getParameter("path"))), "json");
+		} catch (JSONException e) {
+			throw AjaxExceptionCodes.JSON_ERROR.create();
+		}
+	}
 
-    /**
-     * Initializes a new {@link HazelcastCleanupTask}.
-     */
-    public HazelcastCleanupTask() {
-        super();
-    }
-
-    /*
-     * (non-Javadoc)
-     * @see java.lang.Runnable#run()
-     */
-    @Override
-    public void run() {
-        try {
-            HazelcastSessionStorageService.getStorageService().cleanupTask();
-        } catch (Exception e) {
-            LOG.error(e.getMessage(), e);
-        }
-    }
 }

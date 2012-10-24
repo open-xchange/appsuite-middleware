@@ -47,44 +47,55 @@
  *
  */
 
-package com.openexchange.sessionstorage.hazelcast;
+package com.openexchange.appstore.noms.actions;
 
-import com.hazelcast.config.MapConfig;
-import com.openexchange.crypto.CryptoService;
+import com.openexchange.ajax.requesthandler.AJAXActionService;
+import com.openexchange.config.cascade.ComposedConfigProperty;
+import com.openexchange.config.cascade.ConfigView;
+import com.openexchange.config.cascade.ConfigViewFactory;
+import com.openexchange.exception.OXException;
+import com.openexchange.server.ServiceLookup;
+import com.openexchange.tools.session.ServerSession;
 
 /**
- * {@link HazelcastSessionStorageConfiguration}
- * 
- * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
+ * {@link AbstractLibertyAction}
+ *
+ * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class HazelcastSessionStorageConfiguration {
+public abstract class AbstractLibertyAction implements AJAXActionService{
+	protected ServiceLookup services;
 
-    private final String ENCRYPTION_KEY;
+	public AbstractLibertyAction(ServiceLookup services) {
+		super();
+		this.services = services;
+	}
 
-    private final CryptoService cryptoService;
 
-    private final MapConfig mapConfig;
 
-    /**
-     * Initializes a new {@link HazelcastSessionStorageConfiguration}.
-     */
-    public HazelcastSessionStorageConfiguration(String encryptionKey, CryptoService cryptoService, MapConfig mapConfig) {
-        super();
-        ENCRYPTION_KEY = encryptionKey;
-        this.cryptoService = cryptoService;
-        this.mapConfig = mapConfig;
-    }
-
-    public String getEncryptionKey() {
-        return ENCRYPTION_KEY;
-    }
-
-    public CryptoService getCryptoService() {
-        return cryptoService;
-    }
-
-    public MapConfig getMapConfig() {
-        return mapConfig;
-    }
-
+	protected LibertyAppStoreConfig getConfig(ServerSession session) throws OXException {
+		ConfigView view = services.getService(ConfigViewFactory.class).getView(session.getUserId(), session.getContextId());
+		String url = view.property("com.openexchange.liberty.appstore.url", String.class).get();
+		String storefront = view.property("com.openexchange.liberty.appstore.storefront", String.class).get();
+		String gateway = view.property("com.openexchange.liberty.appstore.gateway", String.class).get();
+		String gatewayQuery = view.property("com.openexchange.liberty.appstore.gatewayQuery", String.class).get();
+		
+		String user = null, password = null;
+		
+		ComposedConfigProperty<String> userProp = view.property("com.openexchange.liberty.appstore.user", String.class);
+		if (userProp.isDefined()) {
+			user = userProp.get();
+		} else {
+			user = session.getUserlogin();
+		}
+		
+		ComposedConfigProperty<String> passwordProp = view.property("com.openexchange.liberty.appstore.password", String.class);
+		if (passwordProp.isDefined()) {
+			password = passwordProp.get();
+		} else {
+			password = session.getPassword();
+		}
+		
+		
+		return new LibertyAppStoreConfig(url, storefront, gateway, gatewayQuery, user, password);
+	}
 }
