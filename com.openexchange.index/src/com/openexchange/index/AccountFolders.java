@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2020 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2012 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -49,27 +49,53 @@
 
 package com.openexchange.index;
 
+import java.io.Serializable;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
+
 
 /**
- * {@link StandardIndexDocument}
- * 
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * {@link AccountFolders} should be used to filter index search results by accounts and folders.
+ * If the module you want to search in does not support accounts use {@link IndexConstants#DEFAULT_ATTACHMENT}.<br>
+ * <br>
+ * If you want to search the whole account use constructor {@link AccountFolders#AccountFolders(String)} and just don't add any folders.
+ *
+ * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public class StandardIndexDocument<V> implements IndexDocument<V> {
-
-    private final V object;
+public class AccountFolders implements Serializable {
+    
+    private static final long serialVersionUID = 5383632935001614920L;
+    
+    private final String account;
+    
+    private final Set<String> folders;
     
     
-    /**
-     * Initializes a new {@link StandardIndexDocument}.
-     */
-    public StandardIndexDocument(final V object) {
+    public AccountFolders(String account) {
+        this(account, Collections.EMPTY_SET);
+    }
+    
+    public AccountFolders(String account, Set<String> folders) {
         super();
-        this.object = object;
+        this.account = account;
+        this.folders = new HashSet<String>(folders);
+    }
+    
+    public void addFolder(String folder) {
+        folders.add(folder);
+    }
+    
+    public void removeFolder(String folder) {
+        folders.remove(folder);
+    }
+    
+    public String getAccount() {
+        return account;
+    }
+    
+    public Set<String> getFolders() {
+        return folders;
     }
 
-    @Override
-    public V getObject() {
-        return object;
-    }
 }

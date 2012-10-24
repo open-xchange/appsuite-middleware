@@ -50,6 +50,7 @@
 package com.openexchange.service.indexing.impl.mail;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.EnumSet;
 import java.util.HashMap;
@@ -63,8 +64,8 @@ import com.openexchange.groupware.attach.index.Attachment;
 import com.openexchange.groupware.attach.index.ORTerm;
 import com.openexchange.groupware.attach.index.ObjectIdTerm;
 import com.openexchange.groupware.attach.index.SearchTerm;
+import com.openexchange.index.AccountFolders;
 import com.openexchange.index.IndexAccess;
-import com.openexchange.index.IndexConstants;
 import com.openexchange.index.IndexDocument;
 import com.openexchange.index.IndexFacadeService;
 import com.openexchange.index.IndexResult;
@@ -103,14 +104,14 @@ public class CheckForDeletedFoldersJob extends AbstractMailJob {
             final IndexAccess<Attachment> attachmentIndex = indexFacade.acquireIndexAccess(Types.ATTACHMENT, info.userId, info.contextId);
             Set<String> allFolders = (Set<String>) info.getProperty(ALL_FOLDERS);
             try {            
-                Map<String, Object> params = new HashMap<String, Object>(2);
-                params.put(IndexConstants.ACCOUNT, info.accountId);
-                QueryParameters withFolders = new QueryParameters.Builder(params)
-                    .setFolders(allFolders)
+                AccountFolders accountFolders = new AccountFolders(String.valueOf(info.accountId), allFolders);
+                QueryParameters withFolders = new QueryParameters.Builder()
+                    .setAccountFolders(Collections.singleton(accountFolders))
                     .setHandler(SearchHandler.ALL_REQUEST)
                     .build();
                 
-                QueryParameters withoutFolders = new QueryParameters.Builder(params)
+                QueryParameters withoutFolders = new QueryParameters.Builder()
+                    .setAccountFolders(Collections.singleton(new AccountFolders(String.valueOf(info.accountId))))
                     .setHandler(SearchHandler.ALL_REQUEST)
                     .build();
                 
@@ -157,9 +158,10 @@ public class CheckForDeletedFoldersJob extends AbstractMailJob {
                     /*
                      * Delete mails from mail index
                      */
-                    params.put(IndexConstants.IDS, mailUUIDs);
-                    QueryParameters deleteQuery = new QueryParameters.Builder(params)
+                    QueryParameters deleteQuery = new QueryParameters.Builder()
+                        .setAccountFolders(Collections.singleton(new AccountFolders(String.valueOf(info.accountId))))
                         .setHandler(SearchHandler.GET_REQUEST)
+                        .setIndexIds(new HashSet<String>(Arrays.asList(mailUUIDs)))
                         .build();
                 
                     mailIndex.deleteByQuery(deleteQuery);
@@ -176,13 +178,11 @@ public class CheckForDeletedFoldersJob extends AbstractMailJob {
                         }
                         
                         SearchTerm<?> orTerm = new ORTerm(idTerms);
-                        Map<String, Object> deleteAttachmentsParams = new HashMap<String, Object>();
-                        deleteAttachmentsParams.put(IndexConstants.MODULE, new Integer(Types.EMAIL));
-                        deleteAttachmentsParams.put(IndexConstants.ACCOUNT, String.valueOf(info.accountId));
-                        QueryParameters deleteAttachmentsQuery = new QueryParameters.Builder(deleteAttachmentsParams)
+                        QueryParameters deleteAttachmentsQuery = new QueryParameters.Builder()
                             .setHandler(SearchHandler.CUSTOM)
                             .setSearchTerm(orTerm)
-                            .setFolders(Collections.singleton(folder))
+                            .setAccountFolders(Collections.singleton(new AccountFolders(String.valueOf(info.accountId), Collections.singleton(folder))))
+                            .setModule(Types.EMAIL)
                             .build();
                         attachmentIndex.deleteByQuery(deleteAttachmentsQuery);
                     }                    

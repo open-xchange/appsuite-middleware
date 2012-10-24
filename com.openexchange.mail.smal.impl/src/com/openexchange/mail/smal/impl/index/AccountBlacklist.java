@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2020 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2012 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,29 +47,60 @@
  *
  */
 
-package com.openexchange.index;
+package com.openexchange.mail.smal.impl.index;
+
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
+import com.openexchange.config.ConfigurationService;
+import com.openexchange.mail.smal.impl.SmalServiceLookup;
 
 
 /**
- * {@link StandardIndexDocument}
- * 
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * {@link AccountBlacklist}
+ *
+ * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public class StandardIndexDocument<V> implements IndexDocument<V> {
-
-    private final V object;
+public class AccountBlacklist {
+    
+    private static boolean allExternalAllowed = false;
+    
+    private static Set<String> blacklistedServers = null;
     
     
-    /**
-     * Initializes a new {@link StandardIndexDocument}.
-     */
-    public StandardIndexDocument(final V object) {
-        super();
-        this.object = object;
+    public static boolean isServerBlacklisted(String server) {
+        initBlacklist();
+        if (allExternalAllowed || blacklistedServers.isEmpty()) {
+            return false;
+        }
+        
+        return blacklistedServers.contains(server);
+    }
+    
+    private synchronized static void initBlacklist() {
+        if (blacklistedServers == null) {
+            ConfigurationService config = SmalServiceLookup.getInstance().getService(ConfigurationService.class);
+            String blacklist = config.getProperty("com.openexchange.mail.smal.blacklist");
+            if (blacklist == null) {
+                throw new IllegalArgumentException("Missing value for property 'com.openexchange.mail.smal.blacklist'. Check smal.properties.");
+            }
+            
+            blacklist = blacklist.trim();
+            if (blacklist.isEmpty()) {
+                allExternalAllowed = true;
+                blacklistedServers = Collections.EMPTY_SET;                
+            } else if (blacklist.startsWith("*")) {
+                allExternalAllowed = false;
+                blacklistedServers = Collections.EMPTY_SET;                
+            } else {
+                allExternalAllowed = false;
+                blacklistedServers = new HashSet<String>();
+                String[] servers = blacklist.split(",");
+                for (String server : servers) {
+                    blacklistedServers.add(server.trim());
+                }
+            }
+        }
     }
 
-    @Override
-    public V getObject() {
-        return object;
-    }
 }

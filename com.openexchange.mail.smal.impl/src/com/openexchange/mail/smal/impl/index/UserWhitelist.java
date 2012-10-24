@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2020 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2012 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,29 +47,53 @@
  *
  */
 
-package com.openexchange.index;
+package com.openexchange.mail.smal.impl.index;
+
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
+import com.openexchange.config.ConfigurationService;
+import com.openexchange.mail.smal.impl.SmalServiceLookup;
 
 
 /**
- * {@link StandardIndexDocument}
- * 
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * {@link UserWhitelist}
+ *
+ * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public class StandardIndexDocument<V> implements IndexDocument<V> {
-
-    private final V object;
+public class UserWhitelist {
+    
+    private static Set<String> allowedUsers = null;
     
     
-    /**
-     * Initializes a new {@link StandardIndexDocument}.
-     */
-    public StandardIndexDocument(final V object) {
-        super();
-        this.object = object;
+    public static boolean isIndexingAllowed(String loginName) {
+        initWhitelist();
+        if (allowedUsers.isEmpty() || allowedUsers.contains(loginName)) {
+            return true;
+        }
+        
+        return false;
+    }
+    
+    private synchronized static void initWhitelist() {
+        if (allowedUsers == null) {
+            ConfigurationService config = SmalServiceLookup.getInstance().getService(ConfigurationService.class);
+            String whitelist = config.getProperty("com.openexchange.mail.smal.userWhitelist");
+            if (whitelist == null) {
+                throw new IllegalArgumentException("Missing value for property 'com.openexchange.mail.smal.userWhitelist'. Check smal.properties.");
+            }
+            
+            whitelist = whitelist.trim();
+            if (whitelist.startsWith("*")) {
+                allowedUsers = Collections.EMPTY_SET;
+            } else {
+                allowedUsers = new HashSet<String>();
+                String[] names = whitelist.split(",");                
+                for (String name : names) {
+                    allowedUsers.add(name.trim());
+                }
+            }
+        }
     }
 
-    @Override
-    public V getObject() {
-        return object;
-    }
 }
