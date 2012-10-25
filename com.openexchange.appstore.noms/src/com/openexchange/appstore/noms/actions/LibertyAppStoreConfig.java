@@ -113,9 +113,14 @@ public class LibertyAppStoreConfig {
 	}
 
 	public String getAppLink(String app, String path) {
-		String query = gatewayQuery.replace("[app]", enc(app)).replace("[path]", enc(path)).replace("[user]", enc(getUserName())).replace("[password]", enc(getPassword()));
+		String query = gatewayQuery.replace("[app]", enc(app)).replace("[path]", path).replace("[user]", enc(getUserName())).replace("[password]", enc(getPassword()));
 	
-		return gateway + "?coded=" + Base64.encodeBase64URLSafeString(query.getBytes());
+		try {
+			return gateway + "?coded=" + URLEncoder.encode(Base64.encodeBase64String(query.getBytes()), "UTF-8");
+		} catch (UnsupportedEncodingException e) {
+			e.printStackTrace();
+			return null;
+		}
 		
 	}
 
