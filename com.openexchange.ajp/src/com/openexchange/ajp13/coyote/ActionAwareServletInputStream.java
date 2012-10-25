@@ -119,7 +119,7 @@ public final class ActionAwareServletInputStream extends ServletInputStream {
         }
         final int len = b.length;
         if (len == 0) {
-            return 0;
+            return -1;
         }
         return read0(b, 0, len);
     }
@@ -133,7 +133,7 @@ public final class ActionAwareServletInputStream extends ServletInputStream {
             throw new IndexOutOfBoundsException();
         }
         if (len == 0) {
-            return 0;
+            return -1;
         }
         return read0(b, off, len);
     }
