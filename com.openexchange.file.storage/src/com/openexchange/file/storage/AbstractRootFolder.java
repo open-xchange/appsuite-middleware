@@ -1,3 +1,52 @@
+/*-
+ *
+ *    OPEN-XCHANGE legal information
+ *
+ *    All intellectual property rights in the Software are protected by
+ *    international copyright laws.
+ *
+ *
+ *    In some countries OX, OX Open-Xchange, open xchange and OXtender
+ *    as well as the corresponding Logos OX Open-Xchange and OX are registered
+ *    trademarks of the Open-Xchange, Inc. group of companies.
+ *    The use of the Logos is not covered by the GNU General Public License.
+ *    Instead, you are allowed to use these Logos according to the terms and
+ *    conditions of the Creative Commons License, Version 2.5, Attribution,
+ *    Non-commercial, ShareAlike, and the interpretation of the term
+ *    Non-commercial applicable to the aforementioned license is published
+ *    on the web site http://www.open-xchange.com/EN/legal/index.html.
+ *
+ *    Please make sure that third-party modules and libraries are used
+ *    according to their respective licenses.
+ *
+ *    Any modifications to this package must retain all copyright notices
+ *    of the original copyright holder(s) for the original code used.
+ *
+ *    After any such modifications, the original and derivative code shall remain
+ *    under the copyright of the copyright holder(s) and/or original author(s)per
+ *    the Attribution and Assignment Agreement that can be located at
+ *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
+ *    given Attribution for the derivative code and a license granting use.
+ *
+ *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Mail: info@open-xchange.com
+ *
+ *
+ *     This program is free software; you can redistribute it and/or modify it
+ *     under the terms of the GNU General Public License, Version 2 as published
+ *     by the Free Software Foundation.
+ *
+ *     This program is distributed in the hope that it will be useful, but
+ *     WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+ *     or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License
+ *     for more details.
+ *
+ *     You should have received a copy of the GNU General Public License along
+ *     with this program; if not, write to the Free Software Foundation, Inc., 59
+ *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
+ *
+ */
+
 package com.openexchange.file.storage;
 
 import java.util.Arrays;
@@ -7,87 +56,99 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+/**
+ * {@link AbstractRootFolder} - Abstract root folder.
+ * 
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ */
 public abstract class AbstractRootFolder implements FileStorageFolder {
 
-	public Set<String> getCapabilities() {
-		return Collections.emptySet();
-	}
+    /**
+     * Initializes a new {@link AbstractRootFolder}.
+     */
+    protected AbstractRootFolder() {
+        super();
+    }
 
-	
-	public String getId() {
-		return FileStorageFolder.ROOT_FULLNAME;
-	}
+    @Override
+    public Set<String> getCapabilities() {
+        return Collections.emptySet();
+    }
 
-	
-	public abstract String getName();
+    @Override
+    public String getId() {
+        return FileStorageFolder.ROOT_FULLNAME;
+    }
 
-	
-	public FileStoragePermission getOwnPermission() {
-		return DefaultFileStoragePermission.newInstance();
-	}
+    @Override
+    public abstract String getName();
 
-	
-	public String getParentId() {
-		return null;
-	}
+    @Override
+    public FileStoragePermission getOwnPermission() {
+        return DefaultFileStoragePermission.newInstance();
+    }
 
-	
-	public List<FileStoragePermission> getPermissions() {
-		return Arrays.asList((FileStoragePermission)DefaultFileStoragePermission.newInstance());
-	}
+    @Override
+    public String getParentId() {
+        return null;
+    }
 
-	
-	public boolean hasSubfolders() {
-		return true;
-	}
+    @Override
+    public List<FileStoragePermission> getPermissions() {
+        return Arrays.asList((FileStoragePermission) DefaultFileStoragePermission.newInstance());
+    }
 
-	
-	public boolean hasSubscribedSubfolders() {
-		return false;
-	}
+    @Override
+    public boolean hasSubfolders() {
+        return true;
+    }
 
-	
-	public boolean isSubscribed() {
-		return true;
-	}
+    @Override
+    public boolean hasSubscribedSubfolders() {
+        return false;
+    }
 
-	
-	public Date getCreationDate() {
-		return new Date();
-	}
+    @Override
+    public boolean isSubscribed() {
+        return true;
+    }
 
-	
-	public Date getLastModifiedDate() {
-		return new Date();
-	}
+    @Override
+    public Date getCreationDate() {
+        return new Date();
+    }
 
-	
-	public boolean isHoldsFolders() {
-		return true;
-	}
+    @Override
+    public Date getLastModifiedDate() {
+        return new Date();
+    }
 
-	
-	public boolean isHoldsFiles() {
-		return true;
-	}
+    @Override
+    public boolean isHoldsFolders() {
+        return true;
+    }
 
-	
-	public boolean isRootFolder() {
-		return true;
-	}
+    @Override
+    public boolean isHoldsFiles() {
+        return true;
+    }
 
-	
-	public boolean isDefaultFolder() {
-		return false;
-	}
+    @Override
+    public boolean isRootFolder() {
+        return true;
+    }
 
-	
-	public abstract int getFileCount();
+    @Override
+    public boolean isDefaultFolder() {
+        return false;
+    }
 
-	
-	public Map<String, Object> getProperties() {
-		return Collections.emptyMap();
-	}
+    @Override
+    public abstract int getFileCount();
 
-	
+    @Override
+    public Map<String, Object> getProperties() {
+        return Collections.emptyMap();
+    }
+
 }
