@@ -49,91 +49,39 @@
 
 package com.openexchange.appstore.noms.actions;
 
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
-import java.util.Collection;
+import org.json.JSONException;
+import org.json.JSONObject;
 
-import org.apache.commons.codec.binary.Base64;
+import com.openexchange.ajax.requesthandler.AJAXRequestData;
+import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.exception.OXException;
+import com.openexchange.server.ServiceLookup;
+import com.openexchange.tools.servlet.AjaxExceptionCodes;
+import com.openexchange.tools.session.ServerSession;
 
 /**
- * {@link LibertyAppStoreConfig}
- *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * {@link MarkupLinkAction}
+ * 
+ * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco
+ *         Laguna</a>
  */
-public class LibertyAppStoreConfig {
-	private String url, storefront, gateway, gatewayQuery, userName, password;
-	
-	public LibertyAppStoreConfig(String url, String storefront, String gateway, String gatewayQuery, String userName, String password) {
-		super();
-		this.url = url;
-		this.storefront = storefront;
-		this.gateway = gateway;
-		this.gatewayQuery = gatewayQuery;
-		this.userName = userName;
-		this.password = password;
+public class MarkupLinkAction extends AbstractLibertyAction {
+
+	public MarkupLinkAction(ServiceLookup services) {
+		super(services);
 	}
 
-	public String getUrl() {
-		return url;
-	}
-
-	public void setUrl(String url) {
-		this.url = url;
-	}
-	
-	public String getStorefront() {
-		return storefront;
-	}
-	
-	public String getStorefrontWithSubstitutions() {
-		String ret = getStorefront();
-		ret = ret.replace("[user]", enc(getUserName()));
-		ret = ret.replace("[password]", enc(getPassword()));
-		return ret;
-	}
-
-	public void setStorefront(String storefront) {
-		this.storefront = storefront;
-	}
-
-	public String getUserName() {
-		return userName;
-	}
-
-	public void setUserName(String userName) {
-		this.userName = userName;
-	}
-
-	public String getPassword() {
-		return password;
-	}
-
-	public void setPassword(String password) {
-		this.password = password;
-	}
-
-	public String getAppLink(String app, String path) {
-		String query = gatewayQuery.replace("[app]", enc(app)).replace("[path]", path).replace("[user]", enc(getUserName())).replace("[password]", enc(getPassword()));
-	
+	@Override
+	public AJAXRequestResult perform(AJAXRequestData requestData,
+			ServerSession session) throws OXException {
 		try {
-			return gateway + "?coded=" + URLEncoder.encode(Base64.encodeBase64String(query.getBytes()), "UTF-8");
-		} catch (UnsupportedEncodingException e) {
-			e.printStackTrace();
-			return null;
-		}
-		
-	}
-
-	public String getMarkup(String parameter) {
-		return parameter.replace("[user]", enc(getUserName())).replace("[password]", enc(getPassword()));
-	}
-	
-	private String enc(String s) {
-		try {
-			return URLEncoder.encode(s, "UTF-8");
-		} catch (UnsupportedEncodingException e) {
-			return s;
+			return new AJAXRequestResult(new JSONObject().put(
+					"location",
+					getConfig(session).getMarkup(
+							requestData.getParameter("url"))), "json");
+		} catch (JSONException e) {
+			throw AjaxExceptionCodes.JSON_ERROR.create();
 		}
 	}
-	
+
 }
