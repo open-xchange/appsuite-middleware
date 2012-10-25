@@ -203,11 +203,17 @@ public abstract class ParameterizedHeader implements Serializable, Comparable<Pa
             // Possibly mail-safe encoded
             paramHdr = decodeEnvelopeHeader(paramHdr).trim();
         }
-        final int length = paramHdr.length();
+        int length = paramHdr.length();
         if (length > 0) {
-            final int lastPos = length - 1;
+            int lastPos = length - 1;
             if (paramHdr.charAt(lastPos) == ';') {
                 paramHdr = paramHdr.substring(0, lastPos);
+            }
+            lastPos = paramHdr.length() - 1;
+            if (paramHdr.charAt(0) == '{' && paramHdr.charAt(lastPos) == '}') {
+                paramHdr = paramHdr.substring(1, lastPos);
+            } else if (paramHdr.charAt(0) == '[' && paramHdr.charAt(lastPos) == ']') {
+                paramHdr = paramHdr.substring(1, lastPos);
             }
         }
         return paramHdr;
