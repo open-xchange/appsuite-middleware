@@ -298,6 +298,7 @@ public final class MIMEStructureHandler implements StructureHandler {
                          * Assume an iTIP response or request
                          */
                         contentType.setParameter("method", method.toUpperCase(Locale.US));
+                        part.setContentType(contentType);
                     }
                 } catch (final RuntimeException e) {
                     LOG.warn("A runtime error occurred.", e);

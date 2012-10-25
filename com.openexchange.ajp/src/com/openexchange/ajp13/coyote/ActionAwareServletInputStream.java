@@ -119,7 +119,7 @@ public final class ActionAwareServletInputStream extends ServletInputStream {
         }
         final int len = b.length;
         if (len == 0) {
-            return 0;
+            return -1; // eof
         }
         return read0(b, 0, len);
     }
@@ -133,7 +133,7 @@ public final class ActionAwareServletInputStream extends ServletInputStream {
             throw new IndexOutOfBoundsException();
         }
         if (len == 0) {
-            return 0;
+            return -1; // eof
         }
         return read0(b, off, len);
     }
@@ -155,7 +155,8 @@ public final class ActionAwareServletInputStream extends ServletInputStream {
          */
         final int bLength = byteChunk.getLength();
         if (bLength >= len) {
-            return byteChunk.substract(b, off, len);
+            final int read = byteChunk.substract(b, off, len);
+            return 0 == read ? -1 : read;
         }
         /*
          * Write available bytes into array
@@ -173,7 +174,7 @@ public final class ActionAwareServletInputStream extends ServletInputStream {
             res = byteChunk.substract(b, read + off, len - read);
             read += res;
         }
-        return len;
+        return 0 == len ? -1 : len;
     }
 
 }

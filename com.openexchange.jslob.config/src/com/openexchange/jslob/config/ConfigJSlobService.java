@@ -49,6 +49,11 @@
 
 package com.openexchange.jslob.config;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -68,7 +73,9 @@ import org.json.JSONTokener;
 import org.json.JSONValue;
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
+import com.google.common.collect.ImmutableBiMap;
 import com.openexchange.ajax.tools.JSONUtil;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.cascade.ComposedConfigProperty;
 import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
@@ -76,6 +83,8 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.settings.Setting;
 import com.openexchange.groupware.settings.impl.ConfigTree;
 import com.openexchange.groupware.settings.impl.SettingStorage;
+import com.openexchange.java.Charsets;
+import com.openexchange.java.Streams;
 import com.openexchange.jslob.JSONPathElement;
 import com.openexchange.jslob.JSONUpdate;
 import com.openexchange.jslob.JSlob;
@@ -133,10 +142,38 @@ public final class ConfigJSlobService implements JSlobService {
         super();
         this.services = services;
         this.preferenceItems = initPreferenceItems();
-        // TODO: Initialize core name mapping
-        final BiMap<String, String> biMap = HashBiMap.create(128);
+        // Initialize core name mapping
+        final ConfigurationService service = services.getService(ConfigurationService.class);
+        final File file = service.getFileByName("paths.perfMap");
+        final BiMap<String, String> biMap;
+        if (null == file) {
+            biMap = ImmutableBiMap.of();
+        } else {
+            biMap = HashBiMap.create(128);
+            readPerfMap(file, biMap);
+        }
         core2AttributeMap = biMap;
         attribute2CoreMap = biMap.inverse();
+    }
+
+    private void readPerfMap(final File file, final BiMap<String, String> biMap) throws OXException {
+        BufferedReader reader = null;
+        try {
+            reader = new BufferedReader(new InputStreamReader(new FileInputStream(file), Charsets.ISO_8859_1));
+            for (String line = reader.readLine(); null != line; line = reader.readLine()) {
+                line = line.trim();
+                if (!isEmpty(line) && '#' != line.charAt(0)) {
+                    final int pos = line.indexOf('>');
+                    if (pos > 0) {
+                        biMap.put(line.substring(0, pos), line.substring(pos + 1));
+                    }
+                }
+            }
+        } catch (final IOException e) {
+            throw JSlobExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+        } finally {
+            Streams.close(reader);
+        }
     }
 
     private Map<String, Map<String, AttributedProperty>> initPreferenceItems() throws OXException {
@@ -155,18 +192,20 @@ public final class ConfigJSlobService implements JSlobService {
             String preferencePath = property.get(PREFERENCE_PATH);
             if (null != preferencePath) {
                 // e.g. ui/halo/configuration/property01
-                final int firstSlashPos = preferencePath.indexOf('/');
-                final String key = preferencePath.substring(0, firstSlashPos);
-                preferencePath = preferencePath.substring(firstSlashPos + 1);
-                Map<String, AttributedProperty> attributes = preferenceItems.get(key);
-                if (null == attributes) {
-                    attributes = new HashMap<String, AttributedProperty>(initialCapacity);
-                    preferenceItems.put(key, attributes);
-                }
-                try {
-                    attributes.put(preferencePath, new AttributedProperty(preferencePath, entry.getKey(), property));
-                } catch (final Exception e) {
-                    logger.warn("Couldn't initialize preference path: " + preferencePath, e);
+                final int separatorPos = preferencePath.indexOf("//");
+                if (separatorPos != -1) {
+                    final String key = preferencePath.substring(0, separatorPos);
+                    preferencePath = preferencePath.substring(separatorPos + 2);
+                    Map<String, AttributedProperty> attributes = preferenceItems.get(key);
+                    if (null == attributes) {
+                        attributes = new HashMap<String, AttributedProperty>(initialCapacity);
+                        preferenceItems.put(key, attributes);
+                    }
+                    try {
+                        attributes.put(preferencePath, new AttributedProperty(preferencePath, entry.getKey(), property));
+                    } catch (final Exception e) {
+                        logger.warn("Couldn't initialize preference path: " + preferencePath, e);
+                    }
                 }
             }
         }
@@ -802,5 +841,17 @@ public final class ConfigJSlobService implements JSlobService {
             path = JSONPathElement.parsePath(preferencePath);
         }
     } // End of class AttributedProperty
+
+    private static boolean isEmpty(final String string) {
+        if (null == string) {
+            return true;
+        }
+        final int len = string.length();
+        boolean isWhitespace = true;
+        for (int i = 0; isWhitespace && i < len; i++) {
+            isWhitespace = Character.isWhitespace(string.charAt(i));
+        }
+        return isWhitespace;
+    }
 
 }

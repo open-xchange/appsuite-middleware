@@ -47,32 +47,32 @@
  *
  */
 
-package com.openexchange.api2;
+package com.openexchange.database.internal.wrapping;
 
-import java.util.List;
-import java.util.UUID;
-import com.openexchange.exception.OXException;
-import com.openexchange.groupware.contact.ContactInterface;
-import com.openexchange.groupware.contact.ContactUnificationState;
-import com.openexchange.groupware.container.Contact;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 
 /**
- * {@link FinalContactInterface}
+ * {@link JDBC41ResultSetWrapper}
  *
- * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
+ * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public interface FinalContactInterface extends ContactInterface {
+public class JDBC41ResultSetWrapper extends JDBC4ResultSetWrapper {
 
-    public abstract void setUnificationStateForContacts(Contact aggregator, Contact contributor, ContactUnificationState state) throws OXException;
+    private final ResultSet delegate;
 
-    public abstract void associateTwoContacts(Contact aggregator, Contact contributor) throws OXException;
+    public JDBC41ResultSetWrapper(ResultSet delegate, JDBC4StatementWrapper stmt) {
+        super(delegate, stmt);
+        this.delegate = delegate;
+    }
 
-    public abstract void separateTwoContacts(Contact aggregator, Contact contributor) throws OXException;
+    @Override
+    public <T> T getObject(int columnIndex, Class<T> type) throws SQLException {
+        return delegate.getObject(columnIndex, type);
+    }
 
-    public abstract List<UUID> getAssociatedContacts(Contact contact) throws OXException;
-
-    public abstract ContactUnificationState getAssociationBetween(Contact c1, Contact c2) throws OXException;
-
-    public abstract Contact getContactByUUID(UUID uuid) throws OXException;
-
+    @Override
+    public <T> T getObject(String columnLabel, Class<T> type) throws SQLException {
+        return delegate.getObject(columnLabel, type);
+    }
 }

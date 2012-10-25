@@ -49,80 +49,50 @@
 
 package com.openexchange.database.internal.wrapping;
 
-import java.sql.Array;
-import java.sql.ResultSet;
+import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.Map;
+import java.util.concurrent.Executor;
+import com.openexchange.database.internal.AssignmentImpl;
+import com.openexchange.database.internal.Pools;
 
 /**
- * The method {@link #getResultSet()} must be overwritten to return the {@link JDBC3ResultSetWrapper}.
+ * {@link JDBC41ConnectionReturner}
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public abstract class JDBC3ArrayWrapper implements Array {
+public class JDBC41ConnectionReturner extends JDBC4ConnectionReturner {
 
-    private final Array delegate;
-
-    private final JDBC3ResultSetWrapper result;
-
-    public JDBC3ArrayWrapper(final Array delegate, final JDBC3ResultSetWrapper result) {
-        super();
-        this.delegate = delegate;
-        this.result = result;
+    public JDBC41ConnectionReturner(Pools pools, AssignmentImpl assign, Connection delegate, boolean noTimeout, boolean write, boolean usedAsRead) {
+        super(pools, assign, delegate, noTimeout, write, usedAsRead);
     }
 
     @Override
-    public Object getArray() throws SQLException {
-        return delegate.getArray();
+    public void setSchema(String schema) throws SQLException {
+        checkForAlreadyClosed();
+        delegate.setSchema(schema);
     }
 
     @Override
-    public Object getArray(final Map<String, Class<?>> map) throws SQLException {
-        return delegate.getArray(map);
+    public String getSchema() throws SQLException {
+        checkForAlreadyClosed();
+        return delegate.getSchema();
     }
 
     @Override
-    public Object getArray(final long index, final int count) throws SQLException {
-        return delegate.getArray(index, count);
+    public void abort(Executor executor) throws SQLException {
+        checkForAlreadyClosed();
+        delegate.abort(executor);
     }
 
     @Override
-    public Object getArray(final long index, final int count, final Map<String, Class<?>> map) throws SQLException {
-        return delegate.getArray(index, count, map);
+    public void setNetworkTimeout(Executor executor, int milliseconds) throws SQLException {
+        checkForAlreadyClosed();
+        delegate.setNetworkTimeout(executor, milliseconds);
     }
 
     @Override
-    public int getBaseType() throws SQLException {
-        return delegate.getBaseType();
-    }
-
-    @Override
-    public String getBaseTypeName() throws SQLException {
-        return delegate.getBaseTypeName();
-    }
-
-    @Override
-    public ResultSet getResultSet() throws SQLException {
-        return new JDBC4ResultSetWrapper(delegate.getResultSet(), result.getStatement());
-    }
-
-    @Override
-    public ResultSet getResultSet(final Map<String, Class<?>> map) throws SQLException {
-        return new JDBC4ResultSetWrapper(delegate.getResultSet(map), result.getStatement());
-    }
-
-    @Override
-    public ResultSet getResultSet(final long index, final int count) throws SQLException {
-        return new JDBC4ResultSetWrapper(delegate.getResultSet(index, count), result.getStatement());
-    }
-
-    @Override
-    public ResultSet getResultSet(final long index, final int count, final Map<String, Class<?>> map) throws SQLException {
-        return new JDBC4ResultSetWrapper(delegate.getResultSet(index, count, map), result.getStatement());
-    }
-
-    @Override
-    public String toString() {
-        return delegate.toString();
+    public int getNetworkTimeout() throws SQLException {
+        checkForAlreadyClosed();
+        return delegate.getNetworkTimeout();
     }
 }

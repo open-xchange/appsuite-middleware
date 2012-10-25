@@ -51,170 +51,80 @@ package com.openexchange.ajax.importexport;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
+import java.util.HashMap;
 import java.util.List;
-import org.json.JSONObject;
-import com.meterware.httpunit.GetMethodWebRequest;
-import com.meterware.httpunit.PostMethodWebRequest;
-import com.meterware.httpunit.WebConversation;
-import com.meterware.httpunit.WebRequest;
-import com.meterware.httpunit.WebResponse;
-import com.openexchange.groupware.container.FolderObject;
+import java.util.Map;
+
+import com.openexchange.ajax.contact.AbstractManagedContactTest;
+import com.openexchange.ajax.importexport.actions.CSVExportRequest;
+import com.openexchange.ajax.importexport.actions.CSVExportResponse;
+import com.openexchange.ajax.importexport.actions.CSVImportRequest;
+import com.openexchange.ajax.importexport.actions.CSVImportResponse;
+import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.importexport.csv.CSVParser;
-import com.openexchange.importexport.formats.Format;
-import com.openexchange.test.OXTestToolkit;
 
 /**
- * Tests the CSV imports and exports by using the servlets.
+ * Tests the CSV imports and exports (rewritten from webdav + servlet to test manager).
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias 'Tierlieb' Prinz</a>
  *
  */
-public class CSVImportExportServletTest extends AbstractImportExportServletTest {
-
+public class CSVImportExportServletTest extends AbstractManagedContactTest  {
+	String CSV = "Given name,Email 1, Display name\n Prinz, tobias.prinz@open-xchange.com, Tobias Prinz\nLaguna, francisco.laguna@open-xchange.com, Francisco Laguna\n";
+	private ContactField field;
 
 	public CSVImportExportServletTest(final String name) {
 		super(name);
 	}
 
+	public Map<ContactField, Integer> getPositions(List<List<String>> csv){
+		HashMap<ContactField, Integer> result = new HashMap<ContactField, Integer>();
+		List<String> headers = csv.get(0);
+		for(int i = 0; i < headers.size(); i++) {
+			field = ContactField.getByDisplayName(headers.get(i));
+			if (field != null) {
+				result.put(field, i);
+			}
+		}
+		return result;
+	}
+
 	public void testCSVRoundtrip() throws Exception{
-		//preparations
-		final String insertedCSV = IMPORTED_CSV;
-		final Format format = Format.CSV;
-		final int folderId = createFolder("csv-contact-roundtrip-" + System.currentTimeMillis(),FolderObject.CONTACT);
-		try {
-
-			//test: import
-			InputStream is = new ByteArrayInputStream(insertedCSV.getBytes());
-			WebConversation webconv = getWebConversation();
-			WebRequest req = new PostMethodWebRequest(
-					getCSVColumnUrl(IMPORT_SERVLET, folderId, format),
-					true);
-			req.selectFile("file", "contacts.csv", is, format.getMimeType());
-			WebResponse webRes = webconv.getResource(req);
-
-			extractFromCallback( webRes.getText() );
-
-			//test: export
-			webconv =  getWebConversation();
-			req = new GetMethodWebRequest( getCSVColumnUrl(EXPORT_SERVLET, folderId, format) );
-			webRes = webconv.sendRequest(req);
-			is = webRes.getInputStream();
-			final String resultingCSV = OXTestToolkit.readStreamAsString(is);
-			//finally: checking
-			final CSVParser parser1 = new CSVParser(insertedCSV);
-			final CSVParser parser2 = new CSVParser(resultingCSV);
-			final List<List<String>> res1 = parser1.parse();
-			final List<List<String>> res2 = parser2.parse();
-			assertEquals("input == output ? "+res1+" // "+res2 , res1, res2);
-		} finally {
-			//clean up
-			removeFolder(folderId);
+		client.execute(new CSVImportRequest(folderID, new ByteArrayInputStream(CSV.getBytes())));
+		CSVExportResponse exportResponse = client.execute(new CSVExportRequest(folderID));
+		
+		CSVParser parser = new CSVParser();
+		List<List<String>> expected = parser.parse(CSV);
+		List<List<String>> actual  = parser.parse((String) exportResponse.getData());
+		Map<ContactField, Integer> positions = getPositions(actual);
+		
+		for(int i = 1; i <= 2; i++) {
+			assertEquals("Mismatch of given name in row #"+i, expected.get(i).get(0), actual.get(i).get(positions.get(ContactField.GIVEN_NAME)));
+			assertEquals("Mismatch of email 1 in row #"+i, expected.get(i).get(1), actual.get(i).get(positions.get(ContactField.EMAIL1)));
+			assertEquals("Mismatch of display name in row #"+i, expected.get(i).get(2), actual.get(i).get(positions.get(ContactField.DISPLAY_NAME)));
 		}
 	}
 
-	public void testCSVBrokenFile() throws Exception{
-		//preparations
+
+	public void testUnknownFile() throws Exception{
 		final String insertedCSV = "bla1\nbla2,bla3";
-		final Format format = Format.CSV;
-		final int folderId = createFolder("csv-contact-roundtrip-" + System.currentTimeMillis(),FolderObject.CONTACT);
-		try {
-			//test: import
-			final InputStream is = new ByteArrayInputStream(insertedCSV.getBytes());
-			final WebConversation webconv = getWebConversation();
-			final WebRequest req = new PostMethodWebRequest(
-					getCSVColumnUrl(IMPORT_SERVLET, folderId, format),
-					true);
-			req.selectFile("file", "contacts.csv", is, format.getMimeType());
-			final WebResponse webRes = webconv.getResource(req);
-			final JSONObject response = extractFromCallback( webRes.getText() );
-			assertEquals("Must contain error.", "CSV-1000", response.optString("code"));
-		} finally {
-			removeFolder(folderId);
-		}
-	}
-
-	public void testUnknownCSVFormat() throws Exception{
-		//preparations
-		final String insertedCSV = "bla\nbla\nbla";
-		final Format format = Format.CSV;
-		final int folderId = createFolder("csv-contact-roundtrip-" + System.currentTimeMillis(),FolderObject.CONTACT);
-
-		try {
-			//test: import
-			final InputStream is = new ByteArrayInputStream(insertedCSV.getBytes());
-			final WebConversation webconv = getWebConversation();
-			final WebRequest req = new PostMethodWebRequest(
-					getCSVColumnUrl(IMPORT_SERVLET, folderId, format),
-					true);
-			req.selectFile("file", "contacts.csv", is, format.getMimeType());
-			final WebResponse webRes = webconv.getResource(req);
-			final JSONObject response = extractFromCallback( webRes.getText() );
-			assertEquals("Must contain error ", "I_E-0804", response.optString("code"));
-		} finally {
-			removeFolder(folderId);
-		}
+		
+		CSVImportResponse importResponse = client.execute(new CSVImportRequest(folderID, new ByteArrayInputStream(insertedCSV.getBytes()), false));
+		assertEquals("I_E-0804", importResponse.getException().getErrorCode());
 	}
 
 	public void testEmptyFileUploaded() throws Exception{
 		final InputStream is = new ByteArrayInputStream("".getBytes());
-		final WebConversation webconv = getWebConversation();
-		final Format format = Format.CSV;
-		final int folderId = createFolder("csv-empty-file-" + System.currentTimeMillis(),FolderObject.CONTACT);
-		try {
-			final WebRequest req = new PostMethodWebRequest(
-					getCSVColumnUrl(IMPORT_SERVLET, folderId, format),
-					true);
-			req.selectFile("file", "empty.vcs", is, format.getMimeType());
-			final WebResponse webRes = webconv.getResource(req);
-			final JSONObject response = extractFromCallback( webRes.getText() );
-			assertEquals("Must contain error ", "I_E-0804", response.optString("code"));
-		} finally {
-			removeFolder(folderId);
-		}
+		CSVImportResponse importResponse = client.execute(new CSVImportRequest(folderID, is, false));
+		assertEquals("I_E-1314", importResponse.getException().getErrorCode());
 	}
 
-	public void testImportTwice() throws Exception {
-	  //preparations
-        final String insertedCSV = IMPORTED_CSV;
-        final Format format = Format.CSV;
-        final int folderId = createFolder("csv-contact-double-import-" + System.currentTimeMillis(),FolderObject.CONTACT);
-        try {
-
-            //test: import
-            InputStream is = new ByteArrayInputStream(insertedCSV.getBytes());
-            WebConversation webconv = getWebConversation();
-
-            // Import once
-            WebRequest req = new PostMethodWebRequest(
-                    getCSVColumnUrl(IMPORT_SERVLET, folderId, format),
-                    true);
-            req.selectFile("file", "contacts.csv", is, format.getMimeType());
-            WebResponse webRes = webconv.getResource(req);
-
-            // Import twice
-            is = new ByteArrayInputStream(insertedCSV.getBytes());
-            req = new PostMethodWebRequest(getCSVColumnUrl(IMPORT_SERVLET, folderId, format), true);
-            req.selectFile("file", "contacts.csv", is, format.getMimeType());
-            webRes = webconv.getResource(req);
-
-
-            extractFromCallback( webRes.getText() );
-
-            //test: export
-            webconv =  getWebConversation();
-            req = new GetMethodWebRequest( getCSVColumnUrl(EXPORT_SERVLET, folderId, format) );
-            webRes = webconv.sendRequest(req);
-            is = webRes.getInputStream();
-            final String resultingCSV = OXTestToolkit.readStreamAsString(is);
-            //finally: checking
-            final CSVParser parser1 = new CSVParser(insertedCSV);
-            final CSVParser parser2 = new CSVParser(resultingCSV);
-            final List<List<String>> res1 = parser1.parse();
-            final List<List<String>> res2 = parser2.parse();
-            // Should only contain one set of imports, since they were double.
-            assertEquals("input == output ? "+res1+" // "+res2 , res1, res2);
-        } finally {
-            //clean up
-            removeFolder(folderId);
-        }
-    }
+	public void testDoubleImport() throws Exception{
+		client.execute(new CSVImportRequest(folderID, new ByteArrayInputStream(CSV.getBytes())));
+		client.execute(new CSVImportRequest(folderID, new ByteArrayInputStream(CSV.getBytes())));
+		CSVExportResponse exportResponse = client.execute(new CSVExportRequest(folderID));
+		
+		CSVParser parser = new CSVParser();
+		List<List<String>> expected = parser.parse(CSV);
+		assertEquals(3, expected.size());
+	}
 }

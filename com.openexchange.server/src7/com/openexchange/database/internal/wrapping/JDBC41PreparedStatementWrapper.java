@@ -49,48 +49,30 @@
 
 package com.openexchange.database.internal.wrapping;
 
+import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import java.sql.Statement;
 
 /**
- * {@link JDBC4StatementWrapper}
+ * {@link JDBC41PreparedStatementWrapper}
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public class JDBC4StatementWrapper extends JDBC3StatementWrapper {
+public class JDBC41PreparedStatementWrapper extends JDBC4PreparedStatementWrapper {
 
-    private final Statement delegate;
+    private final PreparedStatement delegate;
 
-    public JDBC4StatementWrapper(Statement delegate, JDBC3ConnectionReturner con) {
+    public JDBC41PreparedStatementWrapper(PreparedStatement delegate, JDBC4ConnectionReturner con) {
         super(delegate, con);
         this.delegate = delegate;
     }
 
     @Override
-    public boolean isClosed() throws SQLException {
-        return delegate.isClosed();
+    public void closeOnCompletion() throws SQLException {
+        delegate.closeOnCompletion();
     }
 
     @Override
-    public boolean isPoolable() throws SQLException {
-        return delegate.isPoolable();
-    }
-
-    @Override
-    public void setPoolable(boolean poolable) throws SQLException {
-        delegate.setPoolable(poolable);
-    }
-
-    @Override
-    public boolean isWrapperFor(Class<?> iface) {
-        return iface.isAssignableFrom(delegate.getClass());
-    }
-
-    @Override
-    public <T> T unwrap(Class<T> iface) throws SQLException {
-        if (iface.isAssignableFrom(delegate.getClass())) {
-            return iface.cast(delegate);
-        }
-        throw new SQLException("Not a wrapper for: " + iface.getName());
+    public boolean isCloseOnCompletion() throws SQLException {
+        return delegate.isCloseOnCompletion();
     }
 }

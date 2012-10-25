@@ -94,6 +94,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.search.ContactSearchObject;
 import com.openexchange.groupware.search.Order;
+import com.openexchange.java.Streams;
 import com.openexchange.java.UnsynchronizedByteArrayOutputStream;
 
 /**
@@ -584,9 +585,10 @@ public class ContactTestManager implements TestManager {
             if (null != contactObject.getImage1()) {
             	final String image1 = new String(contactObject.getImage1());
             	if (0 < image1.length() && image1.contains("image")) {
-            		// interpret as image url, download real image            		
+            		// interpret as image url, download real image
+            	    String url = image1 + "&compress=false&rotate=false";
             		try {
-                        contactObject.setImage1(loadImage(image1));
+                        contactObject.setImage1(loadImage(url));
                         contactObject.setNumberOfImages(1);
                     } catch (final Exception e) {
                         // Ignore possible error during download attempt
@@ -600,30 +602,25 @@ public class ContactTestManager implements TestManager {
 
     private byte[] loadImage(final String imageURL) throws OXException {
         InputStream inputStream = null;
+        ByteArrayOutputStream outputStream = null;
         try {
-            final AJAXSession ajaxSession = getClient().getSession();
-            final HttpGet httpRequest = new HttpGet(getClient().getProtocol() + "://" + getClient().getHostname() + imageURL);
-            final HttpResponse httpResponse = ajaxSession.getHttpClient().execute(httpRequest);
+            AJAXSession ajaxSession = getClient().getSession();
+            HttpGet httpRequest = new HttpGet(getClient().getProtocol() + "://" + getClient().getHostname() + imageURL);
+            HttpResponse httpResponse = ajaxSession.getHttpClient().execute(httpRequest);
             inputStream = httpResponse.getEntity().getContent();
-            final int len = 8192;
-            final byte[] buf = new byte[len];
-            final ByteArrayOutputStream out = new UnsynchronizedByteArrayOutputStream(len << 2);
+            int len = 8192;
+            byte[] buf = new byte[len];
+            outputStream = new UnsynchronizedByteArrayOutputStream(len << 2);
             for (int read; (read = inputStream.read(buf, 0, len)) > 0;) {
-                out.write(buf, 0, read);
+                outputStream.write(buf, 0, read);
             }
-            return out.toByteArray();
-        } catch (final ClientProtocolException e) {
+            return outputStream.toByteArray();
+        } catch (ClientProtocolException e) {
         	throw new OXException(e);
-		} catch (final IOException e) {
+		} catch (IOException e) {
         	throw new OXException(e);
 		} finally {
-            if (null != inputStream) {
-                try {
-                    inputStream.close();
-                } catch (final Exception e) {
-                    // Ignore
-                }
-            }
+		    Streams.close(inputStream, outputStream);
         }
     }
 

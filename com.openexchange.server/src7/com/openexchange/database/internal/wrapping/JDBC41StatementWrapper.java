@@ -47,19 +47,32 @@
  *
  */
 
-package com.openexchange.groupware.contact;
+package com.openexchange.database.internal.wrapping;
 
-import com.openexchange.exception.OXException;
-import com.openexchange.groupware.container.Contact;
-
+import java.sql.SQLException;
+import java.sql.Statement;
 
 /**
- * {@link OverridingContactInterface}
+ * {@link JDBC41StatementWrapper}
  *
- * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
+ * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public interface OverridingContactInterface extends ContactInterface {
+public class JDBC41StatementWrapper extends JDBC4StatementWrapper {
 
-    public void forceInsertContactObject(final Contact co) throws OXException;
+    private final Statement delegate;
 
+    public JDBC41StatementWrapper(Statement delegate, JDBC4ConnectionReturner con) {
+        super(delegate, con);
+        this.delegate = delegate;
+    }
+
+    @Override
+    public void closeOnCompletion() throws SQLException {
+        delegate.closeOnCompletion();
+    }
+
+    @Override
+    public boolean isCloseOnCompletion() throws SQLException {
+        return delegate.isCloseOnCompletion();
+    }
 }
