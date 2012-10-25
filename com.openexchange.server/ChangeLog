@@ -1,3 +1,7 @@
+* 2012-10-25 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 23458: Apply compression only to JPEG images
+
 * 2012-10-23 - marcus.klein@open-xchange.com
 
  - Story 36135203: Separated Parallels specific SpamAssassin spam handler into its own package. Now other spam handler can be used with
