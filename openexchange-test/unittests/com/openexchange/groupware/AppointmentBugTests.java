@@ -49,6 +49,7 @@
 
 package com.openexchange.groupware;
 
+import static com.openexchange.groupware.calendar.TimeTools.D;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
@@ -1297,7 +1298,8 @@ public class AppointmentBugTests extends TestCase {
         final CalendarDataObject cdao = new CalendarDataObject();
         cdao.setContext(ContextStorage.getInstance().getContext(so.getContextId()));
         cdao.setParentFolderID(fid);
-        CalendarTest.fillDatesInDao(cdao);
+        cdao.setStartDate(D("24.12.2012 08:00"));
+        cdao.setEndDate(D("24.12.2012 09:00"));
         cdao.setRecurrenceType(CalendarObject.DAILY);
         cdao.setInterval(1);
         cdao.removeUntil();
