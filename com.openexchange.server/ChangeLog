@@ -2,6 +2,7 @@
 
  - Fix for bug 23457: Don't return zero, because sun.nio.cs.StreamDecoder doesn't like that
  - Fix for bug 23462: Sanitize access token prior to connecting to Facebook OAuth server
+ - Fix for bug 23413: Support for malformed Content-Type header
 
 * 2012-10-25 - tobias.friedrich@open-xchange.com
 
