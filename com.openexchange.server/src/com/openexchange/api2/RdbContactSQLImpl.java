@@ -87,7 +87,6 @@ import com.openexchange.groupware.contact.ContactMySql;
 import com.openexchange.groupware.contact.ContactSql;
 import com.openexchange.groupware.contact.Contacts;
 import com.openexchange.groupware.contact.Contacts.Mapper;
-import com.openexchange.groupware.contact.OverridingContactInterface;
 import com.openexchange.groupware.contact.Search;
 import com.openexchange.groupware.contact.helpers.CollationContactComparator;
 import com.openexchange.groupware.contact.helpers.ContactField;
@@ -127,7 +126,7 @@ import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.sql.DBUtils;
 
-public class RdbContactSQLImpl implements ContactSQLInterface, OverridingContactInterface {
+public class RdbContactSQLImpl implements ContactSQLInterface {
 
     private final int userId;
 
@@ -175,11 +174,6 @@ public class RdbContactSQLImpl implements ContactSQLInterface, OverridingContact
     @Override
     public void insertContactObject(final Contact co) throws OXException {
         insertContactObject(co, false);
-    }
-
-    @Override
-    public void forceInsertContactObject(final Contact co) throws OXException {
-        insertContactObject(co, true);
     }
 
     protected void insertContactObject(final Contact co, final boolean override) throws OXException {
