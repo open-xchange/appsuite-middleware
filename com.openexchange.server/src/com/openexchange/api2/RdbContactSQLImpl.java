@@ -72,9 +72,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
-import java.util.UUID;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.openexchange.ajax.parser.ContactSearchtermSqlConverter;
 import com.openexchange.contact.LdapServer;
 import com.openexchange.database.provider.SimpleDBProvider;
@@ -87,7 +85,6 @@ import com.openexchange.groupware.contact.ContactConfig.Property;
 import com.openexchange.groupware.contact.ContactExceptionCodes;
 import com.openexchange.groupware.contact.ContactMySql;
 import com.openexchange.groupware.contact.ContactSql;
-import com.openexchange.groupware.contact.ContactUnificationState;
 import com.openexchange.groupware.contact.Contacts;
 import com.openexchange.groupware.contact.Contacts.Mapper;
 import com.openexchange.groupware.contact.OverridingContactInterface;
@@ -112,8 +109,8 @@ import com.openexchange.groupware.search.Order;
 import com.openexchange.groupware.tools.iterator.PrefetchIterator;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
-import com.openexchange.java.util.UUIDs;
 import com.openexchange.l10n.SuperCollator;
+import com.openexchange.log.LogFactory;
 import com.openexchange.preferences.ServerUserSetting;
 import com.openexchange.search.SearchTerm;
 import com.openexchange.server.impl.DBPool;
@@ -130,7 +127,7 @@ import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.sql.DBUtils;
 
-public class RdbContactSQLImpl implements ContactSQLInterface, OverridingContactInterface, FinalContactInterface {
+public class RdbContactSQLImpl implements ContactSQLInterface, OverridingContactInterface {
 
     private final int userId;
 
@@ -1357,208 +1354,6 @@ public class RdbContactSQLImpl implements ContactSQLInterface, OverridingContact
     @Override
     public LdapServer getLdapServer() {
         return null;
-    }
-
-    @Override
-    public void setUnificationStateForContacts(final Contact aggregator, final Contact contributor, final ContactUnificationState state) throws OXException{
-        Connection con = null;
-        PreparedStatement stmt = null;
-        try {
-            con = DBPool.pickupWriteable(ctx);
-            boolean contacsAlreadyHadUUID = true;
-
-            for (final Contact c : new Contact[] { aggregator, contributor }) {
-                if (!c.containsUserField20()) {
-                    c.setUserField20(UUID.randomUUID().toString());
-                    updateContactObject(c, c.getParentFolderID(), new Date());
-                    contacsAlreadyHadUUID = false;
-                }
-            }
-            final ContactUnificationState prevState = getAssociationBetween(aggregator, contributor);
-
-            // no change in status => no change in DB:
-            if(prevState == state) {
-                return;
-            }
-
-            final boolean contactsHaveDefinedState = (prevState != ContactUnificationState.UNDEFINED);
-
-			// state == undefined => remove all possible entries
-            if(contacsAlreadyHadUUID && ContactUnificationState.UNDEFINED == state){
-                stmt = con.prepareStatement("DELETE FROM aggregatingContacts WHERE (contributor = ? OR contributor = ?) AND (aggregator = ? OR aggregator = ?)");
-                stmt.setBytes(1, dbUUID(aggregator));
-                stmt.setBytes(2, dbUUID(contributor));
-                stmt.setBytes(3, dbUUID(aggregator));
-                stmt.setBytes(4, dbUUID(contributor));
-            } else if(contacsAlreadyHadUUID && contactsHaveDefinedState ){
-                stmt = con.prepareStatement("UPDATE aggregatingContacts SET contributor = ?, aggregator = ?, state = ? WHERE (contributor = ? OR contributor = ?) AND (aggregator = ? OR aggregator = ?)");
-                stmt.setBytes(1, dbUUID(aggregator));
-                stmt.setBytes(2, dbUUID(contributor));
-                stmt.setInt(3, state.getNumber());
-                stmt.setBytes(4, dbUUID(aggregator));
-                stmt.setBytes(5, dbUUID(contributor));
-                stmt.setBytes(6, dbUUID(aggregator));
-                stmt.setBytes(7, dbUUID(contributor));
-            } else {
-                stmt = con.prepareStatement("INSERT INTO aggregatingContacts (contributor,aggregator,state) VALUES (?,?,?)");
-                stmt.setBytes(1, dbUUID(aggregator));
-                stmt.setBytes(2, dbUUID(contributor));
-                stmt.setInt(3, state.getNumber());
-            }
-            stmt.execute();
-
-        } catch (final SQLException e) {
-            handleUnsupportedAggregatingContactModule(e);
-            LOG.error(e.getMessage(), e);
-        } catch (final OXException e) {
-            LOG.error(e.getMessage(), e);
-        } finally {
-            if (stmt != null) {
-                try {
-                    stmt.close();
-                } catch (final SQLException e) {
-                    e.printStackTrace(); /* won't happen */
-                }
-            }
-            if (con != null) {
-                DBPool.closeWriterSilent(ctx,con);
-            }
-        }
-    }
-
-    private byte[] dbUUID(final Contact c){
-        return UUIDs.toByteArray(UUID.fromString(c.getUserField20()));
-    }
-
-    @Override
-    public void associateTwoContacts(final Contact aggregator, final Contact contributor) throws OXException {
-        setUnificationStateForContacts(aggregator, contributor, ContactUnificationState.GREEN);
-    }
-
-    @Override
-    public void separateTwoContacts(final Contact aggregator, final Contact contributor) throws OXException {
-        setUnificationStateForContacts(aggregator, contributor, ContactUnificationState.RED);
-    }
-
-    @Override
-    public List<UUID> getAssociatedContacts(final Contact contact) throws OXException{
-        if(!contact.containsUserField20()) {
-            return new LinkedList<UUID>();
-        }
-
-        Connection con = null;
-        PreparedStatement stmt = null;
-        ResultSet res = null;
-        try {
-            con = DBPool.pickup(ctx);
-
-            stmt = con.prepareStatement("SELECT contributor, aggregator FROM aggregatingContacts WHERE (contributor = ? OR aggregator = ?) AND state="+ContactUnificationState.GREEN.getNumber());
-            stmt.setBytes(1, dbUUID(contact));
-            stmt.setBytes(2, dbUUID(contact));
-            res = stmt.executeQuery();
-
-            final Set<UUID> uuids = new HashSet<UUID>();
-            while (res.next()) {
-                uuids.add(UUIDs.toUUID(res.getBytes(1)));
-                uuids.add(UUIDs.toUUID(res.getBytes(2)));
-            }
-            res.close();
-            stmt.close();
-            uuids.remove(UUID.fromString(contact.getUserField20()));
-            return new LinkedList<UUID>(uuids);
-        } catch (final SQLException e) {
-            handleUnsupportedAggregatingContactModule(e);
-            LOG.error(e.getMessage(), e);
-        } finally {
-            closeSQLStuff(res, stmt);
-            if (con != null) {
-                DBPool.push(ctx, con);
-            }
-        }
-        return new LinkedList<UUID>();
-    }
-
-
-    @Override
-    public ContactUnificationState getAssociationBetween(final Contact c1, final Contact c2) throws OXException{
-        if(! c1.containsUserField20() || ! c2.containsUserField20()) {
-            return ContactUnificationState.UNDEFINED;
-        }
-
-        final UUID uuid1 = UUID.fromString(c1.getUserField20());
-        final UUID uuid2 = UUID.fromString(c2.getUserField20());
-
-        Connection con = null;
-        PreparedStatement stmt = null;
-        try {
-            con = DBPool.pickup(ctx);
-
-            stmt = con.prepareStatement("SELECT state FROM aggregatingContacts WHERE aggregator IN (?,?) AND contributor IN (?,?) AND aggregator != contributor");
-            final byte[] val1 = UUIDs.toByteArray(uuid1);
-            final byte[] val2 = UUIDs.toByteArray(uuid2);
-            stmt.setBytes(1, val1);
-            stmt.setBytes(2, val2);
-            stmt.setBytes(3, val1);
-            stmt.setBytes(4, val2);
-            final ResultSet resultSet = stmt.executeQuery();
-            if(resultSet.next()) {
-                return ContactUnificationState.getByNumber(resultSet.getInt("state"));
-            }
-            return ContactUnificationState.UNDEFINED;
-        } catch (final SQLException e) {
-            handleUnsupportedAggregatingContactModule(e);
-            LOG.error(e.getMessage(), e);
-        } finally {
-            if (stmt != null) {
-                try {
-                    stmt.close();
-                } catch (final SQLException e) {
-                    e.printStackTrace(); /* won't happen */
-                }
-            }
-            if (con != null) {
-                DBPool.push(ctx, con);
-            }
-        }
-        return null; // TODO: Throw exception
-    }
-
-    @Override
-    public Contact getContactByUUID(final UUID uuid) throws OXException {
-        final Contact contact = null;
-        Connection con = null;
-        PreparedStatement stmt = null;
-        ResultSet res = null;
-        try {
-            con = DBPool.pickup(ctx);
-
-            stmt = con.prepareStatement("SELECT fid,intfield01 FROM prg_contacts WHERE "+ ContactField.USERFIELD20.getDbName() +" = ?");
-            stmt.setString(1, uuid.toString());
-            res = stmt.executeQuery();
-            final boolean found = res.next();
-            if(! found) {
-                return null;
-            }
-            final int fid = res.getInt("fid");
-            final int id = res.getInt("intfield01");
-            return getObjectById(id, fid);
-        } catch (final SQLException e) {
-            handleUnsupportedAggregatingContactModule(e);
-            LOG.error(e.getMessage(), e);
-        } finally {
-            closeSQLStuff(res, stmt);
-            if (con != null) {
-                DBPool.push(ctx, con);
-            }
-        }
-        return contact;
-    }
-
-
-    private void handleUnsupportedAggregatingContactModule(final SQLException e) throws OXException {
-        if(e.getSQLState().equals("42S02")) {
-            throw ContactExceptionCodes.AGGREGATING_CONTACTS_NOT_ENABLED.create();
-        }
     }
 
     private String generateOrder(final int order_field, final Order order, final SuperCollator collation) {
