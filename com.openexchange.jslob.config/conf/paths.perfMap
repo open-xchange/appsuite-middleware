@@ -1,0 +1,4 @@
+# Specifies the configuration tree path to "core" JSlob path mapping
+# <config-tree-path> + ">" + <JSlob-path>
+# my/config/tree/path>my/jslob/path
+
