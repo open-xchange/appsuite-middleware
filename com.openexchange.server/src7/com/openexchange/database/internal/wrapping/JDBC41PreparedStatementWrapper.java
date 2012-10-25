@@ -49,80 +49,30 @@
 
 package com.openexchange.database.internal.wrapping;
 
-import java.sql.Array;
-import java.sql.ResultSet;
+import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import java.util.Map;
 
 /**
- * The method {@link #getResultSet()} must be overwritten to return the {@link JDBC3ResultSetWrapper}.
+ * {@link JDBC41PreparedStatementWrapper}
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public abstract class JDBC3ArrayWrapper implements Array {
+public class JDBC41PreparedStatementWrapper extends JDBC4PreparedStatementWrapper {
 
-    private final Array delegate;
+    private final PreparedStatement delegate;
 
-    private final JDBC3ResultSetWrapper result;
-
-    public JDBC3ArrayWrapper(final Array delegate, final JDBC3ResultSetWrapper result) {
-        super();
+    public JDBC41PreparedStatementWrapper(PreparedStatement delegate, JDBC4ConnectionReturner con) {
+        super(delegate, con);
         this.delegate = delegate;
-        this.result = result;
     }
 
     @Override
-    public Object getArray() throws SQLException {
-        return delegate.getArray();
+    public void closeOnCompletion() throws SQLException {
+        delegate.closeOnCompletion();
     }
 
     @Override
-    public Object getArray(final Map<String, Class<?>> map) throws SQLException {
-        return delegate.getArray(map);
-    }
-
-    @Override
-    public Object getArray(final long index, final int count) throws SQLException {
-        return delegate.getArray(index, count);
-    }
-
-    @Override
-    public Object getArray(final long index, final int count, final Map<String, Class<?>> map) throws SQLException {
-        return delegate.getArray(index, count, map);
-    }
-
-    @Override
-    public int getBaseType() throws SQLException {
-        return delegate.getBaseType();
-    }
-
-    @Override
-    public String getBaseTypeName() throws SQLException {
-        return delegate.getBaseTypeName();
-    }
-
-    @Override
-    public ResultSet getResultSet() throws SQLException {
-        return new JDBC4ResultSetWrapper(delegate.getResultSet(), result.getStatement());
-    }
-
-    @Override
-    public ResultSet getResultSet(final Map<String, Class<?>> map) throws SQLException {
-        return new JDBC4ResultSetWrapper(delegate.getResultSet(map), result.getStatement());
-    }
-
-    @Override
-    public ResultSet getResultSet(final long index, final int count) throws SQLException {
-        return new JDBC4ResultSetWrapper(delegate.getResultSet(index, count), result.getStatement());
-    }
-
-    @Override
-    public ResultSet getResultSet(final long index, final int count, final Map<String, Class<?>> map) throws SQLException {
-        return new JDBC4ResultSetWrapper(delegate.getResultSet(index, count, map), result.getStatement());
-    }
-
-    @Override
-    public String toString() {
-        return delegate.toString();
+    public boolean isCloseOnCompletion() throws SQLException {
+        return delegate.isCloseOnCompletion();
     }
 }

@@ -49,59 +49,30 @@
 
 package com.openexchange.database.internal.wrapping;
 
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.sql.Connection;
 import java.sql.SQLException;
-import org.junit.Test;
-import com.openexchange.database.internal.AssignmentImpl;
-import com.openexchange.database.internal.Pools;
+import java.sql.Statement;
 
 /**
- * Tests methods in class {@link JDBC4ConnectionReturner}
+ * {@link JDBC41StatementWrapper}
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public class JDBC4ConnectionReturnerTest {
+public class JDBC41StatementWrapper extends JDBC4StatementWrapper {
 
-    /**
-     * The delegate is null if a connection is returned 2 times to the pool. The second return should give an SQLException to detect coding
-     * problems.
-     * @throws NoSuchMethodException 
-     * @throws ClassNotFoundException 
-     * @throws InvocationTargetException 
-     * @throws IllegalAccessException 
-     * @throws InstantiationException 
-     * @throws SecurityException 
-     * @throws IllegalArgumentException 
-     */
-    @SuppressWarnings("static-method")
-    @Test(expected = SQLException.class)
-    public final void testForBug22113() throws SQLException, IllegalArgumentException, SecurityException, InstantiationException, IllegalAccessException, InvocationTargetException, ClassNotFoundException, NoSuchMethodException {
-        Connection delegate = null;
-        Object object = getConstructor().newInstance(null, null, delegate, Boolean.FALSE, Boolean.FALSE, Boolean.FALSE);
-        Connection con = (Connection) object;
-        con.close();
+    private final Statement delegate;
+
+    public JDBC41StatementWrapper(Statement delegate, JDBC4ConnectionReturner con) {
+        super(delegate, con);
+        this.delegate = delegate;
     }
 
-    private static Constructor<?> getConstructor() throws ClassNotFoundException, SecurityException, NoSuchMethodException {
-        final Class<?> clazz;
-        if (isJDBC41()) {
-            clazz = Class.forName("com.openexchange.database.internal.wrapping.JDBC41ConnectionReturner");
-        } else {
-            clazz = Class.forName("com.openexchange.database.internal.wrapping.JDBC4ConnectionReturner");
-        }
-        Constructor<?> constructor = clazz.getConstructor(Pools.class, AssignmentImpl.class, Connection.class, boolean.class, boolean.class, boolean.class);
-        return constructor;
+    @Override
+    public void closeOnCompletion() throws SQLException {
+        delegate.closeOnCompletion();
     }
 
-    private static boolean isJDBC41() {
-        for (Method method : Connection.class.getMethods()) {
-            if ("abort".equals(method.getName())) {
-                return true;
-            }
-        }
-        return false;
+    @Override
+    public boolean isCloseOnCompletion() throws SQLException {
+        return delegate.isCloseOnCompletion();
     }
 }

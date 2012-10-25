@@ -50,91 +50,84 @@
 package com.openexchange.database.internal.wrapping;
 
 import java.sql.Array;
-import java.sql.Blob;
-import java.sql.Clob;
-import java.sql.Connection;
-import java.sql.NClob;
-import java.sql.SQLClientInfoException;
+import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.SQLXML;
-import java.sql.Struct;
-import java.util.Properties;
-import com.openexchange.database.internal.AssignmentImpl;
-import com.openexchange.database.internal.Pools;
+import java.util.Map;
 
 /**
- * {@link JDBC4ConnectionReturner}
+ * The method {@link #getResultSet()} must be overwritten to return the {@link JDBC4ResultSetWrapper}.
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public class JDBC4ConnectionReturner extends JDBC3ConnectionReturner {
+public class JDBC4ArrayWrapper implements Array {
 
-    public JDBC4ConnectionReturner(Pools pools, AssignmentImpl assign, Connection delegate, boolean noTimeout, boolean write, boolean usedAsRead) {
-        super(pools, assign, delegate, noTimeout, write, usedAsRead);
+    private final Array delegate;
+
+    private final JDBC4ResultSetWrapper result;
+
+    public JDBC4ArrayWrapper(final Array delegate, final JDBC4ResultSetWrapper result) {
+        super();
+        this.delegate = delegate;
+        this.result = result;
     }
 
     @Override
-    public Array createArrayOf(String typeName, Object[] elements) throws SQLException {
-        return delegate.createArrayOf(typeName, elements);
+    public Object getArray() throws SQLException {
+        return delegate.getArray();
     }
 
     @Override
-    public Blob createBlob() throws SQLException {
-        return delegate.createBlob();
+    public Object getArray(final Map<String, Class<?>> map) throws SQLException {
+        return delegate.getArray(map);
     }
 
     @Override
-    public Clob createClob() throws SQLException {
-        return delegate.createClob();
+    public Object getArray(final long index, final int count) throws SQLException {
+        return delegate.getArray(index, count);
     }
 
     @Override
-    public NClob createNClob() throws SQLException {
-        return delegate.createNClob();
+    public Object getArray(final long index, final int count, final Map<String, Class<?>> map) throws SQLException {
+        return delegate.getArray(index, count, map);
     }
 
     @Override
-    public SQLXML createSQLXML() throws SQLException {
-        return delegate.createSQLXML();
+    public int getBaseType() throws SQLException {
+        return delegate.getBaseType();
     }
 
     @Override
-    public Struct createStruct(String typeName, Object[] attributes) throws SQLException {
-        return delegate.createStruct(typeName, attributes);
+    public String getBaseTypeName() throws SQLException {
+        return delegate.getBaseTypeName();
     }
 
     @Override
-    public Properties getClientInfo() throws SQLException {
-        return delegate.getClientInfo();
+    public ResultSet getResultSet() throws SQLException {
+        return new JDBC4ResultSetWrapper(delegate.getResultSet(), result.getStatement());
     }
 
     @Override
-    public String getClientInfo(String name) throws SQLException {
-        return delegate.getClientInfo(name);
+    public ResultSet getResultSet(final Map<String, Class<?>> map) throws SQLException {
+        return new JDBC4ResultSetWrapper(delegate.getResultSet(map), result.getStatement());
     }
 
     @Override
-    public boolean isValid(int timeout) throws SQLException {
-        return delegate.isValid(timeout);
+    public ResultSet getResultSet(final long index, final int count) throws SQLException {
+        return new JDBC4ResultSetWrapper(delegate.getResultSet(index, count), result.getStatement());
     }
 
     @Override
-    public void setClientInfo(Properties properties) throws SQLClientInfoException {
-        delegate.setClientInfo(properties);
+    public ResultSet getResultSet(final long index, final int count, final Map<String, Class<?>> map) throws SQLException {
+        return new JDBC4ResultSetWrapper(delegate.getResultSet(index, count, map), result.getStatement());
     }
 
     @Override
-    public void setClientInfo(String name, String value) throws SQLClientInfoException {
-        delegate.setClientInfo(name, value);
+    public void free() throws SQLException {
+        delegate.free();
     }
 
     @Override
-    public boolean isWrapperFor(Class<?> iface) throws SQLException {
-        return delegate.isWrapperFor(iface);
-    }
-
-    @Override
-    public <T> T unwrap(Class<T> iface) throws SQLException {
-        return delegate.unwrap(iface);
+    public String toString() {
+        return delegate.toString();
     }
 }

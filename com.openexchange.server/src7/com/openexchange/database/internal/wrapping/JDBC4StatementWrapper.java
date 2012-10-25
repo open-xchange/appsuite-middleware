@@ -56,23 +56,23 @@ import java.sql.SQLWarning;
 import java.sql.Statement;
 
 /**
- * The method {@link #getConnection()} must be overwritten to return the {@link JDBC3ConnectionReturner}.
+ * The method {@link #getConnection()} must be overwritten to return the {@link JDBC4ConnectionReturner}.
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public abstract class JDBC3StatementWrapper implements Statement {
+public abstract class JDBC4StatementWrapper implements Statement {
 
     private final Statement delegate;
 
-    private final JDBC3ConnectionReturner con;
+    private final JDBC4ConnectionReturner con;
 
     /**
-     * Initializes a new {@link JDBC3StatementWrapper}.
+     * Initializes a new {@link JDBC4StatementWrapper}.
      *
      * @param delegate The delegate statement
      * @param con The connection returner
      */
-    public JDBC3StatementWrapper(final Statement delegate, final JDBC3ConnectionReturner con) {
+    public JDBC4StatementWrapper(final Statement delegate, final JDBC4ConnectionReturner con) {
         super();
         this.delegate = delegate;
         this.con = con;
@@ -130,7 +130,7 @@ public abstract class JDBC3StatementWrapper implements Statement {
 
     @Override
     public ResultSet executeQuery(final String sql) throws SQLException {
-        return new JDBC4ResultSetWrapper(delegate.executeQuery(sql), this);
+        return new JDBC41ResultSetWrapper(delegate.executeQuery(sql), this);
     }
 
     @Override
@@ -170,7 +170,7 @@ public abstract class JDBC3StatementWrapper implements Statement {
 
     @Override
     public ResultSet getGeneratedKeys() throws SQLException {
-        return new JDBC4ResultSetWrapper(delegate.getGeneratedKeys(), this);
+        return new JDBC41ResultSetWrapper(delegate.getGeneratedKeys(), this);
     }
 
     @Override
@@ -200,7 +200,7 @@ public abstract class JDBC3StatementWrapper implements Statement {
 
     @Override
     public ResultSet getResultSet() throws SQLException {
-        return new JDBC4ResultSetWrapper(delegate.getResultSet(), this);
+        return new JDBC41ResultSetWrapper(delegate.getResultSet(), this);
     }
 
     @Override
@@ -261,6 +261,34 @@ public abstract class JDBC3StatementWrapper implements Statement {
     @Override
     public void setQueryTimeout(final int seconds) throws SQLException {
         delegate.setQueryTimeout(seconds);
+    }
+
+    @Override
+    public boolean isClosed() throws SQLException {
+        return delegate.isClosed();
+    }
+
+    @Override
+    public boolean isPoolable() throws SQLException {
+        return delegate.isPoolable();
+    }
+
+    @Override
+    public void setPoolable(boolean poolable) throws SQLException {
+        delegate.setPoolable(poolable);
+    }
+
+    @Override
+    public boolean isWrapperFor(Class<?> iface) {
+        return iface.isAssignableFrom(delegate.getClass());
+    }
+
+    @Override
+    public <T> T unwrap(Class<T> iface) throws SQLException {
+        if (iface.isAssignableFrom(delegate.getClass())) {
+            return iface.cast(delegate);
+        }
+        throw new SQLException("Not a wrapper for: " + iface.getName());
     }
 
     @Override

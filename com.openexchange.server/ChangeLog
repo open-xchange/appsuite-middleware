@@ -1,3 +1,7 @@
+* 2012-10-25 - marcus.klein@open-xchange.com
+
+ - Fix for bug 22385: Introduced JDK version specific source folders for bundles.
+
 * 2012-10-25 - thorben.betten@open-xchange.com
 
  - Fix for bug 23457: Don't return zero, because sun.nio.cs.StreamDecoder doesn't like that
