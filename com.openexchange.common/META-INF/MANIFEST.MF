@@ -52,7 +52,8 @@ Import-Package: javax.activation,
  org.w3c.dom.xpath,
  org.xml.sax,
  org.xml.sax.ext,
- org.xml.sax.helpers
+ org.xml.sax.helpers,
+ sun.misc
 Bundle-ClassPath: .,
  lib/apache-mime4j-core-0.7.2.jar,
  lib/apache-mime4j-dom-0.7.2.jar,
