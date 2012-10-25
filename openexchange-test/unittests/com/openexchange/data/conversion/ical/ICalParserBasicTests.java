@@ -1138,7 +1138,7 @@ public class ICalParserBasicTests extends AbstractICalParserTest {
     }
 
     public void testShouldThrowErrorOnNonICalFile() throws ConversionError {
-        assertErrorWhenParsingAppointment("I am not an iCal file.", "This does not look like an iCal file. Please check the file.");
+        assertNothingHappensWhenParsingAppointment("I am not an iCal file.");
     }
 
     

@@ -350,7 +350,7 @@ public class CSVContactImporter extends AbstractImporter {
         final SimpleDateFormat df1 = new SimpleDateFormat("dd.MM.yyyy");
         df1.setTimeZone(utc);
 
-        final SimpleDateFormat df2 = new SimpleDateFormat("dd/MM/yyyy");
+        final SimpleDateFormat df2 = new SimpleDateFormat("MM/dd/yyyy");
         df2.setTimeZone(utc);
 
         final SimpleDateFormat df3 = new SimpleDateFormat("yyyy-MM-dd");

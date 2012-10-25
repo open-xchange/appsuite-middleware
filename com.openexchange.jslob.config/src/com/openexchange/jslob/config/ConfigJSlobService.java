@@ -192,18 +192,20 @@ public final class ConfigJSlobService implements JSlobService {
             String preferencePath = property.get(PREFERENCE_PATH);
             if (null != preferencePath) {
                 // e.g. ui/halo/configuration/property01
-                final int firstSlashPos = preferencePath.indexOf('/');
-                final String key = preferencePath.substring(0, firstSlashPos);
-                preferencePath = preferencePath.substring(firstSlashPos + 1);
-                Map<String, AttributedProperty> attributes = preferenceItems.get(key);
-                if (null == attributes) {
-                    attributes = new HashMap<String, AttributedProperty>(initialCapacity);
-                    preferenceItems.put(key, attributes);
-                }
-                try {
-                    attributes.put(preferencePath, new AttributedProperty(preferencePath, entry.getKey(), property));
-                } catch (final Exception e) {
-                    logger.warn("Couldn't initialize preference path: " + preferencePath, e);
+                final int separatorPos = preferencePath.indexOf("//");
+                if (separatorPos != -1) {
+                    final String key = preferencePath.substring(0, separatorPos);
+                    preferencePath = preferencePath.substring(separatorPos + 2);
+                    Map<String, AttributedProperty> attributes = preferenceItems.get(key);
+                    if (null == attributes) {
+                        attributes = new HashMap<String, AttributedProperty>(initialCapacity);
+                        preferenceItems.put(key, attributes);
+                    }
+                    try {
+                        attributes.put(preferencePath, new AttributedProperty(preferencePath, entry.getKey(), property));
+                    } catch (final Exception e) {
+                        logger.warn("Couldn't initialize preference path: " + preferencePath, e);
+                    }
                 }
             }
         }
