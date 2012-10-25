@@ -56,18 +56,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import org.apache.commons.logging.Log;
-import com.openexchange.api2.ContactSQLInterface;
-import com.openexchange.api2.FinalContactInterface;
-import com.openexchange.api2.RdbContactSQLImpl;
+import com.openexchange.contact.ContactService;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.contact.ContactExceptionCodes;
 import com.openexchange.groupware.contact.ContactInterface;
-import com.openexchange.groupware.contact.ContactInterfaceDiscoveryService;
-import com.openexchange.groupware.contact.OverridingContactInterface;
+import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
-import com.openexchange.groupware.container.DataObject;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.generic.TargetFolderDefinition;
-import com.openexchange.groupware.search.Order;
+import com.openexchange.groupware.tools.mappings.MappedTruncation;
 import com.openexchange.log.LogFactory;
 import com.openexchange.subscribe.TargetFolderSession;
 import com.openexchange.subscribe.osgi.SubscriptionServiceRegistry;
@@ -86,16 +83,17 @@ public class ContactFolderMultipleUpdaterStrategy implements FolderUpdaterStrate
 
     private static final int TARGET = 2;
 
+    private static final int SESSION = 3;
+
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(ContactFolderMultipleUpdaterStrategy.class));
 
     // All columns need to be loaded here as we keep the original, not the update and no data may be lost
-    private static final int[] COMPARISON_COLUMNS = Contact.CONTENT_COLUMNS;
+    private static final ContactField[] COMPARISON_FIELDS = ContactField.values();
 
     @Override
     public int calculateSimilarityScore(final Contact original, final Contact candidate, final Object session) throws OXException {
         int score = 0;
         final int threshhold = getThreshold(session);
-        final FinalContactInterface contactStore = (FinalContactInterface) getFromSession(SQL_INTERFACE, session);
 
         if ((isset(original.getGivenName()) || isset(candidate.getGivenName())) && eq(original.getGivenName(), candidate.getGivenName())) {
             score += 5;
@@ -123,25 +121,6 @@ public class ContactFolderMultipleUpdaterStrategy implements FolderUpdaterStrate
         if( score < threshhold && original.equalsContentwise(candidate)) { //the score check is only to speed the process up
             score += threshhold + 1;
         }
-        //before returning the score the contacts need to be associated GREEN here if the score is high enough, they are not associated already, and they are both on the system
-        try {
-            if (score >= threshhold && original.equalsContentwise(candidate)){
-                final List<UUID> idsOfAlreadyAssociatedContacts = contactStore.getAssociatedContacts(original);
-                //List<Contact> associatedContacts =
-                boolean alreadyAssociated = false;
-                for (final UUID uuid : idsOfAlreadyAssociatedContacts){
-                    final Contact contact = contactStore.getContactByUUID(uuid);
-                    if (contact.equals(candidate)){
-                        alreadyAssociated = true;
-                    }
-                }
-                if (!alreadyAssociated){
-                    contactStore.associateTwoContacts(original, candidate);
-                }
-            }
-        } catch (final OXException e) {
-            LOG.error(e);
-        }
         return score;
     }
 
@@ -164,23 +143,23 @@ public class ContactFolderMultipleUpdaterStrategy implements FolderUpdaterStrate
 
     @Override
     public Collection<Contact> getData(final TargetFolderDefinition target, final Object session) throws OXException {
-        final RdbContactSQLImpl contacts = (RdbContactSQLImpl) getFromSession(SQL_INTERFACE, session);
-
-        final int folderId = target.getFolderIdAsInt();
-        final int numberOfContacts = contacts.getNumberOfContacts(folderId);
-        final SearchIterator<Contact> contactsInFolder = contacts.getContactsInFolder(
-            folderId,
-            0,
-            numberOfContacts,
-            DataObject.OBJECT_ID,
-            Order.ASCENDING,
-            null,
-            COMPARISON_COLUMNS);
-        final List<Contact> retval = new ArrayList<Contact>();
-        while (contactsInFolder.hasNext()) {
-            retval.add(contactsInFolder.next());
+        List<Contact> contacts = new ArrayList<Contact>();
+        ContactService contactService = (ContactService)getFromSession(SQL_INTERFACE, session);
+        TargetFolderSession targetFolderSession = (TargetFolderSession)getFromSession(SESSION, session);
+        SearchIterator<Contact> searchIterator = null;
+        try {
+            searchIterator = contactService.getAllContacts(targetFolderSession, target.getFolderId(), COMPARISON_FIELDS);
+            if (null != searchIterator) {
+                while (searchIterator.hasNext()) {
+                    contacts.add(searchIterator.next());
+                }
+            }
+        } finally {
+            if (null != searchIterator) {
+                searchIterator.close();
+            }
         }
-        return retval;
+        return contacts;
     }
 
     @Override
@@ -195,14 +174,30 @@ public class ContactFolderMultipleUpdaterStrategy implements FolderUpdaterStrate
 
     @Override
     public void save(final Contact newElement, final Object session) throws OXException {
-        final OverridingContactInterface contacts = (OverridingContactInterface) getFromSession(SQL_INTERFACE, session);
-        final TargetFolderDefinition target = (TargetFolderDefinition) getFromSession(TARGET, session);
+        ContactService contactService = (ContactService)getFromSession(SQL_INTERFACE, session);
+        TargetFolderSession targetFolderSession = (TargetFolderSession)getFromSession(SESSION, session);
+        TargetFolderDefinition target = (TargetFolderDefinition) getFromSession(TARGET, session);
         newElement.setParentFolderID(target.getFolderIdAsInt());
 
         // as this is a new contact it needs a UUID to make later aggregation possible. This has to be a new one.
         newElement.setUserField20(UUID.randomUUID().toString());
-
-        contacts.forceInsertContactObject(newElement);
+        try {
+            contactService.createContact(targetFolderSession, target.getFolderId(), newElement);
+        } catch (OXException e) {
+            if (ContactExceptionCodes.DATA_TRUNCATION.equals(e)) {
+                boolean hasTrimmed = false;
+                try {
+                    hasTrimmed = MappedTruncation.truncate(e.getProblematics(), newElement);
+                } catch (OXException x) {
+                    LOG.warn("error trying to handle truncated attributes", x);
+                }
+                if (hasTrimmed) {
+                    save(newElement, session);
+                    return;
+                }
+            }
+            throw e;
+        }
     }
 
     private Object getFromSession(final int key, final Object session) {
@@ -213,15 +208,10 @@ public class ContactFolderMultipleUpdaterStrategy implements FolderUpdaterStrate
     public Object startSession(final TargetFolderDefinition target) throws OXException {
         final Map<Integer, Object> userInfo = new HashMap<Integer, Object>();
         final TargetFolderSession session = new TargetFolderSession(target);
-        final int folderID = target.getFolderIdAsInt();
-
-        final ContactInterface contactInterface = SubscriptionServiceRegistry.getInstance().getService(
-        		ContactInterfaceDiscoveryService.class).newContactInterface(
-        				folderID,
-        				session);
-
-        userInfo.put(SQL_INTERFACE, contactInterface);
+        ContactService contactService = SubscriptionServiceRegistry.getInstance().getService(ContactService.class);
+        userInfo.put(SQL_INTERFACE, contactService);
         userInfo.put(TARGET, target);
+        userInfo.put(SESSION, session);
         return userInfo;
     }
 
@@ -229,7 +219,6 @@ public class ContactFolderMultipleUpdaterStrategy implements FolderUpdaterStrate
     public void update(final Contact original, final Contact update, final Object session) throws OXException {
         //This may only fill up fields NEVER overwrite them. Original should be used as base and filled up as needed
         //ALL Content Columns need to be considered here
-        final ContactSQLInterface contactStore = (ContactSQLInterface) getFromSession(SQL_INTERFACE, session);
         final int[] columns = Contact.CONTENT_COLUMNS;
         for (final int field : columns){
             if (original.get(field) == null){
@@ -238,6 +227,9 @@ public class ContactFolderMultipleUpdaterStrategy implements FolderUpdaterStrate
                 }
             }
         }
-        contactStore.updateContactObject(original, original.getParentFolderID(), original.getLastModified());
+        ContactService contactService = (ContactService)getFromSession(SQL_INTERFACE, session);
+        TargetFolderSession targetFolderSession = (TargetFolderSession)getFromSession(SESSION, session);        
+        contactService.updateContact(targetFolderSession, String.valueOf(original.getParentFolderID()), 
+            String.valueOf(original.getObjectID()), original, original.getLastModified());
     }
 }

@@ -50,7 +50,7 @@
 package com.openexchange.subscribe.osgi;
 
 import com.openexchange.config.ConfigurationService;
-import com.openexchange.groupware.contact.ContactInterfaceDiscoveryService;
+import com.openexchange.contact.ContactService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.osgi.RegistryServiceTrackerCustomizer;
 import com.openexchange.secret.SecretService;
@@ -75,7 +75,7 @@ public final class TrackerActivator extends HousekeepingActivator {
     @Override
     public void startBundle() throws Exception {
         track(ConfigurationService.class, new RegistryServiceTrackerCustomizer<ConfigurationService>(context, SubscriptionServiceRegistry.getInstance(), ConfigurationService.class));
-        track(ContactInterfaceDiscoveryService.class, new RegistryServiceTrackerCustomizer<ContactInterfaceDiscoveryService>(context, SubscriptionServiceRegistry.getInstance(), ContactInterfaceDiscoveryService.class));
+        track(ContactService.class, new RegistryServiceTrackerCustomizer<ContactService>(context, SubscriptionServiceRegistry.getInstance(), ContactService.class));
         openTrackers();
         SubscriptionServiceRegistry.getInstance().addService(SecretService.class, secretService = new WhiteboardSecretService(context));
         secretService.open();

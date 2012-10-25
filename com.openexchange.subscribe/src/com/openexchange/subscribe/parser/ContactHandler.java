@@ -52,11 +52,12 @@ package com.openexchange.subscribe.parser;
 import java.util.Collection;
 import java.util.Date;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
-import com.openexchange.api2.RdbContactSQLImpl;
+import com.openexchange.contact.ContactService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
+import com.openexchange.log.LogFactory;
 import com.openexchange.session.Session;
+import com.openexchange.subscribe.osgi.SubscriptionServiceRegistry;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorException;
 
@@ -79,11 +80,10 @@ public class ContactHandler {
      */
     protected void storeContacts(final Session session, final int folderId, final Collection<Contact> updatedContacts) throws OXException{
 
-
-        final RdbContactSQLImpl storage = new RdbContactSQLImpl(session);
+        ContactService contactService = SubscriptionServiceRegistry.getInstance().getService(ContactService.class);
 
         for(final Contact updatedContact: updatedContacts){
-            final SearchIterator<Contact> existingContacts = storage.getContactsInFolder(folderId, 0, 0, 0, null, null, Contact.ALL_COLUMNS);
+            final SearchIterator<Contact> existingContacts = contactService.getAllContacts(session, String.valueOf(folderId)); 
             boolean foundMatch = false;
             while( existingContacts.hasNext() && ! foundMatch ){
                 Contact existingContact = null;
@@ -98,7 +98,8 @@ public class ContactHandler {
                 if( isSame(existingContact, updatedContact)){
                     foundMatch = true;
                     updatedContact.setObjectID( existingContact.getObjectID() );
-                    storage.updateContactObject(updatedContact,folderId, new Date() );
+                    contactService.updateContact(session, String.valueOf(folderId), 
+                        String.valueOf(existingContact.getObjectID()), updatedContact, new Date());
                 }
             }
             if(foundMatch) {
@@ -106,7 +107,7 @@ public class ContactHandler {
             }
             updatedContact.setParentFolderID( folderId );
             try {
-                storage.insertContactObject(updatedContact);
+                contactService.createContact(session, String.valueOf(folderId), updatedContact);
             } catch (final OXException x) {
                 LOG.error(x.getMessage(), x);
             }
