@@ -52,7 +52,6 @@ package com.openexchange.freebusy;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.TimeZone;
-import com.openexchange.groupware.container.Appointment;
 
 
 /**
@@ -101,28 +100,6 @@ public class FreeBusyInterval implements Comparable<FreeBusyInterval> {
         this.startTime = start;
         this.endTime = end;
         this.status = status;
-    }
-
-    /**
-     * Initializes a new {@link FreeBusyInterval}, based on the supplied appointment.
-     * 
-     * @param appointment The appointment to create the free/busy slot for
-     */
-    public FreeBusyInterval(Appointment appointment) {
-        this(appointment.getStartDate(), appointment.getEndDate(), BusyStatus.valueOf(appointment));
-        this.fullTime = appointment.getFullTime();
-        if (appointment.containsObjectID() && 0 < appointment.getObjectID()) {
-            this.objectID = String.valueOf(appointment.getObjectID());
-        }
-        if (appointment.containsParentFolderID() && 0 < appointment.getParentFolderID()) {
-            this.folderID = String.valueOf(appointment.getParentFolderID());
-        }
-        if (appointment.containsTitle()){
-            this.title = appointment.getTitle();
-        }
-        if (appointment.containsLocation()){
-            this.location = appointment.getLocation();
-        }
     }
 
     /**

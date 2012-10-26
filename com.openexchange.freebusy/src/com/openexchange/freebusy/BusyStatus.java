@@ -49,8 +49,6 @@
 
 package com.openexchange.freebusy;
 
-import com.openexchange.groupware.container.Appointment;
-
 /**
  * {@link BusyStatus}
  * 
@@ -66,36 +64,26 @@ public enum BusyStatus {
     UNKNOWN(0),
     
     /**
-     * Free / <code>Appointment.FREE</code>
+     * Free / 4 / <code>Appointment.FREE</code>
      */
-    FREE(Appointment.FREE),
+    FREE(4),
 
     /**
-     * Tentative / <code>Appointment.TEMPORARY</code>
+     * Tentative / 2 /<code>Appointment.TEMPORARY</code>
      */
-    TEMPORARY(Appointment.TEMPORARY),
+    TEMPORARY(2),
     
     /**
-     * Busy / <code>Appointment.RESERVED</code>
+     * Busy / 1 / <code>Appointment.RESERVED</code>
      */
-    RESERVED(Appointment.RESERVED),
+    RESERVED(1),
 
     /**
-     * Out of Office (OOF) / <code>Appointment.ABSENT</code>
+     * Out of Office (OOF) / 3 / <code>Appointment.ABSENT</code>
      */
-    ABSENT(Appointment.ABSENT),
-    
+    ABSENT(3),
     ;
 
-    /**
-     * Gets the busy status value of the supplied appointment.
-     * 
-     * @param appointment The appointment 
-     * @return The busy status
-     */
-    public static BusyStatus valueOf(Appointment appointment) {
-        return BusyStatus.valueOf(appointment.getShownAs());
-    }
     
     /**
      * Gets the busy status value of the supplied 'shown as' constant.
@@ -105,13 +93,13 @@ public enum BusyStatus {
      */
     public static BusyStatus valueOf(int shownAs) {
         switch (shownAs) {
-        case Appointment.RESERVED:
+        case 1:
             return BusyStatus.RESERVED;
-        case Appointment.TEMPORARY:
+        case 2:
             return BusyStatus.TEMPORARY;
-        case Appointment.ABSENT:
+        case 3:
             return BusyStatus.ABSENT;
-        case Appointment.FREE:        
+        case 4:        
             return BusyStatus.FREE;
         default:
             return BusyStatus.UNKNOWN;
@@ -137,9 +125,9 @@ public enum BusyStatus {
     public boolean isMoreConflicting(BusyStatus other) {
         return 0 < this.compareTo(other);
     }
-
-    private final int value;
     
+    private final int value;
+
     private BusyStatus(int value) {
         this.value = value;
     }

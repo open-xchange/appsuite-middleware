@@ -72,6 +72,7 @@ import com.openexchange.exception.OXException;
 public class FreeBusyData {
     
     protected String participant;
+    protected String uid;
     protected Date from;
     protected Date until;
     protected List<OXException> warnings;    
@@ -178,6 +179,24 @@ public class FreeBusyData {
      */
     public Date getUntil() {
         return until;
+    }
+
+    /**
+     * Gets the UID used to identify the data.
+     *
+     * @return The UID.
+     */
+    public String getUid() {
+        return uid;
+    }
+
+    /**
+     * Sets the UID to identify the data.
+     *
+     * @param uid The UID to set
+     */
+    public void setUid(String uid) {
+        this.uid = uid;
     }
 
     /**
