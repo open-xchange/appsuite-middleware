@@ -53,6 +53,7 @@ import java.util.Map;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageAccountManager;
 import com.openexchange.file.storage.FileStorageAccountManagerProvider;
+import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.FileStorageService;
 import com.openexchange.file.storage.config.ConfigFileStorageAccount;
 import com.openexchange.file.storage.registry.FileStorageServiceRegistry;
@@ -93,12 +94,23 @@ public final class ConfigFileStorageAccountManagerProvider implements FileStorag
     }
 
     @Override
-    public FileStorageAccountManager getAccountManager(String accountId, Session session) throws OXException {
-        ConfigFileStorageAccount storageAccount = parser.get(accountId);
+    public FileStorageAccountManager getAccountManager(final String accountId, final Session session) throws OXException {
+        final ConfigFileStorageAccount storageAccount = parser.get(accountId);
         if (null == storageAccount) {
             return null;
         }
-        return new ConfigFileStorageAccountManager(storageAccount.getFileStorageService());
+        FileStorageService fileStorageService = storageAccount.getFileStorageService();
+        if (null == fileStorageService) {
+            try {
+                fileStorageService = Services.getService(FileStorageServiceRegistry.class).getFileStorageService(storageAccount.getServiceId());
+            } catch (final OXException e) {
+                if (FileStorageExceptionCodes.UNKNOWN_FILE_STORAGE_SERVICE.equals(e)) {
+                    return null;
+                }
+                throw e;
+            }
+        }
+        return new ConfigFileStorageAccountManager(fileStorageService);
     }
 
 }
