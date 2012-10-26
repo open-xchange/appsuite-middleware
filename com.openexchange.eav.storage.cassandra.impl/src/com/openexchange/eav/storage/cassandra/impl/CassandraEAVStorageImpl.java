@@ -126,13 +126,13 @@ public class CassandraEAVStorageImpl implements EAVStorage {
 	private final void initKeyspace() {
 	    Cluster cluster = CassandraEAVStorageImpl.cluster;
 		if (cluster == null) {
-            synchronized (cluster) {
+            //synchronized (cluster) {
                 cluster = CassandraEAVStorageImpl.cluster;
                 if (cluster == null) {
                     cluster = HFactory.getOrCreateCluster("Local Cluster", node);
                     CassandraEAVStorageImpl.cluster = cluster;
                 }
-            }
+            //}
         }
 		
 		KeyspaceDefinition kDef = cluster.describeKeyspace(keyspaceName);
