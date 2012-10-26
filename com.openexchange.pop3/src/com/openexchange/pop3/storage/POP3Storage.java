@@ -102,9 +102,10 @@ public interface POP3Storage {
      * {@link POP3StorageConnectCounter#decrementCounter() decrementCounter()}.
      *
      * @param expunge Whether to expunge messages from actual POP3 account after their retrieval
+     * @param lastAccessed The last-accessed time stamp or <code>null</code> in case of first access
      * @throws OXException If synchronizing messages fails
      */
-    public void syncMessages(boolean expunge) throws OXException;
+    public void syncMessages(boolean expunge, Long lastAccessed) throws OXException;
 
     /**
      * Drops resources for associated user.

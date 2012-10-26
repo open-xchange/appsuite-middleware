@@ -105,7 +105,8 @@ public final class POP3SyncMessagesCallable implements Callable<Object> {
          * Is it allowed to connect to real POP3 account to synchronize messages?
          */
         final long refreshRate = getRefreshRateMillis();
-        if (isConnectable(refreshRate)) {
+        final Long lastAccessed = getLastAccessed();
+        if (isConnectable(refreshRate, lastAccessed)) {
             final String server;
             /*
              * Check refresh rate setting
@@ -159,7 +160,7 @@ public final class POP3SyncMessagesCallable implements Callable<Object> {
                 /*
                  * Access POP3 account and synchronize
                  */
-                pop3Storage.syncMessages(isExpungeOnQuit());
+                pop3Storage.syncMessages(isExpungeOnQuit(), lastAccessed);
                 /*
                  * Update last-accessed time stamp
                  */
@@ -178,8 +179,7 @@ public final class POP3SyncMessagesCallable implements Callable<Object> {
         return null;
     }
 
-    private boolean isConnectable(final long refreshRateMillis) throws OXException {
-        final Long lastAccessed = getLastAccessed();
+    private boolean isConnectable(final long refreshRateMillis, final Long lastAccessed) throws OXException {
         return ((null == lastAccessed) || ((System.currentTimeMillis() - lastAccessed.longValue()) >= refreshRateMillis));
     }
 
