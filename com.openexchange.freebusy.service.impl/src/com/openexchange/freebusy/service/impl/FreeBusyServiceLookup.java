@@ -47,59 +47,60 @@
  *
  */
 
-package com.openexchange.freebusy.osgi;
+package com.openexchange.freebusy.service.impl;
 
-import java.util.ArrayList;
-import java.util.List;
-import org.apache.commons.logging.Log;
-import org.osgi.framework.ServiceReference;
-import com.openexchange.freebusy.provider.FreeBusyProvider;
-import com.openexchange.log.LogFactory;
-import com.openexchange.osgi.SimpleRegistryListener;
+import java.util.concurrent.atomic.AtomicReference;
+import com.openexchange.exception.OXException;
+import com.openexchange.server.ServiceExceptionCode;
+import com.openexchange.server.ServiceLookup;
 
 /**
- * {@link FreeBusyStorageListener} 
+ * {@link FreeBusyServiceLookup}
  * 
- * Recognizes {@link FreeBusyProvider} services.
- * 
+ * Provides access to services.
+ *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class FreeBusyProviderListener implements SimpleRegistryListener<FreeBusyProvider> {
-	
-    private final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(FreeBusyProviderListener.class));
-    
-    private final List<FreeBusyProvider> providers;
-    
+public class FreeBusyServiceLookup {
+
     /**
-     * Initializes a new {@link FreeBusyProviderListener}.
-     * 
-     * @param registry the registry to use
+     * Initializes a new {@link FreeBusyServiceLookup}.
      */
-    public FreeBusyProviderListener() {
+    private FreeBusyServiceLookup() {
         super();
-        this.providers = new ArrayList<FreeBusyProvider>();
-        LOG.debug("initialized.");
     }
 
-    @Override
-    public void added(ServiceReference<FreeBusyProvider> ref, FreeBusyProvider service) {
-        LOG.info("adding free/busy provider: " + service);
-        this.providers.add(service);
+    private static AtomicReference<ServiceLookup> ref = new AtomicReference<ServiceLookup>();
+
+    /**
+     * Gets the service look-up
+     *
+     * @return The service look-up or <code>null</code>
+     */
+    public static ServiceLookup get() {
+        return ref.get();
     }
 
-    @Override
-    public void removed(ServiceReference<FreeBusyProvider> ref, FreeBusyProvider service) {
-        LOG.info("removing free/busy provider: " + service);
-        this.providers.remove(service);
+    public static <S extends Object> S getService(Class<? extends S> c) throws OXException {
+        return FreeBusyServiceLookup.getService(c, true);
+    }
+    
+    public static <S extends Object> S getService(Class<? extends S> c, boolean throwOnAbsence) throws OXException {
+        ServiceLookup serviceLookup = ref.get();
+        S service = null == serviceLookup ? null : serviceLookup.getService(c);
+        if (null == service && throwOnAbsence) {
+            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(c.getName());
+        }
+        return service;
     }
 
     /**
-     * Gets all registered free/busy provider services.
-     * 
-     * @return The free/busy providers
+     * Sets the service look-up
+     *
+     * @param serviceLookup The service look-up or <code>null</code>
      */
-    public List<FreeBusyProvider> getProviders() {
-        return this.providers;
+    public static void set(ServiceLookup serviceLookup) {
+        ref.set(serviceLookup);
     }
 
 }

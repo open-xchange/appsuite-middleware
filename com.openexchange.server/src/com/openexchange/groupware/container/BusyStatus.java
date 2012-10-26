@@ -47,67 +47,101 @@
  *
  */
 
-package com.openexchange.freebusy.osgi;
+package com.openexchange.groupware.container;
 
-import org.apache.commons.logging.Log;
-import com.openexchange.context.ContextService;
-import com.openexchange.freebusy.FreeBusyService;
-import com.openexchange.freebusy.internal.FreeBusyServiceImpl;
-import com.openexchange.freebusy.internal.FreeBusyServiceLookup;
-import com.openexchange.freebusy.provider.FreeBusyProvider;
-import com.openexchange.log.LogFactory;
-import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.threadpool.ThreadPoolService;
-import com.openexchange.userconf.UserConfigurationService;
+import com.openexchange.groupware.container.Appointment;
 
 /**
- * {@link FreeBusyServiceActivator}
+ * {@link BusyStatus}
+ * 
+ * Enumeration of the possible "shown as" types for a free/busy time.
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class FreeBusyServiceActivator extends HousekeepingActivator {
+public enum BusyStatus {
     
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(FreeBusyServiceActivator.class));
+    /**
+     * No data
+     */
+    UNKNOWN(0),
+    
+    /**
+     * Free / <code>Appointment.FREE</code>
+     */
+    FREE(Appointment.FREE),
 
     /**
-     * Initializes a new {@link FreeBusyServiceActivator}.
+     * Tentative / <code>Appointment.TEMPORARY</code>
      */
-    public FreeBusyServiceActivator() {
-        super();
-    }
+    TEMPORARY(Appointment.TEMPORARY),
+    
+    /**
+     * Busy / <code>Appointment.RESERVED</code>
+     */
+    RESERVED(Appointment.RESERVED),
 
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ContextService.class, UserConfigurationService.class, ThreadPoolService.class };
+    /**
+     * Out of Office (OOF) / <code>Appointment.ABSENT</code>
+     */
+    ABSENT(Appointment.ABSENT),
+    
+    ;
+
+    /**
+     * Gets the busy status value of the supplied appointment.
+     * 
+     * @param appointment The appointment 
+     * @return The busy status
+     */
+    public static BusyStatus valueOf(Appointment appointment) {
+        return BusyStatus.valueOf(appointment.getShownAs());
     }
     
-    @Override
-    protected void startBundle() throws Exception {
-        try {
-            LOG.info("starting bundle: com.openexchange.freebusy");
-            FreeBusyServiceLookup.set(this);
-            /*
-             * track providers
-             */
-            FreeBusyProviderListener providerListener = new FreeBusyProviderListener();
-            super.track(FreeBusyProvider.class, providerListener);            
-            super.openTrackers();
-            /*
-             * register services
-             */
-            FreeBusyService freeBusyService = new FreeBusyServiceImpl(providerListener);
-            super.registerService(FreeBusyService.class, freeBusyService);
-        } catch (Exception e) {
-            LOG.error("error starting com.openexchange.freebusy", e);
-            throw e;            
+    /**
+     * Gets the busy status value of the supplied 'shown as' constant.
+     * 
+     * @param shownAs The shown as
+     * @return The busy status
+     */
+    public static BusyStatus valueOf(int shownAs) {
+        switch (shownAs) {
+        case Appointment.RESERVED:
+            return BusyStatus.RESERVED;
+        case Appointment.TEMPORARY:
+            return BusyStatus.TEMPORARY;
+        case Appointment.ABSENT:
+            return BusyStatus.ABSENT;
+        case Appointment.FREE:        
+            return BusyStatus.FREE;
+        default:
+            return BusyStatus.UNKNOWN;
         }
     }
+    
+    /**
+     * Gets the underlying "shown as" value as defined in {@link Appointment}.
+     * 
+     * @return The value
+     */
+    public int getValue() {
+        return value;
+    }
 
-    @Override
-    protected void stopBundle() throws Exception {
-        LOG.info("stopping bundle: com.openexchange.freebusy");
-        FreeBusyServiceLookup.set(null);            
-        super.stopBundle();
+    /**
+     * Gets a value indicating whether this busy status is more conflicting than another one, i.e. it denotes a 'more busy' state
+     * (in the order: <code>ABSENT > RESERVED > TEMPORARY > FREE > UNKNOWN</code>).
+     * 
+     * @param other The busy status to compare
+     * @return <code>true</code>, if this status is more conflicting, <code>false</code>, otherwise
+     */
+    public boolean isMoreConflicting(BusyStatus other) {
+        return 0 < this.compareTo(other);
+    }
+
+    private final int value;
+    
+    private BusyStatus(int value) {
+        this.value = value;
     }
     
 }

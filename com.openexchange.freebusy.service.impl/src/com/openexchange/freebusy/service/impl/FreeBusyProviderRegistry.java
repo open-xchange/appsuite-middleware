@@ -47,60 +47,63 @@
  *
  */
 
-package com.openexchange.freebusy.internal;
+package com.openexchange.freebusy.service.impl;
 
-import java.util.concurrent.atomic.AtomicReference;
-import com.openexchange.exception.OXException;
-import com.openexchange.server.ServiceExceptionCode;
-import com.openexchange.server.ServiceLookup;
+import java.util.ArrayList;
+import java.util.List;
+import org.apache.commons.logging.Log;
+import com.openexchange.freebusy.provider.FreeBusyProvider;
+import com.openexchange.log.LogFactory;
 
 /**
- * {@link FreeBusyServiceLookup}
+ * {@link FreeBusyProviderRegistry} 
  * 
- * Provides access to services.
- *
+ * Holds references to registered {@link FreeBusyProvider}s
+ * 
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class FreeBusyServiceLookup {
-
+public class FreeBusyProviderRegistry {
+	
+    private final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(FreeBusyProviderRegistry.class));
+    
+    private final List<FreeBusyProvider> providers;
+    
     /**
-     * Initializes a new {@link FreeBusyServiceLookup}.
+     * Initializes a new {@link FreeBusyProviderRegistry}.
      */
-    private FreeBusyServiceLookup() {
+    public FreeBusyProviderRegistry() {
         super();
-    }
-
-    private static AtomicReference<ServiceLookup> ref = new AtomicReference<ServiceLookup>();
-
-    /**
-     * Gets the service look-up
-     *
-     * @return The service look-up or <code>null</code>
-     */
-    public static ServiceLookup get() {
-        return ref.get();
-    }
-
-    public static <S extends Object> S getService(Class<? extends S> c) throws OXException {
-        return FreeBusyServiceLookup.getService(c, false);
+        this.providers = new ArrayList<FreeBusyProvider>();
+        LOG.debug("initialized.");
     }
     
-    public static <S extends Object> S getService(Class<? extends S> c, boolean throwOnAbsence) throws OXException {
-        ServiceLookup serviceLookup = ref.get();
-        S service = null == serviceLookup ? null : serviceLookup.getService(c);
-        if (null == service && throwOnAbsence) {
-            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(c.getName());
-        }
-        return service;
+    /**
+     * Adds a {@link FreeBusyProvider} service.
+     * 
+     * @param service The service to add
+     */
+    public void add(FreeBusyProvider service) {
+        LOG.info("adding free/busy provider: " + service);
+        this.providers.add(service);
     }
 
     /**
-     * Sets the service look-up
-     *
-     * @param serviceLookup The service look-up or <code>null</code>
+     * Removes a {@link FreeBusyProvider} service.
+     * 
+     * @param service The service to remove
      */
-    public static void set(ServiceLookup serviceLookup) {
-        ref.set(serviceLookup);
+    public void remove(FreeBusyProvider service) {
+        LOG.info("removing free/busy provider: " + service);
+        this.providers.remove(service);
     }
 
+    /**
+     * Gets all registered free/busy provider services.
+     * 
+     * @return The free/busy providers
+     */
+    public List<FreeBusyProvider> getProviders() {
+        return this.providers;
+    }
+    
 }

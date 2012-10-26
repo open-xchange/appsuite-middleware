@@ -47,12 +47,13 @@
  *
  */
 
-package com.openexchange.freebusy;
+package com.openexchange.freebusy.service;
 
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import com.openexchange.exception.OXException;
+import com.openexchange.freebusy.FreeBusyData;
 import com.openexchange.session.Session;
 
 /**

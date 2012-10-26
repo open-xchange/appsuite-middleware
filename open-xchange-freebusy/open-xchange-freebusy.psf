@@ -4,5 +4,6 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.freebusy"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.freebusy.json"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.freebusy.provider.internal"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.freebusy.service.impl"/>
 </provider>
 </psf>

@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.freebusy.internal;
+package com.openexchange.freebusy.service.impl;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -63,9 +63,8 @@ import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
 import com.openexchange.freebusy.FreeBusyData;
 import com.openexchange.freebusy.FreeBusyExceptionCodes;
-import com.openexchange.freebusy.FreeBusyService;
-import com.openexchange.freebusy.osgi.FreeBusyProviderListener;
 import com.openexchange.freebusy.provider.FreeBusyProvider;
+import com.openexchange.freebusy.service.FreeBusyService;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.session.Session;
@@ -82,23 +81,23 @@ import com.openexchange.userconf.UserConfigurationService;
  */
 public class FreeBusyServiceImpl implements FreeBusyService {
     
-    private final FreeBusyProviderListener providers;
+    private final FreeBusyProviderRegistry registry;
     
-    public FreeBusyServiceImpl(FreeBusyProviderListener providers) {
+    public FreeBusyServiceImpl(FreeBusyProviderRegistry registry) {
         super();
-        this.providers = providers;
+        this.registry = registry;
     }
     
     @Override
     public Map<String, FreeBusyData> getFreeBusy(final Session session, final List<String> participants, final Date from, final Date until) throws OXException {
         checkFreeBusyEnabled(session);
         checkProvidersAvailable();
-        if (1 == providers.getProviders().size()) {
-            return providers.getProviders().get(0).getFreeBusy(session, participants, from, until);
+        if (1 == registry.getProviders().size()) {
+            return registry.getProviders().get(0).getFreeBusy(session, participants, from, until);
         } else {
             ExecutorService executor = FreeBusyServiceLookup.getService(ThreadPoolService.class).getExecutor();
             List<Future<Map<String, FreeBusyData>>> futures = new ArrayList<Future<Map<String, FreeBusyData>>>();
-            for (final FreeBusyProvider provider : providers.getProviders()) {
+            for (final FreeBusyProvider provider : registry.getProviders()) {
                 Future<Map<String, FreeBusyData>> future = executor.submit(new AbstractTask<Map<String, FreeBusyData>>() {
                     @Override
                     public Map<String, FreeBusyData> call() throws Exception {
@@ -170,7 +169,7 @@ public class FreeBusyServiceImpl implements FreeBusyService {
     }
 
     private void checkProvidersAvailable() throws OXException {
-        if (null == providers || null == providers.getProviders() || 0 == providers.getProviders().size()) {
+        if (null == registry || null == registry.getProviders() || 0 == registry.getProviders().size()) {
             throw FreeBusyExceptionCodes.NO_PROVIDERS_AVAILABLE.create();
         }   
     }
