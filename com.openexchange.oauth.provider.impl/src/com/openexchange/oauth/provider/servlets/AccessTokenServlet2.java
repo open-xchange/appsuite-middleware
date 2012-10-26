@@ -71,7 +71,7 @@ import com.openexchange.oauth.provider.v2.OAuth2ProviderService;
 
 /**
  * {@link AccessTokenServlet2} - Access Token request handler for OAuth2.0
- *
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class AccessTokenServlet2 extends HttpServlet {
@@ -89,6 +89,13 @@ public class AccessTokenServlet2 extends HttpServlet {
     @Override
     public void init(final ServletConfig config) throws ServletException {
         super.init(config);
+    }
+
+    @Override
+    protected void service(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        // create a new HttpSession if it's missing
+        req.getSession(true);
+        super.service(req, resp);
     }
 
     @Override

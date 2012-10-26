@@ -62,13 +62,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
-
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
 import org.apache.commons.logging.Log;
 import com.openexchange.log.LogFactory;
-
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.contact.ContactService;
 import com.openexchange.exception.OXException;
@@ -88,7 +85,7 @@ import com.openexchange.user.UserService;
 
 /**
  * {@link MicroformatServlet}
- *
+ * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a> - HTML whitelisting, same-origin-policy stuff
  */
@@ -129,7 +126,6 @@ public class MicroformatServlet extends OnlinePublicationServlet {
 
     private static final DateFormat TIME_FORMAT = new SimpleDateFormat("yyyy-MM-dd H:m:s.S z");
 
-
     static {
         TIME_FORMAT.setTimeZone(TimeZone.getTimeZone("UTC"));
     }
@@ -141,7 +137,6 @@ public class MicroformatServlet extends OnlinePublicationServlet {
     public static void setPublicationDataLoaderService(final PublicationDataLoaderService service) {
         dataLoader = service;
     }
-
 
     public static void setUserService(final UserService service) {
         userService = service;
@@ -168,10 +163,11 @@ public class MicroformatServlet extends OnlinePublicationServlet {
         htmlService = htmlService2;
     }
 
-
     @Override
     protected void service(final HttpServletRequest req, final HttpServletResponse resp) throws IOException {
         try {
+            // create a new HttpSession if it's missing
+            req.getSession(true);
             resp.setContentType("text/html; charset=UTF-8");
             final Map<String, String> args = getPublicationArguments(req);
             final String module = args.get(MODULE);
@@ -197,7 +193,6 @@ public class MicroformatServlet extends OnlinePublicationServlet {
                 return;
             }
 
-
             final Collection<? extends Object> loaded = dataLoader.load(publication);
 
             final HashMap<String, Object> variables = new HashMap<String, Object>();
@@ -210,15 +205,11 @@ public class MicroformatServlet extends OnlinePublicationServlet {
             variables.put("dateFormat", DATE_FORMAT);
             variables.put("timeFormat", TIME_FORMAT);
             String admin = configService.getProperty("PUBLISH_REVOKE");
-            if(admin == null || admin.equals("")) {
+            if (admin == null || admin.equals("")) {
                 admin = userService.getUser(ctx.getMailadmin(), ctx).getMail();
             }
-            final String privacyText = formatPrivacyText(
-                getPrivacyText(user),
-                admin,
-                user,
-                new Date());
-            variables.put("privacy", privacyText ); //TODO Use lastmodified once someone implements this.
+            final String privacyText = formatPrivacyText(getPrivacyText(user), admin, user, new Date());
+            variables.put("privacy", privacyText); // TODO Use lastmodified once someone implements this.
             variables.put("userContact", userContact);
             variables.put("htmlService", new HTMLUtils(htmlService));
 
@@ -230,15 +221,15 @@ public class MicroformatServlet extends OnlinePublicationServlet {
             final StringWriter htmlWriter = new StringWriter();
             template.process(variables, htmlWriter);
             String html = htmlWriter.toString();
-            if(isUsingWhitelisting(template.getLevel())){
-            	html = htmlService.getConformHTML(html, Charset.defaultCharset().toString());
-            	html = htmlService.filterWhitelist(html, "microformatWhitelist");
+            if (isUsingWhitelisting(template.getLevel())) {
+                html = htmlService.getConformHTML(html, Charset.defaultCharset().toString());
+                html = htmlService.filterWhitelist(html, "microformatWhitelist");
             }
             resp.getWriter().write(html);
 
         } catch (final OXException x) {
             LOG.error(x.getMessage(), x);
-            resp.getWriter().println("Publishing failed. Please try again later. Exception ID: "+x.getExceptionId());
+            resp.getWriter().println("Publishing failed. Please try again later. Exception ID: " + x.getExceptionId());
 
         } catch (final Throwable t) {
             LOG.error(t.getMessage(), t);
@@ -247,31 +238,30 @@ public class MicroformatServlet extends OnlinePublicationServlet {
     }
 
     private boolean isUsingWhitelisting(final TemplateLevel templateLevel) {
-    	final String globalWhitelisting = configService.getProperty(USE_WHITELISTING_PROPERTY_NAME, "false");
+        final String globalWhitelisting = configService.getProperty(USE_WHITELISTING_PROPERTY_NAME, "false");
 
-    	if (Boolean.parseBoolean(globalWhitelisting)) {
-    	    return true;
-    	}
+        if (Boolean.parseBoolean(globalWhitelisting)) {
+            return true;
+        }
 
-    	final String[] strings = globalWhitelisting.split("\\s*,\\s*");
-    	for (final String string : strings) {
+        final String[] strings = globalWhitelisting.split("\\s*,\\s*");
+        for (final String string : strings) {
             if (templateLevel.name().toLowerCase().equals(string.toLowerCase())) {
                 return true;
             }
         }
 
-    	return false;
-	}
-
-	private Contact getContact(final PublicationSession publicationSession, final Context context) throws OXException {
-        return contacts.getUser(publicationSession, publicationSession.getUserId()); 
+        return false;
     }
 
+    private Contact getContact(final PublicationSession publicationSession, final Context context) throws OXException {
+        return contacts.getUser(publicationSession, publicationSession.getUserId());
+    }
 
     private String formatPrivacyText(final String privacyText, final String adminAddress, final User user, final Date creationDate) {
         final String date = new SimpleDateFormat("yyyy-MM-dd").format(creationDate);
         final String retVal = String.format(privacyText, adminAddress, user.getMail(), date);
-        return "<p>" +retVal.replaceAll("\n", "</p><p>") + "</p>";
+        return "<p>" + retVal.replaceAll("\n", "</p><p>") + "</p>";
     }
 
     private String getCollectionName(final String module) {
@@ -303,7 +293,7 @@ public class MicroformatServlet extends OnlinePublicationServlet {
         return user;
     }
 
-    private String getPrivacyText(final User user){
+    private String getPrivacyText(final User user) {
         return translator.translate(user.getLocale(), MicroformatStrings.DISCLAIMER_PRIVACY);
     }
 
