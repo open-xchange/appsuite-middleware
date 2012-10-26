@@ -258,7 +258,7 @@ public class FileResponseRenderer implements ResponseRenderer {
         if (request.isSet("width") || request.isSet("height")) {
             transformations.scale(
                 request.isSet("width") ? request.getParameter("width", int.class).intValue() : 0,
-                request.isSet("cropY") ? request.getParameter("cropY", int.class).intValue() : 0,
+                request.isSet("height") ? request.getParameter("height", int.class).intValue() : 0,
                 ScaleType.getType(request.getParameter("scaleType"))
             );
         }

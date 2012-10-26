@@ -64,7 +64,6 @@ import java.util.Set;
 public final class MailFields {
 
     private static final MailField[] VALUES = MailField.values();
-
     private final boolean[] arr;
 
     /**
@@ -132,6 +131,11 @@ public final class MailFields {
         super();
         arr = new boolean[VALUES.length];
         System.arraycopy(mailFields.arr, 0, arr, 0, arr.length);
+    }
+
+    @Override
+    public String toString() {
+        return Arrays.toString(toArray());
     }
 
     /**
