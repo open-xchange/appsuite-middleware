@@ -114,21 +114,13 @@ public class MailAccountPOP3Storage implements POP3Storage {
      */
 
     private final POP3StorageProperties properties;
-
     private String path;
-
     private final POP3Access pop3Access;
-
     private MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> defaultMailAccess;
-
     private final int pop3AccountId;
-
     private MailAccountPOP3MessageStorage messageStorage;
-
     private MailAccountPOP3FolderStorage folderStorage;
-
     private char separator;
-
     private final Collection<OXException> warnings;
 
     MailAccountPOP3Storage(final POP3Access pop3Access, final POP3StorageProperties properties) throws OXException {
