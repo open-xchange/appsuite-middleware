@@ -13,6 +13,8 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.apache.commons.logging.Log;
+import com.openexchange.admin.contextrestore.dataobjects.UpdateTaskEntry;
+import com.openexchange.admin.contextrestore.dataobjects.UpdateTaskInformation;
 import com.openexchange.admin.contextrestore.dataobjects.VersionInformation;
 import com.openexchange.admin.contextrestore.osgi.Activator;
 import com.openexchange.admin.contextrestore.rmi.OXContextRestoreInterface;
@@ -94,8 +96,6 @@ public static class Parser {
         private final static Pattern insertIntoVersion = Pattern.compile("^INSERT INTO `version` VALUES \\((?:([^\\),]*),)(?:([^\\),]*),)(?:([^\\),]*),)(?:([^\\),]*),)([^\\),]*)\\).*$");
 
         public PoolIdSchemaAndVersionInfo start(final int cid, final String filename) throws FileNotFoundException, IOException, OXContextRestoreException {
-            final BufferedReader in = new BufferedReader(new FileReader(filename));
-            BufferedWriter bufferedWriter = null;
             int c;
             int state = 0;
             int oldstate = 0;
@@ -109,6 +109,10 @@ public static class Parser {
             int pool_id = -1;
             String schema = null;
             VersionInformation versionInformation = null;
+            UpdateTaskInformation updateTaskInformation = null;
+
+            final BufferedReader in = new BufferedReader(new FileReader(filename));
+            BufferedWriter bufferedWriter = null;
             try {
                 while ((c = in.read()) != -1) {
                     if (0 == state && c == '-') {
@@ -160,11 +164,16 @@ public static class Parser {
                             } else if (furthersearch && datadumpmatcher.matches()) {
                                 // Content found
                                 LOG.info("Dump found");
+                                if (false && "updateTask".equals(table_name)) {
+                                    // One or more entries for 'updateTask' table
+                                    if (null == updateTaskInformation) {
+                                        updateTaskInformation = new UpdateTaskInformation();
+                                    }
+                                    searchAndCheckUpdateTask(in, updateTaskInformation);
+                                }
                                 if ("version".equals(table_name)) {
                                     // The version table is quite small so it is safe to read the whole line here:
-                                    if ((versionInformation = searchAndCheckVersion(in)) == null) {
-                                        throw new OXContextRestoreException(Code.NO_VERSION_INFORMATION_FOUND);
-                                    }
+                                    versionInformation = searchAndCheckVersion(in);
                                 }
                                 if ("context_server2db_pool".equals(table_name)) {
                                     searchcontext = true;
@@ -242,8 +251,7 @@ public static class Parser {
                 }
                 in.close();
             }
-            final PoolIdSchemaAndVersionInfo poolIdAndSchema = new PoolIdSchemaAndVersionInfo(pool_id, schema, versionInformation);
-            return poolIdAndSchema;
+            return new PoolIdSchemaAndVersionInfo(pool_id, schema, versionInformation);
         }
 
         /**
@@ -266,6 +274,25 @@ public static class Parser {
                 }
             }
             return null;
+        }
+
+        private final static String REGEX_VALUE = "([^\\),]*)";
+        private final static Pattern insertIntoUpdateTask = Pattern.compile("^INSERT INTO `updateTask` VALUES \\((?:" + REGEX_VALUE + ",)(?:" + REGEX_VALUE + ",)(?:" + REGEX_VALUE + ",)" + REGEX_VALUE + "\\).*$");
+
+        private UpdateTaskInformation searchAndCheckUpdateTask(final BufferedReader in, final UpdateTaskInformation updateTaskInformation) throws IOException {
+            String readLine2 = in.readLine();
+            while ((readLine2 = in.readLine()) != null && !readLine2.equals("--")) {
+                final Matcher matcher = insertIntoUpdateTask.matcher(readLine2);
+                if (matcher.matches()) {
+                    final UpdateTaskEntry updateTaskEntry = new UpdateTaskEntry();
+                    updateTaskEntry.setContextId(Integer.parseInt(matcher.group(1)));
+                    updateTaskEntry.setTaskName(matcher.group(2));
+                    updateTaskEntry.setSuccessful((Integer.parseInt(matcher.group(3)) > 0));
+                    updateTaskEntry.setLastModified(Long.parseLong(matcher.group(4)));
+                    updateTaskInformation.add(updateTaskEntry);
+                }
+            }
+            return updateTaskInformation;
         }
         
         /**
@@ -538,8 +565,6 @@ public static class Parser {
             }
             if (null == result) {
                 throw new OXContextRestoreException(Code.NO_CONFIGDB_FOUND);
-            } else if (null == versionInfo) {
-                throw new OXContextRestoreException(Code.NO_USER_DATA_DB_FOUND);
             }
             
             final OXContextRestoreStorageInterface instance = OXContextRestoreStorageInterface.getInstance();
