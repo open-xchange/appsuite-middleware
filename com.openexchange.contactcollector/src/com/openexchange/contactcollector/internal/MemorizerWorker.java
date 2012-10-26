@@ -377,7 +377,7 @@ public final class MemorizerWorker {
     private static final ContactField[] FIELDS = { 
     	ContactField.OBJECT_ID, ContactField.FOLDER_ID, ContactField.LAST_MODIFIED, ContactField.USE_COUNT };
 
-	private static final ContactField[] SEARCH_FIELDS = { ContactField.EMAIL1, ContactField.EMAIL1, ContactField.EMAIL3 }; 
+	private static final ContactField[] SEARCH_FIELDS = { ContactField.EMAIL1, ContactField.EMAIL2, ContactField.EMAIL3 }; 
 
     private static int memorizeContact(final InternetAddress address, final Session session, final Context ctx, final UserConfiguration userConfig) throws OXException {
         /*
