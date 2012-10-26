@@ -3,7 +3,7 @@ Name:           open-xchange-meta
 BuildArch:	noarch
 #!BuildIgnore: post-build-checks
 Version:	@OXVERSION@
-%define		ox_release 3
+%define		ox_release 4
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GPL-2.0
@@ -266,6 +266,8 @@ Authors:
 %doc README.TXT
 
 %changelog
+* Fri Oct 26 2012 Carsten Hoeger <choeger@open-xchange.com>
+Third release build for EDP drop #5
 * Fri Oct 26 2012 Carsten Hoeger <choeger@open-xchange.com>
 Second release build for EDP drop #5
 * Thu Oct 11 2012 Carsten Hoeger <choeger@open-xchange.com>

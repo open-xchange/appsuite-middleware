@@ -1,3 +1,9 @@
+open-xchange-spamsettings-generic (6.23.0-4) unstable; urgency=low
+
+  * Third release build for EDP drop #5
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Fri, 26 Oct 2012 15:59:06 +0200
+
 open-xchange-spamsettings-generic (6.23.0-3) unstable; urgency=low
 
   * Second release build for EDP drop #5

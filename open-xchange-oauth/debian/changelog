@@ -1,3 +1,9 @@
+open-xchange-oauth (6.23.0-4) unstable; urgency=low
+
+  * Third release build for EDP drop #5
+
+ -- Steffen Templin <marcus.klein@open-xchange.com>  Fri, 26 Oct 2012 15:58:42 +0200
+
 open-xchange-oauth (6.23.0-3) unstable; urgency=low
 
   * Second release build for EDP drop #5
