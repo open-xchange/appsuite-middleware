@@ -49,20 +49,24 @@
 
 package com.openexchange.sessiond.impl;
 
+import static com.openexchange.sessiond.services.SessiondServiceRegistry.getServiceRegistry;
+import javax.management.MBeanException;
 import javax.management.NotCompliantMBeanException;
 import javax.management.StandardMBean;
+import com.openexchange.exception.OXException;
 import com.openexchange.sessiond.SessiondMBean;
+import com.openexchange.sessionstorage.SessionStorageService;
 
 /**
  * {@link SessiondMBeanImpl}
- *
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class SessiondMBeanImpl extends StandardMBean implements SessiondMBean {
 
     /**
      * Initializes a new {@link SessiondMBeanImpl}
-     *
+     * 
      * @throws NotCompliantMBeanException If the mbeanInterface does not follow JMX design patterns for Management Interfaces, or if this
      *             does not implement the specified interface.
      */
@@ -87,7 +91,7 @@ public final class SessiondMBeanImpl extends StandardMBean implements SessiondMB
         } catch (final OXException e) {
             // Ignore
         }
-        */
+         */
         /*
          * Clear context-associated sessions
          */
@@ -102,6 +106,16 @@ public final class SessiondMBeanImpl extends StandardMBean implements SessiondMB
     @Override
     public int[] getNumberOfLongTermSessions() {
         return SessionHandler.getNumberOfLongTermSessions();
+    }
+
+    @Override
+    public void clearSessionStorage() throws MBeanException {
+        SessionStorageService storageService = getServiceRegistry().getService(SessionStorageService.class);
+        try {
+            storageService.cleanUp();
+        } catch (OXException e) {
+            throw new MBeanException(e, e.getMessage());
+        }
     }
 
 }

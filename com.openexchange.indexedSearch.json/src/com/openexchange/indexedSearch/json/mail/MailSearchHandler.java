@@ -127,20 +127,14 @@ public class MailSearchHandler implements SearchHandler {
                 {
                     more[0] = false;
                     String name = null == names ? null : names.get(i++);     
-                    Map<String, Object> params = new HashMap<String, Object>(1);
-                    int accountId = query.getAccountId();
-                    if (accountId >= 0) {
-                        params.put("accountId", Integer.valueOf(accountId));
-                    }                    
-                    QueryParameters.Builder builder = new QueryParameters.Builder(params)
+                    
+                    // FIXME: Add account and folder filter
+                    QueryParameters.Builder builder = new QueryParameters.Builder()
                                                                 .setOffset(range[0])
                                                                 .setLength(range[1] - range[0])
                                                                 .setSortField(MailIndexField.RECEIVED_DATE)
                                                                 .setOrder(Order.DESC);                    
-                    String fullName = query.getFullName();
-                    if (fullName != null) {
-                        builder.setFolders(Collections.singleton(fullName));
-                    }
+
                     QueryParameters parameters = builder.setHandler(com.openexchange.index.SearchHandler.CUSTOM).setSearchTerm(mailSearchTerm).build();
                     MailField[] mailFields = MailField.getFields(fields);
                     Set<MailIndexField> indexFields = MailIndexField.getFor(mailFields);

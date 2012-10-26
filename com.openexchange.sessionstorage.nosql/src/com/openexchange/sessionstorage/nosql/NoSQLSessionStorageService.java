@@ -500,13 +500,6 @@ public class NoSQLSessionStorageService implements SessionStorageService {
     }
 
     @Override
-    public void cleanUp() {
-        Mutator<String> mutator = HFactory.createMutator(keyspace, serializer);
-        mutator.addDeletion("*", CF_NAME, null, serializer);
-        mutator.execute();
-    }
-
-    @Override
     public void changePassword(String sessionId, String newPassword) throws OXException {
         SliceQuery<String, String, String> query = HFactory.createSliceQuery(keyspace, serializer, serializer, serializer);
         query.setColumnFamily(CF_NAME).setKey(sessionId).setColumnNames(COLUMN_NAMES);
@@ -570,6 +563,30 @@ public class NoSQLSessionStorageService implements SessionStorageService {
     }
 
     public void cleanup() {
+        long time = System.currentTimeMillis();
+        Mutator<String> mutator = HFactory.createMutator(keyspace, serializer);
+        RangeSlicesQuery<String, String, String> query = HFactory.createRangeSlicesQuery(keyspace, serializer, serializer, serializer);
+        query.setColumnFamily(CF_NAME);
+        query.setColumnNames(COLUMN_NAMES);
+        QueryResult<OrderedRows<String, String, String>> result = query.execute();
+        OrderedRows<String, String, String> rows = result.get();
+        List<Row<String, String, String>> rowsList = rows.getList();
+        Iterator<Row<String, String, String>> rowIterator = rowsList.iterator();
+        while (rowIterator.hasNext()) {
+            Row<String, String, String> row = rowIterator.next();
+            ColumnSlice<String, String> columns = row.getColumnSlice();
+            List<HColumn<String, String>> columnList = columns.getColumns();
+            for (HColumn<String, String> column : columnList) {
+                if (time > column.getClock() + LIFETIME) {
+                    mutator.addDeletion(row.getKey(), CF_NAME, column.getName(), serializer);
+                }
+            }
+        }
+        mutator.execute();
+    }
+
+    @Override
+    public void cleanUp() {
         long time = System.currentTimeMillis();
         Mutator<String> mutator = HFactory.createMutator(keyspace, serializer);
         RangeSlicesQuery<String, String, String> query = HFactory.createRangeSlicesQuery(keyspace, serializer, serializer, serializer);

@@ -50,11 +50,14 @@
 package com.openexchange.cluster.discovery.mdns.osgi;
 
 import java.net.InetAddress;
+import java.util.Dictionary;
+import java.util.Hashtable;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicReference;
 import org.apache.commons.logging.Log;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.openexchange.cluster.discovery.ClusterDiscoveryService;
@@ -152,8 +155,8 @@ public final class MDNSClusterDiscoveryActivator extends HousekeepingActivator {
     }
 
     @Override
-    public <S> void registerService(final Class<S> clazz, final S service) {
-        super.registerService(clazz, service);
+    public <S> void registerService(final Class<S> clazz, final S service, final Dictionary<String, ?> props) {
+        super.registerService(clazz, service, props);
     }
 
     @Override
@@ -174,7 +177,9 @@ public final class MDNSClusterDiscoveryActivator extends HousekeepingActivator {
                 try {
                     if (serviceRef.compareAndSet(null, service)) {
                         final ClusterAwareMdnsServiceListener registeringListener = new ClusterAwareMdnsServiceListener(SERVICE_ID);
-                        registerService(ClusterDiscoveryService.class, new MDNSClusterDiscoveryService(SERVICE_ID, serviceRef, registeringListener));
+                        final Dictionary<String, Object> props = new Hashtable<String, Object>(1);
+                        props.put(Constants.SERVICE_RANKING, Integer.valueOf(10));
+                        registerService(ClusterDiscoveryService.class, new MDNSClusterDiscoveryService(SERVICE_ID, serviceRef, registeringListener), props);
                         service.addListener(registeringListener);
                         registeringListenerRef.set(registeringListener);
                         return service;

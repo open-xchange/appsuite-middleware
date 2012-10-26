@@ -131,7 +131,7 @@ public class SolrSearchEngine implements IndexSearchEngine {
         @Override
         public IndexResult<T> call() throws Exception {
             try {
-                QueryParameters parameters = new QueryParameters.Builder(searchTerm).setHandler(SearchHandler.SIMPLE).build();
+                QueryParameters parameters = new QueryParameters.Builder().setSearchTerm(searchTerm).setHandler(SearchHandler.SIMPLE).build();
                 return indexAccess.query(parameters, null);
             } finally {
                 latch.countDown();

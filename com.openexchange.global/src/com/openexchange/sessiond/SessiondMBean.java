@@ -49,6 +49,7 @@
 
 package com.openexchange.sessiond;
 
+import javax.management.MBeanException;
 
 /**
  * {@link SessiondMBean} - The MBean for sessiond
@@ -88,5 +89,10 @@ public interface SessiondMBean {
      * @return The number of long-term sessions
      */
     int[] getNumberOfLongTermSessions();
+
+    /**
+     * Clear all sessions in central session storage. This does not affect the local short term session container.
+     */
+    public void clearSessionStorage() throws MBeanException;
 
 }

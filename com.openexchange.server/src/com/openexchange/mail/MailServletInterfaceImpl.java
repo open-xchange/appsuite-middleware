@@ -1648,10 +1648,12 @@ final class MailServletInterfaceImpl extends MailServletInterface {
             useFields = MailField.getFields(fields);
             onlyFolderAndID = onlyFolderAndID(useFields);
         }
-        /*
+        /*-
          * More than ID and folder requested?
+         *  AND
+         * Messages do not already contain requested fields although only IDs were requested
          */
-        if (!onlyFolderAndID) {
+        if (!onlyFolderAndID && !containsAll(mails[0], useFields)) {
             /*
              * Extract IDs
              */
@@ -1681,7 +1683,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
              */
             // TODO: JSONMessageCache.getInstance().removeAllFoldersExcept(accountId, fullname, session);
             MailMessageCache.getInstance().removeUserMessages(session.getUserId(), contextId);
-            if ((cachable) && (mails != null) && (mails.length > 0)) {
+            if ((cachable) && (mails.length > 0)) {
                 /*
                  * ... and put new ones
                  */
@@ -1701,6 +1703,72 @@ final class MailServletInterfaceImpl extends MailServletInterface {
             }
         }
         return new SearchIteratorDelegator<MailMessage>(l);
+    }
+
+    private static boolean containsAll(final MailMessage candidate, final MailField[] fields) {
+        boolean contained = true;
+        final int length = fields.length;
+        for (int i = 0; contained && i < length; i++) {
+            final MailField field = fields[i];
+            switch (field) {
+            case ACCOUNT_NAME:
+                contained = candidate.containsAccountId() || candidate.containsAccountName();
+                break;
+            case BCC:
+                contained = candidate.containsBcc();
+                break;
+            case CC:
+                contained = candidate.containsCc();
+                break;
+            case COLOR_LABEL:
+                contained = candidate.containsColorLabel();
+                break;
+            case CONTENT_TYPE:
+                contained = candidate.containsContentType();
+                break;
+            case DISPOSITION_NOTIFICATION_TO:
+                contained = candidate.containsDispositionNotification();
+                break;
+            case FLAGS:
+                contained = candidate.containsFlags();
+                break;
+            case FOLDER_ID:
+                contained = true;
+                break;
+            case FROM:
+                contained = candidate.containsFrom();
+                break;
+            case ID:
+                contained = null != candidate.getMailId();
+                break;
+            case PRIORITY:
+                contained = candidate.containsPriority();
+                break;
+            case RECEIVED_DATE:
+                contained = candidate.containsReceivedDate();
+                break;
+            case SENT_DATE:
+                contained = candidate.containsSentDate();
+                break;
+            case SIZE:
+                contained = candidate.containsSize();
+                break;
+            case SUBJECT:
+                contained = candidate.containsSubject();
+                break;
+            case THREAD_LEVEL:
+                contained = candidate.containsThreadLevel();
+                break;
+            case TO:
+                contained = candidate.containsTo();
+                break;
+
+            default:
+                contained = false;
+                break;
+            }
+        }
+        return contained;
     }
 
     /**

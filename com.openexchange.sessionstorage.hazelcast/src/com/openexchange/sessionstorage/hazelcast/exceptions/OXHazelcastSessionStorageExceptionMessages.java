@@ -82,6 +82,8 @@ public class OXHazelcastSessionStorageExceptionMessages implements LocalizableSt
 
     public final static String HAZELCAST_SESSIONSTORAGE_RANDOM_NOT_FOUND_MSG = "No sessions found by random token %1$s";
 
+    public final static String HAZELCAST_SESSIONSTORAGE_CONFIG_FILE_MSG = "Error in config file.";
+
     /**
      * Initializes a new {@link OXHazelcastSessionStorageExceptionMessages}.
      */

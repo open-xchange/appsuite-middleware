@@ -7,7 +7,10 @@ import java.util.Map;
 
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
+import com.openexchange.appstore.noms.actions.EnterAppAction;
+import com.openexchange.appstore.noms.actions.EnterShopAction;
 import com.openexchange.appstore.noms.actions.ListAction;
+import com.openexchange.appstore.noms.actions.MarkupLinkAction;
 import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceLookup;
 
@@ -19,6 +22,10 @@ public class NOMSAppActionFactory implements AJAXActionServiceFactory {
 	public NOMSAppActionFactory(ServiceLookup services) {
 		this.services = services;
 		ACTIONS.put("list", new ListAction(services));
+		ACTIONS.put("enterShop", new EnterShopAction(services));
+		ACTIONS.put("enterApp", new EnterAppAction(services));
+		ACTIONS.put("markup", new MarkupLinkAction(services));
+			
 	}
 	
 	@Override

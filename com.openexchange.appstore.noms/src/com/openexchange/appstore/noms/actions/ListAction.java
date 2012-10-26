@@ -15,14 +15,12 @@ import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
-public class ListAction implements AJAXActionService {
+public class ListAction extends AbstractLibertyAction {
 
 	
-	private ServiceLookup services;
 
 	public ListAction(ServiceLookup services) {
-		super();
-		this.services = services;
+		super(services);
 	}
 
 	@Override
@@ -34,29 +32,7 @@ public class ListAction implements AJAXActionService {
 		return parseResponse(response);
 	}
 
-	private LibertyAppStoreConfig getConfig(ServerSession session) throws OXException {
-		ConfigView view = services.getService(ConfigViewFactory.class).getView(session.getUserId(), session.getContextId());
-		String url = view.property("com.openexchange.liberty.appstore.url", String.class).get();
-		
-		String user = null, password = null;
-		
-		ComposedConfigProperty<String> userProp = view.property("com.openexchange.liberty.appstore.user", String.class);
-		if (userProp.isDefined()) {
-			user = userProp.get();
-		} else {
-			user = session.getUserlogin();
-		}
-		
-		ComposedConfigProperty<String> passwordProp = view.property("com.openexchange.liberty.appstore.password", String.class);
-		if (passwordProp.isDefined()) {
-			password = passwordProp.get();
-		} else {
-			password = session.getPassword();
-		}
-		
-		
-		return new LibertyAppStoreConfig(url, user, password);
-	}
+	
 	
 	private HTTPResponse getApps(LibertyAppStoreConfig config,
 			AJAXRequestData requestData) throws OXException {

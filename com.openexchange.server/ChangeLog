@@ -1,3 +1,8 @@
+* 2012-10-23 - marcus.klein@open-xchange.com
+
+ - Story 36135203: Separated Parallels specific SpamAssassin spam handler into its own package. Now other spam handler can be used with
+   Parallels integration.
+
 * 2012-10-21 - thorben.betten@open-xchange.com
 
  - Fix for bug 23440: Checking for possibly expunged message prior to writing its JSON representation

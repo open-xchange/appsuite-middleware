@@ -67,7 +67,7 @@ import com.openexchange.sessionstorage.impl.exceptions.OXSessionStorageException
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  */
 public class SessionStorageServiceImpl implements SessionStorageService {
-    
+
     private final Map<String, StoredSession> sessions;
 
     private static Log LOG = com.openexchange.log.Log.loggerFor(SessionStorageServiceImpl.class);
@@ -174,7 +174,7 @@ public class SessionStorageServiceImpl implements SessionStorageService {
         for (String sessionId : sessions.keySet()) {
             StoredSession session = sessions.get(sessionId);
             if (session.getUserId() == userId && session.getContextId() == contextId) {
-                //TODO: is active session?
+                // TODO: is active session?
                 return session;
             }
         }
@@ -207,13 +207,13 @@ public class SessionStorageServiceImpl implements SessionStorageService {
     }
 
     @Override
-    public int getNumberOfActiveSessions()  {
+    public int getNumberOfActiveSessions() {
         int active = 0;
         for (String sessionId : sessions.keySet()) {
             StoredSession session = sessions.get(sessionId);
-            //if (session.isActive()) {
-                active++;
-            //}
+            // if (session.isActive()) {
+            active++;
+            // }
         }
         return active;
     }
@@ -245,15 +245,14 @@ public class SessionStorageServiceImpl implements SessionStorageService {
     }
 
     @Override
-    public Session getCachedSession(String sessionId) throws OXException {
+    public Session getCachedSession(String sessionId) {
         // TODO Auto-generated method stub
         return null;
     }
 
     @Override
-    public void cleanUp() throws OXException {
-        // TODO Auto-generated method stub
-        
+    public void cleanUp() {
+        sessions.clear();
     }
 
     @Override
@@ -272,7 +271,7 @@ public class SessionStorageServiceImpl implements SessionStorageService {
     @Override
     public void checkAuthId(String login, String authId) throws OXException {
         // TODO Auto-generated method stub
-        
+
     }
 
 }

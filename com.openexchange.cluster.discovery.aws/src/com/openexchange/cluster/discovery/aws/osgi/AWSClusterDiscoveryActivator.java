@@ -49,7 +49,10 @@
 
 package com.openexchange.cluster.discovery.aws.osgi;
 
+import java.util.Dictionary;
+import java.util.Hashtable;
 import org.apache.commons.logging.Log;
+import org.osgi.framework.Constants;
 import com.amazonaws.services.ec2.AmazonEC2;
 import com.openexchange.cluster.discovery.ClusterDiscoveryService;
 import com.openexchange.cluster.discovery.aws.AWSClusterDiscoveryService;
@@ -84,7 +87,9 @@ public class AWSClusterDiscoveryActivator extends HousekeepingActivator {
         LOG.info("Starting bundle: com.openexchange.cluster.discovery.aws");
         amazonEC2 = getService(AmazonEC2.class);
         AWSClusterDiscoveryService service = new AWSClusterDiscoveryService(amazonEC2);
-        registerService(ClusterDiscoveryService.class, service);
+        final Dictionary<String, Object> props = new Hashtable<String, Object>(1);
+        props.put(Constants.SERVICE_RANKING, Integer.valueOf(10));
+        registerService(ClusterDiscoveryService.class, service, props);
     }
 
     @Override

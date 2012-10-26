@@ -65,12 +65,10 @@ import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
 import javax.mail.internet.IDNA;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeUtility;
 import javax.mail.internet.ParseException;
-
 import com.openexchange.contact.ContactFieldOperand;
 import com.openexchange.contact.ContactService;
 import com.openexchange.contactcollector.osgi.CCServiceRegistry;
@@ -447,7 +445,7 @@ public final class MemorizerWorker {
             final OCLPermission perm =
                 new OXFolderAccess(ctx).getFolderPermission(foundContact.getParentFolderID(), session.getUserId(), userConfig);
             if (perm.canWriteAllObjects()) {
-                contactService.updateContact(session, Integer.toString(contact.getParentFolderID()), 
+                contactService.updateContact(session, Integer.toString(foundContact.getParentFolderID()), 
                 		Integer.toString(foundContact.getObjectID()), foundContact, foundContact.getLastModified());
             }
             retval = foundContact.getObjectID();

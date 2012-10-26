@@ -49,17 +49,26 @@
 
 package com.openexchange.appstore.noms.actions;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+import java.util.Collection;
+
+import org.apache.commons.codec.binary.Base64;
+
 /**
  * {@link LibertyAppStoreConfig}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class LibertyAppStoreConfig {
-	private String url, userName, password;
+	private String url, storefront, gateway, gatewayQuery, userName, password;
 	
-	public LibertyAppStoreConfig(String url, String userName, String password) {
+	public LibertyAppStoreConfig(String url, String storefront, String gateway, String gatewayQuery, String userName, String password) {
 		super();
 		this.url = url;
+		this.storefront = storefront;
+		this.gateway = gateway;
+		this.gatewayQuery = gatewayQuery;
 		this.userName = userName;
 		this.password = password;
 	}
@@ -70,6 +79,21 @@ public class LibertyAppStoreConfig {
 
 	public void setUrl(String url) {
 		this.url = url;
+	}
+	
+	public String getStorefront() {
+		return storefront;
+	}
+	
+	public String getStorefrontWithSubstitutions() {
+		String ret = getStorefront();
+		ret = ret.replace("[user]", enc(getUserName()));
+		ret = ret.replace("[password]", enc(getPassword()));
+		return ret;
+	}
+
+	public void setStorefront(String storefront) {
+		this.storefront = storefront;
 	}
 
 	public String getUserName() {
@@ -87,6 +111,29 @@ public class LibertyAppStoreConfig {
 	public void setPassword(String password) {
 		this.password = password;
 	}
+
+	public String getAppLink(String app, String path) {
+		String query = gatewayQuery.replace("[app]", enc(app)).replace("[path]", path).replace("[user]", enc(getUserName())).replace("[password]", enc(getPassword()));
 	
+		try {
+			return gateway + "?coded=" + URLEncoder.encode(Base64.encodeBase64String(query.getBytes()), "UTF-8");
+		} catch (UnsupportedEncodingException e) {
+			e.printStackTrace();
+			return null;
+		}
+		
+	}
+
+	public String getMarkup(String parameter) {
+		return parameter.replace("[user]", enc(getUserName())).replace("[password]", enc(getPassword()));
+	}
+	
+	private String enc(String s) {
+		try {
+			return URLEncoder.encode(s, "UTF-8");
+		} catch (UnsupportedEncodingException e) {
+			return s;
+		}
+	}
 	
 }
