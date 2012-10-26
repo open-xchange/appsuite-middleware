@@ -1148,10 +1148,6 @@ msgstr ""
 msgid "Can not set property %1$s in scope %2$s"
 msgstr ""
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contact.aggregator/src/com/openexchange/contact/aggregator/loginHandlers/FolderStrings.java:62
-msgid "All my contacts"
-msgstr ""
-
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contact.storage.ldap/src/com/openexchange/contact/storage/ldap/LdapExceptionMessages.java:64
 msgid "An error occurred: %s"
 msgstr ""
