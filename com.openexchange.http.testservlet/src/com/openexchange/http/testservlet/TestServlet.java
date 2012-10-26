@@ -60,10 +60,9 @@ import javax.servlet.http.HttpServletResponse;
 import com.openexchange.configuration.ServerConfig;
 import com.openexchange.configuration.ServerConfig.Property;
 
-
 /**
  * {@link TestServlet} - Default TestServlet for basic server tests.
- *
+ * 
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
 public class TestServlet extends HttpServlet {
@@ -75,6 +74,13 @@ public class TestServlet extends HttpServlet {
      */
     public TestServlet() {
         super();
+    }
+
+    @Override
+    protected void service(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        // create a new HttpSession if it's missing
+        req.getSession(true);
+        super.service(req, resp);
     }
 
     /**
@@ -205,7 +211,7 @@ public class TestServlet extends HttpServlet {
 
     /**
      * Returns the complete body as a string. Be carefull when getting big request bodies.
-     *
+     * 
      * @param req http servlet request.
      * @return a string with the complete body.
      * @throws IOException if an error occurs while reading the body.

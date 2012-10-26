@@ -54,33 +54,31 @@ import java.net.URLEncoder;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
-
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
 import com.openexchange.http.deferrer.CustomRedirectURLDetermination;
-
 
 /**
  * {@link DeferrerServlet}
- *
+ * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class DeferrerServlet extends HttpServlet {
-	
-	public static final List<CustomRedirectURLDetermination> CUSTOM_HANDLERS = new CopyOnWriteArrayList<CustomRedirectURLDetermination>();
+
+    public static final List<CustomRedirectURLDetermination> CUSTOM_HANDLERS = new CopyOnWriteArrayList<CustomRedirectURLDetermination>();
 
     @Override
     protected void service(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        // create a new HttpSession if it's missing
+        req.getSession(true);
+
         // get url to defer to
         // redirect
-    	
-
         String redirectURL = determineRedirectURL(req);
         if (redirectURL == null) {
-        	return;
+            return;
         }
         char concat = '?';
         if (redirectURL.contains("?")) {
@@ -103,13 +101,13 @@ public class DeferrerServlet extends HttpServlet {
 
     }
 
-	private String determineRedirectURL(HttpServletRequest req) {
-		for(CustomRedirectURLDetermination determination: CUSTOM_HANDLERS) {
-			String url = determination.getURL(req);
-			if (url != null) {
-				return url;
-			}
-		}
-		return req.getParameter("redirect");
-	}
+    private String determineRedirectURL(HttpServletRequest req) {
+        for (CustomRedirectURLDetermination determination : CUSTOM_HANDLERS) {
+            String url = determination.getURL(req);
+            if (url != null) {
+                return url;
+            }
+        }
+        return req.getParameter("redirect");
+    }
 }

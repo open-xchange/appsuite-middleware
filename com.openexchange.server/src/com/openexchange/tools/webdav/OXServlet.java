@@ -221,6 +221,8 @@ public abstract class OXServlet extends WebDavServlet {
 
     @Override
     protected void service(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
+        // create a new HttpSession it it's missing
+        req.getSession(true);
         if (!"TRACE".equals(req.getMethod()) && useHttpAuth() && !doAuth(req, resp, getInterface(), getLoginCustomizer())) {
             return;
         }
