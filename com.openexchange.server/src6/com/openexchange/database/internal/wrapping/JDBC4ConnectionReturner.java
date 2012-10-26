@@ -400,7 +400,6 @@ public class JDBC4ConnectionReturner implements Connection {
     }
 
     protected void checkForAlreadyClosed() throws SQLException {
-        checkForAlreadyClosed();
         if (null == delegate) {
             throw new SQLException("Connection was already closed.");
         }
