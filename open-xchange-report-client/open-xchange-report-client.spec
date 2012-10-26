@@ -55,6 +55,10 @@ fi
 %config(noreplace) /opt/open-xchange/etc/*
 
 %changelog
+* Fri Oct 26 2012 Carsten Hoeger <choeger@open-xchange.com>
+First release candidate for 6.22.1
+* Fri Oct 26 2012 Carsten Hoeger <choeger@open-xchange.com>
+prepare for 6.22.1
 * Wed Oct 10 2012 Carsten Hoeger <choeger@open-xchange.com>
 Fifth release candidate for 6.22.0
 * Tue Oct 09 2012 Carsten Hoeger <choeger@open-xchange.com>
