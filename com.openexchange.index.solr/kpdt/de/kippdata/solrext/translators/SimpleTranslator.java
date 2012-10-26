@@ -3,9 +3,7 @@ package de.kippdata.solrext.translators;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import org.apache.log4j.Logger;
-
+import org.apache.commons.logging.Log;
 import de.kippdata.cria.solrext.utils.FormalFieldParser;
 import de.kippdata.solrext.queries.Configuration;
 import de.kippdata.solrext.queries.QueryTranslator;
@@ -16,7 +14,7 @@ public class SimpleTranslator implements QueryTranslator {
   private String handlerName;
   private FormalFieldParser parser;
 
-  private static final Logger log = Logger.getLogger(SimpleTranslator.class);
+  private static Log log = com.openexchange.log.Log.loggerFor(SimpleTranslator.class);
 
 
   @Override
