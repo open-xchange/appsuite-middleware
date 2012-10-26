@@ -51,6 +51,7 @@ package com.openexchange.webdav;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -59,8 +60,8 @@ import com.openexchange.log.LogFactory;
 import com.openexchange.server.impl.Version;
 
 /**
- * The WebDAV version servlet. OXtender needs this servlet to determine the
- * version of the server that it communicates to.
+ * The WebDAV version servlet. OXtender needs this servlet to determine the version of the server that it communicates to.
+ * 
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
  */
 public final class version extends HttpServlet {
@@ -72,12 +73,18 @@ public final class version extends HttpServlet {
      */
     private static final long serialVersionUID = -7246795219288838650L;
 
+    @Override
+    protected void service(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        // create a new HttpSession if it's missing
+        req.getSession(true);
+        super.service(req, resp);
+    }
+
     /**
      * {@inheritDoc}
      */
     @Override
-    public void doGet(final HttpServletRequest req,
-        final HttpServletResponse resp) {
+    public void doGet(final HttpServletRequest req, final HttpServletResponse resp) {
         try {
             resp.setContentType("text/plain; charset=UTF-8");
             final PrintWriter pw = resp.getWriter();

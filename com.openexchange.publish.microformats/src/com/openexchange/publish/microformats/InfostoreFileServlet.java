@@ -133,6 +133,8 @@ public class InfostoreFileServlet extends OnlinePublicationServlet {
     
     @Override
     protected void service(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
+        // create a new HttpSession if it's missing
+        req.getSession(true);
         final Map<String, String> args = getPublicationArguments(req);
         boolean startedWriting = false;
         try {

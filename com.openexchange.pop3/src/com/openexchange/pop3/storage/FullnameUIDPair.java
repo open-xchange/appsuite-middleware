@@ -69,8 +69,8 @@ public final class FullnameUIDPair implements Comparable<FullnameUIDPair> {
     }
 
     private final String fullName;
-
     private final String mailId;
+    private final int hash;
 
     /**
      * Initializes a new {@link FullnameUIDPair}.
@@ -82,6 +82,11 @@ public final class FullnameUIDPair implements Comparable<FullnameUIDPair> {
         super();
         this.fullName = fullName;
         this.mailId = mailId;
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((fullName == null) ? 0 : fullName.hashCode());
+        result = prime * result + ((mailId == null) ? 0 : mailId.hashCode());
+        this.hash = result;
     }
 
     /**
@@ -104,11 +109,7 @@ public final class FullnameUIDPair implements Comparable<FullnameUIDPair> {
 
     @Override
     public int hashCode() {
-        final int prime = 31;
-        int result = 1;
-        result = prime * result + ((fullName == null) ? 0 : fullName.hashCode());
-        result = prime * result + ((mailId == null) ? 0 : mailId.hashCode());
-        return result;
+        return hash;
     }
 
     @Override
@@ -116,10 +117,7 @@ public final class FullnameUIDPair implements Comparable<FullnameUIDPair> {
         if (this == obj) {
             return true;
         }
-        if (obj == null) {
-            return false;
-        }
-        if (getClass() != obj.getClass()) {
+        if (!(obj instanceof FullnameUIDPair)) {
             return false;
         }
         final FullnameUIDPair other = (FullnameUIDPair) obj;
