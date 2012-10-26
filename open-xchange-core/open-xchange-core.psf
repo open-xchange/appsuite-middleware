@@ -19,7 +19,7 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-6.22.1,com.openexchange.conversion.engine"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-6.22.1,com.openexchange.conversion.servlet"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-6.22.1,com.openexchange.crypto"/>
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-6.22.1,com.openexchange.data.conversion.ical.ical4j"/> core
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-6.22.1,com.openexchange.data.conversion.ical.ical4j"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-6.22.1,com.openexchange.dataretention"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-6.22.1,com.openexchange.datatypes.genericonf"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-6.22.1,com.openexchange.datatypes.genericonf.storage"/>
@@ -49,14 +49,8 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-6.22.1,com.openexchange.index"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-6.22.1,com.openexchange.itip.json"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-6.22.1,com.openexchange.jcharset"/>
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-6.22.1,com.openexchange.jslob"/>
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-6.22.1,com.openexchange.jslob.config"/>
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-6.22.1,com.openexchange.jslob.json"/>
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-6.22.1,com.openexchange.jslob.storage.db"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-6.22.1,com.openexchange.logging"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-6.22.1,com.openexchange.logging.tracking"/>
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-6.22.1,com.openexchange.mail.autoconfig"/>
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-6.22.1,com.openexchange.mail.autoconfig.json"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-6.22.1,com.openexchange.management"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-6.22.1,com.openexchange.management.impl"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-6.22.1,com.openexchange.mdns"/>
@@ -65,7 +59,6 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-6.22.1,com.openexchange.modules.model"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-6.22.1,com.openexchange.modules.storage"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-6.22.1,com.openexchange.monitoring"/>
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-6.22.1,com.openexchange.mq"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-6.22.1,com.openexchange.oauth.provider"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-6.22.1,com.openexchange.osgi"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-6.22.1,com.openexchange.passwordchange.servlet"/>
@@ -77,7 +70,6 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-6.22.1,com.openexchange.publish.online.infostore"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-6.22.1,com.openexchange.push"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-6.22.1,com.openexchange.push.udp"/>
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-6.22.1,com.openexchange.quartz"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-6.22.1,com.openexchange.rdiff"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-6.22.1,com.openexchange.rmi"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-6.22.1,com.openexchange.secret"/>
@@ -85,10 +77,8 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-6.22.1,com.openexchange.secret.recovery.json"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-6.22.1,com.openexchange.secret.recovery.mail"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-6.22.1,com.openexchange.server"/>
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-6.22.1,com.openexchange.service.messaging"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-6.22.1,com.openexchange.sessiond"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-6.22.1,com.openexchange.sessionstorage"/>
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-6.22.1,com.openexchange.sleepycat"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-6.22.1,com.openexchange.sql"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-6.22.1,com.openexchange.subscribe"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-6.22.1,com.openexchange.tasks.json"/>
@@ -100,7 +90,6 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-6.22.1,com.openexchange.xml"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-6.22.1,org.apache.tika"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-6.22.1,org.ho.jyaml"/>
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-6.22.1,org.jboss.netty"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-6.22.1,org.xmlpull"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-6.22.1,oxscripts"/>
 </provider>

@@ -15,13 +15,9 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-6.22.1,open-xchange-authentication-imap"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-6.22.1,open-xchange-authentication-kerberos"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-6.22.1,open-xchange-authorization-standard"/>
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-6.22.1,open-xchange-cluster-discovery-static"/>
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-6.22.1,open-xchange-cluster-discovery-mdns"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-6.22.1,open-xchange-dav"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-6.22.1,open-xchange-imap"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-6.22.1,open-xchange-smtp"/>
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-6.22.1,open-xchange-file-storage-cifs"/>
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-6.22.1,open-xchange-file-storage-cmis"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-6.22.1,open-xchange-oauth"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-6.22.1,open-xchange"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-6.22.1,open-xchange-l10n"/>
@@ -70,10 +66,5 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-6.22.1,open-xchange-themes-default"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-6.22.1,open-xchange-gui-help-plugin"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-6.22.1,open-xchange-meta"/>
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-6.22.1,open-xchange-indexing"/>
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-6.22.1,open-xchange-contact-storage-ldap"/>
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-6.22.1,open-xchange-ui7-backend"/>
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-6.22.1,open-xchange-freebusy"/>
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-6.22.1,open-xchange-freebusy-ews"/>
 </provider>
 </psf>
