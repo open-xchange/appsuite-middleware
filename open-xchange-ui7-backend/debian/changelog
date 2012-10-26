@@ -1,3 +1,9 @@
+open-xchange-ui7-backend (6.23.0-2) unstable; urgency=low
+
+  * Second release build for EDP drop #5
+
+ -- Viktor Pracht <viktor.pracht@open-xchange.com>  Fri, 26 Oct 2012 11:59:05 +0200
+
 open-xchange-ui7-backend (6.23.0-1) unstable; urgency=low
 
   * Release build for EDP drop #5

@@ -1,3 +1,9 @@
+open-xchange-authorization-standard (6.23.0-3) unstable; urgency=low
+
+  * Second release build for EDP drop #5
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Fri, 26 Oct 2012 11:58:21 +0200
+
 open-xchange-authorization-standard (6.23.0-2) unstable; urgency=low
 
   * Release build for EDP drop #5
