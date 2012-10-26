@@ -50,10 +50,8 @@
 package com.openexchange.voipnow.json.osgi;
 
 import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
-import com.openexchange.api2.ContactInterfaceFactory;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.dispatcher.DispatcherPrefixService;
-import com.openexchange.groupware.contact.ContactInterfaceDiscoveryService;
 import com.openexchange.groupware.settings.PreferencesItemService;
 import com.openexchange.osgi.RegistryServiceTrackerCustomizer;
 import com.openexchange.user.UserService;
@@ -107,20 +105,6 @@ public class VoipNowActivator extends AJAXModuleActivator {
              * Configuration service tracker
              */
             track(ConfigurationService.class, new InitializingRegistryServiceTrackerCustomizer(context, serviceRegistry));
-            /*
-             * Contact interface factory tracker
-             */
-            track(ContactInterfaceFactory.class, new RegistryServiceTrackerCustomizer<ContactInterfaceFactory>(
-                context,
-                serviceRegistry,
-                ContactInterfaceFactory.class));
-            /*
-             * HTTP service tracker
-             */
-            track(ContactInterfaceDiscoveryService.class, new RegistryServiceTrackerCustomizer<ContactInterfaceDiscoveryService>(
-                context,
-                serviceRegistry,
-                ContactInterfaceDiscoveryService.class));
             openTrackers();
         } catch (final Throwable e) {
             final org.apache.commons.logging.Log LOG =
