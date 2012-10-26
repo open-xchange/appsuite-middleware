@@ -49,11 +49,15 @@
 
 package com.openexchange.pop3.storage.mailaccount;
 
+import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
 import gnu.trove.map.TIntObjectMap;
 import gnu.trove.map.hash.TIntObjectHashMap;
 import java.io.IOException;
 import java.lang.reflect.Field;
 import java.security.SecureRandom;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -68,6 +72,7 @@ import javax.mail.Message;
 import javax.mail.MessagingException;
 import javax.mail.UIDFolder;
 import javax.mail.internet.MimeMessage;
+import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailServletInterface;
@@ -487,15 +492,62 @@ public class MailAccountPOP3Storage implements POP3Storage {
     };
 
     @Override
-    public void syncMessages(final boolean expunge) throws OXException {
+    public void syncMessages(final boolean expunge, final Long lastAccessed) throws OXException {
+        // Synchronize access
+        final Session session = pop3Access.getSession();
+        {
+            final int cid = session.getContextId();
+            final int user = session.getUserId();
+            final int accountId = pop3Access.getAccountId();
+            final Connection con = Database.get(cid, true);
+            PreparedStatement stmt = null;
+            try {
+                int pos = 1;
+                if (null == lastAccessed) {
+                    stmt = con.prepareStatement("INSERT INTO user_mail_account_properties (id,cid,user,name,value) VALUES (?,?,?,?,?)");
+                    stmt.setInt(pos++, accountId);
+                    stmt.setInt(pos++, cid);
+                    stmt.setInt(pos++, user);
+                    stmt.setString(pos++, POP3StoragePropertyNames.PROPERTY_LAST_ACCESSED);
+                    stmt.setString(pos++, "0"); // Dummy last-accessed
+                    // Uniquely INSERT
+                    try {
+                        final int result = stmt.executeUpdate();
+                        if (result <= 0) {
+                            // Another thread is already in process.
+                            return;
+                        }
+                    } catch (SQLException e) {
+                        // INSERT failed. Another thread is already in process.
+                        return;
+                    }
+                } else {
+                    stmt = con.prepareStatement("UPDATE user_mail_account_properties SET value=? WHERE id=? AND cid=? AND user=? AND name=? AND value=?");
+                    stmt.setString(pos++, Long.toString(lastAccessed.longValue() + 1));
+                    stmt.setInt(pos++, accountId);
+                    stmt.setInt(pos++, cid);
+                    stmt.setInt(pos++, user);
+                    stmt.setString(pos++, POP3StoragePropertyNames.PROPERTY_LAST_ACCESSED);
+                    stmt.setString(pos++, lastAccessed.toString());
+                    final int result = stmt.executeUpdate();
+                    if (result <= 0) {
+                        // Another thread is already in process.
+                        return;
+                    }
+                }
+            } catch (SQLException e) {
+                // Concurrency check failed
+                throw POP3ExceptionCode.SQL_ERROR.create(e, e.getMessage());
+            } finally {
+                closeSQLStuff(null, stmt);
+                Database.back(cid, true, con);
+            }
+        }
+        // Start sync process
         POP3Store pop3Store = null;
         try {
-            final POP3StoreResult result = POP3StoreConnector.getPOP3Store(
-                pop3Access.getPOP3Config(),
-                pop3Access.getMailProperties(),
-                false,
-                pop3Access.getSession(),
-                !expunge);
+            final POP3StoreResult result =
+                POP3StoreConnector.getPOP3Store(pop3Access.getPOP3Config(), pop3Access.getMailProperties(), false, session, !expunge);
             pop3Store = result.getPop3Store();
             final boolean containsWarnings = result.containsWarnings();
             if (containsWarnings) {
@@ -573,14 +625,16 @@ public class MailAccountPOP3Storage implements POP3Storage {
                          */
                         final Message[] messages = inbox.getMessages();
                         final Set<String> trashedUIDLs = getTrashContainer().getUIDLs();
-                        for (int i = 0; i < messages.length; i++) {
-                            final Message message = messages[i];
-                            final String uidl = seqnum2uidl.get(message.getMessageNumber());
-                            if (trashedUIDLs.contains(uidl)) {
-                                message.setFlags(FLAGS_DELETED, true);
+                        if (!trashedUIDLs.isEmpty()) {
+                            for (int i = 0; i < messages.length; i++) {
+                                final Message message = messages[i];
+                                final String uidl = seqnum2uidl.get(message.getMessageNumber());
+                                if (trashedUIDLs.contains(uidl)) {
+                                    message.setFlags(FLAGS_DELETED, true);
+                                    doExpunge = true;
+                                }
                             }
                         }
-                        doExpunge = true;
                     }
                 }
             } finally {
@@ -606,7 +660,7 @@ public class MailAccountPOP3Storage implements POP3Storage {
                 warnings.add(MailExceptionCode.IO_ERROR.create(nested, nested.getMessage()));
             } else {
                 LOG.warn("Connect to POP3 account failed: " + e.getMessage(), e);
-                warnings.add(MimeMailException.handleMessagingException(e, pop3Access.getPOP3Config(), pop3Access.getSession()));
+                warnings.add(MimeMailException.handleMessagingException(e, pop3Access.getPOP3Config(), session));
             }
         } catch (final OXException e) {
             if (MimeMailExceptionCode.LOGIN_FAILED.equals(e) || MimeMailExceptionCode.INVALID_CREDENTIALS.equals(e)) {
@@ -625,6 +679,12 @@ public class MailAccountPOP3Storage implements POP3Storage {
         }
     }
 
+    /**
+     * Checks whether a delete operation performed on storage also deletes affected message in POP3 account.
+     *
+     * @return <code>true</code> if delete-write-through is enabled; otherwise <code>false</code>
+     * @throws OXException If checking behavior fails
+     */
     private boolean isDeleteWriteThrough() throws OXException {
         final String property = properties.getProperty(POP3StoragePropertyNames.PROPERTY_DELETE_WRITE_THROUGH);
         return null == property ? false : Boolean.parseBoolean(property.trim());

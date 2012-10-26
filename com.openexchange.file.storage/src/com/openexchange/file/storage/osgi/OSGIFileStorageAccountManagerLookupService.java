@@ -49,17 +49,10 @@
 
 package com.openexchange.file.storage.osgi;
 
-import java.util.Collection;
-import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
-import java.util.concurrent.FutureTask;
-import java.util.concurrent.atomic.AtomicReference;
 import org.apache.commons.logging.Log;
 import org.osgi.framework.BundleContext;
-import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
@@ -68,6 +61,7 @@ import com.openexchange.file.storage.FileStorageAccountManager;
 import com.openexchange.file.storage.FileStorageAccountManagerLookupService;
 import com.openexchange.file.storage.FileStorageAccountManagerProvider;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
+import com.openexchange.file.storage.FileStorageService;
 import com.openexchange.log.LogFactory;
 import com.openexchange.session.Session;
 
@@ -100,16 +94,10 @@ public class OSGIFileStorageAccountManagerLookupService implements FileStorageAc
     private volatile ServiceTracker<FileStorageAccountManagerProvider, FileStorageAccountManagerProvider> tracker;
 
     /**
-     * Used to "serialize" initialization attempts.
-     */
-    private final AtomicReference<Future<Void>> serializer;
-
-    /**
      * Initializes a new {@link OSGIFileStorageAccountManagerLookupService}.
      */
     public OSGIFileStorageAccountManagerLookupService() {
         super();
-        serializer = new AtomicReference<Future<Void>>();
         providers = new ConcurrentHashMap<FileStorageAccountManagerProvider, Object>(8);
     }
 
@@ -143,8 +131,6 @@ public class OSGIFileStorageAccountManagerLookupService implements FileStorageAc
 
     @Override
     public FileStorageAccountManager getAccountManager(final String accountId, final Session session) throws OXException {
-        initIfAbsent(null);
-
         final String paramName = new StringBuilder(PARAM_DEFAULT_ACCOUNT).append('@').append(accountId).toString();
         FileStorageAccountManager accountManager = (FileStorageAccountManager) session.getParameter(paramName);
         if (null == accountManager) {
@@ -159,6 +145,10 @@ public class OSGIFileStorageAccountManagerLookupService implements FileStorageAc
                 }
             }
             if (null == accountManager) {
+                final Log logger = com.openexchange.log.Log.loggerFor(OSGIFileStorageAccountManagerLookupService.class);
+                logger.warn("\n\tThere is no file storage service available that provides account \"" + accountId + "\".\n" +
+                            "\tPlease ensure the appropriate " + FileStorageService.class.getSimpleName() + " is up and running.\n" +
+                            "\tRefer to /opt/open-xchange/sbin/listservices");
                 return null;
             }
             session.setParameter(paramName, accountManager);
@@ -168,7 +158,10 @@ public class OSGIFileStorageAccountManagerLookupService implements FileStorageAc
 
     @Override
     public FileStorageAccountManager getAccountManagerFor(final String serviceId) throws OXException {
-        initIfAbsent(serviceId);
+        if (null == serviceId) {
+            final String msg = "serviceId is null";
+            throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(new NullPointerException(msg), msg);
+        }
 
         FileStorageAccountManagerProvider candidate = null;
         for (final FileStorageAccountManagerProvider provider : providers.keySet()) {
@@ -180,57 +173,6 @@ public class OSGIFileStorageAccountManagerLookupService implements FileStorageAc
             throw FileStorageExceptionCodes.NO_ACCOUNT_MANAGER_FOR_SERVICE.create(serviceId);
         }
         return candidate.getAccountManagerFor(serviceId);
-    }
-
-    private void initIfAbsent(final String serviceId) throws OXException {
-        Future<Void> future = serializer.get();
-        if (null == future) {
-            if (null == serviceId) {
-                final String msg = "serviceId is null";
-                throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(new NullPointerException(msg), msg);
-            }
-            final BundleContext bundleContext = this.bundleContext;
-            final FutureTask<Void> ft = new FutureTask<Void>(new Callable<Void>() {
-
-                @Override
-                public Void call() throws OXException {
-                    if (null == bundleContext) {
-                        throw FileStorageExceptionCodes.NO_ACCOUNT_MANAGER_FOR_SERVICE.create(serviceId);
-                    }
-                    try {
-                        final Collection<ServiceReference<FileStorageAccountManagerProvider>> references = bundleContext.getServiceReferences(FileStorageAccountManagerProvider.class, null);
-                        for (final ServiceReference<FileStorageAccountManagerProvider> reference : references) {
-                            final FileStorageAccountManagerProvider addMe = bundleContext.getService(reference);
-                            providers.putIfAbsent(addMe, PRESENT);
-                        }
-                    } catch (final InvalidSyntaxException e) {
-                        throw FileStorageExceptionCodes.NO_ACCOUNT_MANAGER_FOR_SERVICE.create(e, serviceId);
-                    } catch (final RuntimeException e) {
-                        throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
-                    }
-                    return null;
-                }
-            });
-            if (serializer.compareAndSet(null, ft)) {
-                ft.run();
-                future = ft;
-            } else {
-                future = serializer.get();
-            }
-        }
-        try {
-            future.get();
-        } catch (final InterruptedException e) {
-            // Keep interrupted flag
-            Thread.currentThread().interrupt();
-            throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
-        } catch (final ExecutionException e) {
-            final Throwable cause = e.getCause();
-            if (cause instanceof OXException) {
-                throw (OXException) cause;
-            }
-            throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(cause, cause.getMessage());
-        }
     }
 
     private final class Customizer implements ServiceTrackerCustomizer<FileStorageAccountManagerProvider, FileStorageAccountManagerProvider> {
