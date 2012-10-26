@@ -6,6 +6,7 @@ BuildRequires:  ant
 BuildRequires:  ant-nodeps
 BuildRequires:  java-devel >= 1.6.0
 BuildRequires:  open-xchange-core
+BuildRequires:  open-xchange-admin
 Version:        @OXVERSION@
 %define         ox_release 1
 Release:        %{ox_release}_<CI_CNT>.<B_CNT>
@@ -16,6 +17,7 @@ URL:            http://www.open-xchange.com/
 Source:         %{name}_%{version}.orig.tar.bz2
 Summary:        The multiple Open-Xchange upsell multiple bundle
 Requires:       open-xchange-core >= @OXVERSION@
+Requires:       open-xchange-admin >= @OXVERSION@
 Provides:       open-xchange-upsell-generic = %{version}
 Obsoletes:      open-xchange-upsell-generic <= %{version}
 

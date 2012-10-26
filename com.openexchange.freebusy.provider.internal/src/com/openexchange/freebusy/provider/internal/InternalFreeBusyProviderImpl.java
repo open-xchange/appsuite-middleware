@@ -199,7 +199,7 @@ public class InternalFreeBusyProviderImpl implements InternalFreeBusyProvider {
         if (null != freeBusyInformation) {
             try {
                 while (freeBusyInformation.hasNext()) {
-                    freeBusyData.add(new FreeBusyInterval(freeBusyInformation.next()));                    
+                    freeBusyData.add(getFreeBusyInterval(freeBusyInformation.next()));                    
                 }
             } finally {
                 if (null != freeBusyInformation) {
@@ -213,6 +213,31 @@ public class InternalFreeBusyProviderImpl implements InternalFreeBusyProvider {
         } else {
             freeBusyData.add(new FreeBusyInterval(freeBusyData.getFrom(), freeBusyData.getUntil(), BusyStatus.UNKNOWN));
         }
+    }
+
+    /**
+     * Creates new {@link FreeBusyInterval}, based on the supplied appointment.
+     * 
+     * @param appointment The appointment to create the free/busy slot for
+     * @return The free/busy interval
+     */
+    private static FreeBusyInterval getFreeBusyInterval(Appointment appointment) {
+        FreeBusyInterval freeBusyInterval = new FreeBusyInterval(appointment.getStartDate(), 
+            appointment.getEndDate(), BusyStatus.valueOf(appointment.getShownAs()));
+        freeBusyInterval.setFullTime(appointment.getFullTime());
+        if (appointment.containsObjectID() && 0 < appointment.getObjectID()) {
+            freeBusyInterval.setObjectID(String.valueOf(appointment.getObjectID()));
+        }
+        if (appointment.containsParentFolderID() && 0 < appointment.getParentFolderID()) {
+            freeBusyInterval.setFolderID(String.valueOf(appointment.getParentFolderID()));
+        }
+        if (appointment.containsTitle()){
+            freeBusyInterval.setTitle(appointment.getTitle());
+        }
+        if (appointment.containsLocation()){
+            freeBusyInterval.setLocation(appointment.getLocation());
+        }
+        return freeBusyInterval;
     }
     
     private static int[] getGroupMembers(Context context, String participant) throws OXException {
