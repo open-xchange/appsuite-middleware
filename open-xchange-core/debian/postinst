@@ -86,7 +86,6 @@ postFix() {
        ox_set_property "com.openexchange.contact.scaleVCardImages" "200x200" $pfile
     fi
 
-    if ! ox_exists_property "html.style.word-wrap" $pfile; then
     # SoftwareChange_Request-1148
     pfile=/opt/open-xchange/etc/whitelist.properties
     if ! ox_exists_property "html.style.word-break" $pfile; then
