@@ -51,8 +51,8 @@ package com.openexchange.sessionstorage.hazelcast;
 
 import java.util.ArrayList;
 import java.util.List;
+import com.hazelcast.config.MapConfig;
 import com.hazelcast.core.HazelcastInstance;
-import com.hazelcast.core.Hazelcasts;
 import com.hazelcast.core.IMap;
 import com.openexchange.crypto.CryptoService;
 import com.openexchange.exception.OXException;
@@ -60,8 +60,6 @@ import com.openexchange.session.Session;
 import com.openexchange.sessionstorage.SessionStorageService;
 import com.openexchange.sessionstorage.hazelcast.exceptions.OXHazelcastSessionStorageExceptionCodes;
 import com.openexchange.sessionstorage.hazelcast.osgi.HazelcastSessionStorageServiceRegistry;
-import com.openexchange.timer.ScheduledTimerTask;
-import com.openexchange.timer.TimerService;
 
 /**
  * {@link HazelcastSessionStorageService}
@@ -76,29 +74,23 @@ public class HazelcastSessionStorageService implements SessionStorageService {
 
     private final String encryptionKey;
 
-    private final long lifetime;
-
     private final CryptoService cryptoService;
 
-    private final TimerService timerService;
-
-    private final ScheduledTimerTask cleanupTask;
+    private final MapConfig mapConfig;
 
     private static volatile HazelcastSessionStorageService instance;
 
     /**
      * Initializes a new {@link HazelcastSessionStorageService}.
      */
-    @SuppressWarnings("unchecked")
     public HazelcastSessionStorageService(HazelcastSessionStorageConfiguration config) {
         super();
         encryptionKey = config.getEncryptionKey();
-        lifetime = config.getLifetime();
+        mapConfig = config.getMapConfig();
         hazelcast = HazelcastSessionStorageServiceRegistry.getRegistry().getService(HazelcastInstance.class);
-        sessions = Hazelcasts.wrapWithClassloader(getClass(), IMap.class, hazelcast.getMap("sessions"));
+        hazelcast.getConfig().addMapConfig(mapConfig);
+        sessions = hazelcast.getMap("sessions");
         cryptoService = config.getCryptoService();
-        timerService = config.getTimerService();
-        cleanupTask = timerService.scheduleWithFixedDelay(new HazelcastCleanupTask(), lifetime, lifetime);
         instance = this;
     }
 
@@ -121,7 +113,7 @@ public class HazelcastSessionStorageService implements SessionStorageService {
             ss.setPassword(crypt(ss.getPassword()));
             sessions.put(session.getSessionID(), ss);
         } catch (Exception e) {
-            throw OXHazelcastSessionStorageExceptionCodes.HAZELCAST_SESSIONSTORAGE_SAVE_FAILED.create(session.getSessionID());
+            throw OXHazelcastSessionStorageExceptionCodes.HAZELCAST_SESSIONSTORAGE_SAVE_FAILED.create(e, session.getSessionID());
         }
     }
 
@@ -130,7 +122,7 @@ public class HazelcastSessionStorageService implements SessionStorageService {
         try {
             sessions.remove(sessionId);
         } catch (Exception e) {
-            throw OXHazelcastSessionStorageExceptionCodes.HAZELCAST_SESSIONSTORAGE_REMOVE_FAILED.create(sessionId);
+            throw OXHazelcastSessionStorageExceptionCodes.HAZELCAST_SESSIONSTORAGE_REMOVE_FAILED.create(e, sessionId);
         }
     }
 
@@ -283,20 +275,6 @@ public class HazelcastSessionStorageService implements SessionStorageService {
 
     private String decrypt(String encPassword) throws OXException {
         return cryptoService.decrypt(encPassword, encryptionKey);
-    }
-
-    public void cleanupTask() {
-        long time = System.currentTimeMillis();
-        for (String sessionId : sessions.keySet()) {
-            HazelcastStoredSession s = sessions.get(sessionId);
-            if (time > s.getLastAccess() + lifetime) {
-                sessions.remove(sessionId);
-            }
-        }
-    }
-
-    public void removeCleanupTask() {
-        cleanupTask.cancel();
     }
 
     public static HazelcastSessionStorageService getStorageService() {

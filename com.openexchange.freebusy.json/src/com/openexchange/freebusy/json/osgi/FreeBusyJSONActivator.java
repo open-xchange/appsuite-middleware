@@ -50,8 +50,8 @@
 package com.openexchange.freebusy.json.osgi;
 
 import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
-import com.openexchange.freebusy.FreeBusyService;
 import com.openexchange.freebusy.json.FreeBusyActionFactory;
+import com.openexchange.freebusy.service.FreeBusyService;
 
 /**
  * {@link FreeBusyJSONActivator}

@@ -49,17 +49,16 @@
 
 package com.openexchange.contactcollector;
 
-import com.openexchange.exception.OXException;
 import java.util.ArrayList;
 import java.util.List;
 import junit.framework.TestCase;
+import com.openexchange.contact.ContactService;
+import com.openexchange.contact.SortOptions;
 import com.openexchange.contactcollector.osgi.CCServiceRegistry;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.Init;
-import com.openexchange.groupware.contact.ContactInterface;
-import com.openexchange.groupware.contact.ContactInterfaceDiscoveryService;
+import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
-import com.openexchange.groupware.container.DataObject;
-import com.openexchange.groupware.container.FolderChildObject;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.search.ContactSearchObject;
@@ -108,9 +107,7 @@ public class OrderByTest extends TestCase {
     }
 
     public void testOrderByUserfield20() throws Throwable {
-        final ContactInterface contactInterface = CCServiceRegistry.getInstance().getService(
-            ContactInterfaceDiscoveryService.class).getContactInterfaceProvider(contactFolder.getObjectID(), ctx.getContextId()).newContactInterface(
-            session);
+        ContactService contactService = CCServiceRegistry.getInstance().getService(ContactService.class);
 
         final Contact contact1 = new Contact();
         final Contact contact2 = new Contact();
@@ -129,24 +126,19 @@ public class OrderByTest extends TestCase {
         contact3.setUserField20("2");
 
         try {
-            contactInterface.insertContactObject(contact1);
-            contactInterface.insertContactObject(contact2);
-            contactInterface.insertContactObject(contact3);
+            contactService.createContact(session, String.valueOf(contactFolder.getObjectID()), contact1);
+            contactService.createContact(session, String.valueOf(contactFolder.getObjectID()), contact2);
+            contactService.createContact(session, String.valueOf(contactFolder.getObjectID()), contact3);
 
-            final ContactSearchObject searchObject = new ContactSearchObject();
+            ContactField[] fields = new ContactField[] { ContactField.FOLDER_ID, ContactField.LAST_MODIFIED, 
+                ContactField.OBJECT_ID, ContactField.SUR_NAME };
+            ContactSearchObject searchObject = new ContactSearchObject();
+            searchObject.addFolder(contactFolder.getObjectID());
             searchObject.setEmailAutoComplete(true);
-            searchObject.setDynamicSearchField(new int[] { Contact.EMAIL1, Contact.EMAIL2, Contact.EMAIL3, });
-            searchObject.setDynamicSearchFieldValue(new String[] { "orderbyTest", "orderbyTest", "orderbyTest" });
-            final int[] columns = new int[] {
-                FolderChildObject.FOLDER_ID, DataObject.LAST_MODIFIED, DataObject.OBJECT_ID, Contact.SUR_NAME };
-            final SearchIterator<Contact> iterator = contactInterface.getContactsByExtendedSearch(
-                searchObject,
-                Contact.USERFIELD20,
-                Order.ASCENDING,
-                null,
-                columns);
-
-            final List<String> surnames = new ArrayList<String>();
+            searchObject.setEmail1("orderbyTest");
+            SearchIterator<Contact> iterator = contactService.searchContacts(session, searchObject, fields,  
+                new SortOptions(ContactField.USERFIELD20, Order.ASCENDING));
+            List<String> surnames = new ArrayList<String>();
             while (iterator.hasNext()) {
                 Contact foundContact;
                 foundContact = iterator.next();
@@ -161,9 +153,12 @@ public class OrderByTest extends TestCase {
             assertEquals("Contact on wrong position", "orderbyTest_contact1", surnames.get(2));
 
         } finally {
-            contactInterface.deleteContactObject(contact1.getObjectID(), contactFolder.getObjectID(), contact1.getLastModified());
-            contactInterface.deleteContactObject(contact2.getObjectID(), contactFolder.getObjectID(), contact2.getLastModified());
-            contactInterface.deleteContactObject(contact3.getObjectID(), contactFolder.getObjectID(), contact3.getLastModified());
+            contactService.deleteContact(session, String.valueOf(contactFolder.getObjectID()), String.valueOf(contact1.getObjectID()), 
+                contact1.getLastModified());
+            contactService.deleteContact(session, String.valueOf(contactFolder.getObjectID()), String.valueOf(contact2.getObjectID()), 
+                contact2.getLastModified());
+            contactService.deleteContact(session, String.valueOf(contactFolder.getObjectID()), String.valueOf(contact3.getObjectID()), 
+                contact3.getLastModified());
         }
 
     }

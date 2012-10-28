@@ -397,6 +397,33 @@ public abstract class AbstractSolrIndexAccess<V> implements IndexAccess<V> {
         return sb.toString();
     }
     
+    protected String catenateQueriesWithOr(String... queries) {
+        if (queries == null || queries.length == 0) {
+            return null;
+        }
+        
+        StringBuilder sb = new StringBuilder();
+        sb.append('(');
+        boolean first = true;
+        for (String query : queries) {
+            if (query != null) {
+                if (first) {
+                    sb.append(query);
+                    first = false; 
+                } else {
+                    sb.append(" OR ").append(query);
+                }
+            }
+        }
+        
+        if (sb.length() == 1) {
+            return null;
+        }
+        
+        sb.append(')');
+        return sb.toString();
+    }
+    
     protected void setSortAndOrder(QueryParameters parameters, SolrQuery solrQuery, Class<? extends SolrField> fieldEnum) {
         IndexField sortField = parameters.getSortField();
         if (sortField == null) {
@@ -428,46 +455,17 @@ public abstract class AbstractSolrIndexAccess<V> implements IndexAccess<V> {
         }
     }
     
-    protected String getStringParameter(QueryParameters parameters, String name) {
-        if (parameters.getParameters() == null) {
-            return null;
-        }
-        
-        Object value = parameters.getParameters().get(name);
-        if (value != null && value instanceof String) {
-            return (String) value;
-        }
-        
-        return null;
-    }
-    
-    protected String[] getStringArrayParameter(QueryParameters parameters, String name) {
-        if (parameters.getParameters() == null) {
-            return null;
-        }
-        
-        Object value = parameters.getParameters().get(name);
-        if (value != null && value instanceof String[]) {
-            return (String[]) value;
-        }
-        
-        return null;
-    }
-    
-    protected Integer getIntParameter(QueryParameters parameters, String name) {
-        if (parameters.getParameters() == null) {
-            return null;
-        }
-        
-        Object value = parameters.getParameters().get(name);
-        if (value != null && value instanceof Integer) {
-            return (Integer) value;
-        }
-        
-        return null;
-    }
-    
     protected String stringArrayToQuery(String[] values) {
+        StringBuilder sb = new StringBuilder();
+        for (String value : values) {
+            sb.append(value);
+            sb.append(' ');
+        }
+        
+        return sb.toString();
+    }
+    
+    protected String stringSetToQuery(Set<String> values) {
         StringBuilder sb = new StringBuilder();
         for (String value : values) {
             sb.append(value);

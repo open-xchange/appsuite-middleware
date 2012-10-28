@@ -52,8 +52,9 @@ package com.openexchange.oauth.facebook;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -66,6 +67,7 @@ import org.scribe.model.Verb;
 import org.scribe.oauth.OAuthService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
+import com.openexchange.log.LogFactory;
 import com.openexchange.oauth.OAuthAccount;
 import com.openexchange.session.Session;
 import com.openexchange.tools.versit.converter.ConverterException;
@@ -104,7 +106,7 @@ public class FacebookServiceImpl implements FacebookService {
         }
         if (null != account) {
             // get the users own profile (for his id) with the given access token
-            final Token accessToken = new Token(account.getToken(), account.getSecret());
+            final Token accessToken = new Token(checkToken(account.getToken()), account.getSecret());
             final OAuthRequest ownProfileRequest = new OAuthRequest(Verb.GET, "https://graph.facebook.com/me");
             service.signRequest(accessToken, ownProfileRequest);
             final Response ownProfileResponse = ownProfileRequest.send();
@@ -130,6 +132,21 @@ public class FacebookServiceImpl implements FacebookService {
 
         return contacts;
 
+    }
+    
+    private static final Pattern P_EXPIRES = Pattern.compile("&expires(=[0-9]+)?$");
+
+    private static String checkToken(final String accessToken) {
+        if (accessToken.indexOf("&expires") < 0) {
+            return accessToken;
+        }
+        final Matcher m = P_EXPIRES.matcher(accessToken);
+        final StringBuffer sb = new StringBuffer(accessToken.length());
+        if (m.find()) {
+            m.appendReplacement(sb, "");
+        }
+        m.appendTail(sb);
+        return sb.toString();
     }
 
     public List<Contact> parseIntoContacts(final String jsonString) throws OXException {
@@ -190,12 +207,12 @@ public class FacebookServiceImpl implements FacebookService {
         } catch (final JSONException e) {
         	// Maybe this is a JSONObject with an error
         	try {
-        		JSONObject obj = new JSONObject(jsonString);
+        		final JSONObject obj = new JSONObject(jsonString);
         		if (obj.has("error")) {
         			LOG.error(obj.get("error").toString());
         			throw OXException.general(obj.getJSONObject("error").getString("message"));
         		}
-        	} catch (JSONException x) {
+        	} catch (final JSONException x) {
         		// Give up
         	}
             LOG.error(e);

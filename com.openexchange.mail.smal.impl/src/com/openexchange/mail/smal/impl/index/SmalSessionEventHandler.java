@@ -59,6 +59,7 @@ import org.osgi.service.event.Event;
 import org.osgi.service.event.EventHandler;
 import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.core.IMap;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.api.IMailFolderStorage;
 import com.openexchange.mail.api.IMailMessageStorage;
@@ -181,6 +182,10 @@ public class SmalSessionEventHandler implements EventHandler {
     }
     
     private void scheduleFolderJobs(Session session, Map<Integer, Set<MailFolder>> allFolders, MailAccountStorageService storageService, IndexingService indexingService) throws OXException {
+        if (!UserWhitelist.isIndexingAllowed(session.getLogin())) {
+            return;
+        }
+        
         int contextId = session.getContextId();
         int userId = session.getUserId();        
         for (Integer accountId : allFolders.keySet()) {

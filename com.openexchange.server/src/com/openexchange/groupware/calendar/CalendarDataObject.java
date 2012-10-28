@@ -429,7 +429,9 @@ public class CalendarDataObject extends Appointment {
         }
         clone.setIgnoreConflicts(ignoreConflicts);
         clone.setRecurrenceCalculator(getRecurrenceCalculator());
-        clone.setRecurrence(getRecurrence());
+        if (containsRecurrenceString()) {
+            clone.setRecurrence(getRecurrence());
+        }
         clone.setFolderType(getFolderType());
         clone.setTimezone(getTimezoneFallbackUTC());
         clone.setParentFolderID(getParentFolderID());

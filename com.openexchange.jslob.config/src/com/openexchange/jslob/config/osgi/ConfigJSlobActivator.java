@@ -49,11 +49,13 @@
 
 package com.openexchange.jslob.config.osgi;
 
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.jslob.JSlobService;
 import com.openexchange.jslob.config.ConfigJSlobService;
 import com.openexchange.jslob.storage.registry.JSlobStorageRegistry;
 import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.sessiond.SessiondService;
 
 /**
  * {@link ConfigJSlobActivator}
@@ -71,7 +73,7 @@ public final class ConfigJSlobActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { JSlobStorageRegistry.class, ConfigViewFactory.class };
+        return new Class<?>[] { JSlobStorageRegistry.class, ConfigViewFactory.class, SessiondService.class, ConfigurationService.class };
     }
 
     @Override

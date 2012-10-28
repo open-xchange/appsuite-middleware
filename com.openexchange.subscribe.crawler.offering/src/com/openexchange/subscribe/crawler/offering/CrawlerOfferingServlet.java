@@ -83,7 +83,6 @@ import com.openexchange.tools.servlet.http.Tools;
  * @author <a href="mailto:martin.herfurth@open-xchange.org">Martin Herfurth</a>
  */
 public class CrawlerOfferingServlet extends HttpServlet {
-
     // TODO: Authentication ?
 
     private static final long serialVersionUID = -6668834083007607601L;
@@ -118,6 +117,8 @@ public class CrawlerOfferingServlet extends HttpServlet {
 
     @Override
     protected void service(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
+        // create a new HttpSession if it's missing
+        req.getSession(true);
         super.service(new CountingHttpServletRequest(req), resp);
     }
 

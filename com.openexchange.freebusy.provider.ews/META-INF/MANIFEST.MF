@@ -21,6 +21,7 @@ Import-Package: com.microsoft.schemas.exchange.services._2006.messages,
  com.openexchange.session,
  com.openexchange.tools.iterator,
  javax.mail.internet,
+ javax.xml.ws,
  org.apache.commons.logging,
  org.osgi.framework,
  org.osgi.util.tracker

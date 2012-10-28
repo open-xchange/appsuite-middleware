@@ -261,6 +261,10 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
             }
             return set;
         } catch (final SQLException e) {
+            if (null != stmt && LOG.isDebugEnabled()) {
+                final String sql = stmt.toString();
+                LOG.debug(new StringBuilder().append("\n\tFailed mail account statement:\n\t").append(sql.substring(sql.indexOf(": ") + 2)).toString());
+            }
             throw MailAccountExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
             DBUtils.closeSQLStuff(rs, stmt);
@@ -360,6 +364,10 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
              */
             fillProperties(mailAccount, cid, user, id, con);
         } catch (final SQLException e) {
+            if (null != stmt && LOG.isDebugEnabled()) {
+                final String sql = stmt.toString();
+                LOG.debug(new StringBuilder().append("\n\tFailed mail account statement:\n\t").append(sql.substring(sql.indexOf(": ") + 2)).toString());
+            }
             throw MailAccountExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
             closeSQLStuff(result, stmt);
@@ -415,6 +423,10 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
                 mailAccount.setTransportServer((String) null);
             }
         } catch (final SQLException e) {
+            if (null != stmt && LOG.isDebugEnabled()) {
+                final String sql = stmt.toString();
+                LOG.debug(new StringBuilder().append("\n\tFailed mail account statement:\n\t").append(sql.substring(sql.indexOf(": ") + 2)).toString());
+            }
             throw MailAccountExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
             closeSQLStuff(result, stmt);
@@ -577,6 +589,10 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
             rs = stmt.executeQuery();
             return rs.next() ? rs.getString(1) : null;
         } catch (final SQLException e) {
+            if (null != stmt && LOG.isDebugEnabled()) {
+                final String sql = stmt.toString();
+                LOG.debug(new StringBuilder().append("\n\tFailed mail account statement:\n\t").append(sql.substring(sql.indexOf(": ") + 2)).toString());
+            }
             throw MailAccountExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
             closeSQLStuff(rs, stmt);
@@ -1275,6 +1291,10 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
                     updateProperty(cid, user, mailAccount.getId(), "pop3.path", properties.get("pop3.path"), con);
                 }
             } catch (final SQLException e) {
+                if (null != stmt && LOG.isDebugEnabled()) {
+                    final String sql = stmt.toString();
+                    LOG.debug(new StringBuilder().append("\n\tFailed mail account statement:\n\t").append(sql.substring(sql.indexOf(": ") + 2)).toString());
+                }
                 throw MailAccountExceptionCodes.SQL_ERROR.create(e, e.getMessage());
             } finally {
                 closeSQLStuff(rs, stmt);
@@ -1302,6 +1322,10 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
             stmt.setInt(pos++, user);
             stmt.executeUpdate();
         } catch (final SQLException e) {
+            if (null != stmt && LOG.isDebugEnabled()) {
+                final String sql = stmt.toString();
+                LOG.debug(new StringBuilder().append("\n\tFailed mail account statement:\n\t").append(sql.substring(sql.indexOf(": ") + 2)).toString());
+            }
             throw MailAccountExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
             closeSQLStuff(stmt);

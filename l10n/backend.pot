@@ -1148,10 +1148,6 @@ msgstr ""
 msgid "Can not set property %1$s in scope %2$s"
 msgstr ""
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contact.aggregator/src/com/openexchange/contact/aggregator/loginHandlers/FolderStrings.java:62
-msgid "All my contacts"
-msgstr ""
-
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contact.storage.ldap/src/com/openexchange/contact/storage/ldap/LdapExceptionMessages.java:64
 msgid "An error occurred: %s"
 msgstr ""
@@ -3025,6 +3021,11 @@ msgstr ""
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.jslob/src/com/openexchange/jslob/JSlobExceptionMessages.java:83
 msgid ""
 "Referenced JSlob %1$s must not be set for service %2$s. Nothing will be done."
+msgstr ""
+
+#. "%1$s" is a reserved identifier. Please choose a different one.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.jslob/src/com/openexchange/jslob/JSlobExceptionMessages.java:86
+msgid "\"%1$s\" is a reserved identifier. Please choose a different one."
 msgstr ""
 
 #. A configuration error: %1$s
@@ -10348,6 +10349,10 @@ msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.sessionstorage.hazelcast/src/com/openexchange/sessionstorage/hazelcast/exceptions/OXHazelcastSessionStorageExceptionMessages.java:83
 msgid "No sessions found by random token %1$s"
+msgstr ""
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.sessionstorage.hazelcast/src/com/openexchange/sessionstorage/hazelcast/exceptions/OXHazelcastSessionStorageExceptionMessages.java:85
+msgid "Error in config file."
 msgstr ""
 
 #. *

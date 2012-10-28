@@ -52,9 +52,7 @@ package com.openexchange.service.indexing.impl.infostore;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import org.apache.commons.logging.Log;
 import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
@@ -68,8 +66,8 @@ import com.openexchange.groupware.results.TimedResult;
 import com.openexchange.groupware.tools.chunk.ChunkPerformer;
 import com.openexchange.groupware.tools.chunk.Performable;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
+import com.openexchange.index.AccountFolders;
 import com.openexchange.index.IndexAccess;
-import com.openexchange.index.IndexConstants;
 import com.openexchange.index.IndexDocument;
 import com.openexchange.index.IndexFacadeService;
 import com.openexchange.index.QueryParameters;
@@ -153,18 +151,17 @@ public class InfostoreFolderJob implements IndexingJob {
     
     private void deleteFromIndex(InfostoreJobInfo info, IndexAccess<DocumentMetadata> infostoreIndex, IndexAccess<Attachment> attachmentIndex) throws OXException {
         IndexFolderManager.deleteFolderEntry(info.contextId, info.userId, Types.INFOSTORE, info.account, String.valueOf(info.folder));
-        Map<String, Object> params = new HashMap<String, Object>();
-        Builder queryBuilder = new Builder(params);
+        AccountFolders accountFolders = new AccountFolders(info.account, Collections.singleton(String.valueOf(info.folder)));
+        Builder queryBuilder = new Builder();
         QueryParameters infostoreAllQuery = queryBuilder.setHandler(SearchHandler.ALL_REQUEST)
-            .setFolders(Collections.singleton(String.valueOf(info.folder)))
-            .build();
-        
+            .setAccountFolders(Collections.singleton(accountFolders))
+            .build();        
         infostoreIndex.deleteByQuery(infostoreAllQuery);
-        Map<String, Object> attachmentAllParams = new HashMap<String, Object>();
-        params.put(IndexConstants.MODULE, new Integer(Types.INFOSTORE));            
-        QueryParameters attachmentAllQuery = new Builder(attachmentAllParams)
+        
+        QueryParameters attachmentAllQuery = new Builder()
             .setHandler(SearchHandler.ALL_REQUEST)
-            .setFolders(Collections.singleton(String.valueOf(info.folder)))
+            .setAccountFolders(Collections.singleton(accountFolders))
+            .setModule(Types.INFOSTORE)
             .build();
         attachmentIndex.deleteByQuery(attachmentAllQuery);
     }

@@ -1,0 +1,5 @@
+open-xchange-cluster-discovery-static (6.23.0-1) unstable; urgency=low
+
+  * Initial release
+
+ -- Steffen Templin <steffen.templin@open-xchange.com>  Wed, 24 Oct 2012 15:24:07 +0200

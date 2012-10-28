@@ -105,9 +105,7 @@ public final class MailAccountPOP3FolderStorage implements IMailFolderStorage {
      * Associated POP3 storage.
      */
     final MailAccountPOP3Storage storage;
-
     private MailAccountPOP3MessageStorage messageStorage;
-
     private volatile Context ctx;
 
     /**

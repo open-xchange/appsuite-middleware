@@ -194,7 +194,7 @@ import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.timer.TimerService;
 import com.openexchange.tools.file.external.FileStorageFactoryCandidate;
 import com.openexchange.tools.file.internal.CompositeFileStorageFactory;
-import com.openexchange.tools.images.ImageScalingService;
+import com.openexchange.tools.images.ImageTransformationService;
 import com.openexchange.tools.session.SessionHolder;
 import com.openexchange.tools.strings.StringParser;
 import com.openexchange.user.UserService;
@@ -250,7 +250,7 @@ public final class ServerActivator extends HousekeepingActivator {
         TimerService.class, ThreadPoolService.class, CalendarAdministrationService.class, AppointmentSqlFactoryService.class,
         CalendarCollectionService.class, MessagingServiceRegistry.class, HtmlService.class, IDBasedFileAccessFactory.class,
         FileStorageServiceRegistry.class, FileStorageAccountManagerLookupService.class, CryptoService.class, HttpService.class,
-        SystemNameService.class, ImageScalingService.class, ConfigViewFactory.class, StringParser.class, PreviewService.class,
+        SystemNameService.class, ImageTransformationService.class, ConfigViewFactory.class, StringParser.class, PreviewService.class,
         TextXtractService.class, SecretEncryptionFactoryService.class };
 
     private static volatile BundleContext CONTEXT;

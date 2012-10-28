@@ -422,15 +422,16 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
     protected void service(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
         incrementRequests();
         try {
+            // create a new HttpSession if missing
+            req.getSession(true);
+
             /*
              * Set 200 OK status code and JSON content by default
              */
             resp.setStatus(HttpServletResponse.SC_OK);
             resp.setContentType(CONTENTTYPE_JAVASCRIPT);
             super.service(new CountingHttpServletRequest(req), resp);
-        } catch (final ServletException x) {
-            throw x;
-        } catch (final Exception e) {
+        } catch (final RuntimeException e) {
             LOG.error(e.getMessage(), e);
             final ServletException se = new ServletException(e.getMessage());
             se.initCause(e);

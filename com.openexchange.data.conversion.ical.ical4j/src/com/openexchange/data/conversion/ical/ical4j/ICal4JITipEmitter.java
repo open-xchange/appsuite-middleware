@@ -51,6 +51,7 @@ package com.openexchange.data.conversion.ical.ical4j;
 
 import java.util.List;
 import net.fortuna.ical4j.model.Calendar;
+import net.fortuna.ical4j.model.Property;
 import net.fortuna.ical4j.model.component.VEvent;
 import net.fortuna.ical4j.model.property.Comment;
 import net.fortuna.ical4j.model.property.Method;
@@ -114,6 +115,8 @@ public class ICal4JITipEmitter extends ICal4JEmitter implements ITipEmitter {
 
         Method method = getICalMethod(message.getMethod());
         if (method != null) {
+            Property oldMethod = calendar.getProperty("METHOD");
+            calendar.getProperties().remove(oldMethod);
             calendar.getProperties().add(method);
         }
 

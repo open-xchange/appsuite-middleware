@@ -360,7 +360,6 @@ public final class Init {
         startAndInjectGroupService();
         startAndInjectFolderService();
         startAndInjectResourceService();
-        startAndInjectContactCollector();
         startAndInjectMailAccountStorageService();
         startAndInjectMailBundle();
         startAndInjectSpamHandler();
@@ -370,8 +369,9 @@ public final class Init {
         startAndInjectImportExportServices();
         startAndInjectSubscribeServices();
         startAndInjectContactStorageServices();
-        startAndInjectContactServices();
-        
+        startAndInjectContactServices();        
+        startAndInjectContactCollector();
+
     }
 
     public static void startAndInjectConfigBundle() {
@@ -586,6 +586,7 @@ public final class Init {
                 }
             });
             TestServiceRegistry.getInstance().addService(ContactService.class, contactService);
+            services.put(ContactService.class, contactService);
         }
     }
 
@@ -700,6 +701,7 @@ public final class Init {
             reg.addService(UserConfigurationService.class, services.get(UserConfigurationService.class));
             reg.addService(UserService.class, services.get(UserService.class));
             reg.addService(ContactInterfaceDiscoveryService.class, services.get(ContactInterfaceDiscoveryService.class));
+            reg.addService(ContactService.class, services.get(ContactService.class));
         }
     }
 
