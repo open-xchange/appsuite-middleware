@@ -69,13 +69,9 @@ import com.openexchange.sessionstorage.hazelcast.osgi.HazelcastSessionStorageSer
 public class HazelcastSessionStorageService implements SessionStorageService {
 
     private final HazelcastInstance hazelcast;
-
     private final IMap<String, HazelcastStoredSession> sessions;
-
     private final String encryptionKey;
-
     private final CryptoService cryptoService;
-
     private final MapConfig mapConfig;
 
     private static volatile HazelcastSessionStorageService instance;
@@ -96,7 +92,7 @@ public class HazelcastSessionStorageService implements SessionStorageService {
 
     @Override
     public Session lookupSession(String sessionId) throws OXException {
-        if (sessions.containsKey(sessionId)) {
+        if (null != sessionId && sessions.containsKey(sessionId)) {
             HazelcastStoredSession s = sessions.get(sessionId);
             s.setLastAccess(System.currentTimeMillis());
             s.setPassword(decrypt(s.getPassword()));
@@ -108,21 +104,25 @@ public class HazelcastSessionStorageService implements SessionStorageService {
 
     @Override
     public void addSession(Session session) throws OXException {
-        try {
-            HazelcastStoredSession ss = new HazelcastStoredSession(session);
-            ss.setPassword(crypt(ss.getPassword()));
-            sessions.put(session.getSessionID(), ss);
-        } catch (Exception e) {
-            throw OXHazelcastSessionStorageExceptionCodes.HAZELCAST_SESSIONSTORAGE_SAVE_FAILED.create(e, session.getSessionID());
+        if (null != session) {
+            try {
+                HazelcastStoredSession ss = new HazelcastStoredSession(session);
+                ss.setPassword(crypt(ss.getPassword()));
+                sessions.put(session.getSessionID(), ss);
+            } catch (Exception e) {
+                throw OXHazelcastSessionStorageExceptionCodes.HAZELCAST_SESSIONSTORAGE_SAVE_FAILED.create(e, session.getSessionID());
+            }
         }
     }
 
     @Override
     public void removeSession(String sessionId) throws OXException {
-        try {
-            sessions.remove(sessionId);
-        } catch (Exception e) {
-            throw OXHazelcastSessionStorageExceptionCodes.HAZELCAST_SESSIONSTORAGE_REMOVE_FAILED.create(e, sessionId);
+        if (null != sessionId) {
+            try {
+                sessions.remove(sessionId);
+            } catch (Exception e) {
+                throw OXHazelcastSessionStorageExceptionCodes.HAZELCAST_SESSIONSTORAGE_REMOVE_FAILED.create(e, sessionId);
+            }
         }
     }
 
