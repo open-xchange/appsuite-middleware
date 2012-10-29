@@ -427,6 +427,7 @@ public final class FacebookFQLStreamParser {
                             throw e;
                         }
                         // Something went wrong loading URL content... Ignore it
+                        LogFactory.getLog(FacebookFQLStreamParser.class).debug("Couldn't load URL: " + sourceURL, e);
                     }
                 }
 
