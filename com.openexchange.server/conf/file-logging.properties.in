@@ -25,5 +25,5 @@ org.apache.level=WARNING
 com.sun.level=INFO
 javax.management.level=INFO
 javax.jmdns.level=WARNING
-com.hazelcast.level=ERROR
+com.hazelcast.level=SEVERE
 
