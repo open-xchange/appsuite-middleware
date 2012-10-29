@@ -61,6 +61,8 @@ import com.openexchange.sessionstorage.StoredSession;
  */
 public class HazelcastStoredSession extends StoredSession implements Serializable {
 
+    private static final long serialVersionUID = -2346327568417617677L;
+
     private long lastAccess;
 
     /**
