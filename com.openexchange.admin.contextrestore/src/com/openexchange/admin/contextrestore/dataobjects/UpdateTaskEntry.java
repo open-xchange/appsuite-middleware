@@ -69,6 +69,17 @@ public final class UpdateTaskEntry {
     }
 
     /**
+     * Initializes a new {@link UpdateTaskEntry}.
+     */
+    public UpdateTaskEntry(int contextId, String taskName, boolean successful, long lastModified) {
+        super();
+        this.contextId = contextId;
+        this.lastModified = lastModified;
+        this.successful = successful;
+        this.taskName = taskName;
+    }
+
+    /**
      * Gets the context identifier
      * 
      * @return The context identifier
@@ -138,6 +149,59 @@ public final class UpdateTaskEntry {
      */
     public void setLastModified(final long lastModified) {
         this.lastModified = lastModified;
+    }
+
+    @Override
+    public String toString() {
+        final StringBuilder builder = new StringBuilder(64);
+        builder.append("{contextId=").append(contextId).append(", ");
+        if (taskName != null) {
+            builder.append("taskName=").append(taskName).append(", ");
+        }
+        builder.append("successful=").append(successful).append(", lastModified=").append(lastModified).append('}');
+        return builder.toString();
+    }
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + contextId;
+        result = prime * result + (int) (lastModified ^ (lastModified >>> 32));
+        result = prime * result + (successful ? 1231 : 1237);
+        result = prime * result + ((taskName == null) ? 0 : taskName.hashCode());
+        return result;
+    }
+
+    @Override
+    public boolean equals(final Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (!(obj instanceof UpdateTaskEntry)) {
+            return false;
+        }
+        final UpdateTaskEntry other = (UpdateTaskEntry) obj;
+        if (contextId != other.contextId) {
+            return false;
+        }
+        if (lastModified != other.lastModified) {
+            return false;
+        }
+        if (successful != other.successful) {
+            return false;
+        }
+        if (taskName == null) {
+            if (other.taskName != null) {
+                return false;
+            }
+        } else if (!taskName.equals(other.taskName)) {
+            return false;
+        }
+        return true;
     }
 
 }
