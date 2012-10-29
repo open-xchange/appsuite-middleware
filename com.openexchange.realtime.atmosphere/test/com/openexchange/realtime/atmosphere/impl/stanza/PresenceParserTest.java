@@ -47,12 +47,19 @@
  *
  */
 
-package com.openexchange.realtime.atmosphere.impl.parser;
+package com.openexchange.realtime.atmosphere.impl.stanza;
 
-import static org.junit.Assert.*;
-import org.junit.After;
+import static org.junit.Assert.fail;
+import org.json.JSONArray;
+import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
+import com.openexchange.exception.OXException;
+import com.openexchange.realtime.StanzaSender;
+import com.openexchange.realtime.atmosphere.impl.stanza.builder.StanzaBuilder;
+import com.openexchange.realtime.atmosphere.impl.stanza.builder.StanzaBuilderSelector;
+import com.openexchange.realtime.packet.ID;
+import com.openexchange.realtime.packet.Stanza;
 
 
 /**
@@ -62,26 +69,40 @@ import org.junit.Test;
  */
 public class PresenceParserTest {
 
+    private JSONObject presenceRequest;
+
     /**
      * @throws java.lang.Exception
      */
     @Before
     public void setUp() throws Exception {
-    }
-
-    /**
-     * @throws java.lang.Exception
-     */
-    @After
-    public void tearDown() throws Exception {
+        presenceRequest = new JSONObject();
+        
+        presenceRequest.put("session", "1234");
+        presenceRequest.put("element", "presence");
+        presenceRequest.put("to", "ox://marc.arens@premium");
+        presenceRequest.put("type", "subscribe");
+        
+        JSONArray payloads = new JSONArray();
+        JSONObject message = new JSONObject();
+        message.put("elementName", "message");
+        message.put("data", "Hello marens, please let me subscribe to your presence, WBR., Mr. X");
+        
+        payloads.put(message);
+        presenceRequest.put("payloads", payloads);
+        
     }
 
     /**
      * Test method for {@link com.openexchange.realtime.atmosphere.impl.parser.PresenceParser#parseStanza(org.json.JSONObject)}.
+     * @throws OXException 
      */
     @Test
-    public void testParseStanza() {
-        fail("Not yet implemented");
+    public void testParseStanza() throws OXException {
+        StanzaBuilder<? extends Stanza> builder = StanzaBuilderSelector.getBuilder(new ID("ox://thorben.betten@premium"), presenceRequest);
+        System.out.println(builder);
+        Stanza stanza = builder.build();
+        System.out.println(stanza);
     }
 
 }

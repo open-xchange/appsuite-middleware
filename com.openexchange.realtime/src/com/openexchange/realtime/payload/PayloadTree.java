@@ -100,6 +100,18 @@ public class PayloadTree {
     }
 
     /**
+     * Get the ElementPath of the root TreeNode
+     * @return the ElementPath of the root TreeNode.
+     * @throws IllegalStateException if no roo node was is set.
+     */
+    public ElementPath getElementPath() {
+        if(root == null) {
+            throw new IllegalStateException("No root TreeNode set.");
+        }
+        return root.getElementPath();
+    }
+    
+    /**
      * Check if this PayloadTreeNode is empty.
      * 
      * @return true if the root node is null, false otherwise.

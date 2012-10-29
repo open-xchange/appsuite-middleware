@@ -49,13 +49,13 @@
 
 package com.openexchange.realtime.packet;
 
-import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import com.openexchange.realtime.payload.PayloadTree;
-import com.openexchange.realtime.payload.PayloadTreeNode;
+import com.openexchange.realtime.util.ElementPath;
 
 /**
  * {@link Stanza} - Abstract information unit that can be send from one entity to another.
@@ -72,17 +72,13 @@ public abstract class Stanza {
     private String id;
 
     // Payloads carried by this Stanza as n-ary trees
-    List<PayloadTree> payloads;
-
-    // Extension elements of this Stanza as n-ary trees, subset of payloads
-    protected List<PayloadTree> extensions;
+    Map<ElementPath, PayloadTree> payloads;
 
     /**
      * Initializes a new {@link Stanza}.
      */
     protected Stanza() {
-        payloads = new ArrayList<PayloadTree>();
-        extensions = new ArrayList<PayloadTree>();
+        payloads = new HashMap<ElementPath, PayloadTree>();
     }
 
     /**
@@ -146,7 +142,7 @@ public abstract class Stanza {
      */
     public Set<String> getNamespaces() {
         Set<String> namespaces = new HashSet<String>();
-        for (PayloadTree tree : payloads) {
+        for (PayloadTree tree : payloads.values()) {
             namespaces.addAll(tree.getNamespaces());
         }
         return namespaces;
@@ -157,31 +153,26 @@ public abstract class Stanza {
      * 
      * @return A List of PayloadTrees.
      */
-    public List<PayloadTree> getPayloads() {
-        return payloads;
+    public Collection<PayloadTree> getPayloads() {
+        return payloads.values();
     }
-    
-    /**
-     * Get all Payloads that aren't part of the basic Stanza Schema.
-     * 
-     * @return A List of extension Payloads.
-     */
-    public List<PayloadTree> getExtensions() {
-        return extensions;
-    }
-    
+       
     /**
      * Add a payload to this Stanza.
      * @param payload The PayloadTreeNoode to add to this Stanza
      * @return true if the PayloadTreeNode could be added to this Stanza 
      */
-    public abstract boolean addPayload(final PayloadTree payload);
+    public void addPayload(final PayloadTree payload) {
+        payloads.put(payload.getElementPath(), payload);
+    }
     
     /**
      * Remove a PayloadTree from this Stanza.
      * @param payload The PayloadTree to add to this Stanza
      * @return true if the PayloadTree could be removed from this Stanza 
      */
-    public abstract boolean removePayload(final PayloadTree payload);
+    public void removePayload(final PayloadTree payload) {
+        payloads.remove(payload);
+    }
 
 }
