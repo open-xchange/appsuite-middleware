@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2020 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,71 +47,57 @@
  *
  */
 
-package com.openexchange.file.storage.cifs.osgi;
+package com.openexchange.mime;
 
-import org.osgi.framework.BundleContext;
-import org.osgi.util.tracker.ServiceTracker;
-import com.openexchange.file.storage.FileStorageAccountManagerLookupService;
-import com.openexchange.file.storage.FileStorageAccountManagerProvider;
-import com.openexchange.file.storage.cifs.CIFSServices;
-import com.openexchange.mime.MimeTypeMap;
-import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.sessiond.SessiondService;
+import java.io.File;
+import java.util.List;
 
 /**
- * {@link CIFSActivator} - Activator for CIFS bundle.
- * 
+ * {@link MimeTypeMap} - Maps MIME types to file extensions and vice versa.
+ * <p>
+ * This class looks in various places for MIME types file entries. When requests are made to look up MIME types or file extensions, it
+ * searches MIME types files in the following order:
+ * <ol>
+ * <li>The file <i>.mime.types</i> in the user's home directory.</li>
+ * <li>The file <i>&lt;java.home&gt;/lib/mime.types</i>.</li>
+ * <li>The file or resources named <i>META-INF/mime.types</i>.</li>
+ * <li>The file or resource named <i>META-INF/mimetypes.default</i>.</li>
+ * <li>The file or resource denoted by property <i>MimeTypeFileName</i>.</li>
+ * </ol>
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class CIFSActivator extends HousekeepingActivator {
+public interface MimeTypeMap {
 
     /**
-     * Initializes a new {@link CIFSActivator}.
+     * Gets the MIME type associated with given file.
+     *
+     * @param file The file
+     * @return The MIME type associated with given file or <code>application/octet-stream</code> if none found
      */
-    public CIFSActivator() {
-        super();
-    }
+    String getContentType(final File file);
 
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { FileStorageAccountManagerLookupService.class, SessiondService.class, MimeTypeMap.class };
-    }
+    /**
+     * Gets the MIME type associated with given file name.
+     *
+     * @param fileName The file name; e.g. <code>"file.html"</code>
+     * @return The MIME type associated with given file name or <code>application/octet-stream</code> if none found
+     */
+    String getContentType(String fileName);
 
-    @Override
-    protected void startBundle() throws Exception {
-        try {
-            CIFSServices.setServices(this);
-            /*
-             * Some initialization stuff
-             */
-            final BundleContext context = this.context;
-            /*
-             * Register tracker
-             */
-            rememberTracker(new ServiceTracker<FileStorageAccountManagerProvider, FileStorageAccountManagerProvider>(context, FileStorageAccountManagerProvider.class, new CIFSServiceRegisterer(context)));
-            openTrackers();
-        } catch (final Exception e) {
-            com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(CIFSActivator.class)).error(e.getMessage(), e);
-            throw e;
-        }
-    }
+    /**
+     * Gets the MIME type associated with given file extension.
+     *
+     * @param extension The file extension; e.g. <code>"txt"</code>
+     * @return The MIME type associated with given file extension or <code>application/octet-stream</code> if none found
+     */
+    String getContentTypeByExtension(String extension);
 
-    @Override
-    public <S> void registerService(final Class<S> clazz, final S service) {
-        super.registerService(clazz, service);
-    }
-
-    @Override
-    protected void stopBundle() throws Exception {
-        try {
-            // Clean-up
-            cleanUp();
-            // Clear service registry
-            CIFSServices.setServices(null);
-        } catch (final Exception e) {
-            com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(CIFSActivator.class)).error(e.getMessage(), e);
-            throw e;
-        }
-    }
-
+    /**
+     * Gets the file extension for given MIME type.
+     *
+     * @param mimeType The MIME type
+     * @return The file extension for given MIME type or <code>dat</code> if none found
+     */
+    List<String> getFileExtensions(String mime);
 }

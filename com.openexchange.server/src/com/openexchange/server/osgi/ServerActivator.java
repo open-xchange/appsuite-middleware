@@ -49,6 +49,7 @@
 
 package com.openexchange.server.osgi;
 
+import java.io.File;
 import java.nio.charset.spi.CharsetProvider;
 import java.util.ArrayList;
 import java.util.Dictionary;
@@ -154,6 +155,7 @@ import com.openexchange.mail.conversion.VCardAttachMailDataHandler;
 import com.openexchange.mail.conversion.VCardMailPartDataSource;
 import com.openexchange.mail.loginhandler.MailLoginHandler;
 import com.openexchange.mail.loginhandler.TransportLoginHandler;
+import com.openexchange.mail.mime.MimeType2ExtMap;
 import com.openexchange.mail.osgi.MailProviderServiceTracker;
 import com.openexchange.mail.osgi.TransportProviderServiceTracker;
 import com.openexchange.mail.service.MailService;
@@ -166,6 +168,7 @@ import com.openexchange.mailaccount.internal.CreateMailAccountTables;
 import com.openexchange.mailaccount.internal.DeleteListenerServiceTracker;
 import com.openexchange.management.ManagementService;
 import com.openexchange.messaging.registry.MessagingServiceRegistry;
+import com.openexchange.mime.MimeTypeMap;
 import com.openexchange.multiple.MultipleHandlerFactoryService;
 import com.openexchange.multiple.internal.MultipleHandlerServiceTracker;
 import com.openexchange.osgi.BundleServiceTracker;
@@ -498,6 +501,28 @@ public final class ServerActivator extends HousekeepingActivator {
             registerService(EventHandler.class, new MailSessionEventHandler(), serviceProperties);
             registerService(MailCounter.class, new MailCounterImpl());
             registerService(MailIdleCounter.class, new MailIdleCounterImpl());
+            registerService(MimeTypeMap.class, new MimeTypeMap() {
+
+                @Override
+                public String getContentType(final File file) {
+                    return MimeType2ExtMap.getContentType(file);
+                }
+
+                @Override
+                public String getContentType(final String fileName) {
+                    return MimeType2ExtMap.getContentType(fileName);
+                }
+
+                @Override
+                public String getContentTypeByExtension(final String extension) {
+                    return MimeType2ExtMap.getContentTypeByExtension(extension);
+                }
+
+                @Override
+                public List<String> getFileExtensions(final String mime) {
+                    return MimeType2ExtMap.getFileExtensions(mime);
+                }
+            });
         }
         // TODO: Register search service here until its encapsulated in an own bundle
         registerService(SearchService.class, new SearchServiceImpl());
