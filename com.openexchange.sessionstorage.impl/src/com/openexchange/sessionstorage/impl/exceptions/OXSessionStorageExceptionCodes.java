@@ -66,6 +66,8 @@ public enum OXSessionStorageExceptionCodes implements OXExceptionCode {
     SESSIONSTORAGE_REMOVE_FAILED(OXSessionStorageExceptionMessages.SESSIONSTORAGE_REMOVE_FAILED_MSG, 4, Category.CATEGORY_ERROR),
     SESSIONSTORAGE_SESSION_NOT_FOUND(OXSessionStorageExceptionMessages.SESSIONSTORAGE_SESSION_NOT_FOUND_MSG, 5, Category.CATEGORY_ERROR);
     
+    private static final String PREFIX = "SST-IN-MEMORY";
+
     /**
      * Message of the exception.
      */
@@ -104,7 +106,7 @@ public enum OXSessionStorageExceptionCodes implements OXExceptionCode {
 
     @Override
     public String getPrefix() {
-        return "SES";
+        return PREFIX;
     }
 
     @Override

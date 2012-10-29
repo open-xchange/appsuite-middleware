@@ -54,7 +54,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.session.Session;
 
 /**
- * {@link SessionStorageService}
+ * {@link SessionStorageService} - A session storage service.
  * 
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  */

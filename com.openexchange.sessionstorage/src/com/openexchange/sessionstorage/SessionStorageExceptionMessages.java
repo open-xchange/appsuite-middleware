@@ -47,29 +47,25 @@
  *
  */
 
-package com.openexchange.sessionstorage.hazelcast.osgi;
+package com.openexchange.sessionstorage;
 
-import com.openexchange.osgi.ServiceRegistry;
-
+import com.openexchange.i18n.LocalizableStrings;
 
 /**
- * {@link HazelcastSessionStorageServiceRegistry}
+ * {@link SessionStorageExceptionMessages} - Error message constants for <b><code>com.openexchange.sessionstorage</code></b>.
  *
- * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class HazelcastSessionStorageServiceRegistry extends ServiceRegistry {
-    
-    private static ServiceRegistry registry = new ServiceRegistry();
+public class SessionStorageExceptionMessages implements LocalizableStrings {
+
+    // An error occurred: %1$s
+    public static final String UNEXPECTED_ERROR = "An error occurred: %1$s";
 
     /**
-     * Initializes a new {@link HazelcastSessionStorageServiceRegistry}.
+     * Initializes a new {@link SessionStorageExceptionMessages}.
      */
-    public HazelcastSessionStorageServiceRegistry() {
+    private SessionStorageExceptionMessages() {
         super();
-    }
-    
-    public static ServiceRegistry getRegistry() {
-        return registry;
     }
 
 }

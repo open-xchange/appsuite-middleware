@@ -7,6 +7,7 @@ Bundle-Activator: com.openexchange.sessionstorage.osgi.SessionStorageActivator
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Import-Package: com.openexchange.exception,
+ com.openexchange.i18n,
  com.openexchange.osgi,
  com.openexchange.session,
  org.osgi.framework

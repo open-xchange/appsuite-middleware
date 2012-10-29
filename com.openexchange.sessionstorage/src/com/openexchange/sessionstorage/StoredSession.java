@@ -57,7 +57,7 @@ import com.openexchange.session.PutIfAbsent;
 import com.openexchange.session.Session;
 
 /**
- * {@link StoredSession}
+ * {@link StoredSession} - Represents a session held in session storage.
  * 
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  */
@@ -79,6 +79,7 @@ public class StoredSession implements PutIfAbsent, Serializable {
     private String client;
     private String userLogin;
     private final ConcurrentMap<String, Object> parameters;
+
     /**
      * Initializes a new {@link StoredSession}.
      */
@@ -119,11 +120,6 @@ public class StoredSession implements PutIfAbsent, Serializable {
                 this.parameters.put(Session.PARAM_CAPABILITIES, parameter);
             }
         }
-    /**
-     * Initializes a new {@link StoredSession}.
-     */
-                // this.parameters.put(Session.PARAM_LOCK, parameter);
-                // this.parameters.put(Session.PARAM_COUNTER, parameter);
     }
 
     /**

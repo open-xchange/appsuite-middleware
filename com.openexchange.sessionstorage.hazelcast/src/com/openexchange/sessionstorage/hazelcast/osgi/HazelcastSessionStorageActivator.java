@@ -57,10 +57,10 @@ import com.openexchange.config.ConfigurationService;
 import com.openexchange.crypto.CryptoService;
 import com.openexchange.log.LogFactory;
 import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.osgi.ServiceRegistry;
 import com.openexchange.sessionstorage.SessionStorageService;
 import com.openexchange.sessionstorage.hazelcast.HazelcastSessionStorageConfiguration;
 import com.openexchange.sessionstorage.hazelcast.HazelcastSessionStorageService;
+import com.openexchange.sessionstorage.hazelcast.Services;
 import com.openexchange.sessionstorage.hazelcast.exceptions.OXHazelcastSessionStorageExceptionCodes;
 
 /**
@@ -72,16 +72,6 @@ public class HazelcastSessionStorageActivator extends HousekeepingActivator {
 
     private static Log LOG = LogFactory.getLog(HazelcastSessionStorageActivator.class);
 
-    private HazelcastSessionStorageService service;
-
-    private ConfigurationService configService;
-
-    private CryptoService cryptoService;
-
-    private HazelcastInstance hazelcast;
-
-    private ServiceRegistry registry;
-
     @Override
     protected Class<?>[] getNeededServices() {
         return new Class<?>[] { ConfigurationService.class, CryptoService.class, HazelcastInstance.class };
@@ -90,29 +80,24 @@ public class HazelcastSessionStorageActivator extends HousekeepingActivator {
     @Override
     protected void startBundle() throws Exception {
         LOG.info("Starting bundle: com.openexchange.sessionstorage.hazelcast");
-        configService = getService(ConfigurationService.class);
-        cryptoService = getService(CryptoService.class);
-        hazelcast = getService(HazelcastInstance.class);
-        registry = HazelcastSessionStorageServiceRegistry.getRegistry();
-        registry.addService(ConfigurationService.class, configService);
-        registry.addService(CryptoService.class, cryptoService);
-        registry.addService(HazelcastInstance.class, hazelcast);
-        boolean enabled = configService.getBoolProperty("com.openexchange.sessionstorage.hazelcast.enabled", false);
+        Services.setServiceLookup(this);
+        final ConfigurationService configService = getService(ConfigurationService.class);
+        final boolean enabled = configService.getBoolProperty("com.openexchange.sessionstorage.hazelcast.enabled", false);
         if (enabled) {
-            String encryptionKey = configService.getProperty("com.openexchange.sessionstorage.hazelcast.encryptionKey");
+            final String encryptionKey = configService.getProperty("com.openexchange.sessionstorage.hazelcast.encryptionKey");
             if (encryptionKey == null) {
                 throw OXHazelcastSessionStorageExceptionCodes.HAZELCAST_SESSIONSTORAGE_NO_ENCRYPTION_KEY.create();
             }
-            MapConfig mapConfig = new MapConfig();
-            String mapName = configService.getProperty("com.openexchange.sessionstorage.hazelcast.map.name");
-            int backupCount = configService.getIntProperty("com.openexchange.sessionstorage.hazelcast.map.backupcount", 1);
-            int asyncBackup = configService.getIntProperty("com.openexchange.sessionstorage.hazelcast.map.asyncbackup", 0);
-            int ttl = configService.getIntProperty("com.openexchange.sessionstorage.hazelcast.map.ttl", 0);
-            int maxidle = configService.getIntProperty("com.openexchange.sessionstorage.hazelcast.map.maxidle", 0);
-            String evictionPolicy = configService.getProperty("com.openexchange.sessionstorage.hazelcast.map.evictionpolicy");
-            int evictionPercentage = configService.getIntProperty("com.openexchange.sessionstorage.hazelcast.map.evictionpercentage", 25);
-            int maxSize = configService.getIntProperty("com.openexchange.sessionstorage.hazelcast.map.maxsize", 0);
-            String mergePolicy = configService.getProperty("com.openexchange.sessionstorage.hazelcast.map.mergepolicy");
+            final MapConfig mapConfig = new MapConfig();
+            final String mapName = configService.getProperty("com.openexchange.sessionstorage.hazelcast.map.name");
+            final int backupCount = configService.getIntProperty("com.openexchange.sessionstorage.hazelcast.map.backupcount", 1);
+            final int asyncBackup = configService.getIntProperty("com.openexchange.sessionstorage.hazelcast.map.asyncbackup", 0);
+            final int ttl = configService.getIntProperty("com.openexchange.sessionstorage.hazelcast.map.ttl", 0);
+            final int maxidle = configService.getIntProperty("com.openexchange.sessionstorage.hazelcast.map.maxidle", 0);
+            final String evictionPolicy = configService.getProperty("com.openexchange.sessionstorage.hazelcast.map.evictionpolicy");
+            final int evictionPercentage = configService.getIntProperty("com.openexchange.sessionstorage.hazelcast.map.evictionpercentage", 25);
+            final int maxSize = configService.getIntProperty("com.openexchange.sessionstorage.hazelcast.map.maxsize", 0);
+            final String mergePolicy = configService.getProperty("com.openexchange.sessionstorage.hazelcast.map.mergepolicy");
             if (mapName == null || !checkEvictionPolicy(evictionPolicy) || !checkMergePolicy(mergePolicy)) {
                 throw OXHazelcastSessionStorageExceptionCodes.HAZELCAST_SESSIONSTORAGE_CONFIG_FILE.create();
             }
@@ -123,24 +108,20 @@ public class HazelcastSessionStorageActivator extends HousekeepingActivator {
             mapConfig.setMaxIdleSeconds(maxidle);
             mapConfig.setEvictionPolicy(evictionPolicy);
             mapConfig.setEvictionPercentage(evictionPercentage);
-            MaxSizeConfig maxSizeConfig = new MaxSizeConfig();
+            final MaxSizeConfig maxSizeConfig = new MaxSizeConfig();
             maxSizeConfig.setSize(maxSize);
             mapConfig.setMaxSizeConfig(maxSizeConfig);
             mapConfig.setMergePolicy(mergePolicy);
-            HazelcastSessionStorageConfiguration config = new HazelcastSessionStorageConfiguration(encryptionKey, cryptoService, mapConfig);
-            service = new HazelcastSessionStorageService(config);
-            registerService(SessionStorageService.class, service);
+            final HazelcastSessionStorageConfiguration config = new HazelcastSessionStorageConfiguration(encryptionKey, mapConfig);
+            registerService(SessionStorageService.class, new HazelcastSessionStorageService(config));
         }
     }
 
     @Override
     public void stopBundle() throws Exception {
         LOG.info("Stopping bundle: com.openexchange.sessionstorage.hazelcast");
-        if (service != null) {
-            unregisterServices();
-        }
-        closeTrackers();
         cleanUp();
+        Services.setServiceLookup(null);
     }
 
     private boolean checkEvictionPolicy(String evictionPolicy) {

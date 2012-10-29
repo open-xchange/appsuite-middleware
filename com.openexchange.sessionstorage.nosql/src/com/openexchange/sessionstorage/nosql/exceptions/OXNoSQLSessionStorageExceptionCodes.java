@@ -73,6 +73,8 @@ public enum OXNoSQLSessionStorageExceptionCodes implements OXExceptionCode {
     NOSQL_SESSIONSTORAGE_NO_USERSESSIONS(OXNoSQLSessionStorageExceptionMessages.NOSQL_SESSIONSTORAGE_NO_USERSESSIONS_MSG, 10, Category.CATEGORY_ERROR),
     NOSQL_SESSIONSTORAGE_NO_CONTEXTSESSIONS(OXNoSQLSessionStorageExceptionMessages.NOSQL_SESSIONSTORAGE_NO_CONTEXTSESSIONS_MSG, 11, Category.CATEGORY_ERROR);
 
+    private static final String PREFIX = "SST-NOSQL";
+
     /**
      * Message of the exception.
      */
@@ -114,7 +116,7 @@ public enum OXNoSQLSessionStorageExceptionCodes implements OXExceptionCode {
 
     @Override
     public String getPrefix() {
-        return "SES";
+        return PREFIX;
     }
 
     @Override

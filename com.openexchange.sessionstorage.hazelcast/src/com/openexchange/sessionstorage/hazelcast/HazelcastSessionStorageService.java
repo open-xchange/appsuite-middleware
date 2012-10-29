@@ -60,7 +60,6 @@ import com.openexchange.exception.OXException;
 import com.openexchange.session.Session;
 import com.openexchange.sessionstorage.SessionStorageService;
 import com.openexchange.sessionstorage.hazelcast.exceptions.OXHazelcastSessionStorageExceptionCodes;
-import com.openexchange.sessionstorage.hazelcast.osgi.HazelcastSessionStorageServiceRegistry;
 
 /**
  * {@link HazelcastSessionStorageService}
@@ -69,13 +68,10 @@ import com.openexchange.sessionstorage.hazelcast.osgi.HazelcastSessionStorageSer
  */
 public class HazelcastSessionStorageService implements SessionStorageService {
 
-    private final HazelcastInstance hazelcast;
     private final IMap<String, HazelcastStoredSession> sessions;
     private final String encryptionKey;
     private final CryptoService cryptoService;
     private final MapConfig mapConfig;
-
-    private static volatile HazelcastSessionStorageService instance;
 
     /**
      * Initializes a new {@link HazelcastSessionStorageService}.
@@ -84,11 +80,10 @@ public class HazelcastSessionStorageService implements SessionStorageService {
         super();
         encryptionKey = config.getEncryptionKey();
         mapConfig = config.getMapConfig();
-        hazelcast = HazelcastSessionStorageServiceRegistry.getRegistry().getService(HazelcastInstance.class);
+        final HazelcastInstance hazelcast = Services.getService(HazelcastInstance.class);
         hazelcast.getConfig().addMapConfig(mapConfig);
         sessions = hazelcast.getMap("sessions");
         cryptoService = config.getCryptoService();
-        instance = this;
     }
 
     @Override
@@ -280,10 +275,6 @@ public class HazelcastSessionStorageService implements SessionStorageService {
 
     private String decrypt(String encPassword) throws OXException {
         return cryptoService.decrypt(encPassword, encryptionKey);
-    }
-
-    public static HazelcastSessionStorageService getStorageService() {
-        return instance;
     }
 
 }
