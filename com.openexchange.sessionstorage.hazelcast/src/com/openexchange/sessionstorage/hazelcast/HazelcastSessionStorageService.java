@@ -52,6 +52,7 @@ package com.openexchange.sessionstorage.hazelcast;
 import java.util.ArrayList;
 import java.util.List;
 import com.hazelcast.config.MapConfig;
+import com.hazelcast.core.HazelcastException;
 import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.core.IMap;
 import com.openexchange.crypto.CryptoService;
@@ -92,14 +93,18 @@ public class HazelcastSessionStorageService implements SessionStorageService {
 
     @Override
     public Session lookupSession(String sessionId) throws OXException {
-        if (null != sessionId && sessions.containsKey(sessionId)) {
-            HazelcastStoredSession s = sessions.get(sessionId);
-            s.setLastAccess(System.currentTimeMillis());
-            s.setPassword(decrypt(s.getPassword()));
-            sessions.replace(sessionId, s);
-            return s;
+        try {
+            if (null != sessionId && sessions.containsKey(sessionId)) {
+                HazelcastStoredSession s = sessions.get(sessionId);
+                s.setLastAccess(System.currentTimeMillis());
+                s.setPassword(decrypt(s.getPassword()));
+                sessions.replace(sessionId, s);
+                return s;
+            }
+            throw OXHazelcastSessionStorageExceptionCodes.HAZELCAST_SESSIONSTORAGE_SESSION_NOT_FOUND.create(sessionId);
+        } catch (final HazelcastException e) {
+            throw OXHazelcastSessionStorageExceptionCodes.HAZELCAST_SESSIONSTORAGE_SESSION_NOT_FOUND.create(e, sessionId);
         }
-        throw OXHazelcastSessionStorageExceptionCodes.HAZELCAST_SESSIONSTORAGE_SESSION_NOT_FOUND.create(sessionId);
     }
 
     @Override
@@ -109,7 +114,7 @@ public class HazelcastSessionStorageService implements SessionStorageService {
                 HazelcastStoredSession ss = new HazelcastStoredSession(session);
                 ss.setPassword(crypt(ss.getPassword()));
                 sessions.put(session.getSessionID(), ss);
-            } catch (Exception e) {
+            } catch (HazelcastException e) {
                 throw OXHazelcastSessionStorageExceptionCodes.HAZELCAST_SESSIONSTORAGE_SAVE_FAILED.create(e, session.getSessionID());
             }
         }
@@ -120,7 +125,7 @@ public class HazelcastSessionStorageService implements SessionStorageService {
         if (null != sessionId) {
             try {
                 sessions.remove(sessionId);
-            } catch (Exception e) {
+            } catch (HazelcastException e) {
                 throw OXHazelcastSessionStorageExceptionCodes.HAZELCAST_SESSIONSTORAGE_REMOVE_FAILED.create(e, sessionId);
             }
         }
