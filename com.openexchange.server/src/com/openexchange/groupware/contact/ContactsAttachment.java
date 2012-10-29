@@ -57,13 +57,11 @@ import com.openexchange.groupware.attach.AttachmentEvent;
 import com.openexchange.groupware.attach.AttachmentListener;
 import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
-import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.User;
-import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.server.impl.EffectivePermission;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
+import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link ContactsAttachment}
@@ -93,137 +91,51 @@ public class ContactsAttachment implements AttachmentListener, AttachmentAuthori
     }
 
     @Override
-    public void checkMayAttach(int folderId, int objectId, User user, UserConfiguration userConfig, Context ctx) throws OXException {
-        checkPermissions(folderId, objectId, user, userConfig, ctx, true, true);
+    public void checkMayAttach(ServerSession session, int folderId, int objectId) throws OXException {
+        checkPermissions(session, folderId, objectId, true, true);
     }
 
     @Override
-    public void checkMayDetach(int folderId, int objectId, User user, UserConfiguration userConfig, Context ctx) throws OXException {
-        checkMayAttach(folderId, objectId, user, userConfig, ctx);
+    public void checkMayDetach(ServerSession session, int folderId, int objectId) throws OXException {
+        checkMayAttach(session, folderId, objectId);
     }
 
     @Override
-    public void checkMayReadAttachments(int folderId, int objectId, User user, UserConfiguration userConfig, Context ctx) 
-        throws OXException {
-        checkPermissions(folderId, objectId, user, userConfig, ctx, true, false);
+    public void checkMayReadAttachments(ServerSession session, int folderId, int objectId) throws OXException {
+        checkPermissions(session, folderId, objectId, true, false);
     }
 
     /**
      * Checks a user's object permissions for a specific contact, throwing appropriate exceptions in case of the requested permissions 
      * are not met.
      * 
+     * @param session The server session of the user to check the permissions for
      * @param folderID The parent folder ID of the contact
      * @param objectID the object ID of the contact
-     * @param user The user to check the permissions for
-     * @param userConfig The user configuration
-     * @param context The context
      * @param needsReadAccess <code>true</code> whether read access is requested, <code>false</code>, otherwise
      * @param needsWriteAccess <code>true</code> whether write access is requested, <code>false</code>, otherwise
      * @throws OXException
      */
-    private static void checkPermissions(int folderID, int objectID, final User user, UserConfiguration userConfig, final Context context, 
-        boolean needsReadAccess, boolean needsWriteAccess) throws OXException {
+    private static void checkPermissions(ServerSession session, int folderID, int objectID, boolean needsReadAccess, boolean needsWriteAccess) throws OXException {
         if (needsReadAccess || needsWriteAccess) {
-            OXFolderAccess folderAccess = new OXFolderAccess(context);
-            EffectivePermission permission = folderAccess.getFolderPermission(folderID, user.getId(), userConfig);
+            OXFolderAccess folderAccess = new OXFolderAccess(session.getContext());
+            EffectivePermission permission = folderAccess.getFolderPermission(
+                folderID, session.getUserId(), session.getUserConfiguration());
             if (needsReadAccess && false == permission.canReadOwnObjects()) {
-                throw ContactExceptionCodes.NO_ACCESS_PERMISSION.create(I(folderID), I(context.getContextId()), I(user.getId()));
+                throw ContactExceptionCodes.NO_ACCESS_PERMISSION.create(I(folderID), I(session.getContextId()), I(session.getUserId()));
             }
             if (needsWriteAccess && false == permission.canWriteOwnObjects()) {
-                throw ContactExceptionCodes.NO_CHANGE_PERMISSION.create(I(objectID), I(context.getContextId()));
+                throw ContactExceptionCodes.NO_CHANGE_PERMISSION.create(I(objectID), I(session.getContextId()));
             }
             ContactService contactService = ServerServiceRegistry.getInstance().getService(ContactService.class);
-            //TODO: this Session may not be sufficient for all storages
-            Session session = new Session() {
-                @Override
-                public int getContextId() {
-                    return context.getContextId();
-                }
-                @Override
-                public String getLocalIp() {
-                    throw new UnsupportedOperationException();
-                }
-                @Override
-                public void setLocalIp(String ip) {
-                    throw new UnsupportedOperationException();
-                }
-                @Override
-                public String getLoginName() {
-                    throw new UnsupportedOperationException();
-                }
-                @Override
-                public boolean containsParameter(String name) {
-                    return false;
-                }
-                @Override
-                public Object getParameter(String name) {
-                    return null;
-                }
-                @Override
-                public String getPassword() {
-                    throw new UnsupportedOperationException();
-                }
-                @Override
-                public String getRandomToken() {
-                    throw new UnsupportedOperationException();
-                }
-                @Override
-                public String getSecret() {
-                    throw new UnsupportedOperationException();
-                }
-                @Override
-                public String getSessionID() {
-                    throw new UnsupportedOperationException();
-                }
-                @Override
-                public int getUserId() {
-                    return user.getId();
-                }
-                @Override
-                public String getUserlogin() {
-                    return user.getLoginInfo();
-                }
-                @Override
-                public String getLogin() {
-                    throw new UnsupportedOperationException();
-                }
-                @Override
-                public void setParameter(String name, Object value) {
-                    throw new UnsupportedOperationException();
-                }
-                @Override
-                public void removeRandomToken() {
-                    throw new UnsupportedOperationException();
-                }
-                @Override
-                public String getAuthId() {
-                    throw new UnsupportedOperationException();
-                }
-                @Override
-                public String getHash() {
-                    throw new UnsupportedOperationException();
-                }
-                @Override
-                public void setHash(String hash) {
-                    throw new UnsupportedOperationException();
-                }
-                @Override
-                public String getClient() {
-                    throw new UnsupportedOperationException();
-                }
-                @Override
-                public void setClient(String client) {
-                    throw new UnsupportedOperationException();
-                }
-            };
             Contact contact = contactService.getContact(session, Integer.toString(folderID), Integer.toString(objectID), 
                 new ContactField[] { ContactField.CREATED_BY, ContactField.PRIVATE_FLAG });
             if (contact.getCreatedBy() != session.getUserId()) {
                 if (contact.getPrivateFlag() || needsReadAccess && false == permission.canReadAllObjects()) {
-                    throw ContactExceptionCodes.NO_ACCESS_PERMISSION.create(I(folderID), I(context.getContextId()), I(user.getId()));
+                    throw ContactExceptionCodes.NO_ACCESS_PERMISSION.create(I(folderID), I(session.getContextId()), I(session.getUserId()));
                 }
                 if (needsWriteAccess && false == permission.canWriteAllObjects()) {
-                    throw ContactExceptionCodes.NO_CHANGE_PERMISSION.create(I(objectID), I(context.getContextId()));
+                    throw ContactExceptionCodes.NO_CHANGE_PERMISSION.create(I(objectID), I(session.getContextId()));
                 }
             }
         }        

@@ -50,20 +50,17 @@
 package com.openexchange.groupware.calendar;
 
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.exception.OXException;
 import com.openexchange.exception.OXException.Generic;
 import com.openexchange.groupware.attach.AttachmentAuthorization;
 import com.openexchange.groupware.attach.AttachmentEvent;
 import com.openexchange.groupware.attach.AttachmentListener;
-import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.User;
-import com.openexchange.groupware.userconfiguration.UserConfiguration;
+import com.openexchange.log.LogFactory;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
-import com.openexchange.sessiond.impl.SessionObjectWrapper;
 import com.openexchange.tools.StringCollection;
+import com.openexchange.tools.session.ServerSession;
 
 /**
  * CalendarAttachments
@@ -93,16 +90,16 @@ public class CalendarAttachments implements  AttachmentListener, AttachmentAutho
 	}
 
 	@Override
-    public void checkMayAttach(final int folderId, final int objectId, final User user, final UserConfiguration userConfig, final Context ctx) throws OXException {
+    public void checkMayAttach(ServerSession session, int folderId, int objectId) throws OXException {
         try {
             final CalendarCollectionService collection = ServerServiceRegistry.getInstance().getService(CalendarCollectionService.class);
-            final Session so = SessionObjectWrapper.createSessionObject(user.getId(), ctx, collection.getUniqueCalendarSessionName());
-            if (!collection.getWritePermission(objectId, folderId, so, ctx)) {
+            if (!collection.getWritePermission(objectId, folderId, session, session.getContext())) {
                 throw OXCalendarExceptionCodes.NO_PERMISSIONS_TO_ATTACH_DETACH.create();
             }
         } catch (final OXException e) {
             if (e.isGeneric(Generic.NOT_FOUND)) {
-                LOG.error(StringCollection.convertArraytoString(new Object[] { "checkMayAttach failed. The object does not exists (cid:oid) : ",ctx.getContextId(),":",objectId } ));
+                LOG.error(StringCollection.convertArraytoString(new Object[] { 
+                    "checkMayAttach failed. The object does not exists (cid:oid) : ", session.getContextId(), ":", objectId } ));
             }
             throw e;
         } catch (final Exception e) {
@@ -111,21 +108,21 @@ public class CalendarAttachments implements  AttachmentListener, AttachmentAutho
     }
 
     @Override
-    public void checkMayDetach(final int folderId, final int objectId, final User user, final UserConfiguration userConfig, final Context ctx) throws OXException {
-        checkMayAttach(folderId, objectId, user, userConfig, ctx);
+    public void checkMayDetach(ServerSession session, int folderId, int objectId) throws OXException {
+        checkMayAttach(session, folderId, objectId);
     }
 
     @Override
-    public void checkMayReadAttachments(final int folderId, final int objectId, final User user, final UserConfiguration userConfig, final Context ctx) throws OXException {
+    public void checkMayReadAttachments(ServerSession session, int folderId, int objectId) throws OXException {
         try {
             final CalendarCollectionService collection = ServerServiceRegistry.getInstance().getService(CalendarCollectionService.class);
-            final Session so = SessionObjectWrapper.createSessionObject(user.getId(), ctx, collection.getUniqueCalendarSessionName());
-            if (!collection.getReadPermission(objectId, folderId, so, ctx)) {
+            if (!collection.getReadPermission(objectId, folderId, session, session.getContext())) {
                 throw OXCalendarExceptionCodes.NO_PERMISSIONS_TO_READ.create();
             }
         } catch (final OXException e) {
             if (e.isGeneric(Generic.NOT_FOUND)) {
-                LOG.error(StringCollection.convertArraytoString(new Object[] { "checkMayReadAttachments failed. The object does not exists (cid:oid) : ",ctx.getContextId(),":",objectId } ));
+                LOG.error(StringCollection.convertArraytoString(new Object[] { 
+                    "checkMayReadAttachments failed. The object does not exists (cid:oid) : ", session.getContextId(), ":", objectId } ));
             }
             throw e;
         } catch(final Exception e) {

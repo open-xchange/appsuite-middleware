@@ -127,13 +127,13 @@ public class AttachmentCleaner implements AppointmentEventInterface, TaskEventIn
     }
 
     private final void deleteAttachments(final int parentFolderID, final int objectID, final int type, final Session session) {
-        SearchIterator iter = null;
+        SearchIterator<AttachmentMetadata> iter = null;
         try {
             final ServerSession sessionObj = ServerSessionAdapter.valueOf(session);
             ATTACHMENT_BASE.startTransaction();
-            final TimedResult rs =
+            final TimedResult<AttachmentMetadata> rs =
                 ATTACHMENT_BASE.getAttachments(
-                    parentFolderID,
+                    session, parentFolderID,
                     objectID,
                     type,
                     new AttachmentField[] { AttachmentField.ID_LITERAL },
@@ -148,7 +148,7 @@ public class AttachmentCleaner implements AppointmentEventInterface, TaskEventIn
                 return; // Shortcut
             }
             while (iter.hasNext()) {
-                ids.add(((AttachmentMetadata) iter.next()).getId());
+                ids.add(iter.next().getId());
             }
 
             ATTACHMENT_BASE.detachFromObject(

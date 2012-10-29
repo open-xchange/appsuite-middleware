@@ -80,15 +80,15 @@ public class CopyAttachmentsForChangeExceptions implements CalendarListener {
             final Context ctx = session.getContext();
             final User userObject = UserStorage.getStorageUser(session.getUserId(), ctx);
             final UserConfiguration userConfig = UserConfigurationStorage.getInstance().getUserConfiguration(session.getUserId(), ctx);
-            final TimedResult result = attachmentBase.getAttachments(master.getParentFolderID(), master.getObjectID(), Types.APPOINTMENT, ctx, userObject, userConfig);
-            final SearchIterator iterator = result.results();
+            final TimedResult<AttachmentMetadata> result = attachmentBase.getAttachments(session, master.getParentFolderID(), master.getObjectID(), Types.APPOINTMENT, ctx, userObject, userConfig);
+            final SearchIterator<AttachmentMetadata> iterator = result.results();
             int folderId = exception.getParentFolderID();
             if(folderId == 0) {
                 folderId = inFolder;
             }
 
             while(iterator.hasNext()) {
-                final AttachmentMetadata attachment = (AttachmentMetadata) iterator.next();
+                final AttachmentMetadata attachment = iterator.next();
                 final AttachmentMetadata copy = new AttachmentImpl(attachment);
                 copy.setId(AttachmentBase.NEW);
                 copy.setFileId(null);
@@ -97,7 +97,7 @@ public class CopyAttachmentsForChangeExceptions implements CalendarListener {
                 copy.setFolderId(folderId);
                 copy.setModuleId(Types.APPOINTMENT);
 
-                final InputStream is = attachmentBase.getAttachedFile(folderId, exception.getObjectID(), Types.APPOINTMENT, attachment.getId(), ctx, userObject, userConfig);
+                final InputStream is = attachmentBase.getAttachedFile(session, folderId, exception.getObjectID(), Types.APPOINTMENT, attachment.getId(), ctx, userObject, userConfig);
                 attachmentBase.attachToObject(copy, is, session, ctx, userObject, userConfig);
             }
             attachmentBase.commit();

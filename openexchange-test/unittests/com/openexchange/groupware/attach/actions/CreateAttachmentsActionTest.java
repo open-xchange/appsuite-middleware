@@ -20,7 +20,7 @@ public class CreateAttachmentsActionTest extends AbstractAttachmentActionTest{
 	@Override
 	protected void verifyPerformed() throws Exception {
 		for(final AttachmentMetadata attachment : getAttachments()) {
-			final AttachmentMetadata loaded = getAttachmentBase().getAttachment(attachment.getFolderId(), attachment.getAttachedId(), attachment.getModuleId(),  attachment.getId(), getContext(), getUser(), null);
+			final AttachmentMetadata loaded = getAttachmentBase().getAttachment(getSession(), attachment.getFolderId(), attachment.getAttachedId(), attachment.getModuleId(),  attachment.getId(), getContext(), getUser(), null);
 			assertEquals(attachment, loaded);
 		}
 
@@ -30,7 +30,7 @@ public class CreateAttachmentsActionTest extends AbstractAttachmentActionTest{
 	protected void verifyUndone() throws Exception {
 		for(final AttachmentMetadata attachment : getAttachments()) {
 			try {
-				getAttachmentBase().getAttachment(attachment.getFolderId(), attachment.getAttachedId(), attachment.getModuleId(),  attachment.getId(), getContext(), getUser(), null);
+				getAttachmentBase().getAttachment(getSession(), attachment.getFolderId(), attachment.getAttachedId(), attachment.getModuleId(),  attachment.getId(), getContext(), getUser(), null);
 				fail("The attachment "+attachment.getId()+" was not removed on undo");
 			} catch (final OXException x) {
 				assertTrue(true);
