@@ -145,7 +145,7 @@ public final class ListAction extends AbstractAttachmentAction {
             final User user = session.getUser();
             final UserConfiguration userConfig = session.getUserConfiguration();
             final TimedResult<AttachmentMetadata> result =
-                ATTACHMENT_BASE.getAttachments(folderId, attachedId, moduleId, ids, fields, ctx, user, userConfig);
+                ATTACHMENT_BASE.getAttachments(session, folderId, attachedId, moduleId, ids, fields, ctx, user, userConfig);
 
             iter = result.results();
 

@@ -1,10 +1,10 @@
 package com.openexchange.groupware.attach.actions;
 
-import com.openexchange.exception.OXException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.attach.AttachmentMetadata;
 import com.openexchange.groupware.attach.impl.CreateAttachmentAction;
 import com.openexchange.groupware.attach.impl.DeleteAttachmentAction;
@@ -57,16 +57,16 @@ public class RemoveAttachmentsActionTest extends AbstractAttachmentActionTest {
     @Override
     protected void verifyUndone() throws Exception {
         for(final AttachmentMetadata attachment : getAttachments()) {
-            final AttachmentMetadata loaded = getAttachmentBase().getAttachment(attachment.getFolderId(), attachment.getAttachedId(), attachment.getModuleId(),  attachment.getId(), getContext(), getUser(), null);
+            final AttachmentMetadata loaded = getAttachmentBase().getAttachment(getSession(), attachment.getFolderId(), attachment.getAttachedId(), attachment.getModuleId(),  attachment.getId(), getContext(), getUser(), null);
             assertEquals(attachment, loaded);
         }
         checkRemovedFromDel();
     }
 
-    private void checkRemovedFromNormalTable() {
+    private void checkRemovedFromNormalTable() throws Exception {
         for(final AttachmentMetadata attachment : getAttachments()) {
             try {
-                getAttachmentBase().getAttachment(attachment.getFolderId(), attachment.getAttachedId(), attachment.getModuleId(),  attachment.getId(), getContext(), getUser(), null);
+                getAttachmentBase().getAttachment(getSession(), attachment.getFolderId(), attachment.getAttachedId(), attachment.getModuleId(),  attachment.getId(), getContext(), getUser(), null);
                 fail("Found attachment");
             } catch (final OXException x) {
                 assertTrue(true);

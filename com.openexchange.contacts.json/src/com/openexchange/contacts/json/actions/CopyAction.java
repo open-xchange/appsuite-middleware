@@ -194,7 +194,7 @@ public class CopyAction extends ContactAction {
          * Copy attachments
          */
         final AttachmentBase attachmentBase = Attachments.getInstance();
-        final SearchIterator<?> iterator = attachmentBase.getAttachments(origFolderId, origObjectId, Types.CONTACT, ctx, user, uc).results();
+        final SearchIterator<?> iterator = attachmentBase.getAttachments(session, origFolderId, origObjectId, Types.CONTACT, ctx, user, uc).results();
         if (iterator.hasNext()) {
             try {
                 attachmentBase.startTransaction();
@@ -206,7 +206,7 @@ public class CopyAction extends ContactAction {
                     copy.setAttachedId(contactObj.getObjectID());
                     copy.setId(AttachmentBase.NEW);
                     attachmentBase.attachToObject(copy, attachmentBase.getAttachedFile(
-                        origFolderId,
+                        session, origFolderId,
                         origObjectId,
                         Types.CONTACT,
                         orig.getId(),

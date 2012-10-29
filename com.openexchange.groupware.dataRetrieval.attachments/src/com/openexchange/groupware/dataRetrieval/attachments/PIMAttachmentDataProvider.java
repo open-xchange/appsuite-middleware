@@ -89,7 +89,7 @@ public class PIMAttachmentDataProvider implements DataProvider<PIMAttachmentStat
         final int moduleId = tolerantInt(specification.get(MODULE));
         final int id = tolerantInt(specification.get(ID));
 
-        return attachments.getAttachedFile(folderId, objectId, moduleId, id, session.getContext(), session.getUser(), session.getUserConfiguration());
+        return attachments.getAttachedFile(session, folderId, objectId, moduleId, id, session.getContext(), session.getUser(), session.getUserConfiguration());
     }
 
     @Override
@@ -100,7 +100,7 @@ public class PIMAttachmentDataProvider implements DataProvider<PIMAttachmentStat
         final int moduleId = tolerantInt(specification.get(MODULE));
         final int id = tolerantInt(specification.get(ID));
 
-        final AttachmentMetadata attachment = attachments.getAttachment(folderId, objectId, moduleId, id, session.getContext(), session.getUser(), session.getUserConfiguration());
+        final AttachmentMetadata attachment = attachments.getAttachment(session, folderId, objectId, moduleId, id, session.getContext(), session.getUser(), session.getUserConfiguration());
 
         return new AttachmentFileMetadata(attachment);
     }

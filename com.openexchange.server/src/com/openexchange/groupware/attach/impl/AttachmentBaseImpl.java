@@ -99,6 +99,8 @@ import com.openexchange.tools.file.external.QuotaFileStorageExceptionCodes;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorAdapter;
 import com.openexchange.tools.iterator.SearchIteratorException;
+import com.openexchange.tools.session.ServerSession;
+import com.openexchange.tools.session.ServerSessionAdapter;
 import com.openexchange.tools.sql.DBUtils;
 
 public class AttachmentBaseImpl extends DBService implements AttachmentBase {
@@ -132,7 +134,9 @@ public class AttachmentBaseImpl extends DBService implements AttachmentBase {
     @Override
     public long attachToObject(final AttachmentMetadata attachment, final InputStream data, final Session session, final Context ctx, final User user, final UserConfiguration userConfig) throws OXException {
 
-        checkMayAttach(attachment.getFolderId(), attachment.getAttachedId(), attachment.getModuleId(), ctx, user, userConfig);
+        checkMayAttach(ServerSessionAdapter.valueOf(session, ctx, user, userConfig), 
+            attachment.getModuleId(), attachment.getFolderId(), attachment.getAttachedId());
+//        checkMayAttach(attachment.getFolderId(), attachment.getAttachedId(), attachment.getModuleId(), ctx, user, userConfig);
 
         checkCharacters(attachment);
 
@@ -168,7 +172,8 @@ public class AttachmentBaseImpl extends DBService implements AttachmentBase {
 
     @Override
     public long detachFromObject(final int folderId, final int objectId, final int moduleId, final int[] ids, final Session session, final Context ctx, final User user, final UserConfiguration userConfig) throws OXException {
-        checkMayDetach(folderId, objectId, moduleId, ctx, user, userConfig);
+        checkMayDetach(ServerSessionAdapter.valueOf(session, ctx, user, userConfig), moduleId, folderId, objectId);
+//        checkMayDetach(folderId, objectId, moduleId, ctx, user, userConfig);
 
         if (ids.length == 0) {
             return System.currentTimeMillis();
@@ -186,8 +191,9 @@ public class AttachmentBaseImpl extends DBService implements AttachmentBase {
     }
 
     @Override
-    public AttachmentMetadata getAttachment(final int folderId, final int objectId, final int moduleId, final int id, final Context ctx, final User user, final UserConfiguration userConfig) throws OXException {
-        checkMayReadAttachments(folderId, objectId, moduleId, ctx, user, userConfig);
+    public AttachmentMetadata getAttachment(Session session, int folderId, int objectId, int moduleId, int id, final Context ctx, final User user, final UserConfiguration userConfig) throws OXException {
+        checkMayReadAttachments(ServerSessionAdapter.valueOf(session, ctx, user, userConfig), moduleId, folderId, objectId);
+//        checkMayReadAttachments(folderId, objectId, moduleId, ctx, user, userConfig);
 
         contextHolder.set(ctx);
 
@@ -195,8 +201,9 @@ public class AttachmentBaseImpl extends DBService implements AttachmentBase {
     }
 
     @Override
-    public InputStream getAttachedFile(final int folderId, final int objectId, final int moduleId, final int id, final Context ctx, final User user, final UserConfiguration userConfig) throws OXException {
-        checkMayReadAttachments(folderId, objectId, moduleId, ctx, user, userConfig);
+    public InputStream getAttachedFile(Session session, final int folderId, final int objectId, final int moduleId, final int id, final Context ctx, final User user, final UserConfiguration userConfig) throws OXException {
+        checkMayReadAttachments(ServerSessionAdapter.valueOf(session, ctx, user, userConfig), moduleId, folderId, objectId);
+//        checkMayReadAttachments(folderId, objectId, moduleId, ctx, user, userConfig);
         contextHolder.set(ctx);
 
         return getFile(id, ctx);
@@ -230,14 +237,14 @@ public class AttachmentBaseImpl extends DBService implements AttachmentBase {
     }
 
     @Override
-    public TimedResult<AttachmentMetadata> getAttachments(final int folderId, final int attachedId, final int moduleId, final Context ctx, final User user, final UserConfiguration userConfig) throws OXException {
-        return getAttachments(folderId, attachedId, moduleId, QUERIES.getFields(), null, ASC, ctx, user, userConfig);
+    public TimedResult<AttachmentMetadata> getAttachments(Session session, final int folderId, final int attachedId, final int moduleId, final Context ctx, final User user, final UserConfiguration userConfig) throws OXException {
+        return getAttachments(session, folderId, attachedId, moduleId, QUERIES.getFields(), null, ASC, ctx, user, userConfig);
     }
 
     @Override
-    public TimedResult<AttachmentMetadata> getAttachments(final int folderId, final int attachedId, final int moduleId, AttachmentField[] columns, final AttachmentField sort, final int order, final Context ctx, final User user, final UserConfiguration userConfig) throws OXException {
-
-        checkMayReadAttachments(folderId, attachedId, moduleId, ctx, user, userConfig);
+    public TimedResult<AttachmentMetadata> getAttachments(Session session, final int folderId, final int attachedId, final int moduleId, AttachmentField[] columns, final AttachmentField sort, final int order, final Context ctx, final User user, final UserConfiguration userConfig) throws OXException {
+        checkMayReadAttachments(ServerSessionAdapter.valueOf(session, ctx, user, userConfig), moduleId, folderId, attachedId);
+//        checkMayReadAttachments(folderId, attachedId, moduleId, ctx, user, userConfig);
 
         contextHolder.set(ctx);
         columns = addCreationDateAsNeeded(columns);
@@ -268,8 +275,9 @@ public class AttachmentBaseImpl extends DBService implements AttachmentBase {
     }
 
     @Override
-    public TimedResult<AttachmentMetadata> getAttachments(final int folderId, final int attachedId, final int moduleId, final int[] idsToFetch, AttachmentField[] columns, final Context ctx, final User user, final UserConfiguration userConfig) throws OXException {
-        checkMayReadAttachments(folderId, attachedId, moduleId, ctx, user, userConfig);
+    public TimedResult<AttachmentMetadata> getAttachments(Session session, final int folderId, final int attachedId, final int moduleId, final int[] idsToFetch, AttachmentField[] columns, final Context ctx, final User user, final UserConfiguration userConfig) throws OXException {
+        checkMayReadAttachments(ServerSessionAdapter.valueOf(session, ctx, user, userConfig), moduleId, folderId, attachedId);
+//        checkMayReadAttachments(folderId, attachedId, moduleId, ctx, user, userConfig);
 
         contextHolder.set(ctx);
 
@@ -294,13 +302,14 @@ public class AttachmentBaseImpl extends DBService implements AttachmentBase {
     }
 
     @Override
-    public Delta<AttachmentMetadata> getDelta(final int folderId, final int attachedId, final int moduleId, final long ts, final boolean ignoreDeleted, final Context ctx, final User user, final UserConfiguration userConfig) throws OXException {
-        return getDelta(folderId, attachedId, moduleId, ts, ignoreDeleted, QUERIES.getFields(), null, ASC, ctx, user, null);
+    public Delta<AttachmentMetadata> getDelta(Session session, final int folderId, final int attachedId, final int moduleId, final long ts, final boolean ignoreDeleted, final Context ctx, final User user, final UserConfiguration userConfig) throws OXException {
+        return getDelta(session, folderId, attachedId, moduleId, ts, ignoreDeleted, QUERIES.getFields(), null, ASC, ctx, user, null);
     }
 
     @Override
-    public Delta<AttachmentMetadata> getDelta(final int folderId, final int attachedId, final int moduleId, final long ts, final boolean ignoreDeleted, AttachmentField[] columns, final AttachmentField sort, final int order, final Context ctx, final User user, final UserConfiguration userConfig) throws OXException {
-        checkMayReadAttachments(folderId, attachedId, moduleId, ctx, user, userConfig);
+    public Delta<AttachmentMetadata> getDelta(Session session, final int folderId, final int attachedId, final int moduleId, final long ts, final boolean ignoreDeleted, AttachmentField[] columns, final AttachmentField sort, final int order, final Context ctx, final User user, final UserConfiguration userConfig) throws OXException {
+        checkMayReadAttachments(ServerSessionAdapter.valueOf(session, ctx, user, userConfig), moduleId, folderId, attachedId);
+//        checkMayReadAttachments(folderId, attachedId, moduleId, ctx, user, userConfig);
 
         contextHolder.set(ctx);
 
@@ -488,24 +497,42 @@ public class AttachmentBaseImpl extends DBService implements AttachmentBase {
 
     // Helper Methods
 
-    private void checkMayAttach(final int folderId, final int attachedId, final int moduleId, final Context ctx, final User user, final UserConfiguration userConfig) throws OXException {
+    private void checkMayAttach(ServerSession session, int moduleId, int folderId, int objectId) throws OXException {
         for (final AttachmentAuthorization authz : getAuthorizors(moduleId)) {
-            authz.checkMayAttach(folderId, attachedId, user, userConfig, ctx);
+            authz.checkMayAttach(session, folderId, objectId);
         }
     }
 
-    private void checkMayReadAttachments(final int folderId, final int objectId, final int moduleId, final Context ctx, final User user, final UserConfiguration userConfig) throws OXException {
+    private void checkMayReadAttachments(ServerSession session, int moduleId, int folderId, int objectId) throws OXException {
         for (final AttachmentAuthorization authz : getAuthorizors(moduleId)) {
-            authz.checkMayReadAttachments(folderId, objectId, user, userConfig, ctx);
+            authz.checkMayReadAttachments(session, folderId, objectId);
         }
     }
 
-    private void checkMayDetach(final int folderId, final int objectId, final int moduleId, final Context ctx, final User user, final UserConfiguration userConfig) throws OXException {
+    private void checkMayDetach(ServerSession session, int moduleId, int folderId, int objectId) throws OXException {
         for (final AttachmentAuthorization authz : getAuthorizors(moduleId)) {
-            authz.checkMayDetach(folderId, objectId, user, userConfig, ctx);
+            authz.checkMayDetach(session, folderId, objectId);
         }
     }
 
+//    private void checkMayAttach(final int folderId, final int attachedId, final int moduleId, final Context ctx, final User user, final UserConfiguration userConfig) throws OXException {
+//        for (final AttachmentAuthorization authz : getAuthorizors(moduleId)) {
+//            authz.checkMayAttach(folderId, attachedId, user, userConfig, ctx);
+//        }
+//    }
+//
+//    private void checkMayReadAttachments(final int folderId, final int objectId, final int moduleId, final Context ctx, final User user, final UserConfiguration userConfig) throws OXException {
+//        for (final AttachmentAuthorization authz : getAuthorizors(moduleId)) {
+//            authz.checkMayReadAttachments(folderId, objectId, user, userConfig, ctx);
+//        }
+//    }
+//
+//    private void checkMayDetach(final int folderId, final int objectId, final int moduleId, final Context ctx, final User user, final UserConfiguration userConfig) throws OXException {
+//        for (final AttachmentAuthorization authz : getAuthorizors(moduleId)) {
+//            authz.checkMayDetach(folderId, objectId, user, userConfig, ctx);
+//        }
+//    }
+//
     private List<AttachmentListener> getListeners(final int moduleId) {
         final Integer key = Integer.valueOf(moduleId);
         List<AttachmentListener> listener = moduleListeners.get(key);
@@ -634,7 +661,7 @@ public class AttachmentBaseImpl extends DBService implements AttachmentBase {
     }
 
     private long removeAttachments(final int folderId, final int objectId, final int moduleId, final int[] ids, final Session session, final Context ctx, final User user, final UserConfiguration userConfig) throws OXException {
-        final TimedResult<AttachmentMetadata> tr = getAttachments(folderId, objectId, moduleId, ids, QUERIES.getFields(), ctx, user, userConfig);
+        final TimedResult<AttachmentMetadata> tr = getAttachments(session, folderId, objectId, moduleId, ids, QUERIES.getFields(), ctx, user, userConfig);
         boolean found = false;
 
         SearchIterator<AttachmentMetadata> iter = null;

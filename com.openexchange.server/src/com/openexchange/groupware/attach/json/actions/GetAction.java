@@ -121,7 +121,7 @@ public final class GetAction extends AbstractAttachmentAction {
             final User user = session.getUser();
             final AttachmentMetadata attachment =
                 ATTACHMENT_BASE.getAttachment(
-                    folderId,
+                    session, folderId,
                     attachedId,
                     moduleId,
                     id,

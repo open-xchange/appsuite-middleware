@@ -255,7 +255,7 @@ public abstract class AttachmentEventAction extends AbstractUndoable implements
         @Override
         public InputStream getAttachedFile() throws OXException {
             if(attachment != null) {
-                return base.getAttachedFile(folderId, attachedId, moduleId, attachment.getId(),    ctx, user, userConfig);
+                return base.getAttachedFile(session, folderId, attachedId, moduleId, attachment.getId(),    ctx, user, userConfig);
             }
             return null;
         }
