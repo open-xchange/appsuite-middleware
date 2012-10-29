@@ -72,6 +72,7 @@ import com.openexchange.sessiond.event.SessiondEventHandler;
 import com.openexchange.sessiond.impl.InvalidatedAwareSessiondService;
 import com.openexchange.sessiond.impl.SessionControl;
 import com.openexchange.sessiond.impl.SessionHandler;
+import com.openexchange.sessiond.impl.SessionImpl;
 import com.openexchange.sessiond.impl.SessiondInit;
 import com.openexchange.sessiond.impl.SessiondServiceImpl;
 import com.openexchange.sessiond.impl.SessiondSessionSpecificRetrievalService;
@@ -88,7 +89,7 @@ public final class SessiondActivator extends HousekeepingActivator {
 
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(SessiondActivator.class));
 
-    private ServiceRegistration<EventHandler> eventHandlerRegistration;
+    private volatile ServiceRegistration<EventHandler> eventHandlerRegistration;
 
     /**
      * Initializes a new {@link SessiondActivator}.
@@ -179,27 +180,51 @@ public final class SessiondActivator extends HousekeepingActivator {
             LOG.info("stopping bundle: com.openexchange.sessiond");
         }
         try {
+            final SessionStorageService storageService = getServiceRegistry().getOptionalService(SessionStorageService.class);
+            final ServiceRegistration<EventHandler> eventHandlerRegistration = this.eventHandlerRegistration;
             if (null != eventHandlerRegistration) {
                 eventHandlerRegistration.unregister();
-                eventHandlerRegistration = null;
+                this.eventHandlerRegistration = null;
             }
             cleanUp();
             SessiondService.SERVICE_REFERENCE.set(null);
-            // Put remaining sessions into cache for remote distribution
+            // Put remaining sessions into cache for remote distribution, if no session storage exist
             final List<SessionControl> sessions = SessionHandler.getSessions();
-            try {
-                for (final SessionControl sessionControl : sessions) {
-                    if (null != sessionControl) {
-                        SessionCache.getInstance().putCachedSession((sessionControl.getSession()).createCachedSession());
+            if (null == storageService) {
+                try {
+                    for (final SessionControl sessionControl : sessions) {
+                        if (null != sessionControl) {
+                            SessionCache.getInstance().putCachedSession((sessionControl.getSession()).createCachedSession());
+                        }
                     }
+                    if (LOG.isInfoEnabled()) {
+                        LOG.info("stopping bundle: com.openexchange.sessiond.\nRemaining active sessions were put into session cache for remote distribution\n");
+                    }
+                } catch (final OXException e) {
+                    LOG.warn("Missing caching service. Remaining active sessions could not be put into session cache for remote distribution.");
+                } catch (final RuntimeException e) {
+                    LOG.warn("Remaining active sessions could not be put into session cache for remote distribution.", e);
                 }
-                if (LOG.isInfoEnabled()) {
-                    LOG.info("stopping bundle:\nRemaining active sessions were put into session cache for remote distribution\n");
+            } else {
+                try {
+                    for (final SessionControl sessionControl : sessions) {
+                        if (null != sessionControl) {
+                            final SessionImpl session = sessionControl.getSession();
+                            try {
+                                if (storageService.lookupSession(session.getSessionID()) == null) {
+                                    storageService.addSession(session);
+                                }
+                            } catch (Exception e) {
+                                LOG.warn("Active session " + session.getSessionID() + " could not be put into central session storage.", e);
+                            }
+                        }
+                    }
+                    if (LOG.isInfoEnabled()) {
+                        LOG.info("stopping bundle: com.openexchange.sessiond.\nRemaining active sessions were put into central session storage\n");
+                    }
+                } catch (final RuntimeException e) {
+                    LOG.warn("Remaining active sessions could not be put into central session storage.", e);
                 }
-            } catch (final OXException e) {
-                LOG.warn("Missing caching service. Remaining active sessions could not be put into session cache for remote distribution.");
-            } catch (final RuntimeException e) {
-                LOG.warn("Remaining active sessions could not be put into session cache for remote distribution.", e);
             }
             // Stop sessiond
             SessiondInit.getInstance().stop();
