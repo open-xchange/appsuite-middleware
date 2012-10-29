@@ -1,3 +1,7 @@
+* 2012-10-29 - marcus.klein@open-xchange.com
+
+ - Fix for bug 23510: Re-added packages mdns and static implementing open-xchange-cluster-discovery.
+
 * 2012-10-25 - marcus.klein@open-xchange.com
 
  - Fix for bug 22385: Introduced JDK version specific source folders for bundles.
