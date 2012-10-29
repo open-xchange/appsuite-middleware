@@ -2,6 +2,7 @@
 
  - Fix for bug 22903: Perform context restore with respect to 'updateTask' table
  - Fix for bug 23509: Fixed SQL statement
+ - Fix for bug 23524: Special handling in case of missing translation for en_US
 
 * 2012-10-29 - marcus.klein@open-xchange.com
 
