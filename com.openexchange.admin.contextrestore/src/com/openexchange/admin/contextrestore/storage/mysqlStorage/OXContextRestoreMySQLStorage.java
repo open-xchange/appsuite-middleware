@@ -166,13 +166,16 @@ public final class OXContextRestoreMySQLStorage extends OXContextRestoreSQLStora
                 prepareStatement = connection.prepareStatement("SELECT cid, taskName, successful, lastModified FROM `updateTask`");
 
                 result = prepareStatement.executeQuery();
+                if (!result.next()) {
+                    throw new OXContextRestoreException(Code.NO_ENTRIES_IN_UPDATE_TASK_TABLE);
+                }
                 current = new HashSet<UpdateTaskEntry>(128);
-                while (result.next()) {
+                do {
                     final int contextId = result.getInt(1);
                     if (contextId <= 0 || contextId == infoObject.getContextId()) {
                         current.add(new UpdateTaskEntry(contextId, result.getString(2), result.getInt(3) > 0, result.getLong(4)));
                     }
-                }
+                } while (result.next());
             } catch (final OXException e) {
                 throw new StorageException(new PoolException(e.getMessage()));
             } finally {
