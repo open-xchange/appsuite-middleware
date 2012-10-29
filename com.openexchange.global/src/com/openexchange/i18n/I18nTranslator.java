@@ -49,6 +49,7 @@
 
 package com.openexchange.i18n;
 
+import java.util.Locale;
 import org.apache.commons.logging.Log;
 import com.openexchange.log.LogFactory;
 
@@ -60,6 +61,8 @@ import com.openexchange.log.LogFactory;
 public class I18nTranslator implements Translator {
 
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(I18nTranslator.class));
+    private static final boolean DEBUG_ENABLED = LOG.isDebugEnabled();
+    private static final boolean WARN_ENABLED = LOG.isWarnEnabled();
 
     private final I18nService service;
 
@@ -76,9 +79,16 @@ public class I18nTranslator implements Translator {
     @Override
     public String translate(final String toTranslate) {
         if (!service.hasKey(toTranslate)) {
-            if (LOG.isWarnEnabled()) {
-                LOG.warn(new StringBuilder(64).append("I18n service for locale ").append(service.getLocale()).append(
-                    " has no translation for \"").append(toTranslate).append("\".").toString());
+            final Locale locale = service.getLocale();
+            if (Locale.US.equals(locale)) {
+                if (DEBUG_ENABLED) {
+                    final String message = new StringBuilder(64).append("I18n service for locale ").append(locale).append(
+                        " has no translation for \"").append(toTranslate).append("\".").toString();
+                    LOG.warn(message, new Throwable(message));
+                } else if (WARN_ENABLED) {
+                    LOG.warn(new StringBuilder(64).append("I18n service for locale ").append(locale).append(" has no translation for \"").append(
+                        toTranslate).append("\".").toString());
+                }
             }
             return toTranslate;
         }
