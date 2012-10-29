@@ -1,3 +1,7 @@
+* 2012-10-30 - thorben.betten@open-xchange.com
+
+ - Fix for bug 23508: Dealing with possible I/O error when loading an URL's content
+
 * 2012-10-29 - thorben.betten@open-xchange.com
 
  - Fix for bug 22903: Perform context restore with respect to 'updateTask' table
