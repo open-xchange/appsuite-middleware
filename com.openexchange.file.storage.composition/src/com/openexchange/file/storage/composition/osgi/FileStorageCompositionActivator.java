@@ -108,7 +108,7 @@ public class FileStorageCompositionActivator extends HousekeepingActivator {
                 };
             }
 
-        }, null);
+        });
     }
 
     @Override

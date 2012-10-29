@@ -78,6 +78,7 @@ import com.openexchange.importexport.formats.csv.EnglishOutlookMapper;
 import com.openexchange.importexport.formats.csv.FrenchOutlookMapper;
 import com.openexchange.importexport.formats.csv.GermanOutlookMapper;
 import com.openexchange.importexport.formats.csv.OxAjaxnameMapper;
+import com.openexchange.importexport.formats.csv.OxReadableNameMapper;
 import com.openexchange.importexport.importers.CSVContactImporter;
 import com.openexchange.importexport.importers.Importer;
 import com.openexchange.test.OXTestToolkit;
@@ -132,6 +133,7 @@ public class CSVContactExportTest extends AbstractContactTest {
 	@Test public void exportData() throws NumberFormatException, Exception{
 		final CSVContactImporter imp = new CSVContactImporter();
         imp.addFieldMapper(new OxAjaxnameMapper());
+        imp.addFieldMapper(new OxReadableNameMapper());
 		InputStream is;
 
 		//importing prior to export test

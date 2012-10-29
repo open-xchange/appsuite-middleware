@@ -124,7 +124,6 @@ public class ContactServiceImpl extends DefaultContactService {
         contact.setModifiedBy(userID);
         contact.removeObjectID(); // set by storage during create
         contact.setNumberOfAttachments(0);
-        contact.setUseCount(0);
         if (contact.containsImage1()) {
         	contact.setImageLastModified(now);
         	if (null != contact.getImage1()) {

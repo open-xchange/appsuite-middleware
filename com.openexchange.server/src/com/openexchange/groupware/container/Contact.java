@@ -51,14 +51,12 @@ package com.openexchange.groupware.container;
 
 import static com.openexchange.java.Autoboxing.B;
 import static com.openexchange.java.Autoboxing.I;
-
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.Set;
-
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contact.helpers.ContactField;
 
@@ -290,8 +288,8 @@ public class Contact extends CommonObject {
     /**
      * This attribute identifier has only a sorting purpose. This does not represent a contact attribute. This identifier can be specified
      * only for the sorting column. The sorting is then done the following way: Use one of {@link #SUR_NAME}, {@link #DISPLAY_NAME},
-     * {@link #COMPANY}, {@link #EMAIL1} or {@link #EMAIL2} in this order whichever is first not null. Use the selected value for sorting
-     * with the AlphanumComparator.
+     * {@link #COMPANY}, {@link #EMAIL1} or {@link #EMAIL2} in this order whichever is first not null and not empty. Use the selected 
+     * value for sorting with the AlphanumComparator.
      */
     public static final int SPECIAL_SORTING = 607;
 

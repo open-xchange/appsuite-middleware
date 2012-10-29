@@ -80,23 +80,14 @@ import com.openexchange.session.Session;
 public class MailAccountPOP3MessageStorage implements IMailMessageStorage {
 
     private final IMailMessageStorage delegatee;
-
     private final MailAccountPOP3Storage storage;
-
     private final int pop3AccountId;
-
     private final Session session;
-
     private MailAccountPOP3FolderStorage folderStorage;
-
     private final String path;
-
     private final char separator;
-
     private final POP3StorageUIDLMap uidlMap;
-
     private final POP3StorageTrashContainer trashContainer;
-
     private MailAccount mailAccount;
 
     MailAccountPOP3MessageStorage(final IMailMessageStorage delegatee, final MailAccountPOP3Storage storage, final int pop3AccountId, final Session session) throws OXException {

@@ -85,7 +85,7 @@ import com.openexchange.tools.oxfolder.OXFolderLoader.IdAndName;
 
 /**
  * {@link SiteServlet}
- *
+ * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class SiteServlet extends HttpServlet {
@@ -110,6 +110,13 @@ public class SiteServlet extends HttpServlet {
 
     public static void setFileAccess(final IDBasedFileAccessFactory fileAccess) {
         files = fileAccess;
+    }
+
+    @Override
+    protected void service(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        // create a new HttpSession if it's missing
+        req.getSession(true);
+        super.service(req, resp);
     }
 
     @Override
@@ -210,7 +217,7 @@ public class SiteServlet extends HttpServlet {
             r = new BufferedReader(new InputStreamReader(inputStream));
             final StringBuilder b = new StringBuilder();
             String l = null;
-            while((l = r.readLine()) != null) {
+            while ((l = r.readLine()) != null) {
                 b.append(l).append('\n');
             }
             f.setDescription(b.toString());

@@ -88,8 +88,8 @@ public class SpecialAlphanumSortContactComparator implements Comparator<Contact>
 
     @Override
     public int compare(final Contact contact1, final Contact contact2) {
-        final int nonNullField1 = detectFirstNonNullField(contact1);
-        final int nonNullField2 = detectFirstNonNullField(contact2);
+        final int nonNullField1 = detectFirstNonEmptyField(contact1);
+        final int nonNullField2 = detectFirstNonEmptyField(contact2);
         final int compared =
             stringComparator.compare(
                 0 == nonNullField1 ? "" : contact1.get(nonNullField1).toString(),
@@ -129,7 +129,7 @@ public class SpecialAlphanumSortContactComparator implements Comparator<Contact>
     }
 
     /**
-     * Gets the field number for the first non-<code>null</code> value in specified contact following this order:
+     * Gets the field number for the first non-<code>null</code>, non-empty value in specified contact following this order:
      * <ol>
      * <li>YOMI last name</li>
      * <li>surname</li>
@@ -141,28 +141,37 @@ public class SpecialAlphanumSortContactComparator implements Comparator<Contact>
      * </ol>
      *
      * @param contact The contact
-     * @return The field number for first non-<code>null</code> field or <code>0</code> if each value of the sequence was <code>null</code>
+     * @return The field number for first non-<code>null</code>, non-empty field or <code>0</code> if each value of the sequence was empty
      */
-    private static int detectFirstNonNullField(final Contact contact) {
-        final int retval;
-        if (contact.containsYomiLastName()) {
-            retval = Contact.YOMI_LAST_NAME;
-        } else if (contact.containsSurName()) {
-            retval = Contact.SUR_NAME;
-        } else if (contact.containsDisplayName()) {
-            retval = Contact.DISPLAY_NAME;
-        } else if (contact.containsYomiCompany()) {
-            retval = Contact.YOMI_COMPANY;
-        } else if (contact.containsCompany()) {
-            retval = Contact.COMPANY;
-        } else if (contact.containsEmail1()) {
-            retval = Contact.EMAIL1;
-        } else if (contact.containsEmail2()) {
-            retval = Contact.EMAIL2;
+    private static int detectFirstNonEmptyField(Contact contact) {
+        if (isNotEmpty(contact.getYomiLastName())) {
+            return Contact.YOMI_LAST_NAME;
+        } else if (isNotEmpty(contact.getSurName())) {
+            return Contact.SUR_NAME;
+        } else if (isNotEmpty(contact.getDisplayName())) {
+            return Contact.DISPLAY_NAME;
+        } else if (isNotEmpty(contact.getYomiCompany())) {
+            return Contact.YOMI_COMPANY;
+        } else if (isNotEmpty(contact.getCompany())) {
+            return Contact.COMPANY;
+        } else if (isNotEmpty(contact.getEmail1())) {
+            return Contact.EMAIL1;
+        } else if (isNotEmpty(contact.getEmail2())) {
+            return Contact.EMAIL2;
         } else {
-            retval = 0; // Neutral
+            return 0; // Neutral
         }
-        return retval;
+    }
+    
+    private static boolean isNotEmpty(final String string) {
+        if (null != string) {
+            for (int i = 0; i < string.length(); i++) {
+                if (false == Character.isWhitespace(string.charAt(i))) {
+                    return true;
+                }                
+            }
+        }
+        return false;
     }
 
 }

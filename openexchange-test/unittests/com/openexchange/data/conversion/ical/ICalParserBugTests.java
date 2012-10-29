@@ -237,10 +237,10 @@ public class ICalParserBugTests extends AbstractICalParserTest {
             assertEquals("Organizer should match", "ChinShimVeron.Koh@some-it.invalid", appointment.getOrganizer());
             boolean choegerFound = false, holgerFound = false;
             for(Participant p : appointment.getParticipants()){
-                if(p.getEmailAddress().matches("choeger@open-xchange.com")) {
+                if(p.getEmailAddress().equals("choeger@open-xchange.com")) {
                     choegerFound = true;
                 }
-                if(p.getEmailAddress().matches("Holger.Achtziger@open-xchange.com")) {
+                if(p.getEmailAddress().equals("holger.achtziger@open-xchange.com")) { //note: now converted to lowercase. This is a behaviour change. Used to be different. But obviously no one cares to fix tests.
                     holgerFound = true;
                 }
             }

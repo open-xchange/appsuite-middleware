@@ -243,7 +243,10 @@ public class FileResponseRenderer implements ResponseRenderer {
          * build transformations
          */
         ImageTransformations transformations = scaler.transfom(file.getStream());
-        transformations.rotate();
+        // rotate by default
+        if (false == request.isSet("rotate") || request.getParameter("rotate", boolean.class)) {
+            transformations.rotate();
+        }
         if (request.isSet("cropWidth") || request.isSet("cropHeight")) {
             transformations.crop(
                 request.isSet("cropX") ? request.getParameter("cropX", int.class).intValue() : 0,
@@ -255,14 +258,18 @@ public class FileResponseRenderer implements ResponseRenderer {
         if (request.isSet("width") || request.isSet("height")) {
             transformations.scale(
                 request.isSet("width") ? request.getParameter("width", int.class).intValue() : 0,
-                request.isSet("cropY") ? request.getParameter("cropY", int.class).intValue() : 0,
+                request.isSet("height") ? request.getParameter("height", int.class).intValue() : 0,
                 ScaleType.getType(request.getParameter("scaleType"))
             );
+        }
+        // compress by default
+        if (false == request.isSet("compress") || request.getParameter("compress", boolean.class)) {
+            transformations.compress();
         }
         /*
          * transform
          */
-        InputStream transformed = transformations.compress().getInputStream(file.getContentType());
+        InputStream transformed = transformations.getInputStream(file.getContentType());
         if (null == transformed) {
             LOG.warn("Got no resulting input stream from transformation, falling back to original input");
             return file;

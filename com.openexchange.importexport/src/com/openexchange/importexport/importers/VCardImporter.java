@@ -60,7 +60,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import org.apache.commons.logging.Log;
-import com.openexchange.api2.ContactSQLInterface;
+import com.openexchange.contact.ContactService;
 import com.openexchange.exception.OXException;
 import com.openexchange.exception.OXException.Generic;
 import com.openexchange.exception.OXExceptionConstants;
@@ -87,7 +87,7 @@ import com.openexchange.tools.versit.converter.OXContainerConverter;
  * This importer translates VCards into contacts for the OX.
  *
  * @see OXContainerConverter - if you have a problem with the content of the parsed ICAL file
- * @see ContactSQLInterface - if you cannot enter the parsed content as contact into the database
+ * @see ContactService - if you cannot enter the parsed content as contact into the database
  *
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias 'Tierlieb' Prinz</a> (minor: changes to new interface)

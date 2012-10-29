@@ -86,7 +86,7 @@ public abstract class StanzaBuilder<T extends Stanza> {
         from();
         to();
         id();
-        payloads();
+//        payloads();
     }
 
     private void from() {

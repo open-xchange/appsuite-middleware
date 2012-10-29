@@ -49,7 +49,6 @@
 
 package com.openexchange.groupware.importexport;
 
-import com.openexchange.exception.OXException;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -59,8 +58,9 @@ import java.util.Arrays;
 import java.util.List;
 import junit.framework.JUnit4TestAdapter;
 import org.junit.Test;
-import com.openexchange.api2.ContactSQLInterface;
-import com.openexchange.api2.RdbContactSQLImpl;
+import com.openexchange.contact.ContactService;
+import com.openexchange.exception.OXException;
+import com.openexchange.groupware.TestServiceRegistry;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.FolderObject;
 
@@ -83,8 +83,8 @@ public class VCardImportTest extends AbstractVCardTest {
 		assertFalse("Should have no error" , results.get(0).hasError() );
 
 		ImportResult res = results.get(0);
-	    final ContactSQLInterface contacts = new RdbContactSQLImpl(sessObj);
-	    final Contact co = contacts.getObjectById(Integer.parseInt( res.getObjectId()), Integer.parseInt( res.getFolder() ) );
+        ContactService contactService = TestServiceRegistry.getInstance().getService(ContactService.class);
+        Contact co = contactService.getContact(sessObj, res.getFolder(), res.getObjectId()); 
 	    assertEquals("Should have truncated name", expected, co.getSurName());
 	}
 
@@ -104,8 +104,8 @@ public class VCardImportTest extends AbstractVCardTest {
 		final ImportResult res = results.get(0);
 		assertEquals("Should have no error" , null, res.getException() );
 
-		final ContactSQLInterface contacts = new RdbContactSQLImpl(sessObj);
-		final Contact co = contacts.getObjectById(Integer.parseInt( res.getObjectId()), Integer.parseInt( res.getFolder() ) );
+		ContactService contactService = TestServiceRegistry.getInstance().getService(ContactService.class);
+		Contact co = contactService.getContact(sessObj, res.getFolder(), res.getObjectId()); 
 		assertEquals("Has telex" , telex , co.getTelephoneTelex());
 	}
 
@@ -120,7 +120,7 @@ public class VCardImportTest extends AbstractVCardTest {
 		final ImportResult res = results.get(0);
 		assertEquals("Should have no error" , null, res.getException() );
 
-		final ContactSQLInterface contacts = new RdbContactSQLImpl(sessObj);
-		contacts.getObjectById(Integer.parseInt( res.getObjectId()), Integer.parseInt( res.getFolder() ) );
+		ContactService contactService = TestServiceRegistry.getInstance().getService(ContactService.class);
+		contactService.getContact(sessObj, res.getFolder(), res.getObjectId()); 
 	}
 }

@@ -12,10 +12,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
-
 import com.openexchange.admin.contextrestore.dataobjects.VersionInformation;
 import com.openexchange.admin.contextrestore.rmi.exceptions.OXContextRestoreException;
 import com.openexchange.admin.contextrestore.rmi.exceptions.OXContextRestoreException.Code;
@@ -26,6 +23,7 @@ import com.openexchange.admin.rmi.exceptions.PoolException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
+import com.openexchange.log.LogFactory;
 
 /**
  * This class contains all the mysql database related code
@@ -134,6 +132,9 @@ public final class OXContextRestoreMySQLStorage extends OXContextRestoreSQLStora
 
     @Override
     public void checkVersion(final PoolIdSchemaAndVersionInfo poolIdAndSchema) throws SQLException, OXContextRestoreException, StorageException {
+        if (null == poolIdAndSchema.getVersionInformation()) {
+            return;
+        }
         Connection connection = null;
         PreparedStatement prepareStatement = null;
         final int pool_id = poolIdAndSchema.getPool_id();

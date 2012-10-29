@@ -240,14 +240,24 @@ public abstract class AbstractICalParserTest extends TestCase {
         assertEquals(warning, warnings.get(0).getSoleMessage());
     }
 
-    protected void assertErrorWhenParsingAppointment(final String icalText, final String error) throws ConversionError {
+    protected void assertErrorWhenParsingAppointment(final String icalText, final String expectedError) throws ConversionError {
         final ArrayList<ConversionError> errors = new ArrayList<ConversionError>();
         final ArrayList<ConversionWarning> warnings = new ArrayList<ConversionWarning>();
         parser.parseAppointments(icalText, TimeZone.getTimeZone("UTC"), new ContextImpl(23), errors, warnings);
         assertEquals(1, errors.size());
-        assertEquals(error, errors.get(0).getSoleMessage());
+        assertEquals(expectedError, errors.get(0).getSoleMessage());
     }
 
+    protected void assertNothingHappensWhenParsingAppointment(final String icalText) throws ConversionError {
+        final ArrayList<ConversionError> errors = new ArrayList<ConversionError>();
+        final ArrayList<ConversionWarning> warnings = new ArrayList<ConversionWarning>();
+        List<CalendarDataObject> parsed = parser.parseAppointments(icalText, TimeZone.getTimeZone("UTC"), new ContextImpl(23), errors, warnings);
+        assertEquals(0, parsed.size());
+        assertEquals(0, errors.size());
+        assertEquals(0, warnings.size());
+    }
+
+    
     protected void warningOnAppRecurrence(final String recurrence, final String warning) throws ConversionError {
         final String icalText = fixtures.veventWithSimpleProperties(D("24/02/1981 10:00"), D("24/02/1981 12:00"), "RRULE", recurrence);
         assertWarningWhenParsingAppointment(icalText, warning);

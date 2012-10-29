@@ -69,6 +69,7 @@ import com.openexchange.file.storage.File.Field;
 import com.openexchange.file.storage.FileStorageAccount;
 import com.openexchange.file.storage.FileStorageAccountAccess;
 import com.openexchange.file.storage.FileStorageEventHelper;
+import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.FileStorageFileAccess;
 import com.openexchange.file.storage.FileStorageFileAccess.IDTuple;
 import com.openexchange.file.storage.FileStorageFileAccess.SortDirection;
@@ -108,7 +109,14 @@ public abstract class CompositingIDBasedFileAccess extends AbstractService<Trans
     @Override
     public boolean exists(final String id, final int version) throws OXException {
         final FileID fileID = new FileID(id);
-        return getFileAccess(fileID.getService(), fileID.getAccountId()).exists(fileID.getFolderId(), fileID.getFileId(), version);
+        try {
+            return getFileAccess(fileID.getService(), fileID.getAccountId()).exists(fileID.getFolderId(), fileID.getFileId(), version);
+        } catch (final OXException e) {
+            if (FileStorageExceptionCodes.UNKNOWN_FILE_STORAGE_SERVICE.equals(e)) {
+                return false;
+            }
+            throw e;
+        }
     }
 
     @Override

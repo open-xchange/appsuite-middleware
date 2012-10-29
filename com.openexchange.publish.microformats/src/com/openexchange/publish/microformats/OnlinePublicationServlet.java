@@ -95,6 +95,8 @@ public class OnlinePublicationServlet extends HttpServlet {
 
     @Override
     protected void service(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
+        // create a new HttpSession if it's missing
+        req.getSession(true);
         super.service(new CountingHttpServletRequest(req), resp);
     }
 

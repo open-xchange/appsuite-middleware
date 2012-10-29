@@ -50,9 +50,14 @@
 package com.openexchange.upsell.multiple.osgi;
 
 import static com.openexchange.upsell.multiple.osgi.MyServiceRegistry.getServiceRegistry;
+import java.rmi.Remote;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTracker;
+import org.osgi.util.tracker.ServiceTrackerCustomizer;
+import com.openexchange.admin.rmi.OXContextInterface;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.context.ContextService;
@@ -99,35 +104,53 @@ public class MyActivator extends HousekeepingActivator {
 
     @Override
     protected void startBundle() throws Exception {
+        final BundleContext context = this.context;
 
-        // try to load all the needed services like config service and hostnameservice
-        try {
-            {
-                final ServiceRegistry registry = getServiceRegistry();
-                registry.clearRegistry();
-                final Class<?>[] classes = getNeededServices();
-                for (final Class<?> classe : classes) {
-                    final Object service = getService(classe);
-                    if (null != service) {
-                        registry.addService(classe, service);
-                    }
-                }
+        final ServiceRegistry registry = getServiceRegistry();
+        registry.clearRegistry();
+        final Class<?>[] classes = getNeededServices();
+        for (final Class<?> classe : classes) {
+            final Object service = getService(classe);
+            if (null != service) {
+                registry.addService(classe, service);
             }
-
-
-            // register the http info/sso servlet
-            rememberTracker(new HTTPServletRegistration(context, getFromConfig("com.openexchange.upsell.multiple.servlet"), new MyServlet()));
-            rememberTracker(new ServiceTracker<UpsellURLService,UpsellURLService>(context, UpsellURLService.class, new UrlServiceInstallationServiceListener(context)));
-
-            // Open service trackers
-            openTrackers();
-
-
-        } catch (final Throwable t) {
-            LOG.error(t.getMessage(), t);
-            throw t instanceof Exception ? (Exception) t : new Exception(t);
         }
 
+        // register the http info/sso servlet
+        rememberTracker(new HTTPServletRegistration(context, getFromConfig("com.openexchange.upsell.multiple.servlet"), new MyServlet()));
+        rememberTracker(new ServiceTracker<UpsellURLService,UpsellURLService>(context, UpsellURLService.class, new UrlServiceInstallationServiceListener(context)));
+
+        // track Remote instances
+        final ServiceTrackerCustomizer<Remote, Remote> trackerCustomizer = new ServiceTrackerCustomizer<Remote, Remote>() {
+            
+            @Override
+            public void removedService(final ServiceReference<Remote> reference, final Remote service) {
+                if (null != service) {
+                    // TODO:
+                    context.ungetService(reference);
+                }
+            }
+            
+            @Override
+            public void modifiedService(final ServiceReference<Remote> reference, final Remote service) {
+                // Ignore
+            }
+            
+            @Override
+            public Remote addingService(final ServiceReference<Remote> reference) {
+                final Remote service = context.getService(reference);
+                if (service instanceof OXContextInterface) {
+                    registry.addService(OXContextInterface.class, service);
+                    return service;
+                }
+                context.ungetService(reference);
+                return null;
+            }
+        };
+        track(Remote.class, trackerCustomizer);
+
+        // Open service trackers
+        openTrackers();
     }
 
     private String getFromConfig(final String key) throws OXException {

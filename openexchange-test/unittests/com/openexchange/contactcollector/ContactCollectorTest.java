@@ -49,7 +49,6 @@
 
 package com.openexchange.contactcollector;
 
-import com.openexchange.exception.OXException;
 import static com.openexchange.java.Autoboxing.I;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -59,12 +58,13 @@ import java.util.List;
 import java.util.Locale;
 import javax.mail.internet.InternetAddress;
 import junit.framework.TestCase;
+import com.openexchange.contact.ContactService;
 import com.openexchange.contactcollector.folder.ContactCollectorFolderCreator;
 import com.openexchange.contactcollector.internal.ContactCollectorServiceImpl;
 import com.openexchange.contactcollector.osgi.CCServiceRegistry;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.Init;
-import com.openexchange.groupware.contact.ContactInterface;
-import com.openexchange.groupware.contact.ContactInterfaceDiscoveryService;
+import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
@@ -207,20 +207,17 @@ public class ContactCollectorTest extends TestCase {
     }
 
     private List<Contact> searchContact(final String pattern) throws Exception {
-        final ContactInterface contactInterface = CCServiceRegistry.getInstance().getService(
-            ContactInterfaceDiscoveryService.class).getContactInterfaceProvider(contactFolder.getObjectID(), ctx.getContextId()).newContactInterface(
-            session);
-
+        
+        ContactService contactService = CCServiceRegistry.getInstance().getService(ContactService.class);
         final ContactSearchObject searchObject = new ContactSearchObject();
         searchObject.setEmail1(pattern);
         searchObject.setEmail2(pattern);
         searchObject.setEmail3(pattern);
         searchObject.setOrSearch(true);
         searchObject.addFolder(contactFolder.getObjectID());
-
-        final int[] columns = new int[] {
-            Contact.FOLDER_ID, Contact.LAST_MODIFIED, Contact.OBJECT_ID, Contact.USERFIELD20 };
-        final SearchIterator<Contact> iterator = contactInterface.getContactsByExtendedSearch(searchObject, 0, null, null, columns);
+        ContactField[] fields = new ContactField[] { ContactField.FOLDER_ID, ContactField.LAST_MODIFIED, ContactField.OBJECT_ID, 
+            ContactField.USERFIELD20, ContactField.USE_COUNT };
+        SearchIterator<Contact> iterator = contactService.searchContacts(session, searchObject, fields);
 
         final List<Contact> contacts = new ArrayList<Contact>();
         while (iterator.hasNext()) {
@@ -234,12 +231,10 @@ public class ContactCollectorTest extends TestCase {
 
     private void deleteContactFromFolder(final String pattern) throws Exception {
         final List<Contact> contacts = searchContact(pattern);
-
+        ContactService contactService = CCServiceRegistry.getInstance().getService(ContactService.class);
         for (final Contact contact : contacts) {
-            final ContactInterface contactInterface = CCServiceRegistry.getInstance().getService(
-                ContactInterfaceDiscoveryService.class).getContactInterfaceProvider(contactFolder.getObjectID(), ctx.getContextId()).newContactInterface(
-                session);
-            contactInterface.deleteContactObject(contact.getObjectID(), contact.getParentFolderID(), contact.getLastModified());
+            contactService.deleteContact(session, String.valueOf(contactFolder.getObjectID()), String.valueOf(contact.getObjectID()), 
+                contact.getLastModified());
         }
     }
 
