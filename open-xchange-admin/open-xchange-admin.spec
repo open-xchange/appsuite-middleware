@@ -86,6 +86,11 @@ if [ ${1:-0} -eq 2 ]; then
         rm -f $ofile
     fi
 
+    # SoftwareChange_Request-1118
+    # -----------------------------------------------------------------------
+    pfile=/opt/open-xchange/etc/AdminDaemon.properties
+    ox_remove_property TOOL_STORAGE $pfile
+
     ofile=/opt/open-xchange/etc/AdminDaemon.properties
     pfile=/opt/open-xchange/etc/rmi.properties
     if ox_exists_property BIND_ADDRESS $ofile; then
