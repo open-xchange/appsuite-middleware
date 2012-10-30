@@ -1,6 +1,7 @@
 * 2012-10-30 - thorben.betten@open-xchange.com
 
  - Fix for bug 23508: Dealing with possible I/O error when loading an URL's content
+ - Fix for bug 23534: Removed listener and re-test if write-own check fails
 
 * 2012-10-29 - thorben.betten@open-xchange.com
 
