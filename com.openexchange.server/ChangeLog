@@ -5,7 +5,7 @@
  - Fix for bug 22827: A move into trash folder leads to removal of associated messages in linked POP3 account if delete-write-through option
                       is enabled
  - Fix for bug 22997: Handling has been changed to a more generic error message
- - Fix for 23542: Fixed possible ClassCastExceotion
+ - Fix for bug 23542: Fixed possible ClassCastExceotion
 
 * 2012-10-29 - thorben.betten@open-xchange.com
 
