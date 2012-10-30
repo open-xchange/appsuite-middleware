@@ -123,6 +123,7 @@ public final class CIFSFileStorageService implements AccountAware {
         // See jcifs.smb.SmbConstants
         Config.setProperty("jcifs.smb.client.soTimeout", "10000");
         Config.setProperty("jcifs.smb.client.connTimeout", "5000");
+        Config.setProperty("jcifs.smb.client.attrExpirationPeriod", "300000");
     }
 
     private FileStorageAccountManager getAccountManager0() throws OXException {
