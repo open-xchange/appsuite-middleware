@@ -74,12 +74,13 @@ public class FormContentParser {
     public static Map<String, Object> parse(final JSONObject object, final DynamicFormDescription form) {
         final Map<String, Object> content = new HashMap<String, Object>();
         for (final FormElement element : form) {
-            if (object.hasAndNotNull(element.getName())) {
-                Object value = object.opt(element.getName());
+            final String name = element.getName();
+            if (object.hasAndNotNull(name)) {
+                Object value = object.opt(name);
                 if (value != null) {
                     value = element.doSwitch(valueReader, value);
                 }
-                content.put(element.getName(), value);
+                content.put(name, value);
             }
         }
         return content;
