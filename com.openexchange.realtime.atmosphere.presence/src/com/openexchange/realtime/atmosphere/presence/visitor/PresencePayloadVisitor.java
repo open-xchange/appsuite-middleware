@@ -47,57 +47,17 @@
  *
  */
 
-package com.openexchange.realtime.packet;
+package com.openexchange.realtime.atmosphere.presence.visitor;
+
+import com.openexchange.realtime.packet.Presence;
+import com.openexchange.realtime.payload.PayloadVisitor;
 
 
 /**
- * {@link Message} - A regular message associated with a certain {@link Type type}.
- * 
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a> JavaDoc
- * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
+ * {@link PresencePayloadVisitor}
+ *
+ * @author <a href="mailto:marc	.arens@open-xchange.com">Marc Arens</a>
  */
-public class Message extends Stanza {
-
-    /**
-     * An enumeration of message types describing a message's purpose.
-     * <ol>
-     * <li>chat: for 1:1 chats</li>
-     * <li>error: indicating that the previous message cased an error</li>
-     * <li>groupchat: for m:n chats</li>
-     * <li>headline: for broadcast content (i.e. feeds), not possible to reply</li>
-     * <li>normal: for messages that are neither chat nor groupchat, iow. it's possible to reply but without chat history</li>
-     * </ol>
-     */
-    public static enum Type {
-        chat, erorr, groupchat, headline, normal, error
-    }
-
-    private Type type;
-
-    /**
-     * Initializes a new {@link Message}.
-     */
-    public Message() {
-        super();
-    }
-
-    /**
-     * Gets the type.
-     * 
-     * @return The type
-     */
-    public Type getType() {
-        return type;
-    }
-
-    /**
-     * Sets the type.
-     * 
-     * @param type The type
-     */
-    public void setType(final Type type) {
-        this.type = type;
-    }
-
+public interface PresencePayloadVisitor extends PayloadVisitor {
+    Presence doVisit();
 }

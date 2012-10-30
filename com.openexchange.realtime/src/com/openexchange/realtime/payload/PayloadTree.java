@@ -62,7 +62,7 @@ import com.openexchange.realtime.util.ElementPath;
  * 
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
-public class PayloadTree {
+public class PayloadTree implements VisitablePayload {
 
     private PayloadTreeNode root;
 
@@ -101,16 +101,17 @@ public class PayloadTree {
 
     /**
      * Get the ElementPath of the root TreeNode
+     * 
      * @return the ElementPath of the root TreeNode.
      * @throws IllegalStateException if no roo node was is set.
      */
     public ElementPath getElementPath() {
-        if(root == null) {
+        if (root == null) {
             throw new IllegalStateException("No root TreeNode set.");
         }
         return root.getElementPath();
     }
-    
+
     /**
      * Check if this PayloadTreeNode is empty.
      * 
@@ -178,7 +179,7 @@ public class PayloadTree {
         if (node == null) {
             throw new IllegalArgumentException("Obligatory parameter node missing.");
         }
-        
+
         Set<String> namespaces = new HashSet<String>();
 
         namespaces.add(node.getNamespace());
@@ -220,7 +221,7 @@ public class PayloadTree {
         if (node == null || elementPath == null) {
             throw new IllegalArgumentException("Obligatory parameter missing.");
         }
-        
+
         List<PayloadTreeNode> matches = new ArrayList<PayloadTreeNode>();
 
         if (elementPath.equals(node.getElementPath())) {
@@ -232,12 +233,24 @@ public class PayloadTree {
 
         return matches;
     }
+
     
+    @Override
+    public void accept(PayloadVisitor visitor) {
+        if (visitor == null) {
+            throw new IllegalArgumentException("Obligatory parameter visitor missing.");
+        }
+        if (root != null) {
+            root.accept(visitor);
+        }
+
+    }
+
     @Override
     public String toString() {
         String stringRepresentation = PayloadTree.class.getSimpleName() + "@" + hashCode();
 
-        if(root != null) {
+        if (root != null) {
             String treeRep = root.recursiveToString(0);
             stringRepresentation += "\n" + "|" + "\n";
             stringRepresentation += treeRep;

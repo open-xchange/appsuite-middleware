@@ -53,6 +53,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import com.openexchange.realtime.payload.PayloadElement.PayloadFormat;
 import com.openexchange.realtime.util.ElementPath;
 
 /**
@@ -61,7 +62,7 @@ import com.openexchange.realtime.util.ElementPath;
  * 
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
-public class PayloadTreeNode {
+public class PayloadTreeNode implements VisitablePayload {
 
     private PayloadTreeNode parent;
 
@@ -235,7 +236,7 @@ public class PayloadTreeNode {
      * @see com.openexchange.realtime.payload.PayloadElement#setData(java.lang.Object, java.lang.String)
      * @throws IllegalStateExcpetion If no PayloadElement is associated with this node
      */
-    public void setData(Object data, String format) {
+    public void setData(Object data, PayloadFormat format) {
         if (payloadElement == null) {
             throw new IllegalStateException("PayloadElement delegate wasn't set, yet!");
         }
@@ -262,7 +263,7 @@ public class PayloadTreeNode {
      * @return Null or the format of the PayloadElement associated with this node.
      * @see com.openexchange.realtime.payload.PayloadElement#getFormat()
      */
-    public String getFormat() {
+    public PayloadFormat getFormat() {
         if (payloadElement != null) {
             return payloadElement.getFormat();
         }
@@ -307,6 +308,14 @@ public class PayloadTreeNode {
             namespaces.addAll(child.getNamespaces());
         }
         return namespaces;
+    }
+
+    @Override
+    public void accept(PayloadVisitor visitor) {
+        payloadElement.accept(visitor);
+        for (PayloadTreeNode child : children) {
+            child.accept(visitor);
+        }
     }
 
     @Override

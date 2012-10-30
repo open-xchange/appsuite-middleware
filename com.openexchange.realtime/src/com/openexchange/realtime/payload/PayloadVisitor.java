@@ -47,57 +47,22 @@
  *
  */
 
-package com.openexchange.realtime.packet;
+package com.openexchange.realtime.payload;
 
+import com.openexchange.realtime.util.ElementPath;
 
 /**
- * {@link Message} - A regular message associated with a certain {@link Type type}.
+ * {@link PayloadVisitor} - Visits a payload object.
  * 
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a> JavaDoc
- * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
+ * @author <a href="mailto:marc	.arens@open-xchange.com">Marc Arens</a>
  */
-public class Message extends Stanza {
+public interface PayloadVisitor {
 
     /**
-     * An enumeration of message types describing a message's purpose.
-     * <ol>
-     * <li>chat: for 1:1 chats</li>
-     * <li>error: indicating that the previous message cased an error</li>
-     * <li>groupchat: for m:n chats</li>
-     * <li>headline: for broadcast content (i.e. feeds), not possible to reply</li>
-     * <li>normal: for messages that are neither chat nor groupchat, iow. it's possible to reply but without chat history</li>
-     * </ol>
+     * Visit the Payload object. 
+     * @param element The PayloadElement
+     * @param data The PayloadData
      */
-    public static enum Type {
-        chat, erorr, groupchat, headline, normal, error
-    }
-
-    private Type type;
-
-    /**
-     * Initializes a new {@link Message}.
-     */
-    public Message() {
-        super();
-    }
-
-    /**
-     * Gets the type.
-     * 
-     * @return The type
-     */
-    public Type getType() {
-        return type;
-    }
-
-    /**
-     * Sets the type.
-     * 
-     * @param type The type
-     */
-    public void setType(final Type type) {
-        this.type = type;
-    }
+    void visit(PayloadElement element, Object data);
 
 }

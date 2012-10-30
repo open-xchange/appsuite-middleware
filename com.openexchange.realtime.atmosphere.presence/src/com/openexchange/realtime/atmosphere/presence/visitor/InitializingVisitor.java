@@ -1,6 +1,3 @@
-
-package com.openexchange.realtime.presence;
-
 /*
  *
  *    OPEN-XCHANGE legal information
@@ -50,38 +47,66 @@ package com.openexchange.realtime.presence;
  *
  */
 
+package com.openexchange.realtime.atmosphere.presence.visitor;
+
+import java.util.Collection;
+import com.openexchange.exception.OXException;
+import com.openexchange.realtime.packet.Presence;
+import com.openexchange.realtime.packet.PresenceState;
+import com.openexchange.realtime.payload.PayloadElement;
+import com.openexchange.realtime.payload.PayloadTree;
+import com.openexchange.realtime.util.ElementPath;
+
 /**
- * {@link PresenceState} - The different Presence states that can be used to display your availability.
+ * {@link InitializingVisitor} - Visit the Stanza's default payloads and initialize its fields based on the found payloads.
  * 
- * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
+ * @author <a href="mailto:marc	.arens@open-xchange.com">Marc Arens</a>
  */
-public enum PresenceState {
-    ONLINE, OFFLINE, DO_NOT_DISTURB, CHAT_ME_UP, AWAY;
+public class InitializingVisitor implements PresencePayloadVisitor {
+
+    private Presence presence;
 
     /**
-     * {@inheritDoc}
-     * <p>
-     * The programmer-friendly form in this case is the name to lower case.
-     * </p>
+     * Initializes a new {@link InitializingVisitor}.
+     * 
+     * @param presence The Presence Stanza to initialize by visiting its payloads.
+     */
+    public InitializingVisitor(Presence presence) {
+        this.presence = presence;
+    }
+    
+    /**
+     * Visit the Stanza's default payloads and initialize its fields based on the found payloads. 
      */
     @Override
-    public String toString() {
-        return this.name().toLowerCase();
+    public Presence doVisit() {
+        Collection<PayloadTree> defaultPayloads = presence.getDefaultPayloads();
+        for (PayloadTree payloadTree : defaultPayloads) {
+            payloadTree.accept(this);
+        }
+        return presence;
     }
 
-    /**
-     * Get the possible PresenceStates as comma separated String
-     * @return the values of this enum as comma separated String
-     */
-    public static String getPossibleStates() {
-        StringBuilder sb = new StringBuilder();
-        PresenceState[] states = values();
-        for(int i = 0; i < states.length; i++) {
-            sb.append(states[i]);
-            if(i < states.length - 1) {
-                sb.append(", ");
-            }
+    @Override
+    public void visit(PayloadElement element, Object data) {
+        // Only needed vor the Visitor interface hierarchy
+    }
+
+    public void visit(PayloadElement element, PresenceState data) {
+        presence.setState(data);
+    }
+
+    public void visit(PayloadElement element, String data) {
+        if (Presence.MESSAGE_PATH.equals(element.getElementPath())) {
+            presence.setMessage(data);
         }
-        return sb.toString();
+    }
+
+    public void visit(PayloadElement element, Byte data) {
+        presence.setPriority(data);
+    }
+
+    public void visit(PayloadElement element, OXException data) {
+        presence.setError(data);
     }
 }

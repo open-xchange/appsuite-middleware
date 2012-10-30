@@ -52,26 +52,29 @@ package com.openexchange.realtime.payload;
 import java.util.concurrent.atomic.AtomicReference;
 import com.openexchange.conversion.simple.SimpleConverter;
 import com.openexchange.exception.OXException;
+import com.openexchange.realtime.util.ElementPath;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link PayloadElement} - Represents a stanza's payload element that is any (POJO) object linked with its format identifier. Namespace and
- * elementName are used for unique identification (@see ElementPath) of payload elements and determine which {@link PayloadElementTransformer}
- * to use. Payloads can form n-ary trees: Payload = data , {Payload}
+ * elementName are used for unique identification (@see ElementPath) of payload elements and determine which
+ * {@link PayloadElementTransformer} to use. Payloads can form n-ary trees: Payload = data , {Payload}
  * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a> JavaDoc
  */
-public class PayloadElement {
+public class PayloadElement implements VisitablePayload {
 
+    public static enum PayloadFormat {JSON, XML, POJO}
+    
     /**
      * The <tt>ServiceLookup</tt> reference.
      */
     public static AtomicReference<ServiceLookup> SERVICES = new AtomicReference<ServiceLookup>();
 
     // Current format of the Payload e.g. json or xml or some other POJO type
-    private String format;
+    private PayloadFormat format;
 
     // The namespace of this payload e.g.: http://jabber.org/protocol/disco#info
     private String namespace;
@@ -89,7 +92,7 @@ public class PayloadElement {
      * @param namespace The namespace of this Payload element
      * @param elementName the unique element name within the namespace
      */
-    public PayloadElement(Object data, String format, String namespace, String elementName) {
+    public PayloadElement(Object data, PayloadFormat format, String namespace, String elementName) {
         this.data = data;
         this.format = format;
         this.namespace = namespace;
@@ -111,7 +114,7 @@ public class PayloadElement {
      * @param data The data object
      * @param format The data object's format
      */
-    public void setData(Object data, String format) {
+    public void setData(Object data, PayloadFormat format) {
         this.data = data;
         this.format = format;
     }
@@ -124,13 +127,21 @@ public class PayloadElement {
     public String getElementName() {
         return elementName;
     }
+    
+    /**
+     * Get the unique elementPath identifying the PayloadElement.
+     * @return The unique elementPath identifying the PayloadElement
+     */
+    public ElementPath getElementPath() {
+        return new ElementPath(namespace, elementName);
+    }
 
     /**
      * Gets the data object's format identifier.
      * 
      * @return The format identifier.
      */
-    public String getFormat() {
+    public PayloadFormat getFormat() {
         return format;
     }
 
@@ -143,21 +154,21 @@ public class PayloadElement {
         return namespace;
     }
 
-    /**
-     * Converts this payload's data object to specified format.
-     * 
-     * @param toFormat The format to convert into
-     * @param session The Open-Xchange session
-     * @return A new {@link PayloadElement payload} with desired format
-     * @throws OXException If conversion fails
-     */
-    public PayloadElement to(String toFormat, ServerSession session) throws OXException {
-        if (toFormat.equals(format)) {
-            return new PayloadElement(data, toFormat, namespace, elementName);
-        }
-        SimpleConverter converter = SERVICES.get().getService(SimpleConverter.class);
-        return new PayloadElement(converter.convert(format, toFormat, data, session), toFormat, namespace, elementName);
-    }
+//    /**
+//     * Converts this payload's data object to specified format.
+//     * 
+//     * @param toFormat The format to convert into
+//     * @param session The Open-Xchange session
+//     * @return A new {@link PayloadElement payload} with desired format
+//     * @throws OXException If conversion fails
+//     */
+//    public PayloadElement to(String toFormat, ServerSession session) throws OXException {
+//        if (toFormat.equals(format)) {
+//            return new PayloadElement(data, toFormat, namespace, elementName);
+//        }
+//        SimpleConverter converter = SERVICES.get().getService(SimpleConverter.class);
+//        return new PayloadElement(converter.convert(format, toFormat, data, session), toFormat, namespace, elementName);
+//    }
 
     @Override
     public int hashCode() {
@@ -206,7 +217,10 @@ public class PayloadElement {
     public String toString() {
         return "PayloadElement" + "@" + hashCode() + " " + "[format=" + format + ", namespace=" + namespace + ", elementName=" + elementName + ", data=" + data + "]";
     }
-    
-    
+
+    @Override
+    public void accept(PayloadVisitor visitor) {
+        visitor.visit(this, data);
+    }
 
 }

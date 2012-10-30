@@ -54,6 +54,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+import static com.openexchange.realtime.payload.PayloadElement.PayloadFormat.*;
 import java.util.ArrayList;
 import java.util.List;
 import org.junit.Before;
@@ -83,9 +84,9 @@ public class PayloadTreeNodeTest {
     public void initPayloadElement() {
         parentPayloadTreeNode = new PayloadTreeNode();
         payloadTreeNode = new PayloadTreeNode();
-        payloadElement1 = new PayloadElement(1, "Integer", null, "testElement");
-        payloadElement2 = new PayloadElement(2, "Integer", null, "testElement");
-        payloadElement3 = new PayloadElement(3, "Integer", null, "testElement");
+        payloadElement1 = new PayloadElement(1, POJO, null, "testElement");
+        payloadElement2 = new PayloadElement(2, POJO, null, "testElement");
+        payloadElement3 = new PayloadElement(3, POJO, null, "testElement");
         payloadTreeNode1 = new PayloadTreeNode(payloadElement1);
         payloadTreeNode2 = new PayloadTreeNode(payloadElement2);
         payloadTreeNode3 = new PayloadTreeNode(payloadElement3);
@@ -268,7 +269,7 @@ public class PayloadTreeNodeTest {
      */
     @Test
     public void testSetData() {
-        payloadTreeNode1.setData(2, "Integer");
+        payloadTreeNode1.setData(2, POJO);
         assertEquals(2, payloadTreeNode1.getData());
     }
 

@@ -49,11 +49,13 @@
 
 package com.openexchange.realtime.packet;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import com.google.common.base.Predicate;
 import com.openexchange.realtime.payload.PayloadTree;
 import com.openexchange.realtime.util.ElementPath;
 
@@ -95,7 +97,7 @@ public abstract class Stanza {
      * 
      * @param id The id to set
      */
-    public void setId(String id) {
+    public void setId(final String id) {
         this.id = id;
     }
 
@@ -138,7 +140,7 @@ public abstract class Stanza {
     /**
      * Get a Set of namespaces of the payloads of this Stanza.
      * 
-     * @return empty Set or the namespaces of the payloads of this Stanza.
+     * @return Empty Set or the namespaces of the payloads of this Stanza.
      */
     public Set<String> getNamespaces() {
         Set<String> namespaces = new HashSet<String>();
@@ -156,23 +158,50 @@ public abstract class Stanza {
     public Collection<PayloadTree> getPayloads() {
         return payloads.values();
     }
-       
+
     /**
      * Add a payload to this Stanza.
+     * 
      * @param payload The PayloadTreeNoode to add to this Stanza
-     * @return true if the PayloadTreeNode could be added to this Stanza 
+     * @return true if the PayloadTreeNode could be added to this Stanza
      */
     public void addPayload(final PayloadTree payload) {
         payloads.put(payload.getElementPath(), payload);
     }
-    
+
     /**
      * Remove a PayloadTree from this Stanza.
-     * @param payload The PayloadTree to add to this Stanza
-     * @return true if the PayloadTree could be removed from this Stanza 
+     * 
+     * @param elementPath The ElementPath of the PayloadTree to remove from this Stanza
+     * @return true if the PayloadTree could be removed from this Stanza
      */
-    public void removePayload(final PayloadTree payload) {
-        payloads.remove(payload);
+    public void removePayload(final ElementPath elementPath) {
+        payloads.remove(elementPath);
+    }
+
+    /**
+     * Get one of the Payloads carried by this Stanza
+     * 
+     * @param elementPath The Elementpath identifying the Payload
+     * @return Null or the PayloadTree containing the Payload
+     */
+    public PayloadTree getPayload(final ElementPath elementPath) {
+        return payloads.get(elementPath);
+    }
+    
+    /**
+     * Filter the payloads based on a Predicate.
+     * @param predicate
+     * @return Payloads matching the Predicate or an empty Collection 
+     */
+    public Collection<PayloadTree> filterPayloads(Predicate<PayloadTree> predicate) {
+        Collection<PayloadTree> result = new ArrayList<PayloadTree>();
+        for (PayloadTree element: payloads.values()) {
+            if (predicate.apply(element)) {
+                result.add(element);
+            }
+        }
+        return result;
     }
 
 }

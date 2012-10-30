@@ -49,14 +49,24 @@
 
 package com.openexchange.realtime.packet;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import com.google.common.base.Predicate;
 import com.openexchange.exception.OXException;
 import com.openexchange.realtime.payload.PayloadTree;
 import com.openexchange.realtime.payload.PayloadTreeNode;
+import com.openexchange.realtime.util.ElementPath;
+import static com.openexchange.realtime.payload.PayloadElement.PayloadFormat.*;
 
 /**
  * {@link Presence} - Exchanges presence information. A Presence Stanza is a broadcast from a single entity X to a set of entities
  * subscribed to this specific entity X. Being a broadcast this stanza normally doesn't specify a recipient via the <code>to</code> field.
  * Nevertheless clients are able to send directed Presence Stanzas to single recipients by specifying a <code>to</code>.
+ * <p>
+ * This class allows access to the default Presence specific fields and knows how to access the default payload fields within the associated
+ * PayloadTrees. Extensions to Presence Stanza can be queried via the {@link Presence#getExtensions()} function and programmatically
+ * extracted from the Stanza via {@link Stanza#getPayload(com.openexchange.realtime.util.ElementPath)} function.
+ * </p>
  * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a> JavaDoc
@@ -84,19 +94,61 @@ public class Presence extends Stanza {
         UNAVAILABLE, SUBSCRIBE, SUBSCRIBED, UNSUBSCRIBE, UNSUBSCRIBED, ERROR, NONE, PENDING;
     }
 
-    // names of the payload elements from the default schema we are interested in
-    public static final String ERROR = "error";
+    // Names of the payload elements from the default schema we are interested in
+    public static final ElementPath MESSAGE_PATH = new ElementPath("show");
 
-    public static final String MESSAGE = "message";
+    public static final ElementPath PRESENCE_STATE_PATH = new ElementPath("status");
 
-    public static final String PRIORITY = "priority";
+    public static final ElementPath PRIORITY_PATH = new ElementPath("priority");
 
-    public static final String STATE = "state";
+    public static final ElementPath ERROR_PATH = new ElementPath("error");
+
+    private ArrayList<ElementPath> defaultElements = new ArrayList<ElementPath>();
+
+    /** Predicate to filter extension elements from {@link Stanza#payloads} */
+    private final Predicate<PayloadTree> defaultsPredicate = new Predicate<PayloadTree>() {
+
+        @Override
+        public boolean apply(PayloadTree input) {
+            return defaultElements.contains(input.getElementPath());
+        }
+    };
+    
+    /** Predicate to filter default elements from {@link Stanza#payloads} */
+    private final Predicate<PayloadTree> extensionsPredicate = new Predicate<PayloadTree>() {
+
+        @Override
+        public boolean apply(PayloadTree input) {
+            return !defaultElements.contains(input.getElementPath());
+        }
+    };
+    
+    
+
+    /**
+     * Initializes a new {@link Presence}.
+     */
+    public Presence() {
+        defaultElements.add(MESSAGE_PATH);
+        defaultElements.add(PRESENCE_STATE_PATH);
+        defaultElements.add(PRIORITY_PATH);
+        defaultElements.add(ERROR_PATH);
+    }
 
     /**
      * Optional attribute. The default of none means the client is available.
      */
     private Type type = Type.NONE;
+
+    /**
+     * Empty message as default. Clients may set a different message.
+     */
+    private String message = "";
+
+    /**
+     * Signal Availability by choosing ONLINE as default. Clients may set different states.
+     */
+    private PresenceState state = PresenceState.ONLINE;
 
     /**
      * The server should deliver messages to the highest-priority available resource or decide on metrics like most recent connect,
@@ -105,38 +157,26 @@ public class Presence extends Stanza {
     private byte priority = 0;
 
     /**
-     * Signal Availability by choosing ONLINE as default. Clients may set different states.
-     */
-    private PresenceState state = PresenceState.ONLINE;
-
-    /**
-     * Empty message as default. Clients may set a different message.
-     */
-    private String message = "";
-
-    /**
      * The error object for Presence Stanza of type error
      */
     private OXException error = null;
 
     /**
-     * Get the error element describing the error-type Stanza in more detail.
+     * Gets the type of Presence Stanza
      * 
-     * @return The OXException representing the error
+     * @return The state
      */
-    public OXException getError() {
-        PayloadTree payloadTree = payloads.get(ERROR);
-        return (OXException) payloadTree.getRoot().getData();
+    public Type getType() {
+        return type;
     }
 
     /**
-     * Set the error element describing the error-type Stanza in more detail.
+     * Sets the type of the Presence Stanza
      * 
-     * @param error The OXException representing the error
+     * @param type The state to set
      */
-    public void setError(OXException error) {
-        PayloadTree payloadTree = payloads.get(ERROR);
-        payloadTree.getRoot().setData(error, error.getClass().getName());
+    public void setType(Type type) {
+        this.type = type;
     }
 
     /**
@@ -145,36 +185,15 @@ public class Presence extends Stanza {
      * @return The message
      */
     public String getMessage() {
-        PayloadTree payloadTree = payloads.get(MESSAGE);
-        return (String) payloadTree.getRoot().getData();
+        return message;
     }
 
     /**
-     * Sets the priority.
-     * 
-     * @return The message
+     * Sets the message.
      */
     public void setMessage(String message) {
-        PayloadTree payloadTree = payloads.get(MESSAGE);
-        payloadTree.getRoot().setData(message, message.getClass().getName());
-    }
-
-    /**
-     * Gets the priority.
-     * 
-     * @return The priority
-     */
-    public byte getPriority() {
-        return priority;
-    }
-
-    /**
-     * Sets the priority.
-     * 
-     * @param priority The priority to set
-     */
-    public void setPriority(byte priority) {
-        this.priority = priority;
+        this.message = message;
+        writeThrough(MESSAGE_PATH, message);
     }
 
     /**
@@ -193,24 +212,79 @@ public class Presence extends Stanza {
      */
     public void setState(PresenceState state) {
         this.state = state;
+        writeThrough(PRESENCE_STATE_PATH, state);
     }
 
     /**
-     * Gets the type of Presence Stanza
+     * Gets the priority.
      * 
-     * @return The state
+     * @return The priority
      */
-    public Type getType() {
-        return type;
+    public byte getPriority() {
+        return priority;
     }
 
     /**
-     * Sets the type of the Presence Stanza
+     * Sets the priority.
      * 
-     * @param type The state to set
+     * @param priority The priority to set
      */
-    public void setType(Type type) {
-        this.type = type;
+    public void setPriority(byte priority) {
+        this.priority = priority;
+        writeThrough(PRIORITY_PATH, priority);
+    }
+
+    /**
+     * Get the error element describing the error-type Stanza in more detail.
+     * 
+     * @return Null or the OXException representing the error
+     */
+    public OXException getError() {
+        return error;
+    }
+
+    /**
+     * Set the error element describing the error-type Stanza in more detail.
+     * 
+     * @param error The OXException representing the error
+     */
+    public void setError(OXException error) {
+        this.error = error;
+        writeThrough(ERROR_PATH, error);
+    }
+
+    /**
+     * Get the default payloads.
+     * @return The default payloads as defined in the Presence specification.
+     */
+    public Collection<PayloadTree> getDefaultPayloads() {
+        return filterPayloads(defaultsPredicate);
+    }
+    /**
+     * Get the extension payloads.
+     * @return Extension payloads that aren't defined in the Presence specification and not accessible via getters and setters.
+     */
+    public Collection<PayloadTree> getExtensions() {
+        return filterPayloads(extensionsPredicate);
+    }
+
+    /**
+     * Write a payload to the PayloadTree identified by the ElementPath. The trees for the default elements only contain one node so we can
+     * set the data by directly writing to the root node.
+     * 
+     * @param path The ElementPath identifying the PayloadTree.
+     * @param data The payload data to write into the root node.
+     */
+    private void writeThrough(ElementPath path, Object data) {
+        PayloadTree payloadTree = payloads.get(path);
+        if (payloadTree == null) {
+            throw new IllegalStateException("PayloadTree removed? This shouldn't happen!");
+        }
+        PayloadTreeNode node = payloadTree.getRoot();
+        if (node == null) {
+            throw new IllegalStateException("PayloadTreeNode removed? This shouldn't happen!");
+        }
+        node.setData(data, POJO);
     }
 
 }

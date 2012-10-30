@@ -118,14 +118,4 @@ public class IQ extends Stanza {
         this.type = type;
     }
 
-    @Override
-    public boolean addPayload(PayloadTree tree) {
-        throw new UnsupportedOperationException("Not implemented yet!");
-    }
-
-    @Override
-    public boolean removePayload(PayloadTree tree) {
-        throw new UnsupportedOperationException("Not implemented yet!");
-    }
-
 }
