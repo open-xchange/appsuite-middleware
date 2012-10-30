@@ -285,12 +285,13 @@ public class ContactServiceImpl extends DefaultContactService {
 		try {
             Check.canWriteOwn(permission, session);
         } catch (OXException e) {
-            if (GAB.equals(folderID) && ContactExceptionCodes.NO_CHANGE_PERMISSION.equals(e) && OXFolderProperties.isEnableInternalUsersEdit()) {
-                OXFolderProperties.updatePermissions(true, contextID);
-                // check again
-                permission = Tools.getPermission(contextID, folderID, userID);
-                Check.canWriteOwn(permission, session);
+            if (!GAB.equals(folderID) || !ContactExceptionCodes.NO_CHANGE_PERMISSION.equals(e) || !OXFolderProperties.isEnableInternalUsersEdit()) {
+                throw e;
             }
+            OXFolderProperties.updatePermissions(true, contextID);
+            // check again
+            permission = Tools.getPermission(contextID, folderID, userID);
+            Check.canWriteOwn(permission, session);
         }
 		/*
 		 * check currently stored contact
