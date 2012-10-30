@@ -77,6 +77,7 @@ import com.openexchange.session.Session;
 public final class CIFSFolderAccess extends AbstractCIFSAccess implements FileStorageFolderAccess {
 
     private static final Log LOG = com.openexchange.log.Log.loggerFor(CIFSFolderAccess.class);
+    private static final boolean DEBUG = LOG.isDebugEnabled();
 
     /**
      * Constant string to indicate that home directory has not been found.
@@ -226,6 +227,7 @@ public final class CIFSFolderAccess extends AbstractCIFSAccess implements FileSt
                     /*
                      * Try to determine home directory by user name
                      */
+                    final long st = DEBUG ? System.currentTimeMillis() : 0L;
                     try {
                         final String folderId = rootUrl;
                         final String fid = checkFolderId(folderId, rootUrl);
@@ -252,6 +254,10 @@ public final class CIFSFolderAccess extends AbstractCIFSAccess implements FileSt
                         homeDirPath = NOT_FOUND;
                     } catch (final Exception e) {
                         homeDirPath = NOT_FOUND;
+                    }
+                    if (DEBUG) {
+                        final long dur = System.currentTimeMillis() - st;
+                        LOG.debug("CIFSFolderAccess.getHomeDirectory() took " + dur + "msec.");
                     }
                     this.homeDirPath = homeDirPath;
                 }
@@ -401,7 +407,14 @@ public final class CIFSFolderAccess extends AbstractCIFSAccess implements FileSt
              */
             SmbFile[] subFiles;
             try {
-                subFiles = smbFolder.canRead() ? smbFolder.listFiles() : new SmbFile[0];
+                if (DEBUG) {
+                    final long st = System.currentTimeMillis();
+                    subFiles = smbFolder.canRead() ? smbFolder.listFiles() : new SmbFile[0];
+                    final long dur = System.currentTimeMillis() - st;
+                    LOG.debug("CIFSFolderAccess.getSubfolders() - SmbFile.listFiles() took " + dur + "msec.");
+                } else {
+                    subFiles = smbFolder.canRead() ? smbFolder.listFiles() : new SmbFile[0];
+                }
             } catch (final SmbException e) {
                 if (!indicatesNotReadable(e)) {
                     throw e;
