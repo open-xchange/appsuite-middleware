@@ -72,7 +72,7 @@ public class PublicationParser {
 
     private final PublicationTargetDiscoveryService discovery;
 
-    private static final FormContentParser formParser = new FormContentParser();
+    // private static final FormContentParser formParser = new FormContentParser();
 
     private final Map<String, EntityType> entityTypes = new EntityMap();
 
@@ -111,7 +111,7 @@ public class PublicationParser {
             PublicationTarget target = discovery.getTarget(object.getString(TARGET));
             publication.setTarget(target);
             if(object.has(target.getId())) {
-                publication.setConfiguration(formParser.parse(object.getJSONObject(target.getId()), target.getFormDescription()));
+                publication.setConfiguration(FormContentParser.parse(object.getJSONObject(target.getId()), target.getFormDescription()));
             }
         }
 

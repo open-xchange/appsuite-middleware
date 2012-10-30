@@ -19,9 +19,9 @@ import com.openexchange.tools.session.ServerSession;
 public class SpamSettingsParser {
 
     public Map<String, Object> parse(final ServerSession session, final JSONObject json) throws JSONException, OXException {
-        final FormContentParser formContentParser = new FormContentParser();
+        // final FormContentParser formContentParser = new FormContentParser();
         final SpamSettingService service = SpamSettingsServiceRegistry.getServiceRegistry().getService(SpamSettingService.class);
         final DynamicFormDescription formDescription = service.getFormDescription(session);
-        return formContentParser.parse(json, formDescription);
+        return FormContentParser.parse(json, formDescription);
     }
 }
