@@ -80,6 +80,12 @@ postFix() {
     # prevent bash from expanding, see bug 13316
     GLOBIGNORE='*'
 
+    # SoftwareChange_Request-1184
+    pfile=/opt/open-xchange/etc/file-logging.properties
+    if ! ox_exists_property com.hazelcast.level $pfile; then
+       ox_set_property com.hazelcast.level SEVERE $pfile
+    fi
+
     # SoftwareChange_Request-1148
     pfile=/opt/open-xchange/etc/whitelist.properties
     if ! ox_exists_property "html.style.word-break" $pfile; then
