@@ -51,33 +51,36 @@ package com.openexchange.datatypes.genericonf.json;
 
 import java.util.HashMap;
 import java.util.Map;
-import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.datatypes.genericonf.DynamicFormDescription;
 import com.openexchange.datatypes.genericonf.FormElement;
 
-
 /**
  * {@link FormContentParser}
- *
+ * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
- *
  */
 public class FormContentParser {
 
     private static final ValueReaderSwitch valueReader = new ValueReaderSwitch();
 
-    public Map<String, Object> parse(JSONObject object, DynamicFormDescription form) throws JSONException {
-        Map<String, Object> content = new HashMap<String, Object>();
-        for(FormElement element : form) {
-            if(!object.has(element.getName())) {
-                continue;
+    /**
+     * Parses specified JSON object to a configuration map.
+     * 
+     * @param object The JSON object
+     * @param form The form description
+     * @return The configuration map
+     */
+    public static Map<String, Object> parse(final JSONObject object, final DynamicFormDescription form) {
+        final Map<String, Object> content = new HashMap<String, Object>();
+        for (final FormElement element : form) {
+            if (object.hasAndNotNull(element.getName())) {
+                Object value = object.opt(element.getName());
+                if (value != null) {
+                    value = element.doSwitch(valueReader, value);
+                }
+                content.put(element.getName(), value);
             }
-            Object value = object.opt(element.getName());
-            if(value != null) {
-                value = element.doSwitch(valueReader, value);
-            }
-            content.put(element.getName(), value);
         }
         return content;
     }
