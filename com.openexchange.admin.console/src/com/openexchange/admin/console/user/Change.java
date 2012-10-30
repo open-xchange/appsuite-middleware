@@ -67,33 +67,33 @@ import com.openexchange.admin.rmi.exceptions.StorageException;
 public class Change extends ChangeCore {
 
     public static void main(final String[] args) {
-        new Change(args);
+        new Change().execute(args);
     }
 
-    public Change(final String[] args2) {
+    public Change() {
+        super();
+    }
 
+    private void execute(final String[] args) {
         final AdminParser parser = new AdminParser("changeuser");
-
-        commonfunctions(parser, args2);
+        commonfunctions(parser, args);
     }
 
     @Override
     protected void maincall(final AdminParser parser, final OXUserInterface oxusr, final Context ctx, final User usr, UserModuleAccess access, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException, NoSuchUserException {
         oxusr.change(ctx, usr, auth);
-        
+
         // Change module access IF an access combination name was supplied!
         // The normal change of access rights is done in the "commonfunctions"
         final String accesscombinationname = parseAndSetAccessCombinationName(parser);
         if (null != accesscombinationname) {
             // Change user with access rights combination name
-        	oxusr.changeModuleAccess(ctx, usr, accesscombinationname, auth);        	
+            oxusr.changeModuleAccess(ctx, usr, accesscombinationname, auth);        	
         }
-        
     }
 
     @Override
     protected void setFurtherOptions(final AdminParser parser) {
         setAddAccessRightCombinationNameOption(parser);
     }
-
 }

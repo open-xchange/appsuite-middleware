@@ -1,3 +1,7 @@
+* 2012-10-30 - marcus.klein@open-xchange.com
+
+ - Fix for bug 21511: Added possibility to delete users birthday value.
+
 * 2012-10-30 - thorben.betten@open-xchange.com
 
  - Fix for bug 23508: Dealing with possible I/O error when loading an URL's content
