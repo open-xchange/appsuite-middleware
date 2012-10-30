@@ -57,6 +57,7 @@ import jcifs.smb.NtlmPasswordAuthentication;
 import jcifs.smb.SmbAuthException;
 import jcifs.smb.SmbException;
 import jcifs.smb.SmbFile;
+import jcifs.smb.SmbFileFilter;
 import org.apache.commons.httpclient.URI;
 import org.apache.commons.logging.Log;
 import com.openexchange.exception.OXException;
@@ -159,43 +160,58 @@ public final class CIFSFolderAccess extends AbstractCIFSAccess implements FileSt
         }
     }
 
+    private static final class CountingSmbFileFilter implements SmbFileFilter {
+        
+        private int fileCount;
+        private boolean hasSubdir;
+
+        protected CountingSmbFileFilter() {
+            super();
+            fileCount = 0;
+            hasSubdir = false;
+        }
+
+        @Override
+        public boolean accept(SmbFile file) throws SmbException {
+            if (file.isDirectory()) {
+                hasSubdir = true;
+            } else if (file.isFile()) {
+                fileCount++;
+            }
+            return false;
+        }
+        
+        public boolean hasSubdir() {
+            return hasSubdir;
+        }
+        
+        public int getFileCount() {
+            return fileCount;
+        }
+    }
+
     private CIFSFolder toFileStorageFolder(final String folderId, final SmbFile smbFolder) throws SmbException, OXException {
         /*
          * Check sub resources
          */
-        SmbFile[] subFiles;
+        final CountingSmbFileFilter filter = new CountingSmbFileFilter();
         try {
-            subFiles = smbFolder.canRead() ? smbFolder.listFiles() : new SmbFile[0];
+            if (smbFolder.canRead()) {
+                smbFolder.listFiles(filter);
+            }
         } catch (final SmbException e) {
             if (!indicatesNotReadable(e)) {
                 throw e;
             }
-            subFiles = new SmbFile[0];
-        }
-        boolean hasSubdir = false;
-        int fileCount = 0;
-        try {
-            for (final SmbFile sub : subFiles) {
-                if (sub.isDirectory()) {
-                    hasSubdir = true;
-                } else if (sub.isFile()) {
-                    fileCount++;
-                }
-            }
-        } catch (final Exception e) {
-            // Ignore
-            LOG.warn("Couldn't determine has-subfolders and file-count for " + folderId, e);
-            hasSubdir = false;
-            fileCount = 0;
         }
         /*
          * Convert to a folder
          */
         final CIFSFolder cifsFolder = new CIFSFolder(session.getUserId(), rootUrl);
         cifsFolder.parseSmbFolder(smbFolder);
-        cifsFolder.setFileCount(fileCount);
-        cifsFolder.setSubfolders(hasSubdir);
-        cifsFolder.setSubscribedSubfolders(hasSubdir);
+        cifsFolder.setFileCount(filter.getFileCount());
+        cifsFolder.setSubfolders(filter.hasSubdir());
+        cifsFolder.setSubscribedSubfolders(filter.hasSubdir);
         /*
          * Home dir or public folder?
          */
@@ -329,13 +345,21 @@ public final class CIFSFolderAccess extends AbstractCIFSAccess implements FileSt
         }
     }
 
+    private static final SmbFileFilter DICTIONARY_FILTER = new SmbFileFilter() {
+
+        @Override
+        public boolean accept(SmbFile file) throws SmbException {
+            return file.isDirectory();
+        }
+    };
+
     private SmbFile recursiveSearch(final SmbFile smbFolder, final String appendix) throws SmbException {
         /*
          * Check sub resources
          */
         SmbFile[] subFiles;
         try {
-            subFiles = smbFolder.canRead() ? smbFolder.listFiles() : new SmbFile[0];
+            subFiles = smbFolder.canRead() ? smbFolder.listFiles(DICTIONARY_FILTER) : new SmbFile[0];
         } catch (final SmbException e) {
             if (!indicatesNotReadable(e)) {
                 throw e;
@@ -409,11 +433,11 @@ public final class CIFSFolderAccess extends AbstractCIFSAccess implements FileSt
             try {
                 if (DEBUG) {
                     final long st = System.currentTimeMillis();
-                    subFiles = smbFolder.canRead() ? smbFolder.listFiles() : new SmbFile[0];
+                    subFiles = smbFolder.canRead() ? smbFolder.listFiles(DICTIONARY_FILTER) : new SmbFile[0];
                     final long dur = System.currentTimeMillis() - st;
                     LOG.debug("CIFSFolderAccess.getSubfolders() - SmbFile.listFiles() took " + dur + "msec.");
                 } else {
-                    subFiles = smbFolder.canRead() ? smbFolder.listFiles() : new SmbFile[0];
+                    subFiles = smbFolder.canRead() ? smbFolder.listFiles(DICTIONARY_FILTER) : new SmbFile[0];
                 }
             } catch (final SmbException e) {
                 if (!indicatesNotReadable(e)) {

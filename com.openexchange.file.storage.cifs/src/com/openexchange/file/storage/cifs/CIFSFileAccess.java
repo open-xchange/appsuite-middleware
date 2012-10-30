@@ -61,6 +61,7 @@ import java.util.Set;
 import jcifs.smb.NtlmPasswordAuthentication;
 import jcifs.smb.SmbException;
 import jcifs.smb.SmbFile;
+import jcifs.smb.SmbFileFilter;
 import jcifs.smb.SmbFileInputStream;
 import jcifs.smb.SmbFileOutputStream;
 import org.apache.commons.logging.Log;
@@ -386,6 +387,14 @@ public final class CIFSFileAccess extends AbstractCIFSAccess implements FileStor
         }
     }
 
+    private static final SmbFileFilter FILE_FILTER = new SmbFileFilter() {
+
+        @Override
+        public boolean accept(SmbFile file) throws SmbException {
+            return file.isDirectory();
+        }
+    };
+
     @Override
     public void removeDocument(final String folderId, final long sequenceNumber) throws OXException {
         try {
@@ -403,7 +412,7 @@ public final class CIFSFileAccess extends AbstractCIFSAccess implements FileStor
             /*
              * List its sub-resources
              */
-            final SmbFile[] subFiles = smbFolder.listFiles();
+            final SmbFile[] subFiles = smbFolder.listFiles(FILE_FILTER);
             for (final SmbFile subFile : subFiles) {
                 if (subFile.isFile()) {
                     subFile.delete();
@@ -583,11 +592,11 @@ public final class CIFSFileAccess extends AbstractCIFSAccess implements FileStor
             try {
                 if (DEBUG) {
                     final long st = System.currentTimeMillis();
-                    subFiles = smbFolder.canRead() ? smbFolder.listFiles() : new SmbFile[0];
+                    subFiles = smbFolder.canRead() ? smbFolder.listFiles(FILE_FILTER) : new SmbFile[0];
                     final long dur = System.currentTimeMillis() - st;
                     LOG.debug("CIFSFileAccess.getFileList() - SmbFile.listFiles() took " + dur + "msec.");
                 } else {
-                    subFiles = smbFolder.canRead() ? smbFolder.listFiles() : new SmbFile[0];
+                    subFiles = smbFolder.canRead() ? smbFolder.listFiles(FILE_FILTER) : new SmbFile[0];
                 }
             } catch (final SmbException e) {
                 if (!indicatesNotReadable(e)) {
