@@ -318,6 +318,7 @@ public final class SessionHandler {
         }
         // Post event for created session
         postSessionCreation(session);
+        postSessionStored(session);
         // Return session ID
         return session;
     }
@@ -687,6 +688,30 @@ public final class SessionHandler {
 
     public static int[] getNumberOfShortTermSessions() {
         return sessionDataRef.get().getShortTermSessionsPerContainer();
+    }
+
+    private static void postSessionStored(final Session session) {
+        postSessionStored(session, null);
+    }
+
+    /**
+     * Post event that a single session has been put into {@link SessionStorageService session storage}.
+     * 
+     * @param session The stored session
+     * @param optEventAdmin The optional {@link EventAdmin} instance
+     */
+    public static void postSessionStored(final Session session, final EventAdmin optEventAdmin) {
+        final EventAdmin eventAdmin = optEventAdmin == null ? getServiceRegistry().getService(EventAdmin.class) : optEventAdmin;
+        if (eventAdmin != null) {
+            final Dictionary<String, Object> dic = new Hashtable<String, Object>(2);
+            dic.put(SessiondEventConstants.PROP_SESSION, session);
+            dic.put(SessiondEventConstants.PROP_COUNTER, SESSION_COUNTER);
+            final Event event = new Event(SessiondEventConstants.TOPIC_STORED_SESSION, dic);
+            eventAdmin.postEvent(event);
+            if (DEBUG) {
+                LOG.debug("Posted event for added session");
+            }
+        }
     }
 
     private static void postSessionCreation(final Session session) {

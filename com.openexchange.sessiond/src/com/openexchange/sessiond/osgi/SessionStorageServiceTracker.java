@@ -51,12 +51,14 @@ package com.openexchange.sessiond.osgi;
 
 import static com.openexchange.sessiond.services.SessiondServiceRegistry.getServiceRegistry;
 import java.util.List;
+import org.apache.commons.logging.Log;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
+import org.osgi.service.event.EventAdmin;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
-import com.openexchange.exception.OXException;
 import com.openexchange.sessiond.impl.SessionControl;
 import com.openexchange.sessiond.impl.SessionHandler;
+import com.openexchange.sessiond.impl.SessionImpl;
 import com.openexchange.sessionstorage.SessionStorageService;
 
 /**
@@ -65,6 +67,8 @@ import com.openexchange.sessionstorage.SessionStorageService;
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  */
 public class SessionStorageServiceTracker implements ServiceTrackerCustomizer<SessionStorageService, SessionStorageService> {
+
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(SessionStorageServiceTracker.class);
 
     private final BundleContext context;
 
@@ -81,12 +85,18 @@ public class SessionStorageServiceTracker implements ServiceTrackerCustomizer<Se
         SessionStorageService service = context.getService(reference);
         getServiceRegistry().addService(SessionStorageService.class, service);
         List<SessionControl> sessions = SessionHandler.getSessions();
-        for (SessionControl session : sessions) {
-            try {
-                service.addSession(session.getSession());
-            } catch (OXException e) {
-
-                e.printStackTrace();
+        if (!sessions.isEmpty()) {
+            final EventAdmin eventAdmin = getServiceRegistry().getService(EventAdmin.class);
+            for (SessionControl session : sessions) {
+                try {
+                    final SessionImpl ses = session.getSession();
+                    service.addSession(ses);
+                    if (eventAdmin != null) {
+                        SessionHandler.postSessionStored(ses, eventAdmin);
+                    }
+                } catch (final Exception e) {
+                    LOG.warn("Couldn't put session into SessionStorageService.", e);
+                }
             }
         }
         return service;
