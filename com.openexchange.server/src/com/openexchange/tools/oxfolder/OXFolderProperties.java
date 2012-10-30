@@ -69,19 +69,17 @@ import com.openexchange.cache.impl.FolderQueryCacheManager;
 import com.openexchange.cache.registry.CacheAvailabilityListener;
 import com.openexchange.cache.registry.CacheAvailabilityRegistry;
 import com.openexchange.config.ConfigurationService;
-import com.openexchange.config.PropertyEvent;
 import com.openexchange.config.PropertyListener;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
+import com.openexchange.folderstorage.cache.CacheFolderStorage;
 import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.management.ManagementService;
 import com.openexchange.server.Initialization;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.server.services.ServerServiceRegistry;
-import com.openexchange.threadpool.ThreadPoolService;
-import com.openexchange.threadpool.ThreadPools;
-import com.openexchange.threadpool.behavior.CallerRunsBehavior;
 import com.openexchange.tools.oxfolder.memory.ConditionTreeMapManagement;
 import com.openexchange.tools.oxfolder.permissionLoader.PermissionLoaderService;
 import com.openexchange.tools.sql.DBUtils;
@@ -246,49 +244,9 @@ public final class OXFolderProperties implements Initialization, CacheAvailabili
             ignoreSharedAddressbook = Boolean.parseBoolean(value.trim());
         }
         /*
-         * ENABLE_INTERNAL_USER_EDIT and add listener
+         * ENABLE_INTERNAL_USER_EDIT
          */
-        final org.apache.commons.logging.Log logger = LOG;
-        value = configurationService.getProperty("ENABLE_INTERNAL_USER_EDIT", (propertyListener = new PropertyListener() {
-
-            @Override
-            public void onPropertyChange(final PropertyEvent event) {
-                if (PropertyEvent.Type.CHANGED.equals(event.getType())) {
-                    final boolean enableInternalUsersEditNew = Boolean.parseBoolean(event.getValue());
-                    if (enableInternalUsersEditNew == enableInternalUsersEdit) {
-                        /*
-                         * Changed to same value; ignore
-                         */
-                        return;
-                    }
-                    enableInternalUsersEdit = enableInternalUsersEditNew;
-                } else {
-                    if (!enableInternalUsersEdit) {
-                        /*
-                         * Already set to false
-                         */
-                        return;
-                    }
-                    enableInternalUsersEdit = false;
-                }
-                final ThreadPoolService pool = ThreadPools.getThreadPool();
-                if (null == pool) {
-                    // Run in this thread
-                    updatePermissions(enableInternalUsersEdit);
-                } else {
-                    // Run in separate thread
-                    final Runnable r = new Runnable() {
-
-                        @Override
-                        public void run() {
-                            updatePermissions(enableInternalUsersEdit);
-                        }
-                    };
-                    pool.submit(ThreadPools.task(r), CallerRunsBehavior.getInstance());
-                }
-            }
-
-        }));
+        value = configurationService.getProperty("ENABLE_INTERNAL_USER_EDIT");
         if (null == value) {
             LOG.warn("Missing property ENABLE_INTERNAL_USER_EDIT");
         } else {
@@ -461,6 +419,31 @@ public final class OXFolderProperties implements Initialization, CacheAvailabili
                 LOG.error(e.getMessage(), e);
             }
         }
+        CacheFolderStorage.getInstance().clearAll();
+    }
+
+    /**
+     * Updates according to given flag.
+     * 
+     * @param enableInternalUsersEdit The flag
+     * @param contextId The context identifier
+     */
+    public static void updatePermissions(final boolean enableInternalUsersEdit, final int contextId) {
+        /*
+         * Update permissions
+         */
+        updateGABWritePermission(enableInternalUsersEdit, contextId);
+        /*
+         * Clear folder cache to ensure removal of all cached instances of global address book
+         */
+        if (FolderCacheManager.isInitialized()) {
+            try {
+                FolderCacheManager.getInstance().removeFolderObject(FolderObject.SYSTEM_LDAP_FOLDER_ID, ContextStorage.getStorageContext(contextId));
+            } catch (final OXException e) {
+                LOG.error(e.getMessage(), e);
+            }
+        }
+        CacheFolderStorage.getInstance().clearCache(-1, contextId);
     }
 
     private static void updateGABWritePermission(final boolean enableInternalUsersEdit, final int contextId) {

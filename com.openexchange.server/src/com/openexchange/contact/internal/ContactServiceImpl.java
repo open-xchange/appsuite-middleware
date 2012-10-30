@@ -79,6 +79,7 @@ import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.impl.EffectivePermission;
 import com.openexchange.session.Session;
 import com.openexchange.tools.iterator.SearchIterator;
+import com.openexchange.tools.oxfolder.OXFolderProperties;
 
 /**
  * {@link ContactServiceImpl} - {@link ContactService} implementation.
@@ -263,6 +264,8 @@ public class ContactServiceImpl extends DefaultContactService {
 		new EventClient(session).modify(storedContact, contact, targetFolder);
 	}
 
+	private static final String GAB = Integer.toString(FolderObject.SYSTEM_LDAP_FOLDER_ID);
+
 	@Override
     protected void doUpdateContact(final Session session, final String folderID, final String objectID, final Contact contact, final Date lastRead) throws OXException {
 		final int userID = session.getUserId();
@@ -278,8 +281,17 @@ public class ContactServiceImpl extends DefaultContactService {
 		/*
 		 * check general permissions
 		 */
-		final EffectivePermission permission = Tools.getPermission(contextID, folderID, userID);
-		Check.canWriteOwn(permission, session);
+		EffectivePermission permission = Tools.getPermission(contextID, folderID, userID);
+		try {
+            Check.canWriteOwn(permission, session);
+        } catch (OXException e) {
+            if (GAB.equals(folderID) && ContactExceptionCodes.NO_CHANGE_PERMISSION.equals(e) && OXFolderProperties.isEnableInternalUsersEdit()) {
+                OXFolderProperties.updatePermissions(true, contextID);
+                // check again
+                permission = Tools.getPermission(contextID, folderID, userID);
+                Check.canWriteOwn(permission, session);
+            }
+        }
 		/*
 		 * check currently stored contact
 		 */

@@ -157,6 +157,7 @@ public final class ConditionTreeMapManagement {
             timerTask.cancel();
             this.timerTask = null;
         }
+        maps.clear();
     }
 
     /**
