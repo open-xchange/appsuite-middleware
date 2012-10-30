@@ -120,7 +120,7 @@ public final class CIFSFileStorageService implements AccountAware {
         formDescription = new ReadOnlyDynamicFormDescription(tmpDescription);
         secretProperties = Collections.unmodifiableSet(new HashSet<String>(Arrays.asList(CIFSConstants.CIFS_PASSWORD)));
         // Configuration
-        // See jcifs.smb.SmbConstants
+        // See jcifs.smb.SmbConstants or http://jcifs.samba.org/src/docs/api/overview-summary.html#scp
         Config.setProperty("jcifs.smb.client.soTimeout", "10000");
         Config.setProperty("jcifs.smb.client.connTimeout", "5000");
         Config.setProperty("jcifs.smb.client.attrExpirationPeriod", "300000");
