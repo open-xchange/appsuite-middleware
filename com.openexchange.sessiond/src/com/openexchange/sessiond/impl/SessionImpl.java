@@ -126,6 +126,30 @@ public final class SessionImpl implements PutIfAbsent {
     }
 
     /**
+     * Initializes a new {@link SessionImpl}
+     *
+     * @param session The copy session
+     */
+    public SessionImpl(final Session s) {
+        this.userId = s.getUserId();
+        this.loginName = s.getLoginName();
+        this.password = s.getPassword();
+        this.sessionId = s.getSessionID();
+        this.secret = s.getSecret();
+        this.randomToken = s.getRandomToken();
+        this.localIp = s.getLocalIp();
+        this.contextId = s.getContextId();
+        this.login = s.getLogin();
+        this.authId = s.getAuthId();
+        this.hash = s.getHash();
+        this.client = s.getClient();
+        parameters = new ConcurrentHashMap<String, Object>();
+        parameters.put(PARAM_LOCK, new ReentrantLock());
+        parameters.put(PARAM_COUNTER, new AtomicInteger());
+        parameters.put(PARAM_ALTERNATIVE_ID, UUIDSessionIdGenerator.randomUUID());
+    }
+
+    /**
      * Initializes a new {@link SessionImpl} from specified cached session.
      *
      * @param cachedSession The cached session
