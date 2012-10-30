@@ -550,6 +550,7 @@ public final class OXFolderAdminHelper {
                     if (FolderCacheManager.isEnabled()) {
                         FolderCacheManager.getInstance().removeFolderObject(globalAddressBookId, ctx);
                     }
+                    CacheFolderStorage.getInstance().clearCache(-1, ctx.getContextId());
                     if (FolderQueryCacheManager.isInitialized()) {
                         FolderQueryCacheManager.getInstance().invalidateContextQueries(cid);
                     }

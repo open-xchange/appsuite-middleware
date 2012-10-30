@@ -49,9 +49,9 @@
 
 package com.openexchange.folderstorage.cache.memory;
 
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.TimeUnit;
+import org.cliffc.high_scale_lib.NonBlockingHashMap;
 import com.openexchange.session.Session;
 
 /**
@@ -74,14 +74,14 @@ public final class FolderMapManagement {
         return INSTANCE;
     }
 
-    private final ConcurrentMap<Key, FolderMap> map;
+    private final ConcurrentMap<Integer, ConcurrentMap<Integer, FolderMap>> map;
 
     /**
      * Initializes a new {@link FolderMapManagement}.
      */
     private FolderMapManagement() {
         super();
-        map = new ConcurrentHashMap<FolderMapManagement.Key, FolderMap>();
+        map = new NonBlockingHashMap<Integer, ConcurrentMap<Integer, FolderMap>>(64);
     }
 
     /**
@@ -92,12 +92,27 @@ public final class FolderMapManagement {
     }
 
     /**
+     * Drop caches for given context.
+     *
+     * @param contextId The context identifier
+     */
+    public void dropFor(final int contextId) {
+        map.get(Integer.valueOf(contextId));
+        if (LOG.isDebugEnabled()) {
+            LOG.debug(new StringBuilder("Cleaned user-sensitive folder cache for context ").append(contextId).toString());
+        }
+    }
+
+    /**
      * Drop caches for given session's user.
      *
      * @param session The session
      */
     public void dropFor(final Session session) {
-        map.remove(keyFor(session));
+        final ConcurrentMap<Integer, FolderMap> contextMap = map.get(Integer.valueOf(session.getContextId()));
+        if (null != contextMap) {
+            contextMap.remove(Integer.valueOf(session.getUserId()));
+        }
         if (LOG.isDebugEnabled()) {
             LOG.debug(new StringBuilder("Cleaned user-sensitive folder cache for user ").append(session.getUserId()).append(" in context ").append(
                 session.getContextId()).toString());
@@ -111,7 +126,10 @@ public final class FolderMapManagement {
      * @param contextId The context identifier
      */
     public void dropFor(final int userId, final int contextId) {
-        map.remove(keyFor(userId, contextId));
+        final ConcurrentMap<Integer, FolderMap> contextMap = map.get(Integer.valueOf(contextId));
+        if (null != contextMap) {
+            contextMap.remove(Integer.valueOf(userId));
+        }
         if (LOG.isDebugEnabled()) {
             LOG.debug(new StringBuilder("Cleaned user-sensitive folder cache for user ").append(userId).append(" in context ").append(
                 contextId).toString());
@@ -125,11 +143,20 @@ public final class FolderMapManagement {
      * @return The folder map
      */
     public FolderMap getFor(final Session session) {
-        final Key key = keyFor(session);
-        FolderMap folderMap = map.get(key);
+        final Integer cid = Integer.valueOf(session.getContextId());
+        ConcurrentMap<Integer, FolderMap> contextMap = map.get(cid);
+        if (null == contextMap) {
+            final ConcurrentMap<Integer, FolderMap> newMap = new NonBlockingHashMap<Integer, FolderMap>(256);
+            contextMap = map.putIfAbsent(cid, newMap);
+            if (null == contextMap) {
+                contextMap = newMap;
+            }
+        }
+        final Integer us = Integer.valueOf(session.getUserId());
+        FolderMap folderMap = contextMap.get(us);
         if (null == folderMap) {
             final FolderMap newFolderMap = new FolderMap(1024, 300, TimeUnit.SECONDS, session.getUserId(), session.getContextId());
-            folderMap = map.putIfAbsent(key, newFolderMap);
+            folderMap = contextMap.putIfAbsent(us, newFolderMap);
             if (null == folderMap) {
                 folderMap = newFolderMap;
             }
@@ -144,7 +171,11 @@ public final class FolderMapManagement {
      * @return The folder map or <code>null</code> if absent
      */
     public FolderMap optFor(final Session session) {
-        return null == session ? null : map.get(keyFor(session));
+        final ConcurrentMap<Integer, FolderMap> contextMap = map.get(Integer.valueOf(session.getContextId()));
+        if (null == contextMap) {
+            return null;
+        }
+        return contextMap.get(Integer.valueOf(session.getUserId()));
     }
 
     /**
@@ -155,59 +186,11 @@ public final class FolderMapManagement {
      * @return The folder map or <code>null</code> if absent
      */
     public FolderMap optFor(final int userId, final int contextId) {
-        return map.get(keyFor(userId, contextId));
-    }
-
-    private static Key keyFor(final Session session) {
-        return new Key(session.getUserId(), session.getContextId());
-    }
-
-    private static Key keyFor(final int userId, final int contextId) {
-        return new Key(userId, contextId);
-    }
-
-    private static final class Key {
-
-        private final int cid;
-
-        private final int user;
-
-        private final int hash;
-
-        protected Key(final int user, final int cid) {
-            super();
-            this.user = user;
-            this.cid = cid;
-            final int prime = 31;
-            int result = 1;
-            result = prime * result + cid;
-            result = prime * result + user;
-            hash = result;
+        final ConcurrentMap<Integer, FolderMap> contextMap = map.get(Integer.valueOf(contextId));
+        if (null == contextMap) {
+            return null;
         }
-
-        @Override
-        public int hashCode() {
-            return hash;
-        }
-
-        @Override
-        public boolean equals(final Object obj) {
-            if (this == obj) {
-                return true;
-            }
-            if (!(obj instanceof Key)) {
-                return false;
-            }
-            final Key other = (Key) obj;
-            if (cid != other.cid) {
-                return false;
-            }
-            if (user != other.user) {
-                return false;
-            }
-            return true;
-        }
-
+        return contextMap.get(Integer.valueOf(userId));
     }
 
 }
