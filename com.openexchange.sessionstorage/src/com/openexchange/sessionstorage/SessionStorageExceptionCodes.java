@@ -61,7 +61,14 @@ import com.openexchange.exception.OXExceptionFactory;
  */
 public enum SessionStorageExceptionCodes implements OXExceptionCode {
 
+    /**
+     * An error occurred: %1$s
+     */
     UNEXPECTED_ERROR(SessionStorageExceptionMessages.UNEXPECTED_ERROR, 1, CATEGORY_ERROR),
+    /**
+     * No session found for identifier: %1$s
+     */
+    NO_SESSION_FOUND(SessionStorageExceptionMessages.NO_SESSION_FOUND, 2, CATEGORY_USER_INPUT),
 
     ;
 

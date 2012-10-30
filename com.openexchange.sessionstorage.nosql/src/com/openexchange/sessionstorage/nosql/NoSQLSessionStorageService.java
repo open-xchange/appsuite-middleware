@@ -76,6 +76,7 @@ import org.apache.commons.logging.Log;
 import com.openexchange.crypto.CryptoService;
 import com.openexchange.exception.OXException;
 import com.openexchange.session.Session;
+import com.openexchange.sessionstorage.SessionStorageExceptionCodes;
 import com.openexchange.sessionstorage.SessionStorageService;
 import com.openexchange.sessionstorage.StoredSession;
 import com.openexchange.sessionstorage.nosql.exceptions.OXNoSQLSessionStorageExceptionCodes;
@@ -204,7 +205,7 @@ public class NoSQLSessionStorageService implements SessionStorageService {
             return session;
         }
         if (log.isDebugEnabled()) {
-            OXException e = OXNoSQLSessionStorageExceptionCodes.NOSQL_SESSIONSTORAGE_SESSION_NOT_FOUND.create(sessionId);
+            OXException e = SessionStorageExceptionCodes.NO_SESSION_FOUND.create(sessionId);
             log.debug(e.getMessage(), e);
             throw e;
         }

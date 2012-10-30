@@ -73,6 +73,7 @@ import com.openexchange.sessiond.SessionExceptionCodes;
 import com.openexchange.sessiond.SessionMatcher;
 import com.openexchange.sessiond.SessiondEventConstants;
 import com.openexchange.sessiond.cache.SessionCache;
+import com.openexchange.sessionstorage.SessionStorageExceptionCodes;
 import com.openexchange.sessionstorage.SessionStorageService;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.timer.ScheduledTimerTask;
@@ -482,7 +483,7 @@ public final class SessionHandler {
             SessionStorageService storageService = getServiceRegistry().getService(SessionStorageService.class);
             if (storageService != null) {
                 try {
-                    Session s = storageService.lookupSession(sessionId);
+                    final Session s = storageService.lookupSession(sessionId);
                     sessionData.addSession(
                         new SessionImpl(
                             s.getUserId(),
@@ -499,8 +500,10 @@ public final class SessionHandler {
                             s.getClient()),
                         noLimit);
                     return sessionToSessionControl(s);
-                } catch (OXException e) {
-                    LOG.error(e.getMessage(), e);
+                } catch (final OXException e) {
+                    if (!SessionStorageExceptionCodes.NO_SESSION_FOUND.equals(e)) {
+                        LOG.warn("Session look-up failed in session storage.", e);
+                    }
                 }
             }
         } else {

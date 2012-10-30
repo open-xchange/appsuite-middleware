@@ -58,6 +58,7 @@ import com.hazelcast.core.IMap;
 import com.openexchange.crypto.CryptoService;
 import com.openexchange.exception.OXException;
 import com.openexchange.session.Session;
+import com.openexchange.sessionstorage.SessionStorageExceptionCodes;
 import com.openexchange.sessionstorage.SessionStorageService;
 import com.openexchange.sessionstorage.hazelcast.exceptions.OXHazelcastSessionStorageExceptionCodes;
 
@@ -96,9 +97,9 @@ public class HazelcastSessionStorageService implements SessionStorageService {
                 sessions.replace(sessionId, s);
                 return s;
             }
-            throw OXHazelcastSessionStorageExceptionCodes.HAZELCAST_SESSIONSTORAGE_SESSION_NOT_FOUND.create(sessionId);
+            throw SessionStorageExceptionCodes.NO_SESSION_FOUND.create(sessionId);
         } catch (final HazelcastException e) {
-            throw OXHazelcastSessionStorageExceptionCodes.HAZELCAST_SESSIONSTORAGE_SESSION_NOT_FOUND.create(e, sessionId);
+            throw SessionStorageExceptionCodes.NO_SESSION_FOUND.create(e, sessionId);
         }
     }
 

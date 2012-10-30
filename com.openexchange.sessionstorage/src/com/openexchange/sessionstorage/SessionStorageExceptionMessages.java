@@ -61,6 +61,9 @@ public class SessionStorageExceptionMessages implements LocalizableStrings {
     // An error occurred: %1$s
     public static final String UNEXPECTED_ERROR = "An error occurred: %1$s";
 
+    // No session found for identifier: %1$s
+    public static final String NO_SESSION_FOUND = "No session found for identifier: %1$s";
+
     /**
      * Initializes a new {@link SessionStorageExceptionMessages}.
      */
