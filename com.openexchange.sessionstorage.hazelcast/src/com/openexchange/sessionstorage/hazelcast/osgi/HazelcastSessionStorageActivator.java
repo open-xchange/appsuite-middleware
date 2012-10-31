@@ -126,6 +126,7 @@ public class HazelcastSessionStorageActivator extends HousekeepingActivator {
                 @Override
                 public HazelcastInstance addingService(final ServiceReference<HazelcastInstance> reference) {
                     final HazelcastInstance hazelcastInstance = context.getService(reference);
+                    addService(HazelcastInstance.class, hazelcastInstance);
                     sessionStorageRegistration = context.registerService(SessionStorageService.class, new HazelcastSessionStorageService(config, hazelcastInstance), null);
                     return hazelcastInstance;
                 }
@@ -143,6 +144,7 @@ public class HazelcastSessionStorageActivator extends HousekeepingActivator {
                         this.sessionStorageRegistration = null;
                     }
                     context.ungetService(reference);
+                    removeService(HazelcastInstance.class);
                 }
             });
             openTrackers();
@@ -150,7 +152,17 @@ public class HazelcastSessionStorageActivator extends HousekeepingActivator {
     }
 
     @Override
-    public <S> void registerService(Class<S> clazz, S service) {
+    public <S> boolean removeService(final Class<? extends S> clazz) {
+        return super.removeService(clazz);
+    }
+
+    @Override
+    public <S> boolean addService(final Class<S> clazz, final S service) {
+        return super.addService(clazz, service);
+    }
+
+    @Override
+    public <S> void registerService(final Class<S> clazz, final S service) {
         super.registerService(clazz, service);
     }
 
@@ -161,11 +173,11 @@ public class HazelcastSessionStorageActivator extends HousekeepingActivator {
         Services.setServiceLookup(null);
     }
 
-    private boolean checkEvictionPolicy(String evictionPolicy) {
+    private boolean checkEvictionPolicy(final String evictionPolicy) {
         return ("NONE".equals(evictionPolicy) || "LRU".equals(evictionPolicy) || "LFU".equals(evictionPolicy));
     }
 
-    private boolean checkMergePolicy(String mergePolicy) {
+    private boolean checkMergePolicy(final String mergePolicy) {
         return ("hz.NO_MERGE".equals(mergePolicy) || "hz.ADD_NEW_ENTRY".equals(mergePolicy) || "hz.HIGHER_HITS".equals(mergePolicy) || "hz.LATEST_UPDATE".equals(mergePolicy));
     }
 
