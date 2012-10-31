@@ -93,8 +93,9 @@ public enum LoginExceptionCodes implements OXExceptionCode {
     NO_SESSION_FOUND(NO_SESSION_FOUND_MSG, Category.CATEGORY_USER_INPUT, 17),
     /** Missing client capabilities. */
     MISSING_CAPABILITIES(MISSING_CAPABILITIES_MSG, Category.CATEGORY_WARNING, 18),
-    /** This exception code should be used for a not supported {@link AuthenticationService#handleAutoLoginInfo(LoginInfo)} method.
-     * Message %s does not support an auto login authentication.
+    /**
+     * This exception code should be used for a not supported {@link AuthenticationService#handleAutoLoginInfo(LoginInfo)} method.
+     * Message: %s does not support an auto login authentication.
      * Add class name as parameter when creating the exception.
      */
     NOT_SUPPORTED(NOT_SUPPORTED_MSG, Category.CATEGORY_SERVICE_DOWN, 19);
