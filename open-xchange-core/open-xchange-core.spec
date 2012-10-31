@@ -243,6 +243,8 @@ fi
 %doc com.openexchange.server/ChangeLog
 
 %changelog
+* Tue Oct 30 2012 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2012-10-29
 * Fri Oct 26 2012 Marcus Klein <marcus.klein@open-xchange.com>
 First release candidate for 6.22.1
 * Fri Oct 26 2012 Marcus Klein <marcus.klein@open-xchange.com>
