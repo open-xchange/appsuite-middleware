@@ -66,6 +66,7 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicLong;
 import javax.servlet.ServletException;
 import javax.servlet.ServletInputStream;
 import javax.servlet.http.HttpServlet;
@@ -95,7 +96,10 @@ import com.openexchange.groupware.upload.impl.UploadListener;
 import com.openexchange.groupware.upload.impl.UploadRegistry;
 import com.openexchange.groupware.upload.impl.UploadUtility;
 import com.openexchange.java.Charsets;
+import com.openexchange.log.ForceLog;
 import com.openexchange.log.LogFactory;
+import com.openexchange.log.LogProperties;
+import com.openexchange.log.Props;
 import com.openexchange.monitoring.MonitoringInfo;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.servlet.CountingHttpServletRequest;
@@ -413,6 +417,9 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
         super();
     }
 
+    private static final AtomicLong REQUEST_NUMBER = new AtomicLong(0L);
+    private static final String PROP_REQUEST_NUMBER = "com.openexchange.ajax.requestNumber";
+
     /**
      * The service method of HttpServlet is extended to catch bad exceptions and keep the AJP socket alive. Otherwise Apache thinks in a
      * balancer environment this AJP container is temporarily dead and redirects requests to other AJP containers. This will kill the users
@@ -421,10 +428,11 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
     @Override
     protected void service(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
         incrementRequests();
+        final Props props = LogProperties.getLogProperties();
+        props.put(PROP_REQUEST_NUMBER, ForceLog.valueOf(Long.toString(REQUEST_NUMBER.incrementAndGet())));
         try {
             // create a new HttpSession if missing
             req.getSession(true);
-
             /*
              * Set 200 OK status code and JSON content by default
              */
@@ -438,6 +446,7 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
             throw se;
         } finally {
             decrementRequests();
+            props.remove(PROP_REQUEST_NUMBER);
         }
     }
 
