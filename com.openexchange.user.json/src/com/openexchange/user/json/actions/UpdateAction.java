@@ -137,6 +137,7 @@ public final class UpdateAction extends AbstractUserAction {
         User parsedUser;
 		try {
 			parsedUserContact = ContactMapper.getInstance().deserialize(jData, CONTACT_FIELDS);
+	        parsedUserContact.setObjectID(contactId);
 			jData.put(UserField.ID.getName(), id);
 			parsedUser = UserMapper.getInstance().deserialize(jData, USER_FIELDS);
 		} catch (final JSONException e) {
