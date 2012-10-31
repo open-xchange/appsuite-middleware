@@ -49,21 +49,55 @@
 
 package com.openexchange.cluster.discovery;
 
+import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
+import org.osgi.util.tracker.ServiceTracker;
+
+
 /**
- * {@link ClusterListenerNotifier} - Notifies added {@link ClusterListener}s about appearing/disappearing nodes in cluster.
+ * {@link AbstractClusterDiscoveryService} - The abstract {@link ClusterDiscoveryService} with capability to register listeners.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface ClusterListenerNotifier {
+public abstract class AbstractClusterDiscoveryService extends ServiceTracker<ClusterListener, ClusterListener> implements ClusterDiscoveryService {
 
     /**
-     * Registers a listener to be notified of changes to the known cluster nodes.
+     * The cluster listeners.
      */
-    public abstract void addListener(ClusterListener listener);
+    protected final List<ClusterListener> listeners;
 
     /**
-     * Un-registers a listener.
+     * Initializes a new {@link AbstractClusterDiscoveryService}.
+     * 
+     * @param context The bundle context
      */
-    public abstract void removeListener(ClusterListener listener);
+    protected AbstractClusterDiscoveryService(final BundleContext context) {
+        super(context, ClusterListener.class, null);
+        listeners = new CopyOnWriteArrayList<ClusterListener>();
+    }
+    
+    /**
+     * Gets the listeners currently contained.
+     *
+     * @return The listeners
+     */
+    public List<ClusterListener> getListeners() {
+        return listeners;
+    }
+
+    @Override
+    public ClusterListener addingService(ServiceReference<ClusterListener> reference) {
+        final ClusterListener listener = context.getService(reference);
+        listeners.add(listener);
+        return listener;
+    }
+
+    @Override
+    public void removedService(ServiceReference<ClusterListener> reference, ClusterListener listener) {
+        listeners.remove(listener);
+        super.removedService(reference, listener);
+    }
 
 }

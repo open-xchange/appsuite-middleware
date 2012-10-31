@@ -37,7 +37,6 @@ import com.openexchange.management.ManagementService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.osgi.ServiceContainer;
 import com.openexchange.timer.TimerService;
-import com.openexchange.tools.strings.TimeSpanParser;
 
 /**
  * {@link HazelcastActivator} - The activator for Hazelcast bundle (registers a {@link HazelcastInstance} for this JVM)
@@ -65,11 +64,6 @@ public class HazelcastActivator extends HousekeepingActivator {
      * The {@code AtomicReference} for {@code HazelcastInstance}.
      */
     public static final AtomicReference<HazelcastInstance> REF_HAZELCAST_INSTANCE = new AtomicReference<HazelcastInstance>();
-
-    /**
-     * The cluster listener.
-     */
-    protected volatile ClusterListener clusterListener;
 
     /**
      * The {@code AtomicReference} for {@code ClusterDiscoveryService}.
@@ -116,6 +110,14 @@ public class HazelcastActivator extends HousekeepingActivator {
          * new member joins.
          */
         final BundleContext context = this.context;
+        /*-
+         * Wait for at least one via ClusterListener
+         * 
+         * Add cluster listener to manage appearing/disappearing nodes
+         */
+        final ClusterListener clusterListener = new HazelcastClusterListener(this, System.currentTimeMillis(), logger);
+        registerService(ClusterListener.class, clusterListener);
+        // Trackers
         track(ManagementService.class, new ManagementRegisterer(context));
         track(ClusterDiscoveryService.class, new ServiceTrackerCustomizer<ClusterDiscoveryService, ClusterDiscoveryService>() {
 
@@ -152,7 +154,7 @@ public class HazelcastActivator extends HousekeepingActivator {
                         deactivated.addFirst(new ServiceContainer<ClusterDiscoveryService>(discovery, ranking));
                         return;
                     }
-                    shutdown(clusterDiscoveryService);
+                    shutdown();
                     deactivated.addFirst(new ServiceContainer<ClusterDiscoveryService>(clusterDiscoveryService, clusterDiscoveryServiceRanking));
                 }
                 clusterDiscoveryService = discovery;
@@ -167,20 +169,20 @@ public class HazelcastActivator extends HousekeepingActivator {
                     logger.info("\nHazelcast\n\tAvailable cluster nodes received in " + (et - st) + "msec from " + ClusterDiscoveryService.class.getSimpleName() + ":\n\t" + nodes + "\n");
                 }
                 /*-
-                 * Wait for at least one via ClusterListener
-                 * 
-                 * Add cluster listener to manage appearing/disappearing nodes
+                 * Check initially available nodes
                  */
-                final HazelcastActivator activator = HazelcastActivator.this;
-                final ClusterListener clusterListener = new HazelcastClusterListener(activator, st, logger);
-                discovery.addListener(clusterListener);
-                activator.clusterListener = clusterListener;
                 if (nodes.isEmpty()) {
                     /*
                      * Timeout before we assume we are either the first or alone in the cluster
                      */
                     final long delay = getDelay();
-                    if (delay >= 0) {
+                    if (delay < 0) {
+                        if (InitMode.INITIALIZED.equals(init(nodes, true, st, logger))) {
+                            if (infoEnabled) {
+                                logger.info("\nHazelcast:\n\tInitialized Hazelcast instance with empty Open-Xchange nodes.\n");
+                            }
+                        }
+                    } else {
                         final Runnable task = new Runnable() {
 
                             @Override
@@ -217,7 +219,7 @@ public class HazelcastActivator extends HousekeepingActivator {
                     return;
                 }
                 if (isSingleton) {
-                    shutdown(service);
+                    shutdown();
                     context.ungetService(reference);
                     clusterDiscoveryServiceReference.set(null);
                     return;
@@ -233,7 +235,7 @@ public class HazelcastActivator extends HousekeepingActivator {
                         }
                     }
                     if (service == clusterDiscoveryService) {
-                        shutdown(service);
+                        shutdown();
                         context.ungetService(reference);
                         clusterDiscoveryService = null;
                         clusterDiscoveryServiceRanking = 0;
@@ -248,12 +250,7 @@ public class HazelcastActivator extends HousekeepingActivator {
                 context.ungetService(reference);
             }
 
-            private void shutdown(final ClusterDiscoveryService service) {
-                final ClusterListener clusterListener = HazelcastActivator.this.clusterListener;
-                if (null != clusterListener) {
-                    service.removeListener(clusterListener);
-                    HazelcastActivator.this.clusterListener = null;
-                }
+            private void shutdown() {
                 final HazelcastInstance hazelcastInstance = REF_HAZELCAST_INSTANCE.get();
                 if (null != hazelcastInstance) {
                     hazelcastInstance.getLifecycleService().shutdown();
@@ -273,8 +270,9 @@ public class HazelcastActivator extends HousekeepingActivator {
      * @return The delay milliseconds
      */
     long getDelay() {
-        final String delay = getService(ConfigurationService.class).getProperty("com.openexchange.hazelcast.startupDelay", "60000");
-        return TimeSpanParser.parseTimespan(delay).longValue();
+        return -1L;
+        //final String delay = getService(ConfigurationService.class).getProperty("com.openexchange.hazelcast.startupDelay", "60000");
+        //return TimeSpanParser.parseTimespan(delay).longValue();
     }
 
     public static final class UtilCommandProvider implements CommandProvider {
