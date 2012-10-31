@@ -51,7 +51,6 @@ package com.openexchange.ajax.contact;
 
 import junit.framework.Test;
 import junit.framework.TestSuite;
-
 import com.openexchange.ajax.contact.action.ExemplaryContactTestManagerTest;
 
 public class ContactAJAXSuite extends TestSuite {
@@ -84,6 +83,7 @@ public class ContactAJAXSuite extends TestSuite {
         tests.addTestSuite(DistListTest.class);
         tests.addTestSuite(DistListMemberUpdateTest.class);
         tests.addTestSuite(DistListPermissionsTest.class);
+        tests.addTestSuite(BirthdayAndAnniversaryTest.class);
 
         tests.addTest(ContactBugTestSuite.suite());
         return tests;

@@ -56,10 +56,12 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.TimeZone;
 import org.apache.commons.logging.Log;
 import com.openexchange.contact.SortOptions;
 import com.openexchange.contact.storage.rdb.fields.DistListMemberField;
@@ -295,8 +297,15 @@ public class Executor {
                 stringBuilder.append(" IN (").append(Tools.toCSV(folderIDs)).append(')');
             }        
         }
-        stringBuilder.append(" AND 1=(FLOOR(DATEDIFF(?,").append(Mappers.CONTACT.get(dateField).getColumnLabel()).append(")/365.25))")
-            .append("-(FLOOR(DATEDIFF(?,").append(Mappers.CONTACT.get(dateField).getColumnLabel()).append(")/365.25))");
+        Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
+        calendar.setTime(from);
+        int fromYear = calendar.get(Calendar.YEAR);
+        calendar.setTime(until);
+        int untilYear = calendar.get(Calendar.YEAR);
+        String columnLabel = Mappers.CONTACT.get(dateField).getColumnLabel();
+        stringBuilder.append(" AND DATE_FORMAT(").append(columnLabel).append(",'%m-%d %T')>=DATE_FORMAT(?,'%m-%d %T') ")
+            .append(untilYear == fromYear ? "AND" : "OR")
+            .append(" DATE_FORMAT(").append(columnLabel).append(",'%m-%d %T')<DATE_FORMAT(?,'%m-%d %T')");
         if (null != sortOptions && false == SortOptions.EMPTY.equals(sortOptions)) {
             stringBuilder.append(' ').append(Tools.getOrderClause(sortOptions));
             if (0 < sortOptions.getLimit()) {
@@ -314,8 +323,8 @@ public class Executor {
         try {
             stmt = connection.prepareStatement(stringBuilder.toString());
             stmt.setInt(parameterIndex++, contextID);
-            stmt.setTimestamp(parameterIndex++, new Timestamp(until.getTime()));
             stmt.setTimestamp(parameterIndex++, new Timestamp(from.getTime()));
+            stmt.setTimestamp(parameterIndex++, new Timestamp(until.getTime()));
             /*
              * execute and read out results
              */
