@@ -171,7 +171,7 @@ public final class AJPv13Activator extends HousekeepingActivator {
                 initialization.start();
             }
             if (LOG.isInfoEnabled()) {
-                LOG.info(new StringBuilder(32).append("NIO AJP server successfully started.").toString());
+                LOG.info(new StringBuilder(32).append("AJP server successfully started.").toString());
             }
             /*
              * Start trackers
