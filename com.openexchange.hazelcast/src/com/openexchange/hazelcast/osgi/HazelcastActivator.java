@@ -329,7 +329,6 @@ public class HazelcastActivator extends HousekeepingActivator {
             if (null == hazelcastInstance) {
                 return InitMode.NONE;
             }
-            final long st = System.currentTimeMillis();
             final Config config = hazelcastInstance.getConfig();
             /*
              * Remove from existing network configuration
@@ -347,6 +346,7 @@ public class HazelcastActivator extends HousekeepingActivator {
             if (!cur.removeAll(members)) {
                 return InitMode.NONE;
             }
+            final long st = System.currentTimeMillis();            
             tcpIpConfig.clear();
             tcpIpConfig.setMembers(new ArrayList<String>(cur));
             hazelcastInstance.getLifecycleService().restart();
