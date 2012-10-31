@@ -49,11 +49,19 @@
 
 package com.openexchange.realtime.atmosphere.impl.stanza.builder;
 
+import java.util.Iterator;
+import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.exception.OXException;
+import com.openexchange.realtime.atmosphere.AtmosphereExceptionCode;
 import com.openexchange.realtime.packet.ID;
 import com.openexchange.realtime.packet.Presence;
 import com.openexchange.realtime.packet.Presence.Type;
+import com.openexchange.realtime.payload.PayloadElement;
+import static com.openexchange.realtime.payload.PayloadElement.PayloadFormat.*;
+import com.openexchange.realtime.payload.PayloadTree;
+import com.openexchange.realtime.payload.PayloadTreeNode;
 
 /**
  * {@link PresenceBuilder} - Parse an atmosphere client's presence message and build a Presence Stanza from it by adding the recipients ID.
@@ -63,8 +71,7 @@ import com.openexchange.realtime.packet.Presence.Type;
 public class PresenceBuilder extends StanzaBuilder<Presence> {
 
     /**
-     * Create a new PresenceBuilder
-     * Initializes a new {@link PresenceBuilder}.
+     * Create a new PresenceBuilder Initializes a new {@link PresenceBuilder}.
      * 
      * @param from the sender's ID, must not be null
      * @param json the sender's message, must not be null
@@ -82,7 +89,7 @@ public class PresenceBuilder extends StanzaBuilder<Presence> {
     @Override
     public Presence build() throws OXException {
         basics();
-        
+
         type();
         return stanza;
     }
@@ -101,4 +108,143 @@ public class PresenceBuilder extends StanzaBuilder<Presence> {
         }
     }
 
+    @Override
+    protected void payloads() throws OXException {
+        if (json.has("payloads")) {
+            JSONArray payloads = json.optJSONArray("payloads");
+            for (int i = 0; i < payloads.length(); i++) {
+                JSONObject payload = payloads.optJSONObject(i);
+                PayloadTree payloadTree = payloadToPayloadTree(payload);
+                stanza.addPayload(payloadTree);
+                stanza.addPayload(new PayloadTree(payloadToPayloadTreeNode(payload)));
+            }
+        }
+    }
+
+    /**
+     * Transform a JSONObject representing a Stanza payload into a PayloadTree.
+     * @param payload JSONObject representing a Stanza payload
+     * @return Stanza payload transformed into a PayloadTree
+     */
+    /**
+     * Generate a hierarchy of PayloadTreeNodes from a nested JSON payload. Each incoming JSONObject has the form of:
+     * 
+     * <pre>
+     * {
+     *  "namespace" : "this is the namespace of the payload element"
+     *  "element" : "this is the name of the payload element"
+     *  "data" : 
+     * }
+     * </pre>
+     * 
+     * where the namespace has to be provided only if the element isn't part of the default namespace or if the hierarchie doesn't carry a
+     * namespace already.
+     * <ul>
+     * <li>JSONObjects are transformed into a PayloadTreeNode (PTNi) containing a PayloadElement (PEi)</li>
+     * <li>If the data portion of the JSONObject contains nested container objects those are attached as seperate PayloadTreeNodes (PTNj,
+     * PTNk, ...) below PTNi containing their own PayloadElements PEj, PEk and so on.</li>
+     * <li>If a JSONObject contains a nested array container it is attached as seperate PayloadTreeNode (PTNi) but the contained
+     * PayloadElement (PEi) doesn't contain any data. Instead the Elements of the array are attached as children to the PayloadTreeNode</li>
+     * </ul>
+     * 
+     * @param payload The payload to transform.
+     * @return A hierarchy of PayloadTreeNodes
+     */
+    private PayloadTree payloadToPayloadTree(JSONObject payload) {
+        PayloadTree payloadTree = new PayloadTree();
+        PayloadTreeNode root = new PayloadTreeNode();
+        
+        String namespace = payload.optString("namespace");
+        String elementName;
+        Object data;
+        
+        try {
+            elementName = payload.getString("element");
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        try {
+            data = payload.get("data");
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        
+        PayloadElement payloadElement = new PayloadElement(null, JSON, namespace, elementName);
+        root.setPayloadElement(payloadElement);
+        
+        payloadTree.setRoot(payloadToPayloadTreeNode(root, data));
+        return payloadTree;
+    }
+    
+    /**
+     * Generate a hierarchy of PayloadTreeNodes from a nested JSON payload. Each incoming JSONObject has the form of:
+     * 
+     * <pre>
+     * {
+     *  "namespace" : "this is the namespace of the payload element"
+     *  "element" : "this is the name of the payload element"
+     *  "data" : 
+     * }
+     * </pre>
+     * 
+     * where the namespace has to be provided only if the element isn't part of the default namespace or if the hierarchie doesn't carry a
+     * namespace already.
+     * <ul>
+     * <li>JSONObjects are transformed into a PayloadTreeNode (PTNi) containing a PayloadElement (PEi)</li>
+     * <li>If the data portion of the JSONObject contains nested container objects those are attached as seperate PayloadTreeNodes (PTNj,
+     * PTNk, ...) below PTNi containing their own PayloadElements PEj, PEk and so on.</li>
+     * <li>If a JSONObject contains a nested array container it is attached as seperate PayloadTreeNode (PTNi) but the contained
+     * PayloadElement (PEi) doesn't contain any data. Instead the Elements of the array are attached as children to the PayloadTreeNode</li>
+     * </ul>
+     * 
+     * @param payload The payload to transform.
+     * @return A hierarchy of PayloadTreeNodes
+     */
+    private PayloadTreeNode payloadToPayloadTreeNode(PayloadTreeNode node, Object data) {
+        try {
+            if (data instanceof JSONArray) {
+                JSONArray array = (JSONArray) data;
+                // TreeNode mit name = key und data = null erzeugen
+                PayloadElement arrayPayloadElement = new PayloadElement(null, JSON, null, key);
+                int arrayLength = array.length();
+                for (int i = 0; i < arrayLength; i++) {
+                    ;
+                }
+            } else if (data instanceof JSONObject) {
+                //alle key durchlaufen 
+            } else {
+                // payloadData only consists of a value, set it in the PayloadElement
+                node.setData(data, JSON);
+            }
+
+            
+            
+            
+            
+            
+        } catch (JSONException e) {
+            OXException exception = AtmosphereExceptionCode.MISSING_KEY.create("element");
+            LOG.error(exception);
+            throw exception;
+        }
+    }
+    
+    private PayloadTreeNode PayloadTreeNodeFromValue() {
+        throw new UnsupportedOperationException("Not implemented yet!");
+    }
+    
+    private PayloadTreeNode PayloadTreeNodeFromArray() {
+        throw new UnsupportedOperationException("Not implemented yet!");
+    }
+    
+    private PayloadTreeNode PayloadTreeNodeFromObject() {
+        throw new UnsupportedOperationException("Not implemented yet!");
+        // Iterate over keys of the data 
+        Iterator<String> keys = payload.keys();
+        while (keys.hasNext()) {
+            String key = keys.next();
+            Object value = payload.get(key);
+        }
+    }
+    
 }

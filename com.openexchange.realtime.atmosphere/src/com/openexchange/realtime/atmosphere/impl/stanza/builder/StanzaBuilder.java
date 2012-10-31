@@ -62,10 +62,12 @@ import com.openexchange.realtime.payload.PayloadTree;
 import com.openexchange.realtime.payload.PayloadTreeNode;
 
 /**
- * {@link StanzaBuilder} - Abstract StanzaBuilder class responsible for 
+ * {@link StanzaBuilder} - Abstract StanzaBuilder class. StanzaBuilders take incoming AtmosphereRequest and are responsible for building the
+ * appropriate Stanza Objects from them. Tis includes filling the Stanza with basic attributes from the JSONObject transported in the
+ * AtmosphereRequest and transforming payload arrays found in the JSON Object into PayloadTrees without actually transforming any Payload
+ * data.
  * 
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
- * @param <T>
  */
 public abstract class StanzaBuilder<T extends Stanza> {
 
@@ -86,7 +88,7 @@ public abstract class StanzaBuilder<T extends Stanza> {
         from();
         to();
         id();
-//        payloads();
+        payloads();
     }
 
     private void from() {
@@ -105,32 +107,10 @@ public abstract class StanzaBuilder<T extends Stanza> {
         }
     }
 
-    private void payloads() throws OXException {
-        throw new UnsupportedOperationException("Not implemented yet!");
-//        if (json.has("payloads")) {
-//            JSONArray payloads = json.optJSONArray("payloads");
-//            for (int i = 0; i < payloads.length(); i++) {
-//                JSONObject payload = payloads.optJSONObject(i);
-//                String elementName;
-//                try {
-//                    elementName = payload.getString("element");
-//                } catch (JSONException e) {
-//                    OXException exception = AtmosphereExceptionCode.MISSING_KEY.create("element");
-//                    LOG.error(exception);
-//                    throw exception;
-//                }
-//                PayloadTree tree = new PayloadTree();
-//                String namespace = null;
-//                if (payload.has("namespace")) {
-//                    namespace = payload.optString("namespace");
-//                }
-//                PayloadElement element = new PayloadElement(payload, "json", namespace, elementName);
-//                PayloadTreeNode node = new PayloadTreeNode(element);
-//                tree.setRoot(node);
-//                stanza.addPayload(tree);
-//            }
-//        }
-    }
+    /**
+     * Process the payloads found in the JSONObject representing the Stanza.
+     */
+    protected abstract void payloads() throws OXException;
 
     /**
      * Build a validated Stanza of type T

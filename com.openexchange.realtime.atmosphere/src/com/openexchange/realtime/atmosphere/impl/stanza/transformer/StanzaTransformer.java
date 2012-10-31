@@ -49,6 +49,7 @@
 
 package com.openexchange.realtime.atmosphere.impl.stanza.transformer;
 
+import java.util.ArrayList;
 import java.util.List;
 import com.openexchange.exception.OXException;
 import com.openexchange.realtime.StanzaFilter;
@@ -83,7 +84,7 @@ public class StanzaTransformer implements StanzaFilter {
      */
     @Override
     public void incoming(Stanza stanza, ServerSession session) throws OXException {
-        List<PayloadTree> payloadTrees = stanza.getPayloads();
+        List<PayloadTree> payloadTrees = new ArrayList<PayloadTree>(stanza.getPayloads());
         for (PayloadTree tree : payloadTrees) {
             // TODO: Use ThreadService to transform trees in parallel
             PayloadTreeNode root = tree.getRoot();

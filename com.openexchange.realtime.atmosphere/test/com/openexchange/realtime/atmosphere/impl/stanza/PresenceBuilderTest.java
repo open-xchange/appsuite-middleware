@@ -63,11 +63,11 @@ import com.openexchange.realtime.packet.Stanza;
 
 
 /**
- * {@link PresenceParserTest}
+ * {@link PresenceBuilderTest}
  *
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
-public class PresenceParserTest {
+public class PresenceBuilderTest {
 
     private JSONObject presenceRequest;
 
@@ -98,10 +98,11 @@ public class PresenceParserTest {
      * @throws OXException 
      */
     @Test
-    public void testParseStanza() throws OXException {
+    public void testBuildPresence() throws OXException {
         StanzaBuilder<? extends Stanza> builder = StanzaBuilderSelector.getBuilder(new ID("ox://thorben.betten@premium"), presenceRequest);
         System.out.println(builder);
         Stanza stanza = builder.build();
+        
         System.out.println(stanza);
     }
 
