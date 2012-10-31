@@ -54,10 +54,12 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.TimeZone;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
@@ -70,14 +72,9 @@ import com.openexchange.caldav.mixins.ScheduleOutboxURL;
 import com.openexchange.data.conversion.ical.ConversionError;
 import com.openexchange.data.conversion.ical.ConversionWarning;
 import com.openexchange.data.conversion.ical.FreeBusyInformation;
-import com.openexchange.data.conversion.ical.FreeBusySlot;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.container.Appointment;
-import com.openexchange.groupware.container.Participant;
-import com.openexchange.groupware.container.UserParticipant;
-import com.openexchange.groupware.ldap.User;
+import com.openexchange.freebusy.FreeBusyData;
 import com.openexchange.log.LogFactory;
-import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.webdav.protocol.Protocol;
 import com.openexchange.webdav.protocol.Protocol.Property;
 import com.openexchange.webdav.protocol.WebdavPath;
@@ -105,7 +102,7 @@ public class ScheduleOutboxCollection extends CommonCollection {
      * 
      * @param factory the factory
      */
-    public ScheduleOutboxCollection(final GroupwareCaldavFactory factory) {
+    public ScheduleOutboxCollection(GroupwareCaldavFactory factory) {
         super(factory, new WebdavPath(ScheduleOutboxURL.SCHEDULE_OUTBOX));
         this.factory = factory;
     }
@@ -116,7 +113,7 @@ public class ScheduleOutboxCollection extends CommonCollection {
     }
 
     @Override
-    public void putBody(final InputStream body, final boolean guessSize) throws WebdavProtocolException {
+    public void putBody(InputStream body, boolean guessSize) throws WebdavProtocolException {
         this.freeBusyRequest = this.parseFreeBusyRequest(body); 
     }   
     
@@ -127,12 +124,12 @@ public class ScheduleOutboxCollection extends CommonCollection {
 
     @Override
     public InputStream getBody() throws WebdavProtocolException {
-        final ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-        final Document document = new Document(this.getScheduleResponse());
-        final XMLOutputter outputter = new XMLOutputter();
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        Document document = new Document(this.getScheduleResponse());
+        XMLOutputter outputter = new XMLOutputter();
         try {
             outputter.output(document, outputStream);
-        } catch (final IOException e) {
+        } catch (IOException e) {
             throw WebdavProtocolException.Code.GENERAL_ERROR.create(getUrl(), HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
         }
         return new ByteArrayInputStream(outputStream.toByteArray());
@@ -148,47 +145,59 @@ public class ScheduleOutboxCollection extends CommonCollection {
     }
     
     public Element getScheduleResponse() {
-        final Element scheduleResponse = new Element("schedule-response", CALDAV_NS);
+        Element scheduleResponse = new Element("schedule-response", CALDAV_NS);
         if (null != this.freeBusyRequest) {
-            for (final FreeBusyInformation freeBusyInformation : freeBusyRequest) {
-                for (final Participant participant : freeBusyInformation.getParticipants()) {
-                    scheduleResponse.addContent(getResponse(participant, freeBusyInformation));
+            for (FreeBusyInformation freeBusyInformation : freeBusyRequest) {
+                Map<String, FreeBusyData> freeBusy = null;
+                try {
+                    freeBusy = factory.getFreeBusyService().getMergedFreeBusy(factory.getSession(), 
+                        Arrays.asList(freeBusyInformation.getAttendees()), 
+                        freeBusyInformation.getStartDate(), freeBusyInformation.getEndDate());
+                } catch (OXException e) {
+                    LOG.error("error getting free/busy information", e);
+                }
+                if (null != freeBusy) {
+                    for (String attendee : freeBusyInformation.getAttendees()) {
+                        scheduleResponse.addContent(getResponse(attendee, freeBusyInformation.getUid(), freeBusy.get(attendee)));
+                    }
                 }
             }
         }
         return scheduleResponse;
     }
     
-    private Element getResponse(final Participant participant, final FreeBusyInformation freeBusyRequest) {
-        final Element response = new Element("response", CALDAV_NS);
+    private Element getResponse(String attendee, String uid, FreeBusyData freeBusyData) {
+        Element response = new Element("response", CALDAV_NS);
         /*
          * prepare recipient
          */     
-        final Element recipient = new Element("recipient", CALDAV_NS);
+        Element recipient = new Element("recipient", CALDAV_NS);
         response.addContent(recipient);
-        final Element href = new Element("href", Protocol.DAV_NS);
+        Element href = new Element("href", Protocol.DAV_NS);
+        href.addContent("mailto:" + attendee);                        
         recipient.addContent(href);
         /*
          * prepare request status
          */     
-        final Element requestStatus = new Element("request-status", CALDAV_NS);
+        Element requestStatus = new Element("request-status", CALDAV_NS);
         response.addContent(requestStatus);
         /*
          * try to resolve user
          */
-        final User user = this.resolveUser(participant);
-        if (null != user) {
+        if (null != freeBusyData) {
             /*
              * add freebusy info for this user
              */         
-            href.addContent("mailto:" + user.getMail());                        
             final Element calendarData = new Element("calendar-data", CALDAV_NS);
-            response.addContent(calendarData);                      
+            response.addContent(calendarData);
             try {
-                calendarData.addContent(this.getVFreeBusy(user.getId(), user.getMail(), freeBusyRequest.getUid(), 
-                        freeBusyRequest.getStartDate(), freeBusyRequest.getEndDate()));
-                requestStatus.addContent("2.0;Success");
-            } catch (final OXException e) {
+                if (false == freeBusyData.hasData() && freeBusyData.hasWarnings()) {
+                    requestStatus.addContent("3.7;Invalid calendar user");
+                } else {
+                    calendarData.addContent(this.getVFreeBusy(uid, freeBusyData));
+                    requestStatus.addContent("2.0;Success");
+                }
+            } catch (OXException e) {
                 LOG.warn("error getting freebusy", e);
                 requestStatus.addContent("5.1;Service unavailable");
             }
@@ -196,57 +205,28 @@ public class ScheduleOutboxCollection extends CommonCollection {
             /*
              * no info for this user
              */
-            href.addContent("mailto:" + participant.getEmailAddress());
             requestStatus.addContent("3.7;Invalid calendar user");
         }
         /*
          * add response description
          */
-        final Element responseDescription = new Element("responsedescription", Protocol.DAV_NS);
+        Element responseDescription = new Element("responsedescription", Protocol.DAV_NS);
         responseDescription.addContent("OK");
         response.addContent(responseDescription);
         return response;
     }
-    
-    private User resolveUser(final Participant participant) {
-        if (null != participant && Participant.USER == participant.getType()) {
-            try {
-                return factory.resolveUser(participant.getIdentifier());
-            } catch (final OXException e) {
-                LOG.error("error resolving participant", e);
-            }
-        }
-        return null;
-    }
-    
-    private List<FreeBusySlot> getFreeBusySlots(final int userID, final Date from, final Date until) throws OXException {
-        final List<FreeBusySlot> freeBusySlots = new ArrayList<FreeBusySlot>();
-        SearchIterator<Appointment> searchIterator = null;
-        try {
-            searchIterator = factory.getAppointmentInterface().getFreeBusyInformation(userID, Participant.USER, from, until);
-            while (searchIterator.hasNext()) {
-                freeBusySlots.add(FreeBusySlot.create(searchIterator.next()));
-            }
-        } finally {
-            if (null != searchIterator) {
-                searchIterator.close();
-            }
-        }
-        return freeBusySlots;
-    }
-    
-    private String getVFreeBusy(final int userID, final String mail, final String uid, final Date from, final Date until) throws OXException {
+
+    private String getVFreeBusy(String uid, FreeBusyData freeBusyData) throws OXException {
         /*
          * generate free busy information
          */
-        final FreeBusyInformation fbInfo = new FreeBusyInformation();
-        final UserParticipant attendee = new UserParticipant(userID);
-        attendee.setEmailAddress(mail);
-        fbInfo.setAttendee(attendee);
-        fbInfo.setFreeBusySlots(getFreeBusySlots(userID, from, until));
+        FreeBusyInformation fbInfo = new FreeBusyInformation();
+        fbInfo.setAttendee(freeBusyData.getParticipant());
         fbInfo.setUid(uid);
-        fbInfo.setStartDate(from);
-        fbInfo.setEndDate(until);
+        fbInfo.setFreeBusyIntervals(freeBusyData.getIntervals());
+        fbInfo.setUid(uid);
+        fbInfo.setStartDate(freeBusyData.getFrom());
+        fbInfo.setEndDate(freeBusyData.getUntil());
         /*
          * serialize as free/busy reply
          */

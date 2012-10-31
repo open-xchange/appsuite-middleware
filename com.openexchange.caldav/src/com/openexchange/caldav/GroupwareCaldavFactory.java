@@ -69,12 +69,12 @@ import com.openexchange.data.conversion.ical.ICalParser;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.FolderService;
 import com.openexchange.folderstorage.FolderStorage;
+import com.openexchange.freebusy.service.FreeBusyService;
 import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
 import com.openexchange.groupware.calendar.CalendarCollectionService;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.tasks.TasksSQLImpl;
-import com.openexchange.log.LogFactory;
 import com.openexchange.session.Session;
 import com.openexchange.tools.session.SessionHolder;
 import com.openexchange.user.UserService;
@@ -108,9 +108,11 @@ public class GroupwareCaldavFactory extends AbstractWebdavFactory implements Bul
     private final UserService users;
     private final CalendarCollectionService calendarUtils;
     private final ConfigViewFactory configs;
+    private final FreeBusyService freeBusyService;
     
     public GroupwareCaldavFactory(SessionHolder sessionHolder, AppointmentSqlFactoryService appointments, FolderService folders, 
-        ICalEmitter icalEmitter, ICalParser icalParser, UserService users, CalendarCollectionService calendarUtils, ConfigViewFactory configs) {
+        ICalEmitter icalEmitter, ICalParser icalParser, UserService users, CalendarCollectionService calendarUtils, ConfigViewFactory configs,
+        FreeBusyService freeBusyService) {
         this.sessionHolder = sessionHolder;
         this.appointments = appointments;
         this.folders = folders;
@@ -119,6 +121,7 @@ public class GroupwareCaldavFactory extends AbstractWebdavFactory implements Bul
         this.users = users;
         this.calendarUtils = calendarUtils;
         this.configs = configs;
+        this.freeBusyService = freeBusyService;
     }
 
     @Override
@@ -150,6 +153,10 @@ public class GroupwareCaldavFactory extends AbstractWebdavFactory implements Bul
 
     public AppointmentSQLInterface getAppointmentInterface() {
         return appointments.createAppointmentSql(sessionHolder.getSessionObject());
+    }
+
+    public FreeBusyService getFreeBusyService() {
+        return freeBusyService;
     }
 
     public TasksSQLInterface getTaskInterface() {

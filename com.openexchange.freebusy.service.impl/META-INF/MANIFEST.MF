@@ -1,6 +1,6 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
-Bundle-Name: Free/Busy definitions
+Bundle-Name: Free/Busy service implementation
 Bundle-SymbolicName: com.openexchange.freebusy.service.impl
 Bundle-Version: 6.23.0
 Bundle-Vendor: Open-Xchange Inc.

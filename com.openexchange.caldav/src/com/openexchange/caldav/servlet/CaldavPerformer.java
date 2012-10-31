@@ -51,12 +51,9 @@ package com.openexchange.caldav.servlet;
 
 import java.util.EnumMap;
 import java.util.Map;
-
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
 import org.apache.commons.logging.Log;
-
 import com.openexchange.caldav.CaldavProtocol;
 import com.openexchange.caldav.GroupwareCaldavFactory;
 import com.openexchange.caldav.WebdavPostAction;
@@ -64,6 +61,7 @@ import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.data.conversion.ical.ICalEmitter;
 import com.openexchange.data.conversion.ical.ICalParser;
 import com.openexchange.folderstorage.FolderService;
+import com.openexchange.freebusy.service.FreeBusyService;
 import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
 import com.openexchange.groupware.calendar.CalendarCollectionService;
 import com.openexchange.groupware.contexts.Context;
@@ -168,7 +166,8 @@ public class CaldavPerformer implements SessionHolder {
             services.getService(ICalParser.class),
             services.getService(UserService.class),
             services.getService(CalendarCollectionService.class),
-            services.getService(ConfigViewFactory.class));
+            services.getService(ConfigViewFactory.class),
+            services.getService(FreeBusyService.class));
 
         unlock = prepare(new WebdavUnlockAction(), true, true, new WebdavIfAction(0, false, false));
         propPatch = prepare(new WebdavProppatchAction(protocol), true, true, new WebdavExistsAction(), new WebdavIfAction(0, true, false));

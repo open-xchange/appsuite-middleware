@@ -49,77 +49,70 @@
 
 package com.openexchange.data.conversion.ical.ical4j.internal.freebusy;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.TimeZone;
-import net.fortuna.ical4j.model.DateTime;
-import net.fortuna.ical4j.model.Period;
+import javax.mail.internet.IDNA;
+import net.fortuna.ical4j.model.Property;
+import net.fortuna.ical4j.model.PropertyList;
 import net.fortuna.ical4j.model.component.VFreeBusy;
-import net.fortuna.ical4j.model.parameter.FbType;
-import net.fortuna.ical4j.model.property.FreeBusy;
+import net.fortuna.ical4j.model.property.Attendee;
 import com.openexchange.data.conversion.ical.ConversionError;
 import com.openexchange.data.conversion.ical.ConversionWarning;
 import com.openexchange.data.conversion.ical.FreeBusyInformation;
 import com.openexchange.data.conversion.ical.Mode;
 import com.openexchange.data.conversion.ical.ical4j.internal.AbstractVerifyingAttributeConverter;
-import com.openexchange.freebusy.FreeBusyInterval;
 import com.openexchange.groupware.contexts.Context;
 
 /**
- * {@link FreeBusyIntervals}
+ * {@link FreeBusyAttendees}
  * 
- * Emits free-busy intervals.
+ * Parses the attendees for a {@link FreeBusyInformation}s attendee. 
  * 
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public final class FreeBusySlots extends AbstractVerifyingAttributeConverter<VFreeBusy, FreeBusyInformation> {
+public class FreeBusyAttendees extends AbstractVerifyingAttributeConverter<VFreeBusy, FreeBusyInformation> {
 
-    public FreeBusySlots() {
+    /**
+     * Initializes a new {@link FreeBusyAttendees}.
+     */
+    public FreeBusyAttendees() {
         super();
     }
 
-	@Override
-	public boolean isSet(FreeBusyInformation u) {
-		return null != u.getFreeBusyIntervals() && 0 < u.getFreeBusyIntervals().size();
-	}
+    @Override
+    public boolean isSet(FreeBusyInformation freeBusyInformation) {
+        return null != freeBusyInformation.getAttendee();
+    }
 
-	@Override
-	public void emit(Mode mode, int index, FreeBusyInformation u, VFreeBusy t, List<ConversionWarning> warnings, Context ctx, Object... args) throws ConversionError {
-		for (FreeBusyInterval interval : u.getFreeBusyIntervals()) {
-			FreeBusy freeBusy = new FreeBusy();
-			freeBusy.getParameters().add(getFBType(interval));
-			freeBusy.getPeriods().add(new Period(new DateTime(interval.getStartTime()), new DateTime(interval.getEndTime())));
-			t.getProperties().add(freeBusy);
-		}
-	}
+    @Override
+    public void emit(Mode mode, int index, FreeBusyInformation freeBusyInformation, VFreeBusy vFreeBusy, List<ConversionWarning> warnings, 
+        Context ctx, Object... args) throws ConversionError {
+        throw new UnsupportedOperationException("not implemented");
+    }
 
-	/**
-	 * Gets the suitable free/busy-type from the supplied free/busy-interval. 
-	 * 
-	 * @param interval The interval to get the free/busy type from
-	 * @return The free/busy-type
-	 */
-	private static FbType getFBType(FreeBusyInterval interval) {
-	    switch (interval.getStatus()) {
-        case ABSENT:
-            return FbType.BUSY_UNAVAILABLE;
-        case FREE:
-            return FbType.FREE;
-        case TEMPORARY:
-            return FbType.BUSY_TENTATIVE;
-        default:
-            return FbType.BUSY;
-            
-	    }
-	}
+    @Override
+    public boolean hasProperty(VFreeBusy vFreeBusy) {
+        PropertyList properties = vFreeBusy.getProperties(Property.ATTENDEE);
+        return null != properties && 0 < properties.size();
+    }
 
-	@Override
-	public boolean hasProperty(VFreeBusy t) {
-        return false;
-	}
-
-	@Override
-	public void parse(int index, VFreeBusy t, FreeBusyInformation u, TimeZone timeZone, Context ctx, List<ConversionWarning> warnings) throws ConversionError {
-		throw new UnsupportedOperationException("not implemented");
-	}
-
+    @Override
+    public void parse(int index, VFreeBusy vFreeBusy, FreeBusyInformation freeBusyInformation, TimeZone timeZone, Context ctx, 
+        List<ConversionWarning> warnings) throws ConversionError {
+        List<String> attendees = new ArrayList<String>();
+        PropertyList properties = vFreeBusy.getProperties(Property.ATTENDEE);
+        if (null != properties && 0 < properties.size()) {
+            for (int i = 0; i < properties.size(); i++) {
+                Attendee attendee = (Attendee)properties.get(i);
+                if (null != attendee && null != attendee.getCalAddress() && 
+                    "mailto".equalsIgnoreCase(attendee.getCalAddress().getScheme())) {
+                    String mail = attendee.getCalAddress().getSchemeSpecificPart();
+                    attendees.add(IDNA.toIDN(mail));
+                }
+            }
+        }
+        freeBusyInformation.setAttendees(attendees.toArray(new String[attendees.size()]));
+    }
+    
 }
