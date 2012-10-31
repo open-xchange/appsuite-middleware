@@ -60,7 +60,7 @@ import com.openexchange.monitoring.MonitoringInfo;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class MailCounterServiceTracker extends ServiceTracker {
+public final class MailCounterServiceTracker extends ServiceTracker<MailCounter, MailCounter> {
 
     /**
      * Initializes a new {@link MailCounterServiceTracker}.
@@ -68,12 +68,12 @@ public final class MailCounterServiceTracker extends ServiceTracker {
      * @param context The bundle context
      */
     public MailCounterServiceTracker(final BundleContext context) {
-        super(context, MailCounter.class.getName(), null);
+        super(context, MailCounter.class, null);
     }
 
     @Override
-    public Object addingService(final ServiceReference reference) {
-        final MailCounter service = (MailCounter) context.getService(reference);
+    public MailCounter addingService(final ServiceReference<MailCounter> reference) {
+        final MailCounter service = context.getService(reference);
         if (MonitoringInfo.putIfAbsent(MonitoringInfo.IMAP, service)) {
             return service;
         }
@@ -82,7 +82,7 @@ public final class MailCounterServiceTracker extends ServiceTracker {
     }
 
     @Override
-    public void removedService(final ServiceReference reference, final Object service) {
+    public void removedService(final ServiceReference<MailCounter> reference, final MailCounter service) {
         if (null != service) {
             MonitoringInfo.remove(MonitoringInfo.IMAP);
             context.ungetService(reference);

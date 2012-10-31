@@ -60,7 +60,7 @@ import com.openexchange.monitoring.MonitoringInfo;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class MailIdleCounterServiceTracker extends ServiceTracker {
+public final class MailIdleCounterServiceTracker extends ServiceTracker<MailIdleCounter, MailIdleCounter> {
 
     /**
      * Initializes a new {@link MailIdleCounterServiceTracker}.
@@ -68,12 +68,12 @@ public final class MailIdleCounterServiceTracker extends ServiceTracker {
      * @param context The bundle context
      */
     public MailIdleCounterServiceTracker(final BundleContext context) {
-        super(context, MailIdleCounter.class.getName(), null);
+        super(context, MailIdleCounter.class, null);
     }
 
     @Override
-    public Object addingService(final ServiceReference reference) {
-        final MailIdleCounter service = (MailIdleCounter) context.getService(reference);
+    public MailIdleCounter addingService(final ServiceReference<MailIdleCounter> reference) {
+        final MailIdleCounter service = context.getService(reference);
         if (MonitoringInfo.putIfAbsent(MonitoringInfo.MAIL_IDLE, service)) {
             return service;
         }
@@ -82,7 +82,7 @@ public final class MailIdleCounterServiceTracker extends ServiceTracker {
     }
 
     @Override
-    public void removedService(final ServiceReference reference, final Object service) {
+    public void removedService(final ServiceReference<MailIdleCounter> reference, final MailIdleCounter service) {
         if (null != service) {
             MonitoringInfo.remove(MonitoringInfo.MAIL_IDLE);
             context.ungetService(reference);
