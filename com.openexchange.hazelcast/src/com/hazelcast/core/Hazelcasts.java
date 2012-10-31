@@ -52,7 +52,7 @@ package com.hazelcast.core;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
-import com.hazelcast.core.HazelcastInstance;
+import java.util.concurrent.atomic.AtomicBoolean;
 import com.openexchange.hazelcast.ClassLoaderAware;
 import com.openexchange.hazelcast.osgi.HazelcastActivator;
 
@@ -143,11 +143,31 @@ public final class Hazelcasts {
 
     } // End of ClassLoaderModifier
 
+    private static final AtomicBoolean PAUSED = new AtomicBoolean();
+
     /**
      * Initializes a new {@link Hazelcasts}.
      */
     private Hazelcasts() {
         super();
+    }
+
+    /**
+     * Sets the paused flag.
+     * 
+     * @param paused The paused flag
+     */
+    public static void setPaused(final boolean paused) {
+        PAUSED.set(paused);
+    }
+
+    /**
+     * Tests whether associated {@link HazelcastInstance} is currently paused.
+     * 
+     * @return <code>true</code> if paused; otherwise <code>false</code>
+     */
+    public static boolean isPaused() {
+        return PAUSED.get();
     }
 
     /**

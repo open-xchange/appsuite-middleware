@@ -28,6 +28,7 @@ import com.hazelcast.config.NetworkConfig;
 import com.hazelcast.config.TcpIpConfig;
 import com.hazelcast.core.Hazelcast;
 import com.hazelcast.core.HazelcastInstance;
+import com.hazelcast.core.Hazelcasts;
 import com.hazelcast.impl.GroupProperties;
 import com.openexchange.cluster.discovery.ClusterDiscoveryService;
 import com.openexchange.cluster.discovery.ClusterListener;
@@ -349,7 +350,7 @@ public class HazelcastActivator extends HousekeepingActivator {
             final long st = System.currentTimeMillis();            
             tcpIpConfig.clear();
             tcpIpConfig.setMembers(new ArrayList<String>(cur));
-            hazelcastInstance.getLifecycleService().restart();
+            restart(hazelcastInstance);
             if (logger.isInfoEnabled()) {
                 logger.info("\nHazelcast:\n\tRe-Started in " + (System.currentTimeMillis() - st) + "msec.\n");
             }
@@ -381,7 +382,7 @@ public class HazelcastActivator extends HousekeepingActivator {
                 if (null != configMode && InitMode.NONE.equals(configMode)) {
                     return InitMode.NONE;
                 }
-                prevHazelcastInstance.getLifecycleService().restart();
+                restart(prevHazelcastInstance);
                 if (logger.isInfoEnabled()) {
                     logger.info("\nHazelcast:\n\tRe-Started in " + (System.currentTimeMillis() - st) + "msec.\n");
                 }
@@ -484,6 +485,15 @@ public class HazelcastActivator extends HousekeepingActivator {
             }
         }
         return null;
+    }
+
+    private void restart(final HazelcastInstance hazelcastInstance) {
+        Hazelcasts.setPaused(true);
+        try {
+            hazelcastInstance.getLifecycleService().restart();
+        } finally {
+            Hazelcasts.setPaused(false);
+        }
     }
 
     private static final Pattern SPLIT = Pattern.compile("\\%");
