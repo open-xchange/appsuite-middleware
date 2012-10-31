@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <psf version="2.0">
 <provider id="org.eclipse.egit.core.GitProvider">
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.http.deferrer"/>
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.oauth"/>
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.oauth.facebook"/>
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.oauth.json"/>
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.oauth.linkedin"/>
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.oauth.msn"/>
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.oauth.twitter"/>
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.oauth.yahoo"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,hotfix-1169,com.openexchange.http.deferrer"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,hotfix-1169,com.openexchange.oauth"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,hotfix-1169,com.openexchange.oauth.facebook"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,hotfix-1169,com.openexchange.oauth.json"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,hotfix-1169,com.openexchange.oauth.linkedin"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,hotfix-1169,com.openexchange.oauth.msn"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,hotfix-1169,com.openexchange.oauth.twitter"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,hotfix-1169,com.openexchange.oauth.yahoo"/>
 </provider>
 </psf>
