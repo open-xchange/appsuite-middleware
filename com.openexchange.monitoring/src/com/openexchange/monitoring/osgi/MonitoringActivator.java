@@ -115,8 +115,8 @@ public final class MonitoringActivator extends HousekeepingActivator {
 
             MonitoringInit.getInstance().start();
 
-            track(MailCounterServiceTracker.class);
-            track(MailIdleCounterServiceTracker.class);
+            rememberTracker(new MailCounterServiceTracker(context));
+            rememberTracker(new MailIdleCounterServiceTracker(context));
             openTrackers();
 
             /*
