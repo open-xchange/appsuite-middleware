@@ -1,3 +1,9 @@
+open-xchange-grizzly (6.22.1-2) unstable; urgency=low
+
+  * Second release candidate for 6.22.1
+
+ -- Marc Arens <marc.arens@open-xchange.com>  Wed, 31 Oct 2012 16:15:58 +0100
+
 open-xchange-grizzly (6.22.1-1) unstable; urgency=low
 
   * First release candidate for 6.22.1
