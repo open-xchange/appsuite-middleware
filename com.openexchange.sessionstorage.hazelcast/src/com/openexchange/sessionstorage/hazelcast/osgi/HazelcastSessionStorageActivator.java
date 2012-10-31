@@ -50,6 +50,10 @@
 package com.openexchange.sessionstorage.hazelcast.osgi;
 
 import org.apache.commons.logging.Log;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
+import org.osgi.framework.ServiceRegistration;
+import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.hazelcast.config.MapConfig;
 import com.hazelcast.config.MaxSizeConfig;
 import com.hazelcast.core.HazelcastInstance;
@@ -74,7 +78,7 @@ public class HazelcastSessionStorageActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ConfigurationService.class, CryptoService.class, HazelcastInstance.class };
+        return new Class<?>[] { ConfigurationService.class, CryptoService.class };
     }
 
     @Override
@@ -113,14 +117,47 @@ public class HazelcastSessionStorageActivator extends HousekeepingActivator {
             mapConfig.setMaxSizeConfig(maxSizeConfig);
             mapConfig.setMergePolicy(mergePolicy);
             final HazelcastSessionStorageConfiguration config = new HazelcastSessionStorageConfiguration(encryptionKey, mapConfig);
-            registerService(SessionStorageService.class, new HazelcastSessionStorageService(config));
+            // Track HazelcastInstance
+            final BundleContext context = this.context;
+            track(HazelcastInstance.class, new ServiceTrackerCustomizer<HazelcastInstance, HazelcastInstance>() {
+
+                private volatile ServiceRegistration<SessionStorageService> sessionStorageRegistration;
+
+                @Override
+                public HazelcastInstance addingService(final ServiceReference<HazelcastInstance> reference) {
+                    final HazelcastInstance hazelcastInstance = context.getService(reference);
+                    sessionStorageRegistration = context.registerService(SessionStorageService.class, new HazelcastSessionStorageService(config, hazelcastInstance), null);
+                    return hazelcastInstance;
+                }
+
+                @Override
+                public void modifiedService(final ServiceReference<HazelcastInstance> reference, final HazelcastInstance service) {
+                    // Ignore
+                }
+
+                @Override
+                public void removedService(final ServiceReference<HazelcastInstance> reference, final HazelcastInstance service) {
+                    final ServiceRegistration<SessionStorageService> sessionStorageRegistration = this.sessionStorageRegistration;
+                    if (null != sessionStorageRegistration) {
+                        sessionStorageRegistration.unregister();
+                        this.sessionStorageRegistration = null;
+                    }
+                    context.ungetService(reference);
+                }
+            });
+            openTrackers();
         }
+    }
+
+    @Override
+    public <S> void registerService(Class<S> clazz, S service) {
+        super.registerService(clazz, service);
     }
 
     @Override
     public void stopBundle() throws Exception {
         LOG.info("Stopping bundle: com.openexchange.sessionstorage.hazelcast");
-        cleanUp();
+        super.stopBundle();
         Services.setServiceLookup(null);
     }
 

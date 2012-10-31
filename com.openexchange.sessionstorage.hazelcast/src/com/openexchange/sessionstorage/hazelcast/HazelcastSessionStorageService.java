@@ -51,45 +51,67 @@ package com.openexchange.sessionstorage.hazelcast;
 
 import java.util.ArrayList;
 import java.util.List;
+import com.hazelcast.config.Config;
 import com.hazelcast.config.MapConfig;
 import com.hazelcast.core.HazelcastException;
 import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.core.IMap;
 import com.openexchange.crypto.CryptoService;
 import com.openexchange.exception.OXException;
+import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.session.Session;
 import com.openexchange.sessionstorage.SessionStorageExceptionCodes;
 import com.openexchange.sessionstorage.SessionStorageService;
 import com.openexchange.sessionstorage.hazelcast.exceptions.OXHazelcastSessionStorageExceptionCodes;
 
 /**
- * {@link HazelcastSessionStorageService}
+ * {@link HazelcastSessionStorageService} - The {@link SessionStorageService} backed by {@link HazelcastInstance}.
  * 
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class HazelcastSessionStorageService implements SessionStorageService {
 
-    private final IMap<String, HazelcastStoredSession> sessions;
+    private final String mapName;
     private final String encryptionKey;
     private final CryptoService cryptoService;
-    private final MapConfig mapConfig;
 
     /**
      * Initializes a new {@link HazelcastSessionStorageService}.
      */
-    public HazelcastSessionStorageService(HazelcastSessionStorageConfiguration config) {
+    public HazelcastSessionStorageService(final HazelcastSessionStorageConfiguration config, final HazelcastInstance hazelcast) {
         super();
         encryptionKey = config.getEncryptionKey();
-        mapConfig = config.getMapConfig();
-        final HazelcastInstance hazelcast = Services.getService(HazelcastInstance.class);
-        hazelcast.getConfig().addMapConfig(mapConfig);
-        sessions = hazelcast.getMap("sessions");
         cryptoService = config.getCryptoService();
+        final MapConfig mapConfig = config.getMapConfig();
+        final String name = mapConfig.getName();
+        mapName = name;
+        final Config hzConfig = hazelcast.getConfig();
+        if (null == hzConfig.getMapConfig(name)) {
+            hzConfig.addMapConfig(mapConfig);
+        }
+    }
+
+    private IMap<String, HazelcastStoredSession> sessions() throws OXException {
+        final HazelcastInstance hazelcastInstance = Services.optService(HazelcastInstance.class);
+        if (null == hazelcastInstance) {
+            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(HazelcastInstance.class.getName());
+        }
+        return hazelcastInstance.getMap(mapName);
+    }
+
+    private IMap<String, HazelcastStoredSession> sessionsUnchecked() {
+        try {
+            return sessions();
+        } catch (final OXException e) {
+            throw new IllegalStateException(e.getMessage(), e);
+        }
     }
 
     @Override
     public Session lookupSession(String sessionId) throws OXException {
         try {
+            final IMap<String, HazelcastStoredSession> sessions = sessions();
             if (null != sessionId && sessions.containsKey(sessionId)) {
                 HazelcastStoredSession s = sessions.get(sessionId);
                 s.setLastAccess(System.currentTimeMillis());
@@ -109,7 +131,7 @@ public class HazelcastSessionStorageService implements SessionStorageService {
             try {
                 HazelcastStoredSession ss = new HazelcastStoredSession(session);
                 ss.setPassword(crypt(ss.getPassword()));
-                sessions.put(session.getSessionID(), ss);
+                sessions().put(session.getSessionID(), ss);
             } catch (HazelcastException e) {
                 throw OXHazelcastSessionStorageExceptionCodes.HAZELCAST_SESSIONSTORAGE_SAVE_FAILED.create(e, session.getSessionID());
             }
@@ -120,7 +142,7 @@ public class HazelcastSessionStorageService implements SessionStorageService {
     public void removeSession(String sessionId) throws OXException {
         if (null != sessionId) {
             try {
-                sessions.remove(sessionId);
+                sessions().remove(sessionId);
             } catch (HazelcastException e) {
                 throw OXHazelcastSessionStorageExceptionCodes.HAZELCAST_SESSIONSTORAGE_REMOVE_FAILED.create(e, sessionId);
             }
@@ -129,6 +151,7 @@ public class HazelcastSessionStorageService implements SessionStorageService {
 
     @Override
     public Session[] removeUserSessions(int userId, int contextId) throws OXException {
+        final IMap<String, HazelcastStoredSession> sessions = sessions();
         List<Session> removed = new ArrayList<Session>();
         for (String sessionId : sessions.keySet()) {
             Session s = sessions.get(sessionId);
@@ -147,6 +170,7 @@ public class HazelcastSessionStorageService implements SessionStorageService {
 
     @Override
     public void removeContextSessions(int contextId) throws OXException {
+        final IMap<String, HazelcastStoredSession> sessions = sessions();
         for (String sessionId : sessions.keySet()) {
             Session s = sessions.get(sessionId);
             if (s.getContextId() == contextId) {
@@ -157,6 +181,7 @@ public class HazelcastSessionStorageService implements SessionStorageService {
 
     @Override
     public boolean hasForContext(int contextId) {
+        final IMap<String, HazelcastStoredSession> sessions = sessionsUnchecked();
         for (String sessionId : sessions.keySet()) {
             Session s = sessions.get(sessionId);
             if (s.getContextId() == contextId) {
@@ -168,6 +193,7 @@ public class HazelcastSessionStorageService implements SessionStorageService {
 
     @Override
     public Session[] getUserSessions(int userId, int contextId) {
+        final IMap<String, HazelcastStoredSession> sessions = sessionsUnchecked();
         List<HazelcastStoredSession> found = new ArrayList<HazelcastStoredSession>();
         for (String sessionId : sessions.keySet()) {
             Session s = sessions.get(sessionId);
@@ -201,6 +227,7 @@ public class HazelcastSessionStorageService implements SessionStorageService {
 
     @Override
     public synchronized List<Session> getSessions() {
+        final IMap<String, HazelcastStoredSession> sessions = sessionsUnchecked();
         List<Session> retval = new ArrayList<Session>();
         for (String sessionId : sessions.keySet()) {
             retval.add(sessions.get(sessionId));
@@ -210,12 +237,12 @@ public class HazelcastSessionStorageService implements SessionStorageService {
 
     @Override
     public int getNumberOfActiveSessions() {
-        return sessions.size();
+        return sessionsUnchecked().size();
     }
 
     @Override
     public Session getSessionByRandomToken(String randomToken, String newIP) throws OXException {
-        for (String sessionId : sessions.keySet()) {
+        for (String sessionId : sessions().keySet()) {
             Session s = lookupSession(sessionId);
             if (s.getRandomToken().equals(randomToken)) {
                 if (!s.getLocalIp().equals(newIP)) {
@@ -229,6 +256,7 @@ public class HazelcastSessionStorageService implements SessionStorageService {
 
     @Override
     public Session getSessionByAlternativeId(String altId) throws OXException {
+        final IMap<String, HazelcastStoredSession> sessions = sessions();
         for (String sessionId : sessions.keySet()) {
             HazelcastStoredSession s = sessions.get(sessionId);
             if (s.getParameter(Session.PARAM_ALTERNATIVE_ID).equals(altId)) {
@@ -245,7 +273,7 @@ public class HazelcastSessionStorageService implements SessionStorageService {
 
     @Override
     public void cleanUp() {
-        sessions.clear();
+        sessionsUnchecked().clear();
     }
 
     @Override
@@ -254,7 +282,7 @@ public class HazelcastSessionStorageService implements SessionStorageService {
         HazelcastStoredSession ss = new HazelcastStoredSession(s);
         ss.setPassword(newPassword);
         ss.setLastAccess(System.currentTimeMillis());
-        sessions.replace(sessionId, new HazelcastStoredSession(s), ss);
+        sessions().replace(sessionId, new HazelcastStoredSession(s), ss);
     }
 
     @Override
