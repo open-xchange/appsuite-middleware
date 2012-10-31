@@ -1,3 +1,7 @@
+* 2012-10-31 - marcus.klein@open-xchange.com
+
+ - Fix for bug 21913: Properly handling null value of appointment titles. Freemarker does not like null values.
+
 * 2012-10-31 - thorben.betten@open-xchange.com
 
  - Fix for bug 23196: Properly opening associated service trackers on bundle start-up
