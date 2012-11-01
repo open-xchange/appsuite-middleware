@@ -1731,6 +1731,7 @@ public final class IMAPCommandsCollection {
     }
 
     private static final String COMMAND_SEARCH_UNSEEN = "SEARCH UNSEEN";
+    private static final String COMMAND_SEARCH_UNSEEN_NOT_DELETED = "SEARCH UNSEEN NOT DELETED";
 
     private static final String COMMAND_SEARCH = "SEARCH";
 
@@ -1746,6 +1747,21 @@ public final class IMAPCommandsCollection {
      * @throws MessagingException
      */
     public static Message[] getUnreadMessages(final IMAPFolder folder, final MailField[] fields, final MailSortField sortField, final OrderDirection orderDir, final boolean fastFetch, final int limit) throws MessagingException {
+        return getUnreadMessages(folder, fields, sortField, orderDir, fastFetch, limit, false);
+    }
+
+    /**
+     * Determines all unseen messages in specified folder.
+     *
+     * @param folder The IMAP folder
+     * @param fields The desired fields
+     * @param sortField The sort-by field
+     * @param fastFetch Whether to perform a fast <code>FETCH</code> or not
+     * @param limit The limit
+     * @return All unseen messages in specified folder
+     * @throws MessagingException
+     */
+    public static Message[] getUnreadMessages(final IMAPFolder folder, final MailField[] fields, final MailSortField sortField, final OrderDirection orderDir, final boolean fastFetch, final int limit, final boolean ignoreDeleted) throws MessagingException {
         final IMAPFolder imapFolder = folder;
         final Message[] val = (Message[]) imapFolder.doCommand(new IMAPFolder.ProtocolCommand() {
 
@@ -1754,7 +1770,7 @@ public final class IMAPCommandsCollection {
                 final Response[] r;
                 {
                     final long start = System.currentTimeMillis();
-                    r = p.command(COMMAND_SEARCH_UNSEEN, null);
+                    r = p.command(ignoreDeleted ? COMMAND_SEARCH_UNSEEN_NOT_DELETED : COMMAND_SEARCH_UNSEEN, null);
                     mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
                 }
                 /*
