@@ -600,10 +600,71 @@ public final class IMAPCommandsCollection {
      * @throws MessagingException If determining counts fails
      */
     public static int getUnread(final IMAPFolder imapFolder) throws MessagingException {
+        return getUnread(imapFolder, false);
+    }
+
+    /**
+     * Gets unread/unseen message count from given IMAP folder
+     *
+     * @param imapFolder The IMAP folder
+     * @return The unread message count
+     * @throws MessagingException If determining counts fails
+     */
+    public static int getUnread(final IMAPFolder imapFolder, final boolean ignoreDeleted) throws MessagingException {
         return ((Integer) imapFolder.doCommand(new IMAPFolder.ProtocolCommand() {
 
             @Override
             public Object doCommand(final IMAPProtocol protocol) throws ProtocolException {
+                /*
+                 * If ignoreDeleted is true, perform via "SEARCH UNSEEN NOT DELETED" command
+                 */
+                if (ignoreDeleted) {
+                    final Response[] r;
+                    {
+                        final long start = System.currentTimeMillis();
+                        r = protocol.command(COMMAND_SEARCH_UNSEEN_NOT_DELETED, null);
+                        mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
+                    }
+                    int unread = 0;
+                    final Response response = r[r.length - 1];
+                    if (response.isOK()) {
+                        for (int i = 0, len = r.length - 1; i < len; i++) {
+                            if (r[i] instanceof IMAPResponse) {
+                                final IMAPResponse ir = (IMAPResponse) r[i];
+                                /*
+                                 * The SEARCH response from the server contains a listing of message sequence numbers corresponding to those
+                                 * messages that match the searching criteria.
+                                 */
+                                if (ir.keyEquals(COMMAND_SEARCH)) {
+                                    while (ir.readAtomString() != null) {
+                                        unread++;
+                                    }
+                                }
+                            }
+                            r[i] = null;
+                        }
+                        protocol.notifyResponseHandlers(r);
+                    } else if (response.isBAD()) {
+                        if (ImapUtility.isInvalidMessageset(response)) {
+                            return new int[0];
+                        }
+                        throw new BadCommandException(IMAPException.getFormattedMessage(
+                            IMAPException.Code.PROTOCOL_ERROR,
+                            COMMAND_SEARCH_UNSEEN_NOT_DELETED,
+                            response.toString() + " ("+imapFolder.getStore().toString()+")"));
+                    } else if (response.isNO()) {
+                        throw new CommandFailedException(IMAPException.getFormattedMessage(
+                            IMAPException.Code.PROTOCOL_ERROR,
+                            COMMAND_SEARCH_UNSEEN_NOT_DELETED,
+                            response.toString() + " ("+imapFolder.getStore().toString()+")"));
+                    } else {
+                        protocol.handleResult(response);
+                    }
+                    return Integer.valueOf(unread);
+                }
+                /*
+                 * Perform via STATUS command
+                 */
                 if (!protocol.isREV1() && !protocol.hasCapability("IMAP4SUNVERSION")) {
                     /*
                      * STATUS is rev1 only, however the non-rev1 SIMS2.0 does support this.
