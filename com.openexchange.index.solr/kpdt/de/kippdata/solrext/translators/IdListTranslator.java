@@ -1,5 +1,7 @@
 package de.kippdata.solrext.translators;
 
+import java.util.Set;
+
 import org.apache.log4j.Logger;
 
 import de.kippdata.solrext.queries.Configuration;
@@ -7,9 +9,8 @@ import de.kippdata.solrext.queries.QueryTranslator;
 import de.kippdata.solrext.queries.TranslationException;
 
 public class IdListTranslator implements QueryTranslator {
-  private static final String ID = "id";
   private static final String INIT_ERROR = "Error getting id key";
-  private static final String TRANSLATION_ERROR = "Only strings are allowed";
+  private static final String TRANSLATION_ERROR = "Only sets of strings are allowed";
   private String idKey;
   private String handlerName;
 
@@ -37,12 +38,13 @@ public class IdListTranslator implements QueryTranslator {
   @Override
   public String translate(Object o) throws TranslationException {
     log.debug("[translate]: Starting");
-    if (o instanceof String) {
-
+    if (o instanceof Set<?>) {
       StringBuffer b = new StringBuffer();
-      String[] idList = ((String) o).split("\\s+");
-      for (String idVal : idList) {
-        b.append(idKey + ":" + idVal + " ");
+      Set<?> idList = (Set<?>) o;
+
+      for (Object idVal : idList) {
+        if (idVal instanceof String) b.append(idKey + ":" + idVal + " ");
+        else log.warn("[translate]: Wrong type in list");
       }
 
       return b.toString().trim();
