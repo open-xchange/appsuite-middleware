@@ -49,10 +49,13 @@
 
 package com.openexchange.file.storage.cifs;
 
+import java.io.IOException;
 import jcifs.smb.NtlmPasswordAuthentication;
 import jcifs.smb.SmbException;
 import jcifs.smb.SmbFile;
 import com.openexchange.file.storage.FileStorageAccount;
+import com.openexchange.file.storage.cifs.cache.SmbFileMap;
+import com.openexchange.file.storage.cifs.cache.SmbFileMapManagement;
 import com.openexchange.session.Session;
 
 /**
@@ -96,6 +99,28 @@ public abstract class AbstractCIFSAccess {
         this.account = account;
         this.session = session;
         this.auth = auth;
+    }
+
+    /**
+     * Gets the associated SMB file.
+     * 
+     * @param path The path
+     * @return The SMB file; either newly created or fetched from cache
+     * @throws IOException If an I/O error occurs in case of newly created SMB file
+     */
+    protected SmbFile getSmbFile(final String path) throws IOException {
+        // Check in map
+        final SmbFileMap smbFileMap = SmbFileMapManagement.getInstance().getFor(session);
+        SmbFile smbFile = smbFileMap.get(path);
+        if (null == smbFile) {
+            // The associated SMB file
+            final SmbFile newSmbFolder = new SmbFile(path, auth);
+            smbFile = smbFileMap.putIfAbsent(newSmbFolder);
+            if (null == smbFile) {
+                smbFile = newSmbFolder;
+            }
+        }
+        return smbFile;
     }
 
     /**

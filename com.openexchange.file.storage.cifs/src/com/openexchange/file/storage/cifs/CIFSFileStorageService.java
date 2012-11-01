@@ -104,6 +104,11 @@ public final class CIFSFileStorageService implements AccountAware {
         return newInst;
     }
 
+    /**
+     * The attribute expiration in millis.
+     */
+    public static final int DEFAULT_ATTR_EXPIRATION_PERIOD = 300000;
+
     private final DynamicFormDescription formDescription;
     private final Set<String> secretProperties;
     private volatile FileStorageAccountManager accountManager;
@@ -123,8 +128,8 @@ public final class CIFSFileStorageService implements AccountAware {
         // See jcifs.smb.SmbConstants or http://jcifs.samba.org/src/docs/api/overview-summary.html#scp
         Config.setProperty("jcifs.smb.client.soTimeout", "10000");
         Config.setProperty("jcifs.smb.client.connTimeout", "5000");
-        Config.setProperty("jcifs.smb.client.attrExpirationPeriod", "300000");
-        Config.setProperty("jcifs.netbios.cachePolicy", "300000");
+        Config.setProperty("jcifs.smb.client.attrExpirationPeriod", Integer.toString(DEFAULT_ATTR_EXPIRATION_PERIOD));
+        Config.setProperty("jcifs.netbios.cachePolicy", Integer.toString(DEFAULT_ATTR_EXPIRATION_PERIOD));
     }
 
     private FileStorageAccountManager getAccountManager0() throws OXException {

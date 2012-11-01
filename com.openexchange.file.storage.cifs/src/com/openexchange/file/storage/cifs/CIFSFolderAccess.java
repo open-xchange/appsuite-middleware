@@ -105,7 +105,7 @@ public final class CIFSFolderAccess extends AbstractCIFSAccess implements FileSt
              * Check
              */
             final String fid = checkFolderId(folderId, rootUrl);
-            final SmbFile smbFolder = new SmbFile(fid, auth);
+            final SmbFile smbFolder = getSmbFile(fid);
             if (!exists(smbFolder)) {
                 return false;
             }
@@ -136,7 +136,7 @@ public final class CIFSFolderAccess extends AbstractCIFSAccess implements FileSt
              * Check
              */
             final String fid = checkFolderId(folderId, rootUrl);
-            final SmbFile smbFolder = new SmbFile(fid, auth);
+            final SmbFile smbFolder = getSmbFile(fid);
             if (!exists(smbFolder)) {
                 throw CIFSExceptionCodes.NOT_FOUND.create(folderId);
             }
@@ -247,7 +247,7 @@ public final class CIFSFolderAccess extends AbstractCIFSAccess implements FileSt
                     try {
                         final String folderId = rootUrl;
                         final String fid = checkFolderId(folderId, rootUrl);
-                        final SmbFile smbFolder = new SmbFile(fid, auth);
+                        final SmbFile smbFolder = getSmbFile(fid);
                         if (!exists(smbFolder)) {
                             throw CIFSExceptionCodes.NOT_FOUND.create(folderId);
                         }
@@ -299,7 +299,7 @@ public final class CIFSFolderAccess extends AbstractCIFSAccess implements FileSt
                  */
                 final String folderId = rootUrl;
                 final String fid = checkFolderId(folderId, rootUrl);
-                final SmbFile smbFolder = new SmbFile(fid, auth);
+                final SmbFile smbFolder = getSmbFile(fid);
                 if (!exists(smbFolder)) {
                     throw CIFSExceptionCodes.NOT_FOUND.create(folderId);
                 }
@@ -320,7 +320,7 @@ public final class CIFSFolderAccess extends AbstractCIFSAccess implements FileSt
                  */
                 final String folderId = homeDirPath;
                 final String fid = checkFolderId(folderId, rootUrl);
-                homeDir = new SmbFile(fid, auth);
+                homeDir = getSmbFile(fid);
                 if (!exists(homeDir)) {
                     throw CIFSExceptionCodes.NOT_FOUND.create(folderId);
                 }
@@ -419,7 +419,7 @@ public final class CIFSFolderAccess extends AbstractCIFSAccess implements FileSt
              * Check
              */
             final String fid = checkFolderId(parentId, rootUrl);
-            final SmbFile smbFolder = new SmbFile(fid, auth);
+            final SmbFile smbFolder = getSmbFile(fid);
             if (!exists(smbFolder)) {
                 throw CIFSExceptionCodes.NOT_FOUND.create(parentId);
             }
@@ -491,7 +491,7 @@ public final class CIFSFolderAccess extends AbstractCIFSAccess implements FileSt
         try {
             final String parentId = toCreate.getParentId();
             final String pid = checkFolderId(parentId, rootUrl);
-            final SmbFile smbFolder = new SmbFile(pid, auth);
+            final SmbFile smbFolder = getSmbFile(pid);
             if (!exists(smbFolder)) {
                 throw CIFSExceptionCodes.NOT_FOUND.create(parentId);
             }
@@ -502,7 +502,7 @@ public final class CIFSFolderAccess extends AbstractCIFSAccess implements FileSt
              * Create folder
              */
             final String fid = pid + '/' + toCreate.getName() + '/';
-            final SmbFile newDir = new SmbFile(fid, auth);
+            final SmbFile newDir = getSmbFile(fid);
             newDir.mkdir();
             return fid;
         } catch (final OXException e) {
@@ -565,14 +565,14 @@ public final class CIFSFolderAccess extends AbstractCIFSAccess implements FileSt
             /*
              * Check validity
              */
-            final SmbFile copyMe = new SmbFile(fid, auth);
+            final SmbFile copyMe = getSmbFile(fid);
             if (!exists(copyMe)) {
                 throw CIFSExceptionCodes.NOT_FOUND.create(folderId);
             }
             if (!copyMe.isDirectory()) {
                 throw CIFSExceptionCodes.NOT_A_FOLDER.create(folderId);
             }
-            final SmbFile dest = new SmbFile(newUri, auth);
+            final SmbFile dest = getSmbFile(newUri);
             /*
              * Perform COPY
              */
@@ -622,14 +622,14 @@ public final class CIFSFolderAccess extends AbstractCIFSAccess implements FileSt
             /*
              * Check validity
              */
-            final SmbFile renameMe = new SmbFile(fid, auth);
+            final SmbFile renameMe = getSmbFile(fid);
             if (!exists(renameMe)) {
                 throw CIFSExceptionCodes.NOT_FOUND.create(folderId);
             }
             if (!renameMe.isDirectory()) {
                 throw CIFSExceptionCodes.NOT_A_FOLDER.create(folderId);
             }
-            final SmbFile dest = new SmbFile(newUri, auth);
+            final SmbFile dest = getSmbFile(newUri);
             /*
              * Perform COPY
              */
@@ -668,7 +668,7 @@ public final class CIFSFolderAccess extends AbstractCIFSAccess implements FileSt
             /*
              * Check validity
              */
-            final SmbFile deleteMe = new SmbFile(fid, auth);
+            final SmbFile deleteMe = getSmbFile(fid);
             if (!exists(deleteMe)) {
                 throw CIFSExceptionCodes.NOT_FOUND.create(folderId);
             }
@@ -715,7 +715,7 @@ public final class CIFSFolderAccess extends AbstractCIFSAccess implements FileSt
             /*
              * Check validity
              */
-            final SmbFile smbFolder = new SmbFile(fid, auth);
+            final SmbFile smbFolder = getSmbFile(fid);
             if (!exists(smbFolder)) {
                 throw CIFSExceptionCodes.NOT_FOUND.create(folderId);
             }
