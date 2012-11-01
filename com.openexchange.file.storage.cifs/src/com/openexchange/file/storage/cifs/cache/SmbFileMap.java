@@ -258,12 +258,12 @@ public final class SmbFileMap {
     private static final class Wrapper {
 
         private final SmbFile value;
-        private final long stamp;
+        private volatile long stamp;
 
         public Wrapper(final SmbFile value) {
             super();
             this.value = value;
-            this.stamp = System.currentTimeMillis();
+            stamp = System.currentTimeMillis();
         }
 
         public long getStamp() {
@@ -279,6 +279,7 @@ public final class SmbFileMap {
         }
 
         public SmbFile getValue() {
+            stamp = System.currentTimeMillis();
             return value;
         }
 
