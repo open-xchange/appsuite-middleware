@@ -8,6 +8,7 @@
  - Fix for bug 23562: Selected displayable error category
  - Fix for bug 23579: Check for proper account identifier support
  - Fix for bug 23578: Proper cache invalidation on write access to CIFS server
+ - Fix for bug 23577: Special handling for unspecified error codes received from CIFS/SMB server
 
 * 2012-10-31 - marcus.klein@open-xchange.com
 
