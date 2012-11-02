@@ -50,10 +50,9 @@
 package com.openexchange.groupware.tools.mappings.json;
 
 import java.util.TimeZone;
-
 import org.json.JSONException;
 import org.json.JSONObject;
-
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.tools.mappings.DefaultMapping;
 import com.openexchange.session.Session;
 
@@ -84,6 +83,11 @@ public abstract class DefaultJsonMapping<T, O> extends DefaultMapping<T, O> impl
 		return this.columnID;
 	}
 	
+    @Override
+    public void deserialize(JSONObject from, O to, TimeZone timeZone) throws JSONException, OXException {
+        this.deserialize(from, to);
+    }
+
 	@Override
 	public void serialize(O from, JSONObject to) throws JSONException {
 		this.serialize(from, to, null);

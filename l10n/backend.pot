@@ -6090,7 +6090,7 @@ msgstr ""
 #. The internationalized text put into text body of an email of which attachments exceed user's quota limitation
 #. Indicates the elapsed date for affected message's attachments
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:143
-msgid "The links will be deleted by #DATE#"
+msgid "The links will be deleted on #DATE#"
 msgstr ""
 
 #. The greeting used for form mails. E.g.

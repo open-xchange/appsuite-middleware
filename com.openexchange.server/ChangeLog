@@ -1,3 +1,7 @@
+* 2012-11-02 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 23549: Subtracting client timezone offset when parsing creation date 
+
 * 2012-11-02 - thorben.betten@open-xchange.com
 
  - Fix for bug 23564: Avoid possible NPE on service look-up
