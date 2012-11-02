@@ -214,11 +214,11 @@ public enum MimeMailExceptionCode implements OXExceptionCode {
     /**
      * Message could not be sent: %1$s
      */
-    SEND_FAILED_MSG(MimeMailExceptionMessage.SEND_FAILED_MSG, Category.CATEGORY_ERROR, 1028),
+    SEND_FAILED_MSG(MimeMailExceptionMessage.SEND_FAILED_MSG, Category.CATEGORY_USER_INPUT, 1028),
     /**
      * Message could not be sent: %1$s %2$s (arbitrary server information)
      */
-    SEND_FAILED_MSG_EXT(MimeMailExceptionMessage.SEND_FAILED_EXT_MSG, Category.CATEGORY_ERROR, 1028),
+    SEND_FAILED_MSG_EXT(MimeMailExceptionMessage.SEND_FAILED_EXT_MSG, Category.CATEGORY_USER_INPUT, 1028),
     /**
      * Message cannot be displayed.
      */
