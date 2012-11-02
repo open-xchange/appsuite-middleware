@@ -155,6 +155,14 @@ public class ClassLoaderAwareHazelcastInstance implements HazelcastInstance {
     }
 
     @Override
+    public <K, V> IMap<K, V> getMap(String name, boolean failIfPaused) {
+        if (null == config.getMapConfig(name)) {
+            LOG.warn("No MapConfig available for \"" + name + "\". Please provide appropriate MapConfig prior to acquiring IMap instance.");
+        }
+        return new ClassLoaderAwareIMap(hazelcastInstance.getMap(name, failIfPaused), kryorize);
+    }
+
+    @Override
     public <K, V> MultiMap<K, V> getMultiMap(final String name) {
         if (null == config.getMultiMapConfig(name)) {
             LOG.warn("No MultiMapConfig available for \"" + name + "\". Please provide appropriate MultiMapConfig prior to acquiring MultiMap instance.");

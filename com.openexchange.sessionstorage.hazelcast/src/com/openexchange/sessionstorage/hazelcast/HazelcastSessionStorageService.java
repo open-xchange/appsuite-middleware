@@ -57,7 +57,6 @@ import com.hazelcast.config.Config;
 import com.hazelcast.config.MapConfig;
 import com.hazelcast.core.HazelcastException;
 import com.hazelcast.core.HazelcastInstance;
-import com.hazelcast.core.Hazelcasts;
 import com.hazelcast.core.IFailOnPausePolicy;
 import com.hazelcast.core.IMap;
 import com.openexchange.crypto.CryptoService;
@@ -110,14 +109,19 @@ public class HazelcastSessionStorageService implements SessionStorageService {
         if (null == hazelcastInstance) {
             throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(HazelcastInstance.class.getName());
         }
-        if (Hazelcasts.isPaused(hazelcastInstance)) {
-            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(HazelcastInstance.class.getName());
+        //        if (Hazelcasts.isPaused(hazelcastInstance)) {
+        //            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(HazelcastInstance.class.getName());
+        //        }
+        try {
+            final IMap<String, HazelcastStoredSession> map = hazelcastInstance.getMap(mapName, true);
+            if (map instanceof IFailOnPausePolicy) {
+                ((IFailOnPausePolicy) map).setFailOnPausePolicy(true);
+            }
+            return map;
+        } catch (final IllegalStateException e) {
+            // Currently paused
+            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(e, HazelcastInstance.class.getName());
         }
-        final IMap<String, HazelcastStoredSession> map = hazelcastInstance.getMap(mapName);
-        if (map instanceof IFailOnPausePolicy) {
-            ((IFailOnPausePolicy) map).setFailOnPausePolicy(true);
-        }
-        return map;
     }
 
     /**
