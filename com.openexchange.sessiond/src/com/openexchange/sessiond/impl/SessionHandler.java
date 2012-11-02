@@ -59,6 +59,9 @@ import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.Callable;
+import java.util.concurrent.Future;
+import java.util.concurrent.FutureTask;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import org.apache.commons.logging.Log;
@@ -66,7 +69,6 @@ import org.osgi.service.event.Event;
 import org.osgi.service.event.EventAdmin;
 import com.openexchange.caching.objects.CachedSession;
 import com.openexchange.exception.OXException;
-import com.openexchange.log.LogFactory;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.SessionCounter;
 import com.openexchange.sessiond.SessionExceptionCodes;
@@ -88,6 +90,8 @@ import com.openexchange.timer.TimerService;
  */
 public final class SessionHandler {
 
+    private static final String SST_FUTURE = "__sst-future";
+
     public static final SessionCounter SESSION_COUNTER = new SessionCounter() {
 
         @Override
@@ -106,7 +110,8 @@ public final class SessionHandler {
 
     private static final AtomicBoolean initialized = new AtomicBoolean();
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(SessionHandler.class));
+    /** Logger */
+    protected static final Log LOG = com.openexchange.log.Log.loggerFor(SessionHandler.class);
 
     private static final boolean INFO = LOG.isInfoEnabled();
 
@@ -316,17 +321,46 @@ public final class SessionHandler {
         sessionDataRef.get().addSession(session, noLimit);
         final SessionStorageService sessionStorageService = getServiceRegistry().getService(SessionStorageService.class);
         if (sessionStorageService != null) {
-            try {
-                sessionStorageService.addSession(session);
-            } catch (final Exception e) {
-                // Put into session storage failed, perform with next getSession()
-            }
+            storeSession(session, sessionStorageService);
         }
         // Post event for created session
         postSessionCreation(session);
-        postSessionStored(session);
         // Return session ID
         return session;
+    }
+
+    /**
+     * Stores specified session.
+     * 
+     * @param session The session to store
+     * @param sessionStorageService The storage service
+     */
+    @SuppressWarnings("unchecked")
+    public static void storeSession(final SessionImpl session, final SessionStorageService sessionStorageService) {
+        if (null == session || null == sessionStorageService) {
+            return;
+        }
+        Future<Void> f = (Future<Void>) session.getParameter(SST_FUTURE);
+        if (null == f) {
+            final FutureTask<Void> ft = new FutureTask<Void>(new Callable<Void>() {
+
+                @Override
+                public Void call() throws Exception {
+                    try {
+                        sessionStorageService.addSession(session);
+                        postSessionStored(session);
+                    } catch (final Exception e) {
+                        LOG.warn("Couldn't put session into SessionStorageService.", e);
+                    }
+                    return null;
+                }
+            });
+            f = (Future<Void>) session.setParameterIfAbsent(SST_FUTURE, ft);
+            if (null == f) {
+                f = ft;
+                ThreadPools.getThreadPool().submit(ThreadPools.task(ft, true));
+            }
+        }
     }
 
     private static void checkMaxSessPerUser(final int userId, final int contextId) throws OXException {
@@ -516,25 +550,7 @@ public final class SessionHandler {
             }
         }
         if (null != sessionControl) {
-            final Runnable task = new Runnable() {
-
-                @Override
-                public void run() {
-                    try {
-                        final SessionStorageService storageService = getServiceRegistry().getService(SessionStorageService.class);
-                        if (storageService != null) {
-                            final SessionImpl session = sessionControl.getSession();
-                            if (storageService.lookupSession(session.getSessionID()) == null) {
-                                storageService.addSession(session);
-                            }
-
-                        }
-                    } catch (final Exception e) {
-                        // Ignore
-                    }
-                }
-            };
-            ThreadPools.getThreadPool().submit(ThreadPools.task(task, true));
+            storeSession(sessionControl.getSession(), getServiceRegistry().getService(SessionStorageService.class));
         }
         return sessionControl;
     }
@@ -705,7 +721,12 @@ public final class SessionHandler {
         return sessionDataRef.get().getShortTermSessionsPerContainer();
     }
 
-    private static void postSessionStored(final Session session) {
+    /**
+     * Post event that a single session has been put into {@link SessionStorageService session storage}.
+     * 
+     * @param session The stored session
+     */
+    protected static void postSessionStored(final Session session) {
         postSessionStored(session, null);
     }
 

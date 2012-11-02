@@ -49,13 +49,14 @@
 
 package com.openexchange.sessiond.osgi;
 
+import static com.openexchange.sessiond.impl.SessionHandler.storeSession;
 import static com.openexchange.sessiond.services.SessiondServiceRegistry.getServiceRegistry;
 import java.util.List;
 import org.apache.commons.logging.Log;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
-import org.osgi.service.event.EventAdmin;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
+import com.openexchange.exception.OXException;
 import com.openexchange.sessiond.impl.SessionControl;
 import com.openexchange.sessiond.impl.SessionHandler;
 import com.openexchange.sessiond.impl.SessionImpl;
@@ -75,26 +76,24 @@ public class SessionStorageServiceTracker implements ServiceTrackerCustomizer<Se
     /**
      * Initializes a new {@link SessionStorageServiceTracker}.
      */
-    public SessionStorageServiceTracker(BundleContext context) {
+    public SessionStorageServiceTracker(final BundleContext context) {
         super();
         this.context = context;
     }
 
     @Override
-    public SessionStorageService addingService(ServiceReference<SessionStorageService> reference) {
-        SessionStorageService service = context.getService(reference);
+    public SessionStorageService addingService(final ServiceReference<SessionStorageService> reference) {
+        final SessionStorageService service = context.getService(reference);
         getServiceRegistry().addService(SessionStorageService.class, service);
-        List<SessionControl> sessions = SessionHandler.getSessions();
+        final List<SessionControl> sessions = SessionHandler.getSessions();
         if (!sessions.isEmpty()) {
-            final EventAdmin eventAdmin = getServiceRegistry().getService(EventAdmin.class);
-            for (SessionControl session : sessions) {
+            for (final SessionControl sessionControl : sessions) {
+                final SessionImpl session = sessionControl.getSession();
                 try {
-                    final SessionImpl ses = session.getSession();
-                    service.addSession(ses);
-                    if (eventAdmin != null) {
-                        SessionHandler.postSessionStored(ses, eventAdmin);
+                    if (service.lookupSession(session.getSessionID()) == null) {
+                        storeSession(session, service);
                     }
-                } catch (final Exception e) {
+                } catch (final OXException e) {
                     LOG.warn("Couldn't put session into SessionStorageService.", e);
                 }
             }
@@ -103,12 +102,12 @@ public class SessionStorageServiceTracker implements ServiceTrackerCustomizer<Se
     }
 
     @Override
-    public void modifiedService(ServiceReference<SessionStorageService> reference, SessionStorageService service) {
+    public void modifiedService(final ServiceReference<SessionStorageService> reference, final SessionStorageService service) {
         // nothing to do
     }
 
     @Override
-    public void removedService(ServiceReference<SessionStorageService> reference, SessionStorageService service) {
+    public void removedService(final ServiceReference<SessionStorageService> reference, final SessionStorageService service) {
         getServiceRegistry().removeService(SessionStorageService.class);
         context.ungetService(reference);
     }
