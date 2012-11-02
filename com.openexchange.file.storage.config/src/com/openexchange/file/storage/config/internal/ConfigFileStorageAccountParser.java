@@ -57,6 +57,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.Set;
+import java.util.TreeSet;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import org.apache.commons.logging.Log;
@@ -64,7 +65,6 @@ import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.config.ConfigFileStorageAccount;
 import com.openexchange.file.storage.config.ConfigFileStorageAuthenticator;
-import com.openexchange.log.LogFactory;
 
 /**
  * {@link ConfigFileStorageAccountParser} - Provides configured accounts parsed from a <i>.properties</i> file.
@@ -162,6 +162,16 @@ public final class ConfigFileStorageAccountParser {
                 ids.add(id);
             }
         }
+        final Log logger = com.openexchange.log.Log.loggerFor(ConfigFileStorageAccountParser.class);
+        if (ids.isEmpty()) {
+            if (logger.isInfoEnabled()) {
+                logger.info("Found no pre-configured file storage accounts.");
+            }
+            return;
+        }
+        if (logger.isInfoEnabled()) {
+            logger.info("Found following pre-configured file storage accounts: " + new TreeSet<String>(ids));
+        }
         /*
          * Get the accounts for identifiers
          */
@@ -177,7 +187,6 @@ public final class ConfigFileStorageAccountParser {
                 }
                 map.put(account.getId(), account);
             } catch (final OXException e) {
-                final Log logger = com.openexchange.log.Log.valueOf(LogFactory.getLog(ConfigFileStorageAccountParser.class));
                 logger.warn("Configuration for file storage account \"" + id + "\" is invalid: " + e.getMessage(), e);
             }
         }
