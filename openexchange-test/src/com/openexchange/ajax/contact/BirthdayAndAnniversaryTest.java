@@ -78,7 +78,7 @@ public class BirthdayAndAnniversaryTest extends AbstractManagedContactTest {
     	/*
     	 * create contacts
     	 */
-        Contact contact1 = super.generateContact("Maerz");
+        Contact contact1 = super.generateContact("M\u00e4rz");
         contact1.setBirthday(D("1988-03-03 00:00"));
         contact1 = manager.newAction(contact1);
         Contact contact2 = super.generateContact("Juli");
