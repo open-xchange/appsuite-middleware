@@ -60,11 +60,11 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.config.ConfigFileStorageAccount;
 import com.openexchange.file.storage.config.ConfigFileStorageAuthenticator;
+import com.openexchange.log.LogFactory;
 
 /**
  * {@link ConfigFileStorageAccountParser} - Provides configured accounts parsed from a <i>.properties</i> file.
@@ -142,24 +142,23 @@ public final class ConfigFileStorageAccountParser {
         return map.get(serviceId);
     }
 
-    private static final String PREFIX = "com.openexchange.file.storage.account.";
-
-    private static final int PREFIX_LEN = PREFIX.length();
-
     /**
      * Parses specified properties to a map associating service identifier with configured file storage accounts.
      *
      * @param properties The properties to parse
      */
     public void parse(final Properties properties) {
+        final String prefix = "com.openexchange.file.storage.account.";
+        final int prefixLength = prefix.length();
         /*
          * Parse identifiers
          */
         final Set<String> ids = new HashSet<String>();
+        final Locale english = Locale.ENGLISH;
         for (final Object key : properties.keySet()) {
-            final String propName = ((String) key).toLowerCase(Locale.ENGLISH);
-            if (propName.startsWith(PREFIX)) {
-                final String id = propName.substring(PREFIX_LEN, propName.indexOf('.', PREFIX_LEN));
+            final String propName = ((String) key).toLowerCase(english);
+            if (propName.startsWith(prefix)) {
+                final String id = propName.substring(prefixLength, propName.indexOf('.', prefixLength));
                 ids.add(id);
             }
         }
@@ -186,7 +185,7 @@ public final class ConfigFileStorageAccountParser {
     }
 
     private ConfigFileStorageAccountImpl parseAccount(final String id, final Properties properties) throws OXException {
-        final StringBuilder sb = new StringBuilder(PREFIX).append(id).append('.');
+        final StringBuilder sb = new StringBuilder("com.openexchange.file.storage.account.").append(id).append('.');
         final int resetLen = sb.length();
         /*
          * Create account
