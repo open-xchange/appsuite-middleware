@@ -164,10 +164,14 @@ public final class Hazelcasts {
     /**
      * Tests whether associated {@link HazelcastInstance} is currently paused.
      * 
+     * @param hazelcastInstance The {@link HazelcastInstance} to test
      * @return <code>true</code> if paused; otherwise <code>false</code>
      */
-    public static boolean isPaused() {
-        return PAUSED.get();
+    public static boolean isPaused(final HazelcastInstance hazelcastInstance) {
+        if (null == hazelcastInstance) {
+            return PAUSED.get();
+        }
+        return hazelcastInstance.getLifecycleService().isPaused();
     }
 
     /**
