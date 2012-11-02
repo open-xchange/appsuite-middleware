@@ -261,6 +261,11 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
     protected volatile boolean first = true;
 
     /**
+     * First processed.
+     */
+    protected volatile boolean firstProcessed = false;
+
+    /**
      * Replay read.
      */
     private volatile boolean replay = false;
@@ -1145,6 +1150,7 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
                 bodyBytes.setBytes(bc.getBytes(), bc.getStart(), length);
                 request.setContentLength(length);
                 first = false;
+                firstProcessed = true;
                 empty = false;
                 replay = true;
             }
@@ -2076,9 +2082,10 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
      * Receive a chunk of data. Called to implement the 'special' packet in ajp13 and to receive the data after we send a GET_BODY packet
      */
     public boolean receive() throws IOException {
+        first = false;
         bodyMessage.reset();
         readMessage(bodyMessage);
-        first = false;
+        firstProcessed = true;
         // No data received.
         if (bodyMessage.getLen() == 0) {
             // just the header
@@ -2149,6 +2156,7 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
     public void recycle() {
         // Recycle Request object
         first = true;
+        firstProcessed = false;
         endOfStream = false;
         empty = true;
         replay = false;
@@ -2160,7 +2168,6 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
         servletPath = null;
         servletId.setLength(0);
         lastWriteAccess = 0L;
-        outputBuffer.flag = false;
         request.recycle();
         response.recycle();
         certificates.recycle();
@@ -2218,19 +2225,9 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
 
         private final int chunkSize;
 
-        /**
-         * The flag whether data has been written.
-         */
-        protected boolean flag;
-
         protected SocketOutputBuffer() {
             super();
             chunkSize = Constants.MAX_SEND_SIZE + (packetSize - Constants.MAX_PACKET_SIZE);
-        }
-
-        @Override
-        public boolean isFlagged() {
-            return flag;
         }
 
         @Override
@@ -2256,7 +2253,6 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
             if (len <= 0) {
                 return len;
             }
-            flag = true;
             // 4 - hardcoded, byte[] marshalling overhead
             // Adjust allowed size if packetSize != default (Constants.MAX_PACKET_SIZE)
             final byte[] b = chunk.getBuffer();
@@ -2325,8 +2321,8 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
         public void run() {
             try {
                 if (ajpProcessor.isProcessing() && ((System.currentTimeMillis() - ajpProcessor.getLastWriteAccess()) > max)) {
-                    if (first && request.getContentLengthLong() > 0) {
-                        // Very first request data chunk not yet received
+                    if (!firstProcessed && request.getContentLengthLong() > 0) {
+                        // Very first request data chunk not yet fully received
                         return;
                     }
                     /*

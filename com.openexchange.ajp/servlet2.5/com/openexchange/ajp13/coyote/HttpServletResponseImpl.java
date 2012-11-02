@@ -93,14 +93,13 @@ import com.openexchange.java.Charsets;
 import com.openexchange.server.impl.Version;
 import com.openexchange.session.Session;
 import com.openexchange.tools.regex.MatcherReplacer;
-import com.openexchange.tools.stream.Flagged;
 
 /**
  * {@link HttpServletResponseImpl}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class HttpServletResponseImpl implements HttpServletResponse, Flagged {
+public final class HttpServletResponseImpl implements HttpServletResponse {
 
     private static final Log LOG = com.openexchange.log.Log.loggerFor(HttpServletResponseImpl.class);
 
@@ -489,11 +488,6 @@ public final class HttpServletResponseImpl implements HttpServletResponse, Flagg
     }
 
     @Override
-    public boolean isFlagged() {
-        return servletOutputStream.isFlagged();
-    }
-
-    @Override
     public ServletOutputStream getOutputStream() throws IOException {
         if (servletOutputStream == null) {
             throw new IOException("no ServletOutputStream found!");
@@ -701,8 +695,7 @@ public final class HttpServletResponseImpl implements HttpServletResponse, Flagg
             // Check for duplicate named cookies
             final Map<String, CookieWrapper> checkedCookies = new LinkedHashMap<String, CookieWrapper>(cookiesSize);
             for (final CookieWrapper wrapper : cookies) {
-                final Cookie cookie = wrapper.getCookie();
-                /*final Cookie prev = */checkedCookies.put(cookie.getName(), wrapper);
+                /*final Cookie prev = */checkedCookies.put(wrapper.getCookie().getName(), wrapper);
                 // Already existing; decide which one to keep or to merge
                 // By now: Keep the newer one (cookies is a LinkedHashSet that keeps order)
                 /*-

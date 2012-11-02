@@ -119,7 +119,7 @@ public final class ActionAwareServletInputStream extends ServletInputStream {
         }
         final int len = b.length;
         if (len == 0) {
-            return -1; // eof
+            return 0;
         }
         return read0(b, 0, len);
     }
@@ -129,11 +129,11 @@ public final class ActionAwareServletInputStream extends ServletInputStream {
         if (b == null) {
             throw new NullPointerException();
         }
-        if (off < 0 || len <= 0 || len > b.length - off) {
+        if (off < 0 || len < 0 || len > b.length - off) {
             throw new IndexOutOfBoundsException();
         }
         if (len == 0) {
-            return -1; // eof
+            return 0;
         }
         return read0(b, off, len);
     }
