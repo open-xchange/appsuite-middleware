@@ -1,3 +1,7 @@
+* 2012-11-02 - thorben.betten@open-xchange.com
+
+ - Fix for bug 23564: Avoid possible NPE on service look-up
+
 * 2012-10-31 - marcus.klein@open-xchange.com
 
  - Fix for bug 21913: Properly handling null value of appointment titles. Freemarker does not like null values.
