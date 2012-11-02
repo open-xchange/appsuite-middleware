@@ -53,6 +53,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import com.google.common.base.Predicate;
 import com.openexchange.exception.OXException;
+import com.openexchange.realtime.payload.PayloadElement;
 import com.openexchange.realtime.payload.PayloadTree;
 import com.openexchange.realtime.payload.PayloadTreeNode;
 import com.openexchange.realtime.util.ElementPath;
@@ -113,7 +114,7 @@ public class Presence extends Stanza {
             return defaultElements.contains(input.getElementPath());
         }
     };
-    
+
     /** Predicate to filter default elements from {@link Stanza#payloads} */
     private final Predicate<PayloadTree> extensionsPredicate = new Predicate<PayloadTree>() {
 
@@ -122,8 +123,6 @@ public class Presence extends Stanza {
             return !defaultElements.contains(input.getElementPath());
         }
     };
-    
-    
 
     /**
      * Initializes a new {@link Presence}.
@@ -255,13 +254,16 @@ public class Presence extends Stanza {
 
     /**
      * Get the default payloads.
+     * 
      * @return The default payloads as defined in the Presence specification.
      */
     public Collection<PayloadTree> getDefaultPayloads() {
         return filterPayloads(defaultsPredicate);
     }
+
     /**
      * Get the extension payloads.
+     * 
      * @return Extension payloads that aren't defined in the Presence specification and not accessible via getters and setters.
      */
     public Collection<PayloadTree> getExtensions() {
@@ -278,7 +280,9 @@ public class Presence extends Stanza {
     private void writeThrough(ElementPath path, Object data) {
         PayloadTree payloadTree = payloads.get(path);
         if (payloadTree == null) {
-            throw new IllegalStateException("PayloadTree removed? This shouldn't happen!");
+            PayloadElement payloadElement = new PayloadElement(data, POJO, path.getNamespace(), path.getElement());
+            PayloadTreeNode payloadTreeNode = new PayloadTreeNode(payloadElement);
+            payloadTree = new PayloadTree(payloadTreeNode);
         }
         PayloadTreeNode node = payloadTree.getRoot();
         if (node == null) {

@@ -51,17 +51,20 @@ package com.openexchange.realtime.atmosphere.osgi;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import org.apache.commons.logging.Log;
 import com.openexchange.osgi.ServiceRegistry;
 import com.openexchange.realtime.atmosphere.impl.stanza.handler.StanzaHandler;
 import com.openexchange.realtime.packet.Stanza;
 
 /**
- * {@link StanzaHandlerRegistry} - Tracks registered StanzaHandlers and
- * makes them accessible through {@link #getHandlerFor(Class<? extends Stanza>)}.
+ * {@link StanzaHandlerRegistry} - Tracks registered StanzaHandlers and makes them accessible through {@link #getHandlerFor(Class<? extends
+ * Stanza>)}.
+ * 
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
 public class StanzaHandlerRegistry extends ServiceRegistry {
 
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(StanzaHandlerRegistry.class);
     private static final StanzaHandlerRegistry INSTANCE = new StanzaHandlerRegistry();
 
     private final Map<Class<? extends Stanza>, StanzaHandler> handlers;
@@ -98,8 +101,9 @@ public class StanzaHandlerRegistry extends ServiceRegistry {
      * 
      * @param transformer The handler to add
      */
-    public void add(StanzaHandler handler) {
+    public void addStanzaHandler(StanzaHandler handler) {
         handlers.put(handler.getStanzaClass(), handler);
+        LOG.info("Added StanzaHandler: " + handler.getStanzaClass());
     }
 
     /**
@@ -107,7 +111,7 @@ public class StanzaHandlerRegistry extends ServiceRegistry {
      * 
      * @param transformer The handler to remove
      */
-    public void remove(StanzaHandler handler) {
+    public void removeStanzaHandler(StanzaHandler handler) {
         handlers.remove(handler.getStanzaClass());
     }
 

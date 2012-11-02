@@ -47,31 +47,40 @@
  *
  */
 
-package com.openexchange.realtime.atmosphere.presence;
+package com.openexchange.realtime.payload.transformer.primitive;
 
+import static com.openexchange.realtime.payload.PayloadElement.PayloadFormat.*;
 import com.openexchange.exception.OXException;
-import com.openexchange.realtime.atmosphere.impl.stanza.handler.StanzaHandler;
-import com.openexchange.realtime.packet.Presence;
+import com.openexchange.realtime.payload.PayloadElement;
+import com.openexchange.realtime.payload.transformer.PayloadElementTransformer;
 import com.openexchange.tools.session.ServerSession;
 
 /**
- * {@link PresenceHandler} Handle incoming and outgoing Presence Stanzas that have previously been transformed to the common POJO
- * representation that can be handled by the realtime framework.
+ * {@link ByteTransformer}
  * 
- * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
+ * @author <a href="mailto:marc	.arens@open-xchange.com">Marc Arens</a>
  */
-public class PresenceHandler implements StanzaHandler<Presence> {
+public class ByteTransformer implements PayloadElementTransformer {
 
     @Override
-    public void incoming(Presence stanza, ServerSession session) throws OXException {
+    public Class<?> getElementClass() {
+        return Byte.class;
     }
 
     @Override
-    public void outgoing(Presence stanza, ServerSession session) throws OXException {
+    public PayloadElement incoming(PayloadElement payload, ServerSession session) throws OXException {
+        String data = (String) payload.getData();
+        Byte transformed = Byte.valueOf(data);
+        payload.setData(transformed, POJO);
+        return payload;
     }
 
     @Override
-    public Class getStanzaClass() {
-        return Presence.class;
+    public PayloadElement outgoing(PayloadElement payload, ServerSession session) throws OXException {
+        Byte data = (Byte) payload.getData();
+        String transformed  = data.toString();
+        payload.setData(transformed, JSON);
+        return payload;
     }
+
 }

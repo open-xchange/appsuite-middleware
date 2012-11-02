@@ -53,14 +53,8 @@ import com.openexchange.osgi.ServiceRegistry;
 import com.openexchange.server.ServiceLookup;
 
 /**
- * {@link AtmospherePresenceServiceRegistry}
+ * {@link AtmospherePresenceServiceRegistry} - Track the Services the Atmosphere requeres before starting.
  *
- * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
- */
-/**
- * {@link AtmosphereServiceRegistry} Singleton that extends the existing {@link ServiceRegistry} to gain functionality and acts as
- * central accesspoint for classes of the AtmospherePresence bundle.
- * 
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
 public class AtmosphereServiceRegistry extends ServiceRegistry {
@@ -84,7 +78,7 @@ public class AtmosphereServiceRegistry extends ServiceRegistry {
      * @param activator the DeferredActivator to get services from
      * @param neededServices the services declared as needed
      */
-    public void initialize(ServiceLookup serviceLookup, Class[] neededServices) {
+    public void initialize(ServiceLookup serviceLookup, Class<?>[] neededServices) {
         INSTANCE.clearRegistry();
         for (Class<?> serviceClass : neededServices) {
             Object service = serviceLookup.getService(serviceClass);

@@ -229,7 +229,7 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
 
     private void printBroadcasters(String preString) {
         if (LOG.isDebugEnabled()) {
-            List<Broadcaster> broadcasters = new ArrayList(BroadcasterFactory.getDefault().lookupAll());
+            List<Broadcaster> broadcasters = new ArrayList<Broadcaster>(BroadcasterFactory.getDefault().lookupAll());
             Collections.sort(broadcasters, new Comparator<Broadcaster>() {
 
                 @Override

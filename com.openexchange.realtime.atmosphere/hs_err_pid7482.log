@@ -1,0 +1,615 @@
+#
+# A fatal error has been detected by the Java Runtime Environment:
+#
+#  SIGSEGV (0xb) at pc=0x00007f5f984090cd, pid=7482, tid=140048497927936
+#
+# JRE version: 6.0_26-b03
+# Java VM: Java HotSpot(TM) 64-Bit Server VM (20.1-b02 mixed mode linux-amd64 compressed oops)
+# Problematic frame:
+# V  [libjvm.so+0x5990cd]  unsigned+0x11d
+#
+# If you would like to submit a bug report, please visit:
+#   http://java.sun.com/webapps/bugreport/crash.jsp
+#
+
+---------------  T H R E A D  ---------------
+
+Current thread (0x00007f5f900a3800):  JavaThread "JDWP Transport Listener: dt_socket" daemon [_thread_in_vm, id=7500, stack(0x00007f5f94e86000,0x00007f5f94f87000)]
+
+siginfo:si_signo=SIGSEGV: si_errno=0, si_code=128 (), si_addr=0x0000000000000000
+
+Registers:
+RAX=0x0000000000000001, RBX=0x0000000000000000, RCX=0x00007f5f9890a000, RDX=0x0000000000000000
+RSP=0x00007f5f94f85980, RBP=0x00007f5f94f859f0, RSI=0x00007f5f900a3800, RDI=0x00007f5f9000d930
+R8 =0x00007f5f99479000, R9 =0x00007f5f98909fe8, R10=0x0000000000000ffc, R11=0x00007f5f98909ff0
+R12=0x00007f5f9000d930, R13=0x6566003b003b7200, R14=0x00007f5f94f85a3f, R15=0x00007f5f94f85980
+RIP=0x00007f5f984090cd, EFLAGS=0x0000000000010206, CSGSFS=0x0000000000000033, ERR=0x0000000000000000
+  TRAPNO=0x000000000000000d
+
+Top of Stack: (sp=0x00007f5f94f85980)
+0x00007f5f94f85980:   00007f5f900a3800 0000000000000000
+0x00007f5f94f85990:   00007f5f00000000 0000000000000000
+0x00007f5f94f859a0:   00007f5f900a3800 0000000000000000
+0x00007f5f94f859b0:   00007f5f900a3800 00007f5f94f85ad0
+0x00007f5f94f859c0:   00007f5f9009c4e0 6566003b003b7200
+0x00007f5f94f859d0:   00007f5f9740c0f0 0000000000000001
+0x00007f5f94f859e0:   0000000000000001 0000000000000007
+0x00007f5f94f859f0:   00007f5f94f85a3f 00007f5f972ff2ce
+0x00007f5f94f85a00:   6566003b003b7200 00007f5f94f85ad0
+0x00007f5f94f85a10:   0000000000000001 00007f5f972dca73
+0x00007f5f94f85a20:   0000000000000000 0000000000000000
+0x00007f5f94f85a30:   0000000000000000 0000000000000001
+0x00007f5f94f85a40:   0000000000000004 00007f5f94f85ad0
+0x00007f5f94f85a50:   00007f5f906e9990 00007f5f972dcc36
+0x00007f5f94f85a60:   00007f5f94f85ad0 0000000494f85c90
+0x00007f5f94f85a70:   00007f5f6c007740 00007f5f94f85ad0
+0x00007f5f94f85a80:   00007f5f94f85c90 00007f5f94f85c60
+0x00007f5f94f85a90:   00007f5f9740c0f0 00007f5f972dccae
+0x00007f5f94f85aa0:   00007f5f94f85c60 00007f5f972e78fb
+0x00007f5f94f85ab0:   000005b300000013 00007f5f640f0200
+0x00007f5f94f85ac0:   00007f5f64001030 00007f5f94f85ad0
+0x00007f5f94f85ad0:   00007f5f94f85bb6 00007f5f00000096
+0x00007f5f94f85ae0:   00007f5f94f85ae8 00007f5f00000096
+0x00007f5f94f85af0:   00007f5f94f85b20 0000000000000000
+0x00007f5f94f85b00:   00007f0000000000 000005b30000001c
+0x00007f5f94f85b10:   00007f5f0000b980 00007f5f94f85b20
+0x00007f5f94f85b20:   5f7f000004000000 08000000f8b56a90
+0x00007f5f94f85b30:   656c694664616572 616a4c2826000000
+0x00007f5f94f85b40:   2f676e616c2f6176 293b676e69727453
+0x00007f5f94f85b50:   616c2f6176616a4c 6e697274532f676e
+0x00007f5f94f85b60:   0000000000003b67 09905f7f00001a00
+0x00007f5f94f85b70:   657305000000d8c4 2803000000705574 
+
+Instructions: (pc=0x00007f5f984090cd)
+0x00007f5f984090ad:   84 c7 03 00 00 41 0f b6 9c 24 68 01 00 00 80 e3
+0x00007f5f984090bd:   10 84 db 0f 84 ed 02 00 00 31 db 4d 85 ed 74 23
+0x00007f5f984090cd:   49 8b 45 00 48 85 c0 0f 84 d2 02 00 00 49 bd fe
+0x00007f5f984090dd:   fe fe fe fe fe fe fe 48 89 c3 4c 39 e8 0f 84 bc 
+
+Register to memory mapping:
+
+RAX=0x0000000000000001 is an unknown value
+RBX=0x0000000000000000 is an unknown value
+RCX=0x00007f5f9890a000: <offset 0xa9a000> in /usr/lib/jvm/java-6-sun-1.6.0.26/jre/lib/amd64/server/libjvm.so at 0x00007f5f97e70000
+RDX=0x0000000000000000 is an unknown value
+RSP=0x00007f5f94f85980 is pointing into the stack for thread: 0x00007f5f900a3800
+RBP=0x00007f5f94f859f0 is pointing into the stack for thread: 0x00007f5f900a3800
+RSI=0x00007f5f900a3800 is a thread
+RDI=0x00007f5f9000d930 is an unknown value
+R8 =0x00007f5f99479000 is an unknown value
+R9 =0x00007f5f98909fe8: <offset 0xa99fe8> in /usr/lib/jvm/java-6-sun-1.6.0.26/jre/lib/amd64/server/libjvm.so at 0x00007f5f97e70000
+R10=0x0000000000000ffc is an unknown value
+R11=0x00007f5f98909ff0: <offset 0xa99ff0> in /usr/lib/jvm/java-6-sun-1.6.0.26/jre/lib/amd64/server/libjvm.so at 0x00007f5f97e70000
+R12=0x00007f5f9000d930 is an unknown value
+R13=0x6566003b003b7200 is an unknown value
+R14=0x00007f5f94f85a3f is pointing into the stack for thread: 0x00007f5f900a3800
+R15=0x00007f5f94f85980 is pointing into the stack for thread: 0x00007f5f900a3800
+
+
+Stack: [0x00007f5f94e86000,0x00007f5f94f87000],  sp=0x00007f5f94f85980,  free space=1022k
+Native frames: (J=compiled Java code, j=interpreted, Vv=VM code, C=native code)
+V  [libjvm.so+0x5990cd]  unsigned+0x11d
+
+
+---------------  P R O C E S S  ---------------
+
+Java Threads: ( => current thread )
+  0x00007f5f906a0800 JavaThread "ReaderThread" [_thread_in_native, id=7513, stack(0x00007f5f9415e000,0x00007f5f9425f000)]
+  0x00007f5f900ae800 JavaThread "Low Memory Detector" daemon [_thread_blocked, id=7511, stack(0x00007f5f94981000,0x00007f5f94a82000)]
+  0x00007f5f900ac800 JavaThread "C2 CompilerThread1" daemon [_thread_blocked, id=7510, stack(0x00007f5f94a82000,0x00007f5f94b83000)]
+  0x00007f5f900a9800 JavaThread "C2 CompilerThread0" daemon [_thread_blocked, id=7509, stack(0x00007f5f94b83000,0x00007f5f94c84000)]
+  0x00007f5f6c001000 JavaThread "JDWP Command Reader" daemon [_thread_in_native, id=7504, stack(0x00007f5f94c84000,0x00007f5f94d85000)]
+  0x00007f5f900a7000 JavaThread "JDWP Event Helper Thread" daemon [_thread_blocked, id=7503, stack(0x00007f5f94d85000,0x00007f5f94e86000)]
+=>0x00007f5f900a3800 JavaThread "JDWP Transport Listener: dt_socket" daemon [_thread_in_vm, id=7500, stack(0x00007f5f94e86000,0x00007f5f94f87000)]
+  0x00007f5f90094000 JavaThread "Signal Dispatcher" daemon [_thread_blocked, id=7498, stack(0x00007f5f9508b000,0x00007f5f9518c000)]
+  0x00007f5f90078800 JavaThread "Finalizer" daemon [_thread_blocked, id=7496, stack(0x00007f5f9518c000,0x00007f5f9528d000)]
+  0x00007f5f90076800 JavaThread "Reference Handler" daemon [_thread_blocked, id=7495, stack(0x00007f5f9528d000,0x00007f5f9538e000)]
+  0x00007f5f90012000 JavaThread "main" [_thread_blocked, id=7485, stack(0x00007f5f97a75000,0x00007f5f97b76000)]
+
+Other Threads:
+  0x00007f5f90070000 VMThread [stack: 0x00007f5f9538e000,0x00007f5f9548f000] [id=7494]
+  0x00007f5f900b9800 WatcherThread [stack: 0x00007f5f94880000,0x00007f5f94981000] [id=7512]
+
+VM state:not at safepoint (normal execution)
+
+VM Mutex/Monitor currently owned by a thread: None
+
+Heap
+ PSYoungGen      total 37184K, used 19797K [0x00000007d6800000, 0x00000007d9180000, 0x0000000800000000)
+  eden space 31872K, 62% used [0x00000007d6800000,0x00000007d7b55458,0x00000007d8720000)
+  from space 5312K, 0% used [0x00000007d8c50000,0x00000007d8c50000,0x00000007d9180000)
+  to   space 5312K, 0% used [0x00000007d8720000,0x00000007d8720000,0x00000007d8c50000)
+ PSOldGen        total 84992K, used 0K [0x0000000783800000, 0x0000000788b00000, 0x00000007d6800000)
+  object space 84992K, 0% used [0x0000000783800000,0x0000000783800000,0x0000000788b00000)
+ PSPermGen       total 21248K, used 6576K [0x000000077e600000, 0x000000077fac0000, 0x0000000783800000)
+  object space 21248K, 30% used [0x000000077e600000,0x000000077ec6c340,0x000000077fac0000)
+
+Code Cache  [0x00007f5f8d000000, 0x00007f5f8d270000, 0x00007f5f90000000)
+ total_blobs=272 nmethods=63 adapters=172 free_code_cache=49773696 largest_free_block=9024
+
+Dynamic libraries:
+40000000-40009000 r-xp 00000000 08:01 4720872                            /usr/lib/jvm/java-6-sun-1.6.0.26/jre/bin/java
+40108000-4010a000 rwxp 00008000 08:01 4720872                            /usr/lib/jvm/java-6-sun-1.6.0.26/jre/bin/java
+4092c000-4094d000 rwxp 00000000 00:00 0                                  [heap]
+77e600000-77fac0000 rwxp 00000000 00:00 0 
+77fac0000-783800000 rwxp 00000000 00:00 0 
+783800000-788b00000 rwxp 00000000 00:00 0 
+788b00000-7d6800000 rwxp 00000000 00:00 0 
+7d6800000-7d9180000 rwxp 00000000 00:00 0 
+7d9180000-800000000 rwxp 00000000 00:00 0 
+7f5f48000000-7f5f48021000 rwxp 00000000 00:00 0 
+7f5f48021000-7f5f4c000000 ---p 00000000 00:00 0 
+7f5f50000000-7f5f50021000 rwxp 00000000 00:00 0 
+7f5f50021000-7f5f54000000 ---p 00000000 00:00 0 
+7f5f54000000-7f5f54021000 rwxp 00000000 00:00 0 
+7f5f54021000-7f5f58000000 ---p 00000000 00:00 0 
+7f5f58000000-7f5f5840c000 rwxp 00000000 00:00 0 
+7f5f5840c000-7f5f5c000000 ---p 00000000 00:00 0 
+7f5f5c000000-7f5f5c34f000 rwxp 00000000 00:00 0 
+7f5f5c34f000-7f5f60000000 ---p 00000000 00:00 0 
+7f5f60000000-7f5f60021000 rwxp 00000000 00:00 0 
+7f5f60021000-7f5f64000000 ---p 00000000 00:00 0 
+7f5f64000000-7f5f64021000 rwxp 00000000 00:00 0 
+7f5f64021000-7f5f68000000 ---p 00000000 00:00 0 
+7f5f68000000-7f5f68021000 rwxp 00000000 00:00 0 
+7f5f68021000-7f5f6c000000 ---p 00000000 00:00 0 
+7f5f6c000000-7f5f6c028000 rwxp 00000000 00:00 0 
+7f5f6c028000-7f5f70000000 ---p 00000000 00:00 0 
+7f5f70000000-7f5f70021000 rwxp 00000000 00:00 0 
+7f5f70021000-7f5f74000000 ---p 00000000 00:00 0 
+7f5f74000000-7f5f74021000 rwxp 00000000 00:00 0 
+7f5f74021000-7f5f78000000 ---p 00000000 00:00 0 
+7f5f78000000-7f5f78021000 rwxp 00000000 00:00 0 
+7f5f78021000-7f5f7c000000 ---p 00000000 00:00 0 
+7f5f7c000000-7f5f7c021000 rwxp 00000000 00:00 0 
+7f5f7c021000-7f5f80000000 ---p 00000000 00:00 0 
+7f5f80000000-7f5f80021000 rwxp 00000000 00:00 0 
+7f5f80021000-7f5f84000000 ---p 00000000 00:00 0 
+7f5f84000000-7f5f84021000 rwxp 00000000 00:00 0 
+7f5f84021000-7f5f88000000 ---p 00000000 00:00 0 
+7f5f88000000-7f5f88021000 rwxp 00000000 00:00 0 
+7f5f88021000-7f5f8c000000 ---p 00000000 00:00 0 
+7f5f8d000000-7f5f8d270000 rwxp 00000000 00:00 0 
+7f5f8d270000-7f5f90711000 rwxp 00000000 00:00 0 
+7f5f90711000-7f5f94000000 ---p 00000000 00:00 0 
+7f5f9415e000-7f5f94161000 ---p 00000000 00:00 0 
+7f5f94161000-7f5f94290000 rwxp 00000000 00:00 0 
+7f5f94290000-7f5f942a3000 r-xp 00000000 08:01 4720649                    /usr/lib/jvm/java-6-sun-1.6.0.26/jre/lib/amd64/libnet.so
+7f5f942a3000-7f5f943a4000 ---p 00013000 08:01 4720649                    /usr/lib/jvm/java-6-sun-1.6.0.26/jre/lib/amd64/libnet.so
+7f5f943a4000-7f5f943a7000 rwxp 00014000 08:01 4720649                    /usr/lib/jvm/java-6-sun-1.6.0.26/jre/lib/amd64/libnet.so
+7f5f943a7000-7f5f943aa000 r-xs 0001b000 08:01 3932419                    /home/marens/Development/git/backendRealtime/com.openexchange.xml/lib/spring-core_1.2.7.jar
+7f5f943aa000-7f5f943b0000 r-xs 00033000 08:01 3932417                    /home/marens/Development/git/backendRealtime/com.openexchange.xml/lib/spring-beans_1.2.7.jar
+7f5f943b0000-7f5f943b2000 r-xs 00006000 08:01 3932416                    /home/marens/Development/git/backendRealtime/com.openexchange.xml/lib/org.dynamicjava.stax-api-1.0.jar
+7f5f943b2000-7f5f943b5000 r-xs 00029000 08:01 3932428                    /home/marens/Development/git/backendRealtime/com.openexchange.xml/lib/stax-1.2.0.jar
+7f5f943b5000-7f5f943b7000 r-xs 0001b000 08:01 3932427                    /home/marens/Development/git/backendRealtime/com.openexchange.xml/lib/joox-1.1.0.jar
+7f5f943b7000-7f5f943bc000 r-xs 00044000 08:01 3932426                    /home/marens/Development/git/backendRealtime/com.openexchange.xml/lib/jdom-2.0.3.jar
+7f5f943bc000-7f5f943cc000 r-xs 00112000 08:01 2910229                    /home/marens/Development/git/backendRealtime/com.openexchange.textxtraction/lib/poi-scratchpad-3.8.jar
+7f5f943cc000-7f5f943ce000 r-xs 0000f000 08:01 2910232                    /home/marens/Development/git/backendRealtime/com.openexchange.textxtraction/lib/poi-contrib-3.6.jar
+7f5f943ce000-7f5f943ee000 r-xs 0019d000 08:01 2910230                    /home/marens/Development/git/backendRealtime/com.openexchange.textxtraction/lib/poi-3.8.jar
+7f5f943ee000-7f5f943fa000 r-xs 000d8000 08:01 2910234                    /home/marens/Development/git/backendRealtime/com.openexchange.textxtraction/lib/poi-ooxml-3.8.jar
+7f5f943fa000-7f5f94410000 r-xs 003a5000 08:01 2910233                    /home/marens/Development/git/backendRealtime/com.openexchange.textxtraction/lib/pdfbox-1.7.0.jar
+7f5f94410000-7f5f94415000 r-xs 00048000 08:01 2910235                    /home/marens/Development/git/backendRealtime/com.openexchange.textxtraction/lib/dom4j-1.6.1.jar
+7f5f94415000-7f5f94433000 r-xs 0014f000 08:01 2917859                    /home/marens/Development/git/backendRealtime/org.apache.tika/lib/mockito-all-1.9.0-rc1.jar
+7f5f94433000-7f5f94465000 rwxp 00000000 00:00 0 
+7f5f94465000-7f5f94619000 r-xs 016d1000 08:01 2917860                    /home/marens/Development/git/backendRealtime/org.apache.tika/lib/tika-app-1.1.jar
+7f5f94619000-7f5f94646000 r-xs 0025b000 08:01 2906213                    /home/marens/Development/git/backendRealtime/com.openexchange.preview/lib/jOpenDocument-1.2.jar
+7f5f94646000-7f5f94656000 r-xs 0017d000 08:01 2906215                    /home/marens/Development/git/backendRealtime/com.openexchange.preview/lib/itextpdf-5.1.2.jar
+7f5f94656000-7f5f94659000 r-xs 0000f000 08:01 2906210                    /home/marens/Development/git/backendRealtime/com.openexchange.preview/lib/jodconverter-core-3.0-beta-4.jar
+7f5f94659000-7f5f9465b000 r-xs 0000a000 08:01 2906216                    /home/marens/Development/git/backendRealtime/com.openexchange.preview/lib/json-20090211.jar
+7f5f9465b000-7f5f94694000 r-xs 00121000 08:01 2906212                    /home/marens/Development/git/backendRealtime/com.openexchange.preview/lib/unoil-3.2.1.jar
+7f5f94694000-7f5f9469f000 r-xs 00034000 08:01 2906214                    /home/marens/Development/git/backendRealtime/com.openexchange.preview/lib/ridl-3.2.1.jar
+7f5f9469f000-7f5f946a2000 r-xs 00018000 08:01 2906211                    /home/marens/Development/git/backendRealtime/com.openexchange.preview/lib/jurt-3.2.1.jar
+7f5f946a2000-7f5f946a4000 r-xs 0000c000 08:01 2906209                    /home/marens/Development/git/backendRealtime/com.openexchange.preview/lib/juh-3.2.1.jar
+7f5f946a4000-7f5f946a6000 r-xs 00009000 08:01 2906208                    /home/marens/Development/git/backendRealtime/com.openexchange.preview/lib/jodreports-2.4.0.jar
+7f5f946a6000-7f5f946aa000 r-xs 0002e000 08:01 1850278                    /home/marens/Development/git/backendRealtime/com.openexchange.oauth.provider/lib/oauth-googlecode.jar
+7f5f946aa000-7f5f946ae000 r-xs 0006b000 08:01 4615468                    /home/marens/Development/git/backendRealtime/com.openexchange.html/lib/jTidy.jar
+7f5f946ae000-7f5f946b5000 r-xs 00058000 08:01 4615467                    /home/marens/Development/git/backendRealtime/com.openexchange.html/lib/org.apache.log4j_1.2.13.v200806030600.jar
+7f5f946b5000-7f5f946b6000 r-xs 00001000 08:01 21966                      /home/marens/Development/git/backendRealtime/com.openexchange.crypto/lib/PBKDF2-1.0.4.jar
+7f5f946b6000-7f5f946bf000 r-xs 0006d000 08:01 3933999                    /home/marens/Development/git/backendRealtime/com.openexchange.caching/lib/concurrent-1.3.4.jar
+7f5f946bf000-7f5f946cf000 r-xs 000f5000 08:01 3934000                    /home/marens/Development/git/backendRealtime/com.openexchange.caching/lib/jcs-1.3.3.5.jar
+7f5f946cf000-7f5f946d1000 r-xs 00009000 08:01 5264195                    /home/marens/Development/git/backendRealtime/com.openexchange.server/lib/java-image-scaling-0.8.5.jar
+7f5f946d1000-7f5f946d4000 r-xs 0002e000 08:01 5264185                    /home/marens/Development/git/backendRealtime/com.openexchange.server/lib/jacksum.jar
+7f5f946d4000-7f5f946d6000 r-xs 00014000 08:01 5264189                    /home/marens/Development/git/backendRealtime/com.openexchange.server/lib/xmpcore.jar
+7f5f946d6000-7f5f946da000 r-xs 00027000 08:01 5264193                    /home/marens/Development/git/backendRealtime/com.openexchange.server/lib/metadata-extractor-2.6.1.jar
+7f5f946da000-7f5f946e7000 r-xs 000ba000 08:01 5264186                    /home/marens/Development/git/backendRealtime/com.openexchange.server/lib/jaudiotagger-2.0.3.jar
+7f5f946e7000-7f5f946e9000 r-xs 0000d000 08:01 4740416                    /home/marens/Development/git/backendRealtime/org.ho.jyaml/lib/jyaml-1.3.jar
+7f5f946e9000-7f5f946ea000 r-xs 00008000 08:01 405345                     /home/marens/Development/git/backendRealtimeExamples/com.openexchange.bundles/jars/org.apache.commons.cli_1.0.0.v20080604-1500.jar
+7f5f946ea000-7f5f946eb000 r-xs 00001000 08:01 3933438                    /home/marens/Development/git/backendRealtime/com.openexchange.http.grizzly/lib/slf4j-jcl-1.6.6.jar
+7f5f946eb000-7f5f946ed000 r-xs 00005000 08:01 3933457                    /home/marens/Development/git/backendRealtime/com.openexchange.http.grizzly/lib/slf4j-api-1.6.6.jar
+7f5f946ed000-7f5f946f0000 r-xs 00008000 08:01 3933450                    /home/marens/Development/git/backendRealtime/com.openexchange.http.grizzly/lib/management-api-3.0.0-b012.jar
+7f5f946f0000-7f5f946f3000 r-xs 00013000 08:01 3933436                    /home/marens/Development/git/backendRealtime/com.openexchange.http.grizzly/lib/grizzly-websockets-2.2.18.jar
+7f5f946f3000-7f5f946f5000 r-xs 00013000 08:01 3933455                    /home/marens/Development/git/backendRealtime/com.openexchange.http.grizzly/lib/grizzly-websockets-2.2.18-sources.jar
+7f5f946f5000-7f5f946f6000 r-xs 00001000 08:01 3933437                    /home/marens/Development/git/backendRealtime/com.openexchange.http.grizzly/lib/grizzly-rcm-2.2.18.jar
+7f5f946f6000-7f5f946f7000 r-xs 00001000 08:01 3933446                    /home/marens/Development/git/backendRealtime/com.openexchange.http.grizzly/lib/grizzly-rcm-2.2.18-sources.jar
+7f5f946f7000-7f5f946f9000 r-xs 00003000 08:01 3933456                    /home/marens/Development/git/backendRealtime/com.openexchange.http.grizzly/lib/grizzly-portunif-2.2.18.jar
+7f5f946f9000-7f5f946fb000 r-xs 00002000 08:01 3933439                    /home/marens/Development/git/backendRealtime/com.openexchange.http.grizzly/lib/grizzly-portunif-2.2.18-sources.jar
+7f5f946fb000-7f5f946fe000 r-xs 00026000 08:01 3933440                    /home/marens/Development/git/backendRealtime/com.openexchange.http.grizzly/lib/grizzly-http-servlet-2.2.18.jar
+7f5f946fe000-7f5f94700000 r-xs 00022000 08:01 3933434                    /home/marens/Development/git/backendRealtime/com.openexchange.http.grizzly/lib/grizzly-http-servlet-2.2.18-sources.jar
+7f5f94700000-7f5f94704000 r-xs 00031000 08:01 3933454                    /home/marens/Development/git/backendRealtime/com.openexchange.http.grizzly/lib/grizzly-http-server-2.2.18.jar
+7f5f94704000-7f5f94707000 r-xs 0002f000 08:01 3933447                    /home/marens/Development/git/backendRealtime/com.openexchange.http.grizzly/lib/grizzly-http-server-2.2.18-sources.jar
+7f5f94707000-7f5f9470b000 r-xs 0003f000 08:01 3933452                    /home/marens/Development/git/backendRealtime/com.openexchange.http.grizzly/lib/grizzly-http-2.2.18.jar
+7f5f9470b000-7f5f9470e000 r-xs 00039000 08:01 3933441                    /home/marens/Development/git/backendRealtime/com.openexchange.http.grizzly/lib/grizzly-http-2.2.18-sources.jar
+7f5f9470e000-7f5f9471c000 r-xs 000a6000 08:01 3933432                    /home/marens/Development/git/backendRealtime/com.openexchange.http.grizzly/lib/grizzly-framework-2.2.18.jar
+7f5f9471c000-7f5f94724000 r-xs 00099000 08:01 3933433                    /home/marens/Development/git/backendRealtime/com.openexchange.http.grizzly/lib/grizzly-framework-2.2.18-sources.jar
+7f5f94724000-7f5f94726000 r-xs 00005000 08:01 3933449                    /home/marens/Development/git/backendRealtime/com.openexchange.http.grizzly/lib/grizzly-comet-2.2.18.jar
+7f5f94726000-7f5f94728000 r-xs 00005000 08:01 3933451                    /home/marens/Development/git/backendRealtime/com.openexchange.http.grizzly/lib/grizzly-comet-2.2.18-sources.jar
+7f5f94728000-7f5f9472f000 r-xs 0003d000 08:01 3933444                    /home/marens/Development/git/backendRealtime/com.openexchange.http.grizzly/lib/gmbal-3.0.0-b023.jar
+7f5f9472f000-7f5f94736000 r-xs 00063000 08:01 3933448                    /home/marens/Development/git/backendRealtime/com.openexchange.http.grizzly/lib/atmosphere-runtime-1.1.0-SNAPSHOT.jar
+7f5f94736000-7f5f9473b000 r-xs 0004b000 08:01 3933443                    /home/marens/Development/git/backendRealtime/com.openexchange.http.grizzly/lib/atmosphere-runtime-1.1.0-SNAPSHOT-sources.jar
+7f5f9473b000-7f5f9473c000 r-xs 00001000 08:01 3933435                    /home/marens/Development/git/backendRealtime/com.openexchange.http.grizzly/lib/atmosphere-compat-tomcat7-1.1.0-SNAPSHOT.jar
+7f5f9473c000-7f5f9473d000 r-xs 00001000 08:01 3933442                    /home/marens/Development/git/backendRealtime/com.openexchange.http.grizzly/lib/atmosphere-compat-tomcat-1.1.0-SNAPSHOT.jar
+7f5f9473d000-7f5f9473e000 r-xs 00001000 08:01 3933453                    /home/marens/Development/git/backendRealtime/com.openexchange.http.grizzly/lib/atmosphere-compat-jbossweb-1.1.0-SNAPSHOT.jar
+7f5f9473e000-7f5f94741000 r-xs 0000f000 08:01 405354                     /home/marens/Development/git/backendRealtimeExamples/com.openexchange.bundles/jars/org.eclipse.osgi.services_3.3.0.v20110513.jar
+7f5f94741000-7f5f94742000 r-xs 00005000 08:01 5395340                    /home/marens/Development/git/backendRealtime/com.openexchange.global/lib/stringsearch-2.jar
+7f5f94742000-7f5f94744000 r-xs 00014000 08:01 5395339                    /home/marens/Development/git/backendRealtime/com.openexchange.global/lib/stringsearch-1.0.0.jar
+7f5f94744000-7f5f94746000 r-xs 0000b000 08:01 3827693                    /home/marens/Development/git/backendRealtime/com.openexchange.test/lib/json.jar
+7f5f94746000-7f5f94749000 r-xs 00017000 08:01 3827694                    /home/marens/Development/git/backendRealtime/com.openexchange.test/lib/jchronic-0.2.3.jar
+7f5f94749000-7f5f9474f000 r-xs 00030000 08:01 3827688                    /home/marens/Development/git/backendRealtime/com.openexchange.test/lib/junit-4.6.jar
+7f5f9474f000-7f5f94763000 r-xs 0013a000 08:01 405356                     /home/marens/Development/git/backendRealtimeExamples/com.openexchange.bundles/jars/org.eclipse.osgi_3.7.2.v20120110-1415.jar
+7f5f94763000-7f5f94765000 r-xs 0000f000 08:01 405347                     /home/marens/Development/git/backendRealtimeExamples/com.openexchange.bundles/jars/org.apache.commons.logging_1.1.1.v201101211721.jar
+7f5f94765000-7f5f94769000 r-xs 0003f000 08:01 405346                     /home/marens/Development/git/backendRealtimeExamples/com.openexchange.bundles/jars/org.apache.commons.lang_2.4.0.v20081016-1030.jar
+7f5f94769000-7f5f9476c000 r-xs 0001b000 08:01 405344                     /home/marens/Development/git/backendRealtimeExamples/com.openexchange.bundles/jars/javax.servlet_2.5.0.v201103041518.jar
+7f5f9476c000-7f5f94783000 r-xs 00114000 08:01 3827642                    /home/marens/Development/git/backendRealtime/com.openexchange.xerces.sun/lib/xerces.jar
+7f5f94783000-7f5f9478b000 r-xs 000c4000 08:01 2916226                    /home/marens/Development/git/backendRealtime/com.openexchange.common/lib/mysql-connector-java-5.1.22-bin.jar
+7f5f9478b000-7f5f9478d000 r-xs 00033000 08:01 2916203                    /home/marens/Development/git/backendRealtime/com.openexchange.common/lib/libidn-1.9.jar
+7f5f9478d000-7f5f9478f000 r-xs 0000b000 08:01 2916222                    /home/marens/Development/git/backendRealtime/com.openexchange.common/lib/json.jar
+7f5f9478f000-7f5f94793000 r-xs 00027000 08:01 2916229                    /home/marens/Development/git/backendRealtime/com.openexchange.common/lib/jakarta-slide-webdavlib-2.1.jar
+7f5f94793000-7f5f94799000 r-xs 00045000 08:01 2916230                    /home/marens/Development/git/backendRealtime/com.openexchange.common/lib/commons-httpclient-3.1.jar
+7f5f94799000-7f5f9479c000 r-xs 0000c000 08:01 2916225                    /home/marens/Development/git/backendRealtime/com.openexchange.common/lib/commons-fileupload-1.2.1.jar
+7f5f9479c000-7f5f9479e000 r-xs 0000f000 08:01 2916231                    /home/marens/Development/git/backendRealtime/com.openexchange.common/lib/tnef-1.8.0.jar
+7f5f9479e000-7f5f947a0000 r-xs 00005000 08:01 2916208                    /home/marens/Development/git/backendRealtime/com.openexchange.common/lib/chardet-1.1.jar
+7f5f947a0000-7f5f947c8000 r-xs 00241000 08:01 2916200                    /home/marens/Development/git/backendRealtime/com.openexchange.common/lib/trove-3.0.3.jar
+7f5f947c8000-7f5f947d6000 r-xs 0007f000 08:01 2916233                    /home/marens/Development/git/backendRealtime/com.openexchange.common/lib/commons-collections-3.2.1.jar
+7f5f947d6000-7f5f947e0000 r-xs 000b2000 08:01 2916234                    /home/marens/Development/git/backendRealtime/com.openexchange.common/lib/owasp-esapi-2.0.1.jar
+7f5f947e0000-7f5f947e1000 r-xs 00002000 08:01 2916238                    /home/marens/Development/git/backendRealtime/com.openexchange.common/lib/rabin-hash-function-2.0.jar
+7f5f947e1000-7f5f947e3000 r-xs 0000e000 08:01 2916220                    /home/marens/Development/git/backendRealtime/com.openexchange.common/lib/gnu-rex.jar
+7f5f947e3000-7f5f947e8000 r-xs 00027000 08:01 2916204                    /home/marens/Development/git/backendRealtime/com.openexchange.common/lib/automaton-1.11-8.jar
+7f5f947e8000-7f5f947ee000 r-xs 00033000 08:01 2916240                    /home/marens/Development/git/backendRealtime/com.openexchange.common/lib/commons-codec-1.6.jar
+7f5f947ee000-7f5f947f2000 r-xs 00029000 08:01 2916201                    /home/marens/Development/git/backendRealtime/com.openexchange.common/lib/commons-io-2.3.jar
+7f5f947f2000-7f5f947f4000 r-xs 00006000 08:01 2916209                    /home/marens/Development/git/backendRealtime/com.openexchange.common/lib/apache-mime4j-storage-0.7.2.jar
+7f5f947f4000-7f5f947fb000 r-xs 00044000 08:01 2916218                    /home/marens/Development/git/backendRealtime/com.openexchange.common/lib/apache-mime4j-dom-0.7.2.jar
+7f5f947fb000-7f5f947fe000 r-xs 00015000 08:01 2916206                    /home/marens/Development/git/backendRealtime/com.openexchange.common/lib/apache-mime4j-core-0.7.2.jar
+7f5f947fe000-7f5f9480b000 r-xs 0011d000 08:01 2916215                    /home/marens/Development/git/backendRealtime/com.openexchange.common/lib/mail-1.4.5.jar
+7f5f9480b000-7f5f9480d000 r-xs 00005000 08:01 2916205                    /home/marens/Development/git/backendRealtime/com.openexchange.common/lib/jboss-jms-api.jar
+7f5f9480d000-7f5f94831000 r-xs 001aa000 08:01 2916228                    /home/marens/Development/git/backendRealtime/com.openexchange.common/lib/guava-13.0.1.jar
+7f5f94831000-7f5f94845000 r-xs 00040000 08:01 2916216                    /home/marens/Development/git/backendRealtime/com.openexchange.common/lib/ical4j-zoneinfo-outlook-1.0.2.jar
+7f5f94845000-7f5f94857000 r-xs 0008d000 08:01 2916237                    /home/marens/Development/git/backendRealtime/com.openexchange.common/lib/ical4j-1.0.1.jar
+7f5f94857000-7f5f9485f000 r-xs 00049000 08:01 2916211                    /home/marens/Development/git/backendRealtime/com.openexchange.common/lib/backport-util-concurrent-3.1.jar
+7f5f9485f000-7f5f94862000 r-xs 00042000 08:01 2916217                    /home/marens/Development/git/backendRealtime/com.openexchange.common/lib/cssparser-0.9.7.jar
+7f5f94862000-7f5f94869000 r-xs 00086000 08:01 2916221                    /home/marens/Development/git/backendRealtime/com.openexchange.common/lib/jericho-3.2.jar
+7f5f94869000-7f5f9486b000 r-xs 00019000 08:01 2916219                    /home/marens/Development/git/backendRealtime/com.openexchange.common/lib/htmlcleaner-2.2.jar
+7f5f9486b000-7f5f9486c000 r-xs 0000a000 08:01 2916207                    /home/marens/Development/git/backendRealtime/com.openexchange.common/lib/kxml2-2.3.0.jar
+7f5f9486c000-7f5f9486f000 r-xs 0001c000 08:01 2916223                    /home/marens/Development/git/backendRealtime/com.openexchange.common/lib/nekohtml-1.9.16.jar
+7f5f9486f000-7f5f94871000 r-xs 00005000 08:01 2916212                    /home/marens/Development/git/backendRealtime/com.openexchange.common/lib/httpmime-4.2.1.jar
+7f5f94871000-7f5f94877000 r-xs 00040000 08:01 2916214                    /home/marens/Development/git/backendRealtime/com.openexchange.common/lib/httpcore-nio-4.2.1.jar
+7f5f94877000-7f5f9487d000 r-xs 00031000 08:01 2916213                    /home/marens/Development/git/backendRealtime/com.openexchange.common/lib/httpcore-4.2.1.jar
+7f5f9487d000-7f5f94880000 r-xs 0001a000 08:01 2916236                    /home/marens/Development/git/backendRealtime/com.openexchange.common/lib/httpclient-cache-4.2.1.jar
+7f5f94880000-7f5f94881000 ---p 00000000 00:00 0 
+7f5f94881000-7f5f94981000 rwxp 00000000 00:00 0 
+7f5f94981000-7f5f94984000 ---p 00000000 00:00 0 
+7f5f94984000-7f5f94a82000 rwxp 00000000 00:00 0 
+7f5f94a82000-7f5f94a85000 ---p 00000000 00:00 0 
+7f5f94a85000-7f5f94b83000 rwxp 00000000 00:00 0 
+7f5f94b83000-7f5f94b86000 ---p 00000000 00:00 0 
+7f5f94b86000-7f5f94c84000 rwxp 00000000 00:00 0 
+7f5f94c84000-7f5f94c87000 ---p 00000000 00:00 0 
+7f5f94c87000-7f5f94d85000 rwxp 00000000 00:00 0 
+7f5f94d85000-7f5f94d88000 ---p 00000000 00:00 0 
+7f5f94d88000-7f5f94e86000 rwxp 00000000 00:00 0 
+7f5f94e86000-7f5f94e89000 ---p 00000000 00:00 0 
+7f5f94e89000-7f5f94f87000 rwxp 00000000 00:00 0 
+7f5f94f87000-7f5f94f8a000 r-xp 00000000 08:01 4720615                    /usr/lib/jvm/java-6-sun-1.6.0.26/jre/lib/amd64/libdt_socket.so
+7f5f94f8a000-7f5f95089000 ---p 00003000 08:01 4720615                    /usr/lib/jvm/java-6-sun-1.6.0.26/jre/lib/amd64/libdt_socket.so
+7f5f95089000-7f5f9508b000 rwxp 00002000 08:01 4720615                    /usr/lib/jvm/java-6-sun-1.6.0.26/jre/lib/amd64/libdt_socket.so
+7f5f9508b000-7f5f9508e000 ---p 00000000 00:00 0 
+7f5f9508e000-7f5f9518c000 rwxp 00000000 00:00 0 
+7f5f9518c000-7f5f9518f000 ---p 00000000 00:00 0 
+7f5f9518f000-7f5f9528d000 rwxp 00000000 00:00 0 
+7f5f9528d000-7f5f95290000 ---p 00000000 00:00 0 
+7f5f95290000-7f5f9538e000 rwxp 00000000 00:00 0 
+7f5f9538e000-7f5f9538f000 ---p 00000000 00:00 0 
+7f5f9538f000-7f5f959c8000 rwxp 00000000 00:00 0 
+7f5f959c8000-7f5f95b60000 r-xs 03029000 08:01 4720603                    /usr/lib/jvm/java-6-sun-1.6.0.26/jre/lib/rt.jar
+7f5f95b60000-7f5f95b88000 rwxp 00000000 00:00 0 
+7f5f95b88000-7f5f95b89000 ---p 00000000 00:00 0 
+7f5f95b89000-7f5f95c89000 rwxp 00000000 00:00 0 
+7f5f95c89000-7f5f95c8a000 ---p 00000000 00:00 0 
+7f5f95c8a000-7f5f95d8a000 rwxp 00000000 00:00 0 
+7f5f95d8a000-7f5f95d8b000 ---p 00000000 00:00 0 
+7f5f95d8b000-7f5f95e8b000 rwxp 00000000 00:00 0 
+7f5f95e8b000-7f5f95e8c000 ---p 00000000 00:00 0 
+7f5f95e8c000-7f5f95f97000 rwxp 00000000 00:00 0 
+7f5f95f97000-7f5f95fb5000 rwxp 00000000 00:00 0 
+7f5f95fb5000-7f5f95fdf000 rwxp 00000000 00:00 0 
+7f5f95fdf000-7f5f9624d000 rwxp 00000000 00:00 0 
+7f5f9624d000-7f5f96258000 rwxp 00000000 00:00 0 
+7f5f96258000-7f5f96276000 rwxp 00000000 00:00 0 
+7f5f96276000-7f5f962a0000 rwxp 00000000 00:00 0 
+7f5f962a0000-7f5f9650e000 rwxp 00000000 00:00 0 
+7f5f9650e000-7f5f96523000 rwxp 00000000 00:00 0 
+7f5f96523000-7f5f9665a000 rwxp 00000000 00:00 0 
+7f5f9665a000-7f5f9665b000 rwxp 00000000 00:00 0 
+7f5f9665b000-7f5f96669000 r-xp 00000000 08:01 4720610                    /usr/lib/jvm/java-6-sun-1.6.0.26/jre/lib/amd64/libzip.so
+7f5f96669000-7f5f9676b000 ---p 0000e000 08:01 4720610                    /usr/lib/jvm/java-6-sun-1.6.0.26/jre/lib/amd64/libzip.so
+7f5f9676b000-7f5f9676e000 rwxp 00010000 08:01 4720610                    /usr/lib/jvm/java-6-sun-1.6.0.26/jre/lib/amd64/libzip.so
+7f5f9676e000-7f5f9676f000 rwxp 00000000 00:00 0 
+7f5f9676f000-7f5f9677b000 r-xp 00000000 08:01 4218033                    /lib/x86_64-linux-gnu/libnss_files-2.15.so
+7f5f9677b000-7f5f9697a000 ---p 0000c000 08:01 4218033                    /lib/x86_64-linux-gnu/libnss_files-2.15.so
+7f5f9697a000-7f5f9697b000 r-xp 0000b000 08:01 4218033                    /lib/x86_64-linux-gnu/libnss_files-2.15.so
+7f5f9697b000-7f5f9697c000 rwxp 0000c000 08:01 4218033                    /lib/x86_64-linux-gnu/libnss_files-2.15.so
+7f5f9697c000-7f5f96986000 r-xp 00000000 08:01 4218029                    /lib/x86_64-linux-gnu/libnss_nis-2.15.so
+7f5f96986000-7f5f96b86000 ---p 0000a000 08:01 4218029                    /lib/x86_64-linux-gnu/libnss_nis-2.15.so
+7f5f96b86000-7f5f96b87000 r-xp 0000a000 08:01 4218029                    /lib/x86_64-linux-gnu/libnss_nis-2.15.so
+7f5f96b87000-7f5f96b88000 rwxp 0000b000 08:01 4218029                    /lib/x86_64-linux-gnu/libnss_nis-2.15.so
+7f5f96b88000-7f5f96b90000 r-xp 00000000 08:01 4218034                    /lib/x86_64-linux-gnu/libnss_compat-2.15.so
+7f5f96b90000-7f5f96d8f000 ---p 00008000 08:01 4218034                    /lib/x86_64-linux-gnu/libnss_compat-2.15.so
+7f5f96d8f000-7f5f96d90000 r-xp 00007000 08:01 4218034                    /lib/x86_64-linux-gnu/libnss_compat-2.15.so
+7f5f96d90000-7f5f96d91000 rwxp 00008000 08:01 4218034                    /lib/x86_64-linux-gnu/libnss_compat-2.15.so
+7f5f96d91000-7f5f971d3000 r-xp 00000000 08:01 4456705                    /usr/lib/locale/locale-archive
+7f5f971d3000-7f5f971d6000 r-xp 00000000 08:01 4720619                    /usr/lib/jvm/java-6-sun-1.6.0.26/jre/lib/amd64/libnpt.so
+7f5f971d6000-7f5f972d5000 ---p 00003000 08:01 4720619                    /usr/lib/jvm/java-6-sun-1.6.0.26/jre/lib/amd64/libnpt.so
+7f5f972d5000-7f5f972d6000 rwxp 00002000 08:01 4720619                    /usr/lib/jvm/java-6-sun-1.6.0.26/jre/lib/amd64/libnpt.so
+7f5f972d6000-7f5f9730c000 r-xp 00000000 08:01 4720634                    /usr/lib/jvm/java-6-sun-1.6.0.26/jre/lib/amd64/libjdwp.so
+7f5f9730c000-7f5f9740b000 ---p 00036000 08:01 4720634                    /usr/lib/jvm/java-6-sun-1.6.0.26/jre/lib/amd64/libjdwp.so
+7f5f9740b000-7f5f97415000 rwxp 00035000 08:01 4720634                    /usr/lib/jvm/java-6-sun-1.6.0.26/jre/lib/amd64/libjdwp.so
+7f5f97415000-7f5f9742c000 r-xp 00000000 08:01 4218042                    /lib/x86_64-linux-gnu/libnsl-2.15.so
+7f5f9742c000-7f5f9762b000 ---p 00017000 08:01 4218042                    /lib/x86_64-linux-gnu/libnsl-2.15.so
+7f5f9762b000-7f5f9762c000 r-xp 00016000 08:01 4218042                    /lib/x86_64-linux-gnu/libnsl-2.15.so
+7f5f9762c000-7f5f9762d000 rwxp 00017000 08:01 4218042                    /lib/x86_64-linux-gnu/libnsl-2.15.so
+7f5f9762d000-7f5f9762f000 rwxp 00000000 00:00 0 
+7f5f9762f000-7f5f97658000 r-xp 00000000 08:01 4720636                    /usr/lib/jvm/java-6-sun-1.6.0.26/jre/lib/amd64/libjava.so
+7f5f97658000-7f5f97757000 ---p 00029000 08:01 4720636                    /usr/lib/jvm/java-6-sun-1.6.0.26/jre/lib/amd64/libjava.so
+7f5f97757000-7f5f9775e000 rwxp 00028000 08:01 4720636                    /usr/lib/jvm/java-6-sun-1.6.0.26/jre/lib/amd64/libjava.so
+7f5f9775e000-7f5f9776b000 r-xp 00000000 08:01 4720612                    /usr/lib/jvm/java-6-sun-1.6.0.26/jre/lib/amd64/libverify.so
+7f5f9776b000-7f5f9786a000 ---p 0000d000 08:01 4720612                    /usr/lib/jvm/java-6-sun-1.6.0.26/jre/lib/amd64/libverify.so
+7f5f9786a000-7f5f9786d000 rwxp 0000c000 08:01 4720612                    /usr/lib/jvm/java-6-sun-1.6.0.26/jre/lib/amd64/libverify.so
+7f5f9786d000-7f5f97874000 r-xp 00000000 08:01 4218027                    /lib/x86_64-linux-gnu/librt-2.15.so
+7f5f97874000-7f5f97a73000 ---p 00007000 08:01 4218027                    /lib/x86_64-linux-gnu/librt-2.15.so
+7f5f97a73000-7f5f97a74000 r-xp 00006000 08:01 4218027                    /lib/x86_64-linux-gnu/librt-2.15.so
+7f5f97a74000-7f5f97a75000 rwxp 00007000 08:01 4218027                    /lib/x86_64-linux-gnu/librt-2.15.so
+7f5f97a75000-7f5f97a78000 ---p 00000000 00:00 0 
+7f5f97a78000-7f5f97b76000 rwxp 00000000 00:00 0 
+7f5f97b76000-7f5f97c6f000 r-xp 00000000 08:01 4218031                    /lib/x86_64-linux-gnu/libm-2.15.so
+7f5f97c6f000-7f5f97e6e000 ---p 000f9000 08:01 4218031                    /lib/x86_64-linux-gnu/libm-2.15.so
+7f5f97e6e000-7f5f97e6f000 r-xp 000f8000 08:01 4218031                    /lib/x86_64-linux-gnu/libm-2.15.so
+7f5f97e6f000-7f5f97e70000 rwxp 000f9000 08:01 4218031                    /lib/x86_64-linux-gnu/libm-2.15.so
+7f5f97e70000-7f5f9878a000 r-xp 00000000 08:01 4720652                    /usr/lib/jvm/java-6-sun-1.6.0.26/jre/lib/amd64/server/libjvm.so
+7f5f9878a000-7f5f9888c000 ---p 0091a000 08:01 4720652                    /usr/lib/jvm/java-6-sun-1.6.0.26/jre/lib/amd64/server/libjvm.so
+7f5f9888c000-7f5f98a41000 rwxp 0091c000 08:01 4720652                    /usr/lib/jvm/java-6-sun-1.6.0.26/jre/lib/amd64/server/libjvm.so
+7f5f98a41000-7f5f98a7b000 rwxp 00000000 00:00 0 
+7f5f98a7b000-7f5f98c30000 r-xp 00000000 08:01 4218023                    /lib/x86_64-linux-gnu/libc-2.15.so
+7f5f98c30000-7f5f98e2f000 ---p 001b5000 08:01 4218023                    /lib/x86_64-linux-gnu/libc-2.15.so
+7f5f98e2f000-7f5f98e33000 r-xp 001b4000 08:01 4218023                    /lib/x86_64-linux-gnu/libc-2.15.so
+7f5f98e33000-7f5f98e35000 rwxp 001b8000 08:01 4218023                    /lib/x86_64-linux-gnu/libc-2.15.so
+7f5f98e35000-7f5f98e3a000 rwxp 00000000 00:00 0 
+7f5f98e3a000-7f5f98e3c000 r-xp 00000000 08:01 4218022                    /lib/x86_64-linux-gnu/libdl-2.15.so
+7f5f98e3c000-7f5f9903c000 ---p 00002000 08:01 4218022                    /lib/x86_64-linux-gnu/libdl-2.15.so
+7f5f9903c000-7f5f9903d000 r-xp 00002000 08:01 4218022                    /lib/x86_64-linux-gnu/libdl-2.15.so
+7f5f9903d000-7f5f9903e000 rwxp 00003000 08:01 4218022                    /lib/x86_64-linux-gnu/libdl-2.15.so
+7f5f9903e000-7f5f99056000 r-xp 00000000 08:01 4218025                    /lib/x86_64-linux-gnu/libpthread-2.15.so
+7f5f99056000-7f5f99255000 ---p 00018000 08:01 4218025                    /lib/x86_64-linux-gnu/libpthread-2.15.so
+7f5f99255000-7f5f99256000 r-xp 00017000 08:01 4218025                    /lib/x86_64-linux-gnu/libpthread-2.15.so
+7f5f99256000-7f5f99257000 rwxp 00018000 08:01 4218025                    /lib/x86_64-linux-gnu/libpthread-2.15.so
+7f5f99257000-7f5f9925b000 rwxp 00000000 00:00 0 
+7f5f9925b000-7f5f9927d000 r-xp 00000000 08:01 4218037                    /lib/x86_64-linux-gnu/ld-2.15.so
+7f5f9927f000-7f5f99289000 r-xs 0005f000 08:01 2916224                    /home/marens/Development/git/backendRealtime/com.openexchange.common/lib/httpclient-4.2.1.jar
+7f5f99289000-7f5f99293000 rwxp 00000000 00:00 0 
+7f5f99293000-7f5f99349000 rwxp 00000000 00:00 0 
+7f5f99349000-7f5f9934c000 rwxp 00000000 00:00 0 
+7f5f9934c000-7f5f99353000 r-xp 00000000 08:01 4720640                    /usr/lib/jvm/java-6-sun-1.6.0.26/jre/lib/amd64/jli/libjli.so
+7f5f99353000-7f5f99454000 ---p 00007000 08:01 4720640                    /usr/lib/jvm/java-6-sun-1.6.0.26/jre/lib/amd64/jli/libjli.so
+7f5f99454000-7f5f99456000 rwxp 00008000 08:01 4720640                    /usr/lib/jvm/java-6-sun-1.6.0.26/jre/lib/amd64/jli/libjli.so
+7f5f99456000-7f5f99457000 rwxp 00000000 00:00 0 
+7f5f99457000-7f5f99459000 r-xs 00006000 08:01 2916210                    /home/marens/Development/git/backendRealtime/com.openexchange.common/lib/httpcore-ab-4.2.1.jar
+7f5f99459000-7f5f9945b000 r-xs 00004000 08:01 2916235                    /home/marens/Development/git/backendRealtime/com.openexchange.common/lib/fluent-hc-4.2.1.jar
+7f5f9945b000-7f5f99460000 r-xs 0001b000 08:01 2916241                    /home/marens/Development/git/backendRealtime/com.openexchange.common/lib/scribe_head.jar
+7f5f99460000-7f5f99462000 r-xs 00016000 08:01 2916227                    /home/marens/Development/git/backendRealtime/com.openexchange.common/lib/high-scale-lib-1.1.4.jar
+7f5f99462000-7f5f99467000 r-xs 0003e000 08:01 2916239                    /home/marens/Development/git/backendRealtime/com.openexchange.common/lib/commons-net-3.1.jar
+7f5f99467000-7f5f9946c000 r-xs 00032000 08:01 2916232                    /home/marens/Development/git/backendRealtime/com.openexchange.common/lib/commons-compress-1.3.jar
+7f5f9946c000-7f5f99471000 r-xs 0003f000 08:01 2916202                    /home/marens/Development/git/backendRealtime/com.openexchange.common/lib/jsoup-1.7.1.jar
+7f5f99471000-7f5f99479000 rwxs 00000000 08:01 4598215                    /tmp/hsperfdata_marens/7482
+7f5f99479000-7f5f9947a000 rwxp 00000000 00:00 0 
+7f5f9947a000-7f5f9947b000 r-xp 00000000 00:00 0 
+7f5f9947b000-7f5f9947d000 rwxp 00000000 00:00 0 
+7f5f9947d000-7f5f9947e000 r-xp 00022000 08:01 4218037                    /lib/x86_64-linux-gnu/ld-2.15.so
+7f5f9947e000-7f5f99480000 rwxp 00023000 08:01 4218037                    /lib/x86_64-linux-gnu/ld-2.15.so
+7fff4c428000-7fff4c44d000 rwxp 00000000 00:00 0                          [stack]
+7fff4c4f4000-7fff4c4f5000 r-xp 00000000 00:00 0                          [vdso]
+ffffffffff600000-ffffffffff601000 r-xp 00000000 00:00 0                  [vsyscall]
+
+VM Arguments:
+jvm_args: -agentlib:jdwp=transport=dt_socket,suspend=y,address=localhost:33598 -Dfile.encoding=UTF-8 
+java_command: org.eclipse.jdt.internal.junit.runner.RemoteTestRunner -version 3 -port 39097 -testLoaderClass org.eclipse.jdt.internal.junit4.runner.JUnit4TestLoader -loaderpluginname org.eclipse.jdt.junit4.runtime -test com.openexchange.realtime.atmosphere.impl.stanza.PresenceBuilderTest:testBuildPresence
+Launcher Type: SUN_STANDARD
+
+Environment Variables:
+PATH=/home/marens/.cabal/bin:/home/marens/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/lib/jvm/java-6-sun/bin
+LD_LIBRARY_PATH=/usr/lib/jvm/java-6-sun-1.6.0.26/jre/lib/amd64/server:/usr/lib/jvm/java-6-sun-1.6.0.26/jre/lib/amd64:/usr/lib/jvm/java-6-sun-1.6.0.26/jre/../lib/amd64
+SHELL=/bin/bash
+DISPLAY=:0
+
+Signal Handlers:
+SIGSEGV: [libjvm.so+0x85f800], sa_mask[0]=0x7ffbfeff, sa_flags=0x10000004
+SIGBUS: [libjvm.so+0x85f800], sa_mask[0]=0x7ffbfeff, sa_flags=0x10000004
+SIGFPE: [libjvm.so+0x70e300], sa_mask[0]=0x7ffbfeff, sa_flags=0x10000004
+SIGPIPE: [libjvm.so+0x70e300], sa_mask[0]=0x7ffbfeff, sa_flags=0x10000004
+SIGXFSZ: [libjvm.so+0x70e300], sa_mask[0]=0x7ffbfeff, sa_flags=0x10000004
+SIGILL: [libjvm.so+0x70e300], sa_mask[0]=0x7ffbfeff, sa_flags=0x10000004
+SIGUSR1: SIG_DFL, sa_mask[0]=0x00000000, sa_flags=0x00000000
+SIGUSR2: [libjvm.so+0x711110], sa_mask[0]=0x00000004, sa_flags=0x10000004
+SIGHUP: [libjvm.so+0x710d10], sa_mask[0]=0x7ffbfeff, sa_flags=0x10000004
+SIGINT: [libjvm.so+0x710d10], sa_mask[0]=0x7ffbfeff, sa_flags=0x10000004
+SIGTERM: [libjvm.so+0x710d10], sa_mask[0]=0x7ffbfeff, sa_flags=0x10000004
+SIGQUIT: [libjvm.so+0x710d10], sa_mask[0]=0x7ffbfeff, sa_flags=0x10000004
+
+
+---------------  S Y S T E M  ---------------
+
+OS:wheezy/sid
+
+uname:Linux 3.2.0-32-generic #51-Ubuntu SMP Wed Sep 26 21:33:09 UTC 2012 x86_64
+libc:glibc 2.15 NPTL 2.15 
+rlimit: STACK 8192k, CORE 0k, NPROC 63534, NOFILE 4096, AS infinity
+load average:0,12 0,14 0,14
+
+/proc/meminfo:
+MemTotal:        8156112 kB
+MemFree:         2572936 kB
+Buffers:          555136 kB
+Cached:          2568240 kB
+SwapCached:            0 kB
+Active:          3030112 kB
+Inactive:        2055928 kB
+Active(anon):    1963672 kB
+Inactive(anon):    15504 kB
+Active(file):    1066440 kB
+Inactive(file):  2040424 kB
+Unevictable:           0 kB
+Mlocked:               0 kB
+SwapTotal:       8364028 kB
+SwapFree:        8364028 kB
+Dirty:                88 kB
+Writeback:             0 kB
+AnonPages:       1962904 kB
+Mapped:           169416 kB
+Shmem:             16372 kB
+Slab:             340500 kB
+SReclaimable:     313972 kB
+SUnreclaim:        26528 kB
+KernelStack:        3584 kB
+PageTables:        18224 kB
+NFS_Unstable:          0 kB
+Bounce:                0 kB
+WritebackTmp:          0 kB
+CommitLimit:    12442084 kB
+Committed_AS:    3367464 kB
+VmallocTotal:   34359738367 kB
+VmallocUsed:      135136 kB
+VmallocChunk:   34359595004 kB
+HardwareCorrupted:     0 kB
+AnonHugePages:         0 kB
+HugePages_Total:       0
+HugePages_Free:        0
+HugePages_Rsvd:        0
+HugePages_Surp:        0
+Hugepagesize:       2048 kB
+DirectMap4k:      110592 kB
+DirectMap2M:     8261632 kB
+
+
+CPU:total 4 (4 cores per cpu, 1 threads per core) family 6 model 42 stepping 7, cmov, cx8, fxsr, mmx, sse, sse2, sse3, ssse3, sse4.1, sse4.2, popcnt
+
+/proc/cpuinfo:
+processor	: 0
+vendor_id	: GenuineIntel
+cpu family	: 6
+model		: 42
+model name	: Intel(R) Core(TM) i5-2500 CPU @ 3.30GHz
+stepping	: 7
+microcode	: 0x1a
+cpu MHz		: 3200.000
+cache size	: 6144 KB
+physical id	: 0
+siblings	: 4
+core id		: 0
+cpu cores	: 4
+apicid		: 0
+initial apicid	: 0
+fpu		: yes
+fpu_exception	: yes
+cpuid level	: 13
+wp		: yes
+flags		: fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush dts acpi mmx fxsr sse sse2 ss ht tm pbe syscall nx rdtscp lm constant_tsc arch_perfmon pebs bts rep_good nopl xtopology nonstop_tsc aperfmperf pni pclmulqdq dtes64 monitor ds_cpl vmx smx est tm2 ssse3 cx16 xtpr pdcm pcid sse4_1 sse4_2 x2apic popcnt tsc_deadline_timer aes xsave avx lahf_lm arat epb xsaveopt pln pts dtherm tpr_shadow vnmi flexpriority ept vpid
+bogomips	: 6621.22
+clflush size	: 64
+cache_alignment	: 64
+address sizes	: 36 bits physical, 48 bits virtual
+power management:
+
+processor	: 1
+vendor_id	: GenuineIntel
+cpu family	: 6
+model		: 42
+model name	: Intel(R) Core(TM) i5-2500 CPU @ 3.30GHz
+stepping	: 7
+microcode	: 0x1a
+cpu MHz		: 3300.000
+cache size	: 6144 KB
+physical id	: 0
+siblings	: 4
+core id		: 1
+cpu cores	: 4
+apicid		: 2
+initial apicid	: 2
+fpu		: yes
+fpu_exception	: yes
+cpuid level	: 13
+wp		: yes
+flags		: fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush dts acpi mmx fxsr sse sse2 ss ht tm pbe syscall nx rdtscp lm constant_tsc arch_perfmon pebs bts rep_good nopl xtopology nonstop_tsc aperfmperf pni pclmulqdq dtes64 monitor ds_cpl vmx smx est tm2 ssse3 cx16 xtpr pdcm pcid sse4_1 sse4_2 x2apic popcnt tsc_deadline_timer aes xsave avx lahf_lm arat epb xsaveopt pln pts dtherm tpr_shadow vnmi flexpriority ept vpid
+bogomips	: 6621.41
+clflush size	: 64
+cache_alignment	: 64
+address sizes	: 36 bits physical, 48 bits virtual
+power management:
+
+processor	: 2
+vendor_id	: GenuineIntel
+cpu family	: 6
+model		: 42
+model name	: Intel(R) Core(TM) i5-2500 CPU @ 3.30GHz
+stepping	: 7
+microcode	: 0x1a
+cpu MHz		: 1600.000
+cache size	: 6144 KB
+physical id	: 0
+siblings	: 4
+core id		: 2
+cpu cores	: 4
+apicid		: 4
+initial apicid	: 4
+fpu		: yes
+fpu_exception	: yes
+cpuid level	: 13
+wp		: yes
+flags		: fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush dts acpi mmx fxsr sse sse2 ss ht tm pbe syscall nx rdtscp lm constant_tsc arch_perfmon pebs bts rep_good nopl xtopology nonstop_tsc aperfmperf pni pclmulqdq dtes64 monitor ds_cpl vmx smx est tm2 ssse3 cx16 xtpr pdcm pcid sse4_1 sse4_2 x2apic popcnt tsc_deadline_timer aes xsave avx lahf_lm arat epb xsaveopt pln pts dtherm tpr_shadow vnmi flexpriority ept vpid
+bogomips	: 6621.42
+clflush size	: 64
+cache_alignment	: 64
+address sizes	: 36 bits physical, 48 bits virtual
+power management:
+
+processor	: 3
+vendor_id	: GenuineIntel
+cpu family	: 6
+model		: 42
+model name	: Intel(R) Core(TM) i5-2500 CPU @ 3.30GHz
+stepping	: 7
+microcode	: 0x1a
+cpu MHz		: 3300.000
+cache size	: 6144 KB
+physical id	: 0
+siblings	: 4
+core id		: 3
+cpu cores	: 4
+apicid		: 6
+initial apicid	: 6
+fpu		: yes
+fpu_exception	: yes
+cpuid level	: 13
+wp		: yes
+flags		: fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush dts acpi mmx fxsr sse sse2 ss ht tm pbe syscall nx rdtscp lm constant_tsc arch_perfmon pebs bts rep_good nopl xtopology nonstop_tsc aperfmperf pni pclmulqdq dtes64 monitor ds_cpl vmx smx est tm2 ssse3 cx16 xtpr pdcm pcid sse4_1 sse4_2 x2apic popcnt tsc_deadline_timer aes xsave avx lahf_lm arat epb xsaveopt pln pts dtherm tpr_shadow vnmi flexpriority ept vpid
+bogomips	: 6621.42
+clflush size	: 64
+cache_alignment	: 64
+address sizes	: 36 bits physical, 48 bits virtual
+power management:
+
+
+
+Memory: 4k page, physical 8156112k(2572936k free), swap 8364028k(8364028k free)
+
+vm_info: Java HotSpot(TM) 64-Bit Server VM (20.1-b02) for linux-amd64 JRE (1.6.0_26-b03), built on May  4 2011 01:13:47 by "java_re" with gcc 3.2.2 (SuSE Linux)
+
+time: Fri Nov  2 11:30:22 2012
+elapsed time: 2167 seconds
+

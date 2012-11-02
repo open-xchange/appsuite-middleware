@@ -47,67 +47,61 @@
  *
  */
 
-package com.openexchange.realtime.atmosphere.impl.stanza.builder;
+package com.openexchange.realtime.atmosphere.osgi.service;
 
-import java.util.Iterator;
-import org.apache.commons.logging.Log;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-import com.openexchange.exception.OXException;
-import com.openexchange.realtime.atmosphere.AtmosphereExceptionCode;
-import com.openexchange.realtime.packet.ID;
-import com.openexchange.realtime.packet.Presence;
-import com.openexchange.realtime.packet.Presence.Type;
-import com.openexchange.realtime.payload.PayloadElement;
-import static com.openexchange.realtime.payload.PayloadElement.PayloadFormat.*;
-import com.openexchange.realtime.payload.PayloadTree;
-import com.openexchange.realtime.payload.PayloadTreeNode;
+import com.openexchange.realtime.atmosphere.impl.stanza.handler.StanzaHandler;
+import com.openexchange.realtime.payload.transformer.PayloadElementTransformer;
+import com.openexchange.realtime.util.ElementPath;
 
 /**
- * {@link PresenceBuilder} - Parse an atmosphere client's presence message and build a Presence Stanza from it by adding the recipients ID.
+ * {@link AtmosphereRegistryService} - Service to register StanzaHandlers and PayloadElementTransformers. This allows us to extend the
+ * functionality of the central Atmosphere realtime bundle from within other bundles that concentrate on specific features like Presence,
+ * Messaging or others.
  * 
- * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
+ * @author <a href="mailto:marc	.arens@open-xchange.com">Marc Arens</a>
  */
-public class PresenceBuilder extends StanzaBuilder<Presence> {
-
-    private static Log LOG = com.openexchange.log.Log.loggerFor(PresenceBuilder.class);
+public interface AtmosphereRegistryService {
 
     /**
-     * Create a new PresenceBuilder Initializes a new {@link PresenceBuilder}.
+     * Adds specified transformer to the Atmosphere realtime bundle.
      * 
-     * @param from the sender's ID, must not be null
-     * @param json the sender's message, must not be null
-     * @throws IllegalArgumentException if from or json are null
+     * @param transformer The transformer to add
      */
-    public PresenceBuilder(ID from, JSONObject json) {
-        if (from == null || json == null) {
-            throw new IllegalArgumentException();
-        }
-        this.from = from;
-        this.json = json;
-        this.stanza = new Presence();
-    }
+    void addPayloadElementTransFormer(PayloadElementTransformer transformer);
 
-    @Override
-    public Presence build() throws OXException {
-        basics();
-        type();
-        return stanza;
-    }
+    /**
+     * Remove specified transformer from the Atmosphere realtime bundle.
+     * 
+     * @param transformer The transformer to remove
+     */
+    void removePayloadElementTransformer(PayloadElementTransformer transformer);
 
-    private void type() {
-        if (json.has("type")) {
-            String type = json.optString("type");
-            for (Presence.Type t : Presence.Type.values()) {
-                if (t.name().equalsIgnoreCase(type)) {
-                    stanza.setType(t);
-                    break;
-                }
-            }
-        } else {
-            stanza.setType(Type.NONE);
-        }
-    }
+    /**
+     * Add an ElementPathMapping to the Atmosphere realtime bundle so it knows how to transform a PayloadElement.
+     * 
+     * @param elementPath The ElementPath of the PayloadElement
+     * @param mappingClass The Class used to map the PayloadElement
+     */
+    void addElementPathMapping(ElementPath elementPath, Class<?> mappingClass);
 
+    /**
+     * Remove an ElementPathMapping from the Atmosphere realtime bundle.
+     * 
+     * @param elementPath The ElementPath of the PayloadElement
+     */
+    void removeElementpathMapping(ElementPath elementPath);
+
+    /**
+     * Add a StazaHandler to the Atmosphere realtime bundle so it knows how to handle a Stanza subclass.
+     * 
+     * @param handler The StanzaHandler to add
+     */
+    void addStanzaHandler(StanzaHandler handler);
+
+    /**
+     * Remove a StazaHandler from the Atmosphere realtime bundle.
+     * 
+     * @param handler The StanzaHandler to remove
+     */
+    void removeStanzaHandler(StanzaHandler handler);
 }

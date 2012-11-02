@@ -291,7 +291,7 @@ public class PayloadTreeNode implements VisitablePayload {
     public String getNamespace() {
         if (payloadElement != null) {
             return payloadElement.getNamespace();
-            wenn namespace null, ersten namespace der hierarchie nutzen
+//            wenn namespace null, ersten namespace der hierarchie nutzen
         }
         return null;
     }

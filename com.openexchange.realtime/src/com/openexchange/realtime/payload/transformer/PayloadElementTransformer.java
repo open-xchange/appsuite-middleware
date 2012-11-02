@@ -47,80 +47,46 @@
  *
  */
 
-package com.openexchange.realtime.atmosphere.presence;
+package com.openexchange.realtime.payload.transformer;
 
-import static com.openexchange.realtime.presence.PresenceData.ERROR;
-import static com.openexchange.realtime.presence.PresenceData.MESSAGE;
-import static com.openexchange.realtime.presence.PresenceData.PRIORITY;
-import static com.openexchange.realtime.presence.PresenceData.STATE;
-import java.io.StringWriter;
-import org.json.JSONException;
-import org.json.JSONObject;
-import org.json.JSONWriter;
-import com.openexchange.ajax.writer.*;
-import com.openexchange.conversion.simple.SimpleConverter;
-import com.openexchange.conversion.simple.SimplePayloadConverter;
 import com.openexchange.exception.OXException;
-import com.openexchange.realtime.presence.PresenceData;
+import com.openexchange.realtime.StanzaSender;
+import com.openexchange.realtime.payload.PayloadElement;
+import com.openexchange.realtime.util.ElementPath;
 import com.openexchange.tools.session.ServerSession;
 
 /**
- * {@link PresenceDataToJSONConverter} - Convert PresenceData into JSON.
+ * {@link PayloadElementTransformer} - Used to transform PayloadElements of incoming and outgoing Stanzas.
  * 
+ * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
-public class PresenceDataToJSONConverter implements SimplePayloadConverter {
+public interface PayloadElementTransformer {
 
-    @Override
-    public String getInputFormat() {
-        return "presenceData";
-    }
-
-    @Override
-    public String getOutputFormat() {
-        return "json";
-    }
-
-    @Override
-    public Quality getQuality() {
-        return Quality.GOOD;
-    }
-
-    /*
-     * Convert PresenceData to JSON like shown below
-     * {
-     * from: userB@realtime
-     * [namespace: 'default',]
-     * element: 'presence'
-     * [type: none]
-     * <--- interesting part to convert
-     * data: {
-     * state: 'online',
-     * message: 'i am here',
-     * [priority: 0,]
-     * [error: "error"]
-     * }
-     * --->
-     * };
+    /**
+     * Get the complete path to an element in a namespace that this PayloadTransformer is able to process.
+     * 
+     * @return the elementPath of elements this PayloadTransformer is able to process.
      */
-    @Override
-    public Object convert(Object data, ServerSession session, SimpleConverter converter) throws OXException {
-        if (!(data instanceof PresenceData)) {
-            throw new IllegalArgumentException("Input must be valid PresenceData");
-        }
+    public Class<?> getElementClass();
 
-        JSONObject json = new JSONObject();
-        PresenceData presenceData = (PresenceData) data;
-        try {
-        if (presenceData.getError() != null) {
-            ResponseWriter.addException(json, ERROR, presenceData.getError(), session.getUser().getLocale());
-        }
-            json.put(MESSAGE, presenceData.getMessage());
-            json.put(PRIORITY, presenceData.getPriority());
-            json.put(STATE, presenceData.getState().toString());
-        } catch (JSONException ex) {
-            AtmospherePresenceExceptionCode.PRESENCE_DATA_MALFORMED.create(ex, new Object[0]);
-        }
-        return json;
-    }
+    /**
+     * Transform an incoming Payload.
+     * 
+     * @param paylaod The incoming Payload to process
+     * @param session The currently active session
+     * @return
+     * @throws OXException When transformation fails
+     */
+    public PayloadElement incoming(PayloadElement payload, ServerSession session) throws OXException;
+
+    /**
+     * Transform an outgoing Payload.
+     * 
+     * @param payload The Payload to process
+     * @param session The currently active session
+     * @throws OXException
+     */
+    public PayloadElement outgoing(PayloadElement payload, ServerSession session) throws OXException;
+
 }

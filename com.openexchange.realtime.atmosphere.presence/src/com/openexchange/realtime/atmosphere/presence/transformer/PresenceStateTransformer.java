@@ -47,38 +47,51 @@
  *
  */
 
-package com.openexchange.realtime.atmosphere.presence.visitor;
+package com.openexchange.realtime.atmosphere.presence.transformer;
 
-import com.openexchange.realtime.packet.Presence;
+import static com.openexchange.realtime.payload.PayloadElement.PayloadFormat.*;
+import com.openexchange.exception.OXException;
+import com.openexchange.realtime.atmosphere.presence.AtmospherePresenceExceptionCode;
+import com.openexchange.realtime.packet.PresenceState;
 import com.openexchange.realtime.payload.PayloadElement;
+import com.openexchange.realtime.payload.transformer.PayloadElementTransformer;
+import com.openexchange.tools.session.ServerSession;
 
 /**
- * {@link JSONToPresenceTransformer}
+ * {@link PresenceStateTransformer}
  * 
  * @author <a href="mailto:marc	.arens@open-xchange.com">Marc Arens</a>
  */
-public class JSONToPresenceTransformer implements PresencePayloadVisitor {
+public class PresenceStateTransformer implements PayloadElementTransformer {
 
-    private Presence presence;
-
-    /**
-     * Initializes a new {@link JSONToPresenceTransformer}.
-     * 
-     * @param presence
-     */
-    public JSONToPresenceTransformer(Presence presence) {
-        this.presence = presence;
+    @Override
+    public Class<?> getElementClass() {
+        return PresenceState.class;
     }
 
     @Override
-    public void visit(PayloadElement element, Object data) {
-        // TODO Auto-generated method stub
+    public PayloadElement incoming(PayloadElement payload, ServerSession session) throws OXException {
+        String state = (String) payload.getData();
+        PresenceState presenceState = null;
+        for (PresenceState ps : PresenceState.values()) {
+            if (ps.name().equalsIgnoreCase(state)) {
+                presenceState = ps;
+                break;
+            }
+        }
+        if (presenceState == null) {
+            throw AtmospherePresenceExceptionCode.PRESENCE_DATA_ELEMENT_MALFORMED.create(payload.getElementPath());
+        }
+        payload.setData(presenceState, POJO);
+
+        return payload;
     }
 
     @Override
-    public Presence doVisit() {
-        // TODO Auto-generated method stub
-        return null;
+    public PayloadElement outgoing(PayloadElement payload, ServerSession session) throws OXException {
+        PresenceState state = (PresenceState) payload.getData();
+        payload.setData(state.toString(), JSON);
+        return payload;
     }
 
 }

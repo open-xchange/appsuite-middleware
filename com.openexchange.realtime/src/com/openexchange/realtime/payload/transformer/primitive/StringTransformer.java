@@ -47,38 +47,41 @@
  *
  */
 
-package com.openexchange.realtime.atmosphere.presence.visitor;
+package com.openexchange.realtime.payload.transformer.primitive;
 
-import com.openexchange.realtime.packet.Presence;
+import static com.openexchange.realtime.payload.PayloadElement.PayloadFormat.*;
+import com.openexchange.exception.OXException;
 import com.openexchange.realtime.payload.PayloadElement;
+import com.openexchange.realtime.payload.transformer.PayloadElementTransformer;
+import com.openexchange.tools.session.ServerSession;
+
 
 /**
- * {@link PresenceToJSONTransformer}
- * 
+ * {@link StringTransformer}
+ *
  * @author <a href="mailto:marc	.arens@open-xchange.com">Marc Arens</a>
  */
-public class PresenceToJSONTransformer implements PresencePayloadVisitor {
+public class StringTransformer implements PayloadElementTransformer {
 
-    private Presence presence;
-
-    /**
-     * Initializes a new {@link PresenceToJSONTransformer}.
-     * 
-     * @param presence
-     */
-    public PresenceToJSONTransformer(Presence presence) {
-        this.presence = presence;
+    @Override
+    public Class<?> getElementClass() {
+        return String.class;
     }
 
     @Override
-    public void visit(PayloadElement element, Object data) {
-        // TODO Auto-generated method stub
+    public PayloadElement incoming(PayloadElement payload, ServerSession session) throws OXException {
+        Object data = payload.getData();
+        //no transformation neccessary for strings, just change the format
+        payload.setData(data, POJO);
+        return payload;
     }
 
     @Override
-    public Presence doVisit() {
-        // TODO Auto-generated method stub
-        return null;
+    public PayloadElement outgoing(PayloadElement payload, ServerSession session) throws OXException {
+        Object data = payload.getData();
+        //no transformation neccessary for strings, just change the format
+        payload.setData(data, JSON);
+        return payload;
     }
 
 }

@@ -49,15 +49,17 @@
 
 package com.openexchange.realtime.atmosphere.presence.osgi;
 
+import java.util.ArrayList;
+import java.util.List;
 import org.apache.commons.logging.Log;
-import com.openexchange.conversion.simple.SimplePayloadConverter;
 import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.realtime.atmosphere.OXRTConversionHandler;
-import com.openexchange.realtime.atmosphere.presence.JSONToPresenceDataConverter;
-import com.openexchange.realtime.atmosphere.presence.OXRTPresenceHandler;
-import com.openexchange.realtime.atmosphere.presence.PresenceDataToJSONConverter;
+import com.openexchange.realtime.atmosphere.impl.stanza.handler.StanzaHandler;
+import com.openexchange.realtime.atmosphere.osgi.service.AtmosphereRegistryService;
+import com.openexchange.realtime.atmosphere.presence.handler.PresenceHandler;
+import com.openexchange.realtime.atmosphere.presence.transformer.PresenceStateTransformer;
 import com.openexchange.realtime.packet.Presence;
-import com.openexchange.realtime.payload.PayloadElementTransformer;
+import com.openexchange.realtime.packet.PresenceState;
+import com.openexchange.realtime.payload.transformer.PayloadElementTransformer;
 import com.openexchange.realtime.presence.PresenceService;
 import com.openexchange.realtime.presence.subscribe.PresenceSubscriptionService;
 
@@ -78,10 +80,21 @@ import com.openexchange.realtime.presence.subscribe.PresenceSubscriptionService;
 public class AtmospherePresenceActivator extends HousekeepingActivator {
 
     private static final Log LOG = com.openexchange.log.Log.loggerFor(AtmospherePresenceActivator.class);
+    private List<StanzaHandler> registeredHandlers;
+    private List<PayloadElementTransformer> registeredTransformers;
+
+    
+    /**
+     * Initializes a new {@link AtmospherePresenceActivator}.
+     */
+    public AtmospherePresenceActivator() {
+        registeredHandlers = new ArrayList<StanzaHandler>();
+        registeredTransformers = new ArrayList<PayloadElementTransformer>();
+    }
 
     @Override
     protected Class<?>[] getNeededServices() {
-         return new Class[] { PresenceSubscriptionService.class, PresenceService.class };
+        return new Class[] { PresenceSubscriptionService.class, PresenceService.class, AtmosphereRegistryService.class };
     }
 
     @Override
@@ -99,20 +112,31 @@ public class AtmospherePresenceActivator extends HousekeepingActivator {
     protected void startBundle() throws Exception {
         AtmospherePresenceServiceRegistry serviceRegistry = AtmospherePresenceServiceRegistry.getInstance();
         serviceRegistry.initialize(this, getNeededServices());
+        AtmosphereRegistryService atmosphereRegistryService = AtmospherePresenceServiceRegistry.getInstance().getService(
+            AtmosphereRegistryService.class,
+            true);
 
-        /*
-         * After adding the new SimplePayloadConverters that are able to convert from and to PresenceStatus we can register a new
-         * OXRTConversionHandler for the PresenceStatus. All this ConversionHandler does is to tell the payload to convert itself into the
-         * desired format.
-         */
-        registerService(SimplePayloadConverter.class, new PresenceDataToJSONConverter());
-        registerService(SimplePayloadConverter.class, new JSONToPresenceDataConverter());
-        registerService(PayloadElementTransformer.class, new OXRTPresenceHandler());
+        // Add Presence specific transformers and mappings
+        atmosphereRegistryService.addPayloadElementTransFormer(new PresenceStateTransformer());
+        atmosphereRegistryService.addElementPathMapping(Presence.PRESENCE_STATE_PATH, PresenceState.class);
+
+        // Add Presence specific handler
+        atmosphereRegistryService.addStanzaHandler(new PresenceHandler());
     }
 
     @Override
     protected void stopBundle() throws Exception {
         AtmospherePresenceServiceRegistry.getInstance().clearRegistry();
+        AtmosphereRegistryService atmosphereRegistryService = AtmospherePresenceServiceRegistry.getInstance().getService(
+            AtmosphereRegistryService.class,
+            true);
+        for (StanzaHandler handler : registeredHandlers) {
+            atmosphereRegistryService.removeStanzaHandler(handler);
+        }
+        for (PayloadElementTransformer transformer : registeredTransformers) {
+            atmosphereRegistryService.removePayloadElementTransformer(transformer);
+        }
+        atmosphereRegistryService.removeElementpathMapping(Presence.PRESENCE_STATE_PATH);
         unregisterServices();
     }
 

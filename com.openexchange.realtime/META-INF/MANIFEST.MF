@@ -22,5 +22,6 @@ Import-Package: com.google.common.base,
 Export-Package: com.openexchange.realtime,
  com.openexchange.realtime.packet,
  com.openexchange.realtime.payload,
+ com.openexchange.realtime.payload.transformer,
  com.openexchange.realtime.util
 Bundle-ClassPath: .

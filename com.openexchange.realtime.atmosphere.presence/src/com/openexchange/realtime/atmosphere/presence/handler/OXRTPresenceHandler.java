@@ -47,25 +47,18 @@
  *
  */
 
-package com.openexchange.realtime.atmosphere.presence;
+package com.openexchange.realtime.atmosphere.presence.handler;
 
 import com.openexchange.exception.OXException;
-<<<<<<< HEAD
 import com.openexchange.realtime.StanzaSender;
-=======
-import com.openexchange.realtime.atmosphere.StanzaSender;
-import com.openexchange.realtime.atmosphere.impl.payload.PayloadTransformer;
->>>>>>> c057920f09d7cfd1a5e35a4fade0598ca69458db
+import com.openexchange.realtime.atmosphere.impl.stanza.handler.StanzaHandler;
 import com.openexchange.realtime.atmosphere.presence.osgi.AtmospherePresenceServiceRegistry;
 import com.openexchange.realtime.packet.ID;
 import com.openexchange.realtime.packet.Presence;
 import com.openexchange.realtime.packet.Presence.Type;
+import com.openexchange.realtime.packet.PresenceState;
 import com.openexchange.realtime.packet.Stanza;
-import com.openexchange.realtime.payload.Payload;
-import com.openexchange.realtime.payload.PayloadTransformer;
-import com.openexchange.realtime.presence.PresenceData;
 import com.openexchange.realtime.presence.PresenceService;
-import com.openexchange.realtime.presence.PresenceState;
 import com.openexchange.realtime.presence.subscribe.PresenceSubscriptionService;
 import com.openexchange.realtime.util.IDMap;
 import com.openexchange.tools.session.ServerSession;
@@ -83,7 +76,7 @@ import com.openexchange.tools.session.ServerSession;
  * 
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
-public class OXRTPresenceHandler implements PayloadTransformer {
+public class OXRTPresenceHandler implements StanzaHandler {
 
     @Override
     public Class<? extends Stanza> getNamespace() {

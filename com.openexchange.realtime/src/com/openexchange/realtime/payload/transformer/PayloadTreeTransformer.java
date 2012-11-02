@@ -47,45 +47,38 @@
  *
  */
 
-package com.openexchange.realtime.payload;
+package com.openexchange.realtime.payload.transformer;
 
 import com.openexchange.exception.OXException;
-import com.openexchange.realtime.StanzaSender;
-import com.openexchange.realtime.util.ElementPath;
+import com.openexchange.realtime.payload.PayloadElement;
+import com.openexchange.realtime.payload.PayloadTree;
 import com.openexchange.tools.session.ServerSession;
 
 /**
- * {@link PayloadElementTransformer} - Used to transform PayloadTrees of incoming and outgoing Stanzas.
+ * {@link PayloadTreeTransformer} - Walks over a PayloadTree and transforms PayloadElements contained in PayloadTreeNodes from the current
+ * to the desired format.
  * 
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
-public interface PayloadElementTransformer {
+public interface PayloadTreeTransformer {
 
     /**
-     * Get the complete path to an element in a namespace that this PayloadTransformer is able to process.
+     * Transform an incoming PayloadTree.
      * 
-     * @return the elementPath of elements this PayloadTransformer is able to process.
-     */
-    public ElementPath getElementPath();
-
-    /**
-     * Transform an incoming Payload.
-     * 
-     * @param paylaod The incoming Payload to process
+     * @param payloadTree The incoming PayloadTree to process
      * @param session The currently active session
      * @return
      * @throws OXException When transformation fails
      */
-    public PayloadElement incoming(PayloadElement payload, ServerSession session) throws OXException;
+    public PayloadElement incoming(PayloadTree payloadTree, ServerSession session) throws OXException;
 
     /**
-     * Transform an outgoing Payload.
+     * Transform an outgoing PayloadTree.
      * 
-     * @param payload The Payload to process
+     * @param payloadTree The PayloadTree to process
      * @param session The currently active session
-     * @throws OXException
+     * @throws OXException When transformation fails
      */
-    public PayloadElement outgoing(PayloadElement payload, ServerSession session) throws OXException;
+    public PayloadElement outgoing(PayloadTree payloadTree, ServerSession session) throws OXException;
 
 }

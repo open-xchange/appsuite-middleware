@@ -49,17 +49,24 @@
 
 package com.openexchange.realtime.atmosphere.impl.stanza;
 
-import static org.junit.Assert.fail;
-import org.json.JSONArray;
+import static org.junit.Assert.assertEquals;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.net.URISyntaxException;
+import java.net.URL;
+import java.nio.ByteBuffer;
+import java.nio.channels.FileChannel;
+import java.util.ArrayList;
 import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.exception.OXException;
-import com.openexchange.realtime.StanzaSender;
 import com.openexchange.realtime.atmosphere.impl.stanza.builder.StanzaBuilder;
 import com.openexchange.realtime.atmosphere.impl.stanza.builder.StanzaBuilderSelector;
 import com.openexchange.realtime.packet.ID;
 import com.openexchange.realtime.packet.Stanza;
+import com.openexchange.realtime.payload.PayloadTree;
 
 
 /**
@@ -69,28 +76,25 @@ import com.openexchange.realtime.packet.Stanza;
  */
 public class PresenceBuilderTest {
 
-    private JSONObject presenceRequest;
+    private String presenceRequest = null;
+    private JSONObject presenceJSON = null;
+    
+    private final static String readFile(String file) throws IOException, URISyntaxException {
+        URL path = PresenceBuilderTest.class.getResource(file);
+        FileChannel channel = new FileInputStream(new File(path.toURI())).getChannel();
+        ByteBuffer buffer = ByteBuffer.allocate((int) channel.size());
+        channel.read(buffer);
+        channel.close();
+        return new String(buffer.array());
+     }
 
     /**
      * @throws java.lang.Exception
      */
     @Before
     public void setUp() throws Exception {
-        presenceRequest = new JSONObject();
-        
-        presenceRequest.put("session", "1234");
-        presenceRequest.put("element", "presence");
-        presenceRequest.put("to", "ox://marc.arens@premium");
-        presenceRequest.put("type", "subscribe");
-        
-        JSONArray payloads = new JSONArray();
-        JSONObject message = new JSONObject();
-        message.put("elementName", "message");
-        message.put("data", "Hello marens, please let me subscribe to your presence, WBR., Mr. X");
-        
-        payloads.put(message);
-        presenceRequest.put("payloads", payloads);
-        
+        presenceRequest = readFile("presence.json");
+        presenceJSON = new JSONObject(presenceRequest);
     }
 
     /**
@@ -99,11 +103,14 @@ public class PresenceBuilderTest {
      */
     @Test
     public void testBuildPresence() throws OXException {
-        StanzaBuilder<? extends Stanza> builder = StanzaBuilderSelector.getBuilder(new ID("ox://thorben.betten@premium"), presenceRequest);
-        System.out.println(builder);
+        StanzaBuilder<? extends Stanza> builder = StanzaBuilderSelector.getBuilder(new ID("ox://thorben.betten@premium"), presenceJSON);
         Stanza stanza = builder.build();
-        
-        System.out.println(stanza);
+        assertEquals(4, stanza.getPayloads().size());
+        ArrayList<PayloadTree> payloads = new ArrayList<PayloadTree>(stanza.getPayloads());
+        for (PayloadTree tree : payloads) {
+            System.out.println(tree);
+            System.out.println("\n");
+        }
     }
 
 }

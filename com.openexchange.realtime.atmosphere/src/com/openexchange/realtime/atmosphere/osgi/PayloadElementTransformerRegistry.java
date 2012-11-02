@@ -54,12 +54,13 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import com.openexchange.osgi.ServiceRegistry;
-import com.openexchange.realtime.payload.PayloadElementTransformer;
+import com.openexchange.realtime.atmosphere.AtmosphereExceptionCode;
+import com.openexchange.realtime.payload.transformer.PayloadElementTransformer;
 import com.openexchange.realtime.util.ElementPath;
 
 /**
- * {@link PayloadElementTransformerRegistry} - Tracks registered {@link PayloadElementTransformer handlers} and
- * makes them accessible through {@link #getHandlerFor(String)}.
+ * {@link PayloadElementTransformerRegistry} - Tracks registered {@link PayloadElementTransformer handlers} and makes them accessible
+ * through {@link #getHandlerFor(String)}.
  * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a> JavaDoc
@@ -69,14 +70,17 @@ public class PayloadElementTransformerRegistry extends ServiceRegistry {
 
     private static final PayloadElementTransformerRegistry INSTANCE = new PayloadElementTransformerRegistry();
 
-    private final Map<ElementPath, PayloadElementTransformer> handlers;
+    private final Map<Class<?>, PayloadElementTransformer> classToTransformer;
+
+    private final Map<ElementPath, PayloadElementTransformer> elementPathToTransformer;
 
     /**
      * Encapsulated constructor.
      */
     private PayloadElementTransformerRegistry() {
         super();
-        handlers = new ConcurrentHashMap<ElementPath, PayloadElementTransformer>();
+        classToTransformer = new ConcurrentHashMap<Class<?>, PayloadElementTransformer>();
+        elementPathToTransformer = new ConcurrentHashMap<ElementPath, PayloadElementTransformer>();
     }
 
     /**
@@ -95,25 +99,37 @@ public class PayloadElementTransformerRegistry extends ServiceRegistry {
      * @return The appropriate handler or <code>null</code> if none is applicable.
      */
     public PayloadElementTransformer getHandlerFor(ElementPath elementPath) {
-        return handlers.get(elementPath);
+        return elementPathToTransformer.get(elementPath);
     }
 
     /**
-     * Adds specified handler/transformer to this library.
+     * Adds specified transformer to this library.
      * 
      * @param transformer The handler to add
      */
-    public void add(PayloadElementTransformer transformer) {
-        handlers.put(transformer.getElementPath(), transformer);
+    public void addPayloadElementTransFormer(PayloadElementTransformer transformer) {
+        classToTransformer.put(transformer.getElementClass(), transformer);
     }
 
     /**
-     * Removes specified handler/transformer from this library.
+     * Removes specified transformer from this library.
      * 
      * @param transformer The handler to remove
      */
-    public void remove(PayloadElementTransformer transformer) {
-        handlers.remove(transformer.getElementPath());
+    public void removePayloadElementTransformer(PayloadElementTransformer transformer) {
+        classToTransformer.remove(transformer.getElementClass());
+    }
+
+    public void addElementPathMapping(ElementPath elementPath, Class<?> mappingClass) {
+        PayloadElementTransformer payloadElementTransformer = classToTransformer.get(mappingClass);
+        if (payloadElementTransformer == null) {
+            AtmosphereExceptionCode.MISSING_TRANSFORMER_FOR_PAYLOADELEMENT.create(elementPath);
+        }
+        elementPathToTransformer.put(elementPath, payloadElementTransformer);
+    }
+
+    public void removeElementpathMapping(ElementPath elementPath) {
+        elementPathToTransformer.remove(elementPath);
     }
 
     /**
@@ -122,7 +138,7 @@ public class PayloadElementTransformerRegistry extends ServiceRegistry {
      * @return the collected namespaces the registered OXRTHandlers are able to transform.
      */
     public Set<ElementPath> getManageableNamespaces() {
-        return new HashSet<ElementPath>(handlers.keySet());
+        return new HashSet<ElementPath>(elementPathToTransformer.keySet());
     }
 
 }

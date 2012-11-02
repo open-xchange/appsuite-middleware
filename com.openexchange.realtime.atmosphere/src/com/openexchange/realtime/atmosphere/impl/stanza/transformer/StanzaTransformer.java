@@ -50,6 +50,7 @@
 package com.openexchange.realtime.atmosphere.impl.stanza.transformer;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import com.openexchange.exception.OXException;
 import com.openexchange.realtime.StanzaFilter;
@@ -57,9 +58,9 @@ import com.openexchange.realtime.atmosphere.AtmosphereExceptionCode;
 import com.openexchange.realtime.atmosphere.osgi.PayloadElementTransformerRegistry;
 import com.openexchange.realtime.packet.Stanza;
 import com.openexchange.realtime.payload.PayloadElement;
-import com.openexchange.realtime.payload.PayloadElementTransformer;
 import com.openexchange.realtime.payload.PayloadTree;
 import com.openexchange.realtime.payload.PayloadTreeNode;
+import com.openexchange.realtime.payload.transformer.PayloadElementTransformer;
 import com.openexchange.realtime.util.ElementPath;
 import com.openexchange.tools.session.ServerSession;
 
@@ -111,7 +112,7 @@ public class StanzaTransformer implements StanzaFilter {
      */
     @Override
     public void outgoing(Stanza stanza, ServerSession session) throws OXException {
-        List<PayloadTree> payloadTrees = stanza.getPayloads();
+        Collection<PayloadTree> payloadTrees = stanza.getPayloads();
         for (PayloadTree tree : payloadTrees) {
             PayloadTreeNode root = tree.getRoot();
             if (root != null) {
@@ -129,6 +130,16 @@ public class StanzaTransformer implements StanzaFilter {
         }
     }
 
+    /**
+     * Get a PayloadElementTransformer suitable for a given ElementPath. We maintain two mappings: ElementPath ->
+     * PayloadElementTransformer.class and PayloadElementTransformer.class -> Transformer. So when we want to transform a PayloadElement whe
+     * have to lookup the class we use to represent it by its ElementPath and then get the Transformer suitable for that class. This way we
+     * don't have to register multiple instances of the same PayloadElementTransformer for different ElementPaths.
+     * 
+     * @param elementPath The ElementPath of the PayloadElement we want to transform
+     * @return A PayloadElementTransformer suitable for that PayloadElement
+     * @throws OXException If no suitable PayloadElementTransformer could be found
+     */
     private PayloadElementTransformer getPayloadTransformer(ElementPath elementPath) throws OXException {
         PayloadElementTransformer transformer = transformers.getHandlerFor(elementPath);
         if (transformer == null) {

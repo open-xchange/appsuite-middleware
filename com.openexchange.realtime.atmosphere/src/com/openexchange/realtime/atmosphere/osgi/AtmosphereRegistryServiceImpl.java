@@ -47,41 +47,52 @@
  *
  */
 
-package com.openexchange.realtime.atmosphere.presence;
+package com.openexchange.realtime.atmosphere.osgi;
 
-import static org.junit.Assert.*;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-
+import com.openexchange.realtime.atmosphere.impl.stanza.handler.StanzaHandler;
+import com.openexchange.realtime.atmosphere.osgi.service.AtmosphereRegistryService;
+import com.openexchange.realtime.payload.transformer.PayloadElementTransformer;
+import com.openexchange.realtime.util.ElementPath;
 
 /**
- * {@link JSONToPresenceStatusConverterTest} - Test conversion from JSON to presence status.
- *
- * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
+ * {@link AtmosphereRegistryServiceImpl} 
+ * 
+ * @author <a href="mailto:marc	.arens@open-xchange.com">Marc Arens</a>
  */
-public class JSONToPresenceStatusConverterTest {
+public class AtmosphereRegistryServiceImpl implements AtmosphereRegistryService {
 
-    /**
-     * @throws java.lang.Exception
-     */
-    @Before
-    public void setUp() throws Exception {
+    private PayloadElementTransformerRegistry payloadElementTransformerRegistry = PayloadElementTransformerRegistry.getInstance();
+
+    private StanzaHandlerRegistry stanzaHandlerRegistry = StanzaHandlerRegistry.getInstance();
+
+    @Override
+    public void addPayloadElementTransFormer(PayloadElementTransformer transformer) {
+        payloadElementTransformerRegistry.addPayloadElementTransFormer(transformer);
     }
 
-    /**
-     * @throws java.lang.Exception
-     */
-    @After
-    public void tearDown() throws Exception {
+    @Override
+    public void removePayloadElementTransformer(PayloadElementTransformer transformer) {
+        payloadElementTransformerRegistry.removePayloadElementTransformer(transformer);
     }
 
-    /**
-     * Test conversion from JSON to presence status.
-     */
-    @Test
-    public void testConvert() {
-        fail("Not yet implemented");
+    @Override
+    public void addElementPathMapping(ElementPath elementPath, Class<?> mappingClass) {
+        payloadElementTransformerRegistry.addElementPathMapping(elementPath, mappingClass);
+    }
+
+    @Override
+    public void removeElementpathMapping(ElementPath elementPath) {
+        payloadElementTransformerRegistry.removeElementpathMapping(elementPath);
+    }
+
+    @Override
+    public void addStanzaHandler(StanzaHandler handler) {
+        stanzaHandlerRegistry.addStanzaHandler(handler);
+    }
+
+    @Override
+    public void removeStanzaHandler(StanzaHandler handler) {
+        stanzaHandlerRegistry.removeStanzaHandler(handler);
     }
 
 }

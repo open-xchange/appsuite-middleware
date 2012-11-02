@@ -47,36 +47,34 @@
  *
  */
 
-package com.openexchange.realtime.payload;
+package com.openexchange.realtime.atmosphere.presence.handler;
 
 import com.openexchange.exception.OXException;
+import com.openexchange.realtime.atmosphere.impl.stanza.handler.StanzaHandler;
+import com.openexchange.realtime.packet.Presence;
+import com.openexchange.realtime.packet.Stanza;
 import com.openexchange.tools.session.ServerSession;
 
 /**
- * {@link PayloadTreeTransformer} - Walks over a PayloadTree and transforms PayloadElements contained in PayloadTreeNodes from the current
- * to the desired format.
+ * {@link PresenceHandler} Handle incoming and outgoing Presence Stanzas that have previously been transformed to the common POJO
+ * representation that can be handled by the realtime framework.
  * 
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
-public interface PayloadTreeTransformer {
+public class PresenceHandler implements StanzaHandler {
 
-    /**
-     * Transform an incoming PayloadTree.
-     * 
-     * @param payloadTree The incoming PayloadTree to process
-     * @param session The currently active session
-     * @return
-     * @throws OXException When transformation fails
-     */
-    public PayloadElement incoming(PayloadTree payloadTree, ServerSession session) throws OXException;
+    @Override
+    public Class getStanzaClass() {
+        return Presence.class;
+    }
 
-    /**
-     * Transform an outgoing PayloadTree.
-     * 
-     * @param payloadTree The PayloadTree to process
-     * @param session The currently active session
-     * @throws OXException When transformation fails
-     */
-    public PayloadElement outgoing(PayloadTree payloadTree, ServerSession session) throws OXException;
+    @Override
+    public void incoming(Stanza stanza, ServerSession session) throws OXException {
+        throw new UnsupportedOperationException("Not implemented yet!");
+    }
 
+    @Override
+    public void outgoing(Stanza stanza, ServerSession session) throws OXException {
+        throw new UnsupportedOperationException("Not implemented yet!");
+    }
 }

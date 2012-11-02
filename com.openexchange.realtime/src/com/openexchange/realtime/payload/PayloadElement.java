@@ -52,6 +52,7 @@ package com.openexchange.realtime.payload;
 import java.util.concurrent.atomic.AtomicReference;
 import com.openexchange.conversion.simple.SimpleConverter;
 import com.openexchange.exception.OXException;
+import com.openexchange.realtime.payload.transformer.PayloadElementTransformer;
 import com.openexchange.realtime.util.ElementPath;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.session.ServerSession;

@@ -47,35 +47,54 @@
  *
  */
 
-package com.openexchange.realtime.atmosphere.presence;
+package com.openexchange.realtime.presence;
 
-import static org.junit.Assert.*;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-
+import com.openexchange.realtime.packet.PresenceState;
 
 /**
- * {@link PresenceStatusToJSONConverterTest} - Test conversion from presence status to JSON.
- *
- * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
+ * {@link PresenceStatus}
+ * 
+ * @author <a href="mailto:marc	.arens@open-xchange.com">Marc Arens</a>
  */
-public class PresenceStatusToJSONConverterTest {
+public class PresenceStatus {
 
-    @Before
-    public void setUp() throws Exception {
-    }
+    private PresenceState state;
 
-    @After
-    public void tearDown() throws Exception {
-    }
+    private String message;
 
     /**
-     * Test conversion from presence status to JSON
+     * Initializes a new {@link PresenceStatus}.
+     * 
+     * @param state One of the avilable states to choose from
+     * @param message The optional user provided message to associate with the current state. May be null.
+     * @throws IllegalArgumentException when the state is missing
      */
-    @Test
-    public void testConvert() {
-        fail("Not yet implemented");
+    public PresenceStatus(PresenceState state, String message) {
+        if (state == null) {
+            throw new IllegalArgumentException("Missing obligatory state parameter");
+        }
+        this.state = state;
+        if (message == null) {
+            this.message = "";
+        } else {
+            this.message = message;
+        }
+    }
+
+    public PresenceState getState() {
+        return state;
+    }
+
+    public void setState(PresenceState state) {
+        this.state = state;
+    }
+
+    public String getMessage() {
+        return message;
+    }
+
+    public void setMessage(String message) {
+        this.message = message;
     }
 
 }

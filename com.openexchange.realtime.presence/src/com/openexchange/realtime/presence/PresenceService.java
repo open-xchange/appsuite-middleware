@@ -51,6 +51,7 @@ package com.openexchange.realtime.presence;
 
 import com.openexchange.exception.OXException;
 import com.openexchange.realtime.packet.ID;
+import com.openexchange.realtime.packet.PresenceState;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -62,17 +63,20 @@ import com.openexchange.tools.session.ServerSession;
 public interface PresenceService {
 
     /**
-     * @param id
-     * @param state
-     * @param statusMessage
-     * @param session
-     * @throws OXException
+     * Change the PresenceStatus of and ID.
+     * 
+     * @param id ID that wants to change its PresenceStatus
+     * @param status The new PresenceStatus
+     * @param session The associated ServerSession
+     * @throws OXException If changing the PresenceStatus fails
      */
-    public void changeState(ID id, PresenceState state, String statusMessage, ServerSession session) throws OXException;
+    public void changePresenceStatus(ID id, PresenceStatus status, ServerSession session) throws OXException;
 
     /**
-     * @param id
-     * @return
+     * Get the current PresenceStatus of an ID.
+     * 
+     * @param id The ID whose PresenceStatus should be queried
+     * @return The current PresenceStatus of ID or null if we aren't allowed to see the PresenceStatus.
      */
-    public PresenceData getPresence(ID id);
+    public PresenceStatus getPresenceStatus(ID id);
 }
