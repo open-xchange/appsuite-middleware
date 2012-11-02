@@ -100,7 +100,7 @@ public final class SessiondActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ConfigurationService.class, CacheService.class, EventAdmin.class, CryptoService.class };
+        return new Class<?>[] { ConfigurationService.class, CacheService.class, EventAdmin.class, CryptoService.class, ThreadPoolService.class };
     }
 
     @Override

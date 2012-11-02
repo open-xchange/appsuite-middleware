@@ -76,6 +76,7 @@ import com.openexchange.sessiond.cache.SessionCache;
 import com.openexchange.sessionstorage.SessionStorageExceptionCodes;
 import com.openexchange.sessionstorage.SessionStorageService;
 import com.openexchange.threadpool.ThreadPoolService;
+import com.openexchange.threadpool.ThreadPools;
 import com.openexchange.timer.ScheduledTimerTask;
 import com.openexchange.timer.TimerService;
 
@@ -315,7 +316,11 @@ public final class SessionHandler {
         sessionDataRef.get().addSession(session, noLimit);
         final SessionStorageService sessionStorageService = getServiceRegistry().getService(SessionStorageService.class);
         if (sessionStorageService != null) {
-            sessionStorageService.addSession(session);
+            try {
+                sessionStorageService.addSession(session);
+            } catch (final Exception e) {
+                // Put into session storage failed, perform with next getSession()
+            }
         }
         // Post event for created session
         postSessionCreation(session);
@@ -509,6 +514,27 @@ public final class SessionHandler {
             } catch (final OXException e) {
                 LOG.error("Unable to look-up session cache", e);
             }
+        }
+        if (null != sessionControl) {
+            final Runnable task = new Runnable() {
+
+                @Override
+                public void run() {
+                    try {
+                        final SessionStorageService storageService = getServiceRegistry().getService(SessionStorageService.class);
+                        if (storageService != null) {
+                            final SessionImpl session = sessionControl.getSession();
+                            if (storageService.lookupSession(session.getSessionID()) == null) {
+                                storageService.addSession(session);
+                            }
+
+                        }
+                    } catch (final Exception e) {
+                        // Ignore
+                    }
+                }
+            };
+            ThreadPools.getThreadPool().submit(ThreadPools.task(task, true));
         }
         return sessionControl;
     }
