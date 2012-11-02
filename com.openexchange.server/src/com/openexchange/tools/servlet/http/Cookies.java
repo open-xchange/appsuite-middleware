@@ -184,7 +184,11 @@ public final class Cookies {
         if (!domainEnabled()) {
             return null;
         }
-        return getDomainValue(serverName, prefixWithDot(), configuredDomain(), true);
+        final String configuredDomain = configuredDomain();
+        if (null != configuredDomain) {
+            return configuredDomain;
+        }
+        return getDomainValue(serverName, prefixWithDot(), null, true);
     }
 
     /**
