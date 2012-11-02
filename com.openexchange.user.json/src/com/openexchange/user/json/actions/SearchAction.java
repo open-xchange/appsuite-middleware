@@ -50,7 +50,6 @@
 package com.openexchange.user.json.actions;
 
 import static com.openexchange.user.json.Utility.checkForRequiredField;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -59,11 +58,9 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.fields.ContactFields;
 import com.openexchange.ajax.fields.OrderFields;
@@ -227,7 +224,7 @@ public final class SearchAction extends AbstractUserAction {
             	 * Get corresponding user
             	 */
             	final User user = userService.getUser(contact.getInternalUserId(), session.getContext());
-            	userContacts.add(new UserContact(contact, user));
+            	userContacts.add(new UserContact(contact, censor(session, user)));
             }
         } finally {
         	if (null != searchIterator) {

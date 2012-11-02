@@ -50,7 +50,6 @@
 package com.openexchange.user.json.actions;
 
 import org.json.JSONObject;
-
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
@@ -128,7 +127,7 @@ public final class GetAction extends AbstractUserAction {
         /*
          * Return appropriate result
          */
-        return new AJAXRequestResult(new UserContact(contact, user), contact.getLastModified(), "usercontact");
+        return new AJAXRequestResult(new UserContact(contact, censor(session, user)), contact.getLastModified(), "usercontact");
     }
     
     public AJAXRequestResult performOLD(final AJAXRequestData request, final ServerSession session) throws OXException {
