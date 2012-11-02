@@ -823,6 +823,10 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
                      */
                     response.setStatus(503, "HTTP server is temporarily overloaded. Try again later.");
                     error = true;
+                } catch (final NullPointerException npe) {
+                    LOG.error("Null dereference occurred.", npe);
+                    response.setStatus(400);
+                    error = true;
                 } catch (final Throwable t) {
                     // 400 - Bad Request
                     {
