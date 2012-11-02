@@ -162,7 +162,10 @@ public final class SmbFileMapManagement {
     public void dropFor(final Session session) {
         final ConcurrentMap<Integer, SmbFileMap> contextMap = map.get(Integer.valueOf(session.getContextId()));
         if (null != contextMap) {
-            contextMap.remove(Integer.valueOf(session.getUserId()));
+            final SmbFileMap smbFileMap = contextMap.remove(Integer.valueOf(session.getUserId()));
+            if (null != smbFileMap) {
+                smbFileMap.clear();
+            }
         }
         if (LOG.isDebugEnabled()) {
             LOG.debug(new StringBuilder("Cleaned user-sensitive SMB file cache for user ").append(session.getUserId()).append(" in context ").append(
@@ -179,7 +182,10 @@ public final class SmbFileMapManagement {
     public void dropFor(final int userId, final int contextId) {
         final ConcurrentMap<Integer, SmbFileMap> contextMap = map.get(Integer.valueOf(contextId));
         if (null != contextMap) {
-            contextMap.remove(Integer.valueOf(userId));
+            final SmbFileMap smbFileMap = contextMap.remove(Integer.valueOf(userId));
+            if (null != smbFileMap) {
+                smbFileMap.clear();
+            }
         }
         if (LOG.isDebugEnabled()) {
             LOG.debug(new StringBuilder("Cleaned user-sensitive SMB file cache for user ").append(userId).append(" in context ").append(
