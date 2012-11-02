@@ -47,71 +47,50 @@
  *
  */
 
-package com.openexchange.mail.smal.impl.index;
+package com.openexchange.index.solr;
 
-import java.util.Collections;
-import java.util.HashSet;
+import java.io.File;
+import java.io.FileWriter;
+import java.util.List;
 import java.util.Set;
-import com.google.common.base.Predicate;
-import com.google.common.collect.Iterables;
-import com.openexchange.config.ConfigurationService;
-import com.openexchange.mail.smal.impl.SmalServiceLookup;
+import junit.framework.Assert;
+import org.junit.Test;
+import com.openexchange.index.solr.internal.querybuilder.Configuration;
+import com.openexchange.index.solr.internal.querybuilder.SimpleConfiguration;
+
 
 /**
- * {@link AccountBlacklist}
- * 
+ * {@link SimpleConfigurationTest}
+ *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public class AccountBlacklist {
-
-    private static boolean allExternalAllowed = false;
-
-    private static Set<String> blacklistedServers = null;
+public class SimpleConfigurationTest {
     
+    private static final String CONTENT = "translator.test = a.b.c.TestTranslator\n" +
+    		"test.param1 = field1\n" +
+    		"test.param2 = field2\n" +
+    		"test.param3 = field3{gen,de,en}";
 
-    public static boolean isServerBlacklisted(final String server) {
-        initBlacklist();
-        if (allExternalAllowed || blacklistedServers.isEmpty()) {
-            return false;
-        }
+    @Test
+    public void testConfig() throws Exception {
+        File tempFile = File.createTempFile("oxtestfile", null);
+        FileWriter fw = new FileWriter(tempFile);
+        fw.write(CONTENT);
+        fw.flush();
+        fw.close();
+        
+        Configuration config = new SimpleConfiguration(tempFile.getAbsolutePath());
+        tempFile.delete();
+        
+        Set<String> handlers = config.getHandlers();
+        Assert.assertTrue(handlers.size() == 1);
+        Assert.assertEquals("test", handlers.iterator().next());
+        
+        List<String> indexFields = config.getIndexFields("test");
+        Set<String> keys = config.getKeys();
+        Set<String> keys2 = config.getKeys("test");
 
-        return Iterables.any(blacklistedServers, new Predicate<String>() {
-            @Override
-            public boolean apply(String input) {
-                if (server.endsWith(input)) {
-                    return true;
-                }
-
-                return false;
-            }
-        });
+        System.out.println(config.toString());
     }
-
-    private synchronized static void initBlacklist() {
-        if (blacklistedServers == null) {
-            ConfigurationService config = SmalServiceLookup.getInstance().getService(ConfigurationService.class);
-            String blacklist = config.getProperty("com.openexchange.mail.smal.blacklist");
-            if (blacklist == null) {
-                throw new IllegalArgumentException(
-                    "Missing value for property 'com.openexchange.mail.smal.blacklist'. Check smal.properties.");
-            }
-
-            blacklist = blacklist.trim();
-            if (blacklist.isEmpty()) {
-                allExternalAllowed = true;
-                blacklistedServers = Collections.EMPTY_SET;
-            } else if (blacklist.startsWith("*")) {
-                allExternalAllowed = false;
-                blacklistedServers = Collections.EMPTY_SET;
-            } else {
-                allExternalAllowed = false;
-                blacklistedServers = new HashSet<String>();
-                String[] servers = blacklist.split(",");
-                for (String server : servers) {
-                    blacklistedServers.add(server.trim());
-                }
-            }
-        }
-    }
-
+    
 }

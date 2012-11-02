@@ -47,20 +47,18 @@
  *
  */
 
-package com.openexchange.index.solr;
+package com.openexchange.index.solr.internal;
 
-import org.apache.solr.client.solrj.SolrQuery;
-import com.openexchange.exception.OXException;
-import com.openexchange.index.QueryParameters;
+import com.openexchange.index.IndexField;
 
 
 /**
- * {@link SolrQueryBuilder}
+ * {@link FieldMapper}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public interface SolrQueryBuilder {
+public interface FieldMapper {
     
-    SolrQuery buildQuery(QueryParameters params) throws OXException;
+    SolrField solrFieldFor(IndexField indexField);
 
 }

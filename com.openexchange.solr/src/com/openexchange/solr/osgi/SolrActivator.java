@@ -1,3 +1,4 @@
+
 package com.openexchange.solr.osgi;
 
 import java.rmi.Remote;
@@ -45,74 +46,74 @@ public class SolrActivator extends HousekeepingActivator {
     public static final String SOLR_NODE_MAP = "solrNodeMap";
 
     static Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(SolrActivator.class));
-	
-	private volatile DelegationSolrAccessImpl delegationAccess;
 
-	private static RMISolrAccessService solrRMI;
+    private volatile DelegationSolrAccessImpl delegationAccess;
+
+    private static RMISolrAccessService solrRMI;
 
     private SolrMBean solrMBean;
 
     private ObjectName solrMBeanName;
-    
 
-	@Override
-	protected Class<?>[] getNeededServices() {
-		return new Class<?>[] { ConfigurationService.class, DatabaseService.class, ThreadPoolService.class, HazelcastInstance.class };
-	}
+    @Override
+    protected Class<?>[] getNeededServices() {
+        return new Class<?>[] { ConfigurationService.class, DatabaseService.class, ThreadPoolService.class, HazelcastInstance.class };
+    }
 
-	@Override
-	protected void startBundle() throws OXException {
-		Services.setServiceLookup(this);
-		new CheckConfigDBTables(getService(DatabaseService.class)).checkTables();
-		EmbeddedSolrAccessImpl embeddedAccess = new EmbeddedSolrAccessImpl();
-		embeddedAccess.startUp();
-		DelegationSolrAccessImpl accessService = this.delegationAccess = new DelegationSolrAccessImpl(embeddedAccess);
-		registerService(SolrAccessService.class, accessService);
-		addService(SolrAccessService.class, accessService);
-		SolrCoreConfigServiceImpl coreService = new SolrCoreConfigServiceImpl();
-		registerService(SolrCoreConfigService.class, coreService);
-		addService(SolrCoreConfigService.class, coreService);
-		solrRMI = new RMISolrAccessImpl(embeddedAccess);
-		registerService(Remote.class, solrRMI);
+    @Override
+    protected void startBundle() throws OXException {
+        Services.setServiceLookup(this);
+        new CheckConfigDBTables(getService(DatabaseService.class)).checkTables();
+        EmbeddedSolrAccessImpl embeddedAccess = new EmbeddedSolrAccessImpl();
+        embeddedAccess.startUp();
+        DelegationSolrAccessImpl accessService = this.delegationAccess = new DelegationSolrAccessImpl(embeddedAccess);
+        registerService(SolrAccessService.class, accessService);
+        addService(SolrAccessService.class, accessService);
+        SolrCoreConfigServiceImpl coreService = new SolrCoreConfigServiceImpl();
+        registerService(SolrCoreConfigService.class, coreService);
+        addService(SolrCoreConfigService.class, coreService);
+        solrRMI = new RMISolrAccessImpl(embeddedAccess);
+        registerService(Remote.class, solrRMI);
 
-		SolrCoresCreateTableService createTableService = new SolrCoresCreateTableService();
-		registerService(CreateTableService.class, createTableService);
-		registerService(UpdateTaskProviderService.class, new DefaultUpdateTaskProviderService(new SolrCoresCreateTableTask(createTableService)));
-		// new SolrCoreStoresCreateTableTask()
-		registerService(LoginHandlerService.class, new SolrCoreLoginHandler(embeddedAccess));
-		registerMBean(coreService);		
-		HazelcastInstance hazelcast = getService(HazelcastInstance.class);
-		
-		ConfigurationService config = getService(ConfigurationService.class);
+        SolrCoresCreateTableService createTableService = new SolrCoresCreateTableService();
+        registerService(CreateTableService.class, createTableService);
+        registerService(UpdateTaskProviderService.class, new DefaultUpdateTaskProviderService(new SolrCoresCreateTableTask(
+            createTableService)));
+        // new SolrCoreStoresCreateTableTask()
+        registerService(LoginHandlerService.class, new SolrCoreLoginHandler(embeddedAccess));
+        registerMBean(coreService);
+        HazelcastInstance hazelcast = getService(HazelcastInstance.class);
+
+        ConfigurationService config = getService(ConfigurationService.class);
         boolean isSolrNode = config.getBoolProperty(SolrProperties.IS_NODE, false);
         if (isSolrNode) {
             IMap<String, Integer> solrNodes = hazelcast.getMap(SOLR_NODE_MAP);
             String memberAddress = hazelcast.getCluster().getLocalMember().getInetSocketAddress().getAddress().getHostAddress();
             solrNodes.put(memberAddress, new Integer(0));
         }
-		openTrackers();
-	}
+        openTrackers();
+    }
 
-	@Override
-	protected void stopBundle() throws Exception {
-		super.stopBundle();
-		
-		solrRMI = null;
-		ManagementService managementService = Services.optService(ManagementService.class);
-		if (managementService != null && solrMBeanName != null) {
-		    managementService.unregisterMBean(solrMBeanName);
-		    solrMBean = null;
-		}
+    @Override
+    protected void stopBundle() throws Exception {
+        super.stopBundle();
 
-		DelegationSolrAccessImpl delegationAccess = this.delegationAccess;
-		if (delegationAccess != null) {
-		    delegationAccess.shutDown();
-			this.delegationAccess = null;
-		}
-	}
-	
-	private void registerMBean(SolrCoreConfigServiceImpl coreService) {
-	    try {
+        solrRMI = null;
+        ManagementService managementService = Services.optService(ManagementService.class);
+        if (managementService != null && solrMBeanName != null) {
+            managementService.unregisterMBean(solrMBeanName);
+            solrMBean = null;
+        }
+
+        DelegationSolrAccessImpl delegationAccess = this.delegationAccess;
+        if (delegationAccess != null) {
+            delegationAccess.shutDown();
+            this.delegationAccess = null;
+        }
+    }
+
+    private void registerMBean(SolrCoreConfigServiceImpl coreService) {
+        try {
             solrMBeanName = new ObjectName(SolrMBean.DOMAIN, "name", "Solr Control");
             DelegationSolrAccessImpl delegationAccess = this.delegationAccess;
             solrMBean = new SolrMBeanImpl(delegationAccess, coreService);
@@ -141,6 +142,6 @@ public class SolrActivator extends HousekeepingActivator {
         } catch (NotCompliantMBeanException e) {
             LOG.error(e.getMessage(), e);
         }
-	}
+    }
 
 }

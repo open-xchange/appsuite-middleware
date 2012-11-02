@@ -47,71 +47,20 @@
  *
  */
 
-package com.openexchange.mail.smal.impl.index;
+package com.openexchange.index.solr.internal.querybuilder;
 
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
-import com.google.common.base.Predicate;
-import com.google.common.collect.Iterables;
-import com.openexchange.config.ConfigurationService;
-import com.openexchange.mail.smal.impl.SmalServiceLookup;
+import org.apache.solr.client.solrj.SolrQuery;
+import com.openexchange.exception.OXException;
+import com.openexchange.index.QueryParameters;
+
 
 /**
- * {@link AccountBlacklist}
- * 
+ * {@link SolrQueryBuilder}
+ *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public class AccountBlacklist {
-
-    private static boolean allExternalAllowed = false;
-
-    private static Set<String> blacklistedServers = null;
+public interface SolrQueryBuilder {
     
-
-    public static boolean isServerBlacklisted(final String server) {
-        initBlacklist();
-        if (allExternalAllowed || blacklistedServers.isEmpty()) {
-            return false;
-        }
-
-        return Iterables.any(blacklistedServers, new Predicate<String>() {
-            @Override
-            public boolean apply(String input) {
-                if (server.endsWith(input)) {
-                    return true;
-                }
-
-                return false;
-            }
-        });
-    }
-
-    private synchronized static void initBlacklist() {
-        if (blacklistedServers == null) {
-            ConfigurationService config = SmalServiceLookup.getInstance().getService(ConfigurationService.class);
-            String blacklist = config.getProperty("com.openexchange.mail.smal.blacklist");
-            if (blacklist == null) {
-                throw new IllegalArgumentException(
-                    "Missing value for property 'com.openexchange.mail.smal.blacklist'. Check smal.properties.");
-            }
-
-            blacklist = blacklist.trim();
-            if (blacklist.isEmpty()) {
-                allExternalAllowed = true;
-                blacklistedServers = Collections.EMPTY_SET;
-            } else if (blacklist.startsWith("*")) {
-                allExternalAllowed = false;
-                blacklistedServers = Collections.EMPTY_SET;
-            } else {
-                allExternalAllowed = false;
-                blacklistedServers = new HashSet<String>();
-                String[] servers = blacklist.split(",");
-                for (String server : servers) {
-                    blacklistedServers.add(server.trim());
-                }
-            }
-        }
-    }
+    SolrQuery buildQuery(QueryParameters params) throws OXException;
 
 }

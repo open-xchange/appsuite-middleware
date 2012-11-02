@@ -57,12 +57,9 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import org.apache.solr.client.solrj.SolrQuery;
-import org.apache.solr.client.solrj.SolrQuery.ORDER;
 import org.apache.solr.common.SolrInputDocument;
-import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.Types;
-import com.openexchange.index.AccountFolders;
 import com.openexchange.index.FacetParameters;
 import com.openexchange.index.IndexDocument;
 import com.openexchange.index.IndexField;
@@ -70,21 +67,18 @@ import com.openexchange.index.IndexResult;
 import com.openexchange.index.Indexes;
 import com.openexchange.index.QueryParameters;
 import com.openexchange.index.QueryParameters.Order;
-import com.openexchange.index.SearchHandler;
 import com.openexchange.index.solr.internal.AbstractSolrIndexAccess;
-import com.openexchange.index.solr.internal.Services;
+import com.openexchange.index.solr.internal.LegacyQueryBuilder;
 import com.openexchange.index.solr.internal.SolrIndexResult;
-import com.openexchange.index.solr.internal.attachments.SolrAttachmentField;
+import com.openexchange.index.solr.internal.querybuilder.SolrQueryBuilder;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.index.MailIndexField;
 import com.openexchange.mail.index.MailUUID;
-import com.openexchange.mail.search.SearchTerm;
 import com.openexchange.solr.SolrCoreIdentifier;
-import com.openexchange.solr.SolrProperties;
 
 /**
  * {@link SolrMailIndexAccess}
- *
+ * 
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public class SolrMailIndexAccess extends AbstractSolrIndexAccess<MailMessage> {
@@ -118,13 +112,13 @@ public class SolrMailIndexAccess extends AbstractSolrIndexAccess<MailMessage> {
         if (documents.isEmpty()) {
             return;
         }
-        
+
         List<SolrInputDocument> inputDocuments = new ArrayList<SolrInputDocument>();
         for (IndexDocument<MailMessage> document : documents) {
             inputDocuments.add(convertToDocument(document));
         }
 
-        addDocuments(inputDocuments);        
+        addDocuments(inputDocuments);
     }
 
     @Override
@@ -137,13 +131,13 @@ public class SolrMailIndexAccess extends AbstractSolrIndexAccess<MailMessage> {
         if (documents.isEmpty()) {
             return;
         }
-        
+
         List<SolrInputDocument> inputDocuments = new ArrayList<SolrInputDocument>();
         for (IndexDocument<MailMessage> document : documents) {
             inputDocuments.add(convertToDocument(document));
         }
 
-        addDocuments(inputDocuments);  
+        addDocuments(inputDocuments);
     }
 
     @Override
@@ -156,13 +150,13 @@ public class SolrMailIndexAccess extends AbstractSolrIndexAccess<MailMessage> {
         if (documents.isEmpty()) {
             return;
         }
-        
+
         List<SolrInputDocument> inputDocuments = new ArrayList<SolrInputDocument>();
         for (IndexDocument<MailMessage> document : documents) {
             inputDocuments.add(convertToDocument(document));
         }
 
-        addDocuments(inputDocuments);  
+        addDocuments(inputDocuments);
     }
 
     @Override
@@ -176,63 +170,66 @@ public class SolrMailIndexAccess extends AbstractSolrIndexAccess<MailMessage> {
         fields.add(MailIndexField.ACCOUNT);
         fields.add(MailIndexField.FULL_NAME);
         fields.add(MailIndexField.ID);
-        
+
         IndexResult<MailMessage> indexResult = query(parameters, fields);
         List<IndexDocument<MailMessage>> documents = indexResult.getResults();
         Set<String> uuids = new HashSet<String>(documents.size());
         for (IndexDocument<MailMessage> document : documents) {
             uuids.add(MailUUID.newUUID(contextId, userId, document.getObject()).toString());
         }
-        
+
         String deleteQuery = buildQueryStringWithOr(SolrMailField.UUID.solrName(), uuids);
         if (deleteQuery != null) {
             deleteDocumentsByQuery(deleteQuery);
-        }        
+        }
     }
 
     @Override
     public IndexResult<MailMessage> query(QueryParameters parameters, Set<? extends IndexField> fields) throws OXException {
-        SolrQuery solrQuery = buildSolrQuery(parameters);
-        boolean sortManually = setSortAndOrder(parameters, solrQuery);
+        IndexField sortField = parameters.getSortField();
+        Order order = parameters.getOrder();
+        SolrMailField solrSortField = (SolrMailField) MailFieldMapper.getInstance().solrFieldFor(sortField);
+        boolean sortManually = false;
+        QueryParameters newParameters = parameters;
+        if (solrSortField != null) {
+            if (solrSortField.equals(SolrMailField.FROM) || solrSortField.equals(SolrMailField.TO)
+               || solrSortField.equals(SolrMailField.CC) || solrSortField.equals(SolrMailField.BCC)) {
+                sortManually = true;
+                newParameters = new QueryParameters.Builder()
+                                                    .setSearchTerm(parameters.getSearchTerm())
+                                                    .setHandler(parameters.getHandler())
+                                                    .setAccountFolders(parameters.getAccountFolders())
+                                                    .setIndexIds(parameters.getIndexIds())
+                                                    .setModule(parameters.getModule())
+                                                    .setOffset(parameters.getOff())
+                                                    .setLength(parameters.getLen())
+                                                    .build();
+            }
+        }
+
+        SolrQuery solrQuery = buildSolrQuery(newParameters);
         Set<SolrMailField> solrFields = checkAndConvert(fields);
         setFieldList(solrQuery, solrFields);
-        List<IndexDocument<MailMessage>> results = queryChunkWise(new SolrMailDocumentConverter(), solrQuery, parameters.getOff(), parameters.getLen(), 100);
+        List<IndexDocument<MailMessage>> results = queryChunkWise(
+            new SolrMailDocumentConverter(),
+            solrQuery,
+            newParameters.getOff(),
+            newParameters.getLen(),
+            100);
         if (results.isEmpty()) {
             return Indexes.emptyResult();
         }
-        
+
         if (sortManually) {
-            Collections.sort(results, new AddressComparator(parameters.getSortField(), parameters.getOrder()));
+            Collections.sort(results, new AddressComparator(solrSortField, order));
         }
         return new SolrIndexResult<MailMessage>(results.size(), results, null);
     }
-    
+
     @Override
     public IndexResult<MailMessage> query(QueryParameters parameters, FacetParameters facetParameters, Set<? extends IndexField> fields) throws OXException {
         // TODO Auto-generated method stub
         return null;
-    }
-    
-    private boolean setSortAndOrder(QueryParameters parameters, final SolrQuery query) {
-        final IndexField indexField = parameters.getSortField();
-        String sortField = null;
-        boolean retval = false;
-        if (indexField != null && indexField instanceof MailIndexField) {
-            final SolrMailField solrField = SolrMailField.solrMailFieldFor((MailIndexField) indexField);
-            if (solrField.equals(SolrMailField.FROM) || solrField.equals(SolrMailField.TO) || solrField.equals(SolrMailField.CC) || solrField.equals(SolrMailField.BCC)) {
-                retval = true;
-            } else {
-                sortField = solrField.solrName();
-            }
-        }
-        
-        final Order orderParam = parameters.getOrder();
-        if (sortField != null) {
-            final ORDER order = orderParam == null ? ORDER.desc : orderParam.equals(Order.DESC) ? ORDER.desc : ORDER.asc;
-            query.setSortField(sortField, order);
-        }
-        
-        return retval;
     }
 
     private Set<SolrMailField> checkAndConvert(Set<? extends IndexField> fields) {
@@ -243,94 +240,20 @@ public class SolrMailIndexAccess extends AbstractSolrIndexAccess<MailMessage> {
             set = EnumSet.noneOf(SolrMailField.class);
             for (IndexField indexField : fields) {
                 if (indexField instanceof MailIndexField) {
-                    set.add(SolrMailField.solrMailFieldFor((MailIndexField) indexField));
+                    SolrMailField solrField = (SolrMailField) MailFieldMapper.getInstance().solrFieldFor(indexField);
+                    if (solrField != null) {
+                        set.add(solrField);
+                    }
                 }
             }
         }
-        
+
         return set;
     }
 
-    private SolrQuery buildSolrQuery(QueryParameters parameters) {
-        SearchHandler searchHandler = parameters.getHandler();
-        if (searchHandler == null) {
-            throw new IllegalArgumentException("Parameter `search handler` must not be null!");
-        }
-        
-        ConfigurationService config = Services.getService(ConfigurationService.class);
-        SolrQuery solrQuery;
-        switch (searchHandler) { 
-            case SIMPLE:
-            {
-                Object searchTerm = parameters.getSearchTerm();
-                if (searchTerm == null || !(searchTerm instanceof String)) {
-                    throw new IllegalArgumentException("Parameter `searchTerm` must not be null and of type java.lang.String!");
-                }
-                
-                solrQuery = new SolrQuery((String) searchTerm);
-                solrQuery.setQueryType(config.getProperty(SolrProperties.SIMPLE_HANLDER));
-                addFilterQueries(parameters, solrQuery);
-                break;
-            }
-            
-            case ALL_REQUEST:
-            {                
-                solrQuery = new SolrQuery("*:*");
-                solrQuery.setQueryType(config.getProperty(SolrProperties.ALL_HANLDER));                
-                addFilterQueries(parameters, solrQuery);             
-                break;
-            }
-            
-            case GET_REQUEST:
-            {
-                Set<String> ids = parameters.getIndexIds();
-                if (ids == null) {
-                    throw new IllegalArgumentException("Parameter `indexIds` must not be null!");
-                }
-                
-                solrQuery = new SolrQuery(stringSetToQuery(ids));
-                solrQuery.setQueryType(config.getProperty(SolrProperties.GET_HANDLER));
-                addFilterQueries(parameters, solrQuery);
-                break;
-            }
-            
-            case CUSTOM:
-            {
-                Object termObject = parameters.getSearchTerm();
-                if (termObject == null || !(termObject instanceof SearchTerm<?>)) {
-                    throw new IllegalArgumentException("Parameter `searchTerm` must not be null and must be instance of com.openexchange.index.attachments.SearchTerm<?>!");
-                }
-                
-                String queryString = SearchTerm2Query.searchTerm2Query((SearchTerm<?>) termObject).toString();
-                solrQuery = new SolrQuery(queryString);
-                solrQuery.setQueryType(config.getProperty(SolrProperties.CUSTOM_HANLDER));
-                addFilterQueries(parameters, solrQuery);
-                break;
-            }
-            
-            default:
-                throw new IllegalArgumentException("Search handler " + searchHandler.name() + " is not implemented for MailSolrIndexAccess.query().");
-        }
-        
-        return solrQuery;
-    }
-    
-    private void addFilterQueries(QueryParameters parameters, SolrQuery solrQuery) {
-        Set<AccountFolders> all = parameters.getAccountFolders();
-        Set<String> queries = new HashSet<String>();
-        if (all != null) {
-            for (AccountFolders accountFolders : all) {
-                String account = accountFolders.getAccount();
-                Set<String> folders = accountFolders.getFolders();
-                if (folders.isEmpty()) {
-                    queries.add(buildQueryString(SolrMailField.ACCOUNT.solrName(), account));
-                } else {
-                    queries.add(catenateQueriesWithAnd(buildQueryString(SolrAttachmentField.ACCOUNT.solrName(), account), buildQueryStringWithOr(SolrMailField.FULL_NAME.solrName(), folders)));
-                }
-            }
-        }
-        
-        addFilterQueryIfNotNull(solrQuery, catenateQueriesWithOr(queries.toArray(new String[queries.size()])));   
+    private SolrQuery buildSolrQuery(QueryParameters parameters) throws OXException {
+        SolrQueryBuilder queryBuilder = new LegacyQueryBuilder(this);
+        return queryBuilder.buildQuery(parameters);
     }
     
     private SolrInputDocument convertToDocument(IndexDocument<MailMessage> document) throws OXException {

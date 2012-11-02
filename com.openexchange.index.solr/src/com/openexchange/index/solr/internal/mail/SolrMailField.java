@@ -52,10 +52,8 @@ package com.openexchange.index.solr.internal.mail;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.EnumMap;
 import java.util.EnumSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import org.apache.commons.lang.StringUtils;
 import com.openexchange.index.solr.internal.SolrField;
@@ -99,8 +97,6 @@ public enum SolrMailField implements SolrField {
     CONTENT("content", MailIndexField.CONTENT, "param28");
 
     
-    private static final Map<MailIndexField, SolrMailField> fieldMapping = new EnumMap<MailIndexField, SolrMailField>(MailIndexField.class);
-
     private static final Set<MailIndexField> indexedFields;
 
     private final String solrName;
@@ -112,8 +108,6 @@ public enum SolrMailField implements SolrField {
     static {
         final Set<MailIndexField> set = EnumSet.noneOf(MailIndexField.class);
         for (final SolrMailField field : values()) {
-            fieldMapping.put(field.indexField, field);
-
             if (field.solrName() != null) {
                 set.add(field.indexField);
             }
@@ -178,23 +172,6 @@ public enum SolrMailField implements SolrField {
             }
         }
         return names.toArray(new String[names.size()]);
-    }
-
-    public static SolrMailField solrMailFieldFor(final MailIndexField indexField) {
-        final SolrMailField solrField = fieldMapping.get(indexField);
-        return solrField;
-    }
-
-    public static SolrMailField[] solrMailFieldsFor(final Set<MailIndexField> indexFields) {
-        final List<SolrMailField> solrFields = new ArrayList<SolrMailField>();
-        for (final MailIndexField indexField : indexFields) {
-            final SolrMailField solrField = fieldMapping.get(indexField);
-            if (solrField != null) {
-                solrFields.add(solrField);
-            }
-        }
-
-        return solrFields.toArray(new SolrMailField[solrFields.size()]);
     }
 
     public Object getValueFromMail(final MailMessage mail) {

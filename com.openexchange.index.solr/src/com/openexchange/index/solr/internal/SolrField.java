@@ -51,17 +51,16 @@ package com.openexchange.index.solr.internal;
 
 import com.openexchange.index.IndexField;
 
-
 /**
  * {@link SolrField}
- *
+ * 
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public interface SolrField {
-    
+
     String solrName();
-    
+
     String parameterName();
-    
+
     IndexField indexField();
 }

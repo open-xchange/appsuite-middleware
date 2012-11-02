@@ -1,30 +1,20 @@
-package de.kippdata.solrext.translators;
+package com.openexchange.index.solr.internal.mail.translators;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-<<<<<<< HEAD
-
 import org.apache.commons.logging.Log;
-import org.apache.log4j.Logger;
-
-=======
-import org.apache.commons.logging.Log;
->>>>>>> 37d8bc647adaacd5659c2e6697ad341d17806e79
-import de.kippdata.cria.solrext.utils.FormalFieldParser;
-import de.kippdata.solrext.queries.Configuration;
-import de.kippdata.solrext.queries.QueryTranslator;
-import de.kippdata.solrext.queries.TranslationException;
+import com.openexchange.index.solr.internal.querybuilder.Configuration;
+import com.openexchange.index.solr.internal.querybuilder.QueryTranslator;
+import com.openexchange.index.solr.internal.querybuilder.TranslationException;
+import com.openexchange.index.solr.internal.querybuilder.utils.FormalFieldParser;
 
 public class SimpleTranslator implements QueryTranslator {
   private Map<String,List<String>> translationDict;
   private String handlerName;
   private FormalFieldParser parser;
-
-<<<<<<< HEAD
   //private static final Logger log = Logger.getLogger(SimpleTranslator.class);
-=======
->>>>>>> 37d8bc647adaacd5659c2e6697ad341d17806e79
+
   private static Log log = com.openexchange.log.Log.loggerFor(SimpleTranslator.class);
 
 

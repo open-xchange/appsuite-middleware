@@ -1,4 +1,4 @@
-package de.kippdata.solrext.queries;
+package com.openexchange.index.solr.internal.querybuilder;
 
 import java.util.List;
 import java.util.Map;

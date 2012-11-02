@@ -1,4 +1,4 @@
-package de.kippdata.cria.solrext.utils;
+package com.openexchange.index.solr.internal.querybuilder.utils;
 /*
  *CVS information:
  * $Revision: 1.2 $

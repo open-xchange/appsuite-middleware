@@ -1,4 +1,4 @@
-package de.kippdata.solrext.queries;
+package com.openexchange.index.solr.internal.querybuilder;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -53,7 +53,7 @@ public class SimpleConfiguration implements Configuration {
 
         if (parts[0].startsWith("translator.")) {
           log.info("[SimpleConfiguration]: Extracting translator ...");
-          String handlerName = parts[0].substring(parts[0].indexOf(".") + 1);
+          String handlerName = parts[0].substring(parts[0].indexOf(".") + 1).trim();
           log.debug("[SimpleConfiguration]: Handler is " + handlerName);
           log.debug("[SimpleConfiguration]: Translator is " + parts[1].trim());
           translators.put(handlerName, parts[1].trim());
