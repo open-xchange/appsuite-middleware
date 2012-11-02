@@ -74,6 +74,7 @@ import com.openexchange.file.storage.FileStorageAccountAccess;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.FileStorageFileAccess;
 import com.openexchange.file.storage.FileTimedResult;
+import com.openexchange.file.storage.cifs.cache.SmbFileMapManagement;
 import com.openexchange.groupware.results.Delta;
 import com.openexchange.groupware.results.TimedResult;
 import com.openexchange.session.Session;
@@ -259,6 +260,10 @@ public final class CIFSFileAccess extends AbstractCIFSAccess implements FileStor
                 smbFile.setLastModified(now);
             }
             smbFile.setReadWrite();
+            /*
+             * Invalidate
+             */
+            SmbFileMapManagement.getInstance().dropFor(session);
             return smbFile;
         } catch (final OXException e) {
             throw e;
@@ -295,6 +300,10 @@ public final class CIFSFileAccess extends AbstractCIFSAccess implements FileStor
              * Save
              */
             saveDocument0(update, newFil, modifiedFields);
+            /*
+             * Invalidate
+             */
+            SmbFileMapManagement.getInstance().dropFor(session);
             /*
              * Return
              */
@@ -418,6 +427,10 @@ public final class CIFSFileAccess extends AbstractCIFSAccess implements FileStor
                     subFile.delete();
                 }
             }
+            /*
+             * Invalidate
+             */
+            SmbFileMapManagement.getInstance().dropFor(session);
         } catch (final OXException e) {
             throw e;
         } catch (final SmbException e) {
@@ -461,6 +474,10 @@ public final class CIFSFileAccess extends AbstractCIFSAccess implements FileStor
                 }
             }
             /*
+             * Invalidate
+             */
+            SmbFileMapManagement.getInstance().dropFor(session);
+            /*
              * Return
              */
             return ret;
@@ -502,6 +519,10 @@ public final class CIFSFileAccess extends AbstractCIFSAccess implements FileStor
              * Delete
              */
             smbFile.delete();
+            /*
+             * Invalidate
+             */
+            SmbFileMapManagement.getInstance().dropFor(session);
             /*
              * Return empty array
              */

@@ -68,6 +68,7 @@ import com.openexchange.file.storage.FileStorageFolderAccess;
 import com.openexchange.file.storage.FileStorageFolderType;
 import com.openexchange.file.storage.Quota;
 import com.openexchange.file.storage.Quota.Type;
+import com.openexchange.file.storage.cifs.cache.SmbFileMapManagement;
 import com.openexchange.session.Session;
 
 /**
@@ -504,6 +505,10 @@ public final class CIFSFolderAccess extends AbstractCIFSAccess implements FileSt
             final String fid = pid + '/' + toCreate.getName() + '/';
             final SmbFile newDir = getSmbFile(fid);
             newDir.mkdir();
+            /*
+             * Invalidate
+             */
+            SmbFileMapManagement.getInstance().dropFor(session);
             return fid;
         } catch (final OXException e) {
             throw e;
@@ -582,6 +587,10 @@ public final class CIFSFolderAccess extends AbstractCIFSAccess implements FileSt
              */
             copyMe.delete();
             /*
+             * Invalidate
+             */
+            SmbFileMapManagement.getInstance().dropFor(session);
+            /*
              * Return URL
              */
             return newUri;
@@ -639,6 +648,10 @@ public final class CIFSFolderAccess extends AbstractCIFSAccess implements FileSt
              */
             renameMe.delete();
             /*
+             * Invalidate
+             */
+            SmbFileMapManagement.getInstance().dropFor(session);
+            /*
              * Return URL
              */
             return newUri;
@@ -679,6 +692,10 @@ public final class CIFSFolderAccess extends AbstractCIFSAccess implements FileSt
              * Delete
              */
             deleteMe.delete();
+            /*
+             * Invalidate
+             */
+            SmbFileMapManagement.getInstance().dropFor(session);
             /*
              * Return
              */
@@ -729,6 +746,10 @@ public final class CIFSFolderAccess extends AbstractCIFSAccess implements FileSt
             for (final SmbFile sub : listFiles) {
                 sub.delete();
             }
+            /*
+             * Invalidate
+             */
+            SmbFileMapManagement.getInstance().dropFor(session);
         } catch (final OXException e) {
             throw e;
         } catch (final SmbAuthException e) {
