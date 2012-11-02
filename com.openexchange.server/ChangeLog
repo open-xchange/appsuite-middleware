@@ -1,3 +1,11 @@
+* 2012-10-30 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 23525: Skip wildcard-only comparisons in search object
+
+* 2012-10-26 - thorben.betten@open-xchange.com
+
+ - Fix for bug 19615: Handle IndexOutOfBoundsException on access to an IMAP message
+
 * 2012-10-25 - marcus.klein@open-xchange.com
 
  - Fix for bug 22385: Introduced JDK version specific source folders for bundles.

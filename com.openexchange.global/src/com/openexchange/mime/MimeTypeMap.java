@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2020 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,21 +47,57 @@
  *
  */
 
-package com.openexchange.user.json.filter;
+package com.openexchange.mime;
 
-import com.openexchange.groupware.container.Contact;
-
+import java.io.File;
+import java.util.List;
 
 /**
- * {@link DoNothingCensorship}
+ * {@link MimeTypeMap} - Maps MIME types to file extensions and vice versa.
+ * <p>
+ * This class looks in various places for MIME types file entries. When requests are made to look up MIME types or file extensions, it
+ * searches MIME types files in the following order:
+ * <ol>
+ * <li>The file <i>.mime.types</i> in the user's home directory.</li>
+ * <li>The file <i>&lt;java.home&gt;/lib/mime.types</i>.</li>
+ * <li>The file or resources named <i>META-INF/mime.types</i>.</li>
+ * <li>The file or resource named <i>META-INF/mimetypes.default</i>.</li>
+ * <li>The file or resource denoted by property <i>MimeTypeFileName</i>.</li>
+ * </ol>
  *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class DoNothingCensorship implements ContactCensorship {
+public interface MimeTypeMap {
 
-    @Override
-    public void censor(final Contact contact) {
-        // Do nothing
-    }
+    /**
+     * Gets the MIME type associated with given file.
+     *
+     * @param file The file
+     * @return The MIME type associated with given file or <code>application/octet-stream</code> if none found
+     */
+    String getContentType(final File file);
 
+    /**
+     * Gets the MIME type associated with given file name.
+     *
+     * @param fileName The file name; e.g. <code>"file.html"</code>
+     * @return The MIME type associated with given file name or <code>application/octet-stream</code> if none found
+     */
+    String getContentType(String fileName);
+
+    /**
+     * Gets the MIME type associated with given file extension.
+     *
+     * @param extension The file extension; e.g. <code>"txt"</code>
+     * @return The MIME type associated with given file extension or <code>application/octet-stream</code> if none found
+     */
+    String getContentTypeByExtension(String extension);
+
+    /**
+     * Gets the file extension for given MIME type.
+     *
+     * @param mimeType The MIME type
+     * @return The file extension for given MIME type or <code>dat</code> if none found
+     */
+    List<String> getFileExtensions(String mime);
 }

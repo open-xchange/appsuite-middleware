@@ -55,18 +55,23 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-
-
 /**
- * {@link HealthProbeServlet} - Used for health checks from proxy servers in front of our backend(cluster).
- * Many proxies use simple http get request to test if backends return an answer and how long it takes to answer so they can do proper
- * loadbalancing. This Servlet implements this functionality in a minimal way. 
- *
+ * {@link HealthProbeServlet} - Used for health checks from proxy servers in front of our backend(cluster). Many proxies use simple http get
+ * request to test if backends return an answer and how long it takes to answer so they can do proper loadbalancing. This Servlet implements
+ * this functionality in a minimal way.
+ * 
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
 public class HealthProbeServlet extends HttpServlet {
 
     private static final long serialVersionUID = 1L;
+
+    @Override
+    protected void service(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        // create a new HttpSession if it's missing
+        req.getSession(true);
+        super.service(req, resp);
+    }
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {

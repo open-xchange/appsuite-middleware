@@ -52,9 +52,7 @@ package com.openexchange.groupware.tasks;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.attach.AttachmentAuthorization;
 import com.openexchange.groupware.container.FolderObject;
-import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.User;
-import com.openexchange.groupware.userconfiguration.UserConfiguration;
+import com.openexchange.tools.session.ServerSession;
 
 /**
  * This class implements authorization checks for attachments.
@@ -73,19 +71,17 @@ public class TaskAuthorization implements AttachmentAuthorization {
      * {@inheritDoc}
      */
     @Override
-    public void checkMayAttach(final int folderId, final int taskId,
-        final User user, final UserConfiguration userConfig, final Context ctx)
-        throws OXException {
+    public void checkMayAttach(ServerSession session, int folderId, int taskId) throws OXException {
         final TaskStorage storage = TaskStorage.getInstance();
         final FolderStorage foldStor = FolderStorage.getInstance();
         try {
-            final Task task = storage.selectTask(ctx, taskId, StorageType
+            final Task task = storage.selectTask(session.getContext(), taskId, StorageType
                 .ACTIVE);
             task.setParentFolderID(folderId);
-            final FolderObject folder = Tools.getFolder(ctx, folderId);
-            Permission.checkWriteInFolder(ctx, user, userConfig, folder, task);
+            final FolderObject folder = Tools.getFolder(session.getContext(), folderId);
+            Permission.checkWriteInFolder(session.getContext(), session.getUser(), session.getUserConfiguration(), folder, task);
             // Check if task appears in folder.
-            foldStor.selectFolderById(ctx, taskId, folderId, StorageType
+            foldStor.selectFolderById(session.getContext(), taskId, folderId, StorageType
                 .ACTIVE);
         } catch (final OXException e) {
             throw e;
@@ -96,30 +92,26 @@ public class TaskAuthorization implements AttachmentAuthorization {
      * {@inheritDoc}
      */
     @Override
-    public void checkMayDetach(final int folderId, final int taskId,
-        final User user, final UserConfiguration userConfig, final Context ctx)
-        throws OXException {
-        checkMayAttach(folderId, taskId, user, userConfig, ctx);
+    public void checkMayDetach(ServerSession session, int folderId, int taskId) throws OXException {
+        checkMayAttach(session, folderId, taskId);
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public void checkMayReadAttachments(final int folderId, final int taskId,
-        final User user, final UserConfiguration userConfig, final Context ctx)
-        throws OXException {
+    public void checkMayReadAttachments(ServerSession session, int folderId, int taskId) throws OXException {
         final TaskStorage storage = TaskStorage.getInstance();
         final FolderObject folder;
         final Task task;
         try {
-            folder = Tools.getFolder(ctx, folderId);
-            task = storage.selectTask(ctx, taskId, StorageType.ACTIVE);
+            folder = Tools.getFolder(session.getContext(), folderId);
+            task = storage.selectTask(session.getContext(), taskId, StorageType.ACTIVE);
         } catch (final OXException e) {
             throw e;
         }
         try {
-            Permission.canReadInFolder(ctx, user, userConfig, folder, task);
+            Permission.canReadInFolder(session.getContext(), session.getUser(), session.getUserConfiguration(), folder, task);
         } catch (final OXException e) {
             throw e;
         }

@@ -75,7 +75,6 @@ import javax.mail.Part;
 import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMultipart;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.openexchange.ajax.Attachment;
 import com.openexchange.data.conversion.ical.ConversionError;
 import com.openexchange.data.conversion.ical.ConversionWarning;
@@ -138,6 +137,7 @@ import com.openexchange.i18n.tools.replacement.StringReplacement;
 import com.openexchange.i18n.tools.replacement.TaskActionReplacement;
 import com.openexchange.i18n.tools.replacement.TaskPriorityReplacement;
 import com.openexchange.i18n.tools.replacement.TaskStatusReplacement;
+import com.openexchange.log.LogFactory;
 import com.openexchange.mail.mime.ContentDisposition;
 import com.openexchange.mail.mime.ContentType;
 import com.openexchange.mail.mime.MessageHeaders;
@@ -1087,7 +1087,7 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
                 final Context context = session.getContext();
                 final User user = session.getUser();
                 final UserConfiguration config = session.getUserConfiguration();
-                final SearchIterator<?> iterator = attachmentBase.getAttachments(folderId, objectId, Types.APPOINTMENT, context, user, config).results();
+                final SearchIterator<?> iterator = attachmentBase.getAttachments(session, folderId, objectId, Types.APPOINTMENT, context, user, config).results();
                 if (iterator.hasNext()) {
                     try {
                         attachmentBase.startTransaction();
@@ -1109,7 +1109,7 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
                             /*
                              * Set content through a DataHandler
                              */
-                            bodyPart.setDataHandler(new DataHandler(new MessageDataSource(attachmentBase.getAttachedFile(folderId, objectId, Types.APPOINTMENT, metadata.getId(), context, user, config), ct)));
+                            bodyPart.setDataHandler(new DataHandler(new MessageDataSource(attachmentBase.getAttachedFile(session, folderId, objectId, Types.APPOINTMENT, metadata.getId(), context, user, config), ct)));
                             final String fileName = metadata.getFilename();
                             if (fileName != null && !ct.containsNameParameter()) {
                                 ct.setNameParameter(fileName);

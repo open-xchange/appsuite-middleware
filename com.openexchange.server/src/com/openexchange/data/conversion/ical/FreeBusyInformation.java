@@ -50,52 +50,87 @@
 package com.openexchange.data.conversion.ical;
 
 import java.util.List;
-
-import com.openexchange.groupware.container.Appointment;
-import com.openexchange.groupware.container.Participant;
+import com.openexchange.freebusy.FreeBusyInterval;
+import com.openexchange.groupware.container.CalendarObject;
 
 /**
  * {@link FreeBusyInformation}
+ * 
+ * Holds additional calendar data needed for VFREEBUSY iCal components. 
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class FreeBusyInformation extends Appointment {
+public class FreeBusyInformation extends CalendarObject {
 
     private static final long serialVersionUID = 9010547430457924153L;
 
-    private Participant attendee;
-	private List<FreeBusySlot> freeBusySlots;
-	
-	public FreeBusyInformation() {
-		super();
-	}
+    private String attendee;
+    private String[] attendees;
+    private List<FreeBusyInterval> intervals;
+    
+    /**
+     * Initializes a new {@link FreeBusyInformation}.
+     */
+    public FreeBusyInformation() {
+        super();
+    }
 
-	/**
-	 * @return the attendee
-	 */
-	public Participant getAttendee() {
-		return attendee;
-	}
+    /**
+     * Gets the attendee, i.e. the calendar user responding to the free/busy 
+     * time request.
+     * 
+     * @return The attendee
+     */
+    public String getAttendee() {
+        return attendee;
+    }
 
-	/**
-	 * @param attendee the attendee to set
-	 */
-	public void setAttendee(Participant attendee) {
-		this.attendee = attendee;
-	}
+    /**
+     * Gets the attendees, i.e. the calendar users whose free/busy time is 
+     * being requested.
+     * 
+     * @return The attendees
+     */
+    public String[] getAttendees() {
+        return attendees;
+    }
 
-	/**
-	 * @return the freeBusySlots
-	 */
-	public List<FreeBusySlot> getFreeBusySlots() {
-		return freeBusySlots;
-	}
+    /**
+     * Sets the attendee, i.e. the calendar user responding to the free/busy 
+     * time request. 
+     * 
+     * @param attendee The attendee to set
+     */
+    public void setAttendee(String attendee) {
+        this.attendee = attendee;
+    }
 
-	/**
-	 * @param freeBusySlots the freeBusySlots to set
-	 */
-	public void setFreeBusySlots(List<FreeBusySlot> freeBusySlots) {
-		this.freeBusySlots = freeBusySlots;
-	}
+    /**
+     * Sets the attendee, i.e. the calendar users whose free/busy time is 
+     * being requested.
+     * 
+     * @param attendee The attendee to set
+     */
+    public void setAttendees(String[] attendees) {
+        this.attendees = attendees;
+    }
+
+    /**
+     * Gets the free/busy data.
+     * 
+     * @return The free/busy intervals
+     */
+    public List<FreeBusyInterval> getFreeBusyIntervals() {
+        return intervals;
+    }
+
+    /**
+     * Sets the free/busy intervals.
+     * 
+     * @param freeBusySlots The intervals to set
+     */
+    public void setFreeBusyIntervals(List<FreeBusyInterval> freeBusySlots) {
+        this.intervals = freeBusySlots;
+    }
 
 }

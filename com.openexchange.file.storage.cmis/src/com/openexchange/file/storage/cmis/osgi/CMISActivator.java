@@ -56,6 +56,7 @@ import com.openexchange.context.ContextService;
 import com.openexchange.file.storage.FileStorageAccountManagerLookupService;
 import com.openexchange.file.storage.FileStorageAccountManagerProvider;
 import com.openexchange.file.storage.cmis.CMISServices;
+import com.openexchange.mime.MimeTypeMap;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.user.UserService;
@@ -76,7 +77,7 @@ public final class CMISActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { FileStorageAccountManagerLookupService.class, SessiondService.class, UserService.class, ContextService.class };
+        return new Class<?>[] { FileStorageAccountManagerLookupService.class, SessiondService.class, UserService.class, ContextService.class, MimeTypeMap.class };
     }
 
     @Override

@@ -63,8 +63,6 @@ import javax.mail.internet.AddressException;
 import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMultipart;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
-
 import com.openexchange.calendar.itip.generators.AttachmentMemory;
 import com.openexchange.calendar.itip.generators.NotificationConfiguration;
 import com.openexchange.calendar.itip.generators.NotificationMail;
@@ -90,6 +88,7 @@ import com.openexchange.groupware.userconfiguration.RdbUserConfigurationStorage;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.html.HtmlService;
+import com.openexchange.log.LogFactory;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.mime.ContentDisposition;
 import com.openexchange.mail.mime.ContentType;
@@ -300,7 +299,7 @@ public class DefaultMailSenderService implements MailSenderService {
 				 * Set content through a DataHandler
 				 */
 				bodyPart.setDataHandler(new DataHandler(new MessageDataSource(
-						attachments.getAttachedFile(folderId, attachedId,
+						attachments.getAttachedFile(session, folderId, attachedId,
 								Types.APPOINTMENT, metadata.getId(), context, user,
 								config), ct)));
 				final String fileName = metadata.getFilename();

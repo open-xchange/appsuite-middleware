@@ -589,8 +589,9 @@ public final class Tools {
             if (append && '*' != pattern.charAt(pattern.length() - 1)) {
                 pattern = pattern + "*";
             }
+            return pattern;
 	    }
-	    return pattern;
+	    return null;
 	}
 	
 	private Tools() {

@@ -53,11 +53,9 @@ import static com.openexchange.java.Autoboxing.I;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.attach.AttachmentAuthorization;
 import com.openexchange.groupware.attach.AttachmentExceptionCodes;
-import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.User;
-import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.tools.service.ServicePriorityConflictException;
 import com.openexchange.tools.service.SpecificServiceChooser;
+import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link OverridableAttachmentAuthorization}
@@ -74,18 +72,18 @@ public class OverridableAttachmentAuthorization implements AttachmentAuthorizati
     }
 
     @Override
-    public void checkMayAttach(int folderId, int objectId, User user, UserConfiguration userConfig, Context ctx) throws OXException {
-        getDelegate(folderId, ctx.getContextId()).checkMayAttach(folderId, objectId, user, userConfig, ctx);
+    public void checkMayAttach(ServerSession session, int folderId, int objectId) throws OXException {
+        getDelegate(folderId, session.getContextId()).checkMayAttach(session, folderId, objectId);
     }
 
     @Override
-    public void checkMayDetach(int folderId, int objectId, User user, UserConfiguration userConfig, Context ctx) throws OXException {
-        getDelegate(folderId, ctx.getContextId()).checkMayDetach(folderId, objectId, user, userConfig, ctx);
+    public void checkMayDetach(ServerSession session, int folderId, int objectId) throws OXException {
+        getDelegate(folderId, session.getContextId()).checkMayDetach(session, folderId, objectId);
     }
 
     @Override
-    public void checkMayReadAttachments(int folderId, int objectId, User user, UserConfiguration userConfig, Context ctx) throws OXException {
-        getDelegate(folderId, ctx.getContextId()).checkMayReadAttachments(folderId, objectId, user, userConfig, ctx);
+    public void checkMayReadAttachments(ServerSession session, int folderId, int objectId) throws OXException {
+        getDelegate(folderId, session.getContextId()).checkMayReadAttachments(session, folderId, objectId);
     }
 
     private AttachmentAuthorization getDelegate(int folderId, int contextId) throws OXException {

@@ -140,9 +140,9 @@ public final class AllAction extends AbstractAttachmentAction {
 
             TimedResult<AttachmentMetadata> result;
             if (sort != null) {
-                result = ATTACHMENT_BASE.getAttachments(folderId, attachedId, moduleId, fields, sort, order, ctx, user, userConfig);
+                result = ATTACHMENT_BASE.getAttachments(session, folderId, attachedId, moduleId, fields, sort, order, ctx, user, userConfig);
             } else {
-                result = ATTACHMENT_BASE.getAttachments(folderId, attachedId, moduleId, ctx, user, userConfig);
+                result = ATTACHMENT_BASE.getAttachments(session, folderId, attachedId, moduleId, ctx, user, userConfig);
             }
             iter = result.results();
             final OXJSONWriter w = new OXJSONWriter();

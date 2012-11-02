@@ -62,6 +62,7 @@ import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.data.conversion.ical.ICalEmitter;
 import com.openexchange.data.conversion.ical.ICalParser;
 import com.openexchange.folderstorage.FolderService;
+import com.openexchange.freebusy.service.FreeBusyService;
 import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
 import com.openexchange.groupware.calendar.CalendarCollectionService;
 import com.openexchange.osgi.HousekeepingActivator;
@@ -93,7 +94,7 @@ public class CaldavActivator extends HousekeepingActivator {
     protected Class<?>[] getNeededServices() {
         return new Class[] {
             ICalEmitter.class, ICalParser.class, AppointmentSqlFactoryService.class, CalendarCollectionService.class, FolderService.class,
-            UserService.class, ConfigViewFactory.class, HttpService.class };
+            UserService.class, ConfigViewFactory.class, HttpService.class, FreeBusyService.class };
     }
 
     @Override

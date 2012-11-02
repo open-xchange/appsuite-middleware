@@ -48,32 +48,34 @@
  */
 package com.openexchange.groupware.attach;
 
-import com.openexchange.exception.OXException;
-import junit.framework.TestCase;
-import com.openexchange.database.provider.DBPoolProvider;
-import com.openexchange.groupware.Init;
-import com.openexchange.groupware.Types;
-import com.openexchange.groupware.results.TimedResult;
-import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
-import com.openexchange.groupware.userconfiguration.UserConfiguration;
-import com.openexchange.groupware.ldap.UserStorage;
-import com.openexchange.groupware.ldap.User;
-import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.calendar.CalendarListener;
-import com.openexchange.groupware.calendar.CalendarDataObject;
-import com.openexchange.groupware.calendar.tools.CommonAppointments;
 import static com.openexchange.groupware.calendar.tools.CommonAppointments.D;
-import com.openexchange.groupware.attach.impl.AttachmentBaseImpl;
-import com.openexchange.groupware.attach.impl.AttachmentImpl;
-import com.openexchange.session.Session;
-import com.openexchange.setuptools.TestContextToolkit;
-import com.openexchange.setuptools.TestConfig;
-import com.openexchange.tools.session.ServerSessionAdapter;
-import com.openexchange.tools.iterator.SearchIterator;
-
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
-import java.io.*;
+import junit.framework.TestCase;
+import com.openexchange.database.provider.DBPoolProvider;
+import com.openexchange.exception.OXException;
+import com.openexchange.groupware.Init;
+import com.openexchange.groupware.Types;
+import com.openexchange.groupware.attach.impl.AttachmentBaseImpl;
+import com.openexchange.groupware.attach.impl.AttachmentImpl;
+import com.openexchange.groupware.calendar.CalendarDataObject;
+import com.openexchange.groupware.calendar.CalendarListener;
+import com.openexchange.groupware.calendar.tools.CommonAppointments;
+import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.ldap.User;
+import com.openexchange.groupware.ldap.UserStorage;
+import com.openexchange.groupware.results.TimedResult;
+import com.openexchange.groupware.userconfiguration.UserConfiguration;
+import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
+import com.openexchange.session.Session;
+import com.openexchange.setuptools.TestConfig;
+import com.openexchange.setuptools.TestContextToolkit;
+import com.openexchange.tools.iterator.SearchIterator;
+import com.openexchange.tools.session.ServerSessionAdapter;
 
 /**
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
@@ -150,7 +152,7 @@ public class CopyAttachmentsForChangeExceptionsTest extends TestCase {
 
         listener.createdChangeExceptionInRecurringAppointment(master, exception,0, ServerSessionAdapter.valueOf(session));
 
-        TimedResult result = attachments.getAttachments(exception.getParentFolderID(), exception.getObjectID(), Types.APPOINTMENT, ctx, userObject, userConfig);
+        TimedResult result = attachments.getAttachments(session, exception.getParentFolderID(), exception.getObjectID(), Types.APPOINTMENT, ctx, userObject, userConfig);
 
         SearchIterator searchIterator = result.results();
         assertTrue(searchIterator.hasNext());
@@ -161,7 +163,7 @@ public class CopyAttachmentsForChangeExceptionsTest extends TestCase {
         assertEquals(attachment.getComment(), newAttachment.getComment());
         assertEquals(attachment.getFilename(), newAttachment.getFilename());
 
-        InputStream is = attachments.getAttachedFile(exception.getParentFolderID(), exception.getObjectID(), Types.APPOINTMENT, newAttachment.getId(), ctx, userObject, userConfig);
+        InputStream is = attachments.getAttachedFile(session, exception.getParentFolderID(), exception.getObjectID(), Types.APPOINTMENT, newAttachment.getId(), ctx, userObject, userConfig);
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         int i = 0;
         while((i = is.read()) != -1) {

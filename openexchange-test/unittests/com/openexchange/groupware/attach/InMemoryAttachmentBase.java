@@ -83,12 +83,12 @@ public class InMemoryAttachmentBase implements AttachmentBase{
     }
 
     @Override
-    public AttachmentMetadata getAttachment(final int folderId, final int objectId, final int moduleId, final int id, final Context ctx, final User user, final UserConfiguration userConfig) {
+    public AttachmentMetadata getAttachment(Session session, final int folderId, final int objectId, final int moduleId, final int id, final Context ctx, final User user, final UserConfiguration userConfig) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public InputStream getAttachedFile(final int folderId, final int attachedId, final int moduleId, final int id, final Context context, final User user, final UserConfiguration userConfig) {
+    public InputStream getAttachedFile(Session session, final int folderId, final int attachedId, final int moduleId, final int id, final Context context, final User user, final UserConfiguration userConfig) {
         throw new UnsupportedOperationException();
     }
 
@@ -102,27 +102,27 @@ public class InMemoryAttachmentBase implements AttachmentBase{
     }
 
     @Override
-    public TimedResult<AttachmentMetadata> getAttachments(final int folderId, final int attachedId, final int moduleId, final Context context, final User user, final UserConfiguration userConfig) {
+    public TimedResult<AttachmentMetadata> getAttachments(Session session, final int folderId, final int attachedId, final int moduleId, final Context context, final User user, final UserConfiguration userConfig) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public TimedResult<AttachmentMetadata> getAttachments(final int folderId, final int attachedId, final int moduleId, final AttachmentField[] columns, final AttachmentField sort, final int order, final Context context, final User user, final UserConfiguration userConfig) {
+    public TimedResult<AttachmentMetadata> getAttachments(Session session, final int folderId, final int attachedId, final int moduleId, final AttachmentField[] columns, final AttachmentField sort, final int order, final Context context, final User user, final UserConfiguration userConfig) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public TimedResult<AttachmentMetadata> getAttachments(final int folderId, final int attachedId, final int moduleId, final int[] idsToFetch, final AttachmentField[] fields, final Context context, final User user, final UserConfiguration userConfig) {
+    public TimedResult<AttachmentMetadata> getAttachments(Session session, final int folderId, final int attachedId, final int moduleId, final int[] idsToFetch, final AttachmentField[] fields, final Context context, final User user, final UserConfiguration userConfig) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public Delta<AttachmentMetadata> getDelta(final int folderId, final int attachedId, final int moduleId, final long ts, final boolean ignoreDeleted, final Context context, final User user, final UserConfiguration userConfig) {
+    public Delta<AttachmentMetadata> getDelta(Session session, final int folderId, final int attachedId, final int moduleId, final long ts, final boolean ignoreDeleted, final Context context, final User user, final UserConfiguration userConfig) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public Delta<AttachmentMetadata> getDelta(final int folderId, final int attachedId, final int moduleId, final long ts, final boolean ignoreDeleted, final AttachmentField[] fields, final AttachmentField sort, final int order, final Context context, final User user, final UserConfiguration userConfig) {
+    public Delta<AttachmentMetadata> getDelta(Session session, final int folderId, final int attachedId, final int moduleId, final long ts, final boolean ignoreDeleted, final AttachmentField[] fields, final AttachmentField sort, final int order, final Context context, final User user, final UserConfiguration userConfig) {
         throw new UnsupportedOperationException();
     }
 

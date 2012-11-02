@@ -339,6 +339,7 @@ public final class AllAction extends AbstractMailAction implements MailRequestSh
             } finally {
                 if (null != it) {
                     it.close();
+                    it = null;
                 }
             }
             if (filterApplied && (null != fromToIndices)) {

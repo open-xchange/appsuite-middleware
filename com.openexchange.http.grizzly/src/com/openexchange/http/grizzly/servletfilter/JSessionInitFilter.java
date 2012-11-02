@@ -47,25 +47,41 @@
  *
  */
 
-package com.openexchange.user.json.filter;
+package com.openexchange.http.grizzly.servletfilter;
 
-import com.openexchange.groupware.container.Contact;
-import com.openexchange.user.json.field.UserField;
+import java.io.IOException;
+import javax.servlet.Filter;
+import javax.servlet.FilterChain;
+import javax.servlet.FilterConfig;
+import javax.servlet.ServletException;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import com.openexchange.http.grizzly.wrapper.HttpServletResponseWrapper;
 
 /**
- * {@link NoGlobalAdressBookContactCensorship}
- *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * {@link JSessionInitFilter} - Initialize the HttpSession for incoming Request if they are missing one.
+ * 
+ * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
-public class NoGlobalAdressBookContactCensorship implements ContactCensorship {
+public class JSessionInitFilter implements Filter {
 
     @Override
-    public void censor(final Contact contact) {
-        for (final int field : Contact.ALL_COLUMNS) {
-            if( UserField.isProtected(field)) {
-                contact.remove(field);
-            }
-        }
+    public void init(FilterConfig filterConfig) {
+        // nothing to do here
+    }
+
+    @Override
+    public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
+        HttpServletRequest httpServletRequest = (HttpServletRequest) request;
+        httpServletRequest.getSession(true);
+        chain.doFilter(httpServletRequest, response);
+    }
+
+    @Override
+    public void destroy() {
+        // nothing to do here
     }
 
 }

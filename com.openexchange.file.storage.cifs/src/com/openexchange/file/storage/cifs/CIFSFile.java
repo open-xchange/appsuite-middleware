@@ -59,6 +59,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.DefaultFile;
 import com.openexchange.file.storage.FileStorageFileAccess;
 import com.openexchange.file.storage.FileStorageFolder;
+import com.openexchange.mime.MimeTypeMap;
 
 /**
  * {@link CIFSFile}
@@ -130,9 +131,16 @@ public final class CIFSFile extends DefaultFile {
                 if (set.contains(Field.LAST_MODIFIED) || set.contains(Field.LAST_MODIFIED_UTC)) {
                     setLastModified(new Date(smbFile.getIfModifiedSince()));
                 }
-                setTitle(smbFile.getName());
+                final String name = smbFile.getName();
+                setTitle(name);
+                setFileName(name);
                 if (set.contains(Field.FILE_MIMETYPE)) {
-                    setFileMIMEType(smbFile.getContentType());
+                    String contentType = smbFile.getContentType();
+                    if (isEmpty(contentType)) {
+                        final MimeTypeMap map = CIFSServices.getService(MimeTypeMap.class);
+                        contentType = map.getContentType(name);
+                    }
+                    setFileMIMEType(contentType);
                 }
                 if (set.contains(Field.FILE_SIZE)) {
                     setFileSize(smbFile.getContentLength());
@@ -159,4 +167,15 @@ public final class CIFSFile extends DefaultFile {
         return this;
     }
 
+    private static boolean isEmpty(final String string) {
+        if (null == string) {
+            return true;
+        }
+        final int len = string.length();
+        boolean isWhitespace = true;
+        for (int i = 0; isWhitespace && i < len; i++) {
+            isWhitespace = Character.isWhitespace(string.charAt(i));
+        }
+        return isWhitespace;
+    }
 }

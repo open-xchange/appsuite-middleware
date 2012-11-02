@@ -65,7 +65,7 @@ import com.openexchange.oauth.provider.internal.OAuthProviderServiceLookup;
 
 /**
  * A text servlet to echo incoming "echo" param along with userId
- *
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class EchoServlet extends HttpServlet {
@@ -73,23 +73,26 @@ public class EchoServlet extends HttpServlet {
     private static final long serialVersionUID = 650486968603097312L;
 
     @Override
-    protected void doPost(final HttpServletRequest request, final HttpServletResponse response)
-            throws ServletException, IOException
-    {
+    protected void service(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        // create a new HttpSession if it's missing
+        req.getSession(true);
+        super.service(req, resp);
+    }
+
+    @Override
+    protected void doPost(final HttpServletRequest request, final HttpServletResponse response) throws ServletException, IOException {
         doGet(request, response);
     }
 
     @Override
-    protected void doGet(final HttpServletRequest request, final HttpServletResponse response)
-            throws IOException, ServletException {
+    protected void doGet(final HttpServletRequest request, final HttpServletResponse response) throws IOException, ServletException {
         final OAuthProviderService providerService = getProviderService();
-        try{
+        try {
             final OAuthMessage requestMessage = OAuthServlet.getMessage(request, null);
             final OAuthAccessor accessor = providerService.getAccessor(requestMessage);
-            providerService.getValidator()
-            .validateMessage(requestMessage, accessor);
+            providerService.getValidator().validateMessage(requestMessage, accessor);
             final String userId = (String) accessor.getProperty("user");
-            
+
             response.setContentType("text/plain");
             final PrintWriter out = response.getWriter();
             out.println("[Your UserId:" + userId + "]");
@@ -101,8 +104,8 @@ public class EchoServlet extends HttpServlet {
                 }
             }
             out.close();
-            
-        } catch (final Exception e){
+
+        } catch (final Exception e) {
             DatabaseOAuthProviderService.handleException(e, request, response, false);
         }
     }

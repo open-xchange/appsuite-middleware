@@ -6,4 +6,6 @@ Bundle-Version: 6.21.0
 Bundle-Vendor: Open-Xchange
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Import-Package: com.openexchange.log,
+ org.apache.cassandra.config,
+ org.apache.cassandra.tools,
  org.apache.commons.logging

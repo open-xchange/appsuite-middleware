@@ -49,26 +49,14 @@
 
 package com.openexchange.user.json.actions;
 
-import static com.openexchange.user.json.Utility.checkForRequiredField;
-
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
-import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
-import org.json.JSONArray;
-
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.fields.OrderFields;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.api2.ContactInterfaceFactory;
 import com.openexchange.contact.ContactService;
 import com.openexchange.contact.SortOptions;
 import com.openexchange.contact.SortOrder;
@@ -78,7 +66,6 @@ import com.openexchange.documentation.Type;
 import com.openexchange.documentation.annotations.Action;
 import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.contact.ContactInterface;
 import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.ldap.User;
@@ -86,13 +73,10 @@ import com.openexchange.groupware.search.Order;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.user.UserService;
-import com.openexchange.user.json.Constants;
 import com.openexchange.user.json.UserContact;
-import com.openexchange.user.json.comparator.Comparators;
 import com.openexchange.user.json.field.UserField;
 import com.openexchange.user.json.mapping.UserMapper;
 import com.openexchange.user.json.services.ServiceRegistry;
-import com.openexchange.user.json.writer.UserWriter;
 
 /**
  * {@link AllAction} - Maps the action to an <tt>all</tt> action.
@@ -108,8 +92,6 @@ import com.openexchange.user.json.writer.UserWriter;
 }, responseDescription = "Response with timestamp: An array with user data. Each array element describes one user and is itself an array. The elements of each array contain the information specified by the corresponding identifiers in the columns parameter.")
 public final class AllAction extends AbstractUserAction {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(AllAction.class));
-
     /**
      * The <tt>all</tt> action string.
      */
@@ -121,17 +103,6 @@ public final class AllAction extends AbstractUserAction {
     public AllAction() {
         super();
     }
-
-    private static final Set<String> EXPECTED_NAMES =
-        Collections.unmodifiableSet(new HashSet<String>(Arrays.asList(
-            AJAXServlet.PARAMETER_COLUMNS,
-            AJAXServlet.PARAMETER_SORT,
-            AJAXServlet.PARAMETER_ORDER,
-            AJAXServlet.LEFT_HAND_LIMIT,
-            AJAXServlet.RIGHT_HAND_LIMIT,
-            AJAXServlet.PARAMETER_TIMEZONE,
-            AJAXServlet.PARAMETER_SESSION,
-            AJAXServlet.PARAMETER_ACTION)));
 
     @Override
     public AJAXRequestResult perform(final AJAXRequestData request, final ServerSession session) throws OXException {
@@ -185,7 +156,7 @@ public final class AllAction extends AbstractUserAction {
                 	 * Get corresponding user
                 	 */
                 	final User user = userService.getUser(contact.getInternalUserId(), session.getContext());
-                	userContacts.add(new UserContact(contact, user));
+                	userContacts.add(new UserContact(contact, censor(session, user)));
                 }
             } finally {
             	if (null != searchIterator) {
@@ -208,148 +179,4 @@ public final class AllAction extends AbstractUserAction {
         }
     }
     
-    public AJAXRequestResult performOLD(final AJAXRequestData request, final ServerSession session) throws OXException {
-        try {
-            /*
-             * Parse parameters
-             */
-            final int[] columns = parseIntArrayParameter(AJAXServlet.PARAMETER_COLUMNS, request);
-            final int orderBy = parseIntParameter(AJAXServlet.PARAMETER_SORT, request);
-            final Order order = OrderFields.parse(request.getParameter(AJAXServlet.PARAMETER_ORDER));
-
-            final int leftHandLimit = parseIntParameter(AJAXServlet.LEFT_HAND_LIMIT, request);
-            final int rightHandLimit = parseIntParameter(AJAXServlet.RIGHT_HAND_LIMIT, request);
-
-            final String timeZoneId = request.getParameter(AJAXServlet.PARAMETER_TIMEZONE);
-            /*
-             * Get remaining parameters
-             */
-            final Map<String, List<String>> attributeParameters = getAttributeParameters(EXPECTED_NAMES, request);
-            /*
-             * Get services
-             */
-            final UserService userService = ServiceRegistry.getInstance().getService(UserService.class, true);
-            final ContactInterface contactInterface =
-                ServiceRegistry.getInstance().getService(ContactInterfaceFactory.class, true).create(
-                    Constants.USER_ADDRESS_BOOK_FOLDER_ID,
-                    session);
-            /*
-             * Get all users/contacts
-             */
-            final User[] users;
-            final Contact[] contacts;
-            /*
-             * Order and fill contact array
-             */
-            if (-1 != orderBy) {
-                /*
-                 * Order them
-                 */
-                final UserField orderField = UserField.getUserOnlyField(orderBy);
-                /*
-                 * Ensure UserField.INTERNAL_USERID is requested to properly load corresponding users
-                 */
-                final int[] checkedCols = checkForRequiredField(columns, UserField.INTERNAL_USERID.getColumn());
-                if (null == orderField) {
-                    /*
-                     * Order by contact field
-                     */
-                    final int lhl = leftHandLimit < 0 ? 0 : leftHandLimit;
-                    final int rhl = rightHandLimit <= 0 ? 50000 : rightHandLimit;
-                    final SearchIterator<Contact> it;
-                    it =
-                        contactInterface.getContactsInFolder(
-                            Constants.USER_ADDRESS_BOOK_FOLDER_ID,
-                            lhl,
-                            rhl,
-                            orderBy,
-                            order,
-                            null,
-                            checkedCols);
-                    try {
-                        final List<Contact> contactList = new ArrayList<Contact>(128);
-                        while (it.hasNext()) {
-                            contactList.add(it.next());
-                        }
-                        contacts = contactList.toArray(new Contact[contactList.size()]);
-                        users = new User[contacts.length];
-                        for (int j = 0; j < users.length; j++) {
-                            final int userId = contacts[j].getInternalUserId();
-                            if (userId > 0) {
-                                users[j] = userService.getUser(userId, session.getContext());
-                            } else {
-                                LOG.error("Missing internal user ID in contact " + contacts[j].getObjectID() + ": " + contacts[j].getDisplayName());
-                            }
-                        }
-                    } finally {
-                        try {
-                            it.close();
-                        } catch (final Exception e) {
-                            LOG.error(e.getMessage(), e);
-                        }
-                    }
-                } else {
-                    // Order by user field
-                    final List<User> allUsers = new ArrayList<User>();
-                    for (final User user : userService.getUser(session.getContext())) {
-                        allUsers.add(user);
-                    }
-                    Collections.sort(allUsers, Comparators.getComparator(
-                        orderField,
-                        session.getUser().getLocale(),
-                        Order.DESCENDING.equals(order)));
-                    final int lhl = leftHandLimit < 0 ? 0 : leftHandLimit;
-                    int rhl = rightHandLimit <= 0 ? 50000 : rightHandLimit;
-                    if (rhl - lhl >= allUsers.size()) {
-                        rhl = allUsers.size();
-                    }
-                    users = allUsers.subList(lhl, rhl).toArray(new User[rhl - lhl]);
-                    final int[] userIds = new int[users.length];
-                    for (int i = 0; i < users.length; i++) {
-                        userIds[i] = users[i].getId();
-                    }
-                    contacts = contactInterface.getUsersById(userIds, false);
-                }
-            } else {
-                // No sorting required
-                final List<User> allUsers = new ArrayList<User>();
-                for (final User user : userService.getUser(session.getContext())) {
-                    allUsers.add(user);
-                }
-                final int lhl = leftHandLimit < 0 ? 0 : leftHandLimit;
-                int rhl = rightHandLimit <= 0 ? 50000 : rightHandLimit;
-                if (rhl - lhl >= allUsers.size()) {
-                    rhl = allUsers.size();
-                }
-                users = allUsers.subList(lhl, rhl).toArray(new User[rhl - lhl]);
-                final int[] userIds = new int[users.length];
-                for (int i = 0; i < users.length; i++) {
-                    userIds[i] = users[i].getId();
-                }
-                contacts = contactInterface.getUsersById(userIds, false);
-            }
-            /*
-             * Determine max. last-modified time stamp
-             */
-            Date lastModified = contacts[0].getLastModified();
-            for (int i = 1; i < contacts.length; i++) {
-                final Date lm = contacts[i].getLastModified();
-                if (lastModified.before(lm)) {
-                    lastModified = lm;
-                }
-            }
-            /*
-             * Write users as JSON arrays to JSON array
-             */
-            censor(session, contacts);
-            censor(session, users);
-            final JSONArray jsonArray = UserWriter.writeMultiple2Array(columns, attributeParameters, users, contacts, timeZoneId);
-            /*
-             * Return appropriate result
-             */
-            return new AJAXRequestResult(jsonArray, lastModified);
-        } catch (final OXException e) {
-            throw new OXException(e);
-        }
-    }
 }

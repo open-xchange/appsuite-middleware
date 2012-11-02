@@ -58,7 +58,7 @@ import javax.servlet.http.HttpServletResponse;
 
 /**
  * HttpErrorServlet
- *
+ * 
  * @author <a href="mailto:sebastian.kauss@open-xchange.org">Sebastian Kauss</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
@@ -72,6 +72,13 @@ public class HttpErrorServlet extends HttpServlet {
 
     public HttpErrorServlet(final String message) {
         this.message = message;
+    }
+
+    @Override
+    protected void service(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        // create a new HttpSession if it's missing
+        req.getSession(true);
+        super.service(req, resp);
     }
 
     @Override

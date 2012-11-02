@@ -58,7 +58,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
 import com.openexchange.ajax.fields.AppointmentFields;
 import com.openexchange.ajax.fields.CalendarFields;
 import com.openexchange.calendar.AppointmentDiff;
@@ -510,7 +509,7 @@ public class NotificationMailGenerator implements ITipMailGenerator {
 		AttachmentBase attachments = services.getService(AttachmentBase.class);
     	SearchIterator<AttachmentMetadata> results = null;
     	try {
-    		TimedResult<AttachmentMetadata> attachmentsResult = attachments.getAttachments(mail.getAppointment().getParentFolderID(), mail.getAppointment().getObjectID(), Types.APPOINTMENT, ctx, user, userConfig);
+    		TimedResult<AttachmentMetadata> attachmentsResult = attachments.getAttachments(session, mail.getAppointment().getParentFolderID(), mail.getAppointment().getObjectID(), Types.APPOINTMENT, ctx, user, userConfig);
     		results = attachmentsResult.results();
     		while(results.hasNext()) {
     			mail.addAttachment(results.next());

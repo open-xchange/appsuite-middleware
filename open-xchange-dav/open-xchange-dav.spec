@@ -5,6 +5,7 @@ BuildArch:     noarch
 BuildRequires: ant
 BuildRequires: ant-nodeps
 BuildRequires: open-xchange-core
+BuildRequires: open-xchange-freebusy
 BuildRequires: java-devel >= 1.6.0
 Version:       @OXVERSION@
 %define        ox_release 1
@@ -16,6 +17,7 @@ URL:           http://www.open-xchange.com/
 Source:        %{name}_%{version}.orig.tar.bz2
 Summary:       The Open-Xchange CardDAV and CalDAV implementation
 Requires:      open-xchange-core >= @OXVERSION@
+Requires:      open-xchange-freebusy >= @OXVERSION@
 Provides:      open-xchange-caldav = %{version}
 Obsoletes:     open-xchange-caldav <= %{version}
 Provides:      open-xchange-carddav = %{version}

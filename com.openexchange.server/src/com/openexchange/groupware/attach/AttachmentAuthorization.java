@@ -50,14 +50,41 @@
 package com.openexchange.groupware.attach;
 
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.User;
-import com.openexchange.groupware.userconfiguration.UserConfiguration;
+import com.openexchange.tools.session.ServerSession;
 
 public interface AttachmentAuthorization {
-	public void checkMayAttach(int folderId, int objectId, User user, UserConfiguration userConfig, Context ctx) throws OXException;
 
-	public void checkMayDetach(int folderId, int objectId, User user, UserConfiguration userConfig, Context ctx) throws OXException;
+    /**
+     * Checks whether a user is allowed to add attachments to objects in a folder or not, throwing an appropriate exception if the 
+     * permission check fails. 
+     * 
+     * @param session The user's session
+     * @param folderId The parent folder ID
+     * @param objectId The object ID
+     * @throws OXException If adding attachments is not permitted
+     */
+	void checkMayAttach(ServerSession session, int folderId, int objectId) throws OXException;
 
-	public void checkMayReadAttachments(int folderId, int objectId, User user, UserConfiguration userConfig, Context ctx) throws OXException;
+    /**
+     * Checks whether a user is allowed to remove attachments from objects in a folder or not, throwing an appropriate exception if the 
+     * permission check fails. 
+     * 
+     * @param session The user's session
+     * @param folderId The parent folder ID
+     * @param objectId The object ID
+     * @throws OXException If remvoing attachments is not permitted
+     */
+	void checkMayDetach(ServerSession session, int folderId, int objectId) throws OXException;
+
+    /**
+     * Checks whether a user is allowed to read attachments of objects in a folder or not, throwing an appropriate exception if the 
+     * permission check fails. 
+     * 
+     * @param session The user's session
+     * @param folderId The parent folder ID
+     * @param objectId The object ID
+     * @throws OXException If reading attachments is not permitted
+     */
+	void checkMayReadAttachments(ServerSession session, int folderId, int objectId) throws OXException;
+	
 }

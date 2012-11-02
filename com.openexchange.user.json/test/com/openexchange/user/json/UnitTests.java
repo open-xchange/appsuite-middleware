@@ -62,7 +62,6 @@ public class UnitTests {
     public static Test suite() {
         final TestSuite tests = new TestSuite();
 
-        tests.addTestSuite(com.openexchange.user.json.filter.NoGlobalAddressBookContactCensorshipTest.class);
         tests.addTestSuite(com.openexchange.user.json.filter.NoGlobalAddressBookUserCensorshipTest.class);
 
 

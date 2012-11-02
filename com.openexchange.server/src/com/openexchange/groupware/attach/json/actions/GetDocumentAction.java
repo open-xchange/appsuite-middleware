@@ -65,6 +65,7 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.log.Log;
 import com.openexchange.server.ServiceLookup;
+import com.openexchange.session.Session;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 
@@ -111,7 +112,7 @@ public final class GetDocumentAction extends AbstractAttachmentAction {
 
         requestData.setFormat("file");
         return document(
-            folderId,
+            session, folderId,
             attachedId,
             moduleId,
             id,
@@ -121,15 +122,15 @@ public final class GetDocumentAction extends AbstractAttachmentAction {
             session.getUserConfiguration());
     }
 
-    private AJAXRequestResult document(final int folderId, final int attachedId, final int moduleId, final int id, final String contentType, final Context ctx, final User user, final UserConfiguration userConfig) throws OXException {
+    private AJAXRequestResult document(Session session, final int folderId, final int attachedId, final int moduleId, final int id, final String contentType, final Context ctx, final User user, final UserConfiguration userConfig) throws OXException {
         try {
             ATTACHMENT_BASE.startTransaction();
-            final AttachmentMetadata attachment = ATTACHMENT_BASE.getAttachment(folderId, attachedId, moduleId, id, ctx, user, userConfig);
+            final AttachmentMetadata attachment = ATTACHMENT_BASE.getAttachment(session, folderId, attachedId, moduleId, id, ctx, user, userConfig);
             /*
              * Get bytes
              */
             final ByteArrayOutputStream os;
-            final InputStream documentData = ATTACHMENT_BASE.getAttachedFile(folderId, attachedId, moduleId, id, ctx, user, userConfig);
+            final InputStream documentData = ATTACHMENT_BASE.getAttachedFile(session, folderId, attachedId, moduleId, id, ctx, user, userConfig);
             try {
                 os = new UnsynchronizedByteArrayOutputStream();
                 final byte[] buffer = new byte[0xFFFF];

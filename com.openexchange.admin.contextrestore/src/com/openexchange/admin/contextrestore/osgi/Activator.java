@@ -50,6 +50,7 @@
 package com.openexchange.admin.contextrestore.osgi;
 
 import java.rmi.Remote;
+import java.util.concurrent.atomic.AtomicReference;
 import org.apache.commons.logging.Log;
 import com.openexchange.admin.contextrestore.rmi.impl.OXContextRestore;
 import com.openexchange.admin.rmi.OXContextInterface;
@@ -60,43 +61,49 @@ import com.openexchange.config.ConfigurationService;
 import com.openexchange.log.LogFactory;
 import com.openexchange.osgi.HousekeepingActivator;
 
+/**
+ * {@link Activator} - The activator for <b><code>com.openexchange.admin.contextrestore</code></b> bundle.
+ *
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ */
 public class Activator extends HousekeepingActivator {
     
-    private static Log log = LogFactory.getLog(Activator.class);
-    
-    private static OXContextRestore contextRestore = null;
-    
-    private static OXContextInterface ox_ctx = null;
+    private static final AtomicReference<OXContextInterface> OXContextInterfaceReference = new AtomicReference<OXContextInterface>();
 
     @Override
     public void startBundle() throws Exception {
+        final Log log = LogFactory.getLog(Activator.class);
         try {
-            ConfigurationService service = getService(ConfigurationService.class);
+            final ConfigurationService service = getService(ConfigurationService.class);
             AdminCache.compareAndSetConfigurationService(null, service);
-            ox_ctx = new OXContext(context);
-            contextRestore = new OXContextRestore();
-
-            // bind all NEW Objects to registry
-            registerService(Remote.class, contextRestore, null);
-            log.info("RMI Interface for context restore bound to RMI registry");
+            OXContextInterfaceReference.set(new OXContext(context));
+            // Register service
+            registerService(Remote.class, new OXContextRestore());
+            log.info("RMI Interface for context restore registered.");
         } catch (final StorageException e) {
-            log.fatal("Error while creating one instance for RMI interface", e);
+            log.fatal("Error while creating instance for OXContextRestoreInterface interface", e);
             throw e;
         }
     }
 
     @Override
-    public void stopBundle() {
-        unregisterServices();
+    public void stopBundle() throws Exception {
+        super.stopBundle();
+        OXContextInterfaceReference.set(null);
     }
 
-    public static final OXContextInterface getContextInterface() {
-        return ox_ctx;
+    /**
+     * Gets the {@link OXContextInterface} instance.
+     *
+     * @return The {@link OXContextInterface} instance or <code>null</code>
+     */
+    public static OXContextInterface getContextInterface() {
+        return OXContextInterfaceReference.get();
     }
 
     @Override
     protected Class<?>[] getNeededServices() {
         return new Class<?>[] { ConfigurationService.class };
     }
-    
+
 }

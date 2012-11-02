@@ -61,9 +61,10 @@ import java.util.Set;
 import jcifs.smb.NtlmPasswordAuthentication;
 import jcifs.smb.SmbException;
 import jcifs.smb.SmbFile;
+import jcifs.smb.SmbFileFilter;
 import jcifs.smb.SmbFileInputStream;
 import jcifs.smb.SmbFileOutputStream;
-import org.apache.commons.httpclient.URI;
+import org.apache.commons.logging.Log;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.File.Field;
@@ -86,6 +87,9 @@ import com.openexchange.tx.TransactionException;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class CIFSFileAccess extends AbstractCIFSAccess implements FileStorageFileAccess {
+
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(CIFSFileAccess.class);
+    private static final boolean DEBUG = LOG.isDebugEnabled();
 
     private final FileStorageAccountAccess accountAccess;
 
@@ -383,6 +387,14 @@ public final class CIFSFileAccess extends AbstractCIFSAccess implements FileStor
         }
     }
 
+    private static final SmbFileFilter FILE_FILTER = new SmbFileFilter() {
+
+        @Override
+        public boolean accept(SmbFile file) throws SmbException {
+            return file.isDirectory();
+        }
+    };
+
     @Override
     public void removeDocument(final String folderId, final long sequenceNumber) throws OXException {
         try {
@@ -400,7 +412,7 @@ public final class CIFSFileAccess extends AbstractCIFSAccess implements FileStor
             /*
              * List its sub-resources
              */
-            final SmbFile[] subFiles = smbFolder.listFiles();
+            final SmbFile[] subFiles = smbFolder.listFiles(FILE_FILTER);
             for (final SmbFile subFile : subFiles) {
                 if (subFile.isFile()) {
                     subFile.delete();
@@ -578,7 +590,14 @@ public final class CIFSFileAccess extends AbstractCIFSAccess implements FileStor
              */
             SmbFile[] subFiles;
             try {
-                subFiles = smbFolder.canRead() ? smbFolder.listFiles() : new SmbFile[0];
+                if (DEBUG) {
+                    final long st = System.currentTimeMillis();
+                    subFiles = smbFolder.canRead() ? smbFolder.listFiles(FILE_FILTER) : new SmbFile[0];
+                    final long dur = System.currentTimeMillis() - st;
+                    LOG.debug("CIFSFileAccess.getFileList() - SmbFile.listFiles() took " + dur + "msec.");
+                } else {
+                    subFiles = smbFolder.canRead() ? smbFolder.listFiles(FILE_FILTER) : new SmbFile[0];
+                }
             } catch (final SmbException e) {
                 if (!indicatesNotReadable(e)) {
                     throw e;

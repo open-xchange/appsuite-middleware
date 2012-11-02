@@ -63,7 +63,6 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -92,6 +91,8 @@ import com.openexchange.groupware.upload.impl.UploadSizeExceededException;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.json.OXJSONWriter;
+import com.openexchange.log.LogFactory;
+import com.openexchange.session.Session;
 import com.openexchange.tools.UnsynchronizedStringWriter;
 import com.openexchange.tools.encoding.Helper;
 import com.openexchange.tools.exceptions.OXAborted;
@@ -177,7 +178,7 @@ public class Attachment extends PermissionServlet {
             }
 
             document(
-                res,
+                session, res,
                 req.getHeader("user-agent"),
                 isIE(req),
                 folderId,
@@ -363,17 +364,17 @@ public class Attachment extends PermissionServlet {
 
     }
 
-    private void document(final HttpServletResponse res, final String userAgent, final boolean ie, final int folderId, final int attachedId, final int moduleId, final int id, final String contentType, final Context ctx, final User user, final UserConfiguration userConfig) {
+    private void document(Session session, final HttpServletResponse res, final String userAgent, final boolean ie, final int folderId, final int attachedId, final int moduleId, final int id, final String contentType, final Context ctx, final User user, final UserConfiguration userConfig) {
         InputStream documentData = null;
         OutputStream os = null;
 
         try {
             ATTACHMENT_BASE.startTransaction();
-            final AttachmentMetadata attachment = ATTACHMENT_BASE.getAttachment(folderId, attachedId, moduleId, id, ctx, user, userConfig);
+            final AttachmentMetadata attachment = ATTACHMENT_BASE.getAttachment(session, folderId, attachedId, moduleId, id, ctx, user, userConfig);
 
             res.setContentLength((int) attachment.getFilesize());
 
-            documentData = ATTACHMENT_BASE.getAttachedFile(folderId, attachedId, moduleId, id, ctx, user, userConfig);
+            documentData = ATTACHMENT_BASE.getAttachedFile(session, folderId, attachedId, moduleId, id, ctx, user, userConfig);
 
             if (SAVE_AS_TYPE.equals(contentType)) {
                 res.setContentType(contentType);
