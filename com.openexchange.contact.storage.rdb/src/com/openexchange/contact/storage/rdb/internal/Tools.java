@@ -52,6 +52,7 @@ package com.openexchange.contact.storage.rdb.internal;
 import java.sql.Connection;
 import java.sql.DataTruncation;
 import java.sql.SQLException;
+import java.util.Arrays;
 import org.apache.commons.logging.Log;
 import com.openexchange.contact.SortOptions;
 import com.openexchange.contact.SortOrder;
@@ -204,6 +205,9 @@ public final class Tools {
 	 * @throws OXException
 	 */
 	public static int[] parse(final String[] ids) throws OXException {
+	    if (null == ids) {
+	        return new int[0];
+	    }
         try {
             final int[] intIDs = new int[ids.length];
             for (int i = 0; i < intIDs.length; i++) {
@@ -211,7 +215,7 @@ public final class Tools {
             }
             return intIDs;
         } catch (final NumberFormatException e) {
-			throw ContactExceptionCodes.ID_PARSING_FAILED.create(e, null != ids ? ids.toString() : null); 
+			throw ContactExceptionCodes.ID_PARSING_FAILED.create(e, Arrays.toString(ids)); 
         }
     }
 	
