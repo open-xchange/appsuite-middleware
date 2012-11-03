@@ -102,7 +102,7 @@ public class LdapContactStorage extends DefaultContactStorage {
     protected final LdapMapper mapper;
     private final LdapFactory factory;
     private LdapIDResolver idResolver;
-    private Integer adminID;
+    private volatile Integer adminID;
     
     /**
      * Initializes a new {@link LdapContactStorage}.
