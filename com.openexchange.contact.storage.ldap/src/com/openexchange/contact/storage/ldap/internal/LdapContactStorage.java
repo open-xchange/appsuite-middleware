@@ -296,7 +296,7 @@ public class LdapContactStorage extends DefaultContactStorage {
             try {
                 sortKeys = mapper.getSortKeys(sortOptions);
             } catch (OXException e) {
-                if (OXException.Generic.NOT_FOUND.equals(e)) {
+                if (e.isNotFound()) {
                     LOG.debug("Unable to generate LDAP sort keys, falling back to groupware sorting.", e);
                 }
             }
