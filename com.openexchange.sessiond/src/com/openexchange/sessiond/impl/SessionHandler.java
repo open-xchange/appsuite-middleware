@@ -469,14 +469,6 @@ public final class SessionHandler {
             LOG.debug("Cannot find session for given identifier to remove session <" + sessionid + '>');
             return false;
         }
-        try {
-            final SessionStorageService sessionStorageService = getServiceRegistry().getService(SessionStorageService.class);
-            if (sessionStorageService != null) {
-                sessionStorageService.removeSession(sessionControl.getSession().getSessionID());
-            }
-        } catch (final OXException e) {
-            LOG.error(e.getMessage(), e);
-        }
         postSessionRemoval(sessionControl.getSession());
         return true;
     }
@@ -693,14 +685,6 @@ public final class SessionHandler {
             if (INFO) {
                 LOG.info("Session timed out. ID: " + sessionControl.getSession().getSessionID());
             }
-            try {
-                final SessionStorageService sessionStorageService = getServiceRegistry().getService(SessionStorageService.class);
-                if (sessionStorageService != null) {
-                    sessionStorageService.removeSession(sessionControl.getSession().getSessionID());
-                }
-            } catch (final OXException e) {
-                LOG.error(e.getMessage(), e);
-            }
         }
         postSessionDataRemoval(controls);
     }
@@ -711,23 +695,15 @@ public final class SessionHandler {
             if (INFO) {
                 LOG.info("Session timed out. ID: " + control.getSession().getSessionID());
             }
-            try {
-                final SessionStorageService sessionStorageService = getServiceRegistry().getService(SessionStorageService.class);
-                if (sessionStorageService != null) {
-                    sessionStorageService.removeSession(control.getSession().getSessionID());
-                }
-            } catch (final OXException e) {
-                LOG.error(e.getMessage(), e);
-            }
         }
-        postContainerRemoval(controls);
+        postContainerRemoval(controls, true);
     }
 
     public static void close() {
         if (initialized.compareAndSet(true, false)) {
             final SessionData sd = sessionDataRef.get();
             if (null != sd) {
-                postContainerRemoval(sd.getShortTermSessions());
+                postContainerRemoval(sd.getShortTermSessions(), false);
                 sd.clear();
                 sessionDataRef.set(null);
             }
@@ -793,6 +769,24 @@ public final class SessionHandler {
     }
 
     static void postSessionRemoval(final Session session) {
+        // Asynchronous remove from session storage
+        final SessionStorageService sessionStorageService = getServiceRegistry().getService(SessionStorageService.class);
+        if (sessionStorageService != null) {
+            ThreadPools.getThreadPool().submit(ThreadPools.task(new Runnable() {
+    
+                @Override
+                public void run() {
+                    try {
+                        sessionStorageService.removeSession(session.getSessionID());
+                    } catch (final OXException e) {
+                        LOG.error(e.getMessage(), e);
+                    } catch (final RuntimeException e) {
+                        LOG.error(e.getMessage(), e);
+                    }
+                }
+            }));
+        }
+        // Asynchronous post of event
         final EventAdmin eventAdmin = getServiceRegistry().getService(EventAdmin.class);
         if (eventAdmin != null) {
             final Dictionary<String, Object> dic = new Hashtable<String, Object>(2);
@@ -822,7 +816,33 @@ public final class SessionHandler {
         }
     }
 
-    private static void postContainerRemoval(final List<SessionControl> sessionControls) {
+    private static void postContainerRemoval(final List<SessionControl> sessionControls, final boolean removeFromSessionStorage) {
+        if (removeFromSessionStorage) {
+            // Asynchronous remove from session storage
+            final SessionStorageService sessionStorageService = getServiceRegistry().getService(SessionStorageService.class);
+            if (sessionStorageService != null) {
+                ThreadPools.getThreadPool().submit(ThreadPools.task(new Runnable() {
+
+                    @Override
+                    public void run() {
+                        try {
+                            for (final SessionControl sessionControl : sessionControls) {
+                                try {
+                                    sessionStorageService.removeSession(sessionControl.getSession().getSessionID());
+                                } catch (final OXException e) {
+                                    LOG.error(e.getMessage(), e);
+                                } catch (final RuntimeException e) {
+                                    LOG.error(e.getMessage(), e);
+                                }
+                            }
+                        } catch (final RuntimeException e) {
+                            LOG.error(e.getMessage(), e);
+                        }
+                    }
+                }));
+            }
+        }
+        // Asynchronous post of event
         final EventAdmin eventAdmin = getServiceRegistry().getService(EventAdmin.class);
         if (eventAdmin != null) {
             final Dictionary<String, Object> dic = new Hashtable<String, Object>(2);
@@ -849,6 +869,30 @@ public final class SessionHandler {
     }
 
     private static void postSessionDataRemoval(final List<SessionControl> controls) {
+        // Asynchronous remove from session storage
+        final SessionStorageService sessionStorageService = getServiceRegistry().getService(SessionStorageService.class);
+        if (sessionStorageService != null) {
+            ThreadPools.getThreadPool().submit(ThreadPools.task(new Runnable() {
+    
+                @Override
+                public void run() {
+                    try {
+                        for (final SessionControl sessionControl : controls) {
+                            try {
+                                sessionStorageService.removeSession(sessionControl.getSession().getSessionID());
+                            } catch (final OXException e) {
+                                LOG.error(e.getMessage(), e);
+                            } catch (final RuntimeException e) {
+                                LOG.error(e.getMessage(), e);
+                            }
+                        }
+                    } catch (final RuntimeException e) {
+                        LOG.error(e.getMessage(), e);
+                    }
+                }
+            }));
+        }
+        // Post event
         final EventAdmin eventAdmin = getServiceRegistry().getService(EventAdmin.class);
         if (eventAdmin != null) {
             final Dictionary<String, Object> dic = new Hashtable<String, Object>(2);

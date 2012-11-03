@@ -212,12 +212,11 @@ public final class SessiondActivator extends HousekeepingActivator {
                         if (null != sessionControl) {
                             final SessionImpl session = sessionControl.getSession();
                             try {
-                                if (storageService.lookupSession(session.getSessionID()) == null) {
-                                    storageService.addSession(session);
+                                if (storageService.addSessionIfAbsent(session)) {
                                     SessionHandler.postSessionStored(session, eventAdmin);
                                 }
                             } catch (Exception e) {
-                                LOG.warn("Active session " + session.getSessionID() + " could not be put into central session storage.", e);
+                                LOG.warn("Active session " + session.getSessionID() + " could not be put into session storage.", e);
                             }
                         }
                     }
