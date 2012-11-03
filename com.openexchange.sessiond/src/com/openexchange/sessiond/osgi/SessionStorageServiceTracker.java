@@ -49,14 +49,12 @@
 
 package com.openexchange.sessiond.osgi;
 
-import static com.openexchange.sessiond.impl.SessionHandler.storeSession;
 import static com.openexchange.sessiond.services.SessiondServiceRegistry.getServiceRegistry;
+import java.util.ArrayList;
 import java.util.List;
-import org.apache.commons.logging.Log;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
-import com.openexchange.exception.OXException;
 import com.openexchange.sessiond.impl.SessionControl;
 import com.openexchange.sessiond.impl.SessionHandler;
 import com.openexchange.sessiond.impl.SessionImpl;
@@ -68,8 +66,6 @@ import com.openexchange.sessionstorage.SessionStorageService;
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  */
 public class SessionStorageServiceTracker implements ServiceTrackerCustomizer<SessionStorageService, SessionStorageService> {
-
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(SessionStorageServiceTracker.class);
 
     private final BundleContext context;
 
@@ -85,18 +81,13 @@ public class SessionStorageServiceTracker implements ServiceTrackerCustomizer<Se
     public SessionStorageService addingService(final ServiceReference<SessionStorageService> reference) {
         final SessionStorageService service = context.getService(reference);
         getServiceRegistry().addService(SessionStorageService.class, service);
-        final List<SessionControl> sessions = SessionHandler.getSessions();
-        if (!sessions.isEmpty()) {
-            for (final SessionControl sessionControl : sessions) {
-                final SessionImpl session = sessionControl.getSession();
-                try {
-                    if (service.lookupSession(session.getSessionID()) == null) {
-                        storeSession(session, service);
-                    }
-                } catch (final OXException e) {
-                    LOG.warn("Couldn't put session into SessionStorageService.", e);
-                }
+        final List<SessionControl> sessionControls = SessionHandler.getSessions();
+        if (!sessionControls.isEmpty()) {
+            final List<SessionImpl> sessions = new ArrayList<SessionImpl>(sessionControls.size());
+            for (final SessionControl sessionControl : sessionControls) {
+                sessions.add(sessionControl.getSession());
             }
+            SessionHandler.storeSessions(sessions, service);
         }
         return service;
     }

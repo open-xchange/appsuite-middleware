@@ -49,6 +49,7 @@
 
 package com.openexchange.sessionstorage;
 
+import java.util.Collection;
 import java.util.List;
 import com.openexchange.exception.OXException;
 import com.openexchange.session.Session;
@@ -57,6 +58,7 @@ import com.openexchange.session.Session;
  * {@link SessionStorageService} - A session storage service.
  * 
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface SessionStorageService {
 
@@ -70,12 +72,29 @@ public interface SessionStorageService {
     public Session lookupSession(String sessionId) throws OXException;
 
     /**
-     * Adds a new session to session storage
+     * Adds a new session to session storage.
      * 
      * @param session The session
      * @throws OXException If adding session failed, e.g. duplicate session
      */
     public void addSession(Session session) throws OXException;
+
+    /**
+     * Adds given sessions to session storage if not already contained.
+     * 
+     * @param sessions The sessions
+     * @throws OXException If adding sessions fails for some reason
+     */
+    public void addSessionsIfAbsent(Collection<Session> sessions) throws OXException;
+
+    /**
+     * Adds given session to session storage if not already contained.
+     * 
+     * @param session The session
+     * @throws OXException If adding session fails for some reason
+     * @return <code>true</code> if session could be added; otherwise <code>false</code> if such a session is already present
+     */
+    public boolean addSessionIfAbsent(Session session) throws OXException;
 
     /**
      * Remove the session with given session Id from session storage

@@ -60,10 +60,16 @@ import com.openexchange.session.Session;
  * {@link StoredSession} - Represents a session held in session storage.
  * 
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class StoredSession implements PutIfAbsent, Serializable {
 
     private static final long serialVersionUID = -3414389910481034283L;
+
+    /**
+     * The parameter name for session storage's {@link java.util.concurrent.Future add task}.
+     */
+    public static final String PARAM_SST_FUTURE = "__sst-future";
 
     private String loginName;
     private String password;
