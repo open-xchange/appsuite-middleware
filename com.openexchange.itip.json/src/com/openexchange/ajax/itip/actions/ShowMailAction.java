@@ -215,7 +215,7 @@ public class ShowMailAction implements AJAXActionService{
                 
                 if (participant instanceof ExternalUserParticipant) {
                     final ExternalUserParticipant ep = (ExternalUserParticipant) participant;
-                    Integer confirmStatus = confirmMap.get(ep.getIdentifier());
+                    Integer confirmStatus = confirmMap.get(Integer.toString(ep.getIdentifier()));
                     if (confirmStatus == null) {
                         confirmStatus = confirmMap.get(ep.getEmailAddress().toLowerCase());
                     }
@@ -244,7 +244,7 @@ public class ShowMailAction implements AJAXActionService{
         final ConfirmableParticipant[] confirmations = parsed.getConfirmations();
         if (confirmations != null) {
             for (final ConfirmableParticipant ep : confirmations) {
-                Integer confirmStatus = confirmMap.get(ep.getIdentifier());
+                Integer confirmStatus = confirmMap.get(Integer.toString(ep.getIdentifier()));
                 if (confirmStatus == null) {
                     confirmStatus = confirmMap.get(ep.getEmailAddress().toLowerCase());
                 }

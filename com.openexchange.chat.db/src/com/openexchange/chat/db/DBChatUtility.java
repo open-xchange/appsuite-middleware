@@ -142,7 +142,7 @@ public final class DBChatUtility {
         int i = 0;
 
         final long limit = -Long.MAX_VALUE;
-        final long multmin = limit / RADIX;
+        final int multmin = (int) (limit / RADIX);
         int digit;
 
         if (i < max) {

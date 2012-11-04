@@ -61,8 +61,6 @@ import java.util.Map;
 import java.util.concurrent.locks.ReentrantLock;
 
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
-
 import com.openexchange.ajax.fields.AppointmentFields;
 import com.openexchange.ajax.fields.CalendarFields;
 import com.openexchange.calendar.AppointmentDiff;
@@ -398,7 +396,7 @@ public class AppointmentNotificationPool implements
 			}
 			Map<PartitionIndex, Update[]> partitions = new HashMap<PartitionIndex, Update[]>();
 			for(Update update: updates) {
-				if (update.getDiff().isAboutCertainParticipantsStateChangeOnly(update.getSession().getUserId()+"")) {
+				if (update.getDiff().isAboutCertainParticipantsStateChangeOnly(Integer.toString(update.getSession().getUserId()))) {
 					continue;
 				}
 				Update[] partition = partitions.get(update.getSession().getUserId());

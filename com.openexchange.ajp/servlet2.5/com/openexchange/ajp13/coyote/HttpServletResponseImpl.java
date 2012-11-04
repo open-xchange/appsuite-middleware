@@ -654,7 +654,10 @@ public final class HttpServletResponseImpl implements HttpServletResponse {
      * @param cookie The cookie to remove
      */
     public void removeCookie(final Cookie cookie) {
-        cookies.remove(cookie);
+        if (null == cookie) {
+            return;
+        }
+        cookies.remove(wrapper(cookie));
     }
 
     private static final List<List<String>> EMPTY_COOKIES = Collections.emptyList();

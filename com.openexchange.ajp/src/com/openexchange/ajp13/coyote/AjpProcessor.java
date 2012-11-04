@@ -1550,6 +1550,8 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
             int mult = 1;
             for (int i = length - 1; i > colonPos; i--) {
                 final int charValue = host.charAt(i);
+                /*-
+                 * 
                 if (charValue == -1) {
                     // Invalid character
                     error = true;
@@ -1558,6 +1560,8 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
                     response.setStatus(400);
                     break;
                 }
+                 * 
+                 */
                 port = port + (charValue * mult);
                 mult = 10 * mult;
             }
