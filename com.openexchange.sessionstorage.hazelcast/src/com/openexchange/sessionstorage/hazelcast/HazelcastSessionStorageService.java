@@ -107,16 +107,16 @@ public class HazelcastSessionStorageService implements SessionStorageService {
         }
     }
 
-    private static volatile Integer getSessionMapTimeout;
-    private static int getSessionMapTimeout() {
-        Integer tmp = getSessionMapTimeout;
+    private static volatile Integer timeout;
+    private static int timeout() {
+        Integer tmp = timeout;
         if (null == tmp) {
             synchronized (HazelcastSessionStorageService.class) {
-                tmp = getSessionMapTimeout;
+                tmp = timeout;
                 if (null == tmp) {
                     ConfigurationService service = Services.optService(ConfigurationService.class);
-                    tmp = Integer.valueOf(null == service ? 1000 : service.getIntProperty("com.openexchange.sessionstorage.hazelcast.getSessionMapTimeout", 1000));
-                    getSessionMapTimeout = tmp;
+                    tmp = Integer.valueOf(null == service ? 1000 : service.getIntProperty("com.openexchange.sessionstorage.hazelcast.timeout", 1000));
+                    timeout = tmp;
                 }
             }
         }
@@ -147,7 +147,7 @@ public class HazelcastSessionStorageService implements SessionStorageService {
 
     private IMap<String, HazelcastStoredSession> getMapFrom(final Future<IMap<String, HazelcastStoredSession>> f) throws OXException {
         try {
-            return f.get(getSessionMapTimeout(), TimeUnit.MILLISECONDS);
+            return f.get(timeout(), TimeUnit.MILLISECONDS);
         } catch (final InterruptedException e) {
             Thread.currentThread().interrupt();
             throw SessionStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
@@ -193,7 +193,8 @@ public class HazelcastSessionStorageService implements SessionStorageService {
             if (null == threadPool) {
                 return hazelcastInstance.getMap(mapName);
             }
-            return getMapFrom(threadPool.submit(new GetSessionMapTask(hazelcastInstance, mapName), callerRunsBehavior));
+            final IMap<String, HazelcastStoredSession> map = getMapFrom(threadPool.submit(new GetSessionMapTask(hazelcastInstance, mapName), callerRunsBehavior));
+            return new TimeoutAwareIMap(map, timeout());
         } catch (final OXException e) {
             throw e;
         } catch (final HazelcastException e) {
