@@ -519,8 +519,7 @@ public class DefaultMailSenderService implements MailSenderService {
     private static boolean isAscii(final byte[] bytes) {
         boolean isAscci = true;
         for (int i = 0; isAscci && (i < bytes.length); i++) {
-            final byte b = bytes[i];
-            isAscci = (b <= 127 && b >= 0);
+            isAscci = (bytes[i] >= 0);
         }
         return isAscci;
     }
