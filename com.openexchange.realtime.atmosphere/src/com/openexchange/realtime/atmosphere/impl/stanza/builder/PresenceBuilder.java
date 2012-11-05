@@ -49,23 +49,17 @@
 
 package com.openexchange.realtime.atmosphere.impl.stanza.builder;
 
-import java.util.Iterator;
 import org.apache.commons.logging.Log;
-import org.json.JSONArray;
-import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.exception.OXException;
-import com.openexchange.realtime.atmosphere.AtmosphereExceptionCode;
+import com.openexchange.realtime.atmosphere.stanza.StanzaBuilder;
 import com.openexchange.realtime.packet.ID;
 import com.openexchange.realtime.packet.Presence;
 import com.openexchange.realtime.packet.Presence.Type;
-import com.openexchange.realtime.payload.PayloadElement;
-import static com.openexchange.realtime.payload.PayloadElement.PayloadFormat.*;
-import com.openexchange.realtime.payload.PayloadTree;
-import com.openexchange.realtime.payload.PayloadTreeNode;
 
 /**
- * {@link PresenceBuilder} - Parse an atmosphere client's presence message and build a Presence Stanza from it by adding the recipients ID.
+ * {@link PresenceBuilder} - Parse an atmosphere request and build a Presence Stanza from it by adding the recipients ID.
+ * Building includes transformation from JSON to POJO and Initialization from the PayloadTree.
  * 
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
@@ -76,8 +70,9 @@ public class PresenceBuilder extends StanzaBuilder<Presence> {
     /**
      * Create a new PresenceBuilder Initializes a new {@link PresenceBuilder}.
      * 
-     * @param from the sender's ID, must not be null
-     * @param json the sender's message, must not be null
+     * @param from The sender's ID, must not be null
+     * @param json The sender's message, must not be null
+     * @param serverSession The ServerSession associated with the incoming Stanza/Sender
      * @throws IllegalArgumentException if from or json are null
      */
     public PresenceBuilder(ID from, JSONObject json) {
@@ -94,6 +89,7 @@ public class PresenceBuilder extends StanzaBuilder<Presence> {
         basics();
         type();
         return stanza;
+        
     }
 
     private void type() {

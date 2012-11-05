@@ -47,34 +47,34 @@
  *
  */
 
-package com.openexchange.realtime.atmosphere.presence.handler;
+package com.openexchange.realtime.atmosphere.impl;
 
 import com.openexchange.exception.OXException;
-import com.openexchange.realtime.atmosphere.impl.stanza.handler.StanzaHandler;
-import com.openexchange.realtime.packet.Presence;
+import com.openexchange.realtime.atmosphere.AtmosphereExceptionCode;
+import com.openexchange.realtime.atmosphere.osgi.ExtensionRegistry;
+import com.openexchange.realtime.atmosphere.stanza.StanzaHandler;
 import com.openexchange.realtime.packet.Stanza;
-import com.openexchange.tools.session.ServerSession;
 
 /**
- * {@link PresenceHandler} Handle incoming and outgoing Presence Stanzas that have previously been transformed to the common POJO
- * representation that can be handled by the realtime framework.
+ * {@link StanzaHandlerSelector} - Select a StanzaHandler suitable for the given type of Stanza.
  * 
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
-public class PresenceHandler implements StanzaHandler {
+public class StanzaHandlerSelector {
 
-    @Override
-    public Class getStanzaClass() {
-        return Presence.class;
+    /**
+     * Select a StanzaHandler suitable for the given type of Stanza.
+     * 
+     * @param stanza The Stanza that has to be handled
+     * @return a StanzaHandler suitable for the given type of Stanza
+     * @throws OXException If no suitable StanzaHandler can be found
+     */
+    public static StanzaHandler getStanzaHandler(Stanza stanza) throws OXException {
+        StanzaHandler handler = ExtensionRegistry.getInstance().getHandlerFor(stanza);
+        if (handler == null) {
+            throw AtmosphereExceptionCode.MISSING_HANDLER_FOR_STANZA.create(stanza.getClass().getName());
+        }
+        return handler;
     }
 
-    @Override
-    public void incoming(Stanza stanza, ServerSession session) throws OXException {
-        throw new UnsupportedOperationException("Not implemented yet!");
-    }
-
-    @Override
-    public void outgoing(Stanza stanza, ServerSession session) throws OXException {
-        throw new UnsupportedOperationException("Not implemented yet!");
-    }
 }

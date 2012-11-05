@@ -52,7 +52,7 @@ package com.openexchange.realtime.atmosphere.impl;
 import java.util.Set;
 import com.openexchange.exception.OXException;
 import com.openexchange.realtime.Channel;
-import com.openexchange.realtime.atmosphere.osgi.PayloadElementTransformerRegistry;
+import com.openexchange.realtime.atmosphere.osgi.ExtensionRegistry;
 import com.openexchange.realtime.packet.ID;
 import com.openexchange.realtime.packet.Stanza;
 import com.openexchange.tools.session.ServerSession;
@@ -68,11 +68,11 @@ public class RTAtmosphereChannel implements Channel {
 
     private final RTAtmosphereHandler handler;
 
-    private final PayloadElementTransformerRegistry library;
+    private final ExtensionRegistry extensions;
 
     public RTAtmosphereChannel(RTAtmosphereHandler handler) {
         this.handler = handler;
-        this.library = PayloadElementTransformerRegistry.getInstance();
+        this.extensions = ExtensionRegistry.getInstance();
     }
 
     @Override
@@ -81,16 +81,16 @@ public class RTAtmosphereChannel implements Channel {
     }
 
     @Override
-    public boolean canHandle(Set<String> namespaces, ID recipient, ServerSession session) {
+    public boolean canHandle(Set<String> elementPaths, ID recipient, ServerSession session) {
         if (!isConnected(recipient, session)) {
             return false;
         }
 
-        if (!hasCapability(recipient, namespaces, session)) {
+        if (!hasCapability(recipient, elementPaths, session)) {
             return false;
         }
 
-        if (!library.getManageableNamespaces().containsAll(namespaces)) {
+        if (!extensions.getTransformableableElementPaths().containsAll(elementPaths)) {
             return false;
         }
 

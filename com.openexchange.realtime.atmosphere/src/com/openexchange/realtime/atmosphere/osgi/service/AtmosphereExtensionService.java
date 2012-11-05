@@ -47,35 +47,65 @@
  *
  */
 
-package com.openexchange.realtime.atmosphere.impl.stanza.handler;
+package com.openexchange.realtime.atmosphere.osgi.service;
 
 import com.openexchange.exception.OXException;
-import com.openexchange.realtime.packet.IQ;
-import com.openexchange.realtime.packet.Presence;
-import com.openexchange.realtime.packet.Stanza;
-import com.openexchange.tools.session.ServerSession;
-
+import com.openexchange.realtime.atmosphere.stanza.StanzaHandler;
+import com.openexchange.realtime.atmosphere.stanza.StanzaInitializer;
+import com.openexchange.realtime.payload.transformer.PayloadElementTransformer;
+import com.openexchange.realtime.util.ElementPath;
 
 /**
- * {@link IQHandler} Handle incoming and outgoing IQ Stanzas that have previously been transformed to the common POJO
- * representation that can be handled by the realtime framework.
- *
- * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
+ * {@link AtmosphereExtensionService} - Service to register StanzaHandlers and PayloadElementTransformers and StanzaInitializers. This allows us to extend the
+ * functionality of the central Atmosphere realtime bundle from within other bundles that concentrate on specific features like Presence,
+ * Messaging or others.
+ * 
+ * @author <a href="mailto:marc	.arens@open-xchange.com">Marc Arens</a>
  */
-public class IQHandler implements StanzaHandler {
+public interface AtmosphereExtensionService {
 
-    @Override
-    public void incoming(Stanza stanza, ServerSession session) throws OXException {
-        throw new UnsupportedOperationException("Not implemented yet!");
-    }
+    /**
+     * Adds specified transformer to the Atmosphere realtime bundle.
+     * 
+     * @param transformer The transformer to add
+     */
+    void addPayloadElementTransFormer(PayloadElementTransformer transformer);
 
-    @Override
-    public void outgoing(Stanza stanza, ServerSession session) throws OXException {
-        throw new UnsupportedOperationException("Not implemented yet!");
-    }
+    /**
+     * Remove specified transformer from the Atmosphere realtime bundle.
+     * 
+     * @param transformer The transformer to remove
+     */
+    void removePayloadElementTransformer(PayloadElementTransformer transformer);
 
-    @Override
-    public Class<IQ> getStanzaClass() {
-        return IQ.class;
-    }
+    /**
+     * Add an ElementPathMapping to the Atmosphere realtime bundle so it knows how to transform a PayloadElement.
+     * 
+     * @param elementPath The ElementPath of the PayloadElement
+     * @param mappingClass The Class used to map the PayloadElement
+     * @throws OXException when no transformer for the mapping class can be found
+     */
+    void addElementPathMapping(ElementPath elementPath, Class<?> mappingClass) throws OXException;
+
+    /**
+     * Remove an ElementPathMapping from the Atmosphere realtime bundle.
+     * 
+     * @param elementPath The ElementPath of the PayloadElement
+     */
+    void removeElementpathMapping(ElementPath elementPath);
+
+    /**
+     * Add a StazaHandler to the Atmosphere realtime bundle so it knows how to handle a Stanza subclass.
+     * 
+     * @param handler The StanzaHandler to add
+     */
+    void addStanzaHandler(StanzaHandler handler);
+
+    /**
+     * Remove a StazaHandler from the Atmosphere realtime bundle.
+     * 
+     * @param handler The StanzaHandler to remove
+     */
+    void removeStanzaHandler(StanzaHandler handler);
+
 }

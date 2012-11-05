@@ -47,33 +47,38 @@
  *
  */
 
-package com.openexchange.realtime.atmosphere.impl.stanza.handler;
+package com.openexchange.realtime.atmosphere.iq.handler;
 
 import com.openexchange.exception.OXException;
-import com.openexchange.realtime.packet.Message;
+import com.openexchange.realtime.StanzaSender;
+import com.openexchange.realtime.atmosphere.stanza.StanzaHandler;
+import com.openexchange.realtime.packet.IQ;
 import com.openexchange.realtime.packet.Stanza;
 import com.openexchange.tools.session.ServerSession;
 
 /**
- * {@link MessageHandler} Handle incoming and outgoing Message Stanzas that have previously been transformed to the common POJO
- * representation that can be handled by the realtime framework.
+ * {@link IQHandler} Handle incoming and outgoing IQ Stanzas.
  * 
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
-public class MessageHandler implements StanzaHandler {
+public class IQHandler implements StanzaHandler {
+
+    @Override
+    public Class<IQ> getStanzaClass() {
+        return IQ.class;
+    }
 
     @Override
     public void incoming(Stanza stanza, ServerSession session) throws OXException {
+        /*
+         * InitializingVisitor
+         */
         throw new UnsupportedOperationException("Not implemented yet!");
     }
 
     @Override
-    public void outgoing(Stanza stanza, ServerSession session) throws OXException {
+    public void outgoing(Stanza stanza, ServerSession session, StanzaSender sender) throws OXException {
         throw new UnsupportedOperationException("Not implemented yet!");
     }
 
-    @Override
-    public Class<Message> getStanzaClass() {
-        return Message.class;
-    }
 }

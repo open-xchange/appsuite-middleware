@@ -52,11 +52,12 @@ package com.openexchange.realtime.atmosphere.presence.osgi;
 import java.util.ArrayList;
 import java.util.List;
 import org.apache.commons.logging.Log;
+import com.openexchange.exception.OXException;
 import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.realtime.atmosphere.impl.stanza.handler.StanzaHandler;
-import com.openexchange.realtime.atmosphere.osgi.service.AtmosphereRegistryService;
-import com.openexchange.realtime.atmosphere.presence.handler.PresenceHandler;
+import com.openexchange.realtime.atmosphere.osgi.service.AtmosphereExtensionService;
+import com.openexchange.realtime.atmosphere.presence.handler.OXRTPresenceHandler;
 import com.openexchange.realtime.atmosphere.presence.transformer.PresenceStateTransformer;
+import com.openexchange.realtime.atmosphere.stanza.StanzaHandler;
 import com.openexchange.realtime.packet.Presence;
 import com.openexchange.realtime.packet.PresenceState;
 import com.openexchange.realtime.payload.transformer.PayloadElementTransformer;
@@ -64,26 +65,19 @@ import com.openexchange.realtime.presence.PresenceService;
 import com.openexchange.realtime.presence.subscribe.PresenceSubscriptionService;
 
 /**
- * {@link AtmospherePresenceActivator} - Register the presence specific payload converters as SimplePayloadConverters and add a new
- * OXRTHandler service that can handle incoming and outgoing Stanzas.
- * <ol>
- * <li>The <code>SimpleConverterActivator</code> listens for registrations of new <code>SimplePayloadConverters</code>.</li>
- * <li>When we register our presence specific <code>SimplePayloadConverters</code> the <code>SimpleconverterActivator</code> wraps them in a
- * <code>PayloadConverterAdapter</code> and registers them as <code>ResultConverter</code> services</li>
- * <li>The <code>DispatcherActivator</code> is listening for new <code>ResultConverter</code> services and adds them to the
- * <code>DefaultConverter</code></li>
- * <li>The presence <code>Payload</code> can then convert itself via the conversion service offered by the <code>DefaultConverter</code></li>
- * </ol>
+ * {@link AtmospherePresenceActivator} - Register the presence specific PayloadTransformers and Mappings from ElementPath to Class<?> and
+ * add a new OXRTHandler that can handle incoming and outgoing Presence Stanzas.
  * 
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
 public class AtmospherePresenceActivator extends HousekeepingActivator {
 
     private static final Log LOG = com.openexchange.log.Log.loggerFor(AtmospherePresenceActivator.class);
+
     private List<StanzaHandler> registeredHandlers;
+
     private List<PayloadElementTransformer> registeredTransformers;
 
-    
     /**
      * Initializes a new {@link AtmospherePresenceActivator}.
      */
@@ -94,7 +88,7 @@ public class AtmospherePresenceActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class[] { PresenceSubscriptionService.class, PresenceService.class, AtmosphereRegistryService.class };
+        return new Class[] { PresenceSubscriptionService.class, PresenceService.class, AtmosphereExtensionService.class };
     }
 
     @Override
@@ -112,23 +106,26 @@ public class AtmospherePresenceActivator extends HousekeepingActivator {
     protected void startBundle() throws Exception {
         AtmospherePresenceServiceRegistry serviceRegistry = AtmospherePresenceServiceRegistry.getInstance();
         serviceRegistry.initialize(this, getNeededServices());
-        AtmosphereRegistryService atmosphereRegistryService = AtmospherePresenceServiceRegistry.getInstance().getService(
-            AtmosphereRegistryService.class,
+        AtmosphereExtensionService atmosphereRegistryService = AtmospherePresenceServiceRegistry.getInstance().getService(
+            AtmosphereExtensionService.class,
             true);
 
         // Add Presence specific transformers and mappings
         atmosphereRegistryService.addPayloadElementTransFormer(new PresenceStateTransformer());
         atmosphereRegistryService.addElementPathMapping(Presence.PRESENCE_STATE_PATH, PresenceState.class);
+        atmosphereRegistryService.addElementPathMapping(Presence.MESSAGE_PATH, String.class);
+        atmosphereRegistryService.addElementPathMapping(Presence.PRIORITY_PATH, Byte.class);
+        atmosphereRegistryService.addElementPathMapping(Presence.ERROR_PATH, OXException.class);
 
         // Add Presence specific handler
-        atmosphereRegistryService.addStanzaHandler(new PresenceHandler());
+        atmosphereRegistryService.addStanzaHandler(new OXRTPresenceHandler());
     }
 
     @Override
     protected void stopBundle() throws Exception {
         AtmospherePresenceServiceRegistry.getInstance().clearRegistry();
-        AtmosphereRegistryService atmosphereRegistryService = AtmospherePresenceServiceRegistry.getInstance().getService(
-            AtmosphereRegistryService.class,
+        AtmosphereExtensionService atmosphereRegistryService = AtmospherePresenceServiceRegistry.getInstance().getService(
+            AtmosphereExtensionService.class,
             true);
         for (StanzaHandler handler : registeredHandlers) {
             atmosphereRegistryService.removeStanzaHandler(handler);

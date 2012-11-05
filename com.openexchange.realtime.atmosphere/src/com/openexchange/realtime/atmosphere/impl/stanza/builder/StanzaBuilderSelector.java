@@ -52,8 +52,11 @@ package com.openexchange.realtime.atmosphere.impl.stanza.builder;
 import org.json.JSONObject;
 import com.openexchange.exception.OXException;
 import com.openexchange.realtime.atmosphere.AtmosphereExceptionCode;
+import com.openexchange.realtime.atmosphere.osgi.ExtensionRegistry;
+import com.openexchange.realtime.atmosphere.stanza.StanzaBuilder;
 import com.openexchange.realtime.packet.ID;
 import com.openexchange.realtime.packet.Stanza;
+import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link StanzaBuilderSelector} - Select and instantiate a new StanzaBuilder matching the client's message.
@@ -62,6 +65,7 @@ import com.openexchange.realtime.packet.Stanza;
  */
 public class StanzaBuilderSelector {
 
+    private final static ExtensionRegistry builders = ExtensionRegistry.getInstance();
     /**
      * Get a parser that is adequate for he JSONObject that has to be parsed.
      * Incoming JSONObjects must contain an <code>element</code> key that let's us determine the needed StanzaBuilder.

@@ -47,66 +47,54 @@
  *
  */
 
-package com.openexchange.realtime.atmosphere.presence.visitor;
+package com.openexchange.realtime.presence;
 
-import java.util.Collection;
-import com.openexchange.exception.OXException;
-import com.openexchange.realtime.packet.Presence;
 import com.openexchange.realtime.packet.PresenceState;
-import com.openexchange.realtime.payload.PayloadElement;
-import com.openexchange.realtime.payload.PayloadTree;
-import com.openexchange.realtime.util.ElementPath;
 
 /**
- * {@link InitializingVisitor} - Visit the Stanza's default payloads and initialize its fields based on the found payloads.
+ * {@link PresenceData} - A pair of PresenceState and associated message. 
  * 
  * @author <a href="mailto:marc	.arens@open-xchange.com">Marc Arens</a>
  */
-public class InitializingVisitor implements PresencePayloadVisitor {
+public class PresenceData {
 
-    private Presence presence;
+    private PresenceState state;
+
+    private String message;
 
     /**
-     * Initializes a new {@link InitializingVisitor}.
+     * Initializes a new {@link PresenceData}.
      * 
-     * @param presence The Presence Stanza to initialize by visiting its payloads.
+     * @param state One of the avilable states to choose from
+     * @param message The optional user provided message to associate with the current state. May be null.
+     * @throws IllegalArgumentException when the state is missing
      */
-    public InitializingVisitor(Presence presence) {
-        this.presence = presence;
-    }
-    
-    /**
-     * Visit the Stanza's default payloads and initialize its fields based on the found payloads. 
-     */
-    @Override
-    public Presence doVisit() {
-        Collection<PayloadTree> defaultPayloads = presence.getDefaultPayloads();
-        for (PayloadTree payloadTree : defaultPayloads) {
-            payloadTree.accept(this);
+    public PresenceData(PresenceState state, String message) {
+        if (state == null) {
+            throw new IllegalArgumentException("Missing obligatory state parameter");
         }
-        return presence;
-    }
-
-    @Override
-    public void visit(PayloadElement element, Object data) {
-        // Only needed vor the Visitor interface hierarchy
-    }
-
-    public void visit(PayloadElement element, PresenceState data) {
-        presence.setState(data);
-    }
-
-    public void visit(PayloadElement element, String data) {
-        if (Presence.MESSAGE_PATH.equals(element.getElementPath())) {
-            presence.setMessage(data);
+        this.state = state;
+        if (message == null) {
+            this.message = "";
+        } else {
+            this.message = message;
         }
     }
 
-    public void visit(PayloadElement element, Byte data) {
-        presence.setPriority(data);
+    public PresenceState getState() {
+        return state;
     }
 
-    public void visit(PayloadElement element, OXException data) {
-        presence.setError(data);
+    public void setState(PresenceState state) {
+        this.state = state;
     }
+
+    public String getMessage() {
+        return message;
+    }
+
+    public void setMessage(String message) {
+        this.message = message;
+    }
+
 }

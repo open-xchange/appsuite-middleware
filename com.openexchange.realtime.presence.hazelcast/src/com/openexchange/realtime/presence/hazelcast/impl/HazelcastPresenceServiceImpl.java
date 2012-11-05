@@ -52,7 +52,7 @@ package com.openexchange.realtime.presence.hazelcast.impl;
 import com.openexchange.exception.OXException;
 import com.openexchange.realtime.packet.ID;
 import com.openexchange.realtime.presence.PresenceService;
-import com.openexchange.realtime.presence.PresenceStatus;
+import com.openexchange.realtime.presence.PresenceData;
 import com.openexchange.tools.session.ServerSession;
 
 
@@ -64,13 +64,13 @@ import com.openexchange.tools.session.ServerSession;
 public class HazelcastPresenceServiceImpl implements PresenceService {
 
     @Override
-    public void changePresenceStatus(ID id, PresenceStatus status, ServerSession session) throws OXException {
+    public void changePresenceStatus(ID id, PresenceData status, ServerSession session) throws OXException {
         // TODO Auto-generated method stub
         
     }
 
     @Override
-    public PresenceStatus getPresenceStatus(ID id) {
+    public PresenceData getPresenceStatus(ID id) {
         // TODO Auto-generated method stub
         return null;
     }

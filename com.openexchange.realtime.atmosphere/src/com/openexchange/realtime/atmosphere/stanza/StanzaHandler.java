@@ -47,54 +47,43 @@
  *
  */
 
-package com.openexchange.realtime.presence;
+package com.openexchange.realtime.atmosphere.stanza;
 
-import com.openexchange.realtime.packet.PresenceState;
+import com.openexchange.exception.OXException;
+import com.openexchange.realtime.StanzaSender;
+import com.openexchange.realtime.packet.Stanza;
+import com.openexchange.tools.session.ServerSession;
 
 /**
- * {@link PresenceStatus}
+ * {@link StanzaHandler} Interface for StanzaHandlers.
  * 
- * @author <a href="mailto:marc	.arens@open-xchange.com">Marc Arens</a>
+ * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
-public class PresenceStatus {
-
-    private PresenceState state;
-
-    private String message;
+public interface StanzaHandler {
 
     /**
-     * Initializes a new {@link PresenceStatus}.
+     * Get the Stanza class that this StanzaHandler is able to handle.
      * 
-     * @param state One of the avilable states to choose from
-     * @param message The optional user provided message to associate with the current state. May be null.
-     * @throws IllegalArgumentException when the state is missing
+     * @return The Stanza class that this StanzaHandler is able to handle.
      */
-    public PresenceStatus(PresenceState state, String message) {
-        if (state == null) {
-            throw new IllegalArgumentException("Missing obligatory state parameter");
-        }
-        this.state = state;
-        if (message == null) {
-            this.message = "";
-        } else {
-            this.message = message;
-        }
-    }
+    public Class<? extends Stanza> getStanzaClass();
 
-    public PresenceState getState() {
-        return state;
-    }
+    /**
+     * Handle an incoming Stanza. Transform the Payloads, initialize the Stanza and handle it. 
+     * 
+     * @param stanza The incoming Stanza
+     * @param session The associated ServerSession
+     * @throws OXException If handling fails
+     */
+    void incoming(Stanza stanza, ServerSession session) throws OXException;
 
-    public void setState(PresenceState state) {
-        this.state = state;
-    }
-
-    public String getMessage() {
-        return message;
-    }
-
-    public void setMessage(String message) {
-        this.message = message;
-    }
-
+    /**
+     * Handle an outgoing Stanza. Transform the payloads and hand it over to the StanzaSender.
+     * 
+     * @param stanza    The outgoing Stanza
+     * @param session   The associated ServerSession
+     * @param sender    A Sender to to transport the handled and transformed Stanza
+     * @throws OXException If handling fails
+     */
+    void outgoing(Stanza stanza, ServerSession session, StanzaSender sender) throws OXException;
 }

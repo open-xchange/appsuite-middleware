@@ -89,10 +89,16 @@ public class StanzaWriter {
             } else if (stanza instanceof IQ) {
                 writeQuery((IQ) stanza, object);
             }
+            writePayloadTrees();
             return object;
         } catch (JSONException x) {
             throw OXException.general("JSONException "+x.toString());
         }
+    }
+
+    private static void writePayloadTrees() {
+        // TODO Auto-generated method stub
+        
     }
 
     private static void writeQuery(IQ stanza, JSONObject object) throws JSONException {
@@ -107,7 +113,6 @@ public class StanzaWriter {
 
     private static void writeMessage(Message stanza, JSONObject object) throws JSONException {
         object.put("element", "message");
-        object.put("type", stanza.getType().name().toLowerCase());
     }
 
     private static void writeBasics(Stanza stanza, JSONObject object) throws JSONException {

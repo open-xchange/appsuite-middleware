@@ -47,23 +47,74 @@
  *
  */
 
-package com.openexchange.realtime.atmosphere.impl.stanza.handler;
+package com.openexchange.realtime.atmosphere.presence.initializer;
 
-import com.openexchange.realtime.StanzaFilter;
+import java.util.Collection;
+import com.openexchange.exception.OXException;
+import com.openexchange.realtime.atmosphere.presence.visitor.PresencePayloadVisitor;
+import com.openexchange.realtime.atmosphere.stanza.StanzaInitializer;
+import com.openexchange.realtime.packet.Presence;
+import com.openexchange.realtime.packet.PresenceState;
 import com.openexchange.realtime.packet.Stanza;
+import com.openexchange.realtime.payload.PayloadElement;
+import com.openexchange.realtime.payload.PayloadTree;
 
 /**
- * {@link StanzaHandler} Abstract superclass for StanzaHandlers.
+ * {@link InitializingVisitor} - Visit the Stanza's default payloads and initialize its fields based on the found payloads.
  * 
- * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
+ * @author <a href="mailto:marc	.arens@open-xchange.com">Marc Arens</a>
  */
-public interface StanzaHandler extends StanzaFilter {
+public class InitializingVisitor implements PresencePayloadVisitor, StanzaInitializer<Presence> {
+
+    private Presence presence;
 
     /**
-     * Get the Stanza class that this StanzaHandler is able to handle.
+     * Initializes a new {@link InitializingVisitor}.
      * 
-     * @return The Stanza class that this StanzaHandler is able to handle.
+     * @param presence The Presence Stanza to initialize by visiting its payloads.
      */
-    public Class<? extends Stanza> getStanzaClass();
+    public InitializingVisitor(Presence presence) {
+        this.presence = presence;
+    }
+
+    @Override
+    public Presence initialize() {
+        return doVisit();
+    }
+
+    /**
+     * Visit the Stanza's default payloads and initialize its fields based on the found payloads.
+     */
+    @Override
+    public Presence doVisit() {
+        Collection<PayloadTree> defaultPayloads = presence.getDefaultPayloads();
+        for (PayloadTree payloadTree : defaultPayloads) {
+            payloadTree.accept(this);
+        }
+        return presence;
+    }
+
+    @Override
+    public void visit(PayloadElement element, Object data) {
+        // Only needed vor the Visitor interface hierarchy
+    }
+
+    public void visit(PayloadElement element, PresenceState data) {
+        presence.setState(data);
+    }
+
+    public void visit(PayloadElement element, String data) {
+        if (Presence.MESSAGE_PATH.equals(element.getElementPath())) {
+            presence.setMessage(data);
+        }
+    }
+
+    public void visit(PayloadElement element, Byte data) {
+        presence.setPriority(data);
+    }
+
+    public void visit(PayloadElement element, OXException data) {
+        presence.setError(data);
+    }
 
 }

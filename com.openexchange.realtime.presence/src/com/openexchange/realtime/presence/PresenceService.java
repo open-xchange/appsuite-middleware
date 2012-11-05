@@ -63,14 +63,15 @@ import com.openexchange.tools.session.ServerSession;
 public interface PresenceService {
 
     /**
-     * Change the PresenceStatus of and ID.
+     * Change the PresenceStatus of an ID.
      * 
      * @param id ID that wants to change its PresenceStatus
-     * @param status The new PresenceStatus
-     * @param session The associated ServerSession
+     * @param status    The new PresenceStatus
+     * @param message   The message for the new PresenceStatus
+     * @param session   The associated ServerSession
      * @throws OXException If changing the PresenceStatus fails
      */
-    public void changePresenceStatus(ID id, PresenceStatus status, ServerSession session) throws OXException;
+    public void changePresenceStatus(ID id, PresenceData status, ServerSession session) throws OXException;
 
     /**
      * Get the current PresenceStatus of an ID.
@@ -78,5 +79,5 @@ public interface PresenceService {
      * @param id The ID whose PresenceStatus should be queried
      * @return The current PresenceStatus of ID or null if we aren't allowed to see the PresenceStatus.
      */
-    public PresenceStatus getPresenceStatus(ID id);
+    public PresenceData getPresenceStatus(ID id);
 }

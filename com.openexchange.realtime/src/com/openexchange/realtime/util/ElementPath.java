@@ -113,6 +113,9 @@ public class ElementPath {
 
     @Override
     public String toString() {
+        if("".equals(namespace)) {
+            return "ElementPath [" + element + "]";            
+        }
         return "ElementPath [" + namespace + "." + element + "]";
     }
 

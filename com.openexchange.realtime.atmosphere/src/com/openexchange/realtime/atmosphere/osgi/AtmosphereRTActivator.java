@@ -8,7 +8,7 @@ import com.openexchange.realtime.Channel;
 import com.openexchange.realtime.MessageDispatcher;
 import com.openexchange.realtime.atmosphere.impl.RTAtmosphereChannel;
 import com.openexchange.realtime.atmosphere.impl.RTAtmosphereHandler;
-import com.openexchange.realtime.atmosphere.osgi.service.AtmosphereRegistryService;
+import com.openexchange.realtime.atmosphere.osgi.service.AtmosphereExtensionService;
 import com.openexchange.sessiond.SessiondService;
 
 public class AtmosphereRTActivator extends HousekeepingActivator {
@@ -22,7 +22,7 @@ public class AtmosphereRTActivator extends HousekeepingActivator {
     protected void startBundle() throws Exception {
         openTrackers();
 
-        registerService(AtmosphereRegistryService.class, new AtmosphereRegistryServiceImpl());
+        registerService(AtmosphereExtensionService.class, new AtmosphereExtensionServiceImpl());
 
         AtmosphereService atmosphereService = getService(AtmosphereService.class);
         RTAtmosphereHandler handler = new RTAtmosphereHandler();
@@ -34,8 +34,7 @@ public class AtmosphereRTActivator extends HousekeepingActivator {
     public void stop(BundleContext context) throws Exception {
         getService(AtmosphereService.class).unregister("rt");
         AtmosphereServiceRegistry.getInstance().clearRegistry();
-        PayloadElementTransformerRegistry.getInstance().clearRegistry();
-        StanzaHandlerRegistry.getInstance().clearRegistry();
+        ExtensionRegistry.getInstance().clearRegistry();
         super.stop(context);
     }
 

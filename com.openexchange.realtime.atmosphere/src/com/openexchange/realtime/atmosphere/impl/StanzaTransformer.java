@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.realtime.atmosphere.impl.stanza.transformer;
+package com.openexchange.realtime.atmosphere.impl;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -55,7 +55,7 @@ import java.util.List;
 import com.openexchange.exception.OXException;
 import com.openexchange.realtime.StanzaFilter;
 import com.openexchange.realtime.atmosphere.AtmosphereExceptionCode;
-import com.openexchange.realtime.atmosphere.osgi.PayloadElementTransformerRegistry;
+import com.openexchange.realtime.atmosphere.osgi.ExtensionRegistry;
 import com.openexchange.realtime.packet.Stanza;
 import com.openexchange.realtime.payload.PayloadElement;
 import com.openexchange.realtime.payload.PayloadTree;
@@ -74,7 +74,7 @@ import com.openexchange.tools.session.ServerSession;
 
 public class StanzaTransformer implements StanzaFilter {
 
-    private final PayloadElementTransformerRegistry transformers = PayloadElementTransformerRegistry.getInstance();
+    private final ExtensionRegistry transformers = ExtensionRegistry.getInstance();
 
     /**
      * Transform an incoming {@link Stanza} by transforming every PayloadTree of the Stanza.
@@ -141,7 +141,7 @@ public class StanzaTransformer implements StanzaFilter {
      * @throws OXException If no suitable PayloadElementTransformer could be found
      */
     private PayloadElementTransformer getPayloadTransformer(ElementPath elementPath) throws OXException {
-        PayloadElementTransformer transformer = transformers.getHandlerFor(elementPath);
+        PayloadElementTransformer transformer = transformers.getTransformerFor(elementPath);
         if (transformer == null) {
             throw AtmosphereExceptionCode.MISSING_TRANSFORMER_FOR_PAYLOADELEMENT.create(elementPath);
         }

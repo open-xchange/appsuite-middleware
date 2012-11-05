@@ -51,8 +51,10 @@ package com.openexchange.realtime.atmosphere.impl.stanza.builder;
 
 import org.json.JSONObject;
 import com.openexchange.exception.OXException;
+import com.openexchange.realtime.atmosphere.stanza.StanzaBuilder;
 import com.openexchange.realtime.packet.ID;
 import com.openexchange.realtime.packet.IQ;
+import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link IQBuilder} - Parse an atmosphere client's IQ message and build a IQ Stanza from it by adding the recipients ID.

@@ -5,7 +5,7 @@
 	"session":"1234",
 	"payloads":
 		[
-	            {"element":"message", "data":"Hello marens, please let me subscribe to your presence, WBR., Mr. X"},
+	            {"element":"show", "data":"Hello marens, please let me subscribe to your presence, WBR., Mr. X"},
 	            {"element":"priority", "data":"7"},
 	            
 	            {"element":"flatObject", "data":

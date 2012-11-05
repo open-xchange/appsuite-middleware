@@ -73,6 +73,10 @@ public enum AtmosphereExceptionCode implements OXExceptionCode {
     MISSING_TRANSFORMER_FOR_PAYLOADELEMENT(AtmosphereExceptionMessage.MISSING_TRANSFORMER_FOR_PAYLOADELEMENT_MSG, CATEGORY_ERROR, 5),
     /** Could not find a handler for the specified stanza: . \"%1$s\" */
     MISSING_HANDLER_FOR_STANZA(AtmosphereExceptionMessage.MISSING_HANDLER_FOR_STANZA_MSG, CATEGORY_ERROR, 6),
+    /** Could not find an initializer for the specified stanza: . \"%1$s\" */
+    MISSING_INITIALIZER_FOR_STANZA(AtmosphereExceptionMessage.MISSING_INITIALIZER_FOR_STANZA_MSG, CATEGORY_ERROR, 7),
+    /** Error while transforming a PayloadElement: \"%1$s, %2$s\" */
+    ERROR_WHILE_TRANSFORMING(AtmosphereExceptionMessage.ERROR_WHILE_TRANSFORMING_MSG, CATEGORY_ERROR, 8)
     ;
 
     private final String message;

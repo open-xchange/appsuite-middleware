@@ -47,52 +47,37 @@
  *
  */
 
-package com.openexchange.realtime.atmosphere.osgi;
+package com.openexchange.realtime.atmosphere.message.handler;
 
-import com.openexchange.realtime.atmosphere.impl.stanza.handler.StanzaHandler;
-import com.openexchange.realtime.atmosphere.osgi.service.AtmosphereRegistryService;
-import com.openexchange.realtime.payload.transformer.PayloadElementTransformer;
-import com.openexchange.realtime.util.ElementPath;
+import com.openexchange.exception.OXException;
+import com.openexchange.realtime.StanzaSender;
+import com.openexchange.realtime.atmosphere.stanza.StanzaHandler;
+import com.openexchange.realtime.packet.Message;
+import com.openexchange.realtime.packet.Stanza;
+import com.openexchange.tools.session.ServerSession;
 
 /**
- * {@link AtmosphereRegistryServiceImpl} 
+ * {@link MessageHandler} Handle incoming and outgoing Message Stanzas.
  * 
- * @author <a href="mailto:marc	.arens@open-xchange.com">Marc Arens</a>
+ * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
-public class AtmosphereRegistryServiceImpl implements AtmosphereRegistryService {
-
-    private PayloadElementTransformerRegistry payloadElementTransformerRegistry = PayloadElementTransformerRegistry.getInstance();
-
-    private StanzaHandlerRegistry stanzaHandlerRegistry = StanzaHandlerRegistry.getInstance();
+public class MessageHandler implements StanzaHandler {
 
     @Override
-    public void addPayloadElementTransFormer(PayloadElementTransformer transformer) {
-        payloadElementTransformerRegistry.addPayloadElementTransFormer(transformer);
+    public void incoming(Stanza stanza, ServerSession session) throws OXException {
+        throw new UnsupportedOperationException("Not implemented yet!");
     }
 
     @Override
-    public void removePayloadElementTransformer(PayloadElementTransformer transformer) {
-        payloadElementTransformerRegistry.removePayloadElementTransformer(transformer);
+    public void outgoing(Stanza stanza, ServerSession session, StanzaSender sender) throws OXException {
+        /*
+         * InitializingVisitor
+         */
+        throw new UnsupportedOperationException("Not implemented yet!");
     }
 
     @Override
-    public void addElementPathMapping(ElementPath elementPath, Class<?> mappingClass) {
-        payloadElementTransformerRegistry.addElementPathMapping(elementPath, mappingClass);
+    public Class<Message> getStanzaClass() {
+        return Message.class;
     }
-
-    @Override
-    public void removeElementpathMapping(ElementPath elementPath) {
-        payloadElementTransformerRegistry.removeElementpathMapping(elementPath);
-    }
-
-    @Override
-    public void addStanzaHandler(StanzaHandler handler) {
-        stanzaHandlerRegistry.addStanzaHandler(handler);
-    }
-
-    @Override
-    public void removeStanzaHandler(StanzaHandler handler) {
-        stanzaHandlerRegistry.removeStanzaHandler(handler);
-    }
-
 }

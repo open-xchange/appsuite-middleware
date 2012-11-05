@@ -68,7 +68,7 @@ public class DummyPresenceService implements PresenceService {
 
     private final ServiceLookup services;
 
-    private final IDMap<PresenceStatus> statusMap = new IDMap<PresenceStatus>();
+    private final IDMap<PresenceData> statusMap = new IDMap<PresenceData>();
 
     private final IDMap<List<ID>> subscriptions = new IDMap<List<ID>>();
 
@@ -92,7 +92,7 @@ public class DummyPresenceService implements PresenceService {
     }
 
     @Override
-    public void changePresenceStatus(ID id, PresenceStatus status, ServerSession session) throws OXException {
+    public void changePresenceStatus(ID id, PresenceData status, ServerSession session) throws OXException {
         statusMap.put(id.toGeneralForm(), status);
 
         MessageDispatcher dispatcher = services.getService(MessageDispatcher.class);
@@ -110,7 +110,7 @@ public class DummyPresenceService implements PresenceService {
     }
 
     @Override
-    public PresenceStatus getPresenceStatus(ID id) {
+    public PresenceData getPresenceStatus(ID id) {
         return statusMap.get(id.toGeneralForm());
     }
 

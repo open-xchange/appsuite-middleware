@@ -47,72 +47,47 @@
  *
  */
 
-package com.openexchange.realtime.atmosphere.osgi;
+package com.openexchange.realtime.payload.transformer.primitive;
 
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import org.apache.commons.logging.Log;
-import com.openexchange.osgi.ServiceRegistry;
-import com.openexchange.realtime.atmosphere.impl.stanza.handler.StanzaHandler;
-import com.openexchange.realtime.packet.Stanza;
+import static com.openexchange.realtime.payload.PayloadElement.PayloadFormat.*;
+import com.openexchange.exception.OXException;
+import com.openexchange.realtime.atmosphere.AtmosphereExceptionCode;
+import com.openexchange.realtime.payload.PayloadElement;
+import com.openexchange.realtime.payload.transformer.PayloadElementTransformer;
+import com.openexchange.tools.session.ServerSession;
 
 /**
- * {@link StanzaHandlerRegistry} - Tracks registered StanzaHandlers and makes them accessible through {@link #getHandlerFor(Class<? extends
- * Stanza>)}.
+ * {@link ByteTransformer} Transform Bytes between JSON and POJO representation.
  * 
- * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
+ * @author <a href="mailto:marc	.arens@open-xchange.com">Marc Arens</a>
  */
-public class StanzaHandlerRegistry extends ServiceRegistry {
+public class ByteTransformer implements PayloadElementTransformer {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(StanzaHandlerRegistry.class);
-    private static final StanzaHandlerRegistry INSTANCE = new StanzaHandlerRegistry();
-
-    private final Map<Class<? extends Stanza>, StanzaHandler> handlers;
-
-    /**
-     * Encapsulated constructor.
-     */
-    private StanzaHandlerRegistry() {
-        super();
-        handlers = new ConcurrentHashMap<Class<? extends Stanza>, StanzaHandler>();
+    @Override
+    public Class<?> getElementClass() {
+        return Byte.class;
     }
 
-    /**
-     * Get the Registry singleton.
-     * 
-     * @return the Registry singleton
-     */
-    public static StanzaHandlerRegistry getInstance() {
-        return INSTANCE;
+    @Override
+    public PayloadElement incoming(PayloadElement payload, ServerSession session) throws OXException {
+        String data = (String) payload.getData();
+        Byte transformed = 0;
+        try {
+            transformed = Byte.valueOf(data);
+        } catch (NumberFormatException ex) {
+            AtmosphereExceptionCode.ERROR_WHILE_TRANSFORMING.create(payload.getElementPath(), ex);
+        }
+        payload.setData(transformed, POJO);
+        return payload;
+
     }
 
-    /**
-     * Gets the appropriate handler for the specified Stanz class.
-     * 
-     * @param stanzaClass The Stanza subclass we want to handle.
-     * @return The appropriate handler or <code>null</code> if none is applicable.
-     */
-    public StanzaHandler getHandlerFor(Stanza stanza) {
-        return handlers.get(stanza.getClass());
-    }
-
-    /**
-     * Adds specified handler/transformer to this library.
-     * 
-     * @param transformer The handler to add
-     */
-    public void addStanzaHandler(StanzaHandler handler) {
-        handlers.put(handler.getStanzaClass(), handler);
-        LOG.info("Added StanzaHandler: " + handler.getStanzaClass());
-    }
-
-    /**
-     * Removes specified handler/transformer from this library.
-     * 
-     * @param transformer The handler to remove
-     */
-    public void removeStanzaHandler(StanzaHandler handler) {
-        handlers.remove(handler.getStanzaClass());
+    @Override
+    public PayloadElement outgoing(PayloadElement payload, ServerSession session) throws OXException {
+        Byte data = (Byte) payload.getData();
+        String transformed = data.toString();
+        payload.setData(transformed, JSON);
+        return payload;
     }
 
 }

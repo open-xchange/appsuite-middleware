@@ -76,14 +76,11 @@ import com.openexchange.log.Log;
 import com.openexchange.log.LogFactory;
 import com.openexchange.realtime.MessageDispatcher;
 import com.openexchange.realtime.StanzaSender;
-import com.openexchange.realtime.atmosphere.impl.stanza.builder.StanzaBuilder;
 import com.openexchange.realtime.atmosphere.impl.stanza.builder.StanzaBuilderSelector;
-import com.openexchange.realtime.atmosphere.impl.stanza.handler.StanzaHandler;
-import com.openexchange.realtime.atmosphere.impl.stanza.handler.StanzaHandlerSelector;
-import com.openexchange.realtime.atmosphere.impl.stanza.transformer.StanzaTransformer;
 import com.openexchange.realtime.atmosphere.impl.stanza.writer.StanzaWriter;
 import com.openexchange.realtime.atmosphere.osgi.AtmosphereServiceRegistry;
-import com.openexchange.realtime.atmosphere.osgi.PayloadElementTransformerRegistry;
+import com.openexchange.realtime.atmosphere.stanza.StanzaBuilder;
+import com.openexchange.realtime.atmosphere.stanza.StanzaHandler;
 import com.openexchange.realtime.packet.ID;
 import com.openexchange.realtime.packet.Stanza;
 import com.openexchange.server.ServiceExceptionCode;
@@ -111,8 +108,6 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
 
     private final ServiceLookup services;
 
-     private final PayloadElementTransformerRegistry payloadTransformerRegistry;
-
     // Keep track of sessionID -> RTAtmosphereState to uniquely identify connected clients
     private final ConcurrentHashMap<String, RTAtmosphereState> sessionIdToState;
 
@@ -129,7 +124,6 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
         super();
         sessionIdToState = new ConcurrentHashMap<String, RTAtmosphereState>();
         userToBroadcasterIDs = new ConcurrentHashMap<String, Set<String>>();
-        this.payloadTransformerRegistry = PayloadElementTransformerRegistry.getInstance();
         this.services = AtmosphereServiceRegistry.getInstance();
     }
 
@@ -516,8 +510,6 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
      */
     protected <T extends Stanza> void handleIncoming(T stanza, RTAtmosphereState atmosphereState) throws OXException {
         ServerSession session = atmosphereState.session;
-        StanzaTransformer stanzaTransformer = new StanzaTransformer();
-        stanzaTransformer.incoming(stanza, session);
         StanzaHandler stanzaHandler = StanzaHandlerSelector.getStanzaHandler(stanza);
         stanzaHandler.incoming(stanza, session);
     }
