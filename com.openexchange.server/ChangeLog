@@ -6,6 +6,7 @@
 
  - Fix for bug 23567: Using proper locale when writing JSON response
  - Fix for bug 23592: Proper check for mandatory fields
+ - Fix for bug 23605: Fixed possible NPE
 
 * 2012-11-02 - tobias.friedrich@open-xchange.com
 
