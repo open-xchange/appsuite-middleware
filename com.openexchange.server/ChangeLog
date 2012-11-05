@@ -1,3 +1,7 @@
+* 2012-11-05 - martin.herfurth@open-xchange.com
+
+ - Fix for bug 23483: Missing Last Modified on delete exception.
+
 * 2012-11-05 - thorben.betten@open-xchange.com
 
  - Fix for bug 23567: Using proper locale when writing JSON response
