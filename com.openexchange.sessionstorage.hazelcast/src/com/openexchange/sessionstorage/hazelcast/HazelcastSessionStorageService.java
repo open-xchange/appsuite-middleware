@@ -58,7 +58,7 @@ import com.openexchange.crypto.CryptoService;
 import com.openexchange.exception.OXException;
 import com.openexchange.session.Session;
 import com.openexchange.sessionstorage.SessionStorageService;
-import com.openexchange.sessionstorage.hazelcast.exceptions.OXHazelcastSessionStorageExceptionCodes;
+import com.openexchange.sessionstorage.exceptions.OXSessionStorageExceptionCodes;
 import com.openexchange.sessionstorage.hazelcast.osgi.HazelcastSessionStorageServiceRegistry;
 
 /**
@@ -103,7 +103,7 @@ public class HazelcastSessionStorageService implements SessionStorageService {
             sessions.replace(sessionId, s);
             return s;
         }
-        throw OXHazelcastSessionStorageExceptionCodes.HAZELCAST_SESSIONSTORAGE_SESSION_NOT_FOUND.create(sessionId);
+        throw OXSessionStorageExceptionCodes.SESSIONSTORAGE_SESSION_NOT_FOUND.create(sessionId);
     }
 
     @Override
@@ -113,7 +113,7 @@ public class HazelcastSessionStorageService implements SessionStorageService {
             ss.setPassword(crypt(ss.getPassword()));
             sessions.put(session.getSessionID(), ss);
         } catch (Exception e) {
-            throw OXHazelcastSessionStorageExceptionCodes.HAZELCAST_SESSIONSTORAGE_SAVE_FAILED.create(e, session.getSessionID());
+            throw OXSessionStorageExceptionCodes.SESSIONSTORAGE_SAVE_FAILED.create(e, session.getSessionID());
         }
     }
 
@@ -122,7 +122,7 @@ public class HazelcastSessionStorageService implements SessionStorageService {
         try {
             sessions.remove(sessionId);
         } catch (Exception e) {
-            throw OXHazelcastSessionStorageExceptionCodes.HAZELCAST_SESSIONSTORAGE_REMOVE_FAILED.create(e, sessionId);
+            throw OXSessionStorageExceptionCodes.SESSIONSTORAGE_REMOVE_FAILED.create(e, sessionId);
         }
     }
 
@@ -223,7 +223,7 @@ public class HazelcastSessionStorageService implements SessionStorageService {
                 return s;
             }
         }
-        throw OXHazelcastSessionStorageExceptionCodes.HAZELCAST_SESSIONSTORAGE_RANDOM_NOT_FOUND.create(randomToken);
+        throw OXSessionStorageExceptionCodes.SESSIONSTORAGE_RANDOM_NOT_FOUND.create(randomToken);
     }
 
     @Override
@@ -234,7 +234,7 @@ public class HazelcastSessionStorageService implements SessionStorageService {
                 return s;
             }
         }
-        throw OXHazelcastSessionStorageExceptionCodes.HAZELCAST_SESSIONSTORAGE_ALTID_NOT_FOUND.create(altId);
+        throw OXSessionStorageExceptionCodes.SESSIONSTORAGE_ALTID_NOT_FOUND.create(altId);
     }
 
     @Override
@@ -261,9 +261,7 @@ public class HazelcastSessionStorageService implements SessionStorageService {
         if (null != authId) {
             for (final Session session : getSessions()) {
                 if (authId.equals(session.getAuthId())) {
-                    throw OXHazelcastSessionStorageExceptionCodes.HAZELCAST_SESSIONSTORAGE_DUPLICATE_AUTHID.create(
-                        session.getLogin(),
-                        login);
+                    throw OXSessionStorageExceptionCodes.SESSIONSTORAGE_DUPLICATE_AUTHID.create(session.getLogin(), login);
                 }
             }
         }

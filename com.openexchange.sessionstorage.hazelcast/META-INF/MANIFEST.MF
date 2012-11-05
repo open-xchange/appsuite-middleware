@@ -17,5 +17,6 @@ Import-Package: com.hazelcast.config,
  com.openexchange.osgi,
  com.openexchange.session,
  com.openexchange.sessionstorage,
+ com.openexchange.sessionstorage.exceptions,
  org.apache.commons.logging,
  org.osgi.framework

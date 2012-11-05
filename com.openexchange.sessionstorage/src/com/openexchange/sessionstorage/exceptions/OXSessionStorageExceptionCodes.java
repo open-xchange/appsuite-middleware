@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.sessionstorage.nosql.exceptions;
+package com.openexchange.sessionstorage.exceptions;
 
 import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
@@ -55,23 +55,24 @@ import com.openexchange.exception.OXExceptionCode;
 import com.openexchange.exception.OXExceptionFactory;
 
 /**
- * {@link OXNoSQLSessionStorageExceptionCodes}
+ * {@link OXSessionStorageExceptionCodes}
  * 
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  */
-public enum OXNoSQLSessionStorageExceptionCodes implements OXExceptionCode {
+public enum OXSessionStorageExceptionCodes implements OXExceptionCode {
 
-    NOSQL_SESSIONSTORAGE_START_FAILED(OXNoSQLSessionStorageExceptionMessages.NOSQL_SESSIONSTORAGE_START_FAILED_MSG, 1, Category.CATEGORY_ERROR),
-    NOSQL_SESSIONSTORAGE_SAVE_FAILED(OXNoSQLSessionStorageExceptionMessages.NOSQL_SESSIONSTORAGE_SAVE_FAILED_MSG, 2, Category.CATEGORY_ERROR),
-    NOSQL_SESSIONSTORAGE_LOOKUP_FAILED(OXNoSQLSessionStorageExceptionMessages.NOSQL_SESSIONSTORAGE_LOOKUP_FAILED_MSG, 3, Category.CATEGORY_ERROR),
-    NOSQL_SESSIONSTORAGE_REMOVE_FAILED(OXNoSQLSessionStorageExceptionMessages.NOSQL_SESSIONSTORAGE_REMOVE_FAILED_MSG, 4, Category.CATEGORY_ERROR),
-    NOSQL_SESSIONSTORAGE_SESSION_NOT_FOUND(OXNoSQLSessionStorageExceptionMessages.NOSQL_SESSIONSTORAGE_SESSION_NOT_FOUND_MSG, 5, Category.CATEGORY_ERROR),
-    NOSQL_SESSIONSTORAGE_NO_ENCRYPTION_KEY(OXNoSQLSessionStorageExceptionMessages.NOSQL_SESSIONSTORAGE_NO_ENCRYPTION_KEY_MSG, 6, Category.CATEGORY_ERROR),
-    NOSQL_SESSIONSTORAGE_DUPLICATE_AUTHID(OXNoSQLSessionStorageExceptionMessages.NOSQL_SESSIONSTORAGE_DUPLICATE_AUTHID_MSG, 7, Category.CATEGORY_ERROR),
-    NOSQL_SESSIONSTORAGE_UNSUPPORTED_OPERATION(OXNoSQLSessionStorageExceptionMessages.NOSQL_SESSIONSTORAGE_UNSUPPORTED_OPERATION_MSG, 8, Category.CATEGORY_ERROR),
-    NOSQL_SESSIONSTORAGE_ALTID_NOT_FOUND(OXNoSQLSessionStorageExceptionMessages.NOSQL_SESSIONSTORAGE_ALTID_NOT_FOUND_MSG, 9, Category.CATEGORY_ERROR),
-    NOSQL_SESSIONSTORAGE_NO_USERSESSIONS(OXNoSQLSessionStorageExceptionMessages.NOSQL_SESSIONSTORAGE_NO_USERSESSIONS_MSG, 10, Category.CATEGORY_ERROR),
-    NOSQL_SESSIONSTORAGE_NO_CONTEXTSESSIONS(OXNoSQLSessionStorageExceptionMessages.NOSQL_SESSIONSTORAGE_NO_CONTEXTSESSIONS_MSG, 11, Category.CATEGORY_ERROR);
+    SESSIONSTORAGE_START_FAILED(OXSessionStorageExceptionMessages.SESSIONSTORAGE_START_FAILED_MSG, 1, Category.CATEGORY_ERROR),
+    SESSIONSTORAGE_SAVE_FAILED(OXSessionStorageExceptionMessages.SESSIONSTORAGE_SAVE_FAILED_MSG, 2, Category.CATEGORY_ERROR),
+    SESSIONSTORAGE_REMOVE_FAILED(OXSessionStorageExceptionMessages.SESSIONSTORAGE_REMOVE_FAILED_MSG, 3, Category.CATEGORY_ERROR),
+    SESSIONSTORAGE_SESSION_NOT_FOUND(OXSessionStorageExceptionMessages.SESSIONSTORAGE_SESSION_NOT_FOUND_MSG, 4, Category.CATEGORY_ERROR),
+    SESSIONSTORAGE_NO_ENCRYPTION_KEY(OXSessionStorageExceptionMessages.SESSIONSTORAGE_NO_ENCRYPTION_KEY_MSG, 5, Category.CATEGORY_ERROR),
+    SESSIONSTORAGE_DUPLICATE_AUTHID(OXSessionStorageExceptionMessages.SESSIONSTORAGE_DUPLICATE_AUTHID_MSG, 6, Category.CATEGORY_ERROR),
+    SESSIONSTORAGE_UNSUPPORTED_OPERATION(OXSessionStorageExceptionMessages.SESSIONSTORAGE_UNSUPPORTED_OPERATION_MSG, 7, Category.CATEGORY_ERROR),
+    SESSIONSTORAGE_ALTID_NOT_FOUND(OXSessionStorageExceptionMessages.SESSIONSTORAGE_ALTID_NOT_FOUND_MSG, 8, Category.CATEGORY_ERROR),
+    SESSIONSTORAGE_NO_USERSESSIONS(OXSessionStorageExceptionMessages.SESSIONSTORAGE_NO_USERSESSIONS_MSG, 9, Category.CATEGORY_ERROR),
+    SESSIONSTORAGE_NO_CONTEXTESSIONS(OXSessionStorageExceptionMessages.SESSIONSTORAGE_NO_CONTEXTSESSIONS_MSG, 10, Category.CATEGORY_ERROR),
+    SESSIONSTORAGE_RANDOM_NOT_FOUND(OXSessionStorageExceptionMessages.SESSIONSTORAGE_RANDOM_NOT_FOUND_MSG, 11, Category.CATEGORY_ERROR),
+    SESSIONSTORAGE_CONFIG_FILE(OXSessionStorageExceptionMessages.SESSIONSTORAGE_CONFIG_FILE_MSG, 12, Category.CATEGORY_ERROR);
 
     /**
      * Message of the exception.
@@ -89,9 +90,9 @@ public enum OXNoSQLSessionStorageExceptionCodes implements OXExceptionCode {
     private final int detailNumber;
 
     /**
-     * Initializes a new {@link OXNoSQLSessionStorageExceptionCodes}.
+     * Initializes a new {@link OXSessionStorageExceptionCodes}.
      */
-    private OXNoSQLSessionStorageExceptionCodes(String message, int detailNumber, Category category) {
+    private OXSessionStorageExceptionCodes(String message, int detailNumber, Category category) {
         this.message = message;
         this.detailNumber = detailNumber;
         this.category = category;
