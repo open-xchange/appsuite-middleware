@@ -69,7 +69,6 @@ import com.openexchange.ajax.fields.ResponseFields.ParsingFields;
 import com.openexchange.ajax.fields.ResponseFields.TruncatedFields;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.Categories;
-import com.openexchange.exception.Categories;
 import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
 import com.openexchange.exception.OXException.Parsing;
@@ -465,10 +464,10 @@ public final class ResponseWriter {
      * @param writer - the <code>{@link JSONWriter}</code> to write to
      * @throws JSONException - if writing fails
      */
-    public static void write(final Response response, final JSONWriter writer) throws JSONException {
+    public static void write(final Response response, final JSONWriter writer, final Locale locale) throws JSONException {
         writer.object();
         final JSONObject json = new JSONObject();
-        write(response, json);
+        write(response, json, locale);
         final Set<Map.Entry<String, Object>> entrySet = json.entrySet();
         final int len = entrySet.size();
         final Iterator<Map.Entry<String, Object>> iter = entrySet.iterator();
@@ -488,8 +487,21 @@ public final class ResponseWriter {
      * @throws IOException If an I/O error occurs during writing
      */
     public static void write(final Response response, final Writer writer) throws JSONException, IOException {
+        write(response, writer, DEFAULT_LOCALE);
+    }
+
+    /**
+     * Serializes a Response object to the writer.
+     *
+     * @param response Response object to serialize.
+     * @param writer the serialized object will be written to this writer.
+     * @param locale The user's locale
+     * @throws JSONException if writing fails.
+     * @throws IOException If an I/O error occurs during writing
+     */
+    public static void write(final Response response, final Writer writer, final Locale locale) throws JSONException, IOException {
         final JSONObject json = new JSONObject();
-        ResponseWriter.write(response, json);
+        ResponseWriter.write(response, json, locale);
         try {
             json.write(writer);
         } catch (final JSONException e) {

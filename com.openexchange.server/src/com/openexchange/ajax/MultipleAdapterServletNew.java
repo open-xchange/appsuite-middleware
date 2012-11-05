@@ -200,11 +200,11 @@ public abstract class MultipleAdapterServletNew extends PermissionServlet {
                     callback = action;
                 }
                 final StringWriter w = new StringWriter();
-                ResponseWriter.write(response, w);
+                ResponseWriter.write(response, w, localeFrom(session));
 
                 resp.getWriter().print(substituteJS(w.toString(), callback));
             } else {
-                ResponseWriter.write(response, resp.getWriter());
+                ResponseWriter.write(response, resp.getWriter(), localeFrom(session));
             }
         } catch (final JSONException e) {
             final OXException e1 = OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e);

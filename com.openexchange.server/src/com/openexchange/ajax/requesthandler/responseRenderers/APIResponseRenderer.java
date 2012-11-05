@@ -51,13 +51,16 @@ package com.openexchange.ajax.requesthandler.responseRenderers;
 
 import java.io.IOException;
 import java.io.Writer;
+import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import javax.servlet.ServletRequest;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
 import org.json.JSONException;
 import com.openexchange.ajax.AJAXServlet;
+import com.openexchange.ajax.SessionServlet;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
@@ -65,6 +68,7 @@ import com.openexchange.ajax.requesthandler.ResponseRenderer;
 import com.openexchange.ajax.writer.ResponseWriter;
 import com.openexchange.log.LogFactory;
 import com.openexchange.tools.UnsynchronizedStringWriter;
+import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link APIResponseRenderer}
@@ -112,6 +116,35 @@ public class APIResponseRenderer implements ResponseRenderer {
             null == plainJson ? false : plainJson.booleanValue());
     }
 
+    private static final String SESSION_KEY = SessionServlet.SESSION_KEY;
+
+    /**
+     * Returns the remembered session.
+     * 
+     * @param req The Servlet request.
+     * @return The remembered session
+     */
+    protected static ServerSession getSession(final ServletRequest req) {
+        final Object attribute = req.getAttribute(SESSION_KEY);
+        if (attribute != null) {
+            return (ServerSession) req.getAttribute(SESSION_KEY);
+        }
+        return null;
+    }
+
+    /**
+     * Gets the locale for given server session
+     * 
+     * @param session The server session
+     * @return The locale
+     */
+    protected static Locale localeFrom(final ServerSession session) {
+        if (null == session) {
+            return Locale.US;
+        }
+        return session.getUser().getLocale();
+    }
+
     /**
      * Write specified response to Servlet output stream either as HTML callback or as JSON data.
      * <p>
@@ -133,8 +166,9 @@ public class APIResponseRenderer implements ResponseRenderer {
 
     private static void writeResponse(final Response response, final String action, final HttpServletRequest req, final HttpServletResponse resp, final boolean plainJson) {
         try {
+            final ServerSession session = getSession(req);
             if (plainJson) {
-                ResponseWriter.write(response, resp.getWriter());
+                ResponseWriter.write(response, resp.getWriter(), localeFrom(session));
             } else if (isMultipartContent(req) || isRespondWithHTML(req) || req.getParameter(CALLBACK) != null) {
                 resp.setContentType(AJAXServlet.CONTENTTYPE_HTML);
                 String callback = req.getParameter(CALLBACK);
@@ -142,20 +176,20 @@ public class APIResponseRenderer implements ResponseRenderer {
                     callback = action;
                 }
                 final Writer w = new UnsynchronizedStringWriter();
-                ResponseWriter.write(response, w);
+                ResponseWriter.write(response, w, localeFrom(session));
                 resp.getWriter().print(substituteJS(w.toString(), callback));
             } else if (req.getParameter(JSONP) != null) {
                 final String call = req.getParameter(JSONP);
 
                 final Writer w = new UnsynchronizedStringWriter();
-                ResponseWriter.write(response, w);
+                ResponseWriter.write(response, w, localeFrom(session));
 
                 final StringBuilder sb = new StringBuilder(call);
                 sb.append('(').append(w.toString()).append(");");
                 resp.setContentType("text/javascript");
                 resp.getWriter().write(sb.toString());
             } else {
-                ResponseWriter.write(response, resp.getWriter());
+                ResponseWriter.write(response, resp.getWriter(), localeFrom(session));
             }
         } catch (final JSONException e) {
             LOG.error(e.getMessage(), e);

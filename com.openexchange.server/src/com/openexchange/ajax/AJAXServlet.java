@@ -65,6 +65,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicLong;
 import javax.servlet.ServletException;
@@ -88,6 +89,7 @@ import com.openexchange.configuration.ServerConfig;
 import com.openexchange.configuration.ServerConfig.Property;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.upload.UploadFile;
 import com.openexchange.groupware.upload.impl.UploadEvent;
 import com.openexchange.groupware.upload.impl.UploadException;
@@ -101,9 +103,11 @@ import com.openexchange.log.LogFactory;
 import com.openexchange.log.LogProperties;
 import com.openexchange.log.Props;
 import com.openexchange.monitoring.MonitoringInfo;
+import com.openexchange.session.Session;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.servlet.CountingHttpServletRequest;
 import com.openexchange.tools.servlet.http.Tools;
+import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 
 /**
@@ -415,6 +419,35 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
      */
     protected AJAXServlet() {
         super();
+    }
+
+    /**
+     * Gets the locale for given server session
+     * 
+     * @param session The server session
+     * @return The locale
+     */
+    protected static Locale localeFrom(final ServerSession session) {
+        if (null == session) {
+            return Locale.US;
+        }
+        return session.getUser().getLocale();
+    }
+
+    /**
+     * Gets the locale for given session
+     * 
+     * @param session The session
+     * @return The locale
+     */
+    protected static Locale localeFrom(final Session session) {
+        if (null == session) {
+            return Locale.US;
+        }
+        if (session instanceof ServerSession) {
+            return ((ServerSession) session).getUser().getLocale();
+        }
+        return UserStorage.getStorageUser(session.getUserId(), session.getContextId()).getLocale();
     }
 
     private static final AtomicLong REQUEST_NUMBER = new AtomicLong(0L);
@@ -985,10 +1018,10 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
          */
     }
 
-    protected void writeResponse(final Response response, final HttpServletResponse servletResponse) throws IOException {
+    protected void writeResponse(final Response response, final HttpServletResponse servletResponse, Session session) throws IOException {
         servletResponse.setContentType(CONTENTTYPE_JAVASCRIPT);
         try {
-            ResponseWriter.write(response, servletResponse.getWriter());
+            ResponseWriter.write(response, servletResponse.getWriter(), localeFrom(session));
         } catch (final JSONException e) {
             log(RESPONSE_ERROR, e);
             sendError(servletResponse);
