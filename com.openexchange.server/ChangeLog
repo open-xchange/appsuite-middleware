@@ -1,3 +1,7 @@
+* 2012-11-05 - thorben.betten@open-xchange.com
+
+ - Fix for bug 23567: Using proper locale when writing JSON response
+
 * 2012-11-02 - tobias.friedrich@open-xchange.com
 
  - Fix for bug 23549: Subtracting client timezone offset when parsing creation date 
