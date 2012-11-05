@@ -64,5 +64,6 @@ public class PresenceTransformerTest {
         transformer.incoming(jsonStanza, null);
         
         
+        
     }
 }
