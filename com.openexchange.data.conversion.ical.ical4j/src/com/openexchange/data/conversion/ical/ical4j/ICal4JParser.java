@@ -65,7 +65,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.TimeZone;
-
 import net.fortuna.ical4j.data.CalendarBuilder;
 import net.fortuna.ical4j.data.ParserException;
 import net.fortuna.ical4j.model.Component;
@@ -75,15 +74,9 @@ import net.fortuna.ical4j.model.component.CalendarComponent;
 import net.fortuna.ical4j.model.component.VEvent;
 import net.fortuna.ical4j.model.component.VFreeBusy;
 import net.fortuna.ical4j.model.component.VToDo;
-import net.fortuna.ical4j.model.property.Completed;
 import net.fortuna.ical4j.model.property.DateProperty;
-import net.fortuna.ical4j.model.property.DtEnd;
-import net.fortuna.ical4j.model.property.DtStart;
-import net.fortuna.ical4j.model.property.Due;
 import net.fortuna.ical4j.util.CompatibilityHints;
-
 import org.apache.commons.logging.Log;
-
 import com.openexchange.data.conversion.ical.ConversionError;
 import com.openexchange.data.conversion.ical.ConversionWarning;
 import com.openexchange.data.conversion.ical.FreeBusyInformation;
@@ -99,7 +92,6 @@ import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.tasks.Task;
 import com.openexchange.log.LogFactory;
-
 import edu.emory.mathcs.backport.java.util.Arrays;
 
 /**
@@ -371,7 +363,7 @@ public class ICal4JParser implements ICalParser {
         }
         Parameter tzid = dateProperty.getParameter("TZID");
 		String tzidName = tzid.getValue();
-		TimeZone inTZID = (null != tzid) ? TimeZone.getTimeZone(tzidName) : null;
+		TimeZone inTZID = TimeZone.getTimeZone(tzidName);
 		
         /* now, if the Java core devs had been smart, they'd made TimeZone.getTimeZone(name,fallback) public. But they did not, so have to do this: */
 		if(inTZID.getID().equals("GMT") && ! tzidName.equals("GMT")){

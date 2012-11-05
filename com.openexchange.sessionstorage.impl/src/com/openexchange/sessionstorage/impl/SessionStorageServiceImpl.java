@@ -137,7 +137,7 @@ public class SessionStorageServiceImpl implements SessionStorageService {
                 retval.add(sessions.remove(sessionId));
             }
         }
-        return (Session[]) retval.toArray();
+        return retval.toArray(new Session[0]);
     }
 
     @Override
@@ -170,7 +170,7 @@ public class SessionStorageServiceImpl implements SessionStorageService {
                 userSessions.add(session);
             }
         }
-        return (Session[]) userSessions.toArray();
+        return userSessions.toArray(new Session[0]);
     }
 
     @Override
