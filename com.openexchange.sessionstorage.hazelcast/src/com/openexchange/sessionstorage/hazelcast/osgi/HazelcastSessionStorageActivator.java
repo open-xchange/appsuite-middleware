@@ -66,11 +66,13 @@ import com.openexchange.sessionstorage.hazelcast.HazelcastSessionStorageConfigur
 import com.openexchange.sessionstorage.hazelcast.HazelcastSessionStorageService;
 import com.openexchange.sessionstorage.hazelcast.Services;
 import com.openexchange.sessionstorage.hazelcast.exceptions.OXHazelcastSessionStorageExceptionCodes;
+import com.openexchange.threadpool.ThreadPoolService;
 
 /**
  * {@link HazelcastSessionStorageActivator}
  * 
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class HazelcastSessionStorageActivator extends HousekeepingActivator {
 
@@ -78,7 +80,7 @@ public class HazelcastSessionStorageActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ConfigurationService.class, CryptoService.class };
+        return new Class<?>[] { ConfigurationService.class, CryptoService.class, ThreadPoolService.class };
     }
 
     @Override

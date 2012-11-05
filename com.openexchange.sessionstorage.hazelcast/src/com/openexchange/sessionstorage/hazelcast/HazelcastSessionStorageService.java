@@ -53,13 +53,19 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.CancellationException;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import org.apache.commons.logging.Log;
 import com.hazelcast.config.Config;
 import com.hazelcast.config.MapConfig;
 import com.hazelcast.core.HazelcastException;
 import com.hazelcast.core.HazelcastInstance;
-import com.hazelcast.core.IFailOnPausePolicy;
+import com.hazelcast.core.Hazelcasts;
 import com.hazelcast.core.IMap;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.crypto.CryptoService;
 import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceExceptionCode;
@@ -67,6 +73,11 @@ import com.openexchange.session.Session;
 import com.openexchange.sessionstorage.SessionStorageExceptionCodes;
 import com.openexchange.sessionstorage.SessionStorageService;
 import com.openexchange.sessionstorage.hazelcast.exceptions.OXHazelcastSessionStorageExceptionCodes;
+import com.openexchange.threadpool.AbstractTask;
+import com.openexchange.threadpool.RefusedExecutionBehavior;
+import com.openexchange.threadpool.ThreadPoolService;
+import com.openexchange.threadpool.ThreadPools;
+import com.openexchange.threadpool.behavior.CallerRunsBehavior;
 
 /**
  * {@link HazelcastSessionStorageService} - The {@link SessionStorageService} backed by {@link HazelcastInstance}.
@@ -79,9 +90,43 @@ public class HazelcastSessionStorageService implements SessionStorageService {
     private static final Log LOG = com.openexchange.log.Log.loggerFor(HazelcastSessionStorageService.class);
     private static final boolean DEBUG = LOG.isDebugEnabled();
 
+    private static final class GetSessionMapTask extends AbstractTask<IMap<String, HazelcastStoredSession>> {
+
+        private final HazelcastInstance hazelcastInstance;
+        private final String mapName;
+
+        protected GetSessionMapTask(final HazelcastInstance hazelcastInstance, final String mapName) {
+            super();
+            this.hazelcastInstance = hazelcastInstance;
+            this.mapName = mapName;
+        }
+
+        @Override
+        public IMap<String, HazelcastStoredSession> call() throws Exception {
+            return hazelcastInstance.getMap(mapName);
+        }
+    }
+
+    private static volatile Integer getSessionMapTimeout;
+    private static int getSessionMapTimeout() {
+        Integer tmp = getSessionMapTimeout;
+        if (null == tmp) {
+            synchronized (HazelcastSessionStorageService.class) {
+                tmp = getSessionMapTimeout;
+                if (null == tmp) {
+                    ConfigurationService service = Services.optService(ConfigurationService.class);
+                    tmp = Integer.valueOf(null == service ? 1000 : service.getIntProperty("com.openexchange.sessionstorage.hazelcast.getSessionMapTimeout", 1000));
+                    getSessionMapTimeout = tmp;
+                }
+            }
+        }
+        return tmp.intValue();
+    }
+
     private final String mapName;
     private final String encryptionKey;
     private final CryptoService cryptoService;
+    private final RefusedExecutionBehavior<IMap<String, HazelcastStoredSession>> callerRunsBehavior;
 
     /**
      * Initializes a new {@link HazelcastSessionStorageService}.
@@ -97,6 +142,32 @@ public class HazelcastSessionStorageService implements SessionStorageService {
         if (null == hzConfig.getMapConfig(name)) {
             hzConfig.addMapConfig(mapConfig);
         }
+        callerRunsBehavior = CallerRunsBehavior.<IMap<String, HazelcastStoredSession>> getInstance();
+    }
+
+    private IMap<String, HazelcastStoredSession> getMapFrom(final Future<IMap<String, HazelcastStoredSession>> f) throws OXException {
+        try {
+            return f.get(getSessionMapTimeout(), TimeUnit.MILLISECONDS);
+        } catch (final InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw SessionStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+        } catch (final ExecutionException e) {
+            final Throwable t = e.getCause();
+            if (t instanceof OXException) {
+                throw (OXException) t;
+            }
+            if (t instanceof RuntimeException) {
+                throw (RuntimeException) t;
+            }
+            if (t instanceof Error) {
+                throw (Error) t;
+            }
+            throw new IllegalStateException("Not unchecked", t);
+        } catch (final TimeoutException e) {
+            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(e, HazelcastInstance.class.getName());
+        } catch (final CancellationException e) {
+            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(e, HazelcastInstance.class.getName());
+        }
     }
 
     /**
@@ -106,22 +177,29 @@ public class HazelcastSessionStorageService implements SessionStorageService {
      * @throws OXException If service is unavailable or currently paused
      */
     private IMap<String, HazelcastStoredSession> sessions(final boolean failIfPaused) throws OXException {
-        final HazelcastInstance hazelcastInstance = Services.optService(HazelcastInstance.class);
-        if (null == hazelcastInstance) {
-            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(HazelcastInstance.class.getName());
-        }
-        //        if (Hazelcasts.isPaused(hazelcastInstance)) {
-        //            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(HazelcastInstance.class.getName());
-        //        }
         try {
-            final IMap<String, HazelcastStoredSession> map = hazelcastInstance.getMap(mapName, failIfPaused);
-            if (map instanceof IFailOnPausePolicy) {
-                ((IFailOnPausePolicy) map).setFailOnPausePolicy(failIfPaused);
+            final HazelcastInstance hazelcastInstance = Services.optService(HazelcastInstance.class);
+            if (null == hazelcastInstance) {
+                throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(HazelcastInstance.class.getName());
             }
-            return map;
-        } catch (final IllegalStateException e) {
-            // Currently paused
-            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(e, HazelcastInstance.class.getName());
+            if (!failIfPaused) {
+                return hazelcastInstance.getMap(mapName);
+            }
+            // Fail if paused
+            if (Hazelcasts.isPaused()) {
+                throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(HazelcastInstance.class.getName());
+            }
+            final ThreadPoolService threadPool = ThreadPools.getThreadPool();
+            if (null == threadPool) {
+                return hazelcastInstance.getMap(mapName);
+            }
+            return getMapFrom(threadPool.submit(new GetSessionMapTask(hazelcastInstance, mapName), callerRunsBehavior));
+        } catch (final OXException e) {
+            throw e;
+        } catch (final HazelcastException e) {
+            throw e;
+        } catch (final RuntimeException e) {
+            throw SessionStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
     }
 

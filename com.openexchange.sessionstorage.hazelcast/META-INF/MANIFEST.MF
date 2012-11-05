@@ -18,6 +18,8 @@ Import-Package: com.hazelcast.config,
  com.openexchange.server,
  com.openexchange.session,
  com.openexchange.sessionstorage,
+ com.openexchange.threadpool,
+ com.openexchange.threadpool.behavior,
  org.apache.commons.logging,
  org.osgi.framework,
  org.osgi.util.tracker
