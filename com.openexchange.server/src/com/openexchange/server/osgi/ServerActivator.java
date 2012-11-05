@@ -78,8 +78,6 @@ import com.openexchange.ajax.customizer.folder.AdditionalFolderField;
 import com.openexchange.ajax.customizer.folder.osgi.FolderFieldCollector;
 import com.openexchange.ajax.requesthandler.AJAXRequestHandler;
 import com.openexchange.ajax.requesthandler.Dispatcher;
-import com.openexchange.api2.ContactInterfaceFactory;
-import com.openexchange.api2.RdbContactInterfaceFactory;
 import com.openexchange.cache.registry.CacheAvailabilityRegistry;
 import com.openexchange.caching.CacheService;
 import com.openexchange.charset.CustomCharsetProvider;
@@ -123,12 +121,9 @@ import com.openexchange.groupware.attach.AttachmentBase;
 import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
 import com.openexchange.groupware.calendar.CalendarAdministrationService;
 import com.openexchange.groupware.calendar.CalendarCollectionService;
-import com.openexchange.groupware.contact.ContactInterfaceDiscoveryService;
-import com.openexchange.groupware.contact.ContactInterfaceProvider;
 import com.openexchange.groupware.contact.datahandler.ContactInsertDataHandler;
 import com.openexchange.groupware.contact.datahandler.ContactJSONDataHandler;
 import com.openexchange.groupware.contact.datasource.ContactDataSource;
-import com.openexchange.groupware.contact.internal.ContactInterfaceDiscoveryServiceImpl;
 import com.openexchange.groupware.datahandler.ICalInsertDataHandler;
 import com.openexchange.groupware.datahandler.ICalJSONDataHandler;
 import com.openexchange.groupware.delete.DeleteListener;
@@ -387,8 +382,6 @@ public final class ServerActivator extends HousekeepingActivator {
         // AJAX request handler
         track(AJAXRequestHandler.class, new AJAXRequestHandlerCustomizer(context));
 
-        // contacts
-        track(ContactInterfaceProvider.class, new ContactServiceListener(context));
         // ICal Parser
         track(ICalParser.class, new RegistryCustomizer<ICalParser>(context, ICalParser.class) {
 
@@ -618,9 +611,6 @@ public final class ServerActivator extends HousekeepingActivator {
         // Register AttachmentBase
         registerService(AttachmentBase.class, Attachment.ATTACHMENT_BASE);
 
-        // Register ContactSQL
-        registerService(ContactInterfaceFactory.class, new RdbContactInterfaceFactory());
-
         // Register event factory service
         registerService(EventFactoryService.class, new EventFactoryServiceImpl());
 
@@ -628,11 +618,6 @@ public final class ServerActivator extends HousekeepingActivator {
         final FolderService folderService = new FolderServiceImpl();
         registerService(FolderService.class, folderService);
         ServerServiceRegistry.getInstance().addService(FolderService.class, folderService);
-
-        // Register contact interface discovery service
-        final ContactInterfaceDiscoveryService cids = ContactInterfaceDiscoveryServiceImpl.getInstance();
-        registerService(ContactInterfaceDiscoveryService.class, cids);
-        ServerServiceRegistry.getInstance().addService(ContactInterfaceDiscoveryService.class, cids);
 
         // Register SessionHolder
         registerService(SessionHolder.class, ThreadLocalSessionHolder.getInstance());

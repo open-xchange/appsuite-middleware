@@ -80,10 +80,6 @@ public class Starter implements Initialization {
      */
     com.openexchange.cache.registry.CacheAvailabilityRegistryInit.getInstance(),
     /**
-     * Initialization for ContactInterfaceDiscovery
-     */
-    new com.openexchange.groupware.contact.internal.ContactInterfaceDiscoveryInitialization(),
-    /**
      * Reads the calendar.properties.
      */
     com.openexchange.groupware.calendar.CalendarConfig.getInstance(),
@@ -184,10 +180,6 @@ public class Starter implements Initialization {
      * Cache availability registry start-up
      */
     com.openexchange.cache.registry.CacheAvailabilityRegistryInit.getInstance(),
-    /**
-     * Initialization for ContactInterfaceDiscovery
-     */
-    new com.openexchange.groupware.contact.internal.ContactInterfaceDiscoveryInitialization(),
     /**
      * Initialization for alias charset provider
      */
