@@ -63,8 +63,6 @@ import javax.mail.internet.AddressException;
 import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMultipart;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
-
 import com.openexchange.calendar.itip.generators.AttachmentMemory;
 import com.openexchange.calendar.itip.generators.NotificationConfiguration;
 import com.openexchange.calendar.itip.generators.NotificationMail;
@@ -90,6 +88,7 @@ import com.openexchange.groupware.userconfiguration.RdbUserConfigurationStorage;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.html.HtmlService;
+import com.openexchange.log.LogFactory;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.mime.ContentDisposition;
 import com.openexchange.mail.mime.ContentType;
@@ -521,7 +520,7 @@ public class DefaultMailSenderService implements MailSenderService {
         boolean isAscci = true;
         for (int i = 0; isAscci && (i < bytes.length); i++) {
             final byte b = bytes[i];
-            isAscci = (b < 128 && b >= 0);
+            isAscci = (b <= 127 && b >= 0);
         }
         return isAscci;
     }

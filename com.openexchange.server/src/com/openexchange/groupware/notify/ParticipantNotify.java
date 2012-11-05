@@ -1293,7 +1293,7 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
         boolean isAscci = true;
         for (int i = 0; isAscci && (i < bytes.length); i++) {
             final byte b = bytes[i];
-            isAscci = (b < 128 && b >= 0);
+            isAscci = (b <= 127 && b >= 0);
         }
         return isAscci;
     }
