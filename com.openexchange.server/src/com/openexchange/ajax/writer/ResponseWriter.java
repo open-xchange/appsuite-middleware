@@ -473,8 +473,21 @@ public final class ResponseWriter {
      * @throws IOException If an I/O error occurs during writing
      */
     public static void write(final Response response, final Writer writer) throws JSONException, IOException {
+        write(response, writer, DEFAULT_LOCALE);
+    }
+
+    /**
+     * Serializes a Response object to the writer.
+     *
+     * @param response Response object to serialize.
+     * @param writer the serialized object will be written to this writer.
+     * @param locale The locale
+     * @throws JSONException if writing fails.
+     * @throws IOException If an I/O error occurs during writing
+     */
+    public static void write(final Response response, final Writer writer, final Locale locale) throws JSONException, IOException {
         final JSONObject json = new JSONObject();
-        ResponseWriter.write(response, json);
+        ResponseWriter.write(response, json, locale);
         try {
             json.write(writer);
         } catch (final JSONException e) {
