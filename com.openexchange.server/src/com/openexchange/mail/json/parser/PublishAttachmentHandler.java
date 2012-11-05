@@ -144,11 +144,7 @@ public final class PublishAttachmentHandler extends AbstractAttachmentHandler {
         this.hostName = hostName;
         this.transportProvider = transportProvider;
         this.session = session;
-        try {
-            fileAccessFactory = ServerServiceRegistry.getInstance().getService(IDBasedFileAccessFactory.class, true);
-        } catch (final OXException e) {
-            throw new OXException(e);
-        }
+        fileAccessFactory = ServerServiceRegistry.getInstance().getService(IDBasedFileAccessFactory.class, true);
     }
 
     @Override
