@@ -465,7 +465,7 @@ public class Mail extends PermissionServlet implements UploadListener {
     }
 
     private final void actionGetUpdates(final HttpServletRequest req, final HttpServletResponse resp) throws IOException {
-        ServerSession session = getSessionObject(req);
+        final ServerSession session = getSessionObject(req);
         try {
             ResponseWriter.write(
                 actionGetUpdates(session, ParamContainer.getInstance(req, EnumComponent.MAIL, resp), null),
@@ -1009,7 +1009,7 @@ public class Mail extends PermissionServlet implements UploadListener {
     }
 
     private final void actionGetStructure(final HttpServletRequest req, final HttpServletResponse resp) throws IOException {
-        ServerSession session = getSessionObject(req);
+        final ServerSession session = getSessionObject(req);
         try {
             final Response response =
                 actionGetStructure(session, ParamContainer.getInstance(req, EnumComponent.MAIL, resp), null);
@@ -1739,7 +1739,7 @@ public class Mail extends PermissionServlet implements UploadListener {
     }
 
     private final void actionGetSaveVersit(final HttpServletRequest req, final HttpServletResponse resp) throws IOException {
-        ServerSession session = getSessionObject(req);
+        final ServerSession session = getSessionObject(req);
         try {
             actionGetSaveVersit(session, resp.getWriter(), ParamContainer.getInstance(req, EnumComponent.MAIL, resp), null);
         } catch (final JSONException e) {
@@ -2399,7 +2399,7 @@ public class Mail extends PermissionServlet implements UploadListener {
     }
 
     private final void actionPutForwardMultiple(final HttpServletRequest req, final HttpServletResponse resp) throws IOException {
-        ServerSession session = getSessionObject(req);
+        final ServerSession session = getSessionObject(req);
         try {
             ResponseWriter.write(
                 actionPutForwardMultiple(
@@ -2527,7 +2527,7 @@ public class Mail extends PermissionServlet implements UploadListener {
     }
 
     private final void actionPutReply(final HttpServletRequest req, final HttpServletResponse resp, final boolean replyAll) throws IOException {
-        ServerSession session = getSessionObject(req);
+        final ServerSession session = getSessionObject(req);
         try {
             ResponseWriter.write(
                 actionPutReply(
@@ -2586,7 +2586,7 @@ public class Mail extends PermissionServlet implements UploadListener {
     }
 
     private final void actionPutGet(final HttpServletRequest req, final HttpServletResponse resp) throws IOException {
-        ServerSession session = getSessionObject(req);
+        final ServerSession session = getSessionObject(req);
         try {
             ResponseWriter.write(
                 actionPutGet(session, getBody(req), ParamContainer.getInstance(req, EnumComponent.MAIL, resp), null),
@@ -2664,7 +2664,7 @@ public class Mail extends PermissionServlet implements UploadListener {
     }
 
     private final void actionPutAutosave(final HttpServletRequest req, final HttpServletResponse resp) throws IOException {
-        ServerSession session = getSessionObject(req);
+        final ServerSession session = getSessionObject(req);
         try {
             ResponseWriter.write(
                 actionPutAutosave(session, getBody(req), ParamContainer.getInstance(req, EnumComponent.MAIL, resp), null),
@@ -2786,7 +2786,7 @@ public class Mail extends PermissionServlet implements UploadListener {
     }
 
     private final void actionPutClear(final HttpServletRequest req, final HttpServletResponse resp) throws IOException {
-        ServerSession session = getSessionObject(req);
+        final ServerSession session = getSessionObject(req);
         try {
             ResponseWriter.write(
                 actionPutClear(session, getBody(req), ParamContainer.getInstance(req, EnumComponent.MAIL, resp), null),
@@ -2875,7 +2875,7 @@ public class Mail extends PermissionServlet implements UploadListener {
     }
 
     private final void actionPutMailSearch(final HttpServletRequest req, final HttpServletResponse resp) throws IOException {
-        ServerSession session = getSessionObject(req);
+        final ServerSession session = getSessionObject(req);
         try {
             ResponseWriter.write(
                 actionPutMailSearch(session, getBody(req), ParamContainer.getInstance(req, EnumComponent.MAIL, resp), null),
@@ -3093,7 +3093,7 @@ public class Mail extends PermissionServlet implements UploadListener {
     }
 
     private final void actionPutMailList(final HttpServletRequest req, final HttpServletResponse resp) throws IOException {
-        ServerSession session = getSessionObject(req);
+        final ServerSession session = getSessionObject(req);
         try {
             ResponseWriter.write(
                 actionPutMailList(session, getBody(req), ParamContainer.getInstance(req, EnumComponent.MAIL, resp), null),
@@ -3266,7 +3266,7 @@ public class Mail extends PermissionServlet implements UploadListener {
     }
 
     private final void actionPutDeleteMails(final HttpServletRequest req, final HttpServletResponse resp) throws IOException {
-        ServerSession session = getSessionObject(req);
+        final ServerSession session = getSessionObject(req);
         try {
             ResponseWriter.write(
                 actionPutDeleteMails(session, getBody(req), ParamContainer.getInstance(req, EnumComponent.MAIL, resp), null),
@@ -3368,7 +3368,7 @@ public class Mail extends PermissionServlet implements UploadListener {
     }
 
     private final void actionPutUpdateMail(final HttpServletRequest req, final HttpServletResponse resp) throws IOException {
-        ServerSession session = getSessionObject(req);
+        final ServerSession session = getSessionObject(req);
         try {
             ResponseWriter.write(
                 actionPutUpdateMail(session, getBody(req), ParamContainer.getInstance(req, EnumComponent.MAIL, resp), null),
@@ -3498,7 +3498,7 @@ public class Mail extends PermissionServlet implements UploadListener {
     }
 
     private final void actionPutNewMail(final HttpServletRequest req, final HttpServletResponse resp) throws IOException {
-        ServerSession session = getSessionObject(req);
+        final ServerSession session = getSessionObject(req);
         try {
             ResponseWriter.write(
                 actionPutNewMail(session, req, ParamContainer.getInstance(req, EnumComponent.MAIL, resp)),
@@ -3520,7 +3520,7 @@ public class Mail extends PermissionServlet implements UploadListener {
     private final void actionPostImportMail(final HttpServletRequest req, final HttpServletResponse resp) throws IOException {
         Tools.disableCaching(resp);
         resp.setContentType(CONTENTTYPE_JAVASCRIPT);
-        ServerSession session = getSessionObject(req);
+        final ServerSession session = getSessionObject(req);
         final Response response =
             actionPostImportMail(session, req, ParamContainer.getInstance(req, EnumComponent.MAIL, resp));
         try {
@@ -3669,7 +3669,7 @@ public class Mail extends PermissionServlet implements UploadListener {
     }
 
     private final void actionPutTransportMail(final HttpServletRequest req, final HttpServletResponse resp) throws IOException {
-        ServerSession session = getSessionObject(req);
+        final ServerSession session = getSessionObject(req);
         try {
             ResponseWriter.write(
                 actionPutTransportMail(session, getBody(req), ParamContainer.getInstance(req, EnumComponent.MAIL, resp), null),
@@ -4218,7 +4218,7 @@ public class Mail extends PermissionServlet implements UploadListener {
     }
 
     private final void actionPutCopyMail(final HttpServletRequest req, final HttpServletResponse resp) throws IOException {
-        ServerSession session = getSessionObject(req);
+        final ServerSession session = getSessionObject(req);
         try {
             ResponseWriter.write(
                 actionPutCopyMail(session, getBody(req), ParamContainer.getInstance(req, EnumComponent.MAIL, resp), null),
@@ -4459,7 +4459,7 @@ public class Mail extends PermissionServlet implements UploadListener {
     }
 
     private final void actionPutAttachment(final HttpServletRequest req, final HttpServletResponse resp) throws IOException {
-        ServerSession session = getSessionObject(req);
+        final ServerSession session = getSessionObject(req);
         try {
             ResponseWriter.write(
                 actionPutAttachment(session, getBody(req), ParamContainer.getInstance(req, EnumComponent.MAIL, resp), null),
@@ -4581,7 +4581,7 @@ public class Mail extends PermissionServlet implements UploadListener {
     }
 
     private final void actionPutReceiptAck(final HttpServletRequest req, final HttpServletResponse resp) throws IOException {
-        ServerSession session = getSessionObject(req);
+        final ServerSession session = getSessionObject(req);
         try {
             ResponseWriter.write(
                 actionPutReceiptAck(session, getBody(req), ParamContainer.getInstance(req, EnumComponent.MAIL, resp), null),
