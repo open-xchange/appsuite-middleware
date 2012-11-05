@@ -29,6 +29,9 @@ import com.hazelcast.config.TcpIpConfig;
 import com.hazelcast.core.Hazelcast;
 import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.core.Hazelcasts;
+import com.hazelcast.core.LifecycleEvent;
+import com.hazelcast.core.LifecycleEvent.LifecycleState;
+import com.hazelcast.core.LifecycleListener;
 import com.hazelcast.impl.GroupProperties;
 import com.openexchange.cluster.discovery.ClusterDiscoveryService;
 import com.openexchange.cluster.discovery.ClusterListener;
@@ -350,7 +353,7 @@ public class HazelcastActivator extends HousekeepingActivator {
             final long st = System.currentTimeMillis();            
             tcpIpConfig.clear();
             tcpIpConfig.setMembers(new ArrayList<String>(cur));
-            restart(hazelcastInstance);
+            hazelcastInstance.getLifecycleService().restart();
             if (logger.isInfoEnabled()) {
                 logger.info("\nHazelcast:\n\tRe-Started in " + (System.currentTimeMillis() - st) + "msec.\n");
             }
@@ -382,7 +385,7 @@ public class HazelcastActivator extends HousekeepingActivator {
                 if (null != configMode && InitMode.NONE.equals(configMode)) {
                     return InitMode.NONE;
                 }
-                restart(prevHazelcastInstance);
+                prevHazelcastInstance.getLifecycleService().restart();
                 if (logger.isInfoEnabled()) {
                     logger.info("\nHazelcast:\n\tRe-Started in " + (System.currentTimeMillis() - st) + "msec.\n");
                 }
@@ -404,6 +407,18 @@ public class HazelcastActivator extends HousekeepingActivator {
             // final HazelcastInstance hazelcastInstance = new ClassLoaderAwareHazelcastInstance(Hazelcast.newHazelcastInstance(config),
             // false);
             final HazelcastInstance hazelcastInstance = Hazelcast.newHazelcastInstance(config);
+            hazelcastInstance.getLifecycleService().addLifecycleListener(new LifecycleListener() {
+                
+                @Override
+                public void stateChanged(final LifecycleEvent event) {
+                    final LifecycleState state = event.getState();
+                    if (LifecycleState.RESTARTING.equals(state)) {
+                        Hazelcasts.setPaused(true);
+                    } else if (LifecycleState.RESTARTED.equals(state)) {
+                        Hazelcasts.setPaused(false);
+                    }
+                }
+            });
             registerService(HazelcastInstance.class, hazelcastInstance);
             REF_HAZELCAST_INSTANCE.set(hazelcastInstance);
             if (logger.isInfoEnabled()) {
@@ -485,15 +500,6 @@ public class HazelcastActivator extends HousekeepingActivator {
             }
         }
         return null;
-    }
-
-    private void restart(final HazelcastInstance hazelcastInstance) {
-        Hazelcasts.setPaused(true);
-        try {
-            hazelcastInstance.getLifecycleService().restart();
-        } finally {
-            Hazelcasts.setPaused(false);
-        }
     }
 
     private static final Pattern SPLIT = Pattern.compile("\\%");

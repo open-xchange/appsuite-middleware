@@ -61,6 +61,7 @@ import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import com.hazelcast.core.EntryListener;
+import com.hazelcast.core.Hazelcasts;
 import com.hazelcast.core.IMap;
 import com.hazelcast.core.MapEntry;
 import com.hazelcast.monitor.LocalMapStats;
@@ -124,6 +125,9 @@ public final class TimeoutAwareIMap implements IMap<String, HazelcastStoredSessi
 
     @Override
     public boolean containsKey(final Object key) {
+        if (!Hazelcasts.isPaused()) { // Not paused/restarting
+            return map.containsKey(key);
+        }
         return get(new Callable<Boolean>() {
 
             @Override
@@ -135,6 +139,9 @@ public final class TimeoutAwareIMap implements IMap<String, HazelcastStoredSessi
 
     @Override
     public InstanceType getInstanceType() {
+        if (!Hazelcasts.isPaused()) { // Not paused/restarting
+            return map.getInstanceType();
+        }
         return get(new Callable<InstanceType>() {
 
             @Override
@@ -146,6 +153,9 @@ public final class TimeoutAwareIMap implements IMap<String, HazelcastStoredSessi
 
     @Override
     public boolean containsValue(final Object value) {
+        if (!Hazelcasts.isPaused()) { // Not paused/restarting
+            return map.containsValue(value);
+        }
         return get(new Callable<Boolean>() {
 
             @Override
@@ -157,18 +167,25 @@ public final class TimeoutAwareIMap implements IMap<String, HazelcastStoredSessi
 
     @Override
     public void destroy() {
-        get(new Callable<Void>() {
+        if (!Hazelcasts.isPaused()) { // Not paused/restarting
+            map.destroy();
+        } else {
+            get(new Callable<Void>() {
 
-            @Override
-            public Void call() throws Exception {
-                map.destroy();
-                return null;
-            }
-        });
+                @Override
+                public Void call() throws Exception {
+                    map.destroy();
+                    return null;
+                }
+            });
+        }
     }
 
     @Override
     public HazelcastStoredSession get(final Object key) {
+        if (!Hazelcasts.isPaused()) { // Not paused/restarting
+            return map.get(key);
+        }
         return get(new Callable<HazelcastStoredSession>() {
 
             @Override
@@ -180,6 +197,9 @@ public final class TimeoutAwareIMap implements IMap<String, HazelcastStoredSessi
 
     @Override
     public Object getId() {
+        if (!Hazelcasts.isPaused()) { // Not paused/restarting
+            return map.getId();
+        }
         return get(new Callable<Object>() {
 
             @Override
@@ -191,6 +211,9 @@ public final class TimeoutAwareIMap implements IMap<String, HazelcastStoredSessi
 
     @Override
     public HazelcastStoredSession put(final String key, final HazelcastStoredSession value) {
+        if (!Hazelcasts.isPaused()) { // Not paused/restarting
+            return map.put(key, value);
+        }
         return get(new Callable<HazelcastStoredSession>() {
 
             @Override
@@ -202,6 +225,9 @@ public final class TimeoutAwareIMap implements IMap<String, HazelcastStoredSessi
 
     @Override
     public HazelcastStoredSession remove(final Object key) {
+        if (!Hazelcasts.isPaused()) { // Not paused/restarting
+            return map.remove(key);
+        }
         return get(new Callable<HazelcastStoredSession>() {
 
             @Override
@@ -213,6 +239,9 @@ public final class TimeoutAwareIMap implements IMap<String, HazelcastStoredSessi
 
     @Override
     public int size() {
+        if (!Hazelcasts.isPaused()) { // Not paused/restarting
+            return map.size();
+        }
         return get(new Callable<Integer>() {
 
             @Override
@@ -224,6 +253,9 @@ public final class TimeoutAwareIMap implements IMap<String, HazelcastStoredSessi
 
     @Override
     public boolean remove(final Object key, final Object value) {
+        if (!Hazelcasts.isPaused()) { // Not paused/restarting
+            return map.remove(key, value);
+        }
         return get(new Callable<Boolean>() {
 
             @Override
@@ -235,6 +267,9 @@ public final class TimeoutAwareIMap implements IMap<String, HazelcastStoredSessi
 
     @Override
     public boolean isEmpty() {
+        if (!Hazelcasts.isPaused()) { // Not paused/restarting
+            return map.isEmpty();
+        }
         return get(new Callable<Boolean>() {
 
             @Override
@@ -246,18 +281,25 @@ public final class TimeoutAwareIMap implements IMap<String, HazelcastStoredSessi
 
     @Override
     public void flush() {
-        get(new Callable<Void>() {
+        if (!Hazelcasts.isPaused()) { // Not paused/restarting
+            map.flush();
+        } else {
+            get(new Callable<Void>() {
 
-            @Override
-            public Void call() throws Exception {
-                map.flush();
-                return null;
-            }
-        });
+                @Override
+                public Void call() throws Exception {
+                    map.flush();
+                    return null;
+                }
+            });
+        }
     }
 
     @Override
     public String getName() {
+        if (!Hazelcasts.isPaused()) { // Not paused/restarting
+            return map.getName();
+        }
         return get(new Callable<String>() {
 
             @Override
@@ -269,6 +311,9 @@ public final class TimeoutAwareIMap implements IMap<String, HazelcastStoredSessi
 
     @Override
     public Map<String, HazelcastStoredSession> getAll(final Set<String> keys) {
+        if (!Hazelcasts.isPaused()) { // Not paused/restarting
+            return map.getAll(keys);
+        }
         return get(new Callable<Map<String, HazelcastStoredSession>>() {
 
             @Override
@@ -280,6 +325,9 @@ public final class TimeoutAwareIMap implements IMap<String, HazelcastStoredSessi
 
     @Override
     public Future<HazelcastStoredSession> getAsync(final String key) {
+        if (!Hazelcasts.isPaused()) { // Not paused/restarting
+            return map.getAsync(key);
+        }
         return get(new Callable<Future<HazelcastStoredSession>>() {
 
             @Override
@@ -291,6 +339,9 @@ public final class TimeoutAwareIMap implements IMap<String, HazelcastStoredSessi
 
     @Override
     public Future<HazelcastStoredSession> putAsync(final String key, final HazelcastStoredSession value) {
+        if (!Hazelcasts.isPaused()) { // Not paused/restarting
+            return map.putAsync(key, value);
+        }
         return get(new Callable<Future<HazelcastStoredSession>>() {
 
             @Override
@@ -302,6 +353,9 @@ public final class TimeoutAwareIMap implements IMap<String, HazelcastStoredSessi
 
     @Override
     public Future<HazelcastStoredSession> removeAsync(final String key) {
+        if (!Hazelcasts.isPaused()) { // Not paused/restarting
+            return map.removeAsync(key);
+        }
         return get(new Callable<Future<HazelcastStoredSession>>() {
 
             @Override
@@ -313,6 +367,9 @@ public final class TimeoutAwareIMap implements IMap<String, HazelcastStoredSessi
 
     @Override
     public Object tryRemove(final String key, final long timeout, final TimeUnit timeunit) throws TimeoutException {
+        if (!Hazelcasts.isPaused()) { // Not paused/restarting
+            return map.tryRemove(key, timeout, timeunit);
+        }
         return get(new Callable<Object>() {
 
             @Override
@@ -324,6 +381,9 @@ public final class TimeoutAwareIMap implements IMap<String, HazelcastStoredSessi
 
     @Override
     public boolean tryPut(final String key, final HazelcastStoredSession value, final long timeout, final TimeUnit timeunit) {
+        if (!Hazelcasts.isPaused()) { // Not paused/restarting
+            return map.tryPut(key, value, timeout, timeunit);
+        }
         return get(new Callable<Boolean>() {
 
             @Override
@@ -335,18 +395,25 @@ public final class TimeoutAwareIMap implements IMap<String, HazelcastStoredSessi
 
     @Override
     public void putAll(final Map<? extends String, ? extends HazelcastStoredSession> m) {
-        get(new Callable<Object>() {
+        if (!Hazelcasts.isPaused()) { // Not paused/restarting
+            map.putAll(m);
+        } else {
+            get(new Callable<Object>() {
 
-            @Override
-            public Object call() throws Exception {
-                map.putAll(m);
-                return null;
-            }
-        });
+                @Override
+                public Object call() throws Exception {
+                    map.putAll(m);
+                    return null;
+                }
+            });
+        }
     }
 
     @Override
     public HazelcastStoredSession put(final String key, final HazelcastStoredSession value, final long ttl, final TimeUnit timeunit) {
+        if (!Hazelcasts.isPaused()) { // Not paused/restarting
+            return map.put(key, value, ttl, timeunit);
+        }
         return get(new Callable<HazelcastStoredSession>() {
 
             @Override
@@ -358,30 +425,41 @@ public final class TimeoutAwareIMap implements IMap<String, HazelcastStoredSessi
 
     @Override
     public void putTransient(final String key, final HazelcastStoredSession value, final long ttl, final TimeUnit timeunit) {
-        get(new Callable<Object>() {
+        if (!Hazelcasts.isPaused()) { // Not paused/restarting
+            map.putTransient(key, value, ttl, timeunit);
+        } else {
+            get(new Callable<Object>() {
 
-            @Override
-            public Object call() throws Exception {
-                map.putTransient(key, value, ttl, timeunit);
-                return null;
-            }
-        });
+                @Override
+                public Object call() throws Exception {
+                    map.putTransient(key, value, ttl, timeunit);
+                    return null;
+                }
+            });
+        }
     }
 
     @Override
     public void clear() {
-        get(new Callable<Object>() {
+        if (!Hazelcasts.isPaused()) { // Not paused/restarting
+            map.clear();
+        } else {
+            get(new Callable<Object>() {
 
-            @Override
-            public Object call() throws Exception {
-                map.clear();
-                return null;
-            }
-        });
+                @Override
+                public Object call() throws Exception {
+                    map.clear();
+                    return null;
+                }
+            });
+        }
     }
 
     @Override
     public HazelcastStoredSession putIfAbsent(final String key, final HazelcastStoredSession value) {
+        if (!Hazelcasts.isPaused()) { // Not paused/restarting
+            return map.putIfAbsent(key, value);
+        }
         return get(new Callable<HazelcastStoredSession>() {
 
             @Override
@@ -393,6 +471,9 @@ public final class TimeoutAwareIMap implements IMap<String, HazelcastStoredSessi
 
     @Override
     public HazelcastStoredSession putIfAbsent(final String key, final HazelcastStoredSession value, final long ttl, final TimeUnit timeunit) {
+        if (!Hazelcasts.isPaused()) { // Not paused/restarting
+            return map.putIfAbsent(key, value, ttl, timeunit);
+        }
         return get(new Callable<HazelcastStoredSession>() {
 
             @Override
@@ -404,6 +485,9 @@ public final class TimeoutAwareIMap implements IMap<String, HazelcastStoredSessi
 
     @Override
     public boolean replace(final String key, final HazelcastStoredSession oldValue, final HazelcastStoredSession newValue) {
+        if (!Hazelcasts.isPaused()) { // Not paused/restarting
+            return map.replace(key, oldValue, newValue);
+        }
         return get(new Callable<Boolean>() {
 
             @Override
@@ -415,6 +499,9 @@ public final class TimeoutAwareIMap implements IMap<String, HazelcastStoredSessi
 
     @Override
     public HazelcastStoredSession replace(final String key, final HazelcastStoredSession value) {
+        if (!Hazelcasts.isPaused()) { // Not paused/restarting
+            return map.replace(key, value);
+        }
         return get(new Callable<HazelcastStoredSession>() {
 
             @Override
@@ -426,20 +513,27 @@ public final class TimeoutAwareIMap implements IMap<String, HazelcastStoredSessi
 
     @Override
     public void set(final String key, final HazelcastStoredSession value, final long ttl, final TimeUnit timeunit) {
-        get(new Callable<Object>() {
+        if (!Hazelcasts.isPaused()) { // Not paused/restarting
+            map.set(key, value, ttl, timeunit);
+        } else {
+            get(new Callable<Object>() {
 
-            @Override
-            public Object call() throws Exception {
-                map.clear();
-                return null;
-            }
-        });
+                @Override
+                public Object call() throws Exception {
+                    map.clear();
+                    return null;
+                }
+            });
+        }
 
         map.set(key, value, ttl, timeunit);
     }
 
     @Override
     public HazelcastStoredSession tryLockAndGet(final String key, final long time, final TimeUnit timeunit) throws TimeoutException {
+        if (!Hazelcasts.isPaused()) { // Not paused/restarting
+            return map.tryLockAndGet(key, time, timeunit);
+        }
         return get(new Callable<HazelcastStoredSession>() {
 
             @Override
@@ -451,30 +545,41 @@ public final class TimeoutAwareIMap implements IMap<String, HazelcastStoredSessi
 
     @Override
     public void putAndUnlock(final String key, final HazelcastStoredSession value) {
-        get(new Callable<Object>() {
+        if (!Hazelcasts.isPaused()) { // Not paused/restarting
+            map.putAndUnlock(key, value);
+        } else {
+            get(new Callable<Object>() {
 
-            @Override
-            public Object call() throws Exception {
-                map.putAndUnlock(key, value);
-                return null;
-            }
-        });
+                @Override
+                public Object call() throws Exception {
+                    map.putAndUnlock(key, value);
+                    return null;
+                }
+            });
+        }
     }
 
     @Override
     public void lock(final String key) {
-        get(new Callable<Object>() {
+        if (!Hazelcasts.isPaused()) { // Not paused/restarting
+            map.lock(key);
+        } else {
+            get(new Callable<Object>() {
 
-            @Override
-            public Object call() throws Exception {
-                map.lock(key);
-                return null;
-            }
-        });
+                @Override
+                public Object call() throws Exception {
+                    map.lock(key);
+                    return null;
+                }
+            });
+        }
     }
 
     @Override
     public boolean isLocked(final String key) {
+        if (!Hazelcasts.isPaused()) { // Not paused/restarting
+            return map.isLocked(key);
+        }
         return get(new Callable<Boolean>() {
 
             @Override
@@ -486,6 +591,9 @@ public final class TimeoutAwareIMap implements IMap<String, HazelcastStoredSessi
 
     @Override
     public boolean equals(final Object o) {
+        if (!Hazelcasts.isPaused()) { // Not paused/restarting
+            return map.equals(o);
+        }
         return get(new Callable<Boolean>() {
 
             @Override
@@ -497,6 +605,9 @@ public final class TimeoutAwareIMap implements IMap<String, HazelcastStoredSessi
 
     @Override
     public boolean tryLock(final String key) {
+        if (!Hazelcasts.isPaused()) { // Not paused/restarting
+            return map.tryLock(key);
+        }
         return get(new Callable<Boolean>() {
 
             @Override
@@ -508,6 +619,9 @@ public final class TimeoutAwareIMap implements IMap<String, HazelcastStoredSessi
 
     @Override
     public int hashCode() {
+        if (!Hazelcasts.isPaused()) { // Not paused/restarting
+            return map.hashCode();
+        }
         return get(new Callable<Integer>() {
 
             @Override
@@ -519,6 +633,9 @@ public final class TimeoutAwareIMap implements IMap<String, HazelcastStoredSessi
 
     @Override
     public boolean tryLock(final String key, final long time, final TimeUnit timeunit) {
+        if (!Hazelcasts.isPaused()) { // Not paused/restarting
+            return map.tryLock(key, time, timeunit);
+        }
         return get(new Callable<Boolean>() {
 
             @Override
@@ -530,30 +647,41 @@ public final class TimeoutAwareIMap implements IMap<String, HazelcastStoredSessi
 
     @Override
     public void unlock(final String key) {
-        get(new Callable<Object>() {
+        if (!Hazelcasts.isPaused()) { // Not paused/restarting
+            map.unlock(key);
+        } else {
+            get(new Callable<Object>() {
 
-            @Override
-            public Object call() throws Exception {
-                map.unlock(key);
-                return null;
-            }
-        });
+                @Override
+                public Object call() throws Exception {
+                    map.unlock(key);
+                    return null;
+                }
+            });
+        }
     }
 
     @Override
     public void forceUnlock(final String key) {
-        get(new Callable<Object>() {
+        if (!Hazelcasts.isPaused()) { // Not paused/restarting
+            map.forceUnlock(key);
+        } else {
+            get(new Callable<Object>() {
 
-            @Override
-            public Object call() throws Exception {
-                map.forceUnlock(key);
-                return null;
-            }
-        });
+                @Override
+                public Object call() throws Exception {
+                    map.forceUnlock(key);
+                    return null;
+                }
+            });
+        }
     }
 
     @Override
     public boolean lockMap(final long time, final TimeUnit timeunit) {
+        if (!Hazelcasts.isPaused()) { // Not paused/restarting
+            return map.lockMap(time, timeunit);
+        }
         return get(new Callable<Boolean>() {
 
             @Override
@@ -565,42 +693,58 @@ public final class TimeoutAwareIMap implements IMap<String, HazelcastStoredSessi
 
     @Override
     public void unlockMap() {
-        get(new Callable<Object>() {
+        if (!Hazelcasts.isPaused()) { // Not paused/restarting
+            map.unlockMap();
+        } else {
+            get(new Callable<Object>() {
 
-            @Override
-            public Object call() throws Exception {
-                map.unlockMap();
-                return null;
-            }
-        });
+                @Override
+                public Object call() throws Exception {
+                    map.unlockMap();
+                    return null;
+                }
+            });
+        }
     }
 
     @Override
     public void addLocalEntryListener(final EntryListener<String, HazelcastStoredSession> listener) {
-        get(new Callable<Object>() {
+        if (!Hazelcasts.isPaused()) { // Not paused/restarting
+            map.addLocalEntryListener(listener);
+        } else {
+            get(new Callable<Object>() {
 
-            @Override
-            public Object call() throws Exception {
-                map.addLocalEntryListener(listener);
-                return null;
-            }
-        });
+                @Override
+                public Object call() throws Exception {
+                    map.addLocalEntryListener(listener);
+                    return null;
+                }
+            });
+        }
     }
 
     @Override
     public void addEntryListener(final EntryListener<String, HazelcastStoredSession> listener, final boolean includeValue) {
-        get(new Callable<Object>() {
+        if (!Hazelcasts.isPaused()) { // Not paused/restarting
+            map.addEntryListener(listener, includeValue);
+        } else {
+            get(new Callable<Object>() {
 
-            @Override
-            public Object call() throws Exception {
-                map.addEntryListener(listener, includeValue);
-                return null;
-            }
-        });
+                @Override
+                public Object call() throws Exception {
+                    map.addEntryListener(listener, includeValue);
+                    return null;
+                }
+            });
+        }
     }
 
     @Override
     public void removeEntryListener(final EntryListener<String, HazelcastStoredSession> listener) {
+        if (!Hazelcasts.isPaused()) { // Not paused/restarting
+            map.removeEntryListener(listener);
+            return;
+        }
         get(new Callable<Object>() {
 
             @Override
@@ -613,30 +757,41 @@ public final class TimeoutAwareIMap implements IMap<String, HazelcastStoredSessi
 
     @Override
     public void addEntryListener(final EntryListener<String, HazelcastStoredSession> listener, final String key, final boolean includeValue) {
-        get(new Callable<Object>() {
+        if (!Hazelcasts.isPaused()) { // Not paused/restarting
+            map.addEntryListener(listener, key, includeValue);
+        } else {
+            get(new Callable<Object>() {
 
-            @Override
-            public Object call() throws Exception {
-                map.addEntryListener(listener, key, includeValue);
-                return null;
-            }
-        });
+                @Override
+                public Object call() throws Exception {
+                    map.addEntryListener(listener, key, includeValue);
+                    return null;
+                }
+            });
+        }
     }
 
     @Override
     public void removeEntryListener(final EntryListener<String, HazelcastStoredSession> listener, final String key) {
-        get(new Callable<Object>() {
+        if (!Hazelcasts.isPaused()) { // Not paused/restarting
+            map.removeEntryListener(listener, key);
+        } else {
+            get(new Callable<Object>() {
 
-            @Override
-            public Object call() throws Exception {
-                map.removeEntryListener(listener, key);
-                return null;
-            }
-        });
+                @Override
+                public Object call() throws Exception {
+                    map.removeEntryListener(listener, key);
+                    return null;
+                }
+            });
+        }
     }
 
     @Override
     public MapEntry<String, HazelcastStoredSession> getMapEntry(final String key) {
+        if (!Hazelcasts.isPaused()) { // Not paused/restarting
+            return map.getMapEntry(key);
+        }
         return get(new Callable<MapEntry<String, HazelcastStoredSession>>() {
 
             @Override
@@ -648,6 +803,9 @@ public final class TimeoutAwareIMap implements IMap<String, HazelcastStoredSessi
 
     @Override
     public boolean evict(final Object key) {
+        if (!Hazelcasts.isPaused()) { // Not paused/restarting
+            return map.evict(key);
+        }
         return get(new Callable<Boolean>() {
 
             @Override
@@ -659,6 +817,9 @@ public final class TimeoutAwareIMap implements IMap<String, HazelcastStoredSessi
 
     @Override
     public Set<String> keySet() {
+        if (!Hazelcasts.isPaused()) { // Not paused/restarting
+            return map.keySet();
+        }
         return get(new Callable<Set<String>>() {
 
             @Override
@@ -670,6 +831,9 @@ public final class TimeoutAwareIMap implements IMap<String, HazelcastStoredSessi
 
     @Override
     public Collection<HazelcastStoredSession> values() {
+        if (!Hazelcasts.isPaused()) { // Not paused/restarting
+            return map.values();
+        }
         return get(new Callable<Collection<HazelcastStoredSession>>() {
 
             @Override
@@ -681,6 +845,9 @@ public final class TimeoutAwareIMap implements IMap<String, HazelcastStoredSessi
 
     @Override
     public Set<java.util.Map.Entry<String, HazelcastStoredSession>> entrySet() {
+        if (!Hazelcasts.isPaused()) { // Not paused/restarting
+            return map.entrySet();
+        }
         return get(new Callable<Set<java.util.Map.Entry<String, HazelcastStoredSession>>>() {
 
             @Override
@@ -692,6 +859,9 @@ public final class TimeoutAwareIMap implements IMap<String, HazelcastStoredSessi
 
     @Override
     public Set<String> keySet(final Predicate predicate) {
+        if (!Hazelcasts.isPaused()) { // Not paused/restarting
+            return map.keySet(predicate);
+        }
         return get(new Callable<Set<String>>() {
 
             @Override
@@ -703,6 +873,9 @@ public final class TimeoutAwareIMap implements IMap<String, HazelcastStoredSessi
 
     @Override
     public Set<java.util.Map.Entry<String, HazelcastStoredSession>> entrySet(final Predicate predicate) {
+        if (!Hazelcasts.isPaused()) { // Not paused/restarting
+            return map.entrySet(predicate);
+        }
         return get(new Callable<Set<java.util.Map.Entry<String, HazelcastStoredSession>>>() {
 
             @Override
@@ -714,6 +887,9 @@ public final class TimeoutAwareIMap implements IMap<String, HazelcastStoredSessi
 
     @Override
     public Collection<HazelcastStoredSession> values(final Predicate predicate) {
+        if (!Hazelcasts.isPaused()) { // Not paused/restarting
+            return map.values(predicate);
+        }
         return get(new Callable<Collection<HazelcastStoredSession>>() {
 
             @Override
@@ -725,6 +901,9 @@ public final class TimeoutAwareIMap implements IMap<String, HazelcastStoredSessi
 
     @Override
     public Set<String> localKeySet() {
+        if (!Hazelcasts.isPaused()) { // Not paused/restarting
+            return map.localKeySet();
+        }
         return get(new Callable<Set<String>>() {
 
             @Override
@@ -736,6 +915,9 @@ public final class TimeoutAwareIMap implements IMap<String, HazelcastStoredSessi
 
     @Override
     public Set<String> localKeySet(final Predicate predicate) {
+        if (!Hazelcasts.isPaused()) { // Not paused/restarting
+            return map.localKeySet(predicate);
+        }
         return get(new Callable<Set<String>>() {
 
             @Override
@@ -747,30 +929,41 @@ public final class TimeoutAwareIMap implements IMap<String, HazelcastStoredSessi
 
     @Override
     public void addIndex(final String attribute, final boolean ordered) {
-        get(new Callable<Object>() {
+        if (!Hazelcasts.isPaused()) { // Not paused/restarting
+            map.addIndex(attribute, ordered);
+        } else {
+            get(new Callable<Object>() {
 
-            @Override
-            public Object call() throws Exception {
-                map.addIndex(attribute, ordered);
-                return null;
-            }
-        });
+                @Override
+                public Object call() throws Exception {
+                    map.addIndex(attribute, ordered);
+                    return null;
+                }
+            });
+        }
     }
 
     @Override
     public void addIndex(final Expression<?> expression, final boolean ordered) {
-        get(new Callable<Object>() {
+        if (!Hazelcasts.isPaused()) { // Not paused/restarting
+            map.addIndex(expression, ordered);
+        } else {
+            get(new Callable<Object>() {
 
-            @Override
-            public Object call() throws Exception {
-                map.addIndex(expression, ordered);
-                return null;
-            }
-        });
+                @Override
+                public Object call() throws Exception {
+                    map.addIndex(expression, ordered);
+                    return null;
+                }
+            });
+        }
     }
 
     @Override
     public LocalMapStats getLocalMapStats() {
+        if (!Hazelcasts.isPaused()) { // Not paused/restarting
+            return map.getLocalMapStats();
+        }
         return get(new Callable<LocalMapStats>() {
 
             @Override
