@@ -72,7 +72,7 @@ import com.openexchange.database.internal.ReplicationMonitor;
 
 /**
  * {@link JDBC4ConnectionReturner}
- *
+ * 
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
 public abstract class JDBC4ConnectionReturner implements Connection {
@@ -242,7 +242,9 @@ public abstract class JDBC4ConnectionReturner implements Connection {
     @Override
     public PreparedStatement prepareStatement(final String sql, final int resultSetType, final int resultSetConcurrency, final int resultSetHoldability) throws SQLException {
         checkForAlreadyClosed();
-        return new JDBC41PreparedStatementWrapper(delegate.prepareStatement(sql, resultSetType, resultSetConcurrency, resultSetHoldability), this);
+        return new JDBC41PreparedStatementWrapper(
+            delegate.prepareStatement(sql, resultSetType, resultSetConcurrency, resultSetHoldability),
+            this);
     }
 
     @Override
@@ -400,7 +402,6 @@ public abstract class JDBC4ConnectionReturner implements Connection {
     }
 
     protected void checkForAlreadyClosed() throws SQLException {
-        checkForAlreadyClosed();
         if (null == delegate) {
             throw new SQLException("Connection was already closed.");
         }
