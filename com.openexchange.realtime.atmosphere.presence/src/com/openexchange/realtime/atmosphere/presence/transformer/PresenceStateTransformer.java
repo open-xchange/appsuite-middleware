@@ -49,12 +49,16 @@
 
 package com.openexchange.realtime.atmosphere.presence.transformer;
 
-import static com.openexchange.realtime.payload.PayloadElement.PayloadFormat.*;
+import static com.openexchange.realtime.payload.PayloadElement.PayloadFormat.JSON;
+import static com.openexchange.realtime.payload.PayloadElement.PayloadFormat.POJO;
 import com.openexchange.exception.OXException;
 import com.openexchange.realtime.atmosphere.presence.AtmospherePresenceExceptionCode;
+import com.openexchange.realtime.packet.Presence;
 import com.openexchange.realtime.packet.PresenceState;
 import com.openexchange.realtime.payload.PayloadElement;
 import com.openexchange.realtime.payload.transformer.PayloadElementTransformer;
+import com.openexchange.realtime.util.ElementPath;
+import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -62,11 +66,11 @@ import com.openexchange.tools.session.ServerSession;
  * 
  * @author <a href="mailto:marc	.arens@open-xchange.com">Marc Arens</a>
  */
-public class PresenceStateTransformer implements PayloadElementTransformer {
-
+public class PresenceStateTransformer extends PayloadElementTransformer {
+    
     @Override
-    public Class<?> getElementClass() {
-        return PresenceState.class;
+    public ElementPath getElementPath() {
+        return Presence.PRESENCE_STATE_PATH;
     }
 
     @Override

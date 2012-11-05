@@ -28,6 +28,7 @@ public class AtmosphereRTActivator extends HousekeepingActivator {
         RTAtmosphereHandler handler = new RTAtmosphereHandler();
         atmosphereService.addAtmosphereHandler("rt", new RTAtmosphereHandler());
         registerService(Channel.class, new RTAtmosphereChannel(handler));
+
     }
 
     @Override

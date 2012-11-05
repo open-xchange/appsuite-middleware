@@ -10,16 +10,18 @@ import java.nio.channels.FileChannel;
 import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
+import com.openexchange.conversion.simple.SimplePayloadConverter;
 import com.openexchange.exception.OXException;
 import com.openexchange.realtime.atmosphere.impl.StanzaTransformer;
 import com.openexchange.realtime.atmosphere.impl.stanza.builder.StanzaBuilderSelector;
 import com.openexchange.realtime.atmosphere.osgi.ExtensionRegistry;
+import com.openexchange.realtime.atmosphere.presence.converter.ByteToJSONConverter;
 import com.openexchange.realtime.atmosphere.stanza.StanzaBuilder;
 import com.openexchange.realtime.packet.ID;
 import com.openexchange.realtime.packet.Presence;
 import com.openexchange.realtime.packet.Stanza;
-import com.openexchange.realtime.payload.transformer.primitive.ByteTransformer;
-import com.openexchange.realtime.payload.transformer.primitive.StringTransformer;
+import com.openexchange.realtime.payload.converter.ByteTransformer;
+import com.openexchange.realtime.payload.converter.StringTransformer;
 
 public class PresenceTransformerTest {
     private String presenceRequest = null;
@@ -52,6 +54,8 @@ public class PresenceTransformerTest {
         registry.addElementPathMapping(Presence.MESSAGE_PATH, String.class);
         registry.addPayloadElementTransFormer(new ByteTransformer());
         registry.addElementPathMapping(Presence.PRIORITY_PATH, Byte.class);
+        
+        //---
     }
 
     /**

@@ -49,12 +49,6 @@
 
 package com.openexchange.realtime.chat;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-import com.openexchange.conversion.simple.SimpleConverter;
-import com.openexchange.conversion.simple.SimplePayloadConverter;
-import com.openexchange.exception.OXException;
-import com.openexchange.tools.session.ServerSession;
 
 
 /**

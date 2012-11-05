@@ -47,47 +47,42 @@
  *
  */
 
-package com.openexchange.realtime.payload.transformer.primitive;
+package com.openexchange.realtime.atmosphere.presence.converter;
 
-import static com.openexchange.realtime.payload.PayloadElement.PayloadFormat.*;
+import com.openexchange.conversion.simple.SimpleConverter;
+import com.openexchange.conversion.simple.SimplePayloadConverter;
 import com.openexchange.exception.OXException;
-import com.openexchange.realtime.atmosphere.AtmosphereExceptionCode;
-import com.openexchange.realtime.payload.PayloadElement;
-import com.openexchange.realtime.payload.transformer.PayloadElementTransformer;
+import com.openexchange.realtime.atmosphere.presence.AtmospherePresenceExceptionCode;
+import com.openexchange.realtime.packet.Presence;
+import com.openexchange.realtime.packet.PresenceState;
 import com.openexchange.tools.session.ServerSession;
 
 /**
- * {@link ByteTransformer} Transform Bytes between JSON and POJO representation.
+ * {@link JSONToPresenceStateConverter}
  * 
  * @author <a href="mailto:marc	.arens@open-xchange.com">Marc Arens</a>
  */
-public class ByteTransformer implements PayloadElementTransformer {
+public class JSONToPresenceStateConverter extends AbstractJSONConverter {
 
     @Override
-    public Class<?> getElementClass() {
-        return Byte.class;
+    public String getOutputFormat() {
+        return PresenceState.class.getSimpleName();
     }
 
     @Override
-    public PayloadElement incoming(PayloadElement payload, ServerSession session) throws OXException {
-        String data = (String) payload.getData();
-        Byte transformed = 0;
-        try {
-            transformed = Byte.valueOf(data);
-        } catch (NumberFormatException ex) {
-            AtmosphereExceptionCode.ERROR_WHILE_TRANSFORMING.create(payload.getElementPath(), ex);
+    public Object convert(Object data, ServerSession session, SimpleConverter converter) throws OXException {
+        String state = (String) data;
+        PresenceState presenceState = null;
+        for (PresenceState ps : PresenceState.values()) {
+            if (ps.name().equalsIgnoreCase(state)) {
+                presenceState = ps;
+                break;
+            }
         }
-        payload.setData(transformed, POJO);
-        return payload;
-
-    }
-
-    @Override
-    public PayloadElement outgoing(PayloadElement payload, ServerSession session) throws OXException {
-        Byte data = (Byte) payload.getData();
-        String transformed = data.toString();
-        payload.setData(transformed, JSON);
-        return payload;
+        if (presenceState == null) {
+            throw AtmospherePresenceExceptionCode.PRESENCE_DATA_ELEMENT_MALFORMED.create(Presence.PRESENCE_STATE_PATH);
+        }
+        return presenceState;
     }
 
 }

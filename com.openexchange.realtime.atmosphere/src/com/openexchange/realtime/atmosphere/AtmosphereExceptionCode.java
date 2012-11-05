@@ -76,7 +76,9 @@ public enum AtmosphereExceptionCode implements OXExceptionCode {
     /** Could not find an initializer for the specified stanza: . \"%1$s\" */
     MISSING_INITIALIZER_FOR_STANZA(AtmosphereExceptionMessage.MISSING_INITIALIZER_FOR_STANZA_MSG, CATEGORY_ERROR, 7),
     /** Error while transforming a PayloadElement: \"%1$s, %2$s\" */
-    ERROR_WHILE_TRANSFORMING(AtmosphereExceptionMessage.ERROR_WHILE_TRANSFORMING_MSG, CATEGORY_ERROR, 8)
+    ERROR_WHILE_TRANSFORMING(AtmosphereExceptionMessage.ERROR_WHILE_TRANSFORMING_MSG, CATEGORY_ERROR, 8),
+    /** Error while converting PayloadElement data: \"%1$s\" */
+    ERROR_WHILE_CONVERTING(AtmosphereExceptionMessage.ERROR_WHILE_CONVERTING_MSG, CATEGORY_ERROR, 8)
     ;
 
     private final String message;

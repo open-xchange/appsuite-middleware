@@ -57,7 +57,6 @@ import com.openexchange.realtime.payload.PayloadElement;
 import com.openexchange.realtime.payload.PayloadTree;
 import com.openexchange.realtime.payload.PayloadTreeNode;
 import com.openexchange.realtime.util.ElementPath;
-import static com.openexchange.realtime.payload.PayloadElement.PayloadFormat.*;
 
 /**
  * {@link Presence} - Exchanges presence information. A Presence Stanza is a broadcast from a single entity X to a set of entities
@@ -96,9 +95,9 @@ public class Presence extends Stanza {
     }
 
     // Names of the payload elements from the default schema we are interested in
-    public static final ElementPath MESSAGE_PATH = new ElementPath("show");
+    public static final ElementPath MESSAGE_PATH = new ElementPath("status");
 
-    public static final ElementPath PRESENCE_STATE_PATH = new ElementPath("status");
+    public static final ElementPath PRESENCE_STATE_PATH = new ElementPath("show");
 
     public static final ElementPath PRIORITY_PATH = new ElementPath("priority");
 
@@ -280,7 +279,7 @@ public class Presence extends Stanza {
     private void writeThrough(ElementPath path, Object data) {
         PayloadTree payloadTree = payloads.get(path);
         if (payloadTree == null) {
-            PayloadElement payloadElement = new PayloadElement(data, POJO, path.getNamespace(), path.getElement());
+            PayloadElement payloadElement = new PayloadElement(data, data.getClass().getSimpleName(), path.getNamespace(), path.getElement());
             PayloadTreeNode payloadTreeNode = new PayloadTreeNode(payloadElement);
             payloadTree = new PayloadTree(payloadTreeNode);
         }
@@ -288,7 +287,7 @@ public class Presence extends Stanza {
         if (node == null) {
             throw new IllegalStateException("PayloadTreeNode removed? This shouldn't happen!");
         }
-        node.setData(data, POJO);
+        node.setData(data, data.getClass().getSimpleName());
     }
 
 }

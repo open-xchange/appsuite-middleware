@@ -47,63 +47,36 @@
  *
  */
 
-package com.openexchange.realtime.osgi;
+package com.openexchange.realtime.atmosphere.presence.converter;
 
-import org.osgi.framework.ServiceReference;
 import com.openexchange.conversion.simple.SimpleConverter;
-import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.osgi.SimpleRegistryListener;
-import com.openexchange.realtime.Channel;
-import com.openexchange.realtime.MessageDispatcher;
-import com.openexchange.realtime.impl.MessageDispatcherImpl;
-import com.openexchange.realtime.payload.PayloadElement;
-import com.openexchange.realtime.payload.transformer.PayloadElementTransformer;
+import com.openexchange.conversion.simple.SimplePayloadConverter;
+import com.openexchange.exception.OXException;
+import com.openexchange.realtime.atmosphere.AtmosphereExceptionCode;
+import com.openexchange.tools.session.ServerSession;
 
 /**
- * {@link RTActivator} - The activator for realtime bundle.
+ * {@link JSONToByteConverter}
  * 
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:marc	.arens@open-xchange.com">Marc Arens</a>
  */
-public class RTActivator extends HousekeepingActivator {
+public class JSONToByteConverter extends AbstractJSONConverter {
 
     @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class[] { SimpleConverter.class };
-    }
-
-    /*
-     * Register the MessageDispatcher as Service and listen for new Channels being added to the OSGi service registry. When new Channels are
-     * added/removed to/from the service registry inform the MessageDispatcher about it.
-     */
-    @Override
-    protected void startBundle() throws Exception {
-        PayloadElement.SERVICES.set(this);
-        PayloadElementTransformer.SERVICES.set(this);
-
-        final MessageDispatcherImpl dispatcher = new MessageDispatcherImpl();
-
-        registerService(MessageDispatcher.class, dispatcher);
-
-        track(Channel.class, new SimpleRegistryListener<Channel>() {
-
-            @Override
-            public void added(final ServiceReference<Channel> ref, final Channel service) {
-                dispatcher.addChannel(service);
-            }
-
-            @Override
-            public void removed(final ServiceReference<Channel> ref, final Channel service) {
-                dispatcher.removeChannel(service);
-            }
-        });
-
-        openTrackers();
+    public String getOutputFormat() {
+        return Byte.class.getSimpleName();
     }
 
     @Override
-    protected void stopBundle() throws Exception {
-        PayloadElement.SERVICES.set(null);
-        super.stopBundle();
+    public Object convert(Object data, ServerSession session, SimpleConverter converter) throws OXException {
+        String incoming = (String) data;
+        Byte transformed = 0;
+        try {
+            transformed = Byte.valueOf(incoming);
+        } catch (NumberFormatException ex) {
+            throw AtmosphereExceptionCode.ERROR_WHILE_CONVERTING.create(ex);
+        }
+        return transformed;
     }
 
 }

@@ -52,9 +52,14 @@ package com.openexchange.realtime.atmosphere.presence.osgi;
 import java.util.ArrayList;
 import java.util.List;
 import org.apache.commons.logging.Log;
+import com.openexchange.conversion.simple.SimplePayloadConverter;
 import com.openexchange.exception.OXException;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.realtime.atmosphere.osgi.service.AtmosphereExtensionService;
+import com.openexchange.realtime.atmosphere.presence.converter.ByteToJSONConverter;
+import com.openexchange.realtime.atmosphere.presence.converter.JSONToByteConverter;
+import com.openexchange.realtime.atmosphere.presence.converter.JSONToStringConverter;
+import com.openexchange.realtime.atmosphere.presence.converter.StringToJSONConverter;
 import com.openexchange.realtime.atmosphere.presence.handler.OXRTPresenceHandler;
 import com.openexchange.realtime.atmosphere.presence.transformer.PresenceStateTransformer;
 import com.openexchange.realtime.atmosphere.stanza.StanzaHandler;
@@ -116,6 +121,11 @@ public class AtmospherePresenceActivator extends HousekeepingActivator {
         atmosphereRegistryService.addElementPathMapping(Presence.MESSAGE_PATH, String.class);
         atmosphereRegistryService.addElementPathMapping(Presence.PRIORITY_PATH, Byte.class);
         atmosphereRegistryService.addElementPathMapping(Presence.ERROR_PATH, OXException.class);
+        
+        registerService(SimplePayloadConverter.class, new ByteToJSONConverter());
+        registerService(SimplePayloadConverter.class, new JSONToByteConverter());
+        registerService(SimplePayloadConverter.class, new StringToJSONConverter());
+        registerService(SimplePayloadConverter.class, new JSONToStringConverter());
 
         // Add Presence specific handler
         atmosphereRegistryService.addStanzaHandler(new OXRTPresenceHandler());

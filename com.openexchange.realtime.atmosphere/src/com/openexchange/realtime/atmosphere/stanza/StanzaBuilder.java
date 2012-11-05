@@ -49,7 +49,6 @@
 
 package com.openexchange.realtime.atmosphere.stanza;
 
-import static com.openexchange.realtime.payload.PayloadElement.PayloadFormat.JSON;
 import java.util.Iterator;
 import org.apache.commons.logging.Log;
 import org.json.JSONArray;
@@ -62,7 +61,6 @@ import com.openexchange.realtime.packet.Stanza;
 import com.openexchange.realtime.payload.PayloadElement;
 import com.openexchange.realtime.payload.PayloadTree;
 import com.openexchange.realtime.payload.PayloadTreeNode;
-import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link StanzaBuilder} - Abstract StanzaBuilder class. StanzaBuilders take incoming AtmosphereRequest and are responsible for building the
@@ -75,6 +73,8 @@ import com.openexchange.tools.session.ServerSession;
 public abstract class StanzaBuilder<T extends Stanza> {
 
     private static Log LOG = com.openexchange.log.Log.loggerFor(StanzaBuilder.class);
+    
+    private final static String JSON = "json";
 
     protected ID from;
 

@@ -67,17 +67,15 @@ import com.openexchange.tools.session.ServerSession;
  */
 public class PayloadElement implements VisitablePayload {
 
-    public static enum PayloadFormat {JSON, XML, POJO}
-    
     /**
      * The <tt>ServiceLookup</tt> reference.
      */
     public static AtomicReference<ServiceLookup> SERVICES = new AtomicReference<ServiceLookup>();
 
-    // Current format of the Payload e.g. json or xml or some other POJO type
-    private PayloadFormat format;
+    // Current format of the Payload e.g. json or some Class.getSimpleName()
+    private String format;
 
-    // The namespace of this payload e.g.: http://jabber.org/protocol/disco#info
+    // The namespace of this payload e.g.: http://jabber.org/protocol/disco.info
     private String namespace;
 
     // The elementname identifying the Payload element in a namespace
@@ -93,7 +91,7 @@ public class PayloadElement implements VisitablePayload {
      * @param namespace The namespace of this Payload element
      * @param elementName the unique element name within the namespace
      */
-    public PayloadElement(Object data, PayloadFormat format, String namespace, String elementName) {
+    public PayloadElement(Object data, String format, String namespace, String elementName) {
         this.data = data;
         this.format = format;
         this.namespace = namespace;
@@ -115,7 +113,7 @@ public class PayloadElement implements VisitablePayload {
      * @param data The data object
      * @param format The data object's format
      */
-    public void setData(Object data, PayloadFormat format) {
+    public void setData(Object data, String format) {
         this.data = data;
         this.format = format;
     }
@@ -142,7 +140,7 @@ public class PayloadElement implements VisitablePayload {
      * 
      * @return The format identifier.
      */
-    public PayloadFormat getFormat() {
+    public String getFormat() {
         return format;
     }
 

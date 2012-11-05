@@ -53,7 +53,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-import com.openexchange.realtime.payload.PayloadElement.PayloadFormat;
 import com.openexchange.realtime.util.ElementPath;
 
 /**
@@ -236,7 +235,7 @@ public class PayloadTreeNode implements VisitablePayload {
      * @see com.openexchange.realtime.payload.PayloadElement#setData(java.lang.Object, java.lang.String)
      * @throws IllegalStateExcpetion If no PayloadElement is associated with this node
      */
-    public void setData(Object data, PayloadFormat format) {
+    public void setData(Object data, String format) {
         if (payloadElement == null) {
             throw new IllegalStateException("PayloadElement delegate wasn't set, yet!");
         }
@@ -263,7 +262,7 @@ public class PayloadTreeNode implements VisitablePayload {
      * @return Null or the format of the PayloadElement associated with this node.
      * @see com.openexchange.realtime.payload.PayloadElement#getFormat()
      */
-    public PayloadFormat getFormat() {
+    public String getFormat() {
         if (payloadElement != null) {
             return payloadElement.getFormat();
         }

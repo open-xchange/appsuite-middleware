@@ -47,63 +47,21 @@
  *
  */
 
-package com.openexchange.realtime.osgi;
+package com.openexchange.realtime.payload.converter;
 
-import org.osgi.framework.ServiceReference;
-import com.openexchange.conversion.simple.SimpleConverter;
-import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.osgi.SimpleRegistryListener;
-import com.openexchange.realtime.Channel;
-import com.openexchange.realtime.MessageDispatcher;
-import com.openexchange.realtime.impl.MessageDispatcherImpl;
-import com.openexchange.realtime.payload.PayloadElement;
-import com.openexchange.realtime.payload.transformer.PayloadElementTransformer;
+import com.openexchange.conversion.simple.SimplePayloadConverter;
+
 
 /**
- * {@link RTActivator} - The activator for realtime bundle.
- * 
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * {@link AbstractGoodQualityConverter}
+ *
+ * @author <a href="mailto:marc	.arens@open-xchange.com">Marc Arens</a>
  */
-public class RTActivator extends HousekeepingActivator {
+public abstract class AbstractGoodQualityConverter implements SimplePayloadConverter {
 
     @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class[] { SimpleConverter.class };
-    }
-
-    /*
-     * Register the MessageDispatcher as Service and listen for new Channels being added to the OSGi service registry. When new Channels are
-     * added/removed to/from the service registry inform the MessageDispatcher about it.
-     */
-    @Override
-    protected void startBundle() throws Exception {
-        PayloadElement.SERVICES.set(this);
-        PayloadElementTransformer.SERVICES.set(this);
-
-        final MessageDispatcherImpl dispatcher = new MessageDispatcherImpl();
-
-        registerService(MessageDispatcher.class, dispatcher);
-
-        track(Channel.class, new SimpleRegistryListener<Channel>() {
-
-            @Override
-            public void added(final ServiceReference<Channel> ref, final Channel service) {
-                dispatcher.addChannel(service);
-            }
-
-            @Override
-            public void removed(final ServiceReference<Channel> ref, final Channel service) {
-                dispatcher.removeChannel(service);
-            }
-        });
-
-        openTrackers();
-    }
-
-    @Override
-    protected void stopBundle() throws Exception {
-        PayloadElement.SERVICES.set(null);
-        super.stopBundle();
+    public Quality getQuality() {
+        return Quality.GOOD;
     }
 
 }

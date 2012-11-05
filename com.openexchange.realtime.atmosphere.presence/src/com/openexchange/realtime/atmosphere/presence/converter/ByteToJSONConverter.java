@@ -47,41 +47,29 @@
  *
  */
 
-package com.openexchange.realtime.payload.transformer.primitive;
+package com.openexchange.realtime.atmosphere.presence.converter;
 
-import static com.openexchange.realtime.payload.PayloadElement.PayloadFormat.*;
+import com.openexchange.conversion.simple.SimpleConverter;
 import com.openexchange.exception.OXException;
-import com.openexchange.realtime.payload.PayloadElement;
-import com.openexchange.realtime.payload.transformer.PayloadElementTransformer;
 import com.openexchange.tools.session.ServerSession;
 
-
 /**
- * {@link StringTransformer}
- *
+ * {@link ByteToJSONConverter}
+ * 
  * @author <a href="mailto:marc	.arens@open-xchange.com">Marc Arens</a>
  */
-public class StringTransformer implements PayloadElementTransformer {
+public class ByteToJSONConverter extends AbstractPOJOConverter {
 
     @Override
-    public Class<?> getElementClass() {
-        return String.class;
+    public String getInputFormat() {
+        return Byte.class.getSimpleName();
     }
 
     @Override
-    public PayloadElement incoming(PayloadElement payload, ServerSession session) throws OXException {
-        Object data = payload.getData();
-        //no transformation neccessary for strings, just change the format
-        payload.setData(data, POJO);
-        return payload;
-    }
-
-    @Override
-    public PayloadElement outgoing(PayloadElement payload, ServerSession session) throws OXException {
-        Object data = payload.getData();
-        //no transformation neccessary for strings, just change the format
-        payload.setData(data, JSON);
-        return payload;
+    public Object convert(Object data, ServerSession session, SimpleConverter converter) throws OXException {
+        Byte incoming = (Byte) data;
+        String transformed = incoming.toString();
+        return transformed;
     }
 
 }
