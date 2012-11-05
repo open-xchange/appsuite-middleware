@@ -79,6 +79,9 @@ public final class TimeoutAwareIMap implements IMap<String, HazelcastStoredSessi
 
     /**
      * Initializes a new {@link TimeoutAwareIMap}.
+     * 
+     * @param map The map to delegate to
+     * @param timeout The timeout
      */
     public TimeoutAwareIMap(final IMap<String, HazelcastStoredSession> map, final long timeout) {
         super();
