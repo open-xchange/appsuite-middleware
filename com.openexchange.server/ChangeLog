@@ -5,6 +5,7 @@
 * 2012-11-05 - thorben.betten@open-xchange.com
 
  - Fix for bug 23567: Using proper locale when writing JSON response
+ - Fix for bug 23592: Proper check for mandatory fields
 
 * 2012-11-02 - tobias.friedrich@open-xchange.com
 
