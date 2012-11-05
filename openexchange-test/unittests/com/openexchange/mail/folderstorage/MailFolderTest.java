@@ -848,11 +848,11 @@ public final class MailFolderTest extends AbstractMailTest {
 
 				trashFullname = mailAccess.getFolderStorage().getTrashFolder();
 				int numTrashedMails = getMessageCount(mailAccess, trashFullname);
-				final Set<Long> ids = new HashSet<Long>(numTrashedMails);
+				final Set<String> ids = new HashSet<String>(numTrashedMails);
 				MailMessage[] trashed = mailAccess.getMessageStorage().getAllMessages(trashFullname, IndexRange.NULL,
 						MailSortField.RECEIVED_DATE, OrderDirection.ASC, FIELDS_ID);
 				for (int i = 0; i < trashed.length; i++) {
-					ids.add(Long.valueOf(trashed[i].getMailId()));
+					ids.add(trashed[i].getMailId());
 				}
 
 				mailAccess.getFolderStorage().clearFolder(fullname);

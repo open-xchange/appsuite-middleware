@@ -57,7 +57,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-
 import me.prettyprint.cassandra.model.BasicColumnFamilyDefinition;
 import me.prettyprint.cassandra.model.ConfigurableConsistencyLevel;
 import me.prettyprint.cassandra.serializers.CompositeSerializer;
@@ -77,14 +76,12 @@ import me.prettyprint.hector.api.ddl.KeyspaceDefinition;
 import me.prettyprint.hector.api.exceptions.HectorException;
 import me.prettyprint.hector.api.factory.HFactory;
 import me.prettyprint.hector.api.mutation.Mutator;
-
 import org.apache.cassandra.db.KeyspaceNotDefinedException;
 import org.apache.cassandra.utils.ByteBufferUtil;
 import org.apache.commons.logging.Log;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-
 import com.openexchange.ajax.tools.JSONCoercion;
 import com.openexchange.ajax.tools.JSONUtil;
 import com.openexchange.eav.EAVStorage;
@@ -126,7 +123,7 @@ public class CassandraEAVStorageImpl implements EAVStorage {
 	private final void initKeyspace() {
 	    Cluster cluster = CassandraEAVStorageImpl.cluster;
 		if (cluster == null) {
-            synchronized (cluster) {
+            synchronized (CassandraEAVStorageImpl.class) {
                 cluster = CassandraEAVStorageImpl.cluster;
                 if (cluster == null) {
                     cluster = HFactory.getOrCreateCluster("Local Cluster", node);
