@@ -57,6 +57,7 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
+import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import com.hazelcast.core.EntryListener;
@@ -110,7 +111,15 @@ public final class TimeoutAwareIMap implements IMap<String, HazelcastStoredSessi
     }
 
     private <V> V get(final Callable<V> task, final V defaultValue) {
-        return getFrom(ThreadPools.getThreadPool().submit(task(task)), defaultValue);
+        try {
+            return getFrom(ThreadPools.getThreadPool().submit(task(task)), defaultValue);
+        } catch (final RejectedExecutionException e) {
+            try {
+                return task.call();
+            } catch (final Exception ignore) {
+                return defaultValue;
+            }
+        }
     }
 
     @Override
