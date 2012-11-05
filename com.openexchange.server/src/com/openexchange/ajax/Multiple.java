@@ -273,7 +273,7 @@ public class Multiple extends SessionServlet {
                     jsonWriter.value(result.getResultObject());
                 } catch (final OXException e) {
                     LOG.error(e.getMessage(), e);
-                    ResponseWriter.writeException(e, jsonWriter);
+                    ResponseWriter.writeException(e, jsonWriter, localeFrom(session));
                     return state;
                 } finally {
                 	jsonWriter.endObject();
@@ -294,7 +294,7 @@ public class Multiple extends SessionServlet {
                     }
                     final Collection<OXException> warnings = multipleHandler.getWarnings();
                     if (null != warnings && !warnings.isEmpty()) {
-                        ResponseWriter.writeException(warnings.iterator().next(), jsonWriter);
+                        ResponseWriter.writeException(warnings.iterator().next(), jsonWriter, localeFrom(session));
                     }
                 } catch (final OXException e) {
                     if (jsonWriter.isExpectingValue()) {
