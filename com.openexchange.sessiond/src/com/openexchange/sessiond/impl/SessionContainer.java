@@ -223,8 +223,7 @@ final class SessionContainer {
                     if (!ole.consideredEqual(session)) {
                         final String login1 = ole.getLogin();
                         final String login2 = session.getLogin();
-                        final Log log = com.openexchange.log.Log.loggerFor(SessionContainer.class);
-                        ole.logDiff(session, log);
+                        ole.logDiff(session, com.openexchange.log.Log.loggerFor(SessionContainer.class));
                         throw SessionExceptionCodes.SESSIONID_COLLISION.create(login1, login2);
                     }
                 }
@@ -233,8 +232,7 @@ final class SessionContainer {
                 if (!ole.consideredEqual(session)) {
                     final String login1 = ole.getLogin();
                     final String login2 = session.getLogin();
-                    final Log log = com.openexchange.log.Log.loggerFor(SessionContainer.class);
-                    ole.logDiff(session, log);
+                    ole.logDiff(session, com.openexchange.log.Log.loggerFor(SessionContainer.class));
                     throw SessionExceptionCodes.SESSIONID_COLLISION.create(login1, login2);
                 }
             }

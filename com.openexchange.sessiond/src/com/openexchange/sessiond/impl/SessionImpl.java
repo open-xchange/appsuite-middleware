@@ -196,7 +196,7 @@ public final class SessionImpl implements PutIfAbsent {
         if (null == s || null == logger) {
             return;
         }
-        final StringBuilder sb = new StringBuilder(1024);
+        final StringBuilder sb = new StringBuilder(1024).append("Session Diff:\n");
         final String format = "%-15s%-45s%s";
         sb.append(String.format(format, "Name", "Session #1", "Session #1"));
         sb.append(String.format(format, "User-Id", Integer.valueOf(userId), Integer.valueOf(s.userId)));
