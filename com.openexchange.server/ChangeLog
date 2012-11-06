@@ -7,6 +7,7 @@
  - Fix for bug 23609: Fixed update of "reply-to" field
  - Fix for bug 23616: Fixed NPE in Hazelcast session storage
  - Fix for bug 23617: Fixed NPE in Hazelcast session storage
+ - Fix for bug 23615: Changed log level to warning
 
 * 2012-11-05 - martin.herfurth@open-xchange.com
 
