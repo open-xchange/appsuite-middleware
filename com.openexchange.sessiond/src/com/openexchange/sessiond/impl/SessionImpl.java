@@ -187,7 +187,7 @@ public final class SessionImpl implements PutIfAbsent {
     }
 
     /**
-     * Logs difference between this and specified session.
+     * Logs differences between this and specified session.
      * 
      * @param s The session to compare with
      * @param logger The logger
