@@ -49,17 +49,29 @@
 
 package com.openexchange.groupware.contact;
 
+import static com.openexchange.java.Autoboxing.I;
+import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
 import gnu.trove.list.TIntList;
 import gnu.trove.list.array.TIntArrayList;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
+import org.apache.commons.logging.Log;
+import com.openexchange.cache.impl.FolderCacheManager;
+import com.openexchange.event.impl.EventClient;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.container.Contact;
+import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.delete.DeleteEvent;
 import com.openexchange.groupware.delete.DeleteListener;
+import com.openexchange.log.LogFactory;
+import com.openexchange.session.Session;
+import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.sql.DBUtils;
 
 /**
@@ -68,6 +80,8 @@ import com.openexchange.tools.sql.DBUtils;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class ContactDeleteListener implements DeleteListener {
+
+    private static Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(ContactDeleteListener.class));
 
     /**
      * Initializes a new {@link ContactDeleteListener}
@@ -88,7 +102,7 @@ public final class ContactDeleteListener implements DeleteListener {
                 /*
                  * Proceed
                  */
-                Contacts.trashAllUserContacts(deleteEvent.getId(), deleteEvent.getSession(), readCon, writeCon);
+                trashAllUserContacts(deleteEvent.getContext(), deleteEvent.getId(), deleteEvent.getSession(), readCon, writeCon);
             }
         } catch (final OXException ox) {
             throw new OXException(ox);
@@ -169,6 +183,226 @@ public final class ContactDeleteListener implements DeleteListener {
         } finally {
             DBUtils.closeSQLStuff(rs, stmt);
         }
+    }
+
+    /*
+     * taken as-is from previous Contacts.java and ContactMySql.java implementations
+     */
+    private static void trashAllUserContacts(Context ct, int uid, Session so, Connection readcon, Connection writecon) throws OXException {
+        Statement stmt = null;
+        Statement del = null;
+        ResultSet rs = null;
+
+        try {
+            final int contextId = so.getContextId();
+            stmt = readcon.createStatement();
+            del = writecon.createStatement();
+            FolderObject contactFolder = null;
+
+            /*
+             * Get all contacts which were created by specified user. This includes the user's contact as well since the user is always the
+             * creator.
+             */
+            rs = stmt.executeQuery(iFgetRightsSelectString(uid, contextId));
+
+            int fid = 0;
+            int oid = 0;
+            int created_from = 0;
+            boolean delete = false;
+            int pflag = 0;
+
+            final EventClient ec = new EventClient(so);
+            OXFolderAccess oxfs = null;
+
+            while (rs.next()) {
+                delete = false;
+                oid = rs.getInt(1);
+                fid = rs.getInt(5);
+                created_from = rs.getInt(6);
+                pflag = rs.getInt(7);
+                if (rs.wasNull()) {
+                    pflag = 0;
+                }
+
+                boolean folder_error = false;
+
+                try {
+                    if (FolderCacheManager.isEnabled()) {
+                        contactFolder = FolderCacheManager.getInstance().getFolderObject(fid, true, ct, readcon);
+                    } else {
+                        contactFolder = FolderObject.loadFolderObjectFromDB(fid, ct, readcon);
+                    }
+                    if (contactFolder.getModule() != FolderObject.CONTACT) {
+                        throw ContactExceptionCodes.NON_CONTACT_FOLDER.create(I(fid), I(contextId), I(uid));
+                    }
+                    if (contactFolder.getType() == FolderObject.PRIVATE) {
+                        delete = true;
+                    }
+
+                } catch (final Exception oe) {
+                    if (LOG.isWarnEnabled()) {
+                        final StringBuilder sb = new StringBuilder(128);
+                        sb.append("WARNING: During the delete process 'delete all contacts from one user', a contact was found who has no folder.");
+                        sb.append("This contact will be modified and can be found in the administrator address book.");
+                        sb.append(" Context=").append(contextId);
+                        sb.append(" Folder=").append(fid);
+                        sb.append(" User=").append(uid);
+                        sb.append(" Contact=").append(oid);
+                        LOG.warn(sb.toString());
+                    }
+                    folder_error = true;
+                    delete = true;
+                }
+
+                if (folder_error && (pflag == 0)) {
+                    try {
+                        final int mailadmin = ct.getMailadmin();
+                        if (null == oxfs) {
+                            oxfs = new OXFolderAccess(readcon, ct);
+                        }
+                        final FolderObject xx = oxfs.getDefaultFolder(mailadmin, FolderObject.CONTACT);
+
+                        final int admin_folder = xx.getObjectID();
+                        iFgiveUserContacToAdmin(del, oid, admin_folder, ct);
+                    } catch (final Exception oxee) {
+                        oxee.printStackTrace();
+                        LOG.error("ERROR: It was not possible to move this contact (without paren folder) to the admin address book!." + "This contact will be deleted." + "Context " + contextId + " Folder " + fid + " User" + uid + " Contact" + oid);
+
+                        folder_error = false;
+                    }
+                } else if (folder_error && (pflag != 0)) {
+                    folder_error = false;
+                }
+
+                if (!folder_error) {
+                    iFtrashAllUserContacts(delete, del, contextId, oid, uid, rs, so, ct);
+                    final Contact co = new Contact();
+                    try {
+                        co.setCreatedBy(created_from);
+                        co.setParentFolderID(fid);
+                        co.setObjectID(oid);
+                        ec.delete(co);
+                    } catch (final Exception e) {
+                        LOG.error(
+                            "Unable to trigger delete event for contact delete: id=" + co.getObjectID() + " cid=" + co.getContextId(),
+                            e);
+                    }
+                }
+            }
+            if (uid == ct.getMailadmin()) {
+                iFtrashAllUserContactsDeletedEntriesFromAdmin(del, contextId, uid);
+            } else {
+                iFtrashAllUserContactsDeletedEntries(del, contextId, uid, ct);
+            }
+        } catch (final SQLException e) {
+            throw ContactExceptionCodes.SQL_PROBLEM.create(e);
+        } finally {
+            closeSQLStuff(rs, stmt);
+            closeSQLStuff(del);
+        }
+    }
+
+    private static String rightsSelectString =
+        "SELECT co.intfield01,co.intfield02,co.intfield03,co.intfield04,co.fid,co.created_from,co.pflag,co.cid FROM prg_contacts AS co ";
+
+    private static String iFgetRightsSelectString(final int uid, final int cid) {
+        return new StringBuilder(rightsSelectString).append(" where created_from = ").append(uid).append(" AND cid = ").append(cid).toString();
+    }
+
+    private static void iFgiveUserContacToAdmin(final Statement smt, final int oid, final int admin_fid, final Context ct) throws SQLException {
+        final StringBuilder tmp =
+            new StringBuilder("UPDATE prg_contacts SET changed_from = ").append(ct.getMailadmin()).append(", created_from = ").append(
+                ct.getMailadmin()).append(", changing_date = ").append(System.currentTimeMillis()).append(", fid = ").append(admin_fid).append(
+                " WHERE intfield01 = ").append(oid).append(" and cid = ").append(ct.getContextId());
+        if (LOG.isDebugEnabled()) {
+            LOG.debug(tmp.toString());
+        }
+        smt.execute(tmp.toString());
+    }
+
+    private static void iFtrashAllUserContacts(final boolean delete, final Statement del, final int cid, final int oid, final int uid, final ResultSet rs, final Session so, Context ctx) throws SQLException {
+
+        final StringBuilder tmp = new StringBuilder(256);
+
+        if (delete) {
+            tmp.append("DELETE from prg_dlist where intfield01 = ").append(oid).append(" AND cid = ").append(cid);
+            if (LOG.isDebugEnabled()) {
+                LOG.debug(tmp.toString());
+            }
+            del.execute(tmp.toString());
+
+            tmp.setLength(0);
+            tmp.append("DELETE from prg_contacts_linkage where (intfield01 = ").append(oid).append(" OR intfield02 = ").append(oid).append(
+                ") AND cid = ").append(cid);
+            if (LOG.isDebugEnabled()) {
+                LOG.debug(tmp.toString());
+            }
+            del.execute(tmp.toString());
+
+            tmp.setLength(0);
+            tmp.append("DELETE from prg_contacts_image where intfield01 = ").append(oid).append(" AND cid = ").append(cid);
+            if (LOG.isDebugEnabled()) {
+                LOG.debug(tmp.toString());
+            }
+            del.execute(tmp.toString());
+
+            tmp.setLength(0);
+            tmp.append("DELETE from prg_contacts WHERE cid = ").append(cid).append(" AND intfield01 = ").append(oid);
+            if (LOG.isDebugEnabled()) {
+                LOG.debug(tmp.toString());
+            }
+            // FIXME quick fix. deleteRow doesn't work because del.execute
+            // creates new resultset
+            del.execute(tmp.toString());
+            // rs.deleteRow();
+
+        } else {
+            /*
+             * tmp = newStringBuilder( "INSERT INTO del_contacts_image SELECT * FROM prg_contacts_image WHERE intfield01 = " + oid +
+             * " AND  cid = "+cid); LOG.debug(tmp.toString()); del.execute(tmp.toString()); tmp = new
+             * StringBuilder("DELETE from prg_contacts_image where intfield01 = " +oid+" AND cid = "+cid); LOG.debug(tmp.toString());
+             * del.execute(tmp.toString()); tmp = newStringBuilder( "INSERT INTO del_dlist SELECT * FROM prg_dlist WHERE intfield01 = " +
+             * oid + " AND  cid = "+cid); LOG.debug(tmp.toString()); del.execute(tmp.toString()); tmp = new
+             * StringBuilder("DELETE FROM prg_dlist WHERE cid = " + cid + " AND intfield01 = " + oid); LOG.debug(tmp.toString());
+             * del.execute(tmp.toString()); tmp = new StringBuilder("DELETE from prg_contacts_linkage where (intfield01 = "
+             * +oid+" OR intfield02 = "+oid+") AND cid = "+cid); LOG.debug(tmp.toString()); del.execute(tmp.toString()); tmp =
+             * newStringBuilder( "INSERT INTO del_contacts SELECT * FROM prg_contacts WHERE intfield01 = " + oid + " AND  cid = "+cid);
+             * LOG.debug(tmp.toString()); del.execute(tmp.toString()); tmp = new StringBuilder("DELETE from prg_contacts WHERE cid = "+cid
+             * +" AND intfield01 = "+oid); LOG.debug(tmp.toString()); del.execute(tmp.toString()); // rs.deleteRow(); tmp = new
+             * StringBuilder("UPDATE del_contacts SET changed_from = "+ so.getContext ().getMailadmin()+", created_from = "+so.getContext()
+             * .getMailadmin()+", changing_date = "+System.currentTimeMillis()+ " WHERE intfield01 = "+oid); LOG.debug(tmp.toString());
+             * del.execute(tmp.toString());
+             */
+
+            tmp.append("UPDATE prg_contacts SET changed_from = ").append(ctx.getMailadmin()).append(", created_from = ").append(
+                ctx.getMailadmin()).append(", changing_date = ").append(System.currentTimeMillis()).append(" WHERE intfield01 = ").append(
+                oid).append(" AND cid = ").append(cid);
+            if (LOG.isDebugEnabled()) {
+                LOG.debug(tmp.toString());
+            }
+            del.execute(tmp.toString());
+
+        }
+    }
+    
+    private static void iFtrashAllUserContactsDeletedEntriesFromAdmin(final Statement del, final int cid, final int uid) throws SQLException {
+        final StringBuilder tmp =
+            new StringBuilder("DELETE FROM del_contacts WHERE created_from = ").append(uid).append(" and cid = ").append(cid);
+        if (LOG.isDebugEnabled()) {
+            LOG.debug(tmp.toString());
+        }
+        del.execute(tmp.toString());
+    }
+
+    private static void iFtrashAllUserContactsDeletedEntries(final Statement del, final int cid, final int uid, final Context ct) throws SQLException {
+        final StringBuilder tmp =
+            new StringBuilder("UPDATE del_contacts SET changed_from = ").append(ct.getMailadmin()).append(", created_from = ").append(
+                ct.getMailadmin()).append(", changing_date = ").append(System.currentTimeMillis()).append(" WHERE created_from = ").append(
+                uid).append(" and cid = ").append(cid);
+        if (LOG.isDebugEnabled()) {
+            LOG.debug(tmp.toString());
+        }
+        del.execute(tmp.toString());
     }
 
 }

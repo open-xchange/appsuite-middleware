@@ -49,6 +49,7 @@
 
 package com.openexchange.server.osgi;
 
+import java.io.File;
 import java.nio.charset.spi.CharsetProvider;
 import java.util.ArrayList;
 import java.util.Dictionary;
@@ -77,8 +78,6 @@ import com.openexchange.ajax.customizer.folder.AdditionalFolderField;
 import com.openexchange.ajax.customizer.folder.osgi.FolderFieldCollector;
 import com.openexchange.ajax.requesthandler.AJAXRequestHandler;
 import com.openexchange.ajax.requesthandler.Dispatcher;
-import com.openexchange.api2.ContactInterfaceFactory;
-import com.openexchange.api2.RdbContactInterfaceFactory;
 import com.openexchange.cache.registry.CacheAvailabilityRegistry;
 import com.openexchange.caching.CacheService;
 import com.openexchange.charset.CustomCharsetProvider;
@@ -122,12 +121,9 @@ import com.openexchange.groupware.attach.AttachmentBase;
 import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
 import com.openexchange.groupware.calendar.CalendarAdministrationService;
 import com.openexchange.groupware.calendar.CalendarCollectionService;
-import com.openexchange.groupware.contact.ContactInterfaceDiscoveryService;
-import com.openexchange.groupware.contact.ContactInterfaceProvider;
 import com.openexchange.groupware.contact.datahandler.ContactInsertDataHandler;
 import com.openexchange.groupware.contact.datahandler.ContactJSONDataHandler;
 import com.openexchange.groupware.contact.datasource.ContactDataSource;
-import com.openexchange.groupware.contact.internal.ContactInterfaceDiscoveryServiceImpl;
 import com.openexchange.groupware.datahandler.ICalInsertDataHandler;
 import com.openexchange.groupware.datahandler.ICalJSONDataHandler;
 import com.openexchange.groupware.delete.DeleteListener;
@@ -154,6 +150,7 @@ import com.openexchange.mail.conversion.VCardAttachMailDataHandler;
 import com.openexchange.mail.conversion.VCardMailPartDataSource;
 import com.openexchange.mail.loginhandler.MailLoginHandler;
 import com.openexchange.mail.loginhandler.TransportLoginHandler;
+import com.openexchange.mail.mime.MimeType2ExtMap;
 import com.openexchange.mail.osgi.MailProviderServiceTracker;
 import com.openexchange.mail.osgi.TransportProviderServiceTracker;
 import com.openexchange.mail.service.MailService;
@@ -166,6 +163,7 @@ import com.openexchange.mailaccount.internal.CreateMailAccountTables;
 import com.openexchange.mailaccount.internal.DeleteListenerServiceTracker;
 import com.openexchange.management.ManagementService;
 import com.openexchange.messaging.registry.MessagingServiceRegistry;
+import com.openexchange.mime.MimeTypeMap;
 import com.openexchange.multiple.MultipleHandlerFactoryService;
 import com.openexchange.multiple.internal.MultipleHandlerServiceTracker;
 import com.openexchange.osgi.BundleServiceTracker;
@@ -384,8 +382,6 @@ public final class ServerActivator extends HousekeepingActivator {
         // AJAX request handler
         track(AJAXRequestHandler.class, new AJAXRequestHandlerCustomizer(context));
 
-        // contacts
-        track(ContactInterfaceProvider.class, new ContactServiceListener(context));
         // ICal Parser
         track(ICalParser.class, new RegistryCustomizer<ICalParser>(context, ICalParser.class) {
 
@@ -498,6 +494,28 @@ public final class ServerActivator extends HousekeepingActivator {
             registerService(EventHandler.class, new MailSessionEventHandler(), serviceProperties);
             registerService(MailCounter.class, new MailCounterImpl());
             registerService(MailIdleCounter.class, new MailIdleCounterImpl());
+            registerService(MimeTypeMap.class, new MimeTypeMap() {
+
+                @Override
+                public String getContentType(final File file) {
+                    return MimeType2ExtMap.getContentType(file);
+                }
+
+                @Override
+                public String getContentType(final String fileName) {
+                    return MimeType2ExtMap.getContentType(fileName);
+                }
+
+                @Override
+                public String getContentTypeByExtension(final String extension) {
+                    return MimeType2ExtMap.getContentTypeByExtension(extension);
+                }
+
+                @Override
+                public List<String> getFileExtensions(final String mime) {
+                    return MimeType2ExtMap.getFileExtensions(mime);
+                }
+            });
         }
         // TODO: Register search service here until its encapsulated in an own bundle
         registerService(SearchService.class, new SearchServiceImpl());
@@ -593,9 +611,6 @@ public final class ServerActivator extends HousekeepingActivator {
         // Register AttachmentBase
         registerService(AttachmentBase.class, Attachment.ATTACHMENT_BASE);
 
-        // Register ContactSQL
-        registerService(ContactInterfaceFactory.class, new RdbContactInterfaceFactory());
-
         // Register event factory service
         registerService(EventFactoryService.class, new EventFactoryServiceImpl());
 
@@ -603,11 +618,6 @@ public final class ServerActivator extends HousekeepingActivator {
         final FolderService folderService = new FolderServiceImpl();
         registerService(FolderService.class, folderService);
         ServerServiceRegistry.getInstance().addService(FolderService.class, folderService);
-
-        // Register contact interface discovery service
-        final ContactInterfaceDiscoveryService cids = ContactInterfaceDiscoveryServiceImpl.getInstance();
-        registerService(ContactInterfaceDiscoveryService.class, cids);
-        ServerServiceRegistry.getInstance().addService(ContactInterfaceDiscoveryService.class, cids);
 
         // Register SessionHolder
         registerService(SessionHolder.class, ThreadLocalSessionHolder.getInstance());

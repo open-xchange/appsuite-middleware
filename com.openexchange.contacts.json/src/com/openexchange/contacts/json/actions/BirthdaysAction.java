@@ -59,6 +59,7 @@ import com.openexchange.documentation.RequestMethod;
 import com.openexchange.documentation.annotations.Action;
 import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.server.ServiceLookup;
 
@@ -74,7 +75,7 @@ import com.openexchange.server.ServiceLookup;
     @Parameter(name = "end", description = "The upper (exclusive) limit of the requested time-range."),
     @Parameter(name = "columns", description = "The requested fields."),
     @Parameter(name = "folder", optional=true, description = "Object ID of the parent folder that is searched. If not set, all visible folders are used."),
-    @Parameter(name = "sort", optional=true, description = "The identifier of a column which determines the sort order of the response. If this parameter is specified, then the parameter order must be also specified. In case of use of column 609 (use count depending order for collected contacts with global address book) the parameter \"order\" ist NOT necessary and will be ignored."),
+    @Parameter(name = "sort", optional=true, description = "The identifier of a column which determines the sort order of the response. If not specified, the results are sorted ascending by their birthday in the supplied timerange. If this parameter is specified, then the parameter order must be also specified. In case of use of column 609 (use count depending order for collected contacts with global address book) the parameter \"order\" is NOT necessary and will be ignored."),
     @Parameter(name = "order", optional=true, description = "\"asc\" if the response entires should be sorted in the ascending order, \"desc\" if the response entries should be sorted in the descending order. If this parameter is specified, then the parameter sort must be also specified."),
     @Parameter(name = "collation", optional=true, description = "Allows you to specify a collation to sort the contacts by. As of 6.20, only supports \"gbk\" and \"gb2312\", not needed for other languages. Parameter sort should be set for this to work.")
 }, responseDescription = "Response with timestamp: An array with contact data. Each array element describes one contact and is itself an array. The elements of each array contain the information specified by the corresponding identifiers in the columns parameter.")
@@ -95,13 +96,13 @@ public class BirthdaysAction extends ContactAction {
         Date lastModified;
         if (null != folderID) {
             List<String> folderIDs = Arrays.asList(new String[] { folderID });
-            lastModified = addContacts(contacts, getContactService().searchContactsWithBirthday(
-                request.getSession(), folderIDs, request.getStart(), request.getEnd(), request.getFields(), request.getSortOptions()));
+            lastModified = addContacts(contacts, getContactService().searchContactsWithBirthday(request.getSession(), folderIDs, 
+                request.getStart(), request.getEnd(), request.getFields(ContactField.BIRTHDAY), request.getSortOptions()));
         } else {
-            lastModified = addContacts(contacts, getContactService().searchContactsWithBirthday(
-                request.getSession(), request.getStart(), request.getEnd(), request.getFields(), request.getSortOptions()));
+            lastModified = addContacts(contacts, getContactService().searchContactsWithBirthday(request.getSession(), request.getStart(), 
+                request.getEnd(), request.getFields(ContactField.BIRTHDAY), request.getSortOptions()));
         }
-        request.sortInternalIfNeeded(contacts);
+        request.sortInternalIfNeeded(contacts, ContactField.BIRTHDAY, request.getStart());
         return new AJAXRequestResult(contacts, lastModified, "contact");
     }
 

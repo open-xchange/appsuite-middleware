@@ -51,75 +51,74 @@ package com.openexchange.data.conversion.ical.ical4j.internal.freebusy;
 
 import java.util.List;
 import java.util.TimeZone;
-
 import net.fortuna.ical4j.model.DateTime;
 import net.fortuna.ical4j.model.Period;
-import net.fortuna.ical4j.model.Property;
 import net.fortuna.ical4j.model.component.VFreeBusy;
 import net.fortuna.ical4j.model.parameter.FbType;
 import net.fortuna.ical4j.model.property.FreeBusy;
-
 import com.openexchange.data.conversion.ical.ConversionError;
 import com.openexchange.data.conversion.ical.ConversionWarning;
 import com.openexchange.data.conversion.ical.FreeBusyInformation;
-import com.openexchange.data.conversion.ical.FreeBusySlot;
 import com.openexchange.data.conversion.ical.Mode;
 import com.openexchange.data.conversion.ical.ical4j.internal.AbstractVerifyingAttributeConverter;
-import com.openexchange.groupware.container.Appointment;
+import com.openexchange.freebusy.FreeBusyInterval;
 import com.openexchange.groupware.contexts.Context;
 
 /**
- * {@link FreeBusySlots} - Emits free-busy timeslots.
+ * {@link FreeBusyIntervals}
+ * 
+ * Emits free-busy intervals.
  * 
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public final class FreeBusySlots<T extends VFreeBusy, U extends FreeBusyInformation> extends AbstractVerifyingAttributeConverter<T, U> {
+public final class FreeBusySlots extends AbstractVerifyingAttributeConverter<VFreeBusy, FreeBusyInformation> {
 
     public FreeBusySlots() {
         super();
     }
 
 	@Override
-	public boolean isSet(U u) {
-		return null != u.getFreeBusySlots() && 0 < u.getFreeBusySlots().size();
+	public boolean isSet(FreeBusyInformation u) {
+		return null != u.getFreeBusyIntervals() && 0 < u.getFreeBusyIntervals().size();
 	}
 
 	@Override
-	public void emit(Mode mode, int index, U u, T t, List<ConversionWarning> warnings, Context ctx, Object... args) throws ConversionError {
-		for (FreeBusySlot fbSlot : u.getFreeBusySlots()) {
+	public void emit(Mode mode, int index, FreeBusyInformation u, VFreeBusy t, List<ConversionWarning> warnings, Context ctx, Object... args) throws ConversionError {
+		for (FreeBusyInterval interval : u.getFreeBusyIntervals()) {
 			FreeBusy freeBusy = new FreeBusy();
-			freeBusy.getParameters().add(getFBType(fbSlot));
-			freeBusy.getPeriods().add(new Period(new DateTime(fbSlot.getStart()), new DateTime(fbSlot.getEnd())));
+			freeBusy.getParameters().add(getFBType(interval));
+			freeBusy.getPeriods().add(new Period(new DateTime(interval.getStartTime()), new DateTime(interval.getEndTime())));
 			t.getProperties().add(freeBusy);
 		}
 	}
 
 	/**
-	 * Gets the suitable free/busy-type from the supplied free/busy-slot. 
+	 * Gets the suitable free/busy-type from the supplied free/busy-interval. 
 	 * 
-	 * @param busyTime the calendar object to get the free/busy type from
-	 * @return the free/busy-type
+	 * @param interval The interval to get the free/busy type from
+	 * @return The free/busy-type
 	 */
-	private static FbType getFBType(FreeBusySlot busyTime) {
-		switch (busyTime.getShownAs()) {
-        case Appointment.FREE: 
-        	return FbType.FREE;
-        case Appointment.TEMPORARY: 
-        	return FbType.BUSY_TENTATIVE;
-        case Appointment.ABSENT: 
-        	return FbType.BUSY_UNAVAILABLE;
-    	default:
-           	return FbType.BUSY;
-		}
+	private static FbType getFBType(FreeBusyInterval interval) {
+	    switch (interval.getStatus()) {
+        case ABSENT:
+            return FbType.BUSY_UNAVAILABLE;
+        case FREE:
+            return FbType.FREE;
+        case TEMPORARY:
+            return FbType.BUSY_TENTATIVE;
+        default:
+            return FbType.BUSY;
+            
+	    }
 	}
 
 	@Override
-	public boolean hasProperty(T t) {
-        return null != t.getProperty(Property.FREEBUSY);
+	public boolean hasProperty(VFreeBusy t) {
+        return false;
 	}
 
 	@Override
-	public void parse(int index, T t, U u, TimeZone timeZone, Context ctx, List<ConversionWarning> warnings) throws ConversionError {
+	public void parse(int index, VFreeBusy t, FreeBusyInformation u, TimeZone timeZone, Context ctx, List<ConversionWarning> warnings) throws ConversionError {
 		throw new UnsupportedOperationException("not implemented");
 	}
 

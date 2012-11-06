@@ -59,9 +59,9 @@ import java.util.Enumeration;
 import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.openexchange.configuration.ServerConfig;
 import com.openexchange.configuration.ServerConfig.Property;
+import com.openexchange.log.LogFactory;
 import com.openexchange.webdav.protocol.WebdavFactory;
 import com.openexchange.webdav.protocol.WebdavPath;
 
@@ -134,11 +134,13 @@ public class ServletWebdavRequest extends AbstractWebdavRequest implements Webda
 			return null;
 		}
 
-		try {
-			final URL urlO = new URL(url);
-			url = urlO.getPath();
-		} catch (final MalformedURLException x ){
-			LOG.debug("",x);
+		if (false == url.startsWith("/")) {
+    		try {
+    			final URL urlO = new URL(url);
+    			url = urlO.getPath();
+    		} catch (final MalformedURLException x ){
+    			LOG.debug("",x);
+    		}
 		}
 
 		if(url.startsWith(req.getServletPath())) {

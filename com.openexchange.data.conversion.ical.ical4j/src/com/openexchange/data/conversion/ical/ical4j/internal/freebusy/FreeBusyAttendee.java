@@ -52,64 +52,64 @@ package com.openexchange.data.conversion.ical.ical4j.internal.freebusy;
 import java.net.URISyntaxException;
 import java.util.List;
 import java.util.TimeZone;
-
 import javax.mail.internet.AddressException;
 import javax.mail.internet.IDNA;
-
-import net.fortuna.ical4j.model.Property;
 import net.fortuna.ical4j.model.component.VFreeBusy;
 import net.fortuna.ical4j.model.property.Attendee;
-import net.fortuna.ical4j.model.property.Description;
-
 import com.openexchange.data.conversion.ical.ConversionError;
 import com.openexchange.data.conversion.ical.ConversionWarning;
 import com.openexchange.data.conversion.ical.ConversionWarning.Code;
 import com.openexchange.data.conversion.ical.FreeBusyInformation;
 import com.openexchange.data.conversion.ical.Mode;
-import com.openexchange.data.conversion.ical.ical4j.internal.calendar.Participants;
+import com.openexchange.data.conversion.ical.ical4j.internal.AbstractVerifyingAttributeConverter;
 import com.openexchange.groupware.contexts.Context;
 
 /**
- * {@link FreeBusyAttendee} 
+ * {@link FreeBusyAttendee}
+ * 
+ * Emits a {@link FreeBusyInformation}s attendee. 
  * 
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public final class FreeBusyAttendee<T extends VFreeBusy, U extends FreeBusyInformation> extends Participants<T, U> {
+public class FreeBusyAttendee extends AbstractVerifyingAttributeConverter<VFreeBusy, FreeBusyInformation> {
 
+    /**
+     * Initializes a new {@link FreeBusyAttendee}.
+     */
     public FreeBusyAttendee() {
         super();
     }
 
     @Override
-    public boolean isSet(U fbInfo) {
-        return null != fbInfo.getAttendee();
+    public boolean isSet(FreeBusyInformation freeBusyInformation) {
+        return null != freeBusyInformation.getAttendee();
     }
 
     @Override
-    public void emit(Mode mode, int index, U fbInfo, T calendarComponent, List<ConversionWarning> warnings, Context ctx, Object... args) throws ConversionError {
-    	Attendee attendee = new Attendee();
-    	String address = fbInfo.getAttendee().getEmailAddress();
+    public void emit(Mode mode, int index, FreeBusyInformation freeBusyInformation, VFreeBusy vFreeBusy, List<ConversionWarning> warnings, 
+        Context ctx, Object... args) throws ConversionError {
+        Attendee attendee = new Attendee();
+        String address = freeBusyInformation.getAttendee();
         try {
             address = IDNA.toACE(address);
-			attendee.setValue("mailto:" + address);
-		} catch (URISyntaxException e) {
+            attendee.setValue("mailto:" + address);
+        } catch (URISyntaxException e) {
             throw new ConversionError(index, Code.UNEXPECTED_ERROR, e, e.getMessage());
-		} catch (AddressException e) {
+        } catch (AddressException e) {
             throw new ConversionError(index, Code.UNEXPECTED_ERROR, e, e.getMessage());
-		}
-        calendarComponent.getProperties().add(attendee);
+        }
+        vFreeBusy.getProperties().add(attendee);
     }
 
     @Override
-    public boolean hasProperty(T calendarComponent) {
-        return null != calendarComponent.getProperty(Property.ATTENDEE);
+    public boolean hasProperty(VFreeBusy vFreeBusy) {
+        return false;
     }
 
     @Override
-    public void parse(int index, T calendarComponent, U fbInfo, TimeZone timeZone, Context ctx, List<ConversionWarning> warnings) throws ConversionError {
-    	super.parse(index, calendarComponent, fbInfo, timeZone, ctx, warnings);
-    	if (null != fbInfo.getParticipants() && 0 < fbInfo.getParticipants().length) {
-    		fbInfo.setAttendee(fbInfo.getParticipants()[0]);
-    	}
+    public void parse(int index, VFreeBusy vFreeBusy, FreeBusyInformation freeBusyInformation, TimeZone timeZone, Context ctx, 
+        List<ConversionWarning> warnings) throws ConversionError {
+        throw new UnsupportedOperationException("not implemented");
     }
+    
 }

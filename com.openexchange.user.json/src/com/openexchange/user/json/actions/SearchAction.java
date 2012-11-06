@@ -49,21 +49,13 @@
 
 package com.openexchange.user.json.actions;
 
-import static com.openexchange.user.json.Utility.checkForRequiredField;
-
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.fields.ContactFields;
 import com.openexchange.ajax.fields.OrderFields;
@@ -79,8 +71,6 @@ import com.openexchange.documentation.Type;
 import com.openexchange.documentation.annotations.Action;
 import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.contact.ContactInterfaceDiscoveryService;
-import com.openexchange.groupware.contact.ContactSearchMultiplexer;
 import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.ldap.User;
@@ -96,7 +86,6 @@ import com.openexchange.user.json.UserContact;
 import com.openexchange.user.json.field.UserField;
 import com.openexchange.user.json.mapping.UserMapper;
 import com.openexchange.user.json.services.ServiceRegistry;
-import com.openexchange.user.json.writer.UserWriter;
 
 /**
  * {@link SearchAction} - Maps the action to a <tt>search</tt> action.
@@ -113,8 +102,6 @@ import com.openexchange.user.json.writer.UserWriter;
 responseDescription = "An array with user data. Each array element describes one user and is itself an array. The elements of each array contain the information specified by the corresponding identifiers in the columns parameter.")
 public final class SearchAction extends AbstractUserAction {
 
-    private static final Contact[] EMPTY_CONTACTS = new Contact[0];
-
     /**
      * The <tt>search</tt> action string.
      */
@@ -126,15 +113,6 @@ public final class SearchAction extends AbstractUserAction {
     public SearchAction() {
         super();
     }
-
-    private static final Set<String> EXPECTED_NAMES =
-        Collections.unmodifiableSet(new HashSet<String>(Arrays.asList(
-            AJAXServlet.PARAMETER_COLUMNS,
-            AJAXServlet.PARAMETER_SORT,
-            AJAXServlet.PARAMETER_ORDER,
-            AJAXServlet.PARAMETER_TIMEZONE,
-            AJAXServlet.PARAMETER_SESSION,
-            AJAXServlet.PARAMETER_ACTION)));
 
     @Override
     public AJAXRequestResult perform(final AJAXRequestData request, final ServerSession session) throws OXException {
@@ -227,7 +205,7 @@ public final class SearchAction extends AbstractUserAction {
             	 * Get corresponding user
             	 */
             	final User user = userService.getUser(contact.getInternalUserId(), session.getContext());
-            	userContacts.add(new UserContact(contact, user));
+            	userContacts.add(new UserContact(contact, censor(session, user)));
             }
         } finally {
         	if (null != searchIterator) {
@@ -248,131 +226,6 @@ public final class SearchAction extends AbstractUserAction {
          * Return appropriate result
          */
         return new AJAXRequestResult(userContacts, lastModified, "usercontact");
-    }
-
-    public AJAXRequestResult performOLD(final AJAXRequestData request, final ServerSession session) throws OXException {
-        try {
-            /*
-             * Parse parameters
-             */
-            final int[] columns = parseIntArrayParameter(AJAXServlet.PARAMETER_COLUMNS, request);
-            final int orderBy = parseIntParameter(AJAXServlet.PARAMETER_SORT, request);
-            final Order order = OrderFields.parse(request.getParameter(AJAXServlet.PARAMETER_ORDER));
-            final String collation = request.getParameter(AJAXServlet.PARAMETER_COLLATION);
-            final String timeZoneId = request.getParameter(AJAXServlet.PARAMETER_TIMEZONE);
-            /*
-             * Get remaining parameters
-             */
-            final Map<String, List<String>> attributeParameters = getAttributeParameters(EXPECTED_NAMES, request);
-            final JSONObject jData = (JSONObject) request.getData();
-            /*
-             * Contact search object
-             */
-            final ContactSearchObject searchObj = new ContactSearchObject();
-            searchObj.addFolder(Constants.USER_ADDRESS_BOOK_FOLDER_ID);
-            if (jData.has(SearchFields.PATTERN)) {
-                searchObj.setPattern(parseString(jData, SearchFields.PATTERN));
-            }
-            if (jData.has("startletter")) {
-                searchObj.setStartLetter(parseBoolean(jData, "startletter"));
-            }
-            if (jData.has("emailAutoComplete") && jData.getBoolean("emailAutoComplete")) {
-                searchObj.setEmailAutoComplete(true);
-            }
-            if (jData.has("orSearch") && jData.getBoolean("orSearch")) {
-                searchObj.setOrSearch(true);
-            }
-            searchObj.setSurname(parseString(jData, ContactFields.LAST_NAME));
-            searchObj.setDisplayName(parseString(jData, ContactFields.DISPLAY_NAME));
-            searchObj.setGivenName(parseString(jData, ContactFields.FIRST_NAME));
-            searchObj.setCompany(parseString(jData, ContactFields.COMPANY));
-            searchObj.setEmail1(parseString(jData, ContactFields.EMAIL1));
-            searchObj.setEmail2(parseString(jData, ContactFields.EMAIL2));
-            searchObj.setEmail3(parseString(jData, ContactFields.EMAIL3));
-            searchObj.setDynamicSearchField(parseJSONIntArray(jData, "dynamicsearchfield"));
-            searchObj.setDynamicSearchFieldValue(parseJSONStringArray(jData, "dynamicsearchfieldvalue"));
-            searchObj.setPrivatePostalCodeRange(parseJSONStringArray(jData, "privatepostalcoderange"));
-            searchObj.setBusinessPostalCodeRange(parseJSONStringArray(jData, "businesspostalcoderange"));
-            searchObj.setPrivatePostalCodeRange(parseJSONStringArray(jData, "privatepostalcoderange"));
-            searchObj.setOtherPostalCodeRange(parseJSONStringArray(jData, "otherpostalcoderange"));
-            searchObj.setBirthdayRange(parseJSONDateArray(jData, "birthdayrange"));
-            searchObj.setAnniversaryRange(parseJSONDateArray(jData, "anniversaryrange"));
-            searchObj.setNumberOfEmployeesRange(parseJSONStringArray(jData, "numberofemployee"));
-            searchObj.setSalesVolumeRange(parseJSONStringArray(jData, "salesvolumerange"));
-            searchObj.setCreationDateRange(parseJSONDateArray(jData, "creationdaterange"));
-            searchObj.setLastModifiedRange(parseJSONDateArray(jData, "lastmodifiedrange"));
-            searchObj.setCatgories(parseString(jData, "categories"));
-            searchObj.setSubfolderSearch(parseBoolean(jData, "subfoldersearch"));
-            /*
-             * Multiplex search
-             */
-            final UserField sortField = UserField.getUserOnlyField(orderBy);
-            final SearchIterator<Contact> it;
-            if (null == sortField) {
-                // Sort field is a contact field: pass as it is
-                final ContactSearchMultiplexer multiplexer =
-                    new ContactSearchMultiplexer(ServiceRegistry.getInstance().getService(ContactInterfaceDiscoveryService.class));
-                final int[] checkedCols = checkForRequiredField(columns, UserField.INTERNAL_USERID.getColumn());
-                it = multiplexer.extendedSearch(session, searchObj, orderBy, order, collation, checkedCols);
-            } else {
-                // Get contact iterator with dummy search fields
-                final ContactSearchMultiplexer multiplexer =
-                    new ContactSearchMultiplexer(ServiceRegistry.getInstance().getService(ContactInterfaceDiscoveryService.class));
-                final int[] checkedCols = checkForRequiredField(columns, UserField.INTERNAL_USERID.getColumn());
-                it = multiplexer.extendedSearch(session, searchObj, UserField.DISPLAY_NAME.getColumn(), Order.ASCENDING, collation, checkedCols);
-            }
-            /*
-             * Collect contacts from iterator
-             */
-            final Contact[] contacts;
-            try {
-                final List<Contact> list = new ArrayList<Contact>(128);
-                while (it.hasNext()) {
-                    list.add(it.next());
-                }
-                contacts = list.toArray(EMPTY_CONTACTS);
-            } finally {
-                try {
-                    it.close();
-                } catch (final Exception e) {
-                    final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(SearchAction.class));
-                    LOG.error(e.getMessage(), e);
-                }
-            }
-            /*
-             * Get corresponding users
-             */
-            final UserService userService = ServiceRegistry.getInstance().getService(UserService.class, true);
-            final User[] users = new User[contacts.length];
-            for (int i = 0; i < users.length; i++) {
-                users[i] = userService.getUser(contacts[i].getInternalUserId(), session.getContext());
-            }
-            /*
-             * TODO: Sort users if a user field was denoted by sort field
-             */
-            // Determine max. last-modified time stamp
-            Date lastModified = new Date(0);
-            for (int i = 1; i < contacts.length; i++) {
-                final Date lm = contacts[i].getLastModified();
-                if (lastModified.before(lm)) {
-                    lastModified = lm;
-                }
-            }
-            /*
-             * Write users as JSON arrays to JSON array
-             */
-            censor(session, contacts);
-            censor(session, users);
-            final JSONArray jsonArray = UserWriter.writeMultiple2Array(columns, attributeParameters, users, contacts, timeZoneId);
-            /*
-             * Return appropriate result
-             */
-            return new AJAXRequestResult(jsonArray, lastModified);
-        } catch (final OXException e) {
-            throw new OXException(e);
-        } catch (final JSONException e) {
-            throw AjaxExceptionCodes.JSON_ERROR.create( e, e.getMessage());
-        }
     }
 
     /**

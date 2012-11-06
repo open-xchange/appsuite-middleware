@@ -66,7 +66,6 @@ import com.openexchange.contact.storage.rdb.fields.QueryFields;
 import com.openexchange.contact.storage.rdb.mapping.Mappers;
 import com.openexchange.contact.storage.rdb.sql.Executor;
 import com.openexchange.contact.storage.rdb.sql.Table;
-import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contact.ContactExceptionCodes;
 import com.openexchange.groupware.contact.helpers.ContactField;
@@ -114,8 +113,8 @@ public class RdbContactStorage extends DefaultContactStorage {
     public Contact get(Session session, String folderId, String id, ContactField[] fields) throws OXException {
         int objectID = parse(id);
         int contextID = session.getContextId();
-        DatabaseService databaseService = getDatabaseService();
-        Connection connection = databaseService.getReadOnly(contextID);
+        ConnectionHelper connectionHelper = new ConnectionHelper(session);
+        Connection connection = connectionHelper.getReadOnly();
         try {
             /*
              * check fields
@@ -160,21 +159,19 @@ public class RdbContactStorage extends DefaultContactStorage {
         } catch (SQLException e) {
             throw ContactExceptionCodes.SQL_PROBLEM.create(e);
         } finally {
-            databaseService.backReadOnly(contextID, connection);
+            connectionHelper.back();
         }
     }
     
     @Override
     public void create(Session session, String folderId, Contact contact) throws OXException {
-    	boolean committed = false;
         int contextID = session.getContextId();
-        DatabaseService databaseService = getDatabaseService();
-        Connection connection = databaseService.getWritable(contextID);
+        ConnectionHelper connectionHelper = new ConnectionHelper(session);
+        Connection connection = connectionHelper.getWritable();
         try {
             /*
              * prepare insert
              */
-            connection.setAutoCommit(false);
             contact.setObjectID(IDGenerator.getId(contextID, com.openexchange.groupware.Types.CONTACT, connection));
             Date now = new Date();
             contact.setLastModified(now);
@@ -202,8 +199,7 @@ public class RdbContactStorage extends DefaultContactStorage {
             /*
              * commit
              */
-            connection.commit();
-        	committed = true;
+            connectionHelper.commit();
         } catch (DataTruncation e) {
             DBUtils.rollback(connection);
             throw Tools.getTruncationException(connection, e, contact, Table.CONTACTS);
@@ -214,25 +210,19 @@ public class RdbContactStorage extends DefaultContactStorage {
             DBUtils.rollback(connection);
             throw e;
         } finally {
-        	if (false == committed) {
-        		DBUtils.rollback(connection);
-        	}
-            DBUtils.autocommit(connection);
-            databaseService.backWritable(contextID, connection);
+        	connectionHelper.backWritable();
         }
     }    
         
     @Override
     public void delete(Session session, String folderId, String id, Date lastRead) throws OXException {
-        boolean committed = false;
         int contextID = session.getContextId();
         int userID = session.getUserId();
         int objectID = parse(id);
         long minLastModified = lastRead.getTime();
-        DatabaseService databaseService = getDatabaseService();
-        Connection connection = databaseService.getWritable(contextID);
+        ConnectionHelper connectionHelper = new ConnectionHelper(session);
+        Connection connection = connectionHelper.getWritable();
         try {
-            connection.setAutoCommit(false);
             /*
              * ensure there is no previous record in the 'deleted' tables
              */
@@ -266,8 +256,7 @@ public class RdbContactStorage extends DefaultContactStorage {
             /*
              * commit
              */
-            connection.commit();
-            committed = true;
+            connectionHelper.commit();
         } catch (SQLException e) {
             DBUtils.rollback(connection);
             throw ContactExceptionCodes.SQL_PROBLEM.create(e);
@@ -275,24 +264,18 @@ public class RdbContactStorage extends DefaultContactStorage {
             DBUtils.rollback(connection);
             throw e;
         } finally {
-            if (false == committed) {
-                DBUtils.rollback(connection);
-            }
-            DBUtils.autocommit(connection);
-            databaseService.backWritable(contextID, connection);
+            connectionHelper.backWritable();
         }
     }
     
     @Override
     public void delete(Session session, String folderId) throws OXException {
-        boolean committed = false;
         int contextID = session.getContextId();
         int userID = session.getUserId();
         int folderID = parse(folderId);
-        DatabaseService databaseService = getDatabaseService();
-        Connection connection = databaseService.getWritable(contextID);
+        ConnectionHelper connectionHelper = new ConnectionHelper(session);
+        Connection connection = connectionHelper.getWritable();
         try {
-            connection.setAutoCommit(false);
             /*
              * get a list of object IDs to delete
              */
@@ -331,8 +314,7 @@ public class RdbContactStorage extends DefaultContactStorage {
             /*
              * commit
              */
-            connection.commit();
-            committed = true;
+            connectionHelper.commit();
         } catch (SQLException e) {
             DBUtils.rollback(connection);
             throw ContactExceptionCodes.SQL_PROBLEM.create(e);
@@ -340,26 +322,20 @@ public class RdbContactStorage extends DefaultContactStorage {
             DBUtils.rollback(connection);
             throw e;
         } finally {
-            if (false == committed) {
-                DBUtils.rollback(connection);
-            }
-            DBUtils.autocommit(connection);
-            databaseService.backWritable(contextID, connection);
+            connectionHelper.backWritable();
         }
     }
     
     @Override
     public void delete(Session session, String folderId, String[] ids, Date lastRead) throws OXException {
-        boolean committed = false;
         int contextID = session.getContextId();
         int userID = session.getUserId();
         int folderID = parse(folderId);
         int[] objectIDs = parse(ids);
         long minLastModified = lastRead.getTime();
-        DatabaseService databaseService = getDatabaseService();
-        Connection connection = databaseService.getWritable(contextID);
+        ConnectionHelper connectionHelper = new ConnectionHelper(session);
+        Connection connection = connectionHelper.getWritable();
         try {
-            connection.setAutoCommit(false);
             /*
              * ensure there is no previous record in the 'deleted' tables
              */
@@ -389,8 +365,7 @@ public class RdbContactStorage extends DefaultContactStorage {
             /*
              * commit
              */
-            connection.commit();
-            committed = true;
+            connectionHelper.commit();
         } catch (SQLException e) {
             DBUtils.rollback(connection);
             throw ContactExceptionCodes.SQL_PROBLEM.create(e);
@@ -398,27 +373,21 @@ public class RdbContactStorage extends DefaultContactStorage {
             DBUtils.rollback(connection);
             throw e;
         } finally {
-            if (false == committed) {
-                DBUtils.rollback(connection);
-            }
-            DBUtils.autocommit(connection);
-            databaseService.backWritable(contextID, connection);
+            connectionHelper.backWritable();
         }
     }
     
     @Override
     public void update(Session session, String folderId, String id, Contact contact, Date lastRead) throws OXException {
-    	boolean committed = false;
         int contextID = session.getContextId();
         int objectID = parse(id);
         long minLastModified = lastRead.getTime();
-        DatabaseService databaseService = getDatabaseService();
-        Connection connection = databaseService.getWritable(contextID);
+        ConnectionHelper connectionHelper = new ConnectionHelper(session);
+        Connection connection = connectionHelper.getWritable();
         try {
             /*
              * prepare insert
              */
-            connection.setAutoCommit(false);
             Date now = new Date();
             contact.setLastModified(now);
             QueryFields queryFields = new QueryFields(Mappers.CONTACT.getAssignedFields(contact));
@@ -489,30 +458,23 @@ public class RdbContactStorage extends DefaultContactStorage {
             /*
              * commit
              */
-            connection.commit();
-        	committed = true;
+            connectionHelper.commit();
         } catch (DataTruncation e) {
             DBUtils.rollback(connection);
             throw Tools.getTruncationException(connection, e, contact, Table.CONTACTS);
         } catch (SQLException e) {
             throw ContactExceptionCodes.SQL_PROBLEM.create(e);
         } finally {
-        	if (false == committed) {
-        		DBUtils.rollback(connection);
-        	}
-            DBUtils.autocommit(connection);
-            databaseService.backWritable(contextID, connection);
+            connectionHelper.backWritable();
         }
     }
     
     @Override
     public void updateReferences(Session session, Contact contact) throws OXException {
-    	boolean committed = false;
         int contextID = session.getContextId();
-        DatabaseService databaseService = getDatabaseService();
-        Connection connection = databaseService.getWritable(contextID);
+        ConnectionHelper connectionHelper = new ConnectionHelper(session);
+        Connection connection = connectionHelper.getWritable();
         try {
-            connection.setAutoCommit(false);
         	/*
         	 * check with existing member references
         	 */
@@ -543,19 +505,14 @@ public class RdbContactStorage extends DefaultContactStorage {
             /*
              * commit
              */
-            connection.commit();
-        	committed = true;
+            connectionHelper.commit();
         } catch (DataTruncation e) {
             DBUtils.rollback(connection);
             throw Tools.getTruncationException(connection, e, contact, Table.CONTACTS);
         } catch (SQLException e) {
             throw ContactExceptionCodes.SQL_PROBLEM.create(e);
         } finally {
-        	if (false == committed) {
-        		DBUtils.rollback(connection);
-        	}
-            DBUtils.autocommit(connection);
-            databaseService.backWritable(contextID, connection);
+            connectionHelper.backWritable();
         }
     }
     
@@ -614,8 +571,8 @@ public class RdbContactStorage extends DefaultContactStorage {
          * prepare select
          */
         int contextID = session.getContextId();
-        DatabaseService databaseService = getDatabaseService();
-        Connection connection = databaseService.getReadOnly(contextID);
+        ConnectionHelper connectionHelper = new ConnectionHelper(session);
+        Connection connection = connectionHelper.getReadOnly();
         int[] parentFolderIDs = null != folderIDs ? parse(folderIDs.toArray(new String[folderIDs.size()])) : null;        
         try {
             /*
@@ -655,7 +612,7 @@ public class RdbContactStorage extends DefaultContactStorage {
         } catch (SQLException e) {
             throw ContactExceptionCodes.SQL_PROBLEM.create(e);
         } finally {
-            databaseService.backReadOnly(contextID, connection);
+            connectionHelper.backReadOnly();       
         }
     }
 
@@ -679,8 +636,8 @@ public class RdbContactStorage extends DefaultContactStorage {
          * prepare select
          */
         int contextID = session.getContextId();
-        DatabaseService databaseService = getDatabaseService();
-        Connection connection = databaseService.getReadOnly(contextID);
+        ConnectionHelper connectionHelper = new ConnectionHelper(session);
+        Connection connection = connectionHelper.getReadOnly();
     	long minLastModified = null != since ? since.getTime() : Long.MIN_VALUE;
         int parentFolderID = null != folderID ? parse(folderID) : Integer.MIN_VALUE;
         int[] objectIDs = null != ids ? parse(ids) : null;        
@@ -723,7 +680,7 @@ public class RdbContactStorage extends DefaultContactStorage {
         } catch (SQLException e) {
             throw ContactExceptionCodes.SQL_PROBLEM.create(e);
         } finally {
-            databaseService.backReadOnly(contextID, connection);
+            connectionHelper.backReadOnly();
         }
     }
 
@@ -733,8 +690,8 @@ public class RdbContactStorage extends DefaultContactStorage {
          * prepare select
          */
         int contextID = session.getContextId();
-        DatabaseService databaseService = getDatabaseService();
-        Connection connection = databaseService.getReadOnly(contextID);
+        ConnectionHelper connectionHelper = new ConnectionHelper(session);
+        Connection connection = connectionHelper.getReadOnly();
         try {
             /*
              * check fields
@@ -774,7 +731,7 @@ public class RdbContactStorage extends DefaultContactStorage {
         } catch (SQLException e) {
             throw ContactExceptionCodes.SQL_PROBLEM.create(e);
         } finally {
-            databaseService.backReadOnly(contextID, connection);
+            connectionHelper.backReadOnly();
         }
     }
 
@@ -877,10 +834,6 @@ public class RdbContactStorage extends DefaultContactStorage {
             objectIDs[i++] = contact.getObjectID();
         }
         return Arrays.copyOf(objectIDs, i);
-    }
-    
-    private static DatabaseService getDatabaseService() throws OXException {
-        return RdbServiceLookup.getService(DatabaseService.class, true);
     }
     
 }

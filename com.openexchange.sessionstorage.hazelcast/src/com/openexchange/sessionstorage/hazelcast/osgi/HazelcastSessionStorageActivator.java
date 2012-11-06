@@ -59,9 +59,9 @@ import com.openexchange.log.LogFactory;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.osgi.ServiceRegistry;
 import com.openexchange.sessionstorage.SessionStorageService;
+import com.openexchange.sessionstorage.exceptions.OXSessionStorageExceptionCodes;
 import com.openexchange.sessionstorage.hazelcast.HazelcastSessionStorageConfiguration;
 import com.openexchange.sessionstorage.hazelcast.HazelcastSessionStorageService;
-import com.openexchange.sessionstorage.hazelcast.exceptions.OXHazelcastSessionStorageExceptionCodes;
 
 /**
  * {@link HazelcastSessionStorageActivator}
@@ -101,7 +101,7 @@ public class HazelcastSessionStorageActivator extends HousekeepingActivator {
         if (enabled) {
             String encryptionKey = configService.getProperty("com.openexchange.sessionstorage.hazelcast.encryptionKey");
             if (encryptionKey == null) {
-                throw OXHazelcastSessionStorageExceptionCodes.HAZELCAST_SESSIONSTORAGE_NO_ENCRYPTION_KEY.create();
+                throw OXSessionStorageExceptionCodes.SESSIONSTORAGE_NO_ENCRYPTION_KEY.create();
             }
             MapConfig mapConfig = new MapConfig();
             String mapName = configService.getProperty("com.openexchange.sessionstorage.hazelcast.map.name");
@@ -114,7 +114,7 @@ public class HazelcastSessionStorageActivator extends HousekeepingActivator {
             int maxSize = configService.getIntProperty("com.openexchange.sessionstorage.hazelcast.map.maxsize", 0);
             String mergePolicy = configService.getProperty("com.openexchange.sessionstorage.hazelcast.map.mergepolicy");
             if (mapName == null || !checkEvictionPolicy(evictionPolicy) || !checkMergePolicy(mergePolicy)) {
-                throw OXHazelcastSessionStorageExceptionCodes.HAZELCAST_SESSIONSTORAGE_CONFIG_FILE.create();
+                throw OXSessionStorageExceptionCodes.SESSIONSTORAGE_CONFIG_FILE.create();
             }
             mapConfig.setName(mapName);
             mapConfig.setBackupCount(backupCount);

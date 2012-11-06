@@ -418,6 +418,15 @@ public interface AppointmentSQLInterface {
     public int resolveUid(String uid) throws OXException;
 
     /**
+     * Resolves the given filename.
+     *
+     * @param filename
+     * @return the object id of the corresponding object, if it exists, 0 otherwise.
+     * @throws OXException
+     */
+    int resolveFilename(String filename) throws OXException;
+
+    /**
      * Returns the folder in which this appointment is located for the current user.
      *
      * @param objectId

@@ -64,7 +64,8 @@ import com.openexchange.http.requestwatcher.osgi.services.RequestWatcherService;
 import com.openexchange.osgi.ServiceRegistry;
 
 /**
- * {@link RequestReportingFilter}
+ * {@link RequestReportingFilter} - Add incoming requests to the RequestWatcherService so we can track and interrupt long running requests.
+ * EAS Requests aren't tracked as they are long running requests simulating server side message pushing.
  * 
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
@@ -87,6 +88,7 @@ public class RequestReportingFilter implements Filter {
 
     @Override
     public void init(FilterConfig filterConfig) throws ServletException {
+        // nothing to do here
     }
 
     @Override
@@ -124,6 +126,7 @@ public class RequestReportingFilter implements Filter {
 
     @Override
     public void destroy() {
+        // nothing to do here
     }
 
     /**

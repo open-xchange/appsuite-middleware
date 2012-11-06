@@ -1,3 +1,13 @@
+* 2012-11-06 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 23167: Always include all recurring appointment exceptions 
+ - Fix for bug 23610: Preserve iCal transparency on participant confirmation  
+ - Fix for bug 23612: Assume no changes to 'absent' and 'temporary' shown-as values for opaque iCal transparency  
+
+* 2012-10-30 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 23525: Skip wildcard-only comparisons in search object
+
 * 2012-10-26 - thorben.betten@open-xchange.com
 
  - Fix for bug 19615: Handle IndexOutOfBoundsException on access to an IMAP message

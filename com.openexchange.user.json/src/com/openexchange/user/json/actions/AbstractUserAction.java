@@ -60,18 +60,14 @@ import java.util.Set;
 import java.util.regex.Pattern;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
-import com.openexchange.groupware.container.Contact;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.server.impl.EffectivePermission;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
-import com.openexchange.exception.OXException;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
-import com.openexchange.user.json.filter.ContactCensorship;
-import com.openexchange.user.json.filter.DoNothingCensorship;
 import com.openexchange.user.json.filter.DoNothingUserCensorship;
-import com.openexchange.user.json.filter.NoGlobalAdressBookContactCensorship;
 import com.openexchange.user.json.filter.NoGlobalAdressBookUserCensorship;
 import com.openexchange.user.json.filter.UserCensorship;
 
@@ -236,9 +232,6 @@ public abstract class AbstractUserAction implements AJAXActionService {
 
     private static final Pattern PAT = Pattern.compile(" *, *");
 
-    private static final ContactCensorship DO_NOTHING_CENSORSHIP = new DoNothingCensorship();
-    private static final ContactCensorship NO_GLOBAL_ADDRESSBOOK_CENSORSHIP = new NoGlobalAdressBookContactCensorship();
-
     private static final UserCensorship DO_NOTHING_USER_CENSORSHIP = new DoNothingUserCensorship();
     private static final UserCensorship NO_GLOBAL_ADDRESSBOOK_USER_CENSORSHIP = new NoGlobalAdressBookUserCensorship();
 
@@ -283,18 +276,6 @@ public abstract class AbstractUserAction implements AJAXActionService {
         return columns;
     }
 
-    protected static void censor(final ServerSession session, final Contact...contacts) throws OXException {
-        final ContactCensorship censorship = getContactCensorship(session);
-
-        for (final Contact contact : contacts) {
-            if(contact.getInternalUserId() == session.getUserId()) {
-                continue;
-            }
-            censorship.censor(contact);
-        }
-
-    }
-
     protected static void censor(final ServerSession session, final User[] user) throws OXException {
         final UserCensorship censorship = getUserCensorship(session);
         for(int i = 0; i < user.length; i++) {
@@ -311,15 +292,6 @@ public abstract class AbstractUserAction implements AJAXActionService {
         }
         final UserCensorship censorship = getUserCensorship(session);
         return censorship.censor(user);
-    }
-
-
-
-    protected static ContactCensorship getContactCensorship(final ServerSession session) throws OXException {
-        if( canSeeGlobalAddressBook(session) ) {
-            return DO_NOTHING_CENSORSHIP;
-        }
-        return NO_GLOBAL_ADDRESSBOOK_CENSORSHIP;
     }
 
     protected static UserCensorship getUserCensorship(final ServerSession session) throws OXException {

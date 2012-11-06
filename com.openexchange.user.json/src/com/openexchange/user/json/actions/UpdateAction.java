@@ -56,7 +56,6 @@ import org.json.JSONObject;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.api2.ContactInterfaceFactory;
 import com.openexchange.contact.ContactService;
 import com.openexchange.contacts.json.mapping.ContactMapper;
 import com.openexchange.documentation.RequestMethod;
@@ -64,7 +63,6 @@ import com.openexchange.documentation.Type;
 import com.openexchange.documentation.annotations.Action;
 import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.contact.ContactInterface;
 import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.ldap.User;
@@ -72,11 +70,8 @@ import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.user.UserService;
 import com.openexchange.user.json.Constants;
-import com.openexchange.user.json.Utility;
 import com.openexchange.user.json.field.UserField;
 import com.openexchange.user.json.mapping.UserMapper;
-import com.openexchange.user.json.parser.ParsedUser;
-import com.openexchange.user.json.parser.UserParser;
 import com.openexchange.user.json.services.ServiceRegistry;
 
 /**
@@ -180,54 +175,6 @@ public final class UpdateAction extends AbstractUserAction {
          * Return contact last-modified from server
          */
         return new AJAXRequestResult(new JSONObject(), parsedUserContact.getLastModified());
-    }
-
-    public AJAXRequestResult performOLD(final AJAXRequestData request, final ServerSession session) throws OXException {
-        /*
-         * Parse parameters
-         */
-        final int id = checkIntParameter(AJAXServlet.PARAMETER_ID, request);
-        final Date clientLastModified = new Date(checkLongParameter(AJAXServlet.PARAMETER_TIMESTAMP, request));
-        /*
-         * Get user service to get contact ID
-         */
-        final UserService userService = ServiceRegistry.getInstance().getService(UserService.class, true);
-        final User storageUser = userService.getUser(id, session.getContext());
-        final int contactId = storageUser.getContactId();
-        /*
-         * Parse user contact
-         */
-        final JSONObject jData = (JSONObject) request.getData();
-        final Contact parsedUserContact = UserParser.parseUserContact(jData, Utility.getTimeZone(session.getUser().getTimeZone()));
-        parsedUserContact.setObjectID(contactId);
-        /*
-         * Perform update
-         */
-        final ContactInterface contactInterface =
-            ServiceRegistry.getInstance().getService(ContactInterfaceFactory.class, true).create(
-                Constants.USER_ADDRESS_BOOK_FOLDER_ID,
-                session);
-        contactInterface.updateUserContact(parsedUserContact, clientLastModified);
-        /*
-         * Update user, too
-         */
-        final ParsedUser parsedUser = UserParser.parseUserData(jData, id);
-        final String parsedTimeZone = parsedUser.getTimeZone();
-        final Locale parsedLocale = parsedUser.getLocale();
-        if ((null != parsedTimeZone) || (null != parsedLocale)) {
-            if (null == parsedTimeZone) {
-                parsedUser.setTimeZone(storageUser.getTimeZone());
-            }
-            if (null == parsedLocale) {
-                parsedUser.setLocale(storageUser.getLocale());
-            }
-            userService.updateUser(parsedUser, session.getContext());
-        }
-        /*
-         * Get last-modified from server
-         */
-        final Date lastModified = contactInterface.getUserById(id, false).getLastModified();
-        return new AJAXRequestResult(new JSONObject(), lastModified);
     }
 
     private static boolean isEmpty(final String string) {

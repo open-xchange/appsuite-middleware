@@ -49,28 +49,22 @@
 
 package com.openexchange.user.json.actions;
 
-import org.json.JSONObject;
-
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.api2.ContactInterfaceFactory;
 import com.openexchange.contact.ContactService;
 import com.openexchange.contacts.json.mapping.ContactMapper;
 import com.openexchange.documentation.RequestMethod;
 import com.openexchange.documentation.annotations.Action;
 import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.contact.ContactInterface;
 import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.user.UserService;
-import com.openexchange.user.json.Constants;
 import com.openexchange.user.json.UserContact;
 import com.openexchange.user.json.services.ServiceRegistry;
-import com.openexchange.user.json.writer.UserWriter;
 
 /**
  * {@link GetAction} - Maps the action to a <tt>get</tt> action.
@@ -128,43 +122,7 @@ public final class GetAction extends AbstractUserAction {
         /*
          * Return appropriate result
          */
-        return new AJAXRequestResult(new UserContact(contact, user), contact.getLastModified(), "usercontact");
+        return new AJAXRequestResult(new UserContact(contact, censor(session, user)), contact.getLastModified(), "usercontact");
     }
     
-    public AJAXRequestResult performOLD(final AJAXRequestData request, final ServerSession session) throws OXException {
-        /*
-         * Parse parameters
-         */
-        final String idParam = request.getParameter("id");
-        int userId;
-        if(null == idParam) {
-            userId = session.getUserId();
-        } else {
-            userId = checkIntParameter("id", request);
-        }
-        /*
-         * Obtain user from user service
-         */
-        final UserService userService = ServiceRegistry.getInstance().getService(UserService.class, true);
-        final User user = userService.getUser(userId, session.getContext());
-        /*
-         * Obtain user's contact
-         */
-        final ContactInterface contactInterface =
-            ServiceRegistry.getInstance().getService(ContactInterfaceFactory.class, true).create(
-                Constants.USER_ADDRESS_BOOK_FOLDER_ID,
-                session);
-        final Contact userContact = contactInterface.getUserById(userId, false);
-        final String timeZoneId = request.getParameter(AJAXServlet.PARAMETER_TIMEZONE);
-        /*
-         * Write user as JSON object
-         */
-        censor(session, userContact);
-        final JSONObject jsonObject = UserWriter.writeSingle2Object(null, null, censor(session, user), userContact, timeZoneId);
-        /*
-         * Return appropriate result
-         */
-        return new AJAXRequestResult(jsonObject, userContact.getLastModified());
-    }
-
 }

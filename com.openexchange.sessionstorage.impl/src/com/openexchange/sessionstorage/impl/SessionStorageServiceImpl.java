@@ -59,7 +59,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.session.Session;
 import com.openexchange.sessionstorage.SessionStorageService;
 import com.openexchange.sessionstorage.StoredSession;
-import com.openexchange.sessionstorage.impl.exceptions.OXSessionStorageExceptionCodes;
+import com.openexchange.sessionstorage.exceptions.OXSessionStorageExceptionCodes;
 
 /**
  * {@link SessionStorageServiceImpl}

@@ -82,7 +82,12 @@ import com.openexchange.userconf.UserConfigurationService;
 public class FreeBusyServiceImpl implements FreeBusyService {
     
     private final FreeBusyProviderRegistry registry;
-    
+
+    /**
+     * Initializes a new {@link FreeBusyServiceImpl}.
+     * 
+     * @param registry The registry to use
+     */
     public FreeBusyServiceImpl(FreeBusyProviderRegistry registry) {
         super();
         this.registry = registry;
@@ -145,13 +150,18 @@ public class FreeBusyServiceImpl implements FreeBusyService {
                 Map<String, FreeBusyData> providerData = future.get();
                 if (null != providerData && 0 < providerData.size()) {
                     for (Entry<String, FreeBusyData> entry : providerData.entrySet()) {
-                        FreeBusyData data = freeBusyInformation.get(entry.getKey());
-                        if (null == data) {
-                            // replace
-                            freeBusyInformation.put(entry.getKey(), entry.getValue());                            
+                        FreeBusyData newData = entry.getValue();
+                        FreeBusyData existingData = freeBusyInformation.get(entry.getKey());
+                        if (null == existingData || 
+                            false == existingData.hasData() && existingData.hasWarnings() && false == newData.hasWarnings()) {
+                            // use new data
+                            freeBusyInformation.put(entry.getKey(), newData);                            
+                        } else if (null == newData || newData.hasWarnings() && false == newData.hasData()) {
+                            // use original data
+                            continue;
                         } else {
-                            // add
-                            data.add(entry.getValue());
+                            // merge both
+                            existingData.add(newData);
                         }
                     }
                 }
@@ -166,7 +176,7 @@ public class FreeBusyServiceImpl implements FreeBusyService {
             }
         }
         return freeBusyInformation;
-    }
+    }     
 
     private void checkProvidersAvailable() throws OXException {
         if (null == registry || null == registry.getProviders() || 0 == registry.getProviders().size()) {

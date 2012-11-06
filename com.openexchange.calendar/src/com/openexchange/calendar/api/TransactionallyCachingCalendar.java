@@ -6,7 +6,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
 import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.calendar.CalendarSql;
 import com.openexchange.exception.OXException;
@@ -281,11 +280,17 @@ public class TransactionallyCachingCalendar implements AppointmentSQLInterface {
         return delegate.getAppointmentsBetween(start, end, cols, orderBy, order);
     }
 
-	@Override
+    @Override
     public int resolveUid(String uid)
-			throws com.openexchange.exception.OXException {
-		return delegate.resolveUid(uid);
-	}
+            throws com.openexchange.exception.OXException {
+        return delegate.resolveUid(uid);
+    }
+
+    @Override
+    public int resolveFilename(String filename)
+            throws com.openexchange.exception.OXException {
+        return delegate.resolveFilename(filename);
+    }
 
 	@Override
     public int getFolder(int objectId)
