@@ -543,9 +543,11 @@ public final class SessionHandler {
             final SessionStorageService storageService = getServiceRegistry().getService(SessionStorageService.class);
             if (storageService != null) {
                 try {
-                    final Session s = storageService.lookupSession(sessionId);
-                    sessionData.addSession(new SessionImpl(s), noLimit);
-                    return sessionToSessionControl(s);
+                    final Session storedSession = storageService.lookupSession(sessionId);
+                    if (null != storedSession) {
+                        sessionData.addSession(new SessionImpl(storedSession), noLimit);
+                        return sessionToSessionControl(storedSession);
+                    }
                 } catch (final OXException e) {
                     if (!SessionStorageExceptionCodes.NO_SESSION_FOUND.equals(e)) {
                         LOG.warn("Session look-up failed in session storage.", e);

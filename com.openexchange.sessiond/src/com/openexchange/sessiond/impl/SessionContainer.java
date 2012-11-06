@@ -218,14 +218,20 @@ final class SessionContainer {
                 if (null == sessionControl) {
                     sessionControl = newSessionControl;
                 } else {
-                    final String login1 = sessionControl.getSession().getLogin();
+                    final SessionImpl ole = sessionControl.getSession();
+                    if (!ole.consideredEqual(session)) {
+                        final String login1 = ole.getLogin();
+                        final String login2 = session.getLogin();
+                        throw SessionExceptionCodes.SESSIONID_COLLISION.create(login1, login2);
+                    }
+                }
+            } else {
+                final SessionImpl ole = sessionControl.getSession();
+                if (!ole.consideredEqual(session)) {
+                    final String login1 = ole.getLogin();
                     final String login2 = session.getLogin();
                     throw SessionExceptionCodes.SESSIONID_COLLISION.create(login1, login2);
                 }
-            } else {
-                final String login1 = sessionControl.getSession().getLogin();
-                final String login2 = session.getLogin();
-                throw SessionExceptionCodes.SESSIONID_COLLISION.create(login1, login2);
             }
         } finally {
             sessionIdMapLock.unlock();
