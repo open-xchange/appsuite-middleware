@@ -5,6 +5,7 @@
 * 2012-11-06 - thorben.betten@open-xchange.com
 
  - Fix for bug 23609: Fixed update of "reply-to" field
+ - Fix for bug 23616: Fixed NPE in Hazelcast session storage
 
 * 2012-11-05 - martin.herfurth@open-xchange.com
 
