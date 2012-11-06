@@ -542,10 +542,15 @@ public class ITipConsistencyCalendar extends ITipCalendarWrapper implements Appo
         return delegate.getAppointmentsBetween(start, end, cols, orderBy, order);
     }
 
-	@Override
+    @Override
     public int resolveUid(final String uid) throws OXException {
-		return delegate.resolveUid(uid);
-	}
+        return delegate.resolveUid(uid);
+    }
+
+    @Override
+    public int resolveFilename(final String filename) throws OXException {
+        return delegate.resolveFilename(filename);
+    }
 
 	@Override
     public int getFolder(final int objectId) throws OXException {

@@ -78,6 +78,7 @@ import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.container.Participant;
+import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.java.Streams;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 import com.openexchange.webdav.protocol.WebdavPath;
@@ -153,8 +154,8 @@ public class AppointmentResource extends CalDAVResource<Appointment> {
             /*
              * get original data
              */
-            final Appointment originalAppointment = parent.load(this.object, false);
-            final List<Appointment> originalExceptions = parent.loadChangeExceptions(this.object.getObjectID());
+            Appointment originalAppointment = parent.load(this.object, false);
+            CalendarDataObject[] originalExceptions = parent.loadChangeExceptions(this.object.getObjectID());
             Date clientLastModified = this.object.getLastModified();
             if (clientLastModified.before(originalAppointment.getLastModified())) {
                 throw super.protocolException(HttpServletResponse.SC_CONFLICT);
@@ -297,18 +298,18 @@ public class AppointmentResource extends CalDAVResource<Appointment> {
             icalEmitter.writeAppointment(session, parent.load(object, true), 
                 factory.getContext(), conversionErrors, conversionWarnings);
             if (0 < object.getRecurrenceID()) {
-                final List<Appointment> changeExceptions = parent.getChangeExceptions(object.getObjectID());
-                if (null != changeExceptions && 0 < changeExceptions.size()) {
+                CalendarDataObject[] changeExceptions = parent.getChangeExceptions(object.getObjectID());
+                if (null != changeExceptions && 0 < changeExceptions.length) {
                     /*
                      * write exceptions
                      */
-                    for (final Appointment changeException : changeExceptions) {
+                    for (Appointment changeException : changeExceptions) {
                         icalEmitter.writeAppointment(session, parent.load(changeException, true), 
                             factory.getContext(), conversionErrors, conversionWarnings);
                     }
                 }
             }
-            final ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+            ByteArrayOutputStream bytes = new ByteArrayOutputStream();
             icalEmitter.writeSession(session, bytes);
             /*
              * apply patches
@@ -440,17 +441,17 @@ public class AppointmentResource extends CalDAVResource<Appointment> {
         return false;
     }
 
-    private void checkForExplicitRemoves(final Appointment oldAppointment, final CalendarDataObject cdo) {
+    private void checkForExplicitRemoves(Appointment oldAppointment, CalendarDataObject updatedAppointment) {
         /*
          * reset previously set appointment fields
          */
-        for (final int field : CALDAV_FIELDS) {
-            if (oldAppointment.contains(field) && false == cdo.contains(field)) {
+        for (int field : CALDAV_FIELDS) {
+            if (oldAppointment.contains(field) && false == updatedAppointment.contains(field)) {
                 if (CalendarObject.ALARM == field) {
                     // -1 resets alarm
-                    cdo.setAlarm(-1);                                                            
+                    updatedAppointment.setAlarm(-1);                                                            
                 } else {
-                    cdo.set(field, cdo.get(field)); 
+                    updatedAppointment.set(field, updatedAppointment.get(field)); 
                 }
             }
         }
@@ -458,13 +459,54 @@ public class AppointmentResource extends CalDAVResource<Appointment> {
          * reset previously set recurrence specific fields
          */
         if (CalendarObject.NO_RECURRENCE != oldAppointment.getRecurrenceType() && 
-                CalendarObject.NO_RECURRENCE != cdo.getRecurrenceType()) {
-            for (final int field : RECURRENCE_FIELDS) {
-                if (oldAppointment.contains(field) && false == cdo.contains(field)) {
-                    cdo.set(field, CalendarObject.UNTIL == field ? null : cdo.get(field)); // getUntil returns 'max until date' if not set 
+                CalendarObject.NO_RECURRENCE != updatedAppointment.getRecurrenceType()) {
+            for (int field : RECURRENCE_FIELDS) {
+                if (oldAppointment.contains(field) && false == updatedAppointment.contains(field)) {
+                    if (CalendarObject.UNTIL == field) {
+                        // getUntil returns 'max until date' if not set
+                        updatedAppointment.set(field, null);
+                    } else {
+                        updatedAppointment.set(field, updatedAppointment.get(field));
+                    }
                 }
             }
-        } 
+        }
+        /*
+         * special handling for "shown as" 
+         */
+        if (updatedAppointment.containsShownAs() && oldAppointment.containsShownAs() && 
+            updatedAppointment.getShownAs() != oldAppointment.getShownAs()) {
+            if (Appointment.RESERVED == updatedAppointment.getShownAs() &&
+                (Appointment.ABSENT == oldAppointment.getShownAs() || Appointment.TEMPORARY == oldAppointment.getShownAs())) {
+                // don't change "shown as", since iCal maps absent/temporary to reserved
+                updatedAppointment.removeShownAs();           
+            } else if (factory.getSession().getUserId() != updatedAppointment.getOrganizerId() && 
+                isConfirmationChange(oldAppointment, updatedAppointment)) {
+                // don't change "shown as", since iCal clients tend to change the transparency on accept/decline actions of participants
+                updatedAppointment.removeShownAs();            
+            }
+        }
+    }
+    
+    private boolean isConfirmationChange(Appointment oldAppointment, CalendarDataObject updatedAppointment) {
+        UserParticipant oldParticipant = getCurrentUserParticipant(oldAppointment);
+        UserParticipant updatedParticipant = getCurrentUserParticipant(updatedAppointment);
+        return null != oldParticipant && null != updatedParticipant && oldParticipant.getConfirm() != updatedParticipant.getConfirm();
+    }
+    
+    private UserParticipant getCurrentUserParticipant(Appointment appointment) {
+        if (null != appointment && null != appointment.getParticipants() && 0 < appointment.getParticipants().length) {
+            int userID = factory.getUser().getId();
+            for (Participant participant : appointment.getParticipants()) {
+                if (UserParticipant.class.isInstance(participant)) {
+                    UserParticipant userParticipant = (UserParticipant)participant;
+                    if (userID == userParticipant.getIdentifier()) {
+                        return userParticipant; 
+                    }
+                }
+            }                        
+        }
+        return null;
     }
     
     private void createNewDeleteExceptions(final Appointment oldAppointment, final CalendarDataObject cdo) throws OXException {
@@ -524,9 +566,9 @@ public class AppointmentResource extends CalDAVResource<Appointment> {
         return cdo.containsRecurrenceType() && CalendarObject.NO_RECURRENCE != cdo.getRecurrenceType();
     }
 
-    private static Appointment getMatchingException(final List<Appointment> changeExceptions, final Date recurrenceDatePosition) {
+    private static CalendarDataObject getMatchingException(CalendarDataObject[] changeExceptions, Date recurrenceDatePosition) {
         if (null != changeExceptions) {
-            for (final Appointment existingException : changeExceptions) {
+            for (CalendarDataObject existingException : changeExceptions) {
                 if (existingException.getRecurrenceDatePosition().equals(recurrenceDatePosition)) {
                     return existingException;
                 }
