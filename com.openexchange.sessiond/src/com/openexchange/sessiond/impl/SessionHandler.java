@@ -545,7 +545,7 @@ public final class SessionHandler {
                 try {
                     final Session storedSession = storageService.lookupSession(sessionId);
                     if (null != storedSession) {
-                        sessionData.addSession(new SessionImpl(storedSession), noLimit);
+                        sessionData.addSession(new SessionImpl(storedSession), noLimit, true);
                         return sessionToSessionControl(storedSession);
                     }
                 } catch (final OXException e) {

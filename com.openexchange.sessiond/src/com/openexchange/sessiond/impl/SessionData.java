@@ -588,7 +588,28 @@ final class SessionData {
         return b.booleanValue();
     }
 
-    SessionControl addSession(final SessionImpl session, final boolean noLimit) throws OXException {
+    /**
+     * Adds specified session.
+     * 
+     * @param session The session to add
+     * @param noLimit <code>true</code> to add without respect to limitation; otherwise <code>false</code> to honor limitation
+     * @return The associated {@link SessionControl} instance
+     * @throws OXException If add operation fails
+     */
+    protected SessionControl addSession(final SessionImpl session, final boolean noLimit) throws OXException {
+        return addSession(session, noLimit, false);
+    }
+
+    /**
+     * Adds specified session.
+     * 
+     * @param session The session to add
+     * @param noLimit <code>true</code> to add without respect to limitation; otherwise <code>false</code> to honor limitation
+     * @param addIfAbsent <code>true</code> to perform an add-if-absent operation; otherwise <code>false</code> to fail on duplicate session
+     * @return The associated {@link SessionControl} instance
+     * @throws OXException If add operation fails
+     */
+    protected SessionControl addSession(final SessionImpl session, final boolean noLimit, final boolean addIfAbsent) throws OXException {
         if (!noLimit && countSessions() > maxSessions) {
             throw SessionExceptionCodes.MAX_SESSION_EXCEPTION.create();
         }
@@ -639,7 +660,7 @@ final class SessionData {
             // Adding a session is a writing operation. Other threads requesting a session should be blocked.
             wlock.lock();
             try {
-                control = sessionList.getFirst().put(session);
+                control = sessionList.getFirst().put(session, addIfAbsent);
                 randoms.put(session.getRandomToken(), session.getSessionID());
             } finally {
                 wlock.unlock();
