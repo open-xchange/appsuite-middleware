@@ -499,10 +499,13 @@ public class HazelcastSessionStorageService implements SessionStorageService {
     @Override
     public Session getSessionByAlternativeId(final String altId) throws OXException {
         try {
+            if (null == altId) {
+                throw new NullPointerException("altId is null.");
+            }
             final IMap<String, HazelcastStoredSession> sessions = sessions(true);
             for (final String sessionId : sessions.keySet()) {
                 final HazelcastStoredSession s = sessions.get(sessionId);
-                if (s.getParameter(Session.PARAM_ALTERNATIVE_ID).equals(altId)) {
+                if (null != s && altId.equals(s.getParameter(Session.PARAM_ALTERNATIVE_ID))) {
                     return s;
                 }
             }
