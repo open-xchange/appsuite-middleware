@@ -8,6 +8,7 @@
  - Fix for bug 23616: Fixed NPE in Hazelcast session storage
  - Fix for bug 23617: Fixed NPE in Hazelcast session storage
  - Fix for bug 23615: Changed log level to warning
+ - Fix for bug 23613: Dealing with possible ArrayIndexOutOfBoundsException due to outdated mailbox attributes
 
 * 2012-11-05 - martin.herfurth@open-xchange.com
 
