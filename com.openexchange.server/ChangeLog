@@ -1,3 +1,7 @@
+* 2012-11-06 - marcus.klein@open-xchange.com
+
+ - Fix for bug 23590: Removed useless line in task code that causes a FindBugs issue.
+
 * 2012-11-06 - thorben.betten@open-xchange.com
 
  - Fix for bug 23609: Fixed update of "reply-to" field
