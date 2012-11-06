@@ -443,12 +443,15 @@ public class HazelcastSessionStorageService implements SessionStorageService {
     }
 
     @Override
-    public synchronized List<Session> getSessions() {
+    public List<Session> getSessions() {
         try {
             final IMap<String, HazelcastStoredSession> sessions = sessionsUnchecked(true);
             final List<Session> retval = new ArrayList<Session>();
             for (final String sessionId : sessions.keySet()) {
-                retval.add(sessions.get(sessionId));
+                final HazelcastStoredSession storedSession = sessions.get(sessionId);
+                if (null != storedSession) {
+                    retval.add(storedSession);
+                }
             }
             return retval;
         } catch (final HazelcastException e) {
@@ -551,7 +554,7 @@ public class HazelcastSessionStorageService implements SessionStorageService {
         try {
             if (null != authId) {
                 for (final Session session : getSessions()) {
-                    if (authId.equals(session.getAuthId())) {
+                    if (null != session && authId.equals(session.getAuthId())) {
                         throw OXHazelcastSessionStorageExceptionCodes.HAZELCAST_SESSIONSTORAGE_DUPLICATE_AUTHID.create(
                             session.getLogin(),
                             login);
