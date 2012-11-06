@@ -11,6 +11,7 @@
  - Fix for bug 23613: Dealing with possible ArrayIndexOutOfBoundsException due to outdated mailbox attributes
  - Fix for bug 23618: Another null guard
  - Fix for bug 23621: Fixed expunge operation on IMAP folder
+ - Fix for bug 23634: Dealing with concurrent session put
 
 * 2012-11-05 - martin.herfurth@open-xchange.com
 
