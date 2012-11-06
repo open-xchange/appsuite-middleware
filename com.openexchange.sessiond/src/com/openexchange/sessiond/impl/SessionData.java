@@ -752,7 +752,8 @@ final class SessionData {
         // Read-only access
         rlock.lock();
         try {
-            for (i = 0; null == control && i < sessionList.size(); i++) {
+            final int size = sessionList.size();
+            for (i = 0; null == control && i < size; i++) {
                 if ((control = sessionList.get(i).getSessionById(sessionId)) != null) {
                     if (i > 0) {
                         // Schedule task to put session into first container and remove from latter one. This requires a write lock.
