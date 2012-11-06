@@ -2,16 +2,21 @@
 package com.openexchange.realtime.atmosphere.osgi;
 
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
 import com.openexchange.http.grizzly.service.atmosphere.AtmosphereService;
 import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.osgi.SimpleRegistryListener;
 import com.openexchange.realtime.Channel;
 import com.openexchange.realtime.MessageDispatcher;
 import com.openexchange.realtime.atmosphere.impl.RTAtmosphereChannel;
 import com.openexchange.realtime.atmosphere.impl.RTAtmosphereHandler;
-import com.openexchange.realtime.atmosphere.osgi.service.AtmosphereExtensionService;
+import com.openexchange.realtime.atmosphere.payload.transformer.AtmospherePayloadElementTransformer;
+import com.openexchange.realtime.atmosphere.stanza.StanzaHandler;
 import com.openexchange.sessiond.SessiondService;
 
 public class AtmosphereRTActivator extends HousekeepingActivator {
+
+    final ExtensionRegistry extensions = ExtensionRegistry.getInstance();
 
     @Override
     protected Class<?>[] getNeededServices() {
@@ -20,10 +25,35 @@ public class AtmosphereRTActivator extends HousekeepingActivator {
 
     @Override
     protected void startBundle() throws Exception {
+
+        track(AtmospherePayloadElementTransformer.class, new SimpleRegistryListener<AtmospherePayloadElementTransformer>() {
+
+            @Override
+            public void added(final ServiceReference<AtmospherePayloadElementTransformer> ref, final AtmospherePayloadElementTransformer transformer) {
+                extensions.addPayloadElementTransFormer(transformer);
+            }
+
+            @Override
+            public void removed(final ServiceReference<AtmospherePayloadElementTransformer> ref, final AtmospherePayloadElementTransformer transformer) {
+                extensions.removePayloadElementTransformer(transformer);
+            }
+        });
+        
+        track(StanzaHandler.class, new SimpleRegistryListener<StanzaHandler>() {
+
+            @Override
+            public void added(final ServiceReference<StanzaHandler> ref, final StanzaHandler handler) {
+                extensions.addStanzaHandler(handler);
+            }
+
+            @Override
+            public void removed(final ServiceReference<StanzaHandler> ref, final StanzaHandler handler) {
+                extensions.removeStanzaHandler(handler);
+            }
+        });
+
         openTrackers();
-
-        registerService(AtmosphereExtensionService.class, new AtmosphereExtensionServiceImpl());
-
+        
         AtmosphereService atmosphereService = getService(AtmosphereService.class);
         RTAtmosphereHandler handler = new RTAtmosphereHandler();
         atmosphereService.addAtmosphereHandler("rt", new RTAtmosphereHandler());

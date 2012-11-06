@@ -61,6 +61,7 @@ import com.openexchange.realtime.MessageDispatcher;
 import com.openexchange.realtime.RealtimeExceptionCodes;
 import com.openexchange.realtime.packet.ID;
 import com.openexchange.realtime.packet.Stanza;
+import com.openexchange.realtime.util.ElementPath;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -112,7 +113,7 @@ public class MessageDispatcherImpl implements MessageDispatcher {
                 return channel;
             }
         } else { // Choose channel based on priority and capabilities
-             Set<String> namespaces = stanza.getNamespaces();
+             Set<ElementPath> namespaces = new HashSet<ElementPath>(stanza.getElementPaths());
             for (Channel c : channels.values()) {
                 //no channel chosen yet, or current channels priority is lower -> replace with better suited channel
                 if ((channel == null || channel.getPriority() < c.getPriority()) && c.canHandle(namespaces, to, session)) {

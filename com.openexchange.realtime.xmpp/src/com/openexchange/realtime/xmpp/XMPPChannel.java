@@ -57,6 +57,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.realtime.Channel;
 import com.openexchange.realtime.packet.ID;
 import com.openexchange.realtime.packet.Stanza;
+import com.openexchange.realtime.util.ElementPath;
 import com.openexchange.realtime.util.IDMap;
 import com.openexchange.tools.session.ServerSession;
 
@@ -82,8 +83,8 @@ public class XMPPChannel implements Channel {
     }
 
     @Override
-    public boolean canHandle(Class<? extends Stanza> stanzaClass, ID recipient, ServerSession session) throws OXException {
-        return true;
+    public boolean canHandle(Set<ElementPath> elementPaths, ID recipient, ServerSession session) {
+        throw new UnsupportedOperationException("Not implemented yet!");
     }
 
     @Override

@@ -47,28 +47,36 @@
  *
  */
 
-package com.openexchange.realtime.atmosphere.presence.converter;
+package com.openexchange.realtime.atmosphere.payload.converter.primitive;
 
 import com.openexchange.conversion.simple.SimpleConverter;
+import com.openexchange.conversion.simple.SimplePayloadConverter;
 import com.openexchange.exception.OXException;
+import com.openexchange.realtime.atmosphere.AtmosphereExceptionCode;
+import com.openexchange.realtime.atmosphere.payload.converter.AbstractJSONConverter;
 import com.openexchange.tools.session.ServerSession;
 
 /**
- * {@link ByteToJSONConverter}
+ * {@link JSONToByteConverter}
  * 
  * @author <a href="mailto:marc	.arens@open-xchange.com">Marc Arens</a>
  */
-public class ByteToJSONConverter extends AbstractPOJOConverter {
+public class JSONToByteConverter extends AbstractJSONConverter {
 
     @Override
-    public String getInputFormat() {
+    public String getOutputFormat() {
         return Byte.class.getSimpleName();
     }
 
     @Override
     public Object convert(Object data, ServerSession session, SimpleConverter converter) throws OXException {
-        Byte incoming = (Byte) data;
-        String transformed = incoming.toString();
+        String incoming = (String) data;
+        Byte transformed = 0;
+        try {
+            transformed = Byte.valueOf(incoming);
+        } catch (NumberFormatException ex) {
+            throw AtmosphereExceptionCode.ERROR_WHILE_CONVERTING.create(ex);
+        }
         return transformed;
     }
 

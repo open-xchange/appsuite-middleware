@@ -77,8 +77,6 @@ public class RTActivator extends HousekeepingActivator {
      */
     @Override
     protected void startBundle() throws Exception {
-        PayloadElement.SERVICES.set(this);
-        PayloadElementTransformer.SERVICES.set(this);
 
         final MessageDispatcherImpl dispatcher = new MessageDispatcherImpl();
 
@@ -102,7 +100,6 @@ public class RTActivator extends HousekeepingActivator {
 
     @Override
     protected void stopBundle() throws Exception {
-        PayloadElement.SERVICES.set(null);
         super.stopBundle();
     }
 

@@ -55,6 +55,7 @@ import com.openexchange.realtime.Channel;
 import com.openexchange.realtime.atmosphere.osgi.ExtensionRegistry;
 import com.openexchange.realtime.packet.ID;
 import com.openexchange.realtime.packet.Stanza;
+import com.openexchange.realtime.util.ElementPath;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -81,7 +82,7 @@ public class RTAtmosphereChannel implements Channel {
     }
 
     @Override
-    public boolean canHandle(Set<String> elementPaths, ID recipient, ServerSession session) {
+    public boolean canHandle(Set<ElementPath> elementPaths, ID recipient, ServerSession session) {
         if (!isConnected(recipient, session)) {
             return false;
         }
@@ -97,7 +98,7 @@ public class RTAtmosphereChannel implements Channel {
         return true;
     }
 
-    public boolean hasCapability(ID recipient, Set<String> namespaces, ServerSession session) {
+    public boolean hasCapability(ID recipient, Set<ElementPath> namespaces, ServerSession session) {
         return true; // TODO: Implement Capability Model
     }
 

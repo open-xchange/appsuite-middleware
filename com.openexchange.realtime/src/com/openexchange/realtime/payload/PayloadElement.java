@@ -67,12 +67,7 @@ import com.openexchange.tools.session.ServerSession;
  */
 public class PayloadElement implements VisitablePayload {
 
-    /**
-     * The <tt>ServiceLookup</tt> reference.
-     */
-    public static AtomicReference<ServiceLookup> SERVICES = new AtomicReference<ServiceLookup>();
-
-    // Current format of the Payload e.g. json or some Class.getSimpleName()
+    // Current format of the Payload e.g. json, xml or some Class.getSimpleName()
     private String format;
 
     // The namespace of this payload e.g.: http://jabber.org/protocol/disco.info
@@ -81,6 +76,7 @@ public class PayloadElement implements VisitablePayload {
     // The elementname identifying the Payload element in a namespace
     private String elementName;
 
+    // The actual payload
     private Object data;
 
     /**
@@ -152,22 +148,6 @@ public class PayloadElement implements VisitablePayload {
     public String getNamespace() {
         return namespace;
     }
-
-//    /**
-//     * Converts this payload's data object to specified format.
-//     * 
-//     * @param toFormat The format to convert into
-//     * @param session The Open-Xchange session
-//     * @return A new {@link PayloadElement payload} with desired format
-//     * @throws OXException If conversion fails
-//     */
-//    public PayloadElement to(String toFormat, ServerSession session) throws OXException {
-//        if (toFormat.equals(format)) {
-//            return new PayloadElement(data, toFormat, namespace, elementName);
-//        }
-//        SimpleConverter converter = SERVICES.get().getService(SimpleConverter.class);
-//        return new PayloadElement(converter.convert(format, toFormat, data, session), toFormat, namespace, elementName);
-//    }
 
     @Override
     public int hashCode() {

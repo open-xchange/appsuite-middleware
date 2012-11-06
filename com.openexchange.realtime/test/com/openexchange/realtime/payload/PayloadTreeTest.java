@@ -53,8 +53,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-import static com.openexchange.realtime.payload.PayloadElement.PayloadFormat.*;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
@@ -106,9 +104,9 @@ public class PayloadTreeTest {
      */
     @Before
     public void setUp() throws Exception {
-        payloadElement1 = new PayloadElement(1, POJO, "namespace1", "testElement1");
-        payloadElement2 = new PayloadElement(2, POJO, "namespace2", "testElement2");
-        payloadElement3 = new PayloadElement(3, POJO, "namespace3", "testElement3");
+        payloadElement1 = new PayloadElement(1, "Integer", "namespace1", "testElement1");
+        payloadElement2 = new PayloadElement(2, "Integer", "namespace2", "testElement2");
+        payloadElement3 = new PayloadElement(3, "Integer", "namespace3", "testElement3");
         
         payloadTreeNode1 = new PayloadTreeNode(payloadElement1);
         payloadTreeNode2 = new PayloadTreeNode(payloadElement2);
@@ -120,12 +118,12 @@ public class PayloadTreeTest {
         filledPayloadTreeNodeList.add(payloadTreeNode2);
         filledPayloadTreeNodeList.add(payloadTreeNode3);
         
-        filledTreePayloadElement1 = new PayloadElement(1, POJO, "namespace1", "testElement1");
-        filledTreePayloadElement2 = new PayloadElement(2, POJO, "namespace2", "testElement2");
-        filledTreePayloadElement3 = new PayloadElement(3, POJO, "namespace3", "testElement3");
-        filledTreePayloadElement4 = new PayloadElement(4, POJO, "namespace4", "testElement4");
-        filledTreePayloadElement5 = new PayloadElement(5, POJO, "namespace5", "testElement5");
-        filledTreePayloadElement6 = new PayloadElement(6, POJO, "namespace6", "testElement6");
+        filledTreePayloadElement1 = new PayloadElement(1, "Integer", "namespace1", "testElement1");
+        filledTreePayloadElement2 = new PayloadElement(2, "Integer", "namespace2", "testElement2");
+        filledTreePayloadElement3 = new PayloadElement(3, "Integer", "namespace3", "testElement3");
+        filledTreePayloadElement4 = new PayloadElement(4, "Integer", "namespace4", "testElement4");
+        filledTreePayloadElement5 = new PayloadElement(5, "Integer", "namespace5", "testElement5");
+        filledTreePayloadElement6 = new PayloadElement(6, "Integer", "namespace6", "testElement6");
         
         filledTreePayloadTreeNode1 = new PayloadTreeNode(filledTreePayloadElement1);
         filledTreePayloadTreeNode2 = new PayloadTreeNode(filledTreePayloadElement2);
@@ -228,28 +226,28 @@ public class PayloadTreeTest {
      * Test method for {@link com.openexchange.realtime.payload.PayloadTree#getNamespaces()}.
      */
     @Test
-    public void testGetNamespaces() {
-        Set<String> expectedNamespaces = new HashSet<String>();
-        expectedNamespaces.add(filledTreePayloadTreeNode1.getNamespace());
-        expectedNamespaces.add(filledTreePayloadTreeNode2.getNamespace());
-        expectedNamespaces.add(filledTreePayloadTreeNode3.getNamespace());
-        expectedNamespaces.add(filledTreePayloadTreeNode4.getNamespace());
-        expectedNamespaces.add(filledTreePayloadTreeNode5.getNamespace());
-        expectedNamespaces.add(filledTreePayloadTreeNode6.getNamespace());
-        Set<String> retrievedNamespaces = new HashSet<String>(filledTree.getNamespaces());
-        assertEquals(expectedNamespaces, retrievedNamespaces);
+    public void testGetElementPaths() {
+        Set<ElementPath> expectedElementPaths = new HashSet<ElementPath>();
+        expectedElementPaths.add(filledTreePayloadTreeNode1.getElementPath());
+        expectedElementPaths.add(filledTreePayloadTreeNode2.getElementPath());
+        expectedElementPaths.add(filledTreePayloadTreeNode3.getElementPath());
+        expectedElementPaths.add(filledTreePayloadTreeNode4.getElementPath());
+        expectedElementPaths.add(filledTreePayloadTreeNode5.getElementPath());
+        expectedElementPaths.add(filledTreePayloadTreeNode6.getElementPath());
+        Set<ElementPath> retrievedElementPaths = new HashSet<ElementPath>(filledTree.getElementPaths());
+        assertEquals(expectedElementPaths, retrievedElementPaths);
     }
 
     /**
      * Test method for {@link com.openexchange.realtime.payload.PayloadTree#recursivelyGetNamespaces(com.openexchange.realtime.payload.PayloadTreeNode)}.
      */
     @Test
-    public void testRecursivelyGetNamespaces() {
-        Set<String> expectedNamespaces = new HashSet<String>();
-        expectedNamespaces.add(filledTreePayloadTreeNode2.getNamespace());
-        expectedNamespaces.add(filledTreePayloadTreeNode3.getNamespace());
-        Set<String> retrievedNamespaces = new HashSet<String>(filledTree.recursivelyGetNamespaces(filledTreePayloadTreeNode2));
-        assertEquals(expectedNamespaces, retrievedNamespaces);
+    public void testRecursivelyGetElementPaths() {
+        Set<ElementPath> expectedElementpaths= new HashSet<ElementPath>();
+        expectedElementpaths.add(filledTreePayloadTreeNode2.getElementPath());
+        expectedElementpaths.add(filledTreePayloadTreeNode3.getElementPath());
+        Set<ElementPath> retrievedNamespaces = new HashSet<ElementPath>(filledTree.recursivelyGetElementPaths(filledTreePayloadTreeNode2));
+        assertEquals(expectedElementpaths, retrievedNamespaces);
     }
 
     /**

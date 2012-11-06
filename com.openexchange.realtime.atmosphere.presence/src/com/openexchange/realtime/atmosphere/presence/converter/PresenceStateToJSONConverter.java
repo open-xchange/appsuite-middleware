@@ -51,6 +51,7 @@ package com.openexchange.realtime.atmosphere.presence.converter;
 
 import com.openexchange.conversion.simple.SimpleConverter;
 import com.openexchange.exception.OXException;
+import com.openexchange.realtime.atmosphere.payload.converter.AbstractPOJOConverter;
 import com.openexchange.realtime.packet.PresenceState;
 import com.openexchange.tools.session.ServerSession;
 

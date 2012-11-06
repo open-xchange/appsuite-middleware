@@ -47,32 +47,21 @@
  *
  */
 
-package com.openexchange.realtime;
+package com.openexchange.realtime.payload.converter;
 
-import com.openexchange.exception.OXException;
-import com.openexchange.realtime.packet.Stanza;
-import com.openexchange.tools.session.ServerSession;
+import com.openexchange.conversion.simple.SimplePayloadConverter;
+
 
 /**
- * {@link StanzaFilter}
- * 
- * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
+ * {@link AbstractGoodQualityConverter} - SimplePayloadConverter defaulting to Quality.GOOD.
+ *
+ * @author <a href="mailto:marc	.arens@open-xchange.com">Marc Arens</a>
  */
-public interface StanzaFilter {
+public abstract class AbstractGoodQualityConverter implements SimplePayloadConverter {
 
-    /**
-     * Filter an incoming Stanza
-     * @param stanza The incoming Stanza
-     * @param session The associated ServerSession
-     * @throws OXException If filtering fails
-     */
-    void incoming(Stanza stanza, ServerSession session) throws OXException;
+    @Override
+    public Quality getQuality() {
+        return Quality.GOOD;
+    }
 
-    /**
-     * Filter an outgoing Stanza
-     * @param stanza The outgoing Stanza
-     * @param session The associated ServerSession
-     * @throws OXException If filtering fails
-     */
-    void outgoing(Stanza stanza, ServerSession session) throws OXException;
 }

@@ -51,6 +51,7 @@ package com.openexchange.realtime.packet;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import com.google.common.base.Predicate;
 import com.openexchange.exception.OXException;
 import com.openexchange.realtime.payload.PayloadElement;
@@ -270,20 +271,26 @@ public class Presence extends Stanza {
     }
 
     /**
-     * Write a payload to the PayloadTree identified by the ElementPath. The trees for the default elements only contain one node so we can
-     * set the data by directly writing to the root node.
+     * Write a payload to the PayloadTree identified by the ElementPath. There is only one tree for the default elements which only contains
+     * one node so we can set the data by directly writing to the root node.
      * 
      * @param path The ElementPath identifying the PayloadTree.
      * @param data The payload data to write into the root node.
      */
     private void writeThrough(ElementPath path, Object data) {
-        PayloadTree payloadTree = payloads.get(path);
-        if (payloadTree == null) {
+        List<PayloadTree> payloadTrees = new ArrayList<PayloadTree>(payloads.get(path));
+        if(payloadTrees.size() > 1) {
+            throw new IllegalStateException("Stanza shouldn't contain more than one PayloadTree per basic ElementPath");
+        }
+        PayloadTree tree;
+        if (payloadTrees.isEmpty()) {
             PayloadElement payloadElement = new PayloadElement(data, data.getClass().getSimpleName(), path.getNamespace(), path.getElement());
             PayloadTreeNode payloadTreeNode = new PayloadTreeNode(payloadElement);
-            payloadTree = new PayloadTree(payloadTreeNode);
+            tree = new PayloadTree(payloadTreeNode);
+        } else {
+            tree = payloadTrees.get(0);
         }
-        PayloadTreeNode node = payloadTree.getRoot();
+        PayloadTreeNode node = tree.getRoot();
         if (node == null) {
             throw new IllegalStateException("PayloadTreeNode removed? This shouldn't happen!");
         }

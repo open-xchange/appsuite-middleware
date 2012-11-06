@@ -91,6 +91,7 @@ public class OXRTPresenceHandler implements StanzaHandler {
         }
         
         Presence presence = (Presence) stanza;
+        
         InitializingVisitor initializingVisitor = new InitializingVisitor(presence);
         presence = initializingVisitor.doVisit();
 

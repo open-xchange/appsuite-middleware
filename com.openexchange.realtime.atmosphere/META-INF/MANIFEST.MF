@@ -39,5 +39,7 @@ Import-Package: com.openexchange.authentication,
 Export-Package: com.openexchange.realtime.atmosphere,
  com.openexchange.realtime.atmosphere.impl,
  com.openexchange.realtime.atmosphere.impl.stanza.builder,
- com.openexchange.realtime.atmosphere.osgi.service,
+ com.openexchange.realtime.atmosphere.payload.converter,
+ com.openexchange.realtime.atmosphere.payload.converter.primitive,
+ com.openexchange.realtime.atmosphere.payload.transformer,
  com.openexchange.realtime.atmosphere.stanza

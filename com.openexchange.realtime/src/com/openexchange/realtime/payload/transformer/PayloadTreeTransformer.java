@@ -50,13 +50,13 @@
 package com.openexchange.realtime.payload.transformer;
 
 import com.openexchange.exception.OXException;
-import com.openexchange.realtime.payload.PayloadElement;
 import com.openexchange.realtime.payload.PayloadTree;
 import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link PayloadTreeTransformer} - Walks over a PayloadTree and transforms PayloadElements contained in PayloadTreeNodes from the current
- * to the desired format.
+ * to the desired representation. Transformation happens when PayloadTrees of incoming Requests or outgoing Responses have to be changed so
+ * that client/server can handle them.
  * 
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
@@ -70,7 +70,7 @@ public interface PayloadTreeTransformer {
      * @return
      * @throws OXException When transformation fails
      */
-    public PayloadElement incoming(PayloadTree payloadTree, ServerSession session) throws OXException;
+    public PayloadTree incoming(PayloadTree payloadTree, ServerSession session) throws OXException;
 
     /**
      * Transform an outgoing PayloadTree.
@@ -79,6 +79,6 @@ public interface PayloadTreeTransformer {
      * @param session The currently active session
      * @throws OXException When transformation fails
      */
-    public PayloadElement outgoing(PayloadTree payloadTree, ServerSession session) throws OXException;
+    public PayloadTree outgoing(PayloadTree payloadTree, ServerSession session) throws OXException;
 
 }

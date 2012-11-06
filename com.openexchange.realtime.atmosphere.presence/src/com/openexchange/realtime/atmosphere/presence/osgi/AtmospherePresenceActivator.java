@@ -49,23 +49,20 @@
 
 package com.openexchange.realtime.atmosphere.presence.osgi;
 
-import java.util.ArrayList;
-import java.util.List;
 import org.apache.commons.logging.Log;
 import com.openexchange.conversion.simple.SimplePayloadConverter;
-import com.openexchange.exception.OXException;
 import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.realtime.atmosphere.osgi.service.AtmosphereExtensionService;
-import com.openexchange.realtime.atmosphere.presence.converter.ByteToJSONConverter;
-import com.openexchange.realtime.atmosphere.presence.converter.JSONToByteConverter;
-import com.openexchange.realtime.atmosphere.presence.converter.JSONToStringConverter;
-import com.openexchange.realtime.atmosphere.presence.converter.StringToJSONConverter;
+import com.openexchange.realtime.atmosphere.payload.converter.primitive.ByteToJSONConverter;
+import com.openexchange.realtime.atmosphere.payload.converter.primitive.JSONToByteConverter;
+import com.openexchange.realtime.atmosphere.payload.converter.primitive.JSONToStringConverter;
+import com.openexchange.realtime.atmosphere.payload.converter.primitive.StringToJSONConverter;
+import com.openexchange.realtime.atmosphere.payload.transformer.AtmospherePayloadElementTransformer;
+import com.openexchange.realtime.atmosphere.presence.converter.JSONToPresenceStateConverter;
+import com.openexchange.realtime.atmosphere.presence.converter.PresenceStateToJSONConverter;
 import com.openexchange.realtime.atmosphere.presence.handler.OXRTPresenceHandler;
-import com.openexchange.realtime.atmosphere.presence.transformer.PresenceStateTransformer;
 import com.openexchange.realtime.atmosphere.stanza.StanzaHandler;
 import com.openexchange.realtime.packet.Presence;
 import com.openexchange.realtime.packet.PresenceState;
-import com.openexchange.realtime.payload.transformer.PayloadElementTransformer;
 import com.openexchange.realtime.presence.PresenceService;
 import com.openexchange.realtime.presence.subscribe.PresenceSubscriptionService;
 
@@ -79,21 +76,15 @@ public class AtmospherePresenceActivator extends HousekeepingActivator {
 
     private static final Log LOG = com.openexchange.log.Log.loggerFor(AtmospherePresenceActivator.class);
 
-    private List<StanzaHandler> registeredHandlers;
-
-    private List<PayloadElementTransformer> registeredTransformers;
-
     /**
      * Initializes a new {@link AtmospherePresenceActivator}.
      */
     public AtmospherePresenceActivator() {
-        registeredHandlers = new ArrayList<StanzaHandler>();
-        registeredTransformers = new ArrayList<PayloadElementTransformer>();
     }
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class[] { PresenceSubscriptionService.class, PresenceService.class, AtmosphereExtensionService.class };
+        return new Class[] { PresenceSubscriptionService.class, PresenceService.class };
     }
 
     @Override
@@ -111,39 +102,32 @@ public class AtmospherePresenceActivator extends HousekeepingActivator {
     protected void startBundle() throws Exception {
         AtmospherePresenceServiceRegistry serviceRegistry = AtmospherePresenceServiceRegistry.getInstance();
         serviceRegistry.initialize(this, getNeededServices());
-        AtmosphereExtensionService atmosphereRegistryService = AtmospherePresenceServiceRegistry.getInstance().getService(
-            AtmosphereExtensionService.class,
-            true);
 
-        // Add Presence specific transformers and mappings
-        atmosphereRegistryService.addPayloadElementTransFormer(new PresenceStateTransformer());
-        atmosphereRegistryService.addElementPathMapping(Presence.PRESENCE_STATE_PATH, PresenceState.class);
-        atmosphereRegistryService.addElementPathMapping(Presence.MESSAGE_PATH, String.class);
-        atmosphereRegistryService.addElementPathMapping(Presence.PRIORITY_PATH, Byte.class);
-        atmosphereRegistryService.addElementPathMapping(Presence.ERROR_PATH, OXException.class);
-        
+        //Register converters
         registerService(SimplePayloadConverter.class, new ByteToJSONConverter());
         registerService(SimplePayloadConverter.class, new JSONToByteConverter());
         registerService(SimplePayloadConverter.class, new StringToJSONConverter());
         registerService(SimplePayloadConverter.class, new JSONToStringConverter());
-
+        registerService(SimplePayloadConverter.class, new JSONToPresenceStateConverter());
+        registerService(SimplePayloadConverter.class, new PresenceStateToJSONConverter());
+        
+        //Add Transformers using Converters
+        registerService(AtmospherePayloadElementTransformer.class,
+            new AtmospherePayloadElementTransformer(PresenceState.class.getSimpleName(), Presence.PRESENCE_STATE_PATH));
+        registerService(AtmospherePayloadElementTransformer.class,
+            new AtmospherePayloadElementTransformer(String.class.getSimpleName(), Presence.MESSAGE_PATH));
+        registerService(AtmospherePayloadElementTransformer.class,
+            new AtmospherePayloadElementTransformer(String.class.getSimpleName(), Presence.PRIORITY_PATH));
+        registerService(AtmospherePayloadElementTransformer.class,
+            new AtmospherePayloadElementTransformer(String.class.getSimpleName(), Presence.PRIORITY_PATH));
+        
         // Add Presence specific handler
-        atmosphereRegistryService.addStanzaHandler(new OXRTPresenceHandler());
+        registerService(StanzaHandler.class, new OXRTPresenceHandler());
     }
 
     @Override
     protected void stopBundle() throws Exception {
         AtmospherePresenceServiceRegistry.getInstance().clearRegistry();
-        AtmosphereExtensionService atmosphereRegistryService = AtmospherePresenceServiceRegistry.getInstance().getService(
-            AtmosphereExtensionService.class,
-            true);
-        for (StanzaHandler handler : registeredHandlers) {
-            atmosphereRegistryService.removeStanzaHandler(handler);
-        }
-        for (PayloadElementTransformer transformer : registeredTransformers) {
-            atmosphereRegistryService.removePayloadElementTransformer(transformer);
-        }
-        atmosphereRegistryService.removeElementpathMapping(Presence.PRESENCE_STATE_PATH);
         unregisterServices();
     }
 

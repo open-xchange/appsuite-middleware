@@ -50,31 +50,22 @@
 package com.openexchange.realtime.atmosphere.impl;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import com.openexchange.exception.OXException;
-import com.openexchange.realtime.StanzaFilter;
-import com.openexchange.realtime.atmosphere.AtmosphereExceptionCode;
-import com.openexchange.realtime.atmosphere.osgi.ExtensionRegistry;
+import com.openexchange.realtime.atmosphere.payload.transformer.AtmospherePayloadTreeTransformer;
 import com.openexchange.realtime.packet.Stanza;
-import com.openexchange.realtime.payload.PayloadElement;
 import com.openexchange.realtime.payload.PayloadTree;
-import com.openexchange.realtime.payload.PayloadTreeNode;
-import com.openexchange.realtime.payload.transformer.PayloadElementTransformer;
-import com.openexchange.realtime.util.ElementPath;
 import com.openexchange.tools.session.ServerSession;
 
 /**
- * {@link StanzaTransformer} - Transforms a Stanza "from" one representation "to" another by visiting all the PayloadTrees found in the
- * Stanza, and recursively applying the proper PayloadTransformers.
+ * {@link StanzaTransformer} - Transforms a Stanza "from" one representation "to" another by transforming all the PayloadTrees found in the
+ * Stanza.
  * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
 
-public class StanzaTransformer implements StanzaFilter {
-
-    private final ExtensionRegistry transformers = ExtensionRegistry.getInstance();
+public class StanzaTransformer {
 
     /**
      * Transform an incoming {@link Stanza} by transforming every PayloadTree of the Stanza.
@@ -83,24 +74,18 @@ public class StanzaTransformer implements StanzaFilter {
      * @param session The currently active session
      * @throws OXException When transformation of the Stanza fails
      */
-    @Override
-    public void incoming(Stanza stanza, ServerSession session) throws OXException {
+    public Stanza incoming(Stanza stanza, ServerSession session) throws OXException {
         List<PayloadTree> payloadTrees = new ArrayList<PayloadTree>(stanza.getPayloads());
+        List<PayloadTree> transformedPayloadTrees = new ArrayList<PayloadTree>();
+
         for (PayloadTree tree : payloadTrees) {
             // TODO: Use ThreadService to transform trees in parallel
-            PayloadTreeNode root = tree.getRoot();
-            if (root != null) {
-                incoming(root, session);
-            }
+            AtmospherePayloadTreeTransformer transformer = new AtmospherePayloadTreeTransformer();
+            PayloadTree transformedTree = transformer.incoming(tree, session);
+            transformedPayloadTrees.add(transformedTree);
         }
-    }
-
-    private void incoming(PayloadTreeNode node, ServerSession session) throws OXException {
-        PayloadElementTransformer transformer = getPayloadTransformer(node.getElementPath());
-        node.setPayloadElement(transformer.incoming(node.getPayloadElement(), session));
-        for (PayloadTreeNode child : node.getChildren()) {
-            incoming(child, session);
-        }
+        stanza.setPayloads(transformedPayloadTrees);
+        return stanza;
     }
 
     /**
@@ -110,42 +95,18 @@ public class StanzaTransformer implements StanzaFilter {
      * @param session The currently active session
      * @throws OXException When transformation of the Stanza fails
      */
-    @Override
-    public void outgoing(Stanza stanza, ServerSession session) throws OXException {
-        Collection<PayloadTree> payloadTrees = stanza.getPayloads();
+    public Stanza outgoing(Stanza stanza, ServerSession session) throws OXException {
+        List<PayloadTree> payloadTrees = new ArrayList<PayloadTree>(stanza.getPayloads());
+        List<PayloadTree> transformedPayloadTrees = new ArrayList<PayloadTree>();
+
         for (PayloadTree tree : payloadTrees) {
-            PayloadTreeNode root = tree.getRoot();
-            if (root != null) {
-                outgoing(root, session);
-            }
+            // TODO: Use ThreadService to transform trees in parallel
+            AtmospherePayloadTreeTransformer transformer = new AtmospherePayloadTreeTransformer();
+            PayloadTree transformedTree = transformer.incoming(tree, session);
+            transformedPayloadTrees.add(transformedTree);
         }
-    }
-
-    private void outgoing(PayloadTreeNode node, ServerSession session) throws OXException {
-        PayloadElementTransformer transformer = getPayloadTransformer(node.getElementPath());
-        PayloadElement result = transformer.outgoing(node.getPayloadElement(), session);
-        node.setPayloadElement(result);
-        for (PayloadTreeNode child : node.getChildren()) {
-            outgoing(child, session);
-        }
-    }
-
-    /**
-     * Get a PayloadElementTransformer suitable for a given ElementPath. We maintain two mappings: ElementPath ->
-     * PayloadElementTransformer.class and PayloadElementTransformer.class -> Transformer. So when we want to transform a PayloadElement whe
-     * have to lookup the class we use to represent it by its ElementPath and then get the Transformer suitable for that class. This way we
-     * don't have to register multiple instances of the same PayloadElementTransformer for different ElementPaths.
-     * 
-     * @param elementPath The ElementPath of the PayloadElement we want to transform
-     * @return A PayloadElementTransformer suitable for that PayloadElement
-     * @throws OXException If no suitable PayloadElementTransformer could be found
-     */
-    private PayloadElementTransformer getPayloadTransformer(ElementPath elementPath) throws OXException {
-        PayloadElementTransformer transformer = transformers.getTransformerFor(elementPath);
-        if (transformer == null) {
-            throw AtmosphereExceptionCode.MISSING_TRANSFORMER_FOR_PAYLOADELEMENT.create(elementPath);
-        }
-        return transformer;
+        stanza.setPayloads(transformedPayloadTrees);
+        return stanza;
     }
 
 }

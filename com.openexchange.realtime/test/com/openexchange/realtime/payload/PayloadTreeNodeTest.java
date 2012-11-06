@@ -54,7 +54,6 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
-import static com.openexchange.realtime.payload.PayloadElement.PayloadFormat.*;
 import java.util.ArrayList;
 import java.util.List;
 import org.junit.Before;
@@ -84,9 +83,9 @@ public class PayloadTreeNodeTest {
     public void initPayloadElement() {
         parentPayloadTreeNode = new PayloadTreeNode();
         payloadTreeNode = new PayloadTreeNode();
-        payloadElement1 = new PayloadElement(1, POJO, null, "testElement");
-        payloadElement2 = new PayloadElement(2, POJO, null, "testElement");
-        payloadElement3 = new PayloadElement(3, POJO, null, "testElement");
+        payloadElement1 = new PayloadElement(1, "Integer", null, "testElement");
+        payloadElement2 = new PayloadElement(2, "Integer", null, "testElement");
+        payloadElement3 = new PayloadElement(3, "Integer", null, "testElement");
         payloadTreeNode1 = new PayloadTreeNode(payloadElement1);
         payloadTreeNode2 = new PayloadTreeNode(payloadElement2);
         payloadTreeNode3 = new PayloadTreeNode(payloadElement3);
@@ -95,14 +94,6 @@ public class PayloadTreeNodeTest {
         filledPayloadTreeNodeList.add(payloadTreeNode1);
         filledPayloadTreeNodeList.add(payloadTreeNode2);
         filledPayloadTreeNodeList.add(payloadTreeNode3);
-    }
-    
-    /**
-     * Test method for {@link com.openexchange.realtime.payload.PayloadTreeNode#hashCode()}.
-     */
-    @Test
-    public void testHashCode() {
-        fail("Not yet implemented");
     }
 
     /**
@@ -161,11 +152,11 @@ public class PayloadTreeNodeTest {
      */
     @Test
     public void testGetChildren() {
-        assertEquals(emptyPayloadTreeNodeList, parentPayloadTreeNode.getChildren());
+        assertEquals(emptyPayloadTreeNodeList, new ArrayList(parentPayloadTreeNode.getChildren()));
         parentPayloadTreeNode.addChild(payloadTreeNode1);
         parentPayloadTreeNode.addChild(payloadTreeNode2);
         parentPayloadTreeNode.addChild(payloadTreeNode3);
-        assertEquals(filledPayloadTreeNodeList, parentPayloadTreeNode.getChildren());
+        assertEquals(filledPayloadTreeNodeList, new ArrayList(parentPayloadTreeNode.getChildren()));
     }
 
     /**
@@ -200,7 +191,7 @@ public class PayloadTreeNodeTest {
         assertFalse(parentPayloadTreeNode.hasChildren());
         parentPayloadTreeNode.setChildren(filledPayloadTreeNodeList);
         assertTrue(parentPayloadTreeNode.hasChildren());
-        assertEquals(filledPayloadTreeNodeList, parentPayloadTreeNode.getChildren());
+        assertEquals(filledPayloadTreeNodeList, new ArrayList(parentPayloadTreeNode.getChildren()));
     }
 
     /**
@@ -213,7 +204,7 @@ public class PayloadTreeNodeTest {
         parentPayloadTreeNode.addChild(payloadTreeNode2);
         parentPayloadTreeNode.addChild(payloadTreeNode3);
         assertTrue(parentPayloadTreeNode.hasChildren());
-        assertEquals(filledPayloadTreeNodeList, parentPayloadTreeNode.getChildren());
+        assertEquals(filledPayloadTreeNodeList, new ArrayList(parentPayloadTreeNode.getChildren()));
     }
 
     /**
@@ -226,7 +217,7 @@ public class PayloadTreeNodeTest {
         assertFalse(parentPayloadTreeNode.hasChildren());
         parentPayloadTreeNode.addChildren(filledPayloadTreeNodeList);
         assertTrue(parentPayloadTreeNode.hasChildren());
-        assertEquals(filledPayloadTreeNodeList, parentPayloadTreeNode.getChildren());
+        assertEquals(filledPayloadTreeNodeList, new ArrayList(parentPayloadTreeNode.getChildren()));
     }
 
     /**
@@ -269,7 +260,7 @@ public class PayloadTreeNodeTest {
      */
     @Test
     public void testSetData() {
-        payloadTreeNode1.setData(2, POJO);
+        payloadTreeNode1.setData(2, "Integer");
         assertEquals(2, payloadTreeNode1.getData());
     }
 

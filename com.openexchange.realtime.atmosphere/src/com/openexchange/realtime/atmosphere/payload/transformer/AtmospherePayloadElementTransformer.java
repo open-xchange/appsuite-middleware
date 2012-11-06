@@ -9,7 +9,7 @@
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
  *    trademarks of the Open-Xchange, Inc. group of companies.
- *    The use of the Logos is not covered by the GNU General Public License.
+ *    The use of the Logos is not covered by the GbsctracNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
  *    Non-commercial, ShareAlike, and the interpretation of the term
@@ -47,23 +47,54 @@
  *
  */
 
-package com.openexchange.realtime.atmosphere.presence.transformer;
+package com.openexchange.realtime.atmosphere.payload.transformer;
 
+import java.util.concurrent.atomic.AtomicReference;
 import com.openexchange.conversion.simple.SimpleConverter;
 import com.openexchange.exception.OXException;
 import com.openexchange.realtime.payload.PayloadElement;
+import com.openexchange.realtime.payload.transformer.PayloadElementTransformer;
+import com.openexchange.realtime.util.ElementPath;
+import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.session.ServerSession;
 
-
 /**
- * {@link PayloadElementTransformerli}
- *
- * @author <a href="mailto:marc	.arens@open-xchange.com">Marc Arens</a>
+ * {@link AtmospherePayloadElementTransformer} - Used to transform PayloadElements of Stanzas transported via the Atmosphere Channel.
+ * 
+ * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
-public class PayloadElementTransformerli implements PayloadElementTransformer {
-    
+public class AtmospherePayloadElementTransformer implements PayloadElementTransformer {
+
+    /**
+     * The ServiceLookup reference.
+     */
+    public static AtomicReference<ServiceLookup> SERVICES = new AtomicReference<ServiceLookup>();
+
+    private static final String EXTERNAL_FORMAT = "json";
+
+    private final String INTERNAL_FORMAT;
+
+    private ElementPath elementPath;
+
+    /**
+     * Initializes a new {@link AtmospherePayloadElementTransformer} for one special PayloadElement identified by an ElementPath.
+     * 
+     * @param internalFormat The internal Format this Transformer converts the PayloadElement to
+     * @param elementPath The ElementPath of the PayloadElement that this Transformer can handle
+     */
+    public AtmospherePayloadElementTransformer(String INTERNAL_FORMAT, ElementPath elementPath) {
+        this.INTERNAL_FORMAT = INTERNAL_FORMAT;
+        this.elementPath = elementPath;
+    }
+
     @Override
-    public PayloadElement incoming(PayloadElement payload, ServerSession session) throws OXException {
+    public ElementPath getElementPath() {
+        return elementPath;
+    }
+
+    @Override
+    public PayloadElement incoming(final PayloadElement payload, final ServerSession session) throws OXException {
         Object data = payload.getData();
         SimpleConverter simpleConverter = SERVICES.get().getService(SimpleConverter.class);
         Object converted = simpleConverter.convert(payload.getFormat(), INTERNAL_FORMAT, data, session);
@@ -71,10 +102,11 @@ public class PayloadElementTransformerli implements PayloadElementTransformer {
     }
 
     @Override
-    public PayloadElement outgoing(PayloadElement payload, ServerSession session) throws OXException {
+    public PayloadElement outgoing(final PayloadElement payload, final ServerSession session) throws OXException {
         Object data = payload.getData();
         SimpleConverter simpleConverter = SERVICES.get().getService(SimpleConverter.class);
         Object converted = simpleConverter.convert(payload.getFormat(), EXTERNAL_FORMAT, data, session);
         return new PayloadElement(converted, Byte.class.getSimpleName(), payload.getNamespace(), payload.getElementName());
     }
+
 }

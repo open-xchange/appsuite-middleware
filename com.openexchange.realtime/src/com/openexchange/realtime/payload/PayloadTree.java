@@ -159,9 +159,9 @@ public class PayloadTree implements VisitablePayload {
      * @return An empty Collection if the PayloadElements don't contain namespaces or the namespaces of of the PayloadElements associated
      *         with this tree
      */
-    public Collection<String> getNamespaces() {
+    public Collection<ElementPath> getElementPaths() {
         if (root != null) {
-            return recursivelyGetNamespaces(root);
+            return recursivelyGetElementPaths(root);
         }
 
         return Collections.emptySet();
@@ -175,19 +175,19 @@ public class PayloadTree implements VisitablePayload {
      *         node
      * @throws IllegalArgumentException If obligatory parameter is missing.
      */
-    public Collection<String> recursivelyGetNamespaces(PayloadTreeNode node) {
+    public Collection<ElementPath> recursivelyGetElementPaths(PayloadTreeNode node) {
         if (node == null) {
             throw new IllegalArgumentException("Obligatory parameter node missing.");
         }
 
-        Set<String> namespaces = new HashSet<String>();
+        Set<ElementPath> paths = new HashSet<ElementPath>();
 
-        namespaces.add(node.getNamespace());
+        paths.add(node.getElementPath());
         for (PayloadTreeNode child : node.getChildren()) {
-            namespaces.addAll(recursivelyGetNamespaces(child));
+            paths.addAll(recursivelyGetElementPaths(child));
         }
 
-        return namespaces;
+        return paths;
     }
 
     /**

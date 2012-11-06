@@ -47,52 +47,23 @@
  *
  */
 
-package com.openexchange.realtime.atmosphere.osgi;
+package com.openexchange.realtime.atmosphere.payload.converter;
 
-import com.openexchange.exception.OXException;
-import com.openexchange.realtime.atmosphere.osgi.service.AtmosphereExtensionService;
-import com.openexchange.realtime.atmosphere.stanza.StanzaHandler;
-import com.openexchange.realtime.atmosphere.stanza.StanzaInitializer;
-import com.openexchange.realtime.payload.transformer.PayloadElementTransformer;
-import com.openexchange.realtime.util.ElementPath;
+import com.openexchange.realtime.payload.converter.AbstractGoodQualityConverter;
+
+
 
 /**
- * {@link AtmosphereExtensionServiceImpl} 
- * 
+ * {@link AbstractJSONConverter}
+ *
  * @author <a href="mailto:marc	.arens@open-xchange.com">Marc Arens</a>
  */
-public class AtmosphereExtensionServiceImpl implements AtmosphereExtensionService {
-   
-    private ExtensionRegistry extensions = ExtensionRegistry.getInstance();
+public abstract class AbstractJSONConverter extends AbstractGoodQualityConverter {
 
     @Override
-    public void addPayloadElementTransFormer(PayloadElementTransformer transformer) {
-        extensions.addPayloadElementTransFormer(transformer);
-    }
-
-    @Override
-    public void removePayloadElementTransformer(PayloadElementTransformer transformer) {
-        extensions.removePayloadElementTransformer(transformer);
-    }
-
-    @Override
-    public void addElementPathMapping(ElementPath elementPath, Class<?> mappingClass) throws OXException {
-        extensions.addElementPathMapping(elementPath, mappingClass);
-    }
-
-    @Override
-    public void removeElementpathMapping(ElementPath elementPath) {
-        extensions.removeElementpathMapping(elementPath);
-    }
-
-    @Override
-    public void addStanzaHandler(StanzaHandler handler) {
-        extensions.addStanzaHandler(handler);
-    }
-
-    @Override
-    public void removeStanzaHandler(StanzaHandler handler) {
-        extensions.removeStanzaHandler(handler);
+    public String getInputFormat() {
+        // TODO Auto-generated method stub
+        return "json";
     }
 
 }

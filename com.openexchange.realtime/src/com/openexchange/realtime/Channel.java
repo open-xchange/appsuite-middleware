@@ -50,10 +50,10 @@
 package com.openexchange.realtime;
 
 import java.util.Set;
-
 import com.openexchange.exception.OXException;
 import com.openexchange.realtime.packet.ID;
 import com.openexchange.realtime.packet.Stanza;
+import com.openexchange.realtime.util.ElementPath;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -81,7 +81,7 @@ public interface Channel {
 	 * @return <code>true</code> if this channel can dispatch messages to given recipient; otherwise <code>false</code>
 	 * @throws OXException If check fails for any reason
 	 */
-	public boolean canHandle(Set<String> elementPaths, ID recipient, ServerSession session) throws OXException;
+	public boolean canHandle(Set<ElementPath> elementPaths, ID recipient, ServerSession session) throws OXException;
 	
 	/**
 	 * Gets the priority used for building a ranking for concurrent channels.

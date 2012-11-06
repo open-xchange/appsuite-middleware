@@ -47,23 +47,30 @@
  *
  */
 
-package com.openexchange.realtime.atmosphere.presence.converter;
+package com.openexchange.realtime.atmosphere.payload.converter.primitive;
 
-import com.openexchange.realtime.payload.converter.AbstractGoodQualityConverter;
-
-
+import com.openexchange.conversion.simple.SimpleConverter;
+import com.openexchange.exception.OXException;
+import com.openexchange.realtime.atmosphere.payload.converter.AbstractPOJOConverter;
+import com.openexchange.tools.session.ServerSession;
 
 /**
- * {@link AbstractJSONConverter}
- *
+ * {@link ByteToJSONConverter}
+ * 
  * @author <a href="mailto:marc	.arens@open-xchange.com">Marc Arens</a>
  */
-public abstract class AbstractJSONConverter extends AbstractGoodQualityConverter {
+public class ByteToJSONConverter extends AbstractPOJOConverter {
 
     @Override
     public String getInputFormat() {
-        // TODO Auto-generated method stub
-        return "json";
+        return Byte.class.getSimpleName();
+    }
+
+    @Override
+    public Object convert(Object data, ServerSession session, SimpleConverter converter) throws OXException {
+        Byte incoming = (Byte) data;
+        String transformed = incoming.toString();
+        return transformed;
     }
 
 }
