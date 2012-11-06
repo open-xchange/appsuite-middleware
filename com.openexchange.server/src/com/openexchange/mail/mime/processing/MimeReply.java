@@ -639,10 +639,10 @@ public final class MimeReply {
                 final char nextLine = '\n';
                 if (isHtml) {
                     replyPrefix =
-                        HtmlProcessing.htmlFormat(new StringBuilder(replyPrefix.length() + 1).append(replyPrefix).append(nextLine).toString());
+                        HtmlProcessing.htmlFormat(new StringBuilder(replyPrefix.length() + 1).append(nextLine).append(replyPrefix).append(nextLine).append(nextLine).toString());
                 } else {
                     replyPrefix =
-                        new StringBuilder(replyPrefix.length() + 1).append(replyPrefix).append(nextLine).toString();
+                        new StringBuilder(replyPrefix.length() + 1).append(nextLine).append(replyPrefix).append(nextLine).append(nextLine).toString();
                 }
             }
             /*-
