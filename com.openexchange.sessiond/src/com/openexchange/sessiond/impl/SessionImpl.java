@@ -197,19 +197,19 @@ public final class SessionImpl implements PutIfAbsent {
             return;
         }
         final StringBuilder sb = new StringBuilder(1024);
-        sb.append("user-id:\t").append(userId).append(" - ").append(s.userId);
-        sb.append("context-id:\t").append(contextId).append(" - ").append(s.contextId);
-        sb.append("localIp:\t").append(localIp).append(" - ").append(s.localIp);
-        sb.append("login:\t").append(login).append(" - ").append(s.login);
-        sb.append("loginName:\t").append(loginName).append(" - ").append(s.loginName);
-        sb.append("sessionId:\t").append(sessionId).append(" - ").append(s.sessionId);
-        sb.append("secret").append(secret).append(" - ").append(s.secret);
-        sb.append("random-token:\t").append(randomToken).append(" - ").append(s.randomToken);
-        sb.append("authId:\t").append(authId).append(" - ").append(s.authId);
-        sb.append("hash:\t").append(hash).append(" - ").append(s.hash);
-        final Object object1 = parameters.get(PARAM_ALTERNATIVE_ID);
-        final Object object2 = s.parameters.get(PARAM_ALTERNATIVE_ID);
-        sb.append("alternative-id:\t").append(object1).append(" - ").append(object2);
+        final String format = "%-15s%-45s%s";
+        sb.append(String.format(format, "Name", "Session #1", "Session #1"));
+        sb.append(String.format(format, "User-Id", Integer.valueOf(userId), Integer.valueOf(s.userId)));
+        sb.append(String.format(format, "Context-Id", Integer.valueOf(contextId), Integer.valueOf(s.contextId)));
+        sb.append(String.format(format, "Session-Id", sessionId, s.sessionId));
+        sb.append(String.format(format, "Secret", secret, s.secret));
+        sb.append(String.format(format, "Alternative-Id", parameters.get(PARAM_ALTERNATIVE_ID), s.parameters.get(PARAM_ALTERNATIVE_ID)));
+        sb.append(String.format(format, "Auth-Id", authId, s.authId));
+        sb.append(String.format(format, "Login", login, s.login));
+        sb.append(String.format(format, "Login-Name", loginName, s.loginName));
+        sb.append(String.format(format, "Local IP", localIp, s.localIp));
+        sb.append(String.format(format, "Random-Token", randomToken, s.randomToken));
+        sb.append(String.format(format, "Hash", hash, s.hash));
         logger.info(sb);
     }
 
