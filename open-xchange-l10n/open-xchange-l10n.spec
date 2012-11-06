@@ -384,19 +384,19 @@ Authors:
 
 #-------------------------------------------------------------------------------------
 
-%package no-nb
-Group:      Applications/Productivity
-Summary:    Package containing Open-Xchange backend localization for no_NB
-Provides:       open-xchange-lang-community-no-nb = %{version}
-Obsoletes:      open-xchange-lang-community-no-nb <= %{version}
-
-%description no-nb
-Package containing Open-Xchange backend localization for no_NB
-This localization package are driven by the community.
-
-Authors:
---------
-    Open-Xchange
+#%package no-nb
+#Group:      Applications/Productivity
+#Summary:    Package containing Open-Xchange backend localization for no_NB
+#Provides:       open-xchange-lang-community-no-nb = %{version}
+#Obsoletes:      open-xchange-lang-community-no-nb <= %{version}
+#
+#%description no-nb
+#Package containing Open-Xchange backend localization for no_NB
+#This localization package are driven by the community.
+#
+#Authors:
+#--------
+#    Open-Xchange
 
 #-------------------------------------------------------------------------------------
 
@@ -480,19 +480,19 @@ Authors:
 
 #-------------------------------------------------------------------------------------
 
-%package vi-vi
-Group:      Applications/Productivity
-Summary:    Package containing Open-Xchange backend localization for vi_VI
-Provides:       open-xchange-lang-community-vi-vi = %{version}
-Obsoletes:      open-xchange-lang-community-vi-vi <= %{version}
-
-%description vi-vi
-Package containing Open-Xchange backend localization for vi_VI
-This localization package are driven by the community.
-
-Authors:
---------
-    Open-Xchange
+#%package vi-vi
+#Group:      Applications/Productivity
+#Summary:    Package containing Open-Xchange backend localization for vi_VI
+#Provides:       open-xchange-lang-community-vi-vi = %{version}
+#Obsoletes:      open-xchange-lang-community-vi-vi <= %{version}
+#
+#%description vi-vi
+#Package containing Open-Xchange backend localization for vi_VI
+#This localization package are driven by the community.
+#
+#Authors:
+#--------
+#    Open-Xchange
 
 #-------------------------------------------------------------------------------------
 
