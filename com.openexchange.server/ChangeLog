@@ -1,6 +1,7 @@
 * 2012-11-06 - marcus.klein@open-xchange.com
 
  - Fix for bug 23590: Removed useless line in task code that causes a FindBugs issue.
+ - Fix for bug 23606: Corrected all names after rename of EAS provisioning bundle and UI plugin.
 
 * 2012-11-06 - thorben.betten@open-xchange.com
 
