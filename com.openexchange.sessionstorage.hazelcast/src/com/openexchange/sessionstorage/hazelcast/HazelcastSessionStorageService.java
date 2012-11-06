@@ -401,7 +401,7 @@ public class HazelcastSessionStorageService implements SessionStorageService {
             final List<HazelcastStoredSession> found = new ArrayList<HazelcastStoredSession>();
             for (final String sessionId : sessions.keySet()) {
                 final Session s = sessions.get(sessionId);
-                if (s.getUserId() == userId && s.getContextId() == contextId) {
+                if (null != s && s.getUserId() == userId && s.getContextId() == contextId) {
                     final HazelcastStoredSession ss = new HazelcastStoredSession(s);
                     ss.setLastAccess(System.currentTimeMillis());
                     found.add(ss);
