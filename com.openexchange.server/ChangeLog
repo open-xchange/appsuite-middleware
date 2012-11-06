@@ -1,3 +1,7 @@
+* 2012-11-06 - thorben.betten@open-xchange.com
+
+ - Fix for bug 23609: Fixed update of "reply-to" field
+
 * 2012-11-05 - martin.herfurth@open-xchange.com
 
  - Fix for bug 23483: Missing Last Modified on delete exception.
