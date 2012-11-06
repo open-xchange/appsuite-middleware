@@ -120,7 +120,8 @@ public final class SessionHandler {
 
     private static final boolean INFO = LOG.isInfoEnabled();
 
-    private static final boolean DEBUG = LOG.isDebugEnabled();
+    /** Whether debug log level is enabled */
+    protected static final boolean DEBUG = LOG.isDebugEnabled();
 
     private static volatile ScheduledTimerTask shortSessionContainerRotator;
 
@@ -779,9 +780,17 @@ public final class SessionHandler {
                     try {
                         sessionStorageService.removeSession(session.getSessionID());
                     } catch (final OXException e) {
-                        LOG.error(e.getMessage(), e);
+                        if (DEBUG) {
+                            LOG.warn("Session could not be removed from session storage: " + session.getSessionID(), e);
+                        } else {
+                            LOG.warn("Session could not be removed from session storage: " + session.getSessionID());
+                        }
                     } catch (final RuntimeException e) {
-                        LOG.error(e.getMessage(), e);
+                        if (DEBUG) {
+                            LOG.warn("Session could not be removed from session storage: " + session.getSessionID(), e);
+                        } else {
+                            LOG.warn("Session could not be removed from session storage: " + session.getSessionID());
+                        }
                     }
                 }
             }));
