@@ -13,6 +13,7 @@
  - Fix for bug 23618: Another null guard
  - Fix for bug 23621: Fixed expunge operation on IMAP folder
  - Fix for bug 23634: Dealing with concurrent session put
+ - Fix for bug 23535: Added linebreaks
 
 * 2012-11-05 - martin.herfurth@open-xchange.com
 
