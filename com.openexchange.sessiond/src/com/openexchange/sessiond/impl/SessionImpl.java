@@ -193,6 +193,9 @@ public final class SessionImpl implements PutIfAbsent {
      * @param logger The logger
      */
     public void logDiff(final SessionImpl s, final Log logger) {
+        if (null == s || null == logger) {
+            return;
+        }
         final StringBuilder sb = new StringBuilder(1024);
         sb.append("user-id:\t").append(userId).append(" - ").append(s.userId);
         sb.append("context-id:\t").append(contextId).append(" - ").append(s.contextId);
