@@ -58,14 +58,19 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheKey;
 import com.openexchange.caching.CacheService;
 import com.openexchange.caching.dynamic.OXObjectFactory;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
+import com.openexchange.folderstorage.FolderExceptionErrorMessage;
 import com.openexchange.folderstorage.FolderStorage;
+import com.openexchange.folderstorage.cache.CacheFolderStorage;
+import com.openexchange.folderstorage.cache.CacheServiceRegistry;
 import com.openexchange.folderstorage.cache.memory.FolderMap;
 import com.openexchange.folderstorage.cache.memory.FolderMapManagement;
 import com.openexchange.folderstorage.outlook.OutlookFolderStorage;
@@ -232,7 +237,7 @@ final class CachingMailAccountStorage implements MailAccountStorageService {
         }
         final CacheKey key = newCacheKey(cacheService, id, user, cid);
         final Cache cache = cacheService.getCache(REGION_NAME);
-        cacheLock.lock();
+        acquire(cacheLock);
         try {
             if (cache.get(key) == null) {
                 /*
@@ -416,6 +421,39 @@ final class CachingMailAccountStorage implements MailAccountStorageService {
     @Override
     public boolean hasAccounts(final Session session) throws OXException {
         return delegate.hasAccounts(session);
+    }
+
+    private static volatile Integer maxWaitMillis;
+    private static int maxWaitMillis() {
+        Integer i = maxWaitMillis;
+        if (null == i) {
+            synchronized (CacheFolderStorage.class) {
+                i = maxWaitMillis;
+                if (null == i) {
+                    final ConfigurationService service = CacheServiceRegistry.getServiceRegistry().getService(ConfigurationService.class);
+                    final int millis = null == service ? 60000 : service.getIntProperty("AJP_WATCHER_MAX_RUNNING_TIME", 60000);
+                    i = Integer.valueOf(millis << 1);
+                    maxWaitMillis = i;
+                }
+            }
+        }
+        return i.intValue();
+    }
+
+    private static void acquire(final Lock lock) throws OXException {
+        if (null == lock) {
+            return;
+        }
+        try {
+            // true if the lock was acquired and false if the waiting time elapsed before the lock was acquired
+            if (!lock.tryLock(maxWaitMillis(), TimeUnit.MILLISECONDS)) {
+                throw FolderExceptionErrorMessage.TRY_AGAIN.create("The maximum time to wait for the lock is exceeded.");
+            }
+        } catch (final InterruptedException e) {
+            // Restore the interrupted status; see http://www.ibm.com/developerworks/java/library/j-jtp05236/index.html
+            Thread.currentThread().interrupt();
+            throw FolderExceptionErrorMessage.TRY_AGAIN.create(e, e.getMessage());
+        }
     }
 
 }
