@@ -58,6 +58,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
+import org.apache.commons.logging.Log;
 import com.openexchange.exception.OXException;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.SessionExceptionCodes;
@@ -222,6 +223,8 @@ final class SessionContainer {
                     if (!ole.consideredEqual(session)) {
                         final String login1 = ole.getLogin();
                         final String login2 = session.getLogin();
+                        final Log log = com.openexchange.log.Log.loggerFor(SessionContainer.class);
+                        ole.logDiff(session, log);
                         throw SessionExceptionCodes.SESSIONID_COLLISION.create(login1, login2);
                     }
                 }
@@ -230,6 +233,8 @@ final class SessionContainer {
                 if (!ole.consideredEqual(session)) {
                     final String login1 = ole.getLogin();
                     final String login2 = session.getLogin();
+                    final Log log = com.openexchange.log.Log.loggerFor(SessionContainer.class);
+                    ole.logDiff(session, log);
                     throw SessionExceptionCodes.SESSIONID_COLLISION.create(login1, login2);
                 }
             }
