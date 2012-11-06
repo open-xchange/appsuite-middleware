@@ -172,8 +172,8 @@ public class MonitoringInfo {
         return numberOfRunningAJPListeners.get();
     }
 
-    public static void setNumberOfRunningAJPListeners(final int num) {
-        numberOfRunningAJPListeners.set(num);
+    public static void addNumberOfRunningAJPListeners(final int num) {
+        numberOfRunningAJPListeners.addAndGet(num);
     }
 
     public static int getNumberOfOpenSockets() {
