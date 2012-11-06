@@ -134,10 +134,18 @@ public class SimpleICal {
 	        this.setProperty("DTEND", ICalUtils.formatAsUTC(start));
 	    }   
 
-	    public String getLocation() {
-	        return this.getPropertyValue("LOCATION");
-	    }
-    	
+        public String getLocation() {
+            return this.getPropertyValue("LOCATION");
+        }
+        
+        public String getTransp() {
+            return this.getPropertyValue("TRANSP");
+        }
+        
+        public void setTransp(String transp) {
+            this.setProperty("TRANSP", transp);
+        }
+        
     	public List<Component> getComponents() {
     		return components;
     	}
