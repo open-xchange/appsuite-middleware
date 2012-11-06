@@ -79,6 +79,7 @@ import com.openexchange.realtime.StanzaSender;
 import com.openexchange.realtime.atmosphere.impl.stanza.builder.StanzaBuilderSelector;
 import com.openexchange.realtime.atmosphere.impl.stanza.writer.StanzaWriter;
 import com.openexchange.realtime.atmosphere.osgi.AtmosphereServiceRegistry;
+import com.openexchange.realtime.atmosphere.osgi.ExtensionRegistry;
 import com.openexchange.realtime.atmosphere.stanza.StanzaBuilder;
 import com.openexchange.realtime.atmosphere.stanza.StanzaHandler;
 import com.openexchange.realtime.packet.ID;
@@ -510,6 +511,8 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
      */
     protected <T extends Stanza> void handleIncoming(T stanza, RTAtmosphereState atmosphereState) throws OXException {
         ServerSession session = atmosphereState.session;
+        StanzaTransformer transformer = new StanzaTransformer();
+        transformer.incoming(stanza, session);
         StanzaHandler stanzaHandler = StanzaHandlerSelector.getStanzaHandler(stanza);
         stanzaHandler.incoming(stanza, session);
     }
