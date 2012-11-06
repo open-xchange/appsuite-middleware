@@ -49,6 +49,7 @@
 
 package com.openexchange.data.conversion.ical.ical4j.osgi;
 
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.data.conversion.ical.ICalEmitter;
 import com.openexchange.data.conversion.ical.ICalParser;
 import com.openexchange.data.conversion.ical.ical4j.ICal4JEmitter;
@@ -75,8 +76,7 @@ public class Activator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        // TODO Auto-generated method stub
-        return null;
+        return new Class[]{ConfigurationService.class};
     }
 
     @Override
@@ -85,6 +85,8 @@ public class Activator extends HousekeepingActivator {
         track(UserService.class, new UserServiceTrackerCustomizer(context, userResolver));
         Participants.userResolver = userResolver;
         CreatedBy.userResolver = userResolver;
+        
+        ConfigurationService configurationService = getService(ConfigurationService.class);
 
         final OXResourceResolver resourceResolver = new OXResourceResolver();
         track(ResourceService.class, new ResourceServiceTrackerCustomizer(context, resourceResolver));
@@ -92,8 +94,10 @@ public class Activator extends HousekeepingActivator {
 
         track(CalendarCollectionService.class, new CalendarServiceTracker(context));
         openTrackers();
-
-        registerService(ICalParser.class, new ICal4JParser(), null);
+        
+        ICal4JParser parser = new ICal4JParser();
+        parser.setLimit(configurationService.getIntProperty("com.openexchange.import.ical.limit", -1));
+		registerService(ICalParser.class, parser, null);
         registerService(ICalEmitter.class, new ICal4JEmitter(), null);
         registerService(ITipParser.class, new ICal4JITipParser(), null);
         registerService(ITipEmitter.class, new ICal4JITipEmitter(), null);
