@@ -237,17 +237,19 @@ final class CachingMailAccountStorage implements MailAccountStorageService {
         }
         final CacheKey key = newCacheKey(cacheService, id, user, cid);
         final Cache cache = cacheService.getCache(REGION_NAME);
-        acquire(cacheLock);
-        try {
-            if (cache.get(key) == null) {
-                /*
-                 * Not contained in cache. Load with specified connection
-                 */
-                final MailAccount mailAccount = delegate.getMailAccount(id, user, cid, con);
-                cache.put(key, mailAccount);
+        if (cache.get(key) == null) {
+            /*
+             * Not contained in cache. Load with specified connection
+             */
+            acquire(cacheLock);
+            try {
+                if (cache.get(key) == null) {
+                    final MailAccount mailAccount = delegate.getMailAccount(id, user, cid, con);
+                    cache.put(key, mailAccount);
+                }
+            } finally {
+                cacheLock.unlock();
             }
-        } finally {
-            cacheLock.unlock();
         }
         /*
          * Return reloading mail account
