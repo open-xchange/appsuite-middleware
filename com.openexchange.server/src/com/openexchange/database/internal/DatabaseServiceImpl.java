@@ -252,7 +252,7 @@ public final class DatabaseServiceImpl implements DatabaseService {
         try {
             pools.getPool(poolId).back(con);
         } catch (final PoolingException e) {
-            final OXException e2 = DBPoolingExceptionCodes.RETURN_FAILED.create(e, I(poolId));
+            final OXException e2 = DBPoolingExceptionCodes.RETURN_FAILED.create(e, con.toString());
             LOG.error(e2.getMessage(), e2);
         } catch (final OXException e) {
             LOG.error(e.getMessage(), e);

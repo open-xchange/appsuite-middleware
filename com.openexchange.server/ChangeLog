@@ -1,3 +1,7 @@
+* 2012-11-07 - marcus.klein@open-xchange.com
+
+ - Fix for bug 23563: Improved exception messages for too long used database connections.
+
 * 2012-11-07 - thorben.betten@open-xchange.com
 
  - Fix for bug 23638: Resolved possible deadlock situation
