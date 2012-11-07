@@ -125,6 +125,7 @@ public class HazelcastSessionStorageService implements SessionStorageService {
 
     private final String mapName;
     private final RefusedExecutionBehavior<IMap<String, HazelcastStoredSession>> abortBehavior;
+    private boolean allowFailIfPaused;
 
     /**
      * Initializes a new {@link HazelcastSessionStorageService}.
@@ -139,6 +140,17 @@ public class HazelcastSessionStorageService implements SessionStorageService {
             hzConfig.addMapConfig(mapConfig);
         }
         abortBehavior = AbortBehavior.<IMap<String, HazelcastStoredSession>> getInstance();
+        allowFailIfPaused = false;
+    }
+    
+    /**
+     * Sets the fail-if-paused behavior.
+     *
+     * @param allowFailIfPaused <code>true</code> to set the fail-if-paused behavior; else <code>false</code>
+     */
+    public HazelcastSessionStorageService setAllowFailIfPaused(boolean allowFailIfPaused) {
+        this.allowFailIfPaused = allowFailIfPaused;
+        return this;
     }
 
     private IMap<String, HazelcastStoredSession> getMapFrom(final Future<IMap<String, HazelcastStoredSession>> f) throws OXException {
@@ -178,7 +190,7 @@ public class HazelcastSessionStorageService implements SessionStorageService {
             if (null == hazelcastInstance) {
                 throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(HazelcastInstance.class.getName());
             }
-            if (!failIfPaused) {
+            if (!failIfPaused || !allowFailIfPaused) {
                 return hazelcastInstance.getMap(mapName);
             }
             // Fail if paused
