@@ -51,6 +51,7 @@ package com.openexchange.sessiond.impl;
 
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.sessiond.services.SessiondServiceRegistry.getServiceRegistry;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Dictionary;
@@ -364,7 +365,16 @@ public final class SessionHandler {
                             postSessionStored(session);
                         }
                     } catch (final Exception e) {
-                        LOG.info("Failed to put session " + session.getSessionID() + " with auth Id " + session.getAuthId() + " into session storage.", e);
+                        if (DEBUG) {
+                            final String s =
+                                MessageFormat.format(
+                                    "Failed to put session {0} with Auth-Id {1} into session storage. (user={2}, context={3})",
+                                    session.getSessionID(),
+                                    session.getAuthId(),
+                                    Integer.valueOf(session.getUserId()),
+                                    Integer.valueOf(session.getContextId()));
+                            LOG.info(s, e);
+                        }
                     }
                     return null;
                 }
