@@ -38,7 +38,7 @@ dpkg-maintscript-helper mv_conffile /opt/open-xchange/etc/groupware/settings/ope
 
 
 
-# SoftwareChange_Request-1196
+# SoftwareChange_Request-1197
 pfile=/opt/open-xchange/etc/settings/eas-provisioning-ui.properties
 ptmp=${pfile}.$$
 if grep com.openexchange.mobile.configuration.gui $pfile > /dev/null; then

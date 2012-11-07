@@ -59,7 +59,7 @@ ox_move_config_file /opt/open-xchange/etc/groupware /opt/open-xchange/etc mobile
 ox_move_config_file /opt/open-xchange/etc/groupware /opt/open-xchange/etc mobilityconfiguration.properties eas-provisioning-mail.properties
 ox_move_config_file /opt/open-xchange/etc/groupware/settings /opt/open-xchange/etc/settings open-xchange-mobile-configuration-gui.properties eas-provisioning-ui.properties
 
-# SoftwareChange_Request-1196
+# SoftwareChange_Request-1197
 pfile=/opt/open-xchange/etc/settings/eas-provisioning-ui.properties
 ptmp=${pfile}.$$
 if grep com.openexchange.mobile.configuration.gui $pfile > /dev/null; then
