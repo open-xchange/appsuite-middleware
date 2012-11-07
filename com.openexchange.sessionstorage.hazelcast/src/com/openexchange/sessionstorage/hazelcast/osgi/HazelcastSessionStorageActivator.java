@@ -90,29 +90,31 @@ public class HazelcastSessionStorageActivator extends HousekeepingActivator {
         final boolean enabled = configService.getBoolProperty("com.openexchange.sessionstorage.hazelcast.enabled", false);
         if (enabled) {
             final MapConfig mapConfig = new MapConfig();
-            final String mapName = configService.getProperty("com.openexchange.sessionstorage.hazelcast.map.name");
-            final int backupCount = configService.getIntProperty("com.openexchange.sessionstorage.hazelcast.map.backupcount", 1);
-            final int asyncBackup = configService.getIntProperty("com.openexchange.sessionstorage.hazelcast.map.asyncbackup", 0);
-            final int ttl = configService.getIntProperty("com.openexchange.sessionstorage.hazelcast.map.ttl", 0);
-            final int maxidle = configService.getIntProperty("com.openexchange.sessionstorage.hazelcast.map.maxidle", 0);
-            final String evictionPolicy = configService.getProperty("com.openexchange.sessionstorage.hazelcast.map.evictionpolicy");
-            final int evictionPercentage = configService.getIntProperty("com.openexchange.sessionstorage.hazelcast.map.evictionpercentage", 25);
-            final int maxSize = configService.getIntProperty("com.openexchange.sessionstorage.hazelcast.map.maxsize", 0);
-            final String mergePolicy = configService.getProperty("com.openexchange.sessionstorage.hazelcast.map.mergepolicy");
-            if (mapName == null || !checkEvictionPolicy(evictionPolicy) || !checkMergePolicy(mergePolicy)) {
-                throw OXHazelcastSessionStorageExceptionCodes.HAZELCAST_SESSIONSTORAGE_CONFIG_FILE.create();
+            {
+                final String mapName = configService.getProperty("com.openexchange.sessionstorage.hazelcast.map.name");
+                final int backupCount = configService.getIntProperty("com.openexchange.sessionstorage.hazelcast.map.backupcount", 1);
+                final int asyncBackup = configService.getIntProperty("com.openexchange.sessionstorage.hazelcast.map.asyncbackup", 0);
+                final int ttl = configService.getIntProperty("com.openexchange.sessionstorage.hazelcast.map.ttl", 0);
+                final int maxidle = configService.getIntProperty("com.openexchange.sessionstorage.hazelcast.map.maxidle", 0);
+                final String evictionPolicy = configService.getProperty("com.openexchange.sessionstorage.hazelcast.map.evictionpolicy");
+                final int evictionPercentage = configService.getIntProperty("com.openexchange.sessionstorage.hazelcast.map.evictionpercentage", 25);
+                final int maxSize = configService.getIntProperty("com.openexchange.sessionstorage.hazelcast.map.maxsize", 0);
+                final String mergePolicy = configService.getProperty("com.openexchange.sessionstorage.hazelcast.map.mergepolicy");
+                if (mapName == null || !checkEvictionPolicy(evictionPolicy) || !checkMergePolicy(mergePolicy)) {
+                    throw OXHazelcastSessionStorageExceptionCodes.HAZELCAST_SESSIONSTORAGE_CONFIG_FILE.create();
+                }
+                mapConfig.setName(mapName);
+                mapConfig.setBackupCount(backupCount);
+                mapConfig.setAsyncBackupCount(asyncBackup);
+                mapConfig.setTimeToLiveSeconds(ttl);
+                mapConfig.setMaxIdleSeconds(maxidle);
+                mapConfig.setEvictionPolicy(evictionPolicy);
+                mapConfig.setEvictionPercentage(evictionPercentage);
+                final MaxSizeConfig maxSizeConfig = new MaxSizeConfig();
+                maxSizeConfig.setSize(maxSize);
+                mapConfig.setMaxSizeConfig(maxSizeConfig);
+                mapConfig.setMergePolicy(mergePolicy);
             }
-            mapConfig.setName(mapName);
-            mapConfig.setBackupCount(backupCount);
-            mapConfig.setAsyncBackupCount(asyncBackup);
-            mapConfig.setTimeToLiveSeconds(ttl);
-            mapConfig.setMaxIdleSeconds(maxidle);
-            mapConfig.setEvictionPolicy(evictionPolicy);
-            mapConfig.setEvictionPercentage(evictionPercentage);
-            final MaxSizeConfig maxSizeConfig = new MaxSizeConfig();
-            maxSizeConfig.setSize(maxSize);
-            mapConfig.setMaxSizeConfig(maxSizeConfig);
-            mapConfig.setMergePolicy(mergePolicy);
             final HazelcastSessionStorageConfiguration config = new HazelcastSessionStorageConfiguration(mapConfig);
             // Track HazelcastInstance
             final BundleContext context = this.context;
