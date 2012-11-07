@@ -214,7 +214,7 @@ public class HazelcastSessionStorageService implements SessionStorageService {
         try {
             return sessions(failIfPaused);
         } catch (final OXException e) {
-            throw new HazelcastException(e.getMessage(), e);
+            throw new HazelcastException(e.getLogMessage(), e);
         }
     }
 
