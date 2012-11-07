@@ -147,6 +147,7 @@ public class HazelcastSessionStorageService implements SessionStorageService {
      * Sets the fail-if-paused behavior.
      *
      * @param allowFailIfPaused <code>true</code> to set the fail-if-paused behavior; else <code>false</code>
+     * @return This session storage with new behavior applied
      */
     public HazelcastSessionStorageService setAllowFailIfPaused(boolean allowFailIfPaused) {
         this.allowFailIfPaused = allowFailIfPaused;
