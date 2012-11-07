@@ -78,7 +78,7 @@ import com.openexchange.threadpool.AbstractTask;
 import com.openexchange.threadpool.RefusedExecutionBehavior;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.threadpool.ThreadPools;
-import com.openexchange.threadpool.behavior.CallerRunsBehavior;
+import com.openexchange.threadpool.behavior.AbortBehavior;
 
 /**
  * {@link HazelcastSessionStorageService} - The {@link SessionStorageService} backed by {@link HazelcastInstance}.
@@ -127,7 +127,7 @@ public class HazelcastSessionStorageService implements SessionStorageService {
     private final String mapName;
     private final String encryptionKey;
     private final CryptoService cryptoService;
-    private final RefusedExecutionBehavior<IMap<String, HazelcastStoredSession>> callerRunsBehavior;
+    private final RefusedExecutionBehavior<IMap<String, HazelcastStoredSession>> abortBehavior;
 
     /**
      * Initializes a new {@link HazelcastSessionStorageService}.
@@ -143,7 +143,7 @@ public class HazelcastSessionStorageService implements SessionStorageService {
         if (null == hzConfig.getMapConfig(name)) {
             hzConfig.addMapConfig(mapConfig);
         }
-        callerRunsBehavior = CallerRunsBehavior.<IMap<String, HazelcastStoredSession>> getInstance();
+        abortBehavior = AbortBehavior.<IMap<String, HazelcastStoredSession>> getInstance();
     }
 
     private IMap<String, HazelcastStoredSession> getMapFrom(final Future<IMap<String, HazelcastStoredSession>> f) throws OXException {
@@ -194,7 +194,7 @@ public class HazelcastSessionStorageService implements SessionStorageService {
             if (null == threadPool) {
                 return hazelcastInstance.getMap(mapName);
             }
-            final IMap<String, HazelcastStoredSession> map = getMapFrom(threadPool.submit(new GetSessionMapTask(hazelcastInstance, mapName), callerRunsBehavior));
+            final IMap<String, HazelcastStoredSession> map = getMapFrom(threadPool.submit(new GetSessionMapTask(hazelcastInstance, mapName), abortBehavior));
             return new TimeoutAwareIMap(map, timeout());
         } catch (final OXException e) {
             throw e;
