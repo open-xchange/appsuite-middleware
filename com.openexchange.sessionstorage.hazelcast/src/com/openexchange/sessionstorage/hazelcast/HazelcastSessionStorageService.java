@@ -59,6 +59,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import java.util.concurrent.atomic.AtomicReference;
 import org.apache.commons.logging.Log;
 import com.hazelcast.config.Config;
 import com.hazelcast.config.MapConfig;
@@ -89,6 +90,17 @@ public class HazelcastSessionStorageService implements SessionStorageService {
 
     private static final Log LOG = com.openexchange.log.Log.loggerFor(HazelcastSessionStorageService.class);
     private static final boolean DEBUG = LOG.isDebugEnabled();
+
+    private static final AtomicReference<HazelcastInstance> REFERENCE = new AtomicReference<HazelcastInstance>();
+
+    /**
+     * Sets specified {@link HazelcastInstance}.
+     * 
+     * @param hazelcast The {@link HazelcastInstance}
+     */
+    public static void setHazelcastInstance(final HazelcastInstance hazelcast) {
+        REFERENCE.set(hazelcast);
+    }
 
     private static final class GetSessionMapTask extends AbstractTask<IMap<String, HazelcastStoredSession>> {
 
@@ -187,7 +199,7 @@ public class HazelcastSessionStorageService implements SessionStorageService {
      */
     private IMap<String, HazelcastStoredSession> sessions(final boolean failIfPaused) throws OXException {
         try {
-            final HazelcastInstance hazelcastInstance = Services.optService(HazelcastInstance.class);
+            final HazelcastInstance hazelcastInstance = REFERENCE.get();
             if (null == hazelcastInstance) {
                 throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(HazelcastInstance.class.getName());
             }

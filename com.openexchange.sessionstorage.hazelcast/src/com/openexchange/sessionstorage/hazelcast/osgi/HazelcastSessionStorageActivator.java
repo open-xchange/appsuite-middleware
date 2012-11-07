@@ -125,7 +125,7 @@ public class HazelcastSessionStorageActivator extends HousekeepingActivator {
                 @Override
                 public HazelcastInstance addingService(final ServiceReference<HazelcastInstance> reference) {
                     final HazelcastInstance hazelcastInstance = context.getService(reference);
-                    addService(HazelcastInstance.class, hazelcastInstance);
+                    HazelcastSessionStorageService.setHazelcastInstance(hazelcastInstance);
                     sessionStorageRegistration = context.registerService(SessionStorageService.class, new HazelcastSessionStorageService(config, hazelcastInstance), null);
                     return hazelcastInstance;
                 }
@@ -143,7 +143,7 @@ public class HazelcastSessionStorageActivator extends HousekeepingActivator {
                         this.sessionStorageRegistration = null;
                     }
                     context.ungetService(reference);
-                    removeService(HazelcastInstance.class);
+                    HazelcastSessionStorageService.setHazelcastInstance(null);
                 }
             });
             openTrackers();
