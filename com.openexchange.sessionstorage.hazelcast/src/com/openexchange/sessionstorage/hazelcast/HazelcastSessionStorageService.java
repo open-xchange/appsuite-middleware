@@ -190,6 +190,9 @@ public class HazelcastSessionStorageService implements SessionStorageService {
                 return hazelcastInstance.getMap(mapName);
             }
             final IMap<String, HazelcastStoredSession> map = getMapFrom(threadPool.submit(new GetSessionMapTask(hazelcastInstance, mapName), abortBehavior));
+            if (null == map) {
+                throw new HazelcastException("No such map: " + mapName);
+            }
             return new TimeoutAwareIMap(map, timeout());
         } catch (final OXException e) {
             throw e;
@@ -208,7 +211,11 @@ public class HazelcastSessionStorageService implements SessionStorageService {
      */
     private IMap<String, HazelcastStoredSession> sessionsUnchecked(final boolean failIfPaused) {
         try {
-            return sessions(failIfPaused);
+            final IMap<String, HazelcastStoredSession> map = sessions(failIfPaused);
+            if (null == map) {
+                throw new HazelcastException("No such map: " + mapName);
+            }
+            return map;
         } catch (final OXException e) {
             throw new HazelcastException(e.getDisplayMessage(Locale.US), e);
         }
