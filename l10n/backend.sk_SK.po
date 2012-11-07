@@ -638,7 +638,7 @@ msgstr "%1$s by bol rád, keby ste zmenili schôdzku:"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/Messages.java:158
 msgid "%1$s has asked %2$s to change the event:"
-msgstr "$%1$s požiadal %2$s o zmenu udalosti:"
+msgstr "%1$s požiadal %2$s o zmenu udalosti:"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/Messages.java:160
 msgid "You have been invited to an event by %1$s:"

@@ -707,4 +707,32 @@ public class ICALFixtures {
 
         return bob.toString();
     }
+    
+    public String severalVevents(int amount) {
+        final StringBuilder bob = new StringBuilder();
+
+        beginCalendar(bob);
+        for(int i = 0; i < amount; i++) {
+	        beginEvent(bob);
+	        bob.append("DTSTART:").append(date.format(new Date())).append('\n');
+	        bob.append("SUMMARY:").append("Appointment #" + i).append('\n');
+	        endEvent(bob);
+        }
+        endCalendar(bob);
+        return bob.toString();
+    }
+
+    public String severalVtodos(int amount) {
+        final StringBuilder bob = new StringBuilder();
+
+        beginCalendar(bob);
+        for(int i = 0; i < amount; i++) {
+	        beginTodo(bob);
+	        bob.append("SUMMARY:").append("Task #" + i).append('\n');
+	        endTodo(bob);
+        }
+        endCalendar(bob);
+        return bob.toString();
+    }
+
 }

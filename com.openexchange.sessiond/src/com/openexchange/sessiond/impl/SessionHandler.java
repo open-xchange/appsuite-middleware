@@ -51,6 +51,7 @@ package com.openexchange.sessiond.impl;
 
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.sessiond.services.SessiondServiceRegistry.getServiceRegistry;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Dictionary;
@@ -120,7 +121,8 @@ public final class SessionHandler {
 
     private static final boolean INFO = LOG.isInfoEnabled();
 
-    private static final boolean DEBUG = LOG.isDebugEnabled();
+    /** Whether debug log level is enabled */
+    protected static final boolean DEBUG = LOG.isDebugEnabled();
 
     private static volatile ScheduledTimerTask shortSessionContainerRotator;
 
@@ -276,7 +278,10 @@ public final class SessionHandler {
             final SessionStorageService storageService = getServiceRegistry().getService(SessionStorageService.class);
             if (storageService != null) {
                 try {
-                    retval = sessionToSessionControl(storageService.getAnyActiveSessionForUser(userId, contextId));
+                    final Session storedSession = storageService.getAnyActiveSessionForUser(userId, contextId);
+                    if (null != storedSession) {
+                        retval = sessionToSessionControl(storedSession);
+                    }
                 } catch (final OXException e) {
                     LOG.error(e.getMessage(), e);
                 }
@@ -363,7 +368,18 @@ public final class SessionHandler {
                             postSessionStored(session);
                         }
                     } catch (final Exception e) {
-                        LOG.info("Failed to put session " + session.getSessionID() + " with auth Id " + session.getAuthId() + " into session storage.", e);
+                        final String s =
+                            MessageFormat.format(
+                                "Failed to put session {0} with Auth-Id {1} into session storage. (user={2}, context={3})",
+                                session.getSessionID(),
+                                session.getAuthId(),
+                                Integer.valueOf(session.getUserId()),
+                                Integer.valueOf(session.getContextId()));
+                        if (DEBUG) {
+                            LOG.info(s, e);
+                        } else {
+                            LOG.info(s);
+                        }
                     }
                     return null;
                 }
@@ -542,9 +558,11 @@ public final class SessionHandler {
             final SessionStorageService storageService = getServiceRegistry().getService(SessionStorageService.class);
             if (storageService != null) {
                 try {
-                    final Session s = storageService.lookupSession(sessionId);
-                    sessionData.addSession(new SessionImpl(s), noLimit);
-                    return sessionToSessionControl(s);
+                    final Session storedSession = storageService.lookupSession(sessionId);
+                    if (null != storedSession) {
+                        sessionData.addSession(new SessionImpl(storedSession), noLimit, true);
+                        return sessionToSessionControl(storedSession);
+                    }
                 } catch (final OXException e) {
                     if (!SessionStorageExceptionCodes.NO_SESSION_FOUND.equals(e)) {
                         LOG.warn("Session look-up failed in session storage.", e);
@@ -779,9 +797,17 @@ public final class SessionHandler {
                     try {
                         sessionStorageService.removeSession(session.getSessionID());
                     } catch (final OXException e) {
-                        LOG.error(e.getMessage(), e);
+                        if (DEBUG) {
+                            LOG.warn("Session could not be removed from session storage: " + session.getSessionID(), e);
+                        } else {
+                            LOG.warn("Session could not be removed from session storage: " + session.getSessionID());
+                        }
                     } catch (final RuntimeException e) {
-                        LOG.error(e.getMessage(), e);
+                        if (DEBUG) {
+                            LOG.warn("Session could not be removed from session storage: " + session.getSessionID(), e);
+                        } else {
+                            LOG.warn("Session could not be removed from session storage: " + session.getSessionID());
+                        }
                     }
                 }
             }));

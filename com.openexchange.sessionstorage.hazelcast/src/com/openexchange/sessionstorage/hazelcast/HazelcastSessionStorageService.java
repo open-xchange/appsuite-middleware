@@ -53,6 +53,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
@@ -214,7 +215,7 @@ public class HazelcastSessionStorageService implements SessionStorageService {
         try {
             return sessions(failIfPaused);
         } catch (final OXException e) {
-            throw new HazelcastException(e.getMessage(), e);
+            throw new HazelcastException(e.getDisplayMessage(Locale.US), e);
         }
     }
 
@@ -401,7 +402,7 @@ public class HazelcastSessionStorageService implements SessionStorageService {
             final List<HazelcastStoredSession> found = new ArrayList<HazelcastStoredSession>();
             for (final String sessionId : sessions.keySet()) {
                 final Session s = sessions.get(sessionId);
-                if (s.getUserId() == userId && s.getContextId() == contextId) {
+                if (null != s && s.getUserId() == userId && s.getContextId() == contextId) {
                     final HazelcastStoredSession ss = new HazelcastStoredSession(s);
                     ss.setLastAccess(System.currentTimeMillis());
                     found.add(ss);
@@ -443,12 +444,15 @@ public class HazelcastSessionStorageService implements SessionStorageService {
     }
 
     @Override
-    public synchronized List<Session> getSessions() {
+    public List<Session> getSessions() {
         try {
             final IMap<String, HazelcastStoredSession> sessions = sessionsUnchecked(true);
             final List<Session> retval = new ArrayList<Session>();
             for (final String sessionId : sessions.keySet()) {
-                retval.add(sessions.get(sessionId));
+                final HazelcastStoredSession storedSession = sessions.get(sessionId);
+                if (null != storedSession) {
+                    retval.add(storedSession);
+                }
             }
             return retval;
         } catch (final HazelcastException e) {
@@ -496,10 +500,13 @@ public class HazelcastSessionStorageService implements SessionStorageService {
     @Override
     public Session getSessionByAlternativeId(final String altId) throws OXException {
         try {
+            if (null == altId) {
+                throw new NullPointerException("altId is null.");
+            }
             final IMap<String, HazelcastStoredSession> sessions = sessions(true);
             for (final String sessionId : sessions.keySet()) {
                 final HazelcastStoredSession s = sessions.get(sessionId);
-                if (s.getParameter(Session.PARAM_ALTERNATIVE_ID).equals(altId)) {
+                if (null != s && altId.equals(s.getParameter(Session.PARAM_ALTERNATIVE_ID))) {
                     return s;
                 }
             }
@@ -551,7 +558,7 @@ public class HazelcastSessionStorageService implements SessionStorageService {
         try {
             if (null != authId) {
                 for (final Session session : getSessions()) {
-                    if (authId.equals(session.getAuthId())) {
+                    if (null != session && authId.equals(session.getAuthId())) {
                         throw OXHazelcastSessionStorageExceptionCodes.HAZELCAST_SESSIONSTORAGE_DUPLICATE_AUTHID.create(
                             session.getLogin(),
                             login);

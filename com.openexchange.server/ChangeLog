@@ -1,10 +1,23 @@
+* 2012-11-07 - thorben.betten@open-xchange.com
+
+ - Fix for bug 23638: Resolved possible deadlock situation
+
 * 2012-11-06 - marcus.klein@open-xchange.com
 
  - Fix for bug 23590: Removed useless line in task code that causes a FindBugs issue.
+ - Fix for bug 23606: Corrected all names after rename of EAS provisioning bundle and UI plugin.
 
 * 2012-11-06 - thorben.betten@open-xchange.com
 
  - Fix for bug 23609: Fixed update of "reply-to" field
+ - Fix for bug 23616: Fixed NPE in Hazelcast session storage
+ - Fix for bug 23617: Fixed NPE in Hazelcast session storage
+ - Fix for bug 23615: Changed log level to warning
+ - Fix for bug 23613: Dealing with possible ArrayIndexOutOfBoundsException due to outdated mailbox attributes
+ - Fix for bug 23618: Another null guard
+ - Fix for bug 23621: Fixed expunge operation on IMAP folder
+ - Fix for bug 23634: Dealing with concurrent session put
+ - Fix for bug 23535: Added linebreaks
 
 * 2012-11-05 - martin.herfurth@open-xchange.com
 

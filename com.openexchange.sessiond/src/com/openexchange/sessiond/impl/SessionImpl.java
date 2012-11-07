@@ -107,6 +107,7 @@ public final class SessionImpl implements PutIfAbsent {
      * @param localIp The local IP
      */
     public SessionImpl(final int userId, final String loginName, final String password, final int contextId, final String sessionId, final String secret, final String randomToken, final String localIp, final String login, final String authId, final String hash, final String client) {
+        super();
         this.userId = userId;
         this.loginName = loginName;
         this.password = password;
@@ -131,6 +132,7 @@ public final class SessionImpl implements PutIfAbsent {
      * @param session The copy session
      */
     public SessionImpl(final Session s) {
+        super();
         this.userId = s.getUserId();
         this.loginName = s.getLoginName();
         this.password = s.getPassword();
@@ -146,7 +148,12 @@ public final class SessionImpl implements PutIfAbsent {
         parameters = new ConcurrentHashMap<String, Object>();
         parameters.put(PARAM_LOCK, new ReentrantLock());
         parameters.put(PARAM_COUNTER, new AtomicInteger());
-        parameters.put(PARAM_ALTERNATIVE_ID, UUIDSessionIdGenerator.randomUUID());
+        final Object altId = s.getParameter(PARAM_ALTERNATIVE_ID);
+        if (null == altId) {
+            parameters.put(PARAM_ALTERNATIVE_ID, UUIDSessionIdGenerator.randomUUID());
+        } else {
+            parameters.put(PARAM_ALTERNATIVE_ID, altId);
+        }
     }
 
     /**
@@ -177,6 +184,127 @@ public final class SessionImpl implements PutIfAbsent {
         if (!parameters.containsKey(PARAM_ALTERNATIVE_ID)) {
             parameters.put(PARAM_ALTERNATIVE_ID, UUIDSessionIdGenerator.randomUUID());
         }
+    }
+
+    /**
+     * Logs differences between this and specified session.
+     * 
+     * @param s The session to compare with
+     * @param logger The logger
+     */
+    public void logDiff(final SessionImpl s, final Log logger) {
+        if (null == s || null == logger) {
+            return;
+        }
+        final StringBuilder sb = new StringBuilder(1024).append("Session Diff:\n");
+        final String format = "%-15s%-45s%s";
+        sb.append(String.format(format, "Name", "Session #1", "Session #1"));
+        sb.append(String.format(format, "User-Id", Integer.valueOf(userId), Integer.valueOf(s.userId)));
+        sb.append(String.format(format, "Context-Id", Integer.valueOf(contextId), Integer.valueOf(s.contextId)));
+        sb.append(String.format(format, "Session-Id", sessionId, s.sessionId));
+        sb.append(String.format(format, "Secret", secret, s.secret));
+        sb.append(String.format(format, "Alternative-Id", parameters.get(PARAM_ALTERNATIVE_ID), s.parameters.get(PARAM_ALTERNATIVE_ID)));
+        sb.append(String.format(format, "Auth-Id", authId, s.authId));
+        sb.append(String.format(format, "Login", login, s.login));
+        sb.append(String.format(format, "Login-Name", loginName, s.loginName));
+        sb.append(String.format(format, "Local IP", localIp, s.localIp));
+        sb.append(String.format(format, "Random-Token", randomToken, s.randomToken));
+        sb.append(String.format(format, "Hash", hash, s.hash));
+        logger.info(sb);
+    }
+
+    /**
+     * Whether specified session is considered equal to this one.
+     * 
+     * @param s The other session
+     * @return <code>true</code> if equal; otherwise <code>false</code>
+     */
+    public boolean consideredEqual(final SessionImpl s) {
+        if (this == s) {
+            return true;
+        }
+        if (null == s) {
+            return false;
+        }
+        if (userId != s.userId) {
+            return false;
+        }
+        if (contextId != s.contextId) {
+            return false;
+        }
+        if (null == loginName) {
+            if (null != s.loginName) {
+                return false;
+            }
+        } else if (loginName.equals(s.loginName)) {
+            return false;
+        }
+        if (null == password) {
+            if (null != s.password) {
+                return false;
+            }
+        } else if (password.equals(s.password)) {
+            return false;
+        }
+        if (null == sessionId) {
+            if (null != s.sessionId) {
+                return false;
+            }
+        } else if (sessionId.equals(s.sessionId)) {
+            return false;
+        }
+        if (null == secret) {
+            if (null != s.secret) {
+                return false;
+            }
+        } else if (secret.equals(s.secret)) {
+            return false;
+        }
+        if (null == randomToken) {
+            if (null != s.randomToken) {
+                return false;
+            }
+        } else if (randomToken.equals(s.randomToken)) {
+            return false;
+        }
+        if (null == login) {
+            if (null != s.login) {
+                return false;
+            }
+        } else if (login.equals(s.login)) {
+            return false;
+        }
+        if (null == localIp) {
+            if (null != s.localIp) {
+                return false;
+            }
+        } else if (localIp.equals(s.localIp)) {
+            return false;
+        }
+        if (null == authId) {
+            if (null != s.authId) {
+                return false;
+            }
+        } else if (authId.equals(s.authId)) {
+            return false;
+        }
+        if (null == hash) {
+            if (null != s.hash) {
+                return false;
+            }
+        } else if (hash.equals(s.hash)) {
+            return false;
+        }
+        final Object object1 = parameters.get(PARAM_ALTERNATIVE_ID);
+        final Object object2 = s.parameters.get(PARAM_ALTERNATIVE_ID);
+        if (null == object1) {
+            if (null != object2) {
+                return false;
+            }
+        } else if (object1.equals(object2)) {
+            return false;
+        }
+        return true;
     }
 
     /**

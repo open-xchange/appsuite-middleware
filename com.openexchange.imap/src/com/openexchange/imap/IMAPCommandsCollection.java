@@ -455,7 +455,7 @@ public final class IMAPCommandsCollection {
                 /*
                  * Dispatch remaining untagged responses
                  */
-                protocol.notifyResponseHandlers(r);
+                notifyResponseHandlers(r, protocol);
                 protocol.handleResult(response);
                 return new int[] { total, recent, unseen };
             }
@@ -521,10 +521,7 @@ public final class IMAPCommandsCollection {
                 } else {
                     list = Collections.emptyList();
                 }
-                /*
-                 * Dispatch remaining untagged responses
-                 */
-                protocol.notifyResponseHandlers(r);
+                notifyResponseHandlers(r, protocol);
                 protocol.handleResult(response);
                 return list;
             }
@@ -582,10 +579,7 @@ public final class IMAPCommandsCollection {
                         }
                     }
                 }
-                /*
-                 * Dispatch remaining untagged responses
-                 */
-                protocol.notifyResponseHandlers(r);
+                notifyResponseHandlers(r, protocol);
                 protocol.handleResult(response);
                 return rights;
             }
@@ -643,7 +637,7 @@ public final class IMAPCommandsCollection {
                             }
                             r[i] = null;
                         }
-                        protocol.notifyResponseHandlers(r);
+                        notifyResponseHandlers(r, protocol);
                     } else if (response.isBAD()) {
                         if (ImapUtility.isInvalidMessageset(response)) {
                             return new int[0];
@@ -709,10 +703,7 @@ public final class IMAPCommandsCollection {
                         }
                     }
                 }
-                /*
-                 * Dispatch remaining untagged responses
-                 */
-                protocol.notifyResponseHandlers(r);
+                notifyResponseHandlers(r, protocol);
                 protocol.handleResult(response);
                 return Integer.valueOf(unread);
             }
@@ -775,10 +766,7 @@ public final class IMAPCommandsCollection {
                         }
                     }
                 }
-                /*
-                 * Dispatch remaining untagged responses
-                 */
-                protocol.notifyResponseHandlers(r);
+                notifyResponseHandlers(r, protocol);
                 protocol.handleResult(response);
                 return Integer.valueOf(unread);
             }
@@ -841,10 +829,7 @@ public final class IMAPCommandsCollection {
                         }
                     }
                 }
-                /*
-                 * Dispatch remaining untagged responses
-                 */
-                protocol.notifyResponseHandlers(r);
+                notifyResponseHandlers(r, protocol);
                 protocol.handleResult(response);
                 return Integer.valueOf(total);
             }
@@ -904,10 +889,7 @@ public final class IMAPCommandsCollection {
                         }
                     }
                 }
-                /*
-                 * Dispatch remaining untagged responses
-                 */
-                protocol.notifyResponseHandlers(r);
+                notifyResponseHandlers(r, protocol);
                 protocol.handleResult(response);
                 return ret;
             }
@@ -1114,10 +1096,7 @@ public final class IMAPCommandsCollection {
                         }
                     }
                 }
-                /*
-                 * Dispatch responses and thus update folder when handling untagged responses of EXISTS and RECENT
-                 */
-                p.notifyResponseHandlers(r);
+                notifyResponseHandlers(r, p);
                 p.handleResult(response);
                 /*
                  * Create return value
@@ -1244,10 +1223,7 @@ public final class IMAPCommandsCollection {
                         r[i] = null;
                     }
                 }
-                /*
-                 * Dispatch responses and thus update folder when handling untagged responses of EXISTS and RECENT
-                 */
-                p.notifyResponseHandlers(r);
+                notifyResponseHandlers(r, p);
                 p.handleResult(response);
                 return Boolean.FALSE;
             }
@@ -1517,7 +1493,7 @@ public final class IMAPCommandsCollection {
                     }
                     response = r[r.length - 1];
                     if (response.isOK()) {
-                        p.notifyResponseHandlers(r);
+                        notifyResponseHandlers(r, p);
                         continue Next;
                     } else if (response.isBAD()) {
                         throw new BadCommandException(IMAPException.getFormattedMessage(
@@ -1580,7 +1556,7 @@ public final class IMAPCommandsCollection {
                     }
                     response = r[r.length - 1];
                     if (response.isOK()) {
-                        p.notifyResponseHandlers(r);
+                        notifyResponseHandlers(r, p);
                         continue Next;
                     } else if (response.isBAD()) {
                         throw new BadCommandException(IMAPException.getFormattedMessage(
@@ -1771,7 +1747,7 @@ public final class IMAPCommandsCollection {
                         }
                         r[i] = null;
                     }
-                    p.notifyResponseHandlers(r);
+                    notifyResponseHandlers(r, p);
                 } else if (response.isBAD()) {
                     throw new BadCommandException(IMAPException.getFormattedMessage(
                         IMAPException.Code.PROTOCOL_ERROR,
@@ -1933,7 +1909,7 @@ public final class IMAPCommandsCollection {
                         }
                         r[i] = null;
                     }
-                    p.notifyResponseHandlers(r);
+                    notifyResponseHandlers(r, p);
                 } else if (response.isBAD()) {
                     if (ImapUtility.isInvalidMessageset(response)) {
                         return new int[0];
@@ -2269,10 +2245,7 @@ public final class IMAPCommandsCollection {
                 } else {
                     p.handleResult(response);
                 }
-                /*
-                 * Consume remaining responses
-                 */
-                p.notifyResponseHandlers(r);
+                notifyResponseHandlers(r, p);
                 return retval;
             }
         }));
@@ -2371,7 +2344,7 @@ public final class IMAPCommandsCollection {
                                 r[j] = null;
                             }
                         }
-                        p.notifyResponseHandlers(r);
+                        notifyResponseHandlers(r, p);
                     } else if (response.isBAD()) {
                         if (ImapUtility.isInvalidMessageset(response)) {
                             return new long[0];
@@ -2454,7 +2427,7 @@ public final class IMAPCommandsCollection {
                             r[j] = null;
                         }
                     }
-                    p.notifyResponseHandlers(r);
+                    notifyResponseHandlers(r, p);
                 } else if (response.isBAD()) {
                     if (ImapUtility.isInvalidMessageset(response)) {
                         return new long[0];
@@ -2537,7 +2510,7 @@ public final class IMAPCommandsCollection {
                                 r[j] = null;
                             }
                         }
-                        p.notifyResponseHandlers(r);
+                        notifyResponseHandlers(r, p);
                     } else if (response.isBAD()) {
                         if (ImapUtility.isInvalidMessageset(response)) {
                             return new int[0];
@@ -2618,7 +2591,7 @@ public final class IMAPCommandsCollection {
                                 r[j] = null;
                             }
                         }
-                        p.notifyResponseHandlers(r);
+                        notifyResponseHandlers(r, p);
                     } else if (response.isBAD()) {
                         if (ImapUtility.isInvalidMessageset(response)) {
                             return new TLongIntHashMap(0);
@@ -2694,7 +2667,7 @@ public final class IMAPCommandsCollection {
                                 r[j] = null;
                             }
                         }
-                        p.notifyResponseHandlers(r);
+                        notifyResponseHandlers(r, p);
                     } else if (response.isBAD()) {
                         throw new BadCommandException(IMAPException.getFormattedMessage(
                             IMAPException.Code.PROTOCOL_ERROR,
@@ -2760,7 +2733,7 @@ public final class IMAPCommandsCollection {
                             r[j] = null;
                         }
                     }
-                    p.notifyResponseHandlers(r);
+                    notifyResponseHandlers(r, p);
                 } else if (response.isBAD()) {
                     if (ImapUtility.isInvalidMessageset(response)) {
                         return new IMAPUpdateableData[0];
@@ -2955,7 +2928,7 @@ public final class IMAPCommandsCollection {
                         }
                         r[i] = null;
                     }
-                    p.notifyResponseHandlers(r);
+                    notifyResponseHandlers(r, p);
                 } else if (response.isBAD()) {
                     throw new BadCommandException(IMAPException.getFormattedMessage(
                         IMAPException.Code.PROTOCOL_ERROR,
@@ -3160,7 +3133,7 @@ public final class IMAPCommandsCollection {
                             uids[i] = uid;
                         }
                     }
-                    p.notifyResponseHandlers(r);
+                    notifyResponseHandlers(r, p);
                     return uids;
                 } else if (response.isBAD()) {
                     if (ImapUtility.isInvalidMessageset(response)) {
@@ -3289,6 +3262,27 @@ public final class IMAPCommandsCollection {
         final ProtocolException pe = new ProtocolException(causeMessage == null ? e.getMessage() : causeMessage);
         pe.initCause(e);
         return pe;
+    }
+
+    /**
+     * Handles specified response(s).
+     * 
+     * @param r The response(s)
+     * @param protocol The IMAP protocol
+     */
+    protected static void notifyResponseHandlers(final Response[] r, final IMAPProtocol protocol) {
+        final Response[] rs = new Response[1];
+        for (int i = 0; i < r.length; i++) {
+            final Response response = r[i];
+            if (null != response) {
+                rs[0] = response;
+                try {
+                    protocol.notifyResponseHandlers(rs);
+                } catch (final java.lang.ArrayIndexOutOfBoundsException e) {
+                    // Ignore
+                }
+            }
+        }
     }
 
 }

@@ -137,4 +137,9 @@ public class ExtraneousSeriesMasterRecoveryParser implements ICalParser {
 		return delegate.parseFreeBusy(ical, defaultTZ, ctx, errors, warnings);
 	}
 
+	@Override
+	public void setLimit(int limit) {
+		delegate.setLimit(limit);
+	}
+
 }
