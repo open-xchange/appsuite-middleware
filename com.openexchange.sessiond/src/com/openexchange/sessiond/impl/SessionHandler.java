@@ -365,15 +365,17 @@ public final class SessionHandler {
                             postSessionStored(session);
                         }
                     } catch (final Exception e) {
+                        final String s =
+                            MessageFormat.format(
+                                "Failed to put session {0} with Auth-Id {1} into session storage. (user={2}, context={3})",
+                                session.getSessionID(),
+                                session.getAuthId(),
+                                Integer.valueOf(session.getUserId()),
+                                Integer.valueOf(session.getContextId()));
                         if (DEBUG) {
-                            final String s =
-                                MessageFormat.format(
-                                    "Failed to put session {0} with Auth-Id {1} into session storage. (user={2}, context={3})",
-                                    session.getSessionID(),
-                                    session.getAuthId(),
-                                    Integer.valueOf(session.getUserId()),
-                                    Integer.valueOf(session.getContextId()));
                             LOG.info(s, e);
+                        } else {
+                            LOG.info(s);
                         }
                     }
                     return null;
