@@ -997,24 +997,10 @@ public final class SessionHandler {
     }
 
     private static SessionControl sessionToSessionControl(final Session session) {
-        if (session != null) {
-            final SessionImpl impl = new SessionImpl(
-                session.getUserId(),
-                session.getLoginName(),
-                session.getPassword(),
-                session.getContextId(),
-                session.getSessionID(),
-                session.getSecret(),
-                session.getRandomToken(),
-                session.getLocalIp(),
-                session.getLogin(),
-                session.getAuthId(),
-                session.getHash(),
-                session.getClient());
-            final SessionControl control = new SessionControl(impl);
-            return control;
+        if (session == null) {
+            return null;
         }
-        return null;
+        return new SessionControl(new SessionImpl(session));
     }
 
     private static Session[] merge(final Session[] array1, final Session[] array2) {
