@@ -102,7 +102,7 @@ public class CassandraEAVStorageImpl implements EAVStorage {
 	private static final String node = "192.168.33.37"; //TODO: fetch dynamic
 	private static final String keyspaceName = "OX";
 	private static final String CF_XT_PROPS = "ExtendedProperties";
-	private static final int replicationFactor = 3;
+	private static final int replicationFactor = 1;
 	
 	private final ColumnFamilyTemplate<UUID, Composite> xtPropsTemplate;
 	
@@ -244,8 +244,8 @@ public class CassandraEAVStorageImpl implements EAVStorage {
 		while (i < attributes.length) {
 			if (attr.containsKey(attributes[i])) {
 				retAttr.put(attributes[i], attr.get(attributes[i]));
-				i++;
 			}
+			i++;
 		}
 		
 		return retAttr;
