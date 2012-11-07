@@ -67,7 +67,6 @@ import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.core.Hazelcasts;
 import com.hazelcast.core.IMap;
 import com.openexchange.config.ConfigurationService;
-import com.openexchange.crypto.CryptoService;
 import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.session.Session;
@@ -116,7 +115,7 @@ public class HazelcastSessionStorageService implements SessionStorageService {
                 tmp = timeout;
                 if (null == tmp) {
                     ConfigurationService service = Services.optService(ConfigurationService.class);
-                    tmp = Integer.valueOf(null == service ? 1000 : service.getIntProperty("com.openexchange.sessionstorage.hazelcast.timeout", 1000));
+                    tmp = Integer.valueOf(null == service ? 250 : service.getIntProperty("com.openexchange.sessionstorage.hazelcast.timeout", 250));
                     timeout = tmp;
                 }
             }
@@ -125,8 +124,6 @@ public class HazelcastSessionStorageService implements SessionStorageService {
     }
 
     private final String mapName;
-    private final String encryptionKey;
-    private final CryptoService cryptoService;
     private final RefusedExecutionBehavior<IMap<String, HazelcastStoredSession>> abortBehavior;
 
     /**
@@ -134,8 +131,6 @@ public class HazelcastSessionStorageService implements SessionStorageService {
      */
     public HazelcastSessionStorageService(final HazelcastSessionStorageConfiguration config, final HazelcastInstance hazelcast) {
         super();
-        encryptionKey = config.getEncryptionKey();
-        cryptoService = config.getCryptoService();
         final MapConfig mapConfig = config.getMapConfig();
         final String name = mapConfig.getName();
         mapName = name;
@@ -195,6 +190,9 @@ public class HazelcastSessionStorageService implements SessionStorageService {
                 return hazelcastInstance.getMap(mapName);
             }
             final IMap<String, HazelcastStoredSession> map = getMapFrom(threadPool.submit(new GetSessionMapTask(hazelcastInstance, mapName), abortBehavior));
+            if (null == map) {
+                throw new HazelcastException("No such map: " + mapName);
+            }
             return new TimeoutAwareIMap(map, timeout());
         } catch (final OXException e) {
             throw e;
@@ -213,7 +211,11 @@ public class HazelcastSessionStorageService implements SessionStorageService {
      */
     private IMap<String, HazelcastStoredSession> sessionsUnchecked(final boolean failIfPaused) {
         try {
-            return sessions(failIfPaused);
+            final IMap<String, HazelcastStoredSession> map = sessions(failIfPaused);
+            if (null == map) {
+                throw new HazelcastException("No such map: " + mapName);
+            }
+            return map;
         } catch (final OXException e) {
             throw new HazelcastException(e.getDisplayMessage(Locale.US), e);
         }
@@ -226,7 +228,7 @@ public class HazelcastSessionStorageService implements SessionStorageService {
             if (null != sessionId && sessions.containsKey(sessionId)) {
                 final HazelcastStoredSession s = sessions.get(sessionId);
                 s.setLastAccess(System.currentTimeMillis());
-                s.setPassword(decrypt(s.getPassword()));
+                s.setPassword(s.getPassword());
                 sessions.replace(sessionId, s);
                 return s;
             }
@@ -251,11 +253,9 @@ public class HazelcastSessionStorageService implements SessionStorageService {
             for (final Session session : sessions) {
                 try {
                     final HazelcastStoredSession ss = new HazelcastStoredSession(session);
-                    ss.setPassword(crypt(ss.getPassword()));
+                    ss.setPassword(ss.getPassword());
                     sessionsMap.putIfAbsent(session.getSessionID(), ss);
                 } catch (final HazelcastException e) {
-                    LOG.warn("Session "+ session.getSessionID() + " could not be added to session storage.", e);
-                } catch (final OXException e) {
                     LOG.warn("Session "+ session.getSessionID() + " could not be added to session storage.", e);
                 }
             }
@@ -271,7 +271,7 @@ public class HazelcastSessionStorageService implements SessionStorageService {
         }
         try {
             final HazelcastStoredSession ss = new HazelcastStoredSession(session);
-            ss.setPassword(crypt(ss.getPassword()));
+            ss.setPassword(ss.getPassword());
             return null == sessions(false).putIfAbsent(session.getSessionID(), ss);
         } catch (final HazelcastException e) {
             throw OXHazelcastSessionStorageExceptionCodes.HAZELCAST_SESSIONSTORAGE_SAVE_FAILED.create(e, session.getSessionID());
@@ -288,7 +288,7 @@ public class HazelcastSessionStorageService implements SessionStorageService {
         if (null != session) {
             try {
                 final HazelcastStoredSession ss = new HazelcastStoredSession(session);
-                ss.setPassword(crypt(ss.getPassword()));
+                ss.setPassword(ss.getPassword());
                 sessions(false).put(session.getSessionID(), ss);
             } catch (final HazelcastException e) {
                 throw OXHazelcastSessionStorageExceptionCodes.HAZELCAST_SESSIONSTORAGE_SAVE_FAILED.create(e, session.getSessionID());
@@ -571,14 +571,6 @@ public class HazelcastSessionStorageService implements SessionStorageService {
             }
             throw SessionStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
-    }
-
-    private String crypt(final String password) throws OXException {
-        return cryptoService.encrypt(password, encryptionKey);
-    }
-
-    private String decrypt(final String encPassword) throws OXException {
-        return cryptoService.decrypt(encPassword, encryptionKey);
     }
 
 }

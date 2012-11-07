@@ -1,6 +1,13 @@
+* 2012-11-07 - marcus.klein@open-xchange.com
+
+ - Fix for bug 23563: Improved exception messages for too long used database connections.
+
 * 2012-11-07 - thorben.betten@open-xchange.com
 
  - Fix for bug 23638: Resolved possible deadlock situation
+ - Fix for bug 23574: Changed behavior of IMAPDefaultFolderChecker class, no retry attempts anymore
+ - Fix for bug 23645: Dropped unnecessary password encryption/decryption from in-memory Hazelcast storage
+ - Fix for bug 23625: fixed prefix
 
 * 2012-11-06 - marcus.klein@open-xchange.com
 

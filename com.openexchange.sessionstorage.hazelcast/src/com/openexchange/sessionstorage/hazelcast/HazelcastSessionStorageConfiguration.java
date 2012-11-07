@@ -50,7 +50,6 @@
 package com.openexchange.sessionstorage.hazelcast;
 
 import com.hazelcast.config.MapConfig;
-import com.openexchange.crypto.CryptoService;
 
 /**
  * {@link HazelcastSessionStorageConfiguration}
@@ -59,26 +58,21 @@ import com.openexchange.crypto.CryptoService;
  */
 public class HazelcastSessionStorageConfiguration {
 
-    private final String encryptionKey;
     private final MapConfig mapConfig;
 
     /**
      * Initializes a new {@link HazelcastSessionStorageConfiguration}.
      */
-    public HazelcastSessionStorageConfiguration(String encryptionKey, MapConfig mapConfig) {
+    public HazelcastSessionStorageConfiguration(MapConfig mapConfig) {
         super();
-        this.encryptionKey = encryptionKey;
         this.mapConfig = mapConfig;
     }
 
-    public String getEncryptionKey() {
-        return encryptionKey;
-    }
-
-    public CryptoService getCryptoService() {
-        return Services.getService(CryptoService.class);
-    }
-
+    /**
+     * Gets the map configuration for Hazelcast.
+     * 
+     * @return The map configuration
+     */
     public MapConfig getMapConfig() {
         return mapConfig;
     }

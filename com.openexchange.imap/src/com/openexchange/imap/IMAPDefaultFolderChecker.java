@@ -279,13 +279,8 @@ public class IMAPDefaultFolderChecker {
                         /*
                          * Check for mbox
                          */
-                        final int type;
                         final boolean mboxEnabled = MBoxEnabledCache.isMBoxEnabled(imapConfig, inboxFolder, prefix);
-                        if (mboxEnabled) {
-                            type = Folder.HOLDS_MESSAGES;
-                        } else {
-                            type = FOLDER_TYPE;
-                        }
+                        final int type = mboxEnabled ? Folder.HOLDS_MESSAGES : FOLDER_TYPE;
                         sequentiallyCheckFolders(prefix, sep, type, IMAPServiceRegistry.getService(MailAccountStorageService.class, true), mailSessionCache);
                         /*
                          * Remember default folders
