@@ -999,7 +999,12 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
         }
     }
 
-    private void appendRequestInfo(final StringBuilder builder) {
+    /**
+     * Appends request information.
+     * 
+     * @param builder The builder to append to
+     */
+    protected void appendRequestInfo(final StringBuilder builder) {
         builder.append("request-URI=''");
         builder.append(request.getRequestURI());
         builder.append("'', query-string=''");
@@ -2304,7 +2309,7 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
 
     }
 
-    private final class KeepAliveRunnable implements Runnable {
+    private static final class KeepAliveRunnable implements Runnable {
 
         private final AjpProcessor ajpProcessor;
         private final int max;
@@ -2325,8 +2330,11 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
         public void run() {
             try {
                 if (ajpProcessor.isProcessing() && ((System.currentTimeMillis() - ajpProcessor.getLastWriteAccess()) > max)) {
-                    if (!firstProcessed && request.getContentLengthLong() > 0) {
+                    if (!ajpProcessor.firstProcessed && ajpProcessor.request.getContentLengthLong() > 0) {
                         // Very first request data chunk not yet fully received
+                        final StringBuilder tmp = new StringBuilder("Very first request data chunk not yet received.");
+                        ajpProcessor.appendRequestInfo(tmp);
+                        LOG.warn(tmp.toString());
                         return;
                     }
                     /*
