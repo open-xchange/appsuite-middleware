@@ -2,6 +2,7 @@
 
  - Fix for bug 23638: Resolved possible deadlock situation
  - Fix for bug 23574: Changed behavior of IMAPDefaultFolderChecker class, no retry attempts anymore
+ - Fix for bug 23645: Dropped unnecessary password encryption/decryption from in-memory Hazelcast storage
 
 * 2012-11-06 - marcus.klein@open-xchange.com
 
