@@ -278,7 +278,10 @@ public final class SessionHandler {
             final SessionStorageService storageService = getServiceRegistry().getService(SessionStorageService.class);
             if (storageService != null) {
                 try {
-                    retval = sessionToSessionControl(storageService.getAnyActiveSessionForUser(userId, contextId));
+                    final Session storedSession = storageService.getAnyActiveSessionForUser(userId, contextId);
+                    if (null != storedSession) {
+                        retval = sessionToSessionControl(storedSession);
+                    }
                 } catch (final OXException e) {
                     LOG.error(e.getMessage(), e);
                 }
