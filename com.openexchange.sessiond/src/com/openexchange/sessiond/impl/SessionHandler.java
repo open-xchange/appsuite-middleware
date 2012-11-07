@@ -328,15 +328,15 @@ public final class SessionHandler {
             Long.toString(System.currentTimeMillis())), sessionIdGenerator.createRandomId(), clientHost, login, authId, hash, client);
         session.setVolatile(isVolatile);
         // Add session
-        sessionDataRef.get().addSession(session, noLimit);
+        final SessionImpl addedSession = sessionDataRef.get().addSession(session, noLimit).getSession();
         final SessionStorageService sessionStorageService = getServiceRegistry().getService(SessionStorageService.class);
         if (sessionStorageService != null) {
-            storeSession(session, sessionStorageService, false);
+            storeSession(addedSession, sessionStorageService, false);
         }
         // Post event for created session
-        postSessionCreation(session);
+        postSessionCreation(addedSession);
         // Return session ID
-        return session;
+        return addedSession;
     }
 
     /**
