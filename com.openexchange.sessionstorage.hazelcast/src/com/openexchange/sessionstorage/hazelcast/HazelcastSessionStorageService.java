@@ -53,6 +53,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
@@ -214,7 +215,7 @@ public class HazelcastSessionStorageService implements SessionStorageService {
         try {
             return sessions(failIfPaused);
         } catch (final OXException e) {
-            throw new HazelcastException(e.getLogMessage(), e);
+            throw new HazelcastException(e.getDisplayMessage(Locale.US), e);
         }
     }
 
