@@ -62,14 +62,20 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Callable;
+import java.util.concurrent.CancellationException;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
+import java.util.concurrent.RejectedExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import org.apache.commons.logging.Log;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventAdmin;
 import com.openexchange.caching.objects.CachedSession;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.SessionCounter;
@@ -77,9 +83,11 @@ import com.openexchange.sessiond.SessionExceptionCodes;
 import com.openexchange.sessiond.SessionMatcher;
 import com.openexchange.sessiond.SessiondEventConstants;
 import com.openexchange.sessiond.cache.SessionCache;
+import com.openexchange.sessiond.services.SessiondServiceRegistry;
 import com.openexchange.sessionstorage.SessionStorageExceptionCodes;
 import com.openexchange.sessionstorage.SessionStorageService;
 import com.openexchange.sessionstorage.StoredSession;
+import com.openexchange.threadpool.AbstractTask;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.threadpool.ThreadPools;
 import com.openexchange.timer.ScheduledTimerTask;
@@ -558,7 +566,7 @@ public final class SessionHandler {
             final SessionStorageService storageService = getServiceRegistry().getService(SessionStorageService.class);
             if (storageService != null) {
                 try {
-                    final Session storedSession = storageService.lookupSession(sessionId);
+                    final Session storedSession = getSessionFrom(sessionId, storageService);
                     if (null != storedSession) {
                         final SessionControl sc = sessionData.addSession(new SessionImpl(storedSession), noLimit, true);
                         return null == sc ? sessionToSessionControl(storedSession) : sc;
@@ -1024,6 +1032,69 @@ public final class SessionHandler {
             }
         }
         return retval;
+    }
+
+    private static final class GetStoredSessionTask extends AbstractTask<Session> {
+
+        private final SessionStorageService storageService;
+        private final String sessionId;
+
+        protected GetStoredSessionTask(final String sessionId, final SessionStorageService storageService) {
+            super();
+            this.storageService = storageService;
+            this.sessionId = sessionId;
+        }
+
+        @Override
+        public Session call() throws Exception {
+            return storageService.lookupSession(sessionId);
+        }
+    }
+
+    private static volatile Integer timeout;
+    private static int timeout() {
+        Integer tmp = timeout;
+        if (null == tmp) {
+            synchronized (SessionHandler.class) {
+                tmp = timeout;
+                if (null == tmp) {
+                    ConfigurationService service = SessiondServiceRegistry.getServiceRegistry().getService(ConfigurationService.class);
+                    tmp = Integer.valueOf(null == service ? 250 : service.getIntProperty("com.openexchange.sessiond.sessionstorage.timeout", 250));
+                    timeout = tmp;
+                }
+            }
+        }
+        return tmp.intValue();
+    }
+
+    private static Session getSessionFrom(final String sessionId, final SessionStorageService storageService) throws OXException {
+        final int timeout = timeout();
+        try {
+            final GetStoredSessionTask task = new GetStoredSessionTask(sessionId, storageService);
+            return ThreadPools.getThreadPool().submit(task).get(timeout, TimeUnit.MILLISECONDS);
+        } catch (final RejectedExecutionException e) {
+            return storageService.lookupSession(sessionId);
+        } catch (final InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw SessionStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+        } catch (final ExecutionException e) {
+            final Throwable t = e.getCause();
+            if (t instanceof OXException) {
+                throw (OXException) t;
+            }
+            if (t instanceof RuntimeException) {
+                throw (RuntimeException) t;
+            }
+            if (t instanceof Error) {
+                throw (Error) t;
+            }
+            throw new IllegalStateException("Not unchecked", t);
+        } catch (final TimeoutException e) {
+            LOG.warn("Session " + sessionId + " could not be retrieved from session storage within " + timeout + "msec.");
+            return null;
+        } catch (final CancellationException e) {
+            return null;
+        }
     }
 
     private static final class UserKey {
