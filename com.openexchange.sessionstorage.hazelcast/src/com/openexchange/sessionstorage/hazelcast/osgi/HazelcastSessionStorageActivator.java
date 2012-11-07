@@ -58,7 +58,6 @@ import com.hazelcast.config.MapConfig;
 import com.hazelcast.config.MaxSizeConfig;
 import com.hazelcast.core.HazelcastInstance;
 import com.openexchange.config.ConfigurationService;
-import com.openexchange.crypto.CryptoService;
 import com.openexchange.log.LogFactory;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.sessionstorage.SessionStorageService;
@@ -80,7 +79,7 @@ public class HazelcastSessionStorageActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ConfigurationService.class, CryptoService.class, ThreadPoolService.class };
+        return new Class<?>[] { ConfigurationService.class, ThreadPoolService.class };
     }
 
     @Override
@@ -90,10 +89,6 @@ public class HazelcastSessionStorageActivator extends HousekeepingActivator {
         final ConfigurationService configService = getService(ConfigurationService.class);
         final boolean enabled = configService.getBoolProperty("com.openexchange.sessionstorage.hazelcast.enabled", false);
         if (enabled) {
-            final String encryptionKey = configService.getProperty("com.openexchange.sessionstorage.hazelcast.encryptionKey");
-            if (encryptionKey == null) {
-                throw OXHazelcastSessionStorageExceptionCodes.HAZELCAST_SESSIONSTORAGE_NO_ENCRYPTION_KEY.create();
-            }
             final MapConfig mapConfig = new MapConfig();
             final String mapName = configService.getProperty("com.openexchange.sessionstorage.hazelcast.map.name");
             final int backupCount = configService.getIntProperty("com.openexchange.sessionstorage.hazelcast.map.backupcount", 1);
@@ -118,7 +113,7 @@ public class HazelcastSessionStorageActivator extends HousekeepingActivator {
             maxSizeConfig.setSize(maxSize);
             mapConfig.setMaxSizeConfig(maxSizeConfig);
             mapConfig.setMergePolicy(mergePolicy);
-            final HazelcastSessionStorageConfiguration config = new HazelcastSessionStorageConfiguration(encryptionKey, mapConfig);
+            final HazelcastSessionStorageConfiguration config = new HazelcastSessionStorageConfiguration(mapConfig);
             // Track HazelcastInstance
             final BundleContext context = this.context;
             track(HazelcastInstance.class, new ServiceTrackerCustomizer<HazelcastInstance, HazelcastInstance>() {
