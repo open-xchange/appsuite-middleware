@@ -76,7 +76,10 @@ public class MailFieldMapper implements FieldMapper {
         super();
         fieldMapping = new EnumMap<MailIndexField, SolrMailField>(MailIndexField.class);
         for (final SolrMailField field : SolrMailField.values()) {
-            fieldMapping.put(field.indexField(), field);
+            MailIndexField indexField = field.indexField();
+            if (indexField != null) {
+                fieldMapping.put(indexField, field);
+            }
         }
     }
     

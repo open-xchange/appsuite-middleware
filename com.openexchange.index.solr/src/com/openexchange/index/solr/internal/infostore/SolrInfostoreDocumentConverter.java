@@ -96,7 +96,7 @@ public class SolrInfostoreDocumentConverter implements SolrResultConverter<Docum
             }
         }
 
-        document.setField(SolrInfostoreField.UUID.solrName(), InfostoreUUID.newUUID(contextId, userId, indexDocument));        
+        document.setField(SolrInfostoreField.UUID.solrName(), InfostoreUUID.newUUID(contextId, userId, indexDocument.getObject()));        
         return document;
     }
 
@@ -119,7 +119,12 @@ public class SolrInfostoreDocumentConverter implements SolrResultConverter<Docum
                 InfostoreIndexField indexField = solrField.indexField();
                 Metadata metadataField = indexField.getMetadataField();
                 if (metadataField != null) {
-                    setter.setValue(value);
+                    if (metadataField.equals(Metadata.CREATION_DATE_LITERAL) || metadataField.equals(Metadata.LAST_MODIFIED_LITERAL)) {
+                        setter.setValue(new Date((Long) value));
+                    } else {
+                        setter.setValue(value);
+                    }
+                    
                     metadataField.doSwitch(setter);
                     setter.setValue(null);
                 }

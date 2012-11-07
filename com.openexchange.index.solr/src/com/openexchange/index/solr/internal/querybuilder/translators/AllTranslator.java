@@ -1,4 +1,4 @@
-package com.openexchange.index.solr.internal.mail.translators;
+package com.openexchange.index.solr.internal.querybuilder.translators;
 
 import com.openexchange.index.solr.internal.querybuilder.Configuration;
 import com.openexchange.index.solr.internal.querybuilder.QueryTranslator;

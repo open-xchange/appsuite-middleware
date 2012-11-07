@@ -49,6 +49,7 @@
 
 package com.openexchange.index.solr.internal.infostore;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.EnumSet;
@@ -73,8 +74,12 @@ import com.openexchange.index.QueryParameters;
 import com.openexchange.index.SearchHandler;
 import com.openexchange.index.solr.internal.AbstractSolrIndexAccess;
 import com.openexchange.index.solr.internal.Services;
+import com.openexchange.index.solr.internal.SolrField;
 import com.openexchange.index.solr.internal.SolrIndexResult;
 import com.openexchange.index.solr.internal.attachments.SolrAttachmentField;
+import com.openexchange.index.solr.internal.querybuilder.BuilderException;
+import com.openexchange.index.solr.internal.querybuilder.SimpleQueryBuilder;
+import com.openexchange.index.solr.internal.querybuilder.SolrQueryBuilder;
 import com.openexchange.solr.SolrCoreIdentifier;
 import com.openexchange.solr.SolrProperties;
 
@@ -106,7 +111,7 @@ public class SolrInfostoreIndexAccess extends AbstractSolrIndexAccess<DocumentMe
 
     @Override
     public void addEnvelopeData(IndexDocument<DocumentMetadata> document) throws OXException {
-        addDocument(convertToDocument(document));        
+        addDocument(convertToDocument(document));
     }
 
     @Override
@@ -139,12 +144,12 @@ public class SolrInfostoreIndexAccess extends AbstractSolrIndexAccess<DocumentMe
             inputDocuments.add(convertToDocument(document));
         }
         
-        addDocuments(inputDocuments);  
+        addDocuments(inputDocuments);
     }
 
     @Override
     public void addAttachments(IndexDocument<DocumentMetadata> document, boolean full) throws OXException {
-        addDocument(convertToDocument(document));  
+        addDocument(convertToDocument(document));
     }
 
     @Override
@@ -176,7 +181,7 @@ public class SolrInfostoreIndexAccess extends AbstractSolrIndexAccess<DocumentMe
         List<IndexDocument<DocumentMetadata>> documents = indexResult.getResults();
         Set<String> uuids = new HashSet<String>(documents.size());
         for (IndexDocument<DocumentMetadata> document : documents) {
-            uuids.add(InfostoreUUID.newUUID(contextId, userId, document).toString());
+            uuids.add(InfostoreUUID.newUUID(contextId, userId, document.getObject()).toString());
         }
         
         String deleteQuery = buildQueryStringWithOr(SolrAttachmentField.UUID.solrName(), uuids);
@@ -192,11 +197,10 @@ public class SolrInfostoreIndexAccess extends AbstractSolrIndexAccess<DocumentMe
     }
 
     @Override
-    public IndexResult<DocumentMetadata> query(QueryParameters parameters, Set<? extends IndexField> fields) throws OXException {        
+    public IndexResult<DocumentMetadata> query(QueryParameters parameters, Set<? extends IndexField> fields) throws OXException {
         SolrQuery solrQuery = buildSolrQuery(parameters);
-        setSortAndOrder(parameters, solrQuery);
         Set<SolrInfostoreField> solrFields = convertAndCheckFields(parameters, fields);
-        setFieldList(solrQuery, solrFields);        
+        setFieldList(solrQuery, solrFields);
         List<IndexDocument<DocumentMetadata>> results = queryChunkWise(new SolrInfostoreDocumentConverter(), solrQuery, parameters.getOff(), parameters.getLen(), 100);
         if (results.isEmpty()) {
             return Indexes.emptyResult();
@@ -206,74 +210,17 @@ public class SolrInfostoreIndexAccess extends AbstractSolrIndexAccess<DocumentMe
     }
     
     private SolrQuery buildSolrQuery(QueryParameters parameters) throws OXException {
-        SearchHandler searchHandler = parameters.getHandler();
-        if (searchHandler == null) {
-            throw new IllegalArgumentException("Parameter `search handler` must not be null!");
+        SolrQueryBuilder queryBuilder;
+        try {
+            ConfigurationService config = Services.getService(ConfigurationService.class);
+            String configDir = config.getProperty(SolrProperties.CONFIG_DIR);
+            queryBuilder = new SimpleQueryBuilder(configDir + File.separatorChar + "infostore-querybuilder.properties", null, SolrInfostoreField.FOLDER, InfostoreFieldMapper.getInstance());
+            return queryBuilder.buildQuery(parameters);
+        } catch (BuilderException e) {
+            throw new OXException(e);
         }
-        
-        ConfigurationService config = Services.getService(ConfigurationService.class);
-        SolrQuery solrQuery;
-        switch (searchHandler) { 
-            case SIMPLE: 
-            {
-                Object searchTerm = parameters.getSearchTerm();
-                if (searchTerm == null || !(searchTerm instanceof String)) {
-                    throw new IllegalArgumentException("Parameter `searchTerm` must not be null and of type java.lang.String!");
-                }
-                
-                solrQuery = new SolrQuery((String) searchTerm);
-                solrQuery.setQueryType(config.getProperty(SolrProperties.SIMPLE_HANLDER));
-                addFilterQueries(parameters, solrQuery);
-                break;
-            }
-            
-            case ALL_REQUEST:
-            {
-                solrQuery = new SolrQuery("*:*");
-                solrQuery.setQueryType(config.getProperty(SolrProperties.ALL_HANLDER));                
-                addFilterQueries(parameters, solrQuery);             
-                break;
-            }
-            
-            case GET_REQUEST:
-            {                
-                Set<String> ids = parameters.getIndexIds();
-                if (ids == null) {
-                    throw new IllegalArgumentException("Parameter `indexIds` must not be null!");
-                }
-                
-                solrQuery = new SolrQuery(stringSetToQuery(ids));
-                solrQuery.setQueryType(config.getProperty(SolrProperties.GET_HANDLER));
-                addFilterQueries(parameters, solrQuery);
-                break;
-            }
-            
-            default:
-                throw new IllegalArgumentException("Search handler " + searchHandler.toString() + " is not valid for this action.");
-        }        
+    }
 
-        return solrQuery;
-    }
-    
-    private void addFilterQueries(QueryParameters parameters, SolrQuery solrQuery) {
-        Set<AccountFolders> all = parameters.getAccountFolders();
-        Set<String> queries = new HashSet<String>();
-        if (all != null) {
-            for (AccountFolders accountFolders : all) {
-                Set<String> folders = accountFolders.getFolders();
-                if (!folders.isEmpty()) {
-                    queries.add(buildQueryStringWithOr(SolrInfostoreField.FOLDER.solrName(), folders));
-                }
-            }
-        }
-        
-        addFilterQueryIfNotNull(solrQuery, catenateQueriesWithOr(queries.toArray(new String[queries.size()])));
-    }
-    
-    private void setSortAndOrder(QueryParameters parameters, SolrQuery solrQuery) {
-        setSortAndOrder(parameters, solrQuery, SolrInfostoreField.class);
-    }
-    
     private Set<SolrInfostoreField> convertAndCheckFields(QueryParameters parameters, Set<? extends IndexField> fields) {
         Set<SolrInfostoreField> set;
         if (fields == null) {
@@ -282,11 +229,14 @@ public class SolrInfostoreIndexAccess extends AbstractSolrIndexAccess<DocumentMe
             set = EnumSet.noneOf(SolrInfostoreField.class);
             for (IndexField field : fields) {
                 if (field instanceof InfostoreIndexField) {
-                    set.add(SolrInfostoreField.getByIndexField((InfostoreIndexField) field));
+                    SolrInfostoreField solrField = (SolrInfostoreField) InfostoreFieldMapper.getInstance().solrFieldFor(field);
+                    if (solrField != null) {
+                        set.add(solrField);
+                    }
                 }
             }
         }
         
-        return set;        
+        return set;
     }
 }

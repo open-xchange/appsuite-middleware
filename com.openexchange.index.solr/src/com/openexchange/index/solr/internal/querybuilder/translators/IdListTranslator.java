@@ -1,4 +1,4 @@
-package com.openexchange.index.solr.internal.mail.translators;
+package com.openexchange.index.solr.internal.querybuilder.translators;
 
 import java.util.Set;
 import org.apache.commons.logging.Log;

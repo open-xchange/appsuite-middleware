@@ -47,64 +47,58 @@
  *
  */
 
-package com.openexchange.groupware.infostore.index;
+package com.openexchange.index.solr.internal.infostore;
 
-import com.openexchange.groupware.infostore.DocumentMetadata;
-import com.openexchange.index.IndexDocument;
+import java.util.EnumMap;
+import java.util.Map;
+import org.apache.commons.logging.Log;
+import com.openexchange.groupware.infostore.index.InfostoreIndexField;
+import com.openexchange.index.IndexField;
+import com.openexchange.index.solr.internal.FieldMapper;
+import com.openexchange.index.solr.internal.SolrField;
+
 
 /**
- * {@link InfostoreUUID}
+ * {@link InfostoreFieldMapper}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public class InfostoreUUID {
-
-    private final String fileUUID;
+public class InfostoreFieldMapper implements FieldMapper {
+    
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(InfostoreFieldMapper.class);
+    
+    private static final InfostoreFieldMapper INSTANCE = new InfostoreFieldMapper();
+    
+    private final Map<InfostoreIndexField, SolrInfostoreField> fieldMapping;
     
     
-    private InfostoreUUID(int contextId, int userId, long folderId, int fileId) {
+    private InfostoreFieldMapper() {
         super();
-        StringBuilder tmp = new StringBuilder(64);
-        tmp.append("infostore/").append(contextId).append('/').append(userId).append('/').append(folderId).append('/').append(fileId);
-        fileUUID = tmp.toString();
+        fieldMapping = new EnumMap<InfostoreIndexField, SolrInfostoreField>(InfostoreIndexField.class);
+        for (SolrInfostoreField solrField : SolrInfostoreField.values()) {
+            InfostoreIndexField indexField = solrField.indexField();
+            if (indexField != null) {
+                fieldMapping.put(indexField, solrField);
+            }
+        }
     }
     
-    public static InfostoreUUID newUUID(int contextId, int userId, DocumentMetadata document) {
-        return newUUID(contextId, userId, document.getFolderId(), document.getId());
-    }
-    
-    public static InfostoreUUID newUUID(int contextId, int userId, long folderId, int fileId) {
-        return new InfostoreUUID(contextId, userId, folderId, fileId);
-    }
-    
-    @Override
-    public String toString() {
-        return fileUUID;
+    public static InfostoreFieldMapper getInstance() {
+        return INSTANCE;
     }
     
     @Override
-    public int hashCode() {
-        final int prime = 31;
-        int result = 1;
-        result = prime * result + ((fileUUID == null) ? 0 : fileUUID.hashCode());
-        return result;
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj)
-            return true;
-        if (obj == null)
-            return false;
-        if (getClass() != obj.getClass())
-            return false;
-        InfostoreUUID other = (InfostoreUUID) obj;
-        if (fileUUID == null) {
-            if (other.fileUUID != null)
-                return false;
-        } else if (!fileUUID.equals(other.fileUUID))
-            return false;
-        return true;
+    public SolrField solrFieldFor(IndexField indexField) {
+        if (indexField == null) {
+            return null;
+        }
+        
+        if (!(indexField instanceof InfostoreIndexField)) {
+            LOG.warn("Parameter 'indexField' must be of type " + InfostoreIndexField.class.getName() + "!");
+            return null;
+        }
+        
+        return fieldMapping.get((InfostoreIndexField) indexField);
     }
 
 }
