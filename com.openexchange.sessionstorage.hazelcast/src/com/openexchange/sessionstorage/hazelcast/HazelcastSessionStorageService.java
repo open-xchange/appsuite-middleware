@@ -116,7 +116,7 @@ public class HazelcastSessionStorageService implements SessionStorageService {
                 tmp = timeout;
                 if (null == tmp) {
                     ConfigurationService service = Services.optService(ConfigurationService.class);
-                    tmp = Integer.valueOf(null == service ? 1000 : service.getIntProperty("com.openexchange.sessionstorage.hazelcast.timeout", 1000));
+                    tmp = Integer.valueOf(null == service ? 250 : service.getIntProperty("com.openexchange.sessionstorage.hazelcast.timeout", 250));
                     timeout = tmp;
                 }
             }
