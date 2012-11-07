@@ -81,8 +81,7 @@ msgstr "Probléma a szolgáltatásjegy törlésekor: %1$s"
 #. %1$s is replaced with the subjects principal name.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.authentication.kerberos/src/com/openexchange/kerberos/KerberosExceptionMessages.java:87
 msgid "Can not find credentials in subject %1$s that need a renewal."
-msgstr ""
-"Nem találhatók eltávolítást igénylő hitelesítési adatok a(z) %1$s alanyban."
+msgstr "Nem találhatók eltávolítást igénylő hitelesítési adatok a(z) %1$s alanyban."
 
 #. Written to the log file if the session does not contain a Kerberos subject for the delegation.
 #. %1$s is replaced with the session identifier.
@@ -181,8 +180,7 @@ msgstr "Nem található gyorsítótár ehhez a régiónévhez: %1$s"
 #. Missing default auxiliary defined by property: jcs.default=<aux-name>
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.caching/src/com/openexchange/caching/CacheExceptionMessage.java:99
 msgid "Missing default auxiliary defined by property: jcs.default=<aux-name>"
-msgstr ""
-"A tulajdonság által megadott alapértelmezett külső érték hiányzik: jcs."
+msgstr "A tulajdonság által megadott alapértelmezett külső érték hiányzik: jcs."
 "default=<aux-name>"
 
 #. Invalid cache region name \"%1$s\".
@@ -442,8 +440,7 @@ msgstr "Befejezés nélkül"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/Messages.java:61
 msgid "An attendee would like to be brought up to date about this appointment."
-msgstr ""
-"Egy résztvevő szeretne naprakész lenni ezzel a találkozóval kapcsolatban."
+msgstr "Egy résztvevő szeretne naprakész lenni ezzel a találkozóval kapcsolatban."
 
 #. *
 #. * Example: "This appointment has attachments, please see the appointment at http://ox.superhoster.invalid/index.html#m=calendar&f=bla&i=bla to retrieve them"
@@ -538,8 +535,7 @@ msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/Messages.java:79
 msgid "This message comes from an internal user. Best ignore it."
-msgstr ""
-"Ez az üzenet egy belső felhasználótól érkezett. Semmit sem kell tennie ezzel "
+msgstr "Ez az üzenet egy belső felhasználótól érkezett. Semmit sem kell tennie ezzel "
 "az üzenettel."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/Messages.java:80
@@ -1127,8 +1123,7 @@ msgstr "Ez a tároló nem kezeli a(z) %s mappát"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contact.storage.ldap/src/com/openexchange/contact/storage/ldap/LdapExceptionMessages.java:68
 msgid "No mapping for object %s, folder %s, context %d found"
-msgstr ""
-"A(z) %s objektum, %s mappa, %d kontextus nem rendelkezik összerendeléssel"
+msgstr "A(z) %s objektum, %s mappa, %d kontextus nem rendelkezik összerendeléssel"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contact.storage.ldap/src/com/openexchange/contact/storage/ldap/LdapExceptionMessages.java:69
 msgid "No mapping for LDAP identifier %s found"
@@ -1503,7 +1498,7 @@ msgstr "A megadott „%s” storagePriority érték a(z) „%s” fájlban nem i
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contact.storage.ldap/src/com/openexchange/contact/storage/ldap/LdapExceptionMessages.java:124
 msgid "Unable to map contact property \"%s\""
-msgstr "A(z) „%1$s”  kapcsolati tulajdonság nem rendelhető össze."
+msgstr "A(z) „%s”  kapcsolati tulajdonság nem rendelhető össze."
 
 #. A JSON error occurred: %1$s
 #. *
@@ -1633,8 +1628,7 @@ msgstr "Általános biztonsági kivétel történt."
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.crypto/src/com/openexchange/crypto/CryptoExceptionMessage.java:92
 msgid "Provide arbitrary byte sequence to generate a secure key."
-msgstr ""
-"A biztonsági kulcs létrehozásához adjon meg egy tetszőleges byte-sorozatot."
+msgstr "A biztonsági kulcs létrehozásához adjon meg egy tetszőleges byte-sorozatot."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.crypto/src/com/openexchange/crypto/CryptoExceptionMessage.java:94
 msgid "Arbitrary byte sequence is missing to generate a secure key."
@@ -1724,8 +1718,7 @@ msgstr "Hiba történt a(z) %1$s felhasználó felhasználói adatainak betölt�
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.eas.provisioning.json/src/com/openexchange/mobile/configuration/json/exception/MobileProvisioningJsonExceptionMessages.java:66
 msgid "Could not load configuration or necessary field from configuration"
-msgstr ""
-"Nem tölthető be a konfiguráció, vagy a szükséges mező a konfigurációból"
+msgstr "Nem tölthető be a konfiguráció, vagy a szükséges mező a konfigurációból"
 
 #. A CIFS/SMB error occurred: %1$s
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.cifs/src/com/openexchange/file/storage/cifs/CIFSExceptionMessages.java:66
@@ -1872,8 +1865,7 @@ msgstr "A(z) „%1$s” könyvtárat nem szabad frissíteni."
 #. Invalid or missing credentials to access WebDAV server "%1$s".
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.webdav/src/com/openexchange/file/storage/webdav/WebDAVFileStorageExceptionMessages.java:88
 msgid "Invalid or missing credentials to access WebDAV server \"%1$s\"."
-msgstr ""
-"Érvénytelen vagy hiányzó hitelesítési adatok a(z) „%1$s” WebDAV kiszolgáló "
+msgstr "Érvénytelen vagy hiányzó hitelesítési adatok a(z) „%1$s” WebDAV kiszolgáló "
 "eléréséhez."
 
 #. The resource is not a file: %1$s
@@ -1997,8 +1989,7 @@ msgstr "Nincs kapcsolat"
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:127
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.messaging/src/com/openexchange/messaging/MessagingExceptionMessages.java:127
 msgid "Invalid sorting column. Cannot sort by %1$s."
-msgstr ""
-"Az oszlop érvénytelen a rendezéshez. Nem lehet a(z) %1$s alapján rendezni."
+msgstr "Az oszlop érvénytelen a rendezéshez. Nem lehet a(z) %1$s alapján rendezni."
 
 #. No attachment found with section identifier %1$s in file %2$s in folder %3$s.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:130
@@ -2164,8 +2155,7 @@ msgstr "Az alapértelmezett elemattribútumok nem kérhetők le."
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/cache/OXCachingExceptionMessage.java:86
 msgid "Cache %s could not be initialized due to following error: %s"
-msgstr ""
-"A(z) %s gyorsítótárat a következő hiba miatt nem lehet előkészíteni: %s"
+msgstr "A(z) %s gyorsítótárat a következő hiba miatt nem lehet előkészíteni: %s"
 
 #. Too few (%d) login attributes.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/configjump/ConfigJumpExceptionMessage.java:73
@@ -2225,8 +2215,7 @@ msgstr "Nem hozható létre kapcsolat a konfigurációs adatbázishoz."
 #. %2$d is replaced with the server identifier.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/database/DBPoolingExceptionStrings.java:68
 msgid "Database for context %1$d and server %2$d can not be resolved"
-msgstr ""
-"Az adatbázis a(z) %1$d kontextushoz és %2$d kiszolgálóhoz nem oldható fel"
+msgstr "Az adatbázis a(z) %1$d kontextushoz és %2$d kiszolgálóhoz nem oldható fel"
 
 #. The connection to the database could not be established.
 #. %1$d is replaced with the database pool identifier.
@@ -2328,8 +2317,7 @@ msgstr "A tranzakciószámláló hiányzik a(z) %1$d kontextushoz."
 #. %2$d is replaced with the server identifier.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/database/DBPoolingExceptionStrings.java:130
 msgid "Inserting database assignment for context %1$d and server %2$d failed!"
-msgstr ""
-"A(z) %1$d kontextushoz és %2$d kiszolgálóhoz hozzáadott adatbázis-"
+msgstr "A(z) %1$d kontextushoz és %2$d kiszolgálóhoz hozzáadott adatbázis-"
 "összerendelés sikertelen!"
 
 #. Text displayed to user if there is no message.
@@ -2454,8 +2442,7 @@ msgstr "A jelszót nem sikerült megváltoztatni"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/sessiond/SessionExceptionMessages.java:74
 msgid "Max. number of sessions exceeded for user %1$s in context %2$s"
-msgstr ""
-"A(z) %1$s felhasználó maximális munkameneteinek száma túllépve a(z) %2$s "
+msgstr "A(z) %1$s felhasználó maximális munkameneteinek száma túllépve a(z) %2$s "
 "kontextusban"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/sessiond/SessionExceptionMessages.java:76
@@ -2655,8 +2642,7 @@ msgstr "Ellenőrizze, hogy a fájl megfelelően van-e formázva."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.i18n/src/com/openexchange/i18n/parsing/I18NErrorStrings.java:79
 msgid "Please make sure the file is readable by the groupware."
-msgstr ""
-"Győződjön meg róla, hogy a fájlt tudja olvasni a csoportmunka-szoftver."
+msgstr "Győződjön meg róla, hogy a fájlt tudja olvasni a csoportmunka-szoftver."
 
 #. Implementing class could not be found
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/entity2acl/Entity2ACLExceptionMessage.java:70
@@ -2685,8 +2671,7 @@ msgstr "Ismeretlen IMAP-kiszolgáló: %1$s"
 #. Missing IMAP server arguments to resolve IMAP login to a user
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/entity2acl/Entity2ACLExceptionMessage.java:88
 msgid "Missing IMAP server arguments to resolve IMAP login to a user"
-msgstr ""
-"Hiányzó IMAP kiszolgálóargumentumok az IMAP bejelentkezés feloldásához "
+msgstr "Hiányzó IMAP kiszolgálóargumentumok az IMAP bejelentkezés feloldásához "
 "felhasználóvá"
 
 #. IMAP login %1$s could not be resolved to a user
@@ -2697,8 +2682,7 @@ msgstr "A(z) %1$s IMAP bejelentkezés nem oldható fel felhasználóvá"
 #. User %1$s from context %2$s is not known on IMAP server "%3$s".
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/entity2acl/Entity2ACLExceptionMessage.java:94
 msgid "User %1$s from context %2$s is not known on IMAP server \"%3$s\"."
-msgstr ""
-"A(z) %2$s kontextus %1$s felhasználója nem ismert a(z) „%3$s” IMAP-"
+msgstr "A(z) %2$s kontextus %1$s felhasználója nem ismert a(z) „%3$s” IMAP-"
 "kiszolgálón."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.importexport/src/com/openexchange/importexport/exceptions/ImportExportExceptionMessages.java:61
@@ -2760,8 +2744,7 @@ msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.importexport/src/com/openexchange/importexport/exceptions/ImportExportExceptionMessages.java:85
 msgid "Tasks module is not enabled for the user. Tasks cannot be imported."
-msgstr ""
-"A feladatmodul nincs engedélyezve a felhasználó számára, a feladatok nem "
+msgstr "A feladatmodul nincs engedélyezve a felhasználó számára, a feladatok nem "
 "importálhatók."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.importexport/src/com/openexchange/importexport/exceptions/ImportExportExceptionMessages.java:87
@@ -2928,8 +2911,7 @@ msgstr "I/O hiba történt: %1$s"
 #. An index entry does not exist for folder %1$s in account %2$s.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.index/src/com/openexchange/index/IndexExceptionMessages.java:73
 msgid "An index entry does not exist for folder %1$s in account %2$s."
-msgstr ""
-"Egy indexbejegyzés nem létezik a(z) %1$s mappához a(z) %2$s felhasználó "
+msgstr "Egy indexbejegyzés nem létezik a(z) %1$s mappához a(z) %2$s felhasználó "
 "számára."
 
 #. Index-based search is not supported for module: %1$s
@@ -3121,8 +3103,7 @@ msgstr "Nem található bejelentkezési űrlap ezen az oldalon: %1$s"
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.messaging.facebook/src/com/openexchange/messaging/facebook/FacebookMessagingExceptionMessages.java:85
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.messaging.mail/src/com/openexchange/messaging/mail/MailMessagingExceptionMessages.java:84
 msgid "Element with attribute %1$s not found on page %2$s."
-msgstr ""
-"A(z) %1$s attribútummal rendelkező elem nem található ezen az oldalon: %2$s."
+msgstr "A(z) %1$s attribútummal rendelkező elem nem található ezen az oldalon: %2$s."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.messaging.facebook/src/com/openexchange/messaging/facebook/FacebookMessagingExceptionMessages.java:89
 msgid ""
@@ -3535,8 +3516,7 @@ msgstr "Ismeretlen OAuth szolgáltatás-metaadatok: %1$s"
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth.provider/src/com/openexchange/oauth/provider/OAuthProviderExceptionMessages.java:90
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:123
 msgid "Account not found with identifier %1$s for user %2$s in context %3$s."
-msgstr ""
-"A(z) %1$s azonosítójú fiók nem található a(z) %3$s kontextus %2$s "
+msgstr "A(z) %1$s azonosítójú fiók nem található a(z) %3$s kontextus %2$s "
 "felhasználójához."
 
 #. Unsupported OAuth service: %1$s
@@ -3599,8 +3579,7 @@ msgstr "Az erőforráskorlát túllépve."
 #. Name contains illegal characters or parent is read-only: %1$s.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:99
 msgid "Name contains illegal characters or parent is read-only: %1$s."
-msgstr ""
-"A név illegális karaktereket tartalmaz, vagy a szülő csak olvasható: %1$s."
+msgstr "A név illegális karaktereket tartalmaz, vagy a szülő csak olvasható: %1$s."
 
 #. Unsupported protocol for SmartDrive server access: %1$s
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:105
@@ -3650,8 +3629,7 @@ msgstr "Az elküldött kérésből hiányzik a törzs"
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.passwordchange.script/src/com/openexchange/passwordchange/script/impl/PasswordExceptionMessage.java:71
 msgid "Cannot change password < %s >, see log files for details."
-msgstr ""
-"Nem módosítható a(z) < %s > jelszó, részletek a naplófájlban találhatók."
+msgstr "Nem módosítható a(z) < %s > jelszó, részletek a naplófájlban találhatók."
 
 #. *
 #. * New password too short.
@@ -3743,8 +3721,7 @@ msgstr "Nincs kapcsolat a postafiók eléréséhez"
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:76
 msgid "User %1$s has no mail module access due to user configuration"
-msgstr ""
-"A felhasználói beállítások miatt a(z) %1$s felhasználónak nincs hozzáférése "
+msgstr "A felhasználói beállítások miatt a(z) %1$s felhasználónak nincs hozzáférése "
 "a levelezőmodulhoz"
 
 #. *
@@ -3995,8 +3972,7 @@ msgstr ""
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:205
 msgid "Not allowed to open folder %1$s due to missing read access"
-msgstr ""
-"A hiányzó olvasási hozzáférés miatt nem engedélyezett a(z) %1$s mappa "
+msgstr "A hiányzó olvasási hozzáférés miatt nem engedélyezett a(z) %1$s mappa "
 "megnyitása"
 
 #. *
@@ -4005,8 +3981,7 @@ msgstr ""
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:209
 msgid ""
 "The raw content's input stream of message %1$s in folder %2$s cannot be read"
-msgstr ""
-"A nyers tartalom bemeneti adatfolyama nem olvasható a(z) %1$s üzenetből a(z) "
+msgstr "A nyers tartalom bemeneti adatfolyama nem olvasható a(z) %1$s üzenetből a(z) "
 "%2$s mappában"
 
 #. *
@@ -4050,8 +4025,7 @@ msgstr "A POP3 nem támogatja a mappák mozgatását."
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:233
 msgid "Sort field %1$s is not supported via POP3 SORT command"
-msgstr ""
-"A(z) %1$s rendezési mező nem támogatott a POP3 SORT parancson keresztül"
+msgstr "A(z) %1$s rendezési mező nem támogatott a POP3 SORT parancson keresztül"
 
 #. *
 #. * Missing personal namespace
@@ -4165,8 +4139,7 @@ msgstr "Inkonzisztencia az UIDL leképezésben."
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:297
 msgid "Missing POP3 storage path for user %1$s in context %2$s."
-msgstr ""
-"A POP3 tároló útvonala hiányzik a(z) %2$s kontextus %1$s felhasználójához."
+msgstr "A POP3 tároló útvonala hiányzik a(z) %2$s kontextus %1$s felhasználójához."
 
 #. *
 #. * Illegal move operation.
@@ -4202,7 +4175,7 @@ msgid ""
 msgstr ""
 "A bejelentkezési késleltetés megakadályozza a kapcsolódást a(z) %1$s "
 "levélkiszolgálóhoz a(z) %2$s bejelentkezéssel (felhasználó=%3$s, kontextus=%4"
-"$s). Próbálja újra %6$s másodpercen belül.\n"
+"$s). Próbálja újra %5$s másodpercen belül.\n"
 "A levélkiszolgáló hibaüzenete: %6$s"
 
 #. *
@@ -4260,8 +4233,7 @@ msgstr "Többszörös proxyregisztráció: %1$s"
 #. HTTP request to VoipNow server %1$s failed. Status line: %2$s
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.proxy/src/com/openexchange/proxy/ProxyExceptionMessages.java:72
 msgid "HTTP request to VoipNow server %1$s failed. Status line: %2$s"
-msgstr ""
-"A HTTP kérés a(z) %1$s VoipNow kiszolgálóhoz sikertelen. Állapotsor: %2$s"
+msgstr "A HTTP kérés a(z) %1$s VoipNow kiszolgálóhoz sikertelen. Állapotsor: %2$s"
 
 #. Malformed URI: %1$s
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.proxy/src/com/openexchange/proxy/ProxyExceptionMessages.java:75
@@ -4320,8 +4292,7 @@ msgstr "Csak olyan oszlopokat kérdezzen, amelyeket a kiszolgáló ismer"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.publish.json/src/com/openexchange/publish/json/PublicationJSONExceptionMessage.java:90
 msgid "Please check the spelling of the id, or load a list of known targets"
-msgstr ""
-"Ellenőrizze az azonosító megfelelő írásmódját vagy töltse be az ismert "
+msgstr "Ellenőrizze az azonosító megfelelő írásmódját vagy töltse be az ismert "
 "célokat"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.publish.microformats/src/com/openexchange/publish/microformats/FormStrings.java:61
@@ -4634,8 +4605,7 @@ msgstr "A konzisztencia MBean regisztrálásának törlése sikertelen."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/consistency/ConsistencyExceptionMessages.java:67
 msgid "Malformed policy. Policies are formed like \"condition:action\""
-msgstr ""
-"Rosszul formázott irányelv. Az irányelvek megfelelő formátuma: \"condition:"
+msgstr "Rosszul formázott irányelv. Az irányelvek megfelelő formátuma: \"condition:"
 "action\""
 
 #. This message will be logged if a context is disabled and some user of that context tries to login.
@@ -4785,8 +4755,7 @@ msgstr "Hiányzó munkamenet."
 #. Folder "%1$s" is not visible to user "%2$s" in context "%3$s"
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/folderstorage/FolderExceptionMessages.java:82
 msgid "Folder \"%1$s\" is not visible to user \"%2$s\" in context \"%3$s\""
-msgstr ""
-"A(z) „%1$s” mappa nem látható a(z) „%3$s” kontextus „%2$s” felhasználója "
+msgstr "A(z) „%1$s” mappa nem látható a(z) „%3$s” kontextus „%2$s” felhasználója "
 "számára"
 
 #. JSON error: %1$s
@@ -4872,8 +4841,7 @@ msgstr "A(z) „%1$s” mappa nem található a(z) „%2$s” fában."
 #. No default folder available for content type "%1$s" in tree "%2$s".
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/folderstorage/FolderExceptionMessages.java:134
 msgid "No default folder available for content type \"%1$s\" in tree \"%2$s\"."
-msgstr ""
-"Nem érhető el alapértelmezett mappa a(z) „%2$s” fa „%1$s” tartalomtípusához."
+msgstr "Nem érhető el alapértelmezett mappa a(z) „%2$s” fa „%1$s” tartalomtípusához."
 
 #. Invalid folder identifier: %1$s.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/folderstorage/FolderExceptionMessages.java:137
@@ -4890,8 +4858,7 @@ msgstr ""
 #. Folder "%1$s" must not be moved by user "%2$s" in context "%3$s".
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/folderstorage/FolderExceptionMessages.java:143
 msgid "Folder \"%1$s\" must not be moved by user \"%2$s\" in context \"%3$s\"."
-msgstr ""
-"A(z) „%1$s” mappát nem mozgathatja a(z) „%3$s” kontextus „%2$s” "
+msgstr "A(z) „%1$s” mappát nem mozgathatja a(z) „%3$s” kontextus „%2$s” "
 "felhasználója."
 
 #. A temporary error occurred. Please retry.
@@ -4963,8 +4930,7 @@ msgstr "A kötelező %1$s mező nincs megadva."
 #. The simple name contains invalid characters: "%1$s".
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/group/GroupExceptionMessage.java:81
 msgid "The simple name contains invalid characters: \"%1$s\"."
-msgstr ""
-"Az egyszerű név ezeket a nem engedélyezett karaktereket tartalmaz: „%1$s”."
+msgstr "Az egyszerű név ezeket a nem engedélyezett karaktereket tartalmaz: „%1$s”."
 
 #. Another group with the same identifier name exists: %1$d.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/group/GroupExceptionMessage.java:84
@@ -5107,8 +5073,7 @@ msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/attach/AttachmentExceptionMessages.java:97
 msgid "Conflicting services registered for context %1$i and folder %2$i"
-msgstr ""
-"Ütköző szolgáltatások regisztrálva a(z) %1$i kontextushoz és %2$i mappához"
+msgstr "Ütköző szolgáltatások regisztrálva a(z) %1$i kontextushoz és %2$i mappához"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/calendar/OXCalendarExceptionMessage.java:68
 msgid "CalendarFolderObject not initialized."
@@ -5178,14 +5143,12 @@ msgstr "Nincs megfelelő jogosultsága a találkozóhoz a(z) %1$d mappában."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/calendar/OXCalendarExceptionMessage.java:103
 msgid "Insert expected but the object id is already given. Aborting action..."
-msgstr ""
-"A program beszúrást várt, de az objektumazonosító már meg van adva. Művelet "
+msgstr "A program beszúrást várt, de az objektumazonosító már meg van adva. Művelet "
 "megszakítása..."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/calendar/OXCalendarExceptionMessage.java:105
 msgid "Update expected but no object id is given. Aborting action..."
-msgstr ""
-"A program frissítést várt, de nincs megadva objektumazonosító. Művelet "
+msgstr "A program frissítést várt, de nincs megadva objektumazonosító. Művelet "
 "megszakítása..."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/calendar/OXCalendarExceptionMessage.java:107
@@ -5284,8 +5247,7 @@ msgstr "Naptárművelet: a kontextus nincs beállítva."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/calendar/OXCalendarExceptionMessage.java:147
 msgid "Insufficient rights to add/remove an attachment to/from this folder."
-msgstr ""
-"Elégtelen jogok melléklet csatolásához a mappához vagy leválasztásához arról."
+msgstr "Elégtelen jogok melléklet csatolásához a mappához vagy leválasztásához arról."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/calendar/OXCalendarExceptionMessage.java:149
 msgid "Insufficient read rights for this folder."
@@ -5424,8 +5386,7 @@ msgstr "Adatbázis-frissítési kivétel történt."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/calendar/OXCalendarExceptionMessage.java:220
 msgid "Move to a shared folder not allowed if the private flag is set"
-msgstr ""
-"A megosztott mappába nem engedélyezett a mozgatás, ha a személyes jelző be "
+msgstr "A megosztott mappába nem engedélyezett a mozgatás, ha a személyes jelző be "
 "van állítva"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/calendar/OXCalendarExceptionMessage.java:222
@@ -5794,8 +5755,7 @@ msgstr "Hiba történt: az objektumazonosító -1"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:87
 msgid "No changes found. No update required. context %1$d object %2$d"
-msgstr ""
-"Nincsenek változtatások. Nincs szükség frissítésre. Kontextus: %1$d, "
+msgstr "Nincsenek változtatások. Nincs szükség frissítésre. Kontextus: %1$d, "
 "objektum: %2$d"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:89
@@ -6003,8 +5963,7 @@ msgstr "A törlési esemény típusa ismeretlen: %1$d"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/filestore/FilestoreExceptionMessages.java:61
 msgid "Wrong file store %1$d for context %2$d. Correct file store: %3$d."
-msgstr ""
-"Hibás fájltároló (%1$d) a(z) %2$d kontextushoz. %3$d a megfelelő tároló."
+msgstr "Hibás fájltároló (%1$d) a(z) %2$d kontextushoz. %3$d a megfelelő tároló."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/filestore/FilestoreExceptionMessages.java:63
 msgid "Cannot find file store with id %1$d."
@@ -7409,8 +7368,7 @@ msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/importexport/csv/CsvExceptionMessages.java:59
 msgid "Illegal state: Found data after presumed last line."
-msgstr ""
-"Érvénytelen állapot: adatok találhatók az utolsónak tekintett sor után."
+msgstr "Érvénytelen állapot: adatok találhatók az utolsónak tekintett sor után."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/importexport/csv/CsvExceptionMessages.java:65
 msgid "Encountered IO error while trying to read stream"
@@ -7578,7 +7536,7 @@ msgstr "Nem állítható össze megkülönböztető név ebből: %s."
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/ldap/LdapExceptionMessage.java:81
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/ldap/UserExceptionMessage.java:81
 msgid "Class %s can not be loaded."
-msgstr "A(z) %1$s osztály nem tölthető be."
+msgstr "A(z) %s osztály nem tölthető be."
 
 #. *
 #. * An implementation can not be instantiated.
@@ -7662,8 +7620,7 @@ msgstr "Nem található a(z) %s e-mail című felhasználó."
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/ldap/LdapExceptionMessage.java:141
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/ldap/UserExceptionMessage.java:116
 msgid "Cannot find user with identifier %1$s in context %2$d."
-msgstr ""
-"Nem található a(z) %1$s azonosítójú felhasználó a(z) %2$d kontextusban."
+msgstr "Nem található a(z) %1$s azonosítójú felhasználó a(z) %2$d kontextusban."
 
 #. *
 #. * Cannot find group with identifier %1$s in context %2$d.
@@ -7684,8 +7641,7 @@ msgstr "Nem klónozható a(z) %1$s objektum."
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/ldap/UserExceptionMessage.java:121
 msgid "Two users with same identifier %1$s in context %2$d found."
-msgstr ""
-"Két felhasználó megegyező azonosítóval (%1$s) rendelkezik a(z) %2$d "
+msgstr "Két felhasználó megegyező azonosítóval (%1$s) rendelkezik a(z) %2$d "
 "kontextusban."
 
 #. *
@@ -7707,8 +7663,7 @@ msgstr "Az új jelszó érvénytelen karaktereket tartalmaz"
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/ldap/UserExceptionMessage.java:146
 msgid "Attributes of user %1$d in context %2$d have been erased."
-msgstr ""
-"A(z) %1$d felhasználó attribútumai a(z) %2$d kontextusban törlésre kerültek."
+msgstr "A(z) %1$d felhasználó attribútumai a(z) %2$d kontextusban törlésre kerültek."
 
 #. *
 #. * Loading one or more users failed.
@@ -7725,8 +7680,7 @@ msgstr "A(z) %2$d kontextus %1$d felhasználójának álnévbejegyzései hiányo
 #. * Updating attributes failed in context %1$d for user %2$d.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/ldap/UserExceptionMessage.java:157
 msgid "Updating attributes failed in context %1$d for user %2$d."
-msgstr ""
-"A(z) %1$d kontextusban a(z) %2$d felhasználó attribútumainak frissítése "
+msgstr "A(z) %1$d kontextusban a(z) %2$d felhasználó attribútumainak frissítése "
 "sikertelen."
 
 #. *
@@ -7757,7 +7711,7 @@ msgstr "A felhasználó %s paramétere hiányzik."
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/ldap/UserExceptionMessage.java:177
 msgid "%s is not a valid locale."
-msgstr "A(z) %1$s nem érvényes nyelv."
+msgstr "A(z) %s nem érvényes nyelv."
 
 #. *
 #. * %s is not a valid time zone.
@@ -7900,8 +7854,7 @@ msgstr "Érvénytelen érték (%s) került kiírásra a(z) %s beállításba."
 #. * Found duplicate database identifier %d. Not adding preferences item.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/settings/SettingExceptionMessage.java:93
 msgid "Found duplicate database identifier %d. Not adding preferences item."
-msgstr ""
-"Többször szereplő adatbázis-azonosító: %d. A beállításelem nem kerül "
+msgstr "Többször szereplő adatbázis-azonosító: %d. A beállításelem nem kerül "
 "hozzáadásra."
 
 #. * Found duplicate path %s.
@@ -7978,8 +7931,7 @@ msgstr ""
 #. Cannot create private task in public/shared folder %1$d.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:87
 msgid "Cannot create private task in public/shared folder %1$d."
-msgstr ""
-"Nem hozható létre személyes feladat a(z) %1$d nyilvános/megosztott mappában."
+msgstr "Nem hozható létre személyes feladat a(z) %1$d nyilvános/megosztott mappában."
 
 #. SQL problem while updating task: %s.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:90
@@ -7999,8 +7951,7 @@ msgstr "SQL-probléma a feladat törlésekor: %s."
 #. Cannot find folder for task %2$d and participant %1$d in context %3$d.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:99
 msgid "Cannot find folder for task %2$d and participant %1$d in context %3$d."
-msgstr ""
-"Nem található a mappa a(z) %2$d. feladathoz és %1$d. résztvevőhöz a(z) %3$d "
+msgstr "Nem található a mappa a(z) %2$d. feladathoz és %1$d. résztvevőhöz a(z) %3$d "
 "kontextusban."
 
 #. SQL problem while listing tasks: %s.
@@ -8021,13 +7972,12 @@ msgstr "Kísérlet történt %1$d mappa törlésére, de csak %2$d törlése sik
 #. Tried to delete %1$d participants but only %2$d were deleted.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:111
 msgid "Tried to delete %1$d participants but only %2$d were deleted."
-msgstr ""
-"Kísérlet történt %1$d résztvevő törlésére, de csak %2$d törlése sikerült."
+msgstr "Kísérlet történt %1$d résztvevő törlésére, de csak %2$d törlése sikerült."
 
 #. Participant %d for task %d is not found.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:114
 msgid "Participant %d for task %d is not found."
-msgstr "A(z) %2$d feladat %1$d résztvevője nem található."
+msgstr "A(z) %d feladat %d résztvevője nem található."
 
 #. Cannot find task %d in context %d.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:117
@@ -8042,8 +7992,7 @@ msgstr "Ismeretlen feladatattribútum: %d."
 #. Date range in search must contain 2 and not %d values.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:123
 msgid "Date range in search must contain 2 and not %d values."
-msgstr ""
-"A keresésben megadott dátumtartománynak 2, és nem %d értéket kell "
+msgstr "A keresésben megadott dátumtartománynak 2, és nem %d értéket kell "
 "tartalmaznia."
 
 #. Cannot decrease number of attachments below zero.
@@ -8107,8 +8056,7 @@ msgstr "Nem módosíthat feladatokat a(z) %1$s (%2$d) mappában."
 #. Moving items from or into shared folder %1$s (%2$d) is not allowed.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:159
 msgid "Moving items from or into shared folder %1$s (%2$d) is not allowed."
-msgstr ""
-"Az elemek mozgatása a(z) %1$s (%2$d) megosztott mappába vagy abból nem "
+msgstr "Az elemek mozgatása a(z) %1$s (%2$d) megosztott mappába vagy abból nem "
 "engedélyezett."
 
 #. Missing folder mapping for task %1$d.
@@ -8129,8 +8077,7 @@ msgstr "Az ismétlődés értéke hiányzik: %d."
 #. For finished tasks the percentage must be 100 and not %d.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:171
 msgid "Finished tasks need to have a percentage of 100 and not %d."
-msgstr ""
-"A befejezett feladatok százalékos készültsége 100, és nem %d kell legyen."
+msgstr "A befejezett feladatok százalékos készültsége 100, és nem %d kell legyen."
 
 #. Invalid task state %d.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:174
@@ -8155,8 +8102,7 @@ msgstr ""
 #. Task with private flag cannot be moved to public folder %1$s (%2$d).
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:184
 msgid "Tasks with private flag cannot be moved to a public folder %1$s (%2$d)."
-msgstr ""
-"A személyes jelzőkkel ellátott feladat nem mozgatható a(z) %1$s (%2$d) "
+msgstr "A személyes jelzőkkel ellátott feladat nem mozgatható a(z) %1$s (%2$d) "
 "nyilvános mappába."
 
 #. Only the task creator is allowed to set private flag.
@@ -8216,8 +8162,7 @@ msgstr "A feladatok uid-jai nem módosíthatók."
 #. Into a numeric attribute something non numeric has been entered. %2$s will name the attribute that contains non digit characters.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:220
 msgid "Value \"%1$s\" of attribute \"%2$s\" contains non digit characters."
-msgstr ""
-"A(z) „%2$s” attribútum „%1$s” értéke nem számjegy karaktereket tartalmaz."
+msgstr "A(z) „%2$s” attribútum „%1$s” értéke nem számjegy karaktereket tartalmaz."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/update/UpdateExceptionMessages.java:62
 msgid ""
@@ -8314,8 +8259,7 @@ msgstr "A tábla frissítése sikertelen. A(z) %1$s séma nem zárolható."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/update/internal/SchemaExceptionMessages.java:70
 msgid "Update conflict detected. Schema %1$s is not marked as locked."
-msgstr ""
-"Frissítési ütközés észlelve. A(z) %1$s séma nincs zároltként megjelölve."
+msgstr "Frissítési ütközés észlelve. A(z) %1$s séma nincs zároltként megjelölve."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/update/internal/SchemaExceptionMessages.java:72
 msgid ""
@@ -8413,8 +8357,7 @@ msgstr "DBPooling hiba történt"
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/userconfiguration/UserConfigurationExceptionMessage.java:81
 msgid "Configuration for user %1$s could not be found in context %2$d"
-msgstr ""
-"A(z) %1$s felhasználó konfigurációja nem található a(z) %2$d kontextusban"
+msgstr "A(z) %1$s felhasználó konfigurációja nem található a(z) %2$d kontextusban"
 
 #. *
 #. * Cache initialization failed. Region: %1$s
@@ -8449,8 +8392,7 @@ msgstr "A felhasználói beállítások nem távolíthatók el a gyorsítótárb
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/userconfiguration/UserConfigurationExceptionMessage.java:121
 msgid "Mail settings for user %1$s could not be found in context %2$d"
-msgstr ""
-"A(z) %1$s felhasználó levélbeállításai nem találhatók a(z) %2$d kontextusban"
+msgstr "A(z) %1$s felhasználó levélbeállításai nem találhatók a(z) %2$d kontextusban"
 
 #. Displayed to user if a volatile error occurred.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:69
@@ -8540,8 +8482,7 @@ msgstr "A levelezőmodul elérése nem engedélyezett"
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:147
 msgid "Mail account is disabled for admin user in context %1$s"
-msgstr ""
-"Az admin felhasználó levelezőfiókja le van tiltva a(z) %1$s kontextusban"
+msgstr "Az admin felhasználó levelezőfiókja le van tiltva a(z) %1$s kontextusban"
 
 #. *
 #. * Process was interrupted. Please try again.
@@ -8773,8 +8714,7 @@ msgstr "Nem lehet több üzenetre válaszolni"
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:312
 msgid "Illegal system flag argument %1$s. Flag must be to the power of 2"
-msgstr ""
-"Érvénytelen rendszer-jelzőargumentum: %1$s. A jelzőnek 2 hatványának kell "
+msgstr "Érvénytelen rendszer-jelzőargumentum: %1$s. A jelzőnek 2 hatványának kell "
 "lennie"
 
 #. *
@@ -9001,8 +8941,7 @@ msgstr "Nincs írási hozzáférés a(z) %1$s levélmappához."
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:463
 msgid "Mail could not be found in folder %1$s for message identifier: %2$s"
-msgstr ""
-"A levél nem található a(z) %1$s mappában a következő azonosítóhoz: %2$s"
+msgstr "A levél nem található a(z) %1$s mappában a következő azonosítóhoz: %2$s"
 
 #. *
 #. * Sent quota exceeded, you are only allowed to sent 1 mail in %1$s seconds.
@@ -9046,8 +8985,7 @@ msgstr "Az e-mail melléklet lejárt vagy hiányzik."
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:488
 msgid "Account has been checked successfully but with a non-secure connection."
-msgstr ""
-"A fiók ellenőrzése sikeresen megtörtént, de egy nem biztonságos kapcsolaton "
+msgstr "A fiók ellenőrzése sikeresen megtörtént, de egy nem biztonságos kapcsolaton "
 "keresztül."
 
 #. *
@@ -9066,8 +9004,7 @@ msgstr ""
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:498
 msgid "Your account has been created but will not use a secure connection."
-msgstr ""
-"A felhasználó fiók létrejött, de egy nem biztonságos kapcsolaton keresztül."
+msgstr "A felhasználó fiók létrejött, de egy nem biztonságos kapcsolaton keresztül."
 
 #. *
 #. * Your E-Mail has been successfully sent, but the original E-Mail could not be flagged as "replied" and/or "forwarded".
@@ -9261,8 +9198,7 @@ msgstr "Hibás üzenetfejléc: %1$s"
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:158
 msgid "An attempt was made to open a read-only folder with read-write \"%1$s\""
-msgstr ""
-"Kísérlet történt egy csak olvasható mappa megnyitására írási joggal: „%1$s”"
+msgstr "Kísérlet történt egy csak olvasható mappa megnyitására írási joggal: „%1$s”"
 
 #. *
 #. * An attempt was made to open a read-only folder with read-write "%1$s" on mail server %2$s with login %3$s (user=%4$s, context=%5$s)
@@ -9382,8 +9318,7 @@ msgstr "A(z) %1$s port elérhetetlen a távoli kiszolgálón"
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:239
 msgid "Connection is broken due to a socket exception on remote server: %1$s"
-msgstr ""
-"A kapcsolat megszakadt egy foglalatkivétel miatt a távoli kiszolgálón: %1$s"
+msgstr "A kapcsolat megszakadt egy foglalatkivétel miatt a távoli kiszolgálón: %1$s"
 
 #. *
 #. * A socket error occurred: %1$s
@@ -9422,8 +9357,7 @@ msgstr ""
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:269
 msgid "A command to mail server failed. Server response: %1$s."
-msgstr ""
-"A levelezőkiszolgálónak adott parancs sikertelen. A kiszolgáló válasza: %1$s."
+msgstr "A levelezőkiszolgálónak adott parancs sikertelen. A kiszolgáló válasza: %1$s."
 
 #. *
 #. * A command failed on mail server %1$s with login %2$s (user=%3$s, context=%4$s). Server response: %5$s
@@ -9613,15 +9547,13 @@ msgstr "Egy gépnév nem oldható fel: %1$s."
 #. Denied deletion of default mail account of user %1$s in context %2$s.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mailaccount/MailAccountExceptionStrings.java:80
 msgid "Denied deletion of default mail account of user %1$s in context %2$s."
-msgstr ""
-"A(z) %2$s kontextus %1$s felhasználójának alapértelmezett levélfiókjának "
+msgstr "A(z) %2$s kontextus %1$s felhasználójának alapértelmezett levélfiókjának "
 "törlése megtagadva."
 
 #. Denied update of default mail account of user %1$s in context %2$s.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mailaccount/MailAccountExceptionStrings.java:83
 msgid "Denied update of default mail account of user %1$s in context %2$s."
-msgstr ""
-"A(z) %2$s kontextus %1$s felhasználójának alapértelmezett levélfiókjának "
+msgstr "A(z) %2$s kontextus %1$s felhasználójának alapértelmezett levélfiókjának "
 "frissítése megtagadva."
 
 #. No duplicate default account allowed.
@@ -9650,8 +9582,7 @@ msgstr ""
 #. The Unified Mail account already exists for user %1$s in context %2$s.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mailaccount/MailAccountExceptionStrings.java:95
 msgid "The Unified Mail account already exists for user %1$s in context %2$s."
-msgstr ""
-"Az egységes levelezési fiók már létezik a(z) %2$s kontextus %1$s "
+msgstr "Az egységes levelezési fiók már létezik a(z) %2$s kontextus %1$s "
 "felhasználójához."
 
 #. Mail account creation failed.
@@ -9667,8 +9598,7 @@ msgstr "A postafiók ellenőrzése sikertelen."
 #. Multiple mail accounts not enabled for user %1$s in context %2$s.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mailaccount/MailAccountExceptionStrings.java:104
 msgid "Multiple mail accounts not enabled for user %1$s in context %2$s."
-msgstr ""
-"Nincs engedélyezve több postafiók a(z) %2$s kontextus %1$s felhasználója "
+msgstr "Nincs engedélyezve több postafiók a(z) %2$s kontextus %1$s felhasználója "
 "számára."
 
 #. Invalid mail account name: %1$s
@@ -9684,8 +9614,7 @@ msgstr "Többszörös postafiók a(z) %2$s kontextus %1$s felhasználója szám�
 #. Duplicate transport account for user %1$s in context %2$s.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mailaccount/MailAccountExceptionStrings.java:113
 msgid "Duplicate transport account for user %1$s in context %2$s."
-msgstr ""
-"Többszörös átviteli fiók a(z) %2$s kontextus %1$s felhasználója számára."
+msgstr "Többszörös átviteli fiók a(z) %2$s kontextus %1$s felhasználója számára."
 
 #. Invalid host name: %1$s
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mailaccount/MailAccountExceptionStrings.java:120
@@ -9711,8 +9640,7 @@ msgstr "Nem található a(z) %1$d azonosítójú erőforráscsoport."
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/resource/ResourceExceptionMessage.java:86
 msgid "Found resource groups with same identifier %1$d."
-msgstr ""
-"Megegyező azonosítóval (%1$d) rendelkező erőforrás-csoportok találhatók."
+msgstr "Megegyező azonosítóval (%1$d) rendelkező erőforrás-csoportok találhatók."
 
 #. *
 #. * Cannot find resource with identifier %1$d.
@@ -9808,7 +9736,7 @@ msgstr "I/O hiba történt: %s"
 #. May be used to turn the IOException of getInstance into a proper OXException
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/file/external/FileStorageExceptionMessage.java:73
 msgid "File store could not be accessed: %s"
-msgstr "A fájltároló nem érhető el: %1$s."
+msgstr "A fájltároló nem érhető el: %s."
 
 #. Cannot create directory \"%1$s\" for FileStorage.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/file/external/FileStorageExceptionMessage.java:76
@@ -9918,8 +9846,7 @@ msgstr ""
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:82
 msgid "Folder \"%1$s\" not visible to user %2$s in context %3$s"
-msgstr ""
-"A(z) „%1$s” mappa nem látható %2$s felhasználó számára a(z) %3$s kontextusban"
+msgstr "A(z) „%1$s” mappa nem látható %2$s felhasználó számára a(z) %3$s kontextusban"
 
 #. *
 #. * User %1$s has no access on shared folder %2$s in context %3$s due to user configuration
@@ -9990,8 +9917,7 @@ msgstr "A(z) %1$s mappa nem létezik a(z) %2$s kontextusban"
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:124
 msgid "Folder %1$s has been modified after last sync timestamp in context %2$s"
-msgstr ""
-"A(z) %1$s mappa az utolsó szinkronizálás időbélyege után lett módosítva a(z) "
+msgstr "A(z) %1$s mappa az utolsó szinkronizálás időbélyege után lett módosítva a(z) "
 "%2$s kontextusban"
 
 #. *
@@ -10002,8 +9928,7 @@ msgstr ""
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:131
 msgid "User %1$s has no admin access to folder %2$s in context %3$s"
-msgstr ""
-"A(z) %1$s felhasználónak nincs admin hozzáférése a(z) %3$s kontextus %2$s "
+msgstr "A(z) %1$s felhasználónak nincs admin hozzáférése a(z) %3$s kontextus %2$s "
 "mappájához"
 
 #. *
@@ -10024,8 +9949,7 @@ msgstr "Az alapértelmezett %1$s mappa nem nevezhető át a(z) %2$s kontextusban
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:145
 msgid "A duplicate folder exists in parent folder %1$s in context %2$s"
-msgstr ""
-"Duplikált mappa található a(z) %1$s szülőmappában, a(z) %2$s kontextusban"
+msgstr "Duplikált mappa található a(z) %1$s szülőmappában, a(z) %2$s kontextusban"
 
 #. *
 #. * Parent folder %1$s does not allow folder's type setting %2$s in context %3$s
@@ -10142,8 +10066,7 @@ msgstr ""
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:215
 msgid "Target folder %1$s contains a duplicate folder in context %2$s"
-msgstr ""
-"A(z) %1$s cél mappa többször szereplő mappát tartalmaz a(z) %2$s kontextusban"
+msgstr "A(z) %1$s cél mappa többször szereplő mappát tartalmaz a(z) %2$s kontextusban"
 
 #. *
 #. * Shared folder %1$s cannot be moved in context %2$s
@@ -10196,8 +10119,7 @@ msgstr ""
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:250
 msgid "Public folder %1$s can only be moved to a public folder in context %2$s"
-msgstr ""
-"A(z) %1$s nyilvános mappa csak nyilvános mappába mozgatható a(z) %2$s "
+msgstr "A(z) %1$s nyilvános mappa csak nyilvános mappába mozgatható a(z) %2$s "
 "kontextusban"
 
 #. *
@@ -10232,8 +10154,7 @@ msgstr ""
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:271
 msgid "User %1$s is not allowed to delete shared folder %2$s in context %3$s"
-msgstr ""
-"A(z) %1$s felhasználó nem törölheti a(z) %3$s kontextus %2$s megosztott "
+msgstr "A(z) %1$s felhasználó nem törölheti a(z) %3$s kontextus %2$s megosztott "
 "mappáját"
 
 #. *
@@ -10244,8 +10165,7 @@ msgstr ""
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:278
 msgid "User %1$s is not allowed to delete default folder %2$s in context %3$s"
-msgstr ""
-"A(z) %1$s felhasználó nem törölheti a(z) %3$s kontextus %2$s alapértelmezett "
+msgstr "A(z) %1$s felhasználó nem törölheti a(z) %3$s kontextus %2$s alapértelmezett "
 "mappáját"
 
 #. *
@@ -10368,8 +10288,7 @@ msgstr ""
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:351
 msgid "Folder %1$s must not be moved to one of its subfolders in context %2$s"
-msgstr ""
-"A(z) %1$s mappa nem mozgatható az egyik almappájába a(z) %2$s kontextusban"
+msgstr "A(z) %1$s mappa nem mozgatható az egyik almappájába a(z) %2$s kontextusban"
 
 #. *
 #. * Inserted for those exception that will turn to an <code>OXException</code> in future
@@ -10442,8 +10361,7 @@ msgstr "A(z) %1$s mappa nem távolítható el a mappa-gyorsítótárból"
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:387
 msgid "User %1$s has no write permission on folder %2$s in context %3$s"
-msgstr ""
-"A(z) %1$s felhasználónak nincs írási hozzáférése a(z) %3$s kontextus %2$s "
+msgstr "A(z) %1$s felhasználónak nincs írási hozzáférése a(z) %3$s kontextus %2$s "
 "mappájához"
 
 #. *
@@ -10497,8 +10415,7 @@ msgstr ""
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:431
 msgid "Unable to map OCL permission value %1$s to a JSON permission value"
-msgstr ""
-"Nem képezhető le a(z) %1$s OCL jogosultságérték JSON jogosultságértékre"
+msgstr "Nem képezhető le a(z) %1$s OCL jogosultságérték JSON jogosultságértékre"
 
 #. *
 #. * Folder existence cannot be checked due to insufficient folder information
@@ -10527,8 +10444,7 @@ msgstr "Ez a módszer nem alkalmazható IMAP jogosultságra."
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:447
 msgid "No subfolder creation below shared folder %1$s in context %2$s"
-msgstr ""
-"Nem lehet almappát létrehozni a(z) %1$s megosztott mappa alatt a(z) %2$s "
+msgstr "Nem lehet almappát létrehozni a(z) %1$s megosztott mappa alatt a(z) %2$s "
 "kontextusban"
 
 #. *
@@ -10549,8 +10465,7 @@ msgstr ""
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:456
 msgid "Owner %1$s of default folder %2$s must keep the folder admin permission"
-msgstr ""
-"A(z) %2$s alapértelmezett mappa %1$s tulajdonosának meg kell tartania a "
+msgstr "A(z) %2$s alapértelmezett mappa %1$s tulajdonosának meg kell tartania a "
 "mappaadmin jogosultságot"
 
 #. *
@@ -10705,8 +10620,7 @@ msgstr "Az alapértelmezett mappa modulja nem módosítható."
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:522
 msgid "User %1$s must not rename folder %2$s in context %3$s"
-msgstr ""
-"A(z) %1$s felhasználó nem nevezheti át a(z) %3$s kontextus %2$s mappáját"
+msgstr "A(z) %1$s felhasználó nem nevezheti át a(z) %3$s kontextus %2$s mappáját"
 
 #. *
 #. * Failed to create folder. Please retry.
@@ -10731,8 +10645,7 @@ msgstr ""
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:534
 msgid "Operation may only be performed for context administrator."
-msgstr ""
-"Lehetséges, hogy a műveletet csak a contex adminisztrátor végezheti el."
+msgstr "Lehetséges, hogy a műveletet csak a contex adminisztrátor végezheti el."
 
 #. Unknown AJAX action: %s.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/servlet/AjaxExceptionMessages.java:70
@@ -10874,8 +10787,7 @@ msgstr "Kivétel a JSON felépítésekor."
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/servlet/OXJSONExceptionMessage.java:91
 msgid "Value \"%1$s\" of attribute %2$s contains non digit characters."
-msgstr ""
-"A(z) %2$s attribútum „%1$s” értéke nem számjegy karaktereket tartalmaz."
+msgstr "A(z) %2$s attribútum „%1$s” értéke nem számjegy karaktereket tartalmaz."
 
 #. *
 #. * Too many digits within field %1$s.
@@ -11269,7 +11181,7 @@ msgstr "A(z) %1$s uuid azonosítójú dokumentum nem található."
 #. %1$s is not a valid field for sorting.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.solr/src/com/openexchange/solr/SolrExceptionMessages.java:113
 msgid "%1$s is not a valid field for sorting."
-msgstr "A(z) %s hibás mező a rendezéshez."
+msgstr "A(z) %1$s hibás mező a rendezéshez."
 
 #. *
 #. * The given value for mode "%s" is not a possible one
@@ -11290,8 +11202,7 @@ msgstr "A(z) „%s” paraméter nincs beállítva a tulajdonságfájlban"
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.spamhandler.spamassassin/src/com/openexchange/spamhandler/spamassassin/exceptions/SpamhandlerSpamassassinExceptionMessage.java:81
 msgid "The parameter \"%s\" must be set in the property file if spamd is true"
-msgstr ""
-"A(z) „%s” paramétert be kell állítani a tulajdonságfájlban, ha a spamd "
+msgstr "A(z) „%s” paramétert be kell állítani a tulajdonságfájlban, ha a spamd "
 "értéke igaz"
 
 #. *
@@ -11414,8 +11325,7 @@ msgstr "Próbálja újra később."
 #. A HTTPException occurred: %1$s. Was trying to get the service at %2$s.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe.microformats/src/com/openexchange/subscribe/microformats/OXMFErrorStrings.java:70
 msgid "A HTTPException occurred: %1$s. Was trying to get the service at %2$s."
-msgstr ""
-"HTTPException (%1$s) történt a következő szolgáltatás elérésekor: %2$s."
+msgstr "HTTPException (%1$s) történt a következő szolgáltatás elérésekor: %2$s."
 
 #. Can only post to external subscription sources.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe.microformats/src/com/openexchange/subscribe/microformats/OXMFErrorStrings.java:74
@@ -11502,8 +11412,7 @@ msgstr "Ezen bejárási munkafolyamat lépései nem illenek össze"
 #. Ask an administrator to check the available subscription sources
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe/src/com/openexchange/subscribe/SubscriptionErrorStrings.java:111
 msgid "Ask an administrator to check the available subscription sources"
-msgstr ""
-"Kérjen meg egy rendszergazdát az elérhető feliratkozási források "
+msgstr "Kérjen meg egy rendszergazdát az elérhető feliratkozási források "
 "ellenőrzésére"
 
 #. The subscription source this subscription belongs to is currently inactive, and cannot provide data.
@@ -11727,15 +11636,13 @@ msgstr "A(z) %1$s nevű felhasználó már létezik a(z) %2$s célkontextusban."
 #. Missing main extension attribute for user %1$s in context %2$s.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.voipnow.json/src/com/openexchange/voipnow/json/VoipNowExceptionMessages.java:71
 msgid "Missing main extension attribute for user %1$s in context %2$s."
-msgstr ""
-"A fő kiterjesztésattribútum hiányzik a(z) %2$s kontextus %1$s "
+msgstr "A fő kiterjesztésattribútum hiányzik a(z) %2$s kontextus %1$s "
 "felhasználójához."
 
 #. HTTP request to VoipNow server %1$s failed. Status line: %2$s
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.voipnow.json/src/com/openexchange/voipnow/json/VoipNowExceptionMessages.java:74
 msgid "HTTP request to VoipNow server \"%1$s\" failed. Status line: %2$s"
-msgstr ""
-"A HTTP-kérés a(z) „%1$s” VoipNow kiszolgálóhoz sikertelen. Állapotsor: %2$s"
+msgstr "A HTTP-kérés a(z) „%1$s” VoipNow kiszolgálóhoz sikertelen. Állapotsor: %2$s"
 
 #. VoipNow request failed. Error code: %1$s. Error message: %2$s
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.voipnow.json/src/com/openexchange/voipnow/json/VoipNowExceptionMessages.java:77
