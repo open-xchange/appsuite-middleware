@@ -83,4 +83,6 @@ public interface ICalParser {
      */
     String parseProperty(String propertyName, final InputStream ical);
 
+	void setLimit(int amount);
+
 }
