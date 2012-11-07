@@ -54,10 +54,12 @@ import org.osgi.framework.BundleActivator;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.database.CreateTableService;
 import com.openexchange.database.DatabaseService;
+import com.openexchange.groupware.delete.DeleteListener;
 import com.openexchange.groupware.infostore.InfostoreFacade;
 import com.openexchange.groupware.update.DefaultUpdateTaskProviderService;
 import com.openexchange.groupware.update.UpdateTaskProviderService;
 import com.openexchange.index.IndexFacadeService;
+import com.openexchange.index.solr.groupware.IndexDeleteListener;
 import com.openexchange.index.solr.groupware.IndexedFoldersCreateTableService;
 import com.openexchange.index.solr.groupware.IndexedFoldersCreateTableTask;
 import com.openexchange.index.solr.internal.Services;
@@ -65,6 +67,7 @@ import com.openexchange.index.solr.internal.SolrIndexFacadeService;
 import com.openexchange.log.LogFactory;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.solr.SolrAccessService;
+import com.openexchange.solr.SolrCoreConfigService;
 import com.openexchange.textxtraction.TextXtractService;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.timer.TimerService;
@@ -89,7 +92,7 @@ public class SolrIndexActivator extends HousekeepingActivator {
     protected Class<?>[] getNeededServices() {
         return new Class[] {
             DatabaseService.class, UserService.class, ConfigurationService.class, TimerService.class, ThreadPoolService.class,
-            SolrAccessService.class, TextXtractService.class, InfostoreFacade.class };
+            SolrAccessService.class, TextXtractService.class, InfostoreFacade.class, SolrCoreConfigService.class };
     }
 
     @Override
@@ -104,15 +107,7 @@ public class SolrIndexActivator extends HousekeepingActivator {
         IndexedFoldersCreateTableService createTableService = new IndexedFoldersCreateTableService();
         registerService(CreateTableService.class, createTableService);
         registerService(UpdateTaskProviderService.class, new DefaultUpdateTaskProviderService(new IndexedFoldersCreateTableTask(createTableService)));
-        try {
-            Class<? extends BundleActivator> clazz = 
-                (Class<? extends BundleActivator>) Class.forName("com.openexchange.index.solr.test.FragmentActivator");
-            fragmentActivator = clazz.newInstance();
-            fragmentActivator.start(context);
-        } catch (Exception e) {
-            // ignore
-        }
-
+        registerService(DeleteListener.class, new IndexDeleteListener());
 //        final SolrCoreConfigService indexService = new SolrCoreConfigServiceImpl();
 //        registerService(SolrCoreConfigService.class, indexService);
     }

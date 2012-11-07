@@ -51,6 +51,7 @@ package com.openexchange.index.solr.internal.mail.translators;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
 import org.apache.commons.logging.Log;
 import com.openexchange.index.solr.internal.mail.SolrMailField;
 import com.openexchange.index.solr.internal.querybuilder.Configuration;
@@ -86,16 +87,20 @@ public class CustomTranslator implements QueryTranslator {
     private static final Log LOG = com.openexchange.log.Log.loggerFor(CustomTranslator.class);
 
     private Configuration config;
+    
+    private String name;
+    
 
     @Override
     public void init(String name, Configuration config) throws TranslationException {
+        this.name = name;
         this.config = config;
     }
 
     @Override
     public String translate(Object o) throws TranslationException {
         if (o instanceof SearchTerm<?>) {
-            TranslatorVisitor visitor = new TranslatorVisitor(config);
+            TranslatorVisitor visitor = new TranslatorVisitor(name, config);
             ((SearchTerm<?>) o).accept(visitor);
             return visitor.queryBuilder.toString();
         }
@@ -110,9 +115,12 @@ public class CustomTranslator implements QueryTranslator {
 
         private final StringBuilder queryBuilder;
 
+        private final String name;
 
-        public TranslatorVisitor(Configuration config) {
+
+        public TranslatorVisitor(String name, Configuration config) {
             super();
+            this.name = name;
             this.config = config;
             queryBuilder = new StringBuilder(48);
         }
@@ -126,13 +134,13 @@ public class CustomTranslator implements QueryTranslator {
             }
 
             queryBuilder.append('(');
-            TranslatorVisitor visitor = new TranslatorVisitor(config);
+            TranslatorVisitor visitor = new TranslatorVisitor(name, config);
             terms[0].accept(visitor);
             queryBuilder.append(visitor.queryBuilder);
             for (int i = 1; i < terms.length; i++) {
                 queryBuilder.append(" AND ");
                 SearchTerm<?> searchTerm = terms[i];
-                visitor = new TranslatorVisitor(config);
+                visitor = new TranslatorVisitor(name, config);
                 searchTerm.accept(visitor);
                 queryBuilder.append(visitor.queryBuilder);
             }
@@ -148,13 +156,13 @@ public class CustomTranslator implements QueryTranslator {
             }
 
             queryBuilder.append('(');
-            TranslatorVisitor visitor = new TranslatorVisitor(config);
+            TranslatorVisitor visitor = new TranslatorVisitor(name, config);
             terms[0].accept(visitor);
             queryBuilder.append(visitor.queryBuilder);
             for (int i = 1; i < terms.length; i++) {
                 queryBuilder.append(" OR ");
                 SearchTerm<?> searchTerm = terms[i];
-                visitor = new TranslatorVisitor(config);
+                visitor = new TranslatorVisitor(name, config);
                 searchTerm.accept(visitor);
                 queryBuilder.append(visitor.queryBuilder);
             }
@@ -164,7 +172,7 @@ public class CustomTranslator implements QueryTranslator {
         @Override
         public void visit(NOTTerm term) {
             queryBuilder.append("NOT (");
-            TranslatorVisitor visitor = new TranslatorVisitor(config);
+            TranslatorVisitor visitor = new TranslatorVisitor(name, config);
             term.getPattern().accept(visitor);
             queryBuilder.append(visitor.queryBuilder);
             queryBuilder.append(')');
@@ -359,7 +367,12 @@ public class CustomTranslator implements QueryTranslator {
         }
 
         private void appendStringTerm(String parameterName, SearchTerm<String> term) {
-            List<String> indexFields = config.getIndexFields(parameterName);
+            Set<String> keys = config.getKeys(name);
+            if (!keys.contains(name + '.' + parameterName)) {
+                LOG.warn("Did not find key '" + name + '.' + parameterName + "'. Skipping this field in search query...");
+                return;
+            }
+            List<String> indexFields = config.getIndexFields(name + '.' + parameterName);
             if (indexFields == null || indexFields.isEmpty()) {
                 LOG.warn("Did not find index fields for parameter " + parameterName + ". Skipping this field in search query...");
                 return;

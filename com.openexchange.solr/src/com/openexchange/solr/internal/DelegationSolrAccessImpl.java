@@ -321,16 +321,18 @@ public class DelegationSolrAccessImpl implements SolrAccessService {
 
     public void shutDown() throws OXException {
         HazelcastInstance hazelcast = Services.getService(HazelcastInstance.class);
-        Collection<String> activeCores = embeddedAccess.getActiveCores();
-        IMap<String, Integer> solrNodes = hazelcast.getMap(SolrActivator.SOLR_NODE_MAP);
-        String localAddress = hazelcast.getCluster().getLocalMember().getInetSocketAddress().getAddress().getHostAddress();
-        solrNodes.remove(localAddress);
-        for (String coreName : activeCores) {
-            IMap<String, String> solrCores = hazelcast.getMap(SOLR_CORE_MAP);
-            solrCores.removeAsync(coreName);
-        }
+        if (hazelcast != null) {
+            Collection<String> activeCores = embeddedAccess.getActiveCores();
+            IMap<String, Integer> solrNodes = hazelcast.getMap(SolrActivator.SOLR_NODE_MAP);
+            String localAddress = hazelcast.getCluster().getLocalMember().getInetSocketAddress().getAddress().getHostAddress();
+            solrNodes.remove(localAddress);
+            for (String coreName : activeCores) {
+                IMap<String, String> solrCores = hazelcast.getMap(SOLR_CORE_MAP);
+                solrCores.removeAsync(coreName);
+            }
 
-        embeddedAccess.shutDown();
+            embeddedAccess.shutDown();
+        }
     }
 
     public EmbeddedSolrAccessImpl getEmbeddedServerAccess() {

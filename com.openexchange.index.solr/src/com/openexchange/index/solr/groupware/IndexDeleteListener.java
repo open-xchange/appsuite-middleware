@@ -50,6 +50,7 @@
 package com.openexchange.index.solr.groupware;
 
 import java.sql.Connection;
+import org.apache.commons.logging.Log;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.delete.DeleteEvent;
@@ -68,13 +69,15 @@ import com.openexchange.user.UserService;
  */
 public class IndexDeleteListener implements DeleteListener {
     
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(IndexDeleteListener.class);
+    
     private final int[] coreTypes;
     
 
     public IndexDeleteListener() {
         super();
         // TODO: extend!
-        coreTypes = new int[] { Types.EMAIL };
+        coreTypes = new int[] { Types.EMAIL, Types.ATTACHMENT, Types.INFOSTORE };
     }
 
     @Override
@@ -98,7 +101,14 @@ public class IndexDeleteListener implements DeleteListener {
     private void deleteAllCores(final int cid, final int uid) throws OXException {
         final SolrCoreConfigService indexService = Services.getService(SolrCoreConfigService.class);
         for (final int type : coreTypes) {
-            indexService.removeCoreEnvironment(new SolrCoreIdentifier(cid, uid, type)); 
+            SolrCoreIdentifier identifier = new SolrCoreIdentifier(cid, uid, type);
+            try {
+                if (indexService.coreEnvironmentExists(identifier)) {
+                    indexService.removeCoreEnvironment(identifier); 
+                }
+            } catch (Exception e) {
+                LOG.warn("Error during clean up of core environment for core " + identifier.toString() + ".", e);
+            }
         }
     }
 }
