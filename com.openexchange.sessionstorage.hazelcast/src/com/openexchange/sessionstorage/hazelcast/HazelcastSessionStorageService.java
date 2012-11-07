@@ -228,7 +228,6 @@ public class HazelcastSessionStorageService implements SessionStorageService {
             if (null != sessionId && sessions.containsKey(sessionId)) {
                 final HazelcastStoredSession s = sessions.get(sessionId);
                 s.setLastAccess(System.currentTimeMillis());
-                s.setPassword(s.getPassword());
                 sessions.replace(sessionId, s);
                 return s;
             }
@@ -253,7 +252,6 @@ public class HazelcastSessionStorageService implements SessionStorageService {
             for (final Session session : sessions) {
                 try {
                     final HazelcastStoredSession ss = new HazelcastStoredSession(session);
-                    ss.setPassword(ss.getPassword());
                     sessionsMap.putIfAbsent(session.getSessionID(), ss);
                 } catch (final HazelcastException e) {
                     LOG.warn("Session "+ session.getSessionID() + " could not be added to session storage.", e);
@@ -271,7 +269,6 @@ public class HazelcastSessionStorageService implements SessionStorageService {
         }
         try {
             final HazelcastStoredSession ss = new HazelcastStoredSession(session);
-            ss.setPassword(ss.getPassword());
             return null == sessions(false).putIfAbsent(session.getSessionID(), ss);
         } catch (final HazelcastException e) {
             throw OXHazelcastSessionStorageExceptionCodes.HAZELCAST_SESSIONSTORAGE_SAVE_FAILED.create(e, session.getSessionID());
@@ -288,7 +285,6 @@ public class HazelcastSessionStorageService implements SessionStorageService {
         if (null != session) {
             try {
                 final HazelcastStoredSession ss = new HazelcastStoredSession(session);
-                ss.setPassword(ss.getPassword());
                 sessions(false).put(session.getSessionID(), ss);
             } catch (final HazelcastException e) {
                 throw OXHazelcastSessionStorageExceptionCodes.HAZELCAST_SESSIONSTORAGE_SAVE_FAILED.create(e, session.getSessionID());
