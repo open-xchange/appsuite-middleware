@@ -395,12 +395,16 @@ public class HazelcastSessionStorageService implements SessionStorageService {
     public Session[] getUserSessions(final int userId, final int contextId) {
         try {
             final IMap<String, HazelcastStoredSession> sessions = sessionsUnchecked(true);
+            if (null == sessions) {
+                return new Session[0];
+            }
             final List<HazelcastStoredSession> found = new ArrayList<HazelcastStoredSession>();
+            final long now = System.currentTimeMillis();
             for (final String sessionId : sessions.keySet()) {
                 final Session s = sessions.get(sessionId);
                 if (null != s && s.getUserId() == userId && s.getContextId() == contextId) {
                     final HazelcastStoredSession ss = new HazelcastStoredSession(s);
-                    ss.setLastAccess(System.currentTimeMillis());
+                    ss.setLastAccess(now);
                     found.add(ss);
                 }
             }

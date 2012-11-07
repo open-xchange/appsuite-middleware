@@ -50,7 +50,6 @@
 package com.openexchange.sessionstorage.hazelcast;
 
 import java.io.Serializable;
-import java.util.Map;
 import com.openexchange.session.Session;
 import com.openexchange.sessionstorage.StoredSession;
 
@@ -64,23 +63,6 @@ public class HazelcastStoredSession extends StoredSession implements Serializabl
     private static final long serialVersionUID = -2346327568417617677L;
 
     private long lastAccess;
-
-    /**
-     * Initializes a new {@link HazelcastStoredSession}.
-     */
-    public HazelcastStoredSession(final String sessionId, final String loginName, final String password, final int contextId, final int userId, final String secret, final String login, final String randomToken, final String localIP, final String authId, final String hash, final String client, final Map<String, Object> parameters) {
-        super(sessionId, loginName, password, contextId, userId, secret, login, randomToken, localIP, authId, hash, client, parameters);
-        this.lastAccess = System.currentTimeMillis();
-    }
-
-    /**
-     * Initializes a new {@link HazelcastStoredSession}.
-     *
-     */
-    public HazelcastStoredSession(final String sessionId, final String loginName, final String password, final int contextId, final int userId, final String secret, final String login, final String randomToken, final String localIP, final String authId, final String hash, final String client, final Map<String, Object> parameters, final long lastAccess) {
-        super(sessionId, loginName, password, contextId, userId, secret, login, randomToken, localIP, authId, hash, client, parameters);
-        this.lastAccess = lastAccess;
-    }
 
     /**
      * Initializes a new {@link HazelcastStoredSession}.
