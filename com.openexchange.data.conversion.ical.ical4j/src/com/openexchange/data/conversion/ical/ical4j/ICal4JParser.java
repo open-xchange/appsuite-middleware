@@ -68,6 +68,7 @@ import java.util.TimeZone;
 import net.fortuna.ical4j.data.CalendarBuilder;
 import net.fortuna.ical4j.data.ParserException;
 import net.fortuna.ical4j.model.Component;
+import net.fortuna.ical4j.model.ComponentList;
 import net.fortuna.ical4j.model.Parameter;
 import net.fortuna.ical4j.model.Property;
 import net.fortuna.ical4j.model.component.CalendarComponent;
@@ -117,6 +118,8 @@ public class ICal4JParser implements ICalParser {
         WEEKDAYS.put("SO", Integer.valueOf(CalendarObject.SUNDAY));
     }
 
+	private int limit = -1;
+
     public ICal4JParser() {
         CompatibilityHints.setHintEnabled(
                 CompatibilityHints.KEY_RELAXED_UNFOLDING, true);
@@ -151,11 +154,13 @@ public class ICal4JParser implements ICalParser {
             while(true) {
                 final net.fortuna.ical4j.model.Calendar calendar = parse(reader);
                 if(calendar == null) { break; }
-                int i = 0;
-                for(final Object componentObj : calendar.getComponents("VEVENT")) {
+                ComponentList vevents = calendar.getComponents("VEVENT");
+                int myLimit = limit < 0 ? vevents.size() : limit < vevents.size() ? limit : vevents.size(); 
+                for(int i = 0; i < myLimit; i++) {
+                	final Object componentObj = vevents.get(i);
                     final Component vevent = (Component) componentObj;
                     try {
-                        appointments.add(convertAppointment(i++, (VEvent)vevent, defaultTZ, ctx, warnings ));
+                        appointments.add(convertAppointment(i, (VEvent)vevent, defaultTZ, ctx, warnings ));
                     } catch (final ConversionError conversionError) {
                         errors.add(conversionError);
                     }
@@ -196,11 +201,12 @@ public class ICal4JParser implements ICalParser {
                 if (null == calendar) { 
                 	break; 
                 }
-                int i = 0;
-                for (Object componentObj : calendar.getComponents("VFREEBUSY")) {
-                    Component vevent = (Component) componentObj;
+                ComponentList freebusies = calendar.getComponents("VFREEBUSY");
+                int myLimit = limit < 0 ? freebusies.size() : limit < freebusies.size() ? limit : freebusies.size();
+                for (int i = 0; i < myLimit; i++) {
+                    Component vevent = (Component) freebusies.get(i);
                     try {
-                        fbInfos.add(convertFreeBusy(i++, (VFreeBusy)vevent, defaultTZ, ctx, warnings));
+                        fbInfos.add(convertFreeBusy(i, (VFreeBusy)vevent, defaultTZ, ctx, warnings));
                     } catch (ConversionError conversionError) {
                         errors.add(conversionError);
                     }
@@ -275,11 +281,14 @@ public class ICal4JParser implements ICalParser {
             while(true) {
                 final net.fortuna.ical4j.model.Calendar calendar = parse(reader);
                 if(calendar == null) { break; }
-                int i = 0;
-                for(final Object componentObj : calendar.getComponents("VTODO")) {
-                    final Component vtodo = (Component) componentObj;
+
+                ComponentList todos = calendar.getComponents("VTODO");
+                int myLimit = limit < 0 ? todos.size() : limit < todos.size() ? limit : todos.size();
+
+                for(int i = 0; i < myLimit; i++) {
+                    final Component vtodo = (Component) todos.get(i);
                     try {
-                        tasks.add(convertTask(i++, (VToDo) vtodo, defaultTZ, ctx, warnings ));
+                        tasks.add(convertTask(i, (VToDo) vtodo, defaultTZ, ctx, warnings ));
                     } catch (final ConversionError conversionError) {
                         errors.add(conversionError);
                     }
@@ -546,5 +555,10 @@ public class ICal4JParser implements ICalParser {
         }
 		return line;
     }
+
+	@Override
+	public void setLimit(int amount) {
+		this.limit = amount;
+	}
 
 }
