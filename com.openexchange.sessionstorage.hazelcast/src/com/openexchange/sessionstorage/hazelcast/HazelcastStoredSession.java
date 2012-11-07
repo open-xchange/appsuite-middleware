@@ -67,45 +67,17 @@ public class HazelcastStoredSession extends StoredSession implements Serializabl
 
     /**
      * Initializes a new {@link HazelcastStoredSession}.
-     * 
-     * @param sessionId
-     * @param loginName
-     * @param password
-     * @param contextId
-     * @param userId
-     * @param secret
-     * @param login
-     * @param randomToken
-     * @param localIP
-     * @param authId
-     * @param hash
-     * @param client
-     * @param parameters
      */
-    public HazelcastStoredSession(String sessionId, String loginName, String password, int contextId, int userId, String secret, String login, String randomToken, String localIP, String authId, String hash, String client, Map<String, Object> parameters) {
+    public HazelcastStoredSession(final String sessionId, final String loginName, final String password, final int contextId, final int userId, final String secret, final String login, final String randomToken, final String localIP, final String authId, final String hash, final String client, final Map<String, Object> parameters) {
         super(sessionId, loginName, password, contextId, userId, secret, login, randomToken, localIP, authId, hash, client, parameters);
         this.lastAccess = System.currentTimeMillis();
     }
 
     /**
      * Initializes a new {@link HazelcastStoredSession}.
-     * 
-     * @param sessionId
-     * @param loginName
-     * @param password
-     * @param contextId
-     * @param userId
-     * @param secret
-     * @param login
-     * @param randomToken
-     * @param localIP
-     * @param authId
-     * @param hash
-     * @param client
-     * @param parameters
-     * @param lastAccess
+     *
      */
-    public HazelcastStoredSession(String sessionId, String loginName, String password, int contextId, int userId, String secret, String login, String randomToken, String localIP, String authId, String hash, String client, Map<String, Object> parameters, long lastAccess) {
+    public HazelcastStoredSession(final String sessionId, final String loginName, final String password, final int contextId, final int userId, final String secret, final String login, final String randomToken, final String localIP, final String authId, final String hash, final String client, final Map<String, Object> parameters, final long lastAccess) {
         super(sessionId, loginName, password, contextId, userId, secret, login, randomToken, localIP, authId, hash, client, parameters);
         this.lastAccess = lastAccess;
     }
@@ -115,16 +87,26 @@ public class HazelcastStoredSession extends StoredSession implements Serializabl
      * 
      * @param session
      */
-    public HazelcastStoredSession(Session session) {
+    public HazelcastStoredSession(final Session session) {
         super(session);
         this.lastAccess = System.currentTimeMillis();
     }
 
+    /**
+     * Gets the last-accessed time stamp.
+     * 
+     * @return The last-accessed time stamp
+     */
     public long getLastAccess() {
         return lastAccess;
     }
 
-    public void setLastAccess(long lastAccess) {
+    /**
+     * Sets the last-accessed time stamp.
+     * 
+     * @param lastAccess The last-accessed time stamp
+     */
+    public void setLastAccess(final long lastAccess) {
         this.lastAccess = lastAccess;
     }
 
