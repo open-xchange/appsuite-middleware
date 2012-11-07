@@ -91,6 +91,12 @@ if [ ${1:-0} -eq 2 ]; then
     # prevent bash from expanding, see bug 13316
     GLOBIGNORE='*'
 
+    # SoftwareChange_Request-1196
+    pfile=/opt/open-xchange/etc/import.properties
+    if ! ox_exists_property com.openexchange.import.ical.limit $pfile; then
+        ox_set_property com.openexchange.import.ical.limit 10000 $pfile
+    fi
+
     # SoftwareChange_Request-1068
     # -----------------------------------------------------------------------
     pfile=/opt/open-xchange/etc/ox-scriptconf.sh
