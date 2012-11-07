@@ -52,7 +52,7 @@ package com.openexchange.realtime.atmosphere.presence.handler;
 import com.openexchange.exception.OXException;
 import com.openexchange.realtime.StanzaSender;
 import com.openexchange.realtime.atmosphere.impl.StanzaTransformer;
-import com.openexchange.realtime.atmosphere.presence.initializer.InitializingVisitor;
+import com.openexchange.realtime.atmosphere.presence.initializer.PresenceInitializer;
 import com.openexchange.realtime.atmosphere.presence.osgi.AtmospherePresenceServiceRegistry;
 import com.openexchange.realtime.atmosphere.stanza.StanzaHandler;
 import com.openexchange.realtime.packet.ID;
@@ -91,9 +91,8 @@ public class OXRTPresenceHandler implements StanzaHandler {
         }
         
         Presence presence = (Presence) stanza;
-        
-        InitializingVisitor initializingVisitor = new InitializingVisitor(presence);
-        presence = initializingVisitor.doVisit();
+        PresenceInitializer initializer = new PresenceInitializer();
+        presence = initializer.initialize(presence);
 
         Type type = presence.getType();
         if (Type.SUBSCRIBE == type) {

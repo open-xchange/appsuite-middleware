@@ -8,6 +8,6 @@ public interface StanzaInitializer<T extends Stanza> {
     /**
      * Visit the Stanza's default payloads and initialize its fields based on the found payloads.
      */
-    T initialize();
+    T initialize(T stanza);
 
 }

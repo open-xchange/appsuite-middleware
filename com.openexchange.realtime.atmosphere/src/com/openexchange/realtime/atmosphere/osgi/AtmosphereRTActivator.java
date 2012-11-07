@@ -3,6 +3,7 @@ package com.openexchange.realtime.atmosphere.osgi;
 
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
+import com.openexchange.conversion.simple.SimpleConverter;
 import com.openexchange.http.grizzly.service.atmosphere.AtmosphereService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.osgi.SimpleRegistryListener;
@@ -20,11 +21,25 @@ public class AtmosphereRTActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { SessiondService.class, AtmosphereService.class, MessageDispatcher.class };
+        return new Class<?>[] { SessiondService.class, AtmosphereService.class, MessageDispatcher.class, SimpleConverter.class };
     }
 
     @Override
+    protected void handleAvailability(Class<?> clazz) {
+        Object service = getService(clazz);
+        AtmosphereServiceRegistry.getInstance().addService(clazz, service);
+    }
+
+    @Override
+    protected void handleUnavailability(Class<?> clazz) {
+        AtmosphereServiceRegistry.getInstance().removeService(clazz);
+    }
+    
+    @Override
     protected void startBundle() throws Exception {
+        
+        AtmosphereServiceRegistry.getInstance().initialize(this, getNeededServices());
+        AtmospherePayloadElementTransformer.SERVICES.set(this);
 
         track(AtmospherePayloadElementTransformer.class, new SimpleRegistryListener<AtmospherePayloadElementTransformer>() {
 
@@ -38,7 +53,7 @@ public class AtmosphereRTActivator extends HousekeepingActivator {
                 extensions.removePayloadElementTransformer(transformer);
             }
         });
-        
+
         track(StanzaHandler.class, new SimpleRegistryListener<StanzaHandler>() {
 
             @Override
@@ -53,7 +68,7 @@ public class AtmosphereRTActivator extends HousekeepingActivator {
         });
 
         openTrackers();
-        
+
         AtmosphereService atmosphereService = getService(AtmosphereService.class);
         RTAtmosphereHandler handler = new RTAtmosphereHandler();
         atmosphereService.addAtmosphereHandler("rt", new RTAtmosphereHandler());

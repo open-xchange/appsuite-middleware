@@ -50,71 +50,85 @@
 package com.openexchange.realtime.atmosphere.presence.initializer;
 
 import java.util.Collection;
-import com.openexchange.exception.OXException;
-import com.openexchange.realtime.atmosphere.presence.visitor.PresencePayloadVisitor;
 import com.openexchange.realtime.atmosphere.stanza.StanzaInitializer;
 import com.openexchange.realtime.packet.Presence;
 import com.openexchange.realtime.packet.PresenceState;
-import com.openexchange.realtime.packet.Stanza;
-import com.openexchange.realtime.payload.PayloadElement;
 import com.openexchange.realtime.payload.PayloadTree;
+import com.openexchange.realtime.util.ElementPath;
 
 /**
- * {@link InitializingVisitor} - Visit the Stanza's default payloads and initialize its fields based on the found payloads.
+ * {@link PresenceInitializer}
  * 
  * @author <a href="mailto:marc	.arens@open-xchange.com">Marc Arens</a>
  */
-public class InitializingVisitor implements PresencePayloadVisitor, StanzaInitializer<Presence> {
-
-    private Presence presence;
-
-    /**
-     * Initializes a new {@link InitializingVisitor}.
-     * 
-     * @param presence The Presence Stanza to initialize by visiting its payloads.
-     */
-    public InitializingVisitor(Presence presence) {
-        this.presence = presence;
-    }
+public class PresenceInitializer implements StanzaInitializer<Presence> {
 
     @Override
-    public Presence initialize() {
-        return doVisit();
-    }
+    public Presence initialize(Presence presence) {
+        initShow(presence);
+        initStatus(presence);
+        initPriority(presence);
 
-    /**
-     * Visit the Stanza's default payloads and initialize its fields based on the found payloads.
-     */
-    @Override
-    public Presence doVisit() {
-        Collection<PayloadTree> defaultPayloads = presence.getDefaultPayloads();
-        for (PayloadTree payloadTree : defaultPayloads) {
-            payloadTree.accept(this);
-        }
         return presence;
     }
 
-    @Override
-    public void visit(PayloadElement element, Object data) {
-        // Only needed vor the Visitor interface hierarchy
-    }
-
-    public void visit(PayloadElement element, PresenceState data) {
-        presence.setState(data);
-    }
-
-    public void visit(PayloadElement element, String data) {
-        if (Presence.MESSAGE_PATH.equals(element.getElementPath())) {
-            presence.setMessage(data);
+    /*
+     * The Status Message
+     */
+    private void initStatus(Presence presence) {
+        PayloadTree status = getSinglePayload(presence, Presence.STATUS_PATH);
+        if (status != null) {
+            Object data = status.getRoot().getPayloadElement().getData();
+            if (!(data instanceof String)) {
+                throw new IllegalStateException("Payload not transformed yet");
+            }
+            presence.setMessage((String)data);
         }
     }
 
-    public void visit(PayloadElement element, Byte data) {
-        presence.setPriority(data);
+    /*
+     * The Status shown
+     */
+    private void initShow(Presence presence) {
+        PayloadTree show = getSinglePayload(presence, Presence.SHOW_PATH);
+        if (show != null) {
+        Object data = show.getRoot().getPayloadElement().getData();
+            if (!(data instanceof PresenceState)) {
+                throw new IllegalStateException("Payload not transformed yet");
+            }
+            presence.setState((PresenceState)data);
+        }
     }
 
-    public void visit(PayloadElement element, OXException data) {
-        presence.setError(data);
+    /*
+     * The Priority of the Stanza
+     */
+    private void initPriority(Presence presence) {
+        PayloadTree priority = getSinglePayload(presence, Presence.PRIORITY_PATH);
+        if (priority != null) {
+        Object data = priority.getRoot().getPayloadElement().getData();
+            if (!(data instanceof Byte)) {
+                throw new IllegalStateException("Payload not transformed yet");
+            }
+            presence.setPriority((Byte)data);
+        }
+    }
+
+    /**
+     * @param presence      The Presence Stanza to search in
+     * @param elementPath   The ElementPath of the PayloadTree we want
+     * @return Null or the PayloadTree matching the ElementPath
+     */
+    private PayloadTree getSinglePayload(Presence presence, ElementPath elementPath) {
+        Collection<PayloadTree> trees = presence.getDefaultPayloads();
+        PayloadTree candidate = null;
+        for (PayloadTree tree : trees) {
+            if(elementPath.equals(tree.getElementPath())) {
+                candidate = tree;
+                break;
+            }
+        }
+        return candidate;
     }
 
 }

@@ -54,6 +54,7 @@
     	};
 
     	request.onMessage = function(response) {
+    		console.log("Received message!");
     	    console.log("onMessage:" + response.responseBody);
     	};
     	
@@ -62,6 +63,7 @@
         window.subSocket = socket.subscribe(request);
     	
     	window.pushit = function() {
+    		console.log("Pushing it");
     		subSocket.push('{"author" : "marens", "message" :"harro "}');
     	}
 

@@ -35,7 +35,7 @@ now available.
 {
      "session" : "$session",
      "element" : "presence"
-};
+}
 ~~~
 
 ## Directed Presence
@@ -49,7 +49,7 @@ additional to key.
      "session" : "$session",
      "element" : "presence",
      "to": "ox://marens@1337/ox7ui
-};
+}
 ~~~
 
 ## Update after initial Presence
@@ -65,11 +65,11 @@ Optionals keys/elementss/elements: priority
   "session" : "$session",
   "element" : "presence",
   "payloads" : [
-    {"element" : "status", "data" : "away"},
-    {"element" : "message", "data" : "I'll be back!"},
+    {"element" : "show", "data" : "away"},
+    {"element" : "status", "data" : "I'll be back!"},
     {"element" : "priority", "data" : "1"}
   ]
-};
+}
 ~~~
 
 ## Final unavailable Presence
@@ -83,10 +83,10 @@ Optionals keys/elements: message
     "session" : "$session",
     "element" : "presence",
     "type": "unavailable",
-    payloads : [
-      {"element" : "message", "data" : "Bye!"}
+    "payloads" : [
+      {"element" : "status", "data" : "Bye!"}
     ]
-};
+}
 ~~~
 
 ## Subscribe Request
@@ -101,7 +101,7 @@ Optionals keys/elements: message
   "to" : "ox://marens@1337",
   "type" : "subscribe",
   "payloads" : [
-    {"element" : "message", "data" : "Hello marens, please let me subscribe to your presence, WBR., Mr. X"}
+    {"element" : "status", "data" : "Hello marens, please let me subscribe to your presence, WBR., Mr. X"}
   ]
 }
 ~~~
@@ -118,7 +118,7 @@ Optionals keys/elements: message
   "to" : "ox://mrx@1337",
   "type" : "subscribed",
   "payloads" : [
-    {"element" : "message", "data" :  "Hello Mr. X!"}
+    {"element" : "status", "data" :  "Hello Mr. X!"}
   ]
 }
 ~~~
@@ -136,7 +136,7 @@ Optionals keys/elements: message
   "to" : "ox://mrx@1337",
   "type" : "unsubscribed",
   "payloads" : [
-    {"element" : "message", "data" : "Bye Mr. X!"}
+    {"element" : "status", "data" : "Bye Mr. X!"}
   ]
 }
 ~~~

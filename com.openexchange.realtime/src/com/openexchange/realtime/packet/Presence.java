@@ -96,9 +96,9 @@ public class Presence extends Stanza {
     }
 
     // Names of the payload elements from the default schema we are interested in
-    public static final ElementPath MESSAGE_PATH = new ElementPath("status");
+    public static final ElementPath STATUS_PATH = new ElementPath("status");
 
-    public static final ElementPath PRESENCE_STATE_PATH = new ElementPath("show");
+    public static final ElementPath SHOW_PATH = new ElementPath("show");
 
     public static final ElementPath PRIORITY_PATH = new ElementPath("priority");
 
@@ -128,8 +128,8 @@ public class Presence extends Stanza {
      * Initializes a new {@link Presence}.
      */
     public Presence() {
-        defaultElements.add(MESSAGE_PATH);
-        defaultElements.add(PRESENCE_STATE_PATH);
+        defaultElements.add(STATUS_PATH);
+        defaultElements.add(SHOW_PATH);
         defaultElements.add(PRIORITY_PATH);
         defaultElements.add(ERROR_PATH);
     }
@@ -192,7 +192,7 @@ public class Presence extends Stanza {
      */
     public void setMessage(String message) {
         this.message = message;
-        writeThrough(MESSAGE_PATH, message);
+        writeThrough(STATUS_PATH, message);
     }
 
     /**
@@ -211,7 +211,7 @@ public class Presence extends Stanza {
      */
     public void setState(PresenceState state) {
         this.state = state;
-        writeThrough(PRESENCE_STATE_PATH, state);
+        writeThrough(SHOW_PATH, state);
     }
 
     /**
@@ -278,7 +278,10 @@ public class Presence extends Stanza {
      * @param data The payload data to write into the root node.
      */
     private void writeThrough(ElementPath path, Object data) {
-        List<PayloadTree> payloadTrees = new ArrayList<PayloadTree>(payloads.get(path));
+        List<PayloadTree> payloadTrees = payloads.get(path);
+        if(payloadTrees == null) {
+            payloadTrees = new ArrayList<PayloadTree>();
+        }
         if(payloadTrees.size() > 1) {
             throw new IllegalStateException("Stanza shouldn't contain more than one PayloadTree per basic ElementPath");
         }
@@ -287,14 +290,16 @@ public class Presence extends Stanza {
             PayloadElement payloadElement = new PayloadElement(data, data.getClass().getSimpleName(), path.getNamespace(), path.getElement());
             PayloadTreeNode payloadTreeNode = new PayloadTreeNode(payloadElement);
             tree = new PayloadTree(payloadTreeNode);
+            addPayload(tree);
         } else {
             tree = payloadTrees.get(0);
+            PayloadTreeNode node = tree.getRoot();
+            if (node == null) {
+                throw new IllegalStateException("PayloadTreeNode removed? This shouldn't happen!");
+            }
+            node.setData(data, data.getClass().getSimpleName());
         }
-        PayloadTreeNode node = tree.getRoot();
-        if (node == null) {
-            throw new IllegalStateException("PayloadTreeNode removed? This shouldn't happen!");
-        }
-        node.setData(data, data.getClass().getSimpleName());
+        
     }
 
 }

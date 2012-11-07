@@ -50,6 +50,8 @@
 package com.openexchange.realtime.atmosphere.presence.osgi;
 
 import org.apache.commons.logging.Log;
+import org.osgi.framework.FrameworkEvent;
+import org.osgi.framework.FrameworkListener;
 import com.openexchange.conversion.simple.SimplePayloadConverter;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.realtime.atmosphere.payload.converter.primitive.ByteToJSONConverter;
@@ -100,6 +102,22 @@ public class AtmospherePresenceActivator extends HousekeepingActivator {
 
     @Override
     protected void startBundle() throws Exception {
+        
+        context.addFrameworkListener(new FrameworkListener() {
+            
+            @Override
+            public void frameworkEvent(FrameworkEvent event) {
+//                if(event.getBundle().getSymbolicName().equalsIgnoreCase("com.openexchange.http.grizzly")) {
+                    int eventType = event.getType();
+                    if(eventType == FrameworkEvent.ERROR) {
+                        LOG.error(event.toString(), event.getThrowable());
+                    } else {
+                        LOG.info(event.toString(), event.getThrowable());
+                    }
+//                }
+            }
+            });
+        
         AtmospherePresenceServiceRegistry serviceRegistry = AtmospherePresenceServiceRegistry.getInstance();
         serviceRegistry.initialize(this, getNeededServices());
 
@@ -113,13 +131,13 @@ public class AtmospherePresenceActivator extends HousekeepingActivator {
         
         //Add Transformers using Converters
         registerService(AtmospherePayloadElementTransformer.class,
-            new AtmospherePayloadElementTransformer(PresenceState.class.getSimpleName(), Presence.PRESENCE_STATE_PATH));
+            new AtmospherePayloadElementTransformer(PresenceState.class.getSimpleName(), Presence.SHOW_PATH));
         registerService(AtmospherePayloadElementTransformer.class,
-            new AtmospherePayloadElementTransformer(String.class.getSimpleName(), Presence.MESSAGE_PATH));
+            new AtmospherePayloadElementTransformer(String.class.getSimpleName(), Presence.STATUS_PATH));
         registerService(AtmospherePayloadElementTransformer.class,
-            new AtmospherePayloadElementTransformer(String.class.getSimpleName(), Presence.PRIORITY_PATH));
-        registerService(AtmospherePayloadElementTransformer.class,
-            new AtmospherePayloadElementTransformer(String.class.getSimpleName(), Presence.PRIORITY_PATH));
+            new AtmospherePayloadElementTransformer(Byte.class.getSimpleName(), Presence.PRIORITY_PATH));
+//        registerService(AtmospherePayloadElementTransformer.class,
+//            new AtmospherePayloadElementTransformer(Byte.class.getSimpleName(), Presence.ERROR_PATH));
         
         // Add Presence specific handler
         registerService(StanzaHandler.class, new OXRTPresenceHandler());

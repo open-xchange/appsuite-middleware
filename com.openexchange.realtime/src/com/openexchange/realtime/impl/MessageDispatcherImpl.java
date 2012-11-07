@@ -82,8 +82,10 @@ public class MessageDispatcherImpl implements MessageDispatcher {
         if (channel == null) {
             if (LOG.isInfoEnabled()) {
                 LOG.info("Couldn't find appropriate channel for sending stanza");
+                //TODO: which messages have to be buffered? which can be thrown away ... 
+                return;
             }
-            throw RealtimeExceptionCodes.NO_APPROPRIATE_CHANNEL.create(stanza.getTo().toString(), stanza);
+//            throw RealtimeExceptionCodes.NO_APPROPRIATE_CHANNEL.create(stanza.getTo().toString(), stanza);
         }
 
         channel.send(stanza, session);
