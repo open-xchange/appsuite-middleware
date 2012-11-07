@@ -372,7 +372,7 @@ public class HazelcastActivator extends HousekeepingActivator {
      *         done by another call
      */
     InitMode init(final List<InetAddress> nodes, final boolean force, final long stamp, final Log logger) {
-        synchronized (REF_HAZELCAST_INSTANCE) {
+        synchronized (this) {
             final HazelcastInstance prevHazelcastInstance = REF_HAZELCAST_INSTANCE.get();
             if (null != prevHazelcastInstance) {
                 // Already initialized
