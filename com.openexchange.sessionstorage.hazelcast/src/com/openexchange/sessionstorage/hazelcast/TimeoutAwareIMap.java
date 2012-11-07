@@ -68,6 +68,7 @@ import com.hazelcast.monitor.LocalMapStats;
 import com.hazelcast.query.Expression;
 import com.hazelcast.query.Predicate;
 import com.openexchange.threadpool.ThreadPools;
+import com.openexchange.threadpool.behavior.AbortBehavior;
 
 /**
  * {@link TimeoutAwareIMap} - Delegates to a given {@link IMap} with respect to timeout setting.
@@ -85,6 +86,7 @@ public final class TimeoutAwareIMap implements IMap<String, HazelcastStoredSessi
      * 
      * @param map The map to delegate to
      * @param timeout The timeout
+     * @param behavior The refused execution behavior to use
      */
     public TimeoutAwareIMap(final IMap<String, HazelcastStoredSession> map, final long timeout) {
         this(map, timeout, false);
@@ -95,6 +97,7 @@ public final class TimeoutAwareIMap implements IMap<String, HazelcastStoredSessi
      * 
      * @param map The map to delegate to
      * @param timeout The timeout
+     * @param behavior The refused execution behavior to use
      * @param nativeIfNonPaused <code>true</code> to simply delegate if not currently paused; otherwise <code>false</code> 
      */
     public TimeoutAwareIMap(final IMap<String, HazelcastStoredSession> map, final long timeout, final boolean nativeIfNonPaused) {
@@ -126,7 +129,7 @@ public final class TimeoutAwareIMap implements IMap<String, HazelcastStoredSessi
 
     private <V> V get(final Callable<V> task, final V defaultValue) {
         try {
-            return getFrom(ThreadPools.getThreadPool().submit(task(task)), defaultValue);
+            return getFrom(ThreadPools.getThreadPool().submit(task(task), AbortBehavior.<V> getInstance()), defaultValue);
         } catch (final RejectedExecutionException e) {
             try {
                 return task.call();
