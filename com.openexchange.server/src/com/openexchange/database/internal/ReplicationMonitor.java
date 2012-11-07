@@ -241,7 +241,7 @@ public final class ReplicationMonitor {
             try {
                 pool.back(con);
             } catch (final PoolingException e) {
-                final OXException e1 = DBPoolingExceptionCodes.RETURN_FAILED.create(e, I(poolId));
+                final OXException e1 = DBPoolingExceptionCodes.RETURN_FAILED.create(e, con.toString());
                 LOG.error(e1.getMessage(), e1);
             }
         }

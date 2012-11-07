@@ -102,4 +102,10 @@ public interface PoolableLifecycle<T> {
      */
     boolean validate(PooledData<T> data);
 
+    /**
+     * @return a name for the pooled objects that can be used to generate more understandable messages for administrators. E.g.
+     *         "Database connection".
+     */
+    String getObjectName();
+
 }

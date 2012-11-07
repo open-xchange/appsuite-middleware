@@ -2353,10 +2353,13 @@ msgid "Driver class %1$s missing."
 msgstr ""
 
 #. The pool throws this exception if it believes the connection does not belong to it.
-#. "Return" in terms of giving a previously obtained pooled connection back into connection pool
-#. %1$d is replace with some database connection pool identifier.
+#. "Return" in terms of giving a previously obtained pooled connection back into connection pool.
+#. %1$s is replaced with the object identifier of the database connection object.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/database/DBPoolingExceptionStrings.java:90
-msgid "Connection to pool %1$d can not be returned"
+msgid ""
+"Object %1$s does not belong to this pool. The object will be removed. If "
+"there was a previous message about this object not having been returned to "
+"the pool, the object was just in use too long."
 msgstr ""
 
 #. A property defining the server name was not found in the configuration properties files.
