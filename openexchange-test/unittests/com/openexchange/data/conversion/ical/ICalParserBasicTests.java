@@ -51,10 +51,13 @@ package com.openexchange.data.conversion.ical;
 
 import static com.openexchange.groupware.calendar.tools.CommonAppointments.D;
 import static com.openexchange.groupware.calendar.tools.CommonAppointments.recalculate;
+
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.TimeZone;
 import com.openexchange.groupware.calendar.CalendarDataObject;
@@ -64,6 +67,7 @@ import com.openexchange.groupware.container.ExternalUserParticipant;
 import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.container.ResourceParticipant;
 import com.openexchange.groupware.container.UserParticipant;
+import com.openexchange.groupware.contexts.impl.ContextImpl;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.tasks.Task;
 
@@ -1171,5 +1175,21 @@ public class ICalParserBasicTests extends AbstractICalParserTest {
 
     public void testAppShouldWarnOnUnhandleableFields() throws ConversionError {
         //TODO        
+    }
+    
+    public void testShouldLimitAmountOfImports() throws Exception {
+        final ArrayList<ConversionError> errors = new ArrayList<ConversionError>();
+        final ArrayList<ConversionWarning> warnings = new ArrayList<ConversionWarning>();
+        try {
+	        parser.setLimit(10);
+	        
+	        List<CalendarDataObject> appointments = parser.parseAppointments(fixtures.severalVevents(20), TimeZone.getTimeZone("UTC"), new ContextImpl(23), errors, warnings);	
+	        assertEquals("Ten appointments only", 10, appointments.size());
+	        
+	        List<Task> tasks = parser.parseTasks(fixtures.severalVtodos(20), TimeZone.getTimeZone("UTC"), new ContextImpl(23), errors, warnings);	
+	        assertEquals("Ten tasks only", 10, tasks.size());
+        } finally {
+        	parser.setLimit(-1);
+        }
     }
 }
