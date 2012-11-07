@@ -560,8 +560,8 @@ public final class SessionHandler {
                 try {
                     final Session storedSession = storageService.lookupSession(sessionId);
                     if (null != storedSession) {
-                        sessionData.addSession(new SessionImpl(storedSession), noLimit, true);
-                        return sessionToSessionControl(storedSession);
+                        final SessionControl sc = sessionData.addSession(new SessionImpl(storedSession), noLimit, true);
+                        return null == sc ? sessionToSessionControl(storedSession) : sc;
                     }
                 } catch (final OXException e) {
                     if (!SessionStorageExceptionCodes.NO_SESSION_FOUND.equals(e)) {
