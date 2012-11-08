@@ -1,0 +1,141 @@
+/*
+ *
+ *    OPEN-XCHANGE legal information
+ *
+ *    All intellectual property rights in the Software are protected by
+ *    international copyright laws.
+ *
+ *
+ *    In some countries OX, OX Open-Xchange, open xchange and OXtender
+ *    as well as the corresponding Logos OX Open-Xchange and OX are registered
+ *    trademarks of the Open-Xchange, Inc. group of companies.
+ *    The use of the Logos is not covered by the GNU General Public License.
+ *    Instead, you are allowed to use these Logos according to the terms and
+ *    conditions of the Creative Commons License, Version 2.5, Attribution,
+ *    Non-commercial, ShareAlike, and the interpretation of the term
+ *    Non-commercial applicable to the aforementioned license is published
+ *    on the web site http://www.open-xchange.com/EN/legal/index.html.
+ *
+ *    Please make sure that third-party modules and libraries are used
+ *    according to their respective licenses.
+ *
+ *    Any modifications to this package must retain all copyright notices
+ *    of the original copyright holder(s) for the original code used.
+ *
+ *    After any such modifications, the original and derivative code shall remain
+ *    under the copyright of the copyright holder(s) and/or original author(s)per
+ *    the Attribution and Assignment Agreement that can be located at
+ *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
+ *    given Attribution for the derivative code and a license granting use.
+ *
+ *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Mail: info@open-xchange.com
+ *
+ *
+ *     This program is free software; you can redistribute it and/or modify it
+ *     under the terms of the GNU General Public License, Version 2 as published
+ *     by the Free Software Foundation.
+ *
+ *     This program is distributed in the hope that it will be useful, but
+ *     WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+ *     or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License
+ *     for more details.
+ *
+ *     You should have received a copy of the GNU General Public License along
+ *     with this program; if not, write to the Free Software Foundation, Inc., 59
+ *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
+ *
+ */
+
+package com.openexchange.index.solr.test.utils;
+
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FilenameFilter;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.ObjectOutputStream;
+import java.util.Properties;
+import java.util.regex.Pattern;
+import javax.mail.MessagingException;
+import javax.mail.Session;
+import javax.mail.internet.MimeMessage;
+import com.openexchange.exception.OXException;
+import com.openexchange.mail.dataobjects.MailMessage;
+import com.openexchange.mail.mime.converters.MimeMessageConverter;
+
+/**
+ * {@link MailCreator}
+ * 
+ * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
+ */
+public class MailCreator {
+
+    public static void main(String[] args) throws MessagingException, OXException, IOException {
+        String dir = "/development/git/backend/openexchange-test/testData";
+        int limit = 1;
+        String mailServer = "192.168.1.2";
+        int imapPort = 143;
+        String user = "user2000";
+        String pass = "secret";
+
+        Properties props = new Properties();
+        props.put("mail.store.protocol", "imap");
+        props.put("mail.imaps.host", mailServer);
+        props.put("mail.imaps.socketFactory.port", imapPort);
+        props.put("mail.user", user);
+        props.put("mail.password", pass);
+        props.put("mail.imaps.auth", "true");
+        final File fdir = new File(dir);
+        final File[] messageFiles = fdir.listFiles(new FilenameFilter() {
+
+            @Override
+            public boolean accept(final File dir, final String name) {
+                return Pattern.compile("mail.*\\.eml").matcher(name).matches();
+            }
+        });
+        final int len = limit < 0 ? messageFiles.length : Math.min(messageFiles.length, limit);
+        final MimeMessage[] msgs = new MimeMessage[len];
+        final Session session = Session.getInstance(props);
+        for (int i = 0; i < msgs.length; i++) {
+            InputStream in = null;
+            try {
+                in = new FileInputStream(messageFiles[i]);
+                msgs[i] = new MimeMessage(session, in);
+            } finally {
+                if (null != in) {
+                    try {
+                        in.close();
+                    } catch (final IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        }
+        
+        for (int i = 0; i < msgs.length; i++) {
+            MailMessage convertMessage = MimeMessageConverter.convertMessage(msgs[i]);
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            ObjectOutputStream oos = new ObjectOutputStream(baos);
+            oos.writeObject(convertMessage);
+            baos.flush();
+            byte[] byteArray = baos.toByteArray();
+            StringBuilder sb = new StringBuilder("new byte[] { ");
+            int j = 0;
+            for (byte b : byteArray) {
+                sb.append(b);
+                sb.append(", ");
+                if (++j % 20 == 0) {
+                    sb.append("\n");
+                }
+            }
+            sb.delete(sb.length() - 2, sb.length());
+            sb.append(" };");
+            System.out.println(sb.toString());
+        }
+        
+        
+    }
+
+}
