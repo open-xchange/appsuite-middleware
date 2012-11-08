@@ -1,3 +1,7 @@
+* 2012-11-08 - martin.herfurth@open-xchange.com
+
+ - Fix for bug 23588: Incompatible type.
+
 * 2012-11-08 - thorben.betten@open-xchange.com
 
  - Fix for bug 23661: Introduced in-application sort
