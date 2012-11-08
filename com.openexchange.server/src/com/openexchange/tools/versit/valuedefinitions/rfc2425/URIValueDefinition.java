@@ -87,16 +87,16 @@ public class URIValueDefinition extends ValueDefinition {
         if (value == null) {
             throw new VersitException(scanner, "URI expected");
         }
-        if (RFC_2396_CONFORMANCE) {
-            try {
-                return new URI(value);
-            } catch (final URISyntaxException e) {
+        try {
+            return new URI(value);
+        } catch (final URISyntaxException e) {
+            if (RFC_2396_CONFORMANCE) {
                 final VersitException ve = new VersitException(scanner, e.getMessage());
                 ve.initCause(e);
                 throw ve;
+            } else {
+                return value; // fallback
             }
-        } else {
-            return value;
         }
     }
 
