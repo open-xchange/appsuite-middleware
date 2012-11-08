@@ -239,7 +239,7 @@ public final class SessionHandler {
                         return null;
                     }
                 };
-                getFrom(c, null);
+                submitSafe(c);
             } catch (final RuntimeException e) {
                 LOG.error(e.getMessage(), e);
             }
@@ -545,7 +545,7 @@ public final class SessionHandler {
                     return null;
                 }
             };
-            getFrom(c, null);
+            submitSafe(c);
         }
     }
 
@@ -1207,6 +1207,14 @@ public final class SessionHandler {
             return null;
         } catch (final CancellationException e) {
             return null;
+        }
+    }
+
+    private static <V> void submitSafe(final Callable<V> c) {
+        try {
+            ThreadPools.getThreadPool().submit(ThreadPools.task(c));
+        } catch (final RejectedExecutionException e) {
+            // Ignore
         }
     }
 
