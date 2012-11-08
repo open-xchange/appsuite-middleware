@@ -62,7 +62,6 @@ import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.Callable;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
@@ -87,6 +86,7 @@ import com.openexchange.sessiond.services.SessiondServiceRegistry;
 import com.openexchange.sessionstorage.SessionStorageExceptionCodes;
 import com.openexchange.sessionstorage.SessionStorageService;
 import com.openexchange.threadpool.AbstractTask;
+import com.openexchange.threadpool.Task;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.threadpool.ThreadPools;
 import com.openexchange.timer.ScheduledTimerTask;
@@ -192,7 +192,7 @@ public final class SessionHandler {
         final SessionStorageService storageService = getServiceRegistry().getService(SessionStorageService.class);
         if (storageService != null) {
             try {
-                final Callable<Session[]> c = new Callable<Session[]>() {
+                final Task<Session[]> c = new AbstractTask<Session[]>() {
                     
                     @Override
                     public Session[] call() throws Exception {
@@ -231,7 +231,7 @@ public final class SessionHandler {
         final SessionStorageService storageService = getServiceRegistry().getService(SessionStorageService.class);
         if (storageService != null) {
             try {
-                final Callable<Void> c = new Callable<Void>() {
+                final Task<Void> c = new AbstractTask<Void>() {
                     
                     @Override
                     public Void call() throws Exception {
@@ -261,7 +261,7 @@ public final class SessionHandler {
             final SessionStorageService storageService = getServiceRegistry().getService(SessionStorageService.class);
             if (storageService != null) {
                 try {
-                    final Callable<Boolean> c = new Callable<Boolean>() {
+                    final Task<Boolean> c = new AbstractTask<Boolean>() {
                         
                         @Override
                         public Boolean call() throws Exception {
@@ -290,7 +290,7 @@ public final class SessionHandler {
             final SessionStorageService storageService = getServiceRegistry().getService(SessionStorageService.class);
             if (storageService != null) {
                 try {
-                    final Callable<Session[]> c = new Callable<Session[]>() {
+                    final Task<Session[]> c = new AbstractTask<Session[]>() {
                         
                         @Override
                         public Session[] call() throws Exception {
@@ -316,7 +316,7 @@ public final class SessionHandler {
             final SessionStorageService storageService = getServiceRegistry().getService(SessionStorageService.class);
             if (storageService != null) {
                 try {
-                    final Callable<Session> c = new Callable<Session>() {
+                    final Task<Session> c = new AbstractTask<Session>() {
                         
                         @Override
                         public Session call() throws Exception {
@@ -341,7 +341,7 @@ public final class SessionHandler {
             final SessionStorageService storageService = getServiceRegistry().getService(SessionStorageService.class);
             if (null != storageService) {
                 try {
-                    final Callable<Session> c = new Callable<Session>() {
+                    final Task<Session> c = new AbstractTask<Session>() {
                         
                         @Override
                         public Session call() throws Exception {
@@ -431,7 +431,7 @@ public final class SessionHandler {
         final SessionStorageService storageService = getServiceRegistry().getService(SessionStorageService.class);
         if (storageService != null) {
             try {
-                final Callable<Integer> c = new Callable<Integer>() {
+                final Task<Integer> c = new AbstractTask<Integer>() {
                     
                     @Override
                     public Integer call() throws Exception {
@@ -467,7 +467,7 @@ public final class SessionHandler {
         if (storageService != null) {
             if (maxSessPerClient > 0) {
                 try {
-                    final Callable<Session[]> c = new Callable<Session[]>() {
+                    final Task<Session[]> c = new AbstractTask<Session[]>() {
                         
                         @Override
                         public Session[] call() throws Exception {
@@ -537,7 +537,7 @@ public final class SessionHandler {
         sessionControl.getSession().setPassword(newPassword);
         final SessionStorageService sessionStorageService = getServiceRegistry().getService(SessionStorageService.class);
         if (sessionStorageService != null) {
-            final Callable<Void> c = new Callable<Void>() {
+            final Task<Void> c = new AbstractTask<Void>() {
                 
                 @Override
                 public Void call() throws Exception {
@@ -555,7 +555,7 @@ public final class SessionHandler {
             final SessionStorageService storageService = getServiceRegistry().getService(SessionStorageService.class);
             if (storageService != null) {
                 try {
-                    final Callable<Session> c = new Callable<Session>() {
+                    final Task<Session> c = new AbstractTask<Session>() {
                         
                         @Override
                         public Session call() throws Exception {
@@ -655,7 +655,7 @@ public final class SessionHandler {
             final SessionStorageService storageService = getServiceRegistry().getService(SessionStorageService.class);
             if (storageService != null) {
                 try {
-                    final Callable<Session> c = new Callable<Session>() {
+                    final Task<Session> c = new AbstractTask<Session>() {
                         
                         @Override
                         public Session call() throws Exception {
@@ -719,7 +719,7 @@ public final class SessionHandler {
         final SessionStorageService storageService = getServiceRegistry().getService(SessionStorageService.class);
         if (storageService != null) {
             try {
-                final Callable<Session> c = new Callable<Session>() {
+                final Task<Session> c = new AbstractTask<Session>() {
                     
                     @Override
                     public Session call() throws Exception {
@@ -750,7 +750,7 @@ public final class SessionHandler {
         if (retval == null) {
             final SessionStorageService storageService = getServiceRegistry().getService(SessionStorageService.class);
             if (storageService != null) {
-                final Callable<List<Session>> c = new Callable<List<Session>>() {
+                final Task<List<Session>> c = new AbstractTask<List<Session>>() {
                     
                     @Override
                     public List<Session> call() throws Exception {
@@ -866,10 +866,10 @@ public final class SessionHandler {
         // Asynchronous remove from session storage
         final SessionStorageService sessionStorageService = getServiceRegistry().getService(SessionStorageService.class);
         if (sessionStorageService != null) {
-            ThreadPools.getThreadPool().submit(ThreadPools.task(new Runnable() {
+            ThreadPools.getThreadPool().submit(new AbstractTask<Void>() {
     
                 @Override
-                public void run() {
+                public Void call() {
                     try {
                         sessionStorageService.removeSession(session.getSessionID());
                     } catch (final OXException e) {
@@ -885,8 +885,9 @@ public final class SessionHandler {
                             LOG.warn("Session could not be removed from session storage: " + session.getSessionID());
                         }
                     }
+                    return null;
                 }
-            }));
+            });
         }
         // Asynchronous post of event
         final EventAdmin eventAdmin = getServiceRegistry().getService(EventAdmin.class);
@@ -923,10 +924,10 @@ public final class SessionHandler {
             // Asynchronous remove from session storage
             final SessionStorageService sessionStorageService = getServiceRegistry().getService(SessionStorageService.class);
             if (sessionStorageService != null) {
-                ThreadPools.getThreadPool().submit(ThreadPools.task(new Runnable() {
+                ThreadPools.getThreadPool().submit(new AbstractTask<Void>() {
 
                     @Override
-                    public void run() {
+                    public Void call() {
                         try {
                             for (final SessionControl sessionControl : sessionControls) {
                                 try {
@@ -940,8 +941,9 @@ public final class SessionHandler {
                         } catch (final RuntimeException e) {
                             LOG.error(e.getMessage(), e);
                         }
+                        return null;
                     }
-                }));
+                });
             }
         }
         // Asynchronous post of event
@@ -974,10 +976,10 @@ public final class SessionHandler {
         // Asynchronous remove from session storage
         final SessionStorageService sessionStorageService = getServiceRegistry().getService(SessionStorageService.class);
         if (sessionStorageService != null) {
-            ThreadPools.getThreadPool().submit(ThreadPools.task(new Runnable() {
+            ThreadPools.getThreadPool().submit(new AbstractTask<Void>() {
     
                 @Override
-                public void run() {
+                public Void call() {
                     try {
                         for (final SessionControl sessionControl : controls) {
                             try {
@@ -991,8 +993,9 @@ public final class SessionHandler {
                     } catch (final RuntimeException e) {
                         LOG.error(e.getMessage(), e);
                     }
+                    return null;
                 }
-            }));
+            });
         }
         // Post event
         final EventAdmin eventAdmin = getServiceRegistry().getService(EventAdmin.class);
@@ -1210,17 +1213,17 @@ public final class SessionHandler {
         }
     }
 
-    private static <V> void submitSafe(final Callable<V> c) {
+    private static <V> void submitSafe(final Task<V> c) {
         try {
-            ThreadPools.getThreadPool().submit(ThreadPools.task(c));
+            ThreadPools.getThreadPool().submit(c);
         } catch (final RejectedExecutionException e) {
             // Ignore
         }
     }
 
-    private static <V> V getFrom(final Callable<V> c, final V defaultValue) {
+    private static <V> V getFrom(final Task<V> c, final V defaultValue) {
         try {
-            return ThreadPools.getThreadPool().submit(ThreadPools.task(c)).get(timeout(), TimeUnit.MILLISECONDS);
+            return ThreadPools.getThreadPool().submit(c).get(timeout(), TimeUnit.MILLISECONDS);
         } catch (final InterruptedException e) {
             Thread.currentThread().interrupt();
             throw new IllegalStateException(e.getMessage(), e);
