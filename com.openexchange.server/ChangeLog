@@ -39,6 +39,10 @@
 
  - Fix for bug 23437: Proper specification of character filter in Java regex expression
 
+* 2012-11-02 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 23549: Subtracting client timezone offset when parsing creation date 
+
 * 2012-10-19 - martin.herfurth@open-xchange.com
 
  - Fix for bug 23092: Wrong Confirmation Status as external participant was sent.
@@ -2349,7 +2353,7 @@
 
 * 2011-05-18 - thorben.betten@open-xchange.com
 
- - Bugfix #19179: Probing for '�' character when decoding an encoded-word with big5 encoding. If present use Big5-HKSCS instead.
+ - Bugfix #19179: Probing for '?' character when decoding an encoded-word with big5 encoding. If present use Big5-HKSCS instead.
 
 * 2011-05-18 - marcus.klein@open-xchange.com
 

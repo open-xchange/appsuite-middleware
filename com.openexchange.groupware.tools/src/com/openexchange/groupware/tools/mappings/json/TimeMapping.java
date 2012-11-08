@@ -51,10 +51,8 @@ package com.openexchange.groupware.tools.mappings.json;
 
 import java.util.Date;
 import java.util.TimeZone;
-
 import org.json.JSONException;
 import org.json.JSONObject;
-
 import com.openexchange.exception.OXException;
 import com.openexchange.session.Session;
 
@@ -71,10 +69,15 @@ public abstract class TimeMapping<O> extends DefaultJsonMapping<Date, O> {
 		super(ajaxName, columnID);
 	}
 
-	@Override
-	public void deserialize(JSONObject from, O to) throws JSONException, OXException {
-		this.set(to, from.isNull(getAjaxName()) ? null : new Date(from.getLong(getAjaxName())));
-	}
+    @Override
+    public void deserialize(JSONObject from, O to) throws JSONException, OXException {
+        this.set(to, from.isNull(getAjaxName()) ? null : new Date(from.getLong(getAjaxName())));
+    }
+
+    @Override
+    public void deserialize(JSONObject from, O to, TimeZone timeZone) throws JSONException, OXException {
+        this.set(to, from.isNull(getAjaxName()) ? null : new Date(subtractTimeZoneOffset(from.getLong(getAjaxName()), timeZone)));
+    }
 
 	@Override
 	public Object serialize(O from, TimeZone timeZone, Session session) throws JSONException {
@@ -83,7 +86,11 @@ public abstract class TimeMapping<O> extends DefaultJsonMapping<Date, O> {
 	}
 
     private static long addTimeZoneOffset(final long date, final TimeZone timeZone) {
-    	return null == timeZone ? date : date + timeZone.getOffset(date); 
+        return null == timeZone ? date : date + timeZone.getOffset(date); 
+    }
+
+    private static long subtractTimeZoneOffset(final long date, final TimeZone timeZone) {
+        return null == timeZone ? date : date - timeZone.getOffset(date); 
     }
 
 }

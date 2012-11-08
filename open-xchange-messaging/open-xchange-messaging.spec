@@ -85,6 +85,8 @@ fi
 %dir /opt/open-xchange/etc/
 
 %changelog
+* Wed Oct 31 2012 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2012-10-31
 * Wed Oct 10 2012 Marcus Klein <marcus.klein@open-xchange.com>
 Fifth release candidate for 6.22.0
 * Tue Oct 09 2012 Marcus Klein <marcus.klein@open-xchange.com>

@@ -66,6 +66,7 @@ import org.w3c.dom.NodeList;
 import com.openexchange.exception.OXException;
 import com.openexchange.html.HtmlService;
 import com.openexchange.log.LogFactory;
+import com.openexchange.messaging.MessagingExceptionCodes;
 import com.openexchange.messaging.MessagingHeader;
 import com.openexchange.messaging.StringContent;
 import com.openexchange.messaging.facebook.FacebookMessagingExceptionCodes;
@@ -385,41 +386,48 @@ public final class FacebookFQLStreamParser {
                  * Source URL present?
                  */
                 if (null != sourceURL) {
-                    final FacebookURLConnectionContent content = new FacebookURLConnectionContent(sourceURL, true);
-                    /*
-                     * Create part
-                     */
-                    final MimeMessagingBodyPart part = new MimeMessagingBodyPart();
-                    final String ct;
-                    final String filename;
-                    {
-                        final MimeContentType mct = new MimeContentType(content.getMimeType());
-                        if (null == ext) {
-                            filename = new StringBuilder("video.").append(Utility.getFileExtensions(mct.getBaseType()).get(0)).toString();
-                        } else {
-                            filename = new StringBuilder("video.").append(ext).toString();
+                    try {
+                        final FacebookURLConnectionContent content = new FacebookURLConnectionContent(sourceURL, true);
+                        /*
+                         * Create part
+                         */
+                        final MimeMessagingBodyPart part = new MimeMessagingBodyPart();
+                        final String ct;
+                        final String filename;
+                        {
+                            final MimeContentType mct = new MimeContentType(content.getMimeType());
+                            if (null == ext) {
+                                filename = new StringBuilder("video.").append(Utility.getFileExtensions(mct.getBaseType()).get(0)).toString();
+                            } else {
+                                filename = new StringBuilder("video.").append(ext).toString();
+                            }
+                            mct.setNameParameter(filename);
+                            ct = mct.toString();
                         }
-                        mct.setNameParameter(filename);
-                        ct = mct.toString();
+                        part.setContent(content, ct);
+                        part.setHeader("Content-Type", ct);
+                        /*
+                         * Force base64 encoding to keep data as it is
+                         */
+                        part.setHeader("Content-Transfer-Encoding", "base64");
+                        {
+                            final MimeContentDisposition mcd = new MimeContentDisposition();
+                            mcd.setDisposition("attachment");
+                            mcd.setFilenameParameter(filename);
+                            part.setHeader("Content-Disposition", mcd.toString());
+                        }
+                        /*
+                         * Add to multipart
+                         */
+                        final MimeMultipartContent multipartContent = new MimeMultipartContent();
+                        multipartContent.addBodyPart(part);
+                        multipartProvider.setMultipartContent(multipartContent);
+                    } catch (final OXException e) {
+                        if (!MessagingExceptionCodes.IO_ERROR.equals(e)) {
+                            throw e;
+                        }
+                        // Something went wrong loading URL content... Ignore it
                     }
-                    part.setContent(content, ct);
-                    part.setHeader("Content-Type", ct);
-                    /*
-                     * Force base64 encoding to keep data as it is
-                     */
-                    part.setHeader("Content-Transfer-Encoding", "base64");
-                    {
-                        final MimeContentDisposition mcd = new MimeContentDisposition();
-                        mcd.setDisposition("attachment");
-                        mcd.setFilenameParameter(filename);
-                        part.setHeader("Content-Disposition", mcd.toString());
-                    }
-                    /*
-                     * Add to multipart
-                     */
-                    final MimeMultipartContent multipartContent = new MimeMultipartContent();
-                    multipartContent.addBodyPart(part);
-                    multipartProvider.setMultipartContent(multipartContent);
                 }
 
             } // End of handleAttachment
