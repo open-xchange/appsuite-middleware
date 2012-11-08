@@ -61,11 +61,9 @@ import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.Callable;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
-import java.util.concurrent.FutureTask;
 import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
@@ -86,7 +84,6 @@ import com.openexchange.sessiond.cache.SessionCache;
 import com.openexchange.sessiond.services.SessiondServiceRegistry;
 import com.openexchange.sessionstorage.SessionStorageExceptionCodes;
 import com.openexchange.sessionstorage.SessionStorageService;
-import com.openexchange.sessionstorage.StoredSession;
 import com.openexchange.threadpool.AbstractTask;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.threadpool.ThreadPools;
@@ -104,7 +101,7 @@ public final class SessionHandler {
     /**
      * The parameter name for session storage's {@link Future add task}.
      */
-    private static final String PARAM_SST_FUTURE = StoredSession.PARAM_SST_FUTURE;
+    //private static final String PARAM_SST_FUTURE = StoredSession.PARAM_SST_FUTURE;
 
     public static final SessionCounter SESSION_COUNTER = new SessionCounter() {
 
@@ -352,52 +349,13 @@ public final class SessionHandler {
      * 
      * @param session The session to store
      * @param sessionStorageService The storage service
+     * @param addIfAbsent <code>true</code> to perform add-if-absent store operation; otherwise <code>false</code>
      */
-    @SuppressWarnings("unchecked")
     public static void storeSession(final SessionImpl session, final SessionStorageService sessionStorageService, final boolean addIfAbsent) {
         if (null == session || null == sessionStorageService) {
             return;
         }
-        Future<Void> f = (Future<Void>) session.getParameter(PARAM_SST_FUTURE);
-        if (null == f) {
-            final FutureTask<Void> ft = new FutureTask<Void>(new Callable<Void>() {
-
-                @Override
-                public Void call() throws Exception {
-                    try {
-                        if (addIfAbsent) {
-                            if (sessionStorageService.addSessionIfAbsent(session)) {
-                                LOG.info("Put session " + session.getSessionID() + " with auth Id " + session.getAuthId() + " into session storage.");
-                                postSessionStored(session);
-                            }
-                        } else {
-                            sessionStorageService.addSession(session);
-                            LOG.info("Put session " + session.getSessionID() + " with auth Id " + session.getAuthId() + " into session storage.");
-                            postSessionStored(session);
-                        }
-                    } catch (final Exception e) {
-                        final String s =
-                            MessageFormat.format(
-                                "Failed to put session {0} with Auth-Id {1} into session storage. (user={2}, context={3})",
-                                session.getSessionID(),
-                                session.getAuthId(),
-                                Integer.valueOf(session.getUserId()),
-                                Integer.valueOf(session.getContextId()));
-                        if (DEBUG) {
-                            LOG.info(s, e);
-                        } else {
-                            LOG.info(s);
-                        }
-                    }
-                    return null;
-                }
-            });
-            f = (Future<Void>) session.setParameterIfAbsent(PARAM_SST_FUTURE, ft);
-            if (null == f) {
-                f = ft;
-                ThreadPools.getThreadPool().submit(ThreadPools.task(ft, true));
-            }
-        }
+        ThreadPools.getThreadPool().submit(new StoreSessionTask(session, sessionStorageService, addIfAbsent));
     }
 
     /**
@@ -1032,6 +990,50 @@ public final class SessionHandler {
             }
         }
         return retval;
+    }
+
+    private static final class StoreSessionTask extends AbstractTask<Void> {
+
+        private final SessionStorageService sessionStorageService;
+        private final boolean addIfAbsent;
+        private final SessionImpl session;
+
+        protected StoreSessionTask(SessionImpl session, SessionStorageService sessionStorageService, boolean addIfAbsent) {
+            super();
+            this.sessionStorageService = sessionStorageService;
+            this.addIfAbsent = addIfAbsent;
+            this.session = session;
+        }
+
+        @Override
+        public Void call() throws Exception {
+            try {
+                if (addIfAbsent) {
+                    if (sessionStorageService.addSessionIfAbsent(session)) {
+                        LOG.info("Put session " + session.getSessionID() + " with auth Id " + session.getAuthId() + " into session storage.");
+                        postSessionStored(session);
+                    }
+                } else {
+                    sessionStorageService.addSession(session);
+                    LOG.info("Put session " + session.getSessionID() + " with auth Id " + session.getAuthId() + " into session storage.");
+                    postSessionStored(session);
+                }
+            } catch (final Exception e) {
+                final String s =
+                    MessageFormat.format(
+                        "Failed to put session {0} with Auth-Id {1} into session storage. (user={2}, context={3})",
+                        session.getSessionID(),
+                        session.getAuthId(),
+                        Integer.valueOf(session.getUserId()),
+                        Integer.valueOf(session.getContextId()));
+                if (DEBUG) {
+                    LOG.info(s, e);
+                } else {
+                    LOG.info(s);
+                }
+            }
+            return null;
+        }
     }
 
     private static final class GetStoredSessionTask extends AbstractTask<Session> {
