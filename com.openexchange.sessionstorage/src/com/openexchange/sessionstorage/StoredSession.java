@@ -69,7 +69,7 @@ public class StoredSession implements PutIfAbsent, Serializable {
     /**
      * The parameter name for session storage's {@link java.util.concurrent.Future add task}.
      */
-    public static final String PARAM_SST_FUTURE = "__sst-future";
+    //public static final String PARAM_SST_FUTURE = "__sst-future";
 
     private String loginName;
     private String password;
