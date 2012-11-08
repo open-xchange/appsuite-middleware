@@ -509,21 +509,29 @@ public final class MailReplyTest extends AbstractMailTest {
 					replyPrefix = replyPrefix.replaceFirst("#SENDER#", from == null || from.length == 0 ? "" : from[0]
 							.toUnicodeString());
 				}
+
+				final String text;
 				{
-					final String nextLine = "\n";
-					replyPrefix = new StringBuilder(replyPrefix.length() + 3).append(nextLine).append(replyPrefix)
-							.append(nextLine).append(nextLine).toString();
+				    final Object content = replyMail.getContent();
+	                assertTrue("Missing content", content != null);
+	                text = content.toString();
 				}
+				
+				/*-
+				 * > 
+				 * > On April 2, 2008 at 7:41 AM "Kraft, Manuel" <manuel.kraft@open-xchange.com> wrote:
+				 * > 
+				 */
+				
+				final int pos = text.indexOf(replyPrefix);
+                assertTrue("No reply prefix found", pos > 0);
 
-				final Object content = replyMail.getContent();
-				assertTrue("Missing content", content != null);
-				final String text = content.toString();
-				assertTrue("No reply prefix found", text.startsWith(replyPrefix));
-
-				final BufferedReader reader = new BufferedReader(new StringReader(text.substring(replyPrefix.length())));
+				final BufferedReader reader = new BufferedReader(new StringReader(text.substring(pos)));
 				String line = null;
-				while ((line = reader.readLine()) != null) {
-					assertTrue("Untagged line found in reply text", line.charAt(0) == '>' && line.charAt(1) == ' ');
+				if ((line = reader.readLine()) != null) { // Consume first line
+				    while ((line = reader.readLine()) != null) {
+	                    assertTrue("Untagged line found in reply text: \"" + line + "\" ", line.charAt(0) == '>' && line.charAt(1) == ' ');
+	                }
 				}
 
 			} finally {
