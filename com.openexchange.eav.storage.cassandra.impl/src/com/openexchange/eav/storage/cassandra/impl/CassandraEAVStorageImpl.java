@@ -92,6 +92,7 @@ import com.openexchange.ajax.tools.JSONCoercion;
 import com.openexchange.ajax.tools.JSONUtil;
 import com.openexchange.eav.EAVStorage;
 import com.openexchange.exception.OXException;
+import com.openexchange.exception.Category.EnumCategory;
 
 /**
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
@@ -215,9 +216,9 @@ public class CassandraEAVStorageImpl implements EAVStorage {
 		Map<String, HConsistencyLevel> readCLMap = new HashMap<String, HConsistencyLevel>();
 		Map<String, HConsistencyLevel> writeCLMap = new HashMap<String, HConsistencyLevel>();
 		
-		readCLMap.put(CF_XT_PROPS, HConsistencyLevel.valueOf(read_cl));
+		readCLMap.put(CF_XT_PROPS, HConsistencyLevel.valueOf(read_cl.trim()));
 		
-		writeCLMap.put(CF_XT_PROPS, HConsistencyLevel.valueOf(write_cl));
+		writeCLMap.put(CF_XT_PROPS, HConsistencyLevel.valueOf(write_cl.trim()));
 		
 		configurableConsistencyLevel.setReadCfConsistencyLevels(readCLMap);
 		configurableConsistencyLevel.setWriteCfConsistencyLevels(writeCLMap);
