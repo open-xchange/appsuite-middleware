@@ -1261,6 +1261,12 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
                             } else {
                                 stmt.setString(pos++, personal);
                             }
+                            final String replyTo = mailAccount.getReplyTo();
+                            if (isEmpty(replyTo)) {
+                                stmt.setNull(pos++, TYPE_VARCHAR);
+                            } else {
+                                stmt.setString(pos++, replyTo);
+                            }
 
                             if (LOG.isDebugEnabled()) {
                                 final String query = stmt.toString();

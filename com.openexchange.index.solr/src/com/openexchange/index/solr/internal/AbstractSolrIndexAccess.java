@@ -165,7 +165,9 @@ public abstract class AbstractSolrIndexAccess<V> implements IndexAccess<V> {
         indexedFolders = null;
         indexedFolders = new HashMap<Integer, Map<String, Set<String>>>();
         final SolrAccessService accessService = Services.getService(SolrAccessService.class);
-        accessService.freeResources(identifier);
+        if (accessService != null) {
+            accessService.freeResources(identifier);
+        }
     }
 
     public SolrCoreIdentifier getIdentifier() {

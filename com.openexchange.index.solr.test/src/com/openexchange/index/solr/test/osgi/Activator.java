@@ -46,46 +46,43 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
-package com.openexchange.eav.storage.cassandra.osgi;
 
-import org.apache.commons.logging.Log;
+package com.openexchange.index.solr.test.osgi;
 
 import com.openexchange.config.ConfigurationService;
-import com.openexchange.eav.EAVStorage;
-import com.openexchange.eav.storage.cassandra.impl.CassandraEAVStorageImpl;
-import com.openexchange.nosql.cassandra.EmbeddedCassandraService;
+import com.openexchange.index.IndexFacadeService;
+import com.openexchange.index.solr.test.AbstractSolrIndexAccessTest;
+import com.openexchange.index.solr.test.SolrTestSuite;
 import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.test.osgi.OSGiTest;
+
 
 /**
- * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ * {@link Activator}
  *
+ * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public class CassandraStorageActivator extends HousekeepingActivator {
+public class Activator extends HousekeepingActivator {
 
-	private static Log log = com.openexchange.log.Log.loggerFor(CassandraStorageActivator.class);
-	
-	/*
-	 * (non-Javadoc)
-	 * @see com.openexchange.osgi.DeferredActivator#getNeededServices()
-	 */
-	@Override
-	protected Class<?>[] getNeededServices() {
-		return new Class[]{EmbeddedCassandraService.class, ConfigurationService.class};
-	}
+    @Override
+    protected Class<?>[] getNeededServices() {
+        return new Class<?>[] { IndexFacadeService.class, ConfigurationService.class };
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * @see com.openexchange.osgi.DeferredActivator#startBundle()
-	 */
-	@Override
-	protected void startBundle() throws Exception {
-		log.info("Starting bundle: com.openexchange.eav.storage.cassandra");
-		
-		EAVStorage eav = new CassandraEAVStorageImpl();
-		registerService(EAVStorage.class, eav);
-		
-		openTrackers();
-		
-		log.info("Cassandra Storage Service started successfully.");
-	}
+    @Override
+    protected void startBundle() throws Exception {
+        System.out.println("!!!STATE: " + context.getBundle().getState());
+        AbstractSolrIndexAccessTest.setIndexFacade(getService(IndexFacadeService.class));
+        AbstractSolrIndexAccessTest.setConfigurationService(getService(ConfigurationService.class));
+        
+        registerService(OSGiTest.class, new SolrTestSuite());
+    }
+    
+    @Override
+    protected void stopBundle() throws Exception {
+        System.out.println("!!!STATE: " + context.getBundle().getState());
+        super.stopBundle();
+        System.out.println("!!!STATE: " + context.getBundle().getState());
+    }
+
 }

@@ -1,3 +1,7 @@
+* 2012-11-07 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 23181: Allow update of existing foreign appointment under special circumstances
+
 * 2012-11-06 - tobias.friedrich@open-xchange.com
 
  - Fix for bug 23167: Always include all recurring appointment exceptions 
@@ -38,6 +42,14 @@
 * 2012-10-19 - thorben.betten@open-xchange.com
 
  - Fix for bug 23437: Proper specification of character filter in Java regex expression
+
+* 2012-11-05 - thorben.betten@open-xchange.com
+
+ - Fix for bug 23567: Proper translation when writing JSON response
+
+* 2012-11-02 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 23549: Subtracting client timezone offset when parsing creation date 
 
 * 2012-10-19 - martin.herfurth@open-xchange.com
 
@@ -2349,7 +2361,7 @@
 
 * 2011-05-18 - thorben.betten@open-xchange.com
 
- - Bugfix #19179: Probing for '�' character when decoding an encoded-word with big5 encoding. If present use Big5-HKSCS instead.
+ - Bugfix #19179: Probing for '?' character when decoding an encoded-word with big5 encoding. If present use Big5-HKSCS instead.
 
 * 2011-05-18 - marcus.klein@open-xchange.com
 

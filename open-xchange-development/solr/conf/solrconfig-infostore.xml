@@ -86,39 +86,12 @@
             <str>query</str>
         </arr>
     </requestHandler>
-
-    <requestHandler name="customSearch" class="solr.SearchHandler">
-        <lst name="defaults">
-            <str name="fl">*</str>
-            <str name="q.op">OR</str>
-        </lst>
-
+    
+    <requestHandler name="getSearch" class="solr.SearchHandler">
         <arr name="components">
-            <str>queryModifier</str>
             <str>query</str>
         </arr>
     </requestHandler>
-
-    <searchComponent name="queryModifier" class="de.kippdata.cria.solrext.searchcomponents.FormalFieldQueryModifier">
-        <str name="param1">uuid</str>
-        <str name="param2">filestore_location</str>
-        <str name="param3">number_of_versions</str>
-        <str name="param4">folder_id</str>
-        <str name="param5">id</str>
-        <str name="param6">created_by</str>
-        <str name="param7">modified_by</str>
-        <str name="param8">creation_date</str>
-        <str name="param9">last_modified</str>
-        <str name="param10">title{gen,de,en,fr,it}</str>
-        <str name="param11">version</str>
-        <str name="param15">description{gen,de,en,fr,it}</str>
-        <str name="param16">url</str>
-        <str name="param17">sequence_number</str>
-        <str name="param18">categories</str>
-        <str name="param19">color_label</str>
-        <str name="param20">version_comment{gen,de,en,fr,it}</str>
-        <str name="param23">locale</str>
-    </searchComponent>
 
     <requestHandler name="/update" class="solr.XmlUpdateRequestHandler">
         <lst name="defaults">

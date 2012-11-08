@@ -143,7 +143,31 @@ public interface JsonMapper<O, E extends Enum<E>> extends Mapper<O, E> {
 	 * @throws OXException
 	 * @throws JSONException
 	 */
-	O deserialize(JSONObject jsonObject, E[] fields) throws OXException, JSONException;
+    O deserialize(JSONObject jsonObject, E[] fields) throws OXException, JSONException;
+
+    /**
+     * Deserializes an object from JSON.
+     * 
+     * @param jsonObject the JSON object to create the object from 
+     * @param fields the fields present in the object
+     * @param timeZone the client time zone to consider, or <code>null</code> if not relevant
+     * @return the object
+     * @throws OXException
+     * @throws JSONException
+     */
+    O deserialize(JSONObject jsonObject, E[] fields, TimeZone timeZone) throws OXException, JSONException;
+
+    /**
+     * Deserializes an object from JSON.
+     * 
+     * @param jsonObject the JSON object to create the object from 
+     * @param fields the fields present in the object
+     * @param timeZoneID the client time zone identifier to consider, or <code>null</code> if not relevant
+     * @return the object
+     * @throws OXException
+     * @throws JSONException
+     */
+    O deserialize(JSONObject jsonObject, E[] fields, String timeZoneID) throws OXException, JSONException;
 
 	/**
 	 * Serializes the supplied object to JSON.

@@ -61,6 +61,7 @@ public class SimpleQueryBuilder implements SolrQueryBuilder {
                     throw new IllegalArgumentException("Parameter 'search term' must not be null and of type java.lang.String!");
                 }
                 solrQuery.setQuery((String) searchTerm);
+                solrQuery.setQueryType("simpleSearch");
                 break;
             }
             
@@ -73,12 +74,14 @@ public class SimpleQueryBuilder implements SolrQueryBuilder {
                     throw new IllegalStateException("Could not find a translator for search handler '" + searchHandler.toString() + "'.");
                 }
                 solrQuery.setQuery(translator.translate(searchTerm));
+                solrQuery.setQueryType("customSearch");
                 break;
             }
             
             case ALL_REQUEST:
             {
-                solrQuery.setQuery("*:*");
+                solrQuery.setQuery(translator.translate(searchTerm));
+                solrQuery.setQueryType("allSearch");
                 break;
             }
             
@@ -92,6 +95,7 @@ public class SimpleQueryBuilder implements SolrQueryBuilder {
                     throw new IllegalStateException("Could not find a translator for search handler '" + searchHandler.toString() + "'.");
                 }
                 solrQuery.setQuery(translator.translate(indexIds));
+                solrQuery.setQueryType("getSearch");
                 break;
             }
             
@@ -100,7 +104,6 @@ public class SimpleQueryBuilder implements SolrQueryBuilder {
         }
         
         log.debug("[buildQuery]: Search term is \'" + solrQuery.getQuery() + "\'");
-//        solrQuery.setQueryType(handlerName);
         setSortAndOrder(parameters, solrQuery);
         addFilterQueries(parameters, solrQuery);
         return solrQuery;

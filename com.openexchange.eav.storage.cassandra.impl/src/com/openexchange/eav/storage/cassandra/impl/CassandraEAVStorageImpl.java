@@ -48,6 +48,8 @@
  */
 package com.openexchange.eav.storage.cassandra.impl;
 
+import java.io.FileInputStream;
+import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.charset.CharacterCodingException;
 import java.util.Arrays;
@@ -56,6 +58,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 import java.util.UUID;
 
 import me.prettyprint.cassandra.model.BasicColumnFamilyDefinition;
@@ -89,6 +92,7 @@ import com.openexchange.ajax.tools.JSONCoercion;
 import com.openexchange.ajax.tools.JSONUtil;
 import com.openexchange.eav.EAVStorage;
 import com.openexchange.exception.OXException;
+import com.openexchange.exception.Category.EnumCategory;
 
 /**
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
@@ -99,10 +103,12 @@ public class CassandraEAVStorageImpl implements EAVStorage {
 	
 	private static volatile Cluster cluster;
 	private static volatile Keyspace keyspace;
-	private static final String node = "192.168.33.37"; //TODO: fetch dynamic
-	private static final String keyspaceName = "OX";
-	private static final String CF_XT_PROPS = "ExtendedProperties";
-	private static final int replicationFactor = 3;
+	private static String node;
+	private static String keyspaceName;
+	private static String CF_XT_PROPS;
+	private static int replicationFactor;
+	private static String read_cl;
+	private static String write_cl;
 	
 	private final ColumnFamilyTemplate<UUID, Composite> xtPropsTemplate;
 	
@@ -112,11 +118,42 @@ public class CassandraEAVStorageImpl implements EAVStorage {
 	private static volatile ConfigurableConsistencyLevel configurableConsistencyLevel;
 	
 	public CassandraEAVStorageImpl() {
-		initKeyspace();
+		readProperties();
+	    initKeyspace();
 		
 		xtPropsTemplate = new ThriftColumnFamilyTemplate<UUID, Composite>(keyspace, CF_XT_PROPS, us, cs);
 	}
 	
+	/**
+	 * Read properties.
+	 */
+	private final void readProperties() {
+	    Properties prop = new Properties();
+        String configUrl = System.getProperty("eavstorage.config");
+        String cassandraConfig = System.getProperty("cassandra.config");
+        
+        /* CassandraActivator needs a full URI with a 'file:' prefix.
+         * However the load method provided by Properties requires an
+         * absolute path, thus we remove the 'file:' prefix in the following
+         * line. 
+         */
+        cassandraConfig = cassandraConfig.substring(5);
+        
+        try {
+            prop.load(new FileInputStream(configUrl));
+            prop.load(new FileInputStream(cassandraConfig));
+            node = prop.getProperty("listen_address");
+            keyspaceName = prop.getProperty("keyspace");
+            CF_XT_PROPS = prop.getProperty("cf_xt_props");
+            replicationFactor = Integer.parseInt(prop.getProperty("replication_factor"));
+            read_cl = prop.getProperty("read_cl");
+            write_cl = prop.getProperty("write_cl");
+        } catch (IOException e) {
+            e.printStackTrace();
+            log.error("Properties file does not exist.");
+        }
+	}
+
 	/**
 	 * Create a connection to the local cluster and initialize all resources.
 	 * 
@@ -124,15 +161,8 @@ public class CassandraEAVStorageImpl implements EAVStorage {
 	 * KeyspaceNotDefinedException will be thrown if the keyspace does not exist
 	 */
 	private final void initKeyspace() {
-	    Cluster cluster = CassandraEAVStorageImpl.cluster;
-		if (cluster == null) {
-            //synchronized (cluster) {
-                cluster = CassandraEAVStorageImpl.cluster;
-                if (cluster == null) {
-                    cluster = HFactory.getOrCreateCluster("Local Cluster", node);
-                    CassandraEAVStorageImpl.cluster = cluster;
-                }
-            //}
+        if (cluster == null) {
+            cluster = HFactory.getOrCreateCluster("Local Cluster", node);
         }
 		
 		KeyspaceDefinition kDef = cluster.describeKeyspace(keyspaceName);
@@ -181,15 +211,14 @@ public class CassandraEAVStorageImpl implements EAVStorage {
 	 * <li><b>ALL</b>: Blocks for all the replicas before returning to the client.
 	 */
 	private final static void defineConsistencyLevels() {
-	    final ConfigurableConsistencyLevel configurableConsistencyLevel = new ConfigurableConsistencyLevel();
-		CassandraEAVStorageImpl.configurableConsistencyLevel = configurableConsistencyLevel;
+		CassandraEAVStorageImpl.configurableConsistencyLevel = new ConfigurableConsistencyLevel();
 		
 		Map<String, HConsistencyLevel> readCLMap = new HashMap<String, HConsistencyLevel>();
 		Map<String, HConsistencyLevel> writeCLMap = new HashMap<String, HConsistencyLevel>();
 		
-		readCLMap.put(CF_XT_PROPS, HConsistencyLevel.ONE);
+		readCLMap.put(CF_XT_PROPS, HConsistencyLevel.valueOf(read_cl.trim()));
 		
-		writeCLMap.put(CF_XT_PROPS, HConsistencyLevel.ONE);
+		writeCLMap.put(CF_XT_PROPS, HConsistencyLevel.valueOf(write_cl.trim()));
 		
 		configurableConsistencyLevel.setReadCfConsistencyLevels(readCLMap);
 		configurableConsistencyLevel.setWriteCfConsistencyLevels(writeCLMap);
@@ -206,7 +235,7 @@ public class CassandraEAVStorageImpl implements EAVStorage {
 			UUID xtPropsKey = u;
 			
 			if (xtPropsKey == null) {
-				//throw new OXException(666, "nothing found for: contextID:" + contextID + ", objectID: " + objectID + ", module: " + module);
+				throw new OXException(666, "xtPropsKey is NULL");
 			}
 			
 			ColumnFamilyResult<UUID, Composite> result = xtPropsTemplate.queryColumns(xtPropsKey);
@@ -244,8 +273,8 @@ public class CassandraEAVStorageImpl implements EAVStorage {
 		while (i < attributes.length) {
 			if (attr.containsKey(attributes[i])) {
 				retAttr.put(attributes[i], attr.get(attributes[i]));
-				i++;
 			}
+			i++;
 		}
 		
 		return retAttr;

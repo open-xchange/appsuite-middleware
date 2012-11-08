@@ -56,12 +56,7 @@ package com.openexchange.index;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public class IndexConstants {
-    
-    public static final String ACCOUNT = "account";
-    
-    public static final String IDS = "ids";
-    
-    public static final String MODULE = "module";
+
     
     public static final String DEFAULT_ATTACHMENT = "1";
     

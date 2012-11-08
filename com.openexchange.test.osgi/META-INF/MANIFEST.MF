@@ -1,0 +1,19 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Open-Xchange OSGi tests
+Bundle-SymbolicName: com.openexchange.test.osgi
+Bundle-Version: 6.23.0
+Bundle-Activator: com.openexchange.test.osgi.internal.Activator
+Bundle-Vendor: Open-Xchange Inc.
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Import-Package: com.openexchange.osgi,
+ com.openexchange.server,
+ javax.xml.parsers,
+ org.osgi.framework,
+ org.osgi.util.tracker,
+ org.w3c.dom
+Bundle-ActivationPolicy: lazy
+Bundle-ClassPath: .,
+ lib/junit-4.6.jar
+Export-Package: com.openexchange.test.osgi,
+ org.junit

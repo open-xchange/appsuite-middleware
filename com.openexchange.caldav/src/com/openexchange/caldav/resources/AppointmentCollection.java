@@ -198,9 +198,7 @@ public class AppointmentCollection extends CalDAVFolderCollection<Appointment> {
             if (0 < objectID) {
                 try {
                     object = getAppointmentInterface().getObjectById(objectID, folderID);
-                    if (null != this.knownAppointments) {
-                        knownAppointments.add(object);
-                    }
+                    this.remember(object);
                 } catch (OXException e) {
                     if ("APP-0059".equals(e.getErrorCode())) {
                         // Got the wrong folder identification. You do not have the appropriate permissions to modify this object
@@ -218,7 +216,10 @@ public class AppointmentCollection extends CalDAVFolderCollection<Appointment> {
 
     protected CalendarDataObject load(Appointment appointment, boolean applyPatches) throws OXException {
         try {
-            CalendarDataObject cdo = getAppointmentInterface().getObjectById(appointment.getObjectID(), appointment.getParentFolderID());
+            CalendarDataObject cdo = 0 < appointment.getParentFolderID() ? 
+                getAppointmentInterface().getObjectById(appointment.getObjectID(), appointment.getParentFolderID()) :
+                getAppointmentInterface().getObjectById(appointment.getObjectID());
+            this.remember(appointment);
             return applyPatches ? patch(cdo) : cdo;
         } catch (SQLException e) {
             throw super.protocolException(e);
@@ -247,21 +248,7 @@ public class AppointmentCollection extends CalDAVFolderCollection<Appointment> {
             searchIterator = getAppointmentInterface().getAppointmentsBetweenInFolder(this.folderID, BASIC_COLUMNS, 
                 getIntervalStart(), getIntervalEnd(), -1, Order.NO_ORDER);
             while (searchIterator.hasNext()) {
-                Appointment appointment = searchIterator.next();
-                if (appointment.containsRecurrenceID()) {
-                    if (appointment.getObjectID() == appointment.getRecurrenceID()) {
-                        knownAppointments.add(appointment);
-                        if (null != appointment.getChangeException() && 0 < appointment.getChangeException().length) {
-                            CalendarDataObject[] changeExceptions = getCalendarCollection().getChangeExceptionsByRecurrence(
-                                appointment.getRecurrenceID(), BASIC_COLUMNS, factory.getSession());
-                            if (null != changeExceptions && 0 < changeExceptions.length) {
-                                knownExceptions.put(Integer.valueOf(appointment.getRecurrenceID()), changeExceptions); 
-                            }
-                        }
-                    }
-                } else {
-                    knownAppointments.add(appointment);
-                }
+                this.remember(searchIterator.next());
             }
         } catch (SQLException e) {
             throw protocolException(e);
@@ -270,6 +257,36 @@ public class AppointmentCollection extends CalDAVFolderCollection<Appointment> {
                 searchIterator.close();
             }
         }
+    }
+    
+    /**
+     * Adds the supplied appointment to the list of known appointments, implicitly loading recurring appointment exceptions as well if 
+     * needed.
+     * 
+     * @param appointment The appointment to remember
+     * @return <code>true</code>, if it was added to the cache, <code>false</code>, otherwise
+     * @throws OXException
+     */
+    private boolean remember(Appointment appointment) throws OXException {
+        if (null == this.knownAppointments || null == this.knownExceptions) {
+            LOG.warn("Appointment cache not initialized, unable to remember appointment.");
+            return false;
+        } else if (appointment.containsRecurrenceID()) {
+            if (appointment.getObjectID() == appointment.getRecurrenceID()) {
+                knownAppointments.add(appointment);
+                if (null != appointment.getChangeException() && 0 < appointment.getChangeException().length) {
+                    CalendarDataObject[] changeExceptions = getCalendarCollection().getChangeExceptionsByRecurrence(
+                        appointment.getRecurrenceID(), BASIC_COLUMNS, factory.getSession());
+                    if (null != changeExceptions && 0 < changeExceptions.length) {
+                        knownExceptions.put(Integer.valueOf(appointment.getRecurrenceID()), changeExceptions); 
+                    }
+                }
+                return true;
+            }
+        } else {
+            return knownAppointments.add(appointment);
+        }
+        return false;
     }
     
     private CalendarDataObject patch(CalendarDataObject appointment) throws OXException {

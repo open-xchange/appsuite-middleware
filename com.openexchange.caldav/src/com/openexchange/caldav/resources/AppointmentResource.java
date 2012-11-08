@@ -73,6 +73,7 @@ import com.openexchange.data.conversion.ical.ICalEmitter;
 import com.openexchange.data.conversion.ical.ICalSession;
 import com.openexchange.exception.OXException;
 import com.openexchange.exception.OXException.Truncated;
+import com.openexchange.folderstorage.type.PrivateType;
 import com.openexchange.folderstorage.type.PublicType;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.container.Appointment;
@@ -82,6 +83,7 @@ import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.java.Streams;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 import com.openexchange.webdav.protocol.WebdavPath;
+import com.openexchange.webdav.protocol.WebdavProtocolException;
 
 /**
  * {@link AppointmentResource}
@@ -131,6 +133,15 @@ public class AppointmentResource extends CalDAVResource<Appointment> {
         this.parent = parent;
     }
 
+    @Override
+    public void create() throws WebdavProtocolException {
+        try {
+            super.create();           
+        } catch (WebdavProtocolException e) {
+            handleOnCreate(e);
+        }
+    }
+    
     private AppointmentSQLInterface getAppointmentInterface() {
         if (null == this.appointmentInterface) {
             this.appointmentInterface = factory.getAppointmentInterface();
@@ -150,6 +161,10 @@ public class AppointmentResource extends CalDAVResource<Appointment> {
 
     @Override
     protected void saveObject() throws OXException {
+        saveObject(true);        
+    }
+    
+    protected void saveObject(boolean checkPermissions) throws OXException {
         try {
             /*
              * get original data
@@ -175,14 +190,14 @@ public class AppointmentResource extends CalDAVResource<Appointment> {
             if (false == containsChanges(originalAppointment, appointmentToSave)) {
                 LOG.debug("No changes detected in " + appointmentToSave + ", skipping update.");
             } else {
-                getAppointmentInterface().updateAppointmentObject(appointmentToSave, parentFolderID, clientLastModified);
+                getAppointmentInterface().updateAppointmentObject(appointmentToSave, parentFolderID, clientLastModified, checkPermissions);
                 clientLastModified = appointmentToSave.getLastModified();
             }
             /*
              * update change exceptions
              */
-            for (final CalendarDataObject exceptionToSave : exceptionsToSave) {
-                final Appointment originalException = getMatchingException(originalExceptions, exceptionToSave.getRecurrenceDatePosition());
+            for (CalendarDataObject exceptionToSave : exceptionsToSave) {
+                Appointment originalException = getMatchingException(originalExceptions, exceptionToSave.getRecurrenceDatePosition());
                 if (null != originalException) {
                     /*
                      * prepare exception update
@@ -212,14 +227,14 @@ public class AppointmentResource extends CalDAVResource<Appointment> {
                 /*
                  * update exception
                  */
-                getAppointmentInterface().updateAppointmentObject(exceptionToSave, parentFolderID, clientLastModified);
+                getAppointmentInterface().updateAppointmentObject(exceptionToSave, parentFolderID, clientLastModified, checkPermissions);
                 clientLastModified = exceptionToSave.getLastModified();
             }
             /*
              * update delete exceptions
              */
-            for (final CalendarDataObject deleteExceptionToSave : deleteExceptionsToSave) {
-                final Appointment originalException = getMatchingException(originalExceptions, deleteExceptionToSave.getRecurrenceDatePosition());
+            for (CalendarDataObject deleteExceptionToSave : deleteExceptionsToSave) {
+                Appointment originalException = getMatchingException(originalExceptions, deleteExceptionToSave.getRecurrenceDatePosition());
                 if (null != originalException) {
                     /*
                      * prepare delete of existing exception
@@ -231,12 +246,12 @@ public class AppointmentResource extends CalDAVResource<Appointment> {
                      */
                     deleteExceptionToSave.setObjectID(object.getObjectID());
                 }
-                getAppointmentInterface().deleteAppointmentObject(deleteExceptionToSave, parentFolderID, clientLastModified);
+                getAppointmentInterface().deleteAppointmentObject(deleteExceptionToSave, parentFolderID, clientLastModified, checkPermissions);
                 if (null != deleteExceptionToSave.getLastModified()) {
                     clientLastModified = deleteExceptionToSave.getLastModified();    
                 }                
             }
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw protocolException(e);
         }
     }
@@ -550,6 +565,73 @@ public class AppointmentResource extends CalDAVResource<Appointment> {
         return hasTrimmed;
     }
     
+    /**
+     * Tries to handle a {@link WebdavProtocolException} that occured during resource creation automatically. 
+     * 
+     * @param e The exception
+     * @throws WebdavProtocolException If not handled
+     */
+    private void handleOnCreate(WebdavProtocolException e) throws WebdavProtocolException {
+        if (null != e && null != e.getCause() && OXException.class.isInstance(e.getCause()) &&
+            "APP-0100".equals(((OXException)e.getCause()).getErrorCode())) {
+            /*
+             * Cannot insert appointment (...). An appointment with the unique identifier (...) already exists.
+             */
+            try {
+                int objectID = getAppointmentInterface().resolveUid(appointmentToSave.getUid());
+                if (0 < objectID) {
+                    CalendarDataObject existingAppointment = getAppointmentInterface().getObjectById(objectID);
+                    if (isUpdate(appointmentToSave, existingAppointment) && 
+                        PrivateType.getInstance().equals(parent.getFolder().getType())) {
+                        LOG.debug("Considering appointment with UID '" + appointmentToSave.getUid() + "', sequence " + 
+                            appointmentToSave.getSequence() + " as update for appointment with object ID " + objectID + ", sequence " + 
+                            existingAppointment.getSequence() + ".");
+                        this.object = existingAppointment;                        
+                        appointmentToSave.setObjectID(objectID);
+                        appointmentToSave.removeParentFolderID();
+                        this.saveObject(false); // update instead of create
+                        return; // handled
+                    }
+                }
+            } catch (OXException x) {
+                LOG.warn("Error during automatic exception handling", x);
+            } catch (SQLException x) {
+                LOG.warn("Error during automatic exception handling", x);
+            }
+        }
+        /*
+         * re-throw if not handled
+         */
+        throw e;
+    }
+    
+    private static boolean isUpdate(CalendarDataObject newAppointment, CalendarDataObject existingAppointment) {
+        /*
+         * check uid
+         */
+        if (null == newAppointment.getUid() && false == newAppointment.getUid().equals(existingAppointment.getUid())) {
+            return false;
+        }        
+        /*
+         * check sequence numbers
+         */
+        if (newAppointment.getSequence() <= existingAppointment.getSequence()) {
+            return false;            
+        }
+        /*
+         * check organizer
+         */
+        if (null == newAppointment.getOrganizer() && null != existingAppointment.getOrganizer() ||
+            newAppointment.containsOrganizerId() && newAppointment.getOrganizerId() != existingAppointment.getOrganizerId() ||
+            null != newAppointment.getOrganizer() && false == newAppointment.getOrganizer().equals(existingAppointment.getOrganizer())) {
+            return false;
+        }
+        /*
+         * all checks passed, consider as update
+         */
+        return true;
+    }
+
     private static boolean trimTruncatedAttribute(final Truncated truncated, final CalendarDataObject calendarObject) {
         final Object value = calendarObject.get(truncated.getId());
         if (null != value && String.class.isInstance(value)) {

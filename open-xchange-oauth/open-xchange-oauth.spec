@@ -68,6 +68,10 @@ done
 %config(noreplace) /opt/open-xchange/etc/*
 
 %changelog
+* Mon Nov 05 2012 Steffen Templin <marcus.klein@open-xchange.com>
+Build for patch 2012-10-31
+* Wed Oct 31 2012 Steffen Templin <marcus.klein@open-xchange.com>
+Build for patch 2012-10-31
 * Wed Oct 10 2012 Steffen Templin <marcus.klein@open-xchange.com>
 Fifth release candidate for 6.22.0
 * Tue Oct 09 2012 Steffen Templin <marcus.klein@open-xchange.com>

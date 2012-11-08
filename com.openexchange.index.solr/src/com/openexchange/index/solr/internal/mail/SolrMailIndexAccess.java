@@ -49,6 +49,7 @@
 
 package com.openexchange.index.solr.internal.mail;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -58,6 +59,7 @@ import java.util.List;
 import java.util.Set;
 import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.common.SolrInputDocument;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.Types;
 import com.openexchange.index.FacetParameters;
@@ -68,13 +70,16 @@ import com.openexchange.index.Indexes;
 import com.openexchange.index.QueryParameters;
 import com.openexchange.index.QueryParameters.Order;
 import com.openexchange.index.solr.internal.AbstractSolrIndexAccess;
-import com.openexchange.index.solr.internal.LegacyQueryBuilder;
+import com.openexchange.index.solr.internal.Services;
 import com.openexchange.index.solr.internal.SolrIndexResult;
+import com.openexchange.index.solr.internal.querybuilder.BuilderException;
+import com.openexchange.index.solr.internal.querybuilder.SimpleQueryBuilder;
 import com.openexchange.index.solr.internal.querybuilder.SolrQueryBuilder;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.index.MailIndexField;
 import com.openexchange.mail.index.MailUUID;
 import com.openexchange.solr.SolrCoreIdentifier;
+import com.openexchange.solr.SolrProperties;
 
 /**
  * {@link SolrMailIndexAccess}
@@ -252,8 +257,15 @@ public class SolrMailIndexAccess extends AbstractSolrIndexAccess<MailMessage> {
     }
 
     private SolrQuery buildSolrQuery(QueryParameters parameters) throws OXException {
-        SolrQueryBuilder queryBuilder = new LegacyQueryBuilder(this);
-        return queryBuilder.buildQuery(parameters);
+        SolrQueryBuilder queryBuilder;
+        try {
+            ConfigurationService config = Services.getService(ConfigurationService.class);
+            String configDir = config.getProperty(SolrProperties.CONFIG_DIR);
+            queryBuilder = new SimpleQueryBuilder(configDir + File.separatorChar + "mail-querybuilder.properties", SolrMailField.ACCOUNT, SolrMailField.FULL_NAME, MailFieldMapper.getInstance());
+            return queryBuilder.buildQuery(parameters);
+        } catch (BuilderException e) {
+            throw new OXException(e);
+        }        
     }
     
     private SolrInputDocument convertToDocument(IndexDocument<MailMessage> document) throws OXException {
