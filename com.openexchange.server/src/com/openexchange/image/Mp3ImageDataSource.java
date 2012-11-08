@@ -49,15 +49,13 @@
 
 package com.openexchange.image;
 
+import static com.openexchange.ajax.requesthandler.converters.cover.Mp3CoverExtractor.isSupported;
+import static com.openexchange.ajax.requesthandler.converters.cover.Mp3CoverExtractor.isSupportedFileExt;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
-import java.util.Set;
 import org.apache.commons.logging.Log;
 import org.jaudiotagger.audio.exceptions.InvalidAudioFrameException;
 import org.jaudiotagger.audio.exceptions.ReadOnlyFileException;
@@ -296,14 +294,14 @@ public final class Mp3ImageDataSource implements ImageDataSource {
             String fileMIMEType = mp3File.getFileMIMEType();
             fileMIMEType = null == fileMIMEType ? null : fileMIMEType.toLowerCase(Locale.ENGLISH);
             if (null != fileMIMEType) {
-                if (!isMp3(fileMIMEType)) {
-                    throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create("File is not an MP3 file: " + fileMIMEType);
+                if (!isSupported(fileMIMEType)) {
+                    throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create("File is not a supported audio file: " + fileMIMEType);
                 }
             } else {
                 String fileName = mp3File.getFileName();
                 fileName = null == fileName ? null : fileName.toLowerCase(Locale.ENGLISH);
-                if (null != fileName && !fileName.endsWith(".mp3")) {
-                    throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create("File is not an MP3 file: " + fileMIMEType);
+                if (null != fileName && !isSupportedFileExt(fileName)) {
+                    throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create("File is not a supported audio file: " + fileMIMEType);
                 }
             }
             return mp3File;
@@ -319,24 +317,6 @@ public final class Mp3ImageDataSource implements ImageDataSource {
         final ServerServiceRegistry serviceRegistry = ServerServiceRegistry.getInstance();
         final IDBasedFileAccess fileAccess = serviceRegistry.getService(IDBasedFileAccessFactory.class).createAccess(session);
         return fileManagement.createManagedFile(fileAccess.getDocument(fileId, FileStorageFileAccess.CURRENT_VERSION)); // Stream is closed during creation of ManagedFile
-    }
-
-    private static final Set<String> MIME_TYPES = Collections.unmodifiableSet(new HashSet<String>(Arrays.asList(
-        "audio/mpeg",
-        "audio/x-mpeg",
-        "audio/mp3",
-        "audio/x-mp3",
-        "audio/mpeg3",
-        "audio/x-mpeg3",
-        "audio/mpg",
-        "audio/x-mpg",
-        "audio/x-mpegaudio")));
-
-    private static boolean isMp3(final String mimeType) {
-        if (null == mimeType) {
-            return false;
-        }
-        return MIME_TYPES.contains(mimeType);
     }
 
 }
