@@ -121,6 +121,7 @@ public class XMPPIq extends XMPPStanza {
         }
         if (payload != null) {
             document.append(JOOX.$(payload.to("xmpp", session)));
+            // PayloadTreeTransformer.outgoing
         }
 
         return document.toString();
@@ -143,6 +144,7 @@ public class XMPPIq extends XMPPStanza {
         Match body = xml.child();
         if (body != null) {
             setPayload(new Payload(body.toString(), "xmpp"));
+            // replace with StanzaInitializer + PayloadTreeTransformer.incoming ?
         }
     }
 

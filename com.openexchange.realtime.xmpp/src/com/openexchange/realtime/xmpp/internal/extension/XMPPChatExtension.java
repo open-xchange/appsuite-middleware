@@ -118,6 +118,11 @@ public class XMPPChatExtension implements XMPPExtension {
         xmpp.setTo(new JID(to.getUser(), to.getContext(), to.getResource()));
 
         xmpp.setPayload(message.getPayload().to("xmpp", session));
+        /*
+         * PayloadTree transformedTree = PayloadTreeTransformer.outgoing(message.getPayload(), session);
+         * xmpp.setPayload(transformedPayloadTree)
+         */
+        
     }
 
     private void transform(XMPPMessage xmpp, Message message, ServerSession session) throws OXException {
@@ -128,6 +133,10 @@ public class XMPPChatExtension implements XMPPExtension {
         message.setTo(new ID(null, to.getUser(), to.getDomain(), to.getResource()));
 
         message.setPayload(xmpp.getPayload().to("chatMessage", session));
+        /*
+         * PayloadTree transformedTree = PayloadTreeTransformer.incoming(xmpp.getPayload(), session);
+         * message.setPayload(transformedPayloadTree)
+         */
     }
 
 }
