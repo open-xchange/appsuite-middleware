@@ -430,7 +430,8 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
 
     @Override
     public void send(Stanza stanza) throws OXException {
-        String stanzaAsJSON = StanzaWriter.write(stanza).toString();
+        StanzaWriter stanzaWriter = new StanzaWriter();
+        String stanzaAsJSON = stanzaWriter.write(stanza).toString();
         ID generalForm = stanza.getTo().toGeneralForm();
         String contextAndUser = generateBroadcasterId(generalForm);
         /*

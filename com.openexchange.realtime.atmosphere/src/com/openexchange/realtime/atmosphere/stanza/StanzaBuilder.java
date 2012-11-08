@@ -158,7 +158,7 @@ public abstract class StanzaBuilder<T extends Stanza> {
     /**
      * Decide based on the type of payloadData how we have to create the PayloadTreeNode and possible children.
      * <p>
-     * Data is transformed into a PayloadTreeNode (PTNi) containing a PayloadElement (PEi).
+     * Data is transformed into a PayloadTreeNode (PTNi) eventually containing a PayloadElement (PEi).
      * <ol>
      * <li>Simple type: The data of the PayloadElement will be set to the simple type</li>
      * <li>Array: The data of the PayloadElement will be set to null. Elements of the array are attached as seperate PayloadTreeNodes (PTNj,
@@ -171,8 +171,7 @@ public abstract class StanzaBuilder<T extends Stanza> {
      * PayloadTreeNode (PTNi) but the contained PayloadElement (PEi) doesn't contain any data. Instead the Elements of the array are
      * attached as children to the PayloadTreeNode.
      * 
-     * @param node The current PayloadTreeNode holding an empty PayloadElement
-     * @param data The payload data
+     * @param payload The payload data
      * @return the PayloadTreeNode with the filled PayloadElement and possible children attached.
      * @throws OXException For payloads with broken syntax
      * @throws JSONException For missing or access to mistyped JSONObjects

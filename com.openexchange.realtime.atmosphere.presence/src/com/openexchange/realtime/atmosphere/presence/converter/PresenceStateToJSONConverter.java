@@ -50,7 +50,6 @@
 package com.openexchange.realtime.atmosphere.presence.converter;
 
 import com.openexchange.conversion.simple.SimpleConverter;
-import com.openexchange.exception.OXException;
 import com.openexchange.realtime.atmosphere.payload.converter.AbstractPOJOConverter;
 import com.openexchange.realtime.packet.PresenceState;
 import com.openexchange.tools.session.ServerSession;
@@ -68,7 +67,7 @@ public class PresenceStateToJSONConverter extends AbstractPOJOConverter {
     }
 
     @Override
-    public Object convert(Object data, ServerSession session, SimpleConverter converter) throws OXException {
+    public Object convert(Object data, ServerSession session, SimpleConverter converter) {
         PresenceState state = (PresenceState) data;
         return state.toString();
     }

@@ -49,6 +49,7 @@
 
 package com.openexchange.realtime.atmosphere.impl.stanza.writer;
 
+import java.util.Collection;
 import java.util.List;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -60,15 +61,15 @@ import com.openexchange.realtime.packet.Presence;
 import com.openexchange.realtime.packet.Stanza;
 import com.openexchange.realtime.payload.PayloadElement;
 import com.openexchange.realtime.payload.PayloadTree;
+import com.openexchange.realtime.payload.PayloadTreeNode;
 
 /**
  * {@link StanzaWriter} - Transforms Stanza objects into their JSON representation.
- *
+ * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a> JavaDoc
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
-//TODO: needs rewrite
 public class StanzaWriter {
 
     /**
@@ -78,10 +79,13 @@ public class StanzaWriter {
      * @return The appropriate JSON representation
      * @throws OXException If a JSON write error occurs
      */
-    public static JSONObject write(Stanza stanza) throws OXException {
+    public JSONObject write(final Stanza stanza) throws OXException {
         try {
             JSONObject object = new JSONObject();
+
             writeBasics(stanza, object);
+            writePayloadTrees(stanza, object);
+
             if (stanza instanceof Message) {
                 writeMessage((Message) stanza, object);
             } else if (stanza instanceof Presence) {
@@ -89,50 +93,136 @@ public class StanzaWriter {
             } else if (stanza instanceof IQ) {
                 writeQuery((IQ) stanza, object);
             }
-            writePayloadTrees();
             return object;
         } catch (JSONException x) {
-            throw OXException.general("JSONException "+x.toString());
+            throw OXException.general("JSONException " + x.toString());
         }
     }
 
-    private static void writePayloadTrees() {
-        // TODO Auto-generated method stub
-        
+    private void writeBasics(Stanza stanza, JSONObject object) throws JSONException {
+        object.put("from", stanza.getFrom().toString());
+        object.put("to", stanza.getTo().toString());
+        String id = stanza.getId();
+        if (id != null && !id.isEmpty()) {
+            object.put("id", id);
+        }
     }
 
-    private static void writeQuery(IQ stanza, JSONObject object) throws JSONException {
+    /**
+     * Write the PayloadTrees contained in the Stanza into a given JSONObject.
+     * 
+     * @param stanza The Stanza conaining the PayloadTrees that have to be written as JSON
+     * @param jsonStanza The Stanza as JSONObject
+     * @throws JSONException If writing the PayloadTrees fails
+     */
+    private void writePayloadTrees(final Stanza stanza, final JSONObject jsonStanza) throws JSONException {
+        Collection<PayloadTree> payloadTrees = stanza.getPayloads();
+        JSONArray payloadArray = new JSONArray();
+        for (PayloadTree payloadTree : payloadTrees) {
+            payloadArray.put(writePayloadTreeNode(payloadTree.getRoot()));
+        }
+        jsonStanza.putOpt("payloads", payloadArray);
+    }
+
+    /**
+     * Decide based on the hierarchy of PayloadTreeNodes how we have to create the JSONObject.
+     * <p>
+     * Data is transformed from a PayloadTreeNode (<b>PTNi</b>) eventually containing a PayloadElement (<b>PEi</b>).
+     * <ol>
+     * <li>SimpleType: <b>PEi</b> is already transformed into a String by one of the converters. <b>PTNi</b> without children -> Produce a
+     * payload JSONObject from data of the PayloadElement</li>
+     * <li>Array: <b>PEi</b> without data but <b>PTNi</b> with children -> The data of the PayloadElement will be set to null. Elements of
+     * the array are attached as seperate PayloadTreeNodes (PTNj, PTNk, ...) below PTNi containing their own PayloadElements PEj, PEk and so
+     * on.</li>
+     * <li>ComplexType (already transformed into a JSONObject by one of the converters). PayloadTreeNode with data and children: The data of
+     * the PayloadElement will be set to the Object. If the object contains nested container objects those are attached as seperate
+     * PayloadTreeNodes (PTNj, PTNk, ...) below PTNi containing their own PayloadElements PEj, PEk and so on.</li>
+     * </ol>
+     * If data contains nested container objects those are attached as seperate PayloadTreeNodes (PTNj, PTNk, ...) below PTNi containing
+     * their own PayloadElements PEj, PEk and so on. If a JSONObject contains a nested array container it is attached as seperate
+     * PayloadTreeNode (PTNi) but the contained PayloadElement (PEi) doesn't contain any data. Instead the Elements of the array are
+     * attached as children to the PayloadTreeNode.
+     * 
+     * @param node The PayloadTreeNode that has be be written into a JSONObject
+     * @param jsonObject The JSONObject to write the PayloadTreeNode into
+     * @return the PayloadTreeNode written into a JSONObject
+     * @throws JSONException If writing the PayloadTreeNode to JSON fails
+     */
+    private JSONObject writePayloadTreeNode(PayloadTreeNode node) throws JSONException {
+        if (isSimpleNode(node)) {
+            return createJSONPayload(node.getPayloadElement());
+        } else if (isArrayNode(node)) {
+            JSONObject jsonArrayNode = new JSONObject();
+            jsonArrayNode.put("namespace", node.getNamespace());
+            jsonArrayNode.put("element", node.getElementName());
+            JSONArray dataArray = new JSONArray();
+            for (PayloadTreeNode treeNode : node.getChildren()) {
+                dataArray.put(writePayloadTreeNode(treeNode));
+            }
+            jsonArrayNode.put("data", dataArray);
+            return jsonArrayNode;
+        } else {
+            /*
+             * Complex Node, maybe with childNodes
+             * PEi.data is a JSONObject
+
+             */
+            JSONObject complexJSONPayload = createJSONPayload(node.getPayloadElement());
+//            /*
+//             * TODO: Implement nesting of objects, need to add keynames as names to payloadTreeNode
+//             */
+//            for (PayloadTreeNode child : node.getChildren()) {
+//                String name = child.getNodeName();
+//                JSONObject jsonChild = createJSONPayload(node.getPayloadElement());
+//                complexJSONPayload.put(name, jsonChild);
+//            }
+            return complexJSONPayload;
+        }
+    }
+
+    private boolean isSimpleNode(PayloadTreeNode node) {
+        Object data = node.getData();
+        if (data != null && data instanceof String) {
+            return true;
+        }
+        return false;
+    }
+
+    private boolean isArrayNode(PayloadTreeNode node) {
+        Object data = node.getData();
+        if (data == null && node.hasChildren()) {
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * Create a JSONObject from a PayloadElement.
+     * @param payloadElement The PayloadElement to convert
+     * @return  A JSONObject in the form <tt>{namespace: ... , element: ... , data: ...}</tt>
+     * @throws JSONException If the JSONObject couldn't be created 
+     */
+    private JSONObject createJSONPayload(PayloadElement payloadElement) throws JSONException {
+        JSONObject jsonPayload = new JSONObject();
+        jsonPayload.put("namespace", payloadElement.getNamespace());
+        jsonPayload.put("element", payloadElement.getElementName());
+        jsonPayload.put("data", payloadElement.getData());
+
+        return jsonPayload;
+    }
+
+    private void writeQuery(IQ stanza, JSONObject object) throws JSONException {
         object.put("element", "iq");
         object.put("type", stanza.getType().name().toLowerCase());
     }
 
-    private static void writePresence(Presence stanza, JSONObject object) throws JSONException {
+    private void writePresence(Presence stanza, JSONObject object) throws JSONException {
         object.put("element", "presence");
         object.put("type", stanza.getType().name().toLowerCase());
     }
 
-    private static void writeMessage(Message stanza, JSONObject object) throws JSONException {
+    private void writeMessage(Message stanza, JSONObject object) throws JSONException {
         object.put("element", "message");
-    }
-
-    private static void writeBasics(Stanza stanza, JSONObject object) throws JSONException {
-//        object.put("from", stanza.getFrom().toString());
-//        object.put("to", stanza.getTo().toString());
-//        List<PayloadElement> payloads = stanza.getPayloads();
-//        if(!payloads.isEmpty()) {
-//            JSONArray payloadArray = new JSONArray();
-//            for(PayloadElement payload : payloads) {
-//                JSONObject payloadObject = new JSONObject();
-//                String namespace = payload.getNamespace();
-//                if(namespace != null) {
-//                    payloadObject.put("namespace",payload.getNamespace());
-//                }
-//                payloadObject.put("element",payload.getElementName());
-//                payloadObject.put("data",payload.getData());
-//                payloadArray.put(payloadObject);
-//            }
-//        }
-        throw new UnsupportedOperationException("Not implemented yet!");
     }
 
 }

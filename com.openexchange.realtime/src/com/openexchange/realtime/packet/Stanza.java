@@ -54,13 +54,11 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import com.google.common.base.Predicate;
-import com.google.common.collect.Iterables;
 import com.openexchange.realtime.payload.PayloadTree;
 import com.openexchange.realtime.util.ElementPath;
 
@@ -76,7 +74,7 @@ public abstract class Stanza {
     private ID to, from;
 
     // All 3 basic stanza types either have an optional or mandatory id field
-    private String id;
+    private String id = "";
 
     // Payloads carried by this Stanza as n-ary trees
     Map<ElementPath, List<PayloadTree>> payloads;

@@ -104,7 +104,7 @@ public class Presence extends Stanza {
 
     public static final ElementPath ERROR_PATH = new ElementPath("error");
 
-    private ArrayList<ElementPath> defaultElements = new ArrayList<ElementPath>();
+    private static final ArrayList<ElementPath> defaultElements = new ArrayList<ElementPath>();
 
     /** Predicate to filter extension elements from {@link Stanza#payloads} */
     private final Predicate<PayloadTree> defaultsPredicate = new Predicate<PayloadTree>() {

@@ -49,18 +49,13 @@
 
 package com.openexchange.realtime.payload;
 
-import java.util.concurrent.atomic.AtomicReference;
-import com.openexchange.conversion.simple.SimpleConverter;
-import com.openexchange.exception.OXException;
 import com.openexchange.realtime.payload.transformer.PayloadElementTransformer;
 import com.openexchange.realtime.util.ElementPath;
-import com.openexchange.server.ServiceLookup;
-import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link PayloadElement} - Represents a stanza's payload element that is any (POJO) object linked with its format identifier. Namespace and
  * elementName are used for unique identification (@see ElementPath) of payload elements and determine which
- * {@link PayloadElementTransformer} to use. Payloads can form n-ary trees: Payload = data , {Payload}
+ * {@link PayloadElementTransformer} to use.
  * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a> JavaDoc
@@ -68,16 +63,16 @@ import com.openexchange.tools.session.ServerSession;
 public class PayloadElement implements VisitablePayload {
 
     // Current format of the Payload e.g. json, xml or some Class.getSimpleName()
-    private String format;
+    private String format = "";
 
     // The namespace of this payload e.g.: http://jabber.org/protocol/disco.info
-    private String namespace;
+    private String namespace = "";
 
     // The elementname identifying the Payload element in a namespace
-    private String elementName;
+    private String elementName = "";
 
     // The actual payload
-    private Object data;
+    private Object data = null;
 
     /**
      * Initializes a new {@link PayloadElement}.
