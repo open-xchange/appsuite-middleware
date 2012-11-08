@@ -1,3 +1,7 @@
+* 2012-11-07 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 23181: Allow update of existing foreign appointment under special circumstances
+
 * 2012-11-06 - tobias.friedrich@open-xchange.com
 
  - Fix for bug 23167: Always include all recurring appointment exceptions 
