@@ -89,6 +89,7 @@ import com.openexchange.mail.utils.MailFolderUtility;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.mailaccount.UnifiedInboxManagement;
 import com.openexchange.server.impl.OCLPermission;
+import com.openexchange.server.services.ServerServiceRegistry;
 
 /**
  * {@link MailFolderImpl} - A mail folder.
@@ -249,7 +250,8 @@ public final class MailFolderImpl extends AbstractFolder implements FolderExtens
                     pe.setFolderPermission(Permission.READ_FOLDER);
                 }
             }
-            final boolean translateDefaultFolders = MailServiceRegistry.getServiceRegistry().getService(ConfigurationService.class).getBoolProperty("com.openexchange.mail.translateDefaultFolders", true);
+            final ConfigurationService configurationService = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
+            final boolean translateDefaultFolders = null == configurationService || configurationService.getBoolProperty("com.openexchange.mail.translateDefaultFolders", true);
             if (mailFolder.containsDefaultFolderType()) {
                 switch (mailFolder.getDefaultFolderType()) {
                 case INBOX:
