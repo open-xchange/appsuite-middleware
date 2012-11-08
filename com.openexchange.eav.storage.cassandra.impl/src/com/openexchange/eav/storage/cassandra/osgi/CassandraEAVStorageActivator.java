@@ -48,6 +48,7 @@
  */
 package com.openexchange.eav.storage.cassandra.osgi;
 
+import java.io.File;
 import org.apache.commons.logging.Log;
 
 import com.openexchange.config.ConfigurationService;
@@ -60,9 +61,9 @@ import com.openexchange.osgi.HousekeepingActivator;
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  *
  */
-public class CassandraStorageActivator extends HousekeepingActivator {
+public class CassandraEAVStorageActivator extends HousekeepingActivator {
 
-	private static Log log = com.openexchange.log.Log.loggerFor(CassandraStorageActivator.class);
+	private static Log log = com.openexchange.log.Log.loggerFor(CassandraEAVStorageActivator.class);
 	
 	/*
 	 * (non-Javadoc)
@@ -80,6 +81,15 @@ public class CassandraStorageActivator extends HousekeepingActivator {
 	@Override
 	protected void startBundle() throws Exception {
 		log.info("Starting bundle: com.openexchange.eav.storage.cassandra");
+		
+		CassandraEAVStorageServiceLookup.set(this);
+        
+        ConfigurationService config = CassandraEAVStorageServiceLookup.getService(ConfigurationService.class);
+        
+        final File file = config.getFileByName("eavstorage.properties");
+        if (null != file) {
+            System.setProperty("eavstorage.config", file.getAbsolutePath().toString());
+        }
 		
 		EAVStorage eav = new CassandraEAVStorageImpl();
 		registerService(EAVStorage.class, eav);
