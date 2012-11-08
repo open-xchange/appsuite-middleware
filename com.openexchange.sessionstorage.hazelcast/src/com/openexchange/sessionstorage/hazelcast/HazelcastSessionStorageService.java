@@ -211,13 +211,14 @@ public class HazelcastSessionStorageService implements SessionStorageService {
                 }
                 final ThreadPoolService threadPool = ThreadPools.getThreadPool();
                 if (null == threadPool) {
-                    return hazelcastInstance.getMap(mapName);
+                    sessions = hazelcastInstance.getMap(mapName);
+                } else {
+                    final IMap<String, HazelcastStoredSession> map = getMapFrom(threadPool.submit(new GetSessionMapTask(hazelcastInstance, mapName), abortBehavior));
+                    if (null == map) {
+                        throw new HazelcastException("No such map: " + mapName);
+                    }
+                    sessions = new TimeoutAwareIMap(map, timeout());
                 }
-                final IMap<String, HazelcastStoredSession> map = getMapFrom(threadPool.submit(new GetSessionMapTask(hazelcastInstance, mapName), abortBehavior));
-                if (null == map) {
-                    throw new HazelcastException("No such map: " + mapName);
-                }
-                sessions = new TimeoutAwareIMap(map, timeout());
             } else {
                 sessions = hazelcastInstance.getMap(mapName);
             }
