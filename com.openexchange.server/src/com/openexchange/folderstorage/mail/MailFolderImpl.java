@@ -143,16 +143,11 @@ public final class MailFolderImpl extends AbstractFolder implements FolderExtens
 
     }
 
-    private MailFolderType mailFolderType;
-
+    private final MailFolderType mailFolderType;
     private final boolean cacheable;
-
     private final String fullName;
-
     private final int accountId;
-
     private final int userId;
-
     private final int contextId;
 
     private static final int BIT_USER_FLAG = (1 << 29);
@@ -241,7 +236,7 @@ public final class MailFolderImpl extends AbstractFolder implements FolderExtens
             }
         } else {
             mp = mailFolder.getOwnPermission();
-            mailFolderType = MailFolderType.NONE;
+            MailFolderType mailFolderType = MailFolderType.NONE;
             /*
              * Check if entity's permission allows to read the folder: Every mail folder listed is at least visible to user
              */
@@ -314,6 +309,7 @@ public final class MailFolderImpl extends AbstractFolder implements FolderExtens
             } else {
                 mailFolderType = MailFolderType.NONE;
             }
+            this.mailFolderType = mailFolderType;
         }
         if (!mailFolder.isHoldsFolders() && mp.canCreateSubfolders()) {
             // Cannot contain subfolders; therefore deny subfolder creation
