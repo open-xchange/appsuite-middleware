@@ -451,12 +451,19 @@ public class HazelcastActivator extends HousekeepingActivator {
             final Set<String> members = resolve2Members(nodes);
             if (members.isEmpty()) {
                 if (logger.isInfoEnabled()) {
-                    logger.info("\nHazelcast:\n\tRe-Starting Hazelcast instance:\n\tNo additional members\n");
+                    logger.info("\nHazelcast:\n\tAbort re-start of Hazelcast instance:\n\tNo additional members\n");
                 }
                 return InitMode.NONE;
             }
             final TcpIpConfig tcpIpConfig = join.getTcpIpConfig();
             final Set<String> cur = new LinkedHashSet<String>(tcpIpConfig.getMembers());
+            if (cur.containsAll(members)) {
+                // Already contained...
+                if (logger.isInfoEnabled()) {
+                    logger.info("\nHazelcast:\n\tAbort re-start of Hazelcast instance:\n\tNo additional members\n");
+                }
+                return InitMode.NONE;
+            }
             if (logger.isInfoEnabled()) {
                 logger.info("\nHazelcast:\n\tRe-Starting Hazelcast instance:\n\tExisting members: " + cur + "\n\tNew members: " + members + "\n");
             }
