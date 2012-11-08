@@ -73,7 +73,6 @@ import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.session.Session;
 import com.openexchange.sessionstorage.SessionStorageExceptionCodes;
 import com.openexchange.sessionstorage.SessionStorageService;
-import com.openexchange.sessionstorage.hazelcast.exceptions.OXHazelcastSessionStorageExceptionCodes;
 import com.openexchange.threadpool.AbstractTask;
 import com.openexchange.threadpool.RefusedExecutionBehavior;
 import com.openexchange.threadpool.ThreadPoolService;
@@ -300,10 +299,10 @@ public class HazelcastSessionStorageService implements SessionStorageService {
             final HazelcastStoredSession ss = new HazelcastStoredSession(session);
             return null == sessions(false).putIfAbsent(session.getSessionID(), ss);
         } catch (final HazelcastException e) {
-            throw OXHazelcastSessionStorageExceptionCodes.HAZELCAST_SESSIONSTORAGE_SAVE_FAILED.create(e, session.getSessionID());
+            throw SessionStorageExceptionCodes.SAVE_FAILED.create(e, session.getSessionID());
         } catch (final OXException e) {
             if (ServiceExceptionCode.SERVICE_UNAVAILABLE.equals(e)) {
-                throw OXHazelcastSessionStorageExceptionCodes.HAZELCAST_SESSIONSTORAGE_SAVE_FAILED.create(e, session.getSessionID());
+                throw SessionStorageExceptionCodes.SAVE_FAILED.create(e, session.getSessionID());
             }
             throw e;
         }
@@ -316,10 +315,10 @@ public class HazelcastSessionStorageService implements SessionStorageService {
                 final HazelcastStoredSession ss = new HazelcastStoredSession(session);
                 sessions(false).put(session.getSessionID(), ss);
             } catch (final HazelcastException e) {
-                throw OXHazelcastSessionStorageExceptionCodes.HAZELCAST_SESSIONSTORAGE_SAVE_FAILED.create(e, session.getSessionID());
+                throw SessionStorageExceptionCodes.SAVE_FAILED.create(e, session.getSessionID());
             } catch (final OXException e) {
                 if (ServiceExceptionCode.SERVICE_UNAVAILABLE.equals(e)) {
-                    throw OXHazelcastSessionStorageExceptionCodes.HAZELCAST_SESSIONSTORAGE_SAVE_FAILED.create(e, session.getSessionID());
+                    throw SessionStorageExceptionCodes.SAVE_FAILED.create(e, session.getSessionID());
                 }
                 throw e;
             }
@@ -332,10 +331,10 @@ public class HazelcastSessionStorageService implements SessionStorageService {
             try {
                 sessions(false).remove(sessionId);
             } catch (final HazelcastException e) {
-                throw OXHazelcastSessionStorageExceptionCodes.HAZELCAST_SESSIONSTORAGE_REMOVE_FAILED.create(e, sessionId);
+                throw SessionStorageExceptionCodes.REMOVE_FAILED.create(e, sessionId);
             } catch (final OXException e) {
                 if (ServiceExceptionCode.SERVICE_UNAVAILABLE.equals(e)) {
-                    throw OXHazelcastSessionStorageExceptionCodes.HAZELCAST_SESSIONSTORAGE_REMOVE_FAILED.create(e, sessionId);
+                    throw SessionStorageExceptionCodes.REMOVE_FAILED.create(e, sessionId);
                 }
                 throw e;
             }
@@ -509,18 +508,18 @@ public class HazelcastSessionStorageService implements SessionStorageService {
                     return s;
                 }
             }
-            throw OXHazelcastSessionStorageExceptionCodes.HAZELCAST_SESSIONSTORAGE_RANDOM_NOT_FOUND.create(randomToken);
+            throw SessionStorageExceptionCodes.RANDOM_NOT_FOUND.create(randomToken);
         } catch (final HazelcastException e) {
             if (DEBUG) {
                 LOG.debug(e.getMessage(), e);
             }
-            throw OXHazelcastSessionStorageExceptionCodes.HAZELCAST_SESSIONSTORAGE_RANDOM_NOT_FOUND.create(e, randomToken);
+            throw SessionStorageExceptionCodes.RANDOM_NOT_FOUND.create(e, randomToken);
         } catch (final OXException e) {
             if (ServiceExceptionCode.SERVICE_UNAVAILABLE.equals(e)) {
                 if (DEBUG) {
                     LOG.debug(e.getMessage(), e);
                 }
-                throw OXHazelcastSessionStorageExceptionCodes.HAZELCAST_SESSIONSTORAGE_RANDOM_NOT_FOUND.create(e, randomToken);
+                throw SessionStorageExceptionCodes.RANDOM_NOT_FOUND.create(e, randomToken);
             }
             throw e;
         }
@@ -539,18 +538,18 @@ public class HazelcastSessionStorageService implements SessionStorageService {
                     return s;
                 }
             }
-            throw OXHazelcastSessionStorageExceptionCodes.HAZELCAST_SESSIONSTORAGE_ALTID_NOT_FOUND.create(altId);
+            throw SessionStorageExceptionCodes.ALTID_NOT_FOUND.create(altId);
         } catch (final HazelcastException e) {
             if (DEBUG) {
                 LOG.debug(e.getMessage(), e);
             }
-            throw OXHazelcastSessionStorageExceptionCodes.HAZELCAST_SESSIONSTORAGE_ALTID_NOT_FOUND.create(e, altId);
+            throw SessionStorageExceptionCodes.ALTID_NOT_FOUND.create(e, altId);
         } catch (final OXException e) {
             if (ServiceExceptionCode.SERVICE_UNAVAILABLE.equals(e)) {
                 if (DEBUG) {
                     LOG.debug(e.getMessage(), e);
                 }
-                throw OXHazelcastSessionStorageExceptionCodes.HAZELCAST_SESSIONSTORAGE_ALTID_NOT_FOUND.create(e, altId);
+                throw SessionStorageExceptionCodes.ALTID_NOT_FOUND.create(e, altId);
             }
             throw e;
         }
@@ -588,7 +587,7 @@ public class HazelcastSessionStorageService implements SessionStorageService {
             if (null != authId) {
                 for (final Session session : getSessions()) {
                     if (null != session && authId.equals(session.getAuthId())) {
-                        throw OXHazelcastSessionStorageExceptionCodes.HAZELCAST_SESSIONSTORAGE_DUPLICATE_AUTHID.create(
+                        throw SessionStorageExceptionCodes.DUPLICATE_AUTHID.create(
                             session.getLogin(),
                             login);
                     }
