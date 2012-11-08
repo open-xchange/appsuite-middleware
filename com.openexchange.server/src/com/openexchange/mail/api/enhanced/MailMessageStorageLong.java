@@ -256,7 +256,14 @@ public abstract class MailMessageStorageLong extends MailMessageStorage {
         final int length = mailIds.length;
         final String[] retval = new String[length];
         for (int i = 0; i < length; i++) {
-            retval[i] = textFinder.getText(getMessageLong(folder, mailIds[i], false));
+            String text = null;
+            try {
+                text = textFinder.getText(getMessageLong(folder, mailIds[i], false));
+            } catch (Throwable t) {
+                LOG.warn("Error while getting primary content for mail '" + mailIds[i] + "' in folder '" + folder + "'. Returning null.", t);
+            }
+            
+            retval[i] = text;
         }
         return retval;
     }
