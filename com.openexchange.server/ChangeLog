@@ -1,3 +1,12 @@
+* 2012-11-08 - martin.herfurth@open-xchange.com
+
+ - Fix for bug 23588: Incompatible type.
+
+* 2012-11-08 - thorben.betten@open-xchange.com
+
+ - Fix for bug 23661: Introduced in-application sort
+ - Fix for bug 23533: Changed that error code's category thus a more meaningful message is shown
+
 * 2012-11-07 - marcus.klein@open-xchange.com
 
  - Fix for bug 23563: Improved exception messages for too long used database connections.
@@ -2416,7 +2425,7 @@
 
 * 2011-05-18 - thorben.betten@open-xchange.com
 
- - Bugfix #19179: Probing for '�' character when decoding an encoded-word with big5 encoding. If present use Big5-HKSCS instead.
+ - Bugfix #19179: Probing for special character when decoding an encoded-word with big5 encoding. If present use Big5-HKSCS instead.
 
 * 2011-05-18 - marcus.klein@open-xchange.com
 

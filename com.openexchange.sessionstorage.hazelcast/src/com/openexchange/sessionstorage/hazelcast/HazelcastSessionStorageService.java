@@ -59,6 +59,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import java.util.concurrent.atomic.AtomicReference;
 import org.apache.commons.logging.Log;
 import com.hazelcast.config.Config;
 import com.hazelcast.config.MapConfig;
@@ -89,6 +90,17 @@ public class HazelcastSessionStorageService implements SessionStorageService {
 
     private static final Log LOG = com.openexchange.log.Log.loggerFor(HazelcastSessionStorageService.class);
     private static final boolean DEBUG = LOG.isDebugEnabled();
+
+    private static final AtomicReference<HazelcastInstance> REFERENCE = new AtomicReference<HazelcastInstance>();
+
+    /**
+     * Sets specified {@link HazelcastInstance}.
+     * 
+     * @param hazelcast The {@link HazelcastInstance}
+     */
+    public static void setHazelcastInstance(final HazelcastInstance hazelcast) {
+        REFERENCE.set(hazelcast);
+    }
 
     private static final class GetSessionMapTask extends AbstractTask<IMap<String, HazelcastStoredSession>> {
 
@@ -125,6 +137,7 @@ public class HazelcastSessionStorageService implements SessionStorageService {
 
     private final String mapName;
     private final RefusedExecutionBehavior<IMap<String, HazelcastStoredSession>> abortBehavior;
+    private boolean allowFailIfPaused;
 
     /**
      * Initializes a new {@link HazelcastSessionStorageService}.
@@ -139,6 +152,18 @@ public class HazelcastSessionStorageService implements SessionStorageService {
             hzConfig.addMapConfig(mapConfig);
         }
         abortBehavior = AbortBehavior.<IMap<String, HazelcastStoredSession>> getInstance();
+        allowFailIfPaused = false;
+    }
+    
+    /**
+     * Sets the fail-if-paused behavior.
+     *
+     * @param allowFailIfPaused <code>true</code> to set the fail-if-paused behavior; else <code>false</code>
+     * @return This session storage with new behavior applied
+     */
+    public HazelcastSessionStorageService setAllowFailIfPaused(boolean allowFailIfPaused) {
+        this.allowFailIfPaused = allowFailIfPaused;
+        return this;
     }
 
     private IMap<String, HazelcastStoredSession> getMapFrom(final Future<IMap<String, HazelcastStoredSession>> f) throws OXException {
@@ -174,26 +199,30 @@ public class HazelcastSessionStorageService implements SessionStorageService {
      */
     private IMap<String, HazelcastStoredSession> sessions(final boolean failIfPaused) throws OXException {
         try {
-            final HazelcastInstance hazelcastInstance = Services.optService(HazelcastInstance.class);
+            final HazelcastInstance hazelcastInstance = REFERENCE.get();
             if (null == hazelcastInstance) {
                 throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(HazelcastInstance.class.getName());
             }
-            if (!failIfPaused) {
-                return hazelcastInstance.getMap(mapName);
+            final IMap<String, HazelcastStoredSession> sessions;
+            if (failIfPaused && allowFailIfPaused) {
+                // Fail if paused
+                if (Hazelcasts.isPaused()) {
+                    throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(HazelcastInstance.class.getName());
+                }
+                final ThreadPoolService threadPool = ThreadPools.getThreadPool();
+                if (null == threadPool) {
+                    sessions = hazelcastInstance.getMap(mapName);
+                } else {
+                    final IMap<String, HazelcastStoredSession> map = getMapFrom(threadPool.submit(new GetSessionMapTask(hazelcastInstance, mapName), abortBehavior));
+                    if (null == map) {
+                        throw new HazelcastException("No such map: " + mapName);
+                    }
+                    sessions = new TimeoutAwareIMap(map, timeout());
+                }
+            } else {
+                sessions = hazelcastInstance.getMap(mapName);
             }
-            // Fail if paused
-            if (Hazelcasts.isPaused()) {
-                throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(HazelcastInstance.class.getName());
-            }
-            final ThreadPoolService threadPool = ThreadPools.getThreadPool();
-            if (null == threadPool) {
-                return hazelcastInstance.getMap(mapName);
-            }
-            final IMap<String, HazelcastStoredSession> map = getMapFrom(threadPool.submit(new GetSessionMapTask(hazelcastInstance, mapName), abortBehavior));
-            if (null == map) {
-                throw new HazelcastException("No such map: " + mapName);
-            }
-            return new TimeoutAwareIMap(map, timeout());
+            return sessions;
         } catch (final OXException e) {
             throw e;
         } catch (final HazelcastException e) {
@@ -228,7 +257,6 @@ public class HazelcastSessionStorageService implements SessionStorageService {
             if (null != sessionId && sessions.containsKey(sessionId)) {
                 final HazelcastStoredSession s = sessions.get(sessionId);
                 s.setLastAccess(System.currentTimeMillis());
-                s.setPassword(s.getPassword());
                 sessions.replace(sessionId, s);
                 return s;
             }
@@ -253,7 +281,6 @@ public class HazelcastSessionStorageService implements SessionStorageService {
             for (final Session session : sessions) {
                 try {
                     final HazelcastStoredSession ss = new HazelcastStoredSession(session);
-                    ss.setPassword(ss.getPassword());
                     sessionsMap.putIfAbsent(session.getSessionID(), ss);
                 } catch (final HazelcastException e) {
                     LOG.warn("Session "+ session.getSessionID() + " could not be added to session storage.", e);
@@ -271,7 +298,6 @@ public class HazelcastSessionStorageService implements SessionStorageService {
         }
         try {
             final HazelcastStoredSession ss = new HazelcastStoredSession(session);
-            ss.setPassword(ss.getPassword());
             return null == sessions(false).putIfAbsent(session.getSessionID(), ss);
         } catch (final HazelcastException e) {
             throw OXHazelcastSessionStorageExceptionCodes.HAZELCAST_SESSIONSTORAGE_SAVE_FAILED.create(e, session.getSessionID());
@@ -288,7 +314,6 @@ public class HazelcastSessionStorageService implements SessionStorageService {
         if (null != session) {
             try {
                 final HazelcastStoredSession ss = new HazelcastStoredSession(session);
-                ss.setPassword(ss.getPassword());
                 sessions(false).put(session.getSessionID(), ss);
             } catch (final HazelcastException e) {
                 throw OXHazelcastSessionStorageExceptionCodes.HAZELCAST_SESSIONSTORAGE_SAVE_FAILED.create(e, session.getSessionID());
@@ -399,12 +424,16 @@ public class HazelcastSessionStorageService implements SessionStorageService {
     public Session[] getUserSessions(final int userId, final int contextId) {
         try {
             final IMap<String, HazelcastStoredSession> sessions = sessionsUnchecked(true);
+            if (null == sessions) {
+                return new Session[0];
+            }
             final List<HazelcastStoredSession> found = new ArrayList<HazelcastStoredSession>();
+            final long now = System.currentTimeMillis();
             for (final String sessionId : sessions.keySet()) {
                 final Session s = sessions.get(sessionId);
                 if (null != s && s.getUserId() == userId && s.getContextId() == contextId) {
                     final HazelcastStoredSession ss = new HazelcastStoredSession(s);
-                    ss.setLastAccess(System.currentTimeMillis());
+                    ss.setLastAccess(now);
                     found.add(ss);
                 }
             }

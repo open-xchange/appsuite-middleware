@@ -372,7 +372,7 @@ public class HazelcastActivator extends HousekeepingActivator {
      *         done by another call
      */
     InitMode init(final List<InetAddress> nodes, final boolean force, final long stamp, final Log logger) {
-        synchronized (REF_HAZELCAST_INSTANCE) {
+        synchronized (this) {
             final HazelcastInstance prevHazelcastInstance = REF_HAZELCAST_INSTANCE.get();
             if (null != prevHazelcastInstance) {
                 // Already initialized
@@ -451,12 +451,19 @@ public class HazelcastActivator extends HousekeepingActivator {
             final Set<String> members = resolve2Members(nodes);
             if (members.isEmpty()) {
                 if (logger.isInfoEnabled()) {
-                    logger.info("\nHazelcast:\n\tRe-Starting Hazelcast instance:\n\tNo additional members\n");
+                    logger.info("\nHazelcast:\n\tAbort re-start of Hazelcast instance:\n\tNo additional members\n");
                 }
                 return InitMode.NONE;
             }
             final TcpIpConfig tcpIpConfig = join.getTcpIpConfig();
             final Set<String> cur = new LinkedHashSet<String>(tcpIpConfig.getMembers());
+            if (cur.containsAll(members)) {
+                // Already contained...
+                if (logger.isInfoEnabled()) {
+                    logger.info("\nHazelcast:\n\tAbort re-start of Hazelcast instance:\n\tNo additional members\n");
+                }
+                return InitMode.NONE;
+            }
             if (logger.isInfoEnabled()) {
                 logger.info("\nHazelcast:\n\tRe-Starting Hazelcast instance:\n\tExisting members: " + cur + "\n\tNew members: " + members + "\n");
             }

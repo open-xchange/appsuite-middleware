@@ -399,7 +399,7 @@ public class AppointmentNotificationPool implements
 				if (update.getDiff().isAboutCertainParticipantsStateChangeOnly(Integer.toString(update.getSession().getUserId()))) {
 					continue;
 				}
-				Update[] partition = partitions.get(update.getSession().getUserId());
+				Update[] partition = partitions.get(update.getPartitionIndex());
 				if (partition == null) {
 					partition = new Update[2];
 					partitions.put(update.getPartitionIndex(), partition);

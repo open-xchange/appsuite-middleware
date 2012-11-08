@@ -69,7 +69,7 @@ public class StoredSession implements PutIfAbsent, Serializable {
     /**
      * The parameter name for session storage's {@link java.util.concurrent.Future add task}.
      */
-    public static final String PARAM_SST_FUTURE = "__sst-future";
+    //public static final String PARAM_SST_FUTURE = "__sst-future";
 
     private String loginName;
     private String password;
@@ -378,6 +378,51 @@ public class StoredSession implements PutIfAbsent, Serializable {
     @Override
     public void removeRandomToken() {
         randomToken = null;
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder builder = new StringBuilder(512);
+        builder.append('{');
+        if (loginName != null) {
+            builder.append("loginName=").append(loginName).append(", ");
+        }
+        if (password != null) {
+            builder.append("password=").append("*****").append(", ");
+        }
+        builder.append("contextId=").append(contextId).append(", userId=").append(userId).append(", ");
+        if (sessionId != null) {
+            builder.append("sessionId=").append(sessionId).append(", ");
+        }
+        if (secret != null) {
+            builder.append("secret=").append(secret).append(", ");
+        }
+        if (login != null) {
+            builder.append("login=").append(login).append(", ");
+        }
+        if (randomToken != null) {
+            builder.append("randomToken=").append(randomToken).append(", ");
+        }
+        if (localIp != null) {
+            builder.append("localIp=").append(localIp).append(", ");
+        }
+        if (authId != null) {
+            builder.append("authId=").append(authId).append(", ");
+        }
+        if (hash != null) {
+            builder.append("hash=").append(hash).append(", ");
+        }
+        if (client != null) {
+            builder.append("client=").append(client).append(", ");
+        }
+        if (userLogin != null) {
+            builder.append("userLogin=").append(userLogin).append(", ");
+        }
+        if (parameters != null) {
+            builder.append("parameters=").append(parameters);
+        }
+        builder.append('}');
+        return builder.toString();
     }
 
 }

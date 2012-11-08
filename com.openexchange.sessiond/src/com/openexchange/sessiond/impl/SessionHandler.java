@@ -61,15 +61,19 @@ import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.Callable;
+import java.util.concurrent.CancellationException;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
-import java.util.concurrent.FutureTask;
+import java.util.concurrent.RejectedExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import org.apache.commons.logging.Log;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventAdmin;
 import com.openexchange.caching.objects.CachedSession;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.SessionCounter;
@@ -77,9 +81,10 @@ import com.openexchange.sessiond.SessionExceptionCodes;
 import com.openexchange.sessiond.SessionMatcher;
 import com.openexchange.sessiond.SessiondEventConstants;
 import com.openexchange.sessiond.cache.SessionCache;
+import com.openexchange.sessiond.services.SessiondServiceRegistry;
 import com.openexchange.sessionstorage.SessionStorageExceptionCodes;
 import com.openexchange.sessionstorage.SessionStorageService;
-import com.openexchange.sessionstorage.StoredSession;
+import com.openexchange.threadpool.AbstractTask;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.threadpool.ThreadPools;
 import com.openexchange.timer.ScheduledTimerTask;
@@ -96,7 +101,7 @@ public final class SessionHandler {
     /**
      * The parameter name for session storage's {@link Future add task}.
      */
-    private static final String PARAM_SST_FUTURE = StoredSession.PARAM_SST_FUTURE;
+    //private static final String PARAM_SST_FUTURE = StoredSession.PARAM_SST_FUTURE;
 
     public static final SessionCounter SESSION_COUNTER = new SessionCounter() {
 
@@ -328,15 +333,15 @@ public final class SessionHandler {
             Long.toString(System.currentTimeMillis())), sessionIdGenerator.createRandomId(), clientHost, login, authId, hash, client);
         session.setVolatile(isVolatile);
         // Add session
-        sessionDataRef.get().addSession(session, noLimit);
+        final SessionImpl addedSession = sessionDataRef.get().addSession(session, noLimit).getSession();
         final SessionStorageService sessionStorageService = getServiceRegistry().getService(SessionStorageService.class);
         if (sessionStorageService != null) {
-            storeSession(session, sessionStorageService, false);
+            storeSession(addedSession, sessionStorageService, false);
         }
         // Post event for created session
-        postSessionCreation(session);
+        postSessionCreation(addedSession);
         // Return session ID
-        return session;
+        return addedSession;
     }
 
     /**
@@ -344,52 +349,13 @@ public final class SessionHandler {
      * 
      * @param session The session to store
      * @param sessionStorageService The storage service
+     * @param addIfAbsent <code>true</code> to perform add-if-absent store operation; otherwise <code>false</code>
      */
-    @SuppressWarnings("unchecked")
     public static void storeSession(final SessionImpl session, final SessionStorageService sessionStorageService, final boolean addIfAbsent) {
         if (null == session || null == sessionStorageService) {
             return;
         }
-        Future<Void> f = (Future<Void>) session.getParameter(PARAM_SST_FUTURE);
-        if (null == f) {
-            final FutureTask<Void> ft = new FutureTask<Void>(new Callable<Void>() {
-
-                @Override
-                public Void call() throws Exception {
-                    try {
-                        if (addIfAbsent) {
-                            if (sessionStorageService.addSessionIfAbsent(session)) {
-                                LOG.info("Put session " + session.getSessionID() + " with auth Id " + session.getAuthId() + " into session storage.");
-                                postSessionStored(session);
-                            }
-                        } else {
-                            sessionStorageService.addSession(session);
-                            LOG.info("Put session " + session.getSessionID() + " with auth Id " + session.getAuthId() + " into session storage.");
-                            postSessionStored(session);
-                        }
-                    } catch (final Exception e) {
-                        final String s =
-                            MessageFormat.format(
-                                "Failed to put session {0} with Auth-Id {1} into session storage. (user={2}, context={3})",
-                                session.getSessionID(),
-                                session.getAuthId(),
-                                Integer.valueOf(session.getUserId()),
-                                Integer.valueOf(session.getContextId()));
-                        if (DEBUG) {
-                            LOG.info(s, e);
-                        } else {
-                            LOG.info(s);
-                        }
-                    }
-                    return null;
-                }
-            });
-            f = (Future<Void>) session.setParameterIfAbsent(PARAM_SST_FUTURE, ft);
-            if (null == f) {
-                f = ft;
-                ThreadPools.getThreadPool().submit(ThreadPools.task(ft, true));
-            }
-        }
+        ThreadPools.getThreadPool().submit(new StoreSessionTask(session, sessionStorageService, addIfAbsent));
     }
 
     /**
@@ -558,10 +524,10 @@ public final class SessionHandler {
             final SessionStorageService storageService = getServiceRegistry().getService(SessionStorageService.class);
             if (storageService != null) {
                 try {
-                    final Session storedSession = storageService.lookupSession(sessionId);
+                    final Session storedSession = getSessionFrom(sessionId, storageService);
                     if (null != storedSession) {
-                        sessionData.addSession(new SessionImpl(storedSession), noLimit, true);
-                        return sessionToSessionControl(storedSession);
+                        final SessionControl sc = sessionData.addSession(new SessionImpl(storedSession), noLimit, true);
+                        return null == sc ? sessionToSessionControl(storedSession) : sc;
                     }
                 } catch (final OXException e) {
                     if (!SessionStorageExceptionCodes.NO_SESSION_FOUND.equals(e)) {
@@ -997,24 +963,10 @@ public final class SessionHandler {
     }
 
     private static SessionControl sessionToSessionControl(final Session session) {
-        if (session != null) {
-            final SessionImpl impl = new SessionImpl(
-                session.getUserId(),
-                session.getLoginName(),
-                session.getPassword(),
-                session.getContextId(),
-                session.getSessionID(),
-                session.getSecret(),
-                session.getRandomToken(),
-                session.getLocalIp(),
-                session.getLogin(),
-                session.getAuthId(),
-                session.getHash(),
-                session.getClient());
-            final SessionControl control = new SessionControl(impl);
-            return control;
+        if (session == null) {
+            return null;
         }
-        return null;
+        return new SessionControl(new SessionImpl(session));
     }
 
     private static Session[] merge(final Session[] array1, final Session[] array2) {
@@ -1038,6 +990,114 @@ public final class SessionHandler {
             }
         }
         return retval;
+    }
+
+    private static final class StoreSessionTask extends AbstractTask<Void> {
+
+        private final SessionStorageService sessionStorageService;
+        private final boolean addIfAbsent;
+        private final SessionImpl session;
+
+        protected StoreSessionTask(SessionImpl session, SessionStorageService sessionStorageService, boolean addIfAbsent) {
+            super();
+            this.sessionStorageService = sessionStorageService;
+            this.addIfAbsent = addIfAbsent;
+            this.session = session;
+        }
+
+        @Override
+        public Void call() throws Exception {
+            try {
+                if (addIfAbsent) {
+                    if (sessionStorageService.addSessionIfAbsent(session)) {
+                        LOG.info("Put session " + session.getSessionID() + " with auth Id " + session.getAuthId() + " into session storage.");
+                        postSessionStored(session);
+                    }
+                } else {
+                    sessionStorageService.addSession(session);
+                    LOG.info("Put session " + session.getSessionID() + " with auth Id " + session.getAuthId() + " into session storage.");
+                    postSessionStored(session);
+                }
+            } catch (final Exception e) {
+                final String s =
+                    MessageFormat.format(
+                        "Failed to put session {0} with Auth-Id {1} into session storage (user={2}, context={3}): {4}",
+                        session.getSessionID(),
+                        session.getAuthId(),
+                        Integer.valueOf(session.getUserId()),
+                        Integer.valueOf(session.getContextId()),
+                        e.getMessage());
+                if (DEBUG) {
+                    LOG.info(s, e);
+                } else {
+                    LOG.info(s);
+                }
+            }
+            return null;
+        }
+    }
+
+    private static final class GetStoredSessionTask extends AbstractTask<Session> {
+
+        private final SessionStorageService storageService;
+        private final String sessionId;
+
+        protected GetStoredSessionTask(final String sessionId, final SessionStorageService storageService) {
+            super();
+            this.storageService = storageService;
+            this.sessionId = sessionId;
+        }
+
+        @Override
+        public Session call() throws Exception {
+            return storageService.lookupSession(sessionId);
+        }
+    }
+
+    private static volatile Integer timeout;
+    private static int timeout() {
+        Integer tmp = timeout;
+        if (null == tmp) {
+            synchronized (SessionHandler.class) {
+                tmp = timeout;
+                if (null == tmp) {
+                    ConfigurationService service = SessiondServiceRegistry.getServiceRegistry().getService(ConfigurationService.class);
+                    tmp = Integer.valueOf(null == service ? 250 : service.getIntProperty("com.openexchange.sessiond.sessionstorage.timeout", 250));
+                    timeout = tmp;
+                }
+            }
+        }
+        return tmp.intValue();
+    }
+
+    private static Session getSessionFrom(final String sessionId, final SessionStorageService storageService) throws OXException {
+        final int timeout = timeout();
+        try {
+            final GetStoredSessionTask task = new GetStoredSessionTask(sessionId, storageService);
+            return ThreadPools.getThreadPool().submit(task).get(timeout, TimeUnit.MILLISECONDS);
+        } catch (final RejectedExecutionException e) {
+            return storageService.lookupSession(sessionId);
+        } catch (final InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw SessionStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+        } catch (final ExecutionException e) {
+            final Throwable t = e.getCause();
+            if (t instanceof OXException) {
+                throw (OXException) t;
+            }
+            if (t instanceof RuntimeException) {
+                throw (RuntimeException) t;
+            }
+            if (t instanceof Error) {
+                throw (Error) t;
+            }
+            throw new IllegalStateException("Not unchecked", t);
+        } catch (final TimeoutException e) {
+            LOG.warn("Session " + sessionId + " could not be retrieved from session storage within " + timeout + "msec.");
+            return null;
+        } catch (final CancellationException e) {
+            return null;
+        }
     }
 
     private static final class UserKey {

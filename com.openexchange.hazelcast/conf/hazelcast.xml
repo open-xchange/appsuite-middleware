@@ -22,6 +22,10 @@
         <name>dev</name>
         <password>dev-pass</password>
     </group>
+    <properties>
+        <property name="hazelcast.jmx">true</property>
+        <property name="hazelcast.jmx.detailed">true</property>
+    </properties>
     <management-center enabled="false">http://localhost:8080/mancenter</management-center>
     <network>
         <port auto-increment="true">5701</port>

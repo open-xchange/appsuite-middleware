@@ -53,8 +53,6 @@ import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Autoboxing.I2i;
 import static com.openexchange.java.Autoboxing.i;
 import static com.openexchange.mail.utils.ProviderUtility.toSocketAddr;
-import gnu.trove.map.TIntObjectMap;
-import gnu.trove.map.hash.TIntObjectHashMap;
 import java.net.InetSocketAddress;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -597,6 +595,8 @@ public abstract class MailConfig {
         mailConfig.doCustomParsing(mailAccount, session);
     }
 
+    private static final int LENGTH = 6;
+
     /*-
      * Member section
      */
@@ -605,16 +605,16 @@ public abstract class MailConfig {
     protected Session session;
     protected String login;
     protected String password;
-    protected final TIntObjectMap<String> standardNames;
-    protected final TIntObjectMap<String> standardFullNames;
+    protected final String[] standardNames;
+    protected final String[] standardFullNames;
 
     /**
      * Initializes a new {@link MailConfig}
      */
     protected MailConfig() {
         super();
-        standardFullNames = new TIntObjectHashMap<String>(6);
-        standardNames = new TIntObjectHashMap<String>(6);
+        standardFullNames = new String[LENGTH];
+        standardNames = new String[LENGTH];
     }
 
     /**
@@ -623,13 +623,8 @@ public abstract class MailConfig {
      * @return The standard names
      */
     public String[] getStandardNames() {
-        final String[] ret = new String[6];
-        ret[StorageUtility.INDEX_CONFIRMED_HAM] = standardNames.get(StorageUtility.INDEX_CONFIRMED_HAM);
-        ret[StorageUtility.INDEX_CONFIRMED_SPAM] = standardNames.get(StorageUtility.INDEX_CONFIRMED_SPAM);
-        ret[StorageUtility.INDEX_DRAFTS] = standardNames.get(StorageUtility.INDEX_DRAFTS);
-        ret[StorageUtility.INDEX_SENT] = standardNames.get(StorageUtility.INDEX_SENT);
-        ret[StorageUtility.INDEX_SPAM] = standardNames.get(StorageUtility.INDEX_SPAM);
-        ret[StorageUtility.INDEX_TRASH] = standardNames.get(StorageUtility.INDEX_TRASH);
+        final String[] ret = new String[LENGTH];
+        System.arraycopy(standardNames, 0, ret, 0, LENGTH);
         return ret;
     }
 
@@ -639,13 +634,8 @@ public abstract class MailConfig {
      * @return The standard full names
      */
     public String[] getStandardFullNames() {
-        final String[] ret = new String[6];
-        ret[StorageUtility.INDEX_CONFIRMED_HAM] = standardFullNames.get(StorageUtility.INDEX_CONFIRMED_HAM);
-        ret[StorageUtility.INDEX_CONFIRMED_SPAM] = standardFullNames.get(StorageUtility.INDEX_CONFIRMED_SPAM);
-        ret[StorageUtility.INDEX_DRAFTS] = standardFullNames.get(StorageUtility.INDEX_DRAFTS);
-        ret[StorageUtility.INDEX_SENT] = standardFullNames.get(StorageUtility.INDEX_SENT);
-        ret[StorageUtility.INDEX_SPAM] = standardFullNames.get(StorageUtility.INDEX_SPAM);
-        ret[StorageUtility.INDEX_TRASH] = standardFullNames.get(StorageUtility.INDEX_TRASH);
+        final String[] ret = new String[LENGTH];
+        System.arraycopy(standardFullNames, 0, ret, 0, LENGTH);
         return ret;
     }
 
@@ -673,11 +663,11 @@ public abstract class MailConfig {
         put(StorageUtility.INDEX_TRASH, mailAccount.getTrashFullname(), standardFullNames);
     }
 
-    private static void put(final int index, final String value, final TIntObjectMap<String> map) {
+    private static void put(final int index, final String value, final String[] arr) {
         if (isEmpty(value)) {
             return;
         }
-        map.put(index, MailFolderUtility.prepareMailFolderParam(value).getFullname());
+        arr[index] = MailFolderUtility.prepareMailFolderParam(value).getFullname();
     }
 
     private static boolean isEmpty(final String string) {

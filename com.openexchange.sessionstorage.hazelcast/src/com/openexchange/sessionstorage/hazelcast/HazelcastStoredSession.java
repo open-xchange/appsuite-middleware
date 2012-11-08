@@ -50,7 +50,6 @@
 package com.openexchange.sessionstorage.hazelcast;
 
 import java.io.Serializable;
-import java.util.Map;
 import com.openexchange.session.Session;
 import com.openexchange.sessionstorage.StoredSession;
 
@@ -68,63 +67,28 @@ public class HazelcastStoredSession extends StoredSession implements Serializabl
     /**
      * Initializes a new {@link HazelcastStoredSession}.
      * 
-     * @param sessionId
-     * @param loginName
-     * @param password
-     * @param contextId
-     * @param userId
-     * @param secret
-     * @param login
-     * @param randomToken
-     * @param localIP
-     * @param authId
-     * @param hash
-     * @param client
-     * @param parameters
-     */
-    public HazelcastStoredSession(String sessionId, String loginName, String password, int contextId, int userId, String secret, String login, String randomToken, String localIP, String authId, String hash, String client, Map<String, Object> parameters) {
-        super(sessionId, loginName, password, contextId, userId, secret, login, randomToken, localIP, authId, hash, client, parameters);
-        this.lastAccess = System.currentTimeMillis();
-    }
-
-    /**
-     * Initializes a new {@link HazelcastStoredSession}.
-     * 
-     * @param sessionId
-     * @param loginName
-     * @param password
-     * @param contextId
-     * @param userId
-     * @param secret
-     * @param login
-     * @param randomToken
-     * @param localIP
-     * @param authId
-     * @param hash
-     * @param client
-     * @param parameters
-     * @param lastAccess
-     */
-    public HazelcastStoredSession(String sessionId, String loginName, String password, int contextId, int userId, String secret, String login, String randomToken, String localIP, String authId, String hash, String client, Map<String, Object> parameters, long lastAccess) {
-        super(sessionId, loginName, password, contextId, userId, secret, login, randomToken, localIP, authId, hash, client, parameters);
-        this.lastAccess = lastAccess;
-    }
-
-    /**
-     * Initializes a new {@link HazelcastStoredSession}.
-     * 
      * @param session
      */
-    public HazelcastStoredSession(Session session) {
+    public HazelcastStoredSession(final Session session) {
         super(session);
         this.lastAccess = System.currentTimeMillis();
     }
 
+    /**
+     * Gets the last-accessed time stamp.
+     * 
+     * @return The last-accessed time stamp
+     */
     public long getLastAccess() {
         return lastAccess;
     }
 
-    public void setLastAccess(long lastAccess) {
+    /**
+     * Sets the last-accessed time stamp.
+     * 
+     * @param lastAccess The last-accessed time stamp
+     */
+    public void setLastAccess(final long lastAccess) {
         this.lastAccess = lastAccess;
     }
 

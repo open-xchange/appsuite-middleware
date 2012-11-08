@@ -70,10 +70,14 @@ done
 %changelog
 * Tue Nov 06 2012 Steffen Templin <marcus.klein@open-xchange.com>
 Fourth release candidate for 6.22.1
+* Mon Nov 05 2012 Steffen Templin <marcus.klein@open-xchange.com>
+Build for patch 2012-10-31
 * Fri Nov 02 2012 Steffen Templin <marcus.klein@open-xchange.com>
 Third release candidate for 6.22.1
 * Wed Oct 31 2012 Steffen Templin <marcus.klein@open-xchange.com>
 Second release candidate for 6.22.1
+* Wed Oct 31 2012 Steffen Templin <marcus.klein@open-xchange.com>
+Build for patch 2012-10-31
 * Fri Oct 26 2012 Steffen Templin <marcus.klein@open-xchange.com>
 First release candidate for 6.22.1
 * Fri Oct 26 2012 Steffen Templin <marcus.klein@open-xchange.com>
