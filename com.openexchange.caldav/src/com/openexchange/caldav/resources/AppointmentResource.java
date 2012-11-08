@@ -331,7 +331,7 @@ public class AppointmentResource extends CalDAVResource<Appointment> {
              */
             String iCal = new String(bytes.toByteArray(), "UTF-8");
             iCal = Patches.Outgoing.removeEmptyRDates(iCal);
-            iCal = iCal.replace("@premium", "424242669@devel-mail.netline.de");
+//            iCal = iCal.replace("@premium", "424242669@devel-mail.netline.de");
             return iCal;
         } catch (final UnsupportedEncodingException e) {
             throw protocolException(e);
@@ -399,7 +399,7 @@ public class AppointmentResource extends CalDAVResource<Appointment> {
         String patchedICal = iCal;
         
         //XXX to make the UserResolver do it's job correctly
-        patchedICal = patchedICal.replace("424242669@devel-mail.netline.de", "@premium");
+        //patchedICal = patchedICal.replace("424242669@devel-mail.netline.de", "@premium");
         /*
          * parse appointments
          */
