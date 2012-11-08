@@ -49,27 +49,69 @@
 
 package com.openexchange.dav.carddav.bugs;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+import com.openexchange.dav.StatusCodes;
+import com.openexchange.dav.carddav.CardDAVTest;
+import com.openexchange.dav.carddav.VCardResource;
+import com.openexchange.groupware.container.Contact;
 
 /**
- * {@link CardDAVBugSuite}
+ * {@link Bug23046Test}
+ * 
+ * Exception for URL format when synchronizing
  * 
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public final class CardDAVBugSuite {
+public class Bug23046Test extends CardDAVTest {
 
-    public static Test suite() {
-        final TestSuite suite = new TestSuite();
-        suite.addTestSuite(Bug20665Test.class);
-        suite.addTestSuite(Bug21079Test.class);
-        suite.addTestSuite(Bug21177Test.class);
-        suite.addTestSuite(Bug21235Test.class);
-        suite.addTestSuite(Bug21240Test.class);
-        suite.addTestSuite(Bug21354Test.class);
-        suite.addTestSuite(Bug21374Test.class);
-        suite.addTestSuite(Bug23046Test.class);
-        suite.addTestSuite(Bug23078Test.class);
-        return suite;
-    }
+	public Bug23046Test(String name) {
+		super(name);
+	}
+	
+	public void testCreateWithURLWithoutAuthority() throws Exception {
+		/*
+		 * fetch sync token for later synchronization
+		 */
+		String syncToken = super.fetchSyncToken();
+		/*
+		 * create contact
+		 */
+    	String uid = randomUID();
+    	String firstName = "test";
+    	String lastName = "jupp";
+    	String url = "http://";
+        String vCard =
+    		"BEGIN:VCARD" + "\r\n" +
+			"VERSION:3.0" + "\r\n" +
+			"N:" + lastName + ";" + firstName + ";;;" + "\r\n" +
+			"FN:" + firstName + " " + lastName + "\r\n" +
+			"URL:" + url + "\r\n" +
+			"UID:" + uid + "\r\n" +
+			"REV:" + super.formatAsUTC(new Date()) + "\r\n" +
+			"PRODID:-//Apple Inc.//AddressBook 6.1//EN" + "\r\n" +
+			"END:VCARD" + "\r\n"
+		;
+        assertEquals("response code wrong", StatusCodes.SC_CREATED, super.putVCard(uid, vCard));
+        /*
+         * verify contact on server
+         */
+        Contact contact = super.getContact(uid);
+        super.rememberForCleanUp(contact);        
+        assertEquals("uid wrong", uid, contact.getUid());
+        assertEquals("url wrong", url, contact.getURL());
+        /*
+         * verify contact on client
+         */
+        Map<String, String> eTags = super.syncCollection(syncToken);
+        assertTrue("no resource changes reported on sync collection", 0 < eTags.size());
+        final List<VCardResource> addressData = super.addressbookMultiget(eTags.keySet());
+        final VCardResource card = assertContains(uid, addressData);
+        assertEquals("N wrong", firstName, card.getVCard().getName().getGivenName());
+        assertEquals("N wrong", lastName, card.getVCard().getName().getFamilyName());
+        assertEquals("FN wrong", firstName + " " + lastName, card.getVCard().getFormattedName().getFormattedName());
+        assertNotNull("URL wrong", card.getVCard().getURLs().next());
+	}
+	
 }

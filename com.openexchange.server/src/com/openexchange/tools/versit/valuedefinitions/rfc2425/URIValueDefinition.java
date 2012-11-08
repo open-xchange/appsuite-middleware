@@ -68,6 +68,9 @@ public class URIValueDefinition extends ValueDefinition {
     public static final URIValueDefinition Default = new URIValueDefinition();
 
     private static final Pattern URIPattern = Pattern.compile("[^,]+");
+    
+    /** Turn off URI validation (bug #23046) */
+    private static final boolean RFC_2396_CONFORMANCE = false;
 
     @Override
     public Object createValue(final StringScanner s, final Property property) throws IOException {
@@ -84,12 +87,16 @@ public class URIValueDefinition extends ValueDefinition {
         if (value == null) {
             throw new VersitException(scanner, "URI expected");
         }
-        try {
-            return new URI(value);
-        } catch (final URISyntaxException e) {
-            final VersitException ve = new VersitException(scanner, e.getMessage());
-            ve.initCause(e);
-            throw ve;
+        if (RFC_2396_CONFORMANCE) {
+            try {
+                return new URI(value);
+            } catch (final URISyntaxException e) {
+                final VersitException ve = new VersitException(scanner, e.getMessage());
+                ve.initCause(e);
+                throw ve;
+            }
+        } else {
+            return value;
         }
     }
 
