@@ -203,22 +203,25 @@ public class HazelcastSessionStorageService implements SessionStorageService {
             if (null == hazelcastInstance) {
                 throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(HazelcastInstance.class.getName());
             }
-            if (!failIfPaused || !allowFailIfPaused) {
-                return hazelcastInstance.getMap(mapName);
+            final IMap<String, HazelcastStoredSession> sessions;
+            if (failIfPaused && allowFailIfPaused) {
+                // Fail if paused
+                if (Hazelcasts.isPaused()) {
+                    throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(HazelcastInstance.class.getName());
+                }
+                final ThreadPoolService threadPool = ThreadPools.getThreadPool();
+                if (null == threadPool) {
+                    return hazelcastInstance.getMap(mapName);
+                }
+                final IMap<String, HazelcastStoredSession> map = getMapFrom(threadPool.submit(new GetSessionMapTask(hazelcastInstance, mapName), abortBehavior));
+                if (null == map) {
+                    throw new HazelcastException("No such map: " + mapName);
+                }
+                sessions = new TimeoutAwareIMap(map, timeout());
+            } else {
+                sessions = hazelcastInstance.getMap(mapName);
             }
-            // Fail if paused
-            if (Hazelcasts.isPaused()) {
-                throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(HazelcastInstance.class.getName());
-            }
-            final ThreadPoolService threadPool = ThreadPools.getThreadPool();
-            if (null == threadPool) {
-                return hazelcastInstance.getMap(mapName);
-            }
-            final IMap<String, HazelcastStoredSession> map = getMapFrom(threadPool.submit(new GetSessionMapTask(hazelcastInstance, mapName), abortBehavior));
-            if (null == map) {
-                throw new HazelcastException("No such map: " + mapName);
-            }
-            return new TimeoutAwareIMap(map, timeout());
+            return sessions;
         } catch (final OXException e) {
             throw e;
         } catch (final HazelcastException e) {
