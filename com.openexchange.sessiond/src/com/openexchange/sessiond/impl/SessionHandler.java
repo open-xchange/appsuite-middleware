@@ -1021,11 +1021,12 @@ public final class SessionHandler {
             } catch (final Exception e) {
                 final String s =
                     MessageFormat.format(
-                        "Failed to put session {0} with Auth-Id {1} into session storage. (user={2}, context={3})",
+                        "Failed to put session {0} with Auth-Id {1} into session storage (user={2}, context={3}): {4}",
                         session.getSessionID(),
                         session.getAuthId(),
                         Integer.valueOf(session.getUserId()),
-                        Integer.valueOf(session.getContextId()));
+                        Integer.valueOf(session.getContextId()),
+                        e.getMessage());
                 if (DEBUG) {
                     LOG.info(s, e);
                 } else {
