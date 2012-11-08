@@ -49,6 +49,7 @@
 
 package com.openexchange.oauth.osgi;
 
+import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.event.EventAdmin;
 import com.openexchange.config.cascade.ConfigViewFactory;
@@ -148,12 +149,13 @@ public final class OAuthActivator extends HousekeepingActivator {
              */
             OSGiMetaDataRegistry.initialize(getService(ConfigViewFactory.class));
             final OSGiMetaDataRegistry registry = OSGiMetaDataRegistry.getInstance();
+            final BundleContext context = this.context;
             registry.start(context);
             /*
              * Start other trackers
              */
-            track(OAuthAccountDeleteListener.class);
-            track(OAuthAccountInvalidationListener.class);
+            track(OAuthAccountDeleteListener.class, new DeleteListenerServiceTracker(context));
+            track(OAuthAccountInvalidationListener.class, new InvalidationListenerServiceTracker(context));
             openTrackers();
             /*
              * Register

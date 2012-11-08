@@ -159,7 +159,7 @@ public class ContactServiceImpl extends DefaultContactService {
 		 * check supplied contact
 		 */
 		ContactMapper.getInstance().validateAll(contact);
-		if (contact.containsObjectID() && false == Integer.toString(contact.getObjectID()).equals(objectID)) {
+		if (contact.containsObjectID() && contact.getObjectID() > 0 && false == Integer.toString(contact.getObjectID()).equals(objectID)) {
 			throw ContactExceptionCodes.NO_CHANGE_PERMISSION.create(parse(objectID), contextID);
 		}
 		/*
@@ -192,9 +192,9 @@ public class ContactServiceImpl extends DefaultContactService {
 		 * check for not allowed changes
 		 */
 		final Contact delta = ContactMapper.getInstance().getDifferences(storedContact, contact);
-		if (delta.containsContextId()) {
+		if (delta.containsContextId() && delta.getContextId() > 0) {
 			throw ContactExceptionCodes.NO_CHANGE_PERMISSION.create(parse(objectID), contextID);
-		} else if (delta.containsObjectID()) {
+		} else if (delta.containsObjectID() && delta.getObjectID() > 0) {
 			throw ContactExceptionCodes.NO_CHANGE_PERMISSION.create(parse(objectID), contextID);
 		} else if (delta.containsUid() && false == Tools.isEmpty(storedContact.getUid())) {
 			throw ContactExceptionCodes.NO_CHANGE_PERMISSION.create(parse(objectID), contextID);
@@ -272,7 +272,7 @@ public class ContactServiceImpl extends DefaultContactService {
 		 * check supplied contact
 		 */
 		Check.validateProperties(contact);
-		if (contact.containsObjectID() && false == Integer.toString(contact.getObjectID()).equals(objectID)) {
+		if (contact.containsObjectID() && contact.getObjectID() > 0 && false == Integer.toString(contact.getObjectID()).equals(objectID)) {
 			throw ContactExceptionCodes.NO_CHANGE_PERMISSION.create(parse(objectID), contextID);
 		}
 		/*
@@ -301,9 +301,9 @@ public class ContactServiceImpl extends DefaultContactService {
 		 * check for not allowed changes
 		 */
 		final Contact delta = ContactMapper.getInstance().getDifferences(storedContact, contact);
-		if (delta.containsContextId()) {
+		if (delta.containsContextId() && delta.getContextId() > 0) {
 			throw ContactExceptionCodes.NO_CHANGE_PERMISSION.create(parse(objectID), contextID);
-		} else if (delta.containsObjectID()) {
+		} else if (delta.containsObjectID() && delta.getObjectID() > 0) {
 			throw ContactExceptionCodes.NO_CHANGE_PERMISSION.create(parse(objectID), contextID);
 		} else if (delta.containsUid() && false == Tools.isEmpty(storedContact.getUid())) {
 			throw ContactExceptionCodes.NO_CHANGE_PERMISSION.create(parse(objectID), contextID);

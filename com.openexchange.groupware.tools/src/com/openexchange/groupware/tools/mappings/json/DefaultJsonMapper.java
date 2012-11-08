@@ -186,18 +186,28 @@ public abstract class DefaultJsonMapper<O, E extends Enum<E>> extends DefaultMap
 		return jsonArray;
 	}
 
-	@Override
-	public O deserialize(final JSONObject jsonObject, final E[] fields) throws OXException, JSONException {
-		final O object = newInstance();
-        for (final E field : fields) {
-        	final JsonMapping<? extends Object, O> mapping = this.get(field);
-        	final String ajaxName = mapping.getAjaxName();
-        	if (null != ajaxName && 0 < ajaxName.length() && jsonObject.has(ajaxName)) {
-        		mapping.deserialize(jsonObject, object);
-        	}
+    @Override
+    public O deserialize(final JSONObject jsonObject, final E[] fields) throws OXException, JSONException {
+        return this.deserialize(jsonObject, fields, (TimeZone)null);
+    }
+    
+    @Override
+    public O deserialize(JSONObject jsonObject, E[] fields, String timeZoneID) throws OXException, JSONException {
+        return this.deserialize(jsonObject, fields, null != timeZoneID ? getTimeZone(timeZoneID) : null);
+    }
+
+    @Override
+    public O deserialize(JSONObject jsonObject, E[] fields, TimeZone timeZone) throws OXException, JSONException {
+        O object = newInstance();
+        for (E field : fields) {
+            JsonMapping<? extends Object, O> mapping = this.get(field);
+            String ajaxName = mapping.getAjaxName();
+            if (null != ajaxName && 0 < ajaxName.length() && jsonObject.has(ajaxName)) {
+                mapping.deserialize(jsonObject, object, timeZone);
+            }
         }
-		return object;
-	}
+        return object;
+    }
 
     @Override
     public JsonMapping<? extends Object, O> get(final E field) throws OXException {
