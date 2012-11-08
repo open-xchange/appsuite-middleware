@@ -111,6 +111,9 @@ public final class Mp3CoverExtractor implements CoverExtractor {
         final ManagedFileManagement fileManagement = ServerServiceRegistry.getInstance().getService(ManagedFileManagement.class);
         final ManagedFile managedFile = fileManagement.createManagedFile(file.getStream());
         try {
+            
+            // http://sharecontent.googlecode.com/svn/trunk/jaudiotaggerv1.0.9/srctest/org/jaudiotagger/tag/mp4/M4aReadTagTest.java
+            
             final File tmpFile = managedFile.getFile();
             // Create MP3 file
             final MP3File mp3 = new MP3File(tmpFile, MP3File.LOAD_IDV2TAG, true);
