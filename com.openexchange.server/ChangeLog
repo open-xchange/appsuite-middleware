@@ -1,3 +1,7 @@
+* 2012-11-09 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 23676: Treat 'image/pjpeg' as JPEG, 'image/x-png' as PNG
+
 * 2012-11-09 - francisco.laguna@open-xchange.com
 
  - Fix for bug 23641: PreferencesItemService to set the module flag to false
