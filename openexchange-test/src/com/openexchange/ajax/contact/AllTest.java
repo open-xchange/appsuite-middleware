@@ -50,13 +50,15 @@
 package com.openexchange.ajax.contact;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
-
+import java.util.Set;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.junit.Assert;
-
+import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.contact.action.AllRequest;
 import com.openexchange.ajax.framework.CommonAllResponse;
 import com.openexchange.exception.OXException;
@@ -104,24 +106,57 @@ public class AllTest extends AbstractManagedContactTest {
     }
     
     public void testExcludeAdmin() throws Exception {
-		int columnIDs[] = new int[] { Contact.OBJECT_ID, Contact.FOLDER_ID, Contact.INTERNAL_USERID };
-		/*
-		 * perform different all requests
-		 */
-		Contact[] allContactsDefault = manager.allAction(FolderObject.SYSTEM_LDAP_FOLDER_ID, columnIDs);
-		assertNotNull("got no contacts", allContactsDefault);
-    	assertTrue("got no contacts", 0 < allContactsDefault.length);
-		Contact[] allContactsWithAdmin = allAction(FolderObject.SYSTEM_LDAP_FOLDER_ID, columnIDs, true);
-		assertNotNull("got no contacts", allContactsWithAdmin);
-    	assertTrue("got no contacts", 0 < allContactsWithAdmin.length);
-		Contact[] allContactsWithoutAdmin = allAction(FolderObject.SYSTEM_LDAP_FOLDER_ID, columnIDs, false);
-		assertNotNull("got no contacts", allContactsWithoutAdmin);
-    	assertTrue("got no contacts", 0 < allContactsWithoutAdmin.length);
-    	/*
-    	 * check results
-    	 */
-    	Assert.assertArrayEquals("'admin=true' differs from default result", allContactsDefault, allContactsWithAdmin);
-    	assertEquals("unexpected number of contacts in result", allContactsWithAdmin.length, allContactsWithoutAdmin.length + 1);
+        int columnIDs[] = new int[] { Contact.OBJECT_ID, Contact.FOLDER_ID, Contact.INTERNAL_USERID };
+        /*
+         * perform different all requests
+         */
+        Contact[] allContactsDefault = manager.allAction(FolderObject.SYSTEM_LDAP_FOLDER_ID, columnIDs);
+        assertNotNull("got no contacts", allContactsDefault);
+        assertTrue("got no contacts", 0 < allContactsDefault.length);
+        Contact[] allContactsWithAdmin = allAction(FolderObject.SYSTEM_LDAP_FOLDER_ID, columnIDs, true);
+        assertNotNull("got no contacts", allContactsWithAdmin);
+        assertTrue("got no contacts", 0 < allContactsWithAdmin.length);
+        Contact[] allContactsWithoutAdmin = allAction(FolderObject.SYSTEM_LDAP_FOLDER_ID, columnIDs, false);
+        assertNotNull("got no contacts", allContactsWithoutAdmin);
+        assertTrue("got no contacts", 0 < allContactsWithoutAdmin.length);
+        /*
+         * check results
+         */
+        Assert.assertArrayEquals("'admin=true' differs from default result", allContactsDefault, allContactsWithAdmin);
+        assertEquals("unexpected number of contacts in result", allContactsWithAdmin.length, allContactsWithoutAdmin.length + 1);
+    }
+        
+    public void testAllVisibleFolders() throws Exception {
+        /*
+         * prepare special all request without folder ID
+         */
+        int columnIDs[] = new int[] { Contact.OBJECT_ID, Contact.FOLDER_ID };
+        AllRequest allRequest = new AllRequest(-1, columnIDs) {
+            @Override
+            public Parameter[] getParameters() {
+                List<Parameter> paramsWithoutFolder = new ArrayList<Parameter>();
+                Parameter[] params = super.getParameters();
+                for (Parameter param : params) {
+                    if (false == AJAXServlet.PARAMETER_FOLDERID.equals(param.getName())) {
+                        paramsWithoutFolder.add(param);
+                    }
+                }
+                return paramsWithoutFolder.toArray(new Parameter[paramsWithoutFolder.size()]); 
+            }
+        };
+        /*
+         * check results
+         */
+        CommonAllResponse response = manager.getClient().execute(allRequest);
+        JSONArray data = (JSONArray) response.getResponse().getData();
+        List<Contact> contacts = manager.transform(data, columnIDs);
+        assertNotNull("got no contacts", contacts);
+        assertTrue("got no contacts", 0 < contacts.size());
+        Set<String> folderIDs = new HashSet<String>();
+        for (Contact contact : contacts) {
+            folderIDs.add(String.valueOf(contact.getParentFolderID()));
+        }        
+        assertTrue("got no results from different folders", 1 < folderIDs.size());
     }
         
     private Contact[] allAction(int folderId, int[] columns, Boolean admin) throws OXException, IOException, JSONException {

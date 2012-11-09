@@ -102,24 +102,9 @@
         </lst>
 
         <arr name="components">
-            <str>queryModifier</str>
             <str>query</str>
         </arr>
     </requestHandler>
-
-    <searchComponent name="queryModifier" class="de.kippdata.cria.solrext.searchcomponents.FormalFieldQueryModifier">
-        <str name="param1">uuid</str>
-        <str name="param2">module</str>
-        <str name="param4">account</str>        
-        <str name="param5">folder</str>
-        <str name="param6">id</str>
-        <str name="param7">file_name</str>
-        <str name="param8">file_size</str>
-        <str name="param9">mime_type</str>
-        <str name="param10">md5_sum</str>
-        <str name="param11">content{gen,de,en,fr,it}</str>
-        <str name="param12">attachment_id</str>
-    </searchComponent>
 
     <requestHandler name="/update" class="solr.XmlUpdateRequestHandler">
         <lst name="defaults">

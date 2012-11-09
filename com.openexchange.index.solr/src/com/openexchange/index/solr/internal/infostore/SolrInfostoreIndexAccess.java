@@ -64,20 +64,16 @@ import com.openexchange.groupware.Types;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.infostore.index.InfostoreIndexField;
 import com.openexchange.groupware.infostore.index.InfostoreUUID;
-import com.openexchange.index.AccountFolders;
 import com.openexchange.index.FacetParameters;
 import com.openexchange.index.IndexDocument;
 import com.openexchange.index.IndexField;
 import com.openexchange.index.IndexResult;
 import com.openexchange.index.Indexes;
 import com.openexchange.index.QueryParameters;
-import com.openexchange.index.SearchHandler;
 import com.openexchange.index.solr.internal.AbstractSolrIndexAccess;
 import com.openexchange.index.solr.internal.Services;
-import com.openexchange.index.solr.internal.SolrField;
 import com.openexchange.index.solr.internal.SolrIndexResult;
 import com.openexchange.index.solr.internal.attachments.SolrAttachmentField;
-import com.openexchange.index.solr.internal.querybuilder.BuilderException;
 import com.openexchange.index.solr.internal.querybuilder.SimpleQueryBuilder;
 import com.openexchange.index.solr.internal.querybuilder.SolrQueryBuilder;
 import com.openexchange.solr.SolrCoreIdentifier;
@@ -89,6 +85,9 @@ import com.openexchange.solr.SolrProperties;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public class SolrInfostoreIndexAccess extends AbstractSolrIndexAccess<DocumentMetadata> {
+    
+    private final SolrQueryBuilder queryBuilder;
+    
 
     /**
      * Initializes a new {@link SolrInfostoreIndexAccess}.
@@ -97,6 +96,18 @@ public class SolrInfostoreIndexAccess extends AbstractSolrIndexAccess<DocumentMe
      */
     public SolrInfostoreIndexAccess(SolrCoreIdentifier identifier) {
         super(identifier);
+        try {
+            ConfigurationService config = Services.getService(ConfigurationService.class);
+            String configDir = config.getProperty(SolrProperties.CONFIG_DIR);
+            queryBuilder = new SimpleQueryBuilder(
+                configDir + File.separatorChar + "infostore-querybuilder.properties", 
+                null,
+                null, 
+                SolrInfostoreField.FOLDER, 
+                InfostoreFieldMapper.getInstance());
+        } catch (Exception e) {
+            throw new IllegalStateException("Could not initialize query builder." + e);
+        }
     }
 
     @Override
@@ -198,7 +209,7 @@ public class SolrInfostoreIndexAccess extends AbstractSolrIndexAccess<DocumentMe
 
     @Override
     public IndexResult<DocumentMetadata> query(QueryParameters parameters, Set<? extends IndexField> fields) throws OXException {
-        SolrQuery solrQuery = buildSolrQuery(parameters);
+        SolrQuery solrQuery = queryBuilder.buildQuery(parameters);            
         Set<SolrInfostoreField> solrFields = convertAndCheckFields(parameters, fields);
         setFieldList(solrQuery, solrFields);
         List<IndexDocument<DocumentMetadata>> results = queryChunkWise(new SolrInfostoreDocumentConverter(), solrQuery, parameters.getOff(), parameters.getLen(), 100);
@@ -207,18 +218,6 @@ public class SolrInfostoreIndexAccess extends AbstractSolrIndexAccess<DocumentMe
         }
         
         return new SolrIndexResult<DocumentMetadata>(results.size(), results, null);
-    }
-    
-    private SolrQuery buildSolrQuery(QueryParameters parameters) throws OXException {
-        SolrQueryBuilder queryBuilder;
-        try {
-            ConfigurationService config = Services.getService(ConfigurationService.class);
-            String configDir = config.getProperty(SolrProperties.CONFIG_DIR);
-            queryBuilder = new SimpleQueryBuilder(configDir + File.separatorChar + "infostore-querybuilder.properties", null, SolrInfostoreField.FOLDER, InfostoreFieldMapper.getInstance());
-            return queryBuilder.buildQuery(parameters);
-        } catch (BuilderException e) {
-            throw new OXException(e);
-        }
     }
 
     private Set<SolrInfostoreField> convertAndCheckFields(QueryParameters parameters, Set<? extends IndexField> fields) {

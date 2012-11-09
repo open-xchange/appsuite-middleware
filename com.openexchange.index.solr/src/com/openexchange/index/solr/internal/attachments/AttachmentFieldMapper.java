@@ -49,90 +49,57 @@
 
 package com.openexchange.index.solr.internal.attachments;
 
-import com.openexchange.groupware.attach.index.ANDTerm;
-import com.openexchange.groupware.attach.index.ORTerm;
-import com.openexchange.groupware.attach.index.ObjectIdTerm;
-import com.openexchange.groupware.attach.index.SearchTerm;
-import com.openexchange.groupware.attach.index.SearchTermVisitor;
+import java.util.EnumMap;
+import java.util.Map;
+import org.apache.commons.logging.Log;
+import com.openexchange.groupware.attach.index.AttachmentIndexField;
+import com.openexchange.groupware.infostore.index.InfostoreIndexField;
+import com.openexchange.index.IndexField;
+import com.openexchange.index.solr.internal.FieldMapper;
+import com.openexchange.index.solr.internal.SolrField;
 
 
 /**
- * {@link SolrAttachmentSearchTermVisitor}
+ * {@link AttachmentFieldMapper}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public class SolrAttachmentSearchTermVisitor implements SearchTermVisitor {
-    
-    private StringBuilder queryBuilder;
-    
+public class AttachmentFieldMapper implements FieldMapper {
 
-    public SolrAttachmentSearchTermVisitor() {
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(AttachmentFieldMapper.class);
+    
+    private static final AttachmentFieldMapper INSTANCE = new AttachmentFieldMapper();
+    
+    private final Map<AttachmentIndexField, SolrAttachmentField> fieldMapping;
+    
+    
+    private AttachmentFieldMapper() {
         super();
-        queryBuilder = new StringBuilder();
+        fieldMapping = new EnumMap<AttachmentIndexField, SolrAttachmentField>(AttachmentIndexField.class);
+        for (SolrAttachmentField field : SolrAttachmentField.values()) {
+            AttachmentIndexField indexField = field.indexField();
+            if (indexField != null) {
+                fieldMapping.put(indexField, field);
+            }
+        }
+    }
+    
+    public static AttachmentFieldMapper getInstance() {
+        return INSTANCE;
+    }
+        
+    @Override
+    public SolrField solrFieldFor(IndexField indexField) {
+        if (indexField == null) {
+            return null;
+        }
+        
+        if (!(indexField instanceof AttachmentIndexField)) {
+            LOG.warn("Parameter 'indexField' must be of type " + AttachmentIndexField.class.getName() + "!");
+            return null;
+        }
+        
+        return fieldMapping.get((AttachmentIndexField) indexField);
     }
 
-    @Override
-    public void visit(ORTerm term) {
-        SearchTerm<?>[] searchTerms = term.getPattern();
-        if (searchTerms == null || searchTerms.length == 0) {
-            return;
-        }
-        
-        SearchTerm<?> firstTerm = searchTerms[0];
-        if (searchTerms.length == 1) {
-            queryBuilder.append(toQuery(firstTerm));
-            return;
-        }        
-        
-        queryBuilder.append(" (");
-        queryBuilder.append(toQuery(firstTerm));
-        for (int i = 1; i < searchTerms.length; i++) {
-            queryBuilder.append(" OR ");
-            queryBuilder.append(toQuery(searchTerms[i]));            
-        }
-        queryBuilder.append(")");
-    }
-    
-    @Override
-    public void visit(ANDTerm term) {        
-        SearchTerm<?>[] searchTerms = term.getPattern();
-        if (searchTerms == null || searchTerms.length == 0) {
-            return;
-        }
-        
-        SearchTerm<?> firstTerm = searchTerms[0];
-        if (searchTerms.length == 1) {
-            queryBuilder.append(toQuery(firstTerm));
-            return;
-        }        
-        
-        queryBuilder.append(" (");
-        queryBuilder.append(toQuery(firstTerm));
-        for (int i = 1; i < searchTerms.length; i++) {
-            queryBuilder.append(" AND ");
-            queryBuilder.append(toQuery(searchTerms[i]));            
-        }
-        queryBuilder.append(")");
-    }
-    
-    @Override
-    public void visit(ObjectIdTerm objectIdTerm) {
-        queryBuilder.append(" (")
-            .append(SolrAttachmentField.OBJECT_ID.parameterName())
-            .append(":")
-            .append(objectIdTerm.getPattern())
-            .append(")");
-    }
-    
-    @Override
-    public String toString() {
-        return queryBuilder.toString().trim();
-    }
-    
-    public static String toQuery(SearchTerm<?> searchTerm) {
-        SolrAttachmentSearchTermVisitor visitor = new SolrAttachmentSearchTermVisitor();
-        searchTerm.accept(visitor);
-        
-        return visitor.toString();
-    }
 }

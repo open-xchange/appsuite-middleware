@@ -50,13 +50,18 @@
 package com.openexchange.index.solr;
 
 import static org.junit.Assert.assertEquals;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import org.junit.Test;
 import com.openexchange.groupware.attach.index.ANDTerm;
 import com.openexchange.groupware.attach.index.ORTerm;
 import com.openexchange.groupware.attach.index.ObjectIdTerm;
 import com.openexchange.groupware.attach.index.SearchTerm;
 import com.openexchange.index.solr.internal.attachments.SolrAttachmentField;
-import com.openexchange.index.solr.internal.attachments.SolrAttachmentSearchTermVisitor;
+import com.openexchange.index.solr.internal.attachments.translators.SolrAttachmentSearchTermVisitor;
+import com.openexchange.index.solr.internal.querybuilder.Configuration;
 
 
 /**
@@ -76,8 +81,60 @@ public class SolrAttachmentSearchTermVisitorTest {
         ORTerm orTerm1 = new ORTerm(new SearchTerm<?>[] { t1, t2 });
         ORTerm orTerm2 = new ORTerm(new SearchTerm<?>[] { t3, t4 });
         ANDTerm andTerm = new ANDTerm(new SearchTerm<?>[] { orTerm1, orTerm2 });
-        String query = SolrAttachmentSearchTermVisitor.toQuery(andTerm);
-        String field = SolrAttachmentField.OBJECT_ID.parameterName();
+        
+        Configuration config = new Configuration() {
+            
+            @Override
+            public boolean haveTranslatorForHandler(String handler) {
+                // TODO Auto-generated method stub
+                return false;
+            }
+            
+            @Override
+            public Map<String, String> getTranslatorMap() {
+                // TODO Auto-generated method stub
+                return null;
+            }
+            
+            @Override
+            public String getTranslatorForHandler(String handler) {
+                // TODO Auto-generated method stub
+                return null;
+            }
+            
+            @Override
+            public Map<String, String> getRawMapping() {
+                // TODO Auto-generated method stub
+                return null;
+            }
+            
+            @Override
+            public Set<String> getKeys(String handlerName) {
+                return Collections.singleton(handlerName + '.' + SolrAttachmentField.OBJECT_ID.parameterName());
+            }
+            
+            @Override
+            public Set<String> getKeys() {
+                // TODO Auto-generated method stub
+                return null;
+            }
+            
+            @Override
+            public List<String> getIndexFields(String key) {
+                if (key.equals("test." + SolrAttachmentField.OBJECT_ID.parameterName())) {
+                    return Collections.singletonList(SolrAttachmentField.OBJECT_ID.solrName());
+                }
+                return null;
+            }
+            
+            @Override
+            public Set<String> getHandlers() {
+                // TODO Auto-generated method stub
+                return null;
+            }
+        };
+        String query = SolrAttachmentSearchTermVisitor.toQuery("test", config, andTerm);
+        String field = SolrAttachmentField.OBJECT_ID.solrName();
         String expected = "(((" + field + ":1) OR (" + field + ":2)) AND ((" + field + ":3) OR (" + field + ":4)))";
         assertEquals(expected, query);
     }

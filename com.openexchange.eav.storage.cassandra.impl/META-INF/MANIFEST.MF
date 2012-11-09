@@ -28,6 +28,7 @@ Import-Package: com.openexchange.ajax.tools,
  me.prettyprint.hector.testutils,
  org.apache.cassandra.db,
  org.apache.cassandra.utils,
+ org.apache.commons.codec.binary,
  org.apache.commons.logging,
  org.json,
  org.osgi.framework
