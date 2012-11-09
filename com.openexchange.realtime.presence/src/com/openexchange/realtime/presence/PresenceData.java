@@ -49,57 +49,18 @@
 
 package com.openexchange.realtime.presence;
 
-import com.openexchange.exception.OXException;
+import com.openexchange.realtime.packet.PresenceState;
 
 /**
- * {@link PresenceData} - Presence specific data that combined with the general Stanza fields forms a Presence Stanza.
+ * {@link PresenceData} - A pair of PresenceState and associated message. 
  * 
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
- * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
+ * @author <a href="mailto:marc	.arens@open-xchange.com">Marc Arens</a>
  */
 public class PresenceData {
 
-    //names of the corresponding keys in the JSONObject
-    public static final String ERROR="error";
-    public static final String MESSAGE="message";
-    public static final String PRIORITY="priority";
-    public static final String STATE="state";
-    
-    /* TODO:
-     * handle extensions to the payload auf the default namespace
-     * ExtensionType needs an elementPath to identify it and get proper parser
-     * <xs:any     namespace='##other'
-                       minOccurs='0'
-                       maxOccurs='unbounded'/>
-     */
-//    private List<ExtensionType> extensions;
+    private PresenceState state;
 
-    /**
-     * The server should deliver messages to the highest-priority available resource or decide on metrics like most recent connect,
-     * activity, PresenceState if several resources with the same priority are connected.
-     */
-    private byte priority = 0;
-
-    /**
-     * Signal Availability by choosing ONLINE as default. Clients may set different states.
-     */
-    private PresenceState state = PresenceState.ONLINE;
-
-    /**
-     * Empty message as default. Clients may set a different message.
-     */
-    private String message = "";
-
-    /**
-     * The error object for Presence Stanza of type error 
-     */
-    private OXException error = null;
-
-    /**
-     * Initializes a new {@link PresenceData} with a default priority of 0, PresenceState set to ONLINE and an empty message.
-     */
-    public PresenceData() {
-    }
+    private String message;
 
     /**
      * Initializes a new {@link PresenceData}.
@@ -109,94 +70,31 @@ public class PresenceData {
      * @throws IllegalArgumentException when the state is missing
      */
     public PresenceData(PresenceState state, String message) {
-        this((byte) 0, state, message);
-    }
-
-    /**
-     * Initializes a new {@link PresenceData}.
-     * 
-     * @param priority The priority used by the server for message dispatching to resources.
-     * @param state One of the avilable states to choose from
-     * @param message The optional user provided message to associate with the current state. May be null.
-     */
-    public PresenceData(byte priority, PresenceState state, String message) {
         if (state == null) {
-            throw new IllegalArgumentException("Missing obligatory parameter: state");
+            throw new IllegalArgumentException("Missing obligatory state parameter");
         }
-        this.priority = priority;
         this.state = state;
-        this.message = message;
+        if (message == null) {
+            this.message = "";
+        } else {
+            this.message = message;
+        }
     }
 
-    /**
-     * Get the error element describing the error-type Stanza in more detail. 
-     *
-     * @return The OXException representing the error
-     */
-    public OXException getError() {
-        return error;
-    }
-    
-    /**
-     * Set the error element describing the error-type Stanza in more detail.
-     *
-     * @param error The OXException representing the error
-     */
-    public void setError(OXException error) {
-        this.error = error;
-    }
-    
-    /**
-     * Gets the message.
-     * 
-     * @return The message
-     */
-    public String getMessage() {
-        return message;
-    }
-
-    /**
-     * Sets the priority.
-     * 
-     * @return The message
-     */
-    public void setMessage(String message) {
-        this.message = message;
-    }
-    
-    /**
-     * Gets the priority.
-     * 
-     * @return The priority
-     */
-    public byte getPriority() {
-        return priority;
-    }
-
-    /**
-     * Sets the priority.
-     * 
-     * @param priority The priority to set
-     */
-    public void setPriority(byte priority) {
-        this.priority = priority;
-    }
-    
-    /**
-     * Gets the state e.g. online or away
-     * 
-     * @return The state
-     */
     public PresenceState getState() {
         return state;
     }
 
-    /**
-     * Sets the state e.g. online or away
-     * @param state The state
-     */
     public void setState(PresenceState state) {
         this.state = state;
+    }
+
+    public String getMessage() {
+        return message;
+    }
+
+    public void setMessage(String message) {
+        this.message = message;
     }
 
 }

@@ -157,7 +157,7 @@ public class GrizzlyActivator extends HousekeepingActivator {
             grizzly = new HttpServer();
             
             final NetworkListener networkListener = new NetworkListener("http-listener", httpHost, 8080);
-            networkListener.setChunkingEnabled(false);
+//            networkListener.setChunkingEnabled(false);
             
             
             if (hasJMXEnabled) {
@@ -179,6 +179,7 @@ public class GrizzlyActivator extends HousekeepingActivator {
                         return "/echo".equals(request.getRequestURI());
                     }
 
+                    @Override
                     public void onMessage(WebSocket socket, String data) {
                         socket.send(data);
                     }

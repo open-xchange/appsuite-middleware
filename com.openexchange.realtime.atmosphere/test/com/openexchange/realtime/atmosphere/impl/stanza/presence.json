@@ -1,0 +1,42 @@
+{
+	"element":"presence",
+	"type":"subscribe",
+	"to":"ox://marc.arens@premium",
+	"session":"1234",
+	"payloads":
+		[
+	            {"element":"show", "data":"Hello marens, please let me subscribe to your presence, WBR., Mr. X"},
+	            {"element":"priority", "data":"7"},
+	            
+	            {"element":"flatObject", "data":
+	            	{
+	            			"string":"hello0",
+	            			"number":"0",
+	            			"boolean":"false",
+	            			"null":"null"
+	            	}
+	            },
+	            
+	            {"element":"arrayOfFlatObjects", "data":
+            		[
+						{"element":"flatObject1", "data":
+							{
+								"string":"hello1",
+								"number":"1",
+								"boolean":"false",
+								"null":"null"
+							}
+						},
+						{"element":"flatObject2", "data":
+							{
+								"string":"hello2",
+								"number":"2",
+								"boolean":"false",
+								"null":"null"
+							}
+						}
+					]
+				}
+	            
+	    ]
+}

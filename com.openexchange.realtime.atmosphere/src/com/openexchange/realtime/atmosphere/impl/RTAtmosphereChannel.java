@@ -49,71 +49,71 @@
 
 package com.openexchange.realtime.atmosphere.impl;
 
+import java.util.Set;
 import com.openexchange.exception.OXException;
 import com.openexchange.realtime.Channel;
+import com.openexchange.realtime.atmosphere.osgi.ExtensionRegistry;
 import com.openexchange.realtime.packet.ID;
 import com.openexchange.realtime.packet.Stanza;
+import com.openexchange.realtime.util.ElementPath;
 import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link RTAtmosphereChannel}
- *
+ * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class RTAtmosphereChannel implements Channel {
-	
+
     public static final String PROTOCOL = "ox";
-	private final RTAtmosphereHandler handler;
-	private final HandlerLibrary library;
-	
-	
 
-	public RTAtmosphereChannel(RTAtmosphereHandler handler,
-			HandlerLibrary library) {
-		this.handler = handler;
-		this.library = library;
-	}
+    private final RTAtmosphereHandler handler;
 
-	@Override
+    private final ExtensionRegistry extensions;
+
+    public RTAtmosphereChannel(RTAtmosphereHandler handler) {
+        this.handler = handler;
+        this.extensions = ExtensionRegistry.getInstance();
+    }
+
+    @Override
     public String getProtocol() {
-		return "ox";
-	}
+        return "ox";
+    }
 
-	@Override
-    public boolean canHandle(Class<? extends Stanza> stanzaClass, ID recipient,
-			ServerSession session) {
-		if (!isConnected(recipient, session)) {
-			return false;
-		}
-		
-		if (!hasCapability(recipient, stanzaClass, session)) {
-			return false;
-		}
-		
-		if (library.getHandlerFor(stanzaClass) == null) {
-			return false;
-		}
-		
-		return true;
-	}
+    @Override
+    public boolean canHandle(Set<ElementPath> elementPaths, ID recipient, ServerSession session) {
+        if (!isConnected(recipient, session)) {
+            return false;
+        }
 
-	public boolean hasCapability(ID recipient, Class<? extends Stanza> stanzaClass,
-			ServerSession session) {
-		return true; // TODO: Implement Capability Model
-	}
+        if (!hasCapability(recipient, elementPaths, session)) {
+            return false;
+        }
 
-	@Override
+        if (!extensions.getTransformableableElementPaths().containsAll(elementPaths)) {
+            return false;
+        }
+
+        return true;
+    }
+
+    public boolean hasCapability(ID recipient, Set<ElementPath> namespaces, ServerSession session) {
+        return true; // TODO: Implement Capability Model
+    }
+
+    @Override
     public int getPriority() {
-		return 10000;
-	}
+        return 10000;
+    }
 
-	@Override
+    @Override
     public boolean isConnected(ID id, ServerSession session) {
-		return handler.isConnected(id);
-	}
+        return handler.isConnected(id);
+    }
 
-	@Override
+    @Override
     public void send(Stanza stanza, ServerSession session) throws OXException {
-		handler.handleOutgoing(stanza, session);
-	}
+        handler.handleOutgoing(stanza, session);
+    }
 }

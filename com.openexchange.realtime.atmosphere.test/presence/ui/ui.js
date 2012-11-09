@@ -29,9 +29,9 @@ define("ui/ui", function () {
         url: url,
         contentType : "application/json",
         logLevel : 'debug',
-        transport : 'websocket' ,
+        transport : 'long-polling' ,
         fallbackTransport: 'long-polling',
-        timeout: 60000,
+        timeout: 300000,
         maxRequests : 3,
         headers : {session: session}
         };

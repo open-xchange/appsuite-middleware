@@ -49,9 +49,10 @@
 
 package com.openexchange.realtime.impl;
 
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-import org.cliffc.high_scale_lib.NonBlockingHashMap;
 import com.openexchange.exception.OXException;
 import com.openexchange.log.Log;
 import com.openexchange.log.LogFactory;
@@ -60,6 +61,7 @@ import com.openexchange.realtime.MessageDispatcher;
 import com.openexchange.realtime.RealtimeExceptionCodes;
 import com.openexchange.realtime.packet.ID;
 import com.openexchange.realtime.packet.Stanza;
+import com.openexchange.realtime.util.ElementPath;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -80,8 +82,10 @@ public class MessageDispatcherImpl implements MessageDispatcher {
         if (channel == null) {
             if (LOG.isInfoEnabled()) {
                 LOG.info("Couldn't find appropriate channel for sending stanza");
+                //TODO: which messages have to be buffered? which can be thrown away ... 
+                return;
             }
-            throw RealtimeExceptionCodes.NO_APPROPRIATE_CHANNEL.create(stanza.getTo().toString(), stanza);
+//            throw RealtimeExceptionCodes.NO_APPROPRIATE_CHANNEL.create(stanza.getTo().toString(), stanza);
         }
 
         channel.send(stanza, session);
@@ -111,10 +115,10 @@ public class MessageDispatcherImpl implements MessageDispatcher {
                 return channel;
             }
         } else { // Choose channel based on priority and capabilities
-            Class<? extends Stanza> clazz = stanza.getClass();
+             Set<ElementPath> namespaces = new HashSet<ElementPath>(stanza.getElementPaths());
             for (Channel c : channels.values()) {
                 //no channel chosen yet, or current channels priority is lower -> replace with better suited channel
-                if ((channel == null || channel.getPriority() < c.getPriority()) && c.canHandle(clazz, to, session)) {
+                if ((channel == null || channel.getPriority() < c.getPriority()) && c.canHandle(namespaces, to, session)) {
                     channel = c;
                 }
             }

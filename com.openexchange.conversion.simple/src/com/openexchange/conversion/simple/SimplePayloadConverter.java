@@ -53,7 +53,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.tools.session.ServerSession;
 
 /**
- * {@link SimplePayloadConverter}
+ * {@link SimplePayloadConverter} Data converter with access to a SimpleConverter during conversion process. 
  * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>

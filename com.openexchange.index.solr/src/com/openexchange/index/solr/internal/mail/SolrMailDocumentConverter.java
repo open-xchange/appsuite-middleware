@@ -51,6 +51,7 @@ package com.openexchange.index.solr.internal.mail;
 
 import java.util.List;
 import java.util.Map;
+import org.apache.commons.logging.Log;
 import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrInputDocument;
 import com.openexchange.exception.OXException;
@@ -70,6 +71,8 @@ import com.openexchange.mail.text.TextFinder;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public class SolrMailDocumentConverter implements SolrResultConverter<MailMessage> {
+    
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(SolrMailDocumentConverter.class);
 
     @Override
     public IndexDocument<MailMessage> convert(SolrDocument document) throws OXException {
@@ -84,19 +87,23 @@ public class SolrMailDocumentConverter implements SolrResultConverter<MailMessag
     public static SolrInputDocument convertStatic(int contextId, int userId, IndexDocument<MailMessage> document) throws OXException {
         MailMessage message = document.getObject();
         SolrInputDocument inputDocument = SolrMailHelper.getInstance().inputDocumentFor(message, userId, contextId);
-        String text;
-        // TODO: Can this be anything else?
-        if (message instanceof ContentAwareMailMessage) {
-            ContentAwareMailMessage contentAwareMessage = (ContentAwareMailMessage) message;
-            text = contentAwareMessage.getPrimaryContent();
-            if (text == null) {
+        String text = null;
+        try {
+            if (message instanceof ContentAwareMailMessage) {
+                ContentAwareMailMessage contentAwareMessage = (ContentAwareMailMessage) message;
+                text = contentAwareMessage.getPrimaryContent();
+                if (text == null) {
+                    TextFinder textFinder = new TextFinder();
+                    text = textFinder.getText(message);
+                }
+            } else {
                 TextFinder textFinder = new TextFinder();
                 text = textFinder.getText(message);
             }
-        } else {
-            TextFinder textFinder = new TextFinder();
-            text = textFinder.getText(message);
+        } catch (Throwable t) {
+            LOG.warn("Error during text extraction. Setting content to null.", t);
         }
+        
         
         if (null != text) {
             String contentField = SolrMailField.CONTENT.solrName();

@@ -52,7 +52,10 @@ package com.openexchange.realtime.xmpp.packet;
 import org.joox.JOOX;
 import org.joox.Match;
 import com.openexchange.exception.OXException;
-import com.openexchange.realtime.packet.Payload;
+import com.openexchange.realtime.payload.PayloadElement;
+//import com.openexchange.realtime.payload.PayloadElement;
+import com.openexchange.realtime.payload.PayloadTree;
+import com.openexchange.realtime.payload.PayloadTreeNode;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -72,7 +75,7 @@ public class XMPPMessage extends XMPPStanza {
 
     private String subject;
 
-    private Payload payload;
+    private PayloadTree payload;
 
     private String thread;
 
@@ -110,11 +113,11 @@ public class XMPPMessage extends XMPPStanza {
         this.subject = subject;
     }
 
-    public Payload getPayload() {
+    public PayloadTree getPayload() {
         return payload;
     }
 
-    public void setPayload(Payload payload) {
+    public void setPayload(PayloadTree payload) {
         this.payload = payload;
     }
 
@@ -139,7 +142,10 @@ public class XMPPMessage extends XMPPStanza {
             document.append(JOOX.$("thread", thread));
         }
         if (payload != null) {
-            Payload p = payload.to("xmpp", session);
+            PayloadElement p = payload.to("xmpp", session);
+            // replace with:
+            // PayloadTree transformedTree = PayloadTreeTransformer.incoming(PayloadTree payloadTree, ServerSession session)
+            // or look at StanzaTransformer/PayloadTreeTransformer/PayloadElementTransformer/SimpleConverter interaction dependency hell
             String d = (String) p.getData();
             Match j = JOOX.$(d);
             document.append(j);
@@ -160,7 +166,14 @@ public class XMPPMessage extends XMPPStanza {
 
         Match body = xml.find("body");
         if (body != null) {
-            setPayload(new Payload(body.toString(), "xmpp"));
+            setPayload(new PayloadElement(body.toString(), "xmpp"));
+            // replace with:
+            //
+            // setPayload(
+            //  new PayloadTree(
+            //      new PayloadTreeNode(
+            //          new PayloadElement(data, format, namespace, elementName))));
+            // or look at StanzaInitializer + StanzaTranformer/PayloadTreeTransformer/PayloadElementTransformer/SimpleConverter interaction dependency hell
         }
     }
 

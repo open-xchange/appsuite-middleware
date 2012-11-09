@@ -49,27 +49,41 @@
 
 package com.openexchange.realtime.packet;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import com.google.common.base.Predicate;
+import com.openexchange.realtime.payload.PayloadTree;
+import com.openexchange.realtime.util.ElementPath;
+
 /**
- * {@link Stanza} - Abstract information unit that can be send from one entity
- * to another.
+ * {@link Stanza} - Abstract information unit that can be send from one entity to another.
  * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
 public abstract class Stanza {
 
+    // recipient and sender
     private ID to, from;
 
-    //All 3 basic stanza types either have an optional or mandatory id field
-    private String id;
+    // All 3 basic stanza types either have an optional or mandatory id field
+    private String id = "";
 
-    private Payload payload;
+    // Payloads carried by this Stanza as n-ary trees
+    Map<ElementPath, List<PayloadTree>> payloads;
 
     /**
      * Initializes a new {@link Stanza}.
      */
     protected Stanza() {
-        super();
+        payloads = new ConcurrentHashMap<ElementPath, List<PayloadTree>>();
     }
 
     /**
@@ -86,7 +100,7 @@ public abstract class Stanza {
      * 
      * @param id The id to set
      */
-    public void setId(String id) {
+    public void setId(final String id) {
         this.id = id;
     }
 
@@ -127,21 +141,110 @@ public abstract class Stanza {
     }
 
     /**
-     * Set the structured information of this Stanza.
+     * Get a List of namespaces of the payloads of this Stanza.
      * 
-     * @param payload the structured information to transport.
+     * @return Empty Set or the namespaces of the payloads of this Stanza.
      */
-    public void setPayload(final Payload payload) {
-        this.payload = payload;
+    public Collection<ElementPath> getElementPaths() {
+        Set<ElementPath> paths = new HashSet<ElementPath>();
+        for (PayloadTree tree : getPayloads()) {
+            paths.addAll(tree.getElementPaths());
+        }
+        return paths;
     }
 
     /**
-     * Get the structured information of this Stanza.
+     * Get all Payloads of this Stanza.
      * 
-     * @return null or the structured information of this Stanza.
+     * @return A List of PayloadTrees.
      */
-    public Payload getPayload() {
-        return payload;
+    public Collection<PayloadTree> getPayloads() {
+        ArrayList<PayloadTree> resultList = new ArrayList<PayloadTree>();
+        Collection<List<PayloadTree>> values = payloads.values();
+        for (List<PayloadTree> list : values) {
+            resultList.addAll(list);
+        }
+        return resultList;
+    }
+
+    /**
+     * Set all Payloads of this Stanza.
+     * @param payloadTrees  The PayloadTrees forming the Payloads.
+     */
+    public void setPayloads(Collection<PayloadTree> payloadTrees) {
+        HashMap<ElementPath, List<PayloadTree>> newPayloads = new HashMap<ElementPath, List<PayloadTree>>();
+        for (PayloadTree tree : payloadTrees) {
+            ElementPath elementPath = tree.getRoot().getElementPath();
+            List<PayloadTree> list = newPayloads.get(elementPath);
+            if (list == null) {
+                list = new ArrayList<PayloadTree>();
+            }
+            list.add(tree);
+            newPayloads.put(tree.getElementPath(), list);
+        }
+        payloads=newPayloads;
+    }
+
+    /**
+     * Add a payload to this Stanza.
+     * 
+     * @param tree The PayloadTreeNoode to add to this Stanza
+     * @return true if the PayloadTreeNode could be added to this Stanza
+     */
+    public void addPayload(final PayloadTree tree) {
+        ElementPath elementPath = tree.getElementPath();
+        List<PayloadTree> list = payloads.get(elementPath);
+        if (list == null) {
+            list = new ArrayList<PayloadTree>();
+        }
+        list.add(tree);
+        payloads.put(tree.getElementPath(), list);
+    }
+
+    /**
+     * Remove a PayloadTree from this Stanza.
+     * 
+     * @param tree The PayloadTree to remove from this Stanza
+     */
+    public void removePayload(final PayloadTree tree) {
+        ElementPath elementPath = tree.getElementPath();
+        List<PayloadTree> list = payloads.get(elementPath);
+        if (list != null) {
+            list.remove(tree);
+            payloads.put(elementPath, list);
+        }
+    }
+
+    /**
+     * Get a Collection of Payloads that match an ElementPath
+     * 
+     * @param elementPath The Elementpath identifying the Payload
+     * @return A Collection of PayloadTrees
+     */
+    @SuppressWarnings("unchecked")
+    public Collection<PayloadTree> getPayloads(final ElementPath elementPath) {
+        List<PayloadTree> list = payloads.get(elementPath);
+        if (list == null) {
+            list = Collections.EMPTY_LIST;
+        }
+
+        return list;
+    }
+
+    /**
+     * Filter the payloads based on a Predicate.
+     * 
+     * @param predicate
+     * @return Payloads matching the Predicate or an empty Collection
+     */
+    public Collection<PayloadTree> filterPayloads(Predicate<PayloadTree> predicate) {
+        Collection<PayloadTree> result = new ArrayList<PayloadTree>();
+        for (PayloadTree element : getPayloads()) {
+            if (predicate.apply(element)) {
+                result.add(element);
+            }
+        }
+        return result;
     }
 
 }
