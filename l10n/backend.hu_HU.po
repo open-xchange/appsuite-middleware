@@ -1503,7 +1503,7 @@ msgstr "A megadott „%s” storagePriority érték a(z) „%s” fájlban nem i
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contact.storage.ldap/src/com/openexchange/contact/storage/ldap/LdapExceptionMessages.java:124
 msgid "Unable to map contact property \"%s\""
-msgstr "A(z) „%1$s”  kapcsolati tulajdonság nem rendelhető össze."
+msgstr "A(z) „%s”  kapcsolati tulajdonság nem rendelhető össze."
 
 #. A JSON error occurred: %1$s
 #. *
@@ -4206,7 +4206,7 @@ msgid ""
 msgstr ""
 "A bejelentkezési késleltetés megakadályozza a kapcsolódást a(z) %1$s "
 "levélkiszolgálóhoz a(z) %2$s bejelentkezéssel (felhasználó=%3$s, kontextus=%4"
-"$s). Próbálja újra %6$s másodpercen belül.\n"
+"$s). Próbálja újra %5$s másodpercen belül.\n"
 "A levélkiszolgáló hibaüzenete: %6$s"
 
 #. *
@@ -7582,7 +7582,7 @@ msgstr "Nem állítható össze megkülönböztető név ebből: %s."
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/ldap/LdapExceptionMessage.java:81
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/ldap/UserExceptionMessage.java:81
 msgid "Class %s can not be loaded."
-msgstr "A(z) %1$s osztály nem tölthető be."
+msgstr "A(z) %s osztály nem tölthető be."
 
 #. *
 #. * An implementation can not be instantiated.
@@ -7761,7 +7761,7 @@ msgstr "A felhasználó %s paramétere hiányzik."
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/ldap/UserExceptionMessage.java:177
 msgid "%s is not a valid locale."
-msgstr "A(z) %1$s nem érvényes nyelv."
+msgstr "A(z) %s nem érvényes nyelv."
 
 #. *
 #. * %s is not a valid time zone.
@@ -9812,7 +9812,7 @@ msgstr "I/O hiba történt: %s"
 #. May be used to turn the IOException of getInstance into a proper OXException
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/file/external/FileStorageExceptionMessage.java:73
 msgid "File store could not be accessed: %s"
-msgstr "A fájltároló nem érhető el: %1$s."
+msgstr "A fájltároló nem érhető el: %s."
 
 #. Cannot create directory \"%1$s\" for FileStorage.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/file/external/FileStorageExceptionMessage.java:76
@@ -11273,7 +11273,7 @@ msgstr "A(z) %1$s uuid azonosítójú dokumentum nem található."
 #. %1$s is not a valid field for sorting.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.solr/src/com/openexchange/solr/SolrExceptionMessages.java:113
 msgid "%1$s is not a valid field for sorting."
-msgstr "A(z) %s hibás mező a rendezéshez."
+msgstr "A(z) %1$s hibás mező a rendezéshez."
 
 #. *
 #. * The given value for mode "%s" is not a possible one

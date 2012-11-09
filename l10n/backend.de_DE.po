@@ -33,7 +33,7 @@ msgstr ""
 "Project-Id-Version: errors.de_DE\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2006-11-13 15:15+0100\n"
-"PO-Revision-Date: 2012-10-01 16:59+0200\n"
+"PO-Revision-Date: 2012-11-09 10:28+0100\n"
 "Last-Translator: Antje Faber\n"
 "Language-Team: German <kde-i18n-de@kde.org>\n"
 "MIME-Version: 1.0\n"
@@ -159,11 +159,11 @@ msgstr "'Put' in Cache fehlgeschlagen"
 
 #. 'Safe put' into cache failed. An object bound to given key already exists.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.caching/src/com/openexchange/caching/CacheExceptionMessage.java:87
-#, fuzzy
 msgid ""
 "'Safe put' into cache failed. An object bound to given key already exists."
 msgstr ""
-"Objekt konnte nicht in Cache gelegt werden. Der zugeordnete Key ist bereits "
+"Objekt konnte nicht per 'safe put' in den Cache gelegt werden. Der "
+"zugeordnete Key ist bereits "
 "vergeben."
 
 #. Remove on cache failed
@@ -3682,7 +3682,6 @@ msgstr ""
 "Einstellungen -> Accounts. Versuchen Sie es dann erneut."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:137
-#, fuzzy
 msgid "The address %1$s is not white-listed as for the %2$s OAuth API"
 msgstr "Die Adresse %1$s ist nicht in der Positivliste der %2$s OAuth API"
 
@@ -5427,7 +5426,6 @@ msgid "The required \"days\"  value is missing or wrong: %d"
 msgstr "Erforderlicher Wert \"Tage\" fehlt oder ist ungültig: %d"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/calendar/OXCalendarExceptionMessage.java:198
-#, fuzzy
 msgid ""
 "Moving appointment to a public folder flagged as private is not allowed."
 msgstr ""
@@ -11230,7 +11228,6 @@ msgstr "Das Speichern der Sitzung mit der ID %1$s ist fehlgeschlagen."
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.sessionstorage.hazelcast/src/com/openexchange/sessionstorage/hazelcast/exceptions/OXHazelcastSessionStorageExceptionMessages.java:65
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.sessionstorage.impl/src/com/openexchange/sessionstorage/impl/exceptions/OXSessionStorageExceptionMessages.java:71
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.sessionstorage.nosql/src/com/openexchange/sessionstorage/nosql/exceptions/OXNoSQLSessionStorageExceptionMessages.java:65
-#, fuzzy
 msgid "Lookup for session with sessionId %1$s failed."
 msgstr "Referenz für die Sitzung mit der ID %1$s ist fehlgeschlagen"
 
