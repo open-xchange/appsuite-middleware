@@ -76,16 +76,17 @@ public class MessageDispatcherImpl implements MessageDispatcher {
 
     private final Map<String, Channel> channels = new ConcurrentHashMap<String, Channel>();
 
+    @Override
     public void send(final Stanza stanza, final ServerSession session) throws OXException {
         Channel channel = chooseChannel(stanza, session);
 
         if (channel == null) {
             if (LOG.isInfoEnabled()) {
                 LOG.info("Couldn't find appropriate channel for sending stanza");
-                //TODO: which messages have to be buffered? which can be thrown away ... 
-                return;
             }
-//            throw RealtimeExceptionCodes.NO_APPROPRIATE_CHANNEL.create(stanza.getTo().toString(), stanza);
+            return;
+            // return for now/testing, otherwise throw Exception
+            // throw RealtimeExceptionCodes.NO_APPROPRIATE_CHANNEL.create(stanza.getTo().toString(), stanza);
         }
 
         channel.send(stanza, session);
@@ -115,9 +116,9 @@ public class MessageDispatcherImpl implements MessageDispatcher {
                 return channel;
             }
         } else { // Choose channel based on priority and capabilities
-             Set<ElementPath> namespaces = new HashSet<ElementPath>(stanza.getElementPaths());
+            Set<ElementPath> namespaces = new HashSet<ElementPath>(stanza.getElementPaths());
             for (Channel c : channels.values()) {
-                //no channel chosen yet, or current channels priority is lower -> replace with better suited channel
+                // no channel chosen yet, or current channels priority is lower -> replace with better suited channel
                 if ((channel == null || channel.getPriority() < c.getPriority()) && c.canHandle(namespaces, to, session)) {
                     channel = c;
                 }
