@@ -351,10 +351,21 @@ public final class Mp3ImageDataSource implements ImageDataSource {
         }
         final ServerServiceRegistry serviceRegistry = ServerServiceRegistry.getInstance();
         final IDBasedFileAccess fileAccess = serviceRegistry.getService(IDBasedFileAccessFactory.class).createAccess(session);
-        final ManagedFile managedFile = fileManagement.createManagedFile(fileAccess.getDocument(fileId, FileStorageFileAccess.CURRENT_VERSION)); // Stream is closed during creation of ManagedFile
         final com.openexchange.file.storage.File audioFile = fileAccess.getFileMetadata(fileId, FileStorageFileAccess.CURRENT_VERSION);
+        final String fileName = audioFile.getFileName();
+        final ManagedFile managedFile;
+        if (null == fileName) {
+            managedFile = fileManagement.createManagedFile(fileAccess.getDocument(fileId, FileStorageFileAccess.CURRENT_VERSION)); // Stream is closed during creation of ManagedFile
+        } else {
+            final int pos = fileName.indexOf('.');
+            if (pos > 0) {
+                managedFile = fileManagement.createManagedFile(fileAccess.getDocument(fileId, FileStorageFileAccess.CURRENT_VERSION), fileName.substring(pos)); // Stream is closed during creation of ManagedFile
+            } else {
+                managedFile = fileManagement.createManagedFile(fileAccess.getDocument(fileId, FileStorageFileAccess.CURRENT_VERSION)); // Stream is closed during creation of ManagedFile
+            }
+        }
         managedFile.setContentType(audioFile.getFileMIMEType());
-        managedFile.setFileName(audioFile.getFileName());
+        managedFile.setFileName(fileName);
         return managedFile;
     }
 
