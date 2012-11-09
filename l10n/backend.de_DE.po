@@ -33,7 +33,7 @@ msgstr ""
 "Project-Id-Version: errors.de_DE\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2006-11-13 15:15+0100\n"
-"PO-Revision-Date: 2012-11-09 10:28+0100\n"
+"PO-Revision-Date: 2012-11-09 14:42+0100\n"
 "Last-Translator: Antje Faber\n"
 "Language-Team: German <kde-i18n-de@kde.org>\n"
 "MIME-Version: 1.0\n"
@@ -163,8 +163,7 @@ msgid ""
 "'Safe put' into cache failed. An object bound to given key already exists."
 msgstr ""
 "Objekt konnte nicht per 'safe put' in den Cache gelegt werden. Der "
-"zugeordnete Key ist bereits "
-"vergeben."
+"zugeordnete Key ist bereits vergeben."
 
 #. Remove on cache failed
 #. *
@@ -3688,6 +3687,10 @@ msgstr "Die Adresse %1$s ist nicht in der Positivliste der %2$s OAuth API"
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:139
 msgid "The request sent was missing its body"
 msgstr "In der gesendeten Anfrage fehlt der Hauptteil"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:141
+msgid "The account is invalid, please recreate it."
+msgstr "Der Account ist ungültig. Bitte erstellen Sie ihn erneut."
 
 #. *
 #. * Cannot change password for any reason.
@@ -10181,8 +10184,7 @@ msgstr ""
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:166
 msgid "Only one admin permission is allowed on a private folder"
 msgstr ""
-"Für einen privaten Ordner kann das Adminrecht nur "
-"einmal vergeben werden"
+"Für einen privaten Ordner kann das Adminrecht nur einmal vergeben werden"
 
 #. *
 #. * A group must not hold admin permission on a private folder
@@ -10192,9 +10194,7 @@ msgstr ""
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:173
 msgid "A group must not hold admin permission on a private folder"
-msgstr ""
-"Eine Gruppe darf kein Adminrecht für einen "
-"privaten Ordner haben"
+msgstr "Eine Gruppe darf kein Adminrecht für einen privaten Ordner haben"
 
 #. *
 #. * Only folder owner may hold admin permission on a private folder
@@ -10440,8 +10440,7 @@ msgid ""
 "context %3$s"
 msgstr ""
 "Die Berechtigung für den Ordner %1$s für Benutzer %2$s im Kontext %3$s "
-"konnte "
-"nicht bestimmt werden."
+"konnte nicht bestimmt werden."
 
 #. *
 #. * A DBPool error occurred in context %1$s
@@ -10974,8 +10973,7 @@ msgid ""
 "(JPG, GIF, BMP or PNG) are supported."
 msgstr ""
 "Die Datei \"%1$s\" (\"%2$s\") kann nicht als Bild importiert werden. Es "
-"werden nur "
-"Bildformate (JPG, GIF, BMP oder PNG) unterstützt."
+"werden nur Bildformate (JPG, GIF, BMP oder PNG) unterstützt."
 
 #. *
 #. * Exception while writing JSON.
