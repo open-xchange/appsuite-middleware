@@ -754,6 +754,9 @@ public abstract class AbstractMailAccount implements MailAccount {
         }
         final Map<String, String> clone = new HashMap<String, String>(properties.size());
         clone.putAll(properties);
+        if (null != replyTo) {
+            clone.put("replyto", replyTo);
+        }
         return clone;
     }
 
@@ -768,6 +771,12 @@ public abstract class AbstractMailAccount implements MailAccount {
         } else if (properties.isEmpty()) {
             this.properties = Collections.emptyMap();
         } else {
+            for (final Map.Entry<String, String> e : properties.entrySet()) {
+                if ("replyto".equals(e.getKey())) {
+                    replyTo = e.getValue();
+                    break;
+                }
+            }
             this.properties = new HashMap<String, String>(properties.size());
             this.properties.putAll(properties);
         }
@@ -777,6 +786,9 @@ public abstract class AbstractMailAccount implements MailAccount {
     public void addProperty(final String name, final String value) {
         if (properties.isEmpty()) {
             properties = new HashMap<String, String>();
+        }
+        if ("replyto".equals(name)) {
+            replyTo = value;
         }
         properties.put(name, value);
     }

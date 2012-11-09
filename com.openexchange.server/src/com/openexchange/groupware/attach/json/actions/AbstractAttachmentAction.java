@@ -106,7 +106,16 @@ public abstract class AbstractAttachmentAction implements AJAXActionService {
         }
     }
 
-    protected void checkSize(final long size) throws OXException {
+    private static final String CALLBACK = "callback";
+
+    /**
+     * Checks current size of uploaded data against possible quota restrictions.
+     * 
+     * @param size The size
+     * @param requestData The associated request data
+     * @throws OXException If any quota restrictions are exceeded
+     */
+    protected void checkSize(final long size, AJAXRequestData requestData) throws OXException {
         if (maxUploadSize.get() == -2) {
             final long configuredSize = AttachmentConfig.getMaxUploadSize();
             long cur;
@@ -119,6 +128,9 @@ public abstract class AbstractAttachmentAction implements AJAXActionService {
             return;
         }
         if (size > maxUploadSize) {
+            if (!requestData.containsParameter(CALLBACK)) {
+                requestData.putParameter(CALLBACK, "error");
+            }
             throw UploadSizeExceededException.create(size, maxUploadSize, true);
         }
     }
