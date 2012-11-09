@@ -1,3 +1,7 @@
+* 2012-11-09 - jan.bauerdick@open-xchange.com
+
+ - Drop map configuration in sessionstorage_hazelcast.properties
+
 * 2012-11-09 - thorben.betten@open-xchange.com
 
  - Fix for bug 23681: Showing proper error information on failed upload due to exceeded quota

@@ -64,7 +64,6 @@ import com.openexchange.sessionstorage.SessionStorageService;
 import com.openexchange.sessionstorage.hazelcast.HazelcastSessionStorageConfiguration;
 import com.openexchange.sessionstorage.hazelcast.HazelcastSessionStorageService;
 import com.openexchange.sessionstorage.hazelcast.Services;
-import com.openexchange.sessionstorage.hazelcast.exceptions.OXHazelcastSessionStorageExceptionCodes;
 import com.openexchange.threadpool.ThreadPoolService;
 
 /**
@@ -94,26 +93,17 @@ public class HazelcastSessionStorageActivator extends HousekeepingActivator {
                 final String mapName = configService.getProperty("com.openexchange.sessionstorage.hazelcast.map.name");
                 final int backupCount = configService.getIntProperty("com.openexchange.sessionstorage.hazelcast.map.backupcount", 1);
                 final int asyncBackup = configService.getIntProperty("com.openexchange.sessionstorage.hazelcast.map.asyncbackup", 0);
-                final int ttl = configService.getIntProperty("com.openexchange.sessionstorage.hazelcast.map.ttl", 0);
-                final int maxidle = configService.getIntProperty("com.openexchange.sessionstorage.hazelcast.map.maxidle", 0);
-                final String evictionPolicy = configService.getProperty("com.openexchange.sessionstorage.hazelcast.map.evictionpolicy");
-                final int evictionPercentage = configService.getIntProperty("com.openexchange.sessionstorage.hazelcast.map.evictionpercentage", 25);
-                final int maxSize = configService.getIntProperty("com.openexchange.sessionstorage.hazelcast.map.maxsize", 0);
-                final String mergePolicy = configService.getProperty("com.openexchange.sessionstorage.hazelcast.map.mergepolicy");
-                if (mapName == null || !checkEvictionPolicy(evictionPolicy) || !checkMergePolicy(mergePolicy)) {
-                    throw OXHazelcastSessionStorageExceptionCodes.HAZELCAST_SESSIONSTORAGE_CONFIG_FILE.create();
-                }
                 mapConfig.setName(mapName);
                 mapConfig.setBackupCount(backupCount);
                 mapConfig.setAsyncBackupCount(asyncBackup);
-                mapConfig.setTimeToLiveSeconds(ttl);
-                mapConfig.setMaxIdleSeconds(maxidle);
-                mapConfig.setEvictionPolicy(evictionPolicy);
-                mapConfig.setEvictionPercentage(evictionPercentage);
+                mapConfig.setTimeToLiveSeconds(0);
+                mapConfig.setMaxIdleSeconds(0);
+                mapConfig.setEvictionPolicy("NONE");
+                mapConfig.setEvictionPercentage(25);
                 final MaxSizeConfig maxSizeConfig = new MaxSizeConfig();
-                maxSizeConfig.setSize(maxSize);
+                maxSizeConfig.setSize(0);
                 mapConfig.setMaxSizeConfig(maxSizeConfig);
-                mapConfig.setMergePolicy(mergePolicy);
+                mapConfig.setMergePolicy("hz.LATEST_UPDATE");
             }
             final HazelcastSessionStorageConfiguration config = new HazelcastSessionStorageConfiguration(mapConfig);
             // Track HazelcastInstance
@@ -126,7 +116,9 @@ public class HazelcastSessionStorageActivator extends HousekeepingActivator {
                 public HazelcastInstance addingService(final ServiceReference<HazelcastInstance> reference) {
                     final HazelcastInstance hazelcastInstance = context.getService(reference);
                     HazelcastSessionStorageService.setHazelcastInstance(hazelcastInstance);
-                    sessionStorageRegistration = context.registerService(SessionStorageService.class, new HazelcastSessionStorageService(config, hazelcastInstance), null);
+                    sessionStorageRegistration = context.registerService(SessionStorageService.class, new HazelcastSessionStorageService(
+                        config,
+                        hazelcastInstance), null);
                     return hazelcastInstance;
                 }
 
@@ -170,14 +162,6 @@ public class HazelcastSessionStorageActivator extends HousekeepingActivator {
         LOG.info("Stopping bundle: com.openexchange.sessionstorage.hazelcast");
         super.stopBundle();
         Services.setServiceLookup(null);
-    }
-
-    private boolean checkEvictionPolicy(final String evictionPolicy) {
-        return ("NONE".equals(evictionPolicy) || "LRU".equals(evictionPolicy) || "LFU".equals(evictionPolicy));
-    }
-
-    private boolean checkMergePolicy(final String mergePolicy) {
-        return ("hz.NO_MERGE".equals(mergePolicy) || "hz.ADD_NEW_ENTRY".equals(mergePolicy) || "hz.HIGHER_HITS".equals(mergePolicy) || "hz.LATEST_UPDATE".equals(mergePolicy));
     }
 
 }
