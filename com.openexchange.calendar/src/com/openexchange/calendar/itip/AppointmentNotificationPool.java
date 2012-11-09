@@ -345,8 +345,7 @@ public class AppointmentNotificationPool implements
 
 
 		private void notifyAllParticipantsAboutOverallChanges() throws OXException {
-			ITipMailGenerator generator = generatorFactory.create(original, mostRecent,
-					session, -1);
+			ITipMailGenerator generator = generatorFactory.create(original, mostRecent, session, -1);
 			if (moreThanOneUserActed()) {
 				generator.noActor();
 			}
