@@ -1210,7 +1210,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
                 if (isEmpty(newName)) {
                     throw MailExceptionCode.INVALID_FOLDER_NAME_EMPTY.create();
                 } else if (newName.indexOf(separator) != -1) {
-                    throw MailExceptionCode.INVALID_FOLDER_NAME.create(String.valueOf(separator));
+                    throw MailExceptionCode.INVALID_FOLDER_NAME2.create(newName);
                 } else if (newName.length() > MAX_MAILBOX_NAME) {
                     throw MailExceptionCode.INVALID_FOLDER_NAME_TOO_LONG.create(Integer.valueOf(MAX_MAILBOX_NAME));
                 }
