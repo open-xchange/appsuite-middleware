@@ -117,7 +117,17 @@ public final class Mp3CoverExtractor implements CoverExtractor {
     @Override
     public IFileHolder extractCover(final IFileHolder file) throws OXException {
         final ManagedFileManagement fileManagement = ServerServiceRegistry.getInstance().getService(ManagedFileManagement.class);
-        final ManagedFile managedFile = fileManagement.createManagedFile(file.getStream());
+        String optExtension = null;
+        {
+            String name = file.getName();
+            if (null != name) {
+                final int pos = name.indexOf('.');
+                if (pos > 0) {
+                    optExtension = name.substring(pos);
+                }
+            }
+        }
+        final ManagedFile managedFile = fileManagement.createManagedFile(file.getStream(), optExtension);
         try {
             final File tmpFile = managedFile.getFile();
             // Check for MP3
@@ -210,6 +220,8 @@ public final class Mp3CoverExtractor implements CoverExtractor {
         } catch (final InvalidAudioFrameException e) {
             throw AjaxExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         } catch (final RuntimeException e) {
+            throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+        } catch (final NoClassDefFoundError e) {
             throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         } finally {
             managedFile.delete();
