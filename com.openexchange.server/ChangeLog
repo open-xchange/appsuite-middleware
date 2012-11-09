@@ -19,6 +19,7 @@
  - Fix for bug 23585: Refer to full-size picture
  - Fix for bug 23332: Changed default value for property 'com.openexchange.push.imapidle.debug'
  - Fix for bug 23532: Use unified error message for invalid folder name
+ - Fix for bug 23200: Fixed IMAP connection counter
 
 * 2012-11-09 - tobias.friedrich@open-xchange.com
 
