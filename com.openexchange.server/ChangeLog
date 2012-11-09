@@ -1,3 +1,11 @@
+* 2012-11-09 - martin.herfurth@open-xchange.com
+
+ - Fix for bug 23580: Fixed reply mail on multiple accept/decline/tentative.
+
+* 2012-11-09 - choeger@open-xchange.com
+
+ - Fix for bug 23463: [L3] linkedin contacts subscription does not work using recently generated linkedin api keys
+ 
 * 2012-11-09 - jan.bauerdick@open-xchange.com
 
  - Drop map configuration in sessionstorage_hazelcast.properties
@@ -8,6 +16,11 @@
  - Fix for bug 23685: More error details
  - Fix for bug 23686: Backward compatibility to previous API usage
  - Fix for bug 23659: Fixed HTML display
+ - Fix for bug 23585: Refer to full-size picture
+ - Fix for bug 23332: Changed default value for property 'com.openexchange.push.imapidle.debug'
+ - Fix for bug 23532: Use unified error message for invalid folder name
+ - Fix for bug 23200: Fixed IMAP connection counter
+ - Fix for bug 23503: Showing proper error message
 
 * 2012-11-09 - tobias.friedrich@open-xchange.com
 
