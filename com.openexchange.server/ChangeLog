@@ -1,3 +1,7 @@
+* 2012-11-09 - thorben.betten@open-xchange.com
+
+ - Fix for bug 23681: Showing proper error information on failed upload due to exceeded quota
+
 * 2012-11-09 - tobias.friedrich@open-xchange.com
 
  - Fix for bug 23676: Treat 'image/pjpeg' as JPEG, 'image/x-png' as PNG
