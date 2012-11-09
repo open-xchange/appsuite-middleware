@@ -61,11 +61,20 @@ import com.openexchange.caldav.servlet.CaldavPerformer;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.data.conversion.ical.ICalEmitter;
 import com.openexchange.data.conversion.ical.ICalParser;
+import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.FolderService;
 import com.openexchange.freebusy.service.FreeBusyService;
 import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
 import com.openexchange.groupware.calendar.CalendarCollectionService;
+import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.ldap.User;
+import com.openexchange.groupware.settings.IValueHandler;
+import com.openexchange.groupware.settings.PreferencesItemService;
+import com.openexchange.groupware.settings.ReadOnlyValue;
+import com.openexchange.groupware.settings.Setting;
+import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.session.Session;
 import com.openexchange.tools.session.SessionHolder;
 import com.openexchange.user.UserService;
 import com.openexchange.webdav.DevNullServlet;
@@ -87,6 +96,8 @@ public class CaldavActivator extends HousekeepingActivator {
     private static final String NULL_PATH = "/servlet/dav/dev/null";
 
     private static final Log LOG = com.openexchange.log.Log.loggerFor(CaldavActivator.class);
+
+	protected static final String[] PREFERENCE_PATH = new String[]{"modules", "caldav", "module"};
     
     private volatile OSGiPropertyMixin mixin;
     
@@ -126,6 +137,32 @@ public class CaldavActivator extends HousekeepingActivator {
             registerService(PropertyMixin.class, new DefaultAlarmVeventDatetime());
 
             registerService(PathRegistration.class, new PathRegistration("caldav"));
+            
+            registerService(PreferencesItemService.class, new PreferencesItemService() {
+				
+				@Override
+				public IValueHandler getSharedValue() {
+					return new ReadOnlyValue() {
+						
+						@Override
+						public boolean isAvailable(UserConfiguration userConfig) {
+							return true;
+						}
+						
+						@Override
+						public void getValue(Session session, Context ctx, User user,
+								UserConfiguration userConfig, Setting setting) throws OXException {
+							setting.setSingleValue(Boolean.FALSE);
+						}
+					};
+				}
+				
+				@Override
+				public String[] getPath() {
+					return PREFERENCE_PATH;
+				}
+			});
+            
             openTrackers();
         } catch (final Throwable t) {
             LOG.error(t.getMessage(), t);
