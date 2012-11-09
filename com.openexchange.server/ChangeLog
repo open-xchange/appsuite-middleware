@@ -18,6 +18,7 @@
  - Fix for bug 23659: Fixed HTML display
  - Fix for bug 23585: Refer to full-size picture
  - Fix for bug 23332: Changed default value for property 'com.openexchange.push.imapidle.debug'
+ - Fix for bug 23532: Use unified error message for invalid folder name
 
 * 2012-11-09 - tobias.friedrich@open-xchange.com
 
