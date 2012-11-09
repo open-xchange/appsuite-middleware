@@ -23,7 +23,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: errors.cs_CZ.po\n"
 "Report-Msgid-Bugs-To: \n"
-"PO-Revision-Date: 2012-10-03 18:10+0200\n"
+"PO-Revision-Date: 2012-11-07 17:39+0100\n"
 "Last-Translator: Robert Krátký <kratky@rob.cz>\n"
 "Language-Team: Czech <cs@bureau-cornavin.com>\n"
 "MIME-Version: 1.0\n"
@@ -2516,8 +2516,8 @@ msgstr ""
 "kontextu %3$s"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/tools/iterator/SearchIteratorExceptionMessages.java:63
-msgid "A DBPool error occurred: %1$s"
-msgstr "Došlo k chybě DBPool: %1$s"
+msgid "A DBPool error occurred: 1$%s"
+msgstr "Došlo k chybě DBPool: 1$%s"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/tools/iterator/SearchIteratorExceptionMessages.java:65
 msgid "Operation not allowed on a closed SearchIterator"
@@ -3609,6 +3609,10 @@ msgstr "Adresa %1$s není na seznamu povolených pro OAuth API %2$s"
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:139
 msgid "The request sent was missing its body"
 msgstr "Odeslanému požadavku chybělo tělo"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:141
+msgid "The account is invalid, please recreate it."
+msgstr "Účet není platný, vytvořte ho, prosím, znovu."
 
 #. *
 #. * Cannot change password for any reason.
@@ -10191,8 +10195,8 @@ msgid ""
 "Effective permission of folder %1$s could not be determined for user %2$s in "
 "context %3$s"
 msgstr ""
-"Platné oprávnění uživatele %2$s pro složku %1$s se nepodařilo v kontextu %3$s "
-"zjistit"
+"Platné oprávnění uživatele %2$s pro složku %1$s se nepodařilo v kontextu %3"
+"$s zjistit"
 
 #. *
 #. * A DBPool error occurred in context %1$s
