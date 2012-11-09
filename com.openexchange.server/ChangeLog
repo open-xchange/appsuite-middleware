@@ -1,3 +1,7 @@
+* 2012-11-09 - francisco.laguna@open-xchange.com
+
+ - Fix for bug 23641: PreferencesItemService to set the module flag to false
+
 * 2012-11-07 - tobias.friedrich@open-xchange.com
 
  - Fix for bug 23181: Allow update of existing foreign appointment under special circumstances
