@@ -27,7 +27,7 @@ msgstr ""
 "Project-Id-Version: errors.nl_NL\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2008-08-04 14:10+0100\n"
-"PO-Revision-Date: 2012-10-03 21:24+0200\n"
+"PO-Revision-Date: 2012-11-07 23:35+0100\n"
 "Last-Translator: Ivar Snaaijer <Ivar@bureau-cornavin.com >\n"
 "Language-Team: Dutch <>\n"
 "MIME-Version: 1.0\n"
@@ -157,8 +157,7 @@ msgid ""
 "'Safe put' into cache failed. An object bound to given key already exists."
 msgstr ""
 "'Veilig schrijven' naar buffer is mislukt. Een object is reeds gekoppeld aan "
-"de "
-"gegeven sleutel."
+"de gegeven sleutel."
 
 #. Remove on cache failed
 #. *
@@ -2554,8 +2553,8 @@ msgstr ""
 "overschreden"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/tools/iterator/SearchIteratorExceptionMessages.java:63
-msgid "A DBPool error occurred: %1$s"
-msgstr "Er is een DBpool-fout opgetreden: %1$s"
+msgid "A DBPool error occurred: 1$%s"
+msgstr "Er is een DBpool-fout opgetreden: 1$%s"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/tools/iterator/SearchIteratorExceptionMessages.java:65
 msgid "Operation not allowed on a closed SearchIterator"
@@ -3667,6 +3666,10 @@ msgstr ""
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:139
 msgid "The request sent was missing its body"
 msgstr "De aanvraag is verstuurd zonder berichttekst"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:141
+msgid "The account is invalid, please recreate it."
+msgstr "Het account is ongeldig, maak het opnieuw aan."
 
 #. *
 #. * Cannot change password for any reason.

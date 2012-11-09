@@ -24,15 +24,15 @@ msgstr ""
 "Project-Id-Version: errors\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2012-10-03 10:34+0200\n"
-"Last-Translator: Monica Raggioli <monica@bureau-cornavin.com>\n"
+"PO-Revision-Date: 2012-11-07 17:37+0100\n"
+"Last-Translator: Vincenzo Reale <vincenzo@bureau-cornavin.com>\n"
 "Language-Team: Italian <it@bureau-cornavin.com>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Language: it\n"
 "#-#-#-#-#  server.it_IT.po (server)  #-#-#-#-#\n"
-"X-Generator: Lokalize 1.4\n"
+"X-Generator: Lokalize 1.5\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 "#-#-#-#-#  errors.it_IT.po (errors)  #-#-#-#-#\n"
 "X-Generator: Lokalize 1.4\n"
@@ -2567,7 +2567,7 @@ msgstr ""
 "contesto %3$s"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/tools/iterator/SearchIteratorExceptionMessages.java:63
-msgid "A DBPool error occurred: %1$s"
+msgid "A DBPool error occurred: 1$%s"
 msgstr "Si è verificato un errore DBPool: %1$s"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/tools/iterator/SearchIteratorExceptionMessages.java:65
@@ -3679,6 +3679,10 @@ msgstr "L'indirizzo %1$s non è tra quelli consentiti per le API OAuth di %2$s"
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:139
 msgid "The request sent was missing its body"
 msgstr "La richiesta inviata non conteneva il corpo"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:141
+msgid "The account is invalid, please recreate it."
+msgstr "L'account non è valido, ricrealo."
 
 #. *
 #. * Cannot change password for any reason.
@@ -8575,9 +8579,7 @@ msgstr "Si è verificato un errore di messaggistica."
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:87
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:415
 msgid "Invalid permission values: fp=%1$s orp=%2$s owp=%3$s odp=%4$s"
-msgstr ""
-"Permessi non validi: fp=%1$s orp=%2$s owp=%3$s odp=%"
-"4$s"
+msgstr "Permessi non validi: fp=%1$s orp=%2$s owp=%3$s odp=%4$s"
 
 #. *
 #. * Missing parameter in user's mail config: %1$s
@@ -9259,7 +9261,7 @@ msgid ""
 "back in with your most current password. (server=%1$s | user=%2$s)"
 msgstr ""
 "Si è verificato un problema in fase di autenticazione della password del "
-"servizio diposta. Potrebbe essere dovuto a un recente cambio di password. "
+"servizio di posta. Potrebbe essere dovuto a un recente cambio di password. "
 "Per continuare disconnettiti subito e riconnettiti con la nuova password."
 "(server=%1$s | utente=%2$s)"
 
@@ -10448,8 +10450,8 @@ msgid ""
 "Effective permission of folder %1$s could not be determined for user %2$s in "
 "context %3$s"
 msgstr ""
-"Impossibile determinare i permessi effettivi per la "
-"cartella %1$s per l'utente %2$s nel contesto %3$s"
+"Impossibile determinare i permessi effettivi per la cartella %1$s per "
+"l'utente %2$s nel contesto %3$s"
 
 #. *
 #. * A DBPool error occurred in context %1$s
@@ -11398,7 +11400,7 @@ msgid ""
 "Can not reach Apache Solr Core Store. URI %1$s does not lead to an existing "
 "directory."
 msgstr ""
-"Impossibile raggiungere  l'Apache Solr Core Store. L'URI %1$s non si "
+"Impossibile raggiungere l'Apache Solr Core Store. L'URI %1$s non si "
 "riferisce a una cartella esistente."
 
 #. The affected Apache Solr Core %1$s is not started up yet. Please try again later.
