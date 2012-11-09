@@ -3,6 +3,7 @@
  - Fix for bug 23681: Showing proper error information on failed upload due to exceeded quota
  - Fix for bug 23685: More error details
  - Fix for bug 23686: Backward compatibility to previous API usage
+ - Fix for bug 23659: Fixed HTML display
 
 * 2012-11-09 - tobias.friedrich@open-xchange.com
 
