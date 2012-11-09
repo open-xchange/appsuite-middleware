@@ -395,4 +395,16 @@ public class SimContactService implements ContactService {
         return null;
     }
 
+    @Override
+    public SearchIterator<Contact> getAllContacts(Session session, List<String> folderIDs, ContactField[] fields, SortOptions sortOptions) throws OXException {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public SearchIterator<Contact> getAllContacts(Session session, ContactField[] fields, SortOptions sortOptions) throws OXException {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
 }
