@@ -343,11 +343,6 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
 
     @Override
     public void appointmentWaiting(final Appointment appointmentObj, final Session session) {
-        sendNotification(null, appointmentObj, session, new AppointmentState(
-                new AppointmentActionReplacement(AppointmentActionReplacement.ACTION_NONE),
-                new ConfirmationActionReplacement(ConfirmationActionReplacement.ACTION_NONE_ACCEPTED),
-                Notifications.APPOINTMENT_CONFIRMATION_MAIL,
-                State.Type.NONE_ACCEPTED), false, false, false);
     }
 
     @Override

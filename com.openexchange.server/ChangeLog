@@ -1,6 +1,7 @@
 * 2012-11-09 - martin.herfurth@open-xchange.com
 
  - Fix for bug 23580: Fixed reply mail on multiple accept/decline/tentative.
+ - Fix for bug 23263: Fixed side effect of another bug fix.
 
 * 2012-11-09 - choeger@open-xchange.com
 
