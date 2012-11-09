@@ -12,6 +12,7 @@
  - Fix for bug 23685: More error details
  - Fix for bug 23686: Backward compatibility to previous API usage
  - Fix for bug 23659: Fixed HTML display
+ - Fix for bug 23585: Refer to full-size picture
 
 * 2012-11-09 - tobias.friedrich@open-xchange.com
 
