@@ -6,6 +6,7 @@
 
  - Fix for bug 23661: Introduced in-application sort
  - Fix for bug 23533: Changed that error code's category thus a more meaningful message is shown
+ - Fix for bug 23666: Use default driver if missing
 
 * 2012-11-07 - marcus.klein@open-xchange.com
 

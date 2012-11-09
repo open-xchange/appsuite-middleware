@@ -82,7 +82,6 @@ import java.util.concurrent.Future;
 import javax.mail.internet.IDNA;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import org.osgi.framework.ServiceException;
 import com.openexchange.admin.daemons.ClientAdminThread;
 import com.openexchange.admin.exceptions.DatabaseContextMappingException;
@@ -121,6 +120,7 @@ import com.openexchange.groupware.impl.IDGenerator;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.i18n.LocaleTools;
+import com.openexchange.log.LogFactory;
 import com.openexchange.threadpool.CompletionFuture;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.threadpool.ThreadPools;
@@ -1331,6 +1331,10 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
             }
             schemaName = db.getName() + '_' + schemaUnique;
             db.setScheme(schemaName);
+            if (null == db.getDriver()) {
+                // Use default driver if missing
+                db.setDriver("com.mysql.jdbc.Driver");
+            }
             oxu.createDatabase(db);
         } else {
             db.setScheme(schemaName);

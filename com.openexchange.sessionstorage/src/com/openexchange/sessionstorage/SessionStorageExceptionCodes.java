@@ -56,7 +56,7 @@ import com.openexchange.exception.OXExceptionFactory;
 
 /**
  * {@link SessionStorageExceptionCodes} - Error codes for <b><code>com.openexchange.sessionstorage</code></b>.
- *
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public enum SessionStorageExceptionCodes implements OXExceptionCode {
@@ -69,6 +69,42 @@ public enum SessionStorageExceptionCodes implements OXExceptionCode {
      * No session found for identifier: %1$s
      */
     NO_SESSION_FOUND(SessionStorageExceptionMessages.NO_SESSION_FOUND, 2, CATEGORY_USER_INPUT),
+    /**
+     * Saving session with session identifier %1$s failed.
+     */
+    SAVE_FAILED(SessionStorageExceptionMessages.SAVE_FAILED_MSG, 3, Category.CATEGORY_ERROR),
+    /**
+     * Lookup for session with session identifier %1$s failed.
+     */
+    LOOKUP_FAILED(SessionStorageExceptionMessages.LOOKUP_FAILED_MSG, 4, Category.CATEGORY_ERROR),
+    /**
+     * Removing session with session identifier %1$s failed.
+     */
+    REMOVE_FAILED(SessionStorageExceptionMessages.REMOVE_FAILED_MSG, 5, Category.CATEGORY_ERROR),
+    /**
+     * Authentication identifier duplicate found. Existing session login: %1$s. Current denied login request: %2$s.
+     */
+    DUPLICATE_AUTHID(SessionStorageExceptionMessages.DUPLICATE_AUTHID_MSG, 6, Category.CATEGORY_ERROR),
+    /**
+     * Operation %1$s not supported.
+     */
+    UNSUPPORTED_OPERATION(SessionStorageExceptionMessages.UNSUPPORTED_OPERATION_MSG, 7, Category.CATEGORY_ERROR),
+    /**
+     * Lookup for session with alternative identifier %1$s failed.
+     */
+    ALTID_NOT_FOUND(SessionStorageExceptionMessages.ALTID_NOT_FOUND_MSG, 8, Category.CATEGORY_ERROR),
+    /**
+     * No sessions found for user %1$s in context %2$s.
+     */
+    NO_USERSESSIONS(SessionStorageExceptionMessages.NO_USERSESSIONS_MSG, 9, Category.CATEGORY_ERROR),
+    /**
+     * No sessions found for context %1$s.
+     */
+    NO_CONTEXTESSIONS(SessionStorageExceptionMessages.NO_CONTEXTSESSIONS_MSG, 10, Category.CATEGORY_ERROR),
+    /**
+     * No sessions found by random token %1$s,
+     */
+    RANDOM_NOT_FOUND(SessionStorageExceptionMessages.RANDOM_NOT_FOUND_MSG, 11, Category.CATEGORY_ERROR),
 
     ;
 

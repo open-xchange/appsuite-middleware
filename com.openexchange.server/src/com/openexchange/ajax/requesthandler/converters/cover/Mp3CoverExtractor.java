@@ -97,11 +97,10 @@ public final class Mp3CoverExtractor implements CoverExtractor {
     @Override
     public boolean handlesFile(final IFileHolder file) {
         final String fileMIMEType = file.getContentType();
-        if (null != fileMIMEType && isMp3(fileMIMEType.toLowerCase(Locale.ENGLISH))) {
+        if (null != fileMIMEType && isSupported(fileMIMEType.toLowerCase(Locale.ENGLISH))) {
             return true;
         }
-        final String fileName = file.getName();
-        if (null != fileName && fileName.toLowerCase(Locale.ENGLISH).endsWith(".mp3")) {
+        if (isSupportedFileExt(file.getName())) {
             return true;
         }
         return false;
@@ -112,6 +111,9 @@ public final class Mp3CoverExtractor implements CoverExtractor {
         final ManagedFileManagement fileManagement = ServerServiceRegistry.getInstance().getService(ManagedFileManagement.class);
         final ManagedFile managedFile = fileManagement.createManagedFile(file.getStream());
         try {
+            
+            // http://sharecontent.googlecode.com/svn/trunk/jaudiotaggerv1.0.9/srctest/org/jaudiotagger/tag/mp4/M4aReadTagTest.java
+            
             final File tmpFile = managedFile.getFile();
             // Create MP3 file
             final MP3File mp3 = new MP3File(tmpFile, MP3File.LOAD_IDV2TAG, true);
@@ -167,6 +169,26 @@ public final class Mp3CoverExtractor implements CoverExtractor {
         }
     }
 
+    private static final Set<String> EXTENSIONS = Collections.unmodifiableSet(new HashSet<String>(Arrays.asList(".mp3", ".m4a", ".flac", ".wma", ".ogg")));
+
+    /**
+     * Tests for a supported file extension.
+     * 
+     * @param fileName The file name
+     * @return <code>true</code> if supported; otherwise <code>false</code>
+     */
+    public static boolean isSupportedFileExt(final String fileName) {
+        if (null != fileName) {
+            final String lowerCase = fileName.toLowerCase(Locale.ENGLISH);
+            for (final String extension : EXTENSIONS) {
+                if (lowerCase.endsWith(extension)) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
     private static final Set<String> MIME_TYPES = Collections.unmodifiableSet(new HashSet<String>(Arrays.asList(
         "audio/mpeg",
         "audio/x-mpeg",
@@ -176,9 +198,23 @@ public final class Mp3CoverExtractor implements CoverExtractor {
         "audio/x-mpeg3",
         "audio/mpg",
         "audio/x-mpg",
-        "audio/x-mpegaudio")));
+        "audio/x-mpegaudio",
+        "audio/mp4",
+        "audio/mp4a-latm",
+        "audio/aac",
+        "audio/aacp",
+        "audio/x-flac",
+        "audio/flac",
+        "audio/x-ms-wma",
+        "application/x-ogg")));
 
-    private static boolean isMp3(final String mimeType) {
+    /**
+     * Tests for a supported MIME type.
+     * 
+     * @param mimeType The MIME type
+     * @return <code>true</code> if supported; otherwise <code>false</code>
+     */
+    public static boolean isSupported(final String mimeType) {
         if (null == mimeType) {
             return false;
         }
