@@ -365,13 +365,9 @@ public class CassandraEAVStorageImpl implements EAVStorage {
 	 */
 	@Override
 	public void setAttributes(UUID u, Map<String, Object> attributes) throws OXException {
-	    int bytesInserted = 0;  
-	    int batchCount = 0;
-	    
-	    // with the thrift frameSize enabled, the set operation seems like a knapsack-0-1 problem
-	    
 	    Mutator<UUID> m = HFactory.createMutator(keyspace, us);
 		UUID xtPropsKey = u;
+		Map<Composite, ByteBuffer> files = new HashMap<Composite, ByteBuffer>();
 		
 		Iterator<String> it = attributes.keySet().iterator();
 		while (it.hasNext()) {
@@ -379,277 +375,84 @@ public class CassandraEAVStorageImpl implements EAVStorage {
 			Object o = attributes.get(columnName);
 			Composite compoColumnName = new Composite(columnName);
 			
-			 /*
-			  * if 'o'.size > frameSize, then drop
-			  * else if 'o'.size > (frameSize - bytesInserted), the put to future
-			  * else addInsertion
-			  */ 
-			 
-			if (countBytes(o) > frameSize) {
-			    System.out.println("File size exceeded for '" + compoColumnName.get(0) + "' . Dropping");
+			if (o == null) {
+				m.addDeletion(xtPropsKey, CF_XT_PROPS, compoColumnName, cs);
 			} else {
-			
-    			if (o == null) {
-    				m.addDeletion(xtPropsKey, CF_XT_PROPS, compoColumnName, cs);
-    			} else {
-    				
-    				if (JSONCoercion.needsJSONCoercion(o)) {
-    					try {
-    						Object j = JSONCoercion.coerceToJSON(o);
-    						String json = null;
-    						
-    						if (j instanceof JSONObject) {
-                                json = ((JSONObject)JSONCoercion.coerceToJSON(o)).toString();
-                            } else if (j instanceof JSONArray) {
-                                json = ((JSONArray)JSONCoercion.coerceToJSON(o)).toString();
-                            } else {
-                                throw new OXException(666, "Unsupported attribute type. Data: " + j);
-                            }
-    						
-    						if ((json.length() <= (frameSize - bytesInserted))) {
-    						    m.addInsertion(xtPropsKey, CF_XT_PROPS, HFactory.createColumn(compoColumnName, json));
-    						    bytesInserted += json.length();
-    						}  else {
-                                try {
-                                    m.execute();
-                                    bytesInserted = 0;
-                                    batchCount++;
-                                } catch (HectorException h) {
-                                    //h.printStackTrace();
-                                }
-                            }
-    					
-    					} catch (JSONException e) {
-    						e.printStackTrace();
-    					}
-    				} else {
-    					if (o instanceof String) {
-    					    String v = (String)o;
-    					    if (v.length()  <= (frameSize - bytesInserted)) { 
-    					        m.addInsertion(xtPropsKey, CF_XT_PROPS, HFactory.createColumn(compoColumnName, (String)o));
-    					        bytesInserted += v.length();
-    					    } else {
-                                try {
-                                    m.execute();
-                                    bytesInserted = 0;
-                                    batchCount++;
-                                } catch (HectorException h) {
-                                    //h.printStackTrace();
-                                }
-                            }
-    					} else if (o instanceof Integer) {
-    					    String v = String.valueOf(o);
-                            if (v.length()  <= (frameSize - bytesInserted)) {
-                                m.addInsertion(xtPropsKey, CF_XT_PROPS, HFactory.createColumn(compoColumnName, String.valueOf(o)));
-                                bytesInserted += v.length();
-                            } else {
-                                try {
-                                    m.execute();
-                                    bytesInserted = 0;
-                                    batchCount++;
-                                } catch (HectorException h) {
-                                    //h.printStackTrace();
-                                }
-                            }
-    
-    					} else if (o instanceof Long) {
-    					    String v = String.valueOf(o);
-                            if (v.length()  <= (frameSize - bytesInserted)) {
-                                m.addInsertion(xtPropsKey, CF_XT_PROPS, HFactory.createColumn(compoColumnName, String.valueOf(o)));
-                                bytesInserted += v.length();
-                            } else {
-                                try {
-                                    m.execute();
-                                    bytesInserted = 0;
-                                    batchCount++;
-                                } catch (HectorException h) {
-                                    //h.printStackTrace();
-                                }
-                            }
-    
-                        } else if (o instanceof Double) {
-                            String v = String.valueOf(o);
-                            if (v.length()  <= (frameSize - bytesInserted)) {
-                                m.addInsertion(xtPropsKey, CF_XT_PROPS, HFactory.createColumn(compoColumnName, String.valueOf(o)));
-                                bytesInserted += v.length();
-                            } else {
-                                try {
-                                    m.execute();
-                                    bytesInserted = 0;
-                                    batchCount++;
-                                } catch (HectorException h) {
-                                    //h.printStackTrace();
-                                }
-                            }
-    
-                        } else if (o instanceof Boolean) {
-                            String v = String.valueOf(o);
-                            if (v.length()  <= (frameSize - bytesInserted)) {
-                                m.addInsertion(xtPropsKey, CF_XT_PROPS, HFactory.createColumn(compoColumnName, String.valueOf(o)));
-                                bytesInserted += v.length();
-                            } else {
-                                try {
-                                    m.execute();
-                                    bytesInserted = 0;
-                                    batchCount++;
-                                } catch (HectorException h) {
-                                    //h.printStackTrace();
-                                }
-                            }
-    
-                        } else if (o instanceof Float) {
-                            String v = String.valueOf(o);
-                            if (v.length()  <= (frameSize - bytesInserted)) {
-                                m.addInsertion(xtPropsKey, CF_XT_PROPS, HFactory.createColumn(compoColumnName, String.valueOf(o)));
-                                bytesInserted += v.length();
-                            } else {
-                                try {
-                                    m.execute();
-                                    bytesInserted = 0;
-                                    batchCount++;
-                                } catch (HectorException h) {
-                                    //h.printStackTrace();
-                                }
-                            }
-    
-                        } else if (o instanceof Date) {
-                            String v = String.valueOf(o);
-                            if (v.length()  <= (frameSize - bytesInserted)) {
-                                m.addInsertion(xtPropsKey, CF_XT_PROPS, HFactory.createColumn(compoColumnName, String.valueOf(((Date) o).getTime())));
-                                bytesInserted += v.length();
-                            } else {
-                                try {
-                                    m.execute();
-                                    bytesInserted = 0;
-                                    batchCount++;
-                                } catch (HectorException h) {
-                                    //h.printStackTrace();
-                                }
-                            }
-    
-                        /*
-                         * Support for small binary objects (not BLOBs). We ought to have a limitation 
-                         * at 15MB per file per mutation due to Thrift and Hector limitations 
-                         * as well as due to Cassandra's column value restrictions.
-                         * - https://issues.apache.org/jira/browse/CASSANDRA-265
-                         * - http://comments.gmane.org/gmane.comp.db.hector.user/2939
-                         * A workaround would be to split a large file in chunks and store each chunk in
-                         * a separate column.
-                         * 
-                         * We will proceed according to customer's wishes.
-                         */
-                         
-                        } else if (o instanceof ByteBuffer) {
-                            // put in a future list.
-                            byte[] by = ((ByteBuffer)o).array();
-                            if (by.length <= (frameSize - bytesInserted)) {
-                                m.addInsertion(xtPropsKey, CF_XT_PROPS, HFactory.createColumn(compoColumnName, ((ByteBuffer)o).array()));
-                                bytesInserted += by.length;
-                            } else {
-                                System.out.println(compoColumnName.get(0) + " goes future");
-                                try {
-                                    m.execute();
-                                    bytesInserted = 0;
-                                    batchCount++;
-                                } catch (HectorException h) {
-                                    //h.printStackTrace();
-                                }
-                            }
+				
+				if (JSONCoercion.needsJSONCoercion(o)) {
+					try {
+						Object j = JSONCoercion.coerceToJSON(o);
+						String json = null;
+						
+						if (j instanceof JSONObject) {
+                            json = ((JSONObject)JSONCoercion.coerceToJSON(o)).toString();
+                        } else if (j instanceof JSONArray) {
+                            json = ((JSONArray)JSONCoercion.coerceToJSON(o)).toString();
                         } else {
-                            throw new OXException(666, "Unsupported attribute type. Data: " + o);
+                            throw new OXException(666, "Unsupported attribute type. Data: " + j);
                         }
-    				}
-    			}
-			}
-			
-			if (bytesInserted >= frameSize) {
-			    try {
-		            m.execute();
-		            bytesInserted = 0;
-		            batchCount++;
-		        } catch (HectorException h) {
-		            //h.printStackTrace();
-		        }
+						
+						m.addInsertion(xtPropsKey, CF_XT_PROPS, HFactory.createColumn(compoColumnName, json));
+					
+					} catch (JSONException e) {
+						e.printStackTrace();
+					}
+				} else {
+					if (o instanceof String) {
+					    m.addInsertion(xtPropsKey, CF_XT_PROPS, HFactory.createColumn(compoColumnName, (String)o));
+					} else if (o instanceof Integer) {
+					    m.addInsertion(xtPropsKey, CF_XT_PROPS, HFactory.createColumn(compoColumnName, String.valueOf(o)));
+					} else if (o instanceof Long) {
+					    m.addInsertion(xtPropsKey, CF_XT_PROPS, HFactory.createColumn(compoColumnName, String.valueOf(o)));
+                    } else if (o instanceof Double) {
+                        m.addInsertion(xtPropsKey, CF_XT_PROPS, HFactory.createColumn(compoColumnName, String.valueOf(o)));
+                    } else if (o instanceof Boolean) {
+                        m.addInsertion(xtPropsKey, CF_XT_PROPS, HFactory.createColumn(compoColumnName, String.valueOf(o)));
+                    } else if (o instanceof Float) {
+                        m.addInsertion(xtPropsKey, CF_XT_PROPS, HFactory.createColumn(compoColumnName, String.valueOf(o)));
+                    } else if (o instanceof Date) {
+                        m.addInsertion(xtPropsKey, CF_XT_PROPS, HFactory.createColumn(compoColumnName, String.valueOf(((Date) o).getTime())));
+                    /*
+                     * Support for small binary objects (and not BLOBs). We ought to have a limitation 
+                     * at 15MB per file per mutation due to Thrift limitations 
+                     * ('thrift_framed_transport_size_in_mb' defaults to 15mb)
+                     * as well as due to Cassandra's column value restrictions.
+                     * Cassandra was not designed to store that kind of information.
+                     * 
+                     * - https://issues.apache.org/jira/browse/CASSANDRA-265
+                     * - http://comments.gmane.org/gmane.comp.db.hector.user/2939
+                     * - http://zanailhan.blogspot.de/2011/09/can-i-store-blobs-in-cassandra.html
+                     * 
+                     * However, a workaround would be to split a large file in chunks and store each chunk in
+                     * a separate column. (tradeoff: file has to be recreated, which increases the response time)
+                     * 
+                     * We will proceed according to customer's wishes.
+                     */
+                     
+                    } else if (o instanceof ByteBuffer) {
+                        byte[] by = ((ByteBuffer)o).array();
+                        if (by.length > frameSize) {
+                            throw new OXException(666, "File size exceeded for '" + compoColumnName.get(0) + "' . Dropping");
+                        }
+                        files.put(compoColumnName, ((ByteBuffer)o));
+                    } else {
+                        throw new OXException(666, "Unsupported attribute type. Data: " + o);
+                    }
+				}
 			}
 		}
-		
-		System.out.println("Batch execution completed. Batch count: " + batchCount);
 		
 		try {
 			m.execute();
 		} catch (HectorException h) {
-			//h.printStackTrace();
+			h.printStackTrace();
+		}
+		
+		Iterator<Composite> iter = files.keySet().iterator();
+		while(iter.hasNext()) {
+		    Composite c = iter.next();
+		    ByteBuffer bb = files.get(c);
+		    m.insert(xtPropsKey, CF_XT_PROPS, HFactory.createColumn(c, bb.array()));
 		}
 	}
-	
-	/*@Override
-    public void setAttributes(UUID u, Map<String, Object> attributes) throws OXException {
-	    Mutator<UUID> m = HFactory.createMutator(keyspace, us);
-        UUID xtPropsKey = u;
-        
-        Iterator<String> it = attributes.keySet().iterator();
-        while (it.hasNext()) {
-            String columnName = it.next();
-            Composite compoColumnName = new Composite(columnName);
-            Object o = attributes.get(columnName);
-            
-            try {
-                if (o instanceof ByteBuffer)
-                    m.addInsertion(xtPropsKey, CF_XT_PROPS, HFactory.createColumn(compoColumnName, ((ByteBuffer)o).array()));
-                else
-                    m.addInsertion(xtPropsKey, CF_XT_PROPS, HFactory.createColumn(compoColumnName, serialize(o)));
-                    
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-        
-        try {
-            m.execute();
-        } catch (HectorException h) {
-            //h.printStackTrace();
-        }
-	}*/
-	
-	/*private void verifyFrameSize(int fs, int bi) {
-	    if (fs > frameSize) {
-	        System.out.println("File size exceeded. Dropping.");
-	    } else if (fs <= (frameSize - bi)) {
-	        
-	    }
-	}*/
-	
-	private int countBytes(Object obj) {
-	    int count;
-	    if (obj instanceof ByteBuffer) {
-	        byte[] by = ((ByteBuffer)obj).array();
-	        count = by.length;
-	    } else {
-    	    ByteArrayOutputStream b = new ByteArrayOutputStream();
-            ObjectOutputStream o;
-            try {
-                o = new ObjectOutputStream(b);
-                o.writeObject(obj);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-            
-            count =  b.toByteArray().length;
-	    }
-	    
-	    return count;
-	}
-	
-	private byte[] serialize(Object obj) throws IOException {
-        ByteArrayOutputStream b = new ByteArrayOutputStream();
-        ObjectOutputStream o = new ObjectOutputStream(b);
-        o.writeObject(obj);
-        return b.toByteArray();
-    }
-
-	private Object deserialize(byte[] bytes) throws IOException, ClassNotFoundException {
-        ByteArrayInputStream b = new ByteArrayInputStream(bytes);
-        ObjectInputStream o = new ObjectInputStream(b);
-        return o.readObject();
-    }
 }
