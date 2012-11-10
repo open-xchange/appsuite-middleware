@@ -2344,23 +2344,13 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
                     /*
                      * Send "keep-alive" package
                      */
-                    keepAlive();
+                    ajpProcessor.action(ActionCode.CLIENT_PING, null);
                 }
             } catch (final Exception e) {
                 if (DEBUG) {
                     LOG.error("AJP KEEP-ALIVE failed.", e);
                 }
             }
-        }
-
-        /**
-         * Performs AJP-style keep-alive poll to web server to avoid connection timeout.
-         */
-        private void keepAlive() {
-            /*
-             * Send "keep-alive" package depending on current request handler's state.
-             */
-            ajpProcessor.action(ActionCode.CLIENT_PING, null);
         }
 
     } // End of class
