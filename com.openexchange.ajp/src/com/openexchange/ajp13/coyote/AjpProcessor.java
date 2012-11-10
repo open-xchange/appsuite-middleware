@@ -151,6 +151,11 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
     protected final HttpServletResponseImpl response;
 
     /**
+     * The request input buffer.
+     */
+    private volatile SocketInputBuffer inputBuffer;
+
+    /**
      * The response output buffer.
      */
     private final SocketOutputBuffer outputBuffer;
@@ -259,11 +264,6 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
      * First read.
      */
     protected volatile boolean first = true;
-
-    /**
-     * First processed.
-     */
-    protected volatile boolean firstProcessed = false;
 
     /**
      * Replay read.
@@ -436,7 +436,9 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
          * Apply input/output
          */
         this.packetSize = packetSize;
-        request.setInputBuffer(new SocketInputBuffer());
+        final SocketInputBuffer inputBuffer = new SocketInputBuffer();
+        this.inputBuffer = inputBuffer;
+        request.setInputBuffer(inputBuffer);
         outputBuffer = new SocketOutputBuffer();
         response.setOutputBuffer(outputBuffer);
         /*
@@ -1088,11 +1090,23 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
                         output.flush();
                         lastWriteAccess = System.currentTimeMillis();
                         /*
-                         * Receive empty body chunk (that requires the soft lock to be acquired)
+                         * Receive probably empty body chunk
                          */
-                        receive();
+                        final ByteChunk byteChunk = new ByteChunk(8192);
+                        final int read = inputBuffer.doRead(byteChunk, request);
+                        if (read > 0) {
+                            // Received a non-empty data chunk...
+                            // Dump that chunk to ServletInputStream
+                            int len = byteChunk.getLength();
+                            if (len > read) {
+                                len = read;
+                            }
+                            final byte[] chunk = new byte[len];
+                            System.arraycopy(byteChunk.getBuffer(), byteChunk.getStart(), chunk, 0, len);
+                            request.dumpToBuffer(chunk);
+                        }
                         if (DEBUG) {
-                            LOG.debug("Performed keep-alive through an empty get-body-chunk package (and received that empty chunk).");
+                            LOG.debug("Performed keep-alive through an empty get-body-chunk package (and received requested chunk).");
                         }
                     }
                 } catch (final IOException e) {
@@ -1155,7 +1169,6 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
                 bodyBytes.setBytes(bc.getBytes(), bc.getStart(), length);
                 request.setContentLength(length);
                 first = false;
-                firstProcessed = true;
                 empty = false;
                 replay = true;
             }
@@ -2094,7 +2107,6 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
         first = false;
         bodyMessage.reset();
         readMessage(bodyMessage);
-        firstProcessed = true;
         // No data received.
         if (bodyMessage.getLen() == 0) {
             // just the header
@@ -2165,7 +2177,6 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
     public void recycle() {
         // Recycle Request object
         first = true;
-        firstProcessed = false;
         endOfStream = false;
         empty = true;
         replay = false;
@@ -2330,13 +2341,6 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
         public void run() {
             try {
                 if (ajpProcessor.isProcessing() && ((System.currentTimeMillis() - ajpProcessor.getLastWriteAccess()) > max)) {
-                    if (!ajpProcessor.firstProcessed && ajpProcessor.request.getContentLengthLong() > 0) {
-                        // Very first request data chunk not yet fully received
-                        final StringBuilder tmp = new StringBuilder("Very first request data chunk not yet received.");
-                        ajpProcessor.appendRequestInfo(tmp);
-                        LOG.warn(tmp.toString());
-                        return;
-                    }
                     /*
                      * Send "keep-alive" package
                      */
