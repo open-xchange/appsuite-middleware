@@ -350,6 +350,17 @@ public final class ByteChunk {
 
     }
 
+    /**
+     * Append bytes.
+     */
+    public void appendBytes(final byte src[], final int off, final int len) {
+        // will grow, up to limit
+        makeSpace(len);
+
+        System.arraycopy(src, off, buff, end, len);
+        end += len;
+    }
+
     // -------------------- Removing data from the buffer --------------------
 
     public int substract() throws IOException {

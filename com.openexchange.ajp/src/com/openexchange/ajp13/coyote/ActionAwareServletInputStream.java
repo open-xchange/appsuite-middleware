@@ -97,6 +97,15 @@ public final class ActionAwareServletInputStream extends ServletInputStream {
         byteChunk.setBytes(bytes, 0, bytes.length);
     }
 
+    /**
+     * Append specified bytes to buffer.
+     *
+     * @param bytes The bytes
+     */
+    public void appendToBuffer(final byte[] bytes) {
+        byteChunk.appendBytes(bytes, 0, bytes.length);
+    }
+
     @Override
     public int read() throws IOException {
         if (byteChunk.getLength() > 0) {

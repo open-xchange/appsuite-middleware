@@ -1103,7 +1103,7 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
                             }
                             final byte[] chunk = new byte[len];
                             System.arraycopy(byteChunk.getBuffer(), byteChunk.getStart(), chunk, 0, len);
-                            request.dumpToBuffer(chunk);
+                            request.appendToBuffer(chunk);
                         }
                         if (DEBUG) {
                             LOG.debug("Performed keep-alive through an empty get-body-chunk package (and received requested chunk).");
