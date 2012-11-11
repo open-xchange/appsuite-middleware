@@ -76,7 +76,7 @@ public class PresenceInitializer implements StanzaInitializer<Presence> {
      * The Status Message
      */
     private void initStatus(Presence presence) {
-        PayloadTree status = getSinglePayload(presence, Presence.STATUS_PATH);
+        PayloadTree status = getSinglePayload(presence, Presence.MESSAGE_PATH);
         if (status != null) {
             Object data = status.getRoot().getPayloadElement().getData();
             if (!(data instanceof String)) {
@@ -90,7 +90,7 @@ public class PresenceInitializer implements StanzaInitializer<Presence> {
      * The Status shown
      */
     private void initShow(Presence presence) {
-        PayloadTree show = getSinglePayload(presence, Presence.SHOW_PATH);
+        PayloadTree show = getSinglePayload(presence, Presence.STATUS_PATH);
         if (show != null) {
         Object data = show.getRoot().getPayloadElement().getData();
             if (!(data instanceof PresenceState)) {

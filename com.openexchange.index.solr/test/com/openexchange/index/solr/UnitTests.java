@@ -61,7 +61,7 @@ import org.junit.runners.Suite.SuiteClasses;
  */
 @RunWith(Suite.class)
 @SuiteClasses({
-    AbstractSolrIndexAccessTest.class,
+    SimpleQueryBuilderTest.class,
     MailSolrIndexAccessTest.class,
     AddressComparatorTest.class,
     SolrFilestoreIndexAccessTest.class

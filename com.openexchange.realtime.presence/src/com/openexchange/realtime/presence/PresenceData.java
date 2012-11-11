@@ -62,6 +62,7 @@ public class PresenceData {
 
     private String message;
 
+    public static PresenceData OFFLINE = new PresenceData(PresenceState.OFFLINE, ""); 
     /**
      * Initializes a new {@link PresenceData}.
      * 

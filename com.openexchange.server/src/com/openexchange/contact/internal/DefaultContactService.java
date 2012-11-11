@@ -65,14 +65,19 @@ import com.openexchange.session.Session;
 import com.openexchange.tools.iterator.SearchIterator;
 
 /**
- * {@link DefaultContactService} - Abstract {@link ContactService} implementation.
+ * {@link DefaultContactService} 
+ * 
+ * Abstract {@link ContactService} implementation.
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 public abstract class DefaultContactService implements ContactService {
 	
     protected static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(DefaultContactService.class));
-    
+   
+    /**
+     * Initializes a new {@link DefaultContactService}.
+     */
     public DefaultContactService() {
     	super();
     	LOG.debug("initialized.");
@@ -205,12 +210,25 @@ public abstract class DefaultContactService implements ContactService {
 		return this.doSearchContacts(session, Tools.prepareContactSearch(contactSearch), fields, sortOptions);
 	}
 
-	@Override
-	public SearchIterator<Contact> getAllContacts(Session session, String folderId, ContactField[] fields, SortOptions sortOptions) throws OXException {
-		Check.argNotNull(session, "session");
-		Check.argNotNull(folderId, "folderId");
-		return this.doGetContacts(false, session, folderId, null, fields, sortOptions, null);
-	}
+    @Override
+    public SearchIterator<Contact> getAllContacts(Session session, String folderId, ContactField[] fields, SortOptions sortOptions) throws OXException {
+        Check.argNotNull(session, "session");
+        Check.argNotNull(folderId, "folderId");
+        return this.doGetContacts(false, session, folderId, null, fields, sortOptions, null);
+    }
+
+    @Override
+    public SearchIterator<Contact> getAllContacts(Session session, ContactField[] fields, SortOptions sortOptions) throws OXException {
+        Check.argNotNull(session, "session");
+        return this.doGetContacts(session, null, fields, sortOptions);
+    }
+
+    @Override
+    public SearchIterator<Contact> getAllContacts(Session session, List<String> folderIDs, ContactField[] fields, SortOptions sortOptions) throws OXException {
+        Check.argNotNull(session, "session");
+        Check.argNotNull(folderIDs, "folderIDs");
+        return this.doGetContacts(session, folderIDs, fields, sortOptions);
+    }
 
 	@Override
 	public SearchIterator<Contact> getContacts(Session session, String folderId, String[] ids, ContactField[] fields, SortOptions sortOptions) throws OXException {
@@ -413,4 +431,7 @@ public abstract class DefaultContactService implements ContactService {
     protected abstract SearchIterator<Contact> doSearchContactsWithAnniversary(Session session, Date from, Date until, List<String> folderIDs,
         ContactField[] fields, SortOptions sortOptions) throws OXException;
     
+    protected abstract SearchIterator<Contact> doGetContacts(Session session, List<String> folderIDs, ContactField[] fields, 
+        SortOptions sortOptions) throws OXException;
+
 }

@@ -35,7 +35,6 @@ public class Activator extends HousekeepingActivator {
 
     @Override
     protected void startBundle() throws Exception {
-       System.out.println("Here i am");
         final DatabaseService dbService = getService(DatabaseService.class);
         SubscriptionsSQL.db = dbService;
         registerService(PresenceSubscriptionService.class, new SubscriptionServiceImpl(this));

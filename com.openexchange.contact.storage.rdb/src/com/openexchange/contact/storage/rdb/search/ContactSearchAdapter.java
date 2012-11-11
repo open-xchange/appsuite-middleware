@@ -49,6 +49,7 @@
 
 package com.openexchange.contact.storage.rdb.search;
 
+import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -65,18 +66,35 @@ import com.openexchange.groupware.tools.mappings.database.DbMapping;
 import com.openexchange.tools.StringCollection;
 
 /**
- * {@link ContactSearchAdapter} - Helps constructing the database statement 
- * for a contact search object.
+ * {@link ContactSearchAdapter} 
+ * 
+ * Helps constructing the database statement for a contact search object.
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 public class ContactSearchAdapter extends DefaultSearchAdapter {
 	
+    /** To make MySQL use the correct indices for UNIONs created from contact search object */
+    private static final boolean IGNORE_INDEX_CID_FOR_UNIONS = true;
+    
+    /** Fields that have an alternative index */
+    private static final EnumSet<ContactField> ALTERNATIVE_INDEXED_FIELDS = EnumSet.of(ContactField.EMAIL1, ContactField.EMAIL2, 
+        ContactField.EMAIL3, ContactField.GIVEN_NAME, ContactField.SUR_NAME, ContactField.DISPLAY_NAME);
+    
 	private static String eMailAutomCompleteClause = null;
 	private static ContactField startLetterField = null;
 	
 	private final StringBuilder stringBuilder;
 
+	/**
+	 * Initializes a new {@link ContactSearchAdapter}.
+	 * 
+	 * @param contactSearch The used contact search object 
+	 * @param contextID the context ID
+	 * @param fields the fields to select
+	 * @param charset The used charset
+	 * @throws OXException
+	 */
 	public ContactSearchAdapter(ContactSearchObject contactSearch, int contextID, ContactField[] fields, String charset) throws OXException {
 		super(charset);
 		this.stringBuilder = new StringBuilder();
@@ -151,41 +169,6 @@ public class ContactSearchAdapter extends DefaultSearchAdapter {
 		     */
             stringBuilder.append(selectClause).append(" WHERE ").append(contextIDClause).append(" AND ").append(folderIDsClause);
 		}
-//		if (contactSearch.isOrSearch() || contactSearch.isEmailAutoComplete()) {
-//			/*
-//			 * construct clause using UNION SELECTs
-//			 */
-//		    Iterator<Entry<ContactField, Object>> iterator = comparisons.entrySet().iterator();
-//			if (iterator.hasNext()) {
-//				Entry<ContactField, Object> entry = iterator.next();
-//				appendComparison(contextIDClause, folderIDsClause, selectClause, entry.getKey(), entry.getValue(), 
-//						contactSearch.isEmailAutoComplete());
-//			}
-//			while (iterator.hasNext()) {
-//				stringBuilder.append(" UNION ");
-//				Entry<ContactField, Object> entry = iterator.next();
-//				appendComparison(contextIDClause, folderIDsClause, selectClause, entry.getKey(), entry.getValue(), 
-//						contactSearch.isEmailAutoComplete());
-//			}
-//		} else {
-//			/*
-//			 * construct clause using single SELECT
-//			 */
-//			Iterator<Entry<ContactField, Object>> iterator = comparisons.entrySet().iterator();
-//			if (iterator.hasNext()) {
-//				stringBuilder.append(selectClause).append(" WHERE ").append(contextIDClause).append(" AND ").append(folderIDsClause).append(" AND ");
-//				Entry<ContactField, Object> entry = iterator.next();
-//				appendComparison(entry.getKey(), entry.getValue());
-//	            while (iterator.hasNext()) {
-//	                entry = iterator.next();
-//	                stringBuilder.append(" AND ");
-//	                appendComparison(entry.getKey(), entry.getValue());
-//	            }
-//			} else {
-//			    // no comparison, just use folders and context id			    
-//	             stringBuilder.append(selectClause).append(" WHERE ").append(contextIDClause).append(" AND ").append(folderIDsClause);
-//			}
-//		}
 	}
 
 	private boolean appendStartLetterComparison(String pattern) throws OXException {
@@ -224,7 +207,11 @@ public class ContactSearchAdapter extends DefaultSearchAdapter {
 	
 	private void appendComparison(String contextIDClause, String folderIDsClause, String selectClause, ContactField field, Object value, 
 			boolean needsEMail) throws OXException {
-		stringBuilder.append('(').append(selectClause).append(" WHERE ").append(contextIDClause).append(" AND ");
+		stringBuilder.append('(').append(selectClause);
+		if (IGNORE_INDEX_CID_FOR_UNIONS && ALTERNATIVE_INDEXED_FIELDS.contains(field)) {
+		    stringBuilder.append(" IGNORE INDEX (cid)");
+		}
+		stringBuilder.append(" WHERE ").append(contextIDClause).append(" AND ");
 		appendComparison(field, value);
 		stringBuilder.append(" AND ").append(folderIDsClause);
 		if (needsEMail) {

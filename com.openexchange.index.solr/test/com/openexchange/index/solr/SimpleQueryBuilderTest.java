@@ -49,34 +49,33 @@
 
 package com.openexchange.index.solr;
 
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 import junit.framework.Assert;
 import org.junit.Test;
-import com.openexchange.exception.OXException;
-import com.openexchange.index.FacetParameters;
-import com.openexchange.index.IndexDocument;
-import com.openexchange.index.IndexField;
-import com.openexchange.index.IndexResult;
-import com.openexchange.index.QueryParameters;
-import com.openexchange.index.solr.internal.AbstractSolrIndexAccess;
-import com.openexchange.solr.SolrCoreIdentifier;
+import com.openexchange.index.solr.internal.querybuilder.BuilderException;
+import com.openexchange.index.solr.internal.querybuilder.SimpleQueryBuilder;
+
 
 /**
- * {@link AbstractSolrIndexAccessTest}
- * 
+ * {@link SimpleQueryBuilderTest}
+ *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public class AbstractSolrIndexAccessTest extends AbstractSolrIndexAccess<Void> {
-
+public class SimpleQueryBuilderTest extends SimpleQueryBuilder {
+    
     /**
-     * Initializes a new {@link AbstractSolrIndexAccessTest}.
-     * @param identifier
+     * Initializes a new {@link SimpleQueryBuilderTest}.
+     * @param configPath
+     * @param moduleField
+     * @param accountField
+     * @param folderField
+     * @param fieldMapper
+     * @throws BuilderException
      */
-    public AbstractSolrIndexAccessTest() {
-        super(new SolrCoreIdentifier(1, 1, 1));
+    public SimpleQueryBuilderTest() {
+        super();
     }
 
     @Test
@@ -105,78 +104,6 @@ public class AbstractSolrIndexAccessTest extends AbstractSolrIndexAccess<Void> {
         Assert.assertNull(buildQueryStringWithOr("abc", null));
         Assert.assertNull(catenateQueriesWithAnd(null));
         Assert.assertNull(catenateQueriesWithAnd(null, null));
-    }
-
-    @Override
-    public boolean isIndexed(String accountId, String folderId) throws OXException {
-        // TODO Auto-generated method stub
-        return false;
-    }
-
-    @Override
-    public Set<? extends IndexField> getIndexedFields() {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public void addEnvelopeData(IndexDocument<Void> document) throws OXException {
-        // TODO Auto-generated method stub
-
-    }
-
-    @Override
-    public void addEnvelopeData(Collection<IndexDocument<Void>> documents) throws OXException {
-        // TODO Auto-generated method stub
-
-    }
-
-    @Override
-    public void addContent(IndexDocument<Void> document, boolean full) throws OXException {
-        // TODO Auto-generated method stub
-
-    }
-
-    @Override
-    public void addContent(Collection<IndexDocument<Void>> documents, boolean full) throws OXException {
-        // TODO Auto-generated method stub
-
-    }
-
-    @Override
-    public void addAttachments(IndexDocument<Void> document, boolean full) throws OXException {
-        // TODO Auto-generated method stub
-
-    }
-
-    @Override
-    public void addAttachments(Collection<IndexDocument<Void>> documents, boolean full) throws OXException {
-        // TODO Auto-generated method stub
-
-    }
-
-    @Override
-    public void deleteById(String id) throws OXException {
-        // TODO Auto-generated method stub
-
-    }
-
-    @Override
-    public void deleteByQuery(QueryParameters parameters) throws OXException {
-        // TODO Auto-generated method stub
-
-    }
-
-    @Override
-    public IndexResult<Void> query(QueryParameters parameters, Set<? extends IndexField> fields) throws OXException {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public IndexResult<Void> query(QueryParameters parameters, FacetParameters facetParameters, Set<? extends IndexField> fields) throws OXException {
-        // TODO Auto-generated method stub
-        return null;
     }
 
 }
