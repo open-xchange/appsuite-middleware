@@ -131,8 +131,7 @@ public class DocLiteralInInterceptor extends AbstractInDatabindingInterceptor {
                             if (fault.getCause() instanceof javax.xml.bind.UnmarshalException) {
                                 final Throwable linkedException = ((javax.xml.bind.UnmarshalException) fault.getCause()).getLinkedException();
                                 if (linkedException != null && linkedException.getClass().getName().indexOf("SAXParseException") >= 0) {
-                                    final String failMessage = linkedException.getMessage();
-                                    String[] info = extractUnexpectedElement(failMessage);
+                                    String[] info = extractUnexpectedElement(linkedException.getMessage());
                                     if (null != info) {
                                         final String m ;
                                         if (isEmpty(info[0])) {
