@@ -118,7 +118,12 @@ public class DocLiteralInInterceptor extends AbstractInDatabindingInterceptor {
                         final Object wrappedObject = dr.read(messagePartInfo, xmlReader);
                         parameters.put(msgInfo.getMessageParts().get(0), wrappedObject);
                     } catch (final org.apache.cxf.interceptor.Fault fault) {
-                        final String localPart = messagePartInfo.getTypeQName().getLocalPart();
+                        final QName typeQName = messagePartInfo.getTypeQName();
+                        if (null == typeQName) {
+                            // Not possible to check against possibly unparseable date element
+                            throw fault;
+                        }
+                        final String localPart = typeQName.getLocalPart();
                         if (("date".equals(localPart) || "xs:date".equals(localPart)) && (fault.getCause() instanceof javax.xml.bind.UnmarshalException)) {
                             // Ignore
                         } else {
