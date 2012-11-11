@@ -1,3 +1,7 @@
+* 2012-11-11 - thorben.betten@open-xchange.com
+
+ - Fix for bug 23689: Avoid NPE and throw a more meaningful SOAP fault
+
 * 2012-11-09 - martin.herfurth@open-xchange.com
 
  - Fix for bug 23580: Fixed reply mail on multiple accept/decline/tentative.
