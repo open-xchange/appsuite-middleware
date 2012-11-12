@@ -115,7 +115,7 @@ public final class OXFolderProperties implements Initialization, CacheAvailabili
 
     private boolean ignoreSharedAddressbook = false;
 
-    volatile boolean enableInternalUsersEdit = false;
+    volatile boolean enableInternalUsersEdit = true;
 
     private boolean enableSharedFolderCaching = true;
 
