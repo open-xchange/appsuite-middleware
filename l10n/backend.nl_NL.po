@@ -1723,7 +1723,7 @@ msgstr "De naam van de container ontbreekt in de container omschrijving."
 #. The module '%s' is not known in the registry.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.documentation/src/com/openexchange/documentation/internal/DocumentationExceptionMessage.java:82
 msgid "The module '%s' is not known in the registry."
-msgstr "De module %1$s is onbekend in de registratielijst."
+msgstr "De module %s is onbekend in de registratielijst."
 
 #. The container '%s' is not known in the registry.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.documentation/src/com/openexchange/documentation/internal/DocumentationExceptionMessage.java:85
@@ -1760,7 +1760,7 @@ msgstr "Ongeldige CIFS/SMB URL: %1$s"
 #. CIFS/SMB URL does not denote a directory: %1$s
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.cifs/src/com/openexchange/file/storage/cifs/CIFSExceptionMessages.java:72
 msgid "CIFS/SMB URL does not denote a directory: %1$s"
-msgstr "CIFS/SMB URL is geen map: %s"
+msgstr "CIFS/SMB URL is geen map: %1$s"
 
 #. The CIFS/SMB resource does not exist: %1$s
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.cifs/src/com/openexchange/file/storage/cifs/CIFSExceptionMessages.java:75
@@ -1823,7 +1823,7 @@ msgstr "Ongeldige CMIS URL: %1$s"
 #. CMIS URL does not denote a directory: %1$s
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.cmis/src/com/openexchange/file/storage/cmis/CMISExceptionMessages.java:72
 msgid "CMIS URL does not denote a directory: %1$s"
-msgstr "CMIS URL is geen map: %s"
+msgstr "CMIS URL is geen map: %1$s"
 
 #. The CMIS resource does not exist: %1$s
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.cmis/src/com/openexchange/file/storage/cmis/CMISExceptionMessages.java:75
@@ -2999,7 +2999,7 @@ msgstr "MAIL-AUTOCONFIG"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.mail.autoconfig/src/com/openexchange/mail/autoconfig/AutoconfigException.java:68
 msgid "The E-Mail address %1$s is invalid."
-msgstr "Het e-mailadres \"%s\" is ongeldig "
+msgstr "Het e-mailadres \"%1$s\" is ongeldig "
 
 #. Missing property: %1$s
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.mail.smal.impl/src/com/openexchange/mail/smal/impl/SmalExceptionMessages.java:65
@@ -3176,7 +3176,7 @@ msgid ""
 "FQL query result size (%1$s) does not match requested number of post "
 "identifiers (%2$s)."
 msgstr ""
-"De resultaatgrootte (%a$s) van FQL-query komt niet overeen met het aantal "
+"De resultaatgrootte (%1$s) van FQL-query komt niet overeen met het aantal "
 "bijdrage-ID's (%2$s)."
 
 #. Unsupported query type: %1$s.
@@ -6029,12 +6029,12 @@ msgstr "Probleem met initialisatie van de buffer."
 #. Cannot remove object %s from cache.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contexts/impl/ContextExceptionMessage.java:88
 msgid "Object %s can not be removed from cache."
-msgstr "Object %1$s kan niet worden verwijderd uit het buffer."
+msgstr "Object %s kan niet worden verwijderd uit het buffer."
 
 #. Cannot find context "%s".
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contexts/impl/ContextExceptionMessage.java:91
 msgid "Context \"%s\" cannot be found."
-msgstr "Context \"%1$s\" was onvindbaar."
+msgstr "Context \"%s\" was onvindbaar."
 
 #. Unknown delete event type: %1$d
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/delete/DeleteFailedExceptionMessage.java:70
@@ -9140,7 +9140,6 @@ msgstr "E-mail aanhangsel is verlopen of afwezig."
 msgid "Account has been checked successfully but with a non-secure connection."
 msgstr ""
 "Account is succesvol gevalideerd maar zonder een beveiligde verbinding."
-"Account is succesvol gevalideerd maar zonder een beveiligde verbinding."
 
 #. *
 #. * Cannot forward more than %1$s messages at once. Please divide the messages to forward in chunks of appropriate size.
@@ -9899,7 +9898,7 @@ msgstr "Onbekende opdracht: %1$s"
 #. An IO error occurred: %s
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/file/external/FileStorageExceptionMessage.java:70
 msgid "An IO error occurred: %s"
-msgstr "Er is een invoer-/uitvoerfout opgetreden: %1$s"
+msgstr "Er is een invoer-/uitvoerfout opgetreden: %s"
 
 #. May be used to turn the IOException of getInstance into a proper OXException
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/file/external/FileStorageExceptionMessage.java:73
