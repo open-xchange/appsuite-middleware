@@ -9,7 +9,7 @@ BuildRequires: open-xchange-log4j
 BuildRequires: open-xchange-xerces
 BuildRequires: java-devel >= 1.6.0
 Version:       @OXVERSION@
-%define        ox_release 1
+%define        ox_release 4
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0 
@@ -179,7 +179,7 @@ perl -pi -e 's;(^.*?)\s+(.*/(mail|configdb|server|filestorage)\.properties)$;$1 
 . /opt/open-xchange/lib/oxfunctions.sh
 ox_move_config_file /opt/open-xchange/etc/common /opt/open-xchange/etc i18n.properties
 ox_move_config_file /opt/open-xchange/etc/groupware /opt/open-xchange/etc push.properties push-udp.properties
-CONFFILES="mdns.properties management.properties templating.properties mail-push.properties filestorage.properties folderjson.properties messaging.properties publications.properties secret.properties secrets threadpool.properties settings/themes.properties settings/ui.properties meta/ui.yml"
+CONFFILES="management.properties templating.properties mail-push.properties filestorage.properties folderjson.properties messaging.properties publications.properties secret.properties secrets threadpool.properties settings/themes.properties settings/ui.properties meta/ui.yml"
 for FILE in $CONFFILES; do
     ox_move_config_file /opt/open-xchange/etc/groupware /opt/open-xchange/etc $FILE
 done
@@ -249,6 +249,12 @@ Build for patch 2012-10-31
 Build for patch 2012-10-31
 * Tue Oct 30 2012 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2012-10-29
+* Fri Oct 26 2012 Marcus Klein <marcus.klein@open-xchange.com>
+Third release build for EDP drop #5
+* Fri Oct 26 2012 Marcus Klein <marcus.klein@open-xchange.com>
+Second release build for EDP drop #5
+* Thu Oct 11 2012 Marcus Klein <marcus.klein@open-xchange.com>
+Release build for EDP drop #5
 * Wed Oct 10 2012 Marcus Klein <marcus.klein@open-xchange.com>
 Fifth release candidate for 6.22.0
 * Tue Oct 09 2012 Marcus Klein <marcus.klein@open-xchange.com>
