@@ -73,6 +73,7 @@ import com.openexchange.database.DatabaseService;
 import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.cache.CacheFolderStorage;
+import com.openexchange.folderstorage.cache.memory.FolderMapManagement;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.management.ManagementService;
@@ -405,6 +406,7 @@ public final class OXFolderProperties implements Initialization, CacheAvailabili
             }
         }
         CacheFolderStorage.getInstance().clearAll();
+        FolderMapManagement.getInstance().clear();
     }
 
     /**
