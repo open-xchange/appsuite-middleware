@@ -11,8 +11,8 @@ import com.openexchange.exception.OXException;
 import com.openexchange.index.AccountFolders;
 import com.openexchange.index.IndexField;
 import com.openexchange.index.QueryParameters;
-import com.openexchange.index.SearchHandler;
 import com.openexchange.index.QueryParameters.Order;
+import com.openexchange.index.SearchHandler;
 import com.openexchange.index.solr.internal.FieldMapper;
 import com.openexchange.index.solr.internal.SolrField;
 
@@ -20,6 +20,7 @@ import com.openexchange.index.solr.internal.SolrField;
 public class SimpleQueryBuilder implements SolrQueryBuilder {
   private Configuration config;
   private Map<String,QueryTranslator> translators;
+  private SolrField moduleField;
   private SolrField accountField;
   private SolrField folderField;
   private FieldMapper fieldMapper;
@@ -27,7 +28,7 @@ public class SimpleQueryBuilder implements SolrQueryBuilder {
   private static Log log = com.openexchange.log.Log.loggerFor(SimpleQueryBuilder.class);
 
 
-  public SimpleQueryBuilder(String configPath, SolrField accountField, SolrField folderField, FieldMapper fieldMapper) throws BuilderException {
+  public SimpleQueryBuilder(String configPath, SolrField moduleField, SolrField accountField, SolrField folderField, FieldMapper fieldMapper) throws BuilderException {
     config = new SimpleConfiguration(configPath);
     translators = new HashMap<String,QueryTranslator>();
 
@@ -35,9 +36,18 @@ public class SimpleQueryBuilder implements SolrQueryBuilder {
       translators.put(handler.trim(), this.initTranslatorForHandler(handler, config));
     }
     
+    this.moduleField = moduleField;
     this.accountField = accountField;
     this.folderField = folderField;
     this.fieldMapper = fieldMapper;
+  }
+  
+  
+  /*
+   * For testing purposes only
+   */
+  protected SimpleQueryBuilder() {
+      super();
   }
 
 
@@ -205,6 +215,14 @@ public class SimpleQueryBuilder implements SolrQueryBuilder {
           String filterQuery = catenateQueriesWithOr(queries);
           solrQuery.addFilterQuery(filterQuery);
       }
+      
+      if (moduleField != null) {
+          Integer module = parameters.getModule() < 0 ? null : new Integer(parameters.getModule());
+          String moduleQuery = buildQueryString(moduleField.solrName(), module);
+          if (moduleQuery != null) {
+              solrQuery.addFilterQuery(moduleQuery);
+          }
+      }
   }
 
   protected String buildQueryString(String fieldName, Object value) {
@@ -290,5 +308,11 @@ public class SimpleQueryBuilder implements SolrQueryBuilder {
       
       sb.append(')');
       return sb.toString();
+  }
+  
+  protected void addFilterQueryIfNotNull(SolrQuery solrQuery, String filterQuery) {
+      if (filterQuery != null) {
+          solrQuery.addFilterQuery(filterQuery);
+      }
   }
 }

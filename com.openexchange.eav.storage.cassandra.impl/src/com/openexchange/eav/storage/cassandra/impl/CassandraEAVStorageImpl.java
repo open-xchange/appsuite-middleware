@@ -48,8 +48,13 @@
  */
 package com.openexchange.eav.storage.cassandra.impl;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.OutputStream;
 import java.nio.ByteBuffer;
 import java.nio.charset.CharacterCodingException;
 import java.util.Arrays;
@@ -63,12 +68,15 @@ import java.util.UUID;
 
 import me.prettyprint.cassandra.model.BasicColumnFamilyDefinition;
 import me.prettyprint.cassandra.model.ConfigurableConsistencyLevel;
+import me.prettyprint.cassandra.serializers.ByteBufferSerializer;
 import me.prettyprint.cassandra.serializers.CompositeSerializer;
 import me.prettyprint.cassandra.serializers.UUIDSerializer;
+import me.prettyprint.cassandra.service.CassandraHostConfigurator;
 import me.prettyprint.cassandra.service.ThriftCfDef;
 import me.prettyprint.cassandra.service.ThriftKsDef;
 import me.prettyprint.cassandra.service.template.ColumnFamilyResult;
 import me.prettyprint.cassandra.service.template.ColumnFamilyTemplate;
+import me.prettyprint.cassandra.service.template.ColumnFamilyUpdater;
 import me.prettyprint.cassandra.service.template.ThriftColumnFamilyTemplate;
 import me.prettyprint.hector.api.Cluster;
 import me.prettyprint.hector.api.HConsistencyLevel;
@@ -83,6 +91,8 @@ import me.prettyprint.hector.api.mutation.Mutator;
 
 import org.apache.cassandra.db.KeyspaceNotDefinedException;
 import org.apache.cassandra.utils.ByteBufferUtil;
+import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.codec.binary.Base64OutputStream;
 import org.apache.commons.logging.Log;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -109,6 +119,7 @@ public class CassandraEAVStorageImpl implements EAVStorage {
 	private static int replicationFactor;
 	private static String read_cl;
 	private static String write_cl;
+	private static int frameSize;
 	
 	private final ColumnFamilyTemplate<UUID, Composite> xtPropsTemplate;
 	
@@ -120,8 +131,8 @@ public class CassandraEAVStorageImpl implements EAVStorage {
 	public CassandraEAVStorageImpl() {
 		readProperties();
 	    initKeyspace();
-		
-		xtPropsTemplate = new ThriftColumnFamilyTemplate<UUID, Composite>(keyspace, CF_XT_PROPS, us, cs);
+	    
+	    xtPropsTemplate = new ThriftColumnFamilyTemplate<UUID, Composite>(keyspace, CF_XT_PROPS, us, cs);
 	}
 	
 	/**
@@ -148,6 +159,7 @@ public class CassandraEAVStorageImpl implements EAVStorage {
             replicationFactor = Integer.parseInt(prop.getProperty("replication_factor"));
             read_cl = prop.getProperty("read_cl");
             write_cl = prop.getProperty("write_cl");
+            frameSize = Integer.parseInt(prop.getProperty("thrift_framed_transport_size_in_mb")) * 1024 * 1024;
         } catch (IOException e) {
             e.printStackTrace();
             log.error("Properties file does not exist.");
@@ -231,30 +243,35 @@ public class CassandraEAVStorageImpl implements EAVStorage {
 	@Override
 	public Map<String, Object> getAttributes(UUID u) throws OXException {
 		Map<String, Object> attr = null;
-		try {
-			UUID xtPropsKey = u;
+		UUID xtPropsKey = u;
+		
+		if (xtPropsKey == null) {
+			throw new OXException(666, "xtPropsKey is NULL");
+		}
+		
+		ColumnFamilyResult<UUID, Composite> result = xtPropsTemplate.queryColumns(xtPropsKey);
+		if (result == null || !result.hasResults()) {
+			log.error("No result");
+		} else {
+			attr = new HashMap<String, Object>();
 			
-			if (xtPropsKey == null) {
-				throw new OXException(666, "xtPropsKey is NULL");
+			Iterator<Composite> it = result.getColumnNames().iterator();
+			while (it.hasNext()) {
+				Composite columnName = it.next();
+				ByteBuffer value = result.getColumn(columnName).getValue();
+				String cn = new String();
+				try {
+				    cn = ByteBufferUtil.string((ByteBuffer)columnName.get(0));
+				    attr.put(ByteBufferUtil.string((ByteBuffer)columnName.get(0)), JSONUtil.toObject((ByteBufferUtil.string(value))));    
+				    //attr.put(ByteBufferUtil.string((ByteBuffer)columnName.get(0)), deserialize(ByteBufferUtil.getArray(value)));
+				} catch (CharacterCodingException e) {
+				    //e.printStackTrace();
+				    attr.put(cn, value); //get the binary file
+                } catch (JSONException e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                }
 			}
-			
-			ColumnFamilyResult<UUID, Composite> result = xtPropsTemplate.queryColumns(xtPropsKey);
-			if (result == null || !result.hasResults()) {
-				log.error("No result");
-			} else {
-				attr = new HashMap<String, Object>();
-				
-				Iterator<Composite> it = result.getColumnNames().iterator();
-				while (it.hasNext()) {
-					Composite columnName = it.next();
-					ByteBuffer value = result.getColumn(columnName).getValue();
-					attr.put(ByteBufferUtil.string((ByteBuffer)columnName.get(0)), JSONUtil.toObject((ByteBufferUtil.string(value))));
-				}
-			}
-		} catch (CharacterCodingException e) {
-			e.printStackTrace();
-		} catch (JSONException j) {
-			j.printStackTrace();
 		}
 		
 		return attr;
@@ -348,14 +365,16 @@ public class CassandraEAVStorageImpl implements EAVStorage {
 	 */
 	@Override
 	public void setAttributes(UUID u, Map<String, Object> attributes) throws OXException {
-		Mutator<UUID> m = HFactory.createMutator(keyspace, us);
+	    Mutator<UUID> m = HFactory.createMutator(keyspace, us);
 		UUID xtPropsKey = u;
+		Map<Composite, ByteBuffer> files = new HashMap<Composite, ByteBuffer>();
 		
 		Iterator<String> it = attributes.keySet().iterator();
 		while (it.hasNext()) {
 			String columnName = it.next();
 			Object o = attributes.get(columnName);
 			Composite compoColumnName = new Composite(columnName);
+			
 			if (o == null) {
 				m.addDeletion(xtPropsKey, CF_XT_PROPS, compoColumnName, cs);
 			} else {
@@ -380,11 +399,11 @@ public class CassandraEAVStorageImpl implements EAVStorage {
 					}
 				} else {
 					if (o instanceof String) {
-						m.addInsertion(xtPropsKey, CF_XT_PROPS, HFactory.createColumn(compoColumnName, (String)o));
+					    m.addInsertion(xtPropsKey, CF_XT_PROPS, HFactory.createColumn(compoColumnName, (String)o));
 					} else if (o instanceof Integer) {
-						m.addInsertion(xtPropsKey, CF_XT_PROPS, HFactory.createColumn(compoColumnName, String.valueOf(o)));
+					    m.addInsertion(xtPropsKey, CF_XT_PROPS, HFactory.createColumn(compoColumnName, String.valueOf(o)));
 					} else if (o instanceof Long) {
-                        m.addInsertion(xtPropsKey, CF_XT_PROPS, HFactory.createColumn(compoColumnName, String.valueOf(o)));
+					    m.addInsertion(xtPropsKey, CF_XT_PROPS, HFactory.createColumn(compoColumnName, String.valueOf(o)));
                     } else if (o instanceof Double) {
                         m.addInsertion(xtPropsKey, CF_XT_PROPS, HFactory.createColumn(compoColumnName, String.valueOf(o)));
                     } else if (o instanceof Boolean) {
@@ -393,6 +412,29 @@ public class CassandraEAVStorageImpl implements EAVStorage {
                         m.addInsertion(xtPropsKey, CF_XT_PROPS, HFactory.createColumn(compoColumnName, String.valueOf(o)));
                     } else if (o instanceof Date) {
                         m.addInsertion(xtPropsKey, CF_XT_PROPS, HFactory.createColumn(compoColumnName, String.valueOf(((Date) o).getTime())));
+                    /*
+                     * Support for small binary objects (and not BLOBs). We ought to have a limitation 
+                     * at 15MB per file per mutation due to Thrift limitations 
+                     * ('thrift_framed_transport_size_in_mb' defaults to 15mb)
+                     * as well as due to Cassandra's column value restrictions.
+                     * Cassandra was not designed to store that kind of information.
+                     * 
+                     * - https://issues.apache.org/jira/browse/CASSANDRA-265
+                     * - http://comments.gmane.org/gmane.comp.db.hector.user/2939
+                     * - http://zanailhan.blogspot.de/2011/09/can-i-store-blobs-in-cassandra.html
+                     * 
+                     * However, a workaround would be to split a large file in chunks and store each chunk in
+                     * a separate column. (tradeoff: file has to be recreated, which increases the response time)
+                     * 
+                     * We will proceed according to customer's wishes.
+                     */
+                     
+                    } else if (o instanceof ByteBuffer) {
+                        byte[] by = ((ByteBuffer)o).array();
+                        if (by.length > frameSize) {
+                            throw new OXException(666, "File size exceeded for '" + compoColumnName.get(0) + "' . Dropping");
+                        }
+                        files.put(compoColumnName, ((ByteBuffer)o));
                     } else {
                         throw new OXException(666, "Unsupported attribute type. Data: " + o);
                     }
@@ -405,6 +447,12 @@ public class CassandraEAVStorageImpl implements EAVStorage {
 		} catch (HectorException h) {
 			h.printStackTrace();
 		}
+		
+		Iterator<Composite> iter = files.keySet().iterator();
+		while(iter.hasNext()) {
+		    Composite c = iter.next();
+		    ByteBuffer bb = files.get(c);
+		    m.insert(xtPropsKey, CF_XT_PROPS, HFactory.createColumn(c, bb.array()));
+		}
 	}
-
 }

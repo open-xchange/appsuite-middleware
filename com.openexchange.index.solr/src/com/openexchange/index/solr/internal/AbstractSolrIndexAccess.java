@@ -61,7 +61,6 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import org.apache.commons.logging.Log;
 import org.apache.solr.client.solrj.SolrQuery;
-import org.apache.solr.client.solrj.SolrQuery.ORDER;
 import org.apache.solr.client.solrj.SolrResponse;
 import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.client.solrj.response.UpdateResponse;
@@ -72,9 +71,6 @@ import org.apache.solr.common.params.SolrParams;
 import com.openexchange.exception.OXException;
 import com.openexchange.index.IndexAccess;
 import com.openexchange.index.IndexDocument;
-import com.openexchange.index.IndexField;
-import com.openexchange.index.QueryParameters;
-import com.openexchange.index.QueryParameters.Order;
 import com.openexchange.index.solr.IndexFolderManager;
 import com.openexchange.solr.SolrAccessService;
 import com.openexchange.solr.SolrCoreIdentifier;
@@ -279,7 +275,7 @@ public abstract class AbstractSolrIndexAccess<V> implements IndexAccess<V> {
         
         return indexDocuments;
     }
-    
+
 //    protected IndexResult<V> queryChunkWise1(SolrResultConverter<V> converter, SolrQuery solrQuery, int off, int len, int chunkSize) throws OXException {
 //        List<IndexDocument<V>> indexDocuments = new ArrayList<IndexDocument<V>>();
 //        Map<IndexField, Map<String, Long>> facetCountsMap = null;
@@ -341,16 +337,16 @@ public abstract class AbstractSolrIndexAccess<V> implements IndexAccess<V> {
 //        return converter.createIndexResult(indexDocuments, facetCountsMap);
 //    }
     
-    protected String buildQueryString(String fieldName, Object value) {
-        if (fieldName == null || value == null) {
-            return null;
-        }
-        
-        StringBuilder sb = new StringBuilder(); 
-        sb.append('(').append(fieldName).append(":\"").append(value.toString()).append("\")");
-        return sb.toString();
-    }
-    
+//    protected String buildQueryString(String fieldName, Object value) {
+//        if (fieldName == null || value == null) {
+//            return null;
+//        }
+//        
+//        StringBuilder sb = new StringBuilder(); 
+//        sb.append('(').append(fieldName).append(":\"").append(value.toString()).append("\")");
+//        return sb.toString();
+//    }
+//    
     protected String buildQueryStringWithOr(String fieldName, Set<String> values) {
         if (fieldName == null || values == null || values.isEmpty()) {
             return null;
@@ -371,82 +367,82 @@ public abstract class AbstractSolrIndexAccess<V> implements IndexAccess<V> {
         sb.append(')');
         return sb.toString();
     }
-    
-    protected String catenateQueriesWithAnd(String... queries) {
-        if (queries == null || queries.length == 0) {
-            return null;
-        }
-        
-        StringBuilder sb = new StringBuilder();
-        sb.append('(');
-        boolean first = true;
-        for (String query : queries) {
-            if (query != null) {
-                if (first) {
-                    sb.append(query);
-                    first = false; 
-                } else {
-                    sb.append(" AND ").append(query);
-                }
-            }
-        }
-        
-        if (sb.length() == 1) {
-            return null;
-        }
-        
-        sb.append(')');
-        return sb.toString();
-    }
-    
-    protected String catenateQueriesWithOr(String... queries) {
-        if (queries == null || queries.length == 0) {
-            return null;
-        }
-        
-        StringBuilder sb = new StringBuilder();
-        sb.append('(');
-        boolean first = true;
-        for (String query : queries) {
-            if (query != null) {
-                if (first) {
-                    sb.append(query);
-                    first = false; 
-                } else {
-                    sb.append(" OR ").append(query);
-                }
-            }
-        }
-        
-        if (sb.length() == 1) {
-            return null;
-        }
-        
-        sb.append(')');
-        return sb.toString();
-    }
-    
-    protected void setSortAndOrder(QueryParameters parameters, SolrQuery solrQuery, Class<? extends SolrField> fieldEnum) {
-        IndexField sortField = parameters.getSortField();
-        if (sortField == null) {
-            return;
-        }
-        
-        SolrField[] enumConstants = fieldEnum.getEnumConstants();
-        if (enumConstants != null) {
-            for (SolrField field : enumConstants) {
-                if (field.indexField() != null && field.indexField().equals(sortField)) {
-                    Order order = parameters.getOrder();
-                    solrQuery.setSortField(field.solrName(), order == null ? ORDER.desc : order.equals(Order.DESC) ? ORDER.desc : ORDER.asc);
-                    return;
-                }
-            }
-            
-            LOG.warn("Did not find a SolrField for IndexField " + sortField.toString());
-        }
-        
-        LOG.warn("Parameter fieldEnum seems not to be a valid enum.");
-    }
+//    
+//    protected String catenateQueriesWithAnd(String... queries) {
+//        if (queries == null || queries.length == 0) {
+//            return null;
+//        }
+//        
+//        StringBuilder sb = new StringBuilder();
+//        sb.append('(');
+//        boolean first = true;
+//        for (String query : queries) {
+//            if (query != null) {
+//                if (first) {
+//                    sb.append(query);
+//                    first = false; 
+//                } else {
+//                    sb.append(" AND ").append(query);
+//                }
+//            }
+//        }
+//        
+//        if (sb.length() == 1) {
+//            return null;
+//        }
+//        
+//        sb.append(')');
+//        return sb.toString();
+//    }
+//    
+//    protected String catenateQueriesWithOr(String... queries) {
+//        if (queries == null || queries.length == 0) {
+//            return null;
+//        }
+//        
+//        StringBuilder sb = new StringBuilder();
+//        sb.append('(');
+//        boolean first = true;
+//        for (String query : queries) {
+//            if (query != null) {
+//                if (first) {
+//                    sb.append(query);
+//                    first = false; 
+//                } else {
+//                    sb.append(" OR ").append(query);
+//                }
+//            }
+//        }
+//        
+//        if (sb.length() == 1) {
+//            return null;
+//        }
+//        
+//        sb.append(')');
+//        return sb.toString();
+//    }
+//    
+//    protected void setSortAndOrder(QueryParameters parameters, SolrQuery solrQuery, Class<? extends SolrField> fieldEnum) {
+//        IndexField sortField = parameters.getSortField();
+//        if (sortField == null) {
+//            return;
+//        }
+//        
+//        SolrField[] enumConstants = fieldEnum.getEnumConstants();
+//        if (enumConstants != null) {
+//            for (SolrField field : enumConstants) {
+//                if (field.indexField() != null && field.indexField().equals(sortField)) {
+//                    Order order = parameters.getOrder();
+//                    solrQuery.setSortField(field.solrName(), order == null ? ORDER.desc : order.equals(Order.DESC) ? ORDER.desc : ORDER.asc);
+//                    return;
+//                }
+//            }
+//            
+//            LOG.warn("Did not find a SolrField for IndexField " + sortField.toString());
+//        }
+//        
+//        LOG.warn("Parameter fieldEnum seems not to be a valid enum.");
+//    }
     
     protected void setFieldList(SolrQuery solrQuery, Set<? extends SolrField> solrFields) {
         for (SolrField field : solrFields) {
@@ -457,29 +453,29 @@ public abstract class AbstractSolrIndexAccess<V> implements IndexAccess<V> {
         }
     }
     
-    protected String stringArrayToQuery(String[] values) {
-        StringBuilder sb = new StringBuilder();
-        for (String value : values) {
-            sb.append(value);
-            sb.append(' ');
-        }
-        
-        return sb.toString();
-    }
-    
-    protected String stringSetToQuery(Set<String> values) {
-        StringBuilder sb = new StringBuilder();
-        for (String value : values) {
-            sb.append(value);
-            sb.append(' ');
-        }
-        
-        return sb.toString();
-    }
-    
-    protected void addFilterQueryIfNotNull(SolrQuery solrQuery, String filterQuery) {
-        if (filterQuery != null) {
-            solrQuery.addFilterQuery(filterQuery);
-        }
-    } 
+//    protected String stringArrayToQuery(String[] values) {
+//        StringBuilder sb = new StringBuilder();
+//        for (String value : values) {
+//            sb.append(value);
+//            sb.append(' ');
+//        }
+//        
+//        return sb.toString();
+//    }
+//    
+//    protected String stringSetToQuery(Set<String> values) {
+//        StringBuilder sb = new StringBuilder();
+//        for (String value : values) {
+//            sb.append(value);
+//            sb.append(' ');
+//        }
+//        
+//        return sb.toString();
+//    }
+//    
+//    protected void addFilterQueryIfNotNull(SolrQuery solrQuery, String filterQuery) {
+//        if (filterQuery != null) {
+//            solrQuery.addFilterQuery(filterQuery);
+//        }
+//    } 
 }

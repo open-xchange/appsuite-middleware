@@ -3,7 +3,7 @@ package com.openexchange.realtime.presence.osgi;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.realtime.MessageDispatcher;
 import com.openexchange.realtime.presence.DummyPresenceService;
-import com.openexchange.realtime.presence.PresenceService;
+import com.openexchange.realtime.presence.PresenceStatusService;
 
 public class PresenceActivator extends HousekeepingActivator {
 
@@ -14,7 +14,7 @@ public class PresenceActivator extends HousekeepingActivator {
 
 	@Override
 	protected void startBundle() throws Exception {
-		registerService(PresenceService.class, new DummyPresenceService(this));
+		//registerService(PresenceStatusService.class, new DummyPresenceService(this));
 	}
 
 

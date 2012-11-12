@@ -47,37 +47,65 @@
  *
  */
 
-package com.openexchange.realtime.presence;
+package com.openexchange.realtime.presence.hazelcast.impl;
 
+import java.util.Collection;
+import java.util.Map;
+import com.hazelcast.core.HazelcastInstance;
 import com.openexchange.exception.OXException;
 import com.openexchange.realtime.packet.ID;
-import com.openexchange.realtime.packet.PresenceState;
+import com.openexchange.realtime.presence.PresenceData;
+import com.openexchange.realtime.presence.PresenceStatusService;
+import com.openexchange.realtime.util.IDMap;
 import com.openexchange.tools.session.ServerSession;
 
 /**
- * {@link PresenceService}
+ * {@link HazelcastPresenceStatusServiceImpl} - Hazelcast based PresenceStatusService that is implemented via a distributed Map containing
+ * <ID, PresenceData> pairs.
  * 
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
-public interface PresenceService {
+public class HazelcastPresenceStatusServiceImpl implements PresenceStatusService {
+    
+    private HazelcastInstance hazelcastInstance;
+    private Map<ID, PresenceData> statusMap;
 
-    /**
-     * Change the PresenceStatus of an ID.
-     * 
-     * @param id ID that wants to change its PresenceStatus
-     * @param status    The new PresenceStatus
-     * @param message   The message for the new PresenceStatus
-     * @param session   The associated ServerSession
-     * @throws OXException If changing the PresenceStatus fails
-     */
-    public void changePresenceStatus(ID id, PresenceData status, ServerSession session) throws OXException;
+    
+    public HazelcastPresenceStatusServiceImpl(HazelcastInstance hazelcastInstance) {
+        super();
+        this.hazelcastInstance = hazelcastInstance;
+        this.statusMap = hazelcastInstance.getMap("com.openexchange.realtime.presence.hazelcast.statusMap");
+        
+    }
 
-    /**
-     * Get the current PresenceStatus of an ID.
-     * 
-     * @param id The ID whose PresenceStatus should be queried
-     * @return The current PresenceStatus of ID or null if we aren't allowed to see the PresenceStatus.
-     */
-    public PresenceData getPresenceStatus(ID id);
+    @Override
+    public void changePresenceStatus(ID id, PresenceData status, ServerSession session) throws OXException {
+        if(id == null || status == null || session == null) {
+            throw new IllegalStateException("Obligatory parameter missing.");
+        }
+        statusMap.put(id, status);
+        
+    }
+
+    @Override
+    public PresenceData getPresenceStatus(ID id) {
+        if(id == null) {
+            throw new IllegalStateException("Obligatory parameter missing.");
+        }
+        PresenceData presenceData = statusMap.get(id);
+        if(presenceData == null) {
+            presenceData = PresenceData.OFFLINE;
+        }
+        return presenceData;
+    }
+
+    @Override
+    public IDMap<PresenceData> getPresenceStatus(Collection<ID> ids) {
+        IDMap<PresenceData> results = new IDMap<PresenceData>();
+        for (ID id : ids) {
+            results.put(id, getPresenceStatus(id));
+        }
+        return results;
+    }
+
 }

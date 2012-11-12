@@ -47,32 +47,52 @@
  *
  */
 
-package com.openexchange.realtime.presence.hazelcast.impl;
+package com.openexchange.realtime.presence;
 
+import java.util.Collection;
 import com.openexchange.exception.OXException;
 import com.openexchange.realtime.packet.ID;
-import com.openexchange.realtime.presence.PresenceService;
-import com.openexchange.realtime.presence.PresenceData;
+import com.openexchange.realtime.util.IDMap;
 import com.openexchange.tools.session.ServerSession;
 
-
 /**
- * {@link HazelcastPresenceServiceImpl}
- *
+ * {@link PresenceStatusService} - Service to store and query the PresenceStatus of currently connected clients.
+ * 
+ * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
-public class HazelcastPresenceServiceImpl implements PresenceService {
+public interface PresenceStatusService {
 
-    @Override
-    public void changePresenceStatus(ID id, PresenceData status, ServerSession session) throws OXException {
-        // TODO Auto-generated method stub
-        
-    }
+    /**
+     * Change the PresenceStatus of an ID. This involves:
+     * <ol>
+     * <li>Set status in central status registry</li>
+     * <li>Notify the user about the successful status update by sending him the new status back</li>
+     * <li>Get subscribed and active users from the roster of the client that sent the status update</li>
+     * <li>Notify users about the status update</li>
+     * <li>Stores the last time ID changed its PresenceStaus <delay xmlns="urn:xmpp:dely"></li>
+     * </ol>
+     * 
+     * @param client    Client that wants to change its PresenceStatus
+     * @param status    The new PresenceData
+     * @param session   The associated ServerSession
+     * @throws OXException If changing the PresenceStatus fails
+     */
+    public void changePresenceStatus(ID client, PresenceData status, ServerSession session) throws OXException;
 
-    @Override
-    public PresenceData getPresenceStatus(ID id) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
+    /**
+     * Get the current PresenceStatus of only one ID.
+     * 
+     * @param id The ID whose PresenceStatus should be queried
+     * @return The current PresenceStatus of ID, Offline if no information can be found for the ID
+     */
+    public PresenceData getPresenceStatus(ID id);
+    
+    /**
+     * Get the current PresenceStatus of one or more IDs.
+     * 
+     * @param ids The IDs whose PresenceStatus should be queried
+     * @return The current PresenceStatus of IDs, Offline if no information can be found for the ID
+     */
+    public IDMap<PresenceData> getPresenceStatus(Collection<ID> ids);
 }

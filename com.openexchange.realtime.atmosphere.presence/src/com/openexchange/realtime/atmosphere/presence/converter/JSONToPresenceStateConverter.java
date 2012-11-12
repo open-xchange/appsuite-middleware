@@ -80,7 +80,7 @@ public class JSONToPresenceStateConverter extends AbstractJSONConverter {
             }
         }
         if (presenceState == null) {
-            throw AtmospherePresenceExceptionCode.PRESENCE_DATA_ELEMENT_MALFORMED.create(Presence.SHOW_PATH);
+            throw AtmospherePresenceExceptionCode.PRESENCE_DATA_ELEMENT_MALFORMED.create(Presence.STATUS_PATH);
         }
         return presenceState;
     }
