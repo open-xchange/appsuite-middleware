@@ -50,8 +50,6 @@
 package com.openexchange.realtime.atmosphere.presence.osgi;
 
 import org.apache.commons.logging.Log;
-import org.osgi.framework.FrameworkEvent;
-import org.osgi.framework.FrameworkListener;
 import com.openexchange.conversion.simple.SimplePayloadConverter;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.realtime.atmosphere.payload.converter.primitive.ByteToJSONConverter;

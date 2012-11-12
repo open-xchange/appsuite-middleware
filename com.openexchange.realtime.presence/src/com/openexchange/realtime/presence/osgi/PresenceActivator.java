@@ -14,7 +14,7 @@ public class PresenceActivator extends HousekeepingActivator {
 
 	@Override
 	protected void startBundle() throws Exception {
-		registerService(PresenceStatusService.class, new DummyPresenceService(this));
+		//registerService(PresenceStatusService.class, new DummyPresenceService(this));
 	}
 
 
