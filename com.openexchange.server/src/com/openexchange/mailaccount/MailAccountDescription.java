@@ -148,7 +148,7 @@ public final class MailAccountDescription implements Serializable {
      */
     public MailAccountDescription() {
         super();
-        properties = Collections.emptyMap();
+        properties = new HashMap<String, String>(4);
         transportPort = 25;
         mailPort = 143;
         transportProtocol = "smtp";
@@ -216,6 +216,9 @@ public final class MailAccountDescription implements Serializable {
      * @return The reply-to address
      */
     public String getReplyTo() {
+        if (isEmpty(replyTo)) {
+            return properties.get("replyto");
+        }
         return replyTo;
     }
 
@@ -601,6 +604,11 @@ public final class MailAccountDescription implements Serializable {
      */
     public void setReplyTo(final String replyTo) {
         this.replyTo = replyTo;
+        if (isEmpty(replyTo)) {
+            properties.remove("replyto");
+        } else {
+            properties.put("replyto", replyTo);
+        }
     }
 
     /**
@@ -933,9 +941,9 @@ public final class MailAccountDescription implements Serializable {
      */
     public void setProperties(final Map<String, String> properties) {
         if (null == properties) {
-            this.properties = Collections.emptyMap();
+            this.properties = new HashMap<String, String>(4);
         } else if (properties.isEmpty()) {
-            this.properties = Collections.emptyMap();
+            this.properties = new HashMap<String, String>(4);
         } else {
             for (final Map.Entry<String, String> e : properties.entrySet()) {
                 if ("replyto".equals(e.getKey())) {
@@ -956,7 +964,7 @@ public final class MailAccountDescription implements Serializable {
      */
     public void addProperty(final String name, final String value) {
         if (properties.isEmpty()) {
-            properties = new HashMap<String, String>();
+            properties = new HashMap<String, String>(4);
         }
         if ("replyto".equals(name)) {
             replyTo = value;
