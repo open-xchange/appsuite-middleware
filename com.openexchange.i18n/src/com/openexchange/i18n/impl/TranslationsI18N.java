@@ -87,6 +87,10 @@ public class TranslationsI18N implements I18nService {
     public String toString() {
         StringBuilder builder = new StringBuilder(64);
         builder.append('{');
+        final Locale locale = getLocale();
+        if (null != locale) {
+            builder.append("locale=").append(locale);
+        }
         if (translations != null) {
             builder.append("translations=").append(translations);
         }
