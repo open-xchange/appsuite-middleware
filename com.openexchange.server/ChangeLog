@@ -1,6 +1,7 @@
 * 2012-11-12 - thorben.betten@open-xchange.com
 
  - Fix for bug 22116: Added sanitizing method to look-up possibly misspelled printf-style identifiers
+ - Fix for bug 23683: Handle possible NPE gracefully with a proper error code
 
 * 2012-11-11 - thorben.betten@open-xchange.com
 
