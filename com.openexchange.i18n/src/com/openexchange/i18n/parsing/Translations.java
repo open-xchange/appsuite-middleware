@@ -95,7 +95,7 @@ public class Translations {
             builder.append("locale=").append(locale).append(", ");
         }
         if (transMap != null) {
-            builder.append("transMap=").append(transMap);
+            builder.append("translation-map=").append(transMap);
         }
         builder.append('}');
         return builder.toString();
