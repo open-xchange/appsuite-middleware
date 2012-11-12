@@ -59,9 +59,13 @@ import java.util.Set;
  */
 public class Translations {
 
-    private final Map<String, String> transMap = new HashMap<String, String>();
+    private final Map<String, String> transMap;
+    private Locale locale;
 
-    private Locale locale = null;
+    public Translations() {
+        super();
+        transMap = new HashMap<String, String>();
+    }
 
     public String translate(final String original) {
         return transMap.get(original);
@@ -82,4 +86,19 @@ public class Translations {
     public void setLocale(final Locale locale) {
         this.locale = locale;
     }
+
+    @Override
+    public String toString() {
+        StringBuilder builder = new StringBuilder(64);
+        builder.append('{');
+        if (locale != null) {
+            builder.append("locale=").append(locale).append(", ");
+        }
+        if (transMap != null) {
+            builder.append("transMap=").append(transMap);
+        }
+        builder.append('}');
+        return builder.toString();
+    }
+
 }
