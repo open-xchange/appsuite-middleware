@@ -1,3 +1,7 @@
+* 2012-11-12 - thorben.betten@open-xchange.com
+
+ - Fix for bug 22116: Added sanitizing method to look-up possibly misspelled printf-style identifiers
+
 * 2012-11-11 - thorben.betten@open-xchange.com
 
  - Fix for bug 23689: Avoid NPE and throw a more meaningful SOAP fault
