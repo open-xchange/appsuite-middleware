@@ -311,7 +311,7 @@ public final class ByteChunk {
         // If the buffer is empty and the source is going to fill up all the
         // space in buffer, may as well write it directly to the output,
         // and avoid an extra copy
-        if (optimizedWrite && len == limit && end == start && out != null) {
+        if (out != null && optimizedWrite && len == limit && end == start) {
             out.realWriteBytes(src, off, len);
             return;
         }
@@ -348,6 +348,17 @@ public final class ByteChunk {
         System.arraycopy(src, (off + len) - remain, buff, end, remain);
         end += remain;
 
+    }
+
+    /**
+     * Append bytes.
+     */
+    public void appendBytes(final byte src[], final int off, final int len) {
+        // will grow, up to limit
+        makeSpace(len);
+
+        System.arraycopy(src, off, buff, end, len);
+        end += len;
     }
 
     // -------------------- Removing data from the buffer --------------------

@@ -15,5 +15,6 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-6.22.1,open-xchange-ui7-backend"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-6.22.1,open-xchange-freebusy"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-6.22.1,open-xchange-freebusy-ews"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-6.22.1,open-xchange-sessionstorage-hazelcast"/>
 </provider>
 </psf>

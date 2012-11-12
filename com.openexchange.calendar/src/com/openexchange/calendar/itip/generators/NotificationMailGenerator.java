@@ -183,14 +183,8 @@ public class NotificationMailGenerator implements ITipMailGenerator {
             if (participant.hasRole(ITipRole.ON_BEHALF_OF)) {
             	this.onBehalfOf = participant;
             }
-            if (onBehalfOf.getId() != user.getId()) {
-                if (participant.getIdentifier() == onBehalfOf.getId()) {
-                    this.actor = participant;
-                }
-            } else {
-                if (participant.getIdentifier() == user.getId()) {
-                    this.actor = participant;
-                }
+            if (participant.getIdentifier() == user.getId()) {
+                this.actor = participant;
             }
         }
         if (this.actor == null) {
@@ -395,7 +389,7 @@ public class NotificationMailGenerator implements ITipMailGenerator {
     protected NotificationMail reply(final NotificationParticipant recipient, final ConfirmStatus confirmStatus) throws OXException {
         final NotificationMail mail = new NotificationMail();
         mail.setRecipient(recipient);
-        mail.setSender(actor);
+        mail.setSender(onBehalfOf != null ? onBehalfOf : actor);
         mail.setStateType(getStateTypeForStatus(confirmStatus));
         initMail(mail);
 
@@ -411,7 +405,7 @@ public class NotificationMailGenerator implements ITipMailGenerator {
                 reply.set(field, appointment.get(field));
             }
         }
-        final UserParticipant userParticipant = new UserParticipant(actor.getIdentifier());
+        final UserParticipant userParticipant = new UserParticipant((onBehalfOf != null ? onBehalfOf : actor).getIdentifier());
         userParticipant.setConfirm(confirmStatus.getId());
         reply.setParticipants(Arrays.asList((Participant) userParticipant));
         reply.setUsers(Arrays.asList(userParticipant));
@@ -980,7 +974,10 @@ public class NotificationMailGenerator implements ITipMailGenerator {
                 if (changed.size() > 1) {
                     return stateChanged = false;
                 }
-                final String identifier = Integer.toString(actor.getIdentifier());
+                String identifier = Integer.toString(actor.getIdentifier());
+                if (onBehalfOf != null) {
+                    identifier = Integer.toString(onBehalfOf.getIdentifier());
+                }
                 for (final Change change : changed) {
                     if (change.getIdentifier().equals(identifier)) {
                         final ConfirmationChange confChange = (ConfirmationChange) change;
