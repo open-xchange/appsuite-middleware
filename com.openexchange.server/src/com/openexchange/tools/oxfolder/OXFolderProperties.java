@@ -69,7 +69,6 @@ import com.openexchange.cache.impl.FolderQueryCacheManager;
 import com.openexchange.cache.registry.CacheAvailabilityListener;
 import com.openexchange.cache.registry.CacheAvailabilityRegistry;
 import com.openexchange.config.ConfigurationService;
-import com.openexchange.config.PropertyListener;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
@@ -106,8 +105,6 @@ public final class OXFolderProperties implements Initialization, CacheAvailabili
      * Fields
      */
     private final AtomicBoolean started = new AtomicBoolean();
-
-    private PropertyListener propertyListener;
 
     private boolean enableDBGrouping = true;
 
@@ -148,17 +145,6 @@ public final class OXFolderProperties implements Initialization, CacheAvailabili
             LOG.error("Folder properties cannot be stopped since they have not been started before", new Throwable());
             return;
         }
-        {
-            /*
-             * Remove listener from property
-             */
-            final ConfigurationService configurationService = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
-            if (configurationService != null) {
-                configurationService.removePropertyListener("ENABLE_INTERNAL_USER_EDIT", propertyListener);
-            } else if (LOG.isDebugEnabled()) {
-                LOG.debug("Cannot look-up configuration service to remove property listener.");
-            }
-        }
         final CacheAvailabilityRegistry reg = CacheAvailabilityRegistry.getInstance();
         if (reg != null) {
             reg.unregisterListener(this);
@@ -196,7 +182,6 @@ public final class OXFolderProperties implements Initialization, CacheAvailabili
 
     private void reset() {
         enableSharedFolderCaching = true;
-        propertyListener = null;
         enableDBGrouping = true;
         enableFolderCache = true;
         ignoreSharedAddressbook = false;
