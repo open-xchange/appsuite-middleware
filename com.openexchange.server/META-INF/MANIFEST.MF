@@ -408,3 +408,4 @@ Bundle-ClassPath: .,
  lib/jaudiotagger-2.0.3.jar,
  lib/xmpcore.jar,
  lib/metadata-extractor-2.6.1.jar
+
