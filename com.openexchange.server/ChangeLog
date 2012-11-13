@@ -18,6 +18,7 @@
  - Fix for bug 23707: Fixed creating an OAuth account
  - Fix for bug 23399: Don't quote non-ascii characters in address' unicode representation
  - Fix for bug 23714: Handle NPE gracefully
+ - Fix for bug 23718: Check against local host name and address
 
 * 2012-11-12 - thorben.betten@open-xchange.com
 
