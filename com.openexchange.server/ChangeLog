@@ -1,3 +1,7 @@
+* 2012-11-13 - thorben.betten@open-xchange.com
+
+ - Fix for bug 23700: Fixed publication link
+
 * 2012-11-12 - thorben.betten@open-xchange.com
 
  - Fix for bug 22116: Added sanitizing method to look-up possibly misspelled printf-style identifiers
