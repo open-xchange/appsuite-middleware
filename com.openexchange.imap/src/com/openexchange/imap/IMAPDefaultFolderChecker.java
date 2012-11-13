@@ -51,14 +51,18 @@ package com.openexchange.imap;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.Callable;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.Lock;
 import javax.mail.Folder;
+import javax.mail.FolderClosedException;
 import javax.mail.MessagingException;
 import javax.mail.MethodNotSupportedException;
+import javax.mail.StoreClosedException;
+import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.imap.cache.ListLsubCache;
@@ -391,7 +395,11 @@ public class IMAPDefaultFolderChecker {
     }
 
     protected static boolean isOverQuotaException(final MessagingException e) {
-        return (null != e && e.getMessage().toLowerCase(Locale.US).indexOf("quota") >= 0);
+        if (null == e) {
+            return false;
+        }
+        final String msg = e.getMessage().toLowerCase(Locale.US);
+        return (msg.indexOf("quota") >= 0 || msg.indexOf("limit") >= 0);
     }
 
     protected Callable<Object> performTaskFor(final int index, final String prefix, final String fullName, final String name, final char sep, final int type, final int subscribe, final AtomicBoolean modified, final MailSessionCache cache) throws OXException {
@@ -401,16 +409,32 @@ public class IMAPDefaultFolderChecker {
             } else {
                 setDefaultMailFolder(index, checkDefaultFolder(index, "", fullName, sep, type, subscribe, true, modified), cache);
             }
-            return null;
+        } catch (final FolderClosedException e) {
+            /*
+             * Not possible to retry since connection is broken
+             */
+            throw MimeMailException.handleMessagingException(e, imapConfig, session);
+        } catch (final StoreClosedException e) {
+            /*
+             * Not possible to retry since connection is broken
+             */
+            throw MimeMailException.handleMessagingException(e, imapConfig, session);
         } catch (final MessagingException e) {
             if (isOverQuotaException(e)) {
                 /*
                  * Special handling for over-quota error
                  */
+                LOG.warn("Couldn't check default folder due to exceeded quota restrictions: " + (null == fullName ? (prefix + name) : fullName), e);
                 setDefaultMailFolder(index, null, cache);
+                final OXException warning = MimeMailException.handleMessagingException(e, imapConfig, session).setCategory(Category.CATEGORY_WARNING);
+                imapStore.getImapAccess().addWarnings(Collections.singleton(warning));
             }
-            throw MimeMailException.handleMessagingException(e, imapConfig, session);
+            LOG.warn("Couldn't check default folder: " + (null == fullName ? (prefix + name) : fullName), e);
+            setDefaultMailFolder(index, null, cache);
+            final OXException warning = MimeMailException.handleMessagingException(e, imapConfig, session).setCategory(Category.CATEGORY_WARNING);
+            imapStore.getImapAccess().addWarnings(Collections.singleton(warning));
         }
+        return null;
     }
 
     protected String[] getDefaultFolderPrefix(final IMAPFolder inboxFolder, final ListLsubEntry inboxListEntry, final MailSessionCache mailSessionCache) throws MessagingException, OXException {
@@ -609,34 +633,7 @@ public class IMAPDefaultFolderChecker {
                     if (isOverQuotaException(e)) {
                         throw e;
                     }
-                    if (!retry) {
-                        return fullName;
-                    }
-                    if (MailAccount.DEFAULT_ID == accountId) {
-                        throw e;
-                    }
-                    String prfx;
-                    {
-                        final ListLsubEntry inboxEntry;
-                        if (modified.get()) {
-                            inboxEntry = ListLsubCache.getActualLISTEntry("INBOX", accountId, imapStore, session);
-                        } else {
-                            inboxEntry = ListLsubCache.getCachedLISTEntry("INBOX", accountId, imapStore, session);
-                        }
-                        if (null != inboxEntry && inboxEntry.exists()) {
-                            prfx = inboxEntry.hasInferiors() ? ("INBOX" + sep) : ("");
-                        } else {
-                            prfx = "";
-                        }
-                    }
-                    if ((0 == prfx.length() && fullName.indexOf(sep) < 0) || (fullName.startsWith(prfx, 0))) {
-                        // No need to retry with same prefix
-                        throw e;
-                    }
-                    LOG.warn("Creating default folder by full name \"" + fullName + "\" failed. Retry with prefix \"" + prfx + "\".", e);
-                    ListLsubCache.clearCache(accountId, session);
-                    modified.set(true);
-                    throw new RetryOtherPrefixException(prfx, e.getMessage(), e);
+                    throw e;
                 }
             }
             /*
@@ -678,11 +675,7 @@ public class IMAPDefaultFolderChecker {
                     if (isOverQuotaException(e)) {
                         throw e;
                     }
-                    final String prfx = prefixLen == 0 ? "INBOX" + sep : "";
-                    LOG.warn("Creating default folder by full name \"" + fullName + "\" failed. Retry with prefix \"" + prfx + "\".", e);
-                    ListLsubCache.clearCache(accountId, session);
-                    modified.set(true);
-                    throw new RetryOtherPrefixException(prfx, e.getMessage(), e);
+                    throw e;
                 }
             } else {
                 // Must not edit default mail account. Try to create IMAP folder
@@ -695,12 +688,7 @@ public class IMAPDefaultFolderChecker {
                     if (isOverQuotaException(e)) {
                         throw e;
                     }
-                    LOG.warn(
-                        new StringBuilder(64).append("Creation of non-existing default IMAP folder \"").append(fullName).append(
-                            "\" failed.").toString(),
-                        e);
-                    ListLsubCache.clearCache(accountId, session);
-                    modified.set(true);
+                    throw e;
                 }
             }
         }
@@ -754,22 +742,6 @@ public class IMAPDefaultFolderChecker {
      */
     private void setSeparator(final char separator, final MailSessionCache mailSessionCache) {
         mailSessionCache.putParameter(accountId, MailSessionParameterNames.getParamSeparator(), Character.valueOf(separator));
-    }
-
-    protected static final class RetryOtherPrefixException extends RuntimeException {
-
-        private static final long serialVersionUID = 544473465523324664L;
-
-        private final String prefix;
-
-        public RetryOtherPrefixException(final String prefix, final String message, final Throwable cause) {
-            super(message, cause);
-            this.prefix = prefix;
-        }
-
-        public String getPrefix() {
-            return prefix;
-        }
     }
 
 }
