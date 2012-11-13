@@ -1,3 +1,8 @@
+* 2012-11-13 - marcus.klein@open-xchange.com
+
+ - Fix for bug 23712: Path in import.properties is still necessary because configuration files for CVS import are not located in the
+   configuration directory.
+
 * 2012-11-13 - jan.bauerdick@open-xchange.com
 
  - Dropped hazelcast.xml config file
