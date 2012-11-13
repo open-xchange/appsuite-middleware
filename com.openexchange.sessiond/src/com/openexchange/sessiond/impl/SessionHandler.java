@@ -1226,7 +1226,7 @@ public final class SessionHandler {
             return ThreadPools.getThreadPool().submit(c).get(timeout(), TimeUnit.MILLISECONDS);
         } catch (final InterruptedException e) {
             Thread.currentThread().interrupt();
-            throw new IllegalStateException(e.getMessage(), e);
+            return defaultValue;
         } catch (final ExecutionException e) {
             ThreadPools.launderThrowable(e, OXException.class);
             return defaultValue;

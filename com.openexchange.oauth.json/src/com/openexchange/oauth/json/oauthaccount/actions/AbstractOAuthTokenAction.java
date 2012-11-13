@@ -84,9 +84,6 @@ public abstract class AbstractOAuthTokenAction extends AbstractOAuthAJAXActionSe
         String oauthToken = request.getParameter(OAuthConstants.URLPARAM_OAUTH_TOKEN);
         if (oauthToken == null) {
             oauthToken = request.getParameter("access_token");
-            if (oauthToken == null) {
-                throw AjaxExceptionCodes.MISSING_PARAMETER.create(OAuthConstants.URLPARAM_OAUTH_TOKEN);
-            }
         }
         final String uuid = request.getParameter(OAuthConstants.SESSION_PARAM_UUID);
         if (uuid == null) {
@@ -103,9 +100,6 @@ public abstract class AbstractOAuthTokenAction extends AbstractOAuthAJAXActionSe
          * The OAuth verifier (PIN)
          */
         final String oauthVerfifier = request.getParameter(OAuthConstants.URLPARAM_OAUTH_VERIFIER);
-        if (isEmpty(oauthVerfifier)) {
-            throw AjaxExceptionCodes.MISSING_PARAMETER.create(OAuthConstants.URLPARAM_OAUTH_VERIFIER);
-        }
         /*
          * Invoke
          */

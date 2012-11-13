@@ -1,3 +1,22 @@
+* 2012-11-13 - jan.bauerdick@open-xchange.com
+
+ - Dropped hazelcast.xml config file
+
+* 2012-11-13 - martin.herfurth@open-xchange.com
+
+ - Fix for bug 23701: Fixed side effect of bugfix for 22116.
+
+* 2012-11-13 - thorben.betten@open-xchange.com
+
+ - Fix for bug 23700: Fixed publication link
+ - Fix for bug 23705: Deal with InterruptedException gracefully
+ - Fix for bug 23707: Fixed creating an OAuth account
+
+* 2012-11-12 - thorben.betten@open-xchange.com
+
+ - Fix for bug 22116: Added sanitizing method to look-up possibly misspelled printf-style identifiers
+ - Fix for bug 23683: Handle possible NPE gracefully with a proper error code
+
 * 2012-11-11 - thorben.betten@open-xchange.com
 
  - Fix for bug 23689: Avoid NPE and throw a more meaningful SOAP fault

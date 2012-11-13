@@ -52,6 +52,8 @@ package com.openexchange.calendar.itip;
 import java.text.DateFormat;
 import java.util.Calendar;
 import java.util.Locale;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.i18n.tools.StringHelper;
 
@@ -219,6 +221,26 @@ public class HumanReadableRecurrences {
     }
 
     private String format(Locale locale, String format, Object... args) {
-        return String.format(StringHelper.valueOf(locale).getString(format), args);
+        return String.format(saneFormatString(StringHelper.valueOf(locale).getString(format)), args);
+    }
+
+    private static final Pattern SANE_FORMAT = Pattern.compile("(%[0-9]+)?" + Pattern.quote("$") + "(\\s|$)");
+    private static String saneFormatString(final String format) {
+        if (isEmpty(format) || format.indexOf('$') < 0) {
+            return format;
+        }
+        return SANE_FORMAT.matcher(format).replaceAll("$1" + Matcher.quoteReplacement("$s") + "$2");
+    }
+
+    private static boolean isEmpty(final String string) {
+        if (null == string) {
+            return true;
+        }
+        final int len = string.length();
+        boolean isWhitespace = true;
+        for (int i = 0; isWhitespace && i < len; i++) {
+            isWhitespace = Character.isWhitespace(string.charAt(i));
+        }
+        return isWhitespace;
     }
 }

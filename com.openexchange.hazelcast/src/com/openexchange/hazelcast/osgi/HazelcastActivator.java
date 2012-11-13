@@ -20,11 +20,18 @@ import org.osgi.framework.BundleException;
 import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
+import com.hazelcast.config.AsymmetricEncryptionConfig;
 import com.hazelcast.config.Config;
-import com.hazelcast.config.InMemoryXmlConfig;
+import com.hazelcast.config.ExecutorConfig;
+import com.hazelcast.config.GroupConfig;
+import com.hazelcast.config.Interfaces;
 import com.hazelcast.config.Join;
+import com.hazelcast.config.ManagementCenterConfig;
 import com.hazelcast.config.MapConfig;
 import com.hazelcast.config.NetworkConfig;
+import com.hazelcast.config.PartitionGroupConfig;
+import com.hazelcast.config.SSLConfig;
+import com.hazelcast.config.SymmetricEncryptionConfig;
 import com.hazelcast.config.TcpIpConfig;
 import com.hazelcast.core.Hazelcast;
 import com.hazelcast.core.HazelcastInstance;
@@ -126,8 +133,11 @@ public class HazelcastActivator extends HousekeepingActivator {
         track(ClusterDiscoveryService.class, new ServiceTrackerCustomizer<ClusterDiscoveryService, ClusterDiscoveryService>() {
 
             private final boolean isSingleton = true;
+
             private final LinkedList<ServiceContainer<ClusterDiscoveryService>> deactivated = new LinkedList<ServiceContainer<ClusterDiscoveryService>>();
+
             private int clusterDiscoveryServiceRanking = 0;
+
             private ClusterDiscoveryService clusterDiscoveryService = null;
 
             @Override
@@ -137,7 +147,8 @@ public class HazelcastActivator extends HousekeepingActivator {
                     if (!clusterDiscoveryServiceReference.compareAndSet(null, discovery)) {
                         final StringBuilder msg = new StringBuilder();
                         msg.append("\n\t").append(ClusterDiscoveryService.class.getName()).append(" is a singleton service!");
-                        msg.append("\n\tThis service is already tracked as \"").append(clusterDiscoveryServiceReference.get().getClass().getName()).append("\".");
+                        msg.append("\n\tThis service is already tracked as \"").append(
+                            clusterDiscoveryServiceReference.get().getClass().getName()).append("\".");
                         msg.append("\n\tDenying \"").append(discovery.getClass().getName()).append("\".");
                         final BundleException be = new BundleException(msg.toString(), BundleException.ACTIVATOR_ERROR);
                         throw new IllegalStateException(msg.toString(), be);
@@ -159,12 +170,14 @@ public class HazelcastActivator extends HousekeepingActivator {
                         return;
                     }
                     shutdown();
-                    deactivated.addFirst(new ServiceContainer<ClusterDiscoveryService>(clusterDiscoveryService, clusterDiscoveryServiceRanking));
+                    deactivated.addFirst(new ServiceContainer<ClusterDiscoveryService>(
+                        clusterDiscoveryService,
+                        clusterDiscoveryServiceRanking));
                 }
                 clusterDiscoveryService = discovery;
                 clusterDiscoveryServiceRanking = ranking;
                 /*
-                 * Do start-up 
+                 * Do start-up
                  */
                 final long st = System.currentTimeMillis();
                 final List<InetAddress> nodes = discovery.getNodes();
@@ -275,8 +288,8 @@ public class HazelcastActivator extends HousekeepingActivator {
      */
     long getDelay() {
         return -1L;
-        //final String delay = getService(ConfigurationService.class).getProperty("com.openexchange.hazelcast.startupDelay", "60000");
-        //return TimeSpanParser.parseTimespan(delay).longValue();
+        // final String delay = getService(ConfigurationService.class).getProperty("com.openexchange.hazelcast.startupDelay", "60000");
+        // return TimeSpanParser.parseTimespan(delay).longValue();
     }
 
     public static final class UtilCommandProvider implements CommandProvider {
@@ -350,7 +363,7 @@ public class HazelcastActivator extends HousekeepingActivator {
             if (!cur.removeAll(members)) {
                 return InitMode.NONE;
             }
-            final long st = System.currentTimeMillis();            
+            final long st = System.currentTimeMillis();
             tcpIpConfig.clear();
             tcpIpConfig.setMembers(new ArrayList<String>(cur));
             hazelcastInstance.getLifecycleService().restart();
@@ -381,7 +394,7 @@ public class HazelcastActivator extends HousekeepingActivator {
                 }
                 final long st = System.currentTimeMillis();
                 final Config config = prevHazelcastInstance.getConfig();
-                final InitMode configMode = configureNetworkJoin(nodes, true, config, logger);
+                final InitMode configMode = configureNetworkJoin(nodes, true, config, logger, null);
                 if (null != configMode && InitMode.NONE.equals(configMode)) {
                     return InitMode.NONE;
                 }
@@ -394,10 +407,40 @@ public class HazelcastActivator extends HousekeepingActivator {
             /*
              * Create configuration from XML data
              */
-            final String xml = getService(ConfigurationService.class).getText("hazelcast.xml");
-            final Config config = new InMemoryXmlConfig(xml);
+            // final String xml = getService(ConfigurationService.class).getText("hazelcast.xml");
+            // final Config config = new InMemoryXmlConfig(xml);
+            ConfigurationService configService = getService(ConfigurationService.class);
+            Config config = new Config();
+            final String groupName = configService.getProperty("com.openexchange.hazelcast.groupname");
+            if (!isEmpty(groupName)) {
+                final String groupPassword = configService.getProperty("com.openexchange.hazelcast.grouppassword");
+                final GroupConfig groupConfig = new GroupConfig(groupName, groupPassword);
+                config.setGroupConfig(groupConfig);
+            }
+            final boolean jmxEnabled = configService.getBoolProperty("com.openexchange.hazelcast.jmx", true);
+            if (jmxEnabled) {
+                config.setProperty("hazelcast.jmx", "true");
+                config.setProperty("hazelcast.jmx.detailed", "true");
+            }
             config.setProperty(GroupProperties.PROP_REDO_GIVE_UP_THRESHOLD, "10");
-            configureNetworkJoin(nodes, false, config, logger);
+            // ManagementCenterConfig
+            ManagementCenterConfig managementCenterConfig = new ManagementCenterConfig();
+            managementCenterConfig.setEnabled(false);
+            managementCenterConfig.setUrl("http://localhost:8080/mancenter");
+            config.setManagementCenterConfig(managementCenterConfig);
+            // PartitionGroupConfig
+            PartitionGroupConfig partitionGroupConfig = new PartitionGroupConfig();
+            partitionGroupConfig.setEnabled(false);
+            config.setPartitionGroupConfig(partitionGroupConfig);
+            // ExecutorConfig
+            ExecutorConfig executorConfig = new ExecutorConfig();
+            executorConfig.setCorePoolSize(16);
+            executorConfig.setMaxPoolSize(64);
+            executorConfig.setKeepAliveSeconds(60);
+            config.setExecutorConfig(executorConfig);
+            // Configure network join
+            final String interfaces = configService.getProperty("com.openexchange.hazelcast.interfaces");
+            configureNetworkJoin(nodes, false, config, logger, interfaces);
             // for (final InetAddress address : nodes) {
             // tcpIpConfig.addAddress(new Address(address, config.getNetworkConfig().getPort()));
             // }
@@ -408,7 +451,7 @@ public class HazelcastActivator extends HousekeepingActivator {
             // false);
             final HazelcastInstance hazelcastInstance = Hazelcast.newHazelcastInstance(config);
             hazelcastInstance.getLifecycleService().addLifecycleListener(new LifecycleListener() {
-                
+
                 @Override
                 public void stateChanged(final LifecycleEvent event) {
                     final LifecycleState state = event.getState();
@@ -439,11 +482,32 @@ public class HazelcastActivator extends HousekeepingActivator {
         }
     }
 
-    private InitMode configureNetworkJoin(final List<InetAddress> nodes, final boolean append, final Config config, final Log logger) {
+    private InitMode configureNetworkJoin(final List<InetAddress> nodes, final boolean append, final Config config, final Log logger, final String interfacesList) {
         /*
          * Get reference to network join
          */
-        final Join join = config.getNetworkConfig().getJoin();
+        NetworkConfig networkConfig = config.getNetworkConfig();
+        if (!isEmpty(interfacesList)) {
+            final String[] ips = interfacesList.split(" *, *");
+            if (null != ips && ips.length > 0) {
+                Interfaces interfaces = new Interfaces();
+                interfaces.setEnabled(true);
+                for (final String ip : ips) {
+                    interfaces.addInterface(ip);
+                }
+                networkConfig.setInterfaces(interfaces);
+            }
+        }
+        AsymmetricEncryptionConfig asymmetricEncryptionConfig = new AsymmetricEncryptionConfig();
+        asymmetricEncryptionConfig.setEnabled(false);
+        networkConfig.setAsymmetricEncryptionConfig(asymmetricEncryptionConfig);
+        SymmetricEncryptionConfig symmetricEncryptionConfig = new SymmetricEncryptionConfig();
+        symmetricEncryptionConfig.setEnabled(false);
+        networkConfig.setSymmetricEncryptionConfig(symmetricEncryptionConfig);
+        SSLConfig sslConfig = new SSLConfig();
+        sslConfig.setEnabled(false);
+        networkConfig.setSSLConfig(sslConfig);
+        final Join join = networkConfig.getJoin();
         if (append) {
             /*
              * Append to existing network configuration
@@ -479,8 +543,8 @@ public class HazelcastActivator extends HousekeepingActivator {
             tcpIpConfig.clear();
             tcpIpConfig.setMembers(new ArrayList<String>(cur));
         } else {
-            config.getNetworkConfig().setPort(NetworkConfig.DEFAULT_PORT);
-            config.getNetworkConfig().setPortAutoIncrement(true);
+            networkConfig.setPort(NetworkConfig.DEFAULT_PORT);
+            networkConfig.setPortAutoIncrement(true);
             /*
              * Disable: Multicast, AWS and ...
              */
@@ -525,6 +589,18 @@ public class HazelcastActivator extends HousekeepingActivator {
     @Override
     protected void stopBundle() throws Exception {
         super.stopBundle();
+    }
+
+    private static boolean isEmpty(final String string) {
+        if (null == string) {
+            return true;
+        }
+        final int len = string.length();
+        boolean isWhitespace = true;
+        for (int i = 0; isWhitespace && i < len; i++) {
+            isWhitespace = Character.isWhitespace(string.charAt(i));
+        }
+        return isWhitespace;
     }
 
 }
