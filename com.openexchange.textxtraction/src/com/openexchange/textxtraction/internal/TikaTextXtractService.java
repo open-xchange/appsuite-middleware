@@ -214,8 +214,12 @@ public class TikaTextXtractService extends AbstractTextXtractService {
         }
         if (null != optMimeType) {
             if (optMimeType.toLowerCase(Locale.ENGLISH).startsWith("text/htm")) {
-                Source source = new Source(content);
-                return new Renderer(new Segment(source, 0, source.getEnd())).setMaxLineLength(9999).setIncludeHyperlinkURLs(false).toString();
+                try {
+                    Source source = new Source(content);
+                    return new Renderer(new Segment(source, 0, source.getEnd())).setMaxLineLength(9999).setIncludeHyperlinkURLs(false).toString();
+                } catch (final StackOverflowError parserOverflow) {
+                    // Ignore
+                }
             }
         }
         return super.extractFrom(content, optMimeType);

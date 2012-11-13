@@ -71,6 +71,7 @@ import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
 import com.openexchange.userconf.UserConfigurationService;
+import org.json.JSONObject;
 
 /**
  * {@link AbstractSubscribeService}
@@ -165,7 +166,11 @@ public abstract class AbstractSubscribeService implements SubscribeService {
     }
 
     public void modifyIncoming(final Subscription subscription) throws OXException {
-
+    	Object accountIDObject = subscription.getConfiguration().get("account");
+        Integer accountId = null;
+        if (JSONObject.NULL == accountIDObject) { 
+        	throw new OXException(90111, SubscriptionErrorStrings.NO_OAUTH_ACCOUNT_GIVEN);
+    	}
     }
 
     public void modifyOutgoing(final Subscription subscription) throws OXException {

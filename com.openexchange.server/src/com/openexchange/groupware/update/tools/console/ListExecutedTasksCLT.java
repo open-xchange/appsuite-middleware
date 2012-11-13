@@ -52,6 +52,9 @@ package com.openexchange.groupware.update.tools.console;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -203,20 +206,39 @@ public class ListExecutedTasksCLT {
     private static final String[] COLUMNS = { "taskName", "successful", "lastModified" };
 
     private static void writeTasks(TabularData taskList) {
-        List<List<Object>> data = new ArrayList<List<Object>>();
+        final List<List<Object>> data = new ArrayList<List<Object>>();
         List<Object> valuesList = new ArrayList<Object>(COLUMNS.length);
-        for (String column : COLUMNS) {
+        for (final String column : COLUMNS) {
             valuesList.add(column);
         }
-        data.add(valuesList);
-        for (Object tmp : taskList.values()) {
-            CompositeData composite = (CompositeData) tmp;
+        final List<Object> hr = valuesList;
+        for (final Object tmp : taskList.values()) {
+            final CompositeData composite = (CompositeData) tmp;
             valuesList = new ArrayList<Object>(COLUMNS.length);
-            for (String column : COLUMNS) {
+            for (final String column : COLUMNS) {
                 valuesList.add(composite.get(column));
             }
             data.add(valuesList);
         }
+        valuesList = null;
+        // Sort rows
+        Collections.sort(data, new Comparator<List<Object>>() {
+
+            @Override
+            public int compare(final List<Object> o1, final List<Object> o2) {
+                final Object object1 = o1.get(2);
+                final Object object2 = o2.get(2);
+                if (null == object1) {
+                    return null == object2 ? 0 : -1;
+                }
+                if (null == object2) {
+                    return 1;
+                }
+                return ((Date) object1).compareTo((Date) object2);
+            }
+        });
+        // Add header row
+        data.add(0, hr);
         new TableWriter(System.out, FORMATS, data).write();
     }
 

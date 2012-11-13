@@ -247,6 +247,15 @@ public final class HttpServletRequestImpl implements HttpServletRequest, Paramet
     }
 
     /**
+     * Append specified bytes to buffer.
+     *
+     * @param bytes The bytes
+     */
+    public void appendToBuffer(final byte[] bytes) {
+        servletInputStream.appendToBuffer(bytes);
+    }
+
+    /**
      * Checks if this request's content type indicates the form data: <code>"application/x-www-form-urlencoded"</code>
      *
      * @return <code>true</code> if form data; otherwise <code>false</code>

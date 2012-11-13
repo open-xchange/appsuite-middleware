@@ -47,73 +47,53 @@
  *
  */
 
-package com.openexchange.subscribe.json.actions;
+package com.openexchange.contactcollector.preferences;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.config.ConfigurationService;
+import com.openexchange.contactcollector.osgi.CCServiceRegistry;
 import com.openexchange.exception.OXException;
-import com.openexchange.secret.SecretService;
-import com.openexchange.server.ServiceLookup;
-import com.openexchange.subscribe.Subscription;
-import com.openexchange.subscribe.json.SubscriptionJSONErrorMessages;
-import com.openexchange.subscribe.json.SubscriptionJSONWriter;
+import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.ldap.User;
+import com.openexchange.groupware.settings.IValueHandler;
+import com.openexchange.groupware.settings.PreferencesItemService;
+import com.openexchange.groupware.settings.ReadOnlyValue;
+import com.openexchange.groupware.settings.Setting;
+import com.openexchange.groupware.userconfiguration.UserConfiguration;
+import com.openexchange.session.Session;
 
 /**
- * {@link GetSubscriptionAction}
+ * {@link ContactCollectFolderDeleteDenied}
  *
- * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class GetSubscriptionAction extends AbstractSubscribeAction {
+public class ContactCollectFolderDeleteDenied implements PreferencesItemService {
 
-	public GetSubscriptionAction(ServiceLookup services) {
-		super();
-		this.services = services;
+    private static final String[] PATH = new String [] { "modules", "mail", "contactCollectFolderDeleteDenied" };
 
-	}
+    public ContactCollectFolderDeleteDenied() {
+        super();
+    }
 
-	@Override
-	public AJAXRequestResult perform(SubscribeRequest subscribeRequest)
-			throws OXException {
-		try {
-			JSONObject parameters = new JSONObject(subscribeRequest
-					.getRequestData().getParameters());
-			final int id;
-            try {
-                id = parameters.getInt("id");
-            } catch (final JSONException e) {
-                if (!parameters.hasAndNotNull("id")) {
-                    throw e;
-                }
-                final Object obj = parameters.get("id");
-                throw new JSONException("JSONObject[\"id\"] is not a number: " + obj);
+    @Override
+    public String[] getPath() {
+        return PATH;
+    }
+
+    @Override
+    public IValueHandler getSharedValue() {
+        return new ReadOnlyValue() {
+
+            @Override
+            public void getValue(final Session session, final Context ctx, final User user, final UserConfiguration userConfig, final Setting setting) throws OXException {
+                final ConfigurationService service = CCServiceRegistry.getInstance().getOptionalService(ConfigurationService.class);
+                final Boolean value = Boolean.valueOf(null != service && service.getBoolProperty("com.openexchange.contactcollector.folder.deleteDenied", false));
+                setting.setSingleValue(value);
             }
-			String source = "";
-			if (parameters.has("source")) {
-				source = parameters.getString("source");
-			}
-			final Subscription subscription = loadSubscription(
-					id,
-					subscribeRequest.getServerSession(),
-					source,
-					services.getService(SecretService.class).getSecret(
-							subscribeRequest.getServerSession()));
-			if (subscription == null) {
-				throw SubscriptionJSONErrorMessages.UNKNOWN_SUBSCRIPTION.create();
-			}
-			String urlPrefix = "";
-			if (subscribeRequest.getRequestData().getParameter("__serverURL") != null) {
-				urlPrefix = subscribeRequest.getRequestData().getParameter(
-						"__serverURL");
-			}
 
-			JSONObject json = new SubscriptionJSONWriter().write(subscription,
-					subscription.getSource().getFormDescription(), urlPrefix);
-			return new AJAXRequestResult(json, "json");
-		} catch (JSONException e) {
-		    throw SubscriptionJSONErrorMessages.THROWABLE.create(e, e.getMessage());
-		}
-
-	}
-
+            @Override
+            public boolean isAvailable(final UserConfiguration userConfig) {
+                return true;
+            }
+        };
+    }
 }

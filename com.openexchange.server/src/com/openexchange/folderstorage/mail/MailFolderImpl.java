@@ -89,6 +89,7 @@ import com.openexchange.mail.utils.MailFolderUtility;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.mailaccount.UnifiedInboxManagement;
 import com.openexchange.server.impl.OCLPermission;
+import com.openexchange.server.services.ServerServiceRegistry;
 
 /**
  * {@link MailFolderImpl} - A mail folder.
@@ -142,16 +143,11 @@ public final class MailFolderImpl extends AbstractFolder implements FolderExtens
 
     }
 
-    private MailFolderType mailFolderType;
-
+    private final MailFolderType mailFolderType;
     private final boolean cacheable;
-
     private final String fullName;
-
     private final int accountId;
-
     private final int userId;
-
     private final int contextId;
 
     private static final int BIT_USER_FLAG = (1 << 29);
@@ -240,7 +236,7 @@ public final class MailFolderImpl extends AbstractFolder implements FolderExtens
             }
         } else {
             mp = mailFolder.getOwnPermission();
-            mailFolderType = MailFolderType.NONE;
+            MailFolderType mailFolderType = MailFolderType.NONE;
             /*
              * Check if entity's permission allows to read the folder: Every mail folder listed is at least visible to user
              */
@@ -249,7 +245,8 @@ public final class MailFolderImpl extends AbstractFolder implements FolderExtens
                     pe.setFolderPermission(Permission.READ_FOLDER);
                 }
             }
-            final boolean translateDefaultFolders = MailServiceRegistry.getServiceRegistry().getService(ConfigurationService.class).getBoolProperty("com.openexchange.mail.translateDefaultFolders", true);
+            final ConfigurationService configurationService = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
+            final boolean translateDefaultFolders = null == configurationService || configurationService.getBoolProperty("com.openexchange.mail.translateDefaultFolders", true);
             if (mailFolder.containsDefaultFolderType()) {
                 switch (mailFolder.getDefaultFolderType()) {
                 case INBOX:
@@ -312,6 +309,7 @@ public final class MailFolderImpl extends AbstractFolder implements FolderExtens
             } else {
                 mailFolderType = MailFolderType.NONE;
             }
+            this.mailFolderType = mailFolderType;
         }
         if (!mailFolder.isHoldsFolders() && mp.canCreateSubfolders()) {
             // Cannot contain subfolders; therefore deny subfolder creation

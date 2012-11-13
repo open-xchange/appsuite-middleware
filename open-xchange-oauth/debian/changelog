@@ -1,3 +1,9 @@
+open-xchange-oauth (6.22.1-5) unstable; urgency=low
+
+  * Fifth release candidate for 6.22.1
+
+ -- Steffen Templin <marcus.klein@open-xchange.com>  Tue, 13 Nov 2012 13:59:25 +0100
+
 open-xchange-oauth (6.22.1-4) unstable; urgency=low
 
   * Fourth release candidate for 6.22.1
@@ -39,6 +45,18 @@ open-xchange-oauth (6.23.0-0) unstable; urgency=low
   * prepare for next EDP drop
 
  -- Steffen Templin <marcus.klein@open-xchange.com>  Mon, 03 Sep 2012 13:46:06 +0200
+
+open-xchange-oauth (6.22.0-7) unstable; urgency=low
+
+  * Build for patch 2012-10-31
+
+ -- Steffen Templin <marcus.klein@open-xchange.com>  Mon, 05 Nov 2012 15:46:06 +0100
+
+open-xchange-oauth (6.22.0-6) unstable; urgency=low
+
+  * Build for patch 2012-10-31
+
+ -- Steffen Templin <marcus.klein@open-xchange.com>  Wed, 31 Oct 2012 14:56:54 +0100
 
 open-xchange-oauth (6.22.0-5) unstable; urgency=low
 

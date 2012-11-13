@@ -2552,8 +2552,8 @@ msgid "Max. number of sessions exceeded for user %1$s in context %2$s"
 msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/sessiond/SessionExceptionMessages.java:76
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.sessionstorage.hazelcast/src/com/openexchange/sessionstorage/hazelcast/exceptions/OXHazelcastSessionStorageExceptionMessages.java:71
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.sessionstorage.nosql/src/com/openexchange/sessionstorage/nosql/exceptions/OXNoSQLSessionStorageExceptionMessages.java:71
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.sessionstorage/src/com/openexchange/sessionstorage/SessionStorageExceptionMessages.java:73
 msgid ""
 "Authentication identifier duplicate found. Existing session login: %1$s. "
 "Current denied login request: %2$s."
@@ -10306,64 +10306,81 @@ msgid "Could not find encryption key."
 msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.sessionstorage.hazelcast/src/com/openexchange/sessionstorage/hazelcast/exceptions/OXHazelcastSessionStorageExceptionMessages.java:63
+msgid "Error in config file."
+msgstr ""
+
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.sessionstorage.impl/src/com/openexchange/sessionstorage/impl/exceptions/OXSessionStorageExceptionMessages.java:69
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.sessionstorage.nosql/src/com/openexchange/sessionstorage/nosql/exceptions/OXNoSQLSessionStorageExceptionMessages.java:63
 msgid "Start of SessionStorageService failed."
 msgstr ""
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.sessionstorage.hazelcast/src/com/openexchange/sessionstorage/hazelcast/exceptions/OXHazelcastSessionStorageExceptionMessages.java:65
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.sessionstorage.impl/src/com/openexchange/sessionstorage/impl/exceptions/OXSessionStorageExceptionMessages.java:70
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.sessionstorage.nosql/src/com/openexchange/sessionstorage/nosql/exceptions/OXNoSQLSessionStorageExceptionMessages.java:65
 msgid "Saving session with sessionId %1$s failed."
 msgstr ""
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.sessionstorage.hazelcast/src/com/openexchange/sessionstorage/hazelcast/exceptions/OXHazelcastSessionStorageExceptionMessages.java:67
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.sessionstorage.impl/src/com/openexchange/sessionstorage/impl/exceptions/OXSessionStorageExceptionMessages.java:71
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.sessionstorage.nosql/src/com/openexchange/sessionstorage/nosql/exceptions/OXNoSQLSessionStorageExceptionMessages.java:67
 msgid "Lookup for session with sessionId %1$s failed."
 msgstr ""
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.sessionstorage.hazelcast/src/com/openexchange/sessionstorage/hazelcast/exceptions/OXHazelcastSessionStorageExceptionMessages.java:69
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.sessionstorage.impl/src/com/openexchange/sessionstorage/impl/exceptions/OXSessionStorageExceptionMessages.java:72
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.sessionstorage.nosql/src/com/openexchange/sessionstorage/nosql/exceptions/OXNoSQLSessionStorageExceptionMessages.java:69
 msgid "Removing session with sessionId %1$s failed."
-msgstr ""
-
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.sessionstorage.hazelcast/src/com/openexchange/sessionstorage/hazelcast/exceptions/OXHazelcastSessionStorageExceptionMessages.java:73
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.sessionstorage.nosql/src/com/openexchange/sessionstorage/nosql/exceptions/OXNoSQLSessionStorageExceptionMessages.java:73
-msgid "Operation %1$s not supported."
-msgstr ""
-
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.sessionstorage.hazelcast/src/com/openexchange/sessionstorage/hazelcast/exceptions/OXHazelcastSessionStorageExceptionMessages.java:75
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.sessionstorage.nosql/src/com/openexchange/sessionstorage/nosql/exceptions/OXNoSQLSessionStorageExceptionMessages.java:75
-msgid "Lookup for session with altId %1$s failed"
-msgstr ""
-
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.sessionstorage.hazelcast/src/com/openexchange/sessionstorage/hazelcast/exceptions/OXHazelcastSessionStorageExceptionMessages.java:77
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.sessionstorage.nosql/src/com/openexchange/sessionstorage/nosql/exceptions/OXNoSQLSessionStorageExceptionMessages.java:77
-msgid "No sessions found for user %1$s in context %2$s"
-msgstr ""
-
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.sessionstorage.hazelcast/src/com/openexchange/sessionstorage/hazelcast/exceptions/OXHazelcastSessionStorageExceptionMessages.java:79
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.sessionstorage.nosql/src/com/openexchange/sessionstorage/nosql/exceptions/OXNoSQLSessionStorageExceptionMessages.java:79
-msgid "No sessions found for context %1$s"
-msgstr ""
-
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.sessionstorage.hazelcast/src/com/openexchange/sessionstorage/hazelcast/exceptions/OXHazelcastSessionStorageExceptionMessages.java:81
-msgid "No sessions found by random token %1$s"
-msgstr ""
-
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.sessionstorage.hazelcast/src/com/openexchange/sessionstorage/hazelcast/exceptions/OXHazelcastSessionStorageExceptionMessages.java:83
-msgid "Error in config file."
 msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.sessionstorage.impl/src/com/openexchange/sessionstorage/impl/exceptions/OXSessionStorageExceptionMessages.java:73
 msgid "No session with sessionId %1$s found."
 msgstr ""
 
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.sessionstorage.nosql/src/com/openexchange/sessionstorage/nosql/exceptions/OXNoSQLSessionStorageExceptionMessages.java:73
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.sessionstorage/src/com/openexchange/sessionstorage/SessionStorageExceptionMessages.java:75
+msgid "Operation %1$s not supported."
+msgstr ""
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.sessionstorage.nosql/src/com/openexchange/sessionstorage/nosql/exceptions/OXNoSQLSessionStorageExceptionMessages.java:75
+msgid "Lookup for session with altId %1$s failed"
+msgstr ""
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.sessionstorage.nosql/src/com/openexchange/sessionstorage/nosql/exceptions/OXNoSQLSessionStorageExceptionMessages.java:77
+msgid "No sessions found for user %1$s in context %2$s"
+msgstr ""
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.sessionstorage.nosql/src/com/openexchange/sessionstorage/nosql/exceptions/OXNoSQLSessionStorageExceptionMessages.java:79
+msgid "No sessions found for context %1$s"
+msgstr ""
+
 #. No session found for identifier: %1$s
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.sessionstorage/src/com/openexchange/sessionstorage/SessionStorageExceptionMessages.java:65
 msgid "No session found for identifier: %1$s"
+msgstr ""
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.sessionstorage/src/com/openexchange/sessionstorage/SessionStorageExceptionMessages.java:67
+msgid "Saving session with session identifier %1$s failed."
+msgstr ""
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.sessionstorage/src/com/openexchange/sessionstorage/SessionStorageExceptionMessages.java:69
+msgid "Lookup for session with session identifier %1$s failed."
+msgstr ""
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.sessionstorage/src/com/openexchange/sessionstorage/SessionStorageExceptionMessages.java:71
+msgid "Removing session with session identifier %1$s failed."
+msgstr ""
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.sessionstorage/src/com/openexchange/sessionstorage/SessionStorageExceptionMessages.java:77
+msgid "Lookup for session with alternative identifier %1$s failed."
+msgstr ""
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.sessionstorage/src/com/openexchange/sessionstorage/SessionStorageExceptionMessages.java:79
+msgid "No sessions found for user %1$s in context %2$s."
+msgstr ""
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.sessionstorage/src/com/openexchange/sessionstorage/SessionStorageExceptionMessages.java:81
+msgid "No sessions found for context %1$s."
+msgstr ""
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.sessionstorage/src/com/openexchange/sessionstorage/SessionStorageExceptionMessages.java:83
+msgid "No sessions found by random token %1$s."
 msgstr ""
 
 #. *
@@ -10770,6 +10787,10 @@ msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe/src/com/openexchange/subscribe/SubscriptionErrorStrings.java:124
 msgid "You do not have the permission to complete this operation."
+msgstr ""
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe/src/com/openexchange/subscribe/SubscriptionErrorStrings.java:126
+msgid "You need to create an OAuth-account first to access this service."
 msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.templating/src/com/openexchange/templating/TemplateExceptionMessage.java:68

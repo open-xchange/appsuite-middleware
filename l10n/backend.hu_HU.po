@@ -27,8 +27,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: errors\n"
 "Report-Msgid-Bugs-To: \n"
-"PO-Revision-Date: 2012-10-03 01:11+0200\n"
-"Last-Translator: Gabor Kelemen <kelemeng at gnome dot hu>\n"
+"PO-Revision-Date: 2012-11-07 10:47+0100\n"
+"Last-Translator: Kalman Kemenczy <kkemenczy@opensuse.org>\n"
 "Language-Team: Hungarian <kde-l10n-hu@kde.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -36,7 +36,7 @@ msgstr ""
 "Language: hu\n"
 "#-#-#-#-#  server.hu_HU.po (evolution master)  #-#-#-#-#\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
-"X-Generator: Lokalize 1.4\n"
+"X-Generator: Lokalize 1.2\n"
 "#-#-#-#-#  errors.hu_HU.po (errors)  #-#-#-#-#\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 "X-Generator: Lokalize 1.0\n"
@@ -476,7 +476,8 @@ msgstr ""
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/Messages.java:71
 msgid ""
 "The organizer would like to cancel an appointment that could not be found."
-msgstr "A szervező törölni kíván egy nem található találkozót."
+msgstr ""
+"A szervező törölni kíván egy nem található találkozót."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/Messages.java:72
 msgid ""
@@ -741,7 +742,8 @@ msgstr "%1$s törölt egy találkozót az Ön nevében:"
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/Messages.java:194
 msgid ""
 "%1$s has deleted an appointment, or you have been removed as a participant:"
-msgstr "%1$s törölt egy találkozót, vagy Ön már nem résztvevője az eseménynek:"
+msgstr ""
+"%1$s törölt egy találkozót, vagy Ön már nem résztvevője az eseménynek:"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/Messages.java:196
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/Messages.java:198
@@ -937,20 +939,23 @@ msgstr "Minden idő ebben az időzónában jelenik meg: %1$s"
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/Messages.java:298
 msgid ""
 "%1$s has %2$s the appointment, but would like to make a counter proposal: "
-msgstr "%1$s %2$s a találkozót, de másik javaslatot szeretne tenni: "
+msgstr ""
+"%1$s %2$s a találkozót, de másik javaslatot szeretne tenni: "
 
 #. TODO: Mah/Cisco, please describe what is meant with the wording 'chair'
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/Messages.java:301
 msgid ""
 "You have received this E-Mail because your are the chair for this "
 "appointment."
-msgstr "Azért kapta ezt a levelet, mert ezt a találkozót Ön vezeti."
+msgstr ""
+"Azért kapta ezt a levelet, mert ezt a találkozót Ön vezeti."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/Messages.java:303
 msgid ""
 "You have received this E-Mail because your are the organizer of this "
 "appointment."
-msgstr "Azért kapta ezt a levelet, mert ezt a találkozót Ön szervezi."
+msgstr ""
+"Azért kapta ezt a levelet, mert ezt a találkozót Ön szervezi."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/Messages.java:305
 msgid ""
@@ -1283,7 +1288,8 @@ msgstr "A megadott „%s” refreshinterval érték nem integer"
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contacts.ldap/src/com/openexchange/contacts/ldap/exceptions/LdapConfigurationExceptionMessage.java:152
 msgid ""
 "The value given for pooltimeout \"%s\" in file \"%s\" is no integer value"
-msgstr "A megadott „%s” pooltimeout érték a(z) „%s” fájlban nem integer"
+msgstr ""
+"A megadott „%s” pooltimeout érték a(z) „%s” fájlban nem integer"
 
 #. *
 #. * The value given for derefAliases "%s" in file "%s" is invalid
@@ -1345,7 +1351,8 @@ msgstr ""
 msgid ""
 "The search object contains more than one folder id. This is not supported by "
 "this implementation."
-msgstr "A keresőobjektum több mappaazonosítót tartalmaz. Ez nem támogatott."
+msgstr ""
+"A keresőobjektum több mappaazonosítót tartalmaz. Ez nem támogatott."
 
 #. *
 #. * The mapping table doesn't contain the string uid %s, so it has never been accessed before
@@ -1478,14 +1485,14 @@ msgstr "Nem található kulcsleképezési táblázat"
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contacts.ldap/src/com/openexchange/contacts/ldap/exceptions/LdapConfigurationExceptionMessage.java:267
 msgid ""
 "An error occurred while trying to get the defaultNamingContext attribute"
-msgstr "Hiba történt a defaultNamingContext attribútum lekérésekor"
+msgstr ""
+"Hiba történt a defaultNamingContext attribútum lekérésekor"
 
 #. The contact object with id "%s" could not be found in folder "%s"
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contact.storage.ldap/src/com/openexchange/contact/storage/ldap/LdapExceptionMessages.java:122
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contacts.ldap/src/com/openexchange/contacts/ldap/exceptions/LdapConfigurationExceptionMessage.java:270
 msgid "The contact object with id \"%s\" could not be found in folder \"%s\""
-msgstr ""
-"A(z) „%s” azonosítójú kapcsolatobjektum nem található a(z) „%s” mappában"
+msgstr "A(z) „%s” azonosítójú kapcsolatobjektum nem található a(z) „%s” mappában"
 
 #. *
 #. * The value given for storagePriority "%s" in file "%s" is no integer value
@@ -1494,7 +1501,8 @@ msgstr ""
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contacts.ldap/src/com/openexchange/contacts/ldap/exceptions/LdapConfigurationExceptionMessage.java:275
 msgid ""
 "The value given for storagePriority \"%s\" in file \"%s\" is no integer value"
-msgstr "A megadott „%s” storagePriority érték a(z) „%s” fájlban nem integer"
+msgstr ""
+"A megadott „%s” storagePriority érték a(z) „%s” fájlban nem integer"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contact.storage.ldap/src/com/openexchange/contact/storage/ldap/LdapExceptionMessages.java:124
 msgid "Unable to map contact property \"%s\""
@@ -2524,8 +2532,8 @@ msgstr ""
 "$s kontextusban "
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/tools/iterator/SearchIteratorExceptionMessages.java:63
-msgid "A DBPool error occurred: %1$s"
-msgstr "DBPool hiba történt: %1$s"
+msgid "A DBPool error occurred: 1$%s"
+msgstr "DBPool hiba történt: 1$%s"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/tools/iterator/SearchIteratorExceptionMessages.java:65
 msgid "Operation not allowed on a closed SearchIterator"
@@ -2612,8 +2620,7 @@ msgstr "Hiba történt a kérésfeldolgozás megszakítása közben"
 #. line number, the fourth a list of tokens expected at this stage.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.i18n/src/com/openexchange/i18n/parsing/I18NErrorStrings.java:63
 msgid "Unexpected token %s in .po file %s:%s. Expected one of %s"
-msgstr ""
-"Váratlan %s jelsor a .po fájlban: %s:%s. A várt érték a következők egyike: %s"
+msgstr "Váratlan %s jelsor a .po fájlban: %s:%s. A várt érték a következők egyike: %s"
 
 #. The first argument will contain the string sent instead of the expected number, the second argument will contain the file name, the
 #. third the line number
@@ -3624,6 +3631,10 @@ msgstr "A(z) %1$s cím nincs a kivétellistán a(z) %2$s OAuth API-hoz"
 msgid "The request sent was missing its body"
 msgstr "Az elküldött kérésből hiányzik a törzs"
 
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:141
+msgid "The account is invalid, please recreate it."
+msgstr "A felhasználói fiók érvénytelen, kérjük hozza létre újra."
+
 #. *
 #. * Cannot change password for any reason.
 #.
@@ -3981,7 +3992,8 @@ msgstr "A hiányzó olvasási hozzáférés miatt nem engedélyezett a(z) %1$s m
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:209
 msgid ""
 "The raw content's input stream of message %1$s in folder %2$s cannot be read"
-msgstr "A nyers tartalom bemeneti adatfolyama nem olvasható a(z) %1$s üzenetből a(z) "
+msgstr ""
+"A nyers tartalom bemeneti adatfolyama nem olvasható a(z) %1$s üzenetből a(z) "
 "%2$s mappában"
 
 #. *
@@ -4396,7 +4408,8 @@ msgstr "Nincs jogosultsága a kiválasztott művelet (%s) végrehajtásához"
 msgid ""
 "The published document has been deleted in the meantime and therefore is no "
 "longer available."
-msgstr "A közreadott dokumentum időközben törölve lett, így már nem érhető el."
+msgstr ""
+"A közreadott dokumentum időközben törölve lett, így már nem érhető el."
 
 #. *
 #. * Push UDP Exception.
@@ -5139,7 +5152,8 @@ msgstr "A SessionObject nincs előkészítve"
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/calendar/OXCalendarExceptionMessage.java:101
 msgid ""
 "You do not have the necessary permissions for appointments in folder %1$d."
-msgstr "Nincs megfelelő jogosultsága a találkozóhoz a(z) %1$d mappában."
+msgstr ""
+"Nincs megfelelő jogosultsága a találkozóhoz a(z) %1$d mappában."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/calendar/OXCalendarExceptionMessage.java:103
 msgid "Insert expected but the object id is already given. Aborting action..."
@@ -5307,7 +5321,8 @@ msgstr "Nem távolítható el a(z) %d. résztvevő"
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/calendar/OXCalendarExceptionMessage.java:186
 msgid ""
 "Unable to remove participant because this participant is the last remaining"
-msgstr "Nem távolítható el a résztvevő, mert ez a résztvevő az utolsó"
+msgstr ""
+"Nem távolítható el a résztvevő, mert ez a résztvevő az utolsó"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/calendar/OXCalendarExceptionMessage.java:188
 msgid "Action type not supported : %d"
@@ -5378,7 +5393,8 @@ msgstr ""
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/calendar/OXCalendarExceptionMessage.java:216
 msgid ""
 "You can not move one element of a recurring appointment into another folder."
-msgstr "Nem mozgathatja ismétlődő találkozó egy elemét másik mappába."
+msgstr ""
+"Nem mozgathatja ismétlődő találkozó egy elemét másik mappába."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/calendar/OXCalendarExceptionMessage.java:218
 msgid "A database update exception occurred."
@@ -5579,7 +5595,8 @@ msgstr "Ismétlődő találkozó másik mappába mozgatása nem támogatott."
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:428
 msgid ""
 "In order to accomplish the search, %1$d or more characters are required."
-msgstr "A keresés végrehajtásához legalább %1$d karakter szükséges."
+msgstr ""
+"A keresés végrehajtásához legalább %1$d karakter szükséges."
 
 #. *
 #. * Redundant information.
@@ -5898,8 +5915,7 @@ msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:139
 msgid "Setting %s requires at least a ContactObject and a value."
-msgstr ""
-"A(z) %s beállításához legalább egy ContactObject-hez és egy értékhez van "
+msgstr "A(z) %s beállításához legalább egy ContactObject-hez és egy értékhez van "
 "szükség."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:141
@@ -7478,7 +7494,8 @@ msgstr ""
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/infostore/InfostoreExceptionMessages.java:105
 msgid ""
 "You do not have the permissions to delete at least one of the info items."
-msgstr "Nincs jogosultsága legalább egy infoelem törlésére."
+msgstr ""
+"Nincs jogosultsága legalább egy infoelem törlésére."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/infostore/InfostoreExceptionMessages.java:107
 msgid "Illegal argument: document %d contains no file"
@@ -7559,8 +7576,7 @@ msgstr "SQL-probléma: „%s”"
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/ldap/LdapExceptionMessage.java:101
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/ldap/UserExceptionMessage.java:126
 msgid "Problem putting/removing an object into/from the cache."
-msgstr ""
-"Probléma egy objektum gyorsítótárba helyezésekor vagy abból való "
+msgstr "Probléma egy objektum gyorsítótárba helyezésekor vagy abból való "
 "eltávolításakor."
 
 #. *
@@ -7689,7 +7705,8 @@ msgstr "A(z) %1$d kontextusban a(z) %2$d felhasználó attribútumainak frissít
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/ldap/UserExceptionMessage.java:162
 msgid ""
 "Invalid password length. The password must have a minimum length of %1$d."
-msgstr "Érvénytelen jelszóhossz. A jelszó minimális hossza %1$d karakter."
+msgstr ""
+"Érvénytelen jelszóhossz. A jelszó minimális hossza %1$d karakter."
 
 #. *
 #. * Invalid password length. The password must be of maximum length %1$d.
@@ -7697,7 +7714,8 @@ msgstr "Érvénytelen jelszóhossz. A jelszó minimális hossza %1$d karakter."
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/ldap/UserExceptionMessage.java:167
 msgid ""
 "Invalid password length. The password must have a maximum length of %1$d."
-msgstr "Érvénytelen jelszóhossz. A jelszó maximális hossza %1$d karakter."
+msgstr ""
+"Érvénytelen jelszóhossz. A jelszó maximális hossza %1$d karakter."
 
 #. *
 #. * The parameter %s for this user is missing.
@@ -7977,7 +7995,7 @@ msgstr "Kísérlet történt %1$d résztvevő törlésére, de csak %2$d törlé
 #. Participant %d for task %d is not found.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:114
 msgid "Participant %d for task %d is not found."
-msgstr "A(z) %d feladat %d résztvevője nem található."
+msgstr "A(z) %2$d feladat %1$d résztvevője nem található."
 
 #. Cannot find task %d in context %d.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:117
@@ -11578,8 +11596,7 @@ msgstr "A mozgatási művelet megszakítva. A forrás és a cél mappa azonosak.
 #. Request aborted due to timeout of %1$s %2$s.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.unifiedinbox/src/com/openexchange/unifiedinbox/UnifiedInboxExceptionMessage.java:109
 msgid "Request aborted due to timeout of %1$s %2$s."
-msgstr ""
-"A kérés megszakítva, mert a következő túllépte az időkorlátot: %1$s %2$s."
+msgstr "A kérés megszakítva, mert a következő túllépte az időkorlátot: %1$s %2$s."
 
 #. Invalid destination folder. Don't know where to append the mails.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.unifiedinbox/src/com/openexchange/unifiedinbox/UnifiedInboxExceptionMessage.java:112

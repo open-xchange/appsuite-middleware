@@ -59,12 +59,12 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheKey;
 import com.openexchange.caching.CacheService;
@@ -75,7 +75,9 @@ import com.openexchange.groupware.update.ExecutedTask;
 import com.openexchange.groupware.update.Schema;
 import com.openexchange.groupware.update.SchemaStore;
 import com.openexchange.groupware.update.SchemaUpdateState;
+import com.openexchange.log.LogFactory;
 import com.openexchange.tools.update.Tools;
+import edu.emory.mathcs.backport.java.util.Collections;
 
 /**
  * Implements loading and storing the schema version information.
@@ -474,6 +476,20 @@ public class SchemaStoreImpl extends SchemaStore {
         } finally {
             closeSQLStuff(result, stmt);
         }
+        Collections.sort(retval, new Comparator<ExecutedTask>() {
+
+            @Override
+            public int compare(final ExecutedTask o1, final ExecutedTask o2) {
+                final Date lastModified1 = o1.getLastModified();
+                final Date lastModified2 = o2.getLastModified();
+                if (null == lastModified1) {
+                    return null == lastModified2 ? 0 : -1;
+                } else if (null == lastModified2) {
+                    return 1;
+                }
+                return lastModified1.compareTo(lastModified2);
+            }
+        });
         return retval.toArray(new ExecutedTask[retval.size()]);
     }
 

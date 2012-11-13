@@ -17,4 +17,5 @@ Export-Package: sun.security,
  sun.misc,
  sun.reflect,
  javax.swing,
- javax.swing.text
+ javax.swing.text,
+ javax.swing.tree

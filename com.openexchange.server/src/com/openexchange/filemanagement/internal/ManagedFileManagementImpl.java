@@ -295,15 +295,20 @@ final class ManagedFileManagementImpl implements ManagedFileManagement {
 
     @Override
     public ManagedFile createManagedFile(final byte[] bytes) throws OXException {
-        return createManagedFile0(new UnsynchronizedByteArrayInputStream(bytes), false);
+        return createManagedFile0(new UnsynchronizedByteArrayInputStream(bytes), false, null);
     }
 
     @Override
     public ManagedFile createManagedFile(final InputStream inputStream) throws OXException {
-        return createManagedFile0(inputStream, true);
+        return createManagedFile0(inputStream, true, null);
     }
 
-    private ManagedFile createManagedFile0(final InputStream inputStream, final boolean closeStream) throws OXException {
+    @Override
+    public ManagedFile createManagedFile(InputStream inputStream, String optExtension) throws OXException {
+        return createManagedFile0(inputStream, true, optExtension);
+    }
+
+    private ManagedFile createManagedFile0(final InputStream inputStream, final boolean closeStream, final String optExtension) throws OXException {
         if (null == inputStream) {
             throw new IllegalArgumentException("Missing input stream.");
         }
@@ -315,7 +320,7 @@ final class ManagedFileManagementImpl implements ManagedFileManagement {
             try {
                 if (null == tmpFile) {
                     // Flush input stream's content via output stream to newly created file
-                    tmpFile = File.createTempFile(PREFIX, SUFFIX, directory);
+                    tmpFile = File.createTempFile(PREFIX, null == optExtension ? SUFFIX : optExtension, directory);
                     tmpFile.deleteOnExit();
                     final OutputStream out = new BufferedOutputStream(new FileOutputStream(tmpFile, false));
                     try {

@@ -774,13 +774,14 @@ final class SessionData {
         rlock.lock();
         try {
             final int size = sessionList.size();
-            for (i = 0; null == control && i < size; i++) {
+            for (i = 0; i < size; i++) {
                     if ((control = sessionList.get(i).getSessionById(sessionId)) != null) {
                         if (i > 0) {
                             // Schedule task to put session into first container and remove from latter one. This requires a write lock.
                             // See bug 16158.
                             scheduleTask2MoveSession2FirstContainer(sessionId, false);
                         }
+                        return control;
                     }
             }
         } catch (final IndexOutOfBoundsException e) {
@@ -788,9 +789,7 @@ final class SessionData {
         } finally {
             rlock.unlock();
         }
-        if (null != control) {
-            return control;
-        }
+        // Check long-term container, too
         rlongTermLock.lock();
         try {
             for (final SessionMap longTermMap : longTermList) {

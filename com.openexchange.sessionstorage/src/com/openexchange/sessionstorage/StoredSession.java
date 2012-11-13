@@ -69,7 +69,7 @@ public class StoredSession implements PutIfAbsent, Serializable {
     /**
      * The parameter name for session storage's {@link java.util.concurrent.Future add task}.
      */
-    public static final String PARAM_SST_FUTURE = "__sst-future";
+    //public static final String PARAM_SST_FUTURE = "__sst-future";
 
     private String loginName;
     private String password;
@@ -378,6 +378,52 @@ public class StoredSession implements PutIfAbsent, Serializable {
     @Override
     public void removeRandomToken() {
         randomToken = null;
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder builder = new StringBuilder(512);
+        final String delim = ", ";
+        builder.append('{');
+        if (loginName != null) {
+            builder.append("loginName=").append(loginName).append(delim);
+        }
+        if (password != null) {
+            builder.append("password=").append("*****").append(delim);
+        }
+        builder.append("contextId=").append(contextId).append(", userId=").append(userId).append(delim);
+        if (sessionId != null) {
+            builder.append("sessionId=").append(sessionId).append(delim);
+        }
+        if (secret != null) {
+            builder.append("secret=").append(secret).append(delim);
+        }
+        if (login != null) {
+            builder.append("login=").append(login).append(delim);
+        }
+        if (randomToken != null) {
+            builder.append("randomToken=").append(randomToken).append(delim);
+        }
+        if (localIp != null) {
+            builder.append("localIp=").append(localIp).append(delim);
+        }
+        if (authId != null) {
+            builder.append("authId=").append(authId).append(delim);
+        }
+        if (hash != null) {
+            builder.append("hash=").append(hash).append(delim);
+        }
+        if (client != null) {
+            builder.append("client=").append(client).append(delim);
+        }
+        if (userLogin != null) {
+            builder.append("userLogin=").append(userLogin).append(delim);
+        }
+        if (parameters != null) {
+            builder.append("parameters=").append(parameters);
+        }
+        builder.append('}');
+        return builder.toString();
     }
 
 }

@@ -345,8 +345,7 @@ public class AppointmentNotificationPool implements
 
 
 		private void notifyAllParticipantsAboutOverallChanges() throws OXException {
-			ITipMailGenerator generator = generatorFactory.create(original, mostRecent,
-					session, -1);
+			ITipMailGenerator generator = generatorFactory.create(original, mostRecent, session, -1);
 			if (moreThanOneUserActed()) {
 				generator.noActor();
 			}
@@ -399,7 +398,7 @@ public class AppointmentNotificationPool implements
 				if (update.getDiff().isAboutCertainParticipantsStateChangeOnly(Integer.toString(update.getSession().getUserId()))) {
 					continue;
 				}
-				Update[] partition = partitions.get(update.getSession().getUserId());
+				Update[] partition = partitions.get(update.getPartitionIndex());
 				if (partition == null) {
 					partition = new Update[2];
 					partitions.put(update.getPartitionIndex(), partition);

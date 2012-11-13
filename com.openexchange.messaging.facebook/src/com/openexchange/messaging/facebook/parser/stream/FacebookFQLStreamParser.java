@@ -437,7 +437,8 @@ public final class FacebookFQLStreamParser {
 
             @Override
             public void handleAttachment(final NodeList attachNodes, final int len, final FacebookMessagingMessage message, final MultipartProvider multipartProvider) throws OXException {
-                String sourceURL = null;
+                String sourceUrlBig = null; // src_big - The URL to the full-sized version of the photo being queried. The image can have a maximum width or height of 960px. This URL may be blank.
+                String sourceUrl = null; // src - The URL to the album view version of the photo being queried. The image can have a maximum width or height of 130px. This URL may be blank.
                 String ext = null;
                 /*
                  * "media" node
@@ -446,20 +447,35 @@ public final class FacebookFQLStreamParser {
                 if (null != media) {
                     final Node streamMedia = getNodeByName("stream_media", media);
                     if (null != streamMedia) {
-                        /*
-                         * "src" node
-                         */
-                        final Node src = getNodeByName("src", streamMedia);
+                        Node src = getNodeByName("src_big", streamMedia);
                         if (null != src) {
-                            sourceURL = src.getTextContent();
-                            final int pos = sourceURL.lastIndexOf('.');
+                            sourceUrlBig = src.getTextContent();
+                            final int pos = sourceUrlBig.lastIndexOf('.');
                             if (pos >= 0) {
-                                final String extension = sourceURL.substring(pos + 1);
+                                final String extension = sourceUrlBig.substring(pos + 1);
                                 if (!"application/octet-stream".equals(Utility.getContentTypeByExtension(extension))) {
                                     /*
                                      * A known extension
                                      */
                                     ext = extension;
+                                }
+                            }
+                        } else {
+                            /*
+                             * "src" node
+                             */
+                            src = getNodeByName("src", streamMedia);
+                            if (null != src) {
+                                sourceUrl = src.getTextContent();
+                                final int pos = sourceUrl.lastIndexOf('.');
+                                if (pos >= 0) {
+                                    final String extension = sourceUrl.substring(pos + 1);
+                                    if (!"application/octet-stream".equals(Utility.getContentTypeByExtension(extension))) {
+                                        /*
+                                         * A known extension
+                                         */
+                                        ext = extension;
+                                    }
                                 }
                             }
                         }
@@ -468,13 +484,19 @@ public final class FacebookFQLStreamParser {
                 /*
                  * Source URL present?
                  */
-                if (null != sourceURL) {
-                    /*
-                     * TODO: Add as multipart/related?!?!
-                     */
+                if (null != sourceUrlBig) {
                     final StringBuilder messageText = message.getMessageText();
                     messageText.append(HTML_BR);
-                    messageText.append("<img src='").append(sourceURL);
+                    messageText.append("<img src='").append(sourceUrlBig);
+                    if (null == ext) {
+                        messageText.append("' />");
+                    } else {
+                        messageText.append("' alt=\"photo.").append(ext).append("\" />");
+                    }
+                } else if (null != sourceUrl) {
+                    final StringBuilder messageText = message.getMessageText();
+                    messageText.append(HTML_BR);
+                    messageText.append("<img src='").append(sourceUrl);
                     if (null == ext) {
                         messageText.append("' />");
                     } else {

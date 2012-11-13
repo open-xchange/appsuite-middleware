@@ -1,3 +1,74 @@
+* 2012-11-13 - marcus.klein@open-xchange.com
+
+ - Fix for bug 23712: Path in import.properties is still necessary because configuration files for CVS import are not located in the
+   configuration directory.
+
+* 2012-11-13 - jan.bauerdick@open-xchange.com
+
+ - Dropped hazelcast.xml config file
+
+* 2012-11-13 - martin.herfurth@open-xchange.com
+
+ - Fix for bug 23701: Fixed side effect of bugfix for 22116.
+
+* 2012-11-13 - thorben.betten@open-xchange.com
+
+ - Fix for bug 23700: Fixed publication link
+ - Fix for bug 23705: Deal with InterruptedException gracefully
+ - Fix for bug 23707: Fixed creating an OAuth account
+
+* 2012-11-12 - thorben.betten@open-xchange.com
+
+ - Fix for bug 22116: Added sanitizing method to look-up possibly misspelled printf-style identifiers
+ - Fix for bug 23683: Handle possible NPE gracefully with a proper error code
+
+* 2012-11-11 - thorben.betten@open-xchange.com
+
+ - Fix for bug 23689: Avoid NPE and throw a more meaningful SOAP fault
+
+* 2012-11-09 - martin.herfurth@open-xchange.com
+
+ - Fix for bug 23580: Fixed reply mail on multiple accept/decline/tentative.
+ - Fix for bug 23263: Fixed side effect of another bug fix.
+
+* 2012-11-09 - choeger@open-xchange.com
+
+ - Fix for bug 23463: [L3] linkedin contacts subscription does not work using recently generated linkedin api keys
+ 
+* 2012-11-09 - jan.bauerdick@open-xchange.com
+
+ - Drop map configuration in sessionstorage_hazelcast.properties
+
+* 2012-11-09 - thorben.betten@open-xchange.com
+
+ - Fix for bug 23681: Showing proper error information on failed upload due to exceeded quota
+ - Fix for bug 23685: More error details
+ - Fix for bug 23686: Backward compatibility to previous API usage
+ - Fix for bug 23659: Fixed HTML display
+ - Fix for bug 23585: Refer to full-size picture
+ - Fix for bug 23332: Changed default value for property 'com.openexchange.push.imapidle.debug'
+ - Fix for bug 23532: Use unified error message for invalid folder name
+ - Fix for bug 23200: Fixed IMAP connection counter
+ - Fix for bug 23503: Showing proper error message
+
+* 2012-11-09 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 23676: Treat 'image/pjpeg' as JPEG, 'image/x-png' as PNG
+
+* 2012-11-09 - francisco.laguna@open-xchange.com
+
+ - Fix for bug 23641: PreferencesItemService to set the module flag to false
+
+* 2012-11-08 - martin.herfurth@open-xchange.com
+
+ - Fix for bug 23588: Incompatible type.
+
+* 2012-11-08 - thorben.betten@open-xchange.com
+
+ - Fix for bug 23661: Introduced in-application sort
+ - Fix for bug 23533: Changed that error code's category thus a more meaningful message is shown
+ - Fix for bug 23666: Use default driver if missing
+
 * 2012-11-07 - marcus.klein@open-xchange.com
 
  - Fix for bug 23563: Improved exception messages for too long used database connections.
@@ -2416,7 +2487,7 @@
 
 * 2011-05-18 - thorben.betten@open-xchange.com
 
- - Bugfix #19179: Probing for '�' character when decoding an encoded-word with big5 encoding. If present use Big5-HKSCS instead.
+ - Bugfix #19179: Probing for special character when decoding an encoded-word with big5 encoding. If present use Big5-HKSCS instead.
 
 * 2011-05-18 - marcus.klein@open-xchange.com
 
