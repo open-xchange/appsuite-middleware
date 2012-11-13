@@ -6,7 +6,7 @@ BuildRequires: ant ant-nodeps
 BuildRequires: open-xchange-osgi
 BuildRequires: java-devel >= 1.6.0
 Version:       @OXVERSION@
-%define        ox_release 4
+%define        ox_release 5
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -47,6 +47,8 @@ ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} 
 %config(noreplace) /opt/open-xchange/etc/*
 
 %changelog
+* Tue Nov 13 2012 Marcus Klein <marcus.klein@open-xchange.com>
+Fifth release candidate for 6.22.1
 * Tue Nov 06 2012 Marcus Klein <marcus.klein@open-xchange.com>
 Fourth release candidate for 6.22.1
 * Fri Nov 02 2012 Marcus Klein <marcus.klein@open-xchange.com>
