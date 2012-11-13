@@ -49,30 +49,63 @@
 
 package com.openexchange.realtime.presence.hazelcast.impl;
 
+import java.util.Collection;
+import java.util.Map;
+import com.hazelcast.core.HazelcastInstance;
 import com.openexchange.exception.OXException;
 import com.openexchange.realtime.packet.ID;
-import com.openexchange.realtime.presence.PresenceService;
 import com.openexchange.realtime.presence.PresenceData;
+import com.openexchange.realtime.presence.PresenceStatusService;
+import com.openexchange.realtime.util.IDMap;
 import com.openexchange.tools.session.ServerSession;
 
-
 /**
- * {@link HazelcastPresenceServiceImpl}
- *
+ * {@link HazelcastPresenceStatusServiceImpl} - Hazelcast based PresenceStatusService that is implemented via a distributed Map containing
+ * <ID, PresenceData> pairs.
+ * 
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
-public class HazelcastPresenceServiceImpl implements PresenceService {
+public class HazelcastPresenceStatusServiceImpl implements PresenceStatusService {
+    
+    private HazelcastInstance hazelcastInstance;
+    private Map<ID, PresenceData> statusMap;
+
+    
+    public HazelcastPresenceStatusServiceImpl(HazelcastInstance hazelcastInstance) {
+        super();
+        this.hazelcastInstance = hazelcastInstance;
+        this.statusMap = hazelcastInstance.getMap("com.openexchange.realtime.presence.hazelcast.statusMap");
+        
+    }
 
     @Override
     public void changePresenceStatus(ID id, PresenceData status, ServerSession session) throws OXException {
-        // TODO Auto-generated method stub
+        if(id == null || status == null || session == null) {
+            throw new IllegalStateException("Obligatory parameter missing.");
+        }
+        statusMap.put(id, status);
         
     }
 
     @Override
     public PresenceData getPresenceStatus(ID id) {
-        // TODO Auto-generated method stub
-        return null;
+        if(id == null) {
+            throw new IllegalStateException("Obligatory parameter missing.");
+        }
+        PresenceData presenceData = statusMap.get(id);
+        if(presenceData == null) {
+            presenceData = PresenceData.OFFLINE;
+        }
+        return presenceData;
+    }
+
+    @Override
+    public IDMap<PresenceData> getPresenceStatus(Collection<ID> ids) {
+        IDMap<PresenceData> results = new IDMap<PresenceData>();
+        for (ID id : ids) {
+            results.put(id, getPresenceStatus(id));
+        }
+        return results;
     }
 
 }

@@ -1,3 +1,21 @@
+open-xchange-push-malpoll (6.23.0-4) unstable; urgency=low
+
+  * Third release build for EDP drop #5
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Fri, 26 Oct 2012 15:59:16 +0200
+
+open-xchange-push-malpoll (6.23.0-3) unstable; urgency=low
+
+  * Second release build for EDP drop #5
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Fri, 26 Oct 2012 11:58:56 +0200
+
+open-xchange-push-malpoll (6.23.0-2) unstable; urgency=low
+
+  * Release build for EDP drop #5
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Thu, 11 Oct 2012 21:56:20 +0200
+
 open-xchange-push-malpoll (6.23.0-1) unstable; urgency=low
 
   * First release candidate for 6.23.0

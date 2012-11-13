@@ -73,6 +73,11 @@ com.openexchange.contact.storage.ldap.baseDN=
 # to restrict the search to one or more object classes. Required.
 com.openexchange.contact.storage.ldap.searchfilter=
 
+# For testing purposes, it's possible to skip certificate validation and trust 
+# all server certificates. Possible values are 'true' and 'false'; defaults to
+# 'false'.  
+com.openexchange.contact.storage.ldap.trustAllCerts=false
+
 
 # == Authentication ==========================================================
 

@@ -172,6 +172,7 @@ public class LdapConfig {
     private int pooltimeout;
     private DerefAliases derefAliases;
     private boolean connectionPooling;
+    private boolean trustAllCerts;
 
     /**
      * Initializes a new {@link LdapConfig}.
@@ -234,6 +235,7 @@ public class LdapConfig {
         }
         String derefAliasesValue = getProperty(properties, "derefAliases", "always");
         derefAliases = null != derefAliasesValue ? DerefAliases.valueOf(derefAliasesValue.toUpperCase()) : null;
+        setTrustAllCerts(Boolean.parseBoolean(getProperty(properties, "trustAllCerts", "false")));
     }
     
     private static String getProperty(Properties properties, String propertyName, String defaultValue) {
@@ -788,6 +790,24 @@ public class LdapConfig {
      */
     public void setConnectionPooling(boolean connectionPooling) {
         this.connectionPooling = connectionPooling;
+    }
+
+    /**
+     * Gets the trustAllCerts
+     *
+     * @return The trustAllCerts
+     */
+    public boolean isTrustAllCerts() {
+        return trustAllCerts;
+    }
+
+    /**
+     * Sets the trustAllCerts
+     *
+     * @param trustAllCerts The trustAllCerts to set
+     */
+    public void setTrustAllCerts(boolean trustAllCerts) {
+        this.trustAllCerts = trustAllCerts;
     }
 
 }

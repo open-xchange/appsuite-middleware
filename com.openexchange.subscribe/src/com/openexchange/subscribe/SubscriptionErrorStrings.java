@@ -122,4 +122,6 @@ public class SubscriptionErrorStrings implements LocalizableStrings {
     public static final String MISSING_ARGUMENT = "Missing argument. %1$s";
 
 	public static final String PERMISSION_DENIED = "You do not have the permission to complete this operation.";
+	
+	public static final String NO_OAUTH_ACCOUNT_GIVEN = "You need to create an OAuth-account first to access this service.";
 }

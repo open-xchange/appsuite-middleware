@@ -49,7 +49,9 @@
 
 package com.openexchange.realtime.atmosphere.presence.handler;
 
+import java.util.List;
 import com.openexchange.exception.OXException;
+import com.openexchange.realtime.MessageDispatcher;
 import com.openexchange.realtime.StanzaSender;
 import com.openexchange.realtime.atmosphere.impl.StanzaTransformer;
 import com.openexchange.realtime.atmosphere.presence.initializer.PresenceInitializer;
@@ -58,9 +60,10 @@ import com.openexchange.realtime.atmosphere.stanza.StanzaHandler;
 import com.openexchange.realtime.packet.ID;
 import com.openexchange.realtime.packet.Presence;
 import com.openexchange.realtime.packet.Presence.Type;
+import com.openexchange.realtime.packet.PresenceState;
 import com.openexchange.realtime.packet.Stanza;
 import com.openexchange.realtime.presence.PresenceData;
-import com.openexchange.realtime.presence.PresenceService;
+import com.openexchange.realtime.presence.PresenceStatusService;
 import com.openexchange.realtime.presence.subscribe.PresenceSubscriptionService;
 import com.openexchange.realtime.util.IDMap;
 import com.openexchange.tools.session.ServerSession;
@@ -89,7 +92,7 @@ public class OXRTPresenceHandler implements StanzaHandler {
         if (stanza == null || session == null || !(stanza instanceof Presence)) {
             throw new IllegalArgumentException();
         }
-        
+
         Presence presence = (Presence) stanza;
         PresenceInitializer initializer = new PresenceInitializer();
         presence = initializer.initialize(presence);
@@ -211,14 +214,60 @@ public class OXRTPresenceHandler implements StanzaHandler {
 
     /**
      * Change the current Presence status.
+     * <ol>
+     * <li>Change the Status in the PresenceStatusService</li>
+     * <li>Check if the Status changes from offline to * and send status of the IDs contacts back to the ID</li>
+     * </ol>
      * 
      * @param stanza Stanza containing the new Presence Status
      * @throws OXException If stanza conversion fails or the status can't be changed
      */
     private void handlePresence(Presence stanza, ServerSession session) throws OXException {
-        PresenceService presenceService = AtmospherePresenceServiceRegistry.getInstance().getService(PresenceService.class);
-        presenceService.changePresenceStatus(stanza.getFrom(), new PresenceData(stanza.getState(), stanza.getMessage()), session);
+        AtmospherePresenceServiceRegistry serviceRegistry = AtmospherePresenceServiceRegistry.getInstance();
+        PresenceSubscriptionService presenceSubscriptionService = serviceRegistry.getService(PresenceSubscriptionService.class, true);
+        PresenceStatusService presenceStatusService = serviceRegistry.getService(PresenceStatusService.class, true);
+        MessageDispatcher messageDispatcher = serviceRegistry.getService(MessageDispatcher.class, true);
+
+        // Change the status of the incoming Stanza's client
+        presenceStatusService.changePresenceStatus(stanza.getFrom(), new PresenceData(stanza.getState(), stanza.getMessage()), session);
+
+        // Inform the client about status of his contacts
+        if (isInitialPresence(stanza)) {
+            List<ID> subscriptions = presenceSubscriptionService.getSubscriptions(session);
+            IDMap<PresenceData> idToStatusMap = presenceStatusService.getPresenceStatus(subscriptions);
+            for (ID id : idToStatusMap.keySet()) {
+                PresenceData presenceData = idToStatusMap.get(id);
+
+                // build Presence Stanza to tell joining client about the status of its contacts
+                Presence presenceStanza = new Presence();
+                presenceStanza.setFrom(id);
+                presenceStanza.setTo(stanza.getFrom());
+                presenceStanza.setState(presenceData.getState());
+                presenceStanza.setMessage(presenceData.getMessage());
+                // TODO: add delay from last statusChange to presenceStanza
+
+                messageDispatcher.send(stanza, session);
+            }
+        }
         // TODO: PresenceService must honor priority
+    }
+
+    /**
+     * Are we dealing with an initial Presence Stanza iow. was the client offline before?
+     * 
+     * @param stanza The incoming Presence Stanza that has to be insepcted
+     * @return true if the client is sending an initial Presence, false otherwise
+     * @throws OXException If the AtmospherePresenceService can't be queried
+     */
+    private boolean isInitialPresence(Presence stanza) throws OXException {
+        boolean isInitial = false;
+        AtmospherePresenceServiceRegistry serviceRegistry = AtmospherePresenceServiceRegistry.getInstance();
+        PresenceStatusService presenceStatusService = serviceRegistry.getService(PresenceStatusService.class, true);
+        PresenceData presenceData = presenceStatusService.getPresenceStatus(stanza.getFrom());
+        if (PresenceState.OFFLINE.equals(presenceData.getState())) {
+            isInitial = true;
+        }
+        return isInitial;
     }
 
     /**
@@ -233,32 +282,22 @@ public class OXRTPresenceHandler implements StanzaHandler {
     }
 
     /**
-     * Update the PresenceStatus of a client. This involves several steps:
-     * <ol>
-     * <li>Set status in central status registry</li>
-     * <li>Notify the user about the successful status update by sending him the new status back</li>
-     * <li>Get active users from the roster of the client that sent the status update</li>
-     * <li>Notify active users about the status update</li>
-     * </ol>
-     * 
-     * @param client The client that sent a new PresenceStatus
-     * @param status The new PresenceStatus of the client that has to be set
-     * @param session The server session associated with the update request
-     */
-    public void updatePresenceStatus(ID client, PresenceData status, ServerSession session) {
-        throw new UnsupportedOperationException("Not implemented.");
-    }
-
-    /**
      * Get a list of clients a given client is subscribed to from the PresenceSubscriptionService and query their status from the
      * PresenceStatus.
      * 
      * @param requester The client requesting thes status map of clients he is subscribed to
      * @param session The associated session
      * @return a map of clients and associated status that a given client is subscribed to
+     * @throws OXException
      */
-    public IDMap<PresenceData> getSubscriptionStatus(ID requester, ServerSession session) {
-        throw new UnsupportedOperationException("Not implemented.");
+    public IDMap<PresenceData> getSubscriptionStatus(ID requester, ServerSession session) throws OXException {
+        AtmospherePresenceServiceRegistry serviceRegistry = AtmospherePresenceServiceRegistry.getInstance();
+        PresenceSubscriptionService presenceSubscriptionService = serviceRegistry.getService(PresenceSubscriptionService.class, true);
+        PresenceStatusService presenceStatusService = serviceRegistry.getService(PresenceStatusService.class, true);
+
+        List<ID> subscribers = presenceSubscriptionService.getSubscribers(session);
+
+        return null;
     }
 
     /**

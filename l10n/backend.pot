@@ -10766,6 +10766,10 @@ msgstr ""
 msgid "You do not have the permission to complete this operation."
 msgstr ""
 
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe/src/com/openexchange/subscribe/SubscriptionErrorStrings.java:126
+msgid "You need to create an OAuth-account first to access this service."
+msgstr ""
+
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.templating/src/com/openexchange/templating/TemplateExceptionMessage.java:68
 msgid "Verify file system and templates."
 msgstr ""

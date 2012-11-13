@@ -47,45 +47,52 @@
  *
  */
 
-package com.openexchange.ews;
+package com.openexchange.realtime.presence;
 
-import com.microsoft.schemas.exchange.services._2006.messages.ResponseMessageType;
-import com.microsoft.schemas.exchange.services._2006.types.ResponseClassType;
-
+import java.util.Collection;
+import com.openexchange.exception.OXException;
+import com.openexchange.realtime.packet.ID;
+import com.openexchange.realtime.util.IDMap;
+import com.openexchange.tools.session.ServerSession;
 
 /**
- * {@link EWSException}
+ * {@link PresenceStatusService} - Service to store and query the PresenceStatus of currently connected clients.
  * 
- * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
-public class EWSException extends Exception {
-    
-    public enum Category { WARNING, ERROR };
+public interface PresenceStatusService {
 
-    private static final long serialVersionUID = 1804221922298361492L;
+    /**
+     * Change the PresenceStatus of an ID. This involves:
+     * <ol>
+     * <li>Set status in central status registry</li>
+     * <li>Notify the user about the successful status update by sending him the new status back</li>
+     * <li>Get subscribed and active users from the roster of the client that sent the status update</li>
+     * <li>Notify users about the status update</li>
+     * <li>Stores the last time ID changed its PresenceStaus <delay xmlns="urn:xmpp:dely"></li>
+     * </ol>
+     * 
+     * @param client    Client that wants to change its PresenceStatus
+     * @param status    The new PresenceData
+     * @param session   The associated ServerSession
+     * @throws OXException If changing the PresenceStatus fails
+     */
+    public void changePresenceStatus(ID client, PresenceData status, ServerSession session) throws OXException;
 
-    private final String code;
-    private final Category category;
+    /**
+     * Get the current PresenceStatus of only one ID.
+     * 
+     * @param id The ID whose PresenceStatus should be queried
+     * @return The current PresenceStatus of ID, Offline if no information can be found for the ID
+     */
+    public PresenceData getPresenceStatus(ID id);
     
-    public EWSException(ResponseMessageType responseMessage) {
-        super(responseMessage.getMessageText());
-        this.code = responseMessage.getResponseCode();
-        this.category = ResponseClassType.ERROR.equals(responseMessage.getResponseClass()) ? Category.ERROR : Category.WARNING;
-    }
-    
-    public EWSException(String message) {
-        super(message);
-        this.code = "0";
-        this.category = Category.ERROR;
-    }
-
-    public String getCode() {
-        return this.code;
-    }
-    
-    public Category getCategory() {
-        return this.category;
-    }
-    
+    /**
+     * Get the current PresenceStatus of one or more IDs.
+     * 
+     * @param ids The IDs whose PresenceStatus should be queried
+     * @return The current PresenceStatus of IDs, Offline if no information can be found for the ID
+     */
+    public IDMap<PresenceData> getPresenceStatus(Collection<ID> ids);
 }
-
