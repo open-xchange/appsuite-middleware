@@ -10,6 +10,7 @@
 
  - Fix for bug 23700: Fixed publication link
  - Fix for bug 23705: Deal with InterruptedException gracefully
+ - Fix for bug 23707: Fixed creating an OAuth account
 
 * 2012-11-12 - thorben.betten@open-xchange.com
 
