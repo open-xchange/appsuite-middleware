@@ -2844,7 +2844,7 @@ msgid "Importing the appointment failed due to a conflicting resource."
 msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.importexport/src/com/openexchange/importexport/exceptions/ImportExportExceptionMessages.java:91
-msgid "Warnings when importing file: %i warnings"
+msgid "Warnings when importing file: %d warnings"
 msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.importexport/src/com/openexchange/importexport/exceptions/ImportExportExceptionMessages.java:93
