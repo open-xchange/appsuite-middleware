@@ -411,29 +411,35 @@ public class HazelcastActivator extends HousekeepingActivator {
             // final Config config = new InMemoryXmlConfig(xml);
             ConfigurationService configService = getService(ConfigurationService.class);
             Config config = new Config();
-            String groupName = configService.getProperty("com.openexchange.hazelcast.groupname");
-            String groupPassword = configService.getProperty("com.openexchange.hazelcast.grouppassword");
-            GroupConfig groupConfig = new GroupConfig(groupName, groupPassword);
-            config.setGroupConfig(groupConfig);
-            boolean jmxEnabled = configService.getBoolProperty("com.openexchange.hazelcast.jmx", false);
+            final String groupName = configService.getProperty("com.openexchange.hazelcast.groupname");
+            if (!isEmpty(groupName)) {
+                final String groupPassword = configService.getProperty("com.openexchange.hazelcast.grouppassword");
+                final GroupConfig groupConfig = new GroupConfig(groupName, groupPassword);
+                config.setGroupConfig(groupConfig);
+            }
+            final boolean jmxEnabled = configService.getBoolProperty("com.openexchange.hazelcast.jmx", true);
             if (jmxEnabled) {
                 config.setProperty("hazelcast.jmx", "true");
                 config.setProperty("hazelcast.jmx.detailed", "true");
             }
             config.setProperty(GroupProperties.PROP_REDO_GIVE_UP_THRESHOLD, "10");
+            // ManagementCenterConfig
             ManagementCenterConfig managementCenterConfig = new ManagementCenterConfig();
             managementCenterConfig.setEnabled(false);
             managementCenterConfig.setUrl("http://localhost:8080/mancenter");
             config.setManagementCenterConfig(managementCenterConfig);
+            // PartitionGroupConfig
             PartitionGroupConfig partitionGroupConfig = new PartitionGroupConfig();
             partitionGroupConfig.setEnabled(false);
             config.setPartitionGroupConfig(partitionGroupConfig);
+            // ExecutorConfig
             ExecutorConfig executorConfig = new ExecutorConfig();
             executorConfig.setCorePoolSize(16);
             executorConfig.setMaxPoolSize(64);
             executorConfig.setKeepAliveSeconds(60);
             config.setExecutorConfig(executorConfig);
-            String interfaces = configService.getProperty("com.openexchange.hazelcast.interfaces");
+            // Configure network join
+            final String interfaces = configService.getProperty("com.openexchange.hazelcast.interfaces");
             configureNetworkJoin(nodes, false, config, logger, interfaces);
             // for (final InetAddress address : nodes) {
             // tcpIpConfig.addAddress(new Address(address, config.getNetworkConfig().getPort()));
@@ -481,14 +487,16 @@ public class HazelcastActivator extends HousekeepingActivator {
          * Get reference to network join
          */
         NetworkConfig networkConfig = config.getNetworkConfig();
-        if (interfacesList != null && !("".equals(interfacesList))) {
-            String[] ips = interfacesList.split(",");
-            Interfaces interfaces = new Interfaces();
-            interfaces.setEnabled(true);
-            for (String ip : ips) {
-                interfaces.addInterface(ip);
+        if (!isEmpty(interfacesList)) {
+            final String[] ips = interfacesList.split(" *, *");
+            if (null != ips && ips.length > 0) {
+                Interfaces interfaces = new Interfaces();
+                interfaces.setEnabled(true);
+                for (final String ip : ips) {
+                    interfaces.addInterface(ip);
+                }
+                networkConfig.setInterfaces(interfaces);
             }
-            networkConfig.setInterfaces(interfaces);
         }
         AsymmetricEncryptionConfig asymmetricEncryptionConfig = new AsymmetricEncryptionConfig();
         asymmetricEncryptionConfig.setEnabled(false);
@@ -581,6 +589,18 @@ public class HazelcastActivator extends HousekeepingActivator {
     @Override
     protected void stopBundle() throws Exception {
         super.stopBundle();
+    }
+
+    private static boolean isEmpty(final String string) {
+        if (null == string) {
+            return true;
+        }
+        final int len = string.length();
+        boolean isWhitespace = true;
+        for (int i = 0; isWhitespace && i < len; i++) {
+            isWhitespace = Character.isWhitespace(string.charAt(i));
+        }
+        return isWhitespace;
     }
 
 }
