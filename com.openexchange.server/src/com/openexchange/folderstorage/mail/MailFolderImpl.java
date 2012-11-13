@@ -281,6 +281,8 @@ public final class MailFolderImpl extends AbstractFolder implements FolderExtens
                 if (null == fullnameProvider) {
                     mailFolderType = MailFolderType.ROOT;
                 } else {
+                    /*
+                     * 
                     try {
                         if (fullName.equals(fullnameProvider.getDraftsFolder())) {
                             name = translateDefaultFolders ? (StringHelper.valueOf(user.getLocale()).getString(MailStrings.DRAFTS)) : (MailStrings.DRAFTS.equals(folderName) ? StringHelper.valueOf(user.getLocale()).getString(MailStrings.DRAFTS) : folderName);
@@ -305,6 +307,8 @@ public final class MailFolderImpl extends AbstractFolder implements FolderExtens
                         com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(MailFolderImpl.class)).error(e.getMessage(), e);
                         mailFolderType = MailFolderType.NONE;
                     }
+                     * 
+                     */
                 }
             } else {
                 mailFolderType = MailFolderType.NONE;
