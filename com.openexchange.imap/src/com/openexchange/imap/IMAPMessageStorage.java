@@ -1033,6 +1033,11 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                 msg = (IMAPMessage) imapFolder.getMessageByUID(msgUID);
                 imapFolder.fetch(new Message[] {msg}, FETCH_PROFILE_ENVELOPE);
                 mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
+            } catch (final java.lang.NullPointerException e) {
+                /*
+                 * Obviously message was removed in the meantime
+                 */
+                return null;
             } catch (final java.lang.IndexOutOfBoundsException e) {
                 /*
                  * Obviously message was removed in the meantime
