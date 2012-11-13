@@ -5,6 +5,7 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
@@ -537,8 +538,11 @@ public class HazelcastActivator extends HousekeepingActivator {
                 }
                 return InitMode.NONE;
             }
+            final Set<String> localHost = getLocalHost();
             for (final String candidate : members) {
-                cur.add(candidate);
+                if (!localHost.contains(candidate)) {
+                    cur.add(candidate);
+                }
             }
             tcpIpConfig.clear();
             tcpIpConfig.setMembers(new ArrayList<String>(cur));
@@ -563,7 +567,14 @@ public class HazelcastActivator extends HousekeepingActivator {
                 if (logger.isInfoEnabled()) {
                     logger.info("\nHazelcast:\n\tStarting Hazelcast instance:\n\tInitial members: " + members + "\n");
                 }
-                tcpIpConfig.setMembers(new ArrayList<String>(members));
+                final List<String> l = new ArrayList<String>(members.size());
+                final Set<String> localHost = getLocalHost();
+                for (final String candidate : members) {
+                    if (!localHost.contains(candidate)) {
+                        l.add(candidate);
+                    }
+                }
+                tcpIpConfig.setMembers(l);
             } else {
                 if (logger.isInfoEnabled()) {
                     logger.info("\nHazelcast:\n\tStarting Hazelcast instance:\n\tNo initial members\n");
@@ -601,6 +612,18 @@ public class HazelcastActivator extends HousekeepingActivator {
             isWhitespace = Character.isWhitespace(string.charAt(i));
         }
         return isWhitespace;
+    }
+
+    private static Set<String> getLocalHost() {
+        try {
+            final Set<String> set = new HashSet<String>(2);
+            final InetAddress inetAddress = InetAddress.getLocalHost();
+            set.add(inetAddress.getCanonicalHostName());
+            set.add(inetAddress.getHostAddress());
+            return set;
+        } catch (final UnknownHostException e) {
+            return Collections.emptySet();
+        }
     }
 
 }
