@@ -52,6 +52,10 @@ package com.openexchange.tools.oxfolder.memory;
 import gnu.trove.ConcurrentTIntObjectHashMap;
 import gnu.trove.EmptyTIntSet;
 import gnu.trove.TIntCollection;
+import gnu.trove.list.TIntList;
+import gnu.trove.list.array.TIntArrayList;
+import gnu.trove.map.TIntObjectMap;
+import gnu.trove.map.hash.TIntObjectHashMap;
 import gnu.trove.procedure.TIntProcedure;
 import gnu.trove.set.TIntSet;
 import gnu.trove.set.hash.TIntHashSet;
@@ -63,7 +67,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.LinkedList;
 import java.util.List;
 import com.openexchange.cache.impl.FolderCacheManager;
 import com.openexchange.database.DatabaseService;
@@ -72,6 +75,7 @@ import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.server.services.ServerServiceRegistry;
+import com.openexchange.tools.oxfolder.OXFolderBatchLoader;
 import com.openexchange.tools.oxfolder.OXFolderExceptionCode;
 import com.openexchange.tools.sql.DBUtils;
 
@@ -474,15 +478,64 @@ public final class ConditionTreeMap {
             /*
              * List of folders to return
              */
-            final List<FolderObject> list = new LinkedList<FolderObject>();
+            final TIntObjectMap<FolderObject> m = new TIntObjectHashMap<FolderObject>(set.size());
+            {
+                final TIntList toLoad = new TIntArrayList(set.size());
+                final FolderCacheManager cacheManager = FolderCacheManager.getInstance();
+                final boolean cacheEnabled = FolderCacheManager.isEnabled();
+                /*
+                 * Iterate set
+                 */
+                final TIntProcedure procedure = new TIntProcedure() {
+    
+                    @Override
+                    public boolean execute(final int folderId) {
+                        try {
+                            if (cacheEnabled) {
+                                final FolderObject fo = cacheManager.getFolderObject(folderId, ctx);
+                                if (null == fo) {
+                                    toLoad.add(folderId);
+                                } else {
+                                    m.put(folderId, fo);
+                                }
+                            } else {
+                                toLoad.add(folderId);
+                            }
+                            return true;
+                        } catch (final Exception e) {
+                            throw new ProcedureFailedException(e);
+                        }
+                    }
+                };
+                set.forEach(procedure);
+                /*
+                 * Loadees...
+                 */
+                if (!toLoad.isEmpty()) {
+                    final List<FolderObject> loaded = OXFolderBatchLoader.loadFolderObjectsFromDB(toLoad.toArray(), ctx, con, true, true);
+                    for (final FolderObject fo : loaded) {
+                        m.put(fo.getObjectID(), fo);
+                        if (cacheEnabled) {
+                            cacheManager.putFolderObject(fo, ctx, false, null);
+                        }
+                    }
+                }
+            }
+            /*
+             * Fill list from map
+             */
+            final List<FolderObject> list = new ArrayList<FolderObject>(m.size());
             final TIntProcedure procedure = new TIntProcedure() {
 
                 @Override
                 public boolean execute(final int folderId) {
                     try {
-                        list.add(getFolderObject(folderId, ctx, con));
+                        final FolderObject fo = m.get(folderId);
+                        if (null != fo) {
+                            list.add(fo);
+                        }
                         return true;
-                    } catch (final OXException e) {
+                    } catch (final Exception e) {
                         throw new ProcedureFailedException(e);
                     }
                 }
