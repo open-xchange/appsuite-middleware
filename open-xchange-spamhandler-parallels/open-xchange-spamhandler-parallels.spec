@@ -48,3 +48,7 @@ ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} 
 /opt/open-xchange/bundles/*
 
 %changelog
+* Tue Nov 13 2012 Marcus Klein <marcus.klein@open-xchange.com>
+First release candidate for EDP drop #6
+* Tue Oct 23 2012 Marcus Klein <marcus.klein@open-xchange.com>
+Initial release

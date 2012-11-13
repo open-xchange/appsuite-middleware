@@ -1,3 +1,9 @@
+open-xchange-cluster-discovery-static (6.23.0-2) unstable; urgency=low
+
+  * First release candidate for EDP drop #6
+
+ -- Steffen Templin <steffen.templin@open-xchange.com>  Tue, 13 Nov 2012 11:21:55 +0100
+
 open-xchange-cluster-discovery-static (6.23.0-1) unstable; urgency=low
 
   * Initial release

@@ -7,7 +7,7 @@ BuildRequires: ant-nodeps
 BuildRequires: open-xchange-core
 BuildRequires: java-devel >= 1.6.0
 Version:       @OXVERSION@
-%define        ox_release 4
+%define        ox_release 5
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -68,6 +68,8 @@ done
 %config(noreplace) /opt/open-xchange/etc/*
 
 %changelog
+* Tue Nov 13 2012 Steffen Templin <marcus.klein@open-xchange.com>
+First release candidate for EDP drop #6
 * Mon Nov 05 2012 Steffen Templin <marcus.klein@open-xchange.com>
 Build for patch 2012-10-31
 * Wed Oct 31 2012 Steffen Templin <marcus.klein@open-xchange.com>

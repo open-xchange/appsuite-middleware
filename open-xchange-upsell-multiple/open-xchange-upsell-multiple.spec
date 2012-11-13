@@ -8,7 +8,7 @@ BuildRequires:  java-devel >= 1.6.0
 BuildRequires:  open-xchange-core
 BuildRequires:  open-xchange-admin
 Version:        @OXVERSION@
-%define         ox_release 4
+%define         ox_release 5
 Release:        %{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GPL-2.0
@@ -53,6 +53,8 @@ ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} 
 %doc com.openexchange.upsell.multiple/ChangeLog
 
 %changelog
+* Tue Nov 13 2012 Carsten Hoeger <choeger@open-xchange.com>
+First release candidate for EDP drop #6
 * Fri Oct 26 2012 Carsten Hoeger <choeger@open-xchange.com>
 Third release build for EDP drop #5
 * Fri Oct 26 2012 Carsten Hoeger <choeger@open-xchange.com>
