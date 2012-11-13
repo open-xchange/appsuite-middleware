@@ -49,6 +49,7 @@
 
 package com.openexchange.solr.internal;
 
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -63,6 +64,7 @@ import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.solr.SolrCoreConfigService;
 import com.openexchange.solr.SolrCoreIdentifier;
+import com.openexchange.solr.SolrCoreStore;
 import com.openexchange.solr.SolrMBean;
 import com.openexchange.solr.SolrProperties;
 
@@ -100,7 +102,7 @@ public class SolrMBeanImpl extends StandardMBean implements SolrMBean {
         try {
             coreService.removeCoreEnvironment(new SolrCoreIdentifier(contextId, userId, module));
         } catch (OXException e) {
-            throw new MBeanException(e, e.getMessage());
+            throw new MBeanException(null, e.getMessage());
         }
     }
 
@@ -129,7 +131,7 @@ public class SolrMBeanImpl extends StandardMBean implements SolrMBean {
             
             return sb.toString();
         } catch (OXException e) {
-            throw new MBeanException(e, e.getMessage());
+            throw new MBeanException(null, e.getMessage());
         }        
     }
     
@@ -141,7 +143,7 @@ public class SolrMBeanImpl extends StandardMBean implements SolrMBean {
             solrServer.deleteByQuery(identifier, queryString, true);
             return count;
         } catch (OXException e) {
-            throw new MBeanException(e, e.getMessage());
+            throw new MBeanException(null, e.getMessage());
         }
     }
     
@@ -155,7 +157,50 @@ public class SolrMBeanImpl extends StandardMBean implements SolrMBean {
             QueryResponse response = solrServer.query(identifier, query);
             return response.getResults().getNumFound();
         } catch (OXException e) {
-            throw new MBeanException(e, e.getMessage());
-        }  
+            throw new MBeanException(null, e.getMessage());
+        }
+    }
+
+    @Override
+    public List<SolrCoreStore> getAllStores() throws MBeanException {
+        try {
+            return coreService.getAllStores();
+        } catch (OXException e) {
+            throw new MBeanException(null, e.getMessage());
+        }
+    }
+
+    @Override
+    public int registerCoreStore(URI uri, int maxCores) throws MBeanException {
+        SolrCoreStore store = new SolrCoreStore();
+        store.setUri(uri);
+        store.setMaxCores(maxCores);
+        try {
+            return coreService.registerCoreStore(store);
+        } catch (OXException e) {
+            throw new MBeanException(null, e.getMessage());
+        }
+    }
+
+    @Override
+    public void modifyCoreStore(int id, URI uri, int maxCores) throws MBeanException {
+        SolrCoreStore store = new SolrCoreStore();
+        store.setId(id);
+        store.setUri(uri);
+        store.setMaxCores(maxCores);
+        try {
+            coreService.modifyCoreStore(store);
+        } catch (OXException e) {
+            throw new MBeanException(null, e.getMessage());
+        }
+    }
+
+    @Override
+    public void unregisterCoreStore(int id) throws MBeanException {
+        try {
+            coreService.unregisterCoreStore(id);
+        } catch (OXException e) {
+            throw new MBeanException(null, e.getMessage());
+        }
     }
 }

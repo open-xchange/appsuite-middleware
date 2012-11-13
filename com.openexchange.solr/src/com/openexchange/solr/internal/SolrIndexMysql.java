@@ -383,7 +383,7 @@ public class SolrIndexMysql {
         ResultSet rs = null;
         String uri = null;
         try {
-            stmt = con.prepareStatement("SELECT id, uri, maxCores FROM solrCoreStores");
+            stmt = con.prepareStatement("SELECT id, uri, maxCores, numCores FROM solrCoreStores");
             rs = stmt.executeQuery();
 
             while (rs.next()) {
@@ -393,6 +393,7 @@ public class SolrIndexMysql {
                 uri = rs.getString(i++);
                 store.setUri(new URI(uri));
                 store.setMaxCores(rs.getInt(i++));
+                store.setNumCores(rs.getInt(i++));
 
                 stores.add(store);
             }
@@ -422,7 +423,7 @@ public class SolrIndexMysql {
         ResultSet rs = null;
         String uri = null;
         try {
-            stmt = con.prepareStatement("SELECT id, uri, maxCores FROM solrCoreStores WHERE id = ?");
+            stmt = con.prepareStatement("SELECT id, uri, maxCores, numCores FROM solrCoreStores WHERE id = ?");
             stmt.setInt(1, storeId);
             rs = stmt.executeQuery();
 
@@ -433,6 +434,7 @@ public class SolrIndexMysql {
                 uri = rs.getString(i++);
                 store.setUri(new URI(uri));
                 store.setMaxCores(rs.getInt(i++));
+                store.setNumCores(rs.getInt(i++));
 
                 return store;
             } else {
@@ -462,11 +464,12 @@ public class SolrIndexMysql {
         try {
             DBUtils.startTransaction(con);
             final int id = IDGenerator.getId(con);
-            stmt = con.prepareStatement("INSERT INTO solrCoreStores (id, uri, maxCores) VALUES (?, ?, ?)");
+            stmt = con.prepareStatement("INSERT INTO solrCoreStores (id, uri, maxCores, numCores) VALUES (?, ?, ?, ?)");
             int i = 1;
             stmt.setInt(i++, id);
             stmt.setString(i++, store.getUri().toString());
-            stmt.setInt(i, store.getMaxCores());
+            stmt.setInt(i++, store.getMaxCores());
+            stmt.setInt(i, 0);
 
             stmt.executeUpdate();
             return id;
