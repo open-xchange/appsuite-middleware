@@ -151,6 +151,7 @@ import com.openexchange.sessiond.SessiondService;
 import com.openexchange.threadpool.ThreadPoolCompletionService;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.threadpool.ThreadPools;
+import com.openexchange.threadpool.Trackable;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.sql.DBUtils;
 
@@ -1268,7 +1269,7 @@ public final class OutlookFolderStorage implements FolderStorage {
             /*
              * Callable for the ones from virtual table
              */
-            maps.add(new Callable<TreeMap<String, List<String>>>() {
+            maps.add(new TrackableCallable<TreeMap<String, List<String>>>() {
 
                 @Override
                 public TreeMap<String, List<String>> call() throws OXException {
@@ -1605,7 +1606,7 @@ public final class OutlookFolderStorage implements FolderStorage {
         final Key key = new Key(id, Integer.parseInt(treeId), storageParameters.getUserId(), storageParameters.getContextId());
         Future<List<SortableId>> f = TCM.get(key);
         if (null == f) {
-            final FutureTask<List<SortableId>> ft = new FutureTask<List<SortableId>>(new Callable<List<SortableId>>() {
+            final FutureTask<List<SortableId>> ft = new FutureTask<List<SortableId>>(new TrackableCallable<List<SortableId>>() {
 
                 @Override
                 public List<SortableId> call() throws Exception {
@@ -1637,7 +1638,7 @@ public final class OutlookFolderStorage implements FolderStorage {
         final Key key = new Key(PREPARED_FULLNAME_INBOX, tree, user.getId(), contextId);
         Future<List<SortableId>> f = TCM.get(key);
         if (null == f) {
-            final FutureTask<List<SortableId>> ft = new FutureTask<List<SortableId>>(new Callable<List<SortableId>>() {
+            final FutureTask<List<SortableId>> ft = new FutureTask<List<SortableId>>(new TrackableCallable<List<SortableId>>() {
 
                 @Override
                 public List<SortableId> call() throws OXException {
@@ -1842,7 +1843,7 @@ public final class OutlookFolderStorage implements FolderStorage {
         /*
          * Callable for real folder storage
          */
-        completionService.submit(new Callable<TreeMap<String, List<String>>>() {
+        completionService.submit(new TrackableCallable<TreeMap<String, List<String>>>() {
 
             @Override
             public TreeMap<String, List<String>> call() throws OXException {
@@ -1896,7 +1897,7 @@ public final class OutlookFolderStorage implements FolderStorage {
         /*
          * Callable for the ones from virtual table
          */
-        completionService.submit(new Callable<TreeMap<String, List<String>>>() {
+        completionService.submit(new TrackableCallable<TreeMap<String, List<String>>>() {
 
             @Override
             public TreeMap<String, List<String>> call() throws OXException {
@@ -1916,7 +1917,7 @@ public final class OutlookFolderStorage implements FolderStorage {
         /*
          * Callable for other top-level folders: shared + public
          */
-        completionService.submit(new Callable<TreeMap<String, List<String>>>() {
+        completionService.submit(new TrackableCallable<TreeMap<String, List<String>>>() {
 
             @Override
             public TreeMap<String, List<String>> call() throws OXException {
@@ -2277,27 +2278,31 @@ public final class OutlookFolderStorage implements FolderStorage {
         }
     }
 
-    private final class MailFolderCallable implements Callable<TreeMap<String, List<String>>> {
+    private final class MailFolderCallable implements Callable<TreeMap<String, List<String>>>, Trackable {
 
         private final FolderNameComparator comparator;
-
         private final Locale locale;
-
         private final User user;
-
         private final int contextId;
-
         private final int tree;
-
         private final StorageParameters parameters;
+        private final Map<String, Object> props;
 
         public MailFolderCallable(final FolderNameComparator comparator, final Locale locale, final User user, final int contextId, final int tree, final StorageParameters parameters) {
+            super();
+            final Props props = LogProperties.optLogProperties(Thread.currentThread());
+            this.props = null == props ? null : Collections.unmodifiableMap(props.getMap());
             this.comparator = comparator;
             this.locale = locale == null ? Locale.US : locale;
             this.user = user;
             this.contextId = contextId;
             this.tree = tree;
             this.parameters = parameters;
+        }
+
+        @Override
+        public Map<String, Object> optLogProperties() {
+            return props;
         }
 
         @Override
@@ -2659,6 +2664,24 @@ public final class OutlookFolderStorage implements FolderStorage {
              * Parsing failed
              */
             return false;
+        }
+    }
+
+    /**
+     * Combines Callable and Trackable
+     */
+    private static abstract class TrackableCallable<V> implements Callable<V>, Trackable {
+        
+        private final Map<String, Object> props;
+        TrackableCallable() {
+            super();
+            final Props props = LogProperties.optLogProperties(Thread.currentThread());
+            this.props = null == props ? null : Collections.unmodifiableMap(props.getMap());
+        }
+
+        @Override
+        public Map<String, Object> optLogProperties() {
+            return props;
         }
     }
 }
