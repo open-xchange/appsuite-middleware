@@ -1036,9 +1036,6 @@ public final class MailFolderStorage implements FolderStorage {
                                 // Nope
                             }
                         } else {
-                            /*-
-                             * Could not translate due to missing default folder information
-                             * 
                             final String fullName = child.getFullname();
                             final IMailFolderStorage folderStorage = mailAccess.getFolderStorage();
                             if (fullName.equals(folderStorage.getDraftsFolder())) {
@@ -1054,8 +1051,6 @@ public final class MailFolderStorage implements FolderStorage {
                             } else if (fullName.equals(folderStorage.getConfirmedHamFolder())) {
                                 child.setName(StringHelper.valueOf(locale).getString(MailStrings.CONFIRMED_HAM));
                             }
-                             * 
-                             */
                         }
                      }
                 }
