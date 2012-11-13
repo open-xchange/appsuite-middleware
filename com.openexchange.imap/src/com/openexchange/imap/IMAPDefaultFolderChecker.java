@@ -660,14 +660,14 @@ public class IMAPDefaultFolderChecker {
                 parent = (IMAPFolder) imapStore.getFolder(parentFullName);
             }
             final Folder[] folders = parent.list();
-            final List<String> candidates = new ArrayList<String>(2);
+            final List<Folder> candidates = new ArrayList<Folder>(2);
             for (int i = 0; i < folders.length; i++) {
-                final String folderName = folders[i].getName();
-                if (qualifiedName.equalsIgnoreCase(folderName)) {
+                final Folder child = folders[i];
+                if (qualifiedName.equalsIgnoreCase(child.getName())) {
                     /*
                      * Detected a similarly named folder
                      */
-                    candidates.add(folderName);
+                    candidates.add(child);
                 }
             }
             final int nCandidates = candidates.size();
@@ -687,18 +687,9 @@ public class IMAPDefaultFolderChecker {
                     throw e;
                 }
             } else {
-                // Must not edit default mail account. Try to create IMAP folder
-                try {
-                    if (!f.exists()) {
-                        IMAPCommandsCollection.createFolder(f, sep, type, false);
-                    }
-                    modified.set(true);
-                } catch (final MessagingException e) {
-                    if (isOverQuotaException(e)) {
-                        throw e;
-                    }
-                    throw e;
-                }
+                // Found one candidate
+                closeSafe(f);
+                f = (IMAPFolder) candidates.get(0);
             }
         }
         if (1 == subscribe) {
@@ -785,6 +776,16 @@ public class IMAPDefaultFolderChecker {
                     }
                 }
                 sb.append('\n');
+            }
+        }
+    }
+
+    private static void closeSafe(final Folder folder) {
+        if (null != folder) {
+            try {
+                folder.close(false);
+            } catch (final Exception e) {
+                // Ignore
             }
         }
     }
