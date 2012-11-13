@@ -2,6 +2,10 @@
 
  - Dropped hazelcast.xml config file
 
+* 2012-11-13 - martin.herfurth@open-xchange.com
+
+ - Fix for bug 23701: Fixed side effect of bugfix for 22116.
+
 * 2012-11-13 - thorben.betten@open-xchange.com
 
  - Fix for bug 23700: Fixed publication link

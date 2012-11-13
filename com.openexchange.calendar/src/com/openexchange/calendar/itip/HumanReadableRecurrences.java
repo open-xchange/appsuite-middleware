@@ -227,7 +227,7 @@ public class HumanReadableRecurrences {
     private static final Pattern SANE_FORMAT = Pattern.compile("(%[0-9]+)?" + Pattern.quote("$") + "(\\s|$)");
     private static String saneFormatString(final String format) {
         if (isEmpty(format) || format.indexOf('$') < 0) {
-            return null;
+            return format;
         }
         return SANE_FORMAT.matcher(format).replaceAll("$1" + Matcher.quoteReplacement("$s") + "$2");
     }
