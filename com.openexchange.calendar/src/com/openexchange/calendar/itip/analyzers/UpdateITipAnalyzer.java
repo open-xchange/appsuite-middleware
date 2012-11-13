@@ -165,7 +165,9 @@ public class UpdateITipAnalyzer extends AbstractITipAnalyzer {
         if (differ && message.getDataObject() != null) {
             CalendarDataObject dataObject = message.getDataObject().clone();
             ensureParticipant(dataObject, session, owner);
-            dataObject.setParentFolderID(original.getParentFolderID());
+            if (original != null) {
+                dataObject.setParentFolderID(original.getParentFolderID());
+            }
             
         	change.setNewAppointment(dataObject);
 
