@@ -412,6 +412,11 @@ public class IMAPDefaultFolderChecker {
             } else {
                 setDefaultMailFolder(index, checkDefaultFolder(index, "", fullName, sep, type, subscribe, true, modified), cache);
             }
+        } catch (final OXException e) {
+            LOG.warn("Couldn't check default folder: " + (null == fullName ? (prefix + name) : fullName), e);
+            setDefaultMailFolder(index, null, cache);
+            e.setCategory(Category.CATEGORY_WARNING);
+            imapStore.getImapAccess().addWarnings(Collections.singleton(e));
         } catch (final FolderClosedException e) {
             /*
              * Not possible to retry since connection is broken
