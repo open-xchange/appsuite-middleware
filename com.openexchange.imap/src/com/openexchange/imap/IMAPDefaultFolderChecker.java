@@ -394,6 +394,9 @@ public class IMAPDefaultFolderChecker {
         }
     }
 
+    /**
+     * Checks for possible over-quota error.
+     */
     protected static boolean isOverQuotaException(final MessagingException e) {
         if (null == e) {
             return false;
