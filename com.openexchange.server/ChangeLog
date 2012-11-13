@@ -1,3 +1,7 @@
+* 2012-11-13 - jan.bauerdick@open-xchange.com
+
+ - Dropped hazelcast.xml config file
+
 * 2012-11-13 - thorben.betten@open-xchange.com
 
  - Fix for bug 23700: Fixed publication link
