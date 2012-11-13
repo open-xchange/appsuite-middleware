@@ -965,6 +965,9 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
             if (!finished) {
                 try {
                     finish();
+                } catch (final IOException e) {
+                    // Lost connection
+                    error = true;
                 } catch (final Throwable t) {
                     ExceptionUtils.handleThrowable(t);
                     final StringBuilder tmp = new StringBuilder(128).append("Error processing request: ");
