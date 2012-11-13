@@ -428,11 +428,12 @@ public class IMAPDefaultFolderChecker {
                 setDefaultMailFolder(index, null, cache);
                 final OXException warning = MimeMailException.handleMessagingException(e, imapConfig, session).setCategory(Category.CATEGORY_WARNING);
                 imapStore.getImapAccess().addWarnings(Collections.singleton(warning));
+            } else {
+                LOG.warn("Couldn't check default folder: " + (null == fullName ? (prefix + name) : fullName), e);
+                setDefaultMailFolder(index, null, cache);
+                final OXException warning = MimeMailException.handleMessagingException(e, imapConfig, session).setCategory(Category.CATEGORY_WARNING);
+                imapStore.getImapAccess().addWarnings(Collections.singleton(warning));
             }
-            LOG.warn("Couldn't check default folder: " + (null == fullName ? (prefix + name) : fullName), e);
-            setDefaultMailFolder(index, null, cache);
-            final OXException warning = MimeMailException.handleMessagingException(e, imapConfig, session).setCategory(Category.CATEGORY_WARNING);
-            imapStore.getImapAccess().addWarnings(Collections.singleton(warning));
         }
         return null;
     }
@@ -742,6 +743,42 @@ public class IMAPDefaultFolderChecker {
      */
     private void setSeparator(final char separator, final MailSessionCache mailSessionCache) {
         mailSessionCache.putParameter(accountId, MailSessionParameterNames.getParamSeparator(), Character.valueOf(separator));
+    }
+
+    /**
+     * Appends stack trace.
+     * 
+     * @param trace The stack trace
+     * @param sb The builder
+     * @param num The max. number of elements to append
+     */
+    protected static void appendStackTrace(final StackTraceElement[] trace, final StringBuilder sb, final int num) {
+        if (null == trace) {
+            return;
+        }
+        for (int i = 0; (num < 0 || i < num) && i < trace.length; i++) {
+            final StackTraceElement ste = trace[i];
+            final String className = ste.getClassName();
+            if (null != className) {
+                sb.append("\tat ").append(className).append('.').append(ste.getMethodName());
+                if (ste.isNativeMethod()) {
+                    sb.append("(Native Method)");
+                } else {
+                    final String fileName = ste.getFileName();
+                    if (null == fileName) {
+                        sb.append("(Unknown Source)");
+                    } else {
+                        final int lineNumber = ste.getLineNumber();
+                        sb.append('(').append(fileName);
+                        if (lineNumber >= 0) {
+                            sb.append(':').append(lineNumber);
+                        }
+                        sb.append(')');
+                    }
+                }
+                sb.append('\n');
+            }
+        }
     }
 
 }
