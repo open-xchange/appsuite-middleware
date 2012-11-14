@@ -1,3 +1,7 @@
+* 2012-11-14 - marcus.klein@open-xchange.com
+
+ - Fix for bug 23635: Corrected class name for AJP monitoring class in showruntimestats.
+
 * 2012-11-13 - marcus.klein@open-xchange.com
 
  - Fix for bug 23712: Path in import.properties is still necessary because configuration files for CVS import are not located in the
