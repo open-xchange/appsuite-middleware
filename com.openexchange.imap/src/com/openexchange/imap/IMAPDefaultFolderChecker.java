@@ -60,7 +60,6 @@ import java.util.concurrent.locks.Lock;
 import javax.mail.Folder;
 import javax.mail.FolderClosedException;
 import javax.mail.MessagingException;
-import javax.mail.MethodNotSupportedException;
 import javax.mail.StoreClosedException;
 import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
@@ -590,25 +589,13 @@ public class IMAPDefaultFolderChecker {
                 final IMAPFolder f = (IMAPFolder) imapStore.getFolder(fullName);
                 if (1 == subscribe) {
                     if (!entry.isSubscribed()) {
-                        try {
-                            f.setSubscribed(true);
-                            modified.set(true);
-                        } catch (final MethodNotSupportedException e) {
-                            LOG.error(e.getMessage(), e);
-                        } catch (final MessagingException e) {
-                            LOG.error(e.getMessage(), e);
-                        }
+                        IMAPCommandsCollection.forceSetSubscribed(imapStore, fullName, true);
+                        modified.set(true);
                     }
                 } else if (0 == subscribe) {
                     if (entry.isSubscribed()) {
-                        try {
-                            f.setSubscribed(false);
-                            modified.set(true);
-                        } catch (final MethodNotSupportedException e) {
-                            LOG.error(e.getMessage(), e);
-                        } catch (final MessagingException e) {
-                            LOG.error(e.getMessage(), e);
-                        }
+                        IMAPCommandsCollection.forceSetSubscribed(imapStore, fullName, false);
+                        modified.set(true);
                     }
                 }
                 if (DEBUG) {
