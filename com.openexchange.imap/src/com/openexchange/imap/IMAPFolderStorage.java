@@ -862,7 +862,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
                         IMAPException.Code.INVALID_FOLDER_NAME,
                         imapConfig,
                         session,
-                        Character.valueOf(toCreate.getSeparator()));
+                        toCreate.getName());
                 }
                 parent = getIMAPFolder(parentFullname);
                 isParentDefault = false;
@@ -933,7 +933,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
                 final boolean mboxEnabled =
                     MBoxEnabledCache.isMBoxEnabled(imapConfig, parent, new StringBuilder(parent.getFullName()).append(separator).toString());
                 if (!checkFolderNameValidity(name, separator, mboxEnabled)) {
-                    throw IMAPException.create(IMAPException.Code.INVALID_FOLDER_NAME, imapConfig, session, Character.valueOf(separator));
+                    throw IMAPException.create(IMAPException.Code.INVALID_FOLDER_NAME, imapConfig, session, name);
                 }
                 if (isParentDefault) {
                     /*
@@ -1243,7 +1243,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
                     throw IMAPException.create(IMAPException.Code.DUPLICATE_FOLDER, imapConfig, session, renameFolder.getFullName());
                 }
                 if (!checkFolderNameValidity(newName, separator, mboxEnabled)) {
-                    throw IMAPException.create(IMAPException.Code.INVALID_FOLDER_NAME, imapConfig, session, Character.valueOf(separator));
+                    throw IMAPException.create(IMAPException.Code.INVALID_FOLDER_NAME, imapConfig, session, newName);
                 }
                 /*
                  * Remember subscription status
@@ -1379,17 +1379,17 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
                                 IMAPException.Code.INVALID_FOLDER_NAME,
                                 imapConfig,
                                 session,
-                                Character.valueOf(separator));
+                                newFullname);
                         }
                         newParent = newFullname.substring(0, pos);
+                        newName = newFullname.substring(pos + 1);
                         if (!checkFolderPathValidity(newParent, separator)) {
                             throw IMAPException.create(
                                 IMAPException.Code.INVALID_FOLDER_NAME,
                                 imapConfig,
                                 session,
-                                Character.valueOf(separator));
+                                newName);
                         }
-                        newName = newFullname.substring(pos + 1);
                     }
                 }
                 if (newName.length() > MAX_MAILBOX_NAME) {
@@ -1496,7 +1496,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
                                 IMAPException.Code.INVALID_FOLDER_NAME,
                                 imapConfig,
                                 session,
-                                Character.valueOf(separator));
+                                newName);
                         }
                         if (isSubfolderOf(destFolder.getFullName(), oldFullname, separator)) {
                             throw IMAPException.create(
@@ -1561,7 +1561,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
                             IMAPException.Code.INVALID_FOLDER_NAME,
                             imapConfig,
                             session,
-                            Character.valueOf(separator));
+                            newName);
                     }
                     /*
                      * Remember subscription status

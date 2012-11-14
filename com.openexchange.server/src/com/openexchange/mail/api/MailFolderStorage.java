@@ -122,7 +122,8 @@ public abstract class MailFolderStorage implements IMailFolderStorage {
         final MailFolder folder = getFolder(fullName);
         if (isEmpty(newName)) {
             throw MailExceptionCode.INVALID_FOLDER_NAME_EMPTY.create();
-        } else if (newName.indexOf(folder.getSeparator()) != -1) {
+        }
+        if (newName.indexOf(folder.getSeparator()) != -1) {
             throw MailExceptionCode.INVALID_FOLDER_NAME2.create(newName);
         }
         final String newPath;
