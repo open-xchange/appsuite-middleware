@@ -50,6 +50,7 @@
 package com.openexchange.service.indexing;
 
 import java.util.Date;
+
 import com.openexchange.exception.OXException;
 
 
@@ -82,7 +83,7 @@ public interface IndexingService {
      * @param info The information needed to run this job.
      * @param startDate The start date of the job. May be <code>null</code> to run immediately.
      * @param repeatInterval The repeat interval in milliseconds. May be negative if the job shall only run once.
-     * @param priority The priority. If two jobs shall be started at the same time, the one with the higher priority wins. See {{@link #DEFAULT_PRIORITY}.
+     * @param priority The priority. If two jobs shall be started at the same time, the one with the higher priority wins. See {@link IndexingService#DEFAULT_PRIORITY}.
      * @throws OXException 
      */
     void scheduleJob(JobInfo info, Date startDate, long repeatInterval, int priority) throws OXException;
@@ -103,5 +104,13 @@ public interface IndexingService {
      * @throws OXException
      */
     void unscheduleAllForUser(int contextId, int userId) throws OXException;
+    
+    /**
+     * Deletes all jobs for a given context.
+     * 
+     * @param contextId The context id.
+     * @throws OXException
+     */
+    void unscheduleAllForContext(int contextId) throws OXException;
 
 }
