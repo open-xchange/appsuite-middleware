@@ -47,43 +47,52 @@
  *
  */
 
-package com.openexchange.index.solr.test.osgi;
+package com.openexchange.index;
 
-import com.openexchange.config.ConfigurationService;
-import com.openexchange.index.IndexFacadeService;
-import com.openexchange.index.IndexManagementService;
-import com.openexchange.index.solr.test.AbstractSolrIndexAccessTest;
-import com.openexchange.index.solr.test.SolrTestSuite;
-import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.test.osgi.OSGiTest;
+import com.openexchange.exception.OXException;
 
 
 /**
- * {@link Activator}
+ * {@link IndexManagementService}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public class Activator extends HousekeepingActivator {
-
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { IndexFacadeService.class, ConfigurationService.class, IndexManagementService.class };
-    }
-
-    @Override
-    protected void startBundle() throws Exception {
-        System.out.println("!!!STATE: " + context.getBundle().getState());
-        AbstractSolrIndexAccessTest.setIndexFacade(getService(IndexFacadeService.class));
-        AbstractSolrIndexAccessTest.setConfigurationService(getService(ConfigurationService.class));
-        AbstractSolrIndexAccessTest.setIndexManagementService(getService(IndexManagementService.class));
-        registerService(OSGiTest.class, new SolrTestSuite());
-    }
+public interface IndexManagementService {
     
-    @Override
-    protected void stopBundle() throws Exception {
-        System.out.println("!!!STATE: " + context.getBundle().getState());
-        super.stopBundle();
-        System.out.println("!!!STATE: " + context.getBundle().getState());
-    }
+    /**
+     * Locks the modules index for a given user.<br>
+     * If an index is locked it throws {@link IndexExceptionCodes#INDEX_LOCKED} on<br>
+     * <ul>
+     *   <li>every method call on the corresponding {@link IndexAccess} object.</li>
+     *   <li>trying to acquire it via {@link IndexFacadeService#acquireIndexAccess}.</li>
+     * </ul>
+     * 
+     * @param contextId The context id.
+     * @param userId The user id.
+     * @param module The module.
+     * @throws OXException
+     */
+    void lockIndex(int contextId, int userId, int module) throws OXException;
+    
+    /**
+     * Unlocks the modules index for a given user.
+     * 
+     * @param contextId The context id.
+     * @param userId The user id.
+     * @param module The module.
+     * @throws OXException
+     */
+    void unlockIndex(int contextId, int userId, int module) throws OXException;
+    
+    /**
+     * Returns whether an modules index is locked for a given user.
+     * 
+     * @param contextId The context id.
+     * @param userId The user id.
+     * @param module The module.
+     * @return <code>true</code> if the index is locked, <code>false</code> if not.
+     * @throws OXException
+     */
+    boolean isLocked(int contextId, int userId, int module) throws OXException;
 
 }

@@ -71,6 +71,8 @@ import org.apache.solr.common.params.SolrParams;
 import com.openexchange.exception.OXException;
 import com.openexchange.index.IndexAccess;
 import com.openexchange.index.IndexDocument;
+import com.openexchange.index.IndexExceptionCodes;
+import com.openexchange.index.IndexManagementService;
 import com.openexchange.index.solr.IndexFolderManager;
 import com.openexchange.solr.SolrAccessService;
 import com.openexchange.solr.SolrCoreIdentifier;
@@ -150,6 +152,13 @@ public abstract class AbstractSolrIndexAccess<V> implements IndexAccess<V> {
             return false;
         } finally {
             folderCacheLock.unlock();
+        }
+    }
+    
+    protected void checkIfIndexIsLocked() throws OXException {
+        IndexManagementService managementService = Services.getService(IndexManagementService.class);
+        if (managementService.isLocked(contextId, userId, module)) {
+            throw IndexExceptionCodes.INDEX_LOCKED.create(module, userId, contextId);
         }
     }
     

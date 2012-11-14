@@ -50,6 +50,7 @@
 package com.openexchange.index.solr.test;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import java.util.Collections;
@@ -64,6 +65,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.Types;
 import com.openexchange.index.AccountFolders;
 import com.openexchange.index.IndexAccess;
+import com.openexchange.index.IndexExceptionCodes;
 import com.openexchange.index.IndexResult;
 import com.openexchange.index.QueryParameters;
 import com.openexchange.index.SearchHandler;
@@ -91,11 +93,49 @@ public class SolrMailIndexAccessTest extends AbstractSolrIndexAccessTest {
     @Before
     public void setUpTest() throws OXException {
         assertNotNull("IndexFacadeService was null.", indexFacade);
+        managementService.unlockIndex(context.getId(), user.getId(), Types.EMAIL);
         IndexAccess<MailMessage> indexAccess = indexFacade.acquireIndexAccess(Types.EMAIL, user.getId(), context.getId());
         QueryParameters params = new QueryParameters.Builder()
                                     .setHandler(SearchHandler.ALL_REQUEST)
                                     .build();
         indexAccess.deleteByQuery(params);
+    }
+    
+    @Test
+    public void testIndexLock() throws Exception {
+        try {
+            managementService.lockIndex(context.getId(), user.getId(), Types.EMAIL);
+            assertTrue("Index was not locked.", managementService.isLocked(context.getId(), user.getId(), Types.EMAIL));
+            
+            try {
+                indexFacade.acquireIndexAccess(Types.EMAIL, user.getId(), context.getId());
+            } catch (OXException e) {
+                assertTrue("Wrong exception.", IndexExceptionCodes.INDEX_LOCKED.equals(e));
+            }
+            
+            managementService.unlockIndex(context.getId(), user.getId(), Types.EMAIL);
+            assertFalse("Index was locked.", managementService.isLocked(context.getId(), user.getId(), Types.EMAIL));
+            
+            IndexAccess<MailMessage> indexAccess = indexFacade.acquireIndexAccess(Types.EMAIL, user.getId(), context.getId());
+            managementService.lockIndex(context.getId(), user.getId(), Types.EMAIL);
+            assertTrue("Index was not locked.", managementService.isLocked(context.getId(), user.getId(), Types.EMAIL));
+            MailMessage m1 = TestMails.toMailMessage(TestMails.MAIL1);
+            m1.setMailId(String.valueOf(new Random().nextInt(Integer.MAX_VALUE)));
+            m1.setFolder("INBOX");
+            m1.setAccountId(0);
+            try {
+                indexAccess.addAttachments(new StandardIndexDocument<MailMessage>(m1), true);
+            } catch (OXException e) {
+                assertTrue("Wrong exception.", IndexExceptionCodes.INDEX_LOCKED.equals(e));
+            }
+            
+            managementService.unlockIndex(context.getId(), user.getId(), Types.EMAIL);
+            assertFalse("Index was locked.", managementService.isLocked(context.getId(), user.getId(), Types.EMAIL));
+            indexAccess.addAttachments(new StandardIndexDocument<MailMessage>(m1), true);
+        } finally {
+            managementService.unlockIndex(context.getId(), user.getId(), Types.EMAIL);
+            assertFalse("Index was locked.", managementService.isLocked(context.getId(), user.getId(), Types.EMAIL));
+        }
     }
 
     @Test

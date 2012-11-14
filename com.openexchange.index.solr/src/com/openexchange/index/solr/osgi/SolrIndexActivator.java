@@ -59,11 +59,13 @@ import com.openexchange.groupware.infostore.InfostoreFacade;
 import com.openexchange.groupware.update.DefaultUpdateTaskProviderService;
 import com.openexchange.groupware.update.UpdateTaskProviderService;
 import com.openexchange.index.IndexFacadeService;
+import com.openexchange.index.IndexManagementService;
 import com.openexchange.index.solr.groupware.IndexDeleteListener;
 import com.openexchange.index.solr.groupware.IndexedFoldersCreateTableService;
 import com.openexchange.index.solr.groupware.IndexedFoldersCreateTableTask;
 import com.openexchange.index.solr.internal.Services;
 import com.openexchange.index.solr.internal.SolrIndexFacadeService;
+import com.openexchange.index.solr.internal.SolrIndexManagementService;
 import com.openexchange.log.LogFactory;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.solr.SolrAccessService;
@@ -108,6 +110,10 @@ public class SolrIndexActivator extends HousekeepingActivator {
         registerService(CreateTableService.class, createTableService);
         registerService(UpdateTaskProviderService.class, new DefaultUpdateTaskProviderService(new IndexedFoldersCreateTableTask(createTableService)));
         registerService(DeleteListener.class, new IndexDeleteListener());
+        
+        IndexManagementService managementService = new SolrIndexManagementService();
+        registerService(IndexManagementService.class, managementService);
+        this.addService(IndexManagementService.class, managementService);
 //        final SolrCoreConfigService indexService = new SolrCoreConfigServiceImpl();
 //        registerService(SolrCoreConfigService.class, indexService);
     }

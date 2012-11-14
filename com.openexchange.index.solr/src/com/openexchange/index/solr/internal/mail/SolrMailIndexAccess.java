@@ -124,11 +124,13 @@ public class SolrMailIndexAccess extends AbstractSolrIndexAccess<MailMessage> {
 
     @Override
     public void addEnvelopeData(IndexDocument<MailMessage> document) throws OXException {
+        checkIfIndexIsLocked();
         addDocument(convertToDocument(document));
     }
 
     @Override
     public void addEnvelopeData(Collection<IndexDocument<MailMessage>> documents) throws OXException {
+        checkIfIndexIsLocked();
         if (documents.isEmpty()) {
             return;
         }
@@ -143,11 +145,13 @@ public class SolrMailIndexAccess extends AbstractSolrIndexAccess<MailMessage> {
 
     @Override
     public void addContent(IndexDocument<MailMessage> document, boolean full) throws OXException {
+        checkIfIndexIsLocked();
         addDocument(convertToDocument(document));
     }
 
     @Override
     public void addContent(Collection<IndexDocument<MailMessage>> documents, boolean full) throws OXException {
+        checkIfIndexIsLocked();
         if (documents.isEmpty()) {
             return;
         }
@@ -162,11 +166,13 @@ public class SolrMailIndexAccess extends AbstractSolrIndexAccess<MailMessage> {
 
     @Override
     public void addAttachments(IndexDocument<MailMessage> document, boolean full) throws OXException {
+        checkIfIndexIsLocked();
         addDocument(convertToDocument(document));
     }
 
     @Override
     public void addAttachments(Collection<IndexDocument<MailMessage>> documents, boolean full) throws OXException {
+        checkIfIndexIsLocked();
         if (documents.isEmpty()) {
             return;
         }
@@ -181,11 +187,13 @@ public class SolrMailIndexAccess extends AbstractSolrIndexAccess<MailMessage> {
 
     @Override
     public void deleteById(String id) throws OXException {
+        checkIfIndexIsLocked();
         deleteDocumentById(id);
     }
 
     @Override
     public void deleteByQuery(QueryParameters parameters) throws OXException {
+        checkIfIndexIsLocked();
         Set<MailIndexField> fields = EnumSet.noneOf(MailIndexField.class);
         fields.add(MailIndexField.ACCOUNT);
         fields.add(MailIndexField.FULL_NAME);
@@ -206,6 +214,7 @@ public class SolrMailIndexAccess extends AbstractSolrIndexAccess<MailMessage> {
 
     @Override
     public IndexResult<MailMessage> query(QueryParameters parameters, Set<? extends IndexField> fields) throws OXException {
+        checkIfIndexIsLocked();
         IndexField sortField = parameters.getSortField();
         Order order = parameters.getOrder();
         SolrMailField solrSortField = (SolrMailField) MailFieldMapper.getInstance().solrFieldFor(sortField);
@@ -248,6 +257,7 @@ public class SolrMailIndexAccess extends AbstractSolrIndexAccess<MailMessage> {
 
     @Override
     public IndexResult<MailMessage> query(QueryParameters parameters, FacetParameters facetParameters, Set<? extends IndexField> fields) throws OXException {
+        checkIfIndexIsLocked();
         // TODO Auto-generated method stub
         return null;
     }

@@ -122,11 +122,13 @@ public class SolrInfostoreIndexAccess extends AbstractSolrIndexAccess<DocumentMe
 
     @Override
     public void addEnvelopeData(IndexDocument<DocumentMetadata> document) throws OXException {
+        checkIfIndexIsLocked();
         addDocument(convertToDocument(document));
     }
 
     @Override
     public void addEnvelopeData(Collection<IndexDocument<DocumentMetadata>> documents) throws OXException {
+        checkIfIndexIsLocked();
         if (documents.isEmpty()) {
             return;
         }
@@ -141,11 +143,13 @@ public class SolrInfostoreIndexAccess extends AbstractSolrIndexAccess<DocumentMe
 
     @Override
     public void addContent(IndexDocument<DocumentMetadata> document, boolean full) throws OXException {
+        checkIfIndexIsLocked();
         addDocument(convertToDocument(document));  
     }
 
     @Override
     public void addContent(Collection<IndexDocument<DocumentMetadata>> documents, boolean full) throws OXException {
+        checkIfIndexIsLocked();
         if (documents.isEmpty()) {
             return;
         }
@@ -160,11 +164,13 @@ public class SolrInfostoreIndexAccess extends AbstractSolrIndexAccess<DocumentMe
 
     @Override
     public void addAttachments(IndexDocument<DocumentMetadata> document, boolean full) throws OXException {
+        checkIfIndexIsLocked();
         addDocument(convertToDocument(document));
     }
 
     @Override
     public void addAttachments(Collection<IndexDocument<DocumentMetadata>> documents, boolean full) throws OXException {
+        checkIfIndexIsLocked();
         if (documents.isEmpty()) {
             return;
         }
@@ -178,16 +184,19 @@ public class SolrInfostoreIndexAccess extends AbstractSolrIndexAccess<DocumentMe
     }
     
     private SolrInputDocument convertToDocument(IndexDocument<DocumentMetadata> document) throws OXException {
+        checkIfIndexIsLocked();
         return SolrInfostoreDocumentConverter.convertStatic(contextId, userId, document);
     }
 
     @Override
     public void deleteById(String id) throws OXException {
-        deleteDocumentById(id);      
+        checkIfIndexIsLocked();
+        deleteDocumentById(id);
     }
 
     @Override
     public void deleteByQuery(QueryParameters parameters) throws OXException {
+        checkIfIndexIsLocked();
         IndexResult<DocumentMetadata> indexResult = query(parameters, null);
         List<IndexDocument<DocumentMetadata>> documents = indexResult.getResults();
         Set<String> uuids = new HashSet<String>(documents.size());
@@ -203,12 +212,14 @@ public class SolrInfostoreIndexAccess extends AbstractSolrIndexAccess<DocumentMe
     
     @Override
     public IndexResult<DocumentMetadata> query(QueryParameters parameters, FacetParameters facetParameters, Set<? extends IndexField> fields) throws OXException {
+        checkIfIndexIsLocked();
         // TODO: implement me
         return null;
     }
 
     @Override
     public IndexResult<DocumentMetadata> query(QueryParameters parameters, Set<? extends IndexField> fields) throws OXException {
+        checkIfIndexIsLocked();
         SolrQuery solrQuery = queryBuilder.buildQuery(parameters);            
         Set<SolrInfostoreField> solrFields = convertAndCheckFields(parameters, fields);
         setFieldList(solrQuery, solrFields);

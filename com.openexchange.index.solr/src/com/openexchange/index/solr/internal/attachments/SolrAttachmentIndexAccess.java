@@ -122,11 +122,13 @@ public class SolrAttachmentIndexAccess extends AbstractSolrIndexAccess<Attachmen
 
     @Override
     public void addEnvelopeData(IndexDocument<Attachment> document) throws OXException {
+        checkIfIndexIsLocked();
         addDocument(convertToDocument(document));
     }
 
     @Override
     public void addEnvelopeData(Collection<IndexDocument<Attachment>> documents) throws OXException {
+        checkIfIndexIsLocked();
         if (documents.isEmpty()) {
             return;
         }
@@ -141,11 +143,13 @@ public class SolrAttachmentIndexAccess extends AbstractSolrIndexAccess<Attachmen
 
     @Override
     public void addContent(IndexDocument<Attachment> document, boolean full) throws OXException {
+        checkIfIndexIsLocked();
         addDocument(convertToDocument(document));
     }
 
     @Override
     public void addContent(Collection<IndexDocument<Attachment>> documents, boolean full) throws OXException {
+        checkIfIndexIsLocked();
         if (documents.isEmpty()) {
             return;
         }
@@ -160,11 +164,13 @@ public class SolrAttachmentIndexAccess extends AbstractSolrIndexAccess<Attachmen
 
     @Override
     public void addAttachments(IndexDocument<Attachment> document, boolean full) throws OXException {
+        checkIfIndexIsLocked();
         addDocument(convertToDocument(document));
     }
 
     @Override
     public void addAttachments(Collection<IndexDocument<Attachment>> documents, boolean full) throws OXException {
+        checkIfIndexIsLocked();
         if (documents.isEmpty()) {
             return;
         }
@@ -179,11 +185,13 @@ public class SolrAttachmentIndexAccess extends AbstractSolrIndexAccess<Attachmen
 
     @Override
     public void deleteById(String id) throws OXException {
+        checkIfIndexIsLocked();
         deleteDocumentById(id);
     }
 
     @Override
     public void deleteByQuery(QueryParameters parameters) throws OXException {
+        checkIfIndexIsLocked();
         Set<AttachmentIndexField> fields = EnumSet.noneOf(AttachmentIndexField.class);
         fields.add(AttachmentIndexField.MODULE);
         fields.add(AttachmentIndexField.SERVICE);
@@ -207,6 +215,7 @@ public class SolrAttachmentIndexAccess extends AbstractSolrIndexAccess<Attachmen
 
     @Override
     public IndexResult<Attachment> query(QueryParameters parameters, Set<? extends IndexField> fields) throws OXException {
+        checkIfIndexIsLocked();
         SolrQuery solrQuery = queryBuilder.buildQuery(parameters);
         Set<SolrAttachmentField> solrFields = checkAndConvert(fields);
         setFieldList(solrQuery, solrFields);
@@ -220,6 +229,7 @@ public class SolrAttachmentIndexAccess extends AbstractSolrIndexAccess<Attachmen
     
     @Override
     public IndexResult<Attachment> query(QueryParameters parameters, FacetParameters facetParameters, Set<? extends IndexField> fields) throws OXException {
+        checkIfIndexIsLocked();
         // TODO Auto-generated method stub
         return null;
     }
