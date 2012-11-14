@@ -5,6 +5,7 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Dictionary;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
@@ -413,11 +414,14 @@ public class HazelcastActivator extends HousekeepingActivator {
             ConfigurationService configService = getService(ConfigurationService.class);
             Config config = new Config();
             final String groupName = configService.getProperty("com.openexchange.hazelcast.groupname");
-            if (!isEmpty(groupName)) {
-                final String groupPassword = configService.getProperty("com.openexchange.hazelcast.grouppassword");
-                final GroupConfig groupConfig = new GroupConfig(groupName, groupPassword);
-                config.setGroupConfig(groupConfig);
+            if (isEmpty(groupName)) {
+                throw new IllegalStateException(new BundleException("Group name is mandatory. Please set a valid identifier through property \"com.openexchange.hazelcast.groupname\".", BundleException.ACTIVATOR_ERROR));
             }
+            final String groupPassword = configService.getProperty("com.openexchange.hazelcast.grouppassword");
+            final Dictionary<?, ?> headers = context.getBundle().getHeaders();
+            final String bundleVersion = (String) headers.get("Bundle-Version");
+            final GroupConfig groupConfig = new GroupConfig(groupName + "-v" + bundleVersion, groupPassword);
+            config.setGroupConfig(groupConfig);
             final boolean jmxEnabled = configService.getBoolProperty("com.openexchange.hazelcast.jmx", true);
             if (jmxEnabled) {
                 config.setProperty("hazelcast.jmx", "true");
