@@ -7,6 +7,10 @@
 
  - Fix for bug 23635: Corrected class name for AJP monitoring class in showruntimestats.
 
+* 2012-11-14 - martin.herfurth@open-xchange.com
+
+ - Fix for bug 23721: Fixed too small images.
+
 * 2012-11-13 - marcus.klein@open-xchange.com
 
  - Fix for bug 23712: Path in import.properties is still necessary because configuration files for CVS import are not located in the

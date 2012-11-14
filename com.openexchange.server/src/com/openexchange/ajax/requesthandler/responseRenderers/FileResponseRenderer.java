@@ -248,19 +248,17 @@ public class FileResponseRenderer implements ResponseRenderer {
             transformations.rotate();
         }
         if (request.isSet("cropWidth") || request.isSet("cropHeight")) {
-            transformations.crop(
-                request.isSet("cropX") ? request.getParameter("cropX", int.class).intValue() : 0,
-                request.isSet("cropY") ? request.getParameter("cropY", int.class).intValue() : 0,
-                request.getParameter("cropWidth", int.class).intValue(),
-                request.getParameter("cropHeight", int.class).intValue()
-            );
+            int cropX = request.isSet("cropX") ? request.getParameter("cropX", int.class).intValue() : 0;
+            int cropY = request.isSet("cropY") ? request.getParameter("cropY", int.class).intValue() : 0;
+            int cropWidth = request.getParameter("cropWidth", int.class).intValue();
+            int cropHeight = request.getParameter("cropHeight", int.class).intValue();
+            transformations.crop(cropX, cropY, cropWidth, cropHeight);
         }
         if (request.isSet("width") || request.isSet("height")) {
-            transformations.scale(
-                request.isSet("width") ? request.getParameter("width", int.class).intValue() : 0,
-                request.isSet("cropY") ? request.getParameter("cropY", int.class).intValue() : 0,
-                ScaleType.getType(request.getParameter("scaleType"))
-            );
+            int maxWidth = request.isSet("width") ? request.getParameter("width", int.class).intValue() : 0;
+            int maxHeight = request.isSet("height") ? request.getParameter("height", int.class).intValue() : 0;
+            ScaleType scaleType = ScaleType.getType(request.getParameter("scaleType"));
+            transformations.scale(maxWidth, maxHeight, scaleType);
         }
         // compress by default
         if (false == request.isSet("compress") || request.getParameter("compress", boolean.class)) {
