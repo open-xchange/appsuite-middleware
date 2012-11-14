@@ -355,7 +355,9 @@ public final class FolderMap {
     private Wrapper wrapperOf(final Folder folder, final Session session) {
         final Wrapper wrapper = new Wrapper(folder);
         if (wrapper.loadSubfolders && null == folder.getSubfolderIDs()) {
+            /*
             loadSubolders(folder, folder.getTreeID(), session);
+            */
         }
         return wrapper;
     }
