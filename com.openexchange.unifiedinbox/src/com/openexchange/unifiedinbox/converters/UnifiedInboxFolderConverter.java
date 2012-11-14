@@ -71,7 +71,6 @@ import com.openexchange.session.Session;
 import com.openexchange.threadpool.ThreadPools;
 import com.openexchange.unifiedinbox.UnifiedInboxAccess;
 import com.openexchange.unifiedinbox.UnifiedInboxException;
-import com.openexchange.unifiedinbox.UnifiedInboxProvider;
 import com.openexchange.unifiedinbox.services.UnifiedInboxServiceRegistry;
 import com.openexchange.unifiedinbox.utility.LoggingCallable;
 import com.openexchange.unifiedinbox.utility.TrackingCompletionService;
@@ -84,6 +83,8 @@ import com.openexchange.unifiedinbox.utility.UnifiedInboxUtility;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class UnifiedInboxFolderConverter {
+
+    private static final String PROTOCOL = UnifiedInboxManagement.PROTOCOL_UNIFIED_INBOX;
 
     static final int[] EMPTY_COUNTS = new int[] { 0, 0, 0, 0 };
 
@@ -129,7 +130,7 @@ public final class UnifiedInboxFolderConverter {
         tmp.setNewMessageCount(-1);
         tmp.setUnreadMessageCount(-1);
         tmp.setDeletedMessageCount(-1);
-        tmp.setProperty("protocol", UnifiedInboxProvider.PROTOCOL_UNIFIED_INBOX.toString());
+        tmp.setProperty("protocol", PROTOCOL);
         ROOT_UNIFIED_INBOX_FOLDER = new ReadOnlyMailFolder(tmp);
     }
 
@@ -224,7 +225,7 @@ public final class UnifiedInboxFolderConverter {
             tmp.setSubfolders(true);
             tmp.setSubscribedSubfolders(true);
         }
-        tmp.setProperty("protocol", UnifiedInboxProvider.PROTOCOL_UNIFIED_INBOX.toString());
+        tmp.setProperty("protocol", PROTOCOL);
         return tmp;
     }
 
@@ -471,7 +472,7 @@ public final class UnifiedInboxFolderConverter {
             tmp.setNewMessageCount(newCount);
             tmp.setUnreadMessageCount(unreadCount);
             tmp.setDeletedMessageCount(deletedCount);
-            tmp.setProperty("protocol", UnifiedInboxProvider.PROTOCOL_UNIFIED_INBOX.toString());
+            tmp.setProperty("protocol", PROTOCOL);
         }
         return retval;
     }
