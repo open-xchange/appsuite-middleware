@@ -7,7 +7,6 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import com.openexchange.authentication.Authenticated;
 import com.openexchange.authentication.AuthenticationService;
 import com.openexchange.authentication.LoginExceptionCodes;
@@ -19,6 +18,7 @@ import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
+import com.openexchange.log.LogFactory;
 import com.openexchange.tools.sql.DBUtils;
 import com.openexchange.user.UserService;
 
@@ -40,8 +40,7 @@ import com.openexchange.user.UserService;
  */
 public class ParallelsOXAuthentication implements AuthenticationService {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(ParallelsOXAuthentication.class);
-
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(ParallelsOXAuthentication.class));
 
     /**
      * Default constructor.
@@ -132,9 +131,9 @@ public class ParallelsOXAuthentication implements AuthenticationService {
                 cid = rs.getString("cid");
                 loginmapping = rs.getString("login_info");
             }else{
-                LOG.fatal("Did not get any login_info mapping from configdb database for loginstring "+gui_loginstring);
-                LOG.fatal("Hint: Account \""+gui_loginstring+"\" not yet provsioned in OX?");
-                LOG.fatal("This authentication request for loginstring "+gui_loginstring+" will fail");
+                LOG.error("Did not get any login_info mapping from configdb database for loginstring "+gui_loginstring);
+                LOG.error("Hint: Account \""+gui_loginstring+"\" not yet provsioned in OX?");
+                LOG.error("This authentication request for loginstring "+gui_loginstring+" will fail");
                 throw LoginExceptionCodes.INVALID_CREDENTIALS.create();
             }
 
@@ -142,7 +141,7 @@ public class ParallelsOXAuthentication implements AuthenticationService {
 
             // only if we get 2 strings out of the split , then proceed
             if(tmp_.length!=2){
-                LOG.fatal("Could not split up login_info mapping correctly for mappingstring \""+loginmapping+"\" ");
+                LOG.error("FIXME1: Could not split up login_info mapping correctly for mappingstring \""+loginmapping+"\" ");
                 throw LoginExceptionCodes.INVALID_CREDENTIALS.create();
             }
 
@@ -165,12 +164,16 @@ public class ParallelsOXAuthentication implements AuthenticationService {
             try {
                 userId = userservice.getUserId(oxuser_, ctx);
             } catch (final OXException e) {
-                LOG.info("UserID for "+oxuser_+" could not be resolved via OX API from database. Not provisioned yet?",e);
+                LOG.error("UserID for "+oxuser_+" could not be resolved via OX API from database. Not provisioned yet?",e);
                 throw LoginExceptionCodes.INVALID_CREDENTIALS.create();
             }
             final User user = userservice.getUser(userId, ctx);
             if (!userservice.authenticate(user, gui_password)) {
-                throw LoginExceptionCodes.INVALID_CREDENTIALS.create();
+                OXException e = LoginExceptionCodes.INVALID_CREDENTIALS.create();
+                LOG.error("Invalid credentials");
+                // FIXME: exception below is never logged for some reason :-(
+                LOG.error(e.getMessage(),e);
+                throw e;
             }
 
 
