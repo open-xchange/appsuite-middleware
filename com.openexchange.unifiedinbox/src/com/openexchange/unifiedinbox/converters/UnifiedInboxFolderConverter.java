@@ -71,6 +71,7 @@ import com.openexchange.session.Session;
 import com.openexchange.threadpool.ThreadPools;
 import com.openexchange.unifiedinbox.UnifiedInboxAccess;
 import com.openexchange.unifiedinbox.UnifiedInboxException;
+import com.openexchange.unifiedinbox.UnifiedInboxProvider;
 import com.openexchange.unifiedinbox.services.UnifiedInboxServiceRegistry;
 import com.openexchange.unifiedinbox.utility.LoggingCallable;
 import com.openexchange.unifiedinbox.utility.TrackingCompletionService;
@@ -128,6 +129,7 @@ public final class UnifiedInboxFolderConverter {
         tmp.setNewMessageCount(-1);
         tmp.setUnreadMessageCount(-1);
         tmp.setDeletedMessageCount(-1);
+        tmp.setProperty("protocol", UnifiedInboxProvider.PROTOCOL_UNIFIED_INBOX.toString());
         ROOT_UNIFIED_INBOX_FOLDER = new ReadOnlyMailFolder(tmp);
     }
 
@@ -222,6 +224,7 @@ public final class UnifiedInboxFolderConverter {
             tmp.setSubfolders(true);
             tmp.setSubscribedSubfolders(true);
         }
+        tmp.setProperty("protocol", UnifiedInboxProvider.PROTOCOL_UNIFIED_INBOX.toString());
         return tmp;
     }
 
@@ -398,11 +401,11 @@ public final class UnifiedInboxFolderConverter {
      * Merges specified default folders.
      *
      * @param accountFolders The default folders
-     * @param fullnames The fullnames
+     * @param fullNames The full names
      * @param localizedNames The localized names
      * @return The merged default folders
      */
-    public static MailFolder[] mergeAccountDefaultFolders(final List<int[][]> accountFolders, final String[] fullnames, final String[] localizedNames) {
+    public static MailFolder[] mergeAccountDefaultFolders(final List<int[][]> accountFolders, final String[] fullNames, final String[] localizedNames) {
         if (accountFolders.isEmpty()) {
             return new MailFolder[0];
         }
@@ -411,7 +414,7 @@ public final class UnifiedInboxFolderConverter {
         for (int i = 0; i < retval.length; i++) {
             final MailFolder tmp = retval[i] = new MailFolder();
             // Subscription not supported by Unified Mail, so every folder is "subscribed"
-            final String fullname = fullnames[i];
+            final String fullname = fullNames[i];
             tmp.setSubscribed(true);
             tmp.setSupportsUserFlags(true);
             tmp.setRootFolder(false);
@@ -468,6 +471,7 @@ public final class UnifiedInboxFolderConverter {
             tmp.setNewMessageCount(newCount);
             tmp.setUnreadMessageCount(unreadCount);
             tmp.setDeletedMessageCount(deletedCount);
+            tmp.setProperty("protocol", UnifiedInboxProvider.PROTOCOL_UNIFIED_INBOX.toString());
         }
         return retval;
     }

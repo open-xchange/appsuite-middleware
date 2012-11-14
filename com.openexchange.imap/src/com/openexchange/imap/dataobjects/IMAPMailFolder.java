@@ -49,6 +49,7 @@
 
 package com.openexchange.imap.dataobjects;
 
+import com.openexchange.imap.IMAPProvider;
 import com.openexchange.mail.dataobjects.MailFolder;
 
 /**
@@ -62,7 +63,6 @@ public final class IMAPMailFolder extends MailFolder {
 	private static final long serialVersionUID = -2181337892739317688L;
 
 	private boolean nonExistent;
-
 	private boolean b_nonExistent;
 
 	/**
@@ -70,6 +70,7 @@ public final class IMAPMailFolder extends MailFolder {
 	 */
 	public IMAPMailFolder() {
 		super();
+		setProperty("protocol", IMAPProvider.PROTOCOL_IMAP.toString());
 	}
 
 	/**

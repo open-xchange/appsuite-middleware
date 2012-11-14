@@ -86,7 +86,6 @@ import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mail.permission.DefaultMailPermission;
 import com.openexchange.mail.permission.MailPermission;
 import com.openexchange.mail.utils.MailFolderUtility;
-import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.mailaccount.UnifiedInboxManagement;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.server.services.ServerServiceRegistry;
@@ -181,7 +180,7 @@ public final class MailFolderImpl extends AbstractFolder implements FolderExtens
      * @param mailConfig The mail configuration
      * @param user The user
      * @param context The context
-     * @param fullnameProvider The (optional) fullname provider
+     * @param fullnameProvider The (optional) full name provider
      * @throws OXException If creation fails
      */
     public MailFolderImpl(final MailFolder mailFolder, final int accountId, final MailConfig mailConfig, final User user, final Context context, final DefaultFolderFullnameProvider fullnameProvider) throws OXException {
@@ -342,19 +341,14 @@ public final class MailFolderImpl extends AbstractFolder implements FolderExtens
             cache = false;
         } else if (mailFolder.isTrash()) { // Trash folder must not be cacheable
             cache = false;
-        } else if (isUnifiedMail()) { // Unified mail must not be cacheable
+        } else if (isUnifiedMail(mailFolder)) { // Unified mail must not be cacheable
             cache = false;
         }
         cacheable = cache;
     }
 
-    private boolean isUnifiedMail() throws OXException {
-        try {
-            return UnifiedInboxManagement.PROTOCOL_UNIFIED_INBOX.equals(MailServiceRegistry.getServiceRegistry().getService(
-                MailAccountStorageService.class).getMailAccount(accountId, userId, contextId).getMailProtocol());
-        } catch (final OXException e) {
-            throw new OXException(e);
-        }
+    private boolean isUnifiedMail(final MailFolder mailFolder) {
+        return UnifiedInboxManagement.PROTOCOL_UNIFIED_INBOX.equals(mailFolder.getProperty("protocol"));
     }
 
     /**
