@@ -1,3 +1,7 @@
+* 2012-11-14 - thorben.betten@open-xchange.com
+
+ - Fix for bug 23724: Reduce number of logged stack trace elements
+
 * 2012-11-14 - marcus.klein@open-xchange.com
 
  - Fix for bug 23635: Corrected class name for AJP monitoring class in showruntimestats.
