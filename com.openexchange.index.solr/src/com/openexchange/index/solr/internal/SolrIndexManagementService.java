@@ -53,6 +53,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+
 import com.openexchange.database.DBPoolingExceptionCodes;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
@@ -113,6 +114,8 @@ public class SolrIndexManagementService implements IndexManagementService {
                 ustmt.setString(4, String.valueOf(module));
                 ustmt.executeUpdate();
             }
+            
+            con.commit();
         } catch (SQLException e) {
             DBUtils.rollback(con);
             throw DBPoolingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
@@ -163,6 +166,8 @@ public class SolrIndexManagementService implements IndexManagementService {
                 ustmt.setString(4, PROPERTY);
                 ustmt.executeUpdate();
             }
+            
+            con.commit();
         } catch (SQLException e) {
             DBUtils.rollback(con);
             throw DBPoolingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
