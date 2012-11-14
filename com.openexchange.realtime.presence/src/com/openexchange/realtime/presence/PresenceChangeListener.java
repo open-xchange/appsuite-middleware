@@ -49,63 +49,34 @@
 
 package com.openexchange.realtime.presence;
 
-import java.util.Collection;
-import com.openexchange.exception.OXException;
-import com.openexchange.realtime.packet.ID;
 import com.openexchange.realtime.packet.Presence;
-import com.openexchange.realtime.util.IDMap;
 import com.openexchange.tools.session.ServerSession;
 
 /**
- * {@link PresenceStatusService} - Service to store and query the PresenceStatus of currently connected clients.
+ * {@link PresenceChangeListener} - Interface for PresenceChangeListeners. Classes interested in notifications of initial (coming online),
+ * normal (e.g. change from online to away) or final (going offline) changes of the PresenceStatus of clients can register instances of
+ * PresenceChangeListeners at the PresenceStatusService being used.
  * 
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
- * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
+ * @author <a href="mailto:marc	.arens@open-xchange.com">Marc Arens</a>
  */
-public interface PresenceStatusService {
+public interface PresenceChangeListener {
 
     /**
-     * Register a new PresenceChangeListener 
-     * @param presenceChangeListener the new PresenceChangeListener
+     * @param stanza
+     * @param session
      */
-    void registerPresenceChangeListener(PresenceChangeListener presenceChangeListener);
-    
-    /**
-     * Unregister an already registered PresenceChangeListener 
-     * @param presenceChangeListener the already registered PresenceChangeListener
-     */
-    void unregisterPresenceChangeListener(PresenceChangeListener presenceChangeListener);
-    
-    /**
-     * Change the PresenceStatus of an ID. This involves:
-     * <ol>
-     * <li>Set status in central status registry</li>
-     * <li>Notify the user about the successful status update by sending him the new status back</li>
-     * <li>Get subscribed and active users from the roster of the client that sent the status update</li>
-     * <li>Notify users about the status update</li>
-     * <li>Stores the last time ID changed its PresenceStaus <delay xmlns="urn:xmpp:dely"></li>
-     * </ol>
-     * 
-     * @param client    Client that wants to change its PresenceStatus
-     * @param status    The new PresenceData
-     * @param session   The associated ServerSession
-     * @throws OXException If changing the PresenceStatus fails
-     */
-    void changePresenceStatus(Presence stanza, ServerSession serverSession) throws OXException;
+    void initialPresence(Presence stanza, ServerSession session);
 
     /**
-     * Get the current PresenceStatus of only one ID.
      * 
-     * @param id The ID whose PresenceStatus should be queried
-     * @return The current PresenceStatus of ID, Offline if no information can be found for the ID
+     * @param stanza
+     * @param session
      */
-    public PresenceData getPresenceStatus(ID id);
+    void normalPresence(Presence stanza, ServerSession session);
     
     /**
-     * Get the current PresenceStatus of one or more IDs.
-     * 
-     * @param ids The IDs whose PresenceStatus should be queried
-     * @return The current PresenceStatus of IDs, Offline if no information can be found for the ID
+     * @param stanza
+     * @param session
      */
-    public IDMap<PresenceData> getPresenceStatus(Collection<ID> ids);
+    void finalPresence(Presence stanza, ServerSession session);
 }

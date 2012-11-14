@@ -82,6 +82,14 @@ import com.openexchange.tools.session.ServerSession;
  */
 public class OXRTPresenceHandler implements StanzaHandler {
 
+    /**
+     * Initializes a new {@link OXRTPresenceHandler}.
+     */
+    public OXRTPresenceHandler() {
+        AtmospherePresenceServiceRegistry serviceRegistry = AtmospherePresenceServiceRegistry.getInstance();
+        PresenceStatusService presenceStatusService = serviceRegistry.getService(PresenceStatusService.class, true);
+    }
+
     @Override
     public Class<? extends Stanza> getStanzaClass() {
         return Presence.class;
@@ -224,7 +232,6 @@ public class OXRTPresenceHandler implements StanzaHandler {
      */
     private void handlePresence(Presence stanza, ServerSession session) throws OXException {
         AtmospherePresenceServiceRegistry serviceRegistry = AtmospherePresenceServiceRegistry.getInstance();
-        PresenceSubscriptionService presenceSubscriptionService = serviceRegistry.getService(PresenceSubscriptionService.class, true);
         PresenceStatusService presenceStatusService = serviceRegistry.getService(PresenceStatusService.class, true);
         MessageDispatcher messageDispatcher = serviceRegistry.getService(MessageDispatcher.class, true);
 
@@ -250,24 +257,6 @@ public class OXRTPresenceHandler implements StanzaHandler {
             }
         }
         // TODO: PresenceService must honor priority
-    }
-
-    /**
-     * Are we dealing with an initial Presence Stanza iow. was the client offline before?
-     * 
-     * @param stanza The incoming Presence Stanza that has to be insepcted
-     * @return true if the client is sending an initial Presence, false otherwise
-     * @throws OXException If the AtmospherePresenceService can't be queried
-     */
-    private boolean isInitialPresence(Presence stanza) throws OXException {
-        boolean isInitial = false;
-        AtmospherePresenceServiceRegistry serviceRegistry = AtmospherePresenceServiceRegistry.getInstance();
-        PresenceStatusService presenceStatusService = serviceRegistry.getService(PresenceStatusService.class, true);
-        PresenceData presenceData = presenceStatusService.getPresenceStatus(stanza.getFrom());
-        if (PresenceState.OFFLINE.equals(presenceData.getState())) {
-            isInitial = true;
-        }
-        return isInitial;
     }
 
     /**

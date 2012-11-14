@@ -50,10 +50,15 @@
 package com.openexchange.realtime.presence.hazelcast.impl;
 
 import java.util.Collection;
-import java.util.Map;
+import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 import com.hazelcast.core.HazelcastInstance;
 import com.openexchange.exception.OXException;
 import com.openexchange.realtime.packet.ID;
+import com.openexchange.realtime.packet.Presence;
+import com.openexchange.realtime.packet.Presence.Type;
+import com.openexchange.realtime.packet.PresenceState;
+import com.openexchange.realtime.presence.PresenceChangeListener;
 import com.openexchange.realtime.presence.PresenceData;
 import com.openexchange.realtime.presence.PresenceStatusService;
 import com.openexchange.realtime.util.IDMap;
@@ -66,34 +71,71 @@ import com.openexchange.tools.session.ServerSession;
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
 public class HazelcastPresenceStatusServiceImpl implements PresenceStatusService {
-    
-    private HazelcastInstance hazelcastInstance;
-    private Map<ID, PresenceData> statusMap;
 
-    
+    private ConcurrentMap<ID, PresenceData> statusMap;
+
+    private CopyOnWriteArrayList<PresenceChangeListener> presenceChangeListeners;
+
+    private enum PresenceChangeType {
+        COMING_ONLINE, ONLINE_CHANGE, GOING_OFFLINE
+    }
+
+    /**
+     * Initializes a new {@link HazelcastPresenceStatusServiceImpl}.
+     * 
+     * @param hazelcastInstance The haszelcastInstance of this server which is used to get the presenceStatus Map distributed in the cluster
+     */
     public HazelcastPresenceStatusServiceImpl(HazelcastInstance hazelcastInstance) {
-        super();
-        this.hazelcastInstance = hazelcastInstance;
         this.statusMap = hazelcastInstance.getMap("com.openexchange.realtime.presence.hazelcast.statusMap");
-        
+        this.presenceChangeListeners = new CopyOnWriteArrayList<PresenceChangeListener>();
     }
 
     @Override
-    public void changePresenceStatus(ID id, PresenceData status, ServerSession session) throws OXException {
-        if(id == null || status == null || session == null) {
+    public void registerPresenceChangeListener(PresenceChangeListener presenceChangeListener) {
+        presenceChangeListeners.add(presenceChangeListener);
+    }
+
+    @Override
+    public void unregisterPresenceChangeListener(PresenceChangeListener presenceChangeListener) {
+        presenceChangeListeners.remove(presenceChangeListener);
+    }
+
+    @Override
+    public void changePresenceStatus(Presence stanza, ServerSession serverSession) {
+        if (stanza == null || serverSession == null) {
             throw new IllegalStateException("Obligatory parameter missing.");
         }
-        statusMap.put(id, status);
-        
+        // check type before setting new status
+        PresenceChangeType presenceChangeType = checkPresenceChangeType(stanza);
+
+        ID from = stanza.getFrom();
+        PresenceData presenceData = new PresenceData(stanza.getState(), stanza.getMessage());
+        statusMap.put(from, presenceData);
+
+        for (PresenceChangeListener listener : presenceChangeListeners) {
+            switch (presenceChangeType) {
+            case COMING_ONLINE:
+                listener.initialPresence(stanza, serverSession);
+                break;
+            case ONLINE_CHANGE:
+                listener.normalPresence(stanza, serverSession);
+                break;
+            case GOING_OFFLINE:
+                listener.finalPresence(stanza, serverSession);
+                break;
+            }
+        }
+
     }
 
     @Override
     public PresenceData getPresenceStatus(ID id) {
-        if(id == null) {
+        if (id == null) {
             throw new IllegalStateException("Obligatory parameter missing.");
         }
         PresenceData presenceData = statusMap.get(id);
-        if(presenceData == null) {
+        // id wasn't seen yet, no status saved, show as offline
+        if (presenceData == null) {
             presenceData = PresenceData.OFFLINE;
         }
         return presenceData;
@@ -106,6 +148,47 @@ public class HazelcastPresenceStatusServiceImpl implements PresenceStatusService
             results.put(id, getPresenceStatus(id));
         }
         return results;
+    }
+
+    private PresenceChangeType checkPresenceChangeType(Presence stanza) {
+        if (isInitialPresence(stanza)) {
+            return PresenceChangeType.COMING_ONLINE;
+        } else if (isFinalPresence(stanza)) {
+            return PresenceChangeType.GOING_OFFLINE;
+        } else {
+            return PresenceChangeType.ONLINE_CHANGE;
+        }
+    }
+
+    /**
+     * Are we dealing with an initial Presence Stanza iow. was the client offline before?
+     * 
+     * @param stanza The incoming Presence Stanza that has to be insepcted
+     * @return true if the client is sending an initial Presence, false otherwise
+     * @throws OXException If the AtmospherePresenceService can't be queried
+     */
+    private boolean isInitialPresence(Presence stanza) {
+        boolean isInitial = false;
+        PresenceData presenceData = getPresenceStatus(stanza.getFrom());
+        if (PresenceState.OFFLINE.equals(presenceData.getState())) {
+            isInitial = true;
+        }
+        return isInitial;
+    }
+
+    /**
+     * Are we dealing with a final Presence Stanza iow. is the client going offline?
+     * 
+     * @param stanza The incoming Presence Stanza that has to be inspected
+     * @return true if the client is sending a final Presence, false otherwise
+     */
+    private boolean isFinalPresence(Presence stanza) {
+        boolean isFinal = false;
+        Type type = stanza.getType();
+        if (Type.UNAVAILABLE.equals(type)) {
+            isFinal = true;
+        }
+        return isFinal;
     }
 
 }

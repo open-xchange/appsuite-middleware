@@ -52,6 +52,7 @@ package com.openexchange.realtime.atmosphere.presence.osgi;
 import org.apache.commons.logging.Log;
 import com.openexchange.conversion.simple.SimplePayloadConverter;
 import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.realtime.MessageDispatcher;
 import com.openexchange.realtime.atmosphere.payload.converter.primitive.ByteToJSONConverter;
 import com.openexchange.realtime.atmosphere.payload.converter.primitive.JSONToByteConverter;
 import com.openexchange.realtime.atmosphere.payload.converter.primitive.JSONToStringConverter;
@@ -84,7 +85,7 @@ public class AtmospherePresenceActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class[] { PresenceSubscriptionService.class, PresenceStatusService.class };
+        return new Class[] { PresenceSubscriptionService.class, PresenceStatusService.class, MessageDispatcher.class };
     }
 
     @Override

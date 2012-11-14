@@ -124,4 +124,22 @@ public class DummyPresenceService implements PresenceStatusService {
         return null;
     }
 
+    /* (non-Javadoc)
+     * @see com.openexchange.realtime.presence.PresenceStatusService#registerPresenceChangeListener(com.openexchange.realtime.presence.PresenceChangeListener)
+     */
+    @Override
+    public void registerPresenceChangeListener(PresenceChangeListener presenceChangeListener) {
+        // TODO Auto-generated method stub
+        
+    }
+
+    /* (non-Javadoc)
+     * @see com.openexchange.realtime.presence.PresenceStatusService#unregisterPresenceChangeListener(com.openexchange.realtime.presence.PresenceChangeListener)
+     */
+    @Override
+    public void unregisterPresenceChangeListener(PresenceChangeListener presenceChangeListener) {
+        // TODO Auto-generated method stub
+        
+    }
+
 }
