@@ -407,12 +407,11 @@ public class HazelcastActivator extends HousekeepingActivator {
                 return InitMode.RE_INITIALIZED;
             }
             /*
-             * Create configuration from XML data
+             * Create Hazelcast configuration from properties
              */
-            // final String xml = getService(ConfigurationService.class).getText("hazelcast.xml");
-            // final Config config = new InMemoryXmlConfig(xml);
-            ConfigurationService configService = getService(ConfigurationService.class);
-            Config config = new Config();
+            final ConfigurationService configService = getService(ConfigurationService.class);
+            final Config config = new Config();
+            // Set cluster/group name
             final String groupName = configService.getProperty("com.openexchange.hazelcast.groupname");
             if (isEmpty(groupName)) {
                 throw new IllegalStateException(new BundleException("Group name is mandatory. Please set a valid identifier through property \"com.openexchange.hazelcast.groupname\".", BundleException.ACTIVATOR_ERROR));
@@ -422,6 +421,7 @@ public class HazelcastActivator extends HousekeepingActivator {
             final String bundleVersion = (String) headers.get("Bundle-Version");
             final GroupConfig groupConfig = new GroupConfig(groupName + "-v" + bundleVersion, groupPassword);
             config.setGroupConfig(groupConfig);
+            // Enable JMX
             final boolean jmxEnabled = configService.getBoolProperty("com.openexchange.hazelcast.jmx", true);
             if (jmxEnabled) {
                 config.setProperty("hazelcast.jmx", "true");
