@@ -59,7 +59,7 @@ import com.openexchange.ajax.framework.Executor;
 import com.openexchange.ajax.mail.actions.AllRequest;
 import com.openexchange.ajax.mail.actions.AllResponse;
 import com.openexchange.ajax.mail.actions.ClearRequest;
-import com.openexchange.ajax.mail.actions.SendRequest;
+import com.openexchange.ajax.mail.actions.NewMailRequest;
 import com.openexchange.exception.OXException;
 
 /**
@@ -108,9 +108,22 @@ public class ClearTest extends AbstractMailTest {
 		 * Insert <numOfMails> mails through a send request
 		 */
 		final int numOfMails = 5;
-		LOG.info("Sending " + numOfMails + " mails to fill emptied INBOX");
+		LOG.info("Appending " + numOfMails + " mails to fill emptied INBOX");
+		String eml =
+            "Message-Id: <4A002517.4650.0059.1@deployfast.com>\n" +
+            "X-Mailer: Novell GroupWise Internet Agent 8.0.0 \n" +
+            "Date: Tue, 05 May 2009 11:37:58 -0500\n" +
+            "To: #TOADDR#\n" +
+            "Subject: Re: Your order for East Texas Lighthouse\n" +
+            "Mime-Version: 1.0\n" +
+            "Content-Type: text/plain; charset=\"UTF-8\"\n" +
+            "Content-Transfer-Encoding: 8bit\n" +
+            "\n" +
+            "This is a MIME message. If you are reading this text, you may want to \n" +
+            "consider changing to a mail reader or gateway that understands how to \n" +
+            "properly handle MIME multipart messages.".replaceFirst("#TOADDR#", getSendAddress());
 		for (int i = 0; i < numOfMails; i++) {
-		    getClient().execute(new SendRequest(mailObject_25kb));
+	        getClient().execute(new NewMailRequest(getInboxFolder(), eml, -1, true));
 			LOG.info("Sent " + (i + 1) + ". mail of " + numOfMails);
 		}
 

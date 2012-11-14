@@ -52,10 +52,15 @@ package com.openexchange.mail.smal.impl.internal;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+
+import org.apache.commons.logging.Log;
+
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.delete.DeleteEvent;
 import com.openexchange.groupware.delete.DeleteFailedExceptionCodes;
 import com.openexchange.groupware.delete.DeleteListener;
+import com.openexchange.mail.smal.impl.SmalServiceLookup;
+import com.openexchange.service.indexing.IndexingService;
 import com.openexchange.tools.sql.DBUtils;
 
 /**
@@ -64,6 +69,9 @@ import com.openexchange.tools.sql.DBUtils;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public class SmalDeleteListenerImpl implements DeleteListener {
+    
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(SmalDeleteListenerImpl.class);
+    
 
     @Override
     public void deletePerformed(final DeleteEvent event, final Connection readCon, final Connection writeCon) throws OXException {
@@ -78,6 +86,13 @@ public class SmalDeleteListenerImpl implements DeleteListener {
 
     private void deleteContextEntriesFromDB(final DeleteEvent event, final Connection writeCon) throws OXException {
         final int contextId = event.getContext().getContextId();
+        try {
+            IndexingService indexingService = SmalServiceLookup.getServiceStatic(IndexingService.class);
+            indexingService.unscheduleAllForContext(contextId);
+        } catch (Throwable t) {
+            LOG.warn("Error while deleting jobs for context " + contextId + ".", t);
+        }
+        
         PreparedStatement stmt = null;
         try {
             stmt = writeCon.prepareStatement("DELETE FROM indexedFolders WHERE cid = ?");
@@ -94,9 +109,16 @@ public class SmalDeleteListenerImpl implements DeleteListener {
 
     private void deleteUserEntriesFromDB(final DeleteEvent event, final Connection writeCon) throws OXException {
         final int contextId = event.getContext().getContextId();
-        PreparedStatement stmt = null;
+        final int userId = event.getId();
         try {
-            final int userId = event.getId();
+            IndexingService indexingService = SmalServiceLookup.getServiceStatic(IndexingService.class);
+            indexingService.unscheduleAllForUser(contextId, userId);
+        } catch (Throwable t) {
+            LOG.warn("Error while deleting jobs for user " + userId + " in context " + contextId + ".", t);
+        }
+        
+        PreparedStatement stmt = null;
+        try {            
             stmt = writeCon.prepareStatement("DELETE FROM indexedFolders WHERE cid = ? AND uid = ?");
             int pos = 1;
             stmt.setInt(pos++, contextId);
