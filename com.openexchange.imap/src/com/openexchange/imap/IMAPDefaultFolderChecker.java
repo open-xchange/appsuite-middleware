@@ -586,7 +586,6 @@ public class IMAPDefaultFolderChecker {
                     imapStore,
                     session);
             if (null != entry && entry.exists()) {
-                final IMAPFolder f = (IMAPFolder) imapStore.getFolder(fullName);
                 if (1 == subscribe) {
                     if (!entry.isSubscribed()) {
                         IMAPCommandsCollection.forceSetSubscribed(imapStore, fullName, true);
