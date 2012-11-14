@@ -186,7 +186,7 @@ public class MailFolder implements Serializable, Cloneable {
     }
 
     /**
-     * Checks for existence of named property.
+     * Checks presence of named property.
      * 
      * @param name The name
      * @return <code>true</code> if present; otherwise <code>false</code>
