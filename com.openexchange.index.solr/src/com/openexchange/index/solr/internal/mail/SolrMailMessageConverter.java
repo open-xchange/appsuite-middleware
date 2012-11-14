@@ -69,7 +69,7 @@ public class SolrMailMessageConverter implements SolrResultConverter<MailMessage
 
     @Override
     public IndexDocument<MailMessage> convert(SolrDocument document) throws OXException {
-        IndexDocument<MailMessage> converted = SolrInputDocumentHelper.getInstance().readDocument(document, MailFillers.allFillers());
+        IndexDocument<MailMessage> converted = SolrMailHelper.getInstance().readDocument(document, MailFillers.allFillers());
         return converted;
     }
 

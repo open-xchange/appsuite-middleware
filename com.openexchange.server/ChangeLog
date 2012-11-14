@@ -1,22 +1,239 @@
+* 2012-11-14 - thorben.betten@open-xchange.com
+
+ - Fix for bug 23724: Reduce number of logged stack trace elements
+ - Fix for bug 23722: Added null guard
+
+* 2012-11-14 - marcus.klein@open-xchange.com
+
+ - Fix for bug 23635: Corrected class name for AJP monitoring class in showruntimestats.
+
+* 2012-11-14 - martin.herfurth@open-xchange.com
+
+ - Fix for bug 23721: Fixed too small images.
+
+* 2012-11-13 - marcus.klein@open-xchange.com
+
+ - Fix for bug 23712: Path in import.properties is still necessary because configuration files for CVS import are not located in the
+   configuration directory.
+
+* 2012-11-13 - jan.bauerdick@open-xchange.com
+
+ - Dropped hazelcast.xml config file
+
+* 2012-11-13 - martin.herfurth@open-xchange.com
+
+ - Fix for bug 23701: Fixed side effect of bugfix for 22116.
+
+* 2012-11-13 - thorben.betten@open-xchange.com
+
+ - Fix for bug 23700: Fixed publication link
+ - Fix for bug 23705: Deal with InterruptedException gracefully
+ - Fix for bug 23707: Fixed creating an OAuth account
+ - Fix for bug 23399: Don't quote non-ascii characters in address' unicode representation
+ - Fix for bug 23714: Handle NPE gracefully
+ - Fix for bug 23718: Check against local host name and address
+ - Fix for bug 23719: Accept equally named folder (ignore-case)
+
+* 2012-11-12 - thorben.betten@open-xchange.com
+
+ - Fix for bug 22116: Added sanitizing method to look-up possibly misspelled printf-style identifiers
+ - Fix for bug 23683: Handle possible NPE gracefully with a proper error code
+
+* 2012-11-11 - thorben.betten@open-xchange.com
+
+ - Fix for bug 23689: Avoid NPE and throw a more meaningful SOAP fault
+
+* 2012-11-09 - martin.herfurth@open-xchange.com
+
+ - Fix for bug 23580: Fixed reply mail on multiple accept/decline/tentative.
+ - Fix for bug 23263: Fixed side effect of another bug fix.
+
+* 2012-11-09 - choeger@open-xchange.com
+
+ - Fix for bug 23463: [L3] linkedin contacts subscription does not work using recently generated linkedin api keys
+ 
+* 2012-11-09 - jan.bauerdick@open-xchange.com
+
+ - Drop map configuration in sessionstorage_hazelcast.properties
+
+* 2012-11-09 - thorben.betten@open-xchange.com
+
+ - Fix for bug 23681: Showing proper error information on failed upload due to exceeded quota
+ - Fix for bug 23685: More error details
+ - Fix for bug 23686: Backward compatibility to previous API usage
+ - Fix for bug 23659: Fixed HTML display
+ - Fix for bug 23585: Refer to full-size picture
+ - Fix for bug 23332: Changed default value for property 'com.openexchange.push.imapidle.debug'
+ - Fix for bug 23532: Use unified error message for invalid folder name
+ - Fix for bug 23200: Fixed IMAP connection counter
+ - Fix for bug 23503: Showing proper error message
+
+* 2012-11-09 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 23676: Treat 'image/pjpeg' as JPEG, 'image/x-png' as PNG
+
+* 2012-11-09 - francisco.laguna@open-xchange.com
+
+ - Fix for bug 23641: PreferencesItemService to set the module flag to false
+
+* 2012-11-08 - martin.herfurth@open-xchange.com
+
+ - Fix for bug 23588: Incompatible type.
+
+* 2012-11-08 - thorben.betten@open-xchange.com
+
+ - Fix for bug 23661: Introduced in-application sort
+ - Fix for bug 23533: Changed that error code's category thus a more meaningful message is shown
+ - Fix for bug 23666: Use default driver if missing
+
+* 2012-11-07 - marcus.klein@open-xchange.com
+
+ - Fix for bug 23563: Improved exception messages for too long used database connections.
+
+* 2012-11-07 - thorben.betten@open-xchange.com
+
+ - Fix for bug 23638: Resolved possible deadlock situation
+ - Fix for bug 23574: Changed behavior of IMAPDefaultFolderChecker class, no retry attempts anymore
+ - Fix for bug 23645: Dropped unnecessary password encryption/decryption from in-memory Hazelcast storage
+ - Fix for bug 23625: fixed prefix
+
+* 2012-11-06 - marcus.klein@open-xchange.com
+
+ - Fix for bug 23590: Removed useless line in task code that causes a FindBugs issue.
+ - Fix for bug 23606: Corrected all names after rename of EAS provisioning bundle and UI plugin.
+
 * 2012-11-06 - thorben.betten@open-xchange.com
 
  - Fix for bug 23609: Fixed update of "reply-to" field
+ - Fix for bug 23616: Fixed NPE in Hazelcast session storage
+ - Fix for bug 23617: Fixed NPE in Hazelcast session storage
+ - Fix for bug 23615: Changed log level to warning
+ - Fix for bug 23613: Dealing with possible ArrayIndexOutOfBoundsException due to outdated mailbox attributes
+ - Fix for bug 23618: Another null guard
+ - Fix for bug 23621: Fixed expunge operation on IMAP folder
+ - Fix for bug 23634: Dealing with concurrent session put
+ - Fix for bug 23535: Added linebreaks
+
+* 2012-11-05 - martin.herfurth@open-xchange.com
+
+ - Fix for bug 23483: Missing Last Modified on delete exception.
 
 * 2012-11-05 - thorben.betten@open-xchange.com
 
- - Fix for bug 23567: Proper translation when writing JSON response
+ - Fix for bug 23567: Using proper locale when writing JSON response
+ - Fix for bug 23592: Proper check for mandatory fields
+ - Fix for bug 23605: Fixed possible NPE
 
 * 2012-11-02 - tobias.friedrich@open-xchange.com
 
  - Fix for bug 23549: Subtracting client timezone offset when parsing creation date
 
+* 2012-11-02 - thorben.betten@open-xchange.com
+
+ - Fix for bug 23564: Avoid possible NPE on service look-up
+ - Fix for bug 23562: Selected displayable error category
+ - Fix for bug 23579: Check for proper account identifier support
+ - Fix for bug 23578: Proper cache invalidation on write access to CIFS server
+ - Fix for bug 23577: Special handling for unspecified error codes received from CIFS/SMB server
+
+* 2012-10-31 - marcus.klein@open-xchange.com
+
+ - Fix for bug 21913: Properly handling null value of appointment titles. Freemarker does not like null values.
+
+* 2012-10-31 - thorben.betten@open-xchange.com
+
+ - Fix for bug 23196: Properly opening associated service trackers on bundle start-up
+
+* 2012-10-30 - marcus.klein@open-xchange.com
+
+ - Fix for bug 21511: Added possibility to delete users birthday value.
+
+* 2012-10-30 - thorben.betten@open-xchange.com
+
+ - Fix for bug 23508: Dealing with possible I/O error when loading an URL's content
+ - Fix for bug 23534: Removed listener and re-test if write-own check fails
+ - Fix for bug 22827: A move into trash folder leads to removal of associated messages in linked POP3 account if delete-write-through option
+                      is enabled
+ - Fix for bug 22997: Handling has been changed to a more generic error message
+ - Fix for bug 23542: Fixed possible ClassCastExceotion
+
+* 2012-10-29 - thorben.betten@open-xchange.com
+
+ - Fix for bug 22903: Perform context restore with respect to 'updateTask' table
+ - Fix for bug 23509: Fixed SQL statement
+ - Fix for bug 23524: Special handling in case of missing translation for en_US
+
+* 2012-10-29 - marcus.klein@open-xchange.com
+
+ - Fix for bug 23510: Re-added packages mdns and static implementing open-xchange-cluster-discovery.
+
+* 2012-10-25 - marcus.klein@open-xchange.com
+
+ - Fix for bug 22385: Introduced JDK version specific source folders for bundles.
+
+* 2012-10-25 - thorben.betten@open-xchange.com
+
+ - Fix for bug 23457: Don't return zero, because sun.nio.cs.StreamDecoder doesn't like that
+ - Fix for bug 23462: Sanitize access token prior to connecting to Facebook OAuth server
+ - Fix for bug 23413: Support for malformed Content-Type header
+
+* 2012-10-25 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 23458: Apply compression only to JPEG images
+
+* 2012-10-23 - marcus.klein@open-xchange.com
+
+ - Story 36135203: Separated Parallels specific SpamAssassin spam handler into its own package. Now other spam handler can be used with
+   Parallels integration.
+
+* 2012-10-21 - thorben.betten@open-xchange.com
+
+ - Fix for bug 23440: Checking for possibly expunged message prior to writing its JSON representation
+
+* 2012-10-19 - thorben.betten@open-xchange.com
+
+ - Fix for bug 23437: Proper specification of character filter in Java regex expression
+
 * 2012-10-19 - martin.herfurth@open-xchange.com
 
  - Fix for bug 23092: Wrong Confirmation Status as external participant was sent.
 
+* 2012-10-18 - thorben.betten@open-xchange.com
+
+ - Fix for bug 23403: Try to detect a non-plain-text attachment although Content-Type indicates to be plain text
+
+* 2012-10-17 - thorben.betten@open-xchange.com
+
+ - Fix for bug 23409: Keep track of already merged messages
+ - Fix for bug 23400: Aggressively cleaning cache
+
+* 2012-10-16 - martin.herfurth@open-xchange.com
+
+ - Fix for bug 21795: Ignoring updates on Appointments with outdated sequence on request.
+                      Added parameter "ignoreOutdatedSequence".
+
+ - Fix for bug 22856: Ignoring bad ical lines.
+
+* 2012-10-15 - viktor.pracht@open-xchange.com
+
+ - Fix for bug 23337: missing values in ui.properties
+
+* 2012-10-15 - thorben.betten@open-xchange.com
+
+ - Fix for bug 23324: More lenient dialing with FETCH responses
+ - Fix for bug 23368: Special treatment for <hr> tag prior to html2text conversion
+
+* 2012-10-14 - thorben.betten@open-xchange.com
+
+ - Fix for bug 23190: Maintain file name during move operation
+
 * 2012-10-10 - thorben.betten@open-xchange.com
 
  - Fix for bug 23238: Properly dealing with transient map on serialization attempt
+
+* 2012-10-10 - jan.bauerdick@open-xchange.com
+
+ - Refactored report client, added yearly login counter
 
 * 2012-10-09 - tobias.friedrich@open-xchange.com
 
@@ -26,6 +243,7 @@
 
  - Fix for bug 23219: Handle subsequent CRLFs in binary value
  - Fix for bug 23176: Checking for indication of 302 HTTP error code in thrown exception's message
+ - Fix for bug 23229: Added CSS3 styles to white-list filter
 
 * 2012-10-08 - thorben.betten@open-xchange.com
 
@@ -38,6 +256,11 @@
 * 2012-10-08 - marcus.klein@open-xchange.com
 
  - Fix for bug 23197: Removed snappy-java from OSGi 3rd party bundles.
+
+* 2012-10-05 - jan.bauerdick@open-xchange.com
+
+ - Improved c.o.aws for AWS S3 encryption
+ - New bundle c.o.aws.s3: AWS S3 based file storage
 
 * 2012-10-05 - thorben.betten@open-xchange.com
 
@@ -180,15 +403,24 @@
 
  - Fix for bug 22405: Extended build system to support arbitrary resources in bundles. Added fetcher.properties to bundle resources.
 
+* 2012-09-20 - martin.herfurth@open-xchange.com
+
+ - Fix for bug 23055: External participant detected as "Party Crasher".
+ - Fix for bug 23072: Bad All day appointments conflict when in different timezone.
+
 * 2012-09-20 - thorben.betten@open-xchange.com
 
  - Fix for bug 22980: No "hidden" mailbox expunge anymore
  - Fix for bug 22897: Delete only matching session if marked for removal
  - Fix for bug 23037: Properly mapping parsed TNEF read receipt to a multipart
 
- * 2012-09-20 - tobias.friedrich@open-xchange.com
+* 2012-09-20 - tobias.friedrich@open-xchange.com
 
  - Fix for bug 23046: Skip validation of URL property in vCards
+
+* 2012-09-19 - martin.herfurth@open-xchange.com
+
+ - Fix for bug 21054: Wrong sorting of Recurring Appointments in Week view.
 
 * 2012-09-19 - francisco.laguna@open-xchange.com
 
@@ -235,6 +467,7 @@
  - Fix for bug 22946: Added Xerces imports
  - Fix for bug 22657: Alternative look-up for configuration service
  - Fix for bug 22580: Deal with possibly absent mpasswd file
+ - Fix for bug 22947: Added null guard
 
 * 2012-09-14 - thorben.betten@open-xchange.com
 
@@ -283,11 +516,19 @@
 
  - Fix for bug 22943: Limit max. size of parseable HTML content; configurable through 'com.openexchange.html.maxLength'
 
+* 2012-09-07 - jan.bauerdick@open-xchange.com
+
+ - New bundle c.o.aws.autoscaling: Monitoring of instances and load-balancers, add/remove instances if necessary
+
 * 2012-09-07 - marcus.klein@open-xchange.com
 
  - Fix for bug 22937: Preventing NullPointerExceptions in SOAP administrator reseller service if optional restrictions are not sent.
  - Fix for bug 22933: Pushing the DatabaseService into AdminCache instances of administration autocontextid bundle.
  - Fix for bug 22669: Not using any reflection mechanisms anymore to instantiate OXToolStorageInterface to prevent NullPointerException.
+
+* 2012-09-06 - jan.bauerdick@open-xchange.com
+
+ - New bundle c.o.aws.ec2: Start and stop EC2 instances and register them with the load-balancer
 
 * 2012-09-06 - marcus.klein@open-xchange.com
 
@@ -320,6 +561,10 @@
  - Fix for bug 22882: Prevent possible NPE
  - Fix for bug 22880: Prevent possible NPE
 
+* 2012-09-04 - jan.bauerdick@open-xchange.com
+
+ - New bundle c.o.aws.loadbalancing: Register and deregister ec2 instances with the elastic loadbalancer
+
 * 2012-09-03 - thorben.betten@open-xchange.com
 
  - Fix for bug 22889: No keep-alive run if very first request body chunk not yet received
@@ -330,11 +575,32 @@
 
 * 2012-08-29 - thorben.betten@open-xchange.com
 
+ - Fix for bug 22860: Prevent possible NPE in file management
+
+* 2012-08-29 - jan.bauerdick@open-xchange.com
+
+ - New bundle c.o.cluster.discovery.aws: Find aws nodes in cluster
+
+* 2012-08-28 - jan.bauerdick@open-xchange.com
+
+ - New bundle c.o.aws: Providing services to communicate with amazon web services
+
+* 2012-08-28 - thorben.betten@open-xchange.com
+
+ - Fix for bug 22851: Abort keep-alive run if expected first request chunk has not been received so far
+
+* 2012-08-27 - thorben.betten@open-xchange.com
+
+ - Fix for bug 22755: Proper Content-Disposition header when downloading a file with Safari
  - Fix for bug 22860: Prevent NPE in file management
 
 * 2012-08-24 - jan.bauerdick@open-xchange.com
 
  - Fix for bug 22838: New implementation of com.openexchange.sessiond.impl.SessionHandler.merge
+
+* 2012-08-20 - thorben.betten@open-xchange.com
+
+ - Fix for bug 22819: Set category to USER_INPUT for invalid or rejected Internet addresses
 
 * 2012-08-20 - tobias.friedrich@open-xchange.com
 
@@ -346,6 +612,7 @@
 
 * 2012-08-19 - thorben.betten@open-xchange.com
 
+ - Fix for bug 22776: Set property "set-jaxb-validation-event-handler" to "false" to turn off the validation event handler.
  - Fix for bug 22735: Enable parsing of TNEF parts
 
 * 2012-08-18 - thorben.betten@open-xchange.com
@@ -375,7 +642,7 @@
 
  - Fix for bug 22769: Don't update appointment unless necessary 
  
-* 2012-08-09 - martin.herfurth@open-xchange.com
+* 2012-08-09 - thorben.betten@open-xchange.com
 
  - Fix for bug 22766: Fixed possible NPE
  - Fix for bug 22740: Rely on IMAP store's capabilities only
@@ -2237,7 +2504,7 @@
 
 * 2011-05-18 - thorben.betten@open-xchange.com
 
- - Bugfix #19179: Probing for '?' character when decoding an encoded-word with big5 encoding. If present use Big5-HKSCS instead.
+ - Bugfix #19179: Probing for special character when decoding an encoded-word with big5 encoding. If present use Big5-HKSCS instead.
 
 * 2011-05-18 - marcus.klein@open-xchange.com
 
@@ -2628,6 +2895,10 @@
 
  - Bugfix #18465: Compiling sources everywhere to Java5 compatible class files.
  - Bugfix #18463: Added necessary imports for OAuth LinkedIn bundle.
+
+* 2011-03-01 - marcus.klein@open-xchange.com
+
+ - Bugfix #18465: Compiling sources everywhere to Java5 compatible class files.
 
 * 2011-02-28 - steffen.templin@open-xchange.com
 

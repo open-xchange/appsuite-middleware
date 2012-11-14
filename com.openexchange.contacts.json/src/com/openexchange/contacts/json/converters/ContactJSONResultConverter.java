@@ -51,11 +51,9 @@ package com.openexchange.contacts.json.converters;
 
 import java.util.List;
 import java.util.Map;
-
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.requesthandler.Converter;
@@ -76,26 +74,6 @@ import com.openexchange.tools.session.ServerSession;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class ContactJSONResultConverter implements ResultConverter {
-
-//    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(ContactJSONResultConverter.class));
-//
-//    private static final TIntObjectMap<String> SPECIAL_COLUMNS;
-//
-//    static {
-//        final TIntObjectMap<String> map = new TIntObjectHashMap<String>(12);
-//        map.put(Contact.LAST_MODIFIED_OF_NEWEST_ATTACHMENT, "date");
-//        map.put(Contact.CREATION_DATE, "date");
-//        map.put(Contact.LAST_MODIFIED, "date");
-//        map.put(Contact.BIRTHDAY, "date");
-//        map.put(Contact.ANNIVERSARY, "date");
-//        map.put(Contact.IMAGE_LAST_MODIFIED, "date");
-//        map.put(Contact.IMAGE1_URL, "image");
-//        map.put(Contact.LAST_MODIFIED_UTC, "date_utc");
-//        map.put(Contact.DISTRIBUTIONLIST, "distributionlist");
-//        map.put(Contact.LINKS, "links");
-//        map.put(Contact.DEFAULT_ADDRESS, "remove_if_zero");
-//        SPECIAL_COLUMNS = map;
-//    }
 
     /**
      * Initializes a new {@link JSONResultConverter}.
@@ -120,7 +98,7 @@ public class ContactJSONResultConverter implements ResultConverter {
     }
 
     @Override
-    public void convert(final AJAXRequestData requestData, final AJAXRequestResult result, final ServerSession session, final Converter converter) throws OXException {
+    public void convert(AJAXRequestData requestData, AJAXRequestResult result, ServerSession session, Converter converter) throws OXException {
     	/*
     	 * determine timezone
     	 */
@@ -188,183 +166,10 @@ public class ContactJSONResultConverter implements ResultConverter {
 		}
     }
 
-//    private JSONObject convertSingleContact(final Contact contact, final ServerSession session) throws OXException {
-//        final JSONObject json = new JSONObject();
-//        final ContactGetter cg = new ContactGetter();
-//        for (final int column : Contact.JSON_COLUMNS) {
-//            final ContactField field = ContactField.getByValue(column);
-//            if (field != null && !field.getAjaxName().isEmpty()) {
-//                try {
-//                    final Object value = field.doSwitch(cg, contact);
-//
-//                    if (isSpecial(column)) {
-//                        final Object special = convertSpecial(field, contact, cg, session);
-//                        if (special != null && !String.valueOf(special).isEmpty()) {
-//                            final String jsonKey = field.getAjaxName();
-//                            json.put(jsonKey, special);
-//                        }
-//                    } else {
-//                        if (value != null && !String.valueOf(value).isEmpty()) {
-//                            final String jsonKey = field.getAjaxName();
-//                            json.put(jsonKey, value);
-//                        }
-//                    }
-//                } catch (final JSONException e) {
-//                    OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e);
-//                }
-//            }
-//        }
-//        return json;
-//    }
-//
-//    private JSONArray convertListOfContacts(final List<Contact> contacts, final int[] columns, final ServerSession session) throws OXException {
-//        final JSONArray resultArray = new JSONArray();
-//        for (final Contact contact : contacts) {
-//            final JSONArray contactArray = new JSONArray();
-//
-//            final ContactGetter cg = new ContactGetter();
-//            for (final int column : columns) {
-//                final ContactField field = ContactField.getByValue(column);
-//                if (field != null && !field.getAjaxName().isEmpty()) {
-//                    final Object value = field.doSwitch(cg, contact);
-//                    if (isSpecial(column)) {
-//                        final Object special = convertSpecial(field, contact, cg, session);
-//                        contactArray.put(special == null ? JSONObject.NULL : special);
-//                    } else if (value == null) {
-//                        contactArray.put(JSONObject.NULL);
-//                    } else {
-//                        contactArray.put(value);
-//                    }
-//                } else {
-//                    LOG.warn("Did not find field or json name for column: " + column);
-//                    contactArray.put(JSONObject.NULL);
-//                }
-//            }
-//            resultArray.put(contactArray);
-//        }
-//        return resultArray;
-//    }
-
-    private void addObjectIdsToResultArray(final JSONArray resultArray, final List<Contact> contacts) {
-        for (final Contact contact : contacts) {
+    private void addObjectIdsToResultArray(JSONArray resultArray, List<Contact> contacts) {
+        for (Contact contact : contacts) {
             resultArray.put(contact.getObjectID());
         }
     }
-
-//    private boolean isSpecial(final int column) {
-//        return SPECIAL_COLUMNS.containsKey(column);
-//    }
-//
-//    private Object convertSpecial(final ContactField field, final Contact contact, final ContactGetter cg, final ServerSession session) throws OXException {
-//        final String type = SPECIAL_COLUMNS.get(field.getNumber());
-//        if (type.equals("date")) {
-//            final Object value = field.doSwitch(cg, contact);
-//            if (value != null) {
-//                final Date date = (Date) value;
-//                return date.getTime();
-//            }
-//
-//            return null;
-//        } else if (type.equals("date_utc")) {
-//            // Set last_modified_utc
-//            final Date lastModified = contact.getLastModified();
-//            final Calendar calendar = new GregorianCalendar();
-//            calendar.setTime(lastModified);
-//            final int offset = calendar.get(Calendar.ZONE_OFFSET) + calendar.get(Calendar.DST_OFFSET);
-//            calendar.add(Calendar.MILLISECOND, -offset);
-//
-//            return calendar.getTime().getTime();
-//        } else if (type.equals("image")) {
-//            String imageUrl = null;
-//            {
-//                final byte[] imageData = contact.getImage1();
-//                if (imageData != null) {
-//                    final ContactImageDataSource imgSource = ContactImageDataSource.getInstance();
-//                    final ImageLocation il =
-//                        new ImageLocation.Builder().folder(String.valueOf(contact.getParentFolderID())).id(
-//                            String.valueOf(contact.getObjectID())).build();
-//                    imageUrl = imgSource.generateUrl(il, session);
-//                }
-//            }
-//            return imageUrl;
-//        } else if (type.equals("distributionlist")) {
-//            JSONArray distributionList = null;
-//            try {
-//                distributionList = getDistributionListAsJSONArray(contact);
-//            } catch (final JSONException e) {
-//                throw OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e);
-//            }
-//
-//            return distributionList;
-//        } else if (type.equals("links")) {
-//            JSONArray links = null;
-//            try {
-//                links = getLinksAsJSONArray(contact);
-//            } catch (final JSONException e) {
-//                throw OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e);
-//            }
-//
-//            return links;
-//        } else if (type.equals("remove_if_zero")) {
-//            final Integer value = (Integer) field.doSwitch(cg, contact);
-//            if (value != null) {
-//                final int intValue = value.intValue();
-//                if (intValue != 0) {
-//                    return intValue;
-//                }
-//            }
-//
-//            return null;
-//        } else {
-//            return null;
-//        }
-//    }
-//
-//    private JSONArray getDistributionListAsJSONArray(final Contact contact) throws JSONException {
-//        final DistributionListEntryObject[] distributionList = contact.getDistributionList();
-//        if (distributionList == null) {
-//            return null;
-//        }
-//
-//        final JSONArray jsonArray = new JSONArray();
-//        for (int i = 0; i < distributionList.length; i++) {
-//            final JSONObject entry = new JSONObject();
-//            final int emailField = distributionList[i].getEmailfield();
-//
-//            if (!(emailField == DistributionListEntryObject.INDEPENDENT)) {
-//                entry.put(DistributionListFields.ID, distributionList[i].getEntryID());
-//            }
-//
-//            entry.put(DistributionListFields.MAIL, distributionList[i].getEmailaddress());
-//            entry.put(DistributionListFields.DISPLAY_NAME, distributionList[i].getDisplayname());
-//            entry.put(DistributionListFields.MAIL_FIELD, emailField);
-//
-//            jsonArray.put(entry);
-//        }
-//
-//        return jsonArray;
-//    }
-//
-//    private JSONArray getLinksAsJSONArray(final Contact contact) throws JSONException {
-//        final LinkEntryObject[] links = contact.getLinks();
-//
-//        if (links != null) {
-//            final JSONArray jsonLinks = new JSONArray();
-//            for (int i = 0; i < links.length; i++) {
-//                final LinkEntryObject link = links[i];
-//                final JSONObject jsonLink = new JSONObject();
-//
-//                if (link.containsLinkID()) {
-//                    jsonLink.put(ContactFields.ID, link.getLinkID());
-//                }
-//
-//                jsonLink.put(ContactFields.DISPLAY_NAME, link.getLinkDisplayname());
-//                jsonLinks.put(jsonLink);
-//            }
-//
-//            return jsonLinks;
-//        }
-//        return null;
-//    }
 
 }

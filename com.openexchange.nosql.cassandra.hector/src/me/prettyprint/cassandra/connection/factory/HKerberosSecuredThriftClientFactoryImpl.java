@@ -130,8 +130,7 @@ public class HKerberosSecuredThriftClientFactoryImpl implements HClientFactory {
   /**
    * {@inheritDoc}
    */
-  @Override
-public HClient createClient(CassandraHost ch) {
+  public HClient createClient(CassandraHost ch) {
     if (log.isDebugEnabled()) {
       log.debug("Creation of new client");
     }

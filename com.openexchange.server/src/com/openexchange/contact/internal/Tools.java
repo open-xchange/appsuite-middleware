@@ -396,7 +396,7 @@ public final class Tools {
 	 * @return the folder IDs
 	 * @throws OXException
 	 */
-	private static List<String> getVisibleFolders(final int contextID, final int userID) throws OXException {
+	public static List<String> getVisibleFolders(final int contextID, final int userID) throws OXException {
 		final List<String> folderIDs = new ArrayList<String>();
         final UserConfiguration userConfig = UserConfigurationStorage.getInstance().getUserConfiguration(
         		userID, Tools.getContext(contextID));

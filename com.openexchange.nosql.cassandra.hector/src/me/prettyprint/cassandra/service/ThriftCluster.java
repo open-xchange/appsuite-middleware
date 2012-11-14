@@ -21,8 +21,7 @@ public class ThriftCluster extends AbstractCluster implements Cluster {
     super(clusterName, cassandraHostConfigurator, credentials);
   }
 
-  @Override
-public List<TokenRange> describeRing(final String keyspace) throws HectorException {
+  public List<TokenRange> describeRing(final String keyspace) throws HectorException {
     Operation<List<TokenRange>> op = new Operation<List<TokenRange>>(OperationType.META_READ, getCredentials()) {
       @Override
       public List<TokenRange> execute(Cassandra.Client cassandra) throws HectorException {
@@ -37,8 +36,7 @@ public List<TokenRange> describeRing(final String keyspace) throws HectorExcepti
     return op.getResult();
   }
 
-  @Override
-public Map<String,List<String>> describeSchemaVersions() throws HectorException {
+  public Map<String,List<String>> describeSchemaVersions() throws HectorException {
     Operation<Map<String,List<String>>> op = new Operation<Map<String,List<String>>>(OperationType.META_READ, getCredentials()) {
       @Override
       public Map<String,List<String>> execute(Cassandra.Client cassandra) throws HectorException {
@@ -59,8 +57,7 @@ public Map<String,List<String>> describeSchemaVersions() throws HectorException 
     return updateKeyspace(ksdef, false);
   }
   
-  @Override
-public String updateKeyspace(final KeyspaceDefinition ksdef, final boolean waitForSchemaAgreement) throws HectorException {
+  public String updateKeyspace(final KeyspaceDefinition ksdef, final boolean waitForSchemaAgreement) throws HectorException {
     Operation<String> op = new Operation<String>(OperationType.META_WRITE, FailoverPolicy.FAIL_FAST, getCredentials()) {
       @Override
       public String execute(Cassandra.Client cassandra) throws HectorException {

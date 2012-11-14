@@ -49,24 +49,19 @@
 
 package com.openexchange.index.solr.osgi;
 
-import java.util.Dictionary;
-import java.util.Hashtable;
 import org.apache.commons.logging.Log;
-import org.osgi.service.event.EventConstants;
-import org.osgi.service.event.EventHandler;
+import org.osgi.framework.BundleActivator;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.database.CreateTableService;
 import com.openexchange.database.DatabaseService;
+import com.openexchange.groupware.infostore.InfostoreFacade;
 import com.openexchange.groupware.update.DefaultUpdateTaskProviderService;
 import com.openexchange.groupware.update.UpdateTaskProviderService;
-import com.openexchange.file.storage.FileStorageEventConstants;
-import com.openexchange.file.storage.composition.IDBasedFileAccessFactory;
 import com.openexchange.index.IndexFacadeService;
 import com.openexchange.index.solr.groupware.IndexedFoldersCreateTableService;
 import com.openexchange.index.solr.groupware.IndexedFoldersCreateTableTask;
 import com.openexchange.index.solr.internal.Services;
 import com.openexchange.index.solr.internal.SolrIndexFacadeService;
-import com.openexchange.index.solr.internal.filestore.SolrFilestoreEventHandler;
 import com.openexchange.log.LogFactory;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.solr.SolrAccessService;
@@ -86,13 +81,15 @@ public class SolrIndexActivator extends HousekeepingActivator {
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(SolrIndexActivator.class));
     
     private SolrIndexFacadeService solrFacadeService;
+    
+    private BundleActivator fragmentActivator;
         
 
     @Override
     protected Class<?>[] getNeededServices() {
         return new Class[] {
             DatabaseService.class, UserService.class, ConfigurationService.class, TimerService.class, ThreadPoolService.class,
-            SolrAccessService.class, IDBasedFileAccessFactory.class, TextXtractService.class };
+            SolrAccessService.class, TextXtractService.class, InfostoreFacade.class };
     }
 
     @Override
@@ -107,11 +104,15 @@ public class SolrIndexActivator extends HousekeepingActivator {
         IndexedFoldersCreateTableService createTableService = new IndexedFoldersCreateTableService();
         registerService(CreateTableService.class, createTableService);
         registerService(UpdateTaskProviderService.class, new DefaultUpdateTaskProviderService(new IndexedFoldersCreateTableTask(createTableService)));
-        Dictionary<String, Object> ht = new Hashtable<String, Object>();
-        ht.put(EventConstants.EVENT_TOPIC, FileStorageEventConstants.ALL_TOPICS);
-        registerService(EventHandler.class, new SolrFilestoreEventHandler(), ht);
-//        	registerService(CommandProvider.class, new UtilCommandProvider());        
-        
+        try {
+            Class<? extends BundleActivator> clazz = 
+                (Class<? extends BundleActivator>) Class.forName("com.openexchange.index.solr.test.FragmentActivator");
+            fragmentActivator = clazz.newInstance();
+            fragmentActivator.start(context);
+        } catch (Exception e) {
+            // ignore
+        }
+
 //        final SolrCoreConfigService indexService = new SolrCoreConfigServiceImpl();
 //        registerService(SolrCoreConfigService.class, indexService);
     }
@@ -122,25 +123,14 @@ public class SolrIndexActivator extends HousekeepingActivator {
             solrFacadeService.shutDown();
         }
         
+        try {
+            if (fragmentActivator != null) {
+                fragmentActivator.stop(context);
+            }
+        } catch (Exception e) {
+            // ignore
+        }
+        
         super.stopBundle();
     }
-    
-//    public class UtilCommandProvider implements CommandProvider {
-//
-//        public UtilCommandProvider() {
-//            super();
-//        }
-//
-//        @Override
-//		public String getHelp() {
-//            final StringBuilder help = new StringBuilder();
-//            help.append("\tstartTest - Start SolrIndexFacadeTest.\n");
-//            return help.toString();
-//        }
-//
-//        public void _startTest(final CommandInterpreter commandInterpreter) {
-//            final JUnitCore jUnit = new JUnitCore();
-//            jUnit.run(SolrIndexFacadeTest.class);
-//        }
-//    }
 }

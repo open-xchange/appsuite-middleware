@@ -64,8 +64,8 @@ import com.openexchange.http.deferrer.CustomRedirectURLDetermination;
  */
 public class CallbackRegistry implements CustomRedirectURLDetermination, Runnable{
 
-	private ConcurrentHashMap<String, String> tokenMap = new ConcurrentHashMap<String, String>();
-	private ConcurrentHashMap<String, Long> timestamps = new ConcurrentHashMap<String, Long>();
+	private final ConcurrentHashMap<String, String> tokenMap = new ConcurrentHashMap<String, String>();
+	private final ConcurrentHashMap<String, Long> timestamps = new ConcurrentHashMap<String, Long>();
 	
 	public void add(String callbackUrl, String token) {
 		timestamps.put(token, System.currentTimeMillis());

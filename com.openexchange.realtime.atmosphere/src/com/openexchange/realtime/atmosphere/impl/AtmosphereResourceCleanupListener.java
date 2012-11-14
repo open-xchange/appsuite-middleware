@@ -49,8 +49,6 @@
 
 package com.openexchange.realtime.atmosphere.impl;
 
-import java.util.HashSet;
-import java.util.Set;
 import org.atmosphere.cpr.AtmosphereResource;
 import org.atmosphere.cpr.AtmosphereResourceEvent;
 import org.atmosphere.cpr.AtmosphereResourceEventListener;
@@ -60,14 +58,14 @@ import com.openexchange.log.LogFactory;
 
 
 /**
- * {@link AtmosphereResourceCleanupListener} - Debug cleanup process and remove resources from broadcasters.
+ * {@link AtmosphereResourceCleanupListener} - Properly disposes Broadcasters after the last resource was disconnected. 
  *
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
 public class AtmosphereResourceCleanupListener implements AtmosphereResourceEventListener {
     private static final org.apache.commons.logging.Log LOG = Log.valueOf(LogFactory.getLog(RTAtmosphereHandler.class));
-    private Broadcaster[] associatedBroadcasters;
-    private AtmosphereResource resource;
+    private final Broadcaster[] associatedBroadcasters;
+    private final AtmosphereResource resource;
     /**
      * Initializes a new {@link AtmosphereResourceCleanupListener}.
      * @param associatedBroadcasters the associated Broadcasters
@@ -79,38 +77,35 @@ public class AtmosphereResourceCleanupListener implements AtmosphereResourceEven
 
     @Override
     public void onSuspend(AtmosphereResourceEvent event) {
-        // TODO Auto-generated method stub
-
     }
 
     @Override
     public void onResume(AtmosphereResourceEvent event) {
-        // TODO Auto-generated method stub
-
     }
 
     @Override
     public void onDisconnect(AtmosphereResourceEvent event) {
         for (Broadcaster broadcaster : associatedBroadcasters) {
-            //TODO: actually not needed
-            broadcaster.removeAtmosphereResource(resource);
-            LOG.info("Removing resource: " + resource.uuid() + " from broadcaster: " + broadcaster.getID());
+            int size = broadcaster.getAtmosphereResources().size();
+            if(size==1) {
+                if(LOG.isDebugEnabled()) {
+                    LOG.debug("Destroying broadcaster: " + broadcaster.getID());
+                }
+              broadcaster.destroy();
+            } 
         }
     }
 
     @Override
     public void onBroadcast(AtmosphereResourceEvent event) {
-        // TODO Auto-generated method stub
-
     }
 
-    /* (non-Javadoc)
-     * @see org.atmosphere.cpr.AtmosphereResourceEventListener#onThrowable(org.atmosphere.cpr.AtmosphereResourceEvent)
-     */
     @Override
     public void onThrowable(AtmosphereResourceEvent event) {
-        // TODO Auto-generated method stub
+    }
 
+    @Override
+    public void onPreSuspend(AtmosphereResourceEvent arg0) {
     }
 
 }

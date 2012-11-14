@@ -132,7 +132,7 @@ public class OAuthServiceImpl implements OAuthService, SecretEncryptionStrategy<
 
     private final ContextService contexts;
     
-    private CallbackRegistry callbackRegistry;
+    private final CallbackRegistry callbackRegistry;
 
     /**
      * Initializes a new {@link OAuthServiceImpl}.

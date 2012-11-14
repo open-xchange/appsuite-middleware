@@ -24,7 +24,7 @@ msgstr ""
 "Project-Id-Version: errors.pl_PL\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2012-10-06 13:38+0200\n"
+"PO-Revision-Date: 2012-10-06 13:42+0200\n"
 "Last-Translator: \n"
 "Language-Team: Polski <kde-i18n-doc@kde.org>\n"
 "MIME-Version: 1.0\n"
@@ -2553,8 +2553,8 @@ msgstr ""
 "$s w kontekście %3$s"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/tools/iterator/SearchIteratorExceptionMessages.java:63
-msgid "A DBPool error occurred: %1$s"
-msgstr "Wystąpił błąd DBPool: %1$s"
+msgid "A DBPool error occurred: 1$%s"
+msgstr "Wystąpił błąd DBPool: %1$s "
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/tools/iterator/SearchIteratorExceptionMessages.java:65
 msgid "Operation not allowed on a closed SearchIterator"
@@ -3674,6 +3674,10 @@ msgstr ""
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:139
 msgid "The request sent was missing its body"
 msgstr "Wysłane żądanie nie ma treści"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:141
+msgid "The account is invalid, please recreate it."
+msgstr "Konto jest nieprawidłowe. Utwórz je ponownie."
 
 #. *
 #. * Cannot change password for any reason.

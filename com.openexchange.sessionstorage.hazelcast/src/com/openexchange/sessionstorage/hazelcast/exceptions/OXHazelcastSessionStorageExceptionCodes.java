@@ -56,20 +56,22 @@ import com.openexchange.exception.OXExceptionFactory;
 
 /**
  * {@link OXHazelcastSessionStorageExceptionCodes}
- *
+ * 
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  */
 public enum OXHazelcastSessionStorageExceptionCodes implements OXExceptionCode {
-    
-    HAZELCAST_SESSIONSTORAGE_START_FAILED(OXHazelcastSessionStorageExceptionMessages.HAZELCAST_SESSIONSTORAGE_START_FAILED_MSG, 1, Category.CATEGORY_ERROR),
-    HAZELCAST_SESSIONSTORAGE_SAVE_FAILED(OXHazelcastSessionStorageExceptionMessages.HAZELCAST_SESSIONSTORAGE_SAVE_FAILED_MSG, 2, Category.CATEGORY_ERROR),
-    HAZELCAST_SESSIONSTORAGE_LOOKUP_FAILED(OXHazelcastSessionStorageExceptionMessages.HAZELCAST_SESSIONSTORAGE_LOOKUP_FAILED_MSG, 3, Category.CATEGORY_ERROR),
-    HAZELCAST_SESSIONSTORAGE_REMOVE_FAILED(OXHazelcastSessionStorageExceptionMessages.HAZELCAST_SESSIONSTORAGE_REMOVE_FAILED_MSG, 4, Category.CATEGORY_ERROR),
-    HAZELCAST_SESSIONSTORAGE_SESSION_NOT_FOUND(OXHazelcastSessionStorageExceptionMessages.HAZELCAST_SESSIONSTORAGE_SESSION_NOT_FOUND_MSG, 5, Category.CATEGORY_ERROR),
+
+    /**
+     * Could not find encryption key.
+     */
     HAZELCAST_SESSIONSTORAGE_NO_ENCRYPTION_KEY(OXHazelcastSessionStorageExceptionMessages.HAZELCAST_SESSIONSTORAGE_NO_ENCRYPTION_KEY_MSG, 6, Category.CATEGORY_ERROR),
-    HAZELCAST_SESSIONSTORAGE_DUPLICATE_AUTHID(OXHazelcastSessionStorageExceptionMessages.HAZELCAST_SESSIONSTORAGE_DUPLICATE_AUTHID_MSG, 7, Category.CATEGORY_ERROR),
-    HAZELCAST_SESSIONSTORAGE_UNSUPPORTED_OPERATION(OXHazelcastSessionStorageExceptionMessages.HAZELCAST_SESSIONSTORAGE_UNSUPPORTED_OPERATION_MSG, 8, Category.CATEGORY_ERROR);
-    
+    /**
+     * Error in config file.
+     */
+    HAZELCAST_SESSIONSTORAGE_CONFIG_FILE(OXHazelcastSessionStorageExceptionMessages.HAZELCAST_SESSIONSTORAGE_CONFIG_FILE_MSG, 13, Category.CATEGORY_ERROR);
+
+    private static final String PREFIX = "SST-HZL";
+
     /**
      * Message of the exception.
      */
@@ -111,14 +113,14 @@ public enum OXHazelcastSessionStorageExceptionCodes implements OXExceptionCode {
 
     @Override
     public String getPrefix() {
-        return "SES";
+        return PREFIX;
     }
 
     @Override
     public String getMessage() {
         return message;
     }
-    
+
     /**
      * Creates a new {@link OXException} instance pre-filled with this code's attributes.
      * 

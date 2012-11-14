@@ -94,7 +94,7 @@ public class CacheingMessageAccess implements MessagingMessageAccess {
         this.cache = cache;
         // this.folderPrefix = folderPrefix;
         // this.session = session;
-        groupNamePrefix = new StringBuilder(session.getContextId()).append('/').append(folderPrefix).append('/').toString();
+        groupNamePrefix = new StringBuilder(null == session ? "" : Integer.toString(session.getContextId())).append('/').append(folderPrefix).append('/').toString();
     }
 
     @Override

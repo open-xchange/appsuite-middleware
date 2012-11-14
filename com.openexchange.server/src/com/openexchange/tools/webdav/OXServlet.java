@@ -101,12 +101,13 @@ public abstract class OXServlet extends WebDavServlet {
 
         private final String login;
         private final HttpServletRequest req;
+        private final String userAgent;
+
         private final String pass;
         private final String client;
         private final Interface interfaze;
         private final String version;
         private final boolean isVolatile;
-        private final String userAgent;
 
         public LoginRequestImpl(final String login, final String pass, final Interface interfaze, final HttpServletRequest req) {
             super();

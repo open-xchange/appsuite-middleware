@@ -51,22 +51,22 @@ package com.openexchange.file.storage.cifs.osgi;
 
 import java.util.Dictionary;
 import java.util.Hashtable;
-import org.apache.commons.logging.Log;
+import java.util.Map;
 import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceReference;
+import org.osgi.service.event.Event;
 import org.osgi.service.event.EventConstants;
 import org.osgi.service.event.EventHandler;
-import com.openexchange.exception.OXException;
+import org.osgi.util.tracker.ServiceTracker;
 import com.openexchange.file.storage.FileStorageAccountManagerLookupService;
 import com.openexchange.file.storage.FileStorageAccountManagerProvider;
-import com.openexchange.file.storage.FileStorageExceptionCodes;
-import com.openexchange.file.storage.FileStorageService;
-import com.openexchange.file.storage.cifs.CIFSFileStorageService;
 import com.openexchange.file.storage.cifs.CIFSServices;
-import com.openexchange.log.LogFactory;
+import com.openexchange.file.storage.cifs.cache.SmbFileMapManagement;
+import com.openexchange.mime.MimeTypeMap;
 import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.osgi.SimpleRegistryListener;
+import com.openexchange.session.Session;
+import com.openexchange.sessiond.SessiondEventConstants;
 import com.openexchange.sessiond.SessiondService;
+import com.openexchange.timer.TimerService;
 
 /**
  * {@link CIFSActivator} - Activator for CIFS bundle.
@@ -74,10 +74,6 @@ import com.openexchange.sessiond.SessiondService;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class CIFSActivator extends HousekeepingActivator {
-
-    volatile CIFSFileStorageService cifsFileStorageService;
-
-    private volatile CIFSServiceRegisterer registerer;
 
     /**
      * Initializes a new {@link CIFSActivator}.
@@ -88,7 +84,7 @@ public final class CIFSActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { FileStorageAccountManagerLookupService.class, SessiondService.class };
+        return new Class<?>[] { FileStorageAccountManagerLookupService.class, SessiondService.class, MimeTypeMap.class, TimerService.class };
     }
 
     @Override
@@ -99,42 +95,41 @@ public final class CIFSActivator extends HousekeepingActivator {
              * Some initialization stuff
              */
             final BundleContext context = this.context;
-            final CIFSActivator activator = this;
-            track(FileStorageAccountManagerProvider.class, new SimpleRegistryListener<FileStorageAccountManagerProvider>() {
+            /*
+             * Register tracker
+             */
+            rememberTracker(new ServiceTracker<FileStorageAccountManagerProvider, FileStorageAccountManagerProvider>(context, FileStorageAccountManagerProvider.class, new CIFSServiceRegisterer(context)));
+            openTrackers();
+            SmbFileMapManagement.getInstance().startShrinker();
+            /*
+             * Event handler
+             */
+            {
+                final EventHandler eventHandler = new EventHandler() {
 
-                @Override
-                public void added(final ServiceReference<FileStorageAccountManagerProvider> ref, final FileStorageAccountManagerProvider service) {
-                    CIFSFileStorageService cifsFileStorageService = activator.cifsFileStorageService;
-                    if (null != cifsFileStorageService) {
-                        return;
-                    }
-                    try {
-                        cifsFileStorageService = CIFSFileStorageService.newInstance(context.getService(ref));
-                        activator.registerService(FileStorageService.class, cifsFileStorageService);
-                        activator.cifsFileStorageService = cifsFileStorageService;
-                    } catch (final OXException e) {
-                        if (!FileStorageExceptionCodes.NO_ACCOUNT_MANAGER_FOR_SERVICE.equals(e)) {
-                            final Log log = com.openexchange.log.Log.valueOf(LogFactory.getLog(CIFSActivator.class));
-                            log.error(e.getMessage(), e);
+                    @Override
+                    public void handleEvent(final Event event) {
+                        final String topic = event.getTopic();
+                        if (SessiondEventConstants.TOPIC_REMOVE_SESSION.equals(topic)) {
+                            handleDroppedSession((Session) event.getProperty(SessiondEventConstants.PROP_SESSION));
+                        } else if (SessiondEventConstants.TOPIC_REMOVE_CONTAINER.equals(topic) || SessiondEventConstants.TOPIC_REMOVE_DATA.equals(topic)) {
+                            @SuppressWarnings("unchecked")
+                            final Map<String, Session> map = (Map<String, Session>) event.getProperty(SessiondEventConstants.PROP_CONTAINER);
+                            for (final Session session : map.values()) {
+                                handleDroppedSession(session);
+                            }
                         }
                     }
-                }
 
-                @Override
-                public void removed(final ServiceReference<FileStorageAccountManagerProvider> ref, final FileStorageAccountManagerProvider service) {
-                    // Nope
-                }
-            });
-            openTrackers();
-            /*
-             * Register event handler
-             */
-            if (false) {
+                    private void handleDroppedSession(final Session session) {
+                        if (null == getService(SessiondService.class).getAnyActiveSessionForUser(session.getUserId(), session.getContextId())) {
+                            SmbFileMapManagement.getInstance().dropFor(session);
+                        }
+                    }
+                };
                 final Dictionary<String, Object> dict = new Hashtable<String, Object>(1);
-                dict.put(EventConstants.EVENT_TOPIC, FileStorageAccountManagerProvider.TOPIC);
-                final CIFSServiceRegisterer registerer = new CIFSServiceRegisterer(context);
-                registerService(EventHandler.class, registerer, dict);
-                this.registerer = registerer;
+                dict.put(EventConstants.EVENT_TOPIC, SessiondEventConstants.getAllTopics());
+                registerService(EventHandler.class, eventHandler, dict);
             }
         } catch (final Exception e) {
             com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(CIFSActivator.class)).error(e.getMessage(), e);
@@ -150,11 +145,7 @@ public final class CIFSActivator extends HousekeepingActivator {
     @Override
     protected void stopBundle() throws Exception {
         try {
-            final CIFSServiceRegisterer registerer = this.registerer;
-            if (null != registerer) {
-                registerer.close();
-                this.registerer = null;
-            }
+            SmbFileMapManagement.getInstance().stopShrinker();
             // Clean-up
             cleanUp();
             // Clear service registry

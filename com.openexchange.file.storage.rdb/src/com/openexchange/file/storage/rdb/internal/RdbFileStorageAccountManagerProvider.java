@@ -52,8 +52,9 @@ package com.openexchange.file.storage.rdb.internal;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageAccountManager;
 import com.openexchange.file.storage.FileStorageAccountManagerProvider;
-import com.openexchange.file.storage.FileStorageService;
 import com.openexchange.file.storage.rdb.RdbFileStorageAccountManager;
+import com.openexchange.file.storage.rdb.Services;
+import com.openexchange.file.storage.registry.FileStorageServiceRegistry;
 import com.openexchange.session.Session;
 
 
@@ -73,18 +74,18 @@ public final class RdbFileStorageAccountManagerProvider implements FileStorageAc
     }
 
     @Override
-    public boolean supports(final FileStorageService service) {
+    public boolean supports(final String serviceId) {
         return true;
     }
 
     @Override
-    public FileStorageAccountManager getAccountManagerFor(final FileStorageService service) throws OXException {
-        return new RdbFileStorageAccountManager(service);
+    public FileStorageAccountManager getAccountManagerFor(final String serviceId) throws OXException {
+        return new RdbFileStorageAccountManager(Services.getService(FileStorageServiceRegistry.class).getFileStorageService(serviceId));
     }
 
     @Override
     public int getRanking() {
-        return 0;
+        return DEFAULT_RANKING;
     }
 
     @Override

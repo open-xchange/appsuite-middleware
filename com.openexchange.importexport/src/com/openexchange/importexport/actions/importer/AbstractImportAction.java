@@ -48,10 +48,9 @@
  */
 package com.openexchange.importexport.actions.importer;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.util.List;
-
 import org.json.JSONException;
-
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
@@ -70,6 +69,7 @@ public abstract class AbstractImportAction implements AJAXActionService {
 	@Override
 	public AJAXRequestResult perform(AJAXRequestData requestData,
 			ServerSession session) throws OXException {
+
 		return perform(new ImportRequest(requestData, session));
 	}
 
@@ -92,14 +92,14 @@ public abstract class AbstractImportAction implements AJAXActionService {
 			e1.printStackTrace();
 		}
 		AJAXRequestResult result = new AJAXRequestResult(jsonWriter.getObject());
-		boolean hasWarnings = false;
+        int num = 0;
 		for(ImportResult res: importResult){
 			if(res.getWarnings() != null && res.getWarnings().size() > 0){
-				hasWarnings = true;		
+                num += res.getWarnings().size();
 			}
 		}
-		if(hasWarnings){
-			result.setException(ImportExportExceptionCodes.WARNINGS.create());
+        if (num > 0) {
+            result.setException(ImportExportExceptionCodes.WARNINGS.create(I(num)));
 		}
 		return result;
 

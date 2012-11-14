@@ -59,6 +59,7 @@ import com.openexchange.tools.session.ServerSession;
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a> JavaDoc
+ * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
 public interface Channel {
 	
@@ -70,15 +71,15 @@ public interface Channel {
 	public String getProtocol();
 	
 	/**
-	 * Checks if this channel can dispatch messages to given recipient in given name space.
+	 * Checks if this channel can dispatch a specific Stanza class to a given recipient.
 	 * 
-	 * @param namespace The name space
+	 * @param stanzaClass The class of the element that has to be handled
 	 * @param recipient The recipient
 	 * @param session The session
 	 * @return <code>true</code> if this channel can dispatch messages to given recipient; otherwise <code>false</code>
 	 * @throws OXException If check fails for any reason
 	 */
-	public boolean canHandle(String namespace, ID recipient, ServerSession session) throws OXException;
+	public boolean canHandle(Class<? extends Stanza> stanzaClass, ID recipient, ServerSession session) throws OXException;
 	
 	/**
 	 * Gets the priority used for building a ranking for concurrent channels.

@@ -135,7 +135,7 @@ public final class LogProperties {
         if (null == thread) {
             return null;
         }
-        final Props props = THREAD_LOCAL.get(thread);
+        Props props = THREAD_LOCAL.get(thread);
         if (props == null) {
             return null;
         }

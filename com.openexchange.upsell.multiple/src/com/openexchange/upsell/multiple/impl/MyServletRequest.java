@@ -49,16 +49,14 @@
 
 package com.openexchange.upsell.multiple.impl;
 
+import static com.openexchange.upsell.multiple.osgi.MyServiceRegistry.getServiceRegistry;
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
-import java.net.MalformedURLException;
 import java.net.URLEncoder;
-import java.rmi.Naming;
-import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.util.HashMap;
 import java.util.Map;
@@ -67,7 +65,6 @@ import java.util.regex.Pattern;
 import javax.mail.MessagingException;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.MimeMessage;
-import javax.mail.internet.MimeMessage.RecipientType;
 import javax.servlet.http.HttpServletRequest;
 import org.apache.commons.httpclient.URIException;
 import org.apache.commons.logging.Log;
@@ -94,12 +91,12 @@ import com.openexchange.mail.mime.MimeDefaultSession;
 import com.openexchange.mail.mime.MimeMailException;
 import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.mail.transport.MailTransport;
+import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.session.Session;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 import com.openexchange.upsell.multiple.api.UpsellURLParametersMap;
 import com.openexchange.upsell.multiple.api.UpsellURLService;
-import com.openexchange.upsell.multiple.osgi.MyServiceRegistry;
 
 /**
  * 
@@ -139,7 +136,7 @@ public final class MyServletRequest  {
     private static final String PROPERTY_METHOD_EMAIL_OXUSER_ENABLED = "com.openexchange.upsell.multiple.method.email.oxuser.enabled";
 
     // RMI API options
-    private static final String PROPERTY_RMI_HOST = "com.openexchange.upsell.multiple.rmi.host";
+    //private static final String PROPERTY_RMI_HOST = "com.openexchange.upsell.multiple.rmi.host";
     private static final String PROPERTY_RMI_MASTERADMIN = "com.openexchange.upsell.multiple.rmi.masteradmin";
     private static final String PROPERTY_RMI_MASTERADMIN_PWD = "com.openexchange.upsell.multiple.rmi.masteradmin.pass";
     private static final String PROPERTY_RMI_DOWNGRADE_NAME = "com.openexchange.upsell.multiple.rmi.downgrade.accessname";
@@ -160,7 +157,8 @@ public final class MyServletRequest  {
         }
 
         // init config
-        this.configView = MyServiceRegistry.getServiceRegistry().getService(ConfigViewFactory.class,true).getView(sessionObj.getUserId(), sessionObj.getContextId());
+        final ConfigViewFactory configViewFactory = getServiceRegistry().getService(ConfigViewFactory.class,true);
+        this.configView = configViewFactory.getView(sessionObj.getUserId(), sessionObj.getContextId());
     }
 
     public Object action(final String action, final JSONObject jsonObject, final HttpServletRequest http_request) throws OXException, JSONException {
@@ -202,9 +200,12 @@ public final class MyServletRequest  {
                 upsell_plan = json.getString("upsell_plan");
             }
 
-            final OXContextInterface iface = (OXContextInterface)Naming.lookup("rmi://"+getFromConfig(PROPERTY_RMI_HOST)+"/"+OXContextInterface.RMI_NAME);
+            final OXContextInterface iface = getServiceRegistry().getService(OXContextInterface.class);
+            if (null == iface) {
+                throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(OXContextInterface.class.getName());
+            }
 
-            final com.openexchange.admin.rmi.dataobjects.Context bla = new com.openexchange.admin.rmi.dataobjects.Context(this.sessionObj.getContextId());
+            final com.openexchange.admin.rmi.dataobjects.Context bla = new com.openexchange.admin.rmi.dataobjects.Context(Integer.valueOf(this.sessionObj.getContextId()));
 
             final Credentials authcreds = new Credentials(getFromConfig(PROPERTY_RMI_MASTERADMIN),getFromConfig(PROPERTY_RMI_MASTERADMIN_PWD));
 
@@ -218,13 +219,7 @@ public final class MyServletRequest  {
             iface.getAccessCombinationName(bla, authcreds);
             LOG.info("Updated access combination name for context "+this.ctx.getContextId()+" to: "+iface.getAccessCombinationName(bla, authcreds));
 
-        } catch (final MalformedURLException e) {
-            LOG.error("Error changing context",e);
-            throw MyServletExceptionCodes.API_COMMUNICATION_ERROR.create(e.getMessage());
         } catch (final RemoteException e) {
-            LOG.error("Error changing context",e);
-            throw MyServletExceptionCodes.API_COMMUNICATION_ERROR.create(e.getMessage());
-        } catch (final NotBoundException e) {
             LOG.error("Error changing context",e);
             throw MyServletExceptionCodes.API_COMMUNICATION_ERROR.create(e.getMessage());
         } catch (final StorageException e) {
@@ -403,7 +398,7 @@ public final class MyServletRequest  {
 
 
             // now check for custom implementations of the URL
-            final UpsellURLService urlservice = MyServiceRegistry.getServiceRegistry().getService(UpsellURLService.class);
+            final UpsellURLService urlservice = getServiceRegistry().getService(UpsellURLService.class);
             final UpsellURLService provider = null;
             if (null != urlservice) {
                 if(LOG.isDebugEnabled()){

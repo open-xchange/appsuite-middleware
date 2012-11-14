@@ -62,7 +62,6 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -82,15 +81,14 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.infostore.InfostoreFacade;
 import com.openexchange.groupware.infostore.InfostoreSearchEngine;
-import com.openexchange.sessiond.impl.ThreadLocalSessionHolder;
 import com.openexchange.groupware.infostore.database.impl.DocumentMetadataImpl;
-import com.openexchange.groupware.infostore.database.impl.GetSwitch;
-import com.openexchange.groupware.infostore.database.impl.SetSwitch;
 import com.openexchange.groupware.infostore.facade.impl.InfostoreFacadeImpl;
 import com.openexchange.groupware.infostore.facade.impl.VirtualFolderInfostoreFacade;
 import com.openexchange.groupware.infostore.search.impl.SearchEngineImpl;
+import com.openexchange.groupware.infostore.utils.GetSwitch;
 import com.openexchange.groupware.infostore.utils.InfostoreConfigUtils;
 import com.openexchange.groupware.infostore.utils.Metadata;
+import com.openexchange.groupware.infostore.utils.SetSwitch;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.upload.UploadFile;
 import com.openexchange.groupware.upload.impl.UploadEvent;
@@ -98,9 +96,12 @@ import com.openexchange.groupware.upload.impl.UploadException;
 import com.openexchange.groupware.upload.impl.UploadSizeExceededException;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.json.OXJSONWriter;
+import com.openexchange.log.LogFactory;
 import com.openexchange.mail.mime.MimeType2ExtMap;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.usersetting.UserSettingMailStorage;
+import com.openexchange.session.Session;
+import com.openexchange.sessiond.impl.ThreadLocalSessionHolder;
 import com.openexchange.tools.UnsynchronizedStringWriter;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.servlet.UploadServletException;
@@ -170,7 +171,7 @@ public class Infostore extends PermissionServlet {
                 resp.setException(AjaxExceptionCodes.UNEXPECTED_ERROR.create("You must provide a value for " + PARAMETER_ID));
                 final UnsynchronizedStringWriter w = new UnsynchronizedStringWriter();
                 try {
-                    ResponseWriter.write(resp, w);
+                    ResponseWriter.write(resp, w, localeFrom(session));
                 } catch (final JSONException e) {
                     // shouldn't happen
                     final ServletException se = new ServletException(e);
@@ -182,18 +183,18 @@ public class Infostore extends PermissionServlet {
             }
             int id;
             try {
-                id = Integer.valueOf(req.getParameter(PARAMETER_ID));
+                id = Integer.parseInt(req.getParameter(PARAMETER_ID));
             } catch (final NumberFormatException x) {
-                handleOXException(res, AjaxExceptionCodes.IMVALID_PARAMETER.create(PARAMETER_ID), STR_ERROR, true);
+                handleOXException(res, AjaxExceptionCodes.IMVALID_PARAMETER.create(PARAMETER_ID), STR_ERROR, true, session);
                 return;
             }
 
             final String versionS = req.getParameter(PARAMETER_VERSION);
-            final int version = (versionS == null) ? InfostoreFacade.CURRENT_VERSION : Integer.valueOf(versionS);
+            final int version = (versionS == null) ? InfostoreFacade.CURRENT_VERSION : Integer.parseInt(versionS);
 
             final String contentType = req.getParameter(PARAMETER_CONTENT_TYPE);
 
-            document(res, req.getHeader("user-agent"), id, version, contentType, ctx, user, userConfig);
+            document(res, req.getHeader("user-agent"), id, version, contentType, ctx, user, userConfig, session);
 
             return;
         }
@@ -341,7 +342,7 @@ public class Infostore extends PermissionServlet {
                 LOG.error("Giving up", e);
             }
         } catch (final OXException x) {
-            handleOXException(res, x, action, true);
+            handleOXException(res, x, action, true, session);
         } catch (final Throwable t) {
             final Response resp = new Response(session);
             resp.setException(AjaxExceptionCodes.UNEXPECTED_ERROR.create(t, t.getMessage()));
@@ -403,13 +404,13 @@ public class Infostore extends PermissionServlet {
             searchEngine.commit();
 
         } catch (final OXException t) {
-            rollback(infostore, searchEngine, res, t, ACTION_NEW, true);
+            rollback(infostore, searchEngine, res, t, ACTION_NEW, true, session);
             return;
         } catch (final FileNotFoundException e) {
-            rollback(infostore, searchEngine, res, e, ACTION_NEW, true);
+            rollback(infostore, searchEngine, res, e, ACTION_NEW, true, session);
             return;
         } catch (final RuntimeException e) {
-            rollback(infostore, searchEngine, res, e, ACTION_NEW, true);
+            rollback(infostore, searchEngine, res, e, ACTION_NEW, true, session);
             return;
         } finally {
             try {
@@ -481,13 +482,13 @@ public class Infostore extends PermissionServlet {
             searchEngine.commit();
 
         } catch (final OXException t) {
-            rollback(infostore, null, res, t, ACTION_UPDATE, true);
+            rollback(infostore, null, res, t, ACTION_UPDATE, true, session);
             return;
         } catch (final FileNotFoundException e) {
-            rollback(infostore, null, res, e, ACTION_UPDATE, true);
+            rollback(infostore, null, res, e, ACTION_UPDATE, true, session);
             return;
         } catch (final RuntimeException e) {
-            rollback(infostore, null, res, e, ACTION_UPDATE, true);
+            rollback(infostore, null, res, e, ACTION_UPDATE, true, session);
             return;
         } finally {
             try {
@@ -553,13 +554,13 @@ public class Infostore extends PermissionServlet {
             infostore.commit();
             searchEngine.commit();
         } catch (final OXException t) {
-            rollback(infostore, searchEngine, res, t, ACTION_COPY, true);
+            rollback(infostore, searchEngine, res, t, ACTION_COPY, true, session);
             return;
         } catch (final FileNotFoundException e) {
-            rollback(infostore, searchEngine, res, e, ACTION_COPY, true);
+            rollback(infostore, searchEngine, res, e, ACTION_COPY, true, session);
             return;
         } catch (final RuntimeException e) {
-            rollback(infostore, searchEngine, res, e, ACTION_COPY, true);
+            rollback(infostore, searchEngine, res, e, ACTION_COPY, true, session);
             return;
         } finally {
             try {
@@ -587,7 +588,7 @@ public class Infostore extends PermissionServlet {
         }
     }
 
-    protected void document(final HttpServletResponse res, final String userAgent, final int id, final int version, final String contentType, final Context ctx, final User user, final UserConfiguration userConfig) throws IOException {
+    protected void document(final HttpServletResponse res, final String userAgent, final int id, final int version, final String contentType, final Context ctx, final User user, final UserConfiguration userConfig, final Session session) throws IOException {
         final InfostoreFacade infostore = getInfostore();
         OutputStream os = null;
         InputStream documentData = null;
@@ -605,7 +606,10 @@ public class Infostore extends PermissionServlet {
                     DownloadUtility.appendFilenameParameter(metadata.getFileName(), SAVE_AS_TYPE, userAgent, sb);
                     res.setHeader("Content-Disposition", sb.toString());
                 } else {
-                    Tools.setHeaderForFileDownload(userAgent, res, metadata.getFileName());
+                    final StringBuilder sb = new StringBuilder(32).append(contentDisposition);
+                    DownloadUtility.appendFilenameParameter(metadata.getFileName(), SAVE_AS_TYPE, userAgent, sb);
+                    res.setHeader("Content-Disposition", sb.toString());
+                    // Tools.setHeaderForFileDownload(userAgent, res, metadata.getFileName());
                 }
                 res.setContentType(contentType);
             } else {
@@ -634,7 +638,7 @@ public class Infostore extends PermissionServlet {
 
         } catch (final OXException x) {
             LOG.debug(x.getMessage(), x);
-            handleOXException(res, x, STR_ERROR, true);
+            handleOXException(res, x, STR_ERROR, true, session);
             return;
         } finally {
 
@@ -660,7 +664,7 @@ public class Infostore extends PermissionServlet {
         }
     }
 
-    private final boolean handleOXException(final HttpServletResponse res, final Throwable t, final String action, final boolean post) {
+    private final boolean handleOXException(final HttpServletResponse res, final Throwable t, final String action, final boolean post, final Session session) {
         res.setContentType("text/html; charset=UTF-8");
         final OXException e;
         if (t instanceof OXException) {
@@ -677,7 +681,7 @@ public class Infostore extends PermissionServlet {
             } else {
                 writer = res.getWriter();
             }
-            ResponseWriter.write(resp, writer);
+            ResponseWriter.write(resp, writer, localeFrom(session));
             if (post) {
                 res.getWriter().write(substituteJS(writer.toString(), action));
             }
@@ -743,7 +747,7 @@ public class Infostore extends PermissionServlet {
         }
     }
 
-    protected void rollback(final InfostoreFacade infostore, final InfostoreSearchEngine searchEngine, final HttpServletResponse res, final Throwable t, final String action, final boolean post) {
+    protected void rollback(final InfostoreFacade infostore, final InfostoreSearchEngine searchEngine, final HttpServletResponse res, final Throwable t, final String action, final boolean post, final Session session) {
         if (infostore != null) {
             try {
                 infostore.rollback();
@@ -758,7 +762,7 @@ public class Infostore extends PermissionServlet {
                 LOG.error("", e);
             }
         }
-        if (!handleOXException(res, t, action, post)) {
+        if (!handleOXException(res, t, action, post, session)) {
             try {
                 sendErrorAsJSHTML(res, t.toString(), action);
                 LOG.error("Got non OXException", t);

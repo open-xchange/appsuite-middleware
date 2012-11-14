@@ -55,7 +55,9 @@ import java.util.Map;
 import java.util.Set;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.infostore.InfostoreFacade;
+import com.openexchange.groupware.infostore.utils.GetSwitch;
 import com.openexchange.groupware.infostore.utils.Metadata;
+import com.openexchange.groupware.infostore.utils.SetSwitch;
 
 public class DocumentMetadataImpl implements DocumentMetadata {
 

@@ -57,6 +57,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.regex.Pattern;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MailDateFormat;
@@ -79,9 +80,13 @@ import com.openexchange.tools.TimeZoneUtils;
  */
 public abstract class MailMessage extends MailPart {
 
+
     private static final long serialVersionUID = 8585899349289256569L;
 
     private static final transient org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(MailMessage.class));
+
+    private static final String HDR_REFERENCES = MessageHeaders.HDR_REFERENCES;
+    private static final String HDR_MESSAGE_ID = MessageHeaders.HDR_MESSAGE_ID;
 
     /*-
      * ------------------- Flags ------------------------------
@@ -1486,6 +1491,30 @@ public abstract class MailMessage extends MailPart {
     }
 
     /**
+     * Gets the <i>Message-Id</i> value.
+     * 
+     * @return The <i>Message-Id</i> value or <code>null</code>
+     */
+    public String getMessageId() {
+        return getFirstHeader(HDR_MESSAGE_ID);
+    }
+
+    private static final Pattern SPLIT = Pattern.compile(" +");
+
+    /**
+     * Gets the <i>References</i> values.
+     * 
+     * @return The <i>References</i> values or <code>null</code>
+     */
+    public String[] getReferences() {
+        final String references = getFirstHeader(HDR_REFERENCES);
+        if (isEmpty(references)) {
+            return null;
+        }
+        return SPLIT.split(MimeMessageUtility.decodeMultiEncodedHeader(references));
+    }
+
+    /**
      * Gets the implementation-specific unique ID of this mail in its mail folder. The ID returned by this method is used in storages to
      * refer to a mail.
      * <p>
@@ -1520,4 +1549,17 @@ public abstract class MailMessage extends MailPart {
      * @param unreadMessages The number of unread messages
      */
     public abstract void setUnreadMessages(int unreadMessages);
+
+    private static boolean isEmpty(final String string) {
+        if (null == string) {
+            return true;
+        }
+        final int len = string.length();
+        boolean isWhitespace = true;
+        for (int i = 0; isWhitespace && i < len; i++) {
+            isWhitespace = Character.isWhitespace(string.charAt(i));
+        }
+        return isWhitespace;
+    }
+
 }

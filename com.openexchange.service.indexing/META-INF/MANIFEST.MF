@@ -2,17 +2,9 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Open-Xchange Indexing Service Bundle
 Bundle-SymbolicName: com.openexchange.service.indexing
-Bundle-Version: 6.21.0
+Bundle-Version: 6.22.1
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
-Import-Package: com.openexchange.exception,
- com.openexchange.log,
- javax.jms,
- javax.management,
- javax.net,
- javax.net.ssl,
- org.apache.commons.logging,
- org.eclipse.osgi.framework.console,
- org.osgi.framework,
- org.osgi.util.tracker
+Import-Package: com.openexchange.exception
 Export-Package: com.openexchange.service.indexing
+

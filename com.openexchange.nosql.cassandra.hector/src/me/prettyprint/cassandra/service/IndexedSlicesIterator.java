@@ -5,13 +5,16 @@ import me.prettyprint.cassandra.model.IndexedSlicesQuery;
 import me.prettyprint.hector.api.beans.Row;
 
 /**
+ * This class will soon be removed, use {@link RangeSlicesIterator} instead.<br>
+ * <br>
  * Iterates over the index slices, automatically refreshing the query until all matching rows are returned.
  *
  * @author thrykol
  */
+@Deprecated
 public class IndexedSlicesIterator<K, N, V> implements Iterator<Row<K, N, V>> {
 
-	private final IndexedSlicesQuery<K, N, V> query;
+	private IndexedSlicesQuery<K, N, V> query;
 	private K startKey;
 	private Iterator<Row<K, N, V>> iterator;
 	private int rows = 0;

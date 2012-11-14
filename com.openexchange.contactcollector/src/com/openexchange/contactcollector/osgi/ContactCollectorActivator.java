@@ -58,6 +58,7 @@ import com.openexchange.contactcollector.folder.ContactCollectorFolderCreator;
 import com.openexchange.contactcollector.internal.ContactCollectorServiceImpl;
 import com.openexchange.contactcollector.preferences.ContactCollectEnabled;
 import com.openexchange.contactcollector.preferences.ContactCollectFolder;
+import com.openexchange.contactcollector.preferences.ContactCollectFolderDeleteDenied;
 import com.openexchange.contactcollector.preferences.ContactCollectOnMailAccess;
 import com.openexchange.contactcollector.preferences.ContactCollectOnMailTransport;
 import com.openexchange.context.ContextService;
@@ -148,6 +149,7 @@ public class ContactCollectorActivator extends HousekeepingActivator {
         registerService(PreferencesItemService.class, new ContactCollectEnabled());
         registerService(PreferencesItemService.class, new ContactCollectOnMailAccess());
         registerService(PreferencesItemService.class, new ContactCollectOnMailTransport());
+        registerService(PreferencesItemService.class, new ContactCollectFolderDeleteDenied());
     }
 
     @Override

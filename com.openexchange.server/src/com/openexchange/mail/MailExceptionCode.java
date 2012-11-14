@@ -174,7 +174,8 @@ public enum MailExceptionCode implements OXExceptionCode {
      */
     UNSUPPORTED_MIME_TYPE(MailExceptionStrings.UNSUPPORTED_MIME_TYPE_MSG, Category.CATEGORY_ERROR, 38),
     /**
-     * Mail could not be moved to trash folder. Quota exceeded
+     * This message could not be moved to trash folder as your mailbox is nearly full.<br>
+     * Please try to empty your deleted items first, or delete smaller messages first.
      */
     DELETE_FAILED_OVER_QUOTA(MailExceptionStrings.DELETE_FAILED_OVER_QUOTA_MSG, Category.CATEGORY_CAPACITY, 39),
     /**
@@ -267,7 +268,7 @@ public enum MailExceptionCode implements OXExceptionCode {
      */
     INVALID_FOLDER_NAME_EMPTY(MailExceptionStrings.INVALID_FOLDER_NAME_EMPTY_MSG, Category.CATEGORY_USER_INPUT, 60),
     /**
-     * Mail folder cannot be created/rename. Name must not contain character '%1$s'
+     * Invalid folder name: "%1$s"
      */
     INVALID_FOLDER_NAME(MailExceptionStrings.INVALID_FOLDER_NAME_MSG, Category.CATEGORY_USER_INPUT, 61),
     /**
@@ -392,6 +393,19 @@ public enum MailExceptionCode implements OXExceptionCode {
     ;
 
     private static final String PREFIX = "MSG";
+
+    /**
+     * Checks if specified {@code OXException}'s prefix is equal to this {@code OXExceptionCode} enumeration.
+     *
+     * @param e The {@code OXException} to check
+     * @return <code>true</code> if prefix is equal; otherwise <code>false</code>
+     */
+    public static boolean hasPrefix(final OXException e) {
+        if (null == e) {
+            return false;
+        }
+        return PREFIX.equals(e.getPrefix());
+    }
 
     private final String message;
 

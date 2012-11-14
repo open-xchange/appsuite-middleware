@@ -86,7 +86,7 @@ public abstract class TransportConfig extends MailConfig {
      * @return The user-specific transport configuration
      * @throws OXException If user-specific transport configuration cannot be determined
      */
-    public static final <C extends TransportConfig> C getTransportConfig(final Class<? extends C> clazz, final C transportConfig, final Session session, final int accountId) throws OXException {
+    public static final <C extends TransportConfig> C getTransportConfig(final C transportConfig, final Session session, final int accountId) throws OXException {
         /*
          * Fetch mail account
          */
@@ -124,6 +124,7 @@ public abstract class TransportConfig extends MailConfig {
             }
         }
         transportConfig.parseServerURL(serverURL);
+        transportConfig.doCustomParsing(mailAccount, session);
         return transportConfig;
     }
 

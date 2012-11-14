@@ -88,10 +88,10 @@ import com.openexchange.ajp13.coyote.util.HexUtils;
 import com.openexchange.ajp13.coyote.util.MessageBytes;
 import com.openexchange.ajp13.exception.AJPv13Exception;
 import com.openexchange.ajp13.exception.AJPv13MaxPackgeSizeException;
-import com.openexchange.ajp13.najp.AJPv13TaskMonitor;
 import com.openexchange.ajp13.servlet.http.HttpErrorServlet;
 import com.openexchange.ajp13.servlet.http.HttpServletManager;
 import com.openexchange.ajp13.servlet.http.HttpSessionManagement;
+import com.openexchange.ajp13.watcher.AJPv13TaskMonitor;
 import com.openexchange.configuration.ServerConfig;
 import com.openexchange.configuration.ServerConfig.Property;
 import com.openexchange.java.Charsets;
@@ -149,6 +149,11 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
      * Response object.
      */
     protected final HttpServletResponseImpl response;
+
+    /**
+     * The request input buffer.
+     */
+    private volatile SocketInputBuffer inputBuffer;
 
     /**
      * The response output buffer.
@@ -213,11 +218,15 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
 
     /**
      * The main read-write-lock.
+     * <p>
+     * A writer can acquire the read lock, but not vice-versa.
      */
     private final ReadWriteLock mainLock;
 
     /**
-     * The soft lock for non-blocking access to output stream.
+     * The soft lock for non-blocking access to output/input stream.
+     * <p>
+     * A writer can acquire this read lock.
      */
     protected final Lock softLock;
 
@@ -427,7 +436,9 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
          * Apply input/output
          */
         this.packetSize = packetSize;
-        request.setInputBuffer(new SocketInputBuffer());
+        final SocketInputBuffer inputBuffer = new SocketInputBuffer();
+        this.inputBuffer = inputBuffer;
+        request.setInputBuffer(inputBuffer);
         outputBuffer = new SocketOutputBuffer();
         response.setOutputBuffer(outputBuffer);
         /*
@@ -479,9 +490,10 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
     }
 
     public void stopKeepAlivePing() {
+        final ScheduledTimerTask scheduledKeepAliveTask = this.scheduledKeepAliveTask;
         if (null != scheduledKeepAliveTask) {
             scheduledKeepAliveTask.cancel(false);
-            scheduledKeepAliveTask = null;
+            this.scheduledKeepAliveTask = null;
             /*
              * Task is automatically purged from TimerService by PurgeRunnable
              */
@@ -818,6 +830,10 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
                      */
                     response.setStatus(503, "HTTP server is temporarily overloaded. Try again later.");
                     error = true;
+                } catch (final NullPointerException npe) {
+                    LOG.error("Null dereference occurred.", npe);
+                    response.setStatus(400);
+                    error = true;
                 } catch (final Throwable t) {
                     // 400 - Bad Request
                     {
@@ -949,6 +965,9 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
             if (!finished) {
                 try {
                     finish();
+                } catch (final IOException e) {
+                    // Lost connection
+                    error = true;
                 } catch (final Throwable t) {
                     ExceptionUtils.handleThrowable(t);
                     final StringBuilder tmp = new StringBuilder(128).append("Error processing request: ");
@@ -985,7 +1004,12 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
         }
     }
 
-    private void appendRequestInfo(final StringBuilder builder) {
+    /**
+     * Appends request information.
+     * 
+     * @param builder The builder to append to
+     */
+    protected void appendRequestInfo(final StringBuilder builder) {
         builder.append("request-URI=''");
         builder.append(request.getRequestURI());
         builder.append("'', query-string=''");
@@ -1069,11 +1093,23 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
                         output.flush();
                         lastWriteAccess = System.currentTimeMillis();
                         /*
-                         * Receive empty body chunk
+                         * Receive probably empty body chunk
                          */
-                        receive();
+                        final ByteChunk byteChunk = new ByteChunk(8192);
+                        final int read = inputBuffer.doRead(byteChunk, request);
+                        if (read > 0) {
+                            // Received a non-empty data chunk...
+                            // Dump that chunk to ServletInputStream
+                            int len = byteChunk.getLength();
+                            if (len > read) {
+                                len = read;
+                            }
+                            final byte[] chunk = new byte[len];
+                            System.arraycopy(byteChunk.getBuffer(), byteChunk.getStart(), chunk, 0, len);
+                            request.appendToBuffer(chunk);
+                        }
                         if (DEBUG) {
-                            LOG.debug("Performed keep-alive through an empty get-body-chunk package (and received that empty chunk).");
+                            LOG.debug("Performed keep-alive through an empty get-body-chunk package (and received requested chunk).");
                         }
                     }
                 } catch (final IOException e) {
@@ -1535,6 +1571,8 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
             int mult = 1;
             for (int i = length - 1; i > colonPos; i--) {
                 final int charValue = host.charAt(i);
+                /*-
+                 * 
                 if (charValue == -1) {
                     // Invalid character
                     error = true;
@@ -1543,6 +1581,8 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
                     response.setStatus(400);
                     break;
                 }
+                 * 
+                 */
                 port = port + (charValue * mult);
                 mult = 10 * mult;
             }
@@ -1587,7 +1627,7 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
         /*
          * Remove leading slash character
          */
-        final String path = removeFromPath(requestURI, '/');
+        final String path = requestURI.length() > 1 ? removeFromPath(requestURI, '/') : requestURI;
         /*
          * Lookup path in available servlet paths
          */
@@ -2067,9 +2107,9 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
      * Receive a chunk of data. Called to implement the 'special' packet in ajp13 and to receive the data after we send a GET_BODY packet
      */
     public boolean receive() throws IOException {
+        first = false;
         bodyMessage.reset();
         readMessage(bodyMessage);
-        first = false;
         // No data received.
         if (bodyMessage.getLen() == 0) {
             // just the header
@@ -2151,7 +2191,6 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
         servletPath = null;
         servletId.setLength(0);
         lastWriteAccess = 0L;
-        outputBuffer.flag = false;
         request.recycle();
         response.recycle();
         certificates.recycle();
@@ -2209,19 +2248,9 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
 
         private final int chunkSize;
 
-        /**
-         * The flag whether data has been written.
-         */
-        protected boolean flag;
-
         protected SocketOutputBuffer() {
             super();
             chunkSize = Constants.MAX_SEND_SIZE + (packetSize - Constants.MAX_PACKET_SIZE);
-        }
-
-        @Override
-        public boolean isFlagged() {
-            return flag;
         }
 
         @Override
@@ -2247,7 +2276,6 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
             if (len <= 0) {
                 return len;
             }
-            flag = true;
             // 4 - hardcoded, byte[] marshalling overhead
             // Adjust allowed size if packetSize != default (Constants.MAX_PACKET_SIZE)
             final byte[] b = chunk.getBuffer();
@@ -2295,7 +2323,7 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
 
     }
 
-    private final class KeepAliveRunnable implements Runnable {
+    private static final class KeepAliveRunnable implements Runnable {
 
         private final AjpProcessor ajpProcessor;
         private final int max;
@@ -2316,30 +2344,16 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
         public void run() {
             try {
                 if (ajpProcessor.isProcessing() && ((System.currentTimeMillis() - ajpProcessor.getLastWriteAccess()) > max)) {
-                    if (first && request.getContentLengthLong() > 0) {
-                        // Very first request data chunk not yet received
-                        return;
-                    }
                     /*
                      * Send "keep-alive" package
                      */
-                    keepAlive();
+                    ajpProcessor.action(ActionCode.CLIENT_PING, null);
                 }
             } catch (final Exception e) {
                 if (DEBUG) {
                     LOG.error("AJP KEEP-ALIVE failed.", e);
                 }
             }
-        }
-
-        /**
-         * Performs AJP-style keep-alive poll to web server to avoid connection timeout.
-         */
-        private void keepAlive() {
-            /*
-             * Send "keep-alive" package depending on current request handler's state.
-             */
-            ajpProcessor.action(ActionCode.CLIENT_PING, null);
         }
 
     } // End of class

@@ -152,6 +152,11 @@ public final class IMAPFolderConverter {
 
     private static final String ATTRIBUTE_NO_INFERIORS = "\\noinferiors";
 
+    private static final String ATTRIBUTE_DRAFTS = "\\drafts";
+    private static final String ATTRIBUTE_JUNK = "\\junk";
+    private static final String ATTRIBUTE_SENT = "\\sent";
+    private static final String ATTRIBUTE_TRASH = "\\trash";
+
     // private static final String ATTRIBUTE_HAS_NO_CHILDREN = "\\HasNoChildren";
 
     /**
@@ -224,7 +229,7 @@ public final class IMAPFolderConverter {
 
     }
 
-    // private static final ConcurrentMap<Key, Object> M = new ConcurrentHashMap<Key, Object>();
+    // private static final ConcurrentMap<Key, Object> M = new NonBlockingHashMap<Key, Object>();
 
     private static final boolean DO_STATUS = false;
 
@@ -260,17 +265,14 @@ public final class IMAPFolderConverter {
                 mailFolder.setSeparator(listEntry.getSeparator());
                 // Shared?
                 {
-                    final String[] userNamespaces = NamespaceFoldersCache.getUserNamespaces(
-                        (IMAPStore) imapFolder.getStore(),
-                        true,
-                        session,
-                        accountId);
+                    final IMAPStore imapStore = (IMAPStore) imapFolder.getStore();
+                    final String[] users = NamespaceFoldersCache.getUserNamespaces(imapStore, true, session, accountId);
                     final char sep = mailFolder.getSeparator();
                     final StringBuilder tmp = new StringBuilder(32);
                     boolean shared = false;
                     String owner = null;
-                    for (int i = 0; !shared && i < userNamespaces.length; i++) {
-                        final String userNamespace = userNamespaces[i];
+                    for (int i = 0; !shared && i < users.length; i++) {
+                        final String userNamespace = users[i];
                         if (!isEmpty(userNamespace)) {
                             if (imapFullName.equals(userNamespace)) {
                                 shared = true;
@@ -295,6 +297,28 @@ public final class IMAPFolderConverter {
                     if (null != owner) {
                         mailFolder.setOwner(owner);
                     }
+                    boolean isPublic = false;
+                    if (!shared) {
+                        final String[] shares = NamespaceFoldersCache.getSharedNamespaces(imapStore, true, session, accountId);
+                        final String[] personals = NamespaceFoldersCache.getPersonalNamespaces(imapStore, true, session, accountId);
+                        for (int i = 0; !shared && i < shares.length; i++) {
+                            final String sharedNamespace = shares[i];
+                            if (!isEmpty(sharedNamespace)) {
+                                if (imapFullName.equals(sharedNamespace)) {
+                                    isPublic = true;
+                                } else {
+                                    tmp.setLength(0);
+                                    final String prefix = tmp.append(sharedNamespace).append(sep).toString();
+                                    if (imapFullName.startsWith(prefix)) {
+                                        isPublic = true;
+                                    }
+                                }
+                            } else if (!startsWithOneOf(imapFullName, sep, personals, users, tmp)) {
+                                isPublic = true;
+                            }
+                        }
+                    }
+                    mailFolder.setPublic(isPublic);
                 }
                 /*-
                  * -------------------------------------------------------------------
@@ -325,6 +349,21 @@ public final class IMAPFolderConverter {
                         if (attrs.contains(ATTRIBUTE_NO_INFERIORS)) {
                             mailFolder.setSubfolders(true);
                             mailFolder.setSubscribedSubfolders(false);
+                        }
+                        if (imapConfig.asMap().containsKey("SPECIAL-USE")) {
+                            if (attrs.contains(ATTRIBUTE_DRAFTS)) {
+                                mailFolder.setDefaultFolder(true);
+                                mailFolder.setDefaultFolderType(DefaultFolderType.DRAFTS);
+                            } else if (attrs.contains(ATTRIBUTE_JUNK)) {
+                                mailFolder.setDefaultFolder(true);
+                                mailFolder.setDefaultFolderType(DefaultFolderType.SPAM);
+                            } else if (attrs.contains(ATTRIBUTE_SENT)) {
+                                mailFolder.setDefaultFolder(true);
+                                mailFolder.setDefaultFolderType(DefaultFolderType.SENT);
+                            } else if (attrs.contains(ATTRIBUTE_TRASH)) {
+                                mailFolder.setDefaultFolder(true);
+                                mailFolder.setDefaultFolderType(DefaultFolderType.TRASH);
+                            }
                         }
                     }
                     if (!mailFolder.containsSubfolders()) {
@@ -357,21 +396,26 @@ public final class IMAPFolderConverter {
                         mailFolder.setParentFullname(pfn.length() == 0 ? MailFolder.DEFAULT_FOLDER_ID : pfn);
                     }
                 }
-                /*
-                 * Default folder
-                 */
-                if ("INBOX".equals(imapFullName)) {
-                    mailFolder.setDefaultFolder(true);
-                    mailFolder.setDefaultFolderType(DefaultFolderType.INBOX);
-                } else if (isDefaultFoldersChecked(session, accountId)) {
-                    final String[] defaultMailFolders = getDefaultMailFolders(session, accountId);
-                    for (int i = 0; i < defaultMailFolders.length && !mailFolder.isDefaultFolder(); i++) {
-                        if (imapFullName.equals(defaultMailFolders[i])) {
-                            mailFolder.setDefaultFolder(true);
-                            mailFolder.setDefaultFolderType(TYPES[i]);
+                if (!mailFolder.containsDefaultFolder()) {
+                    /*
+                     * Default folder
+                     */
+                    if ("INBOX".equals(imapFullName)) {
+                        mailFolder.setDefaultFolder(true);
+                        mailFolder.setDefaultFolderType(DefaultFolderType.INBOX);
+                    } else if (isDefaultFoldersChecked(session, accountId)) {
+                        final String[] defaultMailFolders = getDefaultMailFolders(session, accountId);
+                        for (int i = 0; i < defaultMailFolders.length && !mailFolder.isDefaultFolder(); i++) {
+                            if (imapFullName.equals(defaultMailFolders[i])) {
+                                mailFolder.setDefaultFolder(true);
+                                mailFolder.setDefaultFolderType(TYPES[i]);
+                            }
                         }
-                    }
-                    if (!mailFolder.containsDefaultFolder()) {
+                        if (!mailFolder.containsDefaultFolder()) {
+                            mailFolder.setDefaultFolder(false);
+                            mailFolder.setDefaultFolderType(DefaultFolderType.NONE);
+                        }
+                    } else {
                         mailFolder.setDefaultFolder(false);
                         mailFolder.setDefaultFolderType(DefaultFolderType.NONE);
                     }
@@ -493,6 +537,28 @@ public final class IMAPFolderConverter {
         }
     }
 
+    private static boolean startsWithOneOf(final String imapFullName, final char sep, final String[] personalNamespaces, final String[] userNamespaces, final StringBuilder tmp) {
+        for (final String string : userNamespaces) {
+            if (imapFullName.equals(string)) {
+                return true;
+            }
+            tmp.setLength(0);
+            if (imapFullName.startsWith(tmp.append(string).append(sep).toString())) {
+                return true;
+            }
+        }
+        for (final String string : personalNamespaces) {
+            if (imapFullName.equals(string)) {
+                return true;
+            }
+            tmp.setLength(0);
+            if (imapFullName.startsWith(tmp.append(string).append(sep).toString())) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     private static Rights ownRightsFromProblematic(final Session session, final IMAPAccess imapAccess, final String imapFullName, final IMAPConfig imapConfig, final IMAPMailFolder mailFolder, final int accountId, final ACLPermission ownPermission) throws MessagingException, OXException, IMAPException {
         final Rights ownRights;
         /*
@@ -544,6 +610,8 @@ public final class IMAPFolderConverter {
             final IMAPMailFolder mailFolder = new IMAPMailFolder();
             mailFolder.setRootFolder(true);
             mailFolder.setExists(true);
+            mailFolder.setShared(false);
+            mailFolder.setPublic(true);
             mailFolder.setSeparator(ListLsubCache.getSeparator(imapConfig.getAccountId(), rootFolder, session));
             final String imapFullname = "";
             final ListLsubEntry listEntry = ListLsubCache.getCachedLISTEntry(imapFullname, imapConfig.getAccountId(), rootFolder, session);

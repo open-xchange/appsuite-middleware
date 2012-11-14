@@ -155,7 +155,7 @@ public class VCardImportBugTests extends AbstractVCardImportTest {
         assertEquals("invalid import result array size", 3, importResult.length);
 
         assertTrue("server errors of server", importResult[0].isCorrect());
-        assertTrue("server errors of server", importResult[1].hasError());
+        assertTrue("Should work even in the face of an invalid birthday", importResult[1].isCorrect());
         assertTrue("server errors of server", importResult[2].isCorrect());
     }
 

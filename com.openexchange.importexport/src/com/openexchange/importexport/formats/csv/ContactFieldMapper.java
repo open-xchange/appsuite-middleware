@@ -61,4 +61,6 @@ public interface ContactFieldMapper {
 	public abstract Collection<String> getNamesOfFields();
 
 	public abstract Collection<ContactField> getSupportedFields();
+	
+	public abstract String getEncoding();
 }

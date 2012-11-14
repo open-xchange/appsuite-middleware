@@ -108,7 +108,7 @@ public class ExpressiveErrorMessageWhileParsingVCard extends TestCase {
         } catch(VersitException e){
             String msg = e.getMessage();
             assertTrue("Needs line information to be helpful", msg.contains("line 7"));
-            assertTrue("Needs column information to be helpful", msg.contains("column 7"));
+            assertTrue("Needs column information to be helpful", msg.contains("column 10"));
         }
     }
 }

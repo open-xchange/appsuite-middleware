@@ -85,6 +85,7 @@ public abstract class DefaultDeferringURLService implements DeferringURLService 
     public abstract String getDeferrerURL();
     
     
+    @Override
     public String getBasicDeferrerURL() {
     	final String deferrerURL = getDeferrerURL();
         if (deferrerURL == null) {

@@ -53,9 +53,9 @@ import java.io.Serializable;
 import java.util.Collection;
 import java.util.Map.Entry;
 import java.util.concurrent.Callable;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ExecutionException;
+import org.cliffc.high_scale_lib.NonBlockingHashMap;
 import com.hazelcast.config.MapConfig;
 import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheElement;
@@ -88,7 +88,7 @@ public final class LocalCache extends DefaultCacheKeyService implements Cache, S
         super();
         this.cache = cache;
         this.mapConfig = mapConfig;
-        groups = new ConcurrentHashMap<String, com.google.common.cache.Cache<Serializable, Serializable>>(8);
+        groups = new NonBlockingHashMap<String, com.google.common.cache.Cache<Serializable, Serializable>>(8);
     }
 
     @Override

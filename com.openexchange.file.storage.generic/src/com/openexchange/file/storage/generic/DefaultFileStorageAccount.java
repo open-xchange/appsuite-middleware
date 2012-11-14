@@ -64,15 +64,30 @@ public class DefaultFileStorageAccount implements FileStorageAccount, ServiceAwa
 
     private static final long serialVersionUID = -8295765793020470243L;
 
-    private Map<String, Object> configuration;
+    /**
+     * The account's configuration.
+     */
+    protected Map<String, Object> configuration;
 
-    private String displayName;
+    /**
+     * The account's display name.
+     */
+    protected String displayName;
 
-    private String id;
+    /**
+     * The account identifier.
+     */
+    protected String id;
 
-    private String serviceId;
+    /**
+     * The file storage service identifier.
+     */
+    protected String serviceId;
 
-    private transient FileStorageService fsService;
+    /**
+     * The transient reference to file storage service.
+     */
+    protected transient FileStorageService fsService;
 
     /**
      * Initializes a new {@link DefaultFileStorageAccount}.

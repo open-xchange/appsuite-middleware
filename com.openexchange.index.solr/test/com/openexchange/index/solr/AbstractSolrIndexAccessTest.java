@@ -156,18 +156,6 @@ public class AbstractSolrIndexAccessTest extends AbstractSolrIndexAccess<Void> {
     }
 
     @Override
-    public void change(IndexDocument<Void> document, Set<? extends IndexField> fields) throws OXException {
-        // TODO Auto-generated method stub
-
-    }
-
-    @Override
-    public void change(Collection<IndexDocument<Void>> documents, Set<? extends IndexField> fields) throws OXException {
-        // TODO Auto-generated method stub
-
-    }
-
-    @Override
     public void deleteById(String id) throws OXException {
         // TODO Auto-generated method stub
 

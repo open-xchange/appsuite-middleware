@@ -93,7 +93,7 @@ final class ThreadSortParser {
         final int length = threadList.length();
         if (threadList.charAt(0) == '{') {
             // Now in a thread the thread starts normally with a number.
-            final MessageId message = getMessageID(threadList);
+            final MessageInfo message = getMessageID(threadList);
             if (DEBUG) {
                 LOG.debug(new StringBuilder("Found message: ").append(message).toString());
             }
@@ -135,7 +135,7 @@ final class ThreadSortParser {
                     if (DEBUG) {
                         LOG.debug("Parsing childs of thread with no parent.");
                     }
-                    final ThreadSortNode emptyParent = new ThreadSortNode(MessageId.DUMMY, -1L);
+                    final ThreadSortNode emptyParent = new ThreadSortNode(MessageInfo.DUMMY, -1L);
                     recthreads.add(emptyParent);
                     final List<ThreadSortNode> childThreads = new ArrayList<ThreadSortNode>();
                     parse(subList, childThreads);
@@ -155,11 +155,11 @@ final class ThreadSortParser {
         }
     }
 
-    private MessageId getMessageID(final String threadList) {
+    private MessageInfo getMessageID(final String threadList) {
         if (DEBUG) {
             LOG.debug(new StringBuilder("Parsing messageID: ").append(threadList).toString());
         }
-        final MessageId messageId = MessageId.valueOf(threadList, 0, threadList.indexOf('}') + 1);
+        final MessageInfo messageId = MessageInfo.valueOf(threadList, 0, threadList.indexOf('}') + 1);
         if (DEBUG) {
             LOG.debug(new StringBuilder("Parsed number: ").append(messageId).toString());
         }
@@ -209,7 +209,7 @@ final class ThreadSortParser {
         final int size = threads.size();
         for (int i = 0; i < size; i++) {
             ThreadSortNode actual = threads.get(i);
-            if (MessageId.DUMMY == actual.msgId) {
+            if (MessageInfo.DUMMY == actual.msgInfo) {
                 final List<ThreadSortNode> childs = actual.getChilds();
                 actual = childs.remove(0);
                 newthreads.add(actual);

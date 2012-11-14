@@ -135,6 +135,7 @@ import com.openexchange.mail.mime.processing.MimeForward;
 import com.openexchange.mail.parser.MailMessageParser;
 import com.openexchange.mail.parser.handlers.NonInlineForwardPartHandler;
 import com.openexchange.mail.permission.MailPermission;
+import com.openexchange.mail.search.FlagTerm;
 import com.openexchange.mail.search.HeaderTerm;
 import com.openexchange.mail.search.SearchTerm;
 import com.openexchange.mail.search.SearchUtility;
@@ -285,11 +286,55 @@ final class MailServletInterfaceImpl extends MailServletInterface {
         return Collections.unmodifiableCollection(warnings);
     }
 
+    /**
+     * The fields containing only the mail identifier.
+     */
+    private static final MailField[] FIELDS_ID = new MailField[] { MailField.ID };
+
+    @Override
+    public boolean expungeFolder(final String folder, final boolean hardDelete) throws OXException {
+        final FullnameArgument fullnameArgument = prepareMailFolderParam(folder);
+        final int accountId = fullnameArgument.getAccountId();
+        initConnection(accountId);
+        final String fullname = fullnameArgument.getFullname();
+        final IMailFolderStorage folderStorage = mailAccess.getFolderStorage();
+        if (folderStorage instanceof IMailFolderStorageEnhanced) {
+            ((IMailFolderStorageEnhanced) folderStorage).expungeFolder(fullname, hardDelete);
+        } else {
+            final IMailMessageStorage messageStorage = mailAccess.getMessageStorage();
+            final MailMessage[] messages = messageStorage.searchMessages(
+                fullname,
+                IndexRange.NULL,
+                MailSortField.RECEIVED_DATE,
+                OrderDirection.ASC,
+                new FlagTerm(MailMessage.FLAG_DELETED, true),
+                FIELDS_ID);
+            final List<String> mailIds = new ArrayList<String>(messages.length);
+            for (int i = 0; i < messages.length; i++) {
+                final MailMessage mailMessage = messages[i];
+                if (null != mailMessage) {
+                    mailIds.add(mailMessage.getMailId());
+                }
+            }
+            if (hardDelete) {
+                messageStorage.deleteMessages(fullname, mailIds.toArray(new String[0]), true);
+            } else {
+                messageStorage.moveMessages(fullname, folderStorage.getTrashFolder(), mailIds.toArray(new String[0]), true);
+            }
+        }
+        postEvent(accountId, fullname, true);
+        final String trashFullname = prepareMailFolderParam(getTrashFolder(accountId)).getFullname();
+        if (!hardDelete) {
+            postEvent(accountId, trashFullname, true);
+        }
+        return true;
+    }
+
     @Override
     public boolean clearFolder(final String folder) throws OXException {
         final FullnameArgument fullnameArgument = prepareMailFolderParam(folder);
         final int accountId = fullnameArgument.getAccountId();
-        initConnection(fullnameArgument.getAccountId());
+        initConnection(accountId);
         final String fullname = fullnameArgument.getFullname();
         /*
          * Only backup if no hard-delete is set in user's mail configuration and fullname does not denote trash (sub)folder
@@ -306,7 +351,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
             /*
              * Update message cache
              */
-            MailMessageCache.getInstance().removeFolderMessages(fullnameArgument.getAccountId(), fullname, session.getUserId(), contextId);
+            MailMessageCache.getInstance().removeFolderMessages(accountId, fullname, session.getUserId(), contextId);
         } catch (final OXException e) {
             LOG.error(e.getMessage(), e);
         }
@@ -327,7 +372,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
     public boolean clearFolder(final String folder, final boolean hardDelete) throws OXException {
         final FullnameArgument fullnameArgument = prepareMailFolderParam(folder);
         final int accountId = fullnameArgument.getAccountId();
-        initConnection(fullnameArgument.getAccountId());
+        initConnection(accountId);
         final String fullname = fullnameArgument.getFullname();
         /*
          * Only backup if no hard-delete is set in user's mail configuration and fullname does not denote trash (sub)folder
@@ -349,7 +394,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
             /*
              * Update message cache
              */
-            MailMessageCache.getInstance().removeFolderMessages(fullnameArgument.getAccountId(), fullname, session.getUserId(), contextId);
+            MailMessageCache.getInstance().removeFolderMessages(accountId, fullname, session.getUserId(), contextId);
         } catch (final OXException e) {
             LOG.error(e.getMessage(), e);
         }
@@ -1603,10 +1648,12 @@ final class MailServletInterfaceImpl extends MailServletInterface {
             useFields = MailField.getFields(fields);
             onlyFolderAndID = onlyFolderAndID(useFields);
         }
-        /*
+        /*-
          * More than ID and folder requested?
+         *  AND
+         * Messages do not already contain requested fields although only IDs were requested
          */
-        if (!onlyFolderAndID) {
+        if (!onlyFolderAndID && !containsAll(mails[0], useFields)) {
             /*
              * Extract IDs
              */
@@ -1618,6 +1665,9 @@ final class MailServletInterfaceImpl extends MailServletInterface {
              * Fetch identified messages by their IDs and pre-fill them according to specified fields
              */
             mails = mailAccess.getMessageStorage().getMessages(fullname, mailIds, useFields);
+            if (null == mails) {
+                return SearchIteratorAdapter.emptyIterator();
+            }
         }
         /*
          * Set account information
@@ -1636,7 +1686,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
              */
             // TODO: JSONMessageCache.getInstance().removeAllFoldersExcept(accountId, fullname, session);
             MailMessageCache.getInstance().removeUserMessages(session.getUserId(), contextId);
-            if ((cachable) && (mails != null) && (mails.length > 0)) {
+            if ((cachable) && (mails.length > 0)) {
                 /*
                  * ... and put new ones
                  */
@@ -1644,9 +1694,6 @@ final class MailServletInterfaceImpl extends MailServletInterface {
             }
         } catch (final OXException e) {
             LOG.error(e.getMessage(), e);
-        }
-        if (null == mails) {
-            return SearchIteratorAdapter.emptyIterator();
         }
         final List<MailMessage> l = new ArrayList<MailMessage>(mails.length);
         for (int i = 0; i < mails.length; i++) {
@@ -1656,6 +1703,72 @@ final class MailServletInterfaceImpl extends MailServletInterface {
             }
         }
         return new SearchIteratorDelegator<MailMessage>(l);
+    }
+
+    private static boolean containsAll(final MailMessage candidate, final MailField[] fields) {
+        boolean contained = true;
+        final int length = fields.length;
+        for (int i = 0; contained && i < length; i++) {
+            final MailField field = fields[i];
+            switch (field) {
+            case ACCOUNT_NAME:
+                contained = candidate.containsAccountId() || candidate.containsAccountName();
+                break;
+            case BCC:
+                contained = candidate.containsBcc();
+                break;
+            case CC:
+                contained = candidate.containsCc();
+                break;
+            case COLOR_LABEL:
+                contained = candidate.containsColorLabel();
+                break;
+            case CONTENT_TYPE:
+                contained = candidate.containsContentType();
+                break;
+            case DISPOSITION_NOTIFICATION_TO:
+                contained = candidate.containsDispositionNotification();
+                break;
+            case FLAGS:
+                contained = candidate.containsFlags();
+                break;
+            case FOLDER_ID:
+                contained = true;
+                break;
+            case FROM:
+                contained = candidate.containsFrom();
+                break;
+            case ID:
+                contained = null != candidate.getMailId();
+                break;
+            case PRIORITY:
+                contained = candidate.containsPriority();
+                break;
+            case RECEIVED_DATE:
+                contained = candidate.containsReceivedDate();
+                break;
+            case SENT_DATE:
+                contained = candidate.containsSentDate();
+                break;
+            case SIZE:
+                contained = candidate.containsSize();
+                break;
+            case SUBJECT:
+                contained = candidate.containsSubject();
+                break;
+            case THREAD_LEVEL:
+                contained = candidate.containsThreadLevel();
+                break;
+            case TO:
+                contained = candidate.containsTo();
+                break;
+
+            default:
+                contained = false;
+                break;
+            }
+        }
+        return contained;
     }
 
     /**
@@ -2499,6 +2612,12 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                  * No copy in sent folder
                  */
                 return null;
+            }
+            /*
+             * If mail identifier and folder identifier is already available, assume is has already been stored in Sent folder
+             */
+            if (null != sentMail.getMailId() && null != sentMail.getFolder()) {
+                return new MailPath(accountId, sentMail.getFolder(), sentMail.getMailId()).toString();
             }
             return append2SentFolder(sentMail).toString();
         } finally {

@@ -490,8 +490,9 @@ setup()
 
     echo setting up open-xchange configuration ${CONFDIR}
 
-    # this formular and parameters are from Holger
-    SERVEROPTS="-server -Xmx${SERVER_MEMORY}m -XX:+UseConcMarkSweepGC -XX:+UseParNewGC -XX:+AggressiveOpts -XX:+CMSClassUnloadingEnabled -XX:MaxPermSize=128M -Dsun.net.inetaddr.ttl=3600 -Dnetworkaddress.cache.ttl=3600 -Dnetworkaddress.cache.negative.ttl=10 -Dorg.osgi.framework.bootdelegation=*"
+    CUROPTS=$(eval ox_read_property JAVA_XTRAOPTS ${CONFDIR}/ox-scriptconf.sh)
+    CUROPTS=$(echo $CUROPTS | sed -e 's/"//g' -e 's/-Xmx[0-9]\+m[ ]*//')
+    SERVEROPTS="$CUROPTS -Xmx${SERVER_MEMORY}m"
 
     v_setprop JAVA_XTRAOPTS "\"$SERVEROPTS\"" ${CONFDIR}/ox-scriptconf.sh
 
@@ -561,7 +562,10 @@ setup()
 
     v_setprop SERVER_NAME $SERVER_NAME ${CONFDIR}/AdminDaemon.properties
 
-    CLTOPTS="-server -Xmx${CLT_MEMORY}m -XX:+UseConcMarkSweepGC -XX:+UseParNewGC -XX:+AggressiveOpts -XX:+CMSClassUnloadingEnabled -Djava.net.preferIPv4Stack=true"
+    CUROPTS=$(eval ox_read_property JAVA_OXCMD_OPTS ${CONFDIR}/ox-scriptconf.sh)
+    CUROPTS=$(echo $CUROPTS | sed -e 's/"//g' -e 's/-Xmx[0-9]\+m[ ]*//')
+    CLTOPTS="$CUROPTS -Xmx${CLT_MEMORY}m"
+
     v_setprop JAVA_OXCMD_OPTS "\"$CLTOPTS\"" ${CONFDIR}/ox-scriptconf.sh
 
     if [ -z "$DISABLE_RMI_AUTH" ] ; then

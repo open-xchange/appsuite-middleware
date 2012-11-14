@@ -79,6 +79,7 @@ import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.impl.EffectivePermission;
 import com.openexchange.session.Session;
 import com.openexchange.tools.iterator.SearchIterator;
+import com.openexchange.tools.oxfolder.OXFolderProperties;
 
 /**
  * {@link ContactServiceImpl} - {@link ContactService} implementation.
@@ -160,7 +161,7 @@ public class ContactServiceImpl extends DefaultContactService {
 		 */
 		ContactMapper.getInstance().validateAll(contact);
 		if (contact.containsObjectID() && contact.getObjectID() > 0 && false == Integer.toString(contact.getObjectID()).equals(objectID)) {
-			throw ContactExceptionCodes.NO_CHANGE_PERMISSION.create(parse(objectID), contextID);
+			throw ContactExceptionCodes.NO_CHANGE_PERMISSION.create(Integer.valueOf(parse(objectID)), Integer.valueOf(contextID));
 		}
 		/*
 		 * check source folder
@@ -193,17 +194,17 @@ public class ContactServiceImpl extends DefaultContactService {
 		 */
 		final Contact delta = ContactMapper.getInstance().getDifferences(storedContact, contact);
 		if (delta.containsContextId() && delta.getContextId() > 0) {
-			throw ContactExceptionCodes.NO_CHANGE_PERMISSION.create(parse(objectID), contextID);
+			throw ContactExceptionCodes.NO_CHANGE_PERMISSION.create(Integer.valueOf(parse(objectID)), Integer.valueOf(contextID));
 		} else if (delta.containsObjectID() && delta.getObjectID() > 0) {
-			throw ContactExceptionCodes.NO_CHANGE_PERMISSION.create(parse(objectID), contextID);
+			throw ContactExceptionCodes.NO_CHANGE_PERMISSION.create(Integer.valueOf(parse(objectID)), Integer.valueOf(contextID));
 		} else if (delta.containsUid() && false == Tools.isEmpty(storedContact.getUid())) {
-			throw ContactExceptionCodes.NO_CHANGE_PERMISSION.create(parse(objectID), contextID);
+			throw ContactExceptionCodes.NO_CHANGE_PERMISSION.create(Integer.valueOf(parse(objectID)), Integer.valueOf(contextID));
 		} else if (delta.containsCreatedBy()) {
-			throw ContactExceptionCodes.NO_CHANGE_PERMISSION.create(parse(objectID), contextID);
+			throw ContactExceptionCodes.NO_CHANGE_PERMISSION.create(Integer.valueOf(parse(objectID)), Integer.valueOf(contextID));
 		} else if (delta.containsCreationDate()) {
-			throw ContactExceptionCodes.NO_CHANGE_PERMISSION.create(parse(objectID), contextID);
+			throw ContactExceptionCodes.NO_CHANGE_PERMISSION.create(Integer.valueOf(parse(objectID)), Integer.valueOf(contextID));
 		} else if (delta.containsPrivateFlag() && delta.getPrivateFlag() && storedContact.getModifiedBy() != userID) {
-			throw ContactExceptionCodes.NO_CHANGE_PERMISSION.create(parse(objectID), contextID);
+			throw ContactExceptionCodes.NO_CHANGE_PERMISSION.create(Integer.valueOf(parse(objectID)), Integer.valueOf(contextID));
 		}
 		/*
 		 * prepare update
@@ -263,6 +264,8 @@ public class ContactServiceImpl extends DefaultContactService {
 		new EventClient(session).modify(storedContact, contact, targetFolder);
 	}
 
+	private static final String GAB = Integer.toString(FolderObject.SYSTEM_LDAP_FOLDER_ID);
+
 	@Override
     protected void doUpdateContact(final Session session, final String folderID, final String objectID, final Contact contact, final Date lastRead) throws OXException {
 		final int userID = session.getUserId();
@@ -273,13 +276,23 @@ public class ContactServiceImpl extends DefaultContactService {
 		 */
 		Check.validateProperties(contact);
 		if (contact.containsObjectID() && contact.getObjectID() > 0 && false == Integer.toString(contact.getObjectID()).equals(objectID)) {
-			throw ContactExceptionCodes.NO_CHANGE_PERMISSION.create(parse(objectID), contextID);
+			throw ContactExceptionCodes.NO_CHANGE_PERMISSION.create(Integer.valueOf(parse(objectID)), Integer.valueOf(contextID));
 		}
 		/*
 		 * check general permissions
 		 */
-		final EffectivePermission permission = Tools.getPermission(contextID, folderID, userID);
-		Check.canWriteOwn(permission, session);
+		EffectivePermission permission = Tools.getPermission(contextID, folderID, userID);
+		try {
+            Check.canWriteOwn(permission, session);
+        } catch (OXException e) {
+            if (!GAB.equals(folderID) || !ContactExceptionCodes.NO_CHANGE_PERMISSION.equals(e) || !OXFolderProperties.isEnableInternalUsersEdit()) {
+                throw e;
+            }
+            OXFolderProperties.updatePermissions(true, contextID);
+            // check again
+            permission = Tools.getPermission(contextID, folderID, userID);
+            Check.canWriteOwn(permission, session);
+        }
 		/*
 		 * check currently stored contact
 		 */
@@ -302,19 +315,19 @@ public class ContactServiceImpl extends DefaultContactService {
 		 */
 		final Contact delta = ContactMapper.getInstance().getDifferences(storedContact, contact);
 		if (delta.containsContextId() && delta.getContextId() > 0) {
-			throw ContactExceptionCodes.NO_CHANGE_PERMISSION.create(parse(objectID), contextID);
+			throw ContactExceptionCodes.NO_CHANGE_PERMISSION.create(Integer.valueOf(parse(objectID)), Integer.valueOf(contextID));
 		} else if (delta.containsObjectID() && delta.getObjectID() > 0) {
-			throw ContactExceptionCodes.NO_CHANGE_PERMISSION.create(parse(objectID), contextID);
+			throw ContactExceptionCodes.NO_CHANGE_PERMISSION.create(Integer.valueOf(parse(objectID)), Integer.valueOf(contextID));
 		} else if (delta.containsUid() && false == Tools.isEmpty(storedContact.getUid())) {
-			throw ContactExceptionCodes.NO_CHANGE_PERMISSION.create(parse(objectID), contextID);
+			throw ContactExceptionCodes.NO_CHANGE_PERMISSION.create(Integer.valueOf(parse(objectID)), Integer.valueOf(contextID));
 		} else if (delta.containsCreatedBy()) {
-			throw ContactExceptionCodes.NO_CHANGE_PERMISSION.create(parse(objectID), contextID);
+			throw ContactExceptionCodes.NO_CHANGE_PERMISSION.create(Integer.valueOf(parse(objectID)), Integer.valueOf(contextID));
 		} else if (delta.containsCreationDate()) {
-			throw ContactExceptionCodes.NO_CHANGE_PERMISSION.create(parse(objectID), contextID);
+			throw ContactExceptionCodes.NO_CHANGE_PERMISSION.create(Integer.valueOf(parse(objectID)), Integer.valueOf(contextID));
 		} else if (delta.containsParentFolderID()) {
-			throw ContactExceptionCodes.NO_CHANGE_PERMISSION.create(parse(objectID), contextID);
+			throw ContactExceptionCodes.NO_CHANGE_PERMISSION.create(Integer.valueOf(parse(objectID)), Integer.valueOf(contextID));
 		} else if (delta.containsPrivateFlag() && delta.getPrivateFlag() && storedContact.getModifiedBy() != userID) {
-			throw ContactExceptionCodes.NO_CHANGE_PERMISSION.create(parse(objectID), contextID);
+			throw ContactExceptionCodes.NO_CHANGE_PERMISSION.create(Integer.valueOf(parse(objectID)), Integer.valueOf(contextID));
 		}
 		/*
 		 * prepare update
@@ -387,6 +400,77 @@ public class ContactServiceImpl extends DefaultContactService {
         storedContact.setParentFolderID(parse(folderID));
         storedContact.setObjectID(parse(objectID));
         new EventClient(session).delete(storedContact, folder);
+    }
+
+    @Override
+    protected void doDeleteContacts(Session session, String folderID, String[] objectIDs, Date lastRead) throws OXException {
+        final int userID = session.getUserId();
+        final int contextID = session.getContextId();
+        final ContactStorage storage = Tools.getStorage(session, folderID);
+        /*
+         * check folder
+         */
+        FolderObject folder = Tools.getFolder(contextID, folderID);
+        Check.isContactFolder(folder, session);
+        /*
+         * check general permissions
+         */
+        EffectivePermission permission = Tools.getPermission(contextID, folderID, userID);
+        Check.canDeleteOwn(permission, session, folderID);
+        /*
+         * check currently stored contacts
+         */
+        SearchIterator<Contact> contacts = null;
+        List<Contact> storedContacts = new ArrayList<Contact>();
+        try {
+            contacts = storage.list(session, folderID, objectIDs, new ContactField[] { ContactField.CREATED_BY,
+                ContactField.LAST_MODIFIED, ContactField.OBJECT_ID });
+            while (contacts.hasNext()) {
+                Contact storedContact = contacts.next();
+                if (storedContact.getCreatedBy() != userID) {
+                    Check.canDeleteAll(permission, session, folderID);
+                }
+                Check.lastModifiedBefore(storedContact, lastRead);
+                storedContacts.add(storedContact);
+            }
+        } finally {
+            if (null != contacts) {
+                try {
+                    contacts.close();
+                } catch (OXException e) {
+                    LOG.warn("error closing iterator", e);
+                }
+            }            
+        }
+        /*
+         * ensure all contacts were found
+         */
+        for (String objectID : objectIDs) {
+            boolean found = false;
+            for (Contact contact : storedContacts) {
+                if (contact.getObjectID() == parse(objectID)) {
+                    found = true;
+                    break;
+                }
+            }
+            if (false == found) {
+                throw ContactExceptionCodes.CONTACT_NOT_FOUND.create(Integer.valueOf(parse(objectID)), Integer.valueOf(contextID));
+            }
+        }        
+        /*
+         * delete contacts from storage
+         */
+        storage.delete(session, folderID, objectIDs, lastRead);
+        /*
+         * broadcast event
+         */
+        EventClient eventClient = new EventClient(session);
+        for (Contact storedContact : storedContacts) {
+            storedContact.setContextId(contextID);
+            storedContact.setParentFolderID(parse(folderID));
+            storedContact.setObjectID(storedContact.getObjectID());
+            eventClient.delete(storedContact, folder);
+        }
     }
 
     @Override
@@ -722,5 +806,75 @@ public class ContactServiceImpl extends DefaultContactService {
 		return new ResultIterator(storage.search(session, contactSearch, queryFields.getFields(), sortOptions),
 				queryFields.needsAttachmentInfo(), session, true);
 	}
+
+    @Override
+    protected SearchIterator<Contact> doSearchContactsWithBirthday(Session session, Date from, Date until, List<String> folderIDs, ContactField[] fields, SortOptions sortOptions) throws OXException {
+        int userID = session.getUserId();
+        int contextID = session.getContextId();
+        /*
+         * determine queried storages according to searched folders
+         */
+        Map<ContactStorage, List<String>> queriedStorages = Tools.getStorages(session, 
+            null == folderIDs ? Tools.getVisibleFolders(contextID, userID) : folderIDs);
+        if (null == queriedStorages || 0 == queriedStorages.size()) {
+            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create("No contact storage found for queried folder IDs");
+        }
+        /*
+         * prepare fields and sort options
+         */
+        QueryFields queryFields = new QueryFields(fields);
+        if (null == sortOptions) {
+            sortOptions = SortOptions.EMPTY;
+        }
+        /*
+         * perform searches
+         */
+        List<SearchIterator<Contact>> searchIterators = new ArrayList<SearchIterator<Contact>>();
+        for (Entry<ContactStorage, List<String>> queriedStorage : queriedStorages.entrySet()) {
+            /*
+             * get results, filtered respecting object permission restrictions, adding attachment info as needed
+             */
+            SearchIterator<Contact> searchIterator = queriedStorage.getKey().searchByBirthday(
+                session, queriedStorage.getValue(), from, until, queryFields.getFields(), sortOptions);
+            searchIterators.add(new ResultIterator(searchIterator, queryFields.needsAttachmentInfo(), session));
+        }
+        return 2 > searchIterators.size() ? searchIterators.get(0) :
+            new ContactMergerator(Tools.getComparator(sortOptions), searchIterators);
+    }
+
+    @Override
+    protected SearchIterator<Contact> doSearchContactsWithAnniversary(Session session, Date from, Date until, List<String> folderIDs, ContactField[] fields, SortOptions sortOptions) throws OXException {
+        int userID = session.getUserId();
+        int contextID = session.getContextId();
+        /*
+         * determine queried storages according to searched folders
+         */
+        Map<ContactStorage, List<String>> queriedStorages = Tools.getStorages(session, 
+            null == folderIDs ? Tools.getVisibleFolders(contextID, userID) : folderIDs);
+        if (null == queriedStorages || 0 == queriedStorages.size()) {
+            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create("No contact storage found for queried folder IDs");
+        }
+        /*
+         * prepare fields and sort options
+         */
+        QueryFields queryFields = new QueryFields(fields);
+        if (null == sortOptions) {
+            sortOptions = SortOptions.EMPTY;
+        }
+        /*
+         * perform searches
+         */
+        List<SearchIterator<Contact>> searchIterators = new ArrayList<SearchIterator<Contact>>();
+        for (Entry<ContactStorage, List<String>> queriedStorage : queriedStorages.entrySet()) {
+            /*
+             * get results, filtered respecting object permission restrictions, adding attachment info as needed
+             */
+            SearchIterator<Contact> searchIterator = queriedStorage.getKey().searchByAnniversary(
+                session, queriedStorage.getValue(), from, until, queryFields.getFields(), sortOptions);
+            searchIterators.add(new ResultIterator(searchIterator, queryFields.needsAttachmentInfo(), session));
+        }
+        return 2 > searchIterators.size() ? searchIterators.get(0) :
+            new ContactMergerator(Tools.getComparator(sortOptions), searchIterators);
+    }
 
 }

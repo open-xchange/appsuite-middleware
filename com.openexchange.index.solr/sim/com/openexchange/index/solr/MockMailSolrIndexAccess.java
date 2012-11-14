@@ -53,10 +53,10 @@ import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.common.SolrInputDocument;
 import org.apache.solr.common.params.SolrParams;
 import com.openexchange.exception.OXException;
-import com.openexchange.index.solr.internal.mail.MailSolrIndexAccess;
+import com.openexchange.index.solr.internal.mail.SolrMailIndexAccess;
 import com.openexchange.solr.SolrCoreIdentifier;
 
-public class MockMailSolrIndexAccess extends MailSolrIndexAccess {
+public class MockMailSolrIndexAccess extends SolrMailIndexAccess {
     
     private final InMemoryIndex index;
     
@@ -77,7 +77,7 @@ public class MockMailSolrIndexAccess extends MailSolrIndexAccess {
     }
     
     public static int getQueryRows() {
-        return QUERY_ROWS;
+        return 100;
     }
     
     @Override

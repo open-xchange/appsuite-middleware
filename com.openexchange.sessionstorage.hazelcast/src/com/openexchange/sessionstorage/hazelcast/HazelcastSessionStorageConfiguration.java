@@ -49,8 +49,7 @@
 
 package com.openexchange.sessionstorage.hazelcast;
 
-import com.openexchange.crypto.CryptoService;
-import com.openexchange.timer.TimerService;
+import com.hazelcast.config.MapConfig;
 
 /**
  * {@link HazelcastSessionStorageConfiguration}
@@ -59,39 +58,23 @@ import com.openexchange.timer.TimerService;
  */
 public class HazelcastSessionStorageConfiguration {
 
-    private final String ENCRYPTION_KEY;
-
-    private final long LIFETIME;
-
-    private final CryptoService cryptoService;
-
-    private final TimerService timerService;
+    private final MapConfig mapConfig;
 
     /**
      * Initializes a new {@link HazelcastSessionStorageConfiguration}.
      */
-    public HazelcastSessionStorageConfiguration(String encryptionKey, long lifetime, CryptoService cryptoService, TimerService timerService) {
+    public HazelcastSessionStorageConfiguration(MapConfig mapConfig) {
         super();
-        ENCRYPTION_KEY = encryptionKey;
-        LIFETIME = lifetime;
-        this.cryptoService = cryptoService;
-        this.timerService = timerService;
+        this.mapConfig = mapConfig;
     }
 
-    public String getEncryptionKey() {
-        return ENCRYPTION_KEY;
-    }
-
-    public long getLifetime() {
-        return LIFETIME;
-    }
-
-    public CryptoService getCryptoService() {
-        return cryptoService;
-    }
-
-    public TimerService getTimerService() {
-        return timerService;
+    /**
+     * Gets the map configuration for Hazelcast.
+     * 
+     * @return The map configuration
+     */
+    public MapConfig getMapConfig() {
+        return mapConfig;
     }
 
 }

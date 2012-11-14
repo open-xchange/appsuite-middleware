@@ -157,7 +157,6 @@ import com.openexchange.resource.internal.ResourceServiceImpl;
 import com.openexchange.server.Initialization;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.server.services.I18nServices;
-import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.sessiond.impl.SessiondInit;
 import com.openexchange.sessiond.impl.SessiondServiceImpl;
@@ -184,7 +183,6 @@ import com.openexchange.tools.file.QuotaFileStorage;
 import com.openexchange.tools.file.external.FileStorageFactory;
 import com.openexchange.tools.file.internal.CompositeFileStorageFactory;
 import com.openexchange.tools.file.internal.DBQuotaFileStorageFactory;
-import com.openexchange.tools.file.internal.LocalFileStorageFactory;
 import com.openexchange.user.UserService;
 import com.openexchange.user.internal.UserServiceImpl;
 import com.openexchange.userconf.UserConfigurationService;
@@ -234,7 +232,7 @@ public final class Init {
                 AJPv13Config.getInstance().start();
                 ServletConfigLoader.initDefaultInstance(AJPv13Config.getServletConfigs());
                 if (null == AJPv13Server.getInstance()) {
-                    AJPv13Server.setInstance(new com.openexchange.ajp13.najp.AJPv13ServerImpl());
+                    AJPv13Server.setInstance(new com.openexchange.ajp13.AJPv13ServerImpl());
                 }
                 try {
                     AJPv13Server.startAJPServer();
@@ -597,6 +595,10 @@ public final class Init {
          */
         final ConfigurationService config = (ConfigurationService) services.get(ConfigurationService.class);
         final String directory_name = config.getProperty("i18n.language.path");
+        if (directory_name == null) {
+        	LOG.error("Tried to load i18n files and did not find a property");
+        	return;
+        }
         final File dir = new File(directory_name);
         final I18nServices i18nServices = I18nServices.getInstance();
         try {

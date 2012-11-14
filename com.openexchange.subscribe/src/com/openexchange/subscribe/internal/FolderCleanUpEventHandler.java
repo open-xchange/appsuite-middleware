@@ -53,7 +53,6 @@ import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.List;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.event.Event;
@@ -64,6 +63,7 @@ import com.openexchange.event.CommonEvent;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.log.LogFactory;
 import com.openexchange.subscribe.Subscription;
 import com.openexchange.subscribe.SubscriptionStorage;
 
@@ -79,7 +79,7 @@ public class FolderCleanUpEventHandler implements EventHandler {
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(FolderCleanUpEventHandler.class));
     private final ContextService contexts;
     private final SubscriptionStorage storage;
-    private ServiceRegistration registration;
+    private ServiceRegistration<EventHandler> registration;
 
     public FolderCleanUpEventHandler(final BundleContext context, final SubscriptionStorage storage, final ContextService contexts) {
         this.contexts = contexts;
@@ -90,7 +90,7 @@ public class FolderCleanUpEventHandler implements EventHandler {
     private void register(final BundleContext context) {
         final Dictionary<String, Object> serviceProperties = new Hashtable<String, Object>(1);
         serviceProperties.put(EventConstants.EVENT_TOPIC, new String[] { "com/openexchange/groupware/folder/delete" });
-        registration = context.registerService(EventHandler.class.getName(), this, serviceProperties);
+        registration = context.registerService(EventHandler.class, this, serviceProperties);
     }
 
     public void close() {

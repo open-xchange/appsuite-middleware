@@ -88,7 +88,7 @@ public class ImportExportExceptionMessages implements LocalizableStrings {
 
     public static final String RESOURCE_HARD_CONFLICT_MSG = "Importing the appointment failed due to a conflicting resource.";
 
-    public static final String WARNINGS_MSG = "Warnings when importing file: %i warnings";
+    public static final String WARNINGS_MSG = "Warnings when importing file: %d warnings";
 
     public static final String UNKNOWN_VCARD_FORMAT_MSG = "Could not recognize format of the following data: %s";
 
@@ -151,6 +151,8 @@ public class ImportExportExceptionMessages implements LocalizableStrings {
 	public static final String NEED_FOLDER_MSG = "Missing parameter for folder";
 	
 	public static final String IRREGULAR_COLUMN_ID_MSG ="Columns should be numbers, could not convert %s into number";
+	
+	public static final String NO_CONTENT_MSG = "The uploaded file did not contain any content";
 	
     private ImportExportExceptionMessages() {
         super();

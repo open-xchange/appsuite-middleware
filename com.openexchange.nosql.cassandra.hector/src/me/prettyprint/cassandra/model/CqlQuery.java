@@ -55,7 +55,7 @@ import org.slf4j.LoggerFactory;
 public class CqlQuery<K, N, V> extends AbstractBasicQuery<K, N, CqlRows<K,N,V>> {
   private static Logger log = LoggerFactory.getLogger(CqlQuery.class);
   
-  private final Serializer<V> valueSerializer;
+  private Serializer<V> valueSerializer;
   private ByteBuffer query;
   private boolean useCompression;
   private boolean suppressKeyInColumns;

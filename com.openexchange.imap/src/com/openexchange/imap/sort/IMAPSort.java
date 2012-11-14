@@ -64,7 +64,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.imap.IMAPCapabilities;
 import com.openexchange.imap.IMAPCommandsCollection;
 import com.openexchange.imap.IMAPException;
-import com.openexchange.imap.command.FetchIMAPCommand;
+import com.openexchange.imap.command.MessageFetchIMAPCommand;
 import com.openexchange.imap.config.IMAPConfig;
 import com.openexchange.mail.MailField;
 import com.openexchange.mail.MailFields;
@@ -142,7 +142,7 @@ public final class IMAPSort {
                 final FetchProfile fetchProfile = getFetchProfile(usedFields.toArray(), imapConfig.getIMAPProperties().isFastFetch());
                 final boolean body = usedFields.contains(MailField.BODY) || usedFields.contains(MailField.FULL);
                 final long start = System.currentTimeMillis();
-                msgs = new FetchIMAPCommand(
+                msgs = new MessageFetchIMAPCommand(
                     imapFolder,
                     imapConfig.getImapCapabilities().hasIMAP4rev1(),
                     seqNums,

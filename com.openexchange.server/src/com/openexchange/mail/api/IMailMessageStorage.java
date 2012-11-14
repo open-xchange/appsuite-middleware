@@ -92,8 +92,8 @@ public interface IMailMessageStorage {
      * Moreover the implementation should take care if a copy operation from or to default drafts folder is performed. If so, this method
      * should ensure that system flag <tt>DRAFT</tt> is enabled or disabled.
      *
-     * @param sourceFolder The source folder fullname
-     * @param destFolder The destination folder fullname
+     * @param sourceFolder The source folder full name
+     * @param destFolder The destination folder full name
      * @param mailIds The mail IDs in source folder
      * @param fast <code>true</code> to perform a fast copy operation, meaning the corresponding mail IDs in destination folder are ignored
      *            and an empty array of String is returned; otherwise <code>false</code>
@@ -107,7 +107,7 @@ public interface IMailMessageStorage {
      * <p>
      * If no mail could be found for a given mail ID, it is treated as a no-op.
      *
-     * @param folder The folder fullname
+     * @param folder The folder full name
      * @param mailIds The mail IDs
      * @param hardDelete <code>true</code> to hard delete the messages, meaning not to create a backup copy of each message in default trash
      *            folder; otherwise <code>false</code>
@@ -122,7 +122,7 @@ public interface IMailMessageStorage {
      * <p>
      * Note that sorting needs not to be supported by underlying mailing system. This can be done n application side, too
      *
-     * @param folder The folder fullname
+     * @param folder The folder full name
      * @param indexRange The index range specifying the desired sub-list in sorted list; may be <code>null</code> to obtain complete list.
      *            Range begins at the specified start index and extends to the message at index <code>end - 1</code>. Thus the length of the
      *            range is <code>end - start</code>.
@@ -139,7 +139,7 @@ public interface IMailMessageStorage {
      * <p>
      * If no mail could be found for given mail ID, returned mail part is <code>null</code>.
      *
-     * @param folder The folder fullname
+     * @param folder The folder full name
      * @param mailId The mail ID
      * @param sequenceId The attachment sequence ID
      * @return The attachment wrapped by a {@link MailPart} instance
@@ -153,7 +153,7 @@ public interface IMailMessageStorage {
      * <p>
      * If no mail could be found for given mail ID, returned mail part is <code>null</code>.
      *
-     * @param folder The folder fullname
+     * @param folder The folder full name
      * @param mailId The mail ID
      * @param contentId The value of header <code>Content-Id</code>
      * @return The image attachment wrapped by an {@link MailPart} instance
@@ -181,7 +181,7 @@ public interface IMailMessageStorage {
      * <p>
      * If no mail could be found for given mail ID, <code>null</code> is returned.
      *
-     * @param folder The folder fullname
+     * @param folder The folder full name
      * @param mailId The mail ID
      * @param markSeen <code>true</code> to explicitly mark corresponding mail as seen (setting system flag <i>\Seen</i>); otherwise
      *            <code>false</code> to leave as-is
@@ -198,7 +198,7 @@ public interface IMailMessageStorage {
      * <p>
      * If any mail ID is invalid, <code>null</code> is returned for that entry.
      *
-     * @param folder The folder fullname
+     * @param folder The folder full name
      * @param mailIds The mail IDs
      * @param fields The fields to pre-fill in returned instances of {@link MailMessage}
      * @return Corresponding mails as an array
@@ -214,7 +214,7 @@ public interface IMailMessageStorage {
      * If underlying mailing system is IMAP, this method requires the IMAPv4 SORT extension or in detail the IMAP <code>CAPABILITY</code>
      * command should contain "SORT THREAD=ORDEREDSUBJECT THREAD=REFERENCES".
      *
-     * @param folder The folder fullname
+     * @param folder The folder full name
      * @param indexRange The index range specifying the desired sub-list in sorted list; may be <code>null</code> to obtain complete list.
      *            Range begins at the specified start index and extends to the message at index <code>end - 1</code>. Thus the length of the
      *            range is <code>end - start</code>.
@@ -231,7 +231,7 @@ public interface IMailMessageStorage {
      * Gets all unread messages located in given folder; meaning messages that do not have the \Seen flag set. The constant
      * {@link #EMPTY_RETVAL} may be returned if no unseen messages available in specified folder.
      *
-     * @param folder The folder fullname
+     * @param folder The folder full name
      * @param sortField The sort field
      * @param order The sort order
      * @param fields The fields to pre-fill in returned instances of {@link MailMessage}
@@ -246,8 +246,8 @@ public interface IMailMessageStorage {
      * <p>
      * If no mail could be found for a given mail ID, the corresponding value in returned array of <code>String</code> is <code>null</code>.
      *
-     * @param sourceFolder The source folder fullname
-     * @param destFolder The destination folder fullname
+     * @param sourceFolder The source folder full name
+     * @param destFolder The destination folder full name
      * @param mailIds The mail IDs in source folder
      * @param fast <code>true</code> to perform a fast move operation, meaning the corresponding mail IDs in destination folder are ignored
      *            and an empty array of String is returned; otherwise <code>false</code>
@@ -267,7 +267,7 @@ public interface IMailMessageStorage {
      * A convenience method that saves given draft mail to default drafts folder and supports deletion of old draft's version (draft-edit
      * operation).
      *
-     * @param draftFullname The fullname of default drafts folder
+     * @param draftFullname The full name of default drafts folder
      * @param draftMail The draft mail as a composed mail
      * @return The stored draft mail
      * @throws OXException If saving specified draft message fails
@@ -283,7 +283,7 @@ public interface IMailMessageStorage {
      * <b>Note</b> that sorting needs not to be supported by underlying mailing system. This can be done on application side, too.<br>
      * Same is for search, but in most cases it's faster to search on mailing system, but this heavily depends on how mails are accessed.
      *
-     * @param folder The folder fullname
+     * @param folder The folder full name
      * @param indexRange The index range specifying the desired sub-list in sorted list; may be <code>null</code> to obtain complete list.
      *            Range begins at the specified start index and extends to the message at index <code>end - 1</code>. Thus the length of the
      *            range is <code>end - start</code>.
@@ -307,7 +307,7 @@ public interface IMailMessageStorage {
      * The color labels are user flags with the common prefix <code>"cl_"</code> and its numeric color code appended (currently numbers 0 to
      * 10).
      *
-     * @param folder The folder fullname
+     * @param folder The folder full name
      * @param mailIds The mail IDs
      * @param colorLabel The color label to apply
      * @throws OXException If color label cannot be updated
@@ -341,7 +341,7 @@ public interface IMailMessageStorage {
      * the {@link SpamHandler#handleSpam(String, String[], boolean, MailAccess)}/
      * {@link SpamHandler#handleHam(String, String[], boolean, MailAccess)} methods needs to be executed.
      *
-     * @param folder The folder fullname
+     * @param folder The folder full name
      * @param mailIds The mail IDs
      * @param flags The bit pattern for the flags to alter
      * @param set <code>true</code> to enable the flags; otherwise <code>false</code>
@@ -352,7 +352,7 @@ public interface IMailMessageStorage {
     /**
      * Gets all new and modified messages in specified folder.
      *
-     * @param folder The folder fullname
+     * @param folder The folder full name
      * @param fields The fields to pre-fill in returned instances of {@link MailMessage}
      * @return All new and modified messages in specified folder
      * @throws OXException If mails cannot be returned
@@ -362,7 +362,7 @@ public interface IMailMessageStorage {
     /**
      * Gets all deleted messages in specified folder.
      *
-     * @param folder The folder fullname
+     * @param folder The folder full name
      * @param fields The fields to pre-fill in returned instances of {@link MailMessage}
      * @return All deleted messages in specified folder
      * @throws OXException If mails cannot be returned

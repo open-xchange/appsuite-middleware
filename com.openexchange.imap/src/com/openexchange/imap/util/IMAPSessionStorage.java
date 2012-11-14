@@ -58,9 +58,9 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import javax.mail.MessagingException;
+import org.cliffc.high_scale_lib.NonBlockingHashMap;
 import com.openexchange.exception.OXException;
 import com.openexchange.imap.IMAPCommandsCollection;
 import com.openexchange.mail.cache.MailMessageCache;
@@ -87,7 +87,7 @@ final class IMAPSessionStorage {
      */
     IMAPSessionStorage(final Object lock) {
         super();
-        dataMap = new ConcurrentHashMap<AccAndFN, Set<IMAPUpdateableData>>();
+        dataMap = new NonBlockingHashMap<AccAndFN, Set<IMAPUpdateableData>>();
         this.lock = lock;
     }
 

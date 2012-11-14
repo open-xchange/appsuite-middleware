@@ -63,7 +63,6 @@ import java.util.TreeMap;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Callable;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.DelayQueue;
 import java.util.concurrent.Delayed;
@@ -84,6 +83,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
+import org.cliffc.high_scale_lib.NonBlockingHashMap;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.log.LogProperties;
 import com.openexchange.threadpool.AbstractTask;
@@ -284,7 +284,7 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
     /**
      * Set containing all worker threads in pool.
      */
-    private final ConcurrentMap<Worker, Object> workers = new ConcurrentHashMap<Worker, Object>();
+    private final ConcurrentMap<Worker, Object> workers = new NonBlockingHashMap<Worker, Object>(1024);
     private final Set<Worker> workerSet = workers.keySet();
 
     /**
@@ -586,7 +586,7 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
         final ReentrantLock mainLock = this.mainLock;
         mainLock.lock();
         try {
-            completedTaskCount += w.completedTasks;
+            completedTaskCount += w.completedTasks.get();
             workers.remove(w);
             if (--poolSize > 0) {
                 return;
@@ -733,7 +733,7 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
         /**
          * Per thread completed task counter; accumulated into completedTaskCount upon termination.
          */
-        volatile long completedTasks;
+        final AtomicLong completedTasks;
 
         /**
          * Thread this worker is running in. Acts as a final field, but cannot be set until thread is created.
@@ -741,6 +741,7 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
         Thread thread;
 
         Worker(final Runnable firstTask) {
+            completedTasks = new AtomicLong();
             this.firstTask = firstTask;
         }
 
@@ -797,7 +798,7 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
                     task.run();
                     ran = true;
                     afterExecute(task, null);
-                    ++completedTasks;
+                    completedTasks.incrementAndGet();
                 } catch (final RuntimeException ex) {
                     if (!ran) {
                         afterExecute(task, ex);
@@ -1179,7 +1180,7 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
 
         ActiveTaskWatcher() {
             super();
-            tasks = new ConcurrentHashMap<Long, TaskInfo>(8192);
+            tasks = new NonBlockingHashMap<Long, TaskInfo>(8192);
             final ConfigurationService service = ThreadPoolServiceRegistry.getService(ConfigurationService.class);
             minWaitTime = null == service ? 20000L : service.getIntProperty("AJP_WATCHER_FREQUENCY", 20000);
             maxRunningTime = null == service ? 60000L : service.getIntProperty("AJP_WATCHER_MAX_RUNNING_TIME", 60000);
@@ -1577,6 +1578,7 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
     @Override
     protected void afterExecute(final Runnable r, final Throwable throwable) {
         super.afterExecute(r, throwable);
+        LogProperties.removeLogProperties(); // Drop possible log properties
         if (r instanceof CustomFutureTask<?>) {
             final CustomFutureTask<?> customFutureTask = (CustomFutureTask<?>) r;
             final Trackable trackable = customFutureTask.getTrackable();
@@ -2259,7 +2261,7 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
         try {
             long n = completedTaskCount;
             for (final Worker w : workerSet) {
-                n += w.completedTasks;
+                n += w.completedTasks.get();
                 if (w.isActive()) {
                     ++n;
                 }
@@ -2284,7 +2286,7 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
         try {
             long n = completedTaskCount;
             for (final Worker w : workerSet) {
-                n += w.completedTasks;
+                n += w.completedTasks.get();
             }
             return n;
         } finally {

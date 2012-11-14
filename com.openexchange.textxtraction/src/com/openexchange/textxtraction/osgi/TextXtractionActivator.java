@@ -57,7 +57,7 @@ import com.openexchange.config.ConfigurationService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.textxtraction.DelegateTextXtraction;
 import com.openexchange.textxtraction.TextXtractService;
-import com.openexchange.textxtraction.internal.NewTikaTextXtractService;
+import com.openexchange.textxtraction.internal.TikaTextXtractService;
 
 /**
  * {@link TextXtractionActivator}
@@ -79,7 +79,7 @@ public class TextXtractionActivator extends HousekeepingActivator {
         final String name = "com.openexchange.textxtraction";
         log.info("Starting bundle: " + name);
         try {
-            final NewTikaTextXtractService tikaTextXtractService = new NewTikaTextXtractService(getService(ConfigurationService.class));
+            final TikaTextXtractService tikaTextXtractService = new TikaTextXtractService(getService(ConfigurationService.class));
             final BundleContext context = this.context;
             track(DelegateTextXtraction.class, new ServiceTrackerCustomizer<DelegateTextXtraction, DelegateTextXtraction>() {
 

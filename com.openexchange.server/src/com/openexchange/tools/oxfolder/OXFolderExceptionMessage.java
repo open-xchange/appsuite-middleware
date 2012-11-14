@@ -533,4 +533,7 @@ public class OXFolderExceptionMessage implements LocalizableStrings {
      */
     public final static String ADMIN_OP_ONLY_MSG = "Operation may only be performed for context administrator.";
 
+    // Folder %1$s must not be deleted in context %2$s.
+    public static final String DELETE_DENIED_MSG = "Folder %1$s must not be deleted in context %2$s.";
+
 }

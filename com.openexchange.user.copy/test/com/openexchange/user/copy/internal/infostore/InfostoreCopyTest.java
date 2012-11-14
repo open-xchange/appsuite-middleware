@@ -165,6 +165,10 @@ public class InfostoreCopyTest extends AbstractUserCopyTest {
     
     private static class InfostoreComparator implements Comparator<DocumentMetadata> {
 
+        protected InfostoreComparator() {
+            super();
+        }
+
         /**
          * @see java.util.Comparator#compare(java.lang.Object, java.lang.Object)
          */

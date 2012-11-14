@@ -49,6 +49,7 @@
 
 package com.openexchange.contact.storage.ldap.config;
 
+import java.io.File;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
@@ -76,10 +77,11 @@ public final class LdapContactStorageFactory {
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(LdapContactStorageFactory.class));
 
     private LdapContactStorageFactory() {
+        super();
         // prevent instantiation
     }
     
-    public static ContactStorage create(String propertyFile) throws OXException {
+    public static ContactStorage create(File propertyFile) throws OXException {
         Properties properties = Tools.loadProperties(propertyFile);
         if (null != properties && properties.containsKey("com.openexchange.contact.storage.ldap.contextID")) {
             return create(properties);
@@ -115,7 +117,7 @@ public final class LdapContactStorageFactory {
     
     public static List<ContactStorage> createAll() throws OXException {
         List<ContactStorage> storages = new ArrayList<ContactStorage>();
-        for (String propertyFile : Tools.listPropertyFiles()) {
+        for (File propertyFile : Tools.listPropertyFiles()) {
             ContactStorage storage = null;
             try {
                 storage = create(propertyFile);

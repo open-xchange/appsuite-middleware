@@ -59,9 +59,11 @@ import org.json.JSONObject;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.fields.LoginFields;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.json.OXJSONWriter;
 import com.openexchange.login.LoginResult;
 import com.openexchange.session.Session;
+import com.openexchange.tools.session.ServerSession;
 
 /**
  * JSON writer for login responses.
@@ -124,20 +126,38 @@ public final class LoginWriter {
         write(session, json, Collections.<OXException> emptyList(), null);
     }
 
+    private static final String PARAMETER_USER_ID = AJAXServlet.PARAMETER_USER_ID;
+    private static final String PARAMETER_USER = AJAXServlet.PARAMETER_USER;
+    private static final String RANDOM_PARAM = LoginFields.RANDOM_PARAM;
+    private static final String PARAMETER_SESSION = AJAXServlet.PARAMETER_SESSION;
+    private static final String PARAMETER_LOCALE = "locale";
+
     private static void write(final Session session, final JSONObject json, final Collection<OXException> warnings, final Locale locale) throws JSONException {
-        json.put(AJAXServlet.PARAMETER_SESSION, session.getSessionID());
-        json.put(LoginFields.RANDOM_PARAM, session.getRandomToken());
-        json.put(AJAXServlet.PARAMETER_USER, session.getLogin());
-        json.put(AJAXServlet.PARAMETER_USER_ID, session.getUserId());
+        json.put(PARAMETER_SESSION, session.getSessionID());
+        json.put(RANDOM_PARAM, session.getRandomToken());
+        json.put(PARAMETER_USER, session.getLogin());
+        json.put(PARAMETER_USER_ID, session.getUserId());
+        final Locale loc = locale == null ? resolveLocaleForUser(session, DEFAULT_LOCALE) : locale;
+        json.put(PARAMETER_LOCALE, loc.toString());
         if (null != warnings && !warnings.isEmpty()) {
             /*
              * Write warnings
              */
             final OXJSONWriter writer = new OXJSONWriter(json);
-            ResponseWriter.writeWarnings(
-                (warnings instanceof List) ? ((List<OXException>) warnings) : new ArrayList<OXException>(warnings),
-                writer,
-                locale == null ? DEFAULT_LOCALE : locale);
+            final List<OXException> list =
+                (warnings instanceof List) ? ((List<OXException>) warnings) : new ArrayList<OXException>(warnings);
+            ResponseWriter.writeWarnings(list, writer, loc);
+        }
+    }
+
+    private static Locale resolveLocaleForUser(final Session session, final Locale defaultLocale) {
+        if (session instanceof ServerSession) {
+            return ((ServerSession) session).getUser().getLocale();
+        }
+        try {
+            return UserStorage.getStorageUser(session.getUserId(), session.getContextId()).getLocale();
+        } catch (final Exception e) {
+            return defaultLocale;
         }
     }
 

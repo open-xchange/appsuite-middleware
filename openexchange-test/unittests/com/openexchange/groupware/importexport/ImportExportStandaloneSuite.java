@@ -71,7 +71,6 @@ public class ImportExportStandaloneSuite extends TestSuite {
 	public static Test suite(){
 		final TestSuite tests = new TestSuite();
 		//basics
-		tests.addTestSuite( ImportExportWriterTest.class );
 		tests.addTestSuite( VCardTokenizerTest.class );
 		tests.addTestSuite( ContactFieldTester.class );
 		tests.addTestSuite( ContactSwitcherTester.class );

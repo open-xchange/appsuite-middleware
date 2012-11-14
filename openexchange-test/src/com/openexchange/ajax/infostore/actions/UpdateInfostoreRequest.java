@@ -64,11 +64,8 @@ import com.openexchange.groupware.infostore.DocumentMetadata;
 public class UpdateInfostoreRequest extends AbstractInfostoreRequest<UpdateInfostoreResponse> {
 
     private DocumentMetadata metadata;
-
     private File upload;
-
     private final long folderId;
-
     private final int id;
 
     public UpdateInfostoreRequest() {
@@ -83,8 +80,8 @@ public class UpdateInfostoreRequest extends AbstractInfostoreRequest<UpdateInfos
 
     public UpdateInfostoreRequest(DocumentMetadata data, File upload) {
         this.metadata = data;
-        this.folderId = data.getFolderId();
-        this.id = data.getId();
+        this.folderId = null == data ? 0L : data.getFolderId();
+        this.id = null == data ? 0 : data.getId();
         this.upload = upload;
     }
 

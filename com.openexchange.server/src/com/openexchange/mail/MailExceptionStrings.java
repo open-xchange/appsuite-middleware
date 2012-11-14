@@ -262,9 +262,10 @@ public final class MailExceptionStrings implements LocalizableStrings {
     public final static String UNSUPPORTED_MIME_TYPE_MSG = "Unsupported MIME type %1$s";
 
     /**
-     * Mail could not be moved to trash folder. Quota exceeded
+     * This message could not be moved to trash folder as your mailbox is nearly full.<br>
+     * Please try to empty your deleted items first, or delete smaller messages first.
      */
-    public final static String DELETE_FAILED_OVER_QUOTA_MSG = "Mail could not be moved to trash folder. Quota exceeded.";
+    public final static String DELETE_FAILED_OVER_QUOTA_MSG = "This message could not be moved to trash folder as your mailbox is nearly full.\nPlease try to empty your deleted items first, or delete smaller messages first.";
 
     /**
      * The message part with sequence ID %1$s could not be found in message %2$s in folder %3$s
@@ -378,9 +379,9 @@ public final class MailExceptionStrings implements LocalizableStrings {
     public final static String INVALID_FOLDER_NAME_EMPTY_MSG = "Mail folder cannot be created/renamed. Empty folder name.";
 
     /**
-     * Mail folder cannot be created/rename. Name must not contain character '%1$s'
+     * Invalid folder name: "%1$s"
      */
-    public final static String INVALID_FOLDER_NAME_MSG = "The mail folder cannot be created/renamed. The name must not contain the character '%1$s'.";
+    public final static String INVALID_FOLDER_NAME_MSG = "Invalid folder name: \"%1$s\"";
 
     /**
      * Invalid Content-Disposition value: %1$s
@@ -517,7 +518,7 @@ public final class MailExceptionStrings implements LocalizableStrings {
      * was published and the link added to your email. Whoever receives the email can then download the attachment.
      */
     public final static String USED_PUBLISHING_FEATURE_MSG = "The attachments to this E-Mail exceeded the size limit for attachments. Instead of sending the attachment with the E-Mail, the attachment was published and the link added to your E-Mail. Whoever receives the E-Mail can then download the attachment.";
-
+    
     // Draft message could not be saved
     public static final String DRAFT_FAILED_UNKNOWN_MSG = "Draft message could not be saved";
 

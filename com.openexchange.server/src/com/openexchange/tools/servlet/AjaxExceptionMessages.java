@@ -133,4 +133,13 @@ public final class AjaxExceptionMessages implements LocalizableStrings {
     // The file \"%1$s\" (\"%2$s\") can't be imported as image. Only image types (JPG, GIF, BMP or PNG) are supported.
     public static final String NO_IMAGE_FILE_MSG = "The file \"%1$s\" (\"%2$s\") can't be imported as image. Only image types (JPG, GIF, BMP or PNG) are supported.";
 
+    // Missing request body.
+    public static final String MISSING_REQUEST_BODY_MSG = "Missing request body.";
+
+    // An HTTP error occurred. Status %1$s. Message %2$s.
+    public static final String HTTP_ERROR_MSG = "An HTTP error occurred. Status %1$s. Message %2$s.";
+
+    // Unsupported format: %1$s
+    public static final String UNSUPPORTED_FORMAT_MSG = "Unsupported format: %1$s";
+
 }

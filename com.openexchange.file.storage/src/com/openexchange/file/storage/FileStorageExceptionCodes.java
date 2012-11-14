@@ -170,6 +170,10 @@ public enum FileStorageExceptionCodes implements OXExceptionCode {
      * No such folder.
      */
     NO_SUCH_FOLDER(FileStorageExceptionMessages.NO_SUCH_FOLDER_MSG, Category.CATEGORY_USER_INPUT, 29),
+    /**
+     * Authentication failed for login %1$s to server %2$s (service: %3$s).
+     */
+    LOGIN_FAILED(FileStorageExceptionMessages.LOGIN_FAILED_MSG, Category.CATEGORY_CONFIGURATION, 30),
     
     ;
 

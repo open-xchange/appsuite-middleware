@@ -2,6 +2,7 @@ package com.openexchange.admin.contextrestore.rmi.impl;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
+import java.io.Closeable;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
@@ -13,6 +14,8 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.apache.commons.logging.Log;
+import com.openexchange.admin.contextrestore.dataobjects.UpdateTaskEntry;
+import com.openexchange.admin.contextrestore.dataobjects.UpdateTaskInformation;
 import com.openexchange.admin.contextrestore.dataobjects.VersionInformation;
 import com.openexchange.admin.contextrestore.osgi.Activator;
 import com.openexchange.admin.contextrestore.rmi.OXContextRestoreInterface;
@@ -41,30 +44,51 @@ import com.openexchange.log.LogFactory;
  */
 public class OXContextRestore extends OXCommonImpl implements OXContextRestoreInterface {
 
-public static class Parser {
-        
+    /**
+     * Safely closes specified {@link Closeable} instance.
+     *
+     * @param toClose The {@link Closeable} instance
+     */
+    protected static void close(final Closeable toClose) {
+        if (null != toClose) {
+            try {
+                toClose.close();
+            } catch (final Exception e) {
+                // Ignore
+            }
+        }
+    }
+
+    /**
+     * Parser for MySQL dump files.
+     */
+    public static class Parser {
+
         public class PoolIdSchemaAndVersionInfo {
-            private final int pool_id;
-            
+
+            private final int poolId;
+            private final int contextId;
             private final String schema;
-            
             private VersionInformation versionInformation;
-            
-            /**
-             * @param pool_id
-             * @param schema
-             * @param versionInformation
-             */
-            protected PoolIdSchemaAndVersionInfo(int pool_id, String schema, VersionInformation versionInformation) {
-                this.pool_id = pool_id;
+            private UpdateTaskInformation updateTaskInformation;
+
+            protected PoolIdSchemaAndVersionInfo(final int contextId, int poolId, String schema, VersionInformation versionInformation, UpdateTaskInformation updateTaskInformation) {
+                super();
+                this.contextId = contextId;
+                this.poolId = poolId;
                 this.schema = schema;
                 this.versionInformation = versionInformation;
+                this.updateTaskInformation = updateTaskInformation;
             }
-            
-            public final int getPool_id() {
-                return pool_id;
+
+            public int getContextId() {
+                return contextId;
             }
-            
+
+            public final int getPoolId() {
+                return poolId;
+            }
+
             public final String getSchema() {
                 return schema;
             }
@@ -77,38 +101,59 @@ public static class Parser {
                 this.versionInformation = versionInformation;
             }
 
-        }
-        
-        private final static Pattern database = Pattern.compile("^.*?\\s+Database:\\s+`?([^` ]*)`?.*$");
-        
-        private final static Pattern table = Pattern.compile("^Table\\s+structure\\s+for\\s+table\\s+`([^`]*)`.*$");
-        
-        private final static Pattern cidpattern = Pattern.compile(".*`cid`.*");
-        
-        private final static Pattern engine = Pattern.compile("^\\).*ENGINE=.*.*$");
-        
-        private final static Pattern foreignkey = Pattern.compile("^\\s+CONSTRAINT.*FOREIGN KEY\\s+\\(`([^`]*)`(?:,\\s+`([^`]*)`)*\\)\\s+REFERENCES `([^`]*)`.*$");
-        
-        private final static Pattern datadump = Pattern.compile("^Dumping\\s+data\\s+for\\s+table\\s+`([^`]*)`.*$");
-        
-        private final static Pattern insertIntoVersion = Pattern.compile("^INSERT INTO `version` VALUES \\((?:([^\\),]*),)(?:([^\\),]*),)(?:([^\\),]*),)(?:([^\\),]*),)([^\\),]*)\\).*$");
+            public UpdateTaskInformation getUpdateTaskInformation() {
+                return updateTaskInformation;
+            }
 
-        public PoolIdSchemaAndVersionInfo start(final int cid, final String filename) throws FileNotFoundException, IOException, OXContextRestoreException {
-            final BufferedReader in = new BufferedReader(new FileReader(filename));
-            BufferedWriter bufferedWriter = null;
+            public void setUpdateTaskInformation(UpdateTaskInformation updateTaskInformation) {
+                this.updateTaskInformation = updateTaskInformation;
+            }
+
+        }
+
+        private final static Pattern database = Pattern.compile("^.*?\\s+Database:\\s+`?([^` ]*)`?.*$");
+
+        private final static Pattern table = Pattern.compile("^Table\\s+structure\\s+for\\s+table\\s+`([^`]*)`.*$");
+
+        private final static Pattern cidpattern = Pattern.compile(".*`cid`.*");
+
+        private final static Pattern engine = Pattern.compile("^\\).*ENGINE=.*.*$");
+
+        private final static Pattern foreignkey =
+            Pattern.compile("^\\s+CONSTRAINT.*FOREIGN KEY\\s+\\(`([^`]*)`(?:,\\s+`([^`]*)`)*\\)\\s+REFERENCES `([^`]*)`.*$");
+
+        private final static Pattern datadump = Pattern.compile("^Dumping\\s+data\\s+for\\s+table\\s+`([^`]*)`.*$");
+
+        private final static Pattern insertIntoVersion =
+            Pattern.compile("^INSERT INTO `version` VALUES \\((?:([^\\),]*),)(?:([^\\),]*),)(?:([^\\),]*),)(?:([^\\),]*),)([^\\),]*)\\).*$");
+
+        /**
+         * Starts parsing named MySQL dump file
+         * 
+         * @param cid The context identifier
+         * @param fileName The name of the MySQL dump file
+         * @return The information object for parsed MySQL dump file
+         * @throws IOException If an I/O error occurs
+         * @throws OXContextRestoreException If a context restore error occurs
+         */
+        public PoolIdSchemaAndVersionInfo start(final int cid, final String fileName) throws IOException, OXContextRestoreException {
             int c;
             int state = 0;
             int oldstate = 0;
             int cidpos = -1;
-            String table_name = null;
+            String tableName = null;
             // Set if a database is found in which the search for cid should be done
             boolean furthersearch = true;
             // Defines if we have found a contextserver2pool table
             boolean searchcontext = false;
             // boolean searchdbpool = false;
-            int pool_id = -1;
+            int poolId = -1;
             String schema = null;
             VersionInformation versionInformation = null;
+            UpdateTaskInformation updateTaskInformation = null;
+
+            final BufferedReader in = new BufferedReader(new FileReader(fileName));
+            BufferedWriter bufferedWriter = null;
             try {
                 while ((c = in.read()) != -1) {
                     if (0 == state && c == '-') {
@@ -128,7 +173,7 @@ public static class Parser {
                             final Matcher dbmatcher = database.matcher(readLine);
                             final Matcher tablematcher = table.matcher(readLine);
                             final Matcher datadumpmatcher = datadump.matcher(readLine);
-                            
+
                             if (dbmatcher.matches()) {
                                 // Database found
                                 final String databasename = dbmatcher.group(1);
@@ -142,7 +187,7 @@ public static class Parser {
                                     bufferedWriter.append("/*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;" + '\n');
                                     bufferedWriter.close();
                                 }
-                                
+
                                 final String file = "/tmp/" + databasename + ".txt";
                                 bufferedWriter = new BufferedWriter(new FileWriter(file));
                                 bufferedWriter.append("/*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;" + '\n');
@@ -152,28 +197,33 @@ public static class Parser {
                                 oldstate = 0;
                             } else if (furthersearch && tablematcher.matches()) {
                                 // Table found
-                                table_name = tablematcher.group(1);
-                                LOG.info("Table: " + table_name);
+                                tableName = tablematcher.group(1);
+                                LOG.info("Table: " + tableName);
                                 cidpos = -1;
                                 oldstate = 0;
                                 state = 3;
                             } else if (furthersearch && datadumpmatcher.matches()) {
                                 // Content found
                                 LOG.info("Dump found");
-                                if ("version".equals(table_name)) {
-                                    // The version table is quite small so it is safe to read the whole line here:
-                                    if ((versionInformation = searchAndCheckVersion(in)) == null) {
-                                        throw new OXContextRestoreException(Code.NO_VERSION_INFORMATION_FOUND);
+                                if ("updateTask".equals(tableName)) {
+                                    // One or more entries for 'updateTask' table
+                                    if (null == updateTaskInformation) {
+                                        updateTaskInformation = new UpdateTaskInformation();
                                     }
+                                    searchAndCheckUpdateTask(in, cid, updateTaskInformation);
                                 }
-                                if ("context_server2db_pool".equals(table_name)) {
+                                if ("version".equals(tableName)) {
+                                    // The version table is quite small so it is safe to read the whole line here:
+                                    versionInformation = searchAndCheckVersion(in);
+                                }
+                                if ("context_server2db_pool".equals(tableName)) {
                                     searchcontext = true;
                                 }
-//                            if ("db_pool".equals(table_name)) {
-//                                // As the table in the dump are sorted alphabetically it's safe to
-//                                // assume that we have the pool id here
-//                                searchdbpool = true;
-//                            }
+                                // if ("db_pool".equals(table_name)) {
+                                // // As the table in the dump are sorted alphabetically it's safe to
+                                // // assume that we have the pool id here
+                                // searchdbpool = true;
+                                // }
                                 state = 5;
                                 oldstate = 0;
                             } else {
@@ -207,24 +257,26 @@ public static class Parser {
                         LOG.info("Insert found and cid=" + cidpos);
                         // Now we search for matching cids and write them to the tmp file
                         if (searchcontext && null != bufferedWriter) {
-                            final String value[] = searchAndWriteMatchingCidValues(in, bufferedWriter, cidpos, Integer.toString(cid), table_name, true, true);
+                            final String value[] =
+                                searchAndWriteMatchingCidValues(in, bufferedWriter, cidpos, Integer.toString(cid), tableName, true, true);
                             if (value.length >= 2) {
                                 try {
-                                    pool_id = Integer.parseInt(value[1]);
+                                    poolId = Integer.parseInt(value[1]);
                                 } catch (final NumberFormatException e) {
                                     throw new OXContextRestoreException(Code.COULD_NOT_CONVERT_POOL_VALUE);
                                 }
                                 schema = value[2];
-                                //                    } else if (searchdbpool) {
-                                //                        final String value[] = searchAndWriteMatchingCidValues(in, bufferedWriter, 1, Integer.toString(pool_id), table_name, true, false);
-                                //                        searchdbpool = false;
-                                //                        System.out.println(Arrays.toString(value));
+                                // } else if (searchdbpool) {
+                                // final String value[] = searchAndWriteMatchingCidValues(in, bufferedWriter, 1, Integer.toString(pool_id),
+                                // table_name, true, false);
+                                // searchdbpool = false;
+                                // System.out.println(Arrays.toString(value));
                             } else {
                                 throw new OXContextRestoreException(Code.CONTEXT_NOT_FOUND_IN_POOL_MAPPING);
                             }
                         } else if (null != bufferedWriter) {
                             // Here we should only search if a fitting db was found and thus the writer was set
-                            searchAndWriteMatchingCidValues(in, bufferedWriter, cidpos, Integer.toString(cid), table_name, false, true);
+                            searchAndWriteMatchingCidValues(in, bufferedWriter, cidpos, Integer.toString(cid), tableName, false, true);
                         }
                         searchcontext = false;
                         oldstate = 0;
@@ -237,13 +289,13 @@ public static class Parser {
                     }
                 }
             } finally {
-                if (null != bufferedWriter) {
-                    bufferedWriter.close();
-                }
-                in.close();
+                close(bufferedWriter);
+                close(in);
             }
-            final PoolIdSchemaAndVersionInfo poolIdAndSchema = new PoolIdSchemaAndVersionInfo(pool_id, schema, versionInformation);
-            return poolIdAndSchema;
+            if (null == updateTaskInformation) {
+                throw new OXContextRestoreException(Code.NO_UPDATE_TASK_INFORMATION_FOUND);
+            }
+            return new PoolIdSchemaAndVersionInfo(cid, poolId, schema, versionInformation, updateTaskInformation);
         }
 
         /**
@@ -261,13 +313,60 @@ public static class Parser {
                     final int gw_compatible = Integer.parseInt(matcher.group(3));
                     final int admin_compatible = Integer.parseInt(matcher.group(4));
                     final String server = matcher.group(5);
-                    
-                    return new VersionInformation(admin_compatible, gw_compatible, locked, server.substring(1, server.length() - 1), version);
+
+                    return new VersionInformation(
+                        admin_compatible,
+                        gw_compatible,
+                        locked,
+                        server.substring(1, server.length() - 1),
+                        version);
                 }
             }
             return null;
         }
-        
+
+        private final static String REGEX_VALUE = "([^\\),]*)";
+        private final static Pattern insertIntoUpdateTaskValues =
+            Pattern.compile("\\((?:" + REGEX_VALUE + ",)(?:" + REGEX_VALUE + ",)(?:" + REGEX_VALUE + ",)" + REGEX_VALUE + "\\)");
+
+        private UpdateTaskInformation searchAndCheckUpdateTask(final BufferedReader in, final int contextId, final UpdateTaskInformation updateTaskInformation) throws IOException {
+            StringBuilder insert = null;
+            String line;
+            {
+                boolean eoi = false;
+                while (!eoi && (line = in.readLine()) != null && !line.startsWith("--")) {
+                    if (null == insert) {
+                        if (line.startsWith("INSERT INTO `updateTask` VALUES ")) {
+                            // Start collecting lines
+                            insert = new StringBuilder(2048);
+                            insert.append(line);
+                        }
+                    } else {
+                        insert.append(line);
+                        if (line.endsWith(");")) {
+                            eoi = true;
+                        }
+                    }
+                }
+            }
+            if (null != insert) {
+                final Matcher matcher = insertIntoUpdateTaskValues.matcher(insert.substring(32));
+                insert = null;
+                while (matcher.find()) {
+                    final UpdateTaskEntry updateTaskEntry = new UpdateTaskEntry();
+                    final int contextId2 = Integer.parseInt(matcher.group(1));
+                    if (contextId2 <= 0 || contextId2 == contextId) {
+                        updateTaskEntry.setContextId(contextId2);
+                        updateTaskEntry.setTaskName(matcher.group(2));
+                        updateTaskEntry.setSuccessful((Integer.parseInt(matcher.group(3)) > 0));
+                        updateTaskEntry.setLastModified(Long.parseLong(matcher.group(4)));
+                        updateTaskInformation.add(updateTaskEntry);
+                    }
+                }
+            }
+            return updateTaskInformation;
+        }
+
         /**
          * @param in
          * @param bufferedWriter
@@ -314,7 +413,7 @@ public static class Parser {
                         currentValues.setLength(0);
                         currentValues.append('(');
                     } else {
-                        currentValues.append((char)c);
+                        currentValues.append((char) c);
                     }
                     break;
                 case ')':
@@ -338,14 +437,14 @@ public static class Parser {
                                 } else {
                                     bufferedWriter.write(",");
                                 }
-                                
+
                                 bufferedWriter.write(currentValues.toString());
                                 bufferedWriter.write(")");
                                 bufferedWriter.flush();
                                 found = false;
                             }
                         }
-                        currentValues.append((char)c);
+                        currentValues.append((char) c);
                     }
                     break;
                 case ',':
@@ -361,7 +460,7 @@ public static class Parser {
                             counter++;
                             lastpart.setLength(0);
                         }
-                        currentValues.append((char)c);
+                        currentValues.append((char) c);
                     } else {
                         // New datarow comes
                         counter = 1;
@@ -376,7 +475,7 @@ public static class Parser {
                                 instring = false;
                             }
                         }
-                        currentValues.append((char)c);
+                        currentValues.append((char) c);
                     }
                     break;
                 case '\\':
@@ -384,7 +483,7 @@ public static class Parser {
                         if (instring && !escapted) {
                             escapted = true;
                         }
-                        currentValues.append((char)c);
+                        currentValues.append((char) c);
                     }
                     break;
                 case ';':
@@ -396,7 +495,7 @@ public static class Parser {
                         }
                         continuation = false;
                     } else {
-                        currentValues.append((char)c);
+                        currentValues.append((char) c);
                     }
                     break;
                 default:
@@ -423,14 +522,14 @@ public static class Parser {
             // File at the end or no more chars
             return -1;
         }
-        
+
         /**
-         * Searches for the cid and returns the line number in which is was found,
-         * after this method the reader's position is behind the create structure 
+         * Searches for the cid and returns the line number in which is was found, after this method the reader's position is behind the
+         * create structure
          * 
          * @param in
          * @return
-         * @throws IOException 
+         * @throws IOException
          */
         private int cidsearch(final BufferedReader in) throws IOException {
             String readLine;
@@ -457,7 +556,7 @@ public static class Parser {
             }
             return columnpos;
         }
-        
+
         private List<String> searchingForeignKey(final BufferedReader in) throws IOException {
             String readLine;
             readLine = in.readLine();
@@ -499,10 +598,10 @@ public static class Parser {
     }
 
     @Override
-    public String restore(final Context ctx, final String[] filenames, final Credentials auth, final boolean dryrun) throws InvalidDataException, InvalidCredentialsException, StorageException, OXContextRestoreException, DatabaseUpdateException {
+    public String restore(final Context ctx, final String[] fileNames, final Credentials auth, final boolean dryrun) throws InvalidDataException, InvalidCredentialsException, StorageException, OXContextRestoreException, DatabaseUpdateException {
         try {
-            doNullCheck(ctx, filenames);
-            for (final String filename : filenames) {
+            doNullCheck(ctx, fileNames);
+            for (final String filename : fileNames) {
                 doNullCheck(filename);
             }
         } catch (final InvalidDataException e) {
@@ -519,31 +618,35 @@ public static class Parser {
 
         final Parser parser = new Parser();
         LOG.info("Context: " + ctx);
-        LOG.info("Filenames: " + java.util.Arrays.toString(filenames));
+        LOG.info("Filenames: " + java.util.Arrays.toString(fileNames));
         
         try {
             VersionInformation versionInfo = null;
+            UpdateTaskInformation updateTaskInfo = null;
             PoolIdSchemaAndVersionInfo result = null; 
-            for (final String filename : filenames) {
-                PoolIdSchemaAndVersionInfo start = parser.start(ctx.getId().intValue(), filename);
-                final VersionInformation versionInformation = start.getVersionInformation();
-                final String schema = start.getSchema();
-                final int pool_id = start.getPool_id();
+            for (final String fileName : fileNames) {
+                final PoolIdSchemaAndVersionInfo infoObject = parser.start(ctx.getId().intValue(), fileName);
+                final VersionInformation versionInformation = infoObject.getVersionInformation();
+                final UpdateTaskInformation updateTaskInformation = infoObject.getUpdateTaskInformation();
+                final String schema = infoObject.getSchema();
+                final int pool_id = infoObject.getPoolId();
                 if (null != versionInformation) {
                     versionInfo = versionInformation;
                 }
+                if (null != updateTaskInformation) {
+                    updateTaskInfo = updateTaskInformation;
+                }
                 if (null != schema && -1 != pool_id) {
-                    result = start;
+                    result = infoObject;
                 }
             }
             if (null == result) {
                 throw new OXContextRestoreException(Code.NO_CONFIGDB_FOUND);
-            } else if (null == versionInfo) {
-                throw new OXContextRestoreException(Code.NO_USER_DATA_DB_FOUND);
             }
             
             final OXContextRestoreStorageInterface instance = OXContextRestoreStorageInterface.getInstance();
             result.setVersionInformation(versionInfo);
+            result.setUpdateTaskInformation(updateTaskInfo);
             instance.checkVersion(result);
             
             final OXContextInterface contextInterface = Activator.getContextInterface();

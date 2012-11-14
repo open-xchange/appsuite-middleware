@@ -54,9 +54,9 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicReference;
+import org.cliffc.high_scale_lib.NonBlockingHashMap;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.api.AllMailProvider;
 import com.openexchange.mail.api.MailConfig;
@@ -76,7 +76,7 @@ public final class MailProviderRegistry {
     /**
      * Concurrent map used as set for mail providers
      */
-    private static final ConcurrentMap<Protocol, MailProvider> PROVIDERS = new ConcurrentHashMap<Protocol, MailProvider>();
+    private static final ConcurrentMap<Protocol, MailProvider> PROVIDERS = new NonBlockingHashMap<Protocol, MailProvider>();
 
     private static final AtomicReference<AllMailProvider> ALL_PROVIDER = new AtomicReference<AllMailProvider>();
 

@@ -743,7 +743,7 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
     public final String getTrace() {
         final StringBuilder sBuilder = new StringBuilder(512);
         sBuilder.append(toString());
-        sBuilder.append("\nIMAP connection established (or fetched from cache) at: ").append('\n');
+        sBuilder.append("\nMail connection established (or fetched from cache) at: ").append('\n');
         /*
          * Start at index 3
          */

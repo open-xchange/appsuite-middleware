@@ -51,12 +51,8 @@ package com.openexchange.folderstorage.database;
 
 import java.util.Locale;
 import java.util.Map;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
-import java.util.concurrent.FutureTask;
+import org.cliffc.high_scale_lib.NonBlockingHashMap;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.i18n.LocaleTools;
 import com.openexchange.i18n.tools.StringHelper;
@@ -70,9 +66,7 @@ public class LocalizedDatabaseFolder extends DatabaseFolder {
 
     private static final long serialVersionUID = 3830248343115931304L;
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(LocalizedDatabaseFolder.class));
-
-    private ConcurrentMap<Locale, Future<String>> localizedNames;
+    private ConcurrentMap<Locale, String> localizedNames;
 
     /**
      * Initializes a new cacheable {@link LocalizedDatabaseFolder} from given database folder.
@@ -97,19 +91,19 @@ public class LocalizedDatabaseFolder extends DatabaseFolder {
      */
     public LocalizedDatabaseFolder(final FolderObject folderObject, final boolean cacheable) {
         super(folderObject, cacheable);
-        localizedNames = new ConcurrentHashMap<Locale, Future<String>>();
+        localizedNames = new NonBlockingHashMap<Locale, String>(8);
     }
 
     @Override
     public Object clone() {
         final LocalizedDatabaseFolder clone = (LocalizedDatabaseFolder) super.clone();
         // Locale-sensitive names
-        final ConcurrentMap<Locale, Future<String>> thisMap = localizedNames;
+        final ConcurrentMap<Locale, String> thisMap = localizedNames;
         if (null == localizedNames) {
             clone.localizedNames = null;
         } else {
-            final ConcurrentMap<Locale, Future<String>> cloneMap = new ConcurrentHashMap<Locale, Future<String>>(thisMap.size());
-            for (final Map.Entry<Locale, Future<String>> entry : thisMap.entrySet()) {
+            final ConcurrentMap<Locale, String> cloneMap = new NonBlockingHashMap<Locale, String>(thisMap.size());
+            for (final Map.Entry<Locale, String> entry : thisMap.entrySet()) {
                 cloneMap.put(entry.getKey(), entry.getValue());
             }
             clone.localizedNames = cloneMap;
@@ -121,37 +115,19 @@ public class LocalizedDatabaseFolder extends DatabaseFolder {
     @Override
     public String getLocalizedName(final Locale locale) {
         final Locale loc = null == locale ? LocaleTools.DEFAULT_LOCALE : locale;
-        Future<String> future = localizedNames.get(loc);
-        if (null == future) {
+        String translation = localizedNames.get(loc);
+        if (null == translation) {
             final String fname = getName();
             if (null == fname) {
                 return null;
             }
-            final FutureTask<String> ft = new FutureTask<String>(new Callable<String>() {
-
-                @Override
-                public String call() throws Exception {
-                    return StringHelper.valueOf(loc).getString(fname);
-                }
-            });
-            future = localizedNames.putIfAbsent(loc, ft);
-            if (null == future) {
-                future = ft;
-                ft.run();
+            final String ntranslation = StringHelper.valueOf(loc).getString(fname);
+            translation = localizedNames.putIfAbsent(loc, ntranslation);
+            if (null == translation) {
+                translation = ntranslation;
             }
         }
-        try {
-            return future.get();
-        } catch (final InterruptedException e) {
-            // Keep interrupted status
-            Thread.currentThread().interrupt();
-            LOG.warn(e.getMessage(), e);
-            return getName();
-        } catch (final ExecutionException e) {
-            final Throwable t = e.getCause();
-            LOG.warn(t.getMessage(), t);
-            return getName();
-        }
+        return translation;
     }
 
 }

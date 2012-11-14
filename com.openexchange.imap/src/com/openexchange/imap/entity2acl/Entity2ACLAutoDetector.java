@@ -54,13 +54,13 @@ import java.net.InetSocketAddress;
 import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CancellationException;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
 import javax.mail.MessagingException;
 import javax.mail.internet.IDNA;
+import org.cliffc.high_scale_lib.NonBlockingHashMap;
 import com.openexchange.exception.OXException;
 import com.openexchange.imap.IMAPException;
 import com.openexchange.imap.cache.RightsCache;
@@ -94,7 +94,7 @@ public final class Entity2ACLAutoDetector {
      * Initializes the auto-detector
      */
     static void initEntity2ACLMappings() {
-        map = new ConcurrentHashMap<InetSocketAddress, Future<Entity2ACL>>();
+        map = new NonBlockingHashMap<InetSocketAddress, Future<Entity2ACL>>();
     }
 
     /**
@@ -194,7 +194,7 @@ public final class Entity2ACLAutoDetector {
         return entity2Acl;
     }
 
-    private static final Map<InetSocketAddress, IMAPServer> CACHE = new ConcurrentHashMap<InetSocketAddress, IMAPServer>();
+    private static final Map<InetSocketAddress, IMAPServer> CACHE = new NonBlockingHashMap<InetSocketAddress, IMAPServer>();
 
     private static IMAPServer mapInfo2IMAPServer(final String info, final IMAPConfig imapConfig) throws OXException {
         for (final IMAPServer imapServer : IMAPServer.getIMAPServers()) {

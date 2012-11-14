@@ -49,21 +49,14 @@
 
 package com.openexchange.contacts.json.actions;
 
-import java.util.Date;
-import java.util.TimeZone;
-
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.api2.RdbContactSQLImpl;
 import com.openexchange.contacts.json.ContactRequest;
 import com.openexchange.documentation.RequestMethod;
 import com.openexchange.documentation.annotations.Action;
 import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.contact.ContactInterface;
 import com.openexchange.groupware.container.Contact;
-import com.openexchange.groupware.contexts.Context;
 import com.openexchange.server.ServiceLookup;
-import com.openexchange.tools.session.ServerSession;
 
 
 /**
@@ -82,32 +75,14 @@ public class GetUserAction extends ContactAction {
      * Initializes a new {@link GetUserAction}.
      * @param serviceLookup
      */
-    public GetUserAction(final ServiceLookup serviceLookup) {
+    public GetUserAction(ServiceLookup serviceLookup) {
         super(serviceLookup);
     }
 
     @Override
-    protected AJAXRequestResult perform(final ContactRequest req) throws OXException {
-        final ServerSession session = req.getSession();
-        final TimeZone timeZone = req.getTimeZone();
-        final int uid = req.getId();
-        final Context ctx = session.getContext();
-
-        final ContactInterface contactInterface = new RdbContactSQLImpl(session, ctx);
-        final Contact contact = contactInterface.getUserById(uid);
-        final Date lastModified = contact.getLastModified();
-
-        // Correct last modified and creation date with users timezone
-        contact.setLastModified(getCorrectedTime(contact.getLastModified(), timeZone));
-        contact.setCreationDate(getCorrectedTime(contact.getCreationDate(), timeZone));
-
-        return new AJAXRequestResult(contact, lastModified, "contact");
-    }
-    
-    @Override
-    protected AJAXRequestResult perform2(final ContactRequest request) throws OXException {
-    	final int userID = Integer.parseInt(request.getObjectID());
-    	final Contact contact = getContactService().getUser(request.getSession(), userID);
+    protected AJAXRequestResult perform(ContactRequest request) throws OXException {
+    	int userID = Integer.parseInt(request.getObjectID());
+    	Contact contact = getContactService().getUser(request.getSession(), userID);
         return new AJAXRequestResult(contact, contact.getLastModified(), "contact");
     }
     

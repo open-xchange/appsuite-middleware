@@ -59,26 +59,23 @@ import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
-
+import org.apache.commons.logging.Log;
 import org.apache.solr.client.solrj.SolrQuery;
+import org.apache.solr.client.solrj.SolrQuery.ORDER;
 import org.apache.solr.client.solrj.SolrResponse;
-import org.apache.solr.client.solrj.response.FacetField;
-import org.apache.solr.client.solrj.response.FacetField.Count;
 import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.client.solrj.response.UpdateResponse;
 import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrDocumentList;
 import org.apache.solr.common.SolrInputDocument;
 import org.apache.solr.common.params.SolrParams;
-
 import com.openexchange.exception.OXException;
 import com.openexchange.index.IndexAccess;
 import com.openexchange.index.IndexDocument;
 import com.openexchange.index.IndexField;
-import com.openexchange.index.IndexResult;
-import com.openexchange.index.mail.MailIndexField;
+import com.openexchange.index.QueryParameters;
+import com.openexchange.index.QueryParameters.Order;
 import com.openexchange.index.solr.IndexFolderManager;
-import com.openexchange.index.solr.mail.SolrMailField;
 import com.openexchange.solr.SolrAccessService;
 import com.openexchange.solr.SolrCoreIdentifier;
 
@@ -88,6 +85,8 @@ import com.openexchange.solr.SolrCoreIdentifier;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public abstract class AbstractSolrIndexAccess<V> implements IndexAccess<V> {
+    
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(AbstractSolrIndexAccess.class);
     
     private final Lock folderCacheLock = new ReentrantLock();
 
@@ -279,74 +278,74 @@ public abstract class AbstractSolrIndexAccess<V> implements IndexAccess<V> {
         return indexDocuments;
     }
     
-    protected IndexResult<V> queryChunkWise1(SolrResultConverter<V> converter, SolrQuery solrQuery, int off, int len, int chunkSize) throws OXException {
-        List<IndexDocument<V>> indexDocuments = new ArrayList<IndexDocument<V>>();
-        Map<IndexField, Map<String, Long>> facetCountsMap = null;
-        int fetched = 0;
-        int maxRows = len;
-        if (maxRows > chunkSize) {
-            maxRows = chunkSize;
-        }
-        do {
-            solrQuery.setStart(off);
-            if ((fetched + maxRows) > len) {
-                maxRows = (len - fetched);
-            }
-            solrQuery.setRows(maxRows);
-            QueryResponse queryResponse = query(solrQuery);
-            SolrDocumentList results = queryResponse.getResults();
-            for (SolrDocument document : results) {
-                indexDocuments.add(converter.convert(document));
-            }
-            
-            List<FacetField> facetFields = queryResponse.getFacetFields();
-            if (null != facetFields) {
-                if (null == facetCountsMap) {
-                    // Initialize map
-                    facetCountsMap = new HashMap<IndexField, Map<String,Long>>(facetFields.size());
-                }
-                for (final FacetField facetField : facetFields) {
-                    final List<Count> counts = facetField.getValues();
-                    if (null != counts) {
-                        final MailIndexField field = SolrMailField.fieldFor(facetField.getName());
-                        if (null != field) {
-                            Map<String, Long> map = facetCountsMap.get(field);
-                            if (null == map) {
-                                map = new HashMap<String, Long>(counts.size());
-                                facetCountsMap.put(field, map);
-                            }
-                            for (final Count count : counts) {
-                                final String countName = count.getName();
-                                final Long l = map.get(countName);
-                                if (null == l) {
-                                    map.put(countName, Long.valueOf(count.getCount()));
-                                } else {
-                                    map.put(countName, Long.valueOf(count.getCount() + l.longValue()));
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-
-            if (results.size() < maxRows) {
-                break;
-            }
-            
-            fetched += maxRows;
-            off += maxRows;
-        } while (fetched < len);
-        
-        return converter.createIndexResult(indexDocuments, facetCountsMap);
-    }
+//    protected IndexResult<V> queryChunkWise1(SolrResultConverter<V> converter, SolrQuery solrQuery, int off, int len, int chunkSize) throws OXException {
+//        List<IndexDocument<V>> indexDocuments = new ArrayList<IndexDocument<V>>();
+//        Map<IndexField, Map<String, Long>> facetCountsMap = null;
+//        int fetched = 0;
+//        int maxRows = len;
+//        if (maxRows > chunkSize) {
+//            maxRows = chunkSize;
+//        }
+//        do {
+//            solrQuery.setStart(off);
+//            if ((fetched + maxRows) > len) {
+//                maxRows = (len - fetched);
+//            }
+//            solrQuery.setRows(maxRows);
+//            QueryResponse queryResponse = query(solrQuery);
+//            SolrDocumentList results = queryResponse.getResults();
+//            for (SolrDocument document : results) {
+//                indexDocuments.add(converter.convert(document));
+//            }
+//            
+//            List<FacetField> facetFields = queryResponse.getFacetFields();
+//            if (null != facetFields) {
+//                if (null == facetCountsMap) {
+//                    // Initialize map
+//                    facetCountsMap = new HashMap<IndexField, Map<String,Long>>(facetFields.size());
+//                }
+//                for (final FacetField facetField : facetFields) {
+//                    final List<Count> counts = facetField.getValues();
+//                    if (null != counts) {
+//                        final MailIndexField field = SolrMailField.fieldFor(facetField.getName());
+//                        if (null != field) {
+//                            Map<String, Long> map = facetCountsMap.get(field);
+//                            if (null == map) {
+//                                map = new HashMap<String, Long>(counts.size());
+//                                facetCountsMap.put(field, map);
+//                            }
+//                            for (final Count count : counts) {
+//                                final String countName = count.getName();
+//                                final Long l = map.get(countName);
+//                                if (null == l) {
+//                                    map.put(countName, Long.valueOf(count.getCount()));
+//                                } else {
+//                                    map.put(countName, Long.valueOf(count.getCount() + l.longValue()));
+//                                }
+//                            }
+//                        }
+//                    }
+//                }
+//            }
+//
+//            if (results.size() < maxRows) {
+//                break;
+//            }
+//            
+//            fetched += maxRows;
+//            off += maxRows;
+//        } while (fetched < len);
+//        
+//        return converter.createIndexResult(indexDocuments, facetCountsMap);
+//    }
     
-    protected String buildQueryString(String fieldName, String value) {
+    protected String buildQueryString(String fieldName, Object value) {
         if (fieldName == null || value == null) {
             return null;
         }
         
         StringBuilder sb = new StringBuilder(); 
-        sb.append('(').append(fieldName).append(":\"").append(value).append("\")");
+        sb.append('(').append(fieldName).append(":\"").append(value.toString()).append("\")");
         return sb.toString();
     }
     
@@ -397,4 +396,88 @@ public abstract class AbstractSolrIndexAccess<V> implements IndexAccess<V> {
         sb.append(')');
         return sb.toString();
     }
+    
+    protected String catenateQueriesWithOr(String... queries) {
+        if (queries == null || queries.length == 0) {
+            return null;
+        }
+        
+        StringBuilder sb = new StringBuilder();
+        sb.append('(');
+        boolean first = true;
+        for (String query : queries) {
+            if (query != null) {
+                if (first) {
+                    sb.append(query);
+                    first = false; 
+                } else {
+                    sb.append(" OR ").append(query);
+                }
+            }
+        }
+        
+        if (sb.length() == 1) {
+            return null;
+        }
+        
+        sb.append(')');
+        return sb.toString();
+    }
+    
+    protected void setSortAndOrder(QueryParameters parameters, SolrQuery solrQuery, Class<? extends SolrField> fieldEnum) {
+        IndexField sortField = parameters.getSortField();
+        if (sortField == null) {
+            return;
+        }
+        
+        SolrField[] enumConstants = fieldEnum.getEnumConstants();
+        if (enumConstants != null) {
+            for (SolrField field : enumConstants) {
+                if (field.indexField() != null && field.indexField().equals(sortField)) {
+                    Order order = parameters.getOrder();
+                    solrQuery.setSortField(field.solrName(), order == null ? ORDER.desc : order.equals(Order.DESC) ? ORDER.desc : ORDER.asc);
+                    return;
+                }
+            }
+            
+            LOG.warn("Did not find a SolrField for IndexField " + sortField.toString());
+        }
+        
+        LOG.warn("Parameter fieldEnum seems not to be a valid enum.");
+    }
+    
+    protected void setFieldList(SolrQuery solrQuery, Set<? extends SolrField> solrFields) {
+        for (SolrField field : solrFields) {
+            String solrName = field.solrName();
+            if (solrName != null) {
+                solrQuery.addField(solrName);
+            }            
+        }
+    }
+    
+    protected String stringArrayToQuery(String[] values) {
+        StringBuilder sb = new StringBuilder();
+        for (String value : values) {
+            sb.append(value);
+            sb.append(' ');
+        }
+        
+        return sb.toString();
+    }
+    
+    protected String stringSetToQuery(Set<String> values) {
+        StringBuilder sb = new StringBuilder();
+        for (String value : values) {
+            sb.append(value);
+            sb.append(' ');
+        }
+        
+        return sb.toString();
+    }
+    
+    protected void addFilterQueryIfNotNull(SolrQuery solrQuery, String filterQuery) {
+        if (filterQuery != null) {
+            solrQuery.addFilterQuery(filterQuery);
+        }
+    } 
 }

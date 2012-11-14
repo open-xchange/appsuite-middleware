@@ -56,7 +56,6 @@ import org.apache.commons.logging.Log;
 import org.xerial.snappy.SnappyServiceLookUp;
 
 import com.openexchange.config.ConfigurationService;
-import com.openexchange.log.LogFactory;
 import com.openexchange.nosql.cassandra.CassandraServiceLookUp;
 import com.openexchange.nosql.cassandra.EmbeddedCassandraService;
 import com.openexchange.osgi.HousekeepingActivator;

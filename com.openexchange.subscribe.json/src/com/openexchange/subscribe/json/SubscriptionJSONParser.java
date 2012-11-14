@@ -64,7 +64,7 @@ import com.openexchange.subscribe.SubscriptionSourceDiscoveryService;
  */
 public class SubscriptionJSONParser {
 
-    private static final FormContentParser formParser = new FormContentParser();
+    // private static final FormContentParser formParser = new FormContentParser();
 
     private final SubscriptionSourceDiscoveryService discovery;
 
@@ -95,7 +95,7 @@ public class SubscriptionJSONParser {
             if(source != null) {
                 JSONObject config = object.optJSONObject(subscription.getSource().getId());
                 if(config != null) {
-                    Map<String, Object> configuration = formParser.parse(config, source.getFormDescription());
+                    Map<String, Object> configuration = FormContentParser.parse(config, source.getFormDescription());
                     subscription.setConfiguration(configuration);
                 }
             }

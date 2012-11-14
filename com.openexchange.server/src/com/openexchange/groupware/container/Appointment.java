@@ -113,6 +113,8 @@ public class Appointment extends CalendarObject implements Cloneable {
 
     protected String timezone;
 
+    protected boolean ignoreOutdatedSequence;
+
     protected boolean b_location;
 
     protected boolean b_fulltime;
@@ -273,6 +275,14 @@ public class Appointment extends CalendarObject implements Cloneable {
 
     public boolean containsTimezone() {
         return b_timezone;
+    }
+
+    public boolean isIgnoreOutdatedSequence() {
+        return ignoreOutdatedSequence;
+    }
+
+    public void setIgnoreOutdatedSequence(boolean ignoreOutdatedSequence) {
+        this.ignoreOutdatedSequence = ignoreOutdatedSequence;
     }
 
     @Override

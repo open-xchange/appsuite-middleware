@@ -45,7 +45,6 @@ public class LeastActiveBalancingPolicy implements LoadBalancingPolicy {
 
   private final class ShufflingCompare implements Comparator<HClientPool> {
     
-    @Override
     public int compare(HClientPool o1, HClientPool o2) {
       if ( log.isDebugEnabled() ) {
         log.debug("comparing 1: {} and count {} with 2: {} and count {}",

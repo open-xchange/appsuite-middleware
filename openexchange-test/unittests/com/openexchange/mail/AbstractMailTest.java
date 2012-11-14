@@ -67,6 +67,7 @@ import com.openexchange.folderstorage.internal.StorageParametersImpl;
 import com.openexchange.folderstorage.mail.MailFolderStorage;
 import com.openexchange.groupware.Init;
 import com.openexchange.groupware.contexts.impl.ContextImpl;
+import com.openexchange.mail.api.IMailFolderStorageEnhanced;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.mime.MimeSessionPropertyNames;
@@ -144,7 +145,7 @@ public abstract class AbstractMailTest extends TestCase {
     }
 
     /**
-     * Gets the denoted folder's message count using folder API.
+     * Gets the denoted folder's message count.
      *
      * @param mailAccess The mail access
      * @param fullName The full name
@@ -152,6 +153,9 @@ public abstract class AbstractMailTest extends TestCase {
      * @throws OXException If an error occurs
      */
     protected int getMessageCount(final MailAccess<?, ?> mailAccess, final String fullName) throws OXException {
+        if (mailAccess.getFolderStorage() instanceof IMailFolderStorageEnhanced) {
+            return ((IMailFolderStorageEnhanced) mailAccess.getFolderStorage()).getTotalCounter(fullName);
+        }
         return getMessageCount(mailAccess.getAccountId(), fullName);
     }
 

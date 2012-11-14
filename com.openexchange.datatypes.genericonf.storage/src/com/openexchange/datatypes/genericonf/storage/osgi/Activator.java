@@ -49,6 +49,7 @@
 
 package com.openexchange.datatypes.genericonf.storage.osgi;
 
+import java.util.concurrent.atomic.AtomicReference;
 import com.openexchange.database.CreateTableService;
 import com.openexchange.database.provider.DBProvider;
 import com.openexchange.datatypes.genericonf.storage.GenericConfigurationStorageService;
@@ -59,6 +60,9 @@ import com.openexchange.groupware.delete.DeleteListener;
 import com.openexchange.osgi.HousekeepingActivator;
 
 public class Activator extends HousekeepingActivator {
+
+    public static final AtomicReference<GenericConfigurationStorageService> REF =
+        new AtomicReference<GenericConfigurationStorageService>();
 
     @Override
     protected Class<?>[] getNeededServices() {
@@ -72,10 +76,12 @@ public class Activator extends HousekeepingActivator {
         registerService(DeleteListener.class, new ClearGenConfTables(), null);
         registerService(CreateTableService.class, new CreateGenConfTables(), null);
         registerService(GenericConfigurationStorageService.class, mySQLGenericConfigurationStorage, null);
+        REF.set(mySQLGenericConfigurationStorage);
     }
 
     @Override
     public void stopBundle() {
+        REF.set(null);
         unregisterServices();
         cleanUp();
     }

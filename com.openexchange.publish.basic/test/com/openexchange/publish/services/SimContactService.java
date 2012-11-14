@@ -365,4 +365,34 @@ public class SimContactService implements ContactService {
         
     }
 
+    @Override
+    public void deleteContacts(Session session, String folderId, String[] ids, Date lastRead) throws OXException {
+        // TODO Auto-generated method stub
+        
+    }
+
+    @Override
+    public SearchIterator<Contact> searchContactsWithBirthday(Session session, Date from, Date until, ContactField[] fields, SortOptions sortOptions) throws OXException {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public SearchIterator<Contact> searchContactsWithBirthday(Session session, List<String> folderIDs, Date from, Date until, ContactField[] fields, SortOptions sortOptions) throws OXException {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public SearchIterator<Contact> searchContactsWithAnniversary(Session session, Date from, Date until, ContactField[] fields, SortOptions sortOptions) throws OXException {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public SearchIterator<Contact> searchContactsWithAnniversary(Session session, List<String> folderIDs, Date from, Date until, ContactField[] fields, SortOptions sortOptions) throws OXException {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
 }

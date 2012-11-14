@@ -12,7 +12,7 @@ import org.apache.cassandra.thrift.ColumnOrSuperColumn;
 public class MappedSuperCfResultWrapper<K, SN, N, V> extends SuperCfResultWrapper<K, SN, N> implements
     MappedSuperCfResult<K, SN, N, V> {
   
-  private final SuperCfRowMapper<K, SN, N, V> rowMapper;
+  private SuperCfRowMapper<K, SN, N, V> rowMapper;
 
   public MappedSuperCfResultWrapper(
       Serializer<K> keySerializer,

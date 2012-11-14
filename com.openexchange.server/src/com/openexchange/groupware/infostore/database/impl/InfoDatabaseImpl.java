@@ -67,8 +67,10 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.infostore.InfoDatabase;
 import com.openexchange.groupware.infostore.InfostoreExceptionCodes;
+import com.openexchange.groupware.infostore.utils.GetSwitch;
 import com.openexchange.groupware.infostore.utils.Metadata;
 import com.openexchange.groupware.infostore.utils.MetadataSwitcher;
+import com.openexchange.groupware.infostore.utils.SetSwitch;
 
 public class InfoDatabaseImpl  extends DBService implements InfoDatabase {
 

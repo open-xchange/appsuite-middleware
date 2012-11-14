@@ -66,6 +66,7 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import com.openexchange.exception.OXException;
+import com.openexchange.file.storage.AccountAware;
 import com.openexchange.file.storage.DefaultFileStorageFolder;
 import com.openexchange.file.storage.DefaultFileStoragePermission;
 import com.openexchange.file.storage.FileStorageAccount;
@@ -342,8 +343,8 @@ public final class FileStorageFolderStorage implements FolderStorage {
             }
         }
 
-        final String fullname = accountAccess.getFolderAccess().createFolder(fsFolder);
-        folder.setID(new FileStorageFolderIdentifier(serviceId, accountId, fullname).toString());
+        final String fullName = accountAccess.getFolderAccess().createFolder(fsFolder);
+        folder.setID(new FileStorageFolderIdentifier(serviceId, accountId, fullName).toString());
     }
 
     @Override
@@ -359,9 +360,9 @@ public final class FileStorageFolderStorage implements FolderStorage {
             getFileStorageAccessForAccount(fsfi.getServiceId(), fsfi.getAccountId(), storageParameters.getSession(), accesses);
         openFileStorageAccess(accountAccess);
 
-        final String fullname = fsfi.getFolderId();
+        final String fullName = fsfi.getFolderId();
         final FileStorageFolderAccess folderAccess = accountAccess.getFolderAccess();
-        folderAccess.clearFolder(fullname, true);
+        folderAccess.clearFolder(fullName, true);
     }
 
     @Override
@@ -377,12 +378,12 @@ public final class FileStorageFolderStorage implements FolderStorage {
             getFileStorageAccessForAccount(fsfi.getServiceId(), fsfi.getAccountId(), storageParameters.getSession(), accesses);
         openFileStorageAccess(accountAccess);
 
-        final String fullname = fsfi.getFolderId();
+        final String fullName = fsfi.getFolderId();
         /*
          * Only backup if fullname does not denote trash (sub)folder
          */
         final FileStorageFolderAccess folderAccess = accountAccess.getFolderAccess();
-        folderAccess.deleteFolder(fullname, true);
+        folderAccess.deleteFolder(fullName, true);
     }
 
     @Override
@@ -577,7 +578,12 @@ public final class FileStorageFolderStorage implements FolderStorage {
                     /*
                      * Check if file storage service provides a root folder
                      */
-                    final List<FileStorageAccount> userAccounts = fsService.getAccountManager().getAccounts(session);
+                    final List<FileStorageAccount> userAccounts;
+                    if (fsService instanceof AccountAware) {
+                        userAccounts = ((AccountAware) fsService).getAccounts(session);
+                    } else {
+                        userAccounts = fsService.getAccountManager().getAccounts(session);
+                    }
                     for (final FileStorageAccount userAccount : userAccounts) {
                         if (SERVICE_INFOSTORE.equals(userAccount.getId()) || FileStorageAccount.DEFAULT_ID.equals(userAccount.getId())) {
                             continue;

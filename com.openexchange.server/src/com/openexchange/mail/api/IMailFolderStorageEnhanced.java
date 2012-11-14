@@ -59,6 +59,23 @@ import com.openexchange.exception.OXException;
 public interface IMailFolderStorageEnhanced extends IMailFolderStorage {
 
     /**
+     * Expunge all messages marked as \Deleted and moves them to trash folder.
+     * 
+     * @param fullName The folder full name
+     * @throws OXException If expunge operation fails
+     */
+    public void expungeFolder(String fullName) throws OXException;
+
+    /**
+     * Expunge all messages marked as \Deleted.
+     * 
+     * @param fullName The folder full name
+     * @param hardDelete <code>true</code> to perform hard-delete; otherwise messages are moved to trash folder
+     * @throws OXException If expunge operation fails
+     */
+    public void expungeFolder(String fullName, boolean hardDelete) throws OXException;
+
+    /**
      * Gets the number of unread mails for specified folder.
      *
      * @param fullName The folder's full name

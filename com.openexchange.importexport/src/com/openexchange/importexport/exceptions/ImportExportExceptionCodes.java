@@ -94,7 +94,7 @@ public enum ImportExportExceptionCodes implements OXExceptionCode {
     ICAL_PARSER_SERVICE_MISSING(ICAL_PARSER_SERVICE_MISSING_MSG, CATEGORY_ERROR, 512),
     /** Failed importing appointment due to hard conflicting resource. */
     RESOURCE_HARD_CONFLICT(RESOURCE_HARD_CONFLICT_MSG, CATEGORY_USER_INPUT, 513),
-    /** Warnings when importing file: %i warnings */
+    /** Warnings when importing file: %d warnings */
     WARNINGS(WARNINGS_MSG, CATEGORY_WARNING, 514),
     /** Could not recognize format of the following data: %s */
     UNKNOWN_VCARD_FORMAT(UNKNOWN_VCARD_FORMAT_MSG, CATEGORY_USER_INPUT, 605),
@@ -146,6 +146,7 @@ public enum ImportExportExceptionCodes implements OXExceptionCode {
     TEMP_FILE_NOT_FOUND(TEMP_FILE_NOT_FOUND_MSG, Category.CATEGORY_ERROR, 1311),
     NEED_FOLDER(NEED_FOLDER_MSG, Category.CATEGORY_USER_INPUT, 1312), 
     IRREGULAR_COLUMN_ID(IRREGULAR_COLUMN_ID_MSG, Category.CATEGORY_USER_INPUT, 1313),
+    NO_CONTENT(NO_CONTENT_MSG, Category.CATEGORY_USER_INPUT, 1314),
     ;
 
     private String message;

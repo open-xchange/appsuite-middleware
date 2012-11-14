@@ -49,11 +49,24 @@
 
 package com.openexchange.textxtraction;
 
+import java.io.InputStream;
+
 /**
  * {@link DelegateTextXtraction} - A delegate text extract service.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface DelegateTextXtraction extends TextXtractService {
-    // Nothing
+    
+    /**
+     * @return 
+     * <p>Must be <code>true</code> if this delegate makes {@link InputStream}s unusable for further processing.
+     * This is the case if the delegate does not reset the {@link InputStream} properly or even closes it.
+     * In this case the {@link InputStream} must be written into a temporary file before it can be processed.
+     * This is needed to enable text extraction by the fallback service if a destructive delegate fails.</p>
+     * 
+     * <p><b>Attention:</b><br>
+     * A destructive delegate makes text extraction much more expensive. Avoid destructive behavior if possible!</p>
+     */
+    boolean isDestructive();
 }

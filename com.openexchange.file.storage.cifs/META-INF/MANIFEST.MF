@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Open-Xchange File Storage CIFS/SMB Bundle
 Bundle-SymbolicName: com.openexchange.file.storage.cifs
-Bundle-Version: 6.22.0
+Bundle-Version: 6.22.1
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Import-Package: com.openexchange.datatypes.genericonf,
@@ -12,11 +12,16 @@ Import-Package: com.openexchange.datatypes.genericonf,
  com.openexchange.groupware.results,
  com.openexchange.i18n,
  com.openexchange.log,
- com.openexchange.server,
+ com.openexchange.mime,
  com.openexchange.osgi,
+ com.openexchange.server,
  com.openexchange.session,
  com.openexchange.sessiond,
+ com.openexchange.threadpool,
+ com.openexchange.threadpool.behavior,
+ com.openexchange.timer,
  com.openexchange.tools.iterator,
+ com.openexchange.tools.session,
  com.openexchange.tools.ssl,
  com.openexchange.tx,
  org.apache.commons.httpclient,

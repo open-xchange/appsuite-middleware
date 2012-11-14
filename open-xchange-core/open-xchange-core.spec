@@ -9,7 +9,7 @@ BuildRequires: open-xchange-log4j
 BuildRequires: open-xchange-xerces
 BuildRequires: java-devel >= 1.6.0
 Version:       @OXVERSION@
-%define        ox_release 10
+%define        ox_release 6
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0 
@@ -179,7 +179,7 @@ perl -pi -e 's;(^.*?)\s+(.*/(mail|configdb|server|filestorage)\.properties)$;$1 
 . /opt/open-xchange/lib/oxfunctions.sh
 ox_move_config_file /opt/open-xchange/etc/common /opt/open-xchange/etc i18n.properties
 ox_move_config_file /opt/open-xchange/etc/groupware /opt/open-xchange/etc push.properties push-udp.properties
-CONFFILES="management.properties templating.properties mail-push.properties filestorage.properties folderjson.properties messaging.properties publications.properties secret.properties secrets threadpool.properties settings/themes.properties settings/ui.properties meta/ui.yml"
+CONFFILES="mdns.properties management.properties templating.properties mail-push.properties filestorage.properties folderjson.properties messaging.properties publications.properties secret.properties secrets threadpool.properties settings/themes.properties settings/ui.properties meta/ui.yml"
 for FILE in $CONFFILES; do
     ox_move_config_file /opt/open-xchange/etc/groupware /opt/open-xchange/etc $FILE
 done
@@ -188,6 +188,27 @@ if [ ${1:-0} -eq 2 ]; then
 
     # prevent bash from expanding, see bug 13316
     GLOBIGNORE='*'
+
+    # SoftwareChange_Request-1184
+    pfile=/opt/open-xchange/etc/file-logging.properties
+    if ! ox_exists_property com.hazelcast.level $pfile; then
+       ox_set_property com.hazelcast.level SEVERE $pfile
+    fi
+
+    # SoftwareChange_Request-1148
+    pfile=/opt/open-xchange/etc/whitelist.properties
+    if ! ox_exists_property "html.style.word-break" $pfile; then
+       ox_set_property "html.style.word-break" '"break-all"' $pfile
+    fi
+    if ! ox_exists_property "html.style.word-wrap" $pfile; then
+       ox_set_property "html.style.word-wrap" '"break-word"' $pfile
+    fi
+
+    # SoftwareChange_Request-1125
+    pfile=/opt/open-xchange/etc/contactcollector.properties
+    if ! ox_exists_property com.openexchange.contactcollector.folder.deleteDenied $pfile; then
+       ox_set_property com.openexchange.contactcollector.folder.deleteDenied false $pfile
+    fi
 
     ox_update_permissions "/var/log/open-xchange" open-xchange:root 750
     ox_update_permissions "/opt/open-xchange/osgi" open-xchange:root 750
@@ -222,16 +243,30 @@ fi
 %doc com.openexchange.server/ChangeLog
 
 %changelog
+* Wed Nov 14 2012 Marcus Klein <marcus.klein@open-xchange.com>
+Sixth release candidate for 6.22.1
+* Tue Nov 13 2012 Marcus Klein <marcus.klein@open-xchange.com>
+Fifth release candidate for 6.22.1
 * Mon Nov 12 2012 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2012-11-08
 * Thu Nov 08 2012 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2012-11-08
+* Tue Nov 06 2012 Marcus Klein <marcus.klein@open-xchange.com>
+Fourth release candidate for 6.22.1
 * Mon Nov 05 2012 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2012-10-31
+* Fri Nov 02 2012 Marcus Klein <marcus.klein@open-xchange.com>
+Third release candidate for 6.22.1
+* Wed Oct 31 2012 Marcus Klein <marcus.klein@open-xchange.com>
+Second release candidate for 6.22.1
 * Wed Oct 31 2012 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2012-10-31
 * Tue Oct 30 2012 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2012-10-29
+* Fri Oct 26 2012 Marcus Klein <marcus.klein@open-xchange.com>
+First release candidate for 6.22.1
+* Fri Oct 26 2012 Marcus Klein <marcus.klein@open-xchange.com>
+prepare for 6.22.1
 * Wed Oct 10 2012 Marcus Klein <marcus.klein@open-xchange.com>
 Fifth release candidate for 6.22.0
 * Tue Oct 09 2012 Marcus Klein <marcus.klein@open-xchange.com>
@@ -240,6 +275,10 @@ Fourth release candidate for 6.22.0
 Third release candidate for 6.22.0
 * Thu Oct 04 2012 Marcus Klein <marcus.klein@open-xchange.com>
 Second release candidate for 6.22.0
+* Tue Sep 04 2012 Marcus Klein <marcus.klein@open-xchange.com>
+First release candidate for 6.23.0
+* Mon Sep 03 2012 Marcus Klein <marcus.klein@open-xchange.com>
+prepare for next EDP drop
 * Tue Aug 21 2012 Marcus Klein <marcus.klein@open-xchange.com>
 First release candidate for 6.22.0
 * Mon Aug 20 2012 Marcus Klein <marcus.klein@open-xchange.com>

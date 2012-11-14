@@ -18,7 +18,7 @@ msgstr ""
 "Project-Id-Version: errors\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2012-10-03 09:58+0000\n"
+"PO-Revision-Date: 2012-11-07 21:18+0000\n"
 "Last-Translator: \n"
 "Language-Team: Romanian <kde-i18n-doc@kde.org>\n"
 "MIME-Version: 1.0\n"
@@ -2554,8 +2554,8 @@ msgstr ""
 "2$s în contextul %3$s"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/tools/iterator/SearchIteratorExceptionMessages.java:63
-msgid "A DBPool error occurred: %1$s"
-msgstr "A apărut o eroare DBPool: %1$s"
+msgid "A DBPool error occurred: 1$%s"
+msgstr "A apărut o eroare DBPool: 1$%s"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/tools/iterator/SearchIteratorExceptionMessages.java:65
 msgid "Operation not allowed on a closed SearchIterator"
@@ -3666,6 +3666,10 @@ msgstr ""
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:139
 msgid "The request sent was missing its body"
 msgstr "Lipsește corpul interogării trimise"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:141
+msgid "The account is invalid, please recreate it."
+msgstr "Copntul este incorect, creați-l din nou."
 
 #. *
 #. * Cannot change password for any reason.
@@ -10126,7 +10130,8 @@ msgstr ""
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:173
 msgid "A group must not hold admin permission on a private folder"
 msgstr ""
-"Un grup nu poate să dețină permisiuni de administrare pentru un dosar personal"
+"Un grup nu poate să dețină permisiuni de administrare pentru un dosar "
+"personal"
 
 #. *
 #. * Only folder owner may hold admin permission on a private folder
@@ -10137,8 +10142,8 @@ msgstr ""
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:180
 msgid "Only folder owner may hold admin permission on a private folder"
 msgstr ""
-"Doar proprietarul dosarului poate deține permisiuni de administrare pentru un "
-"dosar personal"
+"Doar proprietarul dosarului poate deține permisiuni de administrare pentru "
+"un dosar personal"
 
 #. *
 #. * Administration rights required. In the Rights tab add at least one user with administration rights.

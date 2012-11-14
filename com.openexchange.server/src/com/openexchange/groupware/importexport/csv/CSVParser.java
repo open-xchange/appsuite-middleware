@@ -84,13 +84,17 @@ public class CSVParser {
         this.file = file;
     }
 
-    public CSVParser() {
-        isTolerant = false;
-        numberOfCells = STARTING_LENGTH;
+    private void reset() {
+    	numberOfCells = STARTING_LENGTH;
         currentLineNumber = 0;
         currentCell = new StringBuilder();
         currentLine = new LinkedList<String>();
-        structure = new LinkedList<List<String>>();
+        structure = new LinkedList<List<String>>();	
+    }
+    
+    public CSVParser() {
+        isTolerant = false;
+        reset();
     }
 
     public boolean isTolerant() {
@@ -114,6 +118,7 @@ public class CSVParser {
      * @throws OXException
      */
     public List<List<String>> parse(final String str) throws OXException {
+    	reset();
         this.file = str;
         return parse();
     }
@@ -163,7 +168,7 @@ public class CSVParser {
         if (isEscaping) {
             currentCell.append(CELL_DELIMITER);
         } else {
-            if ((numberOfCells == STARTING_LENGTH) || (numberOfCells != STARTING_LENGTH && currentLine.size() < numberOfCells)) {
+            if ((numberOfCells == STARTING_LENGTH) || (numberOfCells != STARTING_LENGTH && currentLine.size() <= numberOfCells)) {
                 currentLine.add(currentCell.toString().trim());
                 currentCell = new StringBuilder();
             } else {

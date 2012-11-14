@@ -49,31 +49,35 @@
 
 package com.openexchange.solr.internal;
 
-import java.io.Serializable;
+import java.net.InetSocketAddress;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.FutureTask;
 import org.apache.commons.logging.Log;
 import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.client.solrj.response.UpdateResponse;
 import org.apache.solr.common.SolrInputDocument;
 import org.apache.solr.common.params.SolrParams;
+import com.hazelcast.core.DistributedTask;
+import com.hazelcast.core.HazelcastInstance;
+import com.hazelcast.core.IMap;
+import com.hazelcast.core.Member;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.log.LogFactory;
-import com.openexchange.service.messaging.Message;
-import com.openexchange.service.messaging.MessagingService;
 import com.openexchange.solr.SolrAccessService;
-import com.openexchange.solr.SolrCore;
 import com.openexchange.solr.SolrCoreIdentifier;
 import com.openexchange.solr.SolrExceptionCodes;
 import com.openexchange.solr.SolrProperties;
+import com.openexchange.solr.osgi.SolrActivator;
 import com.openexchange.solr.rmi.RMISolrAccessService;
 
 /**
@@ -82,18 +86,16 @@ import com.openexchange.solr.rmi.RMISolrAccessService;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public class DelegationSolrAccessImpl implements SolrAccessService {
-    
+
+    public static final String SOLR_CORE_MAP = "solrCoreMap";
+
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(DelegationSolrAccessImpl.class));
 
     private final EmbeddedSolrAccessImpl embeddedAccess;
 
-    private final SolrIndexMysql indexMysql;
-        
-
     public DelegationSolrAccessImpl(EmbeddedSolrAccessImpl localDelegate) {
         super();
         embeddedAccess = localDelegate;
-        indexMysql = SolrIndexMysql.getInstance();
     }
 
     /**
@@ -112,7 +114,7 @@ public class DelegationSolrAccessImpl implements SolrAccessService {
         if (LOG.isDebugEnabled()) {
             LOG.debug("Add took " + response.getElapsedTime() + "ms for 1 document.");
         }
-        
+
         return response;
     }
 
@@ -131,7 +133,7 @@ public class DelegationSolrAccessImpl implements SolrAccessService {
         if (LOG.isDebugEnabled()) {
             LOG.debug("Add took " + response.getElapsedTime() + "ms for " + documents.size() + " documents.");
         }
-        
+
         return response;
     }
 
@@ -150,7 +152,7 @@ public class DelegationSolrAccessImpl implements SolrAccessService {
         if (LOG.isDebugEnabled()) {
             LOG.debug("Delete took " + response.getElapsedTime() + "ms for 1 document.");
         }
-        
+
         return response;
     }
 
@@ -169,7 +171,7 @@ public class DelegationSolrAccessImpl implements SolrAccessService {
         if (LOG.isDebugEnabled()) {
             LOG.debug("Delete took " + response.getElapsedTime() + "ms for query " + query + ".");
         }
-        
+
         return response;
     }
 
@@ -186,7 +188,7 @@ public class DelegationSolrAccessImpl implements SolrAccessService {
         if (LOG.isDebugEnabled()) {
             LOG.debug("Commit took " + response.getElapsedTime() + "ms.");
         }
-        
+
         return response;
     }
 
@@ -205,7 +207,7 @@ public class DelegationSolrAccessImpl implements SolrAccessService {
         if (LOG.isDebugEnabled()) {
             LOG.debug("Commit took " + response.getElapsedTime() + "ms.");
         }
-        
+
         return response;
     }
 
@@ -222,7 +224,7 @@ public class DelegationSolrAccessImpl implements SolrAccessService {
         if (LOG.isDebugEnabled()) {
             LOG.debug("Rollback took " + response.getElapsedTime() + "ms.");
         }
-        
+
         return response;
     }
 
@@ -239,7 +241,7 @@ public class DelegationSolrAccessImpl implements SolrAccessService {
         if (LOG.isDebugEnabled()) {
             LOG.debug("Optimize took " + response.getElapsedTime() + "ms.");
         }
-        
+
         return response;
     }
 
@@ -258,7 +260,7 @@ public class DelegationSolrAccessImpl implements SolrAccessService {
         if (LOG.isDebugEnabled()) {
             LOG.debug("Optimize took " + response.getElapsedTime() + "ms.");
         }
-        
+
         return response;
     }
 
@@ -278,7 +280,7 @@ public class DelegationSolrAccessImpl implements SolrAccessService {
         if (LOG.isDebugEnabled()) {
             LOG.debug("Optimize took " + response.getElapsedTime() + "ms.");
         }
-        
+
         return response;
     }
 
@@ -297,128 +299,233 @@ public class DelegationSolrAccessImpl implements SolrAccessService {
         if (LOG.isDebugEnabled()) {
             LOG.debug("Query took " + response.getElapsedTime() + "ms and returned " + response.getResults().size() + " elements.");
         }
-        
+
         return response;
     }
-    
-	@Override
-	public void freeResources(SolrCoreIdentifier identifier) {
-		embeddedAccess.freeResources(identifier);		
-	}
-	
-	public EmbeddedSolrAccessImpl getEmbeddedServerAccess() {
-	    return embeddedAccess;
-	}
-    
+
+    @Override
+    public void freeResources(SolrCoreIdentifier identifier) {
+        if (embeddedAccess.hasActiveCore(identifier)) {
+            HazelcastInstance hazelcast = Services.getService(HazelcastInstance.class);
+            IMap<String, String> solrCores = hazelcast.getMap(SOLR_CORE_MAP);
+            solrCores.lock(identifier.toString());
+            try {                
+                decrementCoreCount(hazelcast, hazelcast.getCluster().getLocalMember());
+                solrCores.remove(identifier.toString());
+                embeddedAccess.freeResources(identifier);
+            } finally {
+                solrCores.unlock(identifier.toString());
+            }            
+        }
+    }
+
+    public void shutDown() throws OXException {
+        HazelcastInstance hazelcast = Services.getService(HazelcastInstance.class);
+        Collection<String> activeCores = embeddedAccess.getActiveCores();
+        IMap<String, Integer> solrNodes = hazelcast.getMap(SolrActivator.SOLR_NODE_MAP);
+        String localAddress = hazelcast.getCluster().getLocalMember().getInetSocketAddress().getAddress().getHostAddress();
+        solrNodes.remove(localAddress);
+        for (String coreName : activeCores) {
+            IMap<String, String> solrCores = hazelcast.getMap(SOLR_CORE_MAP);
+            solrCores.removeAsync(coreName);
+        }
+
+        embeddedAccess.shutDown();
+    }
+
+    public EmbeddedSolrAccessImpl getEmbeddedServerAccess() {
+        return embeddedAccess;
+    }
+
     private SolrAccessService getDelegate(SolrCoreIdentifier identifier) throws OXException {
-    	if (identifier == null) {
-    		throw new IllegalArgumentException("Parameter `identifier` must not be null!");
-    	}
-    	
-    	ConfigurationService config = Services.getService(ConfigurationService.class);
-		boolean isSolrNode = config.getBoolProperty(SolrProperties.IS_NODE, false);
-		if (isSolrNode) {
-			/*
-			 * Three possibilities here:
-			 * 1. The core is already started within our node
-			 * 	  => use embedded solr instance
-			 * 
-			 * 2. The core is not started yet
-			 *    => start it up locally and return embedded solr instance
-			 *    
-			 * 3. The core is started on another node
-			 *    => connect via RMI and return remote solr instance
-			 */
-			if (embeddedAccess.hasActiveCore(identifier) || embeddedAccess.startCore(identifier)) {
-			    if (LOG.isDebugEnabled()) {
-			        LOG.debug("Returning local solr access.");
-			    }
-			    
-	            return embeddedAccess;
-	        }
-			
-			int contextId = identifier.getContextId();
-	        int userId = identifier.getUserId();
-	        int module = identifier.getModule();			
-			SolrCore solrCore = indexMysql.getSolrCore(contextId, userId, module);			
-			if (solrCore.isActive()) {
-				return getRMIAccess(solrCore.getServer());
-			}
-			
-	        throw SolrExceptionCodes.DELEGATION_ERROR.create();	
-		} else {
-			/*
-			 * Two possibilities here:
-			 * 1. The core is already started on another node.
-			 *    => connect via RMI and return remote solr instance
-			 * 
-			 * 2. The core is not started yet.
-			 *    => Delegate core start up to solr nodes. And then?
-			 */
-			int contextId = identifier.getContextId();
-	        int userId = identifier.getUserId();
-	        int module = identifier.getModule();
-			SolrCore solrCore = indexMysql.getSolrCore(contextId, userId, module);
-			if (solrCore.isActive()) {
-				return getRMIAccess(solrCore.getServer());
-			}			
-			
-			MessagingService msgService = Services.getService(MessagingService.class);
-        	Map<String, Serializable> properties = new HashMap<String, Serializable>();
-        	properties.put(MessagingConstants.PROP_IDENTIFIER, identifier);
-        	Message msg = new Message(MessagingConstants.START_CORE_TOPIC, properties);
-        	msgService.postMessage(msg);
-        	if (LOG.isDebugEnabled()) {
-                LOG.debug("Requested a remote solr core startup for core " + identifier.toString() + ".");
+        if (identifier == null) {
+            throw new IllegalArgumentException("Parameter `identifier` must not be null!");
+        }
+
+        long start = System.currentTimeMillis();
+        ConfigurationService config = Services.getService(ConfigurationService.class);
+        boolean isSolrNode = config.getBoolProperty(SolrProperties.IS_NODE, false);
+        HazelcastInstance hazelcast = Services.getService(HazelcastInstance.class);
+        String ownAddress = resolveSocketAddress(hazelcast.getCluster().getLocalMember().getInetSocketAddress());
+        IMap<String, String> solrCores = hazelcast.getMap(SOLR_CORE_MAP);
+        solrCores.lock(identifier.toString());
+        try {
+            String owner = solrCores.get(identifier.toString());
+            if (LOG.isDebugEnabled()) {
+                LOG.debug(Thread.currentThread().getName() + " got the lock for core " + identifier.toString() + ". Current owner: " + owner);
             }
 
-        	// FIXME: Try to sleep and reconnect here?
-        	throw SolrExceptionCodes.CORE_NOT_STARTED.create(identifier.toString());
-		}   
+            if (owner == null) {
+                if (isSolrNode) {
+                    try {
+                        embeddedAccess.startCore(identifier);
+                        incrementCoreCount(hazelcast, hazelcast.getCluster().getLocalMember());
+                        solrCores.put(identifier.toString(), ownAddress);
+                        
+                        return embeddedAccess;
+                    } catch (Exception e) {
+                        if (embeddedAccess.hasActiveCore(identifier)) {
+                            embeddedAccess.stopCore(identifier);
+                        }
+                        throw SolrExceptionCodes.DELEGATION_ERROR.create(e);
+                    }
+                } else {
+                    Member elected = electCoreOwner(hazelcast, identifier);
+                    FutureTask<String> task = new DistributedTask<String>(new StartCoreCallable(identifier, resolveSocketAddress(elected.getInetSocketAddress())), elected);
+                    ExecutorService executorService = hazelcast.getExecutorService();
+                    executorService.execute(task);
+                    try {
+                        String electedAddress = resolveSocketAddress(elected.getInetSocketAddress());
+                        task.get();
+                        incrementCoreCount(hazelcast, elected);                        
+                        solrCores.put(identifier.toString(), electedAddress);
+                        
+                        return getRMIAccess(electedAddress);
+                    } catch (InterruptedException e) {
+                        throw SolrExceptionCodes.DELEGATION_ERROR.create(e);
+                    } catch (ExecutionException e) {
+                        throw SolrExceptionCodes.DELEGATION_ERROR.create(e);
+                    }
+                }
+            } else if (owner.equals(ownAddress)) {
+                return embeddedAccess;
+            }
+            
+            return getRMIAccess(owner);
+        } finally {
+            if (LOG.isDebugEnabled()) {
+                LOG.debug(Thread.currentThread().getName() + " released the lock for core " + identifier.toString() + ".");
+                long diff = System.currentTimeMillis() - start;
+                LOG.debug("getDelegate() lasted " + diff + "ms.");
+            }
+            solrCores.unlock(identifier.toString());
+        }        
     }
-    
-    
+
+    private Member electCoreOwner(HazelcastInstance hazelcast, SolrCoreIdentifier identifier) throws OXException {
+        IMap<String, Integer> solrNodes = hazelcast.getMap(SolrActivator.SOLR_NODE_MAP);
+        String lowestMember = null;
+        Integer lowestCount = null;
+        for (String memberAddress : solrNodes.keySet()) {
+            if (memberAddress.equals(hazelcast.getCluster().getLocalMember().getInetSocketAddress().getAddress().getHostAddress())) {
+                continue;
+            }
+
+            Integer coreCount = solrNodes.get(memberAddress);
+            if (lowestCount == null || coreCount < lowestCount) {
+                lowestCount = coreCount;
+                lowestMember = memberAddress;
+            }
+        }
+
+        Member elected = null;
+        if (lowestMember == null) {
+            throw SolrExceptionCodes.DELEGATION_ERROR.create();
+        } else {
+            Set<Member> members = hazelcast.getCluster().getMembers();
+            for (Member member : members) {
+                if (member.getInetSocketAddress().getAddress().getHostAddress().equals(lowestMember)) {
+                    elected = member;
+                    break;
+                }
+            }
+
+            if (elected == null) {
+                throw SolrExceptionCodes.DELEGATION_ERROR.create();
+            }
+
+            return elected;
+            //
+            // FutureTask<String> task = new DistributedTask<String>(new StartCoreCallable(identifier,
+            // resolveSocketAddress(elected.getInetSocketAddress())), elected);
+            // ExecutorService executorService = hazelcast.getExecutorService();
+            // executorService.execute(task);
+            // try {
+            // incrementCoreCount(hazelcast);
+            // return task.get(1, TimeUnit.SECONDS);
+            // } catch (InterruptedException e) {
+            // throw SolrExceptionCodes.DELEGATION_ERROR.create(e);
+            // } catch (ExecutionException e) {
+            // throw SolrExceptionCodes.DELEGATION_ERROR.create(e);
+            // } catch (TimeoutException e) {
+            // throw SolrExceptionCodes.DELEGATION_ERROR.create(e);
+            // }
+        }
+    }
+
+    private void incrementCoreCount(HazelcastInstance hazelcast, Member member) {
+        IMap<String, Integer> solrNodes = hazelcast.getMap(SolrActivator.SOLR_NODE_MAP);
+        String localAddress = member.getInetSocketAddress().getAddress().getHostAddress();
+        solrNodes.lock(localAddress);
+        try {
+            Integer integer = solrNodes.get(localAddress);
+            solrNodes.put(localAddress, new Integer(integer.intValue() + 1));
+        } finally {
+            solrNodes.unlock(localAddress);
+        }
+    }
+
+    private void decrementCoreCount(HazelcastInstance hazelcast, Member member) {
+        IMap<String, Integer> solrNodes = hazelcast.getMap(SolrActivator.SOLR_NODE_MAP);
+        String localAddress = member.getInetSocketAddress().getAddress().getHostAddress();
+        solrNodes.lock(localAddress);
+        try {
+            Integer integer = solrNodes.get(localAddress);
+            solrNodes.put(localAddress, new Integer(integer.intValue() - 1));
+        } finally {
+            solrNodes.unlock(localAddress);
+        }
+    }
+
+    private String resolveSocketAddress(InetSocketAddress addr) {
+        if (addr.isUnresolved()) {
+            return addr.getHostName();
+        } else {
+            return addr.getAddress().getHostAddress();
+        }
+    }
+
     private static ConcurrentMap<String, RMISolrAccessService> rmiCache = new ConcurrentHashMap<String, RMISolrAccessService>();
-    
+
     private SolrAccessService getRMIAccess(String server) throws OXException {
-    	RMISolrAccessService rmiAccess = rmiCache.get(server);
-    	if (rmiAccess == null) {
-    		rmiAccess = updateRmiCache(server);
-    	} else {
-    		try {
-				rmiAccess.pingRmi();
-			} catch (RemoteException e) {
-				rmiAccess = updateRmiCache(server);
-				if (LOG.isDebugEnabled()) {
-					LOG.debug("Ping failed for remote access on " + server + ". Reconnect.");
-				}
-			}    		
-    	}
-        
-    	if (LOG.isDebugEnabled()) {
-			LOG.debug("Returning remote solr access to server " + server + ".");
-		}
+        RMISolrAccessService rmiAccess = rmiCache.get(server);
+        if (rmiAccess == null) {
+            rmiAccess = updateRmiCache(server);
+        } else {
+            try {
+                rmiAccess.pingRmi();
+            } catch (RemoteException e) {
+                rmiAccess = updateRmiCache(server);
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug("Ping failed for remote access on " + server + ". Reconnect.");
+                }
+            }
+        }
+
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("Returning remote solr access to server " + server + ".");
+        }
         return new SolrAccessServiceRmiWrapper(rmiAccess);
     }
-    
-    private RMISolrAccessService updateRmiCache(String server) throws OXException {
-    	try {
-    		rmiCache.remove(server);
-	    	ConfigurationService config = Services.getService(ConfigurationService.class);
-	        int rmiPort = config.getIntProperty("RMI_PORT", 1099);
-	        Registry registry = LocateRegistry.getRegistry(server, rmiPort);
-	        RMISolrAccessService rmiAccess = (RMISolrAccessService) registry.lookup(RMISolrAccessService.RMI_NAME);
 
-	        RMISolrAccessService cachedRmiAccess = rmiCache.putIfAbsent(server, rmiAccess);
-	        if (cachedRmiAccess == null) {
-	        	return rmiAccess;
-	        }
-	        
-	        return cachedRmiAccess;
-    	} catch (RemoteException e) {
+    private RMISolrAccessService updateRmiCache(String server) throws OXException {
+        try {
+            rmiCache.remove(server);
+            ConfigurationService config = Services.getService(ConfigurationService.class);
+            int rmiPort = config.getIntProperty("RMI_PORT", 1099);
+            Registry registry = LocateRegistry.getRegistry(server, rmiPort);
+            RMISolrAccessService rmiAccess = (RMISolrAccessService) registry.lookup(RMISolrAccessService.RMI_NAME);
+
+            RMISolrAccessService cachedRmiAccess = rmiCache.putIfAbsent(server, rmiAccess);
+            if (cachedRmiAccess == null) {
+                return rmiAccess;
+            }
+
+            return cachedRmiAccess;
+        } catch (RemoteException e) {
             throw new OXException(e);
         } catch (NotBoundException e) {
             throw new OXException(e);
-        }        
+        }
     }
 }

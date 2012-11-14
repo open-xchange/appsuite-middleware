@@ -55,7 +55,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
+import org.cliffc.high_scale_lib.NonBlockingHashMap;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.imap.IMAPProtocol;
@@ -141,7 +141,7 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
         super();
         enableTls = true;
         maxNumConnection = -1;
-        newACLExtMap = new ConcurrentHashMap<String, Boolean>();
+        newACLExtMap = new NonBlockingHashMap<String, Boolean>();
         mailProperties = MailProperties.getInstance();
         propagateHostNames = Collections.emptySet();
     }

@@ -56,6 +56,7 @@ import com.openexchange.conversion.DataSource;
 import com.openexchange.filemanagement.internal.ManagedFileImageDataSource;
 import com.openexchange.groupware.contact.datasource.ContactImageDataSource;
 import com.openexchange.image.ImageActionFactory;
+import com.openexchange.image.Mp3ImageDataSource;
 import com.openexchange.mail.conversion.InlineImageDataSource;
 
 /**
@@ -65,7 +66,9 @@ import com.openexchange.mail.conversion.InlineImageDataSource;
  */
 public class ImageActivator extends AJAXModuleActivator {
 
-    private static final String STR_IDENTIFIER = "identifier";
+    public ImageActivator() {
+        super();
+    }
 
     @Override
     protected Class<?>[] getNeededServices() {
@@ -74,25 +77,34 @@ public class ImageActivator extends AJAXModuleActivator {
 
     @Override
     protected void startBundle() throws Exception {
-
-        InlineImageDataSource inlineDataSource = InlineImageDataSource.getInstance();
-        Dictionary<String, Object> inlineProps = new Hashtable<String, Object>(1);
-        inlineProps.put(STR_IDENTIFIER, inlineDataSource.getRegistrationName());
-        registerService(DataSource.class, inlineDataSource, inlineProps);
-        ImageActionFactory.addMapping(inlineDataSource.getRegistrationName(), inlineDataSource.getAlias());
-
-        ContactImageDataSource contactDataSource = ContactImageDataSource.getInstance();
-        Dictionary<String, Object> contactProps = new Hashtable<String, Object>(1);
-        contactProps.put(STR_IDENTIFIER, contactDataSource.getRegistrationName());
-        registerService(DataSource.class, contactDataSource, contactProps);
-        ImageActionFactory.addMapping(contactDataSource.getRegistrationName(), contactDataSource.getAlias());
-
-        ManagedFileImageDataSource imageDataSource = new ManagedFileImageDataSource();
-        Dictionary<String, Object> imageProps = new Hashtable<String, Object>(1);
-        imageProps.put(STR_IDENTIFIER, imageDataSource.getRegistrationName());
-        registerService(DataSource.class, imageDataSource, imageProps);
-        ImageActionFactory.addMapping(imageDataSource.getRegistrationName(), imageDataSource.getAlias());
-
+        {
+            InlineImageDataSource inlineDataSource = InlineImageDataSource.getInstance();
+            Dictionary<String, Object> inlineProps = new Hashtable<String, Object>(1);
+            inlineProps.put("identifier", inlineDataSource.getRegistrationName());
+            registerService(DataSource.class, inlineDataSource, inlineProps);
+            ImageActionFactory.addMapping(inlineDataSource.getRegistrationName(), inlineDataSource.getAlias());
+        }
+        {
+            ContactImageDataSource contactDataSource = ContactImageDataSource.getInstance();
+            Dictionary<String, Object> contactProps = new Hashtable<String, Object>(1);
+            contactProps.put("identifier", contactDataSource.getRegistrationName());
+            registerService(DataSource.class, contactDataSource, contactProps);
+            ImageActionFactory.addMapping(contactDataSource.getRegistrationName(), contactDataSource.getAlias());
+        }
+        {
+            Mp3ImageDataSource mp3DataSource = Mp3ImageDataSource.getInstance();
+            Dictionary<String, Object> mp3Props = new Hashtable<String, Object>(1);
+            mp3Props.put("identifier", mp3DataSource.getRegistrationName());
+            registerService(DataSource.class, mp3DataSource, mp3Props);
+            ImageActionFactory.addMapping(mp3DataSource.getRegistrationName(), mp3DataSource.getAlias());
+        }
+        {
+            ManagedFileImageDataSource imageDataSource = new ManagedFileImageDataSource();
+            Dictionary<String, Object> imageProps = new Hashtable<String, Object>(1);
+            imageProps.put("identifier", imageDataSource.getRegistrationName());
+            registerService(DataSource.class, imageDataSource, imageProps);
+            ImageActionFactory.addMapping(imageDataSource.getRegistrationName(), imageDataSource.getAlias());
+        }
         registerModule(new ImageActionFactory(this), "image");
     }
 

@@ -2548,15 +2548,16 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
             final SimpleDateFormat sdf = new SimpleDateFormat(COMMANDLINE_DATEFORMAT);
             sdf.setTimeZone(TimeZone.getTimeZone(COMMANDLINE_TIMEZONE));
             try {
-                final String date = (String)parser.getOptionValue(birthdayOption);
-                if( date != null ) {
-                    final Date value = sdf.parse(date);
-                    if (null != value) {
-                        usr.setBirthday(value);
+                final String date = (String) parser.getOptionValue(birthdayOption);
+                if (null != date) {
+                    if ("null".equalsIgnoreCase(date) || 0 == date.length()) {
+                        usr.setBirthday(null);
+                    } else {
+                        usr.setBirthday(sdf.parse(date));
                     }
                 }
             } catch (final ParseException e) {
-                throw new InvalidDataException("Wrong dateformat, use \"" + sdf.toPattern() + "\"");
+                throw new InvalidDataException("Wrong dateformat, use \"" + sdf.toPattern() + "\"", e);
             }
         }
         {

@@ -27,11 +27,11 @@ import me.prettyprint.cassandra.service.CassandraHostConfigurator;
 public class HostTimeoutTracker extends BackgroundCassandraHostService {
   private static final Logger log = LoggerFactory.getLogger(HostTimeoutTracker.class);
 
-  private final ConcurrentHashMap<CassandraHost, LinkedBlockingQueue<Long>> timeouts;
-  private final ConcurrentHashMap<CassandraHost, Long> suspended;
-  private final int timeoutCounter;
-  private final int timeoutWindow;
-  private final int nodeSuspensionDurationInSeconds;
+  private ConcurrentHashMap<CassandraHost, LinkedBlockingQueue<Long>> timeouts;
+  private ConcurrentHashMap<CassandraHost, Long> suspended;
+  private int timeoutCounter;
+  private int timeoutWindow;
+  private int nodeSuspensionDurationInSeconds;
   
   public static final int DEF_TIMEOUT_COUNTER = 10;
   public static final int DEF_TIMEOUT_WINDOW = 500;

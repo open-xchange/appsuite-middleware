@@ -6,7 +6,7 @@ BuildRequires: ant
 BuildRequires: ant-nodeps
 BuildRequires: java-devel >= 1.6.0
 Version:       @OXVERSION@
-%define        ox_release 5
+%define        ox_release 6
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0 
@@ -22,6 +22,11 @@ Requires:      open-xchange-mailstore
 Requires:      open-xchange-httpservice
 Requires:      open-xchange-theme-default
 Requires:      open-xchange-smtp >= @OXVERSION@
+Requires:      open-xchange-cluster-discovery
+%if 0%{?rhel_version}
+# Bug #23216
+Requires:      redhat-lsb
+%endif
 
 %description
 This package provides the dependencies to install a working Open-Xchange backend system. By installing this package a minimal backend is
@@ -86,6 +91,29 @@ if [ ${1:-0} -eq 2 ]; then
     # prevent bash from expanding, see bug 13316
     GLOBIGNORE='*'
 
+    # SoftwareChange_Request-1196
+    pfile=/opt/open-xchange/etc/import.properties
+    if ! ox_exists_property com.openexchange.import.ical.limit $pfile; then
+        ox_set_property com.openexchange.import.ical.limit 10000 $pfile
+    fi
+
+    # SoftwareChange_Request-1068
+    # -----------------------------------------------------------------------
+    pfile=/opt/open-xchange/etc/ox-scriptconf.sh
+    jopts=$(eval ox_read_property JAVA_XTRAOPTS $pfile)
+    jopts=${jopts//\"/}
+    if ! echo $jopts | grep "osgi.compatibility.bootdelegation" > /dev/null; then
+        ox_set_property JAVA_XTRAOPTS \""$jopts -Dosgi.compatibility.bootdelegation=true"\" $pfile
+    fi
+
+    # SoftwareChange_Request-1135
+    pfile=/opt/open-xchange/etc/contact.properties
+    for key in scale_images scale_image_width scale_image_height; do
+        if ox_exists_property $key $pfile; then
+           ox_remove_property $key $pfile
+        fi
+    done
+
     # SoftwareChange_Request-1142
     pfile=/opt/open-xchange/etc/imap.properties
     if ! ox_exists_property com.openexchange.imap.umlautFilterThreshold $pfile; then
@@ -115,6 +143,17 @@ if [ ${1:-0} -eq 2 ]; then
         rm -f $ptmp
     fi
 
+    # SoftwareChange_Request-1028
+    pfile=/opt/open-xchange/etc/contact.properties
+    if ! ox_exists_property com.openexchange.carddav.tree $pfile; then
+        ox_set_property com.openexchange.carddav.tree "0" $pfile
+    fi
+    if ! ox_exists_property com.openexchange.carddav.combinedRequestTimeout $pfile; then
+        ox_set_property com.openexchange.carddav.combinedRequestTimeout "20000" $pfile
+    fi
+    if ! ox_exists_property com.openexchange.carddav.exposedCollections $pfile; then
+        ox_set_property com.openexchange.carddav.exposedCollections "0" $pfile
+    fi
     # SoftwareChange_Request-1091
     pfile=/opt/open-xchange/etc/contact.properties
     if ! ox_exists_property contactldap.configuration.path $pfile; then
@@ -187,6 +226,20 @@ fi
 /sbin/rcopen-xchange
 
 %changelog
+* Wed Nov 14 2012 Marcus Klein <marcus.klein@open-xchange.com>
+Sixth release candidate for 6.22.1
+* Tue Nov 13 2012 Marcus Klein <marcus.klein@open-xchange.com>
+Fifth release candidate for 6.22.1
+* Tue Nov 06 2012 Marcus Klein <marcus.klein@open-xchange.com>
+Fourth release candidate for 6.22.1
+* Fri Nov 02 2012 Marcus Klein <marcus.klein@open-xchange.com>
+Third release candidate for 6.22.1
+* Wed Oct 31 2012 Marcus Klein <marcus.klein@open-xchange.com>
+Second release candidate for 6.22.1
+* Fri Oct 26 2012 Marcus Klein <marcus.klein@open-xchange.com>
+First release candidate for 6.22.1
+* Fri Oct 26 2012 Marcus Klein <marcus.klein@open-xchange.com>
+prepare for 6.22.1
 * Wed Oct 10 2012 Marcus Klein <marcus.klein@open-xchange.com>
 Fifth release candidate for 6.22.0
 * Tue Oct 09 2012 Marcus Klein <marcus.klein@open-xchange.com>
@@ -195,6 +248,10 @@ Fourth release candidate for 6.22.0
 Third release candidate for 6.22.0
 * Thu Oct 04 2012 Marcus Klein <marcus.klein@open-xchange.com>
 Second release candidate for 6.22.0
+* Tue Sep 04 2012 Marcus Klein <marcus.klein@open-xchange.com>
+First release candidate for 6.23.0
+* Mon Sep 03 2012 Marcus Klein <marcus.klein@open-xchange.com>
+prepare for next EDP drop
 * Tue Aug 21 2012 Marcus Klein <marcus.klein@open-xchange.com>
 First release candidate for 6.22.0
 * Mon Aug 20 2012 Marcus Klein <marcus.klein@open-xchange.com>

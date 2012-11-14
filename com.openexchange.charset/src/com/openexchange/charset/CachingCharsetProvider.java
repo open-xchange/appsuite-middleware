@@ -55,8 +55,8 @@ import java.nio.charset.CharsetEncoder;
 import java.nio.charset.UnsupportedCharsetException;
 import java.nio.charset.spi.CharsetProvider;
 import java.util.Iterator;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import org.cliffc.high_scale_lib.NonBlockingHashMap;
 
 /**
  * {@link CachingCharsetProvider} - A charset provider which returns the "CP50220" charset when "ISO-2022-JP" is requested.
@@ -78,13 +78,12 @@ public final class CachingCharsetProvider extends CharsetProvider {
         }
         
         @Override
-        public boolean contains(Charset cs) {
+        public boolean contains(final Charset cs) {
             return false;
         }
     };
 
     private final CharsetProvider standardProvider;
-
     private final ConcurrentMap<String, Charset> cache;
 
     /**
@@ -95,7 +94,7 @@ public final class CachingCharsetProvider extends CharsetProvider {
     public CachingCharsetProvider(final CharsetProvider standardProvider) {
         super();
         this.standardProvider = standardProvider;
-        cache = new ConcurrentHashMap<String, Charset>(32);
+        cache = new NonBlockingHashMap<String, Charset>(32);
     }
 
     @Override

@@ -137,7 +137,7 @@ public final class MobilityProvisioningServlet extends PermissionServlet {
 		 * Close response and flush print writer
 		 */
 		try {
-			ResponseWriter.write(response, resp.getWriter());
+			ResponseWriter.write(response, resp.getWriter(), localeFrom(getSessionObject(request)));
 		} catch (final JSONException e) {
 			LOG.error(e.getLocalizedMessage(), e);
 		}
@@ -151,8 +151,8 @@ public final class MobilityProvisioningServlet extends PermissionServlet {
 
 		final JSONObject obj = new JSONObject();
 
+		final ServerSession session = getSessionObject(request);
 		try {
-			final ServerSession session = getSessionObject(request);
 
 			final String action = JSONUtility.checkStringParameter(request, "action");
 
@@ -242,7 +242,7 @@ public final class MobilityProvisioningServlet extends PermissionServlet {
 		 * Close response and flush print writer
 		 */
 		try {
-			ResponseWriter.write(response, resp.getWriter());
+			ResponseWriter.write(response, resp.getWriter(), localeFrom(session));
 		} catch (final JSONException e) {
 			//cannot send this to user, so just log it:
 			LOG.error(e.getLocalizedMessage(), e);

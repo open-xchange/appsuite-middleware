@@ -53,7 +53,6 @@ import java.io.IOException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.openexchange.ajax.DataServlet;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.config.ConfigurationService;
@@ -95,7 +94,7 @@ public class ReCaptchaServlet extends DataServlet {
             response.setException(e);
         }
 
-        writeResponse(response, resp);
+        writeResponse(response, resp, getSessionObject(req));
     }
 
     private void doGetPublicKey(final Response response) {

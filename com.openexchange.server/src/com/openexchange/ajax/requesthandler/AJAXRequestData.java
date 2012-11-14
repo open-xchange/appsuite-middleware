@@ -68,6 +68,7 @@ import org.json.JSONObject;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.fields.RequestConstants;
 import com.openexchange.ajax.parser.DataParser;
+import com.openexchange.dispatcher.Parameterizable;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.upload.UploadFile;
 import com.openexchange.groupware.upload.impl.UploadEvent;
@@ -99,30 +100,46 @@ public class AJAXRequestData {
         InputStream getInputStream() throws IOException;
     }
 
+    /** Map for parameters */
     private final Map<String, String> params;
 
+    /** The {@code Parameterizable} reference */
+    private Parameterizable parameterizable;
+
+    /** Map for headers */
     private final Map<String, String> headers;
 
+    /** Map for properties */
     private final Map<String, Object> properties;
 
+    /** Associated server session */
     private ServerSession session;
 
+    /** Whether a secure connection has been established */
     private boolean secure;
 
+    /** The request body data */
     private Object data;
 
+    /** The module string */
     private String module;
 
+    /** The action string */
     private String action;
 
+    /** The upload stream provider */
     private InputStreamProvider uploadStreamProvider;
 
+    /** List of uploaded files */
     private final List<UploadFile> files;
 
+    /** The host name */
     private String hostname;
 
+    /** The remote address */
     private String remoteAddress;
 
+    /** The Servlet's request URI */
     private String servletRequestUri;
 
     /**
@@ -130,22 +147,31 @@ public class AJAXRequestData {
      */
     private String route;
 
+    /** The upload event */
     private volatile UploadEvent uploadEvent;
 
+    /** The format */
     private String format;
 
+    /** The state reference */
     private AJAXState state;
 
+    /** The eTag */
     private String eTag;
 
+    /** The expires millis */
     private long expires;
 
+    /** The path information */
     private String pathInfo;
 
+    /** The HTTP Servlet request */
     private HttpServletRequest httpServletRequest;
 
+    /** The decorator identifiers */
     private final List<String> decoratorIds;
 
+    /** The multipart flag. */
     private boolean multipart;
 
     /**
@@ -200,6 +226,7 @@ public class AJAXRequestData {
         copy.properties.putAll(properties);
         copy.decoratorIds.addAll(decoratorIds);
         copy.files.addAll(files);
+        copy.parameterizable = parameterizable;
         copy.session = session;
         copy.secure = secure;
         copy.action = action;
@@ -220,6 +247,18 @@ public class AJAXRequestData {
         copy.uploadEvent = null;
         copy.uploadStreamProvider = null;
         return copy;
+    }
+    
+    /**
+     * Examines specified {@code HttpServletRequest} instance.
+     *
+     * @param servletRequest The HTTP Servlet request to examine
+     */
+    public void examineServletRequest(final HttpServletRequest servletRequest) {
+        if (null == servletRequest) {
+            return;
+        }
+        this.parameterizable = servletRequest instanceof Parameterizable ? (Parameterizable) servletRequest : null;
     }
 
     /**
@@ -290,6 +329,7 @@ public class AJAXRequestData {
      * @param httpServletRequest The HTTP Servlet request to set
      */
     public void setHttpServletRequest(final HttpServletRequest httpServletRequest) {
+        examineServletRequest(httpServletRequest);
         this.httpServletRequest = httpServletRequest;
     }
 
@@ -390,6 +430,11 @@ public class AJAXRequestData {
             params.remove(name);
         } else {
             params.put(name, value);
+        }
+        final Parameterizable parameterizable = this.parameterizable;
+        if (null != parameterizable) {
+            // Write-though
+            parameterizable.putParameter(name, value);
         }
     }
 
@@ -990,6 +1035,9 @@ public class AJAXRequestData {
      * @return <code>true</code> if existent; else <code>false</code>
      */
     public boolean containsProperty(final String name) {
+        if (null == name) {
+            return false;
+        }
         return properties.containsKey(name);
     }
 
@@ -1000,9 +1048,12 @@ public class AJAXRequestData {
      * @return The value or <code>null</code> if absent
      */
     public <V> V getProperty(final String name) {
+        if (null == name) {
+            return null;
+        }
         try {
             return (V) properties.get(name);
-        } catch (final ClassCastException e) {
+        } catch (final RuntimeException e) {
             return null;
         }
     }

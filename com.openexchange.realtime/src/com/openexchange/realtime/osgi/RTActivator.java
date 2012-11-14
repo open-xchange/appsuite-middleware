@@ -81,11 +81,13 @@ public class RTActivator extends HousekeepingActivator {
 		
 		track(Channel.class, new SimpleRegistryListener<Channel>() {
 
-			public void added(final ServiceReference<Channel> ref, final Channel service) {
+			@Override
+            public void added(final ServiceReference<Channel> ref, final Channel service) {
 				dispatcher.addChannel(service);
 			}
 
-			public void removed(final ServiceReference<Channel> ref, final Channel service) {
+			@Override
+            public void removed(final ServiceReference<Channel> ref, final Channel service) {
 				dispatcher.removeChannel(service);
 			}
 		});

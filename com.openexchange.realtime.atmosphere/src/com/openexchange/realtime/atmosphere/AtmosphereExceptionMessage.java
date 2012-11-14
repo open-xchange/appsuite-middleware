@@ -60,4 +60,11 @@ import com.openexchange.i18n.LocalizableStrings;
 public class AtmosphereExceptionMessage implements LocalizableStrings {
     /** The mandatory session information is missing. */
     public static final String SESSIONINFO_DIDNT_MATCH_SERVERSESSION_MSG = "The session information didn't match any ServerSession";
+    /** Missing key \"%1$s\" in: \"%2$s\" */
+    public static final String MISSING_KEY_MSG = "Missing key \"%1$s\" in: \"%2$s\"";
+    /** Could not find a builder for the specified element: . \"%1$s\" */
+    public static final String MISSING_BUILDER_FOR_ELEMENT_MSG = "Could not find a stanza builder for the specified element: . \"%1$s\"";
+    /** Error while building Stanza: \"%1$s\" */
+    public static final String ERROR_WHILE_BUILDING_MSG = "Error while building Stanza: \"%1$s\"";
+    
 }

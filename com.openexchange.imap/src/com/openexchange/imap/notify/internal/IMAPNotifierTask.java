@@ -52,12 +52,12 @@ package com.openexchange.imap.notify.internal;
 import static com.openexchange.mail.dataobjects.MailFolder.DEFAULT_FOLDER_ID;
 import java.util.Iterator;
 import java.util.Locale;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import javax.mail.FetchProfile;
 import javax.mail.Folder;
 import javax.mail.MessagingException;
 import javax.mail.UIDFolder.FetchProfileItem;
+import org.cliffc.high_scale_lib.NonBlockingHashMap;
 import com.openexchange.imap.IMAPFolderStorage;
 import com.openexchange.imap.config.IMAPProperties;
 import com.openexchange.imap.services.IMAPServiceRegistry;
@@ -99,7 +99,7 @@ public final class IMAPNotifierTask {
         this.accountId = accountId;
         this.user = session.getUserId();
         this.context = session.getContextId();
-        fullNames = new ConcurrentHashMap<String, String>(2);
+        fullNames = new NonBlockingHashMap<String, String>(2);
     }
 
     /**

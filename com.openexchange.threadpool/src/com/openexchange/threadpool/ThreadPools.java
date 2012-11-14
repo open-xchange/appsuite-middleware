@@ -378,6 +378,19 @@ public final class ThreadPools {
     }
 
     /**
+     * @param trackable Whether the task is trackable
+     * @return A {@link Task} object
+     * @throws NullPointerException If task is <code>null</code>
+     */
+    public static Task<Object> task(final Runnable task, final boolean trackable) {
+        if (task == null) {
+            throw new NullPointerException();
+        }
+        final RunnableAdapter<Object> callable = new RunnableAdapter<Object>(task, null);
+        return trackable ? new TrackableTaskAdapter<Object>(callable) : new TaskAdapter<Object>(callable);
+    }
+
+    /**
      * Returns a {@link Task} object that, when called, runs the given task, renames thread's prefix and returns <tt>null</tt>.
      *
      * @param task The task to run

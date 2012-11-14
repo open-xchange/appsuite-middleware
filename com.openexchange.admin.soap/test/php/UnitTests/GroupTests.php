@@ -59,6 +59,7 @@ class GroupTests extends PHPUnit_Framework_TestCase {
 				// verfiy user data				
 				$this->verifyUser($new_user,$user_get_response);
 				$users_id_array[] = $user_get_response->id;
+				var_dump($users_id_array);
 			}
 		}
 

@@ -53,14 +53,17 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.concurrent.atomic.AtomicReference;
 import org.apache.commons.logging.Log;
-import com.openexchange.exception.OXException;
 import com.openexchange.mdns.MDNSService;
 import com.openexchange.mdns.MDNSServiceInfo;
 import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.threadpool.AbstractTask;
+import com.openexchange.threadpool.Task;
+import com.openexchange.threadpool.ThreadPoolService;
+import com.openexchange.threadpool.behavior.CallerRunsBehavior;
 
 
 /**
- * {@link HazelcastRegistrationActivator}
+ * {@link HazelcastRegistrationActivator} - The only purpose is to register a Hazelcast MDNS service that identifies the node as Hazelcast-capable.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
@@ -82,28 +85,29 @@ public final class HazelcastRegistrationActivator extends HousekeepingActivator 
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { MDNSService.class };
+        return new Class<?>[] { MDNSService.class, ThreadPoolService.class };
     }
 
     @Override
     protected void startBundle() throws Exception {
+        final long st = System.currentTimeMillis();
         final MDNSService service = getService(MDNSService.class);
         if (mdnsServiceRef.compareAndSet(null, service)) {
-            final Runnable task = new Runnable() {
+            final ThreadPoolService poolService = getService(ThreadPoolService.class);
+            final Task<Void> task = new AbstractTask<Void>() {
 
                 @Override
-                public void run() {
-                    try {
-                        serviceInfo =
-                            service.registerService("openexchange.service.hazelcast", 7001, new StringBuilder(
-                                "open-xchange hazelcast service @").append(getHostName()).toString());
-                    } catch (final OXException e) {
-                        LOG.error(e.getMessage(), e);
-                    }
+                public Void call() throws Exception {
+                    serviceInfo =
+                        service.registerService("openexchange.service.hazelcast", 7001, new StringBuilder(
+                            "open-xchange hazelcast service @").append(getHostName()).toString());
+                    return null;
                 }
             };
-            new Thread(task).run();
+            poolService.submit(task, CallerRunsBehavior.<Void> getInstance());
         }
+        final long dur = System.currentTimeMillis() - st;
+        LOG.info("\n\tBundle \"com.openexchange.mdns.hazelcast\" started in " + dur + "msec.\n");
     }
 
     @Override

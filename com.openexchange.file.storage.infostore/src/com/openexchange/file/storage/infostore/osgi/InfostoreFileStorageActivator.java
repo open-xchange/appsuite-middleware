@@ -69,16 +69,6 @@ public class InfostoreFileStorageActivator extends HousekeepingActivator {
     }
 
     @Override
-    protected void handleAvailability(final Class<?> clazz) {
-        // Don't care
-    }
-
-    @Override
-    protected void handleUnavailability(final Class<?> clazz) {
-        // Don't care
-    }
-
-    @Override
     protected void startBundle() throws Exception {
         registerService(FileStorageService.class, new InfostoreFileStorageService() {
             @Override
@@ -91,11 +81,6 @@ public class InfostoreFileStorageActivator extends HousekeepingActivator {
                 return getService(InfostoreSearchEngine.class);
             }
         }, null);
-    }
-
-    @Override
-    protected void stopBundle() throws Exception {
-        cleanUp();
     }
 
 }

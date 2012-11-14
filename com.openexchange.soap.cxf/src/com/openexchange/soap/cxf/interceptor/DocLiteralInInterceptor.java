@@ -19,11 +19,14 @@
 
 package com.openexchange.soap.cxf.interceptor;
 
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.logging.Logger;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamConstants;
 import javax.xml.stream.XMLStreamReader;
@@ -118,7 +121,36 @@ public class DocLiteralInInterceptor extends AbstractInDatabindingInterceptor {
                         final Object wrappedObject = dr.read(messagePartInfo, xmlReader);
                         parameters.put(msgInfo.getMessageParts().get(0), wrappedObject);
                     } catch (final org.apache.cxf.interceptor.Fault fault) {
-                        final String localPart = messagePartInfo.getTypeQName().getLocalPart();
+                        final QName typeQName = messagePartInfo.getTypeQName();
+                        if (null == typeQName) {
+                            /*-
+                             * Check for an unexpected element:
+                             * 
+                             * javax.xml.bind.UnmarshalException: unexpected element (uri:"<element-uri>", local:"<element-name>").
+                             */
+                            if (fault.getCause() instanceof javax.xml.bind.UnmarshalException) {
+                                final Throwable linkedException = ((javax.xml.bind.UnmarshalException) fault.getCause()).getLinkedException();
+                                if (linkedException != null && linkedException.getClass().getName().indexOf("SAXParseException") >= 0) {
+                                    final String[] info = extractUnexpectedElement(linkedException.getMessage());
+                                    if (null != info) {
+                                        final String m ;
+                                        if (isEmpty(info[0])) {
+                                            m = MessageFormat.format(
+                                                "Unexpected element \"{0}\". Please remove that element from SOAP request.",
+                                                info[1]);
+                                        } else {
+                                            m = MessageFormat.format(
+                                                "Unexpected element \"{0}\" (URI={1}). Please remove that element from SOAP request.",
+                                                info[1],
+                                                info[0]);
+                                        }
+                                        throw new Fault(m, LOG, fault);
+                                    }
+                                }
+                            }
+                            throw fault;
+                        }
+                        final String localPart = typeQName.getLocalPart();
                         if (("date".equals(localPart) || "xs:date".equals(localPart)) && (fault.getCause() instanceof javax.xml.bind.UnmarshalException)) {
                             // Ignore
                         } else {
@@ -239,6 +271,27 @@ public class DocLiteralInInterceptor extends AbstractInDatabindingInterceptor {
             }
             throw f;
         }
+    }
+
+    private static final Pattern P_UNEXPECTED_ELEM = Pattern.compile("\\(uri:\"([^\"]*)\", local:\"([^\"]*)\"\\)");
+    private static String[] extractUnexpectedElement(final String fault) {
+        final Matcher m = P_UNEXPECTED_ELEM.matcher(fault);
+        if (!m.find()) {
+            return null;
+        }
+        return new String[] { m.group(1), m.group(2) };
+    }
+
+    private static boolean isEmpty(final String string) {
+        if (null == string) {
+            return true;
+        }
+        final int len = string.length();
+        boolean isWhitespace = true;
+        for (int i = 0; isWhitespace && i < len; i++) {
+            isWhitespace = Character.isWhitespace(string.charAt(i));
+        }
+        return isWhitespace;
     }
     
     private void getPara(DepthXMLStreamReader xmlReader,

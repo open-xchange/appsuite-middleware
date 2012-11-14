@@ -61,27 +61,17 @@ import com.openexchange.session.Session;
 public interface FileStorageAccountManagerProvider {
 
     /**
-     * The topic for an appearing account manager provider.
+     * The default ranking: <code>0</code>.
      */
-    public static final String TOPIC = "com/openexchange/file/storage/FileStorageAccountManagerProvider";
-
-    /**
-     * The property for the provider's ranking; property is of type <code>java.lang.Integer</code>.
-     */
-    public static final String PROPERTY_RANKING = "ranking";
-
-    /**
-     * The property for the provider; property is of type <code>com.openexchange.file.storage.FileStorageAccountManagerProvider</code>.
-     */
-    public static final String PROPERTY_PROVIDER = "provider";
+    public static final int DEFAULT_RANKING = 0;
 
     /**
      * Whether this provider supports specified {@link FileStorageService file storage service}.
      *
-     * @param service The file storage service
+     * @param serviceId The file storage service identifier
      * @return <code>true</code> if this provider supports specified file storage service; otherwise <code>false</code>
      */
-    boolean supports(FileStorageService service);
+    boolean supports(String serviceId);
 
     /**
      * Gets the appropriate file storage account manager for specified account identifier and session.
@@ -96,11 +86,11 @@ public interface FileStorageAccountManagerProvider {
     /**
      * Gets the appropriate account manager for specified {@link FileStorageService file storage service}.
      *
-     * @param service The file storage service
+     * @param serviceId The file storage service identifier
      * @return The appropriate account manager for specified file storage service.
      * @throws OXException If an appropriate account manager cannot be returned
      */
-    FileStorageAccountManager getAccountManagerFor(FileStorageService service) throws OXException;
+    FileStorageAccountManager getAccountManagerFor(String serviceId) throws OXException;
 
     /**
      * Gets the ranking of this provider.

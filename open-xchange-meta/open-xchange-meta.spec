@@ -3,7 +3,7 @@ Name:           open-xchange-meta
 BuildArch:	noarch
 #!BuildIgnore: post-build-checks
 Version:	@OXVERSION@
-%define		ox_release 5
+%define		ox_release 6
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GPL-2.0
@@ -266,6 +266,20 @@ Authors:
 %doc README.TXT
 
 %changelog
+* Wed Nov 14 2012 Carsten Hoeger <choeger@open-xchange.com>
+Sixth release candidate for 6.22.1
+* Tue Nov 13 2012 Carsten Hoeger <choeger@open-xchange.com>
+Fifth release candidate for 6.22.1
+* Tue Nov 06 2012 Carsten Hoeger <choeger@open-xchange.com>
+Fourth release candidate for 6.22.1
+* Fri Nov 02 2012 Carsten Hoeger <choeger@open-xchange.com>
+Third release candidate for 6.22.1
+* Wed Oct 31 2012 Carsten Hoeger <choeger@open-xchange.com>
+Second release candidate for 6.22.1
+* Fri Oct 26 2012 Carsten Hoeger <choeger@open-xchange.com>
+First release candidate for 6.22.1
+* Fri Oct 26 2012 Carsten Hoeger <choeger@open-xchange.com>
+prepare for 6.22.1
 * Wed Oct 10 2012 Carsten Hoeger <choeger@open-xchange.com>
 Fifth release candidate for 6.22.0
 * Tue Oct 09 2012 Carsten Hoeger <choeger@open-xchange.com>
@@ -274,6 +288,10 @@ Fourth release candidate for 6.22.0
 Third release candidate for 6.22.0
 * Thu Oct 04 2012 Carsten Hoeger <choeger@open-xchange.com>
 Second release candidate for 6.22.0
+* Tue Sep 04 2012 Carsten Hoeger <choeger@open-xchange.com>
+First release candidate for 6.23.0
+* Mon Sep 03 2012 Carsten Hoeger <choeger@open-xchange.com>
+prepare for next EDP drop
 * Tue Aug 21 2012 Carsten Hoeger <choeger@open-xchange.com>
 First release candidate for 6.22.0
 * Mon Aug 20 2012 Carsten Hoeger <choeger@open-xchange.com>

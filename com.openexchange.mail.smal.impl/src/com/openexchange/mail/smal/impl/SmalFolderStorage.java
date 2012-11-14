@@ -50,9 +50,11 @@
 package com.openexchange.mail.smal.impl;
 
 import static com.openexchange.mail.utils.MailFolderUtility.prepareMailFolderParam;
+import java.util.ArrayList;
+import java.util.List;
+import org.apache.commons.logging.Log;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.IndexRange;
-import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailSortField;
 import com.openexchange.mail.OrderDirection;
 import com.openexchange.mail.Quota;
@@ -64,7 +66,7 @@ import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mail.dataobjects.MailFolderDescription;
 import com.openexchange.mail.dataobjects.MailMessage;
-import com.openexchange.mail.smal.impl.index.IndexAccessAdapter;
+import com.openexchange.mail.search.FlagTerm;
 import com.openexchange.session.Session;
 
 /**
@@ -74,6 +76,8 @@ import com.openexchange.session.Session;
  */
 public final class SmalFolderStorage extends AbstractSMALStorage implements IMailFolderStorage, IMailFolderStorageEnhanced {
 
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(SmalFolderStorage.class);
+    
     private static final String DEFAULT_FOLDER_ID = MailFolder.DEFAULT_FOLDER_ID;
 
     private final IMailFolderStorage folderStorage;
@@ -132,65 +136,55 @@ public final class SmalFolderStorage extends AbstractSMALStorage implements IMai
 
     @Override
     public String createFolder(final MailFolderDescription toCreate) throws OXException {
-        final String fullName = folderStorage.createFolder(toCreate);
+        String fullName = folderStorage.createFolder(toCreate);
         try {
-            processFolder(fullName);
-        } catch (final InterruptedException e) {
-            Thread.currentThread().interrupt();
+            submitFolderJob(fullName);
+        } catch (OXException e) {
+            LOG.warn("Could not schedule folder job for folder " + fullName + '.', e);
         }
         return fullName;
     }
 
     @Override
     public String updateFolder(final String fullName, final MailFolderDescription toUpdate) throws OXException {
-        final String fn = folderStorage.updateFolder(fullName, toUpdate);
-        try {
-            processFolder(fn);
-        } catch (final InterruptedException e) {
-            Thread.currentThread().interrupt();
-        }
+        String fn = folderStorage.updateFolder(fullName, toUpdate);
         return fn;
     }
 
     @Override
     public String moveFolder(final String fullName, final String newFullName) throws OXException {
+        String nfn = folderStorage.moveFolder(fullName, newFullName);
         try {
-            final String nfn = folderStorage.moveFolder(fullName, newFullName);
-            deleteFolderFromIndex(fullName, true);
-            processFolderToIndex(folderStorage.getFolder(newFullName), true);
-            return nfn;
-        } catch (final InterruptedException e) {
-            Thread.currentThread().interrupt();
-            throw MailExceptionCode.INTERRUPT_ERROR.create(e, e.getMessage());
+            submitFolderJob(fullName);
+            submitFolderJob(nfn);
+        } catch (OXException e) {
+            LOG.warn("Could not schedule folder job for folder " + fullName + '.', e);
         }
+
+        return nfn;
     }
 
     @Override
     public String deleteFolder(final String fullName, final boolean hardDelete) throws OXException {
+        String retval = folderStorage.deleteFolder(fullName, hardDelete);
         try {
-            final String retval = folderStorage.deleteFolder(fullName, hardDelete);
-            deleteFolderFromIndex(fullName, true);
+            submitFolderJob(retval);
             if (!hardDelete) {
-                processFolderToIndex(folderStorage.getFolder(getTrashFolder()), true);
+                submitFolderJob(getTrashFolder());
             }
-            return retval;
-        } catch (final InterruptedException e) {
-            Thread.currentThread().interrupt();
-            throw MailExceptionCode.INTERRUPT_ERROR.create(e, e.getMessage());
+        } catch (OXException e) {
+            LOG.warn("Could not schedule folder job for folder " + retval + '.', e);
         }
+        return retval;
     }
 
     @Override
     public void clearFolder(final String fullName, final boolean hardDelete) throws OXException {
+        folderStorage.clearFolder(fullName, hardDelete);
         try {
-            folderStorage.clearFolder(fullName, hardDelete);
-            deleteFolderFromIndex(fullName, true);
-            if (!hardDelete) {
-                processFolder(folderStorage.getFolder(getTrashFolder()));
-            }
-        } catch (final InterruptedException e) {
-            Thread.currentThread().interrupt();
-            throw MailExceptionCode.INTERRUPT_ERROR.create(e, e.getMessage());
+            submitFolderJob(fullName);
+        } catch (OXException e) {
+            LOG.warn("Could not schedule folder job for folder " + fullName + '.', e);
         }
     }
 
@@ -241,15 +235,15 @@ public final class SmalFolderStorage extends AbstractSMALStorage implements IMai
 
     @Override
     public String renameFolder(final String fullName, final String newName) throws OXException {
+        String nfn = folderStorage.renameFolder(fullName, newName);
         try {
-            final String nfn = folderStorage.renameFolder(fullName, newName);
-            deleteFolderFromIndex(fullName, true);
-            processFolderToIndex(folderStorage.getFolder(nfn), true);
-            return nfn;
-        } catch (final InterruptedException e) {
-            Thread.currentThread().interrupt();
-            throw MailExceptionCode.INTERRUPT_ERROR.create(e, e.getMessage());
+            submitFolderJob(fullName);
+            submitFolderJob(nfn);
+        } catch (OXException e) {
+            LOG.warn("Could not schedule folder job for folder " + fullName + '.', e);
         }
+        
+        return nfn;
     }
 
     @Override
@@ -295,6 +289,38 @@ public final class SmalFolderStorage extends AbstractSMALStorage implements IMai
             -1).length;
     }
 
+    @Override
+    public void expungeFolder(String fullName) throws OXException {
+        expungeFolder(fullName, false);
+    }
+
+    @Override
+    public void expungeFolder(String fullName, boolean hardDelete) throws OXException {
+        if (folderStorage instanceof IMailFolderStorageEnhanced) {
+            ((IMailFolderStorageEnhanced) folderStorage).expungeFolder(ensureFullName(fullName), hardDelete);
+        }
+        final IMailMessageStorage messageStorage = delegateMailAccess.getMessageStorage();
+        final MailMessage[] messages = messageStorage.searchMessages(
+            ensureFullName(fullName),
+            IndexRange.NULL,
+            MailSortField.RECEIVED_DATE,
+            OrderDirection.ASC,
+            new FlagTerm(MailMessage.FLAG_DELETED, true),
+            FIELDS_ID);
+        final List<String> mailIds = new ArrayList<String>(messages.length);
+        for (int i = 0; i < messages.length; i++) {
+            final MailMessage mailMessage = messages[i];
+            if (null != mailMessage) {
+                mailIds.add(mailMessage.getMailId());
+            }
+        }
+        if (hardDelete) {
+            messageStorage.deleteMessages(fullName, mailIds.toArray(new String[0]), true);
+        } else {
+            messageStorage.moveMessages(fullName, folderStorage.getTrashFolder(), mailIds.toArray(new String[0]), true);
+        }
+    }
+
     private static String ensureFullName(final String fullName) {
         return prepareMailFolderParam(fullName).getFullname();
     }
@@ -334,25 +360,4 @@ public final class SmalFolderStorage extends AbstractSMALStorage implements IMai
             null,
             FIELDS_ID).length;
     }
-
-    private void deleteFolderFromIndex(final String fullName, final boolean recursively) throws OXException, InterruptedException {
-        if (recursively) {
-            final MailFolder[] subfolders = folderStorage.getSubfolders(fullName, true);
-            for (final MailFolder mailFolder : subfolders) {
-                deleteFolder(mailFolder.getFullname(), true);
-            }
-        }
-        IndexAccessAdapter.getInstance().delete(accountId, fullName, null, session);
-    }
-
-    private void processFolderToIndex(final MailFolder mailFolder, final boolean recursively) throws OXException, InterruptedException {
-        if (recursively) {
-            final MailFolder[] subfolders = folderStorage.getSubfolders(mailFolder.getFullname(), true);
-            for (final MailFolder subfolder : subfolders) {
-                processFolderToIndex(subfolder, true);
-            }
-        }
-        processFolder(mailFolder);
-    }
-
 }

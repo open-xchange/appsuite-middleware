@@ -66,14 +66,4 @@ public interface ClusterDiscoveryService {
      */
     List<InetAddress> getNodes();
 
-    /**
-     * Registers a listener to be notified of changes to the known cluster nodes.
-     */
-    void addListener(ClusterListener listener);
-
-    /**
-     * Un-registers a listener.
-     */
-    void removeListener(ClusterListener listener);
-
 }

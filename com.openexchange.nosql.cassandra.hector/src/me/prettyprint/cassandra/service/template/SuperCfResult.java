@@ -23,8 +23,7 @@ public interface SuperCfResult<K, SN, N> extends ColumnFamilyResult<K, N> {
   
   Collection<SN> getSuperColumns();
   
-  @Override
-K getKey();
+  K getKey();
 
   UUID getUUID(SN sColumnName, N columnName);
 
@@ -36,6 +35,8 @@ K getKey();
 
   Boolean getBoolean(SN sColumnName, N columnName);
   
+  Float getFloat(SN sColumnName, N columnName);
+
   Double getDouble(SN sColumnName, N columnName);
 
   byte[] getByteArray(SN sColumnName, N columnName);

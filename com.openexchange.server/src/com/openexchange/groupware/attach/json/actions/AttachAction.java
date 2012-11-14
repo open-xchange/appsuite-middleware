@@ -156,7 +156,7 @@ public final class AttachAction extends AbstractAttachmentAction {
                     sum += uploadFile.getSize();
                     // checkSingleSize(uploadFile.getSize(), UserSettingMailStorage.getInstance().getUserSettingMail(
                     // session.getUserId(), session.getContext()));
-                    checkSize(sum);
+                    checkSize(sum, requestData);
                 }
 
                 return attach(attachments, uploadFiles, session, session.getContext(), session.getUser(), session.getUserConfiguration());

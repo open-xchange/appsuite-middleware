@@ -49,8 +49,6 @@
 
 package com.openexchange.index;
 
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * {@link StandardIndexDocument}
@@ -60,58 +58,18 @@ import java.util.Map;
 public class StandardIndexDocument<V> implements IndexDocument<V> {
 
     private final V object;
-
-    private final Type type;
     
-    private Map<String, Object> properties;
-
+    
     /**
      * Initializes a new {@link StandardIndexDocument}.
      */
-    public StandardIndexDocument(final V object, final Type type) {
+    public StandardIndexDocument(final V object) {
         super();
         this.object = object;
-        this.type = type;
-        properties = new HashMap<String, Object>();
     }
 
     @Override
     public V getObject() {
         return object;
     }
-
-    @Override
-    public com.openexchange.index.IndexDocument.Type getType() {
-        return type;
-    }
-
-    @Override
-    public Map<String, Object> getProperties() {
-        return properties;
-    }
-    
-    public void addProperty(String key, Object value) {
-        properties.put(key, value);
-    }
-    
-    public void removeProperty(String key) {
-        properties.remove(key);
-    }
-    
-    public Object getProperty(String key) {
-        return properties.get(key);
-    }
-    
-    public boolean containsProperty(String key) {
-        return properties.containsKey(key);
-    }
-    
-    public void setProperties(Map<String, Object> properties) {
-        if (properties == null) {
-            return;
-        }
-        
-        this.properties = properties;
-    }
-
 }

@@ -164,7 +164,8 @@ public enum POP3ExceptionCode implements OXExceptionCode {
      */
     NO_MOVE_TO_SUBFLD(POP3ExceptionMessage.NO_MOVE_TO_SUBFLD_MSG, CATEGORY_PERMISSION_DENIED, 2032),
     /**
-     * Message could not be moved to trash folder
+     * This message could not be moved to trash folder, possibly because your mailbox is nearly full.<br>
+     * In that case, please try to empty your deleted items first, or delete smaller messages first.
      */
     MOVE_ON_DELETE_FAILED(POP3ExceptionMessage.MOVE_ON_DELETE_FAILED_MSG, CATEGORY_CAPACITY, 2034),
     /**

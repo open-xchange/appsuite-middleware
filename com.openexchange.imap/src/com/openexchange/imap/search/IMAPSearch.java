@@ -66,7 +66,7 @@ import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.imap.IMAPCapabilities;
 import com.openexchange.imap.IMAPException;
-import com.openexchange.imap.command.FetchIMAPCommand;
+import com.openexchange.imap.command.MessageFetchIMAPCommand;
 import com.openexchange.imap.config.IMAPConfig;
 import com.openexchange.imap.services.IMAPServiceRegistry;
 import com.openexchange.mail.MailField;
@@ -155,7 +155,7 @@ public final class IMAPSearch {
             mailFields.add(MailField.CONTENT_TYPE); // Possibly checked by search term
             final long start = System.currentTimeMillis();
             allMsgs =
-                new FetchIMAPCommand(imapFolder, imapConfig.getImapCapabilities().hasIMAP4rev1(), getFetchProfile(
+                new MessageFetchIMAPCommand(imapFolder, imapConfig.getImapCapabilities().hasIMAP4rev1(), getFetchProfile(
                     mailFields.toArray(),
                     imapConfig.getIMAPProperties().isFastFetch()), msgCount).doCommand();
             mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);

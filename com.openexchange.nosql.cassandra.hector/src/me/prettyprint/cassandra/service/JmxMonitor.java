@@ -27,9 +27,9 @@ public class JmxMonitor {
 
   private final Logger log = LoggerFactory.getLogger(getClass());
 
-  private final MBeanServer mbs;
+  private MBeanServer mbs;
   private static JmxMonitor monitorInstance;
-  private final Map<String,CassandraClientMonitor> monitors;
+  private Map<String,CassandraClientMonitor> monitors;
 
   private JmxMonitor() {
     mbs = ManagementFactory.getPlatformMBeanServer();

@@ -23,13 +23,13 @@ import me.prettyprint.hector.api.query.QueryResult;
  */
 public class ChunkInputStream<T> extends InputStream {
 
-  private final T key;
+  private T key;
   private byte[] chunk;
-  private final Keyspace keyspace;
-  private final String cf;
+  private Keyspace keyspace;
+  private String cf;
   private long chunkPos = 0;
   private int pos;
-  private final Serializer<T> rowKeySerializer;
+  private Serializer<T> rowKeySerializer;
 
   public ChunkInputStream(Keyspace keyspace, String cf, T key, Serializer<T> rowKeySerializer) {
     this.key = key;
@@ -43,8 +43,7 @@ public class ChunkInputStream<T> extends InputStream {
    * 
    * @see java.io.InputStream#read()
    */
-  @Override
-public int read() throws IOException {
+  public int read() throws IOException {
     if (chunk == null || pos + 1 == chunk.length) {
       if (!fetchChunk()) {
         return -1;
@@ -81,8 +80,7 @@ public int read() throws IOException {
   /**
    * Not supported
    */
-  @Override
-public boolean markSupported() {
+  public boolean markSupported() {
     return false;
   }
 

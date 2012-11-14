@@ -49,17 +49,15 @@
 
 package com.openexchange.contacts.json.actions;
 
-import java.util.Calendar;
+import java.util.Collection;
 import java.util.Date;
-import java.util.GregorianCalendar;
-import java.util.TimeZone;
+import org.apache.commons.logging.Log;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.contact.ContactService;
 import com.openexchange.contacts.json.ContactRequest;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.contact.ContactInterfaceDiscoveryService;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
@@ -75,6 +73,9 @@ import com.openexchange.tools.session.ServerSession;
  */
 public abstract class ContactAction implements AJAXActionService {
 
+    /** Named logger instance */
+    protected static final Log LOG = com.openexchange.log.Log.loggerFor(ContactAction.class);
+
     private final ServiceLookup serviceLookup;
 
     public static final int[] COLUMNS_ALIAS_ALL = new int[] { 20, 1, 5, 2, 602 };
@@ -82,29 +83,29 @@ public abstract class ContactAction implements AJAXActionService {
     public static final int[] COLUMNS_ALIAS_LIST = new int[] {
         20, 1, 5, 2, 500, 501, 502, 505, 523, 525, 526, 527, 542, 555, 102, 602, 592, 101, 551, 552, 543, 547, 548, 549, 556, 569 };
 
-    public ContactAction(final ServiceLookup serviceLookup) {
+    /**
+     * Initializes a new {@link ContactAction}.
+     * 
+     * @param serviceLookup The service lookup to use
+     */
+    public ContactAction(ServiceLookup serviceLookup) {
         super();
         this.serviceLookup = serviceLookup;
     }
 
     @Override
-    public AJAXRequestResult perform(final AJAXRequestData requestData, final ServerSession session) throws OXException {
-        final ContactRequest contactRequest = new ContactRequest(requestData, session);
-//		AJAXRequestResult perform = perform(contactRequest);
-		return perform2(contactRequest);
+    public AJAXRequestResult perform(AJAXRequestData requestData, ServerSession session) throws OXException {
+		return perform(new ContactRequest(requestData, session));
     }
 
-    protected abstract AJAXRequestResult perform(ContactRequest req) throws OXException;
-
-    protected abstract AJAXRequestResult perform2(ContactRequest req) throws OXException;
-
-    protected ContactInterfaceDiscoveryService getContactInterfaceDiscoveryService() throws OXException {
-        try {
-            return serviceLookup.getService(ContactInterfaceDiscoveryService.class);
-        } catch (final IllegalStateException e) {
-            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(ContactInterfaceDiscoveryService.class.getName());
-        }
-    }
+    /**
+     * Performs the request.
+     * 
+     * @param request The request
+     * @return The AJAX result
+     * @throws OXException
+     */
+    protected abstract AJAXRequestResult perform(ContactRequest request) throws OXException;
 
     /**
      * Gets the contact service.
@@ -115,7 +116,7 @@ public abstract class ContactAction implements AJAXActionService {
     protected ContactService getContactService() throws OXException {
         try {
             return serviceLookup.getService(ContactService.class);
-        } catch (final IllegalStateException e) {
+        } catch (IllegalStateException e) {
             throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(ContactService.class.getName());
         }
     }
@@ -132,22 +133,44 @@ public abstract class ContactAction implements AJAXActionService {
     	return null == contactLastModified || lastModified.after(contactLastModified) ? lastModified : contactLastModified;
     }
     
-    protected static Date getCorrectedTime(final Date date, final TimeZone timeZone) {
-        if (date == null) {
-            return null;
-        }
-
-        final int offset = timeZone.getOffset(date.getTime());
-        final Calendar calendar = new GregorianCalendar();
-        calendar.setTime(date);
-        calendar.add(Calendar.MILLISECOND, offset);
-
-        return calendar.getTime();
-    }
-    
-    protected static <T> void close(SearchIterator<T> searchIterator) throws OXException {
+    /**
+     * Closes a search iterator silently
+     * 
+     * @param searchIterator The search iterator to close
+     * @throws OXException 
+     */
+    protected static <T> void close(SearchIterator<T> searchIterator) {
     	if (null != searchIterator) {
-			searchIterator.close();
+    	    try {
+    	        searchIterator.close();
+    	    } catch (OXException e) {
+    	        LOG.warn("error closing search iterator", e);
+    	    }
     	}
     }
+    
+    /**
+     * Adds all contacts available from a search iterator into a collection.  
+     * 
+     * @param contacts The collection to add the contacts to
+     * @param searchIterator The search iterator to get the contacts from
+     * @return The latest last-modified timestamp of all added contacts
+     * @throws OXException 
+     */
+    protected static Date addContacts(Collection<Contact> contacts, SearchIterator<Contact> searchIterator) throws OXException {
+        Date lastModified = new Date(0);
+        if (null != searchIterator) {
+            try {
+                while (searchIterator.hasNext()) {
+                    Contact contact = searchIterator.next();
+                    lastModified = getLatestModified(lastModified, contact);
+                    contacts.add(contact);
+                }
+            } finally {
+                close(searchIterator);
+            }
+        }
+        return lastModified;
+    }    
+
 }

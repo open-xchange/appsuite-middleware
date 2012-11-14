@@ -54,7 +54,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
+import org.cliffc.high_scale_lib.NonBlockingHashMap;
 import com.openexchange.realtime.packet.ID;
 
 /**
@@ -82,53 +82,65 @@ public class IDMap<T> implements Map<ID, T> {
      */
     public IDMap(final boolean concurrent) {
         super();
-        delegate = concurrent ? new ConcurrentHashMap<ID, T>() : new HashMap<ID, T>();
+        delegate = concurrent ? new NonBlockingHashMap<ID, T>() : new HashMap<ID, T>();
     }
 
+    @Override
     public int size() {
         return delegate.size();
     }
 
+    @Override
     public boolean isEmpty() {
         return delegate.isEmpty();
     }
 
+    @Override
     public boolean containsKey(Object id) {
         return delegate.containsKey(id);
     }
 
+    @Override
     public boolean containsValue(Object value) {
         return delegate.containsValue(value);
     }
 
+    @Override
     public T get(Object key) {
         return delegate.get(key);
     }
 
+    @Override
     public T put(ID key, T value) {
         return delegate.put(key, value);
     }
 
+    @Override
     public T remove(Object key) {
         return delegate.remove(key);
     }
 
+    @Override
     public void putAll(Map<? extends ID, ? extends T> m) {
         delegate.putAll(m);
     }
 
+    @Override
     public void clear() {
         delegate.clear();
     }
 
+    @Override
     public Set<ID> keySet() {
         return delegate.keySet();
     }
 
+    @Override
     public Collection<T> values() {
         return delegate.values();
     }
 
+    @Override
     public Set<java.util.Map.Entry<ID, T>> entrySet() {
         return delegate.entrySet();
     }
