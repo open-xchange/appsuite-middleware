@@ -8295,12 +8295,11 @@ msgid "Mail folder cannot be created/renamed. Empty folder name."
 msgstr ""
 
 #. *
-#. * Mail folder cannot be created/rename. Name must not contain character '%1$s'
+#. * Invalid folder name: "%1$s"
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:384
-msgid ""
-"The mail folder cannot be created/renamed. The name must not contain the "
-"character '%1$s'."
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:509
+msgid "Invalid folder name: \"%1$s\""
 msgstr ""
 
 #. *
@@ -8464,13 +8463,6 @@ msgstr ""
 msgid ""
 "Your E-Mail has been successfully sent, but the original E-Mail could not be "
 "flagged as \"replied\" and/or \"forwarded\"."
-msgstr ""
-
-#. *
-#. * Invalid folder name: "%1$s"
-#.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:509
-msgid "Invalid folder name: \"%1$s\""
 msgstr ""
 
 #. *
