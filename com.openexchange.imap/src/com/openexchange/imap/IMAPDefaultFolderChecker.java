@@ -622,33 +622,74 @@ public class IMAPDefaultFolderChecker {
         }
         IMAPFolder f = (IMAPFolder) imapStore.getFolder(fullName);
         tmp.setLength(0);
-        {
-            if (isFullname) {
-                /*
-                 * OK, a full name was passed. Try to create obviously non-existing IMAP folder.
-                 */
-                try {
-                    if (!f.exists()) {
-                        IMAPCommandsCollection.createFolder(f, sep, type, false);
+        if (isFullname) {
+            /*
+             * OK, a full name was passed. Try to create obviously non-existing IMAP folder.
+             */
+            try {
+                if (!f.exists()) {
+                    /*
+                     * Check against siblings
+                     */
+                    final IMAPFolder parent = (IMAPFolder) f.getParent();
+                    final Folder[] folders = parent.list();
+                    final String mName = f.getName();
+                    final List<Folder> candidates = new ArrayList<Folder>(2);
+                    for (int i = 0; i < folders.length; i++) {
+                        final Folder child = folders[i];
+                        if (mName.equalsIgnoreCase(child.getName())) {
+                            /*
+                             * Detected a similarly named folder
+                             */
+                            candidates.add(child);
+                        }
                     }
-                    if (1 == subscribe) {
+                    final int nCandidates = candidates.size();
+                    if (nCandidates <= 0 || nCandidates > 1) {
+                        /*
+                         * Zero or more than one candidate found. Try to create IMAP folder
+                         */
+                        try {
+                            if (!f.exists()) {
+                                IMAPCommandsCollection.createFolder(f, sep, type, false);
+                            }
+                            modified.set(true);
+                        } catch (final MessagingException e) {
+                            if (isOverQuotaException(e)) {
+                                throw e;
+                            }
+                            throw e;
+                        }
+                    } else {
+                        // Found one candidate
+                        closeSafe(f);
+                        f = (IMAPFolder) candidates.get(0);
+                    }
+                }
+                if (1 == subscribe) {
+                    if (!f.isSubscribed()) {
                         IMAPCommandsCollection.forceSetSubscribed(imapStore, fullName, true);
-                    } else if (0 == subscribe) {
+                        modified.set(true);
+                    }
+                } else if (0 == subscribe) {
+                    if (f.isSubscribed()) {
                         IMAPCommandsCollection.forceSetSubscribed(imapStore, fullName, false);
+                        modified.set(true);
                     }
-                    modified.set(true);
-                    return fullName;
-                } catch (final MessagingException e) {
-                    if (isOverQuotaException(e)) {
-                        throw e;
-                    }
+                }
+                return fullName;
+            } catch (final MessagingException e) {
+                if (isOverQuotaException(e)) {
                     throw e;
                 }
+                throw e;
             }
-            /*
-             * A name was passed. Perform a case-insensitive look-up because some IMAP servers do not allow to create a folder of which
-             * name equals ignore-case to an existing folder.
-             */
+        }
+        /*
+         * A name was passed. Perform a case-insensitive look-up because some IMAP servers do not allow to create a folder of which name
+         * equals ignore-case to an existing folder.
+         */
+        if (!f.exists()) {
             final IMAPFolder parent;
             if (0 == prefixLen) {
                 parent = (IMAPFolder) imapStore.getDefaultFolder();
@@ -676,9 +717,7 @@ public class IMAPDefaultFolderChecker {
                  * Zero or more than one candidate found. Try to create IMAP folder
                  */
                 try {
-                    if (!f.exists()) {
-                        IMAPCommandsCollection.createFolder(f, sep, type, false);
-                    }
+                    IMAPCommandsCollection.createFolder(f, sep, type, false);
                     modified.set(true);
                 } catch (final MessagingException e) {
                     if (isOverQuotaException(e)) {
@@ -694,27 +733,13 @@ public class IMAPDefaultFolderChecker {
         }
         if (1 == subscribe) {
             if (!f.isSubscribed()) {
-                try {
-                    f.setSubscribed(true);
-                } catch (final MethodNotSupportedException e) {
-                    LOG.error(e.getMessage(), e);
-                } catch (final MessagingException e) {
-                    LOG.error(e.getMessage(), e);
-                } finally {
-                    modified.set(true);
-                }
+                IMAPCommandsCollection.forceSetSubscribed(imapStore, fullName, true);
+                modified.set(true);
             }
         } else if (0 == subscribe) {
             if (f.isSubscribed()) {
-                try {
-                    f.setSubscribed(false);
-                } catch (final MethodNotSupportedException e) {
-                    LOG.error(e.getMessage(), e);
-                } catch (final MessagingException e) {
-                    LOG.error(e.getMessage(), e);
-                } finally {
-                    modified.set(true);
-                }
+                IMAPCommandsCollection.forceSetSubscribed(imapStore, fullName, false);
+                modified.set(true);
             }
         }
         if (DEBUG) {
