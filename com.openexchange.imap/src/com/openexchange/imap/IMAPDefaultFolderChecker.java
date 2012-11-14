@@ -412,7 +412,11 @@ public class IMAPDefaultFolderChecker {
                 setDefaultMailFolder(index, checkDefaultFolder(index, "", fullName, sep, type, subscribe, true, modified), cache);
             }
         } catch (final OXException e) {
-            LOG.warn("Couldn't check default folder: " + (null == fullName ? (prefix + name) : fullName), e);
+            final StringBuilder sb = new StringBuilder(1024);
+            sb.append("Couldn't check default folder: ");
+            sb.append((null == fullName ? (prefix + name) : fullName)).append("\n\n");
+            appendStackTrace(e.getStackTrace(), sb, new ClassNameMatcher(IMAPDefaultFolderChecker.class.getSimpleName()));
+            LOG.warn(sb.toString());
             setDefaultMailFolder(index, null, cache);
             e.setCategory(Category.CATEGORY_WARNING);
             imapStore.getImapAccess().addWarnings(Collections.singleton(e));
@@ -431,12 +435,20 @@ public class IMAPDefaultFolderChecker {
                 /*
                  * Special handling for over-quota error
                  */
-                LOG.warn("Couldn't check default folder due to exceeded quota restrictions: " + (null == fullName ? (prefix + name) : fullName), e);
+                final StringBuilder sb = new StringBuilder(1024);
+                sb.append("Couldn't check default folder due to exceeded quota restrictions: ");
+                sb.append((null == fullName ? (prefix + name) : fullName)).append("\n\n");
+                appendStackTrace(e.getStackTrace(), sb, new ClassNameMatcher(IMAPDefaultFolderChecker.class.getSimpleName()));
+                LOG.warn(sb.toString());
                 setDefaultMailFolder(index, null, cache);
                 final OXException warning = MimeMailException.handleMessagingException(e, imapConfig, session).setCategory(Category.CATEGORY_WARNING);
                 imapStore.getImapAccess().addWarnings(Collections.singleton(warning));
             } else {
-                LOG.warn("Couldn't check default folder: " + (null == fullName ? (prefix + name) : fullName), e);
+                final StringBuilder sb = new StringBuilder(1024);
+                sb.append("Couldn't check default folder: ");
+                sb.append((null == fullName ? (prefix + name) : fullName)).append("\n\n");
+                appendStackTrace(e.getStackTrace(), sb, new ClassNameMatcher(IMAPDefaultFolderChecker.class.getSimpleName()));
+                LOG.warn(sb.toString());
                 setDefaultMailFolder(index, null, cache);
                 final OXException warning = MimeMailException.handleMessagingException(e, imapConfig, session).setCategory(Category.CATEGORY_WARNING);
                 imapStore.getImapAccess().addWarnings(Collections.singleton(warning));
@@ -756,17 +768,55 @@ public class IMAPDefaultFolderChecker {
     }
 
     /**
+     * Matcher for {@link StackTraceElement}s.
+     */
+    protected static interface StackTraceElementMatcher {
+        
+        boolean accepts(StackTraceElement stackTraceElement);
+    }
+
+    private static final class ClassNameMatcher implements StackTraceElementMatcher {
+        
+        private final String className;
+        private boolean found;
+
+        protected ClassNameMatcher(String className) {
+            super();
+            this.className = className;
+        }
+
+        @Override
+        public boolean accepts(StackTraceElement ste) {
+            if (found) {
+                return false;
+            }
+            final String className = ste.getClassName();
+            if (null == className) {
+                found = true;
+                return false;
+            }
+            // Check
+            if (className.indexOf(this.className) >= 0) {
+                found = true;
+                return true;
+            }
+            return true;
+        }
+
+    }
+
+    /**
      * Appends stack trace.
      * 
      * @param trace The stack trace
      * @param sb The builder
      * @param num The max. number of elements to append
      */
-    protected static void appendStackTrace(final StackTraceElement[] trace, final StringBuilder sb, final int num) {
+    protected static void appendStackTrace(final StackTraceElement[] trace, final StringBuilder sb, final StackTraceElementMatcher matcher) {
         if (null == trace) {
             return;
         }
-        for (int i = 0; (num < 0 || i < num) && i < trace.length; i++) {
+        for (int i = 0; i < trace.length && matcher.accepts(trace[i]); i++) {
             final StackTraceElement ste = trace[i];
             final String className = ste.getClassName();
             if (null != className) {
