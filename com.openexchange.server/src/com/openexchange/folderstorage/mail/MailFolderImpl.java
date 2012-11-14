@@ -100,8 +100,9 @@ public final class MailFolderImpl extends AbstractFolder implements FolderExtens
     private static final long serialVersionUID = 6445442372690458946L;
 
     private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(MailFolderImpl.class));
-
     private static final boolean DEBUG = LOG.isDebugEnabled();
+
+    private static final String PROTOCOL_UNIFIED_INBOX = UnifiedInboxManagement.PROTOCOL_UNIFIED_INBOX;
 
     /**
      * The mail folder content type.
@@ -348,7 +349,7 @@ public final class MailFolderImpl extends AbstractFolder implements FolderExtens
     }
 
     private boolean isUnifiedMail(final MailFolder mailFolder) {
-        return UnifiedInboxManagement.PROTOCOL_UNIFIED_INBOX.equals(mailFolder.getProperty("protocol"));
+        return PROTOCOL_UNIFIED_INBOX.equals(mailFolder.getProperty("protocol"));
     }
 
     /**
