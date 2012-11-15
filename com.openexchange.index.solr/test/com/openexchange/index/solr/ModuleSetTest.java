@@ -47,52 +47,48 @@
  *
  */
 
-package com.openexchange.index;
+package com.openexchange.index.solr;
 
-import com.openexchange.exception.OXException;
+import static org.junit.Assert.*;
+import org.junit.Test;
+import com.openexchange.index.solr.internal.ModuleSet;
 
 
 /**
- * {@link IndexManagementService}
+ * {@link ModuleSetTest}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public interface IndexManagementService {
-
-    /**
-     * Locks the modules index for a given user.<br>
-     * If an index is locked it throws {@link IndexExceptionCodes#INDEX_LOCKED} on<br>
-     * <ul>
-     *   <li>every method call on the corresponding {@link IndexAccess} object.</li>
-     *   <li>trying to acquire it via {@link IndexFacadeService#acquireIndexAccess}.</li>
-     * </ul>
-     * 
-     * @param contextId The context id.
-     * @param userId The user id.
-     * @param module The module.
-     * @throws OXException
-     */
-    void lockIndex(int contextId, int userId, int module) throws OXException;
+public class ModuleSetTest {
     
-    /**
-     * Unlocks the modules index for a given user.
-     * 
-     * @param contextId The context id.
-     * @param userId The user id.
-     * @param module The module.
-     * @throws OXException
-     */
-    void unlockIndex(int contextId, int userId, int module) throws OXException;
+    @Test
+    public void testWhitespaces() throws Exception {
+        ModuleSet modules = new ModuleSet(" 19,137, 138 ");
+        assertTrue("Missing module", modules.containsModule(19));
+        assertTrue("Missing module", modules.containsModule(137));
+        assertTrue("Missing module", modules.containsModule(138));
+        
+        modules.removeModule(19);
+        modules.removeModule(137);
+        modules.removeModule(138);
+        assertFalse("Module exists", modules.containsModule(19));
+        assertFalse("Module exists", modules.containsModule(137));
+        assertFalse("Module exists", modules.containsModule(138));
+        
+        assertEquals("Wrong result", "", modules.toString());
+    }
     
-    /**
-     * Returns whether an modules index is locked for a given user.
-     * 
-     * @param contextId The context id.
-     * @param userId The user id.
-     * @param module The module.
-     * @return <code>true</code> if the index is locked, <code>false</code> if not.
-     * @throws OXException
-     */
-    boolean isLocked(int contextId, int userId, int module) throws OXException;
+    @Test
+    public void testEmptySet() throws Exception {
+        ModuleSet modules = new ModuleSet();
+        assertEquals("Wrong result", "", modules.toString());
+    }
+    
+    @Test
+    public void testAddToEmptySet() throws Exception {
+        ModuleSet modules = new ModuleSet();
+        modules.addModule(19);
+        assertEquals("Wrong result", "19", modules.toString());
+    }
 
 }

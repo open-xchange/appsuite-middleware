@@ -72,18 +72,10 @@ public class Activator extends HousekeepingActivator {
 
     @Override
     protected void startBundle() throws Exception {
-        System.out.println("!!!STATE: " + context.getBundle().getState());
         AbstractSolrIndexAccessTest.setIndexFacade(getService(IndexFacadeService.class));
         AbstractSolrIndexAccessTest.setConfigurationService(getService(ConfigurationService.class));
         AbstractSolrIndexAccessTest.setIndexManagementService(getService(IndexManagementService.class));
         registerService(OSGiTest.class, new SolrTestSuite());
-    }
-    
-    @Override
-    protected void stopBundle() throws Exception {
-        System.out.println("!!!STATE: " + context.getBundle().getState());
-        super.stopBundle();
-        System.out.println("!!!STATE: " + context.getBundle().getState());
     }
 
 }

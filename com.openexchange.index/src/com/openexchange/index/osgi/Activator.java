@@ -47,52 +47,64 @@
  *
  */
 
-package com.openexchange.index;
+package com.openexchange.index.osgi;
 
+import javax.management.ObjectName;
+import org.apache.commons.logging.Log;
+import org.osgi.framework.ServiceReference;
 import com.openexchange.exception.OXException;
+import com.openexchange.index.IndexManagementMBean;
+import com.openexchange.index.IndexManagementService;
+import com.openexchange.index.internal.IndexManagementMBeanImpl;
+import com.openexchange.management.ManagementService;
+import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.osgi.SimpleRegistryListener;
 
 
 /**
- * {@link IndexManagementService}
+ * {@link Activator}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public interface IndexManagementService {
+public class Activator extends HousekeepingActivator {
+    
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(Activator.class);
+    
 
-    /**
-     * Locks the modules index for a given user.<br>
-     * If an index is locked it throws {@link IndexExceptionCodes#INDEX_LOCKED} on<br>
-     * <ul>
-     *   <li>every method call on the corresponding {@link IndexAccess} object.</li>
-     *   <li>trying to acquire it via {@link IndexFacadeService#acquireIndexAccess}.</li>
-     * </ul>
-     * 
-     * @param contextId The context id.
-     * @param userId The user id.
-     * @param module The module.
-     * @throws OXException
-     */
-    void lockIndex(int contextId, int userId, int module) throws OXException;
-    
-    /**
-     * Unlocks the modules index for a given user.
-     * 
-     * @param contextId The context id.
-     * @param userId The user id.
-     * @param module The module.
-     * @throws OXException
-     */
-    void unlockIndex(int contextId, int userId, int module) throws OXException;
-    
-    /**
-     * Returns whether an modules index is locked for a given user.
-     * 
-     * @param contextId The context id.
-     * @param userId The user id.
-     * @param module The module.
-     * @return <code>true</code> if the index is locked, <code>false</code> if not.
-     * @throws OXException
-     */
-    boolean isLocked(int contextId, int userId, int module) throws OXException;
+    @Override
+    protected Class<?>[] getNeededServices() {
+        return new Class<?>[] { ManagementService.class };
+    }
+
+    @Override
+    protected void startBundle() throws Exception {
+        final ObjectName objectName = new ObjectName(
+            IndexManagementMBean.DOMAIN, 
+            IndexManagementMBean.KEY, 
+            IndexManagementMBean.VALUE);
+        
+        track(IndexManagementService.class, new SimpleRegistryListener<IndexManagementService>() {
+            @Override
+            public void added(ServiceReference<IndexManagementService> ref, IndexManagementService service) {
+                IndexManagementService indexManagementService = context.getService(ref);
+                ManagementService managementService = getService(ManagementService.class);
+                try {
+                    managementService.registerMBean(objectName, new IndexManagementMBeanImpl(indexManagementService));
+                } catch (OXException e) {
+                    LOG.error(e.getMessage(), e);
+                }
+            }
+
+            @Override
+            public void removed(ServiceReference<IndexManagementService> ref, IndexManagementService service) {
+                ManagementService managementService = getService(ManagementService.class);
+                try {
+                    managementService.unregisterMBean(objectName);
+                } catch (OXException e) {
+                    LOG.error(e.getMessage(), e);
+                }
+            }
+        });
+    }
 
 }

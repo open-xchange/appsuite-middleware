@@ -94,13 +94,13 @@ public class SolrInfostoreIndexAccessTest extends AbstractSolrIndexAccessTest {
         IndexAccess<DocumentMetadata> indexAccess = indexFacade.acquireIndexAccess(Types.INFOSTORE, user.getId(), context.getId());
         
         DocumentMetadata d1 = createDocument(1, 1L, "First Document", "This is the first document");
-        indexAccess.addAttachments(new StandardIndexDocument<DocumentMetadata>(d1), true);
+        indexAccess.addDocument(new StandardIndexDocument<DocumentMetadata>(d1));
         
         DocumentMetadata d2 = createDocument(2, 1L, "Second Document", "This is the second document");
-        indexAccess.addAttachments(new StandardIndexDocument<DocumentMetadata>(d2), true);
+        indexAccess.addDocument(new StandardIndexDocument<DocumentMetadata>(d2));
         
         DocumentMetadata d3 = createDocument(3, 2L, "Third Document", "This is the third document");
-        indexAccess.addAttachments(new StandardIndexDocument<DocumentMetadata>(d3), true);
+        indexAccess.addDocument(new StandardIndexDocument<DocumentMetadata>(d3));
         
         QueryParameters q1 = new QueryParameters.Builder()
             .setHandler(SearchHandler.SIMPLE)
@@ -126,13 +126,13 @@ public class SolrInfostoreIndexAccessTest extends AbstractSolrIndexAccessTest {
         IndexAccess<DocumentMetadata> indexAccess = indexFacade.acquireIndexAccess(Types.INFOSTORE, user.getId(), context.getId());
         
         DocumentMetadata d1 = createDocument(1, 1L, "First Document", "This is the first document");
-        indexAccess.addAttachments(new StandardIndexDocument<DocumentMetadata>(d1), true);
+        indexAccess.addDocument(new StandardIndexDocument<DocumentMetadata>(d1));
         
         DocumentMetadata d2 = createDocument(2, 1L, "Second Document", "This is the second document");
-        indexAccess.addAttachments(new StandardIndexDocument<DocumentMetadata>(d2), true);
+        indexAccess.addDocument(new StandardIndexDocument<DocumentMetadata>(d2));
         
         DocumentMetadata d3 = createDocument(3, 2L, "Third Document", "This is the third document");
-        indexAccess.addAttachments(new StandardIndexDocument<DocumentMetadata>(d3), true);
+        indexAccess.addDocument(new StandardIndexDocument<DocumentMetadata>(d3));
         
         Set<String> allIds = new HashSet<String>();
         allIds.add(InfostoreUUID.newUUID(context.getId(), user.getId(), d1).toString());
@@ -161,13 +161,13 @@ public class SolrInfostoreIndexAccessTest extends AbstractSolrIndexAccessTest {
         IndexAccess<DocumentMetadata> indexAccess = indexFacade.acquireIndexAccess(Types.INFOSTORE, user.getId(), context.getId());
         
         DocumentMetadata d1 = createDocument(1, 1L, "First Document", "This is the first document");
-        indexAccess.addAttachments(new StandardIndexDocument<DocumentMetadata>(d1), true);
+        indexAccess.addDocument(new StandardIndexDocument<DocumentMetadata>(d1));
         
         DocumentMetadata d2 = createDocument(2, 1L, "Second Document", "This is the second document");
-        indexAccess.addAttachments(new StandardIndexDocument<DocumentMetadata>(d2), true);
+        indexAccess.addDocument(new StandardIndexDocument<DocumentMetadata>(d2));
         
         DocumentMetadata d3 = createDocument(3, 2L, "Third Document", "This is the third document");
-        indexAccess.addAttachments(new StandardIndexDocument<DocumentMetadata>(d3), true);
+        indexAccess.addDocument(new StandardIndexDocument<DocumentMetadata>(d3));
         
         QueryParameters q1 = new QueryParameters.Builder()
             .setHandler(SearchHandler.ALL_REQUEST)

@@ -235,12 +235,12 @@ public class Processor {
                 if (LOG.isDebugEnabled()) {
                     LOG.debug("Starting addAttachments() for " + documents.size() + " documents from \"" + folderInfo.getFullName() + "\" " + new DebugInfo(mailAccess));
                     final long st = System.currentTimeMillis();
-                    indexAccess.addAttachments(documents, true);
+                    indexAccess.addDocuments(documents);
                     final long dur = System.currentTimeMillis() - st;
                     LOG.debug("Performed addAttachments() for " + documents.size() + " documents from \"" + folderInfo.getFullName() + "\" in " + dur + "msec. " + new DebugInfo(
                         mailAccess));
                 } else {
-                    indexAccess.addAttachments(documents, true);
+                    indexAccess.addDocuments(documents);
                 }
             } else if (strategy.addHeadersAndContent(messageCount, folderInfo)) { // headers + content
                 final MailMessage[] messages =
@@ -257,12 +257,12 @@ public class Processor {
                 if (LOG.isDebugEnabled()) {
                     LOG.debug("Starting addContent() for " + documents.size() + " documents from \"" + folderInfo.getFullName() + "\" " + new DebugInfo(mailAccess));
                     final long st = System.currentTimeMillis();
-                    indexAccess.addContent(documents, true);
+                    indexAccess.addDocuments(documents);
                     final long dur = System.currentTimeMillis() - st;
                     LOG.debug("Performed addContent() for " + documents.size() + " documents from \"" + folderInfo.getFullName() + "\" in " + dur + "msec. " + new DebugInfo(
                         mailAccess));
                 } else {
-                    indexAccess.addContent(documents, true);
+                    indexAccess.addDocuments(documents);
                 }
             } else if (strategy.addHeadersOnly(messageCount, folderInfo)) { // headers only
                 final MailMessage[] messages =
@@ -279,12 +279,12 @@ public class Processor {
                 if (LOG.isDebugEnabled()) {
                     LOG.debug("Starting addEnvelopeData() for " + documents.size() + " documents from \"" + folderInfo.getFullName() + "\" " + new DebugInfo(mailAccess));
                     final long st = System.currentTimeMillis();
-                    indexAccess.addEnvelopeData(documents);
+                    indexAccess.addDocuments(documents);
                     final long dur = System.currentTimeMillis() - st;
                     LOG.debug("Performed addEnvelopeData() for " + documents.size() + " documents from \"" + folderInfo.getFullName() + "\" in " + dur + "msec. " + new DebugInfo(
                         mailAccess));
                 } else {
-                    indexAccess.addEnvelopeData(documents);
+                    indexAccess.addDocuments(documents);
                 }
             } else {
                  submitJob(mailAccess);           

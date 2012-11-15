@@ -81,7 +81,7 @@ public class MockSolrFilestoreIndexAccess extends SolrInfostoreIndexAccess {
     }
     
     @Override
-    protected UpdateResponse addDocument(SolrInputDocument document) throws OXException {
+    protected UpdateResponse addSolrDocument(SolrInputDocument document) throws OXException {
         return index.addDocument(document);
     }
 

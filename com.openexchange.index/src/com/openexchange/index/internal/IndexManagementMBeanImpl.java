@@ -47,52 +47,54 @@
  *
  */
 
-package com.openexchange.index;
+package com.openexchange.index.internal;
 
+import javax.management.MBeanException;
 import com.openexchange.exception.OXException;
+import com.openexchange.index.IndexManagementMBean;
+import com.openexchange.index.IndexManagementService;
 
 
 /**
- * {@link IndexManagementService}
+ * {@link IndexManagementMBeanImpl}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public interface IndexManagementService {
+public class IndexManagementMBeanImpl implements IndexManagementMBean {
+    
+    private final IndexManagementService managementService;
+    
 
-    /**
-     * Locks the modules index for a given user.<br>
-     * If an index is locked it throws {@link IndexExceptionCodes#INDEX_LOCKED} on<br>
-     * <ul>
-     *   <li>every method call on the corresponding {@link IndexAccess} object.</li>
-     *   <li>trying to acquire it via {@link IndexFacadeService#acquireIndexAccess}.</li>
-     * </ul>
-     * 
-     * @param contextId The context id.
-     * @param userId The user id.
-     * @param module The module.
-     * @throws OXException
-     */
-    void lockIndex(int contextId, int userId, int module) throws OXException;
-    
-    /**
-     * Unlocks the modules index for a given user.
-     * 
-     * @param contextId The context id.
-     * @param userId The user id.
-     * @param module The module.
-     * @throws OXException
-     */
-    void unlockIndex(int contextId, int userId, int module) throws OXException;
-    
-    /**
-     * Returns whether an modules index is locked for a given user.
-     * 
-     * @param contextId The context id.
-     * @param userId The user id.
-     * @param module The module.
-     * @return <code>true</code> if the index is locked, <code>false</code> if not.
-     * @throws OXException
-     */
-    boolean isLocked(int contextId, int userId, int module) throws OXException;
+    public IndexManagementMBeanImpl(IndexManagementService managementService) {
+        super();
+        this.managementService = managementService;
+    }
+
+    @Override
+    public void lockIndex(int contextId, int userId, int module) throws MBeanException {
+        try {
+            managementService.lockIndex(contextId, userId, module);
+        } catch (OXException e) {
+            throw new MBeanException(null, e.getMessage());
+        }
+    }
+
+    @Override
+    public void unlockIndex(int contextId, int userId, int module) throws MBeanException {
+        try {
+            managementService.unlockIndex(contextId, userId, module);
+        } catch (OXException e) {
+            throw new MBeanException(null, e.getMessage());
+        }
+    }
+
+    @Override
+    public boolean isLocked(int contextId, int userId, int module) throws MBeanException {
+        try {
+            return managementService.isLocked(contextId, userId, module);
+        } catch (OXException e) {
+            throw new MBeanException(null, e.getMessage());
+        }
+    }
 
 }

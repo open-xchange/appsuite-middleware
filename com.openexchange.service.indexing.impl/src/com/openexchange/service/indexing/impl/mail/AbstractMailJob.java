@@ -146,11 +146,11 @@ public abstract class AbstractMailJob implements IndexingJob {
                 }
 
                 if (!documents.isEmpty()) {
-                    mailIndex.addContent(documents, true);
+                    mailIndex.addDocuments(documents);
                 }
                 
                 if (!attachments.isEmpty()) {
-                    attachmentIndex.addContent(attachments, true);
+                    attachmentIndex.addDocuments(attachments);
                 }                         
                 
                 return subList.size();
@@ -268,7 +268,7 @@ public abstract class AbstractMailJob implements IndexingJob {
                 }
 
                 if (!documents.isEmpty()) {
-                    mailIndex.addContent(documents, true);
+                    mailIndex.addDocuments(documents);
                 }
                 
                 return subList.size();

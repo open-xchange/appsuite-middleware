@@ -103,7 +103,7 @@ public class SolrAttachmentIndexAccessTest extends AbstractSolrIndexAccessTest {
             "1", 
             String.valueOf(new Random().nextInt()), 
             "sample1.txt");
-        indexAccess.addAttachments(new StandardIndexDocument<Attachment>(a1), true);
+        indexAccess.addDocument(new StandardIndexDocument<Attachment>(a1));
         
         Attachment a2 = createAttachment(
             Types.INFOSTORE, 
@@ -112,7 +112,7 @@ public class SolrAttachmentIndexAccessTest extends AbstractSolrIndexAccessTest {
             "1", 
             String.valueOf(new Random().nextInt()), 
             "sample2.txt");
-        indexAccess.addAttachments(new StandardIndexDocument<Attachment>(a2), true);
+        indexAccess.addDocument(new StandardIndexDocument<Attachment>(a2));
         
         Attachment a3 = createAttachment(
             Types.EMAIL, 
@@ -121,7 +121,7 @@ public class SolrAttachmentIndexAccessTest extends AbstractSolrIndexAccessTest {
             "1", 
             String.valueOf(new Random().nextInt()), 
             "sample.txt");
-        indexAccess.addAttachments(new StandardIndexDocument<Attachment>(a3), true);
+        indexAccess.addDocument(new StandardIndexDocument<Attachment>(a3));
         
         QueryParameters q1 = new QueryParameters.Builder()
             .setHandler(SearchHandler.SIMPLE)
@@ -175,7 +175,7 @@ public class SolrAttachmentIndexAccessTest extends AbstractSolrIndexAccessTest {
             "1", 
             String.valueOf(new Random().nextInt()), 
             "sample1.txt");
-        indexAccess.addAttachments(new StandardIndexDocument<Attachment>(a1), true);
+        indexAccess.addDocument(new StandardIndexDocument<Attachment>(a1));
         
         Attachment a2 = createAttachment(
             Types.INFOSTORE, 
@@ -184,7 +184,7 @@ public class SolrAttachmentIndexAccessTest extends AbstractSolrIndexAccessTest {
             "1", 
             String.valueOf(new Random().nextInt()), 
             "sample2.txt");
-        indexAccess.addAttachments(new StandardIndexDocument<Attachment>(a2), true);
+        indexAccess.addDocument(new StandardIndexDocument<Attachment>(a2));
         
         Attachment a3 = createAttachment(
             Types.EMAIL, 
@@ -193,7 +193,7 @@ public class SolrAttachmentIndexAccessTest extends AbstractSolrIndexAccessTest {
             "1", 
             String.valueOf(new Random().nextInt()), 
             "sample.txt");
-        indexAccess.addAttachments(new StandardIndexDocument<Attachment>(a3), true);
+        indexAccess.addDocument(new StandardIndexDocument<Attachment>(a3));
         
         Set<String> allIds = new HashSet<String>();
         allIds.add(AttachmentUUID.newUUID(context.getId(), user.getId(), a1).toString());
@@ -240,7 +240,7 @@ public class SolrAttachmentIndexAccessTest extends AbstractSolrIndexAccessTest {
             "1", 
             String.valueOf(new Random().nextInt()), 
             "sample1.txt");
-        indexAccess.addAttachments(new StandardIndexDocument<Attachment>(a1), true);
+        indexAccess.addDocument(new StandardIndexDocument<Attachment>(a1));
         
         Attachment a2 = createAttachment(
             Types.INFOSTORE, 
@@ -249,7 +249,7 @@ public class SolrAttachmentIndexAccessTest extends AbstractSolrIndexAccessTest {
             "1", 
             String.valueOf(new Random().nextInt()), 
             "sample2.txt");
-        indexAccess.addAttachments(new StandardIndexDocument<Attachment>(a2), true);
+        indexAccess.addDocument(new StandardIndexDocument<Attachment>(a2));
         
         Attachment a3 = createAttachment(
             Types.EMAIL, 
@@ -258,7 +258,7 @@ public class SolrAttachmentIndexAccessTest extends AbstractSolrIndexAccessTest {
             "1", 
             String.valueOf(new Random().nextInt()), 
             "sample.txt");
-        indexAccess.addAttachments(new StandardIndexDocument<Attachment>(a3), true);
+        indexAccess.addDocument(new StandardIndexDocument<Attachment>(a3));
         
         QueryParameters q1 = new QueryParameters.Builder()
             .setHandler(SearchHandler.ALL_REQUEST)
@@ -295,7 +295,7 @@ public class SolrAttachmentIndexAccessTest extends AbstractSolrIndexAccessTest {
             "1", 
             String.valueOf(new Random().nextInt()), 
             "sample1.txt");
-        indexAccess.addAttachments(new StandardIndexDocument<Attachment>(a1), true);
+        indexAccess.addDocument(new StandardIndexDocument<Attachment>(a1));
         
         Attachment a2 = createAttachment(
             Types.INFOSTORE, 
@@ -304,7 +304,7 @@ public class SolrAttachmentIndexAccessTest extends AbstractSolrIndexAccessTest {
             "2", 
             String.valueOf(new Random().nextInt()), 
             "sample2.txt");
-        indexAccess.addAttachments(new StandardIndexDocument<Attachment>(a2), true);
+        indexAccess.addDocument(new StandardIndexDocument<Attachment>(a2));
         
         Attachment a3 = createAttachment(
             Types.EMAIL, 
@@ -313,7 +313,7 @@ public class SolrAttachmentIndexAccessTest extends AbstractSolrIndexAccessTest {
             "3", 
             String.valueOf(new Random().nextInt()), 
             "sample.txt");
-        indexAccess.addAttachments(new StandardIndexDocument<Attachment>(a3), true);
+        indexAccess.addDocument(new StandardIndexDocument<Attachment>(a3));
     
         SearchTerm<?> orTerm = new ORTerm(new SearchTerm<?>[] { new ObjectIdTerm("1"), new ObjectIdTerm("2"), new ObjectIdTerm("3") });
         QueryParameters q1 = new QueryParameters.Builder()

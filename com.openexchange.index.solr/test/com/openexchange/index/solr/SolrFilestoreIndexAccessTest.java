@@ -104,7 +104,7 @@ public class SolrFilestoreIndexAccessTest extends TestCase {
         
         StandardIndexDocument<DocumentMetadata> document = new StandardIndexDocument<DocumentMetadata>(file);
 //        document.setProperties(parameters);
-        indexAccess.addEnvelopeData(document);
+        indexAccess.addDocument(document);
         
         QueryParameters query = new QueryParameters.Builder().setHandler(SearchHandler.ALL_REQUEST).setAccountFolders(Collections.singleton(new AccountFolders("sada689"))).build();
         IndexResult<DocumentMetadata> result = indexAccess.query(query, null);

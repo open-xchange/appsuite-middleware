@@ -93,6 +93,7 @@ public abstract class AbstractSolrIndexAccessTest {
     public static void setUpClass() throws Exception {
         int rmiPort = config.getIntProperty("RMI_PORT", 1099);
         Registry registry = LocateRegistry.getRegistry("localhost", rmiPort);
+        Thread.sleep(1000);
         contextInterface = (OXContextInterface) registry.lookup(OXContextInterface.RMI_NAME);
         userInterface = (OXUserInterface) registry.lookup(OXUserInterface.RMI_NAME);
 

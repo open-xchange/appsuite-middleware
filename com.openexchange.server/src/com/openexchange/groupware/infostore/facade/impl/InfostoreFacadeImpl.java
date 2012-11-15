@@ -1875,14 +1875,14 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
                         }
                     }
                 }
-            }            
+            }
         });
     }
     
     private void indexDocument(final Context context, final int userId, final int id, final long origFolderId, final boolean isCreation) {
         ThreadPoolService threadPoolService = ServerServiceRegistry.getInstance().getService(ThreadPoolService.class);
         ExecutorService executorService = threadPoolService.getExecutor();
-        executorService.submit(new Runnable() {            
+        executorService.submit(new Runnable() {
             @Override
             public void run() {
                 IndexFacadeService indexFacade = ServerServiceRegistry.getInstance().getService(IndexFacadeService.class);
@@ -1949,7 +1949,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
                 
             private void addToIndex(DocumentMetadata document, IndexAccess<DocumentMetadata> infostoreIndex, IndexAccess<Attachment> attachmentIndex) throws OXException {
                 IndexDocument<DocumentMetadata> indexDocument = new StandardIndexDocument<DocumentMetadata>(document);
-                infostoreIndex.addContent(indexDocument, true);
+                infostoreIndex.addDocument(indexDocument);
                 
                 String filestoreLocation = document.getFilestoreLocation();
                 if (filestoreLocation != null) {                    
@@ -1967,7 +1967,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
                     attachment.setMd5Sum(document.getFileMD5Sum());
                     attachment.setContent(file);
                     
-                    attachmentIndex.addContent(new StandardIndexDocument<Attachment>(attachment), true);
+                    attachmentIndex.addDocument(new StandardIndexDocument<Attachment>(attachment));
                }
             }
         });             

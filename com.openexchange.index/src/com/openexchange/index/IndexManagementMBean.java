@@ -49,50 +49,26 @@
 
 package com.openexchange.index;
 
-import com.openexchange.exception.OXException;
+import javax.management.MBeanException;
 
 
 /**
- * {@link IndexManagementService}
+ * {@link IndexManagementMBean}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public interface IndexManagementService {
-
-    /**
-     * Locks the modules index for a given user.<br>
-     * If an index is locked it throws {@link IndexExceptionCodes#INDEX_LOCKED} on<br>
-     * <ul>
-     *   <li>every method call on the corresponding {@link IndexAccess} object.</li>
-     *   <li>trying to acquire it via {@link IndexFacadeService#acquireIndexAccess}.</li>
-     * </ul>
-     * 
-     * @param contextId The context id.
-     * @param userId The user id.
-     * @param module The module.
-     * @throws OXException
-     */
-    void lockIndex(int contextId, int userId, int module) throws OXException;
+public interface IndexManagementMBean {
     
-    /**
-     * Unlocks the modules index for a given user.
-     * 
-     * @param contextId The context id.
-     * @param userId The user id.
-     * @param module The module.
-     * @throws OXException
-     */
-    void unlockIndex(int contextId, int userId, int module) throws OXException;
+    public static final String DOMAIN = "com.openexchange.index";
     
-    /**
-     * Returns whether an modules index is locked for a given user.
-     * 
-     * @param contextId The context id.
-     * @param userId The user id.
-     * @param module The module.
-     * @return <code>true</code> if the index is locked, <code>false</code> if not.
-     * @throws OXException
-     */
-    boolean isLocked(int contextId, int userId, int module) throws OXException;
+    public static final String KEY = "type";
+    
+    public static final String VALUE = "indexManagement";
+    
+    void lockIndex(int contextId, int userId, int module) throws MBeanException;
+    
+    void unlockIndex(int contextId, int userId, int module) throws MBeanException;
+    
+    boolean isLocked(int contextId, int userId, int module) throws MBeanException;
 
 }
