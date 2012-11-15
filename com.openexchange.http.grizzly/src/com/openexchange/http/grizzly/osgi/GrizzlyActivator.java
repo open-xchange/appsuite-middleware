@@ -53,6 +53,9 @@ import org.glassfish.grizzly.comet.CometAddOn;
 import org.glassfish.grizzly.http.HttpRequestPacket;
 import org.glassfish.grizzly.http.server.HttpServer;
 import org.glassfish.grizzly.http.server.NetworkListener;
+import org.glassfish.grizzly.nio.transport.TCPNIOTransport;
+import org.glassfish.grizzly.nio.transport.TCPNIOTransportBuilder;
+import org.glassfish.grizzly.threadpool.ThreadPoolConfig;
 import org.glassfish.grizzly.websockets.WebSocket;
 import org.glassfish.grizzly.websockets.WebSocketAddOn;
 import org.glassfish.grizzly.websockets.WebSocketApplication;
@@ -114,25 +117,25 @@ public class GrizzlyActivator extends HousekeepingActivator {
                 LOG.info("Starting Grizzly server.");
             }
             context.addFrameworkListener(new FrameworkListener() {
-                
+
                 @Override
                 public void frameworkEvent(FrameworkEvent event) {
-                    if(event.getBundle().getSymbolicName().equalsIgnoreCase("com.openexchange.http.grizzly")) {
+                    if (event.getBundle().getSymbolicName().equalsIgnoreCase("com.openexchange.http.grizzly")) {
                         int eventType = event.getType();
-                        if(eventType == FrameworkEvent.ERROR) {
+                        if (eventType == FrameworkEvent.ERROR) {
                             LOG.error(event.toString(), event.getThrowable());
                         } else {
                             LOG.info(event.toString(), event.getThrowable());
                         }
                     }
                 }
-                });
-            
+            });
+
             GrizzlyServiceRegistry grizzlyServiceRegistry = GrizzlyServiceRegistry.getInstance();
-            
+
             /*
-             * initialize the registry, handleUn/Availability keeps track of services.
-             * Otherwise use trackService(ConfigurationService.class) and openTrackers() to let the superclass handle the services.
+             * initialize the registry, handleUn/Availability keeps track of services. Otherwise use
+             * trackService(ConfigurationService.class) and openTrackers() to let the superclass handle the services.
              */
             initializeServiceRegistry(grizzlyServiceRegistry);
 
@@ -143,37 +146,39 @@ public class GrizzlyActivator extends HousekeepingActivator {
             }
 
             /*
-             *  read config properties
+             * read config properties
              */
             final String httpHost = configService.getProperty("com.openexchange.http.grizzly.httpNetworkListenerHost", "0.0.0.0");
             final int httpPort = configService.getIntProperty("com.openexchange.http.grizzly.httpNetworkListenerPort", 8080);
             final boolean hasJMXEnabled = configService.getBoolProperty("com.openexchange.http.grizzly.hasJMXEnabled", false);
             final boolean hasWebsocketsEnabled = configService.getBoolProperty("com.openexchange.http.grizzly.hasWebSocketsEnabled", false);
             final boolean hasCometEnabled = configService.getBoolProperty("com.openexchange.http.grizzly.hasCometEnabled", false);
+            final int tcpNioTranportThreadPoolSize = configService.getIntProperty("com.openexchange.http.grizzly.tcpNioTranportThreadPoolSize", 5);
 
             /*
-             *  create, configure and start server
+             * create, configure and start server
              */
             grizzly = new HttpServer();
             
             final NetworkListener networkListener = new NetworkListener("http-listener", httpHost, 8080);
-//            networkListener.setChunkingEnabled(false);
-            
-            
+            // networkListener.setChunkingEnabled(false);
+            TCPNIOTransport configuredTcpNioTransport = buildTcpNioTransport(tcpNioTranportThreadPoolSize);
+            networkListener.setTransport(configuredTcpNioTransport);
+
             if (hasJMXEnabled) {
                 if (LOG.isInfoEnabled()) {
                     LOG.info("Enabling JMX for Grizzly server.");
                 }
                 grizzly.getServerConfiguration().setJmxEnabled(true);
             }
-            
+
             if (hasWebsocketsEnabled) {
                 if (LOG.isInfoEnabled()) {
                     LOG.info("Enabling WebSockets for Grizzly server.");
                 }
                 networkListener.registerAddOn(new WebSocketAddOn());
                 WebSocketEngine.getEngine().register(new WebSocketApplication() {
-                    
+
                     @Override
                     public boolean isApplicationRequest(HttpRequestPacket request) {
                         return "/echo".equals(request.getRequestURI());
@@ -185,7 +190,7 @@ public class GrizzlyActivator extends HousekeepingActivator {
                     }
                 });
             }
-            
+
             if (hasCometEnabled) {
                 if (LOG.isInfoEnabled()) {
                     LOG.info("Enabling Comet for Grizzly server.");
@@ -206,8 +211,7 @@ public class GrizzlyActivator extends HousekeepingActivator {
             }
             AtmosphereServiceImpl atmosphereServiceImpl = new AtmosphereServiceImpl(grizzly, context.getBundle());
             registerService(AtmosphereService.class, atmosphereServiceImpl);
-            
-            
+
             if (LOG.isInfoEnabled()) {
                 LOG.info(String.format(
                     "Registering Grizzly HttpNetworkListener on host: %s and port: %d",
@@ -226,7 +230,7 @@ public class GrizzlyActivator extends HousekeepingActivator {
             }
             serviceFactory = new HttpServiceFactory(grizzly, context.getBundle());
             registerService(HttpService.class.getName(), serviceFactory);
-            
+
         } catch (final Exception e) {
             throw GrizzlyExceptionCode.GRIZZLY_SERVER_NOT_STARTED.create(e, new Object[] {});
         }
@@ -236,11 +240,11 @@ public class GrizzlyActivator extends HousekeepingActivator {
     @Override
     protected void stopBundle() throws Exception {
         /*
-         * Clear the registry from the services we are tracking.
-         * Otherwise use super.stopBundle(); if we let the superclass handle the services.
+         * Clear the registry from the services we are tracking. Otherwise use super.stopBundle(); if we let the superclass handle the
+         * services.
          */
         GrizzlyServiceRegistry.getInstance().clearRegistry();
-        
+
         if (LOG.isInfoEnabled()) {
             LOG.info("Unregistering services.");
         }
@@ -253,6 +257,7 @@ public class GrizzlyActivator extends HousekeepingActivator {
 
     /**
      * Initialize the package wide service registry with the services we declared as needed.
+     * 
      * @param serviceRegistry the registry to fill
      */
     private void initializeServiceRegistry(final GrizzlyServiceRegistry serviceRegistry) {
@@ -264,6 +269,20 @@ public class GrizzlyActivator extends HousekeepingActivator {
                 serviceRegistry.addService(serviceClass, service);
             }
         }
+    }
+    
+    private TCPNIOTransport buildTcpNioTransport(final int configuredPoolSize) {
+        int availableProcessors = Runtime.getRuntime().availableProcessors();
+        int fixedPoolSize = availableProcessors > 5 ? availableProcessors : 5;
+        if(configuredPoolSize > fixedPoolSize  && configuredPoolSize <= Integer.MAX_VALUE) {
+            fixedPoolSize = configuredPoolSize;
+        }
+        TCPNIOTransportBuilder builder = TCPNIOTransportBuilder.newInstance();
+        final ThreadPoolConfig config = builder.getWorkerThreadPoolConfig();
+        config.setCorePoolSize(fixedPoolSize).setMaxPoolSize(fixedPoolSize).setQueueLimit(-1);
+        final TCPNIOTransport transport = builder.build();
+        
+        return transport;
     }
 
 }
