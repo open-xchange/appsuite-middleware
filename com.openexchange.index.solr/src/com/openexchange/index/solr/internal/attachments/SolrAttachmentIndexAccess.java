@@ -49,6 +49,7 @@
 
 package com.openexchange.index.solr.internal.attachments;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.EnumSet;
@@ -63,18 +64,18 @@ import com.openexchange.groupware.Types;
 import com.openexchange.groupware.attach.index.Attachment;
 import com.openexchange.groupware.attach.index.AttachmentIndexField;
 import com.openexchange.groupware.attach.index.AttachmentUUID;
-import com.openexchange.groupware.attach.index.SearchTerm;
-import com.openexchange.index.AccountFolders;
 import com.openexchange.index.FacetParameters;
 import com.openexchange.index.IndexDocument;
 import com.openexchange.index.IndexField;
 import com.openexchange.index.IndexResult;
 import com.openexchange.index.Indexes;
 import com.openexchange.index.QueryParameters;
-import com.openexchange.index.SearchHandler;
 import com.openexchange.index.solr.internal.AbstractSolrIndexAccess;
 import com.openexchange.index.solr.internal.Services;
 import com.openexchange.index.solr.internal.SolrIndexResult;
+import com.openexchange.index.solr.internal.querybuilder.BuilderException;
+import com.openexchange.index.solr.internal.querybuilder.SimpleQueryBuilder;
+import com.openexchange.index.solr.internal.querybuilder.SolrQueryBuilder;
 import com.openexchange.solr.SolrCoreIdentifier;
 import com.openexchange.solr.SolrProperties;
 
@@ -84,6 +85,9 @@ import com.openexchange.solr.SolrProperties;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public class SolrAttachmentIndexAccess extends AbstractSolrIndexAccess<Attachment> {
+    
+    private final SolrQueryBuilder queryBuilder;
+    
 
     /**
      * Initializes a new {@link SolrAttachmentIndexAccess}.
@@ -92,6 +96,18 @@ public class SolrAttachmentIndexAccess extends AbstractSolrIndexAccess<Attachmen
      */
     public SolrAttachmentIndexAccess(SolrCoreIdentifier identifier) {
         super(identifier);
+        try {
+            ConfigurationService config = Services.getService(ConfigurationService.class);
+            String configDir = config.getProperty(SolrProperties.CONFIG_DIR);
+            queryBuilder = new SimpleQueryBuilder(
+                configDir + File.separatorChar + "attachment-querybuilder.properties",
+                SolrAttachmentField.MODULE,
+                SolrAttachmentField.ACCOUNT,
+                SolrAttachmentField.FOLDER,
+                AttachmentFieldMapper.getInstance());
+        } catch (BuilderException e) {
+            throw new IllegalStateException("Could not initialize query builder." + e);
+        }
     }
 
     @Override
@@ -182,7 +198,7 @@ public class SolrAttachmentIndexAccess extends AbstractSolrIndexAccess<Attachmen
         for (IndexDocument<Attachment> document : documents) {
             uuids.add(AttachmentUUID.newUUID(contextId, userId, document.getObject()).toString());
         }
-        
+
         String deleteQuery = buildQueryStringWithOr(SolrAttachmentField.UUID.solrName(), uuids);
         if (deleteQuery != null) {
             deleteDocumentsByQuery(deleteQuery);
@@ -191,8 +207,7 @@ public class SolrAttachmentIndexAccess extends AbstractSolrIndexAccess<Attachmen
 
     @Override
     public IndexResult<Attachment> query(QueryParameters parameters, Set<? extends IndexField> fields) throws OXException {
-        SolrQuery solrQuery = buildSolrQuery(parameters);
-        setSortAndOrder(parameters, solrQuery, SolrAttachmentField.class);
+        SolrQuery solrQuery = queryBuilder.buildQuery(parameters);
         Set<SolrAttachmentField> solrFields = checkAndConvert(fields);
         setFieldList(solrQuery, solrFields);
         List<IndexDocument<Attachment>> results = queryChunkWise(new SolrAttachmentDocumentConverter(), solrQuery, parameters.getOff(), parameters.getLen(), 100);
@@ -224,91 +239,6 @@ public class SolrAttachmentIndexAccess extends AbstractSolrIndexAccess<Attachmen
         
         return set;
     }
-
-    private SolrQuery buildSolrQuery(QueryParameters parameters) {
-        SearchHandler searchHandler = parameters.getHandler();
-        if (searchHandler == null) {
-            throw new IllegalArgumentException("Parameter `search handler` must not be null!");
-        }
-        
-        ConfigurationService config = Services.getService(ConfigurationService.class);
-        SolrQuery solrQuery;
-        switch (searchHandler) {            
-            case SIMPLE: 
-            {
-                Object searchTerm = parameters.getSearchTerm();
-                if (searchTerm == null || !(searchTerm instanceof String)) {
-                    throw new IllegalArgumentException("Parameter `searchTerm` must not be null and of type java.lang.String!");
-                }
-                
-                solrQuery = new SolrQuery((String) searchTerm);
-                solrQuery.setQueryType(config.getProperty(SolrProperties.SIMPLE_HANLDER));
-                addFilterQueries(parameters, solrQuery);
-                break;
-            }
-            
-            case ALL_REQUEST:
-            {
-                solrQuery = new SolrQuery("*:*");
-                solrQuery.setQueryType(config.getProperty(SolrProperties.ALL_HANLDER));                
-                addFilterQueries(parameters, solrQuery);             
-                break;
-            }
-            
-            case GET_REQUEST:
-            {                
-                Set<String> ids = parameters.getIndexIds();
-                if (ids == null) {
-                    throw new IllegalArgumentException("Parameter `indexIds` must not be null!");
-                }
-                
-                solrQuery = new SolrQuery(stringSetToQuery(ids));
-                solrQuery.setQueryType(config.getProperty(SolrProperties.GET_HANDLER));
-                addFilterQueries(parameters, solrQuery);
-                break;
-            }
-            
-            case CUSTOM:
-            {
-                Object termObject = parameters.getSearchTerm();
-                if (termObject == null || !(termObject instanceof SearchTerm<?>)) {
-                    throw new IllegalArgumentException("Parameter `searchTerm` must not be null and must be instance of com.openexchange.index.attachments.SearchTerm<?>!");
-                }
-                
-                String queryString = SolrAttachmentSearchTermVisitor.toQuery((SearchTerm<?>) termObject);
-                solrQuery = new SolrQuery(queryString);
-                solrQuery.setQueryType(config.getProperty(SolrProperties.CUSTOM_HANLDER));
-                addFilterQueries(parameters, solrQuery);
-                break;
-            }
-            
-            default:
-                throw new IllegalArgumentException("Search handler " + searchHandler.toString() + " is not valid for this action.");
-        }
-        
-        return solrQuery;
-    }
-    
-    private void addFilterQueries(QueryParameters parameters, SolrQuery solrQuery) {
-        Integer module = parameters.getModule() < 0 ? null : new Integer(parameters.getModule());
-        addFilterQueryIfNotNull(solrQuery, buildQueryString(SolrAttachmentField.MODULE.solrName(), module));
-        
-        Set<AccountFolders> all = parameters.getAccountFolders();
-        Set<String> queries = new HashSet<String>();
-        if (all != null) {
-            for (AccountFolders accountFolders : all) {
-                String account = accountFolders.getAccount();
-                Set<String> folders = accountFolders.getFolders();
-                if (folders.isEmpty()) {
-                    queries.add(buildQueryString(SolrAttachmentField.ACCOUNT.solrName(), account));
-                } else {
-                    queries.add(catenateQueriesWithAnd(buildQueryString(SolrAttachmentField.ACCOUNT.solrName(), account), buildQueryStringWithOr(SolrAttachmentField.FOLDER.solrName(), folders)));
-                }
-            }
-        }
-        
-        addFilterQueryIfNotNull(solrQuery, catenateQueriesWithOr(queries.toArray(new String[queries.size()])));
-    }  
 
     private SolrInputDocument convertToDocument(IndexDocument<Attachment> document) throws OXException {
         return SolrAttachmentDocumentConverter.convertStatic(contextId, userId, document);

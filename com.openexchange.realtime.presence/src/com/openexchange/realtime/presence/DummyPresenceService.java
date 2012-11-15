@@ -50,6 +50,7 @@
 package com.openexchange.realtime.presence;
 
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 import com.openexchange.exception.OXException;
 import com.openexchange.realtime.MessageDispatcher;
@@ -64,7 +65,7 @@ import com.openexchange.tools.session.ServerSession;
  * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class DummyPresenceService implements PresenceService {
+public class DummyPresenceService implements PresenceStatusService {
 
     private final ServiceLookup services;
 
@@ -92,18 +93,18 @@ public class DummyPresenceService implements PresenceService {
     }
 
     @Override
-    public void changePresenceStatus(ID id, PresenceData status, ServerSession session) throws OXException {
-        statusMap.put(id.toGeneralForm(), status);
+    public void changePresenceStatus(Presence stanza, ServerSession session) throws OXException {
+        statusMap.put(stanza.getFrom().toGeneralForm(), new PresenceData(stanza.getState(), stanza.getMessage()));
 
         MessageDispatcher dispatcher = services.getService(MessageDispatcher.class);
 
-        for (ID subscriber : subscriptions.get(id.toGeneralForm())) {
+        for (ID subscriber : subscriptions.get(stanza.getFrom().toGeneralForm())) {
             Presence presence = new Presence();
 
-            presence.setFrom(id);
+            presence.setFrom(stanza.getFrom());
             presence.setTo(subscriber);
-            presence.setState(status.getState());
-            presence.setMessage(status.getMessage());
+            presence.setState(stanza.getState());
+            presence.setMessage(stanza.getMessage());
             dispatcher.send(presence, session);
         }
 
@@ -112,6 +113,33 @@ public class DummyPresenceService implements PresenceService {
     @Override
     public PresenceData getPresenceStatus(ID id) {
         return statusMap.get(id.toGeneralForm());
+    }
+
+    /* (non-Javadoc)
+     * @see com.openexchange.realtime.presence.PresenceStatusService#getPresenceStatus(java.util.Collection)
+     */
+    @Override
+    public IDMap<PresenceData> getPresenceStatus(Collection<ID> ids) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    /* (non-Javadoc)
+     * @see com.openexchange.realtime.presence.PresenceStatusService#registerPresenceChangeListener(com.openexchange.realtime.presence.PresenceChangeListener)
+     */
+    @Override
+    public void registerPresenceChangeListener(PresenceChangeListener presenceChangeListener) {
+        // TODO Auto-generated method stub
+        
+    }
+
+    /* (non-Javadoc)
+     * @see com.openexchange.realtime.presence.PresenceStatusService#unregisterPresenceChangeListener(com.openexchange.realtime.presence.PresenceChangeListener)
+     */
+    @Override
+    public void unregisterPresenceChangeListener(PresenceChangeListener presenceChangeListener) {
+        // TODO Auto-generated method stub
+        
     }
 
 }

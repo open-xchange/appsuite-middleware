@@ -246,5 +246,29 @@ public abstract class Stanza {
         }
         return result;
     }
+    
+    //---
+    /**
+     * @param payloads
+     * @return
+     */
+    private Map<ElementPath, List<PayloadTree>> deepCopyPayloads(Map<ElementPath, List<PayloadTree>> payloads) {
+        
+        return null;
+    }
+    
+    private void foo() {
+    HashMap<ElementPath, List<PayloadTree>> newPayloads = new HashMap<ElementPath, List<PayloadTree>>();
+    for (PayloadTree tree : payloadTrees) {
+        ElementPath elementPath = tree.getRoot().getElementPath();
+        List<PayloadTree> list = newPayloads.get(elementPath);
+        if (list == null) {
+            list = new ArrayList<PayloadTree>();
+        }
+        list.add(tree);
+        newPayloads.put(tree.getElementPath(), list);
+    }
+    payloads=newPayloads;
+    }
 
 }

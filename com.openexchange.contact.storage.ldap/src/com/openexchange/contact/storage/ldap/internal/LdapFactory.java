@@ -157,8 +157,7 @@ public class LdapFactory  {
             environment = new Hashtable<String, String>();
             environment.put(Context.INITIAL_CONTEXT_FACTORY, "com.sun.jndi.ldap.LdapCtxFactory");
             environment.put(Context.PROVIDER_URL, config.getUri());
-            if (config.getUri().startsWith("ldaps://")) { 
-                // TODO check this
+            if (config.isTrustAllCerts() && config.getUri().startsWith("ldaps://")) { 
                 environment.put("java.naming.ldap.factory.socket", "com.openexchange.tools.ssl.TrustAllSSLSocketFactory");
             }
             if (null != config.getReferrals()) {

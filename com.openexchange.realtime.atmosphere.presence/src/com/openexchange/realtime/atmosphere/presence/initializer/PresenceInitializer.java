@@ -76,13 +76,13 @@ public class PresenceInitializer implements StanzaInitializer<Presence> {
      * The Status Message
      */
     private void initStatus(Presence presence) {
-        PayloadTree status = getSinglePayload(presence, Presence.STATUS_PATH);
-        if (status != null) {
-            Object data = status.getRoot().getPayloadElement().getData();
+        PayloadTree message = getSinglePayload(presence, Presence.MESSAGE_PATH);
+        if (message != null) {
+            Object data = message.getRoot().getPayloadElement().getData();
             if (!(data instanceof String)) {
                 throw new IllegalStateException("Payload not transformed yet");
             }
-            presence.setMessage((String)data);
+            presence.setMessage((String) data);
         }
     }
 
@@ -90,13 +90,18 @@ public class PresenceInitializer implements StanzaInitializer<Presence> {
      * The Status shown
      */
     private void initShow(Presence presence) {
-        PayloadTree show = getSinglePayload(presence, Presence.SHOW_PATH);
-        if (show != null) {
-        Object data = show.getRoot().getPayloadElement().getData();
-            if (!(data instanceof PresenceState)) {
-                throw new IllegalStateException("Payload not transformed yet");
+        // final UNAVAILABLE Presence means user goes offline
+        if (Presence.Type.UNAVAILABLE.equals(presence.getType())) {
+            presence.setState(PresenceState.OFFLINE);
+        } else {
+            PayloadTree show = getSinglePayload(presence, Presence.STATUS_PATH);
+            if (show != null) {
+                Object data = show.getRoot().getPayloadElement().getData();
+                if (!(data instanceof PresenceState)) {
+                    throw new IllegalStateException("Payload not transformed yet");
+                }
+                presence.setState((PresenceState) data);
             }
-            presence.setState((PresenceState)data);
         }
     }
 
@@ -106,24 +111,24 @@ public class PresenceInitializer implements StanzaInitializer<Presence> {
     private void initPriority(Presence presence) {
         PayloadTree priority = getSinglePayload(presence, Presence.PRIORITY_PATH);
         if (priority != null) {
-        Object data = priority.getRoot().getPayloadElement().getData();
+            Object data = priority.getRoot().getPayloadElement().getData();
             if (!(data instanceof Byte)) {
                 throw new IllegalStateException("Payload not transformed yet");
             }
-            presence.setPriority((Byte)data);
+            presence.setPriority((Byte) data);
         }
     }
 
     /**
-     * @param presence      The Presence Stanza to search in
-     * @param elementPath   The ElementPath of the PayloadTree we want
+     * @param presence The Presence Stanza to search in
+     * @param elementPath The ElementPath of the PayloadTree we want
      * @return Null or the PayloadTree matching the ElementPath
      */
     private PayloadTree getSinglePayload(Presence presence, ElementPath elementPath) {
         Collection<PayloadTree> trees = presence.getDefaultPayloads();
         PayloadTree candidate = null;
         for (PayloadTree tree : trees) {
-            if(elementPath.equals(tree.getElementPath())) {
+            if (elementPath.equals(tree.getElementPath())) {
                 candidate = tree;
                 break;
             }

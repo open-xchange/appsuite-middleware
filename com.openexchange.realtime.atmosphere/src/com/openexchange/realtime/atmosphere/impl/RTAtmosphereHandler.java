@@ -547,7 +547,7 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
         ServerSession session = atmosphereState.session;
         StanzaTransformer stanzaTransformer = new StanzaTransformer();
         stanzaTransformer.incoming(stanza, session);
-        MessageDispatcher messageDispatcher = AtmosphereServiceRegistry.getInstance().getService(MessageDispatcher.class, true);
+        MessageDispatcher messageDispatcher = AtmosphereServiceRegistry.getInstance().getService(MessageDispatcher.class);
         messageDispatcher.send(stanza, session);
     }
 

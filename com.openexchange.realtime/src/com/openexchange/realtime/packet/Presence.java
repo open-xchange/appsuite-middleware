@@ -52,6 +52,7 @@ package com.openexchange.realtime.packet;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import com.google.common.base.Predicate;
 import com.openexchange.exception.OXException;
 import com.openexchange.realtime.payload.PayloadElement;
@@ -96,9 +97,9 @@ public class Presence extends Stanza {
     }
 
     // Names of the payload elements from the default schema we are interested in
-    public static final ElementPath STATUS_PATH = new ElementPath("status");
+    public static final ElementPath MESSAGE_PATH = new ElementPath("message");
 
-    public static final ElementPath SHOW_PATH = new ElementPath("show");
+    public static final ElementPath STATUS_PATH = new ElementPath("status");
 
     public static final ElementPath PRIORITY_PATH = new ElementPath("priority");
 
@@ -128,10 +129,24 @@ public class Presence extends Stanza {
      * Initializes a new {@link Presence}.
      */
     public Presence() {
+        defaultElements.add(MESSAGE_PATH);
         defaultElements.add(STATUS_PATH);
-        defaultElements.add(SHOW_PATH);
         defaultElements.add(PRIORITY_PATH);
         defaultElements.add(ERROR_PATH);
+    }
+    
+    /**
+     * 
+     * Initializes a new {@link Presence} based on another Presence.
+     * @param other The Presence to copy.
+     */
+    public Presence(Presence other) {
+        this.error= other.error;
+        this.message = other.message;
+        this.payloads = deepCopyPayloads(other.payloads);
+        this.priority = other.priority; 
+        this.state = other.state;
+        this.type = other.type;
     }
 
     /**
@@ -192,7 +207,7 @@ public class Presence extends Stanza {
      */
     public void setMessage(String message) {
         this.message = message;
-        writeThrough(STATUS_PATH, message);
+        writeThrough(MESSAGE_PATH, message);
     }
 
     /**
@@ -211,7 +226,7 @@ public class Presence extends Stanza {
      */
     public void setState(PresenceState state) {
         this.state = state;
-        writeThrough(SHOW_PATH, state);
+        writeThrough(STATUS_PATH, state);
     }
 
     /**

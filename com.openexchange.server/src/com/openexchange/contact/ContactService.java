@@ -143,6 +143,29 @@ public interface ContactService {
     SearchIterator<Contact> getAllContacts(Session session, String folderId, ContactField[] fields, SortOptions sortOptions) throws OXException;
 
     /**
+     * Gets all contacts from multiple folders.
+     * 
+     * @param session the session
+     * @param folderIDs the IDs of the parent folders
+     * @param fields the contact fields that should be retrieved
+     * @param sortOptions the options to sort the results 
+     * @return the contacts
+     * @throws OXException
+     */
+    SearchIterator<Contact> getAllContacts(Session session, List<String> folderIDs, ContactField[] fields, SortOptions sortOptions) throws OXException;
+
+    /**
+     * Gets all contacts from all visible folders.
+     * 
+     * @param session the session
+     * @param fields the contact fields that should be retrieved
+     * @param sortOptions the options to sort the results 
+     * @return the contacts
+     * @throws OXException
+     */
+    SearchIterator<Contact> getAllContacts(Session session, ContactField[] fields, SortOptions sortOptions) throws OXException;
+
+    /**
      * Gets a list of contacts with all fields.
      * 
      * @param session the session
