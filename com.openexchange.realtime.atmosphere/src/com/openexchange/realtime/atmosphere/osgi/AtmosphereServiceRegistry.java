@@ -49,45 +49,41 @@
 
 package com.openexchange.realtime.atmosphere.osgi;
 
-import com.openexchange.osgi.ServiceRegistry;
+import java.util.concurrent.atomic.AtomicReference;
 import com.openexchange.server.ServiceLookup;
 
 /**
- * {@link AtmospherePresenceServiceRegistry} - Track the Services the Atmosphere requeres before starting.
- *
+ * {@link AtmospherePresenceServiceRegistry} - Singleton that acts as central accesspoint for classes of the Atmosphere bundle.
+ * 
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
-public class AtmosphereServiceRegistry extends ServiceRegistry {
+public class AtmosphereServiceRegistry implements ServiceLookup {
+
     private static final AtmosphereServiceRegistry INSTANCE = new AtmosphereServiceRegistry();
-    
+    public static AtomicReference<ServiceLookup> SERVICES = new AtomicReference<ServiceLookup>();
+
     /**
      * Encapsulated constructor.
      */
-    private AtmosphereServiceRegistry() {}
-    
+    private AtmosphereServiceRegistry() {
+    }
+
     /**
      * Get the Registry singleton.
+     * 
      * @return the Registry singleton
      */
     public static AtmosphereServiceRegistry getInstance() {
         return INSTANCE;
     }
-    
-    /**
-     * Initialize the service registry with the services that are declared as needed.
-     * @param activator the DeferredActivator to get services from
-     * @param neededServices the services declared as needed
-     */
-    public void initialize(ServiceLookup serviceLookup, Class<?>[] neededServices) {
-        INSTANCE.clearRegistry();
-        for (Class<?> serviceClass : neededServices) {
-            Object service = serviceLookup.getService(serviceClass);
-            if (service != null) {
-                INSTANCE.addService(serviceClass, service);
-            }
-        }
+
+    @Override
+    public <S> S getService(Class<? extends S> clazz) {
+        return SERVICES.get().getService(clazz);
+    }
+
+    @Override
+    public <S> S getOptionalService(Class<? extends S> clazz) {
+        return SERVICES.get().getOptionalService(clazz);
     }
 }
-
-
-

@@ -62,6 +62,7 @@ import com.openexchange.realtime.packet.Presence;
 import com.openexchange.realtime.packet.Presence.Type;
 import com.openexchange.realtime.packet.PresenceState;
 import com.openexchange.realtime.packet.Stanza;
+import com.openexchange.realtime.presence.PresenceChangeListener;
 import com.openexchange.realtime.presence.PresenceData;
 import com.openexchange.realtime.presence.PresenceStatusService;
 import com.openexchange.realtime.presence.subscribe.PresenceSubscriptionService;
@@ -81,14 +82,6 @@ import com.openexchange.tools.session.ServerSession;
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
 public class OXRTPresenceHandler implements StanzaHandler {
-
-    /**
-     * Initializes a new {@link OXRTPresenceHandler}.
-     */
-    public OXRTPresenceHandler() {
-        AtmospherePresenceServiceRegistry serviceRegistry = AtmospherePresenceServiceRegistry.getInstance();
-        PresenceStatusService presenceStatusService = serviceRegistry.getService(PresenceStatusService.class, true);
-    }
 
     @Override
     public Class<? extends Stanza> getStanzaClass() {
@@ -235,10 +228,11 @@ public class OXRTPresenceHandler implements StanzaHandler {
         PresenceStatusService presenceStatusService = serviceRegistry.getService(PresenceStatusService.class, true);
         MessageDispatcher messageDispatcher = serviceRegistry.getService(MessageDispatcher.class, true);
 
+        
         // Change the status of the incoming Stanza's client
-        presenceStatusService.changePresenceStatus(stanza.getFrom(), new PresenceData(stanza.getState(), stanza.getMessage()), session);
+        presenceStatusService.changePresenceStatus(stanza, session);
 
-        // Inform the client about status of his contacts
+        // Inform the client about the new status of his contacts
         if (isInitialPresence(stanza)) {
             List<ID> subscriptions = presenceSubscriptionService.getSubscriptions(session);
             IDMap<PresenceData> idToStatusMap = presenceStatusService.getPresenceStatus(subscriptions);

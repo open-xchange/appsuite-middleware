@@ -93,18 +93,18 @@ public class DummyPresenceService implements PresenceStatusService {
     }
 
     @Override
-    public void changePresenceStatus(ID id, PresenceData status, ServerSession session) throws OXException {
-        statusMap.put(id.toGeneralForm(), status);
+    public void changePresenceStatus(Presence stanza, ServerSession session) throws OXException {
+        statusMap.put(stanza.getFrom().toGeneralForm(), new PresenceData(stanza.getState(), stanza.getMessage()));
 
         MessageDispatcher dispatcher = services.getService(MessageDispatcher.class);
 
-        for (ID subscriber : subscriptions.get(id.toGeneralForm())) {
+        for (ID subscriber : subscriptions.get(stanza.getFrom().toGeneralForm())) {
             Presence presence = new Presence();
 
-            presence.setFrom(id);
+            presence.setFrom(stanza.getFrom());
             presence.setTo(subscriber);
-            presence.setState(status.getState());
-            presence.setMessage(status.getMessage());
+            presence.setState(stanza.getState());
+            presence.setMessage(stanza.getMessage());
             dispatcher.send(presence, session);
         }
 

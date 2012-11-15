@@ -59,10 +59,13 @@ import com.openexchange.i18n.LocalizableStrings;
  */
 public class RealtimeExceptionMessages implements LocalizableStrings {
 
-    // Unknown channel %1$s
+    /** Unknown channel %1$s */
     public static final String UNKNOWN_CHANNEL = "Unknown channel %1$s";
 
-    // No appropriate channel found for recipient %1$s with payload namespace %2$s
+    /** No appropriate channel found for recipient %1$s with payload namespace %2$s */
     public static final String NO_APPROPRIATE_CHANNEL = "No appropriate channel found for recipient %1$s with payload namespace %2$s";
+    
+    /** The following needed service is missing: \"%1$s\" */
+    public static final String NEEDED_SERVICE_MISSING_MSG = "The following needed service is missing: \"%1$s\"";
 
 }

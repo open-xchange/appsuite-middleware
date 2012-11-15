@@ -52,6 +52,7 @@ package com.openexchange.realtime.packet;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import com.google.common.base.Predicate;
 import com.openexchange.exception.OXException;
 import com.openexchange.realtime.payload.PayloadElement;
@@ -132,6 +133,20 @@ public class Presence extends Stanza {
         defaultElements.add(STATUS_PATH);
         defaultElements.add(PRIORITY_PATH);
         defaultElements.add(ERROR_PATH);
+    }
+    
+    /**
+     * 
+     * Initializes a new {@link Presence} based on another Presence.
+     * @param other The Presence to copy.
+     */
+    public Presence(Presence other) {
+        this.error= other.error;
+        this.message = other.message;
+        this.payloads = deepCopyPayloads(other.payloads);
+        this.priority = other.priority; 
+        this.state = other.state;
+        this.type = other.type;
     }
 
     /**

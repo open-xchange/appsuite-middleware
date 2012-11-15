@@ -25,20 +25,8 @@ public class AtmosphereRTActivator extends HousekeepingActivator {
     }
 
     @Override
-    protected void handleAvailability(Class<?> clazz) {
-        Object service = getService(clazz);
-        AtmosphereServiceRegistry.getInstance().addService(clazz, service);
-    }
-
-    @Override
-    protected void handleUnavailability(Class<?> clazz) {
-        AtmosphereServiceRegistry.getInstance().removeService(clazz);
-    }
-    
-    @Override
     protected void startBundle() throws Exception {
-        
-        AtmosphereServiceRegistry.getInstance().initialize(this, getNeededServices());
+        AtmosphereServiceRegistry.SERVICES.set(this);
         AtmospherePayloadElementTransformer.SERVICES.set(this);
 
         track(AtmospherePayloadElementTransformer.class, new SimpleRegistryListener<AtmospherePayloadElementTransformer>() {
@@ -79,7 +67,7 @@ public class AtmosphereRTActivator extends HousekeepingActivator {
     @Override
     public void stop(BundleContext context) throws Exception {
         getService(AtmosphereService.class).unregister("rt");
-        AtmosphereServiceRegistry.getInstance().clearRegistry();
+        AtmosphereServiceRegistry.SERVICES.set(null);
         ExtensionRegistry.getInstance().clearRegistry();
         super.stop(context);
     }
