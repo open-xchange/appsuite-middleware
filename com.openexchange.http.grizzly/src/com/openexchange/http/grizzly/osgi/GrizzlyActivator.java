@@ -153,16 +153,27 @@ public class GrizzlyActivator extends HousekeepingActivator {
             final boolean hasJMXEnabled = configService.getBoolProperty("com.openexchange.http.grizzly.hasJMXEnabled", false);
             final boolean hasWebsocketsEnabled = configService.getBoolProperty("com.openexchange.http.grizzly.hasWebSocketsEnabled", false);
             final boolean hasCometEnabled = configService.getBoolProperty("com.openexchange.http.grizzly.hasCometEnabled", false);
-            final int tcpNioTranportThreadPoolSize = configService.getIntProperty("com.openexchange.http.grizzly.tcpNioTranportThreadPoolSize", 5);
+            final int tcpNioTranportThreadPoolQueueLimit = configService.getIntProperty(
+                "com.openexchange.http.grizzly.tcpNioTranportThreadPoolQueueLimit",
+                -1);
+            final int tcpNioTranportThreadPoolMinSize = configService.getIntProperty(
+                "com.openexchange.http.grizzly.tcpNioTranportThreadPoolMinSize",
+                5);
+            final int tcpNioTranportThreadPoolMaxSize = configService.getIntProperty(
+                "com.openexchange.http.grizzly.tcpNioTranportThreadPoolMaxSize",
+                5);
 
             /*
              * create, configure and start server
              */
             grizzly = new HttpServer();
-            
+
             final NetworkListener networkListener = new NetworkListener("http-listener", httpHost, 8080);
             // networkListener.setChunkingEnabled(false);
-            TCPNIOTransport configuredTcpNioTransport = buildTcpNioTransport(tcpNioTranportThreadPoolSize);
+            TCPNIOTransport configuredTcpNioTransport = buildTcpNioTransport(
+                tcpNioTranportThreadPoolQueueLimit,
+                tcpNioTranportThreadPoolMinSize,
+                tcpNioTranportThreadPoolMaxSize);
             networkListener.setTransport(configuredTcpNioTransport);
 
             if (hasJMXEnabled) {
@@ -270,18 +281,31 @@ public class GrizzlyActivator extends HousekeepingActivator {
             }
         }
     }
-    
-    private TCPNIOTransport buildTcpNioTransport(final int configuredPoolSize) {
+
+    /**
+     * Build a TCPNIOTransport based on the config from grizzly.properties
+     * 
+     * @param tcpNioTranportThreadPoolQueueLimit The queueLimit for incoming tasks
+     * @param tcpNioTranportThreadPoolMinSize The minimal number of worker threads
+     * @param tcpNioTranportThreadPoolMaxSize The maximum number of worker threads
+     * @return The configure TCPNIOTransport
+     */
+    private TCPNIOTransport buildTcpNioTransport(int tcpNioTranportThreadPoolQueueLimit, int tcpNioTranportThreadPoolMinSize, int tcpNioTranportThreadPoolMaxSize) {
+        int minPoolSize = 0, maxPoolSize = 0;
         int availableProcessors = Runtime.getRuntime().availableProcessors();
-        int fixedPoolSize = availableProcessors > 5 ? availableProcessors : 5;
-        if(configuredPoolSize > fixedPoolSize  && configuredPoolSize <= Integer.MAX_VALUE) {
-            fixedPoolSize = configuredPoolSize;
-        }
+
+        // make sure minimum poolsize is at least equal to number of processors
+        minPoolSize = availableProcessors > 5 ? availableProcessors : 5;
+        minPoolSize = minPoolSize > tcpNioTranportThreadPoolMinSize ? minPoolSize : tcpNioTranportThreadPoolMinSize;
+        
+        // maximum pool size has to be >= minimum pool size, otherwise fixd Threadpool with maximum size = minimum size
+        maxPoolSize = tcpNioTranportThreadPoolMaxSize > minPoolSize ? tcpNioTranportThreadPoolMaxSize : minPoolSize;
+
         TCPNIOTransportBuilder builder = TCPNIOTransportBuilder.newInstance();
         final ThreadPoolConfig config = builder.getWorkerThreadPoolConfig();
-        config.setCorePoolSize(fixedPoolSize).setMaxPoolSize(fixedPoolSize).setQueueLimit(-1);
+        config.setQueueLimit(tcpNioTranportThreadPoolQueueLimit).setCorePoolSize(minPoolSize).setMaxPoolSize(maxPoolSize);
         final TCPNIOTransport transport = builder.build();
-        
+
         return transport;
     }
 
