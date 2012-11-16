@@ -59,14 +59,15 @@ public class ApacheHTTPClient extends AbstractHTTPClient implements HTTPClient {
 
 		for(Class inputType: Arrays.asList(InputStream.class, Reader.class, String.class)) {
 			List<HTTPResponseProcessor> procList = processors.get(inputType);
-			for (HTTPResponseProcessor processor : procList) {
-				if (processor.getTypes()[1] == responseType) {
-					return (R) processor.process(extractPayload(method, inputType));
+			if (null != procList){
+				for (HTTPResponseProcessor processor : procList) {
+					if (processor.getTypes()[1] == responseType) {
+						return (R) processor.process(extractPayload(method, inputType));
+					}
 				}
 			}
 		}
-
-
+		
 		throw OxHttpClientExceptionCodes.APACHE_CLIENT_ERROR.create();
 	}
 

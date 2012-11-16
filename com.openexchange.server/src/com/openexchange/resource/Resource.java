@@ -70,7 +70,6 @@ public final class Resource {
      * This is the name of this resource that can have character restrictions.
      */
     private String simpleName;
-
     private boolean simpleNameSet;
 
     /**
@@ -78,35 +77,30 @@ public final class Resource {
      * identifier. But the identifier is limited in the characters that can be used.
      */
     private String displayName;
-
     private boolean displayNameSet;
 
     /**
      * Mail address of this resource.
      */
     private String mail;
-
     private boolean mailSet;
 
     /**
      * If a resource is not available, it can't be booked.
      */
     private boolean available;
-
     private boolean availableSet;
 
     /**
      * Description of this resource.
      */
     private String description;
-
     private boolean descriptionSet;
 
     /**
      * Timestamp of the last modification of this resource.
      */
     private Date lastModified;
-
     private boolean lastModifiedSet;
 
     /**

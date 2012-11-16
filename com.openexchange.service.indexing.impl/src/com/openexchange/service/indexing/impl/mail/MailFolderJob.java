@@ -58,6 +58,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
 import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.Types;
@@ -113,7 +114,7 @@ public class MailFolderJob extends AbstractMailJob {
             }
             
             checkJobInfo();
-            MailField[] fields = new MailField[] { 
+            MailField[] fields = new MailField[] {
                 MailField.ID,
                 MailField.FLAGS,
                 MailField.COLOR_LABEL };
@@ -157,10 +158,18 @@ public class MailFolderJob extends AbstractMailJob {
                             indexMails.put(msg.getMailId(), msg);
                         }                
                         
+                        if (LOG.isDebugEnabled()) {
+                            long diff = System.currentTimeMillis() - start;
+                            LOG.debug(info.toString() + " Preparation lasted " + diff + "ms.");
+                        }
                         deleteMails(info, indexMails.keySet(), storageMails.keySet(), mailIndex, attachmentIndex);
                         addMails(info, indexMails.keySet(), storageMails.keySet(), mailIndex, attachmentIndex, messageStorage);
                         changeMails(info, indexMails, storageMails, mailIndex, attachmentIndex, messageStorage);              
                     } else {
+                        if (LOG.isDebugEnabled()) {
+                            long diff = System.currentTimeMillis() - start;
+                            LOG.debug(info.toString() + " Preparation lasted " + diff + "ms.");
+                        }
                         addMails(info, Collections.<String> emptySet(), storageMails.keySet(), mailIndex, attachmentIndex, messageStorage);
                         IndexFolderManager.setIndexed(info.contextId, info.userId, Types.EMAIL, String.valueOf(info.accountId), info.folder);
                     }                
@@ -219,7 +228,7 @@ public class MailFolderJob extends AbstractMailJob {
     private void deleteMails(MailJobInfo info, Set<String> indexIds, Set<String> storageIds, final IndexAccess<MailMessage> mailIndex, final IndexAccess<Attachment> attachmentIndex) throws OXException {
         final List<String> toDelete = new ArrayList<String>(indexIds);
         toDelete.removeAll(storageIds);
-        deleteMails(info, toDelete, mailIndex, attachmentIndex);        
+        deleteMails(info, toDelete, mailIndex, attachmentIndex);
     }
     
     private void changeMails(MailJobInfo info, Map<String, MailMessage> indexMails, Map<String, MailMessage> storageMails, final IndexAccess<MailMessage> mailIndex, final IndexAccess<Attachment> attachmentIndex, final IMailMessageStorage messageStorage) throws OXException {

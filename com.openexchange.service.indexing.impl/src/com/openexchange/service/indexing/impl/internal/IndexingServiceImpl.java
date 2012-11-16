@@ -52,6 +52,7 @@ package com.openexchange.service.indexing.impl.internal;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Set;
+
 import org.apache.commons.logging.Log;
 import org.quartz.JobBuilder;
 import org.quartz.JobDataMap;
@@ -66,6 +67,7 @@ import org.quartz.TriggerBuilder;
 import org.quartz.TriggerKey;
 import org.quartz.impl.matchers.GroupMatcher;
 import org.quartz.service.QuartzService;
+
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.service.indexing.IndexingService;
@@ -155,6 +157,18 @@ public class IndexingServiceImpl implements IndexingService {
         }
     }
     
+    @Override
+    public void unscheduleAllForContext(int contextId) throws OXException {
+        Scheduler scheduler = getScheduler();
+        String jobGroup = generateJobGroup(contextId);   
+        try {
+            Set<JobKey> jobKeys = scheduler.getJobKeys(GroupMatcher.jobGroupStartsWith(jobGroup));
+            scheduler.deleteJobs(new ArrayList<JobKey>(jobKeys));
+        } catch (SchedulerException e) {
+            throw new OXException(e);
+        }        
+    }
+    
     JobKey generateJobKey(JobInfo info) {
         JobKey key = new JobKey(info.toUniqueId(), generateJobGroup(info.contextId, info.userId));
         return key;
@@ -163,6 +177,10 @@ public class IndexingServiceImpl implements IndexingService {
     TriggerKey generateTriggerKey(JobInfo info, Date startDate, long repeatInterval) {
         TriggerKey key = new TriggerKey(generateTriggerName(info, startDate, repeatInterval), generateTriggerGroup(info.contextId, info.userId));
         return key;
+    }
+    
+    String generateJobGroup(int contextId) {
+        return "indexingJobs/" + contextId;
     }
     
     String generateJobGroup(int contextId, int userId) {
@@ -199,5 +217,4 @@ public class IndexingServiceImpl implements IndexingService {
         QuartzService quartzService = Services.getService(QuartzService.class);
         quartzService.releaseClusteredScheduler(SCHEDULER_NAME);
     }
-    
 }

@@ -58,7 +58,9 @@ import org.apache.commons.logging.Log;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.Types;
 import com.openexchange.index.IndexAccess;
+import com.openexchange.index.IndexExceptionCodes;
 import com.openexchange.index.IndexFacadeService;
+import com.openexchange.index.IndexManagementService;
 import com.openexchange.index.solr.SolrIndexExceptionCodes;
 import com.openexchange.index.solr.internal.attachments.SolrAttachmentIndexAccess;
 import com.openexchange.index.solr.internal.infostore.SolrInfostoreIndexAccess;
@@ -75,89 +77,91 @@ import com.openexchange.timer.TimerService;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public class SolrIndexFacadeService implements IndexFacadeService {
-    
+
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(SolrIndexFacadeService.class));
-	
-	private final ConcurrentHashMap<SolrCoreIdentifier, AbstractSolrIndexAccess<?>> accessMap;
-	
+
+    private final ConcurrentHashMap<SolrCoreIdentifier, AbstractSolrIndexAccess<?>> accessMap;
+
     /**
-     * Timeout in minutes.
-     * An index access will be released after being unused for this time and if it isn't referenced anymore.
+     * Timeout in minutes. An index access will be released after being unused for this time and if it isn't referenced anymore.
      */
     private static final long SOFT_TIMEOUT = 10;
-    
+
     /**
-     * Timeout in minutes.
-     * An index access will be released after being unused for this time whether it's still referenced or not.
+     * Timeout in minutes. An index access will be released after being unused for this time whether it's still referenced or not.
      */
     private static final long HARD_TIMEOUT = 60;
 
     private ScheduledTimerTask timerTask;
-	
 
     /**
      * Initializes a new {@link SolrIndexFacadeService}.
      */
     public SolrIndexFacadeService() {
-		super();
-		accessMap = new ConcurrentHashMap<SolrCoreIdentifier, AbstractSolrIndexAccess<?>>();
+        super();
+        accessMap = new ConcurrentHashMap<SolrCoreIdentifier, AbstractSolrIndexAccess<?>>();
     }
-    
+
     public void init() {
         TimerService timerService = Services.getService(TimerService.class);
-        timerTask = timerService.scheduleAtFixedRate(new TimerTask() { 
-            
+        timerTask = timerService.scheduleAtFixedRate(new TimerTask() {
+
             @Override
             public void run() {
                 try {
-                    final List<AbstractSolrIndexAccess<?>> accessList = getCachedAccesses();
-                    final List<SolrCoreIdentifier> identifiers = new ArrayList<SolrCoreIdentifier>();
-                    final long now = System.currentTimeMillis();
-                    final long softBarrier = now - (TimeUnit.MINUTES.toMillis(SOFT_TIMEOUT));
-                    final long hardBarrier = now - (TimeUnit.MINUTES.toMillis(HARD_TIMEOUT));
-                    for (final AbstractSolrIndexAccess<?> access : accessList) {
-                        final long lastAccess = access.getLastAccess();
+                    List<AbstractSolrIndexAccess<?>> accessList = getCachedAccesses();
+                    List<SolrCoreIdentifier> identifiers = new ArrayList<SolrCoreIdentifier>();
+                    long now = System.currentTimeMillis();
+                    long softBarrier = now - (TimeUnit.MINUTES.toMillis(SOFT_TIMEOUT));
+                    long hardBarrier = now - (TimeUnit.MINUTES.toMillis(HARD_TIMEOUT));
+                    for (AbstractSolrIndexAccess<?> access : accessList) {
+                        long lastAccess = access.getLastAccess();
                         if ((lastAccess < softBarrier && !access.isRetained()) || lastAccess < hardBarrier) {
                             identifiers.add(access.getIdentifier());
                             access.releaseCore();
                         }
                     }
-                    
+
                     removeFromCache(identifiers);
                     if (LOG.isDebugEnabled() && !identifiers.isEmpty()) {
-                        final StringBuilder sb = new StringBuilder("Removed IndexAccesses:\n");
-                        for (final SolrCoreIdentifier identifier : identifiers) {
+                        StringBuilder sb = new StringBuilder("Removed IndexAccesses:\n");
+                        for (SolrCoreIdentifier identifier : identifiers) {
                             sb.append("    ");
                             sb.append(identifier.toString());
                             sb.append("\n");
                         }
                         LOG.debug(sb.toString());
                     }
-                } catch (final Throwable e) {
+                } catch (Throwable e) {
                     LOG.error("Exception during timer task execution: " + e.getMessage(), e);
                 }
-                
+
             }
         }, SOFT_TIMEOUT, SOFT_TIMEOUT, TimeUnit.MINUTES);
     }
-    
+
     public void shutDown() {
         if (timerTask != null) {
             timerTask.cancel();
         }
-        
+
         for (AbstractSolrIndexAccess<?> access : accessMap.values()) {
             access.releaseCore();
         }
     }
-	
+
     @SuppressWarnings("unchecked")
 	@Override
     public <V> IndexAccess<V> acquireIndexAccess(final int module, final int userId, final int contextId) throws OXException {
-        final SolrCoreIdentifier identifier = new SolrCoreIdentifier(contextId, userId, module);
+        IndexManagementService managementService = Services.getService(IndexManagementService.class);
+        if (managementService.isLocked(contextId, userId, module)) {
+            throw IndexExceptionCodes.INDEX_LOCKED.create(module, userId, contextId);
+        }
+        
+        SolrCoreIdentifier identifier = new SolrCoreIdentifier(contextId, userId, module);
         AbstractSolrIndexAccess<?> cachedIndexAccess = accessMap.get(identifier);
         if (null == cachedIndexAccess) {
-            final AbstractSolrIndexAccess<?> newAccess = createIndexAccessByType(identifier);
+            AbstractSolrIndexAccess<?> newAccess = createIndexAccessByType(identifier);
             cachedIndexAccess = accessMap.putIfAbsent(identifier, newAccess);
             if (null == cachedIndexAccess) {
                 cachedIndexAccess = newAccess;
@@ -173,17 +177,17 @@ public class SolrIndexFacadeService implements IndexFacadeService {
         return acquireIndexAccess(module, session.getUserId(), session.getContextId());
     }
 
-	@Override
-	public void releaseIndexAccess(final IndexAccess<?> indexAccess) throws OXException {
-		final AbstractSolrIndexAccess<?> cachedIndexAccess = accessMap.get(((AbstractSolrIndexAccess<?>) indexAccess).getIdentifier());
+    @Override
+    public void releaseIndexAccess(final IndexAccess<?> indexAccess) throws OXException {
+        AbstractSolrIndexAccess<?> cachedIndexAccess = accessMap.get(((AbstractSolrIndexAccess<?>) indexAccess).getIdentifier());
         if (null != cachedIndexAccess) {
             cachedIndexAccess.decrementRetainCount();
         }
-	}
-	
-	private List<AbstractSolrIndexAccess<?>> getCachedAccesses() {
-        final List<AbstractSolrIndexAccess<?>> accessList = new ArrayList<AbstractSolrIndexAccess<?>>();
-        for (final AbstractSolrIndexAccess<?> access : accessMap.values()) {
+    }
+
+    private List<AbstractSolrIndexAccess<?>> getCachedAccesses() {
+        List<AbstractSolrIndexAccess<?>> accessList = new ArrayList<AbstractSolrIndexAccess<?>>();
+        for (AbstractSolrIndexAccess<?> access : accessMap.values()) {
             accessList.add(access);
         }
 
@@ -198,24 +202,20 @@ public class SolrIndexFacadeService implements IndexFacadeService {
 
     private AbstractSolrIndexAccess<?> createIndexAccessByType(final SolrCoreIdentifier identifier) throws OXException {
         final int module = identifier.getModule();
-        // TODO: Add other modules 
-        switch(module) {
-        
-//            case Types.EMAIL:
-//                return new MailSolrIndexAccess(identifier);
-            
+        // TODO: Add other modules
+        switch (module) {
             case Types.EMAIL:
                 return new SolrMailIndexAccess(identifier);
-                
+
             case Types.INFOSTORE:
                 return new SolrInfostoreIndexAccess(identifier);
-                
+
             case Types.ATTACHMENT:
                 return new SolrAttachmentIndexAccess(identifier);
-                
+
             default:
                 throw SolrIndexExceptionCodes.MISSING_ACCESS_FOR_MODULE.create(module);
-            
+
         }
     }
 }

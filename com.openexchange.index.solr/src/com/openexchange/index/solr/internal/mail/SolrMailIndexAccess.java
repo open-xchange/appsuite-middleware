@@ -123,12 +123,12 @@ public class SolrMailIndexAccess extends AbstractSolrIndexAccess<MailMessage> {
     }
 
     @Override
-    public void addEnvelopeData(IndexDocument<MailMessage> document) throws OXException {
-        addDocument(convertToDocument(document));
+    public void addDocument0(IndexDocument<MailMessage> document) throws OXException {
+        addSolrDocument(convertToDocument(document));
     }
 
     @Override
-    public void addEnvelopeData(Collection<IndexDocument<MailMessage>> documents) throws OXException {
+    public void addDocuments0(Collection<IndexDocument<MailMessage>> documents) throws OXException {
         if (documents.isEmpty()) {
             return;
         }
@@ -138,54 +138,16 @@ public class SolrMailIndexAccess extends AbstractSolrIndexAccess<MailMessage> {
             inputDocuments.add(convertToDocument(document));
         }
 
-        addDocuments(inputDocuments);
+        addSolrDocuments(inputDocuments);
     }
 
     @Override
-    public void addContent(IndexDocument<MailMessage> document, boolean full) throws OXException {
-        addDocument(convertToDocument(document));
-    }
-
-    @Override
-    public void addContent(Collection<IndexDocument<MailMessage>> documents, boolean full) throws OXException {
-        if (documents.isEmpty()) {
-            return;
-        }
-
-        List<SolrInputDocument> inputDocuments = new ArrayList<SolrInputDocument>();
-        for (IndexDocument<MailMessage> document : documents) {
-            inputDocuments.add(convertToDocument(document));
-        }
-
-        addDocuments(inputDocuments);
-    }
-
-    @Override
-    public void addAttachments(IndexDocument<MailMessage> document, boolean full) throws OXException {
-        addDocument(convertToDocument(document));
-    }
-
-    @Override
-    public void addAttachments(Collection<IndexDocument<MailMessage>> documents, boolean full) throws OXException {
-        if (documents.isEmpty()) {
-            return;
-        }
-
-        List<SolrInputDocument> inputDocuments = new ArrayList<SolrInputDocument>();
-        for (IndexDocument<MailMessage> document : documents) {
-            inputDocuments.add(convertToDocument(document));
-        }
-
-        addDocuments(inputDocuments);
-    }
-
-    @Override
-    public void deleteById(String id) throws OXException {
+    public void deleteById0(String id) throws OXException {
         deleteDocumentById(id);
     }
 
     @Override
-    public void deleteByQuery(QueryParameters parameters) throws OXException {
+    public void deleteByQuery0(QueryParameters parameters) throws OXException {
         Set<MailIndexField> fields = EnumSet.noneOf(MailIndexField.class);
         fields.add(MailIndexField.ACCOUNT);
         fields.add(MailIndexField.FULL_NAME);
@@ -205,7 +167,7 @@ public class SolrMailIndexAccess extends AbstractSolrIndexAccess<MailMessage> {
     }
 
     @Override
-    public IndexResult<MailMessage> query(QueryParameters parameters, Set<? extends IndexField> fields) throws OXException {
+    public IndexResult<MailMessage> query0(QueryParameters parameters, Set<? extends IndexField> fields) throws OXException {
         IndexField sortField = parameters.getSortField();
         Order order = parameters.getOrder();
         SolrMailField solrSortField = (SolrMailField) MailFieldMapper.getInstance().solrFieldFor(sortField);
@@ -247,7 +209,7 @@ public class SolrMailIndexAccess extends AbstractSolrIndexAccess<MailMessage> {
     }
 
     @Override
-    public IndexResult<MailMessage> query(QueryParameters parameters, FacetParameters facetParameters, Set<? extends IndexField> fields) throws OXException {
+    public IndexResult<MailMessage> query0(QueryParameters parameters, FacetParameters facetParameters, Set<? extends IndexField> fields) throws OXException {
         // TODO Auto-generated method stub
         return null;
     }

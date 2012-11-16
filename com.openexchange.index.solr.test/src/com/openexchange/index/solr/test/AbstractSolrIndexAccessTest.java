@@ -61,6 +61,7 @@ import com.openexchange.admin.rmi.dataobjects.Filestore;
 import com.openexchange.admin.rmi.dataobjects.User;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.index.IndexFacadeService;
+import com.openexchange.index.IndexManagementService;
 import com.openexchange.test.osgi.OSGiTest;
 
 
@@ -74,6 +75,8 @@ public abstract class AbstractSolrIndexAccessTest {
     protected static IndexFacadeService indexFacade;
 
     protected static ConfigurationService config;
+    
+    protected static IndexManagementService managementService;
 
     protected static Credentials superAdminCredentials;
 
@@ -84,12 +87,13 @@ public abstract class AbstractSolrIndexAccessTest {
     protected static Context context;
 
     protected static User user;
-
+    
 
     @BeforeClass
     public static void setUpClass() throws Exception {
         int rmiPort = config.getIntProperty("RMI_PORT", 1099);
         Registry registry = LocateRegistry.getRegistry("localhost", rmiPort);
+        Thread.sleep(1000);
         contextInterface = (OXContextInterface) registry.lookup(OXContextInterface.RMI_NAME);
         userInterface = (OXUserInterface) registry.lookup(OXUserInterface.RMI_NAME);
 
@@ -114,6 +118,10 @@ public abstract class AbstractSolrIndexAccessTest {
 
     public static void setConfigurationService(ConfigurationService config) {
         AbstractSolrIndexAccessTest.config = config;
+    }
+    
+    public static void setIndexManagementService(IndexManagementService managementService) {
+        AbstractSolrIndexAccessTest.managementService = managementService;
     }
     
     private static Context newContext(String name, int id) {

@@ -5,6 +5,14 @@ import java.util.Map;
 import java.util.Set;
 
 public interface Configuration {
+    
+    public static final String FIELD = "field";
+    
+    public static final String HANDLER = "handler";
+    
+    public static final String TRANSLATOR = "translator";
+    
+    
   public List<String> getIndexFields(String key);
   public Set<String> getKeys();
   public Set<String> getKeys(String handlerName);
