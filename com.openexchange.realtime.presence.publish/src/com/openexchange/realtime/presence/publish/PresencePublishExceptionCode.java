@@ -47,37 +47,39 @@
  *
  */
 
-package com.openexchange.realtime;
+package com.openexchange.realtime.presence.publish;
 
 import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
 import com.openexchange.exception.OXExceptionCode;
 import com.openexchange.exception.OXExceptionFactory;
+import static com.openexchange.realtime.presence.publish.PresencePublishExceptionMessage.*;
+
 
 /**
- * {@link RealtimeExceptionCodes} - Error codes for message dispatcher.
- * 
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a> JavaDoc
+ * {@link PresencePublishExceptionCode}
+ *
+ * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
-public enum RealtimeExceptionCodes implements OXExceptionCode {
-    /** Unknown channel %1$s */
-    UNKNOWN_CHANNEL(RealtimeExceptionMessages.UNKNOWN_CHANNEL, Category.EnumCategory.CONNECTIVITY, 1),
-    /** No appropriate channel found for recipient %1$s with payload namespace %2$s */
-    NO_APPROPRIATE_CHANNEL(RealtimeExceptionMessages.NO_APPROPRIATE_CHANNEL, Category.EnumCategory.CONNECTIVITY, 2),
+public enum PresencePublishExceptionCode implements OXExceptionCode {
+    
     /** The following needed service is missing: "%1$s" */
-    NEEDED_SERVICE_MISSING(RealtimeExceptionMessages.NEEDED_SERVICE_MISSING_MSG, CATEGORY_SERVICE_DOWN, 3);
+//    NEEDED_SERVICE_MISSING(NEEDED_SERVICE_MISSING_MSG, CATEGORY_SERVICE_DOWN, 1)
+    ;
 
-    private int number;
+    private final String message;
+    private final int number;
+    private final Category category;
 
-    private Category category;
-
-    private String message;
-
-    private RealtimeExceptionCodes(final String message, final Category category, final int detailNumber) {
+    private PresencePublishExceptionCode(final String message, final Category category, final int detailNumber) {
         this.message = message;
-        this.number = detailNumber;
+        number = detailNumber;
         this.category = category;
+    }
+    
+    @Override
+    public boolean equals(OXException e) {
+        return OXExceptionFactory.getInstance().equals(this, e);
     }
 
     @Override
@@ -92,22 +94,17 @@ public enum RealtimeExceptionCodes implements OXExceptionCode {
 
     @Override
     public String getPrefix() {
-        return "RT";
+        return "Realtime.Presence.Publish";
     }
 
     @Override
     public String getMessage() {
         return message;
     }
-
-    @Override
-    public boolean equals(final OXException e) {
-        return OXExceptionFactory.getInstance().equals(this, e);
-    }
-
+    
     /**
      * Creates a new {@link OXException} instance pre-filled with this code's attributes.
-     * 
+     *
      * @return The newly created {@link OXException} instance
      */
     public OXException create() {
@@ -116,7 +113,7 @@ public enum RealtimeExceptionCodes implements OXExceptionCode {
 
     /**
      * Creates a new {@link OXException} instance pre-filled with this code's attributes.
-     * 
+     *
      * @param args The message arguments in case of printf-style message
      * @return The newly created {@link OXException} instance
      */
@@ -126,7 +123,7 @@ public enum RealtimeExceptionCodes implements OXExceptionCode {
 
     /**
      * Creates a new {@link OXException} instance pre-filled with this code's attributes.
-     * 
+     *
      * @param cause The optional initial cause
      * @param args The message arguments in case of printf-style message
      * @return The newly created {@link OXException} instance

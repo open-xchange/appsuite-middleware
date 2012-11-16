@@ -47,25 +47,41 @@
  *
  */
 
-package com.openexchange.realtime;
+package com.openexchange.realtime.presence.publish.osgi;
 
-import com.openexchange.i18n.LocalizableStrings;
+import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.realtime.MessageDispatcher;
+import com.openexchange.realtime.presence.PresenceStatusService;
+import com.openexchange.realtime.presence.publish.PresenceStatusChangePublisher;
+import com.openexchange.realtime.presence.subscribe.PresenceSubscriptionService;
 
 /**
- * {@link RealtimeExceptionMessages} - Translatable error messages.
+ * {@link PresencePublishActivator} registers a {@link PresenceStatusChangePublisher} as listener at the PresenceStatusService to inform
+ * clients about a status change of contacts they did subscribe to.
  * 
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a> JavaDoc
+ * @author <a href="mailto:marc	.arens@open-xchange.com">Marc Arens</a>
  */
-public class RealtimeExceptionMessages implements LocalizableStrings {
+public class PresencePublishActivator extends HousekeepingActivator {
 
-    /** Unknown channel %1$s */
-    public static final String UNKNOWN_CHANNEL = "Unknown channel %1$s";
+    PresenceStatusChangePublisher publisher = null;
 
-    /** No appropriate channel found for recipient %1$s with payload namespace %2$s */
-    public static final String NO_APPROPRIATE_CHANNEL = "No appropriate channel found for recipient %1$s with payload namespace %2$s";
-    
-    /** The following needed service is missing: \"%1$s\" */
-    public static final String NEEDED_SERVICE_MISSING_MSG = "The following needed service is missing: \"%1$s\"";
+    @Override
+    protected Class<?>[] getNeededServices() {
+        return new Class<?>[] { PresenceSubscriptionService.class, PresenceStatusService.class, MessageDispatcher.class };
+    }
+
+    @Override
+    protected void startBundle() throws Exception {
+        publisher = new PresenceStatusChangePublisher(this);
+        PresenceStatusService presenceStatusService = getService(PresenceStatusService.class);
+        presenceStatusService.registerPresenceChangeListener(publisher);
+    }
+
+    @Override
+    protected void stopBundle() throws Exception {
+        PresenceStatusService presenceStatusService = getService(PresenceStatusService.class);
+        presenceStatusService.unregisterPresenceChangeListener(publisher);
+        super.stopBundle();
+    }
 
 }

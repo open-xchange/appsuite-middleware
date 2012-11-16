@@ -62,21 +62,25 @@ import com.openexchange.tools.session.ServerSession;
 public interface PresenceChangeListener {
 
     /**
-     * @param stanza
-     * @param session
+     * Called when a client sends his initial Presence to the server iow. comes online.
+     * 
+     * @param presence The initial Presence Stanza sent by the client.
+     * @param serveSession The associated ServerSession
      */
-    void initialPresence(Presence stanza, ServerSession session);
+    void initialPresence(Presence presence, ServerSession serveSession);
 
     /**
-     * 
-     * @param stanza
-     * @param session
+     * Called when a client changes his status between ONLINE, CHAT_ME_UP, AWAY or DO_NOT_DISTURB
+     * @param presence The Presence Stanza sent by the client.
+     * @param serverSession The associated ServerSession
      */
-    void normalPresence(Presence stanza, ServerSession session);
-    
+    void normalPresence(Presence presence, ServerSession serverSession);
+
     /**
-     * @param stanza
-     * @param session
+     * Called when a client sends his final Presence to the server iow. goes offline.
+     * 
+     * @param presence The final Presence Stanza sent by the client.
+     * @param serveSession The associated ServerSession
      */
-    void finalPresence(Presence stanza, ServerSession session);
+    void finalPresence(Presence presence, ServerSession serverSession);
 }

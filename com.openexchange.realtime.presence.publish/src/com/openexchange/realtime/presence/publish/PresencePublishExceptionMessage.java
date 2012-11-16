@@ -47,25 +47,17 @@
  *
  */
 
-package com.openexchange.realtime;
+package com.openexchange.realtime.presence.publish;
 
 import com.openexchange.i18n.LocalizableStrings;
 
 /**
- * {@link RealtimeExceptionMessages} - Translatable error messages.
+ * {@link PresencePublishExceptionMessage}
  * 
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a> JavaDoc
+ * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
-public class RealtimeExceptionMessages implements LocalizableStrings {
+public class PresencePublishExceptionMessage implements LocalizableStrings {
 
-    /** Unknown channel %1$s */
-    public static final String UNKNOWN_CHANNEL = "Unknown channel %1$s";
-
-    /** No appropriate channel found for recipient %1$s with payload namespace %2$s */
-    public static final String NO_APPROPRIATE_CHANNEL = "No appropriate channel found for recipient %1$s with payload namespace %2$s";
-    
     /** The following needed service is missing: \"%1$s\" */
-    public static final String NEEDED_SERVICE_MISSING_MSG = "The following needed service is missing: \"%1$s\"";
-
+//    public static final String NEEDED_SERVICE_MISSING_MSG = "The following needed service is missing: \"%1$s\"";
 }

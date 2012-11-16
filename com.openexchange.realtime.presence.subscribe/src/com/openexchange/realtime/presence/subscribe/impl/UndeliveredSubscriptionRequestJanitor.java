@@ -47,25 +47,37 @@
  *
  */
 
-package com.openexchange.realtime;
+package com.openexchange.realtime.presence.subscribe.impl;
 
-import com.openexchange.i18n.LocalizableStrings;
+import org.apache.commons.logging.Log;
+import com.openexchange.realtime.packet.Presence;
+import com.openexchange.realtime.presence.PresenceChangeListener;
+import com.openexchange.tools.session.ServerSession;
+
 
 /**
- * {@link RealtimeExceptionMessages} - Translatable error messages.
- * 
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a> JavaDoc
+ * {@link UndeliveredSubscriptionRequestJanitor} keeps track of presence status changes and checks for undelivered subscriptionrequest for
+ * clients that just sent an initial Presence io. came online.
+ *
+ * @author <a href="mailto:marc	.arens@open-xchange.com">Marc Arens</a>
  */
-public class RealtimeExceptionMessages implements LocalizableStrings {
+public class UndeliveredSubscriptionRequestJanitor implements PresenceChangeListener {
 
-    /** Unknown channel %1$s */
-    public static final String UNKNOWN_CHANNEL = "Unknown channel %1$s";
-
-    /** No appropriate channel found for recipient %1$s with payload namespace %2$s */
-    public static final String NO_APPROPRIATE_CHANNEL = "No appropriate channel found for recipient %1$s with payload namespace %2$s";
+    public static final Log LOG = com.openexchange.log.Log.loggerFor(UndeliveredSubscriptionRequestJanitor.class);
     
-    /** The following needed service is missing: \"%1$s\" */
-    public static final String NEEDED_SERVICE_MISSING_MSG = "The following needed service is missing: \"%1$s\"";
+    @Override
+    public void initialPresence(Presence presence, ServerSession serveSession) {
+        LOG.info("\nHÄLP I NEED IMPLEMENTATION\n");
+    }
+
+    @Override
+    public void normalPresence(Presence presence, ServerSession serverSession) {
+        LOG.info("\nHÄLP I NEED IMPLEMENTATION\n");
+    }
+
+    @Override
+    public void finalPresence(Presence presence, ServerSession serverSession) {
+        LOG.info("\nHÄLP I NEED IMPLEMENTATION\n");
+    }
 
 }
