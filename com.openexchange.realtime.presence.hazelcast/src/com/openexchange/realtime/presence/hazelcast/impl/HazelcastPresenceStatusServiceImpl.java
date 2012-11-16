@@ -70,6 +70,7 @@ import com.openexchange.tools.session.ServerSession;
  * 
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
+// TODO: PresenceService must honor priority
 public class HazelcastPresenceStatusServiceImpl implements PresenceStatusService {
 
     private ConcurrentMap<ID, PresenceData> statusMap;

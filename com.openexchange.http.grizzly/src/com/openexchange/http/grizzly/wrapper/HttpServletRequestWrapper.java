@@ -245,15 +245,15 @@ public class HttpServletRequestWrapper implements HttpServletRequest, Parameteri
     @Override
     public void putParameter(String name, String value) {
         throw new UnsupportedOperationException();
-        Request internalRequest = ServletUtils.getInternalRequest(httpServletRequest);
-        if (null == name) {
-            throw new NullPointerException("name is null");
-        }
-        if (null == value) {
-            parameters.remove(name);
-        } else {
-            setParameter(name, value);
-        }
+//        Request internalRequest = ServletUtils.getInternalRequest(httpServletRequest);
+//        if (null == name) {
+//            throw new NullPointerException("name is null");
+//        }
+//        if (null == value) {
+//            parameters.remove(name);
+//        } else {
+//            setParameter(name, value);
+//        }
     }
 
 }

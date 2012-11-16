@@ -60,6 +60,7 @@ import com.openexchange.realtime.util.ElementPath;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a> JavaDoc
  */
+//TODO: Make cloneable or offer immutable copy
 public class PayloadElement implements VisitablePayload {
 
     // Current format of the Payload e.g. json, xml or some Class.getSimpleName()

@@ -225,32 +225,11 @@ public class OXRTPresenceHandler implements StanzaHandler {
      */
     private void handlePresence(Presence stanza, ServerSession session) throws OXException {
         AtmospherePresenceServiceRegistry serviceRegistry = AtmospherePresenceServiceRegistry.getInstance();
-        PresenceStatusService presenceStatusService = serviceRegistry.getService(PresenceStatusService.class, true);
-        MessageDispatcher messageDispatcher = serviceRegistry.getService(MessageDispatcher.class, true);
-
+        PresenceStatusService presenceStatusService = serviceRegistry.getService(PresenceStatusService.class);
         
+        // TODO: add delay from last statusChange to presenceStanza
         // Change the status of the incoming Stanza's client
         presenceStatusService.changePresenceStatus(stanza, session);
-
-        // Inform the client about the new status of his contacts
-        if (isInitialPresence(stanza)) {
-            List<ID> subscriptions = presenceSubscriptionService.getSubscriptions(session);
-            IDMap<PresenceData> idToStatusMap = presenceStatusService.getPresenceStatus(subscriptions);
-            for (ID id : idToStatusMap.keySet()) {
-                PresenceData presenceData = idToStatusMap.get(id);
-
-                // build Presence Stanza to tell joining client about the status of its contacts
-                Presence presenceStanza = new Presence();
-                presenceStanza.setFrom(id);
-                presenceStanza.setTo(stanza.getFrom());
-                presenceStanza.setState(presenceData.getState());
-                presenceStanza.setMessage(presenceData.getMessage());
-                // TODO: add delay from last statusChange to presenceStanza
-
-                messageDispatcher.send(stanza, session);
-            }
-        }
-        // TODO: PresenceService must honor priority
     }
 
     /**
@@ -261,48 +240,6 @@ public class OXRTPresenceHandler implements StanzaHandler {
         StanzaTransformer transformer = new StanzaTransformer();
         transformer.outgoing(stanza, session);
         sender.send(stanza);
-
-    }
-
-    /**
-     * Get a list of clients a given client is subscribed to from the PresenceSubscriptionService and query their status from the
-     * PresenceStatus.
-     * 
-     * @param requester The client requesting thes status map of clients he is subscribed to
-     * @param session The associated session
-     * @return a map of clients and associated status that a given client is subscribed to
-     * @throws OXException
-     */
-    public IDMap<PresenceData> getSubscriptionStatus(ID requester, ServerSession session) throws OXException {
-        AtmospherePresenceServiceRegistry serviceRegistry = AtmospherePresenceServiceRegistry.getInstance();
-        PresenceSubscriptionService presenceSubscriptionService = serviceRegistry.getService(PresenceSubscriptionService.class, true);
-        PresenceStatusService presenceStatusService = serviceRegistry.getService(PresenceStatusService.class, true);
-
-        List<ID> subscribers = presenceSubscriptionService.getSubscribers(session);
-
-        return null;
-    }
-
-    /**
-     * Ask someone else for permission to subscribe/see his status. Done by triggering a method on the PresenceSubscriptionService.
-     * 
-     * @param requester The client asking for permission to subscribe to someone else
-     * @param receiver The client the requester wants to ask for permission to subscribe
-     * @param session The associated server session
-     */
-    public void askForSubscriptionAuthorization(ID requester, ID receiver, ServerSession session) {
-        throw new UnsupportedOperationException("Not implemented.");
-    }
-
-    /**
-     * Give somebody else the permission to subscribe to me and see my status. This will persist the permission in the
-     * PresenceSubscriptionService.
-     * 
-     * @param granter The client granting someone the permission to subscribe
-     * @param receiver The client asking for permission to subscribe
-     * @param session The associated serversession
-     */
-    public void grantSubscriptionAUthorization(ID granter, ID receiver, ServerSession session) {
 
     }
 

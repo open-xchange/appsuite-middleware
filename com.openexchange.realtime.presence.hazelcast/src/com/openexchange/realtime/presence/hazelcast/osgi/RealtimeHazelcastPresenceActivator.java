@@ -11,7 +11,7 @@ public class RealtimeHazelcastPresenceActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { HazelcastInstance.class, MessageDispatcher.class };
+        return new Class<?>[] { HazelcastInstance.class };
     }
 
     @Override

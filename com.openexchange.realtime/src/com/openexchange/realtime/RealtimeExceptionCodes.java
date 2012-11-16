@@ -87,7 +87,6 @@ public enum RealtimeExceptionCodes implements OXExceptionCode {
 
     @Override
     public Category getCategory() {
-        // TODO Auto-generated method stub
         return category;
     }
 
