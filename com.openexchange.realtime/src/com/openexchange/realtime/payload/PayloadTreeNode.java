@@ -88,6 +88,25 @@ public class PayloadTreeNode implements VisitablePayload {
     }
 
     /**
+     * Initializes a new {@link PayloadTreeNode} based on another PayloadTreeNode
+     * 
+     * @param otherTreeNode the other PayloadTreeNode, must not be null
+     * @throws IllegalArgumentException if the other PayloadTreeNode is null
+     */
+    public PayloadTreeNode(PayloadTreeNode otherTreeNode) {
+        if (otherTreeNode == null) {
+            throw new IllegalArgumentException("Other PayloadTreeNode must not be null.");
+        }
+        PayloadElement otherPayloadElement = otherTreeNode.payloadElement;
+        if (otherPayloadElement != null) {
+            this.payloadElement = new PayloadElement(otherPayloadElement);
+        }
+        for (PayloadTreeNode otherChild : otherTreeNode.children) {
+            children.add(new PayloadTreeNode(otherChild));
+        }
+    }
+
+    /**
      * Gets the parent node
      * 
      * @return The parent
@@ -290,7 +309,7 @@ public class PayloadTreeNode implements VisitablePayload {
     public String getNamespace() {
         if (payloadElement != null) {
             return payloadElement.getNamespace();
-//            wenn namespace null, ersten namespace der hierarchie nutzen
+            // wenn namespace null, ersten namespace der hierarchie nutzen
         }
         return null;
     }

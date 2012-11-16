@@ -60,6 +60,7 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import com.google.common.base.Predicate;
 import com.openexchange.realtime.payload.PayloadTree;
+import com.openexchange.realtime.payload.PayloadTreeNode;
 import com.openexchange.realtime.util.ElementPath;
 
 /**
@@ -169,7 +170,8 @@ public abstract class Stanza {
 
     /**
      * Set all Payloads of this Stanza.
-     * @param payloadTrees  The PayloadTrees forming the Payloads.
+     * 
+     * @param payloadTrees The PayloadTrees forming the Payloads.
      */
     public void setPayloads(Collection<PayloadTree> payloadTrees) {
         HashMap<ElementPath, List<PayloadTree>> newPayloads = new HashMap<ElementPath, List<PayloadTree>>();
@@ -182,7 +184,7 @@ public abstract class Stanza {
             list.add(tree);
             newPayloads.put(tree.getElementPath(), list);
         }
-        payloads=newPayloads;
+        payloads = newPayloads;
     }
 
     /**
@@ -192,6 +194,10 @@ public abstract class Stanza {
      * @return true if the PayloadTreeNode could be added to this Stanza
      */
     public void addPayload(final PayloadTree tree) {
+        addPayloadToMap(tree, this.payloads);
+    }
+
+    private void addPayloadToMap(PayloadTree tree, Map<ElementPath, List<PayloadTree>> map) {
         ElementPath elementPath = tree.getElementPath();
         List<PayloadTree> list = payloads.get(elementPath);
         if (list == null) {
@@ -246,29 +252,19 @@ public abstract class Stanza {
         }
         return result;
     }
-    
-    //---
+
     /**
-     * @param payloads
-     * @return
+     * Return a Map<ElementPath, List<PayloadTree>> containing deep copies of this stanza's payloads.
+     * 
+     * @return a Map<ElementPath, List<PayloadTree>> containing deep copies of this stanza's payloads.
      */
-    private Map<ElementPath, List<PayloadTree>> deepCopyPayloads(Map<ElementPath, List<PayloadTree>> payloads) {
-        
-        return null;
-    }
-    
-    private void foo() {
-    HashMap<ElementPath, List<PayloadTree>> newPayloads = new HashMap<ElementPath, List<PayloadTree>>();
-    for (PayloadTree tree : payloadTrees) {
-        ElementPath elementPath = tree.getRoot().getElementPath();
-        List<PayloadTree> list = newPayloads.get(elementPath);
-        if (list == null) {
-            list = new ArrayList<PayloadTree>();
+    protected Map<ElementPath, List<PayloadTree>> deepCopyPayloads() {
+        HashMap<ElementPath, List<PayloadTree>> copiedPayloads = new HashMap<ElementPath, List<PayloadTree>>();
+        for (PayloadTree tree : getPayloads()) {
+            PayloadTree copiedTree = new PayloadTree(tree);
+            addPayloadToMap(tree, copiedPayloads);
         }
-        list.add(tree);
-        newPayloads.put(tree.getElementPath(), list);
-    }
-    payloads=newPayloads;
+        return copiedPayloads;
     }
 
 }
