@@ -125,6 +125,7 @@ public class CXFActivator extends HousekeepingActivator {
                         boolean servletRegistered = false;
                         boolean collectorOpened = false;
                         try {
+                            System.setProperty("org.apache.cxf.Logger", "org.apache.cxf.common.logging.Log4jLogger");
                             final CXFNonSpringServlet cxfServlet = new CXFNonSpringServlet();
                             /*
                              * Register CXF Servlet
