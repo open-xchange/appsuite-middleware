@@ -1,3 +1,7 @@
+* 2012-11-18 - thorben.betten@open-xchange.com
+
+ - Fix for bug 23726: Added null guard to deal with possible non-existing image part
+
 * 2012-11-09 - francisco.laguna@open-xchange.com
 
  - Fix for bug 23641: PreferencesItemService to set the module flag to false
