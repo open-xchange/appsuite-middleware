@@ -65,14 +65,27 @@ import com.openexchange.mail.smal.impl.SmalServiceLookup;
 public class AccountBlacklist {
 
     private static boolean allExternalAllowed = false;
+    
+    private static boolean allExternalForbidden = false;
 
     private static Set<String> blacklistedServers = null;
     
 
+    /**
+     * Returns if the given mail account server is blacklisted.<br>
+     * <b>Important: You have to check first if this is the users primary mail account. If
+     * com.openexchange.mail.smal.blacklist is set to '*' this method will return <code>true</code> even for the primary account!</b>
+     * @param server
+     * @return
+     */
     public static boolean isServerBlacklisted(final String server) {
         initBlacklist();
-        if (allExternalAllowed || blacklistedServers.isEmpty()) {
+        if (allExternalAllowed) {
             return false;
+        }
+        
+        if (allExternalForbidden) {
+            return true;
         }
 
         return Iterables.any(blacklistedServers, new Predicate<String>() {
@@ -92,21 +105,23 @@ public class AccountBlacklist {
             ConfigurationService config = SmalServiceLookup.getInstance().getService(ConfigurationService.class);
             String blacklist = config.getProperty("com.openexchange.mail.smal.blacklist");
             if (blacklist == null) {
-                throw new IllegalArgumentException(
-                    "Missing value for property 'com.openexchange.mail.smal.blacklist'. Check smal.properties.");
+                throw new IllegalArgumentException("Missing value for property 'com.openexchange.mail.smal.blacklist'. Check smal.properties.");
             }
 
             blacklist = blacklist.trim();
             if (blacklist.isEmpty()) {
                 allExternalAllowed = true;
+                allExternalForbidden = false;
                 blacklistedServers = Collections.EMPTY_SET;
             } else if (blacklist.startsWith("*")) {
                 allExternalAllowed = false;
+                allExternalForbidden = true;
                 blacklistedServers = Collections.EMPTY_SET;
             } else {
                 allExternalAllowed = false;
+                allExternalForbidden = false;
                 blacklistedServers = new HashSet<String>();
-                String[] servers = blacklist.split(",");
+                String[] servers = blacklist.split("\\s*,\\s*");
                 for (String server : servers) {
                     blacklistedServers.add(server.trim());
                 }

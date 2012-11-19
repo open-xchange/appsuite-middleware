@@ -72,11 +72,11 @@ public enum IndexExceptionCodes implements OXExceptionCode {
      */
     MISSING_FOLDER_ENTRY(IndexExceptionMessages.MISSING_FOLDER_ENTRY_MSG, Category.CATEGORY_ERROR, 2),
     /**
-     * Index search for module %1$d is not enabled for user %1$d in context %2$d.
+     * Index search for module %1$d is not enabled for user %2$d in context %3$d.
      */
     INDEXING_NOT_ENABLED(IndexExceptionMessages.INDEXING_NOT_ENABLED, Category.CATEGORY_PERMISSION_DENIED, 3),
     /**
-     * The index for module %1$d for user %1$d in context %2$d is currently locked.
+     * The index for module %1$d for user %2$d in context %3$d is currently locked.
      */
     INDEX_LOCKED(IndexExceptionMessages.INDEX_LOCKED, Category.CATEGORY_ERROR, 4),
     

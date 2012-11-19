@@ -61,7 +61,13 @@ import org.osgi.service.event.EventHandler;
 
 import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.core.IMap;
+import com.openexchange.config.cascade.ConfigView;
+import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.Types;
+import com.openexchange.index.IndexExceptionCodes;
+import com.openexchange.index.IndexProperties;
+import com.openexchange.index.solr.ModuleSet;
 import com.openexchange.mail.api.IMailFolderStorage;
 import com.openexchange.mail.api.IMailMessageStorage;
 import com.openexchange.mail.api.MailAccess;
@@ -96,19 +102,31 @@ public class SmalSessionEventHandler implements EventHandler {
 
     @Override
     public void handleEvent(Event event) {
-        try {            
+        try {
             IndexingService indexingService = SmalServiceLookup.getServiceStatic(IndexingService.class);
             if (indexingService == null) {
                 OXException e = ServiceExceptionCode.SERVICE_UNAVAILABLE.create(IndexingService.class.getName());
                 LOG.warn("Could not handle session event.", e);
                 return;
-            }  
+            }
             
-            String topic = event.getTopic();            
-            if (SessiondEventConstants.TOPIC_ADD_SESSION.equals(topic) || SessiondEventConstants.TOPIC_REACTIVATE_SESSION.equals(topic)) {                
+            String topic = event.getTopic();
+            if (SessiondEventConstants.TOPIC_ADD_SESSION.equals(topic) || SessiondEventConstants.TOPIC_REACTIVATE_SESSION.equals(topic)) {
                 Session session = (Session) event.getProperty(SessiondEventConstants.PROP_SESSION);
                 int contextId = session.getContextId();
-                int userId = session.getUserId();                
+                int userId = session.getUserId();
+                ConfigViewFactory config = SmalServiceLookup.getServiceStatic(ConfigViewFactory.class);
+                ConfigView view = config.getView(userId, contextId);
+                String moduleStr = view.get(IndexProperties.ALLOWED_MODULES, String.class);
+                ModuleSet modules = new ModuleSet(moduleStr);
+                if (!modules.containsModule(Types.EMAIL)) {
+                    if (LOG.isDebugEnabled()) {
+                        OXException e = IndexExceptionCodes.INDEXING_NOT_ENABLED.create(Types.EMAIL, userId, contextId);
+                        LOG.debug("Skipping event handling execution because: " + e.getMessage());
+                    }
+                }
+                
+                
                 UserContextKey userContextKey = new UserContextKey(contextId, userId);
                 MailAccountStorageService storageService = SmalServiceLookup.getServiceStatic(MailAccountStorageService.class);
                 if (storageService == null) {
@@ -181,10 +199,6 @@ public class SmalSessionEventHandler implements EventHandler {
     }
     
     private void scheduleFolderJobs(Session session, Map<Integer, Set<MailFolder>> allFolders, MailAccountStorageService storageService, IndexingService indexingService) throws OXException {
-        if (!UserWhitelist.isIndexingAllowed(session.getLogin())) {
-            return;
-        }
-        
         int contextId = session.getContextId();
         int userId = session.getUserId();        
         for (Integer accountId : allFolders.keySet()) {
@@ -240,7 +254,7 @@ public class SmalSessionEventHandler implements EventHandler {
         Map<Integer, Set<MailFolder>> folderMap = new HashMap<Integer, Set<MailFolder>>();
         for (MailAccount account : mailAccounts) {
             String mailServer = account.getMailServer();
-            if (AccountBlacklist.isServerBlacklisted(mailServer)) {
+            if (!account.isDefaultAccount() && AccountBlacklist.isServerBlacklisted(mailServer)) {
                 continue;
             }
             

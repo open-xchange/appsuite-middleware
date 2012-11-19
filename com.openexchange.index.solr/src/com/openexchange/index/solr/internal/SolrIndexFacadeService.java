@@ -55,12 +55,16 @@ import java.util.TimerTask;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 import org.apache.commons.logging.Log;
+import com.openexchange.config.cascade.ConfigView;
+import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.Types;
 import com.openexchange.index.IndexAccess;
 import com.openexchange.index.IndexExceptionCodes;
 import com.openexchange.index.IndexFacadeService;
 import com.openexchange.index.IndexManagementService;
+import com.openexchange.index.IndexProperties;
+import com.openexchange.index.solr.ModuleSet;
 import com.openexchange.index.solr.SolrIndexExceptionCodes;
 import com.openexchange.index.solr.internal.attachments.SolrAttachmentIndexAccess;
 import com.openexchange.index.solr.internal.infostore.SolrInfostoreIndexAccess;
@@ -153,6 +157,14 @@ public class SolrIndexFacadeService implements IndexFacadeService {
     @SuppressWarnings("unchecked")
 	@Override
     public <V> IndexAccess<V> acquireIndexAccess(final int module, final int userId, final int contextId) throws OXException {
+        ConfigViewFactory config = Services.getService(ConfigViewFactory.class);
+        ConfigView view = config.getView(userId, contextId);
+        String moduleStr = view.get(IndexProperties.ALLOWED_MODULES, String.class);
+        ModuleSet modules = new ModuleSet(moduleStr);
+        if (!modules.containsModule(module)) {
+            throw IndexExceptionCodes.INDEXING_NOT_ENABLED.create(module, userId, contextId);
+        }
+        
         IndexManagementService managementService = Services.getService(IndexManagementService.class);
         if (managementService.isLocked(contextId, userId, module)) {
             throw IndexExceptionCodes.INDEX_LOCKED.create(module, userId, contextId);

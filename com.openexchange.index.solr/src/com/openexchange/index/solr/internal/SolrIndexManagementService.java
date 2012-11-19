@@ -53,11 +53,15 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-
+import java.util.HashMap;
+import java.util.Map;
+import org.osgi.service.event.Event;
+import org.osgi.service.event.EventAdmin;
 import com.openexchange.database.DBPoolingExceptionCodes;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
 import com.openexchange.index.IndexManagementService;
+import com.openexchange.solr.SolrIndexEventProperties;
 import com.openexchange.tools.sql.DBUtils;
 
 
@@ -125,6 +129,14 @@ public class SolrIndexManagementService implements IndexManagementService {
             DBUtils.autocommit(con);
             dbService.backWritable(contextId, con);
         }
+        
+        Map<String, Integer> properties = new HashMap<String, Integer>();
+        properties.put(SolrIndexEventProperties.PROP_CONTEXT_ID, new Integer(contextId));
+        properties.put(SolrIndexEventProperties.PROP_USER_ID, new Integer(userId));
+        properties.put(SolrIndexEventProperties.PROP_MODULE, new Integer(module));
+        Event event = new Event(SolrIndexEventProperties.TOPIC_LOCK_INDEX, properties);
+        EventAdmin eventAdmin = Services.getService(EventAdmin.class);
+        eventAdmin.sendEvent(event);
     }
 
     @Override

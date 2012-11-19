@@ -50,6 +50,8 @@
 package com.openexchange.index.internal;
 
 import javax.management.MBeanException;
+import javax.management.NotCompliantMBeanException;
+import javax.management.StandardMBean;
 import com.openexchange.exception.OXException;
 import com.openexchange.index.IndexManagementMBean;
 import com.openexchange.index.IndexManagementService;
@@ -60,13 +62,13 @@ import com.openexchange.index.IndexManagementService;
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public class IndexManagementMBeanImpl implements IndexManagementMBean {
+public class IndexManagementMBeanImpl extends StandardMBean implements IndexManagementMBean {
     
     private final IndexManagementService managementService;
     
 
-    public IndexManagementMBeanImpl(IndexManagementService managementService) {
-        super();
+    public IndexManagementMBeanImpl(IndexManagementService managementService) throws NotCompliantMBeanException {
+        super(IndexManagementMBean.class);
         this.managementService = managementService;
     }
 

@@ -49,50 +49,83 @@
 
 package com.openexchange.index.solr;
 
-import static org.junit.Assert.*;
-import org.junit.Test;
+import java.util.HashSet;
+import java.util.Set;
+import com.openexchange.groupware.Types;
 
 
 /**
- * {@link ModuleSetTest}
+ * {@link ModuleSet}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public class ModuleSetTest {
+public class ModuleSet {
     
-    @Test
-    public void testWhitespaces() throws Exception {
-        ModuleSet modules = new ModuleSet(" 19,137 ");
-        assertTrue("Missing module", modules.containsModule(19));
-        assertTrue("Missing module", modules.containsModule(137));
-        assertTrue("Missing module", modules.containsModule(138));
-        
-        modules.removeModule(19);
-        modules.removeModule(137);
-        assertFalse(modules.removeModule(138));
-        assertFalse("Module exists", modules.containsModule(19));
-        assertFalse("Module exists", modules.containsModule(137));
-        
-        assertEquals("Wrong result", "", modules.toString());
+    private Set<Integer> modules = new HashSet<Integer>();
+    
+    
+    public ModuleSet() {
+        super();
     }
     
-    @Test
-    public void testEmptySet() throws Exception {
-        ModuleSet modules = new ModuleSet();
-        assertEquals("Wrong result", "", modules.toString());
-        
-        modules = new ModuleSet("");
-        assertEquals("Wrong result", "", modules.toString());
-        
-        modules = new ModuleSet(" , ");
-        assertEquals("Wrong result", "", modules.toString());
+    public ModuleSet(String moduleStr) {
+        super();
+        String[] split = moduleStr.split("\\s*,\\s*");
+        for (String s : split) {
+            try {
+                Integer module = new Integer(s.trim());
+                if (module.intValue() == Types.ATTACHMENT) {
+                    continue;
+                }
+                
+                modules.add(module);
+            } catch (NumberFormatException e) {
+                // ignore
+            }
+        }
     }
     
-    @Test
-    public void testAddToEmptySet() throws Exception {
-        ModuleSet modules = new ModuleSet();
-        modules.addModule(19);
-        assertEquals("Wrong result", "19", modules.toString());
+    public boolean addModule(int module) {
+        if (module == Types.ATTACHMENT) {
+            return true;
+        }
+        
+        return modules.add(module);
+    }
+    
+    public boolean removeModule(int module) {
+        if (module == Types.ATTACHMENT) {
+            return false;
+        }
+        
+        return modules.remove(module);
+    }
+    
+    public boolean containsModule(int module) {
+        if (module == Types.ATTACHMENT) {
+            return true;
+        }
+        
+        return modules.contains(module);
+    }
+    
+    /**
+     * Returns the string representation of this module set.
+     */
+    @Override
+    public String toString() {
+        if (modules.isEmpty()) {
+            return "";
+        }
+        
+        StringBuilder sb = new StringBuilder();
+        for (Integer module : modules) {
+            sb.append(module);
+            sb.append(',');
+        }
+        sb.deleteCharAt(sb.length() - 1);
+
+        return sb.toString();
     }
 
 }

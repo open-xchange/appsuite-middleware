@@ -69,10 +69,12 @@ public class RMISolrAccessImpl implements RMISolrAccessService {
 
     private final SolrAccessService solrService;
     
+    private final DelegationSolrAccessImpl delegate;
 
-    public RMISolrAccessImpl(final SolrAccessService solrService) {
+    public RMISolrAccessImpl(final DelegationSolrAccessImpl delegate) {
         super();
-        this.solrService = solrService;
+        this.solrService = delegate.getEmbeddedServerAccess();
+        this.delegate = delegate;
     }
 
     @Override
@@ -130,8 +132,13 @@ public class RMISolrAccessImpl implements RMISolrAccessService {
         return solrService.query(identifier, params);
     }
 
-	@Override
-	public void pingRmi() throws RemoteException {
-		return;		
-	}
+    @Override
+    public void pingRmi() throws RemoteException {
+        return;
+    }
+
+    @Override
+    public void freeResources(SolrCoreIdentifier identifier) throws RemoteException {
+        delegate.freeResources(identifier);
+    }
 }

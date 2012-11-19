@@ -54,6 +54,8 @@ import java.util.List;
 import org.apache.commons.logging.Log;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventHandler;
+import com.openexchange.config.cascade.ConfigView;
+import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.Types;
@@ -64,7 +66,10 @@ import com.openexchange.groupware.tools.iterator.FolderObjectIterator;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.index.IndexAccess;
 import com.openexchange.index.IndexConstants;
+import com.openexchange.index.IndexExceptionCodes;
 import com.openexchange.index.IndexFacadeService;
+import com.openexchange.index.IndexProperties;
+import com.openexchange.index.solr.ModuleSet;
 import com.openexchange.server.impl.EffectivePermission;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.service.indexing.IndexingService;
@@ -93,14 +98,22 @@ public class SessionEventHandler implements EventHandler {
     @Override
     public void handleEvent(Event event) {
         String topic = event.getTopic();
-        if (SessiondEventConstants.TOPIC_ADD_SESSION.equals(topic)) {            
+        if (SessiondEventConstants.TOPIC_ADD_SESSION.equals(topic)) {
             ContextService contextService = Services.getService(ContextService.class);
             UserService userService = Services.getService(UserService.class);
             UserConfigurationService configurationService = Services.getService(UserConfigurationService.class);
             IndexFacadeService indexFacade = Services.getService(IndexFacadeService.class);
             IndexAccess<File> infostoreAccess = null;
+            Session session = (Session) event.getProperty(SessiondEventConstants.PROP_SESSION);
             try {
-                Session session = (Session) event.getProperty(SessiondEventConstants.PROP_SESSION);
+                ConfigViewFactory config = Services.getService(ConfigViewFactory.class);
+                ConfigView view = config.getView(session.getUserId(), session.getContextId());
+                String moduleStr = view.get(IndexProperties.ALLOWED_MODULES, String.class);
+                ModuleSet modules = new ModuleSet(moduleStr);
+                if (!modules.containsModule(Types.INFOSTORE)) {
+                    return;
+                }
+                
                 infostoreAccess = indexFacade.acquireIndexAccess(Types.INFOSTORE, session);
                 Context context = contextService.getContext(session.getContextId());
                 User user = userService.getUser(session.getUserId(), context);
@@ -133,7 +146,7 @@ public class SessionEventHandler implements EventHandler {
                     EffectivePermission userPermission = folder.getEffectiveUserPermission(user.getId(), userConfiguration);
                     if (userPermission.getEntity() == user.getId() && userPermission.canReadAllObjects()) {
                         // The folder is a private folder of this user
-                        long folderId = (long) folder.getObjectID();                    
+                        long folderId = (long) folder.getObjectID();
                         if (!infostoreAccess.isIndexed(IndexConstants.DEFAULT_ACCOUNT, String.valueOf(folderId))) {
                             JobInfo jobInfo = InfostoreJobInfo.newBuilder(InfostoreFolderJob.class)
                                 .contextId(session.getContextId())
@@ -145,9 +158,15 @@ public class SessionEventHandler implements EventHandler {
                             indexingService.scheduleJob(jobInfo, IndexingService.NOW, IndexingService.NO_INTERVAL, IndexingService.DEFAULT_PRIORITY);
                         }
                     }
-                }                
+                }
             } catch (Exception e) {
-                LOG.warn("Error while triggering infostore indexing jobs.", e);
+                if ((e instanceof OXException) && (IndexExceptionCodes.INDEX_LOCKED.equals((OXException) e) || IndexExceptionCodes.INDEXING_NOT_ENABLED.equals((OXException) e))) {
+                    if (LOG.isDebugEnabled()) {
+                        LOG.debug("Can not trigger infostore indexing jobs. Infostore index is disabled for user " + session.getUserId() + " in context " + session.getContextId() + ".");
+                    }
+                } else {
+                    LOG.warn("Error while triggering infostore indexing jobs.", e);
+                }
             } finally {
                 if (infostoreAccess != null) {
                     try {

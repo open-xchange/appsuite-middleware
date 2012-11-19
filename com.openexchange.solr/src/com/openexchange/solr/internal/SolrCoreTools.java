@@ -47,52 +47,55 @@
  *
  */
 
-package com.openexchange.index.solr;
+package com.openexchange.solr.internal;
 
-import static org.junit.Assert.*;
-import org.junit.Test;
+import java.net.InetSocketAddress;
+import com.hazelcast.core.HazelcastInstance;
+import com.hazelcast.core.IMap;
+import com.hazelcast.core.Member;
+import com.openexchange.solr.osgi.SolrActivator;
 
 
 /**
- * {@link ModuleSetTest}
+ * {@link SolrCoreTools}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public class ModuleSetTest {
+public class SolrCoreTools {
     
-    @Test
-    public void testWhitespaces() throws Exception {
-        ModuleSet modules = new ModuleSet(" 19,137 ");
-        assertTrue("Missing module", modules.containsModule(19));
-        assertTrue("Missing module", modules.containsModule(137));
-        assertTrue("Missing module", modules.containsModule(138));
-        
-        modules.removeModule(19);
-        modules.removeModule(137);
-        assertFalse(modules.removeModule(138));
-        assertFalse("Module exists", modules.containsModule(19));
-        assertFalse("Module exists", modules.containsModule(137));
-        
-        assertEquals("Wrong result", "", modules.toString());
-    }
+    public static final String SOLR_CORE_MAP = "solrCoreMap";
     
-    @Test
-    public void testEmptySet() throws Exception {
-        ModuleSet modules = new ModuleSet();
-        assertEquals("Wrong result", "", modules.toString());
-        
-        modules = new ModuleSet("");
-        assertEquals("Wrong result", "", modules.toString());
-        
-        modules = new ModuleSet(" , ");
-        assertEquals("Wrong result", "", modules.toString());
+    public static void incrementCoreCount(HazelcastInstance hazelcast, Member member) {
+        IMap<String, Integer> solrNodes = hazelcast.getMap(SolrActivator.SOLR_NODE_MAP);
+        String localAddress = member.getInetSocketAddress().getAddress().getHostAddress();
+        solrNodes.lock(localAddress);
+        try {
+            Integer integer = solrNodes.get(localAddress);
+            solrNodes.put(localAddress, new Integer(integer.intValue() + 1));
+        } finally {
+            solrNodes.unlock(localAddress);
+        }
     }
-    
-    @Test
-    public void testAddToEmptySet() throws Exception {
-        ModuleSet modules = new ModuleSet();
-        modules.addModule(19);
-        assertEquals("Wrong result", "19", modules.toString());
+
+    public static void decrementCoreCount(HazelcastInstance hazelcast, Member member) {
+        IMap<String, Integer> solrNodes = hazelcast.getMap(SolrActivator.SOLR_NODE_MAP);
+        String localAddress = member.getInetSocketAddress().getAddress().getHostAddress();
+        solrNodes.lock(localAddress);
+        try {
+            Integer integer = solrNodes.get(localAddress);
+            solrNodes.put(localAddress, new Integer(integer.intValue() - 1));
+        } finally {
+            solrNodes.unlock(localAddress);
+        }
     }
+
+    public static String resolveSocketAddress(InetSocketAddress addr) {
+        if (addr.isUnresolved()) {
+            return addr.getHostName();
+        } else {
+            return addr.getAddress().getHostAddress();
+        }
+    }
+
 
 }

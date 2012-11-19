@@ -17,4 +17,5 @@ Import-Package: com.openexchange.config,
  org.apache.commons.logging,
  org.osgi.framework,
  org.osgi.util.tracker;version="1.5.0"
+Bundle-Activator: com.openexchange.index.osgi.Activator
 

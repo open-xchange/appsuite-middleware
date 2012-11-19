@@ -56,6 +56,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.index.AccountFolders;
 import com.openexchange.index.IndexAccess;
 import com.openexchange.index.IndexDocument;
+import com.openexchange.index.IndexExceptionCodes;
 import com.openexchange.index.IndexResult;
 import com.openexchange.index.QueryParameters;
 import com.openexchange.index.QueryParameters.Order;
@@ -80,7 +81,6 @@ import com.openexchange.mail.index.MailUtility;
 import com.openexchange.mail.search.SearchTerm;
 import com.openexchange.mail.smal.impl.index.IndexAccessAdapter;
 import com.openexchange.mail.smal.impl.index.IndexDocumentHelper;
-import com.openexchange.mail.smal.impl.index.UserWhitelist;
 import com.openexchange.mail.utils.MailPasswordUtil;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountStorageService;
@@ -178,32 +178,39 @@ public final class SmalMessageStorage extends AbstractSMALStorage implements IMa
     
     @Override
     public MailMessage[] searchMessages(final String folder, final IndexRange indexRange, final MailSortField sortField, final OrderDirection order, final SearchTerm<?> searchTerm, final MailField[] fields) throws OXException {
-    	if (getIndexFacadeService() == null) {
+    	if (getIndexFacadeService() == null || isBlacklisted() || !isIndexingAllowed()) {
             return messageStorage.searchMessages(folder, indexRange, sortField, order, searchTerm, fields);
         }
     	
         final MailFields mfs = new MailFields(fields);
         IndexAccess<MailMessage> indexAccess = null;
         try {
-            indexAccess = IndexAccessAdapter.getInstance().getIndexAccess(session);
-            boolean isIndexed = indexAccess.isIndexed(String.valueOf(accountId), folder);
-            if (!isIndexed) {
-                try {
-                    submitFolderJob(folder);
-                } catch (OXException e) {
-                    LOG.error("Could not schedule folder job.", e);
+            try {
+                indexAccess = IndexAccessAdapter.getInstance().getIndexAccess(session);
+                boolean isIndexed = indexAccess.isIndexed(String.valueOf(accountId), folder);
+                if (!isIndexed) {
+                    try {
+                        submitFolderJob(folder);
+                    } catch (OXException e) {
+                        LOG.error("Could not schedule folder job.", e);
+                    }
+                    
+                    return messageStorage.searchMessages(folder, indexRange, sortField, order, searchTerm, fields);
+                } else if (searchTerm == null || !MailUtility.getIndexableFields(indexAccess).containsAll(mfs)) {
+                    return messageStorage.searchMessages(folder, indexRange, sortField, order, searchTerm, fields);
                 }
-                
-                return messageStorage.searchMessages(folder, indexRange, sortField, order, searchTerm, fields);
-            } else if (searchTerm == null || !MailUtility.getIndexableFields(indexAccess).containsAll(mfs)) {
-                return messageStorage.searchMessages(folder, indexRange, sortField, order, searchTerm, fields);
+            } catch (OXException e) {
+                if (IndexExceptionCodes.INDEX_LOCKED.equals(e) || IndexExceptionCodes.INDEXING_NOT_ENABLED.equals(e)) {
+                    if (LOG.isDebugEnabled()) {
+                        LOG.debug(e.getMessage(), e);
+                    }
+                    return messageStorage.searchMessages(folder, indexRange, sortField, order, searchTerm, fields);
+                }
             }
             
             final AccountFolders accountFolders = new AccountFolders(String.valueOf(accountId), Collections.singleton(folder));
             final QueryParameters.Builder builder = new QueryParameters.Builder()
                                                     .setAccountFolders(Collections.singleton(accountFolders));
-            
-            
             if (null != sortField) {
                 final MailField field = MailField.getField(sortField.getField());
                 final MailIndexField indexSortField = MailIndexField.getFor(field);
@@ -462,8 +469,8 @@ public final class SmalMessageStorage extends AbstractSMALStorage implements IMa
         return messageStorage.getPrimaryContents(folder, mailIds);
     }
     
-    private void submitJob(JobInfo jobInfo) throws OXException {    
-        if (!UserWhitelist.isIndexingAllowed(session.getLogin())) {
+    private void submitJob(JobInfo jobInfo) throws OXException {
+        if (!isIndexingAllowed() || isBlacklisted()) {
             return;
         }
         
@@ -472,7 +479,7 @@ public final class SmalMessageStorage extends AbstractSMALStorage implements IMa
             throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(IndexingService.class);
         }
 
-        indexingService.scheduleJob(jobInfo, null, -1L, IndexingService.DEFAULT_PRIORITY);    
+        indexingService.scheduleJob(jobInfo, null, -1L, IndexingService.DEFAULT_PRIORITY);
     }
     
     private Builder prepareJobBuilder(Class<? extends IndexingJob> clazz) throws OXException {
@@ -496,7 +503,7 @@ public final class SmalMessageStorage extends AbstractSMALStorage implements IMa
             .primaryPassword(session.getPassword())
             .password(decryptedPW);
         
-        return builder;        
+        return builder;
     }
 
 }
