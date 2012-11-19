@@ -57,7 +57,8 @@ import com.openexchange.ajax.mail.actions.DeleteRequest;
 import com.openexchange.ajax.mail.actions.GetRequest;
 import com.openexchange.ajax.mail.actions.GetResponse;
 import com.openexchange.ajax.mail.actions.MultipleAttachmentRequest;
-import com.openexchange.ajax.mail.actions.SendRequest;
+import com.openexchange.ajax.mail.actions.NewMailRequest;
+import com.openexchange.ajax.mail.actions.NewMailResponse;
 import com.openexchange.configuration.AJAXConfig;
 import com.openexchange.mail.MailJSONField;
 import com.openexchange.mail.MailListField;
@@ -89,15 +90,42 @@ public final class MultipleAttachmentTest extends AbstractMailTest {
 		String[] folderAndID = null;
 		try {
 			{
-				/*
-				 * Create JSON mail object
-				 */
-				final String mailObject_25kb = createSelfAddressed25KBMailObject().toString();
-				/*
-				 * Insert mail through a send request
-				 */
-				folderAndID = (Executor.execute(getSession(), new SendRequest(mailObject_25kb)))
-						.getFolderAndID();
+			    final String eml =
+		            "Date: Mon, 19 Nov 2012 21:36:51 +0100 (CET)\n" + 
+		            "From: #ADDR#\n" + 
+		            "To: #ADDR#\n" + 
+		            "Message-ID: <1508703313.17483.1353357411049>\n" + 
+		            "Subject: MultipleAttachmentTest\n" + 
+		            "MIME-Version: 1.0\n" + 
+		            "Content-Type: multipart/alternative; \n" + 
+		            "    boundary=\"----=_Part_17482_1388684087.1353357411002\"\n" + 
+		            "\n" + 
+		            "------=_Part_17482_1388684087.1353357411002\n" + 
+		            "MIME-Version: 1.0\n" + 
+		            "Content-Type: text/plain; charset=UTF-8\n" + 
+		            "Content-Transfer-Encoding: 7bit\n" + 
+		            "\n" + 
+		            "MultipleAttachmentTest\n" + 
+		            "------=_Part_17482_1388684087.1353357411002\n" + 
+		            "MIME-Version: 1.0\n" + 
+		            "Content-Type: text/html; charset=UTF-8\n" + 
+		            "Content-Transfer-Encoding: 7bit\n" + 
+		            "\n" + 
+		            "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Strict//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd\"><html xmlns=\"http://www.w3.org/1999/xhtml\">" +
+		            " <head>\n" + 
+		            "    <meta content=\"text/html; charset=UTF-8\" http-equiv=\"Content-Type\"/>\n" + 
+		            " </head><body style=\"font-family: verdana,geneva; font-size: 10pt; \">\n" + 
+		            " \n" + 
+		            "  <div>\n" + 
+		            "   MultipleAttachmentTest\n" + 
+		            "  </div>\n" + 
+		            " \n" + 
+		            "</body></html>\n" + 
+		            "------=_Part_17482_1388684087.1353357411002--\n".replaceAll("#ADDR#", getSendAddress());
+		        NewMailResponse newMailResponse = getClient().execute(new NewMailRequest(client.getValues().getInboxFolder(), eml, -1, true));
+		        String folder = newMailResponse.getFolder();
+		        String id = newMailResponse.getId();
+		        folderAndID = new String [] { folder, id };
 			}
 			/*
 			 * Perform action=get
