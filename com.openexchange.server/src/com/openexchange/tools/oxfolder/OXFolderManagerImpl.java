@@ -80,6 +80,8 @@ import com.openexchange.exception.OXException;
 import com.openexchange.exception.OXExceptionConstants;
 import com.openexchange.folder.FolderDeleteListenerService;
 import com.openexchange.folder.internal.FolderDeleteListenerRegistry;
+import com.openexchange.folderstorage.FolderStorage;
+import com.openexchange.folderstorage.cache.CacheFolderStorage;
 import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
 import com.openexchange.groupware.calendar.CalendarCache;
 import com.openexchange.groupware.contact.Contacts;
@@ -632,7 +634,7 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
         /*
          * Check if a move is done here
          */
-        if (fo.containsParentFolderID() && storageObj.getParentFolderID() != fo.getParentFolderID()) {
+        if (fo.containsParentFolderID() && fo.getParentFolderID() > 0 && storageObj.getParentFolderID() != fo.getParentFolderID()) {
             throw OXFolderExceptionCode.NO_MOVE_THROUGH_UPDATE.create(OXFolderUtility.getFolderName(fo));
         }
         /*
@@ -817,25 +819,7 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
                 if (containsPermissions) {
                     final List<OCLPermission> permissions = fo.getPermissions();
                     if (permissions != null && !permissions.isEmpty()) {
-                        final TIntList subfolders = OXFolderSQL.getSubfolderIDs(fo.getObjectID(), writeCon, ctx);
-                        if (!subfolders.isEmpty()) {
-                            subfolders.forEach(new TIntProcedure() {
-
-                                @Override
-                                public boolean execute(final int subfolderId) {
-                                    try {
-                                        final FolderObject tmp = new FolderObject(subfolderId);
-                                        tmp.setPermissions(permissions);
-                                        update(fo, OPTION_NONE, getFolderFromMaster(subfolderId), lastModified, true);
-                                        return true;
-                                    } catch (final OXException e) {
-                                        throw new ProcedureFailedException(e);
-                                    } catch (final RuntimeException e) {
-                                        throw new ProcedureFailedException(e);
-                                    }
-                                }
-                            });
-                        }
+                        handDown(fo.getObjectID(), permissions, lastModified, FolderCacheManager.isEnabled() ? FolderCacheManager.getInstance() : null);
                     }
                 }
             } catch (final DataTruncation e) {
@@ -847,8 +831,42 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
                 if (cause instanceof OXException) {
                     throw (OXException) cause;
                 }
+                if (cause instanceof SQLException) {
+                    throw OXFolderExceptionCode.SQL_ERROR.create(cause, cause.getMessage());
+                }
                 throw OXFolderExceptionCode.RUNTIME_ERROR.create(cause, cause.getMessage());
             }
+        }
+    }
+
+    protected void handDown(final int folderId, final List<OCLPermission> permissions, final long lastModified, final FolderCacheManager cacheManager) throws OXException, SQLException {
+        final Context ctx = this.ctx;
+        final TIntList subfolders = OXFolderSQL.getSubfolderIDs(folderId, writeCon, ctx);
+        if (!subfolders.isEmpty()) {
+            final Session session = this.session;
+            subfolders.forEach(new TIntProcedure() {
+
+                @Override
+                public boolean execute(final int subfolderId) {
+                    try {
+                        final FolderObject tmp = new FolderObject(subfolderId);
+                        tmp.setPermissions(permissions);
+                        update(tmp, OPTION_NONE, getFolderFromMaster(subfolderId), lastModified, true);
+                        if (null != cacheManager) {
+                            cacheManager.removeFolderObject(subfolderId, ctx);
+                        }
+                        CacheFolderStorage.getInstance().removeFromCache(Integer.toString(subfolderId), FolderStorage.REAL_TREE_ID, true, session);
+                        handDown(subfolderId, permissions, lastModified, cacheManager);
+                        return true;
+                    } catch (final OXException e) {
+                        throw new ProcedureFailedException(e);
+                    } catch (final SQLException e) {
+                        throw new ProcedureFailedException(e);
+                    } catch (final RuntimeException e) {
+                        throw new ProcedureFailedException(e);
+                    }
+                }
+            });
         }
     }
 

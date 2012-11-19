@@ -68,6 +68,7 @@ import com.openexchange.caching.dynamic.OXObjectFactory;
 import com.openexchange.caching.dynamic.Refresher;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.FolderStorage;
+import com.openexchange.folderstorage.cache.CacheFolderStorage;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.server.services.ServerServiceRegistry;
@@ -329,9 +330,8 @@ public final class FolderCacheManager {
                     if (null != cacheService) {
                         try {
                             final Cache globalCache = cacheService.getCache("GlobalFolderCache");
-                            final CacheKey cacheKey =
-                                cacheService.newCacheKey(ctx.getContextId(), FolderStorage.REAL_TREE_ID, String.valueOf(key));
-                            globalCache.remove(cacheKey);
+                            final CacheKey cacheKey = cacheService.newCacheKey(1, FolderStorage.REAL_TREE_ID, String.valueOf(folderId));
+                            globalCache.removeFromGroup(cacheKey, String.valueOf(ctx.getContextId()));
                         } catch (final OXException e) {
                             LOG.warn(e.getMessage(), e);
                         }
@@ -408,8 +408,8 @@ public final class FolderCacheManager {
                     if (null != cacheService) {
                         try {
                             final Cache globalCache = cacheService.getCache("GlobalFolderCache");
-                            final CacheKey cacheKey = cacheService.newCacheKey(ctx.getContextId(), FolderStorage.REAL_TREE_ID, String.valueOf(key));
-                            globalCache.remove(cacheKey);
+                            final CacheKey cacheKey = cacheService.newCacheKey(1, FolderStorage.REAL_TREE_ID, String.valueOf(folderProvider.getObjectID()));
+                            globalCache.removeFromGroup(cacheKey, String.valueOf(ctx.getContextId()));
                         } catch (final OXException e) {
                             LOG.warn(e.getMessage(), e);
                         }
@@ -496,8 +496,8 @@ public final class FolderCacheManager {
                     if (null != cacheService) {
                         try {
                             final Cache globalCache = cacheService.getCache("GlobalFolderCache");
-                            final CacheKey cacheKey = cacheService.newCacheKey(ctx.getContextId(), FolderStorage.REAL_TREE_ID, String.valueOf(key));
-                            globalCache.remove(cacheKey);
+                            final CacheKey cacheKey = cacheService.newCacheKey(1, FolderStorage.REAL_TREE_ID, String.valueOf(folderObj.getObjectID()));
+                            globalCache.removeFromGroup(cacheKey, String.valueOf(ctx.getContextId()));
                         } catch (final OXException e) {
                             LOG.warn(e.getMessage(), e);
                         }
@@ -557,8 +557,8 @@ public final class FolderCacheManager {
         if (null != cacheService) {
             try {
                 final Cache globalCache = cacheService.getCache("GlobalFolderCache");
-                final CacheKey cacheKey = cacheService.newCacheKey(ctx.getContextId(), FolderStorage.REAL_TREE_ID, String.valueOf(key));
-                globalCache.remove(cacheKey);
+                final CacheKey cacheKey = cacheService.newCacheKey(1, FolderStorage.REAL_TREE_ID, String.valueOf(key));
+                globalCache.removeFromGroup(cacheKey, String.valueOf(ctx.getContextId()));
             } catch (final OXException e) {
                 LOG.warn(e.getMessage(), e);
             }
@@ -605,8 +605,8 @@ public final class FolderCacheManager {
             try {
                 final Cache globalCache = cacheService.getCache("GlobalFolderCache");
                 for (final int key : keys) {
-                    final CacheKey cacheKey = cacheService.newCacheKey(ctx.getContextId(), FolderStorage.REAL_TREE_ID, String.valueOf(key));
-                    globalCache.remove(cacheKey);
+                    final CacheKey cacheKey = cacheService.newCacheKey(1, FolderStorage.REAL_TREE_ID, String.valueOf(key));
+                    globalCache.removeFromGroup(cacheKey, String.valueOf(ctx.getContextId()));
                 }
             } catch (final OXException e) {
                 LOG.warn(e.getMessage(), e);
