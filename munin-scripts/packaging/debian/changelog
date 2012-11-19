@@ -1,3 +1,9 @@
+open-xchange-munin-scripts (0.1-8) unstable; urgency=low
+
+  * bugfix release
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Mon, 19 Nov 2012 08:44:33 +0000
+
 open-xchange-munin-scripts (0.1-7) unstable; urgency=low
 
   * bugfix release
