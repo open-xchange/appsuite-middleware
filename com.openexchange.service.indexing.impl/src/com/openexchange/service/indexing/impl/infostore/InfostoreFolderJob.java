@@ -215,7 +215,7 @@ public class InfostoreFolderJob implements IndexingJob {
                 }
 
                 List<IndexDocument<DocumentMetadata>> subList = indexDocuments.subList(off, len);
-                infostoreIndex.addContent(subList, true);
+                infostoreIndex.addDocuments(subList);
 
                 return subList.size();
             }
@@ -245,7 +245,7 @@ public class InfostoreFolderJob implements IndexingJob {
                 }
 
                 List<IndexDocument<Attachment>> subList = attachments.subList(off, len);
-                attachmentIndex.addContent(subList, true);
+                attachmentIndex.addDocuments(subList);
 
                 return subList.size();
             }

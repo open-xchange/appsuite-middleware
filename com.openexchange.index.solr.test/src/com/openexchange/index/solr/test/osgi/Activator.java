@@ -51,6 +51,7 @@ package com.openexchange.index.solr.test.osgi;
 
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.index.IndexFacadeService;
+import com.openexchange.index.IndexManagementService;
 import com.openexchange.index.solr.test.AbstractSolrIndexAccessTest;
 import com.openexchange.index.solr.test.SolrTestSuite;
 import com.openexchange.osgi.HousekeepingActivator;
@@ -66,23 +67,15 @@ public class Activator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { IndexFacadeService.class, ConfigurationService.class };
+        return new Class<?>[] { IndexFacadeService.class, ConfigurationService.class, IndexManagementService.class };
     }
 
     @Override
     protected void startBundle() throws Exception {
-        System.out.println("!!!STATE: " + context.getBundle().getState());
         AbstractSolrIndexAccessTest.setIndexFacade(getService(IndexFacadeService.class));
         AbstractSolrIndexAccessTest.setConfigurationService(getService(ConfigurationService.class));
-        
+        AbstractSolrIndexAccessTest.setIndexManagementService(getService(IndexManagementService.class));
         registerService(OSGiTest.class, new SolrTestSuite());
-    }
-    
-    @Override
-    protected void stopBundle() throws Exception {
-        System.out.println("!!!STATE: " + context.getBundle().getState());
-        super.stopBundle();
-        System.out.println("!!!STATE: " + context.getBundle().getState());
     }
 
 }

@@ -198,7 +198,7 @@ public final class IndexAccessAdapter {
         IndexAccess<MailMessage> indexAccess = null;
         try {
             indexAccess = facade.acquireIndexAccess(Types.EMAIL, session);
-            indexAccess.addAttachments(new StandardIndexDocument<MailMessage>(message), true);
+            indexAccess.addDocument(new StandardIndexDocument<MailMessage>(message));
         } finally {
             releaseAccess(facade, indexAccess);
         }

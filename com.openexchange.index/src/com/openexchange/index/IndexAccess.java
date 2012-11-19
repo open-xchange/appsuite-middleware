@@ -79,61 +79,20 @@ public interface IndexAccess<V> {
     Set<? extends IndexField> getIndexedFields();
 
     /**
-     * Adds specified document's headers to associated index.
-     * 
-     * @param document The document to add
-     * @throws OXException If add operation fails
-     */
-    void addEnvelopeData(IndexDocument<V> document) throws OXException;
-
-    /**
-     * Adds specified documents' headers to associated index.
-     * 
-     * @param documents The documents to add
-     * @throws OXException If add operation fails
-     * @throws InterruptedException If interrupted while adding
-     */
-    void addEnvelopeData(Collection<IndexDocument<V>> documents) throws OXException;
-
-    /**
      * Adds specified document's content to associated index.
      * 
      * @param document The document to add
-     * @param full If <code>true</code> the document will be added as a whole. Otherwise it will be loaded from the index and only the
-     *            content will be added to the existing document.
      * @throws OXException If parameter full is false but the document could not be found in the index or if an index error occurs.
      */
-    void addContent(IndexDocument<V> document, boolean full) throws OXException;
+    void addDocument(IndexDocument<V> document) throws OXException;
 
     /**
      * Adds specified documents' contents to associated index.
      * 
      * @param documents The documents to add
-     * @param full If <code>true</code> the document will be added as a whole. Otherwise it will be loaded from the index and only the
-     *            content will be added to the existing document.
      * @throws OXException If parameter full is false but one of the documents could not be found in the index or if an index error occurs.
      */
-    void addContent(Collection<IndexDocument<V>> documents, boolean full) throws OXException;
-
-    /**
-     * Adds specified document's attachments to associated index.
-     * 
-     * @param document The document to add
-     * @param full If <code>true</code> the document will be added as a whole. Otherwise it will be loaded from the index and only the
-     *            attachment will be added to the existing document.
-     * @throws OXException If parameter full is false but the document could not be found in the index or if an index error occurs.
-     */
-    void addAttachments(IndexDocument<V> document, boolean full) throws OXException;
-
-    /**
-     * Adds specified documents' attachments to associated index.
-     * 
-     * @param documents The documents to add
-     * @param full If <code>true</code> the document will be added as a whole. Otherwise it will be loaded from the index and only the
-     *            attachment will be added to the existing document.
-     * @throws OXException If parameter full is false but one of the documents could not be found in the index or if an index error occurs.
-     */
-    void addAttachments(Collection<IndexDocument<V>> documents, boolean full) throws OXException;
+    void addDocuments(Collection<IndexDocument<V>> documents) throws OXException;
 
     /**
      * Deletes a document by identifier.

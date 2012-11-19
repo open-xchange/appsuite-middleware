@@ -1,3 +1,21 @@
+open-xchange-preview (6.23.0-4) unstable; urgency=low
+
+  * Third release build for EDP drop #5
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Fri, 26 Oct 2012 15:59:28 +0200
+
+open-xchange-preview (6.23.0-3) unstable; urgency=low
+
+  * Second release build for EDP drop #5
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Fri, 26 Oct 2012 11:59:08 +0200
+
+open-xchange-preview (6.23.0-2) unstable; urgency=low
+
+  * Release build for EDP drop #5
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Thu, 11 Oct 2012 21:56:32 +0200
+
 open-xchange-preview (6.23.0-1) unstable; urgency=low
 
   * First release candidate for 6.23.0

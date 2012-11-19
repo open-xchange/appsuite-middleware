@@ -121,12 +121,12 @@ public class SolrAttachmentIndexAccess extends AbstractSolrIndexAccess<Attachmen
     }
 
     @Override
-    public void addEnvelopeData(IndexDocument<Attachment> document) throws OXException {
-        addDocument(convertToDocument(document));
+    public void addDocument0(IndexDocument<Attachment> document) throws OXException {
+        addSolrDocument(convertToDocument(document));
     }
 
     @Override
-    public void addEnvelopeData(Collection<IndexDocument<Attachment>> documents) throws OXException {
+    public void addDocuments0(Collection<IndexDocument<Attachment>> documents) throws OXException {
         if (documents.isEmpty()) {
             return;
         }
@@ -136,54 +136,16 @@ public class SolrAttachmentIndexAccess extends AbstractSolrIndexAccess<Attachmen
             inputDocuments.add(convertToDocument(document));
         }
 
-        addDocuments(inputDocuments);
+        addSolrDocuments(inputDocuments);
     }
 
     @Override
-    public void addContent(IndexDocument<Attachment> document, boolean full) throws OXException {
-        addDocument(convertToDocument(document));
-    }
-
-    @Override
-    public void addContent(Collection<IndexDocument<Attachment>> documents, boolean full) throws OXException {
-        if (documents.isEmpty()) {
-            return;
-        }
-        
-        List<SolrInputDocument> inputDocuments = new ArrayList<SolrInputDocument>();
-        for (IndexDocument<Attachment> document : documents) {
-            inputDocuments.add(convertToDocument(document));
-        }
-
-        addDocuments(inputDocuments);
-    }
-
-    @Override
-    public void addAttachments(IndexDocument<Attachment> document, boolean full) throws OXException {
-        addDocument(convertToDocument(document));
-    }
-
-    @Override
-    public void addAttachments(Collection<IndexDocument<Attachment>> documents, boolean full) throws OXException {
-        if (documents.isEmpty()) {
-            return;
-        }
-        
-        List<SolrInputDocument> inputDocuments = new ArrayList<SolrInputDocument>();
-        for (IndexDocument<Attachment> document : documents) {
-            inputDocuments.add(convertToDocument(document));
-        }
-
-        addDocuments(inputDocuments);
-    }
-
-    @Override
-    public void deleteById(String id) throws OXException {
+    public void deleteById0(String id) throws OXException {
         deleteDocumentById(id);
     }
 
     @Override
-    public void deleteByQuery(QueryParameters parameters) throws OXException {
+    public void deleteByQuery0(QueryParameters parameters) throws OXException {
         Set<AttachmentIndexField> fields = EnumSet.noneOf(AttachmentIndexField.class);
         fields.add(AttachmentIndexField.MODULE);
         fields.add(AttachmentIndexField.SERVICE);
@@ -206,7 +168,7 @@ public class SolrAttachmentIndexAccess extends AbstractSolrIndexAccess<Attachmen
     }
 
     @Override
-    public IndexResult<Attachment> query(QueryParameters parameters, Set<? extends IndexField> fields) throws OXException {
+    public IndexResult<Attachment> query0(QueryParameters parameters, Set<? extends IndexField> fields) throws OXException {
         SolrQuery solrQuery = queryBuilder.buildQuery(parameters);
         Set<SolrAttachmentField> solrFields = checkAndConvert(fields);
         setFieldList(solrQuery, solrFields);
@@ -219,7 +181,7 @@ public class SolrAttachmentIndexAccess extends AbstractSolrIndexAccess<Attachmen
     }
     
     @Override
-    public IndexResult<Attachment> query(QueryParameters parameters, FacetParameters facetParameters, Set<? extends IndexField> fields) throws OXException {
+    public IndexResult<Attachment> query0(QueryParameters parameters, FacetParameters facetParameters, Set<? extends IndexField> fields) throws OXException {
         // TODO Auto-generated method stub
         return null;
     }

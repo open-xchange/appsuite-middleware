@@ -50,6 +50,7 @@
 package com.openexchange.index.solr.test;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import java.util.Collections;
@@ -64,6 +65,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.Types;
 import com.openexchange.index.AccountFolders;
 import com.openexchange.index.IndexAccess;
+import com.openexchange.index.IndexExceptionCodes;
 import com.openexchange.index.IndexResult;
 import com.openexchange.index.QueryParameters;
 import com.openexchange.index.SearchHandler;
@@ -91,11 +93,49 @@ public class SolrMailIndexAccessTest extends AbstractSolrIndexAccessTest {
     @Before
     public void setUpTest() throws OXException {
         assertNotNull("IndexFacadeService was null.", indexFacade);
+        managementService.unlockIndex(context.getId(), user.getId(), Types.EMAIL);
         IndexAccess<MailMessage> indexAccess = indexFacade.acquireIndexAccess(Types.EMAIL, user.getId(), context.getId());
         QueryParameters params = new QueryParameters.Builder()
                                     .setHandler(SearchHandler.ALL_REQUEST)
                                     .build();
         indexAccess.deleteByQuery(params);
+    }
+    
+    @Test
+    public void testIndexLock() throws Exception {
+        try {
+            managementService.lockIndex(context.getId(), user.getId(), Types.EMAIL);
+            assertTrue("Index was not locked.", managementService.isLocked(context.getId(), user.getId(), Types.EMAIL));
+            
+            try {
+                indexFacade.acquireIndexAccess(Types.EMAIL, user.getId(), context.getId());
+            } catch (OXException e) {
+                assertTrue("Wrong exception.", IndexExceptionCodes.INDEX_LOCKED.equals(e));
+            }
+            
+            managementService.unlockIndex(context.getId(), user.getId(), Types.EMAIL);
+            assertFalse("Index was locked.", managementService.isLocked(context.getId(), user.getId(), Types.EMAIL));
+            
+            IndexAccess<MailMessage> indexAccess = indexFacade.acquireIndexAccess(Types.EMAIL, user.getId(), context.getId());
+            managementService.lockIndex(context.getId(), user.getId(), Types.EMAIL);
+            assertTrue("Index was not locked.", managementService.isLocked(context.getId(), user.getId(), Types.EMAIL));
+            MailMessage m1 = TestMails.toMailMessage(TestMails.MAIL1);
+            m1.setMailId(String.valueOf(new Random().nextInt(Integer.MAX_VALUE)));
+            m1.setFolder("INBOX");
+            m1.setAccountId(0);
+            try {
+                indexAccess.addDocument(new StandardIndexDocument<MailMessage>(m1));
+            } catch (OXException e) {
+                assertTrue("Wrong exception.", IndexExceptionCodes.INDEX_LOCKED.equals(e));
+            }
+            
+            managementService.unlockIndex(context.getId(), user.getId(), Types.EMAIL);
+            assertFalse("Index was locked.", managementService.isLocked(context.getId(), user.getId(), Types.EMAIL));
+            indexAccess.addDocument(new StandardIndexDocument<MailMessage>(m1));
+        } finally {
+            managementService.unlockIndex(context.getId(), user.getId(), Types.EMAIL);
+            assertFalse("Index was locked.", managementService.isLocked(context.getId(), user.getId(), Types.EMAIL));
+        }
     }
 
     @Test
@@ -107,19 +147,19 @@ public class SolrMailIndexAccessTest extends AbstractSolrIndexAccessTest {
         m1.setMailId(String.valueOf(new Random().nextInt(Integer.MAX_VALUE)));
         m1.setFolder("INBOX");
         m1.setAccountId(0);
-        indexAccess.addAttachments(new StandardIndexDocument<MailMessage>(m1), true);
+        indexAccess.addDocument(new StandardIndexDocument<MailMessage>(m1));
 
         MailMessage m2 = TestMails.toMailMessage(TestMails.MAIL1);
         m2.setMailId(String.valueOf(new Random().nextInt(Integer.MAX_VALUE)));
         m2.setFolder("INBOX/Somewhere");
         m2.setAccountId(0);
-        indexAccess.addAttachments(new StandardIndexDocument<MailMessage>(m2), true);
+        indexAccess.addDocument(new StandardIndexDocument<MailMessage>(m2));
 
         MailMessage m3 = TestMails.toMailMessage(TestMails.MAIL1);
         m3.setMailId(String.valueOf(new Random().nextInt(Integer.MAX_VALUE)));
         m3.setFolder("INBOX");
         m3.setAccountId(1);
-        indexAccess.addAttachments(new StandardIndexDocument<MailMessage>(m3), true);
+        indexAccess.addDocument(new StandardIndexDocument<MailMessage>(m3));
 
         QueryParameters q1 = buildSimpleQuery(m1.getAccountId(), m1.getFolder(), m1.getSubject());
         IndexResult<MailMessage> r1 = indexAccess.query(q1, null);
@@ -153,19 +193,19 @@ public class SolrMailIndexAccessTest extends AbstractSolrIndexAccessTest {
         m1.setMailId(String.valueOf(new Random().nextInt(Integer.MAX_VALUE)));
         m1.setFolder("INBOX");
         m1.setAccountId(0);
-        indexAccess.addAttachments(new StandardIndexDocument<MailMessage>(m1), true);
+        indexAccess.addDocument(new StandardIndexDocument<MailMessage>(m1));
 
         MailMessage m2 = TestMails.toMailMessage(TestMails.MAIL1);
         m2.setMailId(String.valueOf(new Random().nextInt(Integer.MAX_VALUE)));
         m2.setFolder("INBOX/Somewhere");
         m2.setAccountId(0);
-        indexAccess.addAttachments(new StandardIndexDocument<MailMessage>(m2), true);
+        indexAccess.addDocument(new StandardIndexDocument<MailMessage>(m2));
 
         MailMessage m3 = TestMails.toMailMessage(TestMails.MAIL1);
         m3.setMailId(String.valueOf(new Random().nextInt(Integer.MAX_VALUE)));
         m3.setFolder("INBOX");
         m3.setAccountId(1);
-        indexAccess.addAttachments(new StandardIndexDocument<MailMessage>(m3), true);
+        indexAccess.addDocument(new StandardIndexDocument<MailMessage>(m3));
         
         Set<String> allIds = new HashSet<String>();
         allIds.add(MailUUID.newUUID(context.getId(), user.getId(), m1).toString());
@@ -200,19 +240,19 @@ public class SolrMailIndexAccessTest extends AbstractSolrIndexAccessTest {
         m1.setMailId(String.valueOf(new Random().nextInt(Integer.MAX_VALUE)));
         m1.setFolder("INBOX");
         m1.setAccountId(0);
-        indexAccess.addAttachments(new StandardIndexDocument<MailMessage>(m1), true);
+        indexAccess.addDocument(new StandardIndexDocument<MailMessage>(m1));
 
         MailMessage m2 = TestMails.toMailMessage(TestMails.MAIL1);
         m2.setMailId(String.valueOf(new Random().nextInt(Integer.MAX_VALUE)));
         m2.setFolder("INBOX/Somewhere");
         m2.setAccountId(0);
-        indexAccess.addAttachments(new StandardIndexDocument<MailMessage>(m2), true);
+        indexAccess.addDocument(new StandardIndexDocument<MailMessage>(m2));
 
         MailMessage m3 = TestMails.toMailMessage(TestMails.MAIL1);
         m3.setMailId(String.valueOf(new Random().nextInt(Integer.MAX_VALUE)));
         m3.setFolder("INBOX");
         m3.setAccountId(1);
-        indexAccess.addAttachments(new StandardIndexDocument<MailMessage>(m3), true);
+        indexAccess.addDocument(new StandardIndexDocument<MailMessage>(m3));
         
         QueryParameters allQuery = new QueryParameters.Builder()
                                     .setHandler(SearchHandler.ALL_REQUEST)
@@ -252,7 +292,7 @@ public class SolrMailIndexAccessTest extends AbstractSolrIndexAccessTest {
         m1.setMailId(String.valueOf(new Random().nextInt(Integer.MAX_VALUE)));
         m1.setFolder("INBOX");
         m1.setAccountId(0);
-        indexAccess.addAttachments(new StandardIndexDocument<MailMessage>(m1), true);
+        indexAccess.addDocument(new StandardIndexDocument<MailMessage>(m1));
         
         MailMessage m2 = TestMails.toMailMessage(TestMails.MAIL1);
         m2.setMailId(String.valueOf(new Random().nextInt(Integer.MAX_VALUE)));
@@ -263,7 +303,7 @@ public class SolrMailIndexAccessTest extends AbstractSolrIndexAccessTest {
         m2.removeTo();
         m2.addTo(new InternetAddress("bncvvn@yxcvyvyxcv.kh"));
         m2.setSubject(UUID.randomUUID().toString());
-        indexAccess.addAttachments(new StandardIndexDocument<MailMessage>(m2), true);
+        indexAccess.addDocument(new StandardIndexDocument<MailMessage>(m2));
         
         SearchTerm<?> fromTerm = new FromTerm(m1.getFrom()[0].toUnicodeString());
         SearchTerm<?> toTerm = new ToTerm(m1.getTo()[0].toUnicodeString());

@@ -85,6 +85,7 @@ import com.openexchange.solr.SolrProperties;
  * 
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
+// FIXME: Use 'catch (Throwable t)' on SolrServer calls and define new error codes.
 public class EmbeddedSolrAccessImpl implements SolrAccessService {
 
     private static final String ISE_MSG = "The core container was null. The embedded solr server was not started up properly.";

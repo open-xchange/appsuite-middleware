@@ -490,7 +490,11 @@ public final class ConditionTreeMap {
             set.forEach(procedure);
             return list;
         } catch (final ProcedureFailedException e) {
-            throw (OXException) e.getCause();
+            final Throwable cause = e.getCause();
+            if (cause instanceof OXException) {
+                throw (OXException) cause;
+            }
+            throw OXFolderExceptionCode.RUNTIME_ERROR.create(cause, cause.getMessage());
         }
     }
 

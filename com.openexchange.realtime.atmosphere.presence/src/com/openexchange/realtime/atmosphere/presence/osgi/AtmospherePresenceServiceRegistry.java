@@ -49,51 +49,43 @@
 
 package com.openexchange.realtime.atmosphere.presence.osgi;
 
+import java.util.concurrent.atomic.AtomicReference;
 import com.openexchange.osgi.ServiceRegistry;
 import com.openexchange.server.ServiceLookup;
 
 /**
- * {@link AtmospherePresenceServiceRegistry}
- *
- * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
- */
-/**
- * {@link AtmospherePresenceServiceRegistry} Singleton that extends the existing {@link ServiceRegistry} to gain functionality and acts as
- * central accesspoint for classes of the AtmospherePresence bundle.
+ * {@link AtmospherePresenceServiceRegistry} Singleton that acts as central accesspoint for classes of the AtmospherePresence bundle.
  * 
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
 public class AtmospherePresenceServiceRegistry extends ServiceRegistry {
+
     private static final AtmospherePresenceServiceRegistry INSTANCE = new AtmospherePresenceServiceRegistry();
-    
+
+    public static AtomicReference<ServiceLookup> SERVICES = new AtomicReference<ServiceLookup>();
+
     /**
      * Encapsulated constructor.
      */
-    private AtmospherePresenceServiceRegistry() {}
-    
+    private AtmospherePresenceServiceRegistry() {
+    }
+
     /**
      * Get the GrizzlyService Registry singleton.
+     * 
      * @return the GrizzlyService Registry singleton
      */
     public static AtmospherePresenceServiceRegistry getInstance() {
         return INSTANCE;
     }
-    
-    /**
-     * Initialize the service registry with the services that are declared as needed.
-     * @param activator the DeferredActivator to get services from
-     * @param neededServices the services declared as needed
-     */
-    public void initialize(ServiceLookup serviceLookup, Class[] neededServices) {
-        INSTANCE.clearRegistry();
-        for (Class<?> serviceClass : neededServices) {
-            Object service = serviceLookup.getService(serviceClass);
-            if (service != null) {
-                INSTANCE.addService(serviceClass, service);
-            }
-        }
+
+    @Override
+    public <S> S getService(Class<? extends S> clazz) {
+        return SERVICES.get().getService(clazz);
+    }
+
+    @Override
+    public <S> S getOptionalService(Class<? extends S> clazz) {
+        return SERVICES.get().getOptionalService(clazz);
     }
 }
-
-
-

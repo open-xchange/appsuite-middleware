@@ -52,6 +52,7 @@ package com.openexchange.realtime.packet;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import com.google.common.base.Predicate;
 import com.openexchange.exception.OXException;
 import com.openexchange.realtime.payload.PayloadElement;
@@ -132,6 +133,26 @@ public class Presence extends Stanza {
         defaultElements.add(STATUS_PATH);
         defaultElements.add(PRIORITY_PATH);
         defaultElements.add(ERROR_PATH);
+    }
+
+    /**
+     * Initializes a new {@link Presence} based on another Presence. This will produce a deep copy up to the leafs of the PayloadTreeNode,
+     * more exactly the data Portion of the PayloadElement in the PayloadTreeNode as we are dealing with Objects that must not neccessarily
+     * implement Cloneable or Serializable.
+     * 
+     * @param other The Presence to copy, must not be null
+     * @throws IllegalArgumentException if the other Presence is null
+     */
+    public Presence(Presence other) {
+        if (other == null) {
+            throw new IllegalArgumentException("Other Presence must not be null.");
+        }
+        this.error = other.error;
+        this.message = other.message;
+        this.payloads = other.deepCopyPayloads();
+        this.priority = other.priority;
+        this.state = other.state;
+        this.type = other.type;
     }
 
     /**
@@ -279,15 +300,19 @@ public class Presence extends Stanza {
      */
     private void writeThrough(ElementPath path, Object data) {
         List<PayloadTree> payloadTrees = payloads.get(path);
-        if(payloadTrees == null) {
+        if (payloadTrees == null) {
             payloadTrees = new ArrayList<PayloadTree>();
         }
-        if(payloadTrees.size() > 1) {
+        if (payloadTrees.size() > 1) {
             throw new IllegalStateException("Stanza shouldn't contain more than one PayloadTree per basic ElementPath");
         }
         PayloadTree tree;
         if (payloadTrees.isEmpty()) {
-            PayloadElement payloadElement = new PayloadElement(data, data.getClass().getSimpleName(), path.getNamespace(), path.getElement());
+            PayloadElement payloadElement = new PayloadElement(
+                data,
+                data.getClass().getSimpleName(),
+                path.getNamespace(),
+                path.getElement());
             PayloadTreeNode payloadTreeNode = new PayloadTreeNode(payloadElement);
             tree = new PayloadTree(payloadTreeNode);
             addPayload(tree);
@@ -299,7 +324,7 @@ public class Presence extends Stanza {
             }
             node.setData(data, data.getClass().getSimpleName());
         }
-        
+
     }
 
 }

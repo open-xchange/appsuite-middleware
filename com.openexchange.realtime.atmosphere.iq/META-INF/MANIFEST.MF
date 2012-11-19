@@ -12,6 +12,6 @@ Import-Package: com.openexchange.exception,
  com.openexchange.realtime.atmosphere.stanza,
  com.openexchange.realtime.packet,
  com.openexchange.tools.session,
- org.apache.commons.logging;version="1.1.1",
+ org.apache.commons.logging,
  org.json,
  org.osgi.framework

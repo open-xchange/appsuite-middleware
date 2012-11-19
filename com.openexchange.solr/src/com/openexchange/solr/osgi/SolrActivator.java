@@ -114,7 +114,7 @@ public class SolrActivator extends HousekeepingActivator {
 
     private void registerMBean(SolrCoreConfigServiceImpl coreService) {
         try {
-            solrMBeanName = new ObjectName(SolrMBean.DOMAIN, "name", "Solr Control");
+            solrMBeanName = new ObjectName(SolrMBean.DOMAIN, SolrMBean.KEY, SolrMBean.VALUE);
             DelegationSolrAccessImpl delegationAccess = this.delegationAccess;
             solrMBean = new SolrMBeanImpl(delegationAccess, coreService);
             track(ManagementService.class, new SimpleRegistryListener<ManagementService>() {

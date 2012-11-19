@@ -88,7 +88,7 @@ public class ImportExportExceptionMessages implements LocalizableStrings {
 
     public static final String RESOURCE_HARD_CONFLICT_MSG = "Importing the appointment failed due to a conflicting resource.";
 
-    public static final String WARNINGS_MSG = "Warnings when importing file: %i warnings";
+    public static final String WARNINGS_MSG = "Warnings when importing file: %d warnings";
 
     public static final String UNKNOWN_VCARD_FORMAT_MSG = "Could not recognize format of the following data: %s";
 

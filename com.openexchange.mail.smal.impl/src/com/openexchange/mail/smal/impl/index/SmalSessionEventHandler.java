@@ -54,9 +54,11 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+
 import org.apache.commons.logging.Log;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventHandler;
+
 import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.core.IMap;
 import com.openexchange.exception.OXException;
@@ -358,6 +360,11 @@ public class SmalSessionEventHandler implements EventHandler {
             if (userId != other.userId)
                 return false;
             return true;
+        }
+        
+        @Override
+        public String toString() {
+            return "{ context: " + contextId + ", user: " + userId + " }";
         }
     }
     
