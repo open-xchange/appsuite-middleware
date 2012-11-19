@@ -103,18 +103,18 @@ public class UpdateMailTest extends AbstractMailTest {
 
     public void testShouldBeAbleToAddFlags() throws OXException, IOException, SAXException, JSONException{
         final String eml =
-            "Message-Id: <4A002517.4650.0059.1@deployfast.com>\n" +
-            "X-Mailer: Novell GroupWise Internet Agent 8.0.0 \n" +
+            "Message-Id: <4A002517.4650.0059.1@foobar.com>\n" +
             "Date: Tue, 05 May 2009 11:37:58 -0500\n" +
-            "To: #TOADDR#\n" +
-            "Subject: Re: Your order for East Texas Lighthouse\n" +
+            "From: #ADDR#\n" +
+            "To: #ADDR#\n" +
+            "Subject: Invitation for launch\n" +
             "Mime-Version: 1.0\n" +
             "Content-Type: text/plain; charset=\"UTF-8\"\n" +
             "Content-Transfer-Encoding: 8bit\n" +
             "\n" +
             "This is a MIME message. If you are reading this text, you may want to \n" +
             "consider changing to a mail reader or gateway that understands how to \n" +
-            "properly handle MIME multipart messages.".replaceFirst("#TOADDR#", values.getSendAddress());
+            "properly handle MIME multipart messages.".replaceAll("#ADDR#", getSendAddress());
         NewMailRequest newMailRequest = new NewMailRequest(values.getInboxFolder(), eml, -1, true);
         NewMailResponse newMailResponse = getClient().execute(newMailRequest);
         String folder = newMailResponse.getFolder();
