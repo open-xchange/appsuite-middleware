@@ -5,6 +5,7 @@ BuildArch:      noarch
 BuildRequires:  ant
 BuildRequires:  ant-nodeps
 BuildRequires:  open-xchange-spamhandler-spamassassin >= @OXVERSION@
+BuildRequires:  open-xchange-parallels >= @OXVERSION@
 BuildRequires:  java-devel >= 1.6.0
 Version:        @OXVERSION@
 %define         ox_release 1

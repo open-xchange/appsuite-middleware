@@ -13,6 +13,7 @@ import com.openexchange.config.ConfigurationService;
 import com.openexchange.context.ContextService;
 import com.openexchange.custom.parallels.impl.ParallelsHostnameService;
 import com.openexchange.custom.parallels.impl.ParallelsOXAuthentication;
+import com.openexchange.custom.parallels.impl.ParallelsOptions;
 import com.openexchange.custom.parallels.soap.OXServerServicePortType;
 import com.openexchange.custom.parallels.soap.OXServerServicePortTypeImpl;
 import com.openexchange.exception.OXException;
@@ -75,11 +76,11 @@ public class SoapParallelsActivator extends HousekeepingActivator {
         rememberTracker(new HTTPServletRegistration(
             context,
             new com.openexchange.custom.parallels.impl.ParallelsInfoServlet(),
-            getFromConfig("com.openexchange.custom.parallels.sso_info_servlet")));
+            getFromConfig(ParallelsOptions.PROPERTY_SSO_INFO_SERVLET)));
         rememberTracker(new HTTPServletRegistration(
             context,
             new com.openexchange.custom.parallels.impl.ParallelsOpenApiServlet(),
-            getFromConfig("com.openexchange.custom.parallels.openapi_servlet")));
+            getFromConfig(ParallelsOptions.PROPERTY_OPENAPI_SERVLET)));
         final BundleContext context = this.context;
         final ServiceTrackerCustomizer<Remote, Remote> trackerCustomizer = new ServiceTrackerCustomizer<Remote, Remote>() {
             
