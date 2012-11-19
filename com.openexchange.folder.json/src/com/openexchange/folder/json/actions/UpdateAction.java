@@ -64,6 +64,7 @@ import com.openexchange.folder.json.parser.FolderParser;
 import com.openexchange.folder.json.services.ServiceRegistry;
 import com.openexchange.folderstorage.Folder;
 import com.openexchange.folderstorage.FolderService;
+import com.openexchange.folderstorage.FolderServiceDecorator;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
@@ -144,10 +145,10 @@ public final class UpdateAction extends AbstractFolderAction {
         }
         folder.setTreeID(treeId);
         /*
-         * Create
+         * Update
          */
         final FolderService folderService = ServiceRegistry.getInstance().getService(FolderService.class, true);
-        folderService.updateFolder(folder, timestamp, session);
+        folderService.updateFolder(folder, timestamp, session, new FolderServiceDecorator().put("permissions", request.getParameter("permissions")));
         /*
          * Invoke folder.getID() to obtain possibly new folder identifier
          */

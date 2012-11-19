@@ -313,7 +313,7 @@ public class DowngradeTest extends TestCase {
                     iter.remove();
                 }
             }
-            oxma.updateFolder(folder, false, System.currentTimeMillis());
+            oxma.updateFolder(folder, false, false, System.currentTimeMillis());
         } finally {
             DBPool.pushWrite(ctx, con);
         }

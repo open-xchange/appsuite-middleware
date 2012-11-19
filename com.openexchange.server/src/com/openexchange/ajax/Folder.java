@@ -100,6 +100,7 @@ import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
 import com.openexchange.exception.OXException.Generic;
 import com.openexchange.exception.OXExceptionConstants;
+import com.openexchange.folderstorage.FolderServiceDecorator;
 import com.openexchange.folderstorage.messaging.MessagingFolderIdentifier;
 import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.container.DataObject;
@@ -1907,7 +1908,7 @@ public class Folder extends SessionServlet implements OXExceptionConstants {
                             pmf.setID(mfi.toString());
                             pmf.parse(jsonObj);
                             final com.openexchange.folderstorage.internal.performers.UpdatePerformer up =
-                                new com.openexchange.folderstorage.internal.performers.UpdatePerformer(session);
+                                new com.openexchange.folderstorage.internal.performers.UpdatePerformer(session, new FolderServiceDecorator().put("permissions", paramContainer.getStringParam("permissions")));
                             up.doUpdate(pmf, null);
                             retval = mfi.toString();
                             done = true;

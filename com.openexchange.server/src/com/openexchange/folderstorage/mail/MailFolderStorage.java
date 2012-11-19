@@ -84,6 +84,7 @@ import com.openexchange.folderstorage.RemoveAfterAccessFolder;
 import com.openexchange.folderstorage.RemoveAfterAccessFolderWrapper;
 import com.openexchange.folderstorage.SortableId;
 import com.openexchange.folderstorage.StorageParameters;
+import com.openexchange.folderstorage.StorageParametersUtility;
 import com.openexchange.folderstorage.StoragePriority;
 import com.openexchange.folderstorage.StorageType;
 import com.openexchange.folderstorage.Type;
@@ -1170,7 +1171,7 @@ public final class MailFolderStorage implements FolderStorage {
 
             final MailFolderDescription mfd = new MailFolderDescription();
             mfd.setExists(true);
-            // Fullname
+            // Full name
             mfd.setFullname(fullname);
             mfd.setAccountId(accountId);
             // Parent
@@ -1195,26 +1196,28 @@ public final class MailFolderStorage implements FolderStorage {
             // Subscribed
             mfd.setSubscribed(folder.isSubscribed());
             // Permissions
-            final Permission[] permissions = folder.getPermissions();
-            if (null != permissions && permissions.length > 0) {
-                final MailPermission[] mailPermissions = new MailPermission[permissions.length];
-                final MailProvider provider = MailProviderRegistry.getMailProviderBySession(session, accountId);
-                for (int i = 0; i < permissions.length; i++) {
-                    final Permission permission = permissions[i];
-                    final MailPermission mailPerm = provider.createNewMailPermission(session, accountId);
-                    mailPerm.setEntity(permission.getEntity());
-                    mailPerm.setAllPermission(
-                        permission.getFolderPermission(),
-                        permission.getReadPermission(),
-                        permission.getWritePermission(),
-                        permission.getDeletePermission());
-                    mailPerm.setFolderAdmin(permission.isAdmin());
-                    mailPerm.setGroupPermission(permission.isGroup());
-                    mailPermissions[i] = mailPerm;
+            MailPermission[] mailPermissions = null;
+            {
+                final Permission[] permissions = folder.getPermissions();
+                if (null != permissions && permissions.length > 0) {
+                    mailPermissions = new MailPermission[permissions.length];
+                    final MailProvider provider = MailProviderRegistry.getMailProviderBySession(session, accountId);
+                    for (int i = 0; i < permissions.length; i++) {
+                        final Permission permission = permissions[i];
+                        final MailPermission mailPerm = provider.createNewMailPermission(session, accountId);
+                        mailPerm.setEntity(permission.getEntity());
+                        mailPerm.setAllPermission(
+                            permission.getFolderPermission(),
+                            permission.getReadPermission(),
+                            permission.getWritePermission(),
+                            permission.getDeletePermission());
+                        mailPerm.setFolderAdmin(permission.isAdmin());
+                        mailPerm.setGroupPermission(permission.isGroup());
+                        mailPermissions[i] = mailPerm;
+                    }
+                    mfd.addPermissions(mailPermissions);
                 }
-                mfd.addPermissions(mailPermissions);
             }
-
             final char separator = mfd.getSeparator();
             final String oldParent;
             final String oldName;
@@ -1323,10 +1326,32 @@ public final class MailFolderStorage implements FolderStorage {
              * Handle update of permission or subscription
              */
             mailAccess.getFolderStorage().updateFolder(fullname, mfd);
+            /*
+             * Is hand-down?
+             */
+            if ((null != mailPermissions) && StorageParametersUtility.isHandDownPermissions(storageParameters)) {
+                handDown(accountId, fullname, mailPermissions, mailAccess, storageParameters);
+            }
             addWarnings(mailAccess, storageParameters);
             postEvent(accountId, fullname, false, storageParameters);
         } finally {
             closeMailAccess(mailAccess);
+        }
+    }
+
+    private static void handDown(final int accountId, final String parentFullName, final MailPermission[] mailPermissions, final MailAccess<?, ?> mailAccess, final StorageParameters params) throws OXException {
+        final MailFolder[] subfolders = mailAccess.getFolderStorage().getSubfolders(parentFullName, true);
+        for (MailFolder mailFolder : subfolders) {
+            final MailFolderDescription mfd = new MailFolderDescription();
+            mfd.setExists(true);
+            final String childFullName = mailFolder.getFullname();
+            mfd.setFullname(childFullName);
+            mfd.setAccountId(accountId);
+            mfd.addPermissions(mailPermissions);
+            mailAccess.getFolderStorage().updateFolder(childFullName, mfd);
+            postEvent(accountId, childFullName, false, params);
+            // Recursive
+            handDown(accountId, childFullName, mailPermissions, mailAccess, params);
         }
     }
 

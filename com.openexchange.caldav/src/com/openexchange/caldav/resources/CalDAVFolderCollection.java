@@ -212,7 +212,7 @@ public abstract class CalDAVFolderCollection<T extends CalendarObject> extends C
         if (false == this.folder.isDefault() && PrivateType.getInstance().equals(this.folder.getType())) {
             this.folder.setName(displayName);
             try {
-                factory.getFolderService().updateFolder(folder, this.folder.getLastModified(), factory.getSession());
+                factory.getFolderService().updateFolder(folder, this.folder.getLastModified(), factory.getSession(), null);
             } catch (OXException e) {
                 throw protocolException(e);
             }
