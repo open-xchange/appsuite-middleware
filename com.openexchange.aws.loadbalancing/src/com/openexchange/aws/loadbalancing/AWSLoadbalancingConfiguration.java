@@ -57,9 +57,7 @@ package com.openexchange.aws.loadbalancing;
 public class AWSLoadbalancingConfiguration {
 
     private final String lbName;
-
     private final boolean useHttps;
-
     private final String zone;
 
     /**
