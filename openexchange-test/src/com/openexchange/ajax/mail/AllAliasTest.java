@@ -62,8 +62,6 @@ import com.openexchange.groupware.search.Order;
  */
 public class AllAliasTest extends AbstractMailTest {
 
-    private AJAXClient client;
-
     /**
      * Initializes a new {@link AllAliasTest}.
      *
@@ -76,7 +74,6 @@ public class AllAliasTest extends AbstractMailTest {
     @Override
     protected void setUp() throws Exception {
         super.setUp();
-        client = getClient();
     }
 
     @Override
@@ -85,6 +82,7 @@ public class AllAliasTest extends AbstractMailTest {
     }
 
     public void testAllAlias() throws Exception {
+        final AJAXClient client = getClient();
         final AllRequest allAliasRequest = new AllRequest(client.getValues().getInboxFolder(), "all", 0, Order.ASCENDING, true);
         final AllResponse allAliasResponse = client.execute(allAliasRequest);
         final Object[][] aliasMails = allAliasResponse.getArray();
