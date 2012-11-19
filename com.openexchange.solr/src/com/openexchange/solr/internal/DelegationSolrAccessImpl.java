@@ -60,11 +60,13 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.FutureTask;
+
 import org.apache.commons.logging.Log;
 import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.client.solrj.response.UpdateResponse;
 import org.apache.solr.common.SolrInputDocument;
 import org.apache.solr.common.params.SolrParams;
+
 import com.hazelcast.core.DistributedTask;
 import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.core.IMap;
@@ -362,7 +364,7 @@ public class DelegationSolrAccessImpl implements SolrAccessService {
                         solrCores.put(identifier.toString(), ownAddress);
                         
                         return embeddedAccess;
-                    } catch (Exception e) {
+                    } catch (Throwable e) {
                         if (embeddedAccess.hasActiveCore(identifier)) {
                             embeddedAccess.stopCore(identifier);
                         }
@@ -387,7 +389,18 @@ public class DelegationSolrAccessImpl implements SolrAccessService {
                     }
                 }
             } else if (owner.equals(ownAddress)) {
-                return embeddedAccess;
+                if (embeddedAccess.hasActiveCore(identifier)) {
+                    return embeddedAccess;
+                } else {
+                    try {
+                        embeddedAccess.startCore(identifier);
+                        SolrCoreTools.incrementCoreCount(hazelcast, hazelcast.getCluster().getLocalMember());
+                        return embeddedAccess;
+                    } catch (Throwable t) {
+                        solrCores.remove(identifier.toString());
+                        throw SolrExceptionCodes.DELEGATION_ERROR.create(t);
+                    }
+                }                
             }
             
             return getRMIAccess(owner);
