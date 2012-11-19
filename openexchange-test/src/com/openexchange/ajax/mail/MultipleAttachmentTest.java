@@ -95,7 +95,7 @@ public final class MultipleAttachmentTest extends AbstractMailTest {
 		            "From: #ADDR#\n" + 
 		            "To: #ADDR#\n" + 
 		            "Message-ID: <1508703313.17483.1353357411049>\n" + 
-		            "Subject: Move a mail\n" + 
+		            "Subject: MultipleAttachmentTest\n" + 
 		            "MIME-Version: 1.0\n" + 
 		            "Content-Type: multipart/alternative; \n" + 
 		            "    boundary=\"----=_Part_17482_1388684087.1353357411002\"\n" + 
@@ -105,7 +105,7 @@ public final class MultipleAttachmentTest extends AbstractMailTest {
 		            "Content-Type: text/plain; charset=UTF-8\n" + 
 		            "Content-Transfer-Encoding: 7bit\n" + 
 		            "\n" + 
-		            "Move from sent to drafts\n" + 
+		            "MultipleAttachmentTest\n" + 
 		            "------=_Part_17482_1388684087.1353357411002\n" + 
 		            "MIME-Version: 1.0\n" + 
 		            "Content-Type: text/html; charset=UTF-8\n" + 
@@ -117,7 +117,7 @@ public final class MultipleAttachmentTest extends AbstractMailTest {
 		            " </head><body style=\"font-family: verdana,geneva; font-size: 10pt; \">\n" + 
 		            " \n" + 
 		            "  <div>\n" + 
-		            "   Move from sent to drafts\n" + 
+		            "   MultipleAttachmentTest\n" + 
 		            "  </div>\n" + 
 		            " \n" + 
 		            "</body></html>\n" + 
