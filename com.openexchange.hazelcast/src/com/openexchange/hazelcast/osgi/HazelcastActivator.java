@@ -42,6 +42,7 @@ import com.openexchange.management.ManagementService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.osgi.ServiceContainer;
 import com.openexchange.timer.TimerService;
+import com.openexchange.tools.strings.TimeSpanParser;
 
 /**
  * {@link HazelcastActivator} - The activator for Hazelcast bundle (registers a {@link HazelcastInstance} for this JVM)
@@ -575,12 +576,14 @@ public class HazelcastActivator extends HousekeepingActivator {
          */
         config.setProperty(GroupProperties.PROP_REDO_GIVE_UP_THRESHOLD, "10");
         /*
-         * reduce merge run intervals 
+         * configure merge run intervals 
          */
-        if (1 == 1) {
-            config.setProperty(GroupProperties.PROP_MERGE_FIRST_RUN_DELAY_SECONDS, "30");
-            config.setProperty(GroupProperties.PROP_MERGE_NEXT_RUN_DELAY_SECONDS, "12");
-        }
+        String mergeFirstRunDelay = configService.getProperty("com.openexchange.hazelcast.mergeFirstRunDelay", "120s");
+        config.setProperty(GroupProperties.PROP_MERGE_FIRST_RUN_DELAY_SECONDS, 
+            String.valueOf(TimeSpanParser.parseTimespan(mergeFirstRunDelay).longValue() / 1000));
+        String mergeRunDelay = configService.getProperty("com.openexchange.hazelcast.mergeRunDelay", "120s");
+        config.setProperty(GroupProperties.PROP_MERGE_NEXT_RUN_DELAY_SECONDS, 
+            String.valueOf(TimeSpanParser.parseTimespan(mergeRunDelay).longValue() / 1000));
         /*
          * set interfaces
          */
