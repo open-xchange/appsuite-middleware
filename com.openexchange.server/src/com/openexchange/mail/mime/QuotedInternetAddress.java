@@ -1066,9 +1066,15 @@ public final class QuotedInternetAddress extends InternetAddress {
                 }
             }
 
-            if (needQuoting(personal)) {
+            if (needQuoting(personal, true)) {
                 try {
-                    encodedPersonal = MimeUtility.encodeWord(quotePhrase(personal, false), jcharset, null);
+                    encodedPersonal = MimeUtility.encodeWord(quotePhrase(personal, true), jcharset, null);
+                } catch (final UnsupportedEncodingException e) {
+                    LOG.error(e.getMessage(), e);
+                }
+            } else if (!isAscii(personal)) {
+                try {
+                    encodedPersonal = MimeUtility.encodeWord(quotePhrase(personal, true), jcharset, null);
                 } catch (final UnsupportedEncodingException e) {
                     LOG.error(e.getMessage(), e);
                 }
@@ -1196,7 +1202,7 @@ public final class QuotedInternetAddress extends InternetAddress {
         return phrase;
     }
 
-    private static boolean needQuoting(final String phrase) {
+    private static boolean needQuoting(final String phrase, final boolean allowNonAscii) {
         final int len = phrase.length();
         boolean needQuoting = false;
 
@@ -1205,7 +1211,7 @@ public final class QuotedInternetAddress extends InternetAddress {
             if (c == '"' || c == '\\') {
                 // need to escape them and then quote the whole string
                 needQuoting = true;
-            } else if ((c < 32 && c != '\r' && c != '\n' && c != '\t') || c >= 127 || RFC822.indexOf(c) >= 0) {
+            } else if ((c < 32 && c != '\r' && c != '\n' && c != '\t') || (!allowNonAscii && c >= 127) || RFC822.indexOf(c) >= 0) {
                 // These characters cause the string to be quoted
                 needQuoting = true;
             }
@@ -1282,6 +1288,22 @@ public final class QuotedInternetAddress extends InternetAddress {
         boolean ret = true;
         for (int i = 0; ret && i < len; i++) {
             ret = Character.isWhitespace(str.charAt(i));
+        }
+        return ret;
+    }
+
+    /**
+     * Determines whether a String is purely ASCII, meaning its characters' code points are all less than 128.
+     */
+    private static boolean isAscii(final String str) {
+        if (null == str || 0 == str.length()) {
+            return true;
+        }
+        final int len = str.length();
+        boolean ret = true;
+        for (int i = 0; ret && i < len; i++) {
+            final char c = str.charAt(i);
+            ret = (c > 32 && c <= 127);
         }
         return ret;
     }
