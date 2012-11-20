@@ -5,7 +5,7 @@
         Installs the solr CLTs.
     </description>
 
-	<import file="build-project.xml" />
+	<import file="build-clt.xml" />
 
 	<!-- Constants -->
 	<property name="sbinDir" value="sbin" />
