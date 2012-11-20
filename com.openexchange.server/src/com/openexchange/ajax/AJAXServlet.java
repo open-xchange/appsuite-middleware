@@ -1017,6 +1017,14 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
          */
     }
 
+    /**
+     * Writes specified response.
+     *
+     * @param response The response to write
+     * @param servletResponse The HTTP Servlet response to write to
+     * @param session The optional session; pass <code>null</code> if not appropriate
+     * @throws IOException If an I/O error occurs
+     */
     protected void writeResponse(final Response response, final HttpServletResponse servletResponse, Session session) throws IOException {
         servletResponse.setContentType(CONTENTTYPE_JAVASCRIPT);
         try {
@@ -1027,14 +1035,33 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
         }
     }
 
+    /**
+     * Checks if specified HTTP Servlet request indicates Internet Explorer as <code>User-Agent</code>.
+     *
+     * @param req The HTTP Servlet request
+     * @return <code>true</code> if Internet Explorer; otherwise <code>false</code>
+     */
     protected final boolean isIE(final HttpServletRequest req) {
         return req.getHeader("User-Agent").contains("MSIE");
     }
 
+    /**
+     * Checks if specified HTTP Servlet request indicates Internet Explorer 7 as <code>User-Agent</code>.
+     *
+     * @param req The HTTP Servlet request
+     * @return <code>true</code> if Internet Explorer 7; otherwise <code>false</code>
+     */
     protected final boolean isIE7(final HttpServletRequest req) {
         return req.getHeader("User-Agent").contains("MSIE 7");
     }
 
+    /**
+     * Gets specified module's string representation.
+     *
+     * @param module The module
+     * @param objectId The identifier of associated object
+     * @return The module's string representation
+     */
     public static final String getModuleString(final int module, final int objectId) {
         String moduleStr = null;
         switch (module) {
@@ -1078,6 +1105,12 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
         return moduleStr;
     }
 
+    /**
+     * Gets specified module's <code>int</code> representation.
+     *
+     * @param moduleStr The module's string representation
+     * @return The module's <code>int</code> representation
+     */
     public static final int getModuleInteger(final String moduleStr) {
         final int module;
         if (MODULE_TASK.equalsIgnoreCase(moduleStr)) {
