@@ -3,6 +3,8 @@
 package com.openexchange.custom.parallels.impl;
 
 import java.io.IOException;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.Arrays;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -83,7 +85,7 @@ public final class ParallelsInfoServlet extends PermissionServlet {
 		obj.put("context_id"
 		obj.put("context_name"
 		obj.put("mail"
-		obj.put("branding_url"
+		obj.put("branding_host"
      * 
      * 
      * @param req
@@ -111,7 +113,7 @@ public final class ParallelsInfoServlet extends PermissionServlet {
         final int contextid = session.getContextId();
         String context_name = "UNRESOLVED";
         String mail = null;
-        String branded_url = null;
+        String branded_host = null;
         try {
 
             final Context ctx = ContextStorage.getInstance().getContext(contextid);
@@ -119,7 +121,7 @@ public final class ParallelsInfoServlet extends PermissionServlet {
             context_name = ctx.getName();
 
             // resolve the branding URL
-            branded_url = getBrandingURLFromLoginMappings(ctx);
+            branded_host = getBrandingHostFromLoginMappings(ctx);
 
             mail = userobject.getMail();
         } catch (final OXException e) {
@@ -135,7 +137,7 @@ public final class ParallelsInfoServlet extends PermissionServlet {
         obj.put("context_id", contextid);
         obj.put("context_name", context_name);
         obj.put("mail", mail);
-        obj.put("branding_url", branded_url);
+        obj.put("branding_host", branded_host);
 
         response.setData(obj);
 
@@ -155,43 +157,57 @@ public final class ParallelsInfoServlet extends PermissionServlet {
 
 
 
-    private String getBrandingURLFromLoginMappings(final Context ctx) throws OXException {
+    private String getBrandingHostFromLoginMappings(final Context ctx) throws OXException {
 
         final String[] login_mappings = ctx.getLoginInfo();
         final ConfigurationService configservice = ParallelsServiceRegistry.getServiceRegistry().getService(ConfigurationService.class,true);
 
-        // load fallback url first, and if context is branded, we switch this url to the branded from database
-        String branded_url = configservice.getProperty("com.openexchange.custom.parallels.branding.fallbackurl");
+        String branded_host = null;
 
         // load suffix for branding string dynamically in loginmappings
-        final String suffix_branded = configservice.getProperty("com.openexchange.custom.parallels.branding.suffix");
+        final String suffix_branded = configservice.getProperty(ParallelsOptions.PROPERTY_BRANDING_SUFFIX);
         // for debugging purposes
         if(LOG.isDebugEnabled()){
             LOG.debug("Loaded loginmappings "+Arrays.toString(login_mappings)+" for context "+ctx.getContextId());
         }
-        for (final String login_mapping : login_mappings) {
-            if(login_mapping.startsWith(suffix_branded)){
-                /**
-                 * 
-                 *  We found our mapping which contains the branded URL!
-                 * 
-                 *  Now split up the string to get the URL part
-                 * 
-                 */
-                final String[] URL_ = login_mapping.split("\\|\\|"); // perhaps replace with substring(start,end) if would be faster
-                if(URL_.length!=3){
-                    LOG.fatal("Could not split up branded URL "+login_mapping+" login mapping for context "+ctx.getContextId());
-                }else{
-                    branded_url = URL_[2];
-                    if(LOG.isDebugEnabled()){
-                        LOG.debug("Successfully resolved HOST to "+branded_url+" for branded context "+ctx.getContextId());
+        boolean found_host = false;
+        if( null != suffix_branded && suffix_branded.length() != 0) {
+            for (final String login_mapping : login_mappings) {
+                if(login_mapping.startsWith(suffix_branded)){
+                    /**
+                     * 
+                     *  We found our mapping which contains the branded host!
+                     * 
+                     *  Now split up the string to get the host part
+                     * 
+                     */
+                    final String[] URL_ = login_mapping.split("\\|\\|"); // perhaps replace with substring(start,end) if would be faster
+                    if(URL_.length!=3){
+                        LOG.error("getBrandingHostFromLoginMappings: Could not split up branded host "+login_mapping+" login mapping for context "+ctx.getContextId());
+                    }else{
+                        branded_host = URL_[2];
+                        if(LOG.isDebugEnabled()){
+                            LOG.debug("Successfully resolved HOST to "+branded_host+" for branded context "+ctx.getContextId());
+                        }
                     }
                 }
             }
         }
+        if(!found_host){
+            // now host was provisioned, load fallback from configuration
+            branded_host = configservice.getProperty(ParallelsOptions.PROPERTY_BRANDING_FALLBACKHOST);
+            // use systems getHostname() if no fallbackhost is set
+            if( null == branded_host || branded_host.length() == 0 ) {
+                try {
+                    branded_host = InetAddress.getLocalHost().getCanonicalHostName();
+                } catch (UnknownHostException e) { }
+            }
+            if( null == branded_host || branded_host.length() == 0 ) {
+                LOG.warn("getHostname: Unable to determine any hostname for context "+ctx.getContextId());
+            }
+        }
 
-
-        return branded_url;
+        return branded_host;
 
     }
 

@@ -47,11 +47,6 @@ public final class ParallelsOpenApiServletRequest  {
     public static final String MODULE_WHITELIST= "whitelist"; // whiteliste module
     public static final String MODULE_BLACKLIST = "blacklist"; // blacklist module
 
-    public static final String PROPERTY_OPENAPI_INTERFACE_URL = "com.openexchange.custom.parallels.openapi.interface_url";
-    public static final String PROPERTY_OPENAPI_INTERFACE_AUTH_ID = "com.openexchange.custom.parallels.openapi.auth_id";
-    public static final String PROPERTY_OPENAPI_INTERFACE_AUTH_PASSWORD = "com.openexchange.custom.parallels.openapi.auth_password";
-    public static final String PROPERTY_OPENAPI_INTERFACE_AUTH_ENABLED = "com.openexchange.custom.parallels.openapi.auth_enabled";
-
     public ParallelsOpenApiServletRequest(final Session sessionObj, final Context ctx)	throws OXException, ServiceException {
         try {
             this.user = UserStorage.getInstance().getUser(sessionObj.getUserId(), ctx);
@@ -207,19 +202,19 @@ public final class ParallelsOpenApiServletRequest  {
 
 
     private String getOpenAPIInterfaceURL() throws ServiceException{
-        return getFromConfig(PROPERTY_OPENAPI_INTERFACE_URL);
+        return getFromConfig(ParallelsOptions.PROPERTY_OPENAPI_INTERFACE_URL);
     }
 
     private String getOpenAPIAuthID() throws ServiceException{
-        return getFromConfig(PROPERTY_OPENAPI_INTERFACE_AUTH_ID);
+        return getFromConfig(ParallelsOptions.PROPERTY_OPENAPI_INTERFACE_AUTH_ID);
     }
 
     private String getOpenAPIAuthPassword() throws ServiceException{
-        return getFromConfig(PROPERTY_OPENAPI_INTERFACE_AUTH_PASSWORD);
+        return getFromConfig(ParallelsOptions.PROPERTY_OPENAPI_INTERFACE_AUTH_PASSWORD);
     }
 
     private boolean isOpenAPIAuthEnabled() throws ServiceException{
-        return this.configservice.getBoolProperty(PROPERTY_OPENAPI_INTERFACE_AUTH_ENABLED, false);
+        return this.configservice.getBoolProperty(ParallelsOptions.PROPERTY_OPENAPI_INTERFACE_AUTH_ENABLED, false);
     }
 
 

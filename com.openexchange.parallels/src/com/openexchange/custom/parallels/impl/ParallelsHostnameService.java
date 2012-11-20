@@ -38,7 +38,7 @@ public final class ParallelsHostnameService implements HostnameService {
                 final ConfigurationService configservice = ParallelsServiceRegistry.getServiceRegistry().getService(ConfigurationService.class,true);
 
                 // load suffix for branding string dynamically in loginmappings
-                final String suffix_branded = configservice.getProperty("com.openexchange.custom.parallels.branding.suffix");
+                final String suffix_branded = configservice.getProperty(ParallelsOptions.PROPERTY_BRANDING_SUFFIX);
                 // for debugging purposes
                 if(LOG.isDebugEnabled()){
                     LOG.debug("Loaded loginmappings "+Arrays.toString(login_mappings)+" for context "+contextId);
@@ -65,12 +65,18 @@ public final class ParallelsHostnameService implements HostnameService {
                         }
                     }
                 }
-
-                if(!found_url){
-                    // now url was provisioned, load fall from configuration
-                    hostname = configservice.getProperty("com.openexchange.custom.parallels.branding.fallbackurl");
-
-                    LOG.debug("No branding URL was specified for context "+contextId+", using fallback from configuration file ");
+                if(!found_host){
+                    // now host was provisioned, load fallback from configuration
+                    hostname = configservice.getProperty(ParallelsOptions.PROPERTY_BRANDING_FALLBACKHOST);
+                    // use systems getHostname() if no fallbackhost is set
+                    if( null == hostname || hostname.length() == 0 ) {
+                        try {
+                            hostname = InetAddress.getLocalHost().getCanonicalHostName();
+                        } catch (UnknownHostException e) { }
+                    }
+                    if( null == hostname || hostname.length() == 0 ) {
+                        LOG.warn("getHostname: Unable to determine any hostname for context "+contextId);
+                    }
                 }
             } catch (final OXException e) {
                 LOG.error(e.getMessage(), e);
