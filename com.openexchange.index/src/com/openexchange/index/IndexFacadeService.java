@@ -62,6 +62,7 @@ public interface IndexFacadeService {
 
     /**
      * Acquires an appropriate {@link IndexAccess} instance.
+     * If the according index is locked, {@link IndexExceptionCodes#INDEX_LOCKED} is thrown.
      * <p>
      * Convenience method for:<br>
      * {@link #acquireIndexAccess(int, int, int) aquireIndexAccess(module, session.getUserId(), session.getContextId()}.
@@ -75,6 +76,7 @@ public interface IndexFacadeService {
 
     /**
      * Acquires an appropriate {@link IndexAccess} instance.
+     * If the according index is locked, {@link IndexExceptionCodes#INDEX_LOCKED} is thrown.
      * 
      * @param module The module
      * @param userId The user identifier

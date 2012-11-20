@@ -87,7 +87,7 @@ public class IndexingServiceImpl implements IndexingService {
     
 
     @Override
-    public void scheduleJob(JobInfo info, Date startDate, long repeatInterval, int priority) throws OXException {        
+    public void scheduleJob(JobInfo info, Date startDate, long repeatInterval, int priority) throws OXException {
         if (startDate == null) {
             startDate = new Date();
         }
@@ -131,7 +131,7 @@ public class IndexingServiceImpl implements IndexingService {
                 }
             } else {
                 throw new OXException(e);
-            }                
+            }
         }
     }
     

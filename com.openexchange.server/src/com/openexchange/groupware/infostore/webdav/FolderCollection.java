@@ -504,7 +504,7 @@ public class FolderCollection extends AbstractCollection implements OXWebdavReso
 
 				writeCon = provider.getWriteConnection(ctx);
 				final OXFolderManager oxma = OXFolderManager.getInstance(getSession(), writeCon, writeCon);
-				oxma.updateFolder(folder, true, System.currentTimeMillis());
+				oxma.updateFolder(folder, true, false, System.currentTimeMillis());
 				//oxfa.updateMoveRenameFolder(folder, session, true, folder.getLastModified().getTime(), writeCon, writeCon);
 			} catch (final OXException x) {
 				if(isPermissionException(x)) {

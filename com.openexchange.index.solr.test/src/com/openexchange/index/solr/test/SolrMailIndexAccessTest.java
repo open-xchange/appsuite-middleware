@@ -131,6 +131,7 @@ public class SolrMailIndexAccessTest extends AbstractSolrIndexAccessTest {
             
             managementService.unlockIndex(context.getId(), user.getId(), Types.EMAIL);
             assertFalse("Index was locked.", managementService.isLocked(context.getId(), user.getId(), Types.EMAIL));
+            indexAccess = indexFacade.acquireIndexAccess(Types.EMAIL, user.getId(), context.getId());
             indexAccess.addDocument(new StandardIndexDocument<MailMessage>(m1));
         } finally {
             managementService.unlockIndex(context.getId(), user.getId(), Types.EMAIL);

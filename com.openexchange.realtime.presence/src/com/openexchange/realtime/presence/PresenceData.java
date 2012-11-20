@@ -49,6 +49,7 @@
 
 package com.openexchange.realtime.presence;
 
+import java.io.Serializable;
 import java.util.Date;
 import com.openexchange.realtime.packet.PresenceState;
 
@@ -58,7 +59,7 @@ import com.openexchange.realtime.packet.PresenceState;
  * 
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
-public class PresenceData {
+public class PresenceData implements Serializable {
 
     private PresenceState state;
 
@@ -127,7 +128,7 @@ public class PresenceData {
 
     /**
      * Get the time when a user set this PresenceData or null when the user didn't publish any PresenceData yet (OFFLINE).
-     * @return the creation time
+     * @return nunll or the creation time
      */
     public Date getCreationTime() {
         return timeStamp;

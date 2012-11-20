@@ -1,3 +1,11 @@
+* 2012-11-20 - thorben.betten@open-xchange.com
+
+ - Fix for bug 23812: Added necessary import to MANIFEST.MF
+
+* 2012-11-18 - thorben.betten@open-xchange.com
+
+ - Fix for bug 23726: Added null guard to deal with possible non-existing image part
+
 * 2012-11-14 - thorben.betten@open-xchange.com
 
  - Fix for bug 23724: Reduce number of logged stack trace elements

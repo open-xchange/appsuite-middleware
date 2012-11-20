@@ -60,6 +60,7 @@ import com.openexchange.realtime.util.ElementPath;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a> JavaDoc
  */
+//TODO: Make cloneable or offer immutable copy
 public class PayloadElement implements VisitablePayload {
 
     // Current format of the Payload e.g. json, xml or some Class.getSimpleName()
@@ -84,9 +85,22 @@ public class PayloadElement implements VisitablePayload {
      */
     public PayloadElement(Object data, String format, String namespace, String elementName) {
         this.data = data;
+        this.elementName = elementName;
         this.format = format;
         this.namespace = namespace;
-        this.elementName = elementName;
+    }
+
+    /**
+     * Initializes a new {@link PayloadElement} based on another PayloadElement.
+     * @param otherPayloadElement The other PayloadElement, must not be null
+     * @throws IllegalArgumentException If the other PayloadElement is null
+     */
+    public PayloadElement(PayloadElement otherPayloadElement) {
+        this.data = otherPayloadElement.data;
+        this.elementName = otherPayloadElement.elementName;
+        this.format = otherPayloadElement.format;
+        this.namespace = otherPayloadElement.namespace;
+        
     }
 
     /**

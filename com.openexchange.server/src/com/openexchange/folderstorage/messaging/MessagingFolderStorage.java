@@ -66,6 +66,10 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import com.openexchange.exception.OXException;
+import com.openexchange.file.storage.DefaultFileStorageFolder;
+import com.openexchange.file.storage.FileStorageAccountAccess;
+import com.openexchange.file.storage.FileStorageFolder;
+import com.openexchange.file.storage.FileStoragePermission;
 import com.openexchange.folderstorage.ContentType;
 import com.openexchange.folderstorage.Folder;
 import com.openexchange.folderstorage.FolderExceptionErrorMessage;
@@ -74,6 +78,7 @@ import com.openexchange.folderstorage.FolderType;
 import com.openexchange.folderstorage.Permission;
 import com.openexchange.folderstorage.SortableId;
 import com.openexchange.folderstorage.StorageParameters;
+import com.openexchange.folderstorage.StorageParametersUtility;
 import com.openexchange.folderstorage.StoragePriority;
 import com.openexchange.folderstorage.StorageType;
 import com.openexchange.folderstorage.Type;
@@ -971,27 +976,30 @@ public final class MessagingFolderStorage implements FolderStorage {
             // Subscribed
             dmf.setSubscribed(folder.isSubscribed());
             // Permissions
-            final Permission[] permissions = folder.getPermissions();
-            if (null != permissions && permissions.length > 0) {
-                final MessagingPermission[] messagingPermissions = new MessagingPermission[permissions.length];
-                final Session session = storageParameters.getSession();
-                if (null == session) {
-                    throw FolderExceptionErrorMessage.MISSING_SESSION.create(new Object[0]);
+            MessagingPermission[] messagingPermissions = null;
+            {
+                final Permission[] permissions = folder.getPermissions();
+                if (null != permissions && permissions.length > 0) {
+                    messagingPermissions = new MessagingPermission[permissions.length];
+                    final Session session = storageParameters.getSession();
+                    if (null == session) {
+                        throw FolderExceptionErrorMessage.MISSING_SESSION.create(new Object[0]);
+                    }
+                    for (int i = 0; i < permissions.length; i++) {
+                        final Permission permission = permissions[i];
+                        final MessagingPermission dmp = DefaultMessagingPermission.newInstance();
+                        dmp.setEntity(permission.getEntity());
+                        dmp.setAllPermissions(
+                            permission.getFolderPermission(),
+                            permission.getReadPermission(),
+                            permission.getWritePermission(),
+                            permission.getDeletePermission());
+                        dmp.setAdmin(permission.isAdmin());
+                        dmp.setGroup(permission.isGroup());
+                        messagingPermissions[i] = dmp;
+                    }
+                    dmf.setPermissions(Arrays.asList(messagingPermissions));
                 }
-                for (int i = 0; i < permissions.length; i++) {
-                    final Permission permission = permissions[i];
-                    final MessagingPermission dmp = DefaultMessagingPermission.newInstance();
-                    dmp.setEntity(permission.getEntity());
-                    dmp.setAllPermissions(
-                        permission.getFolderPermission(),
-                        permission.getReadPermission(),
-                        permission.getWritePermission(),
-                        permission.getDeletePermission());
-                    dmp.setAdmin(permission.isAdmin());
-                    dmp.setGroup(permission.isGroup());
-                    messagingPermissions[i] = dmp;
-                }
-                dmf.setPermissions(Arrays.asList(messagingPermissions));
             }
             /*
              * Load storage version
@@ -1090,8 +1098,29 @@ public final class MessagingFolderStorage implements FolderStorage {
              * Handle update of permission or subscription
              */
             accountAccess.getFolderAccess().updateFolder(id, dmf);
+            /*
+             * Is hand-down?
+             */
+            if ((null != messagingPermissions) && StorageParametersUtility.isHandDownPermissions(storageParameters)) {
+                handDown(accountId, id, messagingPermissions, accountAccess);
+            }
         } catch (final OXException e) {
             throw e;
+        }
+    }
+
+    private static void handDown(final int accountId, final String parentId, final MessagingPermission[] messagingPermissions, final MessagingAccountAccess accountAccess) throws OXException {
+        final MessagingFolder[] subfolders = accountAccess.getFolderAccess().getSubfolders(parentId, true);
+        for (MessagingFolder subfolder : subfolders) {
+            final DefaultMessagingFolder dmf = new DefaultMessagingFolder();
+            dmf.setExists(true);
+            // Full name
+            final String id = subfolder.getId();
+            dmf.setId(id);
+            dmf.setPermissions(Arrays.asList(messagingPermissions));
+            accountAccess.getFolderAccess().updateFolder(id, dmf);
+            // Recursive
+            handDown(accountId, id, messagingPermissions, accountAccess);
         }
     }
 

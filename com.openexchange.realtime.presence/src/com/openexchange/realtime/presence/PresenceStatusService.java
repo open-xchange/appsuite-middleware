@@ -52,6 +52,7 @@ package com.openexchange.realtime.presence;
 import java.util.Collection;
 import com.openexchange.exception.OXException;
 import com.openexchange.realtime.packet.ID;
+import com.openexchange.realtime.packet.Presence;
 import com.openexchange.realtime.util.IDMap;
 import com.openexchange.tools.session.ServerSession;
 
@@ -63,6 +64,18 @@ import com.openexchange.tools.session.ServerSession;
  */
 public interface PresenceStatusService {
 
+    /**
+     * Register a new PresenceChangeListener 
+     * @param presenceChangeListener the new PresenceChangeListener
+     */
+    void registerPresenceChangeListener(PresenceChangeListener presenceChangeListener);
+    
+    /**
+     * Unregister an already registered PresenceChangeListener 
+     * @param presenceChangeListener the already registered PresenceChangeListener
+     */
+    void unregisterPresenceChangeListener(PresenceChangeListener presenceChangeListener);
+    
     /**
      * Change the PresenceStatus of an ID. This involves:
      * <ol>
@@ -78,7 +91,7 @@ public interface PresenceStatusService {
      * @param session   The associated ServerSession
      * @throws OXException If changing the PresenceStatus fails
      */
-    public void changePresenceStatus(ID client, PresenceData status, ServerSession session) throws OXException;
+    void changePresenceStatus(Presence stanza, ServerSession serverSession) throws OXException;
 
     /**
      * Get the current PresenceStatus of only one ID.

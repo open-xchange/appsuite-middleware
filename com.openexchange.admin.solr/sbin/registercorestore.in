@@ -50,9 +50,6 @@
 
 OXFUNCTIONS=@oxfunctions@
 OXCONFIG=@oxscriptconf@
-OXPREFIX=@oxprefix@
-OXBUNDLES=$OXPREFIX/bundles
-BUNDLELIBPATH=@libDir@
 
 
 test -f $OXFUNCTIONS || {

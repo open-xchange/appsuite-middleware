@@ -86,6 +86,7 @@ import com.openexchange.folderstorage.FolderType;
 import com.openexchange.folderstorage.Permission;
 import com.openexchange.folderstorage.SortableId;
 import com.openexchange.folderstorage.StorageParameters;
+import com.openexchange.folderstorage.StorageParametersUtility;
 import com.openexchange.folderstorage.StoragePriority;
 import com.openexchange.folderstorage.StorageType;
 import com.openexchange.folderstorage.Type;
@@ -93,6 +94,10 @@ import com.openexchange.folderstorage.filestorage.contentType.FileStorageContent
 import com.openexchange.folderstorage.type.FileStorageType;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.ldap.User;
+import com.openexchange.mail.api.MailAccess;
+import com.openexchange.mail.dataobjects.MailFolder;
+import com.openexchange.mail.dataobjects.MailFolderDescription;
+import com.openexchange.mail.permission.MailPermission;
 import com.openexchange.messaging.MessagingPermission;
 import com.openexchange.session.Session;
 import com.openexchange.tools.session.ServerSession;
@@ -768,7 +773,7 @@ public final class FileStorageFolderStorage implements FolderStorage {
 
         final DefaultFileStorageFolder fsFolder = new DefaultFileStorageFolder();
         fsFolder.setExists(true);
-        // Fullname
+        // Identifier
         fsFolder.setId(id);
         // TODO: fsFolder.setAccountId(accountId);
         // Parent
@@ -787,27 +792,30 @@ public final class FileStorageFolderStorage implements FolderStorage {
         // Subscribed
         fsFolder.setSubscribed(folder.isSubscribed());
         // Permissions
-        final Permission[] permissions = folder.getPermissions();
-        if (null != permissions && permissions.length > 0) {
-            final FileStoragePermission[] fsPermissions = new FileStoragePermission[permissions.length];
-            final Session session = storageParameters.getSession();
-            if (null == session) {
-                throw FolderExceptionErrorMessage.MISSING_SESSION.create(new Object[0]);
+        FileStoragePermission[] fsPermissions = null;
+        {
+            final Permission[] permissions = folder.getPermissions();
+            if (null != permissions && permissions.length > 0) {
+                fsPermissions = new FileStoragePermission[permissions.length];
+                final Session session = storageParameters.getSession();
+                if (null == session) {
+                    throw FolderExceptionErrorMessage.MISSING_SESSION.create(new Object[0]);
+                }
+                for (int i = 0; i < permissions.length; i++) {
+                    final Permission permission = permissions[i];
+                    final FileStoragePermission dmp = DefaultFileStoragePermission.newInstance();
+                    dmp.setEntity(permission.getEntity());
+                    dmp.setAllPermissions(
+                        permission.getFolderPermission(),
+                        permission.getReadPermission(),
+                        permission.getWritePermission(),
+                        permission.getDeletePermission());
+                    dmp.setAdmin(permission.isAdmin());
+                    dmp.setGroup(permission.isGroup());
+                    fsPermissions[i] = dmp;
+                }
+                fsFolder.setPermissions(Arrays.asList(fsPermissions));
             }
-            for (int i = 0; i < permissions.length; i++) {
-                final Permission permission = permissions[i];
-                final FileStoragePermission dmp = DefaultFileStoragePermission.newInstance();
-                dmp.setEntity(permission.getEntity());
-                dmp.setAllPermissions(
-                    permission.getFolderPermission(),
-                    permission.getReadPermission(),
-                    permission.getWritePermission(),
-                    permission.getDeletePermission());
-                dmp.setAdmin(permission.isAdmin());
-                dmp.setGroup(permission.isGroup());
-                fsPermissions[i] = dmp;
-            }
-            fsFolder.setPermissions(Arrays.asList(fsPermissions));
         }
         /*
          * Load storage version
@@ -901,6 +909,27 @@ public final class FileStorageFolderStorage implements FolderStorage {
          * Handle update of permission or subscription
          */
         accountAccess.getFolderAccess().updateFolder(id, fsFolder);
+        /*
+         * Is hand-down?
+         */
+        if ((null != fsPermissions) && StorageParametersUtility.isHandDownPermissions(storageParameters)) {
+            handDown(accountId, id, fsPermissions, accountAccess);
+        }
+    }
+
+    private static void handDown(final String accountId, final String parentId, final FileStoragePermission[] fsPermissions, final FileStorageAccountAccess accountAccess) throws OXException {
+        final FileStorageFolder[] subfolders = accountAccess.getFolderAccess().getSubfolders(parentId, true);
+        for (FileStorageFolder subfolder : subfolders) {
+            final DefaultFileStorageFolder fsFolder = new DefaultFileStorageFolder();
+            fsFolder.setExists(true);
+            // Full name
+            final String id = subfolder.getId();
+            fsFolder.setId(id);
+            fsFolder.setPermissions(Arrays.asList(fsPermissions));
+            accountAccess.getFolderAccess().updateFolder(id, fsFolder);
+            // Recursive
+            handDown(accountId, id, fsPermissions, accountAccess);
+        }
     }
 
     private void check4DuplicateFolder(final FileStorageAccountAccess accountAccess, final String parentId, final String name2check) throws OXException {

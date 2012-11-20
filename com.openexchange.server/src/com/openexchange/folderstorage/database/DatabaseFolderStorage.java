@@ -89,6 +89,7 @@ import com.openexchange.folderstorage.FolderType;
 import com.openexchange.folderstorage.Permission;
 import com.openexchange.folderstorage.SortableId;
 import com.openexchange.folderstorage.StorageParameters;
+import com.openexchange.folderstorage.StorageParametersUtility;
 import com.openexchange.folderstorage.StoragePriority;
 import com.openexchange.folderstorage.StorageType;
 import com.openexchange.folderstorage.SystemContentType;
@@ -1558,7 +1559,7 @@ public final class DatabaseFolderStorage implements FolderStorage {
                 updateMe.setPermissionsAsArray(oclPermissions);
             }
             final OXFolderManager folderManager = OXFolderManager.getInstance(session, con, con);
-            folderManager.updateFolder(updateMe, true, millis.getTime());
+            folderManager.updateFolder(updateMe, true, StorageParametersUtility.isHandDownPermissions(storageParameters), millis.getTime());
         } finally {
             provider.close();
         }

@@ -73,6 +73,22 @@ public class PayloadTree implements VisitablePayload {
     }
 
     /**
+     * Initializes a new {@link PayloadTree} based on another Presence.
+     * 
+     * @param other The PayloadTree to copy, must not be null
+     * @throws IllegalArgumentException if the other PayloadTree is null
+     */
+    public PayloadTree(PayloadTree other) {
+        if (other == null) {
+            throw new IllegalArgumentException("Other PayloadTree must not be null.");
+        }
+        PayloadTreeNode otherRoot = other.getRoot();
+        if(otherRoot != null) {
+            this.root = new PayloadTreeNode(otherRoot);
+        }
+    }
+
+    /**
      * Initializes a new {@link PayloadTree} with an initial root node.
      * 
      * @param root The root node of the new PayloadTree
@@ -234,7 +250,6 @@ public class PayloadTree implements VisitablePayload {
         return matches;
     }
 
-    
     @Override
     public void accept(PayloadVisitor visitor) {
         if (visitor == null) {

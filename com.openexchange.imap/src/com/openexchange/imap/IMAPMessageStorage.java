@@ -400,8 +400,9 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                     try {
                         return new Renderer(new Segment(new Source(content), 0, content.length())).setMaxLineLength(9999).setIncludeHyperlinkURLs(
                             false).toString();
-                    } catch (final StackOverflowError parserOverflow) {
-                        // Ignore
+                    } catch (StackOverflowError s) {
+                        LOG.warn("StackOverflowError while parsing html mail. Returning null...");
+                        return null;
                     }
                     // content = PATTERN_CRLF.matcher(content).replaceAll("");// .replaceAll("(  )+", "");
                 }

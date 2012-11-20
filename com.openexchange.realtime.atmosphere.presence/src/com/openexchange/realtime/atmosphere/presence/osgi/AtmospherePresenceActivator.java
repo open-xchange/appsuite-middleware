@@ -50,8 +50,11 @@
 package com.openexchange.realtime.atmosphere.presence.osgi;
 
 import org.apache.commons.logging.Log;
+import org.osgi.framework.ServiceReference;
 import com.openexchange.conversion.simple.SimplePayloadConverter;
 import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.osgi.SimpleRegistryListener;
+import com.openexchange.realtime.MessageDispatcher;
 import com.openexchange.realtime.atmosphere.payload.converter.primitive.ByteToJSONConverter;
 import com.openexchange.realtime.atmosphere.payload.converter.primitive.JSONToByteConverter;
 import com.openexchange.realtime.atmosphere.payload.converter.primitive.JSONToStringConverter;
@@ -75,34 +78,54 @@ import com.openexchange.realtime.presence.subscribe.PresenceSubscriptionService;
 public class AtmospherePresenceActivator extends HousekeepingActivator {
 
     private static final Log LOG = com.openexchange.log.Log.loggerFor(AtmospherePresenceActivator.class);
+    private final OXRTPresenceHandler presenceHandler;
 
     /**
      * Initializes a new {@link AtmospherePresenceActivator}.
      */
     public AtmospherePresenceActivator() {
+        presenceHandler = new OXRTPresenceHandler();
     }
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class[] { PresenceSubscriptionService.class, PresenceStatusService.class };
+        return new Class[] { PresenceSubscriptionService.class, PresenceStatusService.class, MessageDispatcher.class };
     }
 
     @Override
     protected void handleAvailability(Class<?> clazz) {
-        Object service = getService(clazz);
-        AtmospherePresenceServiceRegistry.getInstance().addService(clazz, service);
+        //make sure the PresenceChangeListeners always have the proper service reference
+        if(PresenceStatusService.class.equals(clazz)) {
+            
+        }
     }
 
     @Override
     protected void handleUnavailability(Class<?> clazz) {
-        AtmospherePresenceServiceRegistry.getInstance().removeService(clazz);
+      //make sure the PresenceChangeListeners always have the proper service reference
+        if(PresenceStatusService.class.equals(clazz)) {
+            
+        }
     }
 
     @Override
     protected void startBundle() throws Exception {
+        AtmospherePresenceServiceRegistry.SERVICES.set(this);
+        
+        track(PresenceStatusService.class, new SimpleRegistryListener<PresenceStatusService>() {
 
-        AtmospherePresenceServiceRegistry serviceRegistry = AtmospherePresenceServiceRegistry.getInstance();
-        serviceRegistry.initialize(this, getNeededServices());
+            @Override
+            public void added(final ServiceReference<PresenceStatusService> ref, final PresenceStatusService presenceStatusService) {
+//                extensions.addPayloadElementTransFormer(transformer);
+//                register PresenceChangeListener with new presenceStatusService
+            }
+
+            @Override
+            public void removed(final ServiceReference<PresenceStatusService> ref, final PresenceStatusService presenceStatusService) {
+//                extensions.removePayloadElementTransformer(transformer);
+//                remove PresenceChangeListener from old presenceStatusService
+            }
+        });
 
         /*
          * Register the package specific payload converters. The SimpleConverterActivator listens for registrations of new

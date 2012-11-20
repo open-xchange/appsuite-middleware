@@ -70,21 +70,6 @@ import com.openexchange.soap.cxf.interceptor.TransformGenericElementsInterceptor
  */
 public class CXFActivator extends HousekeepingActivator {
 
-    /**
-     * The logger.
-     */
-    static final Log LOG = com.openexchange.log.Log.loggerFor(CXFActivator.class);
-
-    /**
-     * The CXF Servlet's alias.
-     */
-    static final String ALIAS = "/webservices";
-
-    /**
-     * The Axis2 Servlet's alias.
-     */
-    static final String ALIAS2 = "/servlet/axis2/services";
-
     @Override
     protected Class<?>[] getNeededServices() {
         return new Class[] { HttpService.class };
@@ -92,9 +77,15 @@ public class CXFActivator extends HousekeepingActivator {
 
     @Override
     protected void startBundle() throws Exception {
+        final Log log = com.openexchange.log.Log.loggerFor(CXFActivator.class);
         try {
-            LOG.info("Starting Bundle: com.openexchange.soap.cxf");
+            log.info("Starting Bundle: com.openexchange.soap.cxf");
             final BundleContext context = this.context;
+            final String alias = "/webservices";
+            final String alias2 = "/servlet/axis2/services";
+            /*
+             * Initialize ServiceTrackerCustomizer
+             */
             final ServiceTrackerCustomizer<HttpService, HttpService> trackerCustomizer =
                 new ServiceTrackerCustomizer<HttpService, HttpService>() {
 
@@ -105,8 +96,8 @@ public class CXFActivator extends HousekeepingActivator {
                         final HttpService httpService = getService(HttpService.class);
                         if (httpService != null) {
                             try {
-                                httpService.unregister(ALIAS);
-                                httpService.unregister(ALIAS2);
+                                httpService.unregister(alias);
+                                httpService.unregister(alias2);
                             } catch (final Exception e) {
                                 // Ignore
                             }
@@ -134,14 +125,15 @@ public class CXFActivator extends HousekeepingActivator {
                         boolean servletRegistered = false;
                         boolean collectorOpened = false;
                         try {
+                            System.setProperty("org.apache.cxf.Logger", "com.openexchange.soap.cxf.logger.CommonsLoggingLogger");
                             final CXFNonSpringServlet cxfServlet = new CXFNonSpringServlet();
                             /*
                              * Register CXF Servlet
                              */
-                            httpService.registerServlet(ALIAS, cxfServlet, null, null);
-                            LOG.info("Registered CXF Servlet under: " + ALIAS);
-                            httpService.registerServlet(ALIAS2, cxfServlet, null, null);
-                            LOG.info("Registered CXF Servlet under: " + ALIAS2);
+                            httpService.registerServlet(alias, cxfServlet, null, null);
+                            log.info("Registered CXF Servlet under: " + alias);
+                            httpService.registerServlet(alias2, cxfServlet, null, null);
+                            log.info("Registered CXF Servlet under: " + alias2);
                             servletRegistered = true;
                             /*
                              * Get CXF bus
@@ -167,20 +159,20 @@ public class CXFActivator extends HousekeepingActivator {
                             collector.open();
                             this.collector = collector;
                             collectorOpened = true;
-                            LOG.info("CXF SOAP service is up and running");
+                            log.info("CXF SOAP service is up and running");
                             /*
                              * Return tracked HTTP service
                              */
                             return httpService;
                         } catch (final ServletException e) {
-                            LOG.error("Couldn't register CXF Servlet: " + e.getMessage(), e);
+                            log.error("Couldn't register CXF Servlet: " + e.getMessage(), e);
                         } catch (final NamespaceException e) {
-                            LOG.error("Couldn't register CXF Servlet: " + e.getMessage(), e);
+                            log.error("Couldn't register CXF Servlet: " + e.getMessage(), e);
                         } catch (final RuntimeException e) {
                             if (servletRegistered) {
                                 try {
-                                    httpService.unregister(ALIAS);
-                                    httpService.unregister(ALIAS2);
+                                    httpService.unregister(alias);
+                                    httpService.unregister(alias2);
                                 } catch (final Exception e1) {
                                     // Ignore
                                 }
@@ -196,7 +188,7 @@ public class CXFActivator extends HousekeepingActivator {
                                     this.collector = null;
                                 }
                             }
-                            LOG.error("Couldn't register CXF Servlet: " + e.getMessage(), e);
+                            log.error("Couldn't register CXF Servlet: " + e.getMessage(), e);
                         }
                         context.ungetService(reference);
                         return null;
@@ -205,7 +197,7 @@ public class CXFActivator extends HousekeepingActivator {
                 track(HttpService.class, trackerCustomizer);
                 openTrackers();
         } catch (final Exception e) {
-            LOG.error(e.getMessage(), e);
+            log.error(e.getMessage(), e);
             throw e;
         }
     }

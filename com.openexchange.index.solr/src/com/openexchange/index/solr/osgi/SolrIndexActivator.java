@@ -51,7 +51,9 @@ package com.openexchange.index.solr.osgi;
 
 import org.apache.commons.logging.Log;
 import org.osgi.framework.BundleActivator;
+import org.osgi.service.event.EventAdmin;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.database.CreateTableService;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.groupware.delete.DeleteListener;
@@ -94,7 +96,8 @@ public class SolrIndexActivator extends HousekeepingActivator {
     protected Class<?>[] getNeededServices() {
         return new Class[] {
             DatabaseService.class, UserService.class, ConfigurationService.class, TimerService.class, ThreadPoolService.class,
-            SolrAccessService.class, TextXtractService.class, InfostoreFacade.class, SolrCoreConfigService.class };
+            SolrAccessService.class, TextXtractService.class, InfostoreFacade.class, SolrCoreConfigService.class, EventAdmin.class,
+            ConfigViewFactory.class };
     }
 
     @Override
