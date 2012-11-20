@@ -49,12 +49,14 @@
 
 package com.openexchange.index.solr.internal;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.TimerTask;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 import org.apache.commons.logging.Log;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.exception.OXException;
@@ -66,12 +68,22 @@ import com.openexchange.index.IndexManagementService;
 import com.openexchange.index.IndexProperties;
 import com.openexchange.index.solr.ModuleSet;
 import com.openexchange.index.solr.SolrIndexExceptionCodes;
+import com.openexchange.index.solr.internal.attachments.AttachmentFieldMapper;
+import com.openexchange.index.solr.internal.attachments.SolrAttachmentField;
 import com.openexchange.index.solr.internal.attachments.SolrAttachmentIndexAccess;
+import com.openexchange.index.solr.internal.infostore.InfostoreFieldMapper;
+import com.openexchange.index.solr.internal.infostore.SolrInfostoreField;
 import com.openexchange.index.solr.internal.infostore.SolrInfostoreIndexAccess;
+import com.openexchange.index.solr.internal.mail.MailFieldMapper;
+import com.openexchange.index.solr.internal.mail.SolrMailField;
 import com.openexchange.index.solr.internal.mail.SolrMailIndexAccess;
+import com.openexchange.index.solr.internal.querybuilder.BuilderException;
+import com.openexchange.index.solr.internal.querybuilder.SimpleQueryBuilder;
+import com.openexchange.index.solr.internal.querybuilder.SolrQueryBuilder;
 import com.openexchange.log.LogFactory;
 import com.openexchange.session.Session;
 import com.openexchange.solr.SolrCoreIdentifier;
+import com.openexchange.solr.SolrProperties;
 import com.openexchange.timer.ScheduledTimerTask;
 import com.openexchange.timer.TimerService;
 
@@ -97,6 +109,12 @@ public class SolrIndexFacadeService implements IndexFacadeService {
     private static final long HARD_TIMEOUT = 60;
 
     private ScheduledTimerTask timerTask;
+
+    private SolrQueryBuilder attachmentBuilder;
+
+    private SolrQueryBuilder infostoreBuilder;
+
+    private SolrQueryBuilder mailBuilder;
 
     /**
      * Initializes a new {@link SolrIndexFacadeService}.
@@ -142,6 +160,33 @@ public class SolrIndexFacadeService implements IndexFacadeService {
 
             }
         }, SOFT_TIMEOUT, SOFT_TIMEOUT, TimeUnit.MINUTES);
+        
+        try {
+            ConfigurationService config = Services.getService(ConfigurationService.class);
+            String configDir = config.getProperty(SolrProperties.CONFIG_DIR);
+            attachmentBuilder = new SimpleQueryBuilder(
+                configDir + File.separatorChar + "attachment-querybuilder.properties",
+                SolrAttachmentField.MODULE,
+                SolrAttachmentField.ACCOUNT,
+                SolrAttachmentField.FOLDER,
+                AttachmentFieldMapper.getInstance());
+
+            infostoreBuilder = new SimpleQueryBuilder(
+                configDir + File.separatorChar + "infostore-querybuilder.properties", 
+                null,
+                null, 
+                SolrInfostoreField.FOLDER, 
+                InfostoreFieldMapper.getInstance());
+            
+            mailBuilder = new SimpleQueryBuilder(
+                configDir + File.separatorChar + "mail-querybuilder.properties", 
+                null,
+                SolrMailField.ACCOUNT, 
+                SolrMailField.FULL_NAME, 
+                MailFieldMapper.getInstance());
+        } catch (BuilderException e) {
+            throw new IllegalStateException("Could not initialize query builder." + e);
+        }
     }
 
     public void shutDown() {
@@ -217,13 +262,22 @@ public class SolrIndexFacadeService implements IndexFacadeService {
         // TODO: Add other modules
         switch (module) {
             case Types.EMAIL:
-                return new SolrMailIndexAccess(identifier);
+                if (mailBuilder == null) {
+                    throw new IllegalStateException("QueryBuilder for module mail is not initialized.");
+                }
+                return new SolrMailIndexAccess(identifier, mailBuilder);
 
             case Types.INFOSTORE:
-                return new SolrInfostoreIndexAccess(identifier);
+                if (infostoreBuilder == null) {
+                    throw new IllegalStateException("QueryBuilder for module infostore is not initialized.");
+                }
+                return new SolrInfostoreIndexAccess(identifier, infostoreBuilder);
 
             case Types.ATTACHMENT:
-                return new SolrAttachmentIndexAccess(identifier);
+                if (attachmentBuilder == null) {
+                    throw new IllegalStateException("QueryBuilder for module attachments is not initialized.");
+                }
+                return new SolrAttachmentIndexAccess(identifier, attachmentBuilder);
 
             default:
                 throw SolrIndexExceptionCodes.MISSING_ACCESS_FOR_MODULE.create(module);
