@@ -124,6 +124,15 @@ public interface SolrMBean {
     public long count(int contextId, int userId, int module, String queryString) throws MBeanException;
     
     /**
+     * Gets a core store by its id.
+     * 
+     * @param id The core store id.
+     * @return The core store.
+     * @throws MBeanException
+     */
+    public SolrCoreStore getCoreStore(int id) throws MBeanException;
+    
+    /**
      * Gets a list of all available core stores.
      * 
      * @return The store list.

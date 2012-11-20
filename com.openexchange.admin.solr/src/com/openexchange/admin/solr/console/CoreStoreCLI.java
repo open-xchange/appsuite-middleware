@@ -88,6 +88,8 @@ public class CoreStoreCLI {
     
     private static final String ACTION_LIST = "listcorestore";
     
+    private static final String ACTION_CHANGE = "changecorestore";
+    
     
     public static void main(String[] args) {
         if (args == null || args.length == 0) {
@@ -116,6 +118,8 @@ public class CoreStoreCLI {
                 retval = unregister(actionArgs);
             } else if (action.equals(ACTION_LIST)) {
                 retval = list(actionArgs);
+            } else if (action.equals(ACTION_CHANGE)) {
+                retval = change(actionArgs);
             } else {
                 System.out.println("Unknown action '" + action + "'.");
                 System.exit(1);
@@ -134,6 +138,71 @@ public class CoreStoreCLI {
         }
     }
     
+    private static int change(String[] args) throws IOException, MalformedObjectNameException, MBeanException {
+        Options options = new Options();
+        options.addOption(createOption("h", "help", false, "Prints a help text.", false));
+        options.addOption(createOption("i", "id", true, "The core store id.", true));
+        options.addOption(createOption("c", "cores", true, "The maximal number of cores that this core store can handle.", false));
+        options.addOption(createOption("u", "uri", true, "An absolute URI (rfc2396 compliant) that points to the directory where the core store is mounted. E.g. file:/path/to/mount/point", false));
+        
+        if (args == null) {
+            printHelp(ACTION_CHANGE, options);
+            return 1;
+        }
+        
+        CommandLineParser parser = new PosixParser();
+        try {
+            CommandLine cmd = parser.parse(options, args, true);
+            if (cmd.hasOption('h')) {
+                printHelp(ACTION_CHANGE, options);
+                return 0;
+            }
+            
+            int id = Integer.parseInt(cmd.getOptionValue('i'));
+            String cmdUri = cmd.getOptionValue('u');
+            URI uri = null;
+            if (cmdUri != null) {
+                uri = new URI(cmdUri);
+            }
+            String cmdCores = cmd.getOptionValue('c');
+            int maxCores = -1;
+            if (cmdCores != null) {
+                maxCores = Integer.parseInt(cmdCores);
+            }
+            JMXServiceURL url = new JMXServiceURL(JMX_URL);
+            JMXConnector jmxConnector = JMXConnectorFactory.connect(url, null);
+            try {
+                MBeanServerConnection mbsc = jmxConnector.getMBeanServerConnection();
+                SolrMBean solrMBean = solrMBeanProxy(mbsc);
+                SolrCoreStore coreStore = solrMBean.getCoreStore(id);
+                SolrCoreStore modified = new SolrCoreStore();
+                modified.setUri(uri == null ? coreStore.getUri() : uri);
+                modified.setMaxCores(maxCores < 0 ? coreStore.getMaxCores() : maxCores);
+                modified.setNumCores(coreStore.getNumCores());
+                
+                solrMBean.modifyCoreStore(id, modified.getUri(), modified.getMaxCores());
+                System.out.println("Core store '" + id + "' was successfully modified.");
+                
+                return 0;
+            } finally {
+                try {
+                    jmxConnector.close();
+                } catch (IOException e) {
+                    // ignore
+                }
+            }
+        } catch (NumberFormatException e) {
+            System.out.println(e.getMessage());
+            return 1;
+        } catch (ParseException e) {
+            printHelp(ACTION_CHANGE, options);
+            return 1;
+        } catch (URISyntaxException e) {
+            System.out.println("Wrong syntax for 'uri'. " + e.getMessage());
+            return 1;
+        }
+    }
+
     private static int unregister(String[] args) throws IOException, MalformedObjectNameException, MBeanException {
         Options options = new Options();
         options.addOption(createOption("h", "help", false, "Prints a help text.", false));
