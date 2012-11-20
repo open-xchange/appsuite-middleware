@@ -102,7 +102,7 @@ public class LdapContactStorage extends DefaultContactStorage {
     protected final LdapMapper mapper;
     private final LdapFactory factory;
     private LdapIDResolver idResolver;
-    private Integer adminID;
+    private volatile Integer adminID;
     
     /**
      * Initializes a new {@link LdapContactStorage}.
@@ -296,7 +296,7 @@ public class LdapContactStorage extends DefaultContactStorage {
             try {
                 sortKeys = mapper.getSortKeys(sortOptions);
             } catch (OXException e) {
-                if (OXException.Generic.NOT_FOUND.equals(e)) {
+                if (e.isNotFound()) {
                     LOG.debug("Unable to generate LDAP sort keys, falling back to groupware sorting.", e);
                 }
             }

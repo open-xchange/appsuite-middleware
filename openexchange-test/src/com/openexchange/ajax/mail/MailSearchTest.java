@@ -94,8 +94,7 @@ public class MailSearchTest extends AbstractMailTest {
         assertEquals("Should not yield results in empty folder.", 0, search.length());
 
         String eml =
-            "Message-Id: <4A002517.4650.0059.1@deployfast.com>\n" +
-            "X-Mailer: Novell GroupWise Internet Agent 8.0.0 \n" +
+            "Message-Id: <4A002517.4650.0059.1>\n" +
             "Date: Tue, 05 May 2009 11:37:58 -0500\n" +
             "To: #TOADDR#\n" +
             "Subject: Re: Your order for East Texas Lighthouse\n" +
@@ -115,8 +114,7 @@ public class MailSearchTest extends AbstractMailTest {
         assertEquals("Should yield two results when facing two identical mails.", 2, search.length());
 
         eml =
-            "Message-Id: <4A002517.4650.0059.1@deployfast.com>\n" +
-            "X-Mailer: Novell GroupWise Internet Agent 8.0.0 \n" +
+            "Message-Id: <4A002517.4650.0059.1>\n" +
             "Date: Tue, 05 May 2009 11:37:58 -0500\n" +
             "To: #TOADDR#\n" +
             "Subject: Barfoo\n" +

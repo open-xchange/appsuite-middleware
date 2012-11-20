@@ -100,8 +100,18 @@ public class RdbFileStorageAccountManager implements FileStorageAccountManager {
      * @throws OXException If retrieval fails
      */
     public static RdbFileStorageAccountManager getAccountById(final String accountId, final Session session) throws OXException {
-        final FileStorageAccount account = CACHE.getAccount(Integer.parseInt(accountId), session);
-        return null == account ? null : new RdbFileStorageAccountManager(account.getFileStorageService());
+        try {
+            final int id = Integer.parseInt(accountId);
+            if (id < 0) {
+                // Unsupported account identifier
+                return null;
+            }
+            final FileStorageAccount account = CACHE.getAccount(id, session);
+            return null == account ? null : new RdbFileStorageAccountManager(account.getFileStorageService());
+        } catch (final NumberFormatException e) {
+            // Unsupported account identifier
+            return null;
+        }
     }
 
     @Override

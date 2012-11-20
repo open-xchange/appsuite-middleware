@@ -88,7 +88,7 @@ public class Tasks extends DataServlet {
             } catch (final JSONException e) {
                 LOG.error(e.getMessage(), e);
                 response.setException(OXJSONExceptionCodes.JSON_BUILD_ERROR.create(e));
-                writeResponse(response, httpServletResponse);
+                writeResponse(response, httpServletResponse, session);
                 return;
             }
             final TaskRequest taskRequest = new TaskRequest(session);
@@ -107,7 +107,7 @@ public class Tasks extends DataServlet {
             LOG.error(oje.getMessage(), oje);
             response.setException(oje);
         }
-        writeResponse(response, httpServletResponse);
+        writeResponse(response, httpServletResponse, session);
     }
 
     @Override
@@ -127,7 +127,7 @@ public class Tasks extends DataServlet {
                 } catch (final JSONException e) {
                     LOG.error(e.getMessage(), e);
                     response.setException(OXJSONExceptionCodes.JSON_BUILD_ERROR.create(e));
-                    writeResponse(response, httpServletResponse);
+                    writeResponse(response, httpServletResponse, session);
                     return;
                 }
 
@@ -163,7 +163,7 @@ public class Tasks extends DataServlet {
             }
             response.setException(e);
         }
-        writeResponse(response, httpServletResponse);
+        writeResponse(response, httpServletResponse, session);
     }
 
     @Override

@@ -57,7 +57,6 @@ import com.amazonaws.services.ec2.AmazonEC2;
 import com.amazonaws.services.ec2.model.Address;
 import com.amazonaws.services.ec2.model.DescribeAddressesResult;
 import com.openexchange.cluster.discovery.ClusterDiscoveryService;
-import com.openexchange.cluster.discovery.ClusterListener;
 
 /**
  * {@link AWSClusterDiscoveryService}
@@ -68,15 +67,12 @@ public class AWSClusterDiscoveryService implements ClusterDiscoveryService {
 
     private final AmazonEC2 amazonEC2;
 
-    private final List<ClusterListener> listeners;
-
     /**
      * Initializes a new {@link AWSClusterDiscoveryService}.
      */
     public AWSClusterDiscoveryService(AmazonEC2 amazonEC2) {
         super();
         this.amazonEC2 = amazonEC2;
-        this.listeners = new ArrayList<ClusterListener>();
     }
 
     @Override
@@ -92,20 +88,6 @@ public class AWSClusterDiscoveryService implements ClusterDiscoveryService {
             }
         }
         return retval;
-    }
-
-    @Override
-    public void addListener(ClusterListener listener) {
-        synchronized (listeners) {
-            listeners.add(listener);
-        }
-    }
-
-    @Override
-    public void removeListener(ClusterListener listener) {
-        synchronized (listeners) {
-            listeners.remove(listener);
-        }
     }
 
 }

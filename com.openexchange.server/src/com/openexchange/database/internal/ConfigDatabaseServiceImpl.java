@@ -120,7 +120,7 @@ public final class ConfigDatabaseServiceImpl implements ConfigDatabaseService {
         try {
             pool.back(con);
         } catch (final PoolingException e) {
-            final OXException e1 = DBPoolingExceptionCodes.RETURN_FAILED.create(e, I(poolId));
+            final OXException e1 = DBPoolingExceptionCodes.RETURN_FAILED.create(e, con.toString());
             LOG.error(e1.getMessage(), e1);
         }
         // TODO enable the following if the configuration database gets a table replicationMonitor.

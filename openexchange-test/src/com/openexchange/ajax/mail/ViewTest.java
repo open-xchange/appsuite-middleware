@@ -55,7 +55,8 @@ import com.openexchange.ajax.framework.Executor;
 import com.openexchange.ajax.mail.actions.GetRequest;
 import com.openexchange.ajax.mail.actions.GetRequest.View;
 import com.openexchange.ajax.mail.actions.GetResponse;
-import com.openexchange.ajax.mail.actions.SendRequest;
+import com.openexchange.ajax.mail.actions.NewMailRequest;
+import com.openexchange.ajax.mail.actions.NewMailResponse;
 
 /**
  * {@link ViewTest}
@@ -86,13 +87,25 @@ public final class ViewTest extends AbstractMailTest {
         clearFolder(getSentFolder());
         clearFolder(getTrashFolder());
         /*
-         * Create JSON mail object
+         * Create mail
          */
-        final String mailObject_25kb = createSelfAddressed25KBMailObject().toString();
-        /*
-         * Insert mail through a send request
-         */
-        final String[] folderAndID = (Executor.execute(getSession(), new SendRequest(mailObject_25kb))).getFolderAndID();
+        final String eml =
+            "Message-Id: <4A002517.4650.0059.1@foobar.com>\n" +
+            "Date: Tue, 05 May 2009 11:37:58 -0500\n" +
+            "From: #ADDR#\n" +
+            "To: #ADDR#\n" +
+            "Subject: Invitation for launch\n" +
+            "Mime-Version: 1.0\n" +
+            "Content-Type: text/plain; charset=\"UTF-8\"\n" +
+            "Content-Transfer-Encoding: 8bit\n" +
+            "\n" +
+            "This is a MIME message. If you are reading this text, you may want to \n" +
+            "consider changing to a mail reader or gateway that understands how to \n" +
+            "properly handle MIME multipart messages.".replaceAll("#ADDR#", getSendAddress());
+        NewMailResponse newMailResponse = getClient().execute(new NewMailRequest(client.getValues().getInboxFolder(), eml, -1, true));
+        String folder = newMailResponse.getFolder();
+        String mid = newMailResponse.getId();
+        final String[] folderAndID = new String [] { folder, mid };
         /*
          * Perform action=get
          */

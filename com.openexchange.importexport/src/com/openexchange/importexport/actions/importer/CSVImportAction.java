@@ -33,15 +33,15 @@ public class CSVImportAction extends AbstractImportAction implements AJAXActionS
         final CSVContactImporter imp = new CSVContactImporter();
         try {
             final ConfigurationService conf = ImportExportServices.getConfigurationService();
-            final String dirName = conf.getProperty("com.openexchange.import.mapper.path");
-            if (dirName == null) {
-                LOG.error("Reading the property 'com.openexchange.import.mapper.path' did not give directory name for mappers.");
+            final String path = conf.getProperty("com.openexchange.import.mapper.path");
+            if (path == null) {
+                LOG.error("Reading the property 'com.openexchange.import.mapper.path' did not give path to mappers. Defaulting to deprecated mappers as fallback.");
                 return imp;
             }
 
-            final File dir = conf.getDirectory(dirName);
+            final File dir = new File(path);
             if (dir == null || !dir.isDirectory()) {
-                LOG.error("Directory " + dirName + " supposedly containing import mappers information wasn't actually a directory.");
+                LOG.error("Directory " + path + " supposedly containing import mappers information wasn't actually a directory, defaulting to deprecated mappers as fallback.");
                 return imp;
             }
             final File[] files = dir.listFiles();
@@ -63,7 +63,7 @@ public class CSVImportAction extends AbstractImportAction implements AJAXActionS
                 mapperAmount++;
             }
             if (mapperAmount == 0) {
-                LOG.error("Did not load any CSV importer mappings from directory " + dirName +  ".");
+                LOG.error("Did not load any CSV importer mappings from directory " + path +  ".");
             }
         } catch (final IOException e) {
             LOG.error("Failed when trying to load CSV importer mappings.", e);

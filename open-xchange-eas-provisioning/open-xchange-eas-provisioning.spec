@@ -57,6 +57,18 @@ ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} 
 . /opt/open-xchange/lib/oxfunctions.sh
 ox_move_config_file /opt/open-xchange/etc/groupware /opt/open-xchange/etc mobileconfig.properties eas-provisioning.properties
 ox_move_config_file /opt/open-xchange/etc/groupware /opt/open-xchange/etc mobilityconfiguration.properties eas-provisioning-mail.properties
+ox_move_config_file /opt/open-xchange/etc/groupware/settings /opt/open-xchange/etc/settings open-xchange-mobile-configuration-gui.properties eas-provisioning-ui.properties
+
+# SoftwareChange_Request-1197
+pfile=/opt/open-xchange/etc/settings/eas-provisioning-ui.properties
+ptmp=${pfile}.$$
+if grep com.openexchange.mobile.configuration.gui $pfile > /dev/null; then
+    sed -e 's;com.openexchange.mobile.configuration.gui;com.openexchange.eas.provisioning.ui;' < $pfile > $ptmp
+    if [ -s $ptmp ]; then
+       cp $ptmp $pfile
+    fi
+    rm -f $ptmp
+fi
 
 %clean
 %{__rm} -rf %{buildroot}
@@ -78,6 +90,20 @@ ox_move_config_file /opt/open-xchange/etc/groupware /opt/open-xchange/etc mobili
 %config(noreplace) /opt/open-xchange/templates/*
 
 %changelog
+* Wed Nov 14 2012 Marcus Klein <marcus.klein@open-xchange.com>
+Sixth release candidate for 6.22.1
+* Tue Nov 13 2012 Marcus Klein <marcus.klein@open-xchange.com>
+Fifth release candidate for 6.22.1
+* Tue Nov 06 2012 Marcus Klein <marcus.klein@open-xchange.com>
+Fourth release candidate for 6.22.1
+* Fri Nov 02 2012 Marcus Klein <marcus.klein@open-xchange.com>
+Third release candidate for 6.22.1
+* Wed Oct 31 2012 Marcus Klein <marcus.klein@open-xchange.com>
+Second release candidate for 6.22.1
+* Fri Oct 26 2012 Marcus Klein <marcus.klein@open-xchange.com>
+First release candidate for 6.22.1
+* Fri Oct 26 2012 Marcus Klein <marcus.klein@open-xchange.com>
+prepare for 6.22.1
 * Fri Oct 26 2012 Marcus Klein <marcus.klein@open-xchange.com>
 Third release build for EDP drop #5
 * Fri Oct 26 2012 Marcus Klein <marcus.klein@open-xchange.com>

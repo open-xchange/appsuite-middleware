@@ -372,7 +372,7 @@ public class ICal4JParser implements ICalParser {
         }
         Parameter tzid = dateProperty.getParameter("TZID");
 		String tzidName = tzid.getValue();
-		TimeZone inTZID = (null != tzid) ? TimeZone.getTimeZone(tzidName) : null;
+		TimeZone inTZID = TimeZone.getTimeZone(tzidName);
 		
         /* now, if the Java core devs had been smart, they'd made TimeZone.getTimeZone(name,fallback) public. But they did not, so have to do this: */
 		if(inTZID.getID().equals("GMT") && ! tzidName.equals("GMT")){

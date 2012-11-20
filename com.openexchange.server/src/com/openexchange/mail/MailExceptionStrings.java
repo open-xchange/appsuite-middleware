@@ -379,9 +379,9 @@ public final class MailExceptionStrings implements LocalizableStrings {
     public final static String INVALID_FOLDER_NAME_EMPTY_MSG = "Mail folder cannot be created/renamed. Empty folder name.";
 
     /**
-     * Mail folder cannot be created/rename. Name must not contain character '%1$s'
+     * Invalid folder name: "%1$s"
      */
-    public final static String INVALID_FOLDER_NAME_MSG = "The mail folder cannot be created/renamed. The name must not contain the character '%1$s'.";
+    public final static String INVALID_FOLDER_NAME_MSG = "Invalid folder name: \"%1$s\"";
 
     /**
      * Invalid Content-Disposition value: %1$s
@@ -518,7 +518,7 @@ public final class MailExceptionStrings implements LocalizableStrings {
      * was published and the link added to your email. Whoever receives the email can then download the attachment.
      */
     public final static String USED_PUBLISHING_FEATURE_MSG = "The attachments to this E-Mail exceeded the size limit for attachments. Instead of sending the attachment with the E-Mail, the attachment was published and the link added to your E-Mail. Whoever receives the E-Mail can then download the attachment.";
-
+    
     // Draft message could not be saved
     public static final String DRAFT_FAILED_UNKNOWN_MSG = "Draft message could not be saved";
 

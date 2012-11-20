@@ -1068,7 +1068,7 @@ public final class QuotedInternetAddress extends InternetAddress {
 
             if (needQuoting(personal)) {
                 try {
-                    encodedPersonal = MimeUtility.encodeWord(quotePhrase(personal), jcharset, null);
+                    encodedPersonal = MimeUtility.encodeWord(quotePhrase(personal, false), jcharset, null);
                 } catch (final UnsupportedEncodingException e) {
                     LOG.error(e.getMessage(), e);
                 }
@@ -1101,7 +1101,7 @@ public final class QuotedInternetAddress extends InternetAddress {
             if (quoted(p)) {
                 return new StringBuilder(32).append(p).append(" <").append(toIDN(address)).append('>').toString();
             }
-            return new StringBuilder(32).append(quotePhrase(p)).append(" <").append(toIDN(address)).append('>').toString();
+            return new StringBuilder(32).append(quotePhrase(p, true)).append(" <").append(toIDN(address)).append('>').toString();
         } else if (isGroup() || isSimple()) {
             return toIDN(address);
         } else {
@@ -1162,7 +1162,7 @@ public final class QuotedInternetAddress extends InternetAddress {
 
     private final static String RFC822 = "()<>@,;:\\\".[]";
 
-    private static String quotePhrase(final String phrase) {
+    private static String quotePhrase(final String phrase, final boolean allowNonAscii) {
         final int len = phrase.length();
         boolean needQuoting = false;
 
@@ -1182,7 +1182,7 @@ public final class QuotedInternetAddress extends InternetAddress {
                 }
                 sb.append('"');
                 return sb.toString();
-            } else if ((c < 32 && c != '\r' && c != '\n' && c != '\t') || c >= 127 || RFC822.indexOf(c) >= 0) {
+            } else if ((c < 32 && c != '\r' && c != '\n' && c != '\t') || (!allowNonAscii && c >= 127) || RFC822.indexOf(c) >= 0) {
                 // These characters cause the string to be quoted
                 needQuoting = true;
             }

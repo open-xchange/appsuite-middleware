@@ -51,14 +51,18 @@ package com.openexchange.mdns.hazelcast.osgi;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.util.Dictionary;
 import java.util.concurrent.atomic.AtomicReference;
 import org.apache.commons.logging.Log;
-import com.openexchange.exception.OXException;
+import org.osgi.framework.BundleException;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.mdns.MDNSService;
 import com.openexchange.mdns.MDNSServiceInfo;
 import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.threadpool.AbstractTask;
+import com.openexchange.threadpool.Task;
 import com.openexchange.threadpool.ThreadPoolService;
-import com.openexchange.threadpool.ThreadPools;
+import com.openexchange.threadpool.behavior.CallerRunsBehavior;
 
 
 /**
@@ -84,28 +88,40 @@ public final class HazelcastRegistrationActivator extends HousekeepingActivator 
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { MDNSService.class, ThreadPoolService.class };
+        return new Class<?>[] { MDNSService.class, ThreadPoolService.class, ConfigurationService.class };
     }
 
     @Override
     protected void startBundle() throws Exception {
+        final long st = System.currentTimeMillis();
         final MDNSService service = getService(MDNSService.class);
         if (mdnsServiceRef.compareAndSet(null, service)) {
-            final Runnable task = new Runnable() {
+            final ThreadPoolService poolService = getService(ThreadPoolService.class);
+            String name = getService(ConfigurationService.class).getProperty("com.openexchange.cluster.name");
+            if (null == name || 0 == name.trim().length()) {
+                throw new IllegalStateException(new BundleException(
+                    "Cluster name is mandatory. Please set a valid identifier through property \"com.openexchange.cluster.name\".", 
+                    BundleException.ACTIVATOR_ERROR));
+            } else if ("ox".equalsIgnoreCase(name)) {
+                LOG.warn("\n\tThe configuration value for \"com.openexchange.cluster.name\" has not been changed from it's default value "
+                    + "\"ox\". Please do so to make this warning disappear.\n");
+            }
+            Dictionary<?, ?> headers = context.getBundle().getHeaders();
+            String bundleVersion = (String)headers.get("Bundle-Version");
+            final String serviceID = name + "-v" + bundleVersion;
+            final Task<Void> task = new AbstractTask<Void>() {
 
                 @Override
-                public void run() {
-                    try {
-                        serviceInfo =
-                            service.registerService("openexchange.service.hazelcast", 7001, new StringBuilder(
-                                "open-xchange hazelcast service @").append(getHostName()).toString());
-                    } catch (final OXException e) {
-                        LOG.error(e.getMessage(), e);
-                    }
+                public Void call() throws Exception {
+                    serviceInfo = service.registerService(serviceID, 7001, new StringBuilder(
+                            "open-xchange hazelcast service @").append(getHostName()).toString());
+                    return null;
                 }
             };
-            ThreadPools.getThreadPool().submit(ThreadPools.task(task));
+            poolService.submit(task, CallerRunsBehavior.<Void> getInstance());
         }
+        final long dur = System.currentTimeMillis() - st;
+        LOG.info("\n\tBundle \"com.openexchange.mdns.hazelcast\" started in " + dur + "msec.\n");
     }
 
     @Override

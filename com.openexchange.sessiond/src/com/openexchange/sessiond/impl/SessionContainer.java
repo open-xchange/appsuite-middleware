@@ -72,12 +72,13 @@ final class SessionContainer {
     private static final Object PRESENT = new Object();
 
     private final SessionMap sessionMap;
-
     private final Lock sessionIdMapLock = new ReentrantLock();
-
     private final ConcurrentTIntObjectHashMap<ConcurrentTIntObjectHashMap<Map<String, Object>>> userSessions;
 
-    SessionContainer() {
+    /**
+     * Initializes a new {@link SessionContainer}.
+     */
+    protected SessionContainer() {
         super();
         sessionMap = new SessionMap();
         userSessions = new ConcurrentTIntObjectHashMap<ConcurrentTIntObjectHashMap<Map<String, Object>>>(32);
@@ -88,7 +89,7 @@ final class SessionContainer {
      *
      * @return The current number of sessions held by this container
      */
-    int size() {
+    protected int size() {
         return sessionMap.size();
     }
 
@@ -98,7 +99,7 @@ final class SessionContainer {
      * @param sessionId The session ID
      * @return <code>true</code> if this container contains an entry for specified session ID; otherwise <code>false</code>
      */
-    boolean containsSessionId(final String sessionId) {
+    protected boolean containsSessionId(final String sessionId) {
         return sessionMap.containsBySessionId(sessionId);
     }
 
@@ -108,7 +109,7 @@ final class SessionContainer {
      * @param altId The alternative identifier
      * @return <code>true</code> if this container contains an entry for specified alternative identifier; otherwise <code>false</code>
      */
-    boolean containsAlternativeId(final String altId) {
+    protected boolean containsAlternativeId(final String altId) {
         return sessionMap.containsByAlternativeId(altId);
     }
 
@@ -119,7 +120,7 @@ final class SessionContainer {
      * @param contextId The context ID
      * @return <code>true</code> if this container contains an entry for specified user; otherwise <code>false</code>
      */
-    boolean containsUser(final int userId, final int contextId) {
+    protected boolean containsUser(final int userId, final int contextId) {
         final ConcurrentTIntObjectHashMap<Map<String, Object>> map = userSessions.get(contextId);
         return null != map && map.contains(userId);
     }
@@ -131,7 +132,7 @@ final class SessionContainer {
      * @param contextId The context ID
      * @return The number of sessions bound to specified user in specified context
      */
-    int numOfUserSessions(final int userId, final int contextId) {
+    protected int numOfUserSessions(final int userId, final int contextId) {
         final ConcurrentTIntObjectHashMap<Map<String, Object>> map = userSessions.get(contextId);
         if (null == map) {
             return 0;
@@ -146,7 +147,7 @@ final class SessionContainer {
      * @param sessionId The session ID
      * @return The session bound to specified session ID, or <code>null</code> if there's no session for specified session ID.
      */
-    SessionControl getSessionById(final String sessionId) {
+    protected SessionControl getSessionById(final String sessionId) {
         return sessionMap.getBySessionId(sessionId);
     }
 
@@ -156,7 +157,7 @@ final class SessionContainer {
      * @param altId The alternative identifier
      * @return The session bound to specified alternative identifier, or <code>null</code> if there's no session for specified alternative identifier.
      */
-    SessionControl getSessionByAlternativeId(final String altId) {
+    protected SessionControl getSessionByAlternativeId(final String altId) {
         return sessionMap.getByAlternativeId(altId);
     }
 
@@ -167,7 +168,7 @@ final class SessionContainer {
      * @param contextId The context ID
      * @return The sessions bound to specified user ID and context ID
      */
-    SessionControl[] getSessionsByUser(final int userId, final int contextId) {
+    protected SessionControl[] getSessionsByUser(final int userId, final int contextId) {
         final ConcurrentTIntObjectHashMap<Map<String, Object>> map = userSessions.get(contextId);
         if (null == map) {
             return new SessionControl[0];
@@ -183,6 +184,13 @@ final class SessionContainer {
         return l.toArray(new SessionControl[sessionIds.size()]);
     }
 
+    /**
+     * Gets any session associated with specified user.
+     * 
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     * @return An arbitrary session or <code>null</code>
+     */
     public SessionControl getAnySessionByUser(final int userId, final int contextId) {
         final ConcurrentTIntObjectHashMap<Map<String, Object>> map = userSessions.get(contextId);
         if (null == map) {
@@ -203,29 +211,30 @@ final class SessionContainer {
      * Wraps specified session by a newly created {@link SessionControl} object and puts it into this container
      *
      * @param session The session to put
+     * @param addIfAbsent <code>true</code> to perform an add-if-absent operation; otherwise <code>false</code>
      * @return The wrapping {@link SessionControl session control}.
      */
-    SessionControl put(final SessionImpl session) throws OXException {
+    protected SessionControl put(final SessionImpl session, final boolean addIfAbsent) throws OXException {
         final String sessionId = session.getSessionID();
         // Add session
         SessionControl sessionControl;
         sessionIdMapLock.lock();
         try {
-            sessionControl = sessionMap.getBySessionId(sessionId);
+            final SessionControl newSessionControl = new SessionControl(session);
+            sessionControl = sessionMap.putIfAbsentBySessionId(sessionId, newSessionControl);
             if (null == sessionControl) {
-                final SessionControl newSessionControl = new SessionControl(session);
-                sessionControl = sessionMap.putIfAbsentBySessionId(sessionId, newSessionControl);
-                if (null == sessionControl) {
-                    sessionControl = newSessionControl;
-                } else {
-                    final String login1 = sessionControl.getSession().getLogin();
-                    final String login2 = session.getLogin();
-                    throw SessionExceptionCodes.SESSIONID_COLLISION.create(login1, login2);
-                }
+                // Insert succeeded
+                sessionControl = newSessionControl;
             } else {
-                final String login1 = sessionControl.getSession().getLogin();
-                final String login2 = session.getLogin();
-                throw SessionExceptionCodes.SESSIONID_COLLISION.create(login1, login2);
+                // Another session associated with that session identifier
+                if (addIfAbsent) {
+                    return sessionControl;
+                }
+                final SessionImpl ole = sessionControl.getSession();
+                if (!ole.consideredEqual(session)) {
+                    ole.logDiff(session, com.openexchange.log.Log.loggerFor(SessionContainer.class));
+                    throw SessionExceptionCodes.SESSIONID_COLLISION.create(ole.getLogin(), session.getLogin());
+                }
             }
         } finally {
             sessionIdMapLock.unlock();
@@ -259,7 +268,7 @@ final class SessionContainer {
      * @param sessionControl The session control to put
      * @throws OXException
      */
-    void putSessionControl(final SessionControl sessionControl) throws OXException {
+    protected void putSessionControl(final SessionControl sessionControl) throws OXException {
         final Session session = sessionControl.getSession();
         final String sessionId = session.getSessionID();
         final SessionControl oldSessionControl = sessionMap.putIfAbsentBySessionId(sessionId, sessionControl);
@@ -296,7 +305,7 @@ final class SessionContainer {
      * @param sessionId The session Id
      * @return The {@link SessionControl session control} previously associated with specified session ID, or <code>null</code>.
      */
-    SessionControl removeSessionById(final String sessionId) {
+    protected SessionControl removeSessionById(final String sessionId) {
         final SessionControl sessionControl = sessionMap.removeBySessionId(sessionId);
         if (sessionControl != null) {
             final Session session = sessionControl.getSession();
@@ -350,7 +359,7 @@ final class SessionContainer {
      * @param contextId The context ID
      * @return The {@link SessionControl session controls} previously associated with specified user ID and context ID.
      */
-    SessionControl[] removeSessionsByUser(final int userId, final int contextId) {
+    protected SessionControl[] removeSessionsByUser(final int userId, final int contextId) {
         ConcurrentTIntObjectHashMap<Map<String, Object>> map = userSessions.get(contextId);
         if (null == map) {
             return new SessionControl[0];
@@ -394,7 +403,7 @@ final class SessionContainer {
      * @param contextId The context ID
      * @return The {@link SessionControl session controls} previously associated with specified user ID and context ID.
      */
-    SessionControl[] removeSessionsByContext(final int contextId) {
+    protected SessionControl[] removeSessionsByContext(final int contextId) {
         final ConcurrentTIntObjectHashMap<Map<String, Object>> map = userSessions.remove(contextId);
         if (null == map) {
             return new SessionControl[0];
@@ -420,7 +429,13 @@ final class SessionContainer {
         return l.toArray(new SessionControl[l.size()]);
     }
 
-    boolean hasForContext(final int contextId) {
+    /**
+     * Checks if there is any session for given context.
+     * 
+     * @param contextId The context identifier
+     * @return <code>true</code> if there is such a session; otherwise <code>false</code>
+     */
+    protected boolean hasForContext(final int contextId) {
         final ConcurrentTIntObjectHashMap<Map<String, Object>> map = userSessions.get(contextId);
         return null != map && !map.isEmpty();
     }
@@ -432,7 +447,7 @@ final class SessionContainer {
      *
      * @return A collection view of the {@link SessionControl} objects contained in this container.
      */
-    Collection<SessionControl> getSessionControls() {
+    protected Collection<SessionControl> getSessionControls() {
         return sessionMap.values();
     }
 

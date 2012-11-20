@@ -332,6 +332,9 @@ public abstract class HousekeepingActivator extends DeferredActivator {
      * @return The newly created {@link ServiceTracker} instance
      */
     protected <S> ServiceTracker<S, S> track(final Class<S> clazz) {
+        if (clazz.isAssignableFrom(ServiceTrackerCustomizer.class)) {
+            LOG.warn("ServiceTracker/ServiceTrackerCustomizer \"" + clazz.getName() + "\" is tracked as a service! You probably wanted to call rememberTracker() and open it afterwards.");
+        }
         return track(clazz, (ServiceTrackerCustomizer<S, S>) null);
     }
 

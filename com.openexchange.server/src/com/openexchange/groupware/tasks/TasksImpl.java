@@ -49,6 +49,7 @@
 
 package com.openexchange.groupware.tasks;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.Date;
@@ -64,77 +65,56 @@ import com.openexchange.session.Session;
  */
 final class TasksImpl extends Tasks {
 
-    /**
-     * Fields to update of a participant is removed from a task.
-     */
-    private static final int[] UPDATE_FIELDS = new int[] { Task.LAST_MODIFIED,
-                            Task.MODIFIED_BY };
+    private static final int[] UPDATE_FIELDS = new int[] { Task.LAST_MODIFIED, Task.MODIFIED_BY };
 
-    /**
-     * Default constructor.
-     */
     public TasksImpl() {
         super();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
-    public boolean containsNotSelfCreatedTasks(final Session session,
-        final Connection con, final int folderId) throws OXException {
-        try {
-            final Context ctx = Tools.getContext(session.getContextId());
-            return TaskStorage.getInstance().containsNotSelfCreatedTasks(ctx,
-                con, session.getUserId(), folderId);
-        } catch (final OXException e) {
-            throw e;
-        }
+    public boolean containsNotSelfCreatedTasks(final Session session, final Connection con, final int folderId) throws OXException {
+        final Context ctx = Tools.getContext(session.getContextId());
+        return TaskStorage.getInstance().containsNotSelfCreatedTasks(ctx, con, session.getUserId(), folderId);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
-    public void deleteTasksInFolder(final Session session, final Connection con,
-        final int folderId) throws OXException {
+    public void deleteTasksInFolder(final Session session, final Connection con, final int folderId) throws OXException {
         final ParticipantStorage partStor = ParticipantStorage.getInstance();
         final FolderStorage foldStor = FolderStorage.getInstance();
-        final Context ctx;
+        final Context ctx = Tools.getContext(session.getContextId());
         final int userId = session.getUserId();
         final List<Integer> deleteTask = new ArrayList<Integer>();
         final List<UpdateData> removeParticipant = new ArrayList<UpdateData>();
-        try {
-            ctx = Tools.getContext(session.getContextId());
-            final int[] taskIds = foldStor.getTasksInFolder(ctx, con, folderId,
-                StorageType.ACTIVE);
+        {
+            // Pickup all potential tasks in the folder. Sort later which tasks need to be deleted.
+            final int[] taskIds = foldStor.getTasksInFolder(ctx, con, folderId, StorageType.ACTIVE);
             for (final int taskId : taskIds) {
                 final UpdateData data = new UpdateData();
                 data.taskId = taskId;
                 removeParticipant.add(data);
             }
-        } catch (final OXException e) {
-            throw e;
         }
-        try {
+        {
             for (final UpdateData data : removeParticipant) {
-                final Set<Folder> folders = foldStor.selectFolder(ctx, con,
-                    data.taskId, StorageType.ACTIVE);
+                final Set<Folder> folders = foldStor.selectFolder(ctx, con, data.taskId, StorageType.ACTIVE);
                 if (folders.size() == 1) {
-                    // Task is only in the folder that is deleted.
-                    deleteTask.add(Integer.valueOf(data.taskId));
+                    // Task is only in the folder that is deleted. Delete the task.
+                    deleteTask.add(I(data.taskId));
                     continue;
                 }
-                final Set<InternalParticipant> participants = ParticipantStorage
-                    .extractInternal(partStor.selectParticipants(ctx, con,
-                    data.taskId, StorageType.ACTIVE));
+                // Task appears in multiple folders. Now lets have a look on the participants of the task.
+                final Set<InternalParticipant> participants = ParticipantStorage.extractInternal(partStor.selectParticipants(
+                    ctx,
+                    con,
+                    data.taskId,
+                    StorageType.ACTIVE));
                 final Folder folder = FolderStorage.getFolder(folders, folderId);
-                final TaskParticipant participant = ParticipantStorage
-                    .getParticipant(participants, folder.getUser());
+                final TaskParticipant participant = ParticipantStorage.getParticipant(participants, folder.getUser());
                 if (null == participant) {
-                    // Delegators folder of the task is deleted.
-                    deleteTask.add(Integer.valueOf(data.taskId));
+                    // No participant for the task folder is found. Means: delegators folder of the task is deleted.
+                    deleteTask.add(I(data.taskId));
                 } else {
+                    // Update task and remove only participant.
                     data.task = new Task();
                     data.task.setObjectID(data.taskId);
                     data.task.setLastModified(new Date());
@@ -148,60 +128,54 @@ final class TasksImpl extends Tasks {
                     data.removeFolder.add(folder);
                 }
             }
-        } catch (final OXException e) {
-            throw e;
         }
-        removeParticipant.removeAll(deleteTask);
-        try {
+        {
+            // Remove all tasks that have to be deleted.
             for (final int taskId : deleteTask) {
                 final Task task = GetTask.load(ctx, con, folderId, taskId, StorageType.ACTIVE);
                 TaskLogic.deleteTask(ctx, con, userId, task, task.getLastModified());
                 TaskLogic.informDelete(session, ctx, con, task);
             }
+            // Remove only participant and participants folder.
             for (final UpdateData data : removeParticipant) {
-                if (deleteTask.contains(Integer.valueOf(data.taskId))) {
+                // Skip tasks that already have been deleted.
+                if (deleteTask.contains(I(data.taskId))) {
                     continue;
                 }
-                com.openexchange.groupware.tasks.UpdateData.updateTask(ctx, con,
-                    data.task, new Date(), data.modified, data.add,
-                    data.remove, data.addFolder, data.removeFolder);
+                com.openexchange.groupware.tasks.UpdateData.updateTask(
+                    ctx,
+                    con,
+                    data.task,
+                    new Date(),
+                    data.modified,
+                    data.add,
+                    data.remove,
+                    data.addFolder,
+                    data.removeFolder);
             }
-        } catch (final OXException e) {
-            throw e;
         }
     }
 
     private static class UpdateData {
-        private int taskId;
-        private Task task;
-        private int[] modified;
-        private Set<TaskParticipant> add;
-        private Set<TaskParticipant> remove;
-        private Set<Folder> addFolder;
-        private Set<Folder> removeFolder;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public boolean isFolderEmpty(final Context ctx, final int folderId)
-        throws OXException {
-        final TaskStorage storage = TaskStorage.getInstance();
-        try {
-            return storage.countTasks(ctx, -1, folderId, false, false) == 0;
-        } catch (final OXException e) {
-            throw e;
+        UpdateData() {
+            super();
         }
+        int taskId;
+        Task task;
+        int[] modified;
+        Set<TaskParticipant> add;
+        Set<TaskParticipant> remove;
+        Set<Folder> addFolder;
+        Set<Folder> removeFolder;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
-    public boolean isFolderEmpty(final Context ctx, final Connection con,
-        final int folderId) throws OXException {
+    public boolean isFolderEmpty(final Context ctx, final int folderId) throws OXException {
+        return TaskStorage.getInstance().countTasks(ctx, -1, folderId, false, false) == 0;
+    }
+
+    @Override
+    public boolean isFolderEmpty(final Context ctx, final Connection con, final int folderId) throws OXException {
         return isFolderEmpty(ctx, folderId);
     }
-
 }

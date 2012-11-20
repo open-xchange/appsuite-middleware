@@ -74,6 +74,8 @@ public enum OXSessionStorageExceptionCodes implements OXExceptionCode {
     SESSIONSTORAGE_RANDOM_NOT_FOUND(OXSessionStorageExceptionMessages.SESSIONSTORAGE_RANDOM_NOT_FOUND_MSG, 11, Category.CATEGORY_ERROR),
     SESSIONSTORAGE_CONFIG_FILE(OXSessionStorageExceptionMessages.SESSIONSTORAGE_CONFIG_FILE_MSG, 12, Category.CATEGORY_ERROR);
 
+    private static final String PREFIX = "SST-IN-MEMORY";
+
     /**
      * Message of the exception.
      */
@@ -115,7 +117,7 @@ public enum OXSessionStorageExceptionCodes implements OXExceptionCode {
 
     @Override
     public String getPrefix() {
-        return "SES";
+        return PREFIX;
     }
 
     @Override

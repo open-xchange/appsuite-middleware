@@ -106,18 +106,6 @@ public class AutoScalingCLT {
 
     private static final Options toolkitOptions;
 
-    private static AmazonAutoScaling autoScalingClient;
-
-    private static AmazonEC2 ec2Client;
-
-    private static AmazonElasticLoadBalancing elbClient;
-
-    private static AmazonCloudWatch cloudWatchClient;
-
-    private static Properties props;
-
-    private static Map<String, String[]> arrays;
-
     static {
         toolkitOptions = new Options();
         toolkitOptions.addOption("h", "help", false, "Prints a help text");
@@ -248,7 +236,7 @@ public class AutoScalingCLT {
         String secretKey = null;
         String region = null;
         boolean deleteOnly = false;
-        props = new Properties();
+        Properties props = new Properties();
         try {
             props.load(new FileInputStream("conf/awsautoscaling.properties"));
             final CommandLine cmd = parser.parse(toolkitOptions, args);
@@ -274,10 +262,10 @@ public class AutoScalingCLT {
                 System.exit(1);
             }
             AWSCredentials creds = new BasicAWSCredentials(accessKey, secretKey);
-            autoScalingClient = new AmazonAutoScalingClient(creds);
-            ec2Client = new AmazonEC2Client(creds);
-            elbClient = new AmazonElasticLoadBalancingClient(creds);
-            cloudWatchClient = new AmazonCloudWatchClient(creds);
+            AmazonAutoScaling autoScalingClient = new AmazonAutoScalingClient(creds);
+            AmazonEC2 ec2Client = new AmazonEC2Client(creds);
+            AmazonElasticLoadBalancing elbClient = new AmazonElasticLoadBalancingClient(creds);
+            AmazonCloudWatch cloudWatchClient = new AmazonCloudWatchClient(creds);
             String asEndpoint = getASEndpoint(region);
             if (asEndpoint == null) {
                 System.err.println("Invalid region");
@@ -306,17 +294,17 @@ public class AutoScalingCLT {
             ec2Client.setEndpoint(ec2Endpoint);
             elbClient.setEndpoint(elbEndpoint);
             cloudWatchClient.setEndpoint(cwEndpoint);
-            deletePolicies();
-            deleteASGroups();
-            deleteLaunchConfigurations();
+            deletePolicies(autoScalingClient);
+            deleteASGroups(autoScalingClient, ec2Client);
+            deleteLaunchConfigurations(autoScalingClient);
             if (deleteOnly) {
                 System.out.println("Autoscaling configuration deleted");
                 System.exit(0);
             }
-            arrays = checkProperties();
-            createLaunchConfiguration();
-            createAutoScalingGroup();
-            createAlarms();
+            Map<String, String[]> arrays = checkProperties(props);
+            createLaunchConfiguration(autoScalingClient, props, arrays);
+            createAutoScalingGroup(autoScalingClient, props, arrays);
+            createAlarms(autoScalingClient, props, arrays, cloudWatchClient);
         } catch (Exception e) {
             System.err.println(e.getMessage());
             System.exit(2);
@@ -325,7 +313,7 @@ public class AutoScalingCLT {
         System.exit(0);
     }
 
-    private static void deletePolicies() {
+    private static void deletePolicies(AmazonAutoScaling autoScalingClient) {
         DescribePoliciesRequest policiesRequest = new DescribePoliciesRequest();
         DescribePoliciesResult policiesResult = autoScalingClient.describePolicies(policiesRequest);
         for (ScalingPolicy policy : policiesResult.getScalingPolicies()) {
@@ -336,7 +324,7 @@ public class AutoScalingCLT {
         }
     }
 
-    private static Map<String, String[]> checkProperties() {
+    private static Map<String, String[]> checkProperties(Properties props) {
         for (Object o : props.keySet()) {
             String propName = (String) o;
             if (props.get(propName) == null) {
@@ -390,7 +378,7 @@ public class AutoScalingCLT {
         return retval;
     }
 
-    private static void deleteASGroups() {
+    private static void deleteASGroups(AmazonAutoScaling autoScalingClient, AmazonEC2 ec2Client) {
         DescribeAutoScalingGroupsRequest asRequest = new DescribeAutoScalingGroupsRequest();
         DescribeAutoScalingGroupsResult asResult = autoScalingClient.describeAutoScalingGroups(asRequest);
         for (AutoScalingGroup asGroup : asResult.getAutoScalingGroups()) {
@@ -402,13 +390,13 @@ public class AutoScalingCLT {
             StopInstancesRequest stopRequest = new StopInstancesRequest();
             stopRequest.setInstanceIds(instances);
             ec2Client.stopInstances(stopRequest);
-            deleteRequest.setForceDelete(true);
+            deleteRequest.setForceDelete(Boolean.TRUE);
             deleteRequest.setAutoScalingGroupName(asGroup.getAutoScalingGroupName());
             autoScalingClient.deleteAutoScalingGroup(deleteRequest);
         }
     }
 
-    private static void deleteLaunchConfigurations() {
+    private static void deleteLaunchConfigurations(AmazonAutoScaling autoScalingClient) {
         DescribeLaunchConfigurationsRequest launchRequest = new DescribeLaunchConfigurationsRequest();
         DescribeLaunchConfigurationsResult launchResult = autoScalingClient.describeLaunchConfigurations(launchRequest);
         for (LaunchConfiguration launchConfiguration : launchResult.getLaunchConfigurations()) {
@@ -418,7 +406,7 @@ public class AutoScalingCLT {
         }
     }
 
-    private static void createLaunchConfiguration() {
+    private static void createLaunchConfiguration(AmazonAutoScaling autoScalingClient, Properties props, Map<String, String[]> arrays) {
         CreateLaunchConfigurationRequest launchReq = new CreateLaunchConfigurationRequest();
         launchReq.setLaunchConfigurationName(props.getProperty("launchconfiguration"));
         launchReq.setImageId(props.getProperty("ami"));
@@ -439,7 +427,7 @@ public class AutoScalingCLT {
         }
     }
 
-    private static void createAutoScalingGroup() {
+    private static void createAutoScalingGroup(AmazonAutoScaling autoScalingClient, Properties props, Map<String, String[]> arrays) {
         CreateAutoScalingGroupRequest createReq = new CreateAutoScalingGroupRequest();
         createReq.setAutoScalingGroupName(props.getProperty("autoscaling"));
         List<String> regions = new ArrayList<String>();
@@ -453,14 +441,14 @@ public class AutoScalingCLT {
             loadbalancers.add(loadbalancer);
         }
         createReq.setLoadBalancerNames(loadbalancers);
-        createReq.setHealthCheckGracePeriod(100);
+        createReq.setHealthCheckGracePeriod(Integer.valueOf(100));
         createReq.setHealthCheckType("ELB");
-        createReq.setMinSize(Integer.parseInt(props.getProperty("min")));
-        createReq.setMaxSize(Integer.parseInt(props.getProperty("max")));
+        createReq.setMinSize(Integer.valueOf(props.getProperty("min")));
+        createReq.setMaxSize(Integer.valueOf(props.getProperty("max")));
         autoScalingClient.createAutoScalingGroup(createReq);
     }
 
-    private static void createAlarms() {
+    private static void createAlarms(AmazonAutoScaling autoScalingClient, Properties props, Map<String, String[]> arrays, AmazonCloudWatch cloudWatchClient) {
         String[] metrics = arrays.get("metrics");
         String[] gracetimes = arrays.get("gracetimes");
         String[] thresholds = arrays.get("thresholds");
@@ -470,9 +458,9 @@ public class AutoScalingCLT {
                 PutScalingPolicyRequest scaleUpReq = new PutScalingPolicyRequest();
                 scaleUpReq.setAutoScalingGroupName(props.getProperty("autoscaling"));
                 scaleUpReq.setAdjustmentType("ChangeInCapacity");
-                scaleUpReq.setCooldown(Integer.parseInt(gracetimes[i]));
+                scaleUpReq.setCooldown(Integer.valueOf(gracetimes[i]));
                 scaleUpReq.setPolicyName("ox-aws-scale-up");
-                scaleUpReq.setScalingAdjustment(Integer.parseInt(props.getProperty("scaleup")));
+                scaleUpReq.setScalingAdjustment(Integer.valueOf(props.getProperty("scaleup")));
                 PutScalingPolicyResult resultUp = autoScalingClient.putScalingPolicy(scaleUpReq);
                 PutMetricAlarmRequest scaleUpAlarmRequest = new PutMetricAlarmRequest();
                 StandardUnit unit = null;
@@ -506,9 +494,9 @@ public class AutoScalingCLT {
                 scaleUpAlarmRequest.setNamespace("AWS/EC2");
                 scaleUpAlarmRequest.setStatistic(Statistic.Average);
                 scaleUpAlarmRequest.setComparisonOperator(ComparisonOperator.GreaterThanThreshold);
-                scaleUpAlarmRequest.setEvaluationPeriods(Integer.parseInt(evalPeriods[i]));
-                scaleUpAlarmRequest.setPeriod(Integer.parseInt(gracetimes[i]));
-                scaleUpAlarmRequest.setThreshold(Double.parseDouble(thresholds[i * 2]));
+                scaleUpAlarmRequest.setEvaluationPeriods(Integer.valueOf(evalPeriods[i]));
+                scaleUpAlarmRequest.setPeriod(Integer.valueOf(gracetimes[i]));
+                scaleUpAlarmRequest.setThreshold(Double.valueOf(thresholds[i * 2]));
                 List<String> scaleUpAlarms = new ArrayList<String>();
                 scaleUpAlarms.add(resultUp.getPolicyARN());
                 scaleUpAlarmRequest.setAlarmActions(scaleUpAlarms);
@@ -524,9 +512,9 @@ public class AutoScalingCLT {
                 PutScalingPolicyRequest scaleDownReq = new PutScalingPolicyRequest();
                 scaleDownReq.setAutoScalingGroupName(props.getProperty("autoscaling"));
                 scaleDownReq.setAdjustmentType("ChangeInCapacity");
-                scaleDownReq.setCooldown(Integer.parseInt(gracetimes[i]));
+                scaleDownReq.setCooldown(Integer.valueOf(gracetimes[i]));
                 scaleDownReq.setPolicyName("ox-aws-scale-down");
-                scaleDownReq.setScalingAdjustment(Integer.parseInt(props.getProperty("scaledown")));
+                scaleDownReq.setScalingAdjustment(Integer.valueOf(props.getProperty("scaledown")));
                 PutScalingPolicyResult resultDown = autoScalingClient.putScalingPolicy(scaleDownReq);
                 PutMetricAlarmRequest scaleDownAlarmRequest = new PutMetricAlarmRequest();
                 unit = null;
@@ -560,9 +548,9 @@ public class AutoScalingCLT {
                 scaleDownAlarmRequest.setNamespace("AWS/EC2");
                 scaleDownAlarmRequest.setStatistic(Statistic.Average);
                 scaleDownAlarmRequest.setComparisonOperator(ComparisonOperator.LessThanThreshold);
-                scaleDownAlarmRequest.setEvaluationPeriods(Integer.parseInt(evalPeriods[i]));
-                scaleDownAlarmRequest.setPeriod(Integer.parseInt(gracetimes[i]));
-                scaleDownAlarmRequest.setThreshold(Double.parseDouble(thresholds[i * 2 + 1]));
+                scaleDownAlarmRequest.setEvaluationPeriods(Integer.valueOf(evalPeriods[i]));
+                scaleDownAlarmRequest.setPeriod(Integer.valueOf(gracetimes[i]));
+                scaleDownAlarmRequest.setThreshold(Double.valueOf(thresholds[i * 2 + 1]));
                 List<String> scaleDownAlarms = new ArrayList<String>();
                 scaleDownAlarms.add(resultDown.getPolicyARN());
                 scaleDownAlarmRequest.setAlarmActions(scaleDownAlarms);

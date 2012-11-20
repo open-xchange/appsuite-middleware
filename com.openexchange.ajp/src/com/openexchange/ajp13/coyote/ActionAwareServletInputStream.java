@@ -97,6 +97,15 @@ public final class ActionAwareServletInputStream extends ServletInputStream {
         byteChunk.setBytes(bytes, 0, bytes.length);
     }
 
+    /**
+     * Append specified bytes to buffer.
+     *
+     * @param bytes The bytes
+     */
+    public void appendToBuffer(final byte[] bytes) {
+        byteChunk.appendBytes(bytes, 0, bytes.length);
+    }
+
     @Override
     public int read() throws IOException {
         if (byteChunk.getLength() > 0) {
@@ -119,7 +128,7 @@ public final class ActionAwareServletInputStream extends ServletInputStream {
         }
         final int len = b.length;
         if (len == 0) {
-            return -1; // eof
+            return 0;
         }
         return read0(b, 0, len);
     }
@@ -133,7 +142,7 @@ public final class ActionAwareServletInputStream extends ServletInputStream {
             throw new IndexOutOfBoundsException();
         }
         if (len == 0) {
-            return -1; // eof
+            return 0;
         }
         return read0(b, off, len);
     }

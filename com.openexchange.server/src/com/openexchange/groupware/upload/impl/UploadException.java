@@ -120,6 +120,17 @@ public class UploadException extends OXException {
 
         ;
 
+        private static final String PREFIX = "UPL";
+
+        /**
+         * Gets the prefix.
+         * 
+         * @return The prefix
+         */
+        public static String prefix() {
+            return PREFIX;
+        }
+
         private final String message;
 
         private final Category category;
@@ -134,7 +145,7 @@ public class UploadException extends OXException {
 
         @Override
         public String getPrefix() {
-            return "UPL";
+            return PREFIX;
         }
 
         @Override

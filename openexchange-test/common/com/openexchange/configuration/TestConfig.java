@@ -48,8 +48,12 @@ public class TestConfig extends AbstractConfig {
      */
     public static void init() throws OXException {
         if (null == singleton) {
-            singleton = new TestConfig();
-            singleton.loadPropertiesInternal();
+            synchronized (TestConfig.class) {
+                if (null == singleton) {
+                    singleton = new TestConfig();
+                    singleton.loadPropertiesInternal();
+                }
+            }
         }
     }
 

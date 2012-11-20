@@ -125,7 +125,7 @@ public class InfostoreDefaultAccountManager implements FileStorageAccountManager
 
     @Override
     public FileStorageAccount getAccount(final String id, final Session session) throws OXException {
-        if(/*InfostoreFacades.isInfoStoreAvailable() && */(DEFAULT_ID.equals(id) || DEFAULT_ACCOUNT.equals(id))) {
+        if(/*InfostoreFacades.isInfoStoreAvailable() && */(DEFAULT_ID.equals(id) || InfostoreDefaultAccountManager.DEFAULT_ID.equals(id))) {
             return DEFAULT_ACCOUNT;
         }
         throw FileStorageExceptionCodes.ACCOUNT_NOT_FOUND.create(id, "com.openexchange.infostore");

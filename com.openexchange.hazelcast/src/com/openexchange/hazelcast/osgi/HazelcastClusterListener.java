@@ -78,7 +78,7 @@ final class HazelcastClusterListener implements ClusterListener {
 
     @Override
     public void removed(final InetAddress address) {
-        final InitMode initMode = activator.remove(Collections.<InetAddress> singletonList(address), logger);
+        final InitMode initMode = activator.remove(Collections.<InetAddress> singletonList(address), false, logger);
         if (InitMode.RE_INITIALIZED.equals(initMode)) {
             if (logger.isInfoEnabled()) {
                 logger.info("\nHazelcast:\n\tRe-Initialized Hazelcast instance via cluster listener notification about a disappeared Open-Xchange node: "+address+"\n");
@@ -88,7 +88,7 @@ final class HazelcastClusterListener implements ClusterListener {
 
     @Override
     public void added(final InetAddress address) {
-        final InitMode initMode = activator.init(Collections.<InetAddress> singletonList(address), true, stamp, logger);
+        final InitMode initMode = activator.init(Collections.<InetAddress> singletonList(address), false, stamp, logger);
         if (InitMode.INITIALIZED.equals(initMode)) {
             if (logger.isInfoEnabled()) {
                 logger.info("\nHazelcast:\n\tInitialized Hazelcast instance via cluster listener notification about an appeared Open-Xchange node: "+address+"\n");

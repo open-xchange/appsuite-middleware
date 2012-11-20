@@ -172,13 +172,35 @@ public final class CacheFolderStorage implements FolderStorage {
         registry = CacheFolderStorageRegistry.getInstance();
     }
 
+    /**
+     * Clears all cached entries.
+     */
+    public void clearAll() {
+        final Cache cache = globalCache;
+        if (null != cache) {
+            try {
+                cache.clear();
+            } catch (final Exception e) {
+                // Ignore
+            }
+        }
+        FolderMapManagement.getInstance().clear();
+    }
+
     @Override
     public void clearCache(final int userId, final int contextId) {
+        if (contextId <= 0) {
+            return;
+        }
         final Cache cache = globalCache;
         if (null != cache) {
             cache.invalidateGroup(String.valueOf(contextId));
         }
-        dropUserEntries(userId, contextId);
+        if (userId > 0) {
+            dropUserEntries(userId, contextId);
+        } else {
+            FolderMapManagement.getInstance().dropFor(contextId);
+        }
     }
 
     /**

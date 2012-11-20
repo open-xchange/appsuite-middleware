@@ -50,6 +50,7 @@
 package com.openexchange.sessionstorage.nosql;
 
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -76,6 +77,7 @@ import org.apache.commons.logging.Log;
 import com.openexchange.crypto.CryptoService;
 import com.openexchange.exception.OXException;
 import com.openexchange.session.Session;
+import com.openexchange.sessionstorage.SessionStorageExceptionCodes;
 import com.openexchange.sessionstorage.SessionStorageService;
 import com.openexchange.sessionstorage.StoredSession;
 import com.openexchange.sessionstorage.exceptions.OXSessionStorageExceptionCodes;
@@ -204,11 +206,26 @@ public class NoSQLSessionStorageService implements SessionStorageService {
             return session;
         }
         if (log.isDebugEnabled()) {
-            OXException e = OXSessionStorageExceptionCodes.SESSIONSTORAGE_SESSION_NOT_FOUND.create(sessionId);
+            OXException e = SessionStorageExceptionCodes.NO_SESSION_FOUND.create(sessionId);
             log.debug(e.getMessage(), e);
             throw e;
         }
         return null;
+    }
+
+    @Override
+    public void addSessionsIfAbsent(Collection<Session> sessions) throws OXException {
+        // TODO Implement read put-if-absent
+        for (Session session : sessions) {
+            addSessionIfAbsent(session);
+        }
+    }
+
+    @Override
+    public boolean addSessionIfAbsent(Session session) throws OXException {
+        // TODO Implement read put-if-absent
+        addSession(session);
+        return true;
     }
 
     @Override

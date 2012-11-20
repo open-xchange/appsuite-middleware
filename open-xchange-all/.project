@@ -3,8 +3,6 @@
 	<name>open-xchange-all</name>
 	<comment></comment>
 	<projects>
-		<project>open-xchange-core</project>
-		<project>open-xchange-osgi</project>
 	</projects>
 	<buildSpec>
 		<buildCommand>

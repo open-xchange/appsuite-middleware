@@ -193,7 +193,7 @@ public final class OXFolderLoader {
     }
 
     private static final String SQL_LOAD_P =
-        "SELECT permission_id, fp, orp, owp, odp, admin_flag, group_flag, system" + " FROM #TABLE# WHERE cid = ? AND fuid = ?";
+        "SELECT permission_id, fp, orp, owp, odp, admin_flag, group_flag, system FROM #TABLE# WHERE cid = ? AND fuid = ?";
 
     /**
      * Loads folder permissions from database. Creates a new connection if <code>null</code> is given.

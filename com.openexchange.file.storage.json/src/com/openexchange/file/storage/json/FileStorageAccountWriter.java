@@ -86,7 +86,7 @@ public class FileStorageAccountWriter {
         accountJSON.put(FileStorageAccountConstants.FILE_STORAGE_SERVICE, fsService.getId());
         final DynamicFormDescription formDescription = fsService.getFormDescription();
         if (null != formDescription && null != account.getConfiguration()) {
-            final JSONObject configJSON = new FormContentWriter().write(formDescription, account.getConfiguration(), null);
+            final JSONObject configJSON = FormContentWriter.write(formDescription, account.getConfiguration(), null);
             accountJSON.put(FileStorageAccountConstants.CONFIGURATION, configJSON);
         }
         return accountJSON;

@@ -86,7 +86,6 @@ public class LostAndFoundInterfaceTests {
     	tests.addTestSuite(com.openexchange.ajax.conversion.Bug20758Test.class);
     	tests.addTestSuite(com.openexchange.ajax.conversion.ICalMailPartImportTest.class);
     	tests.addTestSuite(com.openexchange.ajax.conversion.IMipImportTest.class);
-    	tests.addTestSuite(com.openexchange.ajax.conversion.VCardMailPartAttachTest.class);
     	tests.addTestSuite(com.openexchange.ajax.conversion.VCardMailPartImportTest.class);
     	tests.addTestSuite(com.openexchange.ajax.folder.api2.Bug15672Test.class);
     	tests.addTestSuite(com.openexchange.ajax.folder.api2.Bug16284Test.class);

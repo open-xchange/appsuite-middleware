@@ -52,7 +52,7 @@ public enum OXFolderExceptionCode implements OXExceptionCode {
      * Operation was canceled due to a missing folder attribute
      * </p>
      */
-    MISSING_FOLDER_ATTRIBUTE(OXFolderExceptionMessage.MISSING_FOLDER_ATTRIBUTE_MSG, Category.CATEGORY_ERROR, 7),
+    MISSING_FOLDER_ATTRIBUTE(OXFolderExceptionMessage.MISSING_FOLDER_ATTRIBUTE_MSG, Category.CATEGORY_USER_INPUT, 7),
     /**
      * Folder %1$s does not exist in context %2$s
      * <p>

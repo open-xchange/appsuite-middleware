@@ -57,7 +57,7 @@ import java.util.List;
  * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public interface ClusterDiscoveryService extends ClusterListenerNotifier {
+public interface ClusterDiscoveryService {
 
     /**
      * Retrieve a list of currently known nodes.

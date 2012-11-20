@@ -56,7 +56,6 @@ import java.util.Iterator;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -69,6 +68,7 @@ import com.openexchange.groupware.settings.Setting;
 import com.openexchange.groupware.settings.impl.ConfigTree;
 import com.openexchange.groupware.settings.impl.SettingStorage;
 import com.openexchange.java.Charsets;
+import com.openexchange.log.LogFactory;
 import com.openexchange.tools.servlet.OXJSONExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
@@ -116,7 +116,7 @@ public class ConfigMenu extends SessionServlet {
         resp.setStatus(HttpServletResponse.SC_OK);
         resp.setContentType(CONTENTTYPE_JAVASCRIPT);
         try {
-            ResponseWriter.write(response, resp.getWriter());
+            ResponseWriter.write(response, resp.getWriter(), localeFrom(sessionObj));
         } catch (final JSONException e) {
             log(RESPONSE_ERROR, e);
             sendError(resp);
@@ -211,7 +211,7 @@ public class ConfigMenu extends SessionServlet {
             resp.setStatus(HttpServletResponse.SC_OK);
             resp.setContentType(AJAXServlet.CONTENTTYPE_JAVASCRIPT);
             if (response.hasError()) {
-                ResponseWriter.write(response, resp.getWriter());
+                ResponseWriter.write(response, resp.getWriter(), localeFrom(session));
             }
         } catch (final JSONException e) {
             log(RESPONSE_ERROR, e);

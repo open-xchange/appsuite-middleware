@@ -70,6 +70,8 @@ import javax.mail.MessagingException;
 import javax.mail.internet.IDNA;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeBodyPart;
+import com.openexchange.config.ConfigurationService;
+import com.openexchange.configuration.ServerConfig;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.DefaultFile;
 import com.openexchange.file.storage.File;
@@ -99,6 +101,7 @@ import com.openexchange.publish.PublicationTarget;
 import com.openexchange.publish.PublicationTargetDiscoveryService;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
+import com.openexchange.tools.servlet.http.Cookies;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tx.TransactionException;
 import com.openexchange.user.UserService;
@@ -144,11 +147,7 @@ public final class PublishAttachmentHandler extends AbstractAttachmentHandler {
         this.hostName = hostName;
         this.transportProvider = transportProvider;
         this.session = session;
-        try {
-            fileAccessFactory = ServerServiceRegistry.getInstance().getService(IDBasedFileAccessFactory.class, true);
-        } catch (final OXException e) {
-            throw new OXException(e);
-        }
+        fileAccessFactory = ServerServiceRegistry.getInstance().getService(IDBasedFileAccessFactory.class, true);
     }
 
     @Override
@@ -272,8 +271,8 @@ public final class PublishAttachmentHandler extends AbstractAttachmentHandler {
              * Add to list
              */
             linkBuilder.setLength(0);
-            links.add(new LinkAndNamePair(attachment.getFileName(), linkBuilder.append(protocol).append("://").append(hostName).append(
-                path).toString()));
+            linkBuilder.append(isEmpty(protocol) ? (forcedSecure(hostName) ? "https://" : "http://") : saneProtocol(protocol)).append(hostName).append(path);
+            links.add(new LinkAndNamePair(attachment.getFileName(), linkBuilder.toString()));
         }
         /*
          * Get recipients
@@ -766,5 +765,29 @@ public final class PublishAttachmentHandler extends AbstractAttachmentHandler {
         }
 
     } // End of PublicationAndInfostoreID
+
+    private static String saneProtocol(final String protocol) {
+        if (protocol.endsWith("://")) {
+            return protocol;
+        }
+        return new StringBuilder(protocol).append("://").toString();
+    }
+
+    private static boolean forcedSecure(final String hostName) {
+        final ConfigurationService configurationService = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
+        return (configurationService != null && configurationService.getBoolProperty(ServerConfig.Property.FORCE_HTTPS.getPropertyName(), false) && !Cookies.isLocalLan(hostName));
+    }
+
+    private static boolean isEmpty(final String string) {
+        if (null == string) {
+            return true;
+        }
+        final int len = string.length();
+        boolean isWhitespace = true;
+        for (int i = 0; isWhitespace && i < len; i++) {
+            isWhitespace = Character.isWhitespace(string.charAt(i));
+        }
+        return isWhitespace;
+    }
 
 }

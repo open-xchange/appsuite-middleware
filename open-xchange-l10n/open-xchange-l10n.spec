@@ -384,19 +384,19 @@ Authors:
 
 #-------------------------------------------------------------------------------------
 
-%package no-nb
-Group:      Applications/Productivity
-Summary:    Package containing Open-Xchange backend localization for no_NB
-Provides:       open-xchange-lang-community-no-nb = %{version}
-Obsoletes:      open-xchange-lang-community-no-nb <= %{version}
-
-%description no-nb
-Package containing Open-Xchange backend localization for no_NB
-This localization package are driven by the community.
-
-Authors:
---------
-    Open-Xchange
+#%package no-nb
+#Group:      Applications/Productivity
+#Summary:    Package containing Open-Xchange backend localization for no_NB
+#Provides:       open-xchange-lang-community-no-nb = %{version}
+#Obsoletes:      open-xchange-lang-community-no-nb <= %{version}
+#
+#%description no-nb
+#Package containing Open-Xchange backend localization for no_NB
+#This localization package are driven by the community.
+#
+#Authors:
+#--------
+#    Open-Xchange
 
 #-------------------------------------------------------------------------------------
 
@@ -480,19 +480,19 @@ Authors:
 
 #-------------------------------------------------------------------------------------
 
-%package vi-vi
-Group:      Applications/Productivity
-Summary:    Package containing Open-Xchange backend localization for vi_VI
-Provides:       open-xchange-lang-community-vi-vi = %{version}
-Obsoletes:      open-xchange-lang-community-vi-vi <= %{version}
-
-%description vi-vi
-Package containing Open-Xchange backend localization for vi_VI
-This localization package are driven by the community.
-
-Authors:
---------
-    Open-Xchange
+#%package vi-vi
+#Group:      Applications/Productivity
+#Summary:    Package containing Open-Xchange backend localization for vi_VI
+#Provides:       open-xchange-lang-community-vi-vi = %{version}
+#Obsoletes:      open-xchange-lang-community-vi-vi <= %{version}
+#
+#%description vi-vi
+#Package containing Open-Xchange backend localization for vi_VI
+#This localization package are driven by the community.
+#
+#Authors:
+#--------
+#    Open-Xchange
 
 #-------------------------------------------------------------------------------------
 
@@ -648,6 +648,20 @@ done
 /opt/open-xchange/i18n/*de_CH*
 
 %changelog
+* Wed Nov 14 2012 Marcus Klein <marcus.klein@open-xchange.com>
+Sixth release candidate for 6.22.1
+* Tue Nov 13 2012 Marcus Klein <marcus.klein@open-xchange.com>
+Fifth release candidate for 6.22.1
+* Tue Nov 06 2012 Marcus Klein <marcus.klein@open-xchange.com>
+Fourth release candidate for 6.22.1
+* Fri Nov 02 2012 Marcus Klein <marcus.klein@open-xchange.com>
+Third release candidate for 6.22.1
+* Wed Oct 31 2012 Marcus Klein <marcus.klein@open-xchange.com>
+Second release candidate for 6.22.1
+* Fri Oct 26 2012 Marcus Klein <marcus.klein@open-xchange.com>
+First release candidate for 6.22.1
+* Fri Oct 26 2012 Marcus Klein <marcus.klein@open-xchange.com>
+prepare for 6.22.1
 * Fri Oct 26 2012 Marcus Klein <marcus.klein@open-xchange.com>
 Third release build for EDP drop #5
 * Fri Oct 26 2012 Marcus Klein <marcus.klein@open-xchange.com>

@@ -669,6 +669,8 @@ public final class MessageUtility {
         return isAscci;
     }
 
+    private static final int THRESHOLD = 25;
+
     /**
      * Detects possible duplicate &lt;html&gt; tags and removes all but last.
      * 
@@ -680,9 +682,23 @@ public final class MessageUtility {
             return html;
         }
         final String lc = html.toLowerCase();
-        int pos = lc.lastIndexOf("<html>");
+        final String sub = "<html>";
+        {
+            int count = 0;
+            int idx = 0;
+            final int subLen = sub.length();            
+            while ((idx = lc.indexOf(sub, idx)) >= 0) {
+                count++;
+                idx += subLen;
+            }
+            if (count <= THRESHOLD) {
+                return html;
+            }
+        }
+        // Threshold exceeded
+        int pos = lc.lastIndexOf(sub);
         if (pos > 0) {
-            pos = lc.lastIndexOf("<html>", pos-1);
+            pos = lc.lastIndexOf(sub, pos-1);
             if (pos >= 0) {
                 return html.substring(pos+6);
             }
