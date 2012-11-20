@@ -49,6 +49,7 @@
 
 package com.openexchange.http.grizzly.osgi;
 
+import java.util.concurrent.ExecutorService;
 import org.glassfish.grizzly.comet.CometAddOn;
 import org.glassfish.grizzly.http.HttpRequestPacket;
 import org.glassfish.grizzly.http.server.HttpServer;
@@ -70,10 +71,12 @@ import com.openexchange.http.grizzly.addon.GrizzlOXAddOn;
 import com.openexchange.http.grizzly.service.atmosphere.AtmosphereService;
 import com.openexchange.http.grizzly.service.atmosphere.AtmosphereServiceImpl;
 import com.openexchange.http.grizzly.service.http.HttpServiceFactory;
+import com.openexchange.http.grizzly.threadpool.GrizzlOXExecutorService;
 import com.openexchange.http.requestwatcher.osgi.services.RequestWatcherService;
 import com.openexchange.log.Log;
 import com.openexchange.log.LogFactory;
 import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.threadpool.ThreadPoolService;
 
 /**
  * {@link GrizzlyActivator}
@@ -90,7 +93,7 @@ public class GrizzlyActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class[] { ConfigurationService.class, RequestWatcherService.class };
+        return new Class[] { ConfigurationService.class, RequestWatcherService.class, ThreadPoolService.class };
     }
 
     @Override
@@ -289,8 +292,13 @@ public class GrizzlyActivator extends HousekeepingActivator {
      * @param tcpNioTranportThreadPoolMinSize The minimal number of worker threads
      * @param tcpNioTranportThreadPoolMaxSize The maximum number of worker threads
      * @return The configure TCPNIOTransport
+     * @throws OXException If the Transport can't be build
      */
-    private TCPNIOTransport buildTcpNioTransport(int tcpNioTranportThreadPoolQueueLimit, int tcpNioTranportThreadPoolMinSize, int tcpNioTranportThreadPoolMaxSize) {
+    private TCPNIOTransport buildTcpNioTransport(int tcpNioTranportThreadPoolQueueLimit, int tcpNioTranportThreadPoolMinSize, int tcpNioTranportThreadPoolMaxSize) throws OXException {
+        ThreadPoolService threadPoolService = getService(ThreadPoolService.class);
+        if(threadPoolService == null) {
+            throw GrizzlyExceptionCode.NEEDED_SERVICE_MISSING.create(ThreadPoolService.class.getSimpleName());
+        }
         int minPoolSize = 0, maxPoolSize = 0;
         int availableProcessors = Runtime.getRuntime().availableProcessors();
 
@@ -306,6 +314,8 @@ public class GrizzlyActivator extends HousekeepingActivator {
         config.setQueueLimit(tcpNioTranportThreadPoolQueueLimit).setCorePoolSize(minPoolSize).setMaxPoolSize(maxPoolSize);
         final TCPNIOTransport transport = builder.build();
 
+        ExecutorService executor = GrizzlOXExecutorService.createInstance();
+        transport.setWorkerThreadPool(executor);
         return transport;
     }
 
