@@ -141,7 +141,7 @@ public class ParallelsOXAuthentication implements AuthenticationService {
 
             // only if we get 2 strings out of the split , then proceed
             if(tmp_.length!=2){
-                LOG.error("FIXME1: Could not split up login_info mapping correctly for mappingstring \""+loginmapping+"\" ");
+                LOG.error("handleLoginInfo: Could not split up login_info mapping correctly for mappingstring \""+loginmapping+"\" ");
                 throw LoginExceptionCodes.INVALID_CREDENTIALS.create();
             }
 

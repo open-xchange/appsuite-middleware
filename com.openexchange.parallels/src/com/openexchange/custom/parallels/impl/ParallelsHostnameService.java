@@ -2,6 +2,8 @@
 
 package com.openexchange.custom.parallels.impl;
 
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.Arrays;
 import org.apache.commons.logging.Log;
 import com.openexchange.config.ConfigurationService;
@@ -40,7 +42,7 @@ public final class ParallelsHostnameService implements HostnameService {
                 final String suffix_branded = configservice.getProperty(ParallelsOptions.PROPERTY_BRANDING_SUFFIX);
                 // for debugging purposes
                 if(LOG.isDebugEnabled()){
-                    LOG.debug("Loaded loginmappings "+Arrays.toString(login_mappings)+" for context "+contextId);
+                    LOG.debug("getHostname: Loaded loginmappings "+Arrays.toString(login_mappings)+" for context "+contextId);
                 }
                 boolean found_host = false;
                 if( null != suffix_branded && suffix_branded.length() != 0) {
@@ -55,7 +57,7 @@ public final class ParallelsHostnameService implements HostnameService {
                              */
                             final String[] URL_ = login_mapping.split("\\|\\|"); // perhaps replace with substring(start,end) if would be faster
                             if(URL_.length!=2){
-                                LOG.fatal("getHostname: Could not split up branded host "+login_mapping+" login mapping for context "+contextId);
+                                LOG.error("getHostname: Could not split up branded host "+login_mapping+" login mapping for context "+contextId);
                             }else{
                                 hostname = URL_[1];
                                 if(LOG.isDebugEnabled()){
@@ -85,7 +87,7 @@ public final class ParallelsHostnameService implements HostnameService {
 
             return hostname;
         }else{
-            LOG.error("Got context with id -1, dont generating any hostname");
+            LOG.error("getHostname: Got context with id -1, dont generating any hostname");
             return null;
         }
 
