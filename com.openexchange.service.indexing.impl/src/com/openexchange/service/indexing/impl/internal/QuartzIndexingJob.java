@@ -96,8 +96,8 @@ public class QuartzIndexingJob implements Job {
     }    
 
     @Override
-    public void execute(JobExecutionContext context) throws JobExecutionException {        
-        JobDataMap jobData = context.getMergedJobDataMap();        
+    public void execute(JobExecutionContext context) throws JobExecutionException {
+        JobDataMap jobData = context.getMergedJobDataMap();
         Object infoObject = jobData.get(JobConstants.JOB_INFO);
         if (infoObject == null || !(infoObject instanceof JobInfo)) {
             String msg = "JobDataMap did not contain valid JobInfo instance.";
@@ -105,7 +105,7 @@ public class QuartzIndexingJob implements Job {
             throw new JobExecutionException(msg, false);
         } 
         
-        JobInfo jobInfo = (JobInfo) infoObject;  
+        JobInfo jobInfo = (JobInfo) infoObject;
         if (LOG.isDebugEnabled()) {
             LOG.debug("Started execution of job " + jobInfo.toString() + ". Trigger: " + context.getTrigger().getKey());
         }
@@ -128,6 +128,8 @@ public class QuartzIndexingJob implements Job {
                 OXException e = IndexExceptionCodes.INDEXING_NOT_ENABLED.create(jobInfo.getModule(), jobInfo.userId, jobInfo.contextId);
                 LOG.debug("Skipping job execution because: " + e.getMessage());
             }
+            
+            return;
         }
         
         IndexManagementService managementService = Services.getService(IndexManagementService.class);
@@ -155,7 +157,7 @@ public class QuartzIndexingJob implements Job {
             return;
         }
         
-        Member executor = null;            
+        Member executor = null;
         for (Member member : hazelcast.getCluster().getMembers()) {
             if (owner.equals(resolveSocketAddress(member.getInetSocketAddress()))) {
                 executor = member;
