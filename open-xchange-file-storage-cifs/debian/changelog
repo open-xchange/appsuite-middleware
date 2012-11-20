@@ -1,11 +1,11 @@
+open-xchange-file-storage-cifs (6.23.0-1) unstable; urgency=low
+
+  * prepare for 6.23.0
+
+ -- Thorben Betten <thorben.betten@open-xchange.com>  Tue, 17 Oct 2012 12:21:28 +0200
+
 open-xchange-file-storage-cifs (6.22.1-0) unstable; urgency=low
 
   * prepare for 6.22.1
 
  -- Thorben Betten <thorben.betten@open-xchange.com>  Fri, 26 Oct 2012 10:03:27 +0200
-
-open-xchange-file-storage-cifs (6.23.0-1) unstable; urgency=low
-
-  * Initial release
-
- -- Thorben Betten <thorben.betten@open-xchange.com>  Tue, 17 Oct 2012 12:21:28 +0200
