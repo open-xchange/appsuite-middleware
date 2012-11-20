@@ -2,9 +2,10 @@
 
 package com.openexchange.custom.parallels.impl;
 
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.Arrays;
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.context.ContextService;
 import com.openexchange.custom.parallels.osgi.ParallelsServiceRegistry;
@@ -41,27 +42,29 @@ public final class ParallelsHostnameService implements HostnameService {
                 final String suffix_branded = configservice.getProperty(ParallelsOptions.PROPERTY_BRANDING_SUFFIX);
                 // for debugging purposes
                 if(LOG.isDebugEnabled()){
-                    LOG.debug("Loaded loginmappings "+Arrays.toString(login_mappings)+" for context "+contextId);
+                    LOG.debug("getHostname: Loaded loginmappings "+Arrays.toString(login_mappings)+" for context "+contextId);
                 }
-                boolean found_url = false;
-                for (final String login_mapping : login_mappings) {
-                    if(login_mapping.startsWith(suffix_branded)){
-                        /**
-                         * 
-                         *  We found our mapping which contains the branded URL!
-                         * 
-                         *  Now split up the string to get the URL part
-                         * 
-                         */
-                        final String[] URL_ = login_mapping.split("\\|\\|"); // perhaps replace with substring(start,end) if would be faster
-                        if(URL_.length!=2){
-                            LOG.fatal("Could not split up branded URL "+login_mapping+" login mapping for context "+contextId);
-                        }else{
-                            hostname = URL_[1];
-                            if(LOG.isDebugEnabled()){
-                                LOG.debug("Successfully resolved HOST to "+hostname+" for branded context "+contextId);
+                boolean found_host = false;
+                if( null != suffix_branded && suffix_branded.length() != 0) {
+                    for (final String login_mapping : login_mappings) {
+                        if(login_mapping.startsWith(suffix_branded)){
+                            /**
+                             * 
+                             *  We found our mapping which contains the branded URL!
+                             * 
+                             *  Now split up the string to get the URL part
+                             * 
+                             */
+                            final String[] URL_ = login_mapping.split("\\|\\|"); // perhaps replace with substring(start,end) if would be faster
+                            if(URL_.length!=2){
+                                LOG.error("getHostname: Could not split up branded host "+login_mapping+" login mapping for context "+contextId);
+                            }else{
+                                hostname = URL_[1];
+                                if(LOG.isDebugEnabled()){
+                                    LOG.debug("getHostname: Successfully resolved HOST to "+hostname+" for branded context "+contextId);
+                                }
+                                found_host = true;
                             }
-                            found_url = true;
                         }
                     }
                 }
@@ -84,7 +87,7 @@ public final class ParallelsHostnameService implements HostnameService {
 
             return hostname;
         }else{
-            LOG.fatal("Got context with id -1, dont generating any hostname");
+            LOG.error("getHostname: Got context with id -1, dont generating any hostname");
             return null;
         }
 

@@ -75,6 +75,7 @@ import javax.mail.Quota.Resource;
 import javax.mail.ReadOnlyFolderException;
 import javax.mail.StoreClosedException;
 import javax.mail.search.FlagTerm;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
@@ -137,9 +138,23 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
     private static final boolean DEBUG = LOG.isDebugEnabled();
 
     /**
-     * The max. length for a mailbox name
+     * Gets the max. length for a mailbox name
      */
-    private static final int MAX_MAILBOX_NAME = 60;
+    private static volatile Integer maxMailboxNameLength;
+    private static int maxMailboxNameLength() {
+        Integer tmp = maxMailboxNameLength;
+        if (null == tmp) {
+            synchronized (IMAPFolderStorage.class) {
+                tmp = maxMailboxNameLength;
+                if (null == tmp) {
+                    final ConfigurationService service = IMAPServiceRegistry.getService(ConfigurationService.class);
+                    tmp = Integer.valueOf(null == service ? 60 : service.getIntProperty("com.openexchange.imap.maxMailboxNameLength", 60));
+                    maxMailboxNameLength = tmp;
+                }
+            }
+        }
+        return tmp.intValue();
+    }
 
     private static final String STR_INBOX = "INBOX";
 
@@ -830,8 +845,8 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
         if (isEmpty(name)) {
             throw MailExceptionCode.INVALID_FOLDER_NAME_EMPTY.create();
         }
-        if (name.length() > MAX_MAILBOX_NAME) {
-            throw MailExceptionCode.INVALID_FOLDER_NAME_TOO_LONG.create(Integer.valueOf(MAX_MAILBOX_NAME));
+        if (name.length() > maxMailboxNameLength()) {
+            throw MailExceptionCode.INVALID_FOLDER_NAME_TOO_LONG.create(Integer.valueOf(maxMailboxNameLength()));
         }
         try {
             final String parentFullname = toCreate.getParentFullname();
@@ -1211,8 +1226,8 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
                     throw MailExceptionCode.INVALID_FOLDER_NAME_EMPTY.create();
                 } else if (newName.indexOf(separator) != -1) {
                     throw MailExceptionCode.INVALID_FOLDER_NAME2.create(newName);
-                } else if (newName.length() > MAX_MAILBOX_NAME) {
-                    throw MailExceptionCode.INVALID_FOLDER_NAME_TOO_LONG.create(Integer.valueOf(MAX_MAILBOX_NAME));
+                } else if (newName.length() > maxMailboxNameLength()) {
+                    throw MailExceptionCode.INVALID_FOLDER_NAME_TOO_LONG.create(Integer.valueOf(maxMailboxNameLength()));
                 }
                 /*-
                  * Perform rename operation
@@ -1392,8 +1407,8 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
                         }
                     }
                 }
-                if (newName.length() > MAX_MAILBOX_NAME) {
-                    throw MailExceptionCode.INVALID_FOLDER_NAME_TOO_LONG.create(Integer.valueOf(MAX_MAILBOX_NAME));
+                if (newName.length() > maxMailboxNameLength()) {
+                    throw MailExceptionCode.INVALID_FOLDER_NAME_TOO_LONG.create(Integer.valueOf(maxMailboxNameLength()));
                 }
                 /*
                  * Check for move

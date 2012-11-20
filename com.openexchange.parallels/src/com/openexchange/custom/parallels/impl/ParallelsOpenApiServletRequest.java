@@ -7,7 +7,6 @@ import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.xmlrpc.XmlRpcException;
 import org.apache.xmlrpc.client.XmlRpcClient;
 import org.apache.xmlrpc.client.XmlRpcClientConfigImpl;
@@ -99,14 +98,14 @@ public final class ParallelsOpenApiServletRequest  {
         try{
 
 
-            final Map bla = new HashMap();
+            final HashMap<String, Object> rpcargs = new HashMap<String, Object>();
             final String[] data = {jsonObject.getString("data")};
-            bla.put("items",data );
-            bla.put("list",list);
+            rpcargs.put("items",data );
+            rpcargs.put("list",list);
 
 
-            bla.put("login", this.user.getMail());
-            final Map response = (HashMap) getRpcClient().execute(method,new Object[]{bla});
+            rpcargs.put("login", this.user.getMail());
+            final Map<?, ?> response = (HashMap<?, ?>) getRpcClient().execute(method,new Object[]{rpcargs});
             checkXMLRpcResponseForError(response);
         } catch (final XmlRpcException e) {
             LOG.error("xml-rpc error detected while communicating with openapi interface");
@@ -128,7 +127,7 @@ public final class ParallelsOpenApiServletRequest  {
      * @param response
      * @throws ParallelsOpenApiServletExceptionCodes
      */
-    private void checkXMLRpcResponseForError(final Map response) throws OXException {
+    private void checkXMLRpcResponseForError(final Map<?, ?> response) throws OXException {
         if(response.containsKey("error_code")){
             throw ParallelsOpenApiServletExceptionCodes.OPENAPI_COMMUNICATION_ERROR.create(response.get("error_message")+" (OPEN_API_ERROR_CODE:"+response.get("error_code")+" )");
         }
@@ -142,16 +141,16 @@ public final class ParallelsOpenApiServletRequest  {
 
 
 
-            final Map bla = new HashMap();
-            bla.put("list",list);
-            bla.put("login", this.user.getMail());
-            final Map response = (HashMap) getRpcClient().execute("pem.spam_assassin.getItems",new Object[]{bla});
+            final HashMap<String, String> rpcargs = new HashMap<String, String>();
+            rpcargs.put("list",list);
+            rpcargs.put("login", this.user.getMail());
+            final HashMap<?, ?> response = (HashMap<?, ?>) getRpcClient().execute("pem.spam_assassin.getItems",new Object[]{rpcargs});
             checkXMLRpcResponseForError(response);
 
             final JSONArray retval = new JSONArray();
 
             if(response.containsKey("result")){
-                final HashMap tmp_ = (HashMap)response.get("result");
+                final HashMap<?, ?> tmp_ = (HashMap<?, ?>)response.get("result");
                 final Object[] tmp__ = (Object[])tmp_.get("list");
                 for (final Object addy : tmp__){
                     retval.put(addy.toString());

@@ -1,7 +1,7 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
-Bundle-Name: Parallels Custom Plugins
-Bundle-SymbolicName: com.openexchange.custom.parallels
+Bundle-Name: Parallels Plugin
+Bundle-SymbolicName: com.openexchange.parallels
 Bundle-Version: 6.23.0
 Bundle-Activator: com.openexchange.custom.parallels.osgi.SoapParallelsActivator
 Bundle-Vendor: Open-Xchange Inc.
@@ -49,6 +49,7 @@ Import-Package: com.openexchange.admin.rmi,
  javax.jws.soap,
  javax.mail,
  javax.mail.internet,
+ javax.management,
  javax.naming,
  javax.servlet,
  javax.servlet.http,
