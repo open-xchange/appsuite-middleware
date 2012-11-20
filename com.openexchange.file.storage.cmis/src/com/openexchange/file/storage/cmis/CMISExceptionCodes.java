@@ -134,7 +134,7 @@ public enum CMISExceptionCodes implements OXExceptionCode {
 
     @Override
     public String getPrefix() {
-        return "CIFS";
+        return "CMIS";
     }
 
     @Override

@@ -586,7 +586,7 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
         final ReentrantLock mainLock = this.mainLock;
         mainLock.lock();
         try {
-            completedTaskCount += w.completedTasks;
+            completedTaskCount += w.completedTasks.get();
             workers.remove(w);
             if (--poolSize > 0) {
                 return;
@@ -733,7 +733,7 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
         /**
          * Per thread completed task counter; accumulated into completedTaskCount upon termination.
          */
-        volatile long completedTasks;
+        final AtomicLong completedTasks;
 
         /**
          * Thread this worker is running in. Acts as a final field, but cannot be set until thread is created.
@@ -741,6 +741,7 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
         Thread thread;
 
         Worker(final Runnable firstTask) {
+            completedTasks = new AtomicLong();
             this.firstTask = firstTask;
         }
 
@@ -797,7 +798,7 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
                     task.run();
                     ran = true;
                     afterExecute(task, null);
-                    ++completedTasks;
+                    completedTasks.incrementAndGet();
                 } catch (final RuntimeException ex) {
                     if (!ran) {
                         afterExecute(task, ex);
@@ -2260,7 +2261,7 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
         try {
             long n = completedTaskCount;
             for (final Worker w : workerSet) {
-                n += w.completedTasks;
+                n += w.completedTasks.get();
                 if (w.isActive()) {
                     ++n;
                 }
@@ -2285,7 +2286,7 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
         try {
             long n = completedTaskCount;
             for (final Worker w : workerSet) {
-                n += w.completedTasks;
+                n += w.completedTasks.get();
             }
             return n;
         } finally {

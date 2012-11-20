@@ -49,6 +49,8 @@
 
 package com.openexchange.messaging.json.actions.accounts;
 
+import java.util.Iterator;
+import java.util.Map.Entry;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
@@ -81,8 +83,20 @@ public class NewAction extends AbstractMessagingAccountAction {
     @Override
     protected AJAXRequestResult doIt(final AJAXRequestData request, final ServerSession session) throws JSONException, OXException {
         final MessagingAccount account = parser.parse((JSONObject) request.getData(), session.getUserId(), session.getContextId());
+        saneConfiguration(account);
         final int id = account.getMessagingService().getAccountManager().addAccount(account, session);
         return new AJAXRequestResult(Integer.valueOf(id));
+    }
+
+    private static void saneConfiguration(final MessagingAccount account) {
+        if (null == account) {
+            return;
+        }
+        for (final Iterator<Entry<String, Object>> it = account.getConfiguration().entrySet().iterator(); it.hasNext();) {
+            if (JSONObject.NULL.equals(it.next().getValue())) {
+                it.remove();
+            }
+        }
     }
 
 }

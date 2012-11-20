@@ -97,7 +97,7 @@ public class LdapContactCache {
     private final LdapContactStorage storage;
     private final int refreshInterval;
     private final boolean incrementalSync;
-    private ContactLoader loader;
+    private volatile ContactLoader loader;
 
     /**
      * Initializes a new {@link LdapContactCache}.

@@ -51,14 +51,13 @@ package com.openexchange.subscribe.json.actions;
 
 import org.json.JSONException;
 import org.json.JSONObject;
-
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
+import com.openexchange.secret.SecretService;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.subscribe.Subscription;
 import com.openexchange.subscribe.json.SubscriptionJSONErrorMessages;
 import com.openexchange.subscribe.json.SubscriptionJSONWriter;
-import com.openexchange.secret.SecretService;
 
 /**
  * {@link GetSubscriptionAction}
@@ -79,7 +78,16 @@ public class GetSubscriptionAction extends AbstractSubscribeAction {
 		try {
 			JSONObject parameters = new JSONObject(subscribeRequest
 					.getRequestData().getParameters());
-			final int id = parameters.getInt("id");
+			final int id;
+            try {
+                id = parameters.getInt("id");
+            } catch (final JSONException e) {
+                if (!parameters.hasAndNotNull("id")) {
+                    throw e;
+                }
+                final Object obj = parameters.get("id");
+                throw new JSONException("JSONObject[\"id\"] is not a number: " + obj);
+            }
 			String source = "";
 			if (parameters.has("source")) {
 				source = parameters.getString("source");
@@ -103,7 +111,7 @@ public class GetSubscriptionAction extends AbstractSubscribeAction {
 					subscription.getSource().getFormDescription(), urlPrefix);
 			return new AJAXRequestResult(json, "json");
 		} catch (JSONException e) {
-			throw new OXException(e);
+		    throw SubscriptionJSONErrorMessages.THROWABLE.create(e, e.getMessage());
 		}
 
 	}

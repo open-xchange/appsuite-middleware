@@ -1,7 +1,7 @@
 # Import configuration - settings for import of CSV, iCal or vCard files 
 
 # Configures path to mappings of ox fields to other csv formats (like Outlook)
-com.openexchange.import.mapper.path=importCSV
+com.openexchange.import.mapper.path=@rootinstalldir@/importCSV/
 
 # sets a limit on how many entries a single import of ical data may contain.
 # Note that this limit applies for each type, so you can have, for example, 10000 VEVENTS and 10000 VFREEBUSY entries in a single file. 

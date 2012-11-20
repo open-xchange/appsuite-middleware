@@ -136,7 +136,7 @@ public final class AJAXFile extends PermissionServlet {
             response.setException(UploadException.UploadCode.UNKNOWN_ACTION_VALUE.create(
                 action == null ? STR_NULL : action).setAction(null));
             try {
-                ResponseWriter.write(response, resp.getWriter());
+                ResponseWriter.write(response, resp.getWriter(), localeFrom(session));
             } catch (final JSONException e) {
                 LOG.error(e.getMessage(), e);
                 final ServletException se = new ServletException(e.getMessage(), e);
@@ -147,13 +147,14 @@ public final class AJAXFile extends PermissionServlet {
     }
 
     private void actionKeepAlive(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
+        ServerSession session = getSessionObject(req);
         try {
-            ResponseWriter.write(actionKeepAlive(getSessionObject(req), ParamContainer.getInstance(req, EnumComponent.UPLOAD, resp)), resp.getWriter());
+            ResponseWriter.write(actionKeepAlive(session, ParamContainer.getInstance(req, EnumComponent.UPLOAD, resp)), resp.getWriter(), localeFrom(session));
         } catch (final JSONException e) {
-            final Response response = new Response(getSessionObject(req));
+            final Response response = new Response(session);
             response.setException(OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e, new Object[0]));
             try {
-                ResponseWriter.write(response, resp.getWriter());
+                ResponseWriter.write(response, resp.getWriter(), localeFrom(session));
             } catch (final JSONException e1) {
                 LOG.error(e1.getMessage(), e1);
                 final ServletException se = new ServletException(e1.getMessage(), e1);
@@ -266,7 +267,7 @@ public final class AJAXFile extends PermissionServlet {
             final Response response = new Response();
             response.setException(e);
             try {
-                ResponseWriter.write(response, resp.getWriter());
+                ResponseWriter.write(response, resp.getWriter(), localeFrom(session));
             } catch (final JSONException e1) {
                 LOG.error(e1.getMessage(), e1);
                 final ServletException se = new ServletException(e1.getMessage(), e1);

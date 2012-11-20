@@ -100,8 +100,7 @@ public abstract class AbstractTest {
     }
 
     public static String getChangedEmailAddress(String address, String changed) {
-        address.replaceFirst("@", changed+"@");
-        return address;
+        return address.replaceFirst("@", changed+"@");
     }
 
     public static Credentials DummyMasterCredentials() {

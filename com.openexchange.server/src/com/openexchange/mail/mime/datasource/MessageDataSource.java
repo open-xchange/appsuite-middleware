@@ -57,6 +57,7 @@ import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import javax.activation.DataSource;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Charsets;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.mime.ContentType;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayInputStream;
@@ -143,7 +144,7 @@ public final class MessageDataSource implements DataSource {
             ct.setContentType(contentType);
             ct.setCharsetParameter(MailProperties.getInstance().getDefaultMimeCharset());
         }
-        this.data = data.getBytes(ct.getCharsetParameter());
+        this.data = data.getBytes(Charsets.forName(ct.getCharsetParameter()));
         this.contentType = ct.toString();
     }
 

@@ -51,6 +51,20 @@ ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} 
 %doc com.openexchange.spamhandler.spamexperts/ChangeLog
 
 %changelog
+* Wed Nov 14 2012 Marcus Klein <marcus.klein@open-xchange.com>
+Sixth release candidate for 6.22.1
+* Tue Nov 13 2012 Marcus Klein <marcus.klein@open-xchange.com>
+Fifth release candidate for 6.22.1
+* Tue Nov 06 2012 Marcus Klein <marcus.klein@open-xchange.com>
+Fourth release candidate for 6.22.1
+* Fri Nov 02 2012 Marcus Klein <marcus.klein@open-xchange.com>
+Third release candidate for 6.22.1
+* Wed Oct 31 2012 Marcus Klein <marcus.klein@open-xchange.com>
+Second release candidate for 6.22.1
+* Fri Oct 26 2012 Marcus Klein <marcus.klein@open-xchange.com>
+First release candidate for 6.22.1
+* Fri Oct 26 2012 Marcus Klein <marcus.klein@open-xchange.com>
+prepare for 6.22.1
 * Fri Oct 26 2012 Marcus Klein <marcus.klein@open-xchange.com>
 Third release build for EDP drop #5
 * Fri Oct 26 2012 Marcus Klein <marcus.klein@open-xchange.com>

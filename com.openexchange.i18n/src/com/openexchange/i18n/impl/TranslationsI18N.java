@@ -82,4 +82,21 @@ public class TranslationsI18N implements I18nService {
     public Locale getLocale() {
         return translations.getLocale();
     }
+
+    @Override
+    public String toString() {
+        StringBuilder builder = new StringBuilder(64);
+        builder.append('{');
+        final Locale locale = getLocale();
+        if (null != locale) {
+            builder.append("locale=").append(locale);
+        }
+        if (translations != null) {
+            builder.append("translations=").append(translations);
+        }
+        builder.append('}');
+        return builder.toString();
+    }
+
+    
 }

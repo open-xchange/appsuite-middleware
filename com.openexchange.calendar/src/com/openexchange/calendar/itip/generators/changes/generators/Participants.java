@@ -248,8 +248,8 @@ public class Participants implements ChangeDescriptionGenerator{
         }
         
         for(Integer id : groupChange.keySet()) {
-            Group group = groups.getGroup(ctx, id);
-            ChangeType changeType = externalChange.get(id);
+            Group group = groups.getGroup(ctx, id.intValue());
+            ChangeType changeType = externalChange.get(id.toString());
             if (changeType == null) {
                 continue;
             }
@@ -260,8 +260,8 @@ public class Participants implements ChangeDescriptionGenerator{
         }
 
         for(Integer id : resourceChange.keySet()) {
-            Resource resource = resources.getResource(id, ctx);
-            ChangeType changeType = externalChange.get(id);
+            Resource resource = resources.getResource(id.intValue(), ctx);
+            ChangeType changeType = externalChange.get(id.toString());
             if (changeType == null) {
                 continue;
             }

@@ -147,6 +147,8 @@ public final class TextFinder {
                     // content = content.replaceAll("(\r?\n)+", "");// .replaceAll("(  )+", "");
                     try {
                         content = new Renderer(new Segment(new Source(content), 0, content.length())).setMaxLineLength(9999).setIncludeHyperlinkURLs(false).toString();
+                    } catch (final StackOverflowError parserOverflow) {
+                        content = extractPlainText(content);
                     } catch (Throwable t) {
                         LOG.warn("Error while rendering html content. Returning null.", t);
                         content = null;

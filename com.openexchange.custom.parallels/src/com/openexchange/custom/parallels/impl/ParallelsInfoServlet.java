@@ -142,7 +142,7 @@ public final class ParallelsInfoServlet extends PermissionServlet {
         /*
          * Close response and flush print writer
          */
-        ResponseWriter.write(response, resp.getWriter());
+        ResponseWriter.write(response, resp.getWriter(), localeFrom(session));
     }
 
     public static User getUserObjectFromSession(final Session session) throws OXException{

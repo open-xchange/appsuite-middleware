@@ -107,7 +107,13 @@ public class CPAppointment {
     }
 
     public String getTitle() {
-        return StringEscapeUtils.escapeHtml( title );
+        final String retval;
+        if (null == title) {
+            retval = "";
+        } else {
+            retval = StringEscapeUtils.escapeHtml(title);
+        }
+        return retval;
     }
 
     public String getDescription() {

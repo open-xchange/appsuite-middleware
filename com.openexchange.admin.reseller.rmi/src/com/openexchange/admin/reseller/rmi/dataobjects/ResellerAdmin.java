@@ -50,6 +50,7 @@
 package com.openexchange.admin.reseller.rmi.dataobjects;
 
 import java.lang.reflect.Field;
+import java.util.Arrays;
 import com.openexchange.admin.rmi.dataobjects.EnforceableDataObject;
 import com.openexchange.admin.rmi.dataobjects.PasswordMechObject;
 
@@ -369,7 +370,7 @@ public class ResellerAdmin extends EnforceableDataObject implements PasswordMech
         result = prime * result + ((passwordMech == null) ? 0 : passwordMech.hashCode());
         result = prime * result + (passwordMechset ? 1231 : 1237);
         result = prime * result + (passwordset ? 1231 : 1237);
-        result = prime * result + ((restrictions == null) ? 0 : restrictions.hashCode());
+        result = prime * result + ((restrictions == null) ? 0 : Arrays.hashCode(restrictions));
         result = prime * result + (restrictionsset ? 1231 : 1237);
         return result;
     }

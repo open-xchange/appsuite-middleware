@@ -50,6 +50,7 @@
 package com.openexchange.groupware.settings.impl;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.settings.Setting;
 import com.openexchange.groupware.settings.SettingExceptionCodes;
@@ -192,7 +193,7 @@ public class ValueSetting extends AbstractSetting<ValueSetting> {
         if (singleValue != null && !singleValue.equals(other.getSingleValue())) {
             return false;
         }
-        if (multiValue != null && !multiValue.equals(other.getMultiValue())) {
+        if (multiValue != null && !multiValue.equals(Arrays.asList(other.getMultiValue()))) {
             return false;
         }
         return true;

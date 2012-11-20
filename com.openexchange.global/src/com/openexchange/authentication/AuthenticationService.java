@@ -76,6 +76,9 @@ public interface AuthenticationService {
      * web services session exists either throw a {@link LoginException} or redirect the browser to some global login site with
      * {@link ResultCode#REDIRECT}. This method should never return <code>null</code>.
      *
+     * If the implementing authentication bundle does not support some global web services single sign on this method has to throw
+     * {@link LoginExceptionCodes#NOT_SUPPORTED}.
+     *
      * @param loginInfo the complete login information from the autologin request. It does never contain login and password.
      * @return an {@link Authenticated} containing context information to resolve the context and user information to resolve the user.
      * This return type can be enhanced with {@link SessionEnhancement} and/or {@link ResponseEnhancement}.

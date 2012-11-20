@@ -113,7 +113,7 @@ public final class ConcurrentTIntObjectHashMap<V> extends TIntObjectHashMap<V> i
         try {
             final ConcurrentTIntObjectHashMap<V> clone = (ConcurrentTIntObjectHashMap<V>) super.clone();
             clone.readWriteLock = new ReentrantReadWriteLock();
-            return clone();
+            return clone;
         } catch (final CloneNotSupportedException e) {
             // Cannot occur
             throw new InternalError("Clone not supported although Cloneable implemented.");

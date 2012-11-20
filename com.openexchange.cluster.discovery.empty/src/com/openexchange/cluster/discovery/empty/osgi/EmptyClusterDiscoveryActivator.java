@@ -53,7 +53,6 @@ import java.net.InetAddress;
 import java.util.Collections;
 import java.util.List;
 import com.openexchange.cluster.discovery.ClusterDiscoveryService;
-import com.openexchange.cluster.discovery.ClusterListener;
 import com.openexchange.osgi.HousekeepingActivator;
 
 /**
@@ -75,16 +74,6 @@ public class EmptyClusterDiscoveryActivator extends HousekeepingActivator {
             @Override
             public List<InetAddress> getNodes() {
                 return Collections.emptyList();
-            }
-
-            @Override
-            public void addListener(ClusterListener listener) {
-                // Ignore
-            }
-
-            @Override
-            public void removeListener(ClusterListener listener) {
-                // Ignore
             }
         });
     }

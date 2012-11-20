@@ -49,22 +49,7 @@
 
 package com.openexchange.messaging.generic;
 
-import static com.openexchange.messaging.MessagingField.BCC;
-import static com.openexchange.messaging.MessagingField.CC;
-import static com.openexchange.messaging.MessagingField.COLOR_LABEL;
-import static com.openexchange.messaging.MessagingField.CONTENT_TYPE;
-import static com.openexchange.messaging.MessagingField.DISPOSITION_NOTIFICATION_TO;
-import static com.openexchange.messaging.MessagingField.FLAGS;
-import static com.openexchange.messaging.MessagingField.FOLDER_ID;
-import static com.openexchange.messaging.MessagingField.FROM;
-import static com.openexchange.messaging.MessagingField.ID;
-import static com.openexchange.messaging.MessagingField.PRIORITY;
-import static com.openexchange.messaging.MessagingField.RECEIVED_DATE;
-import static com.openexchange.messaging.MessagingField.SENT_DATE;
-import static com.openexchange.messaging.MessagingField.SIZE;
-import static com.openexchange.messaging.MessagingField.SUBJECT;
-import static com.openexchange.messaging.MessagingField.THREAD_LEVEL;
-import static com.openexchange.messaging.MessagingField.TO;
+import static com.openexchange.messaging.MessagingField.*;
 import java.text.Collator;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -183,8 +168,8 @@ public class MessagingComparator implements Comparator<MessagingMessage> {
                 final MessagingHeader h1 = (headers1.isEmpty()) ? null : headers1.iterator().next();
                 final MessagingHeader h2 = (headers2.isEmpty()) ? null : headers2.iterator().next();
 
-                c1 = getValue(h1);
-                c2 = getValue(h2);
+                c1 = h1 == null ? null : getValue(h1);
+                c2 = h2 == null ? null : getValue(h2);
 
                 if (c1 == c2) {
                     return 0;

@@ -523,7 +523,7 @@ public final class CMISFolderAccess extends AbstractCMISAccess implements FileSt
             final Folder folder = (Folder) object;
             final ItemIterable<CmisObject> children = folder.getChildren();
             for (final CmisObject sub : children) {
-                if (ObjectType.DOCUMENT_BASETYPE_ID.equals(sub.getType())) {
+                if (ObjectType.DOCUMENT_BASETYPE_ID.equals(sub.getType().getId())) {
                     sub.delete(true);
                 }
             }

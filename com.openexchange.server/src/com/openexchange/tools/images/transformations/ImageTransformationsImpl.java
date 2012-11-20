@@ -402,7 +402,8 @@ public class ImageTransformationsImpl implements ImageTransformations {
 
     /**
      * Strips a leading "image/" as well as trailing additional properties after the first ";" from the supplied value if necessary from 
-     * image formats passed as content type.
+     * image formats passed as content type. Also implicitly converts "pjpeg"- and "x-png"-formats as used by Internet Explorer to their
+     * common format names. 
      * 
      * @param value The value
      * @return The cleaned image format
@@ -415,6 +416,13 @@ public class ImageTransformationsImpl implements ImageTransformations {
             int idx = value.indexOf(';'); 
             if (0 < idx) {
                 value = value.substring(0, idx);
+            }
+            if ("pjpeg".equals(value)) {
+                LOG.debug("Assuming 'jpeg' for image format " + value);
+                return "jpeg";
+            } else if ("x-png".equals(value)) {
+                LOG.debug("Assuming 'png' for image format " + value);
+                return "png";
             }
             return value;
         } else {

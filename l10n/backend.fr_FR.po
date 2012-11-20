@@ -1,28 +1,11 @@
-# #-#-#-#-#  server.fr_FR.po (server)  #-#-#-#-#
-# translation of server.po to Français
-# #-#-#-#-#  errors.fr_FR.po (errors)  #-#-#-#-#
-# translation of errors.po to Français
-#. *
-#. * Mail(s) could not be found in folder
-#. * <p>
-#. * The exception thrown when an invalid method is invoked on an expunged Message. The only valid methods on an expunged Message are
-#. * <code>isExpunged()</code> and <code>getMessageNumber()</code>.
-#. * </p>
-#.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:127
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe.json/src/com/openexchange/subscribe/json/SubscriptionJSONExceptionMessage.java:82
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe.json/src/com/openexchange/subscribe/json/SubscriptionJSONExceptionMessage.java:84
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe.json/src/com/openexchange/subscribe/json/SubscriptionJSONExceptionMessage.java:86
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe.json/src/com/openexchange/subscribe/json/SubscriptionJSONExceptionMessage.java:88
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe.json/src/com/openexchange/subscribe/json/SubscriptionJSONExceptionMessage.java:90
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe.json/src/com/openexchange/subscribe/json/SubscriptionJSONExceptionMessage.java:92
+# translation of backend.po to Français
 # Joëlle Cornavin <joelle@bureau-cornavin.com>, 2010, 2011, 2012.
 # Éric Bischoff <eric@bureau-cornavin.com>, 2012.
-# Joëlle Cornavin <joelle@bureau-cornavin.com>, 2010, 2011.
 # Antje Faber, 2011.
+
 msgid ""
 msgstr ""
-"Project-Id-Version: errors\n"
+"Project-Id-Version: backend\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: \n"
 "PO-Revision-Date: 2012-10-03 21:11+0200\n"
@@ -32,10 +15,6 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Language: fr\n"
-"#-#-#-#-#  server.fr_FR.po (server)  #-#-#-#-#\n"
-"X-Generator: Lokalize 1.4\n"
-"Plural-Forms: nplurals=2; plural=(n > 1);\n"
-"#-#-#-#-#  errors.fr_FR.po (errors)  #-#-#-#-#\n"
 "X-Generator: Lokalize 1.4\n"
 "Plural-Forms: nplurals=2; plural=(n > 1);\n"
 
@@ -1060,8 +1039,7 @@ msgstr ""
 #. No chat found with identifier "%1$s".
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.chat/src/com/openexchange/chat/ChatExceptionMessages.java:84
 msgid "No chat found with identifier \"%1$s\"."
-msgstr ""
-"Impossible de trouver la discussion instantanée d'identifiant « %1$s »."
+msgstr "Impossible de trouver la discussion instantanée d'identifiant « %1$s »."
 
 #. Unknown chat service: %1$s
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.chat/src/com/openexchange/chat/ChatExceptionMessages.java:87
@@ -1314,8 +1292,7 @@ msgstr ""
 msgid ""
 "The value given for pooltimeout \"%s\" in file \"%s\" is no integer value"
 msgstr ""
-"La valeur donnée  « %s » pour pooltimeout dans le fichier « %s » n'est pas "
-"une "
+"La valeur donnée  « %s » pour pooltimeout dans le fichier « %s » n'est pas une "
 "valeur entière"
 
 #. *
@@ -1532,8 +1509,7 @@ msgstr ""
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contacts.ldap/src/com/openexchange/contacts/ldap/exceptions/LdapConfigurationExceptionMessage.java:270
 msgid "The contact object with id \"%s\" could not be found in folder \"%s\""
 msgstr ""
-"L'objet contact d'identifiant « %s » n'a pas pu être trouvé dans le dossier "
-"« %"
+"L'objet contact d'identifiant « %s » n'a pas pu être trouvé dans le dossier « %"
 "s »"
 
 #. *
@@ -1544,8 +1520,7 @@ msgstr ""
 msgid ""
 "The value given for storagePriority \"%s\" in file \"%s\" is no integer value"
 msgstr ""
-"La valeur donnée  « %s » pour pooltimeout dans le fichier « %s » n'est pas "
-"une "
+"La valeur donnée  « %s » pour pooltimeout dans le fichier « %s » n'est pas une "
 "valeur entière"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contact.storage.ldap/src/com/openexchange/contact/storage/ldap/LdapExceptionMessages.java:124
@@ -2034,8 +2009,7 @@ msgid ""
 "A duplicate folder named \"%1$s\" already exists below parent folder \"%2$s"
 "\"."
 msgstr ""
-"Un dossier dupliqué nommé « %1$s » existe déjà en dessous du dossier parent "
-"« %"
+"Un dossier dupliqué nommé « %1$s » existe déjà en dessous du dossier parent « %"
 "2$s »."
 
 #. No create access on folder %1$s.
@@ -2606,7 +2580,7 @@ msgstr ""
 "le contexte %3$s a été dépassé"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/tools/iterator/SearchIteratorExceptionMessages.java:63
-msgid "A DBPool error occurred: %1$s"
+msgid "A DBPool error occurred: 1$%s"
 msgstr "Une erreur DBPool s'est produite : %1$s"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/tools/iterator/SearchIteratorExceptionMessages.java:65
@@ -3746,6 +3720,10 @@ msgstr ""
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:139
 msgid "The request sent was missing its body"
 msgstr "La requête envoyée n'avait pas de corps"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:141
+msgid "The account is invalid, please recreate it."
+msgstr "Le compte est invalide, veuillez le recréer."
 
 #. *
 #. * Cannot change password for any reason.
@@ -4935,8 +4913,7 @@ msgid ""
 "\"%3$s\" for user %4$s in context %5$s."
 msgstr ""
 "Le dossier parent « %1$s » n'autorise pas le type de contenu de dossier « %2"
-"$s » dans l'arborescence « %3$s » pour l'utilisateur « %4$s » dans le "
-"contexte "
+"$s » dans l'arborescence « %3$s » pour l'utilisateur « %4$s » dans le contexte "
 "« %5$s »."
 
 #. Move operation not permitted.
@@ -4992,8 +4969,7 @@ msgstr "Type de stockage non pris en charge : %1$s."
 #. Folder "%1$s" could not be found in tree "%2$s".
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/folderstorage/FolderExceptionMessages.java:131
 msgid "Folder \"%1$s\" could not be found in tree \"%2$s\"."
-msgstr ""
-"Le dossier « %1$s » n'a pas pu être trouvé dans l'arborescence « %2$s »."
+msgstr "Le dossier « %1$s » n'a pas pu être trouvé dans l'arborescence « %2$s »."
 
 #. No default folder available for content type "%1$s" in tree "%2$s".
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/folderstorage/FolderExceptionMessages.java:134
@@ -9351,9 +9327,9 @@ msgid ""
 "then download the attachment."
 msgstr ""
 "Les pièces jointes à ce message dépassent la limite de taille pour les "
-"pièces jointes. Au lieu d'envoyer la pièces jointe avec le message, elle "
-"a été publiée et le lien a été ajouté au message. Toute personne qui "
-"reçoit le message peut alors télécharger la pièce jointe."
+"pièces jointes. Au lieu d'envoyer la pièces jointe avec le message, elle a "
+"été publiée et le lien a été ajouté au message. Toute personne qui reçoit le "
+"message peut alors télécharger la pièce jointe."
 
 #. Draft message could not be saved
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:522
@@ -10350,8 +10326,8 @@ msgstr ""
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:180
 msgid "Only folder owner may hold admin permission on a private folder"
 msgstr ""
-"Seul le propriétaire du dossier peut détenir le droit d'administration sur un "
-"dossier privé"
+"Seul le propriétaire du dossier peut détenir le droit d'administration sur "
+"un dossier privé"
 
 #. *
 #. * Administration rights required. In the Rights tab add at least one user with administration rights.
@@ -11088,15 +11064,13 @@ msgid ""
 "Action \"%1$s\" on request path \"%2$s\" is not permitted via a non-secure "
 "connection."
 msgstr ""
-"L'action « %1$s » sur le chemin de la requête « %2$s » n'est pas autorisée "
-"par "
+"L'action « %1$s » sur le chemin de la requête « %2$s » n'est pas autorisée par "
 "le biais d'une connexion non sécurisée."
 
 #. The action "%1$s" is disabled due to server configuration
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/servlet/AjaxExceptionMessages.java:116
 msgid "The action \"%1$s\" is disabled due to server configuration"
-msgstr ""
-"L'action « %1$s » est désactivée à cause de la configuration du serveur"
+msgstr "L'action « %1$s » est désactivée à cause de la configuration du serveur"
 
 #. Object has been changed in the meantime.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/servlet/AjaxExceptionMessages.java:122

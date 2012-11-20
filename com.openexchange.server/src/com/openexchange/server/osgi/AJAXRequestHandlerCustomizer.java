@@ -82,9 +82,6 @@ public final class AJAXRequestHandlerCustomizer implements ServiceTrackerCustomi
 	@Override
     public AJAXRequestHandler addingService(final ServiceReference<AJAXRequestHandler> reference) {
 		final AJAXRequestHandler addedService = context.getService(reference);
-		if (null == addedService) {
-			LOG.warn("Added service is null!", new Throwable());
-		}
 		ServerRequestHandlerRegistry.getInstance().addHandler(addedService);
 		return addedService;
 	}

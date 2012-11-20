@@ -699,13 +699,18 @@ public class UnixCrypt {
      */
     public static final String crypt(final String original) throws UnsupportedEncodingException
     {
-      final java.util.Random randomGenerator = new java.util.Random();
       final int numSaltChars = saltChars.length;
       String salt;
 
-      salt = (new StringBuffer()).append(saltChars[Math.abs(randomGenerator.nextInt()) % numSaltChars]).append(saltChars[Math.abs(randomGenerator.nextInt()) % numSaltChars]).toString();
+      salt = (new StringBuffer()).append(saltChars[randomUnsigned() % numSaltChars]).append(saltChars[randomUnsigned() % numSaltChars]).toString();
 
       return crypt(salt, original);
+    }
+
+    private static final java.util.Random randomGenerator = new java.util.Random();
+    private static int randomUnsigned() {
+        // int randomNumber = random.nextInt(max - min) + min;
+        return randomGenerator.nextInt(Integer.MAX_VALUE);
     }
 
     /**

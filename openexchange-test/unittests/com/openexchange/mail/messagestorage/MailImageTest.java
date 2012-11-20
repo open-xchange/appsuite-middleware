@@ -207,7 +207,7 @@ public final class MailImageTest extends AbstractMailTest {
 				} else {
 					fail("Missing attachments");
 				}
-				assertTrue("No Content-Id header(s) found", cids.size() > 0);
+				assertTrue("No Content-Id header(s) found", !cids.isEmpty());
 
 				for (final String cid : cids) {
 					final MailPart imgPart = mailAccess.getMessageStorage().getImageAttachment("INBOX", uid, cid);

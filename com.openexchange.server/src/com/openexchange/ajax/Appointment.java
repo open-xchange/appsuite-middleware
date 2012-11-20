@@ -54,7 +54,6 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -62,6 +61,7 @@ import org.json.JSONValue;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.request.AppointmentRequest;
 import com.openexchange.exception.OXException;
+import com.openexchange.log.LogFactory;
 import com.openexchange.tools.servlet.OXJSONExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
@@ -83,7 +83,7 @@ public class Appointment extends DataServlet {
             } catch (final JSONException e) {
                 LOG.error(e.getMessage(), e);
                 response.setException(OXJSONExceptionCodes.JSON_BUILD_ERROR.create(e));
-                writeResponse(response, httpServletResponse);
+                writeResponse(response, httpServletResponse, session);
                 return;
             }
             final AppointmentRequest appointmentRequest = new AppointmentRequest(session);
@@ -99,7 +99,7 @@ public class Appointment extends DataServlet {
             response.setException(oje);
         }
 
-        writeResponse(response, httpServletResponse);
+        writeResponse(response, httpServletResponse, session);
     }
 
     @Override
@@ -119,7 +119,7 @@ public class Appointment extends DataServlet {
                 } catch (final JSONException e) {
                     LOG.error(e.getMessage(), e);
                     response.setException(OXJSONExceptionCodes.JSON_BUILD_ERROR.create(e));
-                    writeResponse(response, httpServletResponse);
+                    writeResponse(response, httpServletResponse, getSessionObject(httpServletRequest));
                     return;
                 }
                 appointmentRequest = new AppointmentRequest(session);
@@ -150,7 +150,7 @@ public class Appointment extends DataServlet {
             response.setException(e);
         }
 
-        writeResponse(response, httpServletResponse);
+        writeResponse(response, httpServletResponse, getSessionObject(httpServletRequest));
     }
 
     @Override

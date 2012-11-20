@@ -1,10 +1,105 @@
+* 2012-11-14 - thorben.betten@open-xchange.com
+
+ - Fix for bug 23724: Reduce number of logged stack trace elements
+ - Fix for bug 23722: Added null guard
+
+* 2012-11-14 - marcus.klein@open-xchange.com
+
+ - Fix for bug 23635: Corrected class name for AJP monitoring class in showruntimestats.
+
+* 2012-11-14 - martin.herfurth@open-xchange.com
+
+ - Fix for bug 23721: Fixed too small images.
+
+* 2012-11-13 - marcus.klein@open-xchange.com
+
+ - Fix for bug 23712: Path in import.properties is still necessary because configuration files for CVS import are not located in the
+   configuration directory.
+
+* 2012-11-13 - jan.bauerdick@open-xchange.com
+
+ - Dropped hazelcast.xml config file
+
+* 2012-11-13 - martin.herfurth@open-xchange.com
+
+ - Fix for bug 23701: Fixed side effect of bugfix for 22116.
+
+* 2012-11-13 - thorben.betten@open-xchange.com
+
+ - Fix for bug 23700: Fixed publication link
+ - Fix for bug 23705: Deal with InterruptedException gracefully
+ - Fix for bug 23707: Fixed creating an OAuth account
+ - Fix for bug 23399: Don't quote non-ascii characters in address' unicode representation
+ - Fix for bug 23714: Handle NPE gracefully
+ - Fix for bug 23718: Check against local host name and address
+ - Fix for bug 23719: Accept equally named folder (ignore-case)
+
+* 2012-11-12 - thorben.betten@open-xchange.com
+
+ - Fix for bug 22116: Added sanitizing method to look-up possibly misspelled printf-style identifiers
+ - Fix for bug 23683: Handle possible NPE gracefully with a proper error code
+
+* 2012-11-11 - thorben.betten@open-xchange.com
+
+ - Fix for bug 23689: Avoid NPE and throw a more meaningful SOAP fault
+
+* 2012-11-09 - martin.herfurth@open-xchange.com
+
+ - Fix for bug 23580: Fixed reply mail on multiple accept/decline/tentative.
+ - Fix for bug 23263: Fixed side effect of another bug fix.
+
+* 2012-11-09 - choeger@open-xchange.com
+
+ - Fix for bug 23463: [L3] linkedin contacts subscription does not work using recently generated linkedin api keys
+ 
+* 2012-11-09 - jan.bauerdick@open-xchange.com
+
+ - Drop map configuration in sessionstorage_hazelcast.properties
+
+* 2012-11-09 - thorben.betten@open-xchange.com
+
+ - Fix for bug 23681: Showing proper error information on failed upload due to exceeded quota
+ - Fix for bug 23685: More error details
+ - Fix for bug 23686: Backward compatibility to previous API usage
+ - Fix for bug 23659: Fixed HTML display
+ - Fix for bug 23585: Refer to full-size picture
+ - Fix for bug 23332: Changed default value for property 'com.openexchange.push.imapidle.debug'
+ - Fix for bug 23532: Use unified error message for invalid folder name
+ - Fix for bug 23200: Fixed IMAP connection counter
+ - Fix for bug 23503: Showing proper error message
+
+* 2012-11-09 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 23676: Treat 'image/pjpeg' as JPEG, 'image/x-png' as PNG
+
 * 2012-11-09 - francisco.laguna@open-xchange.com
 
  - Fix for bug 23641: PreferencesItemService to set the module flag to false
 
+* 2012-11-08 - martin.herfurth@open-xchange.com
+
+ - Fix for bug 23588: Incompatible type.
+
+* 2012-11-08 - thorben.betten@open-xchange.com
+
+ - Fix for bug 23661: Introduced in-application sort
+ - Fix for bug 23533: Changed that error code's category thus a more meaningful message is shown
+ - Fix for bug 23666: Use default driver if missing
+
 * 2012-11-07 - tobias.friedrich@open-xchange.com
 
  - Fix for bug 23181: Allow update of existing foreign appointment under special circumstances
+
+* 2012-11-07 - marcus.klein@open-xchange.com
+
+ - Fix for bug 23563: Improved exception messages for too long used database connections.
+
+* 2012-11-07 - thorben.betten@open-xchange.com
+
+ - Fix for bug 23638: Resolved possible deadlock situation
+ - Fix for bug 23574: Changed behavior of IMAPDefaultFolderChecker class, no retry attempts anymore
+ - Fix for bug 23645: Dropped unnecessary password encryption/decryption from in-memory Hazelcast storage
+ - Fix for bug 23625: fixed prefix
 
 * 2012-11-06 - tobias.friedrich@open-xchange.com
 
@@ -12,9 +107,79 @@
  - Fix for bug 23610: Preserve iCal transparency on participant confirmation  
  - Fix for bug 23612: Assume no changes to 'absent' and 'temporary' shown-as values for opaque iCal transparency  
 
+* 2012-11-06 - marcus.klein@open-xchange.com
+
+ - Fix for bug 23590: Removed useless line in task code that causes a FindBugs issue.
+ - Fix for bug 23606: Corrected all names after rename of EAS provisioning bundle and UI plugin.
+
+* 2012-11-06 - thorben.betten@open-xchange.com
+
+ - Fix for bug 23609: Fixed update of "reply-to" field
+ - Fix for bug 23616: Fixed NPE in Hazelcast session storage
+ - Fix for bug 23617: Fixed NPE in Hazelcast session storage
+ - Fix for bug 23615: Changed log level to warning
+ - Fix for bug 23613: Dealing with possible ArrayIndexOutOfBoundsException due to outdated mailbox attributes
+ - Fix for bug 23618: Another null guard
+ - Fix for bug 23621: Fixed expunge operation on IMAP folder
+ - Fix for bug 23634: Dealing with concurrent session put
+ - Fix for bug 23535: Added linebreaks
+
+* 2012-11-05 - martin.herfurth@open-xchange.com
+
+ - Fix for bug 23483: Missing Last Modified on delete exception.
+
+* 2012-11-05 - thorben.betten@open-xchange.com
+
+ - Fix for bug 23567: Using proper locale when writing JSON response
+ - Fix for bug 23592: Proper check for mandatory fields
+ - Fix for bug 23605: Fixed possible NPE
+
+* 2012-11-02 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 23549: Subtracting client timezone offset when parsing creation date 
+
+* 2012-11-02 - thorben.betten@open-xchange.com
+
+ - Fix for bug 23564: Avoid possible NPE on service look-up
+ - Fix for bug 23562: Selected displayable error category
+ - Fix for bug 23579: Check for proper account identifier support
+ - Fix for bug 23578: Proper cache invalidation on write access to CIFS server
+ - Fix for bug 23577: Special handling for unspecified error codes received from CIFS/SMB server
+
+* 2012-10-31 - marcus.klein@open-xchange.com
+
+ - Fix for bug 21913: Properly handling null value of appointment titles. Freemarker does not like null values.
+
+* 2012-10-31 - thorben.betten@open-xchange.com
+
+ - Fix for bug 23196: Properly opening associated service trackers on bundle start-up
+
 * 2012-10-30 - tobias.friedrich@open-xchange.com
 
  - Fix for bug 23525: Skip wildcard-only comparisons in search object
+
+* 2012-10-30 - marcus.klein@open-xchange.com
+
+ - Fix for bug 21511: Added possibility to delete users birthday value.
+
+* 2012-10-30 - thorben.betten@open-xchange.com
+
+ - Fix for bug 23508: Dealing with possible I/O error when loading an URL's content
+ - Fix for bug 23534: Removed listener and re-test if write-own check fails
+ - Fix for bug 22827: A move into trash folder leads to removal of associated messages in linked POP3 account if delete-write-through option
+                      is enabled
+ - Fix for bug 22997: Handling has been changed to a more generic error message
+ - Fix for bug 23542: Fixed possible ClassCastExceotion
+
+* 2012-10-29 - thorben.betten@open-xchange.com
+
+ - Fix for bug 22903: Perform context restore with respect to 'updateTask' table
+ - Fix for bug 23509: Fixed SQL statement
+ - Fix for bug 23524: Special handling in case of missing translation for en_US
+
+* 2012-10-29 - marcus.klein@open-xchange.com
+
+ - Fix for bug 23510: Re-added packages mdns and static implementing open-xchange-cluster-discovery.
 
 * 2012-10-26 - thorben.betten@open-xchange.com
 
@@ -46,14 +211,6 @@
 * 2012-10-19 - thorben.betten@open-xchange.com
 
  - Fix for bug 23437: Proper specification of character filter in Java regex expression
-
-* 2012-11-05 - thorben.betten@open-xchange.com
-
- - Fix for bug 23567: Proper translation when writing JSON response
-
-* 2012-11-02 - tobias.friedrich@open-xchange.com
-
- - Fix for bug 23549: Subtracting client timezone offset when parsing creation date 
 
 * 2012-10-19 - martin.herfurth@open-xchange.com
 
@@ -2365,7 +2522,7 @@
 
 * 2011-05-18 - thorben.betten@open-xchange.com
 
- - Bugfix #19179: Probing for '?' character when decoding an encoded-word with big5 encoding. If present use Big5-HKSCS instead.
+ - Bugfix #19179: Probing for special character when decoding an encoded-word with big5 encoding. If present use Big5-HKSCS instead.
 
 * 2011-05-18 - marcus.klein@open-xchange.com
 

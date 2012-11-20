@@ -91,6 +91,12 @@ if [ ${1:-0} -eq 2 ]; then
     # prevent bash from expanding, see bug 13316
     GLOBIGNORE='*'
 
+    # SoftwareChange_Request-1196
+    pfile=/opt/open-xchange/etc/import.properties
+    if ! ox_exists_property com.openexchange.import.ical.limit $pfile; then
+        ox_set_property com.openexchange.import.ical.limit 10000 $pfile
+    fi
+
     # SoftwareChange_Request-1068
     # -----------------------------------------------------------------------
     pfile=/opt/open-xchange/etc/ox-scriptconf.sh
@@ -220,6 +226,20 @@ fi
 /sbin/rcopen-xchange
 
 %changelog
+* Wed Nov 14 2012 Marcus Klein <marcus.klein@open-xchange.com>
+Sixth release candidate for 6.22.1
+* Tue Nov 13 2012 Marcus Klein <marcus.klein@open-xchange.com>
+Fifth release candidate for 6.22.1
+* Tue Nov 06 2012 Marcus Klein <marcus.klein@open-xchange.com>
+Fourth release candidate for 6.22.1
+* Fri Nov 02 2012 Marcus Klein <marcus.klein@open-xchange.com>
+Third release candidate for 6.22.1
+* Wed Oct 31 2012 Marcus Klein <marcus.klein@open-xchange.com>
+Second release candidate for 6.22.1
+* Fri Oct 26 2012 Marcus Klein <marcus.klein@open-xchange.com>
+First release candidate for 6.22.1
+* Fri Oct 26 2012 Marcus Klein <marcus.klein@open-xchange.com>
+prepare for 6.22.1
 * Fri Oct 26 2012 Marcus Klein <marcus.klein@open-xchange.com>
 Third release build for EDP drop #5
 * Fri Oct 26 2012 Marcus Klein <marcus.klein@open-xchange.com>

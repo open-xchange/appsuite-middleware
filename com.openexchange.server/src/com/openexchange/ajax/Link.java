@@ -101,7 +101,7 @@ public class Link extends DataServlet {
 			} catch (final JSONException e) {
 				LOG.error(e.getMessage(), e);
 				response.setException(OXJSONExceptionCodes.JSON_BUILD_ERROR.create(e));
-				writeResponse(response, httpServletResponse);
+				writeResponse(response, httpServletResponse, session);
 				return;
 			}
 
@@ -120,7 +120,7 @@ public class Link extends DataServlet {
 			response.setException(oje);
 		}
 
-		writeResponse(response, httpServletResponse);
+		writeResponse(response, httpServletResponse, session);
 
 	}
 
@@ -154,7 +154,7 @@ public class Link extends DataServlet {
 				} catch (final JSONException e) {
 					LOG.error(e.getMessage(), e);
 					response.setException(OXJSONExceptionCodes.JSON_BUILD_ERROR.create(e));
-					writeResponse(response, httpServletResponse);
+					writeResponse(response, httpServletResponse, session);
 					return;
 				}
 
@@ -178,7 +178,7 @@ public class Link extends DataServlet {
 			response.setException(oje);
 		}
 
-		writeResponse(response, httpServletResponse);
+		writeResponse(response, httpServletResponse, session);
 	}
 
 	@Override

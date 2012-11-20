@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2020 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2012 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,23 +47,72 @@
  *
  */
 
-package com.openexchange.cluster.discovery;
+package com.openexchange.sessionstorage.nosql;
+
+import java.util.concurrent.atomic.AtomicReference;
+import com.openexchange.server.ServiceLookup;
 
 /**
- * {@link ClusterListenerNotifier} - Notifies added {@link ClusterListener}s about appearing/disappearing nodes in cluster.
- *
+ * {@link Services} - The static service lookup.
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface ClusterListenerNotifier {
+public final class Services {    
 
     /**
-     * Registers a listener to be notified of changes to the known cluster nodes.
+     * Initializes a new {@link Services}.
      */
-    public abstract void addListener(ClusterListener listener);
+    private Services() {
+        super();
+    }
+
+    private static final AtomicReference<ServiceLookup> REF = new AtomicReference<ServiceLookup>();
 
     /**
-     * Un-registers a listener.
+     * Sets the service lookup.
+     * 
+     * @param serviceLookup The service lookup or <code>null</code>
      */
-    public abstract void removeListener(ClusterListener listener);
+    public static void setServiceLookup(final ServiceLookup serviceLookup) {
+        REF.set(serviceLookup);
+    }
+
+    /**
+     * Gets the service lookup.
+     * 
+     * @return The service lookup or <code>null</code>
+     */
+    public static ServiceLookup getServiceLookup() {
+        return REF.get();
+    }
+
+    /**
+     * Gets the service of specified type
+     * 
+     * @param clazz The service's class
+     * @return The service
+     * @throws IllegalStateException If an error occurs while returning the demanded service
+     */
+    public static <S extends Object> S getService(final Class<? extends S> clazz) {
+        final com.openexchange.server.ServiceLookup serviceLookup = REF.get();
+        if (null == serviceLookup) {
+            throw new IllegalStateException("Missing ServiceLookup instance. Bundle \"com.openexchange.caching.hazelcast\" not started?");
+        }
+        return serviceLookup.getService(clazz);
+    }
+
+    /**
+     * (Optionally) Gets the service of specified type
+     * 
+     * @param clazz The service's class
+     * @return The service or <code>null</code> if absent
+     */
+    public static <S extends Object> S optService(final Class<? extends S> clazz) {
+        try {
+            return getService(clazz);
+        } catch (final IllegalStateException e) {
+            return null;
+        }
+    }
 
 }

@@ -90,7 +90,7 @@ import com.sun.mail.imap.IMAPFolder;
  */
 public class SpecialUseDefaultFolderChecker extends IMAPDefaultFolderChecker {
 
-    static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(SpecialUseDefaultFolderChecker.class));
+    static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.loggerFor(SpecialUseDefaultFolderChecker.class);
 
     static final boolean DEBUG = LOG.isDebugEnabled();
 
@@ -139,7 +139,6 @@ public class SpecialUseDefaultFolderChecker extends IMAPDefaultFolderChecker {
          * Load mail account
          */
         final boolean isSpamOptionEnabled;
-        final MailAccount mailAccount = getMailAccount(storageService);
         {
             final UserSettingMail usm = UserSettingMailStorage.getInstance().getUserSettingMail(session.getUserId(), ctx);
             isSpamOptionEnabled = usm.isSpamOptionEnabled();
@@ -154,12 +153,12 @@ public class SpecialUseDefaultFolderChecker extends IMAPDefaultFolderChecker {
             final DefaultFolderNamesProvider defaultFolderNamesProvider =
                 new DefaultFolderNamesProvider(accountId, session.getUserId(), session.getContextId());
             if (isSpamOptionEnabled) {
-                fullNames = defaultFolderNamesProvider.getDefaultFolderFullnames(mailAccount, true);
-                names = defaultFolderNamesProvider.getDefaultFolderNames(mailAccount, true);
+                fullNames = defaultFolderNamesProvider.getDefaultFolderFullnames(imapConfig, true);
+                names = defaultFolderNamesProvider.getDefaultFolderNames(imapConfig, true);
                 spamHandler = SpamHandlerRegistry.getSpamHandlerBySession(session, accountId);
             } else {
-                fullNames = defaultFolderNamesProvider.getDefaultFolderFullnames(mailAccount, false);
-                names = defaultFolderNamesProvider.getDefaultFolderNames(mailAccount, false);
+                fullNames = defaultFolderNamesProvider.getDefaultFolderFullnames(imapConfig, false);
+                names = defaultFolderNamesProvider.getDefaultFolderNames(imapConfig, false);
                 spamHandler = NoSpamHandler.getInstance();
             }
         }
@@ -315,34 +314,7 @@ public class SpecialUseDefaultFolderChecker extends IMAPDefaultFolderChecker {
                     if (isOverQuotaException(e)) {
                         throw e;
                     }
-                    if (!retry) {
-                        return fullName;
-                    }
-                    if (MailAccount.DEFAULT_ID == accountId) {
-                        throw e;
-                    }
-                    String prfx;
-                    {
-                        final ListLsubEntry inboxEntry;
-                        if (modified.get()) {
-                            inboxEntry = ListLsubCache.getActualLISTEntry("INBOX", accountId, imapStore, session);
-                        } else {
-                            inboxEntry = ListLsubCache.getCachedLISTEntry("INBOX", accountId, imapStore, session);
-                        }
-                        if (null != inboxEntry && inboxEntry.exists()) {
-                            prfx = inboxEntry.hasInferiors() ? ("INBOX" + sep) : ("");
-                        } else {
-                            prfx = "";
-                        }
-                    }
-                    if ((0 == prfx.length() && fullName.indexOf(sep) < 0) || (fullName.startsWith(prfx, 0))) {
-                        // No need to retry with same prefix
-                        throw e;
-                    }
-                    LOG.warn("Creating default folder by full name \"" + fullName + "\" failed. Retry with prefix \"" + prfx + "\".", e);
-                    ListLsubCache.clearCache(accountId, session);
-                    modified.set(true);
-                    throw new RetryOtherPrefixException(prfx, e.getMessage(), e);
+                    throw e;
                 }
             }
             /*
@@ -389,11 +361,7 @@ public class SpecialUseDefaultFolderChecker extends IMAPDefaultFolderChecker {
                     if (isOverQuotaException(e)) {
                         throw e;
                     }
-                    final String prfx = prefixLen == 0 ? "INBOX" + sep : "";
-                    LOG.warn("Creating default folder by full name \"" + fullName + "\" failed. Retry with prefix \"" + prfx + "\".", e);
-                    ListLsubCache.clearCache(accountId, session);
-                    modified.set(true);
-                    throw new RetryOtherPrefixException(prfx, e.getMessage(), e);
+                    throw e;
                 }
             } else {
                 if (MailAccount.DEFAULT_ID == accountId) {

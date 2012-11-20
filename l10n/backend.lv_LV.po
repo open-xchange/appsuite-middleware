@@ -14,7 +14,7 @@ msgstr ""
 "Project-Id-Version: errors.lv_LV.po\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: DATE\n"
-"PO-Revision-Date: 2012-10-02 14:37+0200\n"
+"PO-Revision-Date: 2012-11-06 13:58+0200\n"
 "Last-Translator: Aivars Oliņš <aivars@adsl.lv>\n"
 "Language-Team: Latvian <LL@li.org>\n"
 "MIME-Version: 1.0\n"
@@ -22,7 +22,7 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Language: lv\n"
 "Plural-Forms: nplurals=3; plural=n%10==1 && n%100!=11 ? 0 : n != 0 ? 1 : 2;\n"
-"X-Generator: Poedit 1.5.3\n"
+"X-Generator: Poedit 1.5.4\n"
 "Plural-Forms: nplurals=3; plural=n%10==1 && n%100!=11 ? 0 : n != 0 ? 1 : 2;\n"
 
 #. The client send a ticket within the browser request and the verification of this ticket failed.
@@ -3604,6 +3604,10 @@ msgstr "Adrese %1$s nav baltajā sarakstā kā priekš %2$s OAuth API"
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:139
 msgid "The request sent was missing its body"
 msgstr "Nosūtītajam pieprasījumam iztrūkst pamatdaļa"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:141
+msgid "The account is invalid, please recreate it."
+msgstr "Konts nav derīgs. Lūdzu izveidojiet to no jauna."
 
 #. *
 #. * Cannot change password for any reason.

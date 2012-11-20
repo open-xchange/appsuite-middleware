@@ -50,7 +50,6 @@
 package com.openexchange.tools.oxfolder;
 
 import static com.openexchange.java.Autoboxing.I;
-import static com.openexchange.tools.sql.DBUtils.IN_LIMIT;
 import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
 import static com.openexchange.tools.sql.DBUtils.getIN;
 import gnu.trove.map.TIntObjectMap;
@@ -77,6 +76,8 @@ import com.openexchange.server.impl.OCLPermission;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class OXFolderBatchLoader {
+
+    private static final int IN_LIMIT = com.openexchange.tools.sql.DBUtils.IN_LIMIT;
 
     private static final class FolderPermissionProcedure implements TObjectProcedure<FolderObject> {
 

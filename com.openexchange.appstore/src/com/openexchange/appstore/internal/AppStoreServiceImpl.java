@@ -288,11 +288,8 @@ public class AppStoreServiceImpl implements AppStoreService {
      * @throws OXException
      */
     private List<Application> loadFromDB(List<String> names) throws OXException {
-        if (names.isEmpty()) {
-            return Collections.emptyList();
-        }
         SELECT select = new SELECT(ASTERISK).FROM("applications");
-        if (names != null) {
+        if (names != null && !names.isEmpty()) {
             select = select.WHERE(new IN("application", createLIST(names.size(), PLACEHOLDER)));
         }
 

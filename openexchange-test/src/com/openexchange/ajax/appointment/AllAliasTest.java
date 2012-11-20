@@ -68,7 +68,6 @@ import com.openexchange.groupware.container.Appointment;
 public class AllAliasTest extends AppointmentTest {
 
     private Appointment appointment;
-
     private AJAXClient client;
 
     /**
@@ -82,6 +81,7 @@ public class AllAliasTest extends AppointmentTest {
 
     @Override
     protected void setUp() throws Exception {
+        super.setUp();
         client = getClient();
 
         appointment = new Appointment();
@@ -99,7 +99,7 @@ public class AllAliasTest extends AppointmentTest {
     @Override
     protected void tearDown() throws Exception {
         final DeleteRequest deleteRequest = new DeleteRequest(appointment);
-        client.equals(deleteRequest);
+        client.execute(deleteRequest);
         super.tearDown();
     }
 

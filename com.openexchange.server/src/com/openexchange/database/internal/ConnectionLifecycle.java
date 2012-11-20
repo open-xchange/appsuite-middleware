@@ -199,4 +199,9 @@ class ConnectionLifecycle implements PoolableLifecycle<Connection> {
         }
         return retval;
     }
+
+    @Override
+    public String getObjectName() {
+        return "Database connection";
+    }
 }

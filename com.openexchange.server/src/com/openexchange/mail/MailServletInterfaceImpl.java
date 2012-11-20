@@ -1665,6 +1665,9 @@ final class MailServletInterfaceImpl extends MailServletInterface {
              * Fetch identified messages by their IDs and pre-fill them according to specified fields
              */
             mails = mailAccess.getMessageStorage().getMessages(fullname, mailIds, useFields);
+            if (null == mails) {
+                return SearchIteratorAdapter.emptyIterator();
+            }
         }
         /*
          * Set account information
@@ -1691,9 +1694,6 @@ final class MailServletInterfaceImpl extends MailServletInterface {
             }
         } catch (final OXException e) {
             LOG.error(e.getMessage(), e);
-        }
-        if (null == mails) {
-            return SearchIteratorAdapter.emptyIterator();
         }
         final List<MailMessage> l = new ArrayList<MailMessage>(mails.length);
         for (int i = 0; i < mails.length; i++) {
