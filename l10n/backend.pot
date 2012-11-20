@@ -2698,9 +2698,14 @@ msgstr ""
 msgid "The following needed feature could not be enabled: \"%1$s\""
 msgstr ""
 
-#. * Error while trying to interrupt Request processing
+#. * Error while trying to interrupt Request processing.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.http.requestwatcher/src/com/openexchange/http/requestwatcher/RequestWatcherExceptionMessage.java:62
-msgid "Error while trying to interrupt Request processing"
+msgid "Error while trying to interrupt Request processing."
+msgstr ""
+
+#. * Error while sending the servlet status code.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.http.requestwatcher/src/com/openexchange/http/requestwatcher/RequestWatcherExceptionMessage.java:64
+msgid "Error while sending the servlet status code."
 msgstr ""
 
 #. Messages //
