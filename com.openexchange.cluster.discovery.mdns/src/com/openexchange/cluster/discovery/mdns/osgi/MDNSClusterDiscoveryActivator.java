@@ -156,6 +156,9 @@ public final class MDNSClusterDiscoveryActivator extends HousekeepingActivator {
             throw new IllegalStateException(new BundleException(
                 "Cluster name is mandatory. Please set a valid identifier through property \"com.openexchange.cluster.name\".", 
                 BundleException.ACTIVATOR_ERROR));
+        } else if ("ox".equalsIgnoreCase(name)) {
+            LOG.warn("\n\tThe configuration value for \"com.openexchange.cluster.name\" has not been changed from it's default value "
+                + "\"ox\". Please do so to make this warning disappear.\n");
         }
         Dictionary<?, ?> headers = context.getBundle().getHeaders();
         String bundleVersion = (String)headers.get("Bundle-Version");

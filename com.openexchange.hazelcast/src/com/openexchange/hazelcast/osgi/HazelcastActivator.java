@@ -38,7 +38,6 @@ import com.openexchange.cluster.discovery.ClusterDiscoveryService;
 import com.openexchange.cluster.discovery.ClusterListener;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.hazelcast.HazelcastMBean;
-import com.openexchange.hazelcast.osgi.HazelcastActivator.InitMode;
 import com.openexchange.management.ManagementService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.osgi.ServiceContainer;
@@ -129,7 +128,8 @@ public class HazelcastActivator extends HousekeepingActivator {
 
             private final boolean isSingleton = true;
 
-            private final LinkedList<ServiceContainer<ClusterDiscoveryService>> deactivated = new LinkedList<ServiceContainer<ClusterDiscoveryService>>();
+            private final LinkedList<ServiceContainer<ClusterDiscoveryService>> deactivated = 
+                new LinkedList<ServiceContainer<ClusterDiscoveryService>>();
 
             private int clusterDiscoveryServiceRanking = 0;
 
@@ -178,7 +178,8 @@ public class HazelcastActivator extends HousekeepingActivator {
                 final List<InetAddress> nodes = discovery.getNodes();
                 if (infoEnabled) {
                     final long et = System.currentTimeMillis();
-                    logger.info("\nHazelcast\n\tAvailable cluster nodes received in " + (et - st) + "msec from " + ClusterDiscoveryService.class.getSimpleName() + ":\n\t" + nodes + "\n");
+                    logger.info("\nHazelcast\n\tAvailable cluster nodes received in " + (et - st) + "msec from " + 
+                        ClusterDiscoveryService.class.getSimpleName() + ":\n\t" + nodes + "\n");
                 }
                 /*-
                  * Check initially available nodes
@@ -201,7 +202,8 @@ public class HazelcastActivator extends HousekeepingActivator {
                             public void run() {
                                 if (InitMode.INITIALIZED.equals(init(Collections.<InetAddress> emptyList(), false, st, logger))) {
                                     if (infoEnabled) {
-                                        logger.info("\nHazelcast:\n\tInitialized Hazelcast instance via delayed one-shot task after " + delay + "msec.\n");
+                                        logger.info("\nHazelcast:\n\tInitialized Hazelcast instance via delayed one-shot task after " + 
+                                            delay + "msec.\n");
                                     }
                                 }
                             }
@@ -474,7 +476,8 @@ public class HazelcastActivator extends HousekeepingActivator {
                 return InitMode.NONE;
             }
             if (logger.isInfoEnabled()) {
-                logger.info("\nHazelcast:\n\tRe-configuring Hazelcast instance:\n\tExisting members: " + cur + "\n\tNew members: " + members + "\n");
+                logger.info("\nHazelcast:\n\tRe-configuring Hazelcast instance:\n\tExisting members: " + cur + "\n\tNew members: " + 
+                    members + "\n");
             }
             if (!cur.addAll(members)) {
                 if (logger.isInfoEnabled()) {
@@ -554,6 +557,9 @@ public class HazelcastActivator extends HousekeepingActivator {
             throw new IllegalStateException(new BundleException(
                 "Cluster name is mandatory. Please set a valid identifier through property \"com.openexchange.cluster.name\".", 
                 BundleException.ACTIVATOR_ERROR));
+        } else if ("ox".equalsIgnoreCase(groupName)) {
+            LOG.warn("\n\tThe configuration value for \"com.openexchange.cluster.name\" has not been changed from it's default value "
+                + "\"ox\". Please do so to make this warning disappear.\n");
         }
         Dictionary<?, ?> headers = context.getBundle().getHeaders();
         String bundleVersion = (String) headers.get("Bundle-Version");
