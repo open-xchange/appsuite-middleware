@@ -1022,13 +1022,13 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
      *
      * @param response The response to write
      * @param servletResponse The HTTP Servlet response to write to
-     * @param session The optional session; pass <code>null</code> if not appropriate
+     * @param optSession The optional session; pass <code>null</code> if not appropriate
      * @throws IOException If an I/O error occurs
      */
-    protected void writeResponse(final Response response, final HttpServletResponse servletResponse, Session session) throws IOException {
+    protected void writeResponse(final Response response, final HttpServletResponse servletResponse, Session optSession) throws IOException {
         servletResponse.setContentType(CONTENTTYPE_JAVASCRIPT);
         try {
-            ResponseWriter.write(response, servletResponse.getWriter(), localeFrom(session));
+            ResponseWriter.write(response, servletResponse.getWriter(), localeFrom(optSession));
         } catch (final JSONException e) {
             log(RESPONSE_ERROR, e);
             sendError(servletResponse);
