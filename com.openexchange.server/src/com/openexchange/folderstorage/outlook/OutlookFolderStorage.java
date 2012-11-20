@@ -2719,7 +2719,7 @@ public final class OutlookFolderStorage implements FolderStorage {
             folder.setParentID(INFOSTORE);
         } else if (showPersonalBelowInfoStore(session) && id.equals(getDefaultInfoStoreFolderId(session))) {
             folder.setParentID(INFOSTORE);
-            folder.setName(StringHelper.valueOf(localeFrom(session)).getString(FolderStrings.DEFAULT_INFOSTORE_FOLDER_NAME));
+            folder.setName(FolderStrings.DEFAULT_INFOSTORE_FOLDER_NAME);
         }
     }
 
