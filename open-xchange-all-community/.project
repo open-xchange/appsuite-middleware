@@ -1,9 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <projectDescription>
-	<name>open-xchange-all</name>
+	<name>open-xchange-all-community</name>
 	<comment></comment>
-	<projects>
-	</projects>
 	<buildSpec>
 		<buildCommand>
 			<name>com.csc.dip.projectset.ProjectSetBuilder</name>
