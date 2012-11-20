@@ -57,13 +57,19 @@ import com.openexchange.session.PutIfAbsent;
 import com.openexchange.session.Session;
 
 /**
- * {@link StoredSession}
+ * {@link StoredSession} - Represents a session held in session storage.
  * 
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class StoredSession implements PutIfAbsent, Serializable {
 
     private static final long serialVersionUID = -3414389910481034283L;
+
+    /**
+     * The parameter name for session storage's {@link java.util.concurrent.Future add task}.
+     */
+    //public static final String PARAM_SST_FUTURE = "__sst-future";
 
     private String loginName;
     private String password;
@@ -79,6 +85,7 @@ public class StoredSession implements PutIfAbsent, Serializable {
     private String client;
     private String userLogin;
     private final ConcurrentMap<String, Object> parameters;
+
     /**
      * Initializes a new {@link StoredSession}.
      */
@@ -119,11 +126,6 @@ public class StoredSession implements PutIfAbsent, Serializable {
                 this.parameters.put(Session.PARAM_CAPABILITIES, parameter);
             }
         }
-    /**
-     * Initializes a new {@link StoredSession}.
-     */
-                // this.parameters.put(Session.PARAM_LOCK, parameter);
-                // this.parameters.put(Session.PARAM_COUNTER, parameter);
     }
 
     /**
@@ -376,6 +378,52 @@ public class StoredSession implements PutIfAbsent, Serializable {
     @Override
     public void removeRandomToken() {
         randomToken = null;
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder builder = new StringBuilder(512);
+        final String delim = ", ";
+        builder.append('{');
+        if (loginName != null) {
+            builder.append("loginName=").append(loginName).append(delim);
+        }
+        if (password != null) {
+            builder.append("password=").append("*****").append(delim);
+        }
+        builder.append("contextId=").append(contextId).append(", userId=").append(userId).append(delim);
+        if (sessionId != null) {
+            builder.append("sessionId=").append(sessionId).append(delim);
+        }
+        if (secret != null) {
+            builder.append("secret=").append(secret).append(delim);
+        }
+        if (login != null) {
+            builder.append("login=").append(login).append(delim);
+        }
+        if (randomToken != null) {
+            builder.append("randomToken=").append(randomToken).append(delim);
+        }
+        if (localIp != null) {
+            builder.append("localIp=").append(localIp).append(delim);
+        }
+        if (authId != null) {
+            builder.append("authId=").append(authId).append(delim);
+        }
+        if (hash != null) {
+            builder.append("hash=").append(hash).append(delim);
+        }
+        if (client != null) {
+            builder.append("client=").append(client).append(delim);
+        }
+        if (userLogin != null) {
+            builder.append("userLogin=").append(userLogin).append(delim);
+        }
+        if (parameters != null) {
+            builder.append("parameters=").append(parameters);
+        }
+        builder.append('}');
+        return builder.toString();
     }
 
 }

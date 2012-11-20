@@ -408,7 +408,7 @@ public class EmbeddedSolrAccessImpl implements SolrAccessService {
             throw new IllegalArgumentException(String.format(IAE_MSG, "identifier"));
         }
 
-        stopCore(identifier);  
+        stopCore(identifier);
     }
 
     private String getConfigFileByModule(final int module) throws OXException {

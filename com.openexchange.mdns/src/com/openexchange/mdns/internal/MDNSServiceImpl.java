@@ -58,9 +58,6 @@ import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReadWriteLock;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
 import javax.jmdns.JmDNS;
 import javax.jmdns.ServiceInfo;
 import javax.jmdns.ServiceListener;
@@ -94,10 +91,6 @@ public final class MDNSServiceImpl implements MDNSService, MDNSReregisterer {
 
     private final ServiceListener serviceListener;
 
-    private final Lock rlock;
-
-    private final Lock wlock;
-
     private final List<MDNSServiceListener> listeners;
 
     /**
@@ -122,9 +115,6 @@ public final class MDNSServiceImpl implements MDNSService, MDNSReregisterer {
              * Add service listener for "_openexchange._tcp.local."
              */
             jmdns.addServiceListener(serviceType, (serviceListener = new MDNSListener(map, this)));
-            final ReadWriteLock rw = new ReentrantReadWriteLock();
-            rlock = rw.readLock();
-            wlock = rw.writeLock();
             listeners = new CopyOnWriteArrayList<MDNSServiceListener>();
         } catch (final IOException e) {
             throw MDNSExceptionCodes.IO_ERROR.create(e, e.getMessage());
@@ -139,7 +129,6 @@ public final class MDNSServiceImpl implements MDNSService, MDNSReregisterer {
      * Closes this mDNS service.
      */
     public void close() {
-        wlock.lock();
         try {
             map.clear();
             registeredServicesSet.clear();
@@ -148,8 +137,6 @@ public final class MDNSServiceImpl implements MDNSService, MDNSReregisterer {
             jmdns.close();
         } catch (final Exception e) {
             LOG.error("Closing JmDNS instance failed.", e);
-        } finally {
-            wlock.unlock();
         }
     }
 
@@ -187,21 +174,15 @@ public final class MDNSServiceImpl implements MDNSService, MDNSReregisterer {
 
     @Override
     public List<MDNSServiceEntry> listByService(final String serviceId) throws OXException {
-        rlock.lock();
-        try {
-            final ConcurrentMap<UUID, MDNSServiceEntry> inner = map.get(serviceId);
-            if (null == inner || inner.isEmpty()) {
-                return Collections.<MDNSServiceEntry> emptyList();
-            }
-            return new ArrayList<MDNSServiceEntry>(inner.values());
-        } finally {
-            rlock.unlock();
+        final ConcurrentMap<UUID, MDNSServiceEntry> inner = map.get(serviceId);
+        if (null == inner || inner.isEmpty()) {
+            return Collections.<MDNSServiceEntry> emptyList();
         }
+        return new ArrayList<MDNSServiceEntry>(inner.values());
     }
 
     @Override
     public MDNSServiceInfo registerService(final String serviceId, final int port, final String info) throws OXException {
-        wlock.lock();
         try {
             final UUID id = getIdentifierFor(/* serviceId */);
             final String name = new StringBuilder().append(getUnformattedString(id)).append('/').append(serviceId).toString();
@@ -214,25 +195,20 @@ public final class MDNSServiceImpl implements MDNSService, MDNSReregisterer {
             return new MDNSServiceInfoImpl(id, serviceId, port, info);
         } catch (final IOException e) {
             throw MDNSExceptionCodes.IO_ERROR.create(e, e.getMessage());
-        } finally {
-            wlock.unlock();
+        } catch (final Exception e) {
+            throw MDNSExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
     }
 
     @Override
     public void unregisterService(final MDNSServiceInfo serviceInfo) throws OXException {
-        wlock.lock();
-        try {
-            final ServiceInfo sinfo = registeredServicesSet.remove(new Key(serviceInfo.getId(), serviceInfo.getServiceId()));
-            if (null == sinfo) {
-                return;
-            }
-            jmdns.unregisterService(sinfo);
-            if (LOG.isInfoEnabled()) {
-                LOG.info(new StringBuilder(64).append("Un-Registered service: ").append(sinfo).toString());
-            }
-        } finally {
-            wlock.unlock();
+        final ServiceInfo sinfo = registeredServicesSet.remove(new Key(serviceInfo.getId(), serviceInfo.getServiceId()));
+        if (null == sinfo) {
+            return;
+        }
+        jmdns.unregisterService(sinfo);
+        if (LOG.isInfoEnabled()) {
+            LOG.info(new StringBuilder(64).append("Un-Registered service: ").append(sinfo).toString());
         }
     }
 

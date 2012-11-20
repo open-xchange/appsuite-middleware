@@ -172,13 +172,35 @@ public final class CacheFolderStorage implements FolderStorage {
         registry = CacheFolderStorageRegistry.getInstance();
     }
 
+    /**
+     * Clears all cached entries.
+     */
+    public void clearAll() {
+        final Cache cache = globalCache;
+        if (null != cache) {
+            try {
+                cache.clear();
+            } catch (final Exception e) {
+                // Ignore
+            }
+        }
+        FolderMapManagement.getInstance().clear();
+    }
+
     @Override
     public void clearCache(final int userId, final int contextId) {
+        if (contextId <= 0) {
+            return;
+        }
         final Cache cache = globalCache;
         if (null != cache) {
             cache.invalidateGroup(String.valueOf(contextId));
         }
-        dropUserEntries(userId, contextId);
+        if (userId > 0) {
+            dropUserEntries(userId, contextId);
+        } else {
+            FolderMapManagement.getInstance().dropFor(contextId);
+        }
     }
 
     /**
@@ -1446,11 +1468,11 @@ public final class CacheFolderStorage implements FolderStorage {
             final boolean isMove = null != folder.getParentID();
             final String oldParentId = isMove ? getFolder(treeId, oldFolderId, storageParameters).getParentID() : null;
             if (null == session) {
-                final UpdatePerformer updatePerformer = new UpdatePerformer(storageParameters.getUser(), storageParameters.getContext(), registry);
+                final UpdatePerformer updatePerformer = new UpdatePerformer(storageParameters.getUser(), storageParameters.getContext(), storageParameters.getDecorator(), registry);
                 updatePerformer.setCheck4Duplicates(false);
                 updatePerformer.doUpdate(folder, storageParameters.getTimeStamp());
             } else {
-                final UpdatePerformer updatePerformer = new UpdatePerformer(ServerSessionAdapter.valueOf(session), registry);
+                final UpdatePerformer updatePerformer = new UpdatePerformer(ServerSessionAdapter.valueOf(session), storageParameters.getDecorator(), registry);
                 updatePerformer.setCheck4Duplicates(false);
                 updatePerformer.doUpdate(folder, storageParameters.getTimeStamp());
             }

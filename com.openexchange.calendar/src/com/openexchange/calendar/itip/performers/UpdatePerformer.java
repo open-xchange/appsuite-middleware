@@ -115,18 +115,19 @@ public class UpdatePerformer extends AbstrakterDingeMacher {
             }
             ensureParticipant(appointment, action, owner);
             Appointment original = determineOriginalAppointment(change, processed, session);
-            
+            Appointment forMail = appointment;
             if (original != null) {
                 updateAppointment(original, appointment, session);
             } else {
                 ensureFolderId(appointment, session);
                 createAppointment(appointment, session);
+                forMail = util.reloadAppointment(appointment, session);
             }
             
             if (appointment != null && !change.isException()) {
                 processed.put(appointment.getUid(), appointment);
             }
-            writeMail(action, original, appointment, session, owner);
+            writeMail(action, original, forMail, session, owner);
             result.add(appointment);
         }
         

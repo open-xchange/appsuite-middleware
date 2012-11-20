@@ -235,17 +235,18 @@ public class LdapMapper extends DefaultMapper<Contact, ContactField> {
     }
     
     public String[] getLdapAttributes(ContactField... fields) {
+        if (null == fields) {
+            return new String[0];
+        }
         Set<String> ldapAttributes = new HashSet<String>(fields.length);
-        if (null != fields) {
-            for (ContactField field : fields) {
-                LdapMapping<? extends Object> ldapMapping = this.opt(field);
-                if (null != ldapMapping) {
-                    if (null != ldapMapping.getLdapAttributeName()) {
-                        ldapAttributes.add(ldapMapping.getLdapAttributeName());                    
-                    }
-                    if (null != ldapMapping.getAlternativeLdapAttributeName()) {
-                        ldapAttributes.add(ldapMapping.getAlternativeLdapAttributeName());                    
-                    }
+        for (ContactField field : fields) {
+            LdapMapping<? extends Object> ldapMapping = this.opt(field);
+            if (null != ldapMapping) {
+                if (null != ldapMapping.getLdapAttributeName()) {
+                    ldapAttributes.add(ldapMapping.getLdapAttributeName());                    
+                }
+                if (null != ldapMapping.getAlternativeLdapAttributeName()) {
+                    ldapAttributes.add(ldapMapping.getAlternativeLdapAttributeName());                    
                 }
             }
         }

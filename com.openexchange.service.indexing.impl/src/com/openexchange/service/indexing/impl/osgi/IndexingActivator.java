@@ -61,11 +61,13 @@ import org.osgi.service.event.EventHandler;
 import org.quartz.service.QuartzService;
 import com.hazelcast.core.HazelcastInstance;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.FolderService;
 import com.openexchange.groupware.infostore.InfostoreFacade;
 import com.openexchange.index.IndexFacadeService;
+import com.openexchange.index.IndexManagementService;
 import com.openexchange.log.LogFactory;
 import com.openexchange.mail.service.MailService;
 import com.openexchange.management.ManagementService;
@@ -108,7 +110,9 @@ public class IndexingActivator extends HousekeepingActivator {
             InfostoreFacade.class,
             ContextService.class,
             UserService.class,
-            UserConfigurationService.class };
+            UserConfigurationService.class,
+            IndexManagementService.class,
+            ConfigViewFactory.class };
     }
     
     @Override

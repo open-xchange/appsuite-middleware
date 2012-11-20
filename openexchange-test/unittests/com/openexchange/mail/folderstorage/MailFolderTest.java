@@ -821,38 +821,44 @@ public final class MailFolderTest extends AbstractMailTest {
 						parentFullname = MailFolder.DEFAULT_FOLDER_ID;
 					}
 
-					final MailFolderDescription mfd = new MailFolderDescription();
-					mfd.setExists(false);
-					mfd.setParentFullname(parentFullname);
-					mfd.setSeparator(inbox.getSeparator());
-					mfd.setSubscribed(false);
-					mfd.setName(name);
-
-					final MailPermission p = MailProviderRegistry.getMailProviderBySession(session, MailAccount.DEFAULT_ID)
-							.createNewMailPermission(session, MailAccount.DEFAULT_ID);
-					p.setEntity(getUser());
-					p.setAllPermission(OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION,
-							OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION);
-					p.setFolderAdmin(true);
-					p.setGroupPermission(false);
-					mfd.addPermission(p);
-					mailAccess.getFolderStorage().createFolder(mfd);
+					if (mailAccess.getFolderStorage().exists(fullname)) {
+					    mailAccess.getFolderStorage().clearFolder(fullname, true);
+					} else {
+    					final MailFolderDescription mfd = new MailFolderDescription();
+    					mfd.setExists(false);
+    					mfd.setParentFullname(parentFullname);
+    					mfd.setSeparator(inbox.getSeparator());
+    					mfd.setSubscribed(false);
+    					mfd.setName(name);
+    
+    					final MailPermission p = MailProviderRegistry.getMailProviderBySession(session, MailAccount.DEFAULT_ID)
+    							.createNewMailPermission(session, MailAccount.DEFAULT_ID);
+    					p.setEntity(getUser());
+    					p.setAllPermission(OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION,
+    							OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION);
+    					p.setFolderAdmin(true);
+    					p.setGroupPermission(false);
+    					mfd.addPermission(p);
+    					mailAccess.getFolderStorage().createFolder(mfd);
+					}
 				}
 
 				final MailMessage[] mails = getMessages(getTestMailDir(), -1);
 				String[] uids = mailAccess.getMessageStorage().appendMessages(fullname, mails);
 
-				//MailFolder f = mailAccess.getFolderStorage().getFolder(fullname);
-				assertTrue("Messages not completely appended to mail folder " + fullname,
-						getMessageCount(mailAccess, fullname) == uids.length);
+				final MailFolder f = mailAccess.getFolderStorage().getFolder(fullname);
+				final int messageCount = f.getMessageCount();
+				if (messageCount > 0) {
+                    assertTrue("Messages not completely appended to mail folder " + fullname + ": " + messageCount + " < " + uids.length, messageCount >= uids.length);
+                }
 
 				trashFullname = mailAccess.getFolderStorage().getTrashFolder();
 				int numTrashedMails = getMessageCount(mailAccess, trashFullname);
-				final Set<Long> ids = new HashSet<Long>(numTrashedMails);
+				final Set<String> ids = new HashSet<String>(numTrashedMails);
 				MailMessage[] trashed = mailAccess.getMessageStorage().getAllMessages(trashFullname, IndexRange.NULL,
 						MailSortField.RECEIVED_DATE, OrderDirection.ASC, FIELDS_ID);
 				for (int i = 0; i < trashed.length; i++) {
-					ids.add(Long.valueOf(trashed[i].getMailId()));
+					ids.add(trashed[i].getMailId());
 				}
 
 				mailAccess.getFolderStorage().clearFolder(fullname);

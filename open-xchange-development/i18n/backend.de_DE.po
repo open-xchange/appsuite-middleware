@@ -6105,6 +6105,10 @@ msgstr "Gesammelte Adressen"
 msgid "E-Mail attachments"
 msgstr "E-Mail-Anhänge"
 
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/FolderStrings.java:102
+msgid "My files"
+msgstr "Meine Dateien"
+
 #. Display name of group with identifier 0. This group always contains all existing users of a context.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/Groups.java:68
 msgid "All users"

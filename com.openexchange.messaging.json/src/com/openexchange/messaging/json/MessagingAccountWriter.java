@@ -83,7 +83,7 @@ public class MessagingAccountWriter {
         accountJSON.put(MESSAGING_SERVICE, messagingService.getId());
         final DynamicFormDescription formDescription = messagingService.getFormDescription();
         if (null != formDescription && null != account.getConfiguration()) {
-            final JSONObject configJSON = new FormContentWriter().write(formDescription, account.getConfiguration(), null);
+            final JSONObject configJSON = FormContentWriter.write(formDescription, account.getConfiguration(), null);
             accountJSON.put(CONFIGURATION, configJSON);
         }
         return accountJSON;

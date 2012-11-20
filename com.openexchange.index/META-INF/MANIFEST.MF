@@ -14,7 +14,17 @@ Import-Package: com.openexchange.config,
  com.openexchange.management,
  com.openexchange.osgi,
  com.openexchange.session,
+ javax.management,
+ javax.management.loading,
+ javax.management.modelmbean,
+ javax.management.monitor,
+ javax.management.openmbean,
+ javax.management.relation,
+ javax.management.remote,
+ javax.management.remote.rmi,
+ javax.management.timer,
  org.apache.commons.logging,
  org.osgi.framework,
- org.osgi.util.tracker;version="1.5.0"
+ org.osgi.util.tracker
+Bundle-Activator: com.openexchange.index.osgi.Activator
 

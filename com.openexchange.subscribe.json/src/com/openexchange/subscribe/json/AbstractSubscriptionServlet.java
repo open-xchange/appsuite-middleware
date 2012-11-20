@@ -52,10 +52,11 @@ package com.openexchange.subscribe.json;
 import java.io.IOException;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.openexchange.ajax.PermissionServlet;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.exception.OXException;
+import com.openexchange.log.LogFactory;
+import com.openexchange.session.Session;
 import com.openexchange.tools.session.ServerSession;
 
 
@@ -74,17 +75,17 @@ public abstract class AbstractSubscriptionServlet extends PermissionServlet {
         return session.getUserConfiguration().isSubscription();
     }
 
-    protected void writeOXException(final OXException x, final HttpServletResponse resp) {
+    protected void writeOXException(final OXException x, final HttpServletResponse resp, final Session session) {
         x.log(getLog());
         final Response response = new Response();
         response.setException(x);
-        writeResponseSafely(response, resp);
+        writeResponseSafely(response, resp, session);
     }
 
-    protected void writeData(final Object data, final HttpServletResponse resp) {
+    protected void writeData(final Object data, final HttpServletResponse resp, final Session session) {
         final Response response = new Response();
         response.setData(data);
-        writeResponseSafely(response, resp);
+        writeResponseSafely(response, resp, session);
     }
 
     protected OXException wrapThrowable(final Throwable t) {
@@ -92,9 +93,9 @@ public abstract class AbstractSubscriptionServlet extends PermissionServlet {
         return SubscriptionJSONErrorMessages.THROWABLE.create(t, t.getMessage());
     }
 
-    protected void writeResponseSafely(final Response response, final HttpServletResponse resp) {
+    protected void writeResponseSafely(final Response response, final HttpServletResponse resp, final Session session) {
         try {
-            writeResponse(response, resp);
+            writeResponse(response, resp, session);
         } catch (final IOException e) {
             getLog().error(e.getMessage(), e);
         }

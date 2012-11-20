@@ -95,21 +95,11 @@ public class SolrMailIndexAccess extends AbstractSolrIndexAccess<MailMessage> {
      * Initializes a new {@link SolrMailIndexAccess}.
      * 
      * @param identifier
+     * @param queryBuilder 
      */
-    public SolrMailIndexAccess(SolrCoreIdentifier identifier) {
+    public SolrMailIndexAccess(SolrCoreIdentifier identifier, SolrQueryBuilder queryBuilder) {
         super(identifier);
-        try {
-            ConfigurationService config = Services.getService(ConfigurationService.class);
-            String configDir = config.getProperty(SolrProperties.CONFIG_DIR);
-            queryBuilder = new SimpleQueryBuilder(
-                configDir + File.separatorChar + "mail-querybuilder.properties", 
-                null,
-                SolrMailField.ACCOUNT, 
-                SolrMailField.FULL_NAME, 
-                MailFieldMapper.getInstance());
-        } catch (BuilderException e) {
-            throw new IllegalStateException("Could not initialize query builder." + e);
-        }
+        this.queryBuilder = queryBuilder;
     }
 
     @Override

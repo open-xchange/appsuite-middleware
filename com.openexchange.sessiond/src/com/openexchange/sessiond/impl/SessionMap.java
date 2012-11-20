@@ -66,9 +66,7 @@ import com.openexchange.session.Session;
 public final class SessionMap {
 
     private final ReadWriteLock rwLock;
-
     private final Map<String, SessionControl> sessionIdMap;
-
     private final Map<String, SessionControl> alternativeIdMap;
 
     /**

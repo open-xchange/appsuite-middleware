@@ -80,7 +80,13 @@ public class Mappings {
         if (map.containsKey("last_name")) {
             contact.setSurName(map.get("last_name"));
         }
-        if (map.containsKey("first_name") & map.containsKey("last_name")) {
+        if (map.containsKey("first_name")) {
+        	contact.setDisplayName(map.get("first_name"));
+        }
+        if (map.containsKey("last_name")) {
+        	contact.setDisplayName(map.get("last_name"));
+        }
+        if (map.containsKey("first_name") && map.containsKey("last_name")) {
             contact.setDisplayName(map.get("first_name") + " " + map.get("last_name"));
         }
         if (map.containsKey("display_name")) {

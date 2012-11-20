@@ -232,7 +232,7 @@ public class TestFolderToolkit {
         try {
             writecon = DBPool.pickupWriteable(ctx);
             final OXFolderManager oxma = OXFolderManager.getInstance(session, writecon, writecon);
-            oxma.updateFolder(fo, false, System.currentTimeMillis());
+            oxma.updateFolder(fo, false, false, System.currentTimeMillis());
         } catch (final OXException e) {
             e.printStackTrace();
         } finally {

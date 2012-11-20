@@ -270,7 +270,7 @@ public final class MimeReply {
                 {
                     final String[] replyTo = origMsg.getHeader(MessageHeaders.HDR_REPLY_TO);
                     if (MimeMessageUtility.isEmptyHeader(replyTo)) {
-                        final String owner = MimeProcessingUtility.getFolderOwnerIfShared(msgref.getFolder(), msgref.getAccountId(), session);
+                        final String owner = null == msgref ? null : MimeProcessingUtility.getFolderOwnerIfShared(msgref.getFolder(), msgref.getAccountId(), session);
                         if (null != owner) {
                             final User[] users = UserStorage.getInstance().searchUserByMailLogin(owner, ctx);
                             if (null != users && users.length > 0) {
@@ -639,10 +639,10 @@ public final class MimeReply {
                 final char nextLine = '\n';
                 if (isHtml) {
                     replyPrefix =
-                        HtmlProcessing.htmlFormat(new StringBuilder(replyPrefix.length() + 1).append(replyPrefix).append(nextLine).toString());
+                        HtmlProcessing.htmlFormat(new StringBuilder(replyPrefix.length() + 1).append(replyPrefix).append(nextLine).append(nextLine).toString());
                 } else {
                     replyPrefix =
-                        new StringBuilder(replyPrefix.length() + 1).append(replyPrefix).append(nextLine).toString();
+                        new StringBuilder(replyPrefix.length() + 1).append(replyPrefix).append(nextLine).append(nextLine).toString();
                 }
             }
             /*-
@@ -667,6 +667,11 @@ public final class MimeReply {
                     replyTextBody = quoteText(textBuilder.toString());
                 }
                 textBuilder.setLength(0);
+                if (isHtml) {
+                    textBuilder.append("<br>");
+                } else {
+                    textBuilder.append('\n');
+                }
                 textBuilder.append(replyPrefix);
                 textBuilder.append(replyTextBody);
             } else {
@@ -684,6 +689,11 @@ public final class MimeReply {
                 }
                 textBuilder.setLength(0);
                 textBuilder.append(replyTextBody);
+                if (isHtml) {
+                    textBuilder.insert(getBlockquoteTagStartPos(textBuilder), "<br>");
+                } else {
+                    textBuilder.insert(0, '\n');
+                }
             }
         }
         replyTexts.add(textBuilder.toString());
@@ -692,10 +702,15 @@ public final class MimeReply {
     }
 
     private static final Pattern PATTERN_BODY_TAG = Pattern.compile("<body[^>]*?>", Pattern.CASE_INSENSITIVE);
-
-    private static int getBodyTagEndPos(final StringBuilder textBuilder) {
+    private static int getBodyTagEndPos(final CharSequence textBuilder) {
         final Matcher m = PATTERN_BODY_TAG.matcher(textBuilder);
         return m.find() ? m.end() : 0;
+    }
+
+    private static final Pattern PATTERN_BLOCKQUOTE_TAG = Pattern.compile("<blockquote[^>]*?>", Pattern.CASE_INSENSITIVE);
+    private static int getBlockquoteTagStartPos(final CharSequence textBuilder) {
+        final Matcher m = PATTERN_BLOCKQUOTE_TAG.matcher(textBuilder);
+        return m.find() ? m.start() : 0;
     }
 
     /**

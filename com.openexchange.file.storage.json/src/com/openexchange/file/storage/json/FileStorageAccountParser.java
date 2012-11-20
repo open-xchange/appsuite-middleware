@@ -97,7 +97,7 @@ public class FileStorageAccountParser {
             registry.getFileStorageService(accountJSON.getString(FileStorageAccountConstants.FILE_STORAGE_SERVICE));
         account.setFileStorageService(fsService);
         if (accountJSON.has(FileStorageAccountConstants.CONFIGURATION)) {
-            account.setConfiguration(new FormContentParser().parse(
+            account.setConfiguration(FormContentParser.parse(
                 accountJSON.getJSONObject(FileStorageAccountConstants.CONFIGURATION),
                 fsService.getFormDescription()));
         }

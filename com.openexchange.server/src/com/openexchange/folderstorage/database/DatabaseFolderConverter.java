@@ -56,6 +56,7 @@ import gnu.trove.procedure.TIntProcedure;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageAccount;
@@ -67,6 +68,7 @@ import com.openexchange.folderstorage.database.getfolder.SystemInfostoreFolder;
 import com.openexchange.folderstorage.database.getfolder.SystemPrivateFolder;
 import com.openexchange.folderstorage.database.getfolder.SystemPublicFolder;
 import com.openexchange.folderstorage.database.getfolder.SystemSharedFolder;
+import com.openexchange.folderstorage.database.getfolder.VirtualListFolder;
 import com.openexchange.folderstorage.type.PrivateType;
 import com.openexchange.folderstorage.type.SharedType;
 import com.openexchange.groupware.container.FolderObject;
@@ -283,6 +285,30 @@ public final class DatabaseFolderConverter {
                 retval.setName(FolderStrings.DEFAULT_EMAIL_ATTACHMENTS_FOLDER_NAME);
             } else {
                 retval = new DatabaseFolder(fo);
+                /*-
+                 * If enabled performance need to be improved for:
+                 * 
+                 * VirtualListFolder.getVirtualListFolderSubfolders(int, User, UserConfiguration, Context, Connection)
+                 */
+                final boolean checkIfVirtuallyReachable = false;
+                if (checkIfVirtuallyReachable) {
+                    /*-
+                     * Does it appear below virtual folder?:
+                     * 
+                     * FolderObject.VIRTUAL_LIST_TASK_FOLDER_ID, FolderObject.VIRTUAL_LIST_CALENDAR_FOLDER_ID,
+                     * FolderObject.VIRTUAL_LIST_CONTACT_FOLDER_ID, FolderObject.VIRTUAL_LIST_INFOSTORE_FOLDER_ID
+                     */
+                    final int virtualParent = getPossibleVirtualParent(fo);
+                    if (virtualParent > 0) {
+                        final String sFolderId = Integer.toString(folderId);
+                        for (final String[] arr : VirtualListFolder.getVirtualListFolderSubfolders(virtualParent, user, userConfiguration, ctx, con)) {
+                            if (sFolderId.equals(arr[0])) {
+                                retval.setParentID(Integer.toString(virtualParent));
+                                break;
+                            }
+                        }
+                    }
+                }
             }
             final int userId = user.getId();
             final int[] groups = user.getGroups();
@@ -417,6 +443,21 @@ public final class DatabaseFolderConverter {
             return retval;
         } catch (final SQLException e) {
             throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
+        }
+    }
+
+    private static int getPossibleVirtualParent(final FolderObject fo) {
+        switch (fo.getModule()) {
+        case FolderObject.TASK:
+            return FolderObject.VIRTUAL_LIST_TASK_FOLDER_ID;
+        case FolderObject.CONTACT:
+            return FolderObject.VIRTUAL_LIST_CONTACT_FOLDER_ID;
+        case FolderObject.CALENDAR:
+            return FolderObject.VIRTUAL_LIST_CALENDAR_FOLDER_ID;
+        case FolderObject.INFOSTORE:
+            return FolderObject.VIRTUAL_LIST_INFOSTORE_FOLDER_ID;
+        default:
+            return 0;
         }
     }
 

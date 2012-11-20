@@ -87,7 +87,7 @@ public class POP3StorageProviderServiceTrackerCustomizer implements ServiceTrack
     public POP3StorageProvider addingService(final ServiceReference<POP3StorageProvider> reference) {
         final POP3StorageProvider addedService = context.getService(reference);
         if (null == addedService) {
-            LOG.warn("Added service is null!", new Throwable());
+            throw new NullPointerException("Added service is null!");
         }
         if (addPOP3StorageProvider(addedService)) {
             return addedService;

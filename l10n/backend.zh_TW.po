@@ -5,14 +5,15 @@ msgstr ""
 "Project-Id-Version: errors.zh_TW\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: DATE\n"
-"PO-Revision-Date: 2012-10-03 11:33+0800\n"
+"PO-Revision-Date: 2012-11-07 01:36+0800\n"
 "Language-Team: Traditional Chinese <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
-"X-Generator: Poedit 1.5.3\n"
+"X-Generator: Poedit 1.5.4\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"Last-Translator: \n"
 
 #. The client send a ticket within the browser request and the verification of this ticket failed.
 #. %1$s will be replaced with a detailed exception message.
@@ -3503,6 +3504,10 @@ msgstr "地址 %1$s 不在 %2$s OAuth API 的白名單當中"
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:139
 msgid "The request sent was missing its body"
 msgstr "送出的請求缺少內容"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:141
+msgid "The account is invalid, please recreate it."
+msgstr "帳號無效，請重新建立。"
 
 #. *
 #. * Cannot change password for any reason.

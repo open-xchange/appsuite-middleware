@@ -415,6 +415,9 @@ public final class IMAPFolderConverter {
                             mailFolder.setDefaultFolder(false);
                             mailFolder.setDefaultFolderType(DefaultFolderType.NONE);
                         }
+                    } else {
+                        mailFolder.setDefaultFolder(false);
+                        mailFolder.setDefaultFolderType(DefaultFolderType.NONE);
                     }
                 }
                 /*

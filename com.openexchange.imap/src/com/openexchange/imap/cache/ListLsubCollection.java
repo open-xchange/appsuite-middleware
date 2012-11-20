@@ -1397,6 +1397,9 @@ final class ListLsubCollection {
      * @return The LIST entry for specified full name or <code>null</code>
      */
     public ListLsubEntry getList(final String fullName) {
+        if (null == fullName) {
+            return null;
+        }
         checkDeprecated();
         return listMap.get(fullName);
     }
@@ -1408,6 +1411,9 @@ final class ListLsubCollection {
      * @return The LSUB entry for specified full name or <code>null</code>
      */
     public ListLsubEntry getLsub(final String fullName) {
+        if (null == fullName) {
+            return null;
+        }
         checkDeprecated();
         return lsubMap.get(fullName);
     }

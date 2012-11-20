@@ -2,11 +2,15 @@
 package com.openexchange.solr.osgi;
 
 import java.rmi.Remote;
+import java.util.Dictionary;
+import java.util.Hashtable;
 import javax.management.MalformedObjectNameException;
 import javax.management.NotCompliantMBeanException;
 import javax.management.ObjectName;
 import org.apache.commons.logging.Log;
 import org.osgi.framework.ServiceReference;
+import org.osgi.service.event.EventConstants;
+import org.osgi.service.event.EventHandler;
 import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.core.IMap;
 import com.openexchange.config.ConfigurationService;
@@ -22,11 +26,13 @@ import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.osgi.SimpleRegistryListener;
 import com.openexchange.solr.SolrAccessService;
 import com.openexchange.solr.SolrCoreConfigService;
+import com.openexchange.solr.SolrIndexEventProperties;
 import com.openexchange.solr.SolrMBean;
 import com.openexchange.solr.SolrProperties;
 import com.openexchange.solr.groupware.SolrCoreLoginHandler;
 import com.openexchange.solr.groupware.SolrCoresCreateTableService;
 import com.openexchange.solr.groupware.SolrCoresCreateTableTask;
+import com.openexchange.solr.groupware.SolrIndexEventHandler;
 import com.openexchange.solr.internal.DelegationSolrAccessImpl;
 import com.openexchange.solr.internal.EmbeddedSolrAccessImpl;
 import com.openexchange.solr.internal.RMISolrAccessImpl;
@@ -72,8 +78,11 @@ public class SolrActivator extends HousekeepingActivator {
         SolrCoreConfigServiceImpl coreService = new SolrCoreConfigServiceImpl();
         registerService(SolrCoreConfigService.class, coreService);
         addService(SolrCoreConfigService.class, coreService);
-        solrRMI = new RMISolrAccessImpl(embeddedAccess);
+        solrRMI = new RMISolrAccessImpl(accessService);
         registerService(Remote.class, solrRMI);
+        Dictionary<String, String> eventProperties = new Hashtable<String, String>(1);
+        eventProperties.put(EventConstants.EVENT_TOPIC, SolrIndexEventProperties.TOPIC_LOCK_INDEX);
+        registerService(EventHandler.class, new SolrIndexEventHandler(accessService), eventProperties);
 
         SolrCoresCreateTableService createTableService = new SolrCoresCreateTableService();
         registerService(CreateTableService.class, createTableService);

@@ -137,7 +137,8 @@ public final class GetMultipleAttachmentAction extends AbstractMailAction {
                 req.getRequest().setFormat("file");
                 final ByteArrayFileHolder fileHolder = new ByteArrayFileHolder(out.toByteArray());
                 fileHolder.setName(fileName);
-                fileHolder.setContentType("application/octet-stream");
+                // fileHolder.setContentType("application/octet-stream");
+                fileHolder.setContentType("application/zip");
                 return new AJAXRequestResult(fileHolder, "file");
             } finally {
                 if (null != mf) {

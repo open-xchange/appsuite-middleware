@@ -1018,16 +1018,16 @@ public class HazelcastJobStore implements JobStore {
             
             return returnList;
         } finally {
+            lock.unlock();
+            
             if (LOG.isDebugEnabled()) {
                 StringBuilder sb = new StringBuilder("Releasing lock. ");
                 sb.append(System.nanoTime()).append(". ");
                 for (OperableTrigger trigger : returnList) {
                     sb.append("\n    Trigger: ").append(trigger.getKey().getName());
-                }
-                
+                }                
                 LOG.debug(sb.toString());
             }
-            lock.unlock();
         }
     }
     
@@ -1061,6 +1061,8 @@ public class HazelcastJobStore implements JobStore {
             stateWrapper.setState(TriggerStateWrapper.STATE_WAITING);
             triggersByKey.put(trigger.getKey(), stateWrapper);
         } finally {
+            lock.unlock();
+            
             if (LOG.isDebugEnabled()) {
                 StringBuilder sb = new StringBuilder("Releasing lock. ");
                 sb.append(System.nanoTime()).append(". ");
@@ -1068,8 +1070,6 @@ public class HazelcastJobStore implements JobStore {
                 
                 LOG.debug(sb.toString());
             }
-            
-            lock.unlock();
         }
     }
 
@@ -1143,6 +1143,7 @@ public class HazelcastJobStore implements JobStore {
             
             return results;
         } finally {
+            lock.unlock();
             if (LOG.isDebugEnabled()) {
                 StringBuilder sb = new StringBuilder("Releasing lock. ");
                 sb.append(System.nanoTime()).append(". ");
@@ -1152,8 +1153,6 @@ public class HazelcastJobStore implements JobStore {
                 
                 LOG.debug(sb.toString());
             }
-            
-            lock.unlock();
         }
     }
 
@@ -1243,6 +1242,7 @@ public class HazelcastJobStore implements JobStore {
                 }
             }
         } finally {
+            lock.unlock();
             if (LOG.isDebugEnabled()) {
                 StringBuilder sb = new StringBuilder("Releasing lock. ");
                 sb.append(System.nanoTime()).append(". ");
@@ -1250,8 +1250,6 @@ public class HazelcastJobStore implements JobStore {
                 
                 LOG.debug(sb.toString());
             }
-            
-            lock.unlock();
         }
     }
 

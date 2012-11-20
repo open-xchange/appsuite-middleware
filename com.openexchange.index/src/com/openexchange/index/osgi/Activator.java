@@ -90,7 +90,7 @@ public class Activator extends HousekeepingActivator {
                 ManagementService managementService = getService(ManagementService.class);
                 try {
                     managementService.registerMBean(objectName, new IndexManagementMBeanImpl(indexManagementService));
-                } catch (OXException e) {
+                } catch (Exception e) {
                     LOG.error(e.getMessage(), e);
                 }
             }
@@ -105,6 +105,7 @@ public class Activator extends HousekeepingActivator {
                 }
             }
         });
+        openTrackers();
     }
 
 }

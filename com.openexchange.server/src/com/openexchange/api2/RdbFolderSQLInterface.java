@@ -350,7 +350,7 @@ public class RdbFolderSQLInterface implements FolderSQLInterface {
                 }
                 folderobject.getObjectID();
                 final long lastModfified = System.currentTimeMillis();
-                manager.updateFolder(folderobject, false, lastModfified);
+                manager.updateFolder(folderobject, false, false, lastModfified);
             }
             return folderobject;
         } catch (final SQLException e) {

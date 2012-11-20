@@ -71,7 +71,7 @@ public class ValueWriterSwitch implements WidgetSwitcher {
     }
 
     @Override
-    public Object checkbox(Object[] args) {
+    public Object checkbox(Object... args) {
        return args[0];
     }
 

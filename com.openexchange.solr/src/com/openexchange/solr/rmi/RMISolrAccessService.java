@@ -170,5 +170,13 @@ public interface RMISolrAccessService extends Remote {
      * @throws RemoteException
      */
     public void pingRmi() throws RemoteException;
+    
+    /**
+     * Releases all resources hold for a core.
+     * 
+     * @param identifier The cores identifier.
+     * @throws RemoteException 
+     */
+    public void freeResources(SolrCoreIdentifier identifier) throws RemoteException;
 
 }

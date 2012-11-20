@@ -67,7 +67,7 @@ public class MockMailSolrIndexAccess extends SolrMailIndexAccess {
      * @throws OXException 
      */
     public MockMailSolrIndexAccess(int docs) throws OXException {
-        super(new SolrCoreIdentifier(1, 1, 1));
+        super(new SolrCoreIdentifier(1, 1, 1), null);
         index = new InMemoryIndex();
         for (int i = 0; i < docs; i++) {      
             SolrInputDocument doc = new SolrInputDocument();

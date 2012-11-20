@@ -19,7 +19,6 @@ package com.openexchange.ajp13.coyote;
 
 import java.io.IOException;
 import com.openexchange.ajp13.coyote.util.ByteChunk;
-import com.openexchange.tools.stream.Flagged;
 
 /**
  * Output buffer. This class is used internally by the protocol implementation. All writes from higher level code should happen via
@@ -27,7 +26,7 @@ import com.openexchange.tools.stream.Flagged;
  *
  * @author Remy Maucherat
  */
-public interface OutputBuffer extends Flagged {
+public interface OutputBuffer {
 
     /**
      * Write the response. The caller (servlet container) owns the chunks.

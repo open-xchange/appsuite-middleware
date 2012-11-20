@@ -5,7 +5,6 @@ BuildArch:      noarch
 BuildRequires:  ant
 BuildRequires:  ant-nodeps
 BuildRequires:  open-xchange-admin
-BuildRequires:  open-xchange-spamhandler-spamassassin
 BuildRequires:  java-devel >= 1.6.0
 Version:	@OXVERSION@
 %define		ox_release 4
@@ -24,7 +23,8 @@ Obsoletes:      open-xchange-custom-parallels <= %{version}
 Conflicts:      open-xchange-authentication-database open-xchange-authentication-ldap open-xchange-authentication-imap open-xchange-authentication-kerberos
 
 %description
-This package contains the authentication bundle and a bundle for branding. The spam handler is installed with a separate package.
+This package contains the authentication bundle and a bundle for branding. The
+spam handler is installed with a separate package.
 
 Authors:
 --------
@@ -58,9 +58,25 @@ ox_move_config_file /opt/open-xchange/etc/groupware /opt/open-xchange/etc settin
 %config(noreplace) /opt/open-xchange/etc/*.properties
 %dir /opt/open-xchange/etc/settings/
 %config(noreplace) /opt/open-xchange/etc/settings/parallels-ui.properties
-%doc com.openexchange.custom.parallels/ChangeLog
+%doc com.openexchange.parallels/ChangeLog
 
 %changelog
+* Wed Nov 14 2012 Marcus Klein <marcus.klein@open-xchange.com>
+Sixth release candidate for 6.22.1
+* Tue Nov 13 2012 Marcus Klein <marcus.klein@open-xchange.com>
+Fifth release candidate for 6.22.1
+* Tue Nov 06 2012 Marcus Klein <marcus.klein@open-xchange.com>
+Fourth release candidate for 6.22.1
+* Fri Nov 02 2012 Marcus Klein <marcus.klein@open-xchange.com>
+Third release candidate for 6.22.1
+* Wed Oct 31 2012 Marcus Klein <marcus.klein@open-xchange.com>
+Second release candidate for 6.22.1
+* Fri Oct 26 2012 Marcus Klein <marcus.klein@open-xchange.com>
+First release candidate for 6.22.1
+* Fri Oct 26 2012 Marcus Klein <marcus.klein@open-xchange.com>
+prepare for 6.22.1
+* Fri Oct 26 2012 Marcus Klein <marcus.klein@open-xchange.com>
+prepare for 6.22.1
 * Fri Oct 26 2012 Marcus Klein <marcus.klein@open-xchange.com>
 Third release build for EDP drop #5
 * Fri Oct 26 2012 Marcus Klein <marcus.klein@open-xchange.com>

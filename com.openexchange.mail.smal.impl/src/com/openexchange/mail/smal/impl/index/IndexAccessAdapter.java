@@ -130,41 +130,6 @@ public final class IndexAccessAdapter {
         }
     }
 
-    public void delete(final int accountId, final String folder, final String[] optMailIds, final Session session) throws OXException, InterruptedException {
-        final IndexFacadeService facade = SmalServiceLookup.getServiceStatic(IndexFacadeService.class);
-        if (null == facade) {
-            // Index service missing
-            return;
-        }
-        IndexAccess<MailMessage> indexAccess = null;
-        try {
-            indexAccess = facade.acquireIndexAccess(Types.EMAIL, session);
-            final int contextId = session.getContextId();
-            final int userId = session.getUserId();
-            /*
-             * Delete whole folder?
-             */
-            if (null == optMailIds || 0 == optMailIds.length) {
-                final AccountFolders accountFolders = new AccountFolders(String.valueOf(accountId), Collections.singleton(folder));
-                final QueryParameters.Builder builder = new QueryParameters.Builder()
-                                                        .setAccountFolders(Collections.singleton(accountFolders))
-                                                        .setHandler(SearchHandler.ALL_REQUEST);
-                
-                indexAccess.deleteByQuery(builder.build());
-                return;
-            }
-            /*
-             * Delete by identifier
-             */
-            for (final String id : optMailIds) {
-                final MailUUID indexId = MailUUID.newUUID(contextId, userId, accountId, folder, id);
-                indexAccess.deleteById(indexId.toString());
-            }
-        } finally {
-            releaseAccess(facade, indexAccess);
-        }
-    }
-
     private boolean exists(final int userId, final int contextId, final int accountId, final String folder, final IndexAccess<MailMessage> indexAccess) throws OXException, InterruptedException {
         final AccountFolders accountFolders = new AccountFolders(String.valueOf(accountId), Collections.singleton(folder));
         final QueryParameters qp = new QueryParameters.Builder()
@@ -178,32 +143,7 @@ public final class IndexAccessAdapter {
         fields.add(MailIndexField.ID);
         return indexAccess.query(qp, fields).getNumFound() > 0L;
     }
-
-    /**
-     * Adds specified message's content information to index.
-     * 
-     * @param message The message
-     * @param session The associated session
-     * @throws OXException If adding message's content information to index fails
-     */
-    public void addContent(final MailMessage message, final Session session) throws OXException {
-        if (null == message) {
-            return;
-        }
-        final IndexFacadeService facade = SmalServiceLookup.getServiceStatic(IndexFacadeService.class);
-        if (null == facade) {
-            // Index service missing
-            return;
-        }
-        IndexAccess<MailMessage> indexAccess = null;
-        try {
-            indexAccess = facade.acquireIndexAccess(Types.EMAIL, session);
-            indexAccess.addDocument(new StandardIndexDocument<MailMessage>(message));
-        } finally {
-            releaseAccess(facade, indexAccess);
-        }
-    }
-
+    
     public List<MailMessage> getMessages(final int accountId, final String folder, final Session session, final MailSortField sortField, final OrderDirection order) throws OXException, InterruptedException {
         final IndexFacadeService facade = SmalServiceLookup.getServiceStatic(IndexFacadeService.class);
         if (null == facade) {

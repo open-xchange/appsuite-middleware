@@ -64,6 +64,8 @@ import com.openexchange.folderstorage.StorageType;
 import com.openexchange.folderstorage.cache.CacheFolderStorage;
 import com.openexchange.folderstorage.internal.StorageParametersImpl;
 import com.openexchange.folderstorage.mail.MailFolderType;
+import com.openexchange.log.LogProperties;
+import com.openexchange.log.Props;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.SessiondService;
@@ -251,6 +253,14 @@ public final class FolderMap {
             final ServerSession session = ServerSessionAdapter.valueOf(null == ses ? sessiondService.getAnyActiveSessionForUser(userId, contextId) : ses);
             if (null == session) {
                 return;
+            }
+            if (LogProperties.isEnabled()) {
+                final Props properties = LogProperties.getLogProperties();
+                properties.put("com.openexchange.session.sessionId", session.getSessionID());
+                properties.put("com.openexchange.session.userId", Integer.valueOf(session.getUserId()));
+                properties.put("com.openexchange.session.contextId", Integer.valueOf(session.getContextId()));
+                final String client  = session.getClient();
+                properties.put("com.openexchange.session.clientId", client == null ? "unknown" : client);
             }
             ThreadPools.getThreadPool().submit(ThreadPools.trackableTask(new LoadSubfolders(folder, treeId, this, session)), AbortBehavior.getInstance());
         } catch (final Exception e) {

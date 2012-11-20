@@ -95,7 +95,7 @@ public class OAuthServiceMetaDataLinkedInImpl extends AbstractOAuthServiceMetaDa
 
     @Override
     public String getScope() {
-        return null;
+        return "r_basicprofile,r_emailaddress,r_network";
     }
 
     @Override

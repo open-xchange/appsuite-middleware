@@ -74,6 +74,9 @@ public class PoolingMailSenderService implements MailSenderService {
 	}
 	
 	private boolean shouldEnqueue(NotificationMail mail) {
+	    if (!mail.getActor().equals(mail.getOnBehalfOf())) {
+	        return false;
+	    }
 		if (mail.getOriginal() == null || mail.getAppointment() == null) {
 			return false;
 		}

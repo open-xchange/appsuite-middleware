@@ -160,6 +160,15 @@ public class SolrMBeanImpl extends StandardMBean implements SolrMBean {
             throw new MBeanException(null, e.getMessage());
         }
     }
+    
+    @Override
+    public SolrCoreStore getCoreStore(int id) throws MBeanException {
+        try {
+            return coreService.getCoreStore(id);
+        } catch (OXException e) {
+            throw new MBeanException(null, e.getMessage());
+        }
+    }
 
     @Override
     public List<SolrCoreStore> getAllStores() throws MBeanException {

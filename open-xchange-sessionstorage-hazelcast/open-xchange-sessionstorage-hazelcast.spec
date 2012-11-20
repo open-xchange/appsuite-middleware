@@ -48,5 +48,7 @@ ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} 
 %config(noreplace) /opt/open-xchange/etc/*
 
 %changelog
+* Tue Nov 06 2012 Jan Bauerdick <jan.bauerdick@open-xchange.com>
+Fourth release candidate for 6.22.1
 * Mon Oct 08 2012 Jan Bauerdick <jan.bauerdick@open-xchange.com>
 Initial release

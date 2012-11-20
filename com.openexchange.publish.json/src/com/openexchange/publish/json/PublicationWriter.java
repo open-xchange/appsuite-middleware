@@ -75,7 +75,7 @@ import com.openexchange.publish.json.types.EntityMap;
  */
 public class PublicationWriter {
 
-    private static final FormContentWriter formWriter = new FormContentWriter();
+    //private static final FormContentWriter formWriter = new FormContentWriter();
 
     private static final ValueWriterSwitch valueWrite = new ValueWriterSwitch();
 
@@ -93,7 +93,7 @@ public class PublicationWriter {
         object.put(DISPLAYNAME, publication.getDisplayName());
         String targetId = publication.getTarget().getId();
         object.put(TARGET, targetId);
-        object.put(targetId, formWriter.write(publication.getTarget().getFormDescription(), publication.getConfiguration(), urlPrefix));
+        object.put(targetId, FormContentWriter.write(publication.getTarget().getFormDescription(), publication.getConfiguration(), urlPrefix));
         return object;
     }
 

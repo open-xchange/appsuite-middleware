@@ -55,7 +55,6 @@ import java.util.concurrent.atomic.AtomicReference;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.eclipse.osgi.framework.console.CommandProvider;
-import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTracker;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.mdns.MDNSService;
@@ -77,9 +76,9 @@ import com.openexchange.threadpool.behavior.CallerRunsBehavior;
  */
 public final class MDNSActivator extends HousekeepingActivator {
 
-    volatile MDNSServiceImpl mdnsService;
+    private volatile MDNSServiceImpl mdnsService;
 
-    final AtomicReference<MDNSServiceInfo> serviceInfoReference;
+    protected final AtomicReference<MDNSServiceInfo> serviceInfoReference;
 
     /**
      * Initializes a new {@link MDNSActivator}.
@@ -129,51 +128,35 @@ public final class MDNSActivator extends HousekeepingActivator {
         }
         Services.setServiceLookup(this);
         log.info("Starting bundle: com.openexchange.mdns");
-        final Runnable starter = new Runnable() {
+        try {
+            /*
+             * Create mDNS service
+             */
+            final long st = System.currentTimeMillis();
+            final MDNSServiceImpl mdnsService = new MDNSServiceImpl();
+            this.mdnsService = mdnsService;
+            registerService(MDNSService.class, mdnsService);
+            registerService(CommandProvider.class, new MDNSCommandProvider(mdnsService));
 
-            @Override
-            public void run() {
-                try {
-                    /*
-                     * Create mDNS service
-                     */
-                    final MDNSServiceImpl mdnsService = new MDNSServiceImpl();
-                    MDNSActivator.this.mdnsService = mdnsService;
-                    registerService(MDNSService.class, mdnsService);
-                    registerService(CommandProvider.class, new MDNSCommandProvider(mdnsService));
+            final ThreadPoolService poolService = getService(ThreadPoolService.class);
+            final Task<Void> task = new AbstractTask<Void>() {
 
-                    track(ThreadPoolService.class, new SimpleRegistryListener<ThreadPoolService>() {
-
-                        @Override
-                        public void added(final ServiceReference<ThreadPoolService> ref, final ThreadPoolService service) {
-                            final Task<Void> task = new AbstractTask<Void>() {
-
-                                @Override
-                                public Void call() throws Exception {
-                                    final String serviceId = "openexchange.service.lookup";
-                                    final int port = 6666;
-                                    final String info = new StringBuilder("open-xchange lookup service @").append(getHostName()).toString();
-                                    serviceInfoReference.set(mdnsService.registerService(serviceId, port, info));
-                                    log.info("MDNS Lookup Service successfully registered.");
-                                    return null;
-                                }
-                            };
-                            service.submit(task, CallerRunsBehavior.<Void> getInstance());
-                            addService(ThreadPoolService.class, service);
-                        }
-
-                        @Override
-                        public void removed(final ServiceReference<ThreadPoolService> ref, final ThreadPoolService service) {
-                            removeService(ThreadPoolService.class);
-                        }
-                    });
-                    openTrackers();
-                } catch (final Exception e) {
-                    log.error("Starting bundle failed: com.openexchange.mdns", e);
+                @Override
+                public Void call() throws Exception {
+                    final String serviceId = "openexchange.service.lookup";
+                    final int port = 6666;
+                    final String info = new StringBuilder("open-xchange lookup service @").append(getHostName()).toString();
+                    serviceInfoReference.set(mdnsService.registerService(serviceId, port, info));
+                    log.info("MDNS Lookup Service successfully registered.");
+                    return null;
                 }
-            }
-        };
-        new Thread(starter).run();
+            };
+            poolService.submit(task, CallerRunsBehavior.<Void> getInstance());
+            final long dur = System.currentTimeMillis() - st;
+            log.info("\n\tBundle \"com.openexchange.mdns\" started in " + dur + "msec.\n");
+        } catch (final Exception e) {
+            log.error("Starting bundle failed: com.openexchange.mdns", e);
+        }
     }
 
     protected String getHostName() {

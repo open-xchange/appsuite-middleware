@@ -62,6 +62,7 @@ import com.openexchange.groupware.container.FolderObject;
 public class UpdateRequest extends InsertRequest {
 
     private final FolderObject folder;
+    private boolean handDown;
 
     public UpdateRequest(API api, FolderObject folder, boolean failOnError) {
         super(api, folder, failOnError);
@@ -72,11 +73,19 @@ public class UpdateRequest extends InsertRequest {
         this(api, folder, true);
     }
 
+    public UpdateRequest setHandDown(boolean handDown) {
+        this.handDown = handDown;
+        return this;
+    }
+
     @Override
     protected void addParameters(List<Parameter> params) {
         params.add(new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_UPDATE));
         params.add(new Parameter(AJAXServlet.PARAMETER_INFOLDER, String.valueOf(folder.getParentFolderID())));
         params.add(new Parameter(AJAXServlet.PARAMETER_ID, String.valueOf(folder.getObjectID())));
         params.add(new Parameter(AJAXServlet.PARAMETER_TIMESTAMP, String.valueOf(folder.getLastModified().getTime())));
+        if (handDown) {
+            params.add(new Parameter("permissions", "inherit"));
+        }
     }
 }

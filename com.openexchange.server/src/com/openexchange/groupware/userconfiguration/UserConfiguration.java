@@ -272,8 +272,12 @@ public final class UserConfiguration implements Serializable, Cloneable {
         super();
         this.permissionBits = permissionBits;
         this.userId = userId;
-        this.groups = new int[groups.length];
-        System.arraycopy(groups, 0, this.groups, 0, groups.length);
+        if (null == groups) {
+            this.groups = null;
+        } else {
+            this.groups = new int[groups.length];
+            System.arraycopy(groups, 0, this.groups, 0, groups.length);
+        }
         this.ctx = ctx;
     }
 

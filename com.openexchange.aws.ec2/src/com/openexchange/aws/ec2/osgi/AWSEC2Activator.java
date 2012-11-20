@@ -68,7 +68,7 @@ public class AWSEC2Activator extends HousekeepingActivator {
 
     private static final Log LOG = LogFactory.getLog(AWSEC2Activator.class);
 
-    private AWSEC2Service service;
+    private volatile AWSEC2Service service;
 
     /**
      * Initializes a new {@link AWSEC2Activator}.
@@ -95,15 +95,18 @@ public class AWSEC2Activator extends HousekeepingActivator {
         String securityGroupId = configService.getProperty("com.openexchange.aws.ec2.securitygroup");
         AWSEC2Configuration config = new AWSEC2Configuration(imageId, instanceType, keyPair, placement, securityGroupId);
         AmazonEC2 ec2 = getService(AmazonEC2.class);
-        service = new AWSEC2ServiceImpl(ec2, config);
+        AWSEC2Service service = new AWSEC2ServiceImpl(ec2, config);
         registerService(AWSEC2Service.class, service);
+        this.service = service;
     }
 
     @Override
     protected void stopBundle() throws Exception {
         LOG.info("Stopping bundle: com.openexchange.aws.ec2");
+        final AWSEC2Service service = this.service;
         if (service != null) {
             service.stopAllInstances();
+            this.service = null;
         }
         unregisterServices();
         cleanUp();

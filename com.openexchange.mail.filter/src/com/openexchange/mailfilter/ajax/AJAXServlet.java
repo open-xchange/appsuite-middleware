@@ -50,6 +50,7 @@
 package com.openexchange.mailfilter.ajax;
 
 import java.io.IOException;
+import java.util.Locale;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -63,6 +64,7 @@ import com.openexchange.ajax.writer.ResponseWriter;
 import com.openexchange.configuration.CookieHashSource;
 import com.openexchange.configuration.ServerConfig.Property;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.log.LogFactory;
 import com.openexchange.mailfilter.ajax.actions.AbstractAction;
 import com.openexchange.mailfilter.ajax.actions.AbstractRequest;
@@ -75,6 +77,7 @@ import com.openexchange.sessiond.SessiondService;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.servlet.CountingHttpServletRequest;
 import com.openexchange.tools.servlet.http.Tools;
+import com.openexchange.tools.session.ServerSession;
 
 /**
  *
@@ -100,6 +103,22 @@ public abstract class AJAXServlet extends HttpServlet {
         super();
     }
 
+    /**
+     * Gets the locale for given session
+     * 
+     * @param session The session
+     * @return The locale
+     */
+    protected static Locale localeFrom(final Session session) {
+        if (null == session) {
+            return Locale.US;
+        }
+        if (session instanceof ServerSession) {
+            return ((ServerSession) session).getUser().getLocale();
+        }
+        return UserStorage.getStorageUser(session.getUserId(), session.getContextId()).getLocale();
+    }
+
     @Override
     protected void service(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
         // create a new HttpSession if it's missing
@@ -120,6 +139,7 @@ public abstract class AJAXServlet extends HttpServlet {
     @Override
     protected void doGet(final HttpServletRequest req, final HttpServletResponse resp) throws IOException {
         final Response response = new Response();
+        Session session = null;
         try {
             final String sessionId = req.getParameter(PARAMETER_SESSION);
             if (sessionId == null) {
@@ -130,7 +150,7 @@ public abstract class AJAXServlet extends HttpServlet {
             if (null == service) {
                 throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(SessiondService.class.getName());
             }
-            final Session session = service.getSession(sessionId);
+            session = service.getSession(sessionId);
             if (null == session) {
                 if (LOG.isInfoEnabled()) {
                     LOG.info("There is no session associated with session identifier: " + sessionId);
@@ -176,7 +196,7 @@ public abstract class AJAXServlet extends HttpServlet {
         resp.setStatus(HttpServletResponse.SC_OK);
         resp.setContentType(CONTENTTYPE_JAVASCRIPT);
         try {
-            ResponseWriter.write(response, resp.getWriter());
+            ResponseWriter.write(response, resp.getWriter(), localeFrom(session));
         } catch (final JSONException e) {
             LOG.error("Error while writing JSON.", e);
             sendError(resp);
@@ -189,13 +209,14 @@ public abstract class AJAXServlet extends HttpServlet {
     @Override
     protected void doPut(final HttpServletRequest req, final HttpServletResponse resp) throws IOException {
         final Response response = new Response();
+        Session session = null;
         try {
             final String sessionId = req.getParameter(PARAMETER_SESSION);
             final SessiondService service = MailFilterServletServiceRegistry.getServiceRegistry().getService(SessiondService.class);
             if (null == service) {
                 throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(SessiondService.class);
             }
-            final Session session = service.getSession(sessionId);
+            session = service.getSession(sessionId);
             if (null == session) {
                 if (LOG.isInfoEnabled()) {
                     LOG.info("There is no session associated with session identifier: " + sessionId);
@@ -239,7 +260,7 @@ public abstract class AJAXServlet extends HttpServlet {
         resp.setStatus(HttpServletResponse.SC_OK);
         resp.setContentType(CONTENTTYPE_JAVASCRIPT);
         try {
-            ResponseWriter.write(response, resp.getWriter());
+            ResponseWriter.write(response, resp.getWriter(), localeFrom(session));
         } catch (final JSONException e) {
             LOG.error("Error while writing JSON.", e);
             sendError(resp);

@@ -88,7 +88,10 @@ public class ConfigFileStorageAccountImpl extends DefaultFileStorageAccount impl
 
     @Override
     public String toString() {
-        return new StringBuilder("ConfigFileStorageAccount ( serviceId = ").append(this.serviceId).append(" )").toString();
+        final StringBuilder sb = new StringBuilder(256).append(ConfigFileStorageAccountImpl.class.getSimpleName());
+        sb.append(" ( serviceId=").append(this.serviceId);
+        sb.append(", configuration=").append(null == configuration ? "<empty>" : configuration.toString()).append(" )").toString();
+        return sb.toString();
     }
 
 }

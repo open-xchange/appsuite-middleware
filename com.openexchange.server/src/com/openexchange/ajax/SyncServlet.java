@@ -131,7 +131,7 @@ public class SyncServlet extends PermissionServlet {
 			final Response response = new Response();
 			response.setException(e);
 			try {
-				ResponseWriter.write(response, writer);
+				ResponseWriter.write(response, writer, localeFrom(getSessionObject(req)));
 			} catch (final JSONException e1) {
 				LOG.error(e1.getMessage(), e1);
 			}
@@ -142,7 +142,7 @@ public class SyncServlet extends PermissionServlet {
 			final Response response = new Response();
 			response.setException(wrapper);
 			try {
-				ResponseWriter.write(response, writer);
+				ResponseWriter.write(response, writer, localeFrom(getSessionObject(req)));
 			} catch (final JSONException e1) {
 				LOG.error(e1.getMessage(), e1);
 			}
@@ -169,7 +169,7 @@ public class SyncServlet extends PermissionServlet {
 			actionPutClearFolderContent(getSessionObject(req), resp.getWriter(), getBody(req), ParamContainer
 					.getInstance(req, EnumComponent.SYNCML, resp));
 		} catch (final JSONException e) {
-			writeErrorResponse((HttpServletResponseWrapper) resp, e);
+			writeErrorResponse((HttpServletResponseWrapper) resp, e, getSessionObject(req));
 		}
 	}
 
@@ -182,7 +182,7 @@ public class SyncServlet extends PermissionServlet {
         try {
             response = new Response(sessionObj);
         } catch (final OXException e1) {
-            ResponseWriter.write(new Response().setException(e1), writer);
+            ResponseWriter.write(new Response().setException(e1), writer, localeFrom(sessionObj));
             return;
         }
 		final UnsynchronizedStringWriter strWriter = new UnsynchronizedStringWriter();
@@ -272,27 +272,26 @@ public class SyncServlet extends PermissionServlet {
 		jsonWriter.endArray();
 		response.setData(new JSONArray(strWriter.toString()));
 		response.setTimestamp(lastModifiedDate);
-		ResponseWriter.write(response, writer);
+		ResponseWriter.write(response, writer, localeFrom(sessionObj));
 	}
 
 	/*-
 	 * ++++++++++++++++++++++ Helper methods +++++++++++++++++++++++
 	 */
 
-	private static final void writeErrorResponse(final HttpServletResponseWrapper resp, final Throwable e)
+	private static final void writeErrorResponse(final HttpServletResponseWrapper resp, final Throwable e, final Session session)
 			throws IOException {
 		final OXException wrapper = getWrappingOXException(e);
 		LOG.error(wrapper.getMessage(), wrapper);
-		writeErrorResponse(resp, wrapper);
+		writeErrorResponse(resp, wrapper, session);
 	}
 
-	private static final void writeErrorResponse(final HttpServletResponseWrapper resp, final OXException e)
-			throws IOException {
+	private static final void writeErrorResponse(final HttpServletResponseWrapper resp, final OXException e, final Session session) throws IOException {
 		final Writer writer = resp.getWriter();
 		final Response response = new Response();
 		response.setException(e);
 		try {
-			ResponseWriter.write(response, writer);
+			ResponseWriter.write(response, writer, localeFrom(session));
 		} catch (final JSONException e1) {
 			LOG.error(e1.getMessage(), e1);
 		}

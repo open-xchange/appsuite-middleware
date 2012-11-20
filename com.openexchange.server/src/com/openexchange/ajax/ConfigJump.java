@@ -56,14 +56,15 @@ import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import org.json.JSONException;
 import com.openexchange.ajax.container.Response;
+import com.openexchange.ajax.writer.ResponseWriter;
 import com.openexchange.configjump.ICookie;
 import com.openexchange.configjump.Replacements;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
+import com.openexchange.log.LogFactory;
 import com.openexchange.tools.servlet.http.Tools;
 import com.openexchange.tools.session.ServerSession;
 
@@ -151,7 +152,7 @@ public class ConfigJump extends SessionServlet {
         }
         resp.setContentType(CONTENTTYPE_JAVASCRIPT);
         try {
-            Response.write(response, resp.getWriter());
+            ResponseWriter.write(response, resp.getWriter(), localeFrom(sessionObj));
         } catch (final JSONException e) {
             log(RESPONSE_ERROR, e);
             sendError(resp);

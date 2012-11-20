@@ -49,7 +49,6 @@
 
 package com.openexchange.index.solr.internal.infostore;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.EnumSet;
@@ -58,7 +57,6 @@ import java.util.List;
 import java.util.Set;
 import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.common.SolrInputDocument;
-import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.infostore.DocumentMetadata;
@@ -71,13 +69,10 @@ import com.openexchange.index.IndexResult;
 import com.openexchange.index.Indexes;
 import com.openexchange.index.QueryParameters;
 import com.openexchange.index.solr.internal.AbstractSolrIndexAccess;
-import com.openexchange.index.solr.internal.Services;
 import com.openexchange.index.solr.internal.SolrIndexResult;
 import com.openexchange.index.solr.internal.attachments.SolrAttachmentField;
-import com.openexchange.index.solr.internal.querybuilder.SimpleQueryBuilder;
 import com.openexchange.index.solr.internal.querybuilder.SolrQueryBuilder;
 import com.openexchange.solr.SolrCoreIdentifier;
-import com.openexchange.solr.SolrProperties;
 
 /**
  * {@link SolrInfostoreIndexAccess}
@@ -94,20 +89,9 @@ public class SolrInfostoreIndexAccess extends AbstractSolrIndexAccess<DocumentMe
      * 
      * @param identifier
      */
-    public SolrInfostoreIndexAccess(SolrCoreIdentifier identifier) {
+    public SolrInfostoreIndexAccess(SolrCoreIdentifier identifier, SolrQueryBuilder queryBuilder) {
         super(identifier);
-        try {
-            ConfigurationService config = Services.getService(ConfigurationService.class);
-            String configDir = config.getProperty(SolrProperties.CONFIG_DIR);
-            queryBuilder = new SimpleQueryBuilder(
-                configDir + File.separatorChar + "infostore-querybuilder.properties", 
-                null,
-                null, 
-                SolrInfostoreField.FOLDER, 
-                InfostoreFieldMapper.getInstance());
-        } catch (Exception e) {
-            throw new IllegalStateException("Could not initialize query builder." + e);
-        }
+        this.queryBuilder = queryBuilder;
     }
 
     @Override

@@ -94,18 +94,18 @@ public final class MailFolderUtility {
     private static final int LEN = MailFolder.DEFAULT_FOLDER_ID.length();
 
     /**
-     * Parses specified fullname argument to an appropriate instance of {@link FullnameArgument}.
+     * Parses specified full name argument to an appropriate instance of {@link FullnameArgument}.
      * <p>
-     * Cuts off starting {@link MailFolder#DEFAULT_FOLDER_ID} plus the default separator from specified folder fullname argument only if
-     * fullname argument is not <code>null</code> and is not equal to {@link MailFolder#DEFAULT_FOLDER_ID}.<br>
+     * Cuts off starting {@link MailFolder#DEFAULT_FOLDER_ID} plus the default separator from specified folder full name argument only if
+     * full name argument is not <code>null</code> and is not equal to {@link MailFolder#DEFAULT_FOLDER_ID}.<br>
      * Example:
      *
      * <pre>
      * &quot;default/INBOX&quot; -&gt; &quot;INBOX&quot;
      * </pre>
      *
-     * @param fullnameArgument The groupware's mail folder fullname
-     * @return The stripped mail folder fullname argument
+     * @param fullnameArgument The groupware's mail folder full name
+     * @return The stripped mail folder full name argument
      */
     public static FullnameArgument prepareMailFolderParam(final String fullnameArgument) {
         if (fullnameArgument == null) {
@@ -140,11 +140,11 @@ public final class MailFolderUtility {
     }
 
     /**
-     * Checks if specified fullname argument's real fullname equals given fullname.
+     * Checks if specified full name argument's real full name equals given full name.
      *
-     * @param fullnameArgument The fullname argument
-     * @param fullname The fullname to compare with
-     * @return <code>true</code> if specified fullname argument's real fullname equals given fullname; otherwise <code>false</code>
+     * @param fullnameArgument The full name argument
+     * @param fullname The full name to compare with
+     * @return <code>true</code> if specified full name argument's real full name equals given full name; otherwise <code>false</code>
      */
     public static boolean equalsFullname(final String fullnameArgument, final String fullname) {
         if (fullnameArgument == null) {
@@ -158,7 +158,7 @@ public final class MailFolderUtility {
 
     /**
      * Prepends {@link MailFolder#DEFAULT_FOLDER_ID} plus the default separator (obtained by {@link MailConfig#getDefaultSeparator()}) to
-     * given folder fullname. <br>
+     * given folder full name. <br>
      * Example:
      *
      * <pre>
@@ -166,8 +166,8 @@ public final class MailFolderUtility {
      * </pre>
      *
      * @param accountId The account ID
-     * @param fullname The folder fullname
-     * @return The groupware's mail folder fullname
+     * @param fullname The folder full name
+     * @return The groupware's mail folder full name
      */
     public static String prepareFullname(final int accountId, final String fullname) {
         if (fullname == null) {

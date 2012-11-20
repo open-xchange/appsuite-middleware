@@ -23,7 +23,7 @@ msgstr ""
 "Project-Id-Version: errors\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2008-08-04 14:10+0100\n"
-"PO-Revision-Date: 2012-08-10 05:20+0200\n"
+"PO-Revision-Date: 2012-10-26 22:03+0200\n"
 "Last-Translator: Andres Herrera <andres@bureau-cornavin.com>\n"
 "Language-Team: Spanish <es@bureau-cornavin.com>\n"
 "MIME-Version: 1.0\n"
@@ -2560,7 +2560,7 @@ msgstr ""
 "$s en el contexto %3$s"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/tools/iterator/SearchIteratorExceptionMessages.java:63
-msgid "A DBPool error occurred: %1$s"
+msgid "A DBPool error occurred: 1$%s"
 msgstr "Se ha producido un error de DBPool: %1$s"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/tools/iterator/SearchIteratorExceptionMessages.java:65
@@ -3679,6 +3679,10 @@ msgstr "La dirección %1$s no aparece en la lista blanca para el API OAuth %2$s"
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:139
 msgid "The request sent was missing its body"
 msgstr "Faltaba el cuerpo de la solicitud enviada"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:141
+msgid "The account is invalid, please recreate it."
+msgstr "La cuenta no es válida; por favor, vuelva a crearla."
 
 #. *
 #. * Cannot change password for any reason.
@@ -10971,8 +10975,8 @@ msgid ""
 "The file \"%1$s\" (\"%2$s\") can't be imported as image. Only image types "
 "(JPG, GIF, BMP or PNG) are supported."
 msgstr ""
-"El fichero \"%1$s\" (\"%2$s\") no se puede importar como imagen. Sólo "
-"se admiten ficheros de tipo imagen (JPG, GIF, BMP or PNG)."
+"El fichero \"%1$s\" (\"%2$s\") no se puede importar como imagen. Sólo se "
+"admiten ficheros de tipo imagen (JPG, GIF, BMP or PNG)."
 
 #. *
 #. * Exception while writing JSON.

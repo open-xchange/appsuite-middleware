@@ -49,7 +49,6 @@
 
 package com.openexchange.solr.internal;
 
-import java.net.InetSocketAddress;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
@@ -61,11 +60,13 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.FutureTask;
+
 import org.apache.commons.logging.Log;
 import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.client.solrj.response.UpdateResponse;
 import org.apache.solr.common.SolrInputDocument;
 import org.apache.solr.common.params.SolrParams;
+
 import com.hazelcast.core.DistributedTask;
 import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.core.IMap;
@@ -86,8 +87,6 @@ import com.openexchange.solr.rmi.RMISolrAccessService;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public class DelegationSolrAccessImpl implements SolrAccessService {
-
-    public static final String SOLR_CORE_MAP = "solrCoreMap";
 
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(DelegationSolrAccessImpl.class));
 
@@ -307,15 +306,15 @@ public class DelegationSolrAccessImpl implements SolrAccessService {
     public void freeResources(SolrCoreIdentifier identifier) {
         if (embeddedAccess.hasActiveCore(identifier)) {
             HazelcastInstance hazelcast = Services.getService(HazelcastInstance.class);
-            IMap<String, String> solrCores = hazelcast.getMap(SOLR_CORE_MAP);
+            IMap<String, String> solrCores = hazelcast.getMap(SolrCoreTools.SOLR_CORE_MAP);
             solrCores.lock(identifier.toString());
-            try {                
-                decrementCoreCount(hazelcast, hazelcast.getCluster().getLocalMember());
+            try {
+                SolrCoreTools.decrementCoreCount(hazelcast, hazelcast.getCluster().getLocalMember());
                 solrCores.remove(identifier.toString());
                 embeddedAccess.freeResources(identifier);
             } finally {
                 solrCores.unlock(identifier.toString());
-            }            
+            }
         }
     }
 
@@ -327,7 +326,7 @@ public class DelegationSolrAccessImpl implements SolrAccessService {
             String localAddress = hazelcast.getCluster().getLocalMember().getInetSocketAddress().getAddress().getHostAddress();
             solrNodes.remove(localAddress);
             for (String coreName : activeCores) {
-                IMap<String, String> solrCores = hazelcast.getMap(SOLR_CORE_MAP);
+                IMap<String, String> solrCores = hazelcast.getMap(SolrCoreTools.SOLR_CORE_MAP);
                 solrCores.removeAsync(coreName);
             }
 
@@ -339,7 +338,7 @@ public class DelegationSolrAccessImpl implements SolrAccessService {
         return embeddedAccess;
     }
 
-    private SolrAccessService getDelegate(SolrCoreIdentifier identifier) throws OXException {
+    public SolrAccessService getDelegate(SolrCoreIdentifier identifier) throws OXException {
         if (identifier == null) {
             throw new IllegalArgumentException("Parameter `identifier` must not be null!");
         }
@@ -348,8 +347,8 @@ public class DelegationSolrAccessImpl implements SolrAccessService {
         ConfigurationService config = Services.getService(ConfigurationService.class);
         boolean isSolrNode = config.getBoolProperty(SolrProperties.IS_NODE, false);
         HazelcastInstance hazelcast = Services.getService(HazelcastInstance.class);
-        String ownAddress = resolveSocketAddress(hazelcast.getCluster().getLocalMember().getInetSocketAddress());
-        IMap<String, String> solrCores = hazelcast.getMap(SOLR_CORE_MAP);
+        String ownAddress = SolrCoreTools.resolveSocketAddress(hazelcast.getCluster().getLocalMember().getInetSocketAddress());
+        IMap<String, String> solrCores = hazelcast.getMap(SolrCoreTools.SOLR_CORE_MAP);
         solrCores.lock(identifier.toString());
         try {
             String owner = solrCores.get(identifier.toString());
@@ -361,11 +360,11 @@ public class DelegationSolrAccessImpl implements SolrAccessService {
                 if (isSolrNode) {
                     try {
                         embeddedAccess.startCore(identifier);
-                        incrementCoreCount(hazelcast, hazelcast.getCluster().getLocalMember());
+                        SolrCoreTools.incrementCoreCount(hazelcast, hazelcast.getCluster().getLocalMember());
                         solrCores.put(identifier.toString(), ownAddress);
                         
                         return embeddedAccess;
-                    } catch (Exception e) {
+                    } catch (Throwable e) {
                         if (embeddedAccess.hasActiveCore(identifier)) {
                             embeddedAccess.stopCore(identifier);
                         }
@@ -373,13 +372,13 @@ public class DelegationSolrAccessImpl implements SolrAccessService {
                     }
                 } else {
                     Member elected = electCoreOwner(hazelcast, identifier);
-                    FutureTask<String> task = new DistributedTask<String>(new StartCoreCallable(identifier, resolveSocketAddress(elected.getInetSocketAddress())), elected);
+                    FutureTask<String> task = new DistributedTask<String>(new StartCoreCallable(identifier, SolrCoreTools.resolveSocketAddress(elected.getInetSocketAddress())), elected);
                     ExecutorService executorService = hazelcast.getExecutorService();
                     executorService.execute(task);
                     try {
-                        String electedAddress = resolveSocketAddress(elected.getInetSocketAddress());
+                        String electedAddress = SolrCoreTools.resolveSocketAddress(elected.getInetSocketAddress());
                         task.get();
-                        incrementCoreCount(hazelcast, elected);                        
+                        SolrCoreTools.incrementCoreCount(hazelcast, elected);                        
                         solrCores.put(identifier.toString(), electedAddress);
                         
                         return getRMIAccess(electedAddress);
@@ -390,7 +389,18 @@ public class DelegationSolrAccessImpl implements SolrAccessService {
                     }
                 }
             } else if (owner.equals(ownAddress)) {
-                return embeddedAccess;
+                if (embeddedAccess.hasActiveCore(identifier)) {
+                    return embeddedAccess;
+                } else {
+                    try {
+                        embeddedAccess.startCore(identifier);
+                        SolrCoreTools.incrementCoreCount(hazelcast, hazelcast.getCluster().getLocalMember());
+                        return embeddedAccess;
+                    } catch (Throwable t) {
+                        solrCores.remove(identifier.toString());
+                        throw SolrExceptionCodes.DELEGATION_ERROR.create(t);
+                    }
+                }                
             }
             
             return getRMIAccess(owner);
@@ -455,37 +465,6 @@ public class DelegationSolrAccessImpl implements SolrAccessService {
         }
     }
 
-    private void incrementCoreCount(HazelcastInstance hazelcast, Member member) {
-        IMap<String, Integer> solrNodes = hazelcast.getMap(SolrActivator.SOLR_NODE_MAP);
-        String localAddress = member.getInetSocketAddress().getAddress().getHostAddress();
-        solrNodes.lock(localAddress);
-        try {
-            Integer integer = solrNodes.get(localAddress);
-            solrNodes.put(localAddress, new Integer(integer.intValue() + 1));
-        } finally {
-            solrNodes.unlock(localAddress);
-        }
-    }
-
-    private void decrementCoreCount(HazelcastInstance hazelcast, Member member) {
-        IMap<String, Integer> solrNodes = hazelcast.getMap(SolrActivator.SOLR_NODE_MAP);
-        String localAddress = member.getInetSocketAddress().getAddress().getHostAddress();
-        solrNodes.lock(localAddress);
-        try {
-            Integer integer = solrNodes.get(localAddress);
-            solrNodes.put(localAddress, new Integer(integer.intValue() - 1));
-        } finally {
-            solrNodes.unlock(localAddress);
-        }
-    }
-
-    private String resolveSocketAddress(InetSocketAddress addr) {
-        if (addr.isUnresolved()) {
-            return addr.getHostName();
-        } else {
-            return addr.getAddress().getHostAddress();
-        }
-    }
 
     private static ConcurrentMap<String, RMISolrAccessService> rmiCache = new ConcurrentHashMap<String, RMISolrAccessService>();
 

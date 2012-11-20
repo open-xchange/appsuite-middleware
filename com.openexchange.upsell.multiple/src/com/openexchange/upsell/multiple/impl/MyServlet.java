@@ -98,11 +98,11 @@ public final class MyServlet extends DataServlet {
         IOException {
 
         final Response response = new Response();
+        final Session session = getSessionObject(req);
 
         try {
 
             final String action = parseMandatoryStringParameter(req,PARAMETER_ACTION);
-            final Session session = getSessionObject(req);
             JSONObject jsonObj;
 
             try {
@@ -110,7 +110,7 @@ public final class MyServlet extends DataServlet {
             } catch (final JSONException e) {
                 LOG.error(e.getMessage(), e);
                 response.setException(OXJSONExceptionCodes.JSON_BUILD_ERROR.create(e));
-                writeResponse(response, resp);
+                writeResponse(response, resp, session);
                 return;
             }
             final Context ctx = ContextStorage.getInstance().getContext(session);
@@ -127,7 +127,7 @@ public final class MyServlet extends DataServlet {
             response.setException(oje);
         }
 
-        writeResponse(response, resp);
+        writeResponse(response, resp, session);
 
     }
 

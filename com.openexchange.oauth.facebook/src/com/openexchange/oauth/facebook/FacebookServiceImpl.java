@@ -185,8 +185,10 @@ public class FacebookServiceImpl implements FacebookService {
                     if (dateString.length() == 10) {
                         year = Integer.parseInt(dateString.substring(6, 10)) - 1900;
                     }
-
-                    contact.setBirthday(new Date(year, month, day));
+                    // only set the birthday if there is a year given as well (Bug 23009 - Facebook birthday stored as "0000-00-00" in the database)
+                    if (year != 0){
+                    	contact.setBirthday(new Date(year, month, day));
+                    }
                 }
                 // System.out.println();
 

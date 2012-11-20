@@ -485,7 +485,7 @@ public final class CMISFileAccess extends AbstractCMISAccess implements FileStor
             if (null == object) {
                 throw CMISExceptionCodes.NOT_FOUND.create(folderId);
             }
-            if (!ObjectType.FOLDER_BASETYPE_ID.equals(object.getType())) {
+            if (!ObjectType.FOLDER_BASETYPE_ID.equals(object.getType().getId())) {
                 throw CMISExceptionCodes.NOT_A_FOLDER.create(folderId);
             }
             final Folder folder = (Folder) object;

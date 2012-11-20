@@ -127,6 +127,7 @@ import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.index.IndexAccess;
 import com.openexchange.index.IndexConstants;
 import com.openexchange.index.IndexDocument;
+import com.openexchange.index.IndexExceptionCodes;
 import com.openexchange.index.IndexFacadeService;
 import com.openexchange.index.StandardIndexDocument;
 import com.openexchange.log.LogFactory;
@@ -1832,7 +1833,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
             @Override
             public void run() {
                 IndexFacadeService indexFacade = ServerServiceRegistry.getInstance().getService(IndexFacadeService.class);
-                if (indexFacade != null) {  
+                if (indexFacade != null) {
                     IndexAccess<DocumentMetadata> infostoreIndex = null;
                     IndexAccess<Attachment> attachmentIndex = null;
                     try {
@@ -1858,7 +1859,13 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
                                 IndexConstants.DEFAULT_ATTACHMENT).toString());
                         }
                     } catch (Exception e) {
-                        LOG.error("Error while deleting documents from index.", e);
+                        if ((e instanceof OXException) && (IndexExceptionCodes.INDEX_LOCKED.equals((OXException) e) || IndexExceptionCodes.INDEXING_NOT_ENABLED.equals((OXException) e))) {
+                            if (LOG.isDebugEnabled()) {
+                                LOG.debug("Could not remove document from infostore index.");
+                            }
+                        } else {
+                            LOG.error("Error while deleting documents from index.", e);
+                        }
                     } finally {
                         if (infostoreIndex != null) {
                             try {
@@ -1928,7 +1935,13 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
                             }
                         }
                     } catch (Exception e) {
-                        LOG.error("Error while indexing document.", e);
+                        if ((e instanceof OXException) && (IndexExceptionCodes.INDEX_LOCKED.equals((OXException) e) || IndexExceptionCodes.INDEXING_NOT_ENABLED.equals((OXException) e))) {
+                            if (LOG.isDebugEnabled()) {
+                                LOG.debug("Could index document to infostore index.");
+                            }
+                        } else {
+                            LOG.error("Error while indexing document.", e);
+                        }
                     } finally {
                         if (infostoreIndex != null) {
                             try {

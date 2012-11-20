@@ -3,20 +3,25 @@ Eclipse-RegisterBuddy: com.openexchange.hazelcast
 Bundle-ManifestVersion: 2
 Bundle-Name: Open-Xchange sessionstorage hazelcast bundle
 Bundle-SymbolicName: com.openexchange.sessionstorage.hazelcast
-Bundle-Version: 6.22.1
+Bundle-Version: 6.23.0
 Bundle-Activator: com.openexchange.sessionstorage.hazelcast.osgi.HazelcastSessionStorageActivator
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Import-Package: com.hazelcast.config,
  com.hazelcast.core,
+ com.hazelcast.monitor,
+ com.hazelcast.query,
  com.openexchange.config,
- com.openexchange.crypto,
  com.openexchange.exception,
  com.openexchange.i18n,
  com.openexchange.log,
  com.openexchange.osgi,
+ com.openexchange.server,
  com.openexchange.session,
  com.openexchange.sessionstorage,
  com.openexchange.sessionstorage.exceptions,
+ com.openexchange.threadpool,
+ com.openexchange.threadpool.behavior,
  org.apache.commons.logging,
- org.osgi.framework
+ org.osgi.framework,
+ org.osgi.util.tracker

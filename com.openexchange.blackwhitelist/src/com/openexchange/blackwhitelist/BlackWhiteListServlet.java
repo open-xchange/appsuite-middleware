@@ -100,6 +100,7 @@ public class BlackWhiteListServlet extends DataServlet {
     @Override
     protected void doGet(final HttpServletRequest req, final HttpServletResponse resp) throws IOException {
         final Response response = new Response();
+        final ServerSession session = getSessionObject(req);
 
         try {
             final String action = parseMandatoryStringParameter(req, PARAMETER_ACTION);
@@ -114,7 +115,6 @@ public class BlackWhiteListServlet extends DataServlet {
                 throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create(PARAMETER_MODULE, module);
             }
             
-            final ServerSession session = getSessionObject(req);
 
             if (action.equalsIgnoreCase(ADD)) {
                 doAdd(session, type, req, response);
@@ -132,7 +132,7 @@ public class BlackWhiteListServlet extends DataServlet {
             LOG.error(e.getMessage(), e);
             response.setException(OXJSONExceptionCodes.JSON_BUILD_ERROR.create(e));
         }
-        writeResponse(response, resp);
+        writeResponse(response, resp, session);
     }
 
     private void doGet(final ServerSession session, final ListType type, final Response response) throws JSONException, OXException {

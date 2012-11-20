@@ -456,7 +456,7 @@ public class FolderTest extends TestCase {
                 fo.setObjectID(fuid);
                 fo.setFolderName("NewCalendarTestFolderRenamed");
                 final long lastModified = System.currentTimeMillis();
-                fo = oxfa.updateFolder(fo, true, System.currentTimeMillis());
+                fo = oxfa.updateFolder(fo, true, false, System.currentTimeMillis());
                 // fo = oxfa.updateMoveRenameFolder(fo, session, true,
                 // lastModified, null, null);
                 assertTrue(fo.containsLastModified());
@@ -521,7 +521,7 @@ public class FolderTest extends TestCase {
                 fo.setObjectID(fuid);
                 fo.setParentFolderID(stdCalFolder);
                 final long lastModified = System.currentTimeMillis();
-                fo = oxfa.updateFolder(fo, true, System.currentTimeMillis());
+                fo = oxfa.updateFolder(fo, true, false, System.currentTimeMillis());
                 // fo = oxfa.updateMoveRenameFolder(fo, session, true,
                 // lastModified, null, null);
                 assertTrue(fo.containsLastModified());
@@ -588,7 +588,7 @@ public class FolderTest extends TestCase {
                 fo.setParentFolderID(stdCalFolder);
                 fo.setFolderName("AARRGGH!");
                 final long lastModified = System.currentTimeMillis();
-                fo = oxfa.updateFolder(fo, true, System.currentTimeMillis());
+                fo = oxfa.updateFolder(fo, true, false, System.currentTimeMillis());
                 // fo = oxfa.updateMoveRenameFolder(fo, session, true,
                 // lastModified, null, null);
                 assertTrue(fo.containsLastModified());
@@ -676,7 +676,7 @@ public class FolderTest extends TestCase {
                 final long lastModified = System.currentTimeMillis();
                 // fo = oxfa.updateMoveRenameFolder(fo, session, true,
                 // lastModified, null, null);
-                oxfa.updateFolder(fo, true, System.currentTimeMillis());
+                oxfa.updateFolder(fo, true, false, System.currentTimeMillis());
                 assertTrue(fo.containsLastModified());
                 assertTrue(fo.containsModifiedBy());
                 assertTrue(fo.getLastModified().getTime() == lastModified);
@@ -906,7 +906,7 @@ public class FolderTest extends TestCase {
                 fo.setFolderName("NewCalendarTestFolder_Changed");
                 Exception exc = null;
                 try {
-                    fo = oxfa.updateFolder(fo, true, System.currentTimeMillis());
+                    fo = oxfa.updateFolder(fo, true, false, System.currentTimeMillis());
                     // fo = oxfa.updateMoveRenameFolder(fo, session, true,
                     // System.currentTimeMillis(), null, null);
                 } catch (final Exception e) {
@@ -974,7 +974,7 @@ public class FolderTest extends TestCase {
                 fo.setFolderName("NewCalendarTestFolder_Changed");
                 Exception exc = null;
                 try {
-                    fo = oxfa.updateFolder(fo, true, System.currentTimeMillis());
+                    fo = oxfa.updateFolder(fo, true, false, System.currentTimeMillis());
                     // fo = oxfa.updateMoveRenameFolder(fo, session, true,
                     // System.currentTimeMillis(), null, null);
                 } catch (final Exception e) {

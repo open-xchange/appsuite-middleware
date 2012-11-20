@@ -52,6 +52,7 @@ package com.openexchange.monitoring;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 import com.openexchange.counter.Counter;
 
 /**
@@ -121,7 +122,7 @@ public class MonitoringInfo {
 
     private static int[] numberOfSessionsInContainer;
 
-    private static final AtomicInteger numberOfRunningAJPListeners = new AtomicInteger();
+    private static final AtomicLong numberOfRunningAJPListeners = new AtomicLong();
 
     private static final ConcurrentMap<Integer, Counter> COUNTER_MAP = new ConcurrentHashMap<Integer, Counter>(8);
 
@@ -168,12 +169,12 @@ public class MonitoringInfo {
         return getNumberOfConnections(AJAX);
     }
 
-    public static int getNumberOfRunningAJPListeners() {
+    public static long getNumberOfRunningAJPListeners() {
         return numberOfRunningAJPListeners.get();
     }
 
-    public static void setNumberOfRunningAJPListeners(final int num) {
-        numberOfRunningAJPListeners.set(num);
+    public static void addNumberOfRunningAJPListeners(final int num) {
+        numberOfRunningAJPListeners.addAndGet(num);
     }
 
     public static int getNumberOfOpenSockets() {
