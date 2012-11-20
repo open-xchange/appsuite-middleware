@@ -54,11 +54,13 @@ import java.util.Dictionary;
 import java.util.concurrent.atomic.AtomicReference;
 import org.apache.commons.logging.Log;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.BundleException;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.openexchange.cluster.discovery.ClusterDiscoveryService;
 import com.openexchange.cluster.discovery.ClusterListener;
 import com.openexchange.cluster.discovery.mdns.MDNSClusterDiscoveryService;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.mdns.MDNSService;
 import com.openexchange.mdns.MDNSServiceEntry;
 import com.openexchange.mdns.MDNSServiceListener;
@@ -73,8 +75,6 @@ public final class MDNSClusterDiscoveryActivator extends HousekeepingActivator {
 
     static final Log LOG = com.openexchange.log.Log.loggerFor(MDNSClusterDiscoveryActivator.class);
 
-    private static final String SERVICE_ID = "openexchange.service.hazelcast";
-
     private final class ClusterAwareMdnsServiceListener implements MDNSServiceListener {
 
         private final String serviceId;
@@ -88,6 +88,7 @@ public final class MDNSClusterDiscoveryActivator extends HousekeepingActivator {
 
         @Override
         public void onServiceRemoved(final String serviceId, final MDNSServiceEntry entry) {
+            LOG.debug("Removed: " + entry);
             if (this.serviceId.equals(serviceId)) {
                 /*
                  * Notify listeners
@@ -103,6 +104,7 @@ public final class MDNSClusterDiscoveryActivator extends HousekeepingActivator {
 
         @Override
         public void onServiceAdded(final String serviceId, final MDNSServiceEntry entry) {
+            LOG.debug("Added: " + entry);
             if (this.serviceId.equals(serviceId)) {
                 /*
                  * Notify listeners
@@ -132,7 +134,7 @@ public final class MDNSClusterDiscoveryActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return EMPTY_CLASSES;
+        return new  Class<?>[] { ConfigurationService.class };
     }
 
     @Override
@@ -148,8 +150,19 @@ public final class MDNSClusterDiscoveryActivator extends HousekeepingActivator {
     @Override
     protected void startBundle() throws Exception {
         final BundleContext context = this.context;
+        // Form service ID from cluster name and bundle version
+        String name = getService(ConfigurationService.class).getProperty("com.openexchange.cluster.name");
+        if (null == name || 0 == name.trim().length()) {
+            throw new IllegalStateException(new BundleException(
+                "Cluster name is mandatory. Please set a valid identifier through property \"com.openexchange.cluster.name\".", 
+                BundleException.ACTIVATOR_ERROR));
+        }
+        Dictionary<?, ?> headers = context.getBundle().getHeaders();
+        String bundleVersion = (String)headers.get("Bundle-Version");
+        final String serviceID = name + "-v" + bundleVersion;
+        LOG.info("Cluster Discovery will track services with ID \"" + serviceID + "\".");
         // Create service instance
-        final MDNSClusterDiscoveryService mdnsClusterDiscoveryService = new MDNSClusterDiscoveryService(SERVICE_ID, context);
+        final MDNSClusterDiscoveryService mdnsClusterDiscoveryService = new MDNSClusterDiscoveryService(serviceID, context);
         rememberTracker(mdnsClusterDiscoveryService);
         // Tracker for MDNSService
         track(MDNSService.class, new ServiceTrackerCustomizer<MDNSService, MDNSService>() {
@@ -158,7 +171,7 @@ public final class MDNSClusterDiscoveryActivator extends HousekeepingActivator {
             public MDNSService addingService(final ServiceReference<MDNSService> reference) {
                 final MDNSService service = context.getService(reference);
                 mdnsClusterDiscoveryService.setMDNSService(service);
-                service.addListener(new ClusterAwareMdnsServiceListener(SERVICE_ID, mdnsClusterDiscoveryService));
+                service.addListener(new ClusterAwareMdnsServiceListener(serviceID, mdnsClusterDiscoveryService));
                 return service;
             }
 

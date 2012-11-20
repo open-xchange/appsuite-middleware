@@ -8,6 +8,8 @@ Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Import-Package: com.hazelcast.cluster,
  com.hazelcast.config,
  com.hazelcast.core,
+ com.openexchange.config,
+ com.openexchange.config.cascade,
  com.openexchange.exception,
  com.openexchange.log,
  com.openexchange.mdns,
