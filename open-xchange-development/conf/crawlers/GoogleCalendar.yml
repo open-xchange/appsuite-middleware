@@ -3,19 +3,20 @@ crawlerApiVersion: 618
 displayName: GoogleCalendar
 id: com.openexchange.subscribe.crawler.google.calendar
 module: 2
-priority: 2
+priority: 3
 workflowString: |
   --- !com.openexchange.subscribe.crawler.Workflow
   steps: 
-    - !com.openexchange.subscribe.crawler.LoginPageByFormActionStep
-      actionOfLoginForm: "https://accounts.google.com/ServiceLoginAuth"
+    - !com.openexchange.subscribe.crawler.LoginPageByFormActionReturningStringStep
+      actionOfLoginForm: ".*ServiceLoginAuth"
       baseUrl: "https://calendar.google.com"
       description: Log into Google Calendar
-      linkAvailableAfterLogin: .*?profiles.google.com.*?
       nameOfPasswordField: Passwd
       nameOfUserField: Email
       numberOfForm: 1
       password: ""
+      regexForReturnedString: ".*calendar\\/static.*"
+      submitName: ""
       url: "https://calendar.google.com"
       username: ""
     - !com.openexchange.subscribe.crawler.GoogleCalendarICalStep
