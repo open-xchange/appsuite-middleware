@@ -58,6 +58,8 @@ import com.openexchange.i18n.LocalizableStrings;
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
 public class RequestWatcherExceptionMessage implements LocalizableStrings{
-    /** Error while trying to interrupt Request processing */
-    public static final String ERROR_WHILE_INTERRUPTING_REQUEST_PROCESSING_MSG = "Error while trying to interrupt Request processing";
+    /** Error while trying to interrupt Request processing. */
+    public static final String ERROR_WHILE_INTERRUPTING_REQUEST_PROCESSING_MSG = "Error while trying to interrupt Request processing.";
+    /** Error while sending the servlet status code. */
+    public static final String  ERROR_WHILE_SENDING_SERVLET_STATUS_CODE_MSG="Error while sending the servlet status code.";
 }

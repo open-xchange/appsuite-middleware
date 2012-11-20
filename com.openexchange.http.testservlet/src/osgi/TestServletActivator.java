@@ -2,7 +2,6 @@
 package osgi;
 
 import org.osgi.service.http.HttpService;
-import com.openexchange.config.ConfigurationService;
 import com.openexchange.http.testservlet.TestServlet;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.server.ServiceExceptionCode;

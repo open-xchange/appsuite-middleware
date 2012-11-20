@@ -63,8 +63,10 @@ import static com.openexchange.http.requestwatcher.RequestWatcherExceptionMessag
  */
 public enum RequestWatcherExceptionCode implements OXExceptionCode {
     
-    /** The grizzly server could not be started. */
+    /** Error while trying to interrupt Request processing. */
     ERROR_WHILE_INTERRUPTING_REQUEST_PROCESSING(ERROR_WHILE_INTERRUPTING_REQUEST_PROCESSING_MSG, CATEGORY_ERROR, 1),
+    /** Error while sending the servlet status code. */
+    ERROR_WHILE_SENDING_SERVLET_STATUS_CODE(ERROR_WHILE_SENDING_SERVLET_STATUS_CODE_MSG, CATEGORY_ERROR, 1),
     ;
 
     private final String message;
