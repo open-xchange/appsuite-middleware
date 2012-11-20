@@ -1,3 +1,9 @@
+open-xchange-sessionstorage-hazelcast (6.23.0-0) unstable; urgency=low
+
+  * prepare for next EDP drop
+
+ -- Marcus Klein <marcus.kleni@open-xchange.com>  Tue, 20 Nov 2012 14:50:48 +0100
+
 open-xchange-sessionstorage-hazelcast (6.22.1-1) unstable; urgency=low
 
   * Fourth release candidate for 6.22.1
