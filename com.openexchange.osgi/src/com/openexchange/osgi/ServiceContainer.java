@@ -136,7 +136,7 @@ public final class ServiceContainer<S> {
      * @param keys The named properties to remove
      */
     public void removeProperties(final Collection<String> keys) {
-        if (keys == properties || keys.isEmpty()) {
+        if (keys == null || keys.isEmpty()) {
             return;
         }
         final Map<String, Object> thisProperties = this.properties;

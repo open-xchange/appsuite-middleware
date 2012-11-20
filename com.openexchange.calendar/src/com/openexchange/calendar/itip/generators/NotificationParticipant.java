@@ -54,7 +54,6 @@ import java.util.HashSet;
 import java.util.Locale;
 import java.util.Set;
 import java.util.TimeZone;
-
 import com.openexchange.calendar.itip.ITipRole;
 import com.openexchange.groupware.container.ExternalUserParticipant;
 import com.openexchange.groupware.container.Participant;
@@ -69,7 +68,7 @@ import com.openexchange.groupware.ldap.User;
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class NotificationParticipant {
+public class NotificationParticipant implements Cloneable {
         
     private Set<ITipRole> roles;
     private boolean external;

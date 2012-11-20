@@ -174,7 +174,7 @@ public final class FileStorageFolderIdentifier {
              * Have only service and account ID, so expect root folder
              */
             accountId = components.get(1);
-            if (accountId.length() == 0) {
+            if (isEmpty(accountId)) {
                 throw FolderExceptionErrorMessage.INVALID_FOLDER_ID.create(identifier);
             }
             folderId = MessagingFolder.ROOT_FULLNAME;
@@ -182,7 +182,7 @@ public final class FileStorageFolderIdentifier {
             fqn = IDMangler.mangle(serviceId, accountId, folderId);
         } else {
             accountId = components.get(1);
-            if (accountId.length() == 0) {
+            if (isEmpty(accountId)) {
                 throw FolderExceptionErrorMessage.INVALID_FOLDER_ID.create(identifier);
             }
             folderId = components.get(2);
@@ -293,6 +293,18 @@ public final class FileStorageFolderIdentifier {
             return false;
         }
         return true;
+    }
+
+    private static boolean isEmpty(final String string) {
+        if (null == string) {
+            return true;
+        }
+        final int len = string.length();
+        boolean isWhitespace = true;
+        for (int i = 0; isWhitespace && i < len; i++) {
+            isWhitespace = Character.isWhitespace(string.charAt(i));
+        }
+        return isWhitespace;
     }
 
 }

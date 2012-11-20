@@ -56,12 +56,12 @@ public final class ParallelsOpenApiServlet extends DataServlet {
         IOException {
 
         final Response response = new Response();
+        final Session session = getSessionObject(req);
 
         try {
 
             final String action = parseMandatoryStringParameter(req,PARAMETER_ACTION);
             final String module = parseMandatoryStringParameter(req,PARAMETER_MODULE);
-            final Session session = getSessionObject(req);
             JSONObject jsonObj;
 
             try {
@@ -69,7 +69,7 @@ public final class ParallelsOpenApiServlet extends DataServlet {
             } catch (final JSONException e) {
                 LOG.error(e.getMessage(), e);
                 response.setException(OXJSONExceptionCodes.JSON_BUILD_ERROR.create(e));
-                writeResponse(response, resp);
+                writeResponse(response, resp, session);
                 return;
             }
             final Context ctx = ContextStorage.getInstance().getContext(session);
@@ -86,7 +86,7 @@ public final class ParallelsOpenApiServlet extends DataServlet {
             response.setException(oje);
         }
 
-        writeResponse(response, resp);
+        writeResponse(response, resp, session);
 
     }
 

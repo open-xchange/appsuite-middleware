@@ -61,15 +61,29 @@ public class FileDiscoverer {
 
     private final File dir;
 
+    /**
+     * Initializes a new {@link FileDiscoverer}.
+     * 
+     * @param dir The directory
+     * @throws FileNotFoundException If directory could not be found
+     */
     public FileDiscoverer(final File dir) throws FileNotFoundException {
+        super();
         if (!dir.exists()) {
             throw new FileNotFoundException("Unable to load language files. Directory does not exist: " + dir);
-        } else if (dir.isFile()) {
+        }
+        if (dir.isFile()) {
             throw new FileNotFoundException("Unable to load language files." + dir + " is not a directory");
         }
         this.dir = dir;
     }
 
+    /**
+     * Gets the files with given file extension
+     * 
+     * @param extension The file extension; e.g. <code>".po"</code>
+     * @return The matching files
+     */
     public String[] getFilesFromLanguageFolder(final String extension) {
         final String[] files = dir.list(new FilenameFilter() {
 
@@ -81,25 +95,36 @@ public class FileDiscoverer {
         return files;
     }
 
-    public Locale getLocale(final String file) {
-        final int indexOfUnderscore = file.indexOf("_");
-        if (indexOfUnderscore == -1) {
+    /**
+     * Parses the locale from given file name; e.g. <code>"backend.<b>en_US</b>.po"</code>.
+     * 
+     * @param fileName The file name
+     * @return The parsed locale or <code>null</code>
+     */
+    public Locale getLocale(final String fileName) {
+        final int indexOfUnderscore = fileName.indexOf('_');
+        if (indexOfUnderscore < 0) {
             return null;
         }
-        final int indexOfLastDot = file.lastIndexOf(".");
+        final int indexOfLastDot = fileName.lastIndexOf('.');
         if (indexOfLastDot < indexOfUnderscore) {
             return null;
         }
-        final int indexOfDotBeforeUnderscore = file.lastIndexOf(".", indexOfUnderscore);
+        final int indexOfDotBeforeUnderscore = fileName.lastIndexOf('.', indexOfUnderscore);
 
         if (indexOfUnderscore != -1) {
-            return new Locale(file.substring(indexOfDotBeforeUnderscore + 1, indexOfUnderscore), file.substring(
-                indexOfUnderscore + 1,
-                indexOfLastDot));
+            final String language = fileName.substring(indexOfDotBeforeUnderscore + 1, indexOfUnderscore);
+            final String country = fileName.substring(indexOfUnderscore + 1, indexOfLastDot);
+            return new Locale(language, country);
         }
         return null;
     }
 
+    /**
+     * Gets the directory.
+     * 
+     * @return The directory
+     */
     public File getDirectory() {
         return dir;
     }

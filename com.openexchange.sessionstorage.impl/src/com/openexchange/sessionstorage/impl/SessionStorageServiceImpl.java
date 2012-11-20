@@ -50,10 +50,11 @@
 package com.openexchange.sessionstorage.impl;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import org.apache.commons.logging.Log;
 import com.openexchange.exception.OXException;
 import com.openexchange.session.Session;
@@ -68,7 +69,7 @@ import com.openexchange.sessionstorage.exceptions.OXSessionStorageExceptionCodes
  */
 public class SessionStorageServiceImpl implements SessionStorageService {
 
-    private final Map<String, StoredSession> sessions;
+    private final ConcurrentMap<String, StoredSession> sessions;
 
     private static Log LOG = com.openexchange.log.Log.loggerFor(SessionStorageServiceImpl.class);
 
@@ -80,10 +81,6 @@ public class SessionStorageServiceImpl implements SessionStorageService {
         sessions = new ConcurrentHashMap<String, StoredSession>();
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.sessionstore.SessionStorageService#lookup(java.lang.String, java.lang.String)
-     */
     @Override
     public Session lookupSession(String sessionId) throws OXException {
         StoredSession session = sessions.get(sessionId);
@@ -95,25 +92,32 @@ public class SessionStorageServiceImpl implements SessionStorageService {
         return session;
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.sessionstore.SessionStorageService#save(java.lang.String, java.lang.String)
-     */
+    @Override
+    public void addSessionsIfAbsent(Collection<Session> sessions) throws OXException {
+        if (null == sessions || sessions.isEmpty()) {
+            return;
+        }
+        final ConcurrentMap<String, StoredSession> map = this.sessions;
+        for (Session session : sessions) {
+            map.putIfAbsent(session.getSessionID(), new StoredSession(session));
+        }
+    }
+
+    @Override
+    public boolean addSessionIfAbsent(Session session) throws OXException {
+        return null == sessions.putIfAbsent(session.getSessionID(), new StoredSession(session));
+    }
+
     @Override
     public void addSession(Session session) throws OXException {
-        StoredSession saved = sessions.put(session.getSessionID(), new StoredSession(session));
+        StoredSession saved = sessions.putIfAbsent(session.getSessionID(), new StoredSession(session));
         if (saved != null) {
-            sessions.put(saved.getSessionId(), saved);
             OXException e = OXSessionStorageExceptionCodes.SESSIONSTORAGE_SAVE_FAILED.create("Duplicate session");
             LOG.error(e.getMessage(), e);
             throw e;
         }
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.sessionstore.SessionStorageService#remove(java.lang.String, java.lang.String)
-     */
     @Override
     public void removeSession(String sessionId) throws OXException {
         StoredSession session = sessions.remove(sessionId);
@@ -133,7 +137,7 @@ public class SessionStorageServiceImpl implements SessionStorageService {
                 retval.add(sessions.remove(sessionId));
             }
         }
-        return (Session[]) retval.toArray();
+        return retval.toArray(new Session[0]);
     }
 
     @Override
@@ -166,7 +170,7 @@ public class SessionStorageServiceImpl implements SessionStorageService {
                 userSessions.add(session);
             }
         }
-        return (Session[]) userSessions.toArray();
+        return userSessions.toArray(new Session[0]);
     }
 
     @Override

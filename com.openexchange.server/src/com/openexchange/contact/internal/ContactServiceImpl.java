@@ -81,6 +81,7 @@ import com.openexchange.threadpool.AbstractTask;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorAdapter;
+import com.openexchange.tools.oxfolder.OXFolderProperties;
 
 /**
  * {@link ContactServiceImpl}
@@ -166,7 +167,7 @@ public class ContactServiceImpl extends DefaultContactService {
 		 */
 		ContactMapper.getInstance().validateAll(contact);
 		if (contact.containsObjectID() && contact.getObjectID() > 0 && false == Integer.toString(contact.getObjectID()).equals(objectID)) {
-			throw ContactExceptionCodes.NO_CHANGE_PERMISSION.create(parse(objectID), contextID);
+			throw ContactExceptionCodes.NO_CHANGE_PERMISSION.create(Integer.valueOf(parse(objectID)), Integer.valueOf(contextID));
 		}
 		/*
 		 * check source folder
@@ -199,17 +200,17 @@ public class ContactServiceImpl extends DefaultContactService {
 		 */
 		final Contact delta = ContactMapper.getInstance().getDifferences(storedContact, contact);
 		if (delta.containsContextId() && delta.getContextId() > 0) {
-			throw ContactExceptionCodes.NO_CHANGE_PERMISSION.create(parse(objectID), contextID);
+			throw ContactExceptionCodes.NO_CHANGE_PERMISSION.create(Integer.valueOf(parse(objectID)), Integer.valueOf(contextID));
 		} else if (delta.containsObjectID() && delta.getObjectID() > 0) {
-			throw ContactExceptionCodes.NO_CHANGE_PERMISSION.create(parse(objectID), contextID);
+			throw ContactExceptionCodes.NO_CHANGE_PERMISSION.create(Integer.valueOf(parse(objectID)), Integer.valueOf(contextID));
 		} else if (delta.containsUid() && false == Tools.isEmpty(storedContact.getUid())) {
-			throw ContactExceptionCodes.NO_CHANGE_PERMISSION.create(parse(objectID), contextID);
+			throw ContactExceptionCodes.NO_CHANGE_PERMISSION.create(Integer.valueOf(parse(objectID)), Integer.valueOf(contextID));
 		} else if (delta.containsCreatedBy()) {
-			throw ContactExceptionCodes.NO_CHANGE_PERMISSION.create(parse(objectID), contextID);
+			throw ContactExceptionCodes.NO_CHANGE_PERMISSION.create(Integer.valueOf(parse(objectID)), Integer.valueOf(contextID));
 		} else if (delta.containsCreationDate()) {
-			throw ContactExceptionCodes.NO_CHANGE_PERMISSION.create(parse(objectID), contextID);
+			throw ContactExceptionCodes.NO_CHANGE_PERMISSION.create(Integer.valueOf(parse(objectID)), Integer.valueOf(contextID));
 		} else if (delta.containsPrivateFlag() && delta.getPrivateFlag() && storedContact.getModifiedBy() != userID) {
-			throw ContactExceptionCodes.NO_CHANGE_PERMISSION.create(parse(objectID), contextID);
+			throw ContactExceptionCodes.NO_CHANGE_PERMISSION.create(Integer.valueOf(parse(objectID)), Integer.valueOf(contextID));
 		}
 		/*
 		 * prepare update
@@ -269,6 +270,8 @@ public class ContactServiceImpl extends DefaultContactService {
 		new EventClient(session).modify(storedContact, contact, targetFolder);
 	}
 
+	private static final String GAB = Integer.toString(FolderObject.SYSTEM_LDAP_FOLDER_ID);
+
 	@Override
     protected void doUpdateContact(final Session session, final String folderID, final String objectID, final Contact contact, final Date lastRead) throws OXException {
 		final int userID = session.getUserId();
@@ -279,13 +282,23 @@ public class ContactServiceImpl extends DefaultContactService {
 		 */
 		Check.validateProperties(contact);
 		if (contact.containsObjectID() && contact.getObjectID() > 0 && false == Integer.toString(contact.getObjectID()).equals(objectID)) {
-			throw ContactExceptionCodes.NO_CHANGE_PERMISSION.create(parse(objectID), contextID);
+			throw ContactExceptionCodes.NO_CHANGE_PERMISSION.create(Integer.valueOf(parse(objectID)), Integer.valueOf(contextID));
 		}
 		/*
 		 * check general permissions
 		 */
-		final EffectivePermission permission = Tools.getPermission(contextID, folderID, userID);
-		Check.canWriteOwn(permission, session);
+		EffectivePermission permission = Tools.getPermission(contextID, folderID, userID);
+		try {
+            Check.canWriteOwn(permission, session);
+        } catch (OXException e) {
+            if (!GAB.equals(folderID) || !ContactExceptionCodes.NO_CHANGE_PERMISSION.equals(e) || !OXFolderProperties.isEnableInternalUsersEdit()) {
+                throw e;
+            }
+            OXFolderProperties.updatePermissions(true, contextID);
+            // check again
+            permission = Tools.getPermission(contextID, folderID, userID);
+            Check.canWriteOwn(permission, session);
+        }
 		/*
 		 * check currently stored contact
 		 */
@@ -308,19 +321,19 @@ public class ContactServiceImpl extends DefaultContactService {
 		 */
 		final Contact delta = ContactMapper.getInstance().getDifferences(storedContact, contact);
 		if (delta.containsContextId() && delta.getContextId() > 0) {
-			throw ContactExceptionCodes.NO_CHANGE_PERMISSION.create(parse(objectID), contextID);
+			throw ContactExceptionCodes.NO_CHANGE_PERMISSION.create(Integer.valueOf(parse(objectID)), Integer.valueOf(contextID));
 		} else if (delta.containsObjectID() && delta.getObjectID() > 0) {
-			throw ContactExceptionCodes.NO_CHANGE_PERMISSION.create(parse(objectID), contextID);
+			throw ContactExceptionCodes.NO_CHANGE_PERMISSION.create(Integer.valueOf(parse(objectID)), Integer.valueOf(contextID));
 		} else if (delta.containsUid() && false == Tools.isEmpty(storedContact.getUid())) {
-			throw ContactExceptionCodes.NO_CHANGE_PERMISSION.create(parse(objectID), contextID);
+			throw ContactExceptionCodes.NO_CHANGE_PERMISSION.create(Integer.valueOf(parse(objectID)), Integer.valueOf(contextID));
 		} else if (delta.containsCreatedBy()) {
-			throw ContactExceptionCodes.NO_CHANGE_PERMISSION.create(parse(objectID), contextID);
+			throw ContactExceptionCodes.NO_CHANGE_PERMISSION.create(Integer.valueOf(parse(objectID)), Integer.valueOf(contextID));
 		} else if (delta.containsCreationDate()) {
-			throw ContactExceptionCodes.NO_CHANGE_PERMISSION.create(parse(objectID), contextID);
+			throw ContactExceptionCodes.NO_CHANGE_PERMISSION.create(Integer.valueOf(parse(objectID)), Integer.valueOf(contextID));
 		} else if (delta.containsParentFolderID()) {
-			throw ContactExceptionCodes.NO_CHANGE_PERMISSION.create(parse(objectID), contextID);
+			throw ContactExceptionCodes.NO_CHANGE_PERMISSION.create(Integer.valueOf(parse(objectID)), Integer.valueOf(contextID));
 		} else if (delta.containsPrivateFlag() && delta.getPrivateFlag() && storedContact.getModifiedBy() != userID) {
-			throw ContactExceptionCodes.NO_CHANGE_PERMISSION.create(parse(objectID), contextID);
+			throw ContactExceptionCodes.NO_CHANGE_PERMISSION.create(Integer.valueOf(parse(objectID)), Integer.valueOf(contextID));
 		}
 		/*
 		 * prepare update
@@ -441,7 +454,7 @@ public class ContactServiceImpl extends DefaultContactService {
                 }
             }
             if (false == found) {
-                throw ContactExceptionCodes.CONTACT_NOT_FOUND.create(parse(objectID), contextID);
+                throw ContactExceptionCodes.CONTACT_NOT_FOUND.create(Integer.valueOf(parse(objectID)), Integer.valueOf(contextID));
             }
         }        
         /*

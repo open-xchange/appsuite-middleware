@@ -149,7 +149,7 @@ public final class IMAPException extends OXException {
          */
         FOLDER_DOES_NOT_HOLD_FOLDERS(IMAPCode.FOLDER_DOES_NOT_HOLD_FOLDERS),
         /**
-         * Mail folder cannot be created/rename. Name must not contain character '%1$s'
+         * Invalid folder name: "%1$s"
          */
         INVALID_FOLDER_NAME(IMAPCode.INVALID_FOLDER_NAME),
         /**
@@ -529,7 +529,7 @@ public final class IMAPException extends OXException {
          */
         FOLDER_DOES_NOT_HOLD_FOLDERS_EXT("Folder %1$s does not allow subfolders on server %2$s with login %3$s (user=%4$s, context=%5$s).", FOLDER_DOES_NOT_HOLD_FOLDERS),
         /**
-         * Mail folder cannot be created/rename. Name must not contain character '%1$s'
+         * Invalid folder name: "%1$s"
          */
         INVALID_FOLDER_NAME(MailExceptionCode.INVALID_FOLDER_NAME, null),
         /**

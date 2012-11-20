@@ -219,7 +219,11 @@ public final class Tools {
                     prefix = getPrefix(accountId, serverSession);
                     tmp = new StringBuilder(prefix);
                 } else {
-                    tmp.setLength(prefix.length());
+                    if (null == tmp) {
+                        tmp = new StringBuilder(prefix);
+                    } else {
+                        tmp.setLength(prefix.length());
+                    }
                 }
                 String name = account.getConfirmedSpam();
                 if (null == name) {
@@ -238,7 +242,11 @@ public final class Tools {
                     prefix = getPrefix(accountId, serverSession);
                     tmp = new StringBuilder(prefix);
                 } else {
-                    tmp.setLength(prefix.length());
+                    if (null == tmp) {
+                        tmp = new StringBuilder(prefix);
+                    } else {
+                        tmp.setLength(prefix.length());
+                    }
                 }
                 String name = account.getDrafts();
                 if (null == name) {
@@ -262,7 +270,11 @@ public final class Tools {
                     prefix = getPrefix(accountId, serverSession);
                     tmp = new StringBuilder(prefix);
                 } else {
-                    tmp.setLength(prefix.length());
+                    if (null == tmp) {
+                        tmp = new StringBuilder(prefix);
+                    } else {
+                        tmp.setLength(prefix.length());
+                    }
                 }
                 String name = account.getSent();
                 if (null == name) {
@@ -286,7 +298,11 @@ public final class Tools {
                     prefix = getPrefix(accountId, serverSession);
                     tmp = new StringBuilder(prefix);
                 } else {
-                    tmp.setLength(prefix.length());
+                    if (null == tmp) {
+                        tmp = new StringBuilder(prefix);
+                    } else {
+                        tmp.setLength(prefix.length());
+                    }
                 }
                 String name = account.getSpam();
                 if (null == name) {
@@ -310,7 +326,11 @@ public final class Tools {
                     prefix = getPrefix(accountId, serverSession);
                     tmp = new StringBuilder(prefix);
                 } else {
-                    tmp.setLength(prefix.length());
+                    if (null == tmp) {
+                        tmp = new StringBuilder(prefix);
+                    } else {
+                        tmp.setLength(prefix.length());
+                    }
                 }
                 String name = account.getTrash();
                 if (null == name) {

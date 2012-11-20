@@ -680,12 +680,12 @@ public class MailAccountPOP3Storage implements POP3Storage {
     }
 
     /**
-     * Checks whether a delete operation performed on storage also deletes affected message in POP3 account.
-     *
-     * @return <code>true</code> if delete-write-through is enabled; otherwise <code>false</code>
-     * @throws OXException If checking behavior fails
+     * Checks if delete-write-through option is enabled.
+     * 
+     * @return <code>true</code> if enabled; otherwise <code>false</code>
+     * @throws OXException If option cannot be determined
      */
-    private boolean isDeleteWriteThrough() throws OXException {
+    public boolean isDeleteWriteThrough() throws OXException {
         final String property = properties.getProperty(POP3StoragePropertyNames.PROPERTY_DELETE_WRITE_THROUGH);
         return null == property ? false : Boolean.parseBoolean(property.trim());
     }

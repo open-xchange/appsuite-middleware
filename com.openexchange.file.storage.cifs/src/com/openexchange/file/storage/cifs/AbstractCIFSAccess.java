@@ -49,10 +49,15 @@
 
 package com.openexchange.file.storage.cifs;
 
+import static java.text.MessageFormat.format;
+import java.io.IOException;
 import jcifs.smb.NtlmPasswordAuthentication;
 import jcifs.smb.SmbException;
 import jcifs.smb.SmbFile;
+import org.apache.commons.logging.Log;
 import com.openexchange.file.storage.FileStorageAccount;
+import com.openexchange.file.storage.cifs.cache.SmbFileMap;
+import com.openexchange.file.storage.cifs.cache.SmbFileMapManagement;
 import com.openexchange.session.Session;
 
 /**
@@ -61,6 +66,8 @@ import com.openexchange.session.Session;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public abstract class AbstractCIFSAccess {
+
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(AbstractCIFSAccess.class);
 
     /**
      * The string constant for <code>'/'</code> character.
@@ -99,6 +106,28 @@ public abstract class AbstractCIFSAccess {
     }
 
     /**
+     * Gets the associated SMB file.
+     * 
+     * @param path The path
+     * @return The SMB file; either newly created or fetched from cache
+     * @throws IOException If an I/O error occurs in case of newly created SMB file
+     */
+    protected SmbFile getSmbFile(final String path) throws IOException {
+        // Check in map
+        final SmbFileMap smbFileMap = SmbFileMapManagement.getInstance().getFor(session);
+        SmbFile smbFile = smbFileMap.get(path);
+        if (null == smbFile) {
+            // The associated SMB file
+            final SmbFile newSmbFolder = new SmbFile(path, auth);
+            smbFile = smbFileMap.putIfAbsent(newSmbFolder);
+            if (null == smbFile) {
+                smbFile = newSmbFolder;
+            }
+        }
+        return smbFile;
+    }
+
+    /**
      * Checks for existence of specified SMB file.
      * 
      * @param smbFolder The CIFS/SMB file
@@ -127,6 +156,14 @@ public abstract class AbstractCIFSAccess {
     protected boolean indicatesNotReadable(final SmbException e) {
         final String message = e.getMessage();
         if (message.startsWith("Invalid operation") || "Access is denied.".equals(message) || "Failed to connect to server".equals(message)) {
+            return true;
+        } else if (message.startsWith("0x")) {
+            // Unspecified error occurred
+            if (LOG.isDebugEnabled()) {
+                LOG.warn(format("Unspecified error received from CIFS/SMB server \"{0}\" for login {1}: {2}", rootUrl, auth.getUsername() ,message), e);
+            } else {
+                LOG.warn(format("Unspecified error received from CIFS/SMB server \"{0}\" for login {1}: {2}", rootUrl, auth.getUsername() ,message));
+            }
             return true;
         }
         return false;

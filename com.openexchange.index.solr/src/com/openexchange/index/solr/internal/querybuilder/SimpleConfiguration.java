@@ -11,6 +11,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.regex.Pattern;
 import org.apache.commons.logging.Log;
 
 /**
@@ -26,9 +27,9 @@ import org.apache.commons.logging.Log;
  * @author Sven Maurmann
  */
 public class SimpleConfiguration implements Configuration {
-  private Map<String,String> rawMapping;
-  private Map<String,List<String>> dictionary;
-  private Map<String,String> translators;
+  private final Map<String,String> rawMapping;
+  private final Map<String,List<String>> dictionary;
+  private final Map<String,String> translators;
 
   private static Log log = com.openexchange.log.Log.loggerFor(SimpleConfiguration.class);
 
@@ -38,13 +39,14 @@ public class SimpleConfiguration implements Configuration {
     rawMapping  = new HashMap<String,String>();
     translators = new HashMap<String,String>();
 
+    BufferedReader reader = null;
     try {
-      BufferedReader reader = new BufferedReader(new FileReader(new File(configPath)));
+      reader = new BufferedReader(new FileReader(new File(configPath)));
+      final Pattern pattern = Pattern.compile("=");
       int lineCount = 0;
-      while (reader.ready()) {
-        String line = reader.readLine();
+      for (String line = reader.readLine(); null != line; line = reader.readLine()) {
         lineCount++;
-        String[] parts = line.split("=");
+        String[] parts = pattern.split(line);
         if (parts.length != 2) {
           log.warn("[SimpleConfiguration]: Invalid line " + lineCount + ": " + line);
           continue;
@@ -79,41 +81,60 @@ public class SimpleConfiguration implements Configuration {
       log.error("[SimpleConfiguration]: Error during instantiation: " + e.getMessage());
       throw new BuilderException(e);
     }
+    finally {
+        if (null != reader) {
+            try {
+                reader.close();
+            } catch (Exception e) {
+                // Ignore
+            }
+        }
+    }
   }
 
-  public List<String> getIndexFields(String key) {
+  @Override
+public List<String> getIndexFields(String key) {
     return dictionary.get(key);
   }
 
-  public Set<String> getKeys() {
+  @Override
+public Set<String> getKeys() {
     return dictionary.keySet();
   }
 
-  public Set<String> getKeys(String handlerName) {
+  @Override
+public Set<String> getKeys(String handlerName) {
     Set<String> dictKeys = new HashSet<String>();
     for (String key : dictionary.keySet()) {
-      if (key.startsWith(handlerName)) dictKeys.add(key);
+      if (key.startsWith(handlerName)) {
+        dictKeys.add(key);
+    }
     }
     return dictKeys;
   }
 
-  public Map<String,String> getRawMapping() {
+  @Override
+public Map<String,String> getRawMapping() {
     return this.rawMapping;
   }
 
-  public Map<String,String> getTranslatorMap() {
+  @Override
+public Map<String,String> getTranslatorMap() {
     return this.translators;
   }
 
-  public boolean haveTranslatorForHandler(String handler) {
+  @Override
+public boolean haveTranslatorForHandler(String handler) {
     return translators.containsKey(handler);
   }
 
-  public String getTranslatorForHandler(String handler) {
+  @Override
+public String getTranslatorForHandler(String handler) {
     return translators.get(handler);
   }
 
-  public Set<String> getHandlers() {
+  @Override
+public Set<String> getHandlers() {
     return translators.keySet();
   }
 

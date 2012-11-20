@@ -102,7 +102,7 @@ public class Quota extends SessionServlet {
             LOG.error(e.getMessage(), e);
             response.setException(e);
         }
-        writeResponse(response, res);
+        writeResponse(response, res, session);
 	}
 
 }

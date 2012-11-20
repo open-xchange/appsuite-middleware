@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2020 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2012 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,20 +47,26 @@
  *
  */
 
-package com.openexchange.tools.stream;
+package com.openexchange.sessionstorage.hazelcast.exceptions;
 
+import com.openexchange.i18n.LocalizableStrings;
 
 /**
- * {@link Flagged}
- *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * {@link OXHazelcastSessionStorageExceptionMessages}
+ * 
+ * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  */
-public interface Flagged {
+public class OXHazelcastSessionStorageExceptionMessages implements LocalizableStrings {
+
+    public static final String HAZELCAST_SESSIONSTORAGE_NO_ENCRYPTION_KEY_MSG = "Could not find encryption key.";
+
+    public final static String HAZELCAST_SESSIONSTORAGE_CONFIG_FILE_MSG = "Error in config file.";
 
     /**
-     * Tests if this I/O resource is flagged.
-     * 
-     * @return <code>true</code> if flagged; otherwise <code>false</code>
+     * Initializes a new {@link OXHazelcastSessionStorageExceptionMessages}.
      */
-    boolean isFlagged();
+    private OXHazelcastSessionStorageExceptionMessages() {
+        super();
+    }
+
 }

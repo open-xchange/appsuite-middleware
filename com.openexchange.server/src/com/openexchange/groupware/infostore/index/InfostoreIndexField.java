@@ -104,7 +104,8 @@ public enum InfostoreIndexField implements IndexField {
     }
     
     public static InfostoreIndexField getByMetadateField(int metadataField) {
-        return mapping.get(metadataField);
+        final Metadata key = Metadata.get(metadataField);
+        return null == key ? null : mapping.get(key);
     }
 
 }

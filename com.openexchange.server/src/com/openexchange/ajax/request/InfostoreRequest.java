@@ -309,19 +309,19 @@ public class InfostoreRequest extends CommonRequest {
             }
             return false;
         } catch (final JSONException x) {
-            handle(x);
+            handle(x, session);
             return true;
         } catch (final UnknownMetadataException x) {
-            handle(x);
+            handle(x, session);
             return true;
         } catch (final OXException x) {
-            handle(x);
+            handle(x, session);
             return true;
         } catch (final NumberFormatException x) {
-            handle(x);
+            handle(x, session);
             return true;
         } catch (final Throwable t) {
-            handle(t);
+            handle(t, session);
             return true;
         } finally {
             ThreadLocalSessionHolder.getInstance().clear();
@@ -495,7 +495,7 @@ public class InfostoreRequest extends CommonRequest {
             iWriter.endTimedResult();
 
         } catch (final Throwable t) {
-            handle(t);
+            handle(t, session);
 
         } finally {
             if (iter != null) {
@@ -518,7 +518,7 @@ public class InfostoreRequest extends CommonRequest {
                 sendErrorAsJS("Cannot find document: %s ", Integer.toString(id));
             }
         } catch (final Throwable t) {
-            handle(t);
+            handle(t, session);
             return;
         }
 
@@ -573,7 +573,7 @@ public class InfostoreRequest extends CommonRequest {
             } catch (final OXException e) {
                 LOG.debug("", e);
             }
-            handle(t);
+            handle(t, session);
             return;
         } finally {
             if (iter != null) {
@@ -624,7 +624,7 @@ public class InfostoreRequest extends CommonRequest {
             iWriter.endTimedResult();
 
         } catch (final Throwable t) {
-            handle(t);
+            handle(t, session);
             return;
         } finally {
             if (iter != null) {
@@ -657,7 +657,7 @@ public class InfostoreRequest extends CommonRequest {
             iWriter.endTimedResult();
 
         } catch (final Throwable t) {
-            handle(t);
+            handle(t, session);
             return;
         } finally {
             if (iter != null) {
@@ -783,7 +783,7 @@ public class InfostoreRequest extends CommonRequest {
             iWriter.endTimedResult();
 
         } catch (final Throwable t) {
-            handle(t);
+            handle(t, session);
             return;
         } finally {
             if (iter != null) {
@@ -826,7 +826,7 @@ public class InfostoreRequest extends CommonRequest {
                 try {
                     infostore.rollback();
                     searchEngine.rollback();
-                    handle(t);
+                    handle(t, session);
                     return;
                 } catch (final OXException e) {
                     LOG.error("", e);
@@ -891,7 +891,7 @@ public class InfostoreRequest extends CommonRequest {
                 } catch (final OXException e) {
                     LOG.error("", e);
                 }
-                handle(t);
+                handle(t, session);
                 return;
             } finally {
                 try {
@@ -942,7 +942,7 @@ public class InfostoreRequest extends CommonRequest {
             } catch (final OXException e) {
                 LOG.error("", e);
             }
-            handle(t);
+            handle(t, session);
             return;
         } finally {
             try {
@@ -1018,7 +1018,7 @@ public class InfostoreRequest extends CommonRequest {
             } catch (final OXException e) {
                 LOG.error("", e);
             }
-            handle(t);
+            handle(t, session);
             return;
         } finally {
             try {
@@ -1073,7 +1073,7 @@ public class InfostoreRequest extends CommonRequest {
             } catch (final OXException e) {
                 LOG.error("", e);
             }
-            handle(t);
+            handle(t, session);
             return;
         } finally {
             try {
@@ -1137,7 +1137,7 @@ public class InfostoreRequest extends CommonRequest {
             } catch (final OXException e) {
                 LOG.error("", e);
             }
-            handle(t);
+            handle(t, session);
             return;
         } finally {
             try {
@@ -1186,7 +1186,7 @@ public class InfostoreRequest extends CommonRequest {
             } catch (final OXException e) {
                 LOG.error("", e);
             }
-            handle(t);
+            handle(t, session);
         } finally {
             try {
                 infostore.finish();
@@ -1223,7 +1223,7 @@ public class InfostoreRequest extends CommonRequest {
             } catch (final OXException e) {
                 LOG.error("", e);
             }
-            handle(t);
+            handle(t, session);
         } finally {
             try {
                 infostore.finish();
@@ -1260,7 +1260,7 @@ public class InfostoreRequest extends CommonRequest {
             } catch (final OXException x) {
                 LOG.debug("", x);
             }
-            handle(t);
+            handle(t, session);
         } finally {
             try {
                 searchEngine.finish();

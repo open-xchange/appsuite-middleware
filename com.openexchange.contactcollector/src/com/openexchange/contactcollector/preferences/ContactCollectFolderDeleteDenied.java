@@ -47,29 +47,53 @@
  *
  */
 
-package com.openexchange.sessionstorage.nosql.osgi;
+package com.openexchange.contactcollector.preferences;
 
-import com.openexchange.osgi.ServiceRegistry;
-
+import com.openexchange.config.ConfigurationService;
+import com.openexchange.contactcollector.osgi.CCServiceRegistry;
+import com.openexchange.exception.OXException;
+import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.ldap.User;
+import com.openexchange.groupware.settings.IValueHandler;
+import com.openexchange.groupware.settings.PreferencesItemService;
+import com.openexchange.groupware.settings.ReadOnlyValue;
+import com.openexchange.groupware.settings.Setting;
+import com.openexchange.groupware.userconfiguration.UserConfiguration;
+import com.openexchange.session.Session;
 
 /**
- * {@link NoSQLServiceRegistry}
+ * {@link ContactCollectFolderDeleteDenied}
  *
- * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class NoSQLServiceRegistry extends ServiceRegistry {
-    
-    private static ServiceRegistry registry = new ServiceRegistry();
+public class ContactCollectFolderDeleteDenied implements PreferencesItemService {
 
-    /**
-     * Initializes a new {@link NoSQLServiceRegistry}.
-     */
-    private NoSQLServiceRegistry() {
+    private static final String[] PATH = new String [] { "modules", "mail", "contactCollectFolderDeleteDenied" };
+
+    public ContactCollectFolderDeleteDenied() {
         super();
     }
-    
-    public static ServiceRegistry getRegistry() {
-        return registry;
+
+    @Override
+    public String[] getPath() {
+        return PATH;
     }
 
+    @Override
+    public IValueHandler getSharedValue() {
+        return new ReadOnlyValue() {
+
+            @Override
+            public void getValue(final Session session, final Context ctx, final User user, final UserConfiguration userConfig, final Setting setting) throws OXException {
+                final ConfigurationService service = CCServiceRegistry.getInstance().getOptionalService(ConfigurationService.class);
+                final Boolean value = Boolean.valueOf(null != service && service.getBoolProperty("com.openexchange.contactcollector.folder.deleteDenied", false));
+                setting.setSingleValue(value);
+            }
+
+            @Override
+            public boolean isAvailable(final UserConfiguration userConfig) {
+                return true;
+            }
+        };
+    }
 }

@@ -189,6 +189,12 @@ if [ ${1:-0} -eq 2 ]; then
     # prevent bash from expanding, see bug 13316
     GLOBIGNORE='*'
 
+    # SoftwareChange_Request-1184
+    pfile=/opt/open-xchange/etc/file-logging.properties
+    if ! ox_exists_property com.hazelcast.level $pfile; then
+       ox_set_property com.hazelcast.level SEVERE $pfile
+    fi
+
     # SoftwareChange_Request-1167
     pfile=/opt/open-xchange/etc/contact.properties
     if ! ox_exists_property "com.openexchange.contact.scaleVCardImages" $pfile; then
@@ -243,14 +249,28 @@ fi
 %doc com.openexchange.server/ChangeLog
 
 %changelog
+* Wed Nov 14 2012 Marcus Klein <marcus.klein@open-xchange.com>
+Sixth release candidate for 6.22.1
+* Tue Nov 13 2012 Marcus Klein <marcus.klein@open-xchange.com>
+Fifth release candidate for 6.22.1
+* Tue Nov 06 2012 Marcus Klein <marcus.klein@open-xchange.com>
+Fourth release candidate for 6.22.1
 * Mon Nov 05 2012 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2012-10-31
+* Fri Nov 02 2012 Marcus Klein <marcus.klein@open-xchange.com>
+Third release candidate for 6.22.1
+* Wed Oct 31 2012 Marcus Klein <marcus.klein@open-xchange.com>
+Second release candidate for 6.22.1
 * Wed Oct 31 2012 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2012-10-31
 * Tue Oct 30 2012 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2012-10-29
 * Fri Oct 26 2012 Marcus Klein <marcus.klein@open-xchange.com>
 Third release build for EDP drop #5
+* Fri Oct 26 2012 Marcus Klein <marcus.klein@open-xchange.com>
+First release candidate for 6.22.1
+* Fri Oct 26 2012 Marcus Klein <marcus.klein@open-xchange.com>
+prepare for 6.22.1
 * Fri Oct 26 2012 Marcus Klein <marcus.klein@open-xchange.com>
 Second release build for EDP drop #5
 * Thu Oct 11 2012 Marcus Klein <marcus.klein@open-xchange.com>

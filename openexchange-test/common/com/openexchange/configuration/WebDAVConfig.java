@@ -81,8 +81,12 @@ public class WebDAVConfig extends AbstractConfig {
     public static void init() throws OXException {
         TestConfig.init();
         if (null == singleton) {
-            singleton = new WebDAVConfig();
-            singleton.loadPropertiesInternal();
+            synchronized (WebDAVConfig.class) {
+                if (null == singleton) {
+                    singleton = new WebDAVConfig();
+                    singleton.loadPropertiesInternal();
+                }
+            }
         }
     }
 

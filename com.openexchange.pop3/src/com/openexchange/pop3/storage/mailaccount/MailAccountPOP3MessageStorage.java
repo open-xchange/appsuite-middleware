@@ -284,17 +284,27 @@ public class MailAccountPOP3MessageStorage implements IMailMessageStorage {
         // Invoke with fast=false to be able to update UIDLs
         final String[] newMailIds = delegatee.moveMessages(realSourceFullname, realDestFullname, mailIDs, false);
         // Update UIDL map
-        final List<String> uidls = new ArrayList<String>(mailIDs.length);
-        final List<FullnameUIDPair> pairs = new ArrayList<FullnameUIDPair>(mailIDs.length);
-        for (int i = 0; i < mailIDs.length; i++) {
-            final String mailID = mailIDs[i];
-            final String uidl = uidlMap.getUIDL(new FullnameUIDPair(sourceFolder, mailID));
-            if (null != uidl) {
-                uidls.add(uidl);
-                pairs.add(new FullnameUIDPair(destFolder, newMailIds[i]));
+        if (storage.isDeleteWriteThrough() && getFolderStorage().getTrashFolder().equals(destFolder)) {
+            // Look-up UIDLs for mail IDs
+            final Set<String> cleanedUIDLs = getContainedUIDLs(sourceFolder, mailIDs);
+            if (!cleanedUIDLs.isEmpty()) {
+                // Clean from UIDL map
+                uidlMap.deleteUIDLMappings(cleanedUIDLs.toArray(new String[cleanedUIDLs.size()]));
+                trashContainer.addAllUIDL(cleanedUIDLs);
             }
+        } else {
+            final List<String> uidls = new ArrayList<String>(mailIDs.length);
+            final List<FullnameUIDPair> pairs = new ArrayList<FullnameUIDPair>(mailIDs.length);
+            for (int i = 0; i < mailIDs.length; i++) {
+                final String mailID = mailIDs[i];
+                final String uidl = uidlMap.getUIDL(new FullnameUIDPair(sourceFolder, mailID));
+                if (null != uidl) {
+                    uidls.add(uidl);
+                    pairs.add(new FullnameUIDPair(destFolder, newMailIds[i]));
+                }
+            }
+            uidlMap.addMappings(uidls.toArray(new String[uidls.size()]), pairs.toArray(new FullnameUIDPair[pairs.size()]));
         }
-        uidlMap.addMappings(uidls.toArray(new String[uidls.size()]), pairs.toArray(new FullnameUIDPair[pairs.size()]));
         // Return
         return fast ? new String[0] : newMailIds;
     }

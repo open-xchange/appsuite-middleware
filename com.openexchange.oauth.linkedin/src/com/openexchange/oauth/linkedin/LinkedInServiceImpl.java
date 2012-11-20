@@ -182,6 +182,11 @@ public class LinkedInServiceImpl implements LinkedInService{
     	if (response == null) {
     		return Collections.emptyList();
     	}
+        // FIXME: Error handling via exception is completely missing... :-(
+        // at least log anything here
+        if( response.getCode() != 200 ) {
+            LOG.error(response.getBody());
+        }
     	final LinkedInXMLParser parser = new LinkedInXMLParser();
         final List<Contact> contacts = parser.parseConnections(response.getBody());
         return contacts;

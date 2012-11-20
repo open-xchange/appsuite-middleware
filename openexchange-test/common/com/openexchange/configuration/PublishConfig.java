@@ -63,7 +63,7 @@ public class PublishConfig extends AbstractConfig {
 
     public static final String TEMPLATE_PATH = "publishTemplatePath";
 
-    private static PublishConfig singleton;
+    private static volatile PublishConfig singleton;
 
     /**
      * {@inheritDoc}
@@ -84,8 +84,12 @@ public class PublishConfig extends AbstractConfig {
     public static PublishConfig init() throws OXException {
         TestConfig.init();
         if (null == singleton) {
-            singleton = new PublishConfig();
-            singleton.loadPropertiesInternal();
+            synchronized (PublishConfig.class) {
+                if (null == singleton) {
+                    singleton = new PublishConfig();
+                    singleton.loadPropertiesInternal();
+                }
+            }
         }
         return singleton;
     }

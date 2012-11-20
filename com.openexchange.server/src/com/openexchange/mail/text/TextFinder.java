@@ -149,7 +149,7 @@ public final class TextFinder {
                         content = new Renderer(new Segment(new Source(content), 0, content.length())).setMaxLineLength(9999).setIncludeHyperlinkURLs(false).toString();
                     } catch (StackOverflowError e) {
                         LOG.warn("StackOverflowError while rendering html content. Returning null.");
-                        content = null;
+                        content = extractPlainText(content);
                     } catch (Throwable t) {
                         LOG.warn("Error while rendering html content. Returning null.", t);
                         content = null;
