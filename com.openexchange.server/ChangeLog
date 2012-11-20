@@ -1,6 +1,7 @@
 * 2012-11-20 - thorben.betten@open-xchange.com
 
  - Fix for bug 23812: Added necessary import to MANIFEST.MF
+ - Fix for bug 23828: Added entry to suppress logging of SOAP requests/responses
 
 * 2012-11-18 - thorben.betten@open-xchange.com
 
