@@ -355,7 +355,9 @@ public class HazelcastJobStore implements JobStore {
             }
             
             ISet<TriggerKey> triggers = triggersByJobKey.get(jobKey);
-            removeTriggers(new ArrayList<TriggerKey>(triggers));
+            if (triggers != null) {
+                removeTriggers(new ArrayList<TriggerKey>(triggers));
+            }
         } finally {
             lock.unlock();
         }

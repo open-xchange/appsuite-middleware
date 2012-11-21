@@ -371,21 +371,15 @@ public class DelegationSolrAccessImpl implements SolrAccessService {
                         throw SolrExceptionCodes.DELEGATION_ERROR.create(e);
                     }
                 } else {
-                    Member elected = electCoreOwner(hazelcast, identifier);
-                    FutureTask<String> task = new DistributedTask<String>(new StartCoreCallable(identifier, SolrCoreTools.resolveSocketAddress(elected.getInetSocketAddress())), elected);
-                    ExecutorService executorService = hazelcast.getExecutorService();
-                    executorService.execute(task);
                     try {
-                        String electedAddress = SolrCoreTools.resolveSocketAddress(elected.getInetSocketAddress());
-                        task.get();
-                        SolrCoreTools.incrementCoreCount(hazelcast, elected);                        
-                        solrCores.put(identifier.toString(), electedAddress);
-                        
-                        return getRMIAccess(electedAddress);
-                    } catch (InterruptedException e) {
-                        throw SolrExceptionCodes.DELEGATION_ERROR.create(e);
-                    } catch (ExecutionException e) {
-                        throw SolrExceptionCodes.DELEGATION_ERROR.create(e);
+                        return startRemoteCore(solrCores, hazelcast, identifier);
+                    } catch (OXException e) {
+                        if (SolrExceptionCodes.CORE_NOT_STARTED.equals(e)) {
+                            // Retry
+                            return startRemoteCore(solrCores, hazelcast, identifier);
+                        } else {
+                            throw e;
+                        }
                     }
                 }
             } else if (owner.equals(ownAddress)) {
@@ -400,18 +394,46 @@ public class DelegationSolrAccessImpl implements SolrAccessService {
                         solrCores.remove(identifier.toString());
                         throw SolrExceptionCodes.DELEGATION_ERROR.create(t);
                     }
-                }                
+                }
             }
             
-            return getRMIAccess(owner);
+            try {
+                return getRMIAccess(identifier, owner);
+            } catch (OXException e) {
+                if (SolrExceptionCodes.CORE_NOT_STARTED.equals(e)) {
+                    // Retry
+                    return startRemoteCore(solrCores, hazelcast, identifier);
+                } else {
+                    throw e;
+                }
+            }
         } finally {
+            solrCores.unlock(identifier.toString());
             if (LOG.isDebugEnabled()) {
                 LOG.debug(Thread.currentThread().getName() + " released the lock for core " + identifier.toString() + ".");
                 long diff = System.currentTimeMillis() - start;
                 LOG.debug("getDelegate() lasted " + diff + "ms.");
             }
-            solrCores.unlock(identifier.toString());
-        }        
+        }
+    }
+    
+    private SolrAccessServiceRmiWrapper startRemoteCore(IMap<String, String> solrCores, HazelcastInstance hazelcast, SolrCoreIdentifier identifier) throws OXException {
+        Member elected = electCoreOwner(hazelcast, identifier);
+        FutureTask<String> task = new DistributedTask<String>(new StartCoreCallable(identifier, SolrCoreTools.resolveSocketAddress(elected.getInetSocketAddress())), elected);
+        ExecutorService executorService = hazelcast.getExecutorService();
+        executorService.execute(task);
+        try {
+            String electedAddress = SolrCoreTools.resolveSocketAddress(elected.getInetSocketAddress());
+            task.get();
+            SolrCoreTools.incrementCoreCount(hazelcast, elected);                        
+            solrCores.put(identifier.toString(), electedAddress);
+            
+            return getRMIAccess(identifier, electedAddress);
+        } catch (InterruptedException e) {
+            throw SolrExceptionCodes.DELEGATION_ERROR.create(e);
+        } catch (ExecutionException e) {
+            throw SolrExceptionCodes.DELEGATION_ERROR.create(e);
+        }
     }
 
     private Member electCoreOwner(HazelcastInstance hazelcast, SolrCoreIdentifier identifier) throws OXException {
@@ -468,13 +490,13 @@ public class DelegationSolrAccessImpl implements SolrAccessService {
 
     private static ConcurrentMap<String, RMISolrAccessService> rmiCache = new ConcurrentHashMap<String, RMISolrAccessService>();
 
-    private SolrAccessService getRMIAccess(String server) throws OXException {
+    private SolrAccessServiceRmiWrapper getRMIAccess(SolrCoreIdentifier identifier, String server) throws OXException {
         RMISolrAccessService rmiAccess = rmiCache.get(server);
         if (rmiAccess == null) {
             rmiAccess = updateRmiCache(server);
         } else {
             try {
-                rmiAccess.pingRmi();
+                rmiAccess.pingRmi(identifier);
             } catch (RemoteException e) {
                 rmiAccess = updateRmiCache(server);
                 if (LOG.isDebugEnabled()) {

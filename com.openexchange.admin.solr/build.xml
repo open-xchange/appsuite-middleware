@@ -20,31 +20,4 @@
         <chmod perm="755" file="${sbinInstallDir}/changecorestore" />
 	</target>
 
-	<target name="patchAndInstallScripts" depends="moveAndPatchScripts">
-		<property name="sbinInstallDir" value="${destDir}/${prefix}/${sbinDir}" />
-		<copy todir="${sbinInstallDir}" overwrite="true">
-			<fileset dir="${patchSbinDir}" />
-		</copy>
-		<chmod perm="755" file="${sbinInstallDir}/registercorestore" />
-		<antcall target="createLinks" />
-	</target>
-
-	<target name="moveAndPatchScripts">
-		<mkdir dir="${patchSbinDir}" />
-		<copy todir="${patchSbinDir}" overwrite="true">
-			<fileset dir="${sbinDir}" />
-			<mapper type="glob" from="*.in" to="*"/>
-		</copy>
-	</target>
-
-	<target name="createLinks">
-	    <symlink resource="${prefix}/${sbinDir}/registercorestore" link="${destDir}/${prefix}/${sbinDir}/unregistercorestore" overwrite="true" />
-	    <symlink resource="${prefix}/${sbinDir}/registercorestore" link="${destDir}/${prefix}/${sbinDir}/listcorestore" overwrite="true" />
-	    <symlink resource="${prefix}/${sbinDir}/registercorestore" link="${destDir}/${prefix}/${sbinDir}/changecorestore" overwrite="true" />
-	</target>
-
-	<target name="postClean">
-		<delete dir="${tmpDir}" />
-	</target>
-
 </project>
