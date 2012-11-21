@@ -54,6 +54,7 @@ import org.glassfish.grizzly.comet.CometAddOn;
 import org.glassfish.grizzly.http.HttpRequestPacket;
 import org.glassfish.grizzly.http.server.HttpServer;
 import org.glassfish.grizzly.http.server.NetworkListener;
+import org.glassfish.grizzly.http.server.ServerConfiguration;
 import org.glassfish.grizzly.nio.transport.TCPNIOTransport;
 import org.glassfish.grizzly.nio.transport.TCPNIOTransportBuilder;
 import org.glassfish.grizzly.threadpool.ThreadPoolConfig;
@@ -156,27 +157,19 @@ public class GrizzlyActivator extends HousekeepingActivator {
             final boolean hasJMXEnabled = configService.getBoolProperty("com.openexchange.http.grizzly.hasJMXEnabled", false);
             final boolean hasWebsocketsEnabled = configService.getBoolProperty("com.openexchange.http.grizzly.hasWebSocketsEnabled", false);
             final boolean hasCometEnabled = configService.getBoolProperty("com.openexchange.http.grizzly.hasCometEnabled", false);
-            final int tcpNioTranportThreadPoolQueueLimit = configService.getIntProperty(
-                "com.openexchange.http.grizzly.tcpNioTranportThreadPoolQueueLimit",
-                -1);
-            final int tcpNioTranportThreadPoolMinSize = configService.getIntProperty(
-                "com.openexchange.http.grizzly.tcpNioTranportThreadPoolMinSize",
-                5);
-            final int tcpNioTranportThreadPoolMaxSize = configService.getIntProperty(
-                "com.openexchange.http.grizzly.tcpNioTranportThreadPoolMaxSize",
-                5);
+            final int maxRequestParameters = configService.getIntProperty("com.openexchange.http.grizzly.maxRequestParameters", 30);
 
             /*
              * create, configure and start server
              */
             grizzly = new HttpServer();
+            
+            ServerConfiguration serverConfiguration = grizzly.getServerConfiguration();
+            serverConfiguration.setMaxRequestParameters(maxRequestParameters);
 
             final NetworkListener networkListener = new NetworkListener("http-listener", httpHost, 8080);
             // networkListener.setChunkingEnabled(false);
-            TCPNIOTransport configuredTcpNioTransport = buildTcpNioTransport(
-                tcpNioTranportThreadPoolQueueLimit,
-                tcpNioTranportThreadPoolMinSize,
-                tcpNioTranportThreadPoolMaxSize);
+            TCPNIOTransport configuredTcpNioTransport = buildTcpNioTransport();
             networkListener.setTransport(configuredTcpNioTransport);
 
             if (hasJMXEnabled) {
@@ -286,34 +279,18 @@ public class GrizzlyActivator extends HousekeepingActivator {
     }
 
     /**
-     * Build a TCPNIOTransport based on the config from grizzly.properties
+     * Build a TCPNIOTransport using {c.o].threadpool
      * 
-     * @param tcpNioTranportThreadPoolQueueLimit The queueLimit for incoming tasks
-     * @param tcpNioTranportThreadPoolMinSize The minimal number of worker threads
-     * @param tcpNioTranportThreadPoolMaxSize The maximum number of worker threads
      * @return The configure TCPNIOTransport
      * @throws OXException If the Transport can't be build
      */
-    private TCPNIOTransport buildTcpNioTransport(int tcpNioTranportThreadPoolQueueLimit, int tcpNioTranportThreadPoolMinSize, int tcpNioTranportThreadPoolMaxSize) throws OXException {
+    private TCPNIOTransport buildTcpNioTransport() throws OXException {
         ThreadPoolService threadPoolService = getService(ThreadPoolService.class);
         if(threadPoolService == null) {
             throw GrizzlyExceptionCode.NEEDED_SERVICE_MISSING.create(ThreadPoolService.class.getSimpleName());
         }
-        int minPoolSize = 0, maxPoolSize = 0;
-        int availableProcessors = Runtime.getRuntime().availableProcessors();
-
-        // make sure minimum poolsize is at least equal to number of processors
-        minPoolSize = availableProcessors > 5 ? availableProcessors : 5;
-        minPoolSize = minPoolSize > tcpNioTranportThreadPoolMinSize ? minPoolSize : tcpNioTranportThreadPoolMinSize;
-        
-        // maximum pool size has to be >= minimum pool size, otherwise fixd Threadpool with maximum size = minimum size
-        maxPoolSize = tcpNioTranportThreadPoolMaxSize > minPoolSize ? tcpNioTranportThreadPoolMaxSize : minPoolSize;
-
         TCPNIOTransportBuilder builder = TCPNIOTransportBuilder.newInstance();
-        final ThreadPoolConfig config = builder.getWorkerThreadPoolConfig();
-        config.setQueueLimit(tcpNioTranportThreadPoolQueueLimit).setCorePoolSize(minPoolSize).setMaxPoolSize(maxPoolSize);
         final TCPNIOTransport transport = builder.build();
-
         ExecutorService executor = GrizzlOXExecutorService.createInstance();
         transport.setWorkerThreadPool(executor);
         return transport;
