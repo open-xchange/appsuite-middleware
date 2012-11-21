@@ -200,7 +200,7 @@ public class SmalSessionEventHandler implements EventHandler {
     
     private void scheduleFolderJobs(Session session, Map<Integer, Set<MailFolder>> allFolders, MailAccountStorageService storageService, IndexingService indexingService) throws OXException {
         int contextId = session.getContextId();
-        int userId = session.getUserId();        
+        int userId = session.getUserId();
         for (Integer accountId : allFolders.keySet()) {
             MailAccount account = storageService.getMailAccount(accountId.intValue(), userId, contextId);
             Set<MailFolder> folders = allFolders.get(accountId);
