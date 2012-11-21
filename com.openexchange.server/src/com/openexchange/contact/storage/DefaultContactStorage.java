@@ -374,6 +374,9 @@ public abstract class DefaultContactStorage implements ContactStorage {
      * @throws OXException
      */
     protected static int[] parse(String[] ids) throws OXException {
+        if (null == ids) {
+            return new int[0];
+        }
         try {
             int[] intIDs = new int[ids.length];
             for (int i = 0; i < intIDs.length; i++) {
@@ -381,7 +384,7 @@ public abstract class DefaultContactStorage implements ContactStorage {
             }
             return intIDs;
         } catch (NumberFormatException e) {
-            throw ContactExceptionCodes.ID_PARSING_FAILED.create(e, null != ids ? ids.toString() : null); 
+            throw ContactExceptionCodes.ID_PARSING_FAILED.create(e, Arrays.toString(ids)); 
         }
     }
     
