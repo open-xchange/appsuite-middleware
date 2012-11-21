@@ -160,10 +160,12 @@ public class MapToContactObjectTransformer implements MapToObjectTransformer{
             contact.setCountryOther(map.get(OXMF_PREFIX + "countryOther"));
         }
         if (map.containsKey(OXMF_PREFIX + "birthday")){
-            try {
-                contact.setBirthday(DATE.parse(map.get(OXMF_PREFIX + "birthday")));
-            } catch (ParseException e) {
-                e.printStackTrace();
+            synchronized (DATE) {
+                try {
+                    contact.setBirthday(DATE.parse(map.get(OXMF_PREFIX + "birthday")));
+                } catch (ParseException e) {
+                    e.printStackTrace();
+                }
             }
         }
         if (map.containsKey(OXMF_PREFIX + "maritalStatus")){
@@ -182,10 +184,12 @@ public class MapToContactObjectTransformer implements MapToObjectTransformer{
             contact.setSpouseName(map.get(OXMF_PREFIX + "spouseName"));
         }
         if (map.containsKey(OXMF_PREFIX + "anniversary")){
-            try {
-                contact.setAnniversary(DATE.parse(map.get(OXMF_PREFIX + "anniversary")));
-            } catch (ParseException e) {
-                e.printStackTrace();
+            synchronized (DATE) {
+                try {
+                    contact.setAnniversary(DATE.parse(map.get(OXMF_PREFIX + "anniversary")));
+                } catch (ParseException e) {
+                    e.printStackTrace();
+                }
             }
         }
         if (map.containsKey(OXMF_PREFIX + "comment")){
