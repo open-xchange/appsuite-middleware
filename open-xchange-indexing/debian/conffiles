@@ -1,3 +1,5 @@
 opt/open-xchange/etc/solr.properties
 opt/open-xchange/etc/indexing-service.properties
 opt/open-xchange/etc/smal.properties
+opt/open-xchange/etc/index.properties
+opt/open-xchange/etc/contextSets/index.yml

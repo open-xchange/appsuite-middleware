@@ -352,10 +352,6 @@ public class DelegationSolrAccessImpl implements SolrAccessService {
         solrCores.lock(identifier.toString());
         try {
             String owner = solrCores.get(identifier.toString());
-            if (LOG.isDebugEnabled()) {
-                LOG.debug(Thread.currentThread().getName() + " got the lock for core " + identifier.toString() + ". Current owner: " + owner);
-            }
-
             if (owner == null) {
                 if (isSolrNode) {
                     try {
@@ -410,7 +406,6 @@ public class DelegationSolrAccessImpl implements SolrAccessService {
         } finally {
             solrCores.unlock(identifier.toString());
             if (LOG.isDebugEnabled()) {
-                LOG.debug(Thread.currentThread().getName() + " released the lock for core " + identifier.toString() + ".");
                 long diff = System.currentTimeMillis() - start;
                 LOG.debug("getDelegate() lasted " + diff + "ms.");
             }
