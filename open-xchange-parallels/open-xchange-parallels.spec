@@ -42,8 +42,23 @@ ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} 
 
 %post
 . /opt/open-xchange/lib/oxfunctions.sh
+
 ox_move_config_file /opt/open-xchange/etc/groupware /opt/open-xchange/etc parallels.properties
 ox_move_config_file /opt/open-xchange/etc/groupware /opt/open-xchange/etc settings/parallels_gui.properties settings/parallels-ui.properties
+
+# SoftwareChange_Request-1207
+pfile=/opt/open-xchange/etc/parallels.properties
+if ox_exists_property com.openexchange.custom.parallels.branding.fallbackurl $pfile; then
+    oval=$(ox_read_property com.openexchange.custom.parallels.branding.fallbackurl $pfile)
+    ox_remove_property com.openexchange.custom.parallels.branding.fallbackurl $pfile
+    ox_set_property com.openexchange.custom.parallels.branding.fallbackhost $oval $pfile
+fi
+
+# SoftwareChange_Request-1209
+pfile=/opt/open-xchange/etc/settings/parallels-ui.properties
+if ! ox_exists_property ui/parallels/use_parallels_antispam_features $pfile; then
+    ox_set_property ui/parallels/use_parallels_antispam_features true $pfile
+fi
 
 %clean
 %{__rm} -rf %{buildroot}

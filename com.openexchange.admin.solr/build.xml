@@ -9,42 +9,14 @@
 
 	<!-- Constants -->
 	<property name="sbinDir" value="sbin" />
-	<property name="patchSbinDir" value="${tmpDir}/${sbinDir}" />
 
 	<target name="postInstall">
-	    <symlink resource="${destDir}/${sbinInstallDir}/registercorestore" link="${destDir}/${sbinInstallDir}/unregistercorestore" overwrite="true" />
-	    <symlink resource="${destDir}/${sbinInstallDir}/registercorestore" link="${destDir}/${sbinInstallDir}/listcorestore" overwrite="true" />
-	    <symlink resource="${destDir}/${sbinInstallDir}/registercorestore" link="${destDir}/${sbinInstallDir}/changecorestore" overwrite="true" />
+	    <symlink resource="${sbinInstallDir}/registercorestore" link="${destDir}/${sbinInstallDir}/unregistercorestore" overwrite="true" />
+	    <symlink resource="${sbinInstallDir}/registercorestore" link="${destDir}/${sbinInstallDir}/listcorestore" overwrite="true" />
+	    <symlink resource="${sbinInstallDir}/registercorestore" link="${destDir}/${sbinInstallDir}/changecorestore" overwrite="true" />
 	    <chmod perm="755" file="${sbinInstallDir}/unregistercorestore" />
 	    <chmod perm="755" file="${sbinInstallDir}/listcorestore" />
         <chmod perm="755" file="${sbinInstallDir}/changecorestore" />
-	</target>
-
-	<target name="patchAndInstallScripts" depends="moveAndPatchScripts">
-		<property name="sbinInstallDir" value="${destDir}/${prefix}/${sbinDir}" />
-		<copy todir="${sbinInstallDir}" overwrite="true">
-			<fileset dir="${patchSbinDir}" />
-		</copy>
-		<chmod perm="755" file="${sbinInstallDir}/registercorestore" />
-		<antcall target="createLinks" />
-	</target>
-
-	<target name="moveAndPatchScripts">
-		<mkdir dir="${patchSbinDir}" />
-		<copy todir="${patchSbinDir}" overwrite="true">
-			<fileset dir="${sbinDir}" />
-			<mapper type="glob" from="*.in" to="*"/>
-		</copy>
-	</target>
-
-	<target name="createLinks">
-	    <symlink resource="${prefix}/${sbinDir}/registercorestore" link="${destDir}/${prefix}/${sbinDir}/unregistercorestore" overwrite="true" />
-	    <symlink resource="${prefix}/${sbinDir}/registercorestore" link="${destDir}/${prefix}/${sbinDir}/listcorestore" overwrite="true" />
-	    <symlink resource="${prefix}/${sbinDir}/registercorestore" link="${destDir}/${prefix}/${sbinDir}/changecorestore" overwrite="true" />
-	</target>
-
-	<target name="postClean">
-		<delete dir="${tmpDir}" />
 	</target>
 
 </project>

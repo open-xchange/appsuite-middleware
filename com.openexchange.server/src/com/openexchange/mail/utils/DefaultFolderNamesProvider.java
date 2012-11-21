@@ -148,7 +148,7 @@ public final class DefaultFolderNamesProvider {
      */
     public String[] getDefaultFolderNames(final MailConfig mailConfig, final boolean isSpamEnabled) {
         final String[] standardNames = mailConfig.getStandardNames();
-        return getDefaultFolderFullnames(
+        return getDefaultFolderNames(
             standardNames[StorageUtility.INDEX_TRASH],
             standardNames[StorageUtility.INDEX_SENT],
             standardNames[StorageUtility.INDEX_DRAFTS],

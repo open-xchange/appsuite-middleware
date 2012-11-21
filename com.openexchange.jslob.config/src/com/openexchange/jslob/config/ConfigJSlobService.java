@@ -65,6 +65,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import org.apache.commons.logging.Log;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -120,6 +121,7 @@ public final class ConfigJSlobService implements JSlobService {
      * <code>"meta"</code>
      */
     private static final String METADATA_PREFIX = "meta".intern();
+
     private static final String DATA_PREFIX = "data".intern();
 
     private static final String SERVICE_ID = "com.openexchange.jslob.config";
@@ -129,9 +131,14 @@ public final class ConfigJSlobService implements JSlobService {
      */
 
     private final ServiceLookup services;
+
     private final Map<String, Map<String, AttributedProperty>> preferenceItems;
+
     private final Map<String, String> core2AttributeMap;
+
     private final Map<String, String> attribute2CoreMap;
+
+    private final Map<String, JSlob> sharedJSlobs;
 
     /**
      * Initializes a new {@link ConfigJSlobService}.
@@ -154,6 +161,16 @@ public final class ConfigJSlobService implements JSlobService {
         }
         core2AttributeMap = biMap;
         attribute2CoreMap = biMap.inverse();
+        sharedJSlobs = new ConcurrentHashMap<String, JSlob>();
+    }
+
+    /**
+     * Gets the service look-up.
+     * 
+     * @return The service look-up
+     */
+    public ServiceLookup getServices() {
+        return services;
     }
 
     private void readPerfMap(final File file, final BiMap<String, String> biMap) throws OXException {
@@ -184,8 +201,8 @@ public final class ConfigJSlobService implements JSlobService {
         final Log logger = com.openexchange.log.Log.valueOf(LogFactory.getLog(ConfigJSlobService.class));
         // Initialize resulting map
         final int initialCapacity = all.size() >> 1;
-        final Map<String, Map<String, AttributedProperty>> preferenceItems =
-            new HashMap<String, Map<String, AttributedProperty>>(initialCapacity);
+        final Map<String, Map<String, AttributedProperty>> preferenceItems = new HashMap<String, Map<String, AttributedProperty>>(
+            initialCapacity);
         for (final Map.Entry<String, ComposedConfigProperty<String>> entry : all.entrySet()) {
             // Check for existence of "preferencePath"
             final ComposedConfigProperty<String> property = entry.getValue();
@@ -214,7 +231,7 @@ public final class ConfigJSlobService implements JSlobService {
 
     /**
      * Gets the <code>SessiondService</code>.
-     *
+     * 
      * @return The <code>SessiondService</code>
      */
     private SessiondService getSessiondService() {
@@ -239,6 +256,12 @@ public final class ConfigJSlobService implements JSlobService {
         }
         ret.add(getCoreJslob(userId, contextId));
         return ret;
+    }
+
+    @Override
+    public Collection<JSlob> getShared() {
+        // return sharedJSlobs;
+        return null;
     }
 
     @Override
@@ -267,9 +290,16 @@ public final class ConfigJSlobService implements JSlobService {
         return jsonJSlob;
     }
 
+    @Override
+    public JSlob getShared(String id) {
+        Set<String> keySet = sharedJSlobs.keySet();
+        JSlob retval = sharedJSlobs.get(id);
+        return retval;
+    }
+
     /**
      * Gets the special <code>"core"</code> {@link JSlob} instance.
-     *
+     * 
      * @param userId The user identifier
      * @param contextId The context identifier
      * @return The special <code>"core"</code> {@link JSlob} instance.
@@ -335,8 +365,8 @@ public final class ConfigJSlobService implements JSlobService {
         }
         return retval;
     }
-    
-	@Override
+
+    @Override
     public String getIdentifier() {
         return SERVICE_ID;
     }
@@ -401,23 +431,37 @@ public final class ConfigJSlobService implements JSlobService {
                 for (final AttributedProperty attributedProperty : attributes.values()) {
                     final Object value = JSONPathElement.getPathFrom(attributedProperty.path, jObject);
                     if (null != value) {
-                    	if (view.property(attributedProperty.propertyName, String.class).isDefined()) {
+                        if (view.property(attributedProperty.propertyName, String.class).isDefined()) {
                             pathsToPurge.add(attributedProperty.path);
-                    		final Object oldValue = asJSObject(view.get(attributedProperty.propertyName, String.class));
+                            final Object oldValue = asJSObject(view.get(attributedProperty.propertyName, String.class));
                             // Clients have a habit of dumping the config back at us, so we only save differing values.
                             if (!value.equals(oldValue)) {
                                 view.set("user", attributedProperty.propertyName, value);
                             }
-                    	}
+                        }
                     }
                 }
             }
-            for (final List<JSONPathElement> path: pathsToPurge) {
-            	JSONPathElement.remove(path, jObject);
+            for (final List<JSONPathElement> path : pathsToPurge) {
+                JSONPathElement.remove(path, jObject);
             }
             jsonJSlob.setJsonObject(jObject);
             // Finally store JSlob
             getStorage().store(new JSlobId(SERVICE_ID, id, userId, contextId), jsonJSlob);
+        }
+    }
+
+    @Override
+    public void setShared(final String id, final JSlob jsonJSlob) {
+        if (null == jsonJSlob) {
+            sharedJSlobs.remove(id);
+        } else {
+            final JSONObject jObject = jsonJSlob.getJsonObject();
+            if (null == jObject) {
+                sharedJSlobs.remove(id);
+                return;
+            }
+            sharedJSlobs.put(id, jsonJSlob);
         }
     }
 
@@ -434,7 +478,7 @@ public final class ConfigJSlobService implements JSlobService {
                 final String value = (String) setting.getSingleValue();
                 if (null != value && value.length() > 0 && '[' == value.charAt(0)) {
                     final JSONArray array = new JSONArray(value);
-                    if(array.length() == 0) {
+                    if (array.length() == 0) {
                         setting.setEmptyMultiValue();
                     } else {
                         for (int i = 0; i < array.length(); i++) {
@@ -478,7 +522,9 @@ public final class ConfigJSlobService implements JSlobService {
                     /*
                      * Merge whole object
                      */
-                    final JSONObject merged = JSONUtil.merge(getCoreJslob(userId, contextId).getJsonObject(), (JSONObject) jsonUpdate.getValue());
+                    final JSONObject merged = JSONUtil.merge(
+                        getCoreJslob(userId, contextId).getJsonObject(),
+                        (JSONObject) jsonUpdate.getValue());
                     set(id, new JSlob(merged), userId, contextId);
                     return;
                 }
@@ -492,7 +538,9 @@ public final class ConfigJSlobService implements JSlobService {
                 }
                 final Object value = jsonUpdate.getValue();
                 if (null != value) {
-                    final SettingStorage stor = SettingStorage.getInstance(getSessiondService().getAnyActiveSessionForUser(userId, contextId));
+                    final SettingStorage stor = SettingStorage.getInstance(getSessiondService().getAnyActiveSessionForUser(
+                        userId,
+                        contextId));
                     final ConfigTree configTree = ConfigTree.getInstance();
                     final Setting setting = configTree.getSettingByPath(pathBuilder.toString());
                     setting.setSingleValue(value);
@@ -673,9 +721,9 @@ public final class ConfigJSlobService implements JSlobService {
     private ConfigViewFactory getConfigViewFactory() {
         return services.getService(ConfigViewFactory.class);
     }
-    
+
     private static final Set<String> SKIP_META = new HashSet<String>(Arrays.asList("final", "protected", "preferencePath"));
-    
+
     private static void add2JSlob(final AttributedProperty attributedProperty, final JSlob jsonJSlob, final ConfigView view) throws OXException {
         if (null == attributedProperty) {
             return;
@@ -686,7 +734,7 @@ public final class ConfigJSlobService implements JSlobService {
             Object value = asJSObject(view.get(attributedProperty.propertyName, String.class));
 
             addValueByPath(path, value, jsonJSlob.getJsonObject());
-            
+
             // Add the metadata as well as a separate JSON object
             final JSONObject jMetaData = new JSONObject();
             final ComposedConfigProperty<String> preferenceItem = attributedProperty.property;
@@ -694,9 +742,9 @@ public final class ConfigJSlobService implements JSlobService {
             if (null != metadataNames && !metadataNames.isEmpty()) {
                 for (final String metadataName : metadataNames) {
                     if (SKIP_META.contains(metadataName)) {
-                    	continue;
+                        continue;
                     }
-                	// Metadata value
+                    // Metadata value
                     final ComposedConfigProperty<String> prop = view.property(attributedProperty.propertyName, String.class);
                     value = asJSObject(prop.get(metadataName));
                     jMetaData.put(metadataName, value);
@@ -705,14 +753,14 @@ public final class ConfigJSlobService implements JSlobService {
             // Lastly, let's add configurability.
             final String finalScope = preferenceItem.get("final");
             final String isProtected = preferenceItem.get("protected");
-            final boolean writable =
-                (finalScope == null || finalScope.equals("user")) && (isProtected == null || !preferenceItem.get("protected", boolean.class).booleanValue());
+            final boolean writable = (finalScope == null || finalScope.equals("user")) && (isProtected == null || !preferenceItem.get(
+                "protected",
+                boolean.class).booleanValue());
             value = Boolean.valueOf(writable);
-            if (!(Boolean)value) {
+            if (!(Boolean) value) {
                 jMetaData.put("configurable", value);
             }
-            
-            
+
             if (jMetaData.length() > 0) {
                 addValueByPath(path, jMetaData, jsonJSlob.getMetaObject());
             }
@@ -784,7 +832,7 @@ public final class ConfigJSlobService implements JSlobService {
      * Converts given String to a regular JSON-supported value.
      * <p>
      * The value can be a Boolean, Double, Integer, JSONArray, JSONObject, Long, or String, or the JSONObject.NULL object.
-     *
+     * 
      * @param propertyValue The value to convert
      * @return The resulting value; either Boolean, Double, Integer, JSONArray, JSONObject, Long, or String, or the JSONObject.NULL object
      */

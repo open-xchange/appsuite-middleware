@@ -80,6 +80,7 @@ import com.openexchange.service.indexing.impl.internal.IndexingServiceMBeanImpl;
 import com.openexchange.service.indexing.impl.internal.Services;
 import com.openexchange.service.indexing.impl.internal.groupware.SessionEventHandler;
 import com.openexchange.sessiond.SessiondEventConstants;
+import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.user.UserService;
 import com.openexchange.userconf.UserConfigurationService;
 
@@ -112,7 +113,8 @@ public class IndexingActivator extends HousekeepingActivator {
             UserService.class,
             UserConfigurationService.class,
             IndexManagementService.class,
-            ConfigViewFactory.class };
+            ConfigViewFactory.class,
+            ThreadPoolService.class };
     }
     
     @Override

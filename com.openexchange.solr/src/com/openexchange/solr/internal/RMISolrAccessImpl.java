@@ -56,8 +56,8 @@ import org.apache.solr.client.solrj.response.UpdateResponse;
 import org.apache.solr.common.SolrInputDocument;
 import org.apache.solr.common.params.SolrParams;
 import com.openexchange.exception.OXException;
-import com.openexchange.solr.SolrAccessService;
 import com.openexchange.solr.SolrCoreIdentifier;
+import com.openexchange.solr.SolrExceptionCodes;
 import com.openexchange.solr.rmi.RMISolrAccessService;
 
 /**
@@ -67,7 +67,7 @@ import com.openexchange.solr.rmi.RMISolrAccessService;
  */
 public class RMISolrAccessImpl implements RMISolrAccessService {
 
-    private final SolrAccessService solrService;
+    private final EmbeddedSolrAccessImpl solrService;
     
     private final DelegationSolrAccessImpl delegate;
 
@@ -133,7 +133,10 @@ public class RMISolrAccessImpl implements RMISolrAccessService {
     }
 
     @Override
-    public void pingRmi() throws RemoteException {
+    public void pingRmi(SolrCoreIdentifier identifier) throws RemoteException, OXException {
+        if (solrService.hasActiveCore(identifier)) {
+            throw SolrExceptionCodes.CORE_NOT_STARTED.create(identifier.toString());
+        }
         return;
     }
 

@@ -347,24 +347,6 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
 
     @Override
     public void appointmentDeleted(final Appointment appointmentObj, final Session session) {
-        /*
-         * Clear calendar object from notification pool
-         */
-        NotificationPool.getInstance().removeByObject(appointmentObj.getObjectID(), session.getContextId());
-        /*
-         * Send delete notification
-         */
-        sendNotification(
-            null,
-            appointmentObj,
-            session,
-            new AppointmentState(
-                new AppointmentActionReplacement(AppointmentActionReplacement.ACTION_DELETED),
-                Notifications.APPOINTMENT_DELETE_MAIL,
-                State.Type.DELETED),
-            NotificationConfig.getPropertyAsBoolean(NotificationProperty.NOTIFY_ON_DELETE, false),
-            true,
-            false);
     }
 
     @Override

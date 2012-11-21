@@ -61,6 +61,7 @@ import org.osgi.service.event.EventHandler;
 
 import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.core.IMap;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.exception.OXException;
@@ -97,7 +98,7 @@ public class SmalSessionEventHandler implements EventHandler {
     
     private static final Log LOG = com.openexchange.log.Log.loggerFor(SmalSessionEventHandler.class);
     
-    private static final long FOLDER_INTERVAL = 60000L * 60;
+    private static final String FOLDER_INTERVAL = "com.openexchange.mail.smal.folderJobInterval";
     
 
     @Override
@@ -200,7 +201,10 @@ public class SmalSessionEventHandler implements EventHandler {
     
     private void scheduleFolderJobs(Session session, Map<Integer, Set<MailFolder>> allFolders, MailAccountStorageService storageService, IndexingService indexingService) throws OXException {
         int contextId = session.getContextId();
-        int userId = session.getUserId();        
+        int userId = session.getUserId();
+        ConfigurationService configurationService = SmalServiceLookup.getInstance().getService(ConfigurationService.class);
+        int intervalMinutes = configurationService.getIntProperty(FOLDER_INTERVAL, 60);
+        long interval = 60000L * intervalMinutes;
         for (Integer accountId : allFolders.keySet()) {
             MailAccount account = storageService.getMailAccount(accountId.intValue(), userId, contextId);
             Set<MailFolder> folders = allFolders.get(accountId);
@@ -212,7 +216,7 @@ public class SmalSessionEventHandler implements EventHandler {
                 account.getMailServer());
             
             Set<String> fullNames = new HashSet<String>();
-            for (MailFolder folder : folders) {         
+            for (MailFolder folder : folders) {
                 fullNames.add(folder.getFullname());
                 int priority;
                 if (account.isDefaultAccount() && folder.isInbox()) {
@@ -233,8 +237,8 @@ public class SmalSessionEventHandler implements EventHandler {
                     .primaryPassword(session.getPassword())
                     .password(decryptedPW)
                     .folder(folder.getFullname())
-                    .build();                                
-                indexingService.scheduleJob(jobInfo, IndexingService.NOW, FOLDER_INTERVAL, priority);
+                    .build();
+                indexingService.scheduleJob(jobInfo, IndexingService.NOW, interval, priority);
             }
             
             JobInfo checkDeletedJobInfo = MailJobInfo.newBuilder(CheckForDeletedFoldersJob.class)
@@ -243,7 +247,7 @@ public class SmalSessionEventHandler implements EventHandler {
                 .userId(userId)
                 .addProperty(CheckForDeletedFoldersJob.ALL_FOLDERS, fullNames)
                 .build();                                
-            indexingService.scheduleJob(checkDeletedJobInfo, IndexingService.NOW, FOLDER_INTERVAL, IndexingService.DEFAULT_PRIORITY); 
+            indexingService.scheduleJob(checkDeletedJobInfo, IndexingService.NOW, interval, IndexingService.DEFAULT_PRIORITY); 
         }
     }
     

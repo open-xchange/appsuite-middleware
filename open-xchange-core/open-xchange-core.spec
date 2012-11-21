@@ -247,6 +247,7 @@ fi
 %doc docs/
 %doc com.openexchange.server/doc/examples
 %doc com.openexchange.server/ChangeLog
+%config(noreplace) /opt/open-xchange/etc/contextSets/index.yml
 
 %changelog
 * Wed Nov 14 2012 Marcus Klein <marcus.klein@open-xchange.com>

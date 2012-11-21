@@ -52,7 +52,6 @@ package com.openexchange.service.indexing.impl.internal;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Set;
-
 import org.apache.commons.logging.Log;
 import org.quartz.JobBuilder;
 import org.quartz.JobDataMap;
@@ -67,11 +66,14 @@ import org.quartz.TriggerBuilder;
 import org.quartz.TriggerKey;
 import org.quartz.impl.matchers.GroupMatcher;
 import org.quartz.service.QuartzService;
-
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.service.indexing.IndexingService;
 import com.openexchange.service.indexing.JobInfo;
+import com.openexchange.solr.SolrProperties;
+import com.openexchange.threadpool.Task;
+import com.openexchange.threadpool.ThreadPoolService;
+import com.openexchange.threadpool.ThreadRenamer;
 
 
 /**
@@ -87,86 +89,115 @@ public class IndexingServiceImpl implements IndexingService {
     
 
     @Override
-    public void scheduleJob(JobInfo info, Date startDate, long repeatInterval, int priority) throws OXException {
-        if (startDate == null) {
-            startDate = new Date();
-        }
-        
-        JobDataMap jobData = new JobDataMap();
-        jobData.put(JobConstants.JOB_INFO, info);
-        JobDetail jobDetail = JobBuilder.newJob(QuartzIndexingJob.class)
-            .withIdentity(generateJobKey(info))
-            .usingJobData(jobData)
-            .build();        
-        
-        TriggerBuilder<Trigger> triggerBuilder = TriggerBuilder.newTrigger()
-            .forJob(jobDetail)
-            .withIdentity(generateTriggerKey(info, startDate, repeatInterval))
-            .startAt(startDate)
-            .withPriority(priority);
-        
-        if (repeatInterval > 0L) {
-            triggerBuilder.withSchedule(SimpleScheduleBuilder.simpleSchedule()
-                .withIntervalInMilliseconds(repeatInterval)
-                .repeatForever()
-                .withMisfireHandlingInstructionFireNow());            
-        }        
-          
-        Trigger trigger = triggerBuilder.build(); 
-        Scheduler scheduler = getScheduler();
-        try {
-            if (LOG.isDebugEnabled()) {
-                Exception exception = new Exception();
-                LOG.debug("Scheduling job: " + info.toString() + ".", exception);
-            }
-            
-            scheduler.scheduleJob(jobDetail, trigger);
-        } catch (SchedulerException e) {
-            if (e instanceof ObjectAlreadyExistsException) {
-                LOG.debug("Job already exists within JobStore: " + info.toString() + ". Trying to store trigger only.");
+    public void scheduleJob(final JobInfo info, final Date startDates, final long repeatInterval, final int priority) throws OXException {
+        ThreadPoolService threadPoolService = getThreadPoolService();
+        threadPoolService.submit(new TaskAdapter(new Runnable() {
+            @Override
+            public void run() {
                 try {
-                    scheduler.scheduleJob(trigger);
-                } catch (SchedulerException f) {
-                    LOG.info("Could not schedule trigger.", f);
+                    Date tmpDate = startDates;
+                    if (tmpDate == null) {
+                        tmpDate = new Date();
+                    }
+                    JobDataMap jobData = new JobDataMap();
+                    jobData.put(JobConstants.JOB_INFO, info);
+                    JobDetail jobDetail = JobBuilder.newJob(QuartzIndexingJob.class).withIdentity(generateJobKey(info)).usingJobData(
+                        jobData).build();
+                    TriggerBuilder<Trigger> triggerBuilder = TriggerBuilder.newTrigger().forJob(jobDetail).withIdentity(
+                        generateTriggerKey(info, tmpDate, repeatInterval)).startAt(tmpDate).withPriority(priority);
+                    if (repeatInterval > 0L) {
+                        triggerBuilder.withSchedule(SimpleScheduleBuilder.simpleSchedule().withIntervalInMilliseconds(repeatInterval).repeatForever().withMisfireHandlingInstructionFireNow());
+                    }
+                    Trigger trigger = triggerBuilder.build();
+                    Scheduler scheduler = getScheduler();
+                    try {
+                        if (LOG.isDebugEnabled()) {
+                            Exception exception = new Exception();
+                            LOG.debug("Scheduling job: " + info.toString() + ".", exception);
+                        }
+
+                        scheduler.scheduleJob(jobDetail, trigger);
+                    } catch (SchedulerException e) {
+                        if (e instanceof ObjectAlreadyExistsException) {
+                            LOG.debug("Job already exists within JobStore: " + info.toString() + ". Trying to store trigger only.");
+                            try {
+                                scheduler.scheduleJob(trigger);
+                            } catch (SchedulerException f) {
+                                LOG.debug("Could not schedule trigger.", f);
+                            }
+                        } else {
+                            throw new OXException(e);
+                        }
+                    }
+                } catch (Throwable t) {
+                    LOG.warn(t.getMessage(), t);
                 }
-            } else {
-                throw new OXException(e);
             }
-        }
+        }));
     }
     
     @Override
-    public void unscheduleJob(JobInfo info) throws OXException {
-        Scheduler scheduler = getScheduler();
-        try {
-            scheduler.deleteJob(generateJobKey(info));
-        } catch (SchedulerException e) {
-            throw new OXException(e);
-        }
+    public void unscheduleJob(final JobInfo info) throws OXException {
+        ThreadPoolService threadPoolService = getThreadPoolService();
+        threadPoolService.submit(new TaskAdapter(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    Scheduler scheduler = getScheduler();
+                    try {
+                        scheduler.deleteJob(generateJobKey(info));
+                    } catch (SchedulerException e) {
+                        throw new OXException(e);
+                    }
+                } catch (Throwable t) {
+                    LOG.warn(t.getMessage(), t);
+                }
+            }
+        }));
     }
     
     @Override
-    public void unscheduleAllForUser(int contextId, int userId) throws OXException {
-        Scheduler scheduler = getScheduler();
-        String jobGroup = generateJobGroup(contextId, userId);        
-        try {
-            Set<JobKey> jobKeys = scheduler.getJobKeys(GroupMatcher.jobGroupEquals(jobGroup));
-            scheduler.deleteJobs(new ArrayList<JobKey>(jobKeys));
-        } catch (SchedulerException e) {
-            throw new OXException(e);
-        }
+    public void unscheduleAllForUser(final int contextId, final int userId) throws OXException {
+        ThreadPoolService threadPoolService = getThreadPoolService();
+        threadPoolService.submit(new TaskAdapter(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    Scheduler scheduler = getScheduler();
+                    String jobGroup = generateJobGroup(contextId, userId);
+                    try {
+                        Set<JobKey> jobKeys = scheduler.getJobKeys(GroupMatcher.jobGroupEquals(jobGroup));
+                        scheduler.deleteJobs(new ArrayList<JobKey>(jobKeys));
+                    } catch (SchedulerException e) {
+                        throw new OXException(e);
+                    }
+                } catch (Throwable t) {
+                    LOG.warn(t.getMessage(), t);
+                }
+            }
+        }));
     }
     
     @Override
-    public void unscheduleAllForContext(int contextId) throws OXException {
-        Scheduler scheduler = getScheduler();
-        String jobGroup = generateJobGroup(contextId);   
-        try {
-            Set<JobKey> jobKeys = scheduler.getJobKeys(GroupMatcher.jobGroupStartsWith(jobGroup));
-            scheduler.deleteJobs(new ArrayList<JobKey>(jobKeys));
-        } catch (SchedulerException e) {
-            throw new OXException(e);
-        }        
+    public void unscheduleAllForContext(final int contextId) throws OXException {
+        ThreadPoolService threadPoolService = getThreadPoolService();
+        threadPoolService.submit(new TaskAdapter(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    Scheduler scheduler = getScheduler();
+                    String jobGroup = generateJobGroup(contextId);
+                    try {
+                        Set<JobKey> jobKeys = scheduler.getJobKeys(GroupMatcher.jobGroupStartsWith(jobGroup));
+                        scheduler.deleteJobs(new ArrayList<JobKey>(jobKeys));
+                    } catch (SchedulerException e) {
+                        throw new OXException(e);
+                    }
+                } catch (Throwable t) {
+                    LOG.warn(t.getMessage(), t);
+                }
+            }
+        }));
     }
     
     JobKey generateJobKey(JobInfo info) {
@@ -207,14 +238,52 @@ public class IndexingServiceImpl implements IndexingService {
 
     Scheduler getScheduler() throws OXException {
         ConfigurationService config = Services.getService(ConfigurationService.class);
+        boolean isSolrNode = config.getBoolProperty(SolrProperties.IS_NODE, false);
         int threads = config.getIntProperty(IndexingProperties.WORKER_THREADS, 5);
         QuartzService quartzService = Services.getService(QuartzService.class);
-        Scheduler scheduler = quartzService.getClusteredScheduler(SCHEDULER_NAME, true, threads);
+        Scheduler scheduler = quartzService.getClusteredScheduler(SCHEDULER_NAME, isSolrNode, threads);
         return scheduler;
+    }
+    
+    ThreadPoolService getThreadPoolService() throws OXException {
+        ThreadPoolService threadPoolService = Services.getService(ThreadPoolService.class);
+        return threadPoolService;
     }
     
     public void shutdown() {
         QuartzService quartzService = Services.getService(QuartzService.class);
         quartzService.releaseClusteredScheduler(SCHEDULER_NAME);
+    }
+    
+    private static final class TaskAdapter implements Task<Void> {
+        
+        private final Runnable runnable;
+
+        public TaskAdapter(Runnable runnable) {
+            super();
+            this.runnable = runnable;
+        }
+        
+        @Override
+        public Void call() throws Exception {
+            runnable.run();
+            return null;
+        }
+
+        @Override
+        public void setThreadName(ThreadRenamer threadRenamer) {
+            return;
+        }
+
+        @Override
+        public void beforeExecute(Thread t) {
+            return;
+        }
+
+        @Override
+        public void afterExecute(Throwable t) {
+           return;
+        }
+        
     }
 }
