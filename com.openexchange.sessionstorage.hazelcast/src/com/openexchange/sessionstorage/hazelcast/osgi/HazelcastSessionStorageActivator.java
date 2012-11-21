@@ -61,7 +61,6 @@ import com.openexchange.config.ConfigurationService;
 import com.openexchange.log.LogFactory;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.sessionstorage.SessionStorageService;
-import com.openexchange.sessionstorage.exceptions.OXSessionStorageExceptionCodes;
 import com.openexchange.sessionstorage.hazelcast.HazelcastSessionStorageConfiguration;
 import com.openexchange.sessionstorage.hazelcast.HazelcastSessionStorageService;
 import com.openexchange.sessionstorage.hazelcast.Services;
