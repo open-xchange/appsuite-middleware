@@ -51,7 +51,6 @@ package com.openexchange.mdns.internal;
 
 import static com.openexchange.java.util.UUIDs.getUnformattedString;
 import java.io.IOException;
-import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -101,7 +100,7 @@ public final class MDNSServiceImpl implements MDNSService, MDNSReregisterer {
     public MDNSServiceImpl() throws OXException {
         super();
         try {
-            jmdns = JmDNS.create(InetAddress.getByName("192.168.1.1"));
+            jmdns = JmDNS.create();
             /*
              * Register the "_openexchange._tcp.local." service type
              */
