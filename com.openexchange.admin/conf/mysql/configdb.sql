@@ -154,11 +154,3 @@ CREATE TABLE `oauthNonce` (
   `nonce` varchar(255) NOT NULL,
   PRIMARY KEY  (`nonce`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
-
-CREATE TABLE `solrCoreStores` (
-  `id` INT4 UNSIGNED NOT NULL,
-  `uri` VARCHAR(255) COLLATE utf8_unicode_ci NOT NULL,
-  `maxCores` INT4 UNSIGNED NOT NULL,
-  `numCores` INT4 UNSIGNED NOT NULL,
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;

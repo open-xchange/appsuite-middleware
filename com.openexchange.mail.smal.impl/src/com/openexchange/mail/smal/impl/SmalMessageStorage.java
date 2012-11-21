@@ -120,14 +120,14 @@ public final class SmalMessageStorage extends AbstractSMALStorage implements IMa
 
     @Override
     public String[] appendMessages(final String destFolder, final MailMessage[] msgs) throws OXException {
-        final String[] newIds = messageStorage.appendMessages(destFolder, msgs);        
+        final String[] newIds = messageStorage.appendMessages(destFolder, msgs);
         /*
          * Enqueue adder job
          */
         try {
             Builder builder = prepareJobBuilder(AddByIdsJob.class);
             builder.folder(destFolder);
-            builder.addProperty(AddByIdsJob.IDS, newIds);        
+            builder.addProperty(AddByIdsJob.IDS, newIds);
             submitJob(builder.build());
         } catch (Exception e) {
             LOG.warn("Could not schedule indexing job.", e);
@@ -147,7 +147,7 @@ public final class SmalMessageStorage extends AbstractSMALStorage implements IMa
         try {
             Builder builder = prepareJobBuilder(AddByIdsJob.class);
             builder.folder(destFolder);
-            builder.addProperty(AddByIdsJob.IDS, newIds);        
+            builder.addProperty(AddByIdsJob.IDS, newIds);
             submitJob(builder.build());
         } catch (Exception e) {
             LOG.warn("Could not schedule indexing job.", e);
@@ -164,7 +164,7 @@ public final class SmalMessageStorage extends AbstractSMALStorage implements IMa
         try {
             Builder builder = prepareJobBuilder(RemoveByIdsJob.class);
             builder.folder(folder);
-            builder.addProperty(RemoveByIdsJob.IDS, mailIds);        
+            builder.addProperty(RemoveByIdsJob.IDS, mailIds);
             submitJob(builder.build());
         } catch (Exception e) {
             LOG.warn("Could not schedule indexing job.", e);
@@ -345,12 +345,12 @@ public final class SmalMessageStorage extends AbstractSMALStorage implements IMa
         try {
             Builder deleteBuilder = prepareJobBuilder(RemoveByIdsJob.class);
             deleteBuilder.folder(sourceFolder);
-            deleteBuilder.addProperty(RemoveByIdsJob.IDS, mailIds);        
+            deleteBuilder.addProperty(RemoveByIdsJob.IDS, mailIds);
             submitJob(deleteBuilder.build());
             
             Builder createBuilder = prepareJobBuilder(AddByIdsJob.class);
             createBuilder.folder(destFolder);
-            createBuilder.addProperty(AddByIdsJob.IDS, mailIds);        
+            createBuilder.addProperty(AddByIdsJob.IDS, mailIds);
             submitJob(createBuilder.build());
         } catch (Exception e) {
             LOG.warn("Could not schedule indexing job.", e);
@@ -373,7 +373,7 @@ public final class SmalMessageStorage extends AbstractSMALStorage implements IMa
         try {
             Builder builder = prepareJobBuilder(ChangeByIdsJob.class);
             builder.folder(folder);
-            builder.addProperty(ChangeByIdsJob.IDS, mailIds);        
+            builder.addProperty(ChangeByIdsJob.IDS, mailIds);
             submitJob(builder.build());
         } catch (Exception e) {
             LOG.warn("Could not schedule indexing job.", e);

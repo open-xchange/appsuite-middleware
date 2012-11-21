@@ -18,6 +18,8 @@ opt/open-xchange/etc/HTMLEntities.properties
 opt/open-xchange/etc/i18n.properties
 opt/open-xchange/etc/importerExporter.xml
 opt/open-xchange/etc/import.properties
+opt/open-xchange/etc/index.properties
+opt/open-xchange/etc/contextSets/index.yml
 opt/open-xchange/etc/infostore.properties
 opt/open-xchange/etc/javamail.properties
 opt/open-xchange/etc/ldap.properties
