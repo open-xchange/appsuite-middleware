@@ -202,13 +202,13 @@ public class HashingFileStorage implements FileStorage {
         int i = 0;
         for (; i < prefix.length() && i < 6; i++) {
             b.append(prefix.charAt(i));
-            if (i % 2 == 1 && i > 0) {
+            if (((i & 1) == 1) && (i > 0)) {
                 b.append('/');
             }
         }
         for (; i < 6; i++) {
             b.append('0');
-            if (i % 2 == 1 && i > 0) {
+            if (((i & 1) == 1) && (i > 0)) {
                 b.append('/');
             }
         }
