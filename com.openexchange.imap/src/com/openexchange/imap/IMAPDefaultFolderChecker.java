@@ -404,10 +404,35 @@ public class IMAPDefaultFolderChecker {
         return (msg.indexOf("quota") >= 0 || msg.indexOf("limit") >= 0);
     }
 
+    /** Gets fall-back name */
+    private static String getFallbackName(final int index) {
+        switch (index) {
+        case StorageUtility.INDEX_CONFIRMED_HAM:
+            return DefaultFolderNamesProvider.DEFAULT_PROVIDER.getConfirmedHam();
+        case StorageUtility.INDEX_CONFIRMED_SPAM:
+            return DefaultFolderNamesProvider.DEFAULT_PROVIDER.getConfirmedSpam();
+        case StorageUtility.INDEX_DRAFTS:
+            return DefaultFolderNamesProvider.DEFAULT_PROVIDER.getDrafts();
+        case StorageUtility.INDEX_SENT:
+            return DefaultFolderNamesProvider.DEFAULT_PROVIDER.getSent();
+        case StorageUtility.INDEX_SPAM:
+            return DefaultFolderNamesProvider.DEFAULT_PROVIDER.getSpam();
+        case StorageUtility.INDEX_TRASH:
+            return DefaultFolderNamesProvider.DEFAULT_PROVIDER.getTrash();
+        default:
+            return "Nope";
+        }
+    }
+
     protected Callable<Object> performTaskFor(final int index, final String prefix, final String fullName, final String name, final char sep, final int type, final int subscribe, final AtomicBoolean modified, final MailSessionCache cache) throws OXException {
         try {
-            if (null == fullName || 0 == fullName.length()) {
-                setDefaultMailFolder(index, checkDefaultFolder(index, prefix, name, sep, type, subscribe, false, modified), cache);
+            if (isEmpty(fullName)) {
+                if (isEmpty(name)) {
+                    // Neither full name nor name
+                    setDefaultMailFolder(index, checkDefaultFolder(index, prefix, getFallbackName(index), sep, type, subscribe, false, modified), cache);
+                } else {
+                    setDefaultMailFolder(index, checkDefaultFolder(index, prefix, name, sep, type, subscribe, false, modified), cache);
+                }
             } else {
                 setDefaultMailFolder(index, checkDefaultFolder(index, "", fullName, sep, type, subscribe, true, modified), cache);
             }
@@ -849,6 +874,19 @@ public class IMAPDefaultFolderChecker {
                 // Ignore
             }
         }
+    }
+
+    /** Checks for empty string */
+    protected static boolean isEmpty(final String string) {
+        if (null == string) {
+            return true;
+        }
+        final int len = string.length();
+        boolean isWhitespace = true;
+        for (int i = 0; isWhitespace && i < len; i++) {
+            isWhitespace = Character.isWhitespace(string.charAt(i));
+        }
+        return isWhitespace;
     }
 
 }
