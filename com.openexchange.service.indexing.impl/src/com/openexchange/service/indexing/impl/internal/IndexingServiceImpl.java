@@ -71,8 +71,9 @@ import com.openexchange.exception.OXException;
 import com.openexchange.service.indexing.IndexingService;
 import com.openexchange.service.indexing.JobInfo;
 import com.openexchange.solr.SolrProperties;
+import com.openexchange.threadpool.Task;
 import com.openexchange.threadpool.ThreadPoolService;
-import com.openexchange.threadpool.ThreadPools;
+import com.openexchange.threadpool.ThreadRenamer;
 
 
 /**
@@ -90,7 +91,7 @@ public class IndexingServiceImpl implements IndexingService {
     @Override
     public void scheduleJob(final JobInfo info, final Date startDates, final long repeatInterval, final int priority) throws OXException {
         ThreadPoolService threadPoolService = getThreadPoolService();
-        threadPoolService.submit(ThreadPools.task(new Runnable() {
+        threadPoolService.submit(new TaskAdapter(new Runnable() {
             @Override
             public void run() {
                 try {
@@ -138,7 +139,7 @@ public class IndexingServiceImpl implements IndexingService {
     @Override
     public void unscheduleJob(final JobInfo info) throws OXException {
         ThreadPoolService threadPoolService = getThreadPoolService();
-        threadPoolService.submit(ThreadPools.task(new Runnable() {
+        threadPoolService.submit(new TaskAdapter(new Runnable() {
             @Override
             public void run() {
                 try {
@@ -158,7 +159,7 @@ public class IndexingServiceImpl implements IndexingService {
     @Override
     public void unscheduleAllForUser(final int contextId, final int userId) throws OXException {
         ThreadPoolService threadPoolService = getThreadPoolService();
-        threadPoolService.submit(ThreadPools.task(new Runnable() {
+        threadPoolService.submit(new TaskAdapter(new Runnable() {
             @Override
             public void run() {
                 try {
@@ -180,7 +181,7 @@ public class IndexingServiceImpl implements IndexingService {
     @Override
     public void unscheduleAllForContext(final int contextId) throws OXException {
         ThreadPoolService threadPoolService = getThreadPoolService();
-        threadPoolService.submit(ThreadPools.task(new Runnable() {
+        threadPoolService.submit(new TaskAdapter(new Runnable() {
             @Override
             public void run() {
                 try {
@@ -252,5 +253,37 @@ public class IndexingServiceImpl implements IndexingService {
     public void shutdown() {
         QuartzService quartzService = Services.getService(QuartzService.class);
         quartzService.releaseClusteredScheduler(SCHEDULER_NAME);
+    }
+    
+    private static final class TaskAdapter implements Task<Void> {
+        
+        private final Runnable runnable;
+
+        public TaskAdapter(Runnable runnable) {
+            super();
+            this.runnable = runnable;
+        }
+        
+        @Override
+        public Void call() throws Exception {
+            runnable.run();
+            return null;
+        }
+
+        @Override
+        public void setThreadName(ThreadRenamer threadRenamer) {
+            return;
+        }
+
+        @Override
+        public void beforeExecute(Thread t) {
+            return;
+        }
+
+        @Override
+        public void afterExecute(Throwable t) {
+           return;
+        }
+        
     }
 }
