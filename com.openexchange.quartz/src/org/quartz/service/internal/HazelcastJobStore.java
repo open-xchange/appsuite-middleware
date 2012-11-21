@@ -1312,7 +1312,7 @@ public class HazelcastJobStore implements JobStore {
         return hazelcast;            
     }
     
-    static final class TriggerStateWrapper implements Serializable {
+    public static final class TriggerStateWrapper implements Serializable {
         
         private static final long serialVersionUID = -7286840785328204285L;
         
@@ -1369,7 +1369,7 @@ public class HazelcastJobStore implements JobStore {
      * value first), if the priorities are the same, then they are sorted
      * by key.
      */
-    class TriggerWrapperTimeComparator implements Comparator<TriggerStateWrapper>, Serializable {
+    public class TriggerWrapperTimeComparator implements Comparator<TriggerStateWrapper>, Serializable {
       
         private static final long serialVersionUID = -3904243490805975570L;
 
