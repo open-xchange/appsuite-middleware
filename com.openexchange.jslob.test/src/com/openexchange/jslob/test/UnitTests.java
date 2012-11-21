@@ -47,44 +47,20 @@
  *
  */
 
-package com.openexchange.jslob.config.osgi;
-
-import org.osgi.service.event.EventAdmin;
-import com.openexchange.config.ConfigurationService;
-import com.openexchange.config.cascade.ConfigViewFactory;
-import com.openexchange.jslob.JSlobService;
-import com.openexchange.jslob.config.ConfigJSlobService;
-import com.openexchange.jslob.shared.SharedJSlobService;
-import com.openexchange.jslob.storage.registry.JSlobStorageRegistry;
-import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.sessiond.SessiondService;
+package com.openexchange.jslob.test;
 
 /**
- * {@link ConfigJSlobActivator}
+ * {@link UnitTests}
  * 
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  */
-public final class ConfigJSlobActivator extends HousekeepingActivator {
+public class UnitTests {
 
     /**
-     * Initializes a new {@link ConfigJSlobActivator}.
+     * Initializes a new {@link UnitTests}.
      */
-    public ConfigJSlobActivator() {
+    private UnitTests() {
         super();
-    }
-
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] {
-            JSlobStorageRegistry.class, ConfigViewFactory.class, SessiondService.class, ConfigurationService.class, EventAdmin.class };
-    }
-
-    @Override
-    protected void startBundle() throws Exception {
-        ConfigJSlobService service = new ConfigJSlobService(this);
-        registerService(JSlobService.class, service);
-        track(SharedJSlobService.class, new SharedJSlobServiceTracker(context, service));
-        openTrackers();
     }
 
 }

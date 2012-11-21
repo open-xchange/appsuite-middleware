@@ -47,44 +47,46 @@
  *
  */
 
-package com.openexchange.jslob.config.osgi;
+package com.openexchange.jslob.test;
 
-import org.osgi.service.event.EventAdmin;
-import com.openexchange.config.ConfigurationService;
-import com.openexchange.config.cascade.ConfigViewFactory;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import org.json.JSONException;
+import org.junit.Test;
+import com.openexchange.exception.OXException;
+import com.openexchange.jslob.JSlob;
 import com.openexchange.jslob.JSlobService;
-import com.openexchange.jslob.config.ConfigJSlobService;
-import com.openexchange.jslob.shared.SharedJSlobService;
-import com.openexchange.jslob.storage.registry.JSlobStorageRegistry;
-import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.sessiond.SessiondService;
+import com.openexchange.test.osgi.OSGiTest;
 
 /**
- * {@link ConfigJSlobActivator}
+ * {@link SharedJSlobTest}
  * 
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  */
-public final class ConfigJSlobActivator extends HousekeepingActivator {
+public class SharedJSlobTest implements OSGiTest {
 
-    /**
-     * Initializes a new {@link ConfigJSlobActivator}.
-     */
-    public ConfigJSlobActivator() {
-        super();
+    private static volatile JSlobService jslobService;
+
+    @Test
+    public void testSharedJSlob() throws OXException, JSONException {
+        assertNotNull("JSlob service was null", jslobService);
+        JSlob jslob = jslobService.getShared("sharedjslob");
+        assertNotNull("jslob was null", jslob);
+        assertEquals("JSONObect's length was not 2", 2, jslob.getJsonObject().length());
+        assertTrue("JSONObject has not key test1", jslob.getJsonObject().has("test1"));
+        assertTrue("JSONObject has not key test2", jslob.getJsonObject().has("test2"));
+        assertTrue("Key test1 was not true", jslob.getJsonObject().getBoolean("test1"));
+        assertEquals("Key test2 was not -1", -1, jslob.getJsonObject().getInt("test2"));
+    }
+
+    public static void setJSlobService(JSlobService service) {
+        jslobService = service;
     }
 
     @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] {
-            JSlobStorageRegistry.class, ConfigViewFactory.class, SessiondService.class, ConfigurationService.class, EventAdmin.class };
-    }
-
-    @Override
-    protected void startBundle() throws Exception {
-        ConfigJSlobService service = new ConfigJSlobService(this);
-        registerService(JSlobService.class, service);
-        track(SharedJSlobService.class, new SharedJSlobServiceTracker(context, service));
-        openTrackers();
+    public Class<?>[] getTestClasses() {
+        return new Class<?>[] { SharedJSlobTest.class };
     }
 
 }
