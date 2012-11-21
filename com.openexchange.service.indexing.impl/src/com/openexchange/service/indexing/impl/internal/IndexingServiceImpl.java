@@ -70,6 +70,7 @@ import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.service.indexing.IndexingService;
 import com.openexchange.service.indexing.JobInfo;
+import com.openexchange.solr.SolrProperties;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.threadpool.ThreadPools;
 
@@ -236,9 +237,10 @@ public class IndexingServiceImpl implements IndexingService {
 
     Scheduler getScheduler() throws OXException {
         ConfigurationService config = Services.getService(ConfigurationService.class);
+        boolean isSolrNode = config.getBoolProperty(SolrProperties.IS_NODE, false);
         int threads = config.getIntProperty(IndexingProperties.WORKER_THREADS, 5);
         QuartzService quartzService = Services.getService(QuartzService.class);
-        Scheduler scheduler = quartzService.getClusteredScheduler(SCHEDULER_NAME, true, threads);
+        Scheduler scheduler = quartzService.getClusteredScheduler(SCHEDULER_NAME, isSolrNode, threads);
         return scheduler;
     }
     
