@@ -424,6 +424,21 @@ public class IMAPDefaultFolderChecker {
         }
     }
 
+    /**
+     * Performs default folder check for specified arguments.
+     *
+     * @param index The index
+     * @param prefix The prefix
+     * @param fullName The full name
+     * @param name The name
+     * @param sep The separator character
+     * @param type The folder type
+     * @param subscribe Whether to subscribe
+     * @param modified Whether folders has been modified during check
+     * @param cache The associated cache
+     * @return Dummy <code>null</code>
+     * @throws OXException If an error occurs
+     */
     protected Callable<Object> performTaskFor(final int index, final String prefix, final String fullName, final String name, final char sep, final int type, final int subscribe, final AtomicBoolean modified, final MailSessionCache cache) throws OXException {
         try {
             if (isEmpty(fullName)) {
@@ -482,6 +497,16 @@ public class IMAPDefaultFolderChecker {
         return null;
     }
 
+    /**
+     * Gets the default folder prefix.
+     *
+     * @param inboxFolder The INBOX folder
+     * @param inboxListEntry The associated LIST/LSUB entry
+     * @param mailSessionCache The associated cache
+     * @return The prefix and separator character as an array
+     * @throws MessagingException If a messaging error occurs
+     * @throws OXException If an error occurs
+     */
     protected String[] getDefaultFolderPrefix(final IMAPFolder inboxFolder, final ListLsubEntry inboxListEntry, final MailSessionCache mailSessionCache) throws MessagingException, OXException {
         /*
          * Check for NAMESPACE capability
