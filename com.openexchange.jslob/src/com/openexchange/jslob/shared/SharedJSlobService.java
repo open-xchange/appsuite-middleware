@@ -47,44 +47,58 @@
  *
  */
 
-package com.openexchange.jslob.config.osgi;
+package com.openexchange.jslob.shared;
 
-import org.osgi.service.event.EventAdmin;
-import com.openexchange.config.ConfigurationService;
-import com.openexchange.config.cascade.ConfigViewFactory;
-import com.openexchange.jslob.JSlobService;
-import com.openexchange.jslob.config.ConfigJSlobService;
-import com.openexchange.jslob.shared.SharedJSlobService;
-import com.openexchange.jslob.storage.registry.JSlobStorageRegistry;
-import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.sessiond.SessiondService;
+import org.json.JSONObject;
+import com.openexchange.jslob.JSlob;
 
 /**
- * {@link ConfigJSlobActivator}
+ * {@link SharedJSlobService} - Service for adding shared JSlobs to JSlobService
  * 
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  */
-public final class ConfigJSlobActivator extends HousekeepingActivator {
+public interface SharedJSlobService {
 
     /**
-     * Initializes a new {@link ConfigJSlobActivator}.
+     * Topics for EventAdmin
      */
-    public ConfigJSlobActivator() {
-        super();
-    }
+    public static final String EVENT_ADDED = "com/openexchange/jslob/sharedJSlob/added";
 
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] {
-            JSlobStorageRegistry.class, ConfigViewFactory.class, SessiondService.class, ConfigurationService.class, EventAdmin.class };
-    }
+    public static final String EVENT_REMOVED = "com/openexchange/jslob/sharedJSlob/removed";
 
-    @Override
-    protected void startBundle() throws Exception {
-        ConfigJSlobService service = new ConfigJSlobService(this);
-        registerService(JSlobService.class, service);
-        track(SharedJSlobService.class, new SharedJSlobServiceTracker(context, service));
-        openTrackers();
-    }
+    /**
+     * Returns the jslob service id
+     * 
+     * @return The jslob service id
+     */
+    String getServiceId();
+
+    /**
+     * Returns the shared jslob
+     * 
+     * @return The shared jslob
+     */
+    JSlob getJSlob();
+
+    /**
+     * Returns the jslob's id
+     * 
+     * @return The jslob's id
+     */
+    String getId();
+
+    /**
+     * Set the jslob's JSONObject
+     * 
+     * @param jsonObject The JSONObject to set
+     */
+    void setJSONObject(JSONObject jsonObject);
+
+    /**
+     * Set the jslob's meta data JSONObject
+     * 
+     * @param metaObject The JSONObject to set
+     */
+    void setMetaObject(JSONObject metaObject);
 
 }

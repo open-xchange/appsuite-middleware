@@ -86,6 +86,15 @@ public interface JSlobService {
     JSlob get(String id, int userId, int contextId) throws OXException;
 
     /**
+     * Gets the shared JSlob.
+     * 
+     * @param id The identifier of the JSlob
+     * @return The JSlob
+     * @throws OXException If JSlob cannot be returned
+     */
+    JSlob getShared(String id) throws OXException;
+
+    /**
      * Gets the JSlobs associated with given user in given context.
      * 
      * @param userId The user identifier
@@ -94,6 +103,14 @@ public interface JSlobService {
      * @throws OXException If JSlobs cannot be returned
      */
     Collection<JSlob> get(int userId, int contextId) throws OXException;
+
+    /**
+     * Gets the shared JSlobs.
+     * 
+     * @return The JSlobs
+     * @throws OXException If JSlobs cannot be returned
+     */
+    Collection<JSlob> getShared() throws OXException;
 
     /**
      * Sets the JSlob associated with given user in given context.
@@ -107,6 +124,17 @@ public interface JSlobService {
      * @throws OXException If JSlob cannot be set
      */
     void set(String id, JSlob jsonJSlob, int userId, int contextId) throws OXException;
+
+    /**
+     * Sets the shared JSlob.
+     * <p>
+     * If passed JSlob is <code>null</code>, a delete is performed.
+     * 
+     * @param id The path of the JSlob
+     * @param jsonJSlob The JSlob or <code>null</code> for deletion
+     * @throws OXException If JSlob cannot be set
+     */
+    void setShared(String id, JSlob jsonJSlob) throws OXException;
 
     /**
      * Updates the JSlob associated with given user in given context.
