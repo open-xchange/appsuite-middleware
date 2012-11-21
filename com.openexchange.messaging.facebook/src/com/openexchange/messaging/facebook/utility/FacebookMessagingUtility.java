@@ -49,7 +49,12 @@
 
 package com.openexchange.messaging.facebook.utility;
 
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
+import java.io.Writer;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -61,10 +66,18 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import javax.xml.transform.OutputKeys;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerException;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+import org.w3c.dom.Node;
 import com.openexchange.exception.OXException;
 import com.openexchange.messaging.MessagingContent;
 import com.openexchange.messaging.MessagingExceptionCodes;
@@ -93,6 +106,39 @@ public final class FacebookMessagingUtility {
      */
     private FacebookMessagingUtility() {
         super();
+    }
+
+    /**
+     * Gets pretty-printed string representation of specified node.
+     * 
+     * @param node The node
+     * @return The pretty-printed string representation of specified node
+     */
+    public static String toString(Node node) {
+        try {
+            final StringWriter writer = new StringWriter(1024);
+            printDocument(node, writer);
+            return writer.toString();
+        } catch (final TransformerException e) {
+            return e.getMessage();
+        }
+    }
+
+    /**
+     * Pretty prints specified node.
+     * 
+     * @param node The node
+     * @param writer The writer
+     * @throws TransformerException If a transformation error occurs
+     */
+    public static void printDocument(Node node, Writer writer) throws TransformerException {
+        final Transformer transformer = TransformerFactory.newInstance().newTransformer();
+        transformer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "no");
+        transformer.setOutputProperty(OutputKeys.METHOD, "xml");
+        transformer.setOutputProperty(OutputKeys.INDENT, "yes");
+        transformer.setOutputProperty(OutputKeys.ENCODING, "UTF-8");
+        transformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "4");
+        transformer.transform(new DOMSource(node), new StreamResult(writer));
     }
 
     public interface StaticFiller {
