@@ -6,7 +6,6 @@ import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.Dictionary;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
@@ -486,12 +485,6 @@ public class HazelcastActivator extends HousekeepingActivator {
                 }
                 return InitMode.NONE;
             }
-            final Set<String> localHost = getLocalHost();
-            for (final String candidate : members) {
-                if (!localHost.contains(candidate)) {
-                    cur.add(candidate);
-                }
-            }
             tcpIpConfig.clear();
             tcpIpConfig.setMembers(new ArrayList<String>(cur));
             return InitMode.RE_INITIALIZED;
@@ -501,14 +494,7 @@ public class HazelcastActivator extends HousekeepingActivator {
                 if (logger.isInfoEnabled()) {
                     logger.info("\nHazelcast:\n\tConfiguring Hazelcast instance:\n\tInitial members: " + members + "\n");
                 }
-                final List<String> l = new ArrayList<String>(members.size());
-                final Set<String> localHost = getLocalHost();
-                for (final String candidate : members) {
-                    if (!localHost.contains(candidate)) {
-                        l.add(candidate);
-                    }
-                }
-                join.getTcpIpConfig().setMembers(l);
+                join.getTcpIpConfig().setMembers(new ArrayList<String>(members));
                 return InitMode.INITIALIZED;
             } else {
                 if (logger.isInfoEnabled()) {
@@ -518,19 +504,6 @@ public class HazelcastActivator extends HousekeepingActivator {
                 return InitMode.INITIALIZED;
             }
         }
-    }
-
-    private static final Pattern SPLIT = Pattern.compile("\\%");
-
-    private static Set<String> resolve2Members(final List<InetAddress> nodes) {
-        final Set<String> members = new LinkedHashSet<String>(nodes.size());
-        for (final InetAddress inetAddress : nodes) {
-            final String[] addressArgs = SPLIT.split(inetAddress.getHostAddress(), 0);
-            for (final String address : addressArgs) {
-                members.add(address);
-            }
-        }
-        return members;
     }
 
     @Override
@@ -562,9 +535,7 @@ public class HazelcastActivator extends HousekeepingActivator {
             LOG.warn("\n\tThe configuration value for \"com.openexchange.cluster.name\" has not been changed from it's default value "
                 + "\"ox\". Please do so to make this warning disappear.\n");
         }
-        Dictionary<?, ?> headers = context.getBundle().getHeaders();
-        String bundleVersion = (String) headers.get("Bundle-Version");
-        config.getGroupConfig().setName(groupName + "-v" + bundleVersion).setPassword("YXV0b2JhaG4=");
+        config.getGroupConfig().setName(groupName).setPassword("YXV0b2JhaG4=");
         /*
          * JMX
          */
@@ -618,6 +589,22 @@ public class HazelcastActivator extends HousekeepingActivator {
             isWhitespace = Character.isWhitespace(string.charAt(i));
         }
         return isWhitespace;
+    }
+
+    private static final Pattern SPLIT = Pattern.compile("\\%");
+
+    private static Set<String> resolve2Members(final List<InetAddress> nodes) {
+        Set<String> localHost = getLocalHost(); 
+        final Set<String> members = new LinkedHashSet<String>(nodes.size());
+        for (final InetAddress inetAddress : nodes) {
+            final String[] addressArgs = SPLIT.split(inetAddress.getHostAddress(), 0);
+            for (final String address : addressArgs) {
+                if (false == localHost.contains(address)) {
+                    members.add(address);
+                }
+            }
+        }
+        return members;
     }
 
     private static Set<String> getLocalHost() {

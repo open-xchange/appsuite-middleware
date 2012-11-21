@@ -9,12 +9,11 @@
 
 	<!-- Constants -->
 	<property name="sbinDir" value="sbin" />
-	<property name="patchSbinDir" value="${tmpDir}/${sbinDir}" />
 
 	<target name="postInstall">
-	    <symlink resource="${destDir}/${sbinInstallDir}/registercorestore" link="${destDir}/${sbinInstallDir}/unregistercorestore" overwrite="true" />
-	    <symlink resource="${destDir}/${sbinInstallDir}/registercorestore" link="${destDir}/${sbinInstallDir}/listcorestore" overwrite="true" />
-	    <symlink resource="${destDir}/${sbinInstallDir}/registercorestore" link="${destDir}/${sbinInstallDir}/changecorestore" overwrite="true" />
+	    <symlink resource="${sbinInstallDir}/registercorestore" link="${destDir}/${sbinInstallDir}/unregistercorestore" overwrite="true" />
+	    <symlink resource="${sbinInstallDir}/registercorestore" link="${destDir}/${sbinInstallDir}/listcorestore" overwrite="true" />
+	    <symlink resource="${sbinInstallDir}/registercorestore" link="${destDir}/${sbinInstallDir}/changecorestore" overwrite="true" />
 	    <chmod perm="755" file="${sbinInstallDir}/unregistercorestore" />
 	    <chmod perm="755" file="${sbinInstallDir}/listcorestore" />
         <chmod perm="755" file="${sbinInstallDir}/changecorestore" />

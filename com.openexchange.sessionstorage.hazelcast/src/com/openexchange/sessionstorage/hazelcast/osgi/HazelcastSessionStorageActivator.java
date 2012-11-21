@@ -55,6 +55,7 @@ import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.hazelcast.config.MapConfig;
+import com.hazelcast.config.MapIndexConfig;
 import com.hazelcast.config.MaxSizeConfig;
 import com.hazelcast.core.HazelcastInstance;
 import com.openexchange.config.ConfigurationService;
@@ -104,6 +105,9 @@ public class HazelcastSessionStorageActivator extends HousekeepingActivator {
                 maxSizeConfig.setSize(0);
                 mapConfig.setMaxSizeConfig(maxSizeConfig);
                 mapConfig.setMergePolicy("hz.LATEST_UPDATE");
+                // add indices for context- and user ID
+                mapConfig.addMapIndexConfig(new MapIndexConfig("userId", false));
+                mapConfig.addMapIndexConfig(new MapIndexConfig("contextId", false));
             }
             final HazelcastSessionStorageConfiguration config = new HazelcastSessionStorageConfiguration(mapConfig);
             // Track HazelcastInstance

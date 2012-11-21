@@ -1,3 +1,7 @@
+* 2012-11-21 - thorben.betten@open-xchange.com
+
+ - Fix for bug 23585: Check for possible thumbnail version by URL string
+
 * 2012-11-21 - jan.bauerdick@open-xchange.com
 
  - New SharedJSlobService for adding shared jslobs
