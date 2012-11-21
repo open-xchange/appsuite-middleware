@@ -47,44 +47,77 @@
  *
  */
 
-package com.openexchange.jslob.config.osgi;
+package com.openexchange.jslob.test;
 
-import org.osgi.service.event.EventAdmin;
-import com.openexchange.config.ConfigurationService;
-import com.openexchange.config.cascade.ConfigViewFactory;
-import com.openexchange.jslob.JSlobService;
-import com.openexchange.jslob.config.ConfigJSlobService;
+import org.json.JSONObject;
+import com.openexchange.jslob.JSlob;
+import com.openexchange.jslob.JSlobId;
 import com.openexchange.jslob.shared.SharedJSlobService;
-import com.openexchange.jslob.storage.registry.JSlobStorageRegistry;
-import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.sessiond.SessiondService;
 
 /**
- * {@link ConfigJSlobActivator}
+ * {@link SimSharedJSlobService}
  * 
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  */
-public final class ConfigJSlobActivator extends HousekeepingActivator {
+public class SimSharedJSlobService implements SharedJSlobService {
+
+    private final String serviceId;
+
+    private final JSlob jslob;
 
     /**
-     * Initializes a new {@link ConfigJSlobActivator}.
+     * Initializes a new {@link SimSharedJSlobService}.
      */
-    public ConfigJSlobActivator() {
+    public SimSharedJSlobService(JSONObject jsonObject) {
         super();
+        serviceId = "com.openexchange.jslob.config";
+        jslob = new JSlob(jsonObject);
+        jslob.setId(new JSlobId(serviceId, "sharedjslob", 0, 0));
     }
 
+    /*
+     * (non-Javadoc)
+     * @see com.openexchange.jslob.shared.SharedJSlobService#getServiceId()
+     */
     @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] {
-            JSlobStorageRegistry.class, ConfigViewFactory.class, SessiondService.class, ConfigurationService.class, EventAdmin.class };
+    public String getServiceId() {
+        return serviceId;
     }
 
+    /*
+     * (non-Javadoc)
+     * @see com.openexchange.jslob.shared.SharedJSlobService#getJSlob()
+     */
     @Override
-    protected void startBundle() throws Exception {
-        ConfigJSlobService service = new ConfigJSlobService(this);
-        registerService(JSlobService.class, service);
-        track(SharedJSlobService.class, new SharedJSlobServiceTracker(context, service));
-        openTrackers();
+    public JSlob getJSlob() {
+        return jslob;
+    }
+
+    /*
+     * (non-Javadoc)
+     * @see com.openexchange.jslob.shared.SharedJSlobService#getId()
+     */
+    @Override
+    public String getId() {
+        return jslob.getId().getId();
+    }
+
+    /*
+     * (non-Javadoc)
+     * @see com.openexchange.jslob.shared.SharedJSlobService#setJSONObject()
+     */
+    @Override
+    public void setJSONObject(JSONObject jsonObject) {
+        jslob.setJsonObject(jsonObject);
+    }
+
+    /*
+     * (non-Javadoc)
+     * @see com.openexchange.jslob.shared.SharedJSlobService#setMetaObject()
+     */
+    @Override
+    public void setMetaObject(JSONObject metaObject) {
+        jslob.setMetaObject(metaObject);
     }
 
 }

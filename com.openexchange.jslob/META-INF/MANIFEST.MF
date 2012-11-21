@@ -17,5 +17,6 @@ Import-Package: com.openexchange.exception,
 Bundle-Activator: com.openexchange.jslob.osgi.JSlobActivator
 Export-Package: com.openexchange.jslob,
  com.openexchange.jslob.registry,
+ com.openexchange.jslob.shared,
  com.openexchange.jslob.storage,
  com.openexchange.jslob.storage.registry

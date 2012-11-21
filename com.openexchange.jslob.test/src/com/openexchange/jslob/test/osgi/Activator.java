@@ -47,44 +47,51 @@
  *
  */
 
-package com.openexchange.jslob.config.osgi;
+package com.openexchange.jslob.test.osgi;
 
-import org.osgi.service.event.EventAdmin;
-import com.openexchange.config.ConfigurationService;
-import com.openexchange.config.cascade.ConfigViewFactory;
+import java.util.Dictionary;
+import java.util.Hashtable;
+import org.json.JSONObject;
+import org.osgi.service.event.Event;
+import org.osgi.service.event.EventConstants;
+import org.osgi.service.event.EventHandler;
 import com.openexchange.jslob.JSlobService;
-import com.openexchange.jslob.config.ConfigJSlobService;
 import com.openexchange.jslob.shared.SharedJSlobService;
-import com.openexchange.jslob.storage.registry.JSlobStorageRegistry;
+import com.openexchange.jslob.test.SharedJSlobTest;
+import com.openexchange.jslob.test.SimSharedJSlobService;
 import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.sessiond.SessiondService;
+import com.openexchange.test.osgi.OSGiTest;
 
 /**
- * {@link ConfigJSlobActivator}
+ * {@link Activator}
  * 
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  */
-public final class ConfigJSlobActivator extends HousekeepingActivator {
-
-    /**
-     * Initializes a new {@link ConfigJSlobActivator}.
-     */
-    public ConfigJSlobActivator() {
-        super();
-    }
+public class Activator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] {
-            JSlobStorageRegistry.class, ConfigViewFactory.class, SessiondService.class, ConfigurationService.class, EventAdmin.class };
+        return new Class<?>[] { JSlobService.class };
     }
 
     @Override
     protected void startBundle() throws Exception {
-        ConfigJSlobService service = new ConfigJSlobService(this);
-        registerService(JSlobService.class, service);
-        track(SharedJSlobService.class, new SharedJSlobServiceTracker(context, service));
-        openTrackers();
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put("test1", true);
+        jsonObject.put("test2", -1);
+        registerService(SharedJSlobService.class, new SimSharedJSlobService(jsonObject));
+        // Register event handler
+        EventHandler eventHandler = new EventHandler() {
+
+            @Override
+            public void handleEvent(Event arg0) {
+                SharedJSlobTest.setJSlobService(getService(JSlobService.class));
+                registerService(OSGiTest.class, new SharedJSlobTest());
+            }
+        };
+        Dictionary<String, Object> props = new Hashtable<String, Object>(1);
+        props.put(EventConstants.EVENT_TOPIC, new String[] { SharedJSlobService.EVENT_ADDED });
+        registerService(EventHandler.class, eventHandler, props);
     }
 
 }
