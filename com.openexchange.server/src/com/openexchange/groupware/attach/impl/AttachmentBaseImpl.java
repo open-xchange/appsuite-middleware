@@ -679,7 +679,7 @@ public class AttachmentBaseImpl extends DBService implements AttachmentBase {
             if (null != iter) {
                 try {
                     iter.close();
-                } catch (final OXException e) {
+                } catch (final Exception e) {
                     LOG.error("", e);
                 }
             }
