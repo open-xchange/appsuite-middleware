@@ -59,6 +59,7 @@ import org.apache.solr.common.SolrInputDocument;
 import org.apache.solr.common.params.SolrParams;
 import com.openexchange.exception.OXException;
 import com.openexchange.solr.SolrCoreIdentifier;
+import com.openexchange.solr.SolrExceptionCodes;
 
 
 /**
@@ -164,12 +165,14 @@ public interface RMISolrAccessService extends Remote {
     public QueryResponse queryRmi(SolrCoreIdentifier identifier, SolrParams params) throws RemoteException, OXException;
     
     /**
-     * This method can be used to check if the registry object for a cached RMI stub is still accessible.
+     * This method can be used to check if the registry object for a cached RMI stub is still accessible
+     * and if the given core is active on this node.
      * If a RemoteException is thrown, the remote object was removed from the RMI registry.
+     * An OXException with code {@link SolrExceptionCodes#CORE_NOT_STARTED} indicates that the given core is not active.
      * 
      * @throws RemoteException
      */
-    public void pingRmi() throws RemoteException;
+    public void pingRmi(SolrCoreIdentifier identifier) throws RemoteException, OXException;
     
     /**
      * Releases all resources hold for a core.

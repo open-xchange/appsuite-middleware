@@ -176,11 +176,11 @@ public final class SolrAccessServiceRmiWrapper implements SolrAccessService {
             throw handleRemoteException(e);
         }
     }
-    
-	@Override
-	public void freeResources(SolrCoreIdentifier identifier) {
-		return;
-	}
+
+    @Override
+    public void freeResources(SolrCoreIdentifier identifier) {
+        return;
+    }
 
     private static OXException handleRemoteException(final RemoteException remoteException) {
         return SolrExceptionCodes.REMOTE_ERROR.create(remoteException, remoteException.getMessage());
