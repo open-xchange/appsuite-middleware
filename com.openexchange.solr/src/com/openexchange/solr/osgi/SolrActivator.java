@@ -88,7 +88,6 @@ public class SolrActivator extends HousekeepingActivator {
         registerService(CreateTableService.class, createTableService);
         registerService(UpdateTaskProviderService.class, new DefaultUpdateTaskProviderService(new SolrCoresCreateTableTask(
             createTableService)));
-        // new SolrCoreStoresCreateTableTask()
         registerService(LoginHandlerService.class, new SolrCoreLoginHandler(embeddedAccess));
         registerMBean(coreService);
         HazelcastInstance hazelcast = getService(HazelcastInstance.class);
