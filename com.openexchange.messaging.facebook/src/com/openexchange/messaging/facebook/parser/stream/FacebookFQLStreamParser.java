@@ -444,6 +444,7 @@ public final class FacebookFQLStreamParser {
                  * "media" node
                  */
                 final Node media = getNodeByName("media", attachNodes, len);
+                // System.out.println(FacebookMessagingUtility.toString(media));
                 if (null != media) {
                     final Node streamMedia = getNodeByName("stream_media", media);
                     if (null != streamMedia) {
@@ -470,6 +471,10 @@ public final class FacebookFQLStreamParser {
                                 final int pos = sourceUrl.lastIndexOf('.');
                                 if (pos >= 0) {
                                     final String extension = sourceUrl.substring(pos + 1);
+                                    final String prefix = sourceUrl.substring(0, pos);
+                                    if (prefix.toLowerCase(Locale.US).endsWith("_s")) {
+                                        sourceUrl = prefix.substring(0, prefix.length() - 2) + "_b." + extension;
+                                    }
                                     if (!"application/octet-stream".equals(Utility.getContentTypeByExtension(extension))) {
                                         /*
                                          * A known extension
