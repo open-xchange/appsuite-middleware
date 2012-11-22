@@ -124,7 +124,7 @@ public class SolrActivator extends HousekeepingActivator {
                             
                             SimpleScheduleBuilder scheduleBuilder = SimpleScheduleBuilder
                                 .simpleSchedule()
-                                .withIntervalInMinutes(1)
+                                .withIntervalInMinutes(15)
                                 .repeatForever()
                                 .withMisfireHandlingInstructionFireNow();
                             
