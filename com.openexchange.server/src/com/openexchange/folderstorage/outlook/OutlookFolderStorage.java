@@ -822,7 +822,7 @@ public final class OutlookFolderStorage implements FolderStorage {
         }
         final boolean started = folderStorage.startTransaction(storageParameters, false);
         try {
-            final boolean containsForeignObjects = folderStorage.containsForeignObjects(user, treeId, folderId, storageParameters);
+            final boolean containsForeignObjects = folderStorage.containsForeignObjects(user, realTreeId, folderId, storageParameters);
             if (started) {
                 folderStorage.commitTransaction(storageParameters);
             }
