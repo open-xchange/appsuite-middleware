@@ -87,7 +87,7 @@ public class MailSearchTest extends AbstractMailTest {
     }
 
     public void testSearch() throws Exception {
-        final String searchText = "Re: Your order for East Texas Lighthouse";
+        final String searchText = "Your order";
         JSONArray search;
 
         search = searchBySubject(searchText);
@@ -96,15 +96,16 @@ public class MailSearchTest extends AbstractMailTest {
         String eml =
             "Message-Id: <4A002517.4650.0059.1>\n" +
             "Date: Tue, 05 May 2009 11:37:58 -0500\n" +
-            "To: #TOADDR#\n" +
-            "Subject: Re: Your order for East Texas Lighthouse\n" +
+            "From: " + getSendAddress() + "\n" +
+            "To: " + getSendAddress() + "\n" +
+            "Subject: Your order\n" +
             "Mime-Version: 1.0\n" +
             "Content-Type: text/plain; charset=\"UTF-8\"\n" +
             "Content-Transfer-Encoding: 8bit\n" +
             "\n" +
             "This is a MIME message. If you are reading this text, you may want to \n" +
             "consider changing to a mail reader or gateway that understands how to \n" +
-            "properly handle MIME multipart messages.".replaceFirst("#TOADDR#", getSendAddress());
+            "properly handle MIME multipart messages.";
         getClient().execute(new NewMailRequest(folder, eml, -1, true));
         search = searchBySubject(searchText);
         assertEquals("Should yield one result.", 1, search.length());
@@ -116,7 +117,8 @@ public class MailSearchTest extends AbstractMailTest {
         eml =
             "Message-Id: <4A002517.4650.0059.1>\n" +
             "Date: Tue, 05 May 2009 11:37:58 -0500\n" +
-            "To: #TOADDR#\n" +
+            "From: " + getSendAddress() + "\n" +
+            "To: " + getSendAddress() + "\n" +
             "Subject: Barfoo\n" +
             "Mime-Version: 1.0\n" +
             "Content-Type: text/plain; charset=\"UTF-8\"\n" +
@@ -124,7 +126,7 @@ public class MailSearchTest extends AbstractMailTest {
             "\n" +
             "This is a MIME message. If you are reading this text, you may want to \n" +
             "consider changing to a mail reader or gateway that understands how to \n" +
-            "properly handle MIME multipart messages.".replaceFirst("#TOADDR#", getSendAddress());
+            "properly handle MIME multipart messages.";
         getClient().execute(new NewMailRequest(folder, eml, -1, true));
         search = searchBySubject(searchText);
         assertEquals("Should still yield two results after being sent a different one", 2, search.length());

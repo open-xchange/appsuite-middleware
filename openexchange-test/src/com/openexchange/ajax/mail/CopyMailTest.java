@@ -89,8 +89,8 @@ public class CopyMailTest extends AbstractMailTest {
 
         final String eml =
             "Date: Mon, 19 Nov 2012 21:36:51 +0100 (CET)\n" + 
-            "From: #ADDR#\n" + 
-            "To: #ADDR#\n" + 
+            "From: " + getSendAddress() + "\n" +
+            "To: " + getSendAddress() + "\n" +
             "Message-ID: <1508703313.17483.1353357411049>\n" + 
             "Subject: Copy a mail\n" + 
             "MIME-Version: 1.0\n" + 
@@ -118,7 +118,7 @@ public class CopyMailTest extends AbstractMailTest {
             "  </div>\n" + 
             " \n" + 
             "</body></html>\n" + 
-            "------=_Part_17482_1388684087.1353357411002--\n".replaceAll("#ADDR#", getSendAddress());
+            "------=_Part_17482_1388684087.1353357411002--\n";
 
         getClient().execute(new NewMailRequest(getInboxFolder(), eml, -1, true));
 
