@@ -59,6 +59,7 @@ import javax.servlet.ServletException;
 import net.htmlparser.jericho.Config;
 import net.htmlparser.jericho.LoggerProvider;
 import org.apache.commons.logging.Log;
+import org.json.CharArrayPool;
 import org.json.JSONObject;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
@@ -333,7 +334,14 @@ public final class ServerActivator extends HousekeepingActivator {
     @Override
     protected void startBundle() throws Exception {
         CONTEXT = context;
-        JSONObject.setMaxSize(getService(ConfigurationService.class).getIntProperty("com.openexchange.json.maxSize", 2500));
+        {
+            JSONObject.setMaxSize(getService(ConfigurationService.class).getIntProperty("com.openexchange.json.maxSize", 2500));
+
+            CharArrayPool.setCapacities(1000000, 100000, 1000);
+            CharArrayPool.setLengths(1024, 1024 * 100, 1024 * 1000);
+            
+            JSONObject.setUseCharPool(true);
+        }
         Config.LoggerProvider = LoggerProvider.DISABLED;
         // get version information from MANIFEST file
         final Dictionary<?, ?> headers = context.getBundle().getHeaders();
