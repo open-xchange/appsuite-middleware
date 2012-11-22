@@ -1,3 +1,8 @@
+* 2012-11-22 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 23891: Return non-existing images as-is and don't apply implicit rotation and compression transformations on 
+                      "download"-type delivery  
+
 * 2012-11-22 - thorben.betten@open-xchange.com
 
  - Fix for bug 23887: Fixed possible StackOverflowError
