@@ -105,7 +105,7 @@ public class MailSearchTest extends AbstractMailTest {
             "\n" +
             "This is a MIME message. If you are reading this text, you may want to \n" +
             "consider changing to a mail reader or gateway that understands how to \n" +
-            "properly handle MIME multipart messages.".replaceFirst("#TOADDR#", getSendAddress());
+            "properly handle MIME multipart messages.";
         getClient().execute(new NewMailRequest(folder, eml, -1, true));
         search = searchBySubject(searchText);
         assertEquals("Should yield one result.", 1, search.length());
@@ -126,7 +126,7 @@ public class MailSearchTest extends AbstractMailTest {
             "\n" +
             "This is a MIME message. If you are reading this text, you may want to \n" +
             "consider changing to a mail reader or gateway that understands how to \n" +
-            "properly handle MIME multipart messages.".replaceFirst("#TOADDR#", getSendAddress());
+            "properly handle MIME multipart messages.";
         getClient().execute(new NewMailRequest(folder, eml, -1, true));
         search = searchBySubject(searchText);
         assertEquals("Should still yield two results after being sent a different one", 2, search.length());

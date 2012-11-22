@@ -91,7 +91,7 @@ public final class MultipleAttachmentTest extends AbstractMailTest {
 		try {
 			{
 			    final String eml =
-		            "Date: Mon, 19 Nov 2012 21:36:51 +0100 (CET)\n" + 
+		            ("Date: Mon, 19 Nov 2012 21:36:51 +0100 (CET)\n" + 
 		            "From: #ADDR#\n" + 
 		            "To: #ADDR#\n" + 
 		            "Message-ID: <1508703313.17483.1353357411049>\n" + 
@@ -121,7 +121,7 @@ public final class MultipleAttachmentTest extends AbstractMailTest {
 		            "  </div>\n" + 
 		            " \n" + 
 		            "</body></html>\n" + 
-		            "------=_Part_17482_1388684087.1353357411002--\n".replaceAll("#ADDR#", getSendAddress());
+		            "------=_Part_17482_1388684087.1353357411002--\n").replaceAll("#ADDR#", getSendAddress());
 		        NewMailResponse newMailResponse = getClient().execute(new NewMailRequest(client.getValues().getInboxFolder(), eml, -1, true));
 		        String folder = newMailResponse.getFolder();
 		        String id = newMailResponse.getId();

@@ -90,7 +90,7 @@ public final class ViewTest extends AbstractMailTest {
          * Create mail
          */
         final String eml =
-            "Message-Id: <4A002517.4650.0059.1@foobar.com>\n" +
+            ("Message-Id: <4A002517.4650.0059.1@foobar.com>\n" +
             "Date: Tue, 05 May 2009 11:37:58 -0500\n" +
             "From: #ADDR#\n" +
             "To: #ADDR#\n" +
@@ -101,7 +101,7 @@ public final class ViewTest extends AbstractMailTest {
             "\n" +
             "This is a MIME message. If you are reading this text, you may want to \n" +
             "consider changing to a mail reader or gateway that understands how to \n" +
-            "properly handle MIME multipart messages.".replaceAll("#ADDR#", getSendAddress());
+            "properly handle MIME multipart messages.").replaceAll("#ADDR#", getSendAddress());
         NewMailResponse newMailResponse = getClient().execute(new NewMailRequest(client.getValues().getInboxFolder(), eml, -1, true));
         String folder = newMailResponse.getFolder();
         String mid = newMailResponse.getId();
