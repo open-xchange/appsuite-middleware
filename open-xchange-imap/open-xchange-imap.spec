@@ -45,6 +45,12 @@ if [ ${1:-0} -eq 2 ]; then
 
     ox_move_config_file /opt/open-xchange/etc/groupware /opt/open-xchange/etc imap.properties
 
+    # SoftwareChange_Request-1215
+    pfile=/opt/open-xchange/etc/imap.properties
+    if ! ox_exists_property com.openexchange.imap.maxMailboxNameLength $pfile; then
+        ox_set_property com.openexchange.imap.maxMailboxNameLength 60 $pfile
+    fi
+
     # SoftwareChange_Request-1142
     pfile=/opt/open-xchange/etc/imap.properties
     if ! ox_exists_property com.openexchange.imap.umlautFilterThreshold $pfile; then
