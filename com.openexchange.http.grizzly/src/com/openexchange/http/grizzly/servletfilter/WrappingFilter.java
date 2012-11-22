@@ -56,30 +56,36 @@ import javax.servlet.FilterConfig;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import com.openexchange.http.grizzly.wrapper.HttpServletRequestWrapper;
 import com.openexchange.http.grizzly.wrapper.HttpServletResponseWrapper;
 
-
 /**
- * {@link ResponseWrappingFilter} - Wrap the Response in an {@link HttpServletResponseWrapper}
- *
+ * {@link WrappingFilter} - Wrap the Request in {@link HttpServletResponseWrapper} and the Response in {@link HttpServletResponseWrapper} to
+ * achieve feature parity with the ajp based implementation.
+ * 
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
-public class ResponseWrappingFilter implements Filter {
+public class WrappingFilter implements Filter {
 
     @Override
     public void init(FilterConfig filterConfig) {
+        // nothing to initialize
     }
 
     @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
+        HttpServletRequest httpServletRequest = (HttpServletRequest) request;
+        HttpServletRequestWrapper httpServletRequestWrapper = new HttpServletRequestWrapper(httpServletRequest);
         HttpServletResponse httpServletResponse = (HttpServletResponse) response;
         HttpServletResponseWrapper httpServletResponseWrapper = new HttpServletResponseWrapper(httpServletResponse);
-        chain.doFilter(request, httpServletResponseWrapper);
+        chain.doFilter(httpServletRequestWrapper, httpServletResponseWrapper);
     }
 
     @Override
     public void destroy() {
+        // nothing to destroy
     }
 
 }

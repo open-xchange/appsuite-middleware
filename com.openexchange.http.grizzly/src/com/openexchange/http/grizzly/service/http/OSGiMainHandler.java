@@ -72,7 +72,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.http.grizzly.GrizzlyExceptionMessage;
 import com.openexchange.http.grizzly.osgi.GrizzlyServiceRegistry;
 import com.openexchange.http.grizzly.servletfilter.RequestReportingFilter;
-import com.openexchange.http.grizzly.servletfilter.ResponseWrappingFilter;
+import com.openexchange.http.grizzly.servletfilter.WrappingFilter;
 
 /**
  * OSGi Main HttpHandler.
@@ -230,7 +230,7 @@ public class OSGiMainHandler extends HttpHandler implements OSGiHandler {
                     null);
             }
             
-            servletHandler.addFilter(new ResponseWrappingFilter(), ResponseWrappingFilter.class.getName(), null);
+            servletHandler.addFilter(new WrappingFilter(), WrappingFilter.class.getName(), null);
 
             /*
              * Servlet would be started several times if registered with multiple aliases. Starting means: 1. Set ContextPath 2. Instantiate

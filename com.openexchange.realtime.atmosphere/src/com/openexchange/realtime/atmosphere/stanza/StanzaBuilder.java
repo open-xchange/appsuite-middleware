@@ -215,7 +215,7 @@ public abstract class StanzaBuilder<T extends Stanza> {
                 String key = keys.next();
                 Object value = object.get(key);
                 if (value instanceof JSONArray) {
-                    JSONArray array = (JSONArray) data;
+                    JSONArray array = (JSONArray) value;
                     addPayloadsFromArray(node, array);
                 } else if (value instanceof JSONObject) {
                     JSONObject nestedObject = (JSONObject) value;
