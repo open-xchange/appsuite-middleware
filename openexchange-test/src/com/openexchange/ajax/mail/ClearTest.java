@@ -70,7 +70,6 @@ import com.openexchange.exception.OXException;
 public class ClearTest extends AbstractMailTest {
 
 	private static final Log LOG = LogFactory.getLog(ClearTest.class);
-	private String mailObject_25kb;
 
 	public ClearTest(final String name) {
 		super(name);
@@ -85,11 +84,6 @@ public class ClearTest extends AbstractMailTest {
 		clearFolder(getInboxFolder());
 		clearFolder(getSentFolder());
 		clearFolder(getTrashFolder());
-
-		/*
-		 * Create JSON mail object
-		 */
-		mailObject_25kb = createSelfAddressed25KBMailObject().toString();
 	}
 
 	@Override
@@ -112,16 +106,14 @@ public class ClearTest extends AbstractMailTest {
 		final String eml =
             "Message-Id: <4A002517.4650.0059.1@foobar.com>\n" +
             "Date: Tue, 05 May 2009 11:37:58 -0500\n" +
-            "From: #ADDR#\n" +
-            "To: #ADDR#\n" +
+            "From: " + getSendAddress() + "\n" +
+            "To: " + getSendAddress() + "\n" +
             "Subject: Invitation for launch\n" +
             "Mime-Version: 1.0\n" +
-            "Content-Type: text/plain; charset=\"UTF-8\"\n" +
-            "Content-Transfer-Encoding: 8bit\n" +
+            "Content-Type: text/plain; charset=\"US-ASCII\"\n" +
+            "Content-Transfer-Encoding: 7bit\n" +
             "\n" +
-            "This is a MIME message. If you are reading this text, you may want to \n" +
-            "consider changing to a mail reader or gateway that understands how to \n" +
-            "properly handle MIME multipart messages.".replaceAll("#ADDR#", getSendAddress());
+            "Blah blah blah blah blah blah";
 		for (int i = 0; i < numOfMails; i++) {
 	        getClient().execute(new NewMailRequest(getInboxFolder(), eml, -1, true));
 			LOG.info("Sent " + (i + 1) + ". mail of " + numOfMails);

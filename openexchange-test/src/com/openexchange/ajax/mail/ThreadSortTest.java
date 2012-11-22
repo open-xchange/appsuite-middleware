@@ -119,8 +119,8 @@ public final class ThreadSortTest extends AbstractMailTest {
         final String eml =
             "Message-Id: <4A002517.4650.0059.1@foobar.com>\n" +
             "Date: Tue, 05 May 2009 11:37:58 -0500\n" +
-            "From: #ADDR#\n" +
-            "To: #ADDR#\n" +
+            "From: " + getSendAddress() + "\n" +
+            "To: " + getSendAddress() + "\n" +
             "Subject: Invitation for launch\n" +
             "Mime-Version: 1.0\n" +
             "Content-Type: text/plain; charset=\"UTF-8\"\n" +
@@ -128,7 +128,7 @@ public final class ThreadSortTest extends AbstractMailTest {
             "\n" +
             "This is a MIME message. If you are reading this text, you may want to \n" +
             "consider changing to a mail reader or gateway that understands how to \n" +
-            "properly handle MIME multipart messages.".replaceAll("#ADDR#", getSendAddress());
+            "properly handle MIME multipart messages.";
         for (int i = 0; i < numOfMails; i++) {
             getClient().execute(new NewMailRequest(client.getValues().getInboxFolder(), eml, -1, true));
             LOG.info("Appended " + (i + 1) + ". mail of " + numOfMails);
