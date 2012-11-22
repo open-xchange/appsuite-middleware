@@ -5,6 +5,15 @@ Bundle-SymbolicName: com.openexchange.service.indexing
 Bundle-Version: 6.23.0
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
-Import-Package: com.openexchange.exception
+Import-Package: com.openexchange.exception,
+ javax.management,
+ javax.management.loading,
+ javax.management.modelmbean,
+ javax.management.monitor,
+ javax.management.openmbean,
+ javax.management.relation,
+ javax.management.remote,
+ javax.management.remote.rmi,
+ javax.management.timer
 Export-Package: com.openexchange.service.indexing
 

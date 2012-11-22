@@ -49,6 +49,7 @@
 
 package com.openexchange.solr.internal;
 
+import java.rmi.AccessException;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
@@ -73,6 +74,7 @@ import com.hazelcast.core.IMap;
 import com.hazelcast.core.Member;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
+import com.openexchange.exception.OXExceptionConstants;
 import com.openexchange.log.LogFactory;
 import com.openexchange.solr.SolrAccessService;
 import com.openexchange.solr.SolrCoreIdentifier;
@@ -80,6 +82,7 @@ import com.openexchange.solr.SolrExceptionCodes;
 import com.openexchange.solr.SolrProperties;
 import com.openexchange.solr.osgi.SolrActivator;
 import com.openexchange.solr.rmi.RMISolrAccessService;
+import com.openexchange.solr.rmi.RMISolrException;
 
 /**
  * {@link DelegationSolrAccessImpl}
@@ -484,8 +487,29 @@ public class DelegationSolrAccessImpl implements SolrAccessService {
 
 
     private static ConcurrentMap<String, RMISolrAccessService> rmiCache = new ConcurrentHashMap<String, RMISolrAccessService>();
-
+    
     private SolrAccessServiceRmiWrapper getRMIAccess(SolrCoreIdentifier identifier, String server) throws OXException {
+        try {
+            ConfigurationService config = Services.getService(ConfigurationService.class);
+            int rmiPort = config.getIntProperty("RMI_PORT", 1099);
+            Registry registry = LocateRegistry.getRegistry(server, rmiPort);
+            RMISolrAccessService rmiAccess = (RMISolrAccessService) registry.lookup(RMISolrAccessService.RMI_NAME);
+            rmiAccess.pingRmi(identifier);
+            return new SolrAccessServiceRmiWrapper(rmiAccess);
+        } catch (AccessException e) {
+            throw new OXException(e);
+        } catch (RemoteException e) {
+            throw new OXException(e);
+        } catch (NotBoundException e) {
+            throw new OXException(e);
+        } catch (RMISolrException e) {
+            OXException exception = new OXException(e.getErrorCode(), e.getMessage(), OXExceptionConstants.MESSAGE_ARGS_EMPTY);
+            exception.setPrefix("SOL");
+            throw exception;
+        }
+    }
+
+    private SolrAccessServiceRmiWrapper getCachedRMIAccess(SolrCoreIdentifier identifier, String server) throws OXException {
         RMISolrAccessService rmiAccess = rmiCache.get(server);
         if (rmiAccess == null) {
             rmiAccess = updateRmiCache(server);
@@ -497,6 +521,10 @@ public class DelegationSolrAccessImpl implements SolrAccessService {
                 if (LOG.isDebugEnabled()) {
                     LOG.debug("Ping failed for remote access on " + server + ". Reconnect.");
                 }
+            } catch (RMISolrException e) {
+                OXException exception = new OXException(e.getErrorCode(), e.getMessage(), OXExceptionConstants.MESSAGE_ARGS_EMPTY);
+                exception.setPrefix("SOL");
+                throw exception;
             }
         }
 

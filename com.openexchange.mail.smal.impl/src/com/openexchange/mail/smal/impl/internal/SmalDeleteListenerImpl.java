@@ -88,7 +88,7 @@ public class SmalDeleteListenerImpl implements DeleteListener {
         final int contextId = event.getContext().getContextId();
         try {
             IndexingService indexingService = SmalServiceLookup.getServiceStatic(IndexingService.class);
-            indexingService.unscheduleAllForContext(contextId);
+            indexingService.unscheduleAllForContext(false, contextId);
         } catch (Throwable t) {
             LOG.warn("Error while deleting jobs for context " + contextId + ".", t);
         }
@@ -112,7 +112,7 @@ public class SmalDeleteListenerImpl implements DeleteListener {
         final int userId = event.getId();
         try {
             IndexingService indexingService = SmalServiceLookup.getServiceStatic(IndexingService.class);
-            indexingService.unscheduleAllForUser(contextId, userId);
+            indexingService.unscheduleAllForUser(false, contextId, userId);
         } catch (Throwable t) {
             LOG.warn("Error while deleting jobs for user " + userId + " in context " + contextId + ".", t);
         }

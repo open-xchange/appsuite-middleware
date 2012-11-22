@@ -1021,13 +1021,12 @@ public class HazelcastJobStore implements JobStore {
             return returnList;
         } finally {
             lock.unlock();
-            
             if (LOG.isDebugEnabled()) {
                 StringBuilder sb = new StringBuilder("Releasing lock. ");
                 sb.append(System.nanoTime()).append(". ");
                 for (OperableTrigger trigger : returnList) {
                     sb.append("\n    Trigger: ").append(trigger.getKey().getName());
-                }                
+                }
                 LOG.debug(sb.toString());
             }
         }

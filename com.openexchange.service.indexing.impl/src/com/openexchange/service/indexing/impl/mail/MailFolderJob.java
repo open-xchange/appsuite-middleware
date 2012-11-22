@@ -199,7 +199,7 @@ public class MailFolderJob extends AbstractMailJob {
                     && e.getCode() == 2058) {
                     LOG.warn("Could not connect mail access for job " + info + ". Rescheduling job to run again in 60 seconds.");
                     IndexingService indexingService = Services.getService(IndexingService.class);
-                    indexingService.scheduleJob(info, new Date(System.currentTimeMillis() + 60000), -1L, IndexingService.DEFAULT_PRIORITY);
+                    indexingService.scheduleJob(false, info, new Date(System.currentTimeMillis() + 60000), -1L, IndexingService.DEFAULT_PRIORITY);
                     return;
                 }
                 

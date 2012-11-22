@@ -120,7 +120,7 @@ public class QuartzIndexingJob implements Job {
                 int failCount = jobData.getInt(FAIL_COUNT);
                 if (failCount > 3) {
                     IndexingService indexingService = Services.getService(IndexingService.class);
-                    indexingService.unscheduleJob(jobInfo);
+                    indexingService.unscheduleJob(false, jobInfo);
                     LOG.error("Job " + jobInfo.toString() + " failed more than three times in sequence. It will be removed from the scheduler.");
                 }
             } else {

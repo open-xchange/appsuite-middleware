@@ -47,74 +47,50 @@
  *
  */
 
-package com.openexchange.service.indexing;
-
-import java.util.Date;
-
-import com.openexchange.exception.OXException;
+package com.openexchange.solr.rmi;
 
 
 /**
- * {@link IndexingService}
+ * {@link RMISolrException}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public interface IndexingService {
+public class RMISolrException extends Exception {
     
+    private int errorCode;
+    
+    private String message;
+
     /**
-     * Default priority for jobs.
+     * Initializes a new {@link RMISolrException}.
+     * @param errorCode
+     * @param message
      */
-    public static final int DEFAULT_PRIORITY = 5;
+    public RMISolrException(int errorCode, String message) {
+        super();
+        this.errorCode = errorCode;
+        this.message = message;
+    }
+
     
-    /**
-     * Use this to schedule one-shot jobs.
-     */
-    public static final long NO_INTERVAL = -1L;
+    public final int getErrorCode() {
+        return errorCode;
+    }
+
     
-    /**
-     * Use this if the job should start immediately.
-     */
-    public static final Date NOW = null;
+    public final void setErrorCode(int errorCode) {
+        this.errorCode = errorCode;
+    }
+
     
+    public final String getMessage() {
+        return message;
+    }
+
     
-    /**
-     * Schedules an indexing job. 
-     * 
-     * @param async If <code>true</code> the call returns immediately and the scheduling will be performed asynchronously.
-     * @param info The information needed to run this job.
-     * @param startDate The start date of the job. May be <code>null</code> to run immediately.
-     * @param repeatInterval The repeat interval in milliseconds. May be negative if the job shall only run once.
-     * @param priority The priority. If two jobs shall be started at the same time, the one with the higher priority wins. See {@link IndexingService#DEFAULT_PRIORITY}.
-     * @throws OXException 
-     */
-    void scheduleJob(boolean async, JobInfo info, Date startDate, long repeatInterval, int priority) throws OXException;
+    public final void setMessage(String message) {
+        this.message = message;
+    }
     
-    /**
-     * Deletes an indexing job from the scheduler.
-     * 
-     * @param async If <code>true</code> the call returns immediately and the unscheduling will be performed asynchronously.
-     * @param info The information needed to delete this job.
-     * @throws OXException
-     */
-    void unscheduleJob(boolean async, JobInfo info) throws OXException;
-    
-    /**
-     * Deletes all jobs for a given user from the scheduler.
-     * 
-     * @param async If <code>true</code> the call returns immediately and the unscheduling will be performed asynchronously.
-     * @param contextId The context id.
-     * @param userId The user id.
-     * @throws OXException
-     */
-    void unscheduleAllForUser(boolean async, int contextId, int userId) throws OXException;
-    
-    /**
-     * Deletes all jobs for a given context.
-     * 
-     * @param async If <code>true</code> the call returns immediately and the unscheduling will be performed asynchronously.
-     * @param contextId The context id.
-     * @throws OXException
-     */
-    void unscheduleAllForContext(boolean async, int contextId) throws OXException;
 
 }
