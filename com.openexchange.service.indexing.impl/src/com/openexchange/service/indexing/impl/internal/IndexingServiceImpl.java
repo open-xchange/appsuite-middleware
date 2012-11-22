@@ -264,8 +264,17 @@ public class IndexingServiceImpl implements IndexingService {
             sb.append("withInterval/");
             sb.append(repeatInterval);
         } else {
+            /*
+             * Two one shot triggers within the same quarter of an hour have the same trigger key.
+             * This avoids triggering jobs too often.
+             */
             sb.append("oneShot/");
-            sb.append(startDate.getTime());
+            long now = startDate.getTime();
+            long millisSinceLastFullHour = now % (60000L * 60);
+            long lastFullHourInMillis = now - millisSinceLastFullHour;
+            long quarters = millisSinceLastFullHour / 60000L / 15;
+            long time = lastFullHourInMillis + (quarters * 15 * 60000L);
+            sb.append(time);
         }
         
         return sb.toString();

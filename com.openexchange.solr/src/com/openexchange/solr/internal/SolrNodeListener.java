@@ -50,6 +50,7 @@
 package com.openexchange.solr.internal;
 
 import java.util.Set;
+import org.apache.commons.logging.Log;
 import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.core.IMap;
 import com.hazelcast.core.Member;
@@ -64,6 +65,8 @@ import com.hazelcast.query.SqlPredicate;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public class SolrNodeListener implements MembershipListener {
+    
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(SolrNodeListener.class);
     
     private final HazelcastInstance hazelcast;
     
@@ -88,6 +91,13 @@ public class SolrNodeListener implements MembershipListener {
         String host = SolrCoreTools.resolveSocketAddress(member.getInetSocketAddress());
         SqlPredicate predicate = new SqlPredicate("this = " + host);
         IMap<String, String> solrCores = hazelcast.getMap(SolrCoreTools.SOLR_CORE_MAP);
+        if (LOG.isDebugEnabled()) {
+            StringBuilder sb = new StringBuilder("Solr cores:\n");
+            for (String key : solrCores.keySet()) {
+                sb.append("    ").append(key).append(": ").append(solrCores.get(key));
+            }
+            LOG.debug(sb.toString());
+        }
         Set<String> cores = solrCores.keySet(predicate);
         for (String core : cores) {
             solrCores.remove(core, host);

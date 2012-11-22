@@ -61,13 +61,11 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.FutureTask;
-
 import org.apache.commons.logging.Log;
 import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.client.solrj.response.UpdateResponse;
 import org.apache.solr.common.SolrInputDocument;
 import org.apache.solr.common.params.SolrParams;
-
 import com.hazelcast.core.DistributedTask;
 import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.core.IMap;
@@ -80,7 +78,6 @@ import com.openexchange.solr.SolrAccessService;
 import com.openexchange.solr.SolrCoreIdentifier;
 import com.openexchange.solr.SolrExceptionCodes;
 import com.openexchange.solr.SolrProperties;
-import com.openexchange.solr.osgi.SolrActivator;
 import com.openexchange.solr.rmi.RMISolrAccessService;
 import com.openexchange.solr.rmi.RMISolrException;
 
