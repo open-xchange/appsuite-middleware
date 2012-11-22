@@ -3,5 +3,6 @@
 <provider id="org.eclipse.egit.core.GitProvider">
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.test.osgi.test"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.jslob.test"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.index.solr.test"/>
 </provider>
 </psf>
