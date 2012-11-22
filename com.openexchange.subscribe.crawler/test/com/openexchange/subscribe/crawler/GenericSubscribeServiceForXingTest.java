@@ -68,17 +68,19 @@ public class GenericSubscribeServiceForXingTest extends GenericSubscribeServiceT
         CrawlerDescription crawler = new CrawlerDescription();
         crawler.setDisplayName("XING");
         crawler.setId("com.openexchange.subscribe.xing");
+        crawler.setPriority(2);
 
         List<Step> steps = new LinkedList<Step>();
-        steps.add(new LoginPageStep(
+        steps.add(new LoginPageByFormActionStep(
             "Login to www.xing.com",
             "https://www.xing.com",
             "",
             "",
-            "loginform",
-            "login_user_name",
-            "login_password",
+            "https://login.xing.com/login",
+            "login_form[username]",
+            "login_form[password]",
             "/app/contact",
+            1,
             "https://www.xing.com"));
         steps.add(new TextPagesByLinkStep(
             "Get all vcards as text pages",
