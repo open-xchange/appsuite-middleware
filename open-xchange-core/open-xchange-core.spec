@@ -179,49 +179,200 @@ perl -pi -e 's;(^.*?)\s+(.*/(mail|configdb|server|filestorage)\.properties)$;$1 
 . /opt/open-xchange/lib/oxfunctions.sh
 ox_move_config_file /opt/open-xchange/etc/common /opt/open-xchange/etc i18n.properties
 ox_move_config_file /opt/open-xchange/etc/groupware /opt/open-xchange/etc push.properties push-udp.properties
-CONFFILES="management.properties templating.properties mail-push.properties filestorage.properties folderjson.properties messaging.properties publications.properties secret.properties secrets threadpool.properties settings/themes.properties settings/ui.properties meta/ui.yml"
+CONFFILES="management.properties templating.properties mail-push.properties filestorage.properties folderjson.properties messaging.properties publications.properties secret.properties secrets threadpool.properties settings/themes.properties settings/ui.properties meta/ui.yml attachment.properties cache.ccf calendar.properties configdb.properties contact.properties event.properties file-logging.properties HTMLEntities.properties importerExporter.xml import.properties infostore.properties javamail.properties ldap.properties login.properties mailcache.ccf mail.properties mime.types noipcheck.cnf notification.properties ox-scriptconf.sh participant.properties passwordchange.properties server.properties sessioncache.ccf sessiond.properties smtp.properties system.properties user.properties whitelist.properties folder-reserved-names"
 for FILE in $CONFFILES; do
     ox_move_config_file /opt/open-xchange/etc/groupware /opt/open-xchange/etc $FILE
 done
-if [ ${1:-0} -eq 2 ]; then
-    # only when updating
+COCONFFILES="excludedupdatetasks.properties foldercache.properties transport.properties"
+for FILE in ${COCONFFILES}; do
+    ox_move_config_file /opt/open-xchange/etc/common /opt/open-xchange/etc $FILE
+done
 
-    # prevent bash from expanding, see bug 13316
-    GLOBIGNORE='*'
+# SoftwareChange_Request-1094
+rm -f /opt/open-xchange/etc/groupware/mailjsoncache.properties
+# SoftwareChange_Request-1091
+rm -f /opt/open-xchange/etc/groupware/TidyConfiguration.properties
+rm -f /opt/open-xchange/etc/groupware/TidyMessages.properties
 
-    # SoftwareChange_Request-1184
-    pfile=/opt/open-xchange/etc/file-logging.properties
-    if ! ox_exists_property com.hazelcast.level $pfile; then
-       ox_set_property com.hazelcast.level SEVERE $pfile
+pfile=/opt/open-xchange/etc/ox-scriptconf.sh
+if grep COMMONPROPERTIESDIR $pfile >/dev/null; then
+    ox_remove_property COMMONPROPERTIESDIR $pfile
+    # without original values, we're lost...
+    if [ -e ${pfile}.rpmnew ]; then
+       CHECKPROPS="LIBPATH PROPERTIESDIR LOGGINGPROPERTIES OSGIPATH"
+       grep JAVA_OXCMD_OPTS $pfile > /dev/null || CHECKPROPS="$CHECKPROPS JAVA_OXCMD_OPTS" && true
+       for prop in $CHECKPROPS; do
+           oval=$(ox_read_property $prop ${pfile}.rpmnew)
+           if [ -n "$oval" ]; then
+          ox_set_property $prop "$oval" $pfile
+           fi
+       done
     fi
-
-    # SoftwareChange_Request-1167
-    pfile=/opt/open-xchange/etc/contact.properties
-    if ! ox_exists_property "com.openexchange.contact.scaleVCardImages" $pfile; then
-       ox_set_property "com.openexchange.contact.scaleVCardImages" "200x200" $pfile
-    fi
-
-    # SoftwareChange_Request-1148
-    pfile=/opt/open-xchange/etc/whitelist.properties
-    if ! ox_exists_property "html.style.word-break" $pfile; then
-       ox_set_property "html.style.word-break" '"break-all"' $pfile
-    fi
-    if ! ox_exists_property "html.style.word-wrap" $pfile; then
-       ox_set_property "html.style.word-wrap" '"break-word"' $pfile
-    fi
-
-    # SoftwareChange_Request-1125
-    pfile=/opt/open-xchange/etc/contactcollector.properties
-    if ! ox_exists_property com.openexchange.contactcollector.folder.deleteDenied $pfile; then
-       ox_set_property com.openexchange.contactcollector.folder.deleteDenied false $pfile
-    fi
-
-    ox_update_permissions "/var/log/open-xchange" open-xchange:root 750
-    ox_update_permissions "/opt/open-xchange/osgi" open-xchange:root 750
-    ox_update_permissions "/opt/open-xchange/etc/configdb.properties" root:open-xchange 640
-    ox_update_permissions "/opt/open-xchange/etc/mail.properties" root:open-xchange 640
-    ox_update_permissions "/opt/open-xchange/etc/ox-scriptconf.sh" root:root 644
 fi
+
+# SoftwareChange_Request-1214
+pfile=/opt/open-xchange/etc/file-logging.properties
+for opt in org.apache.cxf.level com.openexchange.soap.cxf.logger.level; do
+    if ! ox_exists_property $opt $pfile; then
+       ox_set_property $opt WARNING $pfile
+    fi
+done
+
+# SoftwareChange_Request-1184
+pfile=/opt/open-xchange/etc/file-logging.properties
+if ! ox_exists_property com.hazelcast.level $pfile; then
+   ox_set_property com.hazelcast.level SEVERE $pfile
+fi
+
+# SoftwareChange_Request-1212
+pfile=/opt/open-xchange/etc/foldercache.properties
+if ! ox_exists_property com.openexchange.folderstorage.outlook.showPersonalBelowInfoStore $pfile; then
+    ox_set_property com.openexchange.folderstorage.outlook.showPersonalBelowInfoStore true $pfile
+fi
+
+# SoftwareChange_Request-1196
+pfile=/opt/open-xchange/etc/import.properties
+if ! ox_exists_property com.openexchange.import.ical.limit $pfile; then
+    ox_set_property com.openexchange.import.ical.limit 10000 $pfile
+fi
+
+# SoftwareChange_Request-1068
+# -----------------------------------------------------------------------
+pfile=/opt/open-xchange/etc/ox-scriptconf.sh
+jopts=$(eval ox_read_property JAVA_XTRAOPTS $pfile)
+jopts=${jopts//\"/}
+if ! echo $jopts | grep "osgi.compatibility.bootdelegation" > /dev/null; then
+    ox_set_property JAVA_XTRAOPTS \""$jopts -Dosgi.compatibility.bootdelegation=true"\" $pfile
+fi
+
+# SoftwareChange_Request-1135
+pfile=/opt/open-xchange/etc/contact.properties
+for key in scale_images scale_image_width scale_image_height; do
+    if ox_exists_property $key $pfile; then
+       ox_remove_property $key $pfile
+    fi
+done
+
+# SoftwareChange_Request-1124
+pfile=/opt/open-xchange/etc/server.properties
+if ! ox_exists_property com.openexchange.ajax.response.includeStackTraceOnError $pfile; then
+    ox_set_property com.openexchange.ajax.response.includeStackTraceOnError false $pfile
+fi
+
+# SoftwareChange_Request-1117
+pfile=/opt/open-xchange/etc/server.properties
+if ! ox_exists_property com.openexchange.webdav.disabled $pfile; then
+    ox_set_property com.openexchange.webdav.disabled false $pfile
+fi
+
+# SoftwareChange_Request-1105
+pfile=/opt/open-xchange/etc/cache.ccf
+ptmp=${pfile}.$$
+if grep -E "^jcs.region.OXIMAPConCache" $pfile > /dev/null; then
+    grep -vE "^jcs.region.OXIMAPConCache" $pfile > $ptmp
+    if [ -s $ptmp ]; then
+        cp $ptmp $pfile
+    fi
+    rm -f $ptmp
+fi
+# SoftwareChange_Request-1028
+pfile=/opt/open-xchange/etc/contact.properties
+if ! ox_exists_property com.openexchange.carddav.tree $pfile; then
+    ox_set_property com.openexchange.carddav.tree "0" $pfile
+fi
+if ! ox_exists_property com.openexchange.carddav.combinedRequestTimeout $pfile; then
+    ox_set_property com.openexchange.carddav.combinedRequestTimeout "20000" $pfile
+fi
+if ! ox_exists_property com.openexchange.carddav.exposedCollections $pfile; then
+    ox_set_property com.openexchange.carddav.exposedCollections "0" $pfile
+fi
+# SoftwareChange_Request-1091
+pfile=/opt/open-xchange/etc/contact.properties
+if ! ox_exists_property contactldap.configuration.path $pfile; then
+    ox_remove_property contactldap.configuration.path $pfile
+fi
+
+# SoftwareChange_Request-1101
+pfile=/opt/open-xchange/etc/configdb.properties
+if ox_exists_property writeOnly $pfile; then
+    ox_remove_property writeOnly $pfile
+fi
+# SoftwareChange_Request-1091
+if ox_exists_property useSeparateWrite $pfile; then
+    ox_remove_property useSeparateWrite $pfile
+fi
+
+# SoftwareChange_Request-1091
+pfile=/opt/open-xchange/etc/system.properties
+for prop in Calendar Infostore Attachment Notification ServletMappingDir CONFIGPATH \
+    AJPPROPERTIES IMPORTEREXPORTER LDAPPROPERTIES EVENTPROPERTIES PUSHPROPERTIES \
+    UPDATETASKSCFG HTMLEntities MailCacheConfig TidyMessages TidyConfiguration Whitelist; do
+    if ox_exists_property $prop $pfile; then
+       ox_remove_property $prop $pfile
+    fi
+done
+if grep -E '^com.openexchange.caching.configfile.*/' $pfile >/dev/null; then
+    ox_set_property com.openexchange.caching.configfile cache.ccf $pfile
+fi
+if ox_exists_property MimeTypeFile $pfile; then
+    ox_set_property MimeTypeFileName mime.types $pfile
+    ox_remove_property MimeTypeFile $pfile
+fi
+pfile=/opt/open-xchange/etc/import.properties
+if ox_exists_property com.openexchange.import.mapper.path $pfile; then
+    ox_remove_property com.openexchange.import.mapper.path $pfile
+fi
+pfile=/opt/open-xchange/etc/mail.properties
+if ox_exists_property com.openexchange.mail.JavaMailProperties $pfile; then
+    ox_remove_property com.openexchange.mail.JavaMailProperties $pfile
+fi
+pfile=/opt/open-xchange/etc/sessiond.properties
+if ox_exists_property com.openexchange.sessiond.sessionCacheConfig $pfile; then
+    ox_remove_property com.openexchange.sessiond.sessionCacheConfig $pfile
+fi
+
+# SoftwareChange_Request-1024
+pfile=/opt/open-xchange/etc/server.properties
+if ! ox_exists_property com.openexchange.IPMaskV4 $pfile; then
+    ox_set_property com.openexchange.IPMaskV4 "" $pfile
+fi
+if ! ox_exists_property com.openexchange.IPMaskV6 $pfile; then
+    ox_set_property com.openexchange.IPMaskV6 "" $pfile
+fi
+
+# SoftwareChange_Request-1027
+pfile=/opt/open-xchange/etc/server.properties
+if ! ox_exists_property com.openexchange.dispatcher.prefix $pfile; then
+    ox_set_property com.openexchange.dispatcher.prefix "/ajax/" $pfile
+fi
+
+
+# SoftwareChange_Request-1167
+pfile=/opt/open-xchange/etc/contact.properties
+if ! ox_exists_property "com.openexchange.contact.scaleVCardImages" $pfile; then
+   ox_set_property "com.openexchange.contact.scaleVCardImages" "200x200" $pfile
+fi
+
+# SoftwareChange_Request-1148
+pfile=/opt/open-xchange/etc/whitelist.properties
+if ! ox_exists_property "html.style.word-break" $pfile; then
+   ox_set_property "html.style.word-break" '"break-all"' $pfile
+fi
+if ! ox_exists_property "html.style.word-wrap" $pfile; then
+   ox_set_property "html.style.word-wrap" '"break-word"' $pfile
+fi
+
+# SoftwareChange_Request-1125
+pfile=/opt/open-xchange/etc/contactcollector.properties
+if ! ox_exists_property com.openexchange.contactcollector.folder.deleteDenied $pfile; then
+   ox_set_property com.openexchange.contactcollector.folder.deleteDenied false $pfile
+fi
+
+ox_update_permissions "/var/log/open-xchange" open-xchange:root 750
+ox_update_permissions "/opt/open-xchange/osgi" open-xchange:root 750
+ox_update_permissions "/opt/open-xchange/etc/configdb.properties" root:open-xchange 640
+ox_update_permissions "/opt/open-xchange/etc/mail.properties" root:open-xchange 640
+ox_update_permissions "/opt/open-xchange/etc/ox-scriptconf.sh" root:root 644
 
 
 %clean
