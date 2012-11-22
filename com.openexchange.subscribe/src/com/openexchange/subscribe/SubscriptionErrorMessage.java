@@ -92,7 +92,12 @@ public enum SubscriptionErrorMessage implements OXExceptionCode {
     INVALID_WORKFLOW(CATEGORY_CONFIGURATION, 9, SubscriptionErrorStrings.OUTPUT_MUST_MATCH_INPUT, SubscriptionErrorStrings.INCONSISTENT_WORKFLOW),
     INACTIVE_SOURCE(CATEGORY_CONFIGURATION, 10, SubscriptionErrorStrings.INACTIVE_SOURCE, SubscriptionErrorStrings.SUBSCRIPTION_SOURCE_CANT_PROVIDE_DATA),
     MISSING_ARGUMENT(CATEGORY_USER_INPUT, 11, SubscriptionErrorStrings.MISSING_ARGUMENT, SubscriptionErrorStrings.MISSING_ARGUMENT), 
-    PERMISSION_DENIED(CATEGORY_WARNING, 12, SubscriptionErrorStrings.PERMISSION_DENIED, SubscriptionErrorStrings.PERMISSION_DENIED);
+    PERMISSION_DENIED(CATEGORY_WARNING, 12, SubscriptionErrorStrings.PERMISSION_DENIED, SubscriptionErrorStrings.PERMISSION_DENIED),
+    /**
+     * An unexpected error occurred: %1$s.
+     */
+    UNEXPECTED_ERROR(CATEGORY_ERROR, 9999, SubscriptionErrorStrings.UNEXPECTED_ERROR, SubscriptionErrorStrings.UNEXPECTED_ERROR),
+    ;
 
     private Category category;
     private int errorCode;

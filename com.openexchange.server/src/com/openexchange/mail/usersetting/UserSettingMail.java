@@ -740,7 +740,7 @@ public final class UserSettingMail implements Cloneable, Serializable {
                 LOG.error(e.getMessage(), e);
             }
         }
-        return (spamHandlerFound.booleanValue() && spamEnabled);
+        return ((null != spamHandlerFound && spamHandlerFound.booleanValue()) && spamEnabled);
     }
 
     /**

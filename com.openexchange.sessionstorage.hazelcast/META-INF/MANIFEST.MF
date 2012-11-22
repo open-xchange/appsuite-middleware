@@ -10,6 +10,7 @@ Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Import-Package: com.hazelcast.config,
  com.hazelcast.core,
  com.hazelcast.monitor,
+ com.hazelcast.nio,
  com.hazelcast.query,
  com.openexchange.config,
  com.openexchange.exception,

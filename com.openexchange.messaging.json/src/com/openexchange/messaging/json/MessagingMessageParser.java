@@ -509,7 +509,7 @@ public class MessagingMessageParser {
             } else if (byte[].class.isInstance(content)) {
                 return new ByteArrayContent((byte[]) content);
             } else {
-                throw MessagingExceptionCodes.UNEXPECTED_ERROR.create("Unexpected content type: " + null == content ? "null" : content.getClass().getName());
+                throw MessagingExceptionCodes.UNEXPECTED_ERROR.create("Unexpected content type: " + (null == content ? "null" : content.getClass().getName()));
             }
         }
 

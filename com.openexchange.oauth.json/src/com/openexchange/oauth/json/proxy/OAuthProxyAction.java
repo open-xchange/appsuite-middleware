@@ -15,6 +15,7 @@ import com.openexchange.http.client.builder.HTTPResponse;
 import com.openexchange.oauth.OAuthHTTPClientFactory;
 import com.openexchange.oauth.OAuthService;
 import com.openexchange.oauth.json.proxy.OAuthProxyRequest.HTTPMethod;
+import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
 public class OAuthProxyAction implements AJAXActionService {
@@ -51,9 +52,8 @@ public class OAuthProxyAction implements AJAXActionService {
 		case POST:
 			httpRequest = buildPost(proxyRequest, client);
 			break;
-
 		default:
-			break;
+		    throw AjaxExceptionCodes.UNKNOWN_ACTION.create(method.toString());
 		}
 		HTTPResponse httpResponse = httpRequest.execute();
 		String payload = httpResponse.getPayload(String.class);

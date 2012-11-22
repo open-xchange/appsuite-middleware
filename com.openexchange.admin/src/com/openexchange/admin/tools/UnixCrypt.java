@@ -696,9 +696,7 @@ public class UnixCrypt {
      * encrypted password.
      * @throws UnsupportedEncodingException 
      */
-    public static final String crypt(String original) throws UnsupportedEncodingException
-    {
-      java.util.Random randomGenerator = new java.util.Random();
+    public static final String crypt(String original) throws UnsupportedEncodingException {
       int numSaltChars = saltChars.length;
       String salt;
       

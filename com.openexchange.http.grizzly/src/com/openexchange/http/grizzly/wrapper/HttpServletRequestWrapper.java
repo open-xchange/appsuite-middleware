@@ -19,241 +19,287 @@ import com.openexchange.dispatcher.Parameterizable;
 
 public class HttpServletRequestWrapper implements HttpServletRequest, Parameterizable {
 
-    private final HttpServletRequest httpServletRequest;
+    private final HttpServletRequest delegate;
 
     public HttpServletRequestWrapper(HttpServletRequest httpServletRequest) {
         super();
-        this.httpServletRequest = httpServletRequest;
+        this.delegate = httpServletRequest;
     }
 
+    @Override
     public Object getAttribute(String arg0) {
-        return httpServletRequest.getAttribute(arg0);
+        return delegate.getAttribute(arg0);
     }
 
+    @Override
     public Enumeration getAttributeNames() {
-        return httpServletRequest.getAttributeNames();
+        return delegate.getAttributeNames();
     }
 
+    @Override
     public String getAuthType() {
-        return httpServletRequest.getAuthType();
+        return delegate.getAuthType();
     }
 
+    @Override
     public String getCharacterEncoding() {
-        return httpServletRequest.getCharacterEncoding();
+        return delegate.getCharacterEncoding();
     }
 
+    @Override
     public int getContentLength() {
-        return httpServletRequest.getContentLength();
+        return delegate.getContentLength();
     }
 
+    @Override
     public String getContentType() {
-        return httpServletRequest.getContentType();
+        return delegate.getContentType();
     }
 
+    @Override
     public String getContextPath() {
-        return httpServletRequest.getContextPath();
+        return delegate.getContextPath();
     }
 
+    @Override
     public Cookie[] getCookies() {
-        return httpServletRequest.getCookies();
+        return delegate.getCookies();
     }
 
+    @Override
     public long getDateHeader(String arg0) {
-        return httpServletRequest.getDateHeader(arg0);
+        return delegate.getDateHeader(arg0);
     }
 
+    @Override
     public String getHeader(String arg0) {
-        return httpServletRequest.getHeader(arg0);
+        return delegate.getHeader(arg0);
     }
 
+    @Override
     public Enumeration getHeaderNames() {
-        return httpServletRequest.getHeaderNames();
+        return delegate.getHeaderNames();
     }
 
+    @Override
     public Enumeration getHeaders(String arg0) {
-        return httpServletRequest.getHeaders(arg0);
+        return delegate.getHeaders(arg0);
     }
 
+    @Override
     public ServletInputStream getInputStream() throws IOException {
-        return httpServletRequest.getInputStream();
+        return delegate.getInputStream();
     }
 
+    @Override
     public int getIntHeader(String arg0) {
-        return httpServletRequest.getIntHeader(arg0);
+        return delegate.getIntHeader(arg0);
     }
 
+    @Override
     public String getLocalAddr() {
-        return httpServletRequest.getLocalAddr();
+        return delegate.getLocalAddr();
     }
 
+    @Override
     public String getLocalName() {
-        return httpServletRequest.getLocalName();
+        return delegate.getLocalName();
     }
 
+    @Override
     public int getLocalPort() {
-        return httpServletRequest.getLocalPort();
+        return delegate.getLocalPort();
     }
 
+    @Override
     public Locale getLocale() {
-        return httpServletRequest.getLocale();
+        return delegate.getLocale();
     }
 
+    @Override
     public Enumeration getLocales() {
-        return httpServletRequest.getLocales();
+        return delegate.getLocales();
     }
 
+    @Override
     public String getMethod() {
-        return httpServletRequest.getMethod();
+        return delegate.getMethod();
     }
 
+    @Override
     public String getParameter(String arg0) {
-        return httpServletRequest.getParameter(arg0);
+        return delegate.getParameter(arg0);
     }
 
+    @Override
     public Map getParameterMap() {
-        return httpServletRequest.getParameterMap();
+        return delegate.getParameterMap();
     }
 
+    @Override
     public Enumeration getParameterNames() {
-        return httpServletRequest.getParameterNames();
+        return delegate.getParameterNames();
     }
 
+    @Override
     public String[] getParameterValues(String arg0) {
-        return httpServletRequest.getParameterValues(arg0);
+        return delegate.getParameterValues(arg0);
     }
 
+    @Override
     public String getPathInfo() {
-        return httpServletRequest.getPathInfo();
+        return delegate.getPathInfo();
     }
 
+    @Override
     public String getPathTranslated() {
-        return httpServletRequest.getPathTranslated();
+        return delegate.getPathTranslated();
     }
 
+    @Override
     public String getProtocol() {
-        return httpServletRequest.getProtocol();
+        return delegate.getProtocol();
     }
 
+    @Override
     public String getQueryString() {
-        return httpServletRequest.getQueryString();
+        return delegate.getQueryString();
     }
 
+    @Override
     public BufferedReader getReader() throws IOException {
-        return httpServletRequest.getReader();
+        return delegate.getReader();
     }
 
+    @Override
     public String getRealPath(String arg0) {
-        return httpServletRequest.getRealPath(arg0);
+        return delegate.getRealPath(arg0);
     }
 
+    @Override
     public String getRemoteAddr() {
-        return httpServletRequest.getRemoteAddr();
+        return delegate.getRemoteAddr();
     }
 
+    @Override
     public String getRemoteHost() {
-        return httpServletRequest.getRemoteHost();
+        return delegate.getRemoteHost();
     }
 
+    @Override
     public int getRemotePort() {
-        return httpServletRequest.getRemotePort();
+        return delegate.getRemotePort();
     }
 
+    @Override
     public String getRemoteUser() {
-        return httpServletRequest.getRemoteUser();
+        return delegate.getRemoteUser();
     }
 
+    @Override
     public RequestDispatcher getRequestDispatcher(String arg0) {
-        return httpServletRequest.getRequestDispatcher(arg0);
+        return delegate.getRequestDispatcher(arg0);
     }
 
+    @Override
     public String getRequestURI() {
-        return httpServletRequest.getRequestURI();
+        return delegate.getRequestURI();
     }
 
+    @Override
     public StringBuffer getRequestURL() {
-        return httpServletRequest.getRequestURL();
+        return delegate.getRequestURL();
     }
 
+    @Override
     public String getRequestedSessionId() {
-        return httpServletRequest.getRequestedSessionId();
+        return delegate.getRequestedSessionId();
     }
 
+    @Override
     public String getScheme() {
-        return httpServletRequest.getScheme();
+        return delegate.getScheme();
     }
 
+    @Override
     public String getServerName() {
-        return httpServletRequest.getServerName();
+        return delegate.getServerName();
     }
 
+    @Override
     public int getServerPort() {
-        return httpServletRequest.getServerPort();
+        return delegate.getServerPort();
     }
 
+    @Override
     public String getServletPath() {
-        return httpServletRequest.getServletPath();
+        return delegate.getServletPath();
     }
 
+    @Override
     public HttpSession getSession() {
-        return httpServletRequest.getSession();
+        return delegate.getSession();
     }
 
+    @Override
     public HttpSession getSession(boolean arg0) {
-        return httpServletRequest.getSession(arg0);
+        return delegate.getSession(arg0);
     }
 
+    @Override
     public Principal getUserPrincipal() {
-        return httpServletRequest.getUserPrincipal();
+        return delegate.getUserPrincipal();
     }
 
+    @Override
     public boolean isRequestedSessionIdFromCookie() {
-        return httpServletRequest.isRequestedSessionIdFromCookie();
+        return delegate.isRequestedSessionIdFromCookie();
     }
 
+    @Override
     public boolean isRequestedSessionIdFromURL() {
-        return httpServletRequest.isRequestedSessionIdFromURL();
+        return delegate.isRequestedSessionIdFromURL();
     }
 
+    @Override
     public boolean isRequestedSessionIdFromUrl() {
-        return httpServletRequest.isRequestedSessionIdFromUrl();
+        return delegate.isRequestedSessionIdFromUrl();
     }
 
+    @Override
     public boolean isRequestedSessionIdValid() {
-        return httpServletRequest.isRequestedSessionIdValid();
+        return delegate.isRequestedSessionIdValid();
     }
 
+    @Override
     public boolean isSecure() {
-        return httpServletRequest.isSecure();
+        return delegate.isSecure();
     }
 
+    @Override
     public boolean isUserInRole(String arg0) {
-        return httpServletRequest.isUserInRole(arg0);
+        return delegate.isUserInRole(arg0);
     }
 
+    @Override
     public void removeAttribute(String arg0) {
-        httpServletRequest.removeAttribute(arg0);
+        delegate.removeAttribute(arg0);
     }
 
+    @Override
     public void setAttribute(String arg0, Object arg1) {
-        httpServletRequest.setAttribute(arg0, arg1);
+        delegate.setAttribute(arg0, arg1);
     }
 
+    @Override
     public void setCharacterEncoding(String arg0) throws UnsupportedEncodingException {
-        httpServletRequest.setCharacterEncoding(arg0);
+        delegate.setCharacterEncoding(arg0);
     }
 
     @Override
     public void putParameter(String name, String value) {
-        throw new UnsupportedOperationException();
-//        Request internalRequest = ServletUtils.getInternalRequest(httpServletRequest);
-//        if (null == name) {
-//            throw new NullPointerException("name is null");
-//        }
-//        if (null == value) {
-//            parameters.remove(name);
-//        } else {
-//            setParameter(name, value);
-//        }
+        Request internalRequest = ServletUtils.getInternalRequest(delegate);
+        internalRequest.putParameter(name, value);
     }
 
 }
