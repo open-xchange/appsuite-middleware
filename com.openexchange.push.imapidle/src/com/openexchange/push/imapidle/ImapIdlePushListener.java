@@ -61,6 +61,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.imap.IMAPCapabilities;
 import com.openexchange.imap.IMAPFolderStorage;
 import com.openexchange.imap.IMAPProvider;
+import com.openexchange.mail.Protocol;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.service.MailService;
 import com.openexchange.mail.utils.MailFolderUtility;
@@ -352,8 +353,9 @@ public final class ImapIdlePushListener implements PushListener, Runnable {
             /*
              * Check protocol
              */
-            if (!IMAPProvider.PROTOCOL_IMAP.equals(access.getProvider().getProtocol())) {
-                throw PushExceptionCodes.UNEXPECTED_ERROR.create("Primary mail account is not IMAP!");
+            final Protocol protocol = access.getProvider().getProtocol();
+            if (!IMAPProvider.PROTOCOL_IMAP.equals(protocol)) {
+                throw PushExceptionCodes.UNEXPECTED_ERROR.create("Primary mail account is not IMAP, but " + (null == protocol ? "is missing." : protocol.getName()));
             }
             /*
              * Check for IDLE capability
