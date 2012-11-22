@@ -155,7 +155,7 @@ public class SessionEventHandler implements EventHandler {
                                 .folder(folderId)
                                 .build();
                             
-                            indexingService.scheduleJob(jobInfo, IndexingService.NOW, IndexingService.NO_INTERVAL, IndexingService.DEFAULT_PRIORITY);
+                            indexingService.scheduleJob(false, jobInfo, IndexingService.NOW, IndexingService.NO_INTERVAL, IndexingService.DEFAULT_PRIORITY);
                         }
                     }
                 }

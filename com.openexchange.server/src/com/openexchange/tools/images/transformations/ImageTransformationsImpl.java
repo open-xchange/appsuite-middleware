@@ -171,7 +171,8 @@ public class ImageTransformationsImpl implements ImageTransformations {
             // nothing to do at all
             return sourceImageStream;
         } else {
-            return Streams.newByteArrayInputStream(getBytes(imageFormat));
+            byte[] bytes = getBytes(imageFormat);
+            return null != bytes ? Streams.newByteArrayInputStream(bytes) : null;
         }            
     }
     
@@ -251,6 +252,9 @@ public class ImageTransformationsImpl implements ImageTransformations {
      * @throws IOException
      */
     private byte[] write(BufferedImage image, String formatName) throws IOException {
+        if (null == image) {
+            return null;
+        }
         UnsynchronizedByteArrayOutputStream outputStream = null;
         try {
             outputStream = new UnsynchronizedByteArrayOutputStream(8192);

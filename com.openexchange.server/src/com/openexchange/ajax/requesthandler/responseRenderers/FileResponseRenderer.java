@@ -143,7 +143,7 @@ public class FileResponseRenderer implements ResponseRenderer {
 
         InputStream documentData = null;
         try {
-            file = transformIfImage(request, file);
+            file = transformIfImage(request, file, delivery);
             InputStream stream = file.getStream();
             if (null == stream) {
                 // React with 404
@@ -232,7 +232,7 @@ public class FileResponseRenderer implements ResponseRenderer {
         }
     }
 
-    private IFileHolder transformIfImage(AJAXRequestData request, IFileHolder file) throws IOException, OXException {
+    private IFileHolder transformIfImage(AJAXRequestData request, IFileHolder file, String delivery) throws IOException, OXException {
         /*
          * check input
          */
@@ -243,8 +243,9 @@ public class FileResponseRenderer implements ResponseRenderer {
          * build transformations
          */
         ImageTransformations transformations = scaler.transfom(file.getStream());
-        // rotate by default
-        if (false == request.isSet("rotate") || request.getParameter("rotate", boolean.class)) {
+        // rotate by default when not delivering as download
+        if (false == request.isSet("rotate") && false == DOWNLOAD.equalsIgnoreCase(delivery) || 
+            request.getParameter("rotate", boolean.class)) {
             transformations.rotate();
         }
         if (request.isSet("cropWidth") || request.isSet("cropHeight")) {
@@ -260,8 +261,9 @@ public class FileResponseRenderer implements ResponseRenderer {
             ScaleType scaleType = ScaleType.getType(request.getParameter("scaleType"));
             transformations.scale(maxWidth, maxHeight, scaleType);
         }
-        // compress by default
-        if (false == request.isSet("compress") || request.getParameter("compress", boolean.class)) {
+        // compress by default when not delivering as download
+        if (false == request.isSet("compress") && false == DOWNLOAD.equalsIgnoreCase(delivery) || 
+            request.getParameter("compress", boolean.class)) {
             transformations.compress();
         }
         /*

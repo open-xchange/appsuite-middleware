@@ -174,7 +174,7 @@ public final class SmalMessageStorage extends AbstractSMALStorage implements IMa
     @Override
     public MailMessage[] getMessages(final String folder, final String[] mailIds, final MailField[] fields) throws OXException {
         return messageStorage.getMessages(folder, mailIds, fields);
-    }    
+    }
     
     @Override
     public MailMessage[] searchMessages(final String folder, final IndexRange indexRange, final MailSortField sortField, final OrderDirection order, final SearchTerm<?> searchTerm, final MailField[] fields) throws OXException {
@@ -479,7 +479,7 @@ public final class SmalMessageStorage extends AbstractSMALStorage implements IMa
             throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(IndexingService.class);
         }
 
-        indexingService.scheduleJob(jobInfo, null, -1L, IndexingService.DEFAULT_PRIORITY);
+        indexingService.scheduleJob(true, jobInfo, null, -1L, IndexingService.DEFAULT_PRIORITY);
     }
     
     private Builder prepareJobBuilder(Class<? extends IndexingJob> clazz) throws OXException {

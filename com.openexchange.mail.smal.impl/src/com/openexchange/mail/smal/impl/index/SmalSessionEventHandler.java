@@ -195,7 +195,7 @@ public class SmalSessionEventHandler implements EventHandler {
         if (goOn) {
             int userId = session.getUserId();
             int contextId = session.getContextId();
-            indexingService.unscheduleAllForUser(contextId, userId);
+            indexingService.unscheduleAllForUser(false, contextId, userId);
         }
     }
     
@@ -238,7 +238,7 @@ public class SmalSessionEventHandler implements EventHandler {
                     .password(decryptedPW)
                     .folder(folder.getFullname())
                     .build();
-                indexingService.scheduleJob(jobInfo, IndexingService.NOW, interval, priority);
+                indexingService.scheduleJob(false, jobInfo, IndexingService.NOW, interval, priority);
             }
             
             JobInfo checkDeletedJobInfo = MailJobInfo.newBuilder(CheckForDeletedFoldersJob.class)
@@ -247,7 +247,7 @@ public class SmalSessionEventHandler implements EventHandler {
                 .userId(userId)
                 .addProperty(CheckForDeletedFoldersJob.ALL_FOLDERS, fullNames)
                 .build();                                
-            indexingService.scheduleJob(checkDeletedJobInfo, IndexingService.NOW, interval, IndexingService.DEFAULT_PRIORITY); 
+            indexingService.scheduleJob(false, checkDeletedJobInfo, IndexingService.NOW, interval, IndexingService.DEFAULT_PRIORITY); 
         }
     }
     

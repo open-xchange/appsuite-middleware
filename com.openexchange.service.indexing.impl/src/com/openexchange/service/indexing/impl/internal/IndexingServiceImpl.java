@@ -87,11 +87,21 @@ public class IndexingServiceImpl implements IndexingService {
     
     private static final Log LOG = com.openexchange.log.Log.loggerFor(IndexingServiceImpl.class);
     
+    private final Scheduler scheduler;
+    
+    
+    public IndexingServiceImpl() throws OXException {
+        super();
+        ConfigurationService config = Services.getService(ConfigurationService.class);
+        boolean isSolrNode = config.getBoolProperty(SolrProperties.IS_NODE, false);
+        int threads = config.getIntProperty(IndexingProperties.WORKER_THREADS, 5);
+        QuartzService quartzService = Services.getService(QuartzService.class);
+        scheduler = quartzService.getClusteredScheduler(SCHEDULER_NAME, isSolrNode, threads);
+    }
 
     @Override
-    public void scheduleJob(final JobInfo info, final Date startDates, final long repeatInterval, final int priority) throws OXException {
-        ThreadPoolService threadPoolService = getThreadPoolService();
-        threadPoolService.submit(new TaskAdapter(new Runnable() {
+    public void scheduleJob(final boolean async, final JobInfo info, final Date startDates, final long repeatInterval, final int priority) throws OXException {
+        Runnable runnable = new Runnable() {
             @Override
             public void run() {
                 try {
@@ -133,13 +143,19 @@ public class IndexingServiceImpl implements IndexingService {
                     LOG.warn(t.getMessage(), t);
                 }
             }
-        }));
+        };
+        
+        if (async) {
+            ThreadPoolService threadPoolService = getThreadPoolService();
+            threadPoolService.submit(new TaskAdapter(runnable));
+        } else {
+            runnable.run();
+        }
     }
     
     @Override
-    public void unscheduleJob(final JobInfo info) throws OXException {
-        ThreadPoolService threadPoolService = getThreadPoolService();
-        threadPoolService.submit(new TaskAdapter(new Runnable() {
+    public void unscheduleJob(final boolean async, final JobInfo info) throws OXException {
+        Runnable runnable = new Runnable() {
             @Override
             public void run() {
                 try {
@@ -153,13 +169,19 @@ public class IndexingServiceImpl implements IndexingService {
                     LOG.warn(t.getMessage(), t);
                 }
             }
-        }));
+        };
+        
+        if (async) {
+            ThreadPoolService threadPoolService = getThreadPoolService();
+            threadPoolService.submit(new TaskAdapter(runnable));
+        } else {
+            runnable.run();
+        }
     }
     
     @Override
-    public void unscheduleAllForUser(final int contextId, final int userId) throws OXException {
-        ThreadPoolService threadPoolService = getThreadPoolService();
-        threadPoolService.submit(new TaskAdapter(new Runnable() {
+    public void unscheduleAllForUser(final boolean async, final int contextId, final int userId) throws OXException {
+        Runnable runnable = new Runnable() {
             @Override
             public void run() {
                 try {
@@ -175,13 +197,19 @@ public class IndexingServiceImpl implements IndexingService {
                     LOG.warn(t.getMessage(), t);
                 }
             }
-        }));
+        };
+        
+        if (async) {
+            ThreadPoolService threadPoolService = getThreadPoolService();
+            threadPoolService.submit(new TaskAdapter(runnable));
+        } else {
+            runnable.run();
+        }
     }
     
     @Override
-    public void unscheduleAllForContext(final int contextId) throws OXException {
-        ThreadPoolService threadPoolService = getThreadPoolService();
-        threadPoolService.submit(new TaskAdapter(new Runnable() {
+    public void unscheduleAllForContext(final boolean async, final int contextId) throws OXException {
+        Runnable runnable = new Runnable() {
             @Override
             public void run() {
                 try {
@@ -197,7 +225,14 @@ public class IndexingServiceImpl implements IndexingService {
                     LOG.warn(t.getMessage(), t);
                 }
             }
-        }));
+        };
+        
+        if (async) {
+            ThreadPoolService threadPoolService = getThreadPoolService();
+            threadPoolService.submit(new TaskAdapter(runnable));
+        } else {
+            runnable.run();
+        }
     }
     
     JobKey generateJobKey(JobInfo info) {
@@ -237,11 +272,6 @@ public class IndexingServiceImpl implements IndexingService {
     }
 
     Scheduler getScheduler() throws OXException {
-        ConfigurationService config = Services.getService(ConfigurationService.class);
-        boolean isSolrNode = config.getBoolProperty(SolrProperties.IS_NODE, false);
-        int threads = config.getIntProperty(IndexingProperties.WORKER_THREADS, 5);
-        QuartzService quartzService = Services.getService(QuartzService.class);
-        Scheduler scheduler = quartzService.getClusteredScheduler(SCHEDULER_NAME, isSolrNode, threads);
         return scheduler;
     }
     

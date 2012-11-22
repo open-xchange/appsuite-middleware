@@ -316,7 +316,7 @@ public abstract class AbstractSMALStorage {
 
         JobInfo jobInfo = builder.build();
         IndexingService indexingService = SmalServiceLookup.getServiceStatic(IndexingService.class);
-        indexingService.scheduleJob(jobInfo, null, -1L, IndexingService.DEFAULT_PRIORITY);
+        indexingService.scheduleJob(true, jobInfo, null, -1L, IndexingService.DEFAULT_PRIORITY);
     }
 
     /**

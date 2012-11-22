@@ -125,9 +125,9 @@ public class IndexingActivator extends HousekeepingActivator {
         addService(IndexingService.class, serviceImpl);
         registerService(IndexingService.class, serviceImpl);
         
-        Dictionary<String, Object> sessionProperties = new Hashtable<String, Object>(1);
-        sessionProperties.put(EventConstants.EVENT_TOPIC, SessiondEventConstants.getAllTopics());
-        registerService(EventHandler.class, new SessionEventHandler(), sessionProperties);
+//        Dictionary<String, Object> sessionProperties = new Hashtable<String, Object>(1);
+//        sessionProperties.put(EventConstants.EVENT_TOPIC, SessiondEventConstants.getAllTopics());
+//        registerService(EventHandler.class, new SessionEventHandler(), sessionProperties);
         
         registerMBean((IndexingServiceImpl) serviceImpl);
         openTrackers();
