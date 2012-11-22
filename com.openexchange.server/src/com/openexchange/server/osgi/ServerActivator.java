@@ -61,6 +61,7 @@ import net.htmlparser.jericho.LoggerProvider;
 import org.apache.commons.logging.Log;
 import org.json.CharArrayPool;
 import org.json.JSONObject;
+import org.json.JSONValue;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
@@ -138,6 +139,7 @@ import com.openexchange.html.HtmlService;
 import com.openexchange.i18n.I18nService;
 import com.openexchange.id.IDGeneratorService;
 import com.openexchange.index.IndexFacadeService;
+import com.openexchange.log.CommonsLoggingLogger;
 import com.openexchange.log.LogFactory;
 import com.openexchange.login.BlockingLoginHandlerService;
 import com.openexchange.login.LoginHandlerService;
@@ -335,9 +337,10 @@ public final class ServerActivator extends HousekeepingActivator {
     protected void startBundle() throws Exception {
         CONTEXT = context;
         {
+            JSONObject.setLogger(new CommonsLoggingLogger(JSONValue.class));
             JSONObject.setMaxSize(getService(ConfigurationService.class).getIntProperty("com.openexchange.json.maxSize", 2500));
 
-            CharArrayPool.setCapacities(1000000, 100000, 100);
+            CharArrayPool.setCapacities(10000, 1000, 0);
             CharArrayPool.setLengths(1024, 1024 * 10, 1024 * 100);
             
             JSONObject.initCharPool();
