@@ -192,7 +192,7 @@ public final class SmalMessageStorage extends AbstractSMALStorage implements IMa
                     try {
                         submitFolderJob(folder);
                     } catch (OXException e) {
-                        LOG.error("Could not schedule folder job.", e);
+                        LOG.warn("Could not schedule folder job.", e);
                     }
                     
                     return messageStorage.searchMessages(folder, indexRange, sortField, order, searchTerm, fields);
@@ -324,6 +324,24 @@ public final class SmalMessageStorage extends AbstractSMALStorage implements IMa
 
     @Override
     public MailMessage[] getThreadSortedMessages(final String folder, final IndexRange indexRange, final MailSortField sortField, final OrderDirection order, final SearchTerm<?> searchTerm, final MailField[] fields) throws OXException {
+        if (getIndexFacadeService() == null || isBlacklisted() || !isIndexingAllowed()) {
+            return messageStorage.getThreadSortedMessages(folder, indexRange, sortField, order, searchTerm, fields);
+        }
+        
+        try {
+            IndexAccess<MailMessage> indexAccess = IndexAccessAdapter.getInstance().getIndexAccess(session);
+            boolean isIndexed = indexAccess.isIndexed(String.valueOf(accountId), folder);
+            if (!isIndexed) {
+                try {
+                    submitFolderJob(folder);
+                } catch (OXException e) {
+                    LOG.warn("Could not schedule folder job.", e);
+                }
+            }
+        } catch (Throwable t) {
+            LOG.warn("Could not schedule folder job.", t);
+        }
+        
         return messageStorage.getThreadSortedMessages(folder, indexRange, sortField, order, searchTerm, fields);
     }
 
