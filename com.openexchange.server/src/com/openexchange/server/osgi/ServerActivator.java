@@ -340,7 +340,7 @@ public final class ServerActivator extends HousekeepingActivator {
             CharArrayPool.setCapacities(1000000, 100000, 100);
             CharArrayPool.setLengths(1024, 1024 * 10, 1024 * 100);
             
-            JSONObject.setUseCharPool(true);
+            JSONObject.initCharPool();
         }
         Config.LoggerProvider = LoggerProvider.DISABLED;
         // get version information from MANIFEST file
