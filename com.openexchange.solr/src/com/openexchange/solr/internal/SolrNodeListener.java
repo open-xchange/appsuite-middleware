@@ -49,54 +49,49 @@
 
 package com.openexchange.solr.internal;
 
-import java.net.InetSocketAddress;
+import java.util.Set;
 import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.core.IMap;
 import com.hazelcast.core.Member;
+import com.hazelcast.core.MembershipEvent;
+import com.hazelcast.core.MembershipListener;
+import com.hazelcast.query.SqlPredicate;
 
 
 /**
- * {@link SolrCoreTools}
+ * {@link SolrNodeListener}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public class SolrCoreTools {
+public class SolrNodeListener implements MembershipListener {
     
-    public static final String SOLR_NODE_MAP = "solrNodeMap";
+    private final HazelcastInstance hazelcast;
     
-    public static final String SOLR_CORE_MAP = "solrCoreMap";
     
-    public static void incrementCoreCount(HazelcastInstance hazelcast, Member member) {
-        IMap<String, Integer> solrNodes = hazelcast.getMap(SOLR_NODE_MAP);
-        String localAddress = member.getInetSocketAddress().getAddress().getHostAddress();
-        solrNodes.lock(localAddress);
-        try {
-            Integer integer = solrNodes.get(localAddress);
-            solrNodes.put(localAddress, new Integer(integer.intValue() + 1));
-        } finally {
-            solrNodes.unlock(localAddress);
-        }
+    public SolrNodeListener(HazelcastInstance hazelcast) {
+        super();
+        this.hazelcast = hazelcast;
     }
 
-    public static void decrementCoreCount(HazelcastInstance hazelcast, Member member) {
-        IMap<String, Integer> solrNodes = hazelcast.getMap(SOLR_NODE_MAP);
-        String localAddress = member.getInetSocketAddress().getAddress().getHostAddress();
-        solrNodes.lock(localAddress);
-        try {
-            Integer integer = solrNodes.get(localAddress);
-            solrNodes.put(localAddress, new Integer(integer.intValue() - 1));
-        } finally {
-            solrNodes.unlock(localAddress);
-        }
+    @Override
+    public void memberAdded(MembershipEvent membershipEvent) {
+        // nothing to do
     }
 
-    public static String resolveSocketAddress(InetSocketAddress addr) {
-        if (addr.isUnresolved()) {
-            return addr.getHostName();
-        } else {
-            return addr.getAddress().getHostAddress();
+    @Override
+    public void memberRemoved(MembershipEvent membershipEvent) {
+        Member member = membershipEvent.getMember();
+        String hostAddress = member.getInetSocketAddress().getAddress().getHostAddress();
+        IMap<String, Integer> solrNodes = hazelcast.getMap(SolrCoreTools.SOLR_NODE_MAP);
+        solrNodes.remove(hostAddress);
+        
+        String host = SolrCoreTools.resolveSocketAddress(member.getInetSocketAddress());
+        SqlPredicate predicate = new SqlPredicate("this = " + host);
+        IMap<String, String> solrCores = hazelcast.getMap(SolrCoreTools.SOLR_CORE_MAP);
+        Set<String> cores = solrCores.keySet(predicate);
+        for (String core : cores) {
+            solrCores.remove(core, host);
         }
     }
-
 
 }

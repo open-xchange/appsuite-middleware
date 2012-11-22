@@ -49,54 +49,63 @@
 
 package com.openexchange.solr.internal;
 
-import java.net.InetSocketAddress;
+import java.util.HashSet;
+import java.util.Set;
+import org.apache.commons.logging.Log;
+import org.quartz.DisallowConcurrentExecution;
+import org.quartz.Job;
+import org.quartz.JobExecutionContext;
+import org.quartz.JobExecutionException;
 import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.core.IMap;
 import com.hazelcast.core.Member;
+import com.hazelcast.query.SqlPredicate;
+import com.openexchange.solr.SolrAccessService;
+import com.openexchange.solr.SolrCoreIdentifier;
 
 
 /**
- * {@link SolrCoreTools}
+ * {@link SolrConsistencyJob}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public class SolrCoreTools {
+@DisallowConcurrentExecution
+public class SolrConsistencyJob implements Job {
     
-    public static final String SOLR_NODE_MAP = "solrNodeMap";
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(SolrConsistencyJob.class);
     
-    public static final String SOLR_CORE_MAP = "solrCoreMap";
-    
-    public static void incrementCoreCount(HazelcastInstance hazelcast, Member member) {
-        IMap<String, Integer> solrNodes = hazelcast.getMap(SOLR_NODE_MAP);
-        String localAddress = member.getInetSocketAddress().getAddress().getHostAddress();
-        solrNodes.lock(localAddress);
+    public SolrConsistencyJob() {
+        super();
+    }
+
+    @Override
+    public void execute(JobExecutionContext context) throws JobExecutionException {
         try {
-            Integer integer = solrNodes.get(localAddress);
-            solrNodes.put(localAddress, new Integer(integer.intValue() + 1));
-        } finally {
-            solrNodes.unlock(localAddress);
+            DelegationSolrAccessImpl accessService = (DelegationSolrAccessImpl) Services.getService(SolrAccessService.class);
+            EmbeddedSolrAccessImpl embeddedAccess = accessService.getEmbeddedServerAccess();
+            HazelcastInstance hazelcast = Services.getService(HazelcastInstance.class);
+            
+            Member member = hazelcast.getCluster().getLocalMember();
+            String host = SolrCoreTools.resolveSocketAddress(member.getInetSocketAddress());
+            SqlPredicate predicate = new SqlPredicate("this = " + host);
+            IMap<String, String> solrCores = hazelcast.getMap(SolrCoreTools.SOLR_CORE_MAP);
+            Set<String> coresInHazelcast = solrCores.keySet(predicate);
+            Set<String> activeCores = new HashSet<String>(embeddedAccess.getActiveCores());
+            if (activeCores.removeAll(coresInHazelcast)) {
+                /*
+                 * Shutdown cores that can not be reached anymore
+                 */
+                for (String core : activeCores) {
+                    embeddedAccess.freeResources(new SolrCoreIdentifier(core));
+                }
+            }
+            
+            String hostAddress = member.getInetSocketAddress().getAddress().getHostAddress();
+            IMap<String, Integer> solrNodes = hazelcast.getMap(SolrCoreTools.SOLR_NODE_MAP);
+            solrNodes.put(hostAddress, coresInHazelcast.size());
+        } catch (Throwable t) {
+            LOG.warn("Error during consistency job.", t);
         }
     }
-
-    public static void decrementCoreCount(HazelcastInstance hazelcast, Member member) {
-        IMap<String, Integer> solrNodes = hazelcast.getMap(SOLR_NODE_MAP);
-        String localAddress = member.getInetSocketAddress().getAddress().getHostAddress();
-        solrNodes.lock(localAddress);
-        try {
-            Integer integer = solrNodes.get(localAddress);
-            solrNodes.put(localAddress, new Integer(integer.intValue() - 1));
-        } finally {
-            solrNodes.unlock(localAddress);
-        }
-    }
-
-    public static String resolveSocketAddress(InetSocketAddress addr) {
-        if (addr.isUnresolved()) {
-            return addr.getHostName();
-        } else {
-            return addr.getAddress().getHostAddress();
-        }
-    }
-
 
 }

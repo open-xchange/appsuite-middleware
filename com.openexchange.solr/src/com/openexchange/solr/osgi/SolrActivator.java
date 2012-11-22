@@ -11,6 +11,14 @@ import org.apache.commons.logging.Log;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.event.EventConstants;
 import org.osgi.service.event.EventHandler;
+import org.quartz.JobBuilder;
+import org.quartz.JobDetail;
+import org.quartz.Scheduler;
+import org.quartz.SchedulerException;
+import org.quartz.SimpleScheduleBuilder;
+import org.quartz.SimpleTrigger;
+import org.quartz.TriggerBuilder;
+import org.quartz.service.QuartzService;
 import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.core.IMap;
 import com.openexchange.config.ConfigurationService;
@@ -37,8 +45,11 @@ import com.openexchange.solr.internal.DelegationSolrAccessImpl;
 import com.openexchange.solr.internal.EmbeddedSolrAccessImpl;
 import com.openexchange.solr.internal.RMISolrAccessImpl;
 import com.openexchange.solr.internal.Services;
+import com.openexchange.solr.internal.SolrConsistencyJob;
 import com.openexchange.solr.internal.SolrCoreConfigServiceImpl;
+import com.openexchange.solr.internal.SolrCoreTools;
 import com.openexchange.solr.internal.SolrMBeanImpl;
+import com.openexchange.solr.internal.SolrNodeListener;
 import com.openexchange.solr.rmi.RMISolrAccessService;
 import com.openexchange.threadpool.ThreadPoolService;
 
@@ -48,8 +59,6 @@ import com.openexchange.threadpool.ThreadPoolService;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public class SolrActivator extends HousekeepingActivator {
-
-    public static final String SOLR_NODE_MAP = "solrNodeMap";
 
     static Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(SolrActivator.class));
 
@@ -90,15 +99,59 @@ public class SolrActivator extends HousekeepingActivator {
             createTableService)));
         registerService(LoginHandlerService.class, new SolrCoreLoginHandler(embeddedAccess));
         registerMBean(coreService);
+        
+        /*
+         * Consistency stuff
+         */
         HazelcastInstance hazelcast = getService(HazelcastInstance.class);
-
         ConfigurationService config = getService(ConfigurationService.class);
         boolean isSolrNode = config.getBoolProperty(SolrProperties.IS_NODE, false);
         if (isSolrNode) {
-            IMap<String, Integer> solrNodes = hazelcast.getMap(SOLR_NODE_MAP);
+            IMap<String, Integer> solrNodes = hazelcast.getMap(SolrCoreTools.SOLR_NODE_MAP);
             String memberAddress = hazelcast.getCluster().getLocalMember().getInetSocketAddress().getAddress().getHostAddress();
             solrNodes.put(memberAddress, new Integer(0));
+            
+            track(QuartzService.class, new SimpleRegistryListener<QuartzService>() {
+                @Override
+                public void added(ServiceReference<QuartzService> ref, QuartzService service) {
+                    try {
+                        Scheduler scheduler = service.getLocalScheduler();
+                        if (scheduler.isStarted()) {
+                            JobDetail jobDetail = JobBuilder
+                                .newJob(SolrConsistencyJob.class)
+                                .withIdentity("com.openexchange.solr", "consistencyJob")
+                                .build();
+                            
+                            SimpleScheduleBuilder scheduleBuilder = SimpleScheduleBuilder
+                                .simpleSchedule()
+                                .withIntervalInMinutes(1)
+                                .repeatForever()
+                                .withMisfireHandlingInstructionFireNow();
+                            
+                            SimpleTrigger trigger = TriggerBuilder
+                                .newTrigger()
+                                .withIdentity("com.openexchange.solr", "consistencyJobTrigger")
+                                .forJob(jobDetail)
+                                .withSchedule(scheduleBuilder)
+                                .build();
+                            
+                            scheduler.scheduleJob(jobDetail, trigger);
+                        }
+                    } catch (OXException e) {
+                        LOG.error(e.getMessage(), e);
+                    } catch (SchedulerException e) {
+                        LOG.error(e.getMessage(), e);
+                    }
+                }
+
+                @Override
+                public void removed(ServiceReference<QuartzService> ref, QuartzService service) {
+                    // nothing to do
+                }
+            });
         }
+        
+        hazelcast.getCluster().addMembershipListener(new SolrNodeListener(hazelcast));        
         openTrackers();
     }
 
