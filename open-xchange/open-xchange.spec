@@ -53,6 +53,11 @@ ln -sf ../etc/init.d/open-xchange %{buildroot}/sbin/rcopen-xchange
 mkdir -p %{buildroot}/var/log/open-xchange
 mkdir -m 750 -p %{buildroot}/var/spool/open-xchange/uploads
 
+%post
+. /opt/open-xchange/lib/oxfunctions.sh
+ox_update_permissions "/var/spool/open-xchange/uploads" open-xchange:root 750
+ox_update_permissions "/var/log/open-xchange" open-xchange:root 750
+
 %clean
 %{__rm} -rf %{buildroot}
 
