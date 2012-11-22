@@ -337,8 +337,8 @@ public final class ServerActivator extends HousekeepingActivator {
         {
             JSONObject.setMaxSize(getService(ConfigurationService.class).getIntProperty("com.openexchange.json.maxSize", 2500));
 
-            CharArrayPool.setCapacities(1000000, 100000, 1000);
-            CharArrayPool.setLengths(1024, 1024 * 100, 1024 * 1000);
+            CharArrayPool.setCapacities(1000000, 100000, 100);
+            CharArrayPool.setLengths(1024, 1024 * 10, 1024 * 100);
             
             JSONObject.setUseCharPool(true);
         }
