@@ -3,6 +3,7 @@
  - Fix for bug 23906: Fixed possible NPE
  - Fix for bug 23894: Deal with possible delegating mail provider
  - Fix for bug 23696: Dealing with content outside of <html> tag when quotinq
+ - Fix for bug 23939: Fixed attachment token for nested messages
 
 * 2012-11-22 - tobias.friedrich@open-xchange.com
 
