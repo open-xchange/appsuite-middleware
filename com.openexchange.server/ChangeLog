@@ -1,6 +1,7 @@
 * 2012-11-23 - thorben.betten@open-xchange.com
 
  - Fix for bug 23906: Fixed possible NPE
+ - Fix for bug 23894: Deal with possible delegating mail provider
 
 * 2012-11-22 - tobias.friedrich@open-xchange.com
 
