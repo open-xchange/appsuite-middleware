@@ -155,7 +155,7 @@ public class CalendarSql implements AppointmentSQLInterface {
         } catch(final SQLException e) {
             throw OXCalendarExceptionCodes.CALENDAR_SQL_ERROR.create(e);
         } catch(final RuntimeException e) {
-            throw OXCalendarExceptionCodes.UNEXPECTED_EXCEPTION.create(e);
+            throw OXCalendarExceptionCodes.UNEXPECTED_EXCEPTION.create(e, e.getMessage());
         } finally {
             if (readcon != null) {
                 DBPool.push(ctx, readcon);
