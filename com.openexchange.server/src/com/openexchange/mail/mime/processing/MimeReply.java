@@ -863,15 +863,27 @@ public final class MimeReply {
             sb.append(BLOCKQUOTE_START);
         }
         mr.appendTail(sb);
-        {
-            final String s = sb.toString();
-            m = PATTERN_HTML_END.matcher(s);
-            mr.resetTo(m, s);
-        }
+
+        final String s = sb.toString();
+        m = PATTERN_HTML_END.matcher(s);
+        mr.resetTo(m, s);
+
         sb.setLength(0);
         if (m.find()) {
             mr.appendLiteralReplacement(sb, BLOCKQUOTE_END);
-            mr.appendTail(sb);
+            final int matcherEnd = m.end();
+            if (matcherEnd < s.length()) {
+                final String tail = s.substring(matcherEnd);
+                if (!isEmpty(tail) && hasContent(tail)) {
+                    sb.append(BLOCKQUOTE_START);
+                    sb.append(tail);
+                    sb.append(BLOCKQUOTE_END);
+                } else {
+                    mr.appendTail(sb);
+                }
+            } else {
+                mr.appendTail(sb);
+            }
         } else {
             mr.appendTail(sb);
             sb.append(BLOCKQUOTE_END);
@@ -906,6 +918,24 @@ public final class MimeReply {
             this.replyTexts = replyTexts;
         }
 
+    }
+
+    private static boolean isEmpty(final String string) {
+        if (null == string) {
+            return true;
+        }
+        final int len = string.length();
+        boolean isWhitespace = true;
+        for (int i = 0; isWhitespace && i < len; i++) {
+            isWhitespace = Character.isWhitespace(string.charAt(i));
+        }
+        return isWhitespace;
+    }
+
+    private static final Pattern PATTERN_CONTENT = Pattern.compile("(<[a-zA-Z]+[^>]*?>)?\\p{L}+");
+
+    private static boolean hasContent(final String html) {
+        return PATTERN_CONTENT.matcher(html).find();
     }
 
 }
