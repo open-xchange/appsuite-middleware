@@ -354,7 +354,7 @@ public final class ImapIdlePushListener implements PushListener, Runnable {
              * Check protocol
              */
             final Protocol protocol = access.getProvider().getProtocol();
-            if (!IMAPProvider.PROTOCOL_IMAP.equals(protocol)) {
+            if (null == protocol || (!Protocol.ALL.equals(protocol.getName()) && !IMAPProvider.PROTOCOL_IMAP.equals(protocol))) {
                 throw PushExceptionCodes.UNEXPECTED_ERROR.create("Primary mail account is not IMAP, but " + (null == protocol ? "is missing." : protocol.getName()));
             }
             /*
