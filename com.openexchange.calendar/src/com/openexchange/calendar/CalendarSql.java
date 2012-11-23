@@ -1241,7 +1241,7 @@ public class CalendarSql implements AppointmentSQLInterface {
         } catch(final OXException oxc) {
             throw oxc;
         } catch(final RuntimeException e) {
-            throw OXCalendarExceptionCodes.UNEXPECTED_EXCEPTION.create(e, Integer.valueOf(36));
+            throw OXCalendarExceptionCodes.UNEXPECTED_EXCEPTION.create(e, e.getMessage());
         } finally {
             if (close_connection) {
                 recColl.closeResultSet(rs);
