@@ -62,6 +62,7 @@ import com.openexchange.imap.IMAPCapabilities;
 import com.openexchange.imap.IMAPFolderStorage;
 import com.openexchange.imap.IMAPProvider;
 import com.openexchange.mail.Protocol;
+import com.openexchange.mail.api.IMailFolderStorageDelegator;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.service.MailService;
 import com.openexchange.mail.utils.MailFolderUtility;
@@ -500,9 +501,15 @@ public final class ImapIdlePushListener implements PushListener, Runnable {
             mailAccess.connect(false);
             final IMAPFolderStorage istore;
             {
-                final Object fstore = mailAccess.getFolderStorage();
+                Object fstore = mailAccess.getFolderStorage();
                 if (!(fstore instanceof IMAPFolderStorage)) {
-                    throw PushExceptionCodes.UNEXPECTED_ERROR.create("Unknown MAL implementation");
+                    if (!(fstore instanceof IMailFolderStorageDelegator)) {
+                        throw PushExceptionCodes.UNEXPECTED_ERROR.create("Unknown MAL implementation");
+                    }
+                    fstore = ((IMailFolderStorageDelegator) fstore).getDelegateFolderStorage();
+                    if (!(fstore instanceof IMAPFolderStorage)) {
+                        throw PushExceptionCodes.UNEXPECTED_ERROR.create("Unknown MAL implementation");
+                    }
                 }
                 istore = (IMAPFolderStorage) fstore;
             }
