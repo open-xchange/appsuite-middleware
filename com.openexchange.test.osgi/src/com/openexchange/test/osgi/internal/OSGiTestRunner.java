@@ -74,9 +74,14 @@ public class OSGiTestRunner extends Thread {
     
     @Override
     public void run() {
+        if (test == null) {
+            System.out.println("No test classes found.");
+            exitOsgi();
+        }
         Class<?>[] testClasses = test.getTestClasses();
         if (testClasses == null) {
-            throw new IllegalStateException("No test classes found.");
+            System.out.println("No tests  found.");
+            exitOsgi();
         }
         
         for (Class<?> clazz : testClasses) {
@@ -94,8 +99,12 @@ public class OSGiTestRunner extends Thread {
             System.out.println("Successful: " + successful + " (" + result.getRunCount() + ").");
         }
         
+        exitOsgi();
+    }
+
+    private void exitOsgi() {
         try {
-            Thread.sleep(10000L);
+            Thread.sleep(1000L);
         } catch (InterruptedException e) {
 
         }
