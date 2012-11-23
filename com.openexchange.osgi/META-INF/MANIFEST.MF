@@ -19,5 +19,6 @@ Import-Package: com.openexchange.exception,
  org.eclipse.osgi.framework.console,
  org.osgi.framework,
  org.osgi.util.tracker
-Export-Package: com.openexchange.osgi
+Export-Package: com.openexchange.osgi,
+ com.openexchange.osgi.console
 Bundle-Activator: com.openexchange.osgi.osgi.OsgiActivator
