@@ -4,6 +4,7 @@
  - Fix for bug 23894: Deal with possible delegating mail provider
  - Fix for bug 23696: Dealing with content outside of <html> tag when quotinq
  - Fix for bug 23939: Fixed attachment token for nested messages
+ - Fix for bug 23943: Dealing with possibly wrapping mail folder storage implementation
 
 * 2012-11-22 - tobias.friedrich@open-xchange.com
 
