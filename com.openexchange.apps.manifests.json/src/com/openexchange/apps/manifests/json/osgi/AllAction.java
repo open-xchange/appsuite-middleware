@@ -89,7 +89,7 @@ public class AllAction implements AJAXActionService {
 	public AJAXRequestResult perform(AJAXRequestData requestData,
 			ServerSession session) throws OXException {
 
-		JSONArray result = new JSONArray();
+ 		JSONArray result = new JSONArray();
 		
 		Set<Capability> capabilities = services.getService(CapabilityService.class).getCapabilities(session);
 		Map<String, Capability> capMap = new HashMap<String, Capability>();
