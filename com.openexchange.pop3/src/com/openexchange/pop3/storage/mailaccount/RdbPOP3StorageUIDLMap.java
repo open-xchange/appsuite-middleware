@@ -135,7 +135,7 @@ public final class RdbPOP3StorageUIDLMap implements POP3StorageUIDLMap {
                     stmt.setInt(pos++, cid);
                     stmt.setInt(pos++, user);
                     stmt.setInt(pos++, accountId);
-                    stmt.setString(pos++, uidl);
+                    stmt.setString(pos, uidl);
                     stmt.addBatch();
                 }
             }
@@ -156,7 +156,7 @@ public final class RdbPOP3StorageUIDLMap implements POP3StorageUIDLMap {
                         stmt.setInt(pos++, accountId);
                         stmt.setString(pos++, uidl);
                         stmt.setString(pos++, fullname);
-                        stmt.setString(pos++, mailId);
+                        stmt.setString(pos, mailId);
                         stmt.addBatch();
                     }
                 }
@@ -194,7 +194,7 @@ public final class RdbPOP3StorageUIDLMap implements POP3StorageUIDLMap {
             stmt.setInt(pos++, cid);
             stmt.setInt(pos++, user);
             stmt.setInt(pos++, accountId);
-            stmt.setString(pos++, uidl);
+            stmt.setString(pos, uidl);
             stmt.executeUpdate();
         } catch (final SQLException e) {
             throw POP3ExceptionCode.SQL_ERROR.create(e, e.getMessage());
@@ -213,7 +213,7 @@ public final class RdbPOP3StorageUIDLMap implements POP3StorageUIDLMap {
             stmt.setInt(pos++, accountId);
             stmt.setString(pos++, uidl);
             stmt.setString(pos++, pair.getFullname());
-            stmt.setString(pos++, pair.getMailId());
+            stmt.setString(pos, pair.getMailId());
             stmt.executeUpdate();
         } catch (final SQLException e) {
             throw POP3ExceptionCode.SQL_ERROR.create(e, e.getMessage());
@@ -231,7 +231,7 @@ public final class RdbPOP3StorageUIDLMap implements POP3StorageUIDLMap {
             stmt.setInt(pos++, cid);
             stmt.setInt(pos++, user);
             stmt.setInt(pos++, accountId);
-            stmt.setString(pos++, uidl);
+            stmt.setString(pos, uidl);
             rs = stmt.executeQuery();
             return rs.next();
         } catch (final SQLException e) {
@@ -259,7 +259,7 @@ public final class RdbPOP3StorageUIDLMap implements POP3StorageUIDLMap {
             stmt.setInt(pos++, cid);
             stmt.setInt(pos++, user);
             stmt.setInt(pos++, accountId);
-            stmt.setString(pos++, uidl);
+            stmt.setString(pos, uidl);
             rs = stmt.executeQuery();
             if (rs.next()) {
                 return new FullnameUIDPair(rs.getString(1), rs.getString(2));
@@ -292,7 +292,7 @@ public final class RdbPOP3StorageUIDLMap implements POP3StorageUIDLMap {
             stmt.setInt(pos++, user);
             stmt.setInt(pos++, accountId);
             stmt.setString(pos++, fullnameUIDPair.getFullname());
-            stmt.setString(pos++, fullnameUIDPair.getMailId());
+            stmt.setString(pos, fullnameUIDPair.getMailId());
             rs = stmt.executeQuery();
             if (rs.next()) {
                 return rs.getString(1);
