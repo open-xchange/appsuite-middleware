@@ -1,0 +1,21 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Capabilities JSON Interface
+Bundle-SymbolicName: com.openexchange.capabilities.json
+Bundle-Version: 6.23.0.0
+Bundle-Activator: com.openexchange.capabilities.json.osgi.CapabilitiesJSONActivator
+Bundle-Vendor: Open-Xchange Inc
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Import-Package: com.openexchange.ajax.requesthandler,
+ com.openexchange.ajax.requesthandler.osgiservice,
+ com.openexchange.capabilities,
+ com.openexchange.documentation,
+ com.openexchange.exception,
+ com.openexchange.osgi,
+ com.openexchange.server,
+ com.openexchange.session,
+ com.openexchange.tools.servlet,
+ com.openexchange.tools.session,
+ org.json,
+ org.osgi.framework;version="1.3.0",
+ org.osgi.util.tracker

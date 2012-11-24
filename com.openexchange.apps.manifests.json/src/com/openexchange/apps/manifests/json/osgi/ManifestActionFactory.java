@@ -47,54 +47,42 @@
  *
  */
 
-package com.openexchange.tools.session;
+package com.openexchange.apps.manifests.json.osgi;
 
-import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.User;
-import com.openexchange.groupware.userconfiguration.UserConfiguration;
-import com.openexchange.mail.usersetting.UserSettingMail;
-import com.openexchange.session.Session;
+import java.util.Arrays;
+import java.util.Collection;
+
+import org.json.JSONArray;
+
+import com.openexchange.ajax.requesthandler.AJAXActionService;
+import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
+import com.openexchange.exception.OXException;
+import com.openexchange.server.ServiceLookup;
 
 /**
- * {@link ServerSession} - Extends common {@link Session} interface by additional getter methods for common used objects like context, user,
- * etc.
+ * {@link ManifestActionFactory}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface ServerSession extends Session {
+public class ManifestActionFactory implements AJAXActionServiceFactory {
 
-    /**
-     * Gets the context object.
-     *
-     * @return The context object.
-     */
-    public Context getContext();
+	private AJAXActionService all;
 
-    /**
-     * Gets the user object
-     *
-     * @return The user object
-     */
-    public User getUser();
+	public ManifestActionFactory(ServiceLookup services,
+			JSONArray manifests) {
+		super();
+		all = new AllAction(services, manifests);
+	}
 
-    /**
-     * Gets the user configuration object.
-     *
-     * @return The user configuration object.
-     */
-    public UserConfiguration getUserConfiguration();
+	@Override
+	public Collection<?> getSupportedServices() {
+		return Arrays.asList("all");
+	}
 
-    /**
-     * Gets the user mail settings.
-     *
-     * @return The user mail settings.
-     */
-    public UserSettingMail getUserSettingMail();
+	@Override
+	public AJAXActionService createActionService(String action)
+			throws OXException {
+		return all;
+	}
 
-	/**
-	 * Determines if this session is not authenticated and therefore anonymous. 
-	 * @return
-	 */
-	public boolean isAnonymous();
 }

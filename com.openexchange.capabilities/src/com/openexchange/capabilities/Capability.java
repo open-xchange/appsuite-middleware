@@ -47,54 +47,87 @@
  *
  */
 
-package com.openexchange.tools.session;
+package com.openexchange.capabilities;
 
-import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.User;
-import com.openexchange.groupware.userconfiguration.UserConfiguration;
-import com.openexchange.mail.usersetting.UserSettingMail;
-import com.openexchange.session.Session;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
- * {@link ServerSession} - Extends common {@link Session} interface by additional getter methods for common used objects like context, user,
- * etc.
+ * {@link Capability}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface ServerSession extends Session {
+public class Capability {
+	private String id;
+	private boolean backendSupport;
+	private Map<String, String> attributes = new HashMap<String, String>();
+	
+	public Capability(String id) {
+		this(id, true);
+	}
+	
+	public Capability(String id, boolean backendSupport) {
+		super();
+		this.id = id;
+		this.backendSupport = backendSupport;
+	}
 
-    /**
-     * Gets the context object.
-     *
-     * @return The context object.
-     */
-    public Context getContext();
+	public String getId() {
+		return id;
+	}
+	public void setId(String id) {
+		this.id = id;
+	}
+	public boolean isSupportedByBackend() {
+		return backendSupport;
+	}
+	public Capability setBackendSupport(boolean backendSupport) {
+		this.backendSupport = backendSupport;
+		return this;
+	}
+	
+	public Map<String, String> getAttributes() {
+		return attributes;
+	}
+	
+	public Capability set(String key, String value) {
+		attributes.put(key, value);
+		return this;
+	}
+	
+	public String getAttribute(String key, String value) {
+		return attributes.get(key);
+	}
+	
+	public void learnFrom(Capability otherCapability) {
+		attributes.putAll(otherCapability.attributes);
+		
+	}
 
-    /**
-     * Gets the user object
-     *
-     * @return The user object
-     */
-    public User getUser();
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((id == null) ? 0 : id.hashCode());
+		return result;
+	}
 
-    /**
-     * Gets the user configuration object.
-     *
-     * @return The user configuration object.
-     */
-    public UserConfiguration getUserConfiguration();
-
-    /**
-     * Gets the user mail settings.
-     *
-     * @return The user mail settings.
-     */
-    public UserSettingMail getUserSettingMail();
-
-	/**
-	 * Determines if this session is not authenticated and therefore anonymous. 
-	 * @return
-	 */
-	public boolean isAnonymous();
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		Capability other = (Capability) obj;
+		if (id == null) {
+			if (other.id != null)
+				return false;
+		} else if (!id.equals(other.id))
+			return false;
+		return true;
+	}
+	
+	
 }

@@ -47,54 +47,82 @@
  *
  */
 
-package com.openexchange.tools.session;
+package com.openexchange.capabilities.json;
 
-import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.User;
-import com.openexchange.groupware.userconfiguration.UserConfiguration;
-import com.openexchange.mail.usersetting.UserSettingMail;
-import com.openexchange.session.Session;
+import java.util.Collection;
+import java.util.Map;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import com.openexchange.ajax.requesthandler.AJAXRequestData;
+import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.ajax.requesthandler.Converter;
+import com.openexchange.ajax.requesthandler.ResultConverter;
+import com.openexchange.capabilities.Capability;
+import com.openexchange.exception.OXException;
+import com.openexchange.tools.servlet.AjaxExceptionCodes;
+import com.openexchange.tools.session.ServerSession;
 
 /**
- * {@link ServerSession} - Extends common {@link Session} interface by additional getter methods for common used objects like context, user,
- * etc.
+ * {@link Capability2JSON}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface ServerSession extends Session {
+public class Capability2JSON implements ResultConverter {
 
-    /**
-     * Gets the context object.
-     *
-     * @return The context object.
-     */
-    public Context getContext();
+	@Override
+	public String getInputFormat() {
+		return "capability";
+	}
 
-    /**
-     * Gets the user object
-     *
-     * @return The user object
-     */
-    public User getUser();
+	@Override
+	public String getOutputFormat() {
+		return "json";
+	}
 
-    /**
-     * Gets the user configuration object.
-     *
-     * @return The user configuration object.
-     */
-    public UserConfiguration getUserConfiguration();
+	@Override
+	public Quality getQuality() {
+		return Quality.GOOD;
+	}
 
-    /**
-     * Gets the user mail settings.
-     *
-     * @return The user mail settings.
-     */
-    public UserSettingMail getUserSettingMail();
+	@SuppressWarnings("unchecked")
+	@Override
+	public void convert(AJAXRequestData requestData, AJAXRequestResult result,
+			ServerSession session, Converter converter) throws OXException {
+		Object resultObject = result.getResultObject();
+		try {
+			if (Collection.class.isInstance(resultObject)) {
+				result.setResultObject( transform((Collection<Capability>) resultObject), "json");
+			} else {
+				result.setResultObject( transform((Capability) resultObject), "json");
+			}
+		} catch (JSONException x) {
+			throw AjaxExceptionCodes.JSON_ERROR.create(x.getMessage());
+		}
+	}
 
-	/**
-	 * Determines if this session is not authenticated and therefore anonymous. 
-	 * @return
-	 */
-	public boolean isAnonymous();
+	private JSONObject transform(Capability resultObject) throws JSONException {
+		JSONObject object = new JSONObject();
+		object.put("id", resultObject.getId());
+		object.put("backendSupport", resultObject.isSupportedByBackend());
+		
+		JSONObject attributes = new JSONObject();
+		for(Map.Entry<String, String> entry: resultObject.getAttributes().entrySet()) {
+			attributes.put(entry.getKey(), entry.getValue());
+		}
+		object.put("attributes", attributes);
+		
+		return object;
+	}
+
+	private JSONArray transform(Collection<Capability> resultObject) throws JSONException {
+		JSONArray array = new JSONArray();
+		for(Capability capability: resultObject) {
+			array.put(transform(capability));
+		}
+		return array;
+	}
+
 }

@@ -47,54 +47,82 @@
  *
  */
 
-package com.openexchange.tools.session;
+package com.openexchange.capabilities.osgi;
 
-import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.User;
-import com.openexchange.groupware.userconfiguration.UserConfiguration;
-import com.openexchange.mail.usersetting.UserSettingMail;
-import com.openexchange.session.Session;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+
+import org.osgi.framework.BundleContext;
+
+import com.openexchange.capabilities.Capability;
+import com.openexchange.capabilities.CapabilityService;
+import com.openexchange.config.ConfigurationService;
+import com.openexchange.exception.OXException;
+import com.openexchange.server.ServiceLookup;
+import com.openexchange.tools.session.ServerSession;
 
 /**
- * {@link ServerSession} - Extends common {@link Session} interface by additional getter methods for common used objects like context, user,
- * etc.
+ * {@link CapabilityServiceImpl}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface ServerSession extends Session {
-
-    /**
-     * Gets the context object.
-     *
-     * @return The context object.
-     */
-    public Context getContext();
-
-    /**
-     * Gets the user object
-     *
-     * @return The user object
-     */
-    public User getUser();
-
-    /**
-     * Gets the user configuration object.
-     *
-     * @return The user configuration object.
-     */
-    public UserConfiguration getUserConfiguration();
-
-    /**
-     * Gets the user mail settings.
-     *
-     * @return The user mail settings.
-     */
-    public UserSettingMail getUserSettingMail();
-
+public class CapabilityServiceImpl implements CapabilityService {
+	
+	private ConcurrentMap<String, Capability> capabilities = new ConcurrentHashMap<String, Capability>();
+	private ServiceLookup services;
+	
 	/**
-	 * Determines if this session is not authenticated and therefore anonymous. 
-	 * @return
+	 * Initializes a new {@link CapabilityServiceImpl}.
+	 * @param capabilitiesActivator
+	 * @param context
 	 */
-	public boolean isAnonymous();
+	public CapabilityServiceImpl(ServiceLookup services,
+			BundleContext context) {
+		super();
+		this.services = services;
+	}
+
+	@Override
+	public Set<Capability> getCapabilities(ServerSession session)
+			throws OXException {
+
+		Set<Capability> capabilities = new HashSet<Capability>();
+		if (!session.isAnonymous()) {
+			for(String type: session.getUserConfiguration().getExtendedPermissions()) {
+				capabilities.add(getCapability(type));
+			}
+		}
+		
+		// What about autologin?
+		
+		boolean autologin = services.getService(ConfigurationService.class).getBoolProperty("com.openexchange.ajax.login.http-auth.autologin", false);
+		
+		if (autologin) {
+			capabilities.add(new Capability("autologin", true));
+		}
+		
+		
+		return capabilities;
+	}
+	
+	public Set<Capability> getAllKnownCapabilities() throws OXException {
+		return new HashSet<Capability>(capabilities.values());
+	}
+	
+	public Capability getCapability(String id) {
+		Capability capability = capabilities.get(id);
+		
+		if (capability == null) {
+			Capability existingCapability = capabilities.putIfAbsent(id, capability = new Capability(id, false));
+			return existingCapability != null ? existingCapability : capability;
+		}
+		
+		return capability;
+	}
+	
+	
 }
