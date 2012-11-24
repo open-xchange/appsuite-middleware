@@ -4,6 +4,7 @@ import org.osgi.framework.ServiceReference;
 
 import com.openexchange.capabilities.Capability;
 import com.openexchange.capabilities.CapabilityService;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.osgi.SimpleRegistryListener;
 
@@ -11,7 +12,7 @@ public class CapabilitiesActivator extends HousekeepingActivator {
 
 	@Override
 	protected Class<?>[] getNeededServices() {
-		return null;
+		return new Class<?>[]{ConfigurationService.class};
 	}
 
 	@Override

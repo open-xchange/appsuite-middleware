@@ -60,6 +60,7 @@ import org.osgi.framework.BundleContext;
 
 import com.openexchange.capabilities.Capability;
 import com.openexchange.capabilities.CapabilityService;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.session.ServerSession;
@@ -72,6 +73,7 @@ import com.openexchange.tools.session.ServerSession;
 public class CapabilityServiceImpl implements CapabilityService {
 	
 	private ConcurrentMap<String, Capability> capabilities = new ConcurrentHashMap<String, Capability>();
+	private ServiceLookup services;
 	
 	/**
 	 * Initializes a new {@link CapabilityServiceImpl}.
@@ -81,6 +83,7 @@ public class CapabilityServiceImpl implements CapabilityService {
 	public CapabilityServiceImpl(ServiceLookup services,
 			BundleContext context) {
 		super();
+		this.services = services;
 	}
 
 	@Override
@@ -88,10 +91,20 @@ public class CapabilityServiceImpl implements CapabilityService {
 			throws OXException {
 
 		Set<Capability> capabilities = new HashSet<Capability>();
-		
-		for(String type: session.getUserConfiguration().getExtendedPermissions()) {
-			capabilities.add(getCapability(type));
+		if (!session.isAnonymous()) {
+			for(String type: session.getUserConfiguration().getExtendedPermissions()) {
+				capabilities.add(getCapability(type));
+			}
 		}
+		
+		// What about autologin?
+		
+		boolean autologin = services.getService(ConfigurationService.class).getBoolProperty("com.openexchange.ajax.login.http-auth.autologin", false);
+		
+		if (autologin) {
+			capabilities.add(new Capability("autologin", true));
+		}
+		
 		
 		return capabilities;
 	}

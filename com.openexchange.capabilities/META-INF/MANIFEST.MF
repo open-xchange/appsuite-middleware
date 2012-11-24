@@ -6,7 +6,8 @@ Bundle-Version: 6.23.0.0
 Bundle-Activator: com.openexchange.capabilities.osgi.CapabilitiesActivator
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
-Import-Package: com.openexchange.exception,
+Import-Package: com.openexchange.config,
+ com.openexchange.exception,
  com.openexchange.groupware.userconfiguration,
  com.openexchange.osgi,
  com.openexchange.server,
