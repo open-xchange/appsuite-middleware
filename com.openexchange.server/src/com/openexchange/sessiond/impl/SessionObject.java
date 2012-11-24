@@ -165,6 +165,9 @@ public class SessionObject implements PutIfAbsent {
 
     @Override
     public int getUserId() {
+    	if (username == null) {
+    		return 0;
+    	}
         return Integer.parseInt(username);
     }
 

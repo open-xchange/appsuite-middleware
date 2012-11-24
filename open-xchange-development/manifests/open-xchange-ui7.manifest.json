@@ -140,7 +140,7 @@
     },
     {
         "path": "io.ox/mail/accounts/keychain",
-        "namespace": "keychain",
+        "namespace": "io.ox/keychain/api",
         "requires": [
             "webmail",
             "multiple_mail_accounts"
@@ -148,7 +148,7 @@
     },
     {
         "path": "io.ox/mail/accounts/settings",
-        "namespace": "settings",
+        "namespace": "io.ox/settings/accounts/settings/pane",
         "requires": [
             "webmail",
             "multiple_mail_accounts"
@@ -171,13 +171,11 @@
     },
     {
         "path": "io.ox/oauth/keychain",
-        "namespace": "keychain",
-        "requires": "oauth"
+        "namespace": "io.ox/keychain/api"
     },
     {
         "path": "io.ox/oauth/settings",
-        "namespace": "settings",
-        "requires": "oauth"
+        "namespace": "io.ox/settings/accounts/settings/pane"
     },
     {
         "title": "Documents",
@@ -244,36 +242,36 @@
         "path": "plugins/halo/test"
     },
     {
-        "namespace": "halo",
+        "namespace": "plugins/halo/register",
         "requires": "calendar",
         "path": "plugins/halo/appointments/register"
     },
     {
-        "namespace": "halo",
+        "namespace": "plugins/halo/register",
         "requires": "contacts",
         "path": "plugins/halo/contacts/register"
     },
     {
-        "namespace": "halo",
+        "namespace": "plugins/halo/register",
         "path": "plugins/halo/linkedIn/register"
     },
     {
-        "namespace": "halo",
+        "namespace": "plugins/halo/register",
         "requires": "webmail",
         "path": "plugins/halo/mail/register"
     },
     {
-        "namespace": "notifications",
+        "namespace": "io.ox/core/notifications",
         "requires": "calendar",
         "path": "plugins/notifications/calendar/register"
     },
     {
-        "namespace": "notifications",
+        "namespace": "io.ox/core/notifications",
         "requires": "webmail",
         "path": "plugins/notifications/mail/register"
     },
     {
-        "namespace": "notifications",
+        "namespace": "io.ox/core/notifications",
         "requires": "tasks",
         "path": "plugins/notifications/tasks/register"
     },
