@@ -85,37 +85,37 @@ public final class UserConfiguration implements Serializable, Cloneable {
     private static final transient Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(UserConfiguration.class));
     
     public static enum Permission {
-    	WEBMAIL(UserConfiguration.WEBMAIL),
-    	CALENDAR(UserConfiguration.CALENDAR),
-    	CONTACTS(UserConfiguration.CONTACTS),
-    	TASKS(UserConfiguration.TASKS),
-    	INFOSTORE(UserConfiguration.INFOSTORE),
-    	PROJECTS(UserConfiguration.PROJECTS),
-    	FORUM(UserConfiguration.FORUM),
-    	PINBOARD_WRITE_ACCESS(UserConfiguration.PINBOARD_WRITE_ACCESS),
-    	WEBDAV_XML(UserConfiguration.WEBDAV_XML),
-    	WEBDAV(UserConfiguration.WEBDAV),
-    	ICAL(UserConfiguration.ICAL),
-    	VCARD(UserConfiguration.VCARD),
-    	RSS_BOOKMARKS(UserConfiguration.RSS_BOOKMARKS),
-    	RSS_PORTAL(UserConfiguration.RSS_PORTAL),
-    	MOBILITY(UserConfiguration.MOBILITY),
-    	EDIT_PUBLIC_FOLDERS(UserConfiguration.EDIT_PUBLIC_FOLDERS),
-    	READ_CREATE_SHARED_FOLDERS(UserConfiguration.READ_CREATE_SHARED_FOLDERS),
-    	DELEGATE_TASKS(UserConfiguration.DELEGATE_TASKS),
-    	EDIT_GROUP(UserConfiguration.EDIT_GROUP),
-    	EDIT_RESOURCE(UserConfiguration.EDIT_RESOURCE),
-    	EDIT_PASSWORD(UserConfiguration.EDIT_PASSWORD),
-    	COLLECT_EMAIL_ADDRESSES(UserConfiguration.COLLECT_EMAIL_ADDRESSES),
-    	MULTIPLE_MAIL_ACCOUNTS(UserConfiguration.MULTIPLE_MAIL_ACCOUNTS),
-    	SUBSCRIPTION(UserConfiguration.SUBSCRIPTION),
-    	PUBLICATION(UserConfiguration.PUBLICATION),
-    	ACTIVE_SYNC(UserConfiguration.ACTIVE_SYNC),
-    	USM(UserConfiguration.USM),
-    	OLOX20(UserConfiguration.OLOX20),
-    	DENIED_PORTAL(UserConfiguration.DENIED_PORTAL),
-    	CALDAV(UserConfiguration.CALDAV),
-    	CARDDAV(UserConfiguration.CARDDAV);
+    	WEBMAIL(UserConfiguration.WEBMAIL, "WebMail"),
+    	CALENDAR(UserConfiguration.CALENDAR, "Calendar"),
+    	CONTACTS(UserConfiguration.CONTACTS, "Contacts"),
+    	TASKS(UserConfiguration.TASKS, "Tasks"),
+    	INFOSTORE(UserConfiguration.INFOSTORE, "Infostore"),
+    	PROJECTS(UserConfiguration.PROJECTS, "Projects"),
+    	FORUM(UserConfiguration.FORUM, "Forum"),
+    	PINBOARD_WRITE_ACCESS(UserConfiguration.PINBOARD_WRITE_ACCESS, "PinboardWriteAccess"),
+    	WEBDAV_XML(UserConfiguration.WEBDAV_XML, "WebDAVXML"),
+    	WEBDAV(UserConfiguration.WEBDAV, "WebDAV"),
+    	ICAL(UserConfiguration.ICAL, "ICal"),
+    	VCARD(UserConfiguration.VCARD, "VCard"),
+    	RSS_BOOKMARKS(UserConfiguration.RSS_BOOKMARKS, "RSSBookmarks"),
+    	RSS_PORTAL(UserConfiguration.RSS_PORTAL, "RSSPortal"),
+    	MOBILITY(UserConfiguration.MOBILITY, "SyncML"),
+    	EDIT_PUBLIC_FOLDERS(UserConfiguration.EDIT_PUBLIC_FOLDERS, "FullPublicFolderAccess"),
+    	READ_CREATE_SHARED_FOLDERS(UserConfiguration.READ_CREATE_SHARED_FOLDERS, "FullSharedFolderAccess"),
+    	DELEGATE_TASKS(UserConfiguration.DELEGATE_TASKS, "DelegateTasks"),
+    	EDIT_GROUP(UserConfiguration.EDIT_GROUP, "EditGroup"),
+    	EDIT_RESOURCE(UserConfiguration.EDIT_RESOURCE, "EditResource"),
+    	EDIT_PASSWORD(UserConfiguration.EDIT_PASSWORD, "EditPassword"),
+    	COLLECT_EMAIL_ADDRESSES(UserConfiguration.COLLECT_EMAIL_ADDRESSES, "CollectEMailAddresses"),
+    	MULTIPLE_MAIL_ACCOUNTS(UserConfiguration.MULTIPLE_MAIL_ACCOUNTS, "MultipleMailAccounts"),
+    	SUBSCRIPTION(UserConfiguration.SUBSCRIPTION, "Subscription"),
+    	PUBLICATION(UserConfiguration.PUBLICATION, "Publication"),
+    	ACTIVE_SYNC(UserConfiguration.ACTIVE_SYNC, "ActiveSync"),
+    	USM(UserConfiguration.USM, "USM"),
+    	OLOX20(UserConfiguration.OLOX20, "OLOX20"),
+    	DENIED_PORTAL(UserConfiguration.DENIED_PORTAL, "DeniedPortal"),
+    	CALDAV(UserConfiguration.CALDAV, "CalDAV"),
+    	CARDDAV(UserConfiguration.CARDDAV, "CardDAV");
     	
     	private static TIntObjectHashMap<Permission> byBit = new TIntObjectHashMap<Permission>();
     	static {
@@ -125,9 +125,11 @@ public final class UserConfiguration implements Serializable, Cloneable {
     	}
     	
     	private int bit;
+    	private String tagName;
     	
-    	Permission(int bit) {
+    	Permission(int bit, String name) {
     		this.bit = bit;
+    		this.tagName = name;
     	}
     	
 		public int getBit() {
@@ -136,6 +138,10 @@ public final class UserConfiguration implements Serializable, Cloneable {
 
 		public static Permission byBit(int permission) {
 			return byBit.get(permission);
+		}
+		
+		public String getTagName() {
+			return tagName;
 		}
     }
     
@@ -417,7 +423,6 @@ public final class UserConfiguration implements Serializable, Cloneable {
      * @return the bit pattern as an <code>int</code>.
      */
     public int getPermissionBits() {
-    	LOG.warn("FIXME");
         return permissionBits;
     }
 
