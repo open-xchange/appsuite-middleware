@@ -1,6 +1,7 @@
 * 2012-11-25 - thorben.betten@open-xchange.com
 
  - Fix for bug 23898: Quoting replacement string
+ - Fix for bug 23698: Added some imports to preview/Tika bundle
 
 * 2012-11-24 - thorben.betten@open-xchange.com
 
