@@ -74,9 +74,7 @@ public final class RdbPOP3StorageUIDLMap implements POP3StorageUIDLMap {
     private static final String TABLE_NAME = "pop3_storage_ids";
 
     private final int cid;
-
     private final int user;
-
     private final int accountId;
 
     /**
