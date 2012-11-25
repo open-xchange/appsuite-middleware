@@ -52,15 +52,9 @@ package com.openexchange.groupware.userconfiguration;
 import gnu.trove.list.TIntList;
 import gnu.trove.list.array.TIntArrayList;
 import gnu.trove.map.hash.TIntObjectHashMap;
-import gnu.trove.set.hash.TIntHashSet;
-
 import java.io.Serializable;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.logging.Log;
@@ -777,35 +771,34 @@ public final class UserConfiguration implements Serializable, Cloneable {
      * @return A sorted array of <code>int</code> carrying accessible module integer constants
      */
     public int[] getAccessibleModules() {
-           
-            final TIntList array = new TIntArrayList(10);
-            if (hasTask()) {
-                array.add(FolderObject.TASK);
-            }
-            if (hasCalendar()) {
-                array.add(FolderObject.CALENDAR);
-            }
-            if (hasContact()) {
-                array.add(FolderObject.CONTACT);
-            }
-            if (hasProject()) {
-                array.add(FolderObject.PROJECT);
-            }
-            if (hasInfostore()) {
-                //if (InfostoreFacades.isInfoStoreAvailable()) {
-                    array.add(FolderObject.INFOSTORE);
-                //}
-            }
-            if (hasWebMail()) {
-                array.add(FolderObject.MAIL);
-            }
-            array.add(FolderObject.SYSTEM_MODULE);
-            array.add(FolderObject.UNBOUND);
-            // TODO: Switcher for messaging module
-            array.add(FolderObject.MESSAGING);
-            // TODO: Switcher for file storage module
-            array.add(FolderObject.FILE);
-            return array.toArray();
+        final TIntList array = new TIntArrayList(10);
+        if (hasTask()) {
+            array.add(FolderObject.TASK); // 1
+        }
+        if (hasCalendar()) {
+            array.add(FolderObject.CALENDAR); // 2
+        }
+        if (hasContact()) {
+            array.add(FolderObject.CONTACT); // 3
+        }
+        array.add(FolderObject.UNBOUND); // 4
+        array.add(FolderObject.SYSTEM_MODULE); // 5
+        if (hasProject()) {
+            array.add(FolderObject.PROJECT); // 6
+        }
+        if (hasWebMail()) {
+            array.add(FolderObject.MAIL); // 7
+        }
+        if (hasInfostore()) {
+            // if (InfostoreFacades.isInfoStoreAvailable()) {
+            array.add(FolderObject.INFOSTORE); // 8
+            // }
+        }
+        // TODO: Switcher for messaging module
+        array.add(FolderObject.MESSAGING); // 13
+        // TODO: Switcher for file storage module
+        array.add(FolderObject.FILE); // 14
+        return array.toArray();
     }
 
     /**
