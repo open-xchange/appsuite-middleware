@@ -324,7 +324,7 @@ public class AJPv13TaskWatcher {
                     appendStackTrace(task.getStackTrace(), logBuilder);
                     log.info(logBuilder);
                 } else {
-                    final StringBuilder logBuilder = new StringBuilder(512);
+                    final StringBuilder logBuilder = new StringBuilder(2048);
                     final Map<String, String> sorted = new TreeMap<String, String>();
                     for (final Entry<String, Object> entry : taskProperties.entrySet()) {
                         final String propertyName = entry.getKey();
