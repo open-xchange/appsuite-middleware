@@ -50,14 +50,24 @@
 package com.openexchange.file.storage.composition;
 
 import com.openexchange.exception.OXException;
+import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.file.storage.FileStoragePermission;
 
 /**
- * {@link PermissionAware} - Extends {@link IDBasedFileAccess} by {@link #getOwnPermission()}.
+ * {@link FolderAware} - Extends {@link IDBasedFileAccess} by folder access..
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface PermissionAware extends IDBasedFileAccess {
+public interface FolderAware extends IDBasedFileAccess {
+
+    /**
+     * Gets the folder identified through given identifier
+     *
+     * @param id The file identifier
+     * @return The corresponding instance of {@link FileStorageFolder}
+     * @throws OXException If either folder does not exist or could not be fetched
+     */
+    public FileStorageFolder getFolder(final String id) throws OXException;
 
     /**
      * Gets the permission for currently logged-in user accessing this folder

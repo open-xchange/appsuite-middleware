@@ -52,12 +52,13 @@ package com.openexchange.file.storage.composition.osgi;
 import java.util.List;
 import org.osgi.service.event.EventAdmin;
 import com.openexchange.exception.OXException;
+import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.file.storage.FileStoragePermission;
 import com.openexchange.file.storage.FileStorageService;
 import com.openexchange.file.storage.composition.FileID;
 import com.openexchange.file.storage.composition.IDBasedFileAccess;
 import com.openexchange.file.storage.composition.IDBasedFileAccessFactory;
-import com.openexchange.file.storage.composition.PermissionAware;
+import com.openexchange.file.storage.composition.FolderAware;
 import com.openexchange.file.storage.composition.internal.CompositingIDBasedFileAccess;
 import com.openexchange.file.storage.registry.FileStorageServiceRegistry;
 import com.openexchange.osgi.HousekeepingActivator;
@@ -71,7 +72,7 @@ import com.openexchange.session.Session;
  */
 public class FileStorageCompositionActivator extends HousekeepingActivator {
 
-    private final class CompositingIDBasedFileAccessExtension extends CompositingIDBasedFileAccess implements PermissionAware {
+    private final class CompositingIDBasedFileAccessExtension extends CompositingIDBasedFileAccess implements FolderAware {
 
         /**
          * Initializes a new {@link CompositingIDBasedFileAccessExtension}.
@@ -100,6 +101,12 @@ public class FileStorageCompositionActivator extends HousekeepingActivator {
         public FileStoragePermission getOwnPermission(final String id) throws OXException {
             final FileID fileID = new FileID(id);
             return getFolderAccess(fileID.getService(), fileID.getAccountId()).getFolder(fileID.getFolderId()).getOwnPermission();
+        }
+
+        @Override
+        public FileStorageFolder getFolder(String id) throws OXException {
+            final FileID fileID = new FileID(id);
+            return getFolderAccess(fileID.getService(), fileID.getAccountId()).getFolder(fileID.getFolderId());
         }
     }
 
