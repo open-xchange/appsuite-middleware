@@ -144,16 +144,16 @@ public final class UserConfiguration implements Serializable, Cloneable {
             return tagName;
         }
 
-		public static List<Permission> byBits(int permissionBit) {
-			List<Permission> permissions = new ArrayList<Permission>();
-			for(Permission p: values()) {
-				final int bit = p.bit;
+        public static List<Permission> byBits(int permissionBit) {
+            List<Permission> permissions = new ArrayList<Permission>(32);
+            for (Permission p : values()) {
+                final int bit = p.bit;
                 if ((permissionBit & bit) == bit) {
-					permissions.add(p);
-				}
-			}
-			return permissions;
-		}
+                    permissions.add(p);
+                }
+            }
+            return permissions;
+        }
     }
     
     /**
