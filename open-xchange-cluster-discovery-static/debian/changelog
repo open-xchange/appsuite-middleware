@@ -1,6 +1,6 @@
 open-xchange-cluster-discovery-static (6.22.1-6) unstable; urgency=low
 
-  * Seventh release candidate for 6.22.1
+  * Build for patch 2012-11-28
 
  -- Steffen Templin <steffen.templin@open-xchange.com>  Mon, 26 Nov 2012 13:25:16 +0100
 
