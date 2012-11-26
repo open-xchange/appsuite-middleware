@@ -394,19 +394,21 @@ public final class DatabaseFolderConverter {
                      * Any folder different from private and user-store folder
                      */
                     boolean setChildren = true;
-                    if (FolderObject.SYSTEM_PUBLIC_INFOSTORE_FOLDER_ID == folderId && !InfostoreFacades.isInfoStoreAvailable()) {
-                        final FileStorageAccount defaultAccount = getDefaultFileStorageAccess(session);
-                        if (null != defaultAccount) {
-                            /*
-                             * Enforce subfolders are retrieved from appropriate file storage
-                             */
-                            retval.setSubfolderIDs(null);
-                            /*
-                             * Mark for user-sensitive cache
-                             */
-                            retval.setCacheable(true);
-                            retval.setGlobal(false);
-                            setChildren = false;
+                    if (FolderObject.SYSTEM_PUBLIC_INFOSTORE_FOLDER_ID == folderId) {
+                        if (!InfostoreFacades.isInfoStoreAvailable()) {
+                            final FileStorageAccount defaultAccount = getDefaultFileStorageAccess(session);
+                            if (null != defaultAccount) {
+                                /*
+                                 * Enforce subfolders are retrieved from appropriate file storage
+                                 */
+                                retval.setSubfolderIDs(null);
+                                /*
+                                 * Mark for user-sensitive cache
+                                 */
+                                retval.setCacheable(true);
+                                retval.setGlobal(false);
+                                setChildren = false;
+                            }
                         }
                     }
                     if (setChildren) {
