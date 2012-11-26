@@ -51,12 +51,21 @@ package com.openexchange.groupware.userconfiguration;
 
 import gnu.trove.list.TIntList;
 import gnu.trove.list.array.TIntArrayList;
+import gnu.trove.map.hash.TIntObjectHashMap;
 import java.io.Serializable;
 import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
+
 import org.apache.commons.logging.Log;
+
+import com.openexchange.config.cascade.ConfigView;
+import com.openexchange.config.cascade.ConfigViewFactory;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.log.LogFactory;
+import com.openexchange.server.services.ServerServiceRegistry;
 
 /**
  * {@link UserConfiguration} - Represents a user configuration.
@@ -68,7 +77,68 @@ public final class UserConfiguration implements Serializable, Cloneable {
     private static final long serialVersionUID = -8277899698366715803L;
 
     private static final transient Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(UserConfiguration.class));
+    
+    public static enum Permission {
+    	WEBMAIL(UserConfiguration.WEBMAIL, "WebMail"),
+    	CALENDAR(UserConfiguration.CALENDAR, "Calendar"),
+    	CONTACTS(UserConfiguration.CONTACTS, "Contacts"),
+    	TASKS(UserConfiguration.TASKS, "Tasks"),
+    	INFOSTORE(UserConfiguration.INFOSTORE, "Infostore"),
+    	PROJECTS(UserConfiguration.PROJECTS, "Projects"),
+    	FORUM(UserConfiguration.FORUM, "Forum"),
+    	PINBOARD_WRITE_ACCESS(UserConfiguration.PINBOARD_WRITE_ACCESS, "PinboardWriteAccess"),
+    	WEBDAV_XML(UserConfiguration.WEBDAV_XML, "WebDAVXML"),
+    	WEBDAV(UserConfiguration.WEBDAV, "WebDAV"),
+    	ICAL(UserConfiguration.ICAL, "ICal"),
+    	VCARD(UserConfiguration.VCARD, "VCard"),
+    	RSS_BOOKMARKS(UserConfiguration.RSS_BOOKMARKS, "RSSBookmarks"),
+    	RSS_PORTAL(UserConfiguration.RSS_PORTAL, "RSSPortal"),
+    	MOBILITY(UserConfiguration.MOBILITY, "SyncML"),
+    	EDIT_PUBLIC_FOLDERS(UserConfiguration.EDIT_PUBLIC_FOLDERS, "FullPublicFolderAccess"),
+    	READ_CREATE_SHARED_FOLDERS(UserConfiguration.READ_CREATE_SHARED_FOLDERS, "FullSharedFolderAccess"),
+    	DELEGATE_TASKS(UserConfiguration.DELEGATE_TASKS, "DelegateTasks"),
+    	EDIT_GROUP(UserConfiguration.EDIT_GROUP, "EditGroup"),
+    	EDIT_RESOURCE(UserConfiguration.EDIT_RESOURCE, "EditResource"),
+    	EDIT_PASSWORD(UserConfiguration.EDIT_PASSWORD, "EditPassword"),
+    	COLLECT_EMAIL_ADDRESSES(UserConfiguration.COLLECT_EMAIL_ADDRESSES, "CollectEMailAddresses"),
+    	MULTIPLE_MAIL_ACCOUNTS(UserConfiguration.MULTIPLE_MAIL_ACCOUNTS, "MultipleMailAccounts"),
+    	SUBSCRIPTION(UserConfiguration.SUBSCRIPTION, "Subscription"),
+    	PUBLICATION(UserConfiguration.PUBLICATION, "Publication"),
+    	ACTIVE_SYNC(UserConfiguration.ACTIVE_SYNC, "ActiveSync"),
+    	USM(UserConfiguration.USM, "USM"),
+    	OLOX20(UserConfiguration.OLOX20, "OLOX20"),
+    	DENIED_PORTAL(UserConfiguration.DENIED_PORTAL, "DeniedPortal"),
+    	CALDAV(UserConfiguration.CALDAV, "CalDAV"),
+    	CARDDAV(UserConfiguration.CARDDAV, "CardDAV");
+    	
+    	private static TIntObjectHashMap<Permission> byBit = new TIntObjectHashMap<Permission>();
+    	static {
+    		for(Permission p: values()) {
+    			byBit.put(p.bit, p);
+    		}
+    	}
+    	
+    	private int bit;
+    	private String tagName;
+    	
+    	Permission(int bit, String name) {
+    		this.bit = bit;
+    		this.tagName = name;
+    	}
+    	
+		public int getBit() {
+			return bit;
+		}
 
+		public static Permission byBit(int permission) {
+			return byBit.get(permission);
+		}
+		
+		public String getTagName() {
+			return tagName;
+		}
+    }
+    
     /**
      * The permission bit for mail access.
      */
@@ -251,16 +321,6 @@ public final class UserConfiguration implements Serializable, Cloneable {
     private final Context ctx;
 
     /**
-     * The accessible modules.
-     */
-    private int[] accessibleModules;
-
-    /**
-     * Whether accessible modules have already been computed.
-     */
-    private volatile boolean accessibleModulesComputed;
-
-    /**
      * Initializes a new {@link UserConfiguration}.
      *
      * @param permissionBits The permissions' bit mask
@@ -289,7 +349,7 @@ public final class UserConfiguration implements Serializable, Cloneable {
             return false;
         }
         final UserConfiguration uc = (UserConfiguration) other;
-        if ((userId != uc.userId) || (permissionBits != uc.permissionBits)) {
+        if ((userId != uc.userId) || (!getExtendedPermissions().equals(uc.getExtendedPermissions()))) {
             return false;
         }
         if (null != groups) {
@@ -318,7 +378,9 @@ public final class UserConfiguration implements Serializable, Cloneable {
     public int hashCode() {
         int hash = 7;
         hash = 31 * hash + userId;
-        hash = 31 * hash + permissionBits;
+        for(String p: getExtendedPermissions()) {
+        	hash = 31 * hash + p.hashCode();
+        }
         if (null != groups) {
             Arrays.sort(groups);
             for (int i = 0; i < groups.length; i++) {
@@ -338,10 +400,6 @@ public final class UserConfiguration implements Serializable, Cloneable {
             if (groups != null) {
                 clone.groups = new int[groups.length];
                 System.arraycopy(groups, 0, clone.groups, 0, groups.length);
-            }
-            if (accessibleModules != null) {
-                clone.accessibleModules = new int[accessibleModules.length];
-                System.arraycopy(accessibleModules, 0, clone.accessibleModules, 0, accessibleModules.length);
             }
             /*
              * if (userSettingMail != null) { clone.userSettingMail = (UserSettingMail) userSettingMail.clone(); }
@@ -369,7 +427,6 @@ public final class UserConfiguration implements Serializable, Cloneable {
      */
     public void setPermissionBits(final int permissionBits) {
         this.permissionBits = permissionBits;
-        accessibleModulesComputed = false;
     }
 
     /**
@@ -388,7 +445,6 @@ public final class UserConfiguration implements Serializable, Cloneable {
      */
     public void setWebMail(final boolean enableWebMail) {
         setPermission(enableWebMail, WEBMAIL);
-        accessibleModulesComputed = false;
     }
 
     /**
@@ -407,7 +463,6 @@ public final class UserConfiguration implements Serializable, Cloneable {
      */
     public void setCalendar(final boolean enableCalender) {
         setPermission(enableCalender, CALENDAR);
-        accessibleModulesComputed = false;
     }
 
     /**
@@ -426,7 +481,6 @@ public final class UserConfiguration implements Serializable, Cloneable {
      */
     public void setContact(final boolean enableContact) {
         setPermission(enableContact, CONTACTS);
-        accessibleModulesComputed = false;
     }
 
     /**
@@ -445,7 +499,6 @@ public final class UserConfiguration implements Serializable, Cloneable {
      */
     public void setTask(final boolean enableTask) {
         setPermission(enableTask, TASKS);
-        accessibleModulesComputed = false;
     }
 
     /**
@@ -464,7 +517,6 @@ public final class UserConfiguration implements Serializable, Cloneable {
      */
     public void setInfostore(final boolean enableInfostore) {
         setPermission(enableInfostore, INFOSTORE);
-        accessibleModulesComputed = false;
     }
 
     /**
@@ -483,7 +535,6 @@ public final class UserConfiguration implements Serializable, Cloneable {
      */
     public void setProject(final boolean enableProject) {
         setPermission(enableProject, PROJECTS);
-        accessibleModulesComputed = false;
     }
 
     /**
@@ -720,45 +771,34 @@ public final class UserConfiguration implements Serializable, Cloneable {
      * @return A sorted array of <code>int</code> carrying accessible module integer constants
      */
     public int[] getAccessibleModules() {
-        if (accessibleModulesComputed) {
-            return cloneAccessibleModules();
+        final TIntList array = new TIntArrayList(10);
+        if (hasTask()) {
+            array.add(FolderObject.TASK); // 1
         }
-        synchronized (this) {
-            if (accessibleModulesComputed) {
-                return cloneAccessibleModules();
-            }
-            final TIntList array = new TIntArrayList(10);
-            if (hasTask()) {
-                array.add(FolderObject.TASK);
-            }
-            if (hasCalendar()) {
-                array.add(FolderObject.CALENDAR);
-            }
-            if (hasContact()) {
-                array.add(FolderObject.CONTACT);
-            }
-            if (hasProject()) {
-                array.add(FolderObject.PROJECT);
-            }
-            if (hasInfostore()) {
-                //if (InfostoreFacades.isInfoStoreAvailable()) {
-                    array.add(FolderObject.INFOSTORE);
-                //}
-            }
-            if (hasWebMail()) {
-                array.add(FolderObject.MAIL);
-            }
-            array.add(FolderObject.SYSTEM_MODULE);
-            array.add(FolderObject.UNBOUND);
-            // TODO: Switcher for messaging module
-            array.add(FolderObject.MESSAGING);
-            // TODO: Switcher for file storage module
-            array.add(FolderObject.FILE);
-            accessibleModules = array.toArray();
-            Arrays.sort(accessibleModules);
-            accessibleModulesComputed = true;
-            return cloneAccessibleModules();
+        if (hasCalendar()) {
+            array.add(FolderObject.CALENDAR); // 2
         }
+        if (hasContact()) {
+            array.add(FolderObject.CONTACT); // 3
+        }
+        array.add(FolderObject.UNBOUND); // 4
+        array.add(FolderObject.SYSTEM_MODULE); // 5
+        if (hasProject()) {
+            array.add(FolderObject.PROJECT); // 6
+        }
+        if (hasWebMail()) {
+            array.add(FolderObject.MAIL); // 7
+        }
+        if (hasInfostore()) {
+            // if (InfostoreFacades.isInfoStoreAvailable()) {
+            array.add(FolderObject.INFOSTORE); // 8
+            // }
+        }
+        // TODO: Switcher for messaging module
+        array.add(FolderObject.MESSAGING); // 13
+        // TODO: Switcher for file storage module
+        array.add(FolderObject.FILE); // 14
+        return array.toArray();
     }
 
     /**
@@ -779,12 +819,6 @@ public final class UserConfiguration implements Serializable, Cloneable {
      */
     public boolean hasModuleAccess(final int module) {
         return Arrays.binarySearch(getAccessibleModules(), module) >= 0;
-    }
-
-    private int[] cloneAccessibleModules() {
-        final int[] clone = new int[accessibleModules.length];
-        System.arraycopy(accessibleModules, 0, clone, 0, clone.length);
-        return clone;
     }
 
     /**
@@ -1025,9 +1059,26 @@ public final class UserConfiguration implements Serializable, Cloneable {
      * @return <code>true</code> if this user configuration enabled specified permission bit; otherwise <code>false</code>
      */
     public boolean hasPermission(final int permission) {
+        return hasPermission(Permission.byBit(permission).name());
+    }
+    
+    public boolean hasPermission(Permission permission) {
+    	return hasPermission(permission.name());
+    }
+    
+    public boolean hasPermission(String name) {
+    	return getExtendedPermissions().contains(name.toLowerCase());
+    }
+    
+    private boolean hasPermissionInternal(final int permission) {
         return (permissionBits & permission) == permission;
     }
+    
+    private boolean hasPermissionInternal(Permission permission) {
+    	return hasPermissionInternal(permission.bit);
+    }
 
+    
     private void setPermission(final boolean enable, final int permission) {
         /*
          * Set or unset specified permission
@@ -1071,4 +1122,44 @@ public final class UserConfiguration implements Serializable, Cloneable {
     public String toString() {
         return new StringBuilder(32).append("UserConfiguration_").append(userId).append('@').append(Integer.toBinaryString(permissionBits)).toString();
     }
+    
+    private static final String PERMISSION_PROPERTY = "permissions";
+    
+	public Set<String> getExtendedPermissions() {
+		Set<String> retval = new HashSet<String>();
+        for(Permission p: Permission.values()) {
+			
+			if (hasPermissionInternal(p)) {
+				retval.add(p.name().toLowerCase());
+			}
+        }
+        // Now apply modifiers from the config cascade
+        ConfigViewFactory configViews = ServerServiceRegistry.getInstance().getService(ConfigViewFactory.class);
+        if (configViews == null) {
+        	return retval;
+        }
+        try {
+            final ConfigView view = configViews.getView(getUserId(), getContext().getContextId());
+
+            final String[] searchPath = configViews.getSearchPath();
+            for (final String scope : searchPath) {
+               final String permissions = view.property(PERMISSION_PROPERTY, String.class).precedence(scope).get();
+               if(permissions != null) {
+            	   for(String permissionModifier: permissions.split("\\s*[, ]\\s*")) {
+            		   if (permissionModifier.startsWith("-")) {
+            			   retval.remove(permissionModifier.substring(1).toLowerCase());
+            			   continue;
+            		   } else if (permissionModifier.startsWith("+")) {
+            			   permissionModifier = permissionModifier.substring(1);
+            		   }
+            		   retval.add(permissionModifier.toLowerCase());
+            	   }
+               }
+            }
+        } catch (OXException x) {
+        	LOG.error(x.getMessage(), x);
+        }
+        
+		return retval;
+	}
 }

@@ -1,3 +1,12 @@
+* 2012-11-25 - thorben.betten@open-xchange.com
+
+ - Fix for bug 23898: Quoting replacement string
+ - Fix for bug 23698: Added some imports to preview/Tika bundle
+
+* 2012-11-24 - thorben.betten@open-xchange.com
+
+ - Fix for bug 23781: Fall-back for failed batch operation; retry with one-by-one operation
+
 * 2012-11-23 - thorben.betten@open-xchange.com
 
  - Fix for bug 23906: Fixed possible NPE

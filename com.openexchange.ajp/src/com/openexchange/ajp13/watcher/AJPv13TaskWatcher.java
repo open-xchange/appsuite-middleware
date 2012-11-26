@@ -324,7 +324,7 @@ public class AJPv13TaskWatcher {
                     appendStackTrace(task.getStackTrace(), logBuilder);
                     log.info(logBuilder);
                 } else {
-                    final StringBuilder logBuilder = new StringBuilder(512);
+                    final StringBuilder logBuilder = new StringBuilder(2048);
                     final Map<String, String> sorted = new TreeMap<String, String>();
                     for (final Entry<String, Object> entry : taskProperties.entrySet()) {
                         final String propertyName = entry.getKey();
@@ -351,11 +351,14 @@ public class AJPv13TaskWatcher {
             }
         }
 
+        private static final int MAX_STACK_TRACE_ELEMENTS = 1000;
+
         private static void appendStackTrace(final StackTraceElement[] trace, final StringBuilder sb) {
             if (null == trace) {
                 return;
             }
-            for (final StackTraceElement ste : trace) {
+            for (int i = 0; i < trace.length && i < MAX_STACK_TRACE_ELEMENTS; i++) {
+                final StackTraceElement ste = trace[i];
                 final String className = ste.getClassName();
                 if (null != className) {
                     sb.append("\tat ").append(className).append('.').append(ste.getMethodName());
