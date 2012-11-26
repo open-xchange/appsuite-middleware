@@ -56,9 +56,9 @@ import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.file.storage.FileStoragePermission;
 import com.openexchange.file.storage.FileStorageService;
 import com.openexchange.file.storage.composition.FileID;
+import com.openexchange.file.storage.composition.FolderAware;
 import com.openexchange.file.storage.composition.IDBasedFileAccess;
 import com.openexchange.file.storage.composition.IDBasedFileAccessFactory;
-import com.openexchange.file.storage.composition.FolderAware;
 import com.openexchange.file.storage.composition.internal.CompositingIDBasedFileAccess;
 import com.openexchange.file.storage.registry.FileStorageServiceRegistry;
 import com.openexchange.osgi.HousekeepingActivator;
@@ -78,7 +78,7 @@ public class FileStorageCompositionActivator extends HousekeepingActivator {
          * Initializes a new {@link CompositingIDBasedFileAccessExtension}.
          * @param session
          */
-        private CompositingIDBasedFileAccessExtension(Session session) {
+        CompositingIDBasedFileAccessExtension(Session session) {
             super(session);
         }
 
