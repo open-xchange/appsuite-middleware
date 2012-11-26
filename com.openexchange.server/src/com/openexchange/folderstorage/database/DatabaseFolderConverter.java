@@ -52,7 +52,6 @@ package com.openexchange.folderstorage.database;
 import gnu.trove.list.TIntList;
 import gnu.trove.map.TIntObjectMap;
 import gnu.trove.map.hash.TIntObjectHashMap;
-import gnu.trove.procedure.TIntProcedure;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -378,7 +377,7 @@ public final class DatabaseFolderConverter {
                             final int len = subfolders.size();
                             final String[] arr = new String[len];
                             for (int i = 0; i < len; i++) {
-                                arr[i] = String.valueOf(subfolders.get(i));
+                                arr[i] = Integer.toString(subfolders.get(i));
                             }
                             retval.setSubfolderIDs(arr);
                             retval.setSubscribedSubfolders(true);
@@ -431,16 +430,12 @@ public final class DatabaseFolderConverter {
                                 retval.setSubfolderIDs(new String[0]);
                                 retval.setSubscribedSubfolders(false);
                             } else {
-                                final List<String> tmp = new ArrayList<String>(subfolderIds.size());
-                                subfolderIds.forEach(new TIntProcedure() {
-    
-                                    @Override
-                                    public boolean execute(final int id) {
-                                        tmp.add(String.valueOf(id));
-                                        return true;
-                                    }
-                                });
-                                retval.setSubfolderIDs(tmp.toArray(new String[tmp.size()]));
+                                final int len = subfolderIds.size();
+                                final String[] arr = new String[len];
+                                for (int i = 0; i < len; i++) {
+                                    arr[i] = Integer.toString(subfolderIds.get(i));
+                                }
+                                retval.setSubfolderIDs(arr);
                                 retval.setSubscribedSubfolders(true);
                             }
                         }
