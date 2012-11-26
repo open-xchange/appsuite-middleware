@@ -151,7 +151,7 @@ public class SolrActivator extends HousekeepingActivator {
             });
         }
         
-        hazelcast.getCluster().addMembershipListener(new SolrNodeListener(hazelcast));        
+        hazelcast.getCluster().addMembershipListener(new SolrNodeListener(hazelcast));
         openTrackers();
     }
 

@@ -363,7 +363,7 @@ public class DelegationSolrAccessImpl implements SolrAccessService {
 
     public void shutDown() throws OXException {
         HazelcastInstance hazelcast = Services.getService(HazelcastInstance.class);
-        if (hazelcast != null) {
+        if (hazelcast != null && hazelcast.getLifecycleService().isRunning()) {
             Collection<String> activeCores = embeddedAccess.getActiveCores();
             IMap<String, Integer> solrNodes = hazelcast.getMap(SolrCoreTools.SOLR_NODE_MAP);
             String localAddress = hazelcast.getCluster().getLocalMember().getInetSocketAddress().getAddress().getHostAddress();
