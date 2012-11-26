@@ -267,7 +267,7 @@ Authors:
 
 %changelog
 * Mon Nov 26 2012 Carsten Hoeger <choeger@open-xchange.com>
-Seventh release candidate for 6.22.1
+Build for patch 2012-11-28
 * Wed Nov 14 2012 Carsten Hoeger <choeger@open-xchange.com>
 Sixth release candidate for 6.22.1
 * Tue Nov 13 2012 Carsten Hoeger <choeger@open-xchange.com>

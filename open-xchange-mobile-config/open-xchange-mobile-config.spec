@@ -47,7 +47,7 @@ ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} 
 
 %changelog
 * Mon Nov 26 2012 Marcus Klein <jenkins@hudson-slave-1.netline.de>
-Seventh release candidate for 6.22.1
+Build for patch 2012-11-28
 * Wed Nov 14 2012 Marcus Klein <jenkins@hudson-slave-1.netline.de>
 Sixth release candidate for 6.22.1
 * Tue Nov 13 2012 Marcus Klein <jenkins@hudson-slave-1.netline.de>
