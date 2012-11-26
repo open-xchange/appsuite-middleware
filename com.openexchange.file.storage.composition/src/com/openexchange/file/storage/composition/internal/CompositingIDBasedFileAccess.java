@@ -100,7 +100,12 @@ public abstract class CompositingIDBasedFileAccess extends AbstractService<Trans
     private final ThreadLocal<Map<String, FileStorageAccountAccess>> connectedAccounts = new ThreadLocal<Map<String, FileStorageAccountAccess>>();
     private final ThreadLocal<List<FileStorageAccountAccess>> accessesToClose = new ThreadLocal<List<FileStorageAccountAccess>>();
 
-    public CompositingIDBasedFileAccess(final Session session) {
+    /**
+     * Initializes a new {@link CompositingIDBasedFileAccess}.
+     * 
+     * @param session The associated session
+     */
+    protected CompositingIDBasedFileAccess(final Session session) {
         super();
         this.session = session;
         connectedAccounts.set(new HashMap<String, FileStorageAccountAccess>());
