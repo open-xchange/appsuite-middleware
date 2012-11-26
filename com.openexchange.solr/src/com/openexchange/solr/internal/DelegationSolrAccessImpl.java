@@ -108,13 +108,16 @@ public class DelegationSolrAccessImpl implements SolrAccessService {
      */
     @Override
     public UpdateResponse add(SolrCoreIdentifier identifier, SolrInputDocument document, boolean commit) throws OXException {
-        SolrAccessService delegate = getDelegate(identifier);
-        UpdateResponse response = delegate.add(identifier, document, commit);
-        if (LOG.isDebugEnabled()) {
-            LOG.debug("Add took " + response.getElapsedTime() + "ms for 1 document.");
+        long start = System.currentTimeMillis();
+        try {
+            SolrAccessService delegate = getDelegate(identifier);
+            return delegate.add(identifier, document, commit);
+        } finally {
+            if (LOG.isDebugEnabled()) {
+                long diff = System.currentTimeMillis() - start;
+                LOG.debug("Add took " + diff + "ms for 1 document.");
+            }
         }
-
-        return response;
     }
 
     /**
@@ -127,13 +130,17 @@ public class DelegationSolrAccessImpl implements SolrAccessService {
      */
     @Override
     public UpdateResponse add(SolrCoreIdentifier identifier, Collection<SolrInputDocument> documents, boolean commit) throws OXException {
-        SolrAccessService delegate = getDelegate(identifier);
-        UpdateResponse response = delegate.add(identifier, documents, commit);
-        if (LOG.isDebugEnabled()) {
-            LOG.debug("Add took " + response.getElapsedTime() + "ms for " + documents.size() + " documents.");
+        long start = System.currentTimeMillis();
+        try {
+            SolrAccessService delegate = getDelegate(identifier);
+            UpdateResponse response = delegate.add(identifier, documents, commit);
+            return response;
+        } finally {
+            if (LOG.isDebugEnabled()) {
+                long diff = System.currentTimeMillis() - start;
+                LOG.debug("Add took " + diff + "ms for " + documents.size() + " documents.");
+            }
         }
-
-        return response;
     }
 
     /**
@@ -146,13 +153,17 @@ public class DelegationSolrAccessImpl implements SolrAccessService {
      */
     @Override
     public UpdateResponse deleteById(SolrCoreIdentifier identifier, String id, boolean commit) throws OXException {
-        SolrAccessService delegate = getDelegate(identifier);
-        UpdateResponse response = delegate.deleteById(identifier, id, commit);
-        if (LOG.isDebugEnabled()) {
-            LOG.debug("Delete took " + response.getElapsedTime() + "ms for 1 document.");
+        long start = System.currentTimeMillis();
+        try {
+            SolrAccessService delegate = getDelegate(identifier);
+            UpdateResponse response = delegate.deleteById(identifier, id, commit);
+            return response;
+        } finally {
+            if (LOG.isDebugEnabled()) {
+                long diff = System.currentTimeMillis() - start;
+                LOG.debug("Delete by id took " + diff + "ms.");
+            }
         }
-
-        return response;
     }
 
     /**
@@ -165,13 +176,17 @@ public class DelegationSolrAccessImpl implements SolrAccessService {
      */
     @Override
     public UpdateResponse deleteByQuery(SolrCoreIdentifier identifier, String query, boolean commit) throws OXException {
-        SolrAccessService delegate = getDelegate(identifier);
-        UpdateResponse response = delegate.deleteByQuery(identifier, query, commit);
-        if (LOG.isDebugEnabled()) {
-            LOG.debug("Delete took " + response.getElapsedTime() + "ms for query " + query + ".");
+        long start = System.currentTimeMillis();
+        try {
+            SolrAccessService delegate = getDelegate(identifier);
+            UpdateResponse response = delegate.deleteByQuery(identifier, query, commit);
+            return response;
+        } finally {
+            if (LOG.isDebugEnabled()) {
+                long diff = System.currentTimeMillis() - start;
+                LOG.debug("Delete by query took " + diff + "ms.");
+            }
         }
-
-        return response;
     }
 
     /**
@@ -182,13 +197,17 @@ public class DelegationSolrAccessImpl implements SolrAccessService {
      */
     @Override
     public UpdateResponse commit(SolrCoreIdentifier identifier) throws OXException {
-        SolrAccessService delegate = getDelegate(identifier);
-        UpdateResponse response = delegate.commit(identifier);
-        if (LOG.isDebugEnabled()) {
-            LOG.debug("Commit took " + response.getElapsedTime() + "ms.");
+        long start = System.currentTimeMillis();
+        try {
+            SolrAccessService delegate = getDelegate(identifier);
+            UpdateResponse response = delegate.commit(identifier);
+            return response;
+        } finally {
+            if (LOG.isDebugEnabled()) {
+                long diff = System.currentTimeMillis() - start;
+                LOG.debug("Commit took " + diff + "ms.");
+            }
         }
-
-        return response;
     }
 
     /**
@@ -201,13 +220,17 @@ public class DelegationSolrAccessImpl implements SolrAccessService {
      */
     @Override
     public UpdateResponse commit(SolrCoreIdentifier identifier, boolean waitFlush, boolean waitSearcher) throws OXException {
-        SolrAccessService delegate = getDelegate(identifier);
-        UpdateResponse response = delegate.commit(identifier, waitFlush, waitSearcher);
-        if (LOG.isDebugEnabled()) {
-            LOG.debug("Commit took " + response.getElapsedTime() + "ms.");
+        long start = System.currentTimeMillis();
+        try {
+            SolrAccessService delegate = getDelegate(identifier);
+            UpdateResponse response = delegate.commit(identifier, waitFlush, waitSearcher);
+            return response;
+        } finally {
+            if (LOG.isDebugEnabled()) {
+                long diff = System.currentTimeMillis() - start;
+                LOG.debug("Commit took " + diff + "ms.");
+            }
         }
-
-        return response;
     }
 
     /**
@@ -218,13 +241,17 @@ public class DelegationSolrAccessImpl implements SolrAccessService {
      */
     @Override
     public UpdateResponse rollback(SolrCoreIdentifier identifier) throws OXException {
-        SolrAccessService delegate = getDelegate(identifier);
-        UpdateResponse response = delegate.rollback(identifier);
-        if (LOG.isDebugEnabled()) {
-            LOG.debug("Rollback took " + response.getElapsedTime() + "ms.");
+        long start = System.currentTimeMillis();
+        try {
+            SolrAccessService delegate = getDelegate(identifier);
+            UpdateResponse response = delegate.rollback(identifier);
+            return response;
+        } finally {
+            if (LOG.isDebugEnabled()) {
+                long diff = System.currentTimeMillis() - start;
+                LOG.debug("Rollback took " + diff + "ms.");
+            }
         }
-
-        return response;
     }
 
     /**
@@ -235,13 +262,17 @@ public class DelegationSolrAccessImpl implements SolrAccessService {
      */
     @Override
     public UpdateResponse optimize(SolrCoreIdentifier identifier) throws OXException {
-        SolrAccessService delegate = getDelegate(identifier);
-        UpdateResponse response = delegate.optimize(identifier);
-        if (LOG.isDebugEnabled()) {
-            LOG.debug("Optimize took " + response.getElapsedTime() + "ms.");
+        long start = System.currentTimeMillis();
+        try {
+            SolrAccessService delegate = getDelegate(identifier);
+            UpdateResponse response = delegate.optimize(identifier);
+            return response;
+        } finally {
+            if (LOG.isDebugEnabled()) {
+                long diff = System.currentTimeMillis() - start;
+                LOG.debug("Optimize took " + diff + "ms.");
+            }
         }
-
-        return response;
     }
 
     /**
@@ -254,13 +285,17 @@ public class DelegationSolrAccessImpl implements SolrAccessService {
      */
     @Override
     public UpdateResponse optimize(SolrCoreIdentifier identifier, boolean waitFlush, boolean waitSearcher) throws OXException {
-        SolrAccessService delegate = getDelegate(identifier);
-        UpdateResponse response = delegate.optimize(identifier, waitFlush, waitSearcher);
-        if (LOG.isDebugEnabled()) {
-            LOG.debug("Optimize took " + response.getElapsedTime() + "ms.");
+        long start = System.currentTimeMillis();
+        try {
+            SolrAccessService delegate = getDelegate(identifier);
+            UpdateResponse response = delegate.optimize(identifier, waitFlush, waitSearcher);
+            return response;
+        } finally {
+            if (LOG.isDebugEnabled()) {
+                long diff = System.currentTimeMillis() - start;
+                LOG.debug("Optimize took " + diff + "ms.");
+            }
         }
-
-        return response;
     }
 
     /**
@@ -274,13 +309,17 @@ public class DelegationSolrAccessImpl implements SolrAccessService {
      */
     @Override
     public UpdateResponse optimize(SolrCoreIdentifier identifier, boolean waitFlush, boolean waitSearcher, int maxSegments) throws OXException {
-        SolrAccessService delegate = getDelegate(identifier);
-        UpdateResponse response = delegate.optimize(identifier, waitFlush, waitSearcher, maxSegments);
-        if (LOG.isDebugEnabled()) {
-            LOG.debug("Optimize took " + response.getElapsedTime() + "ms.");
+        long start = System.currentTimeMillis();
+        try {
+            SolrAccessService delegate = getDelegate(identifier);
+            UpdateResponse response = delegate.optimize(identifier, waitFlush, waitSearcher, maxSegments);
+            return response;
+        } finally {
+            if (LOG.isDebugEnabled()) {
+                long diff = System.currentTimeMillis() - start;
+                LOG.debug("Optimize took " + diff + "ms.");
+            }
         }
-
-        return response;
     }
 
     /**
@@ -293,13 +332,17 @@ public class DelegationSolrAccessImpl implements SolrAccessService {
      */
     @Override
     public QueryResponse query(SolrCoreIdentifier identifier, SolrParams params) throws OXException {
-        SolrAccessService delegate = getDelegate(identifier);
-        QueryResponse response = delegate.query(identifier, params);
-        if (LOG.isDebugEnabled()) {
-            LOG.debug("Query took " + response.getElapsedTime() + "ms and returned " + response.getResults().size() + " elements.");
+        long start = System.currentTimeMillis();
+        try {
+            SolrAccessService delegate = getDelegate(identifier);
+            QueryResponse response = delegate.query(identifier, params);
+            return response;
+        } finally {
+            if (LOG.isDebugEnabled()) {
+                long diff = System.currentTimeMillis() - start;
+                LOG.debug("Query took " + diff + "ms.");
+            }
         }
-
-        return response;
     }
 
     @Override
