@@ -72,13 +72,13 @@ import com.openexchange.session.Session;
  */
 public class FileStorageCompositionActivator extends HousekeepingActivator {
 
-    private final class CompositingIDBasedFileAccessExtension extends CompositingIDBasedFileAccess implements FolderAware {
+    private final class CompositingIDBasedFileAccessImpl extends CompositingIDBasedFileAccess implements FolderAware {
 
         /**
-         * Initializes a new {@link CompositingIDBasedFileAccessExtension}.
+         * Initializes a new {@link CompositingIDBasedFileAccessImpl}.
          * @param session
          */
-        CompositingIDBasedFileAccessExtension(Session session) {
+        CompositingIDBasedFileAccessImpl(Session session) {
             super(session);
         }
 
@@ -131,7 +131,7 @@ public class FileStorageCompositionActivator extends HousekeepingActivator {
 
             @Override
             public IDBasedFileAccess createAccess(final Session session) {
-                return new CompositingIDBasedFileAccessExtension(session);
+                return new CompositingIDBasedFileAccessImpl(session);
             }
 
         });
