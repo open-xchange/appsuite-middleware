@@ -192,16 +192,8 @@ public final class SmalMessageStorage extends AbstractSMALStorage implements IMa
                 QueryParameters.Builder builder = new QueryParameters
                     .Builder()
                     .setAccountFolders(Collections.singleton(accountFolders));
-                
-                SimpleSearchTermVisitor visitor = new SimpleSearchTermVisitor();
-                searchTerm.accept(visitor);
-                QueryParameters parameters;
-                if (visitor.simple) {
-                    parameters = builder.setHandler(SearchHandler.SIMPLE).setSearchTerm(searchTerm.getPattern().toString()).build();
-                } else {
-                    parameters = builder.setHandler(SearchHandler.CUSTOM).setSearchTerm(searchTerm).build();
-                }
 
+                QueryParameters parameters = builder.setHandler(SearchHandler.CUSTOM).setSearchTerm(searchTerm).build();
                 long start = System.currentTimeMillis();
                 IndexResult<MailMessage> result = indexAccess.query(parameters, MailIndexField.getFor(fields));
                 if (LOG.isDebugEnabled()) {

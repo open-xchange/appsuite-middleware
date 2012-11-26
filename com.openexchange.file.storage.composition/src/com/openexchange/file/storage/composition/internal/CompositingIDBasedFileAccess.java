@@ -73,6 +73,7 @@ import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.FileStorageFileAccess;
 import com.openexchange.file.storage.FileStorageFileAccess.IDTuple;
 import com.openexchange.file.storage.FileStorageFileAccess.SortDirection;
+import com.openexchange.file.storage.FileStorageFolderAccess;
 import com.openexchange.file.storage.FileStorageService;
 import com.openexchange.file.storage.composition.FileID;
 import com.openexchange.file.storage.composition.FolderID;
@@ -99,7 +100,12 @@ public abstract class CompositingIDBasedFileAccess extends AbstractService<Trans
     private final ThreadLocal<Map<String, FileStorageAccountAccess>> connectedAccounts = new ThreadLocal<Map<String, FileStorageAccountAccess>>();
     private final ThreadLocal<List<FileStorageAccountAccess>> accessesToClose = new ThreadLocal<List<FileStorageAccountAccess>>();
 
-    public CompositingIDBasedFileAccess(final Session session) {
+    /**
+     * Initializes a new {@link CompositingIDBasedFileAccess}.
+     * 
+     * @param session The associated session
+     */
+    protected CompositingIDBasedFileAccess(final Session session) {
         super();
         this.session = session;
         connectedAccounts.set(new HashMap<String, FileStorageAccountAccess>());
@@ -619,16 +625,44 @@ public abstract class CompositingIDBasedFileAccess extends AbstractService<Trans
 
     }
 
+    /**
+     * Gets the file access.
+     *
+     * @param serviceId The service identifier
+     * @param accountId The account identifier
+     * @return The file access
+     * @throws OXException If an error occurs
+     */
     protected FileStorageFileAccess getFileAccess(final String serviceId, final String accountId) throws OXException {
-        final FileStorageAccountAccess cached = connectedAccounts.get().get(serviceId+"/"+accountId);
-        if(cached != null) {
+        final FileStorageAccountAccess cached = connectedAccounts.get().get(serviceId + "/" + accountId);
+        if (cached != null) {
             return cached.getFileAccess();
         }
         final FileStorageService fileStorage = getFileStorageService(serviceId);
 
         final FileStorageAccountAccess accountAccess = fileStorage.getAccountAccess(accountId, session);
-        connect( accountAccess );
+        connect(accountAccess);
         return accountAccess.getFileAccess();
+    }
+
+    /**
+     * Gets the folder access.
+     *
+     * @param serviceId The service identifier
+     * @param accountId The account identifier
+     * @return The folder access
+     * @throws OXException If an error occurs
+     */
+    protected FileStorageFolderAccess getFolderAccess(final String serviceId, final String accountId) throws OXException {
+        final FileStorageAccountAccess cached = connectedAccounts.get().get(serviceId + "/" + accountId);
+        if (cached != null) {
+            return cached.getFolderAccess();
+        }
+        final FileStorageService fileStorage = getFileStorageService(serviceId);
+
+        final FileStorageAccountAccess accountAccess = fileStorage.getAccountAccess(accountId, session);
+        connect(accountAccess);
+        return accountAccess.getFolderAccess();
     }
 
     private void connect(final FileStorageAccountAccess accountAccess) throws OXException {

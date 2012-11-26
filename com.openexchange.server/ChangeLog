@@ -1,3 +1,7 @@
+* 2012-11-26 - thorben.betten@open-xchange.com
+
+ - Fix for bug 23955: Added null guard when checking permission bit
+
 * 2012-11-25 - thorben.betten@open-xchange.com
 
  - Fix for bug 23898: Quoting replacement string

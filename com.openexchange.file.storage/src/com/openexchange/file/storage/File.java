@@ -59,7 +59,7 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * A {@link File} represents the metadata known about a file
+ * A {@link File} represents the meta data known about a file
  */
 public interface File {
 
