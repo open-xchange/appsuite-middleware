@@ -372,9 +372,8 @@ public class DelegationSolrAccessImpl implements SolrAccessService {
                 IMap<String, String> solrCores = hazelcast.getMap(SolrCoreTools.SOLR_CORE_MAP);
                 solrCores.removeAsync(coreName);
             }
-
-            embeddedAccess.shutDown();
         }
+        embeddedAccess.shutDown();
     }
 
     public EmbeddedSolrAccessImpl getEmbeddedServerAccess() {
