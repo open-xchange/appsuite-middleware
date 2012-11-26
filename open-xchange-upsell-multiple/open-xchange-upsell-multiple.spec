@@ -8,7 +8,7 @@ BuildRequires:  java-devel >= 1.6.0
 BuildRequires:  open-xchange-core
 BuildRequires:  open-xchange-admin
 Version:        @OXVERSION@
-%define         ox_release 6
+%define         ox_release 7
 Release:        %{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GPL-2.0
@@ -53,6 +53,8 @@ ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} 
 %doc com.openexchange.upsell.multiple/ChangeLog
 
 %changelog
+* Mon Nov 26 2012 Carsten Hoeger <choeger@open-xchange.com>
+Seventh release candidate for 6.22.1
 * Wed Nov 14 2012 Carsten Hoeger <choeger@open-xchange.com>
 Sixth release candidate for 6.22.1
 * Tue Nov 13 2012 Carsten Hoeger <choeger@open-xchange.com>
