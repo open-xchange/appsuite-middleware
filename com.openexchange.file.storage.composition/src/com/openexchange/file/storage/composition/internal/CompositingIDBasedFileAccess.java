@@ -620,6 +620,14 @@ public abstract class CompositingIDBasedFileAccess extends AbstractService<Trans
 
     }
 
+    /**
+     * Gets the file access.
+     *
+     * @param serviceId The service identifier
+     * @param accountId The account identifier
+     * @return The file access
+     * @throws OXException If an error occurs
+     */
     protected FileStorageFileAccess getFileAccess(final String serviceId, final String accountId) throws OXException {
         final FileStorageAccountAccess cached = connectedAccounts.get().get(serviceId + "/" + accountId);
         if (cached != null) {
@@ -632,6 +640,14 @@ public abstract class CompositingIDBasedFileAccess extends AbstractService<Trans
         return accountAccess.getFileAccess();
     }
 
+    /**
+     * Gets the folder access.
+     *
+     * @param serviceId The service identifier
+     * @param accountId The account identifier
+     * @return The folder access
+     * @throws OXException If an error occurs
+     */
     protected FileStorageFolderAccess getFolderAccess(final String serviceId, final String accountId) throws OXException {
         final FileStorageAccountAccess cached = connectedAccounts.get().get(serviceId + "/" + accountId);
         if (cached != null) {
