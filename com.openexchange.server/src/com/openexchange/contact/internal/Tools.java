@@ -259,11 +259,11 @@ public final class Tools {
     public static FolderObject getFolder(int contextID, String folderId, boolean deleted) throws OXException {
         FolderService folderService = ContactServiceLookup.getService(FolderService.class, true);
         try {
-            return folderService.getFolderObject(parse(folderId), contextID, Storage.LIVE_WORKING);
+            return folderService.getFolderObject(parse(folderId), contextID/*, Storage.LIVE_WORKING*/);
         } catch (OXException e) {
             if (deleted && "FLD-0008".equals(e.getErrorCode())) {
                 // not found, also try backup folder tree
-                return folderService.getFolderObject(parse(folderId), contextID, Storage.LIVE_BACKUP);
+                return folderService.getFolderObject(parse(folderId), contextID, Storage./*LIVE_*/BACKUP);
             }
             throw e;
         }
