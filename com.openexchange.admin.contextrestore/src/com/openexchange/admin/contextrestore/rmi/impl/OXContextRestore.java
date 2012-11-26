@@ -69,16 +69,22 @@ public class OXContextRestore extends OXCommonImpl implements OXContextRestoreIn
             private final int poolId;
             private final int contextId;
             private final String schema;
+            private final String fileName;
             private VersionInformation versionInformation;
             private UpdateTaskInformation updateTaskInformation;
 
-            protected PoolIdSchemaAndVersionInfo(final int contextId, int poolId, String schema, VersionInformation versionInformation, UpdateTaskInformation updateTaskInformation) {
+            protected PoolIdSchemaAndVersionInfo(final String fileName, final int contextId, int poolId, String schema, VersionInformation versionInformation, UpdateTaskInformation updateTaskInformation) {
                 super();
+                this.fileName = fileName;
                 this.contextId = contextId;
                 this.poolId = poolId;
                 this.schema = schema;
                 this.versionInformation = versionInformation;
                 this.updateTaskInformation = updateTaskInformation;
+            }
+
+            public String getFileName() {
+                return fileName;
             }
 
             public int getContextId() {
@@ -295,7 +301,7 @@ public class OXContextRestore extends OXCommonImpl implements OXContextRestoreIn
             if (null == updateTaskInformation) {
                 throw new OXContextRestoreException(Code.NO_UPDATE_TASK_INFORMATION_FOUND);
             }
-            return new PoolIdSchemaAndVersionInfo(cid, poolId, schema, versionInformation, updateTaskInformation);
+            return new PoolIdSchemaAndVersionInfo(fileName, cid, poolId, schema, versionInformation, updateTaskInformation);
         }
 
         /**
