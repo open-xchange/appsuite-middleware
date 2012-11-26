@@ -56,9 +56,8 @@ import java.io.Serializable;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
-
+import java.util.regex.Pattern;
 import org.apache.commons.logging.Log;
-
 import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.exception.OXException;
@@ -78,65 +77,70 @@ public final class UserConfiguration implements Serializable, Cloneable {
 
     private static final transient Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(UserConfiguration.class));
     
+    /**
+     * Enumeration of known permissions.
+     */
     public static enum Permission {
-    	WEBMAIL(UserConfiguration.WEBMAIL, "WebMail"),
-    	CALENDAR(UserConfiguration.CALENDAR, "Calendar"),
-    	CONTACTS(UserConfiguration.CONTACTS, "Contacts"),
-    	TASKS(UserConfiguration.TASKS, "Tasks"),
-    	INFOSTORE(UserConfiguration.INFOSTORE, "Infostore"),
-    	PROJECTS(UserConfiguration.PROJECTS, "Projects"),
-    	FORUM(UserConfiguration.FORUM, "Forum"),
-    	PINBOARD_WRITE_ACCESS(UserConfiguration.PINBOARD_WRITE_ACCESS, "PinboardWriteAccess"),
-    	WEBDAV_XML(UserConfiguration.WEBDAV_XML, "WebDAVXML"),
-    	WEBDAV(UserConfiguration.WEBDAV, "WebDAV"),
-    	ICAL(UserConfiguration.ICAL, "ICal"),
-    	VCARD(UserConfiguration.VCARD, "VCard"),
-    	RSS_BOOKMARKS(UserConfiguration.RSS_BOOKMARKS, "RSSBookmarks"),
-    	RSS_PORTAL(UserConfiguration.RSS_PORTAL, "RSSPortal"),
-    	MOBILITY(UserConfiguration.MOBILITY, "SyncML"),
-    	EDIT_PUBLIC_FOLDERS(UserConfiguration.EDIT_PUBLIC_FOLDERS, "FullPublicFolderAccess"),
-    	READ_CREATE_SHARED_FOLDERS(UserConfiguration.READ_CREATE_SHARED_FOLDERS, "FullSharedFolderAccess"),
-    	DELEGATE_TASKS(UserConfiguration.DELEGATE_TASKS, "DelegateTasks"),
-    	EDIT_GROUP(UserConfiguration.EDIT_GROUP, "EditGroup"),
-    	EDIT_RESOURCE(UserConfiguration.EDIT_RESOURCE, "EditResource"),
-    	EDIT_PASSWORD(UserConfiguration.EDIT_PASSWORD, "EditPassword"),
-    	COLLECT_EMAIL_ADDRESSES(UserConfiguration.COLLECT_EMAIL_ADDRESSES, "CollectEMailAddresses"),
-    	MULTIPLE_MAIL_ACCOUNTS(UserConfiguration.MULTIPLE_MAIL_ACCOUNTS, "MultipleMailAccounts"),
-    	SUBSCRIPTION(UserConfiguration.SUBSCRIPTION, "Subscription"),
-    	PUBLICATION(UserConfiguration.PUBLICATION, "Publication"),
-    	ACTIVE_SYNC(UserConfiguration.ACTIVE_SYNC, "ActiveSync"),
-    	USM(UserConfiguration.USM, "USM"),
-    	OLOX20(UserConfiguration.OLOX20, "OLOX20"),
-    	DENIED_PORTAL(UserConfiguration.DENIED_PORTAL, "DeniedPortal"),
-    	CALDAV(UserConfiguration.CALDAV, "CalDAV"),
-    	CARDDAV(UserConfiguration.CARDDAV, "CardDAV");
-    	
-    	private static TIntObjectHashMap<Permission> byBit = new TIntObjectHashMap<Permission>();
-    	static {
-    		for(Permission p: values()) {
-    			byBit.put(p.bit, p);
-    		}
-    	}
-    	
-    	private int bit;
-    	private String tagName;
-    	
-    	Permission(int bit, String name) {
-    		this.bit = bit;
-    		this.tagName = name;
-    	}
-    	
-		public int getBit() {
-			return bit;
-		}
+        WEBMAIL(UserConfiguration.WEBMAIL, "WebMail"),
+        CALENDAR(UserConfiguration.CALENDAR, "Calendar"),
+        CONTACTS(UserConfiguration.CONTACTS, "Contacts"),
+        TASKS(UserConfiguration.TASKS, "Tasks"),
+        INFOSTORE(UserConfiguration.INFOSTORE, "Infostore"),
+        PROJECTS(UserConfiguration.PROJECTS, "Projects"),
+        FORUM(UserConfiguration.FORUM, "Forum"),
+        PINBOARD_WRITE_ACCESS(UserConfiguration.PINBOARD_WRITE_ACCESS, "PinboardWriteAccess"),
+        WEBDAV_XML(UserConfiguration.WEBDAV_XML, "WebDAVXML"),
+        WEBDAV(UserConfiguration.WEBDAV, "WebDAV"),
+        ICAL(UserConfiguration.ICAL, "ICal"),
+        VCARD(UserConfiguration.VCARD, "VCard"),
+        RSS_BOOKMARKS(UserConfiguration.RSS_BOOKMARKS, "RSSBookmarks"),
+        RSS_PORTAL(UserConfiguration.RSS_PORTAL, "RSSPortal"),
+        MOBILITY(UserConfiguration.MOBILITY, "SyncML"),
+        EDIT_PUBLIC_FOLDERS(UserConfiguration.EDIT_PUBLIC_FOLDERS, "FullPublicFolderAccess"),
+        READ_CREATE_SHARED_FOLDERS(UserConfiguration.READ_CREATE_SHARED_FOLDERS, "FullSharedFolderAccess"),
+        DELEGATE_TASKS(UserConfiguration.DELEGATE_TASKS, "DelegateTasks"),
+        EDIT_GROUP(UserConfiguration.EDIT_GROUP, "EditGroup"),
+        EDIT_RESOURCE(UserConfiguration.EDIT_RESOURCE, "EditResource"),
+        EDIT_PASSWORD(UserConfiguration.EDIT_PASSWORD, "EditPassword"),
+        COLLECT_EMAIL_ADDRESSES(UserConfiguration.COLLECT_EMAIL_ADDRESSES, "CollectEMailAddresses"),
+        MULTIPLE_MAIL_ACCOUNTS(UserConfiguration.MULTIPLE_MAIL_ACCOUNTS, "MultipleMailAccounts"),
+        SUBSCRIPTION(UserConfiguration.SUBSCRIPTION, "Subscription"),
+        PUBLICATION(UserConfiguration.PUBLICATION, "Publication"),
+        ACTIVE_SYNC(UserConfiguration.ACTIVE_SYNC, "ActiveSync"),
+        USM(UserConfiguration.USM, "USM"),
+        OLOX20(UserConfiguration.OLOX20, "OLOX20"),
+        DENIED_PORTAL(UserConfiguration.DENIED_PORTAL, "DeniedPortal"),
+        CALDAV(UserConfiguration.CALDAV, "CalDAV"),
+        CARDDAV(UserConfiguration.CARDDAV, "CardDAV");
 
-		public static Permission byBit(int permission) {
-			return byBit.get(permission);
-		}
-		
-		public String getTagName() {
-			return tagName;
-		}
+        private static TIntObjectHashMap<Permission> byBit = new TIntObjectHashMap<Permission>();
+        static {
+            for (final Permission p : values()) {
+                byBit.put(p.bit, p);
+            }
+        }
+
+        /** The associated bit constant */
+        int bit;
+        /** The associated tag name */
+        String tagName;
+
+        private Permission(final int bit, final String name) {
+            this.bit = bit;
+            this.tagName = name;
+        }
+
+        public int getBit() {
+            return bit;
+        }
+
+        public static Permission byBit(final int permission) {
+            return byBit.get(permission);
+        }
+
+        public String getTagName() {
+            return tagName;
+        }
     }
     
     /**
@@ -1055,18 +1059,38 @@ public final class UserConfiguration implements Serializable, Cloneable {
     /**
      * Checks if this user configuration enables specified permission bit.
      *
-     * @param permission The permission bit to check
+     * @param permissionBit The permission bit to check
      * @return <code>true</code> if this user configuration enabled specified permission bit; otherwise <code>false</code>
      */
-    public boolean hasPermission(final int permission) {
-        return hasPermission(Permission.byBit(permission).name());
+    public boolean hasPermission(final int permissionBit) {
+        final Permission permission = Permission.byBit(permissionBit);
+        if (null == permission) {
+            LOG.warn("Missing permission constant for bit: " + Integer.toBinaryString(permissionBit) + " (" + permissionBit + ")");
+            return false;
+        }
+        return hasPermission(permission.name());
     }
     
-    public boolean hasPermission(Permission permission) {
-    	return hasPermission(permission.name());
+    /**
+     * Checks if this user configuration enables specified permission.
+     *
+     * @param permission The permission 
+     * @return <code>true</code> if this user configuration enabled specified permission; otherwise <code>false</code>
+     */
+    public boolean hasPermission(final Permission permission) {
+        if (null == permission) {
+            return false;
+        }
+        return hasPermissionInternal(permission);
     }
     
-    public boolean hasPermission(String name) {
+    /**
+     * Checks if this user configuration enables named permission.
+     *
+     * @param name The permission name
+     * @return <code>true</code> if this user configuration enabled named permission; otherwise <code>false</code>
+     */
+    public boolean hasPermission(final String name) {
     	return getExtendedPermissions().contains(name.toLowerCase());
     }
     
@@ -1078,7 +1102,6 @@ public final class UserConfiguration implements Serializable, Cloneable {
     	return hasPermissionInternal(permission.bit);
     }
 
-    
     private void setPermission(final boolean enable, final int permission) {
         /*
          * Set or unset specified permission
@@ -1123,43 +1146,47 @@ public final class UserConfiguration implements Serializable, Cloneable {
         return new StringBuilder(32).append("UserConfiguration_").append(userId).append('@').append(Integer.toBinaryString(permissionBits)).toString();
     }
     
-    private static final String PERMISSION_PROPERTY = "permissions";
+    private static final String PERMISSION_PROPERTY = "permissions".intern();
+    private static final Pattern P_SPLIT = Pattern.compile("\\s*[, ]\\s*");
     
-	public Set<String> getExtendedPermissions() {
-		Set<String> retval = new HashSet<String>();
-        for(Permission p: Permission.values()) {
-			
-			if (hasPermissionInternal(p)) {
-				retval.add(p.name().toLowerCase());
-			}
+	/**
+	 * Gets the extended permissions.
+	 *
+	 * @return The extended permissions
+	 */
+    public Set<String> getExtendedPermissions() {
+        Set<String> retval = new HashSet<String>();
+        for (Permission p : Permission.values()) {
+            if (hasPermissionInternal(p)) {
+                retval.add(p.name().toLowerCase());
+            }
         }
         // Now apply modifiers from the config cascade
         ConfigViewFactory configViews = ServerServiceRegistry.getInstance().getService(ConfigViewFactory.class);
         if (configViews == null) {
-        	return retval;
+            return retval;
         }
         try {
             final ConfigView view = configViews.getView(getUserId(), getContext().getContextId());
-
             final String[] searchPath = configViews.getSearchPath();
             for (final String scope : searchPath) {
-               final String permissions = view.property(PERMISSION_PROPERTY, String.class).precedence(scope).get();
-               if(permissions != null) {
-            	   for(String permissionModifier: permissions.split("\\s*[, ]\\s*")) {
-            		   if (permissionModifier.startsWith("-")) {
-            			   retval.remove(permissionModifier.substring(1).toLowerCase());
-            			   continue;
-            		   } else if (permissionModifier.startsWith("+")) {
-            			   permissionModifier = permissionModifier.substring(1);
-            		   }
-            		   retval.add(permissionModifier.toLowerCase());
-            	   }
-               }
+                final String permissions = view.property(PERMISSION_PROPERTY, String.class).precedence(scope).get();
+                if (permissions != null) {
+                    for (String permissionModifier : P_SPLIT.split(permissions)) {
+                        if ('-' == permissionModifier.charAt(0)) {
+                            retval.remove(permissionModifier.substring(1).toLowerCase());
+                            continue;
+                        } else if ('+' == permissionModifier.charAt(0)) {
+                            permissionModifier = permissionModifier.substring(1);
+                        }
+                        retval.add(permissionModifier.toLowerCase());
+                    }
+                }
             }
         } catch (OXException x) {
-        	LOG.error(x.getMessage(), x);
+            LOG.error(x.getMessage(), x);
         }
-        
-		return retval;
-	}
+        return retval;
+    }
+
 }
