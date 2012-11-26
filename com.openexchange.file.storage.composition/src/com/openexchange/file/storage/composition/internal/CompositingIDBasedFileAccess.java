@@ -71,8 +71,6 @@ import com.openexchange.file.storage.FileStorageAccountAccess;
 import com.openexchange.file.storage.FileStorageEventHelper;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.FileStorageFileAccess;
-import com.openexchange.file.storage.FileStorageFolder;
-import com.openexchange.file.storage.FileStoragePermission;
 import com.openexchange.file.storage.FileStorageFileAccess.IDTuple;
 import com.openexchange.file.storage.FileStorageFileAccess.SortDirection;
 import com.openexchange.file.storage.FileStorageFolderAccess;
@@ -149,13 +147,6 @@ public abstract class CompositingIDBasedFileAccess extends AbstractService<Trans
     @Override
     public InputStream getDocument(final String id, final int version) throws OXException {
         final FileID fileID = new FileID(id);
-        
-        FileStorageFolder f = null;
-        FileStoragePermission p = f.getOwnPermission();
-        int writePermission = p.getWritePermission();
-        if (writePermission >= FileStoragePermission.WRITE_ALL_OBJECTS || ()) {
-            
-        }
 
         return getFileAccess(fileID.getService(), fileID.getAccountId()).getDocument(fileID.getFolderId(), fileID.getFileId(), version);
     }
