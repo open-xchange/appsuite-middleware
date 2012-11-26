@@ -1081,6 +1081,9 @@ public final class UserConfiguration implements Serializable, Cloneable {
      * @return <code>true</code> if this user configuration enabled specified permission bit; otherwise <code>false</code>
      */
     public boolean hasPermission(final int permissionBit) {
+    	if (permissionBit == 0) {
+    		return true;
+    	}
         final List<Permission> permission = Permission.byBits(permissionBit);
         Set<String> extendedPermissions = getExtendedPermissions();
         for (Permission p : permission) {
