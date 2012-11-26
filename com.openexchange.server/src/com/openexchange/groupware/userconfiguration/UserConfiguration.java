@@ -53,8 +53,10 @@ import gnu.trove.list.TIntList;
 import gnu.trove.list.array.TIntArrayList;
 import gnu.trove.map.hash.TIntObjectHashMap;
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.regex.Pattern;
 import org.apache.commons.logging.Log;
@@ -141,6 +143,16 @@ public final class UserConfiguration implements Serializable, Cloneable {
         public String getTagName() {
             return tagName;
         }
+
+		public static List<Permission> byBits(int permissionBit) {
+			List<Permission> permissions = new ArrayList<Permission>();
+			for(Permission p: values()) {
+				if ((permissionBit & p.bit) == permissionBit) {
+					permissions.add(p);
+				}
+			}
+			return permissions;
+		}
     }
     
     /**
@@ -1063,12 +1075,14 @@ public final class UserConfiguration implements Serializable, Cloneable {
      * @return <code>true</code> if this user configuration enabled specified permission bit; otherwise <code>false</code>
      */
     public boolean hasPermission(final int permissionBit) {
-        final Permission permission = Permission.byBit(permissionBit);
-        if (null == permission) {
-            LOG.warn("Missing permission constant for bit: " + Integer.toBinaryString(permissionBit) + " (" + permissionBit + ")");
-            return false;
-        }
-        return hasPermission(permission.name());
+        final List<Permission> permission = Permission.byBits(permissionBit);
+        Set<String> extendedPermissions = getExtendedPermissions();
+        for (Permission p : permission) {
+        	if (!extendedPermissions.contains(p.name().toLowerCase())) {
+        		return false;
+        	}
+		}
+        return true;
     }
     
     /**
