@@ -147,7 +147,8 @@ public final class UserConfiguration implements Serializable, Cloneable {
 		public static List<Permission> byBits(int permissionBit) {
 			List<Permission> permissions = new ArrayList<Permission>();
 			for(Permission p: values()) {
-				if ((permissionBit & p.bit) == permissionBit) {
+				final int bit = p.bit;
+                if ((permissionBit & bit) == bit) {
 					permissions.add(p);
 				}
 			}
