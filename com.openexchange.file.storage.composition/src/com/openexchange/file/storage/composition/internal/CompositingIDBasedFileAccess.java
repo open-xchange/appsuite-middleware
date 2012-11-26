@@ -73,6 +73,7 @@ import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.FileStorageFileAccess;
 import com.openexchange.file.storage.FileStorageFileAccess.IDTuple;
 import com.openexchange.file.storage.FileStorageFileAccess.SortDirection;
+import com.openexchange.file.storage.FileStorageFolderAccess;
 import com.openexchange.file.storage.FileStorageService;
 import com.openexchange.file.storage.composition.FileID;
 import com.openexchange.file.storage.composition.FolderID;
@@ -620,15 +621,27 @@ public abstract class CompositingIDBasedFileAccess extends AbstractService<Trans
     }
 
     protected FileStorageFileAccess getFileAccess(final String serviceId, final String accountId) throws OXException {
-        final FileStorageAccountAccess cached = connectedAccounts.get().get(serviceId+"/"+accountId);
-        if(cached != null) {
+        final FileStorageAccountAccess cached = connectedAccounts.get().get(serviceId + "/" + accountId);
+        if (cached != null) {
             return cached.getFileAccess();
         }
         final FileStorageService fileStorage = getFileStorageService(serviceId);
 
         final FileStorageAccountAccess accountAccess = fileStorage.getAccountAccess(accountId, session);
-        connect( accountAccess );
+        connect(accountAccess);
         return accountAccess.getFileAccess();
+    }
+
+    protected FileStorageFolderAccess getFolderAccess(final String serviceId, final String accountId) throws OXException {
+        final FileStorageAccountAccess cached = connectedAccounts.get().get(serviceId + "/" + accountId);
+        if (cached != null) {
+            return cached.getFolderAccess();
+        }
+        final FileStorageService fileStorage = getFileStorageService(serviceId);
+
+        final FileStorageAccountAccess accountAccess = fileStorage.getAccountAccess(accountId, session);
+        connect(accountAccess);
+        return accountAccess.getFolderAccess();
     }
 
     private void connect(final FileStorageAccountAccess accountAccess) throws OXException {

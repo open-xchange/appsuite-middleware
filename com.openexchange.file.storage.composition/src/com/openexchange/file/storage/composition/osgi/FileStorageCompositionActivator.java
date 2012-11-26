@@ -52,9 +52,12 @@ package com.openexchange.file.storage.composition.osgi;
 import java.util.List;
 import org.osgi.service.event.EventAdmin;
 import com.openexchange.exception.OXException;
+import com.openexchange.file.storage.FileStoragePermission;
 import com.openexchange.file.storage.FileStorageService;
+import com.openexchange.file.storage.composition.FileID;
 import com.openexchange.file.storage.composition.IDBasedFileAccess;
 import com.openexchange.file.storage.composition.IDBasedFileAccessFactory;
+import com.openexchange.file.storage.composition.PermissionAware;
 import com.openexchange.file.storage.composition.internal.CompositingIDBasedFileAccess;
 import com.openexchange.file.storage.registry.FileStorageServiceRegistry;
 import com.openexchange.osgi.HousekeepingActivator;
@@ -67,6 +70,38 @@ import com.openexchange.session.Session;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class FileStorageCompositionActivator extends HousekeepingActivator {
+
+    private final class CompositingIDBasedFileAccessExtension extends CompositingIDBasedFileAccess implements PermissionAware {
+
+        /**
+         * Initializes a new {@link CompositingIDBasedFileAccessExtension}.
+         * @param session
+         */
+        private CompositingIDBasedFileAccessExtension(Session session) {
+            super(session);
+        }
+
+        @Override
+        protected List<FileStorageService> getAllFileStorageServices() throws OXException {
+            return getService(FileStorageServiceRegistry.class).getAllServices();
+        }
+
+        @Override
+        protected FileStorageService getFileStorageService(final String serviceId) throws OXException {
+            return getService(FileStorageServiceRegistry.class).getFileStorageService(serviceId);
+        }
+
+        @Override
+        protected EventAdmin getEventAdmin() {
+            return getService(EventAdmin.class);
+        }
+
+        @Override
+        public FileStoragePermission getOwnPermission(final String id) throws OXException {
+            final FileID fileID = new FileID(id);
+            return getFolderAccess(fileID.getService(), fileID.getAccountId()).getFolder(fileID.getFolderId()).getOwnPermission();
+        }
+    }
 
     @Override
     protected Class<?>[] getNeededServices() {
@@ -89,23 +124,7 @@ public class FileStorageCompositionActivator extends HousekeepingActivator {
 
             @Override
             public IDBasedFileAccess createAccess(final Session session) {
-                return new CompositingIDBasedFileAccess(session) {
-
-                    @Override
-                    protected List<FileStorageService> getAllFileStorageServices() throws OXException {
-                        return getService(FileStorageServiceRegistry.class).getAllServices();
-                    }
-
-                    @Override
-                    protected FileStorageService getFileStorageService(final String serviceId) throws OXException {
-                        return getService(FileStorageServiceRegistry.class).getFileStorageService(serviceId);
-                    }
-                    
-                    @Override
-                    protected EventAdmin getEventAdmin() {
-                        return getService(EventAdmin.class);
-                    }
-                };
+                return new CompositingIDBasedFileAccessExtension(session);
             }
 
         });
