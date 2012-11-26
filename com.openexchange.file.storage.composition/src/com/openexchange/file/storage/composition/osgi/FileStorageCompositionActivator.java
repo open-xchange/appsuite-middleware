@@ -98,15 +98,23 @@ public class FileStorageCompositionActivator extends HousekeepingActivator {
         }
 
         @Override
-        public FileStoragePermission getOwnPermission(final String id) throws OXException {
+        public FileStoragePermission optOwnPermission(final String id) throws OXException {
             final FileID fileID = new FileID(id);
-            return getFolderAccess(fileID.getService(), fileID.getAccountId()).getFolder(fileID.getFolderId()).getOwnPermission();
+            final String folderId = fileID.getFolderId();
+            if (null == folderId) {
+                return null;
+            }
+            return getFolderAccess(fileID.getService(), fileID.getAccountId()).getFolder(folderId).getOwnPermission();
         }
 
         @Override
-        public FileStorageFolder getFolder(String id) throws OXException {
+        public FileStorageFolder optFolder(String id) throws OXException {
             final FileID fileID = new FileID(id);
-            return getFolderAccess(fileID.getService(), fileID.getAccountId()).getFolder(fileID.getFolderId());
+            final String folderId = fileID.getFolderId();
+            if (null == folderId) {
+                return null;
+            }
+            return getFolderAccess(fileID.getService(), fileID.getAccountId()).getFolder(folderId);
         }
     }
 

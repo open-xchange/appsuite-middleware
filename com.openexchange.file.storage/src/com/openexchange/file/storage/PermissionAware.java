@@ -47,35 +47,24 @@
  *
  */
 
-package com.openexchange.file.storage.composition;
+package com.openexchange.file.storage;
 
 import com.openexchange.exception.OXException;
-import com.openexchange.file.storage.FileStorageFolder;
-import com.openexchange.file.storage.FileStoragePermission;
+
 
 /**
- * {@link FolderAware} - Extends {@link IDBasedFileAccess} by folder access..
+ * {@link PermissionAware} - Implementor is aware of permissions.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface FolderAware extends IDBasedFileAccess {
+public interface PermissionAware {
 
     /**
-     * Optionally gets the folder identified through given identifier
+     * Gets the own permission.
      *
-     * @param id The file identifier
-     * @return The corresponding instance of {@link FileStorageFolder} or <code>null</code>
-     * @throws OXException If either folder does not exist or could not be fetched
-     */
-    public FileStorageFolder optFolder(final String id) throws OXException;
-
-    /**
-     * Optionally gets the permission for currently logged-in user accessing this folder
-     *
-     * @param id The file identifier
-     * @return The own permission or <code>null</code>
+     * @return The own permission
      * @throws OXException If permission cannot be returned
      */
-    public FileStoragePermission optOwnPermission(String id) throws OXException;
+    public FileStoragePermission getOwnPermission() throws OXException;
 
 }
