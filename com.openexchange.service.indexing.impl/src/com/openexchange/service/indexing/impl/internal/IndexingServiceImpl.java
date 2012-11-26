@@ -113,10 +113,19 @@ public class IndexingServiceImpl implements IndexingService {
                     jobData.put(JobConstants.JOB_INFO, info);
                     JobDetail jobDetail = JobBuilder.newJob(QuartzIndexingJob.class).withIdentity(generateJobKey(info)).usingJobData(
                         jobData).build();
-                    TriggerBuilder<Trigger> triggerBuilder = TriggerBuilder.newTrigger().forJob(jobDetail).withIdentity(
-                        generateTriggerKey(info, tmpDate, repeatInterval)).startAt(tmpDate).withPriority(priority);
+                    TriggerBuilder<Trigger> triggerBuilder = TriggerBuilder.newTrigger()
+                        .forJob(jobDetail)
+                        .withIdentity(generateTriggerKey(info, tmpDate, repeatInterval))
+                        .startAt(tmpDate)
+                        .withPriority(priority);
                     if (repeatInterval > 0L) {
-                        triggerBuilder.withSchedule(SimpleScheduleBuilder.simpleSchedule().withIntervalInMilliseconds(repeatInterval).repeatForever().withMisfireHandlingInstructionFireNow());
+                        triggerBuilder.withSchedule(
+                            SimpleScheduleBuilder.simpleSchedule()
+                            .withIntervalInMilliseconds(repeatInterval)
+                            .repeatForever()
+                            .withMisfireHandlingInstructionFireNow());
+                    } else {
+                        triggerBuilder.withSchedule(SimpleScheduleBuilder.simpleSchedule().withMisfireHandlingInstructionFireNow());
                     }
                     Trigger trigger = triggerBuilder.build();
                     Scheduler scheduler = getScheduler();
