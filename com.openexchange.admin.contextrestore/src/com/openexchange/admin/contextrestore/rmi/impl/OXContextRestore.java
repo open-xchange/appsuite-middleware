@@ -676,13 +676,13 @@ public class OXContextRestore extends OXCommonImpl implements OXContextRestoreIn
             throw e;
         } catch (final FileNotFoundException e) {
             LOG.error(e.getMessage(), e);
-            throw new OXContextRestoreException(Code.FILE_NOT_FOUND);
+            throw new OXContextRestoreException(Code.FILE_NOT_FOUND, e);
         } catch (final IOException e) {
             LOG.error(e.getMessage(), e);
-            throw new OXContextRestoreException(Code.IO_EXCEPTION);
+            throw new OXContextRestoreException(Code.IO_EXCEPTION, e);
         } catch (final SQLException e) {
             LOG.error(e.getMessage(), e);
-            throw new OXContextRestoreException(Code.DATABASE_OPERATION_ERROR, e.getMessage());
+            throw new OXContextRestoreException(Code.DATABASE_OPERATION_ERROR, e, e.getMessage());
         } catch (final OXContextRestoreException e) {
             LOG.error(e.getMessage(), e);
             throw e;
