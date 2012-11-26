@@ -51,6 +51,7 @@ package com.openexchange.groupware.userconfiguration;
 
 import gnu.trove.list.TIntList;
 import gnu.trove.list.array.TIntArrayList;
+import gnu.trove.map.TIntObjectMap;
 import gnu.trove.map.hash.TIntObjectHashMap;
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -115,11 +116,14 @@ public final class UserConfiguration implements Serializable, Cloneable {
         CALDAV(UserConfiguration.CALDAV, "CalDAV"),
         CARDDAV(UserConfiguration.CARDDAV, "CardDAV");
 
-        private static TIntObjectHashMap<Permission> byBit = new TIntObjectHashMap<Permission>();
+        private static TIntObjectMap<Permission> byBit;
         static {
-            for (final Permission p : values()) {
-                byBit.put(p.bit, p);
+            final Permission[] permissions = values();
+            final TIntObjectMap<Permission> m = new TIntObjectHashMap<Permission>(permissions.length);
+            for (final Permission p : permissions) {
+                m.put(p.bit, p);
             }
+            byBit = m;
         }
 
         /** The associated bit constant */
@@ -144,9 +148,10 @@ public final class UserConfiguration implements Serializable, Cloneable {
             return tagName;
         }
 
-        public static List<Permission> byBits(int permissionBit) {
-            List<Permission> permissions = new ArrayList<Permission>(32);
-            for (Permission p : values()) {
+        public static List<Permission> byBits(final int permissionBit) {
+            final Permission[] pa = values();
+            final List<Permission> permissions = new ArrayList<Permission>(pa.length);
+            for (final Permission p : pa) {
                 final int bit = p.bit;
                 if ((permissionBit & bit) == bit) {
                     permissions.add(p);
