@@ -143,6 +143,10 @@ public class MailTestManager {
         MailSearchResponse searchResponse = client.execute(searchRequest);
 
         JSONArray ids = searchResponse.getDataAsJSONArray();
+        if (null == ids || 0 == ids.length()) {
+            return new LinkedList<String[]>();
+        }
+
         LinkedList<String[]> FoldersAndIds = new LinkedList<String[]>();
         for (int i = 0, length = ids.length(); i < length; i++) {
             JSONArray temp = ids.getJSONArray(i);
