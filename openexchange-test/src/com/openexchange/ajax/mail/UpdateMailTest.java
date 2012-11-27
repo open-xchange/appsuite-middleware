@@ -132,7 +132,7 @@ public class UpdateMailTest extends AbstractMailTest {
         updateRequest.removeFlags();
         updateResponse = getClient().execute(updateRequest);
 
-        updatedMail = getMail(updateResponse.getFolder(), updateResponse.getID());
+        updatedMail = getMail(folder, id);
         assertTrue("Flag should have been changed back again", (updatedMail.getFlags() & additionalFlag) == 0);
     }
 
