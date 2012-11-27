@@ -60,6 +60,7 @@ import com.openexchange.index.IndexDocument;
 import com.openexchange.index.IndexFacadeService;
 import com.openexchange.index.IndexResult;
 import com.openexchange.index.QueryParameters;
+import com.openexchange.index.QueryParameters.Order;
 import com.openexchange.index.SearchHandler;
 import com.openexchange.log.LogFactory;
 import com.openexchange.mail.IndexRange;
@@ -192,6 +193,18 @@ public final class SmalMessageStorage extends AbstractSMALStorage implements IMa
                 QueryParameters.Builder builder = new QueryParameters
                     .Builder()
                     .setAccountFolders(Collections.singleton(accountFolders));
+                
+                if (sortField != null) {
+                    MailField field = MailField.getField(sortField.getField());
+                    MailIndexField indexSortField = MailIndexField.getFor(field);
+                    if (indexSortField != null) {
+                        builder.setSortField(indexSortField);
+                    }
+                    
+                    if (order != null) {
+                        builder.setOrder(order == OrderDirection.ASC ? Order.ASC : Order.DESC);
+                    }
+                }
 
                 QueryParameters parameters = builder.setHandler(SearchHandler.CUSTOM).setSearchTerm(searchTerm).build();
                 long start = System.currentTimeMillis();
