@@ -102,9 +102,11 @@ public final class ContactImageDataSource implements ImageDataSource {
     public String generateUrl(final ImageLocation imageLocation, final Session session) throws OXException {
         final StringBuilder sb = new StringBuilder(64);
         ImageUtility.startImageUrl(imageLocation, session, this, true, sb);
-        final Contact contact = optContact(session, imageLocation, ContactField.LAST_MODIFIED);
-        if (null != contact) {
-            sb.append('&').append("timestamp=").append(contact.getLastModified().getTime());
+        if (null == imageLocation.getTimestamp()) {
+            final Contact contact = optContact(session, imageLocation, ContactField.LAST_MODIFIED);
+            if (null != contact) {
+                sb.append('&').append("timestamp=").append(contact.getLastModified().getTime());
+            }
         }
         return sb.toString();
     }
@@ -140,9 +142,13 @@ public final class ContactImageDataSource implements ImageDataSource {
         // builder.append(delim).append(imageLocation.getId());
         // builder.append(delim).append(session.getUserId());
         // builder.append(delim).append(session.getContextId());
-        final Contact contact = optContact(session, imageLocation, ContactField.LAST_MODIFIED);
-        if (null != contact) {
-            builder.append(delim).append(contact.getLastModified().getTime());
+        if (null == imageLocation.getTimestamp()) {
+            final Contact contact = optContact(session, imageLocation, ContactField.LAST_MODIFIED);
+            if (null != contact) {
+                builder.append(delim).append(contact.getLastModified().getTime());
+            }
+        } else {
+            builder.append(delim).append(imageLocation.getTimestamp());
         }
         builder.append(delim);
         return ImageUtility.getMD5(builder.toString(), "hex");

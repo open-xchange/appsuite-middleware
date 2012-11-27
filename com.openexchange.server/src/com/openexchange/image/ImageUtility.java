@@ -106,6 +106,7 @@ public final class ImageUtility {
         String folder = null;
         String id = null;
         String imageId = null;
+        String timestamp = null;
         String registrationName = null;
         for (String nvp : nvps) {
             nvp = nvp.trim();
@@ -122,13 +123,15 @@ public final class ImageUtility {
                         id = decodeQueryStringValue(nvp.substring(pos + 1));
                     } else if (AJAXServlet.PARAMETER_UID.equals(name)) {
                         imageId = decodeQueryStringValue(nvp.substring(pos + 1));
+                    } else if (AJAXServlet.PARAMETER_TIMESTAMP.equals(name)) {
+                        timestamp = decodeQueryStringValue(nvp.substring(pos + 1));
                     } else if ("source".equals(name)) {
                         registrationName = decodeQueryStringValue(nvp.substring(pos + 1));
                     }
                 }
             }
         }
-        final ImageLocation il = new ImageLocation.Builder(imageId).accountId(accountId).folder(folder).id(id).build();
+        final ImageLocation il = new ImageLocation.Builder(imageId).accountId(accountId).folder(folder).id(id).timestamp(timestamp).build();
         if (null == registrationName) {
             registrationName = ImageActionFactory.getRegistrationNameFor(imageUri);
             if (null == registrationName) {
@@ -148,9 +151,10 @@ public final class ImageUtility {
         final String folder = requestData.getParameter(AJAXServlet.PARAMETER_FOLDERID);
         final String id = requestData.getParameter(AJAXServlet.PARAMETER_ID);
         final String imageId = requestData.getParameter(AJAXServlet.PARAMETER_UID);
+        final String timestamp = requestData.getParameter(AJAXServlet.PARAMETER_TIMESTAMP);
         String registrationName = requestData.getParameter("source");
 
-        final ImageLocation il = new ImageLocation.Builder(imageId).accountId(accountId).folder(folder).id(id).build();
+        final ImageLocation il = new ImageLocation.Builder(imageId).accountId(accountId).folder(folder).id(id).timestamp(timestamp).build();
         if (null == registrationName) {
             registrationName = ImageActionFactory.getRegistrationNameFor(requestData.getSerlvetRequestURI());
             if (null == registrationName) {
@@ -260,6 +264,11 @@ public final class ImageUtility {
         final String imageId = imageLocation.getImageId();
         if (null != imageId) {
             sb.append(first ? '?' : '&').append(AJAXServlet.PARAMETER_UID).append('=').append(urlEncodeSafe(imageId));
+            first = false;
+        }
+        final String timestamp = imageLocation.getTimestamp();
+        if (null != timestamp) {
+            sb.append(first ? '?' : '&').append(AJAXServlet.PARAMETER_TIMESTAMP).append('=').append(urlEncodeSafe(timestamp));
             first = false;
         }
         final String accountId = imageLocation.getAccountId();
