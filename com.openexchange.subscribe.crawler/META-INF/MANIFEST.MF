@@ -6,20 +6,7 @@ Bundle-Version: 6.22.1
 Bundle-Activator: com.openexchange.subscribe.crawler.osgi.Activator
 Bundle-Vendor: OPENEXCHANGE
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
-Import-Package: com.google.common.annotations,
- com.google.common.base,
- com.google.common.base.internal,
- com.google.common.cache,
- com.google.common.collect,
- com.google.common.eventbus,
- com.google.common.hash,
- com.google.common.io,
- com.google.common.math,
- com.google.common.net,
- com.google.common.primitives,
- com.google.common.reflect,
- com.google.common.util.concurrent,
- com.openexchange.config,
+Import-Package: com.openexchange.config,
  com.openexchange.data.conversion.ical,
  com.openexchange.datatypes.genericonf,
  com.openexchange.exception,
@@ -169,4 +156,5 @@ Bundle-ClassPath: lib/facebook-java-api-1.8-final.jar,
  lib/oauth-httpclient3-20100601.jar,
  lib/oauth-httpclient4-20100601.jar,
  lib/oauth-provider-20100601.jar,
+ lib/google-collect-1.0-rc1.jar,
  .
