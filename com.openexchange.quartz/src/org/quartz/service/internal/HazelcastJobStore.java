@@ -1002,7 +1002,7 @@ public class HazelcastJobStore implements JobStore {
                     }
                     
                     excluded.add(jobKey);
-                }                                
+                }
                 
                 triggersByKey.remove(stateWrapper.getTrigger().getKey());
                 stateWrapper.setState(TriggerStateWrapper.STATE_ACQUIRED);

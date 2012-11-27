@@ -123,7 +123,7 @@ public class SolrAttachmentSearchTermVisitor implements SearchTermVisitor {
         queryBuilder.append(toQuery(translatorName, configuration, firstTerm));
         for (int i = 1; i < searchTerms.length; i++) {
             queryBuilder.append(" AND ");
-            queryBuilder.append(toQuery(translatorName, configuration, searchTerms[i]));            
+            queryBuilder.append(toQuery(translatorName, configuration, searchTerms[i]));
         }
         queryBuilder.append(")");
     }
@@ -135,12 +135,12 @@ public class SolrAttachmentSearchTermVisitor implements SearchTermVisitor {
     }
     
     private void appendStringTerm(String parameterName, SearchTerm<String> term) {
-        Set<String> keys = configuration.getKeys(translatorName);
-        if (!keys.contains(translatorName + '.' + parameterName)) {
-            LOG.warn("Did not find key '" + translatorName + '.' + parameterName + "'. Skipping this field in search query...");
+        Set<String> keys = configuration.getKeys(Configuration.FIELD);
+        if (!keys.contains(Configuration.FIELD + '.' + parameterName)) {
+            LOG.warn("Did not find key '" + Configuration.FIELD + '.' + parameterName + "'. Skipping this field in search query...");
             return;
         }
-        List<String> indexFields = configuration.getIndexFields(translatorName + '.' + parameterName);
+        List<String> indexFields = configuration.getIndexFields(Configuration.FIELD + '.' + parameterName);
         if (indexFields == null || indexFields.isEmpty()) {
             LOG.warn("Did not find index fields for parameter " + parameterName + ". Skipping this field in search query...");
             return;

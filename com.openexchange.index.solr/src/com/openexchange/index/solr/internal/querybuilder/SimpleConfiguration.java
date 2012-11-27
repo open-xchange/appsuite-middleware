@@ -102,7 +102,7 @@ public class SimpleConfiguration implements Configuration {
                 }
                 rawMapping.put(parts[0].trim(), parts[1].trim());
 
-                if (parts[0].startsWith("translator.")) {
+                if (parts[0].startsWith(Configuration.TRANSLATOR + ".")) {
                     log.debug("[SimpleConfiguration]: Extracting translator ...");
                     String handlerName = parts[0].substring(parts[0].indexOf(".") + 1).trim();
                     log.debug("[SimpleConfiguration]: Handler is " + handlerName);
