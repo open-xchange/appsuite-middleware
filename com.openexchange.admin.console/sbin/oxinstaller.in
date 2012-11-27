@@ -491,7 +491,7 @@ setup()
     echo setting up open-xchange configuration ${CONFDIR}
 
     CUROPTS=$(eval ox_read_property JAVA_XTRAOPTS ${CONFDIR}/ox-scriptconf.sh)
-    CUROPTS=$(echo $CUROPTS | sed -e 's/"//g' -e 's/-Xmx[0-9]\+m[ ]*//')
+    CUROPTS=$(echo $CUROPTS | sed -e 's/"//g' -e 's/-Xmx[0-9]\+[Mm][ ]*//')
     SERVEROPTS="$CUROPTS -Xmx${SERVER_MEMORY}m"
 
     v_setprop JAVA_XTRAOPTS "\"$SERVEROPTS\"" ${CONFDIR}/ox-scriptconf.sh
