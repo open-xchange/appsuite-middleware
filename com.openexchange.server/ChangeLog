@@ -1,6 +1,7 @@
 * 2012-11-27 - thorben.betten@open-xchange.com
 
  - Fix for bug 23978: Added null guard
+ - Fix for bug 23971: Generate default file name if missing
 
 * 2012-11-26 - thorben.betten@open-xchange.com
 
