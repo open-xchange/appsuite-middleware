@@ -53,11 +53,9 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.text.MessageFormat;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -237,7 +235,6 @@ public final class OXFolderProperties implements Initialization, CacheAvailabili
             LOG.warn("Missing property ENABLE_INTERNAL_USER_EDIT");
         } else {
             final boolean enableInternalUsersEdit = Boolean.parseBoolean(value.trim());
-            updatePermissions(enableInternalUsersEdit);
             this.enableInternalUsersEdit = enableInternalUsersEdit;
         }
         /*
@@ -374,45 +371,6 @@ public final class OXFolderProperties implements Initialization, CacheAvailabili
      * Updates according to given flag.
      * 
      * @param enableInternalUsersEdit The flag
-     */
-    public static void updatePermissions(final boolean enableInternalUsersEdit) {
-        /*
-         * Update permissions
-         */
-        final Map<String, Set<Integer>> map = getSchemasAndContexts();
-        if (!map.isEmpty()) {
-            final int size = map.size();
-            final Iterator<Set<Integer>> iter = map.values().iterator();
-            for (int i = 0; i < size; i++) {
-                final Set<Integer> cids = iter.next();
-                if (!cids.isEmpty()) {
-                    updateGABWritePermission(enableInternalUsersEdit, cids.iterator().next().intValue());
-                }
-            }
-        }
-        if (LOG.isInfoEnabled()) {
-            LOG.info(MessageFormat.format(
-                "Property ''ENABLE_INTERNAL_USER_EDIT'' change propagated. ENABLE_INTERNAL_USER_EDIT={0}",
-                Boolean.valueOf(enableInternalUsersEdit)));
-        }
-        /*
-         * Clear folder cache to ensure removal of all cached instances of global address book
-         */
-        if (FolderCacheManager.isInitialized()) {
-            try {
-                FolderCacheManager.getInstance().clearAll();
-            } catch (final OXException e) {
-                LOG.error(e.getMessage(), e);
-            }
-        }
-        CacheFolderStorage.getInstance().clearAll();
-        FolderMapManagement.getInstance().clear();
-    }
-
-    /**
-     * Updates according to given flag.
-     * 
-     * @param enableInternalUsersEdit The flag
      * @param contextId The context identifier
      */
     public static void updatePermissions(final boolean enableInternalUsersEdit, final int contextId) {
@@ -431,6 +389,7 @@ public final class OXFolderProperties implements Initialization, CacheAvailabili
             }
         }
         CacheFolderStorage.getInstance().clearCache(-1, contextId);
+        FolderMapManagement.getInstance().clear();
     }
 
     private static void updateGABWritePermission(final boolean enableInternalUsersEdit, final int contextId) {

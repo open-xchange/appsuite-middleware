@@ -275,8 +275,12 @@ public final class GetAttachmentAction extends AbstractMailAction implements ETa
                 final File file = parser.parse(jsonFileObject);
                 final List<Field> fields = parser.getFields(jsonFileObject);
                 final Set<Field> set = EnumSet.copyOf(fields);
-                if (!set.contains(Field.FILENAME)) {
-                    file.setFileName(mailPart.getFileName());
+                String fileName = mailPart.getFileName();
+                if (isEmpty(fileName)) {
+                    fileName = "part_" + sequenceId + ".dat";
+                }
+                if (!set.contains(Field.FILENAME) || isEmpty(file.getFileName())) {
+                    file.setFileName(fileName);
                 }
                 file.setFileMIMEType(mailPart.getContentType().toString());
                 /*
@@ -285,8 +289,8 @@ public final class GetAttachmentAction extends AbstractMailAction implements ETa
                  * measure the size.
                  */
                 file.setFileSize(0);
-                if (!set.contains(Field.TITLE)) {
-                    file.setTitle(mailPart.getFileName());
+                if (!set.contains(Field.TITLE) || isEmpty(file.getTitle())) {
+                    file.setTitle(fileName);
                 }
                 file.setFolderId(destFolderID);
                 /*
