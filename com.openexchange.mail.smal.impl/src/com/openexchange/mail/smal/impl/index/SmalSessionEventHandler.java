@@ -98,7 +98,7 @@ public class SmalSessionEventHandler implements EventHandler {
     
     private static final Log LOG = com.openexchange.log.Log.loggerFor(SmalSessionEventHandler.class);
     
-    private static final String FOLDER_INTERVAL = "com.openexchange.mail.smal.folderJobInterval";
+//    private static final String FOLDER_INTERVAL = "com.openexchange.mail.smal.folderJobInterval";
     
 
     @Override
