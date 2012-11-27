@@ -51,6 +51,7 @@ package com.openexchange.index.solr.internal.querybuilder;
 
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import org.apache.commons.logging.Log;
@@ -210,9 +211,22 @@ public class SimpleQueryBuilder implements SolrQueryBuilder {
 
         SolrField solrSortField = fieldMapper.solrFieldFor(sortField);
         if (solrSortField != null) {
+            String parameterName = solrSortField.parameterName();
+            Set<String> keys = config.getKeys(Configuration.FIELD);
+            if (!keys.contains(Configuration.FIELD + '.' + parameterName)) {
+                return;
+            }
+            
+            List<String> indexFields = config.getIndexFields(Configuration.FIELD + '.' + parameterName);
+            if (indexFields == null || indexFields.isEmpty()) {
+                return;
+            }
+            
             Order orderParam = parameters.getOrder();
             ORDER order = orderParam == null ? ORDER.desc : orderParam.equals(Order.DESC) ? ORDER.desc : ORDER.asc;
-            query.setSortField(solrSortField.solrName(), order);
+            for (String indexField : indexFields) {
+                query.addSortField(indexField, order);
+            }
         }
     }
 

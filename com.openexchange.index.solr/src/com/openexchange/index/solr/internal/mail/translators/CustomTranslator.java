@@ -367,12 +367,12 @@ public class CustomTranslator implements QueryTranslator {
         }
 
         private void appendStringTerm(String parameterName, SearchTerm<String> term) {
-            Set<String> keys = config.getKeys(name);
-            if (!keys.contains(name + '.' + parameterName)) {
-                LOG.warn("Did not find key '" + name + '.' + parameterName + "'. Skipping this field in search query...");
+            Set<String> keys = config.getKeys(Configuration.FIELD);
+            if (!keys.contains(Configuration.FIELD + '.' + parameterName)) {
+                LOG.warn("Did not find key '" + Configuration.FIELD + '.' + parameterName + "'. Skipping this field in search query...");
                 return;
             }
-            List<String> indexFields = config.getIndexFields(name + '.' + parameterName);
+            List<String> indexFields = config.getIndexFields(Configuration.FIELD + '.' + parameterName);
             if (indexFields == null || indexFields.isEmpty()) {
                 LOG.warn("Did not find index fields for parameter " + parameterName + ". Skipping this field in search query...");
                 return;
