@@ -329,11 +329,24 @@ public final class HttpServletResponseImpl implements HttpServletResponse {
 
     @Override
     public void flushBuffer() throws IOException {
-        if (null == writer) {
-            servletOutputStream.flush();
-        } else {
-            writer.flush();
-        }
+        /*-
+         * Since PrintWriter simply delegates flush() invocation to underlying OutputStream,
+         * we can safely call ServletOutputStream.flush() directly.
+         * 
+         * See implementation of flush() inside PrintWriter:
+         *    public void flush() {
+         *        try {
+         *        synchronized (lock) {
+         *        ensureOpen()
+         *        out.flush();
+         *        }
+         *        }
+         *        catch (IOException x) {
+         *        trouble = true;
+         *        }
+         *    }
+         */
+        servletOutputStream.flush();
     }
 
     /**
