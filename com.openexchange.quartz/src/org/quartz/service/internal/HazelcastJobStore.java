@@ -1017,7 +1017,7 @@ public class HazelcastJobStore implements JobStore {
                 if (returnList.size() == maxCount) {
                     break;
                 }
-            }            
+            }
             
             return returnList;
         } finally {
@@ -1298,11 +1298,14 @@ public class HazelcastJobStore implements JobStore {
         ((OperableTrigger) stateWrapper.getTrigger()).updateAfterMisfire(calendar);
 
         if (stateWrapper.getTrigger().getNextFireTime() == null) {
-            stateWrapper.setState(TriggerStateWrapper.STATE_COMPLETE);
-            triggersByKey.replace(stateWrapper.getTrigger().getKey(), stateWrapper);
+            removeTrigger(stateWrapper.getTrigger().getKey());
+//            stateWrapper.setState(TriggerStateWrapper.STATE_COMPLETE);
+//            triggersByKey.replace(stateWrapper.getTrigger().getKey(), stateWrapper);
             signaler.notifySchedulerListenersFinalized(stateWrapper.getTrigger());
         } else if (nextFireTime.equals(stateWrapper.getTrigger().getNextFireTime())) {
             return false;
+        } else {
+            triggersByKey.replace(stateWrapper.getTrigger().getKey(), stateWrapper);
         }
 
         return true;
