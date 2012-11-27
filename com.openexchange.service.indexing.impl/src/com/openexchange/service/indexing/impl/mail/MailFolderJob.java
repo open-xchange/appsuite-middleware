@@ -153,7 +153,7 @@ public class MailFolderJob extends AbstractMailJob {
                     if (!info.force && IndexFolderManager.isIndexed(info.contextId, info.userId, Types.EMAIL, String.valueOf(info.accountId), info.folder)) {
                         long lastCompletion = IndexFolderManager.getTimestamp(info.contextId, info.userId, Types.EMAIL, String.valueOf(info.accountId), info.folder);
                         if (System.currentTimeMillis() - lastCompletion < 60000L * 15) {
-                            LOG.info("Skipping job because it already ran in the last 15 minutes.");
+                            LOG.debug("Skipping job because it already ran in the last 15 minutes.");
                             return;
                         }
                         
