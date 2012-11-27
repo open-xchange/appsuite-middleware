@@ -37,9 +37,7 @@
  * only if the new code is made subject to such option by the copyright
  * holder.
  * 
- * Portions Copyright 2012 OPEN-XCHANGE
- * OPEN-XCHANGE elects to include this software in this distribution under the
- * GPL Version 2 license.
+ * Portions Copyright 2012 OPEN-XCHANGE, licensed under GPL Version 2.
  */
 
 package com.openexchange.http.grizzly.service.http;
@@ -73,22 +71,25 @@ import org.osgi.service.http.HttpContext;
 
 /**
  * OSGi customized {@link ServletHandler}.
- *
+ * 
  * @author Hubert Iwaniuk
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
 public class OSGiServletHandler extends ServletHandler implements OSGiHandler {
+
     private static final Log LOG = com.openexchange.log.Log.loggerFor(OSGiServletHandler.class);
+
     private final ReentrantReadWriteLock lock = new ReentrantReadWriteLock();
+
     private HttpContext httpContext;
+
     private String servletPath;
+
     private FilterChainImpl filterChain;
 
-    public OSGiServletHandler(final Servlet servlet,
-                              final HttpContext httpContext,
-                              final HashMap<String, String> servletInitParams) {
+    public OSGiServletHandler(final Servlet servlet, final HttpContext httpContext, final HashMap<String, String> servletInitParams) {
         super(createServletConfig(new OSGiServletContext(httpContext), servletInitParams));
-        //noinspection AccessingNonPublicFieldOfAnotherObject
+        // noinspection AccessingNonPublicFieldOfAnotherObject
         super.servletInstance = servlet;
         this.httpContext = httpContext;
         this.filterChain = new FilterChainImpl(servlet, (OSGiServletContext) getServletCtx());
@@ -100,24 +101,23 @@ public class OSGiServletHandler extends ServletHandler implements OSGiHandler {
     }
 
     public OSGiServletHandler newServletHandler(Servlet servlet) {
-        OSGiServletHandler servletHandler =
-                new OSGiServletHandler(getServletConfig());
+        OSGiServletHandler servletHandler = new OSGiServletHandler(getServletConfig());
 
         servletHandler.setServletInstance(servlet);
         servletHandler.setServletPath(getServletPath());
-        //noinspection AccessingNonPublicFieldOfAnotherObject
+        // noinspection AccessingNonPublicFieldOfAnotherObject
         servletHandler.httpContext = httpContext;
         return servletHandler;
     }
 
     /**
      * Starts {@link Servlet} instance of this {@link OSGiServletHandler}.
-     *
+     * 
      * @throws ServletException If {@link Servlet} startup failed.
      */
     public void startServlet() throws ServletException {
         configureServletEnv();
-//        setResourcesContextPath(getContextPath() + getServletPath());
+        // setResourcesContextPath(getContextPath() + getServletPath());
         // always load servlet
         if (null == servletInstance) {
             loadServlet();
@@ -154,19 +154,14 @@ public class OSGiServletHandler extends ServletHandler implements OSGiHandler {
         return httpContext;
     }
 
-
     // ------------------------------------------------------- Protected Methods
-
 
     @Override
     protected FilterChainInvoker getFilterChain(Request request) {
         return filterChain;
     }
 
-
-    protected void addFilter(final Filter filter,
-                             final String name,
-                             final Map<String,String> initParams) {
+    protected void addFilter(final Filter filter, final String name, final Map<String, String> initParams) {
         try {
             filter.init(createFilterConfig(getServletCtx(), name, initParams));
             filterChain.addFilter(filter);
@@ -176,17 +171,14 @@ public class OSGiServletHandler extends ServletHandler implements OSGiHandler {
 
     }
 
-//    @Override
-//    protected void setPathData(Request from, HttpServletRequestImpl to) {
-//        to.setServletPath(getServletPath());
-//    }
+    // @Override
+    // protected void setPathData(Request from, HttpServletRequestImpl to) {
+    // to.setServletPath(getServletPath());
+    // }
 
     // --------------------------------------------------------- Private Methods
 
-
-    private static FilterConfig createFilterConfig(final WebappContext ctx,
-                                                   final String name,
-                                                   final Map<String,String> initParams) {
+    private static FilterConfig createFilterConfig(final WebappContext ctx, final String name, final Map<String, String> initParams) {
         final OSGiFilterConfig config = new OSGiFilterConfig(ctx);
         config.setFilterName(name);
         config.setInitParameters(initParams);
@@ -194,18 +186,14 @@ public class OSGiServletHandler extends ServletHandler implements OSGiHandler {
 
     }
 
-
-    private static ServletConfigImpl createServletConfig(final OSGiServletContext ctx,
-                                                         final Map<String,String> params) {
+    private static ServletConfigImpl createServletConfig(final OSGiServletContext ctx, final Map<String, String> params) {
 
         final OSGiServletConfig config = new OSGiServletConfig(ctx);
         config.setInitParameters(params);
         return config;
     }
 
-
     // ---------------------------------------------------------- Nested Classes
-
 
     private static final class OSGiFilterConfig extends FilterConfigImpl {
 
@@ -244,21 +232,21 @@ public class OSGiServletHandler extends ServletHandler implements OSGiHandler {
          * The servlet instance to be executed by this chain.
          */
         private final Servlet servlet;
+
         private final OSGiServletContext ctx;
 
         private final Object lock = new Object();
+
         private int n;
 
         private Filter[] filters = new Filter[0];
 
         /**
-         * The int which is used to maintain the current position
-         * in the filter chain.
+         * The int which is used to maintain the current position in the filter chain.
          */
         private int pos;
 
-        public FilterChainImpl(final Servlet servlet,
-                               final OSGiServletContext ctx) {
+        public FilterChainImpl(final Servlet servlet, final OSGiServletContext ctx) {
 
             this.servlet = servlet;
             this.ctx = ctx;
@@ -266,14 +254,10 @@ public class OSGiServletHandler extends ServletHandler implements OSGiHandler {
 
         // ---------------------------------------------------- FilterChain Methods
 
-
         @Override
-        public void invokeFilterChain(final ServletRequest request,
-                                      final ServletResponse response)
-        throws IOException, ServletException {
+        public void invokeFilterChain(final ServletRequest request, final ServletResponse response) throws IOException, ServletException {
 
-            ServletRequestEvent event =
-                    new ServletRequestEvent(ctx, request);
+            ServletRequestEvent event = new ServletRequestEvent(ctx, request);
             try {
                 requestInitialized(event);
                 pos = 0;
@@ -284,20 +268,17 @@ public class OSGiServletHandler extends ServletHandler implements OSGiHandler {
 
         }
 
-
         /**
-         * Invoke the next filter in this chain, passing the specified request
-         * and response.  If there are no more filters in this chain, invoke
-         * the <code>service()</code> method of the servlet itself.
-         *
-         * @param request  The servlet request we are processing
+         * Invoke the next filter in this chain, passing the specified request and response. If there are no more filters in this chain,
+         * invoke the <code>service()</code> method of the servlet itself.
+         * 
+         * @param request The servlet request we are processing
          * @param response The servlet response we are creating
-         * @throws java.io.IOException            if an input/output error occurs
+         * @throws java.io.IOException if an input/output error occurs
          * @throws javax.servlet.ServletException if a servlet exception occurs
          */
         @Override
-        public void doFilter(ServletRequest request, ServletResponse response)
-                throws IOException, ServletException {
+        public void doFilter(ServletRequest request, ServletResponse response) throws IOException, ServletException {
 
             // Call the next filter if there is one
             if (pos < n) {
@@ -315,7 +296,7 @@ public class OSGiServletHandler extends ServletHandler implements OSGiHandler {
 
             try {
                 if (servlet != null) {
-                    //TODO: wrap request! check cookies
+                    // TODO: wrap request! check cookies
                     servlet.service(request, response);
                 }
 
@@ -327,20 +308,26 @@ public class OSGiServletHandler extends ServletHandler implements OSGiHandler {
 
         // ------------------------------------------------------- Protected Methods
 
-
         protected void addFilter(final Filter filter) {
-            synchronized (lock) {
-                if (n == filters.length) {
-                    Filter[] newFilters =
-                            new Filter[n + 4];
-                    System.arraycopy(filters, 0, newFilters, 0, n);
-                    filters = newFilters;
+            boolean isAlreadyAdded = false;
+            for (Filter currentFilter : filters) {
+                if (currentFilter!=null && currentFilter.equals(filter)) {
+                    isAlreadyAdded = true;
+                    break;
                 }
+            }
+            if (!isAlreadyAdded) {
+                synchronized (lock) {
+                    if (n == filters.length) {
+                        Filter[] newFilters = new Filter[n + 4];
+                        System.arraycopy(filters, 0, newFilters, 0, n);
+                        filters = newFilters;
+                    }
 
-                filters[n++] = filter;
+                    filters[n++] = filter;
+                }
             }
         }
-
 
         // --------------------------------------------------------- Private Methods
 
@@ -353,9 +340,10 @@ public class OSGiServletHandler extends ServletHandler implements OSGiHandler {
                         ((ServletRequestListener) listeners[i]).requestDestroyed(event);
                     } catch (Throwable t) {
                         if (LOGGER.isLoggable(Level.WARNING)) {
-                            LOGGER.log(Level.WARNING,
-                                    LogMessages.WARNING_GRIZZLY_HTTP_SERVLET_CONTAINER_OBJECT_DESTROYED_ERROR("requestDestroyed", "ServletRequestListener", listeners[i].getClass().getName()),
-                                    t);
+                            LOGGER.log(Level.WARNING, LogMessages.WARNING_GRIZZLY_HTTP_SERVLET_CONTAINER_OBJECT_DESTROYED_ERROR(
+                                "requestDestroyed",
+                                "ServletRequestListener",
+                                listeners[i].getClass().getName()), t);
                         }
                     }
                 }
@@ -371,9 +359,10 @@ public class OSGiServletHandler extends ServletHandler implements OSGiHandler {
                         ((ServletRequestListener) listeners[i]).requestDestroyed(event);
                     } catch (Throwable t) {
                         if (LOGGER.isLoggable(Level.WARNING)) {
-                            LOGGER.log(Level.WARNING,
-                                    LogMessages.WARNING_GRIZZLY_HTTP_SERVLET_CONTAINER_OBJECT_INITIALIZED_ERROR("requestDestroyed", "ServletRequestListener", listeners[i].getClass().getName()),
-                                    t);
+                            LOGGER.log(Level.WARNING, LogMessages.WARNING_GRIZZLY_HTTP_SERVLET_CONTAINER_OBJECT_INITIALIZED_ERROR(
+                                "requestDestroyed",
+                                "ServletRequestListener",
+                                listeners[i].getClass().getName()), t);
                         }
                     }
                 }

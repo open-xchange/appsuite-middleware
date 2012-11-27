@@ -1,6 +1,5 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
-
  *
  * Copyright (c) 2009-2011 Oracle and/or its affiliates. All rights reserved.
  *
@@ -38,9 +37,7 @@
  * only if the new code is made subject to such option by the copyright
  * holder.
  * 
- * Portions Copyright 2012 OPEN-XCHANGE
- * OPEN-XCHANGE elects to include this software in this distribution under the
- * GPL Version 2 license.
+ * Portions Copyright 2012 OPEN-XCHANGE, licensed under GPL Version 2.
  */
 
 package com.openexchange.http.grizzly.service.http;
@@ -99,6 +96,16 @@ public class OSGiMainHandler extends HttpHandler implements OSGiHandler {
     private final OSGiCleanMapper mapper;
 
     private final boolean isRequestWatcherEnabled;
+
+    private int cookieMaxAge;
+
+    private int cookieMaxInactiveInterval;
+
+    private boolean isCookieForceHttps;
+
+    private boolean isCookieHttpOnly;
+
+    private boolean isSessionAutologin;
 
     /**
      * Constructor.
@@ -222,15 +229,11 @@ public class OSGiMainHandler extends HttpHandler implements OSGiHandler {
             OSGiServletHandler servletHandler = findOrCreateOSGiServletHandler(servlet, context, initparams);
             servletHandler.setServletPath(alias);
 
-            // Do we have to watch long running requests?
-            if (isRequestWatcherEnabled) {
-                servletHandler.addFilter(
-                    new RequestReportingFilter(GrizzlyServiceRegistry.getInstance()),
-                    RequestReportingFilter.class.getName(),
-                    null);
+            try {
+                addServletFilters(servletHandler);
+            } catch (OXException e) {
+                throw new ServletException(e);
             }
-            
-            servletHandler.addFilter(new WrappingFilter(), WrappingFilter.class.getName(), null);
 
             /*
              * Servlet would be started several times if registered with multiple aliases. Starting means: 1. Set ContextPath 2. Instantiate
@@ -243,6 +246,24 @@ public class OSGiMainHandler extends HttpHandler implements OSGiHandler {
         } finally {
             lock.unlock();
         }
+    }
+
+    /**
+     * @param servletHandler
+     * @throws OXException 
+     */
+    private void addServletFilters(OSGiServletHandler servletHandler) throws OXException {
+        // wrap it
+        servletHandler.addFilter(new WrappingFilter(), WrappingFilter.class.getName(), null);
+
+        // watch it
+        if (isRequestWatcherEnabled) {
+            servletHandler.addFilter(
+                new RequestReportingFilter(GrizzlyServiceRegistry.getInstance()),
+                RequestReportingFilter.class.getName(),
+                null);
+        }
+
     }
 
     /**

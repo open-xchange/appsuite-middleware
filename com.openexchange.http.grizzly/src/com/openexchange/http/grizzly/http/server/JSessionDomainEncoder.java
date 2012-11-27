@@ -47,41 +47,37 @@
  *
  */
 
-package com.openexchange.http.grizzly.servletfilter;
+package com.openexchange.http.grizzly.http.server;
 
-import java.io.IOException;
-import javax.servlet.Filter;
-import javax.servlet.FilterChain;
-import javax.servlet.FilterConfig;
-import javax.servlet.ServletException;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import com.openexchange.http.grizzly.wrapper.HttpServletResponseWrapper;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+import java.util.regex.Pattern;
 
 /**
- * {@link JSessionInitFilter} - Initialize the HttpSession for incoming Request if they are missing one.
+ * {@link JSessionDomainEncoder} Generates an application/x-www-form-urlencoded versions of domain strings that additionally have the safe
+ * character "." and "-" replaced by the according URL-Encoding.
  * 
- * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
+ * @author <a href="mailto:marc	.arens@open-xchange.com">Marc Arens</a>
  */
-public class JSessionInitFilter implements Filter {
+public class JSessionDomainEncoder {
 
-    @Override
-    public void init(FilterConfig filterConfig) {
-        // nothing to do here
+    private static final Pattern P_DOT = Pattern.compile("\\.");
+
+    private static final Pattern P_MINUS = Pattern.compile("-");
+
+    /**
+     * Generates an application/x-www-form-urlencoded version of specified domain string that additionally has the safe character "." and
+     * "-" replaced by the according URL-Encoding.
+     * 
+     * @param domain The domain to encode
+     * @return The URL-encoded text that additionally has dots and dashes replaced by their URLEncodings
+     * @throws IllegalStateException if the running Java platform doesn't support the iso-8859-1 encoding which is mandatory since 1.4.2
+     */
+    public static String urlEncode(final String domain) {
+        try {
+            return P_MINUS.matcher(P_DOT.matcher(URLEncoder.encode(domain, "iso-8859-1")).replaceAll("%2E")).replaceAll("%2D");
+        } catch (final UnsupportedEncodingException e) {
+            throw new IllegalStateException("Every implementation of the Java platform is required to support the iso-8859-1 encoding");
+        }
     }
-
-    @Override
-    public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
-        HttpServletRequest httpServletRequest = (HttpServletRequest) request;
-        httpServletRequest.getSession(true);
-        chain.doFilter(httpServletRequest, response);
-    }
-
-    @Override
-    public void destroy() {
-        // nothing to do here
-    }
-
 }
