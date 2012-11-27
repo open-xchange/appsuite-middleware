@@ -2108,7 +2108,7 @@ public final class OXFolderIteratorSQL {
             throw OXFolderExceptionCode.RUNTIME_ERROR.create(t, Integer.valueOf(contextId));
         }
         try {
-            return new FolderObjectIterator(rs, stmt, false, ctx, readCon, closeCon);
+            return new FolderObjectIterator(rs, stmt, false, ctx, readCon, closeCon).releaseCache();
         } catch (final OXException e) {
             closeResources(rs, stmt, closeCon ? readCon : null, true, ctx);
             throw e;
