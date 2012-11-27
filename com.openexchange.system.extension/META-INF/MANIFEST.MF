@@ -16,5 +16,10 @@ Export-Package: sun.security,
  sun.security.action,
  sun.misc,
  sun.reflect,
+ javax.sound.midi,
+ javax.sound.midi.spi,
+ javax.sound.sampled,
+ javax.sound.sampled.spi,
  javax.swing,
- javax.swing.text
+ javax.swing.text,
+ javax.swing.tree

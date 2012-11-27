@@ -138,7 +138,7 @@ public final class MessagingSMSServlet extends PermissionServlet {
          * Close response and flush print writer
          */
         try {
-            ResponseWriter.write(response, resp.getWriter());
+            ResponseWriter.write(response, resp.getWriter(), localeFrom(getSessionObject(req)));
         } catch (final JSONException e) {
             LOG.error(e.getLocalizedMessage(), e);
         }
@@ -151,6 +151,7 @@ public final class MessagingSMSServlet extends PermissionServlet {
 
         JSONObject obj = new JSONObject();
 
+        final ServerSession session = getSessionObject(req);
         try {
             String action = JSONUtility.checkStringParameter(req, "action");
             if (action.equals("send")) {
@@ -162,7 +163,7 @@ public final class MessagingSMSServlet extends PermissionServlet {
 
                 final MessagingNewService service = MessagingSMSServiceRegistry.getServiceRegistry().getService(MessagingNewService.class);
 
-                final MessagingAccountTransport accountTransport = service.getAccountTransport(0, getSessionObject(req));
+                final MessagingAccountTransport accountTransport = service.getAccountTransport(0, session);
                 
                 if (null != accountTransport) {
                     SMSMessagingMessage smsMessagingMessage = new SMSMessagingMessage(from, to, smstext);
@@ -189,7 +190,7 @@ public final class MessagingSMSServlet extends PermissionServlet {
         }
         // Close response and flush print writer
         try {
-            ResponseWriter.write(response, resp.getWriter());
+            ResponseWriter.write(response, resp.getWriter(), localeFrom(session));
         } catch (final JSONException e) {
             LOG.error(e.getLocalizedMessage(), e);
         }

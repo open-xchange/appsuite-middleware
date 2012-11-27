@@ -109,14 +109,13 @@ public final class TaskTools extends Assert {
     /**
      * @return the identifier of the private task folder of the primary user.
      * @throws IOException if the communication with the server fails.
-     * @throws SAXException if a SAX error occurs.
      * @throws JSONException if parsing of serialized json fails.
      * @deprecated Use {@link AJAXClient#getPrivateTaskFolder()}.
      */
     @Deprecated
     public static int getPrivateTaskFolder(final WebConversation conversation,
         final String hostName, final String sessionId)
-        throws IOException, SAXException, JSONException, OXException {
+        throws IOException, JSONException, OXException {
         final AJAXClient client = new AJAXClient(new AJAXSession(conversation, hostName, sessionId));
         return client.getValues().getPrivateTaskFolder();
     }
@@ -129,12 +128,11 @@ public final class TaskTools extends Assert {
      * @param task Task to store.
      * @return the reponse object of inserting the task.
      * @throws JSONException if parsing of serialized json fails.
-     * @throws SAXException if a SAX error occurs.
      * @throws IOException if the communication with the server fails.
      * @deprecated use {@link AJAXClient#execute(com.openexchange.ajax.framework.AJAXRequest)}
      */
     @Deprecated
-    public static Response insertTask(final WebConversation conversation, final String hostName, final String sessionId, final Task task) throws JSONException, IOException, SAXException, OXException {
+    public static Response insertTask(final WebConversation conversation, final String hostName, final String sessionId, final Task task) throws JSONException, IOException, OXException {
         LOG.trace("Inserting task.");
         final AJAXClient client = new AJAXClient(new AJAXSession(conversation, hostName, sessionId));
         final InsertResponse insertR = client.execute(new InsertRequest(task, client.getValues().getTimeZone()));
@@ -192,7 +190,7 @@ public final class TaskTools extends Assert {
 
     public static UpdateResponse update(final AJAXClient client,
         final UpdateRequest request) throws OXException, IOException,
-        SAXException, JSONException {
+        JSONException {
         return Executor.execute(client, request);
     }
 
@@ -202,7 +200,7 @@ public final class TaskTools extends Assert {
     @Deprecated
     public static Response getTask(final WebConversation conversation,
         final String hostName, final String sessionId, final int folderId,
-        final int taskId) throws IOException, SAXException, JSONException,
+        final int taskId) throws IOException, JSONException,
         OXException, OXException {
         LOG.trace("Getting task.");
         final AJAXClient client = new AJAXClient(new AJAXSession(conversation, hostName, sessionId));
@@ -217,7 +215,7 @@ public final class TaskTools extends Assert {
      * @deprecated use {@link AJAXClient#execute(com.openexchange.ajax.framework.AJAXRequest)}.
      */
     @Deprecated
-    public static GetResponse get(AJAXClient client, GetRequest request) throws OXException, IOException, SAXException, JSONException {
+    public static GetResponse get(AJAXClient client, GetRequest request) throws OXException, IOException, JSONException {
         return client.execute(request);
     }
 
@@ -225,15 +223,13 @@ public final class TaskTools extends Assert {
      * @param folderAndTaskId Contains the folder identifier with the index
      * <code>0</code> and the task identifier with the index <code>1</code>.
      * @throws JSONException if parsing of serialized json fails.
-     * @throws SAXException if a SAX error occurs.
      * @throws IOException if the communication with the server fails.
      * @deprecated use {@link #delete(AJAXSession, DeleteRequest)}
      */
     @Deprecated
     public static void deleteTask(final WebConversation conversation,
         final String hostName, final String sessionId, final Date lastUpdate,
-        final int folder, final int task) throws IOException, SAXException,
-        JSONException {
+        final int folder, final int task) throws IOException, JSONException {
         LOG.trace("Deleting tasks.");
         final AJAXSession session = new AJAXSession(conversation, hostName, sessionId);
         final AJAXClient client = new AJAXClient(session);
@@ -249,7 +245,7 @@ public final class TaskTools extends Assert {
     public static CommonDeleteResponse delete(final WebConversation conversation,
         final String hostName, final String sessionId, final String protocol,
         final DeleteRequest request) throws OXException, IOException,
-        SAXException, JSONException {
+        JSONException {
         return Executor.execute(new AJAXSession(conversation, hostName, sessionId), request, protocol, hostName);
     }
 
@@ -291,14 +287,14 @@ public final class TaskTools extends Assert {
         return response;
     }
 
-    public static CommonAllResponse all(final AJAXClient client, final AllRequest request) throws OXException, IOException, SAXException, JSONException {
+    public static CommonAllResponse all(final AJAXClient client, final AllRequest request) throws OXException, IOException, JSONException {
         return client.execute(request);
     }
 
     public static CommonAllResponse all(final WebConversation conversation,
         final String hostName, final String sessionId, final String protocol,
         final AllRequest request) throws OXException, IOException,
-        SAXException, JSONException {
+        JSONException {
         return Executor.execute(new AJAXSession(conversation, hostName, sessionId), request, protocol, hostName);
     }
 
@@ -331,7 +327,7 @@ public final class TaskTools extends Assert {
 
     public static SearchResponse search(final AJAXClient client,
         final SearchRequest request) throws OXException, IOException,
-        SAXException, JSONException {
+        JSONException {
         return Executor.execute(client, request);
     }
 
@@ -416,7 +412,7 @@ public final class TaskTools extends Assert {
     }
 
     public static void insert(final AJAXClient client, final Task... tasks)
-        throws OXException, IOException, SAXException, JSONException {
+        throws OXException, IOException, JSONException {
         final TimeZone tz = client.getValues().getTimeZone();
         final InsertRequest[] inserts = new InsertRequest[tasks.length];
         for (int i = 0; i < tasks.length; i++) {

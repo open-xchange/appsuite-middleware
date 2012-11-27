@@ -133,6 +133,9 @@ public final class InlineImageDataSource implements ImageDataSource {
 
     private MailPart loadImagePart(final String fullname, final String mailId, final String cid, final MailAccess<?, ?> mailAccess) throws OXException {
         final MailPart imagePart = mailAccess.getMessageStorage().getImageAttachment(fullname, mailId, cid);
+        if (null == imagePart) {
+            return null;
+        }
         imagePart.loadContent();
         return imagePart;
     }
@@ -214,6 +217,9 @@ public final class InlineImageDataSource implements ImageDataSource {
             final String mailId = dataArguments.get(ARGS[1]);
             final String cid = dataArguments.get(ARGS[2]);
             mailPart = getImagePart(arg.getAccountId(), fullname, mailId, cid, session);
+            if (null == mailPart) {
+                throw DataExceptionCodes.ERROR.create("Requested image mail part does not exist: " + fullname + "/" + mailId + ":" + cid);
+            }
             final ContentType contentType = mailPart.getContentType();
             if (contentType == null) {
                 throw DataExceptionCodes.ERROR.create("Missing header 'Content-Type' in requested mail part");
@@ -241,7 +247,7 @@ public final class InlineImageDataSource implements ImageDataSource {
                             }
                         }
                     } catch (final OXException e) {
-                        throw new OXException(e);
+                        throw e;
                     }
                 }
             }

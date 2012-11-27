@@ -80,7 +80,9 @@ public class ReauthorizeAction extends AbstractOAuthTokenAction {
             throw AjaxExceptionCodes.MISSING_PARAMETER.create( "id");
         }
         final int id = Tools.getUnsignedInteger(accountId);
-
+        if (id < 0) {
+            throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create("id", Integer.valueOf(id));
+        }
 
         final String serviceId = request.getParameter(AccountField.SERVICE_ID.getName());
         if (serviceId == null) {

@@ -57,13 +57,12 @@ import java.util.Hashtable;
 import java.util.List;
 import org.osgi.framework.Constants;
 import com.openexchange.cluster.discovery.ClusterDiscoveryService;
-import com.openexchange.cluster.discovery.ClusterListener;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.osgi.HousekeepingActivator;
 
 /**
  * {@link StaticClusterDiscoveryActivator}
- *
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class StaticClusterDiscoveryActivator extends HousekeepingActivator {
@@ -94,16 +93,6 @@ public class StaticClusterDiscoveryActivator extends HousekeepingActivator {
             @Override
             public List<InetAddress> getNodes() {
                 return nodes;
-            }
-
-            @Override
-            public void addListener(final ClusterListener listener) {
-                // Ignore
-            }
-
-            @Override
-            public void removeListener(final ClusterListener listener) {
-                // Ignore
             }
         }, props);
     }

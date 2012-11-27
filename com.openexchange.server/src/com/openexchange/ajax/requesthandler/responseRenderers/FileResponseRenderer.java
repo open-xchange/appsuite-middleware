@@ -143,7 +143,7 @@ public class FileResponseRenderer implements ResponseRenderer {
 
         InputStream documentData = null;
         try {
-            file = transformIfImage(request, file);
+            file = transformIfImage(request, file, delivery);
             InputStream stream = file.getStream();
             if (null == stream) {
                 // React with 404
@@ -232,7 +232,7 @@ public class FileResponseRenderer implements ResponseRenderer {
         }
     }
 
-    private IFileHolder transformIfImage(AJAXRequestData request, IFileHolder file) throws IOException, OXException {
+    private IFileHolder transformIfImage(AJAXRequestData request, IFileHolder file, String delivery) throws IOException, OXException {
         /*
          * check input
          */
@@ -243,27 +243,27 @@ public class FileResponseRenderer implements ResponseRenderer {
          * build transformations
          */
         ImageTransformations transformations = scaler.transfom(file.getStream());
-        // rotate by default
-        if (false == request.isSet("rotate") || request.getParameter("rotate", boolean.class)) {
+        // rotate by default when not delivering as download
+        if (false == request.isSet("rotate") && false == DOWNLOAD.equalsIgnoreCase(delivery) || 
+            request.getParameter("rotate", boolean.class)) {
             transformations.rotate();
         }
         if (request.isSet("cropWidth") || request.isSet("cropHeight")) {
-            transformations.crop(
-                request.isSet("cropX") ? request.getParameter("cropX", int.class).intValue() : 0,
-                request.isSet("cropY") ? request.getParameter("cropY", int.class).intValue() : 0,
-                request.getParameter("cropWidth", int.class).intValue(),
-                request.getParameter("cropHeight", int.class).intValue()
-            );
+            int cropX = request.isSet("cropX") ? request.getParameter("cropX", int.class).intValue() : 0;
+            int cropY = request.isSet("cropY") ? request.getParameter("cropY", int.class).intValue() : 0;
+            int cropWidth = request.getParameter("cropWidth", int.class).intValue();
+            int cropHeight = request.getParameter("cropHeight", int.class).intValue();
+            transformations.crop(cropX, cropY, cropWidth, cropHeight);
         }
         if (request.isSet("width") || request.isSet("height")) {
-            transformations.scale(
-                request.isSet("width") ? request.getParameter("width", int.class).intValue() : 0,
-                request.isSet("height") ? request.getParameter("height", int.class).intValue() : 0,
-                ScaleType.getType(request.getParameter("scaleType"))
-            );
+            int maxWidth = request.isSet("width") ? request.getParameter("width", int.class).intValue() : 0;
+            int maxHeight = request.isSet("height") ? request.getParameter("height", int.class).intValue() : 0;
+            ScaleType scaleType = ScaleType.getType(request.getParameter("scaleType"));
+            transformations.scale(maxWidth, maxHeight, scaleType);
         }
-        // compress by default
-        if (false == request.isSet("compress") || request.getParameter("compress", boolean.class)) {
+        // compress by default when not delivering as download
+        if (false == request.isSet("compress") && false == DOWNLOAD.equalsIgnoreCase(delivery) || 
+            request.getParameter("compress", boolean.class)) {
             transformations.compress();
         }
         /*
@@ -276,7 +276,7 @@ public class FileResponseRenderer implements ResponseRenderer {
         }
         return new FileHolder(transformed, -1, file.getContentType(), file.getName());
     }
-    
+
     private boolean isImage(final IFileHolder file) {
         String contentType = file.getContentType();
         if (null == contentType || !contentType.startsWith("image/")) {

@@ -58,13 +58,14 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.fields.ResponseFields;
 import com.openexchange.exception.OXException;
+import com.openexchange.log.LogFactory;
 import com.openexchange.multiple.MultipleHandler;
+import com.openexchange.session.Session;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.servlet.http.Tools;
 import com.openexchange.tools.session.ServerSession;
@@ -116,11 +117,11 @@ public abstract class MultipleAdapterServlet extends PermissionServlet {
             }
             final Object response = handler.performRequest(action, request, session, Tools.considerSecure(req));
             final Date timestamp = handler.getTimestamp();
-            writeResponseSafely(response, session.getUser().getLocale(), timestamp, handler.getWarnings(), resp);
+            writeResponseSafely(response, session.getUser().getLocale(), timestamp, handler.getWarnings(), resp, session);
         } catch (final OXException x) {
-            writeException(x, session.getUser().getLocale(), resp);
+            writeException(x, session.getUser().getLocale(), resp, session);
         } catch (final Throwable t) {
-            writeException(wrap(t), session.getUser().getLocale(), resp);
+            writeException(wrap(t), session.getUser().getLocale(), resp, session);
         }
     }
 
@@ -132,7 +133,7 @@ public abstract class MultipleAdapterServlet extends PermissionServlet {
         return false;
     }
 
-    private void writeResponseSafely(final Object data, final Locale locale, final Date timestamp, final Collection<OXException> warnings, final HttpServletResponse resp) {
+    private void writeResponseSafely(final Object data, final Locale locale, final Date timestamp, final Collection<OXException> warnings, final HttpServletResponse resp, Session session) {
         final Response response = new Response(locale);
         response.setData(data);
         if(null != timestamp) {
@@ -142,18 +143,18 @@ public abstract class MultipleAdapterServlet extends PermissionServlet {
             response.addWarnings(warnings);
         }
         try {
-            writeResponse(response, resp);
+            writeResponse(response, resp, session);
         } catch (final IOException e) {
             LOG.error(e.getMessage(), e);
         }
     }
 
-    private void writeException(final OXException x, final Locale locale, final HttpServletResponse resp) {
+    private void writeException(final OXException x, final Locale locale, final HttpServletResponse resp, Session session) {
         x.log(LOG);
         final Response response = new Response(locale);
         response.setException(x);
         try {
-            writeResponse(response, resp);
+            writeResponse(response, resp, session);
         } catch (final IOException e) {
             LOG.error(e.getMessage(), e);
         }

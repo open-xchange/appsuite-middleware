@@ -124,7 +124,9 @@ public class MapToDocumentMetadataHolderTransformer implements MapToObjectTransf
             switch(field.getId()) {
             default : return value;
             case CREATION_DATE : case LAST_MODIFIED:
-                return TIME_FORMAT.parse(value);
+                synchronized (TIME_FORMAT) {
+                    return TIME_FORMAT.parse(value);
+                }
             case VERSION: return Integer.valueOf(value);
             case FILE_SIZE: return Long.valueOf(value);
             }

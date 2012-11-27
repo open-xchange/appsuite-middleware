@@ -52,14 +52,13 @@ package com.openexchange.ajp13.coyote;
 import java.io.IOException;
 import javax.servlet.ServletOutputStream;
 import com.openexchange.ajp13.coyote.util.ByteChunk;
-import com.openexchange.tools.stream.Flagged;
 
 /**
  * {@link ActionAwareServletOutputStream}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class ActionAwareServletOutputStream extends ServletOutputStream implements Flagged {
+public final class ActionAwareServletOutputStream extends ServletOutputStream {
 
     private final OutputBuffer outputBuffer;
 
@@ -75,11 +74,6 @@ public final class ActionAwareServletOutputStream extends ServletOutputStream im
         this.outputBuffer = outputBuffer;
         packetSize = outputBuffer.getPacketSize();
         byteChunk = new ByteChunk(packetSize);
-    }
-
-    @Override
-    public boolean isFlagged() {
-        return outputBuffer.isFlagged();
     }
 
     @Override
@@ -171,6 +165,19 @@ public final class ActionAwareServletOutputStream extends ServletOutputStream im
             off += rem;
             len -= rem;
         }
+    }
+
+    /**
+     * Closes this output stream and releases any system resources 
+     * associated with this stream. The general contract of <code>close</code> 
+     * is that it closes the output stream. A closed stream cannot perform 
+     * output operations and cannot be reopened.
+     * <p>
+     * The <code>close</code> method of <code>ActionAwareServletOutputStream</code> does nothing.
+     */
+    @Override
+    public void close() {
+        // Nothing
     }
 
 }

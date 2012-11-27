@@ -67,7 +67,6 @@ import com.openexchange.contact.storage.registry.ContactStorageRegistry;
 import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
 import com.openexchange.folder.FolderService;
-import com.openexchange.folder.FolderService.Storage;
 import com.openexchange.groupware.contact.ContactConfig;
 import com.openexchange.groupware.contact.ContactConfig.Property;
 import com.openexchange.groupware.contact.ContactExceptionCodes;
@@ -244,29 +243,8 @@ public final class Tools {
 	 * @throws OXException
 	 */
     public static FolderObject getFolder(int contextID, String folderId) throws OXException {
-        return getFolder(contextID, folderId, false);
-    }
-    
-    /**
-     * Gets a folder.
-     * 
-     * @param contextID the context ID
-     * @param folderId the folder ID
-     * @param deleted <code>true</code> to also query the backup folder table, <code>false</code>, otherwise
-     * @return
-     * @throws OXException
-     */
-    public static FolderObject getFolder(int contextID, String folderId, boolean deleted) throws OXException {
         FolderService folderService = ContactServiceLookup.getService(FolderService.class, true);
-        try {
-            return folderService.getFolderObject(parse(folderId), contextID, Storage.LIVE_WORKING);
-        } catch (OXException e) {
-            if (deleted && "FLD-0008".equals(e.getErrorCode())) {
-                // not found, also try backup folder tree
-                return folderService.getFolderObject(parse(folderId), contextID, Storage.LIVE_BACKUP);
-            }
-            throw e;
-        }
+        return folderService.getFolderObject(parse(folderId), contextID);
     }
     
     /**
@@ -339,27 +317,30 @@ public final class Tools {
 		if (null == folderIDs || 0 == folderIDs.size()) {
 			return null;			
 		} else if (1 == folderIDs.size()) {
-			return getFolderTerm(folderIDs.get(0));
+			return createContactFieldTerm(ContactField.FOLDER_ID, SingleOperation.EQUALS, folderIDs.get(0));
 		} else {
     		final CompositeSearchTerm orTerm = new CompositeSearchTerm(CompositeOperation.OR);
 			for (final String folderID : folderIDs) {
-				orTerm.addSearchTerm(getFolderTerm(folderID));
+				orTerm.addSearchTerm(createContactFieldTerm(ContactField.FOLDER_ID, SingleOperation.EQUALS, folderID));
 			}
 			return orTerm;
 		}
 	}
 
 	/**
-	 * Constructs a search to search for the specific folder ID. 
+	 * Creates a new {@link SingleSearchTerm} using the supplied operation, the contact field as 'column'-, and the constant as 
+	 * 'constant'-type operators. 
 	 * 
-	 * @param folderID the folder ID
-	 * @return the search term
+	 * @param field The contact field for the 'column' operator
+	 * @param operation The operation
+	 * @param constant The 'constant' operator
+	 * @return The search term
 	 */
-	public static SingleSearchTerm getFolderTerm(final String folderID) {
-    	final SingleSearchTerm term = new SingleSearchTerm(SingleOperation.EQUALS);
-    	term.addOperand(new ContactFieldOperand(ContactField.FOLDER_ID));
-    	term.addOperand(new ConstantOperand<String>(folderID));
-    	return term;
+    public static <T> SingleSearchTerm createContactFieldTerm(ContactField field, SingleOperation operation, T constant) {
+        SingleSearchTerm term = new SingleSearchTerm(operation);
+        term.addOperand(new ContactFieldOperand(field));
+        term.addOperand(new ConstantOperand<T>(constant));
+        return term;
     }
 
 	/**
@@ -493,6 +474,21 @@ public final class Tools {
 	}
 	
 	/**
+	 * Closes a search iterator silently.
+	 * 
+	 * @param searchIterator The iterator to close
+	 */
+	public static void close(SearchIterator<?> searchIterator) {
+        if (null != searchIterator) {
+            try {
+                searchIterator.close();
+            } catch (OXException e) {
+                LOG.warn("error closing iterator", e);
+            }
+        }
+	}
+	
+	/**
 	 * Invalidates the address properties of the given contact if one of the 
 	 * corresponding parts of the address is set, e.g. sets the "Business
 	 * Address" to <code>null</code>, when the "Postal Code Business" is set.
@@ -520,6 +516,38 @@ public final class Tools {
 				contact.setAddressOther(null);
 			}
 		}
+	}
+
+	/**
+     * Creates a new {@link ContactSearchObject} based on the supplied one, but using a specific set of folder IDs.
+	 * 
+	 * @param contactSearch The contact search to prepare
+	 * @param folderIDs The folder IDs to use
+	 * @return A new contact search object instance with the supplied folder IDs.
+	 * @throws OXException
+	 */
+	public static ContactSearchObject prepareContactSearch(ContactSearchObject contactSearch, List<String> folderIDs) throws OXException {
+        ContactSearchObject preparedSearchObject = new ContactSearchObject();
+        preparedSearchObject.setFolders(parse(folderIDs));
+        preparedSearchObject.setStartLetter(contactSearch.isStartLetter());
+        preparedSearchObject.setPattern(contactSearch.getPattern());
+        preparedSearchObject.setOrSearch(contactSearch.isOrSearch());
+        preparedSearchObject.setEmailAutoComplete(contactSearch.isEmailAutoComplete());
+        preparedSearchObject.setCatgories(contactSearch.getCatgories());
+        preparedSearchObject.setCityBusiness(contactSearch.getCityBusiness());
+        preparedSearchObject.setCompany(contactSearch.getCompany());
+        preparedSearchObject.setDepartment(contactSearch.getDepartment());
+        preparedSearchObject.setDisplayName(contactSearch.getDisplayName());
+        preparedSearchObject.setEmail1(contactSearch.getEmail1());
+        preparedSearchObject.setEmail2(contactSearch.getEmail2());
+        preparedSearchObject.setEmail3(contactSearch.getEmail3());
+        preparedSearchObject.setGivenName(contactSearch.getGivenName());
+        preparedSearchObject.setStreetBusiness(contactSearch.getStreetBusiness());
+        preparedSearchObject.setSurname(contactSearch.getSurname());
+        preparedSearchObject.setYomiCompany(contactSearch.getYomiCompany());
+        preparedSearchObject.setYomiFirstname(contactSearch.getYomiFirstName());
+        preparedSearchObject.setYomiLastName(contactSearch.getYomiLastName());
+        return preparedSearchObject;
 	}
 
 	/**
@@ -563,7 +591,6 @@ public final class Tools {
         preparedSearchObject.setOrSearch(contactSearch.isOrSearch());
         preparedSearchObject.setEmailAutoComplete(contactSearch.isEmailAutoComplete());
         preparedSearchObject.setFolders(contactSearch.getFolders());
-        preparedSearchObject.setEmailAutoComplete(contactSearch.isEmailAutoComplete());
         preparedSearchObject.setCatgories(addWildcards(contactSearch.getCatgories(), true, true));
         preparedSearchObject.setCityBusiness(addWildcards(contactSearch.getCityBusiness(), prependWildcard, true));
         preparedSearchObject.setCompany(addWildcards(contactSearch.getCompany(), prependWildcard, true));

@@ -1,6 +1,7 @@
 
 package com.openexchange.mail.mime;
 
+import static com.openexchange.exception.OXExceptionFactory.DISPLAYABLE;
 import com.openexchange.exception.Category;
 import com.openexchange.exception.LogLevel;
 import com.openexchange.exception.OXException;
@@ -214,11 +215,11 @@ public enum MimeMailExceptionCode implements OXExceptionCode {
     /**
      * Message could not be sent: %1$s
      */
-    SEND_FAILED_MSG(MimeMailExceptionMessage.SEND_FAILED_MSG, Category.CATEGORY_ERROR, 1028),
+    SEND_FAILED_MSG(MimeMailExceptionMessage.SEND_FAILED_MSG, Category.CATEGORY_USER_INPUT, 1028),
     /**
      * Message could not be sent: %1$s %2$s (arbitrary server information)
      */
-    SEND_FAILED_MSG_EXT(MimeMailExceptionMessage.SEND_FAILED_EXT_MSG, Category.CATEGORY_ERROR, 1028),
+    SEND_FAILED_MSG_EXT(MimeMailExceptionMessage.SEND_FAILED_EXT_MSG, Category.CATEGORY_USER_INPUT, 1028),
     /**
      * Message cannot be displayed.
      */
@@ -339,13 +340,19 @@ public enum MimeMailExceptionCode implements OXExceptionCode {
         if (category.getLogLevel().implies(LogLevel.DEBUG)) {
             ret = new MimeMailException(getNumber(), getMessage(), cause, args);
         } else {
-            ret =
-                new MimeMailException(
-                    getNumber(),
-                    Category.EnumType.TRY_AGAIN.equals(category.getType()) ? OXExceptionStrings.MESSAGE_RETRY : OXExceptionStrings.MESSAGE,
-                    cause,
-                    new Object[0]);
-            ret.setLogMessage(getMessage(), args);
+            if (DISPLAYABLE.contains(category.getType())) {
+                // Displayed message is equal to logged one
+                ret = new MimeMailException(getNumber(), getMessage(), cause, args);
+                ret.setLogMessage(getMessage(), args);
+            } else {
+                ret =
+                    new MimeMailException(
+                        getNumber(),
+                        Category.EnumType.TRY_AGAIN.equals(category.getType()) ? OXExceptionStrings.MESSAGE_RETRY : OXExceptionStrings.MESSAGE,
+                        cause,
+                        new Object[0]);
+                ret.setLogMessage(getMessage(), args);
+            }
         }
         ret.addCategory(category);
         ret.setPrefix(getPrefix());

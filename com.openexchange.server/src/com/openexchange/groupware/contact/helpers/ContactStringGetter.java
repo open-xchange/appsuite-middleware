@@ -87,7 +87,9 @@ public class ContactStringGetter implements ContactSwitcher {
 	    if(date == null) {
 	        return "";
 	    }
-	    return DATE_FORMAT.format(date);
+	    synchronized (DATE_FORMAT) {
+            return DATE_FORMAT.format(date);
+        }
 	}
 
 	public static final String stringifyTimestamp(final Date date) {

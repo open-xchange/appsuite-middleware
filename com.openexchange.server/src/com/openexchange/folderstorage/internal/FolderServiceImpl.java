@@ -285,13 +285,13 @@ public final class FolderServiceImpl implements FolderService {
     }
 
     @Override
-    public void updateFolder(final Folder folder, final Date timeStamp, final User user, final Context context) throws OXException {
-        new UpdatePerformer(user, context).doUpdate(folder, timeStamp);
+    public void updateFolder(final Folder folder, final Date timeStamp, final User user, final Context context, final FolderServiceDecorator decorator) throws OXException {
+        new UpdatePerformer(user, context, decorator).doUpdate(folder, timeStamp);
     }
 
     @Override
-    public void updateFolder(final Folder folder, final Date timeStamp, final Session session) throws OXException {
-        new UpdatePerformer(ServerSessionAdapter.valueOf(session)).doUpdate(folder, timeStamp);
+    public void updateFolder(final Folder folder, final Date timeStamp, final Session session, final FolderServiceDecorator decorator) throws OXException {
+        new UpdatePerformer(ServerSessionAdapter.valueOf(session), decorator).doUpdate(folder, timeStamp);
     }
 
     @Override

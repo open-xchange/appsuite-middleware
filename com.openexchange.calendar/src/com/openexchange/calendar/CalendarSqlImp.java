@@ -162,6 +162,8 @@ public interface CalendarSqlImp {
 
     public int resolveUid(Session session, String uid) throws OXException;
 
+    int resolveFilename(Session session, String filename) throws OXException;
+    
     int getFolder(Session session, int objectId) throws OXException;
 
     public Date setExternalConfirmation(int oid, int folderId, String mail, int confirm, String message, Session so, Context ctx) throws OXException;

@@ -58,6 +58,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
 import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.Types;
@@ -93,7 +94,7 @@ import com.openexchange.service.indexing.impl.internal.Services;
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public class MailFolderJob extends AbstractMailJob {    
+public class MailFolderJob extends AbstractMailJob {
     
     public MailFolderJob() {
         super();
@@ -113,7 +114,7 @@ public class MailFolderJob extends AbstractMailJob {
             }
             
             checkJobInfo();
-            MailField[] fields = new MailField[] { 
+            MailField[] fields = new MailField[] {
                 MailField.ID,
                 MailField.FLAGS,
                 MailField.COLOR_LABEL };
@@ -149,21 +150,37 @@ public class MailFolderJob extends AbstractMailJob {
                         storageMails.put(msg.getMailId(), msg);
                     }
                     
-                    if (!info.force && IndexFolderManager.isIndexed(info.contextId, info.userId, Types.EMAIL, String.valueOf(info.accountId), info.folder)) {         
-                        IndexResult<MailMessage> indexResult = mailIndex.query(mailAllQuery, MailIndexField.getFor(fields));                    
+                    if (!info.force && IndexFolderManager.isIndexed(info.contextId, info.userId, Types.EMAIL, String.valueOf(info.accountId), info.folder)) {
+                        long lastCompletion = IndexFolderManager.getTimestamp(info.contextId, info.userId, Types.EMAIL, String.valueOf(info.accountId), info.folder);
+                        if (System.currentTimeMillis() - lastCompletion < 60000L * 15) {
+                            LOG.debug("Skipping job because it already ran in the last 15 minutes.");
+                            return;
+                        }
+                        
+                        IndexResult<MailMessage> indexResult = mailIndex.query(mailAllQuery, MailIndexField.getFor(fields));
                         Map<String, MailMessage> indexMails = new HashMap<String, MailMessage>();
                         for (IndexDocument<MailMessage> document : indexResult.getResults()) {
                             MailMessage msg = document.getObject();
                             indexMails.put(msg.getMailId(), msg);
-                        }                
+                        }
                         
+                        if (LOG.isDebugEnabled()) {
+                            long diff = System.currentTimeMillis() - start;
+                            LOG.debug(info.toString() + " Preparation lasted " + diff + "ms.");
+                        }
                         deleteMails(info, indexMails.keySet(), storageMails.keySet(), mailIndex, attachmentIndex);
                         addMails(info, indexMails.keySet(), storageMails.keySet(), mailIndex, attachmentIndex, messageStorage);
-                        changeMails(info, indexMails, storageMails, mailIndex, attachmentIndex, messageStorage);              
+                        changeMails(info, indexMails, storageMails, mailIndex, attachmentIndex, messageStorage);
+                        IndexFolderManager.setTimestamp(info.contextId, info.userId, Types.EMAIL, String.valueOf(info.accountId), info.folder, System.currentTimeMillis());
                     } else {
+                        if (LOG.isDebugEnabled()) {
+                            long diff = System.currentTimeMillis() - start;
+                            LOG.debug(info.toString() + " Preparation lasted " + diff + "ms.");
+                        }
                         addMails(info, Collections.<String> emptySet(), storageMails.keySet(), mailIndex, attachmentIndex, messageStorage);
                         IndexFolderManager.setIndexed(info.contextId, info.userId, Types.EMAIL, String.valueOf(info.accountId), info.folder);
-                    }                
+                        IndexFolderManager.setTimestamp(info.contextId, info.userId, Types.EMAIL, String.valueOf(info.accountId), info.folder, System.currentTimeMillis());
+                    }
                 } else {
                     if (LOG.isDebugEnabled()) {
                         LOG.debug("Deleting folder from index: " + info.toString());
@@ -190,7 +207,7 @@ public class MailFolderJob extends AbstractMailJob {
                     && e.getCode() == 2058) {
                     LOG.warn("Could not connect mail access for job " + info + ". Rescheduling job to run again in 60 seconds.");
                     IndexingService indexingService = Services.getService(IndexingService.class);
-                    indexingService.scheduleJob(info, new Date(System.currentTimeMillis() + 60000), -1L, IndexingService.DEFAULT_PRIORITY);
+                    indexingService.scheduleJob(false, info, new Date(System.currentTimeMillis() + 60000), -1L, IndexingService.DEFAULT_PRIORITY);
                     return;
                 }
                 
@@ -219,7 +236,7 @@ public class MailFolderJob extends AbstractMailJob {
     private void deleteMails(MailJobInfo info, Set<String> indexIds, Set<String> storageIds, final IndexAccess<MailMessage> mailIndex, final IndexAccess<Attachment> attachmentIndex) throws OXException {
         final List<String> toDelete = new ArrayList<String>(indexIds);
         toDelete.removeAll(storageIds);
-        deleteMails(info, toDelete, mailIndex, attachmentIndex);        
+        deleteMails(info, toDelete, mailIndex, attachmentIndex);
     }
     
     private void changeMails(MailJobInfo info, Map<String, MailMessage> indexMails, Map<String, MailMessage> storageMails, final IndexAccess<MailMessage> mailIndex, final IndexAccess<Attachment> attachmentIndex, final IMailMessageStorage messageStorage) throws OXException {

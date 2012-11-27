@@ -1,3 +1,21 @@
+open-xchange-hostname-ldap (6.23.0-4) unstable; urgency=low
+
+  * Third release build for EDP drop #5
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Fri, 26 Oct 2012 15:59:16 +0200
+
+open-xchange-hostname-ldap (6.23.0-3) unstable; urgency=low
+
+  * Second release build for EDP drop #5
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Fri, 26 Oct 2012 11:58:57 +0200
+
+open-xchange-hostname-ldap (6.23.0-2) unstable; urgency=low
+
+  * Release build for EDP drop #5
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Thu, 11 Oct 2012 21:56:21 +0200
+
 open-xchange-hostname-ldap (6.23.0-1) unstable; urgency=low
 
   * First release candidate for 6.23.0
@@ -9,6 +27,48 @@ open-xchange-hostname-ldap (6.23.0-0) unstable; urgency=low
   * prepare for next EDP drop
 
  -- Marcus Klein <marcus.klein@open-xchange.com>  Mon, 03 Sep 2012 13:46:54 +0200
+
+open-xchange-hostname-ldap (6.22.1-6) unstable; urgency=low
+
+  * Sixth release candidate for 6.22.1
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Wed, 14 Nov 2012 14:07:25 +0100
+
+open-xchange-hostname-ldap (6.22.1-5) unstable; urgency=low
+
+  * Fifth release candidate for 6.22.1
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Tue, 13 Nov 2012 14:00:00 +0100
+
+open-xchange-hostname-ldap (6.22.1-4) unstable; urgency=low
+
+  * Fourth release candidate for 6.22.1
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Tue, 06 Nov 2012 12:23:07 +0100
+
+open-xchange-hostname-ldap (6.22.1-3) unstable; urgency=low
+
+  * Third release candidate for 6.22.1
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Fri, 02 Nov 2012 10:45:20 +0100
+
+open-xchange-hostname-ldap (6.22.1-2) unstable; urgency=low
+
+  * Second release candidate for 6.22.1
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Wed, 31 Oct 2012 16:16:44 +0100
+
+open-xchange-hostname-ldap (6.22.1-1) unstable; urgency=low
+
+  * First release candidate for 6.22.1
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Fri, 26 Oct 2012 14:59:12 +0200
+
+open-xchange-hostname-ldap (6.22.1-0) unstable; urgency=low
+
+  * prepare for 6.22.1
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Fri, 26 Oct 2012 10:04:18 +0200
 
 open-xchange-hostname-ldap (6.22.0-5) unstable; urgency=low
 

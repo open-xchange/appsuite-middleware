@@ -355,7 +355,9 @@ public class HazelcastJobStore implements JobStore {
             }
             
             ISet<TriggerKey> triggers = triggersByJobKey.get(jobKey);
-            removeTriggers(new ArrayList<TriggerKey>(triggers));
+            if (triggers != null) {
+                removeTriggers(new ArrayList<TriggerKey>(triggers));
+            }
         } finally {
             lock.unlock();
         }
@@ -1018,16 +1020,15 @@ public class HazelcastJobStore implements JobStore {
             
             return returnList;
         } finally {
+            lock.unlock();
             if (LOG.isDebugEnabled()) {
                 StringBuilder sb = new StringBuilder("Releasing lock. ");
                 sb.append(System.nanoTime()).append(". ");
                 for (OperableTrigger trigger : returnList) {
                     sb.append("\n    Trigger: ").append(trigger.getKey().getName());
                 }
-                
                 LOG.debug(sb.toString());
             }
-            lock.unlock();
         }
     }
     
@@ -1061,6 +1062,8 @@ public class HazelcastJobStore implements JobStore {
             stateWrapper.setState(TriggerStateWrapper.STATE_WAITING);
             triggersByKey.put(trigger.getKey(), stateWrapper);
         } finally {
+            lock.unlock();
+            
             if (LOG.isDebugEnabled()) {
                 StringBuilder sb = new StringBuilder("Releasing lock. ");
                 sb.append(System.nanoTime()).append(". ");
@@ -1068,8 +1071,6 @@ public class HazelcastJobStore implements JobStore {
                 
                 LOG.debug(sb.toString());
             }
-            
-            lock.unlock();
         }
     }
 
@@ -1143,6 +1144,7 @@ public class HazelcastJobStore implements JobStore {
             
             return results;
         } finally {
+            lock.unlock();
             if (LOG.isDebugEnabled()) {
                 StringBuilder sb = new StringBuilder("Releasing lock. ");
                 sb.append(System.nanoTime()).append(". ");
@@ -1152,8 +1154,6 @@ public class HazelcastJobStore implements JobStore {
                 
                 LOG.debug(sb.toString());
             }
-            
-            lock.unlock();
         }
     }
 
@@ -1243,6 +1243,7 @@ public class HazelcastJobStore implements JobStore {
                 }
             }
         } finally {
+            lock.unlock();
             if (LOG.isDebugEnabled()) {
                 StringBuilder sb = new StringBuilder("Releasing lock. ");
                 sb.append(System.nanoTime()).append(". ");
@@ -1250,8 +1251,6 @@ public class HazelcastJobStore implements JobStore {
                 
                 LOG.debug(sb.toString());
             }
-            
-            lock.unlock();
         }
     }
 
@@ -1312,7 +1311,7 @@ public class HazelcastJobStore implements JobStore {
         return hazelcast;            
     }
     
-    static final class TriggerStateWrapper implements Serializable {
+    public static final class TriggerStateWrapper implements Serializable {
         
         private static final long serialVersionUID = -7286840785328204285L;
         
@@ -1369,7 +1368,7 @@ public class HazelcastJobStore implements JobStore {
      * value first), if the priorities are the same, then they are sorted
      * by key.
      */
-    class TriggerWrapperTimeComparator implements Comparator<TriggerStateWrapper>, Serializable {
+    public class TriggerWrapperTimeComparator implements Comparator<TriggerStateWrapper>, Serializable {
       
         private static final long serialVersionUID = -3904243490805975570L;
 

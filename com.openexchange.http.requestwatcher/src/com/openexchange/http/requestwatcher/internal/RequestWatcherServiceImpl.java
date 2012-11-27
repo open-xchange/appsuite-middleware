@@ -51,6 +51,7 @@ package com.openexchange.http.requestwatcher.internal;
 
 import java.io.IOException;
 import java.util.Iterator;
+import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.concurrent.TimeUnit;
 import javax.servlet.http.HttpServletRequest;
@@ -58,6 +59,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.http.requestwatcher.RequestWatcherExceptionCode;
 import com.openexchange.http.requestwatcher.RequestWatcherExceptionMessage;
 import com.openexchange.http.requestwatcher.osgi.RequestWatcherServiceRegistry;
 import com.openexchange.http.requestwatcher.osgi.services.RequestRegistryEntry;
@@ -128,11 +130,12 @@ public class RequestWatcherServiceImpl implements RequestWatcherService {
                         if (requestRegistryEntry.getAge() > requestMaxAge) {
                             sb.setLength(0);
                             logRequestRegistryEntry(requestRegistryEntry, sb);
+                            requestRegistry.remove(requestRegistryEntry);
                             try {
                                 requestRegistry.remove(requestRegistryEntry);
                                 requestRegistryEntry.stopProcessing();
                             } catch (final IOException e) {
-                                LOG.error(RequestWatcherExceptionMessage.ERROR_WHILE_INTERRUPTING_REQUEST_PROCESSING_MSG, e.getCause());
+                                LOG.error(RequestWatcherExceptionMessage.ERROR_WHILE_SENDING_SERVLET_STATUS_CODE_MSG, e.getCause());
                             }
                         } else {
                             stillOldRequestsLeft = false;

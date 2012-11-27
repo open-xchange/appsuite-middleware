@@ -1,30 +1,24 @@
 package com.openexchange.realtime.presence.hazelcast.osgi;
 
-import org.osgi.framework.BundleActivator;
-import org.osgi.framework.BundleContext;
+import com.hazelcast.core.HazelcastInstance;
+import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.realtime.MessageDispatcher;
+import com.openexchange.realtime.presence.PresenceStatusService;
+import com.openexchange.realtime.presence.hazelcast.impl.HazelcastPresenceStatusServiceImpl;
 
-public class RealtimeHazelcastPresenceActivator implements BundleActivator {
+public class RealtimeHazelcastPresenceActivator extends HousekeepingActivator {
 
-	private static BundleContext context;
 
-	static BundleContext getContext() {
-		return context;
-	}
+    @Override
+    protected Class<?>[] getNeededServices() {
+        return new Class<?>[] { HazelcastInstance.class };
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * @see org.osgi.framework.BundleActivator#start(org.osgi.framework.BundleContext)
-	 */
-	public void start(BundleContext bundleContext) throws Exception {
-		RealtimeHazelcastPresenceActivator.context = bundleContext;
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * @see org.osgi.framework.BundleActivator#stop(org.osgi.framework.BundleContext)
-	 */
-	public void stop(BundleContext bundleContext) throws Exception {
-		RealtimeHazelcastPresenceActivator.context = null;
-	}
+    @Override
+    protected void startBundle() throws Exception {
+        HazelcastInstance hazelcastInstance = getService(HazelcastInstance.class);
+        HazelcastPresenceStatusServiceImpl statusService = new HazelcastPresenceStatusServiceImpl(hazelcastInstance);
+        registerService(PresenceStatusService.class, statusService);
+    }
 
 }

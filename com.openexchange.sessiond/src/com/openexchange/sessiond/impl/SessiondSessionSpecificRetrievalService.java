@@ -107,7 +107,7 @@ public class SessiondSessionSpecificRetrievalService implements SessionSpecificC
 
     @Override
     public <T> RandomTokenContainer<T> getRandomTokenContainer(String name, Lifecycle lifecycle, CleanUp<T> cleanUp) {
-        if (randomTokenContainer.contains(name)) {
+        if (randomTokenContainer.containsKey(name)) {
             return (RandomTokenContainer<T>) randomTokenContainer.get(name);
         }
         if(lifecycle == null) {

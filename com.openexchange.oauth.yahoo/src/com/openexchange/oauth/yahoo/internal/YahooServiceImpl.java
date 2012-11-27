@@ -50,6 +50,7 @@
 package com.openexchange.oauth.yahoo.internal;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -106,6 +107,7 @@ public class YahooServiceImpl implements YahooService {
                 account = oAuthService.getAccount(accountId, session, user, contextId);
             } catch (final OXException e) {
                 LOG.error(e);
+                return Collections.emptyList();
             }
             final Token accessToken = new Token(account.getToken(), account.getSecret());
             contacts = useAccessTokenToAccessData(accessToken);

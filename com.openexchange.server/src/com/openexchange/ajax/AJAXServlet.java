@@ -65,6 +65,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicLong;
 import javax.servlet.ServletException;
@@ -88,6 +89,7 @@ import com.openexchange.configuration.ServerConfig;
 import com.openexchange.configuration.ServerConfig.Property;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.upload.UploadFile;
 import com.openexchange.groupware.upload.impl.UploadEvent;
 import com.openexchange.groupware.upload.impl.UploadException;
@@ -101,9 +103,11 @@ import com.openexchange.log.LogFactory;
 import com.openexchange.log.LogProperties;
 import com.openexchange.log.Props;
 import com.openexchange.monitoring.MonitoringInfo;
+import com.openexchange.session.Session;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.servlet.CountingHttpServletRequest;
 import com.openexchange.tools.servlet.http.Tools;
+import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 
 /**
@@ -419,6 +423,35 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
 
     private static final AtomicLong REQUEST_NUMBER = new AtomicLong(0L);
     private static final String PROP_REQUEST_NUMBER = "com.openexchange.ajax.requestNumber";
+
+    /**
+     * Gets the locale for given server session
+     * 
+     * @param session The server session
+     * @return The locale
+     */
+    protected static Locale localeFrom(final ServerSession session) {
+        if (null == session) {
+            return Locale.US;
+        }
+        return session.getUser().getLocale();
+    }
+
+    /**
+     * Gets the locale for given session
+     * 
+     * @param session The session
+     * @return The locale
+     */
+    protected static Locale localeFrom(final Session session) {
+        if (null == session) {
+            return Locale.US;
+        }
+        if (session instanceof ServerSession) {
+            return ((ServerSession) session).getUser().getLocale();
+        }
+        return UserStorage.getStorageUser(session.getUserId(), session.getContextId()).getLocale();
+    }
 
     /**
      * The service method of HttpServlet is extended to catch bad exceptions and keep the AJP socket alive. Otherwise Apache thinks in a
@@ -984,24 +1017,51 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
          */
     }
 
-    protected void writeResponse(final Response response, final HttpServletResponse servletResponse) throws IOException {
+    /**
+     * Writes specified response.
+     *
+     * @param response The response to write
+     * @param servletResponse The HTTP Servlet response to write to
+     * @param optSession The optional session; pass <code>null</code> if not appropriate
+     * @throws IOException If an I/O error occurs
+     */
+    protected void writeResponse(final Response response, final HttpServletResponse servletResponse, Session optSession) throws IOException {
         servletResponse.setContentType(CONTENTTYPE_JAVASCRIPT);
         try {
-            ResponseWriter.write(response, servletResponse.getWriter());
+            ResponseWriter.write(response, servletResponse.getWriter(), localeFrom(optSession));
         } catch (final JSONException e) {
             log(RESPONSE_ERROR, e);
             sendError(servletResponse);
         }
     }
 
+    /**
+     * Checks if specified HTTP Servlet request indicates Internet Explorer as <code>User-Agent</code>.
+     *
+     * @param req The HTTP Servlet request
+     * @return <code>true</code> if Internet Explorer; otherwise <code>false</code>
+     */
     protected final boolean isIE(final HttpServletRequest req) {
         return req.getHeader("User-Agent").contains("MSIE");
     }
 
+    /**
+     * Checks if specified HTTP Servlet request indicates Internet Explorer 7 as <code>User-Agent</code>.
+     *
+     * @param req The HTTP Servlet request
+     * @return <code>true</code> if Internet Explorer 7; otherwise <code>false</code>
+     */
     protected final boolean isIE7(final HttpServletRequest req) {
         return req.getHeader("User-Agent").contains("MSIE 7");
     }
 
+    /**
+     * Gets specified module's string representation.
+     *
+     * @param module The module
+     * @param objectId The identifier of associated object
+     * @return The module's string representation
+     */
     public static final String getModuleString(final int module, final int objectId) {
         String moduleStr = null;
         switch (module) {
@@ -1045,6 +1105,12 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
         return moduleStr;
     }
 
+    /**
+     * Gets specified module's <code>int</code> representation.
+     *
+     * @param moduleStr The module's string representation
+     * @return The module's <code>int</code> representation
+     */
     public static final int getModuleInteger(final String moduleStr) {
         final int module;
         if (MODULE_TASK.equalsIgnoreCase(moduleStr)) {

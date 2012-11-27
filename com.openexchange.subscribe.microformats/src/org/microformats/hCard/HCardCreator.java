@@ -260,6 +260,9 @@ class HCardCreator {
 			}
 		}
 
+		if (null == longitude) {
+		    return null;
+		}
 		try {
 			double lat = Double.parseDouble(latitude.trim());
 			double lon = Double.parseDouble(longitude.trim());

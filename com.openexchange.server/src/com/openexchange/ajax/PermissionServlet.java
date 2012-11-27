@@ -71,9 +71,10 @@ public abstract class PermissionServlet extends SessionServlet {
     @Override
     protected void service(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
         Tools.disableCaching(resp);
+        ServerSession session = null;
         try {
             initializeSession(req);
-            final ServerSession session = getSessionObject(req);
+            session = getSessionObject(req);
             if (null != session && !hasModulePermission(session)) {
                 LOG.info("Status code 403 (FORBIDDEN): No permission to access module.");
                 resp.sendError(HttpServletResponse.SC_FORBIDDEN, "No Permission");
@@ -92,7 +93,7 @@ public abstract class PermissionServlet extends SessionServlet {
                 resp.setContentType(CONTENTTYPE_JAVASCRIPT);
                 final PrintWriter writer = resp.getWriter();
                 try {
-                    ResponseWriter.write(response, writer);
+                    ResponseWriter.write(response, writer, localeFrom(session));
                     writer.flush();
                 } catch (final JSONException e1) {
                     log(RESPONSE_ERROR, e1);
@@ -105,7 +106,7 @@ public abstract class PermissionServlet extends SessionServlet {
                 resp.setContentType(CONTENTTYPE_JAVASCRIPT);
                 final PrintWriter writer = resp.getWriter();
                 try {
-                    ResponseWriter.write(response, writer);
+                    ResponseWriter.write(response, writer, localeFrom(session));
                     writer.flush();
                 } catch (final JSONException e1) {
                     log(RESPONSE_ERROR, e1);

@@ -158,8 +158,8 @@ public class SolrAttachmentDocumentConverter implements SolrResultConverter<Atta
         try {
             String extractedText = xtractService.extractFrom(file, mimeType);
             inputDocument.setField(SolrAttachmentField.CONTENT.solrName(), extractedText);
-        } catch (Exception e) {
-            LOG.warn("Exception during text extraction. Skipping attachments content...", e);
+        } catch (Throwable t) {
+            LOG.warn("Error during text extraction. Skipping attachments content...", t);
         }
 
         return inputDocument;

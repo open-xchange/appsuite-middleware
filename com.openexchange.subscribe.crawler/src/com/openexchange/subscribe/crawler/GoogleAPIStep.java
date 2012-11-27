@@ -60,7 +60,6 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.gargoylesoftware.htmlunit.WebClient;
 import com.google.gdata.client.GoogleService.InvalidCredentialsException;
 import com.google.gdata.client.Service;
@@ -90,7 +89,7 @@ public class GoogleAPIStep extends AbstractStep<Contact[], Object> implements Lo
 
     private String username, password;
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(GoogleAPIStep.class));
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(GoogleAPIStep.class);
 
     public GoogleAPIStep() {
     }

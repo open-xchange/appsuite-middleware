@@ -284,7 +284,7 @@ public class OXReseller extends OXCommonImpl implements OXResellerInterface {
             if(! isMaster ) {
                 ResellerAdmin sadmdata = oxresell.getData(new ResellerAdmin[] { new ResellerAdmin(creds.getLogin(), creds.getPassword()) })[0];
                 ResellerAdmin dadmdata = oxresell.getData(new ResellerAdmin[] { adm })[0];
-                if( dadmdata.getParentId() != sadmdata.getId() ) {
+                if( !dadmdata.getParentId().equals(sadmdata.getId()) ) {
                     throw new OXResellerException(Code.SUBADMIN_DOES_NOT_BELONG_TO_SUBADMIN, dadmdata.getName(), sadmdata.getName());   
                 }
             }

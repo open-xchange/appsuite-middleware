@@ -268,7 +268,7 @@ public enum MailExceptionCode implements OXExceptionCode {
      */
     INVALID_FOLDER_NAME_EMPTY(MailExceptionStrings.INVALID_FOLDER_NAME_EMPTY_MSG, Category.CATEGORY_USER_INPUT, 60),
     /**
-     * Mail folder cannot be created/rename. Name must not contain character '%1$s'
+     * Invalid folder name: "%1$s"
      */
     INVALID_FOLDER_NAME(MailExceptionStrings.INVALID_FOLDER_NAME_MSG, Category.CATEGORY_USER_INPUT, 61),
     /**

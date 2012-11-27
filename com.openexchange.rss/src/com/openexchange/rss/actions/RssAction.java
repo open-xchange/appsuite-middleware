@@ -54,6 +54,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLDecoder;
 import java.util.Collections;
+import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -149,7 +150,7 @@ public class RssAction implements AJAXActionService {
 					.setUrl(entry.getUri())
 					.setFeedUrl(feed.getLink())
 					.setFeedTitle(feed.getTitle())
-					.setDate(entry.getPublishedDate());
+					.setDate(entry.getUpdatedDate(), entry.getPublishedDate(), new Date());
 				
 				if(feed.getImage() != null)
 					result.setImageUrl(feed.getImage().getLink());

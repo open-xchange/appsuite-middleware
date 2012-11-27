@@ -59,7 +59,7 @@ import com.openexchange.ajax.framework.Executor;
 import com.openexchange.ajax.mail.actions.AllRequest;
 import com.openexchange.ajax.mail.actions.AllResponse;
 import com.openexchange.ajax.mail.actions.ClearRequest;
-import com.openexchange.ajax.mail.actions.SendRequest;
+import com.openexchange.ajax.mail.actions.NewMailRequest;
 import com.openexchange.exception.OXException;
 
 /**
@@ -70,7 +70,6 @@ import com.openexchange.exception.OXException;
 public class ClearTest extends AbstractMailTest {
 
 	private static final Log LOG = LogFactory.getLog(ClearTest.class);
-	private String mailObject_25kb;
 
 	public ClearTest(final String name) {
 		super(name);
@@ -85,11 +84,6 @@ public class ClearTest extends AbstractMailTest {
 		clearFolder(getInboxFolder());
 		clearFolder(getSentFolder());
 		clearFolder(getTrashFolder());
-
-		/*
-		 * Create JSON mail object
-		 */
-		mailObject_25kb = createSelfAddressed25KBMailObject().toString();
 	}
 
 	@Override
@@ -108,9 +102,20 @@ public class ClearTest extends AbstractMailTest {
 		 * Insert <numOfMails> mails through a send request
 		 */
 		final int numOfMails = 5;
-		LOG.info("Sending " + numOfMails + " mails to fill emptied INBOX");
+		LOG.info("Appending " + numOfMails + " mails to fill emptied INBOX");
+		final String eml =
+            "Message-Id: <4A002517.4650.0059.1@foobar.com>\n" +
+            "Date: Tue, 05 May 2009 11:37:58 -0500\n" +
+            "From: " + getSendAddress() + "\n" +
+            "To: " + getSendAddress() + "\n" +
+            "Subject: Invitation for launch\n" +
+            "Mime-Version: 1.0\n" +
+            "Content-Type: text/plain; charset=\"US-ASCII\"\n" +
+            "Content-Transfer-Encoding: 7bit\n" +
+            "\n" +
+            "Blah blah blah blah blah blah";
 		for (int i = 0; i < numOfMails; i++) {
-		    getClient().execute(new SendRequest(mailObject_25kb));
+	        getClient().execute(new NewMailRequest(getInboxFolder(), eml, -1, true));
 			LOG.info("Sent " + (i + 1) + ". mail of " + numOfMails);
 		}
 

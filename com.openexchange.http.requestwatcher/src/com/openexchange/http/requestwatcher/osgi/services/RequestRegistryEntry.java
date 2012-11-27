@@ -208,7 +208,10 @@ public class RequestRegistryEntry implements Comparable<RequestRegistryEntry> {
      * @throws IOException
      */
     public void stopProcessing() throws IOException {
-        thread.interrupt();
+        /*
+         * We have to make the backend completely interrupt aware before we can enable this
+         * thread.interrupt(); 
+         */
         if (!response.isCommitted()) {
             response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
         }

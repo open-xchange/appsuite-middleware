@@ -90,6 +90,7 @@ import javax.mail.Flags.Flag;
 import javax.mail.Folder;
 import javax.mail.FolderClosedException;
 import javax.mail.Message;
+import javax.mail.MessageRemovedException;
 import javax.mail.MessagingException;
 import javax.mail.Multipart;
 import javax.mail.Part;
@@ -396,8 +397,13 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                     return content;
                 }
                 if (subtype.startsWith("htm")) {
-                    return new Renderer(new Segment(new Source(content), 0, content.length())).setMaxLineLength(9999).setIncludeHyperlinkURLs(
-                        false).toString();
+                    try {
+                        return new Renderer(new Segment(new Source(content), 0, content.length())).setMaxLineLength(9999).setIncludeHyperlinkURLs(
+                            false).toString();
+                    } catch (StackOverflowError s) {
+                        LOG.warn("StackOverflowError while parsing html mail. Returning null...");
+                        return null;
+                    }
                     // content = PATTERN_CRLF.matcher(content).replaceAll("");// .replaceAll("(  )+", "");
                 }
                 try {
@@ -995,6 +1001,14 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
         return header[0];
     }
 
+    private static final FetchProfile FETCH_PROFILE_ENVELOPE = new FetchProfile() {
+
+        // Unnamed block
+        {
+            add(FetchProfile.Item.ENVELOPE);
+        }
+    };
+
     @Override
     public MailMessage getMessageLong(final String fullName, final long msgUID, final boolean markSeen) throws OXException {
         if (msgUID < 0) {
@@ -1018,7 +1032,23 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
             try {
                 final long start = System.currentTimeMillis();
                 msg = (IMAPMessage) imapFolder.getMessageByUID(msgUID);
+                imapFolder.fetch(new Message[] {msg}, FETCH_PROFILE_ENVELOPE);
                 mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
+            } catch (final java.lang.NullPointerException e) {
+                /*
+                 * Obviously message was removed in the meantime
+                 */
+                return null;
+            } catch (final java.lang.IndexOutOfBoundsException e) {
+                /*
+                 * Obviously message was removed in the meantime
+                 */
+                return null;
+            } catch (final MessageRemovedException e) {
+                /*
+                 * Obviously message was removed in the meantime
+                 */
+                return null;
             } catch (final MessagingException e) {
                 final Exception cause = e.getNextException();
                 if (!(cause instanceof BadCommandException)) {
@@ -1039,8 +1069,6 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                     return null;
                 }
                 msg = (IMAPMessage) imapFolder.getMessage(msgnum);
-            } catch (final IndexOutOfBoundsException e) {
-                return null;
             }
             if (msg == null || msg.isExpunged()) {
                 // throw new OXException(OXException.Code.MAIL_NOT_FOUND,
@@ -1082,6 +1110,11 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                     }
                 }
                 throw e;
+            } catch (final java.lang.IndexOutOfBoundsException e) {
+                /*
+                 * Obviously message was removed in the meantime
+                 */
+                return null;
             }
             if (!mail.isSeen() && markSeen) {
                 mail.setPrevSeen(false);

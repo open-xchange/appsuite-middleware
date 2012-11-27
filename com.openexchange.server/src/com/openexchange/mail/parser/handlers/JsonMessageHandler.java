@@ -345,10 +345,7 @@ public final class JsonMessageHandler implements MailMessageHandler {
             try {
                 final AttachmentToken token = new AttachmentToken(ttlMillis <= 0 ? AttachmentTokenConstants.DEFAULT_TIMEOUT : ttlMillis);
                 token.setAccessInfo(accountId, session);
-                token.setAttachmentInfo(
-                    this.jsonObject.getString(FolderChildFields.FOLDER_ID),
-                    this.jsonObject.getString(DataFields.ID),
-                    attachmentId);
+                token.setAttachmentInfo(tokenFolder, tokenMailId, attachmentId);
                 AttachmentTokenRegistry.getInstance().putToken(token, session);
                 final JSONObject attachmentObject = new JSONObject();
                 attachmentObject.put("id", token.getId());

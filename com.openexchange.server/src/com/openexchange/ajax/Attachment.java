@@ -148,7 +148,7 @@ public class Attachment extends PermissionServlet {
         try {
             session = ServerSessionAdapter.valueOf(getSessionObject(req));
         } catch (final OXException e) {
-            handle(res, e, action);
+            handle(res, e, action, getSessionObject(req));
             return;
         }
 
@@ -162,16 +162,16 @@ public class Attachment extends PermissionServlet {
             try {
                 require(req, PARAMETER_FOLDERID, PARAMETER_ATTACHEDID, PARAMETER_MODULE, PARAMETER_ID);
             } catch (final OXException e) {
-                handle(res, e, action);
+                handle(res, e, action, session);
                 return;
             }
             int folderId, attachedId, moduleId, id;
             final String contentType = req.getParameter(PARAMETER_CONTENT_TYPE);
             try {
-                folderId = requireNumber(req, res, action, PARAMETER_FOLDERID);
-                attachedId = requireNumber(req, res, action, PARAMETER_ATTACHEDID);
-                moduleId = requireNumber(req, res, action, PARAMETER_MODULE);
-                id = requireNumber(req, res, action, PARAMETER_ID);
+                folderId = requireNumber(req, res, action, PARAMETER_FOLDERID, session);
+                attachedId = requireNumber(req, res, action, PARAMETER_ATTACHEDID, session);
+                moduleId = requireNumber(req, res, action, PARAMETER_MODULE, session);
+                id = requireNumber(req, res, action, PARAMETER_ID, session);
 
             } catch (final OXAborted x) {
                 return;
@@ -211,12 +211,12 @@ public class Attachment extends PermissionServlet {
         }
     }
 
-    private int requireNumber(final HttpServletRequest req, final HttpServletResponse res, final String action, final String parameter) {
+    private int requireNumber(final HttpServletRequest req, final HttpServletResponse res, final String action, final String parameter, final Session session) {
         final String value = req.getParameter(parameter);
         try {
             return Integer.parseInt(value);
         } catch (final NumberFormatException nfe) {
-            handle(res, AttachmentExceptionCodes.INVALID_REQUEST_PARAMETER.create(parameter, value), action);
+            handle(res, AttachmentExceptionCodes.INVALID_REQUEST_PARAMETER.create(parameter, value), action, session);
             throw new OXAborted();
         }
     }
@@ -234,7 +234,7 @@ public class Attachment extends PermissionServlet {
         try {
             session = ServerSessionAdapter.valueOf(getSessionObject(req));
         } catch (final OXException e) {
-            handle(res, e, action);
+            handle(res, e, action, getSessionObject(req));
             return;
         }
 
@@ -273,7 +273,7 @@ public class Attachment extends PermissionServlet {
         try {
             session = ServerSessionAdapter.valueOf(getSessionObject(req));
         } catch (final OXException e) {
-            handle(res, e, action);
+            handle(res, e, action, getSessionObject(req));
             return;
         }
 
@@ -417,7 +417,7 @@ public class Attachment extends PermissionServlet {
             // in a new window. To call the JS callback routine from a popup we
             // can use parent.callback_error() but
             // must use window.opener.callback_error()
-            rollback(t, res, ResponseFields.ERROR);
+            rollback(t, res, ResponseFields.ERROR, session);
             return;
         } finally {
             if (documentData != null) {
@@ -445,16 +445,16 @@ public class Attachment extends PermissionServlet {
         }
     }
 
-    private void rollback(final Throwable t, final HttpServletResponse res, final String action) {
+    private void rollback(final Throwable t, final HttpServletResponse res, final String action, final Session session) {
         try {
             ATTACHMENT_BASE.rollback();
         } catch (final OXException e) {
             LOG.debug("", e);
         }
         if (t instanceof OXException) {
-            handle(res, (OXException) t, action);
+            handle(res, (OXException) t, action, session);
         } else {
-            handle(res, new OXException(t), action);
+            handle(res, new OXException(t), action, session);
         }
     }
 
@@ -497,7 +497,7 @@ public class Attachment extends PermissionServlet {
             } catch (final OXException e) {
                 LOG.error(e);
             }
-            handle(res, t, ResponseFields.ERROR);
+            handle(res, t, ResponseFields.ERROR, session);
             return;
         } catch (final JSONException e) {
             try {
@@ -505,7 +505,7 @@ public class Attachment extends PermissionServlet {
             } catch (final OXException x) {
                 LOG.error(e);
             }
-            handle(res, new OXException(e), ResponseFields.ERROR);
+            handle(res, new OXException(e), ResponseFields.ERROR, session);
             return;
         } catch (final IOException e) {
             try {
@@ -513,7 +513,7 @@ public class Attachment extends PermissionServlet {
             } catch (final OXException x) {
                 LOG.error(e);
             }
-            handle(res, new OXException(e), ResponseFields.ERROR);
+            handle(res, new OXException(e), ResponseFields.ERROR, session);
             return;
         } finally {
             try {
@@ -558,7 +558,7 @@ public class Attachment extends PermissionServlet {
         }
     }
 
-    private void handle(final HttpServletResponse res, final OXException t, final String action) {
+    private void handle(final HttpServletResponse res, final OXException t, final String action, final Session session) {
         res.setContentType(MIME_TEXT_HTML_CHARSET_UTF8);
 
         final Response resp = new Response();
@@ -567,7 +567,7 @@ public class Attachment extends PermissionServlet {
 
         try {
             writer = new UnsynchronizedStringWriter();
-            ResponseWriter.write(resp, writer);
+            ResponseWriter.write(resp, writer, localeFrom(session));
             res.getWriter().write(substituteJS(writer.toString(), action));
         } catch (final JSONException e) {
             LOG.error("", t);

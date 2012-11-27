@@ -14,6 +14,7 @@ Import-Package: com.openexchange.ajax,
  com.openexchange.groupware,
  com.openexchange.log,
  com.openexchange.osgi,
+ com.openexchange.session,
  com.openexchange.tools.session,
  javax.servlet,
  javax.servlet.http,
@@ -24,5 +25,5 @@ Import-Package: com.openexchange.ajax,
 Bundle-ActivationPolicy: lazy
 Export-Package: com.openexchange.recaptcha
 Bundle-ClassPath: com.openexchange.recaptcha.jar,
- lib/recaptcha4j-0.0.7.jar,
+ lib/recaptcha4j-0.0.8.jar,
  .

@@ -56,6 +56,7 @@ import java.util.List;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.Folder;
 import com.openexchange.folderstorage.FolderExceptionErrorMessage;
+import com.openexchange.folderstorage.FolderServiceDecorator;
 import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.folderstorage.FolderStorageDiscoverer;
 import com.openexchange.folderstorage.Permission;
@@ -70,7 +71,7 @@ import com.openexchange.tools.session.ServerSession;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class UpdatePerformer extends AbstractPerformer {
+public final class UpdatePerformer extends AbstractUserizedFolderPerformer {
 
     private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(UpdatePerformer.class));
 
@@ -81,8 +82,8 @@ public final class UpdatePerformer extends AbstractPerformer {
      *
      * @param session The session
      */
-    public UpdatePerformer(final ServerSession session) {
-        super(session);
+    public UpdatePerformer(final ServerSession session, final FolderServiceDecorator decorator) {
+        super(session, decorator);
     }
 
     /**
@@ -91,8 +92,8 @@ public final class UpdatePerformer extends AbstractPerformer {
      * @param user The user
      * @param context The context
      */
-    public UpdatePerformer(final User user, final Context context) {
-        super(user, context);
+    public UpdatePerformer(final User user, final Context context, final FolderServiceDecorator decorator) {
+        super(user, context, decorator);
     }
 
     /**
@@ -101,8 +102,8 @@ public final class UpdatePerformer extends AbstractPerformer {
      * @param session The session
      * @param folderStorageDiscoverer The folder storage discoverer
      */
-    public UpdatePerformer(final ServerSession session, final FolderStorageDiscoverer folderStorageDiscoverer) {
-        super(session, folderStorageDiscoverer);
+    public UpdatePerformer(final ServerSession session, final FolderServiceDecorator decorator, final FolderStorageDiscoverer folderStorageDiscoverer) {
+        super(session, decorator, folderStorageDiscoverer);
     }
 
     /**
@@ -112,8 +113,8 @@ public final class UpdatePerformer extends AbstractPerformer {
      * @param context The context
      * @param folderStorageDiscoverer The folder storage discoverer
      */
-    public UpdatePerformer(final User user, final Context context, final FolderStorageDiscoverer folderStorageDiscoverer) {
-        super(user, context, folderStorageDiscoverer);
+    public UpdatePerformer(final User user, final Context context, final FolderServiceDecorator decorator, final FolderStorageDiscoverer folderStorageDiscoverer) {
+        super(user, context, decorator, folderStorageDiscoverer);
     }
 
     /**

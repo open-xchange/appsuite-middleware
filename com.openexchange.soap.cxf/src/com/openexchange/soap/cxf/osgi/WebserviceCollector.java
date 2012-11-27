@@ -58,6 +58,8 @@ import javax.xml.ws.Endpoint;
 import org.apache.commons.logging.Log;
 import org.apache.cxf.interceptor.DocLiteralInInterceptor;
 import org.apache.cxf.interceptor.Interceptor;
+import org.apache.cxf.interceptor.LoggingInInterceptor;
+import org.apache.cxf.interceptor.LoggingOutInterceptor;
 import org.apache.cxf.message.Message;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.InvalidSyntaxException;
@@ -114,11 +116,9 @@ public class WebserviceCollector implements ServiceListener {
      */
     public void open() {
         try {
-            final ServiceReference<?>[] allServiceReferences = context.getAllServiceReferences(null, null);
-            for (final ServiceReference<?> serviceReference : allServiceReferences) {
+            for (final ServiceReference<?> serviceReference : context.getAllServiceReferences(null, null)) {
                 add(serviceReference);
             }
-
         } catch (final InvalidSyntaxException e) {
             // Impossible, no filter specified.
         }
@@ -227,6 +227,9 @@ public class WebserviceCollector implements ServiceListener {
                     inInterceptors.remove(index);
                     inInterceptors.add(index, new com.openexchange.soap.cxf.interceptor.DocLiteralInInterceptor());
                 }
+                // Add logging interceptors
+                serverEndpoint.getInInterceptors().add(new LoggingInInterceptor());
+                serverEndpoint.getOutInterceptors().add(new LoggingOutInterceptor());
             }
             oldEndpoint = endpoints.replace(name, endpoint);
             LOG.info("Publishing endpoint succeeded. Published \"" + name + "\" under address \"" + address + "\".");

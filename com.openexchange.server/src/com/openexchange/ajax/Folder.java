@@ -100,6 +100,7 @@ import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
 import com.openexchange.exception.OXException.Generic;
 import com.openexchange.exception.OXExceptionConstants;
+import com.openexchange.folderstorage.FolderServiceDecorator;
 import com.openexchange.folderstorage.messaging.MessagingFolderIdentifier;
 import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.container.DataObject;
@@ -292,13 +293,14 @@ public class Folder extends SessionServlet implements OXExceptionConstants {
      * Performs the GET request to send back root folders
      */
     public void actionGetRoot(final ServerSession session, final JSONWriter w, final JSONObject requestObj) throws JSONException {
-        ResponseWriter.write(actionGetRoot(session, ParamContainer.getInstance(requestObj, EnumComponent.FOLDER)), w);
+        ResponseWriter.write(actionGetRoot(session, ParamContainer.getInstance(requestObj, EnumComponent.FOLDER)), w, localeFrom(session));
     }
 
     private final void actionGetRoot(final HttpServletRequest req, final HttpServletResponse resp) throws JSONException, IOException {
+        final ServerSession session = getSessionObject(req);
         ResponseWriter.write(
-            actionGetRoot(getSessionObject(req), ParamContainer.getInstance(req, EnumComponent.FOLDER, resp)),
-            resp.getWriter());
+            actionGetRoot(session, ParamContainer.getInstance(req, EnumComponent.FOLDER, resp)),
+            resp.getWriter(), localeFrom(session));
     }
 
     /**
@@ -383,18 +385,19 @@ public class Folder extends SessionServlet implements OXExceptionConstants {
      * @throws JSONException
      */
     public void actionGetSubfolders(final ServerSession session, final JSONWriter w, final JSONObject requestObj) throws JSONException {
-        ResponseWriter.write(actionGetSubfolders(session, ParamContainer.getInstance(requestObj, EnumComponent.FOLDER)), w);
+        ResponseWriter.write(actionGetSubfolders(session, ParamContainer.getInstance(requestObj, EnumComponent.FOLDER)), w, localeFrom(session));
     }
 
     private final void actionGetSubfolders(final HttpServletRequest req, final HttpServletResponse resp) throws IOException, ServletException {
+        ServerSession session = getSessionObject(req);
         try {
             ResponseWriter.write(
-                actionGetSubfolders(getSessionObject(req), ParamContainer.getInstance(req, EnumComponent.FOLDER, resp)),
-                resp.getWriter());
+                actionGetSubfolders(session, ParamContainer.getInstance(req, EnumComponent.FOLDER, resp)),
+                resp.getWriter(), localeFrom(session));
         } catch (final JSONException e) {
             try {
                 ResponseWriter.writeException(OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e, new Object[0]), new JSONWriter(
-                    resp.getWriter()));
+                    resp.getWriter()), localeFrom(session));
             } catch (final JSONException jsonError) {
                 throw new ServletException(e.getMessage(), jsonError);
             }
@@ -1066,18 +1069,19 @@ public class Folder extends SessionServlet implements OXExceptionConstants {
      * @throws JSONException
      */
     public void actionGetPath(final ServerSession session, final JSONWriter w, final JSONObject requestObj) throws JSONException {
-        ResponseWriter.write(actionGetPath(session, ParamContainer.getInstance(requestObj, EnumComponent.FOLDER)), w);
+        ResponseWriter.write(actionGetPath(session, ParamContainer.getInstance(requestObj, EnumComponent.FOLDER)), w, localeFrom(session));
     }
 
     private final void actionGetPath(final HttpServletRequest req, final HttpServletResponse resp) throws IOException, ServletException {
+        final ServerSession session = getSessionObject(req);
         try {
             ResponseWriter.write(
-                actionGetPath(getSessionObject(req), ParamContainer.getInstance(req, EnumComponent.FOLDER, resp)),
-                resp.getWriter());
+                actionGetPath(session, ParamContainer.getInstance(req, EnumComponent.FOLDER, resp)),
+                resp.getWriter(), localeFrom(session));
         } catch (final JSONException e) {
             try {
                 ResponseWriter.writeException(OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e, new Object[0]), new JSONWriter(
-                    resp.getWriter()));
+                    resp.getWriter()), localeFrom(session));
             } catch (final JSONException jsonError) {
                 throw new ServletException(e.getMessage(), jsonError);
             }
@@ -1327,18 +1331,19 @@ public class Folder extends SessionServlet implements OXExceptionConstants {
      * @throws JSONException
      */
     public void actionGetUpdatedFolders(final ServerSession session, final JSONWriter w, final JSONObject requestObj) throws JSONException {
-        ResponseWriter.write(actionGetUpdatedFolders(session, ParamContainer.getInstance(requestObj, EnumComponent.FOLDER)), w);
+        ResponseWriter.write(actionGetUpdatedFolders(session, ParamContainer.getInstance(requestObj, EnumComponent.FOLDER)), w, localeFrom(session));
     }
 
     private final void actionGetUpdatedFolders(final HttpServletRequest req, final HttpServletResponse resp) throws IOException, ServletException {
+        ServerSession session = getSessionObject(req);
         try {
             ResponseWriter.write(
-                actionGetUpdatedFolders(getSessionObject(req), ParamContainer.getInstance(req, EnumComponent.FOLDER, resp)),
-                resp.getWriter());
+                actionGetUpdatedFolders(session, ParamContainer.getInstance(req, EnumComponent.FOLDER, resp)),
+                resp.getWriter(), localeFrom(session));
         } catch (final JSONException e) {
             try {
                 ResponseWriter.writeException(OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e, new Object[0]), new JSONWriter(
-                    resp.getWriter()));
+                    resp.getWriter()), localeFrom(session));
             } catch (final JSONException jsonError) {
                 throw new ServletException(e.getMessage(), jsonError);
             }
@@ -1694,18 +1699,19 @@ public class Folder extends SessionServlet implements OXExceptionConstants {
     }
 
     public void actionGetFolder(final ServerSession session, final JSONWriter w, final JSONObject requestObj) throws JSONException {
-        ResponseWriter.write(actionGetFolder(session, ParamContainer.getInstance(requestObj, EnumComponent.FOLDER)), w);
+        ResponseWriter.write(actionGetFolder(session, ParamContainer.getInstance(requestObj, EnumComponent.FOLDER)), w, localeFrom(session));
     }
 
     private final void actionGetFolder(final HttpServletRequest req, final HttpServletResponse resp) throws IOException, ServletException {
+        final ServerSession session = getSessionObject(req);
         try {
             ResponseWriter.write(
-                actionGetFolder(getSessionObject(req), ParamContainer.getInstance(req, EnumComponent.FOLDER, resp)),
-                resp.getWriter());
+                actionGetFolder(session, ParamContainer.getInstance(req, EnumComponent.FOLDER, resp)),
+                resp.getWriter(), localeFrom(session));
         } catch (final JSONException e) {
             try {
                 ResponseWriter.writeException(OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e, new Object[0]), new JSONWriter(
-                    resp.getWriter()));
+                    resp.getWriter()), localeFrom(session));
             } catch (final JSONException jsonError) {
                 throw new ServletException(e.getMessage(), jsonError);
             }
@@ -1820,19 +1826,20 @@ public class Folder extends SessionServlet implements OXExceptionConstants {
     public void actionPutUpdateFolder(final ServerSession session, final JSONWriter w, final JSONObject requestObj) throws JSONException {
         ResponseWriter.write(actionPutUpdateFolder(session, requestObj.getString(ResponseFields.DATA), ParamContainer.getInstance(
             requestObj,
-            EnumComponent.FOLDER)), w);
+            EnumComponent.FOLDER)), w, localeFrom(session));
     }
 
     private final void actionPutUpdateFolder(final HttpServletRequest req, final HttpServletResponse resp) throws IOException, ServletException {
+        ServerSession session = getSessionObject(req);
         try {
-            ResponseWriter.write(actionPutUpdateFolder(getSessionObject(req), getBody(req), ParamContainer.getInstance(
+            ResponseWriter.write(actionPutUpdateFolder(session, getBody(req), ParamContainer.getInstance(
                 req,
                 EnumComponent.FOLDER,
-                resp)), resp.getWriter());
+                resp)), resp.getWriter(), localeFrom(session));
         } catch (final JSONException e) {
             try {
                 ResponseWriter.writeException(OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e, new Object[0]), new JSONWriter(
-                    resp.getWriter()));
+                    resp.getWriter()), localeFrom(session));
             } catch (final JSONException jsonError) {
                 throw new ServletException(e.getMessage(), jsonError);
             }
@@ -1907,7 +1914,7 @@ public class Folder extends SessionServlet implements OXExceptionConstants {
                             pmf.setID(mfi.toString());
                             pmf.parse(jsonObj);
                             final com.openexchange.folderstorage.internal.performers.UpdatePerformer up =
-                                new com.openexchange.folderstorage.internal.performers.UpdatePerformer(session);
+                                new com.openexchange.folderstorage.internal.performers.UpdatePerformer(session, new FolderServiceDecorator().put("permissions", paramContainer.getStringParam("permissions")));
                             up.doUpdate(pmf, null);
                             retval = mfi.toString();
                             done = true;
@@ -1955,19 +1962,20 @@ public class Folder extends SessionServlet implements OXExceptionConstants {
     public void actionPutInsertFolder(final ServerSession session, final JSONWriter w, final JSONObject requestObj) throws JSONException {
         ResponseWriter.write(actionPutInsertFolder(session, requestObj.getJSONObject(ResponseFields.DATA), ParamContainer.getInstance(
             requestObj,
-            EnumComponent.FOLDER)), w);
+            EnumComponent.FOLDER)), w, localeFrom(session));
     }
 
     private final void actionPutInsertFolder(final HttpServletRequest req, final HttpServletResponse resp) throws IOException, ServletException {
+        ServerSession session = getSessionObject(req);
         try {
-            ResponseWriter.write(actionPutInsertFolder(getSessionObject(req), new JSONObject(getBody(req)), ParamContainer.getInstance(
+            ResponseWriter.write(actionPutInsertFolder(session, new JSONObject(getBody(req)), ParamContainer.getInstance(
                 req,
                 EnumComponent.FOLDER,
-                resp)), resp.getWriter());
+                resp)), resp.getWriter(), localeFrom(session));
         } catch (final JSONException e) {
             try {
                 ResponseWriter.writeException(OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e, new Object[0]), new JSONWriter(
-                    resp.getWriter()));
+                    resp.getWriter()), localeFrom(session));
             } catch (final JSONException jsonError) {
                 throw new ServletException(e.getMessage(), jsonError);
             }
@@ -2063,19 +2071,20 @@ public class Folder extends SessionServlet implements OXExceptionConstants {
     public void actionPutDeleteFolder(final ServerSession session, final JSONWriter w, final JSONObject requestObj) throws JSONException {
         ResponseWriter.write(actionPutDeleteFolder(session, requestObj.getString(ResponseFields.DATA), ParamContainer.getInstance(
             requestObj,
-            EnumComponent.FOLDER)), w);
+            EnumComponent.FOLDER)), w, localeFrom(session));
     }
 
     private final void actionPutDeleteFolder(final HttpServletRequest req, final HttpServletResponse resp) throws IOException, ServletException {
+        ServerSession session = getSessionObject(req);
         try {
-            ResponseWriter.write(actionPutDeleteFolder(getSessionObject(req), getBody(req), ParamContainer.getInstance(
+            ResponseWriter.write(actionPutDeleteFolder(session, getBody(req), ParamContainer.getInstance(
                 req,
                 EnumComponent.FOLDER,
-                resp)), resp.getWriter());
+                resp)), resp.getWriter(), localeFrom(session));
         } catch (final JSONException e) {
             try {
                 ResponseWriter.writeException(OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e, new Object[0]), new JSONWriter(
-                    resp.getWriter()));
+                    resp.getWriter()), localeFrom(session));
             } catch (final JSONException jsonError) {
                 throw new ServletException(e.getMessage(), jsonError);
             }
@@ -2184,19 +2193,20 @@ public class Folder extends SessionServlet implements OXExceptionConstants {
     public void actionPutClearFolder(final ServerSession session, final JSONWriter w, final JSONObject requestObj) throws JSONException {
         ResponseWriter.write(actionPutClearFolder(session, requestObj.getString(ResponseFields.DATA), ParamContainer.getInstance(
             requestObj,
-            EnumComponent.FOLDER)), w);
+            EnumComponent.FOLDER)), w, localeFrom(session));
     }
 
     private final void actionPutClearFolder(final HttpServletRequest req, final HttpServletResponse resp) throws IOException, ServletException {
+        ServerSession session = getSessionObject(req);
         try {
-            ResponseWriter.write(actionPutClearFolder(getSessionObject(req), getBody(req), ParamContainer.getInstance(
+            ResponseWriter.write(actionPutClearFolder(session, getBody(req), ParamContainer.getInstance(
                 req,
                 EnumComponent.FOLDER,
-                resp)), resp.getWriter());
+                resp)), resp.getWriter(), localeFrom(session));
         } catch (final JSONException e) {
             try {
                 ResponseWriter.writeException(OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e, new Object[0]), new JSONWriter(
-                    resp.getWriter()));
+                    resp.getWriter()), localeFrom(session));
             } catch (final JSONException jsonError) {
                 throw new ServletException(e.getMessage(), jsonError);
             }

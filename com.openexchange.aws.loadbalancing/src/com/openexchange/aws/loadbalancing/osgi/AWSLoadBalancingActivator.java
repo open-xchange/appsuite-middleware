@@ -75,19 +75,11 @@ public class AWSLoadBalancingActivator extends HousekeepingActivator {
         super();
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.osgi.DeferredActivator#getNeededServices()
-     */
     @Override
     protected Class<?>[] getNeededServices() {
         return new Class<?>[] { ConfigurationService.class, AmazonElasticLoadBalancing.class };
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.osgi.DeferredActivator#startBundle()
-     */
     @Override
     protected void startBundle() throws Exception {
         LOG.info("Starting bundle: com.openexchange.aws.loadbalancing");

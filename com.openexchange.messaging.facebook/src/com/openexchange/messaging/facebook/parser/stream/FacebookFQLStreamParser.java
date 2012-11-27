@@ -66,6 +66,7 @@ import org.w3c.dom.NodeList;
 import com.openexchange.exception.OXException;
 import com.openexchange.html.HtmlService;
 import com.openexchange.log.LogFactory;
+import com.openexchange.messaging.MessagingExceptionCodes;
 import com.openexchange.messaging.MessagingHeader;
 import com.openexchange.messaging.StringContent;
 import com.openexchange.messaging.facebook.FacebookMessagingExceptionCodes;
@@ -385,41 +386,49 @@ public final class FacebookFQLStreamParser {
                  * Source URL present?
                  */
                 if (null != sourceURL) {
-                    final FacebookURLConnectionContent content = new FacebookURLConnectionContent(sourceURL, true);
-                    /*
-                     * Create part
-                     */
-                    final MimeMessagingBodyPart part = new MimeMessagingBodyPart();
-                    final String ct;
-                    final String filename;
-                    {
-                        final MimeContentType mct = new MimeContentType(content.getMimeType());
-                        if (null == ext) {
-                            filename = new StringBuilder("video.").append(Utility.getFileExtensions(mct.getBaseType()).get(0)).toString();
-                        } else {
-                            filename = new StringBuilder("video.").append(ext).toString();
+                    try {
+                        final FacebookURLConnectionContent content = new FacebookURLConnectionContent(sourceURL, true);
+                        /*
+                         * Create part
+                         */
+                        final MimeMessagingBodyPart part = new MimeMessagingBodyPart();
+                        final String ct;
+                        final String filename;
+                        {
+                            final MimeContentType mct = new MimeContentType(content.getMimeType());
+                            if (null == ext) {
+                                filename = new StringBuilder("video.").append(Utility.getFileExtensions(mct.getBaseType()).get(0)).toString();
+                            } else {
+                                filename = new StringBuilder("video.").append(ext).toString();
+                            }
+                            mct.setNameParameter(filename);
+                            ct = mct.toString();
                         }
-                        mct.setNameParameter(filename);
-                        ct = mct.toString();
+                        part.setContent(content, ct);
+                        part.setHeader("Content-Type", ct);
+                        /*
+                         * Force base64 encoding to keep data as it is
+                         */
+                        part.setHeader("Content-Transfer-Encoding", "base64");
+                        {
+                            final MimeContentDisposition mcd = new MimeContentDisposition();
+                            mcd.setDisposition("attachment");
+                            mcd.setFilenameParameter(filename);
+                            part.setHeader("Content-Disposition", mcd.toString());
+                        }
+                        /*
+                         * Add to multipart
+                         */
+                        final MimeMultipartContent multipartContent = new MimeMultipartContent();
+                        multipartContent.addBodyPart(part);
+                        multipartProvider.setMultipartContent(multipartContent);
+                    } catch (final OXException e) {
+                        if (!MessagingExceptionCodes.IO_ERROR.equals(e)) {
+                            throw e;
+                        }
+                        // Something went wrong loading URL content... Ignore it
+                        LogFactory.getLog(FacebookFQLStreamParser.class).debug("Couldn't load URL: " + sourceURL, e);
                     }
-                    part.setContent(content, ct);
-                    part.setHeader("Content-Type", ct);
-                    /*
-                     * Force base64 encoding to keep data as it is
-                     */
-                    part.setHeader("Content-Transfer-Encoding", "base64");
-                    {
-                        final MimeContentDisposition mcd = new MimeContentDisposition();
-                        mcd.setDisposition("attachment");
-                        mcd.setFilenameParameter(filename);
-                        part.setHeader("Content-Disposition", mcd.toString());
-                    }
-                    /*
-                     * Add to multipart
-                     */
-                    final MimeMultipartContent multipartContent = new MimeMultipartContent();
-                    multipartContent.addBodyPart(part);
-                    multipartProvider.setMultipartContent(multipartContent);
                 }
 
             } // End of handleAttachment
@@ -428,29 +437,50 @@ public final class FacebookFQLStreamParser {
 
             @Override
             public void handleAttachment(final NodeList attachNodes, final int len, final FacebookMessagingMessage message, final MultipartProvider multipartProvider) throws OXException {
-                String sourceURL = null;
+                String sourceUrlBig = null; // src_big - The URL to the full-sized version of the photo being queried. The image can have a maximum width or height of 960px. This URL may be blank.
+                String sourceUrl = null; // src - The URL to the album view version of the photo being queried. The image can have a maximum width or height of 130px. This URL may be blank.
                 String ext = null;
                 /*
                  * "media" node
                  */
                 final Node media = getNodeByName("media", attachNodes, len);
+                // System.out.println(FacebookMessagingUtility.toString(media));
                 if (null != media) {
                     final Node streamMedia = getNodeByName("stream_media", media);
                     if (null != streamMedia) {
-                        /*
-                         * "src" node
-                         */
-                        final Node src = getNodeByName("src", streamMedia);
+                        Node src = getNodeByName("src_big", streamMedia);
                         if (null != src) {
-                            sourceURL = src.getTextContent();
-                            final int pos = sourceURL.lastIndexOf('.');
+                            sourceUrlBig = src.getTextContent();
+                            final int pos = sourceUrlBig.lastIndexOf('.');
                             if (pos >= 0) {
-                                final String extension = sourceURL.substring(pos + 1);
+                                final String extension = sourceUrlBig.substring(pos + 1);
                                 if (!"application/octet-stream".equals(Utility.getContentTypeByExtension(extension))) {
                                     /*
                                      * A known extension
                                      */
                                     ext = extension;
+                                }
+                            }
+                        } else {
+                            /*
+                             * "src" node
+                             */
+                            src = getNodeByName("src", streamMedia);
+                            if (null != src) {
+                                sourceUrl = src.getTextContent();
+                                final int pos = sourceUrl.lastIndexOf('.');
+                                if (pos >= 0) {
+                                    final String extension = sourceUrl.substring(pos + 1);
+                                    final String prefix = sourceUrl.substring(0, pos);
+                                    if (prefix.toLowerCase(Locale.US).endsWith("_s")) {
+                                        sourceUrl = prefix.substring(0, prefix.length() - 2) + "_b." + extension;
+                                    }
+                                    if (!"application/octet-stream".equals(Utility.getContentTypeByExtension(extension))) {
+                                        /*
+                                         * A known extension
+                                         */
+                                        ext = extension;
+                                    }
                                 }
                             }
                         }
@@ -459,13 +489,19 @@ public final class FacebookFQLStreamParser {
                 /*
                  * Source URL present?
                  */
-                if (null != sourceURL) {
-                    /*
-                     * TODO: Add as multipart/related?!?!
-                     */
+                if (null != sourceUrlBig) {
                     final StringBuilder messageText = message.getMessageText();
                     messageText.append(HTML_BR);
-                    messageText.append("<img src='").append(sourceURL);
+                    messageText.append("<img src='").append(sourceUrlBig);
+                    if (null == ext) {
+                        messageText.append("' />");
+                    } else {
+                        messageText.append("' alt=\"photo.").append(ext).append("\" />");
+                    }
+                } else if (null != sourceUrl) {
+                    final StringBuilder messageText = message.getMessageText();
+                    messageText.append(HTML_BR);
+                    messageText.append("<img src='").append(sourceUrl);
                     if (null == ext) {
                         messageText.append("' />");
                     } else {

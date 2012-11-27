@@ -672,16 +672,19 @@ public class RdbUserStorage extends UserStorage {
     private void setAttribute(final int contextId, final Connection con, final int userId, final String name, final String value, final int retryCount) throws SQLException {
         PreparedStatement stmt = null;
         boolean retry = false;
-        try {
-            stmt = con.prepareStatement("SELECT value FROM user_attribute WHERE cid=? AND id=? AND name=? FOR UPDATE");
-            int pos = 1;
-            stmt.setInt(pos++, contextId);
-            stmt.setInt(pos++, userId);
-            stmt.setString(pos, name);
-            stmt.executeQuery();
-        } finally {
-            closeSQLStuff(stmt);
-            stmt = null;
+        {
+            ResultSet rs = null;
+            try {
+                stmt = con.prepareStatement("SELECT value FROM user_attribute WHERE cid=? AND id=? AND name=? FOR UPDATE");
+                int pos = 1;
+                stmt.setInt(pos++, contextId);
+                stmt.setInt(pos++, userId);
+                stmt.setString(pos, name);
+                rs = stmt.executeQuery();
+            } finally {
+                closeSQLStuff(rs, stmt);
+                stmt = null;
+            }
         }
         try {
             stmt = con.prepareStatement("DELETE FROM user_attribute WHERE cid=? AND id=? AND name=?");

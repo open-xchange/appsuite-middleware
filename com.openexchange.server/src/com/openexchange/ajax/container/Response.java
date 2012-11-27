@@ -375,7 +375,7 @@ public final class Response {
      */
     @Deprecated
     public static void write(final Response response, final JSONWriter writer) throws JSONException {
-        ResponseWriter.write(response, writer);
+        ResponseWriter.write(response, writer, DEFAULT_LOCALE);
     }
 
     /**

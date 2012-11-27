@@ -59,7 +59,9 @@ import javax.servlet.ServletException;
 import net.htmlparser.jericho.Config;
 import net.htmlparser.jericho.LoggerProvider;
 import org.apache.commons.logging.Log;
+import org.json.CharArrayPool;
 import org.json.JSONObject;
+import org.json.JSONValue;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
@@ -137,6 +139,7 @@ import com.openexchange.html.HtmlService;
 import com.openexchange.i18n.I18nService;
 import com.openexchange.id.IDGeneratorService;
 import com.openexchange.index.IndexFacadeService;
+import com.openexchange.log.CommonsLoggingLogger;
 import com.openexchange.log.LogFactory;
 import com.openexchange.login.BlockingLoginHandlerService;
 import com.openexchange.login.LoginHandlerService;
@@ -330,10 +333,55 @@ public final class ServerActivator extends HousekeepingActivator {
         }
     }
 
+    private static int parseInt(final int index, final String[] sa, final int defaultValue) {
+        if (null == sa) {
+            return defaultValue;
+        }
+        if (index >= sa.length) {
+            return defaultValue;
+        }
+        final String toParse = sa[index];
+        if (null == toParse) {
+            return defaultValue;
+        }
+        try {
+            return Integer.parseInt(toParse.trim());
+        } catch (NumberFormatException e) {
+            LOG.error("Not an integer: " + toParse, e);
+            return defaultValue;
+        }
+    }
+
     @Override
     protected void startBundle() throws Exception {
         CONTEXT = context;
-        JSONObject.setMaxSize(getService(ConfigurationService.class).getIntProperty("com.openexchange.json.maxSize", 2500));
+        {
+            // Set logger
+            JSONObject.setLogger(new CommonsLoggingLogger(JSONValue.class));
+            // JSON configuration
+            final ConfigurationService service = getService(ConfigurationService.class);
+            JSONObject.setMaxSize(service.getIntProperty("com.openexchange.json.maxSize", 2500));
+            // Configure character array pool
+            if (service.getBoolProperty("com.openexchange.json.poolEnabled", false)) {
+                {
+                    final String s = service.getProperty("com.openexchange.json.poolSize", "10000, 1000, 10");
+                    final String[] sa = s.split(" *, *");
+                    final int smallPoolSize = parseInt(0, sa, 10000);
+                    final int mediumPoolSize = parseInt(1, sa, 1000);
+                    final int largePoolSize = parseInt(2, sa, 10);
+                    CharArrayPool.setCapacities(smallPoolSize, mediumPoolSize, largePoolSize);
+                }
+                {
+                    final String s = service.getProperty("com.openexchange.json.poolCharArrayLength", "1024, 10240, 102400");
+                    final String[] sa = s.split(" *, *");
+                    final int smallLength = parseInt(0, sa, 1024);
+                    final int mediumLength = parseInt(1, sa, 10240);
+                    final int largeLength = parseInt(2, sa, 102400);
+                    CharArrayPool.setLengths(smallLength, mediumLength, largeLength);                
+                }
+                JSONObject.initCharPool();
+            }
+        }
         Config.LoggerProvider = LoggerProvider.DISABLED;
         // get version information from MANIFEST file
         final Dictionary<?, ?> headers = context.getBundle().getHeaders();

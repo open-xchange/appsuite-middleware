@@ -75,7 +75,6 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.notify.State;
 import com.openexchange.groupware.search.AppointmentSearchObject;
 import com.openexchange.groupware.search.Order;
-import com.openexchange.log.LogFactory;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 import com.openexchange.tools.iterator.SearchIterator;
@@ -362,6 +361,11 @@ public class NotifyingCalendar extends ITipCalendarWrapper implements Appointmen
     @Override
     public int resolveUid(final String uid) throws OXException {
         return delegate.resolveUid(uid);
+    }
+
+    @Override
+    public int resolveFilename(final String filename) throws OXException {
+        return delegate.resolveFilename(filename);
     }
 
     @Override

@@ -92,7 +92,7 @@ public class Bug19226Test extends AbstractAJAXSession {
         String nodesStr = getNodesResp.getData().toString();
 
         assertTrue("Node module was not found.", nodesStr.contains("module"));
-        assertTrue("Node active was not found", nodesStr.contains("active"));
+        assertTrue("Node products was not found", nodesStr.contains("products"));
     }
 
     @Override

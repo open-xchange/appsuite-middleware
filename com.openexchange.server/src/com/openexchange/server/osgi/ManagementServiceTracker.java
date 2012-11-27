@@ -54,9 +54,11 @@ import static com.openexchange.monitoring.MonitorUtility.getObjectName;
 import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import org.osgi.framework.BundleContext;
 import com.openexchange.groupware.update.tools.UpdateTaskMBeanInit;
+import com.openexchange.json.JSONMBean;
+import com.openexchange.json.JSONMBeanImpl;
+import com.openexchange.log.LogFactory;
 import com.openexchange.management.ManagementService;
 import com.openexchange.osgi.BundleServiceTracker;
 import com.openexchange.report.internal.ReportingInit;
@@ -73,6 +75,7 @@ public final class ManagementServiceTracker extends BundleServiceTracker<Managem
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(ManagementServiceTracker.class));
 
     private ObjectName gadObjectName;
+    private ObjectName jsonObjectName;
 
     /**
      * Initializes a new {@link ManagementServiceTracker}
@@ -95,6 +98,9 @@ public final class ManagementServiceTracker extends BundleServiceTracker<Managem
              */
             gadObjectName = OXFolderProperties.registerRestorerMBean(managementService);
             managementService.registerMBean(getObjectName(mailInterfaceMonitor.getClass().getName(), true), mailInterfaceMonitor);
+            final ObjectName jsonObjectName = new ObjectName("org.json", "name", JSONMBean.class.getSimpleName());
+            this.jsonObjectName = jsonObjectName;
+            managementService.registerMBean(jsonObjectName, new JSONMBeanImpl());
         } catch (final MalformedObjectNameException e) {
             LOG.error(e.getMessage(), e);
         } catch (final NullPointerException e) {
@@ -114,6 +120,7 @@ public final class ManagementServiceTracker extends BundleServiceTracker<Managem
             /*
              * Remove all mbeans since management service now disappears
              */
+            managementService.unregisterMBean(jsonObjectName);
             managementService.unregisterMBean(getObjectName(mailInterfaceMonitor.getClass().getName(), true));
             OXFolderProperties.unregisterRestorerMBean(gadObjectName, managementService);
         } catch (final MalformedObjectNameException e) {

@@ -123,14 +123,18 @@ public class HTTPServletRegistration extends ServiceTracker<HttpService, HttpSer
         super.removedService(reference, service);
     }
 
-    /**
-     * Unregisters the Servlet manually.
-     */
-    public void unregister() {
-        close();
+    private void unregister0() {
         final HttpService service = getService();
         if (service != null) {
             service.unregister(alias);
         }
+    }
+
+    /**
+     * Unregisters the Servlet manually.
+     */
+    public void unregister() {
+        unregister0();
+        close();
     }
 }

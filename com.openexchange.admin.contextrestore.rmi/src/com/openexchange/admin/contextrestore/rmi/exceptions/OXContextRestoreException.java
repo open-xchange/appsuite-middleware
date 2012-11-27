@@ -173,6 +173,15 @@ public class OXContextRestoreException extends Exception {
         this.msgArgs = msgArgs;
     }
 
+    /**
+     * Constructor with parameters
+     * 
+     */
+    public OXContextRestoreException(final Code code, final Throwable cause, final String... msgArgs) {
+        super(code.getText(), cause);
+        this.msgArgs = msgArgs;
+    }
+
     @Override
     public String toString() {
         if (null != this.msgArgs) {

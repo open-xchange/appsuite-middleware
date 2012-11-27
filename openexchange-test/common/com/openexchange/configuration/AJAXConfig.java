@@ -60,7 +60,7 @@ public class AJAXConfig extends AbstractConfig {
 
     private static final TestConfig.Property KEY = TestConfig.Property.AJAX_PROPS;
 
-    private static AJAXConfig singleton;
+    private static volatile AJAXConfig singleton;
 
     /**
      * {@inheritDoc}
@@ -81,8 +81,12 @@ public class AJAXConfig extends AbstractConfig {
     public static void init() throws OXException {
         TestConfig.init();
         if (null == singleton) {
-            singleton = new AJAXConfig();
-            singleton.loadPropertiesInternal();
+            synchronized (AJAXConfig.class) {
+                if (null == singleton) {
+                    singleton = new AJAXConfig();
+                    singleton.loadPropertiesInternal();
+                }
+            }
         }
     }
 

@@ -10,4 +10,7 @@ Package: open-xchange-configjump-generic
 Architecture: all
 Pre-Depends: open-xchange-core (>= @OXVERSION@)
 Depends: ${misc:Depends}
-Description: The Open-Xchange generic ConfigJump
+Description: Generic implementation providing a URL for the settings Extras link
+ This package contains a bundle implementing the ConfigJumpService. This service always provides a URL that is opened in a new window when
+ clicking on the Extras link in the preferences module. To activate this in the UI the corresponding UI plugin needs to be installed, too.
+ That package is named open-xchange-configjump-generic-gui.

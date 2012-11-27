@@ -7,7 +7,7 @@ BuildRequires: ant-nodeps
 BuildRequires: open-xchange-core
 BuildRequires: java-devel >= 1.6.0
 Version:       @OXVERSION@
-%define        ox_release 1
+%define        ox_release 4
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -49,6 +49,24 @@ ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} 
 %config(noreplace) /opt/open-xchange/etc/*
 
 %changelog
+* Tue Nov 06 2012 Marc Arens <marc.arens@open-xchange.com>
+Fourth release candidate for 6.22.1
+* Fri Nov 02 2012 Marc Arens <marc.arens@open-xchange.com>
+Third release candidate for 6.22.1
+* Wed Oct 31 2012 Marc Arens <marc.arens@open-xchange.com>
+Second release candidate for 6.22.1
+* Fri Oct 26 2012 Marc Arens <marc.arens@open-xchange.com>
+First release candidate for 6.22.1
+* Fri Oct 26 2012 Marc Arens <marc.arens@open-xchange.com>
+prepare for 6.22.1
+* Fri Oct 26 2012 Marc Arens <marc.arens@open-xchange.com>
+prepare for 6.22.1
+* Fri Oct 26 2012 Marc Arens <marc.arens@open-xchange.com>
+Third release build for EDP drop #5
+* Fri Oct 26 2012 Marc Arens <marc.arens@open-xchange.com>
+Second release build for EDP drop #5
+* Thu Oct 11 2012 Marc Arens <marc.arens@open-xchange.com>
+Release build for EDP drop #5
 * Tue Sep 04 2012 Marc Arens <marc.arens@open-xchange.com>
 First release candidate for 6.23.0
 * Mon Sep 03 2012 Marc Arens <marc.arens@open-xchange.com>

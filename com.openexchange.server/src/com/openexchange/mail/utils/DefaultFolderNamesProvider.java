@@ -57,6 +57,7 @@ import static com.openexchange.mail.utils.StorageUtility.INDEX_SPAM;
 import static com.openexchange.mail.utils.StorageUtility.INDEX_TRASH;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.i18n.MailStrings;
+import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountDescription;
 import com.openexchange.mailaccount.MailAccountStorageService;
@@ -134,6 +135,26 @@ public final class DefaultFolderNamesProvider {
             mailAccount.getSpam(),
             mailAccount.getConfirmedSpam(),
             mailAccount.getConfirmedHam(),
+            isSpamEnabled);
+    }
+
+    /**
+     * Determines the default folder names (<b>not</b> names). The returned array of {@link String} indexes the names as given through
+     * constants: {@link StorageUtility#INDEX_DRAFTS}, {@link StorageUtility#INDEX_SENT}, etc.
+     *
+     * @param mailConfig The mail configuration providing the names
+     * @param isSpamEnabled <code>true</code> if spam is enabled for current user; otherwise <code>false</code>
+     * @return The default folder names as an array of {@link String}
+     */
+    public String[] getDefaultFolderNames(final MailConfig mailConfig, final boolean isSpamEnabled) {
+        final String[] standardNames = mailConfig.getStandardNames();
+        return getDefaultFolderNames(
+            standardNames[StorageUtility.INDEX_TRASH],
+            standardNames[StorageUtility.INDEX_SENT],
+            standardNames[StorageUtility.INDEX_DRAFTS],
+            standardNames[StorageUtility.INDEX_SPAM],
+            standardNames[StorageUtility.INDEX_CONFIRMED_SPAM],
+            standardNames[StorageUtility.INDEX_CONFIRMED_HAM],
             isSpamEnabled);
     }
 
@@ -251,6 +272,26 @@ public final class DefaultFolderNamesProvider {
 
     private static String extractFullname(final String fullnameParameter) {
         return null == fullnameParameter ? null : MailFolderUtility.prepareMailFolderParam(fullnameParameter).getFullname();
+    }
+
+    /**
+     * Determines the default folder full names (<b>not</b> names). The returned array of {@link String} indexes the names as given through
+     * constants: {@link StorageUtility#INDEX_DRAFTS}, {@link StorageUtility#INDEX_SENT}, etc.
+     *
+     * @param mailConfig The mail configuration providing the full names
+     * @param isSpamEnabled <code>true</code> if spam is enabled for current user; otherwise <code>false</code>
+     * @return The default folder full names as an array of {@link String}
+     */
+    public String[] getDefaultFolderFullnames(final MailConfig mailConfig, final boolean isSpamEnabled) {
+        final String[] standardFullNames = mailConfig.getStandardFullNames();
+        return getDefaultFolderFullnames(
+            standardFullNames[StorageUtility.INDEX_TRASH],
+            standardFullNames[StorageUtility.INDEX_SENT],
+            standardFullNames[StorageUtility.INDEX_DRAFTS],
+            standardFullNames[StorageUtility.INDEX_SPAM],
+            standardFullNames[StorageUtility.INDEX_CONFIRMED_SPAM],
+            standardFullNames[StorageUtility.INDEX_CONFIRMED_HAM],
+            isSpamEnabled);
     }
 
     /**

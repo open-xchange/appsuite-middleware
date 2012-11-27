@@ -656,7 +656,7 @@ msgstr "%1$s מעוניין שתשנה את הפגישה:"
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/Messages.java:158
 #, fuzzy
 msgid "%1$s has asked %2$s to change the event:"
-msgstr "$%1$s ביקש מ %2$s לשנות את הארוע:"
+msgstr "%1$s ביקש מ %2$s לשנות את הארוע:"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/Messages.java:160
 msgid "You have been invited to an event by %1$s:"

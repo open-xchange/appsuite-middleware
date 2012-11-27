@@ -79,32 +79,46 @@ public class ContactSearchObject extends SearchObject {
 
     private String department = null;
 
+    @Deprecated
     private String from = null, to = null;
 
+    @Deprecated
     private int ignoreOwn = 0;
 
+    @Deprecated
     private int[] dynamicSearchField = null;
 
+    @Deprecated
     private String[] dynamicSearchFieldValue = null;
 
+    @Deprecated
     private String[] privatePostalCodeRange = null;
 
+    @Deprecated
     private String[] businessPostalCodeRange = null;
 
+    @Deprecated
     private String[] otherPostalCodeRange = null;
 
+    @Deprecated
     private Date[] birthdayRange = null;
 
+    @Deprecated
     private Date[] anniversaryRange = null;
 
+    @Deprecated
     private String[] numberOfEmployeesRange = null;
 
+    @Deprecated
     private String[] salesVolumeRange = null;
 
+    @Deprecated
     private Date[] creationDateRange = null;
 
+    @Deprecated
     private Date[] lastModifiedRange = null;
 
+    @Deprecated
     private String allFolderSQLINString = null;
 
     private boolean startLetter = false;
@@ -117,26 +131,32 @@ public class ContactSearchObject extends SearchObject {
         super();
     }
 
+    @Deprecated
     public Date[] getAnniversaryRange() {
         return anniversaryRange;
     }
 
+    @Deprecated
     public void setAnniversaryRange(final Date[] anniversaryRange) {
         this.anniversaryRange = anniversaryRange;
     }
 
+    @Deprecated
     public Date[] getBirthdayRange() {
         return birthdayRange;
     }
 
+    @Deprecated
     public void setBirthdayRange(final Date[] birthdayRange) {
         this.birthdayRange = birthdayRange;
     }
 
+    @Deprecated
     public String[] getBusinessPostalCodeRange() {
         return businessPostalCodeRange;
     }
 
+    @Deprecated
     public void setBusinessPostalCodeRange(final String[] businessPostalCodeRange) {
         this.businessPostalCodeRange = businessPostalCodeRange;
     }
@@ -197,10 +217,12 @@ public class ContactSearchObject extends SearchObject {
         this.street_business = street_business;
     }
 
+    @Deprecated
     public Date[] getCreationDateRange() {
         return creationDateRange;
     }
 
+    @Deprecated
     public void setCreationDateRange(final Date[] creationDateRange) {
         this.creationDateRange = creationDateRange;
     }
@@ -213,18 +235,22 @@ public class ContactSearchObject extends SearchObject {
         this.displayName = displayName;
     }
 
+    @Deprecated
     public int[] getDynamicSearchField() {
         return dynamicSearchField;
     }
 
+    @Deprecated
     public void setDynamicSearchField(final int[] dynamicSearchField) {
         this.dynamicSearchField = dynamicSearchField;
     }
 
+    @Deprecated
     public String[] getDynamicSearchFieldValue() {
         return dynamicSearchFieldValue;
     }
 
+    @Deprecated
     public void setDynamicSearchFieldValue(final String[] dynamicSearchFieldValue) {
         this.dynamicSearchFieldValue = dynamicSearchFieldValue;
     }
@@ -233,18 +259,22 @@ public class ContactSearchObject extends SearchObject {
         return givenname;
     }
 
+    @Deprecated
     public String getAllFolderSQLINString(){
         return allFolderSQLINString;
     }
 
+    @Deprecated
     public int getIgnoreOwn(){
         return ignoreOwn;
     }
 
+    @Deprecated
     public void setIgnoreOwn(final int ignoreOwn){
         this.ignoreOwn = ignoreOwn;
     }
 
+    @Deprecated
     public void setAllFolderSQLINString(final String allFolderSQLINString){
         this.allFolderSQLINString = allFolderSQLINString;
     }
@@ -253,42 +283,52 @@ public class ContactSearchObject extends SearchObject {
         this.givenname = forename;
     }
 
+    @Deprecated
     public Date[] getLastModifiedRange() {
         return lastModifiedRange;
     }
 
+    @Deprecated
     public void setLastModifiedRange(final Date[] lastModifiedRange) {
         this.lastModifiedRange = lastModifiedRange;
     }
 
+    @Deprecated
     public String[] getNumberOfEmployeesRange() {
         return numberOfEmployeesRange;
     }
 
+    @Deprecated
     public void setNumberOfEmployeesRange(final String[] numberOfEmployeesRange) {
         this.numberOfEmployeesRange = numberOfEmployeesRange;
     }
 
+    @Deprecated
     public String[] getOtherPostalCodeRange() {
         return otherPostalCodeRange;
     }
 
+    @Deprecated
     public void setOtherPostalCodeRange(final String[] otherPostalCodeRange) {
         this.otherPostalCodeRange = otherPostalCodeRange;
     }
 
+    @Deprecated
     public String[] getPrivatePostalCodeRange() {
         return privatePostalCodeRange;
     }
 
+    @Deprecated
     public void setPrivatePostalCodeRange(final String[] privatePostalCodeRange) {
         this.privatePostalCodeRange = privatePostalCodeRange;
     }
 
+    @Deprecated
     public String[] getSalesVolumeRange() {
         return salesVolumeRange;
     }
 
+    @Deprecated
     public void setSalesVolumeRange(final String[] salesVolumeRange) {
         this.salesVolumeRange = salesVolumeRange;
     }
@@ -349,18 +389,22 @@ public class ContactSearchObject extends SearchObject {
 		this.yomiCompany = yomiCompany;
 	}
 
+    @Deprecated
 	public void setFrom(String from) {
 		this.from = from;
 	}
 
+    @Deprecated
 	public String getFrom() {
 		return from;
 	}
 
+    @Deprecated
 	public void setTo(String to) {
 		this.to = to;
 	}
 
+    @Deprecated
 	public String getTo() {
 		return to;
 	}

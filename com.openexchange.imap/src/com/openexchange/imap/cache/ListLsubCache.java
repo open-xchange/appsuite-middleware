@@ -278,6 +278,12 @@ public final class ListLsubCache {
      */
     public static ListLsubEntry getCachedLSUBEntry(final String fullName, final int accountId, final IMAPFolder imapFolder, final Session session) throws OXException, MessagingException {
         final ListLsubCollection collection = getCollection(accountId, imapFolder, session);
+        if (isAccessible(collection)) {
+            final ListLsubEntry entry = collection.getLsub(fullName);
+            if (null != entry && (entry.canOpen() || entry.isNamespace())) {
+                return entry;
+            }
+        }
         synchronized (collection) {
             if (checkTimeStamp(imapFolder, collection)) {
                 final ListLsubEntry entry = collection.getLsub(fullName);
@@ -313,6 +319,12 @@ public final class ListLsubCache {
         try {
             final IMAPFolder imapFolder = (IMAPFolder) imapStore.getFolder(INBOX);
             final ListLsubCollection collection = getCollection(accountId, imapFolder, session);
+            if (isAccessible(collection)) {
+                final ListLsubEntry entry = collection.getList(fullName);
+                if (null != entry && (entry.canOpen() || entry.isNamespace())) {
+                    return entry;
+                }
+            }
             synchronized (collection) {
                 if (checkTimeStamp(imapFolder, collection)) {
                     final ListLsubEntry entry = collection.getList(fullName);
@@ -396,6 +408,12 @@ public final class ListLsubCache {
      */
     public static ListLsubEntry getCachedLISTEntry(final String fullName, final int accountId, final IMAPFolder imapFolder, final Session session) throws OXException, MessagingException {
         final ListLsubCollection collection = getCollection(accountId, imapFolder, session);
+        if (isAccessible(collection)) {
+            final ListLsubEntry entry = collection.getList(fullName);
+            if (null != entry && (entry.canOpen() || entry.isNamespace() || entry.hasChildren())) {
+                return entry;
+            }
+        }
         synchronized (collection) {
             if (checkTimeStamp(imapFolder, collection)) {
                 final ListLsubEntry entry = collection.getList(fullName);
@@ -428,6 +446,10 @@ public final class ListLsubCache {
         return false;
     }
 
+    private static boolean isAccessible(final ListLsubCollection collection) {
+        return !collection.isDeprecated() && ((System.currentTimeMillis() - collection.getStamp()) <= TIMEOUT);
+    }
+
     /**
      * Gets cached LIST/LSUB entry for specified full name.
      *
@@ -441,6 +463,14 @@ public final class ListLsubCache {
      */
     public static ListLsubEntry[] getCachedEntries(final String fullName, final int accountId, final IMAPFolder imapFolder, final Session session) throws OXException, MessagingException {
         final ListLsubCollection collection = getCollection(accountId, imapFolder, session);
+        if (isAccessible(collection)) {
+            ListLsubEntry listEntry = collection.getList(fullName);
+            if (null != listEntry && (listEntry.canOpen() || listEntry.isNamespace())) {
+                final ListLsubEntry lsubEntry = collection.getLsub(fullName);
+                final ListLsubEntry emptyEntryFor = ListLsubCollection.emptyEntryFor(fullName);
+                return new ListLsubEntry[] { listEntry, lsubEntry == null ? emptyEntryFor : lsubEntry };
+            }
+        }
         synchronized (collection) {
             if (checkTimeStamp(imapFolder, collection)) {
                 final ListLsubEntry listEntry = collection.getLsub(fullName);
@@ -479,6 +509,9 @@ public final class ListLsubCache {
      */
     public static ListLsubEntry getDraftsEntry(final int accountId, final IMAPFolder imapFolder, final Session session) throws OXException, MessagingException {
         final ListLsubCollection collection = getCollection(accountId, imapFolder, session);
+        if (isAccessible(collection)) {
+            return collection.getDraftsEntry();
+        }
         synchronized (collection) {
             if (checkTimeStamp(imapFolder, collection)) {
                 return collection.getDraftsEntry();
@@ -504,6 +537,9 @@ public final class ListLsubCache {
      */
     public static ListLsubEntry getJunkEntry(final int accountId, final IMAPFolder imapFolder, final Session session) throws OXException, MessagingException {
         final ListLsubCollection collection = getCollection(accountId, imapFolder, session);
+        if (isAccessible(collection)) {
+            return collection.getJunkEntry();
+        }
         synchronized (collection) {
             if (checkTimeStamp(imapFolder, collection)) {
                 return collection.getJunkEntry();
@@ -529,6 +565,9 @@ public final class ListLsubCache {
      */
     public static ListLsubEntry getSentEntry(final int accountId, final IMAPFolder imapFolder, final Session session) throws OXException, MessagingException {
         final ListLsubCollection collection = getCollection(accountId, imapFolder, session);
+        if (isAccessible(collection)) {
+            return collection.getSentEntry();
+        }
         synchronized (collection) {
             if (checkTimeStamp(imapFolder, collection)) {
                 return collection.getSentEntry();
@@ -554,6 +593,9 @@ public final class ListLsubCache {
      */
     public static ListLsubEntry getTrashEntry(final int accountId, final IMAPFolder imapFolder, final Session session) throws OXException, MessagingException {
         final ListLsubCollection collection = getCollection(accountId, imapFolder, session);
+        if (isAccessible(collection)) {
+            return collection.getTrashEntry();
+        }
         synchronized (collection) {
             if (checkTimeStamp(imapFolder, collection)) {
                 return collection.getTrashEntry();
@@ -674,6 +716,9 @@ public final class ListLsubCache {
      */
     public static boolean hasAnySubscribedSubfolder(final String fullName, final int accountId, final IMAPFolder imapFolder, final Session session) throws OXException, MessagingException {
         final ListLsubCollection collection = getCollection(accountId, imapFolder, session);
+        if (isAccessible(collection)) {
+            return collection.hasAnySubscribedSubfolder(fullName);
+        }
         synchronized (collection) {
             checkTimeStamp(imapFolder, collection);
             return collection.hasAnySubscribedSubfolder(fullName);

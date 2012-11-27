@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.kata.appointments;
 
+import java.util.Arrays;
 import org.junit.ComparisonFailure;
 import com.openexchange.groupware.container.Participant;
 
@@ -73,8 +74,8 @@ public class ParticipantComparisonFailure extends ComparisonFailure {
     public ParticipantComparisonFailure(String message, Participant[] expected, Participant[] actual) {
         super(
             message,
-            expected == null ? null : expected.toString(),
-            actual == null ? null : expected.toString()
+            expected == null ? null : Arrays.toString(expected),
+            actual == null ? null : Arrays.toString(expected)
         );
         if(expected != null) {
             this.expectedParticipants = expected;

@@ -77,10 +77,12 @@ public class AtmosphereResourceCleanupListener implements AtmosphereResourceEven
 
     @Override
     public void onSuspend(AtmosphereResourceEvent event) {
+        // nothing to do, yet
     }
 
     @Override
     public void onResume(AtmosphereResourceEvent event) {
+     // nothing to do, yet
     }
 
     @Override
@@ -98,14 +100,17 @@ public class AtmosphereResourceCleanupListener implements AtmosphereResourceEven
 
     @Override
     public void onBroadcast(AtmosphereResourceEvent event) {
+     // nothing to do, yet
     }
 
     @Override
     public void onThrowable(AtmosphereResourceEvent event) {
+     // nothing to do, yet
     }
 
     @Override
     public void onPreSuspend(AtmosphereResourceEvent arg0) {
+     // nothing to do, yet
     }
 
 }

@@ -55,11 +55,12 @@ import com.openexchange.crypto.CryptoService;
 import com.openexchange.exception.OXException;
 import com.openexchange.nosql.cassandra.EmbeddedCassandraService;
 import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.osgi.ServiceRegistry;
 import com.openexchange.sessionstorage.SessionStorageService;
 import com.openexchange.sessionstorage.exceptions.OXSessionStorageExceptionCodes;
 import com.openexchange.sessionstorage.nosql.NoSQLSessionStorageConfiguration;
 import com.openexchange.sessionstorage.nosql.NoSQLSessionStorageService;
+import com.openexchange.sessionstorage.nosql.Services;
+import com.openexchange.sessionstorage.nosql.exceptions.OXNoSQLSessionStorageExceptionCodes;
 import com.openexchange.timer.TimerService;
 
 /**
@@ -69,34 +70,14 @@ import com.openexchange.timer.TimerService;
  */
 public class NoSQLSessionStorageActivator extends HousekeepingActivator {
 
-    private final Class<?>[] needed = { ConfigurationService.class, EmbeddedCassandraService.class, CryptoService.class, TimerService.class };
+    private volatile NoSQLSessionStorageService service;
 
-    private NoSQLSessionStorageService service;
-
-    private ConfigurationService configService;
-
-    private CryptoService cryptoService;
-
-    private TimerService timerService;
-
-    private ServiceRegistry registry;
-
-    private final Log log = com.openexchange.log.Log.loggerFor(NoSQLSessionStorageActivator.class);
-
-    /*
-     * (non-Javadoc)
-     * @see org.osgi.framework.BundleActivator#start(org.osgi.framework.BundleContext)
-     */
     @Override
     public void startBundle() throws Exception {
+        final Log log = com.openexchange.log.Log.loggerFor(NoSQLSessionStorageActivator.class);
         log.info("Starting bundle: com.openexchange.sessionstorage.nosql");
-        configService = getService(ConfigurationService.class);
-        cryptoService = getService(CryptoService.class);
-        timerService = getService(TimerService.class);
-        registry = NoSQLServiceRegistry.getRegistry();
-        registry.addService(ConfigurationService.class, configService);
-        registry.addService(CryptoService.class, cryptoService);
-        registry.addService(TimerService.class, timerService);
+        Services.setServiceLookup(this);
+        ConfigurationService configService = getService(ConfigurationService.class);
         boolean enabled = configService.getBoolProperty("com.openexchange.sessionstorage.nosql.enabled", false);
         if (enabled) {
             String host = configService.getProperty("com.openexchange.sessionstorage.nosql.host", "localhost");
@@ -117,31 +98,30 @@ public class NoSQLSessionStorageActivator extends HousekeepingActivator {
                 cf_name,
                 defaultLifetime,
                 encryptionKey,
-                cryptoService,
-                timerService);
-            service = new NoSQLSessionStorageService(config);
-            registerService(SessionStorageService.class, service);
+                getService(CryptoService.class),
+                getService(TimerService.class));
+            NoSQLSessionStorageService service = new NoSQLSessionStorageService(config);
+            registerService(SessionStorageService.class, new NoSQLSessionStorageService(config));
+            this.service = service;
         }
     }
 
-    /*
-     * (non-Javadoc)
-     * @see org.osgi.framework.BundleActivator#stop(org.osgi.framework.BundleContext)
-     */
     @Override
     public void stopBundle() throws Exception {
+        final Log log = com.openexchange.log.Log.loggerFor(NoSQLSessionStorageActivator.class);
         log.info("Stopping bundle: com.openexchange.sessionstorage.nosql");
+        final NoSQLSessionStorageService service = this.service;
         if (service != null) {
             service.removeCleanupTask();
-            unregisterServices();
+            this.service = null;
         }
-        closeTrackers();
         cleanUp();
+        Services.setServiceLookup(null);
     }
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return needed;
+        return new Class<?>[] { ConfigurationService.class, EmbeddedCassandraService.class, CryptoService.class, TimerService.class };
     }
 
 }

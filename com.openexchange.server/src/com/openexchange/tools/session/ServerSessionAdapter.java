@@ -410,5 +410,10 @@ public class ServerSessionAdapter implements ServerSession, PutIfAbsent {
     public void setHash(final String hash) {
         session().setHash(hash);
     }
+    
+    @Override
+    public boolean isAnonymous() {
+    	return session.getUserId() == 0;
+    }
 
 }

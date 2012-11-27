@@ -71,7 +71,7 @@ public class MockSolrFilestoreIndexAccess extends SolrInfostoreIndexAccess {
      * Initializes a new {@link MockSolrFilestoreIndexAccess}.
      */
     public MockSolrFilestoreIndexAccess() {
-        super(new SolrCoreIdentifier(1, 1, 1));
+        super(new SolrCoreIdentifier(1, 1, 1), null);
         index = new InMemoryIndex();
     }
     
@@ -81,7 +81,7 @@ public class MockSolrFilestoreIndexAccess extends SolrInfostoreIndexAccess {
     }
     
     @Override
-    protected UpdateResponse addDocument(SolrInputDocument document) throws OXException {
+    protected UpdateResponse addSolrDocument(SolrInputDocument document) throws OXException {
         return index.addDocument(document);
     }
 

@@ -114,4 +114,10 @@ public class SimICalParser implements ICalParser{
 		return Collections.emptyList();
 	}
 
+	@Override
+	public void setLimit(int amount) {
+		// TODO Auto-generated method stub
+		
+	}
+
 }

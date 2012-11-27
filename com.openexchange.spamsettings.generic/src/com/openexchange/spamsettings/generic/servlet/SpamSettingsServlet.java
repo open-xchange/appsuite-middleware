@@ -48,13 +48,14 @@ public final class SpamSettingsServlet extends PermissionServlet {
 
         final Response response = new Response();
 
+        final ServerSession session = getSessionObject(req);
         try {
             final String action = JSONUtility.checkStringParameter(req, "action");
             if ("get".equals(action)) {
                 final JSONObject result = new JSONObject();
-                result.put("formDescription", new SpamSettingsWriter().write(getSessionObject(req)));
+                result.put("formDescription", new SpamSettingsWriter().write(session));
                 final SpamSettingService service = SpamSettingsServiceRegistry.getServiceRegistry().getService(SpamSettingService.class);
-                result.put("value", getValue(getSessionObject(req), service));
+                result.put("value", getValue(session, service));
                 response.setData(result);
             }
         } catch (final OXException e) {
@@ -69,7 +70,7 @@ public final class SpamSettingsServlet extends PermissionServlet {
          * Close response and flush print writer
          */
         try {
-            ResponseWriter.write(response, resp.getWriter());
+            ResponseWriter.write(response, resp.getWriter(), localeFrom(session));
         } catch (final JSONException e) {
             LOG.error(e.getLocalizedMessage(), e);
         }
@@ -115,7 +116,7 @@ public final class SpamSettingsServlet extends PermissionServlet {
          * Close response and flush print writer
          */
         try {
-            ResponseWriter.write(response, resp.getWriter());
+            ResponseWriter.write(response, resp.getWriter(), localeFrom(getSessionObject(req)));
         } catch (final JSONException e) {
             LOG.error(e.getLocalizedMessage(), e);
         }

@@ -166,6 +166,21 @@ public abstract class OXFolderManager {
     public abstract FolderObject updateFolder(FolderObject fo, boolean checkPermissions, long lastModified) throws OXException;
 
     /**
+     * Updates an existing folder according to changes contained in given folder object. <b>NOTE:</b> given instance of
+     * <tt>FolderObject</tt> is going to be completely filled from storage. Thus it does not matter if you further work on this routine's
+     * return value or with parameter value.
+     * <p>
+     * Possible operations here: rename, move and/or permissions update: When a rename should be performed, given folder object should
+     * contain field 'folder name', so that invocation of <tt>FolderObject.containsFolderName()</tt> returns <tt>true</tt>. If a move should
+     * be done, routine <tt>FolderObject.containsParentFolderID()</tt> should return <tt>true</tt>. Last, but not least, if an update of
+     * folder's permissions should be done, routine <tt>FolderObject.containsPermissions()</tt> should return <tt>true</tt>.
+     * </p>
+     *
+     * @return An instance of <tt>FolderObject</tt> representing modified folder
+     */
+    public abstract FolderObject updateFolder(FolderObject fo, boolean checkPermissions, boolean handDown, long lastModified) throws OXException;
+
+    /**
      * Deletes a folder identified by given folder object. This operation causes a recursive traversal of all folder's subfolders to check
      * if user can delete them, too. Furthermore user's permission on contained objects are checked as well. <b>NOTE:</b> given instance of
      * <tt>FolderObject</tt> is going to be completely filled from storage. Thus it does not matter if you further work on this routine's

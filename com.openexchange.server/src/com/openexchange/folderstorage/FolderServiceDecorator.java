@@ -50,11 +50,14 @@
 package com.openexchange.folderstorage;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 import java.util.TimeZone;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -202,6 +205,40 @@ public final class FolderServiceDecorator {
         return properties.get(propertyName);
     }
 
+    private static final Set<String> BOOL_VALS = Collections.unmodifiableSet(new HashSet<String>(Arrays.asList(
+        "true",
+        "1",
+        "yes",
+        "y",
+        "on")));
+
+    /**
+     * Parses denoted <tt>boolean</tt> value from specified <tt>String</tt> parameter.
+     * <p>
+     * <code>true</code> if given value is not <code>null</code> and equals ignore-case to one of the values "true", "yes", "y", "on", or
+     * "1".
+     * 
+     * @param name The parameter
+     * @return The parsed <tt>boolean</tt> value (<code>false</code> on absence)
+     */
+    public boolean getBoolProperty(final String name) {
+        if (null == name) {
+            return false;
+        }
+        final Object value = properties.get(name);
+        return (null != value) && BOOL_VALS.contains(value.toString().trim().toLowerCase(Locale.ENGLISH));
+    }
+
+    /**
+     * Checks whether to hand-down permissions on update operation.
+     *
+     * @return <code>true</code> to hand down; otherwise <code>false</code>
+     */
+    public boolean isHandDownPermissions() {
+        final Object permissionsHandling = properties.get("permissions");
+        return null != permissionsHandling && "inherit".equalsIgnoreCase(permissionsHandling.toString());
+    }
+    
     /**
      * Gets this decorator's properties.
      *

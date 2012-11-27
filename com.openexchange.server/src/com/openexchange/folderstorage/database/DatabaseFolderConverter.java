@@ -52,7 +52,6 @@ package com.openexchange.folderstorage.database;
 import gnu.trove.list.TIntList;
 import gnu.trove.map.TIntObjectMap;
 import gnu.trove.map.hash.TIntObjectHashMap;
-import gnu.trove.procedure.TIntProcedure;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -67,6 +66,7 @@ import com.openexchange.folderstorage.database.getfolder.SystemInfostoreFolder;
 import com.openexchange.folderstorage.database.getfolder.SystemPrivateFolder;
 import com.openexchange.folderstorage.database.getfolder.SystemPublicFolder;
 import com.openexchange.folderstorage.database.getfolder.SystemSharedFolder;
+import com.openexchange.folderstorage.database.getfolder.VirtualListFolder;
 import com.openexchange.folderstorage.type.PrivateType;
 import com.openexchange.folderstorage.type.SharedType;
 import com.openexchange.groupware.container.FolderObject;
@@ -283,6 +283,30 @@ public final class DatabaseFolderConverter {
                 retval.setName(FolderStrings.DEFAULT_EMAIL_ATTACHMENTS_FOLDER_NAME);
             } else {
                 retval = new DatabaseFolder(fo);
+                /*-
+                 * If enabled performance need to be improved for:
+                 * 
+                 * VirtualListFolder.getVirtualListFolderSubfolders(int, User, UserConfiguration, Context, Connection)
+                 */
+                final boolean checkIfVirtuallyReachable = false;
+                if (checkIfVirtuallyReachable) {
+                    /*-
+                     * Does it appear below virtual folder?:
+                     * 
+                     * FolderObject.VIRTUAL_LIST_TASK_FOLDER_ID, FolderObject.VIRTUAL_LIST_CALENDAR_FOLDER_ID,
+                     * FolderObject.VIRTUAL_LIST_CONTACT_FOLDER_ID, FolderObject.VIRTUAL_LIST_INFOSTORE_FOLDER_ID
+                     */
+                    final int virtualParent = getPossibleVirtualParent(fo);
+                    if (virtualParent > 0) {
+                        final String sFolderId = Integer.toString(folderId);
+                        for (final String[] arr : VirtualListFolder.getVirtualListFolderSubfolders(virtualParent, user, userConfiguration, ctx, con)) {
+                            if (sFolderId.equals(arr[0])) {
+                                retval.setParentID(Integer.toString(virtualParent));
+                                break;
+                            }
+                        }
+                    }
+                }
             }
             final int userId = user.getId();
             final int[] groups = user.getGroups();
@@ -330,7 +354,7 @@ public final class DatabaseFolderConverter {
                  * Set subfolders for folder.
                  */
                 if (FolderObject.SYSTEM_USER_INFOSTORE_FOLDER_ID == folderId) {
-                    boolean lookupDb = true;
+                    boolean setChildren = true;
                     if (!InfostoreFacades.isInfoStoreAvailable()) {
                         final FileStorageAccount defaultAccount = getDefaultFileStorageAccess(session);
                         if (null != defaultAccount) {
@@ -338,10 +362,10 @@ public final class DatabaseFolderConverter {
                              * Enforce subfolders are retrieved from appropriate file storage
                              */
                             retval.setSubfolderIDs(null);
-                            lookupDb = false;
+                            setChildren = false;
                         }
                     }
-                    if (lookupDb) {
+                    if (setChildren) {
                         /*
                          * User-sensitive loading of user infostore folder
                          */
@@ -353,7 +377,7 @@ public final class DatabaseFolderConverter {
                             final int len = subfolders.size();
                             final String[] arr = new String[len];
                             for (int i = 0; i < len; i++) {
-                                arr[i] = String.valueOf(subfolders.get(i));
+                                arr[i] = Integer.toString(subfolders.get(i));
                             }
                             retval.setSubfolderIDs(arr);
                             retval.setSubscribedSubfolders(true);
@@ -364,52 +388,56 @@ public final class DatabaseFolderConverter {
                      */
                     retval.setCacheable(true);
                     retval.setGlobal(false);
-                } else if (FolderObject.SYSTEM_PUBLIC_INFOSTORE_FOLDER_ID == folderId) {
-                    if (!InfostoreFacades.isInfoStoreAvailable()) {
-                        final FileStorageAccount defaultAccount = getDefaultFileStorageAccess(session);
-                        if (null != defaultAccount) {
-                            /*
-                             * Enforce subfolders are retrieved from appropriate file storage
-                             */
-                            retval.setSubfolderIDs(null);
-                            /*
-                             * Mark for user-sensitive cache
-                             */
-                            retval.setCacheable(true);
-                            retval.setGlobal(false);
+                } else {
+                    /*
+                     * Any folder different from private and user-store folder
+                     */
+                    boolean setChildren = true;
+                    if (FolderObject.SYSTEM_PUBLIC_INFOSTORE_FOLDER_ID == folderId) {
+                        if (!InfostoreFacades.isInfoStoreAvailable()) {
+                            final FileStorageAccount defaultAccount = getDefaultFileStorageAccess(session);
+                            if (null != defaultAccount) {
+                                /*
+                                 * Enforce subfolders are retrieved from appropriate file storage
+                                 */
+                                retval.setSubfolderIDs(null);
+                                /*
+                                 * Mark for user-sensitive cache
+                                 */
+                                retval.setCacheable(true);
+                                retval.setGlobal(false);
+                                setChildren = false;
+                            }
                         }
                     }
-                } else {
-                    if (fo.containsSubfolderIds()) {
-                        final List<Integer> subfolderIds = fo.getSubfolderIds();
-                        if (subfolderIds.isEmpty()) {
-                            retval.setSubfolderIDs(new String[0]);
-                            retval.setSubscribedSubfolders(false);
-                        } else {
-                            final List<String> tmp = new ArrayList<String>(subfolderIds.size());
-                            for (final Integer id : subfolderIds) {
-                                tmp.add(id.toString());
-                            }
-                            retval.setSubfolderIDs(tmp.toArray(new String[tmp.size()]));
-                            retval.setSubscribedSubfolders(true);
-                        }
-                    } else {
-                        final TIntList subfolderIds = OXFolderLoader.getSubfolderInts(folderId, ctx, con);
-                        if (subfolderIds.isEmpty()) {
-                            retval.setSubfolderIDs(new String[0]);
-                            retval.setSubscribedSubfolders(false);
-                        } else {
-                            final List<String> tmp = new ArrayList<String>(subfolderIds.size());
-                            subfolderIds.forEach(new TIntProcedure() {
-
-                                @Override
-                                public boolean execute(final int id) {
-                                    tmp.add(String.valueOf(id));
-                                    return true;
+                    if (setChildren) {
+                        if (fo.containsSubfolderIds()) {
+                            final List<Integer> subfolderIds = fo.getSubfolderIds();
+                            if (subfolderIds.isEmpty()) {
+                                retval.setSubfolderIDs(new String[0]);
+                                retval.setSubscribedSubfolders(false);
+                            } else {
+                                final List<String> tmp = new ArrayList<String>(subfolderIds.size());
+                                for (final Integer id : subfolderIds) {
+                                    tmp.add(id.toString());
                                 }
-                            });
-                            retval.setSubfolderIDs(tmp.toArray(new String[tmp.size()]));
-                            retval.setSubscribedSubfolders(true);
+                                retval.setSubfolderIDs(tmp.toArray(new String[tmp.size()]));
+                                retval.setSubscribedSubfolders(true);
+                            }
+                        } else {
+                            final TIntList subfolderIds = OXFolderLoader.getSubfolderInts(folderId, ctx, con);
+                            if (subfolderIds.isEmpty()) {
+                                retval.setSubfolderIDs(new String[0]);
+                                retval.setSubscribedSubfolders(false);
+                            } else {
+                                final int len = subfolderIds.size();
+                                final String[] arr = new String[len];
+                                for (int i = 0; i < len; i++) {
+                                    arr[i] = Integer.toString(subfolderIds.get(i));
+                                }
+                                retval.setSubfolderIDs(arr);
+                                retval.setSubscribedSubfolders(true);
+                            }
                         }
                     }
                 }
@@ -417,6 +445,21 @@ public final class DatabaseFolderConverter {
             return retval;
         } catch (final SQLException e) {
             throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
+        }
+    }
+
+    private static int getPossibleVirtualParent(final FolderObject fo) {
+        switch (fo.getModule()) {
+        case FolderObject.TASK:
+            return FolderObject.VIRTUAL_LIST_TASK_FOLDER_ID;
+        case FolderObject.CONTACT:
+            return FolderObject.VIRTUAL_LIST_CONTACT_FOLDER_ID;
+        case FolderObject.CALENDAR:
+            return FolderObject.VIRTUAL_LIST_CALENDAR_FOLDER_ID;
+        case FolderObject.INFOSTORE:
+            return FolderObject.VIRTUAL_LIST_INFOSTORE_FOLDER_ID;
+        default:
+            return 0;
         }
     }
 

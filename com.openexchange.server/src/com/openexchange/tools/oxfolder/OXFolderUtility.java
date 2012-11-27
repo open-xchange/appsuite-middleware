@@ -865,8 +865,11 @@ public final class OXFolderUtility {
      * @return The folder name for logging/messaging purpose
      */
     public static String getFolderName(final FolderObject fo) {
-        return new StringBuilder().append(fo.getFolderName() == null ? STR_EMPTY : fo.getFolderName()).append(" (").append(fo.getObjectID()).append(
-            ')').toString();
+        final String folderName = fo.getFolderName();
+        if (null == folderName) {
+            return Integer.toString(fo.getObjectID());
+        }
+        return new StringBuilder().append(folderName).append(" (").append(fo.getObjectID()).append(')').toString();
     }
 
     /**

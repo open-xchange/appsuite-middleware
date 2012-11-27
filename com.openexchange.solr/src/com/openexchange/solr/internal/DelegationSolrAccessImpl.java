@@ -49,7 +49,7 @@
 
 package com.openexchange.solr.internal;
 
-import java.net.InetSocketAddress;
+import java.rmi.AccessException;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
@@ -72,13 +72,14 @@ import com.hazelcast.core.IMap;
 import com.hazelcast.core.Member;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
+import com.openexchange.exception.OXExceptionConstants;
 import com.openexchange.log.LogFactory;
 import com.openexchange.solr.SolrAccessService;
 import com.openexchange.solr.SolrCoreIdentifier;
 import com.openexchange.solr.SolrExceptionCodes;
 import com.openexchange.solr.SolrProperties;
-import com.openexchange.solr.osgi.SolrActivator;
 import com.openexchange.solr.rmi.RMISolrAccessService;
+import com.openexchange.solr.rmi.RMISolrException;
 
 /**
  * {@link DelegationSolrAccessImpl}
@@ -86,8 +87,6 @@ import com.openexchange.solr.rmi.RMISolrAccessService;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public class DelegationSolrAccessImpl implements SolrAccessService {
-
-    public static final String SOLR_CORE_MAP = "solrCoreMap";
 
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(DelegationSolrAccessImpl.class));
 
@@ -109,13 +108,16 @@ public class DelegationSolrAccessImpl implements SolrAccessService {
      */
     @Override
     public UpdateResponse add(SolrCoreIdentifier identifier, SolrInputDocument document, boolean commit) throws OXException {
-        SolrAccessService delegate = getDelegate(identifier);
-        UpdateResponse response = delegate.add(identifier, document, commit);
-        if (LOG.isDebugEnabled()) {
-            LOG.debug("Add took " + response.getElapsedTime() + "ms for 1 document.");
+        long start = System.currentTimeMillis();
+        try {
+            SolrAccessService delegate = getDelegate(identifier);
+            return delegate.add(identifier, document, commit);
+        } finally {
+            if (LOG.isDebugEnabled()) {
+                long diff = System.currentTimeMillis() - start;
+                LOG.debug("Add took " + diff + "ms for 1 document.");
+            }
         }
-
-        return response;
     }
 
     /**
@@ -128,13 +130,17 @@ public class DelegationSolrAccessImpl implements SolrAccessService {
      */
     @Override
     public UpdateResponse add(SolrCoreIdentifier identifier, Collection<SolrInputDocument> documents, boolean commit) throws OXException {
-        SolrAccessService delegate = getDelegate(identifier);
-        UpdateResponse response = delegate.add(identifier, documents, commit);
-        if (LOG.isDebugEnabled()) {
-            LOG.debug("Add took " + response.getElapsedTime() + "ms for " + documents.size() + " documents.");
+        long start = System.currentTimeMillis();
+        try {
+            SolrAccessService delegate = getDelegate(identifier);
+            UpdateResponse response = delegate.add(identifier, documents, commit);
+            return response;
+        } finally {
+            if (LOG.isDebugEnabled()) {
+                long diff = System.currentTimeMillis() - start;
+                LOG.debug("Add took " + diff + "ms for " + documents.size() + " documents.");
+            }
         }
-
-        return response;
     }
 
     /**
@@ -147,13 +153,17 @@ public class DelegationSolrAccessImpl implements SolrAccessService {
      */
     @Override
     public UpdateResponse deleteById(SolrCoreIdentifier identifier, String id, boolean commit) throws OXException {
-        SolrAccessService delegate = getDelegate(identifier);
-        UpdateResponse response = delegate.deleteById(identifier, id, commit);
-        if (LOG.isDebugEnabled()) {
-            LOG.debug("Delete took " + response.getElapsedTime() + "ms for 1 document.");
+        long start = System.currentTimeMillis();
+        try {
+            SolrAccessService delegate = getDelegate(identifier);
+            UpdateResponse response = delegate.deleteById(identifier, id, commit);
+            return response;
+        } finally {
+            if (LOG.isDebugEnabled()) {
+                long diff = System.currentTimeMillis() - start;
+                LOG.debug("Delete by id took " + diff + "ms.");
+            }
         }
-
-        return response;
     }
 
     /**
@@ -166,13 +176,17 @@ public class DelegationSolrAccessImpl implements SolrAccessService {
      */
     @Override
     public UpdateResponse deleteByQuery(SolrCoreIdentifier identifier, String query, boolean commit) throws OXException {
-        SolrAccessService delegate = getDelegate(identifier);
-        UpdateResponse response = delegate.deleteByQuery(identifier, query, commit);
-        if (LOG.isDebugEnabled()) {
-            LOG.debug("Delete took " + response.getElapsedTime() + "ms for query " + query + ".");
+        long start = System.currentTimeMillis();
+        try {
+            SolrAccessService delegate = getDelegate(identifier);
+            UpdateResponse response = delegate.deleteByQuery(identifier, query, commit);
+            return response;
+        } finally {
+            if (LOG.isDebugEnabled()) {
+                long diff = System.currentTimeMillis() - start;
+                LOG.debug("Delete by query took " + diff + "ms.");
+            }
         }
-
-        return response;
     }
 
     /**
@@ -183,13 +197,17 @@ public class DelegationSolrAccessImpl implements SolrAccessService {
      */
     @Override
     public UpdateResponse commit(SolrCoreIdentifier identifier) throws OXException {
-        SolrAccessService delegate = getDelegate(identifier);
-        UpdateResponse response = delegate.commit(identifier);
-        if (LOG.isDebugEnabled()) {
-            LOG.debug("Commit took " + response.getElapsedTime() + "ms.");
+        long start = System.currentTimeMillis();
+        try {
+            SolrAccessService delegate = getDelegate(identifier);
+            UpdateResponse response = delegate.commit(identifier);
+            return response;
+        } finally {
+            if (LOG.isDebugEnabled()) {
+                long diff = System.currentTimeMillis() - start;
+                LOG.debug("Commit took " + diff + "ms.");
+            }
         }
-
-        return response;
     }
 
     /**
@@ -202,13 +220,17 @@ public class DelegationSolrAccessImpl implements SolrAccessService {
      */
     @Override
     public UpdateResponse commit(SolrCoreIdentifier identifier, boolean waitFlush, boolean waitSearcher) throws OXException {
-        SolrAccessService delegate = getDelegate(identifier);
-        UpdateResponse response = delegate.commit(identifier, waitFlush, waitSearcher);
-        if (LOG.isDebugEnabled()) {
-            LOG.debug("Commit took " + response.getElapsedTime() + "ms.");
+        long start = System.currentTimeMillis();
+        try {
+            SolrAccessService delegate = getDelegate(identifier);
+            UpdateResponse response = delegate.commit(identifier, waitFlush, waitSearcher);
+            return response;
+        } finally {
+            if (LOG.isDebugEnabled()) {
+                long diff = System.currentTimeMillis() - start;
+                LOG.debug("Commit took " + diff + "ms.");
+            }
         }
-
-        return response;
     }
 
     /**
@@ -219,13 +241,17 @@ public class DelegationSolrAccessImpl implements SolrAccessService {
      */
     @Override
     public UpdateResponse rollback(SolrCoreIdentifier identifier) throws OXException {
-        SolrAccessService delegate = getDelegate(identifier);
-        UpdateResponse response = delegate.rollback(identifier);
-        if (LOG.isDebugEnabled()) {
-            LOG.debug("Rollback took " + response.getElapsedTime() + "ms.");
+        long start = System.currentTimeMillis();
+        try {
+            SolrAccessService delegate = getDelegate(identifier);
+            UpdateResponse response = delegate.rollback(identifier);
+            return response;
+        } finally {
+            if (LOG.isDebugEnabled()) {
+                long diff = System.currentTimeMillis() - start;
+                LOG.debug("Rollback took " + diff + "ms.");
+            }
         }
-
-        return response;
     }
 
     /**
@@ -236,13 +262,17 @@ public class DelegationSolrAccessImpl implements SolrAccessService {
      */
     @Override
     public UpdateResponse optimize(SolrCoreIdentifier identifier) throws OXException {
-        SolrAccessService delegate = getDelegate(identifier);
-        UpdateResponse response = delegate.optimize(identifier);
-        if (LOG.isDebugEnabled()) {
-            LOG.debug("Optimize took " + response.getElapsedTime() + "ms.");
+        long start = System.currentTimeMillis();
+        try {
+            SolrAccessService delegate = getDelegate(identifier);
+            UpdateResponse response = delegate.optimize(identifier);
+            return response;
+        } finally {
+            if (LOG.isDebugEnabled()) {
+                long diff = System.currentTimeMillis() - start;
+                LOG.debug("Optimize took " + diff + "ms.");
+            }
         }
-
-        return response;
     }
 
     /**
@@ -255,13 +285,17 @@ public class DelegationSolrAccessImpl implements SolrAccessService {
      */
     @Override
     public UpdateResponse optimize(SolrCoreIdentifier identifier, boolean waitFlush, boolean waitSearcher) throws OXException {
-        SolrAccessService delegate = getDelegate(identifier);
-        UpdateResponse response = delegate.optimize(identifier, waitFlush, waitSearcher);
-        if (LOG.isDebugEnabled()) {
-            LOG.debug("Optimize took " + response.getElapsedTime() + "ms.");
+        long start = System.currentTimeMillis();
+        try {
+            SolrAccessService delegate = getDelegate(identifier);
+            UpdateResponse response = delegate.optimize(identifier, waitFlush, waitSearcher);
+            return response;
+        } finally {
+            if (LOG.isDebugEnabled()) {
+                long diff = System.currentTimeMillis() - start;
+                LOG.debug("Optimize took " + diff + "ms.");
+            }
         }
-
-        return response;
     }
 
     /**
@@ -275,13 +309,17 @@ public class DelegationSolrAccessImpl implements SolrAccessService {
      */
     @Override
     public UpdateResponse optimize(SolrCoreIdentifier identifier, boolean waitFlush, boolean waitSearcher, int maxSegments) throws OXException {
-        SolrAccessService delegate = getDelegate(identifier);
-        UpdateResponse response = delegate.optimize(identifier, waitFlush, waitSearcher, maxSegments);
-        if (LOG.isDebugEnabled()) {
-            LOG.debug("Optimize took " + response.getElapsedTime() + "ms.");
+        long start = System.currentTimeMillis();
+        try {
+            SolrAccessService delegate = getDelegate(identifier);
+            UpdateResponse response = delegate.optimize(identifier, waitFlush, waitSearcher, maxSegments);
+            return response;
+        } finally {
+            if (LOG.isDebugEnabled()) {
+                long diff = System.currentTimeMillis() - start;
+                LOG.debug("Optimize took " + diff + "ms.");
+            }
         }
-
-        return response;
     }
 
     /**
@@ -294,42 +332,47 @@ public class DelegationSolrAccessImpl implements SolrAccessService {
      */
     @Override
     public QueryResponse query(SolrCoreIdentifier identifier, SolrParams params) throws OXException {
-        SolrAccessService delegate = getDelegate(identifier);
-        QueryResponse response = delegate.query(identifier, params);
-        if (LOG.isDebugEnabled()) {
-            LOG.debug("Query took " + response.getElapsedTime() + "ms and returned " + response.getResults().size() + " elements.");
+        long start = System.currentTimeMillis();
+        try {
+            SolrAccessService delegate = getDelegate(identifier);
+            QueryResponse response = delegate.query(identifier, params);
+            return response;
+        } finally {
+            if (LOG.isDebugEnabled()) {
+                long diff = System.currentTimeMillis() - start;
+                LOG.debug("Query took " + diff + "ms.");
+            }
         }
-
-        return response;
     }
 
     @Override
     public void freeResources(SolrCoreIdentifier identifier) {
         if (embeddedAccess.hasActiveCore(identifier)) {
             HazelcastInstance hazelcast = Services.getService(HazelcastInstance.class);
-            IMap<String, String> solrCores = hazelcast.getMap(SOLR_CORE_MAP);
+            IMap<String, String> solrCores = hazelcast.getMap(SolrCoreTools.SOLR_CORE_MAP);
             solrCores.lock(identifier.toString());
-            try {                
-                decrementCoreCount(hazelcast, hazelcast.getCluster().getLocalMember());
+            try {
+                SolrCoreTools.decrementCoreCount(hazelcast, hazelcast.getCluster().getLocalMember());
                 solrCores.remove(identifier.toString());
                 embeddedAccess.freeResources(identifier);
             } finally {
                 solrCores.unlock(identifier.toString());
-            }            
+            }
         }
     }
 
     public void shutDown() throws OXException {
         HazelcastInstance hazelcast = Services.getService(HazelcastInstance.class);
-        Collection<String> activeCores = embeddedAccess.getActiveCores();
-        IMap<String, Integer> solrNodes = hazelcast.getMap(SolrActivator.SOLR_NODE_MAP);
-        String localAddress = hazelcast.getCluster().getLocalMember().getInetSocketAddress().getAddress().getHostAddress();
-        solrNodes.remove(localAddress);
-        for (String coreName : activeCores) {
-            IMap<String, String> solrCores = hazelcast.getMap(SOLR_CORE_MAP);
-            solrCores.removeAsync(coreName);
+        if (hazelcast != null && hazelcast.getLifecycleService().isRunning()) {
+            Collection<String> activeCores = embeddedAccess.getActiveCores();
+            IMap<String, Integer> solrNodes = hazelcast.getMap(SolrCoreTools.SOLR_NODE_MAP);
+            String localAddress = hazelcast.getCluster().getLocalMember().getInetSocketAddress().getAddress().getHostAddress();
+            solrNodes.remove(localAddress);
+            for (String coreName : activeCores) {
+                IMap<String, String> solrCores = hazelcast.getMap(SolrCoreTools.SOLR_CORE_MAP);
+                solrCores.removeAsync(coreName);
+            }
         }
-
         embeddedAccess.shutDown();
     }
 
@@ -337,7 +380,7 @@ public class DelegationSolrAccessImpl implements SolrAccessService {
         return embeddedAccess;
     }
 
-    private SolrAccessService getDelegate(SolrCoreIdentifier identifier) throws OXException {
+    public SolrAccessService getDelegate(SolrCoreIdentifier identifier) throws OXException {
         if (identifier == null) {
             throw new IllegalArgumentException("Parameter `identifier` must not be null!");
         }
@@ -346,64 +389,91 @@ public class DelegationSolrAccessImpl implements SolrAccessService {
         ConfigurationService config = Services.getService(ConfigurationService.class);
         boolean isSolrNode = config.getBoolProperty(SolrProperties.IS_NODE, false);
         HazelcastInstance hazelcast = Services.getService(HazelcastInstance.class);
-        String ownAddress = resolveSocketAddress(hazelcast.getCluster().getLocalMember().getInetSocketAddress());
-        IMap<String, String> solrCores = hazelcast.getMap(SOLR_CORE_MAP);
+        String ownAddress = SolrCoreTools.resolveSocketAddress(hazelcast.getCluster().getLocalMember().getInetSocketAddress());
+        IMap<String, String> solrCores = hazelcast.getMap(SolrCoreTools.SOLR_CORE_MAP);
         solrCores.lock(identifier.toString());
         try {
             String owner = solrCores.get(identifier.toString());
-            if (LOG.isDebugEnabled()) {
-                LOG.debug(Thread.currentThread().getName() + " got the lock for core " + identifier.toString() + ". Current owner: " + owner);
-            }
-
             if (owner == null) {
                 if (isSolrNode) {
                     try {
                         embeddedAccess.startCore(identifier);
-                        incrementCoreCount(hazelcast, hazelcast.getCluster().getLocalMember());
+                        SolrCoreTools.incrementCoreCount(hazelcast, hazelcast.getCluster().getLocalMember());
                         solrCores.put(identifier.toString(), ownAddress);
                         
                         return embeddedAccess;
-                    } catch (Exception e) {
+                    } catch (Throwable e) {
                         if (embeddedAccess.hasActiveCore(identifier)) {
                             embeddedAccess.stopCore(identifier);
                         }
                         throw SolrExceptionCodes.DELEGATION_ERROR.create(e);
                     }
                 } else {
-                    Member elected = electCoreOwner(hazelcast, identifier);
-                    FutureTask<String> task = new DistributedTask<String>(new StartCoreCallable(identifier, resolveSocketAddress(elected.getInetSocketAddress())), elected);
-                    ExecutorService executorService = hazelcast.getExecutorService();
-                    executorService.execute(task);
                     try {
-                        String electedAddress = resolveSocketAddress(elected.getInetSocketAddress());
-                        task.get();
-                        incrementCoreCount(hazelcast, elected);                        
-                        solrCores.put(identifier.toString(), electedAddress);
-                        
-                        return getRMIAccess(electedAddress);
-                    } catch (InterruptedException e) {
-                        throw SolrExceptionCodes.DELEGATION_ERROR.create(e);
-                    } catch (ExecutionException e) {
-                        throw SolrExceptionCodes.DELEGATION_ERROR.create(e);
+                        return startRemoteCore(solrCores, hazelcast, identifier);
+                    } catch (OXException e) {
+                        if (SolrExceptionCodes.CORE_NOT_STARTED.equals(e)) {
+                            // Retry
+                            return startRemoteCore(solrCores, hazelcast, identifier);
+                        } else {
+                            throw e;
+                        }
                     }
                 }
             } else if (owner.equals(ownAddress)) {
-                return embeddedAccess;
+                if (embeddedAccess.hasActiveCore(identifier)) {
+                    return embeddedAccess;
+                } else {
+                    try {
+                        embeddedAccess.startCore(identifier);
+                        return embeddedAccess;
+                    } catch (Throwable t) {
+                        solrCores.remove(identifier.toString());
+                        throw SolrExceptionCodes.DELEGATION_ERROR.create(t);
+                    }
+                }
             }
             
-            return getRMIAccess(owner);
+            try {
+                return getRMIAccess(identifier, owner);
+            } catch (OXException e) {
+                if (SolrExceptionCodes.CORE_NOT_STARTED.equals(e)) {
+                    // Retry
+                    return startRemoteCore(solrCores, hazelcast, identifier);
+                } else {
+                    throw e;
+                }
+            }
         } finally {
+            solrCores.unlock(identifier.toString());
             if (LOG.isDebugEnabled()) {
-                LOG.debug(Thread.currentThread().getName() + " released the lock for core " + identifier.toString() + ".");
                 long diff = System.currentTimeMillis() - start;
                 LOG.debug("getDelegate() lasted " + diff + "ms.");
             }
-            solrCores.unlock(identifier.toString());
-        }        
+        }
+    }
+    
+    private SolrAccessServiceRmiWrapper startRemoteCore(IMap<String, String> solrCores, HazelcastInstance hazelcast, SolrCoreIdentifier identifier) throws OXException {
+        Member elected = electCoreOwner(hazelcast, identifier);
+        FutureTask<String> task = new DistributedTask<String>(new StartCoreCallable(identifier, SolrCoreTools.resolveSocketAddress(elected.getInetSocketAddress())), elected);
+        ExecutorService executorService = hazelcast.getExecutorService();
+        executorService.execute(task);
+        try {
+            String electedAddress = SolrCoreTools.resolveSocketAddress(elected.getInetSocketAddress());
+            task.get();
+            SolrCoreTools.incrementCoreCount(hazelcast, elected);
+            solrCores.put(identifier.toString(), electedAddress);
+            
+            return getRMIAccess(identifier, electedAddress);
+        } catch (InterruptedException e) {
+            throw SolrExceptionCodes.DELEGATION_ERROR.create(e);
+        } catch (ExecutionException e) {
+            throw SolrExceptionCodes.DELEGATION_ERROR.create(e);
+        }
     }
 
     private Member electCoreOwner(HazelcastInstance hazelcast, SolrCoreIdentifier identifier) throws OXException {
-        IMap<String, Integer> solrNodes = hazelcast.getMap(SolrActivator.SOLR_NODE_MAP);
+        IMap<String, Integer> solrNodes = hazelcast.getMap(SolrCoreTools.SOLR_NODE_MAP);
         String lowestMember = null;
         Integer lowestCount = null;
         for (String memberAddress : solrNodes.keySet()) {
@@ -435,70 +505,49 @@ public class DelegationSolrAccessImpl implements SolrAccessService {
             }
 
             return elected;
-            //
-            // FutureTask<String> task = new DistributedTask<String>(new StartCoreCallable(identifier,
-            // resolveSocketAddress(elected.getInetSocketAddress())), elected);
-            // ExecutorService executorService = hazelcast.getExecutorService();
-            // executorService.execute(task);
-            // try {
-            // incrementCoreCount(hazelcast);
-            // return task.get(1, TimeUnit.SECONDS);
-            // } catch (InterruptedException e) {
-            // throw SolrExceptionCodes.DELEGATION_ERROR.create(e);
-            // } catch (ExecutionException e) {
-            // throw SolrExceptionCodes.DELEGATION_ERROR.create(e);
-            // } catch (TimeoutException e) {
-            // throw SolrExceptionCodes.DELEGATION_ERROR.create(e);
-            // }
         }
     }
 
-    private void incrementCoreCount(HazelcastInstance hazelcast, Member member) {
-        IMap<String, Integer> solrNodes = hazelcast.getMap(SolrActivator.SOLR_NODE_MAP);
-        String localAddress = member.getInetSocketAddress().getAddress().getHostAddress();
-        solrNodes.lock(localAddress);
-        try {
-            Integer integer = solrNodes.get(localAddress);
-            solrNodes.put(localAddress, new Integer(integer.intValue() + 1));
-        } finally {
-            solrNodes.unlock(localAddress);
-        }
-    }
-
-    private void decrementCoreCount(HazelcastInstance hazelcast, Member member) {
-        IMap<String, Integer> solrNodes = hazelcast.getMap(SolrActivator.SOLR_NODE_MAP);
-        String localAddress = member.getInetSocketAddress().getAddress().getHostAddress();
-        solrNodes.lock(localAddress);
-        try {
-            Integer integer = solrNodes.get(localAddress);
-            solrNodes.put(localAddress, new Integer(integer.intValue() - 1));
-        } finally {
-            solrNodes.unlock(localAddress);
-        }
-    }
-
-    private String resolveSocketAddress(InetSocketAddress addr) {
-        if (addr.isUnresolved()) {
-            return addr.getHostName();
-        } else {
-            return addr.getAddress().getHostAddress();
-        }
-    }
 
     private static ConcurrentMap<String, RMISolrAccessService> rmiCache = new ConcurrentHashMap<String, RMISolrAccessService>();
+    
+    private SolrAccessServiceRmiWrapper getRMIAccess(SolrCoreIdentifier identifier, String server) throws OXException {
+        try {
+            ConfigurationService config = Services.getService(ConfigurationService.class);
+            int rmiPort = config.getIntProperty("RMI_PORT", 1099);
+            Registry registry = LocateRegistry.getRegistry(server, rmiPort);
+            RMISolrAccessService rmiAccess = (RMISolrAccessService) registry.lookup(RMISolrAccessService.RMI_NAME);
+            rmiAccess.pingRmi(identifier);
+            return new SolrAccessServiceRmiWrapper(rmiAccess);
+        } catch (AccessException e) {
+            throw new OXException(e);
+        } catch (RemoteException e) {
+            throw new OXException(e);
+        } catch (NotBoundException e) {
+            throw new OXException(e);
+        } catch (RMISolrException e) {
+            OXException exception = new OXException(e.getErrorCode(), e.getMessage(), OXExceptionConstants.MESSAGE_ARGS_EMPTY);
+            exception.setPrefix("SOL");
+            throw exception;
+        }
+    }
 
-    private SolrAccessService getRMIAccess(String server) throws OXException {
+    private SolrAccessServiceRmiWrapper getCachedRMIAccess(SolrCoreIdentifier identifier, String server) throws OXException {
         RMISolrAccessService rmiAccess = rmiCache.get(server);
         if (rmiAccess == null) {
             rmiAccess = updateRmiCache(server);
         } else {
             try {
-                rmiAccess.pingRmi();
+                rmiAccess.pingRmi(identifier);
             } catch (RemoteException e) {
                 rmiAccess = updateRmiCache(server);
                 if (LOG.isDebugEnabled()) {
                     LOG.debug("Ping failed for remote access on " + server + ". Reconnect.");
                 }
+            } catch (RMISolrException e) {
+                OXException exception = new OXException(e.getErrorCode(), e.getMessage(), OXExceptionConstants.MESSAGE_ARGS_EMPTY);
+                exception.setPrefix("SOL");
+                throw exception;
             }
         }
 

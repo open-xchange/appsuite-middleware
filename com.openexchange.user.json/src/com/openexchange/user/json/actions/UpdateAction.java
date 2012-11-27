@@ -127,13 +127,18 @@ public final class UpdateAction extends AbstractUserAction {
         /*
          * Parse user & contact data
          */
+        String timeZoneID = request.getParameter("timezone");
+        if (null == timeZoneID) {
+            timeZoneID = session.getUser().getTimeZone();
+        }
         final JSONObject jData = (JSONObject) request.getData();
         Contact parsedUserContact;
         User parsedUser;
 		try {
-			parsedUserContact = ContactMapper.getInstance().deserialize(jData, CONTACT_FIELDS);
+			parsedUserContact = ContactMapper.getInstance().deserialize(jData, CONTACT_FIELDS, timeZoneID);
+	        parsedUserContact.setObjectID(contactId);
 			jData.put(UserField.ID.getName(), id);
-			parsedUser = UserMapper.getInstance().deserialize(jData, USER_FIELDS);
+			parsedUser = UserMapper.getInstance().deserialize(jData, USER_FIELDS, timeZoneID);
 		} catch (final JSONException e) {
             throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
 		}

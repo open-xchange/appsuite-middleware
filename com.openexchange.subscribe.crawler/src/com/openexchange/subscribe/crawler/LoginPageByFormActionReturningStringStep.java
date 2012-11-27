@@ -61,6 +61,7 @@ import com.gargoylesoftware.htmlunit.WebClient;
 import com.gargoylesoftware.htmlunit.html.HtmlForm;
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
 import com.gargoylesoftware.htmlunit.html.HtmlPasswordInput;
+import com.gargoylesoftware.htmlunit.html.HtmlSubmitInput;
 import com.gargoylesoftware.htmlunit.html.HtmlTextInput;
 import com.openexchange.exception.OXException;
 import com.openexchange.subscribe.SubscriptionErrorMessage;
@@ -77,7 +78,7 @@ public class LoginPageByFormActionReturningStringStep extends AbstractStep<Strin
 
    private static Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(LoginPageByFormActionStep.class));
 
-   private String url, username, password, actionOfLoginForm, nameOfUserField, nameOfPasswordField, baseUrl, regexForReturnedString, submitName;
+   private String url, username, password, actionOfLoginForm, nameOfUserField, nameOfPasswordField, baseUrl, regexForReturnedString, nameOfSubmit;
 
    private int numberOfForm;
 
@@ -97,7 +98,7 @@ public class LoginPageByFormActionReturningStringStep extends AbstractStep<Strin
        this.nameOfPasswordField = nameOfPasswordField;
        this.numberOfForm = numberOfForm;
        this.baseUrl = baseUrl;
-       this.submitName = submitName;
+       this.nameOfSubmit = submitName;
        this.regexForReturnedString = regexForReturnedString;
    }
 
@@ -122,12 +123,18 @@ public class LoginPageByFormActionReturningStringStep extends AbstractStep<Strin
                userfield.setValueAttribute(username);
                final HtmlPasswordInput passwordfield = loginForm.getInputByName(nameOfPasswordField);
                passwordfield.setValueAttribute(password);
-
-               final HtmlPage pageAfterLogin = (HtmlPage) loginForm.submit(loginForm.getInputByName(submitName));
+               HtmlPage pageAfterLogin;
+               // if there is no submit-element specified use the default submit.
+               if (nameOfSubmit.equals("")){
+                   pageAfterLogin = (HtmlPage) loginForm.submit(null);
+               } else {
+                   HtmlSubmitInput button = (HtmlSubmitInput) loginPage.getElementByName(nameOfSubmit);
+                   pageAfterLogin = button.click();
+               }
                Pattern pattern = Pattern.compile(regexForReturnedString);
                Matcher matcher = pattern.matcher(pageAfterLogin.getWebResponse().getContentAsString());
                if (matcher.find()){
-                   output = matcher.group(1);
+                   output = matcher.group(0);
                } else {
                    LOG.error("Page that does not have the String to imply a successful login : " + pageAfterLogin.getWebResponse().getContentAsString());
                    if (debuggingEnabled){
@@ -231,12 +238,12 @@ public String getBaseUrl() {
 
 
     public String getSubmitName() {
-        return submitName;
+        return nameOfSubmit;
     }
 
 
     public void setSubmitName(String submitName) {
-        this.submitName = submitName;
+        this.nameOfSubmit = submitName;
     }
 
 

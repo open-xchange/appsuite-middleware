@@ -50,8 +50,8 @@
 package com.openexchange.ajax.request;
 
 import java.util.Arrays;
+import java.util.Locale;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONWriter;
@@ -59,6 +59,10 @@ import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.fields.ResponseFields;
 import com.openexchange.ajax.writer.ResponseWriter;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.ldap.UserStorage;
+import com.openexchange.log.LogFactory;
+import com.openexchange.session.Session;
+import com.openexchange.tools.session.ServerSession;
 
 public abstract class CommonRequest {
 
@@ -69,6 +73,16 @@ public abstract class CommonRequest {
 	public CommonRequest(final JSONWriter w) {
 		this.w = w;
 	}
+
+    private static Locale localeFrom(final Session session) {
+        if (null == session) {
+            return Locale.US;
+        }
+        if (session instanceof ServerSession) {
+            return ((ServerSession) session).getUser().getLocale();
+        }
+        return UserStorage.getStorageUser(session.getUserId(), session.getContextId()).getLocale();
+    }
 
 	protected void sendErrorAsJS(final String error, final String...errorParams) {
 		//final JSONObject response = new JSONObject();
@@ -86,7 +100,7 @@ public abstract class CommonRequest {
 		}
 	}
 
-	protected void handle(final Throwable t) {
+	protected void handle(final Throwable t, final Session session) {
 		final Response res = new Response();
 		if(t instanceof OXException) {
 		    final OXException x = (OXException) t;
@@ -97,7 +111,7 @@ public abstract class CommonRequest {
             res.setException(new OXException(t));
 		}
 		try {
-			ResponseWriter.write(res, w);
+			ResponseWriter.write(res, w, localeFrom(session));
 		} catch (final JSONException e) {
 			LOG.error("",t);
 		}

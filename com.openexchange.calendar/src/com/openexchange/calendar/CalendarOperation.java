@@ -50,7 +50,6 @@
 package com.openexchange.calendar;
 
 import static com.openexchange.java.Autoboxing.I;
-
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -63,9 +62,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
-
 import org.apache.commons.logging.Log;
-
 import com.openexchange.calendar.api.CalendarCollection;
 import com.openexchange.calendar.storage.ParticipantStorage;
 import com.openexchange.database.provider.SimpleDBProvider;
@@ -476,6 +473,12 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
                             I(action_folder), ":", inFolder }));
                     }
                     throw OXCalendarExceptionCodes.LOAD_PERMISSION_EXCEPTION_5.create(I(oid));
+                } else if (!check_permissions && 0 < inFolder && inFolder == action_folder) {
+                    /*
+                     * Assign parent folder ID when not checking permissions - necessary for bug #23181 so that the parent folder is not
+                     * considered as 'shared' to the current user.
+                     */
+                    cdao.setParentFolderID(inFolder);
                 }
                 cdao.setStartDate(setDate(i++, load_resultset));
                 cdao.setEndDate(setDate(i++, load_resultset));

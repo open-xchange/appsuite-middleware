@@ -48,6 +48,9 @@
  */
 
 package com.openexchange.ajax.mail;
+
+import com.openexchange.ajax.mail.actions.NewMailRequest;
+
 /**
  *
  * {@link CountMailTest} - tests the CountRequest
@@ -79,8 +82,21 @@ public class CountMailTest extends AbstractMailTest {
         clearFolder(folder);
         assertEquals("Should be empty", 0, count(folder));
 
+        final String eml =
+            ("Message-Id: <4A002517.4650.0059.1@foobar.com>\n" +
+            "Date: Tue, 05 May 2009 11:37:58 -0500\n" +
+            "From: #ADDR#\n" +
+            "To: #ADDR#\n" +
+            "Subject: Invitation for launch\n" +
+            "Mime-Version: 1.0\n" +
+            "Content-Type: text/plain; charset=\"UTF-8\"\n" +
+            "Content-Transfer-Encoding: 8bit\n" +
+            "\n" +
+            "This is a MIME message. If you are reading this text, you may want to \n" +
+            "consider changing to a mail reader or gateway that understands how to \n" +
+            "properly handle MIME multipart messages.").replaceAll("#ADDR#", getSendAddress());
         for (int number = 1; number < 10; number++) {
-            sendMail(generateMail());
+            getClient().execute(new NewMailRequest(getInboxFolder(), eml, -1, true));
             assertEquals("Does not contain the expected number of elements in folder "+folder, number, count(folder) );
         }
 

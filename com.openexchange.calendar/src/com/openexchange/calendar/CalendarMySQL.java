@@ -54,7 +54,6 @@ import static com.openexchange.tools.sql.DBUtils.autocommit;
 import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
 import static com.openexchange.tools.sql.DBUtils.forSQLCommand;
 import static com.openexchange.tools.sql.DBUtils.rollback;
-
 import java.sql.Connection;
 import java.sql.DataTruncation;
 import java.sql.PreparedStatement;
@@ -74,9 +73,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TimeZone;
 import java.util.UUID;
-
 import org.apache.commons.logging.Log;
-
 import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.api2.ReminderService;
 import com.openexchange.caching.CacheKey;
@@ -131,7 +128,10 @@ import com.openexchange.server.impl.DBPool;
 import com.openexchange.server.impl.EffectivePermission;
 import com.openexchange.session.Session;
 import com.openexchange.sql.builder.StatementBuilder;
+import com.openexchange.sql.grammar.Column;
 import com.openexchange.sql.grammar.EQUALS;
+import com.openexchange.sql.grammar.ISNULL;
+import com.openexchange.sql.grammar.OR;
 import com.openexchange.sql.grammar.SELECT;
 import com.openexchange.tools.StringCollection;
 import com.openexchange.tools.iterator.SearchIterator;
@@ -2437,7 +2437,7 @@ public class CalendarMySQL implements CalendarSqlImp {
             }
             prep = getPreparedStatement(readcon, loadAppointment(cdao.getObjectID(), cdao.getContext()));
             rs = getResultSet(prep);
-            edao = co.loadAppointment(rs, cdao.getObjectID(), inFolder, this, readcon, so, ctx, CalendarOperation.UPDATE, action_folder);
+            edao = co.loadAppointment(rs, cdao.getObjectID(), inFolder, this, readcon, so, ctx, CalendarOperation.UPDATE, action_folder, checkPermissions);
         } catch (final SQLException sqle) {
             throw OXCalendarExceptionCodes.CALENDAR_SQL_ERROR.create(sqle);
         } catch (final OXException oxe) {
@@ -5261,15 +5261,35 @@ public class CalendarMySQL implements CalendarSqlImp {
 
     @Override
     public int resolveUid(final Session session, final String uid) throws OXException {
-        final Context ctx = Tools.getContext(session);
+        return resolveByField(session, "uid", uid);        
+    }
 
-        final SELECT s = new SELECT("intfield01,uid").
-            FROM("prg_dates").
-            WHERE(new EQUALS("uid", PLACEHOLDER).
-                AND(new EQUALS("cid", PLACEHOLDER)));
+    @Override
+    public int resolveFilename(Session session, String filename) throws OXException {
+        return resolveByField(session, "filename", filename);        
+    }
+    
+    /**
+     * Gets the object ID of an appointment whose value in a specific column matches another value. The comparison is case-sensitive, 
+     * and exceptions from recurring appointments are not taken into account. If there are more than one matches, the first one is 
+     * returned. 
+     * 
+     * @param session The current session
+     * @param columnName The column name
+     * @param value The value to match
+     * @return The appointment's object ID, or <code>0</code> if no matching appointment was found
+     * @throws OXException
+     */
+    private static int resolveByField(Session session, String columnName, String value) throws OXException {
+        Context ctx = Tools.getContext(session);
+        SELECT s = new SELECT("intfield01", columnName).FROM("prg_dates").
+            WHERE(new EQUALS(columnName, PLACEHOLDER).
+                AND(new EQUALS("cid", PLACEHOLDER)).
+                AND(new OR(new ISNULL("intfield02"), new EQUALS(new Column("intfield01"), new Column("intfield02"))))
+            );
 
-        final List<Object> params = new ArrayList<Object>();
-        params.add(uid);
+        List<Object> params = new ArrayList<Object>();
+        params.add(value);
         params.add(ctx.getContextId());
 
         Connection connection = null;
@@ -5281,12 +5301,12 @@ public class CalendarMySQL implements CalendarSqlImp {
             stmt = new StatementBuilder().prepareStatement(connection, s, params);
             rs = stmt.executeQuery();
             while (rs.next()) {
-            	final String actualUID = rs.getString(2);
-            	if(uid.equals(actualUID)) {
+                String actualValue = rs.getString(2);
+                if (null == value && rs.wasNull() || null != value && value.equals(actualValue)) {
                     return rs.getInt(1);
                 }
             }
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw OXCalendarExceptionCodes.CALENDAR_SQL_ERROR.create(e);
         } finally {
             DBUtils.closeResources(rs, stmt, null, true, ctx);

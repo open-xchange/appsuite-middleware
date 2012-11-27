@@ -68,15 +68,17 @@ import com.openexchange.userconf.UserConfigurationService;
  */
 public class DiscovererActivator extends HousekeepingActivator {
 
-    private OSGiPublicationTargetCollector pubServiceCollector;
+    private volatile OSGiPublicationTargetCollector pubServiceCollector;
 
-    private OSGiPublicationTargetDiscovererCollector discovererCollector;
+    private volatile OSGiPublicationTargetDiscovererCollector discovererCollector;
 
     @Override
     public void startBundle() throws Exception {
 
-        pubServiceCollector = new OSGiPublicationTargetCollector(context);
-        discovererCollector = new OSGiPublicationTargetDiscovererCollector(context);
+        final OSGiPublicationTargetCollector pubServiceCollector = new OSGiPublicationTargetCollector(context);
+        this.pubServiceCollector = pubServiceCollector;
+        final OSGiPublicationTargetDiscovererCollector discovererCollector = new OSGiPublicationTargetDiscovererCollector(context);
+        this.discovererCollector = discovererCollector;
 
         final CompositePublicationTargetDiscoveryService compositeDiscovererCollector = new CompositePublicationTargetDiscoveryService();
         compositeDiscovererCollector.addDiscoveryService(pubServiceCollector);
@@ -104,11 +106,17 @@ public class DiscovererActivator extends HousekeepingActivator {
 
     @Override
     public void stopBundle() throws Exception {
-        unregisterServices();
-        pubServiceCollector.close();
-        pubServiceCollector = null;
-        discovererCollector.close();
-        discovererCollector = null;
+        cleanUp();
+        final OSGiPublicationTargetCollector pubServiceCollector = this.pubServiceCollector;
+        if (null != pubServiceCollector) {
+            pubServiceCollector.close();
+            this.pubServiceCollector = null;
+        }
+        final OSGiPublicationTargetDiscovererCollector discovererCollector = this.discovererCollector;
+        if (null != discovererCollector) {
+            discovererCollector.close();
+            this.discovererCollector = null;
+        }
     }
 
     @Override

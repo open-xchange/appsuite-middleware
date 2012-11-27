@@ -56,10 +56,12 @@ import org.apache.solr.client.solrj.response.UpdateResponse;
 import org.apache.solr.common.SolrInputDocument;
 import org.apache.solr.common.params.SolrParams;
 import com.openexchange.exception.OXException;
+import com.openexchange.exception.OXExceptionConstants;
 import com.openexchange.solr.SolrAccessService;
 import com.openexchange.solr.SolrCoreIdentifier;
 import com.openexchange.solr.SolrExceptionCodes;
 import com.openexchange.solr.rmi.RMISolrAccessService;
+import com.openexchange.solr.rmi.RMISolrException;
 
 /**
  * {@link SolrAccessServiceRmiWrapper}
@@ -84,6 +86,10 @@ public final class SolrAccessServiceRmiWrapper implements SolrAccessService {
             return rmiAccessService.addRmi(identifier, document, commit);
         } catch (final RemoteException e) {
             throw handleRemoteException(e);
+        } catch (RMISolrException e) {
+            OXException exception = new OXException(e.getErrorCode(), e.getMessage(), OXExceptionConstants.MESSAGE_ARGS_EMPTY);
+            exception.setPrefix("SOL");
+            throw exception;
         }
     }
 
@@ -93,6 +99,10 @@ public final class SolrAccessServiceRmiWrapper implements SolrAccessService {
             return rmiAccessService.addRmi(identifier, documents, commit);
         } catch (final RemoteException e) {
             throw handleRemoteException(e);
+        } catch (RMISolrException e) {
+            OXException exception = new OXException(e.getErrorCode(), e.getMessage(), OXExceptionConstants.MESSAGE_ARGS_EMPTY);
+            exception.setPrefix("SOL");
+            throw exception;
         }
     }
 
@@ -102,6 +112,10 @@ public final class SolrAccessServiceRmiWrapper implements SolrAccessService {
             return rmiAccessService.deleteByIdRmi(identifier, id, commit);
         } catch (final RemoteException e) {
             throw handleRemoteException(e);
+        } catch (RMISolrException e) {
+            OXException exception = new OXException(e.getErrorCode(), e.getMessage(), OXExceptionConstants.MESSAGE_ARGS_EMPTY);
+            exception.setPrefix("SOL");
+            throw exception;
         }
     }
 
@@ -111,6 +125,10 @@ public final class SolrAccessServiceRmiWrapper implements SolrAccessService {
             return rmiAccessService.deleteByQueryRmi(identifier, query, commit);
         } catch (final RemoteException e) {
             throw handleRemoteException(e);
+        } catch (RMISolrException e) {
+            OXException exception = new OXException(e.getErrorCode(), e.getMessage(), OXExceptionConstants.MESSAGE_ARGS_EMPTY);
+            exception.setPrefix("SOL");
+            throw exception;
         }
     }
 
@@ -120,6 +138,10 @@ public final class SolrAccessServiceRmiWrapper implements SolrAccessService {
             return rmiAccessService.commitRmi(identifier);
         } catch (final RemoteException e) {
             throw handleRemoteException(e);
+        } catch (RMISolrException e) {
+            OXException exception = new OXException(e.getErrorCode(), e.getMessage(), OXExceptionConstants.MESSAGE_ARGS_EMPTY);
+            exception.setPrefix("SOL");
+            throw exception;
         }
     }
 
@@ -129,6 +151,10 @@ public final class SolrAccessServiceRmiWrapper implements SolrAccessService {
             return rmiAccessService.commitRmi(identifier, waitFlush, waitSearcher);
         } catch (final RemoteException e) {
             throw handleRemoteException(e);
+        } catch (RMISolrException e) {
+            OXException exception = new OXException(e.getErrorCode(), e.getMessage(), OXExceptionConstants.MESSAGE_ARGS_EMPTY);
+            exception.setPrefix("SOL");
+            throw exception;
         }
     }
 
@@ -138,6 +164,10 @@ public final class SolrAccessServiceRmiWrapper implements SolrAccessService {
             return rmiAccessService.rollbackRmi(identifier);
         } catch (final RemoteException e) {
             throw handleRemoteException(e);
+        } catch (RMISolrException e) {
+            OXException exception = new OXException(e.getErrorCode(), e.getMessage(), OXExceptionConstants.MESSAGE_ARGS_EMPTY);
+            exception.setPrefix("SOL");
+            throw exception;
         }
     }
 
@@ -147,6 +177,10 @@ public final class SolrAccessServiceRmiWrapper implements SolrAccessService {
             return rmiAccessService.optimizeRmi(identifier);
         } catch (final RemoteException e) {
             throw handleRemoteException(e);
+        } catch (RMISolrException e) {
+            OXException exception = new OXException(e.getErrorCode(), e.getMessage(), OXExceptionConstants.MESSAGE_ARGS_EMPTY);
+            exception.setPrefix("SOL");
+            throw exception;
         }
     }
 
@@ -156,6 +190,10 @@ public final class SolrAccessServiceRmiWrapper implements SolrAccessService {
             return rmiAccessService.optimizeRmi(identifier, waitFlush, waitSearcher);
         } catch (final RemoteException e) {
             throw handleRemoteException(e);
+        } catch (RMISolrException e) {
+            OXException exception = new OXException(e.getErrorCode(), e.getMessage(), OXExceptionConstants.MESSAGE_ARGS_EMPTY);
+            exception.setPrefix("SOL");
+            throw exception;
         }
     }
 
@@ -165,6 +203,10 @@ public final class SolrAccessServiceRmiWrapper implements SolrAccessService {
             return rmiAccessService.optimizeRmi(identifier, waitFlush, waitSearcher, maxSegments);
         } catch (final RemoteException e) {
             throw handleRemoteException(e);
+        } catch (RMISolrException e) {
+            OXException exception = new OXException(e.getErrorCode(), e.getMessage(), OXExceptionConstants.MESSAGE_ARGS_EMPTY);
+            exception.setPrefix("SOL");
+            throw exception;
         }
     }
 
@@ -174,13 +216,17 @@ public final class SolrAccessServiceRmiWrapper implements SolrAccessService {
             return rmiAccessService.queryRmi(identifier, params);
         } catch (final RemoteException e) {
             throw handleRemoteException(e);
+        } catch (RMISolrException e) {
+            OXException exception = new OXException(e.getErrorCode(), e.getMessage(), OXExceptionConstants.MESSAGE_ARGS_EMPTY);
+            exception.setPrefix("SOL");
+            throw exception;
         }
     }
-    
-	@Override
-	public void freeResources(SolrCoreIdentifier identifier) {
-		return;
-	}
+
+    @Override
+    public void freeResources(SolrCoreIdentifier identifier) {
+        return;
+    }
 
     private static OXException handleRemoteException(final RemoteException remoteException) {
         return SolrExceptionCodes.REMOTE_ERROR.create(remoteException, remoteException.getMessage());

@@ -57,33 +57,41 @@ import com.openexchange.session.PutIfAbsent;
 import com.openexchange.session.Session;
 
 /**
- * {@link StoredSession}
+ * {@link StoredSession} - Represents a session held in session storage.
  * 
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class StoredSession implements PutIfAbsent, Serializable {
 
     private static final long serialVersionUID = -3414389910481034283L;
 
-    private String loginName;
-    private String password;
-    private int contextId;
-    private int userId;
-    private String sessionId;
-    private String secret;
-    private String login;
-    private String randomToken;
-    private String localIp;
-    private String authId;
-    private String hash;
-    private String client;
-    private String userLogin;
-    private final ConcurrentMap<String, Object> parameters;
+    /**
+     * The parameter name for session storage's {@link java.util.concurrent.Future add task}.
+     */
+    //public static final String PARAM_SST_FUTURE = "__sst-future";
+
+    protected String loginName;
+    protected String password;
+    protected int contextId;
+    protected int userId;
+    protected String sessionId;
+    protected String secret;
+    protected String login;
+    protected String randomToken;
+    protected String localIp;
+    protected String authId;
+    protected String hash;
+    protected String client;
+    protected String userLogin;
+    protected final ConcurrentMap<String, Object> parameters;
+
     /**
      * Initializes a new {@link StoredSession}.
      */
-    public StoredSession(String sessionId, String loginName, String password, int contextId, int userId, String secret, String login, String randomToken, String localIP, String authId, String hash, String client, Map<String, Object> parameters) {
-        super();
+    public StoredSession(String sessionId, String loginName, String password, int contextId, int userId, String secret, String login, 
+        String randomToken, String localIP, String authId, String hash, String client, Map<String, Object> parameters) {
+        this();
         this.sessionId = sessionId;
         this.loginName = loginName;
         this.password = password;
@@ -97,7 +105,6 @@ public class StoredSession implements PutIfAbsent, Serializable {
         this.hash = hash;
         this.client = client;
         this.userLogin = "";
-        this.parameters = new ConcurrentHashMap<String, Object>();
         // Assign parameters (if not null)
         if (parameters != null) {
             Object parameter = parameters.get(Session.PARAM_LOCK);
@@ -119,18 +126,13 @@ public class StoredSession implements PutIfAbsent, Serializable {
                 this.parameters.put(Session.PARAM_CAPABILITIES, parameter);
             }
         }
-    /**
-     * Initializes a new {@link StoredSession}.
-     */
-                // this.parameters.put(Session.PARAM_LOCK, parameter);
-                // this.parameters.put(Session.PARAM_COUNTER, parameter);
     }
 
     /**
      * Initializes a new {@link StoredSession}.
      */
     public StoredSession(final Session session) {
-        super();
+        this();
         this.authId = session.getAuthId();
         this.client = session.getClient();
         this.contextId = session.getContextId();
@@ -138,7 +140,6 @@ public class StoredSession implements PutIfAbsent, Serializable {
         this.localIp = session.getLocalIp();
         this.login = session.getLogin();
         this.loginName = session.getLoginName();
-        this.parameters = new ConcurrentHashMap<String, Object>();
         // Assign parameters (if not null)
         {
             Object parameter = session.getParameter(Session.PARAM_LOCK);
@@ -166,6 +167,14 @@ public class StoredSession implements PutIfAbsent, Serializable {
         this.sessionId = session.getSessionID();
         this.userId = session.getUserId();
         this.userLogin = session.getUserlogin();
+    }
+    
+    /**
+     * Initializes a new, empty {@link StoredSession}.
+     */
+    public StoredSession() {
+        super();
+        this.parameters = new ConcurrentHashMap<String, Object>(2);
     }
 
     @Override
@@ -376,6 +385,52 @@ public class StoredSession implements PutIfAbsent, Serializable {
     @Override
     public void removeRandomToken() {
         randomToken = null;
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder builder = new StringBuilder(512);
+        final String delim = ", ";
+        builder.append('{');
+        if (loginName != null) {
+            builder.append("loginName=").append(loginName).append(delim);
+        }
+        if (password != null) {
+            builder.append("password=").append("*****").append(delim);
+        }
+        builder.append("contextId=").append(contextId).append(", userId=").append(userId).append(delim);
+        if (sessionId != null) {
+            builder.append("sessionId=").append(sessionId).append(delim);
+        }
+        if (secret != null) {
+            builder.append("secret=").append(secret).append(delim);
+        }
+        if (login != null) {
+            builder.append("login=").append(login).append(delim);
+        }
+        if (randomToken != null) {
+            builder.append("randomToken=").append(randomToken).append(delim);
+        }
+        if (localIp != null) {
+            builder.append("localIp=").append(localIp).append(delim);
+        }
+        if (authId != null) {
+            builder.append("authId=").append(authId).append(delim);
+        }
+        if (hash != null) {
+            builder.append("hash=").append(hash).append(delim);
+        }
+        if (client != null) {
+            builder.append("client=").append(client).append(delim);
+        }
+        if (userLogin != null) {
+            builder.append("userLogin=").append(userLogin).append(delim);
+        }
+        if (parameters != null) {
+            builder.append("parameters=").append(parameters);
+        }
+        builder.append('}');
+        return builder.toString();
     }
 
 }

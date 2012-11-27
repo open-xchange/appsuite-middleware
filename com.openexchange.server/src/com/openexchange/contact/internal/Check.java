@@ -51,7 +51,9 @@ package com.openexchange.contact.internal;
 
 import static com.openexchange.contact.internal.Tools.parse;
 import java.util.Date;
-import com.openexchange.contact.ContactFieldOperand;
+import java.util.List;
+import java.util.Map;
+import com.openexchange.contact.SortOptions;
 import com.openexchange.contact.internal.mapping.ContactMapper;
 import com.openexchange.contact.storage.ContactStorage;
 import com.openexchange.exception.OXException;
@@ -60,12 +62,11 @@ import com.openexchange.groupware.contact.Search;
 import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.FolderObject;
-import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.search.ContactSearchObject;
 import com.openexchange.search.CompositeSearchTerm;
 import com.openexchange.search.CompositeSearchTerm.CompositeOperation;
-import com.openexchange.search.SingleSearchTerm;
-import com.openexchange.search.internal.operands.ConstantOperand;
+import com.openexchange.search.SingleSearchTerm.SingleOperation;
+import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.impl.EffectivePermission;
 import com.openexchange.session.Session;
 import com.openexchange.tools.iterator.SearchIterator;
@@ -81,6 +82,12 @@ public final class Check {
 		if (null == object) {
 			throw new IllegalArgumentException("the passed argument '" + argumentName + "' may not be null");
 		}
+	}
+	
+	public static void hasStorages(final Map<ContactStorage, List<String>> storages) throws OXException {
+	    if (null == storages || 0 == storages.size()) {
+	        throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create("No contact storage available");
+        }
 	}
 
 	public static void validateProperties(final Contact contact) throws OXException {
@@ -179,16 +186,16 @@ public final class Check {
 	}
 
 	/**
-	 * Performs validation checks prior performing write operations on the
-	 * global address book, throwing appropriate exceptions if checks fail.
+	 * Performs validation checks prior performing write operations on the global address book, throwing appropriate exceptions if 
+	 * checks fail.
 	 *
-	 * @param contextID the context ID
-	 * @param userID the user ID
-	 * @param folderID the folder ID
-	 * @param update the contact to be written
+	 * @param storage The queried storage
+	 * @param session The session
+	 * @param folderID The folder ID
+	 * @param update The contact to be written
 	 * @throws OXException
 	 */
-	public static void canWriteInGAB(final ContactStorage storage, final Session session, final String folderID, final Contact update) throws OXException {
+	public static void canWriteInGAB(ContactStorage storage, Session session, String folderID, Contact update) throws OXException {
 		if (FolderObject.SYSTEM_LDAP_FOLDER_ID == parse(folderID)) {
 			/*
 			 * check display name
@@ -200,29 +207,21 @@ public final class Check {
 				/*
 				 * check if display name is already in use
 				 */
-		    	final CompositeSearchTerm andTerm = new CompositeSearchTerm(CompositeOperation.AND);
-				final SingleSearchTerm folderIDTerm = new SingleSearchTerm(SingleSearchTerm.SingleOperation.EQUALS);
-				folderIDTerm.addOperand(new ContactFieldOperand(ContactField.FOLDER_ID));
-				folderIDTerm.addOperand(new ConstantOperand<String>(folderID));
-				andTerm.addSearchTerm(folderIDTerm);
-				final SingleSearchTerm displayNameTerm = new SingleSearchTerm(SingleSearchTerm.SingleOperation.EQUALS);
-				displayNameTerm.addOperand(new ContactFieldOperand(ContactField.DISPLAY_NAME));
-				displayNameTerm.addOperand(new ConstantOperand<String>(update.getDisplayName()));
-				andTerm.addSearchTerm(displayNameTerm);
-				final SingleSearchTerm objectIDTerm = new SingleSearchTerm(SingleSearchTerm.SingleOperation.NOT_EQUALS);
-				objectIDTerm.addOperand(new ContactFieldOperand(ContactField.OBJECT_ID));
-				objectIDTerm.addOperand(new ConstantOperand<Integer>(update.getObjectID()));
-				andTerm.addSearchTerm(objectIDTerm);
+		    	CompositeSearchTerm searchTerm = new CompositeSearchTerm(CompositeOperation.AND);
+				searchTerm.addSearchTerm(Tools.createContactFieldTerm(ContactField.FOLDER_ID, SingleOperation.EQUALS, folderID));
+				searchTerm.addSearchTerm(Tools.createContactFieldTerm(
+				    ContactField.DISPLAY_NAME, SingleOperation.EQUALS, update.getDisplayName()));
+				searchTerm.addSearchTerm(Tools.createContactFieldTerm(
+				    ContactField.OBJECT_ID, SingleOperation.NOT_EQUALS, Integer.valueOf(update.getObjectID())));
 				SearchIterator<Contact> searchIterator = null;
 				try {
-					searchIterator = storage.search(session, andTerm, new ContactField[] { ContactField.OBJECT_ID });
+					searchIterator = storage.search(
+					    session, searchTerm, new ContactField[] { ContactField.OBJECT_ID }, new SortOptions(0, 1));
 					if (searchIterator.hasNext()) {
 						throw ContactExceptionCodes.DISPLAY_NAME_IN_USE.create(session.getContextId(), update.getObjectID());
 					}
 				} finally {
-					if (null != searchIterator) {
-						searchIterator.close();
-					}
+				    Tools.close(searchIterator);
 				}
 			}
 			/*
@@ -237,9 +236,9 @@ public final class Check {
 	         * check primary mail address
 	         */
 	        if (update.containsEmail1()) {
-	        	final Context context = Tools.getContext(session);
-	        	if (context.getMailadmin() != session.getUserId()) {
-	        		throw ContactExceptionCodes.NO_PRIMARY_EMAIL_EDIT.create(session.getContextId(), update.getObjectID(), session.getUserId());
+	        	if (Tools.getContext(session).getMailadmin() != session.getUserId()) {
+	        		throw ContactExceptionCodes.NO_PRIMARY_EMAIL_EDIT.create(
+	        		    session.getContextId(), update.getObjectID(), session.getUserId());
 	        	}
 	        }
 		}

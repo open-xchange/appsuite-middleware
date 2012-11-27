@@ -61,11 +61,13 @@ import org.osgi.service.event.EventHandler;
 import org.quartz.service.QuartzService;
 import com.hazelcast.core.HazelcastInstance;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.FolderService;
 import com.openexchange.groupware.infostore.InfostoreFacade;
 import com.openexchange.index.IndexFacadeService;
+import com.openexchange.index.IndexManagementService;
 import com.openexchange.log.LogFactory;
 import com.openexchange.mail.service.MailService;
 import com.openexchange.management.ManagementService;
@@ -78,6 +80,7 @@ import com.openexchange.service.indexing.impl.internal.IndexingServiceMBeanImpl;
 import com.openexchange.service.indexing.impl.internal.Services;
 import com.openexchange.service.indexing.impl.internal.groupware.SessionEventHandler;
 import com.openexchange.sessiond.SessiondEventConstants;
+import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.user.UserService;
 import com.openexchange.userconf.UserConfigurationService;
 
@@ -108,7 +111,10 @@ public class IndexingActivator extends HousekeepingActivator {
             InfostoreFacade.class,
             ContextService.class,
             UserService.class,
-            UserConfigurationService.class };
+            UserConfigurationService.class,
+            IndexManagementService.class,
+            ConfigViewFactory.class,
+            ThreadPoolService.class };
     }
     
     @Override
@@ -119,9 +125,9 @@ public class IndexingActivator extends HousekeepingActivator {
         addService(IndexingService.class, serviceImpl);
         registerService(IndexingService.class, serviceImpl);
         
-        Dictionary<String, Object> sessionProperties = new Hashtable<String, Object>(1);
-        sessionProperties.put(EventConstants.EVENT_TOPIC, SessiondEventConstants.getAllTopics());
-        registerService(EventHandler.class, new SessionEventHandler(), sessionProperties);
+//        Dictionary<String, Object> sessionProperties = new Hashtable<String, Object>(1);
+//        sessionProperties.put(EventConstants.EVENT_TOPIC, SessiondEventConstants.getAllTopics());
+//        registerService(EventHandler.class, new SessionEventHandler(), sessionProperties);
         
         registerMBean((IndexingServiceImpl) serviceImpl);
         openTrackers();

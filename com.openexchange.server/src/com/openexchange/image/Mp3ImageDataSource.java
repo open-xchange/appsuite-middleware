@@ -49,27 +49,34 @@
 
 package com.openexchange.image;
 
+import static com.openexchange.ajax.requesthandler.converters.cover.Mp3CoverExtractor.isMp3;
+import static com.openexchange.ajax.requesthandler.converters.cover.Mp3CoverExtractor.isMp3FileExt;
+import static com.openexchange.ajax.requesthandler.converters.cover.Mp3CoverExtractor.isSupported;
+import static com.openexchange.ajax.requesthandler.converters.cover.Mp3CoverExtractor.isSupportedFileExt;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
-import java.util.Set;
 import org.apache.commons.logging.Log;
+import org.jaudiotagger.audio.AudioFile;
+import org.jaudiotagger.audio.AudioFileIO;
+import org.jaudiotagger.audio.exceptions.CannotReadException;
 import org.jaudiotagger.audio.exceptions.InvalidAudioFrameException;
 import org.jaudiotagger.audio.exceptions.ReadOnlyFileException;
 import org.jaudiotagger.audio.mp3.MP3File;
 import org.jaudiotagger.tag.FieldKey;
 import org.jaudiotagger.tag.TagException;
 import org.jaudiotagger.tag.TagField;
+import org.jaudiotagger.tag.datatype.Artwork;
 import org.jaudiotagger.tag.datatype.DataTypes;
 import org.jaudiotagger.tag.id3.AbstractID3v2Frame;
 import org.jaudiotagger.tag.id3.AbstractTagFrameBody;
 import org.jaudiotagger.tag.id3.framebody.FrameBodyAPIC;
 import org.jaudiotagger.tag.id3.framebody.FrameBodyPIC;
+import org.jaudiotagger.tag.mp4.Mp4FieldKey;
+import org.jaudiotagger.tag.mp4.Mp4Tag;
+import org.jaudiotagger.tag.mp4.field.Mp4TagCoverField;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.conversion.Data;
 import com.openexchange.conversion.DataArguments;
@@ -152,26 +159,48 @@ public final class Mp3ImageDataSource implements ImageDataSource {
             final ManagedFile managedFile = optData(fileId, folderId, ServerSessionAdapter.valueOf(session), ServerServiceRegistry.getInstance().getService(ManagedFileManagement.class));
             try {
                 final File tmpFile = managedFile.getFile();
-                // Create MP3 file
-                final MP3File mp3 = new MP3File(tmpFile, MP3File.LOAD_IDV2TAG, true);
-                // Get appropriate cover tag
-                final TagField imageField = mp3.getID3v2Tag().getFirstField(FieldKey.COVER_ART);
-                if (imageField instanceof AbstractID3v2Frame) {
-                    final AbstractTagFrameBody body = ((AbstractID3v2Frame) imageField).getBody();
-                    if (body instanceof FrameBodyAPIC) {
-                        final FrameBodyAPIC imageFrameBody = (FrameBodyAPIC) body;
-                        if (!imageFrameBody.isImageUrl()) {
-                            imageBytes = (byte[]) imageFrameBody.getObjectValue(DataTypes.OBJ_PICTURE_DATA);
-                            mimeType = (String) imageFrameBody.getObjectValue(DataTypes.OBJ_MIME_TYPE);
+                // Check for MP3
+                if (isMp3(managedFile.getContentType()) || isMp3FileExt(managedFile.getFileName())) {
+                    // Create MP3 file
+                    final MP3File mp3 = new MP3File(tmpFile, MP3File.LOAD_IDV2TAG, true);
+                    // Get appropriate cover tag
+                    final TagField imageField = mp3.getID3v2Tag().getFirstField(FieldKey.COVER_ART);
+                    if (imageField instanceof AbstractID3v2Frame) {
+                        final AbstractTagFrameBody body = ((AbstractID3v2Frame) imageField).getBody();
+                        if (body instanceof FrameBodyAPIC) {
+                            final FrameBodyAPIC imageFrameBody = (FrameBodyAPIC) body;
+                            if (!imageFrameBody.isImageUrl()) {
+                                imageBytes = (byte[]) imageFrameBody.getObjectValue(DataTypes.OBJ_PICTURE_DATA);
+                                mimeType = (String) imageFrameBody.getObjectValue(DataTypes.OBJ_MIME_TYPE);
+                            }
+                        } else if (body instanceof FrameBodyPIC) {
+                            final FrameBodyPIC imageFrameBody = (FrameBodyPIC) body;
+                            if (!imageFrameBody.isImageUrl()) {
+                                imageBytes = (byte[]) imageFrameBody.getObjectValue(DataTypes.OBJ_PICTURE_DATA);
+                                mimeType = (String) imageFrameBody.getObjectValue(DataTypes.OBJ_MIME_TYPE);
+                            }
+                        } else {
+                            LOG.warn("Extracting cover image from MP3 failed. Unknown frame body class: " + body.getClass().getName());
                         }
-                    } else if (body instanceof FrameBodyPIC) {
-                        final FrameBodyPIC imageFrameBody = (FrameBodyPIC) body;
-                        if (!imageFrameBody.isImageUrl()) {
-                            imageBytes = (byte[]) imageFrameBody.getObjectValue(DataTypes.OBJ_PICTURE_DATA);
-                            mimeType = (String) imageFrameBody.getObjectValue(DataTypes.OBJ_MIME_TYPE);
+                    }
+                } else if (isSupported(managedFile.getContentType()) || isSupportedFileExt(managedFile.getFileName())) {
+                    // Grab audio file
+                    final AudioFile f = AudioFileIO.read(tmpFile);
+                    final org.jaudiotagger.tag.Tag tag = f.getTag();
+                    if (tag instanceof Mp4Tag) {
+                        final Mp4Tag mp4tag = (Mp4Tag) tag;
+                        final List<TagField> coverarts = mp4tag.get(Mp4FieldKey.ARTWORK);
+                        if (null != coverarts && !coverarts.isEmpty()) {
+                            final Mp4TagCoverField coverArtField = (Mp4TagCoverField) coverarts.get(0);
+                            imageBytes = coverArtField.getData();
+                            mimeType = Mp4TagCoverField.getMimeTypeForImageType(coverArtField.getFieldType());
                         }
                     } else {
-                        LOG.warn("Extracting cover image from MP3 failed. Unknown frame body class: " + body.getClass().getName());
+                        final Artwork artwork = tag.getFirstArtwork();
+                        if (null != artwork) {
+                            imageBytes = artwork.getBinaryData();
+                            mimeType = artwork.getMimeType();
+                        }
                     }
                 }
             } catch (final IOException e) {
@@ -180,7 +209,11 @@ public final class Mp3ImageDataSource implements ImageDataSource {
                 throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
             } catch (final ReadOnlyFileException e) {
                 throw FileStorageExceptionCodes.IO_ERROR.create(e, e.getMessage());
+            } catch (final CannotReadException e) {
+                throw FileStorageExceptionCodes.IO_ERROR.create(e, e.getMessage());
             } catch (final InvalidAudioFrameException e) {
+                throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+            } catch (final RuntimeException e) {
                 throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
             } finally {
                 managedFile.delete();
@@ -296,14 +329,14 @@ public final class Mp3ImageDataSource implements ImageDataSource {
             String fileMIMEType = mp3File.getFileMIMEType();
             fileMIMEType = null == fileMIMEType ? null : fileMIMEType.toLowerCase(Locale.ENGLISH);
             if (null != fileMIMEType) {
-                if (!isMp3(fileMIMEType)) {
-                    throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create("File is not an MP3 file: " + fileMIMEType);
+                if (!isSupported(fileMIMEType)) {
+                    throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create("File is not a supported audio file: " + fileMIMEType);
                 }
             } else {
                 String fileName = mp3File.getFileName();
                 fileName = null == fileName ? null : fileName.toLowerCase(Locale.ENGLISH);
-                if (null != fileName && !fileName.endsWith(".mp3")) {
-                    throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create("File is not an MP3 file: " + fileMIMEType);
+                if (null != fileName && !isSupportedFileExt(fileName)) {
+                    throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create("File is not a supported audio file: " + fileMIMEType);
                 }
             }
             return mp3File;
@@ -318,25 +351,22 @@ public final class Mp3ImageDataSource implements ImageDataSource {
         }
         final ServerServiceRegistry serviceRegistry = ServerServiceRegistry.getInstance();
         final IDBasedFileAccess fileAccess = serviceRegistry.getService(IDBasedFileAccessFactory.class).createAccess(session);
-        return fileManagement.createManagedFile(fileAccess.getDocument(fileId, FileStorageFileAccess.CURRENT_VERSION)); // Stream is closed during creation of ManagedFile
-    }
-
-    private static final Set<String> MIME_TYPES = Collections.unmodifiableSet(new HashSet<String>(Arrays.asList(
-        "audio/mpeg",
-        "audio/x-mpeg",
-        "audio/mp3",
-        "audio/x-mp3",
-        "audio/mpeg3",
-        "audio/x-mpeg3",
-        "audio/mpg",
-        "audio/x-mpg",
-        "audio/x-mpegaudio")));
-
-    private static boolean isMp3(final String mimeType) {
-        if (null == mimeType) {
-            return false;
+        final com.openexchange.file.storage.File audioFile = fileAccess.getFileMetadata(fileId, FileStorageFileAccess.CURRENT_VERSION);
+        final String fileName = audioFile.getFileName();
+        final ManagedFile managedFile;
+        if (null == fileName) {
+            managedFile = fileManagement.createManagedFile(fileAccess.getDocument(fileId, FileStorageFileAccess.CURRENT_VERSION)); // Stream is closed during creation of ManagedFile
+        } else {
+            final int pos = fileName.indexOf('.');
+            if (pos > 0) {
+                managedFile = fileManagement.createManagedFile(fileAccess.getDocument(fileId, FileStorageFileAccess.CURRENT_VERSION), fileName.substring(pos)); // Stream is closed during creation of ManagedFile
+            } else {
+                managedFile = fileManagement.createManagedFile(fileAccess.getDocument(fileId, FileStorageFileAccess.CURRENT_VERSION)); // Stream is closed during creation of ManagedFile
+            }
         }
-        return MIME_TYPES.contains(mimeType);
+        managedFile.setContentType(audioFile.getFileMIMEType());
+        managedFile.setFileName(fileName);
+        return managedFile;
     }
 
 }

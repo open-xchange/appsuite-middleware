@@ -191,9 +191,11 @@ public final class MailJSONActivator extends AJAXModuleActivator {
                         if (0 < contact.getNumberOfImages() || contact.containsImage1() && null != contact.getImage1()) {
                             try {
                                 final ContactImageDataSource imgSource = ContactImageDataSource.getInstance();
+                                String timestamp = null != contact.getLastModified() ? 
+                                    String.valueOf(contact.getLastModified().getTime()) : null;
                                 final ImageLocation imageLocation =
                                     new ImageLocation.Builder().folder(Integer.toString(contact.getParentFolderID())).id(
-                                        Integer.toString(contact.getObjectID())).build();
+                                        Integer.toString(contact.getObjectID())).timestamp(timestamp).build();
                                 final String imageURL = imgSource.generateUrl(imageLocation, session);
                                 jArray.put(imageURL);
                             } catch (final OXException e) {

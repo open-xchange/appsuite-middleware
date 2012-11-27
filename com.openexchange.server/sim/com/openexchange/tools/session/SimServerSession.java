@@ -223,4 +223,13 @@ public class SimServerSession implements ServerSession {
         // TODO Auto-generated method stub
     }
 
+	/* (non-Javadoc)
+	 * @see com.openexchange.tools.session.ServerSession#isAnonymous()
+	 */
+	@Override
+	public boolean isAnonymous() {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
 }

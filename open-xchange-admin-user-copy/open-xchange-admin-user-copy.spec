@@ -8,7 +8,7 @@ BuildRequires: open-xchange-core
 BuildRequires: open-xchange-admin
 BuildRequires: java-devel >= 1.6.0
 Version:       @OXVERSION@
-%define        ox_release 1
+%define        ox_release 4
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -62,6 +62,26 @@ ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} 
 %doc com.openexchange.admin.user.copy/ChangeLog
 
 %changelog
+* Wed Nov 14 2012 Jan Bauerdick <jan.bauerdick@open-xchange.com>
+Sixth release candidate for 6.22.1
+* Tue Nov 13 2012 Jan Bauerdick <jan.bauerdick@open-xchange.com>
+Fifth release candidate for 6.22.1
+* Tue Nov 06 2012 Jan Bauerdick <jan.bauerdick@open-xchange.com>
+Fourth release candidate for 6.22.1
+* Fri Nov 02 2012 Jan Bauerdick <jan.bauerdick@open-xchange.com>
+Third release candidate for 6.22.1
+* Wed Oct 31 2012 Jan Bauerdick <jan.bauerdick@open-xchange.com>
+Second release candidate for 6.22.1
+* Fri Oct 26 2012 Jan Bauerdick <jan.bauerdick@open-xchange.com>
+Third release build for EDP drop #5
+* Fri Oct 26 2012 Jan Bauerdick <jan.bauerdick@open-xchange.com>
+Second release build for EDP drop #5
+* Fri Oct 26 2012 Jan Bauerdick <jan.bauerdick@open-xchange.com>
+First release candidate for 6.22.1
+* Fri Oct 26 2012 Jan Bauerdick <jan.bauerdick@open-xchange.com>
+prepare for 6.22.1
+* Thu Oct 11 2012 Jan Bauerdick <jan.bauerdick@open-xchange.com>
+Release build for EDP drop #5
 * Wed Oct 10 2012 Jan Bauerdick <jan.bauerdick@open-xchange.com>
 Fifth release candidate for 6.22.0
 * Tue Oct 09 2012 Jan Bauerdick <jan.bauerdick@open-xchange.com>

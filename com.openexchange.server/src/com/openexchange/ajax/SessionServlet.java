@@ -213,7 +213,7 @@ public abstract class SessionServlet extends AJAXServlet {
         if (sessiondService == null) {
             throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(SessiondService.class.getName());
         }
-        if (req.getParameter("session") != null) {
+        if (req.getParameter("session") != null && !req.getParameter("session").equals("")) {
             final String sessionId = getSessionId(req);
             final ServerSession session = getSession(req, sessionId, sessiondService);
             verifySession(req, sessiondService, sessionId, session);
@@ -271,9 +271,10 @@ public abstract class SessionServlet extends AJAXServlet {
         AtomicInteger counter = null;
         final SessionThreadCounter threadCounter = SessionThreadCounter.REFERENCE.get();
         String sessionId = null;
+        ServerSession session = null;
         try {
             initializeSession(req);
-            final ServerSession session = getSessionObject(req, true);
+            session = getSessionObject(req, true);
             /*
              * Check max. concurrent AJAX requests
              */
@@ -305,7 +306,7 @@ public abstract class SessionServlet extends AJAXServlet {
                 resp.setContentType(CONTENTTYPE_JAVASCRIPT);
                 final PrintWriter writer = resp.getWriter();
                 try {
-                    ResponseWriter.write(response, writer);
+                    ResponseWriter.write(response, writer, localeFrom(session));
                     writer.flush();
                 } catch (final JSONException e1) {
                     log(RESPONSE_ERROR, e1);
@@ -318,7 +319,7 @@ public abstract class SessionServlet extends AJAXServlet {
                 resp.setContentType(CONTENTTYPE_JAVASCRIPT);
                 final PrintWriter writer = resp.getWriter();
                 try {
-                    ResponseWriter.write(response, writer);
+                    ResponseWriter.write(response, writer, localeFrom(session));
                     writer.flush();
                 } catch (final JSONException e1) {
                     log(RESPONSE_ERROR, e1);

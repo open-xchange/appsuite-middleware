@@ -1,3 +1,52 @@
+/*
+ *
+ *    OPEN-XCHANGE legal information
+ *
+ *    All intellectual property rights in the Software are protected by
+ *    international copyright laws.
+ *
+ *
+ *    In some countries OX, OX Open-Xchange, open xchange and OXtender
+ *    as well as the corresponding Logos OX Open-Xchange and OX are registered
+ *    trademarks of the Open-Xchange, Inc. group of companies.
+ *    The use of the Logos is not covered by the GNU General Public License.
+ *    Instead, you are allowed to use these Logos according to the terms and
+ *    conditions of the Creative Commons License, Version 2.5, Attribution,
+ *    Non-commercial, ShareAlike, and the interpretation of the term
+ *    Non-commercial applicable to the aforementioned license is published
+ *    on the web site http://www.open-xchange.com/EN/legal/index.html.
+ *
+ *    Please make sure that third-party modules and libraries are used
+ *    according to their respective licenses.
+ *
+ *    Any modifications to this package must retain all copyright notices
+ *    of the original copyright holder(s) for the original code used.
+ *
+ *    After any such modifications, the original and derivative code shall remain
+ *    under the copyright of the copyright holder(s) and/or original author(s)per
+ *    the Attribution and Assignment Agreement that can be located at
+ *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
+ *    given Attribution for the derivative code and a license granting use.
+ *
+ *     Copyright (C) 2004-2011 Open-Xchange, Inc.
+ *     Mail: info@open-xchange.com
+ *
+ *
+ *     This program is free software; you can redistribute it and/or modify it
+ *     under the terms of the GNU General Public License, Version 2 as published
+ *     by the Free Software Foundation.
+ *
+ *     This program is distributed in the hope that it will be useful, but
+ *     WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+ *     or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License
+ *     for more details.
+ *
+ *     You should have received a copy of the GNU General Public License along
+ *     with this program; if not, write to the Free Software Foundation, Inc., 59
+ *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
+ *
+ */
+
 package com.openexchange.index.solr.internal.querybuilder;
 
 import java.util.HashMap;
@@ -11,281 +60,309 @@ import com.openexchange.exception.OXException;
 import com.openexchange.index.AccountFolders;
 import com.openexchange.index.IndexField;
 import com.openexchange.index.QueryParameters;
-import com.openexchange.index.SearchHandler;
 import com.openexchange.index.QueryParameters.Order;
+import com.openexchange.index.SearchHandler;
 import com.openexchange.index.solr.internal.FieldMapper;
 import com.openexchange.index.solr.internal.SolrField;
 
-
+/**
+ * {@link SimpleQueryBuilder}
+ * 
+ * @author Sven Maurmann
+ * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
+ */
 public class SimpleQueryBuilder implements SolrQueryBuilder {
-  private Configuration config;
-  private Map<String,QueryTranslator> translators;
-  private SolrField accountField;
-  private SolrField folderField;
-  private FieldMapper fieldMapper;
 
-  private static Log log = com.openexchange.log.Log.loggerFor(SimpleQueryBuilder.class);
+    private Configuration config;
 
+    private Map<String, QueryTranslator> translators;
 
-  public SimpleQueryBuilder(String configPath, SolrField accountField, SolrField folderField, FieldMapper fieldMapper) throws BuilderException {
-    config = new SimpleConfiguration(configPath);
-    translators = new HashMap<String,QueryTranslator>();
+    private SolrField moduleField;
 
-    for (String handler : config.getHandlers()) {
-      translators.put(handler.trim(), this.initTranslatorForHandler(handler, config));
-    }
-    
-    this.accountField = accountField;
-    this.folderField = folderField;
-    this.fieldMapper = fieldMapper;
-  }
+    private SolrField accountField;
 
+    private SolrField folderField;
 
-  @Override
-  public SolrQuery buildQuery(QueryParameters parameters) throws OXException {
-    try {
-        SearchHandler searchHandler = parameters.getHandler();
-        if (searchHandler == null) {
-            throw new IllegalArgumentException("Parameter 'search handler' must not be null!");
+    private FieldMapper fieldMapper;
+
+    private static Log log = com.openexchange.log.Log.loggerFor(SimpleQueryBuilder.class);
+
+    public SimpleQueryBuilder(String configPath, SolrField moduleField, SolrField accountField, SolrField folderField, FieldMapper fieldMapper) throws BuilderException {
+        config = new SimpleConfiguration(configPath);
+        translators = new HashMap<String, QueryTranslator>();
+
+        for (String handler : config.getHandlers()) {
+            translators.put(handler.trim(), this.initTranslatorForHandler(handler, config));
         }
-        log.debug("[buildQuery]: Handler is \'" + searchHandler.toString() + "\'");        
-        
-        Object searchTerm = parameters.getSearchTerm();
-        QueryTranslator translator = translators.get(searchHandler.toString().toLowerCase());        
-        SolrQuery solrQuery = new SolrQuery();
-        // FIXME: set query type based on search handler
-        switch (searchHandler) { 
-            case SIMPLE: 
-            {
-                if (searchTerm == null || !(searchTerm instanceof String)) {
-                    throw new IllegalArgumentException("Parameter 'search term' must not be null and of type java.lang.String!");
-                }
-                solrQuery.setQuery((String) searchTerm);
-                break;
+
+        this.moduleField = moduleField;
+        this.accountField = accountField;
+        this.folderField = folderField;
+        this.fieldMapper = fieldMapper;
+    }
+
+    /*
+     * For testing purposes only
+     */
+    protected SimpleQueryBuilder() {
+        super();
+    }
+
+    @Override
+    public SolrQuery buildQuery(QueryParameters parameters) throws OXException {
+        try {
+            SearchHandler searchHandler = parameters.getHandler();
+            if (searchHandler == null) {
+                throw new IllegalArgumentException("Parameter 'search handler' must not be null!");
             }
-            
-            case CUSTOM:
-            {
-                if (searchTerm == null) {
-                    throw new IllegalArgumentException("Parameter 'search term' must not be null!");
+            log.debug("[buildQuery]: Handler is \'" + searchHandler.toString() + "\'");
+
+            Object searchTerm = parameters.getSearchTerm();
+            QueryTranslator translator = translators.get(searchHandler.toString().toLowerCase());
+            SolrQuery solrQuery = new SolrQuery();
+            // FIXME: set query type based on search handler
+            switch (searchHandler) {
+                case SIMPLE: {
+                    if (searchTerm == null || !(searchTerm instanceof String)) {
+                        throw new IllegalArgumentException("Parameter 'search term' must not be null and of type java.lang.String!");
+                    }
+                    solrQuery.setQuery((String) searchTerm);
+                    solrQuery.setQueryType("simpleSearch");
+                    break;
                 }
-                if (translator == null) {
-                    throw new IllegalStateException("Could not find a translator for search handler '" + searchHandler.toString() + "'.");
+
+                case CUSTOM: {
+                    if (searchTerm == null) {
+                        throw new IllegalArgumentException("Parameter 'search term' must not be null!");
+                    }
+                    if (translator == null) {
+                        throw new IllegalStateException(
+                            "Could not find a translator for search handler '" + searchHandler.toString() + "'.");
+                    }
+                    solrQuery.setQuery(translator.translate(searchTerm));
+                    solrQuery.setQueryType("customSearch");
+                    break;
                 }
-                solrQuery.setQuery(translator.translate(searchTerm));
-                break;
+
+                case ALL_REQUEST: {
+                    solrQuery.setQuery(translator.translate(searchTerm));
+                    solrQuery.setQueryType("allSearch");
+                    break;
+                }
+
+                case GET_REQUEST: {
+                    Set<String> indexIds = parameters.getIndexIds();
+                    if (indexIds == null) {
+                        throw new IllegalArgumentException("Parameter 'index ids' must not be null!");
+                    }
+                    if (translator == null) {
+                        throw new IllegalStateException(
+                            "Could not find a translator for search handler '" + searchHandler.toString() + "'.");
+                    }
+                    solrQuery.setQuery(translator.translate(indexIds));
+                    solrQuery.setQueryType("getSearch");
+                    break;
+                }
+
+                default:
+                    throw new IllegalArgumentException("Search handler '" + searchHandler.toString() + "' is not valid for this action.");
             }
-            
-            case ALL_REQUEST:
-            {
-                solrQuery.setQuery("*:*");
-                break;
-            }
-            
-            case GET_REQUEST:
-            {
-                Set<String> indexIds = parameters.getIndexIds();
-                if (indexIds == null) {
-                    throw new IllegalArgumentException("Parameter 'index ids' must not be null!");
-                }
-                if (translator == null) {
-                    throw new IllegalStateException("Could not find a translator for search handler '" + searchHandler.toString() + "'.");
-                }
-                solrQuery.setQuery(translator.translate(indexIds));
-                break;
-            }
-            
-            default:
-                throw new IllegalArgumentException("Search handler '" + searchHandler.toString() + "' is not valid for this action.");
+
+            log.debug("[buildQuery]: Search term is \'" + solrQuery.getQuery() + "\'");
+            setSortAndOrder(parameters, solrQuery);
+            addFilterQueries(parameters, solrQuery);
+            return solrQuery;
+        } catch (Exception e) {
+            log.warn("[buildQuery]: Exception occurred: " + e.getMessage());
+            throw new OXException(e);
+        } finally {
         }
-        
-        log.debug("[buildQuery]: Search term is \'" + solrQuery.getQuery() + "\'");
-//        solrQuery.setQueryType(handlerName);
-        setSortAndOrder(parameters, solrQuery);
-        addFilterQueries(parameters, solrQuery);
-        return solrQuery;
     }
-    catch (Exception e) {
-      log.warn("[buildQuery]: Exception occurred: " + e.getMessage());
-      throw new OXException(e);
-    } finally {
+
+    // -------------------------- private methods below ----------------------------------- //
+
+    private QueryTranslator initTranslatorForHandler(String handler, Configuration conf) throws BuilderException {
+        try {
+            Class<?> cls = Class.forName(conf.getTranslatorForHandler(handler).trim());
+            QueryTranslator qt = (QueryTranslator) cls.newInstance();
+            qt.init(handler, conf);
+            return qt;
+        } catch (ClassNotFoundException e) {
+            log.warn("[SimpleQueryBuilder]: Could not find class for handler \'" + handler + "\': " + e.getMessage());
+            throw new BuilderException(e);
+        } catch (InstantiationException e) {
+            log.warn("[SimpleQueryBuilder]: Could not instantiate translator: " + e.getMessage());
+            throw new BuilderException(e);
+        } catch (IllegalAccessException e) {
+            log.warn("[SimpleQueryBuilder]: Could not instantiate translator: " + e.getMessage());
+            throw new BuilderException(e);
+        } catch (TranslationException e) {
+            log.warn("[SimpleQueryBuilder]: Could not initialize translator: " + e.getMessage());
+            throw new BuilderException(e);
+        }
     }
-  }
 
+    protected void setSortAndOrder(QueryParameters parameters, SolrQuery query) {
+        IndexField sortField = parameters.getSortField();
+        if (sortField == null) {
+            return;
+        }
 
-// -------------------------- private methods below ----------------------------------- //
-
-  private QueryTranslator initTranslatorForHandler(String handler, Configuration conf) throws BuilderException {
-    try {
-      Class<?> cls = Class.forName(conf.getTranslatorForHandler(handler).trim());
-      QueryTranslator qt = (QueryTranslator) cls.newInstance();
-      qt.init(handler, conf);
-      return qt;
+        SolrField solrSortField = fieldMapper.solrFieldFor(sortField);
+        if (solrSortField != null) {
+            Order orderParam = parameters.getOrder();
+            ORDER order = orderParam == null ? ORDER.desc : orderParam.equals(Order.DESC) ? ORDER.desc : ORDER.asc;
+            query.setSortField(solrSortField.solrName(), order);
+        }
     }
-    catch (ClassNotFoundException e) {
-      log.warn("[SimpleQueryBuilder]: Could not find class for handler \'" + handler + "\': " + e.getMessage());
-      throw new BuilderException(e);
-    }
-    catch (InstantiationException e) {
-      log.warn("[SimpleQueryBuilder]: Could not instantiate translator: " + e.getMessage());
-      throw new BuilderException(e);
-    }
-    catch (IllegalAccessException e) {
-      log.warn("[SimpleQueryBuilder]: Could not instantiate translator: " + e.getMessage());
-      throw new BuilderException(e);
-    } catch (TranslationException e) {
-      log.warn("[SimpleQueryBuilder]: Could not initialize translator: " + e.getMessage());
-      throw new BuilderException(e);
-    }
-  }
-  
-  protected void setSortAndOrder(QueryParameters parameters, SolrQuery query) {
-      IndexField sortField = parameters.getSortField();
-      if (sortField == null) {
-          return;
-      }
-      
-      SolrField solrSortField = fieldMapper.solrFieldFor(sortField);
-      if (solrSortField != null) {
-          Order orderParam = parameters.getOrder();
-          ORDER order = orderParam == null ? ORDER.desc : orderParam.equals(Order.DESC) ? ORDER.desc : ORDER.asc;
-          query.setSortField(solrSortField.solrName(), order);
-      }
-  }
-  
-  protected void addFilterQueries(QueryParameters parameters, SolrQuery solrQuery) {
-      if (accountField == null && folderField == null) {
-          return;
-      }
 
-      Set<AccountFolders> all = parameters.getAccountFolders();
-      Set<String> queries = new HashSet<String>();
-      if (all != null && all.size() > 0) {
-          if (accountField == null) {
-              AccountFolders accountFolders = all.iterator().next();
-              Set<String> folders = accountFolders.getFolders();
-              String stringWithOr = buildQueryStringWithOr(folderField.solrName(), folders);
-              if (stringWithOr != null) {
-                  queries.add(stringWithOr);
-              }
-          } else {
-              if (folderField == null) {
-                  AccountFolders accountFolders = all.iterator().next();
-                  String account = accountFolders.getAccount();
-                  String queryString = buildQueryString(accountField.solrName(), account);
-                  if (queryString != null) {
-                      queries.add(queryString);
-                  }
-              } else {
-                  for (AccountFolders accountFolders : all) {
-                      String account = accountFolders.getAccount();
-                      Set<String> folders = accountFolders.getFolders();
-                      if (folders.isEmpty()) {
-                          String queryString = buildQueryString(accountField.solrName(), account);
-                          if (queryString != null) {
-                              queries.add(queryString);
-                          }
-                      } else {
-                          String folderQuery = buildQueryStringWithOr(folderField.solrName(), folders);
-                          String accountQuery = buildQueryString(accountField.solrName(), account);
-                          String finalQuery = catenateQueriesWithAnd(folderQuery, accountQuery);
-                          if (finalQuery != null) {
-                              queries.add(finalQuery);
-                          }
-                      }
-                  }
-              }
-          }
-      }
+    protected void addFilterQueries(QueryParameters parameters, SolrQuery solrQuery) {
+        if (accountField == null && folderField == null) {
+            return;
+        }
 
-      if (!queries.isEmpty()) {
-          String filterQuery = catenateQueriesWithOr(queries);
-          solrQuery.addFilterQuery(filterQuery);
-      }
-  }
+        Set<AccountFolders> all = parameters.getAccountFolders();
+        Set<String> queries = new HashSet<String>();
+        if (all != null && all.size() > 0) {
+            if (accountField == null) {
+                AccountFolders accountFolders = all.iterator().next();
+                Set<String> folders = accountFolders.getFolders();
+                String stringWithOr = buildQueryStringWithOr(folderField.solrName(), folders);
+                if (stringWithOr != null) {
+                    queries.add(stringWithOr);
+                }
+            } else {
+                if (folderField == null) {
+                    AccountFolders accountFolders = all.iterator().next();
+                    String account = accountFolders.getAccount();
+                    String queryString = buildQueryString(accountField.solrName(), account);
+                    if (queryString != null) {
+                        queries.add(queryString);
+                    }
+                } else {
+                    for (AccountFolders accountFolders : all) {
+                        String account = accountFolders.getAccount();
+                        Set<String> folders = accountFolders.getFolders();
+                        if (folders.isEmpty()) {
+                            String queryString = buildQueryString(accountField.solrName(), account);
+                            if (queryString != null) {
+                                queries.add(queryString);
+                            }
+                        } else {
+                            String folderQuery = buildQueryStringWithOr(folderField.solrName(), folders);
+                            String accountQuery = buildQueryString(accountField.solrName(), account);
+                            String finalQuery = catenateQueriesWithAnd(folderQuery, accountQuery);
+                            if (finalQuery != null) {
+                                queries.add(finalQuery);
+                            }
+                        }
+                    }
+                }
+            }
+        }
 
-  protected String buildQueryString(String fieldName, Object value) {
-      if (fieldName == null || value == null) {
-          return null;
-      }
-      
-      StringBuilder sb = new StringBuilder(); 
-      sb.append('(').append(fieldName).append(":\"").append(value.toString()).append("\")");
-      return sb.toString();
-  }
-  
-  protected String buildQueryStringWithOr(String fieldName, Set<String> values) {
-      if (fieldName == null || values == null || values.isEmpty()) {
-          return null;
-      }
-      
-      StringBuilder sb = new StringBuilder();
-      sb.append('(');
-      boolean first = true;
-      for (String value : values) {
-          if (first) {
-              sb.append('(').append(fieldName).append(":\"").append(value).append("\")");
-              first = false;
-          } else {
-              sb.append(" OR (").append(fieldName).append(":\"").append(value).append("\")");
-          }
-      }
-      
-      sb.append(')');
-      return sb.toString();
-  }
-  
-  protected String catenateQueriesWithAnd(String... queries) {
-      if (queries == null || queries.length == 0) {
-          return null;
-      }
-      
-      StringBuilder sb = new StringBuilder();
-      sb.append('(');
-      boolean first = true;
-      for (String query : queries) {
-          if (query != null) {
-              if (first) {
-                  sb.append(query);
-                  first = false; 
-              } else {
-                  sb.append(" AND ").append(query);
-              }
-          }
-      }
-      
-      if (sb.length() == 1) {
-          return null;
-      }
-      
-      sb.append(')');
-      return sb.toString();
-  }
-  
-  protected String catenateQueriesWithOr(Set<String> queries) {
-      if (queries == null || queries.size() == 0) {
-          return null;
-      }
-      
-      StringBuilder sb = new StringBuilder();
-      sb.append('(');
-      boolean first = true;
-      for (String query : queries) {
-          if (query != null) {
-              if (first) {
-                  sb.append(query);
-                  first = false; 
-              } else {
-                  sb.append(" OR ").append(query);
-              }
-          }
-      }
-      
-      if (sb.length() == 1) {
-          return null;
-      }
-      
-      sb.append(')');
-      return sb.toString();
-  }
+        if (!queries.isEmpty()) {
+            String filterQuery = catenateQueriesWithOr(queries);
+            solrQuery.addFilterQuery(filterQuery);
+        }
+
+        if (moduleField != null) {
+            Integer module = parameters.getModule() < 0 ? null : new Integer(parameters.getModule());
+            String moduleQuery = buildQueryString(moduleField.solrName(), module);
+            if (moduleQuery != null) {
+                solrQuery.addFilterQuery(moduleQuery);
+            }
+        }
+    }
+
+    protected String buildQueryString(String fieldName, Object value) {
+        if (fieldName == null || value == null) {
+            return null;
+        }
+
+        StringBuilder sb = new StringBuilder();
+        sb.append('(').append(fieldName).append(":\"").append(value.toString()).append("\")");
+        return sb.toString();
+    }
+
+    protected String buildQueryStringWithOr(String fieldName, Set<String> values) {
+        if (fieldName == null || values == null || values.isEmpty()) {
+            return null;
+        }
+
+        StringBuilder sb = new StringBuilder();
+        sb.append('(');
+        boolean first = true;
+        for (String value : values) {
+            if (first) {
+                sb.append('(').append(fieldName).append(":\"").append(value).append("\")");
+                first = false;
+            } else {
+                sb.append(" OR (").append(fieldName).append(":\"").append(value).append("\")");
+            }
+        }
+
+        sb.append(')');
+        return sb.toString();
+    }
+
+    protected String catenateQueriesWithAnd(String... queries) {
+        if (queries == null || queries.length == 0) {
+            return null;
+        }
+
+        StringBuilder sb = new StringBuilder();
+        sb.append('(');
+        boolean first = true;
+        for (String query : queries) {
+            if (query != null) {
+                if (first) {
+                    sb.append(query);
+                    first = false;
+                } else {
+                    sb.append(" AND ").append(query);
+                }
+            }
+        }
+
+        if (sb.length() == 1) {
+            return null;
+        }
+
+        sb.append(')');
+        return sb.toString();
+    }
+
+    protected String catenateQueriesWithOr(Set<String> queries) {
+        if (queries == null || queries.size() == 0) {
+            return null;
+        }
+
+        StringBuilder sb = new StringBuilder();
+        sb.append('(');
+        boolean first = true;
+        for (String query : queries) {
+            if (query != null) {
+                if (first) {
+                    sb.append(query);
+                    first = false;
+                } else {
+                    sb.append(" OR ").append(query);
+                }
+            }
+        }
+
+        if (sb.length() == 1) {
+            return null;
+        }
+
+        sb.append(')');
+        return sb.toString();
+    }
+
+    protected void addFilterQueryIfNotNull(SolrQuery solrQuery, String filterQuery) {
+        if (filterQuery != null) {
+            solrQuery.addFilterQuery(filterQuery);
+        }
+    }
 }

@@ -87,14 +87,9 @@
     
     <requestHandler name="getSearch" class="solr.SearchHandler">
         <arr name="components">
-            <str>searchFieldSupplier</str>
             <str>query</str>
         </arr>
     </requestHandler>
-    
-    <searchComponent name="searchFieldSupplier" class="de.kippdata.cria.solrext.searchcomponents.SearchFieldSupplier">
-        <str name="sf">uuid</str>
-    </searchComponent>
 
     <requestHandler name="customSearch" class="solr.SearchHandler">
         <lst name="defaults">
@@ -110,7 +105,6 @@
             </arr>
         -->
         <arr name="components">
-            <str>queryModifier</str>
             <str>query</str>
             <!-- Uncomment for debugging purposes only -->
             <!--
@@ -118,37 +112,6 @@
             -->
         </arr>
     </requestHandler>
-
-    <searchComponent name="queryModifier" class="de.kippdata.cria.solrext.searchcomponents.FormalFieldQueryModifier">
-        <str name="param1">uuid</str>
-        <str name="param2">timestamp</str>
-        <str name="param3">account</str>
-        <str name="param4">full_name</str>
-        <str name="param5">id</str>
-        <str name="param6">color_label</str>
-        <str name="param7">attachment</str>
-        <str name="param8">received_date</str>
-        <str name="param9">sent_date</str>
-        <str name="param10">size</str>
-        <str name="param11">flag_answered</str>
-        <str name="param12">flag_deleted</str>
-        <str name="param13">flag_draft</str>
-        <str name="param14">flag_flagged</str>
-        <str name="param15">flag_recent</str>
-        <str name="param16">flag_seen</str>
-        <str name="param17">flag_user</str>
-        <str name="param18">flag_spam</str>
-        <str name="param19">flag_forwarded</str>
-        <str name="param20">flag_read_ack</str>
-        <str name="param21">user_flags</str>
-        <str name="param22">from</str>
-        <str name="param23">to</str>
-        <str name="param24">cc</str>
-        <str name="param25">bcc</str>
-        <str name="param26">subject{gen,de,en,fr,it}</str>
-        <str name="param27">content_flag</str>
-        <str name="param28">content{gen,de,en,fr,it}</str>
-    </searchComponent>
 
     <requestHandler name="/update" class="solr.XmlUpdateRequestHandler">
         <lst name="defaults">

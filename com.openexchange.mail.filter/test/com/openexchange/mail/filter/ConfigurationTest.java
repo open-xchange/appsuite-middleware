@@ -43,7 +43,7 @@ public class ConfigurationTest extends Activator {
             checkConfigfile();
             Assert.fail("No exception thrown");
         } catch (final OXException e) {
-            Assert.assertTrue(OXMailfilterExceptionCode.NO_MASTERPASSWORD_SET.getMessage().equals(e));
+            Assert.assertTrue(OXMailfilterExceptionCode.NO_MASTERPASSWORD_SET.equals(e));
         }
     }
 

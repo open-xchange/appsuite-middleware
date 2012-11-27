@@ -49,14 +49,24 @@
 
 package com.openexchange.file.storage.cifs.osgi;
 
+import java.util.Dictionary;
+import java.util.Hashtable;
+import java.util.Map;
 import org.osgi.framework.BundleContext;
+import org.osgi.service.event.Event;
+import org.osgi.service.event.EventConstants;
+import org.osgi.service.event.EventHandler;
 import org.osgi.util.tracker.ServiceTracker;
 import com.openexchange.file.storage.FileStorageAccountManagerLookupService;
 import com.openexchange.file.storage.FileStorageAccountManagerProvider;
 import com.openexchange.file.storage.cifs.CIFSServices;
+import com.openexchange.file.storage.cifs.cache.SmbFileMapManagement;
 import com.openexchange.mime.MimeTypeMap;
 import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.session.Session;
+import com.openexchange.sessiond.SessiondEventConstants;
 import com.openexchange.sessiond.SessiondService;
+import com.openexchange.timer.TimerService;
 
 /**
  * {@link CIFSActivator} - Activator for CIFS bundle.
@@ -74,7 +84,7 @@ public final class CIFSActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { FileStorageAccountManagerLookupService.class, SessiondService.class, MimeTypeMap.class };
+        return new Class<?>[] { FileStorageAccountManagerLookupService.class, SessiondService.class, MimeTypeMap.class, TimerService.class };
     }
 
     @Override
@@ -90,6 +100,37 @@ public final class CIFSActivator extends HousekeepingActivator {
              */
             rememberTracker(new ServiceTracker<FileStorageAccountManagerProvider, FileStorageAccountManagerProvider>(context, FileStorageAccountManagerProvider.class, new CIFSServiceRegisterer(context)));
             openTrackers();
+            SmbFileMapManagement.getInstance().startShrinker();
+            /*
+             * Event handler
+             */
+            {
+                final EventHandler eventHandler = new EventHandler() {
+
+                    @Override
+                    public void handleEvent(final Event event) {
+                        final String topic = event.getTopic();
+                        if (SessiondEventConstants.TOPIC_REMOVE_SESSION.equals(topic)) {
+                            handleDroppedSession((Session) event.getProperty(SessiondEventConstants.PROP_SESSION));
+                        } else if (SessiondEventConstants.TOPIC_REMOVE_CONTAINER.equals(topic) || SessiondEventConstants.TOPIC_REMOVE_DATA.equals(topic)) {
+                            @SuppressWarnings("unchecked")
+                            final Map<String, Session> map = (Map<String, Session>) event.getProperty(SessiondEventConstants.PROP_CONTAINER);
+                            for (final Session session : map.values()) {
+                                handleDroppedSession(session);
+                            }
+                        }
+                    }
+
+                    private void handleDroppedSession(final Session session) {
+                        if (null == getService(SessiondService.class).getAnyActiveSessionForUser(session.getUserId(), session.getContextId())) {
+                            SmbFileMapManagement.getInstance().dropFor(session);
+                        }
+                    }
+                };
+                final Dictionary<String, Object> dict = new Hashtable<String, Object>(1);
+                dict.put(EventConstants.EVENT_TOPIC, SessiondEventConstants.getAllTopics());
+                registerService(EventHandler.class, eventHandler, dict);
+            }
         } catch (final Exception e) {
             com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(CIFSActivator.class)).error(e.getMessage(), e);
             throw e;
@@ -104,6 +145,7 @@ public final class CIFSActivator extends HousekeepingActivator {
     @Override
     protected void stopBundle() throws Exception {
         try {
+            SmbFileMapManagement.getInstance().stopShrinker();
             // Clean-up
             cleanUp();
             // Clear service registry

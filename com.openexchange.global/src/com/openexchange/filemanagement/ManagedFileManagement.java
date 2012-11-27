@@ -123,6 +123,18 @@ public interface ManagedFileManagement {
     public ManagedFile createManagedFile(InputStream inputStream) throws OXException;
 
     /**
+     * Creates a new managed file from specified input stream.
+     * <p>
+     * Size attribute is already set in returned managed file.
+     *
+     * @param inputStream The input stream whose content is filled into newly created file
+     * @param optExtension An optional file extension; e.g. <code>".txt"</code>
+     * @return A new managed file
+     * @throws OXException If a new managed file cannot be created from specified content
+     */
+    public ManagedFile createManagedFile(InputStream inputStream, String optExtension) throws OXException;
+
+    /**
      * Creates a new managed file from specified bytes.
      * <p>
      * Size attribute is already set in returned managed file.

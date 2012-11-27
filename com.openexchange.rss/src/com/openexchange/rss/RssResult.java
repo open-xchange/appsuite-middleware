@@ -52,7 +52,7 @@ import java.util.Date;
 
 public class RssResult {
 	private String url, author, format, body, subject, feedUrl, feedTitle, imageUrl;
-	private Date publishedDate;
+	private Date date;
 
 	public String getUrl() {
 		return url;
@@ -87,7 +87,7 @@ public class RssResult {
 	}
 	
 	public Date getDate() {
-		return this.publishedDate;
+		return this.date;
 	}
 
 	public RssResult setUrl(String url) {
@@ -130,8 +130,13 @@ public class RssResult {
 		return this;
 	}
 
-	public RssResult setDate(Date publishedDate) {
-		this.publishedDate = publishedDate;
+	public RssResult setDate(Date... possibleDates) {
+		for(Date d: possibleDates) {
+			if(d != null) {
+				this.date = d;
+				return this;
+			}
+		}
 		return this;
 	}
 }

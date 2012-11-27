@@ -61,8 +61,6 @@ import java.util.Map;
 import java.util.concurrent.locks.ReentrantLock;
 
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
-
 import com.openexchange.ajax.fields.AppointmentFields;
 import com.openexchange.ajax.fields.CalendarFields;
 import com.openexchange.calendar.AppointmentDiff;
@@ -347,8 +345,7 @@ public class AppointmentNotificationPool implements
 
 
 		private void notifyAllParticipantsAboutOverallChanges() throws OXException {
-			ITipMailGenerator generator = generatorFactory.create(original, mostRecent,
-					session, -1);
+			ITipMailGenerator generator = generatorFactory.create(original, mostRecent, session, -1);
 			if (moreThanOneUserActed()) {
 				generator.noActor();
 			}
@@ -398,10 +395,10 @@ public class AppointmentNotificationPool implements
 			}
 			Map<PartitionIndex, Update[]> partitions = new HashMap<PartitionIndex, Update[]>();
 			for(Update update: updates) {
-				if (update.getDiff().isAboutCertainParticipantsStateChangeOnly(update.getSession().getUserId()+"")) {
+				if (update.getDiff().isAboutCertainParticipantsStateChangeOnly(Integer.toString(update.getSession().getUserId()))) {
 					continue;
 				}
-				Update[] partition = partitions.get(update.getSession().getUserId());
+				Update[] partition = partitions.get(update.getPartitionIndex());
 				if (partition == null) {
 					partition = new Update[2];
 					partitions.put(update.getPartitionIndex(), partition);

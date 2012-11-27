@@ -49,6 +49,7 @@
 
 package com.openexchange.solr;
 
+import java.io.Serializable;
 import java.net.URI;
 
 
@@ -58,13 +59,17 @@ import java.net.URI;
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public class SolrCoreStore {
-    
+public class SolrCoreStore implements Serializable {
+
+    private static final long serialVersionUID = -3765429569358418129L;
+
     private int id;
     
     private URI uri;
     
     private int maxCores;
+    
+    private int numCores;
     
     
     public SolrCoreStore() {
@@ -123,5 +128,15 @@ public class SolrCoreStore {
      */
     public void setMaxCores(final int maxCores) {
         this.maxCores = maxCores;
+    }
+
+    
+    public final int getNumCores() {
+        return numCores;
+    }
+
+    
+    public final void setNumCores(int numCores) {
+        this.numCores = numCores;
     }
 }

@@ -224,18 +224,18 @@ public final class CMISAccountAccess implements FileStorageAccountAccess {
                  */
                 if (useWebService()) {
                     parameters.put(SessionParameter.BINDING_TYPE, BindingType.WEBSERVICES.value());
-                    parameters.put(SessionParameter.WEBSERVICES_ACL_SERVICE, rootUrl);
-                    parameters.put(SessionParameter.WEBSERVICES_DISCOVERY_SERVICE, rootUrl);
-                    parameters.put(SessionParameter.WEBSERVICES_MULTIFILING_SERVICE, rootUrl);
-                    parameters.put(SessionParameter.WEBSERVICES_NAVIGATION_SERVICE, rootUrl);
-                    parameters.put(SessionParameter.WEBSERVICES_OBJECT_SERVICE, rootUrl);
-                    parameters.put(SessionParameter.WEBSERVICES_POLICY_SERVICE, rootUrl);
-                    parameters.put(SessionParameter.WEBSERVICES_RELATIONSHIP_SERVICE, rootUrl);
-                    parameters.put(SessionParameter.WEBSERVICES_REPOSITORY_SERVICE, rootUrl);
-                    parameters.put(SessionParameter.WEBSERVICES_VERSIONING_SERVICE, rootUrl);
+                    parameters.put(SessionParameter.WEBSERVICES_ACL_SERVICE, url);
+                    parameters.put(SessionParameter.WEBSERVICES_DISCOVERY_SERVICE, url);
+                    parameters.put(SessionParameter.WEBSERVICES_MULTIFILING_SERVICE, url);
+                    parameters.put(SessionParameter.WEBSERVICES_NAVIGATION_SERVICE, url);
+                    parameters.put(SessionParameter.WEBSERVICES_OBJECT_SERVICE, url);
+                    parameters.put(SessionParameter.WEBSERVICES_POLICY_SERVICE, url);
+                    parameters.put(SessionParameter.WEBSERVICES_RELATIONSHIP_SERVICE, url);
+                    parameters.put(SessionParameter.WEBSERVICES_REPOSITORY_SERVICE, url);
+                    parameters.put(SessionParameter.WEBSERVICES_VERSIONING_SERVICE, url);
                 } else if (useAtomPub()) {
                     parameters.put(SessionParameter.BINDING_TYPE, BindingType.ATOMPUB.value());
-                    parameters.put(SessionParameter.ATOMPUB_URL, rootUrl);
+                    parameters.put(SessionParameter.ATOMPUB_URL, url);
                     /*-
                      * If NTLM is enabled on SharePoint, you have to activate the OpenCMIS NTLM authentication provider.
                      * 

@@ -9,12 +9,12 @@
     <!-- This values must be changed for defining other installation places -->
     <property name="logInstallDir" value="/var/log/open-xchange"/>
 
-	<!-- Constants -->
+    <import file="build-project.xml"/>
+
+    <!-- Constants -->
     <property name="osgiDir" value="osgi"/>
     <property name="importCSVDir" value="importCSV"/>
     <property name="patchConfDir" value="${tmpDir}/${confDir}"/>
-
-    <import file="build-project.xml"/>
 
     <target name="installConf" depends="patchConfig">
         <copy todir="${destDir}/${confInstallDir}">
@@ -33,6 +33,7 @@
     <target name="patchConfigFiles">
         <antcall target="patchFileLoggingProperties"/>
         <antcall target="patchScriptConf"/>
+        <antcall target="patchPathInProperties"/>
     </target>
 
     <target name="patchFileLoggingProperties">
@@ -50,7 +51,15 @@
             <replacefilter token="@loggingproperties@" value="${confInstallDir}/file-logging.properties"/>
             <replacefilter token="@oxgroupwaresysconfdir@" value="${prefix}"/>
         </replace>
-    </target>  
+    </target>
+
+    <target name="patchPathInProperties">
+        <move tofile="${patchConfDir}/import.properties" file="${patchConfDir}/import.properties.in" overwrite="true"/>
+
+        <replace dir="${patchConfDir}" includes="import.properties,system.properties">
+            <replacefilter token="@rootinstalldir@" value="${prefix}"/>
+        </replace>
+    </target>
 
     <target name="postInstall" description="Install several additional files that are necessary for the backend.">
         <antcall target="installImportCSV"/>
@@ -69,8 +78,8 @@
         <replaceregexp file="META-INF/MANIFEST.MF" match="Bundle-Version: .*" replace="Bundle-Version: ${version}" byline="true"/>
     </target>
 
-	<target name="postClean" description="Removes artifacts created by this build script.">
-		<delete dir="${tmpDir}"/>
-	</target>
+    <target name="postClean" description="Removes artifacts created by this build script.">
+        <delete dir="${tmpDir}"/>
+    </target>
 
 </project>

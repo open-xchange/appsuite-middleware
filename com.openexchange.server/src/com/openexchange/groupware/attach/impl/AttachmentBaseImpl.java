@@ -676,10 +676,12 @@ public class AttachmentBaseImpl extends DBService implements AttachmentBase {
                 recreate.add(att);
             }
         } finally {
-            try {
-                iter.close();
-            } catch (final OXException e) {
-                LOG.error("", e);
+            if (null != iter) {
+                try {
+                    iter.close();
+                } catch (final Exception e) {
+                    LOG.error("", e);
+                }
             }
         }
 

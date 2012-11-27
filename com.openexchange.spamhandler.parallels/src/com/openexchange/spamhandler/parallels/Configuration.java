@@ -50,6 +50,7 @@
 package com.openexchange.spamhandler.parallels;
 
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.custom.parallels.impl.ParallelsOptions;
 
 /**
  * {@link Configuration}
@@ -69,7 +70,7 @@ public class Configuration {
 
     public static Configuration getInstance(ConfigurationService configService) {
         int port = configService.getIntProperty("com.openexchange.spamhandler.spamassassin.port", 783);
-        int xmlPort = configService.getIntProperty("com.openexchange.custom.parallels.antispam.xmlrpc.port", 3100);
+        int xmlPort = configService.getIntProperty(ParallelsOptions.PROPERTY_ANTISPAM_XMLRPC_PORT, 3100);
         return new Configuration(port, xmlPort);
     }
 

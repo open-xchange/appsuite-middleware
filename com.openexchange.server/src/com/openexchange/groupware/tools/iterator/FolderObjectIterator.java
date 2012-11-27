@@ -139,7 +139,7 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
 
     private final boolean dbGrouping = OXFolderProperties.isEnableDBGrouping();
 
-    private final FolderCacheManager cache;
+    private FolderCacheManager cache;
 
     private final Queue<FolderObject> prefetchQueue;
 
@@ -410,6 +410,16 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
         } else {
             prefetchQueue = null;
         }
+    }
+
+    /**
+     * Releases associated cache
+     *
+     * @return This iterator with cache released
+     */
+    public FolderObjectIterator releaseCache() {
+        cache = null;
+        return this;
     }
 
     private final ElementAttributes getEternalAttributes() throws OXException {
@@ -810,6 +820,9 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
     private static final String SQL_LOAD_P =
         "SELECT permission_id, fp, orp, owp, odp, admin_flag, group_flag, system FROM oxfolder_permissions WHERE cid = ? AND fuid = ?";
 
+    private static final String SQL_LOAD_P_BACKUP =
+        "SELECT permission_id, fp, orp, owp, odp, admin_flag, group_flag, system FROM del_oxfolder_permissions WHERE cid = ? AND fuid = ?";
+
     private static final OCLPermission[] loadFolderPermissions(final int folderId, final int cid, final Connection con) throws OXException {
         PreparedStatement stmt = null;
         ResultSet rs = null;
@@ -820,9 +833,19 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
             rs = stmt.executeQuery();
             if (!rs.next()) {
                 /*
-                 * Empty result set
+                 * Retry with backup table
                  */
-                return new OCLPermission[0];
+                closeSQLStuff(rs, stmt);
+                stmt = con.prepareStatement(SQL_LOAD_P_BACKUP);
+                stmt.setInt(1, cid);
+                stmt.setInt(2, folderId);
+                rs = stmt.executeQuery();
+                if (!rs.next()) {
+                    /*
+                     * Empty result set
+                     */
+                    return new OCLPermission[0];
+                }
             }
             final ArrayList<OCLPermission> ret = new ArrayList<OCLPermission>(8);
             do {

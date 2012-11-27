@@ -53,8 +53,6 @@ import static com.openexchange.mail.MailServletInterface.mailInterfaceMonitor;
 import static com.openexchange.mail.dataobjects.MailFolder.DEFAULT_FOLDER_ID;
 import static com.openexchange.mail.utils.MailFolderUtility.isEmpty;
 import static java.util.regex.Matcher.quoteReplacement;
-import gnu.trove.list.TLongList;
-import gnu.trove.list.array.TLongArrayList;
 import gnu.trove.procedure.TIntProcedure;
 import gnu.trove.set.TIntSet;
 import gnu.trove.set.hash.TIntHashSet;
@@ -67,7 +65,6 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.regex.Pattern;
-import javax.mail.FetchProfile;
 import javax.mail.Flags;
 import javax.mail.Folder;
 import javax.mail.FolderClosedException;
@@ -77,8 +74,8 @@ import javax.mail.Quota;
 import javax.mail.Quota.Resource;
 import javax.mail.ReadOnlyFolderException;
 import javax.mail.StoreClosedException;
-import javax.mail.UIDFolder;
 import javax.mail.search.FlagTerm;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
@@ -141,9 +138,23 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
     private static final boolean DEBUG = LOG.isDebugEnabled();
 
     /**
-     * The max. length for a mailbox name
+     * Gets the max. length for a mailbox name
      */
-    private static final int MAX_MAILBOX_NAME = 60;
+    private static volatile Integer maxMailboxNameLength;
+    private static int maxMailboxNameLength() {
+        Integer tmp = maxMailboxNameLength;
+        if (null == tmp) {
+            synchronized (IMAPFolderStorage.class) {
+                tmp = maxMailboxNameLength;
+                if (null == tmp) {
+                    final ConfigurationService service = IMAPServiceRegistry.getService(ConfigurationService.class);
+                    tmp = Integer.valueOf(null == service ? 60 : service.getIntProperty("com.openexchange.imap.maxMailboxNameLength", 60));
+                    maxMailboxNameLength = tmp;
+                }
+            }
+        }
+        return tmp.intValue();
+    }
 
     private static final String STR_INBOX = "INBOX";
 
@@ -834,8 +845,8 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
         if (isEmpty(name)) {
             throw MailExceptionCode.INVALID_FOLDER_NAME_EMPTY.create();
         }
-        if (name.length() > MAX_MAILBOX_NAME) {
-            throw MailExceptionCode.INVALID_FOLDER_NAME_TOO_LONG.create(Integer.valueOf(MAX_MAILBOX_NAME));
+        if (name.length() > maxMailboxNameLength()) {
+            throw MailExceptionCode.INVALID_FOLDER_NAME_TOO_LONG.create(Integer.valueOf(maxMailboxNameLength()));
         }
         try {
             final String parentFullname = toCreate.getParentFullname();
@@ -866,7 +877,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
                         IMAPException.Code.INVALID_FOLDER_NAME,
                         imapConfig,
                         session,
-                        Character.valueOf(toCreate.getSeparator()));
+                        toCreate.getName());
                 }
                 parent = getIMAPFolder(parentFullname);
                 isParentDefault = false;
@@ -937,7 +948,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
                 final boolean mboxEnabled =
                     MBoxEnabledCache.isMBoxEnabled(imapConfig, parent, new StringBuilder(parent.getFullName()).append(separator).toString());
                 if (!checkFolderNameValidity(name, separator, mboxEnabled)) {
-                    throw IMAPException.create(IMAPException.Code.INVALID_FOLDER_NAME, imapConfig, session, Character.valueOf(separator));
+                    throw IMAPException.create(IMAPException.Code.INVALID_FOLDER_NAME, imapConfig, session, name);
                 }
                 if (isParentDefault) {
                     /*
@@ -1214,9 +1225,9 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
                 if (isEmpty(newName)) {
                     throw MailExceptionCode.INVALID_FOLDER_NAME_EMPTY.create();
                 } else if (newName.indexOf(separator) != -1) {
-                    throw MailExceptionCode.INVALID_FOLDER_NAME.create(String.valueOf(separator));
-                } else if (newName.length() > MAX_MAILBOX_NAME) {
-                    throw MailExceptionCode.INVALID_FOLDER_NAME_TOO_LONG.create(Integer.valueOf(MAX_MAILBOX_NAME));
+                    throw MailExceptionCode.INVALID_FOLDER_NAME2.create(newName);
+                } else if (newName.length() > maxMailboxNameLength()) {
+                    throw MailExceptionCode.INVALID_FOLDER_NAME_TOO_LONG.create(Integer.valueOf(maxMailboxNameLength()));
                 }
                 /*-
                  * Perform rename operation
@@ -1247,7 +1258,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
                     throw IMAPException.create(IMAPException.Code.DUPLICATE_FOLDER, imapConfig, session, renameFolder.getFullName());
                 }
                 if (!checkFolderNameValidity(newName, separator, mboxEnabled)) {
-                    throw IMAPException.create(IMAPException.Code.INVALID_FOLDER_NAME, imapConfig, session, Character.valueOf(separator));
+                    throw IMAPException.create(IMAPException.Code.INVALID_FOLDER_NAME, imapConfig, session, newName);
                 }
                 /*
                  * Remember subscription status
@@ -1383,21 +1394,21 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
                                 IMAPException.Code.INVALID_FOLDER_NAME,
                                 imapConfig,
                                 session,
-                                Character.valueOf(separator));
+                                newFullname);
                         }
                         newParent = newFullname.substring(0, pos);
+                        newName = newFullname.substring(pos + 1);
                         if (!checkFolderPathValidity(newParent, separator)) {
                             throw IMAPException.create(
                                 IMAPException.Code.INVALID_FOLDER_NAME,
                                 imapConfig,
                                 session,
-                                Character.valueOf(separator));
+                                newName);
                         }
-                        newName = newFullname.substring(pos + 1);
                     }
                 }
-                if (newName.length() > MAX_MAILBOX_NAME) {
-                    throw MailExceptionCode.INVALID_FOLDER_NAME_TOO_LONG.create(Integer.valueOf(MAX_MAILBOX_NAME));
+                if (newName.length() > maxMailboxNameLength()) {
+                    throw MailExceptionCode.INVALID_FOLDER_NAME_TOO_LONG.create(Integer.valueOf(maxMailboxNameLength()));
                 }
                 /*
                  * Check for move
@@ -1500,7 +1511,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
                                 IMAPException.Code.INVALID_FOLDER_NAME,
                                 imapConfig,
                                 session,
-                                Character.valueOf(separator));
+                                newName);
                         }
                         if (isSubfolderOf(destFolder.getFullName(), oldFullname, separator)) {
                             throw IMAPException.create(
@@ -1565,7 +1576,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
                             IMAPException.Code.INVALID_FOLDER_NAME,
                             imapConfig,
                             session,
-                            Character.valueOf(separator));
+                            newName);
                     }
                     /*
                      * Remember subscription status
@@ -1971,21 +1982,13 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
                         getSeparator()));
                     if (backup) {
                         imapAccess.getMessageStorage().notifyIMAPFolderModification(trashFullname);
+                        final Message[] candidates = f.search(new FlagTerm(FLAGS_DELETED, true));
+                        if (null != candidates && candidates.length > 0) {
+                            f.copyMessages(candidates, imapStore.getFolder(trashFullname));
+                        }
                     }
-                    final Message[] candidates = f.search(new FlagTerm(FLAGS_DELETED, true));
-                    if (backup) {
-                        f.copyMessages(candidates, imapStore.getFolder(trashFullname));
-                    }
-                    final FetchProfile fp = new FetchProfile();
-                    fp.add(UIDFolder.FetchProfileItem.UID);
-                    f.fetch(candidates, fp);
-                    final TLongList uids = new TLongArrayList(candidates.length);
-                    for (final Message candidate : candidates) {
-                        uids.add(f.getUID(candidate));
-                    }
-                    imapAccess.getMessageStorage().deleteMessagesLong(fullName, uids.toArray(), false);
                 }  finally {
-                    f.close(false);
+                    f.close(true);
                 }
             }
         } catch (final MessagingException e) {

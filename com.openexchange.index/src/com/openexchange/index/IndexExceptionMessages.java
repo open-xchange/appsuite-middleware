@@ -71,5 +71,11 @@ public final class IndexExceptionMessages implements LocalizableStrings {
     
     // An index entry does not exist for folder %1$s in account %2$s.
     public static final String MISSING_FOLDER_ENTRY_MSG = "An index entry does not exist for folder %1$s in account %2$s.";
+
+    // Index search for module %1$d is not enabled for user %2$d in context %3$d.
+    public static final String INDEXING_NOT_ENABLED = "Index search for module %1$d is not enabled for user %2$d in context %3$d.";
+
+    // The index for module %1$d for user %2$d in context %3$d is currently locked.
+    public static final String INDEX_LOCKED = "The index for module %1$d for user %2$d in context %3$d is currently locked.";
     
 }

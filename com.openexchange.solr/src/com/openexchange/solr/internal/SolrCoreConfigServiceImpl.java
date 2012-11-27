@@ -83,6 +83,11 @@ public class SolrCoreConfigServiceImpl implements SolrCoreConfigService {
     }
     
     @Override
+    public SolrCoreStore getCoreStore(int id) throws OXException {
+        return indexMysql.getCoreStore(id);
+    }
+    
+    @Override
     public List<SolrCoreStore> getAllStores() throws OXException {
         return indexMysql.getCoreStores();
     }
