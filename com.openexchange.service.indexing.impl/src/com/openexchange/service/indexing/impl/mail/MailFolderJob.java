@@ -229,7 +229,7 @@ public class MailFolderJob extends AbstractMailJob {
     
     private void addMails(MailJobInfo info, Set<String> indexIds, Set<String> storageIds, final IndexAccess<MailMessage> mailIndex, final IndexAccess<Attachment> attachmentIndex, final IMailMessageStorage messageStorage) throws OXException {
         final List<String> toAdd = new ArrayList<String>(storageIds);
-        toAdd.removeAll(indexIds);        
+        toAdd.removeAll(indexIds);
         addMails(info, toAdd, messageStorage, mailIndex, attachmentIndex);
     }
 

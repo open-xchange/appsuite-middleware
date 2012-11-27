@@ -963,15 +963,16 @@ public class HazelcastJobStore implements JobStore {
             Set<JobKey> excluded = new HashSet<JobKey>();
             for (TriggerStateWrapper stateWrapper : triggers) {
                 if (stateWrapper.trigger.getNextFireTime() == null) {
+                    removeTrigger(stateWrapper.trigger.getKey());
                     continue;
-                }                
+                }
                 
                 if (cannotAcquire(stateWrapper)) {
                     continue;
                 }
                 
                 if (firstAcquiredTriggerFireTime > 0 
-                    && stateWrapper.getTrigger().getNextFireTime().getTime() > (firstAcquiredTriggerFireTime + timeWindow)) {                    
+                    && stateWrapper.getTrigger().getNextFireTime().getTime() > (firstAcquiredTriggerFireTime + timeWindow)) {
                     break;
                 }
                 
@@ -1214,8 +1215,8 @@ public class HazelcastJobStore implements JobStore {
                     }
                 } else if (triggerInstCode == CompletedExecutionInstruction.SET_TRIGGER_COMPLETE) {
                     triggersByKey.remove(trigger.getKey());
-                    stateWrapper.setState(TriggerStateWrapper.STATE_COMPLETE);
-                    triggersByKey.put(trigger.getKey(), stateWrapper);
+//                    stateWrapper.setState(TriggerStateWrapper.STATE_COMPLETE);
+//                    triggersByKey.put(trigger.getKey(), stateWrapper);
                     signaler.signalSchedulingChange(0L);
                 } else if(triggerInstCode == CompletedExecutionInstruction.SET_TRIGGER_ERROR) {
                     triggersByKey.remove(trigger.getKey());
@@ -1233,11 +1234,16 @@ public class HazelcastJobStore implements JobStore {
                     signaler.signalSchedulingChange(0L);
                 } else if (triggerInstCode == CompletedExecutionInstruction.SET_ALL_JOB_TRIGGERS_COMPLETE) {
                     ISet<TriggerKey> otherTriggers = triggersByJobKey.get(jobKey);
-                    for (TriggerKey triggerKeyToChange : otherTriggers) {
-                        TriggerStateWrapper triggerToChange = triggersByKey.remove(triggerKeyToChange);
-                        triggerToChange.setState(TriggerStateWrapper.STATE_COMPLETE);
-                        triggersByKey.put(triggerKeyToChange, triggerToChange);
-                    }
+                    /*
+                     * remove triggers if they are complete
+                     */
+                    removeTriggers(new ArrayList<TriggerKey>(otherTriggers));
+                    
+//                    for (TriggerKey triggerKeyToChange : otherTriggers) {
+//                        TriggerStateWrapper triggerToChange = triggersByKey.remove(triggerKeyToChange);
+//                        triggerToChange.setState(TriggerStateWrapper.STATE_COMPLETE);
+//                        triggersByKey.put(triggerKeyToChange, triggerToChange);
+//                    }
                     
                     signaler.signalSchedulingChange(0L);
                 }
@@ -1293,7 +1299,7 @@ public class HazelcastJobStore implements JobStore {
 
         if (stateWrapper.getTrigger().getNextFireTime() == null) {
             stateWrapper.setState(TriggerStateWrapper.STATE_COMPLETE);
-            triggersByKey.replace(stateWrapper.getTrigger().getKey(), stateWrapper);            
+            triggersByKey.replace(stateWrapper.getTrigger().getKey(), stateWrapper);
             signaler.notifySchedulerListenersFinalized(stateWrapper.getTrigger());
         } else if (nextFireTime.equals(stateWrapper.getTrigger().getNextFireTime())) {
             return false;
@@ -1308,7 +1314,7 @@ public class HazelcastJobStore implements JobStore {
             throw new JobPersistenceException("Hazelcast Service is not available.");
         }
         
-        return hazelcast;            
+        return hazelcast;
     }
     
     public static final class TriggerStateWrapper implements Serializable {
