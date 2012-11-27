@@ -8322,7 +8322,7 @@ msgstr "Die UIDs von Aufgaben können nicht geändert werden."
 #. Into a numeric attribute something non numeric has been entered. %2$s will name the attribute that contains non digit characters.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:220
 msgid "Value \"%1$s\" of attribute \"%2$s\" contains non digit characters."
-msgstr "Der Wert \"%1$s\" des Attributs %2$s darf nur Zahlen enthalten."
+msgstr "Der Wert \"%1$s\" des Attributs \"%2$s\" darf nur Zahlen enthalten."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/update/UpdateExceptionMessages.java:62
 msgid ""
