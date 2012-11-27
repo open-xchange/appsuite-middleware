@@ -202,9 +202,10 @@ public class SmalSessionEventHandler implements EventHandler {
     private void scheduleFolderJobs(Session session, Map<Integer, Set<MailFolder>> allFolders, MailAccountStorageService storageService, IndexingService indexingService) throws OXException {
         int contextId = session.getContextId();
         int userId = session.getUserId();
-        ConfigurationService configurationService = SmalServiceLookup.getInstance().getService(ConfigurationService.class);
-        int intervalMinutes = configurationService.getIntProperty(FOLDER_INTERVAL, 60);
-        long interval = 60000L * intervalMinutes;
+//        ConfigurationService configurationService = SmalServiceLookup.getInstance().getService(ConfigurationService.class);
+//        int intervalMinutes = configurationService.getIntProperty(FOLDER_INTERVAL, 60);
+//        long interval = 60000L * intervalMinutes;
+        long interval = 60000L * 60;
         for (Integer accountId : allFolders.keySet()) {
             MailAccount account = storageService.getMailAccount(accountId.intValue(), userId, contextId);
             Set<MailFolder> folders = allFolders.get(accountId);
