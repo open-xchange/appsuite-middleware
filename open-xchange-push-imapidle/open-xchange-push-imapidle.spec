@@ -53,6 +53,8 @@ ox_move_config_file /opt/open-xchange/etc/groupware /opt/open-xchange/etc push_i
 %config(noreplace) /opt/open-xchange/etc/*
 
 %changelog
+* Mon Nov 26 2012 Carsten Hoeger <choeger@open-xchange.com>
+Build for patch 2012-11-28
 * Wed Nov 14 2012 Carsten Hoeger <choeger@open-xchange.com>
 Sixth release candidate for 6.22.1
 * Tue Nov 13 2012 Carsten Hoeger <choeger@open-xchange.com>
