@@ -741,7 +741,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
     public void saveDocument(final DocumentMetadata document, final InputStream data, final long sequenceNumber, Metadata[] modifiedColumns, final ServerSession sessionObj) throws OXException {
         if (document.getId() == NEW) {
             saveDocument(document, data, sequenceNumber, sessionObj);
-            indexDocument(sessionObj.getContext(), sessionObj.getContextId(), document.getId(), -1L, true);
+            indexDocument(sessionObj.getContext(), sessionObj.getUserId(), document.getId(), -1L, true);
             return;
         }
         try {
