@@ -88,6 +88,7 @@ import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.service.indexing.IndexingJob;
 import com.openexchange.service.indexing.IndexingService;
 import com.openexchange.service.indexing.JobInfo;
+import com.openexchange.service.indexing.impl.internal.FakeSession;
 import com.openexchange.service.indexing.impl.mail.AddByIdsJob;
 import com.openexchange.service.indexing.impl.mail.ChangeByIdsJob;
 import com.openexchange.service.indexing.impl.mail.MailJobInfo;
@@ -469,6 +470,14 @@ public final class SmalMessageStorage extends AbstractSMALStorage implements IMa
     }
     
     private void submitJob(JobInfo jobInfo) throws OXException {
+        if (session instanceof FakeSession) {
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("Session is a fake session. Job will not be submitted...");
+            }
+            // FIXME: This is done to prevent loops here and needs a much better solution!
+            return;
+        }
+        
         if (!isIndexingAllowed() || isBlacklisted()) {
             return;
         }
