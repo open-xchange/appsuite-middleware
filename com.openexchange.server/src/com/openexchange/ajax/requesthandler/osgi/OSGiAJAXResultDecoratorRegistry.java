@@ -103,7 +103,7 @@ public final class OSGiAJAXResultDecoratorRegistry implements AJAXResultDecorato
         }
         final org.apache.commons.logging.Log logger = com.openexchange.log.LogFactory.getLog(OSGiAJAXResultDecoratorRegistry.class);
         if (logger.isWarnEnabled()) {
-            logger.warn(new StringBuilder(128).append("Another AJAXResultDecorator is already registered with identifier: ").append(
+            logger.warn(new com.openexchange.java.StringAllocator(128).append("Another AJAXResultDecorator is already registered with identifier: ").append(
                 service.getIdentifier()).toString());
         }
         context.ungetService(reference);

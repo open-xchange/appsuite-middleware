@@ -238,7 +238,7 @@ public final class MailRequest {
         if (LOG.isDebugEnabled()) {
             final long start = System.currentTimeMillis();
             collectObj.performOperations(session, writer, mailInterface);
-            LOG.debug(new StringBuilder(128).append("Multiple '").append(getOpName(collectObj.getOperation())).append(
+            LOG.debug(new com.openexchange.java.StringAllocator(128).append("Multiple '").append(getOpName(collectObj.getOperation())).append(
                 "' mail request successfully performed: ").append(System.currentTimeMillis() - start).append("msec").toString());
         } else {
             collectObj.performOperations(session, writer, mailInterface);

@@ -124,7 +124,7 @@ public final class ClearPerformer extends AbstractPerformer {
             folderStorage.clearFolder(treeId, folderId, storageParameters);
             if (LOG.isDebugEnabled()) {
                 final long duration = System.currentTimeMillis() - start;
-                LOG.debug(new StringBuilder().append("Clear.doClear() took ").append(duration).append("msec for folder: ").append(folderId).toString());
+                LOG.debug(new com.openexchange.java.StringAllocator().append("Clear.doClear() took ").append(duration).append("msec for folder: ").append(folderId).toString());
             }
             if (started) {
                 folderStorage.commitTransaction(storageParameters);

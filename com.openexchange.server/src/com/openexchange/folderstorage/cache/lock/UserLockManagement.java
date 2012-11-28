@@ -102,7 +102,7 @@ public final class UserLockManagement {
     public void dropFor(final Session session) {
         map.remove(keyFor(session));
         if (LOG.isDebugEnabled()) {
-            LOG.debug(new StringBuilder("Cleaned folder locks for user ").append(session.getUserId()).append(" in context ").append(
+            LOG.debug(new com.openexchange.java.StringAllocator("Cleaned folder locks for user ").append(session.getUserId()).append(" in context ").append(
                 session.getContextId()).toString());
         }
     }

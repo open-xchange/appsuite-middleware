@@ -154,11 +154,11 @@ public class FileResponseRenderer implements ResponseRenderer {
             final String userAgent = req.getHeader("user-agent");
             if (SAVE_AS_TYPE.equals(contentType) || (delivery != null && delivery.equalsIgnoreCase(DOWNLOAD))) {
                 if (null == contentDisposition) {
-                    final StringBuilder sb = new StringBuilder(32).append("attachment");
+                    final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(32).append("attachment");
                     DownloadUtility.appendFilenameParameter(fileName, SAVE_AS_TYPE, userAgent, sb);
                     resp.setHeader("Content-Disposition", sb.toString());
                 } else {
-                    final StringBuilder sb = new StringBuilder(32).append(contentDisposition.trim());
+                    final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(32).append(contentDisposition.trim());
                     DownloadUtility.appendFilenameParameter(file.getName(), SAVE_AS_TYPE, userAgent, sb);
                     resp.setHeader("Content-Disposition", sb.toString());
                     //Tools.setHeaderForFileDownload(userAgent, resp, file.getName(), contentDisposition);

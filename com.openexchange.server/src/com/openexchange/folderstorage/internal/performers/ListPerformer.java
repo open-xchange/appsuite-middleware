@@ -64,7 +64,6 @@ import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CompletionService;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.openexchange.concurrent.CallerRunsCompletionService;
 import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
@@ -82,6 +81,7 @@ import com.openexchange.folderstorage.internal.CalculatePermission;
 import com.openexchange.folderstorage.mail.MailFolderType;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
+import com.openexchange.log.LogFactory;
 import com.openexchange.mail.FullnameArgument;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.utils.MailFolderUtility;
@@ -196,7 +196,7 @@ public final class ListPerformer extends AbstractUserizedFolderPerformer {
             }
             if (DEBUG) {
                 final long duration = System.currentTimeMillis() - start;
-                LOG.debug(new StringBuilder().append("List.doList() took ").append(duration).append("msec for parent folder: ").append(
+                LOG.debug(new com.openexchange.java.StringAllocator().append("List.doList() took ").append(duration).append("msec for parent folder: ").append(
                     parentId).toString());
             }
             return ret;
@@ -352,7 +352,7 @@ public final class ListPerformer extends AbstractUserizedFolderPerformer {
                                             subfolder = tmp.getFolder(treeId, id, newParameters);
                                         } catch (final OXException e) {
                                             log.warn(
-                                                new StringBuilder(128).append("The folder with ID \"").append(id).append("\" in tree \"").append(treeId).append(
+                                                new com.openexchange.java.StringAllocator(128).append("The folder with ID \"").append(id).append("\" in tree \"").append(treeId).append(
                                                     "\" could not be fetched from storage \"").append(tmp.getClass().getSimpleName()).append('"').toString(),
                                                 e);
                                             addWarning(e);
@@ -615,7 +615,7 @@ public final class ListPerformer extends AbstractUserizedFolderPerformer {
                                     subfolder = tmp.getFolder(treeId, id, newParameters);
                                 } catch (final OXException e) {
                                     log.warn(
-                                        new StringBuilder(128).append("The folder with ID \"").append(id).append("\" in tree \"").append(treeId).append(
+                                        new com.openexchange.java.StringAllocator(128).append("The folder with ID \"").append(id).append("\" in tree \"").append(treeId).append(
                                             "\" could not be fetched from storage \"").append(tmp.getClass().getSimpleName()).append('"').toString(),
                                         e);
                                     addWarning(e);

@@ -166,7 +166,7 @@ public final class DeletePerformer extends AbstractPerformer {
             }
             if (DEBUG_ENABLED) {
                 final long duration = System.currentTimeMillis() - start;
-                LOG.debug(new StringBuilder().append("Delete.doDelete() took ").append(duration).append("msec for folder: ").append(
+                LOG.debug(new com.openexchange.java.StringAllocator().append("Delete.doDelete() took ").append(duration).append("msec for folder: ").append(
                     folderId).toString());
             }
             /*

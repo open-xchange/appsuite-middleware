@@ -342,7 +342,7 @@ public final class DatabaseFolderConverter {
                     /*
                      * Either located below private folder or parent not visible
                      */
-                    retval.setParentID(new StringBuilder(8).append(FolderObject.SHARED_PREFIX).append(retval.getCreatedBy()).toString());
+                    retval.setParentID(new com.openexchange.java.StringAllocator(8).append(FolderObject.SHARED_PREFIX).append(retval.getCreatedBy()).toString());
                 } else {
                     /*
                      * Parent is visible

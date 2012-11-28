@@ -265,7 +265,7 @@ public final class EventQueue {
             throw new OXException().setLogMessage("Event system is being shut down and therefore does not accept new events.");
         }
         if (LOG.isDebugEnabled()) {
-            LOG.debug(new StringBuilder("add EventObject: ").append(eventObj));
+            LOG.debug(new com.openexchange.java.StringAllocator("add EventObject: ").append(eventObj));
         }
 
         if (!isEnabled) {

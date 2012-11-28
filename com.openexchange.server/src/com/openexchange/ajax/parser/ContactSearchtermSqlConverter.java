@@ -51,7 +51,6 @@
 
 import java.util.LinkedList;
 import java.util.List;
-
 import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.contact.sqlinjectors.SQLInjector;
 import com.openexchange.groupware.contact.sqlinjectors.StringSQLInjector;
@@ -59,8 +58,8 @@ import com.openexchange.search.CompositeSearchTerm;
 import com.openexchange.search.Operand;
 import com.openexchange.search.Operation;
 import com.openexchange.search.SearchTerm;
-import com.openexchange.search.SingleSearchTerm;
 import com.openexchange.search.SearchTerm.OperationPosition;
+import com.openexchange.search.SingleSearchTerm;
 
  /**
   * @author tobiasprinz
@@ -273,7 +272,7 @@ public class ContactSearchtermSqlConverter  implements ContactSearchTermConverte
 		if(charset == null) {
             return field;
         }
-		return new StringBuilder("CONVERT(").append(field).append(" USING ").append(getCharset()).append(')').toString();
+		return new com.openexchange.java.StringAllocator("CONVERT(").append(field).append(" USING ").append(getCharset()).append(')').toString();
 	}
 
 	/**
@@ -283,7 +282,7 @@ public class ContactSearchtermSqlConverter  implements ContactSearchTermConverte
 		if(getPrefix() == null) {
             return field;
         }
-		return new StringBuilder(getPrefix()).append('.').append(field).toString();
+		return new com.openexchange.java.StringAllocator(getPrefix()).append('.').append(field).toString();
 	}
 
 

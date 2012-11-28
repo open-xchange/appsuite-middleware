@@ -65,7 +65,6 @@ import java.util.List;
 import java.util.TimeZone;
 import java.util.regex.Pattern;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -103,6 +102,7 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.search.AppointmentSearchObject;
 import com.openexchange.groupware.search.Order;
+import com.openexchange.log.LogFactory;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.StringCollection;
 import com.openexchange.tools.iterator.SearchIterator;
@@ -921,7 +921,7 @@ public class AppointmentRequest extends CalendarRequest {
                     true);
                 if (recuResults.size() == 0) {
                     if (LOG.isWarnEnabled()) {
-                        LOG.warn(new StringBuilder(32).append("No occurrence at position ").append(recurrencePosition));
+                        LOG.warn(new com.openexchange.java.StringAllocator(32).append("No occurrence at position ").append(recurrencePosition));
                     }
                     throw OXCalendarExceptionCodes.UNKNOWN_RECURRENCE_POSITION.create(Integer.valueOf(recurrencePosition));
                 }
