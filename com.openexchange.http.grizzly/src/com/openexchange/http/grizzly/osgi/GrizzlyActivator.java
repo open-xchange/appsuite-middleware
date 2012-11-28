@@ -194,10 +194,10 @@ public class GrizzlyActivator extends HousekeepingActivator {
                 networkListener.registerAddOn(new CometAddOn());
             }
 
-            if (LOG.isInfoEnabled()) {
-                LOG.info("Enabling GrizzlOXAddon for Grizzly server.");
-            }
-            networkListener.registerAddOn(new GrizzlOXAddOn());
+//            if (LOG.isInfoEnabled()) {
+//                LOG.info("Enabling GrizzlOXAddon for Grizzly server.");
+//            }
+//            networkListener.registerAddOn(new GrizzlOXAddOn());
 
             /*
              * AtmosphereServiceImpl that contains the framework to handle requests dispatched from the atmosphere servlet

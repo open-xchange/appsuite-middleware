@@ -62,7 +62,7 @@ import com.openexchange.http.grizzly.GrizzlyConfig;
 import com.openexchange.tools.servlet.http.Cookies;
 
 /**
- * {@link OXRequest}
+ * {@link OXRequest} 
  * 
  * @author <a href="mailto:marc	.arens@open-xchange.com">Marc Arens</a>
  */
@@ -82,7 +82,7 @@ public class OXRequest extends Request {
             return request;
         }
 
-        return new OXRequest(new org.glassfish.grizzly.http.server.Response());
+        return new OXRequest(new OXResponse());
     }
     
     protected OXRequest(Response response) {
@@ -225,6 +225,9 @@ public class OXRequest extends Request {
         if (domain != null) {
             jSessionIdCookie.setDomain(domain);
         }
+        
+        jSessionIdCookie.setHttpOnly(grizzlyConfig.isCookieHttpOnly());
+        
         /*
          * Toggle the security of the cookie on when we are dealing with a https request or the forceHttps config option is true e.g. when A
          * proxy like apache terminates ssl in front of the backend. The exception from forced https is a request from the local LAN.
