@@ -284,7 +284,7 @@ public class MailAccountParser extends DataParser {
 
     private static String stripSpecials(final String src) {
         final char[] chars = src.toCharArray();
-        final StringBuilder sb = new StringBuilder(chars.length);
+        final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(chars.length);
         for (final char c : chars) {
             if (Character.isLetterOrDigit(c)) {
                 sb.append(c);

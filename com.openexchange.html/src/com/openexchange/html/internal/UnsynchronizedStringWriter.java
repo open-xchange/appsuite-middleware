@@ -59,13 +59,13 @@ import java.io.Writer;
  */
 public class UnsynchronizedStringWriter extends Writer {
 
-    private final StringBuilder buf;
+    private final com.openexchange.java.StringAllocator buf;
 
     /**
      * Create a new string writer, using the default initial string-buffer size.
      */
     public UnsynchronizedStringWriter() {
-        buf = new StringBuilder();
+        buf = new com.openexchange.java.StringAllocator();
         lock = buf;
     }
 
@@ -78,7 +78,7 @@ public class UnsynchronizedStringWriter extends Writer {
         if (initialSize < 0) {
             throw new IllegalArgumentException("Negative buffer size");
         }
-        buf = new StringBuilder(initialSize);
+        buf = new com.openexchange.java.StringAllocator(initialSize);
         lock = buf;
     }
 
@@ -87,7 +87,7 @@ public class UnsynchronizedStringWriter extends Writer {
      *
      * @param initialSize The initial buffer.
      */
-    public UnsynchronizedStringWriter(final StringBuilder builder) {
+    public UnsynchronizedStringWriter(final com.openexchange.java.StringAllocator builder) {
         if (null == builder) {
             throw new IllegalArgumentException("Builder is null.");
         }
@@ -221,9 +221,9 @@ public class UnsynchronizedStringWriter extends Writer {
     /**
      * Return the string buffer itself.
      *
-     * @return The {@link StringBuilder} instance holding the current buffer value.
+     * @return The {@link com.openexchange.java.StringAllocator} instance holding the current buffer value.
      */
-    public StringBuilder getBuffer() {
+    public com.openexchange.java.StringAllocator getBuffer() {
         return buf;
     }
 
