@@ -63,6 +63,10 @@ public class SimConfigurationService implements ConfigurationService {
     public final Map<String, String> stringProperties = new HashMap<String, String>();
     public final File configurationDirectory;
 
+    public SimConfigurationService() {
+        this("");
+    }
+
     public SimConfigurationService(String dirName) {
         super();
         configurationDirectory = new File(dirName);
