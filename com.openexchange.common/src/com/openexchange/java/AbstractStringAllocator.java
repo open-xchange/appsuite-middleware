@@ -56,7 +56,7 @@ import static java.lang.Character.isHighSurrogate;
 import static java.lang.Character.isLowSurrogate;
 import java.lang.reflect.Method;
 import java.util.Arrays;
-import sun.misc.FloatingDecimal;
+import com.openexchange.java.misc.FloatingDecimal;
 
 
 /**
