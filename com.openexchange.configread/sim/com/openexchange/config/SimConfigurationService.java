@@ -60,7 +60,13 @@ import java.util.Properties;
  */
 public class SimConfigurationService implements ConfigurationService {
 
-    public Map<String, String> stringProperties = new HashMap<String, String>();
+    public final Map<String, String> stringProperties = new HashMap<String, String>();
+    public final File configurationDirectory;
+
+    public SimConfigurationService(String dirName) {
+        super();
+        configurationDirectory = new File(dirName);
+    }
 
     @Override
     public Filter getFilterFromProperty(String name) {
@@ -140,8 +146,7 @@ public class SimConfigurationService implements ConfigurationService {
 
     @Override
     public File getDirectory(String directoryName) {
-        // TODO Auto-generated method stub
-        return null;
+        return new File(configurationDirectory, directoryName);
     }
 
     @Override
@@ -161,5 +166,4 @@ public class SimConfigurationService implements ConfigurationService {
         // TODO Auto-generated method stub
         return null;
     }
-
 }
