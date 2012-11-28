@@ -188,7 +188,7 @@ public final class AJPv13Utility {
      */
     public static String dumpByte(final byte b) {
         final String s = Integer.toHexString(b & 0xff).toUpperCase();
-        final StringBuilder sb = new StringBuilder(4).append("0x");
+        final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(4).append("0x");
         if (s.length() == 1) {
             sb.append('0');
         }

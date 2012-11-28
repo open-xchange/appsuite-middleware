@@ -208,7 +208,7 @@ public class AJPv13TaskWatcher {
                         final int numProcessing = countProcessing.get();
                         if (numProcessing > 0 && countExceeded.get() == numProcessing) {
                             final String delimStr = "\n++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n";
-                            log.error(new StringBuilder(128 + delimStr.length()).append(delimStr).append(
+                            log.error(new com.openexchange.java.StringAllocator(128 + delimStr.length()).append(delimStr).append(
                                 "AJP-Watcher's run done: SYSTEM DEADLOCK DETECTED!").append(" Going to stop and re-initialize system").append(
                                 delimStr).toString());
                             /*
@@ -316,7 +316,7 @@ public class AJPv13TaskWatcher {
                     taskProperties = null == taskProps ? null : taskProps.getMap();
                 }
                 if (null == taskProperties) {
-                    final StringBuilder logBuilder = new StringBuilder(196).append("AJP Listener \"").append(task.getThreadName());
+                    final com.openexchange.java.StringAllocator logBuilder = new com.openexchange.java.StringAllocator(196).append("AJP Listener \"").append(task.getThreadName());
                     logBuilder.append("\" exceeds max. running time of ").append(AJPv13Config.getAJPWatcherMaxRunningTime());
                     logBuilder.append("msec -> Processing time: ").append(System.currentTimeMillis() - task.getProcessingStartTime());
                     logBuilder.append("msec");
@@ -324,7 +324,7 @@ public class AJPv13TaskWatcher {
                     appendStackTrace(task.getStackTrace(), logBuilder);
                     log.info(logBuilder);
                 } else {
-                    final StringBuilder logBuilder = new StringBuilder(2048);
+                    final com.openexchange.java.StringAllocator logBuilder = new com.openexchange.java.StringAllocator(2048);
                     final Map<String, String> sorted = new TreeMap<String, String>();
                     for (final Entry<String, Object> entry : taskProperties.entrySet()) {
                         final String propertyName = entry.getKey();
@@ -353,7 +353,7 @@ public class AJPv13TaskWatcher {
 
         private static final int MAX_STACK_TRACE_ELEMENTS = 1000;
 
-        private static void appendStackTrace(final StackTraceElement[] trace, final StringBuilder sb) {
+        private static void appendStackTrace(final StackTraceElement[] trace, final com.openexchange.java.StringAllocator sb) {
             if (null == trace) {
                 return;
             }
