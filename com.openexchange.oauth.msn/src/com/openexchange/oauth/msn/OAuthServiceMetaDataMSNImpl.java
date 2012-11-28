@@ -49,9 +49,7 @@
 
 package com.openexchange.oauth.msn;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.Map;
@@ -61,14 +59,13 @@ import org.apache.commons.httpclient.protocol.Protocol;
 import org.apache.commons.logging.Log;
 import org.json.JSONException;
 import org.json.JSONObject;
-
-import com.openexchange.log.LogFactory;
+import com.openexchange.exception.OXException;
 import com.openexchange.http.deferrer.DeferringURLService;
+import com.openexchange.log.LogFactory;
+import com.openexchange.oauth.API;
 import com.openexchange.oauth.AbstractOAuthServiceMetaData;
 import com.openexchange.oauth.DefaultOAuthToken;
 import com.openexchange.oauth.OAuthConstants;
-import com.openexchange.exception.OXException;
-import com.openexchange.oauth.API;
 import com.openexchange.oauth.OAuthExceptionCodes;
 import com.openexchange.oauth.OAuthInteraction;
 import com.openexchange.oauth.OAuthInteractionType;
@@ -194,8 +191,9 @@ public class OAuthServiceMetaDataMSNImpl extends AbstractOAuthServiceMetaData {
 
 	private void addParameter(PostMethod postMethod, String param,
 			String value) {
-		if (value == null)
-			return;
+		if (value == null) {
+            return;
+        }
 		postMethod.addParameter(param, value);
 		
 	}
