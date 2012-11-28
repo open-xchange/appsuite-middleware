@@ -87,6 +87,14 @@ public class StoredSession implements PutIfAbsent, Serializable {
     protected final ConcurrentMap<String, Object> parameters;
 
     /**
+     * Initializes a new, empty {@link StoredSession}.
+     */
+    public StoredSession() {
+        super();
+        this.parameters = new ConcurrentHashMap<String, Object>(2);
+    }
+
+    /**
      * Initializes a new {@link StoredSession}.
      */
     public StoredSession(String sessionId, String loginName, String password, int contextId, int userId, String secret, String login, 
@@ -127,7 +135,7 @@ public class StoredSession implements PutIfAbsent, Serializable {
             }
         }
     }
-
+    
     /**
      * Initializes a new {@link StoredSession}.
      */
@@ -169,14 +177,6 @@ public class StoredSession implements PutIfAbsent, Serializable {
         this.userLogin = session.getUserlogin();
     }
     
-    /**
-     * Initializes a new, empty {@link StoredSession}.
-     */
-    public StoredSession() {
-        super();
-        this.parameters = new ConcurrentHashMap<String, Object>(2);
-    }
-
     @Override
     public String getLoginName() {
         return loginName;
