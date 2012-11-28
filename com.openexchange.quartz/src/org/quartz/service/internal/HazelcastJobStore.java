@@ -64,6 +64,7 @@ import java.util.TimerTask;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicLong;
+
 import org.apache.commons.logging.Log;
 import org.quartz.Calendar;
 import org.quartz.JobDataMap;
@@ -85,6 +86,7 @@ import org.quartz.spi.OperableTrigger;
 import org.quartz.spi.SchedulerSignaler;
 import org.quartz.spi.TriggerFiredBundle;
 import org.quartz.spi.TriggerFiredResult;
+
 import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.core.ILock;
 import com.hazelcast.core.IMap;
@@ -188,22 +190,22 @@ public class HazelcastJobStore implements JobStore {
 
     @Override
     public void schedulerStarted() throws SchedulerException {
-        consistencyTimer.schedule(consistencyTask, new Date(System.currentTimeMillis() + 60000L * 5), 60000L * 5);
+//        consistencyTimer.schedule(consistencyTask, new Date(System.currentTimeMillis() + 60000L * 5), 60000L * 5);
     }
 
     @Override
     public void schedulerPaused() {
-        consistencyTask.cancel();
+//        consistencyTask.cancel();
     }
 
     @Override
     public void schedulerResumed() {
-        consistencyTimer.schedule(consistencyTask, new Date(System.currentTimeMillis() + 60000L * 5), 60000L * 5);
+//        consistencyTimer.schedule(consistencyTask, new Date(System.currentTimeMillis() + 60000L * 5), 60000L * 5);
     }
 
     @Override
     public void shutdown() {
-        consistencyTask.cancel();
+//        consistencyTask.cancel();
     }
 
     @Override
