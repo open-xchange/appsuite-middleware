@@ -1284,9 +1284,11 @@ public final class IMAPCommandsCollection {
                 {
                     final StringBuilder cmdBuilder = new StringBuilder(32).append("CREATE ").append(mbox);
                     if (null != specialUses && !specialUses.isEmpty()) {
-                        cmdBuilder.append("(USE (");
-                        for (final String specialUse : specialUses) {
-                            cmdBuilder.append(specialUse);
+                        cmdBuilder.append(" (USE (");
+                        final Iterator<String> iterator = specialUses.iterator();
+                        cmdBuilder.append(iterator.next());
+                        while (iterator.hasNext()) {
+                            cmdBuilder.append(' ').append(iterator.next());
                         }
                         cmdBuilder.append("))");
                     }
