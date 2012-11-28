@@ -663,7 +663,7 @@ public class MimeMessageFiller {
          */
         final String pReferences = referencedMail.getFirstHeader(MessageHeaders.HDR_REFERENCES);
         final String pInReplyTo = referencedMail.getFirstHeader(MessageHeaders.HDR_IN_REPLY_TO);
-        final StringBuilder refBuilder = new StringBuilder();
+        final com.openexchange.java.StringAllocator refBuilder = new com.openexchange.java.StringAllocator();
         if (pReferences != null) {
             /*
              * The "References:" field will contain the contents of the parent's "References:" field (if any) followed by the contents of
@@ -927,7 +927,7 @@ public class MimeMessageFiller {
             AppendVCard: if (mail.isAppendVCard()) {
                 final String fileName =
                     MimeUtility.encodeText(
-                        new StringBuilder(UserStorage.getStorageUser(session.getUserId(), ctx).getDisplayName().replaceAll("\\s+", "")).append(
+                        new com.openexchange.java.StringAllocator(UserStorage.getStorageUser(session.getUserId(), ctx).getDisplayName().replaceAll("\\s+", "")).append(
                             ".vcf").toString(),
                         charset,
                         "Q");
@@ -1768,7 +1768,7 @@ public class MimeMessageFiller {
              * Generate dummy file name
              */
             final List<String> exts = MimeType2ExtMap.getFileExtensions(imageProvider.getContentType().toLowerCase(Locale.ENGLISH));
-            final StringBuilder sb = new StringBuilder("image.");
+            final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator("image.");
             if (exts == null) {
                 sb.append("dat");
             } else {

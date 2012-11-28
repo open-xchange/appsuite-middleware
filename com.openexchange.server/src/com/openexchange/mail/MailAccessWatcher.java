@@ -230,7 +230,7 @@ public final class MailAccessWatcher {
                     if (mailAccess.isConnected()) {
                         if (mailAccess.isWaiting()) {
                             if (traceEnabled) {
-                                logger.trace(new StringBuilder("Idling/waiting mail connection:\n").append(mailAccess.getTrace()).toString());
+                                logger.trace(new com.openexchange.java.StringAllocator("Idling/waiting mail connection:\n").append(mailAccess.getTrace()).toString());
                             }
                         } else {
                             final Long val = e.getValue();

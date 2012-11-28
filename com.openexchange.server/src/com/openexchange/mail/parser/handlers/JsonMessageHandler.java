@@ -871,7 +871,7 @@ public final class JsonMessageHandler implements MailMessageHandler {
             } catch (final Exception e) {
                 final Throwable t =
                     new Throwable(
-                        new StringBuilder("Unable to fetch content/type for '").append(filename).append("': ").append(e).toString());
+                        new com.openexchange.java.StringAllocator("Unable to fetch content/type for '").append(filename).append("': ").append(e).toString());
                 LOG.warn(t.getMessage(), t);
             }
             jsonObject.put(MailJSONField.CONTENT_TYPE.getKey(), contentType);
@@ -1004,7 +1004,7 @@ public final class JsonMessageHandler implements MailMessageHandler {
                     throw MimeMailException.handleMessagingException(e);
                 }
             } else {
-                final StringBuilder sb = new StringBuilder(128);
+                final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(128);
                 sb.append("Ignoring nested message.").append(
                     "Cannot handle part's content which should be a RFC822 message according to its content type: ");
                 sb.append((null == content ? "null" : content.getClass().getSimpleName()));

@@ -462,7 +462,7 @@ public class Enriched2HtmlConverter {
         /*
          * Assume last read character was '<'
          */
-        final StringBuilder result = new StringBuilder();
+        final com.openexchange.java.StringAllocator result = new com.openexchange.java.StringAllocator();
         result.append(Character.toLowerCase((char) firstChar));
         int level = 1;
         while (level > 0) {

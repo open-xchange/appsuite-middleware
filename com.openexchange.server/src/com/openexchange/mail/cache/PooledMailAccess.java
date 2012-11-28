@@ -115,7 +115,7 @@ public final class PooledMailAccess implements Delayed {
 
     @Override
     public String toString() {
-        final StringBuilder builder = new StringBuilder(32);
+        final com.openexchange.java.StringAllocator builder = new com.openexchange.java.StringAllocator(32);
         builder.append("PooledMailAccess [timeoutStamp=").append(timeoutStamp).append(", ");
         if (mailAccess != null) {
             builder.append("mailAccess=").append(mailAccess);

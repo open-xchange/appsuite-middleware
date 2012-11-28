@@ -189,7 +189,7 @@ public abstract class ReferencedMailPart extends MailPart implements ComposedMai
                 setHeaders(referencedPart);
             }
             if (LOG.isInfoEnabled()) {
-                LOG.info(new StringBuilder("Referenced mail part exeeds ").append(
+                LOG.info(new com.openexchange.java.StringAllocator("Referenced mail part exeeds ").append(
                     Float.valueOf(TransportProperties.getInstance().getReferencedPartLimit() / MB).floatValue()).append(
                     "MB limit. A temporary disk copy has been created: ").append(file.getFile().getName()));
             }

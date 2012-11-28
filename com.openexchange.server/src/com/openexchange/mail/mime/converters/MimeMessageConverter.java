@@ -1402,14 +1402,14 @@ public final class MimeMessageConverter {
                             ct.getSubType())));
                     } catch (final ClassCastException e) {
                         // Cast to javax.mail.Multipart failed
-                        LOG1.warn(new StringBuilder(256).append(
+                        LOG1.warn(new com.openexchange.java.StringAllocator(256).append(
                             "Message's Content-Type indicates to be multipart/* but its content is not an instance of javax.mail.Multipart but ").append(
                             e.getMessage()).append(
                             ".\nIn case if IMAP it is due to a wrong BODYSTRUCTURE returned by IMAP server.\nGoing to mark message to have (file) attachments if Content-Type matches multipart/mixed.").toString());
                         mailMessage.setHasAttachment(ct.startsWith(MimeTypes.MIME_MULTIPART_MIXED));
                     } catch (final MessagingException e) {
                         // A messaging error occurred
-                        LOG1.warn(new StringBuilder(256).append(
+                        LOG1.warn(new com.openexchange.java.StringAllocator(256).append(
                             "Parsing message's multipart/* content to check for file attachments caused a messaging error: ").append(
                             e.getMessage()).append(
                             ".\nGoing to mark message to have (file) attachments if Content-Type matches multipart/mixed.").toString());
@@ -1740,14 +1740,14 @@ public final class MimeMessageConverter {
                         ct.getSubType())));
                 } catch (final ClassCastException e) {
                     // Cast to javax.mail.Multipart failed
-                    LOG.warn(new StringBuilder(256).append(
+                    LOG.warn(new com.openexchange.java.StringAllocator(256).append(
                         "Message's Content-Type indicates to be multipart/* but its content is not an instance of javax.mail.Multipart but ").append(
                         e.getMessage()).append(
                         ".\nIn case if IMAP it is due to a wrong BODYSTRUCTURE returned by IMAP server.\nGoing to mark message to have (file) attachments if Content-Type matches multipart/mixed.").toString());
                     mail.setHasAttachment(ct.startsWith(MimeTypes.MIME_MULTIPART_MIXED));
                 } catch (final MessagingException e) {
                     // A messaging error occurred
-                    LOG.warn(new StringBuilder(256).append(
+                    LOG.warn(new com.openexchange.java.StringAllocator(256).append(
                         "Parsing message's multipart/* content to check for file attachments caused a messaging error: ").append(
                         e.getMessage()).append(
                         ".\nGoing to mark message to have (file) attachments if Content-Type matches multipart/mixed.").toString());
@@ -2023,16 +2023,16 @@ public final class MimeMessageConverter {
                             size = estimateSize(((MimeMessage) part).getRawInputStream(), tansferEnc);
                         } else {
                             LOG.warn(
-                                new StringBuilder(256).append(part.getClass().getCanonicalName()).append("'s size cannot be determined").toString(),
+                                new com.openexchange.java.StringAllocator(256).append(part.getClass().getCanonicalName()).append("'s size cannot be determined").toString(),
                                 e);
                         }
                     } catch (final IOException e1) {
                         LOG.warn(
-                            new StringBuilder(256).append(part.getClass().getCanonicalName()).append("'s size cannot be determined").toString(),
+                            new com.openexchange.java.StringAllocator(256).append(part.getClass().getCanonicalName()).append("'s size cannot be determined").toString(),
                             e1);
                     } catch (final MessagingException e1) {
                         LOG.warn(
-                            new StringBuilder(256).append(part.getClass().getCanonicalName()).append("'s size cannot be determined").toString(),
+                            new com.openexchange.java.StringAllocator(256).append(part.getClass().getCanonicalName()).append("'s size cannot be determined").toString(),
                             e1);
                     }
                 }
@@ -2416,7 +2416,7 @@ public final class MimeMessageConverter {
         }
         final String values;
         if ('\0' != delimiter && valueArr.length > 1) {
-            final StringBuilder sb = new StringBuilder(valueArr[0]);
+            final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(valueArr[0]);
             for (int i = 1; i < valueArr.length; i++) {
                 sb.append(delimiter).append(valueArr[i]);
             }
@@ -2447,7 +2447,7 @@ public final class MimeMessageConverter {
         }
         final String values;
         if ('\0' != delimiter && valueArr.length > 1) {
-            final StringBuilder sb = new StringBuilder(valueArr[0]);
+            final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(valueArr[0]);
             for (int i = 1; i < valueArr.length; i++) {
                 sb.append(delimiter).append(valueArr[i]);
             }
@@ -2476,7 +2476,7 @@ public final class MimeMessageConverter {
         }
         final String addresses;
         if (addressArray.length > 1) {
-            final StringBuilder sb = new StringBuilder(addressArray[0]);
+            final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(addressArray[0]);
             for (int i = 1; i < addressArray.length; i++) {
                 sb.append(',').append(addressArray[i]);
             }
@@ -2508,7 +2508,7 @@ public final class MimeMessageConverter {
         }
         final String addresses;
         if (addressArray.length > 1) {
-            final StringBuilder sb = new StringBuilder(addressArray[0]);
+            final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(addressArray[0]);
             for (int i = 1; i < addressArray.length; i++) {
                 sb.append(',').append(addressArray[i]);
             }
@@ -2538,7 +2538,7 @@ public final class MimeMessageConverter {
         } catch (final AddressException e) {
             if (DEBUG) {
                 LOG.debug(
-                    new StringBuilder(128).append("Internet addresses could not be properly parsed: \"").append(e.getMessage()).append(
+                    new com.openexchange.java.StringAllocator(128).append("Internet addresses could not be properly parsed: \"").append(e.getMessage()).append(
                         "\". Using plain addresses' string representation instead.").toString(),
                     e);
             }
@@ -2558,7 +2558,7 @@ public final class MimeMessageConverter {
         } catch (final AddressException e) {
             if (DEBUG) {
                 LOG.debug(
-                    new StringBuilder(128).append("Internet addresses could not be properly parsed: \"").append(e.getMessage()).append(
+                    new com.openexchange.java.StringAllocator(128).append("Internet addresses could not be properly parsed: \"").append(e.getMessage()).append(
                         "\". Using plain addresses' string representation instead.").toString(),
                     e);
             }
