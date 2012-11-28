@@ -167,7 +167,7 @@ public final class GetAttachmentAction extends AbstractMailAction implements ETa
              */
             final MailServletInterface mailInterface = getMailInterface(req);
             if (sequenceId == null && imageContentId == null) {
-                throw MailExceptionCode.MISSING_PARAM.create(new StringBuilder().append(Mail.PARAMETER_MAILATTCHMENT).append(" | ").append(
+                throw MailExceptionCode.MISSING_PARAM.create(new com.openexchange.java.StringAllocator().append(Mail.PARAMETER_MAILATTCHMENT).append(" | ").append(
                     Mail.PARAMETER_MAILCID).toString());
             }
             final MailPart mailPart;

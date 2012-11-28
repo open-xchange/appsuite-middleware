@@ -229,7 +229,7 @@ public final class VCardAttachMailDataHandler implements DataHandler {
 
     private static void addFileInformation(final JSONObject mailObject, final String fileId) throws JSONException, OXException {
         if (!mailObject.has(MailJSONField.ATTACHMENTS.getKey()) || mailObject.isNull(MailJSONField.ATTACHMENTS.getKey())) {
-            throw DataExceptionCodes.ERROR.create(new StringBuilder(64).append("Parsed JSON mail object does not contain field '").append(
+            throw DataExceptionCodes.ERROR.create(new com.openexchange.java.StringAllocator(64).append("Parsed JSON mail object does not contain field '").append(
                 MailJSONField.ATTACHMENTS.getKey()).append('\'').toString());
         }
         final JSONArray attachmentArray = mailObject.getJSONArray(MailJSONField.ATTACHMENTS.getKey());
@@ -241,7 +241,7 @@ public final class VCardAttachMailDataHandler implements DataHandler {
         vcardAttachmentObject.remove(MailListField.ID.getKey());
         vcardAttachmentObject.put(
             MailListField.ID.getKey(),
-            new StringBuilder(FILE_PREFIX.length() + fileId.length()).append(FILE_PREFIX).append(fileId).toString());
+            new com.openexchange.java.StringAllocator(FILE_PREFIX.length() + fileId.length()).append(FILE_PREFIX).append(fileId).toString());
     }
 
     private static ManagedFile getBytesFromVCard(final Object vcard) throws OXException {

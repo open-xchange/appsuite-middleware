@@ -163,7 +163,7 @@ public final class RFC2231Tools {
             return cs.decode(bb).toString();
         } catch (final java.nio.BufferOverflowException e) {
             LOG.warn(
-                new StringBuilder(96).append("Decoding with charset \"").append(charset).append("\" failed for input string: \"").append(
+                new com.openexchange.java.StringAllocator(96).append("Decoding with charset \"").append(charset).append("\" failed for input string: \"").append(
                     encoded).append('"').toString(),
                 e);
             /*
@@ -268,7 +268,7 @@ public final class RFC2231Tools {
         } else if (!Charset.isSupported(charset)) {
             return toEncode;
         }
-        final StringBuilder retval = new StringBuilder(toEncode.length() * 3);
+        final com.openexchange.java.StringAllocator retval = new com.openexchange.java.StringAllocator(toEncode.length() * 3);
         if (prepend) {
             retval.append(charset.toLowerCase(Locale.ENGLISH)).append('\'').append(
                 (language == null) || (language.length() == 0) ? "" : language).append('\'');

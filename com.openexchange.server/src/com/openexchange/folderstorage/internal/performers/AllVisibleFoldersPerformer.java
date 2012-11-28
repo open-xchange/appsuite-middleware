@@ -150,7 +150,7 @@ public final class AllVisibleFoldersPerformer extends AbstractUserizedFolderPerf
 
             if (LOG.isDebugEnabled()) {
                 final long duration = System.currentTimeMillis() - start;
-                LOG.debug(new StringBuilder().append("AllVisibleFolders.doAllVisibleFolders() took ").append(duration).append("msec").toString());
+                LOG.debug(new com.openexchange.java.StringAllocator().append("AllVisibleFolders.doAllVisibleFolders() took ").append(duration).append("msec").toString());
             }
 
             return ret;

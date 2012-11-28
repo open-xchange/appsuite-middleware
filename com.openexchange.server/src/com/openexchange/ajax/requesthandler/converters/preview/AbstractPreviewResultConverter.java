@@ -55,7 +55,6 @@ import java.util.HashSet;
 import java.util.Locale;
 import java.util.Set;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.openexchange.ajax.container.IFileHolder;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
@@ -65,6 +64,7 @@ import com.openexchange.conversion.DataProperties;
 import com.openexchange.conversion.SimpleData;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Streams;
+import com.openexchange.log.LogFactory;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.utils.DisplayMode;
 import com.openexchange.preview.PreviewDocument;
@@ -216,7 +216,7 @@ abstract class AbstractPreviewResultConverter implements ResultConverter {
             usm.setAllowHTMLImages(false);
             displayMode = modifyable ? DisplayMode.MODIFYABLE : DisplayMode.DISPLAY;
         } else {
-            LOG.warn(new StringBuilder(64).append("Unknown value in parameter ").append(PARAMETER_VIEW).append(": ").append(view).append(
+            LOG.warn(new com.openexchange.java.StringAllocator(64).append("Unknown value in parameter ").append(PARAMETER_VIEW).append(": ").append(view).append(
                 ". Using user's mail settings as fallback."));
             displayMode = modifyable ? DisplayMode.MODIFYABLE : DisplayMode.DISPLAY;
         }

@@ -448,7 +448,7 @@ public class RdbContactSQLImpl implements ContactSQLInterface {
         final String fields = fieldsBuilder.toString();
 
         len = fields.length();
-        final StringBuilder sb = new StringBuilder(len + 256).append("SELECT ");
+        final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(len + 256).append("SELECT ");
         sb.append(ContactMySql.PREFIXED_FIELDS);
         if (len > 0) {
             sb.append(',').append(fields);
@@ -653,7 +653,7 @@ public class RdbContactSQLImpl implements ContactSQLInterface {
             final ContactSql cs = new ContactMySql(session, ctx);
             cs.setFolder(folderId);
             cs.setSearchHabit(" OR ");
-            final String sqlOrder = new StringBuilder(32).append(" ORDER BY co.").append(Contacts.mapping[orderBy].getDBFieldName()).append(
+            final String sqlOrder = new com.openexchange.java.StringAllocator(32).append(" ORDER BY co.").append(Contacts.mapping[orderBy].getDBFieldName()).append(
                 ' ').append(orderDir).append(' ').toString();
             cs.setOrder(sqlOrder);
 
@@ -980,7 +980,7 @@ public class RdbContactSQLImpl implements ContactSQLInterface {
                 throw ContactExceptionCodes.NON_CONTACT_FOLDER.create(I(fuid), I(ctx.getContextId()), I(userId));
             }
             if ((contactFolder.getType() != FolderObject.PRIVATE) && pflag) {
-                LOG.debug(new StringBuilder("Here is a contact in a non PRIVATE folder with a set private flag -> (cid=").append(
+                LOG.debug(new com.openexchange.java.StringAllocator("Here is a contact in a non PRIVATE folder with a set private flag -> (cid=").append(
                     ctx.getContextId()).append(" fid=").append(fuid).append(" oid=").append(oid).append(')'));
             } else if ((contactFolder.getType() == FolderObject.PRIVATE) && pflag && created_from != userId) {
                 throw ContactExceptionCodes.NO_DELETE_PERMISSION.create(I(fuid), I(ctx.getContextId()), I(userId));

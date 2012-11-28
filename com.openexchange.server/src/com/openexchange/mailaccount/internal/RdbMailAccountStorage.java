@@ -263,7 +263,7 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
         } catch (final SQLException e) {
             if (null != stmt && LOG.isDebugEnabled()) {
                 final String sql = stmt.toString();
-                LOG.debug(new StringBuilder().append("\n\tFailed mail account statement:\n\t").append(sql.substring(sql.indexOf(": ") + 2)).toString());
+                LOG.debug(new com.openexchange.java.StringAllocator().append("\n\tFailed mail account statement:\n\t").append(sql.substring(sql.indexOf(": ") + 2)).toString());
             }
             throw MailAccountExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
@@ -366,7 +366,7 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
         } catch (final SQLException e) {
             if (null != stmt && LOG.isDebugEnabled()) {
                 final String sql = stmt.toString();
-                LOG.debug(new StringBuilder().append("\n\tFailed mail account statement:\n\t").append(sql.substring(sql.indexOf(": ") + 2)).toString());
+                LOG.debug(new com.openexchange.java.StringAllocator().append("\n\tFailed mail account statement:\n\t").append(sql.substring(sql.indexOf(": ") + 2)).toString());
             }
             throw MailAccountExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
@@ -425,7 +425,7 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
         } catch (final SQLException e) {
             if (null != stmt && LOG.isDebugEnabled()) {
                 final String sql = stmt.toString();
-                LOG.debug(new StringBuilder().append("\n\tFailed mail account statement:\n\t").append(sql.substring(sql.indexOf(": ") + 2)).toString());
+                LOG.debug(new com.openexchange.java.StringAllocator().append("\n\tFailed mail account statement:\n\t").append(sql.substring(sql.indexOf(": ") + 2)).toString());
             }
             throw MailAccountExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
@@ -591,7 +591,7 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
         } catch (final SQLException e) {
             if (null != stmt && LOG.isDebugEnabled()) {
                 final String sql = stmt.toString();
-                LOG.debug(new StringBuilder().append("\n\tFailed mail account statement:\n\t").append(sql.substring(sql.indexOf(": ") + 2)).toString());
+                LOG.debug(new com.openexchange.java.StringAllocator().append("\n\tFailed mail account statement:\n\t").append(sql.substring(sql.indexOf(": ") + 2)).toString());
             }
             throw MailAccountExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
@@ -675,7 +675,7 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
          * Delete referenced
          */
         final String sql =
-            new StringBuilder(64).append("DELETE FROM ").append(tableName).append(" WHERE cid = ? AND id = ? and user = ?").toString();
+            new com.openexchange.java.StringAllocator(64).append("DELETE FROM ").append(tableName).append(" WHERE cid = ? AND id = ? and user = ?").toString();
         PreparedStatement stmt = null;
         boolean retval = false;
         try {
@@ -1146,7 +1146,7 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
 
                     if (LOG.isDebugEnabled()) {
                         final String query = stmt.toString();
-                        LOG.debug(new StringBuilder(query.length() + 32).append("Trying to perform SQL update query for attributes ").append(
+                        LOG.debug(new com.openexchange.java.StringAllocator(query.length() + 32).append("Trying to perform SQL update query for attributes ").append(
                             orderedAttributes).append(" :\n").append(query.substring(query.indexOf(':') + 1)));
                     }
 
@@ -1220,7 +1220,7 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
 
                         if (LOG.isDebugEnabled()) {
                             final String query = stmt.toString();
-                            LOG.debug(new StringBuilder(query.length() + 32).append("Trying to perform SQL update query for attributes ").append(
+                            LOG.debug(new com.openexchange.java.StringAllocator(query.length() + 32).append("Trying to perform SQL update query for attributes ").append(
                                 orderedAttributes).append(" :\n").append(query.substring(query.indexOf(':') + 1)));
                         }
 
@@ -1270,7 +1270,7 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
 
                             if (LOG.isDebugEnabled()) {
                                 final String query = stmt.toString();
-                                LOG.debug(new StringBuilder(query.length() + 32).append("Trying to perform SQL insert query for attributes ").append(
+                                LOG.debug(new com.openexchange.java.StringAllocator(query.length() + 32).append("Trying to perform SQL insert query for attributes ").append(
                                     orderedAttributes).append(" :\n").append(query.substring(query.indexOf(':') + 1)));
                             }
 
@@ -1299,7 +1299,7 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
             } catch (final SQLException e) {
                 if (null != stmt && LOG.isDebugEnabled()) {
                     final String sql = stmt.toString();
-                    LOG.debug(new StringBuilder().append("\n\tFailed mail account statement:\n\t").append(sql.substring(sql.indexOf(": ") + 2)).toString());
+                    LOG.debug(new com.openexchange.java.StringAllocator().append("\n\tFailed mail account statement:\n\t").append(sql.substring(sql.indexOf(": ") + 2)).toString());
                 }
                 throw MailAccountExceptionCodes.SQL_ERROR.create(e, e.getMessage());
             } finally {
@@ -1330,7 +1330,7 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
         } catch (final SQLException e) {
             if (null != stmt && LOG.isDebugEnabled()) {
                 final String sql = stmt.toString();
-                LOG.debug(new StringBuilder().append("\n\tFailed mail account statement:\n\t").append(sql.substring(sql.indexOf(": ") + 2)).toString());
+                LOG.debug(new com.openexchange.java.StringAllocator().append("\n\tFailed mail account statement:\n\t").append(sql.substring(sql.indexOf(": ") + 2)).toString());
             }
             throw MailAccountExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {

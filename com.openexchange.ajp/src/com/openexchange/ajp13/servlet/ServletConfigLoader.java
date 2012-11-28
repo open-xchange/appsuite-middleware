@@ -383,7 +383,7 @@ public final class ServletConfigLoader {
             if (!clazzGuardian.contains(clazz) && null != directory) {
                 props = loadProperties(new File(
                     directory,
-                    new StringBuilder(32).append(clazz).append('.').append(FILEEXT_PROPERTIES).toString()));
+                    new com.openexchange.java.StringAllocator(32).append(clazz).append('.').append(FILEEXT_PROPERTIES).toString()));
                 if (null == props) {
                     clazzGuardian.add(clazz);
                 } else {
@@ -427,7 +427,7 @@ public final class ServletConfigLoader {
             if (!clazzGuardian.contains(clazz) && null != directory) {
                 props = loadProperties(new File(
                     directory,
-                    new StringBuilder(32).append(clazz).append('.').append(FILEEXT_PROPERTIES).toString()));
+                    new com.openexchange.java.StringAllocator(32).append(clazz).append('.').append(FILEEXT_PROPERTIES).toString()));
                 if (null == props) {
                     clazzGuardian.add(clazz);
                 } else {

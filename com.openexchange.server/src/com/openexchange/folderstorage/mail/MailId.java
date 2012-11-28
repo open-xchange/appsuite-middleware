@@ -145,7 +145,7 @@ public final class MailId implements SortableId {
 
     @Override
     public String toString() {
-        return new StringBuilder(32).append("{folderId=").append(fullname).append(", ordinal=").append(ordinal).append('}').toString();
+        return new com.openexchange.java.StringAllocator(32).append("{folderId=").append(fullname).append(", ordinal=").append(ordinal).append('}').toString();
     }
 
 }

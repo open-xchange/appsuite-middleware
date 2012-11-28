@@ -1056,7 +1056,7 @@ public final class QuotedInternetAddress extends InternetAddress {
 
             if (quoted(personal)) {
                 if (checkQuotedPersonal(personal)) {
-                    return new StringBuilder(32).append(encodedPersonal).append(" <").append(address).append('>').toString();
+                    return new com.openexchange.java.StringAllocator(32).append(encodedPersonal).append(" <").append(address).append('>').toString();
                 }
                 personal = personal.substring(1, personal.length() - 1);
                 try {
@@ -1079,7 +1079,7 @@ public final class QuotedInternetAddress extends InternetAddress {
                     LOG.error(e.getMessage(), e);
                 }
             }
-            return new StringBuilder(32).append(encodedPersonal).append(" <").append(address).append('>').toString();
+            return new com.openexchange.java.StringAllocator(32).append(encodedPersonal).append(" <").append(address).append('>').toString();
 
             /*-
              *
@@ -1091,7 +1091,7 @@ public final class QuotedInternetAddress extends InternetAddress {
         } else if (isGroup() || isSimple()) {
             return address;
         } else {
-            return new StringBuilder().append('<').append(address).append('>').toString();
+            return new com.openexchange.java.StringAllocator().append('<').append(address).append('>').toString();
         }
     }
 
@@ -1105,13 +1105,13 @@ public final class QuotedInternetAddress extends InternetAddress {
         final String p = getPersonal();
         if (p != null && p.length() > 0) {
             if (quoted(p)) {
-                return new StringBuilder(32).append(p).append(" <").append(toIDN(address)).append('>').toString();
+                return new com.openexchange.java.StringAllocator(32).append(p).append(" <").append(toIDN(address)).append('>').toString();
             }
-            return new StringBuilder(32).append(quotePhrase(p, true)).append(" <").append(toIDN(address)).append('>').toString();
+            return new com.openexchange.java.StringAllocator(32).append(quotePhrase(p, true)).append(" <").append(toIDN(address)).append('>').toString();
         } else if (isGroup() || isSimple()) {
             return toIDN(address);
         } else {
-            return new StringBuilder(32).append('<').append(toIDN(address)).append('>').toString();
+            return new com.openexchange.java.StringAllocator(32).append('<').append(toIDN(address)).append('>').toString();
         }
     }
 
@@ -1176,7 +1176,7 @@ public final class QuotedInternetAddress extends InternetAddress {
             final char c = phrase.charAt(i);
             if (c == '"' || c == '\\') {
                 // need to escape them and then quote the whole string
-                final StringBuilder sb = new StringBuilder(len + 3);
+                final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(len + 3);
                 sb.append('"');
                 for (int j = 0; j < len; j++) {
                     final char cc = phrase.charAt(j);
@@ -1195,7 +1195,7 @@ public final class QuotedInternetAddress extends InternetAddress {
         }
 
         if (needQuoting) {
-            final StringBuilder sb = new StringBuilder(len + 2);
+            final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(len + 2);
             sb.append('"').append(phrase).append('"');
             return sb.toString();
         }
@@ -1266,7 +1266,7 @@ public final class QuotedInternetAddress extends InternetAddress {
             // check for any escaped characters
             if (s.indexOf('\\') >= 0) {
                 length = length - 2;
-                final StringBuilder sb = new StringBuilder(length); // approx
+                final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(length); // approx
                 for (int i = 0; i < length; i++) {
                     char c = s.charAt(i);
                     if (c == '\\' && i < length - 1) {

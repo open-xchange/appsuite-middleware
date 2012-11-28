@@ -252,7 +252,7 @@ public class DefaultDispatcher implements Dispatcher {
                         current = actionFactories.get(module);
                         final Module moduleAnnotation = current.getClass().getAnnotation(Module.class);
                         if (null == moduleAnnotation) {
-                            final StringBuilder sb = new StringBuilder(512).append("There is already a factory associated with module \"");
+                            final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(512).append("There is already a factory associated with module \"");
                             sb.append(module).append("\": ").append(current.getClass().getName());
                             sb.append(". Therefore registration is denied for factory \"").append(factory.getClass().getName());
                             sb.append("\". Unless these two factories provide the \"").append(Module.class.getName()).append(

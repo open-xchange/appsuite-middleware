@@ -137,6 +137,6 @@ public final class FullnameArgument {
 
     @Override
     public String toString() {
-        return new StringBuilder(32).append("Account-ID=").append(accountId).append(" Fullname=").append(fullname).toString();
+        return new com.openexchange.java.StringAllocator(32).append("Account-ID=").append(accountId).append(" Fullname=").append(fullname).toString();
     }
 }

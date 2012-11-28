@@ -804,7 +804,7 @@ public class Mail extends PermissionServlet implements UploadListener {
         jsonWriter.endArray();
         if (DEBUG) {
             final long d = System.currentTimeMillis() - start;
-            LOG.debug(new StringBuilder(32).append(DefaultDispatcherPrefixService.getInstance().getPrefix()).append("mail?action=all performed in ").append(d).append("msec"));
+            LOG.debug(new com.openexchange.java.StringAllocator(32).append(DefaultDispatcherPrefixService.getInstance().getPrefix()).append("mail?action=all performed in ").append(d).append("msec"));
         }
         response.setData(jsonWriter.getObject());
         response.setTimestamp(null);

@@ -511,7 +511,7 @@ public abstract class AbstractMailAccount implements MailAccount {
         } catch (final URISyntaxException e) {
             LOG.error(e.getMessage(), e);
             // Old implementation is not capable of handling IPv6 addresses.
-            final StringBuilder sb = new StringBuilder(32);
+            final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(32);
             sb.append(mailProtocol);
             if (mailSecure) {
                 sb.append('s');
@@ -604,7 +604,7 @@ public abstract class AbstractMailAccount implements MailAccount {
         } catch (final URISyntaxException e) {
             LOG.error(e.getMessage(), e);
             // Old implementation is not capable of handling IPv6 addresses.
-            final StringBuilder sb = new StringBuilder(32);
+            final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(32);
             sb.append(transportProtocol);
             if (transportSecure) {
                 sb.append('s');
@@ -803,7 +803,7 @@ public abstract class AbstractMailAccount implements MailAccount {
 
     @Override
     public String toString() {
-        final StringBuilder sb = new StringBuilder(128);
+        final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(128);
         sb.append(" id=").append(getId()).append(" user=").append(getUserId());
         sb.append("\nname=").append(getName()).append(" primary-address=").append(getPrimaryAddress());
         sb.append("\nmail-server=").append(generateMailServerURL()).append(" transport-server=").append(generateTransportServerURL());

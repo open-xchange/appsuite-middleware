@@ -50,7 +50,6 @@
 package com.openexchange.mail.json.parser;
 
 import java.util.List;
-
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.dataobjects.MailPart;
@@ -86,7 +85,7 @@ public final class AbortAttachmentHandler extends AbstractAttachmentHandler {
         if (doAction) {
             final long size = attachment.getSize();
             if (size <= 0 && LOG.isDebugEnabled()) {
-                LOG.debug(new StringBuilder("Missing size: ").append(size).toString(), new Throwable());
+                LOG.debug(new com.openexchange.java.StringAllocator("Missing size: ").append(size).toString(), new Throwable());
             }
             if (uploadQuotaPerFile > 0 && size > uploadQuotaPerFile) {
                 final String fileName = attachment.getFileName();

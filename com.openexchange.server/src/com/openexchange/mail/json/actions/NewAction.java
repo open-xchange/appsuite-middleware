@@ -162,7 +162,7 @@ public final class NewAction extends AbstractMailAction {
                 String value = jsonMailObj.getString(MailJSONField.FROM.getKey());
                 final int endPos;
                 if ('[' == value.charAt(0) && (endPos = value.indexOf(']', 1)) < value.length()) {
-                    value = new StringBuilder(32).append("\"[").append(value.substring(1, endPos)).append("]\"").append(value.substring(endPos+1)).toString();
+                    value = new com.openexchange.java.StringAllocator(32).append("\"[").append(value.substring(1, endPos)).append("]\"").append(value.substring(endPos+1)).toString();
                 }
                 from = parseAddressList(value, true, true)[0];
             } catch (final AddressException e) {
@@ -176,7 +176,7 @@ public final class NewAction extends AbstractMailAction {
                     // Re-throw
                     throw e;
                 }
-                LOG.warn(new StringBuilder(128).append(e.getMessage()).append(". Using default account's transport.").toString());
+                LOG.warn(new com.openexchange.java.StringAllocator(128).append(e.getMessage()).append(". Using default account's transport.").toString());
                 // Send with default account's transport provider
                 accountId = MailAccount.DEFAULT_ID;
             }
@@ -337,7 +337,7 @@ public final class NewAction extends AbstractMailAction {
                     // Re-throw
                     throw e;
                 }
-                LOG.warn(new StringBuilder(128).append(e.getMessage()).append(". Using default account's transport.").toString());
+                LOG.warn(new com.openexchange.java.StringAllocator(128).append(e.getMessage()).append(". Using default account's transport.").toString());
                 // Send with default account's transport provider
                 accId = MailAccount.DEFAULT_ID;
             }

@@ -147,7 +147,7 @@ public final class TransportProperties implements ITransportProperties {
     }
 
     private void loadProperties0() {
-        final StringBuilder logBuilder = new StringBuilder(1024);
+        final com.openexchange.java.StringAllocator logBuilder = new com.openexchange.java.StringAllocator(1024);
         logBuilder.append("\nLoading global transport properties...\n");
 
         final ConfigurationService configuration = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
@@ -211,7 +211,7 @@ public final class TransportProperties implements ITransportProperties {
                 publishedDocumentTimeToLive = Long.parseLong(tmp);
             } catch (final NumberFormatException e) {
                 LOG.warn(
-                    new StringBuilder("Value of property \"com.openexchange.mail.transport.publishedDocumentTimeToLive\" is not a number: ").append(
+                    new com.openexchange.java.StringAllocator("Value of property \"com.openexchange.mail.transport.publishedDocumentTimeToLive\" is not a number: ").append(
                         tmp).append(". Using fallback 604800000 instead.").toString(),
                     e);
                 publishedDocumentTimeToLive = 604800000L;
@@ -229,13 +229,13 @@ public final class TransportProperties implements ITransportProperties {
                     externalRecipientsLocale = LocaleTools.getLocale(tmp);
                 } catch (final Exception e) {
                     LOG.warn(
-                        new StringBuilder("Value of property \"com.openexchange.mail.transport.externalRecipientsLocale\"").append(
+                        new com.openexchange.java.StringAllocator("Value of property \"com.openexchange.mail.transport.externalRecipientsLocale\"").append(
                             " is not a valid locale identifier (such as \"en_US\"): ").append(tmp).append(". Using fallback \"en\" instead.").toString(),
                         e);
                     externalRecipientsLocale = Locale.ENGLISH;
                 }
                 if (null == externalRecipientsLocale) {
-                    LOG.warn(new StringBuilder("Value of property \"com.openexchange.mail.transport.externalRecipientsLocale\"").append(
+                    LOG.warn(new com.openexchange.java.StringAllocator("Value of property \"com.openexchange.mail.transport.externalRecipientsLocale\"").append(
                         " is not a valid locale identifier (such as \"en_US\"): ").append(tmp).append(". Using fallback \"en\" instead.").toString());
                     externalRecipientsLocale = Locale.ENGLISH;
                 }

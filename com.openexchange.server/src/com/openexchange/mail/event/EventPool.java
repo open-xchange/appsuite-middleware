@@ -293,7 +293,7 @@ public final class EventPool implements Runnable {
             eventAdmin.sendEvent(event);
         }
         if (DEBUG_ENABLED) {
-            LOG.debug(new StringBuilder(64).append("Notified ").append(pooledEvent.isContentRelated() ? "content-related" : "hierarchical").append(
+            LOG.debug(new com.openexchange.java.StringAllocator(64).append("Notified ").append(pooledEvent.isContentRelated() ? "content-related" : "hierarchical").append(
                 "-wise changed folder \"").append(pooledEvent.getFullname()).append("\" in account ").append(pooledEvent.getAccountId()).append(
                 " of user ").append(pooledEvent.getUserId()).append(" in context ").append(pooledEvent.getContextId()).toString());
         }

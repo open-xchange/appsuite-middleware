@@ -439,7 +439,7 @@ public class ContentType extends ParameterizedHeader {
                         subType = st;
                     }
                 }
-                baseType = new StringBuilder(16).append(primaryType).append(DELIMITER).append(subType).toString();
+                baseType = new com.openexchange.java.StringAllocator(16).append(primaryType).append(DELIMITER).append(subType).toString();
                 lcBaseType = null;
                 if (paramList) {
                     if (pos < 0) {
@@ -500,7 +500,7 @@ public class ContentType extends ParameterizedHeader {
                     subType = DEFAULT_SUBTYPE;
                 }
             }
-            baseType = new StringBuilder(16).append(primaryType).append(DELIMITER).append(subType).toString();
+            baseType = new com.openexchange.java.StringAllocator(16).append(primaryType).append(DELIMITER).append(subType).toString();
             lcBaseType = null;
             if (paramList) {
                 parameterList = new ParameterList(cts.substring(ctMatcher.end()));
@@ -508,7 +508,7 @@ public class ContentType extends ParameterizedHeader {
         } else {
             primaryType = "text";
             subType = "plain";
-            baseType = new StringBuilder(16).append(primaryType).append(DELIMITER).append(subType).toString();
+            baseType = new com.openexchange.java.StringAllocator(16).append(primaryType).append(DELIMITER).append(subType).toString();
             lcBaseType = null;
             if (paramList) {
                 parameterList = new ParameterList(pos < 0 ? cts : cts.substring(pos));
@@ -522,7 +522,7 @@ public class ContentType extends ParameterizedHeader {
                         if ((subType == null) || (subType.length() == 0)) {
                             subType = DEFAULT_SUBTYPE;
                         }
-                        baseType = new StringBuilder(16).append(primaryType).append(DELIMITER).append(subType).toString();
+                        baseType = new com.openexchange.java.StringAllocator(16).append(primaryType).append(DELIMITER).append(subType).toString();
                         lcBaseType = null;
                     }
                 }
@@ -549,7 +549,7 @@ public class ContentType extends ParameterizedHeader {
         primaryType = contentType.getPrimaryType();
         subType = contentType.getSubType();
         parameterList = (ParameterList) contentType.parameterList.clone();
-        baseType = new StringBuilder(16).append(primaryType).append(DELIMITER).append(subType).toString();
+        baseType = new com.openexchange.java.StringAllocator(16).append(primaryType).append(DELIMITER).append(subType).toString();
         lcBaseType = null;
     }
 
@@ -600,7 +600,7 @@ public class ContentType extends ParameterizedHeader {
         if (baseType != null) {
             return baseType;
         }
-        return (baseType = new StringBuilder(16).append(primaryType).append(DELIMITER).append(subType).toString());
+        return (baseType = new com.openexchange.java.StringAllocator(16).append(primaryType).append(DELIMITER).append(subType).toString());
     }
 
     /**
@@ -769,7 +769,7 @@ public class ContentType extends ParameterizedHeader {
             if ((subType == null) || (subType.length() == 0)) {
                 subType = DEFAULT_SUBTYPE;
             }
-            return new StringBuilder(32).append(m.group(1)).append('/').append(subType).toString();
+            return new com.openexchange.java.StringAllocator(32).append(m.group(1)).append('/').append(subType).toString();
         }
         throw MailExceptionCode.INVALID_CONTENT_TYPE.create(mimeType);
     }
@@ -789,7 +789,7 @@ public class ContentType extends ParameterizedHeader {
      * @return An appropriate regular expression ready for being used in a {@link Pattern pattern}
      */
     private static String wildcardToRegex(final String wildcard) {
-        final StringBuilder s = new StringBuilder(wildcard.length());
+        final com.openexchange.java.StringAllocator s = new com.openexchange.java.StringAllocator(wildcard.length());
         s.append('^');
         final int len = wildcard.length();
         for (int i = 0; i < len; i++) {
@@ -821,7 +821,7 @@ public class ContentType extends ParameterizedHeader {
      * @return A RFC2045 style (ASCII-only) string representation of this content type
      */
     public String toString(final boolean skipEmptyParams) {
-        final StringBuilder sb = new StringBuilder(64);
+        final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(64);
         sb.append(primaryType).append(DELIMITER).append(subType);
         if (null != parameterList) {
             parameterList.appendRFC2045String(sb, skipEmptyParams);

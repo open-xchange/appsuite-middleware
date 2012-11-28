@@ -264,7 +264,7 @@ public abstract class AbstractPerformer {
         if (null == name || 0 == name.length()) {
             return String.valueOf(context.getContextId());
         }
-        return new StringBuilder(16).append(name).append(" (").append(context.getContextId()).append(')').toString();
+        return new com.openexchange.java.StringAllocator(16).append(name).append(" (").append(context.getContextId()).append(')').toString();
     }
 
     /**
@@ -281,7 +281,7 @@ public abstract class AbstractPerformer {
         if (null == name || 0 == name.length()) {
             return String.valueOf(user.getId());
         }
-        return new StringBuilder(16).append(name).append(" (").append(user.getId()).append(')').toString();
+        return new com.openexchange.java.StringAllocator(16).append(name).append(" (").append(user.getId()).append(')').toString();
     }
 
     /**
@@ -297,7 +297,7 @@ public abstract class AbstractPerformer {
         if (null == name || 0 == name.length()) {
             return folder.getID();
         }
-        return new StringBuilder(16).append(name).append(" (").append(folder.getID()).append(')').toString();
+        return new com.openexchange.java.StringAllocator(16).append(name).append(" (").append(folder.getID()).append(')').toString();
     }
 
     /**

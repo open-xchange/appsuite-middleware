@@ -87,11 +87,11 @@ import com.openexchange.snippet.Attachment;
 import com.openexchange.snippet.DefaultAttachment;
 import com.openexchange.snippet.DefaultSnippet;
 import com.openexchange.snippet.GetSwitch;
+import com.openexchange.snippet.Property;
 import com.openexchange.snippet.ReferenceType;
 import com.openexchange.snippet.Snippet;
 import com.openexchange.snippet.SnippetExceptionCodes;
 import com.openexchange.snippet.SnippetManagement;
-import com.openexchange.snippet.Property;
 import com.openexchange.tools.file.QuotaFileStorage;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.sql.DBUtils;
@@ -216,7 +216,7 @@ public final class RdbSnippetManagement implements SnippetManagement {
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
-            final StringBuilder sql = new StringBuilder("SELECT id FROM snippet WHERE cid=? AND (user=? OR shared>0) AND refType=").append(ReferenceType.GENCONF.getType());
+            final com.openexchange.java.StringAllocator sql = new com.openexchange.java.StringAllocator("SELECT id FROM snippet WHERE cid=? AND (user=? OR shared>0) AND refType=").append(ReferenceType.GENCONF.getType());
             if (null != types && types.length > 0) {
                 sql.append(" AND (");
                 sql.append("type=?");
@@ -282,7 +282,7 @@ public final class RdbSnippetManagement implements SnippetManagement {
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
-            final StringBuilder sql = new StringBuilder("SELECT id FROM snippet WHERE cid=? AND user=? AND refType=").append(ReferenceType.GENCONF.getType());
+            final com.openexchange.java.StringAllocator sql = new com.openexchange.java.StringAllocator("SELECT id FROM snippet WHERE cid=? AND user=? AND refType=").append(ReferenceType.GENCONF.getType());
             stmt = con.prepareStatement(sql.toString());
             int pos = 0;
             stmt.setInt(++pos, contextId);
@@ -573,7 +573,7 @@ public final class RdbSnippetManagement implements SnippetManagement {
                 stmt.setString(++pos, Integer.toString(id));
                 if (LOG.isDebugEnabled()) {
                     final String query = stmt.toString();
-                    LOG.debug(new StringBuilder(query.length() + 32).append("Trying to perform SQL update query for attributes ").append(
+                    LOG.debug(new com.openexchange.java.StringAllocator(query.length() + 32).append("Trying to perform SQL update query for attributes ").append(
                         modifiableProperties).append(" :\n").append(query.substring(query.indexOf(':') + 1)));
                 }
                 stmt.executeUpdate();

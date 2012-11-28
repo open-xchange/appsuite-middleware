@@ -1463,7 +1463,7 @@ public final class HtmlServiceImpl implements HtmlService {
              */
             final UnsynchronizedStringWriter writer = new UnsynchronizedStringWriter(htmlContent.length());
             SERIALIZER.write(htmlNode, writer, "UTF-8");
-            final StringBuilder builder = writer.getBuffer();
+            final com.openexchange.java.StringAllocator builder = writer.getBuffer();
             /*
              * Insert DOCTYPE if absent
              */

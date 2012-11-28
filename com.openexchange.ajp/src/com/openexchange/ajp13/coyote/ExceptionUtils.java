@@ -74,7 +74,7 @@ public class ExceptionUtils {
                     MARKER + "The Java Virtual Machine is broken or has run out of resources necessary for it to continue operating." + MARKER,
                     t);
             } else {
-                final StringBuilder logBuilder = new StringBuilder(512);
+                final com.openexchange.java.StringAllocator logBuilder = new com.openexchange.java.StringAllocator(512);
                 final Map<String, String> sorted = new TreeMap<String, String>();
                 for (final Map.Entry<String, Object> entry : taskProperties.entrySet()) {
                     final String propertyName = entry.getKey();
@@ -99,6 +99,6 @@ public class ExceptionUtils {
     }
 
     private static String surroundWithMarker(final String message) {
-        return new StringBuilder(message.length() + 40).append(MARKER).append(message).append(MARKER).toString();
+        return new com.openexchange.java.StringAllocator(message.length() + 40).append(MARKER).append(message).append(MARKER).toString();
     }
 }
