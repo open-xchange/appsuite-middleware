@@ -98,7 +98,7 @@ public class FileMetadataParser implements FileMetadataParserService{
         	if (purged.has("last_modified")) {
         		purged.remove("last_modified");
         	}
-        	File.Field.inject(jsonHandler, file, object);
+        	File.Field.inject(jsonHandler, file, purged);
         } catch (final RuntimeException x) {
             if(x.getCause() != null && JSONException.class.isInstance(x.getCause())) {
                 throw AjaxExceptionCodes.JSON_ERROR.create( x.getCause().getMessage());
