@@ -125,17 +125,15 @@ public class RefreshSubscriptionAction extends AbstractSubscribeAction {
 	                ids.add(id);
 	                subscriptionsToRefresh.add(subscription);
 	            }
-	            int resultCode = services.getService(SubscriptionExecutionService.class).executeSubscriptions(subscriptionsToRefresh, subscribeRequest.getServerSession());
-
-	    		return new AJAXRequestResult(Integer.valueOf(1), "json");
-
 			} catch (JSONException e) {
 				throw new OXException(e);
 			}
 
         }
 
-        return new AJAXRequestResult(Integer.valueOf(1), "json");
+        int resultCode = services.getService(SubscriptionExecutionService.class).executeSubscriptions(subscriptionsToRefresh, subscribeRequest.getServerSession());
+
+		return new AJAXRequestResult(resultCode, "json");
 	}
 
 }
