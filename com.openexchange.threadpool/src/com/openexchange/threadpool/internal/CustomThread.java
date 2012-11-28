@@ -216,7 +216,7 @@ public final class CustomThread extends Thread implements ThreadRenamer, Interru
         if (null == appendix) {
             setName(newPrefix);
         } else {
-            setName(new StringBuilder(16).append(newPrefix).append(appendix).toString());
+            setName(new com.openexchange.java.StringAllocator(16).append(newPrefix).append(appendix).toString());
         }
         changed = true;
     }
