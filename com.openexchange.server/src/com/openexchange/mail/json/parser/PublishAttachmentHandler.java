@@ -160,7 +160,7 @@ public final class PublishAttachmentHandler extends AbstractAttachmentHandler {
         if (doAction && !exceeded) {
             final long size = attachment.getSize();
             if (size <= 0 && LOG.isDebugEnabled()) {
-                LOG.debug(new StringBuilder("Missing size: ").append(size).toString(), new Throwable());
+                LOG.debug(new com.openexchange.java.StringAllocator("Missing size: ").append(size).toString(), new Throwable());
             }
             if (uploadQuotaPerFile > 0 && size > uploadQuotaPerFile) {
                 if (LOG.isDebugEnabled()) {
@@ -171,7 +171,7 @@ public final class PublishAttachmentHandler extends AbstractAttachmentHandler {
                             null == fileName ? "" : fileName,
                             Long.valueOf(size));
                     LOG.debug(
-                        new StringBuilder(64).append("Per-file quota (").append(getSize(uploadQuotaPerFile, 2, false, true)).append(
+                        new com.openexchange.java.StringAllocator(64).append("Per-file quota (").append(getSize(uploadQuotaPerFile, 2, false, true)).append(
                             ") exceeded. Message is going to be sent with links to publishing infostore folder.").toString(),
                         e);
                 }
@@ -185,7 +185,7 @@ public final class PublishAttachmentHandler extends AbstractAttachmentHandler {
                     if (LOG.isDebugEnabled()) {
                         final OXException e = MailExceptionCode.UPLOAD_QUOTA_EXCEEDED.create(Long.valueOf(uploadQuota));
                         LOG.debug(
-                            new StringBuilder(64).append("Overall quota (").append(getSize(uploadQuota, 2, false, true)).append(
+                            new com.openexchange.java.StringAllocator(64).append("Overall quota (").append(getSize(uploadQuota, 2, false, true)).append(
                                 ") exceeded. Message is going to be sent with links to publishing infostore folder.").toString(),
                             e);
                     }
@@ -399,13 +399,13 @@ public final class PublishAttachmentHandler extends AbstractAttachmentHandler {
             // Apply text part as it is
             internalVersion.setBodyPart(textPart);
             // Generate text for attachment
-            final StringBuilder textBuilder = new StringBuilder(256 * links.size());
+            final com.openexchange.java.StringAllocator textBuilder = new com.openexchange.java.StringAllocator(256 * links.size());
             textBuilder.append(htmlFormat(stringHelper.getString(MailStrings.PUBLISHED_ATTACHMENTS_PREFIX))).append("<br />");
             appendLinks(links, textBuilder);
             internalVersion.addEnclosedPart(createLinksAttachment(textBuilder.toString()));
         } else {
             final String text = (String) textPart.getContent();
-            final StringBuilder textBuilder = new StringBuilder(text.length() + 512);
+            final com.openexchange.java.StringAllocator textBuilder = new com.openexchange.java.StringAllocator(text.length() + 512);
             textBuilder.append(htmlFormat(stringHelper.getString(MailStrings.PUBLISHED_ATTACHMENTS_PREFIX))).append("<br />");
             appendLinks(links, textBuilder);
             if (elapsedDate != null) {
@@ -438,13 +438,13 @@ public final class PublishAttachmentHandler extends AbstractAttachmentHandler {
                 // Apply text part as it is
                 externalVersion.setBodyPart(textPart);
                 // Generate text for attachment
-                final StringBuilder textBuilder = new StringBuilder(256 * links.size());
+                final com.openexchange.java.StringAllocator textBuilder = new com.openexchange.java.StringAllocator(256 * links.size());
                 textBuilder.append(htmlFormat(stringHelper.getString(MailStrings.PUBLISHED_ATTACHMENTS_PREFIX))).append("<br />");
                 appendLinks(links, textBuilder);
                 externalVersion.addEnclosedPart(createLinksAttachment(textBuilder.toString()));
             } else {
                 final String text = (String) textPart.getContent();
-                final StringBuilder textBuilder = new StringBuilder(text.length() + 512);
+                final com.openexchange.java.StringAllocator textBuilder = new com.openexchange.java.StringAllocator(text.length() + 512);
                 textBuilder.append(htmlFormat(stringHelper.getString(MailStrings.PUBLISHED_ATTACHMENTS_PREFIX))).append("<br />");
                 appendLinks(links, textBuilder);
                 if (elapsedDate != null) {
@@ -657,7 +657,7 @@ public final class PublishAttachmentHandler extends AbstractAttachmentHandler {
                 publisher.delete(publication.publication);
             } catch (final OXException e) {
                 LOG.error(
-                    new StringBuilder("Publication with ID \"").append(publication.publication.getId()).append(" could not be roll-backed.").toString(),
+                    new com.openexchange.java.StringAllocator("Publication with ID \"").append(publication.publication.getId()).append(" could not be roll-backed.").toString(),
                     e);
             }
             try {
@@ -674,14 +674,14 @@ public final class PublishAttachmentHandler extends AbstractAttachmentHandler {
                 }
             } catch (final OXException e) {
                 LOG.error(
-                    new StringBuilder("Transaction error while deleting infostore document with ID \"").append(publication.infostoreId).append(
+                    new com.openexchange.java.StringAllocator("Transaction error while deleting infostore document with ID \"").append(publication.infostoreId).append(
                         "\" failed.").toString(),
                     e);
             }
         }
     } // End of rollbackPublications()
 
-    private static void appendLinks(final List<LinkAndNamePair> links, final StringBuilder textBuilder) {
+    private static void appendLinks(final List<LinkAndNamePair> links, final com.openexchange.java.StringAllocator textBuilder) {
         for (final LinkAndNamePair pair : links) {
             final String link = pair.link;
             final char quot;
@@ -770,7 +770,7 @@ public final class PublishAttachmentHandler extends AbstractAttachmentHandler {
         if (protocol.endsWith("://")) {
             return protocol;
         }
-        return new StringBuilder(protocol).append("://").toString();
+        return new com.openexchange.java.StringAllocator(protocol).append("://").toString();
     }
 
     private static boolean forcedSecure(final String hostName) {

@@ -590,7 +590,7 @@ public final class MailMessageParser {
                             if (null == method) {
                                 contentTypeStr = "text/calendar; charset=UTF-8";
                             } else {
-                                contentTypeStr = new StringBuilder("text/calendar; method=").append(method.getValue()).append("; charset=UTF-8").toString();
+                                contentTypeStr = new com.openexchange.java.StringAllocator("text/calendar; method=").append(method.getValue()).append("; charset=UTF-8").toString();
                             }
                         }
                         /*
@@ -615,7 +615,7 @@ public final class MailMessageParser {
                             final net.fortuna.ical4j.model.Component vEvent = calendar.getComponents().getComponent(net.fortuna.ical4j.model.Component.VEVENT);
                             final Property summary = vEvent.getProperties().getProperty(net.fortuna.ical4j.model.Property.SUMMARY);
                             if (summary != null) {
-                                part.setFileName(new StringBuilder(MimeUtility.encodeText(summary.getValue().replaceAll("\\s", "_"), MailProperties.getInstance().getDefaultMimeCharset(), "Q")).append(".ics").toString());
+                                part.setFileName(new com.openexchange.java.StringAllocator(MimeUtility.encodeText(summary.getValue().replaceAll("\\s", "_"), MailProperties.getInstance().getDefaultMimeCharset(), "Q")).append(".ics").toString());
                             }
                         }
                         /*
@@ -743,7 +743,7 @@ public final class MailMessageParser {
                     // Check RTF part
                     if (null != rtfPart) {
                         final MailPart convertedPart = MimeMessageConverter.convertPart(rtfPart);
-                        convertedPart.setFileName(new StringBuilder(subject.replaceAll("\\s+", "_")).append(".rtf").toString());
+                        convertedPart.setFileName(new com.openexchange.java.StringAllocator(subject.replaceAll("\\s+", "_")).append(".rtf").toString());
                         parseMailContent(convertedPart, handler, prefix, partCount++);
                     }
                     // As attachment
@@ -909,7 +909,7 @@ public final class MailMessageParser {
         String filename = rawFileName;
         if ((filename == null) || isEmptyString(filename)) {
             final List<String> exts = MimeType2ExtMap.getFileExtensions(baseMimeType.toLowerCase(Locale.ENGLISH));
-            final StringBuilder sb = new StringBuilder(16).append(PREFIX).append(sequenceId).append('.');
+            final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(16).append(PREFIX).append(sequenceId).append('.');
             if (exts == null) {
                 sb.append("dat");
             } else {
@@ -948,7 +948,7 @@ public final class MailMessageParser {
         if (prefix == null) {
             return String.valueOf(partCount);
         }
-        return new StringBuilder(prefix).append('.').append(partCount).toString();
+        return new com.openexchange.java.StringAllocator(prefix).append('.').append(partCount).toString();
     }
 
     /**
@@ -985,9 +985,9 @@ public final class MailMessageParser {
                  */
                 String charset = contentType.getCharsetParameter();
                 if (!CharsetDetector.isValid(charset)) {
-                    StringBuilder sb = null;
+                    com.openexchange.java.StringAllocator sb = null;
                     if (null != charset) {
-                        sb = new StringBuilder(64).append("Illegal or unsupported encoding: \"").append(charset).append("\".");
+                        sb = new com.openexchange.java.StringAllocator(64).append("Illegal or unsupported encoding: \"").append(charset).append("\".");
                         mailInterfaceMonitor.addUnsupportedEncodingExceptions(charset);
                     }
                     charset = CharsetDetector.detectCharset(new UnsynchronizedByteArrayInputStream(bytes));
@@ -1025,7 +1025,7 @@ public final class MailMessageParser {
             final String fallback = "ISO-8859-1";
             if (WARN_ENABLED) {
                 LOG.warn(
-                    new StringBuilder("Character conversion exception while reading content with charset \"").append(charset).append(
+                    new com.openexchange.java.StringAllocator("Character conversion exception while reading content with charset \"").append(charset).append(
                         "\". Using fallback charset \"").append(fallback).append("\" instead."),
                     e);
             }
@@ -1051,9 +1051,9 @@ public final class MailMessageParser {
         if (mailPart.containsHeader(HDR_CONTENT_TYPE)) {
             String cs = contentType.getCharsetParameter();
             if (!CharsetDetector.isValid(cs)) {
-                StringBuilder sb = null;
+                com.openexchange.java.StringAllocator sb = null;
                 if (null != cs) {
-                    sb = new StringBuilder(64).append("Illegal or unsupported encoding: \"").append(cs).append("\".");
+                    sb = new com.openexchange.java.StringAllocator(64).append("Illegal or unsupported encoding: \"").append(cs).append("\".");
                     mailInterfaceMonitor.addUnsupportedEncodingExceptions(cs);
                 }
                 if (contentType.startsWith(PRIMARY_TEXT)) {

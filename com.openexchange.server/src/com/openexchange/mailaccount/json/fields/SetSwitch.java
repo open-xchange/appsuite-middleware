@@ -177,7 +177,7 @@ public class SetSwitch implements AttributeSwitch {
             desc.setMailPort(Integer.parseInt(value.toString()));
         } catch (final NumberFormatException e) {
             LOG.error(
-                new StringBuilder("Mail port is not a number: ").append(value).append(". Setting to fallback port 143.").toString(),
+                new com.openexchange.java.StringAllocator("Mail port is not a number: ").append(value).append(". Setting to fallback port 143.").toString(),
                 e);
             desc.setMailPort(143);
         }
@@ -208,7 +208,7 @@ public class SetSwitch implements AttributeSwitch {
             desc.setTransportPort(Integer.parseInt(value.toString()));
         } catch (final NumberFormatException e) {
             LOG.debug(
-                new StringBuilder("Transport port is not a number: ").append(value).append(". Setting to fallback port 25.").toString(),
+                new com.openexchange.java.StringAllocator("Transport port is not a number: ").append(value).append(". Setting to fallback port 25.").toString(),
                 e);
             desc.setTransportPort(25);
         }

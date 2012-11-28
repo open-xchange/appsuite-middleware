@@ -207,7 +207,7 @@ public final class EnqueueingMailAccessCache implements IMailAccessCache {
             final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = pooledMailAccess.getMailAccess();
             mailAccess.setCached(false);
             if (DEBUG) {
-                LOG.debug(new StringBuilder("Remove&Get for ").append(key).toString());
+                LOG.debug(new com.openexchange.java.StringAllocator("Remove&Get for ").append(key).toString());
             }
             return mailAccess;
         }
@@ -255,15 +255,15 @@ public final class EnqueueingMailAccessCache implements IMailAccessCache {
                 if (DEBUG) {
                     final int size = accessQueue.size();
                     if (size == 1) {
-                        LOG.debug(new StringBuilder("Queued ONE mail access for ").append(key).toString());
+                        LOG.debug(new com.openexchange.java.StringAllocator("Queued ONE mail access for ").append(key).toString());
                     } else if (size > queueCapacity) {
-                        LOG.debug(new StringBuilder("\n\tExceeded queue capacity! Detected ").append(size).append(" mail access(es) for ").append(
+                        LOG.debug(new com.openexchange.java.StringAllocator("\n\tExceeded queue capacity! Detected ").append(size).append(" mail access(es) for ").append(
                             key).append('\n').toString());
                     } else if (size == queueCapacity) {
-                        LOG.debug(new StringBuilder("\n\tReached queue capacity! Queued ").append(size).append(" mail access(es) for ").append(
+                        LOG.debug(new com.openexchange.java.StringAllocator("\n\tReached queue capacity! Queued ").append(size).append(" mail access(es) for ").append(
                             key).append('\n').toString());
                     } else {
-                        LOG.debug(new StringBuilder("Queued ").append(size).append(" mail access(es) for ").append(key).toString());
+                        LOG.debug(new com.openexchange.java.StringAllocator("Queued ").append(size).append(" mail access(es) for ").append(key).toString());
                     }
                 }
                 return true;
@@ -321,7 +321,7 @@ public final class EnqueueingMailAccessCache implements IMailAccessCache {
             while (null != (pooledMailAccess = accessQueue.poll())) {
                 final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = pooledMailAccess.getMailAccess();
                 if (DEBUG) {
-                    LOG.debug(new StringBuilder("Dropping: ").append(mailAccess).toString());
+                    LOG.debug(new com.openexchange.java.StringAllocator("Dropping: ").append(mailAccess).toString());
                 }
                 mailAccess.setCached(false);
                 mailAccess.close(false);
@@ -386,7 +386,7 @@ public final class EnqueueingMailAccessCache implements IMailAccessCache {
                                 pooledMailAccess.getMailAccess();
                             mailAccess.setCached(false);
                             if (DEBUG) {
-                                LOG.debug(new StringBuilder("Timed-out mail access for ").append(entry.getKey()).toString());
+                                LOG.debug(new com.openexchange.java.StringAllocator("Timed-out mail access for ").append(entry.getKey()).toString());
                             }
                             mailAccess.close(false);
                         }
@@ -396,7 +396,7 @@ public final class EnqueueingMailAccessCache implements IMailAccessCache {
                              */
                             accessQueue.markDeprecated();
                             if (DEBUG) {
-                                LOG.debug(new StringBuilder("Dropped queue for ").append(entry.getKey()).toString());
+                                LOG.debug(new com.openexchange.java.StringAllocator("Dropped queue for ").append(entry.getKey()).toString());
                             }
                             iterator.remove();
                         }
@@ -471,7 +471,7 @@ public final class EnqueueingMailAccessCache implements IMailAccessCache {
 
         @Override
         public String toString() {
-            final StringBuilder builder = new StringBuilder(16);
+            final com.openexchange.java.StringAllocator builder = new com.openexchange.java.StringAllocator(16);
             builder.append("{ Key [accountId=").append(accountId).append(", user=").append(user).append(", context=").append(context).append(
                 "] }");
             return builder.toString();

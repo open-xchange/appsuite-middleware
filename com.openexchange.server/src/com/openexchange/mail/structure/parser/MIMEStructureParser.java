@@ -76,10 +76,10 @@ import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.compose.ComposedMailMessage;
 import com.openexchange.mail.mime.ContentDisposition;
 import com.openexchange.mail.mime.ContentType;
+import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.mail.mime.MimeDefaultSession;
 import com.openexchange.mail.mime.MimeMailException;
 import com.openexchange.mail.mime.MimeTypes;
-import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.mail.mime.ParameterizedHeader;
 import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.mail.mime.converters.MimeMessageConverter;
@@ -445,7 +445,7 @@ public final class MIMEStructureParser {
                 if (HEADERS_ADDRESS.contains(name)) {
                     final JSONArray jsonAddresses = (JSONArray) entry.getValue();
                     final int length = jsonAddresses.length();
-                    final StringBuilder builder = new StringBuilder(32 * length);
+                    final com.openexchange.java.StringAllocator builder = new com.openexchange.java.StringAllocator(32 * length);
                     final String delim = ", ";
                     for (int i = length - 1; i >= 0; i--) {
                         final JSONObject jsonAddress = jsonAddresses.getJSONObject(i);

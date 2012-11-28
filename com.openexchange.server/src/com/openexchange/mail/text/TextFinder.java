@@ -308,7 +308,7 @@ public final class TextFinder {
             final String fallback = "ISO-8859-1";
             if (LOG.isWarnEnabled()) {
                 LOG.warn(
-                    new StringBuilder("Character conversion exception while reading content with charset \"").append(charset).append(
+                    new com.openexchange.java.StringAllocator("Character conversion exception while reading content with charset \"").append(charset).append(
                         "\". Using fallback charset \"").append(fallback).append("\" instead."),
                     e);
             }
@@ -321,9 +321,9 @@ public final class TextFinder {
         if (mailPart.containsHeader(MessageHeaders.HDR_CONTENT_TYPE)) {
             String cs = contentType.getCharsetParameter();
             if (!CharsetDetector.isValid(cs)) {
-                StringBuilder sb = null;
+                com.openexchange.java.StringAllocator sb = null;
                 if (null != cs) {
-                    sb = new StringBuilder(64).append("Illegal or unsupported encoding: \"").append(cs).append("\".");
+                    sb = new com.openexchange.java.StringAllocator(64).append("Illegal or unsupported encoding: \"").append(cs).append("\".");
                 }
                 if (contentType.startsWith("text/")) {
                     try {
