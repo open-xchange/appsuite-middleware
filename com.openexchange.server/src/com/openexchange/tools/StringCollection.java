@@ -57,6 +57,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import com.openexchange.groupware.calendar.CalendarCollectionService;
+import com.openexchange.java.AllocatingStringWriter;
 import com.openexchange.server.services.ServerServiceRegistry;
 
 /**
@@ -595,7 +596,7 @@ public final class StringCollection {
     public static String getStackAsString() {
         final Throwable t = new Throwable();
         t.fillInStackTrace();
-        final UnsynchronizedStringWriter sw = new UnsynchronizedStringWriter();
+        final AllocatingStringWriter sw = new AllocatingStringWriter();
         final PrintWriter pw = new PrintWriter(sw, true);
         t.printStackTrace(pw);
         return sw.toString();

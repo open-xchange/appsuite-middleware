@@ -52,7 +52,6 @@ package com.openexchange.mail.text;
 import static com.openexchange.mail.utils.MailFolderUtility.prepareFullname;
 import java.io.IOException;
 import java.io.StringReader;
-import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.regex.Matcher;
@@ -72,6 +71,7 @@ import org.xml.sax.SAXException;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.html.HtmlService;
 import com.openexchange.image.ImageLocation;
+import com.openexchange.java.AllocatingStringWriter;
 import com.openexchange.mail.MailPath;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.conversion.InlineImageDataSource;
@@ -526,7 +526,7 @@ public final class HtmlProcessing {
              */
             serializer.setOutputProperty(OutputKeys.INDENT, "yes");
             serializer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", String.valueOf(INDENT));
-            final StringWriter sw = new StringWriter();
+            final AllocatingStringWriter sw = new AllocatingStringWriter();
             serializer.transform(new DOMSource(node), new StreamResult(sw));
             return sw.toString();
         } catch (final TransformerException e) {

@@ -95,6 +95,7 @@ import com.openexchange.groupware.upload.impl.UploadEvent;
 import com.openexchange.groupware.upload.impl.UploadException;
 import com.openexchange.groupware.upload.impl.UploadSizeExceededException;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
+import com.openexchange.java.AllocatingStringWriter;
 import com.openexchange.json.OXJSONWriter;
 import com.openexchange.log.LogFactory;
 import com.openexchange.mail.mime.MimeType2ExtMap;
@@ -102,7 +103,6 @@ import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.usersetting.UserSettingMailStorage;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.impl.ThreadLocalSessionHolder;
-import com.openexchange.tools.UnsynchronizedStringWriter;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.servlet.UploadServletException;
 import com.openexchange.tools.servlet.http.Tools;
@@ -169,7 +169,7 @@ public class Infostore extends PermissionServlet {
             if (req.getParameter(PARAMETER_ID) == null) {
                 final Response resp = new Response(session);
                 resp.setException(AjaxExceptionCodes.UNEXPECTED_ERROR.create("You must provide a value for " + PARAMETER_ID));
-                final UnsynchronizedStringWriter w = new UnsynchronizedStringWriter();
+                final AllocatingStringWriter w = new AllocatingStringWriter();
                 try {
                     ResponseWriter.write(resp, w, localeFrom(session));
                 } catch (final JSONException e) {
@@ -677,7 +677,7 @@ public class Infostore extends PermissionServlet {
         Writer writer = null;
         try {
             if (post) {
-                writer = new UnsynchronizedStringWriter();
+                writer = new AllocatingStringWriter();
             } else {
                 writer = res.getWriter();
             }

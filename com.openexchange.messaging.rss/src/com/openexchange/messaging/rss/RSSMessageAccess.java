@@ -64,6 +64,8 @@ import org.htmlcleaner.SimpleXmlSerializer;
 import org.htmlcleaner.TagNode;
 import org.xml.sax.InputSource;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.AllocatingStringWriter;
+import com.openexchange.java.StringAllocator;
 import com.openexchange.messaging.IndexRange;
 import com.openexchange.messaging.MessagingAccountManager;
 import com.openexchange.messaging.MessagingContent;
@@ -319,9 +321,9 @@ public class RSSMessageAccess extends RSSCommon implements MessagingMessageAcces
                  */
                 final TagNode htmlNode = HTML_CLEANER.clean(new String(tmp.toByteArray())); // No charset needed???
                 tmp = null;
-                final UnsynchronizedStringWriter writer = new UnsynchronizedStringWriter(initLen);
+                final AllocatingStringWriter writer = new AllocatingStringWriter(initLen);
                 SERIALIZER.write(htmlNode, writer, "UTF-8");
-                final StringBuilder builder = writer.getBuffer();
+                final StringAllocator builder = writer.getAllocator();
                 /*
                  * Return feed
                  */

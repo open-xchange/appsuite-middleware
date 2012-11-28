@@ -51,7 +51,6 @@ package com.openexchange.calendar.itip.generators;
 
 import static com.openexchange.calendar.itip.ITipUtils.endOfTheDay;
 import static com.openexchange.calendar.itip.ITipUtils.startOfTheDay;
-import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -91,6 +90,7 @@ import com.openexchange.groupware.results.TimedResult;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.i18n.tools.StringHelper;
+import com.openexchange.java.AllocatingStringWriter;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 import com.openexchange.templating.OXTemplate;
@@ -672,7 +672,7 @@ public class NotificationMailGenerator implements ITipMailGenerator {
         }
         env.put("participantHelper", new ParticipantHelper(participant.getLocale()));
         
-        StringWriter writer = new StringWriter();
+        AllocatingStringWriter writer = new AllocatingStringWriter();
         textTemplate.process(env, writer);
         mail.setText(writer.toString());
         
@@ -681,7 +681,7 @@ public class NotificationMailGenerator implements ITipMailGenerator {
         if (originalForRendering != null) {
             env.put("changes", new ChangeHelper(ctx, mail.getRecipient(), originalForRendering, appointmentForRendering, mail.getDiff(), participant.getLocale(), participant.getTimeZone(), wrapper, attachmentMemory, services).getChanges());
         }
-        writer = new StringWriter();
+        writer = new AllocatingStringWriter();
         htmlTemplate.process(env, writer);
         mail.setHtml(writer.toString());
     }
