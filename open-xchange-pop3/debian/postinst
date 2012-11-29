@@ -21,6 +21,8 @@ postFix() {
     local version=${1%-*}
     version=${version//[-.]/}
 
+    . /opt/open-xchange/lib/oxfunctions.sh
+
     # prevent bash from expanding, see bug 13316
     GLOBIGNORE='*'
 

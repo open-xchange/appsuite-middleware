@@ -120,7 +120,7 @@ public class UpdateMailTest extends AbstractMailTest {
         String folder = newMailResponse.getFolder();
         String id = newMailResponse.getId();
 
-        final UpdateMailRequest updateRequest = new UpdateMailRequest( folder, id );
+        UpdateMailRequest updateRequest = new UpdateMailRequest( folder, id );
         final int additionalFlag = MailMessage.FLAG_ANSWERED; //note: doesn't work for 16 (recent) and 64 (user)
         updateRequest.setFlags( additionalFlag );
         updateRequest.updateFlags();
@@ -129,6 +129,8 @@ public class UpdateMailTest extends AbstractMailTest {
         TestMail updatedMail = getMail(folder, id);
         assertTrue("Flag should have been changed, but are: " + Integer.toBinaryString(updatedMail.getFlags()), (updatedMail.getFlags() & additionalFlag) == additionalFlag);
 
+        updateRequest = new UpdateMailRequest( folder, id );
+        updateRequest.setFlags( additionalFlag );
         updateRequest.removeFlags();
         updateResponse = getClient().execute(updateRequest);
 
