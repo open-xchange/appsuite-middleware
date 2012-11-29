@@ -51,7 +51,6 @@ package com.openexchange.mail.smal.impl;
 
 import java.util.Collections;
 import java.util.List;
-import org.apache.commons.logging.Log;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.Types;
 import com.openexchange.index.AccountFolders;
@@ -62,7 +61,6 @@ import com.openexchange.index.IndexResult;
 import com.openexchange.index.QueryParameters;
 import com.openexchange.index.QueryParameters.Order;
 import com.openexchange.index.SearchHandler;
-import com.openexchange.log.LogFactory;
 import com.openexchange.mail.IndexRange;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailField;
@@ -104,10 +102,7 @@ import com.openexchange.session.Session;
  */
 public final class SmalMessageStorage extends AbstractSMALStorage implements IMailMessageStorage, IMailMessageStorageExt, IMailMessageStorageBatch {
 
-    protected static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(SmalMessageStorage.class));
-    
     private final IMailMessageStorage messageStorage;
-
 
     /**
      * Initializes a new {@link SmalMessageStorage}.
@@ -117,6 +112,13 @@ public final class SmalMessageStorage extends AbstractSMALStorage implements IMa
     public SmalMessageStorage(final Session session, final int accountId, final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> delegateMailAccess) throws OXException {
         super(session, accountId, delegateMailAccess);
         messageStorage = delegateMailAccess.getMessageStorage();
+    }
+
+    @Override
+    public void clearCache() throws OXException {
+        if (messageStorage instanceof IMailMessageStorageExt) {
+            ((IMailMessageStorageExt) messageStorage).clearCache();
+        }
     }
 
     @Override

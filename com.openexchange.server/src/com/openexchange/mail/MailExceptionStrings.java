@@ -525,4 +525,7 @@ public final class MailExceptionStrings implements LocalizableStrings {
     // There was a problem processing the request. Please (refresh view and) try again.
     public static final String PROCESSING_ERROR_MSG = "There was a problem processing the request. Please (refresh view and) try again.";
 
+    // Invoked method is not supported.
+    public static final String UNSUPPORTED_OPERATION_MSG = "Invoked method is not supported.";
+
 }

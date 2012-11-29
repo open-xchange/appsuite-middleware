@@ -67,6 +67,7 @@ import gnu.trove.set.hash.TIntHashSet;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -319,6 +320,33 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
         return imapProperties;
     }
 
+    protected static volatile Field messageCacheField;
+    protected static volatile Field messagesField;
+
+    @Override
+    public void clearCache() throws OXException {
+        if (null == imapFolder) {
+            return;
+        }
+        final Field messageCacheField = IMAPMessageStorage.messageCacheField;
+        if (null == messageCacheField) {
+            return;
+        }
+        final Field messagesField = IMAPMessageStorage.messagesField;
+        if (null == messagesField) {
+            return;
+        }
+        try {
+            final com.sun.mail.imap.MessageCache mc = (com.sun.mail.imap.MessageCache) messageCacheField.get(imapFolder);
+            final IMAPMessage[] messages = (IMAPMessage[]) messagesField.get(mc);
+            Arrays.fill(messages, null);
+        } catch (final IllegalArgumentException e) {
+            LOG.error(e.getMessage(), e);
+        } catch (final IllegalAccessException e) {
+            LOG.error(e.getMessage(), e);
+        }
+    }
+
     @Override
     public MailMessage[] getMessages(final String fullName, final String[] mailIds, final MailField[] mailFields, final String[] headerNames) throws OXException {
         if ((mailIds == null) || (mailIds.length == 0)) {
@@ -400,7 +428,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                     try {
                         return new Renderer(new Segment(new Source(content), 0, content.length())).setMaxLineLength(9999).setIncludeHyperlinkURLs(
                             false).toString();
-                    } catch (StackOverflowError s) {
+                    } catch (final StackOverflowError s) {
                         LOG.warn("StackOverflowError while parsing html mail. Returning null...");
                         return null;
                     }
