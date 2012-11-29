@@ -174,6 +174,8 @@ abstract class AbstractStringAllocator implements Appendable, CharSequence {
 
     /**
      * Reinitializes to specified length.
+     * <p>
+     * Initializes a new <code>char[]</code> to not affect possibly previously created Strings via {@link #toString()} method.
      *
      * @param newLength The new length
      * @throws IndexOutOfBoundsException if the <code>newLength</code> argument is negative.
