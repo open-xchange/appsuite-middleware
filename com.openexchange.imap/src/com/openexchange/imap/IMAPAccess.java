@@ -1183,7 +1183,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
             } catch (final NoSuchFieldException e) {
                 mc = null;
             }
-            IMAPMessageStorage.messageCacheField = mc;
+            IMAPFolderWorker.messageCacheField = mc;
         }
 
         {
@@ -1196,7 +1196,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
             } catch (final NoSuchFieldException e) {
                 mss = null;
             }
-            IMAPMessageStorage.messagesField = mss;
+            IMAPFolderWorker.messagesField = mss;
         }
     }
 

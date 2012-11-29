@@ -67,7 +67,6 @@ import gnu.trove.set.hash.TIntHashSet;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -320,49 +319,9 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
         return imapProperties;
     }
 
-    protected static volatile Field messageCacheField;
-    protected static volatile Field messagesField;
-
     @Override
     public void clearCache() throws OXException {
-        clearCache(imapFolder);
-    }
-
-    /** Clears the cache */
-    protected static void clearCache(final IMAPFolder imapFolder) {
-        if (null == imapFolder) {
-            return;
-        }
-        final Field messageCacheField = IMAPMessageStorage.messageCacheField;
-        if (null == messageCacheField) {
-            return;
-        }
-        final Field messagesField = IMAPMessageStorage.messagesField;
-        if (null == messagesField) {
-            return;
-        }
-        try {
-            final com.sun.mail.imap.MessageCache mc = (com.sun.mail.imap.MessageCache) messageCacheField.get(imapFolder);
-            if (null != mc) {
-                final IMAPMessage[] messages = (IMAPMessage[]) messagesField.get(mc);
-                if (null != messages) {
-                    Arrays.fill(messages, null);
-                }
-            }
-        } catch (final IllegalArgumentException e) {
-            LOG.error(e.getMessage(), e);
-        } catch (final IllegalAccessException e) {
-            LOG.error(e.getMessage(), e);
-        }
-    }
-
-    /** Safely clears the cache */
-    protected static void clearCacheSafe(final IMAPFolder imapFolder) {
-        try {
-            clearCache(imapFolder);
-        } catch (Exception e) {
-            // Ignore
-        }
+        IMAPFolderWorker.clearCache(imapFolder);
     }
 
     @Override
