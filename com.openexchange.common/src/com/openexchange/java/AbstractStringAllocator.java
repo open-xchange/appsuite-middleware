@@ -152,7 +152,7 @@ abstract class AbstractStringAllocator implements Appendable, CharSequence {
      * This implements the expansion semantics of ensureCapacity with no size check or synchronization.
      */
     void expandCapacity(final int minimumCapacity) {
-        int newCapacity = (value.length + 1) * 2;
+        int newCapacity = (value.length + 1) << 1;
         if (newCapacity < 0) {
             newCapacity = Integer.MAX_VALUE;
         } else if (minimumCapacity > newCapacity) {
@@ -169,6 +169,60 @@ abstract class AbstractStringAllocator implements Appendable, CharSequence {
     public void trimToSize() {
         if (count < value.length) {
             value = Arrays.copyOf(value, count);
+        }
+    }
+
+    /**
+     * Reinitializes to specified length.
+     *
+     * @param newLength The new length
+     * @throws IndexOutOfBoundsException if the <code>newLength</code> argument is negative.
+     */
+    public void reinitTo(final int newLength) {
+        if (newLength < 0) {
+            throw new StringIndexOutOfBoundsException(newLength);
+        }
+        final char[] tmp = value;
+        if (newLength <= tmp.length) {
+            value = new char[tmp.length];
+            if (newLength > 0) {
+                System.arraycopy(tmp, 0, value, 0, newLength);
+            }
+        } else {
+            expandCapacity(newLength);
+        }
+        count = newLength;
+    }
+
+    /**
+     * Sets the length of the character sequence. The sequence is changed to a new character sequence whose length is specified by the
+     * argument. For every nonnegative index <i>k</i> less than <code>newLength</code>, the character at index <i>k</i> in the new character
+     * sequence is the same as the character at index <i>k</i> in the old sequence if <i>k</i> is less than the length of the old character
+     * sequence; otherwise, it is the null character <code>'&#92;u0000'</code>. In other words, if the <code>newLength</code> argument is
+     * less than the current length, the length is changed to the specified length.
+     * <p>
+     * If the <code>newLength</code> argument is greater than or equal to the current length, sufficient null characters (
+     * <code>'&#92;u0000'</code>) are appended so that length becomes the <code>newLength</code> argument.
+     * <p>
+     * The <code>newLength</code> argument must be greater than or equal to <code>0</code>.
+     * 
+     * @param newLength the new length
+     * @throws IndexOutOfBoundsException if the <code>newLength</code> argument is negative.
+     */
+    public void setNewLength(int newLength) {
+        if (newLength < 0) {
+            throw new StringIndexOutOfBoundsException(newLength);
+        }
+        if (newLength > value.length) {
+            expandCapacity(newLength);
+        }
+
+        if (count < newLength) {
+            for (; count < newLength; count++) {
+                value[count] = '\0';
+            }
+        } else {
+            count = newLength;
         }
     }
 

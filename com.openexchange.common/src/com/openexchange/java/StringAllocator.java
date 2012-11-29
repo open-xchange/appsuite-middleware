@@ -475,7 +475,7 @@ public final class StringAllocator extends AbstractStringAllocator implements ja
             return new String(value, 0, count);
         }
         try {
-            return STRING_CONSTRUCTOR.newInstance(Integer.valueOf(0), Integer.valueOf(count), value);
+            return stringConstructor.newInstance(Integer.valueOf(0), Integer.valueOf(count), value);
         } catch (final Exception e) {
             // Create a copy, don't share the array
             return new String(value, 0, count);
