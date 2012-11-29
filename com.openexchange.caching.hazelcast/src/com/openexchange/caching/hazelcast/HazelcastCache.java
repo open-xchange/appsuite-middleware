@@ -52,6 +52,7 @@ package com.openexchange.caching.hazelcast;
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Lock;
 import org.apache.commons.logging.Log;
@@ -353,4 +354,14 @@ public final class HazelcastCache extends DefaultCacheKeyService implements Cach
         return null;
     }
 
+    @Override
+    public Set<?> getGroupKeys(String group) {
+        IMap<Serializable, Serializable> g = getGroup(group);
+        return g.keySet();
+    }
+
+    @Override
+    public Set<String> getGroupNames() {
+        return groupNames;
+    }
 }
