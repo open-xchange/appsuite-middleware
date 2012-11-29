@@ -234,7 +234,7 @@ public final class ViewTest extends AbstractMailTest {
                 assertEquals("Unexpected Content-Type: ", "text/plain", attachmentObj.getString("content_type"));
                 assertTrue("Unexpected HTML content", -1 == attachmentObj.getString("content").indexOf("<br />"));
             } else if ("2".equals(id)) {
-                assertEquals("Unexpected Content-Type: ", "image/jpeg", attachmentObj.getString("content_type"));
+                assertTrue("Unexpected Content-Type: "+attachmentObj.getString("content_type"), attachmentObj.getString("content_type").startsWith("image/jpeg"));
                 assertFalse("Unexpected plain text content", attachmentObj.getString("content").startsWith("Mail text."));
             }
         }
