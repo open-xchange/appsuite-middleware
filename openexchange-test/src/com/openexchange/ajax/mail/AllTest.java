@@ -219,7 +219,7 @@ public final class AllTest extends AbstractMailTest {
         final MailMessage[] mailMessages = allR.getMailMessages(COLUMNS_DEFAULT_LIST);
         for (final MailMessage mailMessage : mailMessages) {
             assertEquals("From is not equal", new InternetAddress(getSendAddress()), mailMessage.getFrom()[0]);
-            assertEquals("Subject is not equal", MAIL_SUBJECT, mailMessage.getSubject());
+            assertEquals("Subject is not equal", "Invitation for launch", mailMessage.getSubject());
             assertEquals("Folder is not equal", getInboxFolder(), mailMessage.getFolder());
             assertEquals("hasAttachment is not equal", false, mailMessage.hasAttachment());
             assertEquals("To is not equal", new InternetAddress(getSendAddress()), mailMessage.getTo()[0]);
