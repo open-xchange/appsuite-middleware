@@ -167,7 +167,7 @@ public abstract class UploadFileMailPart extends MailPart implements ComposedMai
                     final String cs = detectCharset(new FileInputStream(uploadFile));
                     getContentType().setCharsetParameter(cs);
                     if (LOG.isWarnEnabled()) {
-                        LOG.warn(new StringBuilder("Uploaded file contains textual content but").append(
+                        LOG.warn(new com.openexchange.java.StringAllocator("Uploaded file contains textual content but").append(
                             " does not specify a charset. Assumed charset is: ").append(cs).toString());
                     }
                 }
@@ -204,7 +204,7 @@ public abstract class UploadFileMailPart extends MailPart implements ComposedMai
                 try {
                     charset = detectCharset(new FileInputStream(uploadFile));
                     if (LOG.isWarnEnabled()) {
-                        LOG.warn(new StringBuilder("Uploaded file contains textual content but").append(
+                        LOG.warn(new com.openexchange.java.StringAllocator("Uploaded file contains textual content but").append(
                             " does not specify a charset. Assumed charset is: ").append(charset).toString());
                     }
                 } catch (final FileNotFoundException e) {

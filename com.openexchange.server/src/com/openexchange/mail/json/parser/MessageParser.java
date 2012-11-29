@@ -352,7 +352,7 @@ public final class MessageParser {
     private static final String UPLOAD_FILE_ATTACHMENT_PREFIX = "file_";
 
     private static String getFieldName(final int num) {
-        return new StringBuilder(8).append(UPLOAD_FILE_ATTACHMENT_PREFIX).append(num).toString();
+        return new com.openexchange.java.StringAllocator(8).append(UPLOAD_FILE_ATTACHMENT_PREFIX).append(num).toString();
     }
 
     private static void parse(final ComposedMailMessage transportMail, final JSONObject jsonObj, final Session session, final int accountId, final TransportProvider provider, final IAttachmentHandler attachmentHandler, final Context ctx, final boolean prepare4Transport) throws OXException {
@@ -552,7 +552,7 @@ public final class MessageParser {
                 String value = jsonObj.getString(fromKey);
                 final int endPos;
                 if ('[' == value.charAt(0) && (endPos = value.indexOf(']', 1)) < value.length()) {
-                    value = new StringBuilder(32).append("\"[").append(value.substring(1, endPos)).append("]\"").append(value.substring(endPos+1)).toString();
+                    value = new com.openexchange.java.StringAllocator(32).append("\"[").append(value.substring(1, endPos)).append("]\"").append(value.substring(endPos+1)).toString();
                 }
                 mail.addFrom(parseAddressList(value, true, true));
             } catch (final AddressException e) {
@@ -992,7 +992,7 @@ public final class MessageParser {
      * @throws JSONException If a JSON error occurs
      */
     private static String parseAdressArray(final JSONArray jsonArray, final int length) throws JSONException {
-        final StringBuilder sb = new StringBuilder(length << 6);
+        final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(length << 6);
         {
             /*
              * Add first address

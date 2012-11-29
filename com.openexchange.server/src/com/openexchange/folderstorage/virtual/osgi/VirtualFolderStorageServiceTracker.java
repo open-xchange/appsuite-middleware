@@ -81,7 +81,7 @@ public final class VirtualFolderStorageServiceTracker implements ServiceTrackerC
         {
             final Object obj = reference.getProperty("tree");
             if (null == obj) {
-                LOG.error(new StringBuilder(32).append("Missing tree identifier property \"tree\" for ").append(
+                LOG.error(new com.openexchange.java.StringAllocator(32).append("Missing tree identifier property \"tree\" for ").append(
                     addedService.getClass().getName()).toString());
                 // Nothing to track, return null
                 context.ungetService(reference);
@@ -112,7 +112,7 @@ public final class VirtualFolderStorageServiceTracker implements ServiceTrackerC
                 {
                     final Object obj = reference.getProperty("tree");
                     if (null == obj) {
-                        LOG.error(new StringBuilder(32).append("Missing tree identifier property \"tree\" for ").append(
+                        LOG.error(new com.openexchange.java.StringAllocator(32).append("Missing tree identifier property \"tree\" for ").append(
                             service.getClass().getName()).toString());
                         return;
                     }

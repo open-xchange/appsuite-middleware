@@ -51,7 +51,7 @@ pfile=/opt/open-xchange/etc/parallels.properties
 if ox_exists_property com.openexchange.custom.parallels.branding.fallbackurl $pfile; then
     oval=$(ox_read_property com.openexchange.custom.parallels.branding.fallbackurl $pfile)
     ox_remove_property com.openexchange.custom.parallels.branding.fallbackurl $pfile
-    ox_set_property com.openexchange.custom.parallels.branding.fallbackhost $oval $pfile
+    ox_set_property com.openexchange.custom.parallels.branding.fallbackhost "$oval" $pfile
 fi
 
 # SoftwareChange_Request-1209

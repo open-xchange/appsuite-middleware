@@ -298,9 +298,9 @@ public class Messages implements LocalizableStrings {
 	public static final String COUNTER_REPLY_INTRO = "%1$s has %2$s the appointment, but would like to make a counter proposal: ";
 
 	// TODO: Mah/Cisco, please describe what is meant with the wording 'chair'
-	public static final String PRINCIPAL_JUSTIFICATION = "You have received this E-Mail because your are the chair for this appointment.";
+	public static final String PRINCIPAL_JUSTIFICATION = "You have received this E-Mail because you are the chair for this appointment.";
 
-	public static final String ORGANIZER_JUSTIFICATION = "You have received this E-Mail because your are the organizer of this appointment.";
+	public static final String ORGANIZER_JUSTIFICATION = "You have received this E-Mail because you are the organizer of this appointment.";
 
 	public static final String RESOURCE_MANAGER_JUSTIFICATION = "You have received this E-Mail because this appointment contains the resource %1$s which is managed by you.";
     

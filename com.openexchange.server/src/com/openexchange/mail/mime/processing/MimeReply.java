@@ -248,7 +248,7 @@ public final class MimeReply {
             {
                 final String decodedSubject = MimeMessageUtility.decodeMultiEncodedHeader(rawSubject);
                 final String newSubject =
-                    decodedSubject.regionMatches(true, 0, subjectPrefix, 0, 4) ? decodedSubject : new StringBuilder().append(subjectPrefix).append(
+                    decodedSubject.regionMatches(true, 0, subjectPrefix, 0, 4) ? decodedSubject : new com.openexchange.java.StringAllocator().append(subjectPrefix).append(
                         decodedSubject).toString();
                 replyMsg.setSubject(newSubject, MailProperties.getInstance().getDefaultMimeCharset());
             }
@@ -332,7 +332,7 @@ public final class MimeReply {
                  */
                 final String[] userAddrs = UserStorage.getStorageUser(session.getUserId(), ctx).getAliases();
                 if (userAddrs != null && userAddrs.length > 0) {
-                    final StringBuilder addrBuilder = new StringBuilder();
+                    final com.openexchange.java.StringAllocator addrBuilder = new com.openexchange.java.StringAllocator();
                     addrBuilder.append(userAddrs[0]);
                     for (int i = 1; i < userAddrs.length; i++) {
                         addrBuilder.append(',').append(userAddrs[i]);
@@ -438,7 +438,7 @@ public final class MimeReply {
                     final LocaleAndTimeZone ltz = new LocaleAndTimeZone(locale, user.getTimeZone());
                     generateReplyText(origMsg, retvalContentType, StringHelper.valueOf(locale), ltz, usm, mailSession, list);
                 }
-                final StringBuilder replyTextBuilder = new StringBuilder(8192 << 1);
+                final com.openexchange.java.StringAllocator replyTextBuilder = new com.openexchange.java.StringAllocator(8192 << 1);
                 for (int i = list.size() - 1; i >= 0; i--) {
                     replyTextBuilder.append(list.get(i));
                 }
@@ -639,10 +639,10 @@ public final class MimeReply {
                 final char nextLine = '\n';
                 if (isHtml) {
                     replyPrefix =
-                        HtmlProcessing.htmlFormat(new StringBuilder(replyPrefix.length() + 1).append(replyPrefix).append(nextLine).append(nextLine).toString());
+                        HtmlProcessing.htmlFormat(new com.openexchange.java.StringAllocator(replyPrefix.length() + 1).append(replyPrefix).append(nextLine).append(nextLine).toString());
                 } else {
                     replyPrefix =
-                        new StringBuilder(replyPrefix.length() + 1).append(replyPrefix).append(nextLine).append(nextLine).toString();
+                        new com.openexchange.java.StringAllocator(replyPrefix.length() + 1).append(replyPrefix).append(nextLine).append(nextLine).toString();
                 }
             }
             /*-

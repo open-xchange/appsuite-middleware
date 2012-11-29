@@ -208,13 +208,13 @@ public final class DownloadUtility {
 
         if (overridingDisposition == null) {
             final String baseType = contentType.getBaseType();
-            final StringBuilder builder = new StringBuilder(32).append("attachment");
+            final com.openexchange.java.StringAllocator builder = new com.openexchange.java.StringAllocator(32).append("attachment");
             appendFilenameParameter(fileName, baseType, userAgent, builder);
             return new CheckedDownload(baseType, builder.toString(), in);
         }
         if (overridingDisposition.indexOf(';') < 0) {
             final String baseType = contentType.getBaseType();
-            final StringBuilder builder = new StringBuilder(32).append(overridingDisposition);
+            final com.openexchange.java.StringAllocator builder = new com.openexchange.java.StringAllocator(32).append(overridingDisposition);
             appendFilenameParameter(fileName, baseType, userAgent, builder);
             return new CheckedDownload(baseType, builder.toString(), in);
         }
@@ -233,18 +233,18 @@ public final class DownloadUtility {
      * @param fileName The file name
      * @param baseCT The base content type; e.g <tt>"application/octet-stream"</tt> or <tt>"text/plain"</tt>
      * @param userAgent The user agent identifier
-     * @param appendTo The {@link StringBuilder} instanc to append to
+     * @param appendTo The {@link StringBuilder} instance to append to
      */
     public static void appendFilenameParameter(final String fileName, final String baseCT, final String userAgent, final StringBuilder appendTo) {
         if (null == fileName) {
-            appendTo.append("; filename=\"").append(DEFAULT_FILENAME).append('"').toString();
+            appendTo.append("; filename=\"").append(DEFAULT_FILENAME).append('"');
             return;
         }
         String fn = fileName;
         if ((null != baseCT) && (null == getFileExtension(fn))) {
-            if (baseCT.regionMatches(true, 0, MIME_TEXT_PLAIN, 0, MIME_TEXT_PLAIN.length())) {
+            if (baseCT.regionMatches(true, 0, MIME_TEXT_PLAIN, 0, MIME_TEXT_PLAIN.length()) && !fileName.toLowerCase(Locale.US).endsWith(".txt")) {
                 fn += ".txt";
-            } else if (baseCT.regionMatches(true, 0, MIME_TEXT_HTML, 0, MIME_TEXT_HTML.length())) {
+            } else if (baseCT.regionMatches(true, 0, MIME_TEXT_HTML, 0, MIME_TEXT_HTML.length()) && !fileName.toLowerCase(Locale.US).endsWith(".html")) {
                 fn += ".html";
             }
         }
@@ -252,7 +252,7 @@ public final class DownloadUtility {
         final BrowserDetector browserDetector = new BrowserDetector(userAgent);
         if (null != userAgent && browserDetector.isMSIE()) {
             // InternetExplorer
-            appendTo.append("; filename=\"").append(Helper.encodeFilenameForIE(fn, Charsets.UTF_8)).append('"').toString();
+            appendTo.append("; filename=\"").append(Helper.encodeFilenameForIE(fn, Charsets.UTF_8)).append('"');
             return;
         }
         /*-
@@ -274,7 +274,62 @@ public final class DownloadUtility {
         } else {
             appendTo.append("; filename*=UTF-8''").append(URLCoder.encode(fn));
         }
-        appendTo.append("; filename=\"").append(foo).append('"').toString();
+        appendTo.append("; filename=\"").append(foo).append('"');
+    }
+
+    /**
+     * Appends the <tt>"filename"</tt> parameter to specified {@link StringBuilder} instance; e.g.
+     * 
+     * <pre>
+     * "attachment; filename="readme.txt"
+     *            ^---------------------^
+     * </pre>
+     * 
+     * @param fileName The file name
+     * @param baseCT The base content type; e.g <tt>"application/octet-stream"</tt> or <tt>"text/plain"</tt>
+     * @param userAgent The user agent identifier
+     * @param appendTo The {@link com.openexchange.java.StringAllocator} instance to append to
+     */
+    public static void appendFilenameParameter(final String fileName, final String baseCT, final String userAgent, final com.openexchange.java.StringAllocator appendTo) {
+        if (null == fileName) {
+            appendTo.append("; filename=\"").append(DEFAULT_FILENAME).append('"');
+            return;
+        }
+        String fn = fileName;
+        if ((null != baseCT) && (null == getFileExtension(fn))) {
+            if (baseCT.regionMatches(true, 0, MIME_TEXT_PLAIN, 0, MIME_TEXT_PLAIN.length())) {
+                fn += ".txt";
+            } else if (baseCT.regionMatches(true, 0, MIME_TEXT_HTML, 0, MIME_TEXT_HTML.length())) {
+                fn += ".html";
+            }
+        }
+        fn = escapeBackslashAndQuote(fn);
+        final BrowserDetector browserDetector = new BrowserDetector(userAgent);
+        if (null != userAgent && browserDetector.isMSIE()) {
+            // InternetExplorer
+            appendTo.append("; filename=\"").append(Helper.encodeFilenameForIE(fn, Charsets.UTF_8)).append('"');
+            return;
+        }
+        /*-
+         * On socket layer characters are casted to byte values.
+         *
+         * See AJPv13Response.writeString():
+         * sink.write((byte) chars[i]);
+         *
+         * Therefore ensure we have a one-character-per-byte charset, as it is with ISO-8859-1
+         */
+        String foo = new String(fn.getBytes(Charsets.UTF_8), Charsets.ISO_8859_1);
+        final boolean isAndroid = (null != userAgent && userAgent.toLowerCase(Locale.ENGLISH).indexOf("android") >= 0);
+        if (isAndroid) {
+            // myfile.dat => myfile.DAT
+            final int pos = foo.lastIndexOf('.');
+            if (pos >= 0) {
+                foo = foo.substring(0, pos) + foo.substring(pos).toUpperCase(Locale.ENGLISH);
+            }
+        } else {
+            appendTo.append("; filename*=UTF-8''").append(URLCoder.encode(fn));
+        }
+        appendTo.append("; filename=\"").append(foo).append('"');
     }
 
     private static final Pattern PAT_BSLASH = Pattern.compile("\\\\");
@@ -289,7 +344,7 @@ public final class DownloadUtility {
         /*
          * We are supposed to offer attachment for download. Therefore enforce application/octet-stream and attachment disposition.
          */
-        return new CheckedDownload("application/octet-stream", new StringBuilder(64).append("attachment; filename=\"").append(
+        return new CheckedDownload("application/octet-stream", new com.openexchange.java.StringAllocator(64).append("attachment; filename=\"").append(
             preparedFileName).append('"').toString(), inputStream);
     }
 
@@ -315,9 +370,9 @@ public final class DownloadUtility {
         }
         final int pos = fileName.indexOf('.');
         if (-1 == pos) {
-            return new StringBuilder(fileName).append('.').append(ext).toString();
+            return new com.openexchange.java.StringAllocator(fileName).append('.').append(ext).toString();
         }
-        return new StringBuilder(fileName.substring(0, pos)).append('.').append(ext).toString();
+        return new com.openexchange.java.StringAllocator(fileName.substring(0, pos)).append('.').append(ext).toString();
     }
 
     private static final String DEFAULT_FILENAME = "file.dat";
@@ -354,9 +409,9 @@ public final class DownloadUtility {
             return fileName;
         }
         if ((null != baseCT) && (null == getFileExtension(fileName))) {
-            if (baseCT.regionMatches(true, 0, MIME_TEXT_PLAIN, 0, MIME_TEXT_PLAIN.length())) {
+            if (baseCT.regionMatches(true, 0, MIME_TEXT_PLAIN, 0, MIME_TEXT_PLAIN.length()) && !fileName.toLowerCase(Locale.US).endsWith(".txt")) {
                 tmp.append(".txt");
-            } else if (baseCT.regionMatches(true, 0, MIME_TEXT_HTML, 0, MIME_TEXT_HTML.length())) {
+            } else if (baseCT.regionMatches(true, 0, MIME_TEXT_HTML, 0, MIME_TEXT_HTML.length()) && !fileName.toLowerCase(Locale.US).endsWith(".html")) {
                 tmp.append(".html");
             }
         }

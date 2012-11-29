@@ -52,10 +52,10 @@ package com.openexchange.mail.cache;
 import java.text.MessageFormat;
 import java.util.Map;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventHandler;
 import com.openexchange.exception.OXException;
+import com.openexchange.log.LogFactory;
 import com.openexchange.mail.MailSessionCache;
 import com.openexchange.mail.event.EventPool;
 import com.openexchange.server.services.ServerServiceRegistry;
@@ -156,7 +156,7 @@ public final class MailSessionEventHandler implements EventHandler {
                 LOG.error(e.getMessage(), e);
             }
             if (DEBUG) {
-                LOG.debug(new StringBuilder("All session-related caches cleared for removed session ").append(session.getSessionID()).toString());
+                LOG.debug(new com.openexchange.java.StringAllocator("All session-related caches cleared for removed session ").append(session.getSessionID()).toString());
             }
             /*
              * Pooled events: Last session removed?
@@ -167,7 +167,7 @@ public final class MailSessionEventHandler implements EventHandler {
                 if (null != eventPool) {
                     eventPool.removeByUser(userId, contextId);
                     if (DEBUG) {
-                        LOG.debug(new StringBuilder("Removed all pooled mail events for user ").append(userId).append(" in context ").append(
+                        LOG.debug(new com.openexchange.java.StringAllocator("Removed all pooled mail events for user ").append(userId).append(" in context ").append(
                             contextId).toString());
                     }
                 }

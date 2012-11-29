@@ -59,7 +59,12 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.Timer;
+import java.util.TimerTask;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicLong;
+
 import org.apache.commons.logging.Log;
 import org.quartz.Calendar;
 import org.quartz.JobDataMap;
@@ -81,11 +86,13 @@ import org.quartz.spi.OperableTrigger;
 import org.quartz.spi.SchedulerSignaler;
 import org.quartz.spi.TriggerFiredBundle;
 import org.quartz.spi.TriggerFiredResult;
+
 import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.core.ILock;
 import com.hazelcast.core.IMap;
 import com.hazelcast.core.ISet;
-
+import com.hazelcast.core.MapEntry;
+import com.hazelcast.query.Predicate;
 
 /**
  * {@link HazelcastJobStore}
@@ -124,9 +131,19 @@ public class HazelcastJobStore implements JobStore {
 
     private String instanceName;
     
+    private String nodeIp;
+    
+    private ConcurrentMap<TriggerKey, Boolean> locallyAcquiredTriggers = new ConcurrentHashMap<TriggerKey, Boolean>();
+    
+    private ConcurrentMap<TriggerKey, Boolean> locallyExecutingTriggers = new ConcurrentHashMap<TriggerKey, Boolean>();
+
+    private ConsistencyTask consistencyTask;
+
+    private Timer consistencyTimer;
+    
     
     public HazelcastJobStore() {
-        super();        
+        super();
     }
     
     public long getMisfireThreshold() {
@@ -159,32 +176,36 @@ public class HazelcastJobStore implements JobStore {
         pausedTriggerGroups = hazelcast.getSet(instanceName + '/' + "quartzPausedTriggerGroups");
         pausedJobGroups = hazelcast.getSet(instanceName + '/' + "quartzPausedJobGroups");
         lock = hazelcast.getLock(instanceName + '/' + "quartzJobStoreLock");
-        blockedJobs = hazelcast.getSet(instanceName + '/' + "quartzBlockedJobs");            
+        blockedJobs = hazelcast.getSet(instanceName + '/' + "quartzBlockedJobs");
+        nodeIp = hazelcast.getCluster().getLocalMember().getInetSocketAddress().getAddress().getHostAddress();
         
         if (triggersByKey.isEmpty()) {
             triggersByKey.addIndex("trigger.nextFireTime", true);
             triggersByKey.addIndex("trigger.misfireInstruction", false);
-        }        
+        }
+        
+        consistencyTask = new ConsistencyTask(this, locallyAcquiredTriggers, locallyExecutingTriggers);
+        consistencyTimer = new Timer(true);
     }
 
     @Override
     public void schedulerStarted() throws SchedulerException {
-
+//        consistencyTimer.schedule(consistencyTask, new Date(System.currentTimeMillis() + 60000L * 5), 60000L * 5);
     }
 
     @Override
     public void schedulerPaused() {
-        
+//        consistencyTask.cancel();
     }
 
     @Override
     public void schedulerResumed() {
-
+//        consistencyTimer.schedule(consistencyTask, new Date(System.currentTimeMillis() + 60000L * 5), 60000L * 5);
     }
 
     @Override
     public void shutdown() {
-
+//        consistencyTask.cancel();
     }
 
     @Override
@@ -194,7 +215,7 @@ public class HazelcastJobStore implements JobStore {
 
     @Override
     public long getEstimatedTimeToReleaseAndAcquireTrigger() {
-        return 100;
+        return 200;
     }
 
     @Override
@@ -237,7 +258,7 @@ public class HazelcastJobStore implements JobStore {
     public void storeTrigger(OperableTrigger newTrigger, boolean replaceExisting) throws ObjectAlreadyExistsException, JobPersistenceException {
         HazelcastInstance hazelcast = getHazelcast();
         lock.lock();
-        try {            
+        try {
             TriggerKey key = newTrigger.getKey();
             String group = key.getGroup();
             ISet<TriggerKey> triggersByKey = triggersByGroup.get(group);
@@ -947,8 +968,8 @@ public class HazelcastJobStore implements JobStore {
     public List<OperableTrigger> acquireNextTriggers(long noLaterThan, int maxCount, long timeWindow) throws JobPersistenceException {
         List<OperableTrigger> returnList = new ArrayList<OperableTrigger>();
         lock.lock();
-        if (LOG.isDebugEnabled()) {
-            LOG.debug("Got lock. " + System.nanoTime());
+        if (LOG.isTraceEnabled()) {
+            LOG.trace("Got lock. " + System.nanoTime());
         }
         
         long firstAcquiredTriggerFireTime = 0L;
@@ -1009,6 +1030,7 @@ public class HazelcastJobStore implements JobStore {
                 
                 triggersByKey.remove(stateWrapper.getTrigger().getKey());
                 stateWrapper.setState(TriggerStateWrapper.STATE_ACQUIRED);
+                stateWrapper.setOwner(nodeIp);
                 OperableTrigger trigger = (OperableTrigger) stateWrapper.getTrigger();
                 trigger.setFireInstanceId(getFiredTriggerRecordId());
                 triggersByKey.put(stateWrapper.getTrigger().getKey(), stateWrapper);
@@ -1016,6 +1038,7 @@ public class HazelcastJobStore implements JobStore {
                     firstAcquiredTriggerFireTime = trigger.getNextFireTime().getTime();
                 }
                 
+                locallyAcquiredTriggers.put(trigger.getKey(), true);
                 returnList.add(trigger);
                 if (returnList.size() == maxCount) {
                     break;
@@ -1025,13 +1048,13 @@ public class HazelcastJobStore implements JobStore {
             return returnList;
         } finally {
             lock.unlock();
-            if (LOG.isDebugEnabled()) {
+            if (LOG.isTraceEnabled()) {
                 StringBuilder sb = new StringBuilder("Releasing lock. ");
                 sb.append(System.nanoTime()).append(". ");
                 for (OperableTrigger trigger : returnList) {
                     sb.append("\n    Trigger: ").append(trigger.getKey().getName());
                 }
-                LOG.debug(sb.toString());
+                LOG.trace(sb.toString());
             }
         }
     }
@@ -1043,18 +1066,19 @@ public class HazelcastJobStore implements JobStore {
     }
     
     private boolean cannotAcquire(TriggerStateWrapper stateWrapper) {
-        return stateWrapper.getState() == TriggerStateWrapper.STATE_BLOCKED 
+        return stateWrapper.getState() == TriggerStateWrapper.STATE_BLOCKED
                 || stateWrapper.getState() == TriggerStateWrapper.STATE_PAUSED_BLOCKED
                 || stateWrapper.getState() == TriggerStateWrapper.STATE_COMPLETE
                 || stateWrapper.getState() == TriggerStateWrapper.STATE_PAUSED
-                || stateWrapper.getState() == TriggerStateWrapper.STATE_ACQUIRED;
+                || stateWrapper.getState() == TriggerStateWrapper.STATE_ACQUIRED
+                || stateWrapper.getState() == TriggerStateWrapper.STATE_EXECUTING;
     }
 
     @Override
     public void releaseAcquiredTrigger(OperableTrigger trigger) throws JobPersistenceException {
         lock.lock();
-        if (LOG.isDebugEnabled()) {
-            LOG.debug("Got lock. " + System.nanoTime());
+        if (LOG.isTraceEnabled()) {
+            LOG.trace("Got lock. " + System.nanoTime());
         }
         
         try {
@@ -1064,16 +1088,18 @@ public class HazelcastJobStore implements JobStore {
             }
             
             stateWrapper.setState(TriggerStateWrapper.STATE_WAITING);
+            stateWrapper.resetOwner();
             triggersByKey.put(trigger.getKey(), stateWrapper);
+            locallyAcquiredTriggers.remove(trigger.getKey());
         } finally {
             lock.unlock();
             
-            if (LOG.isDebugEnabled()) {
+            if (LOG.isTraceEnabled()) {
                 StringBuilder sb = new StringBuilder("Releasing lock. ");
                 sb.append(System.nanoTime()).append(". ");
                 sb.append("\n    Trigger: ").append(trigger.getKey().getName());
                 
-                LOG.debug(sb.toString());
+                LOG.trace(sb.toString());
             }
         }
     }
@@ -1082,8 +1108,8 @@ public class HazelcastJobStore implements JobStore {
     public List<TriggerFiredResult> triggersFired(List<OperableTrigger> firedTriggers) throws JobPersistenceException {
         List<TriggerFiredResult> results = new ArrayList<TriggerFiredResult>();
         lock.lock();
-        if (LOG.isDebugEnabled()) {
-            LOG.debug("Got lock. " + System.nanoTime());
+        if (LOG.isTraceEnabled()) {
+            LOG.trace("Got lock. " + System.nanoTime());
         }
         
         try {
@@ -1104,7 +1130,9 @@ public class HazelcastJobStore implements JobStore {
                 
                 Date prevFireTime = trigger.getPreviousFireTime();
                 trigger.triggered(calendar);
-                triggersByKey.replace(trigger.getKey(), new TriggerStateWrapper(trigger, TriggerStateWrapper.STATE_WAITING));
+                triggersByKey.replace(trigger.getKey(), new TriggerStateWrapper(trigger, TriggerStateWrapper.STATE_EXECUTING));
+                locallyAcquiredTriggers.remove(trigger.getKey());
+                locallyExecutingTriggers.put(trigger.getKey(), true);
                 JobKey jobKey = trigger.getJobKey();
                 JobDetail job = retrieveJob(jobKey);
                 TriggerFiredResult result;
@@ -1149,14 +1177,14 @@ public class HazelcastJobStore implements JobStore {
             return results;
         } finally {
             lock.unlock();
-            if (LOG.isDebugEnabled()) {
+            if (LOG.isTraceEnabled()) {
                 StringBuilder sb = new StringBuilder("Releasing lock. ");
                 sb.append(System.nanoTime()).append(". ");
                 for (OperableTrigger trigger : firedTriggers) {
                     sb.append("\n    Trigger: ").append(trigger.getKey().getName());
                 }                
                 
-                LOG.debug(sb.toString());
+                LOG.trace(sb.toString());
             }
         }
     }
@@ -1164,8 +1192,8 @@ public class HazelcastJobStore implements JobStore {
     @Override
     public void triggeredJobComplete(OperableTrigger trigger, JobDetail jobDetail, CompletedExecutionInstruction triggerInstCode) throws JobPersistenceException {
         lock.lock();
-        if (LOG.isDebugEnabled()) {
-            LOG.debug("Got lock. " + System.nanoTime());
+        if (LOG.isTraceEnabled()) {
+            LOG.trace("Got lock. " + System.nanoTime());
         }
         
         try {
@@ -1205,8 +1233,10 @@ public class HazelcastJobStore implements JobStore {
                 blockedJobs.remove(jobKey);
             }
             
+            locallyExecutingTriggers.remove(trigger.getKey());
             TriggerStateWrapper stateWrapper = triggersByKey.get(trigger.getKey());
             if (stateWrapper != null) {
+                stateWrapper.resetOwner();
                 if (triggerInstCode == CompletedExecutionInstruction.DELETE_TRIGGER) {
                     if (trigger.getNextFireTime() == null) {
                         if (stateWrapper.getTrigger().getNextFireTime() == null) {
@@ -1248,12 +1278,12 @@ public class HazelcastJobStore implements JobStore {
             }
         } finally {
             lock.unlock();
-            if (LOG.isDebugEnabled()) {
+            if (LOG.isTraceEnabled()) {
                 StringBuilder sb = new StringBuilder("Releasing lock. ");
                 sb.append(System.nanoTime()).append(". ");
                 sb.append("\n    Trigger: ").append(trigger.getKey().getName());          
                 
-                LOG.debug(sb.toString());
+                LOG.trace(sb.toString());
             }
         }
     }
@@ -1271,6 +1301,18 @@ public class HazelcastJobStore implements JobStore {
     @Override
     public void setThreadPoolSize(int poolSize) {
         //
+    }
+    
+    public IMap<TriggerKey, TriggerStateWrapper> getTriggerMap() {
+        return triggersByKey;
+    }
+    
+    public String getNodeIp() {
+        return nodeIp;
+    }
+    
+    public ILock getClusterLock() {
+        return lock;
     }
     
     private boolean applyMisfire(TriggerStateWrapper stateWrapper) throws JobPersistenceException {
@@ -1339,17 +1381,21 @@ public class HazelcastJobStore implements JobStore {
         
         private int state;
         
+        private String owner;
+        
 
         public TriggerStateWrapper(Trigger trigger) {
             super();
             this.trigger = trigger;
             this.state = STATE_WAITING;
+            this.owner = null;
         }
         
         public TriggerStateWrapper(Trigger trigger, int state) {
             super();
             this.trigger = trigger;
             this.state = state;
+            this.owner = null;
         }
 
         public Trigger getTrigger() {
@@ -1362,6 +1408,18 @@ public class HazelcastJobStore implements JobStore {
         
         public int getState() {
             return state;
+        }
+        
+        public void setOwner(String owner) {
+            this.owner = owner;
+        }
+        
+        public void resetOwner() {
+            this.owner = null;
+        }
+        
+        public String getOwner() {
+            return owner;
         }
     }
     
@@ -1406,6 +1464,85 @@ public class HazelcastJobStore implements JobStore {
             
             return trig1.getTrigger().getKey().compareTo(trig2.getTrigger().getKey());
         }
+    }
+    
+    private class ConsistencyTask extends TimerTask {
+        
+        private final ConcurrentMap<TriggerKey, Boolean> locallyAcquiredTriggers;
+        
+        private final ConcurrentMap<TriggerKey, Boolean> locallyExecutingTriggers;
+        
+        private final HazelcastJobStore jobStore;
+        
+        public ConsistencyTask(final HazelcastJobStore jobStore, final ConcurrentMap<TriggerKey, Boolean> locallyAcquiredTriggers, final ConcurrentMap<TriggerKey, Boolean> locallyExecutingTriggers) {
+            super();
+            this.jobStore = jobStore;
+            this.locallyAcquiredTriggers = locallyAcquiredTriggers;
+            this.locallyExecutingTriggers = locallyExecutingTriggers;
+        }
+
+        @Override
+        public void run() {
+            long start = System.currentTimeMillis();
+            int removed = 0;
+            try {
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug("Started consistency task run.");
+                }
+                
+                final String nodeIp = jobStore.getNodeIp();
+                ILock lock = jobStore.getClusterLock();
+                IMap<TriggerKey, TriggerStateWrapper> triggerMap = jobStore.getTriggerMap();
+                
+                Set<TriggerKey> clusterKeys = new HashSet<TriggerKey>();
+                lock.lock();
+                try {
+                    Collection<TriggerStateWrapper> acquiredAndExecutingTriggers = triggerMap.values(new Predicate<TriggerKey, TriggerStateWrapper>() {
+
+                        private static final long serialVersionUID = -1102361681951763092L;
+
+                        @Override
+                        public boolean apply(MapEntry<TriggerKey, TriggerStateWrapper> mapEntry) {
+                            TriggerStateWrapper stateWrapper = mapEntry.getValue();
+                            int state = stateWrapper.getState();
+                            if (state == TriggerStateWrapper.STATE_ACQUIRED || state == TriggerStateWrapper.STATE_EXECUTING) {
+                                if (stateWrapper.getOwner().equals(nodeIp)) {
+                                    return true;
+                                }
+                            }
+
+                            return false;
+                        }
+                    });
+                    
+                    for (TriggerStateWrapper stateWrapper : acquiredAndExecutingTriggers) {
+                        clusterKeys.add(stateWrapper.getTrigger().getKey());
+                    }
+                    
+                    clusterKeys.remove(locallyAcquiredTriggers);
+                    clusterKeys.remove(locallyExecutingTriggers);
+                } finally {
+                    lock.unlock();
+                }
+                
+                if (clusterKeys.isEmpty()) {
+                    return;
+                }
+                
+                for (TriggerKey key : clusterKeys) {
+                    jobStore.removeTrigger(key);
+                    ++removed;
+                }
+            } catch (Throwable t) {
+                LOG.warn("Error during consistency task run.", t);
+            } finally {
+                if (LOG.isDebugEnabled()) {
+                    long diff = System.currentTimeMillis() - start;
+                    LOG.debug("Removed " + removed + " triggers from job store in " + diff + "ms.");
+                }
+            }
+        }
+        
     }
 
 }

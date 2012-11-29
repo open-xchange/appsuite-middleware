@@ -67,8 +67,8 @@ import com.openexchange.ajax.parser.ResponseParser;
 import com.openexchange.ajax.writer.ResponseWriter;
 import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.AllocatingStringWriter;
 import com.openexchange.session.Session;
-import com.openexchange.tools.UnsynchronizedStringWriter;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
 
@@ -383,7 +383,7 @@ public final class Response {
      */
     @Override
     public String toString() {
-        final UnsynchronizedStringWriter writer = new UnsynchronizedStringWriter();
+        final AllocatingStringWriter writer = new AllocatingStringWriter();
         final JSONObject json = new JSONObject();
         try {
             ResponseWriter.write(this, json);

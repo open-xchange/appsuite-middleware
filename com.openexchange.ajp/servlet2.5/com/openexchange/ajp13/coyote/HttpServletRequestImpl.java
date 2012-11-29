@@ -694,7 +694,7 @@ public final class HttpServletRequestImpl implements HttpServletRequest, Paramet
              * Determine scheme from protocol (in the form protocol/majorVersion.minorVersion) and isSecure information
              */
             scheme =
-                new StringBuilder(protocol.substring(0, protocol.indexOf('/')).toLowerCase(Locale.ENGLISH)).append(secure ? "s" : "").toString();
+                new com.openexchange.java.StringAllocator(protocol.substring(0, protocol.indexOf('/')).toLowerCase(Locale.ENGLISH)).append(secure ? "s" : "").toString();
         }
         return scheme;
     }

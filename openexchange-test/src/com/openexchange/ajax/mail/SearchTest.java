@@ -49,6 +49,8 @@
 
 package com.openexchange.ajax.mail;
 
+import java.util.Date;
+import javax.mail.internet.MailDateFormat;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.json.JSONArray;
@@ -231,9 +233,13 @@ public final class SearchTest extends AbstractMailTest {
          */
         final int numOfMails = 25;
         LOG.info("Sending " + numOfMails + " mails to fill emptied INBOX");
+
+        MailDateFormat mdf = new MailDateFormat();
+        final long now = System.currentTimeMillis();
+        final Date dnow = new Date(now);
         final String eml =
             "Message-Id: <4A002517.4650.0059.1@foobar.com>\n" +
-            "Date: Tue, 05 May 2009 11:37:58 -0500\n" +
+            "Date: " + mdf.format(dnow) + "\n" +
             "From: " + getSendAddress() + "\n" +
             "To: " + getSendAddress() + "\n" +
             "Subject: Invitation for launch\n" +
@@ -251,7 +257,7 @@ public final class SearchTest extends AbstractMailTest {
         /*
          * Perform search request
          */
-        final long recDate = System.currentTimeMillis() - 86400000L; // minus 1 day
+        final long recDate = now - 86400000L; // minus 1 day
         final JSONArray searchExpression = new JSONArray(
         	//"{\"operation\":\"and\",\"operands\":[{\"operation\":\"gt\",\"operands\":[{\"type\":\"column\",\"value\":\"received_date\"},\""+recDate+"\"]},{\"operation\":\"not\",\"operands\":[{\"operation\":\"equals\",\"operands\":[{\"type\":\"column\",\"value\":\"flags\"},\"32\"]}]}]}}");
         		"['and', ['>',{'field':'received_date'}, '"+recDate+"'], ['not', ['=', {'field':'flags'},'32']]]");

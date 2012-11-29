@@ -612,7 +612,7 @@ public class AJAXRequestResult {
 
     @Override
     public String toString() {
-        return new StringBuilder(34).append(super.toString()).append(" resultObject=").append(resultObject).append(", timestamp=").append(
+        return new com.openexchange.java.StringAllocator(34).append(super.toString()).append(" resultObject=").append(resultObject).append(", timestamp=").append(
             timestamp).append(" warnings=").append(null == warnings ? "<none>" : warnings.toString()).toString();
     }
 

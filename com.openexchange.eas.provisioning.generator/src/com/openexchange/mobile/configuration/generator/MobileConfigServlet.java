@@ -7,7 +7,6 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
-import java.io.StringWriter;
 import java.net.URLEncoder;
 import java.nio.charset.Charset;
 import java.nio.charset.IllegalCharsetNameException;
@@ -24,9 +23,10 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.AllocatingStringWriter;
+import com.openexchange.log.LogFactory;
 import com.openexchange.mobile.configuration.generator.configuration.ConfigurationException;
 import com.openexchange.mobile.configuration.generator.configuration.MobileConfigProperties;
 import com.openexchange.mobile.configuration.generator.configuration.Property;
@@ -94,7 +94,7 @@ public class MobileConfigServlet extends HttpServlet {
     public static String write(final String email, final String host, final String username, final String domain) throws OXException {
         final TemplateService service = MobileConfigServiceRegistry.getServiceRegistry().getService(TemplateService.class);
         final OXTemplate loadTemplate = service.loadTemplate("winMobileTemplate.tmpl");
-        final StringWriter writer = new StringWriter();
+        final AllocatingStringWriter writer = new AllocatingStringWriter();
         loadTemplate.process(generateHashMap(email, host, username, domain), writer);
         return writer.toString();
     }

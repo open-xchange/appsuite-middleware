@@ -51,7 +51,6 @@ package com.openexchange.ajax;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.StringWriter;
 import java.util.Collection;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -70,6 +69,7 @@ import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.writer.ResponseWriter;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.notify.hostname.HostnameService;
+import com.openexchange.java.AllocatingStringWriter;
 import com.openexchange.log.LogFactory;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
@@ -199,7 +199,7 @@ public abstract class MultipleAdapterServletNew extends PermissionServlet {
                 if(callback == null) {
                     callback = action;
                 }
-                final StringWriter w = new StringWriter();
+                final AllocatingStringWriter w = new AllocatingStringWriter();
                 ResponseWriter.write(response, w, localeFrom(session));
 
                 resp.getWriter().print(substituteJS(w.toString(), callback));

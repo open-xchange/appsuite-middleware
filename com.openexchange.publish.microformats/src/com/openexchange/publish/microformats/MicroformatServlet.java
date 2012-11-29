@@ -50,7 +50,6 @@
 package com.openexchange.publish.microformats;
 
 import java.io.IOException;
-import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
 import java.text.DateFormat;
@@ -65,7 +64,6 @@ import java.util.TimeZone;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.contact.ContactService;
 import com.openexchange.exception.OXException;
@@ -73,7 +71,9 @@ import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.html.HtmlService;
+import com.openexchange.java.AllocatingStringWriter;
 import com.openexchange.java.Strings;
+import com.openexchange.log.LogFactory;
 import com.openexchange.publish.Publication;
 import com.openexchange.publish.PublicationDataLoaderService;
 import com.openexchange.publish.microformats.osgi.StringTranslator;
@@ -218,7 +218,7 @@ public class MicroformatServlet extends OnlinePublicationServlet {
             }
 
             final OXTemplate template = publisher.loadTemplate(publication);
-            final StringWriter htmlWriter = new StringWriter();
+            final AllocatingStringWriter htmlWriter = new AllocatingStringWriter();
             template.process(variables, htmlWriter);
             String html = htmlWriter.toString();
             if (isUsingWhitelisting(template.getLevel())) {

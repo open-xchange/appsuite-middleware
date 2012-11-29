@@ -51,6 +51,7 @@ package com.openexchange.imap;
 
 import gnu.trove.ConcurrentTIntObjectHashMap;
 import java.io.IOException;
+import java.lang.reflect.Field;
 import java.net.InetSocketAddress;
 import java.net.SocketTimeoutException;
 import java.nio.charset.UnsupportedCharsetException;
@@ -1171,6 +1172,45 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
             failedAuthTimeout = 10000L;
         }
         FAILED_AUTH_TIMEOUT.set(failedAuthTimeout);
+
+        {
+            Field mc;
+            try {
+                mc = IMAPFolder.class.getDeclaredField("messageCache");
+                mc.setAccessible(true);
+            } catch (final SecurityException e) {
+                mc = null;
+            } catch (final NoSuchFieldException e) {
+                mc = null;
+            }
+            IMAPFolderWorker.messageCacheField = mc;
+        }
+
+        {
+            Field mss;
+            try {
+                mss = com.sun.mail.imap.MessageCache.class.getDeclaredField("messages");
+                mss.setAccessible(true);
+            } catch (final SecurityException e) {
+                mss = null;
+            } catch (final NoSuchFieldException e) {
+                mss = null;
+            }
+            IMAPFolderWorker.messagesField = mss;
+        }
+        
+        {
+            Field ut;
+            try {
+                ut = IMAPFolder.class.getDeclaredField("uidTable");
+                ut.setAccessible(true);
+            } catch (final SecurityException e) {
+                ut = null;
+            } catch (final NoSuchFieldException e) {
+                ut = null;
+            }
+            IMAPFolderWorker.uidTableField = ut;
+        }
     }
 
     private static synchronized void initMaps() {

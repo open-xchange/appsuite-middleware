@@ -17,9 +17,31 @@ set -e
 # for details, see http://www.debian.org/doc/debian-policy/ or
 # the debian-policy package
 
+postFix() {
+    local version=${1%-*}
+    version=${version//[-.]/}
+
+    . /opt/open-xchange/lib/oxfunctions.sh
+
+    # prevent bash from expanding, see bug 13316
+    GLOBIGNORE='*'
+
+    # SoftwareChange_Request-1229
+    pfile=/opt/open-xchange/etc/pop3.properties
+    if ! ox_exists_property com.openexchange.pop3.allowPing $pfile; then
+        ox_set_property com.openexchange.pop3.allowPing false $pfile
+    fi
+    if ! ox_exists_property com.openexchange.pop3.logDeniedPing $pfile; then
+        ox_set_property com.openexchange.pop3.logDeniedPing true $pfile
+    fi
+}
 
 case "$1" in
     configure)
+        test -n "$2" && {
+            # we are in update mode, run postFix to apply fixes
+            postFix "$2"
+        }
     ;;
 
     abort-upgrade|abort-remove|abort-deconfigure)

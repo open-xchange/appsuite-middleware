@@ -389,7 +389,10 @@ public enum MailExceptionCode implements OXExceptionCode {
      * There was a problem processing the request. Please (refresh view and) try again.
      */
     PROCESSING_ERROR(MailExceptionStrings.PROCESSING_ERROR_MSG, Category.CATEGORY_TRY_AGAIN, 86),
-    
+    /**
+     * Invoked method is not supported.
+     */
+    UNSUPPORTED_OPERATION(MailExceptionStrings.UNSUPPORTED_OPERATION_MSG, Category.CATEGORY_ERROR, 87),
     ;
 
     private static final String PREFIX = "MSG";

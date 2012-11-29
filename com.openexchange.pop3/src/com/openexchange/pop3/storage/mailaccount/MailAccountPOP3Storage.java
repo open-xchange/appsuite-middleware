@@ -871,12 +871,28 @@ public class MailAccountPOP3Storage implements POP3Storage {
         return subarray;
     }
 
+    private static final Field messageCacheField;
+    static {
+        Field f;
+        try {
+            f = POP3Folder.class.getDeclaredField("message_cache");
+            f.setAccessible(true);
+        } catch (SecurityException e) {
+            f = null;
+        } catch (NoSuchFieldException e) {
+            f = null;
+        }
+        messageCacheField = f;
+    }
+
     @SuppressWarnings("unchecked")
     private static Vector<POP3Message> getMessageCache(final POP3Folder inbox) throws OXException {
         try {
-            final Field messageCacheField = POP3Folder.class.getDeclaredField("message_cache");
-            messageCacheField.setAccessible(true);
-            return (Vector<POP3Message>) messageCacheField.get(inbox);
+            final Field messageCacheField = MailAccountPOP3Storage.messageCacheField;
+            if (null != messageCacheField) {
+                return (Vector<POP3Message>) messageCacheField.get(inbox);                
+            }
+            throw new NoSuchFieldException("message_cache");
         } catch (final SecurityException e) {
             throw MailExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
         } catch (final IllegalArgumentException e) {

@@ -636,7 +636,7 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
             LOG.error("Unsupported encoding", e);
             uri = req.getRequestURI();
         }
-        final String path = new StringBuilder(req.getContextPath()).append(req.getServletPath()).toString();
+        final String path = new com.openexchange.java.StringAllocator(req.getContextPath()).append(req.getServletPath()).toString();
         final int pos = uri.indexOf(path);
         if (pos >= 0) {
             uri = uri.substring(pos + path.length());
@@ -964,7 +964,7 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
                 try {
                     uploadListener.action(uploadEvent);
                 } catch (final OXException e) {
-                    LOG.error(new StringBuilder(64).append("Failed upload listener: ").append(uploadListener.getClass()), e);
+                    LOG.error(new com.openexchange.java.StringAllocator(64).append("Failed upload listener: ").append(uploadListener.getClass()), e);
                 }
             }
         } finally {
@@ -1008,7 +1008,7 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
 
     protected static void close(final Writer w) {
         if (LOG.isTraceEnabled()) {
-            LOG.trace(new StringBuilder("Called close() with writer").append(w.toString()));
+            LOG.trace(new com.openexchange.java.StringAllocator("Called close() with writer").append(w.toString()));
         }
         // return;
         /*

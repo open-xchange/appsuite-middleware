@@ -320,6 +320,11 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
     }
 
     @Override
+    public void clearCache() throws OXException {
+        IMAPFolderWorker.clearCache(imapFolder);
+    }
+
+    @Override
     public MailMessage[] getMessages(final String fullName, final String[] mailIds, final MailField[] mailFields, final String[] headerNames) throws OXException {
         if ((mailIds == null) || (mailIds.length == 0)) {
             return EMPTY_RETVAL;
@@ -400,7 +405,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                     try {
                         return new Renderer(new Segment(new Source(content), 0, content.length())).setMaxLineLength(9999).setIncludeHyperlinkURLs(
                             false).toString();
-                    } catch (StackOverflowError s) {
+                    } catch (final StackOverflowError s) {
                         LOG.warn("StackOverflowError while parsing html mail. Returning null...");
                         return null;
                     }

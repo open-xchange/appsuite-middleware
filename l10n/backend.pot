@@ -181,6 +181,8 @@ msgid "Missing cache configuration file at location: %1$s"
 msgstr ""
 
 #. An I/O error occurred: %1$s
+#. * An I/O error occurred: %1$s
+#. An I/O error occurred: %1$s
 #. *
 #. * An I/O error occurred: %1$s
 #.
@@ -195,6 +197,7 @@ msgstr ""
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.document.converter/src/com/openexchange/document/converter/DocumentConverterExceptionMessages.java:81
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:70
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/id/IDExceptionMessages.java:65
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.http.grizzly/src/com/openexchange/http/grizzly/GrizzlyExceptionMessage.java:72
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/entity2acl/Entity2ACLExceptionMessage.java:79
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.langdetect/src/com/openexchange/langdetect/LanguageDetectionExceptionMessages.java:73
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.loxandra/src/com/openexchange/loxandra/LoxandraExceptionMessages.java:67
@@ -990,13 +993,12 @@ msgstr ""
 #. TODO: Mah/Cisco, please describe what is meant with the wording 'chair'
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/Messages.java:301
 msgid ""
-"You have received this E-Mail because your are the chair for this "
-"appointment."
+"You have received this E-Mail because you are the chair for this appointment."
 msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/Messages.java:303
 msgid ""
-"You have received this E-Mail because your are the organizer of this "
+"You have received this E-Mail because you are the organizer of this "
 "appointment."
 msgstr ""
 
@@ -2696,6 +2698,11 @@ msgstr ""
 #. * The following needed feature could not be enabled: \"%1$s\"
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.http.grizzly/src/com/openexchange/http/grizzly/GrizzlyExceptionMessage.java:68
 msgid "The following needed feature could not be enabled: \"%1$s\""
+msgstr ""
+
+#. * File "%1$s" could not be found
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.http.grizzly/src/com/openexchange/http/grizzly/GrizzlyExceptionMessage.java:70
+msgid "File \"%1$s\" could not be found."
 msgstr ""
 
 #. * Error while trying to interrupt Request processing.
@@ -8540,6 +8547,11 @@ msgstr ""
 msgid ""
 "There was a problem processing the request. Please (refresh view and) try "
 "again."
+msgstr ""
+
+#. Invoked method is not supported.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:529
+msgid "Invoked method is not supported."
 msgstr ""
 
 #. *
