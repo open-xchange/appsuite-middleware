@@ -97,16 +97,6 @@ public class OSGiMainHandler extends HttpHandler implements OSGiHandler {
 
     private final boolean isRequestWatcherEnabled;
 
-    private int cookieMaxAge;
-
-    private int cookieMaxInactiveInterval;
-
-    private boolean isCookieForceHttps;
-
-    private boolean isCookieHttpOnly;
-
-    private boolean isSessionAutologin;
-
     /**
      * Constructor.
      * 
@@ -210,7 +200,7 @@ public class OSGiMainHandler extends HttpHandler implements OSGiHandler {
         try {
             // TODO: clean up OX servlet structure so we can apply alias and servlet validation
 
-            // validateAlias4RegOk(alias);
+            validateAlias4RegOk(alias);
 
             /*
              * Currently only checks if servlet is already registered. This prevents the same servlet with different aliases. Disabled until
@@ -396,6 +386,12 @@ public class OSGiMainHandler extends HttpHandler implements OSGiHandler {
         if (alias.length() > 1 && alias.endsWith("/")) {
             // if longer than "/", should not end with "/"
             String msg = new StringBuilder(64).append("Alias '").append(alias).append("' can't end with '/' with exception to alias '/'.").toString();
+            LOG.warn(msg);
+            throw new NamespaceException(msg);
+        }
+        if (alias.length() > 1 && alias.endsWith("*")) {
+            // if longer than "/", wildcards/mappings aren't supported
+            String msg = new StringBuilder(64).append("Alias '").append(alias).append("' can't end with '*'. Wildcards/mappings aren't supported.").toString();
             LOG.warn(msg);
             throw new NamespaceException(msg);
         }
