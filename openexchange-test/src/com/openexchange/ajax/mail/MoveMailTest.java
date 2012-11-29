@@ -177,7 +177,7 @@ public class MoveMailTest extends AbstractMailTest {
 
         getClient().execute(new NewMailRequest(getInboxFolder(), eml, -1, true));
 
-        String origin = values.getSentFolder();
+        String origin = values.getInboxFolder();
         String destination = values.getDraftsFolder() + "doesn't exist";
 
         TestMail myMail = new TestMail(getFirstMailInFolder(origin));
