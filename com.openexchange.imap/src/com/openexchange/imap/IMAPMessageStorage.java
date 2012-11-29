@@ -325,7 +325,11 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
 
     @Override
     public void clearCache() throws OXException {
-        final IMAPFolder imapFolder = this.imapFolder;
+        clearCache(imapFolder);
+    }
+
+    /** Clears the cache */
+    protected static void clearCache(final IMAPFolder imapFolder) {
         if (null == imapFolder) {
             return;
         }
@@ -353,9 +357,9 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
     }
 
     /** Safely clears the cache */
-    private void clearCacheSafe() {
+    protected static void clearCacheSafe(final IMAPFolder imapFolder) {
         try {
-            clearCache();
+            clearCache(imapFolder);
         } catch (Exception e) {
             // Ignore
         }
@@ -1212,7 +1216,6 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
 
     @Override
     public MailMessage[] searchMessages(final String fullName, final IndexRange indexRange, final MailSortField sortField, final OrderDirection order, final SearchTerm<?> searchTerm, final MailField[] mailFields) throws OXException {
-        boolean doClearCache = false;
         try {
             try {
                 imapFolder = setAndOpenFolder(imapFolder, fullName, READ_ONLY);
@@ -1284,8 +1287,6 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
             }
             MailMessage[] mails = null;
             Message[] msgs = IMAPSort.sortMessages(imapFolder, usedFields, filter, effectiveSortField, order, getLocale(), imapConfig);
-            final boolean includeBody = usedFields.contains(MailField.BODY) || usedFields.contains(MailField.FULL);
-            doClearCache = !includeBody;
             if (null != msgs) {
                 /*
                  * Sort was performed on IMAP server
@@ -1314,7 +1315,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                     System.arraycopy(tmp, fromIndex, msgs, 0, retvalLength);
                 }
                 mails =
-                    convert2Mails(msgs, usedFields.toArray(), includeBody);
+                    convert2Mails(msgs, usedFields.toArray(), usedFields.contains(MailField.BODY) || usedFields.contains(MailField.FULL));
                 if (usedFields.contains(MailField.ACCOUNT_NAME) || usedFields.contains(MailField.FULL)) {
                     setAccountInfo(mails);
                 }
@@ -1324,7 +1325,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                  */
                 final int size = filter == null ? imapFolder.getMessageCount() : filter.length;
                 final FetchProfile fetchProfile = getFetchProfile(usedFields.toArray(), getIMAPProperties().isFastFetch());
-                final boolean body = includeBody;
+                final boolean body = usedFields.contains(MailField.BODY) || usedFields.contains(MailField.FULL);
                 if (DEBUG) {
                     final long start = System.currentTimeMillis();
                     if (filter == null) {
@@ -1408,10 +1409,6 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
             throw MimeMailException.handleMessagingException(e, imapConfig, session);
         } catch (final RuntimeException e) {
             throw handleRuntimeException(e);
-        } finally {
-            if (doClearCache) {
-                clearCacheSafe();
-            }
         }
     }
 

@@ -310,6 +310,7 @@ public abstract class IMAPFolderWorker extends MailMessageStorageLong {
                          */
                         // IMAPCommandsCollection.updateIMAPFolder(imapFolder,
                         // mode);
+                        IMAPMessageStorage.clearCache(imapFolder);
                         return imapFolder;
                     }
                     /*
