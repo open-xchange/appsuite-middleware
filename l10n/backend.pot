@@ -993,13 +993,12 @@ msgstr ""
 #. TODO: Mah/Cisco, please describe what is meant with the wording 'chair'
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/Messages.java:301
 msgid ""
-"You have received this E-Mail because your are the chair for this "
-"appointment."
+"You have received this E-Mail because you are the chair for this appointment."
 msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/Messages.java:303
 msgid ""
-"You have received this E-Mail because your are the organizer of this "
+"You have received this E-Mail because you are the organizer of this "
 "appointment."
 msgstr ""
 
