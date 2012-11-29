@@ -226,8 +226,6 @@ public class OXRequest extends Request {
             jSessionIdCookie.setDomain(domain);
         }
         
-        jSessionIdCookie.setHttpOnly(grizzlyConfig.isCookieHttpOnly());
-        
         /*
          * Toggle the security of the cookie on when we are dealing with a https request or the forceHttps config option is true e.g. when A
          * proxy like apache terminates ssl in front of the backend. The exception from forced https is a request from the local LAN.

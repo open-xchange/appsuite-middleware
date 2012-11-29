@@ -49,37 +49,25 @@
 
 package com.openexchange.http.grizzly.http.server;
 
-import static com.openexchange.tools.servlet.http.Cookies.getDomainValue;
 import org.glassfish.grizzly.http.Cookie;
 import org.glassfish.grizzly.http.server.Response;
-import com.openexchange.tools.servlet.http.Cookies;
-
+import com.openexchange.http.grizzly.GrizzlyConfig;
 
 /**
- * {@link OXResponse}
- *
+ * {@link OXResponse} OX specific additions to the Grizzly Response like altered cookie handling.
+ * 
  * @author <a href="mailto:marc	.arens@open-xchange.com">Marc Arens</a>
  */
 public class OXResponse extends Response {
 
-    /* (non-Javadoc)
-     * @see org.glassfish.grizzly.http.server.Response#addCookie(org.glassfish.grizzly.http.Cookie)
+    /**
+     * Do OX specific cookie handling before adding the cookie via {@link Response#addCookie(Cookie)}.
+     * @param cookie The cookie to configure and add to the Response
      */
     @Override
     public void addCookie(Cookie cookie) {
-//        String domain = getDomainValue();
-//        if (domain != null) {
-//            cookie.setDomain(domain);
-//        }
-//        
-//        jSessionIdCookie.setHttpOnly(grizzlyConfig.isCookieHttpOnly());
-//        
-//        /*
-//         * Toggle the security of the cookie on when we are dealing with a https request or the forceHttps config option is true e.g. when A
-//         * proxy like apache terminates ssl in front of the backend. The exception from forced https is a request from the local LAN.
-//         */
-//        boolean isCookieSecure = request.isSecure() || (grizzlyConfig.isCookieForceHttps() && !Cookies.isLocalLan(getServerName()));
-//        jSessionIdCookie.setSecure(isCookieSecure);
+        // Prevent unwanted access to cookies by only allowing access via http methods
+        cookie.setHttpOnly(GrizzlyConfig.getInstance().isCookieHttpOnly());
 
         super.addCookie(cookie);
     }
