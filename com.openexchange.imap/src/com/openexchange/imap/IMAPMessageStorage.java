@@ -325,6 +325,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
 
     @Override
     public void clearCache() throws OXException {
+        final IMAPFolder imapFolder = this.imapFolder;
         if (null == imapFolder) {
             return;
         }
