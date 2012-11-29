@@ -423,15 +423,18 @@ public final class SMTPTransport extends MailTransport {
     }
 
     private SMTPConfig getTransportConfig0() throws OXException {
-        if (cachedSmtpConfig == null) {
+        SMTPConfig tmp = cachedSmtpConfig;
+        if (tmp == null) {
             synchronized (this) {
-                if (cachedSmtpConfig == null) {
-                    cachedSmtpConfig = TransportConfig.getTransportConfig(new SMTPConfig(), session, accountId);
-                    cachedSmtpConfig.setTransportProperties(createNewMailProperties());
+                tmp = cachedSmtpConfig;
+                if (tmp == null) {
+                    tmp = TransportConfig.getTransportConfig(new SMTPConfig(), session, accountId);
+                    tmp.setTransportProperties(createNewMailProperties());
+                    cachedSmtpConfig = tmp;
                 }
             }
         }
-        return cachedSmtpConfig;
+        return tmp;
     }
 
     private static final String ACK_TEXT =
