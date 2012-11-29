@@ -431,6 +431,7 @@ public class HazelcastJobStore implements JobStore {
             triggers.remove(triggerKey);
             if (triggers.isEmpty()) {
                 triggersByGroup.remove(group);
+                triggers.destroy();
                 if (pausedTriggerGroups.contains(group)) {
                     pausedTriggerGroups.remove(group);
                 }
@@ -531,12 +532,12 @@ public class HazelcastJobStore implements JobStore {
             jobKeys.clear();
             triggersByKey.clear();
             triggersByJobKey.clear();
-            for (Map<JobKey, JobDetail> inner : jobsByGroup.values()) {
-                inner.clear();
+            for (IMap<JobKey, JobDetail> inner : jobsByGroup.values()) {
+                inner.destroy();
             }
             
             for (ISet<TriggerKey> inner : triggersByGroup.values()) {
-                inner.clear();
+                inner.destroy();
             }
             jobsByGroup.clear();
             triggersByGroup.clear();
@@ -1339,10 +1340,12 @@ public class HazelcastJobStore implements JobStore {
 
         if (stateWrapper.getTrigger().getNextFireTime() == null) {
             stateWrapper.setState(TriggerStateWrapper.STATE_COMPLETE);
-            triggersByKey.replace(stateWrapper.getTrigger().getKey(), stateWrapper);            
+            triggersByKey.replace(stateWrapper.getTrigger().getKey(), stateWrapper);
             signaler.notifySchedulerListenersFinalized(stateWrapper.getTrigger());
         } else if (nextFireTime.equals(stateWrapper.getTrigger().getNextFireTime())) {
             return false;
+        } else {
+            triggersByKey.replace(stateWrapper.getTrigger().getKey(), stateWrapper);
         }
 
         return true;
