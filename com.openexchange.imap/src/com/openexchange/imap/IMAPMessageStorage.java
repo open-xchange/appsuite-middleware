@@ -338,8 +338,12 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
         }
         try {
             final com.sun.mail.imap.MessageCache mc = (com.sun.mail.imap.MessageCache) messageCacheField.get(imapFolder);
-            final IMAPMessage[] messages = (IMAPMessage[]) messagesField.get(mc);
-            Arrays.fill(messages, null);
+            if (null != mc) {
+                final IMAPMessage[] messages = (IMAPMessage[]) messagesField.get(mc);
+                if (null != messages) {
+                    Arrays.fill(messages, null);
+                }
+            }
         } catch (final IllegalArgumentException e) {
             LOG.error(e.getMessage(), e);
         } catch (final IllegalAccessException e) {
