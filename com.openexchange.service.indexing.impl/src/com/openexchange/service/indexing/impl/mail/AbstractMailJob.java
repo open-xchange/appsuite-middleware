@@ -73,6 +73,7 @@ import com.openexchange.index.StandardIndexDocument;
 import com.openexchange.mail.MailField;
 import com.openexchange.mail.api.IMailFolderStorage;
 import com.openexchange.mail.api.IMailMessageStorage;
+import com.openexchange.mail.api.IMailMessageStorageExt;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.dataobjects.ContentAwareMailMessage;
 import com.openexchange.mail.dataobjects.MailMessage;
@@ -123,6 +124,14 @@ public abstract class AbstractMailJob implements IndexingJob {
                     info.folder, 
                     subList.toArray(new String[subList.size()]), 
                     MailField.values());
+                
+                /*
+                 * Avoid memory leak in java mail implementation
+                 */
+                if (messageStorage instanceof IMailMessageStorageExt) {
+                    LOG.debug("Cleaning mail cache of com.sun.mail.imap.IMAPFolder...");
+                    ((IMailMessageStorageExt) messageStorage).clearCache();
+                }
                     
                 String[] mailIds = new String[messages.length];
                 for (int i = 0; i < messages.length; i++) {
@@ -132,7 +141,6 @@ public abstract class AbstractMailJob implements IndexingJob {
                     }
                 }
                     
-                    
                 String[] primaryContents = messageStorage.getPrimaryContents(info.folder, mailIds);                
                 for (int i = 0; i < messages.length; i++) {
                     MailMessage message = messages[i];
@@ -141,7 +149,7 @@ public abstract class AbstractMailJob implements IndexingJob {
                         documents.add(new StandardIndexDocument<MailMessage>(contentAwareMessage));
                         IndexMailHandler handler = new IndexMailHandler(String.valueOf(info.accountId), info.folder, message.getMailId());
                         parser.parseMailMessage(message, handler);
-                        attachments.addAll(handler.getAttachments());                        
+                        attachments.addAll(handler.getAttachments());
                     }
                 }
 
@@ -151,7 +159,7 @@ public abstract class AbstractMailJob implements IndexingJob {
                 
                 if (!attachments.isEmpty()) {
                     attachmentIndex.addDocuments(attachments);
-                }                         
+                }
                 
                 return subList.size();
             }
