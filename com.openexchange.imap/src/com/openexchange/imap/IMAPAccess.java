@@ -1198,6 +1198,19 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
             }
             IMAPFolderWorker.messagesField = mss;
         }
+        
+        {
+            Field ut;
+            try {
+                ut = IMAPFolder.class.getDeclaredField("uidTable");
+                ut.setAccessible(true);
+            } catch (final SecurityException e) {
+                ut = null;
+            } catch (final NoSuchFieldException e) {
+                ut = null;
+            }
+            IMAPFolderWorker.uidTableField = ut;
+        }
     }
 
     private static synchronized void initMaps() {

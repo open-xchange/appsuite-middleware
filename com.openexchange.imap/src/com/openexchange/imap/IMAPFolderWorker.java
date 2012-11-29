@@ -53,6 +53,7 @@ import static com.openexchange.mail.dataobjects.MailFolder.DEFAULT_FOLDER_ID;
 import java.lang.reflect.Field;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.Hashtable;
 import java.util.Set;
 import javax.mail.Flags;
 import javax.mail.Folder;
@@ -445,6 +446,7 @@ public abstract class IMAPFolderWorker extends MailMessageStorageLong {
 
     protected static volatile Field messagesField;
     protected static volatile Field messageCacheField;
+    protected static volatile Field uidTableField;
 
     /** Clears the cache */
     protected static void clearCache(final IMAPFolder imapFolder) {
@@ -459,6 +461,11 @@ public abstract class IMAPFolderWorker extends MailMessageStorageLong {
         if (null == messagesField) {
             return;
         }
+        final Field uidTableField = IMAPFolderWorker.uidTableField;
+        if (null == uidTableField) {
+            return;
+        }
+        
         try {
             final com.sun.mail.imap.MessageCache mc = (com.sun.mail.imap.MessageCache) messageCacheField.get(imapFolder);
             if (null != mc) {
@@ -466,6 +473,11 @@ public abstract class IMAPFolderWorker extends MailMessageStorageLong {
                 if (null != messages) {
                     Arrays.fill(messages, null);
                 }
+            }
+            
+            final Hashtable<?, ?> uidTable = (Hashtable<?, ?>) uidTableField.get(imapFolder);
+            if (null != uidTable) {
+                uidTable.clear();
             }
         } catch (final IllegalArgumentException e) {
             LOG.error(e.getMessage(), e);
