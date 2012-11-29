@@ -166,7 +166,7 @@ public final class JerichoParser {
         if (null == sep) {
             sep = "\n";
         }
-        return new StreamedSource(new StringBuilder(html.length() + 16).append("<body>").append(sep).append(html).append(sep).append("</body>"));
+        return new StreamedSource(new com.openexchange.java.StringAllocator(html.length() + 16).append("<body>").append(sep).append(html).append(sep).append("</body>"));
     }
 
     private static final Pattern NESTED_TAG = Pattern.compile("^(?:\r?\n *)?(<[^>]+>)");

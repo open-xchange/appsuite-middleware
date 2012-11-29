@@ -37,6 +37,7 @@ import com.openexchange.cluster.discovery.ClusterDiscoveryService;
 import com.openexchange.cluster.discovery.ClusterListener;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.hazelcast.HazelcastMBean;
+import com.openexchange.hazelcast.osgi.HazelcastActivator.InitMode;
 import com.openexchange.management.ManagementService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.osgi.ServiceContainer;
@@ -140,7 +141,7 @@ public class HazelcastActivator extends HousekeepingActivator {
                 if (isSingleton) {
                     final ClusterDiscoveryService discovery = context.getService(reference);
                     if (!clusterDiscoveryServiceReference.compareAndSet(null, discovery)) {
-                        final StringBuilder msg = new StringBuilder();
+                        final com.openexchange.java.StringAllocator msg = new com.openexchange.java.StringAllocator();
                         msg.append("\n\t").append(ClusterDiscoveryService.class.getName()).append(" is a singleton service!");
                         msg.append("\n\tThis service is already tracked as \"").append(
                             clusterDiscoveryServiceReference.get().getClass().getName()).append("\".");

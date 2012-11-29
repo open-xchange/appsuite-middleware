@@ -153,6 +153,7 @@ public class ContactMapper extends DefaultJsonMapper<Contact, ContactField> {
                 fields.add(field);
             } else if (Contact.IMAGE1_URL == columnID) {
             	fields.add(ContactField.NUMBER_OF_IMAGES); // query NUMBER_OF_IMAGES to set image URL afterwards
+                fields.add(ContactField.LAST_MODIFIED); // query LAST_MODIFIED to set image URL afterwards
             } else if (DataObject.LAST_MODIFIED_UTC == columnID) {
             	fields.add(ContactField.LAST_MODIFIED); // query LAST_MODIFIED to set last modified utc afterwards
             } else {
@@ -2728,8 +2729,9 @@ public class ContactMapper extends DefaultJsonMapper<Contact, ContactField> {
             @Override
         	public Object serialize(Contact from, TimeZone timeZone, Session session) throws JSONException {
                 if (0 < from.getNumberOfImages() || from.containsImage1() && null != from.getImage1()) {
+                    String timestamp = null != from.getLastModified() ? String.valueOf(from.getLastModified().getTime()) : null;
                     ImageLocation imageLocation = new ImageLocation.Builder().folder(String.valueOf(from.getParentFolderID())).id(
-                        String.valueOf(from.getObjectID())).build();
+                        String.valueOf(from.getObjectID())).timestamp(timestamp).build();
                     try {
                         return ContactImageDataSource.getInstance().generateUrl(imageLocation, session);
                     } catch (OXException e) {

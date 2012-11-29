@@ -232,8 +232,8 @@ public final class MimeMailMessage extends MailMessage implements MimeRawSource,
 
     @Override
     public String toString() {
-        final StringBuilder builder = new StringBuilder(32);
-        builder.append("MIMEMailMessage [");
+        final com.openexchange.java.StringAllocator builder = new com.openexchange.java.StringAllocator(32);
+        builder.append("MimeMailMessage [");
         {
             final String id = getMailId();
             if (id != null) {

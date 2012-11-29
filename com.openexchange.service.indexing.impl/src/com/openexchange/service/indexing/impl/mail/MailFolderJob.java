@@ -94,7 +94,7 @@ import com.openexchange.service.indexing.impl.internal.Services;
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public class MailFolderJob extends AbstractMailJob {    
+public class MailFolderJob extends AbstractMailJob {
     
     public MailFolderJob() {
         super();
@@ -150,13 +150,19 @@ public class MailFolderJob extends AbstractMailJob {
                         storageMails.put(msg.getMailId(), msg);
                     }
                     
-                    if (!info.force && IndexFolderManager.isIndexed(info.contextId, info.userId, Types.EMAIL, String.valueOf(info.accountId), info.folder)) {         
-                        IndexResult<MailMessage> indexResult = mailIndex.query(mailAllQuery, MailIndexField.getFor(fields));                    
+                    if (!info.force && IndexFolderManager.isIndexed(info.contextId, info.userId, Types.EMAIL, String.valueOf(info.accountId), info.folder)) {
+                        long lastCompletion = IndexFolderManager.getTimestamp(info.contextId, info.userId, Types.EMAIL, String.valueOf(info.accountId), info.folder);
+                        if (System.currentTimeMillis() - lastCompletion < 60000L * 15) {
+                            LOG.debug("Skipping job because it already ran in the last 15 minutes.");
+                            return;
+                        }
+                        
+                        IndexResult<MailMessage> indexResult = mailIndex.query(mailAllQuery, MailIndexField.getFor(fields));
                         Map<String, MailMessage> indexMails = new HashMap<String, MailMessage>();
                         for (IndexDocument<MailMessage> document : indexResult.getResults()) {
                             MailMessage msg = document.getObject();
                             indexMails.put(msg.getMailId(), msg);
-                        }                
+                        }
                         
                         if (LOG.isDebugEnabled()) {
                             long diff = System.currentTimeMillis() - start;
@@ -164,7 +170,8 @@ public class MailFolderJob extends AbstractMailJob {
                         }
                         deleteMails(info, indexMails.keySet(), storageMails.keySet(), mailIndex, attachmentIndex);
                         addMails(info, indexMails.keySet(), storageMails.keySet(), mailIndex, attachmentIndex, messageStorage);
-                        changeMails(info, indexMails, storageMails, mailIndex, attachmentIndex, messageStorage);              
+                        changeMails(info, indexMails, storageMails, mailIndex, attachmentIndex, messageStorage);
+                        IndexFolderManager.setTimestamp(info.contextId, info.userId, Types.EMAIL, String.valueOf(info.accountId), info.folder, System.currentTimeMillis());
                     } else {
                         if (LOG.isDebugEnabled()) {
                             long diff = System.currentTimeMillis() - start;
@@ -172,7 +179,8 @@ public class MailFolderJob extends AbstractMailJob {
                         }
                         addMails(info, Collections.<String> emptySet(), storageMails.keySet(), mailIndex, attachmentIndex, messageStorage);
                         IndexFolderManager.setIndexed(info.contextId, info.userId, Types.EMAIL, String.valueOf(info.accountId), info.folder);
-                    }                
+                        IndexFolderManager.setTimestamp(info.contextId, info.userId, Types.EMAIL, String.valueOf(info.accountId), info.folder, System.currentTimeMillis());
+                    }
                 } else {
                     if (LOG.isDebugEnabled()) {
                         LOG.debug("Deleting folder from index: " + info.toString());
@@ -221,7 +229,7 @@ public class MailFolderJob extends AbstractMailJob {
     
     private void addMails(MailJobInfo info, Set<String> indexIds, Set<String> storageIds, final IndexAccess<MailMessage> mailIndex, final IndexAccess<Attachment> attachmentIndex, final IMailMessageStorage messageStorage) throws OXException {
         final List<String> toAdd = new ArrayList<String>(storageIds);
-        toAdd.removeAll(indexIds);        
+        toAdd.removeAll(indexIds);
         addMails(info, toAdd, messageStorage, mailIndex, attachmentIndex);
     }
 

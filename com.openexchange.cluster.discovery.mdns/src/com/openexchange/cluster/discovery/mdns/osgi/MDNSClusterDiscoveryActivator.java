@@ -153,12 +153,11 @@ public final class MDNSClusterDiscoveryActivator extends HousekeepingActivator {
         // Form service ID from cluster name
         final String serviceID = getService(ConfigurationService.class).getProperty("com.openexchange.cluster.name");
         if (null == serviceID || 0 == serviceID.trim().length()) {
-            throw new IllegalStateException(new BundleException(
-                "Cluster name is mandatory. Please set a valid identifier through property \"com.openexchange.cluster.name\".", 
-                BundleException.ACTIVATOR_ERROR));
+            throw new BundleException(
+                "Cluster name is mandatory. Please set a valid identifier through property \"com.openexchange.cluster.name\".",
+                BundleException.ACTIVATOR_ERROR);
         } else if ("ox".equalsIgnoreCase(serviceID)) {
-            LOG.warn("\n\tThe configuration value for \"com.openexchange.cluster.name\" has not been changed from it's default value "
-                + "\"ox\". Please do so to make this warning disappear.\n");
+            LOG.warn("\n\tThe configuration value for \"com.openexchange.cluster.name\" has not been changed from it's default value " + "\"ox\". Please do so to make this warning disappear.\n");
         }
         LOG.info("Cluster Discovery will track services with ID \"" + serviceID + "\".");
         // Create service instance

@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2020 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,41 +47,76 @@
  *
  */
 
-package com.openexchange.http.grizzly.servletfilter;
+package com.openexchange.json;
 
-import java.io.IOException;
-import javax.servlet.Filter;
-import javax.servlet.FilterChain;
-import javax.servlet.FilterConfig;
-import javax.servlet.ServletException;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import com.openexchange.http.grizzly.wrapper.HttpServletResponseWrapper;
+import javax.management.NotCompliantMBeanException;
+import javax.management.StandardMBean;
+import org.json.CharArrayPool;
+import org.json.CharArrayPool.Part;
+
 
 /**
- * {@link JSessionInitFilter} - Initialize the HttpSession for incoming Request if they are missing one.
- * 
- * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
+ * {@link JSONMBeanImpl}
+ *
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class JSessionInitFilter implements Filter {
+public final class JSONMBeanImpl extends StandardMBean implements JSONMBean {
 
-    @Override
-    public void init(FilterConfig filterConfig) {
-        // nothing to do here
+    /**
+     * Initializes a new {@link JSONMBeanImpl}.
+     */
+    public JSONMBeanImpl() throws NotCompliantMBeanException {
+        super(JSONMBean.class);
     }
 
     @Override
-    public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
-        HttpServletRequest httpServletRequest = (HttpServletRequest) request;
-        httpServletRequest.getSession(true);
-        chain.doFilter(httpServletRequest, response);
+    public long getMisses() {
+        return CharArrayPool.getMisses();
     }
 
     @Override
-    public void destroy() {
-        // nothing to do here
+    public int getTotalSmall() {
+        return CharArrayPool.getTotal(Part.SMALL);
+    }
+
+    @Override
+    public int getInUseSmall() {
+        return CharArrayPool.getInUse(Part.SMALL);
+    }
+
+    @Override
+    public int getPooledSmall() {
+        return CharArrayPool.getPooled(Part.SMALL);
+    }
+
+    @Override
+    public int getTotalMedium() {
+        return CharArrayPool.getTotal(Part.MEDIUM);
+    }
+
+    @Override
+    public int getInUseMedium() {
+        return CharArrayPool.getInUse(Part.MEDIUM);
+    }
+ 
+    @Override
+    public int getPooledMedium() {
+        return CharArrayPool.getPooled(Part.LARGE);
+    }
+
+    @Override
+    public int getTotalLarge() {
+        return CharArrayPool.getTotal(Part.LARGE);
+    }
+
+    @Override
+    public int getInUseLarge() {
+        return CharArrayPool.getInUse(Part.LARGE);
+    }
+
+    @Override
+    public int getPooledLarge() {
+        return CharArrayPool.getPooled(Part.LARGE);
     }
 
 }

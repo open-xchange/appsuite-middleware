@@ -111,12 +111,12 @@ public final class TextProcessing {
          */
         int total = used + s.length();
         if (total <= linewrap) {
-            return used > 0 ? new StringBuilder(total).append(prefix).append(s).toString() : s;
+            return used > 0 ? new com.openexchange.java.StringAllocator(total).append(prefix).append(s).toString() : s;
         }
         /*
          * Fold the string
          */
-        final StringBuilder sb = new StringBuilder(total);
+        final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(total);
         char lastc = 0;
         if (used > 0) {
             while (total > linewrap) {
@@ -197,7 +197,7 @@ public final class TextProcessing {
         }
         final String[] lines = content.split(SPLIT_LINES);
         if (lines.length > 0) {
-            final StringBuilder sb = new StringBuilder(content.length() + 128);
+            final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(content.length() + 128);
             {
                 final String foldMe = lines[0];
                 sb.append(foldLine(foldMe, linewrap, getQuotePrefix(foldMe)));
@@ -216,7 +216,7 @@ public final class TextProcessing {
             return null;
         }
         final char[] chars = line.toCharArray();
-        final StringBuilder sb = new StringBuilder(8);
+        final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(8);
         int lastGT = -1;
         for (int i = 0; i < chars.length; i++) {
             final char c = chars[i];
@@ -320,7 +320,7 @@ public final class TextProcessing {
             final String fallback = "US-ASCII";
             if (LOG.isWarnEnabled()) {
                 LOG.warn(
-                    new StringBuilder("Character conversion exception while reading content with charset \"").append(charset).append(
+                    new com.openexchange.java.StringAllocator("Character conversion exception while reading content with charset \"").append(charset).append(
                         "\". Using fallback charset \"").append(fallback).append("\" instead."),
                     e);
             }
@@ -333,9 +333,9 @@ public final class TextProcessing {
         if (mailPart.containsHeader(MessageHeaders.HDR_CONTENT_TYPE)) {
             String cs = contentType.getCharsetParameter();
             if (!CharsetDetector.isValid(cs)) {
-                StringBuilder sb = null;
+                com.openexchange.java.StringAllocator sb = null;
                 if (null != cs) {
-                    sb = new StringBuilder(64).append("Illegal or unsupported encoding: \"").append(cs).append("\".");
+                    sb = new com.openexchange.java.StringAllocator(64).append("Illegal or unsupported encoding: \"").append(cs).append("\".");
                 }
                 if (contentType.startsWith("text/")) {
                     cs = CharsetDetector.detectCharset(mailPart.getInputStream());

@@ -59,8 +59,8 @@ import org.jdom2.Element;
 import org.jdom2.JDOMException;
 import org.jdom2.Namespace;
 import org.jdom2.output.XMLOutputter;
+import com.openexchange.java.AllocatingStringWriter;
 import com.openexchange.log.LogFactory;
-import com.openexchange.tools.UnsynchronizedStringWriter;
 import com.openexchange.webdav.protocol.Protocol;
 import com.openexchange.webdav.protocol.WebdavProperty;
 import com.openexchange.webdav.protocol.WebdavProtocolException;
@@ -176,7 +176,7 @@ public class WebdavProppatchAction extends AbstractAction {
 				if(propertyElement.getChildren().size() > 0) {
 					property.setXML(true);
 					try {
-						final Writer w = new UnsynchronizedStringWriter();
+						final Writer w = new AllocatingStringWriter();
 						outputter.output(propertyElement.cloneContent(), w);
 						property.setValue(w.toString());
 					} catch (final IOException e) {

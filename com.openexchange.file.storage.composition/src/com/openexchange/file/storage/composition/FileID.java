@@ -60,14 +60,15 @@ import com.openexchange.tools.id.IDMangler;
 public class FileID {
 
     private String serviceId;
-
     private String accountId;
-
     private String folderId;
-
     private String fileId;
 
+    /**
+     * Initializes a new {@link FileID}.
+     */
     public FileID(String serviceId, String accountId, String folderId, String fileId) {
+        super();
         this.serviceId = serviceId;
         this.accountId = accountId;
         this.folderId = folderId;

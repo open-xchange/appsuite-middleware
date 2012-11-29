@@ -939,7 +939,7 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
                     // Ignore
                 } catch (final Throwable t) {
                     ExceptionUtils.handleThrowable(t);
-                    final StringBuilder tmp = new StringBuilder(128).append("Error processing request: ");
+                    final com.openexchange.java.StringAllocator tmp = new com.openexchange.java.StringAllocator(128).append("Error processing request: ");
                     appendRequestInfo(tmp);
                     LOG.error(tmp.toString(), t);
                     // 500 - Internal Server Error
@@ -970,7 +970,7 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
                     error = true;
                 } catch (final Throwable t) {
                     ExceptionUtils.handleThrowable(t);
-                    final StringBuilder tmp = new StringBuilder(128).append("Error processing request: ");
+                    final com.openexchange.java.StringAllocator tmp = new com.openexchange.java.StringAllocator(128).append("Error processing request: ");
                     appendRequestInfo(tmp);
                     LOG.error(tmp.toString(), t);
                     error = true;
@@ -1009,7 +1009,7 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
      * 
      * @param builder The builder to append to
      */
-    protected void appendRequestInfo(final StringBuilder builder) {
+    protected void appendRequestInfo(final com.openexchange.java.StringAllocator builder) {
         builder.append("request-URI=''");
         builder.append(request.getRequestURI());
         builder.append("'', query-string=''");
@@ -1716,7 +1716,7 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
                              * Different JVM route detected -> Discard
                              */
                             if (DEBUG) {
-                                LOG.debug(new StringBuilder("\n\tDifferent JVM route detected. Removing JSESSIONID cookie: ").append(id));
+                                LOG.debug(new com.openexchange.java.StringAllocator("\n\tDifferent JVM route detected. Removing JSESSIONID cookie: ").append(id));
                             }
                             current.setPath("/");
                             final String domain = extractDomainValue(id);
@@ -1742,7 +1742,7 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
                              * Invalid cookie
                              */
                             if (DEBUG) {
-                                LOG.debug(new StringBuilder("\n\tExpired or invalid cookie -> Removing JSESSIONID cookie: ").append(current.getValue()));
+                                LOG.debug(new com.openexchange.java.StringAllocator("\n\tExpired or invalid cookie -> Removing JSESSIONID cookie: ").append(current.getValue()));
                             }
                             current.setPath("/");
                             final String domain = extractDomainValue(id);
@@ -1774,7 +1774,7 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
                              * But this host defines a JVM route
                              */
                             if (DEBUG) {
-                                LOG.debug(new StringBuilder("\n\tMissing JVM route in JESSIONID cookie").append(current.getValue()));
+                                LOG.debug(new com.openexchange.java.StringAllocator("\n\tMissing JVM route in JESSIONID cookie").append(current.getValue()));
                             }
                             current.setPath("/");
                             final String domain = extractDomainValue(id);
@@ -1800,7 +1800,7 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
                              * Invalid cookie
                              */
                             if (DEBUG) {
-                                LOG.debug(new StringBuilder("\n\tExpired or invalid cookie -> Removing JSESSIONID cookie: ").append(current.getValue()));
+                                LOG.debug(new com.openexchange.java.StringAllocator("\n\tExpired or invalid cookie -> Removing JSESSIONID cookie: ").append(current.getValue()));
                             }
                             current.setPath("/");
                             final String domain = extractDomainValue(id);
@@ -1845,7 +1845,7 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
         /*
          * Create a new unique id
          */
-        final StringBuilder jsessionIDVal = new StringBuilder(HttpSessionManagement.getNewUniqueId());
+        final com.openexchange.java.StringAllocator jsessionIDVal = new com.openexchange.java.StringAllocator(HttpSessionManagement.getNewUniqueId());
         final String jvmRoute = AJPv13Config.getJvmRoute();
         final String domain = getDomainValue(serverName);
         if ((jvmRoute != null) && (jvmRoute.length() > 0)) {

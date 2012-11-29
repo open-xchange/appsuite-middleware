@@ -90,10 +90,10 @@ import com.openexchange.groupware.upload.impl.UploadException;
 import com.openexchange.groupware.upload.impl.UploadSizeExceededException;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
+import com.openexchange.java.AllocatingStringWriter;
 import com.openexchange.json.OXJSONWriter;
 import com.openexchange.log.LogFactory;
 import com.openexchange.session.Session;
-import com.openexchange.tools.UnsynchronizedStringWriter;
 import com.openexchange.tools.encoding.Helper;
 import com.openexchange.tools.exceptions.OXAborted;
 import com.openexchange.tools.servlet.UploadServletException;
@@ -566,7 +566,7 @@ public class Attachment extends PermissionServlet {
         Writer writer = null;
 
         try {
-            writer = new UnsynchronizedStringWriter();
+            writer = new AllocatingStringWriter();
             ResponseWriter.write(resp, writer, localeFrom(session));
             res.getWriter().write(substituteJS(writer.toString(), action));
         } catch (final JSONException e) {

@@ -60,6 +60,7 @@ import com.openexchange.mail.OrderDirection;
 import com.openexchange.mail.Quota;
 import com.openexchange.mail.Quota.Type;
 import com.openexchange.mail.api.IMailFolderStorage;
+import com.openexchange.mail.api.IMailFolderStorageDelegator;
 import com.openexchange.mail.api.IMailFolderStorageEnhanced;
 import com.openexchange.mail.api.IMailMessageStorage;
 import com.openexchange.mail.api.MailAccess;
@@ -74,7 +75,7 @@ import com.openexchange.session.Session;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class SmalFolderStorage extends AbstractSMALStorage implements IMailFolderStorage, IMailFolderStorageEnhanced {
+public final class SmalFolderStorage extends AbstractSMALStorage implements IMailFolderStorage, IMailFolderStorageEnhanced, IMailFolderStorageDelegator {
 
     private static final Log LOG = com.openexchange.log.Log.loggerFor(SmalFolderStorage.class);
     
@@ -90,6 +91,11 @@ public final class SmalFolderStorage extends AbstractSMALStorage implements IMai
     public SmalFolderStorage(final Session session, final int accountId, final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> delegateMailAccess) throws OXException {
         super(session, accountId, delegateMailAccess);
         folderStorage = delegateMailAccess.getFolderStorage();
+    }
+
+    @Override
+    public IMailFolderStorage getDelegateFolderStorage() throws OXException {
+        return folderStorage;
     }
 
     @Override

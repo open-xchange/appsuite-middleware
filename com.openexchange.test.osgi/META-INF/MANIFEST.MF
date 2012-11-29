@@ -7,6 +7,7 @@ Bundle-Activator: com.openexchange.test.osgi.internal.Activator
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Import-Package: com.openexchange.osgi,
+ com.openexchange.osgi.console,
  com.openexchange.server,
  javax.xml.parsers,
  org.osgi.framework,

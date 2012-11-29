@@ -67,7 +67,6 @@ import com.openexchange.contact.storage.registry.ContactStorageRegistry;
 import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
 import com.openexchange.folder.FolderService;
-import com.openexchange.folder.FolderService.Storage;
 import com.openexchange.groupware.contact.ContactConfig;
 import com.openexchange.groupware.contact.ContactConfig.Property;
 import com.openexchange.groupware.contact.ContactExceptionCodes;
@@ -244,29 +243,8 @@ public final class Tools {
 	 * @throws OXException
 	 */
     public static FolderObject getFolder(int contextID, String folderId) throws OXException {
-        return getFolder(contextID, folderId, false);
-    }
-    
-    /**
-     * Gets a folder.
-     * 
-     * @param contextID the context ID
-     * @param folderId the folder ID
-     * @param deleted <code>true</code> to also query the backup folder table, <code>false</code>, otherwise
-     * @return
-     * @throws OXException
-     */
-    public static FolderObject getFolder(int contextID, String folderId, boolean deleted) throws OXException {
         FolderService folderService = ContactServiceLookup.getService(FolderService.class, true);
-        try {
-            return folderService.getFolderObject(parse(folderId), contextID, Storage.LIVE_WORKING);
-        } catch (OXException e) {
-            if (deleted && "FLD-0008".equals(e.getErrorCode())) {
-                // not found, also try backup folder tree
-                return folderService.getFolderObject(parse(folderId), contextID, Storage.LIVE_BACKUP);
-            }
-            throw e;
-        }
+        return folderService.getFolderObject(parse(folderId), contextID);
     }
     
     /**

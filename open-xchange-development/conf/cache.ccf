@@ -14,6 +14,22 @@ jcs.default.elementattributes.IsSpool=false
 jcs.default.elementattributes.IsRemote=false
 jcs.default.elementattributes.IsLateral=true
 
+# Pre-defined cache regions for usm session objects.
+jcs.region.USMCache=LTCP
+jcs.region.USMCache.cacheattributes=org.apache.jcs.engine.CompositeCacheAttributes
+jcs.region.USMCache.cacheattributes.MaxObjects=1000000
+jcs.region.USMCache.cacheattributes.MemoryCacheName=org.apache.jcs.engine.memory.lru.LRUMemoryCache
+jcs.region.USMCache.cacheattributes.UseMemoryShrinker=true
+jcs.region.USMCache.cacheattributes.MaxMemoryIdleTimeSeconds=43200
+jcs.region.USMCache.cacheattributes.ShrinkerIntervalSeconds=60
+jcs.region.USMCache.elementattributes=org.apache.jcs.engine.ElementAttributes
+jcs.region.USMCache.elementattributes.IsEternal=false
+jcs.region.USMCache.elementattributes.MaxLifeSeconds=-1
+jcs.region.USMCache.elementattributes.IdleTime=43200
+jcs.region.USMCache.elementattributes.IsSpool=false
+jcs.region.USMCache.elementattributes.IsRemote=false
+jcs.region.USMCache.elementattributes.IsLateral=false
+
 # Pre-defined cache regions for ox folder objects.   
 jcs.region.OXFolderCache=LTCP
 jcs.region.OXFolderCache.cacheattributes=org.apache.jcs.engine.CompositeCacheAttributes

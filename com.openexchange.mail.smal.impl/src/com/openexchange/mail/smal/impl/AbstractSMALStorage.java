@@ -50,6 +50,7 @@
 package com.openexchange.mail.smal.impl;
 
 import java.util.Collections;
+import org.apache.commons.logging.Log;
 import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.exception.OXException;
@@ -57,6 +58,7 @@ import com.openexchange.groupware.Types;
 import com.openexchange.index.IndexFacadeService;
 import com.openexchange.index.IndexProperties;
 import com.openexchange.index.solr.ModuleSet;
+import com.openexchange.log.LogFactory;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailField;
 import com.openexchange.mail.api.IMailFolderStorage;
@@ -74,6 +76,7 @@ import com.openexchange.mail.smal.impl.processor.ProcessorStrategy;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.service.indexing.IndexingService;
 import com.openexchange.service.indexing.JobInfo;
+import com.openexchange.service.indexing.impl.internal.FakeSession;
 import com.openexchange.service.indexing.impl.mail.MailFolderJob;
 import com.openexchange.service.indexing.impl.mail.MailJobInfo;
 import com.openexchange.service.indexing.impl.mail.MailJobInfo.Builder;
@@ -89,6 +92,8 @@ import com.openexchange.threadpool.ThreadPools;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public abstract class AbstractSMALStorage {
+    
+    protected static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(AbstractSMALStorage.class));
     /**
      * The fields containing only the mail identifier.
      */
@@ -300,6 +305,14 @@ public abstract class AbstractSMALStorage {
      * @throws OXException
      */
     protected void submitFolderJob(String folder) throws OXException {
+        if (session instanceof FakeSession) {
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("Session is a fake session. Job will not be submitted...");
+            }
+            // FIXME: This is done to prevent loops here and needs a much better solution!
+            return;
+        }
+        
         if (!isIndexingAllowed() || isBlacklisted()) {
             return;
         }

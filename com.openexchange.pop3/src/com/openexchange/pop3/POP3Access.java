@@ -392,7 +392,9 @@ public final class POP3Access extends MailAccess<POP3FolderStorage, POP3MessageS
          */
         final ConfigurationService service = POP3ServiceRegistry.getServiceRegistry().getService(ConfigurationService.class);
         if (null == service || !service.getBoolProperty("com.openexchange.pop3.allowPing", false)) {
-            warnings.add(POP3ExceptionCode.VALIDATE_DENIED.create());
+            if (null == service || service.getBoolProperty("com.openexchange.pop3.logDeniedPing", true)) {
+                warnings.add(POP3ExceptionCode.VALIDATE_DENIED.create());
+            }
             return true;
         }
         /*

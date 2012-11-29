@@ -57,6 +57,7 @@ import gnu.trove.procedure.TIntObjectProcedure;
 import gnu.trove.procedure.TIntProcedure;
 import java.sql.Connection;
 import java.sql.DataTruncation;
+import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.Collections;
@@ -1629,7 +1630,7 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
             closeWriter = true;
         }
         try {
-            try {
+            {
                 Links.deleteAllFolderLinks(folderID, ctx.getContextId(), wc);
 
                 final ServerUserSetting sus = ServerUserSetting.getInstance(wc);
@@ -1639,8 +1640,22 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
                     sus.setContactCollectOnMailTransport(ctx.getContextId(), user.getId(), false);
                     sus.setContactCollectionFolder(ctx.getContextId(), user.getId(), null);
                 }
-            } catch (final OXException e) {
-                throw e;
+            }
+            /*
+             * Subscriptions
+             */
+            {
+                PreparedStatement stmt = null;
+                try {
+                    stmt = wc.prepareStatement("DELETE FROM subscriptions WHERE cid=? AND folder_id=?");
+                    stmt.setInt(1, ctx.getContextId());
+                    stmt.setInt(2, folderID);
+                    stmt.executeUpdate();
+                } catch (final SQLException e) {
+                    throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
+                } finally {
+                    DBUtils.closeSQLStuff(stmt);
+                }
             }
             /*
              * Propagate

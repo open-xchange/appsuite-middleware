@@ -564,7 +564,7 @@ public final class CachingUserSettingMailStorage extends UserSettingMailStorage 
         if ((displayMsgHeaders == null) || (displayMsgHeaders.length == 0)) {
             return null;
         }
-        final StringBuilder tmp = new StringBuilder(256);
+        final com.openexchange.java.StringAllocator tmp = new com.openexchange.java.StringAllocator(256);
         tmp.append(displayMsgHeaders[0]);
         for (int i = 1; i < displayMsgHeaders.length; i++) {
             tmp.append(',').append(displayMsgHeaders[i]);

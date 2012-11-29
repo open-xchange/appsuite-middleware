@@ -110,7 +110,7 @@ public final class AttachmentToken implements AttachmentTokenConstants {
             throw new IllegalArgumentException("ttlMillis must be positive.");
         }
         this.id =
-            new StringBuilder(64).append(UUIDs.getUnformattedString(UUID.randomUUID())).append('.').append(
+            new com.openexchange.java.StringAllocator(64).append(UUIDs.getUnformattedString(UUID.randomUUID())).append('.').append(
                 UUIDs.getUnformattedString(UUID.randomUUID())).toString();
         this.ttlMillis = ttlMillis;
         timeoutStamp = new AtomicLong(System.currentTimeMillis() + ttlMillis);

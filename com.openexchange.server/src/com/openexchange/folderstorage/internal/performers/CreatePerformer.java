@@ -212,7 +212,7 @@ public final class CreatePerformer extends AbstractPerformer {
              */
             if (DEBUG_ENABLED) {
                 final long duration = System.currentTimeMillis() - start;
-                LOG.debug(new StringBuilder().append("Create.doCreate() took ").append(duration).append("msec for folder: ").append(newId).toString());
+                LOG.debug(new com.openexchange.java.StringAllocator().append("Create.doCreate() took ").append(duration).append("msec for folder: ").append(newId).toString());
             }
             return newId;
         } catch (final OXException e) {
@@ -374,7 +374,7 @@ public final class CreatePerformer extends AbstractPerformer {
                             for (int i = 0; !found && i < subfolders.length; i++) {
                                 if (n.equals(capStorage.getFolder(FolderStorage.REAL_TREE_ID, subfolders[i].getId(), storageParameters).getName())) {
                                     found = true;
-                                    clone4Real.setName(new StringBuilder(prefix).append('_').append(appendixCount++).toString());
+                                    clone4Real.setName(new com.openexchange.java.StringAllocator(prefix).append('_').append(appendixCount++).toString());
                                 }
                             }
                             if (!found) {

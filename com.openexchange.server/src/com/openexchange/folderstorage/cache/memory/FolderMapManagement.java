@@ -99,7 +99,7 @@ public final class FolderMapManagement {
     public void dropFor(final int contextId) {
         map.get(Integer.valueOf(contextId));
         if (LOG.isDebugEnabled()) {
-            LOG.debug(new StringBuilder("Cleaned user-sensitive folder cache for context ").append(contextId).toString());
+            LOG.debug(new com.openexchange.java.StringAllocator("Cleaned user-sensitive folder cache for context ").append(contextId).toString());
         }
     }
 
@@ -114,7 +114,7 @@ public final class FolderMapManagement {
             contextMap.remove(Integer.valueOf(session.getUserId()));
         }
         if (LOG.isDebugEnabled()) {
-            LOG.debug(new StringBuilder("Cleaned user-sensitive folder cache for user ").append(session.getUserId()).append(" in context ").append(
+            LOG.debug(new com.openexchange.java.StringAllocator("Cleaned user-sensitive folder cache for user ").append(session.getUserId()).append(" in context ").append(
                 session.getContextId()).toString());
         }
     }
@@ -131,7 +131,7 @@ public final class FolderMapManagement {
             contextMap.remove(Integer.valueOf(userId));
         }
         if (LOG.isDebugEnabled()) {
-            LOG.debug(new StringBuilder("Cleaned user-sensitive folder cache for user ").append(userId).append(" in context ").append(
+            LOG.debug(new com.openexchange.java.StringAllocator("Cleaned user-sensitive folder cache for user ").append(userId).append(" in context ").append(
                 contextId).toString());
         }
     }

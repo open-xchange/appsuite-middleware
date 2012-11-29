@@ -364,7 +364,7 @@ public final class MimeMailPart extends MailPart implements MimeRawSource, MimeC
             } catch (final IOException e) {
                 if (LOG.isDebugEnabled()) {
                     LOG.debug(
-                        new StringBuilder(256).append("Part's input stream could not be obtained: ").append(
+                        new com.openexchange.java.StringAllocator(256).append("Part's input stream could not be obtained: ").append(
                             e.getMessage() == null ? "<no error message given>" : e.getMessage()).append(
                             ". Trying to read from part's raw input stream instead").toString(),
                         e);
@@ -383,7 +383,7 @@ public final class MimeMailPart extends MailPart implements MimeRawSource, MimeC
             } catch (final MessagingException e) {
                 if (LOG.isDebugEnabled()) {
                     LOG.debug(
-                        new StringBuilder(256).append("Part's input stream could not be obtained: ").append(
+                        new com.openexchange.java.StringAllocator(256).append("Part's input stream could not be obtained: ").append(
                             e.getMessage() == null ? "<no error message given>" : e.getMessage()).append(
                             ". Trying to read from part's raw input stream instead").toString(),
                         e);

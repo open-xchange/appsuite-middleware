@@ -514,9 +514,11 @@ public final class ConditionTreeMap {
                 if (!toLoad.isEmpty()) {
                     final List<FolderObject> loaded = OXFolderBatchLoader.loadFolderObjectsFromDB(toLoad.toArray(), ctx, con, true, true);
                     for (final FolderObject fo : loaded) {
-                        m.put(fo.getObjectID(), fo);
-                        if (cacheEnabled) {
-                            cacheManager.putFolderObject(fo, ctx, false, null);
+                        if (null != fo) {
+                            m.put(fo.getObjectID(), fo);
+                            if (cacheEnabled) {
+                                cacheManager.putFolderObject(fo, ctx, false, null);
+                            }
                         }
                     }
                 }

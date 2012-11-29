@@ -52,11 +52,9 @@ package com.openexchange.folderstorage.database;
 import gnu.trove.list.TIntList;
 import gnu.trove.map.TIntObjectMap;
 import gnu.trove.map.hash.TIntObjectHashMap;
-import gnu.trove.procedure.TIntProcedure;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageAccount;
@@ -344,7 +342,7 @@ public final class DatabaseFolderConverter {
                     /*
                      * Either located below private folder or parent not visible
                      */
-                    retval.setParentID(new StringBuilder(8).append(FolderObject.SHARED_PREFIX).append(retval.getCreatedBy()).toString());
+                    retval.setParentID(new com.openexchange.java.StringAllocator(8).append(FolderObject.SHARED_PREFIX).append(retval.getCreatedBy()).toString());
                 } else {
                     /*
                      * Parent is visible
@@ -356,7 +354,7 @@ public final class DatabaseFolderConverter {
                  * Set subfolders for folder.
                  */
                 if (FolderObject.SYSTEM_USER_INFOSTORE_FOLDER_ID == folderId) {
-                    boolean lookupDb = true;
+                    boolean setChildren = true;
                     if (!InfostoreFacades.isInfoStoreAvailable()) {
                         final FileStorageAccount defaultAccount = getDefaultFileStorageAccess(session);
                         if (null != defaultAccount) {
@@ -364,10 +362,10 @@ public final class DatabaseFolderConverter {
                              * Enforce subfolders are retrieved from appropriate file storage
                              */
                             retval.setSubfolderIDs(null);
-                            lookupDb = false;
+                            setChildren = false;
                         }
                     }
-                    if (lookupDb) {
+                    if (setChildren) {
                         /*
                          * User-sensitive loading of user infostore folder
                          */
@@ -379,7 +377,7 @@ public final class DatabaseFolderConverter {
                             final int len = subfolders.size();
                             final String[] arr = new String[len];
                             for (int i = 0; i < len; i++) {
-                                arr[i] = String.valueOf(subfolders.get(i));
+                                arr[i] = Integer.toString(subfolders.get(i));
                             }
                             retval.setSubfolderIDs(arr);
                             retval.setSubscribedSubfolders(true);
@@ -390,52 +388,56 @@ public final class DatabaseFolderConverter {
                      */
                     retval.setCacheable(true);
                     retval.setGlobal(false);
-                } else if (FolderObject.SYSTEM_PUBLIC_INFOSTORE_FOLDER_ID == folderId) {
-                    if (!InfostoreFacades.isInfoStoreAvailable()) {
-                        final FileStorageAccount defaultAccount = getDefaultFileStorageAccess(session);
-                        if (null != defaultAccount) {
-                            /*
-                             * Enforce subfolders are retrieved from appropriate file storage
-                             */
-                            retval.setSubfolderIDs(null);
-                            /*
-                             * Mark for user-sensitive cache
-                             */
-                            retval.setCacheable(true);
-                            retval.setGlobal(false);
+                } else {
+                    /*
+                     * Any folder different from private and user-store folder
+                     */
+                    boolean setChildren = true;
+                    if (FolderObject.SYSTEM_PUBLIC_INFOSTORE_FOLDER_ID == folderId) {
+                        if (!InfostoreFacades.isInfoStoreAvailable()) {
+                            final FileStorageAccount defaultAccount = getDefaultFileStorageAccess(session);
+                            if (null != defaultAccount) {
+                                /*
+                                 * Enforce subfolders are retrieved from appropriate file storage
+                                 */
+                                retval.setSubfolderIDs(null);
+                                /*
+                                 * Mark for user-sensitive cache
+                                 */
+                                retval.setCacheable(true);
+                                retval.setGlobal(false);
+                                setChildren = false;
+                            }
                         }
                     }
-                } else {
-                    if (fo.containsSubfolderIds()) {
-                        final List<Integer> subfolderIds = fo.getSubfolderIds();
-                        if (subfolderIds.isEmpty()) {
-                            retval.setSubfolderIDs(new String[0]);
-                            retval.setSubscribedSubfolders(false);
-                        } else {
-                            final List<String> tmp = new ArrayList<String>(subfolderIds.size());
-                            for (final Integer id : subfolderIds) {
-                                tmp.add(id.toString());
-                            }
-                            retval.setSubfolderIDs(tmp.toArray(new String[tmp.size()]));
-                            retval.setSubscribedSubfolders(true);
-                        }
-                    } else {
-                        final TIntList subfolderIds = OXFolderLoader.getSubfolderInts(folderId, ctx, con);
-                        if (subfolderIds.isEmpty()) {
-                            retval.setSubfolderIDs(new String[0]);
-                            retval.setSubscribedSubfolders(false);
-                        } else {
-                            final List<String> tmp = new ArrayList<String>(subfolderIds.size());
-                            subfolderIds.forEach(new TIntProcedure() {
-
-                                @Override
-                                public boolean execute(final int id) {
-                                    tmp.add(String.valueOf(id));
-                                    return true;
+                    if (setChildren) {
+                        if (fo.containsSubfolderIds()) {
+                            final List<Integer> subfolderIds = fo.getSubfolderIds();
+                            if (subfolderIds.isEmpty()) {
+                                retval.setSubfolderIDs(new String[0]);
+                                retval.setSubscribedSubfolders(false);
+                            } else {
+                                final List<String> tmp = new ArrayList<String>(subfolderIds.size());
+                                for (final Integer id : subfolderIds) {
+                                    tmp.add(id.toString());
                                 }
-                            });
-                            retval.setSubfolderIDs(tmp.toArray(new String[tmp.size()]));
-                            retval.setSubscribedSubfolders(true);
+                                retval.setSubfolderIDs(tmp.toArray(new String[tmp.size()]));
+                                retval.setSubscribedSubfolders(true);
+                            }
+                        } else {
+                            final TIntList subfolderIds = OXFolderLoader.getSubfolderInts(folderId, ctx, con);
+                            if (subfolderIds.isEmpty()) {
+                                retval.setSubfolderIDs(new String[0]);
+                                retval.setSubscribedSubfolders(false);
+                            } else {
+                                final int len = subfolderIds.size();
+                                final String[] arr = new String[len];
+                                for (int i = 0; i < len; i++) {
+                                    arr[i] = Integer.toString(subfolderIds.get(i));
+                                }
+                                retval.setSubfolderIDs(arr);
+                                retval.setSubscribedSubfolders(true);
+                            }
                         }
                     }
                 }

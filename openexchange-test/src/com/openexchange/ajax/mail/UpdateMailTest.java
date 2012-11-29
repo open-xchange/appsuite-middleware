@@ -127,13 +127,13 @@ public class UpdateMailTest extends AbstractMailTest {
         UpdateMailResponse updateResponse = getClient().execute(updateRequest);
 
         TestMail updatedMail = getMail(folder, id);
-        assertTrue("Flag should have been changed", (updatedMail.getFlags() & additionalFlag) == additionalFlag);
+        assertTrue("Flag should have been changed, but are: " + Integer.toBinaryString(updatedMail.getFlags()), (updatedMail.getFlags() & additionalFlag) == additionalFlag);
 
         updateRequest.removeFlags();
         updateResponse = getClient().execute(updateRequest);
 
-        updatedMail = getMail(updateResponse.getFolder(), updateResponse.getID());
-        assertTrue("Flag should have been changed back again", (updatedMail.getFlags() & additionalFlag) == 0);
+        updatedMail = getMail(folder, id);
+        assertTrue("Flag should have been changed back again, but are: " + Integer.toBinaryString(updatedMail.getFlags()), (updatedMail.getFlags() & additionalFlag) == 0);
     }
 
     public void testShouldBeAbleToAddFlags2AllMessages() throws OXException, IOException, SAXException, JSONException {

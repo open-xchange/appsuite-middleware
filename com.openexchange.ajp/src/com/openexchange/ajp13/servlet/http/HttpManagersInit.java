@@ -188,7 +188,7 @@ public final class HttpManagersInit implements Initialization {
         if ('/' == servletPath.charAt(0)) {
             return servletPath;
         }
-        return new StringBuilder(servletPath.length() + 1).append('/').append(servletPath).toString();
+        return new com.openexchange.java.StringAllocator(servletPath.length() + 1).append('/').append(servletPath).toString();
     }
 
     private static Map<Object, Object> getPropertiesFromFile(final File f) throws IOException {
@@ -211,7 +211,7 @@ public final class HttpManagersInit implements Initialization {
     private static void addServletClass(final String name, final String className, final Map<String, Constructor<?>> servletConstructorMap) {
         try {
             if (!checkServletPath(name)) {
-                LOG.error(new StringBuilder("Invalid servlet path: ").append(name).toString());
+                LOG.error(new com.openexchange.java.StringAllocator("Invalid servlet path: ").append(name).toString());
                 return;
             }
             if (servletConstructorMap.containsKey(name)) {

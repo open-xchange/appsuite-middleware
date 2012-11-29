@@ -112,9 +112,9 @@ public final class MessageUtility {
     public static String checkCharset(final MailPart p, final ContentType ct) throws OXException {
         String cs = ct.getCharsetParameter();
         if (!CharsetDetector.isValid(cs)) {
-            StringBuilder sb = null;
+            com.openexchange.java.StringAllocator sb = null;
             if (cs != null) {
-                sb = new StringBuilder(64).append("Illegal or unsupported encoding: \"").append(cs).append("\".");
+                sb = new com.openexchange.java.StringAllocator(64).append("Illegal or unsupported encoding: \"").append(cs).append("\".");
                 mailInterfaceMonitor.addUnsupportedEncodingExceptions(cs);
             }
             cs = CharsetDetector.detectCharset(p.getInputStream());
@@ -136,9 +136,9 @@ public final class MessageUtility {
     public static String checkCharset(final Part p, final ContentType ct) {
         String cs = ct.getCharsetParameter();
         if (!CharsetDetector.isValid(cs)) {
-            StringBuilder sb = null;
+            com.openexchange.java.StringAllocator sb = null;
             if (cs != null) {
-                sb = new StringBuilder(64).append("Illegal or unsupported encoding: \"").append(cs).append("\".");
+                sb = new com.openexchange.java.StringAllocator(64).append("Illegal or unsupported encoding: \"").append(cs).append("\".");
                 mailInterfaceMonitor.addUnsupportedEncodingExceptions(cs);
             }
             cs = CharsetDetector.detectCharset(getPartInputStream(p));

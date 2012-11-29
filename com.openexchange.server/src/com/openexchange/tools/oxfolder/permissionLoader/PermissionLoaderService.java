@@ -78,7 +78,6 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTracker;
@@ -87,6 +86,7 @@ import com.openexchange.concurrent.TimeoutConcurrentMap;
 import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.EnumComponent;
+import com.openexchange.log.LogFactory;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.server.osgi.ServerActivator;
 import com.openexchange.server.services.ServerServiceRegistry;
@@ -683,7 +683,6 @@ public final class PermissionLoaderService implements Runnable {
     private static final class Pair {
 
         public final int folderId;
-
         public final int contextId;
 
         private final int hash;

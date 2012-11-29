@@ -134,7 +134,6 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
-import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.log.LogProperties;
 import com.openexchange.log.Props;
 import com.openexchange.mail.FullnameArgument;
@@ -1622,7 +1621,7 @@ public final class OutlookFolderStorage implements FolderStorage {
         // Load folder data from database
         final MemoryTable memoryTable = MemoryTable.getMemoryTableFor(session);
         final String[] ids = memoryTable.getTree(tree, user.getId(), contextId).getSubfolderIds(locale, parentId, l);
-        if (showPersonalBelowInfoStore(session)) {
+        if (SYSTEM_INFOSTORES.contains(parentId) && showPersonalBelowInfoStore(session)) {
             if (INFOSTORE.equals(parentId)) {
                 // Get personal InfoStore folder
                 final String defaultFolderId = getDefaultInfoStoreFolderId(session);

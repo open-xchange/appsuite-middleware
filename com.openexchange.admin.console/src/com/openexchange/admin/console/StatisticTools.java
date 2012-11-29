@@ -122,6 +122,10 @@ public class StatisticTools extends AbstractJMXTools {
 
     private CLIOption dooperation = null;
     private CLIOption sessionStats = null;
+
+    private CLIOption usmSessionStats = null;
+
+    private CLIOption jsonStats = null;
     
     public static void main(final String args[]) {
         final StatisticTools st = new StatisticTools();
@@ -176,6 +180,20 @@ public class StatisticTools extends AbstractJMXTools {
                 count++;
             }
         }
+        if (null != parser.getOptionValue(this.usmSessionStats)) {
+            if (0 == count) {
+                final MBeanServerConnection initConnection = initConnection(admin, env);
+                System.out.print(getStats(initConnection, "com.openexchange.usm.session", "name", "USMSessionInformation"));
+                count++;
+            }
+        }
+        if (null != parser.getOptionValue(this.jsonStats)) {
+            if (0 == count) {
+                final MBeanServerConnection initConnection = initConnection(admin, env);
+                System.out.print(getStats(initConnection, "org.json", "name", "JSONMBean"));
+                count++;
+            }
+        }
         if (null != parser.getOptionValue(this.allstats)) {
             if (0 == count) {
                 final MBeanServerConnection initConnection = initConnection(admin, env);
@@ -186,6 +204,8 @@ public class StatisticTools extends AbstractJMXTools {
                 System.out.print(getStats(initConnection, "sun.management.RuntimeImpl"));
                 showMemoryPoolData(initConnection);
                 showSysThreadingData(initConnection);
+                System.out.print(getStats(initConnection, "org.json", "name", "JSONMBean"));
+                System.out.print(getStats(initConnection, "com.openexchange.usm.session", "name", "USMSessionInformation"));
             }
             count++;
 
@@ -232,6 +252,8 @@ public class StatisticTools extends AbstractJMXTools {
         this.showoperation = setShortLongOpt(parser, OPT_SHOWOPERATIONS_STATS_SHORT, OPT_SHOWOPERATIONS_STATS_LONG, "shows the operations for the registered beans", false, NeededQuadState.notneeded);
         this.dooperation = setShortLongOpt(parser, OPT_DOOPERATIONS_STATS_SHORT, OPT_DOOPERATIONS_STATS_LONG, "operation", "Syntax is <canonical object name (the first part from showoperatons)>!<operationname>", false);
         this.sessionStats = setShortLongOpt(parser, 'i', "sessionstats", "shows the statistics of the session container", false, NeededQuadState.notneeded);
+        this.usmSessionStats = setShortLongOpt(parser, 'u', "usmsessionstats", "shows the statistics of the USM session container", false, NeededQuadState.notneeded);
+        this.jsonStats = setShortLongOpt(parser, 'j', "jsonstats", "shows the JSON statistics", false, NeededQuadState.notneeded);
     }
 
     private void showMemoryPoolData(final MBeanServerConnection mbc) throws InstanceNotFoundException, AttributeNotFoundException, IntrospectionException, MBeanException, ReflectionException, IOException {

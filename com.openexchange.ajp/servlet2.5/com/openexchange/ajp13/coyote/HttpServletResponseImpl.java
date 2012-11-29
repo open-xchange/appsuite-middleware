@@ -329,11 +329,24 @@ public final class HttpServletResponseImpl implements HttpServletResponse {
 
     @Override
     public void flushBuffer() throws IOException {
-        if (null == writer) {
-            servletOutputStream.flush();
-        } else {
-            writer.flush();
-        }
+        /*-
+         * Since PrintWriter simply delegates flush() invocation to underlying OutputStream,
+         * we can safely call ServletOutputStream.flush() directly.
+         * 
+         * See implementation of flush() inside PrintWriter:
+         *    public void flush() {
+         *        try {
+         *        synchronized (lock) {
+         *        ensureOpen()
+         *        out.flush();
+         *        }
+         *        }
+         *        catch (IOException x) {
+         *        trouble = true;
+         *        }
+         *    }
+         */
+        servletOutputStream.flush();
     }
 
     /**
@@ -370,11 +383,11 @@ public final class HttpServletResponseImpl implements HttpServletResponse {
                 if (!characterEncoding.equalsIgnoreCase(m.group(2))) {
                     final StringBuilder newContentType = new StringBuilder();
                     final MatcherReplacer mr = new MatcherReplacer(m, contentType);
-                    mr.appendLiteralReplacement(newContentType, new StringBuilder().append(m.group(1)).append(characterEncoding).toString());
+                    mr.appendLiteralReplacement(newContentType, new com.openexchange.java.StringAllocator().append(m.group(1)).append(characterEncoding).toString());
                     while (m.find()) {
                         mr.appendLiteralReplacement(
                             newContentType,
-                            new StringBuilder().append(m.group(1)).append(characterEncoding).toString());
+                            new com.openexchange.java.StringAllocator().append(m.group(1)).append(characterEncoding).toString());
                     }
                     mr.appendTail(newContentType);
                     headers.put(CONTENT_TYPE, Collections.singletonList(newContentType.toString()));
@@ -593,7 +606,7 @@ public final class HttpServletResponseImpl implements HttpServletResponse {
         if (url == null) {
             return null;
         } else if (groupwareSessionId == null && httpSessionId == null) {
-            return url.indexOf('?') == -1 ? new StringBuilder(url).append("?jvm=").append(AJPv13Config.getJvmRoute()).toString() : url;
+            return url.indexOf('?') == -1 ? new com.openexchange.java.StringAllocator(url).append("?jvm=").append(AJPv13Config.getJvmRoute()).toString() : url;
         }
         String path = url;
         String query = "";
@@ -608,7 +621,7 @@ public final class HttpServletResponseImpl implements HttpServletResponse {
             anchor = path.substring(pound);
             path = path.substring(0, pound);
         }
-        final StringBuilder sb = new StringBuilder(path);
+        final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(path);
         if (httpSessionId != null && sb.length() > 0) {
             sb.append('/');
             sb.append(AJPv13RequestHandler.JSESSIONID_URI);
@@ -968,7 +981,7 @@ public final class HttpServletResponseImpl implements HttpServletResponse {
             errorMsgStr = errorMsgStr.replaceFirst("#DATE#", HEADER_DATE_FORMAT.format(new Date(System.currentTimeMillis())));
         }
         errorMsgStr = errorMsgStr.replaceFirst("#VERSION#", Version.getVersionString());
-        setContentType(new StringBuilder("text/html; charset=").append(getCharacterEncoding()).toString());
+        setContentType(new com.openexchange.java.StringAllocator("text/html; charset=").append(getCharacterEncoding()).toString());
         final byte[] errormessage = errorMsgStr.getBytes(Charsets.forName(getCharacterEncoding()));
         setContentLength(errormessage.length);
         return errormessage;
@@ -1005,7 +1018,7 @@ public final class HttpServletResponseImpl implements HttpServletResponse {
         if (null == encoding) {
             encoding = "UTF-8";
         }
-        setContentType(new StringBuilder("text/html; charset=").append(encoding).toString());
+        setContentType(new com.openexchange.java.StringAllocator("text/html; charset=").append(encoding).toString());
         final byte[] errormessage = errorMsgStr.getBytes(Charsets.forName(encoding));
         setContentLength(errormessage.length);
         return errormessage;

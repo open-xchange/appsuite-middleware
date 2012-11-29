@@ -75,7 +75,7 @@ public final class HTMLUtils {
         final Matcher matcher = BR.matcher(html);
         while (matcher.find()) {
             final String spaces = matcher.group(1);
-            final StringBuilder replacement = new StringBuilder("<br />");
+            final com.openexchange.java.StringAllocator replacement = new com.openexchange.java.StringAllocator("<br />");
             for (int i = 0; i < spaces.length(); i++) {
                 replacement.append("&#160;");
             }

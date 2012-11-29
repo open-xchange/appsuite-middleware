@@ -37,9 +37,7 @@
  * only if the new code is made subject to such option by the copyright
  * holder.
  * 
- * Portions Copyright 2012 OPEN-XCHANGE
- * OPEN-XCHANGE elects to include this software in this distribution under the
- * GPL Version 2 license.
+ * Portions Copyright 2012 OPEN-XCHANGE, licensed under GPL Version 2.
  */
 
 package com.openexchange.http.grizzly.service.http;

@@ -51,6 +51,7 @@ package com.openexchange.index.solr.internal.querybuilder;
 
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import org.apache.commons.logging.Log;
@@ -120,14 +121,17 @@ public class SimpleQueryBuilder implements SolrQueryBuilder {
             Object searchTerm = parameters.getSearchTerm();
             QueryTranslator translator = translators.get(searchHandler.toString().toLowerCase());
             SolrQuery solrQuery = new SolrQuery();
-            // FIXME: set query type based on search handler
+            String handlerName = config.getRawMapping().get(Configuration.HANDLER + '.' + searchHandler.toString().toLowerCase());
+            if (handlerName == null) {
+                throw new IllegalArgumentException("No solr search handler is configured for '" + searchHandler.toString().toLowerCase() + "'");
+            }
             switch (searchHandler) {
                 case SIMPLE: {
                     if (searchTerm == null || !(searchTerm instanceof String)) {
                         throw new IllegalArgumentException("Parameter 'search term' must not be null and of type java.lang.String!");
                     }
                     solrQuery.setQuery((String) searchTerm);
-                    solrQuery.setQueryType("simpleSearch");
+                    solrQuery.setQueryType(handlerName);
                     break;
                 }
 
@@ -140,13 +144,13 @@ public class SimpleQueryBuilder implements SolrQueryBuilder {
                             "Could not find a translator for search handler '" + searchHandler.toString() + "'.");
                     }
                     solrQuery.setQuery(translator.translate(searchTerm));
-                    solrQuery.setQueryType("customSearch");
+                    solrQuery.setQueryType(handlerName);
                     break;
                 }
 
                 case ALL_REQUEST: {
                     solrQuery.setQuery(translator.translate(searchTerm));
-                    solrQuery.setQueryType("allSearch");
+                    solrQuery.setQueryType(handlerName);
                     break;
                 }
 
@@ -160,7 +164,7 @@ public class SimpleQueryBuilder implements SolrQueryBuilder {
                             "Could not find a translator for search handler '" + searchHandler.toString() + "'.");
                     }
                     solrQuery.setQuery(translator.translate(indexIds));
-                    solrQuery.setQueryType("getSearch");
+                    solrQuery.setQueryType(handlerName);
                     break;
                 }
 
@@ -210,9 +214,22 @@ public class SimpleQueryBuilder implements SolrQueryBuilder {
 
         SolrField solrSortField = fieldMapper.solrFieldFor(sortField);
         if (solrSortField != null) {
+            String parameterName = solrSortField.parameterName();
+            Set<String> keys = config.getKeys(Configuration.FIELD);
+            if (!keys.contains(Configuration.FIELD + '.' + parameterName)) {
+                return;
+            }
+            
+            List<String> indexFields = config.getIndexFields(Configuration.FIELD + '.' + parameterName);
+            if (indexFields == null || indexFields.isEmpty()) {
+                return;
+            }
+            
             Order orderParam = parameters.getOrder();
             ORDER order = orderParam == null ? ORDER.desc : orderParam.equals(Order.DESC) ? ORDER.desc : ORDER.asc;
-            query.setSortField(solrSortField.solrName(), order);
+            for (String indexField : indexFields) {
+                query.addSortField(indexField, order);
+            }
         }
     }
 

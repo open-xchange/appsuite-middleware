@@ -112,8 +112,8 @@ public abstract class AbstractMailJob implements IndexingJob {
         ChunkPerformer.perform(new Performable() {
             @Override
             public int perform(int off, int len) throws OXException {
-                if (LOG.isDebugEnabled()) {
-                    LOG.debug("Adding a chunk of mails of folder " + info.folder + ": " + info.toString());
+                if (LOG.isTraceEnabled()) {
+                    LOG.trace("Adding a chunk of mails of folder " + info.folder + ": " + info.toString());
                 }
                 
                 List<String> subList = idsToAdd.subList(off, len);  
@@ -181,8 +181,8 @@ public abstract class AbstractMailJob implements IndexingJob {
         ChunkPerformer.perform(new Performable() {
             @Override
             public int perform(int off, int len) throws OXException {
-                if (LOG.isDebugEnabled()) {
-                    LOG.debug("Deleting a chunk of mails in folder " + info.folder + ": " + info.toString());
+                if (LOG.isTraceEnabled()) {
+                    LOG.trace("Deleting a chunk of mails in folder " + info.folder + ": " + info.toString());
                 }
                 
                 List<String> subList = idsToDelete.subList(off, len);
@@ -239,8 +239,8 @@ public abstract class AbstractMailJob implements IndexingJob {
         ChunkPerformer.perform(new Performable() {            
             @Override
             public int perform(int off, int len) throws OXException {
-                if (LOG.isDebugEnabled()) {
-                    LOG.debug("Adding a chunk of mails of folder " + info.folder + ": " + info.toString());
+                if (LOG.isTraceEnabled()) {
+                    LOG.trace("Adding a chunk of mails of folder " + info.folder + ": " + info.toString());
                 }
                 
                 List<String> subList = changedMails.subList(off, len);

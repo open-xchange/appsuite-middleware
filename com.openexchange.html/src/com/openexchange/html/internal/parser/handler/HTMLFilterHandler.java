@@ -284,7 +284,7 @@ public final class HTMLFilterHandler implements HtmlHandler {
                         BufferedReader reader = null;
                         try {
                             reader = new BufferedReader(new InputStreamReader(new FileInputStream(whitelist), "US-ASCII"));
-                            final StringBuilder sb = new StringBuilder();
+                            final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator();
                             String line = null;
                             while ((line = reader.readLine()) != null) {
                                 if (line.length() > 0 && '#' != line.charAt(0)) {

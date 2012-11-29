@@ -1,3 +1,30 @@
+* 2012-11-27 - thorben.betten@open-xchange.com
+
+ - Fix for bug 23978: Added null guard
+ - Fix for bug 23971: Generate default file name if missing
+
+* 2012-11-26 - thorben.betten@open-xchange.com
+
+ - Fix for bug 23955: Added null guard when checking permission bit
+
+* 2012-11-25 - thorben.betten@open-xchange.com
+
+ - Fix for bug 23898: Quoting replacement string
+ - Fix for bug 23698: Added some imports to preview/Tika bundle
+
+* 2012-11-24 - thorben.betten@open-xchange.com
+
+ - Fix for bug 23781: Fall-back for failed batch operation; retry with one-by-one operation
+
+* 2012-11-23 - thorben.betten@open-xchange.com
+
+ - Fix for bug 23906: Fixed possible NPE
+ - Fix for bug 23894: Deal with possible delegating mail provider
+ - Fix for bug 23696: Dealing with content outside of <html> tag when quotinq
+ - Fix for bug 23939: Fixed attachment token for nested messages
+ - Fix for bug 23943: Dealing with possibly wrapping mail folder storage implementation
+ - Fix for bug 23838: Manually delete subscriptions on folder deletion
+
 * 2012-11-22 - tobias.friedrich@open-xchange.com
 
  - Fix for bug 23891: Return non-existing images as-is and don't apply implicit rotation and compression transformations on 
@@ -169,7 +196,7 @@
 
 * 2012-11-02 - tobias.friedrich@open-xchange.com
 
- - Fix for bug 23549: Subtracting client timezone offset when parsing creation date 
+ - Fix for bug 23549: Subtracting client timezone offset when parsing creation date
 
 * 2012-11-02 - thorben.betten@open-xchange.com
 

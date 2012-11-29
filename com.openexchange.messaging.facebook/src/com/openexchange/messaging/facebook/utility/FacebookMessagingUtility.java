@@ -49,10 +49,6 @@
 
 package com.openexchange.messaging.facebook.utility;
 
-import java.io.IOException;
-import java.io.OutputStream;
-import java.io.OutputStreamWriter;
-import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
 import java.io.Writer;
 import java.net.URLEncoder;
@@ -75,10 +71,10 @@ import javax.xml.transform.stream.StreamResult;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.AllocatingStringWriter;
 import com.openexchange.messaging.MessagingContent;
 import com.openexchange.messaging.MessagingExceptionCodes;
 import com.openexchange.messaging.MessagingField;
@@ -116,7 +112,7 @@ public final class FacebookMessagingUtility {
      */
     public static String toString(Node node) {
         try {
-            final StringWriter writer = new StringWriter(1024);
+            final AllocatingStringWriter writer = new AllocatingStringWriter(1024);
             printDocument(node, writer);
             return writer.toString();
         } catch (final TransformerException e) {

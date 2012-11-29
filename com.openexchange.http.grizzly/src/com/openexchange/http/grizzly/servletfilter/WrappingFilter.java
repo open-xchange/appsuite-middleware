@@ -58,12 +58,12 @@ import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import com.openexchange.http.grizzly.wrapper.HttpServletRequestWrapper;
-import com.openexchange.http.grizzly.wrapper.HttpServletResponseWrapper;
+import com.openexchange.http.grizzly.http.servlet.HttpServletRequestWrapper;
+import com.openexchange.http.grizzly.http.servlet.HttpServletResponseWrapper;
 
 /**
- * {@link WrappingFilter} - Wrap the Request in {@link HttpServletResponseWrapper} and the Response in {@link HttpServletResponseWrapper} to
- * achieve feature parity with the ajp based implementation.
+ * {@link WrappingFilter} - Wrap the Request in {@link HttpServletResponseWrapper} and the Response in {@link HttpServletResponseWrapper}
+ * and creates a new HttpSession if needed to achieve feature parity with the ajp based implementation.
  * 
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
@@ -76,10 +76,14 @@ public class WrappingFilter implements Filter {
 
     @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
+        // Wrap request and response
         HttpServletRequest httpServletRequest = (HttpServletRequest) request;
         HttpServletRequestWrapper httpServletRequestWrapper = new HttpServletRequestWrapper(httpServletRequest);
         HttpServletResponse httpServletResponse = (HttpServletResponse) response;
         HttpServletResponseWrapper httpServletResponseWrapper = new HttpServletResponseWrapper(httpServletResponse);
+        
+        // Create a Session if needed
+        httpServletRequest.getSession(true);
         chain.doFilter(httpServletRequestWrapper, httpServletResponseWrapper);
     }
 

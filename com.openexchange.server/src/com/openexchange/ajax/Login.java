@@ -862,7 +862,7 @@ public class Login extends AJAXServlet {
         if (confReference.get().insecure) {
             final String oldIP = session.getLocalIp();
             if (null != newIP && !newIP.equals(oldIP)) { // IPs differ
-                LOG.info(new StringBuilder("Updating sessions IP address. authID: ").append(session.getAuthId()).append(", sessionID: ").append(
+                LOG.info(new com.openexchange.java.StringAllocator("Updating sessions IP address. authID: ").append(session.getAuthId()).append(", sessionID: ").append(
                     session.getSessionID()).append(", old ip: ").append(oldIP).append(", new ip: ").append(newIP).toString());
                 session.setLocalIp(newIP);
             }
@@ -1104,7 +1104,7 @@ public class Login extends AJAXServlet {
             }
 
             private void handleException(final Exception e, final HttpServletRequest request, final HttpServletResponse response, final boolean sendBody) throws IOException, ServletException {
-                final StringBuilder realm = new StringBuilder(32).append((request.isSecure()) ? "https://" : "http://");
+                final com.openexchange.java.StringAllocator realm = new com.openexchange.java.StringAllocator(32).append((request.isSecure()) ? "https://" : "http://");
                 realm.append(request.getLocalName());
                 OAuthServlet.handleException(response, e, realm.toString(), sendBody);
             }

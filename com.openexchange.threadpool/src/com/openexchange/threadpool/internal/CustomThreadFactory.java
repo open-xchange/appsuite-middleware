@@ -114,13 +114,13 @@ public final class CustomThreadFactory implements java.util.concurrent.ThreadFac
         /*
          * Create thread
          */
-        final CustomThread t = new CustomThread(r, getThreadName(threadNum, new StringBuilder(len).append(namePrefix)));
+        final CustomThread t = new CustomThread(r, getThreadName(threadNum, new com.openexchange.java.StringAllocator(len).append(namePrefix)));
         t.setUncaughtExceptionHandler(new CustomUncaughtExceptionhandler());
         LogProperties.cloneLogProperties(t);
         return t;
     }
 
-    private static String getThreadName(final int threadNumber, final StringBuilder sb) {
+    private static String getThreadName(final int threadNumber, final com.openexchange.java.StringAllocator sb) {
         for (int i = threadNumber; i < 1000000; i *= 10) {
             sb.append('0');
         }

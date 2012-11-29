@@ -72,6 +72,14 @@ public class HazelcastStoredSession extends StoredSession implements DataSeriali
 
     /**
      * Initializes a new {@link HazelcastStoredSession}.
+     */
+    public HazelcastStoredSession() {
+        super();
+        this.lastAccess = System.currentTimeMillis();
+    }
+
+    /**
+     * Initializes a new {@link HazelcastStoredSession}.
      * 
      * @param session
      */
@@ -80,14 +88,6 @@ public class HazelcastStoredSession extends StoredSession implements DataSeriali
         this.lastAccess = System.currentTimeMillis();
     }
     
-    /**
-     * Initializes a new {@link HazelcastStoredSession}.
-     */
-    public HazelcastStoredSession() {
-        super();
-        this.lastAccess = System.currentTimeMillis();
-    }
-
     /**
      * Gets the last-accessed time stamp.
      * 

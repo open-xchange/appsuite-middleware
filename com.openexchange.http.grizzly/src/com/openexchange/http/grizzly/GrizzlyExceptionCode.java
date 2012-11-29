@@ -70,7 +70,11 @@ public enum GrizzlyExceptionCode implements OXExceptionCode {
     /** The maximum number of HTTP sessions (%1$n) is exceeded */
     MAX_NUMBER_OF_SESSIONS_REACHED(MAX_NUMBER_OF_SESSIONS_REACHED_MSG, CATEGORY_ERROR, 3),
     /** The maximum number of HTTP sessions (%1$n) is exceeded */
-    GRIZZLY_FEATURE_MISSING(GRIZZLY_FEATURE_MISSING_MSG, CATEGORY_SERVICE_DOWN, 4)
+    GRIZZLY_FEATURE_MISSING(GRIZZLY_FEATURE_MISSING_MSG, CATEGORY_SERVICE_DOWN, 4),
+    /** File "%1$s" could not be found */
+    FILE_NOT_FOUND(FILE_NOT_FOUND_MSG, Category.CATEGORY_ERROR, 5),
+    /** An I/O error occurred: %1$s */
+    IO_ERROR(IO_ERROR_MSG, Category.CATEGORY_ERROR, 6),
     ;
 
     private final String message;

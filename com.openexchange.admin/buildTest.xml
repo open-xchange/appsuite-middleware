@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="administration RMI tests" basedir=".">
+
+    <property name="bundlesDir" value="bundles"/>
+    <property name="junitjar" value="com.openexchange.test/lib"/>
+    <property name="logDir" value="log"/>
+
+    <property name="testSrcDir" value="test"/>
+    <property name="testBinDir" value="test-build"/>
+
+    <path id="rmiClasspath">
+        <fileset dir="${bundlesDir}">
+            <include name="com.openexchange.admin.rmi.jar"/>
+        </fileset>
+        <fileset dir="${junitjar}">
+            <include name="junit*.jar"/>
+        </fileset>
+    </path>
+
+    <target name="clean">
+        <delete dir="${testBinDir}"/>
+        <delete dir="${logDir}"/>
+    </target>
+
+    <target name="compileTests" depends="clean">
+        <mkdir dir="${testBinDir}"/>
+        <javac srcdir="${testSrcDir}" destdir="${testBinDir}" debug="true" encoding="US-ASCII" source="1.6" target="1.6" includeAntRuntime="false" debuglevel="lines,vars,source">
+            <classpath>
+                <path refid="rmiClasspath"/>
+            </classpath>
+        </javac>
+    </target>
+
+    <target name="runTests">
+        <delete dir="${logDir}"/>
+        <mkdir dir="${logDir}"/>
+        <junit errorProperty="test.failed" failureProperty="test.failed" showoutput="yes" printsummary="yes">
+            <classpath>
+                <path refid="rmiClasspath"/>
+                <pathelement path="${testBinDir}"/>
+            </classpath>
+            <test name="com.openexchange.admin.rmi.AdminCoreTest" todir="${logDir}"/>
+            <test name="com.openexchange.admin.rmi.ResourceTest" todir="${logDir}"/>
+            <test name="com.openexchange.admin.rmi.UserTest" todir="${logDir}"/>
+            <test name="com.openexchange.admin.rmi.GroupTest" todir="${logDir}"/>
+            <formatter type="xml"/>
+            <sysproperty key="rmi_test_host" value="${rmiTestHost}"/>
+        </junit>
+    </target>
+
+</project>

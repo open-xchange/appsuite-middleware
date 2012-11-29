@@ -99,7 +99,7 @@ public abstract class GenericSubscribeServiceTestHelpers extends TestCase {
             e.printStackTrace();
         }
 
-        SimConfigurationService config = new SimConfigurationService();
+        SimConfigurationService config = new SimConfigurationService(System.getProperty("openexchange.propdir"));
         //test with the real crawlers (switch for automated tests (Hudson) / local tests)
         config.stringProperties.put("com.openexchange.subscribe.crawler.path", System.getProperty("crawlersConf"));
         // config.stringProperties.put("com.openexchange.subscribe.crawler.path", "conf/crawlers/");

@@ -79,7 +79,7 @@ public class SimpleQueryBuilderTest extends SimpleQueryBuilder {
     }
 
     @Test
-    public void testQueryBuilder() throws Exception {
+    public void testFilterQueries() throws Exception {
         String field1 = "field1";
         String field2 = "field2";
         String value1 = "value1";

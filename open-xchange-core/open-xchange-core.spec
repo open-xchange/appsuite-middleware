@@ -400,10 +400,16 @@ ox_update_permissions "/opt/open-xchange/etc/ox-scriptconf.sh" root:root 644
 %config(noreplace) /opt/open-xchange/etc/contextSets/index.yml
 
 %changelog
+* Mon Nov 26 2012 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2012-11-28
 * Wed Nov 14 2012 Marcus Klein <marcus.klein@open-xchange.com>
 Sixth release candidate for 6.22.1
 * Tue Nov 13 2012 Marcus Klein <marcus.klein@open-xchange.com>
 Fifth release candidate for 6.22.1
+* Mon Nov 12 2012 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2012-11-08
+* Thu Nov 08 2012 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2012-11-08
 * Tue Nov 06 2012 Marcus Klein <marcus.klein@open-xchange.com>
 Fourth release candidate for 6.22.1
 * Mon Nov 05 2012 Marcus Klein <marcus.klein@open-xchange.com>
@@ -434,10 +440,6 @@ Fourth release candidate for 6.22.0
 Third release candidate for 6.22.0
 * Thu Oct 04 2012 Marcus Klein <marcus.klein@open-xchange.com>
 Second release candidate for 6.22.0
-* Tue Sep 04 2012 Marcus Klein <marcus.klein@open-xchange.com>
-First release candidate for 6.23.0
-* Mon Sep 03 2012 Marcus Klein <marcus.klein@open-xchange.com>
-prepare for next EDP drop
 * Tue Aug 21 2012 Marcus Klein <marcus.klein@open-xchange.com>
 First release candidate for 6.22.0
 * Mon Aug 20 2012 Marcus Klein <marcus.klein@open-xchange.com>

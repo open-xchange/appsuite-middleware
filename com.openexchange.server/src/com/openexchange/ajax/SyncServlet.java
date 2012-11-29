@@ -72,10 +72,10 @@ import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
+import com.openexchange.java.AllocatingStringWriter;
 import com.openexchange.mail.MailServletInterface;
 import com.openexchange.monitoring.MonitoringInfo;
 import com.openexchange.session.Session;
-import com.openexchange.tools.UnsynchronizedStringWriter;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.oxfolder.OXFolderExceptionCode;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
@@ -185,7 +185,7 @@ public class SyncServlet extends PermissionServlet {
             ResponseWriter.write(new Response().setException(e1), writer, localeFrom(sessionObj));
             return;
         }
-		final UnsynchronizedStringWriter strWriter = new UnsynchronizedStringWriter();
+		final AllocatingStringWriter strWriter = new AllocatingStringWriter();
 		final JSONWriter jsonWriter = new JSONWriter(strWriter);
 		Date lastModifiedDate = null;
 		/*

@@ -529,7 +529,7 @@ public class ContactServiceImpl extends DefaultContactService {
         /*
          * check folder
          */
-        FolderObject folder = Tools.getFolder(contextID, folderID, deleted);
+        FolderObject folder = Tools.getFolder(contextID, folderID);
         Check.isContactFolder(folder, session);
         /*
          * check general permissions

@@ -124,7 +124,7 @@ public final class CookieParser {
                     continue;
                 }
                 if (LOG.isInfoEnabled()) {
-                    LOG.info(new StringBuilder(32).append("Special cookie ").append(name).append(" not handled, yet!"));
+                    LOG.info(new com.openexchange.java.StringAllocator(32).append("Special cookie ").append(name).append(" not handled, yet!"));
                 }
             }
             if (prevEnd != -1) {
@@ -183,7 +183,7 @@ public final class CookieParser {
             throw new AJPv13Exception(AJPv13Exception.AJPCode.INVALID_COOKIE_HEADER, true, headerValue);
         }
         if (DEBUG) {
-            final StringBuilder sb = new StringBuilder(256).append("Parsed Cookies:\n");
+            final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(256).append("Parsed Cookies:\n");
             for (final Cookie cookie : cookieList) {
                 sb.append('\'').append(cookie.getName()).append("'='").append(cookie.getValue()).append("'\n");
             }

@@ -67,6 +67,7 @@ import org.osgi.framework.FrameworkListener;
 import org.osgi.service.http.HttpService;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
+import com.openexchange.http.grizzly.GrizzlyConfig;
 import com.openexchange.http.grizzly.GrizzlyExceptionCode;
 import com.openexchange.http.grizzly.addon.GrizzlOXAddOn;
 import com.openexchange.http.grizzly.service.atmosphere.AtmosphereService;
@@ -143,21 +144,9 @@ public class GrizzlyActivator extends HousekeepingActivator {
              */
             initializeServiceRegistry(grizzlyServiceRegistry);
 
-            // create addons based on given configuration
-            final ConfigurationService configService = grizzlyServiceRegistry.getService(ConfigurationService.class);
-            if (configService == null) {
-                throw GrizzlyExceptionCode.NEEDED_SERVICE_MISSING.create(ConfigurationService.class.getName());
-            }
-
-            /*
-             * read config properties
-             */
-            final String httpHost = configService.getProperty("com.openexchange.http.grizzly.httpNetworkListenerHost", "0.0.0.0");
-            final int httpPort = configService.getIntProperty("com.openexchange.http.grizzly.httpNetworkListenerPort", 8080);
-            final boolean hasJMXEnabled = configService.getBoolProperty("com.openexchange.http.grizzly.hasJMXEnabled", false);
-            final boolean hasWebsocketsEnabled = configService.getBoolProperty("com.openexchange.http.grizzly.hasWebSocketsEnabled", false);
-            final boolean hasCometEnabled = configService.getBoolProperty("com.openexchange.http.grizzly.hasCometEnabled", false);
-            final int maxRequestParameters = configService.getIntProperty("com.openexchange.http.grizzly.maxRequestParameters", 30);
+            
+            GrizzlyConfig grizzlyConfig = GrizzlyConfig.getInstance();
+            grizzlyConfig.start();
 
             /*
              * create, configure and start server
@@ -165,21 +154,21 @@ public class GrizzlyActivator extends HousekeepingActivator {
             grizzly = new HttpServer();
             
             ServerConfiguration serverConfiguration = grizzly.getServerConfiguration();
-            serverConfiguration.setMaxRequestParameters(maxRequestParameters);
+            serverConfiguration.setMaxRequestParameters(grizzlyConfig.getMaxRequestParameters());
 
-            final NetworkListener networkListener = new NetworkListener("http-listener", httpHost, 8080);
+            final NetworkListener networkListener = new NetworkListener("http-listener", grizzlyConfig.getHttpHost(), grizzlyConfig.getHttpPort());
             // networkListener.setChunkingEnabled(false);
             TCPNIOTransport configuredTcpNioTransport = buildTcpNioTransport();
             networkListener.setTransport(configuredTcpNioTransport);
 
-            if (hasJMXEnabled) {
+            if (grizzlyConfig.isJMXEnabled()) {
                 if (LOG.isInfoEnabled()) {
                     LOG.info("Enabling JMX for Grizzly server.");
                 }
                 grizzly.getServerConfiguration().setJmxEnabled(true);
             }
 
-            if (hasWebsocketsEnabled) {
+            if (grizzlyConfig.isWebsocketsEnabled()) {
                 if (LOG.isInfoEnabled()) {
                     LOG.info("Enabling WebSockets for Grizzly server.");
                 }
@@ -198,7 +187,7 @@ public class GrizzlyActivator extends HousekeepingActivator {
                 });
             }
 
-            if (hasCometEnabled) {
+            if (grizzlyConfig.isCometEnabled()) {
                 if (LOG.isInfoEnabled()) {
                     LOG.info("Enabling Comet for Grizzly server.");
                 }
@@ -221,9 +210,9 @@ public class GrizzlyActivator extends HousekeepingActivator {
 
             if (LOG.isInfoEnabled()) {
                 LOG.info(String.format(
-                    "Registering Grizzly HttpNetworkListener on host: %s and port: %d",
-                    httpHost,
-                    Integer.valueOf(httpPort)));
+                    "Registering Grizzly HttpNetworkListener on host: %s and port: %s",
+                    grizzlyConfig.getHttpHost(),
+                    grizzlyConfig.getHttpPort()));
             }
             grizzly.addListener(networkListener);
             grizzly.start();
