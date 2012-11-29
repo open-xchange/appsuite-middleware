@@ -131,6 +131,11 @@ public final class SMTPTransport extends MailTransport {
 
     private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(SMTPTransport.class));
 
+    /**
+     * The SMTP protocol name.
+     */
+    private static final String SMTP = SMTPProvider.PROTOCOL_SMTP.getName();
+
     private static final class SaslSmtpLoginAction implements PrivilegedExceptionAction<Object> {
 
         private final Transport transport;
@@ -544,7 +549,7 @@ public final class SMTPTransport extends MailTransport {
              * Transport message
              */
             final long start = System.currentTimeMillis();
-            final Transport transport = getSMTPSession().getTransport(SMTPProvider.PROTOCOL_SMTP.getName());
+            final Transport transport = getSMTPSession().getTransport(SMTP);
             try {
                 final String server = IDNA.toASCII(smtpConfig.getServer());
                 final int port = smtpConfig.getPort();
@@ -592,7 +597,7 @@ public final class SMTPTransport extends MailTransport {
             checkRecipients(recipients);
             try {
                 final long start = System.currentTimeMillis();
-                final Transport transport = getSMTPSession().getTransport(SMTPProvider.PROTOCOL_SMTP.getName());
+                final Transport transport = getSMTPSession().getTransport(SMTP);
                 try {
                     final String server = IDNA.toASCII(smtpConfig.getServer());
                     final int port = smtpConfig.getPort();
@@ -670,7 +675,7 @@ public final class SMTPTransport extends MailTransport {
                         System.currentTimeMillis() - startPrep).append("msec").toString());
                 }
                 final long start = System.currentTimeMillis();
-                final Transport transport = getSMTPSession().getTransport(SMTPProvider.PROTOCOL_SMTP.getName());
+                final Transport transport = getSMTPSession().getTransport(SMTP);
                 try {
                     final String server = IDNA.toASCII(smtpConfig.getServer());
                     final int port = smtpConfig.getPort();
@@ -780,7 +785,7 @@ public final class SMTPTransport extends MailTransport {
         // Connect to SMTP server
         final Transport transport;
         try {
-            transport = getSMTPSession().getTransport(SMTPProvider.PROTOCOL_SMTP.getName());
+            transport = getSMTPSession().getTransport(SMTP);
         } catch (final NoSuchProviderException e) {
             throw MimeMailException.handleMessagingException(e);
         }
