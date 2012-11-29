@@ -8550,6 +8550,11 @@ msgid ""
 "again."
 msgstr ""
 
+#. Invoked method is not supported.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:529
+msgid "Invoked method is not supported."
+msgstr ""
+
 #. *
 #. * There was an issue in authenticating your E-Mail password. This may be because of a recent password change. To continue please logout
 #. * now and then log back in with your most current password. (server=%1$s | user=%2$s)
