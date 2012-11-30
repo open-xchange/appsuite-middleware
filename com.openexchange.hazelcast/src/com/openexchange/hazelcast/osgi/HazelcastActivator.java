@@ -186,30 +186,10 @@ public class HazelcastActivator extends HousekeepingActivator {
                  * Check initially available nodes
                  */
                 if (nodes.isEmpty()) {
-                    /*
-                     * Timeout before we assume we are either the first or alone in the cluster
-                     */
-                    final long delay = getDelay();
-                    if (delay < 0) {
-                        if (InitMode.INITIALIZED.equals(init(nodes, false, st, logger))) {
-                            if (infoEnabled) {
-                                logger.info("\nHazelcast:\n\tInitialized Hazelcast instance with empty Open-Xchange nodes.\n");
-                            }
+                    if (InitMode.INITIALIZED.equals(init(nodes, false, st, logger))) {
+                        if (infoEnabled) {
+                            logger.info("\nHazelcast:\n\tInitialized Hazelcast instance with empty Open-Xchange nodes.\n");
                         }
-                    } else {
-                        final Runnable task = new Runnable() {
-
-                            @Override
-                            public void run() {
-                                if (InitMode.INITIALIZED.equals(init(Collections.<InetAddress> emptyList(), false, st, logger))) {
-                                    if (infoEnabled) {
-                                        logger.info("\nHazelcast:\n\tInitialized Hazelcast instance via delayed one-shot task after " + 
-                                            delay + "msec.\n");
-                                    }
-                                }
-                            }
-                        };
-                        getService(TimerService.class).schedule(task, delay);
                     }
                 } else {
                     /*
@@ -279,17 +259,6 @@ public class HazelcastActivator extends HousekeepingActivator {
         registerService(CommandProvider.class, new UtilCommandProvider(this), null);
     }
 
-    /**
-     * Gets the delay in milliseconds.
-     * 
-     * @return The delay milliseconds
-     */
-    long getDelay() {
-        return -1L;
-        // final String delay = getService(ConfigurationService.class).getProperty("com.openexchange.hazelcast.startupDelay", "60000");
-        // return TimeSpanParser.parseTimespan(delay).longValue();
-    }
-
     public static final class UtilCommandProvider implements CommandProvider {
 
         private final HazelcastActivator activator;
@@ -302,7 +271,7 @@ public class HazelcastActivator extends HousekeepingActivator {
         @Override
         public String getHelp() {
             final StringBuilder help = new StringBuilder();
-            help.append("\taddnode - Add a solr node.\n");
+            help.append("\taddnode - Add a hazelcast node.\n");
             return help.toString();
         }
 
