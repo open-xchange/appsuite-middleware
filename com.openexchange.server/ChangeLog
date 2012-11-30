@@ -1,3 +1,7 @@
+* 2012-11-30 - dennis.sieben@open-xchange.com
+
+ - Fix for bug 23963: Adjusted error messages parsing
+
 * 2012-11-29 - martin.herfurth@open-xchange.com
 
  - Fix for bug 24005: Fixed typos.
