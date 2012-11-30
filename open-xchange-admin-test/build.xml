@@ -7,13 +7,15 @@
 
     <property name="testSrcDir" value="test"/>
     <property name="testBinDir" value="test-build"/>
+    <property name="libDir" value="lib"/>
+
 
     <path id="rmiClasspath">
         <fileset dir="${bundlesDir}">
-            <include name="com.openexchange.admin.rmi.jar"/>
+            <include name="**/*.jar"/>
         </fileset>
-        <fileset dir="${junitjar}">
-            <include name="junit*.jar"/>
+        <fileset dir="${libDir}">
+            <include name="*.jar"/>
         </fileset>
     </path>
 
