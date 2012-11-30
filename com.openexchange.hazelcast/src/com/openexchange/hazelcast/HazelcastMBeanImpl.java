@@ -49,10 +49,14 @@
 
 package com.openexchange.hazelcast;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
 import javax.management.MBeanException;
 import javax.management.NotCompliantMBeanException;
 import javax.management.StandardMBean;
 import com.hazelcast.core.HazelcastInstance;
+import com.hazelcast.core.Member;
 import com.openexchange.hazelcast.osgi.HazelcastActivator;
 
 
@@ -98,6 +102,52 @@ public final class HazelcastMBeanImpl extends StandardMBean implements Hazelcast
         }
         final Object value = hazelcastInstance.getMap(MAP_NAME).get(name);
         return null == value ? "null" : value.toString();
+    }
+
+    @Override
+    public List<String> listMembers() throws MBeanException {
+        return getHazelcastInstance().getConfig().getNetworkConfig().getJoin().getTcpIpConfig().getMembers();
+    }
+
+    @Override
+    public void addMember(String member) throws MBeanException {
+        getHazelcastInstance().getConfig().getNetworkConfig().getJoin().getTcpIpConfig().addMember(member);
+    }
+
+    @Override
+    public void removeMember(String member) throws MBeanException {
+        List<String> members = listMembers();
+        if (null != members) {
+            if (members.remove(member)) {
+                getHazelcastInstance().getConfig().getNetworkConfig().getJoin().getTcpIpConfig().setMembers(members);
+            }
+        }        
+    }
+    
+    @Override
+    public List<String> listClusterMembers() throws MBeanException {
+        Set<Member> members = getHazelcastInstance().getCluster().getMembers();
+        List<String> clusterMembers = new ArrayList<String>();
+        if (null != members) {
+            for (Member member : members) {
+                clusterMembers.add(member.getInetSocketAddress().toString());
+            }
+        }
+        return clusterMembers;
+    }
+
+    /**
+     * Gets the current Hazelcast instance, throwing an exception if there is none.
+     * 
+     * @return The Hazelcast instance
+     * @throws MBeanException If there's no Hazelcast instance
+     */
+    private static HazelcastInstance getHazelcastInstance() throws MBeanException {
+        HazelcastInstance hazelcastInstance = HazelcastActivator.REF_HAZELCAST_INSTANCE.get();
+        if (null == hazelcastInstance) {
+            throw new MBeanException(null, "HazelcastInstance is absent.");
+        }
+        return hazelcastInstance;
     }
 
 }

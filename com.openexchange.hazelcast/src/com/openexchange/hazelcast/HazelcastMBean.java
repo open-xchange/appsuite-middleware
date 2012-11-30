@@ -49,6 +49,7 @@
 
 package com.openexchange.hazelcast;
 
+import java.util.List;
 import javax.management.MBeanException;
 
 /**
@@ -85,4 +86,37 @@ public interface HazelcastMBean {
      * @return The associated value or <code>null</code>
      */
     String get(String name);
+    
+    /**
+     * Gets the list of (possible) cluster members.
+     * 
+     * @return The members
+     * @throws MBeanException
+     */
+    List<String> listMembers() throws MBeanException;
+
+    /**
+     * Adds a member to the list of (possible) cluster members.
+     * 
+     * @param member The IP address or hostname of the member to add
+     * @throws MBeanException
+     */
+    void addMember(String member) throws MBeanException;
+
+    /**
+     * Removes a member from the list of (possible) cluster members.
+     * 
+     * @param member The IP address or hostname of the member to add
+     * @throws MBeanException
+     */
+    void removeMember(String member) throws MBeanException;
+    
+    /**
+     * Gets a list of the actual cluster members.
+     * 
+     * @return The members
+     * @throws MBeanException
+     */
+    List<String> listClusterMembers() throws MBeanException;
+    
 }
