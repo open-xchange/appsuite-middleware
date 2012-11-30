@@ -1025,7 +1025,7 @@ public class SieveHandler {
     }
 
     /**
-     * COnverts given string to Base64 using given charset encoding.
+     * Converts given string to Base64 using given charset encoding.
      *
      * @param toConvert The string to convert to Base64
      * @param charset The charset encoding to use when retrieving bytes from passed string

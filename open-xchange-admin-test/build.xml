@@ -5,8 +5,8 @@
     <property name="testJar" value="open-xchange-iface-tests.jar"/>
     <property name="logDir" value="log"/>
 
-    <property name="testSrcDir" value="test"/>
-    <property name="testBinDir" value="test-build"/>
+    <property name="srcDir" value="src"/>
+    <property name="binDir" value="build"/>
     <property name="libDir" value="lib"/>
 
     <path id="rmiClasspath">
@@ -20,13 +20,13 @@
     </path>
 
     <target name="clean">
-        <delete dir="${testBinDir}"/>
+        <delete dir="${binDir}"/>
         <delete dir="${logDir}"/>
     </target>
 
     <target name="compileTests" depends="clean">
-        <mkdir dir="${testBinDir}"/>
-        <javac srcdir="${testSrcDir}" destdir="${testBinDir}" debug="true" encoding="US-ASCII" source="1.6" target="1.6" includeAntRuntime="false" debuglevel="lines,vars,source">
+        <mkdir dir="${binDir}"/>
+        <javac srcdir="${srcDir}" destdir="${binDir}" debug="true" encoding="US-ASCII" source="1.6" target="1.6" includeAntRuntime="false" debuglevel="lines,vars,source">
             <classpath>
                 <path refid="rmiClasspath"/>
             </classpath>
@@ -39,7 +39,7 @@
         <junit errorProperty="test.failed" failureProperty="test.failed" showoutput="yes" printsummary="yes">
             <classpath>
                 <path refid="rmiClasspath"/>
-                <pathelement path="${testBinDir}"/>
+                <pathelement path="${binDir}"/>
             </classpath>
             <test name="com.openexchange.admin.rmi.AdminCoreTest" todir="${logDir}"/>
             <test name="com.openexchange.admin.rmi.ResourceTest" todir="${logDir}"/>
