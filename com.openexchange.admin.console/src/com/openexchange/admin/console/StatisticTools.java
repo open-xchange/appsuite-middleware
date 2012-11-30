@@ -205,7 +205,7 @@ public class StatisticTools extends AbstractJMXTools {
                 showMemoryPoolData(initConnection);
                 showSysThreadingData(initConnection);
                 System.out.print(getStats(initConnection, "org.json", "name", "JSONMBean"));
-                System.out.print(getStats(initConnection, "com.openexchange.usm.session", "name", "USMSessionInformation"));
+                System.out.print(getStats(initConnection, "com.openexchange.usm.session", "name", "com.openexchange.usm.session.impl.USMSessionInformation"));
             }
             count++;
 
