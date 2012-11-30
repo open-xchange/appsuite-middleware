@@ -56,11 +56,13 @@ import javax.management.AttributeNotFoundException;
 import javax.management.InstanceNotFoundException;
 import javax.management.IntrospectionException;
 import javax.management.JMException;
+import javax.management.MBeanAttributeInfo;
 import javax.management.MBeanException;
 import javax.management.MBeanInfo;
 import javax.management.MBeanOperationInfo;
 import javax.management.MBeanServerConnection;
 import javax.management.MalformedObjectNameException;
+import javax.management.ObjectInstance;
 import javax.management.ObjectName;
 import javax.management.ReflectionException;
 import com.openexchange.admin.console.AdminParser.NeededQuadState;
@@ -127,6 +129,8 @@ public class StatisticTools extends AbstractJMXTools {
 
     private CLIOption jsonStats = null;
     
+    private CLIOption clusterStats = null;
+
     public static void main(final String args[]) {
         final StatisticTools st = new StatisticTools();
         st.start(args, "showruntimestats");
@@ -191,6 +195,12 @@ public class StatisticTools extends AbstractJMXTools {
             if (0 == count) {
                 final MBeanServerConnection initConnection = initConnection(admin, env);
                 System.out.print(getStats(initConnection, "org.json", "name", "JSONMBean"));
+            }
+        }
+        if (null != parser.getOptionValue(this.clusterStats)) {
+            if (0 == count) {
+                final MBeanServerConnection initConnection = initConnection(admin, env);
+                showClusterData(initConnection);
                 count++;
             }
         }
@@ -254,6 +264,7 @@ public class StatisticTools extends AbstractJMXTools {
         this.sessionStats = setShortLongOpt(parser, 'i', "sessionstats", "shows the statistics of the session container", false, NeededQuadState.notneeded);
         this.usmSessionStats = setShortLongOpt(parser, 'u', "usmsessionstats", "shows the statistics of the USM session container", false, NeededQuadState.notneeded);
         this.jsonStats = setShortLongOpt(parser, 'j', "jsonstats", "shows the JSON statistics", false, NeededQuadState.notneeded);
+        this.clusterStats = setShortLongOpt(parser, 'c', "clusterstats", "shows the cluster statistics", false, NeededQuadState.notneeded);
     }
 
     private void showMemoryPoolData(final MBeanServerConnection mbc) throws InstanceNotFoundException, AttributeNotFoundException, IntrospectionException, MBeanException, ReflectionException, IOException {
@@ -292,4 +303,65 @@ public class StatisticTools extends AbstractJMXTools {
             }
         }
     }
+    
+    private void showClusterData(MBeanServerConnection mbc) throws MalformedObjectNameException, NullPointerException, IOException, InstanceNotFoundException, IntrospectionException, ReflectionException, AttributeNotFoundException, MBeanException {
+        for (String type : new String[] { "Cluster", "Statistics", "Member" }) {
+            for (ObjectInstance mbean : mbc.queryMBeans(new ObjectName("com.hazelcast:type=" + type +",*"), null)) {
+                ObjectName objectName = mbean.getObjectName();
+                MBeanInfo beanInfo = mbc.getMBeanInfo(objectName);
+                System.out.println(objectName);
+                for (MBeanAttributeInfo attributeInfo : beanInfo.getAttributes()) {
+                    if ("Cluster".equals(type) && "Config".equals(attributeInfo.getName())) {
+                        String value = mbc.getAttribute(mbean.getObjectName(), attributeInfo.getName()).toString();
+                        for (String keyword : new String[] { "groupConfig=", "properties=", "interfaces=", "tcpIpConfig=" }) {
+                            int startIdx = value.indexOf(keyword);
+                            if (-1 < startIdx && startIdx + keyword.length() < value.length()) {
+                                System.out.print("  " + keyword.substring(0, keyword.length() - 1) + " : ");
+                                System.out.println(extractTextInBrackets(value, startIdx + keyword.length()));
+                            }                            
+                        }
+                    } else {
+                        System.out.print("  " + attributeInfo.getName() + " : ");
+                        try {
+                            System.out.println(mbc.getAttribute(mbean.getObjectName(), attributeInfo.getName()));
+                        } catch (Exception e) {
+                            System.out.println("[" + e.getMessage() + "]");
+                        }
+                    }
+                }
+            }            
+        }
+    }
+
+    private static String extractTextInBrackets(String value, int startIdx) {
+        StringBuilder stringBuilder = new StringBuilder();
+        if (-1 < startIdx && startIdx < value.length()) {
+            int i = startIdx;
+            for (; i < value.length(); i++) {
+                char c = value.charAt(i);
+                if ('[' == c || '{' == c) {
+                    i++;
+                    break;
+                }
+            }
+            if (i < value.length()) {
+                int brackets = 1;
+                for (; i < value.length(); i++) {
+                    char c = value.charAt(i);
+                    if ('[' == c || '{' == c) {
+                        brackets++;
+                    } else if (']' == c || '}' == c) {
+                        brackets--;
+                    }
+                    if (0 == brackets) {
+                        break;
+                    } else {
+                        stringBuilder.append(c);
+                    }
+                }
+            }
+        }
+        return stringBuilder.toString();
+    }
+    
 }
