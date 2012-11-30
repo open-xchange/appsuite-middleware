@@ -166,8 +166,6 @@ public class MicroformatServlet extends OnlinePublicationServlet {
     @Override
     protected void service(final HttpServletRequest req, final HttpServletResponse resp) throws IOException {
         try {
-            // create a new HttpSession if it's missing
-            req.getSession(true);
             resp.setContentType("text/html; charset=UTF-8");
             final Map<String, String> args = getPublicationArguments(req);
             final String module = args.get(MODULE);

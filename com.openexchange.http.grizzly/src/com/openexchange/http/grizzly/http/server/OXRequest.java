@@ -59,6 +59,7 @@ import org.glassfish.grizzly.http.server.Response;
 import org.glassfish.grizzly.http.server.Session;
 import org.glassfish.grizzly.http.server.util.Globals;
 import com.openexchange.http.grizzly.GrizzlyConfig;
+import com.openexchange.log.LogProperties;
 import com.openexchange.tools.servlet.http.Cookies;
 
 /**
@@ -126,19 +127,26 @@ public class OXRequest extends Request {
         }
         
         if (requestedSessionId != null && httpServerFilter.getConfiguration().isReuseSessionID()) {
-            session = new Session(requestedSessionId);
-            sessions.put(requestedSessionId, session);
-            response.addCookie(createSessionCookie(requestedSessionId));
+            registerNewSession(requestedSessionId);
         } else {
             String sessionId = createSessionID();
-            session = new Session(sessionId);
-            sessions.put(sessionId, session);
-            response.addCookie(createSessionCookie(sessionId));
+            registerNewSession(sessionId);
             if(LOG.isInfoEnabled()) {
                 LOG.info("Set new JSessionId Cookie: "+sessionId);
             }
         }
         return session;
+    }
+
+    /**
+     * Register a new Session in the list of sessions, add it as Cookie to the Response and add the string value to the LogProperties.
+     * @param sessionId The new SessionId that has to be registered 
+     */
+    private void registerNewSession(String sessionId) {
+      session = new Session(sessionId);
+      sessions.put(sessionId, session);
+      response.addCookie(createSessionCookie(sessionId));
+      LogProperties.putLogProperty("com.openexchange.httpSession", sessionId);
     }
 
     /**
