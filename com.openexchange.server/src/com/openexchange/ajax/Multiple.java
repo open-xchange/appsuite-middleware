@@ -50,6 +50,7 @@
 package com.openexchange.ajax;
 
 import java.io.IOException;
+import java.io.Reader;
 import java.io.Writer;
 import java.util.Collection;
 import java.util.Date;
@@ -74,6 +75,7 @@ import com.openexchange.ajax.requesthandler.MultipleAdapter;
 import com.openexchange.ajax.writer.ResponseWriter;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.notify.hostname.HostnameService;
+import com.openexchange.java.Streams;
 import com.openexchange.json.OXJSONWriter;
 import com.openexchange.log.LogFactory;
 import com.openexchange.mail.MailServletInterface;
@@ -120,13 +122,15 @@ public class Multiple extends SessionServlet {
     protected void doPut(final HttpServletRequest req, final HttpServletResponse resp) throws IOException {
         JSONArray dataArray;
         {
-            final String data = getBody(req);
+            final Reader reader = AJAXServlet.getReaderFor(req);
             try {
-                dataArray = new JSONArray(data);
+                dataArray = new JSONArray(reader);
             } catch (final JSONException e) {
-                final OXException exc = OXJSONExceptionCodes.JSON_READ_ERROR.create(e, data);
+                final OXException exc = OXJSONExceptionCodes.JSON_READ_ERROR.create(e, e.getMessage());
                 LOG.warn(exc.getMessage() + Tools.logHeaderForError(req), exc);
                 dataArray = new JSONArray();
+            } finally {
+                Streams.close(reader);
             }
         }
         final JSONArray respArr = new JSONArray();

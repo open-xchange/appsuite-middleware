@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax;
 
+import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
@@ -81,6 +82,7 @@ import org.apache.commons.logging.Log;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.json.JSONValue;
 import org.json.JSONWriter;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.fields.ResponseFields;
@@ -98,6 +100,8 @@ import com.openexchange.groupware.upload.impl.UploadListener;
 import com.openexchange.groupware.upload.impl.UploadRegistry;
 import com.openexchange.groupware.upload.impl.UploadUtility;
 import com.openexchange.java.Charsets;
+import com.openexchange.java.Streams;
+import com.openexchange.java.StringAllocator;
 import com.openexchange.log.ForceLog;
 import com.openexchange.log.LogFactory;
 import com.openexchange.log.LogProperties;
@@ -524,14 +528,92 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
     private static final int SB_SIZE = 0x2000;
 
     /**
+     * Gets the reader for HTTP Servlet request's input stream.
+     * 
+     * @param req The HTTP Servlet request
+     * @return The reader
+     * @throws IOException If an I/O error occurs
+     */
+    public static Reader getReaderFor(final HttpServletRequest req) throws IOException {
+        String charEnc = req.getCharacterEncoding();
+        if (charEnc == null) {
+            charEnc = ServerConfig.getProperty(ServerConfig.Property.DefaultEncoding);
+        }
+        return new BufferedReader(new InputStreamReader(req.getInputStream(), Charsets.forName(charEnc)), BUF_SIZE);
+    }
+
+    /**
+     * Parses specified HTTP Servlet request's input stream content to a JSON value.
+     * 
+     * @param req The HTTP Servlet request to read from 
+     * @return The parsed JSON value
+     * @throws IOException If an I/O error occurs
+     * @throws JSONException If a JSON error occurs
+     */
+    public static JSONValue getBodyAsJsonValue(final HttpServletRequest req) throws IOException, JSONException {
+        String charEnc = req.getCharacterEncoding();
+        if (charEnc == null) {
+            charEnc = ServerConfig.getProperty(ServerConfig.Property.DefaultEncoding);
+        }
+        Reader reader = null;
+        try {
+            reader = new BufferedReader(new InputStreamReader(req.getInputStream(), charEnc), BUF_SIZE);
+            return JSONObject.parse(reader);
+        } catch (final UnsupportedEncodingException e) {
+            /*
+             * Should never occur
+             */
+            LOG.error("Unsupported encoding in request", e);
+            return new JSONObject();
+        } finally {
+            Streams.close(reader);
+        }
+    }
+
+    /**
      * Returns the complete body as a string. Be careful when getting big request bodies.
      *
-     * @param req The HTTP servlet request to read from
+     * @param req The HTTP Servlet request to read from
      * @return A string with the complete body.
      * @throws IOException If an error occurs while reading the body or body size exceeded configured max. size (see "MAX_BODY_SIZE" property)
      */
     public static String getBody(final HttpServletRequest req) throws IOException {
         return BYTE_BASED_READING ? byteBasedBodyReading(req) : decoderBasedBodyReading(req);
+    }
+
+    /**
+     * Reads the content from given reader.
+     * 
+     * @param reader The reader
+     * @return The reader's content
+     * @throws IOException If an I/O error occurs
+     */
+    public static String readFrom(final Reader reader) throws IOException {
+        if (null == reader) {
+            return null;
+        }
+        final int buflen = BUF_SIZE;
+        final char[] cbuf = new char[buflen];
+        final StringAllocator builder = new StringAllocator(SB_SIZE);
+        final int maxBodySize = getMaxBodySize();
+        if (maxBodySize > 0) {
+            int count = 0;
+            for (int read = reader.read(cbuf, 0, buflen); read > 0; read = reader.read(cbuf, 0, buflen)) {
+                count += read;
+                if (count > maxBodySize) {
+                    throw new IOException("Max. body size (" + UploadUtility.getSize(maxBodySize, 2, false, true) + ") exceeded.");
+                }
+                builder.append(cbuf, 0, read);
+            }
+        } else {
+            for (int read = reader.read(cbuf, 0, buflen); read > 0; read = reader.read(cbuf, 0, buflen)) {
+                builder.append(cbuf, 0, read);
+            }
+        }
+        if (0 == builder.length()) {
+            return null;
+        }
+        return builder.toString();
     }
 
     private static String decoderBasedBodyReading(final HttpServletRequest req) throws IOException {
@@ -543,7 +625,7 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
         try {
             final int buflen = BUF_SIZE;
             final char[] cbuf = new char[buflen];
-            final StringBuilder builder = new StringBuilder(SB_SIZE);
+            final StringAllocator builder = new StringAllocator(SB_SIZE);
             final int maxBodySize = getMaxBodySize();
             if (maxBodySize > 0) {
                 int count = 0;
@@ -567,11 +649,7 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
             LOG.error("Unsupported encoding in request", e);
             return STR_EMPTY;
         } finally {
-            try {
-                reader.close();
-            } catch (final IOException e) {
-                LOG.debug(e.getMessage(), e);
-            }
+            Streams.close(reader);
         }
     }
 
