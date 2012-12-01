@@ -245,7 +245,7 @@ public abstract class MultipleAdapterServletNew extends PermissionServlet {
     /**
      * The size of push-back buffer.
      */
-    protected static final int pushbackSize = 32;
+    protected static final int pushbackSize = 8;
 
     protected AJAXRequestData parseRequest(final HttpServletRequest req, final boolean preferStream, final boolean isFileUpload, final ServerSession session) throws IOException, OXException {
         final AJAXRequestData retval = new AJAXRequestData();
@@ -293,7 +293,7 @@ public abstract class MultipleAdapterServletNew extends PermissionServlet {
                     while (count < pushbackSize && Character.isWhitespace((cbuf[count++] = (char) reader.read()))) {
                         // Consume whitespaces
                     }
-                    if (count >= 32) {
+                    if (count >= pushbackSize) {
                         reader.unread(cbuf);
                         retval.setData(AJAXServlet.readFrom(reader));
                     }
