@@ -55,10 +55,12 @@ import java.io.Closeable;
 import java.io.Flushable;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.Reader;
+import java.io.Writer;
 
 /**
  * {@link Streams} - A utility class for streams.
- *
+ * 
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
@@ -66,7 +68,7 @@ public class Streams {
 
     /**
      * Converts specified input stream to a <code>byte</code> array.
-     *
+     * 
      * @param is The input stream to read from
      * @return A newly created <code>byte</code> array carrying input stream's bytes.
      * @throws IOException If an I/O error occurs
@@ -86,8 +88,39 @@ public class Streams {
     }
 
     /**
+     * Creates a new non-thread-safe {@link Reader} whose source is the specified string.
+     * 
+     * @param s The string to read from
+     * @return The reader
+     */
+    public static Reader newStringReader(final String s) {
+        return null == s ? null : new UnsynchronizedStringReader(s);
+    }
+
+    /**
+     * Creates a new non-thread-safe {@link Writer} that collects its output in a string allocator, which can then be used to construct a
+     * string.
+     * 
+     * @return A new writer
+     */
+    public static Writer newStringWriter() {
+        return new UnsynchronizedStringWriter(32);
+    }
+
+    /**
+     * Creates a new non-thread-safe {@link Writer} that collects its output in a string allocator, which can then be used to construct a
+     * string.
+     * 
+     * @param initial The initial capacity
+     * @return A new writer
+     */
+    public static Writer newStringWriter(final int initial) {
+        return new UnsynchronizedStringWriter(initial);
+    }
+
+    /**
      * Creates a new non-thread-safe {@link ByteArrayOutputStream} instance with default initial capacity of <code>32</code>.
-     *
+     * 
      * @return A new non-thread-safe {@link ByteArrayOutputStream} instance
      */
     public static ByteArrayOutputStream newByteArrayOutputStream() {
@@ -96,7 +129,7 @@ public class Streams {
 
     /**
      * Creates a new non-thread-safe {@link ByteArrayOutputStream} instance.
-     *
+     * 
      * @param capacity The initial capacity
      * @return A new non-thread-safe {@link ByteArrayOutputStream} instance
      */
@@ -106,7 +139,7 @@ public class Streams {
 
     /**
      * Creates a new non-thread-safe {@link ByteArrayInputStream} instance carrying specified input stream's data.
-     *
+     * 
      * @param inputStream The input stream
      * @return A new non-thread-safe {@link ByteArrayInputStream} instance
      * @throws IOException If an I/O error occurs
@@ -117,7 +150,7 @@ public class Streams {
 
     /**
      * Creates a new non-thread-safe {@link ByteArrayInputStream} instance carrying specified bytes.
-     *
+     * 
      * @param bytes The bytes
      * @return A new non-thread-safe {@link ByteArrayInputStream} instance
      */
@@ -127,7 +160,7 @@ public class Streams {
 
     /**
      * Safely closes specified {@link Closeable} instance.
-     *
+     * 
      * @param toClose The {@link Closeable} instance
      */
     public static void close(final Closeable toClose) {
@@ -142,7 +175,7 @@ public class Streams {
 
     /**
      * Safely closes specified {@link Closeable} instances.
-     *
+     * 
      * @param closeables The {@link Closeable} instances
      */
     public static void close(final Closeable... closeables) {
@@ -161,7 +194,7 @@ public class Streams {
 
     /**
      * Safely flushes specified {@link Flushable} instance.
-     *
+     * 
      * @param toFlush The {@link Flushable} instance
      */
     public static void flush(final Flushable toFlush) {
