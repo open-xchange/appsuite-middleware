@@ -37,7 +37,6 @@ import com.openexchange.cluster.discovery.ClusterDiscoveryService;
 import com.openexchange.cluster.discovery.ClusterListener;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.hazelcast.HazelcastMBean;
-import com.openexchange.hazelcast.osgi.HazelcastActivator.InitMode;
 import com.openexchange.management.ManagementService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.osgi.ServiceContainer;
@@ -549,7 +548,7 @@ public class HazelcastActivator extends HousekeepingActivator {
         return config;
     }
 
-    private static boolean isEmpty(final String string) {
+    static boolean isEmpty(final String string) {
         if (null == string) {
             return true;
         }
