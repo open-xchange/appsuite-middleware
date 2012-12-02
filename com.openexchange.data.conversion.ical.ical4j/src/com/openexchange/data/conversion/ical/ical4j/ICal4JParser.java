@@ -56,7 +56,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.StringReader;
-import java.io.UnsupportedEncodingException;
+import java.nio.charset.Charset;
+import java.nio.charset.UnsupportedCharsetException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -92,6 +93,7 @@ import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.tasks.Task;
+import com.openexchange.java.Charsets;
 import com.openexchange.log.LogFactory;
 import edu.emory.mathcs.backport.java.util.Arrays;
 
@@ -103,7 +105,7 @@ import edu.emory.mathcs.backport.java.util.Arrays;
  */
 public class ICal4JParser implements ICalParser {
 
-    private static final String UTF8 = "UTF-8";
+    private static final Charset UTF8 = Charsets.UTF_8;
 
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(ICal4JParser.class));
 
@@ -138,7 +140,7 @@ public class ICal4JParser implements ICalParser {
     public List<CalendarDataObject> parseAppointments(final String icalText, final TimeZone defaultTZ, final Context ctx, final List<ConversionError> errors, final List<ConversionWarning> warnings) throws ConversionError {
         try {
             return parseAppointments(new ByteArrayInputStream(icalText.getBytes(UTF8)), defaultTZ, ctx, errors, warnings);
-        } catch (final UnsupportedEncodingException e) {
+        } catch (final UnsupportedCharsetException e) {
             LOG.error(e.getMessage(), e);
         }
         return Collections.emptyList();
@@ -167,7 +169,7 @@ public class ICal4JParser implements ICalParser {
                 }
             }
 
-        } catch (final UnsupportedEncodingException e) {
+        } catch (final UnsupportedCharsetException e) {
             // IGNORE
         } catch (final ConversionError e){
         	errors.add(e);
@@ -184,7 +186,7 @@ public class ICal4JParser implements ICalParser {
 	public List<FreeBusyInformation> parseFreeBusy(String icalText, TimeZone defaultTZ, Context ctx, List<ConversionError> errors, List<ConversionWarning> warnings) throws ConversionError {
         try {
             return parseFreeBusy(new ByteArrayInputStream(icalText.getBytes(UTF8)), defaultTZ, ctx, errors, warnings);
-        } catch (UnsupportedEncodingException e) {
+        } catch (UnsupportedCharsetException e) {
             LOG.error(e.getMessage(), e);
         }
         return Collections.emptyList();
@@ -212,7 +214,7 @@ public class ICal4JParser implements ICalParser {
                     }
                 }
             }
-        } catch (UnsupportedEncodingException e) {
+        } catch (UnsupportedCharsetException e) {
             LOG.error(e.getMessage(), e);
             // IGNORE
         } catch (ConversionError e) {
@@ -250,7 +252,7 @@ public class ICal4JParser implements ICalParser {
             }
             final Property property = calendar.getProperty(propertyName.toUpperCase(Locale.US));
             return null == property ? null : property.getValue();
-        } catch (final UnsupportedEncodingException e) {
+        } catch (final UnsupportedCharsetException e) {
             // IGNORE
             return null;
         } catch (final ConversionError e){
@@ -266,7 +268,7 @@ public class ICal4JParser implements ICalParser {
     public List<Task> parseTasks(final String icalText, final TimeZone defaultTZ, final Context ctx, final List<ConversionError> errors, final List<ConversionWarning> warnings) throws ConversionError {
         try {
             return parseTasks(new ByteArrayInputStream(icalText.getBytes(UTF8)), defaultTZ, ctx, errors, warnings);
-        } catch (final UnsupportedEncodingException e) {
+        } catch (final UnsupportedCharsetException e) {
             LOG.error(e.getMessage(), e);
         }
         return new LinkedList<Task>();
@@ -295,7 +297,7 @@ public class ICal4JParser implements ICalParser {
                 }
             }
 
-        } catch (final UnsupportedEncodingException e) {
+        } catch (final UnsupportedCharsetException e) {
             // IGNORE
         } finally {
             closeSafe(reader);

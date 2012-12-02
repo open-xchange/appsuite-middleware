@@ -245,7 +245,7 @@ public class SieveHandler {
          * Set timeout to the one specified in the config file
          */
         s_sieve.setSoTimeout(timeout);
-        bis_sieve = new BufferedReader(new InputStreamReader(s_sieve.getInputStream(), "UTF-8"));
+        bis_sieve = new BufferedReader(new InputStreamReader(s_sieve.getInputStream(), com.openexchange.java.Charsets.UTF_8));
         bos_sieve = new BufferedOutputStream(s_sieve.getOutputStream());
 
         if (!getServerWelcome()) {
@@ -308,7 +308,7 @@ public class SieveHandler {
              * Switch to TLS
              */
             s_sieve = SocketFetcher.startTLS(s_sieve, sieve_host);
-            bis_sieve = new BufferedReader(new InputStreamReader(s_sieve.getInputStream(), "UTF-8"));
+            bis_sieve = new BufferedReader(new InputStreamReader(s_sieve.getInputStream(), com.openexchange.java.Charsets.UTF_8));
             bos_sieve = new BufferedOutputStream(s_sieve.getOutputStream());
             /*
              * Fire CAPABILITY command but only for cyrus and NEMESIS that is not sieve draft conform to sent CAPABILITY response again

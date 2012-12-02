@@ -136,7 +136,7 @@ public class WebdavLogAction extends AbstractAction {
 		if(logBody) {
 			BufferedReader reader = null;
 			try {
-				reader = new BufferedReader(new InputStreamReader(req.getBody(), "UTF-8"));
+				reader = new BufferedReader(new InputStreamReader(req.getBody(), com.openexchange.java.Charsets.UTF_8));
 				String line = null;
 				final StringBuilder b = new StringBuilder();
 				while((line = reader.readLine()) != null) {

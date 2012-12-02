@@ -302,7 +302,7 @@ public final class MimeType2ExtMap {
     private static void loadInternal(final File file) {
         BufferedReader reader = null;
         try {
-            reader = new BufferedReader(new InputStreamReader(new FileInputStream(file), "iso-8859-1"));
+            reader = new BufferedReader(new InputStreamReader(new FileInputStream(file), com.openexchange.java.Charsets.ISO_8859_1));
             parse(reader);
         } catch (final UnsupportedEncodingException e) {
             LOG.error(e.getMessage(), e);
@@ -329,7 +329,7 @@ public final class MimeType2ExtMap {
     private static void loadInternal(final URL url) {
         BufferedReader reader = null;
         try {
-            reader = new BufferedReader(new InputStreamReader(url.openStream(), "iso-8859-1"));
+            reader = new BufferedReader(new InputStreamReader(url.openStream(), com.openexchange.java.Charsets.ISO_8859_1));
             parse(reader);
         } catch (final UnsupportedEncodingException e) {
             LOG.error(e.getMessage(), e);

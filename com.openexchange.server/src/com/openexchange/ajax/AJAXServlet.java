@@ -557,7 +557,7 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
         }
         Reader reader = null;
         try {
-            reader = new BufferedReader(new InputStreamReader(req.getInputStream(), charEnc), BUF_SIZE);
+            reader = new BufferedReader(new InputStreamReader(req.getInputStream(), Charsets.forName(charEnc)), BUF_SIZE);
             return JSONObject.parse(reader);
         } catch (final UnsupportedEncodingException e) {
             /*
@@ -621,7 +621,7 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
         if (charEnc == null) {
             charEnc = ServerConfig.getProperty(ServerConfig.Property.DefaultEncoding);
         }
-        final Reader reader = new InputStreamReader(req.getInputStream(), charEnc);
+        final Reader reader = new InputStreamReader(req.getInputStream(), Charsets.forName(charEnc));
         try {
             final int buflen = BUF_SIZE;
             final char[] cbuf = new char[buflen];

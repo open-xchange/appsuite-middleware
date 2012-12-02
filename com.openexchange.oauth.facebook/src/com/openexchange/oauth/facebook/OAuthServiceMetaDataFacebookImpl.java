@@ -173,7 +173,7 @@ public class OAuthServiceMetaDataFacebookImpl extends AbstractOAuthServiceMetaDa
             /*
              * Initialize a reader on URL connection...
              */
-            reader = new InputStreamReader(connection.getInputStream(), "UTF-8");
+            reader = new InputStreamReader(connection.getInputStream(), com.openexchange.java.Charsets.UTF_8);
             /*
              * ... and read response using direct buffering
              */

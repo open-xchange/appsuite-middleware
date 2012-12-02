@@ -65,9 +65,9 @@ import net.fortuna.ical4j.model.Calendar;
 import net.fortuna.ical4j.model.Component;
 import net.fortuna.ical4j.model.Property;
 import net.fortuna.ical4j.model.component.VEvent;
-import net.fortuna.ical4j.model.property.Comment;
 import net.fortuna.ical4j.model.property.Method;
 import org.apache.commons.logging.Log;
+import com.openexchange.java.Charsets;
 import com.openexchange.log.LogFactory;
 import com.openexchange.data.conversion.ical.ConversionError;
 import com.openexchange.data.conversion.ical.ConversionWarning;
@@ -106,7 +106,7 @@ public class ICal4JITipParser extends ICal4JParser implements ITipParser {
         Map<String, ITipMessage> messagesPerUID = new HashMap<String, ITipMessage>();
         BufferedReader reader = null;
         try {
-            reader = new BufferedReader(new InputStreamReader(ical, "UTF-8"));
+            reader = new BufferedReader(new InputStreamReader(ical, Charsets.UTF_8));
 
             net.fortuna.ical4j.model.Calendar calendar = parse(reader);
             
@@ -150,8 +150,6 @@ public class ICal4JITipParser extends ICal4JParser implements ITipParser {
                 }
             }
 
-        } catch (UnsupportedEncodingException e) {
-            // IGNORE
         } catch (ConversionError e) {
             errors.add(e);
         } finally {
