@@ -106,7 +106,7 @@ public final class ListAction extends JSlobAction {
         final int contextId = jslobRequest.getContextId();
         final int userId = jslobRequest.getUserId();
         for (int i = 0; i < length; i++) {
-            jslobs.add(jslobService.get(ids.getString(i), userId, contextId));
+            jslobs.add(jslobService.get(ids.getString(i), jslobRequest.getSession()));
         }
 
         return new AJAXRequestResult(jslobs, "jslob");
