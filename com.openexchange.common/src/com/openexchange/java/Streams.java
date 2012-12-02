@@ -74,6 +74,9 @@ public class Streams {
      * @throws IOException If an I/O error occurs
      */
     public static byte[] stream2bytes(final InputStream is) throws IOException {
+        if (null == is) {
+            return new byte[0];
+        }
         try {
             final ByteArrayOutputStream bos = newByteArrayOutputStream(4096);
             final int buflen = 2048;
