@@ -118,8 +118,6 @@ public final class UpdateAction extends JSlobAction {
         final JSlobService jslobService = getJSlobService(serviceId);
 
         final String id = jslobRequest.checkParameter("id");
-        final int userId = jslobRequest.getUserId();
-        final int contextId = jslobRequest.getContextId();
 
         JSlob jslob;
         {
