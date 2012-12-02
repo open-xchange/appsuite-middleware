@@ -71,7 +71,7 @@ public class GrizzlOXExecutorService extends GrizzlyExecutorService {
 
     private ThreadPoolService threadPoolService;
 
-    private ExecutorService executorService;
+    private final ExecutorService executorService;
     
     /**
      * Initializes a new {@link GrizzlOXExecutorService}.

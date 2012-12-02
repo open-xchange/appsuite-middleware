@@ -67,7 +67,7 @@ import org.osgi.framework.Bundle;
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
 public class AtmosphereJSServlet extends HttpServlet {
-    private Bundle bundle;
+    private final Bundle bundle;
     
     public AtmosphereJSServlet(Bundle bundle) {
         this.bundle = bundle;

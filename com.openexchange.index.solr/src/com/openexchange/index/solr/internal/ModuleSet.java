@@ -60,7 +60,7 @@ import java.util.Set;
  */
 public class ModuleSet {
     
-    private Set<Integer> modules = new HashSet<Integer>();
+    private final Set<Integer> modules = new HashSet<Integer>();
     
     
     public ModuleSet() {

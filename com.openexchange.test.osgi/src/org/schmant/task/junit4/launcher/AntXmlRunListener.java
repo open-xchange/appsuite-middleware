@@ -125,15 +125,15 @@ public class AntXmlRunListener extends RunListener
     /**
      * Mapping between test Description:s -> Start timestamp (Long)
      */
-    private Map m_testStarts = new HashMap();
+    private final Map m_testStarts = new HashMap();
     /**
      * Mapping between test Description:s -> Failure objects
      */
-    private Map m_failedTests = new HashMap();
+    private final Map m_failedTests = new HashMap();
     /**
      * Mapping between test Description:s -> XML Element:s
      */
-    private Map m_testElements = new HashMap();
+    private final Map m_testElements = new HashMap();
 
     /**
      * Convenient method to retrieve the full stacktrace from a given exception.
@@ -293,6 +293,7 @@ public class AntXmlRunListener extends RunListener
      * The whole test suite started.
      * @param descr The test suite description.
      */
+    @Override
     public void testRunStarted(Description descr)
     {
         m_doc = getDocumentBuilder().newDocument();
@@ -332,6 +333,7 @@ public class AntXmlRunListener extends RunListener
      * <p>A new Test is started.
      * @param descr The test description.
      */
+    @Override
     public void testStarted(Description descr)
     {
         m_testStarts.put(descr, new Long(System.currentTimeMillis()));
@@ -365,11 +367,13 @@ public class AntXmlRunListener extends RunListener
      * <p>A Test failed.
      * @param f The failure.
      */
+    @Override
     public void testFailure(Failure f)
     {
         formatError(FAILURE, f);
     }
 
+    @Override
     public void testAssumptionFailure(Failure f)
     {
         formatError(FAILURE, f);
@@ -381,6 +385,7 @@ public class AntXmlRunListener extends RunListener
      * <p>A Test is finished.
      * @param descr The test description.
      */
+    @Override
     public void testFinished(Description descr)
     {
         // Fix for bug #5637 - if a junit.extensions.TestSetup is
@@ -419,6 +424,7 @@ public class AntXmlRunListener extends RunListener
      * @param result The test suite result.
      * @throws BuildException on error.
      */
+    @Override
     public void testRunFinished(Result result)
     {
         try
@@ -446,6 +452,7 @@ public class AntXmlRunListener extends RunListener
         }
     }
 
+    @Override
     protected void finalize() throws Throwable
     {
         if (m_outputStream != null)

@@ -69,7 +69,7 @@ public class FileCache {
 
     private class CacheEntry {
 
-        private File path;
+        private final File path;
 
         private long timestamp = Long.MIN_VALUE;
 
@@ -101,7 +101,7 @@ public class FileCache {
         }
     }
 
-    private Map<File, CacheEntry> cache = new ConcurrentHashMap<File, CacheEntry>();
+    private final Map<File, CacheEntry> cache = new ConcurrentHashMap<File, CacheEntry>();
 
     /**
      * Returns the file contents as a byte array.

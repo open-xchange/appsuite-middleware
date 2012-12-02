@@ -65,7 +65,7 @@ public class PresenceData implements Serializable {
 
     private String message;
 
-    private Date timeStamp;
+    private final Date timeStamp;
 
     public static PresenceData OFFLINE = new PresenceData(PresenceState.OFFLINE, "", null);
 

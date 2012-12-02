@@ -73,9 +73,9 @@ import com.openexchange.tools.session.ServerSession;
 // TODO: PresenceService must honor priority
 public class HazelcastPresenceStatusServiceImpl implements PresenceStatusService {
 
-    private ConcurrentMap<ID, PresenceData> statusMap;
+    private final ConcurrentMap<ID, PresenceData> statusMap;
 
-    private CopyOnWriteArrayList<PresenceChangeListener> presenceChangeListeners;
+    private final CopyOnWriteArrayList<PresenceChangeListener> presenceChangeListeners;
 
     private enum PresenceChangeType {
         COMING_ONLINE, ONLINE_CHANGE, GOING_OFFLINE

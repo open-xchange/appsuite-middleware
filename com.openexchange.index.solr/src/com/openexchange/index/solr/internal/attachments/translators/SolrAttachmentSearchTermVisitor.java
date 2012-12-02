@@ -74,7 +74,7 @@ public class SolrAttachmentSearchTermVisitor implements SearchTermVisitor {
     
     private final Configuration configuration;
     
-    private StringBuilder queryBuilder;
+    private final StringBuilder queryBuilder;
     
 
     public SolrAttachmentSearchTermVisitor(String translatorName, Configuration configuration) {

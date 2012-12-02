@@ -146,7 +146,7 @@ public class SessionEventHandler implements EventHandler {
                     EffectivePermission userPermission = folder.getEffectiveUserPermission(user.getId(), userConfiguration);
                     if (userPermission.getEntity() == user.getId() && userPermission.canReadAllObjects()) {
                         // The folder is a private folder of this user
-                        long folderId = (long) folder.getObjectID();
+                        long folderId = folder.getObjectID();
                         if (!infostoreAccess.isIndexed(IndexConstants.DEFAULT_ACCOUNT, String.valueOf(folderId))) {
                             JobInfo jobInfo = InfostoreJobInfo.newBuilder(InfostoreFolderJob.class)
                                 .contextId(session.getContextId())

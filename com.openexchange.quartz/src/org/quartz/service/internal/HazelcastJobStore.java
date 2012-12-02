@@ -133,9 +133,9 @@ public class HazelcastJobStore implements JobStore {
     
     private String nodeIp;
     
-    private ConcurrentMap<TriggerKey, Boolean> locallyAcquiredTriggers = new ConcurrentHashMap<TriggerKey, Boolean>();
+    private final ConcurrentMap<TriggerKey, Boolean> locallyAcquiredTriggers = new ConcurrentHashMap<TriggerKey, Boolean>();
     
-    private ConcurrentMap<TriggerKey, Boolean> locallyExecutingTriggers = new ConcurrentHashMap<TriggerKey, Boolean>();
+    private final ConcurrentMap<TriggerKey, Boolean> locallyExecutingTriggers = new ConcurrentHashMap<TriggerKey, Boolean>();
 
     private ConsistencyTask consistencyTask;
 
@@ -1334,7 +1334,7 @@ public class HazelcastJobStore implements JobStore {
             calendar = retrieveCalendar(calendarName);
         }
 
-        signaler.notifyTriggerListenersMisfired((OperableTrigger) stateWrapper.getTrigger());
+        signaler.notifyTriggerListenersMisfired(stateWrapper.getTrigger());
         ((OperableTrigger) stateWrapper.getTrigger()).updateAfterMisfire(calendar);
 
         if (stateWrapper.getTrigger().getNextFireTime() == null) {
@@ -1434,6 +1434,7 @@ public class HazelcastJobStore implements JobStore {
       
         private static final long serialVersionUID = -3904243490805975570L;
 
+        @Override
         public int compare(TriggerStateWrapper trig1, TriggerStateWrapper trig2) {
 
             Date t1 = trig1.getTrigger().getNextFireTime();

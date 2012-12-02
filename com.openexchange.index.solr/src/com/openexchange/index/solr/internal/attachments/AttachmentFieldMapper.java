@@ -99,7 +99,7 @@ public class AttachmentFieldMapper implements FieldMapper {
             return null;
         }
         
-        return fieldMapping.get((AttachmentIndexField) indexField);
+        return fieldMapping.get(indexField);
     }
 
 }

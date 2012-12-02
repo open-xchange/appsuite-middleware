@@ -412,17 +412,21 @@ public abstract class AbstractJobStoreTest extends TestCase {
     public static class SampleSignaler implements SchedulerSignaler {
         volatile int fMisfireCount = 0;
 
+        @Override
         public void notifyTriggerListenersMisfired(Trigger trigger) {
         	System.out.println("Trigger misfired: " + trigger.getKey() + ", fire time: " + trigger.getNextFireTime());
             fMisfireCount++;
         }
 
+        @Override
         public void signalSchedulingChange(long candidateNewNextFireTime) {
         }
 
+        @Override
         public void notifySchedulerListenersFinalized(Trigger trigger) {
         }
 
+        @Override
         public void notifySchedulerListenersJobDeleted(JobKey jobKey) {
         }
     }

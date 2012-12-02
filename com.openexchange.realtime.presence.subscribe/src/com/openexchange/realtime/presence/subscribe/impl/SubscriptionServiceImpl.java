@@ -72,7 +72,7 @@ import com.openexchange.user.UserService;
  */
 public class SubscriptionServiceImpl implements PresenceSubscriptionService {
 
-    private ServiceLookup services;
+    private final ServiceLookup services;
 
     public SubscriptionServiceImpl(ServiceLookup services) {
         this.services = services;
