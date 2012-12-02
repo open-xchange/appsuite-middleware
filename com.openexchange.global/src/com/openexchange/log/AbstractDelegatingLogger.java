@@ -57,6 +57,7 @@ import java.util.logging.Handler;
 import java.util.logging.Level;
 import java.util.logging.LogRecord;
 import java.util.logging.Logger;
+import com.openexchange.java.StringAllocator;
 
 /**
  * {@link AbstractDelegatingLogger} - A <code>java.util.logging.Logger</code> implementation delegating to another framework.
@@ -231,7 +232,7 @@ public abstract class AbstractDelegatingLogger extends Logger {
                 logp(Level.FINER, sourceClass, sourceMethod, msg);
                 return;
             }
-            StringBuilder builder = new StringBuilder(msg);
+            StringAllocator builder = new StringAllocator(msg);
             for (int i = 0; i < params.length; i++) {
                 builder.append(" {");
                 builder.append(Integer.toString(i));

@@ -106,7 +106,7 @@ public class DateHelper {
     
 
     public String getDateSpec() {
-        StringBuilder b = new StringBuilder();
+        com.openexchange.java.StringAllocator b = new com.openexchange.java.StringAllocator();
         b.append(formatDate(appointment));
         if (appointment.getRecurrenceType() != CalendarObject.NO_RECURRENCE) {
             b.append(" - ").append(formatRecurrenceRule(appointment));

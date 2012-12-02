@@ -87,7 +87,7 @@ public final class Tools {
      * @return the csv-string
      */
     public static String toCSV(final int[] values) {
-        final StringBuilder stringBuilder = new StringBuilder();
+        final com.openexchange.java.StringAllocator stringBuilder = new com.openexchange.java.StringAllocator();
         if (null != values && 0 < values.length) {
             stringBuilder.append(values[0]);
             for (int i = 1; i < values.length; i++) {
@@ -106,7 +106,7 @@ public final class Tools {
      * "?,?,?,?"
      */
     public static String getParameters(final int count) {
-        final StringBuilder parametersBuilder = new StringBuilder(2 * count);
+        final com.openexchange.java.StringAllocator parametersBuilder = new com.openexchange.java.StringAllocator(2 * count);
         if (0 < count) {
             parametersBuilder.append('?');
             for (int i = 1; i < count; i++) {
@@ -139,7 +139,7 @@ public final class Tools {
     public static OXException getTruncationException(final Connection connection, final DataTruncation e, final Contact contact, 
     		final Table table) throws OXException {
         final String[] truncatedColumns = DBUtils.parseTruncatedFields(e);
-        final StringBuilder stringBuilder = new StringBuilder();
+        final com.openexchange.java.StringAllocator stringBuilder = new com.openexchange.java.StringAllocator();
         /*
          * create truncated attributes
          */
@@ -287,7 +287,7 @@ public final class Tools {
      * @throws OXException
      */
     public static String getOrderClause(final SortOptions sortOptions) throws OXException {
-        final StringBuilder stringBuilder = new StringBuilder();
+        final com.openexchange.java.StringAllocator stringBuilder = new com.openexchange.java.StringAllocator();
         if (null != sortOptions && false == SortOptions.EMPTY.equals(sortOptions)) {
             final SortOrder[] order = sortOptions.getOrder();
             if (null != order && 0 < order.length) {
@@ -310,7 +310,7 @@ public final class Tools {
      * @throws OXException
      */
     public static String getLimitClause(final SortOptions sortOptions) throws OXException {
-        final StringBuilder stringBuilder = new StringBuilder();
+        final com.openexchange.java.StringAllocator stringBuilder = new com.openexchange.java.StringAllocator();
         if (null != sortOptions && false == SortOptions.EMPTY.equals(sortOptions)) {
             if (0 < sortOptions.getLimit()) {
                 stringBuilder.append("LIMIT ");
@@ -324,7 +324,7 @@ public final class Tools {
     }
     
     private static String getOrderClause(final SortOrder order, final SuperCollator collator) throws OXException {
-        final StringBuilder stringBuilder = new StringBuilder();
+        final com.openexchange.java.StringAllocator stringBuilder = new com.openexchange.java.StringAllocator();
         if (null == collator || SuperCollator.DEFAULT.equals(collator)) {
             stringBuilder.append(Mappers.CONTACT.get(order.getBy()).getColumnLabel());
         } else {

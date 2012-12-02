@@ -94,10 +94,10 @@ public final class IDNA {
             if (pos == length - 1) {
                 return idnAddress;
             }
-            return new StringBuilder(length + 8).append(idnAddress.substring(0, pos)).append('@').append(
+            return new com.openexchange.java.StringAllocator(length + 8).append(idnAddress.substring(0, pos)).append('@').append(
                 gnu.inet.encoding.IDNA.toASCII(idnAddress.substring(pos + 1), true)).toString();
         } catch (final gnu.inet.encoding.IDNAException e) {
-            throw new AddressException(new StringBuilder(e.getMessage()).append(": ").append(idnAddress).toString());
+            throw new AddressException(new com.openexchange.java.StringAllocator(e.getMessage()).append(": ").append(idnAddress).toString());
         }
     }
 
@@ -121,7 +121,7 @@ public final class IDNA {
         if (pos < 0 || aceAddress.indexOf(ACE_PREFIX) < 0) {
             return aceAddress;
         }
-        return new StringBuilder(aceAddress.length()).append(aceAddress.substring(0, pos)).append('@').append(
+        return new com.openexchange.java.StringAllocator(aceAddress.length()).append(aceAddress.substring(0, pos)).append('@').append(
             gnu.inet.encoding.IDNA.toUnicode(aceAddress.substring(pos + 1), true)).toString();
     }
 
@@ -146,7 +146,7 @@ public final class IDNA {
                 return gnu.inet.encoding.IDNA.toASCII(unicodeHostName, true);
             }
             pos += SCHEME_DELIM.length();
-            final StringBuilder b = new StringBuilder(unicodeHostName.length() + 16);
+            final com.openexchange.java.StringAllocator b = new com.openexchange.java.StringAllocator(unicodeHostName.length() + 16);
             b.append(unicodeHostName.substring(0, pos));
             final String host = unicodeHostName.substring(pos);
             pos = -1;
@@ -181,7 +181,7 @@ public final class IDNA {
             return gnu.inet.encoding.IDNA.toUnicode(asciiHostName, true);
         }
         pos += SCHEME_DELIM.length();
-        final StringBuilder b = new StringBuilder(asciiHostName.length());
+        final com.openexchange.java.StringAllocator b = new com.openexchange.java.StringAllocator(asciiHostName.length());
         b.append(asciiHostName.substring(0, pos));
         final String host = asciiHostName.substring(pos);
         pos = -1;

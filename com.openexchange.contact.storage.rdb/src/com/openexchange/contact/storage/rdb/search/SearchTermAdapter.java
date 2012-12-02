@@ -78,7 +78,7 @@ import com.openexchange.tools.StringCollection;
  */
 public class SearchTermAdapter extends DefaultSearchAdapter {
 	
-	private final StringBuilder stringBuilder;
+	private final com.openexchange.java.StringAllocator stringBuilder;
 	
 	/**
 	 * Initializes a new {@link SearchAdapter}.
@@ -89,7 +89,7 @@ public class SearchTermAdapter extends DefaultSearchAdapter {
 	 */
 	public SearchTermAdapter(SearchTerm<?> term, String charset) throws OXException {
 		super(charset);
-		this.stringBuilder = new StringBuilder();
+		this.stringBuilder = new com.openexchange.java.StringAllocator();
 		this.append(term);
 	}
     

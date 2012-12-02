@@ -1011,7 +1011,7 @@ public class CalendarSql implements AppointmentSQLInterface {
 //                cols = recColl.enhanceCols(cols, ara, 1);
             }
 
-            final StringBuilder columnBuilder = new StringBuilder();
+            final com.openexchange.java.StringAllocator columnBuilder = new com.openexchange.java.StringAllocator(cols.length << 4);
             boolean first = true;
             for (int i = 0; i < cols.length; i++) {
                 final String temp = recColl.getFieldName(cols[i]);
@@ -1350,7 +1350,7 @@ public class CalendarSql implements AppointmentSQLInterface {
      */
     private static final String wrapParenthesis(final int i) {
         final String str = String.valueOf(i);
-        return new StringBuilder(str.length() + 2).append('(').append(str).append(')').toString();
+        return new com.openexchange.java.StringAllocator(str.length() + 2).append('(').append(str).append(')').toString();
     }
 
     @Override

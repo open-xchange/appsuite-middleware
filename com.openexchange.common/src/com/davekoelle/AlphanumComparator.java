@@ -92,7 +92,7 @@ public class AlphanumComparator implements Comparator<String> {
     private final String getChunk(final String s, final int length, final int start) {
         char c = s.charAt(start);
         final boolean digit = Character.isDigit(c);
-        final StringBuilder chunk = new StringBuilder(length - start);
+        final com.openexchange.java.StringAllocator chunk = new com.openexchange.java.StringAllocator(length - start);
         chunk.append(c);
         for (int marker = start + 1; marker < length && digit == Character.isDigit(c = s.charAt(marker)); marker++) {
             chunk.append(c);

@@ -144,7 +144,7 @@ public class HumanReadableRecurrences {
             return format(locale, HRRStrings.DAY);
         }
 
-        StringBuilder days = new StringBuilder();
+        com.openexchange.java.StringAllocator days = new com.openexchange.java.StringAllocator();
 
         if ((cdao.getDays() & CalendarObject.MONDAY) == CalendarObject.MONDAY) {
             days.append(format(locale, HRRStrings.MONDAY)).append(", ");

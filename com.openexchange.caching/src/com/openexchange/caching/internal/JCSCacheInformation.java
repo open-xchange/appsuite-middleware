@@ -92,7 +92,7 @@ public class JCSCacheInformation extends StandardMBean implements CacheInformati
     public String getCacheStatistics(final String name) {
         if ("*".equals(name)) {
             final String[] cacheNames = cacheHub.getCacheNames();
-            final StringBuilder sb = new StringBuilder(512 * cacheNames.length);
+            final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(512 * cacheNames.length);
             for (final String cacheName : cacheNames) {
                 sb.append(cacheHub.getCache(cacheName).getStats()).append("\r\n\r\n");
             }

@@ -83,7 +83,7 @@ public class IDMangler {
      * @return The mangled/composite identifier
      */
     public static String mangle(final String... components) {
-        final StringBuilder id = new StringBuilder(50);
+        final com.openexchange.java.StringAllocator id = new com.openexchange.java.StringAllocator(50);
         boolean first = true;
         for (String component : components) {
             component = escape(component);
@@ -92,7 +92,7 @@ public class IDMangler {
             id.append(delim);
             first = false;
         }
-        id.setLength(id.length()-1);
+        id.setNewLength(id.length()-1);
         return id.toString();
     }
 
@@ -101,7 +101,7 @@ public class IDMangler {
             return null;
         }
         return encodeQP(string);
-        // StringBuilder buffer = new StringBuilder(string.length() * 3);
+        // com.openexchange.java.StringAllocator buffer = new com.openexchange.java.StringAllocator(string.length() * 3);
         // for (char c : string.toCharArray()) {
         // switch (c) {
         // case '/':
@@ -144,7 +144,7 @@ public class IDMangler {
     public static List<String> unmangle(String mangled, final boolean stateMachine) {
         final List<String> list = new ArrayList<String>(5);
         if (stateMachine) {
-            final StringBuilder buffer = new StringBuilder(50);
+            final com.openexchange.java.StringAllocator buffer = new com.openexchange.java.StringAllocator(50);
             ParserState state = ParserState.APPEND_PREFIX;
             ParserState unescapedState = null;
     
@@ -183,7 +183,7 @@ public class IDMangler {
                     switch (state) {
                     case APPEND:
                         list.add(buffer.toString());
-                        buffer.setLength(0);
+                        buffer.reinitTo(0);
                         break;
                     case APPEND_PREFIX:
                     case ESCAPED:
@@ -194,7 +194,7 @@ public class IDMangler {
                         break;
                     case PRIMARY_DELIM2:
                         list.add(buffer.toString());
-                        buffer.setLength(0);
+                        buffer.reinitTo(0);
                         state = ParserState.APPEND;
                         break;
                     }

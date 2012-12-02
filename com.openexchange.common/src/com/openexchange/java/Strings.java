@@ -75,7 +75,7 @@ public class Strings {
         if (coll.size() == 0) {
             return "";
         }
-        final StringBuilder builder = new StringBuilder();
+        final com.openexchange.java.StringAllocator builder = new com.openexchange.java.StringAllocator();
         for (final Object obj : coll) {
             if (obj == null) {
                 builder.append("null");
