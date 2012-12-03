@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="com.openexchange.admin.index overrides">
+
+	<description>
+        Installs the index CLTs.
+    </description>
+
+	<import file="build-clt.xml" />
+
+	<!-- Constants -->
+	<property name="sbinDir" value="sbin" />
+
+	<target name="postInstall">
+	    <symlink resource="${sbinInstallDir}/lockindex" link="${destDir}/${sbinInstallDir}/unlockindex" overwrite="true" />
+	    <chmod perm="755" file="${sbinInstallDir}/unlockindex" />
+	</target>
+
+</project>
