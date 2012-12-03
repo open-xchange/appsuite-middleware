@@ -86,7 +86,11 @@ import com.openexchange.mailfilter.internal.MailFilterProperties;
  */
 public class SieveHandler {
 
-    /**
+    private static final Pattern LITERAL_S2C_PATTERN = Pattern.compile("^.*\\{([^\\}]*)\\}.*$");
+
+    private static final Pattern STRING_PATTERN = Pattern.compile("^.*\"([^\"]*)\".*$");
+
+	/**
      * The logger.
      */
     private static Log log = com.openexchange.log.Log.valueOf(LogFactory.getLog(SieveHandler.class));
@@ -459,11 +463,11 @@ public class SieveHandler {
             }
             final int[] parsed = parseFirstLine(firstLine);
             final int respCode = parsed[0];
-            if (NO == respCode || OK == respCode) {
-                /*
-                 * Either received a NO or an OK which indicates end of response. In both cases no script is availabe.
-                 */
+            if (OK == respCode) {
                 return "";
+            } else if (NO == respCode) {
+                final String errorMessage = parseError(firstLine).replaceAll(CRLF, "\n");
+                throw new OXSieveHandlerException(errorMessage, sieve_host, sieve_host_port, parseSIEVEResponse(firstLine, errorMessage));
             }
             sb.ensureCapacity(parsed[1]);
         }
@@ -549,7 +553,7 @@ public class SieveHandler {
     /**
      * Get the list of active sieve scripts
      *
-     * @return List of scripts
+     * @return List of scripts, or null if no script is active
      * @throws IOException
      * @throws UnsupportedEncodingException
      * @throws OXSieveHandlerException
@@ -1020,12 +1024,13 @@ public class SieveHandler {
      * @param actualline
      * @return
      * @throws IOException
+     * @throws OXSieveHandlerException 
      */
-    private String parseError(final String actualline) throws IOException {
+    private String parseError(final String actualline) throws IOException, OXSieveHandlerException {
 		final StringBuilder sb = new StringBuilder();
 		final String answer = actualline.substring(3);
-		final Pattern p = Pattern.compile("^.*\\{([^\\}]*)\\}.*$");
-		final Matcher matcher = p.matcher(answer);
+		final Matcher matcher = LITERAL_S2C_PATTERN.matcher(answer);
+		final Matcher stringMatcher = STRING_PATTERN.matcher(answer);
 		if (matcher.matches()) {
 		    final String group = matcher.group(1);
 		    final int octetsToRead = Integer.parseInt(group);
@@ -1036,8 +1041,10 @@ public class SieveHandler {
 		    } else {
 		        sb.append(buf, 0, octetsRead);
 		    }
+		} else if (stringMatcher.matches()) {
+		    sb.append(stringMatcher.group(1));
 		} else {
-		    sb.append(answer);
+			throw new OXSieveHandlerException("Unable to parse server answer", sieve_host, sieve_host_port, null);
 		}
 		return sb.toString();
 	}
