@@ -642,7 +642,7 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
                 }
             }
             return builder.toString();
-        } catch (final UnsupportedEncodingException e) {
+        } catch (final UnsupportedCharsetException e) {
             /*
              * Should never occur
              */
