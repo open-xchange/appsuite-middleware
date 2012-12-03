@@ -73,9 +73,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONTokener;
 import org.json.JSONValue;
-import com.google.common.collect.BiMap;
-import com.google.common.collect.HashBiMap;
-import com.google.common.collect.ImmutableBiMap;
 import com.openexchange.ajax.tools.JSONUtil;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.cascade.ComposedConfigProperty;
@@ -167,7 +164,7 @@ public final class ConfigJSlobService implements JSlobService {
     }
 
     @SuppressWarnings("unchecked")
-	private void readPerfMap(final File file, final Map<String, Map<String, String>[]> map) throws OXException {
+    private void readPerfMap(final File file, final Map<String, Map<String, String>[]> map) throws OXException {
         BufferedReader reader = null;
         try {
             reader = new BufferedReader(new InputStreamReader(new FileInputStream(file), Charsets.ISO_8859_1));
@@ -176,23 +173,28 @@ public final class ConfigJSlobService implements JSlobService {
                 if (!isEmpty(line) && '#' != line.charAt(0)) {
                     final int pos = line.indexOf('>');
                     if (pos > 0) {
-                    	String configTreePath = line.substring(0, pos).trim();
-                    	String jslobPath = line.substring(pos + 1).trim();
-                    	int pathSep = jslobPath.indexOf("//");
-                    	String jslobName = jslobPath.substring(0, pathSep);
-                    	jslobPath = jslobPath.substring(pathSep + 2);
-                    	
-                    	Map<String, String>[] maps = map.get(jslobName);
-                    	if (maps == null) {
-                    		maps = new Map[]{
-                    				 new HashMap<String, String>(),
-                    				new HashMap<String, String>()
-                    		};
-                    		map.put(jslobName, maps);
-                    	}
-                    	
-                    	maps[CONFIG2LOB].put(configTreePath, jslobPath);
-                    	maps[LOB2CONFIG].put(jslobPath, configTreePath);
+                        final String configTreePath = line.substring(0, pos).trim();
+                        String jslobPath = line.substring(pos + 1).trim();
+
+                        String jslobName;
+                        {
+                            final int pathSep = jslobPath.indexOf("//");
+                            if (pathSep < 0) {
+                                jslobName = "core";
+                            } else {
+                                jslobName = jslobPath.substring(0, pathSep);
+                                jslobPath = jslobPath.substring(pathSep + 2);
+                            }
+                        }
+
+                        Map<String, String>[] maps = map.get(jslobName);
+                        if (maps == null) {
+                            maps = new Map[] { new HashMap<String, String>(), new HashMap<String, String>() };
+                            map.put(jslobName, maps);
+                        }
+
+                        maps[CONFIG2LOB].put(configTreePath, jslobPath);
+                        maps[LOB2CONFIG].put(jslobPath, configTreePath);
                     }
                 }
             }
