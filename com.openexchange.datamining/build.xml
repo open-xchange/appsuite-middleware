@@ -1,0 +1,129 @@
+<project name="com.openexchange.datamining" default="default" basedir=".">
+
+	<!-- Customizable values -->
+	<property name="destdir" value="" />
+	<property name="prefix" value="/opt/open-xchange" />
+	<property name="source" value="src/" />
+	<property name="output" value="build/" />
+	
+	<!-- Constants -->
+	<property name="project.name" value="com.openexchange.datamining"/>
+
+	<property name="tmp.dir" value="tmp" />
+
+	<property file="META-INF/MANIFEST.MF"/>
+	<property name="version" value="${Bundle-Version}" />
+	<property name="bundle.name" value="${project.name}.jar" />
+	<property name="composite.name" value="open-xchange-datamining-${version}" />
+	<property name="etcdir"  value="etc"/>
+	<property name="oxconfdir" value="etc/groupware"/>
+	<property name="libdir"  value="lib"/>
+		
+	<!-- Install Constants -->
+	<property name="bundlesdir" value="${prefix}/bundles" />
+	<property name="sbindir"  value="${prefix}/sbin"/>
+	
+    <!-- Replacements -->
+    <property name="common.conf.install.dir" value="${prefix}/etc"/>
+    <property name="conf.install.dir" value="${common.conf.install.dir}/groupware"/>
+    <property name="conf.install.copy.dir" location="${destdir}${conf.install.dir}"/>
+
+	<!-- non-osgi jars -->
+	<property name="joptjar" value="jopt-simple-4.2.jar" />
+	<property name="junitjar" value="junit-4.6.jar"/>
+	<property name="mysqljar" value="mysql-connector-java-5.1.21-bin.jar"/>
+	
+    <filterset id="pathsubst">
+        <filter token="oxprefix"          value="${prefix}"/>
+        <filter token="oxfunctions"       value="${prefix}/${etcdir}/oxfunctions.sh"/>
+        <filter token="oxscriptconf"      value="${prefix}/${oxconfdir}/ox-scriptconf.sh"/>
+    	<filter token="oxcommonbundlelib" value="${bundlesdir}/${commonBundle}/lib"/>
+    </filterset>
+	
+	<!-- Classpath -->
+	<path id="project.classpath">
+		<pathelement location="${libdir}/${joptjar}" />
+		<pathelement location="${libdir}/${junitjar}" />
+		<pathelement location="${libdir}/${mysqljar}" />
+	</path>
+
+	<!-- Compile -->
+	<target name="prepare">
+		<mkdir dir="${output}" />
+		<mkdir dir="${tmp.dir}" />
+	</target>
+
+	<target name="compile" depends="prepare">
+		<javac srcdir="${source}" destdir="${output}" debug="true" encoding="US-ASCII" source="1.5" compiler="javac1.5" target="1.5">
+			<classpath refid="project.classpath" />
+		</javac>
+	</target>
+
+	<target name="jar" depends="prepare,compile">
+		<jar jarfile="${tmp.dir}/${bundle.name}">
+			<fileset dir="${output}" />
+		</jar>
+	</target>
+
+	<!-- Install targets -->
+	<target name="installLib">
+		<copy todir="${destdir}/${prefix}/lib" overwrite="true">
+			<fileset dir="lib"/>
+		</copy>
+	</target>
+	
+	<target name="installJar" depends="jar">
+		<copy todir="${destdir}/${prefix}/lib">
+			<fileset dir="${tmp.dir}">
+				<include name="${bundle.name}" />
+			</fileset>
+		</copy>
+	</target>
+	
+	<target name="installBin" depends="replacer">
+        <mkdir dir="${destdir}/${prefix}/sbin"/>
+        <copy todir="${destdir}/${prefix}/sbin" overwrite="true">
+            <fileset dir="sbin" excludes="*.in" followsymlinks="true"/>
+        </copy>
+    	<chmod perm="755">
+            <fileset dir="${destdir}/${prefix}/sbin" includes="*"/>
+        </chmod>
+    </target>
+	
+    <target name="install" depends="installLib,installJar,installBin"/>
+
+	<!-- Replace targets -->	
+    <target name="replacer">
+        <copy todir="." overwrite="true">
+            <mapper type="glob" from="*.in" to="*"/>
+            <fileset dir="."/>
+            <filterset refid="pathsubst"/>
+        </copy>
+    </target>
+	
+    <target name="default" depends="install"/>
+	
+	<!-- Dist -->
+	<target name="dist" depends="clean">
+		<property name="dist-package" value="dist-package" />
+		<delete dir="${dist-package}" />
+		<mkdir dir="${dist-package}/${composite.name}" />
+		<copy todir="${dist-package}/${composite.name}">
+			<fileset dir=".">
+				<exclude name="**${dist-package}/**" />
+				<exclude name="**debian/**" />
+				<exclude name="**CVS/**" />
+				<exclude name="Todo" />
+			</fileset>
+		</copy>
+		<tar destfile="../${composite.name}.tar.gz" basedir="${dist-package}" includes="${composite.name}/" compression="gzip" />
+		<!-- dpkg-source does not like anything else -->
+		<delete dir="${dist-package}" />
+	</target>
+
+	<target name="clean">
+		<delete dir="${output}" />
+		<delete dir="${tmp.dir}" />
+	</target>
+
+</project>
