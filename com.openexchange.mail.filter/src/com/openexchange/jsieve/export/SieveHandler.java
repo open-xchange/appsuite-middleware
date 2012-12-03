@@ -1037,29 +1037,29 @@ public class SieveHandler {
      * @throws OXSieveHandlerException 
      */
     private String parseError(final String actualline) throws IOException, OXSieveHandlerException {
-		final StringBuilder sb = new StringBuilder();
-		final String answer = actualline.substring(3);
-		final Matcher matcher = LITERAL_S2C_PATTERN.matcher(answer);
-		final Matcher stringMatcher = STRING_PATTERN.matcher(answer);
-		if (matcher.matches()) {
-		    final String group = matcher.group(1);
-		    final int octetsToRead = Integer.parseInt(group);
-		    final char[] buf = new char[octetsToRead];
-		    final int octetsRead = bis_sieve.read(buf, 0, octetsToRead);
-		    if (octetsRead == octetsToRead) {
-		        sb.append(buf);
-		    } else {
-		        sb.append(buf, 0, octetsRead);
-		    }
-		} else if (stringMatcher.matches()) {
-		    sb.append(stringMatcher.group(1));
-		} else {
-			throw new OXSieveHandlerException("Unable to parse server answer", sieve_host, sieve_host_port, null);
-		}
-		return sb.toString();
-	}
+        final StringBuilder sb = new StringBuilder();
+        final String answer = actualline.substring(3);
+        final Matcher matcher = LITERAL_S2C_PATTERN.matcher(answer);
+        final Matcher stringMatcher = STRING_PATTERN.matcher(answer);
+        if (matcher.matches()) {
+            final String group = matcher.group(1);
+            final int octetsToRead = Integer.parseInt(group);
+            final char[] buf = new char[octetsToRead];
+            final int octetsRead = bis_sieve.read(buf, 0, octetsToRead);
+            if (octetsRead == octetsToRead) {
+                sb.append(buf);
+            } else {
+                sb.append(buf, 0, octetsRead);
+            }
+        } else if (stringMatcher.matches()) {
+            sb.append(stringMatcher.group(1));
+        } else {
+            throw new OXSieveHandlerException("Unable to parse server answer", sieve_host, sieve_host_port, null);
+        }
+        return sb.toString();
+    }
 
-	/**
+    /**
      * Converts given string to Base64 using given charset encoding.
      *
      * @param toConvert The string to convert to Base64
