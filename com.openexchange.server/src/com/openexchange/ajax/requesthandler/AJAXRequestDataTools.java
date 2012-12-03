@@ -58,7 +58,9 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.regex.Pattern;
 import javax.servlet.http.HttpServletRequest;
+import org.json.JSONArray;
 import org.json.JSONException;
+import org.json.JSONObject;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.notify.hostname.HostnameService;
@@ -204,7 +206,22 @@ public class AJAXRequestDataTools {
                         } catch (final JSONException e) {
                             // No parseable JSON data
                             reader.unread(cbuf, 0, count);
-                            retval.setData(AJAXServlet.readFrom(reader));
+                            final String body = AJAXServlet.readFrom(reader);
+                            if (startsWith('[', body)) {
+                                try {
+                                    retval.setData(new JSONArray(body));
+                                } catch (final JSONException je) {
+                                    retval.setData(body);
+                                }
+                            } else if (startsWith('{', body)) {
+                                try {
+                                    retval.setData(new JSONObject(body));
+                                } catch (final JSONException je) {
+                                    retval.setData(body);
+                                }
+                            } else {
+                                retval.setData(body);
+                            }
                         }
                     } else {
                         // No JSON data
