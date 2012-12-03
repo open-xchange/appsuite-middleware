@@ -1,3 +1,7 @@
+* 2012-12-03 - thorben.betten@open-xchange.com
+
+ - Fix for bug 24045: Fixed parsing JSON
+
 * 2012-11-30 - marcus.klein@open-xchange.com
 
  - Fix for bug 23736: Added conflict to old open-xchange-core package to prevent file conflict during upgrade
