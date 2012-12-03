@@ -11,6 +11,9 @@
 # This file is distributed under the same license as the PACKAGE package.
 # Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER.
 #
+# Antje Faber, 2007.
+# Antje Faber <antje.faber@open-xchange.com>, 2008, 2009, 2010, 2011.
+# Antje Faber, 2006, 2012.
 #. *
 #. * Mail(s) could not be found in folder
 #. * <p>
@@ -25,9 +28,6 @@
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe.json/src/com/openexchange/subscribe/json/SubscriptionJSONExceptionMessage.java:88
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe.json/src/com/openexchange/subscribe/json/SubscriptionJSONExceptionMessage.java:90
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe.json/src/com/openexchange/subscribe/json/SubscriptionJSONExceptionMessage.java:92
-# Antje Faber, 2007.
-# Antje Faber <antje.faber@open-xchange.com>, 2008, 2009, 2010, 2011.
-# Antje Faber, 2006, 2012.
 msgid ""
 msgstr ""
 "Project-Id-Version: errors.de_DE\n"
@@ -155,8 +155,8 @@ msgstr "Das Löschen von %1$i ist fehlgeschlagen: %2$s"
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.aws.s3/src/com/openexchange/aws/s3/exceptions/OXAWSS3ExceptionMessages.java:77
 msgid "Creating md5 hash of file %1$s failed: %2$s"
 msgstr ""
-"Das Erstellen einer md5-Hash-Summe für die Datei %1$s ist fehlgeschlagen: "
-"%2$s"
+"Das Erstellen einer md5-Hash-Summe für die Datei %1$s ist fehlgeschlagen: %2"
+"$s"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.aws.s3/src/com/openexchange/aws/s3/exceptions/OXAWSS3ExceptionMessages.java:79
 msgid "Could not initialize filestorage: %1$s"
@@ -2194,8 +2194,8 @@ msgstr "Kein solcher Ordner vorhanden"
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:145
 msgid "Authentication failed for login %1$s to server %2$s (service: %3$s)."
 msgstr ""
-"Authentifizierung fehlgeschlagen für Login %1$s auf Server %2$s "
-"(Dienst=%3$s)."
+"Authentifizierung fehlgeschlagen für Login %1$s auf Server %2$s (Dienst=%3"
+"$s)."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.freebusy/src/com/openexchange/freebusy/FreeBusyExceptionMessages.java:63
 msgid "No free/busy providers available"
@@ -4239,8 +4239,8 @@ msgid ""
 msgstr ""
 "Die Nachricht konnte nicht in den Papierkorb verschoben werden. "
 "Wahrscheinlich ist Ihre Mailbox fast voll.\n"
-"Entfernen Sie in diesem Fall zunächst Ihre gelöschten Objekte "
-"oder löschen Sie zunächst kleinere Nachrichten."
+"Entfernen Sie in diesem Fall zunächst Ihre gelöschten Objekte oder löschen "
+"Sie zunächst kleinere Nachrichten."
 
 #. *
 #. * Missing %1$s folder in mail move operation
@@ -9124,10 +9124,10 @@ msgid ""
 "Please try to empty your deleted items first, or delete smaller messages "
 "first."
 msgstr ""
-"Die Nachricht konnte nicht in den Papierkorb verschoben werden, "
-"da Ihre Mailbox fast voll ist.\n"
-"Entfernen Sie in diesem Fall zunächst Ihre gelöschten Objekte "
-"oder löschen Sie zunächst kleinere Nachrichten."
+"Die Nachricht konnte nicht in den Papierkorb verschoben werden, da Ihre "
+"Mailbox fast voll ist.\n"
+"Entfernen Sie in diesem Fall zunächst Ihre gelöschten Objekte oder löschen "
+"Sie zunächst kleinere Nachrichten."
 
 #. *
 #. * The message part with sequence ID %1$s could not be found in message %2$s in folder %3$s
