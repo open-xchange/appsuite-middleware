@@ -304,6 +304,7 @@ public abstract class MultipleAdapterServletNew extends PermissionServlet {
                     } else {
                         if ('[' == c || '{' == c) {
                             try {
+                                reader.unread(c);
                                 retval.setData(JSONObject.parse(reader));
                             } catch (final JSONException e) {
                                 // No parseable JSON data
