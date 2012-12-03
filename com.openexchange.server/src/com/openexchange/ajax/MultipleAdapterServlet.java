@@ -58,12 +58,15 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONTokener;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.fields.ResponseFields;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Streams;
+import com.openexchange.java.UnsynchronizedPushbackReader;
 import com.openexchange.log.LogFactory;
 import com.openexchange.multiple.MultipleHandler;
 import com.openexchange.session.Session;
@@ -170,11 +173,7 @@ public abstract class MultipleAdapterServlet extends PermissionServlet {
             request.put(parameterName, parameter);
         }
         if(requiresBody(action)) {
-            final String body = getBody(req);
-            if(body != null && ! body.equals("")) {
-                final Object value = toJSONConformantValue(body);
-                request.put(ResponseFields.DATA, value);
-            }
+            request.put(ResponseFields.DATA, toJSONConformantValue(req));
         }
         return modify(req, action, request);
     }
@@ -183,11 +182,83 @@ public abstract class MultipleAdapterServlet extends PermissionServlet {
         return request;
     }
 
-    private Object toJSONConformantValue(final String body) throws JSONException {
-        if (null == body) {
+    /**
+     * The size of push-back buffer.
+     */
+    private static final int pushbackSize = 8;
+
+    private Object toJSONConformantValue(final HttpServletRequest req) throws JSONException, IOException {
+        if (null == req) {
             return null;
         }
-        return new JSONTokener(body).nextValue();
+        UnsynchronizedPushbackReader reader = null;
+        try {
+            reader = new UnsynchronizedPushbackReader(AJAXServlet.getReaderFor(req), pushbackSize);
+            {
+                int count = 0;
+                final char[] cbuf = new char[pushbackSize];
+                while (count < pushbackSize && Character.isWhitespace((cbuf[count++] = (char) reader.read()))) {
+                    // Consume whitespaces
+                }
+                if (count >= pushbackSize) {
+                    reader.unread(cbuf);
+                    return new JSONTokener(AJAXServlet.readFrom(reader)).nextValue();
+                }
+                final char nonWhitespace = cbuf[count - 1];
+                if ('[' == nonWhitespace || '{' == nonWhitespace) {
+                    try {
+                        reader.unread(nonWhitespace);
+                        return JSONObject.parse(reader);
+                    } catch (final JSONException e) {
+                        // No parseable JSON data
+                        reader.unread(cbuf, 0, count);
+                        final String body = AJAXServlet.readFrom(reader);
+                        if (startsWith('[', body)) {
+                            try {
+                                return new JSONArray(body);
+                            } catch (final JSONException je) {
+                                return new JSONTokener(body).nextValue();
+                            }
+                        } else if (startsWith('{', body)) {
+                            try {
+                                return new JSONObject(body);
+                            } catch (final JSONException je) {
+                                return new JSONTokener(body).nextValue();
+                            }
+                        } else {
+                            return new JSONTokener(body).nextValue();
+                        }
+                    }
+                } else {
+                    // No JSON data
+                    reader.unread(cbuf, 0, count);
+                    return new JSONTokener(AJAXServlet.readFrom(reader)).nextValue();
+                }
+            }
+        } finally {
+            Streams.close(reader);
+            reader = null;
+        }
+    }
+
+    private static boolean startsWith(final char startingChar, final String toCheck) {
+        if (null == toCheck) {
+            return false;
+        }
+        final int len = toCheck.length();
+        if (len <= 0) {
+            return false;
+        }
+        int i = 0;
+        if (Character.isWhitespace(toCheck.charAt(i))) {
+            do {
+                i++;
+            } while (i < len && Character.isWhitespace(toCheck.charAt(i)));
+        }
+        if (i >= len) {
+            return false;
+        }
+        return startingChar == toCheck.charAt(i);
     }
 
     protected abstract boolean requiresBody(String action);
