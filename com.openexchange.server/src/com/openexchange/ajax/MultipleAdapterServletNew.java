@@ -58,7 +58,9 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
+import org.json.JSONArray;
 import org.json.JSONException;
+import org.json.JSONObject;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
@@ -305,7 +307,22 @@ public abstract class MultipleAdapterServletNew extends PermissionServlet {
                         } catch (final JSONException e) {
                             // No parseable JSON data
                             reader.unread(cbuf, 0, count);
-                            retval.setData(AJAXServlet.readFrom(reader));
+                            final String body = AJAXServlet.readFrom(reader);
+                            if (startsWith('[', body)) {
+                                try {
+                                    retval.setData(new JSONArray(body));
+                                } catch (final JSONException je) {
+                                    retval.setData(body);
+                                }
+                            } else if (startsWith('{', body)) {
+                                try {
+                                    retval.setData(new JSONObject(body));
+                                } catch (final JSONException je) {
+                                    retval.setData(body);
+                                }
+                            } else {
+                                retval.setData(body);
+                            }
                         }
                     } else {
                         // No JSON data
@@ -321,16 +338,13 @@ public abstract class MultipleAdapterServletNew extends PermissionServlet {
         return retval;
     }
 
-    private static boolean startsWith(final char startingChar, final String toCheck, final boolean ignoreHeadingWhitespaces) {
+    private static boolean startsWith(final char startingChar, final String toCheck) {
         if (null == toCheck) {
             return false;
         }
         final int len = toCheck.length();
         if (len <= 0) {
             return false;
-        }
-        if (!ignoreHeadingWhitespaces) {
-            return startingChar == toCheck.charAt(0);
         }
         int i = 0;
         if (Character.isWhitespace(toCheck.charAt(i))) {
