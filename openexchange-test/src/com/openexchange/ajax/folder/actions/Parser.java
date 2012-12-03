@@ -78,7 +78,7 @@ public final class Parser {
         switch (column) {
         case FolderObject.OBJECT_ID:
             if (value instanceof Integer) {
-                folder.setObjectID(((Integer) value).intValue());
+                folder.setObjectID(((Number) value).intValue());
             } else if (value instanceof String) {
                 String valueS = (String) value;
                 try {
@@ -109,13 +109,13 @@ public final class Parser {
             break;
         case FolderObject.CREATED_BY:
             if (null != value && JSONObject.NULL != value) {
-                folder.setCreatedBy(((Integer) value).intValue());
+                folder.setCreatedBy(((Number) value).intValue());
             }
             break;
         case FolderChildObject.FOLDER_ID:
             if (null != value && JSONObject.NULL != value) {
                 if (value instanceof Integer) {
-                    folder.setParentFolderID(((Integer) value).intValue());
+                    folder.setParentFolderID(((Number) value).intValue());
                 } else if (value instanceof String) {
                     try {
                         folder.setParentFolderID(Integer.valueOf((String) value).intValue());
