@@ -559,7 +559,7 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
         try {
             reader = new BufferedReader(new InputStreamReader(req.getInputStream(), Charsets.forName(charEnc)), BUF_SIZE);
             return JSONObject.parse(reader);
-        } catch (final UnsupportedEncodingException e) {
+        } catch (final UnsupportedCharsetException e) {
             /*
              * Should never occur
              */
