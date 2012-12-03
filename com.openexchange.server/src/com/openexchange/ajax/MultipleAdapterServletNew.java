@@ -302,11 +302,7 @@ public abstract class MultipleAdapterServletNew extends PermissionServlet {
                         reader.unread(cbuf);
                         retval.setData(AJAXServlet.readFrom(reader));
                     } else {
-                        if (count > 0) {
-                            reader.unread(cbuf, 0, count);
-                        }
-                        final char nonWhitespace = (char) reader.read();
-                        if ('[' == nonWhitespace || '{' == nonWhitespace) {
+                        if ('[' == c || '{' == c) {
                             try {
                                 retval.setData(JSONObject.parse(reader));
                             } catch (final JSONException e) {
@@ -330,6 +326,10 @@ public abstract class MultipleAdapterServletNew extends PermissionServlet {
                                 }
                             }
                         } else {
+                            reader.unread(c);
+                            if (count > 0) {
+                                reader.unread(cbuf, 0, count);
+                            }
                             retval.setData(AJAXServlet.readFrom(reader));
                         }
                     }
