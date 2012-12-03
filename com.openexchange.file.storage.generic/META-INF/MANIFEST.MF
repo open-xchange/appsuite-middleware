@@ -7,5 +7,6 @@ Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Import-Package: com.openexchange.datatypes.genericonf,
  com.openexchange.file.storage,
+ com.openexchange.java,
  com.openexchange.log
 Export-Package: com.openexchange.file.storage.generic

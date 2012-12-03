@@ -53,6 +53,7 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+import com.openexchange.java.StringAllocator;
 
 /**
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
@@ -64,7 +65,7 @@ public class Translations {
 
     public Translations() {
         super();
-        transMap = new HashMap<String, String>();
+        transMap = new HashMap<String, String>(32);
     }
 
     public String translate(final String original) {
@@ -89,7 +90,7 @@ public class Translations {
 
     @Override
     public String toString() {
-        StringBuilder builder = new StringBuilder(64);
+        final StringAllocator builder = new StringAllocator(64);
         builder.append('{');
         if (locale != null) {
             builder.append("locale=").append(locale).append(", ");

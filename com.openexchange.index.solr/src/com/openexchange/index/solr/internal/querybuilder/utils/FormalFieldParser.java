@@ -62,7 +62,7 @@ import org.apache.commons.logging.Log;
  */
 public class FormalFieldParser {
 
-    private Map<String, List<String>> formalFieldMap;
+    private final Map<String, List<String>> formalFieldMap;
 
     private static Log log = com.openexchange.log.Log.loggerFor(FormalFieldParser.class);
 

@@ -129,7 +129,7 @@ public class IndexingActivator extends HousekeepingActivator {
 //        sessionProperties.put(EventConstants.EVENT_TOPIC, SessiondEventConstants.getAllTopics());
 //        registerService(EventHandler.class, new SessionEventHandler(), sessionProperties);
         
-        registerMBean((IndexingServiceImpl) serviceImpl);
+        registerMBean(serviceImpl);
         openTrackers();
     }
     

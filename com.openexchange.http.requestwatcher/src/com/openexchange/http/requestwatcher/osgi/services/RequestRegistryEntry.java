@@ -144,6 +144,15 @@ public class RequestRegistryEntry implements Comparable<RequestRegistryEntry> {
         return new StringBuilder("id=").append(thread.getId()).append(", name=").append(thread.getName()).toString();
     }
 
+    /**
+     * Gets the thread
+     *
+     * @return The thread
+     */
+    public Thread getThread() {
+        return thread;
+    }
+
     @Override
     public int hashCode() {
         final int prime = 31;

@@ -57,6 +57,7 @@ import com.openexchange.groupware.contact.helpers.ContactField;
  * @deprecated Use the PropertyDrivenMapper with .properties files instead.
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias 'Tierlieb' Prinz</a>
  */
+@Deprecated
 public class OxAjaxnameMapper extends AbstractOutlookMapper {
 	public OxAjaxnameMapper() {
 		ContactField[] fields = ContactField.values();

@@ -59,7 +59,7 @@ class DOMElementWriter
 	/**
 	 * Map (URI to prefix) of known namespaces.
 	 */
-	private HashMap nsPrefixMap = new HashMap();
+	private final HashMap nsPrefixMap = new HashMap();
 
 	/**
 	 * Number of generated prefix to use next.
@@ -69,7 +69,7 @@ class DOMElementWriter
 	/**
 	 * Map (Element to URI) of namespaces defined on a given element.
 	 */
-	private HashMap nsURIByElement = new HashMap();
+	private final HashMap nsURIByElement = new HashMap();
 
 	/**
 	 * Whether namespaces should be ignored for elements and attributes.
@@ -78,8 +78,8 @@ class DOMElementWriter
 	 */
 	static class XmlNamespacePolicy
 	{
-		private boolean qualifyElements;
-		private boolean qualifyAttributes;
+		private final boolean qualifyElements;
+		private final boolean qualifyAttributes;
 
 		/**
 		 * Ignores namespaces for elements and attributes, the default.

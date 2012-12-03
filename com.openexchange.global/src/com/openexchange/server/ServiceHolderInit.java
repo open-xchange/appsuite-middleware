@@ -105,7 +105,7 @@ public final class ServiceHolderInit implements Initialization {
             }
             final File sysPropFile = new File(propDir, "system.properties");
             if (!sysPropFile.exists() || !sysPropFile.isFile()) {
-                LOG.error(new StringBuilder("Missing property file \"system.properties\" in properties path \"").append(propDir).append('"').toString());
+                LOG.error(new com.openexchange.java.StringAllocator("Missing property file \"system.properties\" in properties path \"").append(propDir).append('"').toString());
                 throw ServiceExceptionCode.SERVICE_INITIALIZATION_FAILED.create();
             }
             try {

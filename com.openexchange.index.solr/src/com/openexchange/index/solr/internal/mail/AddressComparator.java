@@ -60,7 +60,7 @@ import com.openexchange.mail.mime.QuotedInternetAddress;
 
 public class AddressComparator implements Comparator<IndexDocument<MailMessage>> {
     
-    private SolrMailField sortField;
+    private final SolrMailField sortField;
     
     private final Order order;
     

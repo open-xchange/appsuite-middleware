@@ -61,7 +61,7 @@ import com.openexchange.groupware.Types;
  */
 public class ModuleSet {
     
-    private Set<Integer> modules = new HashSet<Integer>();
+    private final Set<Integer> modules = new HashSet<Integer>();
     
     
     public ModuleSet() {

@@ -75,7 +75,7 @@ public class AtmospherePayloadElementTransformer implements PayloadElementTransf
 
     private final String INTERNAL_FORMAT;
 
-    private ElementPath elementPath;
+    private final ElementPath elementPath;
 
     /**
      * Initializes a new {@link AtmospherePayloadElementTransformer} for one special PayloadElement identified by an ElementPath.

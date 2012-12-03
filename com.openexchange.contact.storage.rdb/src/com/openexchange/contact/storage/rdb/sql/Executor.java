@@ -111,7 +111,7 @@ public class Executor {
      */
     public Contact selectSingle(Connection connection, Table table, int contextID, int objectID, ContactField[] fields) 
     		throws SQLException, OXException {
-        StringBuilder stringBuilder = new StringBuilder();
+        com.openexchange.java.StringAllocator stringBuilder = new com.openexchange.java.StringAllocator(256);
         stringBuilder.append("SELECT ").append(Mappers.CONTACT.getColumns(fields)).append(" FROM ").append(table).append(" WHERE ")
             .append(Mappers.CONTACT.get(ContactField.CONTEXTID).getColumnLabel()).append("=? AND ")
             .append(Mappers.CONTACT.get(ContactField.OBJECT_ID).getColumnLabel()).append("=?;");
@@ -137,7 +137,7 @@ public class Executor {
      * @throws SQLException
      */
     public Date selectNewestAttachmentDate(final Connection connection, final int contextID, final int objectID) throws SQLException {
-        final StringBuilder stringBuilder = new StringBuilder();
+        final com.openexchange.java.StringAllocator stringBuilder = new com.openexchange.java.StringAllocator();
         stringBuilder.append("SELECT MAX(creation_date) FROM prg_attachment WHERE cid=? AND module=? AND attached=?;");
         PreparedStatement stmt = null;
         ResultSet resultSet = null;
@@ -162,7 +162,7 @@ public class Executor {
      * @throws SQLException
      */
     public Map<Integer, Date> selectNewestAttachmentDates(final Connection connection, final int contextID, final int objectIDs[]) throws SQLException {
-        final StringBuilder stringBuilder = new StringBuilder();
+        final com.openexchange.java.StringAllocator stringBuilder = new com.openexchange.java.StringAllocator();
         stringBuilder.append("SELECT attached,MAX(creation_date) FROM prg_attachment WHERE cid=? AND module=? AND attached IN (")
         		.append(Tools.toCSV(objectIDs)).append(") GROUP BY attached;");
         PreparedStatement stmt = null;
@@ -204,7 +204,7 @@ public class Executor {
          * construct query string
          */
     	SearchTermAdapter adapter = null != term ? new SearchTermAdapter(term, getCharset(sortOptions)) : null;
-        StringBuilder stringBuilder = new StringBuilder();
+        com.openexchange.java.StringAllocator stringBuilder = new com.openexchange.java.StringAllocator();
 //      stringBuilder.append("SELECT ").append(Mappers.CONTACT.getColumns(fields)).append(" FROM ").append(table).append(" USE INDEX (cid) WHERE ")
 //      stringBuilder.append("SELECT SQL_NO_CACHE ").append(Mappers.CONTACT.getColumns(fields)).append(" FROM ").append(table).append(" WHERE ")
         stringBuilder.append("SELECT ").append(Mappers.CONTACT.getColumns(fields)).append(" FROM ").append(table).append(" WHERE ")
@@ -286,7 +286,7 @@ public class Executor {
         /*
          * construct query string
          */
-        StringBuilder stringBuilder = new StringBuilder();
+        com.openexchange.java.StringAllocator stringBuilder = new com.openexchange.java.StringAllocator();
         stringBuilder.append("SELECT ").append(Mappers.CONTACT.getColumns(fields)).append(" FROM ").append(Table.CONTACTS)
             .append(" WHERE ").append(Mappers.CONTACT.get(ContactField.CONTEXTID).getColumnLabel()).append("=?");
         if (null != folderIDs && 0 < folderIDs.length) {
@@ -344,7 +344,7 @@ public class Executor {
          * construct query string
          */
         SearchAdapter adapter = new ContactSearchAdapter(contactSearch, contextID, fields, getCharset(sortOptions));
-        StringBuilder stringBuilder = new StringBuilder();
+        com.openexchange.java.StringAllocator stringBuilder = new com.openexchange.java.StringAllocator();
         stringBuilder.append(adapter.getClause());
         if (null != sortOptions && false == SortOptions.EMPTY.equals(sortOptions)) {
             stringBuilder.append(' ').append(Tools.getOrderClause(sortOptions));
@@ -390,7 +390,7 @@ public class Executor {
      */
     public DistListMember[] select(final Connection connection, final Table table, final int contextID, final int objectID, 
     		final DistListMemberField[] fields) throws SQLException, OXException {
-        final StringBuilder stringBuilder = new StringBuilder();
+        final com.openexchange.java.StringAllocator stringBuilder = new com.openexchange.java.StringAllocator();
         stringBuilder.append("SELECT ").append(Mappers.DISTLIST.getColumns(fields)).append(" FROM ").append(table).append(" WHERE ")
             .append(Mappers.DISTLIST.get(DistListMemberField.CONTEXT_ID).getColumnLabel()).append("=? AND ")
             .append(Mappers.DISTLIST.get(DistListMemberField.PARENT_CONTACT_ID).getColumnLabel()).append("=?;"); 
@@ -425,7 +425,7 @@ public class Executor {
      */
     public Map<Integer, List<DistListMember>> select(final Connection connection, final Table table, final int contextID, 
     		final int[] objectIDs, final DistListMemberField[] fields) throws SQLException, OXException {
-        final StringBuilder stringBuilder = new StringBuilder();
+        final com.openexchange.java.StringAllocator stringBuilder = new com.openexchange.java.StringAllocator();
         stringBuilder.append("SELECT ").append(Mappers.DISTLIST.getColumns(fields)).append(" FROM ").append(table).append(" WHERE ")
             .append(Mappers.DISTLIST.get(DistListMemberField.CONTEXT_ID).getColumnLabel()).append("=? AND ")
             .append(Mappers.DISTLIST.get(DistListMemberField.PARENT_CONTACT_ID).getColumnLabel()).append(" IN (")
@@ -467,7 +467,7 @@ public class Executor {
      * @throws OXException
      */
     public List<DistListMember> select(Connection connection, Table table, int contextID, int referencedObjectID, int referencedFolderID, DistListMemberField[] fields) throws SQLException, OXException {
-        StringBuilder stringBuilder = new StringBuilder();
+        com.openexchange.java.StringAllocator stringBuilder = new com.openexchange.java.StringAllocator();
         stringBuilder.append("SELECT ").append(Mappers.DISTLIST.getColumns(fields)).append(" FROM ").append(table).append(" WHERE ")
             .append(Mappers.DISTLIST.get(DistListMemberField.CONTEXT_ID).getColumnLabel()).append("=? AND ")
             .append(Mappers.DISTLIST.get(DistListMemberField.CONTACT_ID).getColumnLabel()).append("=? AND ( ")
@@ -495,7 +495,7 @@ public class Executor {
 
     public int insert(final Connection connection, final Table table, final Contact contact, final ContactField[] fields) 
     		throws SQLException, OXException {        
-        final StringBuilder stringBuilder = new StringBuilder();
+        final com.openexchange.java.StringAllocator stringBuilder = new com.openexchange.java.StringAllocator();
         stringBuilder.append("INSERT INTO ").append(table).append(" (").append(Mappers.CONTACT.getColumns(fields))
             .append(") VALUES (").append(Tools.getParameters(fields.length)).append(");");
         PreparedStatement stmt = null;
@@ -510,7 +510,7 @@ public class Executor {
     
     public int insert(final Connection connection, final Table table, final DistListMember member, final DistListMemberField[] fields) 
     		throws SQLException, OXException {
-        final StringBuilder stringBuilder = new StringBuilder();
+        final com.openexchange.java.StringAllocator stringBuilder = new com.openexchange.java.StringAllocator();
         stringBuilder.append("INSERT INTO ").append(table).append(" (").append(Mappers.DISTLIST.getColumns(fields))
             .append(") VALUES (").append(Tools.getParameters(fields.length)).append(");");
         PreparedStatement stmt = null;
@@ -537,7 +537,7 @@ public class Executor {
     }
     
     public int insertFrom(Connection connection, Table from, Table to, int contextID, int folderID, int[] objectIDs, long maxLastModified) throws SQLException, OXException {
-        StringBuilder stringBuilder = new StringBuilder();
+        com.openexchange.java.StringAllocator stringBuilder = new com.openexchange.java.StringAllocator();
         stringBuilder.append("REPLACE INTO ").append(to).append(" SELECT * FROM ").append(from).append(" WHERE ");
         if (from.isDistListTable()) {
             stringBuilder.append(Mappers.DISTLIST.get(DistListMemberField.CONTEXT_ID).getColumnLabel()).append("=?");
@@ -594,7 +594,7 @@ public class Executor {
 
     public int insertFrom(final Connection connection, final Table from, final Table to, final int contextID, final int objectID, 
         final long maxLastModified) throws SQLException, OXException {
-    final StringBuilder stringBuilder = new StringBuilder();
+    final com.openexchange.java.StringAllocator stringBuilder = new com.openexchange.java.StringAllocator();
     stringBuilder.append("REPLACE INTO ").append(to).append(" SELECT * FROM ").append(from).append(" WHERE ");
     if (from.isDistListTable()) {
         stringBuilder.append(Mappers.DISTLIST.get(DistListMemberField.CONTEXT_ID).getColumnLabel()).append("=? AND ")
@@ -628,7 +628,7 @@ public class Executor {
     }
             
     public int update(Connection connection, Table table, int contextID, int objectID, long maxLastModified, Contact contact, ContactField[] fields) throws SQLException, OXException {
-        StringBuilder stringBuilder = new StringBuilder();
+        com.openexchange.java.StringAllocator stringBuilder = new com.openexchange.java.StringAllocator();
         stringBuilder.append("UPDATE ").append(table).append(" SET ").append(Mappers.CONTACT.getAssignments(fields)).append(" WHERE ")
             .append(Mappers.CONTACT.get(ContactField.CONTEXTID).getColumnLabel()).append("=? AND ")
             .append(Mappers.CONTACT.get(ContactField.OBJECT_ID).getColumnLabel()).append("=?");
@@ -653,7 +653,7 @@ public class Executor {
     }
     
     public int update(Connection connection, Table table, int contextID, int folderID, int[] objectIDs, Contact template, ContactField[] fields, long maxLastModified) throws SQLException, OXException {
-        StringBuilder stringBuilder = new StringBuilder();
+        com.openexchange.java.StringAllocator stringBuilder = new com.openexchange.java.StringAllocator();
         stringBuilder.append("UPDATE ").append(table).append(" SET ").append(Mappers.CONTACT.getAssignments(fields)).append(" WHERE ")
             .append(Mappers.CONTACT.get(ContactField.CONTEXTID).getColumnLabel()).append("=?");
         if (Integer.MIN_VALUE != folderID) {
@@ -691,7 +691,7 @@ public class Executor {
     }
     
     public int updateMember(Connection connection, Table table, int contextID, DistListMember member, DistListMemberField[] fields) throws SQLException, OXException {
-        final StringBuilder stringBuilder = new StringBuilder();
+        final com.openexchange.java.StringAllocator stringBuilder = new com.openexchange.java.StringAllocator();
         stringBuilder.append("UPDATE ").append(table).append(" SET ").append(Mappers.DISTLIST.getAssignments(fields)).append(" WHERE ")
             .append(Mappers.DISTLIST.get(DistListMemberField.CONTEXT_ID).getColumnLabel()).append("=? AND ")
             .append(Mappers.DISTLIST.get(DistListMemberField.CONTACT_ID).getColumnLabel()).append("=?;"); 
@@ -709,7 +709,7 @@ public class Executor {
     
     public int delete(Connection connection, Table table, int contextID, int folderID, int[] objectIDs, long maxLastModified) 
         throws SQLException, OXException {
-        StringBuilder stringBuilder = new StringBuilder();
+        com.openexchange.java.StringAllocator stringBuilder = new com.openexchange.java.StringAllocator();
         stringBuilder.append("DELETE FROM ").append(table).append(" WHERE ")
             .append(Mappers.CONTACT.get(ContactField.CONTEXTID).getColumnLabel()).append("=?");
         if (Integer.MIN_VALUE != folderID) {
@@ -752,7 +752,7 @@ public class Executor {
     }
     
     public int deleteSingle(Connection connection, Table table, int contextID, int objectID, long maxLastModified) throws SQLException, OXException {
-        StringBuilder stringBuilder = new StringBuilder();
+        com.openexchange.java.StringAllocator stringBuilder = new com.openexchange.java.StringAllocator();
         stringBuilder.append("DELETE FROM ").append(table).append(" WHERE ")
             .append(Mappers.CONTACT.get(ContactField.CONTEXTID).getColumnLabel()).append("=? AND ")
             .append(Mappers.CONTACT.get(ContactField.OBJECT_ID).getColumnLabel()).append("=?");

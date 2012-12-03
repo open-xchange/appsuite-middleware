@@ -663,7 +663,7 @@ public final class CalendarCollection implements CalendarCollectionService {
     public String createDSString(final CalendarDataObject cdao) throws OXException {
         if (cdao.containsStartDate()) {
             checkRecurring(cdao);
-            StringBuilder recStrBuilder = new StringBuilder(64);
+            com.openexchange.java.StringAllocator recStrBuilder = new com.openexchange.java.StringAllocator(64);
             final int recurrenceType = cdao.getRecurrenceType();
             int interval = cdao.getInterval(); // i
             if (interval > MAX_OCCURRENCESE) {
@@ -1124,7 +1124,7 @@ public Date getOccurenceDate(final CalendarDataObject cdao) throws OXException {
         rss.add(rs);
     }
 
-    private void dsf(final StringBuilder sb, final char c, final int v) {
+    private void dsf(final com.openexchange.java.StringAllocator sb, final char c, final int v) {
         if (v >= 0) {
             sb.append(c);
             sb.append(DELIMITER_PIPE);
@@ -1133,14 +1133,14 @@ public Date getOccurenceDate(final CalendarDataObject cdao) throws OXException {
         }
     }
 
-    private void dsf(final StringBuilder sb, final char c, final long l) {
+    private void dsf(final com.openexchange.java.StringAllocator sb, final char c, final long l) {
         sb.append(c);
         sb.append(DELIMITER_PIPE);
         sb.append(l);
         sb.append(DELIMITER_PIPE);
     }
 
-    private void dsf(final StringBuilder sb, final int type) {
+    private void dsf(final com.openexchange.java.StringAllocator sb, final int type) {
         dsf(sb, 't', type);
     }
 
@@ -2393,7 +2393,7 @@ public Date getOccurenceDate(final CalendarDataObject cdao) throws OXException {
      */
     @Override
     public String getSQLInStringForParticipants(final List<UserParticipant> userParticipant) {
-        final StringBuilder sb = new StringBuilder(32);
+        final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(32);
         if (userParticipant != null && userParticipant.size() > 0) {
             sb.append('(');
             for (int a = 0; a < userParticipant.size(); a++) {
@@ -2416,7 +2416,7 @@ public Date getOccurenceDate(final CalendarDataObject cdao) throws OXException {
      */
     @Override
     public String getSQLInStringForParticipants(final Participant[] participant) {
-        final StringBuilder sb = new StringBuilder(32);
+        final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(32);
         if (participant != null && participant.length > 0) {
             sb.append('(');
             for (int a = 0; a < participant.length; a++) {
@@ -2439,7 +2439,7 @@ public Date getOccurenceDate(final CalendarDataObject cdao) throws OXException {
      */
     @Override
     public String getSQLInStringForResources(final Participant[] participant) {
-        final  StringBuilder sb = new StringBuilder(32);
+        final  com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(32);
         boolean containsResources = false;
         if (participant != null && participant.length > 0) {
             for (int a = 0; a < participant.length; a++) {
@@ -2516,7 +2516,7 @@ public Date getOccurenceDate(final CalendarDataObject cdao) throws OXException {
         if (d == null || d.length == 0) {
             return null;
         }
-        final StringBuilder sb = new StringBuilder(d.length << 4);
+        final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(d.length << 4);
         Arrays.sort(d);
         sb.append(d[0].getTime());
         for (int i = 1; i < d.length; i++) {
@@ -2654,7 +2654,7 @@ public Date getOccurenceDate(final CalendarDataObject cdao) throws OXException {
             } else {
                 sb.append(" AND (pd.created_from = ");
             }
-            sb.append(uid);
+            sb.append(Integer.toString(uid));
             sb.append(" AND (pdm.pfid IN ");
             sb.append(StringCollection.getSqlInString(private_read_own));
             sb.append("))");
@@ -3118,7 +3118,7 @@ public Date getOccurenceDate(final CalendarDataObject cdao) throws OXException {
         try {
             readcon = Database.get(contextId, false);
             {
-                final StringBuilder sb = new StringBuilder((FIELDS_ALL.length << 3) + 128);
+                final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator((FIELDS_ALL.length << 3) + 128);
                 sb.append(StringCollection.getSelect(FIELDS_ALL, CalendarSql.DATES_TABLE_NAME)).append(" AS pd ");
                 sb.append("WHERE cid = ? AND intfield01 = ?");
                 prep = calendarsqlimp.getPreparedStatement(readcon, sb.toString());
@@ -3185,7 +3185,7 @@ public Date getOccurenceDate(final CalendarDataObject cdao) throws OXException {
             readcon = Database.get(contextId, false);
             final int[] nfields = checkAndAlterCols(fields);
             {
-                final StringBuilder sb = new StringBuilder((nfields.length << 3) + 128);
+                final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator((nfields.length << 3) + 128);
                 sb.append(StringCollection.getSelect(nfields, CalendarSql.DATES_TABLE_NAME)).append(" AS pd ");
                 sb.append("WHERE cid = ? AND intfield02 = ? AND intfield01 != intfield02 AND field08 = ?");
                 prep = calendarsqlimp.getPreparedStatement(readcon, sb.toString());
@@ -3269,7 +3269,7 @@ public Date getOccurenceDate(final CalendarDataObject cdao) throws OXException {
             readcon = Database.get(contextId, false);
             final int[] nfields = checkAndAlterCols(fields);
             {
-                final StringBuilder sb = new StringBuilder((nfields.length << 3) + 128);
+                final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator((nfields.length << 3) + 128);
                 sb.append(StringCollection.getSelect(nfields, CalendarSql.DATES_TABLE_NAME)).append(" AS pd ");
                 sb.append("WHERE cid = ? AND intfield02 = ? AND intfield01 != intfield02");
                 prep = calendarsqlimp.getPreparedStatement(readcon, sb.toString());
@@ -3333,7 +3333,7 @@ public Date getOccurenceDate(final CalendarDataObject cdao) throws OXException {
             readcon = Database.get(contextId, false);
             final int[] nfields = checkAndAlterCols(fields);
             {
-                final StringBuilder sb = new StringBuilder((nfields.length << 3) + 128);
+                final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator((nfields.length << 3) + 128);
                 sb.append(StringCollection.getSelect(nfields, CalendarSql.DATES_TABLE_NAME)).append(" AS pd ");
                 sb.append("WHERE cid = ? AND intfield01 IN (").append(ids[0]);
                 for (int i = 1; i < ids.length; i++) {

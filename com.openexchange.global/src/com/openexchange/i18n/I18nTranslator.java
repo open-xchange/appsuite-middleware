@@ -82,11 +82,11 @@ public class I18nTranslator implements Translator {
             final Locale locale = service.getLocale();
             if (Locale.US.equals(locale)) {
                 if (DEBUG_ENABLED) {
-                    final String message = new StringBuilder(64).append("I18n service for locale ").append(locale).append(
+                    final String message = new com.openexchange.java.StringAllocator(64).append("I18n service for locale ").append(locale).append(
                         " has no translation for \"").append(toTranslate).append("\".").toString();
                     LOG.warn(message, new Throwable(message));
                 } else if (WARN_ENABLED) {
-                    LOG.warn(new StringBuilder(64).append("I18n service for locale ").append(locale).append(" has no translation for \"").append(
+                    LOG.warn(new com.openexchange.java.StringAllocator(64).append("I18n service for locale ").append(locale).append(" has no translation for \"").append(
                         toTranslate).append("\".").toString());
                 }
             }

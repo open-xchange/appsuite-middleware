@@ -129,7 +129,7 @@ class State {
         InputStreamReader isr = null;
         BufferedReader reader = null;
         try {
-            isr = new InputStreamReader(input, "ISO-8859-1");
+            isr = new InputStreamReader(input, com.openexchange.java.Charsets.ISO_8859_1);
             reader = new BufferedReader(isr);
             depth = Integer.parseInt(reader.readLine());
             entries = Integer.parseInt(reader.readLine());

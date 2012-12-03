@@ -118,8 +118,6 @@ public final class UpdateAction extends JSlobAction {
         final JSlobService jslobService = getJSlobService(serviceId);
 
         final String id = jslobRequest.checkParameter("id");
-        final int userId = jslobRequest.getUserId();
-        final int contextId = jslobRequest.getContextId();
 
         JSlob jslob;
         {
@@ -134,11 +132,11 @@ public final class UpdateAction extends JSlobAction {
                 /*
                  * Update...
                  */
-                jslobService.update(id, jsonUpdate, userId, contextId);
+                jslobService.update(id, jsonUpdate, jslobRequest.getSession());
                 /*
                  * ... and write back
                  */
-                jslob = jslobService.get(id, userId, contextId);
+                jslob = jslobService.get(id, jslobRequest.getSession());
             } else {
                 /*
                  * Update by JSON data
@@ -149,22 +147,22 @@ public final class UpdateAction extends JSlobAction {
                     /*
                      * Update...
                      */
-                    jslobService.update(id, jsonUpdate, userId, contextId);
+                    jslobService.update(id, jsonUpdate, jslobRequest.getSession());
                     /*
                      * ... and write back
                      */
-                    jslob = jslobService.get(id, userId, contextId);
+                    jslob = jslobService.get(id, jslobRequest.getSession());
                 } else {
                     /*
                      * Perform merge
                      */
-                    final JSONObject merged = JSONUtil.merge(jslobService.get(id, userId, contextId).getJsonObject(), jsonData);
+                    final JSONObject merged = JSONUtil.merge(jslobService.get(id, jslobRequest.getSession()).getJsonObject(), jsonData);
                     jslob = new JSlob(merged);
-                    jslobService.set(id, jslob, userId, contextId);
+                    jslobService.set(id, jslob, jslobRequest.getSession());
                     /*
                      * ... and write back
                      */
-                    jslob = jslobService.get(id, userId, contextId);
+                    jslob = jslobService.get(id, jslobRequest.getSession());
                 }
             }
         }

@@ -70,6 +70,7 @@ import com.openexchange.http.grizzly.GrizzlyExceptionMessage;
 import com.openexchange.http.grizzly.osgi.GrizzlyServiceRegistry;
 import com.openexchange.http.grizzly.servletfilter.RequestReportingFilter;
 import com.openexchange.http.grizzly.servletfilter.WrappingFilter;
+import com.openexchange.java.StringAllocator;
 
 /**
  * OSGi Main HttpHandler.
@@ -96,16 +97,6 @@ public class OSGiMainHandler extends HttpHandler implements OSGiHandler {
     private final OSGiCleanMapper mapper;
 
     private final boolean isRequestWatcherEnabled;
-
-    private int cookieMaxAge;
-
-    private int cookieMaxInactiveInterval;
-
-    private boolean isCookieForceHttps;
-
-    private boolean isCookieHttpOnly;
-
-    private boolean isSessionAutologin;
 
     /**
      * Constructor.
@@ -163,6 +154,13 @@ public class OSGiMainHandler extends HttpHandler implements OSGiHandler {
                     updateMappingInfo(request, alias, originalAlias);
 
                     httpHandler.service(request, response);
+                } catch(Throwable t) {
+                    ExceptionUtils.handleThrowable(t);
+                    final com.openexchange.java.StringAllocator tmp = new com.openexchange.java.StringAllocator(128).append("Error processing request: ");
+                    appendRequestInfo(tmp, request);
+                    LOG.error(tmp.toString(), t);
+                    // 500 - Internal Server Error
+                    response.setStatus(HttpStatus.INTERNAL_SERVER_ERROR_500);
                 } finally {
                     ((OSGiHandler) httpHandler).getProcessingLock().unlock();
                 }
@@ -187,6 +185,19 @@ public class OSGiMainHandler extends HttpHandler implements OSGiHandler {
             }
         }
     }
+    
+    /**
+     * Appends request information.
+     * 
+     * @param builder The builder to append to
+     */
+    private void appendRequestInfo(final StringAllocator builder, Request request) {
+        builder.append("request-URI=''");
+        builder.append(request.getRequestURI());
+        builder.append("'', query-string=''");
+        builder.append(request.getQueryString());
+        builder.append("''");
+    }
 
     /**
      * Registers {@link services.http.OSGiServletHandler} in OSGi Http Service.
@@ -210,7 +221,7 @@ public class OSGiMainHandler extends HttpHandler implements OSGiHandler {
         try {
             // TODO: clean up OX servlet structure so we can apply alias and servlet validation
 
-            // validateAlias4RegOk(alias);
+            validateAlias4RegOk(alias);
 
             /*
              * Currently only checks if servlet is already registered. This prevents the same servlet with different aliases. Disabled until
@@ -250,7 +261,7 @@ public class OSGiMainHandler extends HttpHandler implements OSGiHandler {
 
     /**
      * @param servletHandler
-     * @throws OXException 
+     * @throws OXException
      */
     private void addServletFilters(OSGiServletHandler servletHandler) throws OXException {
         // wrap it
@@ -396,6 +407,13 @@ public class OSGiMainHandler extends HttpHandler implements OSGiHandler {
         if (alias.length() > 1 && alias.endsWith("/")) {
             // if longer than "/", should not end with "/"
             String msg = new StringBuilder(64).append("Alias '").append(alias).append("' can't end with '/' with exception to alias '/'.").toString();
+            LOG.warn(msg);
+            throw new NamespaceException(msg);
+        }
+        if (alias.length() > 1 && alias.endsWith("*")) {
+            // if longer than "/", wildcards/mappings aren't supported
+            String msg = new StringBuilder(64).append("Alias '").append(alias).append(
+                "' can't end with '*'. Wildcards/mappings aren't supported.").toString();
             LOG.warn(msg);
             throw new NamespaceException(msg);
         }

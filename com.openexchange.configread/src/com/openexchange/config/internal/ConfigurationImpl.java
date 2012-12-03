@@ -583,7 +583,7 @@ public final class ConfigurationImpl implements ConfigurationService {
         try {
             reader = new InputStreamReader(new FileInputStream(file));
 
-            final StringBuilder builder = new StringBuilder((int) file.length());
+            final com.openexchange.java.StringAllocator builder = new com.openexchange.java.StringAllocator((int) file.length());
             final int buflen = 8192;
             final char[] cbuf = new char[buflen];
 

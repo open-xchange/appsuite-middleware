@@ -56,9 +56,9 @@ package com.openexchange.index.solr.internal.querybuilder.utils;
  */
 public class Token {
 
-    private String term;
+    private final String term;
 
-    private TokenTypes type;
+    private final TokenTypes type;
 
     public Token(String term, TokenTypes type) {
         this.term = term;

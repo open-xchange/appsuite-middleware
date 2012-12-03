@@ -58,9 +58,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
-import org.json.JSONArray;
 import org.json.JSONException;
-import org.json.JSONObject;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
@@ -70,6 +68,8 @@ import com.openexchange.ajax.writer.ResponseWriter;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.notify.hostname.HostnameService;
 import com.openexchange.java.AllocatingStringWriter;
+import com.openexchange.java.Streams;
+import com.openexchange.java.UnsynchronizedPushbackReader;
 import com.openexchange.log.LogFactory;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
@@ -242,6 +242,11 @@ public abstract class MultipleAdapterServletNew extends PermissionServlet {
         return false;
     }
 
+    /**
+     * The size of push-back buffer.
+     */
+    protected static final int pushbackSize = 8;
+
     protected AJAXRequestData parseRequest(final HttpServletRequest req, final boolean preferStream, final boolean isFileUpload, final ServerSession session) throws IOException, OXException {
         final AJAXRequestData retval = new AJAXRequestData();
         retval.setMultipart(isFileUpload);
@@ -279,27 +284,38 @@ public abstract class MultipleAdapterServletNew extends PermissionServlet {
             /*
              * Guess an appropriate body object
              */
-            final String body = AJAXServlet.getBody(req);
-            if (startsWith('{', body, true)) {
-                /*
-                 * Expect the body to be a JSON object
-                 */
-                try {
-                    retval.setData(new JSONObject(body));
-                } catch (final JSONException e) {
-                    retval.setData(body);
+            UnsynchronizedPushbackReader reader = null;
+            try {
+                reader = new UnsynchronizedPushbackReader(AJAXServlet.getReaderFor(req), pushbackSize);
+                {
+                    int count = 0;
+                    final char[] cbuf = new char[pushbackSize];
+                    while (count < pushbackSize && Character.isWhitespace((cbuf[count++] = (char) reader.read()))) {
+                        // Consume whitespaces
+                    }
+                    if (count >= pushbackSize) {
+                        reader.unread(cbuf);
+                        retval.setData(AJAXServlet.readFrom(reader));
+                    }
+                    final char nonWhitespace = cbuf[count - 1];
+                    if ('[' == nonWhitespace || '{' == nonWhitespace) {
+                        try {
+                            reader.unread(nonWhitespace);
+                            retval.setData(AJAXServlet.getBodyAsJsonValue(req));
+                        } catch (final JSONException e) {
+                            // No parseable JSON data
+                            reader.unread(cbuf, 0, count);
+                            retval.setData(AJAXServlet.readFrom(reader));
+                        }
+                    } else {
+                        // No JSON data
+                        reader.unread(cbuf, 0, count);
+                        retval.setData(AJAXServlet.readFrom(reader));
+                    }
                 }
-            } else if (startsWith('[', body, true)) {
-                /*
-                 * Expect the body to be a JSON array
-                 */
-                try {
-                    retval.setData(new JSONArray(body));
-                } catch (final JSONException e) {
-                    retval.setData(body);
-                }
-            } else {
-                retval.setData(0 == body.length() ? null : body);
+            } finally {
+                Streams.close(reader);
+                reader = null;
             }
         }
         return retval;

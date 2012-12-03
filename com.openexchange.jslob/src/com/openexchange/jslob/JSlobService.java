@@ -52,6 +52,7 @@ package com.openexchange.jslob;
 import java.util.Collection;
 import java.util.List;
 import com.openexchange.exception.OXException;
+import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link JSlobService} - The JSlob service.
@@ -78,12 +79,11 @@ public interface JSlobService {
      * Gets the JSlob associated with given user in given context.
      * 
      * @param id The identifier of the JSlob
-     * @param userId The user identifier
-     * @param contextId The context identifier
+     * @param userId session An active session
      * @return The JSlob
      * @throws OXException If JSlob cannot be returned
      */
-    JSlob get(String id, int userId, int contextId) throws OXException;
+    JSlob get(String id, ServerSession session) throws OXException;
 
     /**
      * Gets the shared JSlob.
@@ -97,12 +97,11 @@ public interface JSlobService {
     /**
      * Gets the JSlobs associated with given user in given context.
      * 
-     * @param userId The user identifier
-     * @param contextId The context identifier
+     * @param session an active session
      * @return The JSlobs
      * @throws OXException If JSlobs cannot be returned
      */
-    Collection<JSlob> get(int userId, int contextId) throws OXException;
+    Collection<JSlob> get(ServerSession session) throws OXException;
 
     /**
      * Gets the shared JSlobs.
@@ -119,11 +118,10 @@ public interface JSlobService {
      * 
      * @param id The path of the JSlob
      * @param jsonJSlob The JSlob or <code>null</code> for deletion
-     * @param userId The user identifier
-     * @param contextId The context identifier
+     * @param session an active session
      * @throws OXException If JSlob cannot be set
      */
-    void set(String id, JSlob jsonJSlob, int userId, int contextId) throws OXException;
+    void set(String id, JSlob jsonJSlob, ServerSession session) throws OXException;
 
     /**
      * Sets the shared JSlob.
@@ -141,10 +139,9 @@ public interface JSlobService {
      * 
      * @param id The path of the JSlob
      * @param jsonUpdate The JSON update providing the data to update
-     * @param userId The user identifier
-     * @param contextId The context identifier
+     * @param session an active session
      * @throws OXException If update fails
      */
-    void update(String id, JSONUpdate update, int userId, int contextId) throws OXException;
+    void update(String id, JSONUpdate update, ServerSession session) throws OXException;
 
 }

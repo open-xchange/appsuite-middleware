@@ -95,6 +95,7 @@ public class OriginalChatAtmosphereHandler implements AtmosphereHandler {
             this.text = text;
         }
 
+        @Override
         public String toString() {
             return "{ \"text\" : \"" + text + "\", \"author\" : \"" + author + "\" , \"time\" : " + new Date().getTime() + "}";
         }

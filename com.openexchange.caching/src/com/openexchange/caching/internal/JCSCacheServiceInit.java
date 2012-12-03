@@ -213,12 +213,12 @@ public final class JCSCacheServiceInit {
                      */
                     addAuxProps |= checkAdditionalAuxiliary(key, value);
                     if (isDefault(key)) {
-                        LOG.warn(new StringBuilder("Ignoring default cache configuration property: ").append(key).append('=').append(value).toString());
+                        LOG.warn(new com.openexchange.java.StringAllocator("Ignoring default cache configuration property: ").append(key).append('=').append(value).toString());
                     } else if (overwritesExisting(key)) {
-                        LOG.warn(new StringBuilder("Ignoring overwriting existing cache configuration property: ").append(key).append('=').append(
+                        LOG.warn(new com.openexchange.java.StringAllocator("Ignoring overwriting existing cache configuration property: ").append(key).append('=').append(
                             value).toString());
                     } else if (props.containsKey(key)) {
-                        LOG.warn(new StringBuilder("Ignoring overwriting existing cache configuration property: ").append(key).append('=').append(
+                        LOG.warn(new com.openexchange.java.StringAllocator("Ignoring overwriting existing cache configuration property: ").append(key).append('=').append(
                             value).toString());
                     } else {
                         additionalProps.put(key, value);

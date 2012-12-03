@@ -253,7 +253,7 @@ public class LdapConfig {
 
     @Override
     public String toString() {
-        StringBuilder stringBuilder = new StringBuilder();
+        com.openexchange.java.StringAllocator stringBuilder = new com.openexchange.java.StringAllocator();
         stringBuilder
             .append('\t').append("Folder name: ").append(folderName).append('\n')
             .append('\t').append("Folder ID: ").append(folderID).append('\n')

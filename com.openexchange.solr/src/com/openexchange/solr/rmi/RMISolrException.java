@@ -83,6 +83,7 @@ public class RMISolrException extends Exception {
     }
 
     
+    @Override
     public final String getMessage() {
         return message;
     }

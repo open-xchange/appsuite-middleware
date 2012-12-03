@@ -172,7 +172,7 @@ public final class StringAllocator extends AbstractStringAllocator implements ja
      * @throws IndexOutOfBoundsException {@inheritDoc}
      */
     @Override
-    public StringAllocator append(CharSequence s) {
+    public StringAllocator append(final CharSequence s) {
         if (s == null) {
             return this.append("null");
         }
@@ -344,7 +344,7 @@ public final class StringAllocator extends AbstractStringAllocator implements ja
      * @throws IndexOutOfBoundsException {@inheritDoc}
      */
     @Override
-    public StringAllocator insert(final int dstOffset, CharSequence s) {
+    public StringAllocator insert(final int dstOffset, final CharSequence s) {
         if (s == null) {
             return this.insert(dstOffset, "null");
         }
@@ -465,6 +465,35 @@ public final class StringAllocator extends AbstractStringAllocator implements ja
     public StringAllocator reverse() {
         super.reverse();
         return this;
+    }
+
+    @Override
+    public String substring(final int start) {
+        return substring(start, count);
+    }
+
+    @Override
+    public String substring(final int start, final int end) {
+        if (start < 0) {
+            throw new StringIndexOutOfBoundsException(start);
+        }
+        if (end > count) {
+            throw new StringIndexOutOfBoundsException(end);
+        }
+        if (start > end) {
+            throw new StringIndexOutOfBoundsException(end - start);
+        }
+        final Constructor<String> stringConstructor = STRING_CONSTRUCTOR;
+        if (null == stringConstructor) {
+            // Create a copy, don't share the array
+            return new String(value, start, end - start);
+        }
+        try {
+            return stringConstructor.newInstance(Integer.valueOf(start), Integer.valueOf(end - start), value);
+        } catch (final Exception e) {
+            // Create a copy, don't share the array
+            return new String(value, start, end - start);
+        }
     }
 
     @Override

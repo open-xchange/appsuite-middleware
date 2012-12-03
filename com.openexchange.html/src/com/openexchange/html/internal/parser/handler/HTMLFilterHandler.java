@@ -69,6 +69,7 @@ import com.openexchange.config.ConfigurationService;
 import com.openexchange.html.HtmlService;
 import com.openexchange.html.internal.parser.HtmlHandler;
 import com.openexchange.html.services.ServiceRegistry;
+import com.openexchange.java.Charsets;
 
 /**
  * {@link HTMLFilterHandler} - The HTML white-list filter.
@@ -283,7 +284,7 @@ public final class HTMLFilterHandler implements HtmlHandler {
                     } else {
                         BufferedReader reader = null;
                         try {
-                            reader = new BufferedReader(new InputStreamReader(new FileInputStream(whitelist), "US-ASCII"));
+                            reader = new BufferedReader(new InputStreamReader(new FileInputStream(whitelist), Charsets.US_ASCII));
                             final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator();
                             String line = null;
                             while ((line = reader.readLine()) != null) {

@@ -84,7 +84,7 @@ public class ContactSearchAdapter extends DefaultSearchAdapter {
 	private static String eMailAutomCompleteClause = null;
 	private static ContactField startLetterField = null;
 	
-	private final StringBuilder stringBuilder;
+	private final com.openexchange.java.StringAllocator stringBuilder;
 
 	/**
 	 * Initializes a new {@link ContactSearchAdapter}.
@@ -97,7 +97,7 @@ public class ContactSearchAdapter extends DefaultSearchAdapter {
 	 */
 	public ContactSearchAdapter(ContactSearchObject contactSearch, int contextID, ContactField[] fields, String charset) throws OXException {
 		super(charset);
-		this.stringBuilder = new StringBuilder();
+		this.stringBuilder = new com.openexchange.java.StringAllocator(256);
 		if (null != contactSearch.getPattern()) {
 			appendSearch(contactSearch, contextID, fields);
 		} else {
@@ -320,7 +320,7 @@ public class ContactSearchAdapter extends DefaultSearchAdapter {
 
 	private static String getEMailAutoCompleteClause() throws OXException {
 		if (null == eMailAutomCompleteClause) {
-			StringBuilder stringBuilder = new StringBuilder();
+		    com.openexchange.java.StringAllocator stringBuilder = new com.openexchange.java.StringAllocator();
 			stringBuilder
 				.append(Mappers.CONTACT.get(ContactField.EMAIL1).getColumnLabel()).append("<>'' OR ")
 				.append(Mappers.CONTACT.get(ContactField.EMAIL2).getColumnLabel()).append("<>'' OR ")

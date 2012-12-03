@@ -79,6 +79,7 @@ import net.htmlparser.jericho.StartTag;
 import net.htmlparser.jericho.StartTagType;
 import net.htmlparser.jericho.Tag;
 import org.apache.commons.logging.Log;
+import com.openexchange.java.Charsets;
 import com.openexchange.log.LogFactory;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.html.internal.parser.handler.HTMLFilterHandler;
@@ -546,7 +547,7 @@ public final class HtmlWhitelistFilter {
                     } else {
                         BufferedReader reader = null;
                         try {
-                            reader = new BufferedReader(new InputStreamReader(new FileInputStream(whitelist), "US-ASCII"));
+                            reader = new BufferedReader(new InputStreamReader(new FileInputStream(whitelist), Charsets.US_ASCII));
                             final StringBuilder sb = new StringBuilder();
                             String line = null;
                             while ((line = reader.readLine()) != null) {

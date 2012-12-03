@@ -193,7 +193,7 @@ public abstract class ServiceHolder<S> {
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(ServiceHolder.class));
 
     private static final String printStackTrace(final StackTraceElement[] trace) {
-        final StringBuilder sb = new StringBuilder(512);
+        final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(512);
         for (int i = 2; i < trace.length; i++) {
             sb.append("\tat ").append(trace[i]).append('\n');
         }

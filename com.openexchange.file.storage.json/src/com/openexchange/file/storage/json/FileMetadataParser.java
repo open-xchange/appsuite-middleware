@@ -160,11 +160,11 @@ public class FileMetadataParser implements FileMetadataParserService{
             if(value.length() == 0) {
                 return "";
             }
-            final StringBuilder b = new StringBuilder();
+            final com.openexchange.java.StringAllocator b = new com.openexchange.java.StringAllocator();
             for(int i = 0, size = value.length(); i < size; i++) {
                 b.append(value.getString(i)).append(", ");
             }
-            b.setLength(b.length()-2);
+            b.setNewLength(b.length()-2);
             return b.toString();
         }
     }

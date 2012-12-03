@@ -222,7 +222,7 @@ public class PropertiesAppendingLogWrapper implements Log {
                 }
             }
         }
-        final StringBuilder sb = new StringBuilder(256);
+        final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(256);
         if (!isEmpty) {
             for (final Entry<String, String> entry : sorted.entrySet()) {
                 sb.append('\n').append(entry.getKey()).append('=').append(entry.getValue());

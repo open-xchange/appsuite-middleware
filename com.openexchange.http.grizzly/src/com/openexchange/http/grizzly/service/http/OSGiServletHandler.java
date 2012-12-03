@@ -43,6 +43,7 @@
 package com.openexchange.http.grizzly.service.http;
 
 import java.io.IOException;
+import java.util.Enumeration;
 import java.util.EventListener;
 import java.util.HashMap;
 import java.util.Map;
@@ -57,17 +58,19 @@ import javax.servlet.ServletRequest;
 import javax.servlet.ServletRequestEvent;
 import javax.servlet.ServletRequestListener;
 import javax.servlet.ServletResponse;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
 import org.glassfish.grizzly.Grizzly;
 import org.glassfish.grizzly.http.server.Request;
 import org.glassfish.grizzly.localization.LogMessages;
 import org.glassfish.grizzly.servlet.FilterChainInvoker;
 import org.glassfish.grizzly.servlet.FilterConfigImpl;
-import org.glassfish.grizzly.servlet.HttpServletRequestImpl;
 import org.glassfish.grizzly.servlet.ServletConfigImpl;
 import org.glassfish.grizzly.servlet.ServletHandler;
 import org.glassfish.grizzly.servlet.WebappContext;
 import org.osgi.service.http.HttpContext;
+import com.openexchange.java.StringAllocator;
 
 /**
  * OSGi customized {@link ServletHandler}.
@@ -77,7 +80,7 @@ import org.osgi.service.http.HttpContext;
  */
 public class OSGiServletHandler extends ServletHandler implements OSGiHandler {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(OSGiServletHandler.class);
+    static final Log LOG = com.openexchange.log.Log.loggerFor(OSGiServletHandler.class);
 
     private final ReentrantReadWriteLock lock = new ReentrantReadWriteLock();
 
@@ -278,7 +281,7 @@ public class OSGiServletHandler extends ServletHandler implements OSGiHandler {
          * @throws javax.servlet.ServletException if a servlet exception occurs
          */
         @Override
-        public void doFilter(ServletRequest request, ServletResponse response) throws IOException, ServletException {
+        public void doFilter(ServletRequest request, ServletResponse response) {
 
             // Call the next filter if there is one
             if (pos < n) {
@@ -287,10 +290,9 @@ public class OSGiServletHandler extends ServletHandler implements OSGiHandler {
 
                 try {
                     filter.doFilter(request, response, this);
-                } catch (Exception e) {
-                    throw new ServletException(e);
+                } catch(Throwable throwable) {
+                    handleThrowable(throwable, request, response);
                 }
-
                 return;
             }
 
@@ -300,13 +302,78 @@ public class OSGiServletHandler extends ServletHandler implements OSGiHandler {
                     servlet.service(request, response);
                 }
 
-            } catch (Exception e) {
-                throw new ServletException(e);
+            } catch (Throwable throwable) {
+                handleThrowable(throwable, request, response);
             }
 
         }
 
+        /**
+         * Let the ExceptionUtils handle the Throwable for us and set a proper HttpStatus on the response.
+         * @param throwable The Throwable that needs to be handled.
+         * @param request The request that couldn't be serviced because of throwable
+         * @param response The associated Response
+         */
+        private void handleThrowable(Throwable throwable, ServletRequest request, ServletResponse response) {
+            ExceptionUtils.handleThrowable(throwable);
+            StringAllocator allocator = new StringAllocator(128).append("Error processing request: ");
+            if(request instanceof HttpServletRequest && response instanceof HttpServletResponse) {
+                HttpServletRequest httpServletRequest = (HttpServletRequest) request;
+                HttpServletResponse httpServletResponse= (HttpServletResponse) response;
+                appendHttpServletRequestInfo(allocator, httpServletRequest);
+                // 500 - Internal Server Error
+                httpServletResponse.setStatus(500);
+            } else {
+                appendServletRequestInfo(allocator, request);
+            }
+            LOG.error(allocator.toString(), throwable);
+        }
+
         // ------------------------------------------------------- Protected Methods
+
+        /**
+         * Add ServletName and Parameters of the request to the log string allocator.
+         * @param allocator
+         * @param request
+         */
+        private void appendServletRequestInfo(StringAllocator allocator, ServletRequest request) {
+            allocator.append("servlet name=''");
+            allocator.append(servlet.getServletConfig().getServletName());
+            allocator.append("servlet parameters=''");
+            @SuppressWarnings("unchecked")
+            Enumeration<String> parameterNames = request.getParameterNames();
+            boolean firstParam=true;
+            while(parameterNames.hasMoreElements()) {
+                if(firstParam) {
+                    String name = parameterNames.nextElement();
+                    String value = request.getParameter(name);
+                    allocator.append(name);
+                    allocator.append("=");
+                    allocator.append(value);
+                    firstParam=false;
+                } else {
+                    allocator.append("&");
+                    String name = parameterNames.nextElement();
+                    String value = request.getParameter(name);
+                    allocator.append(name);
+                    allocator.append("=");
+                    allocator.append(value);
+                }
+            }
+        }
+
+        /**
+         * Add Uri and QueryString of the httpServletRequest to the log string allocator
+         * @param allocator The log string allocator
+         * @param httpServletRequest The HttpServletRequest
+         */
+        private void appendHttpServletRequestInfo(StringAllocator allocator, HttpServletRequest httpServletRequest) {
+            allocator.append("request-URI=''");
+            allocator.append(httpServletRequest.getRequestURI());
+            allocator.append("'', query-string=''");
+            allocator.append(httpServletRequest.getQueryString());
+            allocator.append("''");
+        }
 
         protected void addFilter(final Filter filter) {
             boolean isAlreadyAdded = false;

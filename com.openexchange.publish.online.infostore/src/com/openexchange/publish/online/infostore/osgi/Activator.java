@@ -66,7 +66,7 @@ public class Activator extends HousekeepingActivator {
 
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(Activator.class));
 
-    private static final String ALIAS = InfostoreDocumentPublicationService.PREFIX+"*";
+    private static final String ALIAS = InfostoreDocumentPublicationService.PREFIX;
     private InfostorePublicationServlet servlet;
 
 

@@ -97,7 +97,7 @@ public class Day implements Comparable<Day> {
 
     @Override
     public String toString() {
-        StringBuilder sb = new StringBuilder(time.toString());
+        com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(time.toString());
         sb.append(':');
         sb.append(appointments.toString());
         return sb.toString();

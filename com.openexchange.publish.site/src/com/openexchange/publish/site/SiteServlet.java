@@ -113,13 +113,6 @@ public class SiteServlet extends HttpServlet {
     }
 
     @Override
-    protected void service(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        // create a new HttpSession if it's missing
-        req.getSession(true);
-        super.service(req, resp);
-    }
-
-    @Override
     protected void doGet(final HttpServletRequest req, final HttpServletResponse resp) throws IOException {
         try {
             final Map<String, Object> args = getPublicationArguments(req);

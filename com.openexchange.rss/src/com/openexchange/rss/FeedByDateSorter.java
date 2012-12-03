@@ -51,7 +51,7 @@ package com.openexchange.rss;
 import java.util.Comparator;
 
 public class FeedByDateSorter<T> implements Comparator<RssResult>{
-	private String order;
+	private final String order;
 
 	public FeedByDateSorter(String order) {
 		this.order = order;

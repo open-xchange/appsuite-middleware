@@ -6,7 +6,8 @@ Bundle-Version: 6.23.0
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-Activator: com.openexchange.charset.osgi.CharsetActivator
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
-Import-Package: com.openexchange.log,
+Import-Package: com.openexchange.java,
+ com.openexchange.log,
  com.openexchange.osgi,
  org.apache.commons.logging,
  org.cliffc.high_scale_lib,

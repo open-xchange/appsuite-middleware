@@ -71,7 +71,7 @@ public class PresenceStatusChangePublisher implements PresenceChangeListener {
 
     private static final Log LOG = com.openexchange.log.Log.loggerFor(PresenceStatusChangePublisher.class);
 
-    private ServiceLookup serviceLookup;
+    private final ServiceLookup serviceLookup;
 
     /**
      * Initializes a new {@link PresenceStatusChangePublisher}.

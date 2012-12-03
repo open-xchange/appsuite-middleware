@@ -125,7 +125,7 @@ public final class GetAction extends JSlobAction {
         final JSlobService jslobService = getJSlobService(serviceId);
    
         final String id = jslobRequest.checkParameter("id");
-        final JSlob jslob = jslobService.get(id, jslobRequest.getUserId(), jslobRequest.getContextId());
+        final JSlob jslob = jslobService.get(id, jslobRequest.getSession());
    
         final String serlvetRequestURI = jslobRequest.getRequestData().getSerlvetRequestURI();
         if (!isEmpty(serlvetRequestURI)) {

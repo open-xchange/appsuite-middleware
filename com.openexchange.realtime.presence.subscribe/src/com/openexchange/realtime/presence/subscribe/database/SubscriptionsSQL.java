@@ -123,7 +123,7 @@ public class SubscriptionsSQL {
     );
     // @formatter:on
 
-    private DatabaseService dbService;
+    private final DatabaseService dbService;
 
     public SubscriptionsSQL(DatabaseService dbService) {
         super();

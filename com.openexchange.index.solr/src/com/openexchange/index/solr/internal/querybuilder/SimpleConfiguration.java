@@ -73,11 +73,11 @@ import org.apache.commons.logging.Log;
  */
 public class SimpleConfiguration implements Configuration {
 
-    private Map<String, String> rawMapping;
+    private final Map<String, String> rawMapping;
 
-    private Map<String, List<String>> dictionary;
+    private final Map<String, List<String>> dictionary;
 
-    private Map<String, String> translators;
+    private final Map<String, String> translators;
 
     private static Log log = com.openexchange.log.Log.loggerFor(SimpleConfiguration.class);
 
@@ -129,14 +129,17 @@ public class SimpleConfiguration implements Configuration {
         }
     }
 
+    @Override
     public List<String> getIndexFields(String key) {
         return dictionary.get(key);
     }
 
+    @Override
     public Set<String> getKeys() {
         return dictionary.keySet();
     }
 
+    @Override
     public Set<String> getKeys(String handlerName) {
         Set<String> dictKeys = new HashSet<String>();
         for (String key : dictionary.keySet()) {
@@ -146,22 +149,27 @@ public class SimpleConfiguration implements Configuration {
         return dictKeys;
     }
 
+    @Override
     public Map<String, String> getRawMapping() {
         return this.rawMapping;
     }
 
+    @Override
     public Map<String, String> getTranslatorMap() {
         return this.translators;
     }
 
+    @Override
     public boolean haveTranslatorForHandler(String handler) {
         return translators.containsKey(handler);
     }
 
+    @Override
     public String getTranslatorForHandler(String handler) {
         return translators.get(handler);
     }
 
+    @Override
     public Set<String> getHandlers() {
         return translators.keySet();
     }

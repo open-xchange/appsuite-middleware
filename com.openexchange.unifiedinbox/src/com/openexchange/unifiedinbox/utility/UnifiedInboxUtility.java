@@ -60,7 +60,6 @@ import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.FullnameArgument;
 import com.openexchange.mail.api.MailAccess;
-import com.openexchange.tools.stream.UnsynchronizedStringWriter;
 import com.openexchange.unifiedinbox.UnifiedInboxAccess;
 import com.openexchange.unifiedinbox.UnifiedInboxException;
 import com.openexchange.unifiedinbox.UnifiedInboxUID;

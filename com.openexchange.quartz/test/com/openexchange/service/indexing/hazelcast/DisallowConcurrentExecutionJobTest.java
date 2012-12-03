@@ -66,6 +66,7 @@ public class DisallowConcurrentExecutionJobTest {
     @DisallowConcurrentExecution
     public static class TestJob implements Job {
 
+        @Override
         public void execute(JobExecutionContext context) throws JobExecutionException {
             try {
                 @SuppressWarnings("unchecked") List<Date> jobExecDates = (List<Date>) context.getScheduler().getContext().get(DATE_STAMPS);
@@ -86,6 +87,7 @@ public class DisallowConcurrentExecutionJobTest {
     @DisallowConcurrentExecution
     public static class SleepingTestJob implements Job {
 
+        @Override
         public void execute(JobExecutionContext context) throws JobExecutionException {
             try {
                 System.out.println("Executing job.");
@@ -99,6 +101,7 @@ public class DisallowConcurrentExecutionJobTest {
     @DisallowConcurrentExecution
     public static class ReschedulingTestJob implements Job {
 
+        @Override
         public void execute(JobExecutionContext context) throws JobExecutionException {
             try {
                 System.out.println("execute. Scheduler: " + context.getScheduler().getSchedulerName() + ". Job: " + context.getJobDetail().getKey().toString() + ". Trigger: " + context.getTrigger().getKey().toString());
@@ -128,6 +131,7 @@ public class DisallowConcurrentExecutionJobTest {
             this.jobExecutionCountToSyncAfter = jobExecutionCountToSyncAfter;
         }
 
+        @Override
         public String getName() {
             return "TestJobListener";
         }
@@ -148,7 +152,7 @@ public class DisallowConcurrentExecutionJobTest {
     
     public static class SleepingJobListener extends JobListenerSupport {
         
-        private AtomicInteger count = new AtomicInteger(0);
+        private final AtomicInteger count = new AtomicInteger(0);
 
         
         @Override

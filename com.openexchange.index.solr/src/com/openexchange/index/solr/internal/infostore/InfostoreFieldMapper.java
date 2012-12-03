@@ -98,7 +98,7 @@ public class InfostoreFieldMapper implements FieldMapper {
             return null;
         }
         
-        return fieldMapping.get((InfostoreIndexField) indexField);
+        return fieldMapping.get(indexField);
     }
 
 }
