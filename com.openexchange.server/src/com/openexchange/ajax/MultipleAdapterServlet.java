@@ -197,42 +197,46 @@ public abstract class MultipleAdapterServlet extends PermissionServlet {
             {
                 int count = 0;
                 final char[] cbuf = new char[pushbackSize];
-                while (count < pushbackSize && Character.isWhitespace((cbuf[count++] = (char) reader.read()))) {
-                    // Consume whitespaces
+                int c = -1;
+                while (count < pushbackSize && (c = reader.read()) >= 0 && Character.isWhitespace(c)) {
+                    cbuf[count++] = (char) c;
                 }
-                if (count >= pushbackSize) {
+                if (c < 0) {
+                    return null;
+                } else if (count >= pushbackSize) {
                     reader.unread(cbuf);
                     return new JSONTokener(AJAXServlet.readFrom(reader)).nextValue();
-                }
-                final char nonWhitespace = cbuf[count - 1];
-                if ('[' == nonWhitespace || '{' == nonWhitespace) {
-                    try {
-                        reader.unread(nonWhitespace);
-                        return JSONObject.parse(reader);
-                    } catch (final JSONException e) {
-                        // No parseable JSON data
-                        reader.unread(cbuf, 0, count);
-                        final String body = AJAXServlet.readFrom(reader);
-                        if (startsWith('[', body)) {
-                            try {
-                                return new JSONArray(body);
-                            } catch (final JSONException je) {
-                                return new JSONTokener(body).nextValue();
-                            }
-                        } else if (startsWith('{', body)) {
-                            try {
-                                return new JSONObject(body);
-                            } catch (final JSONException je) {
-                                return new JSONTokener(body).nextValue();
-                            }
-                        } else {
-                            return new JSONTokener(body).nextValue();
-                        }
-                    }
                 } else {
-                    // No JSON data
-                    reader.unread(cbuf, 0, count);
-                    return new JSONTokener(AJAXServlet.readFrom(reader)).nextValue();
+                    if (count > 0) {
+                        reader.unread(cbuf, 0, count);
+                    }
+                    final char nonWhitespace = (char) reader.read();
+                    if ('[' == nonWhitespace || '{' == nonWhitespace) {
+                        try {
+                            return JSONObject.parse(reader);
+                        } catch (final JSONException e) {
+                            // No parseable JSON data
+                            reader.unread(cbuf, 0, count);
+                            final String body = AJAXServlet.readFrom(reader);
+                            if (startsWith('[', body)) {
+                                try {
+                                    return new JSONArray(body);
+                                } catch (final JSONException je) {
+                                    return new JSONTokener(body).nextValue();
+                                }
+                            } else if (startsWith('{', body)) {
+                                try {
+                                    return new JSONObject(body);
+                                } catch (final JSONException je) {
+                                    return new JSONTokener(body).nextValue();
+                                }
+                            } else {
+                                return new JSONTokener(body).nextValue();
+                            }
+                        }
+                    } else {
+                        return new JSONTokener(AJAXServlet.readFrom(reader)).nextValue();
+                    }
                 }
             }
         } finally {

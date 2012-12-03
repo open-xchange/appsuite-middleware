@@ -292,42 +292,46 @@ public abstract class MultipleAdapterServletNew extends PermissionServlet {
                 {
                     int count = 0;
                     final char[] cbuf = new char[pushbackSize];
-                    while (count < pushbackSize && Character.isWhitespace((cbuf[count++] = (char) reader.read()))) {
-                        // Consume whitespaces
+                    int c = -1;
+                    while (count < pushbackSize && (c = reader.read()) >= 0 && Character.isWhitespace(c)) {
+                        cbuf[count++] = (char) c;
                     }
-                    if (count >= pushbackSize) {
+                    if (c < 0) {
+                        retval.setData(null);
+                    } else if (count >= pushbackSize) {
                         reader.unread(cbuf);
                         retval.setData(AJAXServlet.readFrom(reader));
-                    }
-                    final char nonWhitespace = cbuf[count - 1];
-                    if ('[' == nonWhitespace || '{' == nonWhitespace) {
-                        try {
-                            reader.unread(nonWhitespace);
-                            retval.setData(JSONObject.parse(reader));
-                        } catch (final JSONException e) {
-                            // No parseable JSON data
-                            reader.unread(cbuf, 0, count);
-                            final String body = AJAXServlet.readFrom(reader);
-                            if (startsWith('[', body)) {
-                                try {
-                                    retval.setData(new JSONArray(body));
-                                } catch (final JSONException je) {
-                                    retval.setData(body);
-                                }
-                            } else if (startsWith('{', body)) {
-                                try {
-                                    retval.setData(new JSONObject(body));
-                                } catch (final JSONException je) {
-                                    retval.setData(body);
-                                }
-                            } else {
-                                retval.setData(body);
-                            }
-                        }
                     } else {
-                        // No JSON data
-                        reader.unread(cbuf, 0, count);
-                        retval.setData(AJAXServlet.readFrom(reader));
+                        if (count > 0) {
+                            reader.unread(cbuf, 0, count);
+                        }
+                        final char nonWhitespace = (char) reader.read();
+                        if ('[' == nonWhitespace || '{' == nonWhitespace) {
+                            try {
+                                retval.setData(JSONObject.parse(reader));
+                            } catch (final JSONException e) {
+                                // No parseable JSON data
+                                reader.unread(cbuf, 0, count);
+                                final String body = AJAXServlet.readFrom(reader);
+                                if (startsWith('[', body)) {
+                                    try {
+                                        retval.setData(new JSONArray(body));
+                                    } catch (final JSONException je) {
+                                        retval.setData(body);
+                                    }
+                                } else if (startsWith('{', body)) {
+                                    try {
+                                        retval.setData(new JSONObject(body));
+                                    } catch (final JSONException je) {
+                                        retval.setData(body);
+                                    }
+                                } else {
+                                    retval.setData(body);
+                                }
+                            }
+                        } else {
+                            retval.setData(AJAXServlet.readFrom(reader));
+                        }
                     }
                 }
             } finally {
