@@ -98,9 +98,11 @@ public class MailCleaner implements Cleanable {
 
     @Override
     public void cleanUp() throws Exception {
-        DeleteRequest request = new DeleteRequest( mail, true );
-        request.ignoreError();
-        client.execute(request);
+        if (null != mail) {
+            DeleteRequest request = new DeleteRequest( mail, true );
+            request.ignoreError();
+            client.execute(request);
+        }
     }
 
 }
