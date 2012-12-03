@@ -116,7 +116,6 @@ public class AJAXRequestDataTools {
      * @throws IOException If an I/O error occurs
      * @throws OXException If an OX error occurs
      */
-    @SuppressWarnings("unused")
     public AJAXRequestData parseRequest(final HttpServletRequest req, final boolean preferStream, final boolean isFileUpload, final ServerSession session, final String prefix) throws IOException, OXException {
         final AJAXRequestData retval = new AJAXRequestData();
         parseHostName(retval, req, session);
