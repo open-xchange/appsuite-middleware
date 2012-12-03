@@ -77,6 +77,8 @@ import com.openexchange.tools.session.ServerSession;
  */
 public class AJAXRequestDataTools {
 
+    private static final String PARAMETER_ACTION = AJAXServlet.PARAMETER_ACTION;
+
     private static final AJAXRequestDataTools INSTANCE = new AJAXRequestDataTools();
 
     /**
@@ -311,7 +313,7 @@ public class AJAXRequestDataTools {
      * @return The determined action
      */
     public String getAction(final HttpServletRequest req) {
-        final String action = req.getParameter("action");
+        final String action = req.getParameter(PARAMETER_ACTION);
         if (null == action) {
             return req.getMethod().toUpperCase(Locale.US);
         }
