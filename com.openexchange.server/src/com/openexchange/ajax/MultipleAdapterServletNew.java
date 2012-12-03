@@ -243,11 +243,6 @@ public abstract class MultipleAdapterServletNew extends PermissionServlet {
         return false;
     }
 
-    /**
-     * The size of push-back buffer.
-     */
-    protected static final int pushbackSize = 8;
-
     protected AJAXRequestData parseRequest(final HttpServletRequest req, final boolean preferStream, final boolean isFileUpload, final ServerSession session) throws IOException, OXException {
         final AJAXRequestData retval = new AJAXRequestData();
         retval.setMultipart(isFileUpload);

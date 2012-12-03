@@ -105,11 +105,6 @@ public class AJAXRequestDataTools {
     protected static final Pattern SPLIT_CSV = Pattern.compile("\\s*,\\s*");
 
     /**
-     * The size of push-back buffer.
-     */
-    protected static final int pushbackSize = 8;
-
-    /**
      * Parses an appropriate {@link AJAXRequestData} instance from specified arguments.
      * 
      * @param req The HTTP Servlet request
