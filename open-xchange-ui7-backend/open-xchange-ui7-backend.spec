@@ -6,7 +6,7 @@ BuildRequires: ant-nodeps
 BuildRequires: open-xchange-core
 BuildRequires: java-devel >= 1.6.0
 Version:       @OXVERSION@
-%define        ox_release 3
+%define        ox_release 4
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -49,6 +49,8 @@ ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} 
 
 
 %changelog
+* Tue Nov 13 2012 Viktor Pracht <viktor.pracht@open-xchange.com>
+First release candidate for EDP drop #6
 * Fri Oct 26 2012 Viktor Pracht <viktor.pracht@open-xchange.com>
 Third release build for EDP drop #5
 * Fri Oct 26 2012 Viktor Pracht <viktor.pracht@open-xchange.com>

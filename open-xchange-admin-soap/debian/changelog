@@ -1,3 +1,9 @@
+open-xchange-admin-soap (6.23.0-5) unstable; urgency=low
+
+  * First release candidate for EDP drop #6
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Tue, 13 Nov 2012 11:22:16 +0100
+
 open-xchange-admin-soap (6.23.0-4) unstable; urgency=low
 
   * Third release build for EDP drop #5

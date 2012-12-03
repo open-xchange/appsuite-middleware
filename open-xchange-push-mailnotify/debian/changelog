@@ -1,3 +1,9 @@
+open-xchange-push-mailnotify (6.23.0-5) unstable; urgency=low
+
+  * First release candidate for EDP drop #6
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Tue, 13 Nov 2012 11:22:34 +0100
+
 open-xchange-push-mailnotify (6.23.0-4) unstable; urgency=low
 
   * Third release build for EDP drop #5
