@@ -181,11 +181,6 @@ public abstract class MultipleAdapterServlet extends PermissionServlet {
         return request;
     }
 
-    /**
-     * The size of push-back buffer.
-     */
-    private static final int pushbackSize = 8;
-
     private Object toJSONConformantValue(final HttpServletRequest req) throws JSONException, IOException {
         if (null == req) {
             return null;
@@ -201,12 +196,10 @@ public abstract class MultipleAdapterServlet extends PermissionServlet {
             reader.unread(c);
             if ('[' == c || '{' == c) {
                 return JSONObject.parse(reader);
-            } else {
-                return new JSONTokener(AJAXServlet.readFrom(reader)).nextValue();
             }
+            return new JSONTokener(AJAXServlet.readFrom(reader)).nextValue();
         } finally {
             Streams.close(reader);
-            reader = null;
         }
     }
 

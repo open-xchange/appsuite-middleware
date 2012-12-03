@@ -304,7 +304,6 @@ public abstract class MultipleAdapterServletNew extends PermissionServlet {
                 throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
             } finally {
                 Streams.close(reader);
-                reader = null;
             }
         }
         return retval;

@@ -204,7 +204,6 @@ public class AJAXRequestDataTools {
                 throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
             } finally {
                 Streams.close(reader);
-                reader = null;
             }
         }
         return retval;
