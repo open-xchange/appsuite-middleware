@@ -60,6 +60,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.json.JSONTokener;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.fields.ResponseFields;
 import com.openexchange.exception.OXException;
@@ -183,7 +184,10 @@ public abstract class MultipleAdapterServlet extends PermissionServlet {
     }
 
     private Object toJSONConformantValue(final String body) throws JSONException {
-        return new JSONObject("{ body : "+ body+" }").get("body");
+        if (null == body) {
+            return null;
+        }
+        return new JSONTokener(body).nextValue();
     }
 
     protected abstract boolean requiresBody(String action);
