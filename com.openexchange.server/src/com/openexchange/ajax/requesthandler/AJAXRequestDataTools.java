@@ -202,7 +202,7 @@ public class AJAXRequestDataTools {
                     if ('[' == nonWhitespace || '{' == nonWhitespace) {
                         try {
                             reader.unread(nonWhitespace);
-                            retval.setData(AJAXServlet.getBodyAsJsonValue(req));
+                            retval.setData(JSONObject.parse(reader));
                         } catch (final JSONException e) {
                             // No parseable JSON data
                             reader.unread(cbuf, 0, count);
