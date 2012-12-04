@@ -1396,7 +1396,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                 return Collections.emptyList();
             }
             final int limit = max <= 0 ? -1 : (messageCount <= max ? -1 : (int) max);
-            final boolean mergeWithSent = true; //includeSent && !sentFullName.equals(fullName);
+            final boolean mergeWithSent = includeSent && !sentFullName.equals(fullName);
             if (mergeWithSent) {
                 sentFolder = (IMAPFolder) imapStore.getFolder(sentFullName);
                 sentFolder.open(READ_ONLY);
