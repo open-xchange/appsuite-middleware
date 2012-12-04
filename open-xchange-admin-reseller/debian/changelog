@@ -1,3 +1,9 @@
+open-xchange-admin-reseller (7.0.0-1) unstable; urgency=low
+
+  * First release candidate for 7.0.0
+
+ -- Jan Bauerdick <jan.bauerdick@open-xchange.com>  Tue, 04 Dec 2012 13:48:00 +0100
+
 open-xchange-admin-reseller (7.0.0-0) unstable; urgency=low
 
   * prepare for 7.0.0 release

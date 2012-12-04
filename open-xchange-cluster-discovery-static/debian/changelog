@@ -1,3 +1,9 @@
+open-xchange-cluster-discovery-static (7.0.0-1) unstable; urgency=low
+
+  * First release candidate for 7.0.0
+
+ -- Steffen Templin <steffen.templin@open-xchange.com>  Tue, 04 Dec 2012 13:47:42 +0100
+
 open-xchange-cluster-discovery-static (7.0.0-0) unstable; urgency=low
 
   * prepare for 7.0.0 release
